@@ -1,13 +1,15 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
 Enh:  Selected text can now be indented and un-indented using the tab key
+      (or Shift-Tab)
 Enh:  Column selection mode can now also be activated by keyboard.
       Alt-Q will activate the column selection mode for the next selection
       Column selection is always possible by holding down the Ctrl key while
       selecting with the mouse
 Enh:  Jump to first statement and jump to last statement are now
       available for the statement history.
-Enh:  If a statement fails, it is now highlighted in the editor
+Enh:  If a statement fails (while executing several statements), 
+      it is now highlighted in the editor
 Fix:  When cancelling an update, or an error occured during the update
       of changes made directly in the result set, the changes were lost.
 Fix:  The SQL source for a table was wrong for Firebird, because Firebird

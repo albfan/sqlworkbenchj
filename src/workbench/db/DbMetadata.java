@@ -1523,6 +1523,7 @@ public class DbMetadata
 		{
 			int row = result.addRow();
 			String value = rs.getString(1);
+			if (!rs.wasNull() && value != null) value = value.trim();
 			result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME, value);
 
 			value = rs.getString(2);
