@@ -31,7 +31,6 @@ import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.*;
 import workbench.gui.components.*;
-import workbench.gui.components.ImportFileOptionsPanel;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.*;
@@ -54,7 +53,7 @@ import workbench.util.WbPersistence;
  */
 public class SqlPanel 
 	extends JPanel 
-	implements Runnable, TableModelListener, FontChangedListener, 
+	implements Runnable, TableModelListener, FontChangedListener, ActionListener,
 						MainPanel, Spooler, TextFileContainer
 {
 	private boolean selected;
@@ -89,6 +88,8 @@ public class SqlPanel
 	private CopyAsSqlInsertAction copyAsSqlInsert;
 	private CreateDeleteScriptAction createDeleteScript;
 	private ImportFileAction importFileAction;
+
+	private OptimizeAllColumnsAction optimizeAllCol;
 	
 	private SpoolDataAction spoolData;
 	private UndoAction undo;
@@ -132,6 +133,7 @@ public class SqlPanel
 	
 		this.resultTab = new JTabbedPane();
 		this.resultTab.setTabPlacement(JTabbedPane.TOP);
+		this.resultTab.setUI(TabbedPaneUIFactory.getBorderLessUI());
 		this.resultTab.setDoubleBuffered(true);
 		this.resultTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
@@ -409,6 +411,14 @@ public class SqlPanel
 		this.actions.add(a);
 		this.actions.add(new ExpandResultAction(this));
 		this.actions.add(new UndoExpandAction(this));
+		
+		this.optimizeAllCol = new OptimizeAllColumnsAction(this);
+		this.optimizeAllCol.setCreateMenuSeparator(true);
+		this.optimizeAllCol.setEnabled(false);
+		this.optimizeAllCol.enableShortCut();
+		this.optimizeAllCol.putValue(Action.SMALL_ICON, null);
+		this.optimizeAllCol.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_VIEW);
+		this.actions.add(this.optimizeAllCol);
 		
 		this.dataToClipboard = this.data.getTable().getDataToClipboardAction();
 		this.dataToClipboard.setEnabled(false);
@@ -1106,7 +1116,7 @@ public class SqlPanel
 	private void checkResultSetActions()
 	{
 		boolean hasResult = this.data.hasResultSet();
-		this.setActionState(new Action[] {this.findAction, this.dataToClipboard, this.exportDataAction}, hasResult);
+		this.setActionState(new Action[] {this.findAction, this.dataToClipboard, this.exportDataAction, this.optimizeAllCol}, hasResult);
 		
 		boolean mayEdit = hasResult && this.data.hasUpdateableColumns();
 		this.setActionState(this.startEditAction, mayEdit);
@@ -1243,6 +1253,17 @@ public class SqlPanel
 	public Window getParentWindow()
 	{
 		return SwingUtilities.getWindowAncestor(this);
+	}
+	
+	/** Invoked when an action occurs.
+	 *
+	 */
+	public void actionPerformed(ActionEvent e)
+	{
+		if (e.getSource() == this.optimizeAllCol)
+		{
+			this.data.getTable().optimizeAllColWidth();
+		}
 	}
 	
 }

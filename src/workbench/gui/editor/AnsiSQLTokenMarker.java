@@ -30,28 +30,28 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		try
 		{
 			DatabaseMetaData meta = aConnection.getMetaData();
-			
+
 			String keys = meta.getSQLKeywords();
 			this.addKeywordList(keys, Token.KEYWORD1);
-			
+
 			keys = meta.getStringFunctions();
 			this.addKeywordList(keys, Token.KEYWORD3);
-			
+
 			keys = meta.getNumericFunctions();
 			this.addKeywordList(keys, Token.KEYWORD3);
-			
+
 			keys = meta.getTimeDateFunctions();
 			this.addKeywordList(keys, Token.KEYWORD3);
-			
+
 			keys = meta.getSystemFunctions();
 			this.addKeywordList(keys, Token.KEYWORD3);
-			
+
 		}
 		catch (Exception e)
 		{
 			LogMgr.logWarning(this, "Could not read database keywords", e);
 		}
-	}	
+	}
 	private void addKeywordList(String aList, byte anId)
 	{
 		StringTokenizer tok = new StringTokenizer(aList, ",");
@@ -62,7 +62,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 			keywords.add(keyword.toUpperCase().trim(),anId);
 		}
 	}
-	
+
 	public static KeywordMap getKeywordMap()
 	{
 		if (keywords == null)
@@ -77,7 +77,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		}
 		return keywords;
 	}
-	
+
 	private static void addKeywords()
 	{
 		keywords.add("ADD",Token.KEYWORD1);
@@ -142,6 +142,9 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("PRIMARY",Token.KEYWORD1);
 		keywords.add("PRIVILEGES",Token.KEYWORD1);
 		keywords.add("PROCEDURE",Token.KEYWORD1);
+		keywords.add("FUNCTION",Token.KEYWORD1);
+		keywords.add("PACKAGE",Token.KEYWORD1);
+		keywords.add("BODY",Token.KEYWORD1);
 		keywords.add("REFERENCES",Token.KEYWORD1);
 		keywords.add("RESTORE",Token.KEYWORD1);
 		keywords.add("RESTRICT",Token.KEYWORD1);
@@ -172,7 +175,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("ENABLEOUT",Token.KEYWORD2);
 		keywords.add("DISABLEOUT",Token.KEYWORD2);
 	}
-	
+
 	private static void addDataTypes()
 	{
 		keywords.add("binary",Token.KEYWORD1);
@@ -205,7 +208,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("varchar",Token.KEYWORD1);
 		keywords.add("varchar2",Token.KEYWORD1);
 	}
-	
+
 	private static void addSystemFunctions()
 	{
 		keywords.add("ABS",Token.KEYWORD3);
@@ -245,7 +248,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("USER",Token.KEYWORD3);
 		keywords.add("YEAR",Token.KEYWORD3);
 	}
-	
+
 	private static void addOperators()
 	{
 		keywords.add("ALL",Token.KEYWORD1);
@@ -264,14 +267,14 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("OUTER",Token.KEYWORD1);
 		keywords.add("SOME",Token.KEYWORD1);
 	}
-	
+
 	private static void addSystemStoredProcedures()
 	{
 	}
-	
+
 	private static void addSystemTables()
 	{
 	}
-	
+
 	private static KeywordMap keywords;
 }

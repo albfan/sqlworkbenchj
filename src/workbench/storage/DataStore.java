@@ -61,6 +61,7 @@ public class DataStore
 	// used during sorting to speed up comparison
 	private Class currentSortColumnClass;
 	
+	private SimpleDateFormat defaultFormatter;
 	
 	public DataStore(String[] aColNames, int[] colTypes)
 	{
@@ -1126,12 +1127,25 @@ public class DataStore
 		return 0;
 	}
 	
-	
 	public void sortByColumn(int aColumn, boolean ascending)
 	{
 		this.currentSortColumnClass = this.getColumnClass(aColumn);
 		Collections.sort(this.data, new ColumnComparator(aColumn, ascending));
 	}
+	
+	public void setDefaultDateFormat(String aFormat)
+	{
+		try
+		{
+			this.defaultFormatter = new SimpleDateFormat(aFormat);
+		}
+		catch (Exception e)
+		{
+			this.defaultFormatter = null;
+			LogMgr.logWarning("DataStore.setDefaultDateFormat()", "Could not create date formatter for format " + aFormat);
+		}
+	}
+	
 	
 	public Object convertCellValue(Object aValue, int aColumn)
 		throws Exception
@@ -1164,15 +1178,73 @@ public class DataStore
 				else
 					return aValue.toString();
 			case Types.DATE:
+				/*
 				DateFormat df = new SimpleDateFormat();
 				return df.parse(((String)aValue).trim());
+				*/
+				return this.parseDate((String)aValue, false);
 			case Types.TIMESTAMP:
 				return Timestamp.valueOf(((String)aValue).trim());
 			default:
 				return aValue;
 		}
 	}
+
+	private final SimpleDateFormat[] dateFormatters = new SimpleDateFormat[]
+													{ 
+														new SimpleDateFormat("yyyy-MM-dd"), 
+														new SimpleDateFormat("dd.MM.yyyy"),
+													};
+													
+	private final SimpleDateFormat[] dateTimeFormatters = new SimpleDateFormat[]
+													{ 
+														new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"),
+														new SimpleDateFormat("dd.MM.yyyy HH:mm:ss"),
+														new SimpleDateFormat("yyyy-MM-dd"), 
+														new SimpleDateFormat("dd.MM.yyyy"),
+													};
 	
+  private java.sql.Date parseDate(String aDate, boolean dateOnly)
+  {
+		java.util.Date result = null;
+		if (this.defaultFormatter != null)
+		{
+			try
+			{
+				result = defaultFormatter.parse(aDate);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logWarning("DataStore.parseDate()", "Could not parse date " + aDate + " with default formatter " + this.defaultFormatter.toPattern());
+				result = null;
+			}
+		}
+		if (result == null)
+		{
+			SimpleDateFormat[] formatters = null;
+			if (dateOnly || aDate.length() < 12) 
+				formatters = dateFormatters;
+			else
+				formatters = dateTimeFormatters;
+			
+			for (int i=0; i < formatters.length; i++)
+			{
+				try
+				{
+					result = formatters[i].parse(aDate);
+				}
+				catch (Exception e)
+				{
+					LogMgr.logWarning("DataStore.parseDate()", "Could not parse date " + aDate + " with default formatter " + formatters[i].toPattern());
+					result = null;
+				}
+			}
+		}
+		if (result != null)
+			return new java.sql.Date(result.getTime());
+		else
+			return null;
+  }
 	/**
 	 * Return the status object for the give row.
 	 * The status is one of 

@@ -26,8 +26,10 @@ import javax.swing.border.EtchedBorder;
 import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.ConnectionInfo;
+import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbToolbar;
 import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
@@ -67,6 +69,7 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 			searchPanel = new TableSearchPanel(tables);
 			generator = new PersistenceGeneratorPanel(tables);
 			tabPane = new JTabbedPane(JTabbedPane.TOP);
+			tabPane.setUI(TabbedPaneUIFactory.getBorderLessUI());
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerTables"), tables);
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerProcs"), procs);
 			tabPane.add(ResourceMgr.getString("TxtSearchTables"), searchPanel);
@@ -77,6 +80,7 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		{
 			LogMgr.logError(this, "Could not initialize DbExplorerPane", e);
 		}
+		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setLayout(new BorderLayout());
 		Dimension d = new Dimension(32768, 20);
 		this.selectorPanel = new JPanel();

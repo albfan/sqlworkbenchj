@@ -110,6 +110,15 @@ public class FindPanel extends JPanel implements Searchable
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	}
 
+	public void setSearchString(String aText)
+	{
+		this.findField.setText(aText);
+	}
+	
+	public String getSearchString()
+	{
+		return this.findField.getText();
+	}
 
 	public void addToToolbar(WbAction anAction)
 	{

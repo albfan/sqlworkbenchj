@@ -28,6 +28,7 @@ import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.FindPanel;
+import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
@@ -71,6 +72,7 @@ public class ProcedureListPanel
 	{
 		this.displayTab = new JTabbedPane();
 		this.displayTab.setTabPlacement(JTabbedPane.BOTTOM);
+		this.displayTab.setUI(TabbedPaneUIFactory.getBorderLessUI());
 		this.displayTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		
 		this.procColumns = new WbTable();
@@ -265,6 +267,7 @@ public class ProcedureListPanel
 	public void saveSettings()
 	{
 		WbManager.getSettings().setProperty(this.getClass().getName(), "divider", this.splitPane.getDividerLocation());
+		WbManager.getSettings().setProperty(this.getClass().getName(), "lastsearch", this.findPanel.getSearchString());
 	}
 
 	public void restoreSettings()
@@ -272,6 +275,9 @@ public class ProcedureListPanel
 		int loc = WbManager.getSettings().getIntProperty(this.getClass().getName(), "divider");
 		if (loc == 0) loc = 200;
 		this.splitPane.setDividerLocation(loc);
+		
+		String s = WbManager.getSettings().getProperty(this.getClass().getName(), "lastsearch", "");
+		this.findPanel.setSearchString(s);
 	}
 
 	public void valueChanged(ListSelectionEvent e)

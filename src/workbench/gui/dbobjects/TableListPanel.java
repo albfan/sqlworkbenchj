@@ -56,6 +56,7 @@ import workbench.interfaces.ShareableDisplay;
 import workbench.interfaces.Spooler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 
 
@@ -130,6 +131,7 @@ public class TableListPanel
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.displayTab = new JTabbedPane();
 		this.displayTab.setTabPlacement(JTabbedPane.BOTTOM);
+		this.displayTab.setUI(TabbedPaneUIFactory.getBorderLessUI());
 		this.displayTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		
 		this.tableDefinition = new WbTable();
@@ -241,9 +243,22 @@ public class TableListPanel
 		this.showDataMenu = new WbMenu(ResourceMgr.getString("MnuTxtShowTableData"));
 		this.showDataMenu.setEnabled(false);
 		String[] panels = this.parentWindow.getPanelLabels();
+		int current = this.parentWindow.getCurrentPanelIndex();
 		for (int i=0; i < panels.length; i++)
 		{
-			WbMenuItem item = new WbMenuItem(panels[i]);
+			WbMenuItem item = new WbMenuItem();
+			if (i == current)
+			{
+				StringBuffer b = new StringBuffer(20);
+				b.append("<html><b>");
+				b.append(panels[i]);
+				b.append("</html></b>");
+				item.setText(b.toString());
+			}
+			else
+			{
+				item.setText(panels[i]);
+			}
 			item.removeExtraSpacing();
 			item.setActionCommand("panel-" + i);
 			item.addActionListener(this);
@@ -261,10 +276,22 @@ public class TableListPanel
 	private void updateShowDataMenu()
 	{
 		String[] panels = this.parentWindow.getPanelLabels();
+		int current = this.parentWindow.getCurrentPanelIndex();
 		for (int i=0; i < panels.length; i++)
 		{
 			JMenuItem item = this.showDataMenu.getItem(i);
-			item.setText(panels[i]);
+			if (i == current)
+			{
+				StringBuffer b = new StringBuffer(20);
+				b.append("<html><b>");
+				b.append(panels[i]);
+				b.append("</html></b>");
+				item.setText(b.toString());
+			}
+			else
+			{
+				item.setText(panels[i]);
+			}
 		}
 	}
 	
@@ -426,9 +453,11 @@ public class TableListPanel
 	public void saveSettings()
 	{
 		this.triggers.saveSettings();
-		WbManager.getSettings().setProperty(this.getClass().getName(), "divider", this.splitPane.getDividerLocation());
-		WbManager.getSettings().setProperty(this.getClass().getName(), "exportedtreedivider", this.exportedPanel.getDividerLocation());
-		WbManager.getSettings().setProperty(this.getClass().getName(), "importedtreedivider", this.exportedPanel.getDividerLocation());
+		Settings s = WbManager.getSettings();
+		s.setProperty(this.getClass().getName(), "divider", this.splitPane.getDividerLocation());
+		s.setProperty(this.getClass().getName(), "exportedtreedivider", this.exportedPanel.getDividerLocation());
+		s.setProperty(this.getClass().getName(), "importedtreedivider", this.exportedPanel.getDividerLocation());
+		s.setProperty(this.getClass().getName(), "lastsearch", this.findPanel.getSearchString());
 	}
 
 	public void restoreSettings()
@@ -444,7 +473,9 @@ public class TableListPanel
 		loc = WbManager.getSettings().getIntProperty(this.getClass().getName(), "importedtreedivider");
 		if (loc == 0) loc = 200;
 		this.importedPanel.setDividerLocation(loc);
-		
+
+		String s = WbManager.getSettings().getProperty(this.getClass().getName(), "lastsearch", "");
+		this.findPanel.setSearchString(s);
 		this.triggers.restoreSettings();
 	}
 

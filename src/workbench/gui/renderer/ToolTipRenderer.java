@@ -85,17 +85,17 @@ public class ToolTipRenderer
 		}
 		else
 		{
-			display = value.toString();
-			
-			if (display.length() > 0)
+			display = value.toString().trim();
+			int len = display.length();
+			if (len > 0 && len < 100)
 			{
 				Matcher m = StringUtil.PATTERN_CRLF.matcher(display);
 				if (m.find())
 				{
 					StringBuffer tip = new StringBuffer(display.length() + 50);
-					tip.append("<html><body>");
+					tip.append("<html>");
 					tip.append(m.replaceAll("<br>"));
-					tip.append("</body></html>");
+					tip.append("</html>");
 					toolTip = tip.toString();
 					display = toolTip;
 				}

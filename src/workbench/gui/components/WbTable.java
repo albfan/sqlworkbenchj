@@ -62,6 +62,7 @@ extends JTable
 	private SortAscendingAction sortAscending;
 	private SortDescendingAction sortDescending;
 	private OptimizeColumnWidthAction optimizeCol;
+	private OptimizeAllColumnsAction optimizeAllCol;
 	private SetColumnWidthAction setColWidth;
 	
 	private FindAction findAction;
@@ -94,6 +95,7 @@ extends JTable
 		this.sortDescending = new SortDescendingAction(this);
 		this.sortDescending.setEnabled(false);		
 		this.optimizeCol = new OptimizeColumnWidthAction(this);
+		this.optimizeAllCol = new OptimizeAllColumnsAction(this);
 		this.setColWidth = new SetColumnWidthAction(this);
 		
 		this.headerPopup = new JPopupMenu();
@@ -101,6 +103,7 @@ extends JTable
 		this.headerPopup.add(this.sortDescending.getMenuItem());
 		this.headerPopup.addSeparator();
 		this.headerPopup.add(this.optimizeCol.getMenuItem());
+		this.headerPopup.add(this.optimizeAllCol.getMenuItem());
 		this.headerPopup.add(this.setColWidth.getMenuItem());
 		
 		Font dataFont = this.getFont();
@@ -239,6 +242,8 @@ extends JTable
 				header.setDefaultRenderer(this.sortRenderer);
 				header.addMouseListener(this);
 			}
+			DataStore ds = this.dwModel.getDataStore();
+			ds.setDefaultDateFormat(WbManager.getSettings().getDefaultDateFormat());
 		}
 		if (this.sortAscending != null) this.sortAscending.setEnabled(sortIt);
 		if (this.sortDescending != null) this.sortDescending.setEnabled(sortIt);
@@ -556,6 +561,15 @@ extends JTable
 		}
 	}	
 
+	public synchronized void optimizeAllColWidth()
+	{
+		int count = this.getColumnCount();
+		for (int i=0; i < count; i++)
+		{
+			this.optimizeColWidth(i);
+		}
+	}
+	
 	public synchronized void optimizeColWidth(int aColumn)
 	{
 		if (this.dwModel == null) return;
@@ -750,6 +764,13 @@ extends JTable
 				public void run()	{ optimizeColWidth(column); }
 			}).start();
 			
+		}
+		else if (e.getSource() == this.optimizeAllCol)
+		{
+			new Thread(new Runnable()
+			{
+				public void run()	{ optimizeAllColWidth(); }
+			}).start();
 		}
 		else if (e.getSource() == this.setColWidth)
 		{

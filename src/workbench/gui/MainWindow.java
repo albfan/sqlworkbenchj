@@ -31,6 +31,7 @@ import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.gui.actions.*;
 import workbench.gui.actions.FileDisconnectAction;
+import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbToolbar;
@@ -81,6 +82,7 @@ public class MainWindow
 		this.windowId = "MainWindow" + Integer.toString(instanceCount);
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.addWindowListener(this);
+		this.sqlTab.setUI(TabbedPaneUIFactory.getBorderLessUI());
 		this.sqlTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		int tabCount = WbManager.getSettings().getDefaultTabCount();
@@ -269,6 +271,11 @@ public class MainWindow
 		return menuBar;
 	}
 
+	public int getCurrentPanelIndex()
+	{
+		return this.sqlTab.getSelectedIndex();
+	}
+	
 	public String[] getPanelLabels()
 	{
 		int tabCount = this.sqlTab.getTabCount();
@@ -631,7 +638,7 @@ public class MainWindow
 		if (this.dbExplorerPanel == null)
 		{
 			this.dbExplorerPanel = new DbExplorerPanel(this);
-			this.dbExplorerPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+			//this.dbExplorerPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
 			this.dbExplorerPanel.restoreSettings();
 		}
 		JMenuBar dbmenu = this.getMenuForPanel(this.dbExplorerPanel);

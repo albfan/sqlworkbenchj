@@ -11,7 +11,7 @@
      <string>name</string> 
     </void> 
     <void property="orderBy"> 
-     <string>ORDER BY line</string> 
+     <string>ORDER BY TYPE,LINE</string> 
     </void> 
     <void property="schemaField"> 
      <string>owner</string> 
@@ -31,7 +31,7 @@
      <string>name</string> 
     </void> 
     <void property="orderBy"> 
-     <string>ORDER BY line</string> 
+     <string>ORDER BY TYPE,LINE</string> 
     </void> 
     <void property="schemaField"> 
      <string>owner</string> 
