@@ -1,8 +1,3 @@
-/*
- * ClearAction.java
- *
- * Created on December 2, 2001, 1:32 AM
- */
 package workbench.gui.actions;
 
 import javax.swing.AbstractAction;
@@ -12,16 +7,17 @@ import workbench.resource.ResourceMgr;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.KeyStroke;
 
 /**
- *	Action to paste the contents of the clipboard into the entry field
  *	@author  workbench@kellerer.org
  */
 public class ExecuteSelAction extends WbAction
 {
 	private ActionListener target;
-
+	
 	public ExecuteSelAction(ActionListener aListener)
 	{
 		super();
@@ -38,4 +34,5 @@ public class ExecuteSelAction extends WbAction
 	{
 		this.target.actionPerformed(e);
 	}
+	
 }
