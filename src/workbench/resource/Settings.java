@@ -168,6 +168,17 @@ public class Settings
 		result = new Font(name, style, size);
 		return result;
 	}
+	
+	public String getLastExportDir()
+	{
+		return this.props.getProperty("wb.export.lastdir","");
+	}
+	
+	public void setLastExportDir(String aDir)
+	{
+		this.props.setProperty("wb.export.lastdir", aDir);
+	}
+
 
 	public String toString()
 	{

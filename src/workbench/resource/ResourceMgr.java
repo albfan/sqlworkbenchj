@@ -66,8 +66,10 @@ public class ResourceMgr
 	public static final String IMG_EXEC_ALL = "ExecuteAll";
 	public static final String IMG_STOP = "Stop";
 	public static final String IMG_SAVE = "Save";
+	public static final String IMG_SAVE_AS = "SaveAs";
 	public static final String IMG_NEW = "New";
 	public static final String IMG_DELETE = "Delete";
+	
 	
 	public static final String MNU_TXT_FILE = "File";
 	public static final String MNU_TXT_SQL = "SQL";

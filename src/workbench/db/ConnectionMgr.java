@@ -8,11 +8,13 @@ package workbench.db;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -24,6 +26,8 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.WbManager;
+import workbench.exception.WbException;
+import workbench.util.JARClassLoader;
 import workbench.util.WbPersistence;
 
 /**
@@ -33,16 +37,16 @@ import workbench.util.WbPersistence;
  */
 public class ConnectionMgr
 {
-	private HashMap activeConnections = new HashMap();
-	private HashMap profiles;
+	private Map activeConnections = new HashMap();
+	private Map profiles;
 	private List drivers;
+	private JARClassLoader driverLoader;
 
 	/** Creates new ConnectionMgr */
 	public ConnectionMgr()
 	{
 	}
 	
-
 	/**
 	 *	Return a connection for the given windowId
 	 *	@param ID the windowId for window which is requesting the connection
@@ -51,10 +55,10 @@ public class ConnectionMgr
 	 *	@see #releaseConnection(String)
 	 *	@see #disconnectAll()
 	 */
-	public Connection getConnection(String aWindowId)
+	private WbConnection getConnection(String aWindowId)
 		throws NoConnectionException
 	{
-		Connection conn = (Connection)this.activeConnections.get(aWindowId);
+		WbConnection conn = (WbConnection)this.activeConnections.get(aWindowId);
 		if (conn == null)
 		{
 			throw new NoConnectionException(ResourceMgr.getString(ResourceMgr.ERROR_NO_CONNECTION_AVAIL));
@@ -66,17 +70,65 @@ public class ConnectionMgr
 	 *	Return a new connection specified by the profile, for the
 	 *	given window id
 	 */
-	public Connection getConnection(String aWindowId, ConnectionProfile aProfile)
-		throws ClassNotFoundException, SQLException
+	public WbConnection getConnection(String aWindowId, ConnectionProfile aProfile)
+		throws ClassNotFoundException, SQLException, NoConnectionException
 	{
 		this.disconnect(aWindowId);
 		
-		Class.forName(aProfile.getDriverclass());
-		Connection conn  = DriverManager.getConnection(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword());
-		conn.setAutoCommit(aProfile.getAutocommit());
-		this.activeConnections.put(aWindowId, conn);
+		//Class.forName(aProfile.getDriverclass());
+		String drvName = aProfile.getDriverclass();
+		DbDriver drv = this.findDriver(drvName);
+		if (drv == null)
+		{
+			throw new NoConnectionException("Driver class not registered");
+		}
+		
+		WbConnection conn = new WbConnection();
+		Connection sql;
+		//Connection sql = DriverManager.getConnection(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword());
+		try
+		{
+			sql = drv.getConnection(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword());
+		
+			sql.setAutoCommit(aProfile.getAutocommit());
+			conn.setSqlConnection(sql);
+			this.activeConnections.put(aWindowId, conn);
+		}
+		catch (WbException e)
+		{
+			throw new NoConnectionException(e.getMessage());
+		}
 		
 		return conn;
+	}
+
+	private DbDriver findDriver(String drvName)
+	{
+		if (this.drivers == null)
+		{
+			this.readDrivers();
+		}
+		DbDriver db = null;
+		for (int i=0; i < this.drivers.size(); i ++)
+		{
+			db = (DbDriver)this.drivers.get(i);
+			if (db.getDriverClass().equals(drvName)) return db;
+		}
+		if (db == null)
+		{
+			// maybe it's present in the normal classpath...
+			try
+			{
+				Class drvcls = Class.forName(drvName);
+				Driver drv = (Driver)drvcls.newInstance();
+				db = new DbDriver(drv);
+			}
+			catch (Exception cnf)
+			{
+				db = null;
+			}
+		}
+		return db;
 	}
 	
 	/**
@@ -89,7 +141,7 @@ public class ConnectionMgr
 		{
 			this.readDrivers();
 		}
-		return Collections.unmodifiableList(this.drivers);
+		return this.drivers;
 	}
 
 	public Map getProfiles()
@@ -98,6 +150,18 @@ public class ConnectionMgr
 		return this.profiles;
 	}
 	
+	public static String getDisplayString(WbConnection con)
+	{
+		try
+		{
+			return getDisplayString(con.getSqlConnection());
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("ConnectionMgr", "getDisplayString() - No java.sql.Connection!", e);
+			return "n/a";
+		}
+	}
 	/**
 	 *	Return a readable display of a connection
 	 */
@@ -146,8 +210,11 @@ public class ConnectionMgr
 	{
 		try
 		{
-			Connection con = (Connection)this.activeConnections.get(anId);
-			if (con != null) con.close();
+			WbConnection con = (WbConnection)this.activeConnections.get(anId);
+			if (con != null) 
+			{
+				con.close();
+			}
 			this.activeConnections.put(anId, null);
 		}
 		catch (Exception e)
@@ -174,16 +241,28 @@ public class ConnectionMgr
 	
 	private void readDrivers()
 	{
-		Object result = WbPersistence.readObject("WbDrivers.xml");
-		if (result instanceof Collection)
+		try
 		{
-			Iterator itr = ((Collection)result).iterator();
-			this.drivers = new ArrayList();
-			while (itr.hasNext())
+			Object result = WbPersistence.readObject("WbDrivers.xml");
+			if (result == null)
 			{
-				DbDriver driv = (DbDriver)itr.next();
-				this.drivers.add(driv);
+				this.drivers = Collections.EMPTY_LIST;
 			}
+			else if (result instanceof Collection)
+			{
+				Iterator itr = ((Collection)result).iterator();
+				this.drivers = new ArrayList();
+				while (itr.hasNext())
+				{
+					DbDriver driv = (DbDriver)itr.next();
+					this.drivers.add(driv);
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning(this, "Could not load driver definitions!");
+			this.drivers = Collections.EMPTY_LIST;
 		}
 	}
 	
@@ -200,18 +279,31 @@ public class ConnectionMgr
 		}
 	}
 	
+	public void putProfiles(Collection c)
+	{
+		Iterator itr = ((Collection)c).iterator();
+		if (this.profiles == null)
+		{
+			this.profiles = new HashMap();
+		}
+		else
+		{
+			this.profiles.clear();
+		}
+		while (itr.hasNext())
+		{
+			ConnectionProfile prof = (ConnectionProfile)itr.next();
+			this.profiles.put(prof.getName(), prof);
+		}
+	}
+	
+	
 	public void readXmlProfiles()
 	{
 		Object result = WbPersistence.readObject("WbProfiles.xml");
 		if (result instanceof Collection)
 		{
-			Iterator itr = ((Collection)result).iterator();
-			this.profiles = new HashMap();
-			while (itr.hasNext())
-			{
-				ConnectionProfile prof = (ConnectionProfile)itr.next();
-				this.profiles.put(prof.getName(), prof);
-			}
+			this.putProfiles((Collection)result);
 		}
 		else if (result instanceof Object[])
 		{

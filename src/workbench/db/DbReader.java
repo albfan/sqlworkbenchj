@@ -6,8 +6,12 @@
 
 package workbench.db;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import sun.jdbc.rowset.CachedRowSet;
 import java.lang.ArrayIndexOutOfBoundsException;
+import java.lang.StringBuffer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSetMetaData;
@@ -217,4 +221,55 @@ public class DbReader
 		}
 	}
 	
+	public String getRowString(int aRow)
+	{
+		return this.getRowData(aRow).toString();
+	}
+	
+	public StringBuffer getRowData(int aRow)
+	{
+		StringBuffer result = new StringBuffer(this.colCount * 20);
+		for (int c=1; c <= this.colCount; c++)
+		{
+			try
+			{
+				Object value = this.getValue(aRow, c);
+				if (value != null) result.append(value.toString());
+				if (c < colCount) result.append('\t');
+			}
+			catch (SQLException e)
+			{
+				LogMgr.logError(this, "getRowString() - Could not retrieve value for row " + aRow, e);
+			}
+		}
+		return result;
+	}
+
+	public String getDataString()
+	{
+		int rows = this.getRowCount();
+		StringBuffer contents = new StringBuffer(this.rowCount * 100); 
+		for (int r=1; r <= rows; r ++)
+		{
+			contents.append(this.getRowData(r));
+			contents.append('\r');
+		}
+		return contents.toString();
+	}
+	
+	public void saveAsAscii(PrintWriter out)
+		throws IOException
+	{
+		int rows = this.getRowCount();
+		for (int r=1; r <= rows; r ++)
+		{
+			out.println(this.getRowString(r));
+		}
+		out.flush();
+	}
+	
+	public static void main(String args[])
+	{
+		System.getProperties().list(System.out);
+	}
 }
