@@ -44,11 +44,14 @@ public class DateColumnRenderer
     this.setHorizontalAlignment(DefaultTableCellRenderer.RIGHT);
 		Date aDate = null;
 		String newVal = null;
+		String tip = null;
+		
 		if (value != null )
 		{
 			try
 			{
 				aDate = (Date)value;
+				tip = aDate.toString();
 				newVal = (String)this.displayCache.get(aDate);
 				if (newVal == null)
 				{
@@ -59,12 +62,15 @@ public class DateColumnRenderer
 			catch (ClassCastException cc)
 			{
 				newVal = "";
+				tip = "";
 			}
 		}
 		else
 		{
 			newVal = "";
+			tip = "";
 		}
+		this.setToolTipText(tip);
 		super.setValue(newVal);
   }
 

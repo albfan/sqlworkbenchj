@@ -33,7 +33,7 @@ class DmlStatement
 	public DmlStatement(String aStatement)
 		throws InvalidStatementException
 	{
-		this(aStatement, null, true);
+		this(aStatement, null);
 	}
 	/**
 	 *	Create a new DmlStatement with the given SQL template string 
@@ -44,12 +44,6 @@ class DmlStatement
 	 *	using a prepared statement.
 	 */
 	public DmlStatement(String aStatement, List aValueList)
-		throws InvalidStatementException
-	{
-		this(aStatement, aValueList, true);
-	}
-	
-	public DmlStatement(String aStatement, List aValueList, boolean aFlag)
 		throws InvalidStatementException
 	{
 		if (aStatement == null) throw new NullPointerException();
@@ -78,7 +72,6 @@ class DmlStatement
 		{
 			this.values = aValueList;
 		}
-		this.setUsePreparedStatement(aFlag);
 	}
 	
 	public int execute(WbConnection aWbConn)
@@ -99,15 +92,8 @@ class DmlStatement
 		throws SQLException
 	{
 		int rows; 
+		rows = this.executePrepared(aConnection);
 		
-		if (this.usePrepared)
-		{
-			rows = this.executePrepared(aConnection);
-		}
-		else
-		{
-			rows = this.executeDirect(aConnection);
-		}
 		return rows;
 	}
 
@@ -147,15 +133,6 @@ class DmlStatement
 		int rows = stmt.executeUpdate(this.getExecutableStatement());
 		stmt.close();
 		return rows;
-	}
-	
-	/**
-	 *	Set the usage of prepared statements.
-	 */
-	public void setUsePreparedStatement(boolean aFlag)
-	{
-		//this.usePrepared = aFlag;
-		this.usePrepared = true;
 	}
 	
 	/**

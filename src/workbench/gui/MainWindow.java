@@ -16,7 +16,6 @@ import java.awt.event.WindowListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -26,12 +25,13 @@ import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
-import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FileConnectAction;
 import workbench.gui.actions.FileExitAction;
 import workbench.gui.actions.SelectTabAction;
+import workbench.gui.actions.ShowDbExplorerAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbToolbar;
+import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.gui.sql.SqlPanel;
 import workbench.log.LogMgr;
@@ -44,20 +44,25 @@ import workbench.resource.Settings;
  * @author  sql.workbench@freenet.de
  * @version
  */
-public class MainWindow extends JFrame implements ActionListener, WindowListener, ChangeListener
+public class MainWindow extends JFrame 
+	implements ActionListener, WindowListener, ChangeListener
 {
 	private String windowId;
-
+	private String currentProfileName;
+	private WbConnection currentConnection;
+	private DbExplorerWindow dbExplorer;
+	
 	//private JToolBar currentToolbar;
 	private JMenuBar currentMenu;
 	private FileConnectAction connectAction;
+	private ShowDbExplorerAction dbExplorerAction;
 	
 	//private WindowStatusBar statusBar;
 	private ProfileSelectionDialog profileDialog;
 	private JTabbedPane sqlTab = new JTabbedPane();
 	private WbToolbar currentToolbar;
-	private List sqlPanels = new ArrayList(10);
-	private List panelMenus = new ArrayList(10);
+	private List sqlPanels = new ArrayList(5);
+	private List panelMenus = new ArrayList(5);
 	private int tabCount = 0;
 
 	/** Creates new MainWindow */
@@ -101,6 +106,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 
 	private void initMenu()
 	{
+		this.dbExplorerAction = new ShowDbExplorerAction(this);
+		this.dbExplorerAction.setEnabled(false);
+		
 		for (int tab=0; tab < this.tabCount; tab ++)
 		{
 			JMenuBar menuBar = new JMenuBar();
@@ -191,15 +199,23 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			menuBar.add(this.buildToolsMenu());
 			menuBar.add(this.buildHelpMenu());
 			this.panelMenus.add(menuBar);
+			
+			WbToolbar tool = sql.getToolbar();
+			sql.addToToolbar(this.dbExplorerAction, true);
 		}
 	}
 
 	private SqlPanel getCurrentSqlPanel()
 	{
 		int index = this.sqlTab.getSelectedIndex();
-		return (SqlPanel)this.sqlPanels.get(index);
+		return this.getSqlPanel(index);
 	}
-
+	
+	private SqlPanel getSqlPanel(int anIndex)
+	{
+		return (SqlPanel)this.sqlPanels.get(anIndex);
+	}		
+	
 	private void tabSelected(int anIndex)
 	{
 		this.currentMenu = (JMenuBar)this.panelMenus.get(anIndex);
@@ -291,7 +307,20 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			SqlPanel sql = (SqlPanel)this.sqlPanels.get(i);
 			sql.setConnection(con);
 		}
-		//this.setTitle(ResourceMgr.TXT_PRODUCT_NAME + " [" + ConnectionMgr.getDisplayString(con) + "]");
+		this.currentConnection = con;
+		this.dbExplorerAction.setEnabled(true);
+		if (this.dbExplorer != null)
+		{
+			try
+			{
+				this.dbExplorer.setConnection(con, this.currentProfileName);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError(this, "Could not set connection for DbExplorerWindow", e);
+				this.dbExplorer = null;
+			}
+		}
 	}
 
 	public void selectConnection()
@@ -307,13 +336,37 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			ConnectionProfile prof = this.profileDialog.getSelectedProfile();
 			if (prof != null)
 			{
-				String n = prof.getName();
+				this.currentProfileName = prof.getName();
 				this.connectTo(prof);
-				WbManager.getSettings().setLastConnection(prof.getName());
+				WbManager.getSettings().setLastConnection(this.currentProfileName);
 			}
 		}
 	}
 
+	public void showDbExplorer()
+	{
+		if (this.dbExplorer == null)
+		{
+			try
+			{
+				this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				this.dbExplorer = new DbExplorerWindow(this.currentConnection, this.currentProfileName);
+				this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError(this, "Could not initialize DbExplorerWindow", e);
+				this.dbExplorer = null;
+			}
+		}
+		if (this.dbExplorer != null) this.dbExplorer.show();
+	}
+	
+	public String getCurrentProfileName()
+	{
+		return this.currentProfileName;
+	}
+	
 	public void connectTo(ConnectionProfile aProfile)
 	{
 		try
@@ -362,6 +415,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 	public JMenu buildToolsMenu()
 	{
 		JMenu result = new JMenu(ResourceMgr.getString("MnuTxtTools"));
+		result.add(this.dbExplorerAction);
+		result.addSeparator();
+		
 		JMenuItem options = new JMenuItem(ResourceMgr.getString("MnuTxtOptions"));
 		options.putClientProperty("command", "optionsDialog");
 		options.addActionListener(this);
@@ -415,6 +471,11 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 					UIManager.setLookAndFeel(className);
 					SwingUtilities.updateComponentTreeUI(this);
 					WbManager.getSettings().setLookAndFeelClass(className);
+					for (int i=0; i < this.tabCount; i ++)
+					{
+						JMenuBar menu = (JMenuBar)this.panelMenus.get(i);
+						SwingUtilities.updateComponentTreeUI(menu);
+					}
 				}
 				catch (Exception ex)
 				{
@@ -423,7 +484,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			}
 			else if ("optionsDialog".equals(command))
 			{
-				JOptionPane.showMessageDialog(this, "Not yet implemented. Please edit workbench.settings");
+				JOptionPane.showMessageDialog(this, "Options are not yet implemented\r\n Please edit the file 'workbench.settings'");
 			}
 			else if ("helpContents".equals(command))
 			{

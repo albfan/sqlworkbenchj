@@ -109,4 +109,8 @@ public class WbConnection
 		return this.metaData;
 	}
 
+	public String getDisplayString()
+	{
+		return ConnectionMgr.getDisplayString(this);
+	}
 }

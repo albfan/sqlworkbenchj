@@ -8,13 +8,14 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import javax.swing.JLabel;
+import javax.swing.JTextField;
 import javax.swing.border.AbstractBorder;
 
 public class UnderlineBorder extends AbstractBorder
 {
-	protected JLabel label;
+	protected JTextField label;
 	private Insets insets = new Insets(0, 0, 0, 0);
-	public UnderlineBorder(JLabel aLabel)
+	public UnderlineBorder(JTextField aLabel)
 	{
 		this.label = aLabel;
 	}

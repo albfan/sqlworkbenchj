@@ -33,12 +33,21 @@ public class ResultSetTableModel
 	extends AbstractTableModel
 {
 	private DataStore dataCache;
+	private boolean showStatusColumn = false;
+	private int statusOffset = 0;
 	public static final String NOT_AVAILABLE = "(n/a)";
 	
 	public ResultSetTableModel(ResultSet aResultSet) 
 		throws SQLException, WbException
 	{
 		this(aResultSet, null);
+	}
+	
+	public ResultSetTableModel(DataStore aDataStore)
+		throws NullPointerException
+	{
+		if (aDataStore == null) throw new NullPointerException("DataStore cannot be null");
+		this.dataCache = aDataStore;
 	}
 	
 	public ResultSetTableModel(ResultSet aResultSet, List aColumnList) 
@@ -59,14 +68,14 @@ public class ResultSetTableModel
 	 */
 	public Object getValueAt(int row, int col)
 	{
-		if (col == 0)
+		if (this.showStatusColumn && col == 0)
 		{
 			return this.dataCache.getRowStatus(row);
 		}
 		try
 		{
 			Object result;
-			result = this.dataCache.getValue(row, col - 1);
+			result = this.dataCache.getValue(row, col - this.statusOffset);
 			return result;
 		}
 		catch (Exception e)
@@ -107,24 +116,39 @@ public class ResultSetTableModel
 		this.dataCache.setUpdateTable(aTable);
 	}
 	
+	public void setShowStatusColumn(boolean aFlag)
+	{
+		if (aFlag == this.showStatusColumn) return;
+		this.showStatusColumn = aFlag;
+		if (this.showStatusColumn)
+			this.statusOffset = 1;
+		else 
+			this.statusOffset = 0;
+		this.fireTableStructureChanged();
+	}
+	
+	public boolean getShowStatusColumn() { return this.showStatusColumn; }
+	
 	public boolean isUpdateable() { return this.dataCache.isUpdateable(); }
 	
 	public void setValueAt(Object aValue, int row, int column)
 	{
+		if (this.showStatusColumn && column == 0) return;
+		
 		try
 		{
 			if (this.isUpdateable())
 			{
 				if (aValue == null || aValue.toString().length() == 0) 
 				{
-					this.dataCache.setNull(row, column - 1);
+					this.dataCache.setNull(row, column - this.statusOffset);
 				}
 				else 
 				{
 					try
 					{
 						Object realValue = this.convertCellValue(aValue, row, column);
-						this.dataCache.setValue(row, column - 1, realValue);
+						this.dataCache.setValue(row, column - this.statusOffset, realValue);
 					}
 					catch (Exception ce)
 					{
@@ -186,15 +210,15 @@ public class ResultSetTableModel
 	 */
 	public int getColumnCount()
 	{
-		return this.dataCache.getColumnCount() + 1;
+		return this.dataCache.getColumnCount() + this.statusOffset;
 	}
 
 	public int getColumnWidth(int aColumn)
 	{
-		if (aColumn == 0) return 18;
+		if (this.showStatusColumn && aColumn == 0) return 5;
 		try
 		{
-			return this.dataCache.getColumnDisplaySize(aColumn - 1);
+			return this.dataCache.getColumnDisplaySize(aColumn - this.statusOffset);
 		}
 		catch (Exception e)
 		{
@@ -211,11 +235,11 @@ public class ResultSetTableModel
 	
 	public int getColumnType(int aColumn)
 	{
-		if (aColumn == 0) return 0;
+		if (this.showStatusColumn && aColumn == 0) return 0;
 		
 		try
 		{
-			return this.dataCache.getColumnType(aColumn - 1);
+			return this.dataCache.getColumnType(aColumn - this.statusOffset);
 		}
 		catch (Exception e)
 		{
@@ -234,7 +258,7 @@ public class ResultSetTableModel
 
 	public Class getColumnClass(int aColumn)
 	{
-		if (aColumn == 0) return Integer.class;
+		if (this.showStatusColumn && aColumn == 0) return Integer.class;
 		
 		int type = this.getColumnType(aColumn);
 		switch (type)
@@ -297,11 +321,11 @@ public class ResultSetTableModel
 	 */	
 	public String getColumnName(int aColumn)
 	{
-		if (aColumn == 0) return " ";
+		if (this.showStatusColumn && aColumn == 0) return " ";
 		
 		try
 		{
-			String name = this.dataCache.getColumnName(aColumn - 1);
+			String name = this.dataCache.getColumnName(aColumn - this.statusOffset);
 			if (name == null || name.length() == 0)
 			{
 				name = "Col" + aColumn;
@@ -318,7 +342,9 @@ public class ResultSetTableModel
 	{
 		int count = this.getColumnCount();
 		StringBuffer result = new StringBuffer(count * 20);
-		for (int c=1; c < count; c++)
+		int start = 0;
+		if (this.showStatusColumn) start = 1;
+		for (int c=start; c < count; c++)
 		{
 			Object value = this.getValueAt(aRow, c);
 			if (value != null) result.append(value.toString());
@@ -329,7 +355,10 @@ public class ResultSetTableModel
 	
 	public boolean isCellEditable(int row, int column)
 	{
-		return (column != 0);
+		if (this.showStatusColumn)
+			return (column != 0);
+		else
+			return true;
 	}
 	
 }

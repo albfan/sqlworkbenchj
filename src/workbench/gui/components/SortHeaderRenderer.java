@@ -70,7 +70,9 @@ public class SortHeaderRenderer
 		{
 			this.setIcon(null);
 		}
-		setText((value == null) ? "" : value.toString());
+		String text = (value == null) ? "" : value.toString();
+		setText(text);
+		setToolTipText(text);
     return this;
   }
 }

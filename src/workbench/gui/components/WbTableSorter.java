@@ -18,6 +18,7 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import workbench.gui.WbSwingUtilities;
+import workbench.storage.NullValue;
 
 
 public class WbTableSorter 
@@ -178,10 +179,13 @@ public class WbTableSorter
 		}
 		catch (Exception e)
 		{
-			System.out.println("Error while comparing " + o1 + " to " + o2);
-			System.out.println("o1="+ o1.getClass().getName() + ",o2=" + o2.getClass().getName());
+			//System.out.println("Error while comparing " + o1 + " to " + o2);
+			//System.out.println("o1="+ o1.getClass().getName() + ",o2=" + o2.getClass().getName());
 		}
-		
+
+		if (o1 instanceof NullValue && o2 instanceof NullValue) return 0;
+		if (o1 instanceof NullValue) return -1;
+		if (o2 instanceof NullValue) return 2;
 		/*
 		 * We copy all returned values from the getValue call in case
 		 * an optimised model is reusing one object to return many

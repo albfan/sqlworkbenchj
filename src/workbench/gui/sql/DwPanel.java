@@ -1,52 +1,35 @@
 package workbench.gui.sql;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Toolkit;
-import java.awt.Window;
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.StringTokenizer;
-import javax.swing.CellEditor;
-import javax.swing.DefaultCellEditor;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.border.EmptyBorder;
+import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
-import workbench.exception.InvalidStatementException;
 import workbench.exception.WbException;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ResultSetTableModel;
+import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTable;
 import workbench.gui.renderer.DateColumnRenderer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+
 
 
 
@@ -57,23 +40,38 @@ import workbench.util.SqlUtil;
  *	of the resulting JTable
  */
 public class DwPanel extends JPanel
+	implements TableModelListener
 {
 	private WbTable infoTable;
 	private DwStatusBar statusBar;
 	
 	private ResultSetTableModel realModel;
-	private String sql = null;
-	private String lastMessage = null;
-	private WbConnection dbConnection = null;
-	private DefaultTableModel errorModel = null;
-	private DefaultTableModel emptyModel = null;
+	private String sql;
+	private String lastMessage;
+	private WbConnection dbConnection;
+	private DefaultTableModel errorModel;
+	private DefaultTableModel emptyModel;
 	private int maxWidth = 250;
-	private boolean hasResultSet = true;
+	private boolean hasResultSet = false;
 	private PreparedStatement prepStatement;
-	private JScrollPane scrollPane = null;
+	private JScrollPane scrollPane;
+	private DefaultCellEditor defaultEditor;
+	private DefaultCellEditor defaultNumberEditor;
+	private int maxRows = 0;
 	
 	public DwPanel()
 	{
+		JTextField stringField = new JTextField();
+		stringField.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		stringField.addMouseListener(new TextComponentMouseListener());
+		this.defaultEditor = new DefaultCellEditor(stringField);
+		
+		JTextField numberField = new JTextField();
+		numberField.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		numberField.setHorizontalAlignment(SwingConstants.RIGHT);
+		numberField.addMouseListener(new TextComponentMouseListener());
+		
+		this.defaultNumberEditor = new DefaultCellEditor(numberField);
 		this.initLayout();
 	}
 	
@@ -143,6 +141,13 @@ public class DwPanel extends JPanel
 		}
 		return rows;
 	}
+
+	public void setMaxRows(int aRowCount)
+	{
+		if (aRowCount <= 0) this.maxRows = 0;
+		else this.maxRows = aRowCount;
+	}
+	public int getMaxRows(){ return this.maxRows; }
 	
 	public void setUpdateTable(String aTable)
 	{
@@ -193,6 +198,7 @@ public class DwPanel extends JPanel
 		{
 			long start, end, sqlTime = 0;
 			this.lastMessage = null;
+			this.realModel = null;
 			if (aSql.endsWith(";"))
 			{
 				aSql = aSql.substring(0, aSql.length() - 1);
@@ -203,63 +209,69 @@ public class DwPanel extends JPanel
 			List keepColumns = null;
 			
 			this.statusBar.clearRowcount();
+			this.setMaxRows(this.statusBar.getMaxRows());
 			
 			if (verb.equalsIgnoreCase("DESC"))
 			{
 				StringTokenizer tok = new StringTokenizer(aSql, " ");
 				tok.nextToken();
 				String table = tok.nextToken();
-				if (aConnection.getMetadata().storesUpperCaseIdentifiers()) 
-				{
-					table = table.toUpperCase();
-				}
-				else if (aConnection.getMetadata().storesLowerCaseIdentifiers())
-				{
-					table = table.toLowerCase();
-				}
-				rs = aConnection.getMetadata().getTableDefinition(table);
-				final String[] cols = {"COLUMN_NAME", "TYPE_NAME","COLUMN_SIZE","COLUMN_DEF","IS_NULLABLE"};
-				keepColumns = Arrays.asList(cols);
+				this.hasResultSet = true;
+				this.realModel = aConnection.getMetadata().getTableDefinitionModel(table);
 			}
 			else if (verb.equalsIgnoreCase("LIST"))
 			{
-				rs = aConnection.getMetadata().getTables();
-				final String[] cols = {"TABLE_CAT", "TABLE_NAME", "TABLE_TYPE"};
-				keepColumns = Arrays.asList(cols);
+				this.hasResultSet = true;
+				this.realModel = aConnection.getMetadata().getListOfTables();
 			}
 			else if (verb.equalsIgnoreCase("LISTPROCS"))
 			{
-				rs = sqlcon.getMetaData().getProcedures(null, null,"%");
-				final String[] cols = {"PROCEDURE_CAT", "PROCEDURE_NAME", "PROCEDURE_TYPE"};
-				keepColumns = Arrays.asList(cols);
+				this.realModel = aConnection.getMetadata().getListOfProcedures();
+				this.hasResultSet = true;
 			}
 			else
 			{
 				this.prepStatement = sqlcon.prepareStatement(aSql);
+				// Only set the maxrows parameter for selects
+				if (verb.equalsIgnoreCase("SELECT"))
+				{
+					this.prepStatement.setMaxRows(this.maxRows);
+				}
+				else
+				{
+					this.prepStatement.setMaxRows(0);
+				}					
 				start = System.currentTimeMillis();
 				this.prepStatement.execute();
 				end = System.currentTimeMillis();
 				sqlTime = (end - start);
 				rs = this.prepStatement.getResultSet();
-				keepColumns = null;
+				if (rs != null)
+				{
+					this.hasResultSet = true;
+					this.realModel = new ResultSetTableModel(rs, null);
+					rs.close();
+				}
+				else
+				{
+					this.hasResultSet = false;
+				}
 			}
-			if (rs != null)
+			if (this.hasResultSet)
 			{
-				this.hasResultSet = true;
 				start = System.currentTimeMillis();
 				this.sql = aSql;
-				this.realModel = new ResultSetTableModel(rs, keepColumns);
+				this.realModel.addTableModelListener(this);
 				this.realModel.getDataStore().checkUpdateTable();
-				this.setVisible(false);
+				this.infoTable.setVisible(false);
 				this.infoTable.setAutoCreateColumnsFromModel(true);
 				this.infoTable.setModel(this.realModel, true);
 				this.initColumns();
 				this.infoTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-				this.setVisible(true);
+				this.infoTable.setVisible(true);
 				end = System.currentTimeMillis();
 				//System.out.println("populate = " + (end-start));
 				this.lastMessage = ResourceMgr.getString(ResourceMgr.MSG_SQL_EXCUTE_OK);
-				rs.close();
 				this.statusBar.setRowcount(this.infoTable.getModel().getRowCount());
 			}
 			else
@@ -365,6 +377,7 @@ public class DwPanel extends JPanel
 		this.realModel.getDataStore().restoreOriginalValues();
 		this.repaint();
 	}
+	
 	public String getLastMessage() { return this.lastMessage; }
 	public boolean hasResultSet() { return this.hasResultSet; }
 
@@ -372,40 +385,7 @@ public class DwPanel extends JPanel
 
 	private void initColumns()
 	{
-		Font f = this.infoTable.getFont();
-		FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(f);
-		int charWidth = fm.stringWidth("n");
-		TableColumnModel colMod = this.infoTable.getColumnModel();
-		String format = WbManager.getSettings().getDefaultDateFormat();
-		this.infoTable.setDefaultRenderer(Date.class, new DateColumnRenderer(format));
-
-		JTextField stringField = new JTextField();
-		stringField.setBorder(null);
-		DefaultCellEditor defEditor = new DefaultCellEditor(stringField);
-		
-		JTextField numberField = new JTextField();
-		numberField.setBorder(null);
-		numberField.setHorizontalAlignment(SwingConstants.RIGHT);
-		DefaultCellEditor numbEditor = new DefaultCellEditor(numberField);
-		
-		for (int i=1; i < colMod.getColumnCount(); i++)
-		{
-			TableColumn col = colMod.getColumn(i);
-			if (Number.class.isAssignableFrom(this.realModel.getColumnClass(i)))
-			{
-				col.setCellEditor(numbEditor);
-			}
-			else
-			{
-				col.setCellEditor(defEditor);
-			}
-			String s = this.realModel.getColumnName(i);
-			int width = this.realModel.getColumnWidth(i) * charWidth;
-			int lblWidth = fm.stringWidth(s) + (charWidth * 3);
-			int w = Math.max(width, lblWidth);
-			w = Math.min(w, maxWidth);
-			col.setPreferredWidth(w);
-		}
+		this.infoTable.adjustColumns(this.maxWidth);
 	}
 	
 	private void initLayout()
@@ -413,6 +393,8 @@ public class DwPanel extends JPanel
 		this.setLayout(new BorderLayout());
 		this.infoTable = new WbTable();
 		this.statusBar = new DwStatusBar();
+		this.statusBar.setFocusable(false);
+		this.setFocusable(false);
 		this.scrollPane = new JScrollPane(this.infoTable);
 		this.add(this.scrollPane, BorderLayout.CENTER);
 		this.add(this.statusBar, BorderLayout.SOUTH);
@@ -474,4 +456,17 @@ public class DwPanel extends JPanel
 	}
 
 	public WbTable getTable() { return this.infoTable; }
+	
+	/** This fine grain notification tells listeners the exact range
+	 * of cells, rows, or columns that changed.
+	 *
+	 */
+	public void tableChanged(TableModelEvent e)
+	{
+		if (e.getFirstRow() == TableModelEvent.HEADER_ROW)
+		{
+			this.initColumns();
+		}
+	}
+	
 }

@@ -16,6 +16,7 @@ import workbench.gui.MainWindow;
 import workbench.db.ConnectionMgr;
 import workbench.resource.Settings;
 import java.util.List;
+import javax.swing.JOptionPane;
 import workbench.db.ConnectionProfile;
 import workbench.util.WbCipher;
 
@@ -132,11 +133,15 @@ public class WbManager
 		System.exit(0);
 	}
 	
-	public static void main(String args[])
+	public static void startup()
 	{
 		MainWindow main = wb.createWindow();
 		main.show();
 		main.selectConnection();
 	}
 
+	public static void main(String args[])
+	{
+		startup();
+	}
 }

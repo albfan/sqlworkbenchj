@@ -23,13 +23,13 @@ public class NumberColumnRenderer
 	extends DefaultTableCellRenderer
 {
 	
-	public DecimalFormat formatter = new DecimalFormat();
+	public DecimalFormat formatter = new DecimalFormat("0.##########");
 	
 	/** Creates a new instance of NumberColumnRenderer */
-	public NumberColumnRenderer()
+	public NumberColumnRenderer(int maxDigits)
 	{
-		this.formatter.setMaximumFractionDigits(2);
-		this.formatter.setMinimumFractionDigits(2);
+		this.formatter.setMaximumFractionDigits(maxDigits);
+		//this.formatter.setMinimumFractionDigits(maxDigits);
 	}
 	
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
@@ -45,6 +45,7 @@ public class NumberColumnRenderer
 				double d = n.doubleValue();
 				if (!Double.isNaN(d)) nr = formatter.format(d);
 				this.setValue(nr);
+				this.setToolTipText(Double.toString(d));
 			}
 		}
 		return result;

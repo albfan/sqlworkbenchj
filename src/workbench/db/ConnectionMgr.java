@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +29,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.WbManager;
 import workbench.exception.WbException;
-import workbench.util.JARClassLoader;
+import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.util.WbPersistence;
 
 /**
@@ -38,11 +39,10 @@ import workbench.util.WbPersistence;
  */
 public class ConnectionMgr
 {
-	//private Map activeConnections = new HashMap();
 	private WbConnection currentConnection;
 	private Map profiles;
 	private List drivers;
-
+	
 	/** Creates new ConnectionMgr */
 	public ConnectionMgr()
 	{
@@ -73,7 +73,15 @@ public class ConnectionMgr
 		{
 			sql = drv.connect(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword());
 		
-			sql.setAutoCommit(aProfile.getAutocommit());
+			try
+			{
+				sql.setAutoCommit(aProfile.getAutocommit());
+			}
+			catch (Throwable th)
+			{
+				// some drivers do not support this, so
+				// we just ignore the error :-)
+			}
 			conn.setSqlConnection(sql);
 			this.currentConnection = conn;
 		}
@@ -165,13 +173,24 @@ public class ConnectionMgr
 		try
 		{
 			DatabaseMetaData data = con.getMetaData();
-			StringBuffer buff = new StringBuffer(data.getDatabaseProductName());
-			buff.append(" - ");
-			String db = con.getCatalog();
+			StringBuffer buff = new StringBuffer();
+			buff.append("User=");
 			buff.append(data.getUserName());
-			buff.append('@');
-			String url = data.getURL().substring(5);
-			buff.append(url);
+			
+			String catName = data.getCatalogTerm();
+			String catalog = con.getCatalog();
+			if (catName == null) catName = "Catalog";
+			if (catName != null && catName.length() > 0 &&
+			    catalog != null && catalog.length() > 0)
+			{
+				buff.append(", ");
+				buff.append(catName);
+				buff.append('=');
+				buff.append(catalog);
+			}
+			
+			buff.append(", URL=");
+			buff.append(data.getURL());
 			displayString = buff.toString();
 		}
 		catch (Exception e)
@@ -266,6 +285,19 @@ public class ConnectionMgr
 		{
 			LogMgr.logWarning(this, "Could not load driver definitions!");
 			this.drivers = Collections.EMPTY_LIST;
+		}
+	}
+
+	public ResultSet getTableDefinition(String aTable)
+	{
+		if (this.currentConnection == null) return null;
+		try
+		{
+			return this.currentConnection.getMetadata().getTableDefinition(aTable);
+		}
+		catch (Exception e)
+		{
+			return null;
 		}
 	}
 	

@@ -195,6 +195,7 @@ public class ProfileEditorPanel
 				if (prof.getName().equals(aProfileName))
 				{
 					this.jList1.setSelectedIndex(i);
+					this.jList1.ensureIndexIsVisible(i);
 					break;
 				}
 			}

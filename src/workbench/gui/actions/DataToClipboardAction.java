@@ -14,6 +14,7 @@ import javax.swing.KeyStroke;
 import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.Exporter;
 import workbench.resource.ResourceMgr;
+import workbench.util.StringUtil;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
@@ -29,12 +30,27 @@ public class DataToClipboardAction extends WbAction
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtDataToClipboard"));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtDataToClipboard"));
+		String desc = ResourceMgr.getDescription("MnuTxtDataToClipboard");
+		String shift = KeyEvent.getKeyModifiersText(KeyEvent.SHIFT_MASK);
+		desc = StringUtil.replace(desc, "%s", shift);
+		this.putValue(Action.SHORT_DESCRIPTION, desc);
 		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
 	}
 
 	public void actionPerformed(ActionEvent e)
 	{
-		this.client.copyDataToClipboard();
+//		System.out.println("mod=" + e.getModifiers());
+//		System.out.println("SHIFT=" + e.SHIFT_MASK);
+//		System.out.println("CTRL=" + e.CTRL_MASK);
+		if ( (e.getModifiers() & e.SHIFT_MASK) == e.SHIFT_MASK)
+		{
+//			System.out.println("No headers!");
+			this.client.copyDataToClipboard(false);
+		}
+		else
+		{
+			this.client.copyDataToClipboard(true);
+		}
+			
 	}
 }

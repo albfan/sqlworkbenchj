@@ -33,5 +33,21 @@
     </void>
    </object>
   </void>
+  <void method="add"> 
+   <object class="workbench.db.DbDriver"> 
+    <void property="driverClass"> 
+     <string>sun.jdbc.odbc.JdbcOdbcDriver</string> 
+    </void> 
+    <void property="library"> 
+     <string></string> 
+    </void> 
+    <void property="name"> 
+     <string>ODBC Bridge</string> 
+    </void> 
+    <void property="sampleUrl"> 
+     <string>jdbc:odbc:&lt;dsn name></string> 
+    </void> 
+   </object> 
+  </void> 
  </object>
 </java>

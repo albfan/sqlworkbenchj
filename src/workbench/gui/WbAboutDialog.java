@@ -16,8 +16,10 @@ import javax.swing.ActionMap;
 import javax.swing.ComponentInputMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import workbench.gui.actions.EscAction;
+import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.UnderlineBorder;
 import workbench.resource.ResourceMgr;
 
@@ -36,7 +38,6 @@ public class WbAboutDialog extends javax.swing.JDialog
 		super(parent, modal);
 		initComponents();
 		getRootPane().setDefaultButton(closeButton);
-		this.labelContact.setBorder(new UnderlineBorder(this.labelContact));
 		InputMap im = new ComponentInputMap(this.getRootPane());
 		ActionMap am = new ActionMap();
 		escAction = new EscAction(this);
@@ -44,7 +45,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 		am.put(escAction.getActionName(), escAction);
 		this.getRootPane().setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
 		this.getRootPane().setActionMap(am);
-		this.labelContact.setVisible(false);
+		this.contactInformation.addMouseListener(new TextComponentMouseListener());
 	}
 	
 	/** This method is called from within the constructor to
@@ -63,7 +64,9 @@ public class WbAboutDialog extends javax.swing.JDialog
 		labelTitel = new javax.swing.JLabel();
 		labelDesc = new javax.swing.JLabel();
 		labelVersion = new javax.swing.JLabel();
-		labelContact = new javax.swing.JLabel();
+		contactInformation = new javax.swing.JTextField();
+		labelCopyright = new javax.swing.JLabel();
+		jLabel1 = new javax.swing.JLabel();
 		
 		setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 		setTitle(ResourceMgr.getString("TxtAbout") + " " + ResourceMgr.TXT_PRODUCT_NAME);
@@ -105,7 +108,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 0;
-		gridBagConstraints.gridheight = 4;
+		gridBagConstraints.gridheight = 5;
 		gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 0);
 		contentPanel.add(logo, gridBagConstraints);
 		
@@ -117,7 +120,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
 		gridBagConstraints.weightx = 1.0;
-		gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 8);
+		gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 4);
 		contentPanel.add(labelTitel, gridBagConstraints);
 		
 		labelDesc.setFont(null);
@@ -127,54 +130,54 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.gridy = 1;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 8, 0, 8);
+		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
 		contentPanel.add(labelDesc, gridBagConstraints);
 		
 		labelVersion.setFont(null);
-		labelVersion.setText(ResourceMgr.getString("TxtVersion"));
+		labelVersion.setText(ResourceMgr.getString("TxtVersion") + " (" + ResourceMgr.getString("TxtBuild") + ")");
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 2;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 8, 0, 8);
 		contentPanel.add(labelVersion, gridBagConstraints);
 		
-		labelContact.setFont(null);
-		labelContact.setForeground(java.awt.Color.blue);
-		labelContact.setText(ResourceMgr.getString("TxtContact"));
-		labelContact.addMouseListener(new java.awt.event.MouseAdapter()
-		{
-			public void mouseClicked(java.awt.event.MouseEvent evt)
-			{
-				labelContactMouseClicked(evt);
-			}
-		});
+		contactInformation.setEditable(false);
+		contactInformation.setText(ResourceMgr.getString("TxtContact"));
+		contactInformation.setBorder(null);
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 4;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+		contentPanel.add(contactInformation, gridBagConstraints);
 		
+		labelCopyright.setFont(null);
+		labelCopyright.setText(ResourceMgr.getString("TxtCopyright"));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 3;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		gridBagConstraints.insets = new java.awt.Insets(12, 8, 0, 8);
-		contentPanel.add(labelContact, gridBagConstraints);
+		gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 4);
+		contentPanel.add(labelCopyright, gridBagConstraints);
+		
+		jLabel1.setFont(new java.awt.Font("Dialog", 0, 11));
+		jLabel1.setForeground((java.awt.Color) javax.swing.UIManager.getDefaults().get("Label.disabledForeground"));
+		jLabel1.setText("Built with NetBeans (www.netbeans.org)");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 5;
+		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(4, 5, 5, 4);
+		contentPanel.add(jLabel1, gridBagConstraints);
 		
 		getContentPane().add(contentPanel, java.awt.BorderLayout.CENTER);
 		
 		pack();
 	}//GEN-END:initComponents
-
-	private void labelContactMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_labelContactMouseClicked
-	{//GEN-HEADEREND:event_labelContactMouseClicked
-		try
-		{
-			//Runtime.getRuntime().exec("mailto:sql.workbench@freenet.de");
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}//GEN-LAST:event_labelContactMouseClicked
 
 	private void closeButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_closeButtonActionPerformed
 	{//GEN-HEADEREND:event_closeButtonActionPerformed
@@ -208,13 +211,15 @@ public class WbAboutDialog extends javax.swing.JDialog
 	}
 	
 	// Variables declaration - do not modify//GEN-BEGIN:variables
+	private javax.swing.JLabel labelCopyright;
 	private javax.swing.JLabel labelTitel;
 	private javax.swing.JPanel buttonPanel;
+	private javax.swing.JTextField contactInformation;
 	private javax.swing.JLabel logo;
 	private javax.swing.JLabel labelDesc;
-	private javax.swing.JLabel labelContact;
 	private javax.swing.JPanel contentPanel;
 	private javax.swing.JButton closeButton;
+	private javax.swing.JLabel jLabel1;
 	private javax.swing.JLabel labelVersion;
 	// End of variables declaration//GEN-END:variables
 	

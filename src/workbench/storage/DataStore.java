@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
 import workbench.log.LogMgr;
@@ -41,33 +42,58 @@ public class DataStore
 	private ArrayList data;
 	private ArrayList pkColumns;
 	private ArrayList deletedRows;
-	private String updateTable;
 	private String sql;
 	
 	// Cached ResultSetMetaData information
 	private int[] columnTypes;
   private int[] columnSizes;
 	private String[] columnNames;
-	private String tableName;
 	private String[] columnClassNames;
+	
+	private String updateTable;
+	private ArrayList updateTableColumns;
 
-	public DataStore(String[] aColNames)
+	/**
+	 *	Create a DataStore which is not based on a result set
+	 *	and contains the columns defined in the given array
+	 */
+	public DataStore(String[] aColNames, int[] colTypes)
 	{
 		this.data = new ArrayList();
 		this.colCount = aColNames.length;
 		this.columnNames = new String[this.colCount];
+		this.columnTypes = new int[this.colCount];
 		for (int i=0; i < this.colCount; i++)
 		{
 			this.columnNames[i] = aColNames[i];
+			this.columnTypes[i] = colTypes[i];
 		}
 	}
 	
+	public void setColumnSizes(int[] sizes)
+	{
+		if (sizes == null) return;
+		if (sizes.length != this.colCount) return;
+		this.columnSizes = new int[this.colCount];
+		for (int i=0; i < this.colCount; i++)
+		{
+			this.columnSizes[i] = sizes[i];
+		}
+	}
+	/**
+	 *	Create a DataStore based on the contents of the given
+	 *	ResultSet. All columns of that ResultSet will be cached/used.
+	 */
 	public DataStore(ResultSet aResultSet)
 		throws SQLException
 	{
 		this(aResultSet, null);
 	}
 	
+	/**
+	 *	Create a DataStore where only those columns are used
+	 *	which are listed in the given List
+	 */
   public DataStore (ResultSet aResultSet, List aColumnList)
 		throws SQLException
   {
@@ -127,11 +153,40 @@ public class DataStore
 		if (aTablename == null)
 		{
 			this.updateTable = null;
+			this.updateTableColumns = null;
 		}
 		else if (!aTablename.equalsIgnoreCase(this.updateTable))
 		{
-			this.updateTable = aTablename;
 			this.pkColumns = null;
+			this.updateTable = null;
+			// now check the columns which are in that table
+			// so that we can refuse any changes to columns
+			// which do not derive from that table
+			// note that this does not work, if the 
+			// columns were renamed via an alias in the 
+			// select statement
+			ResultSet columns = WbManager.getInstance().getConnectionMgr().getTableDefinition(aTablename);
+			if (columns == null) 
+			{
+				return;
+			}
+			this.updateTable = aTablename;
+			this.updateTableColumns = new ArrayList();
+			try
+			{
+				while (columns.next())
+				{
+					String table = columns.getString("COLUMN_NAME");
+					this.updateTableColumns.add(table.toLowerCase());
+				}
+				columns.close();
+			}
+			catch (Exception e)
+			{
+				LogMgr.logWarning(this, "Could not retrieve columns for update table!", e);
+				this.updateTable = null;
+				this.updateTableColumns = null;
+			}
 		}
 	}
 	
@@ -167,6 +222,14 @@ public class DataStore
 		// be saved to the database (because most likely they 
 		// are computed columns like count(*) etc)
 		if (this.columnNames[aColumn] == null) return;
+		
+		// If an updatetable is defined, we only accept
+		// values for columns in that table 
+		if (this.updateTableColumns != null)
+		{
+			String col = this.columnNames[aColumn].toLowerCase();
+			if (!this.updateTableColumns.contains(col)) return;
+		}
 		RowData row = this.getRow(aRow);
 		row.setValue(aColumn,aValue);
 		this.modified = row.isModified();
@@ -220,7 +283,14 @@ public class DataStore
 	
 	public boolean hasUpdateableColumns()
 	{
-		return (this.realColumns > 0);
+		if (this.updateTableColumns == null)
+		{
+			return (this.realColumns > 0);
+		}
+		else
+		{
+			return true;
+		}
 	}
 	
 	public boolean isModified() { return this.modified;  }
@@ -647,14 +717,7 @@ public class DataStore
 		{
 			Connection sqlConn = aConnection.getSqlConnection();
 			DatabaseMetaData meta = sqlConn.getMetaData();
-			if (meta.storesUpperCaseIdentifiers()) 
-			{
-				this.updateTable = this.updateTable.toUpperCase();
-			}
-			else if (meta.storesLowerCaseIdentifiers())
-			{
-				this.updateTable = this.updateTable.toLowerCase();
-			}
+			this.updateTable = aConnection.getMetadata().adjustTablename(this.updateTable);
 			ResultSet rs = meta.getBestRowIdentifier(null, null, this.updateTable, DatabaseMetaData.bestRowSession, false);
 			int index;
 			String col;

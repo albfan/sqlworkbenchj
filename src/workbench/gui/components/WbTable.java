@@ -6,34 +6,62 @@
 package workbench.gui.components;
 
 import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import javax.swing.JScrollPane;
+import java.lang.Math;
+import java.util.Date;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+import workbench.WbManager;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.renderer.DateColumnRenderer;
+import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RowStatusRenderer;
+import workbench.gui.renderer.ToolTipRenderer;
+import workbench.storage.NullValue;
 
-public class WbTable extends javax.swing.JTable
+
+public class WbTable extends JTable
 {
 	private WbTableSorter sortModel;
 	private ResultSetTableModel dwModel;
 	private TableModel originalModel;
 	private int lastFoundRow = -1;
-	private String lastSearchText = null;
-	private TableModelListener changeListener = null;
+	private String lastSearchText;
+	private TableModelListener changeListener;
+
+	private DefaultCellEditor defaultEditor;
+	private DefaultCellEditor defaultNumberEditor;
+
+	private boolean adjustToColumnLabel = true;
 	
 	public WbTable()
 	{
 		this.setMinimumSize(null);
 		this.setMaximumSize(null);
 		this.setPreferredSize(null);
+		JTextField stringField = new JTextField();
+		stringField.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		this.defaultEditor = new DefaultCellEditor(stringField);
+		
+		JTextField numberField = new JTextField();
+		numberField.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		numberField.setHorizontalAlignment(SwingConstants.RIGHT);
+		this.defaultNumberEditor = new DefaultCellEditor(numberField);
 	}
 	
 	public void setModel(TableModel aModel)
@@ -77,6 +105,37 @@ public class WbTable extends javax.swing.JTable
 		{
 			this.dwModel = (ResultSetTableModel)this.originalModel;
 			if (this.changeListener != null) this.dwModel.addTableModelListener(this.changeListener);
+		}
+	}
+
+	public String getValueAsString(int row, int column)
+		throws IndexOutOfBoundsException
+	{
+		Object value = this.getValueAt(row, column);
+		if (value == null) return null;
+		if (value instanceof String) return (String)value;
+		if (value instanceof NullValue) return null;
+		return value.toString();
+	}
+	
+	public boolean getShowStatusColumn() 
+	{ 
+		if (this.dwModel == null) return false;
+		return this.dwModel.getShowStatusColumn();
+	}
+	
+	public void setAdjustToColumnLabel(boolean aFlag)
+	{
+		this.adjustToColumnLabel = aFlag;
+	}
+	
+	public void setShowStatusColumn(boolean aFlag)
+	{
+		if (this.dwModel == null) return;
+		if (aFlag == this.dwModel.getShowStatusColumn()) return;
+		this.dwModel.setShowStatusColumn(aFlag);
+		if (aFlag)
+		{
 			TableColumn col = this.getColumnModel().getColumn(0);
 			col.setCellRenderer(new RowStatusRenderer());
 			col.setMaxWidth(20);
@@ -111,16 +170,28 @@ public class WbTable extends javax.swing.JTable
 	
 	public String getDataString(String aLineTerminator)
 	{
+		return this.getDataString(aLineTerminator, true);
+	}
+	public String getDataString(String aLineTerminator, boolean includeHeaders)
+	{
+		if (this.sortModel == null) return "";
+		if (this.dwModel == null) return "";
+		
 		int colCount = this.sortModel.getColumnCount();
 		int count = this.sortModel.getRowCount();
 		StringBuffer result = new StringBuffer(count * 250);
-		// Start loop at 1 --> ignore status column
-		for (int i=1; i < colCount; i++)
+		if (includeHeaders)
 		{
-			result.append(this.sortModel.getColumnName(i));
-			if (i < colCount - 1) result.append('\t');
+			// Start loop at 1 --> ignore status column
+			int start = 0;
+			if (this.dwModel.getShowStatusColumn()) start = 1;
+			for (int i=start; i < colCount; i++)
+			{
+				result.append(this.sortModel.getColumnName(i));
+				if (i < colCount - 1) result.append('\t');
+			}
+			result.append(aLineTerminator);
 		}
-		result.append(aLineTerminator);
 		for (int i=0; i < count; i++)
 		{
 			int row = this.sortModel.getRealIndex(i);
@@ -194,6 +265,59 @@ public class WbTable extends javax.swing.JTable
 		return foundRow;
 	}
 	
+	public void adjustColumns()
+	{
+		this.adjustColumns(32768);
+	}
+	
+	public void adjustColumns(int maxWidth)
+	{
+		Font f = this.getFont();
+		FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(f);
+		int charWidth = fm.stringWidth("n");
+		TableColumnModel colMod = this.getColumnModel();
+		//JTableHeader header = this.getTableHeader();
+		//TableColumnModel headerColMod = header.getColumnModel();
+		String format = WbManager.getSettings().getDefaultDateFormat();
+		TableCellRenderer rend = this.getDefaultRenderer(Integer.class);
+		this.setDefaultRenderer(Date.class, new DateColumnRenderer(format));
+		int maxDigits = WbManager.getSettings().getMaxFractionDigits();
+		if (maxDigits == -1) maxDigits = 10;
+		this.setDefaultRenderer(Number.class, new NumberColumnRenderer(maxDigits));
+		this.setDefaultRenderer(Object.class, new ToolTipRenderer());
+		
+		int start = 0;
+		if (this.getShowStatusColumn()) start = 1;
+		for (int i=0; i < colMod.getColumnCount(); i++)
+		{
+			TableColumn col = colMod.getColumn(i);
+			//TableColumn headerCol = headerColMod.getColumn(i);
+			//col.setCellRenderer(new ToolTipRenderer());
+
+			if (Number.class.isAssignableFrom(this.dwModel.getColumnClass(i)))
+			{
+				col.setCellEditor(this.defaultNumberEditor);
+			}
+			else
+			{
+				col.setCellEditor(this.defaultEditor);
+			}
+			if (this.dwModel != null)
+			{
+				int lblWidth = 0;
+				if (this.adjustToColumnLabel)
+				{
+					String s = this.dwModel.getColumnName(i);
+					lblWidth = fm.stringWidth(s) + (charWidth * 2);
+				}
+				int width = this.dwModel.getColumnWidth(i) * charWidth;
+				int w = Math.max(width, lblWidth);
+				w	= Math.min(w, maxWidth);
+				col.setPreferredWidth(w);
+			}
+		}
+	}	
+
 	public void addTableModelListener(TableModelListener aListener)
 	{
 		this.changeListener = aListener;

@@ -6,26 +6,18 @@
 
 package workbench.gui.sql;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.EventQueue;
-import java.awt.Toolkit;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
-import javax.swing.JFileChooser;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -37,15 +29,17 @@ import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 
 import workbench.gui.actions.*;
-import workbench.gui.components.WbToolbar;
 import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.WbSplitPane;
+import workbench.gui.components.WbToolbar;
+import workbench.gui.components.WbToolbarSeparator;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.Exporter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
+
 
 /**
  *	A panel with an editor (EditorPanel), a log panel and
@@ -54,9 +48,7 @@ import workbench.util.WbPersistence;
  * @author  thomas
  * @version 1.0
  */
-public class SqlPanel 
-	extends JPanel 
-	implements Runnable, TableModelListener, Exporter
+public class SqlPanel extends JPanel implements Runnable, TableModelListener, Exporter
 {
 	private boolean selected;
 	private EditorPanel editor;
@@ -86,6 +78,8 @@ public class SqlPanel
 	private StartEditAction startEditAction;
 	private InsertRowAction insertRowAction;
 	private DeleteRowAction deleteRowAction;
+	private DataToClipboardAction dataToClipboard;
+	private SaveDataAsAction exportDataAction;
 	
 	private int internalId;
 	private String historyFilename;
@@ -129,7 +123,8 @@ public class SqlPanel
 		this.resultTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		
 		this.editor = new EditorPanel();
-		this.contentPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
+		//this.editor.setBorder(new EmptyBorder(0, 1, 2,0));
+		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
 		this.contentPanel.setDividerSize(DIVIDER_SIZE);
 		this.contentPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.add(this.contentPanel, BorderLayout.CENTER);
@@ -143,6 +138,7 @@ public class SqlPanel
 		this.setupActionMap();
 		this.data.getTable().addTableModelListener(this);
 		this.makeReadOnly();
+		this.checkResultSetActions();
 	}
 
 	public WbToolbar getToolbar()
@@ -182,6 +178,12 @@ public class SqlPanel
 		
 	}
 
+	public void addToToolbar(WbAction anAction, boolean withSeperator)
+	{
+		this.toolbar.add(anAction.getToolbarButton(), this.toolbar.getComponentCount() - 1);
+		if (withSeperator) this.toolbar.add(new WbToolbarSeparator(), this.toolbar.getComponentCount() - 1);
+	}
+	
 	public void updateUI()
 	{
 		super.updateUI();
@@ -223,12 +225,20 @@ public class SqlPanel
 		this.actions.add(this.insertRowAction);
 		this.actions.add(this.deleteRowAction);
 	
-		SaveDataAsAction save = new SaveDataAsAction(this);
-		save.setCreateMenuSeparator(true);
+		this.exportDataAction = new SaveDataAsAction(this);
+		exportDataAction.setCreateMenuSeparator(true);
+		this.exportDataAction.setEnabled(false);
 
-		DataToClipboardAction clp = new DataToClipboardAction(this);
-		this.actions.add(save);
-		this.actions.add(clp);
+		SelectEditorAction sea = new SelectEditorAction(this);
+		sea.setCreateMenuSeparator(true);
+		this.actions.add(sea);
+		SelectResultAction r = new SelectResultAction(this);
+		this.actions.add(r);
+		
+		this.dataToClipboard = new DataToClipboardAction(this);
+		this.dataToClipboard.setEnabled(false);
+		this.actions.add(this.exportDataAction);
+		this.actions.add(this.dataToClipboard);
 		
 		this.actions.add(this.executeAll);
 		this.actions.add(this.executeSelected);
@@ -290,6 +300,7 @@ public class SqlPanel
 		{
 			this.addToActionMap((WbAction)this.actions.get(i));
 		}
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK), this.dataToClipboard.getActionName());
 	}
 	
 	public void addToActionMap(WbAction anAction)
@@ -302,6 +313,29 @@ public class SqlPanel
 			in.put(key, anAction.getActionName());
 			am.put(anAction.getActionName(), anAction);
 		}
+	}
+	
+	public void selectEditor()
+	{
+		EventQueue.invokeLater(new Runnable() 
+		{
+			public void run()
+			{
+				editor.requestFocus();
+			}
+		});
+	}
+	
+	public void selectResult()
+	{
+		showResultPanel();
+		EventQueue.invokeLater(new Runnable() 
+		{
+			public void run()
+			{
+				data.getTable().requestFocusInWindow();
+			}
+		});
 	}
 	
 	public void saveAsAscii()
@@ -327,11 +361,17 @@ public class SqlPanel
 	
 	public void copyDataToClipboard()
 	{
+		this.copyDataToClipboard(true);
+	}
+	public void copyDataToClipboard(boolean includeheaders)
+	{
+		if (!this.data.hasResultSet()) return;
+		
 		Window parent = SwingUtilities.getWindowAncestor(this);
 		try
 		{
 			parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			String data = this.data.getTable().getDataString("\r");
+			String data = this.data.getTable().getDataString("\r", includeheaders);
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 			StringSelection sel = new StringSelection(data);
 			clp.setContents(sel, sel);
@@ -424,9 +464,41 @@ public class SqlPanel
 	
 	public void makeReadOnly()
 	{
+		this.data.getTable().setShowStatusColumn(false);
 		this.setActionState(new Action[] {this.updateAction, this.insertRowAction, this.deleteRowAction}, false);
 	}
 	
+	public synchronized void showLogMessage(String aMsg)
+	{
+		this.showLogPanel();
+		this.log.setText(aMsg);
+	}
+
+	public void clearLog()
+	{
+		this.log.setText("");
+	}
+
+	public void showLogPanel()
+	{
+		this.resultTab.setSelectedIndex(1);
+	}
+	
+	public void showResultPanel()
+	{
+		this.resultTab.setSelectedIndex(0);
+	}
+
+	public void showStatusMessage(String aMsg)
+	{
+		this.data.setStatusMessage(aMsg);
+	}
+
+	public void clearStatusMessage()
+	{
+		this.data.clearStatusMessage();
+	}
+		
 	public void endEdit()
 	{
 		this.makeReadOnly();
@@ -450,6 +522,10 @@ public class SqlPanel
 			}
 		}
 		boolean update = this.data.isUpdateable();
+		if (update)
+		{
+			this.data.getTable().setShowStatusColumn(true);
+		}
 		this.setActionState(new Action[] {this.insertRowAction, this.deleteRowAction}, update);
 	}
 
@@ -686,43 +762,12 @@ public class SqlPanel
 		this.clearStatusMessage();
 		this.setBusy(false);
 		this.setCancelState(false);
-		this.setActionState(this.findAction, this.data.hasResultSet());
 		boolean mayEdit = this.data.hasResultSet() && this.data.hasUpdateableColumns();
 		this.setActionState(this.startEditAction, mayEdit);
+		this.checkResultSetActions();
 	}
 
-	public synchronized void showLogMessage(String aMsg)
-	{
-		this.showLogPanel();
-		this.log.setText(aMsg);
-	}
-
-	public void clearLog()
-	{
-		this.log.setText("");
-	}
-
-	public void showLogPanel()
-	{
-		this.resultTab.setSelectedIndex(1);
-	}
-	
-	public void showResultPanel()
-	{
-		this.resultTab.setSelectedIndex(0);
-	}
-
-	public void showStatusMessage(String aMsg)
-	{
-		this.data.setStatusMessage(aMsg);
-	}
-
-	public void clearStatusMessage()
-	{
-		this.data.clearStatusMessage();
-	}
-	
-	public void displayResult(String aSqlScript)
+	private void displayResult(String aSqlScript)
 	{
 		try
 		{
@@ -762,6 +807,12 @@ public class SqlPanel
 			this.showLogMessage(this.data.getLastMessage());
 			LogMgr.logError(this, "Error executing statement", e);
 		}
+	}
+	
+	private void checkResultSetActions()
+	{
+		boolean hasResult = this.data.hasResultSet();
+		this.setActionState(new Action[] {this.findAction, this.dataToClipboard, this.exportDataAction}, hasResult);
 	}
 	
 	public void run()
@@ -834,8 +885,9 @@ public class SqlPanel
 	 */
 	public void tableChanged(TableModelEvent e)
 	{
-		if (this.data.isModified())
+		if (e.getFirstRow() != TableModelEvent.ALL_COLUMNS && this.data.isModified())
 			this.updateAction.setEnabled(true);
 	}
 	
+
 }
