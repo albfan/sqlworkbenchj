@@ -9,10 +9,12 @@ package workbench.gui.components;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
+
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
 

@@ -3,11 +3,12 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import javax.swing.AbstractAction;
+
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.KeyStroke;
+
 import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
@@ -40,7 +41,7 @@ public class FileDiscardAction extends WbAction
 	
 	public void actionPerformed(ActionEvent e)
 	{
-		boolean shiftPressed = ((e.getModifiers() & e.SHIFT_MASK) == e.SHIFT_MASK);
+		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
 		this.client.closeFile(!shiftPressed);
 	}
 }

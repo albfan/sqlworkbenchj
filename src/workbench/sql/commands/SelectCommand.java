@@ -8,7 +8,7 @@ package workbench.sql.commands;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.exception.WbException;

@@ -1,8 +1,7 @@
 package workbench.util;
 
-import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
-import java.io.*;
+import java.util.StringTokenizer;
 
 /**
  * An augmented string tokenizer.
@@ -19,7 +18,7 @@ import java.io.*;
  * It is more sophisticated than the StringTokenizer and less complex than
  * StreamTokenizer.
  *
- * @version $Id: LineTokenizer.java,v 1.3 2002-12-14 15:54:36 thomas Exp $
+ * @version $Id: LineTokenizer.java,v 1.4 2003-02-26 21:42:01 thomas Exp $
  * @author Jean-Paul Le Fèvre
  * @see java.io.StreamTokenizer
  */

@@ -5,7 +5,6 @@
  */
 package workbench.storage;
 
-import workbench.db.WbConnection;
 
 class RowData
 {

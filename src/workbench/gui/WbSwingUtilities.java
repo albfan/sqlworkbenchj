@@ -3,27 +3,19 @@ package workbench.gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.Point;
-import javax.swing.RootPaneContainer;
-import java.awt.Window;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.Window;
 
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusListener;
-import java.awt.event.FocusEvent;
-
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.resource.ResourceMgr;
 

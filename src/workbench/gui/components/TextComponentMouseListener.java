@@ -6,10 +6,11 @@
 
 package workbench.gui.components;
 
-import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+
 import javax.swing.text.JTextComponent;
+
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.ClipboardSupport;
 

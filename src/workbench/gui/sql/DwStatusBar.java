@@ -7,16 +7,13 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Graphics;
-import javax.swing.JFrame;
+
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.TextComponentMouseListener;

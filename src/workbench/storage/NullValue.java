@@ -1,8 +1,7 @@
 package workbench.storage;
 
-import java.lang.Comparable;
-import java.sql.Types;
 import java.util.HashMap;
+
 import workbench.util.StringUtil;
 
 public class NullValue

@@ -8,6 +8,7 @@ package workbench.gui.components;
 
 import javax.swing.Action;
 import javax.swing.JButton;
+
 import workbench.gui.actions.WbAction;
 
 /**

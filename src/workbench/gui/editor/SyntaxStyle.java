@@ -9,14 +9,17 @@ package workbench.gui.editor;
  * remains intact in all source distributions of this package.
  */
 
-import java.awt.*;
-import java.util.StringTokenizer;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Toolkit;
 
 /**
  * A simple text style class. It can specify the color, italic flag,
  * and bold flag of a run of text.
  * @author Slava Pestov
- * @version $Id: SyntaxStyle.java,v 1.1 2001-12-11 19:07:23 thomas Exp $
+ * @version $Id: SyntaxStyle.java,v 1.2 2003-02-26 21:41:59 thomas Exp $
  */
 public class SyntaxStyle
 {

@@ -6,21 +6,17 @@
 
 package workbench.gui.components;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import javax.swing.JButton;
+
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
-import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
+
 import workbench.gui.WbSwingUtilities;
 
 /**

@@ -5,10 +5,22 @@
  */
 package workbench.gui.components;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,17 +31,40 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
-import javax.swing.*;
-import javax.swing.border.EtchedBorder;
+
+import javax.swing.ActionMap;
+import javax.swing.CellEditor;
+import javax.swing.DefaultCellEditor;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.JToolTip;
+import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.table.*;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
+
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.*;
-import workbench.gui.components.MultiLineToolTip;
+import workbench.gui.actions.DataToClipboardAction;
+import workbench.gui.actions.FindAction;
+import workbench.gui.actions.FindAgainAction;
+import workbench.gui.actions.OptimizeAllColumnsAction;
+import workbench.gui.actions.OptimizeColumnWidthAction;
+import workbench.gui.actions.SaveDataAsAction;
+import workbench.gui.actions.SetColumnWidthAction;
+import workbench.gui.actions.SortAscendingAction;
+import workbench.gui.actions.SortDescendingAction;
+import workbench.gui.actions.WbAction;
 import workbench.gui.renderer.DateColumnRenderer;
 import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RowStatusRenderer;
@@ -129,6 +164,7 @@ extends JTable
     WbCellEditor.setDefaultCopyPasteKeys(numberEditorTextField);
     
 		this.defaultNumberEditor = new DefaultCellEditor(numberEditorTextField);
+		
 		this.addMouseListener(this);
 		this.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		JTableHeader th = this.getTableHeader();
@@ -562,6 +598,7 @@ extends JTable
 			else
 			{
 				col.setCellEditor(this.defaultEditor);
+				//this.defaultEditor.getComponent()
 			}
 		}
 	}

@@ -6,8 +6,8 @@
 
 package workbench.gui.dbobjects;
 
-import java.awt.event.ActionListener;
 import java.io.File;
+
 import workbench.db.DataSpooler;
 import workbench.resource.ResourceMgr;
 

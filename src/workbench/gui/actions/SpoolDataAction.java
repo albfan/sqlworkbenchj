@@ -6,20 +6,11 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.util.List;
-import javax.swing.AbstractAction;
+
 import javax.swing.Action;
-import javax.swing.KeyStroke;
-import workbench.WbManager;
-import workbench.db.DataSpooler;
-import workbench.db.WbConnection;
-import workbench.gui.components.ExtensionFileFilter;
-import workbench.interfaces.ClipboardSupport;
-import workbench.interfaces.Exporter;
+
 import workbench.interfaces.Spooler;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.util.SqlUtil;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard

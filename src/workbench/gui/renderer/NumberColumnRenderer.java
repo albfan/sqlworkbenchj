@@ -6,20 +6,13 @@
 
 package workbench.gui.renderer;
 
-import java.awt.Color;
-import java.awt.Component;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
 import java.util.HashMap;
-import javax.swing.JLabel;
-import javax.swing.JTable;
+
 import javax.swing.SwingConstants;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
+
 import workbench.WbManager;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.WbTable;
 import workbench.util.StringUtil;
 
 /**

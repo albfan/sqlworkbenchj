@@ -12,11 +12,21 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.Date;
-import java.sql.*;
-import java.text.DateFormat;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
@@ -1111,11 +1121,25 @@ public class DataStore
 		}
 	}
 	
+	public String getDefaultDateFormat()
+	{
+		if (this.defaultFormatter == null) return null;
+		return this.defaultFormatter.toPattern();
+	}
+	
 	public void setDefaultDateFormat(String aFormat)
 	{
+		if (aFormat == null) return;
 		try
 		{
-			this.defaultFormatter = new SimpleDateFormat(aFormat);
+			if (this.defaultFormatter == null) 
+			{
+				this.defaultFormatter = new SimpleDateFormat(aFormat);
+			}
+			else
+			{
+				this.defaultFormatter.applyPattern(aFormat);
+			}
 		}
 		catch (Exception e)
 		{
@@ -1168,18 +1192,15 @@ public class DataStore
 		}
 	}
 
-	private final SimpleDateFormat[] dateFormatters = new SimpleDateFormat[]
-													{ 
-														new SimpleDateFormat("yyyy-MM-dd"), 
-														new SimpleDateFormat("dd.MM.yyyy"),
-													};
-													
-	private final SimpleDateFormat[] dateTimeFormatters = new SimpleDateFormat[]
-													{ 
-														new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"),
-														new SimpleDateFormat("dd.MM.yyyy HH:mm:ss"),
-														new SimpleDateFormat("yyyy-MM-dd"), 
-														new SimpleDateFormat("dd.MM.yyyy"),
+	private static final String[] dateFormats = new String[] {
+														"yyyy-MM-dd HH:mm:ss",
+														"dd.MM.yyyy HH:mm:ss",
+														"MM/dd/yy HH:mm:ss",
+														"MM/dd/yyyy HH:mm:ss",
+														"yyyy-MM-dd", 
+														"dd.MM.yyyy",
+														"MM/dd/yy",
+														"MM/dd/yyyy"
 													};
 	
   private java.sql.Date parseDate(String aDate, boolean dateOnly)
@@ -1199,29 +1220,31 @@ public class DataStore
 		}
 		if (result == null)
 		{
-			SimpleDateFormat[] formatters = null;
-			if (dateOnly || aDate.length() < 12) 
-				formatters = dateFormatters;
-			else
-				formatters = dateTimeFormatters;
-			
-			for (int i=0; i < formatters.length; i++)
+			SimpleDateFormat formatter = new SimpleDateFormat();
+			for (int i=0; i < dateFormats.length; i++)
 			{
 				try
 				{
-					result = formatters[i].parse(aDate);
+					formatter.applyPattern(dateFormats[i]);
+					result = formatter.parse(aDate);
+					LogMgr.logInfo("DataStore.parseDate()", "Parsing of " + aDate + " successful with format " + dateFormats[i]);
+					break;
 				}
 				catch (Exception e)
 				{
-					LogMgr.logWarning("DataStore.parseDate()", "Could not parse date " + aDate + " with default formatter " + formatters[i].toPattern());
 					result = null;
 				}
 			}
 		}
 		if (result != null)
+		{
 			return new java.sql.Date(result.getTime());
+		}
 		else
+		{
+			LogMgr.logWarning("DataStore.parseDate()", "Could not parse date " + aDate);
 			return null;
+		}
   }
 	/**
 	 * Return the status object for the give row.

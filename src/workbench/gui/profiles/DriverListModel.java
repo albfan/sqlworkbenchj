@@ -7,13 +7,12 @@
 package workbench.gui.profiles;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+
 import javax.swing.ListModel;
 import javax.swing.event.ListDataListener;
-import workbench.db.ConnectionProfile;
+
 import workbench.db.DbDriver;
 
 /**

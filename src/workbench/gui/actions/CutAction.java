@@ -5,13 +5,14 @@
  */
 package workbench.gui.actions;
 
-import workbench.interfaces.ClipboardSupport;
-import javax.swing.AbstractAction;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+
 import javax.swing.Action;
 import javax.swing.KeyStroke;
+
+import workbench.interfaces.ClipboardSupport;
 import workbench.resource.ResourceMgr;
 
 /**

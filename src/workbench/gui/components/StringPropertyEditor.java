@@ -5,13 +5,12 @@ package workbench.gui.components;
 
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
+
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+
 import workbench.interfaces.SimplePropertyEditor;
 
 

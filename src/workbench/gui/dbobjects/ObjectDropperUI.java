@@ -6,16 +6,12 @@
 
 package workbench.gui.dbobjects;
 
-import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.List;
-import javax.swing.DefaultListModel;
+
 import javax.swing.JDialog;
-import javax.swing.ListModel;
 import javax.swing.WindowConstants;
+
 import workbench.WbManager;
 import workbench.db.ObjectDropper;
 import workbench.db.WbConnection;

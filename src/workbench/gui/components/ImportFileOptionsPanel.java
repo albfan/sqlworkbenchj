@@ -34,11 +34,16 @@ public class ImportFileOptionsPanel extends javax.swing.JPanel
     checkBoxHeaders = new javax.swing.JCheckBox();
     labelDelimiter = new javax.swing.JLabel();
     textFieldDelimiter = new javax.swing.JTextField();
+    labelDateFormat = new javax.swing.JLabel();
+    textFieldDateFormat = new javax.swing.JTextField();
     dummy = new javax.swing.JPanel();
 
     setLayout(new java.awt.GridBagLayout());
 
+    setMinimumSize(new java.awt.Dimension(150, 73));
+    setPreferredSize(new java.awt.Dimension(150, 73));
     checkBoxHeaders.setText(ResourceMgr.getString("LabelImportFileHeaders"));
+    checkBoxHeaders.setToolTipText(ResourceMgr.getDescription("LabelImportFileHeaders"));
     checkBoxHeaders.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -50,11 +55,12 @@ public class ImportFileOptionsPanel extends javax.swing.JPanel
 
     labelDelimiter.setLabelFor(textFieldDelimiter);
     labelDelimiter.setText(ResourceMgr.getString("LabelColDelimiter"));
+    labelDelimiter.setToolTipText(ResourceMgr.getDescription("LabelColDelimiter"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
     add(labelDelimiter, gridBagConstraints);
 
     textFieldDelimiter.setColumns(4);
@@ -62,14 +68,35 @@ public class ImportFileOptionsPanel extends javax.swing.JPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 7);
     add(textFieldDelimiter, gridBagConstraints);
 
+    labelDateFormat.setLabelFor(textFieldDateFormat);
+    labelDateFormat.setText(ResourceMgr.getString("LabelImportDateFormat"));
+    labelDateFormat.setToolTipText(ResourceMgr.getDescription("LabelImportDateFormat"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+    add(labelDateFormat, gridBagConstraints);
+
+    textFieldDateFormat.setColumns(8);
+    textFieldDateFormat.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 7);
+    add(textFieldDateFormat, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.weighty = 1.0;
     add(dummy, gridBagConstraints);
 
@@ -79,12 +106,25 @@ public class ImportFileOptionsPanel extends javax.swing.JPanel
 	{
 		WbManager.getSettings().setLastImportDelimiter(this.getColumnDelimiter());
 		WbManager.getSettings().setLastImportWithHeaders(this.getContainsHeader());
+		WbManager.getSettings().setLastImportDateFormat(this.getDateFormat());
 	}
 	
 	public void restoreSettings()
 	{
 		this.setContainsHeader(WbManager.getSettings().getLastImportWithHeaders());
 		this.setColumnDelimiter(WbManager.getSettings().getLastImportDelimiter(true));
+		this.setDateFormat(WbManager.getSettings().getLastImportDateFormat());
+	}
+
+	public String getDateFormat()
+	{
+		return this.textFieldDateFormat.getText();
+	}
+	
+	public void setDateFormat(String aFormat)
+	{
+		this.textFieldDateFormat.setText(aFormat);
+		this.textFieldDateFormat.setCaretPosition(0);
 	}
 	
 	public boolean getContainsHeader()
@@ -107,9 +147,11 @@ public class ImportFileOptionsPanel extends javax.swing.JPanel
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel dummy;
+  private javax.swing.JLabel labelDateFormat;
   private javax.swing.JLabel labelDelimiter;
   private javax.swing.JCheckBox checkBoxHeaders;
   private javax.swing.JTextField textFieldDelimiter;
+  private javax.swing.JTextField textFieldDateFormat;
   // End of variables declaration//GEN-END:variables
 	
 }

@@ -2,6 +2,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import workbench.db.DataSpooler;
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
@@ -10,7 +11,6 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.commands.SelectCommand;
 import workbench.util.ArgumentParser;
-import workbench.util.LineTokenizer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 

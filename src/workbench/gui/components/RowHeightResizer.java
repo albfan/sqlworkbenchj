@@ -1,10 +1,12 @@
 package workbench.gui.components;
 
-import javax.swing.*;
-import javax.swing.table.*;
-import javax.swing.event.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Cursor;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+
+import javax.swing.JTable;
+import javax.swing.event.MouseInputAdapter;
 
 
 

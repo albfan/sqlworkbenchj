@@ -9,6 +9,7 @@ package workbench.gui.renderer;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
+
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -17,9 +18,9 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeCellRenderer;
+
 import workbench.db.DependencyNode;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
 
 /**

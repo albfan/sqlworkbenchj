@@ -9,13 +9,12 @@ package workbench.gui.editor;
  * remains intact in all source distributions of this package.
  */
 
-import javax.swing.text.Segment;
 
 /**
  * Transact-SQL token marker.
  *
  * @author mike dillon
- * @version $Id: TSQLTokenMarker.java,v 1.1 2001-12-11 19:07:23 thomas Exp $
+ * @version $Id: TSQLTokenMarker.java,v 1.2 2003-02-26 21:41:59 thomas Exp $
  */
 public class TSQLTokenMarker extends SQLTokenMarker
 {

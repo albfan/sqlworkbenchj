@@ -9,13 +9,12 @@
 
 package workbench.gui.editor;
 
-import javax.swing.text.Segment;
 
 /**
  * Java token marker.
  *
  * @author Slava Pestov
- * @version $Id: JavaTokenMarker.java,v 1.3 2002-11-15 20:24:28 thomas Exp $
+ * @version $Id: JavaTokenMarker.java,v 1.4 2003-02-26 21:41:59 thomas Exp $
  */
 public class JavaTokenMarker extends CTokenMarker
 {

@@ -55,9 +55,9 @@ public class WbManager implements FontChangedListener
 	/**
 	 *	Return an instance of the WbDesCipher.
 	 *
-	 *	This method uses Class.forName() to create a new 
+	 *	This method uses Class.forName() to create a new
 	 *	instance of WbDesCipher() so that WbManager itself
-	 *	does not reference the javax.crypto classes and 
+	 *	does not reference the javax.crypto classes and
 	 *	it can at least be loaded in JDK < 1.4 to give
 	 *	out an error message.
 	 */
@@ -166,7 +166,7 @@ public class WbManager implements FontChangedListener
 
 	private void setLookAndFeel()
 	{
-		if (trace) System.err.println("WbManager.setLookAndFeel() - start");
+		if (trace) System.out.println("WbManager.setLookAndFeel() - start");
 		try
 		{
 			String className = this.settings.getLookAndFeelClass();
@@ -187,12 +187,12 @@ public class WbManager implements FontChangedListener
 		catch (Exception e)
 		{
 		}
-		if (trace) System.err.println("WbManager.setLookAndFeel() - done");
+		if (trace) System.out.println("WbManager.setLookAndFeel() - done");
 	}
 
 	private void initUI()
 	{
-		if (trace) System.err.println("WbManager.initUI() - start");
+		if (trace) System.out.println("WbManager.initUI() - start");
 		this.setLookAndFeel();
 
 		UIDefaults def = UIManager.getDefaults();
@@ -236,33 +236,37 @@ public class WbManager implements FontChangedListener
 		def.put("SplitPaneUI", "com.sun.java.swing.plaf.windows.WindowsSplitPaneUI");
 
 		if (settings.getShowMnemonics())
+		{
 			def.put("Button.showMnemonics", Boolean.TRUE);
+		}
 		else
+		{
 			def.put("Button.showMnemonics", Boolean.FALSE);
+		}
 
 		this.settings.addFontChangedListener(this);
-		if (trace) System.err.println("WbManager.initUI() - done");
+		if (trace) System.out.println("WbManager.initUI() - done");
 	}
 
 	public MainWindow createWindow()
 	{
-		if (trace) System.err.println("WbManager.createWindow() - start");
+		if (trace) System.out.println("WbManager.createWindow() - start");
 		MainWindow win = new MainWindow();
 		this.mainWindows.add(win);
-		if (trace) System.err.println("WbManager.createWindow() - done");
+		if (trace) System.out.println("WbManager.createWindow() - done");
 		return win;
 	}
 
 	public void showErrorMessage(Component aCaller, String aMsg)
 	{
-		Window w = SwingUtilities.getWindowAncestor(aCaller);
+		//Window w = SwingUtilities.getWindowAncestor(aCaller);
 		WbSwingUtilities.showErrorMessage(aCaller, aMsg);
 	}
 
 	public void exitWorkbench()
 	{
 		this.getConnectionMgr().disconnectAll();
-		boolean first = true;
+		//boolean first = true;
 		if (!this.batchMode)
 		{
 			MainWindow w;
@@ -326,7 +330,7 @@ public class WbManager implements FontChangedListener
 
 	private void openNewWindow(boolean checkCmdLine)
 	{
-		if (trace) System.err.println("WbManager.openNewWindow()");
+		if (trace) System.out.println("WbManager.openNewWindow()");
 		final MainWindow main = this.createWindow();
 
 		main.show();
@@ -342,6 +346,7 @@ public class WbManager implements FontChangedListener
 				ConnectionProfile prof = connMgr.getProfile(profilename);
 				if (prof != null)
 				{
+					LogMgr.logDebug("WbManager.openNewWindow()", "Connecting to " + prof.getName());
 					// try to connect to the profile passed on the
 					// command line. If this fails the connection
 					// dialog will be show to the user
@@ -374,7 +379,7 @@ public class WbManager implements FontChangedListener
 
 	private void initCmdLine(String[] args)
 	{
-		if (trace) System.err.println("WbManager.initCmdLine() - start");
+		if (trace) System.out.println("WbManager.initCmdLine() - start");
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(ARG_PROFILE);
 		cmdLine.addArgument(ARG_CONFIGDIR);
@@ -410,28 +415,28 @@ public class WbManager implements FontChangedListener
 		catch (Exception e)
 		{
 		}
-		if (trace) System.err.println("WbManager.initCmdLine() - done");
+		if (trace) System.out.println("WbManager.initCmdLine() - done");
 	}
 
 	public void init()
 	{
-		if (trace) System.err.println("WbManager.init() - start");
+		if (trace) System.out.println("WbManager.init() - start");
 		this.settings = new Settings();
 		if (!this.batchMode)
 		{
 			WbSplash splash = null;
 			if (wb.settings.getShowSplash())
 			{
-				if (trace) System.err.println("WbManager.init() - opening splash window");
+				if (trace) System.out.println("WbManager.init() - opening splash window");
 				splash = new WbSplash(null, false);
 				splash.setVisible(true);
 			}
-			if (trace) System.err.println("WbManager.init() - initializing UI defaults");
+			if (trace) System.out.println("WbManager.init() - initializing UI defaults");
 			this.initUI();
 			this.openNewWindow(true);
 			if (splash != null)
 			{
-				if (trace) System.err.println("WbManager.init() - closing splash window");
+				if (trace) System.out.println("WbManager.init() - closing splash window");
 				splash.setVisible(false);
 				splash.dispose();
 			}
@@ -451,7 +456,7 @@ public class WbManager implements FontChangedListener
 			String error = cmdLine.getValue(ARG_ERROR_SCRIPT);
 			if (scripts != null && profilename != null)
 			{
-				if (trace) System.err.println("WbManager.init() - initializing BatchRunner");
+				if (trace) System.out.println("WbManager.init() - initializing BatchRunner");
 				BatchRunner runner = new BatchRunner(scripts);
 				try
 				{
@@ -461,9 +466,9 @@ public class WbManager implements FontChangedListener
 					// set profile will connect to the database using the
 					// connection manager. It will throw an exception
 					// if the connection fails.
-					if (trace) System.err.println("WbManager.init() - connecting BatchRunner");
+					if (trace) System.out.println("WbManager.init() - connecting BatchRunner");
 					runner.setProfile(StringUtil.trimQuotes(profilename));
-					if (trace) System.err.println("WbManager.init() - starting BatchRunner");
+					if (trace) System.out.println("WbManager.init() - starting BatchRunner");
 					runner.execute();
 				}
 				catch (Exception e)
@@ -476,14 +481,14 @@ public class WbManager implements FontChangedListener
 				}
 			}
 		}
-		if (trace) System.err.println("WbManager.init() - done.");
+		if (trace) System.out.println("WbManager.init() - done.");
 	}
 
 	public static void main(String args[])
 	{
-		if (trace) System.err.println("WbManager.main() - start");
+		if (trace) System.out.println("WbManager.main() - start");
 		wb.initCmdLine(args);
 		wb.init();
-		if (trace) System.err.println("WbManager.main() - done");
+		if (trace) System.out.println("WbManager.main() - done");
 	}
 }

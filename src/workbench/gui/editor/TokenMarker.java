@@ -10,7 +10,6 @@ package workbench.gui.editor;
  */
 
 import javax.swing.text.Segment;
-import java.util.*;
 
 /**
  * A token marker that splits lines of text into tokens. Each token carries
@@ -23,7 +22,7 @@ import java.util.*;
  * cached.
  *
  * @author Slava Pestov
- * @version $Id: TokenMarker.java,v 1.1 2001-12-11 19:07:23 thomas Exp $
+ * @version $Id: TokenMarker.java,v 1.2 2003-02-26 21:42:00 thomas Exp $
  *
  * @see org.gjt.sp.jedit.syntax.Token
  */

@@ -9,17 +9,19 @@ package workbench.gui.editor;
  * remains intact in all source distributions of this package.
  */
 
-import javax.swing.KeyStroke;
-import java.awt.event.*;
-import java.awt.Toolkit;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
+
+import javax.swing.KeyStroke;
 
 /**
  * The default input handler. It maps sequences of keystrokes into actions
  * and inserts key typed events into the text area.
  * @author Slava Pestov
- * @version $Id: DefaultInputHandler.java,v 1.6 2003-01-19 18:55:05 thomas Exp $
+ * @version $Id: DefaultInputHandler.java,v 1.7 2003-02-26 21:41:59 thomas Exp $
  */
 public class DefaultInputHandler extends InputHandler
 {

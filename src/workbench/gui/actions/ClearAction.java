@@ -5,11 +5,12 @@
  */
 package workbench.gui.actions;
 
-import workbench.interfaces.ClipboardSupport;
-import javax.swing.AbstractAction;
 import java.awt.event.ActionEvent;
-import workbench.resource.ResourceMgr;
+
 import javax.swing.Action;
+
+import workbench.interfaces.ClipboardSupport;
+import workbench.resource.ResourceMgr;
 
 /**
  *	Action to clear the contents of a entry field

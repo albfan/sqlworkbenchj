@@ -9,17 +9,27 @@ package workbench.gui.editor;
  * remains intact in all source distributions of this package.
  */
 
-import javax.swing.ToolTipManager;
-import javax.swing.text.*;
-import javax.swing.JComponent;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
-import java.awt.*;
+
+import javax.swing.JComponent;
+import javax.swing.ToolTipManager;
+import javax.swing.text.PlainDocument;
+import javax.swing.text.Segment;
+import javax.swing.text.TabExpander;
+import javax.swing.text.Utilities;
 
 /**
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.6 2002-10-12 09:23:15 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.7 2003-02-26 21:41:59 thomas Exp $
  */
 public class TextAreaPainter extends JComponent implements TabExpander
 {

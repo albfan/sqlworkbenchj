@@ -6,20 +6,14 @@
 
 package workbench.gui.dbobjects;
 
-import java.awt.Cursor;
-import java.awt.EventQueue;
-import java.awt.Image;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.lang.Runnable;
+
 import javax.swing.JFrame;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
 import javax.swing.WindowConstants;
+
 import workbench.WbManager;
-import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 

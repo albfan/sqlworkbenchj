@@ -7,22 +7,15 @@
 package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import javax.swing.BorderFactory;
-import javax.swing.JDialog;
+
 import javax.swing.JToolBar;
-import javax.swing.ListModel;
-import javax.swing.border.Border;
+
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
-import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
 import workbench.exception.WbException;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
-import workbench.gui.components.WbToolbarButton;
 import workbench.interfaces.FileActions;
 import workbench.resource.ResourceMgr;
 

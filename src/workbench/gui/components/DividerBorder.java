@@ -1,10 +1,10 @@
 package workbench.gui.components;
 
-import java.awt.Graphics;
-import java.awt.Insets;
-import java.awt.Rectangle;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Insets;
+
 import javax.swing.border.AbstractBorder;
 
 public class DividerBorder extends AbstractBorder

@@ -4,17 +4,18 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;

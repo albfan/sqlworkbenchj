@@ -1,16 +1,25 @@
 package workbench.gui.components;
 
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.BorderFactory;
-import javax.swing.border.Border;
-import javax.swing.plaf.*;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Toolkit;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+
+import javax.swing.JComponent;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JToolTip;
+import javax.swing.KeyStroke;
+import javax.swing.UIManager;
+import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicToolTipUI;
 import javax.swing.plaf.metal.MetalLookAndFeel;
+
 import workbench.gui.actions.WbAction;
-import workbench.gui.components.WbToolbarButton;
 
 /**
  *	A copy of Sun's original MetalToolTipUI.

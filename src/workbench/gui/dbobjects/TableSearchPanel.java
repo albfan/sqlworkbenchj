@@ -6,10 +6,22 @@
 
 package workbench.gui.dbobjects;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import javax.swing.*;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -17,14 +29,20 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
+
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.TableSearcher;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
-import workbench.gui.components.*;
-import workbench.interfaces.Reloadable;
+import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.DividerBorder;
+import workbench.gui.components.EmptyTableModel;
+import workbench.gui.components.WbScrollPane;
+import workbench.gui.components.WbSplitPane;
+import workbench.gui.components.WbTable;
+import workbench.gui.components.WbToolbarButton;
 import workbench.interfaces.ShareableDisplay;
 import workbench.interfaces.TableSearchDisplay;
 import workbench.resource.ResourceMgr;

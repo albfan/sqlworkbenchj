@@ -5,21 +5,15 @@
  */
 package workbench.gui.actions;
 
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.lang.Runnable;
-import javax.swing.AbstractAction;
+
 import javax.swing.Action;
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
 import javax.swing.KeyStroke;
+
 import workbench.gui.components.WbTable;
-import workbench.interfaces.ClipboardSupport;
-import workbench.interfaces.Exporter;
 import workbench.resource.ResourceMgr;
-import workbench.util.StringUtil;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard

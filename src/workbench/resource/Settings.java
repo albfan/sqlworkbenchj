@@ -47,7 +47,7 @@ public class Settings
 
 	public Settings()
 	{
-		if (WbManager.trace) System.err.println("Settings.<init> - start");
+		if (WbManager.trace) System.out.println("Settings.<init> - start");
 		this.props = new Properties();
 		this.filename = System.getProperty("workbench.settings.file", null);
 		fillDefaults();
@@ -69,7 +69,7 @@ public class Settings
 		}
 		if (filename == null) this.filename = this.configDir + "workbench.settings";
 
-	  if (WbManager.trace) System.err.println("Settings.<init> - Reading settings");
+	  if (WbManager.trace) System.out.println("Settings.<init> - Reading settings");
 		try
 		{
 			BufferedInputStream in = new BufferedInputStream(new FileInputStream(this.filename));
@@ -81,7 +81,7 @@ public class Settings
 			fillDefaults();
 		}
 
-	  if (WbManager.trace) System.err.println("Settings.<init> - Done reading settings");
+	  if (WbManager.trace) System.out.println("Settings.<init> - Done reading settings");
 
     try
     {
@@ -101,7 +101,7 @@ public class Settings
 		String level = this.props.getProperty("workbench.log.level", "INFO");
 		LogMgr.setLevel(level);
 
-		if (WbManager.trace) System.err.println("Settings.<init> - done");
+		if (WbManager.trace) System.out.println("Settings.<init> - done");
 	}
 
 	public String getConfigDir() { return this.configDir; }
@@ -193,7 +193,7 @@ public class Settings
 
 	private void fillDefaults()
 	{
-		if (WbManager.trace) System.err.println("Setting.fillDefaults() - start");
+		if (WbManager.trace) System.out.println("Setting.fillDefaults() - start");
 		try
 		{
 			this.props.load(ResourceMgr.getDefaultSettings());
@@ -202,7 +202,7 @@ public class Settings
 		{
 			LogMgr.logError(this, "Could not read default settings", e);
 		}
-		if (WbManager.trace) System.err.println("Setting.fillDefaults() - done");
+		if (WbManager.trace) System.out.println("Setting.fillDefaults() - done");
 	}
 
 	public Font getStandardFont()
@@ -246,7 +246,7 @@ public class Settings
 	 */
 	public Font getFont(String aFontName)
 	{
-		if (WbManager.trace) System.err.println("Setting.getFont() - start");
+		if (WbManager.trace) System.out.println("Setting.getFont() - start");
 		Font result;
 
 		String baseKey = new StringBuffer("workbench.font.").append(aFontName).toString();
@@ -272,7 +272,7 @@ public class Settings
 			size = 11;
 		}
 		result = new Font(name, style, size);
-		if (WbManager.trace) System.err.println("Setting.getFont() - done");
+		if (WbManager.trace) System.out.println("Setting.getFont() - done");
 		return result;
 	}
 
@@ -315,6 +315,16 @@ public class Settings
 		}
 	}
 
+	public String getLastImportDateFormat()
+	{
+		return this.props.getProperty("workbench.import.dateformat", this.getDefaultDateFormat());
+	}
+
+	public void setLastImportDateFormat(String aFormat)
+	{
+		this.props.setProperty("workbench.import.dateformat", aFormat);
+	}
+	
 	public String getLastImportDir()
 	{
 		return this.props.getProperty("workbench.import.lastdir", this.getLastExportDir());

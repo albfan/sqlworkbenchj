@@ -3,12 +3,8 @@
  */
 package workbench.gui.components;
 
-import java.awt.Dimension;
 import javax.swing.Action;
-import javax.swing.Icon;
 import javax.swing.JMenu;
-import javax.swing.LookAndFeel;
-import javax.swing.UIManager;
 
 /**
  *

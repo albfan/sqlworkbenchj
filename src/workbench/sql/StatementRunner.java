@@ -7,13 +7,22 @@
 package workbench.sql;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
+
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
-import workbench.sql.StatementRunnerResult;
-import workbench.sql.commands.*;
-import workbench.sql.wbcommands.*;
+import workbench.sql.commands.DdlCommand;
+import workbench.sql.commands.SelectCommand;
+import workbench.sql.commands.SingleVerbCommand;
+import workbench.sql.commands.UpdatingCommand;
+import workbench.sql.wbcommands.WbDescribeTable;
+import workbench.sql.wbcommands.WbDisableOraOutput;
+import workbench.sql.wbcommands.WbEnableOraOutput;
+import workbench.sql.wbcommands.WbListCatalogs;
+import workbench.sql.wbcommands.WbListProcedures;
+import workbench.sql.wbcommands.WbListTables;
+import workbench.sql.wbcommands.WbOraExecute;
+import workbench.sql.wbcommands.WbSpoolCommand;
 import workbench.util.SqlUtil;
 
 /**

@@ -23,16 +23,16 @@ public class SqlSyntaxFormatter
 
 	private static HashMap dateLiteralFormatter;
 	private static DbDateFormatter defaultDateFormatter;
-	
+
 	private SqlSyntaxFormatter()
 	{
 	}
-	
+
 	static
 	{
 		dateLiteralFormatter = readStatementTemplates("DateLiteralFormats.xml");
 	}
-	
+
 	static HashMap readStatementTemplates(String aFilename)
 	{
 		HashMap result = null;
@@ -69,7 +69,7 @@ public class SqlSyntaxFormatter
 		}
 		return defaultDateFormatter;
 	}
-	
+
 	public static DbDateFormatter getDateLiteralFormatter(String aProductname)
 	{
 		Object value = dateLiteralFormatter.get(aProductname);
@@ -80,12 +80,12 @@ public class SqlSyntaxFormatter
 		DbDateFormatter format = (DbDateFormatter)value;
 		return format;
 	}
-	
+
 	public static String getDefaultLiteral(Object aValue)
 	{
 		return getDefaultLiteral(aValue, getDateLiteralFormatter());
 	}
-	
+
 	public static String getDefaultLiteral(Object aValue, DbDateFormatter formatter)
 	{
 		if (aValue == null) return "NULL";
@@ -93,10 +93,11 @@ public class SqlSyntaxFormatter
 		if (aValue instanceof String)
 		{
 			// Single quotes in a String must be "quoted"...
-			StringBuffer realValue = StringUtil.replaceToBuffer((String)aValue, "'", "''");
-			realValue.insert(0, "'");
-			
-			//return realv"'" + realValue + "'";
+			String t = (String)aValue;
+			StringBuffer realValue = new StringBuffer(t.length() + 10);
+			realValue.append('\'');
+			StringUtil.replaceToBuffer(realValue, t, "'", "''");
+			realValue.append("'");
 			return realValue.toString();
 		}
 		else if (aValue instanceof Date)
@@ -113,5 +114,5 @@ public class SqlSyntaxFormatter
 			return aValue.toString();
 		}
 	}
-	
+
 }

@@ -14,15 +14,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.StringTokenizer;
+
 import workbench.WbManager;
 import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.SynonymReader;
@@ -31,7 +28,6 @@ import workbench.gui.components.DataStoreTableModel;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.storage.DbDateFormatter;
-import workbench.storage.NullValue;
 import workbench.storage.SqlSyntaxFormatter;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
@@ -1382,7 +1378,7 @@ public class DbMetadata
 		String template = (String)this.fkStatements.get(this.productName);
 		if (template == null)
 		{
-			template = (String)this.fkStatements.get(this.GENERAL_SQL);
+			template = (String)this.fkStatements.get(GENERAL_SQL);
 		}
 
 		// collects all columns from the base table mapped to the
@@ -1616,7 +1612,7 @@ public class DbMetadata
 		String template = (String)aMap.get(this.productName);
 		if (template == null)
 		{
-			template = (String)aMap.get(this.GENERAL_SQL);
+			template = (String)aMap.get(GENERAL_SQL);
 		}
 		return template;
 	}

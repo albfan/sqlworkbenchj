@@ -6,8 +6,13 @@
 
 package workbench.gui.sql;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -17,24 +22,93 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.swing.*;
+
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.ComponentInputMap;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.InputMap;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+
 import workbench.WbManager;
 import workbench.db.DataSpooler;
 import workbench.db.DeleteScriptGenerator;
 import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.*;
-import workbench.gui.components.*;
+import workbench.gui.actions.CleanJavaCodeAction;
+import workbench.gui.actions.CopyAsSqlInsertAction;
+import workbench.gui.actions.CreateDeleteScriptAction;
+import workbench.gui.actions.CreateSnippetAction;
+import workbench.gui.actions.DataToClipboardAction;
+import workbench.gui.actions.DeleteRowAction;
+import workbench.gui.actions.ExecuteAllAction;
+import workbench.gui.actions.ExecuteSelAction;
+import workbench.gui.actions.ExpandEditorAction;
+import workbench.gui.actions.ExpandResultAction;
+import workbench.gui.actions.FileDiscardAction;
+import workbench.gui.actions.FileOpenAction;
+import workbench.gui.actions.FileSaveAction;
+import workbench.gui.actions.FileSaveAsAction;
+import workbench.gui.actions.FindAction;
+import workbench.gui.actions.FindAgainAction;
+import workbench.gui.actions.ImportFileAction;
+import workbench.gui.actions.InsertRowAction;
+import workbench.gui.actions.MakeInListAction;
+import workbench.gui.actions.MakeLowerCaseAction;
+import workbench.gui.actions.MakeNonCharInListAction;
+import workbench.gui.actions.MakeUpperCaseAction;
+import workbench.gui.actions.NextStatementAction;
+import workbench.gui.actions.OptimizeAllColumnsAction;
+import workbench.gui.actions.PrevStatementAction;
+import workbench.gui.actions.RedoAction;
+import workbench.gui.actions.SaveDataAsAction;
+import workbench.gui.actions.SaveSqlHistoryAction;
+import workbench.gui.actions.SelectEditorAction;
+import workbench.gui.actions.SelectMaxRowsAction;
+import workbench.gui.actions.SelectResultAction;
+import workbench.gui.actions.SpoolDataAction;
+import workbench.gui.actions.StartEditAction;
+import workbench.gui.actions.StopAction;
+import workbench.gui.actions.UndoAction;
+import workbench.gui.actions.UndoExpandAction;
+import workbench.gui.actions.UpdateDatabaseAction;
+import workbench.gui.actions.WbAction;
+import workbench.gui.components.ConnectionInfo;
+import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.ExtensionFileFilter;
+import workbench.gui.components.ImportFileOptionsPanel;
+import workbench.gui.components.TabbedPaneUIFactory;
+import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.WbScrollPane;
+import workbench.gui.components.WbSplitPane;
+import workbench.gui.components.WbTable;
+import workbench.gui.components.WbToolbar;
+import workbench.gui.components.WbToolbarSeparator;
+import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.menu.TextPopup;
-import workbench.interfaces.*;
+import workbench.interfaces.FilenameChangeListener;
+import workbench.interfaces.FontChangedListener;
+import workbench.interfaces.MainPanel;
+import workbench.interfaces.Spooler;
+import workbench.interfaces.TextFileContainer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -847,7 +921,7 @@ public class SqlPanel
 	{
 		return this.dbConnection;
 	}
-	
+
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
@@ -998,6 +1072,7 @@ public class SqlPanel
 		if (table == null) return;
 		DataStoreTableModel model = (DataStoreTableModel)table.getModel();
 		DataStore ds = table.getDataStore();
+		String currentFormat = ds.getDefaultDateFormat();
 		if (ds == null) return;
 		String lastDir = WbManager.getSettings().getLastImportDir();
 		JFileChooser fc = new JFileChooser(lastDir);
@@ -1008,21 +1083,22 @@ public class SqlPanel
 		int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(this));
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
-			//result = this.readFile(fc.getSelectedFile());
 			String filename = fc.getSelectedFile().getAbsolutePath();
+			lastDir = fc.getCurrentDirectory().getAbsolutePath();
+			WbManager.getSettings().setLastImportDir(lastDir);
+			optionPanel.saveSettings();
 			try
 			{
+				ds.setDefaultDateFormat(optionPanel.getDateFormat());
 				model.importFile(filename, optionPanel.getContainsHeader(), optionPanel.getColumnDelimiter());
-				lastDir = fc.getCurrentDirectory().getAbsolutePath();
-				WbManager.getSettings().setLastImportDir(lastDir);
 			}
 			catch (Exception e)
 			{
 				LogMgr.logError("SqlPanel.importFile()", "Error importing " + filename, e);
 			}
-			optionPanel.saveSettings();
 		}
     this.data.dataChanged();
+		ds.setDefaultDateFormat(currentFormat);
 	}
 
 	private void appendToLog(final String aString)

@@ -186,6 +186,7 @@ public class ConnectionMgr
 
 	public ConnectionProfile getProfile(String aName)
 	{
+		//LogMgr.logDebug("LogMgr.getConnection()", "Searching for " + aName);
 		this.getProfiles();
 		if (this.profiles == null) return null;
 		Iterator itr = this.profiles.values().iterator();
@@ -193,9 +194,10 @@ public class ConnectionMgr
 		while (itr.hasNext())
 		{
 			prof = (ConnectionProfile)itr.next();
+			//LogMgr.logDebug("LogMgr.getConnection()", "Current profile= " + prof.getName());
 			if (aName.equalsIgnoreCase(prof.getName())) return prof;
 		}
-		return prof;
+		return null;
 	}
 
 	/**
@@ -286,7 +288,7 @@ public class ConnectionMgr
 
 			if (con != null && !con.isClosed())
 			{
-				LogMgr.logDebug("ConnectionMgr.disconnect()", "Disconnecting connection with Profile=" + con.getProfile().getName());
+				LogMgr.logDebug("ConnectionMgr.disconnect()", "Disconnecting: " + con.getProfile().getName());
 				con.close();
 			}
 			this.activeConnections.put(anId, null);

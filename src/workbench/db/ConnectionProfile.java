@@ -5,11 +5,9 @@
  */
 package workbench.db;
 
-import java.util.HashMap;
 import java.util.Comparator;
-import java.util.StringTokenizer;
+
 import workbench.WbManager;
-import workbench.log.LogMgr;
 import workbench.util.WbCipher;
 import workbench.util.WbPersistence;
 
@@ -98,7 +96,7 @@ public class ConnectionProfile
 	/**
 	 *	Sets the current password. If the password
 	 *	is not already encrypted, it will be encrypted
-	 *B
+	 *	
 	 *	@see #getPassword()
 	 *	@see workbench.util.WbCipher#encryptString(String)
 	 */

@@ -3,8 +3,8 @@
  */
 package workbench.db;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+
 import workbench.util.WbPersistence;
 
 /**

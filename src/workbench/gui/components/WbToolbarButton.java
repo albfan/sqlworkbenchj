@@ -6,8 +6,8 @@
 
 package workbench.gui.components;
 
-import java.awt.Dimension;
 import java.awt.Insets;
+
 import javax.swing.Action;
 
 /**

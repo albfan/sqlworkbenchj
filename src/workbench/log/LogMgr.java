@@ -2,12 +2,11 @@ package workbench.log;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.util.List;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import workbench.WbManager;
 
@@ -83,7 +82,7 @@ public class LogMgr
 
 	public static void setOutputFile(String aFilename)
 	{
-	  if (WbManager.trace) System.err.println("LogMgr.setOutputFile() - " + aFilename);
+	  if (WbManager.trace) System.out.println("LogMgr.setOutputFile() - " + aFilename);
 		if (aFilename == null || aFilename.length() == 0) return;
 		if ("System.out".equalsIgnoreCase(aFilename))
 		{
@@ -110,7 +109,7 @@ public class LogMgr
 		outputfile = aFilename;
 		outputOpened = false;
 		checkOutput();
-	  if (WbManager.trace) System.err.println("LogMgr.setOutputFile() - done");
+	  if (WbManager.trace) System.out.println("LogMgr.setOutputFile() - done");
 	}
 
 	private static void checkOutput()
@@ -128,7 +127,7 @@ public class LogMgr
 			{
 				logOut.close();
 			}
-      if (WbManager.trace) System.err.println("LogMgr.checkOutput() - Opening logfile " + outputfile);
+      if (WbManager.trace) System.out.println("LogMgr.checkOutput() - Opening logfile " + outputfile);
 			logOut = new DuplicatingPrintStream(new BufferedOutputStream(new FileOutputStream(outputfile)), System.out);
       outputOpened = true;
       logInfo("LogMgr", "Log started");

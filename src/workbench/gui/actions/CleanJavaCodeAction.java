@@ -1,16 +1,13 @@
 package workbench.gui.actions;
 
 import java.awt.EventQueue;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
-import javax.swing.AbstractAction;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.lang.Runnable;
+
 import javax.swing.Action;
 import javax.swing.KeyStroke;
+
 import workbench.interfaces.TextContainer;
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;

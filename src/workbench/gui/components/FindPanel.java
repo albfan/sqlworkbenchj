@@ -68,7 +68,7 @@ public class FindPanel extends JPanel implements Searchable
 
 		InputMap im = new ComponentInputMap(this);
 		ActionMap am = new ActionMap();
-		this.setInputMap(this.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, im);
+		this.setInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, im);
 		this.setActionMap(am);
 
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), this.findAction.getActionName());

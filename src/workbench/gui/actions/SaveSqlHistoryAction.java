@@ -1,18 +1,11 @@
 package workbench.gui.actions;
 
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
-import javax.swing.AbstractAction;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
+
 import javax.swing.Action;
-import javax.swing.KeyStroke;
+
 import workbench.gui.sql.SqlPanel;
-import workbench.interfaces.TextContainer;
 import workbench.resource.ResourceMgr;
-import workbench.util.StringUtil;
 
 /**
  *	Action to clear the contents of a entry field

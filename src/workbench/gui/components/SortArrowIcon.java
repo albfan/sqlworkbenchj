@@ -11,9 +11,11 @@
 
 package workbench.gui.components;
 
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.ImageIcon;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics;
+
+import javax.swing.Icon;
 
 public class SortArrowIcon
   implements Icon

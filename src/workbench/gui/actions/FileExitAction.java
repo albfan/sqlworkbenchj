@@ -5,12 +5,12 @@
  */
 package workbench.gui.actions;
 
-import javax.swing.AbstractAction;
 import java.awt.event.ActionEvent;
+
 import javax.swing.Action;
-import workbench.resource.ResourceMgr;
-import java.awt.event.ActionListener;
+
 import workbench.WbManager;
+import workbench.resource.ResourceMgr;
 
 /**
  *	Action to paste the contents of the clipboard into the entry field

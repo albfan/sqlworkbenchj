@@ -6,14 +6,14 @@
 package workbench.gui.profiles;
 
 import java.awt.event.ActionEvent;
-import javax.swing.AbstractAction;
+
 import javax.swing.Action;
-import javax.swing.KeyStroke;
+
 import workbench.exception.WbException;
 import workbench.gui.actions.WbAction;
-import workbench.resource.ResourceMgr;
 import workbench.interfaces.FileActions;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard

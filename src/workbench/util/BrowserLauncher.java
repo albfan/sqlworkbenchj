@@ -1,7 +1,6 @@
 package workbench.util;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -432,7 +431,6 @@ public class BrowserLauncher {
 							}
 						}
 					} catch (IllegalArgumentException iare) {
-						browser = browser;
 						errorMessage = iare.getMessage();
 						return null;
 					} catch (IllegalAccessException iae) {

@@ -1,6 +1,5 @@
 package workbench.interfaces;
 
-import java.awt.event.ItemListener;
 import java.beans.PropertyChangeListener;
 
 /**

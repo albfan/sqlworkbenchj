@@ -69,7 +69,7 @@ public class PasswordPropertyEditor
 		if (this.source == null) return;
 		if (this.setter == null) return;
 		Object args[] = new Object[1];
-		args[0] = this.getText();
+		args[0] = new String(this.getPassword());
 		try
 		{
 			this.setter.invoke(this.source, args);

@@ -8,11 +8,11 @@ package workbench.gui.profiles;
 
 import java.awt.Frame;
 import java.io.File;
+
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-import javax.swing.filechooser.FileFilter;
+
 import workbench.WbManager;
 import workbench.db.DbDriver;
 import workbench.gui.components.ExtensionFileFilter;

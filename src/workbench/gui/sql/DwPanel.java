@@ -4,18 +4,23 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Window;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
-import javax.swing.*;
+
+import javax.swing.DefaultCellEditor;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+
 import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
@@ -33,8 +38,6 @@ import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 import workbench.storage.DmlStatement;
-import workbench.util.LineTokenizer;
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 

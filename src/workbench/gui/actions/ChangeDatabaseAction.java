@@ -8,11 +8,10 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import javax.swing.AbstractAction;
+
 import javax.swing.Action;
 import javax.swing.KeyStroke;
-import workbench.interfaces.ClipboardSupport;
-import workbench.interfaces.Exporter;
+
 import workbench.resource.ResourceMgr;
 
 /**

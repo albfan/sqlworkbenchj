@@ -1,32 +1,19 @@
 package workbench.gui.renderer;
 
-import javax.swing.table.TableCellRenderer;
-
-import javax.swing.JTable;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-import javax.swing.BorderFactory;
-import javax.swing.border.Border;
-
-import java.awt.Component;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 import javax.swing.Icon;
 import javax.swing.JComponent;
-import javax.swing.JToolTip;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.plaf.basic.BasicGraphicsUtils;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.text.View;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.MultiLineToolTip;
-import workbench.gui.components.MultiLineToolTipUI;
-import workbench.gui.components.TextComponentMouseListener;
+import javax.swing.table.TableCellRenderer;
+
 import workbench.gui.components.WbTable;
 import workbench.util.StringUtil;
 

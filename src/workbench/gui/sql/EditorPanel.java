@@ -8,15 +8,21 @@ package workbench.gui.sql;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.event.ActionListener;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+
 import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
-import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
+
 import workbench.WbManager;
 import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.actions.WbAction;
@@ -27,7 +33,6 @@ import workbench.gui.editor.JavaTokenMarker;
 import workbench.gui.editor.SyntaxStyle;
 import workbench.gui.editor.Token;
 import workbench.gui.editor.TokenMarker;
-import workbench.gui.menu.TextPopup;
 import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.TextContainer;

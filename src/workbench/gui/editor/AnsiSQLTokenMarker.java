@@ -3,13 +3,7 @@ package workbench.gui.editor;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.util.StringTokenizer;
-/*
- * AnsiSQLTokenMarker.java
- *
- *	Copied from TSQLTokenMarker and modified for ANSI SQL
- *
- */
-import javax.swing.text.Segment;
+
 import workbench.log.LogMgr;
 
 /**

@@ -8,15 +8,15 @@ package workbench.gui.settings;
 
 import java.awt.Font;
 import java.awt.Frame;
-import java.awt.Window;
 import java.awt.event.ItemEvent;
+
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
+
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.NumberField;
-import workbench.gui.components.WbFontChooser;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 

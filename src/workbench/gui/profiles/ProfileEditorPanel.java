@@ -11,22 +11,17 @@ import java.awt.EventQueue;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import javax.swing.BorderFactory;
-import javax.swing.JDialog;
+
 import javax.swing.JToolBar;
 import javax.swing.ListModel;
-import javax.swing.border.Border;
+
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.exception.WbException;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
-import workbench.gui.components.WbToolbarButton;
-import workbench.gui.components.WbToolbarSeparator;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.FileActions;
 import workbench.resource.ResourceMgr;

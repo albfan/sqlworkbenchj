@@ -3,10 +3,8 @@ package workbench.gui.actions;
 import java.awt.EventQueue;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.lang.Runnable;
+
 import javax.swing.AbstractAction;
-import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
@@ -15,10 +13,9 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
-import javax.swing.UIManager;
+
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbToolbarButton;
-import workbench.interfaces.ClipboardSupport;
 import workbench.resource.ResourceMgr;
 
 /**

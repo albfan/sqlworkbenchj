@@ -8,10 +8,7 @@ package workbench.interfaces;
 
 import java.awt.Font;
 import java.util.List;
-import javax.swing.Action;
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
-import javax.swing.JToolBar;
+
 import workbench.db.WbConnection;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbToolbar;

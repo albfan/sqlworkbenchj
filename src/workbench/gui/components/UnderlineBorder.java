@@ -1,13 +1,12 @@
 package workbench.gui.components;
 
-import java.awt.Graphics;
-import java.awt.Insets;
-import java.awt.Rectangle;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import javax.swing.JLabel;
+import java.awt.Graphics;
+import java.awt.Insets;
+
 import javax.swing.JTextField;
 import javax.swing.border.AbstractBorder;
 

@@ -12,8 +12,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+
 import workbench.WbManager;
-import workbench.exception.NoConnectionException;
 import workbench.log.LogMgr;
 
 /**

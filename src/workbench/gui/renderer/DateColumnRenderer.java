@@ -6,17 +6,12 @@
 
 package workbench.gui.renderer;
 
-import java.awt.Color;
-import java.awt.Component;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import javax.swing.JComponent;
-import javax.swing.JTable;
+
 import javax.swing.SwingConstants;
-import javax.swing.table.DefaultTableCellRenderer;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.WbTable;
+
 import workbench.util.StringUtil;
 
 /**

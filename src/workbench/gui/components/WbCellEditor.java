@@ -2,32 +2,26 @@ package workbench.gui.components;
 
 
 import java.awt.Component;
-import java.awt.event.*;
-import java.awt.AWTEvent;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.lang.Boolean;
-import javax.swing.table.*;
-import javax.swing.event.*;
-import java.util.EventObject;
-import javax.swing.tree.*;
-import java.io.Serializable;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.EventObject;
+
 import javax.swing.AbstractAction;
-import javax.swing.AbstractCellEditor;
-import javax.swing.Action;
-import javax.swing.ActionMap;
+import javax.swing.DefaultCellEditor;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.text.Keymap;
+import javax.swing.table.TableCellEditor;
+
 import workbench.gui.WbSwingUtilities;
 
 public class WbCellEditor 
@@ -37,6 +31,11 @@ public class WbCellEditor
 	private JScrollPane scroll;
 	private ArrayList listeners;
 	private ChangeEvent changedEvent;
+	
+	private static final KeyStroke CTRL_TAB = KeyStroke.getKeyStroke("control TAB");
+	private static final KeyStroke TAB = KeyStroke.getKeyStroke("TAB");
+	private static final KeyStroke ENTER = KeyStroke.getKeyStroke("ENTER");
+	private static final KeyStroke CTRL_ENTER = KeyStroke.getKeyStroke("control ENTER");
 	
 	public WbCellEditor()
 	{
@@ -95,6 +94,10 @@ public class WbCellEditor
 		{
 			return ((MouseEvent)anEvent).getClickCount() >= 2;
 		}
+		else if (anEvent instanceof KeyEvent)
+		{
+			return (((KeyEvent)anEvent).getKeyCode() == KeyEvent.VK_F2);
+		}
 		return true;
 	}
 	
@@ -110,7 +113,7 @@ public class WbCellEditor
 	{
 		return true;
 	}
-	
+
 	public boolean isManagingFocus() { return false; }
 	
 	public void addCellEditorListener(CellEditorListener l)
@@ -128,6 +131,11 @@ public class WbCellEditor
 	{
 		if (this.listeners == null) return;
 		this.listeners.remove(l);
+	}
+	
+	public boolean startCellEditing()
+	{
+		return true;
 	}
 	
 	public boolean stopCellEditing()
@@ -160,25 +168,22 @@ public class WbCellEditor
 	
 	class TextAreaEditor extends JTextArea
 	{
-		private KeyStroke ctrlTab = KeyStroke.getKeyStroke("control TAB");
 		public TextAreaEditor()
 		{
 			super();
-			KeyStroke tab = KeyStroke.getKeyStroke("TAB");
-			Object tabAction = this.getInputMap().get(tab);
-			this.getInputMap().put(tab, "wb-do-nothing-at-all");
+			Object tabAction = this.getInputMap().get(TAB);
+			
+			this.getInputMap().put(TAB, "wb-do-nothing-at-all");
+
 			if (tabAction != null) 
 			{
-				this.getInputMap().put(ctrlTab, tabAction);
-				this.getInputMap().put(ctrlTab, tabAction);
+				this.getInputMap().put(CTRL_TAB, tabAction);
+				this.getInputMap().put(CTRL_TAB, tabAction);
 			}
 
-			KeyStroke enter = KeyStroke.getKeyStroke("ENTER");
-			KeyStroke ctrlEnter = KeyStroke.getKeyStroke("control ENTER");
-			Object enterAction = this.getInputMap().get(enter);
+			Object enterAction = this.getInputMap().get(ENTER);
 
-			this.getInputMap().put(enter, "wb-stop-editing");
-			
+			this.getInputMap().put(ENTER, "wb-stop-editing");
 			this.getActionMap().put("stopEditing", new AbstractAction("wb-stop-editing")
 				{
 						public void actionPerformed(ActionEvent e)
@@ -189,7 +194,7 @@ public class WbCellEditor
 			); 
 			if (enterAction != null)
 			{
-				this.getInputMap().put(ctrlEnter, enterAction);
+				this.getInputMap().put(CTRL_ENTER, enterAction);
 			}
 
 		}
@@ -233,6 +238,16 @@ public class WbCellEditor
 		}
 
 		public boolean isManagingFocus() { return false; }
+		public void requestFocus()
+		{
+			this.editor.requestFocus();
+		}
+		
+		public boolean requestFocusInWindow()
+		{
+			return this.editor.requestFocusInWindow();
+		}
+		
 	}
 	
 } 

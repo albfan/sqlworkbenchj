@@ -1,17 +1,12 @@
 package workbench.util;
 
-import java.lang.Character;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import workbench.WbManager;
-import workbench.storage.DataStore;
-import workbench.storage.NullValue;
 
 public class SqlUtil
 {

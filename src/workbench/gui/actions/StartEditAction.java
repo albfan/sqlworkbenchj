@@ -5,29 +5,20 @@
  */
 package workbench.gui.actions;
 
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import javax.swing.AbstractAction;
-import javax.swing.AbstractButton;
+
 import javax.swing.Action;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import javax.swing.KeyStroke;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
+
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.sql.SqlPanel;
-import workbench.interfaces.ClipboardSupport;
-import workbench.interfaces.Exporter;
 import workbench.resource.ResourceMgr;
 
 /**

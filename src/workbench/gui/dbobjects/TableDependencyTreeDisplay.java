@@ -9,21 +9,20 @@ package workbench.gui.dbobjects;
 import java.awt.BorderLayout;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import javax.swing.ImageIcon;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+
 import workbench.db.DependencyNode;
 import workbench.db.TableDependency;
 import workbench.db.WbConnection;
@@ -31,8 +30,6 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.renderer.DependencyTreeCellRenderer;
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.storage.DataStore;
 
 
 /**
