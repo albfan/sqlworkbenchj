@@ -9,6 +9,7 @@ package workbench.storage;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -50,8 +51,6 @@ public class DataStore
 	private String tableName;
 	private String[] columnClassNames;
 
-	public static final Object NULL_VALUE = new NullValue();
-	
 	public DataStore(String[] aColNames)
 	{
 		this.data = new ArrayList();
@@ -173,6 +172,12 @@ public class DataStore
 		this.modified = row.isModified();
 	}
 
+	public void setNull(int aRow, int aColumn)
+	{
+		NullValue nul = NullValue.getInstance(this.columnTypes[aColumn]);
+		this.setValue(aRow, aColumn, nul);
+	}
+	
 	public int getColumnIndex(String aName)
 		throws SQLException
 	{
@@ -291,13 +296,14 @@ public class DataStore
 					if (colmapping[i] > -1)
 					{
 						Object value = aResultSet.getObject(i + 1);
+						int realCol = colmapping[i];
 						if (aResultSet.wasNull())
 						{
-							row.setNull(colmapping[i]);
+							row.setNull(realCol, this.columnTypes[realCol]);
 						}
 						else
 						{
-							row.setValue(colmapping[i], value);
+							row.setValue(realCol, value);
 						}
 					}
 				}
@@ -488,8 +494,16 @@ public class DataStore
 					sql.append(", ");
 				}
 				sql.append(this.getColumnName(col));
-				sql.append(" = ?");
-				values.add(aRow.getValue(col));
+				Object value = aRow.getValue(col);
+				if (value instanceof NullValue)
+				{
+					sql.append(" = NULL");
+				}
+				else
+				{
+					sql.append(" = ?");
+					values.add(value);
+				}
 			}
 		}
 		sql.append(" WHERE ");
@@ -506,8 +520,16 @@ public class DataStore
 				sql.append(" AND ");
 			}
 			sql.append(this.getColumnName(pkcol));
-			sql.append(" = ?");
-			values.add(aRow.getOriginalValue(pkcol));
+			Object value = aRow.getOriginalValue(pkcol);
+			if (value instanceof NullValue)
+			{
+				sql.append(" IS NULL");
+			}
+			else
+			{
+				sql.append(" = ?");
+				values.add(value);
+			}
 		}
 		try
 		{
@@ -593,8 +615,16 @@ public class DataStore
 				sql.append(" AND ");
 			}
 			sql.append(this.getColumnName(pkcol));
-			sql.append(" = ?");
-			values.add(aRow.getOriginalValue(pkcol));
+			Object value = aRow.getOriginalValue(pkcol);
+			if (value instanceof NullValue)
+			{
+				sql.append(" IS NULL");
+			}
+			else
+			{
+				sql.append(" = ?");
+				values.add(value);
+			}
 		}
 		try
 		{
@@ -665,22 +695,24 @@ public class DataStore
 		if (aColumn < 0 || aColumn > this.colCount - 1) throw new IndexOutOfBoundsException("Column index " + aColumn + " out of range ([0," + this.colCount + "])");
 	}
 
-	private static class NullValue
-	{
-		public String toString() { return null; }
-	}
-	
 	public static void main(String args[])
 	{
 		try
 		{
-			//Class.forName("oracle.jdbc.OracleDriver");
-			//Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:oradb", "test", "test");
-			//WbConnection wb = new WbConnection(con);
+			Class.forName("oracle.jdbc.OracleDriver");
+			Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:oradb", "test", "test");
+			WbConnection wb = new WbConnection(con);
 			try
 			{
 				//Statement stmt = con.createStatement();
 				//ResultSet rs = stmt.executeQuery("select nr, name from test");
+				PreparedStatement stmt = con.prepareStatement("insert into test (nr, name) values (?,?)");
+				stmt.setObject(1, new Integer(10));
+				stmt.setNull(2, java.sql.Types.VARCHAR);
+				stmt.executeUpdate();
+				con.commit();
+				stmt.close();
+				/*
 				//DataStore ds = new DataStore(rs);
 				//rs.close();
 				DataStore ds = new DataStore(new String[] { "Column1", "Column2"} );
@@ -705,13 +737,14 @@ public class DataStore
 				{
 					System.out.println(l.get(i));
 				}
+				 */
 			}
 			catch (Exception e)
 			{
 				e.printStackTrace();
 			}
-			//con.commit();
-			//con.close();
+			con.commit();
+			con.close();
 		}
 		catch (Exception e)
 		{

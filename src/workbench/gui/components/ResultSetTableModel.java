@@ -1,5 +1,6 @@
 package workbench.gui.components;
 
+import java.awt.Toolkit;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,6 +22,7 @@ import workbench.db.WbConnection;
 import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
+import workbench.util.SqlUtil;
 
 
 /** 
@@ -113,8 +115,24 @@ public class ResultSetTableModel
 		{
 			if (this.isUpdateable())
 			{
-				Object realValue = this.convertCellValue(aValue, row, column);
-				this.dataCache.setValue(row, column - 1, realValue);
+				if (aValue == null || aValue.toString().length() == 0) 
+				{
+					this.dataCache.setNull(row, column - 1);
+				}
+				else 
+				{
+					try
+					{
+						Object realValue = this.convertCellValue(aValue, row, column);
+						this.dataCache.setValue(row, column - 1, realValue);
+					}
+					catch (Exception ce)
+					{
+						LogMgr.logError(this, "Error converting input >" + aValue + "< to column type (" + this.getColumnType(column) + ") ", ce);
+						Toolkit.getDefaultToolkit().beep();
+						return;
+					}
+				}
 				fireTableDataChanged();
 			}
 		}
@@ -127,35 +145,37 @@ public class ResultSetTableModel
 	
 	/**
 	 *	Convert a String to the internal storage class for this cell.
+	 *	An empty string will be converted to DataStore.NULL_VALUE.
 	 */
 	private Object convertCellValue(Object aValue, int aRow, int aColumn)
 		throws Exception
 	{
 		Object lastValue = this.getValueAt(aRow, aColumn);
+		String current = (String)aValue;
 		int type = this.getColumnType(aColumn);
 		switch (type)
 		{
 			case Types.BIGINT:
-				return new BigInteger((String)aValue);
+				return new BigInteger(((String)aValue).trim());
 			case Types.INTEGER:
 			case Types.SMALLINT:
-				return Integer.valueOf((String)aValue);
+				return Integer.valueOf(((String)aValue).trim());
 			case Types.NUMERIC:
 			case Types.DECIMAL:
-				return new BigDecimal((String)aValue);
+				return new BigDecimal(((String)aValue).trim());
 			case Types.DOUBLE:
-				return new Double((String)aValue);
+				return new Double(((String)aValue).trim());
 			case Types.REAL:
 			case Types.FLOAT:
-				return new Float((String)aValue);
+				return new Float(((String)aValue).trim());
 			case Types.CHAR:
 			case Types.VARCHAR:
 				return (String)aValue;
 			case Types.DATE:
 				DateFormat df = new SimpleDateFormat();
-				return df.parse((String)aValue);
+				return df.parse(((String)aValue).trim());
 			case Types.TIMESTAMP:
-				return java.sql.Timestamp.valueOf((String)aValue);
+				return java.sql.Timestamp.valueOf(((String)aValue).trim());
 			default:
 				return aValue;
 		}
@@ -181,6 +201,12 @@ public class ResultSetTableModel
 			e.printStackTrace();
 			return 100;
 		}
+	}
+
+	public String getColumnTypeName(int aColumn)
+	{
+		if (aColumn == 0) return "";
+		return SqlUtil.getTypeName(this.getColumnType(aColumn));
 	}
 	
 	public int getColumnType(int aColumn)

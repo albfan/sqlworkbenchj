@@ -117,7 +117,16 @@ class DmlStatement
 		PreparedStatement stmt = aConnection.prepareStatement(this.sql);
 		for (int i=0; i < this.values.size(); i++)
 		{
-			stmt.setObject(i + 1, this.values.get(i));
+			Object value = this.values.get(i);
+			if (value instanceof NullValue)
+			{
+				NullValue nv = (NullValue)value;
+				stmt.setNull(i+1, nv.getType());
+			}
+			else
+			{
+				stmt.setObject(i + 1, value);
+			}
 		}
 		int rows = stmt.executeUpdate();
 		stmt.close();

@@ -73,17 +73,6 @@ public class StartEditAction extends WbAction
 		if (this.toggleButton != null) 
 		{
 			this.toggleButton.setSelected(aFlag);
-			if (aFlag)
-			{
-				//this.originalBorder = this.toggleButton.getBorder();
-				//this.toggleButton.setBorder(this.enabledBorder);
-				this.toggleButton.setRolloverEnabled(false);
-			}
-			else
-			{
-				//this.toggleButton.setBorder(this.originalBorder);
-				this.toggleButton.setRolloverEnabled(true);
-			}
 		}
 	}
 	

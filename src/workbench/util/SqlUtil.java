@@ -1,12 +1,14 @@
 package workbench.util;
 
 import java.lang.Character;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.StringTokenizer;
 import workbench.storage.DataStore;
+import workbench.storage.NullValue;
 
 public class SqlUtil
 {
@@ -104,7 +106,6 @@ public class SqlUtil
 	public static String getLiteral(Object aValue)
 	{
 		if (aValue == null) return "NULL";
-		if (aValue == DataStore.NULL_VALUE) return "NULL";
 
 		if (aValue instanceof String)
 		{
@@ -115,6 +116,10 @@ public class SqlUtil
 		else if (aValue instanceof Date)
 		{
 			return "'" + aValue.toString() + "'";
+		}
+		else if (aValue instanceof NullValue)
+		{
+			return "NULL";
 		}
 		else
 		{
@@ -203,6 +208,72 @@ public class SqlUtil
 		return aStartpos + 1;
 	}
 
+	public static String getTypeName(int aSqlType)
+	{
+		if (aSqlType == Types.ARRAY)
+			return "ARRAY";
+		else if (aSqlType == Types.BIGINT)
+			return "BIGINT";
+		else if (aSqlType == Types.BINARY)
+			return "BINARY";
+		else if (aSqlType == Types.BIT)
+			return "BIT";
+		else if (aSqlType == Types.BLOB)
+			return "BLOB";
+		else if (aSqlType == Types.BOOLEAN)
+			return "BOOLEAN";
+		else if (aSqlType == Types.CHAR)
+			return "CHAR";
+		else if (aSqlType == Types.CLOB)
+			return "CLOB";
+		else if (aSqlType == Types.DATALINK)
+			return "DATALINK";
+		else if (aSqlType == Types.DATE)
+			return "DATE";
+		else if (aSqlType == Types.DECIMAL)
+			return "DECIMAL";
+		else if (aSqlType == Types.DISTINCT)
+			return "DISTINCT";
+		else if (aSqlType == Types.DOUBLE)
+			return "DOUBLE";
+		else if (aSqlType == Types.FLOAT)
+			return "FLOAT";
+		else if (aSqlType == Types.INTEGER)
+			return "INTEGER";
+		else if (aSqlType == Types.JAVA_OBJECT)
+			return "JAVA_OBJECT";
+		else if (aSqlType == Types.LONGVARBINARY)
+			return "LONGVARBINARY";
+		else if (aSqlType == Types.LONGVARCHAR)
+			return "LONGVARCHAR";
+		else if (aSqlType == Types.NULL)
+			return "NULL";
+		else if (aSqlType == Types.NUMERIC)
+			return "NUMERIC";
+		else if (aSqlType == Types.OTHER)
+			return "OTHER";
+		else if (aSqlType == Types.REAL)
+			return "REAL";
+		else if (aSqlType == Types.REF)
+			return "REF";
+		else if (aSqlType == Types.SMALLINT)
+			return "SMALLINT";
+		else if (aSqlType == Types.STRUCT)
+			return "STRUCT";
+		else if (aSqlType == Types.TIME)
+			return "TIME";
+		else if (aSqlType == Types.TIMESTAMP)
+			return "TIMESTAMP";
+		else if (aSqlType == Types.TINYINT)
+			return "TINYINT";
+		else if (aSqlType == Types.VARBINARY)
+			return "VARBINARY";
+		else if (aSqlType == Types.VARCHAR)
+			return "VARCHAR";
+		else 
+			return "UNKNOWN";
+	}
+	
 	public static void main(String args[])
 	{
 		//String script = "select 'testing'';''', test.spalte1 from test;\r\n                ;\r\nupdate test set blba='xx';";

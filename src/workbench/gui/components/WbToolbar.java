@@ -53,6 +53,6 @@ public class WbToolbar
 		if (isRollover())
 			this.add(new WbToolbarSeparator());
 		else
-			this.addSeparator();
+			super.addSeparator();
 	}
 }

@@ -104,9 +104,10 @@ class RowData
 			return (this.originalData[aColumn] != null);
 		}
 	}
-	public void setNull(int aColumn)
+	public void setNull(int aColumn, int aType)
 	{
-		this.setValue(aColumn, DataStore.NULL_VALUE);
+		NullValue nul = NullValue.getInstance(aType);
+		this.setValue(aColumn, nul);
 	}
 	
 	/**	
