@@ -6,6 +6,7 @@ import workbench.gui.actions.AddTabAction;
 import workbench.gui.actions.FileDiscardAction;
 import workbench.gui.actions.FileOpenAction;
 import workbench.gui.actions.RemoveTabAction;
+import workbench.gui.actions.RenameTabAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.MainPanel;
@@ -20,6 +21,7 @@ public class SqlTabPopup extends JPopupMenu
 	private MainWindow client;
 	private AddTabAction add;
 	private RemoveTabAction remove;
+	private RenameTabAction rename;
 	
 	/** Creates new LogPanelPopup */
 	public SqlTabPopup(MainWindow aClient)
@@ -32,6 +34,13 @@ public class SqlTabPopup extends JPopupMenu
 		}
 		this.remove = new RemoveTabAction(aClient);
 		this.add(remove.getMenuItem());
+		
+		if (aClient.canRenameTab())
+		{
+			this.rename = new RenameTabAction(aClient);
+			this.add(rename.getMenuItem());
+		}
+		
 		if (panel instanceof SqlPanel)
 		{
 			this.addSeparator();
