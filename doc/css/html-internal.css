@@ -4,6 +4,13 @@ body {
     font-family: sans-serif;
 }
 
+td,th {
+    background: #FFFFFF; 
+    font-size: 14pt;
+    font-family: sans-serif;
+	border-color:gray;
+}
+
 h1 { 
     color: #800000; 
     font-family: sans-serif; 
@@ -44,4 +51,45 @@ pre.programlisting {
     padding: 2px; 
     font-size: 12pt;
     white-space: pre;
+}
+
+span.guimenuitem, span.guimenu {
+	font-variant:small-caps;
+	font-stretch:extra-condensed;
+	color:#0000A0;
+}
+
+span.guibutton {
+  /*background: #C0C0C0; 
+  border: 1px solid gray; */
+  color:#000000;
+  text-transform:uppercase;
+  font-family: monospace;
+}
+
+informaltable.table {
+  border-width:1px;
+}
+
+span.markup {
+  font-family: courier;
+  white-space: pre;
+}
+
+div.note {
+  background: #F0F0F0; 
+  border: 1px solid #CCCCCC;
+  margin-top:10px;
+}
+
+div.note p {
+  margin:0px;
+  margin-top:5px;
+}
+
+div.note h3 { 
+    font-size: 14pt;
+    font-family: sans-serif;
+    padding:0px;
+    margin:0px;
 }

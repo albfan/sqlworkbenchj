@@ -602,21 +602,33 @@ public class DwPanel
 	{
 		if (this.readOnly) return false;
 		this.setStatusMessage(ResourceMgr.getString("MsgCheckingUpdateTable"));
-		DataStore ds = this.infoTable.getDataStore();
-		if (ds == null) return false;
-		if (this.dbConnection == null) return false;
-		if (this.sql == null) return false;
-		boolean result = ds.checkUpdateTable(this.sql, this.dbConnection);
-		if (result)
+		boolean result = false;
+		try
 		{
-			this.fireUpdateTableChanged();
+			DataStore ds = this.infoTable.getDataStore();
+			if (ds == null) return false;
+			if (this.dbConnection == null) return false;
+			if (this.sql == null) return false;
+			result = ds.checkUpdateTable(this.sql, this.dbConnection);
+			if (result)
+			{
+				this.fireUpdateTableChanged();
+			}
+			this.selectKeys.setEnabled(result);
 		}
-		this.selectKeys.setEnabled(result);
-
-		this.clearStatusMessage();
+		finally
+		{
+			this.clearStatusMessage();
+		}
 		return result;
 	}
 
+	public boolean hasKeyColumns()
+	{
+		if (this.infoTable.getDataStore() == null) return false;
+		return this.infoTable.getDataStore().hasPkColumns();
+	}
+	
 	public boolean isUpdateable()
 	{
 		if (this.infoTable.getDataStore() == null) return false;

@@ -16,6 +16,7 @@ import java.util.List;
 import workbench.db.ColumnIdentifier;
 
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
@@ -28,7 +29,9 @@ public class StatementFactory
 {
 	private ResultInfo resultInfo;
 	private String tableToUse;
-
+	private boolean includeTableOwner = true;
+	private String currentUser;
+	
 	public StatementFactory(ResultInfo metaData)
 	{
 		this.resultInfo = metaData;
@@ -287,8 +290,13 @@ public class StatementFactory
 
 	public DmlStatement createDeleteStatement(RowData aRow)
 	{
+		return createDeleteStatement(aRow, false);
+	}
+	
+	public DmlStatement createDeleteStatement(RowData aRow, boolean ignoreStatus)
+	{
 		if (aRow == null) return null;
-		if (aRow.isNew()) return null;
+		if (!ignoreStatus && aRow.isNew()) return null;
 
 		boolean first = true;
 		DmlStatement dml;
@@ -343,20 +351,20 @@ public class StatementFactory
 		TableIdentifier updateTable = this.resultInfo.getUpdateTable();
 		if (this.tableToUse != null || updateTable == null )
 		{
-			name = this.tableToUse;
+			name = SqlUtil.quoteObjectname(this.tableToUse);
 		}
 		else
 		{
-			name = updateTable.getTableExpression();
+			name = (includeTableOwner ? updateTable.getTableExpression() : updateTable.getTable());
 		}
-		return SqlUtil.quoteObjectname(name);
+		return name;
 	}
 
 	/**
 	 * Getter for property tableToUse.
 	 * @return Value of property tableToUse.
 	 */
-	public java.lang.String getTableToUse()
+	public String getTableToUse()
 	{
 		return tableToUse;
 	}
@@ -365,9 +373,24 @@ public class StatementFactory
 	 * Setter for property tableToUse.
 	 * @param tableToUse New value of property tableToUse.
 	 */
-	public void setTableToUse(java.lang.String tableToUse)
+	public void setTableToUse(String tableToUse)
 	{
-		this.tableToUse = tableToUse;
+		if (!this.includeTableOwner)
+		{
+			TableIdentifier id = new TableIdentifier(tableToUse);
+			this.tableToUse = id.getTable();
+		}
+		else
+		{
+			this.tableToUse = tableToUse;
+		}
 	}
 
+	public void setIncludeTableOwner(boolean flag) { this.includeTableOwner = flag; }
+	public boolean getIncludeTableOwner() { return this.includeTableOwner; }
+	
+	public void setCurrentConnection(WbConnection conn)
+	{
+		this.currentUser = conn.getCurrentUser();
+	}
 }

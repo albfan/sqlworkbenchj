@@ -73,6 +73,12 @@ public class WbConnection
 		}
 	}
 
+	public String getCurrentUser()
+	{
+		if (this.metaData == null) return null;
+		return this.metaData.getUserName();
+	}
+	
 	public ConnectionProfile getProfile()
 	{
 		return this.profile;

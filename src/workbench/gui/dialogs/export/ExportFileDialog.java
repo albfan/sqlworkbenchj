@@ -45,6 +45,7 @@ public class ExportFileDialog
 	private boolean selectDirectory = false;
 	private boolean includeSqlUpdate = true;
 	private boolean includeSqlInsert = true;
+	private boolean includeSqlDeleteInsert = true;
 	private String lastDirConfigKey = "workbench.export.lastdir";
 	private Component parentComponent;
 	
@@ -123,6 +124,11 @@ public class ExportFileDialog
 		this.includeSqlInsert = flag;
 	}
 	
+	public void setIncludeSqlDeleteInsert(boolean flag)
+	{
+		this.includeSqlDeleteInsert = flag;
+	}
+	
 	/**
 	 *	Set the config key for the Settings object
 	 *  where the selected directory should be stored
@@ -180,7 +186,8 @@ public class ExportFileDialog
 		}
 		this.restoreSettings();
 		this.exportOptions.setTypeText();
-		this.exportOptions.setSqlUpdateAvailable(includeSqlUpdate);
+		this.exportOptions.setIncludeSqlUpdate(includeSqlUpdate);
+		this.exportOptions.setIncludeSqlDeleteInsert(includeSqlDeleteInsert);
 			
 		chooser.setAccessory(this.exportOptions);
 		

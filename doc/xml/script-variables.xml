@@ -12,7 +12,11 @@
         The value will internally be stored as a string (character data). When using the
         variable later, the value will be put into the SQL statement without further
         modification. It is your responsibility to use a literal that is approriate 
-        for the usage in the SQL statement.
+        for the usage in the SQL statement. As this is a parameter for the JVM, it has
+        to be specified before the -jar parameter:
+        <programlisting>java -Dwbp.varname=value -jar Workbench.jar ...</programlisting>.
+        If you have special characters (e.g. a backslash) in the value for the variable,
+        you have to quote the value part: <literal>-Dwbp.filename='c:\temp\test-data.txt'</literal>
       </para>
       <para>
         You can also define a variable from within &wb-productname;. This is done through the
@@ -28,7 +32,7 @@
         <literal>-file=filename</literal> for the <literal>WBVARDEF</literal> command, 
         or by passing the <literal>-vardef</literal> parameter when starting &wb-productname;.
         Please see the description for the <link linkend="vardef-commandline">command line parameters</link>
-        for details.
+        for details. 
       </para>
       <programlisting>wbvardef -file=/temp/myvars.def</programlisting>
       <para>This file has to be a standard Java "properties" file. Each variable 
@@ -98,7 +102,7 @@ workbench.sql.parameter.suffix=#</programlisting>
         </para>
     </section>
 
-    <section id="access-variable">
+    <section id="prompt-variable">
       <title>Prompting for values during execution</title>
       <para>You can also use variables in a way that &wb-productname; will prompt you 
       during execution of a SQL statement that contains a variable.</para>

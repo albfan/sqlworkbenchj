@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.Clob;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -42,6 +43,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.exporter.HtmlRowDataConverter;
 import workbench.db.exporter.RowDataConverter;
+import workbench.db.exporter.SqlRowDataConverter;
 import workbench.db.exporter.XmlRowDataConverter;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
@@ -529,19 +531,24 @@ public class DataStore
 				if (meta == null) return;
 
 
-				DataStore columns = meta.getTableDefinition(aTablename);
-				if (columns == null)
+				List columns = meta.getTableColumns(new TableIdentifier(aTablename));
+				if (columns == null || columns.size() == 0)
 				{
 					return;
 				}
 
 				this.updateTable = meta.adjustObjectname(aTablename);
 
-				for (int i=0; i < columns.getRowCount(); i++)
+				for (int i=0; i < columns.size(); i++)
 				{
-					String column = columns.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-					int index = this.findColumn(column);
-					if (index > -1) this.resultInfo.setUpdateable(index, true);
+					ColumnIdentifier column = (ColumnIdentifier)columns.get(i);
+
+					int index = this.findColumn(column.getColumnName());
+					if (index > -1) 
+					{
+						this.resultInfo.setUpdateable(index, true);
+						this.resultInfo.setIsPkColumn(index, column.isPkColumn());
+					}
 				}
 			}
 			catch (Exception e)
@@ -887,6 +894,16 @@ public class DataStore
 			out.write(this.getHeaderString(aFieldDelimiter, columns).toString());
 			out.write(aLineTerminator);
 		}
+		boolean[] includeColumns = columnListToBool(columns);
+		for (int i=0; i < count; i++)
+		{
+			out.write(this.getRowDataAsString(i, aFieldDelimiter, includeColumns).toString());
+			out.write(aLineTerminator);
+		}
+	}
+
+	private boolean[] columnListToBool(List columns)
+	{
 		int colCount = this.getColumnCount();
 		boolean[] includeColumns = new boolean[colCount];
 		for (int i=0; i < colCount; i++)
@@ -900,19 +917,18 @@ public class DataStore
 				includeColumns[i] = true;
 			}
 		}
-		for (int i=0; i < count; i++)
-		{
-			out.write(this.getRowDataAsString(i, aFieldDelimiter, includeColumns).toString());
-			out.write(aLineTerminator);
-		}
+		return includeColumns;
 	}
-
 	public void writeDataString(Writer out, String aFieldDelimiter, String aLineTerminator, boolean includeHeaders, int[] rows)
 		throws IOException
 	{
 		writeDataString(out, aFieldDelimiter, aLineTerminator, includeHeaders, rows, null);
 	}
 	
+	/**
+	 *	Write the contents of the datastore into the writer but only the rows
+	 *  that have been passed in the rows[] parameter
+	 */
 	public void writeDataString(Writer out, String aFieldDelimiter, String aLineTerminator, boolean includeHeaders, int[] rows, List columns)
 		throws IOException
 	{
@@ -921,23 +937,10 @@ public class DataStore
 			out.write(this.getHeaderString(aFieldDelimiter, columns).toString());
 			out.write(aLineTerminator);
 		}
-		int colCount = this.getColumnCount();
-		boolean[] includeColumns = new boolean[colCount];
-		for (int i=0; i < colCount; i++)
-		{
-			if (columns != null) 
-			{
-				includeColumns[i] = columns.contains(this.resultInfo.getColumn(i));
-			}
-			else
-			{
-				includeColumns[i] = true;
-			}
-		}
 		int count = rows.length;
 		for (int i=0; i < count; i++)
 		{
-			out.write(this.getRowDataAsString(rows[i], aFieldDelimiter, includeColumns).toString());
+			out.write(this.getRowDataAsString(rows[i], aFieldDelimiter, columnListToBool(columns)).toString());
 			out.write(aLineTerminator);
 		}
 	}
@@ -986,7 +989,9 @@ public class DataStore
 		if (!this.isModified()) return false;
 		return (this.hasDeletedRows() || this.hasUpdatedRows());
 	}
+	
 	public boolean isModified() { return this.modified;  }
+	
 	public boolean isUpdateable()
 	{
 		if (this.allowUpdates) return true;
@@ -1109,6 +1114,23 @@ public class DataStore
 		return true;
 	}
 
+	/**
+	 *	Return the table that should be used for INSERTs
+	 *	Normally this is the update table. If no update table 
+	 *	is defined, the table from the SQL statement will be used
+	 *	but no checking for key columns takes place (which might take long)
+	 */
+	private String getInsertTable()
+	{
+		if (this.updateTable != null) return this.updateTable;
+		if (this.sql == null) return null;
+		if (!this.sqlHasUpdateTable()) return null;
+		List tables = SqlUtil.getTables(this.sql);
+		if (tables.size() != 1) return null;
+		String table = (String)tables.get(0);
+		return table;
+	}
+	
 	public void writeXmlData(Writer pw)
 		throws IOException
 	{
@@ -1172,10 +1194,7 @@ public class DataStore
 	 */
 	public boolean canSaveAsSqlInsert()
 	{
-		if (this.updateTable == null)
-			return this.checkUpdateTable();
-		else
-			return true;
+		return (this.getInsertTable() != null);
 	}
 
 	public boolean sqlHasUpdateTable()
@@ -1186,77 +1205,25 @@ public class DataStore
 		if (tables.size() != 1) return false;
 		return true;
 	}
-	
-	
-	
-	// =========== SQL Insert generation ================
 
-	/**
-	 * Returns the given row as an INSERT statement.
-	 * \n will be used as the line terminator
-	 * @param aRow the row to be returned
-	 * @param aConn the connection object to be used to retrieve MetaData information
-	 * @return a StringBuffer with a single INSERT statement.
-	 * @see #getRowDataAsSqlInsert(int, String, WbConnection)
-	 */
-	public StringBuffer getRowDataAsSqlInsert(int aRow, WbConnection aConn)
+	public String getDataAsSqlDeleteInsert()
+		throws Exception, SQLException
 	{
-		return this.getRowDataAsSqlInsert(aRow, "\n", aConn);
+		return this.getDataAsSqlInsert("\n", null, null, (int[])null, null, true);
 	}
-
-	/**
-	 * Returns the given row as an INSERT statement.
-	 *
-	 * @param aRow the row to be returned
-	 * @param aLineTerminator the line terminator to be used
-	 * @param aConn the connection object to be used to retrieve MetaData information
-	 * @return a StringBuffer with a single INSERT statement.
-	 * @see #getRowDataAsSqlInsert(int, WbConnection)
-	 * @see #getRowDataAsSqlInsert(int, String, WbConnection, String, String)
-	 */
-	public StringBuffer getRowDataAsSqlInsert(int aRow, String aLineTerminator, WbConnection aConn)
+	
+	public String getDataAsSqlDeleteInsert(List columns)
+		throws Exception, SQLException
 	{
-		return this.getRowDataAsSqlInsert(aRow, aLineTerminator, aConn, null, null);
+		return this.getDataAsSqlInsert("\n", null, null, null, columns, true);
 	}
-
-	/**
-	 * Returns the given row as an INSERT statement.
-	 * If aCharFunc and aConcatString are not null, then all non-printable characters
-	 * in character data are replaced with a call to the passed function. <br>
-	 * Example:<br>
-	 * A character column contains a carriage return character (ASCII 13) and
-	 * aCharFunc is passed as "CHR" and aConcatString is passed as "||". The generated
-	 * SQL will look like this: <br>
-	 * <code>
-	 * INSERT INTO table (col1, character_column)
-	 * VALUES
-	 * (1, "Hello, "||chr(13)||"world");
-	 * </code>
-	 * @param aRow the row to be returned
-	 * @param aLineTerminator the line terminator to be used
-	 * @param aConn the connection object to be used to retrieve MetaData information
-	 * @param aCharFunc the SQL function to be used for non printable characters
-	 * @param aConcatString the operator to be used for string concatenation
-	 * @return a StringBuffer with a single INSERT statement.
-	 * @see #getRowDataAsSqlInsert(int, WbConnection)
-	 * @see #getRowDataAsSqlInsert(int, String, WbConnection)
-	 */
-	public StringBuffer getRowDataAsSqlInsert(int aRow, String aLineTerminator, WbConnection aConn, String aCharFunc, String aConcatString)
+	
+	public String getDataAsSqlDeleteInsert(int rows[], List columns)
+		throws Exception, SQLException
 	{
-		if (!this.canSaveAsSqlInsert()) return null;
-		RowData data = this.getRow(aRow);
-		StatementFactory factory = new StatementFactory(this.resultInfo);
-		DmlStatement stmt = factory.createInsertStatement(data, true, aLineTerminator);
-		if (aCharFunc != null)
-		{
-			stmt.setChrFunction(aCharFunc);
-			stmt.setConcatString(aConcatString);
-		}
-		StringBuffer sql = new StringBuffer(stmt.getExecutableStatement(aConn.getSqlConnection()));
-		sql.append(";");
-		return sql;
+		return this.getDataAsSqlInsert("\n", null, null, rows, columns, true);
 	}
-
+	
 	public String getDataAsSqlInsert()
 		throws Exception, SQLException
 	{
@@ -1278,11 +1245,18 @@ public class DataStore
 	public String getDataAsSqlInsert(String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns)
 		throws Exception, SQLException
 	{
+		return getDataAsSqlInsert(aLineTerminator, aCharFunc, aConcatString, rows, columns, false);
+	}
+	
+	public String getDataAsSqlInsert(String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns, boolean includeDelete)
+		throws Exception, SQLException
+	{
 		if (!this.canSaveAsSqlInsert()) return "";
+		
 		StringWriter script = new StringWriter(this.getRowCount() * 150);
 		try
 		{
-			this.writeDataAsSqlInsert(script, aLineTerminator, aCharFunc, aConcatString, rows, columns);
+			this.writeDataAsSqlInsert(script, aLineTerminator, aCharFunc, aConcatString, rows, columns, includeDelete);
 		}
 		catch (Exception e)
 		{
@@ -1301,34 +1275,56 @@ public class DataStore
 	public void writeDataAsSqlInsert(Writer out, String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns)
 		throws IOException
 	{
+		writeDataAsSqlInsert(out, aLineTerminator, aCharFunc, aConcatString, rows, columns, false);
+	}
+	
+	public void writeDataAsSqlInsert(Writer out, String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns, boolean includeDelete)
+		throws IOException
+	{
 		if (!this.canSaveAsSqlInsert()) return;
 		int count;
 
 		if (rows == null) count = this.getRowCount();
 		else count = rows.length;
 
-		StatementFactory factory = new StatementFactory(this.resultInfo);
-
+		if (includeDelete && !this.hasPkColumns())
+		{
+			includeDelete = false;
+		}
+		//StatementFactory factory = new StatementFactory(this.resultInfo);
+		SqlRowDataConverter converter = new SqlRowDataConverter(this.resultInfo);
+		converter.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
+		converter.setOriginalConnection(this.originalConnection);
+		converter.setLineTerminator(aLineTerminator);
+		converter.setColumnsToExport(columns);
+		if (aCharFunc != null)
+		{
+			converter.setChrFunction(aCharFunc);
+			converter.setConcatString(aConcatString);
+		}
+		if (includeDelete)
+		{
+			converter.setCreateInsertDelete();
+		}
+		else
+		{
+			converter.setCreateInsert();
+			converter.setAlternateUpdateTable(this.getInsertTable());
+		}
+		
 		for (int row = 0; row < count; row ++)
 		{
 			RowData data;
-			if (rows == null) data = this.getRow(row);
-			else data = this.getRow(rows[row]);
+			int rowIndex = -1;
+			if (rows == null) rowIndex = row; 
+			else rowIndex = rows[row];
 
-			DmlStatement stmt = factory.createInsertStatement(data, true, aLineTerminator, columns);
-			String sql = stmt.getExecutableStatement(this.originalConnection.getSqlConnection());
-			if (aCharFunc != null)
-			{
-				stmt.setChrFunction(aCharFunc);
-				stmt.setConcatString(aConcatString);
-			}
-			out.write(sql);
-			out.write(";");
-			out.write(aLineTerminator);
-			out.write(aLineTerminator);
+			data = this.getRow(rowIndex);
+			StrBuffer sql = converter.convertRowData(data, rowIndex);
+			sql.writeTo(out);
 		}
 	}
-
+	
 	// =========== SQL Update generation ================
 	public String getDataAsSqlUpdate()
 	{
@@ -1399,6 +1395,7 @@ public class DataStore
 		else count = this.getRowCount();
 
 		StatementFactory factory = new StatementFactory(this.resultInfo);
+		factory.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
 
 		for (int row = 0; row < count; row ++)
 		{
@@ -1418,52 +1415,6 @@ public class DataStore
 			out.write(aLineTerminator);
 			out.write(aLineTerminator);
 		}
-	}
-
-	public StringBuffer getRowDataAsSqlUpdate(int aRow, WbConnection aConn)
-	{
-		return this.getRowDataAsSqlUpdate(aRow, "\n", aConn);
-	}
-
-	public StringBuffer getRowDataAsSqlUpdate(int aRow, String aLineTerminator, WbConnection aConn)
-	{
-		return this.getRowDataAsSqlUpdate(aRow, aLineTerminator, aConn, null, null);
-	}
-
-	/**
-	 * Returns the given row as an UPDATE statement.
-	 * If aCharFunc and aConcatString are not null, then all non-printable characters
-	 * in character data are replaced with a call to the passed function. <br>
-	 * Example:<br>
-	 * A character column contains a carriage return character (ASCII 13) and
-	 * aCharFunc is passed as "CHR" and aConcatString is passed as "||". The generated
-	 * SQL will look like this: <br>
-	 * <code>
-	 * UPDATE table set character_column = "Hello, "||chr(13)||"world";
-	 * </code>
-	 * @param aRow the row to be returned
-	 * @param aLineTerminator the line terminator to be used
-	 * @param aConn to the WbConnection to be used to retrieve the metadata
-	 * @param aCharFunc the SQL function to be used for non printable characters
-	 * @param aConcatString the operator to be used for string concatenation
-	 * @return a StringBuffer with a single INSERT statement.
-	 * @see #getRowDataAsSqlUpdate()
-	 * @see #getRowDataAsSqlInsert(int, String, WbConnection)
-	 */
-	public StringBuffer getRowDataAsSqlUpdate(int aRow, String aLineTerminator, WbConnection aConn, String aCharFunc, String aConcatString)
-	{
-		if (!this.canSaveAsSqlInsert()) return null;
-		RowData data = this.getRow(aRow);
-		StatementFactory factory = new StatementFactory(this.resultInfo);
-		DmlStatement stmt = factory.createUpdateStatement(data, true, aLineTerminator);
-		if (aCharFunc != null)
-		{
-			stmt.setChrFunction(aCharFunc);
-			stmt.setConcatString(aConcatString);
-		}
-		StringBuffer sql = new StringBuffer(stmt.getExecutableStatement(aConn.getSqlConnection()));
-		sql.append(";");
-		return sql;
 	}
 
 	/**

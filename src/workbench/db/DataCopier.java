@@ -629,7 +629,16 @@ public class DataCopier
 		}
 		this.retrieveSql = sql.toString();
 		LogMgr.logDebug("DataCopier.initImporter()", "Using retrieve statement\n" + this.retrieveSql);
-		this.importer.setTargetTable(this.targetTable.getTableExpression(), cols);
+		try
+		{
+			this.importer.setTargetTable(this.targetTable.getTableExpression(), cols);
+		}
+		catch (SQLException e)
+		{
+			String msg = ResourceMgr.getString("ErrorCopyTargetTableNotFound").replaceAll("%table%", this.targetTable.getTableExpression());
+			this.addMessage(msg);
+			throw e;
+		}
 	}
 
 	/**

@@ -1012,6 +1012,7 @@ public class DbMetadata
 	public String adjustObjectname(String aTable)
 	{
 		if (aTable == null) return null;
+		aTable = StringUtil.trimQuotes(aTable);
 		try
 		{
 			if (this.metaData.storesUpperCaseIdentifiers())

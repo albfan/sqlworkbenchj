@@ -23,13 +23,12 @@
     <guibutton>New Profile</guibutton> button (<guiicon>
     <inlinegraphic fileref="@IMAGE_DIR@/New16.gif" format="GIF"/></guiicon>).
     This will create a new profile with the name "New Profile".
-    The other properties will be empty.</para>
+    The other properties will be empty. To create a copy of the currently
+    selected profile click on the <guibutton>Copy Profile</guibutton> button 
+    (<guiicon>
+    <inlinegraphic fileref="@IMAGE_DIR@/CopyProfile16.gif" format="GIF"/></guiicon>). 
+    </para>
 
-    <note>
-    <para>You can create a copy of the currently selected profile by holding
-    down the <keycap>Shift</keycap> key while clicking on the
-    <guibutton>New Profile</guibutton> button.</para>
-    </note>
     <para>To delete an existing profile, select the profile in the list and
     click on the <guibutton>Delete Profile</guibutton> button
     (<guiicon><inlinegraphic fileref="@IMAGE_DIR@/Delete16.gif" format="GIF"/></guiicon>)
@@ -187,6 +186,17 @@
       </para>
     </section>
     
+    <section id="profile-confirm-updates">
+      <title>Confirm updates</title>
+
+      <para>If this option is enabled, then &wb-productname; will ask you to confirm
+      the execution of any SQL statement that is updating or changing the database in
+      any way (e.g. UPDATE, DELETE, INSERT, DROP, CREATE, COMMIT, ...). If you save changes
+			from within the result list, you will be prompted even if <link linkend="options-confirm-update">Confirm result set updates</link>
+			is disabled.
+      </para>
+    </section>
+
     <section id="profile-workspace-file">
       <title>Workspace</title>
 
@@ -243,7 +253,9 @@
     <para>In the profile dialog, click on the <guibutton>Extended Properties</guibutton> button.
     Add a new property in the following window with the name <literal>remarksReporting</literal>
     and the value <literal>true</literal>. Now close the dialog by clicking on the OK button.
-		</para>    
+		</para>
+		<para>Turning on this features slows down the retrieval of table information.
+		</para>
   </section>
 
   <section id="odbc">

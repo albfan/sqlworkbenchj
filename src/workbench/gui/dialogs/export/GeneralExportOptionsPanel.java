@@ -114,6 +114,7 @@ public class GeneralExportOptionsPanel
     gridBagConstraints.weightx = 1.0;
     add(encodingPanel, gridBagConstraints);
 
+    dateFormatLabel.setText(ResourceMgr.getString("LabelDateFormat"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -130,6 +131,7 @@ public class GeneralExportOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
     add(dateFormat, gridBagConstraints);
 
+    timestampFormatLabel.setText(ResourceMgr.getString("LabelTimestampFormat"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;

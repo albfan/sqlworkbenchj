@@ -16,7 +16,7 @@
       <para>The name of the library has to contain the full path to the driver&apos;s jar file, so that
       &wb-productname; can find it. If a driver requires more than one library,
       select all necessary libraries in the file open dialog, or enter all the
-      filenames separated by a semicolon. There is no need </para>
+      filenames separated by a semicolon.</para>
 
       <note><para>When using the JDBC-ODBC bridge you do not need to specify a library as
       the necessary drivers are already part of the Java runtime.</para>
@@ -98,7 +98,7 @@
           </row>
           <row>
             <entry> <para>Cloudscape</para> </entry>
-            <entry> <para>com.ihost.cs.jdbc.CloudscapeDriver</para> </entry>
+            <entry> <para>org.apache.derby.jdbc.EmbeddedDriver</para> </entry>
             <entry>
               <simplelist columns="1">
                 <member>cs.jar</member>

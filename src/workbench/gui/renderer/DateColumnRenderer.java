@@ -12,7 +12,6 @@
 package workbench.gui.renderer;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.swing.SwingConstants;
 
@@ -28,7 +27,7 @@ public class DateColumnRenderer
 	private SimpleDateFormat dateFormatter;
 
 	public static final String DEFAULT_FORMAT = "yyyy-MM-dd";
-	//private HashMap displayCache = new HashMap(500);
+	
 	public DateColumnRenderer()
 	{
 		this(DEFAULT_FORMAT);
@@ -44,13 +43,13 @@ public class DateColumnRenderer
     this.setHorizontalAlignment(SwingConstants.RIGHT);
 	}
 
-  public void prepareValue(Object value)
+	public void prepareDisplay(Object value)
 	{
 		// this method will not be called with a null value, so we do not need
 		// to check it here!
 		try
 		{
-			Date d = (Date)value;
+			java.util.Date d = (java.util.Date)value;
 			this.displayValue = this.dateFormatter.format(d);
 			this.tooltip = d.toString();
 		}

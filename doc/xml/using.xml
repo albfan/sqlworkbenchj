@@ -386,7 +386,7 @@ Done.</programlisting>
       the SQL statement and tries to find out which tables are part of the result.
       If only one table was used in the <literal>FROM</literal> list, the primary key
       definition for that table is automatically retrieved from the server. On slow
-      network connections this can take up so several seconds. If you don't need the automatic
+      network connections (or databases) this can take some time. If you don't need the automatic
       retrieval, you can turn it off in the <xref linkend="profile-ignore-disable-auto-edit">
       connection profile</xref>.
       </para>
@@ -428,7 +428,7 @@ Done.</programlisting>
     <section id="change-display">
       <title>Changing the display of the result set table</title>
 
-      <para>Each column width of the result set table can be changed. When you
+      <para>You may change the width of each column. When you
       press the right mouse button in the header area of the result set, the
       following menu is displayed:</para>
 

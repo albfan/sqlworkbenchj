@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project basedir="." default="make-jar" name="Workbench">
+<project basedir="." default="make-dev-jar" name="Workbench">
 
   <property name="root" value=".."/>
   <property name="doc" value="../doc"/>
@@ -49,11 +49,26 @@
   <target name="set-build-number" depends="init">
     <buildnumber file="build.number"/>
     <echo message="Build number is ${build.number}"/>
+    
+    <!-- Reset the sub-build number for dev-builds -->
+    <propertyfile file="devbuild.number">
+        <entry key="dev-build.number" type="int" operation="=" value="0"/>
+    </propertyfile>
+    
   </target>
 
   <target name="set-dev-build" depends="init">
-    <property name="build.number" value="[Dev]"/>
+    <propertyfile file="devbuild.number">
+        <entry key="dev-build.number" type="int" operation="+" value="1"/>
+    </propertyfile>
+    
+    <!-- <echo message="sub ${dev-build.number}"/> -->
+    <loadproperties srcFile="release.property"/>
+    <loadproperties srcFile="devbuild.number"/>
+    
+    <property name="build.number" value="${release.build.number}.${dev-build.number}"/>
     <echo message="Build number is ${build.number}"/>
+    
   </target>
 
   <target name="clean">
@@ -170,10 +185,12 @@
 
       <param name="root.filename" expression="index"/>
       <param name="html.stylesheet" expression="html-internal.css"/>
+      <!--
       <param name="admon.graphics.path" expression="../workbench/resource/images/"/>
       <param name="admon.graphics.extension" expression=".gif"/>
       <param name="admon.graphics" expression="1"/>
-      <param name="admon.textlabel" expression="0"/>
+      -->
+      <param name="admon.textlabel" expression="1"/>
       <param name="chunk.first.sections" expression="1"/>
       <param name="chunker.output.indent" expression="yes"/>
       <param name="chunk.quietly" expression="1"/>
@@ -210,7 +227,8 @@
   </target>
 
   <!-- Create the HTML files suitable for publishing on the website -->
-  <target name="publish" depends="init-publish,build-html"/>
+  <target name="publish" depends="init-publish,build-html">
+  </target>
 
   <target name="init-publish">
     <property name="html-stylesheet" value="html-publish.css"/>
@@ -227,6 +245,7 @@
       <fileset dir="${src}/workbench/resource/images">
         <include name="New16.gif"/>
         <include name="Delete16.gif"/>
+        <include name="CopyProfile16.gif"/>
         <include name="ExecuteSel16.gif"/>
         <include name="note.gif"/>
       </fileset>
@@ -253,7 +272,6 @@
     <copy overwrite="true" tofile="${html-outdir}/history.txt" file="${scriptsrc}/history.new"/>
 
     <xslt basedir="${html-outdir}" includes="Manual.xml" style="${doc}/docbook/html/chunk.xsl"
-          processor="trax"
           destdir="${html-outdir}" classpathref="docbook.extensions.path">
       <xmlcatalog>
         <dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN"
@@ -305,7 +323,7 @@
       <manifest>
         <attribute name="Main-Class" value="workbench.WbStarter"/>
         <attribute name="Class-Path" value="."/>
-        <attribute name="Created-By" value="workbench@kellerer.org"/>
+        <attribute name="Created-By" value="Thomas Kellerer (info@sql-workbench.net)"/>
         <attribute name="WbBuild-Number" value="${build.number}"/>
         <attribute name="WbBuild-Date" value="${build_date}"/>
       </manifest>
@@ -315,11 +333,8 @@
 
   </target>
 
-  <target name="publish-dev" depends="set-dev-build, copy-history, publish, clean-history"/>
-
-  <target name="dev-release" depends="set-dev-build, clean, copy-history, prepare, compile, build-help, make-jar, clean-history"/>
-
-  <target name="make-dev-jar" depends="set-dev-build, clean, copy-history, prepare, compile, make-jar, clean-history"/>
+  <target name="publish-dev" depends="set-dev-build, copy-history, publish, clean-history">
+  </target>
 
   <target name="make-src-zip">
     <delete file="${srczip}"/>
@@ -356,13 +371,47 @@
         <exclude name="**/*pdf*/*.*"/>
         <exclude name="dtd/**/*.*"/>
       </zipfileset>
+
+      <zipfileset dir="..\website" prefix="website">
+        <include name="*.xml"/>
+        <include name="*.xslt"/>
+        <include name="wb.css"/>
+      </zipfileset>
+
     </zip>
   </target>
 
   <!-- build a full relase with documentation and source distribution -->
-  <target name="release"
-      depends="clean, set-build-number, copy-history, build-help, compile, make-jar, pdf, publish, release-package, restart-history, clean-history"
-  />
+  <target name="release" depends="clean, set-build-number, copy-history, build-help, compile, make-jar, pdf, publish, release-package, restart-history, clean-history">
+    <tstamp>
+      <format pattern="yyyy-MM-dd" property="today"/>
+    </tstamp>
+    <propertyfile file="release.property">
+      <entry key="release.build.number" value="${build.number}"/>
+      <entry key="release.build.date" value="${today}"/>
+    </propertyfile>
+    <ant dir="..\website" target="noDev">
+    </ant>
+  </target>
+
+  <target name="make-dev-jar" depends="set-dev-build, clean, copy-history, prepare, compile, make-jar, clean-history">
+  </target>
+
+  <!-- build a development release -->
+  <target name="dev-release" depends="set-dev-build, clean, copy-history, prepare, compile, build-help, make-jar, clean-history">
+    <tstamp>
+      <format pattern="yyyy-MM-dd" property="today"/>
+    </tstamp>
+
+    <propertyfile file="release.property">
+        <entry key="dev.build.date" value="${today}"/>
+        <entry key="dev.build.number" value="${build.number}"/>
+    </propertyfile>
+
+    <ant dir="..\website" target="withDev">
+    </ant>
+  </target>
+
 
   <target name="copy-history">
     <copy file="${scriptsrc}/history.txt" overwrite="true" tofile="${scriptsrc}/history.new">
@@ -383,36 +432,41 @@
   </target>
 
   <target name="release-package" depends="init">
-
-    <copy file="${distdir}/${jarfile}" overwrite="true" todir="${root}/release"/>
-    <copy file="${scriptsrc}/history.new" overwrite="true" tofile="${root}/release/history.txt"/>
+    <copy file="${scriptsrc}/history.new" overwrite="true" failonerror="false" tofile="${root}/release/history.txt"/>
 
     <copy file="${doc}/pdf/SQLWorkbench-Manual.pdf" overwrite="true" todir="${root}/release"/>
-    <copy file="${distdir}/JWorkbench.exe" overwrite="true" todir="${root}/release"/>
 
-    <delete dir="${root}/release/manual"/>
+    <delete dir="${root}/release/manual" failonerror="false"/>
     <copy todir="${root}/release/manual">
         <fileset dir="${html-outdir}"/>
     </copy>
-    <delete file="${packagezip}"/>
-    <zip zipfile="${packagezip}">
-      <zipfileset dir="${root}/release">
+
+    <delete>
+      <fileset dir="${root}/release">
+        <include name="Workbench*.zip"/>
+        <include name="Workbench*.tar.gz"/>
+      </fileset>
+    </delete>
+
+    <zip zipfile="${root}/release/workbench.zip">
+      <zipfileset dir="${distdir}">
         <include name="Workbench.jar"/>
         <include name="history.txt"/>
       </zipfileset>
       <zipfileset dir="${distdir}">
         <include name="JWorkbench.exe"/>
+        <include name="DataPumper.exe"/>
+        <include name="DbExplorer.exe"/>
+      </zipfileset>
+      <zipfileset dir="${scriptsrc}">
+        <include name="jworkbench"/>
+        <include name="datapumper"/>
+        <include name="dbexplorer"/>
       </zipfileset>
       <zipfileset dir="${html-outdir}" prefix="manual">
         <include name="**/*.*"/>
       </zipfileset>
     </zip>
-
-    <delete>
-      <fileset dir="${root}/release">
-        <include name="WorkbenchSrc*.zip"/>
-      </fileset>
-    </delete>
 
     <zip zipfile="${root}/release/WorkbenchSrc-Build${build.number}.zip">
       <zipfileset dir="${src}" prefix="src">
@@ -434,6 +488,9 @@
         <include name="build.number"/>
         <include name="history.header"/>
         <include name="jworkbench"/>
+        <include name="datapumper"/>
+        <include name="dbexplorer"/>
+        <include name="*.xslt"/>
       </zipfileset>
 
       <zipfileset dir="${doc}" prefix="doc">
@@ -447,28 +504,25 @@
         <exclude name="help/*.*"/>
         <exclude name="**/*.tws"/>
       </zipfileset>
-      <zipfileset dir="${root}/release" prefix="doc">
-        <include name="history.txt"/>
-      </zipfileset>
     </zip>
 
-    <delete file="${packagetar}"/>
-    <tar destfile="${packagetar}" compression="gzip">
-      <tarfileset dir="${root}/release">
+    <tar destfile="${root}/release/Workbench-Build${build.number}.tar.gz" compression="gzip">
+      <tarfileset dir="${root}/dist">
         <include name="Workbench.jar"/>
         <include name="history.txt"/>
       </tarfileset>
       <tarfileset dir="${root}/scripts" mode="755">
           <include name="jworkbench"/>
+          <include name="datapumper"/>
+          <include name="dbexplorer"/>
       </tarfileset>
       <tarfileset dir="${html-outdir}" prefix="manual">
         <include name="**/*.*"/>
       </tarfileset>
     </tar>
-    
+
   </target>
-  
-  <target  name="src" depends="make-src-zip"/>
-  <target name="dj" depends="make-dev-jar" />
+
+  <target name="src" depends="make-src-zip"/>
 
 </project>

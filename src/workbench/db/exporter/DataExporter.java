@@ -81,7 +81,8 @@ public class DataExporter
 	private boolean exportHeaders;
 	private boolean includeCreateTable = false;
 	private boolean headerOnly = false;
-	private boolean useSqlUpdate = false;
+	//private boolean useSqlUpdate = false;
+	private int sqlType = SqlRowDataConverter.SQL_INSERT;
 	private boolean useCDATA = false;
 	private CharacterRange escapeRange = null;
 	private String lineEnding = StringUtil.LINE_TERMINATOR;
@@ -370,17 +371,29 @@ public class DataExporter
 	public void setOutputTypeSqlInsert()
 	{
 		this.exportType = EXPORT_SQL;
-		this.useSqlUpdate = false;
+		this.sqlType = SqlRowDataConverter.SQL_INSERT;
 	}
 
 	public void setOutputTypeSqlUpdate()
 	{
 		this.exportType = EXPORT_SQL;
-		this.useSqlUpdate = true;
+		this.sqlType = SqlRowDataConverter.SQL_UPDATE;
+	}
+	
+	public void setOutputTypeSqlDeleteInsert()
+	{
+		this.exportType = EXPORT_SQL;
+		this.sqlType = SqlRowDataConverter.SQL_DELETE_INSERT;
 	}
 
-	public boolean getCreateSqlInsert() { return !this.useSqlUpdate; }
-
+	public int getSqlType()
+	{
+		if (this.exportType == EXPORT_SQL)
+			return this.sqlType;
+		else
+			return -1;
+	}
+		
 	public void setOutputFilename(String aFilename) { this.outputfile = aFilename; }
 
 	public String getOutputFilename() { return this.outputfile; }
@@ -796,13 +809,18 @@ public class DataExporter
 		{
 			this.setOutputTypeSqlInsert();
 		}
-		else
+		else if (sqlOptions.getCreateUpdate())
 		{
 			this.setOutputTypeSqlUpdate();
+		}
+		else if (sqlOptions.getCreateDeleteInsert())
+		{
+			this.setOutputTypeSqlDeleteInsert();
 		}
 		this.setIncludeCreateTable(sqlOptions.getCreateTable());
 		this.setCommitEvery(sqlOptions.getCommitEvery());
 		this.setTableName(sqlOptions.getAlternateUpdateTable());
+		this.setKeyColumnsToUse(sqlOptions.getKeyColumns());
 	}
 
 	public void setXmlOptions(XmlOptions xmlOptions)

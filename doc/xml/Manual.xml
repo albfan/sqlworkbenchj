@@ -15,11 +15,11 @@
 	<!ENTITY data-pumper SYSTEM "data-pumper.xml">
 	<!ENTITY options SYSTEM "options.xml">
 	<!ENTITY variables SYSTEM "script-variables.xml">
-	<!ENTITY wb-productname	"SQL&nbsp;Workbench/J">
+	<!ENTITY wb-productname	"SQL Workbench/J">
 ]>
 
 <?xml-stylesheet href="html.css" type="text/css"?>
-<article>
+<article lang="en">
   <title>&wb-productname; User Manual</title>
 &information;
 &install;

@@ -134,6 +134,11 @@ public class ColumnSelectorPanel
 		this.model.selectNone();
 	}
 	
+	public void setColumnSelected(int i, boolean flag)
+	{
+		this.model.selected[i] = flag;
+	}
+	
 	public void selectColumns(List columns)
 	{
 		if (columns == null) 

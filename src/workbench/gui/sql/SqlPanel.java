@@ -57,6 +57,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.AutoJumpNextStatement;
 import workbench.gui.actions.CleanJavaCodeAction;
 import workbench.gui.actions.CommitAction;
+import workbench.gui.actions.CopyAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopyAsSqlInsertAction;
 import workbench.gui.actions.CopyAsSqlUpdateAction;
 import workbench.gui.actions.CreateDeleteScriptAction;
@@ -188,6 +189,7 @@ public class SqlPanel
 	private SaveDataAsAction exportDataAction;
 	private CopyAsSqlInsertAction copyAsSqlInsert;
 	private CopyAsSqlUpdateAction copyAsSqlUpdate;
+	private CopyAsSqlDeleteInsertAction copyAsSqlDeleteInsert;
 	private CreateDeleteScriptAction createDeleteScript;
 	private ImportFileAction importFileAction;
 	private PrintAction printDataAction;
@@ -679,6 +681,9 @@ public class SqlPanel
 		this.copyAsSqlUpdate = this.data.getTable().getCopyAsUpdateAction();
 		this.actions.add(this.copyAsSqlUpdate);
 
+		this.copyAsSqlDeleteInsert = this.data.getTable().getCopyAsDeleteInsertAction();
+		this.actions.add(this.copyAsSqlDeleteInsert);
+
 		copySelectedMenu = this.data.getTable().getCopySelectedMenu();
 		this.actions.add(copySelectedMenu);
 
@@ -1162,7 +1167,7 @@ public class SqlPanel
 		this.data.setMaxRows(v);
 		v = w.getQueryTimeout(this.internalId - 1);
 		this.data.setQueryTimeout(v);
-		
+
 		boolean fileLoaded = false;
 		if (filename != null)
 		{
@@ -1878,6 +1883,7 @@ public class SqlPanel
 			int startIndex = 0;
 			int endIndex = sqls.size();
 			int count = sqls.size();
+			int failuresIgnored = 0;
 
 			compressLog = !this.data.getVerboseLogging() && (count > 1);
 			logWasCompressed = logWasCompressed || compressLog;
@@ -2004,6 +2010,7 @@ public class SqlPanel
 				if (!this.data.wasSuccessful())
 				{
 					commandWithError = i;
+
 					// error messages should always be shown in the log
 					// panel, even if compressLog is enabled (if it is not enabled
 					// the messages have been appended to the log already)
@@ -2036,9 +2043,10 @@ public class SqlPanel
 							onErrorAsk = false;
 						}
 					}
+					failuresIgnored ++;
 				}
 				executedCount ++;
-				
+
 				Thread.yield();
 				if (cancelExecution) break;
 
@@ -2063,6 +2071,11 @@ public class SqlPanel
 			}
 
 			final long end = System.currentTimeMillis();
+
+			if (failuresIgnored > 0)
+			{
+				this.appendToLog("\n" + failuresIgnored + " " + ResourceMgr.getString("MsgTotalStatementsFailed")+ "\n");
+			}
 
 			if (compressLog || logWasCompressed)
 			{
@@ -2215,10 +2228,16 @@ public class SqlPanel
 		boolean findNext = hasResult && (this.data.getTable() != null && this.data.getTable().canSearchAgain());
 		this.findDataAgainAction.setEnabled(findNext);
 
-		boolean canUpdate = this.data.isUpdateable();
-		this.copyAsSqlInsert.setEnabled(canUpdate);
-		this.copyAsSqlUpdate.setEnabled(canUpdate);
+		this.data.getTable().checkKeyActions();
+		
+		boolean canUpdate = this.data.hasKeyColumns();
+		//this.copyAsSqlUpdate.setEnabled(canUpdate);
 		this.importFileAction.setEnabled(canUpdate);
+
+		//DataStore ds = this.data.getTable().getDataStore();
+		//boolean canInsert = (ds == null ? false : ds.canSaveAsSqlInsert());
+		//this.copyAsSqlInsert.setEnabled(canInsert);
+		//this.copyAsSqlDeleteInsert.setEnabled(canUpdate && canInsert);
 	}
 
 	private ImageIcon getLoadingIndicator()

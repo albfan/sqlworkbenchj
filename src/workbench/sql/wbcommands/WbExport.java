@@ -68,8 +68,8 @@ public class WbExport
 		cmdLine.addArgument("nodata");
 		cmdLine.addArgument("encoding");
 		cmdLine.addArgument("showprogress");
-		cmdLine.addArgument("sqlinsert");
-		cmdLine.addArgument("sqlupdate");
+		//cmdLine.addArgument("sqlinsert");
+		//cmdLine.addArgument("sqlupdate");
 		cmdLine.addArgument("keycolumns");
 		cmdLine.addArgument("append");
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
@@ -244,6 +244,11 @@ public class WbExport
 			{
 				exporter.setOutputTypeSqlUpdate();
 				typeDisplay = "SQL UPDATE";
+			}
+			else if (type.equals("sqldeleteinsert"))
+			{
+				exporter.setOutputTypeSqlDeleteInsert();
+				typeDisplay = "SQL DELETE/INSERT";
 			}
 			exporter.setIncludeCreateTable(cmdLine.getBoolean("createtable"));
 			exporter.setChrFunction(cmdLine.getValue("charfunc"));

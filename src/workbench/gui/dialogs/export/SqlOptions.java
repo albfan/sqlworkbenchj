@@ -23,8 +23,13 @@ public interface SqlOptions
 	void setCommitEvery(int value);
 	int getCommitEvery();
 	boolean getCreateInsert();
-	void setCreateInsert(boolean flag);
+	boolean getCreateUpdate();
+	boolean getCreateDeleteInsert();
+	void setCreateInsert();
+	void setCreateUpdate();
+	void setCreateDeleteInsert();
 	String getAlternateUpdateTable();
 	void setAlternateUpdateTable(String table);
+	java.util.List getKeyColumns();
 	
 }

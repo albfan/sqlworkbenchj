@@ -109,6 +109,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 
 	private static void addKeywords()
 	{
+		keywords.add("AVG",Token.KEYWORD1);
 		keywords.add("ADD",Token.KEYWORD1);
 		keywords.add("ALTER",Token.KEYWORD1);
 		keywords.add("AS",Token.KEYWORD1);

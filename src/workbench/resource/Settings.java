@@ -687,6 +687,7 @@ public class Settings
 	{
 		return StringUtil.stringToBool(this.props.getProperty("workbench.editor.autojumpnext", "false"));
 	}
+	
 	public void setAutoJumpNextStatement(boolean show)
 	{
 		this.props.setProperty("workbench.editor.autojumpnext", Boolean.toString(show));
@@ -701,6 +702,16 @@ public class Settings
 		this.props.setProperty("workbench.editor.highlightcurrent", Boolean.toString(show));
 	}
 
+	public boolean getIncludeOwnerInSqlExport()
+	{
+		return this.getBoolProperty("workbench.export.sql.includeowner", true);
+	}
+	
+	public void setIncludeOwnerInSqlExport(boolean flag)
+	{
+		this.props.setProperty("workbench.export.sql.includeowner", Boolean.toString(flag));
+	}
+	
 	public String getConnectionDisplayModel()
 	{
 		return this.props.getProperty("workbench.gui.connectiondisplay", "");
@@ -1097,10 +1108,21 @@ public class Settings
 		return this.props.getProperty("workbench.gui.display.dateformat", "yyyy-MM-dd");
 	}
 
+	public String getDefaultDateTimeFormat()
+	{
+		return this.props.getProperty("workbench.gui.display.datetimeformat", "yyyy-MM-dd HH:mm:ss");
+	}
+	
 	public void setDefaultDateFormat(String aFormat)
 	{
 		this.defaultDateFormatter = null;
 		this.props.setProperty("workbench.gui.display.dateformat", aFormat);
+	}
+
+	public void setDefaultDateTimeFormat(String aFormat)
+	{
+		this.defaultDateFormatter = null;
+		this.props.setProperty("workbench.gui.display.datetimeformat", aFormat);
 	}
 
 	public int getMaxFractionDigits()

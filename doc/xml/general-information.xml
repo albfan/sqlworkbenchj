@@ -4,9 +4,7 @@
   <section id="license">
     <title>Software license</title>
 
-    <para>Copyright (c) 2002-2004, Thomas Kellerer</para>
-
-    <para>This software is released to the public domain.</para>
+    <para>Copyright (c) 2002-2005, Thomas Kellerer</para>
 
     <para>Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation files (the
@@ -50,8 +48,8 @@
     <para>Feedback regarding this program is more then welcome. Please report
     any problems you find, or send ideas to improve the usability.
     </para>
-    <para>Please send all emails to <ulink url="mailto:workbench@kellerer.org">workbench@kellerer.org</ulink></para>
-    <para>&wb-productname; can be downloaded from <ulink url="http://www.kellerer.org/workbench">http://www.kellerer.org/workbench</ulink>
+    <para>Please send all emails to <ulink url="mailto:info@sql-workbench.net">info@sql-workbench.net</ulink></para>
+    <para>&wb-productname; can be downloaded from <ulink url="http://www.sql-workbench.net">http://www.sql-workbench.net</ulink>
     </para>
   </section>
 

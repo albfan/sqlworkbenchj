@@ -49,6 +49,7 @@ public class KeyColumnSelectorPanel
 		for (int i=0; i < this.columns.length; i++)
 		{
 			this.columns[i] = cols[i].createCopy();
+			this.setColumnSelected(i, cols[i].isPkColumn());
 		}
 	}
 

@@ -349,7 +349,7 @@ public class ResultInfo
 		Connection sqlConn = aConnection.getSqlConnection();
 		DatabaseMetaData meta = sqlConn.getMetaData();
 		String table = aConnection.getMetadata().adjustObjectname(this.updateTable.getTable());
-		String schema = this.updateTable.getSchema();
+		String schema = aConnection.getMetadata().adjustObjectname(this.updateTable.getSchema());
 
 		ResultSet rs = meta.getPrimaryKeys(null, schema, table);
 		boolean found = this.readPkColumns(rs);

@@ -12,6 +12,7 @@
 
 package workbench.gui.dialogs.export;
 
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
@@ -64,7 +65,7 @@ public class XmlOptionsPanel
 
     setLayout(new java.awt.GridBagLayout());
 
-    useCdata.setText(java.util.ResourceBundle.getBundle("language/wbstrings").getString("LabelExportUseCDATA"));
+    useCdata.setText(ResourceMgr.getString("LabelExportUseCDATA"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;

@@ -103,6 +103,8 @@ public class SettingsPanel
     autoAdvance = new javax.swing.JCheckBox();
     defTableTypeLabel1 = new javax.swing.JLabel();
     tabSize = new javax.swing.JTextField();
+    timestampFormatLabel = new javax.swing.JLabel();
+    timestampFormatTextField = new javax.swing.JTextField();
     fontPanel = new javax.swing.JPanel();
     wbFontChooser1 = new workbench.gui.components.WbFontChooser();
     fontsComboBox = new javax.swing.JComboBox();
@@ -209,7 +211,7 @@ public class SettingsPanel
     altDelimLabel.setToolTipText(ResourceMgr.getDescription("LabelAltDelimit"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
     generalPanel.add(altDelimLabel, gridBagConstraints);
@@ -217,7 +219,7 @@ public class SettingsPanel
     altDelimitTextField.setText(Settings.getInstance().getAlternateDelimiter());
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -228,7 +230,7 @@ public class SettingsPanel
     historySizeLabel.setToolTipText(ResourceMgr.getDescription("LabelHistorySize"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
     generalPanel.add(historySizeLabel, gridBagConstraints);
@@ -236,7 +238,7 @@ public class SettingsPanel
     historySizeField.setText(Integer.toString(Settings.getInstance().getMaxHistorySize()));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -247,7 +249,7 @@ public class SettingsPanel
     decimalLabel.setToolTipText(ResourceMgr.getDescription("LabelDecimalSymbol"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 12;
+    gridBagConstraints.gridy = 13;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
     generalPanel.add(decimalLabel, gridBagConstraints);
@@ -255,7 +257,7 @@ public class SettingsPanel
     decimalField.setText(Settings.getInstance().getDecimalSymbol());
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 12;
+    gridBagConstraints.gridy = 13;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -266,7 +268,7 @@ public class SettingsPanel
     maxDigitsLabel.setToolTipText(ResourceMgr.getDescription("LabelMaxDigits"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 14;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
     generalPanel.add(maxDigitsLabel, gridBagConstraints);
@@ -274,7 +276,7 @@ public class SettingsPanel
     maxDigitsField.setText(Integer.toString(Settings.getInstance().getMaxFractionDigits()));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 14;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -285,7 +287,7 @@ public class SettingsPanel
     maxColSizeLabel.setToolTipText(ResourceMgr.getDescription("LabelMaxColsize"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 14;
+    gridBagConstraints.gridy = 15;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
     generalPanel.add(maxColSizeLabel, gridBagConstraints);
@@ -293,7 +295,7 @@ public class SettingsPanel
     maxColSizeField.setText(Integer.toString(Settings.getInstance().getMaxColumnWidth()));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 14;
+    gridBagConstraints.gridy = 15;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -304,7 +306,7 @@ public class SettingsPanel
     textDelimiterLabel.setToolTipText(ResourceMgr.getDescription("LabelFieldDelimiter"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 15;
+    gridBagConstraints.gridy = 16;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
     generalPanel.add(textDelimiterLabel, gridBagConstraints);
@@ -313,7 +315,7 @@ public class SettingsPanel
     textDelimiterField.setText(Settings.getInstance().getDefaultTextDelimiter(true));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 15;
+    gridBagConstraints.gridy = 16;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -324,7 +326,7 @@ public class SettingsPanel
     quoteCharLabel.setToolTipText(ResourceMgr.getDescription("LabelQuoteChar"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 16;
+    gridBagConstraints.gridy = 17;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
     generalPanel.add(quoteCharLabel, gridBagConstraints);
@@ -333,7 +335,7 @@ public class SettingsPanel
     quoteCharField.setText(Settings.getInstance().getQuoteChar());
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 16;
+    gridBagConstraints.gridy = 17;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -342,7 +344,7 @@ public class SettingsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 19;
+    gridBagConstraints.gridy = 20;
     gridBagConstraints.weighty = 1.0;
     generalPanel.add(jPanel1, gridBagConstraints);
 
@@ -483,7 +485,7 @@ public class SettingsPanel
     editorTabSizeLabel.setToolTipText(ResourceMgr.getDescription("LabelTabWidth"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 18;
+    gridBagConstraints.gridy = 19;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 12, 8, 0);
     generalPanel.add(editorTabSizeLabel, gridBagConstraints);
@@ -492,7 +494,7 @@ public class SettingsPanel
     defTableTypeField.setText(Settings.getInstance().getProperty("workbench.dbexplorer", "defTableType", null));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 17;
+    gridBagConstraints.gridy = 18;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -593,7 +595,7 @@ public class SettingsPanel
     defTableTypeLabel1.setToolTipText(ResourceMgr.getDescription("LabelDefTableType"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 17;
+    gridBagConstraints.gridy = 18;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
     generalPanel.add(defTableTypeLabel1, gridBagConstraints);
@@ -602,12 +604,33 @@ public class SettingsPanel
     tabSize.setText(Settings.getInstance().getProperty("workbench.editor", "tabwidth", "2"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 18;
+    gridBagConstraints.gridy = 19;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 10, 8, 11);
     generalPanel.add(tabSize, gridBagConstraints);
+
+    timestampFormatLabel.setFont(null);
+    timestampFormatLabel.setText(ResourceMgr.getString("LabelTimestampFormat"));
+    timestampFormatLabel.setToolTipText(ResourceMgr.getDescription("LabelTimestampFormat"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 10;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
+    generalPanel.add(timestampFormatLabel, gridBagConstraints);
+
+    timestampFormatTextField.setFont(getFont());
+    timestampFormatTextField.setText(Settings.getInstance().getDefaultDateTimeFormat());
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 11);
+    generalPanel.add(timestampFormatTextField, gridBagConstraints);
 
     mainTab.addTab(ResourceMgr.getString("LabelSettingsGeneral"), generalPanel);
 
@@ -759,6 +782,7 @@ public class SettingsPanel
 		set.setShowDbExplorerInMainWindow(this.showDbExplorer.isSelected());
 		set.setAlternateDelimiter(this.altDelimitTextField.getText());
 		set.setDefaultDateFormat(this.dateFormatTextField.getText());
+		set.setDefaultDateTimeFormat(this.timestampFormatTextField.getText());
 		set.setDecimalSymbol(this.decimalField.getText());
 		set.setUseEncryption(this.useEncryption.isSelected());
 		set.setRetrieveDbExplorer(this.retrieveDbExplorer.isSelected());
@@ -868,6 +892,8 @@ public class SettingsPanel
   private javax.swing.JTextField tabSize;
   private javax.swing.JTextField textDelimiterField;
   private javax.swing.JLabel textDelimiterLabel;
+  private javax.swing.JLabel timestampFormatLabel;
+  private javax.swing.JTextField timestampFormatTextField;
   private javax.swing.JCheckBox useEncryption;
   private javax.swing.JLabel useEncryptionLabel;
   private workbench.gui.components.WbFontChooser wbFontChooser1;

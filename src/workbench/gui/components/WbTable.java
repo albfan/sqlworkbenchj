@@ -94,8 +94,10 @@ import javax.swing.table.TableModel;
 
 import workbench.db.ColumnIdentifier;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.CopyAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopyAsSqlInsertAction;
 import workbench.gui.actions.CopyAsSqlUpdateAction;
+import workbench.gui.actions.CopySelectedAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopySelectedAsSqlInsertAction;
 import workbench.gui.actions.CopySelectedAsSqlUpdateAction;
 import workbench.gui.actions.CopySelectedAsTextAction;
@@ -162,10 +164,12 @@ public class WbTable
 	private DataToClipboardAction dataToClipboard;
 	private SaveDataAsAction exportDataAction;
 	private CopyAsSqlInsertAction copyInsertAction;
+	private CopyAsSqlDeleteInsertAction copyDeleteInsertAction;
 	private CopyAsSqlUpdateAction copyUpdateAction;
 
 	private CopySelectedAsTextAction copySelectedAsTextAction;
 	private CopySelectedAsSqlInsertAction copySelectedAsInsertAction;
+	private CopySelectedAsSqlDeleteInsertAction copySelectedAsDeleteInsertAction;
 	private CopySelectedAsSqlUpdateAction copySelectedAsUpdateAction;
 	private ArrayList copySelectedMenus = new ArrayList();
 
@@ -183,6 +187,7 @@ public class WbTable
 
 	private ToolTipRenderer defaultTooltipRenderer = new ToolTipRenderer();
 	private DateColumnRenderer defaultDateRenderer;
+	private DateColumnRenderer defaultTimestampRenderer;
 	private NumberColumnRenderer defaultNumberRenderer;
 	private NumberColumnRenderer defaultIntegerRenderer = new NumberColumnRenderer(0);
 	private StringColumnRenderer defaultStringRenderer = new StringColumnRenderer();
@@ -254,6 +259,7 @@ public class WbTable
 
 		this.dataToClipboard = new DataToClipboardAction(this);
 		this.copyInsertAction = new CopyAsSqlInsertAction(this);
+		this.copyDeleteInsertAction = new CopyAsSqlDeleteInsertAction(this);
 		this.copyUpdateAction = new CopyAsSqlUpdateAction(this);
 		this.exportDataAction = new SaveDataAsAction(this);
 
@@ -263,6 +269,7 @@ public class WbTable
 		this.addPopupAction(this.dataToClipboard, true);
 		this.addPopupAction(this.copyUpdateAction, false);
 		this.addPopupAction(this.copyInsertAction, false);
+		this.addPopupAction(this.copyDeleteInsertAction, false);
 
 		WbMenu copy = this.getCopySelectedMenu();
 		this.addPopupSubMenu(copy, true);
@@ -322,6 +329,11 @@ public class WbTable
 		return this.copySelectedAsTextAction;
 	}
 
+	public CopySelectedAsSqlDeleteInsertAction getCopySelectedAsSqlDeleteInsertAction()
+	{
+		return this.copySelectedAsDeleteInsertAction;
+	}
+
 	public CopySelectedAsSqlInsertAction getCopySelectedAsSqlInsertAction()
 	{
 		return this.copySelectedAsInsertAction;
@@ -348,6 +360,11 @@ public class WbTable
 		{
 			copySelectedAsInsertAction = new CopySelectedAsSqlInsertAction(this);
 		}
+		
+		if (copySelectedAsDeleteInsertAction == null)
+		{
+			copySelectedAsDeleteInsertAction = new CopySelectedAsSqlDeleteInsertAction(this);
+		}
 
 		if (copySelectedAsUpdateAction == null)
 		{
@@ -357,6 +374,7 @@ public class WbTable
 		copyMenu.add(this.copySelectedAsTextAction);
 		copyMenu.add(copySelectedAsUpdateAction);
 		copyMenu.add(copySelectedAsInsertAction);
+		copyMenu.add(copySelectedAsDeleteInsertAction);
 		this.copySelectedMenus.add(copyMenu);
 
 		return copyMenu;
@@ -366,6 +384,12 @@ public class WbTable
 	{
 		 return this.copyInsertAction;
 	}
+	
+	public CopyAsSqlDeleteInsertAction getCopyAsDeleteInsertAction()
+	{
+		 return this.copyDeleteInsertAction;
+	}
+	
 	public CopyAsSqlUpdateAction getCopyAsUpdateAction()
 	{
 		return this.copyUpdateAction;
@@ -449,11 +473,13 @@ public class WbTable
 
 		boolean selected = this.getSelectedRowCount() > 0;
 		boolean update = false;
-
+		boolean insert = false;
+		
 		if (selected)
 		{
 			DataStore ds = this.getDataStore();
-			update = (ds == null ? false : ds.isUpdateable());
+			update = (ds == null ? false : ds.hasPkColumns());
+			insert = (ds == null ? false : ds.canSaveAsSqlInsert());
 		}
 
 		if (this.copySelectedAsTextAction != null)
@@ -463,12 +489,19 @@ public class WbTable
 
 		if (this.copySelectedAsInsertAction != null)
 		{
-			this.copySelectedAsInsertAction.setEnabled(selected && update);
+			this.copySelectedAsInsertAction.setEnabled(selected && insert);
 		}
+		
 		if (this.copySelectedAsUpdateAction != null)
 		{
 			this.copySelectedAsUpdateAction.setEnabled(selected & update);
 		}
+		
+		if (this.copySelectedAsDeleteInsertAction != null)
+		{
+			this.copySelectedAsDeleteInsertAction.setEnabled(selected & update && insert);
+		}
+		
 	}
 
 	protected void configureEnclosingScrollPane()
@@ -978,7 +1011,7 @@ public class WbTable
 	{
 		// need to let JTable do some initialization stuff
 		// otherwise setDefaultRenderer() bombs out with a NullPointerException
-		if (this.defaultRenderersByColumnClass == null) this.createDefaultRenderers();
+		if (this.defaultRenderersByColumnClass == null) createDefaultRenderers();
 
 		Settings sett = Settings.getInstance();
 		if (this.defaultDateRenderer == null)
@@ -986,8 +1019,15 @@ public class WbTable
 			String format = sett.getDefaultDateFormat();
 			defaultDateRenderer = new DateColumnRenderer(format);
 		}
-		this.setDefaultRenderer(Date.class, defaultDateRenderer);
-
+		if (this.defaultTimestampRenderer == null)
+		{
+			String format = sett.getDefaultDateTimeFormat();
+			defaultTimestampRenderer = new DateColumnRenderer(format);
+		}
+		
+		this.setDefaultRenderer(java.sql.Timestamp.class, defaultTimestampRenderer);
+		this.setDefaultRenderer(java.sql.Date.class, defaultDateRenderer);
+		
 		int maxDigits = sett.getMaxFractionDigits();
 		char sep = sett.getDecimalSymbol().charAt(0);
 
@@ -1015,17 +1055,6 @@ public class WbTable
 
 		ToolTipRenderer rend = new ToolTipRenderer();
 		this.setDefaultRenderer(Object.class, rend);
-
-		/*
-		InputMap mymap = this.getInputMap(WHEN_FOCUSED);
-		InputMap im = defaultNumberRenderer.getInputMap(WHEN_FOCUSED);
-
-		im.setParent(mymap);
-		im = rend.getInputMap(WHEN_FOCUSED);
-		im.setParent(mymap);
-		im = rend.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-		im.setParent(mymap);
-		*/
 	}
 
 	public void initDefaultEditors()
@@ -1616,7 +1645,7 @@ public class WbTable
 		}
 		if (result)
 		{
-			this.copyAsSql(true, selectedOnly, showSelectColumns);
+			this.copyAsSql(true, selectedOnly, showSelectColumns, false);
 		}
 	}
 
@@ -1627,9 +1656,19 @@ public class WbTable
 
 	public void copyAsSqlInsert(boolean selectedOnly, boolean showSelectColumns)
 	{
-		this.copyAsSql(false, selectedOnly, showSelectColumns);
+		this.copyAsSql(false, selectedOnly, showSelectColumns, false);
 	}
 
+	public void copyAsSqlDeleteInsert()
+	{
+		copyAsSqlDeleteInsert(false, false);
+	}
+
+	public void copyAsSqlDeleteInsert(boolean selectedOnly, boolean showSelectColumns)
+	{
+		this.copyAsSql(false, selectedOnly, showSelectColumns, true);
+	}
+	
 	/**
 	 *	A general purpose method to select specific columns from the result set
 	 *  this is e.g. used for copying data to the clipboard
@@ -1644,7 +1683,7 @@ public class WbTable
 		ColumnIdentifier[] originalCols = ds.getColumns();
 		ColumnSelectorPanel panel = new ColumnSelectorPanel(originalCols);
 		panel.selectAll();
-		int choice = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(this), panel, ResourceMgr.getString("MsgSelectSelectColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+		int choice = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(this), panel, ResourceMgr.getString("MsgSelectColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
 		if (choice == JOptionPane.OK_OPTION)
 		{
@@ -1671,6 +1710,7 @@ public class WbTable
 		if (choice == JOptionPane.OK_OPTION)
 		{
 			ds.setPKColumns(panel.getColumns());
+			checkKeyActions();
 			return true;
 		}
 		return false;
@@ -1692,6 +1732,28 @@ public class WbTable
 		return true;
 	}
 
+	public void checkKeyActions()
+	{
+		DataStore ds = this.getDataStore();
+		boolean update = (ds == null ? false : ds.hasPkColumns());
+		boolean insert = (ds == null ? false : ds.canSaveAsSqlInsert());
+
+		if (this.copyInsertAction != null)
+		{
+			this.copyInsertAction.setEnabled(insert);
+		}
+		
+		if (this.copyUpdateAction != null)
+		{
+			this.copyUpdateAction.setEnabled(update);
+		}
+		
+		if (this.copyDeleteInsertAction != null)
+		{
+			this.copyDeleteInsertAction.setEnabled(update && insert);
+		}
+	}
+	
 	/**
 	 *	Check for any defined PK columns.
 	 *	If no key columns can be found, the user
@@ -1727,13 +1789,12 @@ public class WbTable
 	 * 	Copy the data of this table into the clipboard using SQL statements
 	 *
 	 */
-	private void copyAsSql(boolean useUpdate, boolean selectedOnly, boolean showSelectColumns)
+	private void copyAsSql(boolean useUpdate, boolean selectedOnly, boolean showSelectColumns, boolean includeDelete)
 	{
 		if (this.getRowCount() <= 0) return;
 
 		DataStore ds = this.dwModel.getDataStore();
 		if (ds == null) return;
-		//if (!ds.canSaveAsSqlInsert()) return;
 
 		List columnsToInclude = null;
 		if (showSelectColumns)
@@ -1742,7 +1803,6 @@ public class WbTable
 		}
 		try
 		{
-			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 			WbSwingUtilities.showWaitCursorOnWindow(this);
 			int rows[] = null;
 			if (selectedOnly) rows = this.getSelectedRows();
@@ -1752,10 +1812,15 @@ public class WbTable
 			{
 				data = ds.getDataAsSqlUpdate(rows, columnsToInclude);
 			}
+			else if (includeDelete)
+			{
+				data = ds.getDataAsSqlDeleteInsert(rows, columnsToInclude);
+			}
 			else
 			{
 				data = ds.getDataAsSqlInsert(rows, columnsToInclude);
 			}
+			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 			StringSelection sel = new StringSelection(data);
 			clp.setContents(sel, sel);
 		}

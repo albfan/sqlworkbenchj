@@ -99,7 +99,7 @@ public class ExportOptionsPanel
 		this.typePanel.setLayout(card);
 		this.typePanel.add(this.textOptions, "text");
 		
-		this.sqlOptions = new SqlOptionsPanel();
+		this.sqlOptions = new SqlOptionsPanel(columns);
 		this.typePanel.add(this.sqlOptions, "sql");
 		
 		xmlOptions = new XmlOptionsPanel();
@@ -112,9 +112,14 @@ public class ExportOptionsPanel
 		typeSelector.addActionListener(this);
 	}
 	
-	public void setSqlUpdateAvailable(boolean flag)
+	public void setIncludeSqlUpdate(boolean flag)
 	{
-		this.sqlOptions.setSqlUpdateAvailable(flag);
+		this.sqlOptions.setIncludeUpdate(flag);
+	}
+	
+	public void setIncludeSqlDeleteInsert(boolean flag)
+	{
+		this.sqlOptions.setIncludeDeleteInsert(flag);
 	}
 
 	public List getColumnsToExport()
@@ -272,7 +277,7 @@ public class ExportOptionsPanel
 			this.columnSelectorPanel.selectColumns(this.selectedColumns);
 		}
 		
-		int choice = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(this), this.columnSelectorPanel, ResourceMgr.getString("MsgSelectSelectColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+		int choice = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(this), this.columnSelectorPanel, ResourceMgr.getString("MsgSelectColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
 		if (choice == JOptionPane.OK_OPTION)
 		{

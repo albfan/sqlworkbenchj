@@ -12,7 +12,16 @@
 
 package workbench.gui.dialogs.export;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import workbench.db.ColumnIdentifier;
+import workbench.gui.components.ColumnSelectorPanel;
+import workbench.gui.components.KeyColumnSelectorPanel;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.storage.ResultInfo;
 
 /**
  *
@@ -22,11 +31,15 @@ public class SqlOptionsPanel
 	extends javax.swing.JPanel
 	implements SqlOptions
 {
+	private List keyColumns;
+	private ColumnSelectorPanel columnSelectorPanel;	
+	private ResultInfo tableColumns;
 	
 	/** Creates new form SqlOptionsPanel */
-	public SqlOptionsPanel()
+	public SqlOptionsPanel(ResultInfo info)
 	{
 		initComponents();
+		this.tableColumns = info;
 	}
 
 	public void saveSettings()
@@ -77,22 +90,31 @@ public class SqlOptionsPanel
 		return result;
 	}
 
-	public void setSqlUpdateAvailable(boolean flag)
+	public void setIncludeUpdate(boolean flag)
 	{
-		if (flag)
-		{
-			useUpdate.setEnabled(true);
-		}
-		else
-		{
-			useInsert.setSelected(true);
-			useUpdate.setEnabled(false);
-		}
+		useUpdate.setEnabled(flag);
+	}
+	
+	public void setIncludeDeleteInsert(boolean flag)
+	{
+		useDeleteInsert.setEnabled(flag);
 	}
 	
 	public boolean getCreateInsert()
 	{
 		if (useInsert.isSelected()) return true;
+		return false;
+	}
+	
+	public boolean getCreateUpdate()
+	{
+		if (useUpdate.isEnabled()) return useUpdate.isSelected();
+		return false;
+	}
+	
+	public boolean getCreateDeleteInsert()
+	{
+		if (useDeleteInsert.isEnabled()) return useDeleteInsert.isSelected();
 		return false;
 	}
 
@@ -113,15 +135,62 @@ public class SqlOptionsPanel
 		}
 	}
 
-	public void setCreateInsert(boolean flag)
+	public void setCreateInsert()
 	{
-		if (flag) this.useInsert.setSelected(true);
-		else if (this.useUpdate.isEnabled()) useUpdate.setSelected(true);
+		this.useInsert.setSelected(true);
+	}
+	
+	public void setCreateUpdate()
+	{
+		if (this.useUpdate.isEnabled()) this.useUpdate.setSelected(true);
 	}
 
+	public void setCreateDeleteInsert()
+	{
+		if (this.useDeleteInsert.isEnabled()) this.useDeleteInsert.setSelected(true);
+	}
+	
 	public void setCreateTable(boolean flag)
 	{
 		this.createTable.setSelected(flag);
+	}
+
+	public List getKeyColumns()
+	{
+		return keyColumns;
+	}
+
+	private void selectColumns()
+	{
+		if (this.tableColumns == null) return;
+		if (this.columnSelectorPanel == null) 
+		{
+			this.columnSelectorPanel = new KeyColumnSelectorPanel(this.tableColumns.getColumns(), this.tableColumns.getUpdateTable().getTable());
+		}
+		else
+		{
+			this.columnSelectorPanel.selectColumns(this.keyColumns);
+		}
+		
+		int choice = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(this), this.columnSelectorPanel, ResourceMgr.getString("MsgSelectKeyColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+		if (choice == JOptionPane.OK_OPTION)
+		{
+			this.keyColumns = null;
+			
+			List selected = this.columnSelectorPanel.getSelectedColumns();
+			int size = selected.size();
+			this.keyColumns = new ArrayList(size);
+			for (int i=0; i < size; i++)
+			{
+				ColumnIdentifier col = (ColumnIdentifier)selected.get(i);
+				this.keyColumns.add(col.getColumnName());
+			}
+			
+			boolean keysPresent = (size > 0);
+			this.setIncludeDeleteInsert(keysPresent);
+			this.setIncludeUpdate(keysPresent);
+		}
 	}
 	
 	/** This method is called from within the constructor to
@@ -141,10 +210,12 @@ public class SqlOptionsPanel
     useInsert = new javax.swing.JRadioButton();
     alternateTable = new javax.swing.JTextField();
     jLabel1 = new javax.swing.JLabel();
+    useDeleteInsert = new javax.swing.JRadioButton();
+    selectKeys = new javax.swing.JButton();
 
     setLayout(new java.awt.GridBagLayout());
 
-    commitLabel.setText(java.util.ResourceBundle.getBundle("language/wbstrings").getString("LabelExportCommitEvery"));
+    commitLabel.setText(ResourceMgr.getString("LabelExportCommitEvery"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -160,7 +231,7 @@ public class SqlOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
     add(commitCount, gridBagConstraints);
 
-    createTable.setText(java.util.ResourceBundle.getBundle("language/wbstrings").getString("LabelExportIncludeCreateTable"));
+    createTable.setText(ResourceMgr.getString("LabelExportIncludeCreateTable"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
@@ -170,7 +241,8 @@ public class SqlOptionsPanel
     add(createTable, gridBagConstraints);
 
     typeGroup.add(useUpdate);
-    useUpdate.setText(java.util.ResourceBundle.getBundle("language/wbstrings").getString("LabelExportSqlUpdate"));
+    useUpdate.setText(ResourceMgr.getString("LabelExportSqlUpdate"));
+    useUpdate.setEnabled(false);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
@@ -179,7 +251,7 @@ public class SqlOptionsPanel
 
     typeGroup.add(useInsert);
     useInsert.setSelected(true);
-    useInsert.setText(java.util.ResourceBundle.getBundle("language/wbstrings").getString("LabelExportSqlInsert"));
+    useInsert.setText(ResourceMgr.getString("LabelExportSqlInsert"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -190,21 +262,51 @@ public class SqlOptionsPanel
     alternateTable.setColumns(15);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(2, 4, 0, 0);
     add(alternateTable, gridBagConstraints);
 
-    jLabel1.setText(java.util.ResourceBundle.getBundle("language/wbstrings").getString("LabelUseExportTableName"));
+    jLabel1.setText(ResourceMgr.getString("LabelUseExportTableName"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 0);
     add(jLabel1, gridBagConstraints);
 
+    typeGroup.add(useDeleteInsert);
+    useDeleteInsert.setText(ResourceMgr.getString("LabelExportSqlDeleteInsert"));
+    useDeleteInsert.setEnabled(false);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    add(useDeleteInsert, gridBagConstraints);
+
+    selectKeys.setText(ResourceMgr.getString("LabelSelectKeyColumns"));
+    selectKeys.addMouseListener(new java.awt.event.MouseAdapter()
+    {
+      public void mouseClicked(java.awt.event.MouseEvent evt)
+      {
+        selectKeysMouseClicked(evt);
+      }
+    });
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+    add(selectKeys, gridBagConstraints);
+
   }//GEN-END:initComponents
+
+	private void selectKeysMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_selectKeysMouseClicked
+	{//GEN-HEADEREND:event_selectKeysMouseClicked
+		this.selectColumns();
+	}//GEN-LAST:event_selectKeysMouseClicked
 	
 	
   // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -213,7 +315,9 @@ public class SqlOptionsPanel
   private javax.swing.JLabel commitLabel;
   private javax.swing.JCheckBox createTable;
   private javax.swing.JLabel jLabel1;
+  private javax.swing.JButton selectKeys;
   private javax.swing.ButtonGroup typeGroup;
+  private javax.swing.JRadioButton useDeleteInsert;
   private javax.swing.JRadioButton useInsert;
   private javax.swing.JRadioButton useUpdate;
   // End of variables declaration//GEN-END:variables

@@ -27,7 +27,7 @@
 
 			     <para>Example:</para>
 
-			     <programlisting>java -jar Workbench.jar -profile=&#34;Oracle - Test&#34; -script='test.sql'</programlisting>
+			     <programlisting>java -jar Workbench.jar -profile='Oracle - Test' -script='test.sql'</programlisting>
         </section>
 
         <section id="scripting-connecting-no-profile">
@@ -105,7 +105,12 @@
         <para>With the parameter <literal>-script=&#60;filename&#62;</literal> the script
         file to be executed can be passed to the application. Multiple scripts can be specified by
         separating them with a comma. The scripts will be executed in the
-        order in which they appear in the commandline</para>
+        order in which they appear in the commandline.
+				</para>
+				<para>
+				You can also execute several scripts by using the <link linkend="command-wbinclude"><literal>WBINCLUDE</literal></link>
+				command inside a script.
+				</para>
       </section>
 
       <section id="scripting-logfile">
@@ -185,11 +190,18 @@
           <para>When running &wb-productname; in batch mode, it is recommended that
           the <link linkend="options-log-console">logging to the console</link> is disabled.
           If you are running <literal>SELECT</literal> statements in your script wihtout "using" 
-          the data through an <link linkend="command-spool"><literal>EXPORT</literal></link>, 
+          the data through an <link linkend="command-export"><literal>EXPORT</literal></link>, 
           you can optionally display the results to the console using the parameter 
           <literal>-displayresult=true</literal>. If this parameter is not passed or set
           to false, results sets will not be visible (for a <literal>SELECT</literal> statement
           you will simply see the message '<literal>SELECT executed successfully</literal>'.
+          </para>
+          <para>
+					Usually each statement reports its success or failure individually. You can control
+					this logging by using the <link linkend="command-wbfeedback">WBFEEBACK</link> command.
+					As displaying the statement's result can be quite some overhead especially when executing
+					thousands of statements in a script file, it is recommended to turn off the result logging
+					using <literal>WBFEEDBACK off</literal>.
           </para>
           
           <para>
@@ -213,21 +225,16 @@
      -username=thomas
      -password=welcome
      -driverjar=C:/Programme/pgsql/pg73jdbc3.jar 
-     -script=&quot;test-script.sql&quot;</programlisting>
+     -script='test-script.sql'</programlisting>
 
         <para>This will start &wb-productname;, connect to the database server
         as specified in the connection parameters and execute the script
         <filename>test-script.sql</filename>. As the script&apos;s filename contains
         a dash, it has to be quoted. This is also necessary when the filename contains spaces.
-        You can either use single quotes (<literal>&apos;test-script.sql&apos;</literal>) or
-        double quotes (<literal>&quot;test-script.sql&quot;</literal>)
+        You should use single quotes (<literal>&apos;test-script.sql&apos;</literal>) to quote
+        these values because most command line shells (including Windows&reg;) do not pass
+        double quotes to the application.
         </para>
-        <note>
-          <para>If you are using these commands in a Windows&reg; batch file you
-          <emphasis role="bold">have</emphasis> to use single quotes, because the
-          double quotes are not passed on to the application from within a batch file.
-          </para>
-        </note>
 
         <para><emphasis role="bold">Executing several scripts with a cleanup and failure script:</emphasis></para>
         <programlisting>java -jar Workbench.jar

@@ -1,9 +1,16 @@
-  <section id="dbexplorer">
+  <section id="dbexplorer" xreflabel="Database Object Explorer">
     <title>Database Object Explorer</title>
 
     <para>The Database Object Explorer displays the available database objects
     such as Tables, Views, Triggers and Stored Procedures.</para>
-
+    
+    <para>There are three ways to start the DbExplorer
+      <simplelist columns="1">
+          <member>Using <menuchoice><guimenu>Tools</guimenu><guimenuitem>Database Explorer</guimenuitem></menuchoice></member>
+          <member>Passing the paramter <literal>-dbexplorer</literal> to the main program (jworkbench or JWorkbench.exe)</member>
+          <member>When using Windows with the <literal>DbExplorer.exe</literal> executable or in Linux/Unix using shell script <literal>jworkbench</literal></member>
+      </simplelist>
+    </para>
     <para>At the top of the window, the current schema (for MS SQL Server this
     would be the current database, for Oracle this is the user) can be selected.</para>
 
@@ -43,7 +50,6 @@
         and the value should be set to <literal>true</literal>.
         </para>
 
-
         <para>When an Oracle synonym is selected, the columns tab will display
         the column definition of the underlying table or view. The source tab
         will display the statement to re-create the synonym.</para>
@@ -55,60 +61,86 @@
         <para>The table list offers the following additional commands in the
         context menu:</para>
 
-        <para><emphasis>Spool data</emphasis></para>
+        <simplesect>
+          <title>Spool data</title>
+          <blockquote>
+          <para>This will execute a <literal>SPOOL</literal> command for the currently selected
+          table. Choosing this option is equivalent to do a <literal>SELECT * FROM table;</literal>
+          and then executing <menuchoice><guimenu>SQL</guimenu><guimenuitem>Spool data</guimenuitem></menuchoice>
+          from the SQL editor in the main window (or issuing a SPOOL command before the SELECT).
+          See the description of the <link linkend="command-export">SPOOL command</link>
+          for details.</para>
+          </blockquote>
+        </simplesect>
 
-        <para>This will execute a <literal>SPOOL</literal> command for the currently selected
-        table. Choosing this option is equivalent to do a <literal>SELECT * FROM table;</literal>
-        and then executing <menuchoice><guimenu>SQL</guimenu><guimenuitem>Spool data</guimenuitem></menuchoice>
-        from the SQL editor in the main window (or issuing a SPOOL command before the SELECT).
-        See the description of the <link linkend="command-spool">SPOOL command</link>
-        for details.</para>
-
-        <para><emphasis>Create Empty INSERT</emphasis></para>
-
-        <para>This creates an empty <literal>INSERT</literal>statement for the 
-        currently selected table.
-        </para>
+        <simplesect>
+          <title>Create Empty INSERT</title>
+          
+          <blockquote>
+          <para>This creates an empty <literal>INSERT</literal>statement for the 
+          currently selected table.
+          </para>
+          </blockquote>
+        </simplesect>
         
-        <para><emphasis>Drop</emphasis></para>
+        <simplesect>
+          <title>Drop</title>
 
-        <para>Drops the selected objects. If at least one object is a table, and 
-        the currently used DBMS supports cascaded dropping of constraints, you 
-        can enable cascaded delete of constraints. If this option is enabled
-        &wb-productname; would generate e.g. for Oracle a <literal>DROP TABLE
-        mytable CASCADE CONSTRAINTS</literal>. This is necessary if you want to
-        drop several tables at the same time that have foreign key constraints
-        defined.
-        </para>
+          <blockquote>
+          <para>Drops the selected objects. If at least one object is a table, and 
+          the currently used DBMS supports cascaded dropping of constraints, you 
+          can enable cascaded delete of constraints. If this option is enabled
+          &wb-productname; would generate e.g. for Oracle a <literal>DROP TABLE
+          mytable CASCADE CONSTRAINTS</literal>. This is necessary if you want to
+          drop several tables at the same time that have foreign key constraints
+          defined.
+          </para>
+          </blockquote>
+        </simplesect>
+        
+        <simplesect>
+          <title>Create SQL Script</title>
 
-        <para><emphasis>Create SQL Script</emphasis></para>
+          <blockquote>
+          <para>With this command a script for multiple objects can be created. Select
+          all the tables, views or other objects in the table list, that you want
+          to create a script for, then right click and select "Create SQL Script".
+          This will generate one script for all selected items in the list.</para>
+          <para>When this command is selected, a new window will be shown. The window
+          contains a statusbar which indicates the object that is currently processed. The
+          complete script will be shown as soon as all objects have been processed. 
+          The objects will be processed in this order:</para>
+          <simplelist columns="1">
+              <member>SEQUENCES</member>
+              <member>TABLEs</member>
+              <member>VIEWs</member>
+              <member>SYNONYMS</member>
+          </simplelist>
+          </blockquote>
+        </simplesect>
+        
+        <simplesect id="dbexplorer-schema-report">
+          <title>Create Report</title>
 
-        <para>This will create one SQL script to recreate all selected objects.
-        The SQL statements for the objects will be created in the following order:
-        </para>
-        <simplelist columns="1">
-            <member>SEQUENCES</member>
-            <member>TABLEs</member>
-            <member>VIEWs</member>
-            <member>SYNONYMS</member>
-        </simplelist>
-               
-        <para><emphasis>Show table data</emphasis></para>
+          <blockquote>
+          <para>This will create an XML report of the selected tables. You will be
+          prompted to specify the location of the generated XML file. This report can
+          also be generated using the <link linkend="command-schema-report">WBREPORT</link>
+          command.
+          </para>
+          </blockquote>
+       </simplesect>
+       
+       <simplesect>
+        <title>Show table data</title>
 
+        <blockquote>
         <para>This will put a SELECT statement into the SQL editor to display
         all data for the selected table. You can choose into which editor tab
         the statement will be written. The currently selected editor tab is
         displayed in bold</para>
-
-        <para><emphasis>Create SQL Script</emphasis></para>
-
-        <para>With this command a script for multiple objects can be created. Select
-        all the tables, views or other objects in the table list, that you want
-        to create a script for, then right click and select "Create SQL Script".
-        This will generate one script for all selected items in the list.</para>
-        <para>When this command is selected, a new window will be shown. The window
-        contains a statusbar which indicates the object that is currently processed. The
-        complete script will be shown as soon as all objects have been processed</para>
+        </blockquote>
+      </simplesect>
 
       </section>
 

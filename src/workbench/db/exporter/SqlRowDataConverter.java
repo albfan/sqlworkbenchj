@@ -31,8 +31,11 @@ import workbench.util.StrBuffer;
 public class SqlRowDataConverter
 	extends RowDataConverter
 {
-	// if this is false, we will generate update statements
-	private boolean createInsert = true;
+	public static final int SQL_INSERT = 1;
+	public static final int SQL_UPDATE = 2;
+	public static final int SQL_DELETE_INSERT = 3;
+	
+	private int sqlType = SQL_INSERT;
 	private boolean createTable = false;
 	private String alternateUpdateTable;
 	private int commitEvery;
@@ -42,7 +45,10 @@ public class SqlRowDataConverter
 	private String sql;
 	private StatementFactory factory;
 	private List keyColumnsToUse;
-
+	private String lineTerminator = "\n";
+	private String doubleLineTerminator = "\n\n";
+	private boolean includeOwner = true;
+	
 	public SqlRowDataConverter(ResultInfo info)
 	{
 		super(info);
@@ -67,24 +73,48 @@ public class SqlRowDataConverter
 		if (writeCommit)
 		{
 			end = new StrBuffer();
-			end.append("\nCOMMIT;\n");
+			end.append(lineTerminator);
+			end.append("COMMIT;");
+			end.append(lineTerminator);
 		}
 		return end;
 	}
 
+	public void setType(int type)
+	{
+		if (type == SQL_INSERT)
+			this.setCreateInsert();
+		else if (type == SQL_UPDATE)
+			this.setCreateUpdate();
+		else if (type == SQL_DELETE_INSERT)
+			this.setCreateInsertDelete();
+		else
+			throw new IllegalArgumentException("Invalid type specified");
+	}
+	
 	public String getFormatName()
 	{
-		if (createInsert)
+		if (isCreateInsert())
 			return "SQL INSERT";
-		else
+		else if (sqlType == SQL_UPDATE)
 			return "SQL UPDATE";
+		else
+			return "SQL DELETE/INSERT";
 	}
 
 	public StrBuffer convertRowData(RowData row, long rowIndex)
 	{
 		StrBuffer result = new StrBuffer();
 		DmlStatement dml = null;
-		if (this.createInsert)
+		this.factory.setIncludeTableOwner(this.includeOwner);
+		if (this.sqlType == SQL_DELETE_INSERT)
+		{
+			dml = this.factory.createDeleteStatement(row, true);
+			result.append(dml.getExecutableStatement());
+			result.append(';');
+			result.append(lineTerminator);
+		}
+		if (this.sqlType == SQL_DELETE_INSERT || this.sqlType == SQL_INSERT)
 		{
 			dml = this.factory.createInsertStatement(row, true, "\n", this.exportColumns);
 		}
@@ -96,11 +126,13 @@ public class SqlRowDataConverter
 		dml.setConcatString(this.concatString);
 		dml.setConcatFunction(this.concatFunction);
 		result.append(dml.getExecutableStatement());
-		result.append(";\n\n");
+		result.append(';');
+		result.append(doubleLineTerminator);
 
 		if (this.commitEvery > 0 && ((rowIndex + 1) % commitEvery) == 0)
 		{
-			result.append("COMMIT;\n\n");
+			result.append("COMMIT;");
+			result.append(doubleLineTerminator);
 		}
 		return result;
 	}
@@ -113,60 +145,78 @@ public class SqlRowDataConverter
 		DbMetadata db = this.originalConnection.getMetadata();
 		String source = db.getTableSource(updatetable, cols, alternateUpdateTable);
 		StrBuffer createSql = new StrBuffer(source);
-		createSql.append("\n\n");
+		createSql.append(doubleLineTerminator);
 		return createSql;
 	}
 
 	public boolean isCreateInsert()
 	{
-		return createInsert;
+		return this.sqlType == SQL_INSERT;
 	}
 
-	public void setCreateInsert(boolean createInsert)
+	public boolean isCreateUpdate()
 	{
-		this.createInsert = createInsert;
-		if (!createInsert)
+		return this.sqlType == SQL_UPDATE;
+	}
+	
+	public boolean isCreateInsertDelete()
+	{
+		return this.sqlType == SQL_DELETE_INSERT;
+	}
+	
+	public void setCreateInsert()
+	{
+		this.sqlType = SQL_INSERT;
+	}
+	
+	public void setCreateUpdate()
+	{
+		this.sqlType = SQL_UPDATE;
+		// when creating update statements, we need to make sure
+		// that we have key columns
+		this.checkKeyColumns();
+	}
+
+	public void setCreateInsertDelete()
+	{
+		this.sqlType = SQL_DELETE_INSERT;
+		if (!this.checkKeyColumns())
 		{
-			boolean keysPresent = false;
-			if (this.keyColumnsToUse != null && this.keyColumnsToUse.size() > 0)
-			{
-				// first check if all defined columns are actually present
-				int keyCount = this.keyColumnsToUse.size();
-				for (int i=0; i < keyCount; i++)
-				{
-					int col = this.metaData.findColumn((String)this.keyColumnsToUse.get(i));
-					if (col == -1)
-					{
-						keysPresent = false;
-						break;
-					}
-				}
-				if (keysPresent)
-				{
-					// make sure the default key columns are not used
-					this.metaData.resetPkColumns();
-
-					for (int i=0; i < keyCount; i++)
-					{
-						this.metaData.setIsPkColumn((String)this.keyColumnsToUse.get(i), true);
-					}
-				}
-			}
-
-			if (!keysPresent)
-			{
-				try
-				{
-					this.metaData.readPkDefinition(this.originalConnection);
-				}
-				catch (SQLException e)
-				{
-					LogMgr.logError("SqlRowDataConverter.setCreateInsert", "Could not read PK columns for update table", e);
-				}
-			}
+			LogMgr.logWarning("SqlRowDataConverter.setCreateInsertDelete()", "No key columns found, reverting back to INSERT generation");
+			this.sqlType = SQL_INSERT;
 		}
 	}
+	
+	private boolean checkKeyColumns()
+	{
+		boolean keysPresent = false;
+		if (this.keyColumnsToUse != null && this.keyColumnsToUse.size() > 0)
+		{
+			int keyCount = this.keyColumnsToUse.size();
+			// make sure the default key columns are not used
+			this.metaData.resetPkColumns();
 
+			for (int i=0; i < keyCount; i++)
+			{
+				this.metaData.setIsPkColumn((String)this.keyColumnsToUse.get(i), true);
+			}
+			keysPresent = true;
+		}
+
+		if (!keysPresent)
+		{
+			try
+			{
+				this.metaData.readPkDefinition(this.originalConnection);
+				keysPresent = this.metaData.hasPkColumns();
+			}
+			catch (SQLException e)
+			{
+				LogMgr.logError("SqlRowDataConverter.setCreateInsert", "Could not read PK columns for update table", e);
+			}
+		}
+		return keysPresent;
+	}
 	public int getCommitEvery()
 	{
 		return commitEvery;
@@ -271,7 +321,7 @@ public class SqlRowDataConverter
 	 * Getter for property keyColumnsToUse.
 	 * @return Value of property keyColumnsToUse.
 	 */
-	public java.util.List getKeyColumnsToUse()
+	public List getKeyColumnsToUse()
 	{
 		return keyColumnsToUse;
 	}
@@ -280,9 +330,21 @@ public class SqlRowDataConverter
 	 * Setter for property keyColumnsToUse.
 	 * @param keyColumnsToUse New value of property keyColumnsToUse.
 	 */
-	public void setKeyColumnsToUse(java.util.List keyColumnsToUse)
+	public void setKeyColumnsToUse(List keyColumnsToUse)
 	{
 		this.keyColumnsToUse = keyColumnsToUse;
+		checkKeyColumns();
 	}
 
+	public void setLineTerminator(String lineEnd)
+	{
+		this.lineTerminator = lineEnd;
+		this.doubleLineTerminator = lineEnd + lineEnd;
+	}
+	
+	public void setIncludeTableOwner(boolean flag)
+	{
+		this.includeOwner = flag;
+		this.factory.setIncludeTableOwner(flag);
+	}
 }

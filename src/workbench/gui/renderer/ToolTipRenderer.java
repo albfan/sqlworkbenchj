@@ -207,7 +207,7 @@ public class ToolTipRenderer
 		// this is the tooltip
 		tooltip = null;
 		if (displayValue.length() > 0) tooltip = displayValue;
-
 	}
 
+	public String getDisplayValue() { return displayValue; }
 }

@@ -12,6 +12,7 @@
 
 package workbench.gui.dialogs.export;
 
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
@@ -91,7 +92,7 @@ public class HtmlOptionsPanel
 
     setLayout(new java.awt.GridBagLayout());
 
-    pageTitleLabel.setText(java.util.ResourceBundle.getBundle("language/wbstrings").getString("LabelExportHtmlPageTitle"));
+    pageTitleLabel.setText(ResourceMgr.getString("LabelExportHtmlPageTitle"));
     pageTitleLabel.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -109,14 +110,14 @@ public class HtmlOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
     add(pageTitle, gridBagConstraints);
 
-    fullPage.setText(java.util.ResourceBundle.getBundle("language/wbstrings").getString("LabelExportFullHtml"));
+    fullPage.setText(ResourceMgr.getString("LabelExportFullHtml"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     add(fullPage, gridBagConstraints);
 
-    escapeHtml.setText(java.util.ResourceBundle.getBundle("language/wbstrings").getString("LabelExportEscapeHtml"));
+    escapeHtml.setText(ResourceMgr.getString("LabelExportEscapeHtml"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;

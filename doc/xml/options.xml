@@ -142,7 +142,9 @@
 
       <para>This would lead to problems as the slash is recognized as the
       statement terminator. Thus the &wb-productname; would send everything up
-      to sum(field) to the database and execute it.</para>
+      to sum(field) to the database and execute it. The same is true when
+			using the column mapping parameters for the <link linkend="command-copy"><literal>WBCOPY</literal></link>
+			command.</para>
     </section>
 
     <section id="options-history-size">
@@ -199,7 +201,7 @@
       quoting the data is necessary in case the data contains a a comma (or
       whatever character is used to delimit the columns). This will be the
       default for exporting data through the menu. If you use the <link
-      linkend="command-spool"><literal>SPOOL</literal> command</link>, you can
+      linkend="command-export"><literal>SPOOL</literal> command</link>, you can
       freely customize the output for each file you create.</para>
     </section>
 

@@ -481,7 +481,6 @@ public class StringUtil
 		{
 			result = result.substring(1, len - 1);
 		}
-		//System.out.println("trimmed=>" + result + "<" );
 		return result;
 	}
 

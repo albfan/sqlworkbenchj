@@ -276,23 +276,26 @@
       <para>Store all settings, the connection profile and the statement
       history in the given directory.</para>
 
-      <programlisting>java -jar Workbench.jar -configdir=&#34;c:/Configurations/JWorkbench&#34;
-jworkbench -configdir=&#34;c:/Configurations/JWorkbench&#34;</programlisting>
+      <programlisting>java -jar Workbench.jar -configdir=$HOME/wbconfig
+jworkbench -configdir='c:/Configurations/JWorkbench'</programlisting>
     </section>
 
     <section id="vardef-commandline">
-      <title>-vardef=&#60;variable definition file&#62;</title>
+      <title>-vardef=&#60;variable definition&#62;</title>
 
       <para>With this command line parameter a definition file for internal variables can 
-      be defined. This file has to be a standard Java "properties" file. Each variable 
-      is listed on a single line in the format <literal>variable=value</literal>.
+      be defined. Each variable is listed on a single line in the format <literal>variable=value</literal>.
       Lines starting with a <literal>#</literal> character are ignored (comments)
       </para>
-      <programlisting>#Define the ID that we need later
+      <programlisting>#Define some values
 var_id=42
 person_name=Dent
 another_variable=24</programlisting>
 
+        <para>You can also define a list of variables with this parameter. In this case, the first
+        character after the = sign, has to be # (hash sign) to flag the value as a variable list:
+        <programlisting>java -jar Workbench.jar -vardef=#var_id=42,person_name=Dent</programlisting>
+       </para>
     </section>
 
     <section id="commandline-scripting">
@@ -300,7 +303,8 @@ another_variable=24</programlisting>
 
       <para>When using &wb-productname; inside batch files, additional command line parameters 
       are supported to define the database connection and other things. 
-      Details about using batch execution can be found in the chapter <xref linkend="using-scripting"/>
+      Details about using batch execution can be found in the chapter <link linkend="using-scripting">
+      Using &wb-productname; in batch files</link>
       </para>
     </section>
     
