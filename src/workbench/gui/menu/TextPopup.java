@@ -20,7 +20,7 @@ import workbench.gui.actions.WbAction;
 
 /**
  *
- * @author  thomas
+ * @author  workbench@kellerer.org
  * @version
  */
 public class TextPopup extends JPopupMenu
@@ -36,16 +36,16 @@ public class TextPopup extends JPopupMenu
 	public TextPopup(ClipboardSupport aClient)
 	{
 		this.cut = new CutAction(aClient);
-		this.add(cut);
+		this.add(cut.getMenuItem());
 		this.copy = new CopyAction(aClient);
-		this.add(this.copy);
+		this.add(this.copy.getMenuItem());
 		this.paste = new PasteAction(aClient);
-		this.add(this.paste);
+		this.add(this.paste.getMenuItem());
 		this.addSeparator();
 		this.clear = new ClearAction(aClient);
-		this.add(this.clear);
+		this.add(this.clear.getMenuItem());
 		this.selectAll = new SelectAllAction(aClient);
-		this.add(this.selectAll);
+		this.add(this.selectAll.getMenuItem());
 	}
 	
 	public void addAction(WbAction anAction, boolean withSep)
