@@ -88,7 +88,7 @@ public class ConnectionMgr
 		//Connection sql = DriverManager.getConnection(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword());
 		try
 		{
-			sql = drv.getConnection(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword());
+			sql = drv.connect(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword());
 		
 			sql.setAutoCommit(aProfile.getAutocommit());
 			conn.setSqlConnection(sql);

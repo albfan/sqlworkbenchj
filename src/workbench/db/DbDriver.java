@@ -40,10 +40,16 @@ public class DbDriver
 	{
 	}
 	
-	public DbDriver(Driver aDriverClass)
+	public DbDriver(Driver aDriverClassInstance)
 	{
-		this.driverClassInstance = aDriverClass;
-		this.driverClass = aDriverClass.getClass().getName();
+		this.driverClassInstance = aDriverClassInstance;
+		this.driverClass = aDriverClassInstance.getClass().getName();
+		this.name = this.driverClass;
+	}
+	
+	public DbDriver(String aDriverClassname)
+	{
+		this.driverClass = aDriverClassname;
 		this.name = this.driverClass;
 	}
 	
@@ -88,7 +94,7 @@ public class DbDriver
 		}
 	}
 	
-	public Connection getConnection(String url, String user, String password)
+	public Connection connect(String url, String user, String password)
 		throws WbException, SQLException
 	{
 		Connection c = null;

@@ -343,5 +343,13 @@ public class Settings
 		if (aName == null) aName = "";
 		this.props.setProperty("connection.last", aName);
 	}
-	
+
+	public String getLastLibraryDir()
+	{
+		return this.props.getProperty("drivers.lastlibdir", "");
+	}
+	public void setLastLibraryDir(String aDir)
+	{
+		this.props.setProperty("drivers.lastlibdir", aDir);
+	}
 }

@@ -56,6 +56,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		dummy = new javax.swing.JPanel();
 		tfProfileName = new javax.swing.JTextField();
 		updateButton = new javax.swing.JButton();
+		manageDriversButton = new javax.swing.JButton();
 		
 		setLayout(new java.awt.GridBagLayout());
 		
@@ -65,8 +66,8 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 3;
-		gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
 		add(lblUsername, gridBagConstraints);
 		
 		tfUserName.setFont(null);
@@ -89,8 +90,8 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.gridy = 3;
 		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		add(tfUserName, gridBagConstraints);
 		
 		lblPwd.setFont(null);
@@ -98,8 +99,8 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 4;
-		gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
 		add(lblPwd, gridBagConstraints);
 		
 		jLabel1.setFont(null);
@@ -107,8 +108,8 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 1;
-		gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
 		add(jLabel1, gridBagConstraints);
 		
 		cbDrivers.setEditable(true);
@@ -128,11 +129,11 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 1;
-		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+		gridBagConstraints.gridwidth = 2;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
+		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 4);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.weightx = 1.0;
+		gridBagConstraints.weightx = 0.5;
 		add(cbDrivers, gridBagConstraints);
 		
 		jLabel2.setFont(null);
@@ -140,8 +141,8 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 2;
-		gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
 		add(jLabel2, gridBagConstraints);
 		
 		tfURL.setFont(null);
@@ -163,8 +164,8 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.gridy = 2;
 		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		add(tfURL, gridBagConstraints);
 		
 		tfPwd.setFont(null);
@@ -181,8 +182,8 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.gridy = 4;
 		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		add(tfPwd, gridBagConstraints);
 		
 		cbAutocommit.setFont(null);
@@ -198,8 +199,8 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 5;
-		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		add(cbAutocommit, gridBagConstraints);
 		
 		gridBagConstraints = new java.awt.GridBagConstraints();
@@ -227,6 +228,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.weightx = 1.0;
 		add(tfProfileName, gridBagConstraints);
 		
 		updateButton.setText("Update");
@@ -239,11 +241,23 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		});
 		
 		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 2;
+		gridBagConstraints.gridx = 3;
 		gridBagConstraints.gridy = 5;
 		gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
 		add(updateButton, gridBagConstraints);
+		
+		manageDriversButton.setFont(null);
+		manageDriversButton.setText(ResourceMgr.getString("EditDrivers"));
+		manageDriversButton.setMaximumSize(new java.awt.Dimension(200, 20));
+		manageDriversButton.setMinimumSize(new java.awt.Dimension(70, 20));
+		manageDriversButton.setPreferredSize(new java.awt.Dimension(100, 20));
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 3;
+		gridBagConstraints.gridy = 1;
+		gridBagConstraints.insets = new java.awt.Insets(0, 0, 1, 6);
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+		add(manageDriversButton, gridBagConstraints);
 		
 	}//GEN-END:initComponents
 
@@ -264,6 +278,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
+	private javax.swing.JButton manageDriversButton;
 	private javax.swing.JComboBox cbDrivers;
 	private javax.swing.JLabel lblUsername;
 	private javax.swing.JPasswordField tfPwd;
