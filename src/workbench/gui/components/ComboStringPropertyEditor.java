@@ -33,7 +33,7 @@ public class ComboStringPropertyEditor
 	public ComboStringPropertyEditor()
 	{
 		super();
-		this.addFocusListener(this);
+		//this.addFocusListener(this);
 	}
 	
 	public void setSourceObject(Object aSource, String aProperty)
@@ -55,7 +55,7 @@ public class ComboStringPropertyEditor
 			Class[] parms = {String.class};
 
 			this.setter = cls.getMethod(name, parms);
-			this.setEditable(true);
+			//this.setEditable(true);
 			if (this.getModel() != null) 
 			{
 				this.initData();

@@ -1,6 +1,7 @@
 package workbench.log;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
@@ -136,6 +137,13 @@ public class LogMgr
 				logOut.close();
 			}
       if (WbManager.trace) System.out.println("LogMgr.checkOutput() - Opening logfile " + outputfile);
+			File f = new File(outputfile);
+			if (f.exists())
+			{
+				File last = new File(outputfile + ".last");
+				if (last.exists()) last.delete();
+				f.renameTo(last);
+			}
 			logOut = new DuplicatingPrintStream(new BufferedOutputStream(new FileOutputStream(outputfile)), System.out);
       outputOpened = true;
       logInfo("LogMgr", "Log started");
@@ -220,6 +228,8 @@ public class LogMgr
 			}
 			else if (exceptionType == EXC_TYPE_COMPLETE)
 			{
+				String msg = th.getMessage();
+				if (msg != null) logOut.println(msg);
 				logOut.println();
 				logStackTrace(th);
 			}

@@ -494,6 +494,21 @@ public class TableListPanel
 
 	public void retrieve()
 	{
+		
+		try
+		{
+			if (dbConnection == null || dbConnection.isClosed())
+			{
+				WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("ErrorConnectionGone"));
+				return;
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("TableListPanel.retrieve()", "Error checking connection", e);
+			return;
+		}
+		
 		final Container parent = this.getParent();
 		new Thread(new Runnable()
 		{
@@ -690,51 +705,60 @@ public class TableListPanel
 	private synchronized void retrieveTableDefinition()
 		throws SQLException, WbException
 	{
-		DbMetadata meta = this.dbConnection.getMetadata();
-		DataStore def = meta.getTableDefinition(this.selectedCatalog, this.selectedSchema, this.selectedTableName, this.selectedObjectType, false);
-		DataStoreTableModel model = new DataStoreTableModel(def);
-		tableDefinition.setModel(model, true);
-		tableDefinition.adjustColumns();
-		TableColumnModel colmod = tableDefinition.getColumnModel();
-		TableColumn col = colmod.getColumn(DbMetadata.COLUMN_IDX_TABLE_DEFINITION_TYPE_ID);
-		col.setCellRenderer(new SqlTypeRenderer());
+		WbSwingUtilities.showWaitCursor(this);
 
-		// remove the last two columns...
-
-		col = colmod.getColumn(colmod.getColumnCount() - 1);
-		colmod.removeColumn(col);
-
-		col = colmod.getColumn(colmod.getColumnCount() - 1);
-		colmod.removeColumn(col);
-
-		if (this.selectedObjectType.indexOf("view") > -1)
+		try
 		{
-			String viewSource = meta.getViewSource(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
-			tableSource.setText(this.extendViewSource(viewSource, this.selectedTableName, def));
-			tableSource.setCaretPosition(0);
+			DbMetadata meta = this.dbConnection.getMetadata();
+			DataStore def = meta.getTableDefinition(this.selectedCatalog, this.selectedSchema, this.selectedTableName, this.selectedObjectType, false);
+			DataStoreTableModel model = new DataStoreTableModel(def);
+			tableDefinition.setModel(model, true);
+			tableDefinition.adjustColumns();
+			TableColumnModel colmod = tableDefinition.getColumnModel();
+			TableColumn col = colmod.getColumn(DbMetadata.COLUMN_IDX_TABLE_DEFINITION_TYPE_ID);
+			col.setCellRenderer(new SqlTypeRenderer());
+
+			// remove the last two columns...
+
+			col = colmod.getColumn(colmod.getColumnCount() - 1);
+			colmod.removeColumn(col);
+
+			col = colmod.getColumn(colmod.getColumnCount() - 1);
+			colmod.removeColumn(col);
+
+			if (this.selectedObjectType.indexOf("view") > -1)
+			{
+				String viewSource = meta.getViewSource(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+				tableSource.setText(this.extendViewSource(viewSource, this.selectedTableName, def));
+				tableSource.setCaretPosition(0);
+			}
+			else if ("synonym".equals(this.selectedObjectType))
+			{
+				String synSource = meta.getSynonymSource(this.selectedSchema, this.selectedTableName);
+				tableSource.setText(synSource);
+				tableSource.setCaretPosition(0);
+			}
+			else if ("sequence".equals(this.selectedObjectType))
+			{
+				String seqSource = meta.getSequenceSource(this.selectedTableName);
+				tableSource.setText(seqSource);
+				tableSource.setCaretPosition(0);
+			}
+			else if (this.selectedObjectType.indexOf("table") > -1)
+			{
+				// the table information has to be retrieved before
+				// the table source, because otherwise the DataStores
+				// passed to getTableSource() would be empty
+				this.retrieveIndexes();
+				this.retrieveImportedTables();
+				String sql = meta.getTableSource(this.selectedTableName, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore());
+				tableSource.setText(sql);
+				tableSource.setCaretPosition(0);
+			}
 		}
-		else if ("synonym".equals(this.selectedObjectType))
+		finally
 		{
-			String synSource = meta.getSynonymSource(this.selectedSchema, this.selectedTableName);
-			tableSource.setText(synSource);
-			tableSource.setCaretPosition(0);
-		}
-		else if ("sequence".equals(this.selectedObjectType))
-		{
-			String seqSource = meta.getSequenceSource(this.selectedTableName);
-			tableSource.setText(seqSource);
-			tableSource.setCaretPosition(0);
-		}
-		else if (this.selectedObjectType.indexOf("table") > -1)
-		{
-			// the table information has to be retrieved before
-			// the table source, because otherwise the DataStores
-			// passed to getTableSource() would be empty
-			this.retrieveIndexes();
-			this.retrieveImportedTables();
-			String sql = meta.getTableSource(this.selectedTableName, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore());
-			tableSource.setText(sql);
-			tableSource.setCaretPosition(0);
+			WbSwingUtilities.showDefaultCursor(this);
 		}
 		shouldRetrieveTable = false;
 	}
@@ -756,9 +780,9 @@ public class TableListPanel
 		if (this.busy) return;
 		
 		if (this.tableList.getSelectedRowCount() <= 0) return;
-		WbSwingUtilities.showWaitCursorOnWindow(this);
-		this.busy = true;
 		int index = this.displayTab.getSelectedIndex();
+		if (index != 2) WbSwingUtilities.showWaitCursorOnWindow(this);
+		this.busy = true;
 		try
 		{
 			switch (index)
@@ -796,9 +820,8 @@ public class TableListPanel
 		finally
 		{
 			this.busy = false;
+			WbSwingUtilities.showDefaultCursorOnWindow(this);
 		}
-
-		WbSwingUtilities.showDefaultCursorOnWindow(this);
 	}
 
 	private void retrieveTriggers()

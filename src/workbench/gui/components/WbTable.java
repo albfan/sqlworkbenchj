@@ -6,6 +6,7 @@
 package workbench.gui.components;
 
 import java.awt.*;
+import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
@@ -529,14 +530,14 @@ extends JTable
 		}
 		return renderer;
 	}
+	
 	public void initDefaultRenderers()
 	{
 		// need to let JTable do some initialization stuff
-		// otherwise setDefaultRenderer() bombs out with
-		// a NullPointerException
-
+		// otherwise setDefaultRenderer() bombs out with a NullPointerException
 		if (this.defaultRenderersByColumnClass == null) this.createDefaultRenderers();
 
+		
 		if (this.defaultDateRenderer == null)
 		{
 			String format = WbManager.getSettings().getDefaultDateFormat();
@@ -558,6 +559,11 @@ extends JTable
 		}
 		defaultNumberRenderer.clearDisplayCache();
 
+		InputMap mymap = this.getInputMap(WHEN_FOCUSED);
+		InputMap im = defaultNumberRenderer.getInputMap(WHEN_FOCUSED);
+		
+		im.setParent(mymap);
+		
 		this.setDefaultRenderer(Number.class, defaultNumberRenderer);
 		this.setDefaultRenderer(Double.class, defaultNumberRenderer);
 		this.setDefaultRenderer(Float.class, defaultNumberRenderer);
@@ -566,7 +572,12 @@ extends JTable
 		this.setDefaultRenderer(BigInteger.class, defaultIntegerRenderer);
 		this.setDefaultRenderer(Integer.class, defaultIntegerRenderer);
 
-		this.setDefaultRenderer(Object.class, ToolTipRenderer.DEFAULT_TEXT_RENDERER);
+		ToolTipRenderer rend = new ToolTipRenderer();
+		im = rend.getInputMap(WHEN_FOCUSED);
+		im.setParent(mymap);
+		im = rend.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		im.setParent(mymap);
+		this.setDefaultRenderer(Object.class, rend);
 	}
 
 	public void initDefaultEditors()
@@ -585,7 +596,6 @@ extends JTable
 			else
 			{
 				col.setCellEditor(this.defaultEditor);
-				//this.defaultEditor.getComponent()
 			}
 		}
 	}
@@ -731,10 +741,15 @@ extends JTable
 		int col = this.getEditingColumn();
 		int row = this.getEditingRow();
 		String data = this.getValueAsString(row, col);
-		Frame owner = (Frame)SwingUtilities.getWindowAncestor(this);
+		Window owner = (Window)SwingUtilities.getWindowAncestor(this);
+		Frame ownerFrame = null;
+		if (owner instanceof Frame)
+		{
+			ownerFrame = (Frame)owner;
+		}
 		String title = ResourceMgr.getString("TxtEditWindowTitle");
 		TableCellEditor editor = this.getCellEditor();
-		EditWindow w = new EditWindow(owner, title, data);
+		EditWindow w = new EditWindow(ownerFrame, title, data);
 		w.show();
 		if (editor != null) 
 		{
@@ -1134,5 +1149,69 @@ extends JTable
 		this.stopEditing();
 	}
 
+	public long addRow()
+	{
+		DataStoreTableModel ds = this.getDataStoreTableModel();
+		if (ds == null) return -1;
+		
+		int selectedRow = this.getSelectedRow();
+		final int newRow;
+		
+		this.stopEditing();
+		
+		if (selectedRow == -1)
+		{
+			newRow = ds.addRow();
+		}
+		else
+		{
+			newRow = ds.insertRow(selectedRow);
+		}
+		this.getSelectionModel().setSelectionInterval(newRow, newRow);
+		this.scrollToRow(newRow);
+		this.setEditingRow(newRow);
+		if (this.dwModel.getShowStatusColumn())
+		{
+			this.setEditingColumn(1);
+			this.editCellAt(newRow, 1);
+		}
+		else
+		{
+			this.setEditingColumn(0);
+			this.editCellAt(newRow, 0);
+		}
+		
+		final Component edit = this.getEditorComponent();
+		if (edit != null)
+		{
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					edit.requestFocusInWindow();
+				}
+			});
+		}
+		return newRow;
+	}	
+	
+	public boolean deleteRow()
+	{
+		DataStoreTableModel ds = this.getDataStoreTableModel();
+		if (ds == null) return false;
+		
+		int selectedRow = this.getSelectedRow();
+		if (selectedRow != -1)
+		{
+			ds.deleteRow(selectedRow);
+			if (selectedRow >= ds.getRowCount())
+			{
+				selectedRow --;
+			}
+			this.getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
+		}
+		return true;
+	}
+	
 }
 

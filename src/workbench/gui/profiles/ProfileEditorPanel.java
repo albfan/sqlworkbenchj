@@ -68,7 +68,7 @@ public class ProfileEditorPanel
 		this.addKeyListener(this);
 		this.connectionEditor.setSourceList(this.model);
 		WbTraversalPolicy policy = new WbTraversalPolicy();
-		this.setFocusCycleRoot(true);
+		this.setFocusCycleRoot(false);
 		policy.addComponent(this.jList1);
 		policy.addComponent(this.connectionEditor);
 		policy.setDefaultComponent(this.jList1);
@@ -88,7 +88,7 @@ public class ProfileEditorPanel
 	
 	private void fillDrivers()
 	{
-		List drivers = WbManager.getInstance().getConnectionMgr().getDriverClasses();
+		List drivers = WbManager.getInstance().getConnectionMgr().getDrivers();
 		this.connectionEditor.setDrivers(drivers);
 	}
 

@@ -33,4 +33,6 @@ public interface MainPanel
 	void setFont(Font aFont);
 	void disconnect();
 	void setTabTitle(JTabbedPane tab, int index);
+	String getId();
+	boolean isConnected();
 }

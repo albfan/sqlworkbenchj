@@ -38,12 +38,20 @@ public class StringPropertyEditor
 	
 	public void setSourceObject(Object aSource, String aProperty)
 	{
+		this.setSourceObject(aSource, aProperty, null);
+	}
+	public void setSourceObject(Object aSource, String aProperty, String initialText)
+	{
 		this.source = aSource;
 		this.changed = false;
 		this.propName = aProperty;
 		String propertyName = Character.toUpperCase(aProperty.charAt(0)) + aProperty.substring(1);
 		
 		this.getDocument().removeDocumentListener(this);
+		if (initialText != null)
+		{
+			this.setText(initialText);
+		}
 		
 		try
 		{
@@ -140,6 +148,5 @@ public class StringPropertyEditor
 	{
 		if (!this.immediateUpdate) this.applyChanges();
 	}
-	
 }
 

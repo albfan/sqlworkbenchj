@@ -1,18 +1,9 @@
 package workbench.gui;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.Window;
+import java.awt.*;
 import javax.swing.JDialog;
-
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
@@ -21,6 +12,7 @@ import javax.swing.border.EmptyBorder;
 
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.resource.ResourceMgr;
+
 
 public class WbSwingUtilities
 {

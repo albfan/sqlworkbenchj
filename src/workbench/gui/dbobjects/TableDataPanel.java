@@ -22,12 +22,14 @@ import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
+import workbench.gui.actions.StopAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.sql.DwPanel;
+import workbench.interfaces.Interruptable;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -43,7 +45,7 @@ import workbench.util.SqlUtil;
  */
 public class TableDataPanel
   extends JPanel
-	implements Reloadable, ActionListener
+	implements Reloadable, ActionListener, Interruptable
 {
 	private WbConnection dbConnection;
 	private DwPanel dataDisplay;
@@ -66,11 +68,22 @@ public class TableDataPanel
 	private String tableName;
 	private ImageIcon loadingIcon;
 	private Image loadingImage;
+	
+	private StopAction cancelRetrieve;
 
 	public TableDataPanel() throws Exception
 	{
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setLayout(new BorderLayout());
+		
+		this.dataDisplay = new DwPanel();
+		this.dataDisplay.setManageActions(true);
+		this.dataDisplay.setShowLoadProcess(true);
+		this.dataDisplay.setDefaultStatusMessage("");
+		this.dataDisplay.setShowErrorMessages(true);
+		this.dataDisplay.getTable().setMaxColWidth(WbManager.getSettings().getMaxColumnWidth());
+		this.dataDisplay.getTable().setMinColWidth(WbManager.getSettings().getMinColumnWidth());
+		
     JPanel topPanel = new JPanel();
 		topPanel.setMaximumSize(new Dimension(32768, 32768));
 		//topPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
@@ -84,6 +97,10 @@ public class TableDataPanel
 		toolbar.addDefaultBorder();
 		topPanel.add(toolbar);
 		toolbar.add(a);
+		toolbar.addSeparator();
+
+		this.cancelRetrieve = new StopAction(this);
+		toolbar.add(this.cancelRetrieve);
 		toolbar.addSeparator();
 		
 		//JButton b = a.getToolbarButton();
@@ -124,13 +141,6 @@ public class TableDataPanel
 		//topPanel.add(this.maxRowField);
 
 		this.add(topPanel, BorderLayout.NORTH);
-		
-		this.dataDisplay = new DwPanel();
-		this.dataDisplay.setManageActions(true);
-		this.dataDisplay.setShowLoadProcess(true);
-		this.dataDisplay.setDefaultStatusMessage("");
-		this.dataDisplay.getTable().setMaxColWidth(WbManager.getSettings().getMaxColumnWidth());
-		this.dataDisplay.getTable().setMinColWidth(WbManager.getSettings().getMinColumnWidth());
 		
 		toolbar.add(this.dataDisplay.getUpdateDatabaseAction());
 		toolbar.addSeparator();
@@ -184,6 +194,7 @@ public class TableDataPanel
 	public long showRowCount()
 	{
 		if (this.dbConnection == null) return -1;
+		
 		this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount"));
 		this.rowCountLabel.setIcon(this.getLoadingIndicator());
 		this.repaint();
@@ -197,6 +208,8 @@ public class TableDataPanel
 
 		try
 		{
+			WbSwingUtilities.showWaitCursor(this);
+			
 			stmt = this.dbConnection.createStatement();
 			rs = stmt.executeQuery(sql);
 			if (rs.next())
@@ -216,6 +229,7 @@ public class TableDataPanel
 			this.rowCountLabel.setIcon(null);
 			try { rs.close(); } catch (Throwable th) {}
 			try { stmt.close(); } catch (Throwable th) {}
+			WbSwingUtilities.showDefaultCursor(this);
 		}
 		return rowCount;
 	}
@@ -240,46 +254,58 @@ public class TableDataPanel
 			sql.append("SELECT * FROM ");
 		if (this.schema != null && this.schema.trim().length() > 0)
 		{
-			sql.append(SqlUtil.quoteObjectname(this.schema));
-			sql.append(".");
+			if (this.dbConnection.getMetadata().isOracle() && !"PUBLIC".equalsIgnoreCase(this.schema))
+			{
+				sql.append(SqlUtil.quoteObjectname(this.schema));
+				sql.append(".");
+			}
 		}
 		sql.append(table);
 
 		return sql.toString();
 	}
 
-	public synchronized void retrieve()
+	public void cancelExecution()
 	{
-    final String sql = this.buildSqlForTable(false);
-    if (sql == null) return;
-
-		final Container parent = this.getParent();
-		final int maxRows = this.getMaxRows();
-
 		Thread t = new Thread()
 		{
 			public void run()
 			{
 				try
 				{
-					synchronized (retrieveLock)
-					{
-						try
-						{
-							dataDisplay.scriptStarting();
-							dataDisplay.setMaxRows(maxRows);
-							dataDisplay.runStatement(sql);
-						}
-						catch (Exception e)
-						{
-							e.printStackTrace();
-						}
-						finally
-						{
-							WbSwingUtilities.showDefaultCursor(parent);
-							dataDisplay.scriptFinished();
-						}
-					}
+					dataDisplay.cancelExecution();
+				}
+				finally
+				{
+					cancelRetrieve.setEnabled(false);
+					WbSwingUtilities.showDefaultCursor(dataDisplay);
+				}
+			}
+		};
+		t.setDaemon(true);
+		t.start();
+	}
+	
+	
+	public synchronized void retrieve()
+	{
+    final String sql = this.buildSqlForTable(false);
+    if (sql == null) return;
+
+		final int maxRows = this.getMaxRows();
+
+		this.cancelRetrieve.setEnabled(true);
+		Thread t = new Thread()
+		{
+			public void run()
+			{
+				try
+				{
+					WbSwingUtilities.showWaitCursor(dataDisplay);
+					dataDisplay.setShowErrorMessages(true);
+					dataDisplay.scriptStarting();
+					dataDisplay.setMaxRows(maxRows);
+					dataDisplay.runStatement(sql);
 				}
 				catch (OutOfMemoryError mem)
 				{
@@ -287,7 +313,13 @@ public class TableDataPanel
 				}
 				catch (Throwable e)
 				{
-					LogMgr.logError("TableListPanel.retrieve()", "Error retrieving table list", e);
+					LogMgr.logError("TableListPanel.retrieve()", "Error retrieving table data", e);
+				}
+				finally
+				{
+					WbSwingUtilities.showDefaultCursor(dataDisplay);
+					dataDisplay.scriptFinished();
+					cancelRetrieve.setEnabled(false);
 				}
 			}
 		};

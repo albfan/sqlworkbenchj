@@ -391,6 +391,7 @@ public class TableSearchPanel
 		this.resultPanel = new JPanel();
     this.resultPanel.setLayout(new GridBagLayout());
     this.resultScrollPane.setViewportView(resultPanel);
+		this.sqlDisplay.setText("");
 		this.firstTable = null;
 	}
 	

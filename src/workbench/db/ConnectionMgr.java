@@ -118,6 +118,29 @@ public class ConnectionMgr
 		return null;
 	}
 
+	public DbDriver findDriver(String drvClassName, String aName)
+	{
+		DbDriver firstMatch = null;
+		DbDriver db = null;
+		
+		if (aName == null) return this.findDriver(drvClassName);
+		
+		for (int i=0; i < this.drivers.size(); i ++)
+		{
+			db = (DbDriver)this.drivers.get(i);
+			if (db.getDriverClass().equals(drvClassName)) 
+			{
+				if (db.getName().equals(aName)) return db;
+				if (firstMatch == null)
+				{
+					firstMatch = db;
+				}
+			}
+		}
+		
+		return firstMatch;
+	}
+	
 	public DbDriver findDriver(String drvClassName)
 	{
 		if (this.drivers == null)
@@ -126,15 +149,16 @@ public class ConnectionMgr
 		}
     DbDriver db = null;
 
+		for (int i=0; i < this.drivers.size(); i ++)
+		{
+			db = (DbDriver)this.drivers.get(i);
+			if (db.getDriverClass().equals(drvClassName)) return db;
+		}
+		
     try
     {
-      for (int i=0; i < this.drivers.size(); i ++)
-      {
-        db = (DbDriver)this.drivers.get(i);
-        if (db.getDriverClass().equals(drvClassName)) return db;
-      }
-
       // not found --> maybe it's present in the normal classpath...
+			// eg the ODBC bridge
       Class drvcls = Class.forName(drvClassName);
       Driver drv = (Driver)drvcls.newInstance();
       db = new DbDriver(drv);

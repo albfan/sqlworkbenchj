@@ -30,6 +30,7 @@ import workbench.gui.actions.UpdateDatabaseAction;
 import workbench.gui.components.*;
 import workbench.interfaces.DbData;
 import workbench.interfaces.DbUpdater;
+import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunner;
@@ -47,7 +48,7 @@ import workbench.util.StringUtil;
  */
 public class DwPanel 
 	extends JPanel
-	implements TableModelListener, ListSelectionListener, RowActionMonitor, DbData, DbUpdater
+	implements TableModelListener, ListSelectionListener, RowActionMonitor, DbData, DbUpdater, Interruptable
 {
 	private WbTable infoTable;
 	private DwStatusBar statusBar;
@@ -55,7 +56,7 @@ public class DwPanel
 	private String sql;
 	private String lastMessage;
 	private WbConnection dbConnection;
-	private TableModel errorModel;
+	private OneLineTableModel errorModel;
 	private TableModel resultEmptyMsgModel;
 	private boolean hasResultSet = false;
 	
@@ -76,6 +77,7 @@ public class DwPanel
 	private boolean editingStarted = false;
 	private boolean batchUpdate = false;
 	private boolean manageUpdateAction = false;
+	private boolean showErrorMessages = false;
 	private boolean readOnly = false;
 	
 	private StatementRunner stmtRunner;
@@ -198,7 +200,11 @@ public class DwPanel
 		}
 		this.statusBar.setStatusMessage(msg.toString());
 	}
-	
+
+	public void setShowErrorMessages(boolean aFlag)
+	{
+		this.showErrorMessages = aFlag;
+	}
 	
 	/**
 	 *	Defines the connection for this DBPanel.
@@ -497,8 +503,11 @@ public class DwPanel
 			{
 				end = System.currentTimeMillis();
 				this.hasResultSet = false;
-				this.setMessageDisplayModel(this.getErrorTableModel());
-				this.lastMessage = ResourceMgr.getString("MsgExecuteError") + "\r\n";
+				if (!this.showErrorMessages)
+				{
+					this.setMessageDisplayModel(this.getErrorTableModel());
+				}
+				this.lastMessage = ResourceMgr.getString("MsgExecuteError") + "\n";
 			}
 			execTime = (end - start);
 			
@@ -510,10 +519,16 @@ public class DwPanel
 				for (int i=0; i < messages.length; i++)
 				{
 					msg.append(messages[i]);
-					msg.append('\n');
+					msg.append(" \n");
 				}
 				this.lastMessage = msg.toString();
 			}
+			
+			if (!result.isSuccess() && this.showErrorMessages)
+			{
+				this.setMessageDisplayModel(this.getErrorTableModel(this.lastMessage));
+			}
+			
 			if (LogMgr.isDebug())
 			{
 				this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgSqlVerbTime") + " " + (((double)sqlTime) / 1000.0) + "s";
@@ -523,9 +538,18 @@ public class DwPanel
 		catch (SQLException sqle)
 		{
 			LogMgr.logError(this, "SQL error when executing statement: \r\n" + this.sql, sqle);
-			this.setMessageDisplayModel(this.getErrorTableModel());
 			this.lastMessage = ResourceMgr.getString("MsgExecuteError") + "\r\n";
-			this.lastMessage = this.lastMessage + ExceptionUtil.getDisplay(sqle);
+			this.lastMessage = this.lastMessage + ExceptionUtil.getDisplay(sqle);;
+			if (this.showErrorMessages)
+			{
+				//this.setMessageDisplayModel(this.getEmptyMsgTableModel());
+				this.setMessageDisplayModel(this.getErrorTableModel(sqle.getMessage()));
+				WbManager.getInstance().showErrorMessage(this, this.lastMessage);
+			}
+			else
+			{
+				this.setMessageDisplayModel(this.getErrorTableModel());
+			}
 			throw sqle;
 		}
 		catch (Throwable e)
@@ -535,7 +559,7 @@ public class DwPanel
 				WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
 			}
 			LogMgr.logError(this, "Error executing statement: \r\n" + this.sql, e);
-			this.setMessageDisplayModel(this.getErrorTableModel());
+			this.setMessageDisplayModel(this.getErrorTableModel(e.getMessage()));
 			this.lastMessage = ResourceMgr.getString("MsgExecuteError") + "\r\n";
 			String s = ExceptionUtil.getDisplay(e);
 			this.lastMessage = this.lastMessage + s;
@@ -569,64 +593,25 @@ public class DwPanel
 	public void deleteRow()
 	{
 		if (this.readOnly) return;
-		
-		DataStoreTableModel ds = this.infoTable.getDataStoreTableModel();
-		if (ds == null) return;
-		
-		int selectedRow = this.infoTable.getSelectedRow();
-		if (selectedRow != -1)
-		{
-			ds.deleteRow(selectedRow);
-			if (selectedRow >= ds.getRowCount())
-			{
-				selectedRow --;
-			}
-			this.infoTable.getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
-		}
+		this.infoTable.deleteRow();
     this.dataChanged();
 	}
 	
 	public long addRow()
 	{
 		if (this.readOnly) return -1;
-		DataStoreTableModel ds = this.infoTable.getDataStoreTableModel();
-		if (ds == null) return -1;
-		
-		int selectedRow = this.infoTable.getSelectedRow();
-		final int newRow;
-		
-		this.infoTable.stopEditing();
-		
-		if (selectedRow == -1)
-		{
-			newRow = ds.addRow();
-		}
-		else
-		{
-			newRow = ds.insertRow(selectedRow);
-		}
-		this.infoTable.getSelectionModel().setSelectionInterval(newRow, newRow);
-		this.infoTable.scrollToRow(newRow);
-		infoTable.grabFocus();
-		infoTable.setEditingRow(newRow);
-		infoTable.setEditingColumn(1);
-		infoTable.editCellAt(newRow, 1);
-		Component edit = infoTable.getEditorComponent();
-		if (edit != null)
-		{
-			edit.requestFocus();
-		}
-    this.dataChanged();
+		long newRow = this.infoTable.addRow();
+		if (newRow > -1) this.dataChanged();
 		return newRow;
 	}
 
-	public boolean cancelExecution()
+	public void cancelExecution()
 	{
 		if (this.stmtRunner != null)
 		{
+			LogMgr.logDebug("DwPanel.cancelExecution()", "Cancelling DwPanel retrieval...");
 			this.stmtRunner.cancel();
 		}
-		return false;
 	}
 
 	public void restoreOriginalValues()
@@ -707,11 +692,23 @@ public class DwPanel
 	
 	private TableModel getErrorTableModel()
 	{
+		return this.getErrorTableModel(null);
+	}
+	private TableModel getErrorTableModel(String aMsg)
+	{
 		if (this.errorModel == null)
 		{
 			String msg = ResourceMgr.getString(ResourceMgr.TXT_ERROR_MSG_DATA);
 			String title = ResourceMgr.getString(ResourceMgr.TXT_ERROR_MSG_TITLE);
 			this.errorModel = new OneLineTableModel(title, msg);
+		}
+		if (aMsg == null)
+		{
+			this.errorModel.setMessage(ResourceMgr.getString(ResourceMgr.TXT_ERROR_MSG_DATA));
+		}
+		else
+		{
+			this.errorModel.setMessage(aMsg);
 		}
 		return this.errorModel;
 	}

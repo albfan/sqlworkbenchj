@@ -29,6 +29,7 @@ import javax.swing.event.ListSelectionListener;
 import workbench.WbManager;
 import workbench.exception.WbException;
 import workbench.gui.MainWindow;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.actions.SaveListFileAction;
@@ -76,9 +77,11 @@ public class MacroManagerGui
 		jSplitPane1.setDividerLocation(100);
 
 		JScrollPane scroll = new JScrollPane(this.macroList);
+		scroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		listPanel.add(scroll, java.awt.BorderLayout.CENTER);
 
 		this.macroEditor = EditorPanel.createSqlEditor();
+		//this.macroEditor.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		jSplitPane1.setLeftComponent(listPanel);
 
@@ -123,6 +126,14 @@ public class MacroManagerGui
 		
 	}
 
+	public String getSelectedMacroName()
+	{
+		int index = this.macroList.getSelectedIndex();
+		if (index < 0) return null;
+		String name = this.model.getKeyAt(index);
+		return name;
+	}
+	
 	public void deleteItem() 
 		throws WbException
 	{
@@ -199,6 +210,11 @@ public class MacroManagerGui
 		this.jSplitPane1.setDividerLocation(location);
 	}
 	
+	public void addSelectionListener(ListSelectionListener aListener)
+	{
+		this.macroList.addListSelectionListener(aListener);
+	}
+	
 	public void valueChanged(ListSelectionEvent evt)
 	{
 		if (this.macroList.getValueIsAdjusting()) return;
@@ -214,6 +230,7 @@ public class MacroManagerGui
 		this.macroNameField.setSourceObject(this.currentEntry, "name", entry.getName());
 		this.macroNameField.setImmediateUpdate(true);
 		this.macroEditor.setText(entry.getText());
+		this.macroEditor.setCaretPosition(0);
 	}
 
 	public void propertyChange(java.beans.PropertyChangeEvent evt)

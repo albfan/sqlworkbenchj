@@ -73,6 +73,7 @@ public class DataStore
 	private ColumnComparator comparator;
 	
 	private String defaultExportDelimiter = "\t";
+	private boolean allowUpdates = false;
 	
 	public DataStore(String[] aColNames, int[] colTypes)
 	{
@@ -168,6 +169,11 @@ public class DataStore
 		}
 	}
 
+	public void setAllowUpdates(boolean aFlag)
+	{
+		this.allowUpdates = aFlag;
+	}
+	
 	public int[] getColumnTypes() { return this.columnTypes; }
 	
 	public DataStore createCopy(boolean withData)
@@ -742,6 +748,7 @@ public class DataStore
 	public boolean isModified() { return this.modified;  }
 	public boolean isUpdateable()
 	{
+		if (this.allowUpdates) return true;
 		return (this.updateTable != null && this.hasUpdateableColumns());
 	}
 	

@@ -365,7 +365,18 @@ public class DataSpooler
 		}
 		else if (this.exportType == EXPORT_XML)
 		{
-			if (this.tableName != null) ds.useUpdateTable(this.tableName);
+			if (this.tableName == null)
+			{
+				if (ds.useUpdateTableFromSql(this.sql))
+				{
+					this.tableName = ds.getUpdateTable();
+				}
+			}
+			else
+			{
+				ds.useUpdateTable(this.tableName);
+			}
+			
 		}
 		
 		int row = 0;
@@ -468,8 +479,9 @@ public class DataSpooler
 				{
 					pw.write(" name=\"");
 					pw.write(tableName);
+					pw.write("\"");
 				}
-				pw.write("\">");
+				pw.write(">");
 				pw.newLine();
 			}
 			

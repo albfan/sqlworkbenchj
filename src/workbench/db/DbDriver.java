@@ -13,11 +13,13 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import workbench.exception.WbException;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
 
@@ -38,6 +40,8 @@ public class DbDriver
 	
 	/** Holds value of property driverClass. */
 	private String driverClass;
+
+	private String identifier;
 	
 	/** Holds value of property library. */
 	private String library;
@@ -70,15 +74,39 @@ public class DbDriver
 	}
 	
 	public String getName() { return this.name; }
-	public void setName(String name) { 	this.name = name; }
+	public void setName(String name) 
+	{ 	
+		this.name = name; 
+		this.identifier = null;
+	}
 	
 	public String getDriverClass() {  return this.driverClass; }
-	public void setDriverClass(String driverClass) { this.driverClass = driverClass;	}
-	
+	public void setDriverClass(String driverClass) 
+	{ 
+		this.driverClass = driverClass;	
+		this.identifier = null;
+	}
+
+	public String getIdentifier()
+	{
+		if (this.identifier == null)
+		{
+			StringBuffer b = new StringBuffer(100);
+			b.append(this.driverClass);
+			b.append(" (");
+			b.append(this.name);
+			b.append(")");
+			this.identifier = b.toString();
+		}
+		return this.identifier; 
+	}
 	public String getLibrary() { return this.library; }
 	public void setLibrary(String library) { this.library = library; }
 	
-	public String toString() { return this.getDriverClass(); }
+	public String toString() 
+	{ 
+		return this.getIdentifier();
+	}
 
 	public void setSampleUrl(String anUrl) { this.sampleUrl = anUrl; }
 	public String getSampleUrl() { return this.sampleUrl; }
@@ -152,13 +180,14 @@ public class DbDriver
 			
 			if (connProps != null)
 			{
-				Iterator itr = props.keySet().iterator();
-				while (itr.hasNext())
+				Enumeration keys = connProps.propertyNames();
+				while (keys.hasMoreElements())
 				{
-					Map.Entry entry = (Map.Entry)itr.next();
-					if (!props.containsKey(entry.getKey()))
+					String key = (String)keys.nextElement();
+					if (!props.containsKey(key))
 					{
-						props.put(entry.getKey(), entry.getValue());
+						String value = connProps.getProperty(key);
+						props.put(key, value);
 					}
 				}
 			}
@@ -183,6 +212,7 @@ public class DbDriver
 			{
 				propName = "ProgramName";
 			}
+			
 			if (propName != null && !props.containsKey(propName)) 
 			{
 				props.put(propName, ResourceMgr.TXT_PRODUCT_NAME);
@@ -251,6 +281,26 @@ public class DbDriver
 					String name1 = ((DbDriver)o1).name;
 					String name2 = ((DbDriver)o2).name;
 					return name1.compareTo(name2);				
+				}
+				return 0;
+			}
+		};
+	}
+	
+	public static Comparator getDriverClassComparator()
+	{
+		return new Comparator()
+		{
+			public int compare(Object o1, Object o2)
+			{
+				if (o1 == null && o2 == null) return 0;
+				if (o1 == null) return -1;
+				if (o2 == null) return 1;
+				if (o1 instanceof DbDriver && o2 instanceof DbDriver)
+				{
+					String drv1 = ((DbDriver)o1).getIdentifier(); // returns driver class & name
+					String drv2 = ((DbDriver)o2).getIdentifier();
+					return drv1.compareTo(drv2);				
 				}
 				return 0;
 			}

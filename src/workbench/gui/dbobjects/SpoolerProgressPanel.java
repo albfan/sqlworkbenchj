@@ -28,9 +28,9 @@ public class SpoolerProgressPanel extends javax.swing.JPanel
 		initComponents();
 	}
 	
-	public synchronized void setRowInfo(int aRow)
+	public synchronized void setRowInfo(long aRow)
 	{
-		this.rowInfo.setText(Integer.toString(aRow));
+		this.rowInfo.setText(Long.toString(aRow));
 	}
 	
 	public synchronized void setInfoText(String aText)

@@ -354,7 +354,7 @@ public class WbManager implements FontChangedListener
 				if (w.isFocused())
 				{
 					if (!this.checkProfiles(w)) return;
-					if (!this.checkMacros(w)) return;
+					//if (!this.checkMacros(w)) return;
 					w.saveSettings();
 				}
 				aborted = w.abortAll();

@@ -6,6 +6,7 @@
 package workbench.db;
 
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -15,13 +16,6 @@ import workbench.WbManager;
 import workbench.util.WbCipher;
 import workbench.util.WbPersistence;
 
-/**
- *	Supplies connection information as stored in
- *	the configuration files. This is used to read & parse
- *	the xml file which stores user defined configuration.
- *
- *	@author  thomas
- */
 public class ConnectionProfile
 {
 	private static final String CRYPT_PREFIX = "@*@";
@@ -31,6 +25,7 @@ public class ConnectionProfile
 	private String driverlib;
 	private String username;
 	private String password;
+	private String driverName;
 	private boolean autocommit;
 	private String description;
 	private int id;
@@ -39,12 +34,10 @@ public class ConnectionProfile
 	private boolean changed;
 	private boolean isNew;
 	private boolean storePassword = true;
-	private boolean seperateConnection = false;
-	private Properties connectionProperties = null;
-
-	private String workspaceFile = null;
-	
-	private boolean ignoreDropErrors = true;
+	private boolean seperateConnection;
+	private Properties connectionProperties;
+	private String workspaceFile;
+	private boolean ignoreDropErrors;
 	
 	static
 	{
@@ -337,12 +330,14 @@ public class ConnectionProfile
 		result.setUseSeperateConnectionPerTab(this.seperateConnection);
 		if (this.connectionProperties != null)
 		{
-			Iterator itr = this.connectionProperties.keySet().iterator();
+			Enumeration keys = this.connectionProperties.propertyNames();
 			result.connectionProperties = new Properties();
-			while (itr.hasNext())
+			
+			while (keys.hasMoreElements())
 			{
-				Map.Entry entry = (Map.Entry)itr.next();
-				result.connectionProperties.put(entry.getKey(), entry.getValue());
+				String key = (String)keys.nextElement();
+				String value = this.connectionProperties.getProperty(key);
+				result.connectionProperties.put(key, value);
 			}
 		}
 		result.changed = false;
@@ -369,44 +364,29 @@ public class ConnectionProfile
 		};
 	}
 
-	/** Getter for property ignoreDropErrors.
-	 * @return Value of property ignoreDropErrors.
-	 *
-	 */
 	public boolean getIgnoreDropErrors()
 	{
-		return ignoreDropErrors;
+		return this.ignoreDropErrors;
 	}
 	
-	/** Setter for property ignoreDropErrors.
-	 * @param ignoreDropErrors New value of property ignoreDropErrors.
-	 *
-	 */
-	public void setIgnoreDropErrors(boolean ignoreDropErrors)
+	public void setIgnoreDropErrors(boolean aFlag)
 	{
-		this.ignoreDropErrors = ignoreDropErrors;
+		this.changed = (aFlag != this.ignoreDropErrors);
+		this.ignoreDropErrors = aFlag;
 	}
 	
-	/** Getter for property workspaceFile.
-	 * @return Value of property workspaceFile.
-	 *
-	 */
 	public String getWorkspaceFile()
 	{
 		return this.workspaceFile;
 	}
 	
-	/** Setter for property workspaceFile.
-	 * @param workspaceFile New value of property workspaceFile.
-	 *
-	 */
 	public void setWorkspaceFile(String aWorkspaceFile)
 	{
 		this.workspaceFile = aWorkspaceFile;
     this.changed = true;
 	}
 
-	public void addConnectionProterty(String aKey, String aValue)
+	public void addConnectionProperty(String aKey, String aValue)
 	{
 		if (aKey == null) return;
 		if (this.connectionProperties == null)
@@ -414,6 +394,7 @@ public class ConnectionProfile
 			this.connectionProperties = new Properties();
 		}
 		this.connectionProperties.put(aKey, aValue);
+		this.changed = true;
 	}
 	
 	public Properties getConnectionProperties()
@@ -423,6 +404,35 @@ public class ConnectionProfile
 	
 	public void setConnectionProperties(Properties props)
 	{
-		this.connectionProperties = props;
+		boolean wasDefined = (this.connectionProperties != null && this.connectionProperties.size() > 0);
+		if (props != null)
+		{
+			if (props.size() == 0) 
+			{
+				this.connectionProperties = null;
+				if (wasDefined) this.changed = true;
+			}
+			else
+			{
+				this.connectionProperties = props;
+				this.changed = true;
+			}
+		}
+		else
+		{
+			this.connectionProperties = null;
+			if (wasDefined) this.changed = true;
+		}
 	}
+
+	public java.lang.String getDriverName()
+	{
+		return driverName;
+	}
+	
+	public void setDriverName(java.lang.String driverName)
+	{
+		this.driverName = driverName;
+	}
+	
 }

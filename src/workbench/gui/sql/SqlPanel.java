@@ -13,19 +13,13 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 
 import workbench.WbManager;
 import workbench.db.DataSpooler;
@@ -38,7 +32,7 @@ import workbench.gui.components.*;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.*;
-import workbench.interfaces.TextSelectionListener;
+import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -46,7 +40,6 @@ import workbench.sql.MacroManager;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
-import workbench.util.WbPersistence;
 import workbench.util.WbWorkspace;
 
 
@@ -61,7 +54,7 @@ import workbench.util.WbWorkspace;
 public class SqlPanel
 	extends JPanel
 	implements Runnable, FontChangedListener, ActionListener, TextSelectionListener, 
-						MainPanel, Spooler, TextFileContainer, DbUpdater
+						MainPanel, Spooler, TextFileContainer, DbUpdater, Interruptable
 {
 	private boolean runSelectedCommand;
 	private boolean runCurrentCommand;
@@ -186,6 +179,11 @@ public class SqlPanel
 		this.data.setUpdateDelegate(this);
 	}
 
+	public String getId()
+	{
+		return Integer.toString(this.internalId);
+	}
+	
 	public void setId(int anId)
 	{
 		this.internalId = anId;
@@ -532,8 +530,9 @@ public class SqlPanel
 		this.actions.add(action);
 		action = new CleanJavaCodeAction(this.editor);
 		this.actions.add(action);
+		
 		this.addMacro = new AddMacroAction(this.editor);
-		action.setCreateMenuSeparator(true);
+		this.addMacro.setCreateMenuSeparator(true);
 		this.actions.add(this.addMacro);
 		
 
@@ -547,7 +546,7 @@ public class SqlPanel
 		this.actions.add(this.findAction);
 		this.actions.add(this.findAgainAction);
 	}
-
+	
 	private void setupActionMap()
 	{
 		InputMap im = new ComponentInputMap(this);
@@ -891,6 +890,19 @@ public class SqlPanel
 		return this.dbConnection;
 	}
 
+	public boolean isConnected()
+	{
+		if (this.dbConnection == null) return false;
+		try
+		{
+			return !this.dbConnection.isClosed();
+		}
+		catch (Throwable e)
+		{
+			return false;
+		}
+	}
+	
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
@@ -909,6 +921,11 @@ public class SqlPanel
 		{
 			AnsiSQLTokenMarker token = this.editor.getSqlTokenMarker();
 			token.initDatabaseKeywords(aConnection.getSqlConnection());
+			
+			if (WbManager.getSettings().getEnableDbmsOutput())
+			{
+				aConnection.getMetadata().enableOutput();
+			}
 		}
 		this.checkResultSetActions();
 	}
@@ -977,6 +994,7 @@ public class SqlPanel
 				ds.resetStatusForSentRow();
 			}
 		}
+		this.setCancelState(false);
 	}
 
 	public boolean abortExecution()
@@ -1019,6 +1037,7 @@ public class SqlPanel
 					DataStore ds = table.getDataStore();
 					ds.cancelImport();
 				}
+				this.setCancelState(false);
 			}
 			else if (this.updateRunning)
 			{
@@ -1026,19 +1045,30 @@ public class SqlPanel
 			}
 			else
 			{
-				this.showCancelIcon();
-				this.data.cancelExecution();
+				Thread t = new Thread()
+				{
+					public void run()
+					{
+						try
+						{
+							showCancelIcon();
+							data.cancelExecution();
+							suspendThread();
+						}
+						finally
+						{
+							setCancelState(false);
+						}
+					}
+				};
+				t.setDaemon(true);
+				t.start();
 			}
 		}
 		catch (Throwable th)
 		{
 			LogMgr.logError("SqlPanel.cancelExecution()", "Error cancelling execution", th);
 		}
-		finally
-		{
-			this.setCancelState(false);
-		}
-		this.suspendThread();
 	}
 
 	public void setCancelState(final boolean aFlag)
@@ -1137,6 +1167,41 @@ public class SqlPanel
 		this.selectEditor();
 	}
 
+	public void executeMacro(final String macroName)
+	{
+		Thread t = new Thread()
+		{
+			public void run()
+			{
+				runMacro(macroName);
+			}
+		};
+		t.start();
+	}
+	
+	private void runMacro(String macroName)
+	{
+		String sql = MacroManager.getInstance().getMacroText(macroName);
+		if (sql == null || sql.trim().length() == 0) return;
+		
+		this.setBusy(true);
+		this.setCancelState(true);
+		this.makeReadOnly();
+
+		this.showStatusMessage(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
+		this.data.getStartEditAction().setSwitchedOn(false);
+
+		this.displayResult(sql, -1);
+
+		this.setBusy(false);
+
+		this.clearStatusMessage();
+		this.setCancelState(false);
+		this.checkResultSetActions();
+
+		this.selectEditor();
+	}
+	
 	public void spoolData()
 	{
 		String sql = SqlUtil.makeCleanSql(this.editor.getSelectedStatement(),false);

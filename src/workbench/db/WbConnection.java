@@ -218,6 +218,7 @@ public class WbConnection
 		
 		try
 		{
+			this.metaData.close();
 			this.sqlConnection.close();
 			this.sqlConnection = null;
 		}

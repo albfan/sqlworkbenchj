@@ -15,14 +15,21 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import javax.swing.event.ListSelectionListener;
 import workbench.WbManager;
 import workbench.exception.WbException;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
+import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
 
-public class MacroManagerDialog extends JDialog implements ActionListener
+public class MacroManagerDialog 
+	extends JDialog 
+	implements ActionListener, ListSelectionListener
 {
 	private JPanel dummyPanel;
 	private JPanel buttonPanel;
@@ -31,32 +38,59 @@ public class MacroManagerDialog extends JDialog implements ActionListener
 	private JButton cancelButton;
   private boolean cancelled = true;
 	private EscAction escAction;
-	
-	/** Creates new form DriverEditorDialog */
+	private boolean runMacro;
+	private SqlPanel client;
+
 	public MacroManagerDialog(Frame parent, boolean modal)
 	{
 		super(parent, modal);
-		initComponents();
-		
+		this.initComponents(false);
+		this.initKeys();
+		this.initWindow(parent);
+	}
+
+	public MacroManagerDialog(Frame parent, SqlPanel aTarget)
+	{
+		super(parent, true);
+		this.initComponents(true);
+		this.runMacro = true;
+		this.initKeys();
+		this.initWindow(parent);
+		this.client = aTarget;
+	}
+
+	private void initWindow(Frame parent)
+	{
+		if (!WbManager.getSettings().restoreWindowSize(this))
+		{
+			this.setSize(600,400);
+		}
+		WbSwingUtilities.center(this, parent);
+		macroPanel.restoreSettings();
+	}
+	
+	private void initKeys()
+	{
 		this.getRootPane().setDefaultButton(this.okButton);
 		InputMap im = this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 		ActionMap am = this.getRootPane().getActionMap();
 		escAction = new EscAction(this);
 		im.put(escAction.getAccelerator(), escAction.getActionName());
 		am.put(escAction.getActionName(), escAction);
-		
-		if (!WbManager.getSettings().restoreWindowSize(this))
-		{
-			this.setSize(600,400);
-		}
-		macroPanel.restoreSettings();
 	}
-
-	private void initComponents()
+	
+	private void initComponents(boolean withRunButton)
 	{
 		macroPanel = new MacroManagerGui();
 		buttonPanel = new JPanel();
-		okButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_OK));
+		if (withRunButton)
+		{
+			okButton = new WbButton(ResourceMgr.getString("LabelRunMacro"));
+		}
+		else
+		{
+			okButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_OK));
+		}
 		cancelButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));
 		dummyPanel = new JPanel();
 
@@ -71,12 +105,11 @@ public class MacroManagerDialog extends JDialog implements ActionListener
 			}
 		});
 
-		macroPanel.setBorder(new EtchedBorder());
+		macroPanel.setBorder(new CompoundBorder(new EmptyBorder(1,1,1,1), new EtchedBorder()));
 		getContentPane().add(macroPanel, BorderLayout.CENTER);
 
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
-		okButton.setFont(null);
 		okButton.addActionListener(this);
 		buttonPanel.add(okButton);
 
@@ -114,8 +147,13 @@ public class MacroManagerDialog extends JDialog implements ActionListener
 		try
 		{
 			this.macroPanel.saveItem();
-      this.cancelled = false;
+			this.cancelled = false;
 			this.closeDialog();
+			if (this.runMacro && this.client != null)
+			{
+				String name = this.macroPanel.getSelectedMacroName();
+				this.client.executeMacro(name);
+			}
 		}
 		catch (WbException e)
 		{
@@ -136,6 +174,13 @@ public class MacroManagerDialog extends JDialog implements ActionListener
 		WbManager.getSettings().storeWindowSize(this);
 		macroPanel.saveSettings();
 		setVisible(false);
+	}
+	
+	public void valueChanged(javax.swing.event.ListSelectionEvent e)
+	{
+		if (!this.runMacro) return;
+		if (e.getValueIsAdjusting()) return;
+		this.okButton.setEnabled(e.getFirstIndex() > -1);
 	}
 	
 }

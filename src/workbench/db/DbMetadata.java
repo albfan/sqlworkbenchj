@@ -642,6 +642,7 @@ public class DbMetadata
 			try
 			{
 				this.oraOutput.enable(aLimit);
+				LogMgr.logInfo("DbMetadata.enableOutput", "Support for DBMS_OUTPUT package enabled");
 			}
 			catch (Throwable e)
 			{
@@ -663,6 +664,7 @@ public class DbMetadata
 			try
 			{
 				this.oraOutput.disable();
+				LogMgr.logInfo("DbMetadata.enableOutput", "Support for DBMS_OUTPUT package disabled");
 			}
 			catch (Throwable e)
 			{
@@ -690,7 +692,10 @@ public class DbMetadata
 		return result;
 	}
 
-
+	public void close()
+	{
+		if (this.oraOutput != null) this.oraOutput.close();
+	}
 
 	public boolean storesLowerCaseIdentifiers()
 	{

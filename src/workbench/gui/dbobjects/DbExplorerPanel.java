@@ -123,6 +123,11 @@ public class DbExplorerPanel
 		this.tabPane.addChangeListener(this);
 	}
 
+	public String getId()
+	{
+		return "DbExp";
+	}
+	
 	private void initSearchPanel()
 	{
 		if (this.searchPanel != null) return;
@@ -187,6 +192,18 @@ public class DbExplorerPanel
 		this.schemaSelector.addActionListener(this);
 	}
 
+	public boolean isConnected()
+	{
+		if (this.dbConnection == null) return false;
+		try
+		{
+			return !this.dbConnection.isClosed();
+		}
+		catch (Throwable e)
+		{
+			return false;
+		}
+	}
 
 	public void setConnection(WbConnection aConnection, String aProfilename)
 	{
@@ -246,11 +263,6 @@ public class DbExplorerPanel
 		}
 
 		this.closeWindow();
-	}
-
-	public boolean isConnected()
-	{
-		return this.dbConnection != null;
 	}
 
 	public void saveSettings()

@@ -11,6 +11,7 @@ import java.awt.event.*;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -36,10 +37,12 @@ import workbench.gui.settings.SettingsPanel;
 import workbench.gui.sql.SqlHistory;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.FilenameChangeListener;
+import workbench.interfaces.MacroChangeListener;
 import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.sql.MacroManager;
 import workbench.util.BrowserLauncher;
 import workbench.util.WbWorkspace;
 
@@ -53,7 +56,8 @@ import workbench.util.WbWorkspace;
  */
 public class MainWindow
 	extends JFrame
-	implements ActionListener, MouseListener, WindowListener, ChangeListener, FilenameChangeListener
+	implements ActionListener, MouseListener, WindowListener, ChangeListener, 
+						FilenameChangeListener, MacroChangeListener
 {
 	private static final String DEFAULT_WORKSPACE = "%ConfigDir%/Default.wksp";
 	private static int instanceCount;
@@ -137,6 +141,8 @@ public class MainWindow
 
 		this.sqlTab.addChangeListener(this);
 		this.sqlTab.addMouseListener(this);
+		
+		MacroManager.getInstance().addChangeListener(this);
 	}
 
 	public String getWindowId() { return this.windowId; }
@@ -295,7 +301,12 @@ public class MainWindow
 			menu.setVisible(true);
 		}
 
-
+		if (aPanel instanceof SqlPanel)
+		{
+			menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_SQL);
+			this.appendMacros(menu, (SqlPanel)aPanel);
+		}
+		
 		action = new FileExitAction();
 		menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_FILE);
 		menu.addSeparator();
@@ -312,6 +323,70 @@ public class MainWindow
 		return menuBar;
 	}
 
+	private void setMacroMenuEnabled(boolean enabled)
+	{
+		int count = this.sqlTab.getTabCount();
+		for (int i=0; i < count; i++)
+		{
+			JMenuItem sql = this.getSQLMacroMenu(i);
+			if (sql != null)
+			{
+				sql.setEnabled(enabled);
+			}
+		}
+	}
+	
+	public void macroListChanged()
+	{
+		this.updateMacroMenus();
+	}
+	
+	private void updateMacroMenus()
+	{
+		int count = this.sqlTab.getTabCount();
+		for (int i=0; i < count; i++)
+		{
+			JMenu macros = (JMenu)this.getSQLMacroMenu(i);
+			MainPanel p = this.getSqlPanel(i);
+			if (macros != null && p instanceof SqlPanel)
+			{
+				macros.removeAll();
+				this.addMacros(macros, (SqlPanel)p);
+				macros.setEnabled(p.isConnected());
+			}
+		}
+	}
+	
+	private void appendMacros(JMenu sqlMenu, SqlPanel aClient)
+	{
+		
+		JMenu macroMenu = new WbMenu(ResourceMgr.getString("MnuTxtMacroList"));
+		macroMenu.setName("sql-macros");
+		macroMenu.setIcon(ResourceMgr.getImage("blank"));
+		this.addMacros(macroMenu, aClient);
+		macroMenu.setEnabled(aClient.isConnected());
+		sqlMenu.add(macroMenu);
+	}
+	
+	private void addMacros(JMenu macroMenu, SqlPanel aClient)
+	{
+		List macros = MacroManager.getInstance().getMacroList();
+		if (macros == null || macros.size() == 0) return;
+		
+		Collections.sort(macros);
+		int count = macros.size();
+		for (int i=0; (i < count && i < 10); i++)
+		{
+			String name = (String)macros.get(i);
+			RunMacroAction run = new RunMacroAction(aClient, name);
+			run.addToMenu(macroMenu);
+		}
+		
+		macroMenu.addSeparator();
+		RunMacroAction run = new RunMacroAction(aClient);
+		run.addToMenu(macroMenu);
+	}
+	
 	public int getCurrentPanelIndex()
 	{
 		return this.sqlTab.getSelectedIndex();
@@ -353,7 +428,7 @@ public class MainWindow
 	private void checkConnectionForPanel(int anIndex)
 	{
 		MainPanel p = this.getSqlPanel(anIndex);
-		this.checkConnectionForPanel(p);
+		this.checkConnectionForPanel(p, true);
 	}
 
 	private void checkConnectionForPanel(MainPanel aPanel)
@@ -374,7 +449,7 @@ public class MainWindow
 					try
 					{
 						aPanel.showStatusMessage(ResourceMgr.getString("MsgConnecting"));
-						aPanel.setConnection(this.getConnectionForTab());
+						aPanel.setConnection(this.getConnectionForTab(aPanel.getId()));
 					}
 					catch (Exception e)
 					{
@@ -554,15 +629,13 @@ public class MainWindow
 			this.isProfileWorkspace = false;
 			this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			this.showStatusMessage(ResourceMgr.getString("MsgConnecting"));
-			this.paint(this.getGraphics());
+			//this.paint(this.getGraphics());
 			
 			try
 			{
 				ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
 				WbConnection conn = null;
 
-				this.loadWorkspaceForProfile(aProfile);
-				
 				if (aProfile.getUseSeperateConnectionPerTab())
 				{
 					// getConnectionForTab() checks these variables
@@ -571,7 +644,7 @@ public class MainWindow
 					this.currentConnection = null;
 					this.currentProfile = aProfile;
 					MainPanel p = this.getCurrentPanel();
-					conn = this.getConnectionForTab();
+					conn = this.getConnectionForTab(p.getId());
 					p.setConnection(conn);
 				}
 				else
@@ -587,6 +660,7 @@ public class MainWindow
 				{
 					this.getCurrentPanel().showLogMessage(warn);
 				}
+				this.loadWorkspaceForProfile(aProfile);
 				
 				this.currentProfile = aProfile;
 				connected = true;
@@ -623,16 +697,18 @@ public class MainWindow
 		finally
 		{
 			this.showStatusMessage("");
-			this.updateWindowTitle();
 			this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		}
+		this.setMacroMenuEnabled(connected);
+		this.updateWindowTitle();
+		
 		if (connected)
 		{
 			selectCurrentEditorLater();
 		}
 		return connected;
 	}
-
+	
 	private void loadWorkspaceForProfile(ConnectionProfile aProfile)
 	{
 		String realFilename = null;
@@ -656,8 +732,8 @@ public class MainWindow
 				{
 					// loadWorkspace will replace the %ConfigDir% placeholder,
 					// so we need to pass the original filename
-					this.loadWorkspace(file);
 					this.isProfileWorkspace = true;
+					this.loadWorkspace(file);
 				}
 			}
 			else
@@ -714,6 +790,7 @@ public class MainWindow
 			this.isProfileWorkspace = false;
 			this.currentWorkspaceFile = null;
 		}
+		this.setMacroMenuEnabled(false);
 		
 		this.updateWindowTitle();
 		this.disconnectAction.setEnabled(false);
@@ -862,6 +939,23 @@ public class MainWindow
 		}
 	}
 
+	public JMenuItem getSQLMacroMenu(int anIndex)
+	{
+		JMenu menu = this.getMenu(ResourceMgr.MNU_TXT_SQL, anIndex);
+
+		int count = menu.getItemCount();
+		for (int i=0; i< count; i++)
+		{
+			JMenuItem item = menu.getItem(i);
+			if (item == null) continue;
+			if ("sql-macros".equals(item.getName()))
+			{
+				return item;
+			}
+		}
+		return null;
+	}
+	
 	public JMenu getViewMenu(int anIndex)
 	{
 		return this.getMenu(ResourceMgr.MNU_TXT_VIEW, anIndex);
@@ -869,8 +963,10 @@ public class MainWindow
 
 	public JMenu getMenu(String aName, int anIndex)
 	{
+		if (anIndex < 0 || anIndex > this.panelMenus.size()) return null;
 		JMenuBar menubar = (JMenuBar)this.panelMenus.get(anIndex);
-		for (int k=0; k < menubar.getMenuCount(); k++)
+		int count = menubar.getMenuCount();
+		for (int k=0; k < count; k++)
 		{
 			JMenu item = menubar.getMenu(k);
 			if (aName.equals(item.getName())) return item;
@@ -1008,15 +1104,15 @@ public class MainWindow
 		}
 	}
 
-	private WbConnection getConnectionForTab()
+	private WbConnection getConnectionForTab(String addId)
 		throws Exception
 	{
 		if (this.currentConnection != null) return this.currentConnection;
-		String id = this.windowId + "-" + this.nextConnectionId;
+		String id = "Wb-" + addId;
 		LogMgr.logInfo("MainWindow.getConnectionForTab()", "Creating new connection for " + this.currentProfile.getName() + " with ID=" + id);
 		ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
 		WbConnection conn = mgr.getConnection(this.currentProfile, id);
-		this.nextConnectionId ++;
+		//this.nextConnectionId ++;
 		return conn;
 	}
 
@@ -1046,12 +1142,27 @@ public class MainWindow
 			this.dbExplorerPanel.restoreSettings();
 			try
 			{
-				this.dbExplorerPanel.setConnection(this.getConnectionForTab());
+				this.dbExplorerPanel.setConnection(this.getConnectionForTab(this.dbExplorerPanel.getId()));
 			}
 			catch (Exception e)
 			{
 				LogMgr.logError("MainWindow.showDbExplorer()", "Error getting new connection for DbExplorer tab. Using connection from current panel", e);
 				this.dbExplorerPanel.setConnection(this.getCurrentPanel().getConnection());
+			}
+		}
+		else
+		{
+			if (this.dbExplorerPanel.getConnection() == null)
+			{
+				try
+				{
+					this.dbExplorerPanel.setConnection(this.getConnectionForTab(this.dbExplorerPanel.getId()));
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("MainWindow.showDbExplorer()", "Error getting new connection for DbExplorer tab. Using connection from current panel", e);
+					this.dbExplorerPanel.setConnection(this.getCurrentPanel().getConnection());
+				}
 			}
 		}
 
@@ -1274,6 +1385,7 @@ public class MainWindow
 		String filename = WbManager.getInstance().putConfigDirKey(this.currentWorkspaceFile);
 		this.currentProfile.setWorkspaceFile(filename);
 		this.isProfileWorkspace = true;
+		this.updateWindowTitle();
 	}
 
 	public void saveWorkspace(String filename)
@@ -1371,8 +1483,8 @@ public class MainWindow
 		}
 		SqlPanel sql = new SqlPanel(index + 1);
 
-		this.checkConnectionForPanel(sql, false);
 		sql.addFilenameChangeListener(this);
+		this.checkConnectionForPanel(sql, false);
 		this.sqlTab.add(sql, index);
 		this.setTabTitle(index, ResourceMgr.getString("LabelTabStatement") + " ");
 
@@ -1387,6 +1499,9 @@ public class MainWindow
 		// initDefaults has to be called after doLayout()!!!
 		sql.initDefaults();
 		if (selectNew) sqlTab.setSelectedIndex(index);
+		
+		JMenuItem m = this.getSQLMacroMenu(index);
+		if (m != null) m.setEnabled(sql.isConnected());
 	}
 
 	/**
@@ -1405,8 +1520,11 @@ public class MainWindow
 	private void setTabTitle(int anIndex, String aName)
 	{
 		this.sqlTab.setTitleAt(anIndex, aName + " " + Integer.toString(anIndex+1));
-		char c = Integer.toString(anIndex+1).charAt(0);
-		this.sqlTab.setMnemonicAt(anIndex, c);
+		if (anIndex < 9)
+		{
+			char c = Integer.toString(anIndex+1).charAt(0);
+			this.sqlTab.setMnemonicAt(anIndex, c);
+		}
 		this.updateViewMenu(anIndex, aName);
 	}
 
@@ -1439,6 +1557,7 @@ public class MainWindow
 			this.setTabTitle(index, newName);
 			this.updateViewMenu(index, newName);
 		}
+		this.selectCurrentEditorLater();
 	}
 
 	public void removeTab()

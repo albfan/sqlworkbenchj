@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.Action;
 
 import workbench.gui.sql.SqlPanel;
+import workbench.interfaces.Interruptable;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -18,15 +19,15 @@ import workbench.resource.ResourceMgr;
  */
 public class StopAction extends WbAction
 {
-	private SqlPanel panel;
+	private Interruptable panel;
 
-	public StopAction(SqlPanel aPanel)
+	public StopAction(Interruptable aPanel)
 	{
 		super();
 		this.panel = aPanel;
 		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_STOP_STMT));
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription(ResourceMgr.TXT_STOP_STMT));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_STOP));
+		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("StopIE"));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
 		this.putValue(WbAction.ADD_TO_TOOLBAR, "true");
 		this.setCreateMenuSeparator(true);

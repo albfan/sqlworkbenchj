@@ -65,8 +65,11 @@ public class SqlCommand
 			while (warn != null)
 			{
 				s = warn.getMessage();
-				msg.append('\n');
-				msg.append(s);
+				if (s != null && s.length() > 0)
+				{
+					msg.append('\n');
+					msg.append(s);
+				}
 				warn = warn.getNextWarning();
 				added.add(s);
 			}
@@ -75,7 +78,7 @@ public class SqlCommand
 			if (outMsg.length() > 0)
 			{
 				msg.append(outMsg);
-				msg.append("\n\n");
+				if (!outMsg.endsWith("\n")) msg.append("\n");
 				warnings = true;
 			}
 			warn = aConn.getSqlConnection().getWarnings();

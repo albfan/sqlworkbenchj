@@ -97,7 +97,6 @@ public class WbSpoolCommand
 			if (delimiter != null) spooler.setTextDelimiter(delimiter);
 			
 			String quote = cmdLine.getValue("quotechar");
-			System.out.println("quote=" + quote);
 			if (quote != null) spooler.setTextQuoteChar(quote);
 
 			String format = cmdLine.getValue("dateformat");
@@ -168,14 +167,13 @@ public class WbSpoolCommand
 			{
 				ResultSet[] data = aResult.getResultSets();
 				this.spooler.setSql(aResult.getSourceCommand());
-				this.spooler.startExport(data[0]);
-
+				long rowCount = this.spooler.startExport(data[0]);
 
 				String msg = null;
 
 				if (spooler.isSuccess())
 				{
-					msg = ResourceMgr.getString("MsgSpoolOk");
+					msg = ResourceMgr.getString("MsgSpoolOk").replaceAll("%rows%", Long.toString(rowCount));
 					aResult.addMessage(""); // force new line in output
 					aResult.addMessage(msg);
 				}

@@ -301,7 +301,7 @@ public class DataStoreTableModel
 	{
 		return this.dataCache.getRowDataAsString(aRow);
 	}
-	
+
 	public boolean isCellEditable(int row, int column)
 	{
 		if (this.showStatusColumn)

@@ -26,6 +26,8 @@ public class DbmsOutput
 	private CallableStatement disable_stmt;
 	private CallableStatement show_stmt;
 	
+	private boolean enabled;
+	private long lastSize;
 	
 /*
  * our constructor simply prepares the three
@@ -71,9 +73,13 @@ public class DbmsOutput
 	 */
 	public void enable(long size) throws SQLException
 	{
+		if (this.enabled && size == this.lastSize) return;
+		
 		this.disable();
 		enable_stmt.setLong( 1, size );
 		enable_stmt.executeUpdate();
+		this.enabled = true;
+		this.lastSize = size;
 	}
 	
 	public void enable()
@@ -88,6 +94,7 @@ public class DbmsOutput
 	public void disable() throws SQLException
 	{
 		disable_stmt.executeUpdate();
+		this.enabled = false;
 	}
 	
 	/*
@@ -113,6 +120,7 @@ public class DbmsOutput
 			result.append(show_stmt.getString(3).trim());
 			if ( (done = show_stmt.getInt(2)) == 1 ) break;
 		}
+
 		return result.toString().trim();
 	}
 	
@@ -123,22 +131,17 @@ public class DbmsOutput
  * just as you would with any callable statement, result set
  * and so on.
  */
-	public void close() throws SQLException
+	public void close() 
 	{
-		enable_stmt.close();
-		disable_stmt.close();
-		show_stmt.close();
+		try { this.disable(); } catch (Throwable th) {}
+		try { enable_stmt.close(); } catch (Throwable th) {}
+		try { disable_stmt.close(); } catch (Throwable th) {}
+		try { show_stmt.close(); } catch (Throwable th) {}
 	}
 	
 	public void finalize()
 	{
-		try
-		{
-			this.close();
-		}
-		catch (Throwable th)
-		{
-		}
+		this.close();
 	}
 }
 	

@@ -4,6 +4,7 @@ import java.sql.SQLException;
 
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
+import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.LineTokenizer;
@@ -46,6 +47,7 @@ public class WbEnableOraOutput extends SqlCommand
 		}
 		aConnection.getMetadata().enableOutput(limit);
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		result.addMessage(ResourceMgr.getString("MsgDbmsOutputEnabled"));
 		return result;
 	}	
 	

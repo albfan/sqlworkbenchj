@@ -11,6 +11,7 @@ import java.util.HashMap;
 
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
+import workbench.log.LogMgr;
 import workbench.sql.MacroManager;
 import workbench.sql.commands.DdlCommand;
 import workbench.sql.commands.SelectCommand;
@@ -41,6 +42,7 @@ public class StatementRunner
 	private SqlCommand currentConsumer;
 	
 	private int maxRows;
+	private boolean isCancelled;
 	
 	public StatementRunner()
 	{
@@ -155,12 +157,13 @@ public class StatementRunner
 		{
 			if (this.currentCommand != null)
 			{
+				this.isCancelled = true;
 				this.currentCommand.cancel();
 			}
 		}
 		catch (Throwable th)
 		{
-			th.printStackTrace();
+			LogMgr.logDebug("StatementRunner.cancel()", "Error when cancelling statement", th);
 		}
 	}
 	

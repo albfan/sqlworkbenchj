@@ -4,7 +4,8 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
 
-public class OneLineTableModel implements TableModel
+public class OneLineTableModel 
+	implements TableModel
 {
 	private String columnTitle;
 	private String message;
@@ -13,6 +14,11 @@ public class OneLineTableModel implements TableModel
 	{
 		this.columnTitle = colTitle;
 		this.message = msg;
+	}
+
+	public void setMessage(String aMessage)
+	{
+		this.message = aMessage;
 	}
 	
 	public Object getValueAt(int row, int col)

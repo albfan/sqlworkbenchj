@@ -6,13 +6,19 @@
 
 package workbench.sql;
 
+import java.awt.Frame;
+import java.awt.Window;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import javax.swing.SwingUtilities;
 import workbench.WbManager;
+import workbench.gui.macros.MacroManagerDialog;
+import workbench.gui.sql.SqlPanel;
+import workbench.interfaces.MacroChangeListener;
 import workbench.log.LogMgr;
 import workbench.util.WbPersistence;
 
@@ -25,39 +31,37 @@ public class MacroManager
 	private static MacroManager instance = new MacroManager();
 	private HashMap macros;
 	private boolean modified = false;
-	
+	private List changeListeners = null;
+		
 	public static MacroManager getInstance()
 	{
 		return instance;
 	}
 
-	public String getMacroText(String aKey)
+	public synchronized String getMacroText(String aKey)
 	{
 		if (aKey == null) return null;
-		this.checkMacros();
 		return (String)this.macros.get(aKey.toLowerCase());
 	}
 	
 	
-	public void removeMacro(String aKey)
+	public synchronized void removeMacro(String aKey)
 	{
 		if (aKey == null) return;
-		this.checkMacros();
 		this.macros.remove(aKey);
 		this.modified = true;
+		this.fireMacroListChange();
 	}
 	
-	public List getMacroList()
+	public synchronized List getMacroList()
 	{
-		this.checkMacros();
 		Set keys = this.macros.keySet();
 		ArrayList result = new ArrayList(keys);
 		return result;
 	}
 	
-	public String[] getMacroNames()
+	public synchronized String[] getMacroNames()
 	{
-		this.checkMacros();
 		Set keys = this.macros.keySet();
 		String[] result = new String[keys.size()];
 		Iterator itr = keys.iterator();
@@ -68,17 +72,17 @@ public class MacroManager
 		return result;
 	}
 	 
-	public void setMacro(String aKey, String aText)
+	public synchronized void setMacro(String aKey, String aText)
 	{
 		if (aKey == null || aKey.trim().length() == 0) return;
-		this.checkMacros();
 		this.macros.put(aKey.toLowerCase(), aText);
 		this.modified = true;
+		this.fireMacroListChange();
 	}
 
 	public boolean isModified() { return this.modified; }
 	
-	public void clearAll()
+	public synchronized void clearAll()
 	{
 		if (this.macros != null)
 		{
@@ -89,9 +93,31 @@ public class MacroManager
 			this.macros = new HashMap();
 		}
 		this.modified = true;
+		this.fireMacroListChange();
 	}
 	
-	public void saveMacros()
+	public synchronized void addChangeListener(MacroChangeListener aListener)
+	{
+		if (this.changeListeners == null)
+		{
+			this.changeListeners = new ArrayList();
+		}
+		this.changeListeners.add(aListener);
+	}
+	
+	public void selectAndRun(SqlPanel aPanel)
+	{
+		Window w = SwingUtilities.getWindowAncestor(aPanel);
+		Frame parent = null;
+		if (w instanceof Frame)
+		{
+			parent = (Frame)w;
+		}
+		MacroManagerDialog d = new MacroManagerDialog(parent, aPanel);
+		d.show();
+	}
+	
+	public synchronized void saveMacros()
 	{
 		if (this.macros != null && this.macros.size() > 0)
 		{
@@ -102,12 +128,9 @@ public class MacroManager
 
 	private MacroManager()
 	{
+		this.loadMacros();
 	}
 
-	private void checkMacros()
-	{
-		if (this.macros == null) this.loadMacros();
-	}
 	private File getMacroFile()
 	{
 		String configDir = WbManager.getSettings().getConfigDir();
@@ -135,7 +158,20 @@ public class MacroManager
 		}
 		this.modified = false;
 	}
-	
+
+	private void fireMacroListChange()
+	{
+		if (this.changeListeners == null) return;
+		int count = this.changeListeners.size();
+		for (int i=0; i < count; i++)
+		{
+			MacroChangeListener listener = (MacroChangeListener)this.changeListeners.get(i);
+			if (listener != null)
+			{
+				listener.macroListChanged();
+			}
+		}
+	}
 
 }
 

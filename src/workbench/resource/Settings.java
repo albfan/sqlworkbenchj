@@ -307,6 +307,16 @@ public class Settings
 		}
 	}
 
+	public boolean getEnableDbmsOutput()
+	{
+		return StringUtil.stringToBool(this.props.getProperty("workbench.sql.enable_dbms_output", "false"));
+	}
+	
+	public void setEnableDbmsOutput(boolean aFlag)
+	{
+		this.props.setProperty("workbench.sql.enable_dbms_output", Boolean.toString(aFlag));
+	}
+	
 	public String getLastImportDateFormat()
 	{
 		return this.props.getProperty("workbench.import.dateformat", this.getDefaultDateFormat());
