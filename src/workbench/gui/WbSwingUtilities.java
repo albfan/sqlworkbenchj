@@ -14,6 +14,7 @@ import java.awt.event.FocusEvent;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
 public class WbSwingUtilities
@@ -85,19 +86,21 @@ public class WbSwingUtilities
 		return new Point(x, y);
 	}
 	
-	public static void showWaitCursor(Component caller)
+	public static void showWaitCursor(JComponent caller)
 	{
-		RootPaneContainer rpc = (RootPaneContainer)SwingUtilities.getWindowAncestor(caller);
-		if (rpc == null) return;
-		rpc.getGlassPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		rpc.getGlassPane().setVisible(true);
+		//RootPaneContainer rpc = (RootPaneContainer)SwingUtilities.getWindowAncestor(caller);
+		//if (rpc == null) return;
+		//rpc.getGlassPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		//rpc.getGlassPane().setVisible(true);
+		caller.getTopLevelAncestor().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 	}
 	
-	public static void showDefaultCursor(Component caller)
+	public static void showDefaultCursor(JComponent caller)
 	{
-		RootPaneContainer rpc = (RootPaneContainer)SwingUtilities.getWindowAncestor(caller);
-		if (rpc == null) return;
-		rpc.getGlassPane().setVisible(false);
+		//RootPaneContainer rpc = (RootPaneContainer)SwingUtilities.getWindowAncestor(caller);
+		//if (rpc == null) return;
+		//rpc.getGlassPane().setVisible(false);
+		caller.getTopLevelAncestor().setCursor(null);
 	}
 	
 }

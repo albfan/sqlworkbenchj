@@ -70,7 +70,10 @@ public class LogMgr
 		logOut.print(" ");
 		logOut.print(getTimeString());
 		logOut.print(" - ");
-		logOut.print(aCaller);
+		if (aCaller instanceof String)
+			logOut.print(aCaller);
+		else
+			logOut.print(aCaller.getClass().getName());
 		logOut.print(" ");
 		logOut.print(aMsg);
 		if (th == null)

@@ -18,8 +18,8 @@ public class SortArrowIcon
   implements Icon
 {
   public static final int NONE = 0;
-  public static final int DESCENDING = 1;
-  public static final int ASCENDING = 2;
+  public static final int UP = 1;
+  public static final int DOWN = 2;
 
   protected int direction;
   protected int width = 8;
@@ -49,7 +49,7 @@ public class SortArrowIcon
     int w = width;
     int h = height;
     int m = w / 2;
-    if (direction == ASCENDING)
+    if (direction == UP)
     {
       g.setColor(shade);
       g.drawLine(x, y, x + w, y);
@@ -57,7 +57,7 @@ public class SortArrowIcon
       g.setColor(light);
       g.drawLine(x + w, y, x + m, y + h);
     }
-    if (direction == DESCENDING)
+    if (direction == DOWN)
     {
       g.setColor(shade);
       g.drawLine(x + m, y, x, y + h);

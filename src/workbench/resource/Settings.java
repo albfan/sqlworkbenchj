@@ -367,4 +367,26 @@ public class Settings
 	{
 		this.props.setProperty("workbench.sql.maxcolwidth", Integer.toString(aWidth));
 	}
+	
+	public String getDefaultDateFormat()
+	{
+		return this.props.getProperty("workbench.gui.display.dateformat", null);
+	}
+	
+	public void setDefaultDateFormat(String aFormat)
+	{
+		this.props.setProperty("workbench.gui.display.dateformat", aFormat);
+	}
+	
+	public int getMaxFractionDigits()
+	{
+		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.display.maxfractiondigits", "-1"));
+	}
+	
+	public void setDefaultDateFormat(int aDigits)
+	{
+		this.props.setProperty("workbench.gui.display.maxfractiondigits", Integer.toString(aDigits));
+	}
+	
+	
 }

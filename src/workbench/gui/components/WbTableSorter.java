@@ -1,6 +1,7 @@
 package workbench.gui.components;
 
 import java.awt.Cursor;
+import java.awt.EventQueue;
 import java.awt.event.InputEvent;
 // Imports for picking up mouse events from the JTable.
 import java.awt.event.MouseAdapter;
@@ -174,10 +175,11 @@ public class WbTableSorter
 			int result = ((Comparable)o1).compareTo(o2);
 			//System.out.println("Result=" + result);
 			return result;
-			
 		}
-		catch (ClassCastException e)
+		catch (Exception e)
 		{
+			System.out.println("Error while comparing " + o1 + " to " + o2);
+			System.out.println("o1="+ o1.getClass().getName() + ",o2=" + o2.getClass().getName());
 		}
 		
 		/*
@@ -342,9 +344,18 @@ public class WbTableSorter
 	{
 		checkModel();
 		compares = 0;
+		//dumpIndexes();
 		Arrays.sort(indexes, this.comparator);
+		//dumpIndexes();
 	}
-	
+
+	public void dumpIndexes()
+	{
+		for (int i=0; i < this.indexes.length; i++)
+		{
+			System.out.println("Row " + i + " --> " + indexes[i].rowIndex);
+		}
+	}
 	/**    Sort by the given column in ascending order.
 	 *
 	 * @param column The column
@@ -362,13 +373,10 @@ public class WbTableSorter
 	public synchronized void sortByColumn(int aColumn, boolean ascending)
 	{
 		this.ascending = ascending;
-		if (aColumn != this.column)
-		{
-			this.column = column;
-			sortingColumns.removeAllElements();
-			sortingColumns.addElement(new Integer(column));
-		}
-		sort(this);
+		this.column = aColumn;
+		sortingColumns.removeAllElements();
+		sortingColumns.addElement(new Integer(column));
+		this.sort(this);
 		fireTableChanged(new TableModelEvent(this));
 	}
 	
@@ -399,7 +407,8 @@ public class WbTableSorter
 	{
 		return ascending;
 	}
-	
+
+
 	// There is no-where else to put this.
 	// Add a mouse listener to the Table to trigger a table sort
 	// when a column heading is clicked in the JTable.
@@ -424,7 +433,6 @@ public class WbTableSorter
 				TableColumnModel columnModel = tableView.getColumnModel();
 				final int viewColumn = columnModel.getColumnIndexAtX(e.getX());
 				final int column = tableView.convertColumnIndexToModel(viewColumn);
-				//WbSwingUtilities.showWaitCursor(tableView.getTableHeader());
 
 				if (e.getClickCount() == 1 && column != -1)
 				{
@@ -436,21 +444,19 @@ public class WbTableSorter
 					{
 						ascending = true;
 					}
-					Thread sortThread = new Thread(new Runnable()
-							{
-								public void run()
-								{
-									tableView.sortingStarted();
-									tableView.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-									tableView.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-									sorter.sortByColumn(column, ascending);
-									tableView.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-									tableView.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-									tableView.sortingFinished();
-									tableView.repaint();
-								}
-							});
-					sortThread.start();
+					EventQueue.invokeLater( new Runnable()
+					{
+						public void run()
+						{
+							tableView.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+							tableView.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+							sorter.sortByColumn(column, ascending);
+							tableView.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+							tableView.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+							// repaint the header so that the icon is displayed...
+							tableView.getTableHeader().repaint(); 
+						}
+					});
 				}
 			}
 		};
