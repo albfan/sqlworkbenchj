@@ -57,19 +57,17 @@ public class ResourceMgr
 	
 	public static final String TXT_SELECT_PROFILE = "SelectProfile";
 	public static final String TXT_SAVE_PROFILE = "SaveProfile";
+	public static final String TXT_SAVE = "Save";
 	
-	public static final String IMG_COPY_16 = "Copy16";
-	public static final String IMG_COPY_24 = "Copy24";
-	public static final String IMG_CUT_16 = "Cut16";
-	public static final String IMG_CUT_24 = "Cut24";
-	public static final String IMG_PASTE_16 = "Paste16";
-	public static final String IMG_PASTE_24 = "Paste24";
-	public static final String IMG_EXEC_SEL_16 = "ExecuteSel16";
-	public static final String IMG_EXEC_SEL_24 = "ExecuteSel24";
-	public static final String IMG_EXEC_ALL_16 = "ExecuteAll16";
-	public static final String IMG_EXEC_ALL_24 = "ExecuteAll24";
-	public static final String IMG_STOP_16 = "Stop16.gif";
-	public static final String IMG_STOP_24 = "Stop24.gif";
+	public static final String IMG_COPY = "Copy";
+	public static final String IMG_CUT = "Cut";
+	public static final String IMG_PASTE = "Paste";
+	public static final String IMG_EXEC_SEL = "ExecuteSel";
+	public static final String IMG_EXEC_ALL = "ExecuteAll";
+	public static final String IMG_STOP = "Stop";
+	public static final String IMG_SAVE = "Save";
+	public static final String IMG_NEW = "New";
+	public static final String IMG_DELETE = "Delete";
 	
 	public static final String MNU_TXT_FILE = "File";
 	public static final String MNU_TXT_SQL = "SQL";
@@ -127,6 +125,14 @@ public class ResourceMgr
 	
 	public static ImageIcon getImage(String aKey)
 	{
+		return getImage(aKey, true);
+	}
+	
+	public static ImageIcon getImage(String aKey, boolean checkForLargeIcons)
+	{
+		// check system setting if large toolbar icons should be used
+		aKey = aKey + "16";
+		
 		Object value = images.get(aKey.toUpperCase());
 		ImageIcon result = null;
 		

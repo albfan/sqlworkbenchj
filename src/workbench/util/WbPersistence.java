@@ -1,5 +1,9 @@
 package workbench.util;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.BufferedInputStream;
@@ -14,6 +18,28 @@ public class WbPersistence
 	private WbPersistence()
 	{
 	}
+	
+	public static void makeTransient( Class clazz, String property )
+	{
+		try
+		{
+			BeanInfo info = Introspector.getBeanInfo( clazz );
+			PropertyDescriptor propertyDescriptors[] = info.getPropertyDescriptors();
+			
+			for ( int i = 0; i < propertyDescriptors.length; i++ )
+			{
+				PropertyDescriptor pd = propertyDescriptors[i];
+				//System.out.println( pd.getName() );
+				if ( pd.getName().equals(property) )
+				{
+					pd.setValue( "transient", Boolean.TRUE );
+				}
+			}
+		} 
+		catch ( IntrospectionException e )
+		{ 
+		}
+	}	
 	
 	public static Object readObject(String aFilename)
 	{

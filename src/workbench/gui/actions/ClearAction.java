@@ -5,7 +5,7 @@
  */
 package workbench.gui.actions;
 
-import workbench.gui.ClipboardSupport;
+import workbench.interfaces.ClipboardSupport;
 import javax.swing.AbstractAction;
 import java.awt.event.ActionEvent;
 import workbench.resource.ResourceMgr;

@@ -176,8 +176,8 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
     add(tfProfileName, gridBagConstraints);
 
   }//GEN-END:initComponents
@@ -211,6 +211,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		profile.setUrl(tfURL.getText());
 		profile.setUsername(tfUserName.getText());
 		profile.setAutocommit(cbAutocommit.isSelected());
+		profile.setName(tfProfileName.getText());
 		return profile;
 	}
 
@@ -222,6 +223,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		this.tfURL.setText(aProfile.getUrl());
 		this.tfURL.setCaretPosition(0);
 		this.tfPwd.setText(aProfile.decryptPassword());
+		this.cbAutocommit.setSelected(aProfile.getAutocommit());
 		DbDriver driver;
 		int newIndex = -1;
 		int count = this.cbDrivers.getItemCount();

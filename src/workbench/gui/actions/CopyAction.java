@@ -9,7 +9,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
-import workbench.gui.ClipboardSupport;
+import workbench.interfaces.ClipboardSupport;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -24,7 +24,7 @@ public class CopyAction extends AbstractAction
 	{
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_COPY));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_COPY_16));
+		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_COPY));
 		//this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("C+C"));
 	}
 	

@@ -35,11 +35,7 @@ public class WbManager
 	private WbManager() 
 	{
 		this.initFonts();
-		long start, end;
-		start = System.currentTimeMillis();
 		this.cipher = new WbCipher();
-		end = System.currentTimeMillis();
-		System.out.println("new WbCipher() " + (end - start));
 	}
 
 	public static WbManager getInstance()
@@ -120,7 +116,7 @@ public class WbManager
 			win.saveSettings();
 			win.dispose();
 		}
-		this.connMgr.writeSettings();
+		//this.connMgr.writeSettings();
 		this.settings.saveSettings();
 		System.exit(0);
 	}

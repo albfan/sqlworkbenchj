@@ -5,7 +5,7 @@
  */
 package workbench.gui.actions;
 
-import workbench.gui.ClipboardSupport;
+import workbench.interfaces.ClipboardSupport;
 import javax.swing.AbstractAction;
 import java.awt.event.ActionEvent;
 import javax.swing.Action;
@@ -23,7 +23,7 @@ public class CutAction extends AbstractAction
 	{
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_CUT));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_CUT_16));
+		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_CUT));
 	}
 	
 	public void actionPerformed(ActionEvent e)

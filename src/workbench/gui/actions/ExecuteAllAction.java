@@ -23,7 +23,7 @@ public class ExecuteAllAction extends AbstractAction
 	{
 		this.client = aListener;
 		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_EXECUTE_ALL));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_EXEC_ALL_16));
+		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_EXEC_ALL));
 	}
 	
 	public void actionPerformed(ActionEvent e)

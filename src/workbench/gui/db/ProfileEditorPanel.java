@@ -12,46 +12,45 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JDialog;
+import javax.swing.JToolBar;
 import javax.swing.ListModel;
 import javax.swing.border.Border;
 import workbench.WbManager;
+import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.exception.WbException;
+import workbench.interfaces.FileActions;
+import workbench.resource.ResourceMgr;
 
 /**
  *
  * @author  thomas.kellerer@inline-skate.com
  */
-public class ProfileEditorPanel extends javax.swing.JPanel
+public class ProfileEditorPanel 
+	extends javax.swing.JPanel
+	implements FileActions
 {
 	private ConnectionEditorPanel connectionEditor;
-	private Map profiles;
+	private ProfileListModel model;
+	private JToolBar toolbar;
+	private int lastIndex = -1;
 	
 	/** Creates new form ProfileEditor */
 	public ProfileEditorPanel()
 	{
 		initComponents();
 		String last = WbManager.getSettings().getLastConnection();
-		try
-		{
-			ListModel m = jList1.getModel();
-			int count = m.getSize();
-			
-			for (int i=0; i < count; i++)
-			{
-				ConnectionProfile prof = (ConnectionProfile)m.getElementAt(i);
-				if (prof.getName().equals(last))
-				{
-					jList1.setSelectedIndex(i);
-					break;
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			jList1.setSelectedIndex(0);
-		}
+		System.out.println("selecting last profile");
+		this.selectProfile(last);
 		jList1.setNextFocusableComponent(connectionEditor);
 		this.connectionEditor.setNextFocusableComponent(jList1);
+		this.toolbar = new JToolBar();
+		this.toolbar.setFloatable(false);
+		this.toolbar.add(new NewProfileAction(this));
+		this.toolbar.add(new SaveProfileAction(this));
+		this.toolbar.addSeparator();
+		this.toolbar.add(new DeleteProfileAction(this));
+		this.listPanel.add(this.toolbar, BorderLayout.NORTH);
 		//jSplitPane1.setBorder(BorderFactory.createEmptyBorder());
 //		Border b = BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createLoweredBevelBorder());
 //		jList1.setBorder(b);
@@ -68,10 +67,8 @@ public class ProfileEditorPanel extends javax.swing.JPanel
 	
 	private void fillProfiles()
 	{
-		this.profiles = WbManager.getInstance().getConnectionMgr().getProfiles();
-		Object[] l = this.profiles.values().toArray();
-		Arrays.sort(l, ConnectionProfile.getNameComparator());
-		jList1.setListData(l);
+		this.model = new ProfileListModel(WbManager.getInstance().getConnectionMgr().getProfiles());
+		this.jList1.setModel(this.model);
 	}
 	/** This method is called from within the constructor to
 	 * initialize the form.
@@ -83,6 +80,7 @@ public class ProfileEditorPanel extends javax.swing.JPanel
     jSplitPane1 = new javax.swing.JSplitPane();
     this.initConnectionEditor();
     jSplitPane1.setRightComponent(this.connectionEditor);
+    listPanel = new javax.swing.JPanel();
     jList1 = new javax.swing.JList();
 
     setLayout(new java.awt.BorderLayout());
@@ -90,6 +88,8 @@ public class ProfileEditorPanel extends javax.swing.JPanel
     jSplitPane1.setBorder(new javax.swing.border.EtchedBorder());
     jSplitPane1.setDividerLocation(100);
     jSplitPane1.setDividerSize(5);
+    listPanel.setLayout(new java.awt.BorderLayout());
+
     jList1.setFont(null);
     this.fillProfiles();
     jList1.addListSelectionListener(new javax.swing.event.ListSelectionListener()
@@ -100,7 +100,9 @@ public class ProfileEditorPanel extends javax.swing.JPanel
       }
     });
 
-    jSplitPane1.setLeftComponent(jList1);
+    listPanel.add(jList1, java.awt.BorderLayout.CENTER);
+
+    jSplitPane1.setLeftComponent(listPanel);
 
     add(jSplitPane1, java.awt.BorderLayout.CENTER);
 
@@ -110,8 +112,14 @@ public class ProfileEditorPanel extends javax.swing.JPanel
 	{//GEN-HEADEREND:event_jList1ValueChanged
 		if (evt.getSource() == this.jList1)
 		{
+			ConnectionProfile current = this.connectionEditor.getProfile();
+			if (lastIndex > -1) 
+			{
+				this.model.putProfile(lastIndex, current);
+			}
 			ConnectionProfile newProfile = (ConnectionProfile)this.jList1.getSelectedValue();
 			this.connectionEditor.setProfile(newProfile);
+			lastIndex = this.jList1.getSelectedIndex();
 		}
 	}//GEN-LAST:event_jList1ValueChanged
 	
@@ -135,17 +143,64 @@ public class ProfileEditorPanel extends javax.swing.JPanel
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JSplitPane jSplitPane1;
   private javax.swing.JList jList1;
+  private javax.swing.JPanel listPanel;
   // End of variables declaration//GEN-END:variables
 	
-	public static void main(String args[])
+
+	private void selectProfile(String aProfileName)
 	{
-		JDialog f = new JDialog();
-		ProfileEditorPanel p = new ProfileEditorPanel();
-		f.getContentPane().add(p);
-		f.setSize(400, 200);
-		//f.pack();
-		f.show();
+		if (aProfileName == null) return;
+		
+		try
+		{
+			ListModel m = jList1.getModel();
+			int count = m.getSize();
+			
+			for (int i=0; i < count; i++)
+			{
+				ConnectionProfile prof = (ConnectionProfile)m.getElementAt(i);
+				if (prof.getName().equals(aProfileName))
+				{
+					this.jList1.setSelectedIndex(i);
+					break;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			jList1.setSelectedIndex(0);
+		}
+	}
+	
+	/**
+	 *	Remove an item from the listmodel
+	 */
+	public void deleteItem() throws WbException
+	{
+		int index = this.jList1.getSelectedIndex();
+		if (index > 0) this.jList1.setSelectedIndex(index - 1);
+		this.model.deleteProfile(index);
+		this.jList1.updateUI();
+	}	
+	
+	/**
+	 *	Create a new profile. This will only be 
+	 *	created in the ListModel. 
+	 */
+	public void newItem() throws WbException
+	{
+		ConnectionProfile cp = new ConnectionProfile();
+		cp.setName(ResourceMgr.getString("EmptyProfileName"));
+		this.model.addProfile(cp);
+		this.selectProfile(cp.getName());
+		this.jList1.updateUI();
+	}
+	
+	public void saveItem() throws WbException
+	{
+		ConnectionMgr conn = WbManager.getInstance().getConnectionMgr();
+		conn.putProfiles(this.model.getValues());
+		conn.saveXmlProfiles();
 	}
 
-	
 }

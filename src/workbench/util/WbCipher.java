@@ -16,19 +16,30 @@ public class WbCipher
 	/** Creates a new instance of WbCipher */
 	public WbCipher()
 	{
-		try
-		{
-			DesCipher = Cipher.getInstance("DES");
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning("ConnectionProfile", "No encryption available!");
-			DesCipher = null;
-		}
+		Thread t = new Thread(
+			new Runnable() 
+			{	
+				public void run()
+				{
+					try
+					{
+						DesCipher = Cipher.getInstance("DES");
+					}
+					catch (Exception e)
+					{
+						LogMgr.logWarning("ConnectionProfile", "No encryption available!");
+						DesCipher = null;
+					}
+				}
+			}
+			);
+		t.setPriority(Thread.MIN_PRIORITY);
+		t.run();
 	}
 
 	public String decryptString(String aValue)
 	{
+		if (aValue == null) return aValue;
 		try
 		{
 			DesCipher.init(Cipher.DECRYPT_MODE, KEY);
@@ -47,6 +58,7 @@ public class WbCipher
 
 	public String encryptString(String aValue)
 	{
+		if (aValue == null) return null;
 		if (DesCipher == null) return aValue;
 		try
 		{

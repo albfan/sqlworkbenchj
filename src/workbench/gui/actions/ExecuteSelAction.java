@@ -23,7 +23,7 @@ public class ExecuteSelAction extends AbstractAction
 	{
 		this.target = aListener;
 		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_EXECUTE_SEL));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_EXEC_SEL_16));
+		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_EXEC_SEL));
 	}
 	
 	public void actionPerformed(ActionEvent e)
