@@ -27,7 +27,7 @@ import workbench.util.WbPersistence;
 
 /**
  * @author  workbench@kellerer.org
- * @version
+ * @version  $Revision: 1.39 $
  */
 public class ConnectionMgr
 {
