@@ -1220,7 +1220,7 @@ public class DataPumper
 
 		if (evt.getSource() == this.sourceTable && source != null)
 		{
-			if (target != null && target.isNewTable()) 
+			if (target != null && target.isNewTable())
 			{
 				this.targetTable.resetNewTableItem();
 			}

@@ -31,7 +31,7 @@ import workbench.storage.DataStore;
  *
  * @author  workbench@kellerer.org
  */
-public class TableSelectorPanel 
+public class TableSelectorPanel
 	extends JPanel
 	implements ItemListener, ActionListener
 {
@@ -45,7 +45,7 @@ public class TableSelectorPanel
 	private TableIdentifier newTableId = new TableIdentifier();
 	//private WbMenuItem editNewTableNameItem;
 	//private JPopupMenu popupMenu;
-	
+
 	/** Creates new form TableSelectorPanel */
 	public TableSelectorPanel()
 	{
@@ -60,20 +60,21 @@ public class TableSelectorPanel
 		//this.popupMenu.add(this.editNewTableNameItem);
 		this.editNewTableNameButton.setVisible(false);
 	}
-	
+
 	public void setTablesOnly(boolean tablesOnly) { this.tablesOnly = tablesOnly; }
 	public boolean getTablesOnly() { return this.tablesOnly; }
-	
+
 	public void resetNewTableItem()
 	{
 		if (this.newTableId != null)
 		{
 			this.newTableId.setNewTable(true);
 			this.newTableId.setTable(null);
+			this.newTableId.setSchema(null);
 			this.repaint();
 		}
 	}
-	
+
 	public void allowNewTable(boolean flag)
 	{
 		this.allowNewTable = flag;
@@ -84,7 +85,7 @@ public class TableSelectorPanel
 			if (this.allowNewTable)
 			{
 				int newTableIndex = -1;
-				
+
 				for (int i=0; i < count; i++)
 				{
 					Object item = this.tableSelector.getItemAt(i);
@@ -121,13 +122,13 @@ public class TableSelectorPanel
 		this.client = null;
 		this.clientPropName = null;
 	}
-	
+
 	public void setChangeListener(PropertyChangeListener l, String propName)
 	{
 		this.client = l;
 		this.clientPropName = propName;
 	}
-	
+
 	public void setConnection(WbConnection conn)
 	{
 		this.dbConnection = conn;
@@ -151,25 +152,25 @@ public class TableSelectorPanel
 			StringBuffer s = new StringBuffer(this.dbConnection.getMetadata().getSchemaTerm().toLowerCase());
 			s.setCharAt(0, Character.toUpperCase(s.charAt(0)));
 			this.schemaLabel.setText(s.toString());
-			
+
 			this.schemaSelector.removeItemListener(this);
 			this.tableSelector.removeItemListener(this);
-			
+
 			this.schemaSelector.removeAllItems();
 			this.tableSelector.removeAllItems();
-			
+
 			//this.schemaSelector.addItem(ResourceMgr.getString("LabelLoadingProgress"));
 			//this.schemaSelector.setSelectedIndex(0);
-			
+
 			List schemas = this.dbConnection.getMetadata().getSchemas();
 			String user = this.dbConnection.getMetadata().getUserName();
-			
+
 			//this.schemaSelector.removeAllItems();
 			this.schemaSelector.addItem("*");
-			
+
 			int numSchemasFound = 0;
 			this.currentSchema = null;
-			
+
 			for (int i=0; i < schemas.size(); i++)
 			{
 				String schema = (String)schemas.get(i);
@@ -195,13 +196,13 @@ public class TableSelectorPanel
 			LogMgr.logError("TableSelectorPanel.retrieveSchemas()", "Could not retrieve schema list", e);
 		}
 	}
-	
+
 	public void setEnabled(boolean enable)
 	{
 		super.setEnabled(enable);
 		this.schemaSelector.setEnabled(enable);
 		this.tableSelector.setEnabled(enable);
-		
+
 		if (enable)
 		{
 			this.tableLabel.setForeground(Color.BLACK);
@@ -219,7 +220,7 @@ public class TableSelectorPanel
 		}
 		this.repaint();
 	}
-	
+
 	public void retrieveTables()
 	{
 		try
@@ -228,7 +229,7 @@ public class TableSelectorPanel
 			this.tableSelector.removeItemListener(this);
 			if (this.tablesOnly) types = new String[] { "TABLE"};
 			else types = new String[] { "TABLE", "VIEW" };
-			
+
 			DataStore tables = this.dbConnection.getMetadata().getTables(null, this.currentSchema, types);
 			tables.sortByColumn(DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, true);
 			this.tableSelector.removeAllItems();
@@ -260,26 +261,26 @@ public class TableSelectorPanel
 		if (!this.isEnabled()) return null;
 		Object selected = this.tableSelector.getSelectedItem();
 		if (selected == null) return null;
-		
+
 		if (selected instanceof TableIdentifier)
 		{
 			TableIdentifier id = (TableIdentifier)selected;
 			return id;
 		}
-		
+
 		String schema = (String)this.schemaSelector.getSelectedItem();
 		if ("*".equals(schema) || (schema != null && schema.length() == 0)) schema = null;
-		
+
 		String table = (String)selected;
-		
+
 		if (table == null || table.trim().length() == 0) return null;
 		return new TableIdentifier(schema, table);
 	}
-	
+
 	public void findAndSelectTable(String aTable)
 	{
 		if (aTable == null) return;
-		
+
 		int count = this.tableSelector.getItemCount();
 		for (int i=0; i < count; i++)
 		{
@@ -294,19 +295,19 @@ public class TableSelectorPanel
 				table = (String)item;
 			}
 			if (table == null) continue;
-			
-			if (aTable.equalsIgnoreCase(table)) 
+
+			if (aTable.equalsIgnoreCase(table))
 			{
 				this.tableSelector.setSelectedIndex(i);
 				break;
 			}
 		}
 	}
-	
+
 	public void itemStateChanged(ItemEvent e)
 	{
 		if (e.getStateChange() != ItemEvent.SELECTED) return;
-	
+
 		if (e.getSource() == this.schemaSelector)
 		{
 			this.currentSchema = (String)this.schemaSelector.getSelectedItem();
@@ -314,6 +315,7 @@ public class TableSelectorPanel
 			{
 				this.retrieveTables();
 			}
+			this.newTableId.setSchema(this.currentSchema);
 		}
 		else if (e.getSource() == this.tableSelector)
 		{
@@ -336,13 +338,13 @@ public class TableSelectorPanel
 			});
 		}
 	}
-	
+
 	private void firePropertyChange(TableIdentifier oldTable, TableIdentifier newTable)
 	{
 		if (this.client == null) return;
 		if (oldTable == null && newTable == null) return;
 		if (oldTable != null && newTable != null && oldTable.equals(newTable)) return;
-		
+
 		PropertyChangeEvent evt = new PropertyChangeEvent(this, this.clientPropName, oldTable, newTable);
 		this.client.propertyChange(evt);
 	}
@@ -365,7 +367,7 @@ public class TableSelectorPanel
 			}
 		}
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -462,5 +464,5 @@ public class TableSelectorPanel
   private javax.swing.JLabel tableLabel;
   private javax.swing.JComboBox tableSelector;
   // End of variables declaration//GEN-END:variables
-	
+
 }
