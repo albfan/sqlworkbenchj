@@ -56,10 +56,18 @@ public class PrintUtil
 	
 	public static void printPageFormat(String aName, PageFormat aFormat)
 	{
-		System.out.println(aName + ": width=" + aFormat.getWidth() + ",height=" + aFormat.getHeight() + 
-		                    ",imageableX=" + aFormat.getImageableX() + ",imageableY=" + aFormat.getImageableY() + 
-												",imageableWidth=" + aFormat.getImageableWidth() + ",imageableHeight=" + aFormat.getImageableHeight());
+		double width = aFormat.getPaper().getWidth();
+		double height = aFormat.getPaper().getHeight();
 		
+		double leftmargin = aFormat.getImageableX();
+		double rightmargin = width - leftmargin - aFormat.getImageableWidth();
+		
+		double topmargin = (int)aFormat.getImageableY();
+		double bottommargin = height - topmargin - aFormat.getImageableHeight();
+
+		System.out.println(aName + ": paper size=[" + width + "," + height + "]");
+		System.out.println(aName + ": imageable size=[" + aFormat.getImageableWidth() + "," + aFormat.getImageableHeight() + "]");
+		System.out.println(aName + ": margins (l,r,t,b)=" + leftmargin + "," + rightmargin + "," + topmargin + "," + bottommargin);
 	}
 
 	public static void main(String[] args)

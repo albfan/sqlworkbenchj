@@ -13,15 +13,20 @@ import java.awt.event.WindowListener;
 import java.awt.image.*;
 import java.util.*;
 import java.awt.print.*;
+import java.awt.print.Paper;
 import javax.print.attribute.Attribute;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.Size2DSyntax;
 import javax.print.attribute.standard.MediaPrintableArea;
+import javax.print.attribute.standard.MediaSize;
 import javax.print.attribute.standard.MediaSizeName;
 
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbToolbar;
@@ -44,6 +49,7 @@ public class PrintPreview
 	private JButton pageSetupButton;
 	private JButton printButton;
 	private JButton closeButton;
+	private JScrollPane scroll;
 	protected PreviewContainer preview;
 	
 	public PrintPreview(JFrame owner, TablePrinter target)
@@ -54,7 +60,10 @@ public class PrintPreview
 		{
 			setSize(500, 600);
 		}
-		WbSwingUtilities.center(this, owner);
+		if (!WbManager.getSettings().restoreWindowPosition(this))
+		{
+			WbSwingUtilities.center(this, owner);
+		}
 		getContentPane().setLayout(new BorderLayout());
 		this.printTarget = target;
 
@@ -87,12 +96,22 @@ public class PrintPreview
 		this.addWindowListener(this);
 		
 		this.preview = new PreviewContainer();
-		JScrollPane ps = new JScrollPane(this.preview);
-		getContentPane().add(ps, BorderLayout.CENTER);
+		this.scroll = new JScrollPane(this.preview);
+		adjustScrollbar();
+		
+		getContentPane().add(scroll, BorderLayout.CENTER);
 		
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		updateDisplay();
 		setVisible(true);
+	}
+	
+	private void adjustScrollbar()
+	{
+		this.scroll.getVerticalScrollBar().setBlockIncrement((int)printTarget.getPageFormat().getImageableHeight());
+		Font f = this.printTarget.getFont();
+		FontMetrics fm = this.getFontMetrics(f);
+		this.scroll.getVerticalScrollBar().setUnitIncrement((int)fm.getHeight());
 	}
 	
 	private void updateDisplay()
@@ -118,7 +137,6 @@ public class PrintPreview
 		{
 			while (true)
 			{
-				
 				BufferedImage img = new BufferedImage(pageWidth, pageHeight, BufferedImage.TYPE_INT_RGB);
 				Graphics2D g = img.createGraphics();
 				g.setColor(Color.white);
@@ -174,14 +192,11 @@ public class PrintPreview
 	{
 		PrinterJob prnJob = PrinterJob.getPrinterJob();
 		PageFormat oldFormat = this.printTarget.getPageFormat();
-		PrintUtil.printPageFormat("oldFormat", oldFormat);
 		
 		PageFormat newFormat = prnJob.pageDialog(oldFormat);
-		PrintUtil.printPageFormat("newFormat", oldFormat);
 		
 		if (!PrintUtil.pageFormatEquals(newFormat, oldFormat))
 		{
-			System.out.println("settings changed");
 			WbManager.getSettings().setPageFormat(newFormat);
 			this.printTarget.setPageFormat(newFormat);
 			updateDisplay();
@@ -202,8 +217,6 @@ public class PrintPreview
 		MediaPrintableArea area = new MediaPrintableArea(x,y,w,h,MediaPrintableArea.MM);
 		attr.add(area);
 
-		//pageFormat = prnJob.pageDialog(pageFormat);
-		//printTarget.setPageFormat(pageFormat);
 		PageFormat newFormat = prnJob.pageDialog(attr);
 		if (newFormat != null)
 		{
@@ -221,13 +234,8 @@ public class PrintPreview
 					System.out.println("media=" + WbMediaSizeName.getName(media));
 				}
 			}
-			System.out.println("new width (mm) =" + PrintUtil.pointsToMillimeter(newFormat.getWidth()));
-			System.out.println("new height (mm) =" + PrintUtil.pointsToMillimeter(newFormat.getHeight()));		
-			System.out.println("x = " + PrintUtil.pointsToMillimeter(newFormat.getImageableX()));
-			System.out.println("y = " + PrintUtil.pointsToMillimeter(newFormat.getImageableY()));
-			System.out.println("iw = " + PrintUtil.pointsToMillimeter(newFormat.getImageableWidth()));
-			System.out.println("ih = " + PrintUtil.pointsToMillimeter(newFormat.getImageableHeight()));
-			
+			this.printTarget.setPageFormat(newFormat);
+			this.updateDisplay();
 		}
 	}
 	
@@ -314,6 +322,7 @@ public class PrintPreview
 	public void saveSettings()
 	{
 		WbManager.getSettings().storeWindowSize(this);
+		WbManager.getSettings().storeWindowPosition(this);
 	}
 	
 	public void windowActivated(WindowEvent e)
@@ -472,5 +481,93 @@ public class PrintPreview
 			paintBorder(g);
 		}
 	}
+
+	public static void _main(String[] args)
+	{
+		try
+		{
+			PrinterJob prnJob = PrinterJob.getPrinterJob();
+			PrintRequestAttributeSet attr = new HashPrintRequestAttributeSet();
+			WbManager.getInstance().initSettings();
+			PageFormat pageFormat = WbManager.getInstance().getSettings().getPageFormat();
+			/*
+			PageFormat pageFormat = new PageFormat();
+			Paper p = new Paper();
+			
+			MediaSize size = MediaSize.getMediaSizeForName(MediaSizeName.ISO_A4);
+			
+			float a4width_points = (float)PrintUtil.millimeterToPoints(size.getX(Size2DSyntax.MM));
+			float a4height_points = (float)PrintUtil.millimeterToPoints(size.getY(Size2DSyntax.MM));
+			p.setSize(a4width_points, a4height_points);
+			
+			double x = PrintUtil.millimeterToPoints(20);
+			double y = PrintUtil.millimeterToPoints(20);
+			double w = a4width_points - (x * 2);
+			double h = a4height_points - (y * 2);
+			
+			p.setImageableArea(x,y, w,h);
+			
+			
+			//MediaPrintableArea area = new MediaPrintableArea(x,y,w,h,MediaPrintableArea.MM);
+			//attr.add(area);
+			//attr.add(MediaSizeName.ISO_A4);
+			pageFormat.setPaper(p);
+			*/
+			
+			MediaSize size = MediaSize.getMediaSizeForName(MediaSizeName.ISO_A4);
+			
+			float a4width_points = (float)PrintUtil.millimeterToPoints(size.getX(Size2DSyntax.MM));
+			float a4height_points = (float)PrintUtil.millimeterToPoints(size.getY(Size2DSyntax.MM));
+			System.out.println("a4size = [" + a4width_points + "," + a4height_points + "]");
+			
+			PrintUtil.printPageFormat("test", pageFormat);
+			
+			PageFormat newFormat = prnJob.pageDialog(pageFormat);
+			PrintUtil.printPageFormat("changed", newFormat);
+			WbManager.getSettings().setPageFormat(newFormat);
+			WbManager.getSettings().saveSettings();
+			System.exit(0);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 	
-}//
+	public static void main(String[] args)
+	{
+		int cols = 5;
+		int rows = 100;
+		
+		DefaultTableModel data = new DefaultTableModel(rows, cols);
+		for (int row = 0; row < rows; row ++)
+		{
+			for (int c = 0; c < cols; c++)
+			{
+				data.setValueAt("Test" + row + "/" + c, row, c);
+			}
+		}
+		JTable tbl = new JTable(data);
+		TableColumnModel mod = tbl.getColumnModel();
+		for (int c = 0; c < cols; c++)
+		{
+			mod.getColumn(c).setWidth(85);
+		}
+
+		try
+		{
+			PrinterJob pj=PrinterJob.getPrinterJob();
+			PageFormat page = pj.defaultPage();
+			TablePrinter printer = new TablePrinter(tbl, page, new Font("Courier New", Font.PLAIN, 12));
+			printer.setFooterText("Page");
+			PrintPreview preview = new PrintPreview((JFrame)null, printer);
+			System.out.println("done.");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		System.exit(0);
+	}
+	
+}

@@ -6,18 +6,12 @@
 
 package workbench.print;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Stroke;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
+
 
 /**
  *	This class is responsible for keeping a page definition while printing a JTable. 
@@ -27,6 +21,7 @@ import javax.swing.table.TableColumnModel;
  *  It is also not checked if the definition actually fits on the graphics context
  *  this calculation needs to be done prior to creating the TablePrintPages
  *
+ * @see TablePrinter
  * @author  thomas
  */
 public class TablePrintPage
@@ -45,6 +40,7 @@ public class TablePrintPage
 	private int lineSpacing;
 	private int colSpacing;
 	private String[] colHeaders;
+	private int[] colHeadersX;
 	
 	public TablePrintPage(JTable source, int startRow, int endRow, int startColumn, int endColumn)
 	{
@@ -91,6 +87,11 @@ public class TablePrintPage
 	public void setColumnWidths(int[] widths)
 	{
 		this.colWidth = widths;
+	}
+	
+	public void setColumnLabelsXPos(int[] xpos)
+	{
+		this.colHeadersX = xpos;
 	}
 	
 	public String toString()
@@ -140,7 +141,7 @@ public class TablePrintPage
 		{
 			if (this.colHeaders[col] != null)
 			{
-				pg.drawString(this.colHeaders[col], (int)x, (int)y);
+				pg.drawString(this.colHeaders[col], (int)x + this.colHeadersX[col], (int)y);
 			}
 			x += this.colWidth[col] + this.colSpacing;
 		}

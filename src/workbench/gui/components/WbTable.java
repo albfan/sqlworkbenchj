@@ -10,6 +10,7 @@ import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
+import java.awt.print.PageFormat;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -32,14 +33,19 @@ import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 
 import workbench.gui.actions.*;
+import workbench.gui.actions.PrintAction;
 import workbench.gui.renderer.DateColumnRenderer;
 import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RowStatusRenderer;
 import workbench.gui.renderer.ToolTipRenderer;
 import workbench.interfaces.Exporter;
 import workbench.interfaces.FontChangedListener;
+import workbench.interfaces.PrintableComponent;
 import workbench.interfaces.Searchable;
 import workbench.log.LogMgr;
+import workbench.print.PrintPreview;
+import workbench.print.PrintUtil;
+import workbench.print.TablePrinter;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -50,7 +56,7 @@ import workbench.util.StringUtil;
 public class WbTable
 extends JTable
 	implements ActionListener, FocusListener, MouseListener,
-	           Exporter, FontChangedListener, Searchable
+	           Exporter, FontChangedListener, Searchable, PrintableComponent
 {
 	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.YELLOW);
 	private JPopupMenu popup;
@@ -76,6 +82,9 @@ extends JTable
 	private DataToClipboardAction dataToClipboard;
 	private SaveDataAsAction exportDataAction;
 
+	private PrintAction printDataAction;
+	private PrintPreviewAction printPreviewAction;
+	
 	private boolean adjustToColumnLabel = false;
 	private int headerPopupY = -1;
 	private int headerPopupX = -1;
@@ -157,6 +166,12 @@ extends JTable
 		this.addPopupAction(this.findAction, true);
 		this.addPopupAction(this.findAgainAction, false);
 
+		this.printDataAction = new PrintAction(this);
+		this.popup.addSeparator();
+		this.popup.add(this.printDataAction.getMenuItem());
+		
+		this.printPreviewAction = new PrintPreviewAction(this);
+		
 		InputMap im = this.getInputMap(WHEN_FOCUSED);
 		ActionMap am = this.getActionMap();
 		this.findAction.addToInputMap(im, am);
@@ -233,11 +248,53 @@ extends JTable
 	public void addPopupAction(WbAction anAction, boolean withSep)
 	{
 		if (this.popup == null) this.popup = new JPopupMenu();
-		if (withSep) this.popup.addSeparator();
-		this.popup.add(anAction.getMenuItem());
+
+
+		if (this.printDataAction != null)
+		{
+			int count = this.popup.getComponentCount();
+			
+			if (withSep)
+			{
+				this.popup.add(new JPopupMenu.Separator(), this.popup.getComponentCount() - 2);
+			}
+			this.popup.add(anAction.getMenuItem(), this.popup.getComponentCount() - 2);
+		}
+		else
+		{
+			if (withSep) this.popup.addSeparator();
+			this.popup.add(anAction.getMenuItem());
+		}
 	}
 
 
+	public void printPreview()
+	{
+		TablePrinter printer = this.getTablePrinter();
+		
+		Window w = SwingUtilities.getWindowAncestor(this);
+		JFrame parent = null;
+		if (w instanceof JFrame)
+		{
+			parent = (JFrame)w;
+		}
+		PrintPreview preview = new PrintPreview(parent, printer);
+	}
+	
+	public void print()
+	{
+		this.getTablePrinter().startPrint();
+	}
+
+	private TablePrinter getTablePrinter()
+	{
+		PageFormat format = WbManager.getSettings().getPageFormat();
+		Font printerFont = WbManager.getSettings().getPrinterFont();
+		TablePrinter printer = new TablePrinter(this, format, printerFont);
+		printer.setFooterText(ResourceMgr.getString("TxtPageFooter"));
+		return printer;
+	}
+	
 	public synchronized void setModel(TableModel aModel)
 	{
 		this.setModel(aModel, false);
@@ -294,6 +351,8 @@ extends JTable
 		{
 			this.createDefaultColumnsFromModel();
 		}
+		if (this.printDataAction != null) this.printDataAction.setEnabled(this.getRowCount() > 0);
+		if (this.printPreviewAction != null) this.printPreviewAction.setEnabled(this.getRowCount() > 0);
 	}
 
 	public DataStoreTableModel getDataStoreTableModel()
@@ -313,6 +372,16 @@ extends JTable
 		}
 	}
 
+	public PrintPreviewAction getPrintPreviewAction()
+	{
+		return this.printPreviewAction;
+	}
+	
+	public PrintAction getPrintAction()
+	{
+		return this.printDataAction;
+	}
+	
 	public String getValueAsString(int row, int column)
 		throws IndexOutOfBoundsException
 	{

@@ -27,7 +27,7 @@ public class WbStringTokenizer
 	public WbStringTokenizer()
 	{
 	}
-	
+
 	public WbStringTokenizer(String aSource, String delimiter)
 	{
 		this(delimiter, false, "\"", false);
@@ -41,14 +41,14 @@ public class WbStringTokenizer
 		this.quoteChars = quoteChars;
 		this.keepQuotes = keepQuotes;
 	}
-	
+
 	/**
 	 *	Create a new tokenizer.
 	 *	If aDelim contains more then one character, the parameter isSingleDelimter indicates
-	 *  whether the given delimiter string should be considered one delimiter or a sequence
+	 *  whether the given delimiter string should be considered as one delimiter or a sequence
 	 *  of possible delimiter characters.
 	 *
-	 *	Once the Tokenizer is created, the string to be tokenized can be set with 
+	 *	Once the Tokenizer is created, the string to be tokenized can be set with
 	 *	setSourceString()
 	 *
 	 */
@@ -65,30 +65,30 @@ public class WbStringTokenizer
 		this.delimit = aDelimiter;
 		this.singleWordDelimiter = isSingleWord;
 	}
-	
+
 	public void setQuoteChars(String chars)
 	{
 		this.quoteChars = chars;
 	}
-	
+
 	public void setKeepQuotes(boolean aFlag)
 	{
 		this.keepQuotes = aFlag;
 	}
-	
+
 	public void setSourceFile(String aFilename)
 		throws IOException, FileNotFoundException
 	{
 		BufferedReader reader = new BufferedReader(new FileReader(aFilename));
 		this.initTokenizer(reader);
 	}
-	
+
 	public void setSourceString(String aString)
 	{
 		StringReader reader = new StringReader(aString);
 		this.initTokenizer(reader);
 	}
-	
+
 	private void initTokenizer(Reader aReader)
 	{
 		this.lastToken = 0;
@@ -110,7 +110,7 @@ public class WbStringTokenizer
 	{
 		return this.lastToken != StreamTokenizer.TT_EOF;
 	}
-	
+
 	public String nextToken()
 	{
 		int token;
@@ -122,18 +122,18 @@ public class WbStringTokenizer
 		StringBuffer current = null;
 		boolean tokenFound = false;
 		String result = null;
-		
+
 		try
 		{
 			while (true)
 			{
 				token = this.tokenizer.nextToken();
 				this.lastToken = token;
-				
+
 				switch (token)
 				{
 					case StreamTokenizer.TT_EOF:
-						if (current != null) 
+						if (current != null)
 							return current.toString();
 						else
 							return null;
@@ -155,7 +155,7 @@ public class WbStringTokenizer
 							{
 								if (token == this.delimit.charAt(delimIndex))
 								{
-									if (delimIndex < maxDelim ) 
+									if (delimIndex < maxDelim )
 									{
 										delimIndex ++;
 										inDelimit = true;
@@ -190,7 +190,7 @@ public class WbStringTokenizer
 		{
 			return null;
 		}
-			
+
 	}
 
 	public static void main(String[] args)

@@ -407,6 +407,9 @@ public class DbMetadata
 			String cat = tableRs.getString(1);
 			String schem = tableRs.getString(2);
 			String name = tableRs.getString(3);
+			if (name == null) continue; 
+			// filter out "internal" synonyms for Oracle
+			if (this.isOracle && name.startsWith("/")) continue;
 			String ttype = tableRs.getString(4);
 			String rem = tableRs.getString(5);
 			int row = result.addRow();
@@ -618,11 +621,7 @@ public class DbMetadata
 
 	public void enableOutput(long aLimit)
 	{
-    if (!this.isOracle)
-		{
-			LogMgr.logWarning("DbMetadata.enableOutput()", "This is not an Oracle connection! Ignoring call to enableOutput()");
-			return;
-		}
+    if (!this.isOracle)	return;
 
 		if (this.oraOutput == null)
 		{
@@ -642,11 +641,9 @@ public class DbMetadata
 			try
 			{
 				this.oraOutput.enable(aLimit);
-				LogMgr.logInfo("DbMetadata.enableOutput", "Support for DBMS_OUTPUT package enabled");
 			}
 			catch (Throwable e)
 			{
-				e.printStackTrace();
 				LogMgr.logError("DbMetadata.enableOutput()", "Error when enabling DbmsOutput", e);
 			}
 		}
@@ -656,7 +653,6 @@ public class DbMetadata
 	{
     if (!this.isOracle)
 		{
-			LogMgr.logWarning("DbMetadata.disableOutput()", "This is not an Oracle connection! Ignoring call to disableOutput()");
 			return;
 		}
 		if (this.oraOutput != null)
@@ -664,11 +660,9 @@ public class DbMetadata
 			try
 			{
 				this.oraOutput.disable();
-				LogMgr.logInfo("DbMetadata.enableOutput", "Support for DBMS_OUTPUT package disabled");
 			}
 			catch (Throwable e)
 			{
-				e.printStackTrace();
 				LogMgr.logError("DbMetadata.disableOutput()", "Error when disabling DbmsOutput", e);
 			}
 		}
@@ -1116,6 +1110,11 @@ public class DbMetadata
 		}
 		catch (Exception e)
 		{
+		}
+		if (this.isOracle)
+		{
+			result.add("PUBLIC");
+			Collections.sort(result);
 		}
 		return result;
 	}

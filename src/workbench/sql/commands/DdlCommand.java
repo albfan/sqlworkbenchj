@@ -141,12 +141,14 @@ public class DdlCommand extends SqlCommand
       }
     }
 		if (type == null || name == null) return false;
-		// get rid off any paranthesis at the end of the word
-
-		if (name.endsWith("("))
+		
+		// remove anything behind the ( to get the real object name
+		tok = new StringTokenizer(name, "(");
+		if (tok.hasMoreTokens())
 		{
-			name = name.substring(0, name.length() - 1);
+			name = tok.nextToken();
 		}
+		
     String msg = aConnection.getMetadata().getExtendedErrorInfo(null, type, name);
 		if (msg != null && msg.length() > 0)
 		{

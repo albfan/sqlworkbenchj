@@ -540,10 +540,14 @@ public class WbManager implements FontChangedListener
 		if (trace) System.out.println("WbManager.initCmdLine() - done");
 	}
 
+	public void initSettings()
+	{
+		this.settings = new Settings();
+	}
 	public void init()
 	{
 		if (trace) System.out.println("WbManager.init() - start");
-		this.settings = new Settings();
+		this.initSettings();
 		if (!this.batchMode)
 		{
 			WbSplash splash = null;

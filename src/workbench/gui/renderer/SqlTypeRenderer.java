@@ -25,7 +25,6 @@ public class SqlTypeRenderer extends DefaultTableCellRenderer
 	private Color unselectedForeground;
 	private Color unselectedBackground;
 	
-	/** Creates a new instance of NumberColumnRenderer */
 	public SqlTypeRenderer()
 	{
 	}

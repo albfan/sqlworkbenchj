@@ -35,8 +35,10 @@ public class ToolTipRenderer
 	private Rectangle paintIconR = new Rectangle();
 	private Rectangle paintTextR = new Rectangle();
 	private Rectangle paintViewR = new Rectangle();
-	private Insets paintViewInsets = new Insets(0, 0, 0, 0);
-	private Insets emptyInsets = new Insets(0, 0, 0, 0);
+	private static Insets paintViewInsets = new Insets(0, 0, 0, 0);
+	private static Insets emptyInsets = new Insets(0, 0, 0, 0);
+
+	private boolean isPrinting = false;
 	
 	public static final ToolTipRenderer DEFAULT_TEXT_RENDERER = new ToolTipRenderer();
 	
@@ -55,6 +57,8 @@ public class ToolTipRenderer
 	
 	public static final String[] EMPTY_DISPLAY = new String[] { StringUtil.EMPTY_STRING, null };
 	
+	public boolean debug = false;
+	
 	public ToolTipRenderer()
 	{
 	}
@@ -67,6 +71,10 @@ public class ToolTipRenderer
 	public void setHorizontalAlignment(int align)
 	{
 		this.halign = align;
+	}
+	public int getHorizontalAlignment()
+	{
+		return this.halign;
 	}
 
 	public Component getTableCellRendererComponent(	JTable table,
@@ -103,6 +111,9 @@ public class ToolTipRenderer
 	
 	public void paint(Graphics g)
 	{
+		int w = this.getWidth();
+		int h = this.getHeight();
+		
 		FontMetrics fm = g.getFontMetrics();
 
 		Insets insets;
@@ -116,8 +127,6 @@ public class ToolTipRenderer
 			insets = emptyInsets;
 		}
 			
-		int w = this.getWidth();
-		int h = this.getHeight();
 		paintViewR.x = insets.left;
 		paintViewR.y = insets.top;
 		paintViewR.width = w - (insets.left + insets.right);
@@ -138,9 +147,10 @@ public class ToolTipRenderer
 						,paintViewR, paintIconR, paintTextR, 0);
 		
 		int textX = paintTextR.x;
+		if (textX < 0) textX = 0;
 		int textY = paintTextR.y + fm.getAscent();
-		
-		
+		if (textY < 0) textY = 0;
+
 		if (this.selected)
 		{
 			g.setColor(selectedBackground);
@@ -154,10 +164,18 @@ public class ToolTipRenderer
 			g.setColor(unselectedForeground);
 		}
 		g.drawString(clippedText, textX, textY);
+
 		if (focus) 
 		{
 			WbTable.FOCUSED_CELL_BORDER.paintBorder(this, g, 0, 0, w, h);
 		}
+	}
+
+	public void print(Graphics g)
+	{
+		this.isPrinting = true;
+		super.print(g);
+		this.isPrinting = false;
 	}
 	
   protected void firePropertyChange(String propertyName, Object oldValue, Object newValue) {}
@@ -179,30 +197,6 @@ public class ToolTipRenderer
 				tooltip = null;
 			else
 				tooltip = display;
-			/* HTML parsing no longer need as we are using 
-			 * MultiLineToolTip now which (I think) is 
-			 * faster than building a new StringBuffer with 
-			 * HTML code
-			 */
-			/*
-			int len = display.length();
-			if (len > 0 && len < 100)
-			{
-				Matcher m = StringUtil.PATTERN_CRLF.matcher(display);
-				if (m.find())
-				{
-					StringBuffer tip = new StringBuffer(display.length() + 50);
-					tip.append("<html>");
-					tip.append(m.replaceAll("<br>"));
-					tip.append("</html>");
-					tooltip = tip.toString();
-				}
-				else
-				{
-					tooltip = display;
-				}
-			}
-			*/
 			displayResult[0] = display;
 			displayResult[1] = tooltip;
 		}

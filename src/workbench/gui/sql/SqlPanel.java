@@ -28,6 +28,7 @@ import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.*;
+import workbench.gui.actions.PrintAction;
 import workbench.gui.components.*;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.menu.TextPopup;
@@ -90,7 +91,9 @@ public class SqlPanel
 	private CopyAsSqlInsertAction copyAsSqlInsert;
 	private CreateDeleteScriptAction createDeleteScript;
 	private ImportFileAction importFileAction;
-
+	private PrintAction printDataAction;
+	private PrintPreviewAction printPreviewAction;
+	
 	private OptimizeAllColumnsAction optimizeAllCol;
 
 	private SpoolDataAction spoolData;
@@ -485,7 +488,10 @@ public class SqlPanel
 
 		this.importFileAction = new ImportFileAction(this);
 		this.actions.add(this.importFileAction);
-
+		
+		this.printDataAction = this.data.getTable().getPrintAction();
+		this.printPreviewAction = this.data.getTable().getPrintPreviewAction();
+		
 		this.actions.add(this.executeAll);
 		this.actions.add(this.executeSelected);
 		this.actions.add(this.executeCurrent);
@@ -524,6 +530,7 @@ public class SqlPanel
 		this.findAction.setCreateMenuSeparator(true);
 		this.findAgainAction = this.data.getTable().getFindAgainAction();
 		this.findAgainAction.setEnabled(false);
+		
 
 		WbAction action = new CreateSnippetAction(this.editor);
 		action.setCreateMenuSeparator(true);
@@ -545,6 +552,9 @@ public class SqlPanel
 		this.findAction.setCreateMenuSeparator(true);
 		this.actions.add(this.findAction);
 		this.actions.add(this.findAgainAction);
+		this.printDataAction.setCreateMenuSeparator(true);
+		this.actions.add(this.printDataAction);
+		this.actions.add(this.printPreviewAction);
 	}
 	
 	private void setupActionMap()
@@ -1481,7 +1491,7 @@ public class SqlPanel
 	{
 		boolean hasResult = this.data.hasResultSet();
 		this.setActionState(new Action[] {this.findAction, this.dataToClipboard, this.exportDataAction, this.optimizeAllCol}, hasResult);
-
+		
 		boolean mayEdit = hasResult && this.data.hasUpdateableColumns();
 		this.setActionState(this.data.getStartEditAction(), mayEdit);
 		this.setActionState(this.createDeleteScript, mayEdit);

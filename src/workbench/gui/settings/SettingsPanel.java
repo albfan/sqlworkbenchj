@@ -38,6 +38,7 @@ public class SettingsPanel extends javax.swing.JPanel
 		this.fontsComboBox.addItem(new FontListEntry(Settings.EDITOR_FONT_KEY));
 		this.fontsComboBox.addItem(new FontListEntry(Settings.STANDARD_FONT_KEY));
 		this.fontsComboBox.addItem(new FontListEntry(Settings.MSGLOG_FONT_KEY));
+		this.fontsComboBox.addItem(new FontListEntry(Settings.PRINTER_FONT_KEY));
 		this.fontsComboBox.setSelectedIndex(0);
 	}
 	

@@ -9,6 +9,9 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
+import java.awt.print.PageFormat;
+import java.awt.print.Paper;
+import java.awt.print.PrinterJob;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,6 +31,7 @@ import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
+import workbench.print.PrintUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
 
@@ -42,8 +46,10 @@ public class Settings
 	public static final String STANDARD_FONT_KEY = "standard";
 	public static final String MSGLOG_FONT_KEY = "msglog";
 	public static final String DATA_FONT_KEY = "data";
+	public static final String PRINTER_FONT_KEY = "printer";
 
 	private WbProperties props;
+	private Font printerFont;
 	private Font standardFont;
 	private Font editorFont;
 	private Font msgLogFont;
@@ -228,21 +234,47 @@ public class Settings
 	{
 		if (this.dataFont == null)
 		{
-			this.dataFont = this.getFont("data");
+			this.dataFont = this.getFont(DATA_FONT_KEY);
 		}
 		return this.dataFont;
 	}
 
+	public Font getPrinterFont()
+	{
+		if (this.printerFont == null)
+		{
+			this.printerFont = this.getFont(PRINTER_FONT_KEY);
+			if (this.printerFont == null)
+			{
+				this.printerFont = this.getDataFont();
+			}
+		}
+		return this.printerFont;
+	}
+	
+	public Font getFont(String aFontName)
+	{
+		return this.getFont(aFontName, true);
+	}
+	
 	/**
 	 *	Returns the font configured for this keyword
 	 */
-	public Font getFont(String aFontName)
+	public Font getFont(String aFontName, boolean returnDefault)
 	{
 		if (WbManager.trace) System.out.println("Setting.getFont() - start");
 		Font result;
 
 		String baseKey = new StringBuffer("workbench.font.").append(aFontName).toString();
-		String name = this.props.getProperty(baseKey + ".name", "Dialog");
+		String name = null;
+		
+		if (returnDefault)
+			name = this.props.getProperty(baseKey + ".name", "Dialog");
+		else
+			name = this.props.getProperty(baseKey + ".name", null);
+		
+		if (name == null) return null;
+		
 		String sizeS = this.props.getProperty(baseKey + ".size", "11");
 		String type = this.props.getProperty(baseKey + ".style", "Plain");
 		int style = Font.PLAIN;
@@ -268,6 +300,123 @@ public class Settings
 		return result;
 	}
 
+	public PageFormat getPageFormat()
+	{
+		double leftmargin = this.getPrintMarginLeft();
+		double rightmargin = this.getPrintMarginRight();
+		
+		double topmargin = this.getPrintMarginTop();
+		double bottommargin = this.getPrintMarginBottom();
+
+		PageFormat page = new PageFormat(); 
+		page.setOrientation(this.getPrintOrientation());
+		
+		Paper paper = null;
+		double width = this.getPrintPaperWidth();
+		double height = this.getPrintPaperHeight();
+		
+		if (width > 0 && height > 0)
+		{
+			paper = new Paper();
+			paper.setSize(width, height);
+		}
+		else
+		{
+			paper = page.getPaper();
+			width = paper.getWidth();
+			height = paper.getHeight();
+		}
+		paper.setImageableArea(leftmargin, topmargin, width - leftmargin - rightmargin, height - topmargin - bottommargin);
+		page.setPaper(paper);
+		return page;
+	}
+
+	private int getPrintOrientation()
+	{
+		return StringUtil.getIntValue(this.props.getProperty("print.paper.orientation"), PageFormat.PORTRAIT);
+	}
+	
+	private void setPrintOrientation(int aValue)
+	{
+		this.props.setProperty("workbench.print.orientation", Integer.toString(aValue));
+	}
+	
+	private double getPrintPaperWidth()
+	{
+		return StringUtil.getDoubleValue(this.props.getProperty("workbench.print.paper.width"), -1);
+	}
+	
+	private double getPrintPaperHeight()
+	{
+		return StringUtil.getDoubleValue(this.props.getProperty("workbench.print.paper.height"), -1);
+	}
+	
+	public void setPageFormat(PageFormat aFormat)
+	{
+		Paper p = aFormat.getPaper();
+		double width = p.getWidth();
+		double height = p.getHeight();
+		
+		double leftmargin = aFormat.getImageableX();
+		double rightmargin = width - leftmargin - aFormat.getImageableWidth();
+		
+		double topmargin = aFormat.getImageableY();
+		double bottommargin = height - topmargin - aFormat.getImageableHeight();
+		
+		this.setPrintMarginLeft(leftmargin);
+		this.setPrintMarginRight(rightmargin);
+		this.setPrintMarginTop(topmargin);
+		this.setPrintMarginBottom(bottommargin);
+		
+		this.props.setProperty("workbench.print.paper.width", Double.toString(width));
+		this.props.setProperty("workbench.print.paper.height", Double.toString(height));
+		this.props.setProperty("workbench.print.orientation", Integer.toString(aFormat.getOrientation()));
+	}
+	
+	public void setPrintMarginLeft(double aValue)
+	{
+		this.setPrintMargin("left", aValue);
+	}
+	public void setPrintMarginRight(double aValue)
+	{
+		this.setPrintMargin("right", aValue);
+	}
+	public void setPrintMarginTop(double aValue)
+	{
+		this.setPrintMargin("top", aValue);
+	}
+	public void setPrintMarginBottom(double aValue)
+	{
+		this.setPrintMargin("bottom", aValue);
+	}
+	
+	public double getPrintMarginLeft()
+	{
+		return this.getPrintMargin("left");
+	}
+	public double getPrintMarginRight()
+	{
+		return this.getPrintMargin("right");
+	}
+	public double getPrintMarginTop()
+	{
+		return this.getPrintMargin("top");
+	}
+	public double getPrintMarginBottom()
+	{
+		return this.getPrintMargin("bottom");
+	}
+	
+	private void setPrintMargin(String aKey, double aValue)
+	{
+		this.props.setProperty("workbench.print.margin." + aKey, Double.toString(aValue));
+	}
+	
+	private double getPrintMargin(String aKey)
+	{
+		return StringUtil.getDoubleValue(this.props.getProperty("workbench.print.margin." + aKey, "72"),72);
+	}
+	
 	public void setFont(String aFontName, Font aFont)
 	{
 		String baseKey = new StringBuffer("workbench.font.").append(aFontName).toString();
@@ -294,6 +443,8 @@ public class Settings
 			this.standardFont = aFont;
 		else if (aFontName.equals(DATA_FONT_KEY))
 			this.dataFont = aFont;
+		else if (aFontName.equals(PRINTER_FONT_KEY))
+			this.printerFont = aFont;
 
 		this.fireFontChangedEvent(aFontName, aFont);
 	}

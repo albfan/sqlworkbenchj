@@ -31,6 +31,7 @@ import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.dbobjects.DbExplorerPanel;
 import workbench.gui.dbobjects.DbExplorerWindow;
+import workbench.gui.html.HtmlViewer;
 import workbench.gui.menu.SqlTabPopup;
 import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.gui.settings.SettingsPanel;
@@ -89,6 +90,8 @@ public class MainWindow
 	private boolean isProfileWorkspace = false;
 	private boolean workspaceLoaded = false;
 
+	private HtmlViewer helpWindow;
+	
 	/** Creates new MainWindow */
 	public MainWindow()
 	{
@@ -307,12 +310,13 @@ public class MainWindow
 			this.appendMacros(menu, (SqlPanel)aPanel);
 		}
 		
-		action = new FileExitAction();
 		menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_FILE);
 		menu.addSeparator();
 		menu.add(new ManageMacrosAction(this));
 		menu.add(new ManageDriversAction(this));
 		menu.addSeparator();
+		
+		action = new FileExitAction();
 		menu.add(action.getMenuItem());
 
 		menuBar.add(this.buildToolsMenu());
@@ -625,16 +629,22 @@ public class MainWindow
 		boolean connected = false;
 		try
 		{
+			this.connecting = true;
+			this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			
 			this.disconnect(false);
 			this.isProfileWorkspace = false;
-			this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			
+			this.showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
+			this.loadWorkspaceForProfile(aProfile);
+			
 			this.showStatusMessage(ResourceMgr.getString("MsgConnecting"));
-			//this.paint(this.getGraphics());
 			
 			try
 			{
 				ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
 				WbConnection conn = null;
+				
 
 				if (aProfile.getUseSeperateConnectionPerTab())
 				{
@@ -660,7 +670,6 @@ public class MainWindow
 				{
 					this.getCurrentPanel().showLogMessage(warn);
 				}
-				this.loadWorkspaceForProfile(aProfile);
 				
 				this.currentProfile = aProfile;
 				connected = true;
@@ -698,6 +707,7 @@ public class MainWindow
 		{
 			this.showStatusMessage("");
 			this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			this.connecting = false;
 		}
 		this.setMacroMenuEnabled(connected);
 		this.updateWindowTitle();
@@ -711,6 +721,7 @@ public class MainWindow
 	
 	private void loadWorkspaceForProfile(ConnectionProfile aProfile)
 	{
+		//this.showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
 		String realFilename = null;
 		try
 		{
@@ -745,6 +756,10 @@ public class MainWindow
 		{
 			LogMgr.logError("MainWindow.loadCurrentWorkspace()", "Error reading workspace " + realFilename, e);
 			this.loadDefaultWorkspace();
+		}
+		finally
+		{
+			//this.showStatusMessage("");
 		}
 	}
 	
@@ -910,8 +925,6 @@ public class MainWindow
 		if (connecting) return;
 		try
 		{
-			// prevent a second
-			this.connecting = true;
 			WbSwingUtilities.showWaitCursor(this);
 			ProfileSelectionDialog dialog = new ProfileSelectionDialog(this, true);
 			WbSwingUtilities.center(dialog, this);
@@ -932,10 +945,6 @@ public class MainWindow
 		catch (Throwable th)
 		{
 			LogMgr.logError("MainWindow.selectConnection()", "Error during connect", th);
-		}
-		finally
-		{
-			this.connecting = false;
 		}
 	}
 
@@ -1652,7 +1661,14 @@ public class MainWindow
 			{
 				try
 				{
-					BrowserLauncher.openURL("www.kellerer.org/workbench/manual/SQL Workbench Manual.html");
+					//BrowserLauncher.openURL("www.kellerer.org/workbench/manual/SQL Workbench Manual.html");
+					if (this.helpWindow == null)
+					{
+						this.helpWindow = new HtmlViewer(this);
+					}
+					this.helpWindow.show();
+					this.helpWindow.requestFocus();
+					
 				}
 				catch (Exception ex)
 				{

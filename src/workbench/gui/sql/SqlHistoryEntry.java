@@ -64,7 +64,7 @@ public class SqlHistoryEntry
 		{
 			editor.setText(this.text);
 			if (this.cursorPos > -1) editor.setCaretPosition(this.cursorPos);
-			if (this.selectionStart > -1 && this.selectionEnd > this.selectionStart && this.selectionStart < editor.getCaretPosition())
+			if (this.selectionStart > -1 && this.selectionEnd > this.selectionStart /*&& this.selectionStart < editor.getCaretPosition()*/)
 			{
 				editor.setSelectionStart(this.selectionStart);
 				editor.setSelectionEnd(this.selectionEnd);

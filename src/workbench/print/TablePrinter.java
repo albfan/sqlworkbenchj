@@ -6,32 +6,40 @@
 
 package workbench.print;
 
+import java.awt.*;
 /**
  *
  * @author  thomas
  */
-import javax.swing.*;
-import javax.swing.table.*;
-import java.awt.print.*;
-import java.util.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.geom.*;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.print.PageFormat;
-import java.awt.print.Pageable;
-import javax.swing.DebugGraphics;
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-import workbench.resource.ResourceMgr;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
-public class TablePrinter implements Printable, Pageable
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
+import java.awt.print.*;
+import javax.swing.*;
+import javax.swing.table.TableCellRenderer;
+import workbench.gui.renderer.ToolTipRenderer;
+
+/**
+ *	Prints the content of a JTable.
+ *	Usage:
+<pre>
+PrinterJob job = PrinterJob.getPrintJob();
+PageFormat format = job.defaultPage();
+Font f = new Font("Courier New", Font.PLAIN, 10);
+TablePrinter printer = new TablePrinter(theTable, format, printerFont);
+printer.setFooterText("Page");
+printer.startPrint();
+</pre>
+ *  The printout will be started in a separate thread on the default printer.
+ */
+public class TablePrinter 
+	implements Printable, Pageable
 {
-	private static final int PRINT_DATA = 0;
-	private static final int PRINT_COMPONENT = 1;
-	
+	/**
+	 *	The PageFormat to be used when printing
+	 */
 	private PageFormat format;
 	private JTable table;
 	private int pageCount = -1;
@@ -123,12 +131,12 @@ public class TablePrinter implements Printable, Pageable
 
 		if (this.printFont == null)	this.printFont = table.getFont();
 		
-		FontMetrics fm = this.table.getGraphics().getFontMetrics(this.printFont);
-    int lineHeight = fm.getAscent() + this.lineSpacing;
+		FontMetrics fm = this.table.getFontMetrics(this.printFont);
+    int lineHeight = fm.getMaxAscent() + this.lineSpacing;
 		
 		if (this.headerText != null) pageHeight -= lineHeight;
 		if (this.footerText != null) pageHeight -= lineHeight;
-		pageHeight -= lineHeight; // reserve one row for the column headers
+		pageHeight -= (lineHeight + 10); // reserve one row for the column headers
 		
     int rowsPerPage = (int)(pageHeight / lineHeight);
     TableColumnModel colModel = table.getColumnModel();
@@ -140,12 +148,12 @@ public class TablePrinter implements Printable, Pageable
 		int currentPageWidth = 0;
 		int[] width = new int[colCount]; // stores the width for each column
 		
-		
 		// stores the column number where a horizontal page needs to be 
 		// created
 		
 		int[] colPageBreaks = new int[colCount]; 
 		this.colHeaders = new String[colCount];
+		int[] colHeaderX = new int[colCount];
 		int pagesAcross = 1;
 		
 		Rectangle paintIconR = new Rectangle();
@@ -167,14 +175,28 @@ public class TablePrinter implements Printable, Pageable
 			paintIconR.x = paintIconR.y = paintIconR.width = paintIconR.height = 0;
 			paintTextR.x = paintTextR.y = paintTextR.width = paintTextR.height = 0;
 
+			int halign = SwingConstants.LEFT;
+			
+			Class clz = this.table.getColumnClass(col);
+			TableCellRenderer rend = this.table.getDefaultRenderer(clz);
+			if (rend instanceof JLabel)
+			{
+				halign = ((JLabel)rend).getHorizontalAlignment();
+			}
+			else if (rend instanceof ToolTipRenderer)
+			{
+				halign = ((ToolTipRenderer)rend).getHorizontalAlignment();
+			}
+			
 			this.colHeaders[col] = 
 					SwingUtilities.layoutCompoundLabel(fm,title,(Icon)null
 							,SwingConstants.TOP 
-							,SwingConstants.LEFT
+							,halign
 							,SwingConstants.TOP
 							,SwingConstants.RIGHT
 							,paintViewR, paintIconR, paintTextR, 0);
 			
+			colHeaderX[col] = paintTextR.x;
 			
 			//System.out.println("col=" + col + ",colWidth=" + width[col] +",currentPageWidth="+ currentPageWidth + ",width=" + pageWidth);
 			if ((currentPageWidth + width[col] + colSpacing) >= pageWidth)
@@ -217,6 +239,7 @@ public class TablePrinter implements Printable, Pageable
 				p.setSpacing(lineSpacing, colSpacing);
 				p.setColumnHeaders(this.colHeaders);
 				p.setColumnWidths(width);
+				p.setColumnLabelsXPos(colHeaderX);
 				p.setFont(this.printFont);
 				this.pages[currentPage] = p;
 				currentPage ++;
@@ -229,9 +252,8 @@ public class TablePrinter implements Printable, Pageable
 		throws PrinterException
 	{
 		Graphics2D pg = (Graphics2D)g;
-		
     if (pageIndex >= this.pageCount) return NO_SUCH_PAGE;
-
+		
     double startx = pageFormat.getImageableX();
 		double starty = pageFormat.getImageableY();
 		
@@ -241,15 +263,20 @@ public class TablePrinter implements Printable, Pageable
 		pg.translate(startx, starty);
 		AffineTransform oldTransform= pg.getTransform();
 		
+    pg.setColor(Color.BLACK);
+		pg.setFont(this.printFont);
 		TablePrintPage p = this.pages[pageIndex];
+		
+		String footer = this.footerText + " " + p.getPageIndexDisplay() + "/" + (this.pageCount);
+		FontMetrics fm = pg.getFontMetrics(this.printFont);
+		Rectangle2D bounds = fm.getStringBounds(footer, pg);
+		double len = bounds.getWidth();
+		
+    pg.drawString(footer, (int)((wPage - len)/2), (int)(hPage - lineSpacing) );
+		
 		p.print(pg);
 		
 		pg.setTransform(oldTransform);
-		pg.setClip(null);
-		
-    pg.setColor(Color.BLACK);
-		String footer = this.footerText + " " + p.getPageIndexDisplay() + "/" + (this.pageCount);
-    pg.drawString(footer, (int)(wPage/2-footer.length()/2), (int)(hPage - lineSpacing) );
 
     return PAGE_EXISTS;
   }
@@ -271,62 +298,4 @@ public class TablePrinter implements Printable, Pageable
 		return this;
 	}
 
-	public static void main(String[] args)
-	{
-		try
-		{
-			PageFormat format = PrinterJob.getPrinterJob().defaultPage();
-			System.out.println("width=" + format.getWidth());
-			System.out.println("height=" + format.getHeight());
-			System.out.println("x=" + format.getImageableX());
-			System.out.println("y=" + format.getImageableY());
-			System.out.println("i-width=" + format.getImageableWidth() );
-			System.out.println("i-height=" + format.getImageableHeight());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-	public static void _main(String[] args)
-	{
-		int cols = 5;
-		int rows = 15;
-		
-		DefaultTableModel data = new DefaultTableModel(rows, cols);
-		for (int row = 0; row < rows; row ++)
-		{
-			for (int c = 0; c < cols; c++)
-			{
-				data.setValueAt("Test" + row + "/" + c, row, c);
-			}
-		}
-		JTable tbl = new JTable(data);
-		TableColumnModel mod = tbl.getColumnModel();
-		for (int c = 0; c < cols; c++)
-		{
-			mod.getColumn(c).setWidth(85);
-		}
-
-		try
-		{
-			PrinterJob pj=PrinterJob.getPrinterJob();
-			PageFormat page = pj.defaultPage();
-			Paper p = page.getPaper();
-			//p.setImageableArea(PrintUtil.millimeterToPoints(10), PrintUtil.millimeterToPoints(10), PrintUtil.millimeterToPoints(190), PrintUtil.millimeterToPoints(265));
-			//page.setPaper(p);
-			TablePrinter printer = new TablePrinter(tbl, page, new Font("Courier New", Font.PLAIN, 12));
-			printer.setFooterText("Page");
-			//printer.setPageFormat(page);
-			
-			PrintPreview preview = new PrintPreview((JFrame)null, printer);
-			System.out.println("done.");
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		System.exit(0);
-		//PrintPreview preview = new PrintPreview(printer);
-	}
 }

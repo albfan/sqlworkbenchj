@@ -109,10 +109,13 @@ public class DwStatusBar extends javax.swing.JPanel
 	public void setRowcount(int count)
 	{
 		this.tfRowCount.setText(Integer.toString(count));
+		this.doRepaint();
 	}
+	
 	public void setMaxRows(int max)
 	{
 		this.tfMaxRows.setText(Integer.toString(max));
+		this.doRepaint();
 	}
 
 	public void clearRowcount()
@@ -137,6 +140,7 @@ public class DwStatusBar extends javax.swing.JPanel
 	public void clearStatusMessage()
 	{
 		this.tfStatus.setText(this.readyMsg);
+		this.doRepaint();
 	}
 
 	public int getMaxRows()

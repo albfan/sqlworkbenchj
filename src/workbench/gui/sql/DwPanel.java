@@ -23,6 +23,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteRowAction;
 import workbench.gui.actions.InsertRowAction;
 import workbench.gui.actions.OptimizeAllColumnsAction;
+import workbench.gui.actions.PrintAction;
 import workbench.gui.actions.StartEditAction;
 import workbench.gui.actions.UpdateDatabaseAction;
 
@@ -74,6 +75,7 @@ public class DwPanel
 	private InsertRowAction insertRow = null;
 	private DeleteRowAction deleteRow = null;
 	private StartEditAction startEdit = null;
+	
 	private boolean editingStarted = false;
 	private boolean batchUpdate = false;
 	private boolean manageUpdateAction = false;

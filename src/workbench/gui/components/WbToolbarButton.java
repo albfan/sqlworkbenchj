@@ -23,7 +23,12 @@ public class WbToolbarButton extends javax.swing.JButton
 	{
 		super();
 	}
-	/** Creates a new instance of WbToolbarButton */
+
+	public WbToolbarButton(String aText)
+	{
+		super(aText);
+		this.setMargin(MARGIN);
+	}
 	public WbToolbarButton(Action a)
 	{
 		super(a);

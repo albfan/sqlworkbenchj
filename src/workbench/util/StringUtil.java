@@ -132,6 +132,22 @@ public class StringUtil
 		}
 		return result.toString();
 	}
+	
+	public static double getDoubleValue(String aValue, double aDefault)
+	{
+		if (aValue == null) return aDefault;
+		
+		double result = aDefault;
+		try
+		{
+			result = Double.parseDouble(aValue);
+		}
+		catch (NumberFormatException e)
+		{
+		}
+		return result;
+	}
+	
 	public static int getIntValue(String aValue)
 	{
 		return getIntValue(aValue, 0);
@@ -139,6 +155,8 @@ public class StringUtil
 
 	public static int getIntValue(String aValue, int aDefault)
 	{
+		if (aValue == null) return aDefault;
+		
 		int result = aDefault;
 		try
 		{

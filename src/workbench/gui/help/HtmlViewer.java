@@ -7,17 +7,20 @@
 package workbench.gui.html;
 
 import java.awt.BorderLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.FileInputStream;
 import java.net.URL;
+import java.util.Enumeration;
 import javax.swing.*;
 import javax.swing.JDialog;
 import javax.swing.JTextPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.text.AttributeSet;
 import javax.swing.text.Element;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
@@ -25,6 +28,7 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.HTMLFrameHyperlinkEvent;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 
@@ -54,7 +58,7 @@ public class HtmlViewer
 			WbSwingUtilities.center(this, owner);
 		}
 		
-		//setSize(800, 600);
+//		setSize(800, 600);
 		
 		HTMLEditorKit kit = new HTMLEditorKit();
 		HTMLDocument htmlDoc = new HTMLDocument();
@@ -66,13 +70,19 @@ public class HtmlViewer
 		{
 
 			URL file = this.getClass().getClassLoader().getResource("help/SQL Workbench Manual.html");
+			if (file == null)
+			{
+				file = this.getClass().getClassLoader().getResource("workbench/gui/html/NotFound.html");
+			}
+			
 			if (file != null)
 			{
 				display.setPage(file);
 			}
 			else
 			{
-				System.out.println("file not found!");
+				display.setContentType("text/html");
+				display.setText("<h2>Help file not found!</h2>"); 
 			}
 		}
 		catch (Exception e)
@@ -97,6 +107,38 @@ public class HtmlViewer
 		WbManager.getSettings().storeWindowPosition(this);
 		WbManager.getSettings().storeWindowSize(this);
 	}
+
+	public void scrollToReference(HTMLDocument doc, String reference)
+	{
+		HTMLDocument.Iterator iter = doc.getIterator(HTML.Tag.A);
+		String ref2 = reference.replaceAll(" ", "%20");
+		for (; iter.isValid(); iter.next())
+		{
+			AttributeSet a = iter.getAttributes();
+			String nm = (String) a.getAttribute(HTML.Attribute.NAME);
+			if ((nm != null) && ( nm.equals(reference)  || nm.equals(ref2) ))
+			{
+				// found a matching reference in the document.
+				try
+				{
+					Rectangle r = display.modelToView(iter.getStartOffset());
+					if (r != null)
+					{
+						// the view is visible, scroll it to the
+						// center of the current visible area.
+						Rectangle vis = display.getVisibleRect();
+						r.height = vis.height;
+						display.scrollRectToVisible(r);
+					}
+				} 
+				catch (Exception ble)
+				{
+					ble.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	
 	public void hyperlinkUpdate(HyperlinkEvent e)
 	{
@@ -106,9 +148,20 @@ public class HtmlViewer
 			String descr=e.getDescription();
 			if (descr != null && descr.startsWith("#"))
 			{
-				//System.out.println("descr=" + descr);
-				descr=descr.substring(1).replaceAll(" ", "%20");
-				display.scrollToReference(descr);
+				descr=descr.substring(1);
+				HTMLDocument html = (HTMLDocument)display.getDocument();
+				this.scrollToReference(html, descr);
+			}
+			else
+			{
+				try
+				{
+					display.setPage(e.getURL());
+				}
+				catch (Exception ex)
+				{
+					LogMgr.logError("HtmlViewer.hyperlinkUpdate()", "Could not open URL=" + e.getURL(), ex);
+				}
 			}
 		}
 	}

@@ -4,6 +4,7 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
+import workbench.log.LogMgr;
 
 
 public class DbmsOutput
@@ -80,6 +81,7 @@ public class DbmsOutput
 		enable_stmt.executeUpdate();
 		this.enabled = true;
 		this.lastSize = size;
+		LogMgr.logInfo("DbmsOutput.enable()", "Support for DBMS_OUTPUT package enabled");
 	}
 	
 	public void enable()
@@ -95,6 +97,7 @@ public class DbmsOutput
 	{
 		disable_stmt.executeUpdate();
 		this.enabled = false;
+		LogMgr.logInfo("DbmsOutput.disable()", "Support for DBMS_OUTPUT package disabled");
 	}
 	
 	/*
