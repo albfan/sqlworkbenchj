@@ -111,6 +111,8 @@ public class ConnectionProfile
 			return;
 		}
 
+		aPwd = aPwd.trim();
+		
 		// check encryption settings when reading the profiles...
 		if (WbManager.getSettings().getUseEncryption())
 		{
@@ -264,6 +266,7 @@ public class ConnectionProfile
 	public String getUrl() { return this.url; }
 	public void setUrl(String aUrl)
 	{
+		if (aUrl != null) aUrl = aUrl.trim();
 		this.url = aUrl;
 		this.changed = true;
 	}
@@ -271,6 +274,7 @@ public class ConnectionProfile
 	public String getDriverclass() { return this.driverclass; }
 	public void setDriverclass(String aDriverclass)
 	{
+		if (aDriverclass != null) aDriverclass = aDriverclass.trim();
 		this.driverclass = aDriverclass;
 		this.changed = true;
 	}
@@ -278,6 +282,7 @@ public class ConnectionProfile
 	public String getUsername() { return this.username; }
 	public void setUsername(java.lang.String aUsername)
 	{
+		if (aUsername != null) aUsername = aUsername.trim();
 		this.username = aUsername;
 		this.changed = true;
 	}

@@ -28,6 +28,7 @@ public class WbConnection
 	private DbMetadata metaData;
 	private ConnectionProfile profile;
 
+	private boolean ddlNeedsCommit;
 	private boolean ignoreDropErrors = false;
 	
 	/** Creates a new instance of WbConnection */
@@ -237,6 +238,11 @@ public class WbConnection
 			return (this.id.equals(((WbConnection)o).id));
 		}
 		return false;
+	}
+	
+	public boolean getDdlNeedsCommit()
+	{
+		return this.metaData.getDDLNeedsCommit();
 	}
 	
 }

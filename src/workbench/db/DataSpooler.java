@@ -18,6 +18,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -48,12 +49,18 @@ public class DataSpooler
 	private String outputfile;
 	private int exportType;
 	private boolean exportHeaders;
+	private boolean includeCreateTable = false;
 	private String tableName;
 	
 	private boolean showProgress = false;
 	private SpoolerProgressPanel progressPanel;
 	private JFrame progressWindow;
 	private boolean keepRunning = true;
+
+	private boolean jobsRunning = false;
+	
+	
+	private ArrayList jobQueue;
 	
 	public DataSpooler()
 	{
@@ -69,6 +76,7 @@ public class DataSpooler
 		
 		progressPanel = new SpoolerProgressPanel(this);
 		this.progressPanel.setFilename(this.outputfile);
+		this.progressPanel.setInfoText(ResourceMgr.getString("MsgSpoolingRow"));
 	
 		this.progressWindow = new JFrame();
 		this.progressWindow.getContentPane().add(progressPanel);
@@ -87,6 +95,18 @@ public class DataSpooler
 		this.progressWindow.show();
 	}
 
+	public void addJob(String anOutputfile, String aStatement)
+	{
+		if (this.jobQueue == null)
+		{
+			this.jobQueue = new ArrayList();
+		}
+		SpoolerJob job = new DataSpooler.SpoolerJob();
+		job.outputFile = anOutputfile;
+		job.sqlStatement = aStatement;
+		this.jobQueue.add(job);
+	}
+	
 	public void setConnection(WbConnection aConn)
 	{
 		this.dbConn = aConn;
@@ -170,6 +190,47 @@ public class DataSpooler
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
 	}
+
+	public void startExportJobs()
+	{
+		Thread t = new Thread()
+		{
+			public void run()
+			{
+				try { runJobs(); } catch (Throwable th) {}
+			}
+		};
+		t.setPriority(Thread.MIN_PRIORITY);
+		t.start();
+	}
+	
+	private void runJobs()
+	{
+		if (this.jobQueue == null) return;
+		int count = this.jobQueue.size();
+		this.jobsRunning = true;
+		for (int i=0; i < count; i++)
+		{
+			SpoolerJob job = (SpoolerJob)this.jobQueue.get(i);
+			this.sql = job.sqlStatement;
+			this.outputfile = job.outputFile;
+			if (this.progressPanel != null)
+			{
+				this.progressPanel.setFilename(this.outputfile);
+				this.progressPanel.setRowInfo(0);
+			}
+			try
+			{
+				this.startExport();
+			}
+			catch (Throwable th)
+			{
+				LogMgr.logError("DataSpooler.runJobs()", "Error spooling data for [" + this.sql + "] to file: " + this.outputfile, th);
+			}
+		}
+		this.jobsRunning = false;
+		this.closeProgress();
+	}
 	
 	public void startExport()
 		throws IOException, SQLException, WbException
@@ -204,6 +265,7 @@ public class DataSpooler
 		ResultSetMetaData meta = rs.getMetaData();
 		DataStore ds = new DataStore(meta, this.dbConn);
 		ds.setOriginalStatement(this.sql);
+		
 		if (this.exportType == EXPORT_SQL)
 		{
 			if (this.tableName == null)
@@ -218,6 +280,7 @@ public class DataSpooler
 				ds.useUpdateTable(this.tableName);
 			}
 		}
+		
 		int row = 0;
 
 		BufferedWriter pw = null;
@@ -235,7 +298,7 @@ public class DataSpooler
 		
 		if (showProgress)
 		{
-			this.progressPanel.setInfoText(ResourceMgr.getString("MsgSpoolingRow"));
+			if (this.progressPanel == null) this.openProgressMonitor();
 		}
 
 		byte[] quoteBytes = quoteChar.getBytes();
@@ -249,10 +312,31 @@ public class DataSpooler
 			
 			pw = new BufferedWriter(new FileWriter(this.outputfile), 16*1024);
 			
-			if (exportHeaders && exportType == EXPORT_TXT)
+			if (exportType == EXPORT_TXT && exportHeaders)
 			{
 				pw.write(ds.getHeaderString().toString());
 				pw.newLine();
+			}
+			else if (this.exportType == EXPORT_SQL && this.includeCreateTable)
+			{
+				String table = ds.getUpdateTable();
+				String source = null;
+				try
+				{
+					DbMetadata db = this.dbConn.getMetadata();
+					DataStore def = db.getTableDefinition(table);
+					source = db.getTableSource(table, def);
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("DataSpooler.startExport()", "Could not retrieve table definition for " + table, e);
+					source = null;
+				}
+				if (source != null)
+				{
+					pw.write(source);
+					pw.newLine();
+				}
 			}
 			
 			while (rs.next())
@@ -260,9 +344,6 @@ public class DataSpooler
 				currentRow ++;
 				if (showProgress)
 				{
-//					if (interval == 1 && rsRow > 1000 ) interval = 1000;
-//					else if (interval == 1000 && rsRow > 10000) interval = 5000;
-//					if ( (rsRow % interval) == 0)
 					progressPanel.setRowInfo(currentRow);
 				}
 
@@ -313,7 +394,7 @@ public class DataSpooler
 		finally 
 		{
 			try { if (pw != null) pw.close(); } catch (Throwable th) {}
-			this.closeProgress();
+			if (!jobsRunning) this.closeProgress();
 		}
 	}
 
@@ -358,37 +439,20 @@ public class DataSpooler
 			}
 		}
 	}
-	
-	public static void main(String[] args)
+
+	public boolean isIncludeCreateTable()
 	{
-		Connection con = null;
-		try
-		{
-			Class.forName("com.inet.tds.TdsDriver");
-			//Class.forName("oracle.jdbc.OracleDriver");
-			//con = DriverManager.getConnection("jdbc:inetdae:demsqlvisa02:1433?database=visa_cpl_test", "visa", "savivisa");
-			//con = DriverManager.getConnection("jdbc:inetdae:reosqlpro08:1433?database=visa", "visa", "savivisa");
-
-			//con = DriverManager.getConnection("jdbc:oracle:thin:@DEMRDB34:1521:SBL1", "sadmin", "sadmin");
-			con = DriverManager.getConnection("jdbc:inetdae:cpqdevdb01:1433?database=cpl_hq", "rds", "version42");
-
-			WbConnection wb = new WbConnection(con);
-			DataSpooler spooler = new DataSpooler();
-			spooler.setShowProgress(true);
-			//spooler.exportData(wb, "select * from visa_product", "c:/thomas/temp/visa_product.txt", true, EXPORT_TXT);
-			//spooler.exportData(wb, "select * from siebel.s_contact", "c:/thomas/temp/contact.txt", true, EXPORT_TXT);
-			//spooler.exportData(wb, "select * from epl_base_item", "c:/temp/test.txt", true, EXPORT_TXT);
-			//spooler.openProgressMonitor("test.txt");
-			System.exit(0);
-		}
-		catch (Throwable e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			try { con.close(); } catch (Throwable th) {}
-		}
+		return includeCreateTable;
 	}
 	
+	public void setIncludeCreateTable(boolean includeCreateTable)
+	{
+		this.includeCreateTable = includeCreateTable;
+	}
+	
+	private class SpoolerJob
+	{
+		private String outputFile;
+		private String sqlStatement;
+	}
 }

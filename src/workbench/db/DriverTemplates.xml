@@ -71,7 +71,7 @@
      <string>oracle.jdbc.OracleDriver</string>
     </void>
     <void property="library">
-     <string>classes12.zip</string>
+     <string>ojdbc14.jar</string>
     </void>
     <void property="name">
      <string>Oracle</string>
@@ -110,6 +110,22 @@
     </void> 
     <void property="sampleUrl"> 
      <string>jdbc:adabasd://&lt;server&gt;/&lt;database&gt;</string> 
+    </void> 
+   </object> 
+  </void> 
+  <void method="add"> 
+   <object class="workbench.db.DbDriver"> 
+    <void property="driverClass"> 
+     <string>org.postgresql.Driver</string> 
+    </void> 
+    <void property="library"> 
+     <string>pg73jdbc3.jar</string> 
+    </void> 
+    <void property="name"> 
+     <string>PostgreSQL</string> 
+    </void> 
+    <void property="sampleUrl"> 
+     <string>jdbc:postgresql://host:port/database</string> 
     </void> 
    </object> 
   </void> 

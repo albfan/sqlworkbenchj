@@ -27,6 +27,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.gui.actions.*;
+import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbMenuItem;
@@ -42,6 +43,7 @@ import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.BrowserLauncher;
 import workbench.util.WbWorkspace;
 
 
@@ -137,7 +139,13 @@ public class MainWindow extends JFrame implements ActionListener, MouseListener,
 
 		if (WbManager.getSettings().getRestoreLastWorkspace())
 		{
-			this.loadWorkspace(WbManager.getSettings().getLastWorkspaceFile());
+			String filename = WbManager.getSettings().getLastWorkspaceFile();
+			if (filename == null)
+			{
+				File f = new File(WbManager.getSettings().getConfigDir(), "Default." + ExtensionFileFilter.WORKSPACE_EXT);
+				filename = f.getAbsolutePath();
+			}
+			this.loadWorkspace(filename);
 		}
 		
 		this.checkWorkspaceActions();
@@ -190,9 +198,17 @@ public class MainWindow extends JFrame implements ActionListener, MouseListener,
 
 	private void checkWorkspaceActions()
 	{
-		this.closeWorkspace.setEnabled(this.currentWorkspaceFile != null);
 		this.saveWorkspace.setEnabled(this.currentWorkspaceFile != null);
 		WbManager.getSettings().setLastWorkspaceFile(this.currentWorkspaceFile);
+		if (WbManager.getSettings().getRestoreLastWorkspace())
+		{
+			this.closeWorkspace.setEnabled(false);
+		}
+		else
+		{
+			this.closeWorkspace.setEnabled(this.currentWorkspaceFile != null);
+		}
+		
 	}
 	
 	private void initMenu()
@@ -524,10 +540,12 @@ public class MainWindow extends JFrame implements ActionListener, MouseListener,
 
 	public void windowClosing(WindowEvent windowEvent)
 	{
+		/*
 		if (WbManager.getSettings().getRestoreLastWorkspace() && this.currentWorkspaceFile == null)
 		{
 			this.saveWorkspace(null);
 		}
+		*/
 		WbManager.getInstance().windowClosing(this);
 	}
 
@@ -974,16 +992,16 @@ public class MainWindow extends JFrame implements ActionListener, MouseListener,
 				SqlPanel sql = (SqlPanel)this.getSqlPanel(i);
 				sql.initStatementHistory(data);
 			}
-			this.currentWorkspaceFile = filename;
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("MainWindow.saveWorkspace()", "Error saving workspace", e);
+			LogMgr.logWarning("MainWindow.loadWorkspace()", "Error loading workspace  " + filename + ": " + e.getMessage());
 		}
 		finally
 		{
 			try { w.close(); } catch (Throwable th) {}
 		}
+		this.currentWorkspaceFile = filename;
 		this.updateWindowTitle();
 		this.checkWorkspaceActions();
 	}
@@ -1027,7 +1045,7 @@ public class MainWindow extends JFrame implements ActionListener, MouseListener,
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("MainWindow.saveWorkspace()", "Error saving workspace", e);
+			LogMgr.logError("MainWindow.saveWorkspace()", "Error saving workspace: " + filename, e);
 		}
 		finally
 		{
@@ -1204,7 +1222,14 @@ public class MainWindow extends JFrame implements ActionListener, MouseListener,
 			}
 			else if ("helpContents".equals(command))
 			{
-				JOptionPane.showMessageDialog(this, "Sorry! Help is not yet available\nFor command details check the tooltip for each menu item");
+				try
+				{
+					BrowserLauncher.openURL("www.kellerer.org/workbench/manual/SQL Workbench Manual.html");
+				}
+				catch (Exception ex)
+				{
+					JOptionPane.showMessageDialog(this, "The documentation is currently available at www.kellerer.org/workbench");
+				}
 			}
 			else if ("helpAbout".equals(command))
 			{

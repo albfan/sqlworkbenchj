@@ -59,20 +59,21 @@ public class TableSearcher
 	public void cancelSearch()
 	{
 		this.cancelSearch = true;
-		if (this.query != null)
+		try
 		{
-			try
+			if (this.searchThread != null) this.searchThread.interrupt();
+			if (this.query != null)
 			{
-				this.searchThread.interrupt();
 				this.query.cancel();
 				if (this.getConnection().cancelNeedsReconnect())
 				{
 					this.getConnection().reconnect();
 				}
 			}
-			catch (Exception e)
-			{
-			}
+			//this.setRunning(false);
+		}
+		catch (Exception e)
+		{
 		}
 	}
 	
@@ -119,6 +120,7 @@ public class TableSearcher
 		try
 		{
 			String sql = this.buildSqlForTable(aTable);
+			if (sql == null) return;
 			if (this.display != null) this.display.setCurrentTable(aTable, sql);
 			
 			this.query = this.connection.getSqlConnection().createStatement();
@@ -176,6 +178,7 @@ public class TableSearcher
 		sql.append(aTable);
 		sql.append("\n WHERE ");
 		boolean first = true;
+		int colcount = 0;
 		for (int i=0; i < cols; i++)
 		{
 			String column = (String)def.getValue(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
@@ -184,6 +187,7 @@ public class TableSearcher
 			boolean isChar = (sqlType == Types.VARCHAR || sqlType == Types.CHAR);
 			if (isChar)
 			{
+				colcount ++;
 				if (!first) 
 				{
 					sql.append(" OR ");
@@ -196,7 +200,10 @@ public class TableSearcher
 				first = false;
 			}
 		}
-		return sql.toString();
+		if (colcount == 0)
+			return null;
+		else
+			return sql.toString();
 	}
 	
 	/** Getter for property tableNames.

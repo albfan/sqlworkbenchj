@@ -63,6 +63,7 @@ public class DbMetadata
 
 	private static List serversWhichNeedReconnect = Collections.EMPTY_LIST;
 	private static List caseSensitiveServers = Collections.EMPTY_LIST;
+	private static List ddlNeedsCommit = Collections.EMPTY_LIST;
 
 	// These Hashmaps contains templates
 	// for object creation
@@ -73,6 +74,7 @@ public class DbMetadata
 	private HashMap pkStatements;
 	private HashMap idxStatements;
 	private HashMap fkStatements;
+	
 	//private HashMap dateLiteralFormatter;
 	private DbmsOutput oraOutput;
   private boolean needsReconnect;
@@ -305,6 +307,10 @@ public class DbMetadata
 		if (rs.next())
 		{
 			table = rs.getString(2);
+		}
+		else
+		{
+			schema = null;
 		}
 		rs.close();
 		if (table == null)
@@ -1541,11 +1547,20 @@ public class DbMetadata
 		return idx;
 	}
 
+	public static void setServersWhereDDLNeedsCommit(List aList)
+	{
+		ddlNeedsCommit = aList;
+	}
 	public static void setServersWhichNeedReconnect(List aList)
 	{
 		serversWhichNeedReconnect = aList;
 	}
 
+	public boolean getDDLNeedsCommit()
+	{
+		return ddlNeedsCommit.contains(this.productName);
+	}
+	
 	public static void setCaseSensitiveServers(List aList)
 	{
 		caseSensitiveServers = aList;

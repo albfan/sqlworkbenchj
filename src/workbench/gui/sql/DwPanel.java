@@ -323,10 +323,18 @@ public class DwPanel extends JPanel
 		finally
 		{
 			result = null;
-			this.stmtRunner.done();
 		}
   }
 
+	public void scriptStarting()
+	{
+	}
+	
+	public void scriptFinished()
+	{
+		this.stmtRunner.done();
+	}
+	
 	public boolean wasSuccessful()
 	{
 		return this.success;

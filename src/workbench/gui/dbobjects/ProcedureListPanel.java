@@ -184,7 +184,7 @@ public class ProcedureListPanel
 	{
 		final Container parent = this.getParent();
 
-		EventQueue.invokeLater(new Runnable()
+		new Thread(new Runnable()
 		{
 			public void run()
 			{
@@ -194,10 +194,12 @@ public class ProcedureListPanel
 					{
 						DbMetadata meta = dbConnection.getMetadata();
 						procList.setVisible(false);
-						parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+						WbSwingUtilities.showWaitCursor(parent);
+						LogMgr.logDebug("ProcedureListPanel.retrieve()", "Retrieving procedure list");
 						procList.setModel(meta.getListOfProcedures(currentCatalog, currentSchema), true);
+						LogMgr.logDebug("ProcedureListPanel.retrieve()", "Procedure list retrieved");
 						procList.adjustColumns();
-						parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+						WbSwingUtilities.showDefaultCursor(parent);
 						procList.setVisible(true);
 						shouldRetrieve = false;
 					}
@@ -207,7 +209,7 @@ public class ProcedureListPanel
 					}
 				}
 			}
-		});
+		}).start();
 	}
 
 	private void dropTables()

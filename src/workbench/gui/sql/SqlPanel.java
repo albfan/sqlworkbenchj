@@ -60,7 +60,7 @@ public class SqlPanel
 {
 	private boolean runSelectedCommand;
 	private boolean runCurrentCommand;
-	
+
 	EditorPanel editor;
 	private DwPanel data;
 	private JTextArea log;
@@ -137,6 +137,8 @@ public class SqlPanel
 		this.log.setWrapStyleWord(true);
 		this.log.addMouseListener(new TextComponentMouseListener());
 
+		this.maxHistorySize = WbManager.getSettings().getMaxHistorySize();
+
 		this.resultTab = new JTabbedPane();
 		this.resultTab.setTabPlacement(JTabbedPane.TOP);
 		this.resultTab.setUI(TabbedPaneUIFactory.getBorderLessUI());
@@ -169,7 +171,7 @@ public class SqlPanel
 		this.data.getTable().setMinColWidth(WbManager.getSettings().getMinColumnWidth());
 		this.makeReadOnly();
 		this.checkResultSetActions();
-		
+
 		Settings s = WbManager.getSettings();
 		s.addFontChangedListener(this);
 	}
@@ -184,7 +186,7 @@ public class SqlPanel
 	{
 		int loc = this.getHeight() / 2;
 		this.contentPanel.setDividerLocation(loc);
-		this.initStatementHistory(false);
+		this.initStatementHistory(null);
 	}
 
 	public void restoreSettings()
@@ -194,10 +196,7 @@ public class SqlPanel
 		this.contentPanel.setDividerLocation(loc);
 		loc = WbManager.getSettings().getLastSqlDividerLocation(this.internalId);
 		if (loc > 0) this.contentPanel.setLastDividerLocation(loc);
-		if (!WbManager.getSettings().getRestoreLastWorkspace()) 
-			this.initStatementHistory(true);
-		else
-			this.initStatementHistory(false);
+		this.readStatementHistory();
 		this.restoreLastEditorFile();
 	}
 
@@ -359,7 +358,7 @@ public class SqlPanel
 
 		ExecuteCurrentSql c = new ExecuteCurrentSql();
 		this.executeCurrent = new ExecuteCurrentAction(c);
-		
+
 		MakeLowerCaseAction makeLower = new MakeLowerCaseAction(this.editor);
 		MakeUpperCaseAction makeUpper = new MakeUpperCaseAction(this.editor);
 
@@ -449,7 +448,7 @@ public class SqlPanel
 		this.actions.add(this.executeAll);
 		this.actions.add(this.executeSelected);
 		this.actions.add(this.executeCurrent);
-		
+
 		this.spoolData = new SpoolDataAction(this);
 		this.actions.add(this.spoolData);
 
@@ -701,39 +700,53 @@ public class SqlPanel
 		this.background.start();
 	}
 
-
-	private void initStatementHistory()
-	{
-		this.initStatementHistory(false);
-	}
-
-	private void initStatementHistory(boolean readFromFile)
+	private void readStatementHistory()
 	{
 		if (this.statementHistory != null) return;
 
-		this.maxHistorySize = WbManager.getSettings().getMaxHistorySize();
+		boolean readFromFile = true;
+
+		if (WbManager.getSettings().getRestoreLastWorkspace())
+		{
+			String filename = WbManager.getSettings().getLastWorkspaceFile();
+			if (filename != null)
+			{
+				File f = new File(filename);
+				if (f.exists())
+				{
+					readFromFile = false;
+				}
+			}
+			else
+			{
+				readFromFile = true;
+			}
+		}
+
+		if (!readFromFile)
+		{
+			this.initStatementHistory(null);
+			return;
+		}
 
 		try
 		{
 			ArrayList history = null;
-			if (readFromFile && !WbManager.getSettings().getRestoreLastWorkspace())
+			File f = new File(this.historyFilename + ".xml");
+			if (f.exists())
 			{
-				File f = new File(this.historyFilename + ".xml");
+				Object data = WbPersistence.readObject(this.historyFilename + ".xml");
+				if (data instanceof ArrayList)
+				{
+					history = (ArrayList)data;
+				}
+			}
+			else
+			{
+				f = new File(this.historyFilename + ".txt");
 				if (f.exists())
 				{
-					Object data = WbPersistence.readObject(this.historyFilename + ".xml");
-					if (data instanceof ArrayList)
-					{
-						history = (ArrayList)data;
-					}
-				}
-				else
-				{
-					f = new File(this.historyFilename + ".txt");
-					if (f.exists())
-					{
-						history = StringUtil.readStringList(this.historyFilename + ".txt");
-					}
+					history = StringUtil.readStringList(this.historyFilename + ".txt");
 				}
 			}
 			this.initStatementHistory(history);
@@ -770,7 +783,7 @@ public class SqlPanel
 		}
 		this.checkStatementActions();
 	}
-	
+
 	private void checkHistorySize()
 	{
 		if (this.statementHistory == null) return;
@@ -779,7 +792,7 @@ public class SqlPanel
 			this.statementHistory.remove(0);
 		}
 	}
-				
+
 	private void checkStatementActions()
 	{
 		int count;
@@ -832,7 +845,7 @@ public class SqlPanel
 			f.delete();
 		}
 	}
-	
+
 	public void saveSettings()
 	{
 		Settings s = WbManager.getSettings();
@@ -865,12 +878,12 @@ public class SqlPanel
 			LogMgr.logWarning(this, "Error storing statement history", e);
 		}
 	}
-	
+
 	public String getHistoryFilename()
 	{
 		return this.historyFilename + ".txt";
 	}
-	
+
 	public ArrayList getStatementHistory()
 	{
 		this.storeInHistory(this.editor.getText());
@@ -1033,7 +1046,7 @@ public class SqlPanel
 		}
 
 		this.storeInHistory(sql);
-		
+
 		if (runCurrentCommand)
 		{
 			this.displayResult(sql, this.editor.getCaretPosition());
@@ -1042,7 +1055,7 @@ public class SqlPanel
 		{
 			this.displayResult(sql, -1);
 		}
-		
+
 		this.setBusy(false);
 
 		this.clearStatusMessage();
@@ -1127,13 +1140,15 @@ public class SqlPanel
 				sqls = new ArrayList();
 				sqls.add(s);
 			}
-			
+
 			String msg = ResourceMgr.getString("TxtScriptStatementFinished");
 			int count = sqls.size();
 			msg = StringUtil.replace(msg, "%total%", Integer.toString(count));
 			this.log.setText("");
-			
+
 			boolean onErrorAsk = true;
+
+			this.data.scriptStarting();
 			
 			for (int i=0; i < count; i++)
 			{
@@ -1163,7 +1178,7 @@ public class SqlPanel
 					question = StringUtil.replace(question, "%nr%", Integer.toString(i+1));
 					question = StringUtil.replace(question, "%count%", Integer.toString(count));
 					int choice = WbSwingUtilities.getYesNoIgnoreAll(this, question);
-					
+
 					if (choice == JOptionPane.NO_OPTION)
 					{
 						break;
@@ -1182,7 +1197,7 @@ public class SqlPanel
 			else
 			{
 				this.showLogPanel();
-			}							
+			}
 
 			if (count > 1)
 			{
@@ -1200,6 +1215,10 @@ public class SqlPanel
 		{
 			this.showLogMessage(this.data.getLastMessage());
 			LogMgr.logError("SqlPanel.displayResult()", "Error executing statement", e);
+		}
+		finally
+		{
+			this.data.scriptFinished();
 		}
 	}
 

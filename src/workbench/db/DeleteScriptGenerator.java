@@ -258,23 +258,20 @@ public class DeleteScriptGenerator
 		Connection con = null;
 		try
 		{
-			Class.forName("com.inet.tds.TdsDriver");
+			//Class.forName("com.inet.tds.TdsDriver");
+			Class.forName("org.postgresql.Driver");
 			//Class.forName("oracle.jdbc.OracleDriver");
 			//con = DriverManager.getConnection("jdbc:inetdae:demsqlvisa02:1433?database=visa_cpl_test", "visa", "savivisa");
-			con = DriverManager.getConnection("jdbc:inetdae:reosqlpro08:1433?database=visa", "visa", "savivisa");
+			//con = DriverManager.getConnection("jdbc:inetdae:reosqlpro08:1433?database=visa", "visa", "savivisa");
 			//con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:oradb", "auto", "auto");
+			con = DriverManager.getConnection("jdbc:postgresql://techdata/techdata", "techdata", "techdata");
 			WbConnection wb = new WbConnection(con);
 			DeleteScriptGenerator gen = new DeleteScriptGenerator(wb);
 			HashMap m = new HashMap();
-			//m.put("custid", "100");
-			m.put("bidid", "345");
-			//m.put("configid", "2");
-			//gen.setTable("visa_cpl_test", "dbo", "visa_bid");
-			gen.setTable("visa", "dbo", "visa_bid");
-			//gen.setTable(null, "auto", "expense_type");
+			m.put("pip3a4_id", "6");
+			gen.setTable(null, null, "pip3a4");
 			gen.setValues(m);
 			String sql = gen.createScript();
-
 			System.out.println(sql);
 		}
 		catch (Exception e)

@@ -3,37 +3,21 @@
  */
 package workbench.gui.dbobjects;
 
+import java.awt.*;
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
-import javax.swing.border.LineBorder;
+import java.util.Locale;
+import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
+import javax.swing.JRadioButton;
+import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -41,27 +25,20 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-
 import workbench.WbManager;
 import workbench.db.DataSpooler;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
+import workbench.exception.ExceptionUtil;
 import workbench.exception.WbException;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.SpoolDataAction;
-import workbench.gui.components.DataStoreTableModel;
-import workbench.gui.components.ExportOptionsPanel;
-import workbench.gui.components.ExtensionFileFilter;
-import workbench.gui.components.FindPanel;
-import workbench.gui.components.TabbedPaneUIFactory;
-import workbench.gui.components.WbMenu;
-import workbench.gui.components.WbMenuItem;
-import workbench.gui.components.WbScrollPane;
-import workbench.gui.components.WbSplitPane;
-import workbench.gui.components.WbTable;
-import workbench.gui.components.WbTraversalPolicy;
+
+
+import workbench.gui.components.*;
+import workbench.gui.components.DirectoryFileFilter;
 import workbench.gui.renderer.SqlTypeRenderer;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
@@ -73,6 +50,8 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
+
 
 
 /**
@@ -587,23 +566,20 @@ public class TableListPanel
 			{
 				removeTablePanels();
 			}
-			if (this.selectedObjectType.indexOf("table") > -1 ||
-			    this.selectedObjectType.indexOf("view") > -1 ||
-					this.selectedObjectType.indexOf("synonym") > -1)
-			{
-				this.showDataMenu.setEnabled(true);
-			}
-			else
-			{
-				this.showDataMenu.setEnabled(false);
-			}
-
+			this.showDataMenu.setEnabled(this.isTableType(selectedObjectType));
 			this.tableData.setTable(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
 			this.retrieveCurrentPanel();
 			this.startRetrieveCurrentPanel();
 		}
 	}
 
+	private boolean isTableType(String aType)
+	{
+		if (aType == null) return false;
+		aType = aType.toLowerCase();
+		return (aType.indexOf("table") > -1 || aType.indexOf("view") > -1 || aType.indexOf("synonym") > -1);
+	}
+	
 	private String extendViewSource(String aSource, String aName, DataStore viewDefinition)
 	{
 		if (aSource == null) return "";
@@ -976,13 +952,13 @@ public class TableListPanel
 	{
 		int rowCount = this.tableList.getSelectedRowCount();
 		if (rowCount <= 0) return;
-		/*
+
 		if (rowCount > 1)
 		{
 			this.spoolTables();
 			return;
 		}
-		*/
+
 		int row = this.tableList.getSelectedRow();
 		if (row < 0) return;
 		String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
@@ -995,12 +971,52 @@ public class TableListPanel
 	{
 		String lastDir = WbManager.getSettings().getLastExportDir();
 		JFileChooser fc = new JFileChooser(lastDir);
-		ExportOptionsPanel optionPanel = new ExportOptionsPanel();
-		optionPanel.restoreSettings();
-		fc.setAccessory(optionPanel);
-		fc.addChoosableFileFilter(ExtensionFileFilter.getTextFileFilter());
-		fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
-		int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(this));
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		//fc.setApproveButtonText(ResourceMgr.getString("LabelSelectDirButton"));
+		
+		fc.setDialogTitle(ResourceMgr.getString("LabelSelectDirTitle"));
+		ExportOptionsPanel options = new ExportOptionsPanel();
+		fc.setAccessory(options);
+		
+		int answer = fc.showDialog(SwingUtilities.getWindowAncestor(this), null);
+		if (answer == JFileChooser.APPROVE_OPTION)
+		{
+			File fdir = fc.getSelectedFile();
+			DataSpooler spooler = new DataSpooler();
+			spooler.setConnection(this.dbConnection);
+			spooler.setShowProgress(true);
+			String ext = null;
+			if (options.isTypeSql())
+			{
+				spooler.setOutputTypeSqlInsert();
+				spooler.setIncludeCreateTable(options.getCreateTable());
+				ext = ".sql";
+			}
+			else
+			{
+				spooler.setOutputTypeText();
+				spooler.setExportHeaders(options.getIncludeTextHeader());
+				ext = ".txt";
+			}
+			
+			fc = null;
+			
+			int[] rows = this.tableList.getSelectedRows();
+			for (int i = 0; i < rows.length; i ++)
+			{
+				if (rows[i] < 0) continue;
+				String table = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+				if (table == null) continue;
+				
+				String ttype = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+				if (!this.isTableType(ttype)) continue;
+				String stmt = "SELECT * FROM " + SqlUtil.quoteObjectname(table);
+				String fname = table.replaceAll("[\t\\:\\\\/\\?\\*\\|<>]", "").toLowerCase();
+				File f = new File(fdir, fname + ext);
+				spooler.addJob(f.getAbsolutePath(), stmt);
+			}
+			spooler.startExportJobs();
+		}
 	}
 
 	public Window getParentWindow()

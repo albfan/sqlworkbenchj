@@ -24,19 +24,22 @@ public class NumberColumnRenderer
 {
 	private DecimalFormat decimalFormatter;
 	private HashMap displayCache = new HashMap(500);
+	private DecimalFormatSymbols symb = new DecimalFormatSymbols();
   
 	public NumberColumnRenderer(int maxDigits)
 	{
 		if (maxDigits <= 0) maxDigits = 10;
 		String sep = WbManager.getSettings().getDecimalSymbol();
-		DecimalFormatSymbols symb = new DecimalFormatSymbols();
-		symb.setDecimalSeparator(sep.charAt(0));
-		//StringBuffer format = new StringBuffer(maxDigits + 4);
-		//format.append("0.");
-		//for (int i=0; i < maxDigits; i++) format.append('0');
+		this.symb.setDecimalSeparator(sep.charAt(0));
 		decimalFormatter = new DecimalFormat("0.#", symb);
 		decimalFormatter.setMaximumFractionDigits(maxDigits);
 		this.setHorizontalAlignment(SwingConstants.RIGHT);
+	}
+	
+	public void setDecimalSymbol(char aSymbol)
+	{
+		this.symb.setDecimalSeparator(aSymbol);
+		this.decimalFormatter.setDecimalFormatSymbols(this.symb);
 	}
 	
 	public void clearDisplayCache() 

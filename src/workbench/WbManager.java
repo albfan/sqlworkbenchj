@@ -13,6 +13,7 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Locale;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.LookAndFeel;
@@ -53,9 +54,8 @@ public class WbManager implements FontChangedListener
 	{
 		wb = new WbManager();
 		wb.connMgr = new ConnectionMgr();
-		wb.settings = new Settings();
 	}
-	
+
 	private WbManager()
 	{
 	}
@@ -145,7 +145,7 @@ public class WbManager implements FontChangedListener
 		}
 		return filename;
 	}
-	
+
 	public String getExportFilename(boolean includeSqlType)
 	{
 		return this.getExportFilename(null, includeSqlType);
@@ -283,10 +283,10 @@ public class WbManager implements FontChangedListener
 
 		def.put("Table.font", dataFont);
 		def.put("TableHeader.font", dataFont);
-		
+
 		LookAndFeel lnf = UIManager.getLookAndFeel();
 		String lnfClass = lnf.getClass().getName();
-		
+
 		if (lnfClass.equals("javax.swing.plaf.metal.MetalLookAndFeel") ||
 		    lnfClass.equals("com.sun.java.swing.plaf.windows.WindowsLookAndFeel") ||
 		    lnfClass.equals("com.sun.java.swing.plaf.motif.MotifLookAndFeel"))
@@ -481,7 +481,7 @@ public class WbManager implements FontChangedListener
 	public void init()
 	{
 		if (trace) System.out.println("WbManager.init() - start");
-		//this.settings = new Settings();
+		this.settings = new Settings();
 		if (!this.batchMode)
 		{
 			WbSplash splash = null;

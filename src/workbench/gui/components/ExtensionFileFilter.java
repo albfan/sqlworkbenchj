@@ -28,8 +28,9 @@ public class ExtensionFileFilter
 	
 	private List extensions;
 	private String desc;
-	private static final String SQL_EXT = "sql";
-	private static final String TXT_EXT = "txt";
+	public static final String SQL_EXT = "sql";
+	public static final String TXT_EXT = "txt";
+	public static final String WORKSPACE_EXT = "wksp";
 	
 	private boolean ignoreCase = true;
 
@@ -154,8 +155,6 @@ public class ExtensionFileFilter
 		return textFileFilter;
 	}
 
-	public static final String WORKSPACE_EXT = "wksp";
-	
 	public static FileFilter getWorkspaceFileFilter()
 	{
 		if (wkspFileFilter == null)

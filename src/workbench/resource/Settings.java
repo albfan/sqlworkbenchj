@@ -13,12 +13,17 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.CodeSource;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import javax.swing.JOptionPane;
+import javax.swing.text.DateFormatter;
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.interfaces.FontChangedListener;
@@ -59,15 +64,18 @@ public class Settings
 			this.configDir = System.getProperty("workbench.configdir", "");
 		}
 
-		if (configDir == null) configDir = "";
-		if (configDir.length() > 0)
+		if (configDir == null || configDir.trim().length() == 0)
 		{
-			String sep = System.getProperty("file.separator");
-			if (!this.configDir.endsWith(sep))
-			{
-				configDir = configDir + sep;
-			}
+			File f = new File("");
+			configDir = f.getAbsolutePath();
 		}
+		
+		String sep = System.getProperty("file.separator");
+		if (!this.configDir.endsWith(sep))
+		{
+			configDir = configDir + sep;
+		}
+		
 		if (filename == null) this.filename = this.configDir + "workbench.settings";
 
 	  if (WbManager.trace) System.out.println("Settings.<init> - Reading settings");
@@ -102,6 +110,7 @@ public class Settings
 		if (WbManager.trace) System.out.println("Setting server lists for MetaData");
 		DbMetadata.setServersWhichNeedReconnect(this.getCancelWithReconnectServers());
 		DbMetadata.setCaseSensitiveServers(this.getCaseSensitivServers());
+		DbMetadata.setServersWhereDDLNeedsCommit(this.getServersWhereDDLNeedsCommit());
 		if (WbManager.trace) System.out.println("Done setting server lists for MetaData");
 
 		String level = this.props.getProperty("workbench.log.level", "INFO");
@@ -660,6 +669,17 @@ public class Settings
 		this.props.setProperty("workbench.sql.maxcolwidth", Integer.toString(aWidth));
 	}
 
+	private DateFormat defaultDateFormatter = null;
+	
+	public DateFormat getDefaultDateFormatter()
+	{
+		if (this.defaultDateFormatter == null)
+		{
+			this.defaultDateFormatter = new SimpleDateFormat(this.getDefaultDateFormat());
+		}
+		return this.defaultDateFormatter;
+	}
+	
 	public String getDefaultDateFormat()
 	{
 		return this.props.getProperty("workbench.gui.display.dateformat", "yyyy-MM-dd");
@@ -667,6 +687,7 @@ public class Settings
 
 	public void setDefaultDateFormat(String aFormat)
 	{
+		this.defaultDateFormatter = null;
 		this.props.setProperty("workbench.gui.display.dateformat", aFormat);
 	}
 
@@ -677,13 +698,30 @@ public class Settings
 	public void setMaxFractionDigits(int aValue)
 	{
 		this.props.setProperty("workbench.gui.display.maxfractiondigits", Integer.toString(aValue));
+		this.initFormatter();
 	}
 
-	public void setDefaultDateFormat(int aDigits)
+	private DecimalFormat defaultFormatter = null;
+	private DecimalFormatSymbols decSymbols = new DecimalFormatSymbols();
+	
+	public DecimalFormat getDefaultDecimalFormatter()
 	{
-		this.props.setProperty("workbench.gui.display.maxfractiondigits", Integer.toString(aDigits));
+		this.initFormatter();
+		return this.defaultFormatter;
 	}
 
+	private void initFormatter()
+	{
+		if (this.defaultFormatter == null)
+		{
+			this.defaultFormatter = new DecimalFormat("0.#");
+		}
+		String sep = this.getDecimalSymbol();
+		int maxDigits = this.getMaxFractionDigits();
+		this.decSymbols.setDecimalSeparator(sep.charAt(0));
+		this.defaultFormatter.setDecimalFormatSymbols(this.decSymbols);
+		this.defaultFormatter.setMaximumFractionDigits(maxDigits);
+	}
 	public String getDecimalSymbol()
 	{
 		return this.props.getProperty("workbench.gui.display.decimal.separator", ".");
@@ -692,6 +730,7 @@ public class Settings
 	public void setDecimalSymbol(String aSep)
 	{
 		this.props.setProperty("workbench.gui.display.decimal.separator", aSep);
+		this.initFormatter();
 	}
 
 	public String getDecimalGroupingSeparator()
@@ -893,6 +932,12 @@ public class Settings
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.db.retrievepklist", "true"));
 	}
 
+	public List getServersWhereDDLNeedsCommit()
+	{
+		String list = this.props.getProperty("workbench.db.ddlneedscommit", "PostgreSQL");
+    return StringUtil.stringToList(list, ",");
+	}
+	
   public List getCaseSensitivServers()
   {
 		String list = this.props.getProperty("workbench.db.casesensitive", null);

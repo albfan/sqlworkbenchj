@@ -19,6 +19,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -579,11 +580,26 @@ public class DataStore
 		int count = this.getColumnCount();
 		StringBuffer result = new StringBuffer(count * 20);
 		int start = 0;
+		DecimalFormat formatter = WbManager.getSettings().getDefaultDecimalFormatter();
 		for (int c=0; c < count; c++)
 		{
 			RowData row = this.getRow(aRow);
 			Object value = row.getValue(c);
-			if (value != null) result.append(value.toString());
+			if (value != null) 
+			{
+				if (value instanceof Double ||
+				    value instanceof Float ||
+						value instanceof BigDecimal)
+				{
+					Number num = (Number)value;
+					result.append(formatter.format(num.doubleValue()));
+				}
+				else
+				{
+					result.append(value.toString());
+				}
+				
+			}
 			if (c < count - 1) result.append(aDelimiter);
 		}
 		return result;
@@ -610,7 +626,7 @@ public class DataStore
 	
 	public String getDataString(String aLineTerminator, boolean includeHeaders)
 	{
-		return this.getDataString("\t", aLineTerminator, includeHeaders);
+		return this.getDataString(WbManager.getSettings().getDefaultTextDelimiter(), aLineTerminator, includeHeaders);
 	}
 	
 	public String getDataString(String aFieldDelimiter, String aLineTerminator, boolean includeHeaders)

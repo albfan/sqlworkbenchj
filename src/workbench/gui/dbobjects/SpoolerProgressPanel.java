@@ -9,6 +9,7 @@ package workbench.gui.dbobjects;
 import java.io.File;
 
 import workbench.db.DataSpooler;
+import workbench.gui.components.WbButton;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -58,7 +59,7 @@ public class SpoolerProgressPanel extends javax.swing.JPanel
 		infoPanel = new javax.swing.JPanel();
 		progressInfoText = new javax.swing.JTextField();
 		rowInfo = new javax.swing.JTextField();
-		cancelButton = new javax.swing.JButton();
+		cancelButton = new WbButton();
 		
 		setLayout(new java.awt.GridBagLayout());
 		
@@ -108,8 +109,8 @@ public class SpoolerProgressPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 2;
-		gridBagConstraints.insets = new java.awt.Insets(12, 0, 4, 0);
 		gridBagConstraints.weighty = 1.0;
+		gridBagConstraints.insets = new java.awt.Insets(12, 0, 4, 0);
 		add(cancelButton, gridBagConstraints);
 		
 	}//GEN-END:initComponents
@@ -124,11 +125,11 @@ public class SpoolerProgressPanel extends javax.swing.JPanel
 	
 	
 	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.JPanel infoPanel;
-	private javax.swing.JTextField rowInfo;
-	private javax.swing.JTextField fileNameField;
 	private javax.swing.JButton cancelButton;
+	private javax.swing.JTextField fileNameField;
+	private javax.swing.JPanel infoPanel;
 	private javax.swing.JTextField progressInfoText;
+	private javax.swing.JTextField rowInfo;
 	// End of variables declaration//GEN-END:variables
 	
 }

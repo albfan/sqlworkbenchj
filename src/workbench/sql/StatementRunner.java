@@ -103,9 +103,6 @@ public class StatementRunner
 	public void runStatement(String aSql, int maxRows)
 		throws SQLException, WbException
 	{
-		// make sure everything's cleaned up from the previous call
-		this.done();
-		
 		String cleanSql = SqlUtil.makeCleanSql(aSql, false);
 		if (cleanSql == null || cleanSql.length() == 0)
 		{
