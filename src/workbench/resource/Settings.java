@@ -341,6 +341,40 @@ public class Settings
 		this.props.setProperty("workbench.import.lastdir", aDir);
 	}
 
+	public void setRestoreLastWorkspace(boolean aFlag)
+	{
+		this.props.setProperty("workbench.workspace.restorelast", Boolean.toString(aFlag));
+	}
+	
+	public boolean getRestoreLastWorkspace()
+	{
+		return "true".equals(this.props.getProperty("workbench.workspace.restorelast", "false"));
+	}
+	
+	public String getLastWorkspaceFile()
+	{
+		String file = this.props.getProperty("workbench.workspace.lastfile", null);
+		if (file == null) return null;
+		if (file.trim().length() == 0) return null;
+		return file;
+	}
+
+	public void setLastWorkspaceFile(String aFilename)
+	{
+		if (aFilename == null) aFilename = "";
+		this.props.setProperty("workbench.workspace.lastfile", aFilename);
+	}
+	
+	public String getLastWorkspaceDir()
+	{
+		return this.props.getProperty("workbench.workspace.lastdir", this.getLastSqlDir());
+	}
+
+	public void setLastWorkspaceDir(String aDir)
+	{
+		this.props.setProperty("workbench.workspace.lastdir", aDir);
+	}
+	
 	public String getLastExportDir()
 	{
 		return this.props.getProperty("workbench.export.lastdir","");

@@ -33,13 +33,12 @@ public class WbAboutDialog extends javax.swing.JDialog
 		super(parent, modal);
 		initComponents();
 		getRootPane().setDefaultButton(closeButton);
-		InputMap im = new ComponentInputMap(this.getRootPane());
-		ActionMap am = new ActionMap();
+		InputMap im = this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+		ActionMap am = this.getRootPane().getActionMap();
 		escAction = new EscAction(this);
 		im.put(escAction.getAccelerator(), escAction.getActionName());
 		am.put(escAction.getActionName(), escAction);
-		this.getRootPane().setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
-		this.getRootPane().setActionMap(am);
+		
 		//this.contactInformation.addMouseListener(new TextComponentMouseListener());
 	}
 

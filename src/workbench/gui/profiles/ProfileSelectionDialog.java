@@ -25,6 +25,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
 
 import workbench.WbManager;
 import workbench.db.ConnectionProfile;
@@ -56,14 +57,18 @@ public class ProfileSelectionDialog extends JDialog implements ActionListener, W
 		super(parent, modal);
 		initComponents();
 		
-		InputMap im = new ComponentInputMap(this.getRootPane());
-		ActionMap am = new ActionMap();
+		JRootPane root = this.getRootPane();
+		root.setDefaultButton(okButton);		
+		InputMap im = root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+		ActionMap am = root.getActionMap();
 		EscAction esc = new EscAction(this);
 		escActionCommand = esc.getActionName();
 		im.put(esc.getAccelerator(), esc.getActionName());
 		am.put(esc.getActionName(), esc);
-		this.getRootPane().setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
-		this.getRootPane().setActionMap(am);
+		
+		//this.getRootPane().setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
+		//this.getRootPane().setActionMap(am);
+		
 		
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -122,7 +127,8 @@ public class ProfileSelectionDialog extends JDialog implements ActionListener, W
 		getContentPane().add(dummy, BorderLayout.NORTH);
 		getContentPane().add(profiles, BorderLayout.CENTER);
     getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-		getRootPane().setDefaultButton(okButton);
+		
+		
 		setTitle(ResourceMgr.getString(ResourceMgr.TXT_SELECT_PROFILE));
 		//this.setFocusTraversalPolicy(null);
 		this.restoreSize();

@@ -49,9 +49,12 @@ public class EditWindow
 		buttonPanel.add(this.okButton);
 		buttonPanel.add(this.cancelButton);
 		this.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+		
 		this.editor.setText(text);
 		this.editor.setMinimumSize(new Dimension(100,100));
 		this.editor.setPreferredSize(new Dimension(300,200));
+		this.editor.setCaretPosition(0);
+		
 		this.okButton.addActionListener(this);
 		this.cancelButton.addActionListener(this);
 		
@@ -73,6 +76,7 @@ public class EditWindow
 		
 		this.pack();
 		
+		// pack() needs to be called before center() !!!
 		WbSwingUtilities.center(this, owner);
 	}
 	

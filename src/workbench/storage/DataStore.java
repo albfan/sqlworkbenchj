@@ -711,12 +711,21 @@ public class DataStore
 	}
 	
 	private void initData(ResultSet aResultSet)
+		throws SQLException
 	{
 		try
 		{
 			ResultSetMetaData metaData = aResultSet.getMetaData();
 			this.initMetaData(metaData);
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError(this, "Error while retrieving ResultSetMetaData", e);
+			throw e;
+		}
 			
+		try
+		{
 			this.data = new ArrayList(500);
 			while (aResultSet.next())
 			{
@@ -738,9 +747,15 @@ public class DataStore
 			}
 			this.modified = false;
 		}
+		catch (SQLException e)
+		{
+			LogMgr.logError(this, "Error while retrieving ResultSet", e);
+			throw e;
+		}
 		catch (Exception e)
 		{
-			LogMgr.logError(this, "Error while retrieving ResultSetMetaData", e);
+			LogMgr.logError(this, "Error while retrieving ResultSet", e);
+			throw new SQLException(e.getMessage());
 		}
 	}
 

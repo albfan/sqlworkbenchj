@@ -8,12 +8,19 @@ package workbench.util;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -490,15 +497,27 @@ public class StringUtil
 		throws IOException
 	{
 		File f = new File(aFilename);
+		if (!f.exists()) throw new FileNotFoundException(aFilename);
+	  Reader in = new FileReader(f);
+		return readStringList(in);
+	}
+
+	public static ArrayList readStringList(InputStream aStream)
+		throws IOException
+	{
+		Reader in = new InputStreamReader(aStream);
+		return readStringList(in);
+	}
+	
+	public static ArrayList readStringList(Reader aReader)
+		throws IOException
+	{
 		ArrayList result = new ArrayList(25);
-		if (!f.exists()) return result;
-		BufferedReader in = null;
 		long start,end;
-		start = System.currentTimeMillis();
+		BufferedReader in = new BufferedReader(aReader, 65536);
 		StringBuffer content = new StringBuffer(500);
 		try
 		{
-			in = new BufferedReader(new FileReader(f), 65536);
 			String line = in.readLine();
 			while(line != null)
 			{
@@ -523,19 +542,31 @@ public class StringUtil
 		{
 			result.add(content.toString());
 		}
-		end = System.currentTimeMillis();
-		//LogMgr.logDebug("StringUtil.readStringList()", "Time = " + (end - start));
 		return result;
 	}
 
 	public static void writeStringList(List aList, String aFilename)
 		throws IOException
 	{
+		Writer out = new FileWriter(aFilename);
+		writeStringList(aList, out, true);
+	}
+	
+	public static void writeStringList(List aList, OutputStream out)
+		throws IOException
+	{
+		Writer w = new OutputStreamWriter(out);
+		writeStringList(aList, w, false);
+	}	
+	
+	public static void writeStringList(List aList, Writer aWriter, boolean closeStream)
+		throws IOException
+	{
 		if (aList == null) return;
 		BufferedWriter out = null;
 		try
 		{
-			out = new BufferedWriter(new FileWriter(aFilename));
+			out = new BufferedWriter(aWriter);
 			for (int i=0; i < aList.size(); i++)
 			{
 				String content = (String)aList.get(i);
@@ -547,10 +578,14 @@ public class StringUtil
 					out.write(LINE_TERMINATOR);
 				}
 			}
+			out.flush();
 		}
 		finally
 		{
-			try { out.close(); } catch (Throwable th) {}
+			if (closeStream)
+			{
+				try { out.close(); } catch (Throwable th) {}
+			}
 		}
 	}
 

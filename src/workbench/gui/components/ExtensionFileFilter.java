@@ -23,6 +23,8 @@ public class ExtensionFileFilter
 	private static FileFilter sqlFileFilter;
 	private static FileFilter jarFileFilter;
 	private static FileFilter htmlFileFilter;
+
+	private static FileFilter wkspFileFilter;
 	
 	private List extensions;
 	private String desc;
@@ -152,6 +154,20 @@ public class ExtensionFileFilter
 		return textFileFilter;
 	}
 
+	public static final String WORKSPACE_EXT = "wksp";
+	
+	public static FileFilter getWorkspaceFileFilter()
+	{
+		if (wkspFileFilter == null)
+		{
+			ArrayList ext = new ArrayList();
+			ext.add(WORKSPACE_EXT);
+			String desc = ResourceMgr.getString("TxtFileFilterWksp");
+			wkspFileFilter = new ExtensionFileFilter(desc, ext, true);
+		}
+		return wkspFileFilter;
+	}
+	
 	public static FileFilter getHtmlFileFilter()
 	{
 		if (htmlFileFilter == null)

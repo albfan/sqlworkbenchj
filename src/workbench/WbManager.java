@@ -102,6 +102,50 @@ public class WbManager implements FontChangedListener
 		return this.connMgr;
 	}
 
+	public String getWorkspaceFilename(Window parent, boolean toSave)
+	{
+		String lastDir = settings.getLastWorkspaceDir();
+		JFileChooser fc = new JFileChooser(lastDir);
+		FileFilter wksp = ExtensionFileFilter.getWorkspaceFileFilter();
+		fc.addChoosableFileFilter(wksp);
+		//fc.setFileFilter(wksp);
+		String filename = null;
+
+		int answer = JFileChooser.CANCEL_OPTION;
+		if (toSave)
+		{
+			answer = fc.showSaveDialog(parent);
+		}
+		else
+		{
+			answer = fc.showOpenDialog(parent);
+		}
+		if (answer == JFileChooser.APPROVE_OPTION)
+		{
+			File fl = fc.getSelectedFile();
+			FileFilter ff = fc.getFileFilter();
+			if (ff == wksp)
+			{
+				filename = fl.getAbsolutePath();
+
+				String ext = ExtensionFileFilter.getExtension(fl);
+				if (ext.length() == 0)
+				{
+					if (!filename.endsWith(".")) filename = filename + ".";
+					filename = filename + ExtensionFileFilter.WORKSPACE_EXT;
+				}
+			}
+			else
+			{
+				filename = fl.getAbsolutePath();
+			}
+
+			lastDir = fc.getCurrentDirectory().getAbsolutePath();
+			settings.setLastWorkspaceDir(lastDir);
+		}
+		return filename;
+	}
+	
 	public String getExportFilename(boolean includeSqlType)
 	{
 		return this.getExportFilename(null, includeSqlType);

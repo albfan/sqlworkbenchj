@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -168,7 +169,9 @@ public class SqlPanel
 		this.data.getTable().setMinColWidth(WbManager.getSettings().getMinColumnWidth());
 		this.makeReadOnly();
 		this.checkResultSetActions();
-		WbManager.getSettings().addFontChangedListener(this);
+		
+		Settings s = WbManager.getSettings();
+		s.addFontChangedListener(this);
 	}
 
 	public void setId(int anId)
@@ -191,7 +194,10 @@ public class SqlPanel
 		this.contentPanel.setDividerLocation(loc);
 		loc = WbManager.getSettings().getLastSqlDividerLocation(this.internalId);
 		if (loc > 0) this.contentPanel.setLastDividerLocation(loc);
-		this.initStatementHistory(true);
+		if (!WbManager.getSettings().getRestoreLastWorkspace()) 
+			this.initStatementHistory(true);
+		else
+			this.initStatementHistory(false);
 		this.restoreLastEditorFile();
 	}
 
@@ -706,47 +712,74 @@ public class SqlPanel
 		if (this.statementHistory != null) return;
 
 		this.maxHistorySize = WbManager.getSettings().getMaxHistorySize();
+
 		try
 		{
-			Object data = null;
-			if (readFromFile)
+			ArrayList history = null;
+			if (readFromFile && !WbManager.getSettings().getRestoreLastWorkspace())
 			{
 				File f = new File(this.historyFilename + ".xml");
 				if (f.exists())
 				{
-					data = WbPersistence.readObject(this.historyFilename + ".xml");
+					Object data = WbPersistence.readObject(this.historyFilename + ".xml");
+					if (data instanceof ArrayList)
+					{
+						history = (ArrayList)data;
+					}
 				}
 				else
 				{
-					data = StringUtil.readStringList(this.historyFilename + ".txt");
+					f = new File(this.historyFilename + ".txt");
+					if (f.exists())
+					{
+						history = StringUtil.readStringList(this.historyFilename + ".txt");
+					}
 				}
 			}
-			if (data != null && data instanceof ArrayList)
-			{
-				this.statementHistory = (ArrayList)data;
-				this.currentHistoryEntry = this.statementHistory.size() - 1;
-				if (this.currentHistoryEntry > -1)
-				{
-					this.editor.setText(this.statementHistory.get(currentHistoryEntry).toString());
-					this.editor.setCaretPosition(0);
-					this.editor.clearUndoBuffer();
-				}
-			}
-			else
-			{
-				this.statementHistory = new ArrayList();
-				this.currentHistoryEntry = -1;
-			}
+			this.initStatementHistory(history);
 		}
 		catch (Exception e)
 		{
 			LogMgr.logWarning(this, "Error reading the statement history (" + e.getMessage() + ")");
-			this.statementHistory = new ArrayList();
+			this.initStatementHistory(null);
+		}
+	}
+
+	public void initStatementHistory(ArrayList data)
+	{
+		if (data != null)
+		{
+			this.statementHistory = data;
+			this.checkHistorySize();
+			this.currentHistoryEntry = this.statementHistory.size() - 1;
+			if (this.currentHistoryEntry > -1)
+			{
+				this.editor.setText(this.statementHistory.get(currentHistoryEntry).toString());
+				this.editor.setCaretPosition(0);
+				this.editor.clearUndoBuffer();
+			}
+			if (WbManager.getSettings().getRestoreLastWorkspace())
+			{
+				this.removeHistoryFile();
+			}
+		}
+		else
+		{
+			this.statementHistory = new ArrayList(this.maxHistorySize);
 			this.currentHistoryEntry = -1;
 		}
 		this.checkStatementActions();
 	}
-
+	
+	private void checkHistorySize()
+	{
+		if (this.statementHistory == null) return;
+		while (this.statementHistory.size() >= this.maxHistorySize)
+		{
+			this.statementHistory.remove(0);
+		}
+	}
+				
 	private void checkStatementActions()
 	{
 		int count;
@@ -791,15 +824,25 @@ public class SqlPanel
 		this.checkStatementActions();
 	}
 
+	public void removeHistoryFile()
+	{
+		File f = new File(this.historyFilename + ".txt");
+		if (f.exists())
+		{
+			f.delete();
+		}
+	}
+	
 	public void saveSettings()
 	{
+		Settings s = WbManager.getSettings();
 		int location = this.contentPanel.getDividerLocation();
 		int last = this.contentPanel.getLastDividerLocation();
-		WbManager.getSettings().setSqlDividerLocation(this.internalId, location);
-		WbManager.getSettings().setLastSqlDividerLocation(this.internalId, last);
+		s.setSqlDividerLocation(this.internalId, location);
+		s.setLastSqlDividerLocation(this.internalId, last);
 		String fname = this.editor.getCurrentFileName();
-		WbManager.getSettings().setEditorFile(this.internalId, fname);
-		this.saveSqlStatementHistory();
+		s.setEditorFile(this.internalId, fname);
+		if (!s.getRestoreLastWorkspace()) this.saveSqlStatementHistory();
 	}
 
 	public void saveSqlStatementHistory()
@@ -821,6 +864,17 @@ public class SqlPanel
 		{
 			LogMgr.logWarning(this, "Error storing statement history", e);
 		}
+	}
+	
+	public String getHistoryFilename()
+	{
+		return this.historyFilename + ".txt";
+	}
+	
+	public ArrayList getStatementHistory()
+	{
+		this.storeInHistory(this.editor.getText());
+		return this.statementHistory;
 	}
 
 	private void restoreLastEditorFile()
@@ -905,10 +959,7 @@ public class SqlPanel
 			this.statementHistory.remove(index);
 		}
 
-		if (this.statementHistory.size() == this.maxHistorySize)
-		{
-			this.statementHistory.remove(0);
-		}
+		this.checkHistorySize();
 		this.statementHistory.add(aStatement);
 		this.currentHistoryEntry = this.statementHistory.size() - 1;
 	}
