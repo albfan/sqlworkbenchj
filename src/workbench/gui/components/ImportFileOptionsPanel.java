@@ -6,8 +6,8 @@
 
 package workbench.gui.components;
 
-import workbench.WbManager;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 /**
  *
@@ -150,20 +150,20 @@ public class ImportFileOptionsPanel extends javax.swing.JPanel
 	
 	public void saveSettings()
 	{
-		WbManager.getSettings().setLastImportDelimiter(this.getColumnDelimiter());
-		WbManager.getSettings().setLastImportWithHeaders(this.getContainsHeader());
-		WbManager.getSettings().setLastImportDateFormat(this.getDateFormat());
-		WbManager.getSettings().setLastImportNumberFormat(this.getNumberFormat());
-		WbManager.getSettings().setLastImportQuoteChar(this.getQuoteChar());
+		Settings.getInstance().setLastImportDelimiter(this.getColumnDelimiter());
+		Settings.getInstance().setLastImportWithHeaders(this.getContainsHeader());
+		Settings.getInstance().setLastImportDateFormat(this.getDateFormat());
+		Settings.getInstance().setLastImportNumberFormat(this.getNumberFormat());
+		Settings.getInstance().setLastImportQuoteChar(this.getQuoteChar());
 	}
 	
 	public void restoreSettings()
 	{
-		this.setContainsHeader(WbManager.getSettings().getLastImportWithHeaders());
-		this.setColumnDelimiter(WbManager.getSettings().getLastImportDelimiter(true));
-		this.setDateFormat(WbManager.getSettings().getLastImportDateFormat());
-		this.setNumberFormat(WbManager.getSettings().getLastImportNumberFormat());
-		this.setQuoteChar(WbManager.getSettings().getLastImportQuoteChar());
+		this.setContainsHeader(Settings.getInstance().getLastImportWithHeaders());
+		this.setColumnDelimiter(Settings.getInstance().getLastImportDelimiter(true));
+		this.setDateFormat(Settings.getInstance().getLastImportDateFormat());
+		this.setNumberFormat(Settings.getInstance().getLastImportNumberFormat());
+		this.setQuoteChar(Settings.getInstance().getLastImportQuoteChar());
 	}
 
 	public void setNumberFormat(String aFormat)
