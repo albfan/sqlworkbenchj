@@ -12,17 +12,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.StreamTokenizer;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.lang.Character;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import workbench.log.LogMgr;
 
 /**
  *
@@ -39,27 +35,43 @@ public class StringUtil
 
 	public static final StringBuffer replaceToBuffer(String aString, String aValue, String aReplacement)
 	{
-		if (aReplacement == null) return new StringBuffer(aString);
+		return replaceToBuffer(null, aString, aValue, aReplacement);
+	}
+	
+	public static final StringBuffer replaceToBuffer(StringBuffer target, String aString, String aValue, String aReplacement)
+	{
+		if (target == null)
+		{
+			target = new StringBuffer((int)(aString.length() * 1.1));
+		}
+		
+		if (aReplacement == null) 
+		{
+			target.append(aString);
+		}
 
 		int pos = aString.indexOf(aValue);
-		if (pos == -1) return new StringBuffer(aString);
+		if (pos == -1) 
+		{
+			target.append(aString);
+			return target;
+		}
 
-		StringBuffer temp = new StringBuffer(aString.length());
 
 		int lastpos = 0;
 		int len = aValue.length();
 		while (pos != -1)
 		{
-			temp.append(aString.substring(lastpos, pos));
-			temp.append(aReplacement);
+			target.append(aString.substring(lastpos, pos));
+			target.append(aReplacement);
 			lastpos = pos + len;
 			pos = aString.indexOf(aValue, lastpos);
 		}
 		if (lastpos < aString.length())
 		{
-			temp.append(aString.substring(lastpos));
+			target.append(aString.substring(lastpos));
 		}
-		return temp;
+		return target;
 	}
 	
 	public static final String replace(String aString, String aValue, String aReplacement)
