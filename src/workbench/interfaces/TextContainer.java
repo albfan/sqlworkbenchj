@@ -13,4 +13,7 @@ package workbench.interfaces;
 public interface TextContainer
 {
 	String getText();
+	String getSelectedText();
+	void setSelectedText(String aText);
+	void setText(String aText);
 }

@@ -263,13 +263,17 @@ public class DwPanel extends JPanel
 			
 			this.lastMessage = "";
 			this.realModel = null;
+			
 			if (aSql.endsWith(";"))
-			{
 				aSql = aSql.substring(0, aSql.length() - 1);
-			}
+				
 			boolean repeatLast = false;
 			repeatLast = aSql.equals(this.sql);
-			cleanSql = SqlUtil.makeCleanSql(aSql, false).trim();
+			
+			// the cleanSql is necessary to strip the 
+			// statement from all comments so that the actual SQL verb 
+			// can be identified
+			cleanSql = SqlUtil.makeCleanSql(aSql, false);
 			this.sql = null;
 			
 			String verb = SqlUtil.getSqlVerb(cleanSql).toUpperCase();
@@ -335,7 +339,7 @@ public class DwPanel extends JPanel
 			}
 			else if (verb.equalsIgnoreCase("DISABLEOUT"))
 			{
-				this.dbConnection.getMetadata().enableOutput();
+				this.dbConnection.getMetadata().disableOutput();
 				this.hasResultSet = false;
 				this.lastStatement = null;
 			}
@@ -354,14 +358,19 @@ public class DwPanel extends JPanel
 					this.lastStatement.setMaxRows(0);
 				}					
 				start = System.currentTimeMillis();
-				this.lastStatement.execute(aSql);
-
-				int updateCount = this.lastStatement.getUpdateCount();
+				
+				boolean hasResult = this.lastStatement.execute(aSql);
+				int updateCount = -1;
+				
+				if (hasResult) 
+					rs = this.lastStatement.getResultSet();
+				else
+					updateCount = this.lastStatement.getUpdateCount();
+				
 				boolean moreResults = false; 
 				StringBuffer rows = null;
 				if (!noResultVerbs.contains(verb))
 				{
-					rs = this.lastStatement.getResultSet();
 					if (rs == null)
 					{
 						moreResults = this.lastStatement.getMoreResults();
@@ -369,8 +378,6 @@ public class DwPanel extends JPanel
 
 					while (moreResults || (updateCount != -1))
 					{
-						System.out.println("moreresults=" + moreResults);
-						System.out.println("updatecount=" + updateCount);
 						if (moreResults)
 						{
 							rs  = this.lastStatement.getResultSet();

@@ -17,6 +17,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTable;
+import workbench.util.StringUtil;
 
 /**
  * Displays a string in a table cell and shows a tool
@@ -31,8 +32,6 @@ public class ToolTipRenderer
 	private Color unselectedForeground;
 	private Color unselectedBackground;
 
-	private static Pattern CRLF = Pattern.compile("(\r\n|\r|\n|\n\r)");
-	
 	public ToolTipRenderer()
 	{
 		this.setVerticalAlignment(SwingConstants.TOP);
@@ -90,7 +89,7 @@ public class ToolTipRenderer
 			
 			if (display.length() > 0)
 			{
-				Matcher m = CRLF.matcher(display);
+				Matcher m = StringUtil.PATTERN_CRLF.matcher(display);
 				if (m.find())
 				{
 					StringBuffer tip = new StringBuffer(display.length() + 50);

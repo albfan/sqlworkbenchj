@@ -33,7 +33,11 @@ public class CreateSnippetAction extends WbAction
 
 	public void actionPerformed(ActionEvent e)
 	{
-		String sql = this.client.getText();
+		String sql = this.client.getSelectedText();
+		if (sql == null || sql.length() == 0)
+		{
+			sql = this.client.getText();
+		}
 		String code = StringUtil.makeJavaString(sql);
 		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 		StringSelection sel = new StringSelection(code);

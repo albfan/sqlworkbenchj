@@ -24,6 +24,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.table.*;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
@@ -872,6 +873,31 @@ extends JTable
 		WbSwingUtilities.showDefaultCursor(this);
 	}
 	
+	public void saveAsHtml(String aFilename)
+	{
+		if (this.dwModel == null) return;
+		
+		PrintWriter out = null;
+		
+		WbSwingUtilities.showWaitCursor(this.getParent());
+		try
+		{
+			out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(aFilename)));
+			DataStore ds = this.getDataStore();
+			String contents = ds.getDataAsHtmlTable();
+			out.print(contents);
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError(this, "Could not save data", th);
+		}
+		finally
+		{
+			try { out.close(); } catch (Throwable th) {}
+		}
+		WbSwingUtilities.showDefaultCursor(this.getParent());
+	}
+	
 	public void saveAsAscii(String aFilename)
 	{
 		if (this.dwModel == null) return;
@@ -900,15 +926,13 @@ extends JTable
 	{
 		try
 		{
-			String lastDir = WbManager.getSettings().getLastExportDir();
-			JFileChooser fc = new JFileChooser(lastDir);
-			fc.addChoosableFileFilter(ExtensionFileFilter.getTextFileFilter());
 			DataStore ds = this.dwModel.getDataStore();
 			boolean sql = (ds != null && ds.canSaveAsSqlInsert());
 			String filename = WbManager.getInstance().getExportFilename(this, sql);
 			if (filename != null)
 			{
 				String ext = ExtensionFileFilter.getExtension(new File(filename));
+				
 				final String name = filename;
 				if (ExtensionFileFilter.hasSqlExtension(filename))
 				{
@@ -924,7 +948,13 @@ extends JTable
 						public void run() { saveAsAscii(name); }
 					}).start();
 				}
-				
+				else if (ExtensionFileFilter.hasHtmlExtension(filename))
+				{
+					new Thread(new Runnable()
+					{
+						public void run() { saveAsHtml(name); }
+					}).start();
+				}
 			}
 		}
 		catch (Exception e)

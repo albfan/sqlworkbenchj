@@ -22,7 +22,8 @@ public class ExtensionFileFilter
 	private static FileFilter textFileFilter;
 	private static FileFilter sqlFileFilter;
 	private static FileFilter jarFileFilter;
-
+	private static FileFilter htmlFileFilter;
+	
 	private List extensions;
 	private String desc;
 	private static final String SQL_EXT = "sql";
@@ -68,6 +69,12 @@ public class ExtensionFileFilter
 	{
 		String ext = getExtension(aFilename);
 		return TXT_EXT.equalsIgnoreCase(ext);
+	}
+	
+	public static boolean hasHtmlExtension(String aFilename)
+	{
+		String ext = getExtension(aFilename);
+		return "html".equalsIgnoreCase(ext);
 	}
 	
 	public boolean accept(File f)
@@ -133,6 +140,18 @@ public class ExtensionFileFilter
 		return textFileFilter;
 	}
 
+	public static FileFilter getHtmlFileFilter()
+	{
+		if (htmlFileFilter == null)
+		{
+			ArrayList ext = new ArrayList();
+			ext.add("html");
+			String desc = ResourceMgr.getString("TxtFileFilterHtml");
+			htmlFileFilter = new ExtensionFileFilter(desc, ext, true);
+		}
+		return htmlFileFilter;
+	}
+	
 	// The description of this filter
 	public String getDescription()
 	{

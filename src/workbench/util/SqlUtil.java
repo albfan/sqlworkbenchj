@@ -188,7 +188,7 @@ public class SqlUtil
 
 	/**
 	 *	Replaces all white space characters with ' ' (But not inside
-	 *	string literals)
+	 *	string literals), removes -- style and Java style comments
 	 *	@param String - The sql script to "clean out"
 	 *  @param boolean - if true, newline characters (\n) are kept
 	 *	@returns String
@@ -201,6 +201,10 @@ public class SqlUtil
 		boolean inQuotes = false;
 		
 		StringBuffer newSql = new StringBuffer(count);
+		
+		// remove trailing semicolon
+		if (aSql.charAt(count - 1) == ';') count --;
+		
 		for (int i=0; i < count; i++)
 		{
 			char c = aSql.charAt(i);
@@ -250,7 +254,7 @@ public class SqlUtil
 		return newSql.toString();
 	}
 	
-	private static int skipQuotes(String aString, int aStartpos)
+	private static final int skipQuotes(String aString, int aStartpos)
 	{
 		char c = aString.charAt(aStartpos);
 		while (c != '\'')
@@ -261,7 +265,7 @@ public class SqlUtil
 		return aStartpos + 1;
 	}
 
-	public static String getJavaPrimitive(String aClass)
+	public static final String getJavaPrimitive(String aClass)
 	{
 		if (aClass == null) return null;
 		int pos = aClass.lastIndexOf('.');
@@ -296,7 +300,7 @@ public class SqlUtil
 		return null;
 	}
 	
-	public static String getJavaClass(int aSqlType, int aSize, int aPrecision)
+	public static final String getJavaClass(int aSqlType, int aSize, int aPrecision)
 	{
 		if (aSqlType == Types.BIGINT)
 			return "java.math.BigInteger";
@@ -334,7 +338,7 @@ public class SqlUtil
 			return null;
 	}
 
-	private static String getDecimalClass(int aSqlType, int aSize, int aPrecision)
+	private static final String getDecimalClass(int aSqlType, int aSize, int aPrecision)
 	{
 		if (aPrecision == 0)
 		{
@@ -380,9 +384,26 @@ public class SqlUtil
 	{
 		return getDecimalClass(aSqlType, aSize, aPrecision);
 	}
-	
-	
-	public static String getTypeName(int aSqlType)
+
+	public static final boolean isNumberType(int aSqlType)
+	{
+		return (aSqlType == Types.BIGINT ||
+				    aSqlType == Types.INTEGER ||
+						aSqlType == Types.DECIMAL ||
+						aSqlType == Types.DOUBLE ||
+					  aSqlType == Types.FLOAT ||
+					  aSqlType == Types.NUMERIC ||
+					  aSqlType == Types.REAL ||
+					  aSqlType == Types.SMALLINT ||
+					  aSqlType == Types.TINYINT);
+	}
+	public static final boolean isDateType(int aSqlType)
+	{
+		return (aSqlType == Types.DATE ||
+						aSqlType == Types.TIMESTAMP);
+	}
+
+	public static final String getTypeName(int aSqlType)
 	{
 		if (aSqlType == Types.ARRAY)
 			return "ARRAY";
@@ -447,7 +468,7 @@ public class SqlUtil
 		else 
 			return "UNKNOWN";
 	}
-	
+
 	public static void main(String args[])
 	{
 		//String script = "select 'testing'';''', test.spalte1 from test;\r\n                ;\r\nupdate test set blba='xx';";

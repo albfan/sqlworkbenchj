@@ -96,11 +96,14 @@ public class WbManager
 	{
 		String lastDir = settings.getLastExportDir();
 		JFileChooser fc = new JFileChooser(lastDir);
+		FileFilter text = ExtensionFileFilter.getTextFileFilter();
+		fc.addChoosableFileFilter(text);
+		fc.addChoosableFileFilter(ExtensionFileFilter.getHtmlFileFilter());
 		if (includeSqlType)
 		{
 			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
 		}
-		fc.addChoosableFileFilter(ExtensionFileFilter.getTextFileFilter());
+		fc.setFileFilter(text);
 		String filename = null;
 
 		Window parent;
@@ -120,6 +123,17 @@ public class WbManager
 				{
 					if (!filename.endsWith(".")) filename = filename + ".";
 					filename = filename + "sql";
+				}
+			}
+			else if (ff == ExtensionFileFilter.getHtmlFileFilter())
+			{
+				filename = fl.getAbsolutePath();
+
+				String ext = ExtensionFileFilter.getExtension(fl);
+				if (ext.length() == 0)
+				{
+					if (!filename.endsWith(".")) filename = filename + ".";
+					filename = filename + "html";
 				}
 			}
 			else

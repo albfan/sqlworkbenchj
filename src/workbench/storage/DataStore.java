@@ -734,6 +734,56 @@ public class DataStore
 		return true;
 	}
 	
+	public String getDataAsHtmlTable()
+	{
+		int count = this.getRowCount();
+		if (count == 0) return "";
+		StringBuffer html = new StringBuffer(this.getRowCount() * 100);
+		html.append("<style type=\"text/css\">\n");
+		html.append("<!--\n");
+		html.append("  table { border-spacing:0; border-left-style:solid; border-left-width:1px; border-bottom-style:solid; border-bottom-width:1px;}\n");
+		html.append("  td { padding:2; border-top-style:solid;border-top-width:1px;border-right-style:solid;border-right-width:1px;}\n");
+		html.append("  .number-cell { text-align:right; } \n");
+		html.append("  .text-cell { text-align:left; } \n");
+		html.append("-->\n</style>\n");
+		html.append("<table>\n");
+
+		// table header with column names
+		html.append("  <tr>\n      ");
+		for (int c=0; c < this.getColumnCount(); c ++)
+		{
+			html.append("<td><b>");
+			html.append(this.getColumnName(c));
+			html.append("</b></td>");
+		}
+		html.append("\n  </tr>\n");
+		for (int i=0; i < count; i++)
+		{
+			html.append("  <tr>\n      ");
+			for (int c=0; c < this.getColumnCount(); c ++)
+			{
+				String value = this.getValueAsString(i, c);
+				int type = this.getColumnType(c);
+				if (SqlUtil.isNumberType(type) || SqlUtil.isDateType(type))
+					html.append("<td class=\"number-cell\">");
+				else
+					html.append("<td class=\"text-cell\">");
+				if (value == null)
+				{
+					html.append("&nbsp;");
+				}
+				else
+				{
+					html.append(StringUtil.escapeHTML(value));
+				}
+				html.append("</td>");
+			}
+			html.append("\n  </tr>\n");
+		}
+		html.append("</table>");
+		return html.toString();
+	}
+
 	public boolean canSaveAsSqlInsert()
 	{
 		if (this.updateTable == null)
@@ -756,7 +806,7 @@ public class DataStore
 		sql.append(";");
 		return sql;
 	}
-	
+
 	public String getDataAsSqlInsert()
 		throws WbException, SQLException
 	{

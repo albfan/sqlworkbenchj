@@ -461,8 +461,11 @@ public class SqlPanel
 		WbAction action = new CreateSnippetAction(this.editor);
 		action.setCreateMenuSeparator(true);
 		this.actions.add(action);
+		action = new CleanJavaCodeAction(this.editor);
+		this.actions.add(action);
 
 		action = new SaveSqlHistoryAction(this);
+		action.setCreateMenuSeparator(true);
 		this.actions.add(action);
 		
 		this.toolbarActions.add(this.findAction);
