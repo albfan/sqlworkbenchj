@@ -6,17 +6,31 @@
 
 package workbench.db;
 
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 
-import workbench.resource.ResourceMgr;
-import workbench.log.LogMgr;
-import workbench.exception.NoConnectionException;
-import java.sql.DriverManager;
 import org.xml.sax.InputSource;
-import java.io.BufferedReader;
-import java.io.FileReader;
+
+import workbench.exception.NoConnectionException;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+import workbench.WbManager;
 
 /**
  *
@@ -25,12 +39,15 @@ import java.io.FileReader;
  */
 public class ConnectionMgr
 {
-	private HashMap connections;
-	
+	private HashMap activeConnections;
+	private List profiles;
+	private List drivers;
+
 	/** Creates new ConnectionMgr */
 	public ConnectionMgr()
 	{
-		this.connections = new HashMap(10);
+		this.activeConnections = new HashMap();
+		this.readProfiles();
 	}
 	
 	/**
@@ -65,11 +82,11 @@ public class ConnectionMgr
 	public WbConnection getConnection(String anId, boolean showSelectWindow)
 		throws NoConnectionException
 	{
-		WbConnection conn = (WbConnection)this.connections.get(anId);
+		WbConnection conn = (WbConnection)this.activeConnections.get(anId);
 		if (conn == null && showSelectWindow)
 		{
 			conn = this.selectConnection();
-			if (conn != null) this.connections.put(anId, conn);
+			if (conn != null) this.activeConnections.put(anId, conn);
 		}
 		if (conn == null)
 		{
@@ -78,20 +95,53 @@ public class ConnectionMgr
 		return conn;
 	}
 	
+	/**
+	 *	Returns a List of registered drivers.
+	 *	This list is read from the workbench.settings file
+	 */
+	public List getDrivers()
+	{
+		if (this.drivers == null)
+		{
+			this.drivers = new ArrayList();
+			int i=0;
+			String name = null;
+			String classname = null;
+			String lib = null;
+			Settings sett = WbManager.getSettings();
+			do
+			{
+				try
+				{
+					name = sett.getDriverName(i);
+					classname = sett.getDriverClass(i);
+					lib = sett.getDriverName(i);
+					this.drivers.add(new DbDriver(name, classname, lib));
+					i++;
+				}
+				catch (NoSuchElementException e)
+				{
+					name = null;
+				}
+			}
+			while (name != null);
+		}
+		return Collections.unmodifiableList(this.drivers);
+	}
+	
+	private void saveDrivers()
+	{
+	}
+	
 	public WbConnection selectConnection()
 	{
 		WbConnection result = null;
 		
 		try
 		{
-			//Class.forName("org.postgresql.Driver");
-			//String url = "jdbc:postgresql:wbtest";
-			//String user = "thomas";
-			Class.forName("oracle.jdbc.OracleDriver");
-			String url="jdbc:oracle:thin:@gromit:1521:oradb";
-			String user = "auto";
-			String pwd = "auto";
-			Connection conn  = DriverManager.getConnection(url, user, pwd);
+			ConnectionInfo info = this.getProfile(WbManager.getSettings().getLastConnection());
+			Class.forName(info.getDriverclass());
+			Connection conn  = DriverManager.getConnection(info.getUrl(), info.getUsername(), info.getPassword());
 			result = new WbConnection(conn);
 		}
 		catch (Exception e)
@@ -108,9 +158,16 @@ public class ConnectionMgr
 	 *	The connection is is identified by the given name and is
 	 *	assigned to the given id (=MainWindow)
 	 */
-	public WbConnection getNamedConnection(String anId, String aConnectionName)
+	public ConnectionInfo getProfile(int anId)
 	{
-		return null;
+		try
+		{
+			return (ConnectionInfo)this.profiles.get(anId);
+		}
+		catch (ArrayIndexOutOfBoundsException e)
+		{
+			return null;
+		}
 	}
 	
 	/**
@@ -118,12 +175,12 @@ public class ConnectionMgr
 	 */
 	public void disconnectAll()
 	{
-		Iterator itr = this.connections.keySet().iterator();
+		Iterator itr = this.activeConnections.keySet().iterator();
 		while (itr.hasNext())
 		{
 			String key = itr.next().toString();
 			this.disconnect(key);
-			this.connections.put(key, null);
+			this.activeConnections.put(key, null);
 		}
 	}
 	
@@ -134,7 +191,7 @@ public class ConnectionMgr
 	{
 		try
 		{
-			Connection con = (Connection)this.connections.get(anId);
+			Connection con = (Connection)this.activeConnections.get(anId);
 			if (con != null) con.close();
 		}
 		catch (Exception e)
@@ -146,6 +203,66 @@ public class ConnectionMgr
 	{
 		return this.getClass().getName();
 	}
+	
+	public void readProfiles()
+		//throws FileNotFoundException
+	{
+		this.profiles = new ArrayList();
+		Settings set = WbManager.getSettings();
+		int count = set.getConnectionCount();
+		String driver;
+		String url;
+		String pwd;
+		String user;
+		String name;
+		for (int i=0; i < count; i++)
+		{
+			driver = set.getConnectionDriver(i);
+			url = set.getConnectionUrl(i);
+			user = set.getConnectionUsername(i);
+			pwd = set.getConnectionPassword(i);
+			ConnectionInfo info = new ConnectionInfo(driver, url, user, pwd);
+			this.profiles.add(i, info);
+		}
+		/*
+		BufferedInputStream in = new BufferedInputStream(new FileInputStream(aFilename));
+		XMLDecoder de = new XMLDecoder(in);
+		boolean finished = false;
+		while (!finished)
+		{
+			try
+			{
+				ConnectionInfo i = (ConnectionInfo)de.readObject();
+			}
+			catch (ClassCastException ce)
+			{
+				LogMgr.logError(this, "Wrong class in " + aFilename, ce);
+			}
+			catch (ArrayIndexOutOfBoundsException ex)
+			{
+				de.close();
+				finished = true;
+			}
+		}
+		*/
+	}
+	
+	public void saveConnectionInfo(String aFilename)
+		throws FileNotFoundException
+	{
+		/*
+		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(aFilename));
+		XMLEncoder en = new XMLEncoder(out);
+		Iterator itr = this.connections.values().iterator();
+		while (itr.hasNext())
+		{
+			en.writeObject(itr.next());
+		}
+		en.close();
+		*/
+		
+	}
+	
 	
 	public static void main(String args[])
 	{
@@ -162,8 +279,8 @@ public class ConnectionMgr
      javax.xml.parsers.DocumentBuilderFactory builderFactory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
      javax.xml.parsers.DocumentBuilder builder = builderFactory.newDocumentBuilder();
      org.w3c.dom.Document document = builder.parse (new org.xml.sax.InputSource (in));
-     ConnectionsScanner scanner = new ConnectionsScanner (document);
-     scanner.visitDocument();
+//     ConnectionsScanner scanner = new ConnectionsScanner (document);
+//     scanner.visitDocument();
 			
 		}
 		catch (Exception e)

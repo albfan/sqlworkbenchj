@@ -15,7 +15,7 @@ import workbench.log.LogMgr;
  *	java.sql.Connection throughout the JWorkbench
  *
  * @author  thomas
- * @version $Revision: 1.2 $  
+ * @version $Revision: 1.3 $  
  */
 public class WbConnection
 	implements java.sql.Connection
@@ -182,6 +182,66 @@ public class WbConnection
 	public void rollback() throws java.sql.SQLException
 	{
 		this.sqlConnection.rollback();
+	}
+	
+	public java.sql.Statement createStatement(int param, int param1, int param2) throws java.sql.SQLException
+	{
+		return this.sqlConnection.createStatement(param, param1, param2);
+	}
+	
+	public int getHoldability() throws java.sql.SQLException
+	{
+		return this.sqlConnection.getHoldability();
+	}
+	
+	public java.sql.CallableStatement prepareCall(String str, int param, int param2, int param3) throws java.sql.SQLException
+	{
+		return this.sqlConnection.prepareCall(str, param, param2, param3);
+	}
+	
+	public java.sql.PreparedStatement prepareStatement(String str, int param) throws java.sql.SQLException
+	{
+		return this.sqlConnection.prepareStatement(str, param);
+	}
+	
+	public java.sql.PreparedStatement prepareStatement(String str, int[] values) throws java.sql.SQLException
+	{
+		return this.sqlConnection.prepareStatement(str, values);
+	}
+	
+	public java.sql.PreparedStatement prepareStatement(String str, String[] str1) throws java.sql.SQLException
+	{
+		return this.sqlConnection.prepareStatement(str, str1);
+	}
+	
+	public java.sql.PreparedStatement prepareStatement(String str, int param, int param2, int param3) throws java.sql.SQLException
+	{
+		return this.sqlConnection.prepareStatement(str, param, param2, param3);
+	}
+	
+	public void releaseSavepoint(java.sql.Savepoint savepoint) throws java.sql.SQLException
+	{
+		this.sqlConnection.releaseSavepoint(savepoint);
+	}
+	
+	public void rollback(java.sql.Savepoint savepoint) throws java.sql.SQLException
+	{
+		this.sqlConnection.rollback(savepoint);
+	}
+	
+	public void setHoldability(int param) throws java.sql.SQLException
+	{
+		this.sqlConnection.setHoldability(param);
+	}
+	
+	public java.sql.Savepoint setSavepoint() throws java.sql.SQLException
+	{
+		return this.sqlConnection.setSavepoint();
+	}
+	
+	public java.sql.Savepoint setSavepoint(String str) throws java.sql.SQLException
+	{
+		return this.sqlConnection.setSavepoint(str);
 	}
 	
 }

@@ -7,6 +7,7 @@
 package workbench.db;
 
 import java.sql.Connection;
+import workbench.db.DbReader;
 
 /**
  *
@@ -33,7 +34,7 @@ public class SqlResult
 		return (result != null);
 	}
 	
-	public boolean getMessage()
+	public String getMessage()
 	{
 		return message;
 	}
