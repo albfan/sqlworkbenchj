@@ -44,6 +44,7 @@ public class DeleteScriptGenerator
 	}
 	
 	public void setTable(String aCatalog, String aSchema, String aTable)
+		throws SQLException
 	{
 		if (aTable == null || aTable.trim().length() == 0) throw new IllegalArgumentException("The table name may not be empty");
 		this.tablename = this.meta.adjustObjectname(aTable);
@@ -68,14 +69,7 @@ public class DeleteScriptGenerator
 		}
 		
 		this.dependency.setTableName(this.catalogname, this.schemaname, this.tablename);
-		try
-		{
-			this.tableDefinition = this.meta.getTableDefinition(this.catalogname, this.schemaname, this.tablename);
-		}
-		catch (Exception e)
-		{
-			//
-		}
+		this.tableDefinition = this.meta.getTableDefinition(this.catalogname, this.schemaname, this.tablename);
 	}
 	
 	public void setValues(Map colValues)

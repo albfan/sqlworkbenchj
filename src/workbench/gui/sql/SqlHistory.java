@@ -81,6 +81,22 @@ public class SqlHistory
 		this.changed = false;
 	}
 
+	public void showLast(EditorPanel editor)
+	{
+		if (this.history.size() == 0) return;
+		this.currentEntry = this.history.size() - 1;
+		SqlHistoryEntry entry = (SqlHistoryEntry)this.history.get(this.currentEntry);
+		entry.applyTo(editor);
+	}
+	
+	public void showFirst(EditorPanel editor)
+	{
+		if (this.history.size() == 0) return;
+		this.currentEntry = 0;
+		SqlHistoryEntry entry = (SqlHistoryEntry)this.history.get(this.currentEntry);
+		entry.applyTo(editor);
+	}
+		
 	public void showCurrent(EditorPanel editor)
 	{
 		if (this.currentEntry >= this.history.size()) return;

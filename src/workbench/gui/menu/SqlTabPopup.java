@@ -22,7 +22,7 @@ public class SqlTabPopup extends JPopupMenu
 	private AddTabAction add;
 	private RemoveTabAction remove;
 	private RenameTabAction rename;
-	
+
 	/** Creates new LogPanelPopup */
 	public SqlTabPopup(MainWindow aClient)
 	{
@@ -34,13 +34,14 @@ public class SqlTabPopup extends JPopupMenu
 		}
 		this.remove = new RemoveTabAction(aClient);
 		this.add(remove.getMenuItem());
-		
+
 		if (aClient.canRenameTab())
 		{
 			this.rename = new RenameTabAction(aClient);
 			this.add(rename.getMenuItem());
 		}
-		
+
+
 		if (panel instanceof SqlPanel)
 		{
 			this.addSeparator();
@@ -50,15 +51,16 @@ public class SqlTabPopup extends JPopupMenu
 			FileDiscardAction discard = new FileDiscardAction((SqlPanel)panel);
 			discard.removeIcon();
 			this.add(discard.getMenuItem());
+			this.remove.setEnabled(aClient.canCloseTab());
 		}
 	}
-	
+
 	public void addAction(WbAction anAction, boolean withSep)
 	{
 		if (withSep) this.addSeparator();
 		this.add(anAction);
 	}
-	
+
 	public RemoveTabAction getRemoveAction() { return this.remove; }
 	public AddTabAction getAddAction() { return this.add; }
 }

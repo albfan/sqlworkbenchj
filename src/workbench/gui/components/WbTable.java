@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import javax.swing.AbstractListModel;
 
 import javax.swing.ActionMap;
 import javax.swing.CellEditor;
@@ -44,6 +45,8 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -55,6 +58,12 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.JPopupMenu.Separator;
 import javax.swing.JScrollBar;
+import javax.swing.ListCellRenderer;
+import javax.swing.ListModel;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -150,6 +159,8 @@ public class WbTable
 	private TableModelListener changeListener;
 	private JScrollPane scrollPane;
 
+	private boolean showRowNumbers = false;
+	private JList rowHeader = null;
 	private boolean showPopup = true;
 	
 	public WbTable()
@@ -445,7 +456,34 @@ public class WbTable
 		}
 		if (this.printDataAction != null) this.printDataAction.setEnabled(this.getRowCount() > 0);
 		if (this.printPreviewAction != null) this.printPreviewAction.setEnabled(this.getRowCount() > 0);
-		
+
+		if (this.showRowNumbers && aModel != EMPTY_MODEL)
+		{
+			ListModel lm = new AbstractListModel()
+			{
+				public int getSize() { return getRowCount(); }
+				public Object getElementAt(int index)
+				{
+					return "";
+				}
+			};
+			
+			this.rowHeader = new JList(lm);
+			this.rowHeader.setCellRenderer(new RowHeaderRenderer(this));
+			String max = Integer.toString(aModel.getRowCount());
+			FontMetrics fm = this.getFontMetrics(this.getFont());
+			int width = fm.stringWidth(max);
+			this.rowHeader.setFixedCellWidth(width + 10);
+			
+			if (this.scrollPane != null)
+			{
+				this.scrollPane.setRowHeaderView(this.rowHeader);
+			}
+		}
+		else if (this.scrollPane != null)
+		{
+			this.scrollPane.setRowHeaderView(null);
+		}
 	}
 
 	public DataStoreTableModel getDataStoreTableModel()
@@ -1482,3 +1520,33 @@ public class WbTable
 
 }
 
+class RowHeaderRenderer
+	extends JLabel
+	implements ListCellRenderer
+{
+	private WbTable table;
+	RowHeaderRenderer(WbTable aTable)
+	{
+		this.table = aTable;
+		JTableHeader header = table.getTableHeader();
+		setOpaque(true);
+		//Border b = new CompoundBorder(new DividerBorder(DividerBorder.TOP, 1, false), new EmptyBorder(0, 0, 0, 2));
+		Border b = new WbLineBorder(WbLineBorder.BOTTOM);
+		setBorder(b);
+		setHorizontalAlignment(RIGHT);
+		setForeground(header.getForeground());
+		setBackground(header.getBackground());
+		setFont(header.getFont());
+	}
+	
+	public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
+	{
+		setText(Integer.toString(index + 1));
+		Dimension d = this.getPreferredSize();
+		d.height = this.table.getRowHeight(index);
+		this.setPreferredSize(d);
+		this.setMaximumSize(d);
+		this.setMinimumSize(d);
+		return this;
+	}
+}

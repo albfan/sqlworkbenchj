@@ -157,7 +157,7 @@ public class TableDependencyTreeDisplay
 					table = child.getTable();
 					Entry entry = (Entry)entries.next();
 					StringBuffer coldef = new StringBuffer(100);
-					coldef.append("<html><body><b>");
+					coldef.append("<html><b>");
 					if (this.showExported)
 					{
 						coldef.append(table);
@@ -183,7 +183,7 @@ public class TableDependencyTreeDisplay
 						coldef.append('.');
 						coldef.append(entry.getKey());
 					}
-					coldef.append("</b></body></html>");
+					coldef.append("</b></html>");
 					DefaultMutableTreeNode colnode = new DefaultMutableTreeNode(coldef.toString());
 					colnode.setAllowsChildren(false);
 					treeNode.add(colnode);

@@ -1,6 +1,6 @@
 <section id="information">
 	<title>General Information</title>
-	
+
 	<section id="license">
 		<title>Software license</title>
 
@@ -33,12 +33,12 @@
 		OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 		USE OR OTHER DEALINGS IN THE SOFTWARE.</para>
 	</section>
-	
-	
+
+
 	<section id="version">
 		<title>Program version</title>
 
-		<para>This document describes build @BUILD_NUMBER@ of the SQL Workbench/J</para>
+		<para>This document describes build @BUILD_NUMBER@ of the &wb-productname;</para>
 	</section>
 
 </section>

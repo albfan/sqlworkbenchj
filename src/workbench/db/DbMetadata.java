@@ -158,7 +158,7 @@ public class DbMetadata
 		}
 
 		String productLower = this.productName.toLowerCase();
-		
+
 		// For some functions we need to know which DBMS this is.
 		if (productLower.indexOf("oracle") > -1)
 		{
@@ -207,21 +207,34 @@ public class DbMetadata
   public boolean isStringComparisonCaseSensitive() { return this.caseSensitive; }
 	public boolean cancelNeedsReconnect() { return this.needsReconnect; }
 
+	/**
+	 *	Returns if the current DBMS understands the NULL
+	 *	keyword in a column definition for columns which may
+	 *	be null
+	 */
+	public boolean acceptsColumnNullKeyword()
+	{
+		// currently I know only of Firebird which does not accept
+		// the keyword NULL in the column definition
+		return !this.isFirebird;
+	}
+
 	public boolean isMySql() { return this.isMySql; }
 	public boolean isPostgres() { return this.isPostgres; }
   public boolean isOracle() { return this.isOracle; }
 	public boolean isHsql() { return this.isHsql; }
 	public boolean isFirebird() { return this.isFirebird; }
+	public boolean isSqlServer() { return this.isSqlServer; }
 
 	/**
 	 *	Return a list of datatype as returned from DatabaseMetaData.getTypeInfo()
 	 *	which we cannot handle. This is used by the TableCreator when searching
-	 *	for a matching data type. 
+	 *	for a matching data type.
 	 */
 	public List getIgnoredDataTypes()
 	{
 		String types = null;
-		if (this.isMySql) 
+		if (this.isMySql)
 		{
 			types = WbManager.getSettings().getProperty("workbench.ignoretypes.mysql", null);
 		}
@@ -245,14 +258,14 @@ public class DbMetadata
 		{
 			types = WbManager.getSettings().getProperty("workbench.ignoretypes.sqlserver", null);
 		}
-		else 
+		else
 		{
 			types = WbManager.getSettings().getProperty("workbench.ignoretypes.other", null);
 		}
-		
+
 		return StringUtil.stringToList(types, ",");
 	}
-	
+
 	private HashMap readStatementTemplates(String aFilename)
 	{
 		HashMap result = null;
@@ -278,9 +291,16 @@ public class DbMetadata
 		File f = new File(aFilename);
 		if (f.exists())
 		{
-			LogMgr.logInfo("DbMetadata.readStatementTemplates()", "Reading user define template file " + aFilename);
+			//LogMgr.logInfo("DbMetadata.readStatementTemplates()", "Reading user define template file " + aFilename);
 			// try to read additional definitions from local file
-			value = WbPersistence.readObject(aFilename);
+			try
+			{
+				value = WbPersistence.readObject(aFilename);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logDebug("DbMetadata.readStatementTemplate()", "Error reading template file " + aFilename, e);
+			}
 			if (value != null && value instanceof HashMap)
 			{
 				HashMap m = (HashMap)value;
@@ -376,6 +396,10 @@ public class DbMetadata
 		{
 			result.append("CREATE OR REPLACE VIEW " + aView);
 		}
+		else if (this.isFirebird)
+		{
+			result.append("RECREATE VIEW " + aView);
+		}
 		else
 		{
 			if (includeDrop) result.append("DROP VIEW " + aView);
@@ -391,17 +415,15 @@ public class DbMetadata
 			for (int i=0; i < rows; i++)
 			{
 				String colName = viewTableDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-				if (i == 0)
-				{
-					result.append("  ");
-				}
-				else
-				{
-					result.append(" ,");
-				}
+				result.append("  ");
 				result.append(colName);
-				result.append("\n)");
+				if (i < rows - 1)
+				{
+					result.append(",");
+					result.append("\n");
+				}
 			}
+			result.append("\n)");
 		}
 		result.append("\nAS \n");
 		result.append(source);
@@ -1147,7 +1169,7 @@ public class DbMetadata
 		}
 
 		boolean hasEnums = false;
-		
+
 		ResultSet rs = this.metaData.getColumns(aCatalog, aSchema, aTable, "%");
 		while (rs.next())
 		{
@@ -1160,7 +1182,7 @@ public class DbMetadata
 			{
 				hasEnums = typeName.startsWith("enum") || typeName.startsWith("set");
 			}
-			
+
 			int size = rs.getInt("COLUMN_SIZE");
 			int digits = rs.getInt("DECIMAL_DIGITS");
 			String rem = rs.getString("REMARKS");
@@ -2073,10 +2095,14 @@ public class DbMetadata
 				result.append(" DEFAULT ");
 				result.append(def.trim());
 			}
-			if ("YES".equals(nul))
-				result.append(" NULL");
+			if ("YES".equals(nul) )
+			{
+				if (this.acceptsColumnNullKeyword()) result.append(" NULL");
+			}
 			else
+			{
 				result.append(" NOT NULL");
+			}
 
 			if (!this.isOracle && def != null && def.length() > 0)
 			{

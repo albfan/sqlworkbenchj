@@ -1,5 +1,29 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh:  Selected text can now be indented and un-indented using the tab key
+Enh:  Column selection mode can now also be activated by keyboard.
+      Alt-Q will activate the column selection mode for the next selection
+      Column selection is always possible by holding down the Ctrl key while
+      selecting with the mouse
+Enh:  Jump to first statement and jump to last statement are now
+      available for the statement history.
+Enh:  If a statement fails, it is now highlighted in the editor
+Fix:  When cancelling an update, or an error occured during the update
+      of changes made directly in the result set, the changes were lost.
+Fix:  The SQL source for a table was wrong for Firebird, because Firebird
+      does not understand the NULL keyword
+Fix:  Macros where not saved
+Fix:  The MacroManager did not work if no macros where defined.
+Fix:  The COPY command did not work if no columns where specified
+Fix:  Adjusted the MetaData SQL for HSQLDB 1.7.2 Triggers
+      (which unfortunately breaks the trigger display for earlier versions
+      as the column names where changed)
+Fix:  The source code for VIEWS was wrong
+Fix:  The last SQL tab could be closed.
+
+
+Build 66, 10.01.2004
+--------------------
 Enh:  A Data Pumper is now available which makes it possible to copy
       tables directly from one database to another without using export files
       (Tools->Data Pumper)
@@ -12,6 +36,7 @@ Enh:  You can now check if newer versions are available from the WebSite
       (Help -> Check for updates)
 Enh:  With MySQL the database explorer now displays correctly columns of
       type enum or set (complete definition)
+Enh:  Reworked the documentation about using batch files
 Fix:  Logging with type INFO did not work
 Fix:  When reformatting SQL statements the formatter would remove closing
       brackets in some cases.
@@ -86,6 +111,7 @@ Fix:  Under Firebird, listdb would throw a NullPointerException. LISTDB now
 Fix:  Disconnect did not work properly if "One Connection per tab" was enabled
       in the profile.
 Fix:  The current workspace was not saved, when File->Disconnect was selected
+
 
 Build 62, 15.11.2003
 --------------------

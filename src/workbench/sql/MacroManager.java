@@ -9,6 +9,7 @@ package workbench.sql;
 import java.awt.Frame;
 import java.awt.Window;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -21,6 +22,7 @@ import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.MacroChangeListener;
 import workbench.log.LogMgr;
 import workbench.util.WbPersistence;
+import java.io.FileNotFoundException;
 
 /**
  *
@@ -32,10 +34,16 @@ public class MacroManager
 	private HashMap macros;
 	private boolean modified = false;
 	private List changeListeners = null;
-		
+	private boolean errorDuringLoad = false;
+
 	public static MacroManager getInstance()
 	{
 		return instance;
+	}
+
+	public boolean hadLoadErrors()
+	{
+		return this.errorDuringLoad;
 	}
 
 	public synchronized String getMacroText(String aKey)
@@ -43,8 +51,8 @@ public class MacroManager
 		if (aKey == null) return null;
 		return (String)this.macros.get(aKey.toLowerCase());
 	}
-	
-	
+
+
 	public synchronized void removeMacro(String aKey)
 	{
 		if (aKey == null) return;
@@ -52,14 +60,14 @@ public class MacroManager
 		this.modified = true;
 		this.fireMacroListChange();
 	}
-	
+
 	public synchronized List getMacroList()
 	{
 		Set keys = this.macros.keySet();
 		ArrayList result = new ArrayList(keys);
 		return result;
 	}
-	
+
 	public synchronized String[] getMacroNames()
 	{
 		Set keys = this.macros.keySet();
@@ -71,7 +79,7 @@ public class MacroManager
 		}
 		return result;
 	}
-	 
+
 	public synchronized void setMacro(String aKey, String aText)
 	{
 		if (aKey == null || aKey.trim().length() == 0) return;
@@ -81,7 +89,7 @@ public class MacroManager
 	}
 
 	public boolean isModified() { return this.modified; }
-	
+
 	public synchronized void clearAll()
 	{
 		if (this.macros != null)
@@ -95,7 +103,7 @@ public class MacroManager
 		this.modified = true;
 		this.fireMacroListChange();
 	}
-	
+
 	public synchronized void addChangeListener(MacroChangeListener aListener)
 	{
 		if (this.changeListeners == null)
@@ -104,7 +112,7 @@ public class MacroManager
 		}
 		this.changeListeners.add(aListener);
 	}
-	
+
 	public void selectAndRun(SqlPanel aPanel)
 	{
 		Window w = SwingUtilities.getWindowAncestor(aPanel);
@@ -116,13 +124,14 @@ public class MacroManager
 		MacroManagerDialog d = new MacroManagerDialog(parent, aPanel);
 		d.show();
 	}
-	
+
 	public synchronized void saveMacros()
 	{
-		if (this.macros != null && this.macros.size() > 0)
+		if (this.macros != null && this.modified)
 		{
 			WbPersistence.writeObject(this.macros, this.getMacroFile().getAbsolutePath());
 			this.modified = false;
+			this.errorDuringLoad = false;
 		}
 	}
 
@@ -137,7 +146,7 @@ public class MacroManager
 		File f = new File(configDir, "WbMacros.xml");
 		return f;
 	}
-	
+
 	private void loadMacros()
 	{
 		try
@@ -152,9 +161,16 @@ public class MacroManager
 				this.macros = new HashMap(20);
 			}
 		}
+		catch (FileNotFoundException fne)
+		{
+			this.errorDuringLoad = false;
+			this.macros = new HashMap(20);
+		}
 		catch (Exception e)
 		{
 			LogMgr.logError("MacroManager.loadMacros()", "Error loading macro file", e);
+			this.macros = new HashMap(20);
+			this.errorDuringLoad = true;
 		}
 		this.modified = false;
 	}
@@ -174,4 +190,3 @@ public class MacroManager
 	}
 
 }
-

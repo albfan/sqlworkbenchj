@@ -56,11 +56,11 @@ public class WbExport extends SqlCommand
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
 		int pos = aSql.indexOf(' ');
-		if (pos > -1) 
+		if (pos > -1)
 			aSql = aSql.substring(pos);
-		else 
+		else
 			aSql = "";
-		
+
 		try
 		{
 			cmdLine.parse(aSql);
@@ -71,7 +71,7 @@ public class WbExport extends SqlCommand
 			result.setFailure();
 			return result;
 		}
-		
+
 		if (cmdLine.hasUnknownArguments())
 		{
 			List params = cmdLine.getUnknownArguments();
@@ -89,12 +89,12 @@ public class WbExport extends SqlCommand
 
 		String type = null;
 		String file = null;
-		
+
 		this.spooler = new DataSpooler();
-		
+
 		type = cmdLine.getValue("type");
 		file = cmdLine.getValue("file");
-		
+
 		if (type == null || file == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrorSpoolWrongParameters"));
@@ -103,7 +103,7 @@ public class WbExport extends SqlCommand
 		}
 
 		String table = cmdLine.getValue("table");
-		
+
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
 			// change the contents of type in order to display it properly
@@ -111,7 +111,7 @@ public class WbExport extends SqlCommand
 			spooler.setOutputTypeText();
 			String delimiter = cmdLine.getValue("delimiter");
 			if (delimiter != null) spooler.setTextDelimiter(delimiter);
-			
+
 			String quote = cmdLine.getValue("quotechar");
 			if (quote != null) spooler.setTextQuoteChar(quote);
 
@@ -150,7 +150,7 @@ public class WbExport extends SqlCommand
 
 			String encoding = cmdLine.getValue("encoding");
 			if (encoding != null) spooler.setXmlEncoding(encoding);
-			
+
 			format = cmdLine.getValue("timestampformat");
 			if (format != null) spooler.setTextTimestampFormat(format);
 
@@ -169,10 +169,11 @@ public class WbExport extends SqlCommand
 		file = StringUtil.trimQuotes(file);
 		this.spooler.setOutputFilename(file);
 		this.spooler.setConnection(aConnection);
-		
+		this.spooler.setRowMonitor(this.rowMonitor);
+
 		String progress = cmdLine.getValue("showprogress");
 		this.spooler.setShowProgress("true".equalsIgnoreCase(progress));
-		
+
 		String msg = ResourceMgr.getString("MsgSpoolInit");
 		msg = StringUtil.replace(msg, "%type%", type);
 		msg = StringUtil.replace(msg, "%file%", file);

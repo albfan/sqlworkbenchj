@@ -11,13 +11,15 @@ import javax.swing.border.AbstractBorder;
 
 public class DividerBorder extends AbstractBorder
 {
-	public static final int LEFT = 0;
-	public static final int RIGHT = 1;
-	public static final int TOP = 2;
-	public static final int BOTTOM = 3;
-	public static final int MIDDLE = 4;
-	public static final int LEFT_RIGHT = 5;
-	public static final int HORIZONTAL_MIDDLE = 6;
+	public static final int LEFT = 1;
+	public static final int RIGHT = 2;
+	public static final int TOP = 4;
+	public static final int BOTTOM = 8;
+	public static final int LEFT_RIGHT = 3;
+	public static final int RIGHT_TOP = 7;
+	
+	public static final int VERTICAL_MIDDLE = 16;
+	public static final int HORIZONTAL_MIDDLE = 32;
 	
 	protected int type;
 	protected int thickness;
@@ -26,7 +28,7 @@ public class DividerBorder extends AbstractBorder
 	{
 		this(type, 1);
 	}
-	
+
 	/**
 	 * Creates a divider border with the specified type and thickness
 	 * @param type (LEFT, RIGHT, TOP, BOTTOM)
@@ -46,56 +48,59 @@ public class DividerBorder extends AbstractBorder
     Color bg = c.getBackground();
     Color light = bg.brighter();
     Color shade = bg.darker();
-		g.setColor(shade);
-		switch (this.type)
+		
+		if ((this.type & TOP) == TOP)
 		{
-			case TOP:
-				g.drawLine(x, y, x + width, y);
-				g.setColor(light);
-				g.drawLine(x, y + 1, x  + width, y + 1);
-				break;
-			case BOTTOM:
-				g.drawLine(x, y + height - 2, x + width, y + height - 2);
-				g.setColor(light);
-				g.drawLine(x, y + height - 1, x  + width, y + height - 1);
-				break;
-			case RIGHT:
-				g.drawLine(x + width - 2, y, x + width - 2, y + height);
-				g.setColor(light);
-				g.drawLine(x + width - 1, y, x + width - 1, y + height);
-				break;
-			case LEFT:
-				g.drawLine(x, y, x, y + height);
-				g.setColor(light);
-				g.drawLine(x + 1, y, x + 1, y + height);
-				break;
-			case LEFT_RIGHT:
-				g.drawLine(x + width - 2, y, x + width - 2, y + height);
-				g.setColor(light);
-				g.drawLine(x + width - 1, y, x + width - 1, y + height);
-				g.setColor(shade);
-				g.drawLine(x, y, x, y + height);
-				g.setColor(light);
-				g.drawLine(x + 1, y, x + 1, y + height);
-				break;
-			case MIDDLE:
-				int w2 = (int)width / 2;
-				g.drawLine(x + w2, y, x + w2, y + height);
-				g.setColor(light);
-				g.drawLine(x + w2 + 1, y, x + w2 + 1, y + height);
-				break;
-			case HORIZONTAL_MIDDLE:
-				int h2 = (int)height / 2;
-				g.drawLine(0, y + h2, width, y + h2);
-				g.setColor(light);
-				g.drawLine(0, y + h2 + 1, width, y + h2 + 1);
-				break;
-				
+			g.setColor(shade);
+			g.drawLine(x, y, x + width, y);
+			g.setColor(light);
+			g.drawLine(x, y + 1, x  + width, y + 1);
+		}
+		
+		if ((this.type & BOTTOM) == BOTTOM)
+		{
+			g.setColor(shade);
+			g.drawLine(x, y + height - 2, x + width, y + height - 2);
+			g.setColor(light);
+			g.drawLine(x, y + height - 1, x  + width, y + height - 1);
+		}
+		
+		if ((this.type & LEFT) == LEFT)
+		{
+			g.setColor(shade);
+			g.drawLine(x, y, x, y + height);
+			g.setColor(light);
+			g.drawLine(x + 1, y, x + 1, y + height);
+		
+		}
+		if ((this.type & RIGHT) == RIGHT)
+		{
+			g.setColor(shade);
+			g.drawLine(x + width - 2, y, x + width - 2, y + height);
+			g.setColor(light);
+			g.drawLine(x + width - 1, y, x + width - 1, y + height);
+		}
+		
+		if ((this.type & VERTICAL_MIDDLE) == VERTICAL_MIDDLE)
+		{
+			g.setColor(shade);
+			int w2 = (int)width / 2;
+			g.drawLine(x + w2, y, x + w2, y + height);
+			g.setColor(light);
+			g.drawLine(x + w2 + 1, y, x + w2 + 1, y + height);
+		}
+		if ((this.type & HORIZONTAL_MIDDLE) == HORIZONTAL_MIDDLE)
+		{
+			g.setColor(shade);
+			int h2 = (int)height / 2;
+			g.drawLine(0, y + h2, width, y + h2);
+			g.setColor(light);
+			g.drawLine(0, y + h2 + 1, width, y + h2 + 1);
 		}
 		
 		g.setColor(oldColor);
 	}
-	
+
 	public Insets getBorderInsets(Component c)
 	{
 		return new Insets(2, 2, 2, 2);

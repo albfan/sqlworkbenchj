@@ -41,6 +41,9 @@ import java.util.Enumeration;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.ActionMap;
+import javax.swing.ComponentInputMap;
+import javax.swing.InputMap;
 
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
@@ -99,9 +102,9 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.18 2003-12-16 21:58:36 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.19 2004-01-20 18:11:46 thomas Exp $
  */
-public class JEditTextArea 
+public class JEditTextArea
 	extends JComponent
 	implements MouseWheelListener, Undoable, ClipboardSupport
 {
@@ -112,6 +115,7 @@ public class JEditTextArea
 	 * bar is added this way.
 	 */
 	public static String LEFT_OF_SCROLLBAR = "los";
+
 
 	/**
 	 * Creates a new JEditTextArea with the default settings.
@@ -169,13 +173,13 @@ public class JEditTextArea
 
 		this.addKeyBinding("C+C", this.popup.getCopyAction());
 		this.addKeyBinding("C+INSERT", this.popup.getCopyAction());
-		
+
 		this.addKeyBinding("C+V", this.popup.getPasteAction());
 		this.addKeyBinding("SHIFT+INSERT", this.popup.getPasteAction());
-		
+
 		this.addKeyBinding("C+X", this.popup.getCutAction());
 		this.addKeyBinding("SHIFT+DELETE", this.popup.getCutAction());
-		
+
 		this.addKeyBinding("C+a", this.popup.getSelectAllAction());
 
 		// We don't seem to get the initial focus event?
@@ -186,10 +190,12 @@ public class JEditTextArea
 	{
 		this.painter.setShowLineNumbers(aFlag);
 	}
+
 	public boolean getShowLineNumbers()
 	{
 		return this.painter.getShowLineNumbers();
 	}
+
 	private void changeCase(boolean toLower)
 	{
 		String sel = this.getSelectedText();
@@ -203,24 +209,89 @@ public class JEditTextArea
 		this.setSelectedText(sel);
 		this.select(start, end);
 	}
-	
+
 	public void toLowerCase()
 	{
 		this.changeCase(true);
 	}
-	
+
 	public void toUpperCase()
 	{
 		this.changeCase(false);
 	}
-	
+
+	public void indentSelection()
+	{
+		this.shiftSelection(true);
+	}
+
+	public void unIndentSelection()
+	{
+		this.shiftSelection(false);
+	}
+
+	private void shiftSelection(boolean indent)
+	{
+		int startline = this.getSelectionStartLine();
+		int realEndline = this.getSelectionEndLine();
+		int endline = realEndline;
+		int tabSize = this.getTabSize();
+		StringBuffer buff = new StringBuffer(tabSize);
+		for (int i=0; i < tabSize; i++) buff.append(' ');
+		String spacer = buff.toString();
+
+		int pos = this.getSelectionEnd(endline) - this.getLineStartOffset(endline);
+		if (pos == 0) endline --;
+
+		document.beginCompoundEdit();
+		try
+		{
+			for (int line = startline; line <= endline; line ++)
+			{
+				String text = this.getLineText(line);
+				if (text == null || text.trim().length() == 0) continue;
+				int lineStart = this.getLineStartOffset(line);
+				if (indent)
+				{
+					document.insertString(lineStart, spacer, null);
+				}
+				else
+				{
+					char c = text.charAt(0);
+					if (c == '\t')
+					{
+						document.remove(lineStart, 1);
+					}
+					else
+					{
+						int numChars = 0;
+						while (Character.isWhitespace(text.charAt(numChars)) && numChars < tabSize) numChars ++;
+						document.remove(lineStart, numChars);
+					}
+				}
+			}
+		}
+		catch (BadLocationException e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			document.endCompoundEdit();
+		}
+//		this.setSelectedText(newText.toString());
+//		int startPos = this.getLineStartOffset(startline);
+//		int endPos = this.getLineEndOffset(realEndline);
+//		this.select(startPos, endPos - 1);
+	}
+
 	private Pattern lastSearchPattern;
 	private String lastSearchExpression;
 	private int lastSearchPos = -1;
 	private boolean lastSearchOptionWholeWords;
 
 	private static final String REGEX_SPECIAL_CHARS = "\\[](){}.*+?$^|";
-	
+
 	private String quoteRegexMeta(String str)
 	{
 		if (str.length() == 0)
@@ -240,12 +311,12 @@ public class JEditTextArea
 		}
 		return buf.toString();
 	}
-	
+
 	public int findText(String anExpression, boolean ignoreCase)
 	{
 		return this.findText(anExpression, ignoreCase, false, true);
 	}
-	
+
 	protected String getSearchExpression(String anExpression, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 	{
 		String regex = anExpression;
@@ -255,11 +326,11 @@ public class JEditTextArea
 		{
 			regex = "(" + quoted + ")";
 		}
-		
+
 		if (wholeWord)
 		{
 			char c = anExpression.charAt(0);
-			// word boundary dos not work if the expression starts with 
+			// word boundary dos not work if the expression starts with
 			// a special Regex character. So in that case, we'll just ignore it
 			if (REGEX_SPECIAL_CHARS.indexOf(c) == -1)
 			{
@@ -271,7 +342,7 @@ public class JEditTextArea
 				regex = regex + "\\b";
 			}
 		}
-		
+
 		if (ignoreCase)
 		{
 			regex = "(?i)" + regex;
@@ -279,7 +350,7 @@ public class JEditTextArea
 
 		return regex;
 	}
-	
+
 	public boolean isCurrentSearchCriteria(String aValue, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 	{
 		if (this.lastSearchExpression == null) return false;
@@ -291,7 +362,7 @@ public class JEditTextArea
 	public int findText(String anExpression, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 	{
 		String regex = this.getSearchExpression(anExpression, ignoreCase, wholeWord, useRegex);
-		
+
 		int start = -1;
 		int end = -1;
 		this.lastSearchPattern = Pattern.compile(regex);
@@ -310,16 +381,16 @@ public class JEditTextArea
 		}
 		return this.lastSearchPos;
 	}
-	
-		
+
+
 	public int findNextText()
 	{
 		if (this.lastSearchPattern == null) return -1;
 		if (this.lastSearchPos == -1) return -1;
 		String search = null;
-	
+
 		Matcher m = this.lastSearchPattern.matcher(this.getText());
-		
+
 		if (m.find(this.getCaretPosition() + 1))
 		{
 			this.lastSearchPos = m.start();
@@ -333,18 +404,18 @@ public class JEditTextArea
 		}
 		return this.lastSearchPos;
 	}
-	
+
 	public boolean searchPatternMatchesSelectedText()
 	{
 		Matcher m = this.lastSearchPattern.matcher(this.getSelectedText());
 		return m.matches();
 	}
-	
+
 	public void addKeyBinding(String aBinding, ActionListener aListener)
 	{
 		this.getInputHandler().addKeyBinding(aBinding, aListener);
 	}
-	
+
 	public void addKeyBinding(WbAction anAction)
 	{
 		KeyStroke key = anAction.getAccelerator();
@@ -353,7 +424,7 @@ public class JEditTextArea
 			this.getInputHandler().addKeyBinding(key, anAction);
 		}
 	}
-	
+
 	/**
 	 * Returns if this component can be traversed by pressing
 	 * the Tab key. This returns false.
@@ -922,7 +993,7 @@ public class JEditTextArea
 		updateScrollBars();
 		painter.repaint();
 	}
-	
+
 	public void setFont(Font aNewFont)
 	{
 		this.painter.setFont(aNewFont);
@@ -1041,16 +1112,16 @@ public class JEditTextArea
 	{
 		document.putProperty(PlainDocument.tabSizeAttribute, new Integer(aSize));
 	}
-	
-	
+
+
 	/**
 	 *	Return the current Tab size in characters
 	 */
 	public int getTabSize()
 	{
 		Integer tab = (Integer)document.getProperty(PlainDocument.tabSizeAttribute);
-		
-		if (tab != null) 
+
+		if (tab != null)
 		{
 			return tab.intValue();
 		}
@@ -1058,9 +1129,9 @@ public class JEditTextArea
 		{
 			return 4;
 		}
-		
+
 	}
-	
+
 	public void appendLine(String aLine)
 	{
 		int count = Integer.toString(this.getLineCount()).length();
@@ -1077,7 +1148,7 @@ public class JEditTextArea
 		{
 			document.endCompoundEdit();
 		}
-		int newCount = Integer.toString(this.getLineCount()).length(); 
+		int newCount = Integer.toString(this.getLineCount()).length();
 		System.out.println("count=" + count + ", newcount" + newCount);
 		if (newCount > count)
 		{
@@ -1335,7 +1406,7 @@ public class JEditTextArea
 	{
 		select(getCaretPosition(),getCaretPosition());
 	}
-	
+
 	public void clearUndoBuffer()
 	{
 		this.document.clearUndoBuffer();
@@ -1345,12 +1416,43 @@ public class JEditTextArea
 	{
 		this.document.undo();
 	}
-	
+
 	public void redo()
 	{
 		this.document.redo();
 	}
-	
+
+	public void selectError(int start, int end)
+	{
+		int len = (end - start);
+		String text = this.getText(start, len);
+		len = text.length();
+		int pos = 0;
+		char c = text.charAt(pos);
+		while (Character.isWhitespace(c) && pos < len)
+		{
+			pos ++;
+			c = text.charAt(pos);
+		}
+
+		int newStart = start + pos;
+		int maxIndex = len - 1;
+
+		pos = 0;
+		c = text.charAt(maxIndex - pos);
+		while (Character.isWhitespace(c) && pos < maxIndex)
+		{
+			pos ++;
+			c = text.charAt(maxIndex - pos);
+		}
+		int newEnd = end - pos;
+		this.select(newStart, newEnd, true);
+	}
+	public void select(int start, int end)
+	{
+		this.select(start, end, false);
+	}
+
 	/**
 	 * Selects from the start offset to the end offset. This is the
 	 * general selection method used by all other selecting methods.
@@ -1359,7 +1461,7 @@ public class JEditTextArea
 	 * @param start The start offset
 	 * @param end The end offset
 	 */
-	public void select(int start, int end)
+	private void select(int start, int end, boolean userErrorColor)
 	{
 		int newStart, newEnd;
 		boolean newBias;
@@ -1373,6 +1475,7 @@ public class JEditTextArea
 		{
 			newStart = end;
 			newEnd = start;
+			this.currentSelectionIsError = false;
 			newBias = true;
 		}
 
@@ -1387,6 +1490,8 @@ public class JEditTextArea
 		if(newStart != selectionStart || newEnd != selectionEnd
 			|| newBias != biasLeft)
 		{
+			this.currentSelectionIsError = userErrorColor;
+
 			int newStartLine = getLineOfOffset(newStart);
 			int newEndLine = getLineOfOffset(newEnd);
 
@@ -1425,6 +1530,11 @@ public class JEditTextArea
 
 		scrollToCaret();
 		fireSelectionEvent();
+	}
+
+	public boolean currentSelectionIsError()
+	{
+		return this.currentSelectionIsError;
 	}
 
 	/**
@@ -1494,7 +1604,7 @@ public class JEditTextArea
 		}
 
 //		int oldcount = Integer.toString(this.getLineCount()).length();
-		
+
 		document.beginCompoundEdit();
 
 		try
@@ -1552,7 +1662,7 @@ public class JEditTextArea
 				{
 					document.insertString(selectionStart,selectedText,null);
 				}
-				if (this.autoIndent) 
+				if (this.autoIndent)
 				{
 					int c = this.getCaretLine();
 					if (c > 0 && selectedText.equals("\n"))
@@ -1591,7 +1701,7 @@ public class JEditTextArea
 
 	public void setAutoIndent(boolean aFlag)  { this.autoIndent = aFlag; }
 	public boolean getAutoIndent() 	{ return this.autoIndent; }
-	
+
 	/**
 	 * Returns true if this text area is editable, false otherwise.
 	 */
@@ -1750,22 +1860,22 @@ public class JEditTextArea
 	{
 		listenerList.add(TextSelectionListener.class, l);
 	}
-	
+
 	public final void removeSelectionListener(TextSelectionListener l)
 	{
 		listenerList.remove(TextSelectionListener.class, l);
 	}
-	
+
 	public final void addTextChangeListener(TextChangeListener l)
 	{
 		listenerList.add(TextChangeListener.class, l);
 	}
-	
+
 	public final void removeTextChangeListener(TextChangeListener l)
 	{
 		listenerList.remove(TextChangeListener.class, l);
 	}
-	
+
 	/**
 	 * Adds a caret change listener to this text area.
 	 * @param listener The listener
@@ -1798,7 +1908,7 @@ public class JEditTextArea
 	}
 
 	/**
-	 *	Deletes the selected text from the text area 
+	 *	Deletes the selected text from the text area
 	 **/
 	public void clear()
 	{
@@ -1807,7 +1917,7 @@ public class JEditTextArea
 			setSelectedText("");
 		}
 	}
-	
+
 	/**
 	 * Places the selected text into the clipboard.
 	 */
@@ -1879,7 +1989,7 @@ public class JEditTextArea
 	{
 		if(inputHandler == null)
 			return;
-		
+
 		int oldcount = Integer.toString(this.getLineCount()).length();
 		switch(evt.getID())
 		{
@@ -1899,17 +2009,17 @@ public class JEditTextArea
 		}
 		int newcount = Integer.toString(this.getLineCount()).length();
 		boolean changed = false;
-		
+
 		if(this.getFirstLine() < 0)
 		{
 			updateScrollBars();
 			changed = true;
 		}
-		
+
 		changed = changed || (oldcount != newcount);
-	
+
 		if (changed)
-		{	
+		{
 			this.invalidate();
 			this.repaint();
 		}
@@ -1922,7 +2032,7 @@ public class JEditTextArea
 
 	protected static JEditTextArea focusedComponent;
 	protected static Timer caretTimer;
-	
+
 	protected TextAreaPainter painter;
 
 	protected TextPopup popup;
@@ -1936,13 +2046,13 @@ public class JEditTextArea
 
 	protected boolean editable;
 	protected boolean autoIndent;
-	
+
 	protected int firstLine;
 	protected int visibleLines;
 	protected int electricScroll;
 
 	protected int horizontalOffset;
-	
+
 	protected JScrollBar vertical;
 	protected JScrollBar horizontal;
 	protected boolean scrollBarsInitialized;
@@ -1958,6 +2068,7 @@ public class JEditTextArea
 	protected int selectionEnd;
 	protected int selectionEndLine;
 	protected boolean biasLeft;
+	protected boolean currentSelectionIsError = false;
 
 	protected int bracketPosition;
 	protected int bracketLine;
@@ -1966,7 +2077,7 @@ public class JEditTextArea
 	protected boolean overwrite;
 	protected boolean rectSelect;
 	protected boolean modified;
-	
+
 	protected void fireTextStatusChanged(boolean isModified)
 	{
 		Object[] listeners = listenerList.getListenerList();
@@ -1978,7 +2089,7 @@ public class JEditTextArea
 			}
 		}
 	}
-	
+
 	protected void fireSelectionEvent()
 	{
 		Object[] listeners = listenerList.getListenerList();
@@ -1990,7 +2101,7 @@ public class JEditTextArea
 			}
 		}
 	}
-	
+
 	protected void fireCaretEvent()
 	{
 		Object[] listeners = listenerList.getListenerList();
@@ -2065,16 +2176,16 @@ public class JEditTextArea
 	}
 
 	public boolean isModified() { return this.modified; }
-	public void resetModified() 
-	{ 
+	public void resetModified()
+	{
 		boolean wasModified = this.modified;
-		this.modified = false; 
+		this.modified = false;
 		if (wasModified)
 		{
 			this.fireTextStatusChanged(false);
 		}
 	}
-	
+
 	/** Invoked when the mouse wheel is rotated.
 	 * @see MouseWheelEvent
 	 *
@@ -2087,7 +2198,7 @@ public class JEditTextArea
 			vertical.setValue(vertical.getValue() + totalScrollAmount);
 		}
 	}
-	
+
 	class ScrollLayout implements LayoutManager
 	{
 		public void addLayoutComponent(String name, Component comp)
@@ -2140,7 +2251,7 @@ public class JEditTextArea
 			dim.height = insets.top + insets.bottom;
 
 			Dimension centerPref = center.getMinimumSize();
-			dim.width += centerPref.width; 
+			dim.width += centerPref.width;
 			dim.height += centerPref.height;
 			Dimension rightPref = right.getMinimumSize();
 			dim.width += rightPref.width;
@@ -2286,7 +2397,7 @@ public class JEditTextArea
 
 			select(newStart,newEnd);
 		}
-	
+
 		public void removeUpdate(DocumentEvent evt)
 		{
 			documentChanged(evt);
@@ -2332,7 +2443,7 @@ public class JEditTextArea
 			if(popup != null && popup.isVisible()) return;
 
 			setSelectionRectangular((evt.getModifiers()	& InputEvent.CTRL_MASK) != 0);
-			
+
 			int x = evt.getX() - painter.getGutterWidth();
 			int y = evt.getY();
 			select(getMarkPosition(),xyToOffset(x,y));
@@ -2367,7 +2478,7 @@ public class JEditTextArea
 			focusedComponent = JEditTextArea.this;
 
 			int x = evt.getX() - painter.getGutterWidth();
-			
+
 			if((evt.getModifiers() & InputEvent.BUTTON3_MASK) != 0 && popup != null)
 			{
 				popup.show(painter,x,evt.getY());
@@ -2412,7 +2523,7 @@ public class JEditTextArea
 				setCaretPosition(dot);
 		}
 
-		private void doDoubleClick(MouseEvent evt, int line, int offset, int dot) 
+		private void doDoubleClick(MouseEvent evt, int line, int offset, int dot)
 			throws BadLocationException
 		{
 			// Ignore empty lines

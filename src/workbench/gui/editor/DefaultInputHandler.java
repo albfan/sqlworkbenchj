@@ -21,7 +21,7 @@ import javax.swing.KeyStroke;
  * The default input handler. It maps sequences of keystrokes into actions
  * and inserts key typed events into the text area.
  * @author Slava Pestov
- * @version $Id: DefaultInputHandler.java,v 1.10 2003-08-30 15:57:09 thomas Exp $
+ * @version $Id: DefaultInputHandler.java,v 1.11 2004-01-20 18:11:46 thomas Exp $
  */
 public class DefaultInputHandler extends InputHandler
 {
@@ -47,7 +47,7 @@ public class DefaultInputHandler extends InputHandler
 		addKeyBinding("TAB",INSERT_TAB);
 
 		addKeyBinding("INSERT",OVERWRITE);
-		addKeyBinding("C+\\",TOGGLE_RECT);
+		//addKeyBinding("C+Q",TOGGLE_RECT);
 
 		addKeyBinding("HOME",HOME);
 		addKeyBinding("END",END);
@@ -81,7 +81,7 @@ public class DefaultInputHandler extends InputHandler
 		addKeyBinding("C+L", MAKE_LOWER_CASE);
 		addKeyBinding("C+B", MATCH_BRACKET);
 		addKeyBinding("C+Z", UNDO);
-		//addKeyBinding("C+Y", REDO);
+		addKeyBinding("C+Y", REDO);
 	}
 
 	/**
@@ -119,11 +119,13 @@ public class DefaultInputHandler extends InputHandler
 			else
 				current.put(keyStroke,action);
 		}
+		this.currentBindings = bindings;
 	}
 
 	public void addKeyBinding(KeyStroke key, ActionListener action)
 	{
 		this.bindings.put(key, action);
+		this.currentBindings = this.bindings;
 	}
 	
 	/**
@@ -183,6 +185,25 @@ public class DefaultInputHandler extends InputHandler
 				return;
 			}
 
+			if (keyCode == KeyEvent.VK_TAB)
+			{
+				JEditTextArea area = this.getTextArea(evt);
+				int start = area.getSelectionStart();
+				int end = area.getSelectionEnd();
+				if (start < end)
+				{
+					if ((modifiers & KeyEvent.SHIFT_MASK) == KeyEvent.SHIFT_MASK)
+					{
+						area.unIndentSelection();
+					}
+					else
+					{
+						area.indentSelection();
+					}
+					return;
+				}
+			}
+			
 		  KeyStroke keyStroke = KeyStroke.getKeyStroke(keyCode,modifiers);
 			Object o = currentBindings.get(keyStroke);
 			if(o == null)

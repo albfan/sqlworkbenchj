@@ -27,6 +27,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
 
 import workbench.WbManager;
+import workbench.gui.actions.ColumnSelectionAction;
 import workbench.gui.actions.FileOpenAction;
 import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.actions.FindAction;
@@ -53,6 +54,7 @@ import workbench.interfaces.TextFileContainer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.sql.ScriptParser;
 import workbench.sql.formatter.SqlFormatter;
 import workbench.util.LineTokenizer;
 import workbench.util.SqlUtil;
@@ -64,9 +66,9 @@ import workbench.util.StringUtil;
  * @author  workbench@kellerer.org
  * @version
  */
-public class EditorPanel 
-	extends JEditTextArea 
-	implements ClipboardSupport, FontChangedListener, PropertyChangeListener, 
+public class EditorPanel
+	extends JEditTextArea
+	implements ClipboardSupport, FontChangedListener, PropertyChangeListener,
 						 TextContainer, TextFileContainer, Replaceable, Searchable, FormattableSql
 {
 	private static final Border DEFAULT_BORDER = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
@@ -83,7 +85,8 @@ public class EditorPanel
 	private ReplaceAction replaceAction;
 	private FormatSqlAction formatSql;
 	private FileOpenAction fileOpen;
-	
+	private ColumnSelectionAction columnSelection;
+
   private static final SyntaxStyle[] SYNTAX_COLORS;
   static
   {
@@ -100,7 +103,7 @@ public class EditorPanel
 		SYNTAX_COLORS[Token.OPERATOR] = new SyntaxStyle(Color.BLACK,false,false);
 		SYNTAX_COLORS[Token.INVALID] = new SyntaxStyle(Color.RED,false,true);
   }
-  
+
 	public static EditorPanel createSqlEditor()
 	{
 		AnsiSQLTokenMarker sql = new AnsiSQLTokenMarker();
@@ -109,36 +112,36 @@ public class EditorPanel
 		p.sqlTokenMarker = sql;
 		return p;
 	}
-	
+
 	public static EditorPanel createJavaEditor()
 	{
 		EditorPanel p = new EditorPanel(new JavaTokenMarker());
 		p.editorType = JAVA_EDITOR;
 		return p;
 	}
-	
+
 	public static EditorPanel createTextEditor()
 	{
 		EditorPanel p = new EditorPanel(null);
 		p.editorType = JAVA_EDITOR;
 		return p;
 	}
-	
-	
+
+
 	private EditorPanel()
 	{
 		this(null);
 	}
-	
+
 	public EditorPanel(TokenMarker aMarker)
 	{
 		super();
 		this.setDoubleBuffered(true);
 		this.setFont(WbManager.getSettings().getEditorFont());
 		this.setBorder(DEFAULT_BORDER);
-		
+
 		this.getPainter().setStyles(SYNTAX_COLORS);
-		
+
 		this.setTabSize(WbManager.getSettings().getEditorTabWidth());
 		this.setCaretBlinkEnabled(true);
 		this.addPopupMenuItem(new FileSaveAsAction(this), true);
@@ -147,16 +150,24 @@ public class EditorPanel
 
 		this.findAction = new FindAction(this);
 		this.findAction.setEnabled(true);
+		this.addKeyBinding(this.findAction);
+
 		this.findAgainAction = new FindAgainAction(this);
 		this.findAgainAction.setEnabled(false);
+		this.addKeyBinding(this.findAgainAction);
 
 		this.replaceAction = new ReplaceAction(this);
+		this.addKeyBinding(this.replaceAction);
 
 		if (aMarker != null) this.setTokenMarker(aMarker);
 
 		this.setMaximumSize(null);
 		this.setPreferredSize(null);
 		this.setShowLineNumbers(WbManager.getSettings().getShowLineNumbers());
+
+		this.columnSelection = new ColumnSelectionAction(this);
+
+		//this.setSelectionRectangular(true);
 		WbManager.getSettings().addFontChangedListener(this);
 		WbManager.getSettings().addChangeListener(this);
 	}
@@ -172,43 +183,53 @@ public class EditorPanel
 	{
 		return this.sqlTokenMarker;
 	}
-	
+
 	public void showFindOnPopupMenu()
 	{
 		this.addPopupMenuItem(this.findAction, true);
 		this.addPopupMenuItem(this.findAgainAction, false);
 		this.addPopupMenuItem(this.replaceAction, false);
 	}
-	
+
+	public ColumnSelectionAction getColumnSelection()
+	{
+		return this.columnSelection;
+	}
+
 	public FormatSqlAction getFormatSqlAction()
 	{
 		return this.formatSql;
 	}
-	
+
 	public void showFormatSql()
 	{
 		if (this.formatSql != null) return;
 		this.formatSql = new FormatSqlAction(this);
+		this.addKeyBinding(this.formatSql);
 		this.addPopupMenuItem(this.formatSql, true);
 	}
+
 	public void setEditable(boolean editable)
 	{
 		super.setEditable(editable);
 		this.replaceAction.setEnabled(editable);
 		this.fileOpen.setEnabled(false);
 	}
-	
+
 	public void reformatSql()
 	{
 		String sql = this.getSelectedStatement();
-		String delimit = SqlUtil.getDelimiterToUse(sql);
-		List commands = SqlUtil.getCommands(sql, delimit);
+		ScriptParser parser = new ScriptParser();
+		parser.setAlternateDelimiter(WbManager.getSettings().getAlternateDelimiter());
+		parser.setScript(sql);
+		List commands = parser.getCommands();
+		String delimit = parser.getDelimiter();
 		
 		int count = commands.size();
 		StringBuffer newSql = new StringBuffer(sql.length() + 100);
 		String formattedDelimit = "";
-		
-		if (count > 1) 
+
+		if (count > 1)
 		{
 			formattedDelimit = "\n" + delimit + "\n\n";
 		}
@@ -220,7 +241,7 @@ public class EditorPanel
 		{
 			formattedDelimit = delimit;
 		}
-		
+
 		for (int i=0; i < count; i++)
 		{
 			SqlFormatter f = new SqlFormatter((String)commands.get(i), WbManager.getSettings().getMaxSubselectLength());
@@ -234,7 +255,7 @@ public class EditorPanel
 			{
 			}
 		}
-		
+
 		if (newSql.length() == 0) return;
 		int caret = -1;
 
@@ -250,19 +271,28 @@ public class EditorPanel
 			this.setText(newSql.toString());
 			if (caret > 0 && caret < this.getText().length()) this.setCaretPosition(caret);
 		}
-		
+
 	}
-	
+
 	/**
-	 *	Make the current selection suitable for a SQL IN statement with
+	 * 	Enable column selection for the next selection.
+	 */
+	public void enableColumnSelection()
+	{
+		this.setSelectionRectangular(true);
+	}
+
+
+	/**
+	 *	Change the currently selected so that it can be used for a SQL IN statement with
 	 *	character datatype.
-	 *	e.g. 
+	 *	e.g.
 	 *<pre>
 	 *1234
 	 *5678
 	 *</pre>
-	 *will be converted to 
-	 *<pre>  
+	 *will be converted to
+	 *<pre>
 	 *('1234',
 	 *'4456')
 	 *</pre>
@@ -271,8 +301,8 @@ public class EditorPanel
 	{
 		this.makeInList(true);
 	}
-	
-	
+
+
 	public void makeInListForNonChar()
 	{
 		this.makeInList(false);
@@ -282,17 +312,24 @@ public class EditorPanel
 	{
 		int startline = this.getSelectionStartLine();
 		int endline = this.getSelectionEndLine();
-		StringBuffer newText = new StringBuffer((endline - startline + 1) * 80);
+		int count = (endline - startline + 1);
+		StringBuffer newText = new StringBuffer(count * 80);
 		for (int i=startline; i <= endline; i++)
 		{
 			String line = this.getLineText(i);
+
+			// make sure at least one character from the line is selected
+			// if the selection does not extend into the line, then
+			// the line is ignored. This can happen with the last line
+			int pos = this.getSelectionEnd(i) - this.getLineStartOffset(i);
+
 			StringBuffer newline = new StringBuffer(line.length() + 10);
-			if (line != null && line.length() > 0)
+			if (pos > 0 && line != null && line.length() > 0)
 			{
 				if (i > startline)
 				{
 					if (i < endline) newText.append(',');
-					newText.append('\n');
+					if ( (quoteElements && count > 5) || (!quoteElements && count > 15)) newText.append('\n');
 					newline.append(' ');
 				}
 				else
@@ -309,9 +346,11 @@ public class EditorPanel
 			}
 			newText.append(newline);
 		}
+		int pos = this.getSelectionEnd(endline) - this.getLineStartOffset(endline);
+		if (pos == 0) newText.append("\n");
 		this.setSelectedText(newText.toString());
 	}
-	
+
 	public void addPopupMenuItem(WbAction anAction, boolean withSeparator)
 	{
 		if (withSeparator)
@@ -319,8 +358,9 @@ public class EditorPanel
 			this.popup.addSeparator();
 		}
 		this.popup.add(anAction.getMenuItem());
+		this.addKeyBinding(anAction);
 	}
-	
+
 	/**
 	 *	Return the contents of the EditorPanel
 	 */
@@ -328,7 +368,7 @@ public class EditorPanel
 	{
 		return this.getText();
 	}
-	
+
 	/**
 	 *	Return the selected text of the editor
 	 */
@@ -340,7 +380,7 @@ public class EditorPanel
 		else
 			return text;
 	}
-	
+
 	public boolean closeFile(boolean clearText)
 	{
     if (this.currentFile == null) return false;
@@ -354,7 +394,7 @@ public class EditorPanel
 		this.resetModified();
     return true;
 	}
-	
+
 	public boolean openFile()
 	{
 		boolean result = false;
@@ -370,12 +410,12 @@ public class EditorPanel
 		}
 		return result;
 	}
-	
+
 	public boolean readFile(File aFile)
 	{
 		if (aFile == null) return false;
 		if (!aFile.exists()) return false;
-		if (aFile.length() > Integer.MAX_VALUE) 
+		if (aFile.length() > Integer.MAX_VALUE)
 		{
 			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgFileTooBig"));
 			return false;
@@ -412,7 +452,7 @@ public class EditorPanel
 		this.setCaretPosition(0);
 		return result;
 	}
-	
+
 	public boolean saveCurrentFile()
 	{
 		if (this.currentFile != null)
@@ -424,7 +464,7 @@ public class EditorPanel
 			return this.saveFile();
 		}
 	}
-	
+
 	public boolean saveFile()
 	{
 		boolean result = false;
@@ -440,7 +480,7 @@ public class EditorPanel
 			lastDir = WbManager.getSettings().getLastJavaDir();
 			ff = ExtensionFileFilter.getJavaFileFilter();
 		}
-		else 
+		else
 		{
 			lastDir = WbManager.getSettings().getLastEditorDir();
 			ff = ExtensionFileFilter.getTextFileFilter();
@@ -465,11 +505,11 @@ public class EditorPanel
 			{
 				WbManager.getSettings().setLastEditorDir(lastDir);
 			}
-				
+
 		}
 		return result;
 	}
-	
+
 	public boolean saveFile(File aFile)
 	{
 		try
@@ -505,19 +545,19 @@ public class EditorPanel
 		}
 		return false;
 	}
-	
+
 	public File getCurrentFile() { return this.currentFile; }
-	public String getCurrentFileName() 
-	{ 
+	public String getCurrentFileName()
+	{
 		if (this.currentFile == null) return null;
-		return this.currentFile.getAbsolutePath(); 
+		return this.currentFile.getAbsolutePath();
 	}
 
 	public FindAction getFindAction() { return this.findAction; }
 	public FindAgainAction getFindAgainAction() { return this.findAgainAction; }
-	
+
 	public ReplaceAction getReplaceAction() { return this.replaceAction; }
-	
+
 	public int find()
 	{
 		String crit = this.lastSearchCriteria;
@@ -534,7 +574,7 @@ public class EditorPanel
 		this.findAgainAction.setEnabled(pos > -1);
 		return pos;
 	}
-	
+
 	public int findNext()
 	{
 		return this.findNextText();
@@ -545,7 +585,7 @@ public class EditorPanel
 		int pos = this.findText(aValue, ignoreCase, wholeWord, useRegex);
 		return pos;
 	}
-	
+
 	public int find(String aValue, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 	{
 		if (this.isCurrentSearchCriteria(aValue, ignoreCase, wholeWord, useRegex))
@@ -558,12 +598,12 @@ public class EditorPanel
 		}
 	}
 	private ReplacePanel replacePanel = null;
-	
+
 	public void replace()
 	{
 		if (this.replacePanel == null)
 		{
-			
+
 			this.replacePanel = new ReplacePanel(this);
 		}
 		this.replacePanel.showReplaceDialog(this, this.getSelectedText());
@@ -581,7 +621,7 @@ public class EditorPanel
 		}
 		return (pos > -1);
 	}
-	
+
 	public boolean isTextSelected()
 	{
 		int selStart = this.getSelectionStart();
@@ -627,7 +667,7 @@ public class EditorPanel
 		}
 		return 0;
 	}
-	
+
 	public boolean replaceCurrent(String aReplacement)
 	{
 		if (this.searchPatternMatchesSelectedText())
@@ -657,5 +697,5 @@ public class EditorPanel
 			this.repaint();
 		}
 	}
-	
+
 }

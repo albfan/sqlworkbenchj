@@ -2,12 +2,12 @@
     <title>Editing SQL Statements</title>
     <section id="editor-java-tools">
       <title>Java related editor functions</title>
-      <para>The editor of the &wb-productname; offers two functions to aid in developing 
+      <para>The editor of the &wb-productname; offers two functions to aid in developing
       SQL statements which should be used inside a Java class (e.g. with JDBC access).</para>
-      
+
       <section id="editor-copy-java-code-snippet" xreflabel="Copy Code Snippet">
         <title>Copy Code Snippet</title>
-        <para>Suppose you have created the SQL statement that you wish to use inside 
+        <para>Suppose you have created the SQL statement that you wish to use inside
         a Java class to access your DBMS. The menu item <menuchoice><guimenu>SQL</guimenu><guimenuitem>Copy Code Snippet</guimenuitem></menuchoice>
         will create a piece of code that defines a String variable which contains the current SQL statement (or
         the currently selected statement if any text is selected).</para>
@@ -21,71 +21,71 @@ FROM person p,
      address a
 WHERE p.person_id = a.person_id;</programlisting>
       <para>When copying the code snippet, the following text will be placed into the clipboard</para>
-      <programlisting>String sql="SELECT p.name, \n" + 
-           "       p.firstname, \n" + 
-           "       a.street, \n" + 
-           "       a.zipcode, \n" + 
-           "       a.phone \n" + 
-           "FROM person p, \n" + 
-           "     address a \n" + 
+      <programlisting>String sql="SELECT p.name, \n" +
+           "       p.firstname, \n" +
+           "       a.street, \n" +
+           "       a.zipcode, \n" +
+           "       a.phone \n" +
+           "FROM person p, \n" +
+           "     address a \n" +
            "WHERE p.person_id = a.person_id; \n";</programlisting>
-           
+
            <para>You can now paste this code into your Java class.</para>
-					 <para>If you don't like the <literal>\n</literal> character in 
+					 <para>If you don't like the <literal>\n</literal> character in
 					 your code, you can disable the generation of the newline characters
-					 in you <literal>workbench.settings</literal> file. 
+					 in you <literal>workbench.settings</literal> file.
 					 See <link linkend="manual-setting-snippet-no-newline">Manual settings</link>
 					 for details.
 					 </para>
       </section>
-      
+
       <section id="editor-clean-java-code" xreflabel="Clean Java Code">
         <title>Clean Java code</title>
         <para>When using the <xref linkend="editor-copy-java-code-snippet"/> feature during
-        development, the SQL statement ususally needs refinement after testing the Java class. 
+        development, the SQL statement usually needs refinement after testing the Java class.
         You can Copy &amp; Paste the generated Java code into &wb-productname;, then when you select
         the pasted text, and call <menuchoice><guimenu>SQL</guimenu><guimenuitem>Clean Java Code</guimenuitem></menuchoice>
-        the selected text will be "cleaned" from the Java stuff around it. The algorithm behind that is as 
-        follows: remove everything up to the first &quot; at the beginning of the line. Delete everything 
-        up to the first &quot; searching backwards from the end of the line. Any trailing whitespace including
-        escaped characters such as \n will be removed as well. Lines starting with // will be converted to 
-        SQL single line comments starting with -- (keeping existings quotes!). The following code:</para>
-<programlisting>String sql="SELECT p.name, \n" + 
-           "       p.firstname, \n" + 
-           "       a.street, \n" + 
-           //"       a.county, \n" + 
-           "       a.zipcode, \n" + 
-           "       a.phone \n" + 
-           "FROM person p, \n" + 
-           "     address a \n" + 
+        the selected text will be "cleaned" from the Java stuff around it. The algorithm behind that is as
+        follows: remove everything up to the first &quot; at the beginning of the line. Delete everything
+        up to the first &quot; searching backwards from the end of the line. Any trailing white-space including
+        escaped characters such as \n will be removed as well. Lines starting with // will be converted to
+        SQL single line comments starting with -- (keeping existing quotes!). The following code:</para>
+<programlisting>String sql="SELECT p.name, \n" +
+           "       p.firstname, \n" +
+           "       a.street, \n" +
+           //"       a.county, \n" +
+           "       a.zipcode, \n" +
+           "       a.phone \n" +
+           "FROM person p, \n" +
+           "     address a \n" +
            "WHERE p.person_id = a.person_id; \n"</programlisting>
         <para>will be converted to:</para>
-        <programlisting>SELECT p.name, 
-       p.firstname, 
-       a.street, 
+        <programlisting>SELECT p.name,
+       p.firstname,
+       a.street,
 --"       a.county, " +
-       a.zipcode, 
-       a.phone 
-FROM person p, 
-     address a 
+       a.zipcode,
+       a.phone
+FROM person p,
+     address a
 WHERE p.person_id = a.person_id; </programlisting>
-      
+
       </section>
 
     </section>
     <section id="editor-sql-tools">
       <title>SQL related editor functions</title>
-    
+
       <section id="editor-reformat-sql" xreflabel="SQL Formatter">
         <title>Reformat SQL</title>
         <para>When you analyze statements from e.g. a log file, they are not necessarily formatted in a way that
-        can be easily read, let alone understood. The editor of the &wb-productname; can reformat SQL statements 
+        can be easily read, let alone understood. The editor of the &wb-productname; can reformat SQL statements
         into a format that's easier to read and understand for a human beeing. This feature is often called pretty-printing.
         Suppose you have the following statement (pasted from a log file)
         </para>
-<programlisting>select user.* from user, user_profile, uprof where user.user_id = user_profile.user_id and 
+<programlisting>select user.* from user, user_profile, uprof where user.user_id = user_profile.user_id and
 user_profile.user_id = uprof.user_id and uprof.user_role = 1 and uprof.internal_user = 'F'
-and not exists (select 1 from claim where 
+and not exists (select 1 from claim where
 claim.id = uprof.id)</programlisting>
       <para>this will be reformatted to look like this:</para>
       <programlisting>SELECT user. *
@@ -101,22 +101,22 @@ AND   NOT EXISTS (
                    FROM claim
                    WHERE claim.id = uprof.id
                   )</programlisting>
-      
+
       <note><para>Please note that currently only <literal>SELECT</literal>, <literal>INSERT</literal>, <literal>UPDATE</literal> and <literal>DELETE</literal> are supported for reformatting.
 			</para></note>
-			<para>You can configure a threshold up to which sub-<literal>SELECT</literal>s will not be reformatted but 
-			put into one single line. The default for this threshold is 80 characters. Meaning that any 
+			<para>You can configure a threshold up to which sub-<literal>SELECT</literal>s will not be reformatted but
+			put into one single line. The default for this threshold is 80 characters. Meaning that any
 			subselect that is shorter than 80 characters will not be reformatted as the sub-<literal>SELECT</literal>
 			in the above example. Please refer to <link linkend="formatter-subselect-threshold">Formatting options</link> for details. </para>
       </section>
-      
+
       <section id="editor-make-in-list">
         <title>Create SQL IN List</title>
-        <para>Sometimes when you Copy &amp; Paste lines of text from e.g. a spreadsheet, you might want to use those values  
+        <para>Sometimes when you Copy &amp; Paste lines of text from e.g. a spreadsheet, you might want to use those values
 				as a condition for a SQL <literal>IN</literal> expression. Suppose you a have a list of ID's in your
         spreadsheet each in one row of the same column. If you copy and paste this into the editor, each ID
-				will be put on a separate line. 
-        If you select the text, and then choose <menuchoice><guimenu>SQL</guimenu><guimenuitem>Create SQL List</guimenuitem></menuchoice> 
+				will be put on a separate line.
+        If you select the text, and then choose <menuchoice><guimenu>SQL</guimenu><guimenuitem>Create SQL List</guimenuitem></menuchoice>
 				the selected text will be converted into a format that can be used as an expression for an <literal>IN</literal> condition:</para>
 <programlisting>Dent
 Beeblebrox
@@ -138,7 +138,8 @@ Marvin
 44
 45</programlisting>
         <para>will be converted to:</para><programlisting>(42, 43, 44, 45)</programlisting>
-        <para>These two functions will only be available when text is selected</para>
+        <para>These two functions will only be available when text is selected which spans
+        more then one line.</para>
        </section>
     </section>
   </section>

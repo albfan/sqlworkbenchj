@@ -12,7 +12,7 @@ import workbench.WbManager;
 
 public class SqlUtil
 {
-	private static Pattern specialCharPattern = Pattern.compile("[$ ]");		
+	private static Pattern specialCharPattern = Pattern.compile("[$ ]");
 
 	/** Creates a new instance of SqlUtil */
 	private SqlUtil()
@@ -31,213 +31,11 @@ public class SqlUtil
 		col.append('"');
 		return col.toString();
 	}
-	
+
 	public static String getSqlVerb(String aStatement)
 	{
 		StringTokenizer tok = new StringTokenizer(aStatement.trim());
 		return tok.nextToken(" \t");
-	}
-
-	public static String getDelimiterToUse(String aSql)
-	{
-		String delimit = ";";
-
-		String cleanSql = makeCleanSql(aSql, false).trim();
-		String alternate = WbManager.getSettings().getAlternateDelimiter();
-		if (cleanSql.endsWith(alternate))
-		{
-			delimit = WbManager.getSettings().getAlternateDelimiter();
-		}
-		return delimit;
-	}
-	
-	public static List getCommands(String aScript)
-	{
-		String delimit = getDelimiterToUse(aScript);
-		ArrayList result = new ArrayList();
-		parseCommands(aScript, delimit, -1, result);
-		return result;
-	}
-	
-	public static List getCommands(String aScript, String aDelimiter)
-	{
-		ArrayList result = new ArrayList();
-		parseCommands(aScript, aDelimiter, -1, result);
-		return result;
-	}
-
-	private static final Pattern GO_PATTERN = Pattern.compile("(?mi)^\\s*go\\s*$");
-
-	public static int parseCommands(String aScript, String aDelimiter, int currentCursorPos, List result)
-	{
-		if (result == null) return -1;
-		
-		if (aScript == null || aScript.trim().length() == 0) 
-		{
-			result.clear();
-			return -1;
-		}
-		int count, pos, scriptLen, cmdNr, lastPos, delimitLen;
-		boolean quoteOn = false;
-		boolean commentOn = false;
-		boolean blockComment = false;
-		boolean singleLineComment = false;
-		ArrayList emptyList, commands;
-		String value, ls_OldDelimit, delimit;
-		int oldPos;
-		String currChar;
-		String lastQuote = null;
-
-		// Handle MS SQL GO's
-		Matcher m = GO_PATTERN.matcher(aScript);
-		if (m.find())
-		{
-			aScript = m.replaceAll(aDelimiter + "\n");
-		}
-		
-		cmdNr = 0;
-		scriptLen = aScript.length();
-		delimit = aDelimiter.trim().toUpperCase();
-		delimitLen = delimit.length();
-		lastPos = 0;
-		int currentIndex = -1;
-		
-		pos = aScript.indexOf(aDelimiter);
-		if (pos == -1 || pos == aScript.length() - 1)
-		{
-			if (aScript.endsWith(aDelimiter))
-				result.add(aScript.substring(0, aScript.length() - delimitLen));
-			else
-				result.add(aScript);
-			return 0;
-		}
-
-		boolean isCurrent = false;
-		for (pos = 0; pos < scriptLen; pos++)
-		{
-			currChar = aScript.substring(pos, pos + 1); 
-			
-			if (currChar.charAt(0) == '\'' || currChar.charAt(0) == '"')
-			{
-				if (!quoteOn)
-				{
-					lastQuote = currChar;
-					quoteOn = true;
-				}
-				else if (currChar.equals(lastQuote))
-				{
-					if (pos > 1)
-					{
-						// check if the current quote char was escaped
-						if (aScript.charAt(pos - 1) != '\\')
-						{
-							lastQuote = null;
-							quoteOn = false;
-						}
-					}
-					else
-					{
-						lastQuote = null;
-						quoteOn = false;
-					}
-				}
-			}
-			
-			// now check for comment start
-			if (!quoteOn && pos < scriptLen - 1)
-			{
-				char toTest = currChar.charAt(0);
-				
-				if (!commentOn)
-				{
-					char next = aScript.charAt(pos + 1);
-					if (toTest == '/' && next == '*')
-					{
-						//System.out.println("turning on blockcomment at pos = " + pos);
-						blockComment = true;
-						singleLineComment = false;
-						commentOn = true;
-					}
-					else if (toTest == '-' && next == '-')
-					{
-						//System.out.println("turning on line comment at pos = " + pos);
-						singleLineComment = true;
-						blockComment = false;
-						commentOn = true;
-					}
-				}
-				else
-				{
-					if (singleLineComment)
-					{
-						if (toTest == '\r' || toTest == '\n')
-						{
-							singleLineComment = false;
-							blockComment = false;
-							commentOn = false;
-							continue;
-						}
-					}
-					else if (blockComment)
-					{
-						char last = aScript.charAt(pos - 1);
-						if (toTest == '/' && last == '*')
-						{
-							blockComment = false;
-							singleLineComment = false;
-							commentOn = false;
-							continue;
-						}
-					}
-				}
-			}
-
-			if (!quoteOn && !commentOn)
-			{
-				if (delimitLen > 1 && pos + delimitLen < scriptLen)
-				{
-					currChar = aScript.substring(pos, pos + delimitLen).toUpperCase();
-				}
-
-				if ((currChar.equals(delimit) || (pos == scriptLen)))
-				{
-					value = aScript.substring(lastPos, pos).trim();
-					isCurrent = (lastPos <= currentCursorPos) && (pos >= currentCursorPos);
-					int l = value.length();
-					if (l > 0)
-					{
-						if (value.endsWith(aDelimiter))
-						{
-							value = value.substring(0, l - delimitLen);
-						}
-						if (makeCleanSql(value, false).length() > 0) result.add(value);
-						if (isCurrent)
-						{
-							currentIndex = result.size() - 1;
-						}
-					}
-					//System.out.println("added value=" + value);
-					lastPos = pos + delimitLen;
-				}
-			}
-		}
-		
-		if (lastPos < pos)
-		{
-			value = aScript.substring(lastPos).trim();
-			if (value.endsWith(aDelimiter))
-			{
-				value = value.substring(0, value.length() - delimitLen);
-			}
-			if (makeCleanSql(value, false).length() > 0) result.add(value);
-			
-			if ((lastPos <= currentCursorPos) && (pos >= currentCursorPos))
-			{
-				currentIndex = result.size() - 1;
-			}
-		}
-		//return result;
-		return currentIndex;
 	}
 
 	/**
@@ -249,11 +47,11 @@ public class SqlUtil
 		boolean fromFound = false;
 		String orgSql = makeCleanSql(aSql, false);
 		aSql = orgSql.toUpperCase();
-		
+
 		final String FROM = " FROM ";
 		int fromPos = aSql.indexOf(FROM);
 		if (fromPos == -1) return Collections.EMPTY_LIST;
-		
+
 		int quotePos = aSql.indexOf('\'');
 		int pos;
 		if (quotePos != -1 && quotePos < fromPos)
@@ -285,7 +83,7 @@ public class SqlUtil
 			}
 			result.add(table);
 		}
-			
+
 		return result;
 	}
 
@@ -294,12 +92,12 @@ public class SqlUtil
 		return makeCleanSql(aSql, keepNewlines, '\'');
 	}
 
-	
+
 	public static String makeCleanSql(String aSql, boolean keepNewlines, char quote)
 	{
 		return makeCleanSql(aSql, keepNewlines, false, quote);
 	}
-	
+
 	/**
 	 *	Replaces all white space characters with ' ' (But not inside
 	 *	string literals) and removes -- style and Java style comments
@@ -314,17 +112,17 @@ public class SqlUtil
 		if (count == 0) return aSql;
 		boolean inComment = false;
 		boolean inQuotes = false;
-		
+
 		StringBuffer newSql = new StringBuffer(count);
-		
+
 		// remove trailing semicolon
 		if (aSql.charAt(count - 1) == ';') count --;
-		
+
 		for (int i=0; i < count; i++)
 		{
 			char c = aSql.charAt(i);
 			inQuotes = c == quote;
-			
+
 			if (!inComment || keepComments)
 			{
 				if ( c == '/' && i < count - 1 && aSql.charAt(i+1) == '*' & !inQuotes)
@@ -335,14 +133,14 @@ public class SqlUtil
 				else if (c == '-' && i < count - 1 && aSql.charAt(i+1) == '-' && !inQuotes)
 				{
 					// ignore rest of line for -- style comments
-					while (c != '\n' && i < count - 1) 
+					while (c != '\n' && i < count - 1)
 					{
 						i++;
 						c = aSql.charAt(i);
 					}
 				}
 				else
-				{						
+				{
 					if (c == '\n' && !keepNewlines)
 					{
 						newSql.append(' ');
@@ -368,7 +166,7 @@ public class SqlUtil
 		}
 		return newSql.toString();
 	}
-	
+
 	private static final int skipQuotes(String aString, int aStartpos)
 	{
 		char c = aString.charAt(aStartpos);
@@ -414,7 +212,7 @@ public class SqlUtil
 		}
 		return null;
 	}
-	
+
 	public static final String getJavaClass(int aSqlType, int aScale, int aPrecision)
 	{
 		if (aSqlType == Types.BIGINT)
@@ -449,7 +247,7 @@ public class SqlUtil
 			return "Integer";
 		else if (aSqlType == Types.VARCHAR)
 			return "String";
-		else 
+		else
 			return null;
 	}
 
@@ -465,7 +263,7 @@ public class SqlUtil
 			{
 				return "java.lang.Long";
 			}
-			else 
+			else
 			{
 				return "java.math.BigInteger";
 			}
@@ -480,23 +278,23 @@ public class SqlUtil
 			{
 				return "java.lang.Double";
 			}
-			else 
+			else
 			{
 				return "java.math.BigDecimal";
 			}
 		}
 	}
-	
+
 	private static String getDoubleClass(int aSqlType, int aSize, int aPrecision)
 	{
 		return getDecimalClass(aSqlType, aSize, aPrecision);
 	}
-	
+
 	private static String getFloatClass(int aSqlType, int aSize, int aPrecision)
 	{
 		return getDecimalClass(aSqlType, aSize, aPrecision);
 	}
-	
+
 	private static String getNumericClass(int aSqlType, int aSize, int aPrecision)
 	{
 		return getDecimalClass(aSqlType, aSize, aPrecision);
@@ -517,7 +315,7 @@ public class SqlUtil
 			return false;
 		}
 	}
-	
+
 	public static final boolean isIntegerType(int aSqlType)
 	{
 		return (aSqlType == Types.BIGINT ||
@@ -605,7 +403,7 @@ public class SqlUtil
 			return "VARBINARY";
 		else if (aSqlType == Types.VARCHAR)
 			return "VARCHAR";
-		else 
+		else
 			return "UNKNOWN";
 	}
 

@@ -28,7 +28,7 @@ import javax.swing.text.Utilities;
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.10 2004-01-07 20:13:50 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.11 2004-01-20 18:11:47 thomas Exp $
  */
 public class TextAreaPainter extends JComponent implements TabExpander
 {
@@ -45,7 +45,8 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	protected Color lineHighlightColor;
 	protected Color bracketHighlightColor;
 	protected Color eolMarkerColor;
-
+	protected Color errorColor;
+	
 	protected boolean blockCaret;
 	protected boolean lineHighlight;
 	protected boolean bracketHighlight;
@@ -93,6 +94,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 		cols = defaults.cols;
 		rows = defaults.rows;
 		caretColor = defaults.caretColor;
+		errorColor = defaults.errorColor;
 		selectionColor = defaults.selectionColor;
 		lineHighlightColor = defaults.lineHighlightColor;
 		lineHighlight = defaults.lineHighlight;
@@ -689,7 +691,14 @@ public class TextAreaPainter extends JComponent implements TabExpander
 		}
 		else
 		{
-			gfx.setColor(selectionColor);
+			if (this.textArea.currentSelectionIsError())
+			{
+				gfx.setColor(errorColor);
+			}
+			else
+			{
+				gfx.setColor(selectionColor);
+			}
 
 			int selectionStartLine = textArea.getSelectionStartLine();
 			int selectionEndLine = textArea.getSelectionEndLine();

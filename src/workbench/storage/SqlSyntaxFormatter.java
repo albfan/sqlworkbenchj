@@ -57,7 +57,14 @@ public class SqlSyntaxFormatter
 		}
 
 		// try to read additional definitions from local file
-		value = WbPersistence.readObject(aFilename);
+		try
+		{
+			value = WbPersistence.readObject(aFilename);
+		}
+		catch (Exception e)
+		{
+			value = null;
+		}
 		if (value != null && value instanceof HashMap)
 		{
 			HashMap m = (HashMap)value;

@@ -20,7 +20,7 @@ import workbench.log.LogMgr;
 public class WbPersistence
 {
 	private static final ErrorListener listener = new ErrorListener();
-	
+
 	/** Creates a new instance of Persistence */
 	private WbPersistence()
 	{
@@ -28,7 +28,7 @@ public class WbPersistence
 
 	/**
 	 * Makes a property of the given class transient, so that it won't be written
-	 * into the XML file when saved using WbPersistence 
+	 * into the XML file when saved using WbPersistence
 	 * @param clazz
 	 * @param property
 	 */
@@ -46,12 +46,12 @@ public class WbPersistence
 					pd.setValue( "transient", Boolean.TRUE );
 				}
 			}
-		} 
+		}
 		catch ( IntrospectionException e )
-		{ 
+		{
 		}
 	}
-	
+
 	public static void makeTransient(Class clazz, String[] properties)
 	{
 		try
@@ -61,37 +61,38 @@ public class WbPersistence
 			int count = properties.length;
 			Set props = new HashSet(count);
 			for (int i=0; i < count; i++) props.add(properties[i]);
-			
+
 			for (int i = 0; i < propertyDescriptors.length; i++)
 			{
 				PropertyDescriptor pd = propertyDescriptors[i];
 				String name = pd.getName();
-				
+
 				if (props.contains(name))
 				{
 					pd.setValue( "transient", Boolean.TRUE );
 				}
 			}
-		} 
+		}
 		catch ( IntrospectionException e )
-		{ 
-		}
-	}	
-	
-	public static Object readObject(String aFilename)
-	{
-		try
 		{
-			InputStream in = new BufferedInputStream(new FileInputStream(aFilename));
-			return readObject(in, aFilename);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logDebug("WbPersistence.readObject()", "File " + aFilename + " not found!");
-			return null;
 		}
 	}
-	
+
+	public static Object readObject(String aFilename)
+		throws Exception
+	{
+		//try
+		//{
+			InputStream in = new BufferedInputStream(new FileInputStream(aFilename));
+			return readObject(in, aFilename);
+		//}
+		//catch (Exception e)
+		//{
+		//	LogMgr.logDebug("WbPersistence.readObject()", "File " + aFilename + " not found!");
+		//	return null;
+		//}
+	}
+
 	public static Object readObject(InputStream in, String filename)
 		throws Exception
 	{
@@ -102,14 +103,14 @@ public class WbPersistence
 		Object result = e.readObject();
 		e.close();
 		end = System.currentTimeMillis();
-		//LogMgr.logDebug("WbPersistence.readObject()", "Reading " + filename + " took " + (end - start) + "ms"); 
+		//LogMgr.logDebug("WbPersistence.readObject()", "Reading " + filename + " took " + (end - start) + "ms");
 		return result;
 	}
-	
+
 	public static void writeObject(Object aValue, String aFilename)
 	{
 		if (aValue == null) return;
-		
+
 		try
 		{
 			BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(aFilename));
@@ -126,11 +127,11 @@ public class WbPersistence
 
 }
 
-class ErrorListener 
+class ErrorListener
 	implements ExceptionListener
 {
 	private String currentFilename;
-	
+
 	public ErrorListener()
 	{
 	}
@@ -139,7 +140,7 @@ class ErrorListener
 	{
 		this.currentFilename = file;
 	}
-	
+
 	public void exceptionThrown(Exception e)
 	{
 		LogMgr.logError("WbPersistence", "Error reading file " + currentFilename, e);

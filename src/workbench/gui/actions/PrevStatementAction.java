@@ -29,8 +29,8 @@ public class PrevStatementAction extends WbAction
 		this.initMenuDefinition("MnuTxtPrevStatement", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.ALT_MASK));
 		this.setIcon(ResourceMgr.getImage("Back"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setCreateMenuSeparator(true);
-		this.setCreateToolbarSeparator(true);
+		this.setCreateMenuSeparator(false);
+		this.setCreateToolbarSeparator(false);
 		//this.putValue(ALTERNATE_ACCELERATOR, KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK));
 	}
 

@@ -1,5 +1,52 @@
   <section id="options">
-    <title>Configuring SQL Workbench/J</title>
+    <title>Configuring &wb-productname;</title>
+
+    <section id="configure-shortcuts">
+      <title>Configuring keyboard shortcuts</title>
+
+      <para>You can configure the keyboard shortcut to execute a specific action (=menu item)
+			in the dialog which is displayed when you select <menuchoice><guimenu>Tools</guimenu><guimenu>Configure shortcuts...</guimenu></menuchoice>.
+			The dialog lists the available actions together with their configured shortcut and their default shortcut.
+			</para>
+
+			<section id="configure-shortcuts-assign">
+				<title>Assign a shortcut to an action</title>
+				<para>
+				To assign a (new) keyboard combination for a specific action, select (highlight) the action in the list
+				and click on the <guibutton>Assign</guibutton> button. A small window will pop up, where you can
+				press the key combination which you would like to assign to that action.
+				Note that only F-Keys (F1, F2, ...) can be used without a modifier (Shift, Control, Alt). All other
+				keys need be pressed together with one of the modifier keys.
+				</para>
+				<para>After you have entered the desired keyboard shortcut, press the <guibutton>OK</guibutton> button.
+				If the shortcut is already assigned to a different action, you will be prompted, if you want to
+				override that definition. If you select to overwrite the shortcut for the other action, that
+				action will then have <emphasis role="bold">no</emphasis> shortcut assigned
+				</para>
+			</section>
+
+			<section id="configure-shortcuts-clear">
+				<title>Removing a shortcut from an action</title>
+				<para>
+					To remove a shortcut completely from an action, select (highlight) that action, and
+					click on the <guibutton>Clear</guibutton> button. Once the shortcut has been cleared,
+					the action is no longer accessible through a shortcut (only through the menu).
+				</para>
+			</section>
+
+			<section id="configure-shortcuts-reset">
+				<title>Reset to defaults</title>
+				<para>
+					If you want to reset the shortcut for a single action to its default, select (highlight) the
+					action in the list, and click on the <guibutton>Reset</guibutton> button.
+					To reset all shortcuts click on the <guibutton>Reset all</guibutton> button.
+				</para>
+			</section>
+
+    </section>
+
+    <para>The following options can be changed in the options dialog: <menuchoice><guimenu>Tools</guimenu><guimenuitem>Options</guimenuitem></menuchoice>
+    </para>
 
     <section id="options-explorer-as-tab">
       <title>DB Explorer as Tab</title>
@@ -8,7 +55,7 @@
       window, or inside the main window as a another tab. If this option is
       selected, the Db Explorer will be displayed inside the main window. If
       the option Retrieve DB Explorer is checked as well, the current database
-      scheme will be retrieved upon starting SQL Workbench/J!</para>
+      scheme will be retrieved upon starting &wb-productname;</para>
     </section>
 
     <section id="options-retrieve-explorer" xreflabel="Retrieve DB Explorer">
@@ -16,7 +63,7 @@
 
       <para>If this option is enabled, the contents of the database schema is
       retrieved when the DB Explorer is displayed. If this option is not
-      checked, either the &#34;Refresh&#34; button or selecting a schema or
+      checked, either the <guibutton>Refresh</guibutton> button or selecting a schema or
       table type will load the list.</para>
     </section>
 
@@ -46,21 +93,21 @@
       <para>If this option is enabled, the <literal>DBMS_OUTPUT</literal> package is
       automatically enabled when connecting to an Oracle database. This option
       has no effect on other DBMS. If it is disabled, the <literal>DBMS_OUTPUT</literal> package
-      can be enabled using the enableout command.</para>
+      can be enabled using the <xref linkend="command-enableout"/> command.</para>
 
-      <para>If this option is not checked, you need to manually enable the <literal>DBMS_OUTPUT</literal> 
+      <para>If this option is not checked, you need to manually enable the <literal>DBMS_OUTPUT</literal>
       with <xref linkend="command-enableout"/>.</para>
     </section>
 
     <section id="option-animated-icon" xreflabel="Enable animated icons">
       <title>Enable animated icons</title>
       <para>Enable or disable the use of an animated icons in the SQL editor to indicate a running
-      SQL statement. It has been reported, that the animated icon does impact 
-      performance on certain combinations of JDK/OS Version/Graphics driver. If you 
+      SQL statement. It has been reported, that the animated icon does impact
+      performance on certain combinations of JDK/OS Version/Graphics driver. If you
       experience a high CPU usage during the execution of SQL statements, try
       to turn off the usage of the animated icons.</para>
     </section>
-    
+
     <section id="options-date-format">
       <title>Date format</title>
 
@@ -76,7 +123,7 @@
       individual statements in the editor.</para>
 
       <para>This is needed when creating stored procedures which themselves
-      have a semicolon in the source code. Normally the SQL Workbench/J would
+      have a semicolon in the source code. Normally the &wb-productname; would
       stop parsing the command at the first semicolon and send that command to
       the database (which will produce an error message as the statement is
       not complete).</para>
@@ -84,7 +131,7 @@
       <para>In the case of a <literal>CREATE PROCEDURE</literal> statement this should be
       terminated with the character sequence entered in this input field. The
       terminator can have more than one character e.g. ./
-      (a dot followed by a slash). 
+      (a dot followed by a slash).
       It should not be a sequence which is used inside a SQL statement.</para>
 
       <para>Using a slash as the terminator (as e.g. SQL*Plus does) might lead
@@ -94,7 +141,7 @@
       <para><programlisting>SELECT sum(field)/count(*) FROM table;</programlisting></para>
 
       <para>This would lead to problems as the slash is recognized as the
-      statement terminator. Thus the SQL Workbench/J would send everything up
+      statement terminator. Thus the &wb-productname; would send everything up
       to sum(field) to the database and execute it.</para>
     </section>
 
@@ -155,34 +202,34 @@
       linkend="command-spool"><literal>SPOOL</literal> command</link>, you can
       freely customize the output for each file you create.</para>
     </section>
-    
+
     <section id="options-deftabletype">
     <title>Default Object Type</title>
-      <para>This setting allows you to control the initial display of objects in the 
+      <para>This setting allows you to control the initial display of objects in the
       <link linkend="dbexplorer">DbExplorer's</link> table panel. The value entered here
       will be used to set the default selection in the type drop down.</para>
-      <para>The list in that dropdown is retrieved from the underlying DBMS through 
-      a JDBC function call. So the value entered here should be something that is 
+      <para>The list in that dropdown is retrieved from the underlying DBMS through
+      a JDBC function call. So the value entered here should be something that is
       available on all used DBMS. If the value entered in this property is not found
       in the list, the selection defaults to "*" which means all object types.</para>
       <note>
-      <para>Don't forget to enable <xref linkend="options-retrieve-explorer"/> so 
-      that the DbExplorer will be retrieved automatically with the desired object 
+      <para>Don't forget to enable <xref linkend="options-retrieve-explorer"/> so
+      that the DbExplorer will be retrieved automatically with the desired object
       type, when you open it.</para>
       </note>
- 
+
     </section>
 
       <section id="manual-settings">
         <title>Settings not available through the GUI</title>
-        
-        <para>This section describes the additional options for SQL Workbench/J which 
+
+        <para>This section describes the additional options for &wb-productname; which
         are not available in the options dialog.</para>
-        
+
         <para>The name of the setting refers to the entry in the file <literal>workbench.settings</literal>
-        which is located in the <link linkend="config-dir">configuration directoy</link>.
+        which is located in the <link linkend="config-dir">configuration directory</link>.
         </para>
-        
+
         <informaltable frame="all">
           <tgroup cols="3">
             <thead>
@@ -195,15 +242,15 @@
             <tbody valign="top">
               <row>
                 <entry><para>workbench.gui.showmnemonics</para></entry>
-                <entry><para>Usually the mnemonic for a menu item is not shown under 
-                       Windows 2000 or later. It will only be shown, when you press the 
+                <entry><para>Usually the mnemonic for a menu item is not shown under
+                       Windows 2000 or later. It will only be shown, when you press the
                        ALT key. With this settings, this JDK behaviour can be controlled.</para></entry>
                 <entry><para>true</para></entry>
               </row>
               <row>
                 <entry><para>workbench.db.verifydriverurl</para></entry>
-                <entry><para>Usually before connecting to the DBMS, SQL Workbench/J will 
-                        call the acceptsUrl() method of the JDBC driver, to verify 
+                <entry><para>Usually before connecting to the DBMS, &wb-productname; will
+                        call the acceptsUrl() method of the JDBC driver, to verify
                         if the entered URL is correct and will be accepted by the
                         driver. Some drivers have been reported to indicate an error
                         in the URL even if they could connect successfully.</para>
@@ -234,15 +281,15 @@
               </row>
               <row>
                 <entry><para>workbench.workspace.autosave</para></entry>
-                <entry><para>If this is enabled, the current workspace will 
-                be saved automatically, when a SQL statement is executed. This 
+                <entry><para>If this is enabled, the current workspace will
+                be saved automatically, when a SQL statement is executed. This
                 setting was introduced with Build 61.</para>
                 </entry>
                 <entry><para>false</para></entry>
               </row>
               <row>
                 <entry><para>workbench.workspace.createbackup</para></entry>
-                <entry><para>If this is enabled, a backup file will be created 
+                <entry><para>If this is enabled, a backup file will be created
 								before saving the workspace. This is done by renaming the current
 								file (overwriting any existing backup) and then saving the workspace.</para>
                 </entry>
@@ -250,7 +297,7 @@
               </row>
               <row>
                 <entry><para>workbench.dbmetadata.logsql</para></entry>
-                <entry><para>If this is enabled, the SQL queries used to 
+                <entry><para>If this is enabled, the SQL queries used to
                 retrieve DBMS specific meta data (such as view/procedure/trigger source,
 								defined triggers/views) will be logged with level INFO.
 								This can be used to debug customized SQL statements
@@ -260,11 +307,11 @@
               </row>
               <row>
                 <entry><para id="formatter-subselect-threshold">workbench.sql.formatter.subselect.maxlength</para></entry>
-                <entry><para>When the SQL formatter hits a sub-SELECT while 
+                <entry><para>When the SQL formatter hits a sub-SELECT while
                 parsing it will not reformat any statement which is shorter
                 then the length specified through this property. I.e. any sub SELECT
                 shorter then this value will be formatted as one single String without
-                line breaks or indention. See <xref linkend="editor-reformat-sql"/> for 
+                line breaks or indention. See <xref linkend="editor-reformat-sql"/> for
 								details on how the SQL formatting works.</para>
                 </entry>
                 <entry><para>60</para></entry>
@@ -273,8 +320,8 @@
                 <entry><para id="manual-setting-snippet-no-newline">workbench.javacode.includenewline</para></entry>
                 <entry><para>When creating a <link linkend="editor-copy-java-code-snippet">Java code snippet</link>,
 								the newlines inside the editor are preserved by putting a <literal>\n</literal>
-								character into the String declaration. Setting this property to false, will 
-								tell SQL Workbench/J not put any <literal>\n</literal> characters into the Java string.</para>
+								character into the String declaration. Setting this property to false, will
+								tell &wb-productname; not put any <literal>\n</literal> characters into the Java string.</para>
                 </entry>
                 <entry><para>true</para></entry>
               </row>

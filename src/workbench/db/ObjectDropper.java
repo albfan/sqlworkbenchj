@@ -99,7 +99,7 @@ public class ObjectDropper
 			stmt.execute(sql.toString());
 		}
 		stmt.close();
-		// Postgres requires a COMMIT if autocommit is set to false...
+		// Postgres and Firebird requires a COMMIT if autocommit is set to false...
 		if (!this.connection.getAutoCommit() && this.connection.getDdlNeedsCommit())
 		{
 			try { this.connection.commit(); } catch (Throwable th) {}

@@ -1,412 +1,300 @@
 <section id="install">
-	<title>Installing and starting &wb-productname;</title>
+  <title>Installing and starting &wb-productname;</title>
 
-	<para>To run &wb-productname; JDK 1.4 (or above) is required. Apart from
-	that, no special installation procedure is required. Just copy the files
-	into a directory that is convenient. When upgrading to a newer version of
-	&wb-productname; the old .jar file can simply be overwritten.</para>
-	
-	<section id="starting">
-		<title>Starting the program</title>
+  <para>To run &wb-productname; JDK 1.4 (or above) is required. Apart from
+  that, no special installation procedure is required. Just copy the files
+  into a directory that is convenient. When upgrading to a newer version of
+  &wb-productname; the old .jar file can simply be overwritten.</para>
 
-		<para>Workbench.jar is a self executing JAR file. This means, that if
-		your JDK is installed properly, a double click (on the Windows&reg; platform)
-		on Workbench.jar will execute the application. To run the application
-		manually use the command:</para>
+  <section id="starting">
+    <title>Starting the program</title>
 
-		<programlisting>java -jar Workbench.jar</programlisting>
+    <para>Workbench.jar is a self executing JAR file. This means, that if
+    your JDK is installed properly, a double click (on the Windows&reg; platform)
+    on Workbench.jar will execute the application. To run the application
+    manually use the command:</para>
 
-		<para>If you want to create a shortcut on your desktop use the above
-		line. On Windows&reg; systems - if you don&#39;t use the native launcher - it
-		is recommended to use javaw instead of java, so that the console window
-		is not displayed.</para>
+    <programlisting>java -jar Workbench.jar</programlisting>
 
-		<section id="config-dir" xreflabel="Configuration directory">
-			<title>Specifying the location of configuration files</title>
+    <para>If you want to create a shortcut on your desktop use the above
+    line. On Windows&reg; systems - if you don&apos;t use the native launcher - it
+    is recommended to use javaw instead of java, so that the console window
+    is not displayed.</para>
+    <programlisting>javaw -jar Workbench.jar</programlisting>
 
-			<para>By default &wb-productname; will put all its configuration files
-			into the current directory. The current directory is not necessarily the
-			directory where the .jar file is located, but it will be that directory in 
-			most of the cases.
-			</para>
-			<para>The configuration files are:
-			<itemizedlist>
-				<listitem><para>General configuration settings (<filename>workbench.settings</filename>)</para></listitem>
-				<listitem><para>Connection profiles (<filename>WbProfiles.xml</filename>)</para></listitem>
-				<listitem><para>JDBC Driver definitions (<filename>WbDrivers.xml</filename>)</para></listitem>
-				<listitem><para>Customized shortcut definitions (<filename>WbShortcuts.xml</filename>)</para></listitem>
-				<listitem><para>Macro definitions (<filename>WbMacros.xml</filename>)</para></listitem>
-				<listitem><para>Log file (<filename>workbench.log</filename>)</para></listitem>
-				<listitem><para>Workspace files (<filename>*.wksp</filename>)</para></listitem>
-			</itemizedlist>
-			</para>
-			
-			<para>If you want to put these files into a different directory, start &wb-productname;
-			with the parameter -configdir to specify an alternate directory:</para>
-			<para>
-			<programlisting>java -jar Workbench.jar -configdir=c:\ConfigData</programlisting>
-			or if you are using the Windows&reg; launcher:
-			<programlisting>JWorkbench -configdir=c:\ConfigData</programlisting>
-			</para>
-			
-			<para>To copy an installation to a different computer, simply copy all the above
-			files to the other computer (the log file does not need to be copied). 
-			When a profile is connected to a workspace, the filename
-			of the workspace file is usually stored with a placeholder for the configuration directory
-			(%ConfigDir%) so that the profiles don't need to be adjusted. 
-			</para>
-			<para>The driver definitions will most probably need editing, as the path
-			to the actual .jar files is stored as an absolute path.</para>
-		</section>
+    <section id="config-dir" xreflabel="Configuration directory">
+      <title>Specifying the location of configuration files</title>
 
-	</section>
-	
-	<section id="install-increase-memory">
-		<title>Increasing the memory available to the application</title>
-		<para>&wb-productname; is a Java application and thus runs inside a 
-		so-called virtual machine (JVM). The virtual machine limits the memory 
-		independently from the installed memory that is available to the operating 
-		system.</para>
-		<para>&wb-productname; reads the data that is returned by a <literal>SELECT</literal>
-		statement into the main memory. When retrieving large result sets, you might
-		get an error message, indicating that not enough memory is available. In this 
-		case you need to increase the memory that the JVM requests from the operating
-		system (or change your statement to return fewer rows).</para>
-		<para>When you use the <link linkend="launcher-using">Windows&reg; Launcher</link> to start &wb-productname; 
-		you need to pass the parameter -J-Xmx256m to the executable:
-		<programlisting>JWorkbench.exe -J-Xmx256m</programlisting>This example
-		will increase the maximum memory to 256MB. The recommended way
-		is to create Windows&reg; shortcut (e.g. on the desktop) and add the above parameter
-		to the shortcut definition. The launcher increases the available heap size 
-		by default to 128 MB.</para>
-		<para>If you are running &wb-productname; on a non-Windows&reg; operating system or do not 
-		want to use the launcher, then you need to pass this parameter directly to the JVM</para>
-		<para><programlisting>java -Xmx256m -jar Workbench.jar</programlisting></para>
-		<note>
-			<para>The -Xmx parameter increases the <emphasis role="bold">maximum</emphasis>
-			memory to the given value. This does not mean that the application will use 
-			that much memory</para>
-		</note>
-	</section>
-	
-	<section id="no-ddraw">
-		<title>Display Problems, Crashes/Bluescreen when running under Windows�</title>
-		
-		<para>If you experience problems when running &wb-productname; (or
-		other Java/Swing based applications) on the Windows platform, this
-		might be due to problems with the graphics driver and/or the
-		DirectDraw installation. If upgrading the graphics driver or the
-		DirectDraw/DirectX version is not an option (or does not solve the
-		problem), try to run SQL Workbench with the direct draw feature
-		turned off:</para>
+      <para>By default &wb-productname; will put all its configuration files
+      into the current directory. The current directory is not necessarily the
+      directory where the .jar file is located, but it will be that directory in
+      most of the cases.
+      </para>
+      <para>The configuration files are:
+      <itemizedlist>
+        <listitem><para>General configuration settings (<filename>workbench.settings</filename>)</para></listitem>
+        <listitem><para>Connection profiles (<filename>WbProfiles.xml</filename>)</para></listitem>
+        <listitem><para>JDBC Driver definitions (<filename>WbDrivers.xml</filename>)</para></listitem>
+        <listitem><para>Customized shortcut definitions (<filename>WbShortcuts.xml</filename>)</para></listitem>
+        <listitem><para>Macro definitions (<filename>WbMacros.xml</filename>)</para></listitem>
+        <listitem><para>Log file (<filename>workbench.log</filename>)</para></listitem>
+        <listitem><para>Workspace files (<filename>*.wksp</filename>)</para></listitem>
+      </itemizedlist>
+      </para>
+
+      <para>If you want to put these files into a different directory, start &wb-productname;
+      with the parameter -configdir to specify an alternate directory:</para>
+      <para>
+      <programlisting>java -jar Workbench.jar -configdir=c:\ConfigData</programlisting>
+      or if you are using the Windows&reg; launcher:
+      <programlisting>JWorkbench -configdir=c:\ConfigData</programlisting>
+      </para>
+
+      <para>To copy an installation to a different computer, simply copy all the above
+      files to the other computer (the log file does not need to be copied).
+      When a profile is connected to a workspace, the filename
+      of the workspace file is usually stored with a placeholder for the configuration directory
+      (%ConfigDir%) so that the profiles don't need to be adjusted.
+      </para>
+      <para>The driver definitions (stored in <filename>WbDrivers.xml</filename>)
+      will most probably need editing, as the path to the actual .jar files is stored
+      as an absolute path.</para>
+    </section>
+  </section>
+
+  <section id="install-increase-memory">
+    <title>Increasing the memory available to the application</title>
+    <para>&wb-productname; is a Java application and thus runs inside a
+    so-called virtual machine (JVM). The virtual machine limits the memory
+    independently from the installed memory that is available to the operating
+    system.</para>
+    <para>&wb-productname; reads the data that is returned by a <literal>SELECT</literal>
+    statement into the main memory. When retrieving large result sets, you might
+    get an error message, indicating that not enough memory is available. In this
+    case you need to increase the memory that the JVM requests from the operating
+    system (or change your statement to return fewer rows).</para>
+    <para>When you use the Windows&reg; <link linkend="launcher-using">Launcher</link> to start &wb-productname;
+    you need to pass the parameter -J-Xmx256m to the executable:
+    <programlisting>JWorkbench.exe -J-Xmx256m</programlisting>This example
+    will increase the maximum memory to 256MB. The recommended way
+    is to create Windows&reg; shortcut (e.g. on the desktop) and add the above parameter
+    to the shortcut definition. The launcher increases the available heap size
+    by default to 128 MB.</para>
+    <para>If you are running &wb-productname; on a non-Windows&reg; operating system or do not
+    want to use the launcher, then you need to pass this parameter directly to the JVM</para>
+    <para><programlisting>java -Xmx256m -jar Workbench.jar</programlisting></para>
+    <note>
+      <para>The -Xmx parameter increases the <emphasis role="bold">maximum</emphasis>
+      memory to the given value. This does not mean that the application will use
+      that much memory</para>
+    </note>
+  </section>
+
+  <section id="no-ddraw">
+    <title>Display Problems, Crashes, Bluescreens when running under Windows&reg;</title>
+
+    <para>If you experience problems when running &wb-productname; (or
+    other Java/Swing based applications) on the Windows&reg; platform, this
+    might be due to problems with the graphics driver and/or the
+    DirectDraw installation. If upgrading the graphics driver or the
+    DirectDraw/DirectX version is not an option (or does not solve the
+    problem), try to run SQL Workbench with the direct draw feature
+    turned off:</para>
 
 
-		<programlisting>java -Dsun.java2d.noddraw=true -jar Workbench.jar</programlisting>
+    <programlisting>java -Dsun.java2d.noddraw=true -jar Workbench.jar</programlisting>
 
-		<para>When using the exe launcher, you have to use the following
-		syntax:</para>
+    <para>When using the exe launcher, you have to use the following
+    syntax:</para>
 
-		<programlisting>jworkbench -J-Dsun.java2d.noddraw=true</programlisting>
-		<para>Starting with build 64, you can also use the parameter -noddraw for
-		the launcher to set that property</para>
+    <programlisting>jworkbench -J-Dsun.java2d.noddraw=true</programlisting>
+    <para>Starting with build 64, you can also use the parameter -noddraw for
+    the launcher to set that property</para>
 
-		<programlisting>jworkbench -noddraw</programlisting>
-		
-		<para>This will then be translated by the launcher into the approriate 
-		system property (but it's easier to remember)</para>
-		
-		<para>If you run &wb-productname; through PC-Duo or a similar program
-		that enables remote access to Windows workstations (VNC, NetMeeting, etc), 
-		you may need to disable the use of DirectDraw for Java as well.</para>
+    <programlisting>jworkbench -noddraw</programlisting>
 
-		<para>Simply add the above parameter to the Windows shortcut definition</para>
-		
-	</section>
-	
-	<section id="hi-cpu-usage">
-		<title>High CPU usage when executing statements</title>
-		<para>If you experience a high CPU usage when running a SQL statement, 
-		this might be caused by a combination of the graphics driver, the JDK and
-		the Windows version you are using. This is usually caused by the animated 
-		icon which indicates a running statement (the yellow smiley). This animation can be turned off
-		with a setting in the <filename>workbench.settings</filename> configuration file. 
-		See <xref linkend="option-animated-icon"/> for details. A different
-		icon (not animated) will be used if that option is disabled. 
-		</para>
-	</section>
+    <para>This will then be translated by the launcher into the approriate
+    system property (but it's easier to remember)</para>
 
-	<section id="launcher-using">
-		<title>Using the Windows launcher</title>
+    <para>If you run &wb-productname; through PC-Duo or a similar program
+    that enables remote access to a Windows&reg; workstations (VNC, NetMeeting, etc),
+    you may need to disable the use of DirectDraw for Java as well.</para>
 
-		<para>On the windows platform the supplied JWorkbench.exe can be used to
-		start the program. The native launcher searches for an installed JDK
-		(querying the registry) and then starts the SQL Workbench. The file
-		workbench.jar has to be located in the same directory as the
-		JWorkbench.exe, otherwise it doesn&#39;t work.</para>
+    <para>Simply add the above parameter to the Windows shortcut definition</para>
 
-		<para>By default the launcher increases the maximum JVM heap size to 128
-		MB (the default for JDK 1.4 is 96MB). If you need more heap memory, you
-		need to pass the appropriate JVM parameter to the launcher</para>
+  </section>
 
-		<section id="launcher-jdk-search">
-			<title>How the Windows launcher searches for a JDK</title>
+  <section id="hi-cpu-usage">
+    <title>High CPU usage when executing statements</title>
+    <para>If you experience a high CPU usage when running a SQL statement,
+    this might be caused by a combination of the graphics driver, the JDK and
+    the Windows&reg; version you are using. This is usually caused by the animated
+    icon which indicates a running statement (the yellow smiley). This animation can be turned off
+    with a setting in the <filename>workbench.settings</filename> configuration file.
+    See <xref linkend="option-animated-icon"/> for details. A different
+    icon (not animated) will be used if that option is disabled.
+    </para>
+  </section>
 
-			<para>First the launcher checks for a system variable <literal>WORKBENCH_JDK</literal>.
-			If that is defined, the JDK specified by that directory is used. If
-			<literal>WORKBENCH_JDK</literal> is not found, <literal>JAVA_HOME</literal> is used. 
-			If <literal>JAVA_HOME</literal> is not defined, then the launcher checks if 
-			a sub-directory JRE exists in the folder where JWorkbench.exe is located. If 
-			that sub-directory exists, it is assumed that it contains a valid JRE. If the 
-			sub-directory does not exist, or if it is not a JRE installation, then the registry key 
-			<literal>HKLM\Software\JavaSoft\Java Runtime Environment</literal> is queried. 
-			If that is not defined, <literal>HKLM\Software\JavaSoft\Java Development Kit</literal> 
-			is queried.</para>
+  <section id="launcher-using">
+    <title>Using the Windows launcher</title>
 
-			<para>In the registry key, a subkey for the version 1.4 is retrieved, and
-			the directory specified by that key is used as the base JDK
-			directory.</para>
-			<para>If your JDK/JRE installation cannot be found by the launcher, but you do have 
-			a JDK available, you can specify the location of the JDK with the -jdk parameter</para>
-		</section>
+    <para>On the Windows&reg; platform the supplied JWorkbench.exe can be used to
+    start the program when using a Sun JDK. The native launcher searches for an installed
+    JDK (querying the registry) and then starts the &wb-productname;. The file
+    workbench.jar has to be located in the same directory as the
+    JWorkbench.exe, otherwise it doesn&#39;t work.</para>
+    <note><para>
+      The launcher only works with JDK&apos;s from Sun, as it directly calls the
+      JDK dll&apos;s to start the virtual machine. If you are using a different JDK,
+      you cannot use the launcher to start &wb-productname; (unless it uses the same
+      directory layout and filenames as the Sun JDK).</para>
+    </note>
 
-		<section id="launcher-parameters">
-			<title>Parameters for the Windows launcher</title>
+    <para>By default the launcher increases the maximum JVM heap size to 128
+    MB (the default for JDK 1.4 is 96MB). If you need more heap memory, you
+    need to pass the appropriate JVM parameter to the launcher</para>
 
-			<para>To distinguish parameters for the launcher and parameters to the 
-			JVM, JVM parameter need to be prefixed with -J.
-			If you want to pass the parameter <literal>-Xmx256m</literal> to the JVM, 
-			pass the parameter <literal>-J-Xmx128m</literal> to the launcher. 
-			To define a system property you need to pass the parameter
-			<literal>-J-Dproperty.name=property_value</literal>.</para>
+    <section id="launcher-jdk-search">
+      <title>How the Windows launcher searches for a Sun JDK</title>
 
-			<para>The following parameters are recognized:</para>
+      <para>First the launcher checks for a system variable <literal>WORKBENCH_JDK</literal>.
+      If that is defined, the JDK specified by that directory is used. If
+      <literal>WORKBENCH_JDK</literal> is not found, <literal>JAVA_HOME</literal> is used.
+      If <literal>JAVA_HOME</literal> is not defined, then the launcher checks if
+      a sub-directory JRE exists in the folder where JWorkbench.exe is located. If
+      that sub-directory exists, it is assumed that it contains a valid JRE. If the
+      sub-directory does not exist, or if it is not a JRE installation, then the registry key
+      <literal>HKLM\Software\JavaSoft\Java Runtime Environment</literal> is queried.
+      If that is not defined, <literal>HKLM\Software\JavaSoft\Java Development Kit</literal>
+      is queried.</para>
 
-			<informaltable frame="all">
-				<tgroup cols="2" align="left">
-					<colspec colname="c1" colwidth="2cm" />
-					<colspec colname="c2"  />
-					<thead>
-						<row>
-							<entry>Parameter</entry>
-							<entry>Description</entry>
-						</row>
-					</thead>
-					<tbody valign="top">
-						<row>
-							<entry>-jdk</entry>
-							<entry>Specify the installation directory of the JDK e.g.: -jdk=c:\jdk1.4.1.
-							When this parameter is specified the launcher will not look for a JDK 
-							installation as described <link linkend="launcher-jdk-search">here</link>
-							</entry>
-						</row>
+      <para>In the registry key, a subkey for the version 1.4 is retrieved, and
+      the directory specified by that key is used as the base JDK
+      directory.</para>
+      <para>If your JDK/JRE installation cannot be found by the launcher, but you do have
+      a JDK available, you can specify the location of the JDK with the -jdk parameter</para>
+      <para>The launcher assumes the layout of the Sun jdk in the specified directory. If you
+      specify <literal>c:\jdk</literal> as the JDK directory, the launcher looks for the file
+      <literal>c:\jdk\bin\client\jvm.dll</literal> (the specified directory would actually be a
+      JRE then). If that is not found, it looks for <literal>c:\jdk\jre\bin\client\jvm.dll</literal>
+      (that would be a &quot;true&quot; JRE installation). If the <literal>-sever</literal> parameter
+      is specified, it will look for a sub-directory <literal>server</literal> instead of
+      <literal>client</literal>. If your non-Sun JDK/JRE follows the same directory layout
+      and filename conventions, you can use the launcher for that JDK as well.</para>
+    </section>
 
-						<row>
-							<entry>-J</entry>
-							<entry>Pass a parameter to the JVM e.g: -J-Xms128m</entry>
-						</row>
+    <section id="launcher-parameters">
+      <title>Parameters for the Windows launcher</title>
 
-						<row>
-							<entry>-server</entry>
-							<entry>Select the server JVM (instead of the default client JVM)</entry>
-						</row>
+      <para>To distinguish parameters for the launcher and parameters to the
+      JVM, JVM parameter need to be prefixed with -J.
+      If you want to pass the parameter <literal>-Xmx256m</literal> to the JVM,
+      pass the parameter <literal>-J-Xmx128m</literal> to the launcher.
+      To define a system property you need to pass the parameter
+      <literal>-J-Dproperty.name=property_value</literal>.</para>
 
-						<row>
-							<entry>-noddraw</entry>
-							<entry>Disable the use of DirectDraw routines for the JVM. Use this
-							parameter when you are running &wb-productname; through PC-Duo or a similar
-							program, or if you are experiencing crashes when starting &wb-productname; 
-							</entry>
-						</row>
-						
-						<row>
-							<entry>-debug</entry>
-							<entry>Write debug information to the file workbench.dbg to identify problems when using the launcher</entry>
-						</row>
+      <para>The following parameters are recognized:</para>
 
-						<row>
-							<entry>-help</entry>
-							<entry>Display a message with the list of parameters</entry>
-						</row>
-					</tbody>
-				</tgroup>
-			</informaltable>
+      <informaltable frame="all">
+        <tgroup cols="2" align="left">
+          <colspec colname="c1" colwidth="2cm" />
+          <colspec colname="c2"  />
+          <thead>
+            <row>
+              <entry>Parameter</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody valign="top">
+            <row>
+              <entry>-jdk</entry>
+              <entry>Specify the installation directory of the JDK e.g.: -jdk=c:\jdk1.4.1.
+              When this parameter is specified the launcher will not look for a JDK
+              installation as described <link linkend="launcher-jdk-search">here</link>
+              </entry>
+            </row>
 
-			<para>All other parameters are passed unchanged to the main class.
-			See <xref linkend="commandline"/> for details.</para>
+            <row>
+              <entry>-J</entry>
+              <entry>Pass a parameter to the JVM e.g: -J-Xms128m</entry>
+            </row>
 
-			<para>The following call to the launcher:</para>
+            <row>
+              <entry>-server</entry>
+              <entry>Select the server JVM (instead of the default client JVM)</entry>
+            </row>
 
-			<programlisting>JWorkbench -configdir=c:\MyConf -J-Dsun.java2d.noddraw=true</programlisting>
+            <row>
+              <entry>-noddraw</entry>
+              <entry>Disable the use of DirectDraw routines for the JVM. Use this
+              parameter when you are running &wb-productname; through PC-Duo or a similar
+              program, or if you are experiencing crashes when starting &wb-productname;
+              </entry>
+            </row>
 
-			<para>is the same as directly starting Workbench.jar with these
-			parameters:</para>
+            <row>
+              <entry>-debug</entry>
+              <entry>Write debug information to the file workbench.dbg to identify problems when using the launcher</entry>
+            </row>
 
-			<programlisting>java -Dsun.java2d.noddraw=true -jar Workbench.jar -configdir=c:\MyConf</programlisting>
-		</section>
-	</section>
+            <row>
+              <entry>-help</entry>
+              <entry>Display a message with the list of parameters</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
 
-	<section id="commandline" xreflabel="command line parameters">
-		<title>Command line parameters</title>
+      <para>All other parameters are passed unchanged to the main class.
+      See <xref linkend="commandline"/> for details.</para>
 
-		<para>Command line parameters are <emphasis role="bold">not</emphasis> case sensitive, 
-		the parameters <literal>-Profile</literal> or <literal>-profile</literal> are
-		identical. The usage of the command line parameters is identical between
-		the launcher or starting &wb-productname; using the java command itself.</para>
+      <para>The following call to the launcher:</para>
 
-		<section>
-			<title>-configdir=&#60;a directory&#62;</title>
+      <programlisting>JWorkbench -configdir=c:\MyConf -J-Dsun.java2d.noddraw=true</programlisting>
 
-			<para>Store all settings, the connection profile and the statement
-			history in the given directory.</para>
+      <para>is the same as directly starting Workbench.jar with these
+      parameters:</para>
 
-			<programlisting>java -jar Workbench.jar -configdir=&#34;c:/Configurations/JWorkbench&#34; 
+      <programlisting>java -Dsun.java2d.noddraw=true -jar Workbench.jar -configdir=c:\MyConf</programlisting>
+    </section>
+  </section>
+
+  <section id="commandline" xreflabel="command line parameters">
+    <title>Command line parameters</title>
+
+    <para>Command line parameters are <emphasis role="bold">not</emphasis> case sensitive,
+    the parameters <literal>-Profile</literal> or <literal>-profile</literal> are
+    identical. The usage of the command line parameters is identical between
+    the launcher or starting &wb-productname; using the java command itself.</para>
+
+    <section>
+      <title>-configdir=&#60;a directory&#62;</title>
+
+      <para>Store all settings, the connection profile and the statement
+      history in the given directory.</para>
+
+      <programlisting>java -jar Workbench.jar -configdir=&#34;c:/Configurations/JWorkbench&#34;
 jworkbench -configdir=&#34;c:/Configurations/JWorkbench&#34;</programlisting>
-		</section>
+    </section>
 
-		<section>
-			<title>-profile=&#60;profile name&#62;</title>
+    <section>
+      <title>-profile=&#60;profile name&#62;</title>
 
-			<para>Connect to the given profile. The name has to be exactly the
-			same as it appears in the profile dialog (case sensitiv!). If the name
-			contains spaces, it has to be enclosed in quotations marks:</para>
+      <para>Connect to the given profile. The name has to be exactly the
+      same as it appears in the profile dialog (case sensitiv!). If the name
+      contains spaces, it has to be enclosed in quotations marks.</para>
 
-			<para>Example:</para>
+      <para>Example:</para>
 
-			<programlisting>java -jar Workbench.jar -profile=&#34;Oracle - Test&#34;
+      <programlisting>java -jar Workbench.jar -profile=&#34;Oracle - Test&#34;
 jworkbench -profile='Oracle - Test'</programlisting>
-		</section>
 
-		<section>
-			<title>-script=&#60;filename&#62;</title>
+      <para>&wb-productname; understands more command line parameters, which can be used
+      to execute SQL scripts from batch files. Please refer to <link linkend="using-scripting">
+      Using &wb-productname; in batch files</link>
+      for more detailed information.</para>
+    </section>
 
-			<para>Run the given script. Multiple scripts can be specified by
-			separating them with a comma. The scripts will be executed in the
-			order in which they appear in the commandline</para>
-
-			<para>Example:</para>
-
-			<programlisting>java -jar Workbench.jar -script='c:/scripts/script1.sql','c:/scripst/script2.sql'
-jworkbench -script='c:/scripts/script1.sql','c:/scripst/script2.sql'</programlisting>
-
-			<para>When this parameter is specified no GUI will be displayed. The
-			script(s) will be executed and then the Workbench will terminate. Any
-			messages are written to the logfile which can either be specified with
-			the -logfile parameter or via an entry in workbench.settings.</para>
-
-			<para>When specifying the -script parameter, make sure you also
-			specify a connection profile!</para>
-		</section>
-
-		<section>
-			<title>-logfile=&#60;filename&#62;</title>
-
-			<para>Write messages to a file named &#60;filename&#62;. If this
-			parameter is not passed, the logfile name will be retrieved from
-			workbench.settings (currently there is no field in the option dialog
-			to enter the location of the log file)</para>
-		</section>
-
-		<section>
-			<title>-AbortOnError=[true|false]</title>
-
-			<para>Controls the behavior when running a script through the -script
-			parameter. If any error occurs, and AbortOnError is true, script
-			processing is completely stopped. The only script which will be
-			executed after that point is the script specified with the parameter
-			-CleanupError. If no error occurs the script specified with
-			-CleanupSuccess is executed.</para>
-
-			<para>If AbortOnError is false all statements in all scripts are
-			executed regardless of any errors. As no error information is
-			evaluated the script specified in -CleanupSuccess will be executed at
-			the end.</para>
-
-			<para>Instead of true/false you can also use yes/no</para>
-
-			<para>If this parameter is not supplied it defaults to true, meaning
-			that the script will be aborted when an error occurs.</para>
-		</section>
-
-		<section>
-			<title>-CleanupSuccess=&#60;filename&#62;</title>
-
-			<para>This script is executed as the last script if either no error
-			occurred or AbortOnError is set to false.</para>
-		</section>
-
-		<section>
-			<title>-CleanupErorr=&#60;filename&#62;</title>
-
-			<para>This script is executed as the last script if AbortOnError is
-			set to true and an error occurred during script execution.</para>
-		</section>
-
-		<section>
-			<title>Script execution without a profile</title>
-
-			<para>When specifying a script to execute, you don&#39;t need to have
-			a profile for the connection (in fact you don&#39;t need
-			WbProfiles.xml, WbDrivers.xml to run in this mode).</para>
-
-			<para>When specifying a script, &wb-productname; accepts the following
-			parameters to specify the full connection details</para>
-
-			<informaltable frame="all">
-				<tgroup cols="2">
-					<colspec colname="c1" colwidth="2.5cm" />
-					<colspec colname="c2" />
-					<thead>
-						<row>
-							<entry>Parameter</entry>
-							<entry>Description</entry>
-						</row>
-					</thead>
-					<tbody valign="top">
-						<row>
-							<entry>-url</entry>
-
-							<entry>The -url parameter specifies the JDBC url
-							to connect to.</entry>
-						</row>
-
-						<row>
-							<entry>-username</entry>
-
-							<entry>Specify the username for the DBMS</entry>
-						</row>
-
-						<row>
-							<entry>-password</entry>
-
-							<entry>Specify the password for the user</entry>
-						</row>
-
-						<row>
-							<entry>-driver</entry>
-
-							<entry>Specify the full class name of the JDBC
-							driver</entry>
-						</row>
-
-						<row>
-							<entry>-driverjar</entry>
-
-							<entry>Specify the full pathname to the .jar file
-							containing the JDBC driver</entry>
-						</row>
-					</tbody>
-				</tgroup>
-			</informaltable>
-
-			<para>Example (one line):</para>
-
-			<programlisting>java -jar Workbench.jar -url=jdbc:postgresql:/dbserver/mydb
-	 -driver=org.postgresql.Driver -username=thomas -password=welcome  
-	 -driverjar=C:/Programme/pgsql/pg73jdbc3.jar -script=test.sql</programlisting>
-
-			<para>This will start &wb-productname;, connect to the database server
-			as specified in the connection parameters and execute the script
-			test.sql</para>
-		</section>
-	</section>
+  </section>
 </section>

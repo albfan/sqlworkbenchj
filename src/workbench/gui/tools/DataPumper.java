@@ -57,7 +57,7 @@ import workbench.util.StringUtil;
  *
  * @author  workbench@kellerer.org
  */
-public class DataPumper 
+public class DataPumper
 	extends JPanel
 	implements ActionListener, WindowListener, PropertyChangeListener, RowActionMonitor
 {
@@ -65,7 +65,7 @@ public class DataPumper
 	private ConnectionProfile target;
 	private WbConnection sourceConnection;
 	private WbConnection targetConnection;
-	
+
 	private JFrame window;
 	private ColumnMapper columnMapper;
 	private final String copyMsg = ResourceMgr.getString("MsgCopyingRow");
@@ -94,15 +94,15 @@ public class DataPumper
 		this.mapperPanel.setLayout(new BorderLayout());
 		this.mapperPanel.add(this.columnMapper, BorderLayout.CENTER);
 
-		this.separatorPanel1.setBorder(new DividerBorder(DividerBorder.MIDDLE));
-		this.separatorPanel2.setBorder(new DividerBorder(DividerBorder.MIDDLE));
+		this.separatorPanel1.setBorder(new DividerBorder(DividerBorder.VERTICAL_MIDDLE));
+		this.separatorPanel2.setBorder(new DividerBorder(DividerBorder.VERTICAL_MIDDLE));
 		this.checkQueryButton.addActionListener(this);
 		this.showWbCommand.addActionListener(this);
 		this.useQueryCbx.addActionListener(this);
 		this.sqlEditor = EditorPanel.createSqlEditor();
 		this.wherePanel.add(this.sqlEditor);
 		this.showWbCommand.setEnabled(false);
-		
+
 		if (!this.allowCreateTable)
 		{
 			this.dropTargetCbx.setVisible(this.allowCreateTable);
@@ -110,18 +110,18 @@ public class DataPumper
 			GridBagLayout grid = (GridBagLayout)this.buttonPanel.getLayout();
 			grid.removeLayoutComponent(this.dropTargetCbx);
 			this.buttonPanel.remove(this.dropTargetCbx);
-			
+
 			GridBagConstraints cons = grid.getConstraints(this.commitEvery);
 			cons.gridy --;
 			grid.setConstraints(this.commitEvery, cons);
-			
+
 			cons = grid.getConstraints(this.commitLabel);
 			cons.gridy--;
 			grid.setConstraints(this.commitLabel, cons);
 			//grid.layoutContainer(this);
 		}
 	}
-	
+
 	public void saveSettings()
 	{
 		Settings s = WbManager.getSettings();
@@ -151,7 +151,7 @@ public class DataPumper
 		s.storeWindowSize(this.window, "workbench.datapumper.window");
 		s.storeWindowPosition(this.window, "workbench.datapumper.window");
 	}
-	
+
 	public void restoreSettings()
 	{
 		Settings s = WbManager.getSettings();
@@ -202,7 +202,7 @@ public class DataPumper
 		}
 		this.updateWindowTitle();
 	}
-	
+
 	private void updateSourceDisplay()
 	{
 		String label = ResourceMgr.getString("LabelDPSourceProfile");
@@ -216,7 +216,7 @@ public class DataPumper
 		}
 		this.updateWindowTitle();
 	}
-	
+
 	private void updateDisplay()
 	{
 		this.updateSourceDisplay();
@@ -232,25 +232,22 @@ public class DataPumper
 			title = title + " [" + this.source.getName() + " -> " + this.target.getName() + "]";
 			if (this.copier != null && this.copyRunning)
 			{
-				title = "» " + title; 
+				title = "» " + title;
 			}
 			this.window.setTitle(title);
 		}
 	}
-	
+
 	private void checkConnections()
 	{
 		this.connectSource();
 		this.connectTarget();
 	}
-	
+
 	private void connectSource()
 	{
 		if (this.source == null) return;
-		
-		String label = ResourceMgr.getString("MsgConnectingTo") + " " + this.source.getName() + " ...";
-		this.sourceProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
-		this.sourceProfileLabel.setText(label);
+
 		Thread t = new Thread()
 		{
 			public void run()
@@ -262,10 +259,15 @@ public class DataPumper
 		t.setDaemon(true);
 		t.start();
 	}
-	
+
 	private void doConnectSource()
 	{
 		this.disconnectSource();
+
+		String label = ResourceMgr.getString("MsgConnectingTo") + " " + this.source.getName() + " ...";
+		this.sourceProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
+		this.sourceProfileLabel.setText(label);
+
 		try
 		{
 			this.sourceConnection = WbManager.getInstance().getConnectionMgr().getConnection(this.source, "Dp-Source");
@@ -282,11 +284,12 @@ public class DataPumper
 			this.sourceProfileLabel.setIcon(null);
 			this.updateSourceDisplay();
 		}
-		
+
+
 		if (this.sourceConnection != null)
 		{
 			this.sourceTable.setChangeListener(this, "source-table");
-			
+
 		  Thread t = new Thread()
 		  {
 			  public void run()
@@ -299,14 +302,11 @@ public class DataPumper
 		  t.start();
 		}
 	}
-	
+
 	private void connectTarget()
 	{
 		if (this.target == null) return;
-		
-		String label = ResourceMgr.getString("MsgConnectingTo") + " " + this.target.getName() + " ...";
-		this.targetProfileLabel.setText(label);
-		this.targetProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
+
 		Thread t = new Thread()
 		{
 			public void run()
@@ -318,11 +318,15 @@ public class DataPumper
 		t.setDaemon(true);
 		t.start();
 	}
-	
+
 	private void doConnectTarget()
 	{
 		this.disconnectTarget();
-		
+
+		String label = ResourceMgr.getString("MsgConnectingTo") + " " + this.target.getName() + " ...";
+		this.targetProfileLabel.setText(label);
+		this.targetProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
+
 		try
 		{
 			this.targetConnection = WbManager.getInstance().getConnectionMgr().getConnection(this.target, "Dp-Target");
@@ -339,11 +343,11 @@ public class DataPumper
 			this.targetProfileLabel.setIcon(null);
 			this.updateTargetDisplay();
 		}
-		
+
 		if (this.targetConnection != null)
 		{
 			this.targetTable.setChangeListener(this, "target-table");
-			
+
 		  Thread t = new Thread()
 		  {
 			  public void run()
@@ -728,8 +732,8 @@ public class DataPumper
     add(statusLabel, gridBagConstraints);
 
   }//GEN-END:initComponents
-	
-	
+
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel buttonPanel;
   private javax.swing.JButton cancelButton;
@@ -775,14 +779,14 @@ public class DataPumper
 				super.hide();
 			}
 		};
-		
+
 		this.window.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		this.window.setIconImage(ResourceMgr.getImage("DataPumper").getImage());
 		this.window.getContentPane().add(this);
 		this.restoreSettings();
 		this.window.addWindowListener(this);
 		WbManager.getInstance().registerToolWindow(this.window);
-		
+
 		if (aParent == null)
 		{
 			if (!WbManager.getSettings().restoreWindowPosition(this.window, "workbench.datapumper.window"))
@@ -803,17 +807,17 @@ public class DataPumper
 			}
 		});
 	}
-	
+
 	private void disconnectTarget()
 	{
 		if (this.targetConnection == null) return;
-		
+
 		try
 		{
 			String label = ResourceMgr.getString("MsgDisconnecting");
 			this.targetProfileLabel.setText(label);
 			this.targetProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
-			
+
 			this.targetTable.removeChangeListener();
 			this.targetConnection.disconnect();
 			this.targetTable.setConnection(null);
@@ -829,17 +833,17 @@ public class DataPumper
 			this.targetProfileLabel.setIcon(null);
 		}
 	}
-	
+
 	private void disconnectSource()
 	{
 		if (this.sourceConnection == null) return;
-		
+
 		try
 		{
 			String label = ResourceMgr.getString("MsgDisconnecting");
 			this.sourceProfileLabel.setText(label);
 			this.sourceProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
-			
+
 			this.sourceTable.removeChangeListener();
 			this.sourceConnection.disconnect();
 			this.sourceTable.setConnection(null);
@@ -855,19 +859,19 @@ public class DataPumper
 			this.sourceProfileLabel.setIcon(null);
 		}
 	}
-	
+
 	private void selectTargetConnection()
 	{
 		this.target = this.selectConnection("workbench.datapumper.target.lastprofile");
 		this.connectTarget();
 	}
-	
+
 	private void selectSourceConnection()
 	{
 		this.source = this.selectConnection("workbench.datapumper.source.lastprofile");
 		this.connectSource();
 	}
-	
+
 	private ConnectionProfile selectConnection(String lastProfileKey)
 	{
 		ConnectionProfile prof = null;
@@ -895,7 +899,7 @@ public class DataPumper
 		}
 		return prof;
 	}
-	
+
 	private void showHelp()
 	{
 		HtmlViewer viewer = new HtmlViewer(this.window, "data-pumper.html");
@@ -962,7 +966,7 @@ public class DataPumper
 		boolean useQuery = this.useQueryCbx.isSelected();
 		this.sourceTable.setEnabled(!useQuery);
 		this.checkQueryButton.setEnabled(useQuery);
-	
+
 		this.targetTable.allowNewTable(!useQuery && allowCreateTable);
 		if (useQuery)
 		{
@@ -984,7 +988,7 @@ public class DataPumper
 			}
 		}
 	}
-	
+
 	private boolean isSelectQuery()
 	{
 		String sql = this.sqlEditor.getText();
@@ -999,11 +1003,11 @@ public class DataPumper
 	public void windowActivated(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowClosed(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowClosing(java.awt.event.WindowEvent e)
 	{
 		this.closeWindow();
@@ -1018,7 +1022,7 @@ public class DataPumper
 			this.window.dispose();
 		}
 	}
-	
+
 	public void done()
 	{
 		this.saveSettings();
@@ -1041,74 +1045,74 @@ public class DataPumper
 		t.setDaemon(true);
 		t.start();
 	}
-	
+
 	private void disconnectDone()
 	{
 		WbManager.getInstance().unregisterToolWindow(this.window);
 	}
-	
-	
+
+
 	public void windowDeactivated(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowDeiconified(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowIconified(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowOpened(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	/**
 	 *	We have registered with both table selectors to be informed
-	 *	when the user changes the selection. After each change (and 
+	 *	when the user changes the selection. After each change (and
 	 *	we don't actually care where it came from) the tables are
-	 *	checked, and if both are present, we'll initialize the 
+	 *	checked, and if both are present, we'll initialize the
 	 *	ColumnMapper
 	 */
 	public void propertyChange(java.beans.PropertyChangeEvent evt)
 	{
 		TableIdentifier target = this.targetTable.getSelectedTable();
-		
+
 		if (target != null && target.isNewTable())
 		{
-			
+
 			String name = target.getTable();
-			if (name == null) 
+			if (name == null)
 			{
 				TableIdentifier source = this.sourceTable.getSelectedTable();
 				String def = null;
 				if (source != null)
 					def = source.getTable();
-				
+
 				name = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("TxtEnterNewTableName"), def);
-				if (name != null) 
-				{ 
+				if (name != null)
+				{
 					target.setTable(name);
 					this.targetTable.repaint();
 				}
 			}
 		}
-		
+
 		if (this.hasSource() && target != null)
 		{
 			SwingUtilities.invokeLater(new Runnable()
 			{
 				public void run()
 				{
-					initColumnMapper();	
+					initColumnMapper();
 				}
 			});
 		}
 		else
 		{
 			this.startButton.setEnabled(false);
-			this.showWbCommand.setEnabled(false);			
+			this.showWbCommand.setEnabled(false);
 			this.columnMapper.resetData();
 			this.dropTargetCbx.setEnabled(false);
 		}
@@ -1129,11 +1133,11 @@ public class DataPumper
 	{
 		if (this.sourceConnection == null) return null;
 		String sql = this.sqlEditor.getText();
-		
+
 		ResultSet rs = null;
 		Statement stmt = null;
 		ArrayList result = null;
-		
+
 		try
 		{
 			stmt = this.sourceConnection.createStatement();
@@ -1147,7 +1151,7 @@ public class DataPumper
 				String name = meta.getColumnName(i + 1);
 				if (name == null) name = meta.getColumnLabel(i + 1);
 				if (name == null) continue;
-				
+
 				int type = meta.getColumnType(i + 1);
 				ColumnIdentifier col = new ColumnIdentifier(name, type);
 				result.add(col);
@@ -1165,7 +1169,7 @@ public class DataPumper
 		}
 		return result;
 	}
-	
+
 	private void resetColumnMapper()
 	{
 		this.columnMapper.resetData();
@@ -1175,14 +1179,14 @@ public class DataPumper
 	{
 		if (this.source == null || this.target == null) return;
 		if (!this.hasSource()) return;
-		
+
 		StringBuffer result = new StringBuffer(150);
 		result.append("COPY -" + WbCopy.PARAM_SOURCEPROFILE + "=");
 		String s = this.source.getName();
 		if (s.indexOf(' ') >-1) result.append('"');
 		result.append(s);
 		if (s.indexOf(' ') >-1) result.append('"');
-		
+
 		s = this.target.getName();
 		result.append("\n     -" + WbCopy.PARAM_TARGETPROFILE + "=");
 		if (s.indexOf(' ') >-1) result.append('"');
@@ -1191,14 +1195,14 @@ public class DataPumper
 
 		TableIdentifier id = this.targetTable.getSelectedTable();
 		if (target == null) return;
-		
+
 		if (id.isNewTable())
 			s = id.getTable();
 		else
 			s = id.getTableExpression();
 		result.append("\n     -" + WbCopy.PARAM_TARGETTABLE + "=");
 		result.append(s);
-		
+
 		/*
 		if (id.isNewTable())
 		{
@@ -1209,18 +1213,18 @@ public class DataPumper
 			}
 		}
 		*/
-		
+
 		ColumnMapper.MappingDefinition colMapping = this.columnMapper.getMapping();
 		if (colMapping == null) return;
 		int count = colMapping.targetColumns.length;
-		
+
 		if (this.useQueryCbx.isSelected())
 		{
 			String sql = SqlUtil.makeCleanSql(this.sqlEditor.getText(), false);
 			result.append("\n     -" + WbCopy.PARAM_SOURCEQUERY + "=\"");
 			result.append(sql);
 			result.append('"');
-			
+
 			result.append("\n     -"+ WbCopy.PARAM_COLUMNS + "=\"");
 			for (int i=0; i < count; i++)
 			{
@@ -1238,7 +1242,7 @@ public class DataPumper
 			if (s.indexOf(' ') > -1) result.append('"');
 			result.append(s);
 			if (s.indexOf(' ') > -1) result.append('"');
-			
+
 			s = sqlEditor.getText();
 			if (s != null && s.length() > 0)
 			{
@@ -1246,7 +1250,7 @@ public class DataPumper
 				result.append(SqlUtil.makeCleanSql(s, false));
 				result.append('"');
 			}
-			
+
 			result.append("\n     -" + WbCopy.PARAM_COLUMNS + "=\"");
 			for (int i=0; i < count; i++)
 			{
@@ -1257,13 +1261,13 @@ public class DataPumper
 			}
 			result.append('"');
 		}
-		
+
 		result.append("\n     -" + WbCopy.PARAM_DELETETARGET + "=");
 		result.append(Boolean.toString(this.deleteTargetCbx.isSelected()));
-		
+
 		result.append("\n     -" + WbCopy.PARAM_CONTINUE + "=");
 		result.append(Boolean.toString(this.continueOnErrorCbx.isSelected()));
-		
+
 		int commit = StringUtil.getIntValue(this.commitEvery.getText(), -1);
 		if (commit > 0)
 		{
@@ -1271,21 +1275,21 @@ public class DataPumper
 			result.append(commit);
 		}
 		result.append(";");
-		
+
 		EditWindow w = new EditWindow(this.window, ResourceMgr.getString("MsgWindowTitleDPScript"), result.toString(), "workbench.datapumper.scriptwindow");
 		w.show();
 		w.dispose();
 	}
-	
+
 	private void initColumnMapper()
 	{
-		if (this.sourceConnection == null || this.targetConnection == null || !this.hasSource()) 
+		if (this.sourceConnection == null || this.targetConnection == null || !this.hasSource())
 		{
 			this.startButton.setEnabled(false);
 			this.showWbCommand.setEnabled(false);
 			return;
 		}
-		
+
 		TableIdentifier target = this.targetTable.getSelectedTable();
 		if (target == null)
 		{
@@ -1307,7 +1311,7 @@ public class DataPumper
 				TableIdentifier source = this.sourceTable.getSelectedTable();
 				sourceCols = this.sourceConnection.getMetadata().getTableColumns(source);
 			}
-			
+
 			boolean newTable = target.isNewTable();
 			this.columnMapper.setAllowTargetEditing(newTable);
 			this.dropTargetCbx.setEnabled(newTable);
@@ -1320,7 +1324,7 @@ public class DataPumper
 				List targetCols = this.targetConnection.getMetadata().getTableColumns(target);
 				this.columnMapper.defineColumns(sourceCols, targetCols);
 			}
-			
+
 			this.columnMapper.setAllowSourceEditing(!useQuery && !newTable);
 			this.startButton.setEnabled(true);
 			this.showWbCommand.setEnabled(true);
@@ -1342,17 +1346,17 @@ public class DataPumper
 		this.updateWindowTitle();
 		this.statusLabel.setText(ResourceMgr.getString("MsgCopyCancelled"));
 	}
-	
+
 	private void startCopy()
 	{
 		if (this.targetConnection == null || this.sourceConnection == null) return;
 		if (this.columnMapper == null) return;
-		
+
 		TableIdentifier stable = null;
 		TableIdentifier ttable = this.targetTable.getSelectedTable();
-		
+
 		boolean ignoreSelect = false;
-		
+
 		if (!this.useQueryCbx.isSelected())
 		{
 			stable = this.sourceTable.getSelectedTable();
@@ -1363,10 +1367,10 @@ public class DataPumper
 			}
 		}
 		//if (stable == null || ttable == null) return;
-		
+
 		ColumnMapper.MappingDefinition colMapping = this.columnMapper.getMapping();
 		if (colMapping == null) return;
-		
+
 		try
 		{
 			this.copier = new DataCopier();
@@ -1391,7 +1395,7 @@ public class DataPumper
 					{
 						mapping.put(colMapping.sourceColumns[i].getColumnName(), colMapping.targetColumns[i].getColumnName());
 					}
-					
+
 					this.copier.copyFromTable(this.sourceConnection, this.targetConnection, stable, ttable, mapping, where, true, dropTable);
 				}
 				else
@@ -1399,14 +1403,14 @@ public class DataPumper
 					this.copier.setSourceTableWhere(where);
 					this.copier.copyFromTable(this.sourceConnection, this.targetConnection, stable, ttable, colMapping.sourceColumns, colMapping.targetColumns);
 				}
-			}			
+			}
 			this.copier.setRowActionMonitor(this);
 			this.copier.startBackgroundCopy();
 			this.copyRunning = true;
 			this.showLogButton.setEnabled(false);
 			this.startButton.setEnabled(false);
 			this.cancelButton.setEnabled(true);
-			
+
 			this.updateWindowTitle();
 		}
 		catch (Exception e)
@@ -1419,17 +1423,17 @@ public class DataPumper
 			this.statusLabel.setText(ResourceMgr.getString("MsgCopyFinishedWithErrors"));
 		}
 	}
-	
+
 	public void setCurrentRow(int currentRow, int totalRows)
 	{
 		if (currentRow == 1) this.updateWindowTitle();
 		this.statusLabel.setText(this.copyMsg + " " + currentRow);
 	}
-	
+
 	public void setMonitorType(int aType)
 	{
 	}
-	
+
 	public void jobFinished()
 	{
 		this.copyRunning = false;
@@ -1449,7 +1453,7 @@ public class DataPumper
 		{
 			this.statusLabel.setText(ResourceMgr.getString("MsgCopyFinishedWithErrors"));
 		}
-		
+
 		this.startButton.setEnabled(true);
 		if (this.copier.hasWarnings() || !this.copier.isSuccess())
 		{
@@ -1475,14 +1479,6 @@ public class DataPumper
 			return;
 		}
 		StringBuffer log = new StringBuffer(250);
-		
-		String errmsg = this.copier.getErrorMessage();
-		if (errmsg != null) log.append(errmsg);
-		
-		
-		String s = this.copier.getMessages();
-		log.append(s);
-		if (s != null) log.append("\n");
 
 		String[] msg = this.copier.getImportWarnings();
 		int count = msg.length;
@@ -1499,6 +1495,14 @@ public class DataPumper
 			log.append(msg[i]);
 			log.append("\n");
 		}
+
+		String errmsg = this.copier.getErrorMessage();
+		if (errmsg != null) log.append(errmsg);
+
+		String s = this.copier.getMessages();
+		log.append(s);
+		if (s != null) log.append("\n");
+
 		EditWindow w = new EditWindow(this.window, ResourceMgr.getString("MsgWindowTitleDPLog"), log.toString(), "workbench.datapumper.logwindow");
 		w.show();
 		w.dispose();

@@ -1560,6 +1560,7 @@ public class MainWindow
 					setConnectionForDbExplorer();
 				}
 			};
+			t.setDaemon(true);
 			t.setName("DbExplorer connection thread");
 			t.start();
 		}
@@ -1579,10 +1580,10 @@ public class MainWindow
 
 			// make sure the setConnection is called on the AWT thread, so that the
 			// GUI update will work properly
-			SwingUtilities.invokeLater(new Runnable()
-			{
-				public void run()
-				{
+//			SwingUtilities.invokeLater(new Runnable()
+//			{
+//				public void run()
+//				{
 					dbExplorerPanel.setConnection(conn);
 					if (dbExplorerTabVisible)
 					{
@@ -1593,8 +1594,8 @@ public class MainWindow
 						}
 					}
 					dbExplorerPanel.updateUI();
-				}
-			});
+//				}
+//			});
 		}
 		catch (Exception e)
 		{
@@ -2146,6 +2147,13 @@ public class MainWindow
 		if (p instanceof DbExplorerPanel)
 			index --;
 		this.removeTab(index);
+	}
+
+	public boolean canCloseTab()
+	{
+		int numTabs = this.sqlTab.getTabCount();
+		if (this.dbExplorerTabVisible) numTabs --;
+		return numTabs > 1;
 	}
 
 	public boolean canRenameTab()

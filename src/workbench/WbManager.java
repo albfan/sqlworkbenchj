@@ -38,9 +38,9 @@ import workbench.util.WbNullCipher;
  * The main application "controller" for the jWorkbench
  * @author  workbench@kellerer.org
  */
-public class WbManager 
+public class WbManager
 	implements FontChangedListener, Runnable
-	
+
 {
 	private static final String CONFIG_DIR_KEY = "%ConfigDir%/";
 	private static WbManager wb;
@@ -54,7 +54,7 @@ public class WbManager
 	private HtmlViewer helpWindow;
 
 	private Thread shutdownHook = new Thread(this);
-	
+
 	static
 	{
 		wb = new WbManager();
@@ -102,7 +102,7 @@ public class WbManager
 	{
 		return wb.settings;
 	}
-	
+
 	public static ShortcutManager getShortcutManager()
 	{
 		return wb.settings.getShortcutManager();
@@ -136,7 +136,7 @@ public class WbManager
 	{
 		this.toolWindows.add(aWindow);
 	}
-	
+
 	public void unregisterToolWindow(Window aWindow)
 	{
 		if (aWindow == null) return;
@@ -149,7 +149,7 @@ public class WbManager
 		{
 			this.exitWorkbench();
 		}
-			
+
 	}
 	private void closeToolWindows()
 	{
@@ -162,7 +162,7 @@ public class WbManager
 		}
 		this.toolWindows.clear();
 	}
-	
+
 	public String getWorkspaceFilename(Window parent, boolean toSave, boolean replaceConfigDir)
 	{
 		String lastDir = settings.getLastWorkspaceDir();
@@ -225,13 +225,13 @@ public class WbManager
 			return aPathname;
 		}
 	}
-	
+
 	public String replaceConfigDir(String aPathname)
 	{
 		if (aPathname == null) return null;
 		return StringUtil.replace(aPathname, CONFIG_DIR_KEY, this.settings.getConfigDir());
 	}
-	
+
 	public String getExportFilename(boolean includeSqlType)
 	{
 		return this.getExportFilename(null, includeSqlType);
@@ -249,7 +249,7 @@ public class WbManager
 			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
 		}
 		fc.addChoosableFileFilter(ExtensionFileFilter.getXmlFileFilter());
-		
+
 		fc.setFileFilter(text);
 		String filename = null;
 
@@ -309,8 +309,8 @@ public class WbManager
 		{
 			LogMgr.logWarning("Settings.setLookAndFeel()", "Could not set look and feel", e);
 		}
-		
-		
+
+
 		try
 		{
 			Toolkit.getDefaultToolkit().setDynamicLayout(settings.getUseDynamicLayout());
@@ -368,11 +368,11 @@ public class WbManager
 
 		// Polish up the standard look & feel settings
 		def.put("Table.gridColor", Color.LIGHT_GRAY);
-		
+
 		// use our own classes for some GUI elements
 		def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
 		def.put("SplitPaneUI", "com.sun.java.swing.plaf.windows.WindowsSplitPaneUI");
-		
+
 		if (settings.getShowMnemonics())
 		{
 			def.put("Button.showMnemonics", Boolean.TRUE);
@@ -401,14 +401,14 @@ public class WbManager
 	}
 
 	private JDialog closeMessage;
-	
+
 	private boolean saveSettings()
 	{
 		MainWindow w = this.getCurrentWindow();
 		if (w == null) return true;
 		w.saveSettings();
 		w.saveWorkspace();
-		
+
 		if (w.isBusy())
 		{
 			if (!this.checkAbort(w)) return false;
@@ -421,7 +421,7 @@ public class WbManager
 	{
 	  return this.batchMode;
 	}
-	
+
 	public void exitWorkbench()
 	{
 		//boolean first = true;
@@ -434,15 +434,15 @@ public class WbManager
 				this.doShutdown();
 				return;
 			}
-			
+
 			boolean canExit = this.saveSettings();
 			if (!canExit) return;
-			
+
 			// When disconnecting it can happen that the disconnect itself
 			// takes some time. Because of this, a small window is displayed
 			// that the disconnect takes place, and the actual disconnect is
 			// carried out in a different thread to not block the AWT thread.
-			
+
 			// If it takes too long the user can still abort the JVM ...
 			this.createCloseMessageWindow(w);
 			if (this.closeMessage != null) this.closeMessage.show();
@@ -500,7 +500,7 @@ public class WbManager
 		this.closeMessage.setSize(210,80);
 		WbSwingUtilities.center(this.closeMessage, parent);
 	}
-	
+
 	private void disconnectWindows()
 	{
 		MainWindow w = null;
@@ -513,7 +513,7 @@ public class WbManager
 			w.doDisconnect();
 		}
 	}
-	
+
 	/**
 	 *	This gets called from the thread that disconnects everything
 	 */
@@ -524,7 +524,7 @@ public class WbManager
 			this.closeMessage.setVisible(false);
 			this.closeMessage.dispose();
 		}
-		
+
 		try
 		{
 			if (SwingUtilities.isEventDispatchThread())
@@ -566,21 +566,21 @@ public class WbManager
 		}
 		this.closeToolWindows();
 	}
-	
+
 	private void doShutdown()
 	{
-		this.settings.saveSettings();
+		if (!this.isBatchMode()) settings.saveSettings();
 		LogMgr.logInfo("WbManager.doShutdown()", "Stopping " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
 		LogMgr.shutdown();
 		Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
 		System.exit(0);
 	}
-	
+
 	private boolean checkAbort(MainWindow win)
 	{
 		return WbSwingUtilities.getYesNo(win, ResourceMgr.getString("MsgAbortRunningSql"));
 	}
-	
+
 	private boolean checkMacros(MainWindow win)
 	{
 		if (MacroManager.getInstance().isModified())
@@ -623,7 +623,7 @@ public class WbManager
     }
     return true;
   }
-	
+
 	public void windowClosing(final MainWindow win)
 	{
 		if (this.mainWindows.size() == 1)
@@ -648,7 +648,7 @@ public class WbManager
 			t.setDaemon(true);
 			t.start();
 		}
-			
+
 	}
 
 	// open a new window, but do not check any command line
@@ -682,14 +682,14 @@ public class WbManager
 					// command line. If this fails the connection
 					// dialog will be show to the user
 					main.connectTo(prof, true);
-					
+
 					// the main window will take of displaying the connection dialog
 					// if the connection to the requested profile fails.
-					connected = true; 
+					connected = true;
 				}
 			}
 		}
-		
+
 		// no connection? then display the connection dialog
 		if (!connected)
 		{
@@ -718,7 +718,7 @@ public class WbManager
 	private static final String ARG_CONN_USER = "username";
 	private static final String ARG_CONN_PWD = "password";
 	private static final String ARG_SHOW_PUMPER = "datapumper";
-	
+
 	private void initCmdLine(String[] args)
 	{
 		if (trace) System.out.println("WbManager.initCmdLine() - start");
@@ -730,7 +730,7 @@ public class WbManager
 		cmdLine.addArgument(ARG_ABORT);
 		cmdLine.addArgument(ARG_SUCCESS_SCRIPT);
 		cmdLine.addArgument(ARG_ERROR_SCRIPT);
-		
+
 		cmdLine.addArgument(ARG_CONN_URL);
 		cmdLine.addArgument(ARG_CONN_DRIVER);
 		cmdLine.addArgument(ARG_CONN_JAR);
@@ -774,7 +774,7 @@ public class WbManager
 	{
 		this.settings = new Settings();
 	}
-	
+
 	public void init()
 	{
 		if (trace) System.out.println("WbManager.init() - start");
@@ -786,7 +786,7 @@ public class WbManager
 		{
 			LogMgr.logWarning("WbManager.init()", "Ignoring unknown argument(s) " + StringUtil.listToString(this.cmdLine.getUnknownArguments(), ','));
 		}
-		
+
 		if (!this.batchMode)
 		{
 			WbSplash splash = null;
@@ -845,10 +845,15 @@ public class WbManager
 			{
 				profile = this.connMgr.getProfile(StringUtil.trimQuotes(profilename));
 			}
-			
+
 			String success = cmdLine.getValue(ARG_SUCCESS_SCRIPT);
 			String error = cmdLine.getValue(ARG_ERROR_SCRIPT);
-			if (scripts != null && profile != null)
+
+			// we will allow a null profile now, as the script
+			// could potentially contain a COPY command which kicks
+			// off its own connection to source and target profile
+			// if the script does need a connection, it will throw an exception later
+			if (scripts != null /*&& profile != null*/)
 			{
 				if (trace) System.out.println("WbManager.init() - initializing BatchRunner");
 				BatchRunner runner = new BatchRunner(scripts);
@@ -903,7 +908,7 @@ public class WbManager
 			JOptionPane.showMessageDialog(this.getCurrentWindow(), "The documentation is currently available at www.kellerer.org/workbench");
 		}
 	}
-	
+
 	public HtmlViewer getHelpViewer()
 	{
 		if (this.helpWindow == null) this.showHelp(null);
@@ -917,7 +922,7 @@ public class WbManager
 		wb.init();
 		if (trace) System.out.println("WbManager.main() - done");
 	}
-	
+
 	/**
 	 *  this is only to support the thread for the shutdownhook
 	 */
@@ -926,5 +931,5 @@ public class WbManager
 		LogMgr.logDebug("WbManager.run()", "Shutdownhook activated!");
 		this.saveSettings();
 	}
-	
+
 }

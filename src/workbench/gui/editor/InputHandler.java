@@ -32,7 +32,7 @@ import javax.swing.text.Document;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.10 2003-12-16 21:58:36 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.11 2004-01-20 18:11:46 thomas Exp $
  * @see org.gjt.sp.jedit.textarea.DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
@@ -1149,8 +1149,7 @@ public abstract class InputHandler extends KeyAdapter
 		public void actionPerformed(ActionEvent evt)
 		{
 			JEditTextArea textArea = getTextArea(evt);
-			textArea.setSelectionRectangular(
-				!textArea.isSelectionRectangular());
+			textArea.setSelectionRectangular(!textArea.isSelectionRectangular());
 		}
 	}
 

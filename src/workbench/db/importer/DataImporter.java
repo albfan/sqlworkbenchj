@@ -29,34 +29,34 @@ public class DataImporter
 {
 	private WbConnection dbConn;
 	private String sql;
-	
+
 	private String tableName;
 
 	private RowDataProducer source;
 	private PreparedStatement updateStatement;
-	
+
 	private String targetTable = null;
 
 	private int commitEvery = 0;
-	
+
 	private boolean keepRunning = true;
 
 	private boolean success = false;
 	private boolean hasWarning = false;
 	private boolean deleteTarget = false;
 	private boolean continueOnError = false;
-	
+
 	private long totalRows = 0;
 	private int currentImportRow = 0;
-	
+
 	private int colCount;
 	private ArrayList warnings = new ArrayList();
 	private ArrayList errors = new ArrayList();
 	private int[] columnTypes = null;
-	
+
 	private RowActionMonitor progressMonitor;
 	private boolean isRunning = false;
-	
+
 	public DataImporter()
 	{
 	}
@@ -66,7 +66,7 @@ public class DataImporter
 		this.dbConn = aConn;
 	}
 
-	
+
 	public void setRowActionMonitor(RowActionMonitor rowMonitor)
 	{
 		this.progressMonitor = rowMonitor;
@@ -81,13 +81,13 @@ public class DataImporter
 		this.source = producer;
 		this.source.setReceiver(this);
 	}
-	
-	public void setCommitEvery(int aCount) 
-	{ 
-		this.commitEvery = aCount; 
+
+	public void setCommitEvery(int aCount)
+	{
+		this.commitEvery = aCount;
 	}
 	public int getCommitEvery() { return this.commitEvery; }
-	
+
 	public void startBackgroundImport()
 	{
 		if (this.source == null) return;
@@ -122,7 +122,7 @@ public class DataImporter
 		int rows = stmt.executeUpdate(deleteSql);
 		this.warnings.add(rows + " " + ResourceMgr.getString("MsgImporterRowsDeleted") + " " + this.targetTable);
 	}
-	
+
 	public boolean isRunning() { return this.isRunning; }
 	public boolean isSuccess() { return this.errors.size() == 0; }
 	public boolean hasWarning() { return this.warnings.size() > 0; }
@@ -138,7 +138,7 @@ public class DataImporter
 		}
 		return result;
 	}
-	
+
 	public String[] getWarnings()
 	{
 		int count = this.warnings.size();
@@ -149,7 +149,7 @@ public class DataImporter
 		}
 		return result;
 	}
-	
+
 	public void cancelExecution()
 	{
 		this.isRunning = false;
@@ -173,7 +173,7 @@ public class DataImporter
 			currentImportRow++;
 			this.updateStatement.clearParameters();
 			if (this.progressMonitor != null)
-			{		
+			{
 				progressMonitor.setCurrentRow(currentImportRow, -1);
 			}
 
@@ -204,7 +204,7 @@ public class DataImporter
 			this.errors.add("");
 			if (!this.continueOnError) throw e;
 		}
-		if (this.commitEvery > 0 && ((this.totalRows % this.commitEvery) == 0))
+		if (this.commitEvery > 0 && ((this.totalRows % this.commitEvery) == 0) && !this.dbConn.getAutoCommit())
 		{
 			try
 			{
@@ -227,10 +227,10 @@ public class DataImporter
 		throws SQLException
 	{
 		this.targetTable = tableName;
-		
+
 		StringBuffer text = new StringBuffer(columns.length * 50);
 		StringBuffer parms = new StringBuffer(columns.length * 20);
-		
+
 		text.append("INSERT INTO ");
 		text.append(tableName);
 		text.append(" (");
@@ -239,7 +239,7 @@ public class DataImporter
 		for (int i=0; i < columns.length; i++)
 		{
 			this.columnTypes[i] = columns[i].getDataType();
-			if (i > 0) 
+			if (i > 0)
 			{
 				text.append(",");
 				parms.append(",");
@@ -263,7 +263,7 @@ public class DataImporter
 			this.updateStatement = null;
 			throw e;
 		}
-		
+
 		if (this.deleteTarget)
 		{
 			try
@@ -275,17 +275,17 @@ public class DataImporter
 				LogMgr.logError("DataImporter.setTargetTable()", "Could not delete contents of table " + this.targetTable, e);
 			}
 		}
-		
+
 	}
-	
+
 	public void importFinished()
 	{
 		try
 		{
-			if (!this.dbConn.getAutoCommit()) 
+			if (!this.dbConn.getAutoCommit())
 			{
 				LogMgr.logDebug("DataImporter.importFinished()", "Committing changes");
-				this.dbConn.commit();	
+				this.dbConn.commit();
 			}
 		}
 		catch (Exception e)
@@ -298,14 +298,14 @@ public class DataImporter
 			this.isRunning = false;
 			if (this.progressMonitor != null) this.progressMonitor.jobFinished();
 		}
-	}	
+	}
 
 	public void importCancelled()
 	{
 		try
 		{
-			if (!this.dbConn.getAutoCommit()) 
-			{ 
+			if (!this.dbConn.getAutoCommit())
+			{
 				LogMgr.logDebug("DataImporter.importCancelled()", "Rollback changes");
 				this.dbConn.rollback();
 			}
@@ -321,18 +321,18 @@ public class DataImporter
 			if (this.progressMonitor != null) this.progressMonitor.jobFinished();
 		}
 	}
-	
+
 	public boolean getContinueOnError() { return this.continueOnError; }
 	public void setContinueOnError(boolean flag) { this.continueOnError = flag; }
-	
+
 	public boolean getDeleteTarget()
 	{
 		return deleteTarget;
 	}
-	
+
 	public void setDeleteTarget(boolean deleteTarget)
 	{
 		this.deleteTarget = deleteTarget;
 	}
-	
+
 }

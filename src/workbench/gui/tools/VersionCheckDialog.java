@@ -9,6 +9,8 @@ package workbench.gui.tools;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.SwingUtilities;
@@ -16,6 +18,7 @@ import javax.swing.Timer;
 import workbench.gui.components.DividerBorder;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.util.BrowserLauncher;
 import workbench.util.WbVersionReader;
 
 /**
@@ -23,7 +26,7 @@ import workbench.util.WbVersionReader;
  * @author  workbench@kellerer.org
  */
 public class VersionCheckDialog extends javax.swing.JDialog
-	implements ActionListener
+	implements ActionListener, MouseListener
 {
 	private Thread readThread;
 	private Timer timeout;
@@ -40,6 +43,7 @@ public class VersionCheckDialog extends javax.swing.JDialog
 		Font f = this.headingLabel.getFont().deriveFont(Font.BOLD);
 		this.headingLabel.setFont(f);
 		this.headingLabel.setText(ResourceMgr.getString("LabelReadingVersion"));
+		this.headingLabel.addMouseListener(this);
 	}
 
 	public void startRetrieveVersions()
@@ -325,6 +329,39 @@ public class VersionCheckDialog extends javax.swing.JDialog
 			this.devVersion.setText(" " + ResourceMgr.getString("LabelVersionNotAvailable"));
 		}
 	}	
+	
+	public void mouseClicked(java.awt.event.MouseEvent e)
+	{
+		if (e.getSource() == this.headingLabel &&
+				e.getButton() == MouseEvent.BUTTON1 &&
+				e.getClickCount() == 2)
+		{
+			try
+			{
+				BrowserLauncher.openURL("http://www.kellerer.org/workbench");
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+	}
+	
+	public void mouseEntered(java.awt.event.MouseEvent e)
+	{
+	}
+	
+	public void mouseExited(java.awt.event.MouseEvent e)
+	{
+	}
+	
+	public void mousePressed(java.awt.event.MouseEvent e)
+	{
+	}
+	
+	public void mouseReleased(java.awt.event.MouseEvent e)
+	{
+	}
 	
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton closeButton;

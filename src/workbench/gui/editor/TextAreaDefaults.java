@@ -37,6 +37,7 @@ public class TextAreaDefaults
 	public SyntaxStyle[] styles;
 	public Color caretColor;
 	public Color selectionColor;
+	public Color errorColor;
 	public Color lineHighlightColor;
 	public boolean lineHighlight;
 	public Color bracketHighlightColor;
@@ -81,6 +82,7 @@ public class TextAreaDefaults
 			DEFAULTS.paintInvalid = false;
 			DEFAULTS.tabSize = 2;
 			DEFAULTS.autoIndent = true;
+			DEFAULTS.errorColor = Color.RED.brighter();
 		}
 
 		return DEFAULTS;

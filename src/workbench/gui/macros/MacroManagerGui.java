@@ -41,8 +41,8 @@ import workbench.interfaces.FileActions;
 import workbench.resource.ResourceMgr;
 import workbench.sql.MacroManager;
 
-public class MacroManagerGui 
-	extends JPanel 
+public class MacroManagerGui
+	extends JPanel
 	implements FileActions, ListSelectionListener, PropertyChangeListener
 {
 	private JToolBar toolbar;
@@ -61,11 +61,11 @@ public class MacroManagerGui
 		this.toolbar.add(new SaveListFileAction(this));
 		this.toolbar.addSeparator();
 		this.toolbar.add(new DeleteListEntryAction(this));
-		
+
 		JPanel listPanel = new JPanel();
 		listPanel.setLayout(new BorderLayout());
 		listPanel.add(this.toolbar, BorderLayout.NORTH);
-		
+
 		this.jSplitPane1 = new WbSplitPane();
 
 		this.model = new MacroListModel();
@@ -81,9 +81,7 @@ public class MacroManagerGui
 
 		this.macroEditor = EditorPanel.createSqlEditor();
 		this.macroEditor.showFindOnPopupMenu();
-		FormatSqlAction a = new FormatSqlAction(this.macroEditor);
-		this.macroEditor.addPopupMenuItem(a, true);
-		//this.macroEditor.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		this.macroEditor.showFormatSql();
 
 		jSplitPane1.setLeftComponent(listPanel);
 
@@ -96,17 +94,17 @@ public class MacroManagerGui
 		this.macroNameField.setImmediateUpdate(true);
 		this.macroNameField.addPropertyChangeListener(this);
 		//this.macroNameField.setBorder(new CompoundBorder(new EmptyBorder(0,0,0,5), this.macroNameField.getBorder()));
-		
+
 		namePanel.add(l, BorderLayout.WEST);
 		namePanel.add(this.macroNameField, BorderLayout.CENTER);
-		
+
 		// Create some visiual space above and below the entry field
 		JPanel p = new JPanel();
 		namePanel.add(p, BorderLayout.SOUTH);
 		p = new JPanel();
 		namePanel.add(p, BorderLayout.NORTH);
-		
-		
+
+
 		JPanel editor = new JPanel();
 		editor.setLayout(new BorderLayout());
 		editor.add(namePanel, BorderLayout.NORTH);
@@ -126,7 +124,7 @@ public class MacroManagerGui
 	}
 
 	public JList getMacroList() { return this.macroList; }
-	
+
 	public String getSelectedMacroName()
 	{
 		int index = this.macroList.getSelectedIndex();
@@ -134,8 +132,8 @@ public class MacroManagerGui
 		String name = this.model.getKeyAt(index);
 		return name;
 	}
-	
-	public void deleteItem() 
+
+	public void deleteItem()
 		throws WbException
 	{
 		int index = this.macroList.getSelectedIndex();
@@ -144,11 +142,11 @@ public class MacroManagerGui
 		//this.macroList.setValueIsAdjusting(true);
 		this.macroEditor.clear();
 		this.model.removeElementAt(index);
-		
+
 		// check if the last driver was deleted
 		if (index > this.model.getSize() - 1) index--;
 		//this.macroList.setValueIsAdjusting(false);
-		
+
 		this.macroList.setSelectedIndex(index);
 		this.macroList.repaint();
 	}
@@ -159,13 +157,13 @@ public class MacroManagerGui
 	 */
 	public void newItem(boolean copyCurrent) throws WbException
 	{
-		String key; 
+		String key;
 		String text;
 		if (copyCurrent)
 		{
 			int index = this.macroList.getSelectedIndex();
 			key = this.model.getKeyAt(index);
-			if (key == null) 
+			if (key == null)
 			{
 				key = ResourceMgr.getString("TxtEmptyMacroName");
 				text = "";
@@ -195,7 +193,7 @@ public class MacroManagerGui
 			}
 		});
 	}
-	
+
 	public void saveItem() throws WbException
 	{
 		int index = this.macroList.getSelectedIndex();
@@ -213,7 +211,7 @@ public class MacroManagerGui
 		String macro = this.getSelectedMacroName();
 		WbManager.getSettings().setProperty(this.getClass().getName(), "lastmacro", macro);
 	}
-	
+
 	public void restoreSettings()
 	{
 		int location = WbManager.getSettings().getIntProperty(this.getClass().getName(), "divider");
@@ -233,12 +231,12 @@ public class MacroManagerGui
 		int count = this.model.getSize();
 		boolean selected = false;
 		int index = 0;
-		if (macro == null) 
+		if (macro == null)
 		{
 			this.macroList.setSelectedIndex(0);
 			return;
 		}
-		
+
 		for (int i=0; i < count; i ++)
 		{
 			MacroEntry entry = (MacroEntry)this.model.getElementAt(i);
@@ -251,12 +249,12 @@ public class MacroManagerGui
 		// if we get here, the macro was not found
 		this.macroList.setSelectedIndex(0);
 	}
-	
+
 	public void addSelectionListener(ListSelectionListener aListener)
 	{
 		this.macroList.addListSelectionListener(aListener);
 	}
-	
+
 	public void valueChanged(ListSelectionEvent evt)
 	{
 		if (this.macroList.getValueIsAdjusting()) return;
@@ -266,7 +264,8 @@ public class MacroManagerGui
 		}
 		this.lastIndex = this.macroList.getSelectedIndex();
 		if (this.lastIndex < 0) return;
-		
+		if (this.lastIndex > this.model.getSize() - 1) return;
+
 		MacroEntry entry = (MacroEntry)this.model.getElementAt(this.lastIndex);
 		this.currentEntry = entry;
 		this.macroNameField.setSourceObject(this.currentEntry, "name", entry.getName());
@@ -279,26 +278,26 @@ public class MacroManagerGui
 	{
 		this.macroList.repaint();
 	}
-	
+
 }
 
 class MacroListModel
 	extends AbstractListModel
 {
 	ArrayList macros;
-	
+
 	public MacroListModel()
 	{
 		List keys = MacroManager.getInstance().getMacroList();
 		Collections.sort(keys);
 		int size = keys.size();
-		if (size == 0) 
+		if (size == 0)
 		{
 			macros = new ArrayList(10);
 			return;
 		}
 		macros = new ArrayList(size);
-		
+
 		for (int i=0; i < size; i++)
 		{
 			String key = (String)keys.get(i);
@@ -306,7 +305,7 @@ class MacroListModel
 			macros.add(new MacroEntry(key, text));
 		}
 	}
-	
+
 	/*
 	public void addListDataListener(javax.swing.event.ListDataListener l)
 	{
@@ -316,18 +315,18 @@ class MacroListModel
 	{
 		return this.macros.get(index);
 	}
-	
+
 	public int getSize()
 	{
 		return this.macros.size();
 	}
-	
+
 	/*
 	public void removeListDataListener(javax.swing.event.ListDataListener l)
 	{
 	}
 	*/
-	
+
 	public void setMacroAt(int index, String aName, String aText)
 	{
 		if (index < 0 || index >= this.macros.size()) return;
@@ -343,7 +342,7 @@ class MacroListModel
 		int size = this.macros.size();
 		this.fireContentsChanged(this, size, size);
 	}
-	
+
 	public void removeElementAt(int index)
 	{
 		this.macros.remove(index);
@@ -352,7 +351,7 @@ class MacroListModel
 
 	public String getKeyAt(int index)
 	{
-		String name = null; 
+		String name = null;
 		if (index > -1 && index < this.macros.size())
 		{
 			MacroEntry entry = (MacroEntry)this.macros.get(index);
@@ -360,8 +359,8 @@ class MacroListModel
 		}
 		return name;
 	}
-	
-	
+
+
 	public void saveMacros()
 	{
 		MacroManager mgr = MacroManager.getInstance();

@@ -57,16 +57,16 @@ public class DataStore
 	public static final Integer ROW_ORIGINAL = new Integer(RowData.NOT_MODIFIED);
 
 	private RowActionMonitor rowActionMonitor;
-	
+
 	private boolean modified;
 	private int colCount;
 	private int realColumns;
-	
+
 	private ArrayList data;
 	private ArrayList pkColumns;
 	private ArrayList deletedRows;
 	private String sql;
-	
+
 	// Cached ResultSetMetaData information
 	private int[] columnTypes;
   private int[] columnSizes;
@@ -75,33 +75,33 @@ public class DataStore
 	private String[] columnNames;
 	private String[] columnClassNames;
 	private String[] columnTypeNames;
-	
+
 	private String updateTable;
 	private String updateTableSchema;
 	private ArrayList updateTableColumns;
-	
+
 	private WbConnection originalConnection;
 
 	private SimpleDateFormat defaultDateFormatter;
 	private DecimalFormat defaultNumberFormatter;
 	private SimpleDateFormat defaultTimestampFormatter;
-	
+
 	private ColumnComparator comparator;
-	
+
 	private String defaultExportDelimiter = "\t";
 	private boolean allowUpdates = false;
 
 	private ValueConverter converter = new ValueConverter();
-	
+
 	private static final Collator defaultCollator;
-	static 
+	static
 	{
 		String lang = System.getProperty("org.kellerer.sort.language", System.getProperty("user.language"));
 		String country = System.getProperty("org.kellerer.sort.country", System.getProperty("user.country"));
 		Locale l = new Locale(lang, country);
 		defaultCollator = Collator.getInstance(l);
 	}
-	
+
 	public DataStore(String[] aColNames, int[] colTypes)
 	{
 		this(aColNames, colTypes, null);
@@ -125,7 +125,7 @@ public class DataStore
 	}
 
 	/**
-	 *	Create a DataStore based on the contents of the given	ResultSet. 
+	 *	Create a DataStore based on the contents of the given	ResultSet.
 	 */
   public DataStore(final ResultSet aResultSet, WbConnection aConn) throws SQLException
   {
@@ -139,13 +139,13 @@ public class DataStore
 		this(aResult, false);
 	}
 	/**
-	 *	Create a DataStore based on the given ResultSet but do not 
+	 *	Create a DataStore based on the given ResultSet but do not
 	 *	add the data yet
 	 */
 	public DataStore(ResultSet aResult, boolean readData) throws SQLException
 	{
 		this(aResult, readData, null);
-		
+
 	}
 	public DataStore(ResultSet aResult, boolean readData, RowActionMonitor aMonitor) throws SQLException
 	{
@@ -162,10 +162,10 @@ public class DataStore
 			this.data = new ArrayList(100);
 		}
 	}
-	
-	
+
+
 	/**
-	 * Create an empty DataStore based on the information given in the MetaData 
+	 * Create an empty DataStore based on the information given in the MetaData
 	 * object. The DataStore can be populated with the {@link #addRow(ResultSet)} method.
 	 */
 	public DataStore(ResultSetMetaData metaData, WbConnection aConn) throws SQLException
@@ -174,12 +174,12 @@ public class DataStore
 		this.initMetaData(metaData);
 		this.reset();
 	}
-	
+
 	public void setSourceConnection(WbConnection aConn)
 	{
 		this.originalConnection = aConn;
 	}
-	
+
 	public void setColumnSizes(int[] sizes)
 	{
 		if (sizes == null) return;
@@ -195,9 +195,9 @@ public class DataStore
 	{
 		this.allowUpdates = aFlag;
 	}
-	
+
 	public int[] getColumnTypes() { return this.columnTypes; }
-	
+
 	public DataStore createCopy(boolean withData)
 	{
 		DataStore ds = new DataStore(this.columnNames, this.columnTypes, this.columnSizes);
@@ -214,7 +214,7 @@ public class DataStore
 		}
 		return ds;
 	}
-	
+
 	public void copyData(DataStore target, int beginRow, int endRow)
 	{
 		for (int i=beginRow; i <= endRow; i++)
@@ -224,7 +224,7 @@ public class DataStore
 			target.data.set(row, rowData);
 		}
 	}
-	
+
 	public void copyData(DataStore target, int[] rows)
 	{
 		for (int i=0; i < rows.length; i++)
@@ -235,7 +235,7 @@ public class DataStore
 			target.data.set(targetRow, data);
 		}
 	}
-	
+
 	public List getColumnValues(int aColumn)
 	{
 		int rowCount = this.getRowCount();
@@ -246,7 +246,7 @@ public class DataStore
 		}
 		return result;
 	}
-	
+
   public int getRowCount() { return this.data.size(); }
 	public int getColumnCount() { return this.colCount; }
 
@@ -254,12 +254,12 @@ public class DataStore
 	{
 		this.defaultExportDelimiter = aDelimit;
 	}
-	
-	public String getExportDelimiter() 
+
+	public String getExportDelimiter()
 	{
 		return this.defaultExportDelimiter;
 	}
-	
+
 	/**
 	 *	Returns the total number of modified, new or deleted rows
 	 */
@@ -283,7 +283,7 @@ public class DataStore
 		}
 		return modifiedCount;
 	}
-	
+
 	public int getColumnType(int aColumn)
 		throws IndexOutOfBoundsException
 	{
@@ -297,7 +297,7 @@ public class DataStore
 	}
 	public Class getColumnClass(int aColumn)
 	{
-		
+
 		int type = this.getColumnType(aColumn);
 		switch (type)
 		{
@@ -325,12 +325,12 @@ public class DataStore
 				return Object.class;
 		}
 	}
-	
+
 	/**
 	 *	Removes the row from the DataStore without putting
 	 *	it into the delete buffer. So now DELETE statement
 	 *	will be generated for that row, when updating the
-	 *	DataStore. 
+	 *	DataStore.
 	 *	The internal modification state will not be modified.
 	 */
 	public void discardRow(int aRow)
@@ -340,7 +340,7 @@ public class DataStore
 	}
 	/**
 	 *	Deletes the given row and saves it in the delete buffer
-	 *	in order to be able to generate a DELETE statement if 
+	 *	in order to be able to generate a DELETE statement if
 	 *	this DataStore needs updating
 	 */
 	public void deleteRow(int aRow)
@@ -381,7 +381,7 @@ public class DataStore
 		row.resetStatus();
 		return this.getRowCount() - 1;
 	}
-	
+
 	/**
 	 *	Adds a new empty row to the DataStore.
 	 *	The new row will be marked as Modified
@@ -394,7 +394,7 @@ public class DataStore
 		this.modified = true;
 		return this.getRowCount() - 1;
 	}
-	
+
 	/**
 	 *	Inserts a row after the given row number.
 	 *	If the new Index is greater then the current
@@ -407,7 +407,7 @@ public class DataStore
 		RowData row = new RowData(this.colCount);
 		anIndex ++;
 		int newIndex = -1;
-		
+
 		if (anIndex > this.data.size() || anIndex < 0)
 		{
 			this.data.add(row);
@@ -426,24 +426,24 @@ public class DataStore
 	{
 		this.setUpdateTable(aTablename, this.originalConnection);
 	}
-	
+
 	public boolean useUpdateTableFromSql(String aSql)
 	{
 		this.updateTable = null;
 		this.updateTableColumns = null;
-		
+
 		if (aSql == null) return false;
 		List tables = SqlUtil.getTables(aSql);
 		if (tables.size() != 1) return false;
-		
+
 		String table = (String)tables.get(0);
 		this.useUpdateTable(table);
 		return true;
 	}
-	
+
 	public void useUpdateTable(String aTablename)
 	{
-		// A connection-less update table is used to 
+		// A connection-less update table is used to
 		// create INSERT statements regardless if the
 		// table actually exists, or if it really is a table.
 		// this is used e.g. for creating scripts from result sets
@@ -454,7 +454,7 @@ public class DataStore
 			this.updateTableColumns.add(this.columnNames[i]);
 		}
 	}
-	
+
 	public void setUpdateTable(String aTablename, WbConnection aConn)
 	{
 		if (aTablename == null)
@@ -470,16 +470,16 @@ public class DataStore
 			// now check the columns which are in that table
 			// so that we can refuse any changes to columns
 			// which do not derive from that table
-			// note that this does not work, if the 
-			// columns were renamed via an alias in the 
+			// note that this does not work, if the
+			// columns were renamed via an alias in the
 			// select statement
 			try
 			{
 				DbMetadata meta = aConn.getMetadata();
 				if (meta == null) return;
-				
+
 				DataStore columns = meta.getTableDefinition(aTablename);
-				if (columns == null) 
+				if (columns == null)
 				{
 					return;
 				}
@@ -500,24 +500,24 @@ public class DataStore
 			}
 		}
 	}
-	
-	public String getUpdateTable() 
-	{ 
-		return this.updateTable; 
+
+	public String getUpdateTable()
+	{
+		return this.updateTable;
 	}
-	
+
 	public String getColumnName(int aColumn)
 		throws IndexOutOfBoundsException
 	{
 		return this.columnNames[aColumn];
 	}
-	
+
 	public int getColumnDisplaySize(int aColumn)
 		throws IndexOutOfBoundsException
 	{
 		return this.columnSizes[aColumn];
 	}
-	
+
 	public Object getValue(int aRow, int aColumn)
 		throws IndexOutOfBoundsException
 	{
@@ -526,7 +526,7 @@ public class DataStore
 		//return row.colData[aColumn]; //getValue(aColumn);
 		//return ((RowData)this.data.elementData[aRow]).colData[aColumn];
 	}
-  
+
 	public String getValueAsString(int aRow, int aColumn)
 		throws IndexOutOfBoundsException
 	{
@@ -534,10 +534,10 @@ public class DataStore
 		Object value = row.getValue(aColumn);
     if (value == null || value instanceof NullValue)
       return null;
-    else 
+    else
       return value.toString();
 	}
-	
+
 	public String getValueAsFormattedString(int aRow, int aColumn)
 		throws IndexOutOfBoundsException
 	{
@@ -547,7 +547,7 @@ public class DataStore
 		{
       return null;
 		}
-    else 
+    else
 		{
 			String result = null;
 			if (value instanceof java.sql.Timestamp && this.defaultTimestampFormatter != null)
@@ -569,8 +569,8 @@ public class DataStore
       return result;
 		}
 	}
-	
-	
+
+
 	public int getValueAsInt(int aRow, int aColumn, int aDefault)
 	{
 		RowData row = this.getRow(aRow);
@@ -589,7 +589,7 @@ public class DataStore
 			return result;
 		}
 	}
-	
+
 	public long getValueAsLong(int aRow, int aColumn, long aDefault)
 	{
 		RowData row = this.getRow(aRow);
@@ -608,18 +608,18 @@ public class DataStore
 			return result;
 		}
 	}
-	
+
 	public void setValue(int aRow, int aColumn, Object aValue)
 		throws IndexOutOfBoundsException
 	{
 		// do not allow setting the value for columns
-		// which do not have a name. Those columns cannot 
-		// be saved to the database (because most likely they 
+		// which do not have a name. Those columns cannot
+		// be saved to the database (because most likely they
 		// are computed columns like count(*) etc)
 		if (this.columnNames[aColumn] == null) return;
-		
+
 		// If an updatetable is defined, we only accept
-		// values for columns in that table 
+		// values for columns in that table
 		RowData row = this.getRow(aRow);
 		if (aValue == null)
 			row.setNull(aColumn, this.columnTypes[aColumn]);
@@ -633,13 +633,13 @@ public class DataStore
 		NullValue nul = NullValue.getInstance(this.columnTypes[aColumn]);
 		this.setValue(aRow, aColumn, nul);
 	}
-	
+
 	public int getColumnIndex(String aName)
 		throws SQLException
 	{
 		return this.findColumn(aName);
 	}
-		
+
 	public boolean isRowModified(int aRow)
 	{
 		RowData row = this.getRow(aRow);
@@ -666,7 +666,7 @@ public class DataStore
 		}
 		this.resetStatus();
 	}
-	
+
 	public boolean isRowNew(int aRow)
 		throws IndexOutOfBoundsException
 	{
@@ -679,7 +679,7 @@ public class DataStore
 		String delimit = WbManager.getSettings().getDefaultTextDelimiter();
 		return this.getRowDataAsString(aRow, delimit);
 	}
-	
+
 	public StringBuffer getRowDataAsString(int aRow, String aDelimiter)
 	{
 		int count = this.getColumnCount();
@@ -690,7 +690,7 @@ public class DataStore
 		{
 			RowData row = this.getRow(aRow);
 			Object value = row.getValue(c);
-			if (value != null) 
+			if (value != null)
 			{
 				if (value instanceof Double ||
 				    value instanceof Float ||
@@ -715,18 +715,18 @@ public class DataStore
 					}
 					result.append(v);
 				}
-				
+
 			}
 			if (c < count - 1) result.append(aDelimiter);
 		}
 		return result;
-	}	
-	
+	}
+
 	public StringBuffer getHeaderString()
 	{
 		return this.getHeaderString(this.defaultExportDelimiter);
 	}
-	
+
 	public StringBuffer getHeaderString(String aFieldDelimiter)
 	{
 		StringBuffer result = new StringBuffer(this.colCount * 30);
@@ -739,12 +739,12 @@ public class DataStore
 		}
 		return result;
 	}
-	
+
 	public String getDataString(String aLineTerminator, boolean includeHeaders)
 	{
 		return this.getDataString(WbManager.getSettings().getDefaultTextDelimiter(), aLineTerminator, includeHeaders);
 	}
-	
+
 	public String getDataString(String aFieldDelimiter, String aLineTerminator, boolean includeHeaders)
 	{
 		int count = this.getRowCount();
@@ -781,12 +781,12 @@ public class DataStore
 			out.write(aLineTerminator);
 		}
 	}
-	
+
 	public void reset()
 	{
 		this.reset(150);
 	}
-	
+
 	public void reset(int initialCapacity)
 	{
 		this.data = new ArrayList(initialCapacity);
@@ -805,20 +805,20 @@ public class DataStore
 			return true;
 		}
 	}
-	
+
 	public boolean isModified() { return this.modified;  }
 	public boolean isUpdateable()
 	{
 		if (this.allowUpdates) return true;
 		return (this.updateTable != null && this.hasUpdateableColumns());
 	}
-	
-	
+
+
 	private int findColumn(String name)
 		throws SQLException
 	{
 		if (name == null) throw new SQLException("Invalid column name");
-		
+
 		for (int i = 0; i < this.colCount; i++)
 		{
 			if (this.columnNames[i] != null && name.equalsIgnoreCase(this.columnNames[i]))
@@ -829,13 +829,13 @@ public class DataStore
 
 		throw new SQLException("Invalid column name");
 	}
-	
+
 	private RowData getRow(int aRow)
 		throws IndexOutOfBoundsException
 	{
 		return (RowData)this.data.get(aRow);
 	}
-	
+
 	private void initMetaData(ResultSetMetaData metaData)
 		throws SQLException
 	{
@@ -855,8 +855,8 @@ public class DataStore
 			this.columnTypes[i] = metaData.getColumnType(i + 1);
 			this.columnTypeNames[i] = metaData.getColumnTypeName(i + 1);
 			this.columnSizes[i] = metaData.getColumnDisplaySize(i + 1);
-			
-			if (name != null && name.trim().length() > 0) 
+
+			if (name != null && name.trim().length() > 0)
 			{
 				this.realColumns ++;
 				this.columnNames[i] = name;
@@ -866,8 +866,8 @@ public class DataStore
 				this.columnNames[i] = "Col" + (i+1);
 			}
 		}
-		
-		// these methods might not work with certain drivers, so I'll put 
+
+		// these methods might not work with certain drivers, so I'll put
 		// the calls into a separate loop!
 		for (int i=0; i < this.colCount; i++)
 		{
@@ -880,7 +880,7 @@ public class DataStore
 				LogMgr.logWarning("DataStore.initMetaData()", "Error when retrieving class name for column " + i + " (" + e.getClass().getName() + ")");
 				this.columnClassNames[i] = "java.lang.Object";
 			}
-			
+
 			try
 			{
 				this.columnPrecision[i] = metaData.getPrecision(i + 1);
@@ -890,7 +890,7 @@ public class DataStore
 				LogMgr.logWarning("DataStore.initMetaData()", "Error when retrieving precision for column " + i + " (" + e.getClass().getName() + ")");
 				this.columnPrecision[i] = 0;
 			}
-			
+
 			try
 			{
 				this.columnScale[i] = metaData.getScale(i + 1);
@@ -900,10 +900,10 @@ public class DataStore
 				LogMgr.logWarning("DataStore.initMetaData()", "Error when retrieving scale for column " + i + " (" + e.getClass().getName() + ")");
 				this.columnScale[i] = 0;
 			}
-			
+
 		}
 	}
-	
+
 	private void initData(ResultSet aResultSet)
 		throws SQLException
 	{
@@ -917,7 +917,7 @@ public class DataStore
 			LogMgr.logError(this, "Error while retrieving ResultSetMetaData", e);
 			throw e;
 		}
-		
+
 		if (this.rowActionMonitor != null)
 		{
 			this.rowActionMonitor.setMonitorType(RowActionMonitor.MONITOR_LOAD);
@@ -934,7 +934,7 @@ public class DataStore
 					rowCount ++;
 					this.rowActionMonitor.setCurrentRow(rowCount, -1);
 				}
-				
+
 				RowData row = new RowData(this.colCount);
 				for (int i=0; i < this.colCount; i++)
 				{
@@ -969,20 +969,20 @@ public class DataStore
 	{
 		this.sql = aSql;
 	}
-	
+
 	public boolean checkUpdateTable(WbConnection aConn)
 	{
 		if (this.sql == null) return false;
 		return this.checkUpdateTable(this.sql, aConn);
 	}
-	
+
 	public boolean checkUpdateTable()
 	{
 		if (this.sql == null) return false;
 		if (this.originalConnection == null) return false;
 		return this.checkUpdateTable(this.sql, this.originalConnection);
 	}
-			
+
 	public boolean checkUpdateTable(String aSql, WbConnection aConn)
 	{
 		if (aSql == null) return false;
@@ -1002,7 +1002,7 @@ public class DataStore
 	{
 		return this.getXmlStart("UTF-8");
 	}
-	
+
 	public StringBuffer getXmlStart(String encoding)
 	{
 		StringBuffer xml = new StringBuffer(1000 + colCount * 50);
@@ -1026,9 +1026,9 @@ public class DataStore
 		xml.append(StringUtil.LINE_TERMINATOR);
 		return xml;
 	}
-	
+
 	public StringBuffer getMetaDataAsXml(String anIndent)
-	{	
+	{
 		boolean indent = (anIndent != null && anIndent.length() > 0);
 		StringBuffer result = new StringBuffer(this.colCount * 50);
 		if (indent) result.append(anIndent);
@@ -1053,7 +1053,7 @@ public class DataStore
 			result.append(StringUtil.LINE_TERMINATOR);
 			result.append(StringUtil.LINE_TERMINATOR);
 		}
-		
+
 		if (this.originalConnection != null)
 		{
 			result.append(this.originalConnection.getDatabaseInfoAsXml(anIndent));
@@ -1071,7 +1071,7 @@ public class DataStore
 		result.append("</meta-data>");
 		result.append(StringUtil.LINE_TERMINATOR);
 		result.append(StringUtil.LINE_TERMINATOR);
-		
+
 		if (indent) result.append(anIndent);
 		result.append("<table-def>");
 		result.append(StringUtil.LINE_TERMINATOR);
@@ -1087,7 +1087,7 @@ public class DataStore
 		if (indent) result.append(anIndent);
 		result.append("  <!-- java-class is retrieved from ResultSetMetaData.getColumnClassName() -->");
 		result.append(StringUtil.LINE_TERMINATOR);
-		
+
 		if (indent) result.append(anIndent);
 		result.append("  <!-- java-sql-type-name is the constant's name from java.sql.Types -->");
 		result.append(StringUtil.LINE_TERMINATOR);
@@ -1095,7 +1095,7 @@ public class DataStore
 		if (indent) result.append(anIndent);
 		result.append("  <!-- java-sql-type is the constant's numeric value from java.sql.Types as returned from ResultSetMetaData.getColumnType() -->");
 		result.append(StringUtil.LINE_TERMINATOR);
-		
+
 		if (indent) result.append(anIndent);
 		result.append("  <!-- dbms-data-type is retrieved from ResultSetMetaData.getColumnTypeName() -->");
 		result.append(StringUtil.LINE_TERMINATOR);
@@ -1114,7 +1114,7 @@ public class DataStore
 		result.append("  -->");
 		result.append(StringUtil.LINE_TERMINATOR);
 		result.append(StringUtil.LINE_TERMINATOR);
-		
+
 		/*
 		if (indent) result.append(anIndent);
 		result.append("  <!-- precision is retrieved from ResultSetMetaData.getPrecision() -->");
@@ -1136,14 +1136,14 @@ public class DataStore
 		if (updateTable != null) result.append(updateTable);
 		result.append("</table-name>");
 		result.append(StringUtil.LINE_TERMINATOR);
-		
+
 		if (indent) result.append(anIndent);
 		result.append("  <column-count>");
 		result.append(this.colCount);
 		result.append("</column-count>");
 		result.append(StringUtil.LINE_TERMINATOR);
 		result.append(StringUtil.LINE_TERMINATOR);
-		
+
 		for (int i=0; i < this.colCount; i++)
 		{
 			if (indent) result.append(anIndent);
@@ -1151,7 +1151,7 @@ public class DataStore
 			result.append(i);
 			result.append("\">");
 			result.append(StringUtil.LINE_TERMINATOR);
-			
+
 			if (indent) result.append(anIndent);
 			result.append("    <column-name>");
 			result.append(this.getColumnName(i));
@@ -1169,7 +1169,7 @@ public class DataStore
 			result.append(SqlUtil.getTypeName(this.getColumnType(i)));
 			result.append("</java-sql-type-name>");
 			result.append(StringUtil.LINE_TERMINATOR);
-			
+
 			if (indent) result.append(anIndent);
 			result.append("    <java-sql-type>");
 			result.append(this.getColumnType(i));
@@ -1182,7 +1182,7 @@ public class DataStore
 			result.append("</dbms-data-type>");
 			result.append(StringUtil.LINE_TERMINATOR);
 
-			
+
 			int type = this.getColumnType(i);
 			if (SqlUtil.isDateType(type) )
 			{
@@ -1215,7 +1215,7 @@ public class DataStore
 					result.append(StringUtil.LINE_TERMINATOR);
 				}
 			}
-			
+
 			if (indent) result.append(anIndent);
 			result.append("    <precision>");
 			result.append(this.columnPrecision[i]);
@@ -1241,10 +1241,10 @@ public class DataStore
 		if (indent) result.append(anIndent);
 		result.append("</table-def>");
 		result.append(StringUtil.LINE_TERMINATOR);
-		
+
 		return result;
 	}
-	
+
 	public String getDataAsXml()
 	{
 		int count = this.getRowCount();
@@ -1266,11 +1266,11 @@ public class DataStore
 	{
 		int count = this.getRowCount();
 		if (count == 0) return;
-		
+
 		pw.write(this.getXmlStart().toString());
-		
+
 		String indent = "    ";
-		
+
 		for (int row=0; row < count; row++)
 		{
 			StringBuffer rowData = this.getRowDataAsXml(row, indent);
@@ -1279,17 +1279,17 @@ public class DataStore
 
 		pw.write(this.getXmlEnd().toString());
 	}
-	
+
 	public StringBuffer getRowDataAsXml(int aRow)
 	{
 		return this.getRowDataAsXml(aRow, null);
 	}
-	
+
 	public StringBuffer getRowDataAsXml(int aRow, String anIndent)
 	{
 		return this.getRowDataAsXml(aRow, anIndent, aRow + 1);
 	}
-	
+
 	public StringBuffer getRowDataAsXml(int aRow, String anIndent, int displayRowIndex)
 	{
 		boolean indent = (anIndent != null && anIndent.length() > 0);
@@ -1305,7 +1305,7 @@ public class DataStore
 		{
 			String value = this.getValueAsFormattedString(aRow, c);
 			Object data = this.getValue(aRow, c);
-			
+
 			if (indent) xml.append(anIndent);
 			xml.append("  <column-data index=\"");
 			xml.append(c);
@@ -1318,7 +1318,7 @@ public class DataStore
 			{
 				xml.append(" null=\"false\"");
 			}
-			
+
 			if (SqlUtil.isDateType(this.columnTypes[c]))
 			{
 				try
@@ -1333,8 +1333,8 @@ public class DataStore
 				}
 			}
 			xml.append('>');
-			
-			if (value != null) 
+
+			if (value != null)
 			{
 				// String data needs to be escaped!
 				if (data instanceof String)
@@ -1354,7 +1354,7 @@ public class DataStore
 		xml.append(StringUtil.LINE_TERMINATOR);
 		return xml;
 	}
-	
+
 	public String getDataAsHtml()
 	{
 		StringWriter html = new StringWriter(this.getRowCount() * 100);
@@ -1368,7 +1368,7 @@ public class DataStore
 		}
 		return html.toString();
 	}
-	
+
 	public void writeHtmlData(Writer html)
 		throws IOException
 	{
@@ -1425,12 +1425,12 @@ public class DataStore
 		else
 			return true;
 	}
-	
+
 	public StringBuffer getRowDataAsSqlInsert(int aRow, WbConnection aConn)
 	{
 		return this.getRowDataAsSqlInsert(aRow, "\n", aConn);
 	}
-	
+
 	public StringBuffer getRowDataAsSqlInsert(int aRow, String aLineTerminator, WbConnection aConn)
 	{
 		return this.getRowDataAsSqlInsert(aRow, aLineTerminator, aConn, null, null);
@@ -1439,7 +1439,7 @@ public class DataStore
 	{
 		if (!this.canSaveAsSqlInsert()) return null;
 		RowData data = this.getRow(aRow);
-		DmlStatement stmt = this.createInsertStatement(data, true, aLineTerminator); 
+		DmlStatement stmt = this.createInsertStatement(data, true, aLineTerminator);
 		if (aCharFunc != null)
 		{
 			stmt.setChrFunction(aCharFunc);
@@ -1464,7 +1464,7 @@ public class DataStore
 		for (int row = 0; row < count; row ++)
 		{
 			RowData data = this.getRow(row);
-			DmlStatement stmt = this.createInsertStatement(data, true, aLineTerminator); 
+			DmlStatement stmt = this.createInsertStatement(data, true, aLineTerminator);
 			String sql = stmt.getExecutableStatement(this.originalConnection.getSqlConnection());
 			out.write(sql);
 			out.write(";");
@@ -1472,7 +1472,7 @@ public class DataStore
 			out.write(aLineTerminator);
 		}
 	}
-	
+
 	public String getDataAsSqlInsert(String aLineTerminator)
 		throws Exception, SQLException
 	{
@@ -1489,7 +1489,7 @@ public class DataStore
 		}
 		return script.toString();
 	}
-	
+
 	/**
 	 *	Import a text file (tab separated) with a header row and no column mapping
 	 *	into this DataStore
@@ -1500,8 +1500,8 @@ public class DataStore
 	{
 		this.importData(aFilename, true, "\t", "\"", Collections.EMPTY_MAP);
 	}
-	
-	/** 
+
+	/**
 	 * Import a text file (tab separated) with no column mapping
 	 * into this DataStore.
 	 *
@@ -1524,16 +1524,16 @@ public class DataStore
 			this.setNull(aRow, i);
 		}
 	}
-	
+
 	public void importData(String aFilename, boolean hasHeader, String aColSeparator, String aQuoteChar)
 		throws FileNotFoundException
 	{
 		this.importData(aFilename, hasHeader, aColSeparator, aQuoteChar, Collections.EMPTY_MAP);
 	}
-	
+
 	private boolean cancelUpdate = false;
 	private boolean cancelImport = false;
-	
+
 	public void cancelUpdate()
 	{
 		this.cancelUpdate = true;
@@ -1542,8 +1542,8 @@ public class DataStore
 	{
 		this.cancelImport = true;
 	}
-	
-	/** 	
+
+	/**
 	 *	Import a text file into this DataStore.
 	 * @param aFilename - The text file to import
 	 * @param hasHeader - wether the text file has a header row
@@ -1567,12 +1567,12 @@ public class DataStore
 		int col;
 		int row;
 		this.cancelImport = false;
-		
+
 		if ("\\t".equals(aColSeparator))
     {
       aColSeparator = "\t";
     }
-    
+
 		try
 		{
 			line = in.readLine();
@@ -1587,12 +1587,12 @@ public class DataStore
 			this.rowActionMonitor.setMonitorType(RowActionMonitor.MONITOR_INSERT);
 		}
 
-		// if the data store is empty, we tried to initialize the 
-		// data array to an approx. size. As we don't know how many lines 
+		// if the data store is empty, we tried to initialize the
+		// data array to an approx. size. As we don't know how many lines
 		// we really have in the file, we take the length of the first line
 		// as the average, and calculate the expected number of lines from
-		// this length. 
-		// Event if we don't get the number of lines correct, this method should be better 
+		// this length.
+		// Event if we don't get the number of lines correct, this method should be better
 		// then not initializing the array at all.
 		if (line != null && this.data.size() == 0)
 		{
@@ -1614,9 +1614,9 @@ public class DataStore
 			row = this.addRow();
 			importRow ++;
 			this.updateProgressMonitor(importRow, -1);
-			
+
 			this.setRowNull(row);
-			
+
 			int count = lineData.size();
 			for (int i=0; i < count; i++)
 			{
@@ -1648,7 +1648,7 @@ public class DataStore
 							this.setNull(row, col);
 						}
 						else
-						{		
+						{
 							colData = this.convertCellValue(value, col);
 							this.setValue(row, col, colData);
 						}
@@ -1659,10 +1659,10 @@ public class DataStore
 					}
 				}
 			}
-			
+
 			Thread.yield();
 			if (this.cancelImport) break;
-			
+
 			try
 			{
 				line = in.readLine();
@@ -1672,10 +1672,10 @@ public class DataStore
 				line = null;
 			}
 		}
-		
+
 		try { in.close(); } catch (IOException e) {}
 	}
-	
+
 	private void updateProgressMonitor(int currentRow, int totalRows)
 	{
 		if (this.rowActionMonitor != null)
@@ -1685,7 +1685,7 @@ public class DataStore
 	}
 
 	/**
-	 * Returns a List of {@link #DmlStatements } which 
+	 * Returns a List of {@link #DmlStatements } which
 	 * would be executed in order to store the current content
 	 * of the DataStore.
 	 */
@@ -1694,12 +1694,12 @@ public class DataStore
 	{
 		if (this.updateTable == null) throw new NullPointerException("No update table defined!");
 		this.updatePkInformation(aConnection);
-		
+
 		ArrayList stmt = new ArrayList(this.getModifiedCount());
 		this.resetUpdateRowCounters();
 		DmlStatement dml = null;
 		RowData row = null;
-		
+
 		row = this.getNextDeletedRow();
 		while (row != null)
 		{
@@ -1725,8 +1725,8 @@ public class DataStore
 		}
 		this.resetUpdateRowCounters();
 		return stmt;
-	}	
-	
+	}
+
 	/**
 	 * Save the changes to this DataStore to the database.
 	 * The changes are applied in the following order
@@ -1737,7 +1737,7 @@ public class DataStore
 	 * </ul>
 	 */
 	public synchronized int updateDb(WbConnection aConnection)
-		throws Exception, SQLException, Exception
+		throws SQLException
 	{
 		int rows = 0;
 		this.updatePkInformation(aConnection);
@@ -1747,7 +1747,7 @@ public class DataStore
 		{
 			this.rowActionMonitor.setMonitorType(RowActionMonitor.MONITOR_UPDATE);
 		}
-		
+
 		try
 		{
 			this.resetUpdateRowCounters();
@@ -1767,7 +1767,7 @@ public class DataStore
 				if (this.cancelUpdate) return rows;
 				row = this.getNextDeletedRow();
 			}
-			
+
 			row = this.getNextChangedRow();
 			while (row != null)
 			{
@@ -1783,7 +1783,7 @@ public class DataStore
 				if (this.cancelUpdate) return rows;
 				row = this.getNextChangedRow();
 			}
-		
+
 			row = this.getNextInsertedRow();
 			while (row != null)
 			{
@@ -1799,11 +1799,11 @@ public class DataStore
 				if (this.cancelUpdate) return rows;
 				row = this.getNextInsertedRow();
 			}
-			
+
 			if (!aConnection.getAutoCommit() && rows > 0) aConnection.commit();
 			this.resetStatus();
 		}
-		catch (Exception e)
+		catch (SQLException e)
 		{
 			if (!aConnection.getAutoCommit())
 			{
@@ -1811,7 +1811,7 @@ public class DataStore
 			}
 			throw e;
 		}
-		
+
 		return rows;
 	}
 
@@ -1833,7 +1833,7 @@ public class DataStore
 			}
 		}
 	}
-	
+
 	public void resetStatusForSentRow()
 	{
 		int rows = this.getRowCount();
@@ -1861,7 +1861,7 @@ public class DataStore
 			this.deletedRows = newDeleted;
 		}
 	}
-	
+
 	public void resetStatus()
 	{
 		this.deletedRows = null;
@@ -1873,8 +1873,8 @@ public class DataStore
 		}
 		this.resetUpdateRowCounters();
 	}
-	
-	
+
+
 	public int compareRowsByColumn(RowData row1, RowData row2, int column)
 	{
 		Object o1 = row1.getValue(column);
@@ -1898,7 +1898,7 @@ public class DataStore
 		{
 			return defaultCollator.compare(o1, o2);
 		}
-		
+
 		try
 		{
 			int result = ((Comparable)o1).compareTo(o2);
@@ -1915,7 +1915,7 @@ public class DataStore
 		String v2 = o2.toString();
 		return v1.compareTo(v2);
 	}
-	
+
 	/**    Compare two rows.  All sorting columns will be sorted.
 	 *
 	 * @param row1 Row 1
@@ -1926,13 +1926,13 @@ public class DataStore
 	{
 		int result = compareRowsByColumn(row1, row2, column);
 		if (result == 0) return 0;
-		
-		//if (result == -2 || result == 2) 
+
+		//if (result == -2 || result == 2)
 		//	return result;
 		//else
 		return ascending ? result : -result;
 	}
-	
+
 	public void sortByColumn(int aColumn, boolean ascending)
 	{
 		synchronized (this)
@@ -1945,7 +1945,7 @@ public class DataStore
 			Collections.sort(this.data, this.comparator);
 		}
 	}
-	
+
 	public String getDefaultDateFormat()
 	{
 		if (this.defaultDateFormatter == null) return null;
@@ -1956,12 +1956,12 @@ public class DataStore
 	{
 		this.defaultTimestampFormatter = aFormatter;
 	}
-	
+
 	public void setDefaultDateFormatter(SimpleDateFormat aFormatter)
 	{
 		this.defaultDateFormatter = aFormatter;
 	}
-	
+
 	public void setDefaultDateFormat(String aFormat)
 	{
 		if (aFormat == null) return;
@@ -1981,12 +1981,12 @@ public class DataStore
 		if (this.defaultNumberFormatter == null) return null;
 		return this.defaultNumberFormatter.toPattern();
 	}
-	
+
 	public void setDefaultNumberFormatter(DecimalFormat aFormatter)
 	{
 		this.defaultNumberFormatter = aFormatter;
 	}
-	
+
 	public void setDefaultNumberFormat(String aFormat)
 	{
 		if (aFormat == null) return;
@@ -2002,7 +2002,7 @@ public class DataStore
 			LogMgr.logWarning("DataStore.setDefaultDateFormat()", "Could not create decimal formatter for format " + aFormat);
 		}
 	}
-	
+
 	public Object convertCellValue(Object aValue, int aColumn)
 		throws Exception
 	{
@@ -2040,14 +2040,14 @@ public class DataStore
 				LogMgr.logWarning("DataStore.parseDate()", "Could not parse date " + aDate + " with default formatter " + this.defaultDateFormatter.toPattern());
 				result = null;
 			}
-			
+
 		}
-		
+
 		if (result == null)
 		{
 			result = converter.parseDate(aDate);
 		}
-		
+
 		if (result == null)
 		{
 			LogMgr.logWarning("DataStore.parseDate()", "Could not parse date " + aDate);
@@ -2056,13 +2056,13 @@ public class DataStore
   }
 	/**
 	 * Return the status object for the give row.
-	 * The status is one of 
+	 * The status is one of
 	 * <ul>
 	 * <li>DataStore.ROW_ORIGINAL</li>
 	 * <li>DataStore.ROW_MODIFIED</li>
 	 * <li>DataStore.ROW_NEW</li>
 	 * <ul>
-	 * The status object is used by the renderer in the result 
+	 * The status object is used by the renderer in the result
 	 * table to display the approriate icon.
 	 */
 	public Integer getRowStatus(int aRow)
@@ -2086,12 +2086,12 @@ public class DataStore
 			return ROW_ORIGINAL;
 		}
 	}
-  
+
 	public Map getPkValues(int aRow)
 	{
 		return this.getPkValues(this.originalConnection, aRow);
 	}
-  
+
 	public Map getPkValues(WbConnection aConnection, int aRow)
 	{
 		if (aConnection == null) return Collections.EMPTY_MAP;
@@ -2103,12 +2103,12 @@ public class DataStore
 		{
 			return Collections.EMPTY_MAP;
 		}
-		
+
 		if (this.pkColumns == null) return Collections.EMPTY_MAP;
-		
+
 		RowData data = this.getRow(aRow);
 		if (data == null) return Collections.EMPTY_MAP;
-		
+
 		int count = this.pkColumns.size();
 		HashMap result = new HashMap(count);
 		for (int j=0; j < count ; j++)
@@ -2128,44 +2128,44 @@ public class DataStore
 		return result;
 	}
 
-	
+
 	private int currentUpdateRow = 0;
 	private int currentInsertRow = 0;
 	private int currentDeleteRow = 0;
-	
+
 	private void resetUpdateRowCounters()
 	{
 		currentUpdateRow = 0;
 		currentInsertRow = 0;
 		currentDeleteRow = 0;
 	}
-	
+
 	private RowData getNextChangedRow()
 	{
 		if (this.currentUpdateRow >= this.getRowCount()) return null;
 		RowData row = null;
-		
+
 		int count = this.getRowCount();
-		
+
 		while (this.currentUpdateRow < count)
 		{
 			row = this.getRow(this.currentUpdateRow);
 			this.currentUpdateRow ++;
-			
+
 			if (row.isModified() && !row.isNew()) return row;
 		}
 		return null;
 	}
-	
+
 	private RowData getNextDeletedRow()
 	{
 		if (this.deletedRows == null || this.deletedRows.size() == 0) return null;
 		int count = this.deletedRows.size();
-		
+
 		if (this.currentDeleteRow > count) return null;
-		
+
 		RowData row = null;
-		
+
 		while (this.currentDeleteRow < count)
 		{
 			row = (RowData)this.deletedRows.get(this.currentDeleteRow);
@@ -2174,14 +2174,14 @@ public class DataStore
 		}
 		return null;
 	}
-	
+
 	private RowData getNextInsertedRow()
 	{
 		int count = this.getRowCount();
 		if (this.currentInsertRow >= count) return null;
-		
+
 		RowData row = null;
-		
+
 		while (this.currentInsertRow < count)
 		{
 			row = this.getRow(this.currentInsertRow);
@@ -2193,22 +2193,22 @@ public class DataStore
 		}
 		return null;
 	}
-	
+
 	private DmlStatement createUpdateStatement(RowData aRow)
 	{
 		return this.createUpdateStatement(aRow, false, System.getProperty("line.separator"));
 	}
-	
+
 	private DmlStatement createUpdateStatement(RowData aRow, boolean ignoreStatus, String lineEnd)
 	{
 		if (aRow == null) return null;
 		boolean first = true;
 		DmlStatement dml;
-		
+
 		if (!ignoreStatus && !aRow.isModified()) return null;
 		ArrayList values = new ArrayList();
 		StringBuffer sql = new StringBuffer("UPDATE ");
-		
+
 		sql.append(SqlUtil.quoteObjectname(this.updateTable));
 		sql.append(" SET ");
 		first = true;
@@ -2220,7 +2220,7 @@ public class DataStore
 				{
 					first = false;
 				}
-				else 
+				else
 				{
 					sql.append(", ");
 				}
@@ -2243,7 +2243,7 @@ public class DataStore
 		for (int j=0; j < this.pkColumns.size(); j++)
 		{
 			int pkcol = ((Integer)this.pkColumns.get(j)).intValue();
-			if (first) 
+			if (first)
 			{
 				first = false;
 			}
@@ -2274,12 +2274,12 @@ public class DataStore
 		}
 		return dml;
 	}
-	
+
 	private DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus)
 	{
 		return this.createInsertStatement(aRow, ignoreStatus, "\n");
 	}
-	
+
 	/**
 	 *	Generate an insert statement for the given row
 	 *	When creating a script for the DataStore the ignoreStatus
@@ -2290,12 +2290,12 @@ public class DataStore
 	{
 		boolean first = true;
 		DmlStatement dml;
-		
+
 		if (!ignoreStatus && !aRow.isModified()) return null;
 		//String lineEnd = System.getProperty("line.separator", "\r\n");
 		//String lineEnd = "\n";
 		boolean newLineAfterColumn = (this.colCount > 5);
-		
+
 		ArrayList values = new ArrayList();
 		StringBuffer sql = new StringBuffer(250);
     sql.append("INSERT INTO ");
@@ -2304,18 +2304,18 @@ public class DataStore
 		sql.append(SqlUtil.quoteObjectname(this.updateTable));
 		if (ignoreStatus) sql.append(lineEnd);
 		sql.append('(');
-		if (newLineAfterColumn) 
+		if (newLineAfterColumn)
 		{
 			sql.append(lineEnd);
 			sql.append("  ");
 			valuePart.append(lineEnd);
 			valuePart.append("  ");
 		}
-		
+
 		first = true;
     String colName = null;
 		int includedColumns = 0;
-		
+
 		for (int col=0; col < this.colCount; col ++)
 		{
 			if (ignoreStatus || aRow.isColumnModified(col))
@@ -2337,21 +2337,21 @@ public class DataStore
 						valuePart.append(',');
 					}
 				}
-				
+
 				colName = SqlUtil.quoteObjectname(this.getColumnName(col));
 				sql.append(colName);
 				valuePart.append('?');
-				
-				if (ignoreStatus && newLineAfterColumn) 
+
+				if (ignoreStatus && newLineAfterColumn)
 				{
 					sql.append(lineEnd);
 					valuePart.append(lineEnd);
-				}					
+				}
 				values.add(aRow.getValue(col));
 			}
 		}
 		sql.append(')');
-		if (ignoreStatus) 
+		if (ignoreStatus)
 		{
 			sql.append(lineEnd);
 			sql.append("VALUES");
@@ -2375,19 +2375,19 @@ public class DataStore
 		}
 		return dml;
 	}
-	
+
 	private DmlStatement createDeleteStatement(RowData aRow)
 	{
 		if (aRow == null) return null;
 		if (aRow.isNew()) return null;
-		
-		// don't create a statement for a row which was inserted and 
+
+		// don't create a statement for a row which was inserted and
 		// then deleted
 		//if (aRow.isNew()) return null;
-		
+
 		boolean first = true;
 		DmlStatement dml;
-		
+
 		ArrayList values = new ArrayList();
 		StringBuffer sql = new StringBuffer(250);
     sql.append("DELETE FROM ");
@@ -2397,7 +2397,7 @@ public class DataStore
 		for (int j=0; j < this.pkColumns.size(); j++)
 		{
 			int pkcol = ((Integer)this.pkColumns.get(j)).intValue();
-			if (first) 
+			if (first)
 			{
 				first = false;
 			}
@@ -2407,7 +2407,7 @@ public class DataStore
 			}
 			String colName = SqlUtil.quoteObjectname(this.getColumnName(pkcol));
 			sql.append(colName);
-			
+
 			Object value = aRow.getOriginalValue(pkcol);
 			if (value instanceof NullValue)
 			{
@@ -2435,18 +2435,18 @@ public class DataStore
 	{
 		return this.getUpdateTableSchema(this.originalConnection);
 	}
-	
+
 	public String getUpdateTableSchema(WbConnection aConnection)
 	{
 		if (this.updateTable == null) return null;
 		LineTokenizer tok = new LineTokenizer(this.updateTable, ".");
 		String schema = null;
-		
+
 		if (tok.countTokens() > 1)
 		{
 			schema = tok.nextToken();
 		}
-		
+
 		if (schema == null || schema.trim().length() == 0)
 		{
 			try
@@ -2461,7 +2461,7 @@ public class DataStore
 		this.updateTableSchema = schema;
 		return schema;
 	}
-	
+
 	public String getRealUpdateTable()
 	{
 		if (this.updateTable.indexOf('.') > 0)
@@ -2470,12 +2470,12 @@ public class DataStore
 		}
 		return this.updateTable;
 	}
-	
+
 	private void updatePkInformation(WbConnection aConnection)
 		throws SQLException
 	{
 		if (this.pkColumns != null) return;
-		
+
 		if (aConnection != null)
 		{
 			Connection sqlConn = aConnection.getSqlConnection();
@@ -2487,7 +2487,7 @@ public class DataStore
 			String col;
 			ResultSet rs = meta.getPrimaryKeys(null, schema, this.getRealUpdateTable());
 			ArrayList cols = this.readPkColumns(rs);
-			
+
 			// no primary keys found --> try the bestRowIdentifier...
 			if (cols.size() == 0)
 			{
@@ -2497,7 +2497,7 @@ public class DataStore
 			this.pkColumns = cols;
 		}
 		if (this.pkColumns == null) this.pkColumns = new ArrayList();
-		
+
 		// if we didn't find any columns, use all columns as the identifier
 		if (this.pkColumns.size() == 0)
 		{
@@ -2507,7 +2507,7 @@ public class DataStore
 			}
 		}
 	}
-	
+
 	private ArrayList readPkColumns(ResultSet rs)
 	{
 		ArrayList result = new ArrayList();
@@ -2537,7 +2537,7 @@ public class DataStore
 		}
 		return result;
 	}
-	
+
 	private void checkRowBounds(int aRow)
 		throws IndexOutOfBoundsException
 	{
@@ -2557,7 +2557,7 @@ public class DataStore
 	{
 		return this.rowActionMonitor;
 	}
-	
+
 	/** Setter for property progressMonitor.
 	 * @param progressMonitor New value of property progressMonitor.
 	 *
@@ -2566,12 +2566,12 @@ public class DataStore
 	{
 		this.rowActionMonitor = aMonitor;
 	}
-	
+
 	class ColumnComparator implements Comparator
 	{
 		int column;
 		boolean ascending;
-		
+
 		public ColumnComparator()
 		{
 		}
@@ -2581,7 +2581,7 @@ public class DataStore
 			this.column = aCol;
 			this.ascending = aFlag;
 		}
-		
+
 		public int compare(Object o1, Object o2)
 		{
 			try
@@ -2596,8 +2596,7 @@ public class DataStore
 			}
 			return 0;
 		}
-	}	
+	}
 
 
 }
-

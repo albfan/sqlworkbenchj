@@ -117,13 +117,13 @@ where trg.tgrelid = tbl.oid
    <string>HSQL Database Engine</string> 
    <object class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
-     <string>SELECT trigger_name, when_clause as trigger_type, triggering_event as trigger_event from system_triggers</string> 
+     <string>SELECT trigger_name, trigger_type, triggering_event as trigger_event from system_triggers</string> 
     </void> 
     <void property="objectNameField"> 
      <string>table_name</string> 
     </void> 
     <void property="orderBy"> 
-     <string>trigger_name</string> 
+     <string>ORDER BY trigger_name</string> 
     </void> 
    </object> 
   </void> 

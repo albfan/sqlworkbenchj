@@ -1,132 +1,135 @@
 
 <section id="data-pumper">
-	<title>Data Pumper</title>
-	
+	<title>DataPumper</title>
+
 	<section id="data-pumper-overview">
 		<title>Overview</title>
-		
-		<para>The export and import features are useful, if you cannot connect to 
+
+		<para>The export and import features are useful, if you cannot connect to
 		the source and the target database at once. If your source and target
-		are both reachable at the same time, it is more efficient to use the data
-		pumper to copy data between two systems. With the data pumper no intermediate
+		are both reachable at the same time, it is more efficient to use the DataPumper
+		to copy data between two systems. With the DataPumper no intermediate
 		files are necessary. Especially with large tables this can be an advantage.
 		</para>
-		
-		<para>The data pumper lets you copy data from a single table (or SELECT 
-		query) to a table in the target database. The mapping between source columns 
+		<para>
+  	To open the DataPumper, select <menuchoice><guimenu>Tools</guimenu><guimenuitem>DataPumper</guimenuitem></menuchoice>
+  	</para>
+		<para>The DataPumper lets you copy data from a single table (or SELECT
+		query) to a table in the target database. The mapping between source columns
 		and target columns can be specified as well</para>
-		
-		<para>Everything that can be done with the data pumper, can also be accomplished
-		with the <link linkend="command-copy">COPY</link> command. The data pumper can
+
+		<para>Everything that can be done with the DataPumper, can also be accomplished
+		with the <link linkend="command-copy">COPY</link> command. The DataPumper can
 		also generate a script which executes the COPY command with the correct parameters
-		according to the current settings in the window. This can be used to create 
-		scripts which copy several tables.</para>
-		
-		<para><note>The DataPumper can also be started as a stand-alone application - without the 
-		main window - by specifying -datapumper=true in the commandline when starting &wb-productname;.
+		according to the current settings in the window. This can be used to create
+		scripts which copy several tables.
+		</para>
+
+		<para><note>The DataPumper can also be started as a stand-alone application - without the
+		main window - by specifying -datapumper=true in the command line when starting &wb-productname;.
 		</note></para>
 	</section>
-	
+
 	<section id="data-pumper-connecting">
 		<title>Selecting source and target connection</title>
-		
+
 		<para>The DataPumper window is divided in three parts: the upper left part for
 		defining the source of the data, the upper right part for defining the target, and
 		the lower part to adjust various settings which influence the way, the data is copied.
 		</para>
-		
-		<para>After you have opened the data pumper window it will automatically connect
-		the source to the currently selected connection from the main window. If the DataPumper 
+
+		<para>After you have opened the DataPumper window it will automatically connect
+		the source to the currently selected connection from the main window. If the DataPumper
 		is started as a separate application, no initial connection will be made.</para>
-		
+
 		<para>To select the source connection, press the ellipsis right next to the
 		source profile label. The standard connection dialog will appear. Select the
 		connection you want to use as the source, and click OK. The DataPumper will then
 		connect to the database. Connecting to the target database works similar. Simply
 		click on the ellipsis next to the target profile box.</para>
-		
+
 		<!--
 		<para>The dropdown for the target table includes an entry labelled "(Create new table)". For details
-		on how to create a new table during the copy process please refer to the 
+		on how to create a new table during the copy process please refer to the
 		<link linkend="data-pumper-advanced-tasks">advanced tasks</link> section.</para>
 		-->
 		<para>After source and target connection are established you can specify the tables and
 		define the column mapping between the tables.</para>
 	</section>
-	
+
 	<section id="data-pumper-simple-task">
-	
+
 		<title>Copying a complete table</title>
-		
-		<para>To copy a single table select the source and target table in the dropdowns (which 
+
+		<para>To copy a single table select the source and target table in the dropdowns (which
 		are filled as soon as the connection is established)</para>
-		<para>After both tables are selected, the middle part of the window will 
+		<para>After both tables are selected, the middle part of the window will
 		display the available columns from the source and target table. This grid display
 		represents the column mapping between source and target table.</para>
-		
+
 		<section id="column-mapping">
 			<title>Mapping source to target columns</title>
-			
+
 			<para>Each row in the display maps a source column to a target column. Initially the DataPumper
 			tries to match those columns which have the same name and data type. If no match is found
 			for a target column, the source column will display <literal>(Skip target column)</literal>
-			This means that the column from the target table will not be included when 
+			This means that the column from the target table will not be included when
 			inserting data into the target table (technically speaking: it will be excluded from the column
-			list in the INSERT statement). 
+			list in the INSERT statement).
 			</para>
 		</section>
-		
+
 		<section id="source-where">
 			<title>Restricting the data to be copied</title>
-			
-			<para>You can restrict the number of rows to be copied by specifying a 
-			<literal>WHERE</literal> clause which will be used when retrieving the data from the source table. 
+
+			<para>You can restrict the number of rows to be copied by specifying a
+			<literal>WHERE</literal> clause which will be used when retrieving the data from the source table.
 			The <literal>WHERE</literal> clause can be entered in the SQL editor in the lower part
 			of the window.
 			</para>
 		</section>
-	
+
 		<section id="delete-target">
 			<title>Deleting all rows from the target table</title>
-			
+
 			<para>When you select the option "Delete target table", all rows from
-			the target table will be deleted before the copy process is started. 
+			the target table will be deleted before the copy process is started.
 			This is done with a <literal>DELETE FROM &lt;tablename&gt;;</literal>
 			When you select this option, make sure the data can be deleted in this way,
 			otherwise the copy process will fail.
 			</para>
 			<para>The <literal>DELETE</literal> will not be committed right away, but
-			at the end of the copy process. This is obviously only of interest if 
-			the connection is not done with autcommit = true
+			at the end of the copy process. This is obviously only of interest if
+			the connection is not done with autocommit = true
 			</para>
 		</section>
-		
+
 		<section id="continue-error">
 			<title>Continuing when an insert fails</title>
-			
+
 			<para>In some cases inserting of individual rows in the target table might
 			fail (e.g. a primary key violation if the table is not empty). When selecting the
-			option "Delete target table", the copy process will continue even if rows fail 
+			option "Delete target table", the copy process will continue even if rows fail
 			to insert
 			</para>
 		</section>
-	
+
 		<section id="commit-every">
 			<title>Committing inserts</title>
 			<para>By default all changes are committed at the end, when all rows
 			have been copied. By supplying a value in the field "Commit every"
-			&wb-productname; will commit changes every time the specified number of 
-			rows has been inserted into the target. When a value of 50 rows has been 
+			&wb-productname; will commit changes every time the specified number of
+			rows has been inserted into the target. When a value of 50 rows has been
 			specified, and the source table contains 175 rows, &wb-productname; will send
-			4 <literal>COMMIT</literal>s to the target database. After inserting 
+			4 <literal>COMMIT</literal>s to the target database. After inserting
 			row 50, row 100, row 150 and after the last row.</para>
 		</section>
-		
+
 	</section>
-	
+
 	<section id="data-pumper-advanced-tasks" xreflabel="Advanced tasks">
 		<title>Advanced copy tasks</title>
-	
+
 		<section id="dp-constants">
 			<title>Populating a column with a constant</title>
 			<para>To populate a target column with a constant value. The name
@@ -139,13 +142,13 @@
 		<!--
 		<section id="create-target-table">
 			<title>Creating the target table</title>
-			<para>You can create the target table "on the fly" by selecting 
+			<para>You can create the target table "on the fly" by selecting
 			<literal>(Create&nbsp;target&nbsp;table)</literal> from the list of target tables.
 			You will be prompted for the name of the new table. If you later want to use a different
 			name for the table, click on the button to the right of the drop down.
 			</para>
 			<note><para>The target table will be created without any primary key definitions, indexes
-			of foreign key constraints.</para></note> 
+			of foreign key constraints.</para></note>
 			<para>The DataPumper tries to map the column types from the source columns to
 			data types available on the target database. For this mapping it relies on information
 			returned from the JDBC driver. The functions used for this may not be implemented fully
@@ -155,15 +158,15 @@
 			</para>
 			<para>
 			Most JDBC drivers map a single JDBC data type to more then one native datatype. MySql
-			maps its <literal>VARCHAR</literal>, <literal>ENUM</literal> and <literal>SET</literal> 
-			type to java.sql.Types.VARCHAR. The data pumper will take the first mapping 
-			which is returned by the driver and will ignore all subsequent ones. Any datatype 
-			that is returned twice by the driver is logged as a warning in the log file. 
+			maps its <literal>VARCHAR</literal>, <literal>ENUM</literal> and <literal>SET</literal>
+			type to java.sql.Types.VARCHAR. The DataPumper will take the first mapping
+			which is returned by the driver and will ignore all subsequent ones. Any datatype
+			that is returned twice by the driver is logged as a warning in the log file.
 			The actual mappings used, are logged with type INFO.
 			</para>
 			<para>
 			If you want the datapumper to use a different native data type (and not the first
-			match returned by the driver), you can specify a list of types that should completely 
+			match returned by the driver), you can specify a list of types that should completely
 			be ignored during the mapping process. This can be specified in <filename>workbench.properties</filename>.
 			The following keys are recognized:
 			</para>
@@ -181,7 +184,7 @@
 					<tbody valign="top">
 						<row>
 							<entry><para>workbench.ignoretypes.postgres</para></entry>
-							<entry><para>Datatypes to be ignored for PostgreSQL. The default 
+							<entry><para>Datatypes to be ignored for PostgreSQL. The default
 							list is name,text.</para></entry>
 						</row>
 						<row>
@@ -215,22 +218,22 @@
 			<para>
 				The case of the datatype names is relevant, they should be entered
 				the same way as they are reported in the log file!
-			</para>	
-			<para>If you want to override the default settings with an "empty" list, 
-				remove the value from the key (<literal>workbench.ignoretypes.hsqldb=</literal>) or 
+			</para>
+			<para>If you want to override the default settings with an "empty" list,
+				remove the value from the key (<literal>workbench.ignoretypes.hsqldb=</literal>) or
 				use the value <literal>no-ignore-list</literal>.
 			</para>
 		</section>
 		-->
 		<section id="source-query">
 			<title>Using a query as the source</title>
-			
+
 			<para>If you want to copy the data from several tables into one
-			table, you can use a SELECT query as the source of your data. To do this, 
+			table, you can use a SELECT query as the source of your data. To do this,
 			select the option <literal>Use SQL query as source</literal> below the SQL editor.
-			After you have entered you query into the editor, click the button 
-			<guibutton>Retrieve columns from query</guibutton>. The columns resulting from the 
-			query will then be put into the source part of the column mapping. 
+			After you have entered you query into the editor, click the button
+			<guibutton>Retrieve columns from query</guibutton>. The columns resulting from the
+			query will then be put into the source part of the column mapping.
 			Make sure, the columns are named uniquely when creating the query. If you select
 			columns from different tables with the same name, make sure you use a column alias
 			to rename the columns.
@@ -240,7 +243,7 @@
 			query as the source of the data</para>
 			-->
 		</section>
-		
+
 	</section>
 
 </section>

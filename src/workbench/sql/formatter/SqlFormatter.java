@@ -255,12 +255,20 @@ public class SqlFormatter
 	{
 		return this.needsWhitespace(last, current, false);
 	}
+
+	/**
+	 * 	Return true if a whitespace should be added before the current token.
+	 */
 	private boolean needsWhitespace(SQLToken last, SQLToken current, boolean ignoreStartOfline)
 	{
+		char lastChar = last.getContents().charAt(0);
 		if (!ignoreStartOfline && this.isStartOfLine()) return false;
-		if (last.getContents().equals("\"")) return false;
-		if (last.getContents().equals(".") && current.isIdentifier()) return false;
-		if (last.getContents().equals(")") && !current.isSeparator() ) return true;
+		if (current.getContents().equals("=")) return true;
+		if (lastChar == '=') return true;
+		if (lastChar == '\"') return false;
+		if (lastChar == '.' && current.isIdentifier()) return false;
+		if (lastChar == '(' && current.isReservedWord()) return false;
+		if (lastChar == ')' && !current.isSeparator() ) return true;
 		if ((last.isIdentifier()|| last.isLiteral()) && current.isOperator()) return true;
 		if ((current.isIdentifier() || current.isLiteral()) && last.isOperator()) return true;
 		if (current.isSeparator() || current.isOperator()) return false;
@@ -349,8 +357,9 @@ public class SqlFormatter
 			}
 			else if (t.isSeparator() && text.equals("("))
 			{
+				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
 				this.appendText("(");
-				this.processFunctionCall();
+				this.processFunctionCall(t);
 			}
 			else if (t.isSeparator() && text.equals(","))
 			{
@@ -370,6 +379,11 @@ public class SqlFormatter
 			lastToken = t;
 			t = (SQLToken)this.lexer.getNextToken(true, false);
 		}
+		return null;
+	}
+
+	private SQLToken processUpdate()
+	{
 		return null;
 	}
 
@@ -457,7 +471,7 @@ public class SqlFormatter
 			else if (t.isSeparator() && text.equals("("))
 			{
 				this.appendText(" (");
-				this.processFunctionCall();
+				this.processFunctionCall(t);
 			}
 			else if (t.isSeparator() && text.equals(","))
 			{
@@ -638,6 +652,13 @@ public class SqlFormatter
 					continue;
 				}
 
+//				if (word.equals("UPDATE"))
+//				{
+//					t = this.processUpdate();
+//					if (t == null) return;
+//					continue;
+//				}
+
 				if (word.equals("SET"))
 				{
 					t = this.processList(t,"SET".length() + 1, SET_TERMINAL);
@@ -705,7 +726,7 @@ public class SqlFormatter
 				if (t.isSeparator() && word.equals("("))
 				{
 					this.appendText(" (");
-					this.processFunctionCall();
+					this.processFunctionCall(t);
 				}
 				else
 				{
@@ -825,12 +846,12 @@ public class SqlFormatter
 		}
 	}
 
-	private void processFunctionCall()
+	private void processFunctionCall(SQLToken last)
 		throws Exception
 	{
 		int bracketCount = 1;
 		SQLToken t = (SQLToken)this.lexer.getNextToken(true, false);
-		SQLToken lastToken = t;
+		SQLToken lastToken = last;
 		while (t != null)
 		{
 			String text = t.getContents();
@@ -1356,7 +1377,7 @@ public class SqlFormatter
 //			" \nfrom test_table t1, table2 t2\nWHERE t2.col=1 " +
 //			" AND  (substr(partner_cbn.cust_base_no, 1, 2) = opg_country.opg_cbn  OR  col_header.country IN ('GER','EUR','ITA') AND substr(partner_cbn.cust_base_no, 1, 4) IN ('N883','N882') )  ";
 //			String sql = "select * \nfrom (select * from person) AS t \nwhere nr2 = 2;";
-			String sql = "insert into test values ('x', 2);commit;";
+//			String sql = "insert into test values ('x', 2);commit;";
 //			String sql = "SELECT * from test, table22";
 //			String sql = "select * \nfrom (select * from person) AS t \nwhere t.nr2 = 2;";
 //			String sql = "select /* testing */1\n--, bla\n from dual\n -- table\nwhere x = 6\n--and y = 6\n and x in (1,2, /* comment */3)";
@@ -1366,6 +1387,7 @@ public class SqlFormatter
 //           "      FROM userprops \n" +
 //           "      WHERE NAME= 'city' \n" +
 //           "      ) city \n";
+					String sql = "update bla set col1 = (select x from y)";
 			//String sql = "UPDATE bla set column1='test',col2=NULL, col4=222 where xyz=42 AND ab in (SELECT x from t\nWHERE x = 6) OR y = 5;commit;";
 //			String sql="SELECT city.id, \n" +
 //           "       city.value, \n" +

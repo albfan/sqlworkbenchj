@@ -100,13 +100,14 @@ public class TableCreator
 			numCols++;
 		}
 		sql.append(')');
-		LogMgr.logDebug("TableCreator.createTable()", "Using sql=" + sql);
+		LogMgr.logInfo("TableCreator.createTable()", "Using sql=" + sql);
 		Statement stmt = this.connection.createStatement();
 		try
 		{
 			stmt.executeUpdate(sql.toString());
 			if (this.connection.getMetadata().getDDLNeedsCommit() && !this.connection.getAutoCommit())
 			{
+				LogMgr.logDebug("TableCreator.createTable()", "Commiting the changes");
 				this.connection.commit();
 			}
 		}

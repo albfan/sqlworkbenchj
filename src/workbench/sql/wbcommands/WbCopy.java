@@ -41,7 +41,7 @@ public class WbCopy
 	public static final String PARAM_DELETETARGET = "deletetarget";
 	//public static final String PARAM_DROPTARGET = "droptarget";
 	//public static final String PARAM_CREATETARGET = "createtarget";
-	
+
 	private ArgumentParser cmdLine;
 	private DataCopier copier;
 
@@ -129,6 +129,8 @@ public class WbCopy
 		String targettable = cmdLine.getValue(PARAM_TARGETTABLE);
 		if (targettable == null)
 		{
+			result.addMessage(ResourceMgr.getString("ErrorCopyNoProfile"));
+			result.addMessage(""); // force empty line
 			result.addMessage(ResourceMgr.getString("ErrorCopyWrongParameters"));
 			result.setFailure();
 			return result;
@@ -197,9 +199,10 @@ public class WbCopy
 				TableIdentifier srcTable = new TableIdentifier(sourcetable);
 				String where = cmdLine.getValue(PARAM_SOURCEWHERE);
 				String columns = cmdLine.getValue(PARAM_COLUMNS);
-				boolean containsMapping = (columns.indexOf('/') > -1);
-				
-				if (containsMapping)
+				boolean hasColumns = columns != null;
+				boolean containsMapping = hasColumns && (columns.indexOf('/') > -1);
+
+				if (!hasColumns || containsMapping)
 				{
 					Map mapping = this.parseMapping();
 					copier.copyFromTable(sourceCon, targetCon, srcTable, targetId, mapping, where, false, false);
@@ -218,12 +221,14 @@ public class WbCopy
 
 			copier.start();
 			result.setSuccess();
-			
+
 			String s = copier.getErrorMessage();
 			if (s != null) result.addMessage(s);
+
 			this.addErrorsFromImporter(result);
-			result.addMessage(copier.getMessages());
 			this.addWarningsFromImporter(result);
+
+			result.addMessage(copier.getMessages());
 		}
 		catch (SQLException e)
 		{
@@ -287,6 +292,8 @@ public class WbCopy
 	private Map parseMapping()
 	{
 		String cols = cmdLine.getValue(PARAM_COLUMNS);
+		if (cols == null) return null;
+
 		List l = StringUtil.stringToList(cols, ",");
 		int count = l.size();
 		HashMap mapping = new HashMap(count);

@@ -31,7 +31,7 @@ public class BatchRunner
 	private String successScript;
 	private String errorScript;
 	private String delimiter = ";";
-	
+
 	public BatchRunner(String aFilelist)
 	{
 		this.files = StringUtil.stringToList(aFilelist, ",");
@@ -43,7 +43,7 @@ public class BatchRunner
 		LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchConnecting") + " [" + aProfilename + "]");
 		ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
 		ConnectionProfile prof = mgr.getProfile(aProfilename);
-		if (prof == null) 
+		if (prof == null)
 		{
 			LogMgr.logError("BatchRunner", ResourceMgr.getString("ErrorConnectionError"),null);
 			throw new IllegalArgumentException("Could not find profile " + aProfilename);
@@ -54,13 +54,19 @@ public class BatchRunner
 	public void setProfile(ConnectionProfile aProfile)
 		throws Exception
 	{
+		if (aProfile == null)
+		{
+			LogMgr.logWarning("BatchRunner.setProfile()", "Called with a <null> profile!");
+			return;
+		}
+
 		ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
 		this.connection = mgr.getConnection(aProfile, "BatchRunner");
 		this.stmtRunner = new StatementRunner();
 		this.stmtRunner.setConnection(this.connection);
 		LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchConnectOk"));
 	}
-	
+
 	public void setSuccessScript(String aFilename)
 	{
 		if (aFilename == null) return;
@@ -70,7 +76,7 @@ public class BatchRunner
 		else
 			this.successScript = null;
 	}
-	
+
 	public void setErrorScript(String aFilename)
 	{
 		if (aFilename == null) return;
@@ -80,7 +86,7 @@ public class BatchRunner
 		else
 			this.errorScript = null;
 	}
-	
+
 	private String readFile(String aFilename)
 	{
 		BufferedReader in = null;
@@ -115,7 +121,7 @@ public class BatchRunner
 		String file = null;
 		boolean error = false;
 		//WbStringTokenizer reader = new WbStringTokenizer(";",false, "\"'", true);
-		
+
 		for (int i=0; i < this.files.size(); i++)
 		{
 			file = (String)this.files.get(i);
@@ -138,7 +144,7 @@ public class BatchRunner
 				break;
 			}
 		}
-		
+
 		if (abortOnError && error)
 		{
 			try
@@ -156,7 +162,7 @@ public class BatchRunner
 				LogMgr.logError("BatchRunner.execute()", ResourceMgr.getString("MsgBatchScriptFileError") + " " + this.errorScript, e);
 			}
 		}
-		else 
+		else
 		{
 			try
 			{
@@ -175,23 +181,25 @@ public class BatchRunner
 		}
 	}
 
-	
+
 	//private boolean executeScript(WbStringTokenizer reader)
 	private boolean executeScript(String aScript)
 	{
 		boolean error = false;
 		StatementRunnerResult result = null;
-		List statements = SqlUtil.getCommands(aScript);
+		ScriptParser parser = new ScriptParser();
+		parser.setAlternateDelimiter(WbManager.getSettings().getAlternateDelimiter());
+		parser.setScript(aScript);
+		List statements = parser.getCommands();
 		String sql = null;
 		int count = statements.size();
-		//while (reader.hasMoreTokens())
 		for (int i=0; i < count; i++)
 		{
 			sql = (String)statements.get(i);//reader.nextToken();
 			if (sql == null) continue;
 			sql = sql.trim();
 			if (sql.length() == 0) continue;
-			
+
 			try
 			{
 				LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchExecutingStatement") + " "  + sql);
@@ -206,7 +214,7 @@ public class BatchRunner
 							LogMgr.logInfo("BatchRunner", msg[m]);
 					}
 				}
-				if (!result.isSuccess()) 
+				if (!result.isSuccess())
 				{
 					error = true;
 				}
@@ -217,20 +225,20 @@ public class BatchRunner
 				error = true;
 				break;
 			}
-			if (error && abortOnError) break; 
+			if (error && abortOnError) break;
 		}
 		return error;
 	}
-	
+
 	public void done()
 	{
 		ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
 		mgr.disconnectAll();
 	}
-	
+
 	public void setAbortOnError(boolean aFlag)
 	{
 		this.abortOnError = aFlag;
 	}
-	
+
 }

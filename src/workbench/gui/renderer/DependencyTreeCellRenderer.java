@@ -18,6 +18,7 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeCellRenderer;
+import workbench.WbManager;
 
 import workbench.db.DependencyNode;
 import workbench.gui.WbSwingUtilities;
@@ -50,6 +51,7 @@ public class DependencyTreeCellRenderer
 		this.selectedBackground = UIManager.getColor("Tree.selectionBackground");
 		this.unselectedForeground = UIManager.getColor("Tree.textForeground");
 		this.unselectedBackground = UIManager.getColor("Tree.textBackground");
+		this.setFont(WbManager.getSettings().getStandardFont());
 	}
 	
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus)
@@ -78,7 +80,7 @@ public class DependencyTreeCellRenderer
 				if (uaction.length() > 0 || daction.length() > 0)
 				{
 					StringBuffer tooltip = new StringBuffer(50);
-					tooltip.append("<html><body>");
+					tooltip.append("<html>");
 					boolean needBreak = false;
 					if (uaction.length() > 0) 
 					{
@@ -92,7 +94,7 @@ public class DependencyTreeCellRenderer
 						tooltip.append("ON DELETE ");
 						tooltip.append(daction);
 					}
-					tooltip.append("</body></html>");
+					tooltip.append("</html>");
 					setToolTipText(tooltip.toString());
 				}
 				else

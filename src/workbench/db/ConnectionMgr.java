@@ -49,7 +49,7 @@ public class ConnectionMgr
 	{
 		ConnectionProfile prof = this.getProfile(aProfileName);
 		if (prof == null) return null;
-		
+
 		return this.getConnection(prof, anId);
 	}
 	/**
@@ -65,7 +65,7 @@ public class ConnectionMgr
 		Connection sql = this.connect(aProfile, anId);
 		conn.setSqlConnection(sql);
 		conn.setProfile(aProfile);
-		
+
 		try
 		{
 			if (WbManager.getSettings().getEnableDbmsOutput())
@@ -78,7 +78,7 @@ public class ConnectionMgr
 		{
 			LogMgr.logWarning("ConnectionMgr.getConnection()", "Could not enable DBMS_OUTPUT package");
 		}
-		
+
 		this.activeConnections.put(anId, conn);
 
 		return conn;
@@ -97,7 +97,7 @@ public class ConnectionMgr
 		DbDriver drv = this.findDriverByName(drvClass, drvName);
 		end = System.currentTimeMillis();
 		//LogMgr.logDebug("ConnectionMgr.connect()", "FindDriver took " + (end - start) + " ms");
-		if (drv == null) 
+		if (drv == null)
 		{
 			throw new NoConnectionException("Driver class not registered");
 		}
@@ -187,7 +187,7 @@ public class ConnectionMgr
 	public DbDriver findRegisteredDriver(String drvClassName)
 	{
 		if (this.drivers == null)	this.readDrivers();
-		
+
     DbDriver db = null;
 
 		for (int i=0; i < this.drivers.size(); i ++)
@@ -403,7 +403,7 @@ public class ConnectionMgr
 	/**
 	 *	Check if the given (HSQLDB) connection can be safely closed.
 	 *	A in-memory HSQLDB engine allows the creation of several connections
-	 *	to the same database (from within the same JVM) 
+	 *	to the same database (from within the same JVM)
 	 *	But the connections may not be closed except for the last one, because
 	 *	they seem to "share" something in the driver and closing one
 	 *	will close the others as well.
@@ -411,29 +411,29 @@ public class ConnectionMgr
 	private boolean canDisconnectHsql(WbConnection aConn)
 	{
 		if (!aConn.getMetadata().isHsql()) return true;
-		
+
 		// a HSQLDB server connection can always be closed!
 		if (aConn.getUrl().startsWith("jdbc:hsqldb:hsql:")) return true;
-		
+
 		String url = aConn.getUrl();
 		String id = aConn.getId();
-		
+
 		Iterator itr = this.activeConnections.values().iterator();
 		while (itr.hasNext())
 		{
 			WbConnection c = (WbConnection)itr.next();
 			if (c == null) continue;
-			
+
 			if (c.getId().equals(id)) continue;
-			
+
 			String u = c.getUrl();
 			// we found one connection with the same URL --> do not connect this one!
 			if (u.equals(url)) return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	public void writeSettings()
 	{
 		this.saveProfiles();
@@ -461,7 +461,7 @@ public class ConnectionMgr
 		}
 		catch (Exception e)
 		{
-			LogMgr.logWarning(this, "Could not load driver definitions!", e);
+			LogMgr.logDebug(this, "Could not load driver definitions!", e);
 			this.drivers = new ArrayList();
 		}
 		if (this.readTemplates)
@@ -508,7 +508,16 @@ public class ConnectionMgr
 
 	public void readProfiles()
 	{
-		Object result = WbPersistence.readObject(WbManager.getSettings().getProfileFileName());
+		Object result = null;
+		try
+		{
+			result = WbPersistence.readObject(WbManager.getSettings().getProfileFileName());
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("ConnectionMgr.readProfiles()", "Error when reading connection profiles", e);
+			result = null;
+		}
 		if (result instanceof Collection)
 		{
 			this.setProfiles((Collection)result);

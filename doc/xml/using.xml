@@ -10,32 +10,32 @@
         <para>When executing a statement the contents of the editor is put
         into an internal buffer together with the information about the
         text selection and the cursor position. Even when you select a part of the current
-        text and execute that statement, the whole text is stored in the history buffer together 
+        text and execute that statement, the whole text is stored in the history buffer together
         with the selection information. When you select and execute different parts of the text
         and then move through the history you will see the selection change for each history
-        entry.</para> 
+        entry.</para>
         <para>The previous statement can be
-        recalled by pressing <keycap>Alt-Left</keycap> or choosing 
+        recalled by pressing <keycap>Alt-Left</keycap> or choosing
         <menuchoice><guimenu>SQL</guimenu><guimenuitem>Previous Statement</guimenuitem></menuchoice>
         statement from the menu. Once the previous statement(s) have been
         recalled the next statement can be shown using <keycap>Alt-Right</keycap> or choosing
-        <menuchoice><guimenu>SQL</guimenu><guimenuitem>Next Statement</guimenuitem></menuchoice> 
+        <menuchoice><guimenu>SQL</guimenu><guimenuitem>Next Statement</guimenuitem></menuchoice>
         from the menu. This is similar to browsing through the history of a web browser.</para>
       </section>
 
       <section id="execute-sql-commands">
 	       <title>Executing Statements</title>
 				 <para>There are three different ways to execute a SQL command</para>
-				 
+
 				 <para><emphasis role="bold">Execute the selected text</emphasis></para>
-				 <para>When you press <keycap>Ctrl-E</keycap> or select 
+				 <para>When you press <keycap>Ctrl-E</keycap> or select
 				 <menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute selected</guimenuitem></menuchoice>
-				 the currently selected text will be send to the DBMS for execution. If no text is 
+				 the currently selected text will be send to the DBMS for execution. If no text is
 				 selected the complete contents of the editor will be send to the database.
 				 </para>
 
 				 <para><emphasis role="bold">Execute current command</emphasis></para>
-				 <para>When you press <keycap>Ctrl-Enter</keycap> or select 
+				 <para>When you press <keycap>Ctrl-Enter</keycap> or select
 				 <menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute current</guimenuitem></menuchoice>
 				 the current statement will be executed. The "current" statement will be the text
 				 between the next delimiter before the current cursor position and the delimiter
@@ -46,19 +46,19 @@
 DELETE FROM person| WHERE lastname = 'Dent';
 COMMIT;</programlisting>
 				 <para>When pressing Ctrl-Enter the <literal>DELETE</literal> statement will be exectuted</para>
-				 
+
 				 <para><emphasis role="bold">Execute All</emphasis></para>
 				 <para>If you want to execute the complete text in the editor regardless
 				 of the current selection, use the <guimenuitem>Execute all</guimenuitem> command.
-				 Either by pressing <keycap>Ctrl-Shift-E</keycap> or selecting 
+				 Either by pressing <keycap>Ctrl-Shift-E</keycap> or selecting
 				 <menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute All</guimenuitem></menuchoice>
 				 </para>
-				 
+
 				 <para>As long as at least one statement is running the title of the main window
 				 will be prefixed with the &raquo; sign. Even if the main window is minimized
 				 you can still see if a statement is running by looking at the window title.</para>
 			</section>
-			
+
       <section id="execute-dml">
         <title>Executing DML Statements</title>
 
@@ -72,20 +72,20 @@ COMMIT;</programlisting>
         different statement tab, the result list in the lower part of the
         window will change to either the last result or the last message of
         that statement.</para>
-        
-        <para>For JDBC drivers which do not support multi-threaded execution, you 
-        can configure your <link linkend="profiles">Connection Profile</link> such 
+
+        <para>For JDBC drivers which do not support multi-threaded execution, you
+        can configure your <link linkend="profiles">Connection Profile</link> such
         that &wb-productname; will open a new connection for each tab</para>
 
-        <para>If you enter more than one statement in the editor and want to execute all statements 
-        as a batch script, you need to delimit each statement. The SQL standard for terminating a SQL 
+        <para>If you enter more than one statement in the editor and want to execute all statements
+        as a batch script, you need to delimit each statement. The SQL standard for terminating a SQL
         statement is the semicolon. Alternatively you can separate each statement with the keyword
         <literal>GO</literal> on a single line (MS SQL Server Syntax).</para>
         <para>As a third alternative, an <link linkend="options-alternate-delimiter">alternate delimiter</link>
         can be defined, which can be used in cases where the semicolon is not suitable. See <xref linkend="execute-ddl"/>
         for details.
         </para>
-        
+
         <para>Valid "scripts" are:</para>
 <programlisting>UPDATE person SET numheads = 2 WHERE name='Beeblebrox';
 COMMIT;</programlisting>
@@ -104,24 +104,26 @@ COMMIT
         the statement returns a result set, it will be displayed, otherwise
         any messages from the server will be displayed in the messages tab. To
         add or remove tab pages, right click on the tab header and choose
-        <guimenuitem>Add tab</guimenuitem> or <guimenuitem>Close tab</guimenuitem>). 
+        <guimenuitem>Add tab</guimenuitem> or <guimenuitem>Close tab</guimenuitem>).
         The number of tabs is stored in
         the associated workspace. If you do not have a workspace assigned to
         the current profile, the tab count will be stored in the default
         workspace.</para>
 
         <para>The statement is executed by either pressing <keycap>F9</keycap>, <keycap>Ctrl-E</keycap> or
-        clicking the <guibutton>Execute Selected</guibutton> button 
+        clicking the <guibutton>Execute Selected</guibutton> button
 				(<guiicon><inlinegraphic fileref="@IMAGE_DIR@/ExecuteSel16.gif" format="GIF"/></guiicon>)
 				in the toolbar. This will execute the currently selected
         text. If no text is selected in the editor, the complete statement
         will be executed. If you want to execute the whole statement even when
-        text is selected, use the command SQL/Execute All</para>
+        text is selected, use the command
+				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute All</guimenuitem></menuchoice>
+				</para>
 
         <para>To execute the statement in which the cursor is currently
         located use <keycap>Ctrl-Enter</keycap>. The current statement is defined as the text
         between the previous SQL delimiter and the next SQL delimiter. The
-        delimiter is not necessarily a semicolon. The delimiter can 
+        delimiter is not necessarily a semicolon. The delimiter can
         be configured in the <link linkend="options">system preferences</link>.
         </para>
 
@@ -132,17 +134,17 @@ COMMIT
       <section id="execute-ddl" xreflabel="Executing DDL Statements">
         <title>Executing DDL Statements</title>
 
-        <para>SQLWorkbench will send every statement to the backend DBMS, so
+        <para>&wb-productname; will send every statement to the backend DBMS, so
         executing DDL statements (<literal>CREATE TABLE</literal>, ...) is not a problem.</para>
 
         <para>However when executing statements such as <literal>CREATE PROCEDURE</literal> which
-        in turn contain valid SQL statement, delimited with a ; the SQL
-        Workbench will send everything up to the first semicolon to the
+        in turn contain valid SQL statement, delimited with a ; the &wb-productname;
+				will send everything up to the first semicolon to the
         backend. In case of a <literal>CREATE PROCEDURE</literal> statement this will obviously
         result in an error as the statement is not complete.</para>
-        
-        <para>This is an example of a <literal>CREATE PROCEDURE</literal> which will 
-        <emphasis role="bold">not</emphasis> work due to the embedded semicolon in 
+
+        <para>This is an example of a <literal>CREATE PROCEDURE</literal> which will
+        <emphasis role="bold">not</emphasis> work due to the embedded semicolon in
         the procedure source itself</para>
 <programlisting>CREATE OR REPLACE FUNCTION proc_sample RETURN INTEGER
 IS
@@ -154,17 +156,17 @@ END;</programlisting>
         <para>When executing this script, Oracle would return an error because &wb-productname; will
         send everything up to the keyword <literal>INTEGER</literal> to the database. Obviously this
         fragment is not correct.</para>
-        
+
         <para>The solution is to terminate the script with a character
-        sequence called "<xref linkend="options-alternate-delimiter"/>". 
-        The value of this sequence can be configured in the <link linkend="options">options dialog</link>. 
+        sequence called "<xref linkend="options-alternate-delimiter"/>".
+        The value of this sequence can be configured in the <link linkend="options">options dialog</link>.
         The default is <emphasis role="bold">./</emphasis> (a dot followed by a slash)</para>
 
-        <para>If a SQL statement is terminated with the alternate delimiter, 
+        <para>If a SQL statement is terminated with the alternate delimiter,
         that delimiter is used instead of a semicolon. This way the semicolons embedded in
         the <literal>CREATE PROCEDURE</literal> script will be sent correctly to the backend
         DBMS.</para>
-        
+
         <para>So the solution to the above problem is the following script:</para>
 <programlisting>CREATE OR REPLACE FUNCTION proc_sample RETURN INTEGER
 IS
@@ -176,11 +178,11 @@ END;
 ./</programlisting>
         <para>Note the trailing <literal>./</literal> at the end in order to "turn on" the
         use of the alternate delimiter.</para>
-        
+
         <para><emphasis role="bold">When is the alternate delimiter used?</emphasis></para>
-        
+
         <para>As soon as the statement (or script) that you execute is terminated with the
-        alternate delimiter, the alternate delimiter is used to separate the individual 
+        alternate delimiter, the alternate delimiter is used to separate the individual
         SQL statements. When you execute selected text from the editor, be sure to
         select the alternate delimiter as well, otherwise it will not be
         recognized (if the alternate delimiter is not selected, the statement to be executed
@@ -219,8 +221,8 @@ END;
           <title>Defining Macros</title>
 
           <para>There are two ways to define a SQL macro.</para>
-					<para>If the current statement in the editor should be defined as a macro, select (highlight) the statement's text 
-					and select  <menuchoice><guimenu>Macros</guimenu><guimenuitem>Add SQL macro</guimenuitem></menuchoice> from the main 
+					<para>If the current statement in the editor should be defined as a macro, select (highlight) the statement's text
+					and select  <menuchoice><guimenu>Macros</guimenu><guimenuitem>Add SQL macro</guimenuitem></menuchoice> from the main
           menu. You will be prompted to supply a name for the new macro. If you supply the name of an existing
 					macro, the existing macro will be overwritten.</para>
           <para>Alternatively you can add a new macro through
@@ -236,70 +238,70 @@ END;
           <title>Executing macros</title>
 
           <para>To execute a macro, you can either type the alias you have
-          defined, or select the macro from the <guimenu>Macros</guimenu> menu. 
-          The first 10 macros will be listed there directly. To view the complete list of 
+          defined, or select the macro from the <guimenu>Macros</guimenu> menu.
+          The first 10 macros will be listed there directly. To view the complete list of
 					macros select <menuchoice><guimenu>Macros</guimenu><guimenuitem>Manage Macros...</guimenuitem></menuchoice>
 					After selecting a macro, it can be executed by clicking on the <guibutton>Run</guibutton> button. If you check the
 					option "Replace current SQL", then the text in the editor will be replaced with the
 					text from the macro when you click on the run button.</para>
-					<para>The <guibutton>Run</guibutton> will only be available if you are connected to a database.</para>
+					<para>The <guibutton>Run</guibutton> button will only be available if you are connected to a database.</para>
         </section>
       </section>
-    
+
       <section id="using-workspaces">
         <title>Using workspaces</title>
 
         <para>The complete history for all editor tabs is saved and loaded
         into one file, called a workspace. These workspaces can be saved and loaded
-        to restore a specific editing context. 
-        You can assign a saved workspace to a <link linkend="profiles">connection profile</link>. 
+        to restore a specific editing context.
+        You can assign a saved workspace to a <link linkend="profiles">connection profile</link>.
         When the connection is established, the workspace is loaded into &wb-productname;. Using this feature
         you can maintain a completely different set of statements for different connections.</para>
-        
-        <para>If you do not assign a workspace to a connection profile, a workspace with the 
+
+        <para>If you do not assign a workspace to a connection profile, a workspace with the
         name <filename>Default.wksp</filename> will be used for storing the statement history.
         This default workspace is shared between <emphasis role="bold">all</emphasis> profiles
-        that have no workspace assigned. 
+        that have no workspace assigned.
         </para>
 
         <para>To save a new workspace from the current SQL statement history,
-        select <menuchoice><guimenu>Workspace</guimenu><guimenuitem>Save Workspace as....</guimenuitem></menuchoice></para> 
+        select <menuchoice><guimenu>Workspace</guimenu><guimenuitem>Save Workspace as....</guimenuitem></menuchoice></para>
         <para>The default file extension for workspaces is <filename>wksp</filename>.</para>
 
         <para>Once you have loaded a workspace, you can save it with
-        <menuchoice><guimenu>Workspace</guimenu><guimenuitem>Save Workspace</guimenuitem></menuchoice>. 
+        <menuchoice><guimenu>Workspace</guimenu><guimenuitem>Save Workspace</guimenuitem></menuchoice>.
         The current workspace is automatically
-        saved, when you exit the Workbench.</para>
+        saved, when you exit &wb-productname;.</para>
 
         <para>An existing workspace can be loaded with
         <menuchoice><guimenu>Workspace</guimenu><guimenuitem>Load Workspace</guimenuitem></menuchoice>
         </para>
-        <para>If you have an external file open in one of the editor tabs, the filename itself 
+        <para>If you have an external file open in one of the editor tabs, the filename itself
         will be stored in workspace. When loading the workspace &wb-productname; will try to load
-        the external file again. If the file does not exist, the last history entry from the saved 
+        the external file again. If the file does not exist, the last history entry from the saved
         history for that tab will be displayed.</para>
-        <para>The workspace file itself is a normal ZIP file, which contains one file with the 
-        statement history for each tab. The individual files can be extracted from the workspace 
+        <para>The workspace file itself is a normal ZIP file, which contains one file with the
+        statement history for each tab. The individual files can be extracted from the workspace
         using your favorite UNZIP tool.</para>
-        
+
       </section>
 
     <section id="manage-scripts">
       <title>Saving and loading SQL scripts</title>
 
       <para>The text from the current editor can be saved to an external file,
-      by choosing <menuchoice><guimenu>File</guimenu><guimenuitem>Save</guimenuitem></menuchoice> or 
+      by choosing <menuchoice><guimenu>File</guimenu><guimenuitem>Save</guimenuitem></menuchoice> or
       <menuchoice><guimenu>File</guimenu><guimenuitem>Save as</guimenuitem></menuchoice>. The filename for the
-      current editor will be remembered. To close the current file, select <menuchoice><guimenu>File</guimenu><guimenuitem>Discard file</guimenuitem></menuchoice> 
+      current editor will be remembered. To close the current file, select <menuchoice><guimenu>File</guimenu><guimenuitem>Discard file</guimenuitem></menuchoice>
       <keycap>(Ctrl-F4)</keycap> or use the context menu on the tab label itself.</para>
       <note>
-        <para>Detaching a file from the editor will remove the text from editor as well. 
-        If you only want to detach the filename from the editor 
+        <para>Detaching a file from the editor will remove the text from editor as well.
+        If you only want to detach the filename from the editor
         but keep the text, then press <keycap>Ctrl-Shift-F4</keycap> or hold down the <keycap>Shift</keycap> key
         while selecting the Discard menu item.</para>
       </note>
-      <para>When you load a SQL script and execute the statements, be aware that due to the history management 
-      in &wb-productname; the content of the external file will be placed into the history buffer. If you load 
+      <para>When you load a SQL script and execute the statements, be aware that due to the history management
+      in &wb-productname; the content of the external file will be placed into the history buffer. If you load
       large files, this might lead to massive memory consumption. Currently only the <emphasis>number</emphasis> of
       statements put into the history can be controlled, but not the total size of the history itself. This might
       change with a later version.</para>
@@ -308,27 +310,60 @@ END;
     <section id="server-messages">
       <title>Viewing server messages</title>
 
-      <para>For MS SQL Server, any message written with the
-      <literal>PRINT</literal> command will be displayed in the messages tab.</para>
+      <section>
+        <title>MS SQL Server</title>
+      <para>For MS SQL Server, any message written with the <literal>PRINT</literal>
+      command will be displayed in the <literal>Messages</literal> tab after the
+      SQL command has finished. The <literal>PRINT</literal> command is usually
+      used in stored procedures for logging purposes, but it can also be used
+      as a command on its own:</para>
+      <programlisting>PRINT "Deleting records...";
+DELETE from my_table WHERE value = 42;
+PRINT "Done."</programlisting>
+      <para>This will execute the <literal>DELETE</literal>. Once this script has
+      finished, the <literal>Messages</literal> tab will contain the text:</para>
+      <programlisting>Deleting records...
+Done.</programlisting>
+      </section>
 
-      <para>For Oracle the dbms_output package is supported as well. Support for this
-      package can to be turned on manually with the <xref linkend="command-enableout"/> command 
-      or by default in the <link linkend="options-enable-out">system preferences</link>
+      <section>
+        <title>Oracle</title>
+      <para>For Oracle the <literal>DBMS_OUTPUT</literal> package is supported. Support for this
+      package can to be turned on manually with the <xref linkend="command-enableout"/> command
+      or by default in the <link linkend="options-enable-out">system preferences</link>. If
+      this support is not turned on, the messages will not be displayed. This is the same
+      as using the <literal>SET SERVEROUTPUT ON</literal> command in SQL*Plus
       </para>
+      <para>Any message "printed" with <literal>DBMS_OUTPUT.put_line()</literal> will
+      be displayed in the message part after the SQL command has finished. Please
+      refer to the Oracle documentation if you want to learn more about the
+      <literal>DBMS_OUTPUT</literal> package.</para>
 
-      <para>Postgres supports a similar mechanism. Any text returned by a function or 
+      <programlisting>dbms_output.put_line("The answer is 42");</programlisting>
+      <para>Once the command has finished, the following will be displayed in the <literal>Messages</literal>
+      tab.</para>
+      <programlisting>The answer is 42</programlisting>
+      </section>
+
+      <section>
+        <title>PostgreSQL</title>
+      <para>Postgres supports a similar mechanism. Any text returned by a function or
       stored procedure with the <literal>RAISE</literal> keyword, will be displayed in the message tab as well</para>
-      
+      </section>
+
+      <section>
+        <title>Other database systems</title>
       <para>If your DBMS supports something similar please let me know, and I
-      will implement it provided I have access to the DBMS. Please send your
-      request to workbench@kellerer.org</para>
+      will try to implement it - provided I have access to the DBMS. Please send your
+      request to <ulink url="mailto:workbench@kellerer.org">workbench@kellerer.org</ulink></para>
+      </section>
     </section>
 
     <section id="edit-data">
       <title>Editing the data</title>
 
       <para>Once the data has been retrieved from the database, it can be
-      edited directly in the table. The SQL Workbench assumes that enough
+      edited directly in the table. The &wb-productname; assumes that enough
       columns have been retrieved from the table so that at a unique
       identifier is available to identify the rows to be updated.</para>
 
@@ -340,32 +375,32 @@ END;
       columns in the result set will be used to restrict <literal>DELETE</literal>&#39;s and
       <literal>UPDATE</literal>&#39;s</para>
 
-      <para>To enter the Edit mode, choose 
+      <para>To enter the Edit mode, choose
       <menuchoice><guimenu>Data</guimenu><guimenuitem>Enable Data Edit</guimenuitem></menuchoice>
       from the main menu. The toolbar icon will indicate the edit mode by
       being pressed down (The pressed down look is dependent on the
       Look &#38; Feel). Now the data in the result set can be edited. To
-      insert a new row choose 
+      insert a new row choose
       <menuchoice><guimenu>Data</guimenu><guimenuitem>Insert row</guimenuitem></menuchoice>. The new row will be
       inserted prior the current row. To delete the current row, choose
       <menuchoice><guimenu>Data</guimenu><guimenuitem>Delete row</guimenuitem></menuchoice>.</para>
 
       <para>The changes will not be saved to the database until you choose
-      <menuchoice><guimenu>Data</guimenu><guimenuitem>Save</guimenuitem></menuchoice>. 
+      <menuchoice><guimenu>Data</guimenu><guimenuitem>Save</guimenuitem></menuchoice>.
       If the update is successful (no database errors) a <literal>COMMIT</literal> will be
-      sent to the database automatically. If an error is reported during the 
+      sent to the database automatically. If an error is reported during the
       update, a <literal>ROLLBACK</literal> will be sent to the database</para>
 
-			<note><para>When you save changes from the result set, &wb-productname; will 
+			<note><para>When you save changes from the result set, &wb-productname; will
 			always send a <literal>ROLLBACK</literal> or <literal>COMMIT</literal> to the database server
 			regardless of the autocommit setting of the connection profile</para></note>
-			
+
       <para>Once you issue a new <literal>SELECT</literal> statement the edit mode will be
       disabled. If you try to enable the edit mode for a result set where more
-      than one table is involved, you will be prompted for the table that should 
+      than one table is involved, you will be prompted for the table that should
       be updated.</para>
     </section>
-    
+
     <section id="change-display">
       <title>Changing the display of the result set table</title>
 
@@ -381,50 +416,5 @@ END;
       <para>Each row can be resized vertically as well, to display multi line
       contents.</para>
     </section>
-		
-    <section id="configure-shortcuts">
-      <title>Configuring keyboard shortcuts</title>
-
-      <para>You can configure the keyboard shortcut to execute a specific action (=menu item) 
-			in the dialog which is displayed when you select <menuchoice><guimenu>Tools</guimenu><guimenu>Configure shortcuts...</guimenu></menuchoice>.
-			The dialog lists the available actions together with their configured shortcut and their default shortcut.
-			</para>
-
-			<section id="configure-shortcuts-assign">
-				<title>Assign a shortcut to an action</title>
-				<para>
-				To assign a (new) keyboard combination for a specific action, select (highlight) the action in the list
-				and click on the <guibutton>Assign</guibutton> button. A small window will pop up, where you can 
-				press the key combination which you would like to assign to that action.
-				Note that only F-Keys (F1, F2, ...) can be used without a modifier (Shift, Control, Alt). All other
-				keys need be pressed together with one of the modifier keys.
-				</para>
-				<para>After you have entered the desired keyboard shortcut, press the <guibutton>OK</guibutton> button.
-				If the shortcut is already assigned to a different action, you will be prompted, if you want to 
-				override that definition. If you select to overwrite the shortcut for the other action, that 
-				action will then have <emphasis role="bold">no</emphasis> shortcut assigned
-				</para>
-			</section>
-			
-			<section id="configure-shortcuts-clear">
-				<title>Removing a shortcut from an action</title>
-				<para>
-					To remove a shortcut completely from an action, select (highlight) that action, and 
-					click on the <guibutton>Clear</guibutton> button. Once the shortcut has been cleared, 
-					the action is no longer accessible through a shortcut (only through the menu).
-				</para>
-			</section>
-			
-			<section id="configure-shortcuts-reset">
-				<title>Reset to defaults</title>
-				<para>
-					If you want to reset the shortcut for a single action to its default, select (highlight) the 
-					action in the list, and click on the <guibutton>Reset</guibutton> button.
-					To reset all shortcuts click on the <guibutton>Reset all</guibutton> button.
-				</para>
-			</section>
-			
-    </section>
 
   </section>
-
