@@ -23,6 +23,7 @@ import workbench.db.WbConnection;
 import workbench.storage.DataStore;
 import workbench.util.StrBuffer;
 import workbench.util.StrWriter;
+import java.util.Collections;
 
 /**
  *
@@ -42,6 +43,7 @@ public class ReportTable
 	private IndexReporter index;
 	private String tableComment;
 	private TagWriter tagWriter = new TagWriter();
+	private String schemaNameToUse = null;
 
 	/** Creates a new instance of ReportTable */
 	public ReportTable(TableIdentifier tbl, WbConnection conn, String namespace)
@@ -49,6 +51,8 @@ public class ReportTable
 	{
 		this.table = tbl;
 		List cols = conn.getMetadata().getTableColumns(tbl);
+		Collections.sort(cols);
+
 		this.tableComment = conn.getMetadata().getTableComment(this.table);
 		String schema = this.table.getSchema();
 		if (schema == null || schema.length() == 0)
@@ -134,6 +138,10 @@ public class ReportTable
 		return out.toString();
 	}
 
+	public void setSchemaNameToUse(String name)
+	{
+		this.schemaNameToUse = name;
+	}
 	public void writeXml(Writer out)
 		throws IOException
 	{
@@ -146,7 +154,7 @@ public class ReportTable
 		line.append('\n');
 
 		tagWriter.appendTag(line, colindent, TAG_TABLE_CATALOG, this.table.getCatalog());
-		tagWriter.appendTag(line, colindent, TAG_TABLE_SCHEMA, this.table.getSchema());
+		tagWriter.appendTag(line, colindent, TAG_TABLE_SCHEMA, (this.schemaNameToUse == null ? this.table.getSchema() : this.schemaNameToUse));
 		tagWriter.appendTag(line, colindent, TAG_TABLE_NAME, this.table.getTable());
 		tagWriter.appendTag(line, colindent, TAG_TABLE_COMMENT, this.tableComment);
 

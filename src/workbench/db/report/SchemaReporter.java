@@ -59,6 +59,8 @@ public class SchemaReporter
 	private ProgressPanel progressPanel;
 	private JFrame progressWindow;
 	private boolean showProgress = false;
+	private boolean outputDbDesigner = false;
+	private String schemaNameToUse = null;
 
 	/**
 	 * Creates a new SchemaReporter for the supplied connection
@@ -108,7 +110,17 @@ public class SchemaReporter
 
 	public void setSchemas(List list)
 	{
+		if (list == null || list.size() == 0) return;
 		this.schemas = list;
+		this.schemaNameToUse = null;
+	}
+
+	public void setSchemaNameToUse(String name)
+	{
+		if (this.schemas == null || this.schemas.size() == 1)
+		{
+			this.schemaNameToUse = name;
+		}
 	}
 
 	public void setOutputFilename(String filename)
@@ -167,6 +179,7 @@ public class SchemaReporter
 			closeProgress();
 		}
 	}
+
 	/**
 	 *	Write the XML into the supplied output
 	 */
@@ -209,6 +222,7 @@ public class SchemaReporter
 					this.progressPanel.setInfoText(tableName);
 				}
 				ReportTable rtable = new ReportTable(table, this.dbConn, this.xmlNamespace);
+				rtable.setSchemaNameToUse(this.schemaNameToUse);
 				rtable.writeXml(out);
 				rtable.done();
 				out.flush();
@@ -352,6 +366,7 @@ public class SchemaReporter
 		{
 			if (this.cancel) return null;
 			DataStore ds = this.dbConn.getMetadata().getTables(null, null, name, this.types);
+			ds.sortByColumn(DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, true);
 			int count = ds.getRowCount();
 			ArrayList result = new ArrayList(count);
 			for (int i=0; i < count; i++)
@@ -389,25 +404,31 @@ public class SchemaReporter
 
 			if (this.cancel) return;
 			DataStore ds = this.dbConn.getMetadata().getTables(targetSchema, this.types);
-			int count = ds.getRowCount();
-
-			for (int i=0; i < count; i++)
-			{
-				if (this.cancel) return;
-
-				String type = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-				if (type.indexOf("TABLE") > -1)
-				{
-					String table = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-					String catalog = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
-					String schema = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-					this.tables.add(new TableIdentifier(catalog, schema, table));
-				}
-			}
+			this.processTableList(ds);
 		}
 		catch (SQLException e)
 		{
 			LogMgr.logError("SchemaReporter.retrieveTables()", "Error retrieving tables", e);
+		}
+	}
+
+	private void processTableList(DataStore ds)
+	{
+		int count = ds.getRowCount();
+		ds.sortByColumn(DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, true);
+
+		for (int i=0; i < count; i++)
+		{
+			if (this.cancel) return;
+
+			String type = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+			if (type.indexOf("TABLE") > -1)
+			{
+				String table = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+				String catalog = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
+				String schema = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+				this.tables.add(new TableIdentifier(catalog, schema, table));
+			}
 		}
 	}
 }
