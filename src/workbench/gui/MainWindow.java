@@ -11,8 +11,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.event.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -26,12 +24,8 @@ import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
-import workbench.gui.actions.FileConnectAction;
-import workbench.gui.actions.FileExitAction;
-import workbench.gui.actions.RemoveTabAction;
-import workbench.gui.actions.SelectTabAction;
-import workbench.gui.actions.ShowDbExplorerAction;
-import workbench.gui.actions.WbAction;
+import workbench.exception.ExceptionUtil;
+import workbench.gui.actions.*;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbToolbar;
@@ -48,6 +42,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 
+
 /**
  *
  * @author  workbench@kellerer.org
@@ -55,8 +50,8 @@ import workbench.resource.Settings;
  */
 public class MainWindow 
 	extends JFrame 
-	implements ActionListener, WindowListener, ChangeListener, FilenameChangeListener, 
-						MouseListener
+	implements ActionListener, MouseListener, WindowListener, 
+						ChangeListener, FilenameChangeListener
 {
 	private String windowId;
 	private String currentProfileName;
@@ -84,11 +79,13 @@ public class MainWindow
 		int tabCount = WbManager.getSettings().getDefaultTabCount();
 		if (tabCount <= 0) tabCount = 1;
 
+		ImageIcon dummy = ResourceMgr.getPicture("small_blank");
 		for (int i=0; i < tabCount; i++)
 		{
 			SqlPanel sql = new SqlPanel(i + 1);
 			sql.addFilenameChangeListener(this);
-			this.sqlTab.addTab(ResourceMgr.getString("LabelTabStatement") + " " + Integer.toString(i+1), sql);
+			this.sqlTab.addTab(ResourceMgr.getString("LabelTabStatement") + " " + Integer.toString(i+1), dummy, sql);
+			sql.restoreSettings();
 		}
 		this.initMenu();
 
@@ -480,6 +477,7 @@ public class MainWindow
 		if (this.dbExplorerPanel == null)
 		{
 			this.dbExplorerPanel = new DbExplorerPanel();
+			this.dbExplorerPanel.restoreSettings();
 		}
 		JMenuBar dbmenu = this.getMenuForPanel(this.dbExplorerPanel);
 
@@ -541,11 +539,16 @@ public class MainWindow
 			{
 				this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_CONNECTION_ERROR) + "\r\n\n" + se.toString());
 			}
-			this.showStatusMessage(null);
+			this.showStatusMessage("");
 		}
 		catch (Exception e)
 		{
-			this.showLogMessage("Could not connect\r\n" + e.getMessage());
+			String msg = e.getMessage();
+			if (msg == null)
+			{
+				ExceptionUtil.getDisplay(e, true);
+			}
+			this.showLogMessage("Could not connect\n" + msg);
 		}
 		this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	}
@@ -624,7 +627,7 @@ public class MainWindow
 			index --;
 		}
 		SqlPanel sql = new SqlPanel(index + 1);
-		sql.setConnection(this.currentConnection, true);
+		sql.setConnection(this.currentConnection);
 		this.sqlTab.add(sql, index);
 		this.sqlTab.setTitleAt(index, ResourceMgr.getString("LabelTabStatement") + " " + Integer.toString(index+1));
 
@@ -730,10 +733,6 @@ public class MainWindow
 		}
 	}
 
-	/** Invoked when the mouse button has been clicked (pressed
-	 * and released) on a component.
-	 *
-	 */
 	public void mouseClicked(MouseEvent e)
 	{
 		if (e.getSource() == this.sqlTab && e.getButton() == MouseEvent.BUTTON3)
@@ -749,30 +748,18 @@ public class MainWindow
 		}
 	}
 	
-	/** Invoked when the mouse enters a component.
-	 *
-	 */
 	public void mouseEntered(MouseEvent e)
 	{
 	}
 	
-	/** Invoked when the mouse exits a component.
-	 *
-	 */
 	public void mouseExited(MouseEvent e)
 	{
 	}
 	
-	/** Invoked when a mouse button has been pressed on a component.
-	 *
-	 */
 	public void mousePressed(MouseEvent e)
 	{
 	}
 	
-	/** Invoked when a mouse button has been released on a component.
-	 *
-	 */
 	public void mouseReleased(MouseEvent e)
 	{
 	}

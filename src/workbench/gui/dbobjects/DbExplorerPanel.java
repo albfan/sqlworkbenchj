@@ -56,8 +56,6 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		{
 			tables = new TableListPanel();
 			procs = new ProcedureListPanel();
-			tables.restoreSettings();
-			procs.restoreSettings();
 			tabPane = new JTabbedPane(JTabbedPane.TOP);
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerTables"), tables);
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerProcs"), procs);
@@ -103,6 +101,12 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		this.toolbar.add(this.connectionInfo);
 	}
 
+	public void restoreSettings()
+	{
+		tables.restoreSettings();
+		procs.restoreSettings();
+	}
+	
 	public void setConnection(WbConnection aConnection)
 	{
 		this.setConnection(aConnection, null);

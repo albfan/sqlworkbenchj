@@ -44,14 +44,6 @@ public class SpoolerProgressPanel extends javax.swing.JPanel
 		this.fileNameField.setToolTipText(fullName);
 		this.fileNameField.setText(fullName);
 	}
-	public void startProgressBar()
-	{
-		this.progressBar.setIndeterminate(true);
-	}
-	public void stopProgressBar()
-	{
-		this.progressBar.setIndeterminate(false);
-	}
 	
 	/** This method is called from within the constructor to
 	 * initialize the form.
@@ -67,8 +59,6 @@ public class SpoolerProgressPanel extends javax.swing.JPanel
 		progressInfoText = new javax.swing.JTextField();
 		rowInfo = new javax.swing.JTextField();
 		cancelButton = new javax.swing.JButton();
-		barPanel = new javax.swing.JPanel();
-		progressBar = new javax.swing.JProgressBar();
 		
 		setLayout(new java.awt.GridBagLayout());
 		
@@ -117,27 +107,10 @@ public class SpoolerProgressPanel extends javax.swing.JPanel
 		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 3;
-		gridBagConstraints.weighty = 1.0;
-		gridBagConstraints.insets = new java.awt.Insets(20, 0, 4, 0);
-		add(cancelButton, gridBagConstraints);
-		
-		barPanel.setLayout(new java.awt.BorderLayout());
-		
-		barPanel.setBorder(new javax.swing.border.EtchedBorder());
-		progressBar.setBorder(null);
-		progressBar.setBorderPainted(false);
-		progressBar.setMaximumSize(new java.awt.Dimension(32767, 18));
-		progressBar.setMinimumSize(new java.awt.Dimension(10, 18));
-		progressBar.setPreferredSize(new java.awt.Dimension(148, 18));
-		barPanel.add(progressBar, java.awt.BorderLayout.CENTER);
-		
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 2;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(5, 6, 0, 6);
-		add(barPanel, gridBagConstraints);
+		gridBagConstraints.insets = new java.awt.Insets(12, 0, 4, 0);
+		gridBagConstraints.weighty = 1.0;
+		add(cancelButton, gridBagConstraints);
 		
 	}//GEN-END:initComponents
 
@@ -152,9 +125,7 @@ public class SpoolerProgressPanel extends javax.swing.JPanel
 	
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JPanel infoPanel;
-	private javax.swing.JPanel barPanel;
 	private javax.swing.JTextField rowInfo;
-	private javax.swing.JProgressBar progressBar;
 	private javax.swing.JTextField fileNameField;
 	private javax.swing.JButton cancelButton;
 	private javax.swing.JTextField progressInfoText;

@@ -27,6 +27,7 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.components.WbToolbarSeparator;
+import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.FileActions;
 import workbench.resource.ResourceMgr;
 
@@ -55,8 +56,6 @@ public class ProfileEditorPanel
 		this.fillDrivers();
 		String last = WbManager.getSettings().getLastConnection();
 		this.selectProfile(last);
-		jList1.setNextFocusableComponent(connectionEditor);
-		this.connectionEditor.setNextFocusableComponent(jList1);
 		this.toolbar = new WbToolbar();
 		this.toolbar.add(new NewListEntryAction(this));
 		this.toolbar.add(new SaveProfilesAction(this));
@@ -70,6 +69,10 @@ public class ProfileEditorPanel
 		}
 		this.addKeyListener(this);
 		this.connectionEditor.setSourceList(this.model);
+		WbTraversalPolicy policy = new WbTraversalPolicy();
+		policy.addComponent(this.jList1);
+		policy.addComponent(this.connectionEditor);
+		this.setFocusTraversalPolicy(policy);
 	}
 
 	private void fillDrivers()
@@ -245,6 +248,7 @@ public class ProfileEditorPanel
 	public void saveItem() throws WbException
 	{
 		ConnectionMgr conn = WbManager.getInstance().getConnectionMgr();
+		this.connectionEditor.updateProfile();
 		conn.setProfiles(this.model.getValues());
 		conn.saveXmlProfiles();
 	}

@@ -54,7 +54,6 @@ public class TextPopup extends JPopupMenu
 		this.add(anAction.getMenuItem());
 	}
 	
-
 	public WbAction getCopyAction() { return this.copy; }
 	public WbAction getCutAction() { return this.cut; }
 	public WbAction getPasteAction() { return this.paste; }

@@ -9,6 +9,8 @@ package workbench.gui.profiles;
 import java.awt.Component;
 import java.awt.Frame;
 import java.awt.event.ItemEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
@@ -20,8 +22,10 @@ import workbench.db.DbDriver;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.BooleanPropertyEditor;
 import workbench.gui.components.ComboStringPropertyEditor;
+import workbench.gui.components.PasswordPropertyEditor;
 import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.resource.ResourceMgr;
 
@@ -29,7 +33,9 @@ import workbench.resource.ResourceMgr;
  *
  * @author  workbench@kellerer.org
  */
-public class ConnectionEditorPanel extends JPanel
+public class ConnectionEditorPanel 
+	extends JPanel
+	implements PropertyChangeListener
 {
 	private ConnectionProfile currentProfile;
 	private List drivers;
@@ -41,6 +47,21 @@ public class ConnectionEditorPanel extends JPanel
 	{
 		this.initComponents();
 		this.initEditorList();
+		
+		// we only monitor changes to the name, because that needs
+		// to be updated immediately on the list. The other
+		// property are only updated when the parent requests this
+		this.tfProfileName.addPropertyChangeListener(tfProfileName.getName(), this);
+		WbTraversalPolicy policy = new WbTraversalPolicy();
+		policy.addComponent(tfProfileName);
+		policy.addComponent(cbDrivers);
+		policy.addComponent(tfURL);
+		policy.addComponent(tfUserName);
+		policy.addComponent(tfPwd);
+		policy.addComponent(cbAutocommit);
+		policy.setDefaultComponent(tfProfileName);
+		this.setFocusTraversalPolicy(policy);
+		this.setFocusCycleRoot(true);
 	}
 	
 	private void initEditorList()
@@ -72,7 +93,7 @@ public class ConnectionEditorPanel extends JPanel
 		cbDrivers = new ComboStringPropertyEditor();
 		jLabel2 = new javax.swing.JLabel();
 		tfURL = new StringPropertyEditor();
-		tfPwd = new javax.swing.JPasswordField();
+		tfPwd = new PasswordPropertyEditor();
 		cbAutocommit = new BooleanPropertyEditor();
 		dummy = new javax.swing.JPanel();
 		tfProfileName = new StringPropertyEditor();
@@ -168,7 +189,7 @@ public class ConnectionEditorPanel extends JPanel
 		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		add(tfURL, gridBagConstraints);
 		
-		tfPwd.setName("inputPassword");
+		tfPwd.setName("password");
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 4;
@@ -296,21 +317,9 @@ public class ConnectionEditorPanel extends JPanel
 			changed = changed || editor.isChanged();
 			editor.applyChanges();
 		}
-		/*
-		Object driver = cbDrivers.getSelectedItem();
-		if (driver != null)
-		{
-			this.currentProfile.setDriverclass(driver.toString());
-		}
-		this.currentProfile.setPassword(tfPwd.getText());
-		this.currentProfile.setUrl(tfURL.getText());
-		this.currentProfile.setUsername(tfUserName.getText());
-		this.currentProfile.setAutocommit(cbAutocommit.isSelected());
-		this.currentProfile.setName(tfProfileName.getText());
-		*/
 		if (changed)
 		{
-//			this.sourceModel.profileChanged(this.currentProfile);
+			this.sourceModel.profileChanged(this.currentProfile);
 		}
 	}
 
@@ -337,60 +346,26 @@ public class ConnectionEditorPanel extends JPanel
 		}
 	}
 	
-
 	public void setProfile(ConnectionProfile aProfile)
 	{
 		this.init = true;
 		this.currentProfile = aProfile;
-		//this.tfProfileName.setText(aProfile.getName());
-		//this.tfProfileName.setText(aProfile.getName());
-		//this.tfUserName.setText(aProfile.getUsername());
-		//this.tfURL.setText(aProfile.getUrl());
-		//this.tfURL.setCaretPosition(0);
-		this.tfPwd.setText(aProfile.decryptPassword());
-		//this.cbAutocommit.setSelected(aProfile.getAutocommit());
-		//this.checkDriverDropDown();
 		this.initPropertyEditors();
 		this.init = false;
 	}
 
-	private void checkDriverDropDown()
+	/** This method gets called when a bound property is changed.
+	 * @param evt A PropertyChangeEvent object describing the event source
+	 *   	and the property that has changed.
+	 *
+	 */
+	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (this.currentProfile == null) return;
-		int newIndex = -1;
-		int count = this.cbDrivers.getItemCount();
-		String currentClass = this.currentProfile.getDriverclass();
-		String drvClass;
-		
-		for (int i=0; i < count; i++)
+		if (evt.getSource() == this.tfProfileName)
 		{
-			drvClass = (String)this.cbDrivers.getItemAt(i);
-			if (drvClass.equals(currentClass))
-			{
-				newIndex = i;
-				break;
-			}
+			this.updateProfile();
+			this.sourceModel.profileChanged(this.currentProfile);
 		}
-		if (newIndex >= 0 )
-		{
-			this.cbDrivers.setSelectedIndex(newIndex);
-		}
-		else
-		{
-			this.init = true;
-			String cls = this.currentProfile.getDriverclass();
-			if (cls != null && cls.length() > 0)
-			{
-				DbDriver drv = new DbDriver(cls);
-				this.cbDrivers.addItem(drv);
-				this.cbDrivers.setSelectedItem(drv);
-			}
-			else
-			{
-				this.cbDrivers.setSelectedItem(null);
-			}
-			this.init = false;
-		}
-	}
+	}	
 
 }

@@ -346,7 +346,17 @@ public class Settings
 		return result;
 	}
 
+	public void setEditorFile(int anEditorId, String aFilename)
+	{
+		if (aFilename == null) aFilename = "";
+		this.props.setProperty("workbench.editor.lastfile" + anEditorId, aFilename);
+	}
 
+	public String getEditorFile(int anEditorId)
+	{
+		return this.props.getProperty("workbench.editor.lastfile" + anEditorId, null);
+	}
+	
 	public void setLastSqlDividerLocation(int aDividerId, int y)
 	{
 		this.props.setProperty("workbench.gui.sql.lastdivider" + aDividerId, Integer.toString(y));

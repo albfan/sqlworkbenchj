@@ -53,7 +53,6 @@ public class TablePopup extends JPopupMenu
 		if (withSep) this.addSeparator();
 		this.add(anAction);
 	}
-	
 
 	public WbAction getCopyAction() { return this.copy; }
 	public WbAction getCutAction() { return this.cut; }

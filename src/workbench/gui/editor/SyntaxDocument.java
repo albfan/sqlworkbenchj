@@ -12,6 +12,9 @@ import java.util.ArrayList;
 
 import javax.swing.event.*;
 import javax.swing.text.*;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
 
 /**
@@ -19,12 +22,26 @@ import javax.swing.undo.UndoableEdit;
  * system.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxDocument.java,v 1.2 2002-07-11 22:27:47 thomas Exp $
+ * @version $Id: SyntaxDocument.java,v 1.3 2002-08-31 11:47:14 thomas Exp $
  */
-public class SyntaxDocument extends PlainDocument
+public class SyntaxDocument 
+	extends PlainDocument
+	implements UndoableEditListener
 {
 	private ArrayList undoList = new ArrayList();
+	private UndoManager undoManager = new UndoManager();
 	
+	public SyntaxDocument()
+	{
+		super();
+		this.addUndoableEditListener(this);
+	}
+	public SyntaxDocument(AbstractDocument.Content aContent)
+	{
+		super(aContent);
+		this.addUndoableEditListener(this);
+	}
+
 	/**
 	 * Returns the token marker that is to be used to split lines
 	 * of this document up into tokens. May return null if this
@@ -51,6 +68,42 @@ public class SyntaxDocument extends PlainDocument
 		tokenizeLines();
 	}
 
+	public void undoableEditHappened(UndoableEditEvent e) 
+	{
+		if (e.getEdit().isSignificant())
+		{
+			undoManager.addEdit(e.getEdit());
+		}
+	}
+
+	public void clearUndoBuffer()
+	{
+		this.undoManager.discardAllEdits();
+	}
+	
+	public void redo()
+	{
+		try
+		{ 
+			undoManager.redo(); 
+		}
+		catch (CannotRedoException cre)
+		{ 
+			//cre.printStackTrace(); 
+		}
+	}
+	
+	public void undo()
+	{
+		try
+		{ 
+			undoManager.undo(); 
+		}
+		catch (CannotUndoException cre)
+		{ 
+			//cre.printStackTrace(); 
+		}
+	}
 	/**
 	 * Reparses the document, by passing all lines to the token
 	 * marker. This should be called after the document is first

@@ -25,7 +25,7 @@ import javax.swing.KeyStroke;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.3 2002-08-10 15:57:27 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.4 2002-08-31 11:47:14 thomas Exp $
  * @see org.gjt.sp.jedit.textarea.DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
@@ -74,6 +74,8 @@ public abstract class InputHandler extends KeyAdapter
 	public static final ActionListener TOGGLE_RECT = new toggle_rect();
 	public static final ActionListener MAKE_UPPER_CASE = new make_upper();
 	public static final ActionListener MAKE_LOWER_CASE = new make_lower();
+	public static final ActionListener UNDO = new undo();
+	public static final ActionListener REDO = new redo();
 	
 	// Default action
 	public static final ActionListener INSERT_CHAR = new insert_char();
@@ -401,6 +403,24 @@ public abstract class InputHandler extends KeyAdapter
 			String actionCommand);
 	}
 
+	public static class redo implements ActionListener
+	{
+		public void actionPerformed(ActionEvent evt)
+		{
+			JEditTextArea textArea = getTextArea(evt);
+			textArea.getDocument().redo();
+		}
+	}
+	
+	public static class undo implements ActionListener
+	{
+		public void actionPerformed(ActionEvent evt)
+		{
+			JEditTextArea textArea = getTextArea(evt);
+			textArea.getDocument().undo();
+		}
+	}
+	
 	public static class make_upper implements ActionListener
 	{
 		public void actionPerformed(ActionEvent evt)

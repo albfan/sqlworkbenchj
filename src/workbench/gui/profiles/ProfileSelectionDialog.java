@@ -16,6 +16,7 @@ import javax.swing.*;
 import workbench.WbManager;
 import workbench.db.ConnectionProfile;
 import workbench.gui.actions.EscAction;
+import workbench.gui.components.WbTraversalPolicy;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -109,6 +110,7 @@ public class ProfileSelectionDialog extends JDialog implements ActionListener, W
     getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 		getRootPane().setDefaultButton(okButton);
 		setTitle(ResourceMgr.getString(ResourceMgr.TXT_SELECT_PROFILE));
+		this.setFocusTraversalPolicy(null);
 		this.restoreSize();
   }
 

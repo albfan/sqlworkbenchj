@@ -22,6 +22,7 @@ import java.util.Vector;
 import javax.swing.border.BevelBorder;
 import javax.swing.BorderFactory;
 import workbench.interfaces.TextSelectionListener;
+import workbench.interfaces.Undoable;
 import workbench.util.StringUtil;
 
 /**
@@ -52,11 +53,11 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.6 2002-08-23 14:35:21 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.7 2002-08-31 11:47:14 thomas Exp $
  */
 public class JEditTextArea 
 	extends JComponent
-	implements MouseWheelListener
+	implements MouseWheelListener, Undoable
 {
 	/**
 	 * Adding components with this name to the text area will place
@@ -1112,7 +1113,22 @@ public class JEditTextArea
 	{
 		select(getCaretPosition(),getCaretPosition());
 	}
+	
+	public void clearUndoBuffer()
+	{
+		this.document.clearUndoBuffer();
+	}
 
+	public void undo()
+	{
+		this.document.undo();
+	}
+	
+	public void redo()
+	{
+		this.document.redo();
+	}
+	
 	/**
 	 * Selects from the start offset to the end offset. This is the
 	 * general selection method used by all other selecting methods.
