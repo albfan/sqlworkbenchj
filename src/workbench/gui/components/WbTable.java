@@ -77,8 +77,8 @@ extends JTable
 	private OptimizeAllColumnsAction optimizeAllCol;
 	private SetColumnWidthAction setColWidth;
 
-	private FindAction findAction;
-	private FindAgainAction findAgainAction;
+	private FindDataAction findAction;
+	private FindDataAgainAction findAgainAction;
 	private DataToClipboardAction dataToClipboard;
 	private SaveDataAsAction exportDataAction;
 
@@ -152,10 +152,10 @@ extends JTable
 		JTableHeader th = this.getTableHeader();
 		th.addMouseListener(this);
 
-		this.findAction = new FindAction(this);
+		this.findAction = new FindDataAction(this);
 		this.findAction.setEnabled(false);
 		this.findAction.setCreateMenuSeparator(true);
-		this.findAgainAction = new FindAgainAction(this);
+		this.findAgainAction = new FindDataAgainAction(this);
 		this.findAgainAction.setEnabled(false);
 
 		this.dataToClipboard = new DataToClipboardAction(this);
@@ -220,12 +220,12 @@ extends JTable
 		return this.dataToClipboard;
 	}
 
-	public FindAction getFindAction()
+	public FindDataAction getFindAction()
 	{
 		return this.findAction;
 	}
 
-	public FindAgainAction getFindAgainAction()
+	public FindDataAgainAction getFindAgainAction()
 	{
 		return this.findAgainAction;
 	}
@@ -974,7 +974,7 @@ extends JTable
 	/**
 	 *	Open the Find dialog for searching strings in the result set
 	 */
-	public void findData()
+	public void find()
 	{
 		String criteria;
 		criteria = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgEnterSearchCriteria"), this.lastSearchCriteria);

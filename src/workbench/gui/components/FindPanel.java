@@ -16,10 +16,13 @@ import workbench.gui.actions.WbAction;
 import workbench.interfaces.Searchable;
 
 /**
- *
+ * A small panel with a find and find next button, and a criteria field 
+*  which provides a quick search facitiliy for a WbTable component
  * @author  workbench@kellerer.org
  */
-public class FindPanel extends JPanel implements Searchable
+public class FindPanel 
+	extends JPanel 
+	implements Searchable
 {
 	private WbTable searchTable;
 	private JTextField findField;
@@ -65,7 +68,6 @@ public class FindPanel extends JPanel implements Searchable
 
 		this.add(findField, gridBagConstraints);
 
-
 		InputMap im = new ComponentInputMap(this);
 		ActionMap am = new ActionMap();
 		this.setInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, im);
@@ -91,7 +93,7 @@ public class FindPanel extends JPanel implements Searchable
 		this.findField.grabFocus();
 	}
 
-	public void findData()
+	public void find()
 	{
 		if (this.searchTable.getRowCount() <= 0) return;
 		Window parent = SwingUtilities.getWindowAncestor(this);
