@@ -3,7 +3,7 @@
  *
  * Created on December 2, 2001, 1:32 AM
  */
-package workbench.gui.db;
+package workbench.gui.profiles;
 
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
@@ -21,7 +21,7 @@ import workbench.log.LogMgr;
 public class SaveProfileAction extends AbstractAction
 {
 	private FileActions client;
-	
+
 	public SaveProfileAction(FileActions aClient)
 	{
 		this.client = aClient;
@@ -29,7 +29,7 @@ public class SaveProfileAction extends AbstractAction
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("SaveProfile"));
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_SAVE));
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
 		try

@@ -4,7 +4,7 @@
  * Created on 5. Juli 2002, 23:40
  */
 
-package workbench.gui.db;
+package workbench.gui.profiles;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,7 +22,7 @@ import workbench.db.DbDriver;
  */
 class DriverListModel implements ListModel
 {
-	
+
 	ArrayList drivers;
 	/** Creates a new instance of ProfileListModel */
 	public DriverListModel(List aDriverList)
@@ -31,7 +31,7 @@ class DriverListModel implements ListModel
 		this.drivers.addAll(0, aDriverList);
 		Collections.sort(this.drivers, DbDriver.getNameComparator());
 	}
-	
+
 	/** Adds a listener to the list that's notified each time a change
 	 * to the data model occurs.
 	 * @param l the <code>ListDataListener</code> to be added
@@ -40,7 +40,7 @@ class DriverListModel implements ListModel
 	public void addListDataListener(ListDataListener l)
 	{
 	}
-	
+
 	/** Returns the value at the specified index.
 	 * @param index the requested index
 	 * @return the value at <code>index</code>
@@ -56,7 +56,7 @@ class DriverListModel implements ListModel
 		DbDriver drv = (DbDriver)this.drivers.get(index);
 		return drv;
 	}
-	
+
 	/**
 	 * Returns the length of the list.
 	 * @return the length of the list
@@ -66,7 +66,7 @@ class DriverListModel implements ListModel
 	{
 		return this.drivers.size();
 	}
-	
+
 	/** Removes a listener from the list that's notified each time a
 	 * change to the data model occurs.
 	 * @param l the <code>ListDataListener</code> to be removed
@@ -93,7 +93,7 @@ class DriverListModel implements ListModel
 		DbDriver newp = (DbDriver)this.drivers.get(index);
 		index = 1;
 	}
-	
+
 	public List getValues()
 	{
 		return this.drivers;

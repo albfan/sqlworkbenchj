@@ -4,7 +4,7 @@
  * Created on 1. Juli 2002, 18:34
  */
 
-package workbench.gui.db;
+package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
 import java.util.Arrays;
@@ -18,6 +18,7 @@ import javax.swing.border.Border;
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.db.DbDriver;
 import workbench.exception.WbException;
 import workbench.interfaces.FileActions;
 import workbench.resource.ResourceMgr;
@@ -26,43 +27,37 @@ import workbench.resource.ResourceMgr;
  *
  * @author  thomas.kellerer@inline-skate.com
  */
-public class ProfileEditorPanel
-	extends javax.swing.JPanel
-	implements FileActions
+public class DriverlistEditorPanel extends javax.swing.JPanel implements FileActions
 {
 	//private ConnectionEditorPanel connectionEditor;
-	private ProfileListModel model;
+	private DriverListModel model;
 	private JToolBar toolbar;
 	private int lastIndex = -1;
 
 	/** Creates new form ProfileEditor */
-	public ProfileEditorPanel()
+	public DriverlistEditorPanel()
 	{
 		initComponents();
-		this.fillDrivers();
-		String last = WbManager.getSettings().getLastConnection();
-		this.selectProfile(last);
-		jList1.setNextFocusableComponent(connectionEditor);
-		this.connectionEditor.setNextFocusableComponent(jList1);
+		this.fillDriverList();
+		jList1.setNextFocusableComponent(driverEditor);
+		this.driverEditor.setNextFocusableComponent(jList1);
 		this.toolbar = new JToolBar();
 		this.toolbar.setFloatable(false);
 		this.toolbar.add(new NewProfileAction(this));
-		this.toolbar.add(new SaveProfileAction(this));
-		this.toolbar.addSeparator();
+		//this.toolbar.add(new SaveProfileAction(this));
+		//this.toolbar.addSeparator();
 		this.toolbar.add(new DeleteProfileAction(this));
 		this.listPanel.add(this.toolbar, BorderLayout.NORTH);
 	}
 
-	private void fillDrivers()
+	private void fillDriverList()
 	{
-		List drivers = WbManager.getInstance().getConnectionMgr().getDrivers();
-		this.connectionEditor.setDrivers(drivers);
-	}
-
-	private void fillProfiles()
-	{
-		this.model = new ProfileListModel(WbManager.getInstance().getConnectionMgr().getProfiles());
+		this.model = new DriverListModel(WbManager.getInstance().getConnectionMgr().getDrivers());
 		this.jList1.setModel(this.model);
+		if (this.model.getSize() > 0)
+		{
+			this.jList1.setSelectedIndex(0);
+		}
 	}
 	/** This method is called from within the constructor to
 	 * initialize the form.
@@ -72,21 +67,20 @@ public class ProfileEditorPanel
 	private void initComponents()//GEN-BEGIN:initComponents
 	{
 		jSplitPane1 = new javax.swing.JSplitPane();
-		
-		
+
+
 		listPanel = new javax.swing.JPanel();
 		jList1 = new javax.swing.JList();
-		connectionEditor = new workbench.gui.db.ConnectionEditorPanel();
-		
+		driverEditor = new workbench.gui.profiles.DriverEditorPanel();
+
 		setLayout(new java.awt.BorderLayout());
-		
+
 		jSplitPane1.setBorder(new javax.swing.border.EtchedBorder());
 		jSplitPane1.setDividerLocation(100);
 		jSplitPane1.setDividerSize(4);
 		listPanel.setLayout(new java.awt.BorderLayout());
-		
+
 		jList1.setFont(null);
-		this.fillProfiles();
 		jList1.addListSelectionListener(new javax.swing.event.ListSelectionListener()
 		{
 			public void valueChanged(javax.swing.event.ListSelectionEvent evt)
@@ -94,17 +88,16 @@ public class ProfileEditorPanel
 				jList1ValueChanged(evt);
 			}
 		});
-		
+
 		listPanel.add(jList1, java.awt.BorderLayout.CENTER);
-		
+
 		jSplitPane1.setLeftComponent(listPanel);
-		
-		
-		connectionEditor.setFont(null);
-		jSplitPane1.setRightComponent(connectionEditor);
-		
+
+
+		jSplitPane1.setRightComponent(driverEditor);
+
 		add(jSplitPane1, java.awt.BorderLayout.CENTER);
-		
+
 	}//GEN-END:initComponents
 
 	private void jList1ValueChanged(javax.swing.event.ListSelectionEvent evt)//GEN-FIRST:event_jList1ValueChanged
@@ -113,45 +106,46 @@ public class ProfileEditorPanel
 		{
 			if (lastIndex > -1)
 			{
-				ConnectionProfile current = this.connectionEditor.getProfile();
-				this.model.putProfile(lastIndex, current);
+				DbDriver current = this.driverEditor.getDriver();
+				this.model.putDriver(lastIndex, current);
 			}
-			ConnectionProfile newProfile = (ConnectionProfile)this.jList1.getSelectedValue();
-			this.connectionEditor.setProfile(newProfile);
-			lastIndex = this.jList1.getSelectedIndex();
+			int index = this.jList1.getSelectedIndex();
+			DbDriver newDriver = this.model.getDriver(index);
+			this.driverEditor.setDriver(newDriver);
+			lastIndex = index;
 		}
 	}//GEN-LAST:event_jList1ValueChanged
 
-	public ConnectionProfile getSelectedProfile()
+	public DbDriver getSelectedDriver()
 	{
 		this.updateUI();
-		this.connectionEditor.updateProfile();
-		ConnectionProfile prof = (ConnectionProfile)jList1.getSelectedValue();
-		return prof;
+		this.driverEditor.updateDriver();
+		int index = jList1.getSelectedIndex();
+		DbDriver drv = this.model.getDriver(index);
+		return drv;
 	}
 
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private workbench.gui.db.ConnectionEditorPanel connectionEditor;
+	private workbench.gui.profiles.DriverEditorPanel driverEditor;
 	private javax.swing.JSplitPane jSplitPane1;
 	private javax.swing.JList jList1;
 	private javax.swing.JPanel listPanel;
 	// End of variables declaration//GEN-END:variables
 
 
-	private void selectProfile(String aProfileName)
+	private void selectDriver(String aDriverName)
 	{
-		if (aProfileName == null) return;
+		if (aDriverName == null) return;
 
 		try
 		{
-			ListModel m = jList1.getModel();
-			int count = m.getSize();
+			int count = this.model.getSize();
 
 			for (int i=0; i < count; i++)
 			{
-				ConnectionProfile prof = (ConnectionProfile)m.getElementAt(i);
-				if (prof.getName().equals(aProfileName))
+				DbDriver drv = (DbDriver)this.model.getElementAt(i);
+				if (drv.getName().equals(aDriverName))
 				{
 					this.jList1.setSelectedIndex(i);
 					break;
@@ -172,7 +166,7 @@ public class ProfileEditorPanel
 	{
 		int index = this.jList1.getSelectedIndex();
 		if (index > 0) this.jList1.setSelectedIndex(index - 1);
-		this.model.deleteProfile(index);
+		this.model.deleteDriver(index);
 		this.jList1.updateUI();
 	}
 
@@ -182,18 +176,18 @@ public class ProfileEditorPanel
 	 */
 	public void newItem() throws WbException
 	{
-		ConnectionProfile cp = new ConnectionProfile();
-		cp.setName(ResourceMgr.getString("EmptyProfileName"));
-		this.model.addProfile(cp);
-		this.selectProfile(cp.getName());
+		DbDriver drv = new DbDriver();
+		drv.setName(ResourceMgr.getString("EmptyDriverName"));
+		this.model.addDriver(drv);
+		this.selectDriver(drv.getName());
 		this.jList1.updateUI();
 	}
 
 	public void saveItem() throws WbException
 	{
 		ConnectionMgr conn = WbManager.getInstance().getConnectionMgr();
-		conn.setProfiles(this.model.getValues());
-		conn.saveXmlProfiles();
+		conn.setDrivers(this.model.getValues());
+		conn.saveDrivers();
 	}
 
 }

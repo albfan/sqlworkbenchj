@@ -4,7 +4,7 @@
  * Created on 9. Juli 2002, 13:10
  */
 
-package workbench.gui.db;
+package workbench.gui.profiles;
 
 import workbench.WbManager;
 import workbench.exception.WbException;
@@ -16,7 +16,7 @@ import workbench.resource.ResourceMgr;
  */
 public class DriverEditorDialog extends javax.swing.JDialog
 {
-	
+
 	/** Creates new form DriverEditorDialog */
 	public DriverEditorDialog(java.awt.Frame parent, boolean modal)
 	{
@@ -27,7 +27,7 @@ public class DriverEditorDialog extends javax.swing.JDialog
 			this.setSize(300,300);
 		}
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -35,12 +35,12 @@ public class DriverEditorDialog extends javax.swing.JDialog
 	 */
 	private void initComponents()//GEN-BEGIN:initComponents
 	{
-		driverlistEditorPanel1 = new workbench.gui.db.DriverlistEditorPanel();
+		driverlistEditorPanel1 = new workbench.gui.profiles.DriverlistEditorPanel();
 		jPanel1 = new javax.swing.JPanel();
 		okButton = new javax.swing.JButton();
 		cancelButton = new javax.swing.JButton();
 		jPanel2 = new javax.swing.JPanel();
-		
+
 		setTitle(ResourceMgr.getString("DriverEditorWindowTitle"));
 		setModal(true);
 		setName("DriverEditorDialog");
@@ -51,13 +51,13 @@ public class DriverEditorDialog extends javax.swing.JDialog
 				closeDialog(evt);
 			}
 		});
-		
-		
+
+
 		driverlistEditorPanel1.setBorder(new javax.swing.border.EtchedBorder());
 		getContentPane().add(driverlistEditorPanel1, java.awt.BorderLayout.CENTER);
-		
+
 		jPanel1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
-		
+
 		okButton.setFont(null);
 		okButton.setMnemonic('O');
 		okButton.setText(ResourceMgr.getString(ResourceMgr.TXT_OK));
@@ -68,9 +68,9 @@ public class DriverEditorDialog extends javax.swing.JDialog
 				okButtonActionPerformed(evt);
 			}
 		});
-		
+
 		jPanel1.add(okButton);
-		
+
 		cancelButton.setText(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));
 		cancelButton.addActionListener(new java.awt.event.ActionListener()
 		{
@@ -79,16 +79,16 @@ public class DriverEditorDialog extends javax.swing.JDialog
 				cancelButtonActionPerformed(evt);
 			}
 		});
-		
+
 		jPanel1.add(cancelButton);
-		
+
 		getContentPane().add(jPanel1, java.awt.BorderLayout.SOUTH);
-		
+
 		jPanel2.setMaximumSize(new java.awt.Dimension(2, 2));
 		jPanel2.setMinimumSize(new java.awt.Dimension(1, 1));
 		jPanel2.setPreferredSize(new java.awt.Dimension(2, 2));
 		getContentPane().add(jPanel2, java.awt.BorderLayout.NORTH);
-		
+
 	}//GEN-END:initComponents
 
 	private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_cancelButtonActionPerformed
@@ -101,7 +101,7 @@ public class DriverEditorDialog extends javax.swing.JDialog
 		try
 		{
 			this.driverlistEditorPanel1.saveItem();
-			this.closeDialog();		
+			this.closeDialog();
 		}
 		catch (WbException e)
 		{
@@ -128,14 +128,14 @@ public class DriverEditorDialog extends javax.swing.JDialog
 	{
 		new DriverEditorDialog(new javax.swing.JFrame(), true).show();
 	}
-	
-	
+
+
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JPanel jPanel2;
 	private javax.swing.JPanel jPanel1;
 	private javax.swing.JButton okButton;
-	private workbench.gui.db.DriverlistEditorPanel driverlistEditorPanel1;
+	private workbench.gui.profiles.DriverlistEditorPanel driverlistEditorPanel1;
 	private javax.swing.JButton cancelButton;
 	// End of variables declaration//GEN-END:variables
-	
+
 }

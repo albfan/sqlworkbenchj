@@ -4,7 +4,7 @@
  * Created on 5. Juli 2002, 23:40
  */
 
-package workbench.gui.db;
+package workbench.gui.profiles;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,7 +20,7 @@ import workbench.db.ConnectionProfile;
  */
 class ProfileListModel implements ListModel
 {
-	
+
 	ArrayList profiles;
 	/** Creates a new instance of ProfileListModel */
 	public ProfileListModel(Map aProfileList)
@@ -29,7 +29,7 @@ class ProfileListModel implements ListModel
 		this.profiles.addAll(aProfileList.values());
 		Collections.sort(this.profiles, ConnectionProfile.getNameComparator());
 	}
-	
+
 	/** Adds a listener to the list that's notified each time a change
 	 * to the data model occurs.
 	 * @param l the <code>ListDataListener</code> to be added
@@ -38,7 +38,7 @@ class ProfileListModel implements ListModel
 	public void addListDataListener(ListDataListener l)
 	{
 	}
-	
+
 	/** Returns the value at the specified index.
 	 * @param index the requested index
 	 * @return the value at <code>index</code>
@@ -48,7 +48,7 @@ class ProfileListModel implements ListModel
 	{
 		return this.profiles.get(index);
 	}
-	
+
 	/**
 	 * Returns the length of the list.
 	 * @return the length of the list
@@ -58,7 +58,7 @@ class ProfileListModel implements ListModel
 	{
 		return this.profiles.size();
 	}
-	
+
 	/** Removes a listener from the list that's notified each time a
 	 * change to the data model occurs.
 	 * @param l the <code>ListDataListener</code> to be removed
@@ -85,7 +85,7 @@ class ProfileListModel implements ListModel
 		ConnectionProfile newp = (ConnectionProfile)this.profiles.get(index);
 		index = 1;
 	}
-	
+
 	public Collection getValues()
 	{
 		return this.profiles;

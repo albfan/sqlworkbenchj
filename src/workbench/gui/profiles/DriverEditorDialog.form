@@ -17,7 +17,7 @@
 
   <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout"/>
   <SubComponents>
-    <Container class="workbench.gui.db.DriverlistEditorPanel" name="driverlistEditorPanel1">
+    <Container class="workbench.gui.profiles.DriverlistEditorPanel" name="driverlistEditorPanel1">
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.EtchedBorderInfo">

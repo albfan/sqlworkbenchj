@@ -3,7 +3,7 @@
  *
  * Created on December 2, 2001, 1:32 AM
  */
-package workbench.gui.db;
+package workbench.gui.profiles;
 
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
@@ -18,27 +18,27 @@ import workbench.log.LogMgr;
  *	Action to copy the contents of a entry field into the clipboard
  *	@author  thomas.kellerer@web.de
  */
-public class NewProfileAction extends AbstractAction
+public class DeleteProfileAction extends AbstractAction
 {
 	private FileActions client;
-	
-	public NewProfileAction(FileActions aClient)
+
+	public DeleteProfileAction(FileActions aClient)
 	{
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("NewProfile"));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("NewProfile"));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_NEW));
+		this.putValue(Action.NAME, ResourceMgr.getString("DeleteProfile"));
+		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("DeleteProfile"));
+		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_DELETE));
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
 		try
 		{
-			this.client.newItem();
+			this.client.deleteItem();
 		}
 		catch (WbException ex)
 		{
-			LogMgr.logError(this, "Error creating profile", ex);
+			LogMgr.logError(this, "Error saving profiles", ex);
 		}
 	}
 }

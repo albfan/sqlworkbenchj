@@ -4,7 +4,7 @@
  * Created on 8. Juli 2002, 21:39
  */
 
-package workbench.gui.db;
+package workbench.gui.profiles;
 
 import java.awt.Frame;
 import java.io.File;
@@ -24,13 +24,13 @@ import workbench.resource.ResourceMgr;
 public class DriverEditorPanel extends javax.swing.JPanel
 {
 	private DbDriver currentDriver;
-	
+
 	/** Creates new form BeanForm */
 	public DriverEditorPanel()
 	{
 		initComponents();
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -39,7 +39,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 	private void initComponents()//GEN-BEGIN:initComponents
 	{
 		java.awt.GridBagConstraints gridBagConstraints;
-		
+
 		lblName = new javax.swing.JLabel();
 		tfName = new javax.swing.JTextField();
 		lblClassName = new javax.swing.JLabel();
@@ -50,9 +50,9 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		jButton1 = new javax.swing.JButton();
 		lblSample = new javax.swing.JLabel();
 		tfSampleUrl = new javax.swing.JTextField();
-		
+
 		setLayout(new java.awt.GridBagLayout());
-		
+
 		setFont(null);
 		lblName.setFont(null);
 		lblName.setText(ResourceMgr.getString("LabelDriverName"));
@@ -62,7 +62,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 7);
 		add(lblName, gridBagConstraints);
-		
+
 		tfName.setMinimumSize(new java.awt.Dimension(50, 20));
 		tfName.setPreferredSize(new java.awt.Dimension(100, 20));
 		tfName.addFocusListener(new java.awt.event.FocusAdapter()
@@ -72,7 +72,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 				DriverEditorPanel.this.focusLost(evt);
 			}
 		});
-		
+
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 0;
@@ -82,7 +82,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.weightx = 1.0;
 		gridBagConstraints.insets = new java.awt.Insets(11, 3, 0, 3);
 		add(tfName, gridBagConstraints);
-		
+
 		lblClassName.setFont(null);
 		lblClassName.setText(ResourceMgr.getString("LabelDriverClass"));
 		gridBagConstraints = new java.awt.GridBagConstraints();
@@ -91,7 +91,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 7);
 		add(lblClassName, gridBagConstraints);
-		
+
 		tfClassName.setColumns(10);
 		tfClassName.addFocusListener(new java.awt.event.FocusAdapter()
 		{
@@ -100,7 +100,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 				DriverEditorPanel.this.focusLost(evt);
 			}
 		});
-		
+
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 1;
@@ -109,7 +109,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 3);
 		add(tfClassName, gridBagConstraints);
-		
+
 		lblLibrary.setFont(null);
 		lblLibrary.setText(ResourceMgr.getString("LabelDriverLibrary"));
 		gridBagConstraints = new java.awt.GridBagConstraints();
@@ -118,7 +118,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 7);
 		add(lblLibrary, gridBagConstraints);
-		
+
 		tfLibrary.setColumns(10);
 		tfLibrary.addFocusListener(new java.awt.event.FocusAdapter()
 		{
@@ -127,7 +127,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 				DriverEditorPanel.this.focusLost(evt);
 			}
 		});
-		
+
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 2;
@@ -137,7 +137,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.weightx = 1.0;
 		add(tfLibrary, gridBagConstraints);
-		
+
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 4;
@@ -145,7 +145,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
 		gridBagConstraints.weighty = 1.0;
 		add(jPanel1, gridBagConstraints);
-		
+
 		jButton1.setFont(null);
 		jButton1.setText("...");
 		jButton1.setMaximumSize(new java.awt.Dimension(20, 20));
@@ -158,13 +158,13 @@ public class DriverEditorPanel extends javax.swing.JPanel
 				selectLibrary(evt);
 			}
 		});
-		
+
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 5;
 		gridBagConstraints.gridy = 2;
 		gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 3);
 		add(jButton1, gridBagConstraints);
-		
+
 		lblSample.setFont(null);
 		lblSample.setText(ResourceMgr.getString("LabelSampleUrl"));
 		gridBagConstraints = new java.awt.GridBagConstraints();
@@ -173,7 +173,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 7);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		add(lblSample, gridBagConstraints);
-		
+
 		tfSampleUrl.setColumns(10);
 		tfSampleUrl.setFont(null);
 		gridBagConstraints = new java.awt.GridBagConstraints();
@@ -184,7 +184,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 3);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		add(tfSampleUrl, gridBagConstraints);
-		
+
 	}//GEN-END:initComponents
 
 	private void focusLost(java.awt.event.FocusEvent evt)//GEN-FIRST:event_focusLost
@@ -205,7 +205,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 			WbManager.getSettings().setLastLibraryDir(jf.getCurrentDirectory().getAbsolutePath());
 		}
 	}//GEN-LAST:event_selectLibrary
-	
+
 	public void setDriver(DbDriver aDriver)
 	{
 		this.currentDriver = aDriver;
@@ -214,7 +214,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		this.tfLibrary.setText(aDriver.getLibrary());
 		this.tfSampleUrl.setText(aDriver.getSampleUrl());
 	}
-	
+
 	void updateDriver()
 	{
 		this.currentDriver.setName(tfName.getText());
@@ -222,13 +222,13 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		this.currentDriver.setLibrary(tfLibrary.getText());
 		this.currentDriver.setSampleUrl(tfSampleUrl.getText());
 	}
-	
+
 	public DbDriver getDriver()
 	{
 		this.updateDriver();
 		return this.currentDriver;
 	}
-	
+
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JPanel jPanel1;
 	private javax.swing.JButton jButton1;
@@ -260,21 +260,21 @@ public class DriverEditorPanel extends javax.swing.JPanel
 			String ext = null;
 			String s = f.getName();
 			int i = s.lastIndexOf('.');
-			
+
 			if (i > 0 &&  i < s.length() - 1)
 			{
 				ext = s.substring(i+1).toLowerCase();
 			}
 			return ext;
 		}
-		
+
 		public boolean accept(File f)
 		{
 			if (f.isDirectory())
 			{
 				return true;
 			}
-			
+
 			String extension = this.getExtension(f);
 			if (extension != null)
 			{
@@ -283,17 +283,17 @@ public class DriverEditorPanel extends javax.swing.JPanel
 			}
 			return false;
 		}
-		
+
 		public String getDescription()
-		{ 
+		{
 			String s = ResourceMgr.getString("ArchivesFilterName");
-			return s; 
+			return s;
 		}
-		
+
 		/** Whether the given file is accepted by this filter.
 		 *
 		 */
-		
+
 	}
 
 }
