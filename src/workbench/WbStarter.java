@@ -9,10 +9,6 @@ import javax.swing.JOptionPane;
 public class WbStarter
 {
 
-	public WbStarter()
-	{
-	}
-
 	/**
 	 * @param args the command line arguments
 	 */
@@ -24,7 +20,7 @@ public class WbStarter
 			version = System.getProperty("java.runtime.version");
 		}
 		boolean is14 = false;
-		
+		System.out.println("Workbench: Using Java version=" + version);
 		try
 		{
 			int majorversion = Integer.parseInt(version.substring(0,1));
@@ -43,7 +39,7 @@ public class WbStarter
 			System.err.println("A JDK or JRE 1.4 or later is needed to run this application!");
 			System.exit(1);
 		}
-		WbManager.startup(args);
+		WbManager.main(args);
 	}
 
 }

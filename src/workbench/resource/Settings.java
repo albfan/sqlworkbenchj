@@ -30,6 +30,7 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import workbench.WbManager;
 import workbench.interfaces.FontChangedListener;
 import workbench.util.LineTokenizer;
 import workbench.util.StringUtil;
@@ -56,6 +57,7 @@ public class Settings
 		
 	public Settings()
 	{
+		if (WbManager.trace) System.err.println("Settings.<init> - start");
 		this.props = new Properties();
 		this.filename = System.getProperty("workbench.settings.file", null);
 		fillDefaults();
@@ -89,16 +91,25 @@ public class Settings
 			LogMgr.logInfo(this, "Using defaults");
 			fillDefaults();
 		}
+		
     try
     {
-			LogMgr.setOutputFile(this.props.getProperty("workbench.log.filename", "System.out"));
+			String logfile = System.getProperty("workbench.log.filename", null);
+			if (logfile == null)
+			{
+				logfile = this.props.getProperty("workbench.log.filename", "System.out");
+			}
+			LogMgr.setOutputFile(logfile);
     }
     catch (Exception e)
     {
     }
+		if (WbManager.trace) System.err.println("Settings.<init> - done");
 	}
 
 	public String getConfigDir() { return this.configDir; }
+	public void setConfigDir(String aDir) { this.configDir = aDir; }
+	
 	public String getProfileFileName()
 	{
 		return this.configDir + "WbProfiles.xml";
@@ -185,6 +196,7 @@ public class Settings
 
 	private void fillDefaults()
 	{
+		if (WbManager.trace) System.err.println("Setting.fillDefaults() - start");
 		try
 		{
 			this.props.load(ResourceMgr.getDefaultSettings());
@@ -193,6 +205,7 @@ public class Settings
 		{
 			LogMgr.logError(this, "Could not read default settings", e);
 		}
+		if (WbManager.trace) System.err.println("Setting.fillDefaults() - done");
 	}
 
 	public Font getStandardFont()
@@ -236,6 +249,7 @@ public class Settings
 	 */
 	public Font getFont(String aFontName)
 	{
+		if (WbManager.trace) System.err.println("Setting.getFont() - start");
 		Font result;
 
 		String baseKey = new StringBuffer("workbench.font.").append(aFontName).toString();
@@ -261,6 +275,7 @@ public class Settings
 			size = 11;
 		}
 		result = new Font(name, style, size);
+		if (WbManager.trace) System.err.println("Setting.getFont() - done");
 		return result;
 	}
 

@@ -7,11 +7,13 @@
 package workbench;
 
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.lang.Runnable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -30,6 +32,7 @@ import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.sql.BatchRunner;
 import workbench.util.CmdLineParser;
 import workbench.util.StringUtil;
 import workbench.util.WbCipher;
@@ -44,16 +47,15 @@ public class WbManager
 	implements FontChangedListener
 {
 	private static WbManager wb = new WbManager();
-	private Settings settings = new Settings();
+	private Settings settings;
 	private ConnectionMgr connMgr = new ConnectionMgr();
 	private ArrayList mainWindows = new ArrayList();
 	private WbCipher desCipher = null;
+	private boolean batchMode = false;
+	public static boolean trace = "true".equalsIgnoreCase(System.getProperty("workbench.startuptrace", "false"));
 	
 	private WbManager() 
 	{
-		this.setLookAndFeel();
-		this.initUI();
-		this.settings.addFontChangedListener(this);
 	}
 
 	public WbCipher getDesCipher()
@@ -161,6 +163,7 @@ public class WbManager
 
 	private void setLookAndFeel()
 	{
+		if (trace) System.err.println("WbManager.setLookAndFeel() - start");
 		try
 		{
 			String className = this.settings.getLookAndFeelClass();
@@ -181,13 +184,15 @@ public class WbManager
 		catch (Exception e)
 		{
 		}
+		if (trace) System.err.println("WbManager.setLookAndFeel() - done");
 	}
 	
 	private void initUI() 
 	{
-		long start,end;
-		UIDefaults def = UIManager.getDefaults();
+		if (trace) System.err.println("WbManager.initUI() - start");
+		this.setLookAndFeel();
 		
+		UIDefaults def = UIManager.getDefaults();
 		Font stdFont = this.settings.getStandardFont();
 		
 		def.put("Button.font", stdFont);
@@ -231,12 +236,17 @@ public class WbManager
 			def.put("Button.showMnemonics", Boolean.TRUE);
 		else
 			def.put("Button.showMnemonics", Boolean.FALSE);
+		
+		this.settings.addFontChangedListener(this);
+		if (trace) System.err.println("WbManager.initUI() - done");
 	}
 
 	public MainWindow createWindow()
 	{
+		if (trace) System.err.println("WbManager.createWindow() - start");
 		MainWindow win = new MainWindow();
 		this.mainWindows.add(win);
+		if (trace) System.err.println("WbManager.createWindow() - done");
 		return win;
 	}
 	
@@ -245,6 +255,7 @@ public class WbManager
 		Window w = SwingUtilities.getWindowAncestor(aCaller);
 		WbSwingUtilities.showErrorMessage(aCaller, aMsg);
 	}
+	
 	public void exitWorkbench()
 	{
 		this.getConnectionMgr().disconnectAll();
@@ -299,9 +310,16 @@ public class WbManager
     }
 	}
 	
+	public void openNewWindow()
+	{
+		this.openNewWindow(false);
+	}
+	
 	public void openNewWindow(boolean checkCmdLine)
 	{
-		MainWindow main = this.createWindow();
+		if (trace) System.err.println("WbManager.openNewWindow()");
+		final MainWindow main = this.createWindow();
+		
 		main.show();
 		main.restoreState();
 		boolean connected = false;
@@ -310,8 +328,6 @@ public class WbManager
 		{
 			// get profile name from commandline
 			String profilename = (String)cmdLine.getOptionValue(profileNameOption);
-			System.out.println("profile=" + profilename);
-			//profilename = StringUtil.trimQuotes(profilename);
 			if (profilename != null && profilename.trim().length() > 0)
 			{
 				ConnectionProfile prof = connMgr.getProfile(profilename);
@@ -324,46 +340,108 @@ public class WbManager
 		
 		if (!connected)
 		{
-			main.selectConnection();
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					main.selectConnection();
+				}
+			});
 		}
 	}
 	
 	private CmdLineParser cmdLine;
 	private CmdLineParser.Option profileNameOption;
-	private String[] cmdArguments;
+	private CmdLineParser.Option configDirOption;
+	private CmdLineParser.Option scriptOption;
+	private CmdLineParser.Option logFileOption;
 	
 	private void initCmdLine(String[] args)
 	{
+		if (trace) System.err.println("WbManager.initCmdLine()");
 		cmdLine = new CmdLineParser();
 		profileNameOption = cmdLine.addStringOption('p', "profile");
+		configDirOption = cmdLine.addStringOption('c', "configdir");
+		scriptOption = cmdLine.addStringOption('s', "script");
+		logFileOption = cmdLine.addStringOption('l', "logfile");
+		
 		try
 		{
 			cmdLine.parse(args);
+			String value = (String)cmdLine.getOptionValue(configDirOption);
+			if (value != null && value.length() > 0)
+			{
+				System.setProperty("workbench.configdir", value);
+			}
+			
+			value = (String)cmdLine.getOptionValue(logFileOption);
+			if (value != null && value.length() > 0)
+			{
+				System.setProperty("workbench.log.filename", value);
+			}
+			
+			String scriptname = this.getScriptFile();
+			if (scriptname == null || scriptname.length() == 0)
+			{
+				this.batchMode = false;
+			}
+			else
+			{
+				this.batchMode = true;
+			}
+
 		}
 		catch (Exception e)
 		{
 		}
 	}
-	
-	public static void startup(String[] args)
+
+	public String getScriptFile()
 	{
-		WbSplash splash = null;
-		if (wb.settings.getShowSplash())
+		String scriptname = (String)cmdLine.getOptionValue(scriptOption);
+		return scriptname;
+	}
+	
+	private void init()
+	{
+		if (trace) System.err.println("WbManager.init()");
+		this.settings = new Settings();
+		if (!this.batchMode)
 		{
-			splash = new WbSplash(null, false);
-			splash.setVisible(true);
+			WbSplash splash = null;
+			if (wb.settings.getShowSplash())
+			{
+				splash = new WbSplash(null, false);
+				splash.setVisible(true);
+			}
+			this.initUI();
+			this.openNewWindow(true);
+			if (splash != null)
+			{
+				splash.setVisible(false);
+				splash.dispose();
+			}
 		}
-		wb.initCmdLine(args);
-		wb.openNewWindow(true);
-		if (splash != null)
+		else
 		{
-			splash.setVisible(false);
-			splash.dispose();
+			BatchRunner runner = new BatchRunner(this.getScriptFile());
+			String profilename = (String)cmdLine.getOptionValue(profileNameOption);
+			try
+			{
+				runner.setProfile(profilename);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("WbManager", "Could not initialize the batch runner", e);
+			}
 		}
 	}
 
 	public static void main(String args[])
 	{
-		startup(args);
+		if (trace) System.err.println("WbManager.main() - start");
+		wb.initCmdLine(args);
+		wb.init();
+		if (trace) System.err.println("WbManager.main() - done");
 	}
 }
