@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.StringTokenizer;
 import workbench.WbManager;
 import workbench.log.LogMgr;
+import workbench.util.WbPersistence;
 
 /**
  *	Supplies connection information as stored in
@@ -31,14 +32,17 @@ public class ConnectionProfile
 	private String description;
 	private boolean isNew;
 	
+	static
+	{
+		WbPersistence.makeTransient(ConnectionProfile.class, "isNew");
+	}
+	
 	public ConnectionProfile()
 	{
-		this.isNew = true;
 	}
 	
 	public ConnectionProfile(String driverClass, String url, String userName, String pwd)
 	{
-		this.isNew = true;
 		this.setUrl(url);
 		this.setDriverclass(driverClass);
 		this.setUsername(userName);
@@ -48,7 +52,6 @@ public class ConnectionProfile
 	
 	public ConnectionProfile(String aName, String driverClass, String url, String userName, String pwd)
 	{
-		this.isNew = true;
 		this.setUrl(url);
 		this.setDriverclass(driverClass);
 		this.setUsername(userName);
@@ -107,6 +110,7 @@ public class ConnectionProfile
 	 */
 	public String decryptPassword(String aPwd)
 	{
+		if (aPwd == null) return null;
 		if (!aPwd.startsWith(CRYPT_PREFIX))
 		{
 			return aPwd;
@@ -169,6 +173,9 @@ public class ConnectionProfile
 	public String getDescription() { return this.description; }
 	public void setDescription(String description) { this.description = description; }
 
+	public void setIsNew(boolean aFlag) { this.isNew = aFlag; }
+	public boolean getIsNew() { return this.isNew; }
+	
 	public static Comparator getNameComparator()
 	{
 		return new Comparator()
