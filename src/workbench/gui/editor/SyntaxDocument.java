@@ -1,5 +1,6 @@
 package workbench.gui.editor;
 
+import java.util.ArrayList;
 /*
  * SyntaxDocument.java - Document that can be tokenized
  * Copyright (C) 1999 Slava Pestov
@@ -18,10 +19,12 @@ import javax.swing.undo.UndoableEdit;
  * system.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxDocument.java,v 1.1 2001-12-11 19:07:23 thomas Exp $
+ * @version $Id: SyntaxDocument.java,v 1.2 2002-07-11 22:27:47 thomas Exp $
  */
 public class SyntaxDocument extends PlainDocument
 {
+	private ArrayList undoList = new ArrayList();
+	
 	/**
 	 * Returns the token marker that is to be used to split lines
 	 * of this document up into tokens. May return null if this
@@ -115,7 +118,9 @@ public class SyntaxDocument extends PlainDocument
 	 *
 	 * @since jEdit 2.2pre1
 	 */
-	public void addUndoableEdit(UndoableEdit edit) {}
+	public void addUndoableEdit(UndoableEdit edit) 
+	{
+	}
 
 	// protected members
 	protected TokenMarker tokenMarker;

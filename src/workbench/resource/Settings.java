@@ -349,5 +349,22 @@ public class Settings
 	{
 		return this.props.getProperty("workbench.gui.lookandfeelclass", "");
 	}
+
+	public int getPreferredColumnWidth()
+	{
+		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.preferredcolwidth", "80"));
+	}
+	public void setPreferredColumnWidth(int aWidth)
+	{
+		this.props.setProperty("workbench.sql.preferredcolwidth", Integer.toString(aWidth));
+	}
 	
+	public int getMaxColumnWidth()
+	{
+		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.maxcolwidth", "500"));
+	}
+	public void setMaxColumnWidth(int aWidth)
+	{
+		this.props.setProperty("workbench.sql.maxcolwidth", Integer.toString(aWidth));
+	}
 }
