@@ -33,26 +33,27 @@ public class StringColumnRenderer extends ToolTipRenderer
 
 	public void prepareDisplay(Object aValue)
 	{
-		if (aValue == null)
+		// this method will not be called with a null value, so we do not need
+		// to check it here!
+		
+		try
 		{
-			displayValue[0] = StringUtil.EMPTY_STRING;
-			displayValue[1] = null;
+			this.displayValue = (String)aValue;
+		}
+		catch (Throwable e)
+		{
+			displayValue = aValue.toString();
+		}
+		
+		if (this.displayValue.length() > 0) 
+		{
+			this.tooltip = this.displayValue;
 		}
 		else
 		{
-			// this is the tooltip
-			displayValue[1] = null;
-			
-			try
-			{
-				displayValue[0] = (String)aValue;
-			}
-			catch (ClassCastException e)
-			{
-				displayValue[0] = aValue.toString();
-			}
-			if (displayValue[0].length() > 0) displayValue[1] = displayValue[0];
+			this.tooltip = null;
 		}
+
 	}
 
 }

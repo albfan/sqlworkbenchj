@@ -34,7 +34,8 @@ import workbench.WbManager;
 import workbench.exception.WbException;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
-import workbench.gui.dbobjects.SpoolerProgressPanel;
+import workbench.gui.dbobjects.ProgressPanel;
+import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
@@ -47,6 +48,7 @@ import workbench.util.StringUtil;
  * @author  workbench@kellerer.org
  */
 public class DataSpooler
+	implements Interruptable
 {
 	public static final int EXPORT_SQL = 1;
 	public static final int EXPORT_TXT = 2;
@@ -72,6 +74,7 @@ public class DataSpooler
 	private String chrFunc = null;
 	private String concatString = "||";
 	private int commitEvery=0;
+	private int maxDigits=340;
 	
 	/** If true, then cr/lf characters will be removed from
 	 *  character columns
@@ -79,7 +82,7 @@ public class DataSpooler
 	private boolean cleancr = false;
 	
 	private boolean showProgress = false;
-	private SpoolerProgressPanel progressPanel;
+	private ProgressPanel progressPanel;
 	private JFrame progressWindow;
 	private boolean keepRunning = true;
 
@@ -105,7 +108,7 @@ public class DataSpooler
 		File f = new File(this.outputfile);
 		String fname = f.getName();
 		
-		progressPanel = new SpoolerProgressPanel(this);
+		progressPanel = new ProgressPanel(this);
 		this.progressPanel.setFilename(this.outputfile);
 		this.progressPanel.setInfoText(ResourceMgr.getString("MsgSpoolingRow"));
 	
@@ -143,7 +146,7 @@ public class DataSpooler
 		this.dbConn = aConn;
 	}
 
-	public void stopExport() 
+	public void cancelExecution() 
 	{ 
 		this.keepRunning = false; 
 	}
@@ -436,8 +439,9 @@ public class DataSpooler
 			{
 				DecimalFormatSymbols symbols = new DecimalFormatSymbols();
 				symbols.setDecimalSeparator(this.decimalSymbol);
-				numberFormatter = new DecimalFormat("#.#", symbols);
+				numberFormatter = new DecimalFormat("0.#", symbols);
 				numberFormatter.setGroupingUsed(false);
+				numberFormatter.setMaximumFractionDigits(999);
 				ds.setDefaultNumberFormatter(numberFormatter);
 			}
 		}
@@ -479,15 +483,7 @@ public class DataSpooler
 			}
 			else if (this.exportType == EXPORT_XML)
 			{
-				pw.write("<table");
-				if (this.tableName != null && this.tableName.length() > 0)
-				{
-					pw.write(" name=\"");
-					pw.write(tableName);
-					pw.write("\"");
-				}
-				pw.write(">");
-				pw.newLine();
+				pw.write(ds.getXmlStart().toString());
 			}
 			
 			FieldPosition position = new FieldPosition(0);
@@ -524,7 +520,7 @@ public class DataSpooler
 				else if (this.exportType == EXPORT_XML)
 				{
 					row = ds.addRow(rs);
-					line = ds.getRowDataAsXml(row, "row", "column", "  ");
+					line = ds.getRowDataAsXml(row, "    ", (int)currentRow);
 					ds.discardRow(row);
 					if (line != null)
 					{
@@ -585,8 +581,7 @@ public class DataSpooler
 			
 			if (this.exportType == EXPORT_XML)
 			{
-				pw.write("</table>");
-				pw.newLine();
+				pw.write(ds.getXmlEnd().toString());
 			}
 		}
 		catch (IOException e)

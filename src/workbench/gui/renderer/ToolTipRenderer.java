@@ -25,7 +25,8 @@ public class ToolTipRenderer
 	extends JComponent
 	implements TableCellRenderer
 {
-	protected String[] displayResult = new String[] { StringUtil.EMPTY_STRING, null };
+	protected String displayValue = StringUtil.EMPTY_STRING;
+	protected String tooltip = null;
 
 	private Color selectedForeground;
 	private Color selectedBackground;
@@ -49,7 +50,6 @@ public class ToolTipRenderer
 		focusedInsets = new Insets(thick, thick, thick, thick);
 	}
 
-	private String displayText = StringUtil.EMPTY_STRING;
 	private boolean selected;
 	private boolean focus;
 	private int valign = SwingConstants.TOP; 
@@ -103,9 +103,16 @@ public class ToolTipRenderer
 		}
 		this.selected = isSelected;
 		
-		String[] displayValue = this.getDisplay(value);
-		this.setToolTipText(displayValue[1]);
-		this.displayText = displayValue[0];
+		if (value != null)
+		{
+			this.prepareDisplay(value);
+			this.setToolTipText(this.tooltip);
+		}
+		else
+		{
+			displayValue = StringUtil.EMPTY_STRING;
+			tooltip = null;
+		}
 		return this;
 	}
 	
@@ -139,7 +146,7 @@ public class ToolTipRenderer
 		Icon ic = null;
 		
 		String clippedText = 
-        SwingUtilities.layoutCompoundLabel(this,fm,this.displayText,ic
+        SwingUtilities.layoutCompoundLabel(this,fm,this.displayValue,ic
 						,this.valign
 						,this.halign
 						,SwingConstants.TOP
@@ -181,26 +188,15 @@ public class ToolTipRenderer
   protected void firePropertyChange(String propertyName, Object oldValue, Object newValue) {}
   public boolean isOpaque() { return true; }
 	
-	public String[] getDisplay(Object aValue)
+	public void prepareDisplay(Object aValue)
 	{
-		if (aValue == null)
-		{
-			return EMPTY_DISPLAY;
-		}
-		else
-		{
-			String display;
-			String tooltip = null;
-			
-			display = aValue.toString();
-			if (display.trim().length() == 0)
-				tooltip = null;
-			else
-				tooltip = display;
-			displayResult[0] = display;
-			displayResult[1] = tooltip;
-		}
-		return displayResult;
+		// this method will not be called with a null value, so we do not need
+		// to check it here!
+		displayValue = aValue.toString();
+		// this is the tooltip
+		tooltip = null;
+		if (displayValue.length() > 0) tooltip = displayValue;
+
 	}
-	
+
 }

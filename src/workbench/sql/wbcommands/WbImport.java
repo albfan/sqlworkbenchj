@@ -125,10 +125,8 @@ public class WbImport extends SqlCommand
 			imp.setImportTypeXml();
 			if (table != null) imp.setTableName(table);
 			
-			String commit = cmdLine.getValue("commitevery");
-			if (commit != null)
-			{
-			}
+			int commit = StringUtil.getIntValue(cmdLine.getValue("commitevery"),-1);
+			imp.setCommitEvery(commit);
 		}
 		else
 		{

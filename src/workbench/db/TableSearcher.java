@@ -44,13 +44,16 @@ public class TableSearcher
 	
 	private Thread createThread()
 	{	
-		return new Thread()
+		Thread t = new Thread()
 		{
 			public void run()
 			{
 				doSearch();
 			}
 		};
+		t.setName("TableSearcher thread");
+		t.setDaemon(true);
+		return t;
 	}
 	
 	public void search()
@@ -167,7 +170,7 @@ public class TableSearcher
 			}
 		}
 	}
-	
+
 	private String buildSqlForTable(String aTable)
 		throws SQLException, WbException
 	{
@@ -222,7 +225,25 @@ public class TableSearcher
 		else
 			return sql.toString();
 	}
-	
+
+	public boolean getCriteriaMightBeCaseInsensitive()
+	{
+		if (this.columnFunction == null) return false;
+		if (this.criteria == null) return false;
+		String func = this.columnFunction.toLowerCase();
+		
+		// upper() lower() is for Oracle, Postgres, Firebird/Interbase and MS SQL Server
+		// lcase, ucase is for Access and HSQLDB
+		if (func.indexOf("upper") > -1 || func.indexOf("ucase") > -1)
+		{
+			return (this.criteria.toUpperCase().equals(this.criteria));
+		}
+		if (func.indexOf("lower") > -1 || func.indexOf("lcase") > -1)
+		{
+			return (this.criteria.toLowerCase().equals(this.criteria));
+		}
+		return false;
+	}
 	public boolean setColumnFunction(String aColFunc)
 	{
 		this.columnFunction = null;

@@ -42,6 +42,7 @@ import workbench.gui.editor.Token;
 import workbench.gui.editor.TokenMarker;
 import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.FontChangedListener;
+import workbench.interfaces.FormattableSql;
 import workbench.interfaces.Replaceable;
 import workbench.interfaces.Searchable;
 import workbench.interfaces.TextContainer;
@@ -61,7 +62,7 @@ import workbench.util.LineTokenizer;
 public class EditorPanel 
 	extends JEditTextArea 
 	implements ClipboardSupport, FontChangedListener, 
-						 TextContainer, TextFileContainer, Replaceable, Searchable
+						 TextContainer, TextFileContainer, Replaceable, Searchable, FormattableSql
 {
 	private static final Border DEFAULT_BORDER = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
 	private AnsiSQLTokenMarker sqlTokenMarker;
@@ -174,10 +175,23 @@ public class EditorPanel
 		return this.sqlTokenMarker;
 	}
 	
+	public void showFindOnPopupMenu()
+	{
+		this.addPopupMenuItem(this.findAction, true);
+		this.addPopupMenuItem(this.findAgainAction, false);
+		this.addPopupMenuItem(this.replaceAction, false);
+	}
+
+	public void setEditable(boolean editable)
+	{
+		super.setEditable(editable);
+		this.replaceAction.setEnabled(editable);
+	}
+	
 	public void reformatSql()
 	{
 		String sql = this.getSelectedStatement();
-		SqlFormatter f = new SqlFormatter(sql);
+		SqlFormatter f = new SqlFormatter(sql, WbManager.getSettings().getMaxSubselectLength());
 		String newSql = null;
 		try
 		{
@@ -253,6 +267,7 @@ public class EditorPanel
 		}
 		this.setSelectedText(newText.toString());
 	}
+	
 	
 	public void makeInListForNonChar()
 	{

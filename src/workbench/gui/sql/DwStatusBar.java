@@ -6,14 +6,13 @@
 
 package workbench.gui.sql;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.*;
 import javax.swing.JLabel;
-
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+
+import javax.swing.border.EtchedBorder;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DividerBorder;
@@ -21,13 +20,15 @@ import workbench.gui.components.TextComponentMouseListener;
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
 
+
 /**
  *
  * @author  workbench@kellerer.org
  */
-public class DwStatusBar extends javax.swing.JPanel
+public class DwStatusBar extends JPanel
 {
 	private JTextField tfRowCount;
+	
 	private JTextField tfStatus;
 	JTextField tfMaxRows;
 	private String readyMsg;
@@ -43,7 +44,7 @@ public class DwStatusBar extends javax.swing.JPanel
 		this.tfMaxRows = new JTextField(8);
 		this.tfMaxRows.setEditable(true);
 		this.tfMaxRows.setMaximumSize(d);
-		this.tfMaxRows.setMargin(new java.awt.Insets(0, 2, 0, 2));
+		this.tfMaxRows.setMargin(new Insets(0, 2, 0, 2));
 		this.tfMaxRows.setText("0");
 		this.tfMaxRows.setToolTipText(ResourceMgr.getDescription("TxtMaxRows"));
 		this.tfMaxRows.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -54,29 +55,29 @@ public class DwStatusBar extends javax.swing.JPanel
 		fl.setHgap(0);
 		fl.setVgap(0);
 		p.setLayout(fl);
-		p.setMaximumSize(new java.awt.Dimension(85, FIELD_HEIGHT));
+		p.setMaximumSize(new Dimension(300, FIELD_HEIGHT));
 
-		this.setLayout(new java.awt.BorderLayout());
-		this.setBorder(new javax.swing.border.EtchedBorder());
-		this.setMaximumSize(new java.awt.Dimension(32768, BAR_HEIGHT));
-		this.setMinimumSize(new java.awt.Dimension(80, BAR_HEIGHT));
+		this.setLayout(new BorderLayout());
+		this.setBorder(new EtchedBorder());
+		this.setMaximumSize(new Dimension(32768, BAR_HEIGHT));
+		this.setMinimumSize(new Dimension(80, BAR_HEIGHT));
 		this.setPreferredSize(null);
 		tfRowCount.setEditable(false);
-		tfRowCount.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+		tfRowCount.setHorizontalAlignment(JTextField.RIGHT);
 		tfRowCount.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		tfRowCount.setDisabledTextColor(java.awt.Color.black);
-		tfRowCount.setMargin(new java.awt.Insets(0, 5, 0, 10));
-		tfRowCount.setMaximumSize(d);
+		tfRowCount.setDisabledTextColor(Color.BLACK);
+		tfRowCount.setMargin(new Insets(0, 15, 0, 10));
+		//tfRowCount.setMaximumSize(new java.awt.Dimension(32768, FIELD_HEIGHT));
 		tfRowCount.setMinimumSize(d);
-		tfRowCount.setPreferredSize(d);
+		tfRowCount.setPreferredSize(null);
 		tfRowCount.setAutoscrolls(false);
 		tfRowCount.setEnabled(false);
 
 		tfStatus.setHorizontalAlignment(JTextField.LEFT);
 		tfStatus.setBorder(new DividerBorder(DividerBorder.RIGHT));
-		tfStatus.setDisabledTextColor(java.awt.Color.black);
-		tfStatus.setMaximumSize(new java.awt.Dimension(32768, FIELD_HEIGHT));
-		tfStatus.setMinimumSize(new java.awt.Dimension(80, FIELD_HEIGHT));
+		tfStatus.setDisabledTextColor(Color.BLACK);
+		tfStatus.setMaximumSize(new Dimension(32768, FIELD_HEIGHT));
+		tfStatus.setMinimumSize(new Dimension(80, FIELD_HEIGHT));
 		tfStatus.setPreferredSize(null);
 		tfStatus.setAutoscrolls(false);
 		tfStatus.setEnabled(false);
@@ -106,9 +107,24 @@ public class DwStatusBar extends javax.swing.JPanel
 			this.readyMsg = aMsg;
 		}
 	}
-	public void setRowcount(int count)
+	
+	public void setRowcount(int start, int end, int count)
 	{
-		this.tfRowCount.setText(Integer.toString(count));
+		StringBuffer s = new StringBuffer(20);
+		if (count > 0)
+		{			
+			// for some reason the dynamic layout does not leave enough
+			// space to the left of the text, so we'll add some space here
+			s.append(" ");
+			s.append(start);
+			s.append("-");
+			s.append(end);
+			s.append("/");
+			s.append(count);
+		}
+		this.tfRowCount.setText(s.toString());
+		this.doLayout();
+		this.updateUI();
 		this.doRepaint();
 	}
 	

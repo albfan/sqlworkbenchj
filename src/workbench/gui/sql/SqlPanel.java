@@ -35,6 +35,7 @@ import workbench.gui.components.*;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.*;
+import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.Interruptable;
 import workbench.interfaces.TextChangeListener;
 import workbench.log.LogMgr;
@@ -49,8 +50,8 @@ import workbench.util.WbWorkspace;
 
 
 /**
- *	A panel with an editor (EditorPanel), a log panel and
- *	a display panel.
+ *	A panel with an SQL editor (EditorPanel), a log panel and
+ *	a panel for displaying SQL results (DwPanel) 
  *
  * @author  workbench@kellerer.org
  * @version 1.0
@@ -59,7 +60,7 @@ public class SqlPanel
 	extends JPanel
 	implements Runnable, FontChangedListener, ActionListener, TextSelectionListener, TextChangeListener, 
 				    PropertyChangeListener, 
-						MainPanel, Spooler, TextFileContainer, DbUpdater, Interruptable
+						MainPanel, Spooler, TextFileContainer, DbUpdater, Interruptable, FormattableSql
 {
 	private boolean runSelectedCommand;
 	private boolean runCurrentCommand;
@@ -129,6 +130,9 @@ public class SqlPanel
 	//private boolean dummyIconFetched = false;
 	private int lastDividerLocation = -1;
 
+	private ArrayList execListener = null;
+	private JMenu macroMenu = null;
+	
 	/** Creates new SqlPanel */
 	public SqlPanel(int anId)
 	{
@@ -258,9 +262,14 @@ public class SqlPanel
 		toolbar.addSeparator();
 		this.connectionInfo = new ConnectionInfo(this.toolbar.getBackground());
 		toolbar.add(this.connectionInfo);
-
 	}
 
+	public void setMacroMenu(JMenu aMenu)
+	{
+		this.macroMenu = aMenu;
+		this.macroMenu.setEnabled(this.isConnected());
+	}
+	
 	public void addToToolbar(WbAction anAction, boolean withSeperator)
 	{
 		this.toolbar.add(anAction.getToolbarButton(true), this.toolbar.getComponentCount() - 1);
@@ -588,6 +597,7 @@ public class SqlPanel
 		
 		this.addMacro = new AddMacroAction(this.editor);
 		this.addMacro.setCreateMenuSeparator(true);
+		this.addMacro.setEnabled(false);
 		this.actions.add(this.addMacro);
 		
 		this.findDataAction.setCreateMenuSeparator(true);
@@ -862,11 +872,21 @@ public class SqlPanel
 		else
 		{
 			int cursorPos = w.getExternalFileCursorPos(this.internalId - 1);
-			if (cursorPos > -1) this.editor.setCaretPosition(cursorPos);
+			if (cursorPos > -1 && cursorPos < this.editor.getText().length()) this.editor.setCaretPosition(cursorPos);
 		}
 		
 		Properties props = w.getSettings();
 		this.restoreSettings(props);
+	}
+
+	/** Do any work which should be done during the process of saving the 
+	 *  current workspace, but before the workspace file is actually opened!
+	 *  This is to ensure a corrupted workspace due to interrupting the saving
+	 *  because of the check for unsaved changes in the current editor file
+	 */
+	public void prepareWorkspaceSaving()
+	{
+		this.checkAndSaveFile();
 	}
 	
 	public void saveToWorkspace(WbWorkspace w)
@@ -880,7 +900,6 @@ public class SqlPanel
 			w.setExternalFileName(this.internalId - 1, this.getCurrentFileName());
 			w.setExternalFileCursorPos(this.internalId - 1, this.editor.getCaretPosition());
 		}
-		this.checkAndSaveFile();
 	}
 	
 	public void saveHistory(WbWorkspace w)
@@ -986,7 +1005,7 @@ public class SqlPanel
 		catch (Exception e)
 		{
 		}
-		boolean enable = aConnection != null;
+		boolean enable = (aConnection != null);
 		this.connectionInfo.setConnection(aConnection);
 		this.setActionState( new Action[] {this.executeAll, this.executeSelected, this.spoolData}, enable);
 
@@ -1000,7 +1019,9 @@ public class SqlPanel
 				aConnection.getMetadata().enableOutput();
 			}
 		}
+		this.macroMenu.setEnabled(enable);
 		this.checkResultSetActions();
+		this.doLayout();
 	}
 
 	public boolean isRequestFocusEnabled() { return true; }
@@ -1171,29 +1192,15 @@ public class SqlPanel
 	 */
 	public void setActionState(final Action anAction, final boolean aFlag)
 	{
-//		EventQueue.invokeLater(
-//			new Runnable()
-//			{
-//				public void run()
-//				{
-					anAction.setEnabled(aFlag);
-//				}
-//			});
+		anAction.setEnabled(aFlag);
 	}
 
 	public void setActionState(final Action[] anActionList, final boolean aFlag)
 	{
-		//EventQueue.invokeLater(
-		//	new Runnable()
-		//	{
-		//		public void run()
-		//		{
-					for (int i=0; i < anActionList.length; i++)
-					{
-						anActionList[i].setEnabled(aFlag);
-					}
-		//		}
-		//	});
+		for (int i=0; i < anActionList.length; i++)
+		{
+			anActionList[i].setEnabled(aFlag);
+		}
 	}
 
 	public String getCurrentStatement()
@@ -1217,9 +1224,7 @@ public class SqlPanel
 		if (sql == null) return;
 		
 		if (background.interrupted()) return;
-		this.setBusy(true);
-		this.setCancelState(true);
-		this.makeReadOnly();
+		
 
 		this.showStatusMessage(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
 		this.data.getStartEditAction().setSwitchedOn(false);
@@ -1227,6 +1232,14 @@ public class SqlPanel
 		this.storeStatementInHistory();
 		this.checkStatementActions();
 
+		// the dbStart should be fired *after* updating the 
+		// history, as the history might be saved if the MainWindow
+		// receives the execStart event
+		this.fireDbExecStart();
+		
+		this.setBusy(true);
+		this.setCancelState(true);
+		this.makeReadOnly();
 		this.data.setBatchUpdate(true);
 		
 		if (runCurrentCommand)
@@ -1246,6 +1259,7 @@ public class SqlPanel
 		this.setCancelState(false);
 		this.checkResultSetActions();
 
+		/*
 		if (sql.trim().toLowerCase().startsWith("shutdown"))
 		{
 			String url = this.dbConnection.getUrl();
@@ -1261,6 +1275,8 @@ public class SqlPanel
 				}
 			}
 		}
+		*/
+		this.fireDbExecEnd();
 		this.selectEditor();
 	}
 
@@ -1396,6 +1412,8 @@ public class SqlPanel
 
 	private void displayResult(String aSqlScript, int currentCursorPos)
 	{
+		boolean compressLog = WbManager.getSettings().getConsolidateLogMsg();
+				
 		try
 		{
 			this.log.setText(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
@@ -1429,6 +1447,7 @@ public class SqlPanel
 			this.log.setText("");
 
 			boolean onErrorAsk = true;
+			if (count == 1) compressLog = false;
 
 			this.data.scriptStarting();
 			long startTime = System.currentTimeMillis();
@@ -1438,14 +1457,18 @@ public class SqlPanel
 				StringBuffer logmsg = new StringBuffer(200);
 				String sql = (String)sqls.get(i);
 				this.data.runStatement(sql);
-				logmsg.append(this.data.getLastMessage());
-				if (count > 1)
-				{
-					logmsg.append("\n");
-					logmsg.append(StringUtil.replace(msg, "%nr%", Integer.toString(i + 1)));
-					logmsg.append("\n\n");
+				if (!compressLog || !this.data.wasSuccessful())
+				{	
+					logmsg.append(this.data.getLastMessage());
+					if (count > 1)
+					{
+						logmsg.append("\n");
+						logmsg.append(StringUtil.replace(msg, "%nr%", Integer.toString(i + 1)));
+						logmsg.append("\n\n");
+					}
+					this.appendToLog(logmsg.toString());
 				}
-				this.appendToLog(logmsg.toString());
+				
 				if (i == 0 && !this.data.hasResultSet())
 				{
 					this.showLogPanel();
@@ -1473,6 +1496,15 @@ public class SqlPanel
 				}
 			}
 			final long end = System.currentTimeMillis();
+
+			if (compressLog)
+			{
+				msg = count + " " + ResourceMgr.getString("MsgTotalStatementsExecuted") + "\n";
+				this.appendToLog(msg);
+				long rows = this.data.getRowsAffectedByScript();
+				msg = rows + " " + ResourceMgr.getString("MsgTotalRowsAffected") + "\n";
+				this.appendToLog(msg);
+			}
 			
 			if (this.data.hasResultSet())
 			{
@@ -1699,17 +1731,18 @@ public class SqlPanel
 	
 	private void removeTabIcon()
 	{
+		if (this.isBusy()) return;
 		this.showTabIcon(null);
 	}
 	
 	private void showFileIcon()
 	{
+		if (this.isBusy()) return;
 		this.showTabIcon(this.getFileIcon());
 	}
 	
 	private void showTabIcon(ImageIcon icon)
 	{
-		if (this.isBusy()) return;
 		Container parent = this.getParent();
 		if (parent instanceof JTabbedPane)
 		{
@@ -1758,7 +1791,7 @@ public class SqlPanel
 		this.setExecuteActionStates(!busy);
 	}
 
-	private synchronized boolean isBusy() { return this.threadBusy; }
+	public synchronized boolean isBusy() { return this.threadBusy; }
 
 	public class ExecuteCurrentSql implements ActionListener
 	{
@@ -1851,6 +1884,37 @@ public class SqlPanel
 		if (this.hasFileLoaded())
 		{
 			this.showFileIcon();
+		}
+	}
+
+	public void addDbExecutionListener(DbExecutionListener l)
+	{
+		if (this.execListener == null) this.execListener = new ArrayList();
+		this.execListener.add(l);
+	}
+	
+	public void removeDbExecutionListener(DbExecutionListener l)
+	{
+		if (this.execListener == null) return;
+		this.execListener.remove(l);
+	}
+	
+	private void fireDbExecStart()
+	{
+		if (this.execListener == null) return;
+		int count = this.execListener.size();
+		for (int i=0; i < count; i++)
+		{
+			((DbExecutionListener)this.execListener.get(i)).executionStart(this.dbConnection, this);
+		}
+	}
+	private void fireDbExecEnd()
+	{
+		if (this.execListener == null) return;
+		int count = this.execListener.size();
+		for (int i=0; i < count; i++)
+		{
+			((DbExecutionListener)this.execListener.get(i)).executionEnd(this.dbConnection, this);
 		}
 	}
 	

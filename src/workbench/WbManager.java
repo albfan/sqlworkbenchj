@@ -7,9 +7,16 @@
 package workbench;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -96,6 +103,20 @@ public class WbManager implements FontChangedListener
 		return this.connMgr;
 	}
 
+	public MainWindow getCurrentWindow()
+	{
+		if (this.mainWindows == null) return null;
+		if (this.mainWindows.size() == 1)
+		{
+			return (MainWindow)this.mainWindows.get(0);
+		}
+		for (int i=0; i < this.mainWindows.size(); i++)
+		{
+			MainWindow w = (MainWindow)this.mainWindows.get(i);
+			if (w.hasFocus()) return w;
+		}
+		return null;
+	}
 	public String getWorkspaceFilename(Window parent, boolean toSave)
 	{
 		return this.getWorkspaceFilename(parent, toSave, false);
@@ -335,54 +356,160 @@ public class WbManager implements FontChangedListener
 
 	public void showErrorMessage(Component aCaller, String aMsg)
 	{
-		//Window w = SwingUtilities.getWindowAncestor(aCaller);
 		WbSwingUtilities.showErrorMessage(aCaller, aMsg);
 	}
 
+	private JDialog closeMessage;
+	
 	public void exitWorkbench()
 	{
 		//boolean first = true;
 		if (!this.batchMode)
 		{
-			MainWindow w = null;
-			boolean aborted = false;
-			for (int i=0; i < mainWindows.size(); i ++)
+			MainWindow w = this.getCurrentWindow();
+
+			if (w.isBusy())
 			{
-				w = (MainWindow)this.mainWindows.get(i);
-				if (w == null) continue;
-				// If there are multiple Windows open, we only save the
-				// settings for the currently active window
-				if (w.isFocused())
+				if (!this.checkAbort(w)) return;
+			}
+			if (!this.checkProfiles(w)) return;
+			w.saveSettings();
+			w.saveWorkspace();
+			
+			
+			// When disconnecting it can happen that the disconnect itself
+			// takes several minutes. Because of this, a small window is displayed
+			// that the disconnect takes place, and the actual disconnect is
+			// carried out in a different thread to not block the AWT thread.
+			
+			// If it takes too long the user can still abort the JVM ...
+			this.createCloseMessageWindow(w);
+			this.closeMessage.show();
+
+			this.settings.saveSettings();
+			MacroManager.getInstance().saveMacros();
+			Thread t = new Thread()
+			{
+				public void run()
 				{
-					if (!this.checkProfiles(w)) return;
-					w.saveSettings();
+					disconnectWindows();
+					getConnectionMgr().disconnectAll();
+					disconnected();
 				}
-				
-				aborted = w.abortAll();
-				if (!aborted)
+			};
+			t.setName("WbManager exit disconnect thread");
+			t.setDaemon(false);
+			t.start();
+		}
+		else
+		{
+			getConnectionMgr().disconnectAll();
+			doShutdown();
+		}
+	}
+
+	private void createCloseMessageWindow(MainWindow parent)
+	{
+		this.closeMessage = new JDialog(parent, false);
+		JPanel p = new JPanel();
+		p.setBorder(WbSwingUtilities.BEVEL_BORDER_RAISED);
+		p.setLayout(new BorderLayout());
+		JLabel l = new JLabel(ResourceMgr.getString("MsgClosingConnections"));
+		l.setFont(l.getFont().deriveFont(Font.BOLD));
+		l.setHorizontalAlignment(SwingConstants.CENTER);
+		p.add(l, BorderLayout.CENTER);
+
+		JButton b = new JButton(ResourceMgr.getString("MsgAbortImmediately"));
+		b.setToolTipText(ResourceMgr.getDescription("MsgAbortImmediately"));
+		b.addActionListener(new ActionListener()
+			{
+				public void actionPerformed(ActionEvent evt)
 				{
-					if (!checkAbort(w)) return;
-					// workspace will only be save if we call disconnect()
-					// so we need to save the workspace here.
-					// I know it's not nice...
-					w.saveWorkspace(); 
+					doShutdown();
 				}
-				else
+			});
+
+		JPanel p2 = new JPanel();
+		p2.setLayout(new FlowLayout(FlowLayout.CENTER));
+		p2.add(b);
+		p.add(p2, BorderLayout.SOUTH);
+		this.closeMessage.getContentPane().setLayout(new BorderLayout());
+		this.closeMessage.getContentPane().add(p, BorderLayout.CENTER);
+		this.closeMessage.setUndecorated(true);
+		this.closeMessage.setSize(200,70);
+		WbSwingUtilities.center(this.closeMessage, parent);
+	}
+	
+	private void disconnectWindows()
+	{
+		MainWindow w = null;
+		boolean aborted = false;
+		for (int i=0; i < mainWindows.size(); i ++)
+		{
+			w = (MainWindow)this.mainWindows.get(i);
+			if (w == null) continue;
+			aborted = w.abortAll();
+			w.doDisconnect();
+		}
+	}
+	
+	/**
+	 *	This gets called from the thread that disconnects everything
+	 */
+	private void disconnected()
+	{
+		if (this.closeMessage != null)
+		{
+			this.closeMessage.setVisible(false);
+			this.closeMessage.dispose();
+		}
+		try
+		{
+			if (SwingUtilities.isEventDispatchThread())
+			{
+				closeAllWindows();
+			}
+			else
+			{
+				SwingUtilities.invokeAndWait(new Runnable()
 				{
-					w.disconnect();
-				}
+					public void run()
+					{
+						closeAllWindows();
+					}
+				});
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			doShutdown();
+		}
+	}
+
+	private void closeAllWindows()
+	{
+		for (int i=0; i < mainWindows.size(); i ++)
+		{
+			MainWindow w = (MainWindow)this.mainWindows.get(i);
+			if (w != null)
+			{
 				this.mainWindows.remove(w);
 				w.setVisible(false);
 				w.dispose();
 			}
-			if (aborted) this.getConnectionMgr().disconnectAll();
-			this.settings.saveSettings();
-			MacroManager.getInstance().saveMacros();
 		}
+	}
+	
+	private void doShutdown()
+	{
 		LogMgr.shutdown();
 		System.exit(0);
 	}
-
+	
 	private boolean checkAbort(MainWindow win)
 	{
 		return WbSwingUtilities.getYesNo(win, ResourceMgr.getString("MsgAbortRunningSql"));
@@ -430,7 +557,8 @@ public class WbManager implements FontChangedListener
     }
     return true;
   }
-	public void windowClosing(MainWindow win)
+	
+	public void windowClosing(final MainWindow win)
 	{
 		if (this.mainWindows.size() == 1)
     {
@@ -439,9 +567,20 @@ public class WbManager implements FontChangedListener
 		else
 		{
 			this.mainWindows.remove(win);
-			win.disconnect();
-			win.hide();
-			win.dispose();
+			Thread t = new Thread()
+			{
+				public void run()
+				{
+					// no need to do the disconnect on the window in its
+					// own thread as we are already in a background thread
+					win.disconnect(false);
+					win.hide();
+					win.dispose();
+				}
+			};
+			t.setName("WbManager window disconnect thread");
+			t.setDaemon(true);
+			t.start();
 		}
 			
 	}
@@ -463,6 +602,7 @@ public class WbManager implements FontChangedListener
 		main.restoreState();
 		boolean connected = false;
 
+		/*
 		if (checkCmdLine)
 		{
 			// get profile name from commandline
@@ -480,7 +620,7 @@ public class WbManager implements FontChangedListener
 				}
 			}
 		}
-
+		*/
 		// no connection, display the connection dialog
 		if (!connected)
 		{

@@ -307,6 +307,7 @@ public class TableSearchPanel
 				// therefor it's important to call this in searchEnded() as well
 				this.adjustDataTable();
 				this.currentDisplayTable = new WbTable();
+				this.currentDisplayTable.setUseDefaultStringRenderer(false);
 				if (this.firstTable == null)
 				{
 					this.firstTable = this.currentDisplayTable;
@@ -448,8 +449,13 @@ public class TableSearchPanel
 		String text = this.searchText.getText();
 		searcher.setMaxRows(maxRows);
 		searcher.setCriteria(text);
-		boolean sensitive = this.connection.getMetadata().isStringComparisonCaseSensitve();
-		this.searchPattern = new Like(searcher.getCriteria(), !sensitive);
+		boolean sensitive= this.connection.getMetadata().isStringComparisonCaseSensitive();
+		boolean ignoreCase = !sensitive;
+		if (sensitive)
+		{
+			ignoreCase = searcher.getCriteriaMightBeCaseInsensitive();
+		}
+		this.searchPattern = new Like(searcher.getCriteria(), ignoreCase);
 		searcher.setTableNames(searchTables);
 		searcher.search(); // starts the background thread
 	}
@@ -497,6 +503,7 @@ public class TableSearchPanel
 		
 		this.resultPanel.doLayout();
 		this.searchText.setEnabled(true);
+		this.columnFunction.setEnabled(true);
 		startButton.setText(ResourceMgr.getString("LabelStartSearch"));
 		this.statusInfo.setText("");
 	}
@@ -504,6 +511,7 @@ public class TableSearchPanel
 	public void searchStarted()
 	{
 		this.searchText.setEnabled(false);
+		this.columnFunction.setEnabled(false);
 		startButton.setText(ResourceMgr.getString("LabelCancelSearch"));
 	}
 	

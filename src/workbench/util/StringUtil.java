@@ -104,7 +104,7 @@ public class StringUtil
 		if (len == 0) return "";
 
 		char c = aLine.charAt(pos);
-		while (c <= ' ' && pos < len)
+		while (c <= ' ' && pos < len - 1)
 		{
 			pos ++;
 			c = aLine.charAt(pos);
@@ -393,7 +393,43 @@ public class StringUtil
 		return result.toString();
 	}
 
-
+	public static final String escapeXML(String s)
+	{
+		StringBuffer result = null;
+		
+		for(int i = 0, max = s.length(), delta = 0; i < max; i++)
+		{
+			char c = s.charAt(i);
+			String replacement = null;
+			
+			switch (c) 
+			{
+				case '&': replacement = "&amp;"; break;
+				case '<': replacement = "&lt;"; break;
+				case '\r': replacement = "&#13;"; break;
+				case '>': replacement = "&gt;"; break;
+				case '"': replacement = "&quot;"; break;
+				case '\'': replacement = "&apos;"; break;
+			}
+			
+			if (replacement != null)
+			{
+				if (result == null)
+				{
+					result = new StringBuffer(s);
+				}
+				result.replace(i + delta, i + delta + 1, replacement);
+				delta += (replacement.length() - 1);
+			}
+		}
+		if (result == null)
+		{
+			return s;
+		}
+		return result.toString();
+		
+	}
+	
 	public static final String escapeHTML(String s)
 	{
 		if (s == null) return null;
@@ -654,11 +690,8 @@ public class StringUtil
 	{
 		try
 		{
-			String test = "\"";
-			test = test + "\\\\";
-			test = test + "\"\"";
-			
-			System.out.println("result=>" + trimQuotes(test) + "<");
+			String test = "SELECT x,y\n      FROM test \n     WHERE x=1".replaceAll(" *\n *", " ");;
+			System.out.println(test);
 		}
 		catch (Exception e)
 		{

@@ -9,12 +9,18 @@ package workbench.db;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import workbench.WbManager;
 import workbench.log.LogMgr;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -30,6 +36,8 @@ public class WbConnection
 
 	private boolean ddlNeedsCommit;
 	private boolean ignoreDropErrors = false;
+
+	private List listeners;
 	
 	/** Creates a new instance of WbConnection */
 	public WbConnection(String anId)
@@ -170,15 +178,9 @@ public class WbConnection
 	 * Any exceptions are ignored. What should we do anyway?
 	 */
 	public void rollback()
+		throws SQLException
 	{
-		try
-		{
-			this.sqlConnection.rollback();
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logError("WbConnection.rollback()", "Rollback failed!", th);
-		}
+		this.sqlConnection.rollback();
 	}
 
 	public boolean getIgnoreDropErrors()
@@ -240,6 +242,11 @@ public class WbConnection
 		return this.sqlConnection.createStatement();
 	}
 
+	public boolean useJdbcConnect()
+	{
+		return this.metaData.getUseJdbcCommit();
+	}
+	
 	public boolean cancelNeedsReconnect()
 	{
 		return this.metaData.cancelNeedsReconnect();
@@ -285,10 +292,94 @@ public class WbConnection
 		}
 		return false;
 	}
+
+	public StringBuffer getDatabaseInfoAsXml(String anIndent)
+	{
+		boolean indent = (anIndent != null && anIndent.length() > 0);
+		StringBuffer dbInfo = new StringBuffer(200);
+		DatabaseMetaData db = null;
+		try
+		{
+			db = this.sqlConnection.getMetaData();
+		}
+		catch (Exception e)
+		{
+			return new StringBuffer("");
+		}
+
+		/* The JDBC is version does not seem to be supported by most of the drivers
+		   so we'll leave it out here.
+		if (indent) dbInfo.append(anIndent);
+		dbInfo.append("  <jdbc-version><major-version>");
+		try { dbInfo.append(db.getJDBCMajorVersion()); }  catch (Throwable e) { dbInfo.append("n/a"); }
+		dbInfo.append("</major-version><minor-version>");
+		try { dbInfo.append(db.getJDBCMinorVersion()); } catch (Throwable e) { dbInfo.append("n/a"); }
+		dbInfo.append("</minor-version></jdbc-version>" + StringUtil.LINE_TERMINATOR);
+		*/
+		
+		if (indent) dbInfo.append(anIndent);
+		dbInfo.append("  <jdbc-driver>");
+		try { dbInfo.append(db.getDriverName());  } catch (Throwable e) { dbInfo.append("n/a"); }
+		dbInfo.append("</jdbc-driver>"  + StringUtil.LINE_TERMINATOR);
+
+		if (indent) dbInfo.append(anIndent);
+		dbInfo.append("  <jdbc-driver-version>");
+		try { dbInfo.append(db.getDriverVersion()); } catch (Throwable th) {dbInfo.append("n/a");}
+		dbInfo.append("</jdbc-driver-version>"  + StringUtil.LINE_TERMINATOR);
+
+		if (indent) dbInfo.append(anIndent);
+		dbInfo.append("  <connection>");
+		dbInfo.append(this.getDisplayString());
+		dbInfo.append("</connection>"  + StringUtil.LINE_TERMINATOR);
+
+		if (indent) dbInfo.append(anIndent);
+		dbInfo.append("  <database-product-name>");
+		try { dbInfo.append(db.getDatabaseProductName()); } catch (Throwable th) { dbInfo.append("n/a"); }
+		dbInfo.append("</database-product-name>" + StringUtil.LINE_TERMINATOR);
+
+		if (indent) dbInfo.append(anIndent);
+		dbInfo.append("  <database-product-version>");
+		try { dbInfo.append(db.getDatabaseProductVersion()); } catch (Throwable th) {dbInfo.append("n/a"); }
+		dbInfo.append("</database-product-version>" + StringUtil.LINE_TERMINATOR);
+
+		return dbInfo;
+	}
+	
 	
 	public boolean getDdlNeedsCommit()
 	{
 		return this.metaData.getDDLNeedsCommit();
+	}
+	
+	public void addChangeListener(ChangeListener l)
+	{
+		if (this.listeners == null) this.listeners = new ArrayList();
+		this.listeners.add(l);
+	}
+	
+	public void removeChangeListener(ChangeListener l)
+	{
+		if (this.listeners == null) return;
+		this.listeners.remove(l);
+	}
+	
+	private void fireConnectionStateChanged()
+	{
+		if (this.listeners != null)
+		{
+			int count = this.listeners.size();
+			ChangeEvent evt = new ChangeEvent(this);
+			for (int i=0; i < count; i++)
+			{
+				ChangeListener l = (ChangeListener)this.listeners.get(i);
+				l.stateChanged(evt);
+			}
+		}
+	}
+	
+	public void connectionStateChanged()
+	{
+		this.fireConnectionStateChanged();
 	}
 	
 }

@@ -9,6 +9,7 @@ package workbench.gui.components;
 import java.awt.Color;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeListener;
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 
@@ -18,7 +19,10 @@ import workbench.resource.ResourceMgr;
  */
 public class ConnectionInfo
 	extends JTextField
+	implements ChangeListener
 {
+	
+	private WbConnection sourceConnection;
 	
 	/** Creates a new instance of ConnectionInfo */
 	public ConnectionInfo(Color aBackground)
@@ -33,10 +37,24 @@ public class ConnectionInfo
 	
 	public void setConnection(WbConnection aConnection)
 	{
-		if (aConnection != null)
+		if (this.sourceConnection != null)
 		{
-			this.setText(aConnection.getDisplayString());
-			this.setToolTipText(aConnection.getDatabaseProductName());
+			this.sourceConnection.removeChangeListener(this);
+		}
+		this.sourceConnection = aConnection;
+		if (this.sourceConnection != null)
+		{
+			this.sourceConnection.addChangeListener(this);
+		}
+		this.updateDisplay();
+	}
+	
+	private void updateDisplay()
+	{
+		if (this.sourceConnection != null)
+		{
+			this.setText(this.sourceConnection.getDisplayString());
+			this.setToolTipText(this.sourceConnection.getDatabaseProductName());
 		}
 		else
 		{
@@ -44,5 +62,12 @@ public class ConnectionInfo
 			this.setToolTipText(null);
 		}
 	}
+	public void stateChanged(javax.swing.event.ChangeEvent e)
+	{
+		if (e.getSource() == this.sourceConnection)
+		{
+			this.updateDisplay();
+		}
+	}	
 	
 }

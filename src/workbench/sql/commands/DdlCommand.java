@@ -24,6 +24,10 @@ public class DdlCommand extends SqlCommand
 	public static final SqlCommand ALTER = new DdlCommand("ALTER");
 	public static final SqlCommand GRANT = new DdlCommand("GRANT");
 	public static final SqlCommand REVOKE = new DdlCommand("REVOKE");
+	
+	// HSQLDB commands...
+	public static final SqlCommand CHECKPOINT = new DdlCommand("CHECKPOINT");
+	public static final SqlCommand SHUTDOWN = new DdlCommand("SHUTDOWN");
 
 	public static final List DDL_COMMANDS = new ArrayList();
 	
@@ -34,6 +38,8 @@ public class DdlCommand extends SqlCommand
 		DDL_COMMANDS.add(ALTER);
 		DDL_COMMANDS.add(GRANT);
 		DDL_COMMANDS.add(REVOKE);
+		DDL_COMMANDS.add(CHECKPOINT);
+		DDL_COMMANDS.add(SHUTDOWN);
 	}
 	
 	private String verb;
@@ -57,7 +63,7 @@ public class DdlCommand extends SqlCommand
 			{
 				try
 				{
-					this.currentStatement.execute(aSql);
+					this.currentStatement.executeUpdate(aSql);
 				}
 				catch (Throwable th)
 				{

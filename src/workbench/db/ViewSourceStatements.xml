@@ -57,5 +57,22 @@
     </void> 
    </object> 
   </void> 
+  <void method="put"> 
+   <string>Firebird</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>SELECT rdb$view_source FROM rdb$relations</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>rdb$relation_name</string> 
+    </void> 
+    <void property="useUpperCase"> 
+     <boolean>true</boolean> 
+    </void> 
+    <void property="schemaField"> 
+     <string>RDB$OWNER_NAME</string> 
+    </void> 
+   </object> 
+  </void> 
  </object> 
 </java> 

@@ -15,7 +15,7 @@ class RowData
 	private int status = NOT_MODIFIED;
 	private boolean dmlSent = false;
 	
-	private Object[] colData;
+	Object[] colData;
 	private Object[] originalData;
 	
 	/** Creates new RowData */

@@ -4,6 +4,7 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.EventQueue;
@@ -88,8 +89,7 @@ public class ProcedureListPanel
 
 		this.source = EditorPanel.createSqlEditor();
 		this.source.setEditable(false);
-		//this.source.addPopupMenuItem(new FileSaveAsAction(this.source), true);
-		//this.source.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		this.source.showFindOnPopupMenu();
 
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.source);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), scroll);
@@ -130,6 +130,7 @@ public class ProcedureListPanel
 		this.setFocusTraversalPolicy(pol);
 		this.reset();
 		this.extendPopupMenu();
+		LogMgr.logDebug("ProcedureListPanel.init()", "ProcedureListPanel created");
 	}
 
 	private void extendPopupMenu()
@@ -168,6 +169,7 @@ public class ProcedureListPanel
 	{
 		this.setCatalogAndSchema(aCatalog, aSchema, true);
 	}
+	
 	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)
 		throws Exception
 	{
@@ -180,11 +182,17 @@ public class ProcedureListPanel
 			this.shouldRetrieve = true;
 	}
 
+	public void retrieveIfNeeded()
+	{
+		if (this.shouldRetrieve) this.retrieve();
+	}
+	
 	public void retrieve()
 	{
-		final Container parent = this.getParent();
+		final Component current = this;
 
-		new Thread(new Runnable()
+		LogMgr.logDebug("ProcedureListPanel.retrieve()", "Starting retrieve for procedures...");
+		Thread t = new Thread(new Runnable()
 		{
 			public void run()
 			{
@@ -193,27 +201,29 @@ public class ProcedureListPanel
 					try
 					{
 						DbMetadata meta = dbConnection.getMetadata();
-						procList.setVisible(false);
-						WbSwingUtilities.showWaitCursor(parent);
+						//procList.setVisible(false);
+						WbSwingUtilities.showWaitCursorOnWindow(current);
 						LogMgr.logDebug("ProcedureListPanel.retrieve()", "Retrieving procedure list");
 						procList.setModel(meta.getListOfProcedures(currentCatalog, currentSchema), true);
 						LogMgr.logDebug("ProcedureListPanel.retrieve()", "Procedure list retrieved");
 						procList.adjustColumns();
-						WbSwingUtilities.showDefaultCursor(parent);
-						procList.setVisible(true);
+						WbSwingUtilities.showDefaultCursorOnWindow(current);
+						//procList.setVisible(true);
 						shouldRetrieve = false;
 					}
 					catch (OutOfMemoryError mem)
 					{
 						WbManager.getInstance().showErrorMessage(ProcedureListPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
 					}
-					catch (Exception e)
+					catch (Throwable e)
 					{
 						LogMgr.logError("ProcedureListPanel.retrieve() thread", "Could not retrieve procedure list", e);
 					}
 				}
 			}
-		}).start();
+		});
+		t.setName("ProcedureListPanel retrieve thread");
+		t.start();
 	}
 
 	private void dropTables()
@@ -283,7 +293,7 @@ public class ProcedureListPanel
 	public void setVisible(boolean aFlag)
 	{
 		super.setVisible(aFlag);
-		if (this.shouldRetrieve)
+		if (aFlag && this.shouldRetrieve)
 			this.retrieve();
 	}
 

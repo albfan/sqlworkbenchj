@@ -38,7 +38,7 @@ public class ConnectionProfile
 	private Properties connectionProperties;
 	private String workspaceFile;
 	private boolean ignoreDropErrors;
-	
+
 	static
 	{
 		WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
@@ -98,7 +98,7 @@ public class ConnectionProfile
 	/**
 	 *	Sets the current password. If the password
 	 *	is not already encrypted, it will be encrypted
-	 *	
+	 *
 	 *	@see #getPassword()
 	 *	@see workbench.util.WbCipher#encryptString(String)
 	 */
@@ -112,7 +112,7 @@ public class ConnectionProfile
 		}
 
 		aPwd = aPwd.trim();
-		
+
 		// check encryption settings when reading the profiles...
 		if (WbManager.getSettings().getUseEncryption())
 		{
@@ -234,7 +234,7 @@ public class ConnectionProfile
 	/**
 	 *	Returns the name of the Profile
 	 */
-	public String toString() { return this.name + " - " + super.toString(); }
+	public String toString() { return this.name; }
 
 	/** Two connection profiles are equal if:
 	 *  <ul>
@@ -332,7 +332,7 @@ public class ConnectionProfile
 		{
 			Enumeration keys = this.connectionProperties.propertyNames();
 			result.connectionProperties = new Properties();
-			
+
 			while (keys.hasMoreElements())
 			{
 				String key = (String)keys.nextElement();
@@ -368,18 +368,18 @@ public class ConnectionProfile
 	{
 		return this.ignoreDropErrors;
 	}
-	
+
 	public void setIgnoreDropErrors(boolean aFlag)
 	{
 		this.changed = (aFlag != this.ignoreDropErrors);
 		this.ignoreDropErrors = aFlag;
 	}
-	
+
 	public String getWorkspaceFile()
 	{
 		return this.workspaceFile;
 	}
-	
+
 	public void setWorkspaceFile(String aWorkspaceFile)
 	{
 		this.workspaceFile = aWorkspaceFile;
@@ -396,18 +396,18 @@ public class ConnectionProfile
 		this.connectionProperties.put(aKey, aValue);
 		this.changed = true;
 	}
-	
+
 	public Properties getConnectionProperties()
 	{
 		return this.connectionProperties;
 	}
-	
+
 	public void setConnectionProperties(Properties props)
 	{
 		boolean wasDefined = (this.connectionProperties != null && this.connectionProperties.size() > 0);
 		if (props != null)
 		{
-			if (props.size() == 0) 
+			if (props.size() == 0)
 			{
 				this.connectionProperties = null;
 				if (wasDefined) this.changed = true;
@@ -429,10 +429,10 @@ public class ConnectionProfile
 	{
 		return driverName;
 	}
-	
+
 	public void setDriverName(java.lang.String driverName)
 	{
 		this.driverName = driverName;
 	}
-	
+
 }

@@ -44,7 +44,7 @@ import workbench.util.WbProperties;
 public class Settings
 {
 	public static final String ANIMATED_ICONS_KEY = "workbench.gui.animatedicon";
-	
+
 	public static final String EDITOR_FONT_KEY = "editor";
 	public static final String STANDARD_FONT_KEY = "standard";
 	public static final String MSGLOG_FONT_KEY = "msglog";
@@ -79,14 +79,14 @@ public class Settings
 			File f = new File("");
 			configDir = f.getAbsolutePath();
 		}
-	
+
 		if (WbManager.trace) System.out.println("Settings.<init> - using configDir: " + configDir);
 		String sep = System.getProperty("file.separator");
 		if (!this.configDir.endsWith(sep))
 		{
 			configDir = configDir + sep;
 		}
-		
+
 		if (filename == null) this.filename = this.configDir + "workbench.settings";
 
 	  if (WbManager.trace) System.out.println("Settings.<init> - Reading settings");
@@ -124,11 +124,12 @@ public class Settings
 		DbMetadata.setServersWhichNeedReconnect(this.getCancelWithReconnectServers());
 		DbMetadata.setCaseSensitiveServers(this.getCaseSensitivServers());
 		DbMetadata.setServersWhereDDLNeedsCommit(this.getServersWhereDDLNeedsCommit());
+		DbMetadata.setServersWhichNeedJdbcCommit(this.getServersWhichNeedJdbcCommit());
 		if (WbManager.trace) System.out.println("Done setting server lists for MetaData");
 
 		String level = this.props.getProperty("workbench.log.level", "INFO");
 		LogMgr.setLevel(level);
-		
+
 		// init settings for datastore
 		System.setProperty("org.kellerer.sort.language", this.getSortLanguage());
 		System.setProperty("org.kellerer.sort.country", this.getSortCountry());
@@ -167,12 +168,12 @@ public class Settings
 	{
 		this.props.addChangeListener(l);
 	}
-	
+
 	public void removeChangeLister(PropertyChangeListener l)
 	{
 		this.props.removeChangeListener(l);
 	}
-	
+
 	public void saveSettings()
 	{
 		this.removeObsolete();
@@ -205,7 +206,7 @@ public class Settings
 			LogMgr.logWarning("Settings.removeObsolete()", "Error when removing obsolete properties", e);
 		}
 	}
-	
+
 	private void fillDefaults()
 	{
 		if (WbManager.trace) System.out.println("Setting.fillDefaults() - start");
@@ -268,12 +269,12 @@ public class Settings
 		}
 		return this.printerFont;
 	}
-	
+
 	public Font getFont(String aFontName)
 	{
 		return this.getFont(aFontName, true);
 	}
-	
+
 	/**
 	 *	Returns the font configured for this keyword
 	 */
@@ -284,14 +285,14 @@ public class Settings
 
 		String baseKey = new StringBuffer("workbench.font.").append(aFontName).toString();
 		String name = null;
-		
+
 		if (returnDefault)
 			name = this.props.getProperty(baseKey + ".name", "Dialog");
 		else
 			name = this.props.getProperty(baseKey + ".name", null);
-		
+
 		if (name == null) return null;
-		
+
 		String sizeS = this.props.getProperty(baseKey + ".size", "11");
 		String type = this.props.getProperty(baseKey + ".style", "Plain");
 		int style = Font.PLAIN;
@@ -321,17 +322,17 @@ public class Settings
 	{
 		double leftmargin = this.getPrintMarginLeft();
 		double rightmargin = this.getPrintMarginRight();
-		
+
 		double topmargin = this.getPrintMarginTop();
 		double bottommargin = this.getPrintMarginBottom();
 
-		PageFormat page = new PageFormat(); 
+		PageFormat page = new PageFormat();
 		page.setOrientation(this.getPrintOrientation());
-		
+
 		Paper paper = null;
 		double width = this.getPrintPaperWidth();
 		double height = this.getPrintPaperHeight();
-		
+
 		if (width > 0 && height > 0)
 		{
 			paper = new Paper();
@@ -352,44 +353,44 @@ public class Settings
 	{
 		return StringUtil.getIntValue(this.props.getProperty("print.paper.orientation"), PageFormat.PORTRAIT);
 	}
-	
+
 	private void setPrintOrientation(int aValue)
 	{
 		this.props.setProperty("workbench.print.orientation", Integer.toString(aValue));
 	}
-	
+
 	private double getPrintPaperWidth()
 	{
 		return StringUtil.getDoubleValue(this.props.getProperty("workbench.print.paper.width"), -1);
 	}
-	
+
 	private double getPrintPaperHeight()
 	{
 		return StringUtil.getDoubleValue(this.props.getProperty("workbench.print.paper.height"), -1);
 	}
-	
+
 	public void setPageFormat(PageFormat aFormat)
 	{
 		Paper p = aFormat.getPaper();
 		double width = p.getWidth();
 		double height = p.getHeight();
-		
+
 		double leftmargin = aFormat.getImageableX();
 		double rightmargin = width - leftmargin - aFormat.getImageableWidth();
-		
+
 		double topmargin = aFormat.getImageableY();
 		double bottommargin = height - topmargin - aFormat.getImageableHeight();
-		
+
 		this.setPrintMarginLeft(leftmargin);
 		this.setPrintMarginRight(rightmargin);
 		this.setPrintMarginTop(topmargin);
 		this.setPrintMarginBottom(bottommargin);
-		
+
 		this.props.setProperty("workbench.print.paper.width", Double.toString(width));
 		this.props.setProperty("workbench.print.paper.height", Double.toString(height));
 		this.props.setProperty("workbench.print.orientation", Integer.toString(aFormat.getOrientation()));
 	}
-	
+
 	public void setPrintMarginLeft(double aValue)
 	{
 		this.setPrintMargin("left", aValue);
@@ -406,7 +407,7 @@ public class Settings
 	{
 		this.setPrintMargin("bottom", aValue);
 	}
-	
+
 	public double getPrintMarginLeft()
 	{
 		return this.getPrintMargin("left");
@@ -423,17 +424,17 @@ public class Settings
 	{
 		return this.getPrintMargin("bottom");
 	}
-	
+
 	private void setPrintMargin(String aKey, double aValue)
 	{
 		this.props.setProperty("workbench.print.margin." + aKey, Double.toString(aValue));
 	}
-	
+
 	private double getPrintMargin(String aKey)
 	{
 		return StringUtil.getDoubleValue(this.props.getProperty("workbench.print.margin." + aKey, "72"),72);
 	}
-	
+
 	public void setFont(String aFontName, Font aFont)
 	{
 		String baseKey = new StringBuffer("workbench.font.").append(aFontName).toString();
@@ -479,12 +480,12 @@ public class Settings
 	{
 		return StringUtil.stringToBool(this.props.getProperty("workbench.sql.enable_dbms_output", "false"));
 	}
-	
+
 	public void setEnableDbmsOutput(boolean aFlag)
 	{
 		this.props.setProperty("workbench.sql.enable_dbms_output", Boolean.toString(aFlag));
 	}
-	
+
 	public String getLastImportDateFormat()
 	{
 		return this.props.getProperty("workbench.import.dateformat", this.getDefaultDateFormat());
@@ -505,11 +506,11 @@ public class Settings
 		String result = this.props.getProperty("workbench.import.numberformat", null);
 		if (result == null)
 		{
-			result = "#" + this.getDecimalSymbol() + "#"; 
+			result = "#" + this.getDecimalSymbol() + "#";
 		}
 		return result;
 	}
-	
+
 	public String getLastImportDir()
 	{
 		return this.props.getProperty("workbench.import.lastdir", this.getLastExportDir());
@@ -529,7 +530,7 @@ public class Settings
 	{
 		this.props.setProperty("workbench.import.quotechar", aChar);
 	}
-	
+
 	public String getLastWorkspaceDir()
 	{
 		return this.props.getProperty("workbench.workspace.lastdir", this.getConfigDir());
@@ -539,7 +540,7 @@ public class Settings
 	{
 		this.props.setProperty("workbench.workspace.lastdir", aDir);
 	}
-	
+
 	public String getLastExportDir()
 	{
 		return this.props.getProperty("workbench.export.lastdir","");
@@ -669,7 +670,7 @@ public class Settings
 	{
 		return this.restoreWindowPosition(target, target.getClass().getName());
 	}
-	
+
 	public boolean restoreWindowPosition(Component target, String id)
 	{
 		boolean result = false;
@@ -774,6 +775,7 @@ public class Settings
 		this.props.setProperty("workbench.sql.historysize", Integer.toString(aValue));
 	}
 
+  /*
 	public int getDefaultTabCount()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.defaulttabcount", "4"));
@@ -783,7 +785,7 @@ public class Settings
 	{
 		this.props.setProperty("workbench.sql.defaulttabcount", Integer.toString(aCount));
 	}
-
+	*/
 	public void setLookAndFeelClass(String aClassname)
 	{
 		this.props.setProperty("workbench.gui.lookandfeelclass", aClassname);
@@ -812,6 +814,11 @@ public class Settings
 		this.props.setProperty("workbench.sql.mincolwidth", Integer.toString(aWidth));
 	}
 
+	public int getMaxSubselectLength()
+	{
+		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.formatter.subselect.maxlength"), 60);
+	}
+	
 	public int getMaxColumnWidth()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.maxcolwidth", "500"));
@@ -823,7 +830,7 @@ public class Settings
 	}
 
 	private DateFormat defaultDateFormatter = null;
-	
+
 	public DateFormat getDefaultDateFormatter()
 	{
 		if (this.defaultDateFormatter == null)
@@ -832,7 +839,7 @@ public class Settings
 		}
 		return this.defaultDateFormatter;
 	}
-	
+
 	public String getDefaultDateFormat()
 	{
 		return this.props.getProperty("workbench.gui.display.dateformat", "yyyy-MM-dd");
@@ -856,7 +863,7 @@ public class Settings
 
 	private DecimalFormat defaultFormatter = null;
 	private DecimalFormatSymbols decSymbols = new DecimalFormatSymbols();
-	
+
 	public DecimalFormat getDefaultDecimalFormatter()
 	{
 		this.initFormatter();
@@ -963,17 +970,27 @@ public class Settings
 
 		return del;
 	}
-	
+
+	public boolean getConsolidateLogMsg()
+	{
+		return "true".equals(this.props.getProperty("workbench.gui.log.consolidate", "false"));
+	}
+
+	public void setConsolidateLogMsg(boolean aFlag)
+	{
+		this.props.setProperty("workbench.gui.log.consolidate", Boolean.toString(aFlag));
+	}
+
 	public String getSortLanguage()
 	{
 		return this.props.getProperty("sort.language", System.getProperty("user.language"));
 	}
-	
+
 	public String getSortCountry()
 	{
 		return this.props.getProperty("sort.country", System.getProperty("user.country"));
 	}
-	
+
 	public void setLastImportDelimiter(String aDelimit)
 	{
 		if (aDelimit.equals("\t")) aDelimit = "\\t";
@@ -1030,7 +1047,7 @@ public class Settings
 		String value = this.getProperty(aClass, aProperty, Integer.toString(aDefault));
 		return StringUtil.getIntValue(value);
 	}
-	
+
 	public int getIntProperty(String aClass, String aProperty)
 	{
 		String value = this.getProperty(aClass, aProperty, "0");
@@ -1077,16 +1094,27 @@ public class Settings
 		this.props.setProperty("workbench.dbexplorer.retrieveonopen", Boolean.toString(aFlag));
 	}
 
+
+	public boolean getAutoSaveWorkspace()
+	{
+		return "true".equalsIgnoreCase(this.props.getProperty("workbench.workspace.autosave", "false"));
+	}
+
+	public void setAutoSaveWorkspace(boolean aFlag)
+	{
+		this.props.setProperty("workbench.workspace.autosave", Boolean.toString(aFlag));
+	}
+
 	public boolean getUseAnimatedIcon()
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty(ANIMATED_ICONS_KEY, "true"));
 	}
-	
+
 	public void setUseAnimatedIcon(boolean flag)
 	{
 		this.props.setProperty(ANIMATED_ICONS_KEY, Boolean.toString(flag));
 	}
-	
+
 	public boolean getUseDynamicLayout()
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.gui.dynamiclayout", "false"));
@@ -1118,10 +1146,16 @@ public class Settings
 
 	public List getServersWhereDDLNeedsCommit()
 	{
-		String list = this.props.getProperty("workbench.db.ddlneedscommit", "PostgreSQL");
+		String list = this.props.getProperty("workbench.db.ddlneedscommit", null);
     return StringUtil.stringToList(list, ",");
 	}
 	
+	public List getServersWhichNeedJdbcCommit()
+	{
+		String list = this.props.getProperty("workbench.db.usejdbccommit", null);
+    return StringUtil.stringToList(list, ",");
+	}
+
   public List getCaseSensitivServers()
   {
 		String list = this.props.getProperty("workbench.db.casesensitive", null);

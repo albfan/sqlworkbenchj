@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -49,7 +50,8 @@ import workbench.util.StringUtil;
  */
 public class DwPanel 
 	extends JPanel
-	implements TableModelListener, ListSelectionListener, RowActionMonitor, DbData, DbUpdater, Interruptable
+	implements TableModelListener, ListSelectionListener, ChangeListener,
+						RowActionMonitor, DbData, DbUpdater, Interruptable
 {
 	private WbTable infoTable;
 	private DwStatusBar statusBar;
@@ -81,6 +83,9 @@ public class DwPanel
 	private boolean manageUpdateAction = false;
 	private boolean showErrorMessages = false;
 	private boolean readOnly = false;
+	
+	private long rowsAffectedByScript = -1;
+	private boolean scriptRunning = false;
 	
 	private StatementRunner stmtRunner;
 
@@ -188,7 +193,10 @@ public class DwPanel
 			clearRowMonitorSettings();
 		}
 	}
-	
+
+	/**
+	 *	Callback method from the {@link workbench.interfaces.RowActionMonitor}
+	 */
 	public void setCurrentRow(int currentRow, int totalRows)
 	{
 		if (this.monitorType < 0) return;
@@ -203,14 +211,16 @@ public class DwPanel
 		this.statusBar.setStatusMessage(msg.toString());
 	}
 
+	/**
+	 *	Enables or disables the display of error messages.
+	 */
 	public void setShowErrorMessages(boolean aFlag)
 	{
 		this.showErrorMessages = aFlag;
 	}
 	
 	/**
-	 *	Defines the connection for this DBPanel.
-	 *	@see setSqlStatement(String)
+	 *	Defines the connection for this DwPanel.
 	 */
 	public void setConnection(WbConnection aConn)
 		throws SQLException, WbException
@@ -225,6 +235,13 @@ public class DwPanel
 		this.stmtRunner.setConnection(aConn);
 	}
 
+	/**
+	 *	Sets a delegate which performs the DbUpdates.
+	 *  This delegate is passed to the UpdateDatabaseAction. The action will in turn
+	 *  call the delegate's saveChangesToDatabase() method instead of ours.
+	 *  @see workbench.interfaces.DbUpdater#saveChangesToDatabase()
+	 *  @see saveChangesToDatabase()
+	 */
 	public void setUpdateDelegate(DbUpdater aDelegate)
 	{
 		this.updateAction.setClient(aDelegate);
@@ -268,6 +285,8 @@ public class DwPanel
 					Dimension max = new Dimension(800,600);
 					Dimension pref = new Dimension(400, 300);
 					EditorPanel preview = EditorPanel.createSqlEditor();
+					preview.setEditable(false);
+					preview.showFindOnPopupMenu();
 					preview.setBorder(WbSwingUtilities.EMPTY_BORDER);
 					preview.setPreferredSize(pref);
 					preview.setMaximumSize(max);
@@ -388,9 +407,15 @@ public class DwPanel
 	{
 		return this.statusBar.getMaxRows();
 	}
+	
 	public void setMaxRows(int aMax)
 	{
 		this.statusBar.setMaxRows(aMax);
+	}
+	
+	public long getRowsAffectedByScript()
+	{
+		return rowsAffectedByScript;
 	}
 	
 	public void runStatement(String aSql)
@@ -512,6 +537,7 @@ public class DwPanel
 				this.lastMessage = ResourceMgr.getString("MsgExecuteError") + "\n";
 			}
 			execTime = (end - start);
+			this.rowsAffectedByScript += result.getTotalUpdateCount();
 			
 			String[] messages = result.getMessages();
 			StringBuffer msg = null;
@@ -573,12 +599,24 @@ public class DwPanel
 		}
   }
 
+	/**
+	 *	Callback method to tell this component that a script is running. 
+	 *  It resets the number of rows which have been affected by the script to zero
+	 */
 	public void scriptStarting()
 	{
+		this.rowsAffectedByScript = 0;
+		this.scriptRunning = true;
 	}
-	
+
+	/**
+	 *	Callback method to tell this component that the script execution has finished.
+	 *  This method will cleanup the StatementRunner
+	 *  @see workbench.sql.StatementRunner#done()
+	 */
 	public void scriptFinished()
 	{
+		this.scriptRunning = false;
 		this.stmtRunner.done();
 	}
 	
@@ -587,11 +625,19 @@ public class DwPanel
 		return this.success;
 	}
 	
+	/**
+	 *  This method will update the row info display on the statusbar.
+	 */
   public void rowCountChanged()
   {
-		this.statusBar.setRowcount(this.infoTable.getRowCount());
+		int startRow = this.infoTable.getFirstVisibleRow();
+		int endRow = this.infoTable.getLastVisibleRow();
+		int count = this.infoTable.getRowCount();
+		
+		// start row and end row are 0 based
+		this.statusBar.setRowcount(startRow + 1, endRow + 1, count);
   }
-  
+
 	public void deleteRow()
 	{
 		if (this.readOnly) return;
@@ -607,7 +653,7 @@ public class DwPanel
 		return newRow;
 	}
 
-	public synchronized void cancelExecution()
+	public void cancelExecution()
 	{
 		if (this.stmtRunner != null)
 		{
@@ -616,6 +662,12 @@ public class DwPanel
 		}
 	}
 
+	/**
+	 *	Replaces the current values with the values initially retrieved from the 
+	 *  database. 
+	 *	@see workbench.storage.DataStore#restoreOriginalValues()
+	 */
+	
 	public void restoreOriginalValues()
 	{
 		DataStore ds = this.infoTable.getDataStore();
@@ -627,6 +679,10 @@ public class DwPanel
 	public String getLastMessage() { return this.lastMessage; }
 	public boolean hasResultSet() { return this.hasResultSet; }
 
+	/**
+	 *	Returns true if the DataStore of the Table has been modified.
+	 *	@see workbench.storage.DataStore#isModified()
+	 */
 	public boolean isModified() 
 	{ 
 		DataStore ds = this.infoTable.getDataStore();
@@ -644,6 +700,8 @@ public class DwPanel
 		this.statusBar.setFocusable(false);
 		this.setFocusable(false);
 		this.scrollPane = new WbScrollPane(this.infoTable);
+		this.scrollPane.getViewport().addChangeListener(this);
+		
 		this.add(this.scrollPane, BorderLayout.CENTER);
 		this.add(this.statusBar, BorderLayout.SOUTH);
 		//this.infoTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -652,14 +710,67 @@ public class DwPanel
 		this.infoTable.setAdjustToColumnLabel(true);
 	}
 	
-	public void setStatusMessage(String aMsg)
+	/**
+	 *	Show a message in the status panel.
+	 *	This method might be called from within a background thread, so we 
+	 *  need to make sure the actual setText() stuff is called on the AWT
+	 *  thread in order to update the GUI correctly.
+	 *  @see DwStatusBar#setStatusMessage(String)
+	 */
+	public void setStatusMessage(final String aMsg)
 	{
-		this.statusBar.setStatusMessage(aMsg);
+		if (SwingUtilities.isEventDispatchThread())
+		{
+			this.statusBar.setStatusMessage(aMsg);
+		}
+		else
+		{
+			try
+			{
+				SwingUtilities.invokeAndWait(new Runnable()
+				{
+					public void run()
+					{
+						statusBar.setStatusMessage(aMsg);
+					}
+				});
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("DwPanel.setStatusMessage()", "Error showing status message on AWT thread", e);
+			}
+		}
 	}
 	
+	/**
+	 *	Clears the display on the status bar. 
+	 *  It is ensured that the call to the status bar methods is always called
+	 *  on the AWT thread.
+	 *  @see DwStatusBar#clearStatusMessage()
+	 */
 	public void clearStatusMessage()
 	{
-		this.statusBar.clearStatusMessage();
+		if (SwingUtilities.isEventDispatchThread())
+		{
+			this.statusBar.clearStatusMessage();
+		}
+		else
+		{
+			try
+			{
+				SwingUtilities.invokeAndWait(new Runnable()
+				{
+					public void run()
+					{
+						statusBar.clearStatusMessage();
+					}
+				});
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("DwPanel.setStatusMessage()", "Error clearing status message on AWT thread", e);
+			}
+		}
 	}
 	
 	private void setMessageDisplayModel(TableModel aModel)
@@ -670,6 +781,17 @@ public class DwPanel
 		col.setPreferredWidth(this.getWidth() - 10);
 	}
 
+	/**
+	 *	Clears everything.
+	 *	<ul>
+	 *	<li>Ends the edit mode</li>
+	 *	<li>removes all rows from the table</li>
+	 *	<li>sets the hasResultSet flag to false</li>
+	 *  <li>the lastMessage is set to an empty string</li>
+	 *  <li>the last SQL is set to null</li>
+	 *  <li>the statusbar display is cleared</li>
+	 *  </ul>
+	 */
 	public void clearContent()
 	{
 		this.infoTable.reset();
@@ -681,6 +803,10 @@ public class DwPanel
 		this.statusBar.clearRowcount();
 	}
 	
+	/**
+	 *	Returns a table model which displays a message that the last
+	 *  statement did not produce a result set.
+	 */
 	private TableModel getEmptyMsgTableModel()
 	{
 		if (this.resultEmptyMsgModel == null)
@@ -696,6 +822,13 @@ public class DwPanel
 	{
 		return this.getErrorTableModel(null);
 	}
+	
+	/**
+	 *	Returns a TableModel which displays an error text. 
+	 *	This is used to show a hint in the table panel that an error 
+	 *  occurred and the actual error message is displayed in the log 
+	 *  panel
+	 */
 	private TableModel getErrorTableModel(String aMsg)
 	{
 		if (this.errorModel == null)
@@ -715,6 +848,10 @@ public class DwPanel
 		return this.errorModel;
 	}
 
+	/**
+	 *	Set the focus to the max rows field.
+	 *	@see DwStatusBar#selectMaxRowsField()
+	 */
   public void selectMaxRowsField()
   {
     this.statusBar.selectMaxRowsField();
@@ -722,22 +859,38 @@ public class DwPanel
 
 	public WbTable getTable() { return this.infoTable; }
 
-	private void doRepaint()
-	{
-		this.paint(this.getGraphics());
-	}
 
+	/**
+	 *	Stops the editing mode of the displayed WbTable:
+	 *	<ul>
+	 *	<li>the status column is turned off</li>
+	 *  <li>the edit actions are enabled/disabled correctly </li>
+	 *  <li>the originalValues for the DataStore are restored </li>
+	 *  </ul>
+	 */
 	public void endEdit()
 	{
 		this.editingStarted = false;
 		this.infoTable.setShowStatusColumn(false);
 		this.updateAction.setEnabled(false);
-		this.insertRow.setEnabled(false);
+		this.insertRow.setEnabled(this.manageUpdateAction);
 		this.deleteRow.setEnabled(false);
 		this.startEdit.setSwitchedOn(false);
 		this.restoreOriginalValues();
 	}
-	
+
+	/**
+	 *	Starts the "edit" mode of the table. It will not start the edit
+	 *  mode, if the table is "read only" meaning if no update table (=database 
+	 *  table) is defined.
+	 *  The following actions are carried out:
+	 *	<ul>
+	 *	<li>if the updateable flag is not yet set, try to find out which table to update</li>
+	 *  <li>the status column is displayec</li>
+	 *  <li>the corresponding actions (insert row, delete row) are enabled</li>
+	 *  <li>the startEdit action is turned to "switched on"</li>
+	 *  </ul>
+	 */
 	public boolean startEdit()
 	{
 		if (this.readOnly) return false;
@@ -794,11 +947,22 @@ public class DwPanel
 	public UpdateDatabaseAction getUpdateDatabaseAction() { return this.updateAction; }
 	public StartEditAction getStartEditAction() { return this.startEdit; }
 
+	/**
+	 *	Turns on the batchUpdate mode. 
+	 *  In this mode, the automatic switch to edit mode is disabled. This 
+	 *  is used when populating the table from the database otherwise, the 
+	 *  first row, which is retrieved will start the edit mode
+	 */
 	public void setBatchUpdate(boolean aFlag)
 	{
 		this.batchUpdate = aFlag;
 	}
 
+	/**
+	 *	If the user changes something in the database (which is possible, as
+	 *  the table defaults to beeing editable) the edit mode (with status column
+	 *  and the different actions enabled) is switched on automatically.
+	 */
 	public void tableChanged(TableModelEvent e)
 	{
 		if (this.batchUpdate) return;
@@ -816,11 +980,25 @@ public class DwPanel
 		}
 	}
 	
+	/**
+	 *	This is called when the selection in the table changes.
+	 *  The delete row action will be enabled when exactly one row
+	 *  is selected
+	 */
 	public void valueChanged(javax.swing.event.ListSelectionEvent e)
 	{
 		if (this.readOnly) return;
 		long rows = this.infoTable.getSelectedRowCount();
 		this.deleteRow.setEnabled( (rows == 1) );
+	}
+
+	/**
+	 *	Called from the viewport, when the display has been scrolled
+	 *  We need to update the row display then.
+	 */
+	public void stateChanged(javax.swing.event.ChangeEvent e)
+	{
+		this.rowCountChanged();
 	}
 	
 }

@@ -22,9 +22,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import workbench.WbManager;
 
 import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.SynonymReader;
+import workbench.exception.ExceptionUtil;
 import workbench.exception.WbException;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.log.LogMgr;
@@ -65,8 +67,8 @@ public class DbMetadata
 
 	private static List serversWhichNeedReconnect = Collections.EMPTY_LIST;
 	private static List caseSensitiveServers = Collections.EMPTY_LIST;
-	private static List ddlNeedsCommit = Collections.EMPTY_LIST;
-
+	private static List ddlNeedsCommitServers = Collections.EMPTY_LIST;
+	private static List serverNeedsJdbcCommit = Collections.EMPTY_LIST;
 	// These Hashmaps contains templates
 	// for object creation
 	private HashMap procSourceSql;
@@ -81,8 +83,12 @@ public class DbMetadata
 	private DbmsOutput oraOutput;
   private boolean needsReconnect;
   private boolean caseSensitive;
+	private boolean useJdbcCommit;
+	private boolean ddlNeedsCommit;
   private boolean isOracle;
 	private boolean isPostgres;
+	private boolean isHsql;
+	private boolean isFirebird;
 
 	private List keywords;
 	
@@ -149,14 +155,30 @@ public class DbMetadata
 		{
 			this.isPostgres = true;
 		}
+		else if (this.productName.toLowerCase().indexOf("hsql") > -1)
+		{
+			this.isHsql = true;
+		}
+		else if (this.productName.toLowerCase().indexOf("firebird") > -1)
+		{
+			this.isFirebird = true;
+		}
 
 		this.needsReconnect = serversWhichNeedReconnect.contains(this.productName);
 		this.caseSensitive = caseSensitiveServers.contains(this.productName);
+		this.useJdbcCommit = serverNeedsJdbcCommit.contains(this.productName);
+		this.ddlNeedsCommit = ddlNeedsCommitServers.contains(this.productName);
 	}
+
+	public boolean getDDLNeedsCommit() { return ddlNeedsCommit; }
+	public boolean getUseJdbcCommit() { return this.useJdbcCommit; }
+  public boolean isStringComparisonCaseSensitive() { return this.caseSensitive; }
+	public boolean cancelNeedsReconnect() { return this.needsReconnect; }
 
 	public boolean isPostgres() { return this.isPostgres; }
   public boolean isOracle() { return this.isOracle; }
-
+	public boolean isHsql() { return this.isHsql; }
+	public boolean isFirebird() { return this.isFirebird; }
 
 	private HashMap readStatementTemplates(String aFilename)
 	{
@@ -232,8 +254,7 @@ public class DbMetadata
 		}
 		String source = this.getViewSource(aCatalog, aSchema, aView);
 		
-		if (source == null) return "";
-		if (source.length() == 0) return "";
+		if (source == null || source.length() == 0) return "";
 
 		StringBuffer result = new StringBuffer(source.length() + 100);
 
@@ -243,26 +264,30 @@ public class DbMetadata
 		}
 		else
 		{
-			if (includeDrop) result.append("DROP VIEW " + aView + ";\r\n");
-			result.append("CREATE VIEW " + aView);
+			if (includeDrop) result.append("DROP VIEW " + aView);
+			if (this.isHsql()) result.append(" IF EXISTS");
+			result.append(";\r\nCREATE VIEW " + aView);
 		}
-		result.append("\r\n(\r\n");
-		int rows = viewTableDefinition.getRowCount();
-		for (int i=0; i < rows; i++)
+		if (!isHsql())
 		{
-			String colName = viewTableDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-			if (i == 0)
+			result.append("\r\n(\r\n");
+			int rows = viewTableDefinition.getRowCount();
+			for (int i=0; i < rows; i++)
 			{
-				result.append("  ");
+				String colName = viewTableDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+				if (i == 0)
+				{
+					result.append("  ");
+				}
+				else
+				{
+					result.append(" ,");
+				}
+				result.append(colName);
+				result.append("\r\n");
 			}
-			else
-			{
-				result.append(" ,");
-			}
-			result.append(colName);
-			result.append("\r\n");
 		}
-		result.append(") AS \r\n");
+		result.append(")\r\nAS \r\n");
 		result.append(source);
 		return result.toString();
 	}
@@ -282,7 +307,12 @@ public class DbMetadata
 			sql.setObjectName(aViewname);
 			sql.setCatalog(aCatalog);
 			Statement stmt = this.dbConnection.getSqlConnection().createStatement();
-			ResultSet rs = stmt.executeQuery(sql.getSql());
+			String query = sql.getSql();
+			if ("true".equals(WbManager.getSettings().getProperty("workbench.dbmetadata", "logsql", "false")))
+			{
+				LogMgr.logInfo("DbMetadata.getViewSource()", "Using query=\n" + query);
+			}
+			ResultSet rs = stmt.executeQuery(query);
 			while (rs.next())
 			{
 				String line = rs.getString(1);
@@ -298,7 +328,7 @@ public class DbMetadata
 		catch (Exception e)
 		{
 			LogMgr.logWarning("DbMetadata.getViewSource()", "Could not retrieve view definition for " + aViewname, e);
-			source = new StringBuffer("");
+			source = new StringBuffer(ExceptionUtil.getDisplay(e));
 		}
 		return source.toString();
 	}
@@ -533,16 +563,6 @@ public class DbMetadata
 		{
 			return false;
 		}
-	}
-
-  public boolean isStringComparisonCaseSensitve()
-  {
-    return this.caseSensitive;
-  }
-
-	public boolean cancelNeedsReconnect()
-	{
-		return this.needsReconnect;
 	}
 
 	public DataStoreTableModel getProcedureColumns(String aCatalog, String aSchema, String aProcname)
@@ -973,7 +993,7 @@ public class DbMetadata
 			}
 			catch (Exception e)
 			{
-				LogMgr.logWarning("DbMetadata.getTableIndexInformatioN()", "Error retrieving PK information", e);
+				LogMgr.logWarning("DbMetadata.getTableIndexInformation()", "Error retrieving PK information", e);
 			}
 			finally 
 			{
@@ -1120,6 +1140,10 @@ public class DbMetadata
 		sql.setObjectName(aTable);
 		Statement stmt = this.dbConnection.getSqlConnection().createStatement();
 		String query = sql.getSql();
+		if ("true".equals(WbManager.getSettings().getProperty("workbench.dbmetadata", "debugmetasql", "false")))
+		{
+			LogMgr.logInfo("DbMetadata.getTableTriggers()", "Using query=\n" + query);
+		}
 		ResultSet rs = stmt.executeQuery(query);
 		while (rs.next())
 		{
@@ -1157,6 +1181,10 @@ public class DbMetadata
 		sql.setObjectName(aTriggername);
 		Statement stmt = this.dbConnection.getSqlConnection().createStatement();
 		String query = sql.getSql();
+		if ("true".equals(WbManager.getSettings().getProperty("workbench.dbmetadata", "debugmetasql", "false")))
+		{
+			LogMgr.logInfo("DbMetadata.getTriggerSource()", "Using query=\n" + query);
+		}
 
 		ResultSet rs = stmt.executeQuery(query);
 		int colCount = rs.getMetaData().getColumnCount();
@@ -1519,7 +1547,7 @@ public class DbMetadata
 		}
 		return result;
 	}
-	
+
 	public TableIdentifier getSynonymTable(String anOwner, String aSynonym)
 	{
 		if (!this.isOracle) return null;
@@ -1825,18 +1853,18 @@ public class DbMetadata
 
 	public static void setServersWhereDDLNeedsCommit(List aList)
 	{
-		ddlNeedsCommit = aList;
+		ddlNeedsCommitServers = aList;
 	}
 	public static void setServersWhichNeedReconnect(List aList)
 	{
 		serversWhichNeedReconnect = aList;
 	}
 
-	public boolean getDDLNeedsCommit()
+	public static void setServersWhichNeedJdbcCommit(List aList)
 	{
-		return ddlNeedsCommit.contains(this.productName);
+		serverNeedsJdbcCommit = aList;
 	}
-
+	
 	public static void setCaseSensitiveServers(List aList)
 	{
 		caseSensitiveServers = aList;

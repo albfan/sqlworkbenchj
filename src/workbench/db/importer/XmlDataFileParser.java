@@ -24,7 +24,7 @@ import workbench.log.LogMgr;
 
 /**
  *
- * @author  thomas
+ * @author  workbench@kellerer.org
  */
 public class XmlDataFileParser
 extends DefaultHandler

@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 import workbench.WbManager;
 
@@ -48,6 +49,7 @@ public class ConnectionMgr
 		this.disconnect(anId);
 
 		WbConnection conn = new WbConnection(anId);
+		LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + aProfile.getName() + "] with ID=" + anId);
 		Connection sql = this.connect(aProfile, anId);
 		conn.setSqlConnection(sql);
 		conn.setProfile(aProfile);
@@ -62,8 +64,9 @@ public class ConnectionMgr
 		// The DriverManager refuses to use a driver which was not loaded
 		// from the system classloader, so the connection has to be
 		// established directly from the driver.
-		String drvName = aProfile.getDriverclass();
-		DbDriver drv = this.findDriver(drvName);
+		String drvClass = aProfile.getDriverclass();
+		String drvName = aProfile.getDriverName();
+		DbDriver drv = this.findDriver(drvClass, drvName);
 		if (drv == null)
 		{
 			throw new NoConnectionException("Driver class not registered");
@@ -125,7 +128,7 @@ public class ConnectionMgr
 		DbDriver firstMatch = null;
 		DbDriver db = null;
 		
-		if (aName == null) return this.findDriver(drvClassName);
+		if (aName == null || aName.length() == 0) return this.findDriver(drvClassName);
 		
 		for (int i=0; i < this.drivers.size(); i ++)
 		{
@@ -314,6 +317,7 @@ public class ConnectionMgr
 	 */
 	public void disconnectAll()
 	{
+		//try { Thread.sleep(10000); } catch (Throwable th) {}
 		Iterator itr = this.activeConnections.keySet().iterator();
 		while (itr.hasNext())
 		{
@@ -323,7 +327,7 @@ public class ConnectionMgr
 	}
 
 	/**
-	 *	Disconnect the connection with the given (window) id
+	 *	Disconnect the connection with the given id
 	 */
 	public void disconnect(String anId)
 	{
@@ -334,6 +338,7 @@ public class ConnectionMgr
 			if (con != null)
 			{
 				LogMgr.logDebug("ConnectionMgr.disconnect()", "Disconnecting: " + con.getProfile().getName() + " with ID=" + anId);
+				this.disconnectLocalHsql(con);
 				con.close();
 			}
 			this.activeConnections.put(anId, null);
@@ -344,6 +349,30 @@ public class ConnectionMgr
 		}
 	}
 
+	/**
+	 *	Disconnects a local HSQL connection. Beginning with 1.7.2 the local
+	 *  (=in process) engine should be closed down with SHUTDOWN when 
+	 *  disconnecting. It shouldn't hurt for pre-1.7.2 either :-)
+	 */
+	private void disconnectLocalHsql(WbConnection con)
+	{
+		String url = con.getUrl();
+		if (!url.startsWith("jdbc:hsqldb")) return;
+		
+		// this is a HSQL server connection. Do not shut down this!
+		if (url.startsWith("jdbc:hsqldb:hsql:")) return;
+		
+		try
+		{
+			Statement stmt = con.createStatement();
+			stmt.executeUpdate("SHUTDOWN");
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("ConnectionMgr.disconnectLocalHsql()", "Error when executing SHUTDOWN", e);
+		}
+		
+	}
 	public String toString()
 	{
 		return this.getClass().getName();

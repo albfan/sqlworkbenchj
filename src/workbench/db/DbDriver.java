@@ -27,7 +27,7 @@ import workbench.util.StringUtil;
 /**
  *	Represents a JDBC Driver definition.
  *	The definition includes a (logical) name, a driver class
- *	and (optional) a library from which the driver is to 
+ *	and (optional) a library from which the driver is to
  *	be loaded.
  *	@author  thomas
  */
@@ -35,37 +35,37 @@ public class DbDriver
 {
 	private Driver driverClassInstance;
 	private URLClassLoader classLoader;
-	
+
 	/** Holds value of property name. */
 	private String name;
-	
+
 	/** Holds value of property driverClass. */
 	private String driverClass;
 
 	private String identifier;
-	
+
 	/** Holds value of property library. */
 	private String library;
-	
+
 	private String sampleUrl;
-	
+
 	public DbDriver()
 	{
 	}
-	
+
 	public DbDriver(Driver aDriverClassInstance)
 	{
 		this.driverClassInstance = aDriverClassInstance;
 		this.driverClass = aDriverClassInstance.getClass().getName();
 		this.name = this.driverClass;
 	}
-	
+
 	public DbDriver(String aDriverClassname)
 	{
 		this.driverClass = aDriverClassname;
 		this.name = this.driverClass;
 	}
-	
+
 	/** Creates a new instance of DbDriver */
 	public DbDriver(String aName, String aClass, String aLibrary)
 	{
@@ -73,18 +73,18 @@ public class DbDriver
 		this.setDriverClass(aClass);
 		this.setLibrary(aLibrary);
 	}
-	
+
 	public String getName() { return this.name; }
-	public void setName(String name) 
-	{ 	
-		this.name = name; 
+	public void setName(String name)
+	{
+		this.name = name;
 		this.identifier = null;
 	}
-	
+
 	public String getDriverClass() {  return this.driverClass; }
-	public void setDriverClass(String driverClass) 
-	{ 
-		this.driverClass = driverClass;	
+	public void setDriverClass(String driverClass)
+	{
+		this.driverClass = driverClass;
 		this.identifier = null;
 	}
 
@@ -99,19 +99,19 @@ public class DbDriver
 			b.append(")");
 			this.identifier = b.toString();
 		}
-		return this.identifier; 
+		return this.identifier;
 	}
 	public String getLibrary() { return this.library; }
 	public void setLibrary(String library) { this.library = library; }
-	
-	public String toString() 
-	{ 
+
+	public String toString()
+	{
 		return this.getIdentifier();
 	}
 
 	public void setSampleUrl(String anUrl) { this.sampleUrl = anUrl; }
 	public String getSampleUrl() { return this.sampleUrl; }
-	
+
 	private void loadDriverClass()
 		throws WbException
 	{
@@ -129,7 +129,7 @@ public class DbDriver
 				}
 				this.classLoader = new URLClassLoader(url);
 			}
-			
+
 			Class drvClass = this.classLoader.loadClass(this.driverClass);
 			this.driverClassInstance = (Driver)drvClass.newInstance();
 		}
@@ -140,7 +140,7 @@ public class DbDriver
 			throw new WbException("Could not load driver class " + this.driverClass);
 		}
 	}
-	
+
 	public DbDriver createCopy()
 	{
 		DbDriver copy = new DbDriver();
@@ -149,19 +149,19 @@ public class DbDriver
 		copy.sampleUrl = this.sampleUrl;
 		return copy;
 	}
-	
+
 	public Connection connect(String url, String user, String password)
 		throws WbException, SQLException
 	{
 		return this.connect(url, user, password, null);
 	}
-	
+
 	public Connection connect(String url, String user, String password, String id)
 		throws WbException, SQLException
 	{
 		return this.connect(url, user, password, id, null);
 	}
-	
+
 	public Connection connect(String url, String user, String password, String id, Properties connProps)
 		throws WbException, SQLException
 	{
@@ -184,11 +184,14 @@ public class DbDriver
 					LogMgr.logWarning("DbDriver.connect()", "The driver class " + this.driverClass  + " reports that it does not accept the given URL!");
 				}
 			}
-			
+
+			// as we are not using the DriverManager, we need to supply username
+			// and password in the connection properties!
 			Properties props = new Properties();
 			if (user != null) props.put("user", user);
 			if (password != null) props.put("password", password);
-			
+
+			// copy the user defined connection properties into the actually used ones!
 			if (connProps != null)
 			{
 				Enumeration keys = connProps.propertyNames();
@@ -202,11 +205,11 @@ public class DbDriver
 					}
 				}
 			}
-			
+
 			// identify the program name when connecting
 			// this is different for each DBMS...
 			String propName = null;
-			if (url.startsWith("jdbc:oracle")) 
+			if (url.startsWith("jdbc:oracle"))
 			{
 				propName = "v$session.program";
 				if (id != null) props.put("v$session.terminal", id);
@@ -223,12 +226,12 @@ public class DbDriver
 			{
 				propName = "ProgramName";
 			}
-			
-			if (propName != null && !props.containsKey(propName)) 
+
+			if (propName != null)
 			{
-				props.put(propName, ResourceMgr.TXT_PRODUCT_NAME);
+				props.put(propName, ResourceMgr.TXT_PRODUCT_NAME); // + "(" + ResourceMgr.getString("TxtBuildNumber") + ")");
 			}
-			
+
 			c = this.driverClassInstance.connect(url, props);
 			if (c == null)
 			{
@@ -247,7 +250,7 @@ public class DbDriver
 		{
 			throw new WbException("Error connecting to database. (" + th.getClass().getName() + " - " + th.getMessage() + ")");
 		}
-		
+
 		return c;
 	}
 
@@ -255,7 +258,7 @@ public class DbDriver
 	{
 		if (other == null) return false;
 		if (this.driverClass == null) return false;
-		
+
 		if (other instanceof DbDriver)
 		{
 			DbDriver o = (DbDriver)other;
@@ -277,7 +280,7 @@ public class DbDriver
 			return false;
 		}
 	}
-	
+
 	public static Comparator getNameComparator()
 	{
 		return new Comparator()
@@ -291,13 +294,13 @@ public class DbDriver
 				{
 					String name1 = ((DbDriver)o1).name;
 					String name2 = ((DbDriver)o2).name;
-					return name1.compareTo(name2);				
+					return name1.compareTo(name2);
 				}
 				return 0;
 			}
 		};
 	}
-	
+
 	public static Comparator getDriverClassComparator()
 	{
 		return new Comparator()
@@ -311,7 +314,7 @@ public class DbDriver
 				{
 					String drv1 = ((DbDriver)o1).getIdentifier(); // returns driver class & name
 					String drv2 = ((DbDriver)o2).getIdentifier();
-					return drv1.compareTo(drv2);				
+					return drv1.compareTo(drv2);
 				}
 				return 0;
 			}

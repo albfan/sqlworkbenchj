@@ -31,8 +31,23 @@ public class SingleVerbCommand extends SqlCommand
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		try
 		{
-			this.currentStatement = aConnection.createStatement();
-			this.currentStatement.execute(aSql);
+			if (aConnection.useJdbcConnect())
+			{
+				if ("COMMIT".equals(this.verb))
+				{
+					aConnection.getSqlConnection().commit();
+				}
+				else if ("ROLLBACK".equals(this.verb))
+				{
+					aConnection.getSqlConnection().rollback();
+				}
+			}
+			else
+			{
+				this.currentStatement = aConnection.createStatement();
+				this.currentStatement.execute(aSql);
+			}
+			
 			result.addMessage(this.verb + " " + ResourceMgr.getString("MsgKnownStatementOK"));
 			StringBuffer warnings = new StringBuffer();
 			if (this.appendWarnings(aConnection, this.currentStatement , warnings))

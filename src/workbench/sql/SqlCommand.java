@@ -122,9 +122,12 @@ public class SqlCommand
 
 	public void done()
 	{
-		try { this.currentStatement.clearWarnings(); } catch (Throwable th) {}
-		try { this.currentStatement.clearBatch(); } catch (Throwable th) {}
-		try { this.currentStatement.close(); } catch (Throwable th) {}
+		if (this.currentStatement != null)
+		{
+			try { this.currentStatement.clearWarnings(); } catch (Throwable th) {}
+			try { this.currentStatement.clearBatch(); } catch (Throwable th) {}
+			try { this.currentStatement.close(); } catch (Throwable th) {}
+		}
 		this.currentStatement = null;
 		this.isCancelled = false;
 	}
@@ -171,14 +174,16 @@ public class SqlCommand
 			else
 			{
 				updateCount = this.currentStatement.getUpdateCount();
-				result.addUpdateCount(updateCount);
+				//result.addUpdateCount(updateCount);
+				result.addMessage(updateCount + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
 			}
 
 			boolean moreResults = false; 
 			
 			moreResults = this.currentStatement.getMoreResults();
 
-			while ( (moreResults || (updateCount != -1)) && (loopcounter < maxLoops) )
+			//while ( (moreResults || (updateCount != -1 && zeroUpdates < 2) ) && (loopcounter < maxLoops) )
+			while (moreResults)
 			{
 				if (moreResults)
 				{
@@ -188,11 +193,16 @@ public class SqlCommand
 					moreResults = this.currentStatement.getMoreResults();
 				}
 
+				/*
 				if (updateCount > -1)
 				{
 					result.addMessage(updateCount + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
 					updateCount = this.currentStatement.getUpdateCount();
+					if (updateCount == 0) zeroUpdates ++;
 				}
+				*/
+				loopcounter ++;
+				if (loopcounter > maxLoops) break;
 			}						
 			result.setSuccess();
 		}

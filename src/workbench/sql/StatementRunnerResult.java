@@ -123,6 +123,18 @@ public class StatementRunnerResult
 		return msgs;
 	}
 	
+	public long getTotalUpdateCount()
+	{
+		if (this.updateCounts == null) return 0;
+		int size = this.updateCounts.size();
+		long result = 0;
+		for (int i=0; i< size; i++)
+		{
+			result += ((Integer)this.updateCounts.get(i)).intValue();
+		}
+		return result;
+	}
+	
 	public int[] getUpdateCounts()
 	{
 		if (this.updateCounts == null) return new int[0];

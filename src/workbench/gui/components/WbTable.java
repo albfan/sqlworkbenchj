@@ -6,14 +6,14 @@
 package workbench.gui.components;
 
 import java.awt.*;
-import java.awt.Window;
+import java.awt.Container;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.awt.print.PageFormat;
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -22,21 +22,20 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import javax.swing.*;
-import javax.swing.CellEditor;
+import javax.swing.JPopupMenu.Separator;
 import javax.swing.border.LineBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
 import javax.swing.table.*;
-import javax.swing.table.TableCellEditor;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 
 import workbench.gui.actions.*;
-import workbench.gui.actions.PrintAction;
 import workbench.gui.renderer.DateColumnRenderer;
 import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RowStatusRenderer;
+import workbench.gui.renderer.StringColumnRenderer;
 import workbench.gui.renderer.ToolTipRenderer;
 import workbench.interfaces.Exporter;
 import workbench.interfaces.FontChangedListener;
@@ -44,7 +43,6 @@ import workbench.interfaces.PrintableComponent;
 import workbench.interfaces.Searchable;
 import workbench.log.LogMgr;
 import workbench.print.PrintPreview;
-import workbench.print.PrintUtil;
 import workbench.print.TablePrinter;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -53,8 +51,9 @@ import workbench.storage.NullValue;
 import workbench.util.StringUtil;
 
 
+
 public class WbTable
-extends JTable
+	extends JTable
 	implements ActionListener, FocusListener, MouseListener,
 	           Exporter, FontChangedListener, Searchable, PrintableComponent
 {
@@ -70,7 +69,7 @@ extends JTable
 	private WbTextCellEditor defaultEditor;
 	private DefaultCellEditor defaultNumberEditor;
 	private JTextField numberEditorTextField;
-	
+
 	private SortAscendingAction sortAscending;
 	private SortDescendingAction sortDescending;
 	private OptimizeColumnWidthAction optimizeCol;
@@ -84,7 +83,7 @@ extends JTable
 
 	private PrintAction printDataAction;
 	private PrintPreviewAction printPreviewAction;
-	
+
 	private boolean adjustToColumnLabel = false;
 	private int headerPopupY = -1;
 	private int headerPopupX = -1;
@@ -98,10 +97,12 @@ extends JTable
 	private DateColumnRenderer defaultDateRenderer;
 	private NumberColumnRenderer defaultNumberRenderer;
 	private NumberColumnRenderer defaultIntegerRenderer = new NumberColumnRenderer(0);
+	private StringColumnRenderer defaultStringRenderer = new StringColumnRenderer();
 
 	private RowHeightResizer rowResizer;
 	//private List changeListener;
 	private TableModelListener changeListener;
+	private JScrollPane scrollPane;
 
 	public WbTable()
 	{
@@ -137,16 +138,16 @@ extends JTable
 		text.setFont(dataFont);
 		this.defaultEditor = WbTextCellEditor.createInstance(this);
 		this.defaultEditor.setFont(dataFont);
-		
+
 		numberEditorTextField = new JTextField();
 		if (dataFont != null)  numberEditorTextField.setFont(dataFont);
 		numberEditorTextField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		numberEditorTextField.setHorizontalAlignment(SwingConstants.RIGHT);
 		numberEditorTextField.addMouseListener(new TextComponentMouseListener());
     WbCellEditor.setDefaultCopyPasteKeys(numberEditorTextField);
-    
+
 		this.defaultNumberEditor = new DefaultCellEditor(numberEditorTextField);
-		
+
 		this.addMouseListener(this);
 		this.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		JTableHeader th = this.getTableHeader();
@@ -171,8 +172,8 @@ extends JTable
 		this.popup.addSeparator();
 		this.popup.add(this.printDataAction.getMenuItem());
 		this.popup.add(this.printPreviewAction.getMenuItem());
-		
-		
+
+
 		InputMap im = this.getInputMap(WHEN_FOCUSED);
 		ActionMap am = this.getActionMap();
 		this.findAction.addToInputMap(im, am);
@@ -188,15 +189,12 @@ extends JTable
 		if (aFlag && this.rowResizer == null)
 		{
 			this.rowResizer = new RowHeightResizer(this);
-			this.addMouseListener(this.rowResizer);
-			this.addMouseMotionListener(this.rowResizer);
 		}
 		else if (!aFlag)
 		{
 			 if (this.rowResizer != null)
 			 {
-					this.removeMouseListener(this.rowResizer);
-					this.removeMouseMotionListener(this.rowResizer);
+				 this.rowResizer.done();
 			 }
 			 this.rowResizer = null;
 		}
@@ -254,10 +252,10 @@ extends JTable
 		if (this.printDataAction != null)
 		{
 			int count = this.popup.getComponentCount();
-			
+
 			if (withSep)
 			{
-				this.popup.add(new JPopupMenu.Separator(), this.popup.getComponentCount() - 3);
+				this.popup.add(new Separator(), this.popup.getComponentCount() - 3);
 			}
 			this.popup.add(anAction.getMenuItem(), this.popup.getComponentCount() - 3);
 		}
@@ -269,10 +267,31 @@ extends JTable
 	}
 
 
+	protected void configureEnclosingScrollPane()
+	{
+		super.configureEnclosingScrollPane();
+		Container p = getParent();
+		if (p instanceof JViewport)
+		{
+			Container gp = p.getParent();
+			if (gp instanceof JScrollPane)
+			{
+				// Make certain we are the viewPort's view and not, for
+				// example, the rowHeaderView of the scrollPane -
+				// an implementor of fixed columns might do this.
+				this.scrollPane = (JScrollPane)gp;
+				JViewport viewport = scrollPane.getViewport();
+				if (viewport == null || viewport.getView() != this)
+				{
+					this.scrollPane = null;
+				}
+			}
+		}
+	}	
 	public void printPreview()
 	{
 		TablePrinter printer = this.getTablePrinter();
-		
+
 		Window w = SwingUtilities.getWindowAncestor(this);
 		JFrame parent = null;
 		if (w instanceof JFrame)
@@ -281,7 +300,7 @@ extends JTable
 		}
 		PrintPreview preview = new PrintPreview(parent, printer);
 	}
-	
+
 	public void print()
 	{
 		this.getTablePrinter().startPrint();
@@ -295,7 +314,7 @@ extends JTable
 		printer.setFooterText(ResourceMgr.getString("TxtPageFooter"));
 		return printer;
 	}
-	
+
 	public synchronized void setModel(TableModel aModel)
 	{
 		this.setModel(aModel, false);
@@ -377,12 +396,12 @@ extends JTable
 	{
 		return this.printPreviewAction;
 	}
-	
+
 	public PrintAction getPrintAction()
 	{
 		return this.printDataAction;
 	}
-	
+
 	public String getValueAsString(int row, int column)
 		throws IndexOutOfBoundsException
 	{
@@ -600,6 +619,13 @@ extends JTable
 		}
 		return renderer;
 	}
+
+	private boolean useDefaultStringRenderer = true;
+	public void setUseDefaultStringRenderer(boolean aFlag)
+	{
+		this.useDefaultStringRenderer = aFlag;
+	}
+	public boolean getUseDefaultStringRenderer() { return this.useDefaultStringRenderer; }
 	
 	public void initDefaultRenderers()
 	{
@@ -607,33 +633,26 @@ extends JTable
 		// otherwise setDefaultRenderer() bombs out with a NullPointerException
 		if (this.defaultRenderersByColumnClass == null) this.createDefaultRenderers();
 
-		
 		if (this.defaultDateRenderer == null)
 		{
 			String format = WbManager.getSettings().getDefaultDateFormat();
 			defaultDateRenderer = new DateColumnRenderer(format);
 		}
-		defaultDateRenderer.clearDisplayCache();
 		this.setDefaultRenderer(Date.class, defaultDateRenderer);
 
+		int maxDigits = WbManager.getSettings().getMaxFractionDigits();
+		char sep = WbManager.getSettings().getDecimalSymbol().charAt(0);
+		
 		if (this.defaultNumberRenderer == null)
 		{
-			int maxDigits = WbManager.getSettings().getMaxFractionDigits();
-			if (maxDigits == -1) maxDigits = 10;
-			defaultNumberRenderer = new NumberColumnRenderer(maxDigits);
+			this.defaultNumberRenderer = new NumberColumnRenderer(maxDigits, sep);
 		}
 		else
 		{
-			String sep = WbManager.getSettings().getDecimalSymbol();
-			defaultNumberRenderer.setDecimalSymbol(sep.charAt(0));
+			defaultNumberRenderer.setMaxDigits(maxDigits);
+			defaultNumberRenderer.setDecimalSymbol(sep);
 		}
-		defaultNumberRenderer.clearDisplayCache();
 
-		InputMap mymap = this.getInputMap(WHEN_FOCUSED);
-		InputMap im = defaultNumberRenderer.getInputMap(WHEN_FOCUSED);
-		
-		im.setParent(mymap);
-		
 		this.setDefaultRenderer(Number.class, defaultNumberRenderer);
 		this.setDefaultRenderer(Double.class, defaultNumberRenderer);
 		this.setDefaultRenderer(Float.class, defaultNumberRenderer);
@@ -641,13 +660,24 @@ extends JTable
 
 		this.setDefaultRenderer(BigInteger.class, defaultIntegerRenderer);
 		this.setDefaultRenderer(Integer.class, defaultIntegerRenderer);
+		if (this.useDefaultStringRenderer)
+		{
+			this.setDefaultRenderer(String.class, defaultStringRenderer);
+		}
 
 		ToolTipRenderer rend = new ToolTipRenderer();
+		this.setDefaultRenderer(Object.class, rend);
+		
+		InputMap mymap = this.getInputMap(WHEN_FOCUSED);
+		InputMap im = defaultNumberRenderer.getInputMap(WHEN_FOCUSED);
+
+		/*
+		im.setParent(mymap);
 		im = rend.getInputMap(WHEN_FOCUSED);
 		im.setParent(mymap);
 		im = rend.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		im.setParent(mymap);
-		this.setDefaultRenderer(Object.class, rend);
+		*/
 	}
 
 	public void initDefaultEditors()
@@ -727,11 +757,11 @@ extends JTable
 		for (int row = 0; row < this.getRowCount(); row ++)
 		{
 			s = this.getValueAsString(row, aColumn);
-			if (s == null || s.length() == 0) 
+			if (s == null || s.length() == 0)
 				stringWidth = 0;
 			else
 				stringWidth = fm.stringWidth(s);
-				
+
 			optWidth = Math.max(optWidth, stringWidth + addWidth);
 		}
 		if (optWidth > 0)
@@ -807,7 +837,7 @@ extends JTable
 	public void openEditWindow()
 	{
 		if (!this.isEditing()) return;
-		
+
 		int col = this.getEditingColumn();
 		int row = this.getEditingRow();
 		String data = this.getValueAsString(row, col);
@@ -821,10 +851,10 @@ extends JTable
 		TableCellEditor editor = this.getCellEditor();
 		EditWindow w = new EditWindow(ownerFrame, title, data);
 		w.show();
-		if (editor != null) 
+		if (editor != null)
 		{
 			// we need to "cancel" the editor so that the data
-			// in the editor component will not be written into the 
+			// in the editor component will not be written into the
 			// table model!
 			editor.cancelCellEditing();
 		}
@@ -834,7 +864,7 @@ extends JTable
 		}
 		w.dispose();
 	}
-	
+
 	public void addTableModelListener(TableModelListener aListener)
 	{
 		this.changeListener = aListener;
@@ -847,15 +877,43 @@ extends JTable
 		if (this.dwModel != null) this.dwModel.removeTableModelListener(aListener);
 	}
 
-
+	public int getFirstVisibleRow()
+	{
+		if (this.getRowCount() == 0) return -1;
+		Point p = this.scrollPane.getViewport().getViewPosition();
+		int row = this.rowAtPoint(p);
+		return row;
+	}
+	
+	public int getLastVisibleRow()
+	{
+		if (this.getRowCount() == 0) return -1;
+		int first = this.getFirstVisibleRow();
+		
+		JViewport view = this.scrollPane.getViewport();
+		Point p = view.getViewPosition();
+		Dimension d = view.getExtentSize();
+		p.move(0, (int)d.getHeight());
+		
+		int row = this.rowAtPoint(p);
+		
+		// if rowAtPoint() returns a negative number, then all 
+		// rows fit into the current viewport
+		if (row < 0) row = this.getRowCount() - 1;
+		
+		return first + row;
+	}
+	
+	/** Scroll the given row into view.
+	 */
 	public void scrollToRow(int aRow)
 	{
 		Rectangle rect = this.getCellRect(aRow, 1, true);
 		this.scrollRectToVisible(rect);
 	}
 
-	/** Invoked when the mouse button has been clicked (pressed
-	 * and released) on a component.
+	/** 
+	 *	Start sorting if the column header has been clicked.
 	 *
 	 */
 	public void mouseClicked(MouseEvent e)
@@ -968,6 +1026,7 @@ extends JTable
 
 	public void resetPopup()
 	{
+		if (this.popup != null) this.popup.setVisible(false);
 		this.popup = null;
 	}
 
@@ -1050,10 +1109,8 @@ extends JTable
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			String contents = ds.getDataAsSqlInsert(StringUtil.LINE_TERMINATOR);
 			out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(aFilename)));
-			out.print(contents);
-			out.close();
+			ds.writeDataAsSqlInsert(out, StringUtil.LINE_TERMINATOR);
 		}
 		catch (Throwable th)
 		{
@@ -1077,8 +1134,7 @@ extends JTable
 		{
 			out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(aFilename)));
 			DataStore ds = this.getDataStore();
-			String contents = ds.getDataAsHtmlTable();
-			out.print(contents);
+			ds.writeHtmlData(out);
 		}
 		catch (Throwable th)
 		{
@@ -1102,8 +1158,7 @@ extends JTable
 		{
 			out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(aFilename)));
 			DataStore ds = this.getDataStore();
-			String contents = ds.getDataAsXml();
-			out.print(contents);
+			ds.writeXmlData(out);
 		}
 		catch (Throwable th)
 		{
@@ -1115,7 +1170,7 @@ extends JTable
 		}
 		WbSwingUtilities.showDefaultCursor(this.getParent());
 	}
-	
+
 	public void saveAsAscii(String aFilename)
 	{
 		if (this.dwModel == null) return;
@@ -1126,8 +1181,8 @@ extends JTable
 		try
 		{
 			out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(aFilename)));
-			String contents = this.getDataString(System.getProperty("line.separator", "\r\n"));
-			out.print(contents);
+			DataStore ds = this.getDataStore();
+			ds.writeDataString(out, WbManager.getSettings().getDefaultTextDelimiter(), StringUtil.LINE_TERMINATOR, true);
 		}
 		catch (Throwable th)
 		{
@@ -1224,12 +1279,12 @@ extends JTable
 	{
 		DataStoreTableModel ds = this.getDataStoreTableModel();
 		if (ds == null) return -1;
-		
+
 		int selectedRow = this.getSelectedRow();
 		final int newRow;
-		
+
 		this.stopEditing();
-		
+
 		if (selectedRow == -1)
 		{
 			newRow = ds.addRow();
@@ -1251,7 +1306,7 @@ extends JTable
 			this.setEditingColumn(0);
 			this.editCellAt(newRow, 0);
 		}
-		
+
 		final Component edit = this.getEditorComponent();
 		if (edit != null)
 		{
@@ -1264,13 +1319,13 @@ extends JTable
 			});
 		}
 		return newRow;
-	}	
-	
+	}
+
 	public boolean deleteRow()
 	{
 		DataStoreTableModel ds = this.getDataStoreTableModel();
 		if (ds == null) return false;
-		
+
 		int selectedRow = this.getSelectedRow();
 		if (selectedRow != -1)
 		{
@@ -1283,6 +1338,6 @@ extends JTable
 		}
 		return true;
 	}
-	
+
 }
 

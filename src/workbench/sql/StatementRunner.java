@@ -20,6 +20,8 @@ import workbench.sql.commands.UpdatingCommand;
 import workbench.sql.wbcommands.WbDescribeTable;
 import workbench.sql.wbcommands.WbDisableOraOutput;
 import workbench.sql.wbcommands.WbEnableOraOutput;
+import workbench.sql.wbcommands.WbHelp;
+import workbench.sql.wbcommands.WbImport;
 import workbench.sql.wbcommands.WbListCatalogs;
 import workbench.sql.wbcommands.WbListProcedures;
 import workbench.sql.wbcommands.WbListTables;
@@ -48,8 +50,12 @@ public class StatementRunner
 	{
 		cmdDispatch = new HashMap(10);
 		cmdDispatch.put("*", new SqlCommand());
+
 		
 		SqlCommand sql = new WbListTables();
+		cmdDispatch.put(sql.getVerb(), sql);
+		
+		sql = new WbHelp();
 		cmdDispatch.put(sql.getVerb(), sql);
 		
 		sql = new WbListProcedures();
@@ -70,6 +76,12 @@ public class StatementRunner
 		
 		sql = new WbSpoolCommand();
 		cmdDispatch.put(sql.getVerb(), sql);
+		cmdDispatch.put("EXP", sql);
+		cmdDispatch.put("EXPORT", sql);
+		
+		sql = new WbImport();
+		cmdDispatch.put(sql.getVerb(), sql);
+		cmdDispatch.put("IMP", sql);
 		
 		cmdDispatch.put(WbListCatalogs.LISTCAT.getVerb(), WbListCatalogs.LISTCAT);
 		cmdDispatch.put(WbListCatalogs.LISTDB.getVerb(), WbListCatalogs.LISTDB);
@@ -125,6 +137,12 @@ public class StatementRunner
 			cleanSql = SqlUtil.makeCleanSql(macro, false);
 		}
 		
+		String oldCatalog = null;
+		String newCatalog = null;
+		
+		try { oldCatalog = this.dbConnection.getSqlConnection().getCatalog(); } catch (Throwable th) {}
+		if (oldCatalog == null) oldCatalog = "";
+		
 		String verb = SqlUtil.getSqlVerb(cleanSql).toUpperCase();
 		
 		this.currentCommand = (SqlCommand)this.cmdDispatch.get(verb);
@@ -148,6 +166,13 @@ public class StatementRunner
 				this.currentConsumer.consumeResult(this.result);
 			}
 			this.currentConsumer = null;
+		}
+		try { newCatalog = this.dbConnection.getSqlConnection().getCatalog(); } catch (Throwable th) {}
+		if (newCatalog == null) newCatalog = "";
+		
+		if (!oldCatalog.equals(newCatalog))
+		{
+			this.dbConnection.connectionStateChanged();
 		}
 	}
 

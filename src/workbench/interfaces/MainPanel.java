@@ -35,5 +35,6 @@ public interface MainPanel
 	void setTabTitle(JTabbedPane tab, int index);
 	String getId();
 	boolean isConnected();
+	boolean isBusy();
 	void dispose();
 }

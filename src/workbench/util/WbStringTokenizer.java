@@ -97,7 +97,7 @@ public class WbStringTokenizer
 		this.lastToken = 0;
 		this.tokenizer = new StreamTokenizer(aReader);
 		this.tokenizer.resetSyntax();
-		this.tokenizer.wordChars(32,255);
+		this.tokenizer.wordChars(0,255);
 		
 		for (int i=0; i< this.delimit.length(); i++)
 		{
@@ -206,7 +206,7 @@ public class WbStringTokenizer
 		try
 		{
 			WbStringTokenizer tok = new WbStringTokenizer("FROM",true, "\"'", true);
-			tok.setSourceString("SELECT 'from', col1, col2 FROM test WHERE x=u");
+			tok.setSourceString("SELECT 'from', col1, col2 \r\nFROM test WHERE x=u");
 			System.out.println(tok.nextToken());
 			System.out.println(tok.nextToken());
 		}

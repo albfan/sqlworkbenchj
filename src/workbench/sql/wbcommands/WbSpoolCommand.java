@@ -8,6 +8,7 @@ import workbench.db.WbConnection;
 import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.commands.SelectCommand;
 import workbench.util.ArgumentParser;
@@ -19,7 +20,7 @@ import workbench.util.StringUtil;
  * @author  workbench@kellerer.org
  */
 public class WbSpoolCommand
-	extends SelectCommand
+	extends SqlCommand
 {
 	public static final String VERB = "SPOOL";
 	public DataSpooler spooler;
@@ -89,7 +90,7 @@ public class WbSpoolCommand
 
 		String table = cmdLine.getValue("table");
 		
-		if ("text".equalsIgnoreCase(type))
+		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
 			
 			spooler.setOutputTypeText();
@@ -231,7 +232,7 @@ public class WbSpoolCommand
 		super.cancel();
 		if (this.spooler != null)
 		{
-			this.spooler.stopExport();
+			this.spooler.cancelExecution();
 		}
 	}
 }

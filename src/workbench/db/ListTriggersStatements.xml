@@ -113,5 +113,42 @@ where trg.tgrelid = tbl.oid
     </void> 
    </object> 
   </void> 
+  <void method="put"> 
+   <string>Firebird</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>SELECT rdb$trigger_name AS TRIGGER_NAME,
+       case rdb$trigger_type 
+          when 0 then 'UNKNOWN'
+          when 1 then 'BEFORE'
+          when 2 then 'AFTER'
+          when 3 then 'BEFORE'
+          when 4 then 'AFTER'
+          when 5 then 'BEFORE'
+          when 6 then 'AFTER'
+       END AS trigger_type,
+       case rdb$trigger_type 
+          when 0 then 'UNKNOWN'
+          when 1 then 'INSERT'
+          when 2 then 'INSERT'
+          when 3 then 'UPDATE'
+          when 4 then 'UPDATE'
+          when 5 then 'DELETE'
+          when 6 then 'DELETE'
+       END AS trigger_event
+FROM rdb$triggers
+</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>rdb$relation_name</string> 
+    </void> 
+    <void property="useUpperCase"> 
+     <boolean>true</boolean> 
+    </void> 
+    <void property="schemaField"> 
+     <string>RDB$OWNER_NAME</string> 
+    </void> 
+   </object> 
+  </void> 
  </object>
 </java>

@@ -66,5 +66,20 @@
     </void> 
    </object> 
   </void> 
+  <void method="put"> 
+   <string>Firebird</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>SELECT RDB$PROCEDURE_SOURCE FROM RDB$PROCEDURES</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>RDB$PROCEDURE_NAME</string> 
+    </void> 
+    <void property="schemaField"> 
+     <string>RDB$OWNER_NAME</string> 
+    </void> 
+   </object> 
+  </void> 
+  
  </object> 
 </java> 

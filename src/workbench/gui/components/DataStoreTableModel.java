@@ -11,6 +11,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 
 import workbench.WbManager;
+import workbench.exception.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
@@ -19,9 +20,9 @@ import workbench.util.SqlUtil;
 
 
 /** 
- * TableModel for displaying the contents of a DataStore or 
- * a ResultSet. If it's a result set, this will be cached
- * in a {@link workbench.storage.DataStore }
+ * TableModel for displaying the contents of a {@link workbench.storage.DataStore }
+ * @author workbench@kellerer.org
+ *
  */
 public class DataStoreTableModel 
 	extends AbstractTableModel
@@ -83,14 +84,7 @@ public class DataStoreTableModel
 			msg.append('/');
 			msg.append(col);
 			msg.append(" - ");
-			if (e.getMessage() == null)
-			{
-				msg.append(e.getClass().getName());
-			}
-			else
-			{
-				msg.append(e.getMessage());
-			}
+			msg.append(ExceptionUtil.getDisplay(e));
 			return msg.toString();
 		}
 	}	
@@ -114,6 +108,11 @@ public class DataStoreTableModel
 		this.dataCache.setUpdateTable(aTable);
 	}
 	
+	/**
+	 *	Shows or hides the status column.
+	 *	The status column will display an indicator if the row has 
+	 *  been modified or was inserted
+	 */
 	public void setShowStatusColumn(boolean aFlag)
 	{
 		if (aFlag == this.showStatusColumn) return;
@@ -141,48 +140,48 @@ public class DataStoreTableModel
 	{
 		if (this.showStatusColumn && column == 0) return;
 		
-		try
+		if (this.isUpdateable())
 		{
-			if (this.isUpdateable())
+			if (aValue == null || aValue.toString().length() == 0) 
 			{
-				if (aValue == null || aValue.toString().length() == 0) 
-				{
-					this.dataCache.setNull(row, column - this.statusOffset);
-				}
-				else 
-				{
-					try
-					{
-						Object realValue = this.dataCache.convertCellValue(aValue, column - this.statusOffset);
-						this.dataCache.setValue(row, column - this.statusOffset, realValue);
-					}
-					catch (Exception ce)
-					{
-						LogMgr.logError(this, "Error converting input >" + aValue + "< to column type (" + this.getColumnType(column) + ") ", ce);
-						Toolkit.getDefaultToolkit().beep();
-						String msg = ResourceMgr.getString("MsgConvertError");
-						msg = msg + "\r\n" + ce.getLocalizedMessage();
-						WbManager.getInstance().showErrorMessage(parentTable, msg);
-						return;
-					}
-				}
-				fireTableDataChanged();
+				this.dataCache.setNull(row, column - this.statusOffset);
 			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DataStoreTableModel.setValueAt()", "Error when setting new value " + aValue + " at " + row + "/" + column, e);
+			else 
+			{
+				try
+				{
+					Object realValue = this.dataCache.convertCellValue(aValue, column - this.statusOffset);
+					this.dataCache.setValue(row, column - this.statusOffset, realValue);
+				}
+				catch (Exception ce)
+				{
+					LogMgr.logError(this, "Error converting input >" + aValue + "< to column type (" + this.getColumnType(column) + ") ", ce);
+					Toolkit.getDefaultToolkit().beep();
+					String msg = ResourceMgr.getString("MsgConvertError");
+					msg = msg + "\r\n" + ce.getLocalizedMessage();
+					WbManager.getInstance().showErrorMessage(parentTable, msg);
+					return;
+				}
+			}
+			fireTableDataChanged();
 		}
 	}
 	
 	/**
 	 *	Return the number of columns in the model.
+	 *	This will return the number of columns of the underlying DataStore (plus one 
+	 *  if the status column is enabled)
 	 */
 	public int getColumnCount()
 	{
 		return this.dataCache.getColumnCount() + this.statusOffset;
 	}
 
+	/**
+	 *	Returns the current width of the given column.
+	 *	It returns the value of {@link workbench.storage.DataStore#getColumnDisplaySize(int)} 
+	 *  for every column which is not the status column.
+	 */
 	public int getColumnWidth(int aColumn)
 	{
 		if (this.showStatusColumn && aColumn == 0) return 5;
@@ -192,17 +191,24 @@ public class DataStoreTableModel
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logWarning("DataStoreTableModel.getColumnWidth()", "Error retrieving display size for column " + aColumn, e);
 			return 100;
 		}
 	}
 
+	/**
+	 *	Returns the name of the datatype (according to java.sql.Types) of the 
+	 *  given column.
+	 */
 	public String getColumnTypeName(int aColumn)
 	{
 		if (aColumn == 0) return "";
 		return SqlUtil.getTypeName(this.getColumnType(aColumn));
 	}
 	
+	/**
+	 *	Returns the type (java.sql.Types) of the given column.
+	 */
 	public int getColumnType(int aColumn)
 	{
 		if (this.dataCache == null) return Types.NULL;
@@ -269,10 +275,17 @@ public class DataStoreTableModel
 		this.fireTableRowsInserted(0, row - 1);
 	}
 	
+	/**
+	 *	Clears the EventListenerList and empties the DataStore
+	 */
 	public void dispose()
 	{
 		this.listenerList = new EventListenerList();
-		this.dataCache = null;
+		if (this.dataCache != null)
+		{
+			this.dataCache.reset();
+			this.dataCache = null;
+		}
 	}
 	
 	public void finalize()
@@ -332,7 +345,7 @@ public class DataStoreTableModel
 		sortByColumn(column, ascending);
 	}
 	
-	public synchronized void sortByColumn(int aColumn, boolean ascending)
+	public void sortByColumn(int aColumn, boolean ascending)
 	{
 		this.sortAscending = ascending;
 		this.sortColumn = aColumn;
@@ -342,13 +355,17 @@ public class DataStoreTableModel
 		}
 		catch (Throwable th)
 		{
-			th.printStackTrace();
+			LogMgr.logError("DataStoreTableModel.sortByColumn()", "Error when sorting data", th);
 		}
 		fireTableChanged(new TableModelEvent(this));
 	}
 	
+	private boolean sortingInProgress = false;
+	
 	public void sortInBackground(WbTable table, int aColumn)
 	{
+		if (sortingInProgress) return;
+		
 		if (aColumn < 0 && aColumn >= this.getColumnCount()) 
 		{
 			LogMgr.logWarning("DataStoreTableModel", "Wrong column index specified!");
@@ -360,13 +377,20 @@ public class DataStoreTableModel
 		sortInBackground(table, aColumn, ascending);
 	}
 	
+	/**
+	 *	Start a new thread to sort the data.
+	 *	Any call to this method while the thread is running, will be ignored
+	 */
 	public void sortInBackground(final WbTable table, final int aColumn, final boolean ascending)
 	{
+		if (sortingInProgress) return;
+		
 		final DataStoreTableModel model = this;
-		new Thread()
+		Thread t = new Thread()
 		{
 			public void run()
 			{
+				sortingInProgress = true;
 				table.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				table.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -376,8 +400,11 @@ public class DataStoreTableModel
 				table.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				// repaint the header so that the icon is displayed...
 				table.getTableHeader().repaint(); 
+				sortingInProgress = false;
 			}
-		}.start();
+		};
+		t.setName("DataStoreTableModel sort thread");
+		t.start();
 	}
 
 

@@ -225,6 +225,7 @@ public class ProfileSelectionDialog
 	public void windowClosing(WindowEvent e)
 	{
 		this.cancelled = true;
+		this.selectedProfile = null;
     this.closeDialog();
 	}
 
@@ -243,6 +244,7 @@ public class ProfileSelectionDialog
 	public void windowOpened(WindowEvent e)
 	{
 		this.cancelled = true;
+		this.selectedProfile = null;
 		this.setInitialFocus();
 	}
 

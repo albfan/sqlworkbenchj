@@ -28,6 +28,19 @@ public class WbSwingUtilities
 					b.getHighlightInnerColor(), 
 					b.getShadowInnerColor());
 	}
+
+	public static final Border BEVEL_BORDER_RAISED;
+	static
+	{
+		BevelBorder b = new BevelBorder(BevelBorder.RAISED);
+		Color c = Color.LIGHT_GRAY;
+		//c.darker();
+		BEVEL_BORDER_RAISED = new BevelBorder(BevelBorder.RAISED, 
+					b.getHighlightOuterColor(), 
+					c,//b.getShadowOuterColor(),
+					b.getHighlightInnerColor(), 
+					b.getShadowInnerColor());
+	}
 	
 	public static final Border EMPTY_BORDER = new EmptyBorder(0,0,0,0);
 	
@@ -101,23 +114,49 @@ public class WbSwingUtilities
 	{
 		Window parent = SwingUtilities.getWindowAncestor(caller);
 		showWaitCursor(caller);
-		showWaitCursor(parent);
+		if (parent != null) showWaitCursor(parent);
 	}
 	public static void showDefaultCursorOnWindow(Component caller)
 	{
 		Window parent = SwingUtilities.getWindowAncestor(caller);
 		showDefaultCursor(caller);
-		showDefaultCursor(parent);
+		if (parent != null) showDefaultCursor(parent);
 	}
 	
-	public static void showWaitCursor(Component caller)
+	public static void showWaitCursor(final Component caller)
 	{
-		caller.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		if (SwingUtilities.isEventDispatchThread())
+		{
+			caller.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		}
+		else
+		{
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					caller.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				}
+			});
+		}
 	}
 	
-	public static void showDefaultCursor(Component caller)
+	public static void showDefaultCursor(final Component caller)
 	{
-		caller.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		if (SwingUtilities.isEventDispatchThread())
+		{
+			caller.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		}
+		else
+		{
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					caller.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				}
+			});
+		}
 	}
 	
 	public static void showErrorMessage(Component aCaller, String aMessage)

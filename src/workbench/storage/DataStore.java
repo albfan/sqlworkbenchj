@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.*;
@@ -60,6 +62,7 @@ public class DataStore
 	private int[] columnScale;
 	private String[] columnNames;
 	private String[] columnClassNames;
+	private String[] columnTypeNames;
 	
 	private String updateTable;
 	private String updateTableSchema;
@@ -110,16 +113,14 @@ public class DataStore
 	/**
 	 *	Create a DataStore based on the contents of the given	ResultSet. 
 	 */
-  public DataStore (final ResultSet aResultSet, WbConnection aConn)
-		throws SQLException
+  public DataStore(final ResultSet aResultSet, WbConnection aConn) throws SQLException
   {
 		if (aResultSet == null) return;
 		this.originalConnection = aConn;
 		this.initData(aResultSet);
   }
 
-	public DataStore(ResultSet aResult)
-		throws SQLException
+	public DataStore(ResultSet aResult) throws SQLException
 	{
 		this(aResult, false);
 	}
@@ -127,14 +128,12 @@ public class DataStore
 	 *	Create a DataStore based on the given ResultSet but do not 
 	 *	add the data yet
 	 */
-	public DataStore(ResultSet aResult, boolean readData)
-		throws SQLException
+	public DataStore(ResultSet aResult, boolean readData) throws SQLException
 	{
 		this(aResult, readData, null);
 		
 	}
-	public DataStore(ResultSet aResult, boolean readData, RowActionMonitor aMonitor)
-		throws SQLException
+	public DataStore(ResultSet aResult, boolean readData, RowActionMonitor aMonitor) throws SQLException
 	{
 		this.rowActionMonitor = aMonitor;
 		if (readData)
@@ -153,10 +152,9 @@ public class DataStore
 	
 	/**
 	 * Create an empty DataStore based on the information given in the MetaData 
-	 * object. The datastore can be populated with the {@link #addRow(ResultSet)} method.
+	 * object. The DataStore can be populated with the {@link #addRow(ResultSet)} method.
 	 */
-	public DataStore(ResultSetMetaData metaData, WbConnection aConn)
-		throws SQLException
+	public DataStore(ResultSetMetaData metaData, WbConnection aConn) throws SQLException
 	{
 		this.originalConnection = aConn;
 		this.initMetaData(metaData);
@@ -278,8 +276,14 @@ public class DataStore
 		return this.columnTypes[aColumn];
 	}
 
+	public String getColumnClassName(int aColumn)
+	{
+		if (this.columnClassNames[aColumn] != null) return this.columnClassNames[aColumn];
+		return this.getColumnClass(aColumn).getName();
+	}
 	public Class getColumnClass(int aColumn)
 	{
+		
 		int type = this.getColumnType(aColumn);
 		switch (type)
 		{
@@ -505,6 +509,8 @@ public class DataStore
 	{
 		RowData row = this.getRow(aRow);
 		return row.getValue(aColumn);
+		//return row.colData[aColumn]; //getValue(aColumn);
+		//return ((RowData)this.data.elementData[aRow]).colData[aColumn];
 	}
   
 	public String getValueAsString(int aRow, int aColumn)
@@ -681,7 +687,19 @@ public class DataStore
 				}
 				else
 				{
-					result.append(value.toString());
+					String v = value.toString();
+					if (v.indexOf((char)0) > 0)
+					{
+						LogMgr.logWarning("DataStore.getRowDataAsString()", "Found a zero byte in the data! Replacing with space char.");
+						byte[] d = v.getBytes();
+						int len = d.length;
+						for (int i=0; i < len; i++)
+						{
+							if (d[i] == 0) d[i] = 20;
+						}
+						v = new String(d);
+					}
+					result.append(v);
 				}
 				
 			}
@@ -715,25 +733,44 @@ public class DataStore
 	
 	public String getDataString(String aFieldDelimiter, String aLineTerminator, boolean includeHeaders)
 	{
-		int colCount = this.getColumnCount();
 		int count = this.getRowCount();
-		StringBuffer result = new StringBuffer(count * 250);
+		StringWriter result = new StringWriter(count * 250);
+		try
+		{
+			this.writeDataString(result, aFieldDelimiter, aLineTerminator, includeHeaders);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DataStore.getDataString()", "Error when writing ASCII data to StringWriter", e);
+			return "";
+		}
+		return result.toString();
+	}
+
+	/**
+	 *	WriteDataString writes the contents of this datastore into the passed Writer.
+	 *	This can be used to write the contents directly to disk without the need
+	 *  to build a complete buffer in memory
+	 */
+	public void writeDataString(Writer out, String aFieldDelimiter, String aLineTerminator, boolean includeHeaders)
+		throws IOException
+	{
+		int count = this.getRowCount();
 		if (includeHeaders)
 		{
-			result.append(this.getHeaderString(aFieldDelimiter));
-			result.append(aLineTerminator);
+			out.write(this.getHeaderString(aFieldDelimiter).toString());
+			out.write(aLineTerminator);
 		}
 		for (int i=0; i < count; i++)
 		{
-			result.append(this.getRowDataAsString(i, aFieldDelimiter));
-			result.append(aLineTerminator);
+			out.write(this.getRowDataAsString(i, aFieldDelimiter).toString());
+			out.write(aLineTerminator);
 		}
-		return result.toString();
 	}
 	
 	public void reset()
 	{
-		this.reset(50);
+		this.reset(150);
 	}
 	
 	public void reset(int initialCapacity)
@@ -791,8 +828,10 @@ public class DataStore
 		this.colCount = metaData.getColumnCount();
 		int col = 0;
 		this.columnTypes = new int[this.colCount];
+		this.columnTypeNames = new String[this.colCount];
 		this.columnSizes = new int[this.colCount];
 		this.columnNames = new String[this.colCount];
+		this.columnClassNames = new String[this.colCount];
 		this.columnPrecision = new int[this.colCount];
 		this.columnScale = new int[this.colCount];
 
@@ -800,9 +839,22 @@ public class DataStore
 		{
 			String name = metaData.getColumnName(i + 1);
 			this.columnTypes[i] = metaData.getColumnType(i + 1);
+			this.columnTypeNames[i] = metaData.getColumnTypeName(i + 1);
 			this.columnSizes[i] = metaData.getColumnDisplaySize(i + 1);
-			this.columnPrecision[i] = metaData.getPrecision(i + 1);
-			this.columnScale[i] = metaData.getScale(i + 1);
+			
+			try
+			{
+				this.columnClassNames[i] = metaData.getColumnClassName(i + 1);
+				this.columnPrecision[i] = metaData.getPrecision(i + 1);
+				this.columnScale[i] = metaData.getScale(i + 1);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logWarning("DataStore.initMetaData()", "Error when retrieving meta data for column " + i + " (" + e.getClass().getName() + ")");
+				this.columnPrecision[i] = 0;
+				this.columnScale[i] = 0;
+			}
+			
 			if (name != null && name.trim().length() > 0) 
 			{
 				this.realColumns ++;
@@ -903,67 +955,318 @@ public class DataStore
 		this.setUpdateTable(table, aConn);
 		return true;
 	}
+
+	public StringBuffer getMetaDataAsXml()
+	{
+		return this.getMetaDataAsXml(null);
+	}
+
+	public StringBuffer getXmlStart()
+	{
+		StringBuffer xml = new StringBuffer(1000 + colCount * 50);
+		xml.append("<?xml version=\"1.0\"?>");
+		xml.append(StringUtil.LINE_TERMINATOR);
+		xml.append("<wb-export>");
+		xml.append(StringUtil.LINE_TERMINATOR);
+		xml.append(this.getMetaDataAsXml("  "));
+		xml.append(StringUtil.LINE_TERMINATOR);
+		xml.append("  <data>");
+		xml.append(StringUtil.LINE_TERMINATOR);
+		return xml;
+	}
+
+	public StringBuffer getXmlEnd()
+	{
+		StringBuffer xml = new StringBuffer(100);
+		xml.append("  </data>");
+		xml.append(StringUtil.LINE_TERMINATOR);
+		xml.append("</wb-export>");
+		xml.append(StringUtil.LINE_TERMINATOR);
+		return xml;
+	}
+	
+	public StringBuffer getMetaDataAsXml(String anIndent)
+	{	
+		boolean indent = (anIndent != null && anIndent.length() > 0);
+		StringBuffer result = new StringBuffer(this.colCount * 50);
+		if (indent) result.append(anIndent);
+		result.append("<meta-data>");
+		result.append(StringUtil.LINE_TERMINATOR);
+
+		if (this.sql != null)
+		{
+			if (indent) result.append(anIndent);
+			result.append("  <generating-sql>");
+			result.append(StringUtil.LINE_TERMINATOR);
+			if (indent) result.append(anIndent);
+			result.append("  <![CDATA[");
+			result.append(StringUtil.LINE_TERMINATOR);
+			result.append(sql);
+			result.append(StringUtil.LINE_TERMINATOR);
+			if (indent) result.append(anIndent);
+			result.append("  ]]>");
+			result.append(StringUtil.LINE_TERMINATOR);
+			if (indent) result.append(anIndent);
+			result.append("  </generating-sql>");
+			result.append(StringUtil.LINE_TERMINATOR);
+			result.append(StringUtil.LINE_TERMINATOR);
+		}
+		
+		if (this.originalConnection != null)
+		{
+			result.append(this.originalConnection.getDatabaseInfoAsXml(anIndent));
+			result.append(StringUtil.LINE_TERMINATOR);
+		}
+
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+		if (indent) result.append(anIndent);
+		result.append("  <created>");
+		result.append(df.format(new java.util.Date()));
+		result.append("</created>" + StringUtil.LINE_TERMINATOR);
+		result.append(StringUtil.LINE_TERMINATOR);
+
+		if (indent) result.append(anIndent);
+		result.append("</meta-data>");
+		result.append(StringUtil.LINE_TERMINATOR);
+		result.append(StringUtil.LINE_TERMINATOR);
+		
+		if (indent) result.append(anIndent);
+		result.append("<table-def>");
+		result.append(StringUtil.LINE_TERMINATOR);
+
+		if (indent) result.append(anIndent);
+		result.append("  <!-- The following information was retrieved from the JDBC driver's ResultSetMetaData -->");
+		result.append(StringUtil.LINE_TERMINATOR);
+
+		if (indent) result.append(anIndent);
+		result.append("  <!-- name is retrieved from ResultSetMetaData.getColumnName() -->");
+		result.append(StringUtil.LINE_TERMINATOR);
+
+		if (indent) result.append(anIndent);
+		result.append("  <!-- java-class is retrieved from ResultSetMetaData.getColumnClassName() -->");
+		result.append(StringUtil.LINE_TERMINATOR);
+		
+		if (indent) result.append(anIndent);
+		result.append("  <!-- java-sql-type-name is the constant's name from java.sql.Types -->");
+		result.append(StringUtil.LINE_TERMINATOR);
+
+		if (indent) result.append(anIndent);
+		result.append("  <!-- java-sql-type is the constant's numeric value from java.sql.Types as returned from ResultSetMetaData.getColumnType() -->");
+		result.append(StringUtil.LINE_TERMINATOR);
+		
+		if (indent) result.append(anIndent);
+		result.append("  <!-- dbms-data-type is retrieved from ResultSetMetaData.getColumnTypeName() -->");
+		result.append(StringUtil.LINE_TERMINATOR);
+
+		result.append(StringUtil.LINE_TERMINATOR);
+		if (indent) result.append(anIndent);
+		result.append("  <!-- For date and timestamp types, the internal long value obtained from java.util.Date.getTime()");
+		result.append(StringUtil.LINE_TERMINATOR);
+		if (indent) result.append(anIndent);
+		result.append("       will be written as an attribute to the <column-data> tag. That value can be used");
+		result.append(StringUtil.LINE_TERMINATOR);
+		if (indent) result.append(anIndent);
+		result.append("       to create a java.util.Date() object directly, without the need to parse the actual tag content");
+		result.append(StringUtil.LINE_TERMINATOR);
+		if (indent) result.append(anIndent);
+		result.append("  -->");
+		result.append(StringUtil.LINE_TERMINATOR);
+		result.append(StringUtil.LINE_TERMINATOR);
+		
+		/*
+		if (indent) result.append(anIndent);
+		result.append("  <!-- precision is retrieved from ResultSetMetaData.getPrecision() -->");
+		result.append(StringUtil.LINE_TERMINATOR);
+
+		if (indent) result.append(anIndent);
+		result.append("  <!-- scale is retrieved from ResultSetMetaData.getScale() -->");
+		result.append(StringUtil.LINE_TERMINATOR);
+
+		if (indent) result.append(anIndent);
+		result.append("  <!-- display-size is retrieved from ResultSetMetaData.getColumnDisplaySize() -->");
+		result.append(StringUtil.LINE_TERMINATOR);
+		result.append(StringUtil.LINE_TERMINATOR);
+		*/
+		String updateTable = this.getUpdateTable();
+		boolean hasTable = false;
+		if (indent) result.append(anIndent);
+		result.append("  <table-name>");
+		if (updateTable != null) result.append(updateTable);
+		result.append("</table-name>");
+		result.append(StringUtil.LINE_TERMINATOR);
+		
+		if (indent) result.append(anIndent);
+		result.append("  <column-count>");
+		result.append(this.colCount);
+		result.append("</column-count>");
+		result.append(StringUtil.LINE_TERMINATOR);
+		result.append(StringUtil.LINE_TERMINATOR);
+		
+		for (int i=0; i < this.colCount; i++)
+		{
+			if (indent) result.append(anIndent);
+			result.append("  <column-def index=\"");
+			result.append(i);
+			result.append("\">");
+			result.append(StringUtil.LINE_TERMINATOR);
+			
+			if (indent) result.append(anIndent);
+			result.append("    <column-name>");
+			result.append(this.getColumnName(i));
+			result.append("</column-name>");
+			result.append(StringUtil.LINE_TERMINATOR);
+
+			if (indent) result.append(anIndent);
+			result.append("    <java-class>");
+			result.append(this.getColumnClassName(i));
+			result.append("</java-class>");
+			result.append(StringUtil.LINE_TERMINATOR);
+
+			if (indent) result.append(anIndent);
+			result.append("    <java-sql-type-name>");
+			result.append(SqlUtil.getTypeName(this.getColumnType(i)));
+			result.append("</java-sql-type-name>");
+			result.append(StringUtil.LINE_TERMINATOR);
+			
+			if (indent) result.append(anIndent);
+			result.append("    <java-sql-type>");
+			result.append(this.getColumnType(i));
+			result.append("</java-sql-type>");
+			result.append(StringUtil.LINE_TERMINATOR);
+
+			if (indent) result.append(anIndent);
+			result.append("    <dbms-data-type>");
+			result.append(this.columnTypeNames[i]);
+			result.append("</dbms-data-type>");
+			result.append(StringUtil.LINE_TERMINATOR);
+
+			
+			int type = this.getColumnType(i);
+			if (SqlUtil.isDateType(type) )
+			{
+				if (type == Types.TIMESTAMP && this.defaultTimestampFormatter != null)
+				{
+					if (indent) result.append(anIndent);
+					result.append("    <data-format>");
+					result.append(this.defaultTimestampFormatter.toPattern());
+					result.append("</data-format>");
+					result.append(StringUtil.LINE_TERMINATOR);
+				}
+				else if (this.defaultDateFormatter != null)
+				{
+					if (indent) result.append(anIndent);
+					result.append("    <data-format>");
+					result.append(this.defaultDateFormatter.toPattern());
+					result.append("</data-format>");
+					result.append(StringUtil.LINE_TERMINATOR);
+				}
+			}
+			/*
+			else if (SqlUtil.isDecimalType(type, this.columnScale[i], this.columnPrecision[i]))
+			{
+				if (this.defaultNumberFormatter != null)
+				{
+					if (indent) result.append(anIndent);
+					result.append("    <data-format>");
+					result.append(this.defaultNumberFormatter.toPattern());
+					result.append("</data-format>");
+					result.append(StringUtil.LINE_TERMINATOR);
+				}
+			}
+			
+			if (indent) result.append(anIndent);
+			result.append("    <precision>");
+			result.append(this.columnPrecision[i]);
+			result.append("</precision>");
+			result.append(StringUtil.LINE_TERMINATOR);
+
+			if (indent) result.append(anIndent);
+			result.append("    <scale>");
+			result.append(this.columnScale[i]);
+			result.append("</scale>");
+			result.append(StringUtil.LINE_TERMINATOR);
+
+			if (indent) result.append(anIndent);
+			result.append("    <display-size>");
+			result.append(this.columnSizes[i]);
+			result.append("</display-size>");
+			result.append(StringUtil.LINE_TERMINATOR);
+			*/
+			if (indent) result.append(anIndent);
+			result.append("  </column-def>");
+			result.append(StringUtil.LINE_TERMINATOR);
+		}
+		if (indent) result.append(anIndent);
+		result.append("</table-def>");
+		result.append(StringUtil.LINE_TERMINATOR);
+		
+		return result;
+	}
 	
 	public String getDataAsXml()
 	{
-		return this.getDataAsXml("table", "row", "column");
+		int count = this.getRowCount();
+		StringWriter out = new StringWriter(count * 1000 + colCount * 50);
+		try
+		{
+			this.writeXmlData(out);
+		}
+		catch (IOException io)
+		{
+			LogMgr.logError("DataStore.getDataAsXml()", "Error writing XML to StringWriter", io);
+			return "";
+		}
+		return out.toString();
 	}
-	
-	public String getDataAsXml(String tableTag, String rowTag, String colTag)
+
+	public void writeXmlData(Writer pw)
+		throws IOException
 	{
 		int count = this.getRowCount();
-		if (count == 0) return "";
-		StringBuffer xml = new StringBuffer(count * 1000);
-
-		String updateTable = this.getUpdateTable();
-		String indent = null;
-		boolean hasTable = false;
-		xml.append("<table");
-		if (updateTable != null && updateTable.length() > 0)
-		{
-			xml.append(" name=\"");
-			xml.append(updateTable);
-		}
-		xml.append("\">");
-		xml.append(StringUtil.LINE_TERMINATOR);
-		indent = "  ";
+		if (count == 0) return;
+		
+		pw.write(this.getXmlStart().toString());
+		
+		String indent = "    ";
 		
 		for (int row=0; row < count; row++)
 		{
-			StringBuffer rowData = this.getRowDataAsXml(row, rowTag, colTag, indent);
-			xml.append(rowData);
+			StringBuffer rowData = this.getRowDataAsXml(row, indent);
+			pw.write(rowData.toString());
 		}
-		
-		xml.append("</table>");
-		xml.append(StringUtil.LINE_TERMINATOR);
-		
-		return xml.toString();
-	}
 
-	public StringBuffer getRowDataAsXml(int aRow)
-	{
-		return this.getRowDataAsXml(aRow, "row", "column", null);
+		pw.write(this.getXmlEnd().toString());
 	}
 	
-	public StringBuffer getRowDataAsXml(int aRow, String aRowTag, String aColTag, String anIndent)
+	public StringBuffer getRowDataAsXml(int aRow)
+	{
+		return this.getRowDataAsXml(aRow, null);
+	}
+	
+	public StringBuffer getRowDataAsXml(int aRow, String anIndent)
+	{
+		return this.getRowDataAsXml(aRow, anIndent, aRow + 1);
+	}
+	
+	public StringBuffer getRowDataAsXml(int aRow, String anIndent, int displayRowIndex)
 	{
 		boolean indent = (anIndent != null && anIndent.length() > 0);
 		int colCount = this.getColumnCount();
 		StringBuffer xml = new StringBuffer(colCount * 100);
 		if (indent) xml.append(anIndent);
-		xml.append("<");
-		xml.append(aRowTag);
-		xml.append(">");
+		xml.append("<row-data ");
+		xml.append("row-num=\"");
+		xml.append(displayRowIndex);
+		xml.append("\">");
 		xml.append(StringUtil.LINE_TERMINATOR);
 		for (int c=0; c < colCount; c ++)
 		{
 			String value = this.getValueAsFormattedString(aRow, c);
-
+			Object data = this.getValue(aRow, c);
+			
 			if (indent) xml.append(anIndent);
-			xml.append("  <");
-			xml.append(aColTag);
-			xml.append(" name=\"");
-			xml.append(this.getColumnName(c));
+			xml.append("  <column-data index=\"");
+			xml.append(c);
 			xml.append('"');
 			if (value == null)
 			{
@@ -973,94 +1276,104 @@ public class DataStore
 			{
 				xml.append(" null=\"false\"");
 			}
-			int type = this.getColumnType(c);
-			if (SqlUtil.isDateType(type) )
+			
+			if (SqlUtil.isDateType(this.columnTypes[c]))
 			{
-				if (type == Types.TIMESTAMP && this.defaultTimestampFormatter != null)
+				try
 				{
-					xml.append(" datetimeformat=\"");
-					xml.append(this.defaultTimestampFormatter.toPattern());
+					java.util.Date d = (java.util.Date)data;
+					xml.append(" longValue=\"");
+					xml.append(d.getTime());
 					xml.append('"');
 				}
-				else if (this.defaultDateFormatter != null)
+				catch (Exception e)
 				{
-					xml.append(" dateformat=\"");
-					xml.append(this.defaultDateFormatter.toPattern());
-					xml.append('"');
-				}
-			}
-			else if (SqlUtil.isDecimalType(type, this.columnScale[c], this.columnPrecision[c]))
-			{
-				if (this.defaultNumberFormatter != null)
-				{
-					xml.append(" numberformat=\"");
-					xml.append(this.defaultNumberFormatter.toPattern());
-					xml.append('"');
 				}
 			}
 			xml.append('>');
-			if (value != null) xml.append(value);
-			xml.append("</");
-			xml.append(aColTag);
-			xml.append('>');
+			
+			if (value != null) 
+			{
+				// String data needs to be escaped!
+				if (data instanceof String)
+				{
+					xml.append(StringUtil.escapeXML((String)data));
+				}
+				else
+				{
+					xml.append(value);
+				}
+			}
+			xml.append("</column-data>");
 			xml.append(StringUtil.LINE_TERMINATOR);
 		}
 		if (indent) xml.append(anIndent);
-		xml.append("</");
-		xml.append(aRowTag);
-		xml.append(">");
+		xml.append("</row-data>");
 		xml.append(StringUtil.LINE_TERMINATOR);
 		return xml;
 	}
 	
-	public String getDataAsHtmlTable()
+	public String getDataAsHtml()
+	{
+		StringWriter html = new StringWriter(this.getRowCount() * 100);
+		try
+		{
+			this.writeHtmlData(html);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DataStore.getDataAsHtml()", "Error writing HTML to StringWriter", e);
+		}
+		return html.toString();
+	}
+	
+	public void writeHtmlData(Writer html)
+		throws IOException
 	{
 		int count = this.getRowCount();
-		if (count == 0) return "";
-		StringBuffer html = new StringBuffer(this.getRowCount() * 100);
-		html.append("<style type=\"text/css\">\n");
-		html.append("<!--\n");
-		html.append("  table { border-spacing:0; border-left-style:solid; border-left-width:1px; border-bottom-style:solid; border-bottom-width:1px;}\n");
-		html.append("  td { padding:2; border-top-style:solid;border-top-width:1px;border-right-style:solid;border-right-width:1px;}\n");
-		html.append("  .number-cell { text-align:right; } \n");
-		html.append("  .text-cell { text-align:left; } \n");
-		html.append("-->\n</style>\n");
-		html.append("<table>\n");
+		if (count == 0) return;
+		html.write("<style type=\"text/css\">\n");
+		html.write("<!--\n");
+		html.write("  table { border-spacing:0; border-left-style:solid; border-left-width:1px; border-bottom-style:solid; border-bottom-width:1px;}\n");
+		html.write("  td { padding:2; border-top-style:solid;border-top-width:1px;border-right-style:solid;border-right-width:1px;}\n");
+		html.write("  .number-cell { text-align:right; } \n");
+		html.write("  .text-cell { text-align:left; } \n");
+		html.write("-->\n</style>\n");
+		html.write("<table>\n");
 
 		// table header with column names
-		html.append("  <tr>\n      ");
+		html.write("  <tr>\n      ");
 		for (int c=0; c < this.getColumnCount(); c ++)
 		{
-			html.append("<td><b>");
-			html.append(this.getColumnName(c));
-			html.append("</b></td>");
+			html.write("<td><b>");
+			html.write(this.getColumnName(c));
+			html.write("</b></td>");
 		}
-		html.append("\n  </tr>\n");
+		html.write("\n  </tr>\n");
 		for (int i=0; i < count; i++)
 		{
-			html.append("  <tr>\n      ");
+			html.write("  <tr>\n      ");
 			for (int c=0; c < this.getColumnCount(); c ++)
 			{
 				String value = this.getValueAsString(i, c);
 				int type = this.getColumnType(c);
 				if (SqlUtil.isNumberType(type) || SqlUtil.isDateType(type))
-					html.append("<td class=\"number-cell\">");
+					html.write("<td class=\"number-cell\">");
 				else
-					html.append("<td class=\"text-cell\">");
+					html.write("<td class=\"text-cell\">");
 				if (value == null)
 				{
-					html.append("&nbsp;");
+					html.write("&nbsp;");
 				}
 				else
 				{
-					html.append(StringUtil.escapeHTML(value));
+					html.write(StringUtil.escapeHTML(value));
 				}
-				html.append("</td>");
+				html.write("</td>");
 			}
-			html.append("\n  </tr>\n");
+			html.write("\n  </tr>\n");
 		}
-		html.append("</table>");
-		return html.toString();
+		html.write("</table>\n");
 	}
 
 	public boolean canSaveAsSqlInsert()
@@ -1100,29 +1413,44 @@ public class DataStore
 	{
 		return this.getDataAsSqlInsert("\n");
 	}
-	
-	public String getDataAsSqlInsert(String aLineTerminator)
-		throws Exception, SQLException
+
+	public void writeDataAsSqlInsert(Writer out, String aLineTerminator)
+		throws IOException
 	{
-		if (!this.canSaveAsSqlInsert()) return "";
-		StringBuffer script = new StringBuffer(this.getRowCount() * 100);
+		if (!this.canSaveAsSqlInsert()) return;
 		int count = this.getRowCount();
 		for (int row = 0; row < count; row ++)
 		{
 			RowData data = this.getRow(row);
 			DmlStatement stmt = this.createInsertStatement(data, true, aLineTerminator); 
 			String sql = stmt.getExecutableStatement(this.originalConnection.getSqlConnection());
-			script.append(sql);
-			script.append(";");
-			script.append(aLineTerminator);
-			script.append(aLineTerminator);
+			out.write(sql);
+			out.write(";");
+			out.write(aLineTerminator);
+			out.write(aLineTerminator);
+		}
+	}
+	
+	public String getDataAsSqlInsert(String aLineTerminator)
+		throws Exception, SQLException
+	{
+		if (!this.canSaveAsSqlInsert()) return "";
+		StringWriter script = new StringWriter(this.getRowCount() * 150);
+		try
+		{
+			this.writeDataAsSqlInsert(script, aLineTerminator);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DataStore.getDataAsSqlInsert()", "Error writing script to StringWriter", e);
+			return "";
 		}
 		return script.toString();
 	}
 	
 	/**
 	 *	Import a text file (tab separated) with a header row and no column mapping
-	 *	into this datastore
+	 *	into this DataStore
 	 * @param aFilename - The text file to import
 	 */
 	public void importData(String aFilename)
@@ -1133,7 +1461,7 @@ public class DataStore
 	
 	/** 
 	 * Import a text file (tab separated) with no column mapping
-	 * into this datastore.
+	 * into this DataStore.
 	 *
 	 * @param aFilename - The text file to import
 	 * @param hasHeader - wether the text file has a header row
@@ -1174,11 +1502,11 @@ public class DataStore
 	}
 	
 	/** 	
-	 *	Import a text file into this datastore.
+	 *	Import a text file into this DataStore.
 	 * @param aFilename - The text file to import
 	 * @param hasHeader - wether the text file has a header row
 	 * @param aColSeparator - the separator for column data
-	 * @param aColumnMapping - a mapping between columns in the text file and the datastore
+	 * @param aColumnMapping - a mapping between columns in the text file and the DataStore
 	 */
 	public void importData(String aFilename
 	                     , boolean hasHeader
@@ -1358,7 +1686,7 @@ public class DataStore
 	}	
 	
 	/**
-	 * Save the changes to this datastore to the database.
+	 * Save the changes to this DataStore to the database.
 	 * The changes are applied in the following order
 	 * <ul>
 	 * <li>Delete statements</li>
@@ -1674,29 +2002,31 @@ public class DataStore
 		switch (type)
 		{
 			case Types.BIGINT:
-				result = this.parseNumber(aValue.toString());
-				if (result == null) return null;
-				return new Integer(result.intValue());
+//				result = this.parseNumber(aValue.toString());
+//				if (result == null) return null;
+				return new BigInteger(aValue.toString());
 			case Types.INTEGER:
 			case Types.SMALLINT:
-				result = this.parseNumber(aValue.toString());
-				if (result == null) return null;
-				return new Integer(result.intValue());
+			case Types.TINYINT:
+//				result = this.parseNumber(aValue.toString());
+//				if (result == null) return null;
+				return new Integer(aValue.toString());
 			case Types.NUMERIC:
 			case Types.DECIMAL:
-				//return new BigDecimal(aValue.toString());
-				result = this.parseNumber(aValue.toString());
-				if (result == null) return null;
-				return new BigDecimal(result.doubleValue());
 			case Types.DOUBLE:
-				result = this.parseNumber(aValue.toString());
-				if (result == null) return null;
-				return new Double(result.doubleValue());
 			case Types.REAL:
 			case Types.FLOAT:
-				result = this.parseNumber(aValue.toString());
-				if (result == null) return null;
-				return new Float(result.doubleValue());
+				return new BigDecimal(aValue.toString());
+				//result = this.parseNumber(aValue.toString());
+				//if (result == null) return null;
+				//return new BigDecimal(result.doubleValue());
+				//result = this.parseNumber(aValue.toString());
+				//if (result == null) return null;
+				//return new Double(result.doubleValue());
+//				return new Double(aValue.toString());
+//				result = this.parseNumber(aValue.toString());
+//				if (result == null) return null;
+//				return new Float(result.doubleValue());
 			case Types.CHAR:
 			case Types.VARCHAR:
 				if (aValue instanceof String)

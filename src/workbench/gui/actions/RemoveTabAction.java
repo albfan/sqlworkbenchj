@@ -24,7 +24,7 @@ public class RemoveTabAction extends WbAction
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtRemoveTab"));
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtRemoveTab"));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_VIEW);
-		//this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK));
+		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_MASK));
 		this.putValue(Action.SMALL_ICON, null);
 	}
 

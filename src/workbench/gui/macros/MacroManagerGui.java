@@ -12,6 +12,7 @@ import java.awt.FlowLayout;
 import java.beans.PropertyChangeListener;
 import java.lang.Runnable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.swing.AbstractListModel;
 import javax.swing.JLabel;
@@ -139,13 +140,14 @@ public class MacroManagerGui
 	{
 		int index = this.macroList.getSelectedIndex();
 		if (index < 0) return;
-		this.macroList.setValueIsAdjusting(true);
+		this.macroList.clearSelection();
+		//this.macroList.setValueIsAdjusting(true);
 		this.macroEditor.clear();
 		this.model.removeElementAt(index);
 		
 		// check if the last driver was deleted
 		if (index > this.model.getSize() - 1) index--;
-		this.macroList.setValueIsAdjusting(false);
+		//this.macroList.setValueIsAdjusting(false);
 		
 		this.macroList.setSelectedIndex(index);
 		this.macroList.repaint();
@@ -248,6 +250,7 @@ class MacroListModel
 	public MacroListModel()
 	{
 		List keys = MacroManager.getInstance().getMacroList();
+		Collections.sort(keys);
 		int size = keys.size();
 		if (size == 0) 
 		{

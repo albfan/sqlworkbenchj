@@ -24,7 +24,7 @@ public class DateColumnRenderer
 	private SimpleDateFormat dateFormatter;
 
 	public static final String DEFAULT_FORMAT = "yyyy-MM-dd";
-	private HashMap displayCache = new HashMap(500);
+	//private HashMap displayCache = new HashMap(500);
 	public DateColumnRenderer()
 	{
 		this(DEFAULT_FORMAT);
@@ -40,44 +40,41 @@ public class DateColumnRenderer
     this.setHorizontalAlignment(SwingConstants.RIGHT);
 	}
 
-	public void clearDisplayCache() 
+  public void prepareValue(Object value)
 	{
-		this.displayCache.clear();
-	}
-	
-  public String[] getDisplay(Object value)
-	{
-		Date d = null;
-		String newVal = null;
-		String tip = null;
-
-		if (value == null )
+		// this method will not be called with a null value, so we do not need
+		// to check it here!
+		try
 		{
-			return ToolTipRenderer.EMPTY_DISPLAY;
+			Date d = (Date)value;
+			this.displayValue = this.dateFormatter.format(d);
+			this.tooltip = d.toString();
 		}
-		else
+		catch (Throwable cc)
 		{
-			try
-			{
-				d = (Date)value;
-				tip = d.toString();
-				newVal = (String)this.displayCache.get(d);
-				if (newVal == null)
-				{
-					newVal = this.dateFormatter.format(d);
-					this.displayCache.put(d, newVal);
-				}
-			}
-			catch (ClassCastException cc)
-			{
-				newVal = StringUtil.EMPTY_STRING;
-				tip = null;
-			}
+			this.displayValue = StringUtil.EMPTY_STRING;
+			this.tooltip = null;
 		}
-		displayResult[0] = newVal;
-		displayResult[1] = tip;
-		
-		return displayResult;
   }
 	
+	public static void main(String[] args)
+	{
+		SimpleDateFormat form = new SimpleDateFormat("yyyy-MM-dd");
+		int loops = 50000000;
+		long start,end;
+		Date d = new Date();
+		start = System.currentTimeMillis();
+		for (int i=0; i < loops; i++)
+		{
+			String s= form.format(d);
+		}
+		end = System.currentTimeMillis();
+		long duration = (end - start);
+		long secs = duration / 1000;
+		System.out.println("dauer " + (end - start));
+		System.out.println("ms/call = " + duration / loops);
+		System.out.println("secs=" + secs	);
+		System.out.println("calls/s " + loops/secs);
+		
+	}
 }

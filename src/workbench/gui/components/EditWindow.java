@@ -19,6 +19,7 @@ import javax.swing.*;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
+import workbench.gui.actions.FormatSqlAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbButton;
 import workbench.gui.editor.JEditTextArea;
@@ -45,6 +46,8 @@ public class EditWindow
 		super(owner, title, true);
 		this.getContentPane().setLayout(new BorderLayout());
 		this.editor = EditorPanel.createTextEditor();
+		this.editor.showFindOnPopupMenu();
+		
 		this.getContentPane().add(editor, BorderLayout.CENTER);
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -57,6 +60,8 @@ public class EditWindow
 		this.editor.setPreferredSize(new Dimension(300,200));
 		this.editor.setCaretPosition(0);
 		
+		FormatSqlAction format = new FormatSqlAction(this.editor);
+		this.editor.addPopupMenuItem(format, true);
 		this.okButton.addActionListener(this);
 		this.cancelButton.addActionListener(this);
 		

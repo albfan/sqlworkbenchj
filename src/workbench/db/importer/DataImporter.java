@@ -66,14 +66,13 @@ public class DataImporter
 
 	private PreparedStatement updateStatement;
 	
-	/** Needed for later Text import */
+	/** Needed for Text import */
 	private String delimiter = "\t";
 	private String quoteChar = null;
 	private String dateFormat = null;
 	private String dateTimeFormat = null;
 	private char decimalSymbol = '.';
-	private String chrFunc = null;
-	private String concatString = "||";
+	private String targetTable = null;
 
 	private int commitEvery=0;
 	private int colCount;
@@ -142,6 +141,9 @@ public class DataImporter
 	public void setShowProgress(boolean aFlag) { this.showProgress = aFlag; }
 	public boolean getShowProgress() { return this.showProgress; }
 
+	public void setTargetTable(String tableName) { this.targetTable = tableName; }
+	public String getTargetTable() { return this.targetTable; }
+	
 	public void setTextDelimiter(String aDelimiter) { this.delimiter = aDelimiter; }
 	public String getTextDelimiter() { return this.delimiter; }
 

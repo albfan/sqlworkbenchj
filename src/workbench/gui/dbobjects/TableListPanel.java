@@ -147,6 +147,8 @@ public class TableListPanel
 
 		this.tableSource = EditorPanel.createSqlEditor();
 		this.tableSource.setEditable(false);
+		this.tableSource.showFindOnPopupMenu();
+		
 		//this.tableSource.addPopupMenuItem(new FileSaveAsAction(this.tableSource), true);
 
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.tableSource);
@@ -333,9 +335,11 @@ public class TableListPanel
 				item.setFont(this.standardFont);
 			}
 		}
-		for (int i=newCount; i < currentCount; i++)
+		int i = newCount;
+		while (i < this.showDataMenu.getItemCount())
 		{
 			this.showDataMenu.remove(i);
+			i++;
 		}
 	}
 
@@ -419,11 +423,20 @@ public class TableListPanel
 
 	public void reset()
 	{
-		this.tableList.reset();
-		this.resetDetails();
-		this.invalidateData();
+		synchronized (retrieveLock)
+		{
+			this.tableList.reset();
+			this.resetDetails();
+			this.invalidateData();
+		}
 	}
 
+	public void clearTableData()
+	{
+		this.tableData.reset();
+		this.shouldRetrieveTableDataCount = true;
+	}
+	
 	public void resetDetails()
 	{
 		this.tableDefinition.reset();
@@ -467,14 +480,34 @@ public class TableListPanel
 		this.reset();
 		try
 		{
+			String preferredType = WbManager.getSettings().getProperty("workbench.dbexplorer", "defTableType", null);
+			if (preferredType != null && preferredType.length() == 0) preferredType = null;
 			List types = this.dbConnection.getMetadata().getTableTypes();
 			this.tableTypes.removeAllItems();
 			this.tableTypes.addItem("*");
+			int preferredIndex = -1;
+			
 			for (int i=0; i < types.size(); i++)
 			{
-				this.tableTypes.addItem(types.get(i));
+				String type = types.get(i).toString();
+				if (type.equalsIgnoreCase(preferredType))
+				{
+					preferredIndex = i + 1;
+				}
+				this.tableTypes.addItem(type);
 			}
-			this.tableTypes.setSelectedItem(null);
+			
+			if (preferredIndex > -1)
+			{
+				try
+				{
+					this.tableTypes.setSelectedIndex(preferredIndex);
+				}
+				catch (Exception e)
+				{
+					// ignore it!
+				}
+			}
 		}
 		catch (Exception e)
 		{
@@ -512,6 +545,7 @@ public class TableListPanel
 
 	public void retrieve()
 	{
+		if (busy) return;
 		
 		try
 		{
@@ -528,22 +562,29 @@ public class TableListPanel
 		}
 		
 		final Container parent = this.getParent();
-		new Thread(new Runnable()
+		new Thread()
 		{
 			public void run()
 			{
 				try
 				{
+					setBusy(true);
 					synchronized (retrieveLock)
 					{
-						busy = true;
 						parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 						reset();
 						String table = (String)tableTypes.getSelectedItem();
+						//LogMgr.logDebug("TableListPanel.retrieve()", "Retrieving table list for type " + table);
 						DataStoreTableModel rs = dbConnection.getMetadata().getListOfTables(currentCatalog, currentSchema, table);
 						tableList.setModel(rs, true);
 						tableList.adjustColumns();
-						updateDisplayClients();
+						SwingUtilities.invokeLater(new Runnable()
+						{
+							public void run()
+							{
+								updateDisplayClients();
+							}
+						});
 						parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 						shouldRetrieve = false;
 					}
@@ -558,10 +599,10 @@ public class TableListPanel
 				}
 				finally
 				{
-					busy = false;
+					setBusy(false);
 				}
 			}
-		}).start();
+		}.start();
 	}
 
 	public void setVisible(boolean aFlag)
@@ -620,51 +661,48 @@ public class TableListPanel
 		int row = this.tableList.getSelectedRow();
 		if (row < 0) return;
 
-		synchronized (retrieveLock)
+		this.selectedCatalog = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
+		this.selectedSchema = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+		this.selectedTableName = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+		this.selectedObjectType = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE).toLowerCase();
+		this.resetDetails();
+		boolean dataVisible = false;
+
+		if (this.selectedObjectType.indexOf("table") > -1)
 		{
-			this.selectedCatalog = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
-			this.selectedSchema = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-			this.selectedTableName = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-			this.selectedObjectType = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE).toLowerCase();
-			this.resetDetails();
-			boolean dataVisible = false;
-			
-			if (this.selectedObjectType.indexOf("table") > -1)
+			addTablePanels();
+			dataVisible = true;
+		}
+		else
+		{
+			if (isTableType(this.selectedObjectType))
 			{
-				addTablePanels();
 				dataVisible = true;
-			}
-			else
-			{
-				if (isTableType(this.selectedObjectType))
+				if (this.displayTab.getTabCount() == 2)
 				{
-					dataVisible = true;
-					if (this.displayTab.getTabCount() == 2)
-					{
-						this.addDataPanel();
-					}
-					else
-					{
-						this.removeTablePanels(false);
-					}
+					this.addDataPanel();
 				}
 				else
 				{
-					removeTablePanels(true);
+					this.removeTablePanels(false);
 				}
-			}
-			if (dataVisible)
-			{
-				this.tableData.setReadOnly(!maybeUpdateable(this.selectedObjectType));
-				this.tableData.setTable(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
 			}
 			else
 			{
-				this.tableData.reset();
+				removeTablePanels(true);
 			}
-			this.showDataMenu.setEnabled(this.isTableType(selectedObjectType));
-			this.startRetrieveCurrentPanel();
 		}
+		if (dataVisible)
+		{
+			this.tableData.setReadOnly(!maybeUpdateable(this.selectedObjectType));
+			this.tableData.setTable(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+		}
+		else
+		{
+			this.tableData.reset();
+		}
+		this.showDataMenu.setEnabled(this.isTableType(selectedObjectType));
+		this.startRetrieveCurrentPanel();
 	}
 
 	private boolean maybeUpdateable(String aType)
@@ -688,7 +726,6 @@ public class TableListPanel
 	{
 		WbSwingUtilities.showWaitCursor(this);
 		WbSwingUtilities.showWaitCursor(this.tableSource);
-		
 		
 		try
 		{
@@ -779,15 +816,13 @@ public class TableListPanel
 		}.start();
 	}
 
-	private synchronized void retrieveCurrentPanel()
+	private void retrieveCurrentPanel()
 	{
-		if (this.busy) return;
-		
 		if (this.tableList.getSelectedRowCount() <= 0) return;
 		int index = this.displayTab.getSelectedIndex();
 		
 		WbSwingUtilities.showWaitCursorOnWindow(this);
-		this.busy = true;
+		//this.setBusy(true);
 		try
 		{
 			switch (index)
@@ -826,57 +861,80 @@ public class TableListPanel
 		}
 		finally
 		{
-			this.busy = false;
+			//this.setBusy(false);
 			WbSwingUtilities.showDefaultCursorOnWindow(this);
 		}
 	}
 
+	private synchronized void setBusy(boolean aFlag)
+	{
+		this.busy = aFlag;
+	}
+	
 	private void retrieveTriggers()
 		throws SQLException
 	{
-		triggers.readTriggers(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
-		this.shouldRetrieveTriggers = false;
+		synchronized (retrieveLock)
+		{
+			triggers.readTriggers(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+			this.shouldRetrieveTriggers = false;
+		}
 	}
 
-	private synchronized void retrieveIndexes()
+	private void retrieveIndexes()
 		throws SQLException
 	{
-		DbMetadata meta = this.dbConnection.getMetadata();
-		indexes.setModel(meta.getTableIndexes(this.selectedCatalog, this.selectedSchema, this.selectedTableName), true);
-		indexes.adjustColumns();
-		this.shouldRetrieveIndexes = false;
+		synchronized (retrieveLock)
+		{
+			DbMetadata meta = this.dbConnection.getMetadata();
+			indexes.setModel(meta.getTableIndexes(this.selectedCatalog, this.selectedSchema, this.selectedTableName), true);
+			indexes.adjustColumns();
+			this.shouldRetrieveIndexes = false;
+		}
 	}
 
-	private synchronized void retrieveExportedTables()
+	private void retrieveExportedTables()
 		throws SQLException
 	{
-		DbMetadata meta = this.dbConnection.getMetadata();
-		DataStoreTableModel model = new DataStoreTableModel(meta.getReferencedBy(this.selectedCatalog, this.selectedSchema, this.selectedTableName));
-		exportedKeys.setModel(model, true);
-		exportedKeys.adjustColumns();
-		this.shouldRetrieveExportedKeys = false;
+		synchronized (retrieveLock)
+		{
+			DbMetadata meta = this.dbConnection.getMetadata();
+			DataStoreTableModel model = new DataStoreTableModel(meta.getReferencedBy(this.selectedCatalog, this.selectedSchema, this.selectedTableName));
+			exportedKeys.setModel(model, true);
+			exportedKeys.adjustColumns();
+			this.shouldRetrieveExportedKeys = false;
+		}
 	}
 
-	private synchronized void retrieveImportedTables()
+	private void retrieveImportedTables()
 		throws SQLException
 	{
-		DbMetadata meta = this.dbConnection.getMetadata();
-		DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(this.selectedCatalog, this.selectedSchema, this.selectedTableName));
-		importedKeys.setModel(model, true);
-		importedKeys.adjustColumns();
-		this.shouldRetrieveImportedKeys = false;
+		synchronized (retrieveLock)
+		{
+			DbMetadata meta = this.dbConnection.getMetadata();
+			DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(this.selectedCatalog, this.selectedSchema, this.selectedTableName));
+			importedKeys.setModel(model, true);
+			importedKeys.adjustColumns();
+			this.shouldRetrieveImportedKeys = false;
+		}
 	}
 
 	private void retrieveImportedTree()
 	{
-		importedTableTree.readTree(this.selectedCatalog, this.selectedSchema, this.selectedTableName, false);
-		this.shouldRetrieveImportedTree = false;
+		synchronized (retrieveLock)
+		{
+			importedTableTree.readTree(this.selectedCatalog, this.selectedSchema, this.selectedTableName, false);
+			this.shouldRetrieveImportedTree = false;
+		}
 	}
 
 	private void retrieveExportedTree()
 	{
-		exportedTableTree.readTree(this.selectedCatalog, this.selectedSchema, this.selectedTableName, true);
-		this.shouldRetrieveExportedTree = false;
+		synchronized (retrieveLock)
+		{
+			exportedTableTree.readTree(this.selectedCatalog, this.selectedSchema, this.selectedTableName, true);
+			this.shouldRetrieveExportedTree = false;
+		}
 	}
 
 	public void reload()
@@ -901,9 +959,12 @@ public class TableListPanel
 				return null;
 			}
 		}
+		
 		int colCount = this.tableDefinition.getRowCount();
 		if (colCount == 0) return null;
+		
 		StringBuffer sql = new StringBuffer(colCount * 80);
+		
 		sql.append("SELECT ");
 		boolean quote = false;
 		for (int i=0; i < colCount; i++)
@@ -922,7 +983,7 @@ public class TableListPanel
 		}
 
 		sql.append(table);
-
+		
 		return sql.toString();
 	}
 	/**

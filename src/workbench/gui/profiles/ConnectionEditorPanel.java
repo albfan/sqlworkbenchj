@@ -384,21 +384,17 @@ public class ConnectionEditorPanel
 		if (this.init) return;
 		if (evt.getStateChange() == ItemEvent.SELECTED)
 		{
-			/*
-			String selected = (String)this.cbDrivers.getSelectedItem();
-			if (selected != null)
-			{
-				DbDriver newDriver = WbManager.getInstance().getConnectionMgr().findDriver(selected);
-				if (newDriver != null) this.tfURL.setText(newDriver.getSampleUrl());
-			}
-			*/
+			String oldDriver = this.currentProfile.getDriverclass();
 			DbDriver newDriver = (DbDriver)this.cbDrivers.getSelectedItem();
 			if(this.currentProfile != null)
 			{
 				this.currentProfile.setDriverclass(newDriver.getDriverClass());
 				this.currentProfile.setDriverName(newDriver.getName());
 			}
-			this.tfURL.setText(newDriver.getSampleUrl());
+			if (oldDriver == null || !oldDriver.equals(newDriver.getDriverClass()))
+			{
+				this.tfURL.setText(newDriver.getSampleUrl());
+			}
 		}
 	}//GEN-LAST:event_cbDriversItemStateChanged
 

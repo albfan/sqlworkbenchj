@@ -10,6 +10,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import workbench.util.StringUtil;
@@ -47,6 +49,7 @@ public class SqlFormatter
 		LINE_BREAK_AFTER.add("INTERSECT");
 		LINE_BREAK_AFTER.add("AS");
 		LINE_BREAK_AFTER.add("FOR");
+		LINE_BREAK_AFTER.add("JOIN");
 	}
 
 	private static final Set SUBSELECT_START = new HashSet();
@@ -109,13 +112,15 @@ public class SqlFormatter
 	private SQLLexer lexer;
 	private StringBuffer result;
 	private StringBuffer indent = null;
-
-	public SqlFormatter(String aScript)
+	private int realLength = 0;
+	private int maxSubselectLength = 60;
+	
+	public SqlFormatter(String aScript, int maxLength)
 	{
-		this(aScript, 0);
+		this(aScript, 0, maxLength);
 	}
 
-	public SqlFormatter(String aScript, int indentCount)
+	private SqlFormatter(String aScript, int indentCount, int maxSubselectLength)
 	{
 		this.sql = aScript;
 		Reader in = new StringReader(this.sql);
@@ -126,6 +131,7 @@ public class SqlFormatter
 			this.indent = new StringBuffer(indentCount);
 			for (int i=0; i < indentCount; i++) this.indent.append(' ');
 		}
+		this.maxSubselectLength = maxSubselectLength;
 	}
 
 	public String format()
@@ -135,6 +141,16 @@ public class SqlFormatter
 		return this.result.toString();
 	}
 
+	private int getRealLength()
+	{
+		return this.realLength;
+	}
+	
+	public void setMaxSubSelectLength(int max)
+	{
+		this.maxSubselectLength = max;
+	}
+	
 	private int getCurrentLineLength()
 	{
 		int c = this.result.length() - 1;
@@ -175,23 +191,43 @@ public class SqlFormatter
 		char c = this.result.charAt(len -1);
 		return Character.isWhitespace(c);
 	}
+	
 	private void appendText(char c)
+	{
+		this.realLength++;
+		this.result.append(c);
+	}
+	
+	private void indent(char c)
 	{
 		this.result.append(c);
 	}
 
 	private void appendText(String text)
 	{
+		this.realLength += text.length();
 		this.result.append(text);
 	}
 
 	private void appendText(StringBuffer text)
 	{
+		this.realLength += text.length();
 		this.result.append(text);
 	}
 
+	private void indent(String text)
+	{
+		this.result.append(text);
+	}
+	
+	private void indent(StringBuffer text)
+	{
+		this.result.append(text);
+	}
+	
 	private void appendNonSeparator(String text)
 	{
+		this.realLength += text.length();
 		if (!text.startsWith(" ") && !lastCharIsWhitespace()) this.result.append(' ');
 		this.result.append(text);
 	}
@@ -199,6 +235,7 @@ public class SqlFormatter
 	private boolean needsWhitespace(SQLToken last, SQLToken current)
 	{
 		if (this.isStartOfLine()) return false;
+		if (last.getContents().equals("\"")) return false;
 		if (last.getContents().equals(".") && current.isIdentifier()) return false;
 		if (last.getContents().equals(")") && !current.isSeparator() ) return true;
 		if ((last.isIdentifier()|| last.isLiteral()) && current.isOperator()) return true;
@@ -212,6 +249,8 @@ public class SqlFormatter
 		throws Exception
 	{
 		StringBuffer b = new StringBuffer("     ");
+		StringBuffer oldIndent = this.indent;
+		this.indent = null;
 		SQLToken t = (SQLToken)this.lexer.getNextToken(false, false);
 		SQLToken lastToken = t;
 		while (t != null)
@@ -220,6 +259,7 @@ public class SqlFormatter
 
 			if (t.isReservedWord() && FROM_TERMINAL.contains(text.toUpperCase()))
 			{
+				this.indent = oldIndent;
 				return t;
 			}
 			else if (lastToken.isSeparator() && lastToken.getContents().equals("(") && text.equalsIgnoreCase("SELECT") )
@@ -230,7 +270,7 @@ public class SqlFormatter
 
 			if (t.isSeparator() && text.equals("("))
 			{
-				if (!lastToken.isSeparator() || lastToken == t) this.appendText(' ');
+				if ((!lastToken.isSeparator() || lastToken == t) && !this.lastCharIsWhitespace()) this.appendText(' ');
 				this.appendText(text);
 			}
 			else if (t.isSeparator() && text.equals(")"))
@@ -241,16 +281,22 @@ public class SqlFormatter
 			{
 				this.appendText(",");
 				this.appendNewline();
-				this.appendText(b);
+				this.indent(b);
 			}
 			else
 			{
 				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
 				this.appendText(text);
+				if (LINE_BREAK_AFTER.contains(text))
+				{
+					this.appendNewline();
+					this.indent(b);
+				}
 			}
 			lastToken = t;
 			t = (SQLToken)this.lexer.getNextToken(false, false);
 		}
+		this.indent = oldIndent;
 		return null;
 	}
 
@@ -279,16 +325,18 @@ public class SqlFormatter
 			{
 				this.appendText(",");
 				this.appendNewline();
-				this.appendText(b);
+				this.indent(b);
 			}
-			else if (text.equals("*"))
+			else if (text.equals("*") && !lastToken.isSeparator())
 			{
 				this.appendText(" *");
 			}
-			else if (t.isOperator() ||t.isSeparator())
+			/*
+			else if (t.isOperator() || t.isSeparator())
 			{
 				this.appendText(text);
 			}
+			*/
 			else
 			{
 				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
@@ -300,26 +348,30 @@ public class SqlFormatter
 		return null;
 	}
 
-	private SQLToken processSubSelect(boolean selectMissing)
+	private SQLToken processSubSelect(boolean addSelectKeyword)
 		throws Exception
 	{
-		SQLToken t = (SQLToken)this.lexer.getNextToken();
+		SQLToken t = (SQLToken)this.lexer.getNextToken(false, false);
 		int bracketCount = 1;
 		StringBuffer subSql = new StringBuffer(250);
 
-		if (selectMissing)
+		// this method gets called when then "parser" hits an 
+		// IN ( situation. If no SELECT is coming, we assume
+		// its a list like IN ('x','Y')
+		if (!"SELECT".equalsIgnoreCase(t.getContents()) && !addSelectKeyword)
+		{
+			return this.processInList(t);
+		}
+		
+		if (addSelectKeyword)
 		{
 			subSql.append("SELECT ");
 		}
 
 		int lastIndent = this.getCurrentLineLength();
-		this.appendNewline();
 
-		for (int k=0; k < lastIndent + 1; k++)
-		{
-			this.appendText(' ');
-		}
-
+		boolean realSubSelect = false;
+		
 		while (t != null)
 		{
 			String text = t.getContents();
@@ -329,14 +381,20 @@ public class SqlFormatter
 
 				if (bracketCount == 0)
 				{
-					SqlFormatter f = new SqlFormatter(subSql.toString(), lastIndent + 1);
+					SqlFormatter f = new SqlFormatter(subSql.toString(), lastIndent, this.maxSubselectLength);
 					String s = f.format();
-					this.appendText(s);
-					this.appendNewline();
-					for (int k=0; k < lastIndent; k++)
+					if (f.getRealLength() < this.maxSubselectLength) 
 					{
-						this.appendText(' ');
+						s = s.replaceAll(" *\n *", " ");
+						this.appendText(s.trim());
 					}
+					else
+					{
+						this.appendText(s);
+						this.appendNewline();
+						for (int i=0; i < lastIndent; i++) this.indent(' ');
+					}
+					
 					return t;
 				}
 			}
@@ -355,6 +413,7 @@ public class SqlFormatter
 		throws Exception
 	{
 		StringBuffer b = new StringBuffer(indentCount);
+		
 		for (int i=0; i < indentCount; i++) b.append(' ');
 
 		this.appendText(b);
@@ -366,6 +425,7 @@ public class SqlFormatter
 			if (t.isSeparator() && text.equals(")"))
 			{
 				this.appendNewline();
+				this.indent(b);
 				this.appendText(")");
 				return (SQLToken)this.lexer.getNextToken();
 			}
@@ -379,7 +439,7 @@ public class SqlFormatter
 			{
 				this.appendText(",");
 				this.appendNewline();
-				this.appendText(b);
+				this.indent(b);
 			}
 			else if (!t.isWhiteSpace())
 			{
@@ -390,6 +450,91 @@ public class SqlFormatter
 		return null;
 	}
 
+	private SQLToken processInList(SQLToken current)
+		throws Exception
+	{
+		ArrayList list = new ArrayList(25);
+		list.add(new StringBuffer(""));
+		SQLToken t = current;
+
+		int bracketcount = 0;
+		int elementcounter = 0;
+		
+		while (t != null)
+		{
+			String text = t.getContents();
+			if (t.isSeparator() && text.equals(")"))
+			{
+				if (bracketcount == 0)
+				{
+					this.appendCommaList(list);
+					return (SQLToken)this.lexer.getNextToken();
+				}
+				else
+				{
+					StringBuffer b = (StringBuffer)list.get(elementcounter);
+					if (b == null) 
+					{
+						b = new StringBuffer(text);
+						if (elementcounter < list.size()) list.set(elementcounter, b);
+					}
+					else 
+					{
+						b.append(text);
+					}
+				}
+			}
+			else if (t.isSeparator() && text.equals("("))
+			{
+				bracketcount ++;
+				
+			}
+			else if (t.isSeparator() && text.equals(","))
+			{
+				if (bracketcount == 0)
+				{
+					list.add(new StringBuffer(""));
+					elementcounter = list.size() - 1;
+				}
+			}
+			else if (!t.isWhiteSpace())
+			{
+				StringBuffer b = (StringBuffer)list.get(elementcounter);
+				if (b == null)
+				{
+					b = new StringBuffer(text);
+					list.set(elementcounter, b);
+				}
+				else
+				{
+					b.append(text);
+				}
+			}
+			t = (SQLToken)this.lexer.getNextToken(false, false);
+		}
+		return null;
+	}
+	
+	private void appendCommaList(ArrayList aList)
+	{
+		int indent = this.getCurrentLineLength();
+		StringBuffer ind = new StringBuffer(indent);
+		for (int i=0; i < indent; i++) ind.append(' ');
+		boolean newline = (aList.size() > 10);
+		int count = aList.size();
+		for (int i=0; i < count; i++)
+		{
+			this.appendText((StringBuffer)aList.get(i));
+			if (i < count - 1) this.appendText(", ");
+			if (newline) 
+			{
+				this.appendNewline();
+				this.indent(ind);
+			}
+		}
+		this.appendText(")");
+	}
+	
 	private void advanceToOpeningBracket()
 		throws Exception
 	{
@@ -536,6 +681,7 @@ public class SqlFormatter
 			lastToken = t;
 			t = (SQLToken)this.lexer.getNextToken(false, false);
 		}
+		this.appendNewline();
 	}
 
 	private SQLToken processWhere(SQLToken previousToken)
@@ -636,6 +782,7 @@ public class SqlFormatter
 	{
 		int bracketCount = 1;
 		SQLToken t = (SQLToken)this.lexer.getNextToken(false, false);
+		SQLToken lastToken = t;
 		while (t != null)
 		{
 			String text = t.getContents();
@@ -647,12 +794,14 @@ public class SqlFormatter
 			{
 				bracketCount ++;
 			}
+			if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
 			this.appendText(t.getContents());
 			if (bracketCount == 0)
 			{
 				this.appendText(' ');
 				break;
 			}
+			lastToken = t;
 			t = (SQLToken)this.lexer.getNextToken(false, false);
 		}
 	}
@@ -725,18 +874,64 @@ public class SqlFormatter
 //           "     AND    bv_cow_uprof.mind_location_id = bvc.mind_location_id \n" +
 //           "     ) \n";
 
+//					String sql = "SELECT      count(*)     FROM      COL_editorial     WHERE COL_EDITORIAL.oid NOT IN (select BV_CONTENT_REF.oid FROM BV_CONTENT_REF) and deleted='0'";
+					
+//					String sql="SELECT substr(to_char(s.pct, '99.00'), 2) || '%'  load, \n" + 
+//           "       p.sql_text, \n" + 
+//           "       p.piece, \n" + 
+//           "       s.executions executes, \n" + 
+//           "       s.ranking \n" + 
+//           "FROM \n" + 
+//           "    (  \n" + 
+//           "      SELECT address, disk_reads, executions, pct, rank() over (ORDER BY disk_reads DESC)  ranking \n" + 
+//           "      FROM \n" + 
+//           "      ( \n" + 
+//           "        SELECT address, disk_reads, executions, 100 * ratio_to_report(disk_reads) over ()  pct \n" + 
+//           "        FROM sys.v_$sql  \n" + 
+//           "        WHERE command_type != 47 \n" + 
+//           "      )  \n" + 
+//           "      WHERE disk_reads > 50 * executions \n" + 
+//           "  )  s, \n" + 
+//           "  sys.v_$sqltext  p \n" + 
+//           "WHERE s.ranking <= 5  \n" + 
+//           "AND   p.address = s.address \n" + 
+//           "ORDER BY s.address, p.piece \n";
+
+//			String sql="SELECT username, value || ' bytes' \"Current UGA memory\", stat.* \n" + 
+//           "   FROM v$session sess, v$sesstat stat, v$statname name \n" + 
+//           "WHERE sess.sid = stat.sid \n" + 
+//           "   AND stat.statistic# = name.statistic# \n" + 
+//           "   AND name.name = 'session uga memory' \n" + 
+//           "   and username = 'BVUSER' \n";			
+//				String sql="select bug_id, short_desc  \n" + 
+//           "from bugs \n" + 
+//           "where rep_platform in ('CONSULTANCY', 'ENHANCEMENT') \n" + 
+//           "and bug_status not in ('CLOSED','RESOLVED') \n" + 
+//           "and reporter = 47 \n";			
+//				String sql = "SELECT * from v_$test";
 //			String sql = "SELECT 1 FROM table WHERE (bv_user_profile.number_login=0 OR bv_user_profile.number_login IS NULL)";
 
-			String sql = "SELECT \n t1.col1, nvl(to_upper(bla,1),1), 'xxx'||col4, col3 " +
-			" \nfrom test_table t1, table2 t2\nWHERE t2.col=1 " +
-			" and col2 = 'f';\n";
+//			String sql = "SELECT \n t1.col1, nvl(to_upper(bla,1),1), 'xxx'||col4, col3 " +
+//			" \nfrom test_table t1, table2 t2\nWHERE t2.col=1 " +
+//			" and col2 = 'f';\n";
 //			String sql = "select * \nfrom (select * from person) AS t \nwhere nr2 = 2;";
 //			String sql = "insert into test values ('x', 2);commit;";
 //			String sql = "SELECT * from test, table22";
 //			String sql = "select * \nfrom (select * from person) AS t \nwhere t.nr2 = 2;";
 //			String sql = "select 1 from dual";
-//			String sql = "UPDATE bla set column1='test',col2=NULL, col4=222 where xyz=42 AND ab in (SELECT x from t\nWHERE x = 6) OR y = 5;commit;";
-			SqlFormatter f = new SqlFormatter(sql);
+//			String sql="SELECT * \n" + 
+//           "FROM (SELECT id, \n" + 
+//           "             VALUE \n" + 
+//           "      FROM userprops \n" + 
+//           "      WHERE NAME= 'city' \n" + 
+//           "      ) city \n";
+			//String sql = "UPDATE bla set column1='test',col2=NULL, col4=222 where xyz=42 AND ab in (SELECT x from t\nWHERE x = 6) OR y = 5;commit;";
+			String sql="SELECT city.id, \n" + 
+           "       city.value, \n" + 
+           "       state.value \n" + 
+           "FROM (SELECT id, value FROM userprops WHERE NAME= 'city') city LEFT OUTER JOIN \n" + 
+           " (SELECT id, value FROM userprops WHERE NAME= 'state') state ON city.id = state.id  \n" + 
+           " \n";			SqlFormatter f = new SqlFormatter(sql,60);
 			System.out.println(f.format());
 //			System.out.println("----------------------------------");
 //			"insert into test (col1, col2) values ('x', to_date(2,'XXXX'));commit;" 	 ;

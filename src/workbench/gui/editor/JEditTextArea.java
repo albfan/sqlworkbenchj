@@ -99,7 +99,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.15 2003-09-06 09:00:22 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.16 2003-11-02 21:31:38 thomas Exp $
  */
 public class JEditTextArea 
 	extends JComponent
@@ -1540,7 +1540,7 @@ public class JEditTextArea
 	 * @param editable True if this text area should be editable,
 	 * false otherwise
 	 */
-	public final void setEditable(boolean editable)
+	public void setEditable(boolean editable)
 	{
 		this.editable = editable;
 	}

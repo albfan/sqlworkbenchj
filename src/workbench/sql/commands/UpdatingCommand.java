@@ -39,6 +39,7 @@ public class UpdatingCommand extends SqlCommand
 		{
 			this.currentStatement = aConnection.createStatement();
 			int updateCount = this.currentStatement.executeUpdate(aSql);
+			result.addUpdateCount(updateCount);
 			StringBuffer warnings = new StringBuffer();
 			boolean hasWarnings = this.appendWarnings(aConnection, this.currentStatement, warnings);
 			this.appendSuccessMessage(result);

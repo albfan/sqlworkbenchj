@@ -124,5 +124,22 @@ where trg.tgrelid = tbl.oid
     </void> 
    </object> 
   </void> 
+  <void method="put"> 
+   <string>Firebird</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>SELECT rdb$trigger_source FROM rdb$triggers</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>rdb$trigger_name</string> 
+    </void> 
+    <void property="useUpperCase"> 
+     <boolean>true</boolean> 
+    </void> 
+    <void property="schemaField"> 
+     <string>RDB$OWNER_NAME</string> 
+    </void> 
+   </object> 
+  </void> 
  </object>
 </java>
