@@ -39,7 +39,7 @@ public class ArgumentParser
 	
 	public void parse(String aCmdLine)
 	{
-		List words = StringUtil.split(aCmdLine, "/", false, "\"", true);
+		List words = StringUtil.split(aCmdLine, "-", false, "\"", true);
 
 		int count = words.size();
 		for (int i=0; i < count; i++)

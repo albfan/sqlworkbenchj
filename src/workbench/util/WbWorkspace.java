@@ -66,7 +66,9 @@ public class WbWorkspace
 	{
 		if (this.isReadOnly) throw new IllegalStateException("Workspace is opened for reading. addHistoryEntry() may not be called");
 		
-		ZipEntry entry = new ZipEntry(aFilename);
+		File f = new File(aFilename);
+		String filename = f.getName();
+		ZipEntry entry = new ZipEntry(filename);
 		this.zout.putNextEntry(entry);
 		StringUtil.writeStringList(data, this.zout);
 		zout.closeEntry();
