@@ -1,0 +1,103 @@
+package workbench.gui;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Point;
+import javax.swing.RootPaneContainer;
+import java.awt.Window;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusListener;
+import java.awt.event.FocusEvent;
+
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import javax.swing.SwingUtilities;
+
+public class WbSwingUtilities
+{
+	
+	private WbSwingUtilities()
+	{
+	}
+	
+	/**
+	 *	Centers the given window either agains anotherone on the screen
+	 *	If a second window is passed the first window is centered
+	 *	against that one
+	 *
+	 *	@param 	Window 	the window to be centered
+	 *	@param	Window	center against this window. If null -> center on screen
+	 */
+	public static void center(Window aWinToCenter, Window aReference)
+	{
+		if (aWinToCenter == null) return;
+		Point location = getLocationToCenter(aWinToCenter, aReference);
+		aWinToCenter.setLocation(location);
+	}
+	
+	public static Point getLocationToCenter(Window aWinToCenter, Window aReference)
+	{
+		int screenWidth, screenHeight;
+		if (aReference == null)
+		{
+			Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+			screenWidth = (int)screen.getWidth();
+			screenHeight = (int)screen.getHeight();
+		}
+		else
+		{
+			screenWidth = aReference.getWidth();
+			screenHeight = aReference.getHeight();
+		}
+		int winWidth, winHeight;
+		if (aWinToCenter == null)
+		{
+			winWidth = 0;
+			winHeight = 0;
+		}
+		else
+		{
+			winWidth = aWinToCenter.getWidth();
+			winHeight = aWinToCenter.getHeight();
+		}
+		
+		int x = 1, y = 1;
+		
+		// Get center points
+		if (screenWidth > winWidth)
+		{
+			x = (int)((screenWidth / 2) - (winWidth / 2));
+		}
+		if (screenHeight > winHeight)
+		{
+			y = (int)((screenHeight/ 2) - (winHeight / 2));
+		}
+		
+		if (aReference != null)
+		{
+			x += aReference.getX();
+			y += aReference.getY();
+		}
+		
+		return new Point(x, y);
+	}
+	
+	public static void showWaitCursor(Component caller)
+	{
+		RootPaneContainer rpc = (RootPaneContainer)SwingUtilities.getWindowAncestor(caller);
+		if (rpc == null) return;
+		rpc.getGlassPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		rpc.getGlassPane().setVisible(true);
+	}
+	
+	public static void showDefaultCursor(Component caller)
+	{
+		RootPaneContainer rpc = (RootPaneContainer)SwingUtilities.getWindowAncestor(caller);
+		if (rpc == null) return;
+		rpc.getGlassPane().setVisible(false);
+	}
+	
+}

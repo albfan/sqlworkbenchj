@@ -11,6 +11,7 @@ import java.util.MissingResourceException;
 import java.io.InputStream;
 import java.util.HashMap;
 import javax.swing.ImageIcon;
+import workbench.log.LogMgr;
 
 
 /**
@@ -48,6 +49,8 @@ public class ResourceMgr
 	public static final String TXT_DB_URL = "DbURL";
 	public static final String TXT_DB_PASSWORD = "Password";
 	
+	public static final String TXT_SELECT_PROFILE = "SelectProfile";
+	
 	public static final String IMG_COPY_16 = "Copy16";
 	public static final String IMG_COPY_24 = "Copy24";
 	public static final String IMG_CUT_16 = "Cut16";
@@ -60,10 +63,18 @@ public class ResourceMgr
 	public static final String IMG_EXEC_ALL_24 = "ExecuteAll24";
 	
 	public static final String MNU_TXT_FILE = "File";
-	public static final String MNU_TXT_EXIT = "Exit";
-	public static final String MNU_TXT_DATA = "Data";
 	public static final String MNU_TXT_SQL = "SQL";
+	public static final String MNU_TXT_EDIT = "Edit";
+	public static final String MNU_TXT_DATA = "Data";
+	
+	public static final String MNU_TXT_CONNECT = "Connect";
+	public static final String MNU_TXT_EXIT = "Exit";
 
+	public static final String STAT_READY = "Ready";
+	
+	public static final String ERR_DRIVER_NOT_FOUND = "ErrDriverNotFound";
+	public static final String ERR_CONNECTION_ERROR = "ErrConnectionError";
+	
 	private static ResourceBundle resources = ResourceBundle.getBundle("workbench/resource/wbstrings");
 	private static HashMap images = new HashMap();
 	
@@ -80,10 +91,16 @@ public class ResourceMgr
 		}
 		catch (MissingResourceException e)
 		{
+			LogMgr.logWarning("ResourceMgr", "String with key=" + aKey + " not found in resource file!", e);
 			return aKey;
 		}
 	}
 	
+	/**
+	 *	Returns the description associcate with the given key.
+	 *	This is used for Tooltips which are associated with a 
+	 *	certain menu text etc.
+	 */
 	public static String getDescription(String aKey)
 	{
 		return getString("Desc_" + aKey);

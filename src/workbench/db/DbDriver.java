@@ -83,7 +83,7 @@ public class DbDriver
 	
 	public String toString()
 	{
-		return this.getName() + " - " + this.getDriverClass();
+		return this.getDriverClass();
 	}
 	
 }

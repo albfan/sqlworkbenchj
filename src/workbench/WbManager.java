@@ -8,11 +8,15 @@ package workbench;
 
 import java.util.HashMap;
 import java.awt.Font;
+import java.sql.Connection;
+import java.util.Iterator;
 import javax.swing.UIManager;
 
 import workbench.gui.display.MainWindow;
 import workbench.db.ConnectionMgr;
 import workbench.resource.Settings;
+import java.util.List;
+import workbench.db.ConnectionProfile;
 
 /**
  *	The main application "controller" for the jWorkbench
@@ -26,25 +30,19 @@ public class WbManager
 	private ConnectionMgr connMgr = new ConnectionMgr();
 	private HashMap windowList = new HashMap();
 	
-	private WbManager() {}
-	
+	private WbManager() 
+	{
+		this.initFonts();
+	}
+
 	public static WbManager getInstance()
 	{
 		return wb;
 	}
 	
-	private void init()
+	public static Settings getSettings()
 	{
-		this.initFonts();
-	}
-	
-	private void initGui()
-	{
-	}
-
-	public Settings getSettings()
-	{
-		return this.settings;
+		return wb.settings;
 	}
 	
 	public ConnectionMgr getConnectionMgr()
@@ -88,7 +86,7 @@ public class WbManager
 		UIManager.put("Tree.font", stdFont);
 		UIManager.put("ViewPort.font", stdFont);
 		end = System.currentTimeMillis();
-//		System.out.println("initFonts=" + (end - start));
+		System.out.println("initFonts=" + (end - start));
 	}
 
 	public MainWindow createWindow()
@@ -100,13 +98,42 @@ public class WbManager
 		return result;
 	}
 	
+	public void exitWorkbench()
+	{
+		this.getConnectionMgr().disconnectAll();
+		Iterator values = this.windowList.values().iterator();
+		while (values.hasNext())
+		{
+			MainWindow win = (MainWindow)values.next();
+			win.saveSettings();
+			win.dispose();
+		}
+		
+		this.settings.saveSettings();
+		System.exit(0);
+	}
+	
 	public static void main(String args[])
 	{
-		WbManager mgr = WbManager.getInstance();
-		mgr.init();
-		
-		MainWindow main = mgr.createWindow();
+		// init() may not be called in the constructor
+		// because the creation of the settings and
+		// connectionMgr object rely on an existing
+		// wb instance which is not the case during
+		// the constructor
+		MainWindow main = wb.createWindow();
 		main.show();
+		/*
+		Connection conn = null;
+		ConnectionProfile profile = wb.connMgr.selectConnection();
+		try
+		{
+			main.connectTo(profile);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		*/
 	}
 	
 }

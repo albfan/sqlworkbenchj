@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.ResultSetMetaData;
 
 import workbench.exception.WbException;
+import workbench.log.LogMgr;
 
 /**
  * Read the result set for a SQL statement from the database.
@@ -200,8 +201,11 @@ public class DbReader
 			String name = this.metaData.getColumnLabel(aColumn);
 			if (name == null || name.length() == 0)
 			{
-				System.err.println("Column name not found, using column label for col=" + aColumn);
 				name = this.metaData.getColumnName(aColumn);
+			}
+			if (name == null || name.length() == 0) 
+			{
+				name = "Col" + aColumn;
 			}
 			return name;
 		}

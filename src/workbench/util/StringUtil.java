@@ -34,7 +34,6 @@ public class StringUtil
 		}
 		return temp.toString();
 	}
-	
 
 	public static String getStartingWhiteSpace(final String aLine)
 	{
@@ -42,7 +41,7 @@ public class StringUtil
 		int pos = 0;
 		int len = aLine.length();
 		if (len == 0) return "";
-		
+
 		char c = aLine.charAt(pos);
 		while (c <= ' ' && pos < len)
 		{

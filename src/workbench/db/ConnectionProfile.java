@@ -57,7 +57,7 @@ public class ConnectionProfile
 	/** Setter for property url.
 	 * @param url New value of property url.
 	 */
-	public void setUrl(java.lang.String aUrl)
+	public void setUrl(String aUrl)
 	{
 		this.url = aUrl;
 	}
@@ -131,6 +131,8 @@ public class ConnectionProfile
 			return aPwd;
 		}
 	}
+	
+	public String toString() { return this.name; }
 	
 	public String encryptPassword(String aPwd)
 	{

@@ -229,50 +229,51 @@ public class Settings
 		int x,y,w,h;
 		Point p = target.getLocation();
 		Dimension d = target.getSize();
-		this.setWindowPosition(p.x, p.y, d.width, d.height);
+		String id = target.getClass().getName();
+		this.setWindowPosition(id, p.x, p.y, d.width, d.height);
 	}
 	
-	public void setWindowPosition(int x, int y, int width, int height)
+	public void setWindowPosition(String windowClass, int x, int y, int width, int height)
 	{
-		this.props.setProperty("window.x", Integer.toString(x));
-		this.props.setProperty("window.y", Integer.toString(y));
-		this.props.setProperty("window.width", Integer.toString(width));
-		this.props.setProperty("window.height", Integer.toString(height));
+		this.props.setProperty("window." + windowClass + ".x", Integer.toString(x));
+		this.props.setProperty("window." + windowClass + ".y", Integer.toString(y));
+		this.props.setProperty("window." + windowClass + ".width", Integer.toString(width));
+		this.props.setProperty("window." + windowClass + ".height", Integer.toString(height));
 	}
 
-	public void setDividerLocation(int y)
+	public void setSqlDividerLocation(int y)
 	{
-		this.props.setProperty("window.divider", Integer.toString(y));
+		this.props.setProperty("window.sql.divider", Integer.toString(y));
 	}
 	
-	public int getDividerLocation()
+	public int getSqlDividerLocation()
 	{
-		return StringUtil.getIntValue(this.props.getProperty("window.divider", "-1"));
+		return StringUtil.getIntValue(this.props.getProperty("window.sql.divider", "-1"));
 	}
 	
-	public int getWindowPosX()
+	public int getWindowPosX(String windowClass)
 	{
-		return StringUtil.getIntValue(this.props.getProperty("window.x", "0"));
+		return StringUtil.getIntValue(this.props.getProperty("window." + windowClass + ".x", "0"));
 	}
 	
-	public int getWindowPosY()
+	public int getWindowPosY(String windowClass)
 	{
-		return StringUtil.getIntValue(this.props.getProperty("window.y", "0"));
+		return StringUtil.getIntValue(this.props.getProperty("window." + windowClass + ".y", "0"));
 	}
 	
-	public int getWindowWidth()
+	public int getWindowWidth(String windowClass)
 	{
-		return StringUtil.getIntValue(this.props.getProperty("window.width", "0"));
+		return StringUtil.getIntValue(this.props.getProperty("window." + windowClass + ".width", "0"));
 	}
 	
-	public int getWindowHeight()
+	public int getWindowHeight(String windowClass)
 	{
-		return StringUtil.getIntValue(this.props.getProperty("window.height", "0"));
+		return StringUtil.getIntValue(this.props.getProperty("window." + windowClass + ".height", "0"));
 	}
 	
 	public int getEditorTabWidth()
 	{
-		return StringUtil.getIntValue(this.props.getProperty("editor.tabwidth", "4"));
+		return StringUtil.getIntValue(this.props.getProperty("editortabwidth", "4"));
 	}
 	
 	public void setEditorTabWidth(int aWidth)
@@ -280,6 +281,10 @@ public class Settings
 		this.props.setProperty("editor.tabwidth", Integer.toString(aWidth));
 	}
 
+	public String getConnectionName(int anId)
+	{
+		return this.props.getProperty("connection" + anId + ".name", "");
+	}
 	public String getConnectionDriver(int anId)
 	{
 		return this.props.getProperty("connection" + anId + ".driverclass", "");

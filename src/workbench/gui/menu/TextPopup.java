@@ -25,16 +25,26 @@ import workbench.gui.actions.SelectAllAction;
 public class TextPopup extends JPopupMenu
 {
 	private ClipboardSupport client;
+	private CopyAction copy;
+	private PasteAction paste;
+	private ClearAction clear;
+	private SelectAllAction selectAll;
+	private CutAction cut;
 	
 	/** Creates new LogPanelPopup */
 	public TextPopup(ClipboardSupport aClient)
 	{
-		this.add(new CutAction(aClient));
-		this.add(new CopyAction(aClient));
-		this.add(new PasteAction(aClient));
+		this.cut = new CutAction(aClient);
+		this.add(cut);
+		this.copy = new CopyAction(aClient);
+		this.add(this.copy);
+		this.paste = new PasteAction(aClient);
+		this.add(this.paste);
 		this.addSeparator();
-		this.add(new ClearAction(aClient));
-		this.add(new SelectAllAction(aClient));
+		this.clear = new ClearAction(aClient);
+		this.add(this.clear);
+		this.selectAll = new SelectAllAction(aClient);
+		this.add(this.selectAll);
 	}
 	
 	public void addAction(Action anAction, boolean withSep)
@@ -43,4 +53,10 @@ public class TextPopup extends JPopupMenu
 		this.add(anAction);
 	}
 	
+
+	public Action getCopyAction() { return this.copy; }
+	public Action getCutAction() { return this.cut; }
+	public Action getPasteAction() { return this.paste; }
+	public Action getSelectAllAction() { return this.selectAll; }
+	public Action getClearAction() { return this.clear; }
 }
