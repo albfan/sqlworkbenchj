@@ -47,7 +47,7 @@ public class WbConnection
 	}
 	
 	public Statement createStatement()
-		throws NoConnectionException, SQLException
+		throws SQLException
 	{
 		return this.sqlConnection.createStatement();
 	}

@@ -1,5 +1,6 @@
 package workbench.util;
 
+import java.awt.EventQueue;
 import java.util.StringTokenizer;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -34,7 +35,7 @@ public class WbCipher
 			}
 			);
 		t.setPriority(Thread.MIN_PRIORITY);
-		t.run();
+		EventQueue.invokeLater(t);
 	}
 
 	public String decryptString(String aValue)

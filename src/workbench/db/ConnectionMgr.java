@@ -6,6 +6,7 @@
 
 package workbench.db;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
@@ -144,6 +145,11 @@ public class ConnectionMgr
 		return this.drivers;
 	}
 
+	public void setDrivers(List aDriverList)
+	{
+		this.drivers = aDriverList;
+	}
+	
 	public Map getProfiles()
 	{
 		if (this.profiles == null) this.readProfiles();
@@ -234,7 +240,7 @@ public class ConnectionMgr
 		this.saveDrivers();
 	}
 	
-	private void saveDrivers()
+	public void saveDrivers()
 	{
 		WbPersistence.writeObject(this.drivers, "WbDrivers.xml");
 	}
@@ -244,6 +250,12 @@ public class ConnectionMgr
 		try
 		{
 			Object result = WbPersistence.readObject("WbDrivers.xml");
+			if (result == null)
+			{
+				InputStream in = this.getClass().getResourceAsStream("DriverTemplates.xml");
+				result = WbPersistence.readObject(in);
+			}
+			
 			if (result == null)
 			{
 				this.drivers = Collections.EMPTY_LIST;
@@ -279,7 +291,7 @@ public class ConnectionMgr
 		}
 	}
 	
-	public void putProfiles(Collection c)
+	public void setProfiles(Collection c)
 	{
 		Iterator itr = ((Collection)c).iterator();
 		if (this.profiles == null)
@@ -303,7 +315,7 @@ public class ConnectionMgr
 		Object result = WbPersistence.readObject("WbProfiles.xml");
 		if (result instanceof Collection)
 		{
-			this.putProfiles((Collection)result);
+			this.setProfiles((Collection)result);
 		}
 		else if (result instanceof Object[])
 		{

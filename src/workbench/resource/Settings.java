@@ -43,7 +43,7 @@ public class Settings
 	public Settings()
 	{
 		this.props = new Properties();
-		this.filename = System.getProperty("wb.settings.file", "workbench.settings");
+		this.filename = System.getProperty("workbench.settings.file", "workbench.settings");
 		
 		try
 		{
@@ -75,7 +75,10 @@ public class Settings
 				
 				if (lastKey != null)
 				{
-					if (!lastKey.substring(0, lastKey.indexOf('.')).equals(key.substring(0,key.indexOf('.'))))
+					String k1, k2;
+					k1 = getFirstTwoSections(lastKey);
+					k2 = getFirstTwoSections(key);
+					if (!k1.equals(k2))
 					{
 						bw.newLine();
 					}
@@ -91,6 +94,29 @@ public class Settings
 		{
 			LogMgr.logError(this, "Error saving Settings file '" + filename + "'", e);
 		}
+	}
+
+	private String getFirstTwoSections(String aString)
+	{
+		int pos1 = aString.indexOf(".");
+		String result;
+		if (pos1 > -1) 
+		{
+			int pos2 = aString.indexOf(".", pos1 + 1);
+			if (pos2 > -1) 
+			{
+				result = aString.substring(0, pos2);
+			}
+			else
+			{
+				result = aString.substring(0, pos1);
+			}
+			return result;
+		}
+		else
+		{
+			return aString;
+		}		
 	}
 	
 	private void fillDefaults()
@@ -119,7 +145,6 @@ public class Settings
 		if (this.editorFont == null)
 		{
 			this.editorFont = this.getFont("editor");
-			LogMgr.logInfo(this, "Using editor font=" + this.editorFont);
 		}
 		return editorFont;
 	}
@@ -149,7 +174,7 @@ public class Settings
 	{
 		Font result;
 		
-		String baseKey = new StringBuffer("wb.font.").append(aFontName).toString();
+		String baseKey = new StringBuffer("workbench.font.").append(aFontName).toString();
 		String name = this.props.getProperty(baseKey + ".name", "Dialog");
 		String sizeS = this.props.getProperty(baseKey + ".size", "11");
 		String type = this.props.getProperty(baseKey + ".style", "Plain");
@@ -171,71 +196,18 @@ public class Settings
 	
 	public String getLastExportDir()
 	{
-		return this.props.getProperty("wb.export.lastdir","");
+		return this.props.getProperty("workbench.export.lastdir","");
 	}
 	
 	public void setLastExportDir(String aDir)
 	{
-		this.props.setProperty("wb.export.lastdir", aDir);
+		this.props.setProperty("workbench.export.lastdir", aDir);
 	}
 
 
 	public String toString()
 	{
 		return "[Settings]";
-	}
-	
-	/**
-	 *	Returns the name of the driver with the given number
-	 *	@see #getDriverClass(int)
-	 */
-	public String getDriverName(int aNr)
-	 throws NoSuchElementException
-	{
-		String name = this.props.getProperty("driver" + aNr + ".name");
-		if (name == null) throw new NoSuchElementException();
-		return name;
-	}
-	
-	/**
-	 *	Return the driver class associated with the given driver
-	 *	definition.
-	 *	@throws NoSuchElementException
-	 */
-	public String getDriverClass(int aNr)
-		throws NoSuchElementException
-	{
-		String classname = this.props.getProperty("driver" + aNr + ".class");
-		if (classname == null) throw new NoSuchElementException();
-		return classname;
-	}
-
-	/**
-	 *	Returns the name of the jar file for the driver number
-	 *	@see #getDriverName(int)
-	 *	@see #getDriverClass(int)
-	 *	@param	int - The number of the driver
-	 */
-	public String getDriverLibrary(int aNr)
-		throws NoSuchElementException
-	{
-		String lib = this.props.getProperty("driver" + aNr + ".library");
-		if (lib == null) throw new NoSuchElementException();
-		return lib;
-	}
-	
-	/**
-	 *	Returns the number of JDBC drivers configured in the settings
-	 *	file.
-	 *	@see #getDriverClass(int)
-	 *	@see #getDriverName(int)
-	 *	@see #getDriverLibrary(int)
-	 *	@return the number of drivers as defined in driver.count
-	 */
-	public int getDriverCount()
-	{
-		String value = this.props.getProperty("driver.count", "0");
-		return StringUtil.getIntValue(value, 0);
 	}
 	
 	public void storeWindowPosition(Component target)
@@ -295,12 +267,12 @@ public class Settings
 	
 	public void setSqlDividerLocation(int y)
 	{
-		this.props.setProperty("window.sql.divider", Integer.toString(y));
+		this.props.setProperty("workbench.gui.sql.divider", Integer.toString(y));
 	}
 	
 	public int getSqlDividerLocation()
 	{
-		return StringUtil.getIntValue(this.props.getProperty("window.sql.divider", "-1"));
+		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.sql.divider", "-1"));
 	}
 	
 	public int getWindowPosX(String windowClass)
@@ -352,4 +324,30 @@ public class Settings
 	{
 		this.props.setProperty("drivers.lastlibdir", aDir);
 	}
+	
+	public int getMaxHistorySize()
+	{
+		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.historysize", "15"));
+	}
+	
+	public int getDefaultTabCount()
+	{
+		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.defaulttabcount", "4"));
+	}
+
+	public void setDefaultTabCount(int aCount)
+	{
+		this.props.setProperty("workbench.sql.defaulttabcount", Integer.toString(aCount));
+	}
+
+	public void setLookAndFeelClass(String aClassname)
+	{
+		this.props.setProperty("workbench.gui.lookandfeelclass", aClassname);
+	}
+	
+	public String getLookAndFeelClass()
+	{
+		return this.props.getProperty("workbench.gui.lookandfeelclass", "");
+	}
+	
 }

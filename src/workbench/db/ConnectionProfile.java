@@ -30,19 +30,21 @@ public class ConnectionProfile
 	private String password;
 	private boolean autocommit;
 	private String description;
-	private boolean isNew;
-	
-	static
-	{
-		WbPersistence.makeTransient(ConnectionProfile.class, "isNew");
-	}
+	private int id;
+	private static int nextId = 1;
 	
 	public ConnectionProfile()
 	{
+		this.id = getNextId();
 	}
-	
+
+	private static synchronized int getNextId()
+	{
+		return nextId++;
+	}
 	public ConnectionProfile(String driverClass, String url, String userName, String pwd)
 	{
+		this();
 		this.setUrl(url);
 		this.setDriverclass(driverClass);
 		this.setUsername(userName);
@@ -52,6 +54,7 @@ public class ConnectionProfile
 	
 	public ConnectionProfile(String aName, String driverClass, String url, String userName, String pwd)
 	{
+		this();
 		this.setUrl(url);
 		this.setDriverclass(driverClass);
 		this.setUsername(userName);
@@ -144,10 +147,13 @@ public class ConnectionProfile
 		try 
 		{
 			ConnectionProfile prof = (ConnectionProfile)other;
+			return this.id == prof.id;
+			/*
 			return this.url.equals(prof.url) && 
 						 this.driverclass.equals(prof.driverclass) &&
 						 this.username.equals(prof.username) &&
 						 this.password.equals(prof.password);
+			*/
 		}
 		catch (ClassCastException e)
 		{
@@ -172,9 +178,6 @@ public class ConnectionProfile
 	
 	public String getDescription() { return this.description; }
 	public void setDescription(String description) { this.description = description; }
-
-	public void setIsNew(boolean aFlag) { this.isNew = aFlag; }
-	public boolean getIsNew() { return this.isNew; }
 	
 	public static Comparator getNameComparator()
 	{

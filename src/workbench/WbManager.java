@@ -62,6 +62,18 @@ public class WbManager
 	{
 		long end;
 		long start = System.currentTimeMillis();
+		try
+		{
+			String className = this.settings.getLookAndFeelClass();
+			if (className != null && className.trim().length() > 0)
+			{
+				UIManager.setLookAndFeel(className);
+			}
+		}
+		catch (Exception e)
+		{
+			System.out.println("Could not set look and feel");
+		}
 		Font stdFont = this.settings.getStandardFont();
 		UIManager.put("Button.font", stdFont);
 		UIManager.put("CheckBox.font", stdFont);
@@ -116,33 +128,15 @@ public class WbManager
 			win.saveSettings();
 			win.dispose();
 		}
-		//this.connMgr.writeSettings();
 		this.settings.saveSettings();
 		System.exit(0);
 	}
 	
 	public static void main(String args[])
 	{
-		// init() may not be called in the constructor
-		// because the creation of the settings and
-		// connectionMgr object rely on an existing
-		// wb instance which is not the case during
-		// the constructor
 		MainWindow main = wb.createWindow();
 		main.show();
 		main.selectConnection();
-		/*
-		Connection conn = null;
-		ConnectionProfile profile = wb.connMgr.selectConnection();
-		try
-		{
-			main.connectTo(profile);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		*/
 	}
-	
+
 }

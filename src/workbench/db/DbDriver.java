@@ -12,6 +12,7 @@ import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.Properties;
 import workbench.exception.WbException;
 
@@ -35,6 +36,8 @@ public class DbDriver
 	
 	/** Holds value of property library. */
 	private String library;
+	
+	private String sampleUrl;
 	
 	public DbDriver()
 	{
@@ -72,6 +75,9 @@ public class DbDriver
 	
 	public String toString() { return this.getDriverClass(); }
 
+	public void setSampleUrl(String anUrl) { this.sampleUrl = anUrl; }
+	public String getSampleUrl() { return this.sampleUrl; }
+	
 	private void loadDriverClass()
 		throws WbException
 	{
@@ -116,5 +122,25 @@ public class DbDriver
 		}
 		return c;
 	}
-	
+
+	public static Comparator getNameComparator()
+	{
+		return new Comparator()
+		{
+			public int compare(Object o1, Object o2)
+			{
+				if (o1 == null && o2 == null) return 0;
+				if (o1 == null) return -1;
+				if (o2 == null) return 1;
+				if (o1 instanceof DbDriver && o2 instanceof DbDriver)
+				{
+					String name1 = ((DbDriver)o1).name;
+					String name2 = ((DbDriver)o2).name;
+					return name1.compareTo(name2);				
+				}
+				return 0;
+			}
+		};
+	}
+
 }

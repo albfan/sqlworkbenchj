@@ -10,6 +10,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 
 public class WbPersistence
 {
@@ -29,7 +30,6 @@ public class WbPersistence
 			for ( int i = 0; i < propertyDescriptors.length; i++ )
 			{
 				PropertyDescriptor pd = propertyDescriptors[i];
-				//System.out.println( pd.getName() );
 				if ( pd.getName().equals(property) )
 				{
 					pd.setValue( "transient", Boolean.TRUE );
@@ -43,15 +43,29 @@ public class WbPersistence
 	
 	public static Object readObject(String aFilename)
 	{
+		try
+		{
+			InputStream in = new BufferedInputStream(new FileInputStream(aFilename));
+			return readObject(in);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static Object readObject(InputStream in)
+	{
 		long start,end;
 		try
 		{
 			start = System.currentTimeMillis();
-			XMLDecoder e = new XMLDecoder(new BufferedInputStream(new FileInputStream(aFilename)));
+			XMLDecoder e = new XMLDecoder(in);
 			Object result = e.readObject();
 			e.close();
 			end = System.currentTimeMillis();
-			System.out.println("XMLDecode for " + aFilename + " " + (end - start));
+			//System.out.println("XMLDecode for " + aFilename + " " + (end - start));
 			return result;
 		}
 		catch (Exception e)
@@ -73,7 +87,7 @@ public class WbPersistence
 			e.writeObject(aValue);
 			e.close();
 			end = System.currentTimeMillis();
-			System.out.println("XMLEncode for " + aFilename + " " + (end - start));
+			//System.out.println("XMLEncode for " + aFilename + " " + (end - start));
 		}
 		catch (Exception e)
 		{

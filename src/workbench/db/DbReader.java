@@ -9,12 +9,14 @@ package workbench.db;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import sun.jdbc.rowset.CachedRowSet;
 import java.lang.ArrayIndexOutOfBoundsException;
 import java.lang.StringBuffer;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.ResultSetMetaData;
+
+import sun.jdbc.rowset.CachedRowSet;
 
 import workbench.exception.WbException;
 import workbench.log.LogMgr;
@@ -47,6 +49,12 @@ public class DbReader
 		this(aStatement, null);
 	}
 	
+	public DbReader()
+		throws SQLException
+	{
+		this(null, null);
+	}
+	
 	/**
 	 *	Create an instance of DBReader for the given connection.
 	 *	The load() method can be called without specifying the
@@ -59,8 +67,8 @@ public class DbReader
 	{
 		this.data = new CachedRowSet();
 		this.sqlStatement = aStatement;
-		this.dbConnection = aConn.getSqlConnection();
-		this.data.setCommand(this.sqlStatement);
+		if (aConn != null) this.dbConnection = aConn.getSqlConnection();
+		if (this.sqlStatement != null) this.data.setCommand(this.sqlStatement);
 	}
 	
 	/**
@@ -74,6 +82,19 @@ public class DbReader
 		return this.getRowCount();
 	}
 	
+	public int load(ResultSet aResultSet)
+		throws SQLException
+	{
+		this.rowCount = -1;
+		this.colCount = -1;
+		this.metaData = null;
+		
+		this.data.populate(aResultSet);
+		this.metaData = this.data.getMetaData();
+		this.colCount = this.metaData.getColumnCount();
+
+		return this.getRowCount();
+	}
 	/**
 	 *	Load the date from the database
 	 */
@@ -267,9 +288,5 @@ public class DbReader
 		}
 		out.flush();
 	}
-	
-	public static void main(String args[])
-	{
-		System.getProperties().list(System.out);
-	}
+
 }

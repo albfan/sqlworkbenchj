@@ -50,7 +50,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.1 2001-12-11 19:07:23 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.2 2002-07-10 23:40:15 thomas Exp $
  */
 public class JEditTextArea extends JComponent
 {
@@ -103,8 +103,9 @@ public class JEditTextArea extends JComponent
 		addFocusListener(new FocusHandler());
 
 		// Load the defaults
-		setInputHandler(defaults.inputHandler);
-		setDocument(defaults.document);
+		setInputHandler(new DefaultInputHandler());
+		this.inputHandler.addDefaultKeyBindings();
+		setDocument(new SyntaxDocument());
 		editable = defaults.editable;
 		caretVisible = defaults.caretVisible;
 		caretBlinks = defaults.caretBlinks;
