@@ -398,10 +398,10 @@ public class DataStoreTableModel
 			{
 				sortingInProgress = true;
 				table.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				table.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				//table.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				model.sortByColumn(aColumn, ascending);
-				table.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				//table.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				table.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				table.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				// repaint the header so that the icon is displayed...

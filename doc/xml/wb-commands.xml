@@ -1,0 +1,650 @@
+  <section id="wb-commands">
+    <title>Special &wb-productname; commands</title>
+
+    <section id="command-list">
+      <title>LIST</title>
+
+      <para>This command lists all available tables (including views and
+      synonyms). This output is equivalent to the left part of the Database
+      Object Explorer&#39;s Table tab.</para>
+    </section>
+
+    <section id="command-listprocs">
+      <title>LISTPROCS</title>
+
+      <para>This command will list all stored procedures available to the
+      current user. The output of this command is equivalent to the Database
+      Explorer&#39;s Procedure tab.</para>
+    </section>
+
+    <section id="command-desc">
+      <title>DESCRIBE (DESC)</title>
+
+      <para>Describe shows the definition of the given table. It can be
+      abbreviated with DESC. The command expects the table name as a parameter.</para>
+      <programlisting>DESC person;</programlisting>
+      <para>If you want to show the structure of a table from a different user, you need
+      to prefix the table name with the desired user</para>
+      <programlisting>DESCRIBE otheruser.person;</programlisting>
+    </section>
+
+    <section id="command-listcat">
+      <title>LISTCAT (LISTDB)</title>
+
+      <para>Lists the available catalogs or databases. The output of this
+      command depends on the underlying JDBC driver and DBMS. For MS SQL
+      Server this lists the available databases (which then could be changed
+      by USE &#60;dbname&#62;)</para>
+
+      <para>For Oracle this command returns nothing (as Oracle does not
+      implement the concept of catalogs)</para>
+      <para>This command calls the JDBC driver's getCatalogs() method and will 
+      return its result. If on your database system this command does not display
+      a list, it is most likely that your DBMS does not support catalogs (e.g. Oracle)
+      or the driver does not implement this feature.
+      </para>
+    </section>
+
+    <section id="command-spool">
+      <title>EXPORT (EXP, SPOOL)</title>
+
+      <para>Exports the result of the <emphasis role="strong">next</emphasis>
+      SQL statement (which has to produce a result set) to a file without
+      loading the data into memroy. This is
+      equivalent to the menu item       
+      <menuchoice><guimenu>SQL</guimenu><guimenuitem>Spool Data</guimenuitem></menuchoice>. 
+      The export command gives you more control over the format of the created file, then the
+      menu.</para>
+      <note><para>EXP and SPOOL are synonyms for the EXPORT command. All three
+      commands are identical.</para></note>
+
+      <para>The command supports the following parameters:</para>
+
+      <informaltable frame="all">
+        <tgroup cols="2" align="left">
+          <colspec colname="c1" colwidth="4cm" />
+          <colspec colname="c2" />
+            <thead>
+              <row>
+                <entry>Parameter</entry>
+                <entry>Description</entry>
+              </row>
+            </thead>
+          
+          <tbody valign="top">
+            <row>
+              <entry><para>-type=[text|sql|xml]</para></entry>
+
+              <entry><para>Defines the type of the output file
+              </para></entry>
+            </row>
+
+            <row>
+              <entry><para>-file=&#60;filename&#62;</para></entry>
+
+              <entry><para>Defines the output file </para></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+
+      <section id="spool-sql-parameters">
+        <title>Parameters for the type SQL</title>
+
+        <informaltable frame="all">
+          <tgroup cols="2" align="left">
+            <colspec colname="c1" colwidth="4cm" />
+            <colspec colname="c2" />
+            <thead>
+              <row>
+                <entry>Parameter</entry>
+                <entry>Description</entry>
+              </row>
+            </thead>
+
+            <tbody valign="top">
+              <row>
+                <entry><para>-table</para></entry>
+
+                <entry><para>If the type is SQL the given
+                tablename will be used to create the INSERT statements. This
+                is useful when the data is retrieved from several different
+                tables, and should be inserted into one target table (e.g.
+                when migrating data from one DBMS to another)</para></entry>
+              </row>
+
+              <row>
+                <entry><para>-charfunc</para></entry>
+
+                <entry><para>If this parameter is given, any
+                non-printable character in a text/character column will be
+                replaced with a call to the given function with the ASCII
+                value as the parameter. </para> <para>If -charfunc=chr is
+                given (e.g. for an Oracle syntax), a CR (=13) inside a
+                character column will be replaced with:</para> 
+                <para><literal>INSERT
+                INTO ... VALUES (&#39;First line&#39;||chr(13)||&#39;Second
+                line&#39; ... )</literal></para> 
+                
+                <para>This setting will affect ASCII values 0 to 31</para>
+                </entry>
+              </row>
+
+              <row>
+                <entry><para>-concat</para></entry>
+
+                <entry><para>If charfunc is given and the DBMS
+                does not support the standard ANSI character for
+                concatenating strings (which is ||) then a different
+                concatenation character can be defined with this parameter:</para>
+                <para>-concat=+</para> <para>e.g. for MS Access </para></entry>
+              </row>
+
+              <row>
+                <entry><para>-commitevery</para></entry>
+
+                <entry><para>A numeric value which identifies
+                the number of <literal>INSERT</literal> statements after which a <literal>COMMIT</literal> 
+                is put into the generated SQL script.</para> 
+                <para>-commitevery=100</para>
+                <para>will create a <literal>COMMIT;</literal> after every 100 <literal>INSERT</literal>&#39;s</para>
+                </entry>
+              </row>
+
+              <row>
+                <entry><para>-createtable==[true|false]</para></entry>
+
+                <entry><para>If this parameter is set to true,
+                the necessary <literal>CREATE TABLE</literal> command is put into the output
+                file.</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </section>
+
+      <section id="spool-text-parameters">
+        <title>Parameters for the type TEXT</title>
+
+        <informaltable frame="all">
+          <tgroup cols="2"  align="left">
+            <colspec colname="c1" colwidth="4cm" />
+
+            <colspec colname="c2" />
+            <thead>
+              <row>
+                <entry>Parameter</entry>
+                <entry>Description</entry>
+              </row>
+            </thead>
+
+            <tbody valign="top">
+              <row>
+                <entry><para>-delimiter</para></entry>
+
+                <entry><para>The given string sequence will be
+                placed between two columns. The default is a tab character.</para></entry>
+              </row>
+
+              <row>
+                <entry><para>-dateformat</para></entry>
+
+                <entry><para>The date format to be used when
+                writing date columns into the output file. The syntax of the
+                format definition, is the same as for the SimpleDateFormat
+                class.</para></entry>
+              </row>
+
+              <row>
+                <entry><para>-datetimeformat</para></entry>
+
+                <entry><para>The format to be used when writing
+                datetime (or timestamp) columns into the output file.
+                </para></entry>
+              </row>
+
+              <row>
+                <entry><para>-quotechar</para></entry>
+
+                <entry><para>The character (or sequence of
+                characters) to be used to enclose text data. The default is
+                not to use a quote character</para></entry>
+              </row>
+
+              <row>
+                <entry><para>-decimal</para></entry>
+
+                <entry><para>The decimal symbol to be used for
+                numbers. The default is a point.</para></entry>
+              </row>
+
+              <row>
+                <entry><para>-cleancr=[true|false]</para></entry>
+
+                <entry><para>Controls the writing of non
+                printing characters inside character columns. If
+                cleancr=true, any non printable character (&#60; 32) will be
+                replaced with a space character.</para></entry>
+              </row>
+
+              <row>
+                <entry><para>-header=[true|false]</para></entry>
+
+                <entry><para>If this parameter is set to true,
+                the header (i.e. The column names) are placed into the
+                output file.</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </section>
+
+      <section id="spool-xml-parameters">
+        <title>Parameters for the type XML</title>
+
+        <informaltable frame="all">
+          <tgroup cols="2" align="left">
+            <thead>
+              <row>
+                <entry>Parameter</entry>
+                <entry>Description</entry>
+              </row>
+            </thead>
+            <tbody valign="top">
+              <row>
+                <entry><para>-table</para></entry>
+
+                <entry><para>The given tablename will be put
+                into the &#60;table&#62; tag as an attribute.</para></entry>
+              </row>
+
+              <row>
+                <entry><para>-dateformat</para></entry>
+
+                <entry><para>The date format to be used when
+                writing date columns into the output file. The syntax of the
+                format definition, is the same as for the SimpleDateFormat
+                class.</para></entry>
+              </row>
+
+              <row>
+                <entry><para>-datetimeformat</para></entry>
+
+                <entry><para>The format to be used when writing
+                datetime (or timestamp) columns into the output file.
+                </para></entry>
+              </row>
+
+              <row>
+                <entry><para>-decimal</para></entry>
+
+                <entry><para>The decimal symbol to be used for
+                numbers. The default is a point.</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+
+			</section>
+				<section id="export-examples">
+					<title>Examples:</title>
+	
+					<programlisting>EXPORT -type=text -file=&#34;c:/data/data.txt&#34; -delimiter=&#34;|&#34; -decimal=&#34;,&#34;;
+SELECT * FROM data_table;</programlisting>
+
+				<para>Will create a text file with the data from data_table. Each
+				column will be separated with the character | Each fractional number
+					will be written with a comma as the decimal separator.</para>
+
+				<programlisting>EXPORT -type=sql -file=&#34;c:/data/newtable.sql&#34; -table=newtable;
+SELECT * FROM table1, table2 
+WHERE table1.column1 = table2.column1;</programlisting>
+
+				<para>Will create a SQL scripts which inserts the data from table1
+				and table2 into a table called newtable. If the parameter -table is
+				omitted, the creation of SQL is only possible, if the SELECT is
+				based on a single table (or view).</para>
+				<para>For more details on how you can export and import data using the XML format 
+				please refer to <xref linkend="xml-export-import"/></para>
+			</section>
+			
+    </section>
+		
+    <section id="command-import">
+      <title>IMPORT (IMP)</title>
+      <para>The IMPORT command can read and parse XML files generated by the
+      <link linkend="command-spool">EXPORT</link> command's XML format.
+      It is the recommended way to transfer files from one system to another because
+      those commands do not need to read all the data into memory.
+      </para>
+			
+      <para>The IMPORT command has the following syntax</para>
+      <informaltable frame="all">
+        <tgroup cols="2" align="left">
+          <colspec colname="c1" colwidth="4cm" />
+          <colspec colname="c2"/>
+          <thead>
+            <row>
+              <entry>Parameter</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody valign="top">
+            <row>
+              <entry><para>-type=[xml|text]</para></entry>
+              <entry><para>Defines the type of the input file</para></entry>
+            </row>
+            <row>
+              <entry><para>-file</para></entry>
+              <entry><para>Defines the full name of the input file</para></entry>
+            </row>
+            <row>
+              <entry><para>-commitevery</para></entry>
+              <entry><para>Issue a commit every (number) rows. If this parameter
+              is not passed (or a value of zero or lower), then &wb-productname; will commit everything when 
+              all rows have been imported. </para></entry>
+            </row>
+						<row>
+							<entry><para>-table</para></entry>
+							<entry><para>Define the table into which the data should be imported. For 
+							XML imports this is optional, and will overwrite the information stored
+							in the XML file.</para>
+							<para>For text imports this parameter is mandatory.</para></entry>
+						</row>
+            <row>
+              <entry><para>-encoding</para></entry>
+              <entry><para>Define the encoding for the input file. For XML files
+							the default encoding is UTF-8, for text files it's 8859_1</para></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+			
+      <section id="import-text-parameters">
+        <title>Parameters for the type TEXT</title>
+
+        <informaltable frame="all">
+          <tgroup cols="2"  align="left">
+            <colspec colname="c1" colwidth="4cm" />
+
+            <colspec colname="c2" />
+            <thead>
+              <row>
+                <entry>Parameter</entry>
+                <entry>Description</entry>
+              </row>
+            </thead>
+
+            <tbody valign="top">
+              <row>
+                <entry><para>-columns</para></entry>
+                <entry><para>A comma separated list of columns to import. The order 
+								in which the columns are listed, defines the order in which the 
+								columns appear in the text file. If the file does not contain a header
+								line or the header line does not contain the names of the columns in the 
+								database, this parameter has to be supplied</para></entry>
+              </row>
+              <row>
+                <entry><para>-delimiter</para></entry>
+                <entry><para>Define the character which separates columns in one line. Records are always
+								separated by newlines (either CR/LF or only a LF character)</para></entry>
+              </row>
+
+              <row>
+                <entry><para>-dateformat</para></entry>
+                <entry><para>The format for date columns
+								The syntax of the format definition, is the same as for the SimpleDateFormat
+                class.</para></entry>
+              </row>
+
+              <row>
+                <entry><para>-datetimeformat</para></entry>
+                <entry><para>The format for datetime (or timestamp) columns in the input file.
+                </para></entry>
+              </row>
+
+              <row>
+                <entry><para>-quotechar</para></entry>
+                <entry><para>The character which is used to quote values where the delimiter is contained.
+                </para></entry>
+              </row>
+
+              <row>
+                <entry><para>-decimal</para></entry>
+                <entry><para>The decimal symbol to be used for
+                numbers. The default is a point.</para></entry>
+              </row>
+
+              <row>
+                <entry><para>-header=[true|false]</para></entry>
+                <entry><para>If set to true, indicates that the file contains a header
+								line with the column names for the target table. This parameter has to be set 
+								to true, even if the column definitons are passed with the -columns parameter, so
+								that the first line can be ignored by the import process.
+								</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+				<para>Example:</para>
+				<programlisting>IMPORT -file=c:/temp/contacts.txt -table=person -columns=lastname,firstname,birthday -dateformat=yyyy-MM-dd;</programlisting>
+      </section>
+
+      <section id="import-xml-parameters">
+        <title>Parameters for the type XML</title>
+				<para>The XML import has no additional parameters, as all the necessary
+				information is stored in the XML file itself. Therefore
+				the XML import only works on files generated by the <link linkend="command-spool">EXPORT</link> 
+				(or SPOOL) command.</para>
+				<!--
+				<note><para>The architecture of the &wb-productname; makes it possible to 
+				plug other XML parsers into the system to allow the import of other 
+				XML formats. This is not yet enabled. If you have the need to use your
+				own XML parser, please contact the author for details.</para></note>
+				<para>For more information on how to export and import data with &wb-productname;
+				please see <xref linkend="xml-export-import"/>.</para>
+				-->
+			</section>
+			
+    </section>
+
+		<section id="command-copy">
+			<title>COPY</title>
+			<para>The <literal>COPY</literal> is essentially the command line version of the 
+			the <link linkend="data-pumper">Data Pumper</link>. For a more detailed discussion 
+			on copying data directly from one DBMS to another, please refer to that section.
+			</para>
+			
+			<section id="copy-general-parameters">
+				
+				<title>General parameters for the <literal>COPY</literal> command.</title>
+				<informaltable frame="all">
+					<tgroup cols="2"  align="left">
+						<colspec colname="c1"/>
+						<colspec colname="c2"/>
+						<thead>
+							<row>
+								<entry>Parameter</entry>
+								<entry>Description</entry>
+							</row>
+						</thead>
+	
+						<tbody valign="top">
+							<row>
+								<entry><para>-sourceprofile</para></entry>
+								<entry><para>The name of the connection profile to use as the source connection.
+								If -sourceprofile is not specified, the current connection is used as the source.
+								</para></entry>
+							</row>
+							<row>
+								<entry><para>-targetprofile</para></entry>
+								<entry><para>The name of the connection profile to use as the target connection. If either
+								-targetprofile is not specified, the current connection is used as the target.</para></entry>
+							</row>
+							<row>
+								<entry><para>-commitevery</para></entry>
+								<entry><para>The number of rows after which a commit is send to the target database.</para></entry>
+							</row>
+							<row>
+								<entry><para>-deletetarget=[true|false]</para></entry>
+								<entry><para>If this parameter is set to true, all rows are deleted from the
+								target table before copying the data.</para></entry>
+							</row>
+						</tbody>
+					</tgroup>
+				</informaltable>
+			</section>
+			
+			<section id="copy-single-table">
+				<title>Copying data from a single table.</title>
+				<informaltable frame="all">
+					<tgroup cols="2"  align="left">
+						<colspec colname="c1"/>
+						<colspec colname="c2"/>
+						<thead>
+							<row>
+								<entry>Parameter</entry>
+								<entry>Description</entry>
+							</row>
+						</thead>
+						<tbody valign="top">
+							<row>
+								<entry><para>-sourcetable=&lt;tablename&gt;</para></entry>
+								<entry><para>The name of the table to be copied.</para></entry>
+							</row>
+							<row>
+								<entry><para>-sourcewhere=&lt;condition&gt;</para></entry>
+								<entry><para>A WHERE condition which is applied to the source table.</para></entry>
+							</row>
+							<row>
+								<entry><para>-targettable=&lt;tablename&gt;</para></entry>
+								<entry><para>The name of the table into which the data should be written.</para></entry>
+							</row>
+							<row>
+								<entry><para>-createtarget=[true|false]</para></entry>
+								<entry><para>If this parameter is set to <literal>true</literal> the target table
+								will be created, if it doesn't exist.</para></entry>
+							</row>
+							<row>
+								<entry><para>-droptarget=[true|false]</para></entry>
+								<entry><para>If this parameter is set to <literal>true</literal> the target table
+								will be dropped before it is create. This parameter is ignored if -createtarget
+								is <literal>false</literal></para></entry>
+							</row>
+							<row>
+								<entry><para>-columns=[&lt;list&gt;|&lt;mapping&gt;]</para></entry>
+								<entry>
+									<para>Defines the columns to be copied. If this parameter is not specified, then 
+									all matching columns are copied from source to target. Matching
+									is done on name <emphasis role="bold">and</emphasis> data type.
+									</para>
+									<para>&lt;list&gt; is a list of columns in the source table. The data from
+									each table will be copied into the corresponding column in the target table. 
+									If <literal>-createtable=true</literal>, then
+									the list also defines the columns of the target table. The names have to be separated
+									by comma: <literal>-columns=firstname, lastname, zipcode</literal>
+									</para>
+									<para>
+									&lt;mapping&gt; defines a column mapping between the source and the target table
+									if the column names do no match. If <literal>-createtable=true</literal> then the 
+									target table will be created from the specified target names: 
+									<literal>-columns=firstname/surname, lastname/name, zipcode/zip</literal> Will copy the column
+									<literal>firstname</literal> from the source table to a column named <literal>surname</literal> 
+									in the target table, and so on.
+									</para>
+								</entry>
+							</row>
+						</tbody>
+					</tgroup>
+				</informaltable>
+			</section>
+						
+			<section id="command-copy-query">
+				<title>Copying data based on a SQL query</title>
+				<informaltable frame="all">
+					<tgroup cols="2"  align="left">
+						<colspec colname="c1" colwidth="4cm" />
+	
+						<colspec colname="c2" />
+						<thead>
+							<row>
+								<entry>Parameter</entry>
+								<entry>Description</entry>
+							</row>
+						</thead>
+						<tbody>
+							<row>
+								<entry><para>-sourcequery=&lt;SELECT statement&gt;</para></entry>
+								<entry><para>The SQL query to be used as the source data (instead of a table).</para></entry>
+							</row>
+							<row>
+								<entry><para>-columns=&lt;list&gt;</para></entry>
+								<entry><para>The list of columns of the target table, in the order
+								in which they appear in the source table.</para></entry>
+							</row>
+						</tbody>
+					</tgroup>
+				</informaltable>
+			</section>
+			
+			<section id="copy-examples">
+				<title>Examples:</title>
+				<para>Copy all columns from a table to a table with the same columns:</para>
+				<programlisting>COPY -sourceprofile=ProfileA
+     -targerprofile=ProfileB
+     -sourcetable=the_table
+     -targettable=the_other_table</programlisting>
+
+				<para>Copy all columns from a table to a table with the same columns, but 
+							only certain rows.</para>
+				<programlisting>COPY -sourceprofile=ProfileA
+     -targerprofile=ProfileB
+     -sourcetable=the_table
+     -sourcewhere="lastname LIKE 'D%'
+     -targettable=the_other_table</programlisting>
+		 
+		 		<para>Copy only selected columns to a table with different column names. Before the 
+				copy is started all rows are deleted from the target table:
+				</para>
+				<programlisting>COPY -sourceprofile=ProfileA
+     -targerprofile=ProfileB
+     -sourcetable=the_table
+     -targettable=the_other_table
+     -deletetarget=true
+     -columns=firstname/surname, lastname/name, birthday/bday</programlisting>
+
+				<para>Copy data based on a SQL query, matching the columns
+				from the query to the corresponding columns from the target table:</para>
+				<programlisting>COPY -sourceprofile=ProfileA
+     -targerprofile=ProfileB
+     -sourcewhere="SELECT firstname, lastname, birthday FROM person"
+     -targettable=the_other_table
+     -deletetarget=true
+     -columns=surname, name, bday</programlisting>
+			 <para>The order in the <literal>-columns</literal> parameter <emphasis role="bold">must</emphasis>
+			 match the order in the <literal>SELECT</literal> statement!</para>
+		 </section>
+		 
+		</section>
+		
+    <section id="command-enableout" xreflabel="ENABLEOUT">
+      <title>ENABLEOUT</title>
+
+      <para>This command enables the <literal>DBMS_OUTPUT</literal> package when connected to
+      an Oracle database. On other systems this command does nothing. After
+      the <literal>DBMS_OUTPUT</literal> package is enabled, any message written with
+      dbms_output.put_line() are displayed in the message pane after
+      executing a SQL statement. It is equivalent to calling the
+      dbms_output.enable() procedure.</para>
+
+      <para>The <literal>DBMS_OUTPUT</literal> package can be enabled automatically when a
+      connection is established. See <xref linkend="options-enable-out"/></para>
+    </section>
+
+    <section id="command-disableout">
+      <title>DISABLEOUT</title>
+
+      <para>This disables the <literal>DBMS_OUTPUT</literal> package for an Oracle database.
+      This is equivalent to calling dbms_output.disable() procedure.</para>
+    </section>
+  </section>

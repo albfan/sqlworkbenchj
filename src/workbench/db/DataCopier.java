@@ -54,7 +54,8 @@ public class DataCopier
 	private boolean useQuery = false;
 	private ColumnIdentifier[] targetColumnsForQuery;
 	private StringBuffer messages = null;
-
+	private StringBuffer errors = null;
+	
 	public DataCopier()
 	{
 		this.importer = new DataImporter();
@@ -125,17 +126,29 @@ public class DataCopier
 			{
 				cols[i] = (ColumnIdentifier)itr.next();
 			}
-			TableCreator creator = new TableCreator(this.targetConnection, this.targetTable, cols);
-			creator.createTable();
-			String msg = creator.getMessages();
-			if (msg != null)
+			try
 			{
-				this.addMessage(msg);
+				TableCreator creator = new TableCreator(this.targetConnection, this.targetTable, cols);
+				creator.createTable();
+				String msg = creator.getMessages();
+				if (msg != null)
+				{
+					this.addMessage(msg);
+				}
+				this.addMessage(ResourceMgr.getString("MsgCopyTableCreated").replaceAll("%name%", aTargetTable.getTable()));
 			}
-			this.addMessage(ResourceMgr.getString("MsgCopyTableCreated").replaceAll("%name%", aTargetTable.getTable()));
+			catch (SQLException e)
+			{
+				LogMgr.logError("DataCopier.copyFromTable()", "Error when creating target table", e);
+				this.addError(ResourceMgr.getString("MsgCopyErrorCreatTable").replaceAll("%name%", aTargetTable.getTable()));
+				this.addError(ExceptionUtil.getDisplay(e));
+				this.success = false;
+				throw e;
+			}
 		}
 		else
 		{
+			this.success = false;
 			throw new SQLException("Table " + aTargetTable.getTable() + " not found in target connection");
 		}
 		this.initImporterForTable();
@@ -242,9 +255,26 @@ public class DataCopier
 		{
 			realCols[i] = (ColumnIdentifier)targetCols.get(i);
 		}
-
-		TableCreator creator = new TableCreator(this.targetConnection, this.targetTable, realCols);
-		creator.createTable();
+		
+		try
+		{
+			TableCreator creator = new TableCreator(this.targetConnection, this.targetTable, realCols);
+			creator.createTable();
+			String msg = creator.getMessages();
+			if (msg != null)
+			{
+				this.addMessage(msg);
+			}
+			this.addMessage(ResourceMgr.getString("MsgCopyTableCreated").replaceAll("%name%", this.targetTable.getTable()));
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("DataCopier.copyFromTable()", "Error when creating target table", e);
+			this.addError(ResourceMgr.getString("MsgCopyErrorCreatTable").replaceAll("%name%", targetTable.getTable()));
+			this.addError(ExceptionUtil.getDisplay(e));
+			this.success = false;
+			throw e;
+		}
 	}
 
 	/**
@@ -377,6 +407,12 @@ public class DataCopier
 		return this.importer.hasWarning();
 	}
 
+	public String getErrorMessage()
+	{
+		if (this.errors == null) return null;
+		return this.errors.toString();
+	}
+	
 	public String[] getErrors()
 	{
 		return this.importer.getErrors();
@@ -618,6 +654,14 @@ public class DataCopier
 		}
 	}
 
+	private void addError(String msg)
+	{
+		if (this.errors == null) this.errors = new StringBuffer(250);
+		if (this.errors.length() > 0) this.errors.append('\n');
+		this.errors.append(msg);
+	}
+	
+	
 	private void addMessage(String msg)
 	{
 		if (this.messages == null) this.messages = new StringBuffer(250);

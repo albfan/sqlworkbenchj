@@ -31,7 +31,7 @@ public class WbWorkspace
 	private String basename;
 	private ZipOutputStream zout;
 	private ZipFile archive;
-	private ArrayList entries;
+	private ZipEntry[] entries;
 	
 	private boolean isReadOnly;
 	private WbProperties tabInfo = new WbProperties(1);
@@ -54,7 +54,7 @@ public class WbWorkspace
 			this.zout = null;
 			this.archive = new ZipFile(archiveName);
 			Enumeration e = this.archive.entries();
-			this.entries = new ArrayList(10);
+			ArrayList tempEntries = new ArrayList(10);
 			while (e.hasMoreElements())
 			{
 				ZipEntry entry = (ZipEntry)e.nextElement();
@@ -62,11 +62,34 @@ public class WbWorkspace
 				
 				if (filename.endsWith("txt"))
 				{
-					this.entries.add(entry);
+					tempEntries.add(entry);
 				}
 				else if (filename.endsWith("properties"))
 				{
 					this.readTabInfo(entry);
+				}
+			}
+			
+			int count = tempEntries.size();
+			this.entries = new ZipEntry[count];
+
+			for (int i=0; i < count; i++)
+			{
+				try
+				{
+					ZipEntry entry = (ZipEntry)tempEntries.get(i);
+					String filename = entry.getName().toLowerCase();
+					int pos = filename.indexOf('.');
+					int ind = -1;
+					try { ind = Integer.parseInt(filename.substring(12,pos)); } catch (Throwable th) {ind = -1;}
+					if (ind != -1)
+					{
+						entries[ind - 1] = entry;
+					}
+				}
+				catch (Exception ex)
+				{
+					LogMgr.logError("WbWorkspace.<init>", "Error when reading history data", ex);
 				}
 			}
 		}
@@ -89,17 +112,24 @@ public class WbWorkspace
 	{
 		if (!this.isReadOnly) throw new IllegalStateException("Workspace is opened for writing. Entry count is not available");
 		if (this.entries == null) return 0;
-		return this.entries.size();
+		return this.entries.length;
 	}
 	
 	public void readHistoryData(int anIndex, SqlHistory history)
 		throws IOException
 	{
 		if (!this.isReadOnly) throw new IllegalStateException("Workspace is opened for writing. Entry count is not available");
-		if (anIndex > this.entries.size() - 1) throw new IndexOutOfBoundsException("Index " + anIndex + " is great then " + (this.entries.size() - 1));
-		ZipEntry e = (ZipEntry)this.entries.get(anIndex);
-		InputStream in = this.archive.getInputStream(e);
-		history.readFromStream(in);
+		if (anIndex > this.entries.length - 1) throw new IndexOutOfBoundsException("Index " + anIndex + " is great then " + (this.entries.length - 1));
+		ZipEntry e = this.entries[anIndex];
+		if (e != null)
+		{
+			InputStream in = this.archive.getInputStream(e);
+			history.readFromStream(in);
+		}
+		else
+		{
+			LogMgr.logError("WbWorkspace.readHistoryData()", "Requested ZipEntry for index " + anIndex + " was null!", null);
+		}
 		return;
 	}
 	
@@ -236,5 +266,20 @@ public class WbWorkspace
 		String key = "tab" + tabIndex + ".filename";
 		this.tabInfo.setProperty(key, filename);
 	}
-	
+
+	public static void main(String args[])
+	{
+		try
+		{
+			String filename = "WbStatements99.txt";
+			int pos = filename.indexOf('.');
+			System.out.println(filename.substring(12,pos));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		System.out.println("done.");
+		System.exit(0);
+	}
 }

@@ -1,0 +1,163 @@
+  <section id="dbexplorer">
+    <title>Database Object Explorer</title>
+    
+    <para>The Database Object Explorer displays the available database objects
+    such as Tables, Views, Triggers and Stored Procedures.</para>
+
+    <para>At the top of the window, the current schema (for MS SQL Server this
+    would be a database, for Oracle this is the user) can be selected.</para>
+
+    <para>The first tab displays the structure of tables and views. The type
+    of object displayed can be chosen from the drop down right above the table
+    list. This list will be returned by the JDBC driver, so the available
+    "Table types" can vary from DBMS to DBMS.</para>
+
+    <para>As soon as either the Schema/Database or the Type is selected, the
+    list will be refreshed.</para>
+
+    <para>The Database Explorer can either be displayed as a separate window,
+    or as a tab inside the main window. This behavior can be changed in the
+    system options. To close the Db Explorer Tab, right click on the tab
+    label, and choose <guimenuitem>Close Tab</guimenuitem>. If the Explorer tab is left 
+    open when exiting the SQLWorkbench/J, the explorer tab will be restored the next
+    time SQL Workbench/J is started. (the Explorer <emphasis role="strong">window</emphasis>
+    will <emphasis role="strong">not</emphasis> be restored)</para>
+
+    <section id="dbexplorer-tablelist">
+      <title>Table tab</title>
+
+      <section id="table-tab">
+        <title>Tables</title>
+
+        <para>When a table is selected, the right part of the window will
+        display it&#39;s column definition, the SQL statement to create the
+        table, any index defined on that table (only if the JDBC driver
+        returns that information), other tables that are referenced by the
+        currently selected table, any table that references the currently
+        selected table and any trigger that is defined on that table.</para>
+
+        <para>When an Oracle synonym is selected, the columns tab will display
+        the column definition of the underlying table or view. The source tab
+        will display the statement to re-create the synonym.</para>
+
+        <para>The References/Referenced by tabs, also display the complete
+        reference tree (any table referencing the tables referencing the
+        currently selected one, and so on).</para>
+
+        <para>The table list offers the following additional commands in the
+        context menu:</para>
+
+        <para><emphasis>Spool data</emphasis></para>
+
+        <para>This will execute a <literal>SPOOL</literal> command for the currently selected
+        table. Choosing this option is equivalent to do a <literal>SELECT * FROM table;</literal>
+        and then executing <menuchoice><guimenu>SQL</guimenu><guimenuitem>Spool data</guimenuitem></menuchoice>
+        from the SQL editor in the main window (or issuing a SPOOL command before the SELECT). 
+        See the description of the <link linkend="command-spool">SPOOL command</link>
+        for details.</para>
+
+        <para><emphasis>Show table data</emphasis></para>
+
+        <para>This will put a SELECT statement into the SQL editor to display
+        all data for the selected table. You can choose into which editor tab
+        the statement will be written. The currently selected editor tab is
+        displayed in bold</para>
+        
+        <para><emphasis role="bold">Create SQL Script</emphasis></para>
+        
+        <para>With this command a script for multiple objects can be created. Select
+        all the tables, views or other objects in the table list, that you want 
+        to create a script for, then right click and select "Create SQL Script". 
+        This will generate one script for all selected items in the list.</para>
+        <para>When this command is selected, a new window will be shown. The window
+        contains a statusbar which indicates the object that is currently processed. The
+        complete script will be shown as soon as all objects have been processed</para>
+        
+      </section>
+
+      <section id="data-tab">
+        <title>Data tab</title>
+
+        <para>The data tab will display the data from the currently selected
+        table. There are several options to configure the display of this tab.
+        The Autoload check box, controls the retrieval of the data. If this is
+        checked, then the data will be retrieved from the database as soon as
+        the table is selected in the table list (and the tab is visible).</para>
+
+        <para>You can define a maximum number of rows which should be
+        retrieved. If you enter 0 (zero) then all rows are retrieved. Limiting
+        the number of rows is useful if you have tables with a lot of rows,
+        where the entire table would not fit into memory.</para>
+
+        <para>In addition to the max rows setting, another limit can be
+        defined. If the total number of rows in the table exceeds this second
+        limit, a warning is displayed, whether the data should be loaded.</para>
+
+        <para>This is useful when the max rows parameter is set to zero and
+        you accidently display a table with a large number of rows.</para>
+
+        <para>If the automatic retrieval is activated, then the retrieve of
+        the data can be prevented by holding down the Shift key while
+        switching to the data tab.</para>
+
+        <para>The data in the tab can be edited just like the data in the main
+        window. To add or delete rows, you can either use the buttons on the
+        toolbar in the upper part of the data display, or the popup menu. To
+        edit a value in a field, simply double click that field, start typing
+        while the field has focus (yellow border) or hit F2 while the field
+        has focus.</para>
+      </section>
+    </section>
+
+    <section id="procedure-tab">
+      <title>Procedure tab</title>
+
+      <para>The procedure tab will list all stored procedures and functions
+      stored in the current schema. For procedures or functions returning a
+      result set, the definition of the columns will be displayed as well.</para>
+
+      <para>Functions in Oracle packages will be listed separately on the left
+      side, but the source code will contain all functions/procedures from
+      that package.</para>
+    </section>
+
+    <section id="search-tables">
+      <title>Search tables</title>
+
+      <para>This tab offers the ability to search for a value in all text
+      columns of all tables which are selected. The results will be displayed
+      on the right side of that tab. The result will always display the
+      complete row where the search value was found. Any column that contains
+      the entered value will be highlighted.</para>
+
+      <para>The value will be used to create a <literal>LIKE &#60;value&#62;</literal>
+      restriction for each text column on the selected tables. Therefore the
+      value should contain a wildcard, otherwise the exact expression will be
+      searched.</para>
+
+      <para>You can apply a function to each column as well. This is useful if
+      you want to to do a case insensitive search on Oracle (Oracles VARCHAR
+      comparison is case sensitiv). In the entry field for the column the
+      placeholder $col$ is replaced with the actual column name during the
+      search. To do a case insensitive search in Oracle, you would enter
+      lower($col$) in the column field and &#39;%test%&#39; in the value
+      field.</para>
+
+      <para>The expression in the column field is sent to the DBMS without
+      changes, except the replacement of $col$ with the current column name.
+      The above example would yield a lower(&#60;column_name&#62;) like
+      &#39;%test%&#39; for each text column for the selected tables.</para>
+
+      <para>The generated SQL statements are logged in the second tab, labelled
+      SQL Statements</para>
+			
+			<para>In the resulting tables, SQL Workbench/J tries to highlight those columns
+			which match the criteria. This might not always work, if you apply a funtion to the 
+			column itself such as <literal>to_upper()</literal> SQL Workbench/J does not know 
+			that this will result in a case-insesitive search on the database. SQL Workbench/J tries to 
+			guess if the given function/value combination might result in a case insesitive search (especially
+			on a DBMS which does a case sensitive search by default) but this might not work 
+			in all the cases and for all DBMS</para>
+			
+    </section>
+  </section>

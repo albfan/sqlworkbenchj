@@ -1,0 +1,125 @@
+  <section id="jdbc-setup" xreflabel="JDBC setup">
+    <title>JDBC setup</title>
+
+    <section id="configure-drivers">
+      <title>Configuring JDBC drivers</title>
+      <para>Before you can connect to a DBMS you have to configure the JDBC
+      driver to be used. The driver configuration is available in the connection 
+      dialog or through <menuchoice><guimenu>File</guimenu><guimenuitem>Manage Drivers</guimenuitem></menuchoice>
+      </para>
+      
+      <para>The configuration of a specific driver requires at least two properties:</para>
+  
+      <itemizedlist><listitem><para>the driver&#39;s class name</para></listitem>
+      <listitem><para>the library where to find the classes</para></listitem></itemizedlist>
+    
+			<para>The name of the library has to contain the full path to the driver's jar file, so that
+			SQLWorkbench/J can find it. If a driver requires more than one library,
+			select all necessary libraries in the file open dialog, or enter all the
+			filenames separated by a semicolon.</para>
+	
+			<note><para>You do not need to add the jar file containing the driver to the
+			classpath of the JVM! This is handled by the application automatically.</para>
+			</note>
+			
+			<para>You can assign a sample URL to each driver, which will be put into
+			the URL property of the profile, when the driver class is selected.</para>
+			
+			<para>SQLWorkbench/J comes with some sample URLs pre-configured.
+			Some of these sample URLs use brackets to indicate a parameters that need 
+			to be replaced with the actual value for your connection:  (servername)</para> 
+			<para>In this case the entire sequence including the brackets need to be replaced with the actual servername.</para>
+    </section>
+
+    <section id="jdbc-drivers">
+      <title>JDBC Drivers</title>
+      
+        <para>Here is an overview of common JDBC drivers, and how they have to
+    be configured. SQLWorkbench/J contains predefined JDBC drivers. The only
+    thing that needs to be changed is the exact location of the library
+    containing the driver class.</para>
+
+    <informaltable frame="all">
+      <tgroup cols="3" align="left">
+        <colspec colname="c1" colwidth="2cm" />
+        <colspec colname="c2" colwidth="4cm" />
+        <colspec colname="c3"  />
+        <thead valign="top">
+          <row> 
+            <entry><para>DBMS</para> </entry> 
+            <entry> <para>Driver class</para></entry> 
+            <entry> <para>Library name</para> </entry> 
+          </row>      
+        </thead>
+        <tbody valign="top"> 
+          <row> 
+            <entry> <para>Oracle</para> </entry> 
+            <entry> <para>oracle.jdbc.OracleDriver</para> </entry> 
+            <entry> 
+										<simplelist columns="1">
+											<member>ojdbc4.jar (JDBC 2.x, for JDK 1.4)</member>
+                    	<member><ulink url="http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html"/></member>
+										</simplelist>
+            </entry> 
+          </row> 
+          <row> 
+            <entry> <para>PostgreSQL</para> </entry> 
+            <entry> <para>org.postgresql.Driver</para> </entry> 
+            <entry> <simplelist columns="1">
+										<member>pg73jdbc3.jar (exact name depends on PostgreSQL version)</member>
+                    <member><ulink url="http://jdbc.postgresql.org"/></member>
+										</simplelist>
+            </entry> 
+          </row> 
+          <row> 
+            <entry> <para>SQL Server 2000</para> </entry> 
+            <entry> <para>com.microsoft.jdbc.sqlserver.SQLServerDriver</para></entry> 
+            <entry> <simplelist columns="1">
+										<member>msbase.jar;mssqlserver.jar;msutil.jar</member>
+                    <member><ulink url="http://www.microsoft.com/sql/default.asp"/></member>
+										</simplelist>
+						</entry> 
+          </row> 
+          <row> 
+            <entry> <para>SQL Server </para> </entry> 
+            <entry> <para>net.sourceforge.jtds.jdbc.Driver</para> </entry> 
+            <entry>
+							<simplelist columns="1">
+								<member><ulink url="http://jtds.sourceforge.net"/></member>
+							</simplelist>
+						</entry> 
+          </row> 
+          <row> 
+            <entry> <para>HSQLDB</para> </entry>
+            <entry> <para>org.hsqldb.jdbcDriver</para> </entry> 
+            <entry>
+							<simplelist columns="1">
+								<member>hsqldb.jar</member>
+                <member><ulink url="http://hsqldb.sourceforge.net"/></member>
+							</simplelist>
+						</entry> 
+          </row> 
+          <row> 
+            <entry> <para>Firebird</para> </entry>
+            <entry> <para>org.firebirdsql.jdbc.FBDriver</para> </entry> 
+            <entry>
+							<simplelist columns="1">
+								<member>firebirdsql-full.jar</member>
+                <member><ulink url="http://firebird.sourceforge.net"/></member>
+							</simplelist>
+						</entry> 
+          </row> 
+          <row> 
+            <entry> <para>ODBC Bridge</para></entry> 
+            <entry> <para>sun.jdbc.odbc.JdbcOdbcDriver</para> </entry> 
+            <entry><simplelist columns="1">
+							<member>Included in the JDK</member>
+							</simplelist>
+						</entry>
+          </row> 
+        </tbody> 
+      </tgroup>
+    </informaltable>
+
+    </section>
+  </section>

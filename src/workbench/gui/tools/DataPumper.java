@@ -8,6 +8,8 @@ package workbench.gui.tools;
 
 import java.awt.BorderLayout;
 import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
 import java.beans.PropertyChangeListener;
@@ -70,6 +72,7 @@ public class DataPumper
 	private DataCopier copier;
 	private StringBuffer copyLog;
 	private EditorPanel sqlEditor;
+	boolean allowCreateTable = "true".equals(WbManager.getSettings().getProperty("workbench.datapumper.allowcreate", "false"));
 
 	/** Creates new form DataPumper */
 	public DataPumper(ConnectionProfile source, ConnectionProfile target)
@@ -97,6 +100,24 @@ public class DataPumper
 		this.sqlEditor = EditorPanel.createSqlEditor();
 		this.wherePanel.add(this.sqlEditor);
 		this.showWbCommand.setEnabled(false);
+		
+		if (!this.allowCreateTable)
+		{
+			this.dropTargetCbx.setVisible(this.allowCreateTable);
+			//this.remove(this.dropTargetCbx);
+			GridBagLayout grid = (GridBagLayout)this.buttonPanel.getLayout();
+			grid.removeLayoutComponent(this.dropTargetCbx);
+			this.buttonPanel.remove(this.dropTargetCbx);
+			
+			GridBagConstraints cons = grid.getConstraints(this.commitEvery);
+			cons.gridy --;
+			grid.setConstraints(this.commitEvery, cons);
+			
+			cons = grid.getConstraints(this.commitLabel);
+			cons.gridy--;
+			grid.setConstraints(this.commitLabel, cons);
+			//grid.layoutContainer(this);
+		}
 	}
 	
 	public void saveSettings()
@@ -516,7 +537,7 @@ public class DataPumper
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 4);
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 1);
     buttonPanel.add(startButton, gridBagConstraints);
 
     deleteTargetCbx.setText(ResourceMgr.getString("LabelDeleteTargetTable"));
@@ -537,7 +558,7 @@ public class DataPumper
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 4);
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 1);
     buttonPanel.add(showLogButton, gridBagConstraints);
 
     continueOnErrorCbx.setText(ResourceMgr.getString("MsgDPContinueOnError"));
@@ -617,7 +638,7 @@ public class DataPumper
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 4);
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 1);
     buttonPanel.add(cancelButton, gridBagConstraints);
 
     checkQueryButton.setText(ResourceMgr.getString("LabelDPCheckQuery"));
@@ -656,7 +677,7 @@ public class DataPumper
     gridBagConstraints.gridx = 7;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(2, 0, 4, 4);
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 4, 1);
     buttonPanel.add(showWbCommand, gridBagConstraints);
 
     dropTargetCbx.setText(ResourceMgr.getString("LabelDPDropTable"));
@@ -676,7 +697,7 @@ public class DataPumper
     gridBagConstraints.gridx = 7;
     gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(2, 0, 4, 4);
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 4, 1);
     buttonPanel.add(helpButton, gridBagConstraints);
 
     jSplitPane1.setBottomComponent(buttonPanel);
@@ -938,7 +959,7 @@ public class DataPumper
 		this.sourceTable.setEnabled(!useQuery);
 		this.checkQueryButton.setEnabled(useQuery);
 	
-		this.targetTable.allowNewTable(!useQuery);
+		this.targetTable.allowNewTable(!useQuery && allowCreateTable);
 		if (useQuery)
 		{
 			this.sqlEditorLabel.setText(ResourceMgr.getString("LabelDPQueryText"));
@@ -1056,9 +1077,17 @@ public class DataPumper
 			String name = target.getTable();
 			if (name == null) 
 			{
-				name = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("TxtEnterNewTableName"), "");
-				target.setTable(name);
-				this.targetTable.repaint();
+				TableIdentifier source = this.sourceTable.getSelectedTable();
+				String def = null;
+				if (source != null)
+					def = source.getTable();
+				
+				name = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("TxtEnterNewTableName"), def);
+				if (name != null) 
+				{ 
+					target.setTable(name);
+					this.targetTable.repaint();
+				}
 			}
 		}
 		
@@ -1417,6 +1446,16 @@ public class DataPumper
 		if (this.copier.hasWarnings() || !this.copier.isSuccess())
 		{
 			this.showLogButton.setEnabled(true);
+			if (!this.copier.isSuccess())
+			{
+				SwingUtilities.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						showLog();
+					}
+				});
+			}
 		}
 		this.updateWindowTitle();
 	}
@@ -1428,6 +1467,10 @@ public class DataPumper
 			return;
 		}
 		StringBuffer log = new StringBuffer(250);
+		
+		String errmsg = this.copier.getErrorMessage();
+		if (errmsg != null) log.append(errmsg);
+		
 		String[] msg = this.copier.getWarnings();
 		int count = msg.length;
 		for (int i=0; i < count; i++)

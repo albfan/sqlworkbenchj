@@ -157,29 +157,31 @@ public class DbMetadata
 			this.productName = aConnection.getProfile().getDriverclass();
 		}
 
+		String productLower = this.productName.toLowerCase();
+		
 		// For some functions we need to know which DBMS this is.
-		if (this.productName.toLowerCase().indexOf("oracle") > -1)
+		if (productLower.indexOf("oracle") > -1)
 		{
 			this.isOracle = true;
 			this.oracleMetaData = new OracleMetaData(this.dbConnection.getSqlConnection());
 		}
-		else if (this.productName.toLowerCase().indexOf("postgres") > - 1)
+		else if (productLower.toLowerCase().indexOf("postgres") > - 1)
 		{
 			this.isPostgres = true;
 		}
-		else if (this.productName.toLowerCase().indexOf("hsql") > -1)
+		else if (productLower.toLowerCase().indexOf("hsql") > -1)
 		{
 			this.isHsql = true;
 		}
-		else if (this.productName.toLowerCase().indexOf("firebird") > -1)
+		else if (productLower.toLowerCase().indexOf("firebird") > -1)
 		{
 			this.isFirebird = true;
 		}
-		else if (this.productName.toLowerCase().indexOf("sql server") > -1)
+		else if (productLower.toLowerCase().indexOf("sql server") > -1)
 		{
 			this.isSqlServer = true;
 		}
-		else if (this.productName.toLowerCase().indexOf("mysql") > -1)
+		else if (productLower.toLowerCase().indexOf("mysql") > -1)
 		{
 			this.isMySql = true;
 		}
@@ -205,11 +207,52 @@ public class DbMetadata
   public boolean isStringComparisonCaseSensitive() { return this.caseSensitive; }
 	public boolean cancelNeedsReconnect() { return this.needsReconnect; }
 
+	public boolean isMySql() { return this.isMySql; }
 	public boolean isPostgres() { return this.isPostgres; }
   public boolean isOracle() { return this.isOracle; }
 	public boolean isHsql() { return this.isHsql; }
 	public boolean isFirebird() { return this.isFirebird; }
 
+	/**
+	 *	Return a list of datatype as returned from DatabaseMetaData.getTypeInfo()
+	 *	which we cannot handle. This is used by the TableCreator when searching
+	 *	for a matching data type. 
+	 */
+	public List getIgnoredDataTypes()
+	{
+		String types = null;
+		if (this.isMySql) 
+		{
+			types = WbManager.getSettings().getProperty("workbench.ignoretypes.mysql", null);
+		}
+		else if (this.isFirebird)
+		{
+			types = WbManager.getSettings().getProperty("workbench.ignoretypes.firebird", null);
+		}
+		else if (this.isOracle)
+		{
+			types = WbManager.getSettings().getProperty("workbench.ignoretypes.oracle", null);
+		}
+		else if (this.isPostgres)
+		{
+			types = WbManager.getSettings().getProperty("workbench.ignoretypes.postgres", null);
+		}
+		else if (this.isHsql)
+		{
+			types = WbManager.getSettings().getProperty("workbench.ignoretypes.hsqldb", null);
+		}
+		else if (this.isSqlServer)
+		{
+			types = WbManager.getSettings().getProperty("workbench.ignoretypes.sqlserver", null);
+		}
+		else 
+		{
+			types = WbManager.getSettings().getProperty("workbench.ignoretypes.other", null);
+		}
+		
+		return StringUtil.stringToList(types, ",");
+	}
+	
 	private HashMap readStatementTemplates(String aFilename)
 	{
 		HashMap result = null;
@@ -1113,9 +1156,9 @@ public class DbMetadata
 			String colName = rs.getString("COLUMN_NAME");
 			int sqlType = rs.getInt("DATA_TYPE");
 			String typeName = rs.getString("TYPE_NAME");
-			if (this.isMySql)
+			if (this.isMySql && !hasEnums)
 			{
-				hasEnums = this.isMySql && (typeName.startsWith("enum") || typeName.startsWith("set"));
+				hasEnums = typeName.startsWith("enum") || typeName.startsWith("set");
 			}
 			
 			int size = rs.getInt("COLUMN_SIZE");

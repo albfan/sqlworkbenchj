@@ -1,0 +1,216 @@
+  <section id="profiles">
+    <title>Connecting to the database</title>
+
+    <section id="profile-intro">
+      <title>Connection profiles</title>
+      <para>SQL Workbench/J uses the concept of database profiles to store
+      connection information. A connection profile stores two different types
+			of settings:
+			
+			<itemizedlist>
+				<listitem><para>JDBC related properties such as the JDBC driver class, the connection URL, etc.</para></listitem>
+				<listitem><para>SQL Workbench/J related properties such as the profile name the assocated workspace, etc.</para></listitem>
+			</itemizedlist>
+			</para>
+
+      <para>After the program is started, you are prompted to choose a
+      connection profile to connect to a database. The dialog will display a list
+			of available profiles on the left side. When selecting a profile, its details
+			(JDBC and SQL Workbench/J settings) are displayed on the right side of the 
+			window.</para>
+
+      <para>To create a new profile click on the  
+			<guibutton>New Profile</guibutton> button (<guiicon>
+			<inlinegraphic fileref="@IMAGE_DIR@/New16.gif" format="GIF"/></guiicon>). 
+			This will create a new profile with the name "New Profile". 
+			The other properties will be empty.</para>
+			
+			<note>
+      <para>You can create a copy of the currently selected profile by holding
+			down the <keycap>Shift</keycap> key while clicking on the 
+			<guibutton>New Profile</guibutton> button.</para>
+			</note>
+      <para>To delete an existing profile, select the profile in the list and
+      click on the <guibutton>Delete Profile</guibutton> button
+			(<guiicon> <inlinegraphic fileref="@IMAGE_DIR@/Delete16.gif" format="GIF"/></guiicon>)
+			</para>
+    </section>
+
+		<section id="profile-jdbc-properties">
+			<title>JDBC related profile settings</title>
+			<informaltable frame="all">
+				<tgroup cols="2" align="left">
+					<colspec colname="c1" colwidth="2cm" />
+					<colspec colname="c2" colwidth="4cm" />
+					<thead valign="top">
+						<row> 
+							<entry><para>Property</para> </entry> 
+							<entry> <para>Description</para></entry> 
+						</row>      
+					</thead>
+					<tbody valign="top"> 
+						<row> 
+							<entry> <para>Driver</para> </entry> 
+							<entry> <para>This is the classname for the JDBC driver. The exact
+							name depends on the DBMS and driver combination. The documentation
+							for your driver should contain this information. SQL Workbench/J has some 
+							drivers pre-configured. See <xref linkend="jdbc-setup"/> for details on 
+							how to configure your JDBC driver for SQL Workbench/J.
+							</para> </entry>
+						</row>
+						<row>
+							<entry><para>URL</para></entry>
+							<entry><para>The connection URL for your DBMS. This value is highly
+							DBMS specific. The pre-configured drivers from SQL Workbench/J contain
+							a sample URL. If the sample URL (which gets filled into the text field
+							when you select a driver class) contains words in brackets, then these
+							words (including the brackets) are placeholders for the actual values.
+							You have to replace them (including the brackets) with the approriate values 
+							for your DBMS connection</para></entry>
+						</row>
+						<row>
+							<entry><para>Username</para></entry>
+							<entry><para>This is the name of the DBMS user account</para></entry>
+						</row>
+						<row>
+							<entry><para>Password</para></entry>
+							<entry><para>This is the password for your DBMS user account. You can 
+							choose not to store the password in the connection profile.</para></entry>
+						</row>
+						<row>
+							<entry><para>Autocommit</para></entry>
+							<entry><para>This checkbox enables/disables the Autocommit property 
+							for the connection. If Autocommit is enabled, then each SQL statement
+							is automatically committed on the DBMS. If this is disabled, any DML
+							statement (<literal>UPDATE, INSERT, DELETE, ...</literal>) has to be 
+							committed in order to make the change permanent. Some DBMS 
+							require a commit for DDL statements (<literal>CREATE TABLE, ...</literal>) 
+							as well. Please refer to the documentation of your DBMS.</para></entry>
+						</row>
+					</tbody>
+				</tgroup>
+				
+			</informaltable>
+			
+		</section>
+    
+    <section id="profile-workbench-settings">
+      <title>SQL Workbench/J specific settings</title>
+
+      <section id="profile-save-password">
+        <title>Save password</title>
+
+        <para>If this option is enabled (i.e. checked) the password for the
+        profile will also be stored in the profile file. If the global
+        option <link linkend="options-encrypt-password">Encrypt Passwords</link> 
+        is selected, then the password will be stored encrypted, 
+        otherwise it will be stored in plain text!</para>
+      </section>
+
+      <section id="profile-separate-connection">
+        <title>One connection per tab</title>
+
+        <para>If this option is enabled, then each tab in the main window
+        will open a separate connection to the database server. This is
+        useful, if the JDBC driver is not multi-threaded and does not allow
+        to execute two statements concurrently on the same connection.</para>
+
+        <para>The connection for each tab will not be opened until the tab
+        is actually selected.</para>
+      </section>
+
+      <section id="profile-ignore-drop-error">
+        <title>Ignore DROP errors</title>
+
+        <para>If this option is enabled, any error reported by the database
+        server when issuing a statement that begins with DROP, will be
+        ignored. Only a warning will be printed into the message area. This
+        is useful when executing SQL scripts to build up a schema, where a
+        <literal>DROP TABLE</literal> is executed before each <literal>CREATE TABLE</literal>. If the table does
+        not exist the error which the <literal>DROP</literal> statement will report, is not
+        considered as an error and the script execution continues.</para>
+      </section>
+
+      <section id="profile-workspace-file">
+        <title>Workspace</title>
+
+        <para>For each connection profile, a workspace file can be assigned. When you
+        create a new connection, you can either leave this field empty or 
+				supply a name for a new profile. </para>
+				<para>If the profile you specify does not exist, you will be prompted
+				if you want to create a new file, load a different workspace or want to 
+				ignore the missing file. If you choose to ignore, the association 
+				with the workspacefile will be cleared and the default workspace will be loaded.</para>
+				<para>If you choose to leave the workspace file empty, or ignore the missing
+				file, you can later save your workspace to a new file. When you do that, 
+				you will be prompted if you want to assign the new workspace to the current
+				connection profile.</para>
+				<para> To save you current workspace choose 
+        <menuchoice><guimenu>Workspace</guimenu><guimenuitem>Save Workspace as</guimenuitem></menuchoice>
+        to create a new workspace file.</para>
+				<note><para>When specifying the location of the workspace file, you can use the placeholder 
+				<literal>%ConfigDir%</literal> as part of the filename. The file will then be stored 
+				in the same directory as SQL Workbench/J's configuration files e.g.: <literal>%ConfigDir%/oracle.wksp</literal>
+				</para></note>
+				<para>
+				When you use the <literal>%ConfigDir%</literal> placeholder, you can move the profiles 
+				and workspaces to a different computer, without changing the location of the workspace files.
+				</para>
+				<para>The placeholder will be put automatically into the filename
+				when you select the location of the profile using the file dialog. The file dialog
+				will be opened when you click the button with <literal>...</literal> to the right
+				of the input field.</para>
+      </section>
+    </section>
+  
+		<section id="oracle-sysdba-connection">
+			<title>Connect to Oracle with SYSDBA privilege</title>
+			<para>Connecting to Oracle with SYSDBA privilege can be done by supplying an additional 
+			property to the driver when connecting.</para>
+			<para>In the profile dialog, click on the <guibutton>Extended Properties</guibutton> button.
+			Add a new property in the following window with the name <literal>internal_logon</literal> 
+			and the value <literal>sysdba</literal>. Now close the dialog by clicking on the OK button.
+			This property will be passed on to the JDBC driver, which will enable the SYSDBA role when 
+			connecting to the server.
+			</para>
+			<para>The profile itself has to use an Oracle user account which is allowed to connect
+			as SYSDBA (e.g. SYS).</para>
+		</section>
+    
+    <section id="odbc">
+      <title>ODBC connections without a data source</title>
+      <para>On Microsoft Windows® you can use the ODBC bridge to connect to
+      ODBC datasources. For some drivers you don&#39;t need to create an ODBC
+      datasource in order to be able to use the ODBC driver. The following
+      URLs can be used to connect to data files directly</para>
+      <para>The class name of the driver is <literal>sun.jdbc.odbc.JdbcOdbcDriver</literal></para>
+  
+      <informaltable frame="all">
+        <tgroup cols="2" align="left">
+          <colspec colname="c1" colwidth="2.5cm" />
+          <colspec colname="c2"  />
+          <thead valign="top">
+            <row>
+              <entry>ODBC Connection</entry>
+              <entry>URL to be used</entry>
+            </row>
+          </thead>
+          <tbody valign="top"> 
+            <row> 
+              <entry> <para>Excel</para> </entry> 
+              <entry><para>jdbc:odbc:DRIVER={Microsoft Excel Driver (*.xls)};DBQ=&#60;filename&#62;</para> </entry> 
+              </row> 
+              <row> 
+                <entry> <para>Access</para> </entry> 
+                <entry> <para>jdbc:odbc:DRIVER={Microsoft Access Driver (*.mdb)};DBQ=&#60;filename&#62;</para> </entry> </row> 
+              <row> 
+                <entry> <para>dBase</para> </entry> 
+                <entry>  <para>jdbc:odbc:DRIVER={Microsoft dBase Driver (*.dbf)};DefaultDir=&#60;directory where the .dbf files are located&#62;</para></entry> 
+              </row> 
+          </tbody> 
+        </tgroup> 
+      </informaltable>
+    </section>
+    
+    
+  </section>

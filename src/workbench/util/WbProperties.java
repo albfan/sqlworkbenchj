@@ -83,6 +83,16 @@ public class WbProperties
 					bw.write(key + "=" + value);
 					bw.newLine();
 				}
+				else
+				{
+					bw.write(key + "=");
+					bw.newLine();
+				}
+			}
+			else
+			{
+				bw.write(key + "=");
+				bw.newLine();
 			}
 			lastKey = key;
 		}

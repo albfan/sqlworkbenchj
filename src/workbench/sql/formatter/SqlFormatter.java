@@ -450,7 +450,7 @@ public class SqlFormatter
 			if (t.isSeparator() && text.equals(")"))
 			{
 				this.appendNewline();
-				this.indent(b);
+				//this.indent(b);
 				this.appendText(")");
 				return (SQLToken)this.lexer.getNextToken();
 			}
@@ -1352,11 +1352,11 @@ public class SqlFormatter
 //				String sql = "SELECT * from v_$test";
 //			String sql = "SELECT 1 FROM my_TABLE WHERE (bv_user_profile.number_login=0 OR bv_user_profile.number_login = 'tEEt')";
 
-			String sql = "SELECT \n t1.col1, nvl(to_upper(bla,1),1), 'xxx'||col4, col3 " +
-			" \nfrom test_table t1, table2 t2\nWHERE t2.col=1 " +
-			" AND  (substr(partner_cbn.cust_base_no, 1, 2) = opg_country.opg_cbn  OR  col_header.country IN ('GER','EUR','ITA') AND substr(partner_cbn.cust_base_no, 1, 4) IN ('N883','N882') )  ";
+//			String sql = "SELECT \n t1.col1, nvl(to_upper(bla,1),1), 'xxx'||col4, col3 " +
+//			" \nfrom test_table t1, table2 t2\nWHERE t2.col=1 " +
+//			" AND  (substr(partner_cbn.cust_base_no, 1, 2) = opg_country.opg_cbn  OR  col_header.country IN ('GER','EUR','ITA') AND substr(partner_cbn.cust_base_no, 1, 4) IN ('N883','N882') )  ";
 //			String sql = "select * \nfrom (select * from person) AS t \nwhere nr2 = 2;";
-//			String sql = "insert into test values ('x', 2);commit;";
+			String sql = "insert into test values ('x', 2);commit;";
 //			String sql = "SELECT * from test, table22";
 //			String sql = "select * \nfrom (select * from person) AS t \nwhere t.nr2 = 2;";
 //			String sql = "select /* testing */1\n--, bla\n from dual\n -- table\nwhere x = 6\n--and y = 6\n and x in (1,2, /* comment */3)";

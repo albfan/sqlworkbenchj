@@ -1627,10 +1627,15 @@ public class MainWindow
 		item.addActionListener(this);
 		result.add(item);
 
+		result.addSeparator();
+
 		item = new WbMenuItem(ResourceMgr.getString("MnuTxtWhatsNew"));
 		item.putClientProperty("command", "whatsNew");
 		item.addActionListener(this);
 		result.add(item);
+
+		VersionCheckAction version = new VersionCheckAction();
+		result.add(version);
 
 		item = new WbMenuItem(ResourceMgr.getString("MnuTxtAbout"));
 		item.putClientProperty("command", "helpAbout");
@@ -1662,10 +1667,6 @@ public class MainWindow
 		shortcuts.putClientProperty("command", "keyboardDialog");
 		shortcuts.addActionListener(this);
 		result.add(shortcuts);
-
-		VersionCheckAction version = new VersionCheckAction();
-		result.add(version);
-		result.addSeparator();
 
 		JMenu lnf = new WbMenu(ResourceMgr.getString("MnuTxtLookAndFeel"));
 		lnf.setName("lnf");

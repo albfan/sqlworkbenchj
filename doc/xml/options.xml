@@ -1,0 +1,285 @@
+  <section id="options">
+    <title>Configuring SQL Workbench/J</title>
+
+    <section id="options-explorer-as-tab">
+      <title>DB Explorer as Tab</title>
+
+      <para>The Database Explorer can either be displayed as a separate
+      window, or inside the main window as a another tab. If this option is
+      selected, the Db Explorer will be displayed inside the main window. If
+      the option Retrieve DB Explorer is checked as well, the current database
+      scheme will be retrieved upon starting SQL Workbench/J!</para>
+    </section>
+
+    <section id="options-retrieve-explorer" xreflabel="Retrieve DB Explorer">
+      <title>Retrieve DB Explorer</title>
+
+      <para>If this option is enabled, the contents of the database schema is
+      retrieved when the DB Explorer is displayed. If this option is not
+      checked, either the &#34;Refresh&#34; button or selecting a schema or
+      table type will load the list.</para>
+    </section>
+
+    <section id="options-encrypt-password">
+      <title>Encrypt passwords</title>
+
+      <para>If this option is enabled, the password stored within a connection
+      profile will be encrypted. Whether the password should be stored at all
+      can be selected in the profile itself.</para>
+    </section>
+
+    <section id="options-confirm-update">
+      <title>Confirm result set updates</title>
+
+      <para>When this option is enabled, the statements which are sent to the
+      database when saving changes to result set table, are displayed before
+      execution. The update can be canceled at that point if the statements
+      are not correct. The generated statements can also be saved to a file
+      from that window.</para>
+
+      <para>The displayed statements can not be changed!</para>
+    </section>
+
+    <section id="options-enable-out" xreflabel="Enabling DBMS_OUTPUT">
+      <title>Enable DBMS_OUTPUT</title>
+
+      <para>If this option is enabled, the <literal>DBMS_OUTPUT</literal> package is
+      automatically enabled when connecting to an Oracle database. This option
+      has no effect on other DBMS. If it is disabled, the <literal>DBMS_OUTPUT</literal> package
+      can be enabled using the enableout command.</para>
+
+      <para>If this option is not checked, you need to manually enable the <literal>DBMS_OUTPUT</literal> 
+      with <xref linkend="command-enableout"/>.</para>
+    </section>
+
+    <section id="option-animated-icon" xreflabel="Enable animated icons">
+      <title>Enable animated icons</title>
+      <para>Enable or disable the use of an animated icons in the SQL editor to indicate a running
+      SQL statement. It has been reported, that the animated icon does impact 
+      performance on certain combinations of JDK/OS Version/Graphics driver. If you 
+      experience a high CPU usage during the execution of SQL statements, try
+      to turn off the usage of the animated icons.</para>
+    </section>
+    
+    <section id="options-date-format">
+      <title>Date format</title>
+
+      <para>Define the date format for displaying date columns in the result
+      set.</para>
+    </section>
+
+    <section id="options-alternate-delimiter" xreflabel="alternate delimiter">
+      <title>Alternate Delimiter</title>
+
+      <para>When last characters of the text in the editor match the character
+      sequence in this input field, this character sequence is used to delimit
+      individual statements in the editor.</para>
+
+      <para>This is needed when creating stored procedures which themselves
+      have a semicolon in the source code. Normally the SQL Workbench/J would
+      stop parsing the command at the first semicolon and send that command to
+      the database (which will produce an error message as the statement is
+      not complete).</para>
+
+      <para>In the case of a <literal>CREATE PROCEDURE</literal> statement this should be
+      terminated with the character sequence entered in this input field. The
+      terminator can have more than one character e.g. ./
+      (a dot followed by a slash). 
+      It should not be a sequence which is used inside a SQL statement.</para>
+
+      <para>Using a slash as the terminator (as e.g. SQL*Plus does) might lead
+      to problems when stored procedures are created that do calculations such
+      as</para>
+
+      <para><programlisting>SELECT sum(field)/count(*) FROM table;</programlisting></para>
+
+      <para>This would lead to problems as the slash is recognized as the
+      statement terminator. Thus the SQL Workbench/J would send everything up
+      to sum(field) to the database and execute it.</para>
+    </section>
+
+    <section id="options-history-size">
+      <title>History size</title>
+
+      <para>The number of statements per tab which should be stored in the
+      statement history. Remember that always the full text of the editor
+      (together with the selection and cursor information) is stored in the
+      history. If you have large amounts of text in the editor and set this
+      number quite high, be aware of the memory consumption this might create.</para>
+    </section>
+
+    <section id="options-decimal-symbol">
+      <title>Decimal symbol</title>
+
+      <para>The character which is used as the decimal separator when
+      displaying numbers.</para>
+    </section>
+
+    <section id="options-decimal-digits">
+      <title>Decimal digits</title>
+
+      <para>Define the maximum number of digits which will be displayed for
+      numeric columns. This only affects the display of the number internally
+      they are still stored as the DBMS returned them. To see the internal
+      value, leave the mouse cursor over the cell. The tooltip which is
+      displayed will contain the number as it was returned by the JDBC driver.
+      When exporting data or copying it to the clipboard, the real value will
+      be used.</para>
+    </section>
+
+    <section id="options-column-width">
+      <title>Max column width</title>
+
+      <para>When the initial display size of a column is calculated, the
+      column width will not exceed this number. This is useful when displaying
+      large character columns.</para>
+    </section>
+
+    <section id="options-filed-delimiter">
+      <title>Field delimiter</title>
+
+      <para>The default delimiter used when exporting data to a text file.
+      This can be overridden in the file selection dialog when actually
+      exporting the data.</para>
+    </section>
+
+    <section id="options-quote-character">
+      <title>Quote character</title>
+
+      <para>This character will be used to quote column data when exporting to
+      a text file. When using a tab character (\t) as the field delimiter this
+      is not really necessary. When using a comma as the field delimiter,
+      quoting the data is necessary in case the data contains a a comma (or
+      whatever character is used to delimit the columns). This will be the
+      default for exporting data through the menu. If you use the <link
+      linkend="command-spool"><literal>SPOOL</literal> command</link>, you can
+      freely customize the output for each file you create.</para>
+    </section>
+    
+    <section id="options-deftabletype">
+    <title>Default Object Type</title>
+      <para>This setting allows you to control the initial display of objects in the 
+      <link linkend="dbexplorer">DbExplorer's</link> table panel. The value entered here
+      will be used to set the default selection in the type drop down.</para>
+      <para>The list in that dropdown is retrieved from the underlying DBMS through 
+      a JDBC function call. So the value entered here should be something that is 
+      available on all used DBMS. If the value entered in this property is not found
+      in the list, the selection defaults to "*" which means all object types.</para>
+      <note>
+      <para>Don't forget to enable <xref linkend="options-retrieve-explorer"/> so 
+      that the DbExplorer will be retrieved automatically with the desired object 
+      type, when you open it.</para>
+      </note>
+ 
+    </section>
+
+      <section id="manual-settings">
+        <title>Settings not available through the GUI</title>
+        
+        <para>This section describes the additional options for SQL Workbench/J which 
+        are not available in the options dialog.</para>
+        
+        <para>The name of the setting refers to the entry in the file <literal>workbench.settings</literal>
+        which is located in the <link linkend="config-dir">configuration directoy</link>.
+        </para>
+        
+        <informaltable frame="all">
+          <tgroup cols="3">
+            <thead>
+              <row>
+                <entry>Key</entry>
+                <entry>Description</entry>
+                <entry>Default value</entry>
+              </row>
+            </thead>
+            <tbody valign="top">
+              <row>
+                <entry><para>workbench.gui.showmnemonics</para></entry>
+                <entry><para>Usually the mnemonic for a menu item is not shown under 
+                       Windows 2000 or later. It will only be shown, when you press the 
+                       ALT key. With this settings, this JDK behaviour can be controlled.</para></entry>
+                <entry><para>true</para></entry>
+              </row>
+              <row>
+                <entry><para>workbench.db.verifydriverurl</para></entry>
+                <entry><para>Usually before connecting to the DBMS, SQL Workbench/J will 
+                        call the acceptsUrl() method of the JDBC driver, to verify 
+                        if the entered URL is correct and will be accepted by the
+                        driver. Some drivers have been reported to indicate an error
+                        in the URL even if they could connect successfully.</para>
+                        <para>If you are seeing an error indicating that the URL is not
+                        accepted by the drive, but you are sure that the driver accepts
+                        the URL, then set this property to <literal>false</literal>
+                        </para>
+                </entry>
+                <entry><para>true</para></entry>
+              </row>
+              <row>
+                <entry><para>workbench.gui.showsplash</para></entry>
+                <entry><para>Show a splash screen at startup</para></entry>
+                <entry><para>false</para></entry>
+              </row>
+              <row>
+                <entry><para>workbench.log.level</para></entry>
+                <entry><para>Set the log level for the log file. Valid values are
+                       <itemizedlist spacing="compact">
+                          <listitem><para>DEBUG</para></listitem>
+                          <listitem><para>INFO</para></listitem>
+                          <listitem><para>WARN</para></listitem>
+                          <listitem><para>ERROR</para></listitem>
+                       </itemizedlist>
+                       </para>
+                </entry>
+                <entry><para>INFO</para></entry>
+              </row>
+              <row>
+                <entry><para>workbench.workspace.autosave</para></entry>
+                <entry><para>If this is enabled, the current workspace will 
+                be saved automatically, when a SQL statement is executed. This 
+                setting was introduced with Build 61.</para>
+                </entry>
+                <entry><para>false</para></entry>
+              </row>
+              <row>
+                <entry><para>workbench.workspace.createbackup</para></entry>
+                <entry><para>If this is enabled, a backup file will be created 
+								before saving the workspace. This is done by renaming the current
+								file (overwriting any existing backup) and then saving the workspace.</para>
+                </entry>
+                <entry><para>false</para></entry>
+              </row>
+              <row>
+                <entry><para>workbench.dbmetadata.logsql</para></entry>
+                <entry><para>If this is enabled, the SQL queries used to 
+                retrieve DBMS specific meta data (such as view/procedure/trigger source,
+								defined triggers/views) will be logged with level INFO.
+								This can be used to debug customized SQL statements
+								for DBMS's which are not (yet) preconfigured.</para>
+                </entry>
+                <entry><para>false</para></entry>
+              </row>
+              <row>
+                <entry><para id="formatter-subselect-threshold">workbench.sql.formatter.subselect.maxlength</para></entry>
+                <entry><para>When the SQL formatter hits a sub-SELECT while 
+                parsing it will not reformat any statement which is shorter
+                then the length specified through this property. I.e. any sub SELECT
+                shorter then this value will be formatted as one single String without
+                line breaks or indention. See <xref linkend="editor-reformat-sql"/> for 
+								details on how the SQL formatting works.</para>
+                </entry>
+                <entry><para>60</para></entry>
+              </row>
+              <row>
+                <entry><para id="manual-setting-snippet-no-newline">workbench.javacode.includenewline</para></entry>
+                <entry><para>When creating a <link linkend="editor-copy-java-code-snippet">Java code snippet</link>,
+								the newlines inside the editor are preserved by putting a <literal>\n</literal>
+								character into the String declaration. Setting this property to false, will 
+								tell SQL Workbench/J not put any <literal>\n</literal> characters into the Java string.</para>
+                </entry>
+                <entry><para>true</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </section>
+</section>

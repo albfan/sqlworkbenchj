@@ -42,6 +42,7 @@ import javax.swing.table.TableColumnModel;
 
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.WbFontChooser;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarButton;
 import workbench.log.LogMgr;
@@ -61,6 +62,7 @@ public class PrintPreview
 	protected JComboBox cbZoom;
 	private JButton pageSetupButton;
 	private JButton printButton;
+	private JButton chooseFontButton;
 	private JButton closeButton;
 	
 	private JButton pageRight;
@@ -74,7 +76,7 @@ public class PrintPreview
 	protected PreviewContainer preview;
 	private PagePreview pageDisplay;
 	private int currentPage = 0;
-	
+
 	public PrintPreview(JFrame owner, TablePrinter target)
 	{
 		super(owner, ResourceMgr.getString("TxtPrintPreviewWindowTitle"), true);
@@ -96,6 +98,14 @@ public class PrintPreview
 		this.printButton = new WbToolbarButton(ResourceMgr.getString("LabelPrintButton"));
 		this.printButton.addActionListener(this);
 		tb.add(printButton);
+
+		tb.addSeparator();
+		
+		this.chooseFontButton = new WbToolbarButton(ResourceMgr.getString("LabelSetectPrintFont"));
+		this.chooseFontButton.addActionListener(this);
+		tb.add(this.chooseFontButton);
+		
+		tb.addSeparator();
 		
 		this.pageSetupButton = new WbToolbarButton(ResourceMgr.getString("LabelPageSetupButton"));
 		this.pageSetupButton.addActionListener(this);
@@ -161,6 +171,27 @@ public class PrintPreview
 		setVisible(true);
 	}
 	
+	private void selectPrintFont()
+	{
+		Font f = WbFontChooser.chooseFont(this, this.printTarget.getFont());
+		if (f != null)
+		{
+			this.printTarget.setFont(f);
+			WbManager.getSettings().setPrintFont(f);
+			final PrintPreview preview = this;
+			Thread t = new Thread()
+			{
+				public void run()
+				{
+					preview.showCurrentPage();
+					preview.doLayout();
+				}
+			};
+			t.setName("PrintPreview update font");
+			t.setDaemon(true);
+			t.start();
+		}
+	}
 	private void adjustScrollbar()
 	{
 		this.scroll.getVerticalScrollBar().setBlockIncrement((int)printTarget.getPageFormat().getImageableHeight());
@@ -327,6 +358,10 @@ public class PrintPreview
 		{
 			this.doPageSetup();
 		}
+		else if (e.getSource() == this.chooseFontButton)
+		{
+			this.selectPrintFont();
+		}
 		else if (e.getSource() == this.cbZoom)
 		{
 			Thread runner = new Thread()
@@ -336,6 +371,8 @@ public class PrintPreview
 					changeZoom();
 				}
 			};
+			runner.setName("PrintPreview Zoom thread");
+			runner.setDaemon(true);
 			runner.start();
 		}
 		else if (e.getSource() == this.pageRight)

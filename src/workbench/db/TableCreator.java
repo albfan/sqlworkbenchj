@@ -40,19 +40,33 @@ public class TableCreator
 		this.typeInfo = new HashMap(27);
 		try
 		{
+			List ignored = target.getMetadata().getIgnoredDataTypes();
 			rs = this.connection.getSqlConnection().getMetaData().getTypeInfo();
 			while (rs.next())
 			{
 				String name = rs.getString(1);
 				int type = rs.getInt(2);
-				if (type == java.sql.Types.ARRAY) continue;
+				
+				// we can't handle arrays anyway
+				if (type == java.sql.Types.ARRAY || type == java.sql.Types.OTHER) continue;
+				if (ignored.contains(name)) continue;
+				
 				TypeInfo info = new TypeInfo();
 				info.name = name;
 				info.type = type;
 				info.precision = rs.getInt(3);
 				info.min_scale = rs.getInt(14);
 				info.max_scale = rs.getInt(15);
-				this.typeInfo.put(new Integer(type), info);
+				Integer key = new Integer(type);
+				if (this.typeInfo.containsKey(key))
+				{
+					LogMgr.logWarning("TableCreator.<init>", "The mapping from JDBC type "  + SqlUtil.getTypeName(type) + " to  DB type " + name + " will be ignored. A mapping is already present.");
+				}
+				else
+				{
+					LogMgr.logInfo("TableCreator.<init>", "Mapping JDBC type "  + SqlUtil.getTypeName(type) + " to DB type " + name);
+					this.typeInfo.put(key, info);
+				}
 			}
 		}
 		catch (SQLException e)

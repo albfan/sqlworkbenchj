@@ -141,6 +141,8 @@ public class Settings
 		if (WbManager.trace) System.out.println("Initializing ShortcutManager");
 		this.keyManager = new ShortcutManager(this.getShortcutFilename());
 
+		this.renameOldProps();
+		
 		if (WbManager.trace) System.out.println("Settings.<init> - done");
 	}
 
@@ -203,6 +205,21 @@ public class Settings
 		}
 	}
 
+	private void renameOldProps()
+	{
+		this.renameProperty("connection.last", "workbench.connection.last");
+		this.renameProperty("drivers.lastlibdir", "workbench.drivers.lastlibdir");
+	}
+	
+	private void renameProperty(String oldKey, String newKey)
+	{
+		if (this.props.containsKey(oldKey))
+		{
+			Object value = this.props.get(oldKey);
+			this.props.remove(oldKey);
+			this.props.put(newKey, value);
+		}
+	}
 	private void removeObsolete()
 	{
 		try
@@ -464,8 +481,15 @@ public class Settings
 		return StringUtil.getDoubleValue(this.props.getProperty("workbench.print.margin." + aKey, "72"),72);
 	}
 
+	public void setPrintFont(Font aFont)
+	{
+		this.setFont(PRINTER_FONT_KEY, aFont);
+	}
+	
 	public void setFont(String aFontName, Font aFont)
 	{
+		if (aFont == null) return;
+		
 		String baseKey = new StringBuffer("workbench.font.").append(aFontName).toString();
 		String name = aFont.getFamily();
 		String size = Integer.toString(aFont.getSize());
@@ -603,35 +627,6 @@ public class Settings
 	public void setLastExportDir(String aDir)
 	{
 		this.props.setProperty("workbench.export.lastdir", aDir);
-	}
-
-	public String getLastTableGenerateDir()
-	{
-		return this.props.getProperty("workbench.persistence.lastdir.table","");
-	}
-
-	public void setLastTableGenerateDir(String aDir)
-	{
-		this.props.setProperty("workbench.persistence.lastdir.table", aDir);
-	}
-
-	public String getLastValueGenerateDir()
-	{
-		return this.props.getProperty("workbench.persistence.lastdir.value","");
-	}
-
-	public void setLastValueGenerateDir(String aDir)
-	{
-		this.props.setProperty("workbench.persistence.lastdir.value", aDir);
-	}
-	public boolean getCleanupUnderscores()
-	{
-		return "true".equalsIgnoreCase(this.props.getProperty("workbench.persistence.cleanupunderscores", "false"));
-	}
-
-	public void setCleanupUnderscores(boolean useEncryption)
-	{
-		this.props.setProperty("workbench.persistence.cleanupunderscores", Boolean.toString(useEncryption));
 	}
 
 	public boolean getIncludeNewLineInCodeSnippet()
@@ -794,22 +789,22 @@ public class Settings
 	{
 		this.props.setProperty("workbench.editor.tabwidth", Integer.toString(aWidth));
 	}
-	
+
 	public String getLastConnection(String key)
 	{
-		if (key == null) return this.props.getProperty("connection.last");
+		if (key == null) return this.props.getProperty("workbench.connection.last");
 		return this.props.getProperty(key);
 	}
 
 	public String getLastConnection()
 	{
-		return this.getLastConnection("connection.last");
+		return this.getLastConnection("workbench.connection.last");
 	}
 
 	public void setLastConnection(String aName)
 	{
 		if (aName == null) aName = "";
-		this.props.setProperty("connection.last", aName);
+		this.props.setProperty("workbench.connection.last", aName);
 	}
 
 	public int getDefaultFetchSize()
@@ -825,11 +820,11 @@ public class Settings
 
 	public String getLastLibraryDir()
 	{
-		return this.props.getProperty("drivers.lastlibdir", "");
+		return this.props.getProperty("workbench.drivers.lastlibdir", "");
 	}
 	public void setLastLibraryDir(String aDir)
 	{
-		this.props.setProperty("drivers.lastlibdir", aDir);
+		this.props.setProperty("workbench.drivers.lastlibdir", aDir);
 	}
 
 	public int getMaxHistorySize()
@@ -1129,6 +1124,11 @@ public class Settings
 		return this.props.getProperty(aClass + "." + aProperty.toLowerCase(), aDefault);
 	}
 
+	public String getProperty(String aProperty, String aDefault)
+	{
+		return this.props.getProperty(aProperty.toLowerCase(), aDefault);
+	}
+	
 	public int getIntProperty(String aClass, String aProperty, int aDefault)
 	{
 		String value = this.getProperty(aClass, aProperty, Integer.toString(aDefault));
