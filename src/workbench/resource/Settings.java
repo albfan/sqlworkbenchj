@@ -273,6 +273,16 @@ public class Settings
 		this.props.setProperty("workbench.export.lastdir", aDir);
 	}
 
+	public String getLastSqlDir()
+	{
+		return this.props.getProperty("workbench.sql.lastscriptdir","");
+	}
+
+	public void setLastSqlDir(String aDir)
+	{
+		this.props.setProperty("workbench.sql.lastscriptdir", aDir);
+	}
+
 
 	public String toString()
 	{

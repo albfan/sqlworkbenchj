@@ -323,7 +323,6 @@ public class DwPanel extends JPanel
 				}
 				else
 				{
-					this.infoTable.setDefaultRenderersAndEditors();
 					this.infoTable.adjustColumns();
 				}
 				this.setVisible(true);

@@ -6,43 +6,41 @@
 
 package workbench.gui.sql;
 
-import javax.swing.border.Border;
-import javax.swing.border.BevelBorder;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.ActionListener;
+import java.io.*;
 import javax.swing.BorderFactory;
+import javax.swing.JFileChooser;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+import javax.swing.border.EtchedBorder;
+import workbench.WbManager;
+import workbench.gui.actions.WbAction;
+import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.editor.JEditTextArea;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import workbench.WbManager;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-import workbench.interfaces.ClipboardSupport;
-import workbench.interfaces.TextContainer;
-import workbench.gui.menu.TextPopup;
-import javax.swing.Action;
-import javax.swing.JTextPane;
-import javax.swing.KeyStroke;
-import javax.swing.border.EtchedBorder;
-import workbench.gui.actions.WbAction;
 import workbench.gui.editor.SyntaxStyle;
 import workbench.gui.editor.Token;
+import workbench.gui.menu.TextPopup;
+import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.FontChangedListener;
+import workbench.interfaces.TextContainer;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
+
 
 /**
  *
  * @author  thomas
  * @version
  */
-public class EditorPanel 
-	extends JEditTextArea
-	implements ClipboardSupport, TextContainer, FontChangedListener
+public class EditorPanel extends JEditTextArea implements ClipboardSupport, FontChangedListener, TextContainer
 {
 	private TextPopup popup = new TextPopup(this);
 	private AnsiSQLTokenMarker tokenMarker;
+	private File currentFile;
 	
 	/** Creates new EditorPanel */
 	public EditorPanel()
@@ -144,6 +142,106 @@ public class EditorPanel
 		{
 			this.getInputHandler().addKeyBinding(key, anAction);
 		}
+	}
+	
+	public void closeFile()
+	{
+		this.currentFile = null;
+		this.setText("");
+	}
+	
+	public boolean openFile()
+	{
+		boolean result = false;
+		String lastDir = WbManager.getSettings().getLastSqlDir();
+		JFileChooser fc = new JFileChooser(lastDir);
+		fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
+		int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(this));
+		if (answer == JFileChooser.APPROVE_OPTION)
+		{
+			result = this.readFile(fc.getSelectedFile());
+			lastDir = fc.getCurrentDirectory().getAbsolutePath();
+			WbManager.getSettings().setLastSqlDir(lastDir);
+		}
+		return result;
+	}
+	
+	public boolean readFile(File aFile)
+	{
+		if (aFile == null) return false;
+		if (!aFile.exists()) return false;
+		if (aFile.length() > Integer.MAX_VALUE) 
+		{
+			WbManager.getInstance().showErrorMessage(ResourceMgr.getString("MsgFileTooBig"));
+			return false;
+		}
+		boolean result = false;
+		try
+		{
+			String filename = aFile.getAbsolutePath();
+			BufferedReader reader = new BufferedReader(new FileReader(filename));
+			StringBuffer content = new StringBuffer((int)aFile.length());
+			this.setText("");
+			String line = reader.readLine();
+			while (line != null)
+			{
+				content.append(line);
+				content.append(StringUtil.LINE_TERMINATOR);
+				//this.appendLine(line);
+				line = reader.readLine();
+			}
+			this.setText(content.toString());
+			reader.close();
+			this.currentFile = aFile;
+			result = true;
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	public boolean saveFile()
+	{
+		boolean result = false;
+		String lastDir = WbManager.getSettings().getLastSqlDir();
+		JFileChooser fc = new JFileChooser(lastDir);
+		fc.setSelectedFile(this.currentFile);
+		fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
+		int answer = fc.showSaveDialog(SwingUtilities.getWindowAncestor(this));
+		if (answer == JFileChooser.APPROVE_OPTION)
+		{
+			result = this.saveFile(fc.getSelectedFile());
+			lastDir = fc.getCurrentDirectory().getAbsolutePath();
+			WbManager.getSettings().setLastSqlDir(lastDir);
+		}
+		return result;
+	}
+	
+	public boolean saveFile(File aFile)
+	{
+		try
+		{
+			String filename = aFile.getAbsolutePath();
+			BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
+			writer.write(this.getText());
+			writer.close();
+			this.currentFile = aFile;
+			return true;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	public File getCurrentFile() { return this.currentFile; }
+	public String getCurrentFileName() 
+	{ 
+		if (this.currentFile == null) return null;
+		return this.currentFile.getAbsolutePath(); 
 	}
 	
 }

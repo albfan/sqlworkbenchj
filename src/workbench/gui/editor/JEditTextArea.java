@@ -52,7 +52,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.5 2002-08-10 15:57:37 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.6 2002-08-23 14:35:21 thomas Exp $
  */
 public class JEditTextArea 
 	extends JComponent
@@ -851,6 +851,23 @@ public class JEditTextArea
 			return 4;
 		}
 		
+	}
+	
+	public void appendLine(String aLine)
+	{
+		try
+		{
+			document.beginCompoundEdit();
+			document.insertString(document.getLength(),aLine,null);
+		}
+		catch(BadLocationException bl)
+		{
+			bl.printStackTrace();
+		}
+		finally
+		{
+			document.endCompoundEdit();
+		}
 	}
 	/**
 	 * Sets the entire text of this text area.

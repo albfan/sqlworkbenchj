@@ -27,10 +27,13 @@ import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.*;
 import workbench.gui.actions.CopyAsSqlInsertAction;
+import workbench.gui.actions.FileCloseAction;
+import workbench.gui.actions.FileSaveAction;
 
 import workbench.gui.components.*;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.menu.TextPopup;
+import workbench.interfaces.FilenameChangeListener;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
@@ -69,7 +72,10 @@ public class SqlPanel extends JPanel
 
 	private List actions = new ArrayList();
 	private List toolbarActions = new ArrayList();
+
+	private List filenameChangeListeners;
 	
+	private FileOpenAction fileOpenAction;
 	private NextStatementAction nextStmtAction;
 	private PrevStatementAction prevStmtAction;
 	private StopAction stopAction;
@@ -195,6 +201,58 @@ public class SqlPanel extends JPanel
 		}
 	}
 	
+	public void openFile()
+	{
+		String oldFile = this.editor.getCurrentFileName();
+		if (this.editor.openFile())
+		{
+			String newFile = this.editor.getCurrentFileName();
+			if (newFile != null && !newFile.equals(oldFile))
+			{
+				this.fireFilenameChanged();
+			}
+		}
+	}
+	public void saveFile()
+	{
+		String oldFile = this.editor.getCurrentFileName();
+		if (this.editor.saveFile())
+		{
+			String newFile = this.editor.getCurrentFileName();
+			if (newFile != null && !newFile.equals(oldFile))
+			{
+				this.fireFilenameChanged();
+			}
+		}
+	}
+
+	public void closeFile()
+	{
+		this.editor.closeFile();
+		this.fireFilenameChanged();
+	}
+	public void fireFilenameChanged()
+	{
+		if (this.filenameChangeListeners == null) return;
+		for (int i=0; i < this.filenameChangeListeners.size(); i++)
+		{
+			FilenameChangeListener l = (FilenameChangeListener)this.filenameChangeListeners.get(i);
+			l.fileNameChanged(this, this.editor.getCurrentFileName());
+		}
+	}
+	public void addFilenameChangeListener(FilenameChangeListener aListener)
+	{
+		if (aListener == null) return;
+		if (this.filenameChangeListeners == null) this.filenameChangeListeners = new ArrayList();
+		this.filenameChangeListeners.add(aListener);
+	}
+	
+	public void removeFilenameChangeListener(FilenameChangeListener aListener)
+	{
+		if (aListener == null) return;
+		if (this.filenameChangeListeners == null) return;
+		this.filenameChangeListeners.remove(aListener);
+	}
 	private void initActions()
 	{
 		ExecuteSql e = new ExecuteSql();
@@ -213,6 +271,11 @@ public class SqlPanel extends JPanel
 		this.editor.addPopupMenuItem(this.executeAll, false);
 
 		TextPopup pop = (TextPopup)this.editor.getRightClickPopup();
+
+		this.fileOpenAction = new FileOpenAction(this);
+		this.actions.add(this.fileOpenAction);
+		this.actions.add(new FileSaveAction(this));
+		this.actions.add(new FileCloseAction(this));
 		
 		this.actions.add(pop.getCutAction());
 		this.actions.add(pop.getCopyAction());

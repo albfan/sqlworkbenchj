@@ -10,15 +10,14 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
-import java.awt.Font;
 import java.awt.event.*;
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.UIManager.LookAndFeelInfo;
-import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import workbench.WbManager;
@@ -38,7 +37,7 @@ import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.gui.settings.SettingsPanel;
 import workbench.gui.sql.SqlPanel;
-import workbench.interfaces.FontChangedListener;
+import workbench.interfaces.FilenameChangeListener;
 import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -50,8 +49,9 @@ import workbench.resource.Settings;
  * @author  workbench@kellerer.org
  * @version
  */
-public class MainWindow extends JFrame 
-	implements ActionListener, WindowListener, ChangeListener
+public class MainWindow 
+	extends JFrame 
+	implements ActionListener, WindowListener, ChangeListener, FilenameChangeListener
 {
 	private String windowId;
 	private String currentProfileName;
@@ -83,6 +83,7 @@ public class MainWindow extends JFrame
 		for (int i=0; i < tabCount; i++)
 		{
 			SqlPanel sql = new SqlPanel(i + 1);
+			sql.addFilenameChangeListener(this);
 			this.sqlTab.addTab(ResourceMgr.getString("LabelTabStatement") + " " + Integer.toString(i+1), sql);
 		}
 		this.initMenu();
@@ -127,12 +128,17 @@ public class MainWindow extends JFrame
 
 	private JMenuBar getMenuForPanel(MainPanel aPanel)
 	{
+		HashMap menus = new HashMap(10);
+		
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setBorderPainted(false);
 
 		// Create the file menu for all tabs
 		JMenu menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_FILE));
 		menu.setName(ResourceMgr.MNU_TXT_FILE);
+		menuBar.add(menu);
+		menus.put(ResourceMgr.MNU_TXT_FILE, menu);
+		
 		WbAction action;
 		JMenuItem item;
 
@@ -141,14 +147,8 @@ public class MainWindow extends JFrame
 		menu.add(item);
 		menu.addSeparator();
 
-		action = new FileExitAction();
-		menu.add(action.getMenuItem());
-		menuBar.add(menu);
-
 		// now create the menus for the current tab
 		List actions = aPanel.getActions();
-
-		HashMap menus = new HashMap(10);
 
 		// Create the menus in the correct order
 		menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_EDIT));
@@ -200,6 +200,12 @@ public class MainWindow extends JFrame
 			action.addToMenu(menu);
 			menu.setVisible(true);
 		}
+		
+		
+		action = new FileExitAction();
+		menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_FILE);
+		menu.addSeparator();
+		menu.add(action.getMenuItem());
 
 		// now put the tabs into the view menu
 		menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_VIEW);
@@ -282,6 +288,34 @@ public class MainWindow extends JFrame
 		}
 	}
 
+	public void fileNameChanged(Object sender, String newFilename)
+	{
+		String fname;
+		int index = -1;
+		String tooltip = null;
+		for (int i=0; i < this.sqlTab.getTabCount(); i++)
+		{
+			if (this.sqlTab.getComponentAt(i) == sender)
+			{
+				index = i;
+				break;
+			}
+		}
+		if (index == -1) return;
+		
+		if (newFilename == null) 
+		{
+			fname = ResourceMgr.getString("LabelTabStatement") + " " + (index + 1);
+		}
+		else
+		{
+			File f = new File(newFilename);
+			fname = f.getName();
+			tooltip = f.getAbsolutePath();
+		}
+		this.sqlTab.setTitleAt(index, fname);
+		this.sqlTab.setToolTipTextAt(index, tooltip);
+	}
 	public void windowOpened(WindowEvent windowEvent)
 	{
 	}
