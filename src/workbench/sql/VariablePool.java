@@ -41,10 +41,10 @@ import workbench.util.WbProperties;
  *
  * @author  info@sql-workbench.net
  */
-public class SqlParameterPool
+public class VariablePool
 {
 	private HashMap data = new HashMap(); 
-	private static final SqlParameterPool POOL = new SqlParameterPool();
+	private static final VariablePool POOL = new VariablePool();
 	private String prefix;
 	private String suffix;
 	private int prefixLen = 0;
@@ -53,12 +53,12 @@ public class SqlParameterPool
 	private Pattern promptPattern;
 	private Pattern variablePattern;
 	
-	public static SqlParameterPool getInstance()
+	public static VariablePool getInstance()
 	{
 		return POOL;
 	}
 	
-	private SqlParameterPool()
+	private VariablePool()
 	{
 		this.prefix = Settings.getInstance().getSqlParameterPrefix();
 		this.suffix = Settings.getInstance().getSqlParameterSuffix();
@@ -238,7 +238,6 @@ public class SqlParameterPool
 			String var = this.buildVarNamePattern(name, forPrompt);
 			String value = (String)this.data.get(name);
 			if (value == null) continue;
-			//if (LogMgr.isDebugEnabled()) LogMgr.logDebug("SqlParameterPool", "Using value=[" + value + "] for parameter=" + name);
 			newSql = replaceVarValue(newSql, var, value);
 		}
 		return newSql;
@@ -422,7 +421,7 @@ class VariableDataStore
 		int rowcount = this.getRowCount();
 		this.resetUpdateRowCounters();
 		
-		SqlParameterPool pool = SqlParameterPool.getInstance();
+		VariablePool pool = VariablePool.getInstance();
 		for (int i=0; i < rowcount; i++)
 		{
 			String key = this.getValueAsString(i, 0);
