@@ -17,6 +17,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
@@ -88,7 +89,7 @@ import workbench.interfaces.JobErrorHandler;
  */
 public class SqlPanel
 	extends JPanel
-	implements Runnable, FontChangedListener, ActionListener, TextChangeListener, 
+	implements Runnable, FontChangedListener, ActionListener, TextChangeListener,
 				    PropertyChangeListener,
 						MainPanel, Spooler, TextFileContainer, DbUpdater, Interruptable, FormattableSql, Commitable,
 						JobErrorHandler, FilenameChangeListener
@@ -233,6 +234,7 @@ public class SqlPanel
 
 		this.editor.addTextChangeListener(this);
 		this.data.setUpdateDelegate(this);
+		this.data.addPropertyChangeListener("updateTable", this);
 
 		WbManager.getSettings().addChangeListener(this);
 	}
@@ -453,7 +455,7 @@ public class SqlPanel
 	{
 		this.fireFilenameChanged(aNewName);
 	}
-	
+
 	public void fireFilenameChanged(String aNewName)
 	{
 		if (this.filenameChangeListeners == null) return;
@@ -1991,7 +1993,7 @@ public class SqlPanel
 		this.data.getStartEditAction().setEnabled(mayEdit);
 		this.createDeleteScript.setEnabled(mayEdit);
 		int rows = this.data.getTable().getSelectedRowCount();
-		
+
 		this.data.getCopyRowAction().setEnabled(mayEdit && (rows == 1));
 		this.data.getInsertRowAction().setEnabled(this.data.isUpdateable());
 
@@ -1999,6 +2001,7 @@ public class SqlPanel
 		this.findDataAgainAction.setEnabled(findNext);
 
 		boolean canUpdate = this.data.isUpdateable();
+		//boolean hasPK = this.data.hasPrimaryKey();
 		this.copyAsSqlInsert.setEnabled(canUpdate);
 		this.copyAsSqlUpdate.setEnabled(canUpdate);
 		this.importFileAction.setEnabled(canUpdate);
@@ -2275,7 +2278,7 @@ public class SqlPanel
 		this.background = null;
 	}
 
-	public void propertyChange(java.beans.PropertyChangeEvent evt)
+	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (evt.getPropertyName().equals(Settings.ANIMATED_ICONS_KEY))
 		{
@@ -2289,6 +2292,10 @@ public class SqlPanel
 				this.loadingIcon.getImage().flush();
 				this.loadingIcon = null;
 			}
+		}
+		if (evt.getSource() == this.data && evt.getPropertyName().equals("updateTable"))
+		{
+			this.checkResultSetActions();
 		}
 	}
 

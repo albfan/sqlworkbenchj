@@ -85,6 +85,7 @@ public class LogMgr
 	{
 		if (logOut != null)
 		{
+			logInfo("LogMgr", "========= Log stopped =========");
 			logOut.close();
 		}
 	}
@@ -103,7 +104,7 @@ public class LogMgr
 			}
       if (WbManager.trace) System.out.println("LogMgr.checkOutput() - Opening logfile " + aFilename);
 			File f = new File(aFilename);
-			
+
 			if (f.exists() && f.length() > maxFilesize)
 			{
 				File last = new File(aFilename + ".last");
@@ -159,7 +160,7 @@ public class LogMgr
 	{
 		int level = LEVELS.indexOf(aType);
 		//System.out.println("requested level=" + level + ", current level=" + loglevel + ",msg=" + aMsg);
-		
+
 		if (level > loglevel) return;
 
 		String s = formatMessage(aType, aCaller, aMsg, th);

@@ -92,7 +92,7 @@ public class TableDataPanel
 		this.dataDisplay.getTable().setMaxColWidth(WbManager.getSettings().getMaxColumnWidth());
 		this.dataDisplay.getTable().setMinColWidth(WbManager.getSettings().getMinColumnWidth());
 		this.dataDisplay.setSaveChangesInBackground(true);
-		
+
     JPanel topPanel = new JPanel();
 		topPanel.setMaximumSize(new Dimension(32768, 32768));
 		//topPanel.setLayout(new FlowLayout(FlowLayout.LEADING));

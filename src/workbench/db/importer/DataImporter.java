@@ -20,6 +20,7 @@ import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
 import workbench.util.StringUtil;
 import workbench.db.TableIdentifier;
+import workbench.util.SqlUtil;
 
 
 /**
@@ -274,11 +275,25 @@ public class DataImporter
 	public String[] getWarnings()
 	{
 		int count = this.warnings.size();
-		String[] result = new String[count];
+		String msg = this.source.getMessages();
+		
+		
+		String[] result = null;
+		if (msg.length() == 0) 
+		{
+			result = new String[count];
+		}
+		else
+		{
+			result = new String[count + 1];
+			result[count] = msg;
+		}
+		
 		for (int i=0; i < count; i++)
 		{
 			result[i] = (String)this.warnings.get(i);
 		}
+
 		return result;
 	}
 
@@ -596,6 +611,14 @@ public class DataImporter
 			this.updateSql = null;
 			this.updateStatement = null;
 			throw new SQLException("No key columns defined for update mode");
+		}
+		if (colIndex == 0)
+		{
+			LogMgr.logDebug("DataImporter.prepareUpdateStatement()", "Only PK columns defined! Update mode is not available!");
+			this.errors.add(ResourceMgr.getString("ErrorImportOnlyKeyColumnsForUpdate"));
+			this.updateSql = null;
+			this.updateStatement = null;
+			throw new SQLException("Only key columns defined for update mode");
 		}
 		sql.append(where);
 		this.updateSql = sql.toString();

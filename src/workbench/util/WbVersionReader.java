@@ -23,6 +23,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import java.net.InetAddress;
 
 /**
  *
@@ -36,10 +38,14 @@ public class WbVersionReader
 
 	private String currentStableBuildNumber;
 	private String currentStableBuildDate;
+	private final String userAgent;
 
 	public WbVersionReader()
 		throws Exception
 	{
+
+		this.userAgent = ResourceMgr.TXT_PRODUCT_NAME + " (" + ResourceMgr.getString("TxtBuildNumber") + ")";
+		LogMgr.logDebug("WbVersionReader.<init>", "Using User-Agent: " + this.userAgent);
 		long start, end;
 		start = System.currentTimeMillis();
 		try
@@ -69,9 +75,12 @@ public class WbVersionReader
 	{
 		try
 		{
-			URL conn = new URL("http://www.kellerer.org/workbench/Workbench.jar");
+			URL url = new URL("http://www.kellerer.org/workbench/Workbench.jar");
 			LogMgr.logDebug("WbVersionReader.readDevBuildInfo", "Retrieving development version information...");
-			InputStream httpStream = conn.openStream();
+			URLConnection conn = url.openConnection();
+			conn.setRequestProperty("User-Agent", this.userAgent);
+			InputStream httpStream = conn.getInputStream();
+
 			JarInputStream devBuildArchive = new JarInputStream(httpStream);
 
 			Manifest mani = devBuildArchive.getManifest();
@@ -103,9 +112,10 @@ public class WbVersionReader
 		try
 		{
 			LogMgr.logDebug("WbVersionReader.readDevBuildInfo", "Retrieving release version information...");
-			URL conn = new URL("http://www.kellerer.org/workbench/workbench.zip");
-
-			InputStream zipStream = conn.openStream();
+			URL url = new URL("http://www.kellerer.org/workbench/workbench.zip");
+			URLConnection conn = url.openConnection();
+			conn.setRequestProperty("User-Agent", this.userAgent);
+			InputStream zipStream = conn.getInputStream();
 			ZipInputStream zipInput = new ZipInputStream(zipStream);
 
 			ZipEntry jarEntry = zipInput.getNextEntry();

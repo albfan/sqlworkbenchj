@@ -55,9 +55,11 @@ public class DataSpooler
 	public static final int EXPORT_SQL = 1;
 	public static final int EXPORT_TXT = 2;
 	public static final int EXPORT_XML = 3;
+	public static final int EXPORT_HTML = 4;
 
 	private WbConnection dbConn;
 	private String sql;
+	private String htmlTitle = null;
 	private String outputfile;
 	private String fullOutputFileName;
 	private int exportType;
@@ -82,6 +84,8 @@ public class DataSpooler
 	 */
 	private boolean cleancr = false;
 	private boolean append = false;
+	private boolean escapeHtml = true;
+	private boolean createFullHtmlPage = true;
 
 	private boolean showProgress = false;
 	private ProgressPanel progressPanel;
@@ -198,6 +202,9 @@ public class DataSpooler
 	public void setExportHeaders(boolean aFlag) { this.exportHeaders = aFlag; }
 	public boolean getExportHeaders() { return this.exportHeaders; }
 
+	public void setCreateFullHtmlPage(boolean aFlag) { this.createFullHtmlPage = aFlag; }
+	public void setEscapeHtml(boolean aFlag) { this.escapeHtml = aFlag; }
+
 	public void setTextDelimiter(String aDelimiter) { this.delimiter = aDelimiter; }
 	public String getTextDelimiter() { return this.delimiter; }
 
@@ -210,6 +217,8 @@ public class DataSpooler
 	public void setTextTimestampFormat(String aFormat) { this.dateTimeFormat = aFormat; }
 	public String getTextTimestampFormat() { return this.dateTimeFormat; }
 
+	public void setHtmlTitle(String aTitle) { this.htmlTitle = aTitle; }
+	public void setOutputTypeHtml() { this.exportType = EXPORT_HTML; }
 	public void setOutputTypeXml() { this.exportType = EXPORT_XML; }
 	public void setOutputTypeText() { this.exportType = EXPORT_TXT; }
 	public void setOutputTypeSqlInsert()
@@ -446,15 +455,11 @@ public class DataSpooler
 
 		boolean useQuotes = (this.quoteChar != null) && (this.quoteChar.trim().length() > 0);
 
-		//byte[] quoteBytes = quoteChar.getBytes();
-		//byte[] lineEnd = StringUtil.LINE_TERMINATOR.getBytes();
-		//byte[] fieldBytes = delimiter.getBytes();
-
 		SimpleDateFormat dateFormatter = null;
 		SimpleDateFormat dateTimeFormatter = null;
 		DecimalFormat numberFormatter = null;
 
-		if (this.exportType == EXPORT_TXT || this.exportType == EXPORT_XML)
+		if (this.exportType == EXPORT_TXT || this.exportType == EXPORT_XML || this.exportType == EXPORT_HTML)
 		{
 			if (this.dateFormat != null)
 			{
@@ -523,8 +528,15 @@ public class DataSpooler
 				try
 				{
 					DbMetadata db = this.dbConn.getMetadata();
-					DataStore def = db.getTableDefinition(table);
-					source = db.getTableSource(table, def);
+					if (table == null)
+					{
+						DataStore def = db.getTableDefinition(table);
+						source = db.getTableSource(table, def);
+					}
+					if (source == null || source.length() == 0)
+					{
+						source = db.getTableSourceFromResultSet(this.tableName, rs.getMetaData());
+					}
 				}
 				catch (Exception e)
 				{
@@ -540,6 +552,11 @@ public class DataSpooler
 			else if (this.exportType == EXPORT_XML)
 			{
 				pw.write(ds.getXmlStart(this.encoding).toString());
+			}
+			else if (this.exportType == EXPORT_HTML)
+			{
+				ds.setEscapeExportValues(this.escapeHtml);
+				pw.write(ds.getHtmlStart(this.createFullHtmlPage, this.htmlTitle).toString());
 			}
 
 			FieldPosition position = new FieldPosition(0);
@@ -596,6 +613,18 @@ public class DataSpooler
 						pw.write(line.toString());
 					}
 				}
+				else if (this.exportType == EXPORT_HTML)
+				{
+					row = ds.addRow(rs);
+					line = ds.getRowDataAsHtml(row);
+					ds.discardRow(row);
+					if (line != null)
+					{
+						// the line returned by getRowDataAsHtml() already contains
+						// a NEWLINE, so we don't need to create it here
+						pw.write(line.toString());
+					}
+				}
 				else
 				{
 					// we don't use the DataStore when exporting to text for performance reasons
@@ -611,7 +640,7 @@ public class DataSpooler
 							{
 								pw.write(dateFormatter.format((Date)value));
 							}
-							else if (this.dateTimeFormat != null && value instanceof Timestamp)
+							else if (dateTimeFormatter != null && value instanceof Timestamp)
 							{
 								pw.write(dateTimeFormatter.format((Timestamp)value));
 							}
@@ -649,6 +678,10 @@ public class DataSpooler
 			if (this.exportType == EXPORT_XML)
 			{
 				pw.write(ds.getXmlEnd().toString());
+			}
+			else if (this.exportType == EXPORT_HTML)
+			{
+				pw.write(ds.getHtmlEnd(this.createFullHtmlPage).toString());
 			}
 			else if (this.exportType == EXPORT_SQL)
 			{
@@ -704,7 +737,6 @@ public class DataSpooler
 		String filename = WbManager.getInstance().getExportFilename(aParent, includeSqlExport);
 		if (filename != null)
 		{
-			//DataSpooler spool = new DataSpooler();
 			try
 			{
 				this.setConnection(aConnection);

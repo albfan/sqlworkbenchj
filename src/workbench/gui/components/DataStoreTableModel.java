@@ -262,6 +262,13 @@ public class DataStoreTableModel
 		this.fireTableRowsDeleted(aRow, aRow);
 	}
 
+	public int duplicateRow(int aRow)
+	{
+		int row = this.dataCache.duplicateRow(aRow);
+		this.fireTableRowsInserted(row, row);
+		return row;
+	}
+
 	public void importFile(String aFilename, boolean hasHeader, String colSep, String quoteChar)
 		throws FileNotFoundException
 	{

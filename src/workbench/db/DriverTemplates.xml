@@ -81,22 +81,22 @@
     </void>
    </object>
   </void>
-  <void method="add"> 
-   <object class="workbench.db.DbDriver"> 
-    <void property="driverClass"> 
-     <string>com.sybase.jdbc2.jdbc.SybDriver</string> 
-    </void> 
-    <void property="library"> 
-     <string>jconn2.jar</string> 
-    </void> 
-    <void property="name"> 
-     <string>Adaptive Server Anywhere</string> 
-    </void> 
-    <void property="sampleUrl"> 
-     <string>jdbc:sybase:Tds:machine-name:port-number</string> 
-    </void> 
-   </object> 
-  </void> 
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.sybase.jdbc2.jdbc.SybDriver</string>
+    </void>
+    <void property="library">
+     <string>jconn2.jar</string>
+    </void>
+    <void property="name">
+     <string>Adaptive Server Anywhere</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:sybase:Tds:machine-name:port-number</string>
+    </void>
+   </object>
+  </void>
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -157,7 +157,7 @@
      <string>Adabas</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:adabasd://server/name_of_database</string>
+     <string>jdbc:adabasd://servername/name_of_database</string>
     </void>
    </object>
   </void>
@@ -225,5 +225,39 @@
     </void>
    </object>
   </void>
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.ibm.as400.access.AS400JDBCDriver</string>
+    </void>
+    <void property="library">
+     <string>jt400Native.jar</string>
+    </void>
+    <void property="name">
+     <string>IBM DB2 (AS400 native)</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:as400://server_name/database_name</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.ibm.db2.jcc.DB2Driver</string>
+    </void>
+    <void property="library">
+     <string>db2jcc.jar</string>
+    </void>
+    <void property="name">
+     <string>IBM DB2</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:db2://server_name:50000/database_name</string>
+    </void>
+   </object>
+  </void>
+
  </object>
 </java>

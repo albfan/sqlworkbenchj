@@ -164,6 +164,7 @@ public class WbTable
 	private boolean showRowNumbers = false;
 	private JList rowHeader = null;
 	private boolean showPopup = true;
+	private boolean selectOnRightButtonClick = false;
 
 	public WbTable()
 	{
@@ -293,6 +294,9 @@ public class WbTable
 	{
 		return this.findAgainAction;
 	}
+
+	public void setSelectOnRightButtonClick(boolean flag) { this.selectOnRightButtonClick = flag; }
+	public boolean getSelectOnRightButtonClick() { return this.selectOnRightButtonClick; }
 
 	public void reset()
 	{
@@ -561,7 +565,7 @@ public class WbTable
 	{
 		if (this.dwModel == null) return;
 		if (aFlag == this.dwModel.getShowStatusColumn()) return;
-		
+
 		try
 		{
 			int column = this.getSelectedColumn();
@@ -578,7 +582,7 @@ public class WbTable
 			this.saveColumnSizes();
 
 			this.setSuspendRepaint(true);
-			
+
 			this.dwModel.setShowStatusColumn(aFlag);
 			if (aFlag)
 			{
@@ -600,9 +604,9 @@ public class WbTable
 
 			this.initDefaultEditors();
 			this.restoreColumnSizes();
-			
+
 			this.setSuspendRepaint(false);
-			
+
 			if (sortColumn > -1 && this.dwModel != null)
 			{
 				if (aFlag)
@@ -630,12 +634,12 @@ public class WbTable
 	}
 
 	private boolean suspendRepaint = false;
-	
+
 	public synchronized void setSuspendRepaint(boolean aFlag)
 	{
 		boolean suspend = this.suspendRepaint;
 		this.suspendRepaint = aFlag;
-		
+
 		// if repainting was re-enabled, then queue
 		// a repaint event right away
 		if (suspend && !aFlag)
@@ -650,19 +654,19 @@ public class WbTable
 			});
 		}
 	}
-	
+
 	public void repaint()
 	{
 		if (this.suspendRepaint) return;
 		super.repaint();
 	}
-	
+
 	public void paintComponents(Graphics g)
 	{
 		if (this.suspendRepaint) return;
 		super.paintComponents(g);
 	}
-		
+
 
 	public int getSortedViewColumnIndex()
 	{
@@ -1146,6 +1150,12 @@ public class WbTable
 			}
 			else if (this.showPopup && this.popup != null)
 			{
+				int row = this.rowAtPoint(e.getPoint());
+				int selected = this.getSelectedRowCount();
+				if (selected <= 1 && row >= 0 && this.selectOnRightButtonClick)
+				{
+					this.getSelectionModel().setSelectionInterval(row, row);
+				}
 				this.findAction.setEnabled(this.getRowCount() > 0);
 				this.findAgainAction.setEnabled(this.lastFoundRow > 0);
 				this.popup.show(this, e.getX(), e.getY());
@@ -1616,14 +1626,14 @@ public class WbTable
 
 	public int duplicateRow()
 	{
-		DataStore ds = this.getDataStore();
-		if (ds == null) return -1;
+		DataStoreTableModel model = this.getDataStoreTableModel();
+		if (model == null) return -1;
 		if (this.getSelectedRowCount() != 1) return -1;
 		int row = this.getSelectedRow();
-		int newRow = ds.duplicateRow(row);
+		int newRow = model.duplicateRow(row);
 		return newRow;
 	}
-	
+
 	public boolean deleteRow()
 	{
 		DataStoreTableModel ds = this.getDataStoreTableModel();

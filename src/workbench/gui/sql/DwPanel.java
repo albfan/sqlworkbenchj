@@ -270,18 +270,18 @@ public class DwPanel
 	}
 
 	private boolean saveChangesInBackground = false;
-	
-	public void setSaveChangesInBackground(boolean flag) 
-	{ 
-		this.saveChangesInBackground = flag; 
+
+	public void setSaveChangesInBackground(boolean flag)
+	{
+		this.saveChangesInBackground = flag;
 	}
-	
+
 	public synchronized void saveChangesToDatabase()
 	{
 		if (this.dbConnection == null) return;
 		if (!this.shouldSaveChanges(this.dbConnection)) return;
-		
-		if (this.saveChangesInBackground) 
+
+		if (this.saveChangesInBackground)
 		{
 			this.startBackgroundSave();
 			return;
@@ -305,7 +305,7 @@ public class DwPanel
 		{
 			WbSwingUtilities.showDefaultCursor(this);
 		}
-		
+
 	}
 	private void startBackgroundSave()
 	{
@@ -320,7 +320,7 @@ public class DwPanel
 		t.setDaemon(true);
 		t.start();
 	}
-	
+
 	public boolean shouldSaveChanges(WbConnection aConnection)
 	{
 		if (!WbManager.getSettings().getDbDebugMode()) return true;
@@ -425,6 +425,12 @@ public class DwPanel
 	public void setUpdateTable(String aTable)
 	{
 		this.infoTable.getDataStore().setUpdateTable(aTable);
+		this.fireUpdateTableChanged();
+	}
+
+	private void fireUpdateTableChanged()
+	{
+		firePropertyChange("updateTable", null, this.getTable().getDataStore().getUpdateTable());
 	}
 
 	public void setReadOnly(boolean aFlag)
@@ -452,7 +458,12 @@ public class DwPanel
 		if (ds == null) return false;
 		if (this.dbConnection == null) return false;
 		if (this.sql == null) return false;
-		return ds.checkUpdateTable(this.sql, this.dbConnection);
+		boolean result = ds.checkUpdateTable(this.sql, this.dbConnection);
+		if (result)
+		{
+			this.fireUpdateTableChanged();
+		}
+		return result;
 	}
 
 	public boolean isUpdateable()
@@ -501,6 +512,7 @@ public class DwPanel
 		{
 			long end, sqlTime = 0;
 			long execTime = 0;
+			long checkUpdateTime = 0;
 
 			this.clearContent();
 
@@ -571,8 +583,15 @@ public class DwPanel
 					this.infoTable.adjustColumns();
 				}
 
-				this.setStatusMessage(ResourceMgr.getString("MsgCheckingUpdateTable"));
-				this.checkUpdateTable();
+				if (!this.dbConnection.getProfile().getDisableUpdateTableCheck())
+				{
+					this.setStatusMessage(ResourceMgr.getString("MsgCheckingUpdateTable"));
+					long updStart, updEnd;
+					updStart = System.currentTimeMillis();
+					this.checkUpdateTable();
+					updEnd = System.currentTimeMillis();
+					checkUpdateTime = (updEnd - updStart);
+				}
 				this.clearStatusMessage();
 
 				if (this.manageUpdateAction)
@@ -624,6 +643,11 @@ public class DwPanel
 				this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgSqlVerbTime") + " " + (((double)sqlTime) / 1000.0) + "s";
 			}
 			this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s";
+
+			if (checkUpdateTime > 0 && LogMgr.isDebug())
+			{
+				this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgCheckUpdateTableTime") + " " + (((double)checkUpdateTime) / 1000.0) + "s";
+			}
 		}
 		catch (SQLException sqle)
 		{

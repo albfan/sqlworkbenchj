@@ -17,9 +17,10 @@ import java.util.List;
 import java.util.Map;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import workbench.log.LogMgr;
 
 /**
- *	Generates a SQL script to delete a record from the given table and 
+ *	Generates a SQL script to delete a record from the given table and
  *	any dependent tables.
  * @author  workbench@kellerer.org
  */
@@ -33,7 +34,7 @@ public class DeleteScriptGenerator
 	private TableDependency dependency;
 	private DbMetadata meta;
 	private DataStore tableDefinition;
-	
+
 	public DeleteScriptGenerator(WbConnection aConnection)
 		throws SQLException
 	{
@@ -42,7 +43,7 @@ public class DeleteScriptGenerator
 		this.dependency = new TableDependency();
 		this.dependency.setConnection(this.connection);
 	}
-	
+
 	public void setTable(String aCatalog, String aSchema, String aTable)
 		throws SQLException
 	{
@@ -52,10 +53,10 @@ public class DeleteScriptGenerator
 		{
 			this.tablename = this.tablename.substring(this.tablename.lastIndexOf('.') + 1);
 		}
-		
+
 		this.catalogname = this.meta.adjustObjectname(aCatalog);
 		this.schemaname = this.meta.adjustObjectname(aSchema);
-		
+
 		if (this.schemaname == null)
 		{
 			try
@@ -67,23 +68,23 @@ public class DeleteScriptGenerator
 				this.schemaname = null;
 			}
 		}
-		
+
 		this.dependency.setTableName(this.catalogname, this.schemaname, this.tablename);
 		this.tableDefinition = this.meta.getTableDefinition(this.catalogname, this.schemaname, this.tablename);
 	}
-	
+
 	public void setValues(Map colValues)
 	{
 		this.columnValues = colValues;
 	}
-	
+
 	public String createScript()
 	{
 		ArrayList parents = new ArrayList();
 		this.dependency.readDependencyTree(true);
 		List leafs = this.dependency.getLeafs();
 		StringBuffer sql = new StringBuffer(2000);
-		DependencyNode p, node; 
+		DependencyNode p, node;
 		for (int i=0; i < leafs.size(); i++)
 		{
 			node = (DependencyNode)leafs.get(i);
@@ -108,7 +109,7 @@ public class DeleteScriptGenerator
 		DependencyNode root = this.dependency.getRootNode();
 		sql.append("DELETE FROM ");
 		sql.append(this.createTableExpression(root.getCatalog(), root.getSchema(), root.getTable()));
-		sql.append(" WHERE ");
+		sql.append("\n WHERE ");
 		this.addRootTableWhere(sql);
 		sql.append(';');
 		return sql.toString();
@@ -120,11 +121,11 @@ public class DeleteScriptGenerator
 		String catalog = node.getCatalog();
 		String schema = node.getSchema();
 		String table = node.getTable();
-		
+
 		sql.append("DELETE FROM ");
 		sql.append(this.createTableExpression(catalog, schema, table));
-		sql.append("\n   WHERE ");
-		
+		sql.append("\n WHERE ");
+
 		this.addParentWhere(sql, node);
 		sql.append(';');
 	}
@@ -162,7 +163,7 @@ public class DeleteScriptGenerator
 					sql.append(parentColumn);
 					sql.append(" FROM ");
 					sql.append(this.createTableExpression(parentCatalog, parentSchema, parentTable));
-					sql.append(" WHERE ");
+					sql.append("\n WHERE ");
 					this.addParentWhere(sql, parent, column);
 					sql.append(")) ");
 					count ++;
@@ -176,16 +177,16 @@ public class DeleteScriptGenerator
 		}
 		catch (Throwable th)
 		{
-			th.printStackTrace();
+			LogMgr.logError("DeleteScriptGenerator.addParentWhere()", "Error during script generation", th);
 		}
 	}
-	
+
 	private boolean isMasterTable(DependencyNode node)
 	{
 		String table = node.getTable();
 		String schema = node.getSchema();
 		String catalog = node.getCatalog();
-		
+
 		if (schema == null) schema = "";
 		if (table == null) table = "";
 		return (schema.equals(this.schemaname) && table.equals(this.tablename));
@@ -200,24 +201,31 @@ public class DeleteScriptGenerator
 			String column = (String)entry.getKey();
 			column = this.meta.adjustObjectname(column);
 			Object data = entry.getValue();
-      String value = data.toString();
 			int type = this.getColumnType(tableDefinition, column);
-			if (!first) 
+			if (!first)
 			{
-				sql.append(" AND ");
+				sql.append("\n   AND ");
 			}
 			else
 			{
 				first = false;
 			}
-			
+
 			sql.append(SqlUtil.quoteObjectname(column));
-			sql.append(" = ");
-			boolean charType = (type == Types.VARCHAR || type == Types.CHAR);
-			if (charType)	sql.append('\'');
-			sql.append(value);
-			if (charType)	sql.append('\'');
-		}		
+			if (data == null)
+			{
+				sql.append(" IS NULL");
+			}
+			else
+			{
+	      String value = data.toString();
+				sql.append(" = ");
+				boolean charType = (type == Types.VARCHAR || type == Types.CHAR);
+				if (charType)	sql.append('\'');
+				sql.append(value);
+				if (charType)	sql.append('\'');
+			}
+		}
 	}
 	private StringBuffer createTableExpression(String aCatalog, String aSchema, String aTable)
 	{
@@ -230,9 +238,9 @@ public class DeleteScriptGenerator
 		buff.append(SqlUtil.quoteObjectname(this.meta.adjustObjectname(aTable)));
 		return buff;
 	}
-	
+
 	private int getColumnType(DataStore tableDef, String aColname)
-	{	
+	{
 		for (int i=0; i < tableDef.getRowCount(); i ++)
 		{
 			String col = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
@@ -277,5 +285,5 @@ public class DeleteScriptGenerator
 			try { con.close(); } catch (Throwable th) {}
 		}
 	}
-	
+
 }

@@ -15,8 +15,10 @@ import java.math.BigInteger;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -29,6 +31,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import workbench.db.ColumnIdentifier;
 
 import workbench.log.LogMgr;
+import workbench.util.ValueConverter;
 
 /**
  *
@@ -43,7 +46,7 @@ public class XmlDataFileParser
 
 	private int currentRowNumber = 1;
 	private int colCount;
-	//private String[] colNames;
+
 	private ColumnIdentifier[] columns;
 	private String[] colClasses;
 	private String[] colFormats;
@@ -433,22 +436,36 @@ public class XmlDataFileParser
 				
 			case Types.DATE:
 			case Types.TIMESTAMP:
+				java.sql.Date d = null;
 				if (this.hasLongValue)
 				{
-					this.currentRow[this.currentColIndex] = new java.sql.Date(this.columnLongValue);
+					d = new java.sql.Date(this.columnLongValue);
 				}
 				else
 				{
 					try
 					{
-						SimpleDateFormat sdf = new SimpleDateFormat(this.colFormats[this.currentColIndex]);
-						java.util.Date d = sdf.parse(value);
-						this.currentRow[this.currentColIndex] = new java.sql.Date(d.getTime());
+						SimpleDateFormat sdf = new SimpleDateFormat();
+						java.util.Date ud = sdf.parse(value);
+						d = new java.sql.Date(d.getTime());
 					}
 					catch (Exception e)
 					{
 						LogMgr.logError("XmlDataFileParser.buildColumnData()", "Could not convert data value " + value + " using format " + this.colFormats[this.currentColIndex], e);
 						this.currentRow[this.currentColIndex] = null;
+						d = null;
+					}
+				}
+				
+				if (d != null)
+				{
+					if (this.columns[this.currentColIndex].getDataType() == Types.TIMESTAMP)
+					{
+						this.currentRow[this.currentColIndex] = new java.sql.Timestamp(d.getTime());
+					}
+					else
+					{
+						this.currentRow[this.currentColIndex] = d;
 					}
 				}
 				break;
@@ -509,6 +526,11 @@ public class XmlDataFileParser
 			}
 		}
 		if (!this.keepRunning) throw new ParsingInterruptedException();
+	}
+	
+	public String getMessages()
+	{
+		return "";
 	}
 	
 }

@@ -672,8 +672,12 @@ public class MainWindow
 
 	public void saveSettings()
 	{
-		int index = this.sqlTab.getSelectedIndex();
     Settings sett = WbManager.getSettings();
+
+    // this stores the state of the dbExplorer tab
+    // if the DbExplorer should be displayed as a tab
+    // it will be restored the next time if is't visible when
+    // closing the window
 		sett.setDbExplorerVisible(this.dbExplorerTabVisible);
 
 		int state = this.getExtendedState();

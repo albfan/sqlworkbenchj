@@ -72,7 +72,7 @@ public class SqlUtil
 		if (fromEnd == -1) fromEnd = aSql.indexOf(" ORDER ", fromPos);
 		if (fromEnd == -1) fromEnd = aSql.length();
 		String fromList = orgSql.substring(fromPos + FROM.length(), fromEnd);
-		
+
 		boolean joinSyntax = (aSql.indexOf(" JOIN ", fromPos) > -1);
 		ArrayList result = new ArrayList();
 		if (joinSyntax)
@@ -93,7 +93,7 @@ public class SqlUtil
 					result.add(s);
 					nextIsTable = false;
 				}
-				else 
+				else
 				{
 					nextIsTable = ("JOIN".equalsIgnoreCase(s));
 				}
@@ -116,7 +116,7 @@ public class SqlUtil
 
 		return result;
 	}
-	
+
 	public static String makeCleanSql(String aSql, boolean keepNewlines)
 	{
 		return makeCleanSql(aSql, keepNewlines, '\'');
@@ -330,6 +330,11 @@ public class SqlUtil
 		return getDecimalClass(aSqlType, aSize, aPrecision);
 	}
 
+	/**
+	 * returns true if the passed data type (from java.sql.Types)
+	 * indicates a data type which can hold numeric values with
+	 * decimals
+	 */
 	public static final boolean isDecimalType(int aSqlType, int aScale, int aPrecision)
 	{
 		if (aSqlType == Types.DECIMAL ||
@@ -353,6 +358,10 @@ public class SqlUtil
 						aSqlType == Types.SMALLINT ||
 						aSqlType == Types.TINYINT);
 	}
+	/**
+	 * 	Returns true if the passed datatype (from java.sql.Types)
+	 *  can hold a numeric value (either with or without decimals)
+	 */
 	public static final boolean isNumberType(int aSqlType)
 	{
 		return (aSqlType == Types.BIGINT ||
@@ -454,5 +463,5 @@ public class SqlUtil
 		}
 		System.out.println("*** Done.");
 	}
-	
+
 }

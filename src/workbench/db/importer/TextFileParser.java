@@ -17,9 +17,13 @@ import java.util.List;
 import workbench.db.ColumnIdentifier;
 
 import workbench.db.DbMetadata;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.exception.ExceptionUtil;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.util.CsvLineParser;
 import workbench.util.ValueConverter;
 import workbench.util.WbStringTokenizer;
 
@@ -50,7 +54,8 @@ public class TextFileParser
 	private WbConnection connection;
 
 	private ValueConverter converter;
-
+	private StringBuffer messages = new StringBuffer(100);
+	
 	/** Creates a new instance of TextFileParser */
 	public TextFileParser(String aFile)
 	{
@@ -83,6 +88,11 @@ public class TextFileParser
 		this.encoding = enc;
 	}
 
+	public String getMessages()
+	{
+		return this.messages.toString();
+	}
+	
 	public void setDelimiter(String delimit)
 	{
 		this.delimiter = delimit;
@@ -145,8 +155,6 @@ public class TextFileParser
 		this.converter.setDecimalCharacter(this.decimalChar);
 
 		String line;
-		List lineData;
-		Object colData;
 		int col;
 		int row;
 
@@ -171,41 +179,41 @@ public class TextFileParser
 
 		this.receiver.setTargetTable(this.tableName, this.columns);
 
-		lineData = new ArrayList(this.colCount);
 		Object value = null;
 		this.rowData = new Object[this.colCount];
-		WbStringTokenizer tok = new WbStringTokenizer(delimiter.charAt(0), "", false);
 		int importRow = 0;
+		CsvLineParser tok = new CsvLineParser(delimiter.charAt(0), '"');
 
 		while (line != null)
 		{
 			if (this.doCancel()) break;
 
 			this.clearRowData();
-			lineData.clear();
-
-			tok.setSourceString(line);
-			while (tok.hasMoreTokens())
-			{
-				lineData.add(tok.nextToken());
-			}
 
 			importRow ++;
+			tok.setLine(line);
 
 			for (int i=0; i < this.colCount; i++)
 			{
 				try
 				{
-					value = lineData.get(i);
-					if (value != null)
+					if (tok.hasNext())
 					{
+						value = tok.getNext();
 						rowData[i] = converter.convertValue(value, this.columns[i].getDataType());
 					}
 				}
 				catch (Exception e)
 				{
-					LogMgr.logWarning("TextFileParser.parse()","Error in line=" + importRow + "reading col=" + i + ",value=" + value, e);
+					LogMgr.logWarning("TextFileParser.start()","Error in line=" + importRow + "reading col=" + i + ",value=" + value, e);
 					rowData[i] = null;
+					String msg = ResourceMgr.getString("ErrorTextfileImport");
+					msg = msg.replaceAll("%row%", Integer.toString(importRow + 1));
+					//msg = msg.replaceAll("%col%", this.columns[i].getName());
+					msg = msg.replaceAll("%value%", (value == null ? "" : value.toString()));
+					msg = msg.replaceAll("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
+					this.messages.append(msg);
+					this.messages.append("\n");
 				}
 			}
 
@@ -239,6 +247,8 @@ public class TextFileParser
 
 	private void clearRowData()
 	{
+		// this is nearly as fast as using System.arrayCopy() 
+		// with a blank array...
 		for (int i=0; i < this.colCount; i++)
 		{
 			this.rowData[i] = null;
@@ -264,24 +274,28 @@ public class TextFileParser
 	{
 		try
 		{
-			this.colCount = cols.size();
+			ArrayList myCols = new ArrayList(cols);
+			this.colCount = myCols.size();
 			this.columns = new ColumnIdentifier[this.colCount];
 
 			for (int i=0; i < this.colCount; i++)
 			{
-				this.columns[i] = new ColumnIdentifier((String)cols.get(i));
+				String colname = (String)myCols.get(i);
+				this.columns[i] = new ColumnIdentifier(colname);
+				myCols.set(i, colname.toUpperCase());
 			}
 			DbMetadata meta = this.connection.getMetadata();
-			DataStore ds = meta.getTableDefinition(this.tableName);
-			int tableCols = ds.getRowCount();
+			List colIds = meta.getTableColumns(new TableIdentifier(this.tableName));
+			int tableCols = colIds.size();
 
 			for (int i=0; i < tableCols; i++)
 			{
-				String column = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME).toUpperCase();
-				int index = cols.indexOf(column);
+				ColumnIdentifier id = (ColumnIdentifier)colIds.get(i);
+				String column = id.getColumnName().toUpperCase();
+				int index = myCols.indexOf(column);
 				if (index >= 0)
 				{
-					this.columns[i].setDataType(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE, ColumnIdentifier.NO_TYPE));
+					this.columns[i].setDataType(id.getDataType());
 				}
 			}
 		}

@@ -66,6 +66,7 @@ public class ConnectionEditorPanel
 		policy.addComponent(cbStorePassword);
 		policy.addComponent(cbSeperateConnections);
 		policy.addComponent(cbIgnoreDropErrors);
+		policy.addComponent(disableTableCheck);
 		policy.addComponent(tfWorkspaceFile);
 		policy.setDefaultComponent(tfProfileName);
 
@@ -116,12 +117,13 @@ public class ConnectionEditorPanel
     cbSeperateConnections = new BooleanPropertyEditor();
     cbIgnoreDropErrors = new BooleanPropertyEditor();
     jSeparator1 = new javax.swing.JSeparator();
-    jLabel3 = new javax.swing.JLabel();
+    workspaceFileLabel = new javax.swing.JLabel();
     tfWorkspaceFile = new StringPropertyEditor();
     selectWkspButton = new javax.swing.JButton();
     manageDriversButton = new WbButton();
     extendedProps = new javax.swing.JButton();
     helpButton = new WbButton();
+    disableTableCheck = new BooleanPropertyEditor();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -299,16 +301,16 @@ public class ConnectionEditorPanel
     gridBagConstraints.weighty = 1.0;
     add(jSeparator1, gridBagConstraints);
 
-    jLabel3.setLabelFor(tfWorkspaceFile);
-    jLabel3.setText(ResourceMgr.getString("LabelOpenWksp"));
-    jLabel3.setToolTipText(ResourceMgr.getDescription("LabelOpenWksp"));
+    workspaceFileLabel.setLabelFor(tfWorkspaceFile);
+    workspaceFileLabel.setText(ResourceMgr.getString("LabelOpenWksp"));
+    workspaceFileLabel.setToolTipText(ResourceMgr.getDescription("LabelOpenWksp"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
-    add(jLabel3, gridBagConstraints);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    add(workspaceFileLabel, gridBagConstraints);
 
     tfWorkspaceFile.setHorizontalAlignment(javax.swing.JTextField.LEFT);
     tfWorkspaceFile.setMaximumSize(new java.awt.Dimension(2147483647, 20));
@@ -317,11 +319,11 @@ public class ConnectionEditorPanel
     tfWorkspaceFile.setPreferredSize(new java.awt.Dimension(100, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 6, 2, 29);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     add(tfWorkspaceFile, gridBagConstraints);
 
     selectWkspButton.setText("...");
@@ -330,7 +332,7 @@ public class ConnectionEditorPanel
     selectWkspButton.setPreferredSize(new java.awt.Dimension(26, 22));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
     add(selectWkspButton, gridBagConstraints);
 
@@ -389,6 +391,16 @@ public class ConnectionEditorPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 4);
     add(helpButton, gridBagConstraints);
+
+    disableTableCheck.setText(ResourceMgr.getString("LabelDisableAutoTableCheck"));
+    disableTableCheck.setToolTipText(ResourceMgr.getDescription("LabelDisableAutoTableCheck"));
+    disableTableCheck.setName("disableUpdateTableCheck");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 11;
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    add(disableTableCheck, gridBagConstraints);
 
   }//GEN-END:initComponents
 
@@ -468,9 +480,9 @@ public class ConnectionEditorPanel
   private javax.swing.JCheckBox cbIgnoreDropErrors;
   private javax.swing.JCheckBox cbSeperateConnections;
   private javax.swing.JCheckBox cbStorePassword;
+  private javax.swing.JCheckBox disableTableCheck;
   private javax.swing.JButton extendedProps;
   private javax.swing.JButton helpButton;
-  private javax.swing.JLabel jLabel3;
   private javax.swing.JSeparator jSeparator1;
   private javax.swing.JSeparator jSeparator2;
   private javax.swing.JLabel lblDriver;
@@ -484,6 +496,7 @@ public class ConnectionEditorPanel
   private javax.swing.JTextField tfURL;
   private javax.swing.JTextField tfUserName;
   private javax.swing.JTextField tfWorkspaceFile;
+  private javax.swing.JLabel workspaceFileLabel;
   // End of variables declaration//GEN-END:variables
 
 	public void setDrivers(List aDriverList)

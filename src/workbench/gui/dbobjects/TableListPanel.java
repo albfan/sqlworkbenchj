@@ -183,6 +183,7 @@ public class TableListPanel
 
 		this.listPanel = new JPanel();
 		this.tableList = new WbTable();
+		this.tableList.setSelectOnRightButtonClick(true);
 		this.tableList.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		this.tableList.setCellSelectionEnabled(false);
 		this.tableList.setColumnSelectionAllowed(false);

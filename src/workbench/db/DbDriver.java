@@ -143,7 +143,7 @@ public class DbDriver
 				for (int i=0; tok.hasMoreTokens(); i++)
 				{
 					url[i] = new File(tok.nextToken().trim()).toURL();
-					LogMgr.logDebug("DbDriver.loadDriverClass()", "Adding ClassLoader URL=" + url[i].toString());
+					LogMgr.logInfo("DbDriver.loadDriverClass()", "Adding ClassLoader URL=" + url[i].toString());
 				}
 				this.classLoader = new URLClassLoader(url);
 			}

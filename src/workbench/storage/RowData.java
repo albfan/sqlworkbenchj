@@ -11,13 +11,13 @@ class RowData
 	public static final int NOT_MODIFIED = 0;
 	public static final int MODIFIED = 1;
 	public static final int NEW = 2;
-	
+
 	private int status = NOT_MODIFIED;
 	private boolean dmlSent = false;
-	
+
 	Object[] colData;
 	private Object[] originalData;
-	
+
 	/** Creates new RowData */
 	public RowData(int aColCount)
 	{
@@ -28,10 +28,13 @@ class RowData
 	public RowData createCopy()
 	{
 		RowData result = new RowData(this.colData.length);
-		result.colData = this.colData;
+		for (int i=0; i < this.colData.length; i++)
+		{
+			result.colData[i] = this.colData[i];
+		}
 		return result;
 	}
-	
+
 	/**
 	 *	Sets the new data for the given column.
 	 *	After a call isModified() will return true
@@ -64,7 +67,7 @@ class RowData
 		this.colData[aColIndex] = aValue;
 		this.setModified();
 	}
-	
+
 	/**
 	 *	Returns the value for the given column
 	 *
@@ -83,7 +86,7 @@ class RowData
 		if (this.originalData[aColumn] == null) return this.getValue(aColumn);
 		return this.originalData[aColumn];
 	}
-	
+
 	public void restoreOriginalValues()
 	{
 		if (this.originalData == null) return;
@@ -97,7 +100,7 @@ class RowData
 		this.originalData = null;
 		this.resetStatus();
 	}
-	
+
 	public boolean isColumnModified(int aColumn)
 	{
 		if (this.isOriginal()) return false;
@@ -116,8 +119,8 @@ class RowData
 		NullValue nul = NullValue.getInstance(aType);
 		this.setValue(aColumn, nul);
 	}
-	
-	/**	
+
+	/**
 	 *	Resets the internal status. After a call to resetStatus()
 	 *	isModified() will return false, and isOriginal() will return true.
 	 */
@@ -137,7 +140,7 @@ class RowData
 	}
 
 	/**
-	 *	Returns true if the row is neither modified nor is a new row. 
+	 *	Returns true if the row is neither modified nor is a new row.
 	 *
 	 *	@returns true if the row has not been altered since retrieval
 	 */
@@ -145,7 +148,7 @@ class RowData
 	{
 		return this.status == NOT_MODIFIED;
 	}
-	
+
 	/**
 	 *	Check if the row has been modified.
 	 *
@@ -169,7 +172,7 @@ class RowData
 	}
 
 	/**
-	 *	Set the status to modified. 
+	 *	Set the status to modified.
 	 */
 	public void setModified()
 	{
@@ -180,6 +183,6 @@ class RowData
 	{
 		this.dmlSent = aFlag;
 	}
-	
+
 	public boolean isDmlSent() { return this.dmlSent; }
 }

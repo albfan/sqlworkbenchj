@@ -38,6 +38,8 @@ import workbench.storage.SqlSyntaxFormatter;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
+import java.sql.ResultSetMetaData;
+import workbench.db.mssql.MsSqlMetaData;
 
 /**
  *  @author  workbench@kellerer.org
@@ -66,8 +68,12 @@ public class DbMetadata
 	private DatabaseMetaData metaData;
 	//private List tableListColumns;
 	private WbConnection dbConnection;
+	
+	// Specialized classes to retrieve metadata that is either not
+	// supported by JDBC or where the JDBC driver does not work properly
 	private OracleMetaData oracleMetaData;
-
+	private MsSqlMetaData msSqlMetaData;
+	
 	private static List serversWhichNeedReconnect = Collections.EMPTY_LIST;
 	private static List caseSensitiveServers = Collections.EMPTY_LIST;
 	private static List ddlNeedsCommitServers = Collections.EMPTY_LIST;
@@ -90,18 +96,20 @@ public class DbMetadata
   private boolean caseSensitive;
 	private boolean useJdbcCommit;
 	private boolean ddlNeedsCommit;
-  private boolean isOracle;
-	private boolean isPostgres;
-	private boolean isHsql;
-	private boolean isFirebird;
-	private boolean isSqlServer;
-	private boolean isMySql;
+  private boolean isOracle = false;
+	private boolean isPostgres = false;
+	private boolean isHsql = false;
+	private boolean isFirebird = false;
+	private boolean isSqlServer = false;
+	private boolean isMySql = false;
+	private boolean isASA = false; // Adaptive Server Anywhere
 	private boolean createInlineConstraints = false;
 
 	private AbstractConstraintReader constraintReader = null;
 
 	private List keywords;
 	private String quoteCharacter;
+	private String dbVersion;
 
 	/** Creates a new instance of DbMetadata */
 	public DbMetadata(WbConnection aConnection)
@@ -189,9 +197,11 @@ public class DbMetadata
 		{
 			this.isSqlServer = true;
 			this.constraintReader = new SqlServerConstraintReader();
+			this.msSqlMetaData = new MsSqlMetaData(this.dbConnection.getSqlConnection());
 		}
 		else if (productLower.indexOf("adaptive server") > -1)
 		{
+			this.isASA = true;
 			this.constraintReader = new ASAConstraintReader();
 		}
 		else if (productLower.indexOf("mysql") > -1)
@@ -209,6 +219,15 @@ public class DbMetadata
 		}
 		if (this.quoteCharacter == null || this.quoteCharacter.length() == 0) this.quoteCharacter = "\"";
 
+		try
+		{
+			this.dbVersion = this.metaData.getDatabaseProductVersion();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("DbMetadata.<init>", "errro calling getDatabaseProductVersion()", e);
+		}
+
 		this.needsReconnect = serversWhichNeedReconnect.contains(this.productName);
 		this.caseSensitive = caseSensitiveServers.contains(this.productName);
 		this.useJdbcCommit = serverNeedsJdbcCommit.contains(this.productName);
@@ -216,6 +235,7 @@ public class DbMetadata
 		this.createInlineConstraints = serversWithInlineConstraints.contains(this.productName);
 	}
 
+	public String getDbVersion() { return this.dbVersion; }
 	public boolean getDDLNeedsCommit() { return ddlNeedsCommit; }
 	public boolean getUseJdbcCommit() { return this.useJdbcCommit; }
   public boolean isStringComparisonCaseSensitive() { return this.caseSensitive; }
@@ -1047,9 +1067,14 @@ public class DbMetadata
 		{
 			aSchema = null;
 		}
+		
+		ResultSet rs = null;
 		try
 		{
-			ResultSet rs = this.metaData.getProcedures(aCatalog, aSchema, "%");
+			if (this.msSqlMetaData != null)
+				rs = this.msSqlMetaData.getProcedures(aCatalog, aSchema);
+			else
+				rs = this.metaData.getProcedures(aCatalog, aSchema, "%");
 
 			String sType;
 
@@ -1075,17 +1100,22 @@ public class DbMetadata
 				}
 				int row = ds.addRow();
 
+
 				ds.setValue(row, COLUMN_IDX_PROC_LIST_CATALOG, cat);
 				ds.setValue(row, COLUMN_IDX_PROC_LIST_SCHEMA, schema);
 				ds.setValue(row, COLUMN_IDX_PROC_LIST_NAME, name);
 				ds.setValue(row, COLUMN_IDX_PROC_LIST_TYPE, sType);
 				ds.setValue(row, COLUMN_IDX_PROC_LIST_REMARKS, remark);
 			}
-			rs.close();
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("DbMetadata.getProcedures()", "Error while retrieving procedures", e);
+		}
+		finally
+		{
+			rs.close();
+			if (this.msSqlMetaData != null) this.msSqlMetaData.closeStatement();
 		}
 		return ds;
 	}
@@ -1167,6 +1197,7 @@ public class DbMetadata
 	{
 		if (this.oraOutput != null) this.oraOutput.close();
 		if (this.oracleMetaData != null) this.oracleMetaData.done();
+		if (this.msSqlMetaData != null) this.msSqlMetaData.done();
 		if (this.constraintReader != null) this.constraintReader.done();
 	}
 
@@ -1275,6 +1306,14 @@ public class DbMetadata
 		return this.getTableDefinition(aTable.getCatalog(), aTable.getSchema(), aTable.getTable(), "TABLE", false);
 	}
 
+	private DataStore createTableDefinitionDataStore()
+	{
+		final String cols[] = {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "java.sql.Types", "SCALE/SIZE", "PRECISION"};
+		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER};
+		final int sizes[] =   {20, 18, 5, 8, 10, 25, 18, 2, 2};
+		DataStore ds = new DataStore(cols, types, sizes);
+		return ds;
+	}
 	/** Return a DataStore containing the definition of the given table.
 	 * @param aCatalog The catalog in which the table is defined. This should be null if the DBMS does not support catalogs
 	 * @param aSchema The schema in which the table is defined. This should be null if the DBMS does not support schemas
@@ -1292,10 +1331,7 @@ public class DbMetadata
 	{
 		if (aTable == null) throw new IllegalArgumentException("Tablename may not be null!");
 
-		final String cols[] = {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "java.sql.Types", "SCALE/SIZE", "PRECISION"};
-		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER};
-		final int sizes[] =   {20, 18, 5, 8, 10, 25, 18, 2, 2};
-		DataStore ds = new DataStore(cols, types, sizes);
+		DataStore ds = this.createTableDefinitionDataStore();
 
 		int pos = aTable.indexOf(".");
 
@@ -1406,6 +1442,50 @@ public class DbMetadata
 			EnumReader.updateEnumDefinition(aTable, ds, this.dbConnection);
 		}
 
+		return ds;
+	}
+
+	public String getTableSourceFromResultSet(String tableName, ResultSetMetaData meta)
+		throws SQLException
+	{
+		DataStore table = this.getTableDefinitionFromResultSet(meta);
+		String source = this.getTableSource(null, null, tableName, table, null, null, false);
+		return source;
+	}
+
+	public DataStore getTableDefinitionFromResultSet(ResultSetMetaData meta)
+		throws SQLException
+	{
+		DataStore ds = this.createTableDefinitionDataStore();
+		int colCount = meta.getColumnCount();
+		for (int i=1; i <= colCount; i++)
+		{
+			int row = ds.addRow();
+
+			String colName = meta.getColumnName(i);;
+			int sqlType = meta.getColumnType(i);
+			String typeName = meta.getColumnTypeName(i);
+			int size = 0;
+
+			if (SqlUtil.isNumberType(sqlType))
+				size = meta.getPrecision(i);
+			else
+				size = meta.getColumnDisplaySize(i);
+
+			int digits = meta.getScale(i);
+
+			String display = this.getSqlTypeDisplay(typeName, sqlType, size, digits);
+			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_COL_NAME, colName);
+			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE, display);
+			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG, "NO");
+			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_NULLABLE, "YES");
+
+			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DEFAULT, null);
+			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_REMARKS, null);
+			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, new Integer(sqlType));
+			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_SIZE, new Integer(size));
+			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DIGITS, new Integer(digits));
+		}
 		return ds;
 	}
 
@@ -1627,9 +1707,16 @@ public class DbMetadata
 		return catalog;
 	}
 
-	public boolean understandsTruncate()
+	public boolean supportsTruncate()
 	{
-		return this.isOracle || this.isPostgres;
+		if (this.isMySql)
+		{
+			return !this.dbVersion.startsWith("3");
+		}
+		else
+		{
+			return this.isOracle || this.isPostgres || this.isASA;
+		}
 	}
 	/**
 	 *	Returns a list of all catalogs in the database.

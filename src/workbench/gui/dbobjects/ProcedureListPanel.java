@@ -165,7 +165,7 @@ public class ProcedureListPanel
 		this.dbConnection = aConnection;
 		this.source.getSqlTokenMarker().initDatabaseKeywords(aConnection.getSqlConnection());
 		this.reset();
-		
+
 		if (this.dbConnection.getMetadata().isOracle())
 		{
 			this.recompileItem = new WbMenuItem(ResourceMgr.getString("MnuTxtRecompile"));
@@ -187,7 +187,7 @@ public class ProcedureListPanel
 	{
 		this.setCatalogAndSchema(aCatalog, aSchema, true);
 	}
-	
+
 	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)
 		throws Exception
 	{
@@ -204,7 +204,7 @@ public class ProcedureListPanel
 	{
 		if (this.shouldRetrieve) this.retrieve();
 	}
-	
+
 	public void retrieve()
 	{
 		final Component current = this;
@@ -249,9 +249,9 @@ public class ProcedureListPanel
 
 		ArrayList names = new ArrayList(count);
 		ArrayList types = new ArrayList(count);
-		
+
 		this.readSelecteItems(names, types);
-		
+
 		ObjectDropperUI ui = new ObjectDropperUI();
 		ui.setObjects(names, types);
 		ui.setConnection(this.dbConnection);
@@ -359,7 +359,7 @@ public class ProcedureListPanel
 		for (int i=0; i < count; i ++)
 		{
 			String name = this.procList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_PROC_LIST_NAME);
-			
+
 			// MS SQL Server appends a semicolon at the end of the name...
 			if (name.indexOf(';') > 0)
 			{
@@ -386,7 +386,7 @@ public class ProcedureListPanel
 				if (catalog != null && catalog.length() > 0)
 				{
 					type = "PACKAGE";
-					
+
 					// the procedure itself cannot neither be dropped
 					// nor recompiled. So we use the name of the package
 					// as the object name
@@ -401,11 +401,22 @@ public class ProcedureListPanel
 					type = "PROCEDURE";
 				}
 			}
+			else
+			{
+				if ("RESULT".equalsIgnoreCase(type))
+      	{
+        	type = "FUNCTION";
+				}
+				else if ("NO RESULT".equalsIgnoreCase(type))
+				{
+					type = "PROCEDURE";
+				}
+			}
 			names.add(name);
 			types.add(type);
 		}
 	}
-	
+
 	private void compileObjects()
 	{
 		if (this.procList.getSelectedRowCount() == 0) return;
@@ -415,9 +426,9 @@ public class ProcedureListPanel
 
 		ArrayList names = new ArrayList(count);
 		ArrayList types = new ArrayList(count);
-		
+
 		this.readSelecteItems(names, types);
-		
+
 		try
 		{
 			ObjectCompilerUI ui = new ObjectCompilerUI(names, types, this.dbConnection);
@@ -427,7 +438,7 @@ public class ProcedureListPanel
 		{
 			LogMgr.logError("ProcedureListPanel.compileObjects()", "Error initializing ObjectCompilerUI", e);
 		}
-		
+
 	}
 	public void reload()
 	{

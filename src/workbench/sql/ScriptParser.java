@@ -263,16 +263,6 @@ public class ScriptParser
 		if (pos == -1 || pos == this.originalScript.length() - this.delimiterLength)
 		{
 			this.addCommand(0, -1);
-			/*
-			if (this.originalScript.endsWith(this.delimiter))
-			{
-				this.commands.add(this.originalScript.substring(0, this.originalScript.length() - this.delimiterLength));
-			}
-			else
-			{
-				this.commands.add(this.originalScript);
-			}
-			*/
 			return;
 		}
 
@@ -280,7 +270,8 @@ public class ScriptParser
 		{
 			currChar = this.originalScript.substring(pos, pos + 1);
 
-			if (currChar.charAt(0) == '\'' || currChar.charAt(0) == '"')
+			// ignore quotes in comments
+			if (!commentOn && currChar.charAt(0) == '\'' || currChar.charAt(0) == '"')
 			{
 				if (!quoteOn)
 				{
@@ -318,9 +309,9 @@ public class ScriptParser
 					// the single line comment test further down
 					char last = '\r';
 					if (pos > 1)  last = this.originalScript.charAt(pos - 1);
-					
+
 					char next = this.originalScript.charAt(pos + 1);
-					
+
 					if (toTest == '/' && next == '*')
 					{
 						blockComment = true;
@@ -370,18 +361,6 @@ public class ScriptParser
 				if ((currChar.equals(this.delimiter) || (pos == scriptLen)))
 				{
 					this.addCommand(lastPos, pos);
-					/*
-					value = this.originalScript.substring(lastPos, pos).trim();
-					int l = value.length();
-					if (l > 0)
-					{
-						if (value.endsWith(this.delimiter))
-						{
-							value = value.substring(0, l - this.delimiterLength);
-						}
-						if (SqlUtil.makeCleanSql(value, false).length() > 0) this.commands.add(value);
-					}
-					*/
 					lastPos = pos + this.delimiterLength;
 				}
 			}

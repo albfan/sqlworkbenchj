@@ -235,13 +235,13 @@ public class DataStore
 		if (aRow < 0 || aRow >= this.getRowCount()) return -1;
 		RowData oldRow = this.getRow(aRow);
 		RowData newRow = oldRow.createCopy();
-		int newIndex = aRow + 1; 
+		int newIndex = aRow + 1;
 		if (newIndex >= this.getRowCount()) newIndex = this.getRowCount();
 		this.data.add(newIndex, newRow);
 		this.modified = true;
 		return newIndex;
 	}
-	
+
 	public DataStore createCopy(boolean withData)
 	{
 		DataStore ds = new DataStore(this.columnNames, this.columnTypes, this.columnSizes);
@@ -545,13 +545,14 @@ public class DataStore
 		{
 			this.updateTable = null;
 			this.updateTableColumns = null;
+			this.pkColumns = null;
 		}
 		else if (!aTablename.equalsIgnoreCase(this.updateTable) && aConn != null)
 		{
 			this.pkColumns = null;
 			this.updateTable = null;
 			this.updateTableColumns = null;
-			// now check the columns which are in that table
+			// check the columns which are in that table
 			// so that we can refuse any changes to columns
 			// which do not derive from that table
 			// note that this does not work, if the
@@ -571,7 +572,7 @@ public class DataStore
 				this.updateTableColumns = new ArrayList();
 				for (int i=0; i < columns.getRowCount(); i++)
 				{
-					String column = columns.getValue(i, 0).toString();
+					String column = columns.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
 					this.updateTableColumns.add(column.toLowerCase());
 				}
 			}
@@ -1885,13 +1886,11 @@ public class DataStore
 
 	// =========== SQL Update generation ================
 	public String getDataAsSqlUpdate()
-		throws Exception, SQLException
 	{
 		return this.getDataAsSqlUpdate("\n");
 	}
 
 	public String getDataAsSqlUpdate(String aLineTerminator)
-		throws Exception, SQLException
 	{
 		return this.getDataAsSqlUpdate(aLineTerminator, null, null);
 	}
@@ -2130,14 +2129,14 @@ public class DataStore
 
 		CsvLineParser tok = new CsvLineParser(aColSeparator.charAt(0), '"');
 		int importRow = 0;
-		
+
 		while (line != null)
 		{
 			tok.setLine(line);
 
 			row = this.addRow();
 			importRow ++;
-			
+
 			this.updateProgressMonitor(importRow, -1);
 
 			this.setRowNull(row);
@@ -2149,9 +2148,9 @@ public class DataStore
 					String value = null;
 					try
 					{
-						
+
 						if (tok.hasNext()) value = tok.getNext();
-						
+
 						if (value == null || value.length() == 0)
 						{
 							this.setNull(row, col);
@@ -3012,7 +3011,7 @@ public class DataStore
 		if (this.updateTable == null) return null;
 		int pos = this.updateTable.indexOf(".");
 		String schema = null;
-		if (pos > -1) 
+		if (pos > -1)
 		{
 			schema = this.updateTable.substring(0, pos);
 		}

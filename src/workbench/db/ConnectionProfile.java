@@ -23,6 +23,7 @@ public class ConnectionProfile
 	private String password;
 	private String driverName;
 	private boolean autocommit;
+	private boolean disableUpdateTableCheck;
 	private String description;
 	private int id;
   private String identifier;
@@ -431,4 +432,23 @@ public class ConnectionProfile
 		this.driverName = driverName;
 	}
 
+	/**
+	 * Getter for property disableUpdateTableCheck.
+	 * @return Value of property disableUpdateTableCheck.
+	 */
+	public boolean getDisableUpdateTableCheck()
+	{
+		return disableUpdateTableCheck;
+	}
+	
+	/**
+	 * Setter for property disableUpdateTableCheck.
+	 * @param disableUpdateTableCheck New value of property disableUpdateTableCheck.
+	 */
+	public void setDisableUpdateTableCheck(boolean aFlag)
+	{
+		if (aFlag != this.disableUpdateTableCheck) this.changed = true;
+		this.disableUpdateTableCheck = aFlag;
+	}
+	
 }

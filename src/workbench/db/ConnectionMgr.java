@@ -62,10 +62,12 @@ public class ConnectionMgr
 		this.disconnect(anId);
 
 		WbConnection conn = new WbConnection(anId);
-		LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + aProfile.getName() + "] with ID=" + anId);
+		LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + aProfile.getName() + "] with ID=" + anId + " for driver=" + aProfile.getDriverclass());
 		Connection sql = this.connect(aProfile, anId);
 		conn.setSqlConnection(sql);
 		conn.setProfile(aProfile);
+		
+		LogMgr.logInfo("ConnectionMgr.connect()", "Connected to: [" + sql.getMetaData().getDatabaseProductName() + "], " + conn.getMetadata().getDbVersion());
 
 		try
 		{
@@ -93,10 +95,10 @@ public class ConnectionMgr
 		// established directly from the driver.
 		String drvClass = aProfile.getDriverclass();
 		String drvName = aProfile.getDriverName();
-		long start, end;
-		start = System.currentTimeMillis();
+		//long start, end;
+		//start = System.currentTimeMillis();
 		DbDriver drv = this.findDriverByName(drvClass, drvName);
-		end = System.currentTimeMillis();
+		//end = System.currentTimeMillis();
 		//LogMgr.logDebug("ConnectionMgr.connect()", "FindDriver took " + (end - start) + " ms");
 		if (drv == null)
 		{
@@ -121,7 +123,6 @@ public class ConnectionMgr
 					LogMgr.logInfo("ConnectionMgr.connect()", "(" + th.getMessage() + ")");
 				}
 			}
-			LogMgr.logInfo("ConnectionMgr.connect()", "Connected to: [" + sql.getMetaData().getDatabaseProductName() + "]");
 			return sql;
 		}
 		catch (Exception e)
