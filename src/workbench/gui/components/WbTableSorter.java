@@ -2,22 +2,18 @@ package workbench.gui.components;
 
 import java.awt.Cursor;
 import java.awt.EventQueue;
-import java.awt.event.InputEvent;
-// Imports for picking up mouse events from the JTable.
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
-import java.util.*;
 import java.util.Arrays;
-
-import javax.swing.JTable;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Vector;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-import workbench.gui.WbSwingUtilities;
 import workbench.storage.NullValue;
 
 
@@ -213,7 +209,7 @@ public class WbTableSorter
 				return 0;
 			}
 		}
-		else if (type == java.util.Date.class)
+		else if (type == Date.class)
 		{
 			Date d1 = (Date)data.getValueAt(row1, column);
 			long n1 = d1.getTime();
@@ -447,11 +443,14 @@ public class WbTableSorter
 		{
 			public void mouseClicked(MouseEvent e)
 			{
+				if (e.getButton() != e.BUTTON1) return;
+				if (e.getClickCount() != 1) return;
+				
 				TableColumnModel columnModel = tableView.getColumnModel();
 				final int viewColumn = columnModel.getColumnIndexAtX(e.getX());
 				final int column = tableView.convertColumnIndexToModel(viewColumn);
 
-				if (e.getButton() == e.BUTTON1 && e.getClickCount() == 1 && column != -1)
+				if (column != -1)
 				{
 					if (WbTableSorter.this.column == column)
 					{
@@ -479,8 +478,7 @@ public class WbTableSorter
 		}
 	}
 	
-	class ColumnComparator
-		implements Comparator
+	class ColumnComparator implements Comparator
 	{
 		public ColumnComparator()
 		{

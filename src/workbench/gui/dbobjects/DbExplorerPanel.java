@@ -7,9 +7,7 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
-import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -193,7 +191,7 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		return this.dbConnection != null;
 	}
 	
-	public void storeSettings()
+	public void saveSettings()
 	{
 		this.tables.saveSettings();
 		this.procs.saveSettings();
@@ -203,30 +201,21 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 	{
 		if (e.getSource() == this.schemaSelector)
 		{
-			
-			EventQueue.invokeLater(new Runnable()
+			try
 			{
-				public void run()
+				String schema = (String)schemaSelector.getSelectedItem();
+				String cat = null;
+				if (catalogSelector != null) 
 				{
-					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					try
-					{
-						String schema = (String)schemaSelector.getSelectedItem();
-						String cat = null;
-						if (catalogSelector != null) 
-						{
-							cat = (String)catalogSelector.getSelectedItem();
-						}
-						tables.setCatalogAndSchema(cat, schema);
-						procs.setCatalogAndSchema(cat, schema);
-					}
-					catch (Exception ex)
-					{
-						LogMgr.logError(this, "Could not set schema", ex);
-					}
-					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+					cat = (String)catalogSelector.getSelectedItem();
 				}
-			});
+				tables.setCatalogAndSchema(cat, schema);
+				procs.setCatalogAndSchema(cat, schema);
+			}
+			catch (Exception ex)
+			{
+				LogMgr.logError(this, "Could not set schema", ex);
+			}
 		}
 	}
 	

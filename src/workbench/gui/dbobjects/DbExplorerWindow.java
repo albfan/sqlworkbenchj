@@ -75,7 +75,7 @@ public class DbExplorerWindow
 	{
 		WbManager.getSettings().storeWindowPosition(this);
 		WbManager.getSettings().storeWindowSize(this);
-		this.panel.storeSettings();
+		this.panel.saveSettings();
 	}	
 	
 	public void windowClosing(WindowEvent e)

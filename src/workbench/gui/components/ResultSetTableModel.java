@@ -1,31 +1,24 @@
 package workbench.gui.components;
 
 import java.awt.Toolkit;
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.List;
-import javax.swing.table.AbstractTableModel;
-import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import javax.swing.JOptionPane;
+import java.util.Date;
+import java.util.List;
+import javax.swing.table.AbstractTableModel;
 import workbench.WbManager;
-
-import workbench.db.WbConnection;
 import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+
 
 
 /** 
@@ -205,7 +198,7 @@ public class ResultSetTableModel
 				DateFormat df = new SimpleDateFormat();
 				return df.parse(((String)aValue).trim());
 			case Types.TIMESTAMP:
-				return java.sql.Timestamp.valueOf(((String)aValue).trim());
+				return Timestamp.valueOf(((String)aValue).trim());
 			default:
 				return aValue;
 		}
@@ -286,9 +279,9 @@ public class ResultSetTableModel
 			case Types.VARCHAR:
 				return String.class;
 			case Types.DATE:
-				return java.util.Date.class;
+				return Date.class;
 			case Types.TIMESTAMP:
-				return java.sql.Timestamp.class;
+				return Timestamp.class;
 			default:
 				return Object.class;
 		}

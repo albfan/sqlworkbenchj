@@ -4,6 +4,7 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.sql.Connection;
@@ -47,7 +48,9 @@ public class ProcedureListPanel extends JPanel implements ListSelectionListener
 	private JSplitPane splitPane;
 	private DbMetadata meta;
 	private Object retrieveLock = new Object();
-	private TableModel emptyModel = new DefaultTableModel();
+	private String currentSchema;
+	private String currentCatalog;
+	private boolean shouldRetrieve;
 	
 	public ProcedureListPanel() throws Exception
 	{
@@ -112,8 +115,8 @@ public class ProcedureListPanel extends JPanel implements ListSelectionListener
 	
 	public void reset()
 	{
-		this.procList.setModel(new DefaultTableModel(), false);
-		this.procColumns.setModel(new DefaultTableModel(), false);
+		this.procList.reset();
+		this.procColumns.reset();
 		this.source.setText("");
 	}
 	
@@ -128,9 +131,48 @@ public class ProcedureListPanel extends JPanel implements ListSelectionListener
 		throws Exception
 	{
 		this.reset();
-		this.procList.setModel(this.meta.getListOfProcedures(aCatalog, aSchema), true);
-		this.procList.adjustColumns();
-		this.procColumns.setModel(new DefaultTableModel(), false);
+		this.currentSchema = aSchema;
+		this.currentCatalog = aCatalog;
+		if (this.isVisible())
+			this.retrieve();
+		else
+			this.shouldRetrieve = true;
+	}
+
+	public void retrieve()
+	{
+		final Container parent = this.getParent();
+		
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				synchronized (retrieveLock)
+				{
+					try
+					{
+						procList.setVisible(false);
+						parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+						procList.setModel(meta.getListOfProcedures(currentCatalog, currentSchema), true);
+						procList.adjustColumns();
+						parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+						procList.setVisible(true);
+						shouldRetrieve = false;
+					}
+					catch (Exception e)
+					{
+						LogMgr.logError("ProcedureListPanel.retrieve() thread", "Could not retrieve procedure list", e);
+					}
+				}
+			}
+		});
+	}
+	
+	public void setVisible(boolean aFlag)
+	{
+		super.setVisible(aFlag);
+		if (this.shouldRetrieve)
+			this.retrieve();
 	}
 	
 	public void saveSettings()
@@ -148,59 +190,52 @@ public class ProcedureListPanel extends JPanel implements ListSelectionListener
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
+		final Container parent = this.getParent();
+		int row = this.procList.getSelectedRow();
 		
-		try
-		{
-			int row = this.procList.getSelectedRow();
-			if (row >= 0)
-			{
-				int col = this.procList.getColumn("TYPE").getModelIndex();
-				final String type = this.procList.getValueAsString(row, 3);
-				
-				final String proc = this.procList.getValueAsString(row, 2);
-				final String schema = this.procList.getValueAsString(row, 1);
-				final String catalog = this.procList.getValueAsString(row, 0);
-				
-				EventQueue.invokeLater(new Runnable() 
-				{
-					public void run()
-					{
-						synchronized (retrieveLock)
-						{
-							splitPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-							try
-							{
-								procColumns.setModel(meta.getProcedureColumns(catalog, schema, proc), true);
-								procColumns.adjustColumns();
-							}
-							catch (Exception ex)
-							{
-								LogMgr.logError(this, "Could not read procedure definition", ex);
-								procColumns.setModel(new DefaultTableModel());
-							}
-							
-							try
-							{
-								String sql = meta.getProcedureSource(catalog, schema, proc);
-								source.setText(sql);
-							}
-							catch (Exception ex)
-							{
-								LogMgr.logError(this, "Could not read procedure source", ex);
-								source.setText(ex.getMessage());
-							}
-							source.setCaretPosition(0);
+		if (row < 0) return;
+		
+		final String proc = this.procList.getValueAsString(row, DbMetadata.COLUMN_IDX_PROC_LIST_NAME);
+		final String schema = this.procList.getValueAsString(row, DbMetadata.COLUMN_IDX_PROC_LIST_SCHEMA);
+		final String catalog = this.procList.getValueAsString(row, DbMetadata.COLUMN_IDX_PROC_LIST_CATALOG);
 
-							splitPane.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-						}
-					}
-				});
-			}
-		}
-		catch (Exception ex)
+		EventQueue.invokeLater(new Runnable() 
 		{
-			ex.printStackTrace();
-		}
+			public void run()
+			{
+				synchronized (retrieveLock)
+				{
+					parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					try
+					{
+						procColumns.setVisible(false);
+						procColumns.setModel(meta.getProcedureColumns(catalog, schema, proc), true);
+						procColumns.adjustColumns();
+						procColumns.setVisible(true);
+					}
+					catch (Exception ex)
+					{
+						LogMgr.logError("ProcedureListPanel.valueChanged() thread", "Could not read procedure definition", ex);
+						procColumns.reset();
+						procColumns.setVisible(true);
+					}
+
+					try
+					{
+						String sql = meta.getProcedureSource(catalog, schema, proc);
+						source.setText(sql);
+					}
+					catch (Exception ex)
+					{
+						LogMgr.logError("ProcedureListPanel.valueChanged() thread", "Could not read procedure source", ex);
+						source.setText(ex.getMessage());
+					}
+					source.setCaretPosition(0);
+
+					parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				}
+			}
+		});
 	}
 	
 }

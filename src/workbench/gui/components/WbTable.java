@@ -5,58 +5,40 @@
  */
 package workbench.gui.components;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.Math;
 import java.util.Date;
-import javax.swing.Action;
-import javax.swing.DefaultCellEditor;
-import javax.swing.JComponent;
-import javax.swing.JPopupMenu;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
+import javax.swing.table.*;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.OptimizeColumnWidthAction;
-import workbench.gui.actions.SetColumnWidthAction;
-import workbench.gui.actions.SortAscendingAction;
-import workbench.gui.actions.SortDescendingAction;
-import workbench.gui.actions.WbAction;
+import workbench.gui.actions.*;
 import workbench.gui.renderer.DateColumnRenderer;
 import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RowStatusRenderer;
 import workbench.gui.renderer.ToolTipRenderer;
+import workbench.interfaces.Exporter;
+import workbench.interfaces.Searchable;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.storage.NullValue;
 
 
-public class WbTable 
-	extends JTable
-	implements MouseListener, ActionListener
+
+public class WbTable extends JTable implements ActionListener, MouseListener, Exporter, Searchable
 {
 	private WbTableSorter sortModel;
 	private JPopupMenu popup;
@@ -64,8 +46,8 @@ public class WbTable
 	
 	private ResultSetTableModel dwModel;
 	private TableModel originalModel;
+	private String lastSearchCriteria;
 	private int lastFoundRow = -1;
-	private String lastSearchText;
 	private TableModelListener changeListener;
 
 	private DefaultCellEditor defaultEditor;
@@ -74,6 +56,11 @@ public class WbTable
 	private SortDescendingAction sortDescending;
 	private OptimizeColumnWidthAction optimizeCol;
 	private SetColumnWidthAction setColWidth;
+	
+	private FindAction findAction;
+	private FindAgainAction findAgainAction;
+	private DataToClipboardAction dataToClipboard;
+	private SaveDataAsAction exportDataAction;
 	
 	private boolean adjustToColumnLabel = true;
 	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.yellow);
@@ -116,8 +103,48 @@ public class WbTable
 		this.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		JTableHeader th = this.getTableHeader();
 		th.addMouseListener(this);	
+		
+		this.findAction = new FindAction(this);
+		this.findAction.setEnabled(false);
+		this.findAction.setCreateMenuSeparator(true);
+		this.findAgainAction = new FindAgainAction(this);
+		this.findAgainAction.setEnabled(false);
+		
+		this.dataToClipboard = new DataToClipboardAction(this);
+		this.exportDataAction = new SaveDataAsAction(this);
+		
+		this.addPopupAction(this.exportDataAction, false);
+		this.addPopupAction(this.dataToClipboard, false);
+		this.addPopupAction(this.findAction, true);
+		this.addPopupAction(this.findAgainAction, false);
+
+		InputMap im = this.getInputMap(WHEN_FOCUSED);
+		ActionMap am = this.getActionMap();
+		this.findAction.addToInputMap(im, am);
+		this.findAgainAction.addToInputMap(im, am);
+		this.dataToClipboard.addToInputMap(im, am);
+		this.exportDataAction.addToInputMap(im, am);
 	}
 	
+	public SaveDataAsAction getExportAction()
+	{
+		return this.exportDataAction;
+	}
+	
+	public DataToClipboardAction getDataToClipboardAction()
+	{
+		return this.dataToClipboard;
+	}
+	
+	public FindAction getFindAction()
+	{
+		return this.findAction;
+	}
+	
+	public FindAgainAction getFindAgainAction()
+	{
+		return this.findAgainAction;
+	}
 	public void reset()
 	{
 		if (this.dwModel != null)
@@ -147,6 +174,7 @@ public class WbTable
 			super.setModel(aModel);
 			this.sortModel = null;
 			this.originalModel = aModel;
+			this.dwModel = null;
 			this.checkModel();
 			if (this.sortAscending != null) this.sortAscending.setEnabled(false);
 			if (this.sortDescending != null) this.sortDescending.setEnabled(false);
@@ -161,6 +189,7 @@ public class WbTable
 	{
 		this.originalModel = aModel;
 		this.sortModel = new WbTableSorter(aModel);
+		this.dwModel = null;
 		super.setModel(this.sortModel);
     JTableHeader header = this.getTableHeader();
 		if (header != null)
@@ -289,18 +318,6 @@ public class WbTable
 		return result.toString();
 	}
 	
-	public void saveAsAscii(String aFilename)
-		throws IOException
-	{
-		if (this.sortModel == null || this.dwModel == null) return;
-		
-		PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(aFilename)));
-		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		this.getDataString("\r\n");
-		out.close();
-		this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	}
-	
 	public boolean canSearchAgain()
 	{
 		return this.lastFoundRow >= 0;
@@ -313,7 +330,7 @@ public class WbTable
 	
 	public int searchNext()
 	{
-		return this.search(this.lastSearchText, true);
+		return this.search(this.lastSearchCriteria, true);
 	}
 	
 	public int search(String aText, boolean doContinue)
@@ -338,7 +355,7 @@ public class WbTable
 			{
 				this.getSelectionModel().setSelectionInterval(i,i);
 				foundRow = i;
-				this.lastSearchText = aText;
+				this.lastSearchCriteria = aText;
 				break;
 			}
 		}
@@ -498,6 +515,8 @@ public class WbTable
 			}
 			else if (this.popup != null)
 			{
+				this.findAction.setEnabled(this.getRowCount() > 0);
+				this.findAgainAction.setEnabled(this.lastFoundRow > 0);
 				this.popup.show(this, e.getX(), e.getY());
 			}
 		}
@@ -571,6 +590,86 @@ public class WbTable
 			catch (Exception ex2)
 			{
 			}
+		}
+	}
+
+	public void resetPopup()
+	{
+		this.popup = null;
+	}
+	
+	/**
+	 *	Open the Find dialog for searching strings in the result set
+	 */
+	public void findData()
+	{
+		String criteria;
+		criteria = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgEnterSearchCriteria"), this.lastSearchCriteria);
+		if (criteria == null) return;
+		int row = this.search(criteria, false);
+		this.lastSearchCriteria = criteria;
+		this.findAgainAction.setEnabled(row >= 0);
+	}
+	
+	public void findNext()
+	{
+		this.searchNext();
+	}
+
+	public void copyDataToClipboard()
+	{
+		this.copyDataToClipboard(true);
+	}
+	public void copyDataToClipboard(boolean includeheaders)
+	{
+		if (this.getRowCount() == 0) return;
+		
+		Window parent = SwingUtilities.getWindowAncestor(this);
+		try
+		{
+			parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			String data = this.getDataString("\r", includeheaders);
+			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
+			StringSelection sel = new StringSelection(data);
+			clp.setContents(sel, sel);
+			parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError(this, "Could not access clipboard", e);
+		}
+	}
+	
+	public void saveAsAscii(String aFilename)
+		throws IOException
+	{
+		if (this.sortModel == null || this.dwModel == null) return;
+		
+		PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(aFilename)));
+		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		this.getDataString(System.getProperty("line.terminator", "\r\n"));
+		out.close();
+		this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+	}
+	
+	public void saveAsAscii()
+	{
+		try
+		{
+			String lastDir = WbManager.getSettings().getLastExportDir();
+			JFileChooser fc = new JFileChooser(lastDir);
+			int answer = fc.showSaveDialog(SwingUtilities.getWindowAncestor(this));
+			if (answer == JFileChooser.APPROVE_OPTION)
+			{
+				File fl = fc.getSelectedFile();
+				this.saveAsAscii(fl.getAbsolutePath());
+				lastDir = fc.getCurrentDirectory().getAbsolutePath();
+				WbManager.getSettings().setLastExportDir(lastDir);
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError(this, "Error saving ASCII file", e);
 		}
 	}
 	

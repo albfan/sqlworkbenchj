@@ -10,20 +10,12 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
-import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.lang.Runnable;
+import java.awt.event.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.*;
-import javax.swing.KeyStroke;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -52,8 +44,7 @@ import workbench.resource.Settings;
  * @author  sql.workbench@freenet.de
  * @version
  */
-public class MainWindow extends JFrame 
-	implements ActionListener, WindowListener, ChangeListener
+public class MainWindow extends JFrame implements ActionListener, WindowListener, ChangeListener
 {
 	private String windowId;
 	private String currentProfileName;
@@ -61,24 +52,20 @@ public class MainWindow extends JFrame
 	
 	private DbExplorerPanel dbExplorerPanel;
 	
-	//private JToolBar currentToolbar;
 	private JMenuBar currentMenu;
 	private FileConnectAction connectAction;
 	private ShowDbExplorerAction dbExplorerAction;
 	
-	//private WindowStatusBar statusBar;
 	private ProfileSelectionDialog profileDialog;
 	private JTabbedPane sqlTab = new JTabbedPane();
 	private WbToolbar currentToolbar;
-	private ArrayList sqlPanels = new ArrayList(5);
 	private ArrayList panelMenus = new ArrayList(5);
 	private int tabCount = 0;
 	
 	/** Creates new MainWindow */
-	public MainWindow(String id)
+	public MainWindow()
 	{
 		super(ResourceMgr.TXT_PRODUCT_NAME);
-		this.windowId = id;
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.addWindowListener(this);
 		this.sqlTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
@@ -89,7 +76,6 @@ public class MainWindow extends JFrame
 		for (int i=0; i < tabCount; i++)
 		{
 			SqlPanel sql = new SqlPanel(i + 1);
-			this.sqlPanels.add(sql);
 			this.sqlTab.addTab(ResourceMgr.getString("LabelTabStatement") + " " + Integer.toString(i+1), sql);
 		}
 		this.initMenu();
@@ -126,7 +112,7 @@ public class MainWindow extends JFrame
 		
 		for (int tab=0; tab < this.tabCount; tab ++)
 		{
-			MainPanel sql = (MainPanel)this.sqlPanels.get(tab);
+			MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(tab);
 			JMenuBar menuBar = this.getMenuForPanel(sql);
 			this.panelMenus.add(menuBar);
 		}
@@ -151,7 +137,6 @@ public class MainWindow extends JFrame
 		action = new FileExitAction();
 		menu.add(action.getMenuItem());
 		menuBar.add(menu);
-		aPanel.addToActionMap(this.connectAction);
 
 		// now create the menus for the current tab
 		List actions = aPanel.getActions();
@@ -205,7 +190,6 @@ public class MainWindow extends JFrame
 			{
 				menu.addSeparator();
 			}
-			//menu.add(action.getMenuItem());
 			action.addToMenu(menu);
 			menu.setVisible(true);
 		}
@@ -213,23 +197,12 @@ public class MainWindow extends JFrame
 		// now put the tabs into the view menu
 		menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_VIEW);
 		menu.setVisible(true);
-		InputMap im = new ComponentInputMap(this.sqlTab);
-		ActionMap am = new ActionMap();
-		this.sqlTab.setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
-		this.sqlTab.setActionMap(am);
+		
 		for (int i=0; i < this.tabCount; i ++)
 		{
 			action = new SelectTabAction(this.sqlTab, i);
-			KeyStroke key = action.getAccelerator();
-			if (key != null)
-			{
-				im.put(key, action.getActionName());
-				am.put(action.getActionName(), action);
-			}
 			menu.add(action);
 		}
-		aPanel.getInputMap().setParent(im);
-		aPanel.getActionMap().setParent(am);
 		
 		menuBar.add(this.buildToolsMenu());
 		menuBar.add(this.buildHelpMenu());
@@ -256,18 +229,18 @@ public class MainWindow extends JFrame
 	private void tabSelected(int anIndex)
 	{
 		Container content = this.getContentPane();
-		this.currentMenu = (JMenuBar)this.panelMenus.get(anIndex);
-		this.setJMenuBar(currentMenu);
+		MainPanel current = this.getCurrentPanel();
+		
+		JMenuBar menu = (JMenuBar)this.panelMenus.get(anIndex);
+		this.setJMenuBar(menu);
 		
 		if (this.currentToolbar != null) content.remove(this.currentToolbar);
-		MainPanel current = this.getCurrentPanel();
 		if (current != null)
 		{
 			this.currentToolbar = current.getToolbar();
 			content.add(this.currentToolbar, BorderLayout.NORTH);
 		}
 		this.doLayout();
-		//this.repaint();
 	}
 
 	public void restorePosition()
@@ -291,16 +264,15 @@ public class MainWindow extends JFrame
 		WbManager.getSettings().setLastSqlTab(index);
 		for (int i=0; i < this.tabCount; i++)
 		{
-			MainPanel sql = (MainPanel)this.sqlPanels.get(i);
-			sql.storeSettings();
+			MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
+			sql.saveSettings();
 		}
 		WbManager.getSettings().storeWindowPosition(this);
 		WbManager.getSettings().storeWindowSize(this);
-	}
-
-	public String getWindowId()
-	{
-		return this.windowId;
+		if (dbExplorerPanel != null && !WbManager.getSettings().getShowDbExplorerInMainWindow())
+		{
+			this.dbExplorerPanel.saveSettings();
+		}
 	}
 
 	public void windowOpened(WindowEvent windowEvent)
@@ -349,7 +321,7 @@ public class MainWindow extends JFrame
 	{
 		for (int i=0; i < this.tabCount; i++)
 		{
-			MainPanel sql = (MainPanel)this.sqlPanels.get(i);
+			MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
 			sql.setConnection(con);
 		}
 		this.currentConnection = con;
@@ -425,19 +397,18 @@ public class MainWindow extends JFrame
 
 		this.sqlTab.addTab(ResourceMgr.getString("MnuTxtDbExplorer"), this.dbExplorerPanel);
 		this.tabCount = this.sqlTab.getTabCount();
-		this.sqlPanels.add(this.dbExplorerPanel);
 
-		InputMap im = this.sqlTab.getInputMap();
-		ActionMap am = this.sqlTab.getActionMap();
 		WbAction action = new SelectTabAction(this.sqlTab, this.tabCount - 1, ResourceMgr.getString("MnuTxtShowDbExplorer"));
-		KeyStroke key = action.getAccelerator();
+
+		// Add a second keystroke for the Db Explorer panel
+		KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_MASK);
+		InputMap im = this.sqlTab.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+		ActionMap am = this.sqlTab.getActionMap();
 		im.put(key, action.getActionName());
-		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_MASK), action.getActionName());
 		am.put(action.getActionName(), action);
 
 		this.panelMenus.add(dbmenu);
 		this.addToViewMenu(action);
-
 	}
 	
 	public void showDbExplorer()

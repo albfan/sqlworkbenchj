@@ -193,9 +193,7 @@ public class DwPanel extends JPanel
 	public void runStatement(String aSql, WbConnection aConnection)
 		throws SQLException, WbException
 	{
-		if (aSql == null || 
-		    aConnection == null || 
-				aConnection.isClosed())
+		if (aSql == null || aConnection == null || aConnection.isClosed())
 		{
 			LogMgr.logInfo(this, "No connection given or connection closed!");
 			return;
@@ -368,7 +366,7 @@ public class DwPanel extends JPanel
 			edit.requestFocus();
 		}
 	}
-	
+
 	public boolean cancelExecution()
 	{
 		if (this.prepStatement != null)
@@ -377,6 +375,8 @@ public class DwPanel extends JPanel
 			{
 				LogMgr.logDebug(this, "Trying to cancel the current statement...");
 				this.prepStatement.cancel();
+				this.prepStatement.close();
+				this.prepStatement = null;
 				LogMgr.logDebug(this, "Call of cancel() finished.");
 				return true;
 			}
@@ -449,7 +449,7 @@ public class DwPanel extends JPanel
 			this.realModel.dispose();
 			this.realModel = null;
 		}
-		this.infoTable.setModel(new DefaultTableModel());
+		this.infoTable.reset();
 		this.statusBar.clearRowcount();
 	}
 	

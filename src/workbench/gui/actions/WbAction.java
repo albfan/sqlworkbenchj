@@ -11,6 +11,8 @@ import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
 import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -43,6 +45,12 @@ public abstract class WbAction extends AbstractAction
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("blank"));
 	}
 
+
+	public void clearAccelerator()
+	{
+		this.putValue(Action.ACCELERATOR_KEY, null);
+	}
+	
 	protected void setActionName(String aName)
 	{
 		this.actionName = aName;
@@ -104,5 +112,11 @@ public abstract class WbAction extends AbstractAction
 	public String getActionName()
 	{
 		return this.actionName;
+	}
+	
+	public void addToInputMap(InputMap im, ActionMap am)
+	{
+		im.put(this.getAccelerator(), this.getActionName());
+		am.put(this.getActionName(), this);
 	}
 }

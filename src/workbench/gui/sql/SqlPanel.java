@@ -55,7 +55,7 @@ import workbench.util.WbPersistence;
  * @version 1.0
  */
 public class SqlPanel extends JPanel 
-	implements Runnable, TableModelListener, Exporter, Searchable, MainPanel
+	implements Runnable, TableModelListener, MainPanel
 {
 	private boolean selected;
 	EditorPanel editor;
@@ -107,7 +107,6 @@ public class SqlPanel extends JPanel
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.historyFilename = "WbStatements" + Integer.toString(this.internalId) + ".xml";
 		this.setLayout(new BorderLayout());
-		//this.result = new SqlResultDisplay();
 		this.data = new DwPanel();
 		this.data.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		
@@ -169,7 +168,6 @@ public class SqlPanel extends JPanel
 				{
 					toolbar.addSeparator();
 				}
-				//toolbar.add(a);
 				a.addToToolbar(toolbar);
 			}
 		}
@@ -236,8 +234,8 @@ public class SqlPanel extends JPanel
 		this.actions.add(this.insertRowAction);
 		this.actions.add(this.deleteRowAction);
 	
-		this.exportDataAction = new SaveDataAsAction(this);
-		exportDataAction.setCreateMenuSeparator(true);
+		this.exportDataAction = this.data.getTable().getExportAction();
+		this.exportDataAction.setCreateMenuSeparator(true);
 		this.exportDataAction.setEnabled(false);
 
 		SelectEditorAction sea = new SelectEditorAction(this);
@@ -246,7 +244,7 @@ public class SqlPanel extends JPanel
 		SelectResultAction r = new SelectResultAction(this);
 		this.actions.add(r);
 		
-		this.dataToClipboard = new DataToClipboardAction(this);
+		this.dataToClipboard = this.data.getTable().getDataToClipboardAction();
 		this.dataToClipboard.setEnabled(false);
 		this.actions.add(this.exportDataAction);
 		this.actions.add(this.dataToClipboard);
@@ -280,10 +278,10 @@ public class SqlPanel extends JPanel
 		this.toolbarActions.add(this.insertRowAction);
 		this.toolbarActions.add(this.deleteRowAction);
 		
-		this.findAction = new FindAction(this);
+		this.findAction = this.data.getTable().getFindAction();
 		this.findAction.setEnabled(false);
 		this.findAction.setCreateMenuSeparator(true);
-		this.findAgainAction = new FindAgainAction(this);
+		this.findAgainAction = this.data.getTable().getFindAgainAction();
 		this.findAgainAction.setEnabled(false);
 
 		WbAction action = new CreateSnippetAction(this.editor);
@@ -300,10 +298,6 @@ public class SqlPanel extends JPanel
 		this.actions.add(this.findAgainAction);
 		
 		WbTable table = this.data.getTable();
-		table.addPopupAction(this.exportDataAction, false);
-		table.addPopupAction(this.dataToClipboard, false);
-		table.addPopupAction(this.findAction, true);
-		table.addPopupAction(this.findAgainAction, false);
 		table.addPopupAction(this.startEditAction, true);
 		table.addPopupAction(this.insertRowAction, false);
 		table.addPopupAction(this.deleteRowAction, false);
@@ -318,94 +312,29 @@ public class SqlPanel extends JPanel
 
 		for (int i=0; i < this.actions.size(); i++)
 		{
-			this.addToActionMap((WbAction)this.actions.get(i));
+			WbAction wb = (WbAction)this.actions.get(i);
+			wb.addToInputMap(im, am);
 		}
-		// Add a second keystroke entry for the CopyDataToClipboard action
-		// so that it can be invoked with the shift key as well
-		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK), this.dataToClipboard.getActionName());
-		
 		editor.getInputMap().setParent(im);
 		editor.getActionMap().setParent(am);
 	}
 	
 	public void addToActionMap(WbAction anAction)
 	{
-		InputMap in = this.getInputMap();
+		InputMap im = this.getInputMap(WHEN_IN_FOCUSED_WINDOW);
 		ActionMap am = this.getActionMap();
-		KeyStroke key = anAction.getAccelerator();
-		if (key != null)
-		{
-			in.put(key, anAction.getActionName());
-			am.put(anAction.getActionName(), anAction);
-		}
+		anAction.addToInputMap(im, am);
 	}
 	
 	public void selectEditor()
 	{
-		EventQueue.invokeLater(new Runnable() 
-		{
-			public void run()
-			{
-				editor.requestFocus();
-			}
-		});
+		editor.requestFocusInWindow();
 	}
 	
 	public void selectResult()
 	{
 		showResultPanel();
-//		EventQueue.invokeLater(new Runnable() 
-//		{
-//			public void run()
-//			{
-				data.getTable().grabFocus();
-//			}
-//		});
-	}
-	
-	public void saveAsAscii()
-	{
-		try
-		{
-			String lastDir = WbManager.getSettings().getLastExportDir();
-			JFileChooser fc = new JFileChooser(lastDir);
-			int answer = fc.showSaveDialog(SwingUtilities.getWindowAncestor(this));
-			if (answer == JFileChooser.APPROVE_OPTION)
-			{
-				File fl = fc.getSelectedFile();
-				this.data.getTable().saveAsAscii(fl.getAbsolutePath());
-				lastDir = fc.getCurrentDirectory().getAbsolutePath();
-				WbManager.getSettings().setLastExportDir(lastDir);
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError(this, "Error saving ASCII file", e);
-		}
-	}
-	
-	public void copyDataToClipboard()
-	{
-		this.copyDataToClipboard(true);
-	}
-	public void copyDataToClipboard(boolean includeheaders)
-	{
-		if (!this.data.hasResultSet()) return;
-		
-		Window parent = SwingUtilities.getWindowAncestor(this);
-		try
-		{
-			parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			String data = this.data.getTable().getDataString("\r", includeheaders);
-			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
-			StringSelection sel = new StringSelection(data);
-			clp.setContents(sel, sel);
-			parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError(this, "Could not access clipboard", e);
-		}
+		data.getTable().requestFocusInWindow();
 	}
 	
 	public void saveChangesToDatabase()
@@ -446,27 +375,6 @@ public class SqlPanel extends JPanel
 		}
 	}
 
-	/**
-	 *	Open the Find dialog for searching strings in the result set
-	 */
-	public void findData()
-	{
-		String criteria;
-		criteria = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgEnterSearchCriteria"), this.lastSearchCriteria);
-		if (criteria == null) return;
-		int row = this.data.getTable().search(criteria, false);
-		this.lastSearchCriteria = criteria;
-		this.setActionState(this.findAgainAction, (row >= 0));
-	}
-	
-	/**
-	 *	Find the next occurance after findData() has been called.
-	 */
-	public void findNext()
-	{
-		this.data.getTable().searchNext();
-	}
-	
 	public List getToolbarActions()
 	{
 		return this.toolbarActions;
@@ -638,7 +546,7 @@ public class SqlPanel extends JPanel
 		this.checkStatementActions();
 	}
 	
-	public void storeSettings()
+	public void saveSettings()
 	{
 		WbManager.getSettings().setSqlDividerLocation(this.internalId, this.contentPanel.getDividerLocation());
 		this.saveSqlStatementHistory();

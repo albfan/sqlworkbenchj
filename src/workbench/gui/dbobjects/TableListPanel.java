@@ -4,6 +4,7 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
@@ -27,6 +28,7 @@ import workbench.gui.components.ResultSetTableModel;
 import workbench.gui.sql.EditorPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.storage.DataStore;
 
 
 /**
@@ -56,7 +58,8 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 	private JComboBox tableTypes = new JComboBox();
 	private String currentSchema;
 	private String currentCatalog;
-
+	private boolean shouldRetrieve;
+	
 	public TableListPanel()
 		throws Exception
 	{
@@ -132,12 +135,8 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerFkColumns"), this.importedPanel);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerReferencedColumns"), this.exportedPanel);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTriggers"), this.triggers);
-		
-		//this.displayTab.insertTab(ResourceMgr.getString("TxtDbExplorerIndexes"), null, this.indexPanel, null, 1);
-		//this.displayTab.insertTab(ResourceMgr.getString("TxtDbExplorerFkColumns"), null, this.importedPanel, null, 2);
-		//this.displayTab.insertTab(ResourceMgr.getString("TxtDbExplorerReferencedColumns"), null, this.exportedPanel, null, 3);
-		//this.displayTab.insertTab(ResourceMgr.getString("TxtDbExplorerTriggers"), null, this.triggers, null, 4);
 	}
+	
 	private void removeTablePanels()
 	{
 		if (this.displayTab.getComponentCount() == 2) return;
@@ -201,23 +200,28 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 		this.reset();
 		this.currentSchema = aSchema;
 		this.currentCatalog = aCatalog;
-		this.retrieve();
+		if (this.isVisible())
+			this.retrieve();
+		else
+			this.shouldRetrieve = true;
 	}
 
 	public void retrieve()
-		throws Exception
 	{
+		final Container parent = this.getParent();
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
 				try
 				{
-					splitPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					String table = (String)tableTypes.getSelectedItem();
-					tableList.setModel(meta.getListOfTables(null, currentSchema, table), true);
+					ResultSetTableModel rs = meta.getListOfTables(currentCatalog, currentSchema, table);
+					tableList.setModel(rs, true);
 					tableList.adjustColumns();
-					splitPane.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+					parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+					shouldRetrieve = false;
 				}
 				catch (Exception e)
 				{
@@ -225,7 +229,13 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 				}
 			}
 		});
-			
+	}
+	
+	public void setVisible(boolean aFlag)
+	{
+		super.setVisible(aFlag);
+		if (this.shouldRetrieve)
+			this.retrieve();
 	}
 	
 	public void saveSettings()
@@ -245,99 +255,89 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
+		final int row = this.tableList.getSelectedRow();
+		if (row < 0) return;
+		final Container parent = this.getParent();
 		
-		try
+		EventQueue.invokeLater(new Runnable() 
 		{
-			final int row = this.tableList.getSelectedRow();
-			if (row >= 0)
+			public void run()
 			{
-				
-				EventQueue.invokeLater(new Runnable() 
-				{
-					public void run()
-					{
-						String catalog = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
-						String schema = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-						String table = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-						String type = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-						boolean isTable = false;
-						
-						synchronized (retrieveLock)
-						{
-							splitPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-							try
-							{
-								tableDefinition.setModel(meta.getTableDefinitionModel(catalog, schema, table), true);
-								tableDefinition.adjustColumns();
-							}
-							catch (Exception ex)
-							{
-								LogMgr.logError(this, "Could not read table definition", ex);
-							}
-							
-							
-							if ("VIEW".equalsIgnoreCase(type))
-							{
-								String viewSource = meta.getViewSource(catalog, schema, table);
-								tableSource.setText(viewSource);
-								tableSource.setCaretPosition(0);
-							}
-							else if ("TABLE".equalsIgnoreCase(type))
-							{
-								String sql = meta.getTableSource(table, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore());
-								tableSource.setText(sql);
-								tableSource.setCaretPosition(0);
-								isTable = true;
-							}
-							else
-							{
-								tableSource.setText("");
-							}
+				String catalog = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
+				String schema = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+				String table = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+				String type = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+				boolean isTable = false;
 
-							if (isTable)
-							{
-								addTablePanels();
-								triggers.readTriggers(catalog, schema, table);
-								
-								try
-								{
-									ResultSetTableModel model = new ResultSetTableModel(meta.getForeignKeys(catalog, schema, table));
-									importedKeys.setModel(model, true);
-									importedKeys.adjustColumns();
-									model = new ResultSetTableModel(meta.getReferencedBy(catalog, schema, table));
-									exportedKeys.setModel(model, true);
-									exportedKeys.adjustColumns();
-								}
-								catch (Exception e)
-								{
-									importedKeys.reset();
-									exportedKeys.reset();
-								}
-								try
-								{
-									indexes.setModel(meta.getTableIndexes(catalog, schema, table));
-									indexes.adjustColumns();
-								}
-								catch (Exception ex)
-								{
-									indexes.reset();
-									// they might be due to privileges missing
-								}
-							}
-							else
-							{
-								removeTablePanels();
-							}
-							splitPane.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				synchronized (retrieveLock)
+				{
+					parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					try
+					{
+						tableDefinition.setModel(meta.getTableDefinitionModel(catalog, schema, table), true);
+						tableDefinition.adjustColumns();
+					}
+					catch (Exception ex)
+					{
+						LogMgr.logError(this, "Could not read table definition", ex);
+					}
+
+					if (type.toLowerCase().indexOf("view") > -1)
+					{
+						String viewSource = meta.getViewSource(catalog, schema, table);
+						tableSource.setText(viewSource);
+						tableSource.setCaretPosition(0);
+					}
+					else if (type.toLowerCase().indexOf("table") > -1)
+					{
+						String sql = meta.getTableSource(table, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore());
+						tableSource.setText(sql);
+						tableSource.setCaretPosition(0);
+						isTable = true;
+					}
+					else
+					{
+						tableSource.setText("");
+					}
+
+					if (isTable)
+					{
+						addTablePanels();
+						triggers.readTriggers(catalog, schema, table);
+
+						try
+						{
+							ResultSetTableModel model = new ResultSetTableModel(meta.getForeignKeys(catalog, schema, table));
+							importedKeys.setModel(model, true);
+							importedKeys.adjustColumns();
+							model = new ResultSetTableModel(meta.getReferencedBy(catalog, schema, table));
+							exportedKeys.setModel(model, true);
+							exportedKeys.adjustColumns();
+						}
+						catch (Exception e)
+						{
+							importedKeys.reset();
+							exportedKeys.reset();
+						}
+						try
+						{
+							indexes.setModel(meta.getTableIndexes(catalog, schema, table));
+							indexes.adjustColumns();
+						}
+						catch (Exception ex)
+						{
+							indexes.reset();
+							// they might be due to privileges missing
 						}
 					}
-				});
+					else
+					{
+						removeTablePanels();
+					}
+					parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				}
 			}
-		}
-		catch (Exception ex)
-		{
-			ex.printStackTrace();
-		}
+		});
 	}
 
 	/** Invoked when an action occurs.

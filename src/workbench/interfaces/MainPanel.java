@@ -22,13 +22,10 @@ import workbench.gui.components.WbToolbar;
 public interface MainPanel
 {
 	List getActions();
-	void addToActionMap(WbAction anAction);
 	WbToolbar getToolbar();
-	void storeSettings();
+	void saveSettings();
 	void showStatusMessage(String aMsg);
 	void showLogMessage(String aMsg);
 	void setConnection(WbConnection aConnection);
 	void addToToolbar(WbAction anAction, boolean aFlag);
-	InputMap getInputMap();
-	ActionMap getActionMap();
 }

@@ -10,6 +10,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
 import javax.swing.KeyStroke;
 import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.Exporter;
@@ -39,18 +41,19 @@ public class DataToClipboardAction extends WbAction
 
 	public void actionPerformed(ActionEvent e)
 	{
-//		System.out.println("mod=" + e.getModifiers());
-//		System.out.println("SHIFT=" + e.SHIFT_MASK);
-//		System.out.println("CTRL=" + e.CTRL_MASK);
 		if ( (e.getModifiers() & e.SHIFT_MASK) == e.SHIFT_MASK)
 		{
-//			System.out.println("No headers!");
 			this.client.copyDataToClipboard(false);
 		}
 		else
 		{
 			this.client.copyDataToClipboard(true);
 		}
-			
+	}
+	
+	public void addToInputMap(InputMap im, ActionMap am)
+	{
+		super.addToInputMap(im, am);
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK), this.getActionName());
 	}
 }

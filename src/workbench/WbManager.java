@@ -6,19 +6,12 @@
 
 package workbench;
 
-import java.util.HashMap;
 import java.awt.Font;
-import java.sql.Connection;
-import java.util.Iterator;
 import javax.swing.UIManager;
-
-import workbench.gui.MainWindow;
 import workbench.db.ConnectionMgr;
-import workbench.resource.Settings;
-import java.util.List;
-import javax.swing.JOptionPane;
-import workbench.db.ConnectionProfile;
+import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
+import workbench.resource.Settings;
 import workbench.util.WbCipher;
 
 /**
@@ -113,7 +106,7 @@ public class WbManager
 
 	public MainWindow createWindow()
 	{
-		this.mainWindow = new MainWindow("MainWindow");
+		this.mainWindow = new MainWindow();
 		return this.mainWindow;
 	}
 	

@@ -36,6 +36,6 @@ public class SelectResultAction extends WbAction
 
 	public void actionPerformed(ActionEvent e)
 	{
-		this.client.selectEditor();
+		this.client.selectResult();
 	}
 }

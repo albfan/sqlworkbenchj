@@ -452,7 +452,7 @@ public class Settings
 	
 	public boolean getShowDbExplorerInMainWindow()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty("workbench.dbexplorer.mainwindow", "false"));
+		return "true".equalsIgnoreCase(this.props.getProperty("workbench.dbexplorer.mainwindow", "true"));
 	}
 	
 	public boolean getRetrievePKList()
