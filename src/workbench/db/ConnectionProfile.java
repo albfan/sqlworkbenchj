@@ -36,7 +36,8 @@ public class ConnectionProfile
 	private static int nextId = 1;
 	private boolean changed;
 	private boolean isNew;
-
+	private boolean storePassword = true;
+	
 	static
 	{
 		WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
@@ -117,18 +118,22 @@ public class ConnectionProfile
 		if (!aPwd.equals(this.password))
 		{
 			this.password = aPwd;
-			this.changed = true;
+			if (this.storePassword) this.changed = true;
 		}
 	}
 
 	
 	/**
 	 *	Returns the encrypted version of the password.
+	 *	This getter/setter pair is used when saving the profile
 	 *	@see #decryptPassword(String)
 	 */
 	public String getPassword() 
 	{ 
-		return this.password; 
+		if (this.storePassword)
+			return this.password; 
+		else
+			return null;
 	}
 	
 	public String getInputPassword()
@@ -289,6 +294,9 @@ public class ConnectionProfile
 		this.changed = true;
 		this.description = description; 
 	}
+
+	public boolean getStorePassword() { return this.storePassword; }
+	public void setStorePassword(boolean aFlag) { this.storePassword = aFlag; }
 	
 	public ConnectionProfile createCopy()
 	{

@@ -1,9 +1,3 @@
-/*
- * AbstractTablePersistence.java
- *
- * Created on 1. November 2002, 00:15
- */
-
 package workbench.util;
 
 import java.sql.Connection;
@@ -18,26 +12,47 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- *
- * @author  workbench@kellerer.org
+ *  Base class for handling the database access for a single table.
+ *	Although this class can be used directly it should be subclassed to allow
+ *	for customized factory methods of the ValueObject
  */
 public class BaseTablePersistence
 {
 	protected Connection connection;
-	protected PreparedStatement insert;
-	protected PreparedStatement delete;
-	protected PreparedStatement update;
-	protected PreparedStatement select;
-
+	protected String insertSql;
+	protected String deleteSql;
+	protected String updateSql;
+	protected String selectSql;
+	
 	protected ArrayList columns = new ArrayList();
 	protected ArrayList pkColumns = new ArrayList();
+	
 	private String tablename;
+	
+	/**
+	 *	Contains the class name for the concrete ValueObject 
+	 *	which is used for any descdentant of this class.
+	 */
 	protected String valueObjectClass;
 
 	protected BaseTablePersistence()
 	{
 	}
 
+	/**
+	 *	Returns a configured BaseValueObject for this table.
+	 *	The value object will contain only the primary key columns 
+	 *	which were defined for this table.
+	 *	
+	 *	If the variable valueObjectClass is defined, an instance of that
+	 *	class will be created. This functionality is used by the generated 
+	 *	descendants of this class.
+	 *
+	 *	@return	BaseValueObject with all columns for this table
+	 *
+	 *	@see #getValueObject()
+	 *	@see #createValueObject()
+	 */
 	protected BaseValueObject getPkValueObject()
 	{
 		BaseValueObject result =  this.createValueObject();
@@ -48,6 +63,20 @@ public class BaseTablePersistence
 		return result;
 	}
 
+	/**
+	 *	Returns a configured BaseValueObject for this table
+	 *	The value object will contain all columns which were defined for
+	 *	this table.
+	 *	
+	 *	If the variable valueObjectClass is defined, an instance of that
+	 *	class will be created. This functionality is used by the generated 
+	 *	descendants of this class
+	 *
+	 *	@return	BaseValueObject with all columns for this table
+	 *
+	 *	@see #getPkValueObject()
+	 *	@see #createValueObject()
+	 */
 	protected BaseValueObject getValueObject()
 	{
 		BaseValueObject result = this.createValueObject();
@@ -62,6 +91,17 @@ public class BaseTablePersistence
 		return result;
 	}
 
+	/**
+	 *	Factory method for creating a ValueObject.
+	 *	If valueObjectClass is defined an instance of 
+	 *	that class is created (if that fails, an instance
+	 *	of BaseValueObject will be created instead)
+	 *
+	 *	@return an empty BaseValueObject
+	 *
+	 *	@see #getPkValueObject()
+	 *	@see #getValueObject()
+	 */
 	private BaseValueObject createValueObject()
 	{
 		BaseValueObject result =  null;
@@ -84,8 +124,21 @@ public class BaseTablePersistence
 		return result;
 	}
 
+	/**	
+	 *	Returns the tablename for this persistence class.
+	 *
+	 *	@return the name of the database table
+	 */
 	public String getTablename() { return this.tablename; }
 
+	/**
+	 *	Define the table for which this class is responsible.
+	 *	In an environment where catalog or schema are required
+	 *	it is assumed that the passed tablename already contains
+	 *	that information (e.g. myschema.mytable)
+	 *
+	 *	@param aTablename the tableanme to be set
+	 */
 	protected void setTablename(String aTablename)
 	{
 		if (aTablename == null || aTablename.trim().length() == 0)
@@ -93,16 +146,34 @@ public class BaseTablePersistence
 		this.tablename = aTablename;
 	}
 
+	/**
+	 *	Define the connection on which this persistence class operates.
+	 *
+	 *	@param aConn the database connection to be used.
+	 */
 	public void setConnection(Connection aConn)
 	{
 		this.connection = aConn;
 	}
 
-
+	/**
+	 *	Inserts a new row into the database based on the data
+	 *	provided in the given value object.
+	 *	It is assumed that the list of columns inside the given 
+	 *	ValueObject is always the same. This is guaranteed if 
+	 *	the factory method for creating the value object is used.
+	 *	
+	 *	@param data the column data to be inserted
+	 *
+	 *	@see #getPkValueObject()
+	 *	@see #getValueObject()
+	 */
 	public int insertRow(BaseValueObject data)
 		throws SQLException
 	{
-		if (this.insert == null)
+		if (data == null) throw new IllegalArgumentException("The ValueObject might not be null");
+		
+		if (this.insertSql == null || data.getColumnCount() != this.columns.size())
 		{
 			StringBuffer sql = new StringBuffer(2000);
 			sql.append("INSERT INTO ");
@@ -125,9 +196,9 @@ public class BaseTablePersistence
 			values.append(')');
 			sql.append(')');
 			sql.append(values);
-			this.insert = this.connection.prepareStatement(sql.toString());
+			this.insertSql = sql.toString();
 		}
-
+		PreparedStatement stmt = this.connection.prepareStatement(this.insertSql);		
 		int count = this.columns.size();
 		for (int i=0; i < count; i++)
 		{
@@ -135,21 +206,40 @@ public class BaseTablePersistence
 			Object value = data.getColumnValue(col);
 			if  (value == null)
 			{
-				this.insert.setNull(i+1, Types.OTHER);
+				stmt.setNull(i+1, Types.OTHER);
 			}
 			else
 			{
-				this.insert.setObject(i+1, value);
+				stmt.setObject(i+1, value);
 			}
 		}
-		int updateCount = this.insert.executeUpdate();
+		int updateCount = stmt.executeUpdate();
+		stmt.close();
 		return updateCount;
 	}
 
+	/**
+	 *	Deletes a row from the database based on the data
+	 *	provided in the given value object.
+	 *	
+	 *	Only the values for columns defined as primary key columns
+	 *	for this table are used from the ValueObject. If the ValueObject
+	 *	contains more columns they are ignored.
+	 *	
+	 *	@param data the ValueObject with the primary key information
+	 *
+	 *	@see #getPkValueObject()
+	 */
 	public int deleteRow(BaseValueObject data)
 		throws SQLException
 	{
-		if (this.delete == null)
+		if (data == null) throw new IllegalArgumentException("The ValueObject might not be null");
+		
+		// re-initialize the sql if the given value object has a different
+		// number of columns then we expect
+		if (this.deleteSql == null || 
+			  (data.getColumnCount() != this.columns.size() &&
+				 data.getColumnCount() != this.pkColumns.size()))
 		{
 			StringBuffer sql = new StringBuffer(2000);
 			sql.append("DELETE FROM ");
@@ -166,9 +256,10 @@ public class BaseTablePersistence
 				sql.append(col);
 				sql.append(" = ?");
 			}
-			this.delete = this.connection.prepareStatement(sql.toString());
+			this.deleteSql = sql.toString(); 
 			System.out.println(sql);
 		}
+		PreparedStatement stmt = this.connection.prepareStatement(this.deleteSql);
 		int count = this.pkColumns.size();
 		for (int i=0; i < count; i++)
 		{
@@ -176,16 +267,35 @@ public class BaseTablePersistence
 			Object value = data.getColumnValue(col);
 			// we do not need to check for null values
 			// because the PK columns may never be null
-			this.delete.setObject(i+1, value);
+			stmt.setObject(i+1, value);
 		}
-		int updateCount = this.delete.executeUpdate();
+		int updateCount = stmt.executeUpdate();
+		stmt.close();
 		return updateCount;
 	}
 
-	public int updateRow(BaseValueObject newValues, BaseValueObject oldValues)
+	/**
+	 *	Update a record in the database with the given values in <code>newValues</code>.
+	 *	All defined columns for this table will be included in the update statement.
+	 *	
+	 *	The <code>pkValues</code> ValueObject has to contain the primary key values
+	 *	which identify the record to be updated. 
+	 *
+	 *	@param newValues		the new values for the record
+	 *	@param pkValues			the primary key values to identify the record
+	 *
+	 *	@see #getPkValueObject()
+	 *	@see #getValueObject()
+	 */
+	public int updateRow(BaseValueObject newValues, BaseValueObject pkValues)
 		throws SQLException
 	{
-		if (this.update == null)
+		if (newValues == null) throw new IllegalArgumentException("The new ValueObject might not be null");
+		if (pkValues == null) throw new IllegalArgumentException("The PK ValueObject might not be null");
+		
+		if (this.updateSql == null || 
+			  newValues.getColumnCount() != this.columns.size() ||
+				pkValues.getColumnCount() != this.pkColumns.size())
 		{
 			StringBuffer sql = new StringBuffer(2000);
 			sql.append("UPDATE ");
@@ -213,9 +323,10 @@ public class BaseTablePersistence
 				sql.append(col);
 				sql.append(" = ?");
 			}
-			this.update = this.connection.prepareStatement(sql.toString());
+			this.updateSql = sql.toString();
 			System.out.println(sql);
 		}
+		PreparedStatement stmt = this.connection.prepareStatement(this.updateSql);
 		int valuecount = this.columns.size();
 		for (int i=0; i < valuecount; i++)
 		{
@@ -223,11 +334,11 @@ public class BaseTablePersistence
 			Object value = newValues.getColumnValue(col);
 			if (value == null)
 			{
-				this.update.setNull(i+1, Types.OTHER);
+				stmt.setNull(i+1, Types.OTHER);
 			}
 			else
 			{
-				this.update.setObject(i+1, value);
+				stmt.setObject(i+1, value);
 			}
 		}
 
@@ -235,20 +346,39 @@ public class BaseTablePersistence
 		for (int i=0; i < pkcount; i++)
 		{
 			String col = (String)this.pkColumns.get(i);
-			Object value = oldValues.getColumnValue(col);
+			Object value = pkValues.getColumnValue(col);
 			// we do not need to check for null values
 			// because the PK columns may never be null
-			this.update.setObject(i + 1 + valuecount, value);
+			stmt.setObject(i + 1 + valuecount, value);
 		}
 
-		int updateCount = this.update.executeUpdate();
+		int updateCount = stmt.executeUpdate();
+		stmt.close();
 		return updateCount;
 	}
 
-	public BaseValueObject selectRow(BaseValueObject data)
+	/**
+	 *	Returns a row from the database identified by its primary key.	
+	 *	Returns a ValueObject which contains all columns from the defined
+	 *	table by retrieving a row identified by the primary key values
+	 *	defined in the given ValueObject.
+	 *
+	 *	Only the primary key columns of the given ValueObject are used.
+	 *	Any other column contained in the ValueObject is ignored.
+	 *
+	 *	@param data the value object with the primary key information.
+	 *
+	 *	@see #getPkValueObject()
+	 */
+	 public BaseValueObject selectRow(BaseValueObject data)
 		throws SQLException
 	{
-		if (this.select == null)
+		if (data == null) throw new IllegalArgumentException("The ValueObject might not be null");
+		
+		// re-initialize the sql if the given value object has a different number of columns then we expect
+		if (this.selectSql == null || 
+			  (data.getColumnCount() != this.columns.size() &&
+				 data.getColumnCount() != this.pkColumns.size()))
 		{
 			StringBuffer sql = new StringBuffer(2000);
 			sql.append("SELECT ");
@@ -274,9 +404,10 @@ public class BaseTablePersistence
 				sql.append(col);
 				sql.append(" = ?");
 			}
-			this.select = this.connection.prepareStatement(sql.toString());
+			this.selectSql = sql.toString();
 			System.out.println(sql);
 		}
+		PreparedStatement stmt = this.connection.prepareStatement(this.selectSql);
 		int pkcount = this.pkColumns.size();
 		for (int i=0; i < pkcount; i++)
 		{
@@ -285,15 +416,15 @@ public class BaseTablePersistence
 			Object value = data.getColumnValue(col);
 			if (value == null)
 			{
-				this.select.setNull(i+1, Types.OTHER);
+				stmt.setNull(i+1, Types.OTHER);
 			}
 			else
 			{
-				this.select.setObject(i+1, value);
+				stmt.setObject(i+1, value);
 			}
 		}
 
-		ResultSet rs = this.select.executeQuery();
+		ResultSet rs = stmt.executeQuery();
 		BaseValueObject result = null;
 		if (rs.next())
 		{
@@ -306,9 +437,15 @@ public class BaseTablePersistence
 			}
 		}
 		rs.close();
+		stmt.close();
 		return result;
 	}
 
+	/**
+	 *	Add a column to the list of columns for this table persistence.
+	 *	
+	 *	@param aColumn the name of the column
+	 */
 	protected void addColumn(String aColumn)
 	{
 		if (!this.columns.contains(aColumn))
@@ -317,6 +454,11 @@ public class BaseTablePersistence
 		}
 	}
 
+	/**
+	 *	Add a column to the list of primary key columns for this table.
+	 *	
+	 *	@param aColumn the name of the primary key column
+	 */
 	protected void addPkColumn(String aColumn)
 	{
 		if (!this.pkColumns.contains(aColumn))
@@ -324,67 +466,5 @@ public class BaseTablePersistence
 			this.pkColumns.add(aColumn);
 		}
 	}
-
-
-	private static Connection getConnection()
-		throws SQLException, ClassNotFoundException
-	{
-		Connection con;
-		Class.forName("org.hsqldb.jdbcDriver");
-		//Class.forName("com.inet.tds.TdsDriver");
-		//Class.forName("oracle.jdbc.OracleDriver");
-		//Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
-		//con = DriverManager.getConnection("jdbc:inetdae:demsqlvisa02:1433?database=visa_cpl_test", "visa", "savivisa");
-		//con = DriverManager.getConnection("jdbc:inetdae:reosqlpro08:1433?database=visa", "visa", "savivisa");
-		//con = DriverManager.getConnection("jdbc:oracle:thin:@DEMRDB34:1521:SBL1", "sadmin", "sadmin");
-		//con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:oradb", "auto", "auto");
-		//con = DriverManager.getConnection("jdbc:oracle:oci8:@oradb", "auto", "auto");
-		//con = DriverManager.getConnection("jdbc:odbc:Patsy");
-		//con = DriverManager.getConnection("jdbc:hsqldb:d:\\daten\\db\\hsql\\test", "sa", null);
-		con = DriverManager.getConnection("jdbc:hsqldb:hsql://localhost", "sa", null);
-
-		return con;
-	}
-
-	public static void main (String args[])
-	{
-		Connection con = null;
-		try
-		{
-			con = getConnection();
-			ArrayList pks = new ArrayList();
-			pks.add("nr");
-			BaseTablePersistence b = new BaseTablePersistence();
-			b.setTablename("test");
-			b.addPkColumn("nr");
-			b.addColumn("nr");
-			b.addColumn("name");
-			b.setConnection(con);
-
-			BaseValueObject newValue = b.getValueObject();
-			newValue.setColumnValue("name", "third row");
-			newValue.setColumnValue("nr", new Integer(3));
-
-			BaseValueObject oldValue = b.getPkValueObject();
-			oldValue.setColumnValue("nr", new Integer(1));
-
-			int count = 0;
-			//count = b.insertRow(newValue);
-			//count = b.deleteRow(oldValue);
-			//count = b.updateRow(newValue, oldValue);
-			BaseValueObject data = b.selectRow(oldValue);
-			System.out.println("data=" + data);
-			con.commit();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			try { con.close(); } catch (Throwable th) {}
-		}
-	}
-
 
 }

@@ -3,7 +3,15 @@
  */
 package workbench.gui.dbobjects;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
@@ -25,6 +33,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import workbench.WbManager;
 import workbench.db.DataSpooler;
 import workbench.db.DbMetadata;
@@ -37,10 +47,12 @@ import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.components.*;
 import workbench.gui.dbobjects.TableDependencyTreeDisplay;
+import workbench.gui.renderer.SqlTypeRenderer;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.FilenameChangeListener;
 import workbench.interfaces.Reloadable;
+import workbench.interfaces.ShareableDisplay;
 import workbench.interfaces.Spooler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -55,7 +67,7 @@ import workbench.util.SqlUtil;
 public class TableListPanel 
 	extends JPanel 
 	implements ActionListener, ChangeListener, ListSelectionListener
-						, Reloadable, Spooler, FilenameChangeListener
+						, ShareableDisplay, Spooler, FilenameChangeListener
 {
 	private WbConnection dbConnection;
 	private JPanel listPanel;
@@ -65,16 +77,19 @@ public class TableListPanel
 	private WbTable indexes;
 	private WbTable importedKeys;
 	private WbTable exportedKeys;
-	private WbScrollPane importedPanel;
-	private TableDependencyTreeDisplay tableTree;
-	//private WbScrollPane exportedPanel;
+	
+	private TableDependencyTreeDisplay importedTableTree;
+	private WbSplitPane importedPanel;
+	
+	private TableDependencyTreeDisplay exportedTableTree;
 	private WbSplitPane exportedPanel;
+	
 	private WbScrollPane indexPanel;
 	private TriggerDisplayPanel triggers;
 	private EditorPanel tableSource;
 	private JTabbedPane displayTab;
 	private WbSplitPane splitPane;
-	//private DbMetadata meta;
+	
 	private Object retrieveLock = new Object();
 	private JComboBox tableTypes = new JComboBox();
 	private String currentSchema;
@@ -94,8 +109,10 @@ public class TableListPanel
 	private boolean shouldRetrieveTable;
 	private boolean shouldRetrieveTriggers;
 	private boolean shouldRetrieveIndexes;
-	private boolean shouldRetrieveKeys;
-	private boolean shouldRetrieveTree;
+	private boolean shouldRetrieveExportedKeys;
+	private boolean shouldRetrieveImportedKeys;
+	private boolean shouldRetrieveExportedTree;
+	private boolean shouldRetrieveImportedTree;
 	private boolean busy;
 
 	private static final String DROP_CMD = "drop-table";
@@ -132,16 +149,25 @@ public class TableListPanel
 
 		this.importedKeys = new WbTable();
 		this.importedKeys.setAdjustToColumnLabel(false);
-		this.importedPanel = new WbScrollPane(this.importedKeys);
+		scroll = new WbScrollPane(this.importedKeys);
+		this.importedPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT);
+		this.importedPanel.setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
+		this.importedPanel.setDividerLocation(100);
+		this.importedPanel.setDividerSize(4);
+		this.importedPanel.setTopComponent(scroll);
+		this.importedTableTree = new TableDependencyTreeDisplay();
+		this.importedPanel.setBottomComponent(this.importedTableTree);
 		
 		this.exportedKeys = new WbTable();
 		this.exportedKeys.setAdjustToColumnLabel(false);
 		scroll = new WbScrollPane(this.exportedKeys);
 		this.exportedPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT);
+		this.exportedPanel.setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.exportedPanel.setDividerLocation(100);
+		this.exportedPanel.setDividerSize(4);
 		this.exportedPanel.setTopComponent(scroll);
-		this.tableTree = new TableDependencyTreeDisplay();
-		this.exportedPanel.setBottomComponent(this.tableTree);
+		this.exportedTableTree = new TableDependencyTreeDisplay();
+		this.exportedPanel.setBottomComponent(this.exportedTableTree);
 		
 		//this.exportedPanel = new WbScrollPane(this.exportedKeys);
 		
@@ -218,6 +244,7 @@ public class TableListPanel
 		for (int i=0; i < panels.length; i++)
 		{
 			WbMenuItem item = new WbMenuItem(panels[i]);
+			item.removeExtraSpacing();
 			item.setActionCommand("panel-" + i);
 			item.addActionListener(this);
 			this.showDataMenu.add(item);
@@ -288,7 +315,8 @@ public class TableListPanel
 		this.tableSource.setText("");
 		this.invalidateData();
 		this.updateDisplayClients();
-		this.tableTree.reset();
+		this.importedTableTree.reset();
+		this.exportedTableTree.reset();
 	}
 	
 	private void invalidateData()
@@ -296,15 +324,18 @@ public class TableListPanel
 		this.shouldRetrieveTable = true;
 		this.shouldRetrieveTriggers = true;
 		this.shouldRetrieveIndexes = true;
-		this.shouldRetrieveKeys = true;
-		this.shouldRetrieveTree = true;
+		this.shouldRetrieveExportedKeys = true;
+		this.shouldRetrieveImportedKeys = true;
+		this.shouldRetrieveExportedTree = true;
+		this.shouldRetrieveImportedTree = true;
 	}
 	
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
-		this.tableTree.setConnection(aConnection);
-		//this.meta = aConnection.getMetadata();
+		this.importedTableTree.setConnection(aConnection);
+		this.exportedTableTree.setConnection(aConnection);
+		
 		this.tableTypes.removeActionListener(this);
 		this.triggers.setConnection(aConnection);
 		this.tableSource.getSqlTokenMarker().initDatabaseKeywords(aConnection.getSqlConnection());
@@ -330,9 +361,19 @@ public class TableListPanel
 	public void setCatalogAndSchema(String aCatalog, String aSchema)
 		throws Exception
 	{
+		this.setCatalogAndSchema(aCatalog, aSchema, true);
+	}
+	
+	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)
+		throws Exception
+	{
 		this.reset();
 		this.currentSchema = aSchema;
 		this.currentCatalog = aCatalog;
+		
+		if (!retrieve) return;
+		if (this.dbConnection == null) return;
+		
 		if (this.isVisible() || this.isClientVisible())
 		{
 			this.retrieve();
@@ -386,7 +427,8 @@ public class TableListPanel
 	{
 		this.triggers.saveSettings();
 		WbManager.getSettings().setProperty(this.getClass().getName(), "divider", this.splitPane.getDividerLocation());
-		WbManager.getSettings().setProperty(this.getClass().getName(), "treedivider", this.exportedPanel.getDividerLocation());
+		WbManager.getSettings().setProperty(this.getClass().getName(), "exportedtreedivider", this.exportedPanel.getDividerLocation());
+		WbManager.getSettings().setProperty(this.getClass().getName(), "importedtreedivider", this.exportedPanel.getDividerLocation());
 	}
 
 	public void restoreSettings()
@@ -395,9 +437,13 @@ public class TableListPanel
 		if (loc == 0) loc = 200;
 		this.splitPane.setDividerLocation(loc);
 		
-		loc = WbManager.getSettings().getIntProperty(this.getClass().getName(), "treedivider");
+		loc = WbManager.getSettings().getIntProperty(this.getClass().getName(), "exportedtreedivider");
 		if (loc == 0) loc = 200;
 		this.exportedPanel.setDividerLocation(loc);
+
+		loc = WbManager.getSettings().getIntProperty(this.getClass().getName(), "importedtreedivider");
+		if (loc == 0) loc = 200;
+		this.importedPanel.setDividerLocation(loc);
 		
 		this.triggers.restoreSettings();
 	}
@@ -454,6 +500,18 @@ public class TableListPanel
 		DbMetadata meta = this.dbConnection.getMetadata();
 		tableDefinition.setModel(meta.getTableDefinitionModel(this.selectedCatalog, this.selectedSchema, this.selectedTableName), true);
 		tableDefinition.adjustColumns();
+		TableColumnModel colmod = tableDefinition.getColumnModel();
+		TableColumn col = colmod.getColumn(DbMetadata.COLUMN_IDX_TABLE_DEFINITION_TYPE_ID);
+		col.setCellRenderer(new SqlTypeRenderer());
+		
+		// remove the last two columns...
+		
+		col = colmod.getColumn(colmod.getColumnCount() - 1);
+		colmod.removeColumn(col);
+		
+		col = colmod.getColumn(colmod.getColumnCount() - 1);
+		colmod.removeColumn(col);
+		
 		if (this.selectedObjectType.indexOf("view") > -1)
 		{
 			String viewSource = meta.getViewSource(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
@@ -466,7 +524,7 @@ public class TableListPanel
 			// the table source, because otherwise the DataStores
 			// passed to getTableSource() would be empty
 			this.retrieveIndexes();
-			this.retrieveFkInformation();
+			this.retrieveImportedTables();
 			String sql = meta.getTableSource(this.selectedTableName, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore());
 			tableSource.setText(sql);
 			tableSource.setCaretPosition(0);
@@ -509,9 +567,12 @@ public class TableListPanel
 						if (this.shouldRetrieveIndexes) this.retrieveIndexes();
 						break;
 					case 3:
+						if (this.shouldRetrieveImportedKeys) this.retrieveImportedTables();
+						if (this.shouldRetrieveImportedTree) this.retrieveImportedTree();
+						break;
 					case 4:
-						if (this.shouldRetrieveKeys) this.retrieveFkInformation();
-						if (this.shouldRetrieveTree) this.retrieveFkTree();
+						if (this.shouldRetrieveExportedKeys) this.retrieveExportedTables();
+						if (this.shouldRetrieveExportedTree) this.retrieveExportedTree();
 						break;
 					case 5:
 						if (this.shouldRetrieveTriggers) this.retrieveTriggers();
@@ -544,23 +605,36 @@ public class TableListPanel
 		this.shouldRetrieveIndexes = false;
 	}
 	
-	private void retrieveFkInformation()
+	private void retrieveExportedTables()
+		throws SQLException
+	{
+		DbMetadata meta = this.dbConnection.getMetadata();
+		DataStoreTableModel model = new DataStoreTableModel(meta.getReferencedBy(this.selectedCatalog, this.selectedSchema, this.selectedTableName));
+		exportedKeys.setModel(model, true);
+		exportedKeys.adjustColumns();
+		this.shouldRetrieveExportedKeys = false;
+	}
+	
+	private void retrieveImportedTables()
 		throws SQLException
 	{
 		DbMetadata meta = this.dbConnection.getMetadata();
 		DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(this.selectedCatalog, this.selectedSchema, this.selectedTableName));
 		importedKeys.setModel(model, true);
 		importedKeys.adjustColumns();
-		model = new DataStoreTableModel(meta.getReferencedBy(this.selectedCatalog, this.selectedSchema, this.selectedTableName));
-		exportedKeys.setModel(model, true);
-		exportedKeys.adjustColumns();
-		this.shouldRetrieveKeys = false;
+		this.shouldRetrieveImportedKeys = false;
 	}
 
-	private void retrieveFkTree()
+	private void retrieveImportedTree()
 	{
-		tableTree.readTree(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
-		this.shouldRetrieveTree = false;
+		importedTableTree.readTree(this.selectedCatalog, this.selectedSchema, this.selectedTableName, false);
+		this.shouldRetrieveImportedTree = false;
+	}
+	
+	private void retrieveExportedTree()
+	{
+		exportedTableTree.readTree(this.selectedCatalog, this.selectedSchema, this.selectedTableName, true);
+		this.shouldRetrieveExportedTree = false;
 	}
 	
 	public void reload()

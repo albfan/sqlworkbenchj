@@ -24,8 +24,6 @@ import workbench.gui.WbSwingUtilities;
  */
 public class WbScrollPane extends JScrollPane
 {
-
-	private static Border scrollBorder = new CompoundBorder(new EmptyBorder(1,1,2,1), WbSwingUtilities.BEVEL_BORDER);
 	public static final JPanel CORNER;
 	static
 	{
@@ -58,7 +56,7 @@ public class WbScrollPane extends JScrollPane
 
 	private void initDefaults()
 	{
-		this.setBorder(scrollBorder);
+		this.setBorder(WbSwingUtilities.BEVEL_BORDER);
 		//this.setViewportBorder(WbSwingUtilities.EMPTY_BORDER);
 		//this.setCorner(JScrollPane.UPPER_RIGHT_CORNER, CORNER);
 	}

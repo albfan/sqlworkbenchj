@@ -6,6 +6,7 @@ import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.ResultSet;
@@ -58,13 +59,6 @@ public class DataStoreTableModel
 		this.setDataStore(aDataStore);
 	}
 	
-	/*
-	public DataStoreTableModel(ResultSet aResultSet) throws SQLException, WbException
-	{
-		DataStore ds = new DataStore(aResultSet);
-		this.setDataStore(ds);
-	}
-	*/
 	public DataStore getDataStore()
 	{
 		return this.dataCache;
@@ -268,6 +262,15 @@ public class DataStoreTableModel
 	{
 		this.dataCache.deleteRow(aRow);
 		this.fireTableRowsDeleted(aRow, aRow);
+	}
+	
+	public void importFile(String aFilename, boolean hasHeader, String colSep)
+		throws FileNotFoundException
+	{
+		if (this.dataCache == null) return;
+		this.dataCache.importData(aFilename, hasHeader, colSep);
+		int row = this.getRowCount();
+		this.fireTableRowsInserted(0, row - 1);
 	}
 	
 	public void dispose()

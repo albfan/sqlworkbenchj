@@ -44,6 +44,7 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 	private TableListPanel tables;
 	private TableSearchPanel searchPanel;
 	private ProcedureListPanel procs;
+	private PersistenceGeneratorPanel generator;
 	private JComboBox schemaSelector;
 	private JComboBox catalogSelector;
 	private JLabel schemaLabel;
@@ -64,10 +65,12 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 			tables = new TableListPanel(aParent);
 			procs = new ProcedureListPanel();
 			searchPanel = new TableSearchPanel(tables);
+			generator = new PersistenceGeneratorPanel(tables);
 			tabPane = new JTabbedPane(JTabbedPane.TOP);
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerTables"), tables);
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerProcs"), procs);
 			tabPane.add(ResourceMgr.getString("TxtSearchTables"), searchPanel);
+			tabPane.add(ResourceMgr.getString("TxtPersistenceGenerator"), generator);
 			tabPane.setFocusable(false);
 		}
 		catch (Exception e)
@@ -81,7 +84,7 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		this.selectorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 0));
 
 		this.schemaLabel = new JLabel();
-
+		
 		this.selectorPanel.add(schemaLabel);
 		this.schemaSelector = new JComboBox();
 		d = new Dimension(150, 20);
@@ -135,19 +138,15 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 				this.schemaSelector.addItem(schema);
 				if (user.equalsIgnoreCase(schema)) currentSchema = schema;
 			}
+			schemaSelector.setSelectedItem(currentSchema);
+			tables.setCatalogAndSchema(null, currentSchema, false);
+      procs.setCatalogAndSchema(null, currentSchema, false);
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError(this, "Could not retrieve list of schemas", e);
 		}
-		if (currentSchema == null)
-		{
-			this.schemaSelector.setSelectedItem(null);
-		}
-		else if (WbManager.getSettings().getRetrieveDbExplorer())
-		{
-			schemaSelector.setSelectedItem(currentSchema);
-		}
+		
 		this.schemaSelector.addActionListener(this);
 	}
 
@@ -159,7 +158,9 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		this.tables.setConnection(aConnection);
 		this.procs.setConnection(aConnection);
 		this.searchPanel.setConnection(aConnection);
-		this.tables.addTableListDisplayClient(this.searchPanel.getTableList());
+		this.generator.setConnection(aConnection);
+		this.schemaLabel.setText(aConnection.getMetadata().getSchemaTerm());
+		this.schemaSelector.doLayout();
 		this.readSchemas();
 
 		if (this.window != null && aProfilename != null)
@@ -182,9 +183,10 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 	public void disconnect()
 	{
 		this.dbConnection = null;
-		tables.disconnect();
-		procs.disconnect();
+		this.tables.disconnect();
+		this.procs.disconnect();
 		this.searchPanel.disconnect();
+		this.generator.disconnect();
 	}
 
 	public boolean isConnected()
@@ -197,12 +199,14 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		this.tables.saveSettings();
 		this.procs.saveSettings();
 		this.searchPanel.saveSettings();
+		this.generator.saveSettings();
 	}
 	public void restoreSettings()
 	{
 		tables.restoreSettings();
 		procs.restoreSettings();
 		this.searchPanel.restoreSettings();
+		this.generator.restoreSettings();
 	}
 
 	public void actionPerformed(ActionEvent e)

@@ -34,4 +34,5 @@ public interface MainPanel
 	void setConnection(WbConnection aConnection);
 	void addToToolbar(WbAction anAction, boolean aFlag);
 	void setFont(Font aFont);
+	void disconnect();
 }

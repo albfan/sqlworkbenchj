@@ -14,4 +14,6 @@ public interface SimplePropertyEditor
 	boolean isChanged();
 	void addPropertyChangeListener(PropertyChangeListener aListener);
 	void removePropertyChangeListener(PropertyChangeListener aListener);
+  void setImmediateUpdate(boolean aFlag);
+  boolean getImmediateUpdate();
 }

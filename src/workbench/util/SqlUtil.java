@@ -28,10 +28,10 @@ public class SqlUtil
 		if (aColname == null) return null;
 		Matcher m = specialCharPattern.matcher(aColname);
 		boolean b = m.find();
-		if (!b) return aColname;
+		if (!b) return aColname.trim();
 		StringBuffer col = new StringBuffer(aColname.length() + 5);
 		col.append('"');
-		col.append(aColname);
+		col.append(aColname.trim());
 		col.append('"');
 		return col.toString();
 	}
@@ -261,6 +261,127 @@ public class SqlUtil
 		return aStartpos + 1;
 	}
 
+	public static String getJavaPrimitive(String aClass)
+	{
+		if (aClass == null) return null;
+		int pos = aClass.lastIndexOf('.');
+		if (pos >= 0)
+		{
+			aClass = aClass.substring(pos + 1);
+		}
+		if (aClass.equals("Integer"))
+		{
+			return "int";
+		}
+		else if (aClass.equals("Long"))
+		{
+			return "long";
+		}
+		else if (aClass.equals("Boolean"))
+		{
+			return "boolean";
+		}
+		else if (aClass.equals("Character"))
+		{
+			return "char";
+		}
+		else if (aClass.equals("Float"))
+		{
+			return "float";
+		}
+		else if (aClass.equals("Double"))
+		{
+			return "double";
+		}
+		return null;
+	}
+	
+	public static String getJavaClass(int aSqlType, int aSize, int aPrecision)
+	{
+		if (aSqlType == Types.BIGINT)
+			return "java.math.BigInteger";
+		else if (aSqlType == Types.BOOLEAN)
+			return "Boolean";
+		else if (aSqlType == Types.CHAR)
+			return "Character";
+		else if (aSqlType == Types.DATE)
+			return "java.util.Date";
+		else if (aSqlType == Types.DECIMAL)
+			return getDecimalClass(aSqlType, aSize, aPrecision);
+		else if (aSqlType == Types.DOUBLE)
+			return getDecimalClass(aSqlType, aSize, aPrecision);
+		else if (aSqlType == Types.FLOAT)
+			return getDecimalClass(aSqlType, aSize, aPrecision);
+		else if (aSqlType == Types.INTEGER)
+			return "Integer";
+		else if (aSqlType == Types.JAVA_OBJECT)
+			return "Object";
+		else if (aSqlType == Types.NUMERIC)
+			return getDecimalClass(aSqlType, aSize, aPrecision);
+		else if (aSqlType == Types.REAL)
+			return getDecimalClass(aSqlType, aSize, aPrecision);
+		else if (aSqlType == Types.SMALLINT)
+			return "Integer";
+		else if (aSqlType == Types.TIME)
+			return "java.sql.Time";
+		else if (aSqlType == Types.TIMESTAMP)
+			return "java.sql.Timestamp";
+		else if (aSqlType == Types.TINYINT)
+			return "Integer";
+		else if (aSqlType == Types.VARCHAR)
+			return "String";
+		else 
+			return null;
+	}
+
+	private static String getDecimalClass(int aSqlType, int aSize, int aPrecision)
+	{
+		if (aPrecision == 0)
+		{
+			if (aSize < 11)
+			{
+				return "java.lang.Integer";
+			}
+			if (aSize >= 11 && aSize < 18)
+			{
+				return "java.lang.Long";
+			}
+			else 
+			{
+				return "java.math.BigInteger";
+			}
+		}
+		else
+		{
+			if (aSize < 11)
+			{
+				return "java.lang.Float";
+			}
+			if (aSize >= 11 && aSize < 18)
+			{
+				return "java.lang.Double";
+			}
+			else 
+			{
+				return "java.math.BigDecimal";
+			}
+		}
+	}
+	
+	private static String getDoubleClass(int aSqlType, int aSize, int aPrecision)
+	{
+		return getDecimalClass(aSqlType, aSize, aPrecision);
+	}
+	private static String getFloatClass(int aSqlType, int aSize, int aPrecision)
+	{
+		return getDecimalClass(aSqlType, aSize, aPrecision);
+	}
+	private static String getNumericClass(int aSqlType, int aSize, int aPrecision)
+	{
+		return getDecimalClass(aSqlType, aSize, aPrecision);
+	}
+	
+	
 	public static String getTypeName(int aSqlType)
 	{
 		if (aSqlType == Types.ARRAY)

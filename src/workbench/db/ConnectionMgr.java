@@ -391,6 +391,7 @@ public class ConnectionMgr
   public boolean profilesChanged()
   {
 		if (this.profilesChanged) return true;
+    if (this.profiles == null) return false;
     Iterator values = this.profiles.values().iterator();
     while (values.hasNext())
     {
@@ -410,6 +411,11 @@ public class ConnectionMgr
 	 */
 	public void addProfile(ConnectionProfile aProfile)
 	{
+    if (this.profiles == null)
+    {
+      this.readProfiles();
+      if (this.profiles == null) this.profiles = new HashMap();
+    }
 		this.profiles.put(aProfile.getIdentifier(), aProfile);
     this.profilesChanged = true;
 	}
@@ -419,6 +425,8 @@ public class ConnectionMgr
 	 */
 	public void removeProfile(ConnectionProfile aProfile)
 	{
+    if (this.profiles == null) return;
+    
 		this.profiles.remove(aProfile.getIdentifier());
 		// deleting a new profile should not change the status to changed
 		if (!aProfile.isNew())

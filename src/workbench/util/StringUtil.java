@@ -7,6 +7,7 @@ package workbench.util;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.lang.Character;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -119,6 +120,14 @@ public class StringUtil
 		{
 			try { reader.close(); } catch (Exception e) {}
 		}
+		return result.toString();
+	}
+
+	public static String capitalize(String aString)
+	{
+		StringBuffer result = new StringBuffer(aString);
+		char ch = aString.charAt(0);
+		result.setCharAt(0, Character.toUpperCase(ch));
 		return result.toString();
 	}
 	

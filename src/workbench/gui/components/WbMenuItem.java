@@ -11,6 +11,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 
 /**
  *
@@ -19,7 +22,8 @@ import javax.swing.UIManager;
 public class WbMenuItem 
 	extends JMenuItem
 {
-	private int additionalVerticalSpace = 0;
+	//private int additionalVerticalSpace = 0;
+	Border originalBorder;
 	
 	public WbMenuItem()
 	{
@@ -67,14 +71,29 @@ public class WbMenuItem
 		LookAndFeel lnf = UIManager.getLookAndFeel();	
 		if (lnf.getClass() == com.sun.java.swing.plaf.windows.WindowsLookAndFeel.class)
 		{
-			this.additionalVerticalSpace = 3;
+			if (this.originalBorder == null)
+			{
+				this.originalBorder = this.getBorder();
+			}
+			EmptyBorder e = new EmptyBorder(0,0,2,0);
+			Border nb = new CompoundBorder(this.originalBorder, e);
+			this.setBorder(nb);
 		}
-		else
+		else if (this.originalBorder != null)
 		{
-			this.additionalVerticalSpace = 0;
+			this.setBorder(this.originalBorder);
 		}
 	}
 
+	public void removeExtraSpacing()
+	{
+		if (this.originalBorder != null)
+		{
+			this.setBorder(this.originalBorder);
+		}	
+	}
+	
+	/*
 	public Dimension getPreferredSize()
 	{
 		Dimension pref = super.getPreferredSize();
@@ -85,6 +104,7 @@ public class WbMenuItem
     }
 		return pref;
 	}
+	*/
 	
 	public void setText(String aText)
 	{

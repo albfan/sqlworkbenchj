@@ -377,6 +377,10 @@ public class MainWindow
 		if (dbExplorerPanel != null)
 		{
 			this.dbExplorerPanel.saveSettings();
+      if (this.dbExplorerPanel.getWindow() != null)
+      {
+        this.dbExplorerPanel.getWindow().saveSettings();
+      }
 		}
 	}
 
@@ -797,9 +801,20 @@ public class MainWindow
 	public void removeTab()
 	{
 		if (this.getCurrentPanel() instanceof DbExplorerPanel) return;
-		int lastIndex = this.getLastSqlIndex();
-		this.sqlTab.remove(lastIndex);
-		this.panelMenus.remove(lastIndex);
+		int index = this.sqlTab.getSelectedIndex();
+		this.sqlTab.remove(index);
+		this.panelMenus.remove(index);
+		
+		int count = this.sqlTab.getTabCount();
+		for (int i=index; i < count; i++)
+		{
+			MainPanel p = this.getSqlPanel(i);
+			if (p instanceof SqlPanel)
+			{
+				((SqlPanel)p).setId(i+1);
+				this.sqlTab.setTitleAt(i, ResourceMgr.getString("LabelTabStatement") + " " + Integer.toString(i + 1));
+			}
+		}
 	}
 
 	private int getLastSqlIndex()
@@ -893,8 +908,8 @@ public class MainWindow
 			if (p instanceof SqlPanel)
 			{
 				SqlTabPopup pop = new SqlTabPopup(this);
-				RemoveTabAction a = pop.getRemoveAction();
-				a.setEnabled(this.sqlTab.getSelectedIndex() == this.getLastSqlIndex());
+				//RemoveTabAction a = pop.getRemoveAction();
+				//a.setEnabled(this.sqlTab.getSelectedIndex() == this.getLastSqlIndex());
 				pop.show(this.sqlTab,e.getX(),e.getY());
 			}
 		}

@@ -51,6 +51,13 @@ public class DbExplorerWindow
 	{
 		this.setTitle(ResourceMgr.getString("TxtDbExplorerTitel") + " - [" + aProfileName + "]");
 	}
+  
+  public void saveSettings()
+  {
+		WbManager.getSettings().storeWindowPosition(this);
+		WbManager.getSettings().storeWindowSize(this);
+		this.panel.saveSettings();
+  }
 
 	public void restorePosition()
 	{
@@ -73,13 +80,11 @@ public class DbExplorerWindow
 
 	public void windowClosed(WindowEvent e)
 	{
-		WbManager.getSettings().storeWindowPosition(this);
-		WbManager.getSettings().storeWindowSize(this);
-		this.panel.saveSettings();
 	}
 
 	public void windowClosing(WindowEvent e)
 	{
+    this.saveSettings();
 	}
 
 	public void windowDeactivated(WindowEvent e)

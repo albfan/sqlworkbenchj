@@ -21,6 +21,9 @@ import java.util.Enumeration;
 import java.util.Vector;
 import javax.swing.border.BevelBorder;
 import javax.swing.BorderFactory;
+import workbench.gui.actions.WbAction;
+import workbench.gui.menu.TextPopup;
+import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.TextSelectionListener;
 import workbench.interfaces.Undoable;
 import workbench.util.StringUtil;
@@ -53,12 +56,13 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.9 2002-10-12 09:23:15 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.10 2002-11-15 20:15:25 thomas Exp $
  */
 public class JEditTextArea 
 	extends JComponent
-	implements MouseWheelListener, Undoable
+	implements MouseWheelListener, Undoable, ClipboardSupport
 {
+
 	/**
 	 * Adding components with this name to the text area will place
 	 * them left of the horizontal scroll bar. In jEdit, the status
@@ -118,7 +122,18 @@ public class JEditTextArea
 		electricScroll = defaults.electricScroll;
 		autoIndent = defaults.autoIndent;
 		this.setTabSize(defaults.tabSize);
-		popup = defaults.popup;
+		this.popup = new TextPopup(this);
+
+		this.addKeyBinding("C+C", this.popup.getCopyAction());
+		this.addKeyBinding("C+INSERT", this.popup.getCopyAction());
+		
+		this.addKeyBinding("C+V", this.popup.getPasteAction());
+		this.addKeyBinding("SHIFT+INSERT", this.popup.getPasteAction());
+		
+		this.addKeyBinding("C+X", this.popup.getCutAction());
+		this.addKeyBinding("SHIFT+DELETE", this.popup.getCutAction());
+		
+		this.addKeyBinding("C+a", this.popup.getSelectAllAction());
 
 		// We don't seem to get the initial focus event?
 		focusedComponent = this;
@@ -146,6 +161,20 @@ public class JEditTextArea
 	public void toUpperCase()
 	{
 		this.changeCase(false);
+	}
+	
+	public void addKeyBinding(String aBinding, ActionListener aListener)
+	{
+		this.getInputHandler().addKeyBinding(aBinding, aListener);
+	}
+	
+	public void addKeyBinding(WbAction anAction)
+	{
+		KeyStroke key = anAction.getAccelerator();
+		if (key != null)
+		{
+			this.getInputHandler().addKeyBinding(key, anAction);
+		}
 	}
 	
 	/**
@@ -1394,7 +1423,7 @@ public class JEditTextArea
 	 * Sets the right click popup menu.
 	 * @param popup The popup
 	 */
-	public final void setRightClickPopup(JPopupMenu popup)
+	public final void setRightClickPopup(TextPopup popup)
 	{
 		this.popup = popup;
 	}
@@ -1666,7 +1695,7 @@ public class JEditTextArea
 	
 	protected TextAreaPainter painter;
 
-	protected JPopupMenu popup;
+	protected TextPopup popup;
 
 	protected EventListenerList listenerList;
 	protected MutableCaretEvent caretEvent;

@@ -22,6 +22,7 @@ import workbench.gui.actions.EscAction;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.UnderlineBorder;
 import workbench.resource.ResourceMgr;
+import workbench.util.BrowserLauncher;
 
 /**
  *
@@ -68,6 +69,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 		labelCopyright = new javax.swing.JLabel();
 		jLabel1 = new javax.swing.JLabel();
 		jLabel2 = new javax.swing.JLabel();
+		jdkVersion = new javax.swing.JLabel();
 		
 		setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 		setTitle(ResourceMgr.getString("TxtAbout") + " " + ResourceMgr.TXT_PRODUCT_NAME);
@@ -109,7 +111,8 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 0;
-		gridBagConstraints.gridheight = 5;
+		gridBagConstraints.gridheight = 6;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
 		gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 0);
 		contentPanel.add(logo, gridBagConstraints);
 		
@@ -135,7 +138,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 		contentPanel.add(labelDesc, gridBagConstraints);
 		
 		labelVersion.setFont(null);
-		labelVersion.setText(ResourceMgr.getString("TxtVersion") + " (" + ResourceMgr.getString("TxtBuild") + ")");
+		labelVersion.setText(ResourceMgr.getString("TxtBuild"));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 2;
@@ -149,7 +152,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 		contactInformation.setBorder(null);
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 4;
+		gridBagConstraints.gridy = 5;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
 		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
@@ -159,17 +162,25 @@ public class WbAboutDialog extends javax.swing.JDialog
 		labelCopyright.setText(ResourceMgr.getString("TxtCopyright"));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 3;
+		gridBagConstraints.gridy = 4;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 4);
 		contentPanel.add(labelCopyright, gridBagConstraints);
 		
 		jLabel1.setFont(new java.awt.Font("Dialog", 0, 11));
 		jLabel1.setForeground((java.awt.Color) javax.swing.UIManager.getDefaults().get("Label.disabledForeground"));
-		jLabel1.setText("Built with NetBeans (www.netbeans.org)");
+		jLabel1.setText("<html>Built with NetBeans (<u>www.netbeans.org</u>)</html>");
+		jLabel1.addMouseListener(new java.awt.event.MouseAdapter()
+		{
+			public void mouseClicked(java.awt.event.MouseEvent evt)
+			{
+				jLabel1MouseClicked(evt);
+			}
+		});
+		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 5;
+		gridBagConstraints.gridy = 6;
 		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.insets = new java.awt.Insets(4, 5, 0, 4);
@@ -180,16 +191,36 @@ public class WbAboutDialog extends javax.swing.JDialog
 		jLabel2.setText("The editor is based on jEdit's 2.2.1 syntax highlighting package");
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 6;
+		gridBagConstraints.gridy = 7;
 		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 4);
 		contentPanel.add(jLabel2, gridBagConstraints);
 		
+		jdkVersion.setText(ResourceMgr.getString("TxtJavaVersion") + " " + System.getProperty("java.version"));
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 3;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
+		contentPanel.add(jdkVersion, gridBagConstraints);
+		
 		getContentPane().add(contentPanel, java.awt.BorderLayout.CENTER);
 		
 		pack();
 	}//GEN-END:initComponents
+
+	private void jLabel1MouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_jLabel1MouseClicked
+	{//GEN-HEADEREND:event_jLabel1MouseClicked
+		try
+		{
+			if (evt.getClickCount() == 2) BrowserLauncher.openURL("http://www.netbeans.org");
+		}
+		catch (Exception e)
+		{
+		}
+	}//GEN-LAST:event_jLabel1MouseClicked
 
 	private void closeButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_closeButtonActionPerformed
 	{//GEN-HEADEREND:event_closeButtonActionPerformed
@@ -223,17 +254,18 @@ public class WbAboutDialog extends javax.swing.JDialog
 	}
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.JLabel labelCopyright;
-	private javax.swing.JLabel labelTitel;
-	private javax.swing.JPanel buttonPanel;
-	private javax.swing.JTextField contactInformation;
-	private javax.swing.JLabel logo;
-	private javax.swing.JLabel labelDesc;
-	private javax.swing.JPanel contentPanel;
-	private javax.swing.JButton closeButton;
-	private javax.swing.JLabel jLabel2;
-	private javax.swing.JLabel jLabel1;
 	private javax.swing.JLabel labelVersion;
+	private javax.swing.JLabel jLabel1;
+	private javax.swing.JLabel logo;
+	private javax.swing.JLabel labelCopyright;
+	private javax.swing.JLabel jLabel2;
+	private javax.swing.JTextField contactInformation;
+	private javax.swing.JLabel labelDesc;
+	private javax.swing.JPanel buttonPanel;
+	private javax.swing.JButton closeButton;
+	private javax.swing.JLabel labelTitel;
+	private javax.swing.JLabel jdkVersion;
+	private javax.swing.JPanel contentPanel;
 	// End of variables declaration//GEN-END:variables
 
 }

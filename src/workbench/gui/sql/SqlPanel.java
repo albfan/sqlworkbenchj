@@ -9,10 +9,13 @@ package workbench.gui.sql;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -22,16 +25,21 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import workbench.WbManager;
 import workbench.db.DataSpooler;
+import workbench.db.DeleteScriptGenerator;
 import workbench.db.WbConnection;
+import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.*;
 import workbench.gui.components.*;
+import workbench.gui.components.ImportFileOptionsPanel;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.*;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.storage.DataStore;
+import workbench.util.LineTokenizer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
@@ -79,6 +87,9 @@ public class SqlPanel
 	private DataToClipboardAction dataToClipboard;
 	private SaveDataAsAction exportDataAction;
 	private CopyAsSqlInsertAction copyAsSqlInsert;
+	private CreateDeleteScriptAction createDeleteScript;
+	private ImportFileAction importFileAction;
+	
 	private SpoolDataAction spoolData;
 	private UndoAction undo;
 	private RedoAction redo;
@@ -105,10 +116,9 @@ public class SqlPanel
 	/** Creates new SqlPanel */
 	public SqlPanel(int anId)
 	{
-		this.internalId = anId;
+		this.setId(anId);
 		this.setDoubleBuffered(true);
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		this.historyFilename = "WbStatements" + Integer.toString(this.internalId) + ".xml";
 		this.setLayout(new BorderLayout());
 		this.data = new DwPanel();
 		this.data.setBorder(WbSwingUtilities.EMPTY_BORDER);
@@ -155,6 +165,12 @@ public class SqlPanel
 		WbManager.getSettings().addFontChangedListener(this);
 	}
 
+	public void setId(int anId)
+	{
+		this.internalId = anId;
+		this.historyFilename = "WbStatements" + Integer.toString(this.internalId) + ".xml";
+	}
+	
 	public void initDefaults()
 	{
 		int loc = this.getHeight() / 2;
@@ -376,10 +392,13 @@ public class SqlPanel
 		this.actions.add(this.insertRowAction);
 		this.actions.add(this.deleteRowAction);
 	
+		this.createDeleteScript = new CreateDeleteScriptAction(this);
+		this.actions.add(this.createDeleteScript);
+		
 		this.exportDataAction = this.data.getTable().getExportAction();
 		this.exportDataAction.setCreateMenuSeparator(true);
 		this.exportDataAction.setEnabled(false);
-
+		
 		SelectEditorAction sea = new SelectEditorAction(this);
 		sea.setCreateMenuSeparator(true);
 		this.actions.add(sea);
@@ -398,6 +417,9 @@ public class SqlPanel
 		
 		this.copyAsSqlInsert = new CopyAsSqlInsertAction(this.data.getTable());
 		this.actions.add(this.copyAsSqlInsert);
+		
+		this.importFileAction = new ImportFileAction(this);
+		this.actions.add(this.importFileAction);
 		
 		this.actions.add(this.executeAll);
 		this.actions.add(this.executeSelected);
@@ -590,7 +612,7 @@ public class SqlPanel
 		this.data.restoreOriginalValues();
 	}
 	
-	public void startEdit()
+	public boolean startEdit()
 	{
 		// if the result is not yet updateable (automagically)
 		// then try to find the table. If the table cannot be
@@ -637,6 +659,7 @@ public class SqlPanel
 			this.startEditAction.setSwitchedOn(false);
 		}
 		this.setActionState(new Action[] {this.insertRowAction, this.deleteRowAction}, update);
+		return update;
 	}
 
 	private void initBackgroundThread()
@@ -923,6 +946,40 @@ public class SqlPanel
 		DataSpooler spooler = new DataSpooler();
 		spooler.executeStatement(this.getParentWindow(), this.dbConnection, sql);
 	}
+
+	public void importFile()
+	{
+		if (!this.startEdit()) return;
+		
+		WbTable table = this.data.getTable(); 
+		if (table == null) return;
+		DataStoreTableModel model = (DataStoreTableModel)table.getModel();
+		DataStore ds = table.getDataStore();
+		if (ds == null) return;
+		String lastDir = WbManager.getSettings().getLastImportDir();
+		JFileChooser fc = new JFileChooser(lastDir);
+		ImportFileOptionsPanel optionPanel = new ImportFileOptionsPanel();
+		optionPanel.restoreSettings();
+		fc.setAccessory(optionPanel);
+		fc.addChoosableFileFilter(ExtensionFileFilter.getTextFileFilter());
+		int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(this));
+		if (answer == JFileChooser.APPROVE_OPTION)
+		{
+			//result = this.readFile(fc.getSelectedFile());
+			String filename = fc.getSelectedFile().getAbsolutePath();
+			try
+			{
+				model.importFile(filename, optionPanel.getContainsHeader(), optionPanel.getColumnDelimiter());
+				lastDir = fc.getCurrentDirectory().getAbsolutePath();
+				WbManager.getSettings().setLastImportDir(lastDir);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("SqlPanel.importFile()", "Error importing " + filename, e);
+			}
+			optionPanel.saveSettings();
+		}
+	}
 	
 	private void displayResult(String aSqlScript)
 	{
@@ -981,7 +1038,65 @@ public class SqlPanel
 		catch (Exception e)
 		{
 			this.showLogMessage(this.data.getLastMessage());
-			LogMgr.logError(this, "Error executing statement", e);
+			LogMgr.logError("SqlPanel.displayResult()", "Error executing statement", e);
+		}
+	}
+	
+	public void generateDeleteScript()
+	{
+		WbTable table = this.data.getTable();
+		if (table == null) return;
+		
+		DataStore ds = table.getDataStore();
+		if (ds == null) return;
+		
+		int row = table.getSelectedRow();
+		if (row < 0) 
+		{
+			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgSelectRow"));
+			return;
+		}
+		
+		String updatetable = ds.getUpdateTable();
+		String schema = ds.getUpdateTableSchema();
+		
+		Map pkvalues = ds.getPkValues(row);
+		try
+		{
+			DeleteScriptGenerator gen = new DeleteScriptGenerator(this.dbConnection);
+			gen.setTable(null, schema, updatetable);
+			gen.setValues(pkvalues);
+			String script = gen.createScript();
+			MainWindow parent = (MainWindow)SwingUtilities.getWindowAncestor(this);
+			String title = ResourceMgr.getString("TxtDeleteScriptWindowTitle") + " " + schema + "." + ds.getRealUpdateTable();
+			final String id = this.getClass().getName() + ".ScriptDialog";
+			JFrame f = new JFrame(title);
+			f.setIconImage(ResourceMgr.getPicture("workbench16").getImage());
+			final JFrame fd = f;
+			f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+			f.addWindowListener(new WindowAdapter()
+			{
+				public void windowClosing(WindowEvent e)
+				{
+					WbManager.getSettings().storeWindowSize(fd, id);
+				}
+			});
+			EditorPanel editor = new EditorPanel();
+			editor.setText(script);
+			editor.setCaretPosition(0);
+			editor.addPopupMenuItem(new FileSaveAsAction(editor), true);			
+			
+			f.getContentPane().add(editor);
+			if (!WbManager.getSettings().restoreWindowSize(f, id))
+			{
+				f.setSize(400,400);
+			}
+			WbSwingUtilities.center(f, parent);
+			f.show();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("SqlPanel.generateDeleteScript", "Error generating delete script", e);
 		}
 	}
 	
@@ -992,12 +1107,14 @@ public class SqlPanel
 		
 		boolean mayEdit = hasResult && this.data.hasUpdateableColumns();
 		this.setActionState(this.startEditAction, mayEdit);
+		this.setActionState(this.createDeleteScript, mayEdit);
 
 		boolean findNext = hasResult && (this.data.getTable() != null && this.data.getTable().canSearchAgain());
 		this.setActionState(this.findAgainAction, findNext);
 		
 		boolean canUpdate = this.data.isUpdateable();
 		this.setActionState(this.copyAsSqlInsert, canUpdate);
+		this.setActionState(this.importFileAction, canUpdate);
 	}
 	
 	public void run()

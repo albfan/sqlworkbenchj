@@ -163,10 +163,15 @@ public class ProcedureListPanel
 	public void setCatalogAndSchema(String aCatalog, String aSchema)
 		throws Exception
 	{
+		this.setCatalogAndSchema(aCatalog, aSchema, true);
+	}
+	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)
+		throws Exception
+	{
 		this.reset();
 		this.currentSchema = aSchema;
 		this.currentCatalog = aCatalog;
-		if (this.isVisible())
+		if (this.isVisible() && retrieve)
 			this.retrieve();
 		else
 			this.shouldRetrieve = true;

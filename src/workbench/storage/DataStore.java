@@ -22,6 +22,7 @@ import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
 import workbench.log.LogMgr;
+import workbench.util.LineTokenizer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -52,6 +53,7 @@ public class DataStore
 	private String[] columnClassNames;
 	
 	private String updateTable;
+	private String updateTableSchema;
 	private ArrayList updateTableColumns;
 	
 	private WbConnection originalConnection;
@@ -468,11 +470,13 @@ public class DataStore
 		
 		// If an updatetable is defined, we only accept
 		// values for columns in that table 
+		/*
 		if (this.updateTableColumns != null)
 		{
 			String col = this.columnNames[aColumn].toLowerCase();
 			if (!this.updateTableColumns.contains(col)) return;
 		}
+		*/
 		RowData row = this.getRow(aRow);
 		if (aValue == null)
 			row.setNull(aColumn, this.columnTypes[aColumn]);
@@ -620,7 +624,7 @@ public class DataStore
 		return (this.updateTable != null && this.hasUpdateableColumns());
 	}
 	
-	/* Private methods */
+	
 	private int findColumn(String name)
 		throws SQLException
 	{
@@ -812,6 +816,12 @@ public class DataStore
 			this.setNull(aRow, i);
 		}
 	}
+	public void importData(String aFilename, boolean hasHeader, String aColSeparator)
+		throws FileNotFoundException
+	{
+		this.importData(aFilename, hasHeader, aColSeparator, Collections.EMPTY_MAP);
+	}
+	
 	/** 	
 	 *	Import a text file into this datastore.
 	 * @param aFilename - The text file to import
@@ -877,8 +887,10 @@ public class DataStore
 					}
 					catch (Exception e)
 					{
+						LogMgr.logWarning("DataStore.importData()","Error reading line #" + row + ",contents=" + line, e);
 					}
 				}
+				
 			}
 			
 			try
@@ -1142,6 +1154,38 @@ public class DataStore
 		{
 			return ROW_ORIGINAL;
 		}
+	}
+	public Map getPkValues(int aRow)
+	{
+		return this.getPkValues(this.originalConnection, aRow);
+	}
+	public Map getPkValues(WbConnection aConnection, int aRow)
+	{
+		if (aConnection == null) return Collections.EMPTY_MAP;
+		try
+		{
+			this.updatePkInformation(this.originalConnection);
+		}
+		catch (SQLException e)
+		{
+			return Collections.EMPTY_MAP;
+		}
+		
+		if (this.pkColumns == null) return Collections.EMPTY_MAP;
+		
+		RowData data = this.getRow(aRow);
+		if (data == null) return Collections.EMPTY_MAP;
+		
+		int count = this.pkColumns.size();
+		HashMap result = new HashMap(count);
+		for (int j=0; j < count ; j++)
+		{
+			int pkcol = ((Integer)this.pkColumns.get(j)).intValue();
+			String name = this.getColumnName(pkcol);
+			Object value = data.getValue(pkcol);
+			result.put(name, value);
+		}
+		return result;
 	}
 
 	/**
@@ -1409,37 +1453,75 @@ public class DataStore
 		}
 		return dml;
 	}
+
+	public String getUpdateTableSchema()
+	{
+		return this.getUpdateTableSchema(this.originalConnection);
+	}
+	
+	public String getUpdateTableSchema(WbConnection aConnection)
+	{
+		if (this.updateTable == null) return null;
+		LineTokenizer tok = new LineTokenizer(this.updateTable, ".");
+		String schema = null;
+		
+		if (tok.countTokens() > 1)
+		{
+			schema = tok.nextToken();
+		}
+		
+		if (schema == null || schema.trim().length() == 0)
+		{
+			try
+			{
+				schema = aConnection.getMetadata().getSchemaForTable(this.updateTable);
+			}
+			catch (Exception e)
+			{
+				schema = null;
+			}
+		}
+		this.updateTableSchema = schema;
+		return schema;
+	}
+	
+	public String getRealUpdateTable()
+	{
+		if (this.updateTable.indexOf('.') > 0)
+		{
+			return this.updateTable.substring(this.updateTable.lastIndexOf('.') + 1);
+		}
+		return this.updateTable;
+	}
 	
 	private void updatePkInformation(WbConnection aConnection)
 		throws SQLException
 	{
 		if (this.pkColumns != null) return;
-		this.pkColumns = new ArrayList();
+		
 		if (aConnection != null)
 		{
 			Connection sqlConn = aConnection.getSqlConnection();
 			DatabaseMetaData meta = sqlConn.getMetaData();
 			this.updateTable = aConnection.getMetadata().adjustObjectname(this.updateTable);
-			ResultSet rs = meta.getBestRowIdentifier(null, null, this.updateTable, DatabaseMetaData.bestRowSession, false);
+			String schema = this.getUpdateTableSchema(aConnection);
+
 			int index;
 			String col;
-			while (rs.next())
+			ResultSet rs = meta.getPrimaryKeys(null, schema, this.getRealUpdateTable());
+			ArrayList cols = this.readPkColumns(rs);
+			
+			// no primary keys found --> try the bestRowIdentifier...
+			if (cols.size() == 0)
 			{
-				col = rs.getString("COLUMN_NAME");
-				try
-				{
-					index = this.findColumn(col);
-					this.pkColumns.add(new Integer(index));
-				}
-				catch (SQLException e)
-				{
-					LogMgr.logError(this, "Identifier column " + col + " not found in resultset! Using all rows as keys", e);
-					this.pkColumns.clear();
-					break;
-				}
+				rs = meta.getBestRowIdentifier(null, null, this.updateTable, DatabaseMetaData.bestRowSession, false);
+				cols = this.readPkColumns(rs);
 			}
-			rs.close();
+			this.pkColumns = cols;
 		}
+		if (this.pkColumns == null) this.pkColumns = new ArrayList();
+		
+		// if we didn't find any columns, so use all columns as the identifier
 		if (this.pkColumns.size() == 0)
 		{
 			for (int i=0; i < this.colCount; i++)
@@ -1447,6 +1529,32 @@ public class DataStore
 				this.pkColumns.add(new Integer(i));
 			}
 		}
+	}
+	
+	private ArrayList readPkColumns(ResultSet rs)
+	{
+		ArrayList result = new ArrayList();
+		String col = null;
+		int index = 0;
+		try
+		{
+			while (rs.next())
+			{
+				col = rs.getString("COLUMN_NAME");
+				index = this.findColumn(col);
+				result.add(new Integer(index));
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError(this, "Identifier column " + col + " not found in resultset! Using all rows as keys", e);
+			result.clear();
+		}
+		finally
+		{
+			try { rs.close(); } catch (Exception e) {}
+		}
+		return result;
 	}
 	
 	private void checkRowBounds(int aRow)

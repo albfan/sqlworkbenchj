@@ -61,9 +61,10 @@ public class DwPanel extends JPanel
 	
 	private static int nextId = 0;
 	private WbConnection lastConnection;
-	private static final ArrayList knownSqlVerbs;
 	private boolean cancelled;
-	
+	private static final ArrayList knownSqlVerbs;
+	private static final ArrayList noResultVerbs;
+	private static final ArrayList noUpdateCountVerbs;
 	static
 	{
 		knownSqlVerbs = new ArrayList();
@@ -75,7 +76,24 @@ public class DwPanel extends JPanel
 		knownSqlVerbs.add("DROP");
 		knownSqlVerbs.add("ALTER");
 		knownSqlVerbs.add("GRANT");
+		
+		noResultVerbs = new ArrayList();
+		noResultVerbs.add("COMMIT");
+		noResultVerbs.add("ROLLBACK");
+		noResultVerbs.add("UPDATE");
+		noResultVerbs.add("INSERT");
+		noResultVerbs.add("DELETE");
+
+		noUpdateCountVerbs = new ArrayList();
+		noUpdateCountVerbs.add("COMMIT");
+		noUpdateCountVerbs.add("ROLLBACK");
+		noUpdateCountVerbs.add("DROP");
+		noUpdateCountVerbs.add("CREATE");
+		noUpdateCountVerbs.add("ALTER");
+		noUpdateCountVerbs.add("GRANT");
 	}
+	
+	
 	public DwPanel()
 	{
 		this.objectId = nextId++;
@@ -139,10 +157,10 @@ public class DwPanel extends JPanel
 			DataStore ds = this.realModel.getDataStore();
 			if (WbManager.getSettings().getDbDebugMode())
 			{
-				Dimension max = new Dimension(300,32768);
+				Dimension max = new Dimension(400,400);
 				JTextArea preview = new JTextArea();
 				preview.setLineWrap(false);
-				preview.setColumns(40);
+				preview.setColumns(60);
 				preview.setPreferredSize(null);
 				preview.setMaximumSize(max);
 				JScrollPane scroll = new JScrollPane(preview);
@@ -153,6 +171,10 @@ public class DwPanel extends JPanel
 					DmlStatement dml = (DmlStatement)stmts.get(i);
 					preview.append(dml.getExecutableStatement(aConnection));
 					preview.append(";\n");
+				}
+				if (stmts.size() > 20)
+				{
+					scroll.setPreferredSize(max);
 				}
 				Window win = SwingUtilities.getWindowAncestor(this);
 				int choice = JOptionPane.showConfirmDialog(win, scroll, "Please confirm updates", JOptionPane.OK_CANCEL_OPTION);
@@ -237,6 +259,7 @@ public class DwPanel extends JPanel
 		{
 			long start, end, sqlTime = 0;
 			String cleanSql = null;
+			StringBuffer msg = new StringBuffer(500);
 			
 			this.lastMessage = "";
 			this.realModel = null;
@@ -318,6 +341,8 @@ public class DwPanel extends JPanel
 			}
 			else
 			{
+				boolean checkForResultSet = false;
+				
 				this.lastStatement = sqlcon.createStatement();
 
 				if (verb.equalsIgnoreCase("SELECT"))
@@ -330,7 +355,39 @@ public class DwPanel extends JPanel
 				}					
 				start = System.currentTimeMillis();
 				this.lastStatement.execute(aSql);
-				rs = this.lastStatement.getResultSet();
+
+				int updateCount = this.lastStatement.getUpdateCount();
+				boolean moreResults = false; 
+				StringBuffer rows = null;
+				if (!noResultVerbs.contains(verb))
+				{
+					rs = this.lastStatement.getResultSet();
+					if (rs == null)
+					{
+						moreResults = this.lastStatement.getMoreResults();
+					}
+
+					while (moreResults || (updateCount != -1))
+					{
+						System.out.println("moreresults=" + moreResults);
+						System.out.println("updatecount=" + updateCount);
+						if (moreResults)
+						{
+							rs  = this.lastStatement.getResultSet();
+						}
+
+						if (updateCount > -1 && !this.noUpdateCountVerbs.contains(verb))
+						{
+							if (rows == null) rows = new StringBuffer(100);
+							rows.append('\n');
+							rows.append(updateCount + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
+							rows.append('\n');
+						}
+
+						moreResults = this.lastStatement.getMoreResults();
+						updateCount = this.lastStatement.getUpdateCount();
+					}			
+				}
 				
 				if (rs != null)
 				{
@@ -345,12 +402,12 @@ public class DwPanel extends JPanel
 				else
 				{
 					this.hasResultSet = false;
+					if (rows != null) msg.append(rows);
 				}
 				end = System.currentTimeMillis();
 				sqlTime = (end - start);
 			}
 
-			StringBuffer msg = new StringBuffer(500);
 			
 			if (this.hasResultSet)
 			{
@@ -386,7 +443,10 @@ public class DwPanel extends JPanel
 				this.infoTable.setVisible(true);
 				this.infoTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 				this.infoTable.setRowSelectionAllowed(true);
-				this.lastMessage = ResourceMgr.getString(ResourceMgr.MSG_SQL_EXCUTE_OK);
+				msg.append('\n');
+				msg.append(verb.toUpperCase());
+				msg.append(' ');
+				msg.append(ResourceMgr.getString("MsgKnownStatementOK"));
 				this.statusBar.setRowcount(this.infoTable.getModel().getRowCount());
 			}
 			else if (this.lastStatement != null)
@@ -411,6 +471,7 @@ public class DwPanel extends JPanel
 				{
 					if (knownSqlVerbs.contains(verb))
 					{
+						msg.append('\n');
 						msg.append(verb.toUpperCase());
 						msg.append(' ');
 						msg.append(ResourceMgr.getString("MsgKnownStatementOK"));
@@ -428,15 +489,8 @@ public class DwPanel extends JPanel
 					msg.append("\n");
 					msg.append(count + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
 				}
-				this.lastMessage = msg.toString();
 			}
-			else
-			{
-				msg.append(verb.toUpperCase());
-				msg.append(' ');
-				msg.append(ResourceMgr.getString("MsgKnownStatementOK"));
-				this.lastMessage = msg.toString();
-			}
+			this.lastMessage = msg.toString();
 			this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgExecTime") + " " + (((double)sqlTime) / 1000.0) + "s";
 			if (this.lastStatement != null) this.lastStatement.close();
 			this.lastStatement = null;
@@ -450,6 +504,7 @@ public class DwPanel extends JPanel
 		}
 		catch (Throwable e)
 		{
+			e.printStackTrace();
 			LogMgr.logError(this, "Error executing statement: \r\n" + this.sql, e);
 			this.setMessageDisplayModel(this.getErrorTableModel());
 			this.lastMessage = ResourceMgr.getString("MsgExecuteError") + "\r\n";

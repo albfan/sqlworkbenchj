@@ -105,8 +105,7 @@ public class StartEditAction extends WbAction
 				this.toggleMenu.setMnemonic((int)mnemonic);
 			}
 			this.toggleMenu.setText(text);
-			this.toggleMenu.setIcon(null);
-
+			this.toggleMenu.setIcon(ResourceMgr.getImage("blank"));
 		}
 		aMenu.add(this.toggleMenu);
 	}

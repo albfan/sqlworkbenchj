@@ -49,14 +49,8 @@ public class WbManager
 	private WbManager() 
 	{
 		long start,end;
-		//start = System.currentTimeMillis();
 		this.setLookAndFeel();
-		//end = System.currentTimeMillis();
-		//System.out.println("setLookAndFeel()=" + (end - start));
-		//start = System.currentTimeMillis();
 		this.initUI();
-		//end = System.currentTimeMillis();
-		//System.out.println("initUI=" + (end - start));
 		this.settings.addFontChangedListener(this);
 	}
 
@@ -217,24 +211,10 @@ public class WbManager
 		def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
 		def.put("SplitPaneUI", "com.sun.java.swing.plaf.windows.WindowsSplitPaneUI");
 		
-		/*
-		try
-		{
-			// always use the Windows SplitPaneUI (because it does not display 
-			// those strange "bumps" on the divider... :-)
-			Class.forName("com.sun.java.swing.plaf.windows.WindowsSplitPaneUI");
-			def.put("SplitPaneUI", "com.sun.java.swing.plaf.windows.WindowsSplitPaneUI");
-		}
-		catch (ClassNotFoundException cnf)
-		{
-		}
-		*/
-		
 		if (settings.getShowMnemonics())
 			def.put("Button.showMnemonics", Boolean.TRUE);
 		else
 			def.put("Button.showMnemonics", Boolean.FALSE);
-		
 	}
 
 	public MainWindow createWindow()

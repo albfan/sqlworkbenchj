@@ -4,8 +4,7 @@
   <void method="put">
    <string>All</string>
    <string>ALTER TABLE %tablename%
-   ADD CONSTRAINT %pk_name% PRIMARY KEY (%columnlist%)
-   </string>
+   ADD CONSTRAINT %pk_name% PRIMARY KEY (%columnlist%)</string>
   </void>
  </object>
 </java>

@@ -65,7 +65,6 @@ public class Settings
 			BufferedInputStream in = new BufferedInputStream(new FileInputStream(this.filename));
 			this.props.load(in);
 			in.close();
-			LogMgr.setOutputFile(this.props.getProperty("workbench.log.filename", "System.out"));
 		}
 		catch (IOException e)
 		{
@@ -73,6 +72,13 @@ public class Settings
 			LogMgr.logInfo(this, "Using defaults");
 			fillDefaults();
 		}
+    try
+    {
+			LogMgr.setOutputFile(this.props.getProperty("workbench.log.filename", "System.out"));
+    }
+    catch (Exception e)
+    {
+    }
 	}
 
 	public void showOptionsDialog()
@@ -270,6 +276,16 @@ public class Settings
 		}
 	}
 	
+	public String getLastImportDir()
+	{
+		return this.props.getProperty("workbench.import.lastdir", this.getLastExportDir());
+	}
+
+	public void setLastImportDir(String aDir)
+	{
+		this.props.setProperty("workbench.import.lastdir", aDir);
+	}
+	
 	public String getLastExportDir()
 	{
 		return this.props.getProperty("workbench.export.lastdir","");
@@ -280,6 +296,36 @@ public class Settings
 		this.props.setProperty("workbench.export.lastdir", aDir);
 	}
 
+	public String getLastTableGenerateDir()
+	{
+		return this.props.getProperty("workbench.persistence.lastdir.table","");
+	}
+
+	public void setLastTableGenerateDir(String aDir)
+	{
+		this.props.setProperty("workbench.persistence.lastdir.table", aDir);
+	}
+
+	public String getLastValueGenerateDir()
+	{
+		return this.props.getProperty("workbench.persistence.lastdir.value","");
+	}
+
+	public void setLastValueGenerateDir(String aDir)
+	{
+		this.props.setProperty("workbench.persistence.lastdir.value", aDir);
+	}
+	public boolean getCleanupUnderscores()
+	{
+		return "true".equalsIgnoreCase(this.props.getProperty("workbench.persistence.cleanupunderscores", "false"));
+	}
+	
+	public void setCleanupUnderscores(boolean useEncryption)
+	{
+		this.props.setProperty("workbench.persistence.cleanupunderscores", Boolean.toString(useEncryption));
+	}
+	
+	
 	public String getLastSqlDir()
 	{
 		return this.props.getProperty("workbench.sql.lastscriptdir","");
@@ -305,8 +351,12 @@ public class Settings
 
 	public void storeWindowSize(Component target)
 	{
+		this.storeWindowSize(target, null);
+	}
+	public void storeWindowSize(Component target, String id)
+	{
 		Dimension d = target.getSize();
-		String id = target.getClass().getName();
+		if (id == null) id = target.getClass().getName();
 		this.setWindowSize(id, d.width, d.height);
 	}
 
@@ -595,12 +645,50 @@ public class Settings
 		
 		this.props.setProperty("workbench.export.text.fielddelimiter", aDelimit);
 	}
+
+	public String getLastImportDelimiter(boolean readable) 
+	{
+		String del = this.props.getProperty("workbench.import.text.fielddelimiter", "\\t");
+		if (readable)
+		{
+			if (del.equals("\t"))
+			{
+				del = "\\t";
+			}
+		}
+		else
+		{
+			if (del.equals("\\t")) del = "\t";
+		}
+		
+		return del;
+	}
+	public void setLastImportDelimiter(String aDelimit)
+	{
+		if (aDelimit.equals("\t")) aDelimit = "\\t";
+		
+		this.props.setProperty("workbench.import.text.fielddelimiter", aDelimit);
+	}
+
+	public boolean getLastImportWithHeaders()
+	{
+		return "true".equals(this.props.getProperty("workbench.import.text.containsheader", "true"));
+	}
+	
+	public void setLastImportWithHeaders(boolean aFlag)
+	{
+		this.props.setProperty("workbench.import.text.containsheader", Boolean.toString(aFlag));
+	}
 	
 	public boolean getDbDebugMode()
 	{
 		return "true".equals(this.props.getProperty("workbench.db.debugger", "true"));
 	}
-
+	public void setDbDebugMode(boolean aFlag)
+	{
+		this.props.setProperty("workbench.db.debugger", Boolean.toString(aFlag));
+	}
+	
 	public int getProfileDividerLocation()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.profiles.divider", "-1"));

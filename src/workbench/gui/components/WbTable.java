@@ -55,7 +55,6 @@ extends JTable
 	private DataStoreTableModel dwModel;
 	private String lastSearchCriteria;
 	private int lastFoundRow = -1;
-	private TableModelListener changeListener;
 
 	private TableCellEditor defaultEditor;
 	private DefaultCellEditor defaultNumberEditor;
@@ -79,6 +78,8 @@ extends JTable
 	private SortHeaderRenderer sortRenderer = new SortHeaderRenderer();
 	private ToolTipRenderer defaultTooltipRenderer = new ToolTipRenderer();
 	private RowHeightResizer rowResizer;
+	//private List changeListener;
+	private TableModelListener changeListener;
 	
 	public WbTable()
 	{
@@ -229,11 +230,6 @@ extends JTable
 		}
 		
 		this.dwModel = null;
-		super.setModel(aModel);
-		if (aModel == EMPTY_MODEL)
-		{
-			this.createDefaultColumnsFromModel();
-		}
 		if (aModel instanceof DataStoreTableModel)
 		{
 			this.dwModel = (DataStoreTableModel)aModel;
@@ -253,6 +249,11 @@ extends JTable
 		
 		this.initDefaultRenderers();
 		this.initDefaultEditors();
+		super.setModel(aModel);
+		if (aModel == EMPTY_MODEL)
+		{
+			this.createDefaultColumnsFromModel();
+		}
 	}
 	
 	public DataStore getDataStore()
@@ -641,6 +642,7 @@ extends JTable
 			this.initDefaultEditors();
 		}
 	}
+
 	public void addTableModelListener(TableModelListener aListener)
 	{
 		this.changeListener = aListener;
@@ -653,6 +655,7 @@ extends JTable
 		if (this.dwModel != null) this.dwModel.removeTableModelListener(aListener);
 	}
 
+	
 	public void scrollToRow(int aRow)
 	{
 		Rectangle rect = this.getCellRect(aRow, 1, true);

@@ -20,8 +20,10 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.editor.JEditTextArea;
+import workbench.gui.editor.JavaTokenMarker;
 import workbench.gui.editor.SyntaxStyle;
 import workbench.gui.editor.Token;
+import workbench.gui.editor.TokenMarker;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.FontChangedListener;
@@ -42,50 +44,73 @@ public class EditorPanel
 	implements ClipboardSupport, FontChangedListener, 
 						 TextContainer, TextFileContainer
 {
-	private TextPopup popup = new TextPopup(this);
-	private AnsiSQLTokenMarker tokenMarker;
+	private AnsiSQLTokenMarker sqlTokenMarker;
 	private File currentFile;
+	private static final int JAVA_EDITOR = 1;
+	private static final int SQL_EDITOR = 0;
+	private int editorType;
+
+  private static final SyntaxStyle[] SYNTAX_COLORS;
+  static
+  {
+		SYNTAX_COLORS = new SyntaxStyle[Token.ID_COUNT];
+
+		SYNTAX_COLORS[Token.COMMENT1] = new SyntaxStyle(Color.GRAY,true,false);
+		SYNTAX_COLORS[Token.COMMENT2] = new SyntaxStyle(Color.GRAY,true,false);
+		SYNTAX_COLORS[Token.KEYWORD1] = new SyntaxStyle(Color.BLUE,false,false);
+		SYNTAX_COLORS[Token.KEYWORD2] = new SyntaxStyle(Color.MAGENTA,false,false);
+		SYNTAX_COLORS[Token.KEYWORD3] = new SyntaxStyle(new Color(0x009600),false,false);
+		SYNTAX_COLORS[Token.LITERAL1] = new SyntaxStyle(new Color(0x650099),false,false);
+		SYNTAX_COLORS[Token.LITERAL2] = new SyntaxStyle(new Color(0x650099),false,true);
+		SYNTAX_COLORS[Token.LABEL] = new SyntaxStyle(new Color(0x990033),false,true);
+		SYNTAX_COLORS[Token.OPERATOR] = new SyntaxStyle(Color.BLACK,false,false);
+		SYNTAX_COLORS[Token.INVALID] = new SyntaxStyle(Color.RED,false,true);
+		
+  }
+  
+	public static EditorPanel createSqlEditor()
+	{
+		EditorPanel p = new EditorPanel();
+		p.editorType = SQL_EDITOR;
+		return p;
+	}
 	
-	/** Creates new EditorPanel */
+	public static EditorPanel createJavaEditor()
+	{
+		EditorPanel p = new EditorPanel(new JavaTokenMarker());
+		p.editorType = JAVA_EDITOR;
+		return p;
+	}
+	
 	public EditorPanel()
 	{
+		this(null);
+	}
+	
+	/** Creates new EditorPanel */
+	public EditorPanel(TokenMarker aMarker)
+	{
 		super();
-		this.setDoubleBuffered(true);
+		this.setDoubleBuffered(false);
 		this.setFont(WbManager.getSettings().getEditorFont());
 		this.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
 		
-		SyntaxStyle[] styles = new SyntaxStyle[Token.ID_COUNT];
-
-		styles[Token.COMMENT1] = new SyntaxStyle(Color.GRAY,true,false);
-		styles[Token.COMMENT2] = new SyntaxStyle(Color.GRAY,true,false);
-		styles[Token.KEYWORD1] = new SyntaxStyle(Color.BLUE,false,false);
-		styles[Token.KEYWORD2] = new SyntaxStyle(Color.MAGENTA,false,false);
-		styles[Token.KEYWORD3] = new SyntaxStyle(new Color(0x009600),false,false);
-		styles[Token.LITERAL1] = new SyntaxStyle(new Color(0x650099),false,false);
-		styles[Token.LITERAL2] = new SyntaxStyle(new Color(0x650099),false,true);
-		styles[Token.LABEL] = new SyntaxStyle(new Color(0x990033),false,true);
-		styles[Token.OPERATOR] = new SyntaxStyle(Color.BLACK,false,false);
-		styles[Token.INVALID] = new SyntaxStyle(Color.RED,false,true);
-		
-		this.getPainter().setStyles(styles);
-		
-		this.addKeyBinding("C+C", this.popup.getCopyAction());
-		this.addKeyBinding("C+INSERT", this.popup.getCopyAction());
-		
-		this.addKeyBinding("C+V", this.popup.getPasteAction());
-		this.addKeyBinding("SHIFT+INSERT", this.popup.getPasteAction());
-		
-		this.addKeyBinding("C+X", this.popup.getCutAction());
-		this.addKeyBinding("SHIFT+DELETE", this.popup.getCutAction());
-		
-		this.addKeyBinding("C+a", this.popup.getSelectAllAction());
+		this.getPainter().setStyles(SYNTAX_COLORS);
 		
 		this.setTabSize(WbManager.getSettings().getEditorTabWidth());
-		this.tokenMarker = new AnsiSQLTokenMarker();
-		this.setTokenMarker(tokenMarker);
 		this.setCaretBlinkEnabled(true);
+	
+		if (aMarker == null)
+		{
+			this.sqlTokenMarker = new AnsiSQLTokenMarker();
+			this.setTokenMarker(this.sqlTokenMarker);
+			this.editorType = SQL_EDITOR;
+		}
+		else
+		{
+			this.setTokenMarker(aMarker);
+		}
 		
-		this.setRightClickPopup(popup);
 		this.setMaximumSize(null);
 		this.setPreferredSize(null);
 		WbManager.getSettings().addFontChangedListener(this);
@@ -97,6 +122,10 @@ public class EditorPanel
 		{
 			this.setFont(aFont);
 		}
+	}
+	public AnsiSQLTokenMarker getSqlTokenMarker()
+	{
+		return this.sqlTokenMarker;
 	}
 	
 	/**
@@ -182,12 +211,7 @@ public class EditorPanel
 		}
 		this.setSelectedText(newText.toString());
 	}
-	
-	public AnsiSQLTokenMarker getSqlTokenMarker()
-	{
-		return this.tokenMarker;
-	}
-	
+
 	public void addPopupMenuItem(WbAction anAction, boolean withSeparator)
 	{
 		if (withSeparator)
@@ -215,25 +239,6 @@ public class EditorPanel
 			return this.getText();
 		else
 			return text;
-	}
-	
-	public void clear()
-	{
-		this.setSelectedText("");
-	}
-	
-	public void addKeyBinding(String aBinding, ActionListener aListener)
-	{
-		this.getInputHandler().addKeyBinding(aBinding, aListener);
-	}
-	
-	public void addKeyBinding(WbAction anAction)
-	{
-		KeyStroke key = anAction.getAccelerator();
-		if (key != null)
-		{
-			this.getInputHandler().addKeyBinding(key, anAction);
-		}
 	}
 	
 	public boolean closeFile()
