@@ -19,16 +19,15 @@ import workbench.util.StringUtil;
  *
  * @author  workbench@kellerer.org
  */
-public class WbSpoolCommand
-	extends SqlCommand
+public class WbExport extends SqlCommand
 {
-	public static final String VERB = "SPOOL";
+	public static final String VERB = "EXPORT";
 	public DataSpooler spooler;
 	private int instance;
 
 	private ArgumentParser cmdLine;
 
-	public WbSpoolCommand()
+	public WbExport()
 	{
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument("type");
@@ -46,6 +45,7 @@ public class WbSpoolCommand
 		cmdLine.addArgument("header");
 		cmdLine.addArgument("createtable");
 		cmdLine.addArgument("nodata");
+		cmdLine.addArgument("encoding");
 	}
 
 	public String getVerb() { return VERB; }
@@ -129,6 +129,10 @@ public class WbSpoolCommand
 			String format = cmdLine.getValue("dateformat");
 			if (format != null) spooler.setTextDateFormat(format);
 
+			String encoding = cmdLine.getValue("encoding");
+			System.out.println("encoding=" + encoding);
+			if (encoding != null) spooler.setXmlEncoding(encoding);
+			
 			format = cmdLine.getValue("timestampformat");
 			if (format != null) spooler.setTextTimestampFormat(format);
 
