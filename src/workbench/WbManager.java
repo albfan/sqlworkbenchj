@@ -88,7 +88,7 @@ public class WbManager
 		UIManager.put("Tree.font", stdFont);
 		UIManager.put("ViewPort.font", stdFont);
 		end = System.currentTimeMillis();
-		//System.out.println("initFonts=" + (end - start));
+//		System.out.println("initFonts=" + (end - start));
 	}
 
 	public MainWindow createWindow()

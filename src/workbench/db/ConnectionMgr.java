@@ -14,6 +14,9 @@ import workbench.resource.ResourceMgr;
 import workbench.log.LogMgr;
 import workbench.exception.NoConnectionException;
 import java.sql.DriverManager;
+import org.xml.sax.InputSource;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 /**
  *
@@ -23,14 +26,14 @@ import java.sql.DriverManager;
 public class ConnectionMgr
 {
 	private HashMap connections;
-
+	
 	/** Creates new ConnectionMgr */
 	public ConnectionMgr()
 	{
 		this.connections = new HashMap(10);
 	}
 	
-	/**	
+	/**
 	 *	Return a connection for the given ID.
 	 *	A NoConnectException is thrown if no connection
 	 *	is found for that ID
@@ -44,15 +47,15 @@ public class ConnectionMgr
 	/**
 	 *	Return the connection identified by the given id.
 	 *	Typically the ID is the ID of the MainWindow requesting
-	 *	the connection. 
-	 *	If no connection is found with that ID and the selectWindow 
+	 *	the connection.
+	 *	If no connection is found with that ID and the selectWindow
 	 *	parameter is set to true, the connection dialog
 	 *	is displayed.
 	 *	If still no connection is found a NoConnectionException is thrown
 	 *	If a connection is created then it will be stored together
 	 *	with the given ID.
 	 *
-	 *	@param ID the id for the connection 
+	 *	@param ID the id for the connection
 	 *	@param showSelectWindow if true show the connection window
 	 *	@throws NoConnectionException
 	 *	@see workbench.gui.MainWindow#getWindowId()
@@ -81,11 +84,14 @@ public class ConnectionMgr
 		
 		try
 		{
-			Class.forName("org.postgresql.Driver");
-			String url = "jdbc:postgresql:wbtest";
-			String user = "thomas";
-
-			Connection conn  = DriverManager.getConnection(url, user, "");
+			//Class.forName("org.postgresql.Driver");
+			//String url = "jdbc:postgresql:wbtest";
+			//String user = "thomas";
+			Class.forName("oracle.jdbc.OracleDriver");
+			String url="jdbc:oracle:thin:@gromit:1521:oradb";
+			String user = "auto";
+			String pwd = "auto";
+			Connection conn  = DriverManager.getConnection(url, user, pwd);
 			result = new WbConnection(conn);
 		}
 		catch (Exception e)
@@ -139,5 +145,30 @@ public class ConnectionMgr
 	public String toString()
 	{
 		return this.getClass().getName();
+	}
+	
+	public static void main(String args[])
+	{
+		try
+		{
+//			System.out.println(System.getProperty("user.dir"));
+//			ConnectionsHandler handler = new ConnectionsHandlerImpl();
+//			org.xml.sax.EntityResolver resolver = new org.xml.sax.helpers.DefaultHandler();
+//			
+//			ConnectionsParser parser = new ConnectionsParser(handler,resolver);
+			BufferedReader in = new BufferedReader(new FileReader("/home/thomas/projects/java/jworkbench/src/workbench/connections.xml"));
+//			
+//			parser.parse(new InputSource(in));
+     javax.xml.parsers.DocumentBuilderFactory builderFactory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
+     javax.xml.parsers.DocumentBuilder builder = builderFactory.newDocumentBuilder();
+     org.w3c.dom.Document document = builder.parse (new org.xml.sax.InputSource (in));
+     ConnectionsScanner scanner = new ConnectionsScanner (document);
+     scanner.visitDocument();
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 }

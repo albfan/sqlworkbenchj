@@ -37,10 +37,14 @@ public class Settings
 		}
 		catch (IOException e)
 		{
-			LogMgr.logInfo(this, "Settings file '" + filename + "' not found! ", e);
+			LogMgr.logInfo(this, "Settings file '" + filename + "' not found! ");
 			LogMgr.logInfo(this, "Using defaults");
 			fillDefaults();
 		}
+	}
+	
+	public void saveSettings()
+	{
 	}
 	
 	private void fillDefaults()
