@@ -184,6 +184,11 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		}
 	}
 
+	public WbConnection getConnection()
+	{
+		return this.dbConnection;
+	}
+	
 	public void disconnect()
 	{
 		this.dbConnection = null;

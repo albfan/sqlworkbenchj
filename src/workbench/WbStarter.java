@@ -1,5 +1,7 @@
 package workbench;
 
+import java.awt.Toolkit;
+import java.lang.reflect.Method;
 import javax.swing.JOptionPane;
 
 /**
@@ -37,9 +39,27 @@ public class WbStarter
 		{
 			JOptionPane.showMessageDialog(null, "JDK/JRE 1.4 or later is needed to run this application!");
 			System.err.println("A JDK or JRE 1.4 or later is needed to run this application!");
+			Toolkit.getDefaultToolkit().beep();
+			Toolkit.getDefaultToolkit().beep();
+			Toolkit.getDefaultToolkit().beep();
 			System.exit(1);
 		}
-		WbManager.main(args);
+		try
+		{
+			// Make this class can be loaded even with JDK < 1.4
+			// so no compile time reference to WbManager should occur here.
+			Class manager = Class.forName("workbench.WbManager");
+			Class[] parms = {String[].class};
+			Method main = manager.getDeclaredMethod("main", parms);
+			Object[] para = new Object[] { args };
+			main.invoke(null, para);
+			//WbManager.main(args);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 
 }

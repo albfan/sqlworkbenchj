@@ -5,22 +5,16 @@
  */
 package workbench.resource;
 
-import java.awt.Image;
-import java.awt.MediaTracker;
-import java.awt.Toolkit;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 import java.util.HashMap;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import javax.swing.ImageIcon;
-import javax.swing.JPanel;
-
 import workbench.log.LogMgr;
+
 
 
 /**
@@ -30,13 +24,6 @@ import workbench.log.LogMgr;
  */
 public class ResourceMgr
 {
-	private static ResourceMgr theInstance = new ResourceMgr();
-	private static ClassLoader loader = theInstance.getClass().getClassLoader();
-	private static Class theClass = theInstance.getClass();
-
-	private static final JPanel dummy = new JPanel();
-	private static final MediaTracker tracker = new MediaTracker(dummy);
-
 	public static final String    ERROR_DISCONNECT = "ErrorOnDiscconect";
 	public static final String    ERROR_NO_CONNECTION_AVAIL = "ErrorNoConnectionAvailable";
 	public static final String    TAB_LABEL_RESULT = "LabelTabResult";
@@ -131,7 +118,7 @@ public class ResourceMgr
 
 	public static InputStream getDefaultSettings()
 	{
-		InputStream in = theInstance.getClass().getResourceAsStream("guidefaults.properties");
+		InputStream in = ResourceMgr.class.getResourceAsStream("guidefaults.properties");
 
 		return in;
 	}
@@ -157,7 +144,7 @@ public class ResourceMgr
 		ImageIcon result = null;
 		if (value == null)
 		{
-			java.net.URL imageIconUrl = loader.getResource("workbench/resource/images/" + aKey + ".gif");
+			URL imageIconUrl = ResourceMgr.class.getClassLoader().getResource("workbench/resource/images/" + aKey + ".gif");
 			if (imageIconUrl != null)
 			{
 				result = new ImageIcon(imageIconUrl);
@@ -174,21 +161,4 @@ public class ResourceMgr
 		return result;
 	}
 
-
-  /*
-	public static ImageIcon[] loadImages(String aName)
-	{
-		 ImageIcon all = getPicture(aName);
-		 int w, h;
-     
-     for (int i=0; i < iconCount; i++)
-     {
-       Image z= Toolkit.createImage(iconWidth,iconHeight);
-       Graphics g=z.getGraphics();
-       g.clipRect(0,0,iconWidth,iconHeight);
-       g.drawImage(allIcons,-i*iconWidth,0,this);
-       icon[i]=z;
-     }
-	 }
-  */
 }

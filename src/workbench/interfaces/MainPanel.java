@@ -32,6 +32,7 @@ public interface MainPanel
 	void showLogPanel();
 	void showResultPanel();
 	void setConnection(WbConnection aConnection);
+	WbConnection getConnection();
 	void addToToolbar(WbAction anAction, boolean aFlag);
 	void setFont(Font aFont);
 	void disconnect();

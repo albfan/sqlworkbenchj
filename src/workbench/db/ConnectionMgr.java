@@ -14,11 +14,8 @@ import java.util.*;
 import workbench.WbManager;
 
 import workbench.exception.NoConnectionException;
-import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.storage.DataStore;
-import workbench.util.WbCipher;
 import workbench.util.WbPersistence;
 
 
@@ -30,16 +27,16 @@ public class ConnectionMgr
 {
 	//private WbConnection currentConnection;
 	private HashMap activeConnections = new HashMap();
-	
+
 	private HashMap profiles;
 	private List drivers;
 	private boolean profilesChanged;
-	
+
 	/** Creates new ConnectionMgr */
 	public ConnectionMgr()
 	{
 	}
-	
+
 	/**
 	 *	Return a new connection specified by the profile
 	 */
@@ -47,13 +44,13 @@ public class ConnectionMgr
 		throws ClassNotFoundException, SQLException, Exception
 	{
 		this.disconnect(anId);
-		
-		WbConnection conn = new WbConnection();
+
+		WbConnection conn = new WbConnection(anId);
 		Connection sql = this.connect(aProfile);
 		conn.setSqlConnection(sql);
 		conn.setProfile(aProfile.createCopy());
 		this.activeConnections.put(anId, conn);
-		
+
 		return conn;
 	}
 
@@ -61,7 +58,7 @@ public class ConnectionMgr
 		throws ClassNotFoundException, SQLException, Exception
 	{
 		// The DriverManager refuses to use a driver which was not loaded
-		// from the system classloader, so the connection has to be 
+		// from the system classloader, so the connection has to be
 		// established directly from the driver.
 		String drvName = aProfile.getDriverclass();
 		DbDriver drv = this.findDriver(drvName);
@@ -72,7 +69,7 @@ public class ConnectionMgr
 		try
 		{
 			Connection sql = drv.connect(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword());
-		
+
 			try
 			{
 				sql.setAutoCommit(aProfile.getAutocommit());
@@ -85,7 +82,7 @@ public class ConnectionMgr
 				if (th.getMessage() != null)
 				{
 					LogMgr.logInfo("ConnectionMgr.connect()", "(" + th.getMessage() + ")");
-				}					
+				}
 			}
 			return sql;
 		}
@@ -94,7 +91,7 @@ public class ConnectionMgr
 			throw e;
 		}
 	}
-	
+
 	public void reconnect(WbConnection aConn)
 		throws ClassNotFoundException, SQLException, Exception
 	{
@@ -104,7 +101,7 @@ public class ConnectionMgr
     Connection sql = this.connect(aConn.getProfile());
     aConn.setSqlConnection(sql);
 	}
-	
+
 	public DbMetadata getMetaDataForConnection(Connection aConn)
 	{
 		Iterator itr = this.activeConnections.entrySet().iterator();
@@ -112,14 +109,14 @@ public class ConnectionMgr
 		{
 			java.util.Map.Entry e = (Map.Entry)itr.next();
 			WbConnection c = (WbConnection)e.getValue();
-			if (c.getSqlConnection().equals(aConn)) 
+			if (c.getSqlConnection().equals(aConn))
 			{
 				return c.getMetadata();
 			}
 		}
 		return null;
 	}
-	
+
 	public DbDriver findDriver(String drvClassName)
 	{
 		if (this.drivers == null)
@@ -127,7 +124,7 @@ public class ConnectionMgr
 			this.readDrivers();
 		}
     DbDriver db = null;
-     
+
     try
     {
       for (int i=0; i < this.drivers.size(); i ++)
@@ -135,7 +132,7 @@ public class ConnectionMgr
         db = (DbDriver)this.drivers.get(i);
         if (db.getDriverClass().equals(drvClassName)) return db;
       }
-      
+
       // not found --> maybe it's present in the normal classpath...
       Class drvcls = Class.forName(drvClassName);
       Driver drv = (Driver)drvcls.newInstance();
@@ -148,7 +145,7 @@ public class ConnectionMgr
     }
 		return db;
 	}
-	
+
 	/**
 	 *	Returns a List of registered drivers.
 	 *	This list is read from WbDrivers.xml
@@ -161,7 +158,7 @@ public class ConnectionMgr
 		}
 		return this.drivers;
 	}
-	
+
 	/**
 	 *	Return a list of driverclasses
 	 */
@@ -170,7 +167,7 @@ public class ConnectionMgr
 		if (this.drivers == null) this.readDrivers();
 		ArrayList result = new ArrayList();
 		String drvClass;
-		
+
 		for (int i=0; i < this.drivers.size(); i++)
 		{
 			drvClass = ((DbDriver)this.drivers.get(i)).getDriverClass();
@@ -200,7 +197,7 @@ public class ConnectionMgr
 		}
 		return prof;
 	}
-	
+
 	/**
 	 *	Returns a Map with the current profiles.
 	 *	The key to the map is the profile name, the value is the actual profile
@@ -232,7 +229,7 @@ public class ConnectionMgr
 	public static String getDisplayString(Connection con)
 	{
 		String displayString = null;
-		
+
 		try
 		{
 			DatabaseMetaData data = con.getMetaData();
@@ -240,7 +237,7 @@ public class ConnectionMgr
 			buff.append(ResourceMgr.getString("TxtUser"));
 			buff.append('=');
 			buff.append(data.getUserName());
-			
+
 			String catName = data.getCatalogTerm();
 			String catalog = con.getCatalog();
 			if (catName == null) catName = "Catalog";
@@ -252,7 +249,7 @@ public class ConnectionMgr
 				buff.append('=');
 				buff.append(catalog);
 			}
-			
+
 			buff.append(", URL=");
 			buff.append(data.getURL());
 			displayString = buff.toString();
@@ -277,7 +274,7 @@ public class ConnectionMgr
 			this.disconnect(key);
 		}
 	}
-	
+
 	/**
 	 *	Disconnect the connection with the given (window) id
 	 */
@@ -286,7 +283,12 @@ public class ConnectionMgr
 		try
 		{
 			WbConnection con = (WbConnection)this.activeConnections.get(anId);
-			if (con != null && !con.isClosed()) con.close();
+
+			if (con != null && !con.isClosed())
+			{
+				LogMgr.logDebug("ConnectionMgr.disconnect()", "Disconnecting connection with Profile=" + con.getProfile().getName());
+				con.close();
+			}
 			this.activeConnections.put(anId, null);
 		}
 		catch (Exception e)
@@ -294,29 +296,29 @@ public class ConnectionMgr
 			LogMgr.logError(this, ResourceMgr.getString(ResourceMgr.ERROR_DISCONNECT), e);
 		}
 	}
-	
+
 	public String toString()
 	{
 		return this.getClass().getName();
 	}
-	
+
 	public void writeSettings()
 	{
 		this.saveProfiles();
 		this.saveDrivers();
 	}
-	
+
 	public void saveDrivers()
 	{
 		WbPersistence.writeObject(this.drivers, WbManager.getSettings().getDriverConfigFileName());
 	}
-	
+
 	private void readDrivers()
 	{
 		try
 		{
 			Object result = WbPersistence.readObject(WbManager.getSettings().getDriverConfigFileName());
-			if (result == null) 
+			if (result == null)
 			{
 				this.drivers = new ArrayList();
 			}
@@ -324,22 +326,34 @@ public class ConnectionMgr
 			{
 				this.drivers = (ArrayList)result;
 			}
-			
+
 			// now read the templates and append them to the driver list
-			InputStream in = this.getClass().getResourceAsStream("DriverTemplates.xml");
-			ArrayList templates = (ArrayList)WbPersistence.readObject(in);
-			for (int i=0; i < templates.size(); i++)
+			InputStream in = null;
+			try
 			{
-				Object drv = templates.get(i);
-				if (!this.drivers.contains(drv))
+				in = this.getClass().getResourceAsStream("DriverTemplates.xml");
+				ArrayList templates = (ArrayList)WbPersistence.readObject(in);
+				for (int i=0; i < templates.size(); i++)
 				{
-					this.drivers.add(drv);
+					Object drv = templates.get(i);
+					if (!this.drivers.contains(drv))
+					{
+						this.drivers.add(drv);
+					}
 				}
+			}
+			catch (Throwable io)
+			{
+				LogMgr.logWarning("ConectionMgr.readDrivers()", "Could not read driver templates!");
+			}
+			finally
+			{
+				try { in.close(); } catch (Throwable ignore) {}
 			}
 		}
 		catch (Exception e)
 		{
-			LogMgr.logWarning(this, "Could not load driver definitions!");
+			LogMgr.logWarning(this, "Could not load driver definitions!", e);
 			this.drivers = Collections.EMPTY_LIST;
 		}
 	}
@@ -364,8 +378,8 @@ public class ConnectionMgr
 			}
 		}
 	}
-	
-	
+
+
 	/**
 	 *	Reset the changed status on the profiles.
 	 *	Called after saving the profiles.
@@ -383,10 +397,10 @@ public class ConnectionMgr
       this.profilesChanged = false;
 		}
 	}
-	
+
 	/**
 	 *	Make the profile list persistent.
-	 *	This will also reset the changed flag for any modified or new 
+	 *	This will also reset the changed flag for any modified or new
 	 *	profiles.
 	 */
 	public void saveProfiles()
@@ -410,7 +424,7 @@ public class ConnectionMgr
     while (values.hasNext())
     {
       ConnectionProfile profile = (ConnectionProfile)values.next();
-      if (profile.isChanged()) 
+      if (profile.isChanged())
 			{
 				return true;
 			}
@@ -433,14 +447,14 @@ public class ConnectionMgr
 		this.profiles.put(aProfile.getIdentifier(), aProfile);
     this.profilesChanged = true;
 	}
-	
+
 	/**
 	 *	This is called from the ProfileListModel when a profile has been deleted
 	 */
 	public void removeProfile(ConnectionProfile aProfile)
 	{
     if (this.profiles == null) return;
-    
+
 		this.profiles.remove(aProfile.getIdentifier());
 		// deleting a new profile should not change the status to changed
 		if (!aProfile.isNew())
@@ -448,7 +462,7 @@ public class ConnectionMgr
 			this.profilesChanged = true;
 		}
 	}
-	
+
 	public void setProfiles(Collection c)
 	{
 		Iterator itr = ((Collection)c).iterator();
@@ -466,5 +480,5 @@ public class ConnectionMgr
 			this.profiles.put(prof.getIdentifier(), prof);
 		}
 	}
-		
+
 }

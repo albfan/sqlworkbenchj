@@ -37,12 +37,13 @@ public class ConnectionProfile
 	private boolean changed;
 	private boolean isNew;
 	private boolean storePassword = true;
-	
+	private boolean seperateConnection = false;
+
 	static
 	{
 		WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
 	}
-	
+
 	public ConnectionProfile()
 	{
 		this.id = getNextId();
@@ -55,7 +56,7 @@ public class ConnectionProfile
 	{
 		return nextId++;
 	}
-	
+
 	public ConnectionProfile(String driverClass, String url, String userName, String pwd)
 	{
 		this();
@@ -66,12 +67,12 @@ public class ConnectionProfile
 		this.setName(url);
 		this.changed = false;
 	}
-	
+
   public String getIdentifier()
   {
     return this.identifier;
   }
-  
+
 	public ConnectionProfile(String aName, String driverClass, String url, String userName, String pwd)
 	{
 		this();
@@ -82,7 +83,18 @@ public class ConnectionProfile
 		this.setName(aName);
 		this.changed = false;
 	}
-	
+
+	public boolean getUseSeperateConnectionPerTab()
+	{
+		return this.seperateConnection;
+	}
+
+	public void setUseSeperateConnectionPerTab(boolean aFlag)
+	{
+		this.seperateConnection = aFlag;
+		this.changed = true;
+	}
+
 	/**
 	 *	Sets the current password. If the password
 	 *	is not already encrypted, it will be encrypted
@@ -92,20 +104,20 @@ public class ConnectionProfile
 	 */
 	public void setPassword(String aPwd)
 	{
-		if (aPwd == null) 
+		if (aPwd == null)
 		{
 			this.password = null;
 			this.changed = true;
 			return;
 		}
-		
+
 		// check encryption settings when reading the profiles...
 		if (WbManager.getSettings().getUseEncryption())
 		{
 			if (!this.isEncrypted(aPwd))
 			{
 				aPwd = this.encryptPassword(aPwd);
-			}				
+			}
 		}
 		else
 		{
@@ -114,7 +126,7 @@ public class ConnectionProfile
 				aPwd = this.decryptPassword(aPwd);
 			}
 		}
-			
+
 		if (!aPwd.equals(this.password))
 		{
 			this.password = aPwd;
@@ -122,25 +134,25 @@ public class ConnectionProfile
 		}
 	}
 
-	
+
 	/**
 	 *	Returns the encrypted version of the password.
 	 *	This getter/setter pair is used when saving the profile
 	 *	@see #decryptPassword(String)
 	 */
-	public String getPassword() 
-	{ 
+	public String getPassword()
+	{
 		if (this.storePassword)
-			return this.password; 
+			return this.password;
 		else
 			return null;
 	}
-	
+
 	public String getInputPassword()
 	{
 		return this.decryptPassword();
 	}
-	
+
 	public void setInputPassword(String aPassword)
 	{
 		this.setPassword(aPassword);
@@ -162,7 +174,7 @@ public class ConnectionProfile
 	 *	password. This is not put into the getPassword()
 	 *	method because the XMLEncode would write the
 	 *	password in plain text into the XML file.
-	 *	A method beginning with decrypt is not 
+	 *	A method beginning with decrypt is not
 	 *	regarded as a property and thus not written
 	 *	to the XML file.
 	 *
@@ -187,23 +199,23 @@ public class ConnectionProfile
 		return aPwd.startsWith(CRYPT_PREFIX);
 	}
 
-	public void setNew() 
-	{ 
-		this.changed = true; 
+	public void setNew()
+	{
+		this.changed = true;
 		this.isNew = true;
 	}
 	public boolean isNew() { return this.isNew; }
-  public boolean isChanged() 
-	{ 
-		return this.changed || this.isNew; 
+  public boolean isChanged()
+	{
+		return this.changed || this.isNew;
 	}
-	
-  public void reset() 
-	{ 
-		this.changed = false; 
+
+  public void reset()
+	{
+		this.changed = false;
 		this.isNew = false;
 	}
-  
+
 	private String encryptPassword(String aPwd)
 	{
 		if (WbManager.getSettings().getUseEncryption())
@@ -212,11 +224,11 @@ public class ConnectionProfile
 			{
 				WbCipher des = WbManager.getInstance().getDesCipher();
 				aPwd = CRYPT_PREFIX + des.encryptString(aPwd);
-			}				
+			}
 		}
 		return aPwd;
 	}
-	
+
 	/**
 	 *	Returns the name of the Profile
 	 */
@@ -228,16 +240,16 @@ public class ConnectionProfile
 	 *  <li>the driver classes are equal</li>
 	 *	<li>the usernames are equal</li>
 	 *	<li>the (encrypted) passwords are equal</li>
-	 *  </ul> 
-	 */	
+	 *  </ul>
+	 */
 	public boolean equals(Object other)
 	{
-		try 
+		try
 		{
 			ConnectionProfile prof = (ConnectionProfile)other;
 			return this.id == prof.id;
 			/*
-			return this.url.equals(prof.url) && 
+			return this.url.equals(prof.url) &&
 						 this.driverclass.equals(prof.driverclass) &&
 						 this.username.equals(prof.username) &&
 						 this.password.equals(prof.password);
@@ -248,56 +260,56 @@ public class ConnectionProfile
 			return false;
 		}
 	}
-	
+
 	public String getUrl() { return this.url; }
-	public void setUrl(String aUrl) 
-	{ 
-		this.url = aUrl; 
+	public void setUrl(String aUrl)
+	{
+		this.url = aUrl;
 		this.changed = true;
 	}
-	
+
 	public String getDriverclass() { return this.driverclass; }
-	public void setDriverclass(String aDriverclass) 
-	{ 
-		this.driverclass = aDriverclass; 
+	public void setDriverclass(String aDriverclass)
+	{
+		this.driverclass = aDriverclass;
 		this.changed = true;
 	}
-	
+
 	public String getUsername() { return this.username; }
-	public void setUsername(java.lang.String aUsername) 
-	{ 
-		this.username = aUsername; 
+	public void setUsername(java.lang.String aUsername)
+	{
+		this.username = aUsername;
 		this.changed = true;
 	}
 
 	public boolean getAutocommit() { return this.autocommit; }
-	public void setAutocommit(boolean aFlag) 
-	{ 
+	public void setAutocommit(boolean aFlag)
+	{
 		if (aFlag != this.autocommit)
 		{
 			this.autocommit = aFlag;
 			this.changed = true;
 		}
 	}
-	
+
 	public String getName() { return this.name; }
-	public void setName(String aName) 
-	{ 
-		this.name = aName;	
+	public void setName(String aName)
+	{
+		this.name = aName;
 		this.changed = true;
 	}
-	
+
 	public String getDescription() { return this.description; }
-	
-	public void setDescription(String description) 
-	{ 
+
+	public void setDescription(String description)
+	{
 		this.changed = true;
-		this.description = description; 
+		this.description = description;
 	}
 
 	public boolean getStorePassword() { return this.storePassword; }
 	public void setStorePassword(boolean aFlag) { this.storePassword = aFlag; }
-	
+
 	public ConnectionProfile createCopy()
 	{
 		ConnectionProfile result = new ConnectionProfile();
@@ -311,7 +323,7 @@ public class ConnectionProfile
 		result.changed = false;
 		return result;
 	}
-	
+
 	public static Comparator getNameComparator()
 	{
 		return new Comparator()
@@ -325,11 +337,11 @@ public class ConnectionProfile
 				{
 					String name1 = ((ConnectionProfile)o1).name;
 					String name2 = ((ConnectionProfile)o2).name;
-					return name1.compareTo(name2);				
+					return name1.compareTo(name2);
 				}
 				return 0;
 			}
 		};
 	}
-	
+
 }

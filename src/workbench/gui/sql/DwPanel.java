@@ -145,7 +145,7 @@ public class DwPanel extends JPanel
 				for (int i=0; i < stmts.size(); i++)
 				{
 					DmlStatement dml = (DmlStatement)stmts.get(i);
-          text.append(dml.getExecutableStatement(aConnection));
+          text.append(dml.getExecutableStatement(aConnection.getDatabaseProductName()));
           text.append(";\n");
 				}
         preview.setText(text.toString());

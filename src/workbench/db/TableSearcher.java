@@ -119,6 +119,7 @@ public class TableSearcher
 		try
 		{
 			String sql = this.buildSqlForTable(aTable);
+      if (sql == null) return;
 			if (this.display != null) this.display.setCurrentTable(aTable, sql);
 			
 			this.query = this.connection.getSqlConnection().createStatement();
@@ -156,6 +157,7 @@ public class TableSearcher
 			}
 		}
 	}
+  
 	private String buildSqlForTable(String aTable)
 		throws SQLException, WbException
 	{
@@ -176,6 +178,7 @@ public class TableSearcher
 		sql.append(aTable);
 		sql.append("\n WHERE ");
 		boolean first = true;
+    int colCount = 0;
 		for (int i=0; i < cols; i++)
 		{
 			String column = (String)def.getValue(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
@@ -184,6 +187,7 @@ public class TableSearcher
 			boolean isChar = (sqlType == Types.VARCHAR || sqlType == Types.CHAR);
 			if (isChar)
 			{
+        colCount ++;
 				if (!first) 
 				{
 					sql.append(" OR ");
@@ -196,7 +200,14 @@ public class TableSearcher
 				first = false;
 			}
 		}
-		return sql.toString();
+		if (colCount > 0)
+		{
+			return sql.toString();
+		}
+		else
+		{
+			return null;
+		}
 	}
 	
 	/** Getter for property tableNames.

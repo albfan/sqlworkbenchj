@@ -52,6 +52,15 @@ public class WbManager implements FontChangedListener
 	{
 	}
 
+	/**
+	 *	Return an instance of the WbDesCipher.
+	 *
+	 *	This method uses Class.forName() to create a new 
+	 *	instance of WbDesCipher() so that WbManager itself
+	 *	does not reference the javax.crypto classes and 
+	 *	it can at least be loaded in JDK < 1.4 to give
+	 *	out an error message.
+	 */
 	public WbCipher getDesCipher()
 	{
 		if (desCipher == null)

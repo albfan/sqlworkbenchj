@@ -124,6 +124,8 @@ public class DdlCommand extends SqlCommand
         nextTokenIsName = true;
       }
     }
+		if (type == null || name == null) return false;
+		
     String msg = aConnection.getMetadata().getExtendedErrorInfo(null, type, name);
 		if (msg != null && msg.length() > 0)
 		{

@@ -54,7 +54,9 @@ public class WbToolTipUI extends BasicToolTipUI
 		smallFont = new Font( f.getName(), f.getStyle(), f.getSize() - 2 );
 		acceleratorDelimiter = UIManager.getString( "MenuItem.acceleratorDelimiter" );
 		if ( acceleratorDelimiter == null )
-		{ acceleratorDelimiter = "-"; }
+		{ 
+			acceleratorDelimiter = "-"; 
+		}
 	}
 	
 	public void uninstallUI(JComponent c)

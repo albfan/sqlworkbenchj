@@ -23,16 +23,22 @@ import workbench.log.LogMgr;
 public class WbConnection
 {
 	private boolean oraOutput = false;
-  
+  private String id;
 	private Connection sqlConnection;
 	private DbMetadata metaData;
 	private ConnectionProfile profile;
 	
 	/** Creates a new instance of WbConnection */
-	public WbConnection()
+	public WbConnection(String anId)
 	{
+		this.id = anId;
 	}
-
+	
+	public String getId()
+	{
+		return this.id;
+	}
+	
 	public WbConnection(Connection aConn)
 	{
 		this.setSqlConnection(aConn);
@@ -210,4 +216,13 @@ public class WbConnection
 		return this.metaData.getOutputMessages();
 	}
 
+	public boolean equals(Object o)
+	{
+		if (o != null && o instanceof WbConnection)
+		{
+			return (this.id.equals(((WbConnection)o).id));
+		}
+		return false;
+	}
+	
 }

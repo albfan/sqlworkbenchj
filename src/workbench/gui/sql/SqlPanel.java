@@ -12,7 +12,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.image.ImageProducer;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -40,7 +39,6 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
-import workbench.util.LineTokenizer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
@@ -845,6 +843,11 @@ public class SqlPanel
 		this.log.setText("");
 	}
 
+	public WbConnection getConnection()
+	{
+		return this.dbConnection;
+	}
+	
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
@@ -899,6 +902,7 @@ public class SqlPanel
 			this.statementHistory.remove(0);
 		}
 		this.statementHistory.add(aStatement);
+		this.currentHistoryEntry = this.statementHistory.size() - 1;
 	}
 
 	public void cancelExecution()

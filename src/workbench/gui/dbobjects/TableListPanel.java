@@ -12,6 +12,7 @@ import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
@@ -23,8 +24,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.*;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -69,8 +68,8 @@ import workbench.util.SqlUtil;
  * @author  workbench@kellerer.org
  *
  */
-public class TableListPanel 
-	extends JPanel 
+public class TableListPanel
+	extends JPanel
 	implements ActionListener, ChangeListener, ListSelectionListener
 						, ShareableDisplay, Spooler, FilenameChangeListener
 {
@@ -82,35 +81,35 @@ public class TableListPanel
 	private WbTable indexes;
 	private WbTable importedKeys;
 	private WbTable exportedKeys;
-	
+
 	private TableDependencyTreeDisplay importedTableTree;
 	private WbSplitPane importedPanel;
-	
+
 	private TableDependencyTreeDisplay exportedTableTree;
 	private WbSplitPane exportedPanel;
-	
+
 	private WbScrollPane indexPanel;
 	private TriggerDisplayPanel triggers;
 	private EditorPanel tableSource;
 	private JTabbedPane displayTab;
 	private WbSplitPane splitPane;
-	
+
 	private Object retrieveLock = new Object();
 	private JComboBox tableTypes = new JComboBox();
 	private String currentSchema;
 	private String currentCatalog;
 	private SpoolDataAction spoolData;
 	private WbMenuItem dropTableItem;
-	
+
 	private MainWindow parentWindow;
-	
+
 	private String selectedCatalog;
 	private String selectedSchema;
 	private String selectedTableName;
 	private String selectedObjectType;
-	
+
 	private boolean shouldRetrieve;
-	
+
 	private boolean shouldRetrieveTable;
 	private boolean shouldRetrieveTriggers;
 	private boolean shouldRetrieveIndexes;
@@ -122,8 +121,8 @@ public class TableListPanel
 
 	private static final String DROP_CMD = "drop-table";
 	private JMenu showDataMenu;
-	
-	// holds a reference to other WbTables which 
+
+	// holds a reference to other WbTables which
 	// need to display the same table list
 	// e.g. the table search panel
 	private List tableListClients;
@@ -137,7 +136,7 @@ public class TableListPanel
 		this.displayTab.setTabPlacement(JTabbedPane.BOTTOM);
 		this.displayTab.setUI(TabbedPaneUIFactory.getBorderLessUI());
 		this.displayTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		
+
 		this.tableDefinition = new WbTable();
 		this.tableDefinition.setAdjustToColumnLabel(false);
 		WbScrollPane scroll = new WbScrollPane(this.tableDefinition);
@@ -150,7 +149,7 @@ public class TableListPanel
 		this.tableSource = new EditorPanel();
 		this.tableSource.setEditable(false);
 		//this.tableSource.addPopupMenuItem(new FileSaveAsAction(this.tableSource), true);
-		
+
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.tableSource);
 
 		this.importedKeys = new WbTable();
@@ -163,7 +162,7 @@ public class TableListPanel
 		this.importedPanel.setTopComponent(scroll);
 		this.importedTableTree = new TableDependencyTreeDisplay();
 		this.importedPanel.setBottomComponent(this.importedTableTree);
-		
+
 		this.exportedKeys = new WbTable();
 		this.exportedKeys.setAdjustToColumnLabel(false);
 		scroll = new WbScrollPane(this.exportedKeys);
@@ -174,9 +173,9 @@ public class TableListPanel
 		this.exportedPanel.setTopComponent(scroll);
 		this.exportedTableTree = new TableDependencyTreeDisplay();
 		this.exportedPanel.setBottomComponent(this.exportedTableTree);
-		
+
 		//this.exportedPanel = new WbScrollPane(this.exportedKeys);
-		
+
 		this.triggers = new TriggerDisplayPanel();
 
 		this.listPanel = new JPanel();
@@ -194,7 +193,7 @@ public class TableListPanel
 		this.extendPopupMenu();
 		JPanel topPanel = new JPanel();
 		this.findPanel = new FindPanel(this.tableList);
-		
+
 		ReloadAction a = new ReloadAction(this);
 		a.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshTableList"));
 		this.findPanel.addToToolbar(a, true, false);
@@ -205,7 +204,7 @@ public class TableListPanel
 		GridBagConstraints constr = new GridBagConstraints();
 		constr.anchor = GridBagConstraints.WEST;
 		topPanel.add(this.tableTypes, constr);
-		
+
 		constr = new GridBagConstraints();
 		constr.anchor = GridBagConstraints.WEST;
 		constr.gridwidth = GridBagConstraints.REMAINDER;
@@ -250,7 +249,7 @@ public class TableListPanel
 		this.dropTableItem.addActionListener(this);
 		this.dropTableItem.setEnabled(false);
 		popup.add(this.dropTableItem);
-		
+
 		this.showDataMenu = new WbMenu(ResourceMgr.getString("MnuTxtShowTableData"));
 		this.showDataMenu.setEnabled(false);
 		this.updateShowDataMenu();
@@ -258,37 +257,57 @@ public class TableListPanel
 		popup.add(this.showDataMenu);
 	}
 
+	private Font boldFont = null;
+	private Font standardFont = null;
+	
+	private void initFonts()
+	{
+		this.standardFont = WbManager.getSettings().getStandardFont();
+		this.boldFont = new Font(this.standardFont.getName(), Font.BOLD, this.standardFont.getSize());
+	}
+	
 	private void updateShowDataMenu()
 	{
 		String[] panels = this.parentWindow.getPanelLabels();
 		int current = this.parentWindow.getCurrentPanelIndex();
+		int newCount = panels.length;
+		int currentCount = this.showDataMenu.getItemCount();
 		
-		if (this.showDataMenu != null)
+		if (this.showDataMenu == null) return;
+		if (this.boldFont == null) this.initFonts();
+		JMenuItem item = null;
+		
+		for (int i=0; i < newCount; i++)
 		{
-			this.showDataMenu.removeAll();
-		}
-		for (int i=0; i < panels.length; i++)
-		{
-			WbMenuItem item = new WbMenuItem();
-			if (i == current)
+			if (i >= currentCount)
 			{
-				StringBuffer b = new StringBuffer(20);
-				b.append("<html><b>");
-				b.append(panels[i]);
-				b.append("</html></b>");
-				item.setText(b.toString());
+				item = new WbMenuItem();
+				((WbMenuItem)item).removeExtraSpacing();
+				item.setActionCommand("panel-" + i);
+				item.addActionListener(this);
+				this.showDataMenu.add(item);
 			}
 			else
 			{
-				item.setText(panels[i]);
+				item = this.showDataMenu.getItem(i);
 			}
-			item.removeExtraSpacing();
-			item.setActionCommand("panel-" + i);
-			item.addActionListener(this);
-			this.showDataMenu.add(item);
+
+			item.setText(panels[i]);
+			if (i == current)
+			{
+				item.setFont(this.boldFont);
+			}
+			else
+			{
+				item.setFont(this.standardFont);
+			}
+		}
+		for (int i=newCount; i < currentCount; i++)
+		{
+			this.showDataMenu.remove(i);
 		}
 	}
-	
+
 	private void addTablePanels()
 	{
 		if (this.displayTab.getComponentCount() > 2) return;
@@ -325,7 +344,7 @@ public class TableListPanel
 		this.resetDetails();
 		this.invalidateData();
 	}
-	
+
 	private void resetDetails()
 	{
 		this.tableDefinition.reset();
@@ -339,7 +358,7 @@ public class TableListPanel
 		this.importedTableTree.reset();
 		this.exportedTableTree.reset();
 	}
-	
+
 	private void invalidateData()
 	{
 		this.shouldRetrieveTable = true;
@@ -350,13 +369,13 @@ public class TableListPanel
 		this.shouldRetrieveExportedTree = true;
 		this.shouldRetrieveImportedTree = true;
 	}
-	
+
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
 		this.importedTableTree.setConnection(aConnection);
 		this.exportedTableTree.setConnection(aConnection);
-		
+
 		this.tableTypes.removeActionListener(this);
 		this.triggers.setConnection(aConnection);
 		this.tableSource.getSqlTokenMarker().initDatabaseKeywords(aConnection.getSqlConnection());
@@ -384,17 +403,17 @@ public class TableListPanel
 	{
 		this.setCatalogAndSchema(aCatalog, aSchema, true);
 	}
-	
+
 	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)
 		throws Exception
 	{
 		this.reset();
 		this.currentSchema = aSchema;
 		this.currentCatalog = aCatalog;
-		
+
 		if (!retrieve) return;
 		if (this.dbConnection == null) return;
-		
+
 		if (this.isVisible() || this.isClientVisible())
 		{
 			this.retrieve();
@@ -459,7 +478,7 @@ public class TableListPanel
 		int loc = WbManager.getSettings().getIntProperty(this.getClass().getName(), "divider");
 		if (loc == 0) loc = 200;
 		this.splitPane.setDividerLocation(loc);
-		
+
 		loc = WbManager.getSettings().getIntProperty(this.getClass().getName(), "exportedtreedivider");
 		if (loc == 0) loc = 200;
 		this.exportedPanel.setDividerLocation(loc);
@@ -477,7 +496,7 @@ public class TableListPanel
 	{
 		if (e.getValueIsAdjusting()) return;
 		int count = this.tableList.getSelectedRowCount();
-		if (count > 1) 
+		if (count > 1)
 		{
 			this.showDataMenu.setEnabled(false);
 			this.dropTableItem.setEnabled(true);
@@ -485,10 +504,10 @@ public class TableListPanel
 		}
 		this.showDataMenu.setEnabled(count == 1);
 		this.dropTableItem.setEnabled(count > 0);
-		
+
 		int row = this.tableList.getSelectedRow();
 		if (row < 0) return;
-		
+
 		//synchronized (retrieveLock)
 		//{
 			this.selectedCatalog = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
@@ -514,7 +533,7 @@ public class TableListPanel
 			{
 				this.showDataMenu.setEnabled(false);
 			}
-			
+
 			this.retrieveCurrentPanel();
 			//this.startRetrieveCurrentPanel();
 		//}
@@ -524,22 +543,22 @@ public class TableListPanel
 		throws SQLException, WbException
 	{
 		DbMetadata meta = this.dbConnection.getMetadata();
-		DataStore ds = meta.getTableDefinition(this.selectedCatalog, this.selectedSchema, this.selectedTableName, this.selectedObjectType);
+		DataStore ds = meta.getTableDefinition(this.selectedCatalog, this.selectedSchema, this.selectedTableName, this.selectedObjectType, false);
 		DataStoreTableModel model = new DataStoreTableModel(ds);
 		tableDefinition.setModel(model, true);
 		tableDefinition.adjustColumns();
 		TableColumnModel colmod = tableDefinition.getColumnModel();
 		TableColumn col = colmod.getColumn(DbMetadata.COLUMN_IDX_TABLE_DEFINITION_TYPE_ID);
 		col.setCellRenderer(new SqlTypeRenderer());
-		
+
 		// remove the last two columns...
-		
+
 		col = colmod.getColumn(colmod.getColumnCount() - 1);
 		colmod.removeColumn(col);
-		
+
 		col = colmod.getColumn(colmod.getColumnCount() - 1);
 		colmod.removeColumn(col);
-		
+
 		if (this.selectedObjectType.indexOf("view") > -1)
 		{
 			String viewSource = meta.getViewSource(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
@@ -574,7 +593,7 @@ public class TableListPanel
 			public void run()
 			{
 				WbSwingUtilities.showWaitCursor(caller);
-				retrieveCurrentPanel();	
+				retrieveCurrentPanel();
 				WbSwingUtilities.showDefaultCursor(caller);
 			}
 		}.start();
@@ -623,14 +642,14 @@ public class TableListPanel
 		}
 		WbSwingUtilities.showDefaultCursorOnWindow(this);
 	}
-	
+
 	private void retrieveTriggers()
 		throws SQLException
 	{
 		triggers.readTriggers(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
 		this.shouldRetrieveTriggers = false;
 	}
-	
+
 	private void retrieveIndexes()
 		throws SQLException
 	{
@@ -639,7 +658,7 @@ public class TableListPanel
 		indexes.adjustColumns();
 		this.shouldRetrieveIndexes = false;
 	}
-	
+
 	private void retrieveExportedTables()
 		throws SQLException
 	{
@@ -649,7 +668,7 @@ public class TableListPanel
 		exportedKeys.adjustColumns();
 		this.shouldRetrieveExportedKeys = false;
 	}
-	
+
 	private void retrieveImportedTables()
 		throws SQLException
 	{
@@ -665,25 +684,25 @@ public class TableListPanel
 		importedTableTree.readTree(this.selectedCatalog, this.selectedSchema, this.selectedTableName, false);
 		this.shouldRetrieveImportedTree = false;
 	}
-	
+
 	private void retrieveExportedTree()
 	{
 		exportedTableTree.readTree(this.selectedCatalog, this.selectedSchema, this.selectedTableName, true);
 		this.shouldRetrieveExportedTree = false;
 	}
-	
+
 	public void reload()
 	{
 		this.reset();
 		this.retrieve();
 	}
-	
+
 	private String buildSqlForTable()
 	{
 		if (this.selectedTableName == null || this.selectedTableName.length() == 0) return null;
 		String table = SqlUtil.quoteObjectname(this.selectedTableName);
-		
-		if (this.tableDefinition.getRowCount() == 0) 
+
+		if (this.tableDefinition.getRowCount() == 0)
 		{
 			try
 			{
@@ -712,10 +731,10 @@ public class TableListPanel
 		{
 			sql.append(this.selectedSchema);
 			sql.append(".");
-		}	
-		
+		}
+
 		sql.append(table);
-		
+
 		return sql.toString();
 	}
 	/**
@@ -733,9 +752,9 @@ public class TableListPanel
 			if (command.startsWith("panel-"))
 			{
 				int panelIndex = 0;
-				try 
-				{ 
-					panelIndex = Integer.parseInt(command.substring(6)); 
+				try
+				{
+					panelIndex = Integer.parseInt(command.substring(6));
 					final SqlPanel panel = (SqlPanel)this.parentWindow.getSqlPanel(panelIndex);
 					String sql = this.buildSqlForTable();
 					if (sql != null)
@@ -752,7 +771,7 @@ public class TableListPanel
 						});
 					}
 				}
-				catch (Exception ex) 
+				catch (Exception ex)
 				{
 					ex.printStackTrace();
 				}
@@ -775,7 +794,7 @@ public class TableListPanel
 		}
 		return false;
 	}
-	
+
 	private void updateDisplayClients()
 	{
 		if (this.tableListClients == null) return;
@@ -795,7 +814,7 @@ public class TableListPanel
 			}
 		}
 	}
-	
+
 	public void addTableListDisplayClient(JTable aClient)
 	{
 		if (this.tableListClients == null) this.tableListClients = new ArrayList();
@@ -813,7 +832,7 @@ public class TableListPanel
 		int rows[] = this.tableList.getSelectedRows();
 		int count = rows.length;
 		if (count == 0) return;
-		
+
 		ArrayList names = new ArrayList(count);
 		ArrayList types = new ArrayList(count);
 		for (int i=0; i < count; i ++)
@@ -843,12 +862,12 @@ public class TableListPanel
 			{
 				public void run()
 				{
-					reload();	
+					reload();
 				}
 			});
 		}
 	}
-	
+
 	public void spoolData()
 	{
 		int rowCount = this.tableList.getSelectedRowCount();
@@ -879,12 +898,12 @@ public class TableListPanel
 		fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
 		int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(this));
 	}
-	
+
 	public Window getParentWindow()
 	{
 		return SwingUtilities.getWindowAncestor(this);
 	}
-	
+
 	/** Invoked when the displayed tab has changed.
 	 *	Retrieve table detail information here.
 	 */
@@ -895,11 +914,11 @@ public class TableListPanel
     {
       this.startRetrieveCurrentPanel();
     }
-    else 
+    else
     {
 			// Updating the showDataMenu needs to be posted because
-			// the EhangeEvent is also triggered when a tab has been 
-			// removed (thus implicitely changing the index) 
+			// the EhangeEvent is also triggered when a tab has been
+			// removed (thus implicitely changing the index)
 			// but the changeEvent occurs <b>before</b> the actual
 			// pane is removed from the control.
       EventQueue.invokeLater(new Runnable()
@@ -911,10 +930,10 @@ public class TableListPanel
 			});
     }
 	}
-	
+
 	public void fileNameChanged(Object sender, String newFilename)
 	{
 		this.updateShowDataMenu();
 	}
-	
+
 }

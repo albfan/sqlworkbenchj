@@ -37,12 +37,12 @@ public class StringUtil
 	public static final StringBuffer EMPTY_STRINGBUFFER = new StringBuffer("");
 	public static final String EMPTY_STRING = "";
 
-	public static final String replace(String aString, String aValue, String aReplacement)
+	public static final StringBuffer replaceToBuffer(String aString, String aValue, String aReplacement)
 	{
-		if (aReplacement == null) return aString;
+		if (aReplacement == null) return new StringBuffer(aString);
 
 		int pos = aString.indexOf(aValue);
-		if (pos == -1) return aString;
+		if (pos == -1) return new StringBuffer(aString);
 
 		StringBuffer temp = new StringBuffer(aString.length());
 
@@ -59,6 +59,18 @@ public class StringUtil
 		{
 			temp.append(aString.substring(lastpos));
 		}
+		return temp;
+	}
+	
+	public static final String replace(String aString, String aValue, String aReplacement)
+	{
+		if (aReplacement == null) return aString;
+
+		int pos = aString.indexOf(aValue);
+		if (pos == -1) return aString;
+
+		StringBuffer temp = replaceToBuffer(aString, aValue, aReplacement);
+		
 		return temp.toString();
 	}
 

@@ -30,7 +30,9 @@ import workbench.exception.WbException;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
+import workbench.storage.DbDateFormatter;
 import workbench.storage.NullValue;
+import workbench.storage.SqlSyntaxFormatter;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 
@@ -74,7 +76,7 @@ public class DbMetadata
 	private HashMap pkStatements;
 	private HashMap idxStatements;
 	private HashMap fkStatements;
-	private HashMap dateLiteralFormatter;
+	//private HashMap dateLiteralFormatter;
 	private DbmsOutput oraOutput;
   private boolean needsReconnect;
   private boolean caseSensitive;
@@ -97,7 +99,7 @@ public class DbMetadata
 		this.idxStatements = this.readStatementTemplates("CreateIndexStatements.xml");
 		this.triggerList = this.readStatementTemplates("ListTriggersStatements.xml");
 		this.triggerSourceSql = this.readStatementTemplates("TriggerSourceStatements.xml");
-		this.dateLiteralFormatter = this.readStatementTemplates("DateLiteralFormats.xml");
+		//this.dateLiteralFormatter = this.readStatementTemplates("DateLiteralFormats.xml");
 
 		this.schemaTerm = this.metaData.getSchemaTerm();
 
@@ -118,7 +120,8 @@ public class DbMetadata
 	}
 
   public boolean isOracle() { return this.isOracle; }
-  
+
+	
 	private HashMap readStatementTemplates(String aFilename)
 	{
 		HashMap result = null;
@@ -146,22 +149,7 @@ public class DbMetadata
 		}
 		return result;
 	}
-
-	/**
-	 *	Returns a literal which can be used directly in a SQL statement.
-	 *	This method will quote character datatypes and convert
-	 *	Date datatypes to the correct format.
-	 */
-	public String getLiteral(Object aValue)
-	{
-		return getDefaultLiteral(aValue, getDateLiteralFormatter());
-	}
-
-	public static String getDefaultLiteral(Object aValue)
-	{
-		return getDefaultLiteral(aValue, null);
-	}
-
+	
 	public String getCascadeConstraintsVerb()
 	{
 		if (this.productName.toLowerCase().indexOf("oracle") >= 0)
@@ -174,7 +162,6 @@ public class DbMetadata
 		}
 	}
 
-
 	public String getUserName()
 	{
 		try
@@ -186,39 +173,10 @@ public class DbMetadata
 			return "";
 		}
 	}
-	public static String getDefaultLiteral(Object aValue, DbDateFormatter formatter)
-	{
-		if (aValue == null) return "NULL";
-
-		if (aValue instanceof String)
-		{
-			// Single quotes in a String must be "quoted"...
-			String realValue = StringUtil.replace((String)aValue, "'", "''");
-			return "'" + realValue + "'";
-		}
-		else if (aValue instanceof Date)
-		{
-			if (formatter == null) formatter = DbDateFormatter.DEFAULT_FORMATTER;
-			return formatter.getLiteral((Date)aValue);
-		}
-		else if (aValue instanceof NullValue)
-		{
-			return "NULL";
-		}
-		else
-		{
-			return aValue.toString();
-		}
-
-	}
-
+	
 	public DbDateFormatter getDateLiteralFormatter()
 	{
-		Object value = this.dateLiteralFormatter.get(this.productName);
-		if (value == null)
-			value = this.dateLiteralFormatter.get(GENERAL_SQL);
-		DbDateFormatter format = (DbDateFormatter)value;
-		return format;
+		return SqlSyntaxFormatter.getDateLiteralFormatter(this.productName);
 	}
 
 	//public List getTableListColumns() { return this.tableListColumns; }
@@ -520,9 +478,19 @@ public class DbMetadata
 				{
 					display = aTypeName;
 				}
-				else if ((aTypeName.indexOf('(') == -1) && digits > 0)
+				else if ((aTypeName.indexOf('(') == -1))
 				{
-					display = aTypeName + "(" + size + "," + digits + ")";
+					if (digits > 0 && size > 0)
+					{
+						display = aTypeName + "(" + size + "," + digits + ")";
+					}
+					else if (size > 0)
+					{
+						if ("NUMBER".equals(aTypeName)) // Oracle specific
+							display = aTypeName + "(" + size + ")";
+						else
+							display = aTypeName;
+					}
 				}
 				else
 				{
@@ -740,13 +708,25 @@ public class DbMetadata
 	public final static int COLUMN_IDX_TABLE_DEFINITION_SCALE = 7;
 	public final static int COLUMN_IDX_TABLE_DEFINITION_PRECISION = 8;
 
+	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, boolean adjustNames)
+		throws SQLException, WbException
+	{
+		return this.getTableDefinition(aCatalog, aSchema, aTable, "TABLE", adjustNames);
+	}
+	
 	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable)
 		throws SQLException, WbException
 	{
-		return this.getTableDefinition(aCatalog, aSchema, aTable, "TABLE");
+		return this.getTableDefinition(aCatalog, aSchema, aTable, "TABLE", true);
+	}
+
+	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, String aType)
+		throws SQLException, WbException
+	{
+		return this.getTableDefinition(aCatalog, aSchema, aTable, aType, true);
 	}
 	
-	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, String aType)
+	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, String aType, boolean adjustNames)
 		throws SQLException, WbException
 	{
 		final String cols[] = {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "java.sql.Types", "SCALE", "PRECISION"};
@@ -754,6 +734,13 @@ public class DbMetadata
 		final int sizes[] =   {20, 18, 5, 8, 10, 25, 18, 2, 2};
 		DataStore ds = new DataStore(cols, types, sizes);
 
+		if (adjustNames)
+		{
+			aCatalog = this.adjustObjectname(aCatalog);
+			aSchema = this.adjustObjectname(aSchema);
+			aTable = this.adjustObjectname(aTable);
+		}
+		
 		if ("SYNONYM".equalsIgnoreCase(aType))
 		{
 			try
@@ -770,11 +757,11 @@ public class DbMetadata
 			{
 			}
 		}
-		
+
 		ArrayList keys = new ArrayList();
 		try
 		{
-			ResultSet keysRs = this.metaData.getPrimaryKeys(aCatalog, aSchema, this.adjustObjectname(aTable));
+			ResultSet keysRs = this.metaData.getPrimaryKeys(aCatalog, aSchema, aTable);
 			while (keysRs.next())
 			{
 				keys.add(keysRs.getString("COLUMN_NAME").toLowerCase());
@@ -786,7 +773,7 @@ public class DbMetadata
 		}
 
     int rows = 0;
-		ResultSet rs = this.metaData.getColumns(this.adjustObjectname(aCatalog), this.adjustObjectname(aSchema), this.adjustObjectname(aTable), "%");
+		ResultSet rs = this.metaData.getColumns(aCatalog, aSchema, aTable, "%");
 		while (rs.next())
 		{
 			int row = ds.addRow();
@@ -1300,7 +1287,7 @@ public class DbMetadata
 		}
 		return name;
 	}
-	
+
 	public String getSynonymSource(String anOwner, String aSynonym)
 	{
 		String result = null;
@@ -1314,7 +1301,7 @@ public class DbMetadata
 		}
 		return result;
 	}
-	
+
 
 	public String getTableSource(String aTablename, DataStore aTableDef)
 	{
@@ -1559,18 +1546,21 @@ public class DbMetadata
   public String getExtendedErrorInfo(String schema, String objectType, String objectName)
   {
     if (!this.isOracle) return "";
+		if (objectType == null) return "";
+		if (objectName == null) return "";
+
     StringBuffer sql = new StringBuffer(200);
-    
+
     sql.append("SELECT line, position, text FROM all_errors WHERE ");
     if (schema == null)
     {
       schema = this.getUserName();
     }
-    
+
     sql.append("owner='");
     sql.append(this.adjustObjectname(schema));
     sql.append('\'');
-    
+
     if (objectType != null)
     {
       sql.append(" AND ");
@@ -1578,7 +1568,7 @@ public class DbMetadata
       sql.append(this.adjustObjectname(objectType));
       sql.append('\'');
     }
-    
+
     if (objectName != null)
     {
       sql.append(" AND ");
@@ -1620,7 +1610,7 @@ public class DbMetadata
     }
     return result.toString();
   }
-  
+
 	private String getSqlTemplate(HashMap aMap)
 	{
 		String template = (String)aMap.get(this.productName);

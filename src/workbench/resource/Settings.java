@@ -7,33 +7,23 @@ package workbench.resource;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.util.Properties;
 import java.awt.Font;
 import java.awt.Point;
-import java.io.BufferedInputStream;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.CodeSource;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-
-import workbench.log.LogMgr;
-import java.util.NoSuchElementException;
+import java.util.Properties;
 import java.util.StringTokenizer;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import workbench.WbManager;
 import workbench.interfaces.FontChangedListener;
-import workbench.util.LineTokenizer;
+import workbench.log.LogMgr;
 import workbench.util.StringUtil;
+
 
 /**
  *

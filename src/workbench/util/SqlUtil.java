@@ -10,7 +10,6 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.WbManager;
-import workbench.db.DbDateFormatter;
 import workbench.storage.DataStore;
 import workbench.storage.NullValue;
 
