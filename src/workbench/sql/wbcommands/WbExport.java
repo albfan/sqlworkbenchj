@@ -224,8 +224,8 @@ public class WbExport extends SqlCommand
 					}
 					aResult.addMessage("");
 				}
-				msg = ResourceMgr.getString("MsgSpoolSource") + " " + aResult.getSourceCommand();
-				aResult.addMessage(msg);
+				//msg = ResourceMgr.getString("MsgSpoolSource") + " " + aResult.getSourceCommand();
+				//aResult.addMessage(msg);
 				msg = ResourceMgr.getString("MsgSpoolTarget") + " " + this.spooler.getFullOutputFilename();
 				aResult.addMessage(msg);
 				aResult.clearResultSets();

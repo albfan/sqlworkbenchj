@@ -125,7 +125,7 @@ public class BatchRunner
 				//reader.setSourceFile(file);
 				//error = this.executeScript(reader);
 				String script = this.readFile(file);
-				this.executeScript(script);
+				error = this.executeScript(script);
 				LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchProcessingFileDone") + " " + file);
 			}
 			catch (Exception e)
@@ -145,7 +145,7 @@ public class BatchRunner
 			{
 				if (this.errorScript != null)
 				{
-					LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchExecutingErrorScript") + this.errorScript);
+					LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchExecutingErrorScript") + " " + this.errorScript);
 					//reader.setSourceFile(this.errorScript);
 					String errorScript = this.readFile(this.errorScript);
 					this.executeScript(errorScript);
@@ -153,7 +153,7 @@ public class BatchRunner
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("BatchRunner.execute()", ResourceMgr.getString("MsgBatchScriptFileError") + this.errorScript, e);
+				LogMgr.logError("BatchRunner.execute()", ResourceMgr.getString("MsgBatchScriptFileError") + " " + this.errorScript, e);
 			}
 		}
 		else 
@@ -162,7 +162,7 @@ public class BatchRunner
 			{
 				if (this.successScript != null)
 				{
-					LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchExecutingSuccessScript") + this.successScript);
+					LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchExecutingSuccessScript") + " " + this.successScript);
 					//reader.setSourceFile(this.successScript);
 					String script = this.readFile(this.successScript);
 					this.executeScript(script);
@@ -170,7 +170,7 @@ public class BatchRunner
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("BatchRunner.execute()", ResourceMgr.getString("MsgBatchScriptFileError") + this.successScript, e);
+				LogMgr.logError("BatchRunner.execute()", ResourceMgr.getString("MsgBatchScriptFileError") + " " + this.successScript, e);
 			}
 		}
 	}
