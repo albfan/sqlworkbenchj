@@ -8,6 +8,7 @@ package workbench;
 
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -48,6 +49,7 @@ public class WbManager
 
 	public WbCipher getDesCipher()
 	{
+		System.out.println("WbManager.getDesCipher()");
 		if (desCipher == null)
 		{
 			try
@@ -149,6 +151,14 @@ public class WbManager
 		{
 			System.out.println("Could not set look and feel");
 		}
+		
+		try
+		{
+			Toolkit.getDefaultToolkit().setDynamicLayout(settings.getUseDynamicLayout());
+		}
+		catch (Exception e)
+		{
+		}
 	}
 	
 	private void initFonts() 
@@ -187,7 +197,10 @@ public class WbManager
 		Font dataFont = this.settings.getDataFont();
 		UIManager.put("Table.font", dataFont);
 		UIManager.put("TableHeader.font", dataFont);
-		//UIManager.put("Button.showMnemonics", Boolean.TRUE);
+		if (settings.getShowMnemonics())
+			UIManager.put("Button.showMnemonics", Boolean.TRUE);
+		else
+			UIManager.put("Button.showMnemonics", Boolean.FALSE);
 	}
 
 	public MainWindow createWindow()
@@ -230,24 +243,33 @@ public class WbManager
 		}
 		if (this.mainWindows.size() == 0)
 			this.exitWorkbench();
-		//WbManager.getInstance().windowClosed(e);//exitWorkbench();
 	}
 	
 	public void openNewWindow()
 	{
+		//System.out.println("WbManager.openNewWindow()");
 		MainWindow main = this.createWindow();
 		main.show();
+		main.restoreState();
 		main.selectConnection();
 	}
 	
 	
 	public static void startup()
 	{
-		//WbSplash splash = new WbSplash(null, false);
-		//splash.setVisible(true);
+		WbSplash splash = null;
+		if (wb.settings.getShowSplash())
+		{
+			splash = new WbSplash(null, false);
+			splash.setVisible(true);
+		}
+
 		wb.openNewWindow();
-		//splash.setVisible(false);
-		//splash.dispose();
+		if (splash != null)
+		{
+			splash.setVisible(false);
+			splash.dispose();
+		}
 	}
 
 	public static void main(String args[])

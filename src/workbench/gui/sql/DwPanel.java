@@ -326,7 +326,7 @@ public class DwPanel extends JPanel
 					s = System.currentTimeMillis();
 					newData = new DataStore(rs, this.dbConnection);
 					e = System.currentTimeMillis();
-					LogMgr.logInfo("DwPanel.runStatement()", "Create of DataStore took " + (e - s) + "ms");
+					//LogMgr.logInfo("DwPanel.runStatement()", "Create of DataStore took " + (e - s) + "ms");
 					rs.close();
 				}
 				else

@@ -53,7 +53,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.8 2002-09-20 17:59:29 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.9 2002-10-12 09:23:15 thomas Exp $
  */
 public class JEditTextArea 
 	extends JComponent
@@ -1271,8 +1271,7 @@ public class JEditTextArea
 	{
 		if(!editable)
 		{
-			throw new InternalError("Text component"
-				+ " read only");
+			throw new InternalError("Text component read only");
 		}
 
 		document.beginCompoundEdit();
@@ -1283,10 +1282,8 @@ public class JEditTextArea
 			{
 				Element map = document.getDefaultRootElement();
 
-				int start = selectionStart - map.getElement(selectionStartLine)
-					.getStartOffset();
-				int end = selectionEnd - map.getElement(selectionEndLine)
-					.getStartOffset();
+				int start = selectionStart - map.getElement(selectionStartLine).getStartOffset();
+				int end = selectionEnd - map.getElement(selectionEndLine).getStartOffset();
 
 				// Certain rectangles satisfy this condition...
 				if(end < start)
@@ -1352,8 +1349,7 @@ public class JEditTextArea
 		catch(BadLocationException bl)
 		{
 			bl.printStackTrace();
-			throw new InternalError("Cannot replace"
-				+ " selection");
+			throw new InternalError("Cannot replace selection");
 		}
 		// No matter what happends... stops us from leaving document
 		// in a bad state
@@ -1710,7 +1706,8 @@ public class JEditTextArea
 	protected int magicCaret;
 	protected boolean overwrite;
 	protected boolean rectSelect;
-
+	protected boolean modified;
+	
 	protected void fireSelectionEvent()
 	{
 		Object[] listeners = listenerList.getListenerList();
@@ -1790,8 +1787,12 @@ public class JEditTextArea
 			painter.invalidateLineRange(line,firstLine + visibleLines);
 			updateScrollBars();
 		}
+		this.modified = true;
 	}
 
+	public boolean isModified() { return this.modified; }
+	public void resetModified() { this.modified = false; }
+	
 	/** Invoked when the mouse wheel is rotated.
 	 * @see MouseWheelEvent
 	 *

@@ -25,6 +25,12 @@ class RowData
 		this.setNew();
 	}
 
+	public RowData createCopy()
+	{
+		RowData result = new RowData(this.colData.length);
+		result.colData = this.colData;
+		return result;
+	}
 	/**
 	 *	Sets the new data for the given column.
 	 *	After a call isModified() will return true

@@ -27,6 +27,7 @@ import java.util.StringTokenizer;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import workbench.interfaces.FontChangedListener;
+import workbench.util.LineTokenizer;
 import workbench.util.StringUtil;
 
 /**
@@ -50,6 +51,7 @@ public class Settings
 	
 	public Settings()
 	{
+		//System.out.println("Settings.<init>");
 		this.props = new Properties();
 		this.filename = System.getProperty("workbench.settings.file", "workbench.settings");
 
@@ -645,24 +647,41 @@ public class Settings
 		this.props.setProperty("workbench.profiles.encryptpassword", Boolean.toString(useEncryption));
 	}
 
+	public boolean getUseDynamicLayout()
+	{
+		return "true".equalsIgnoreCase(this.props.getProperty("workbench.gui.dynamiclayout", "false"));
+	}
+	
+	public void setUseDynamicLayout(boolean useEncryption)
+	{
+		this.props.setProperty("workbench.gui.dynamiclayout", Boolean.toString(useEncryption));
+	}
+	
+	public boolean getShowMnemonics()
+	{
+		return "true".equalsIgnoreCase(this.props.getProperty("workbench.gui.showmnemonics", "true"));
+	}
+	
+	public boolean getShowSplash()
+	{
+		return "true".equalsIgnoreCase(this.props.getProperty("workbench.gui.showsplash", "false"));
+	}
+	
 	public boolean getRetrievePKList()
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.db.retrievepklist", "true"));
 	}
 
-
+  public List getCaseSensitivServers()
+  {
+		String list = this.props.getProperty("workbench.db.casesensitive", null);
+    return StringUtil.stringToList(list, ",");
+  }
+  
 	public List getCancelWithReconnectServers()
 	{
 		String list = this.props.getProperty("workbench.db.cancelwithreconnect", null);
-		if (list == null || list.trim().length() == 0) return Collections.EMPTY_LIST;
-		StringTokenizer tok = new StringTokenizer(list, ";");
-		ArrayList result = new ArrayList(tok.countTokens());
-		while (tok.hasMoreElements())
-		{
-			String server = tok.nextToken();
-			result.add(server);
-		}
-		return result;
+    return StringUtil.stringToList(list, ",");
 	}
 	
 }

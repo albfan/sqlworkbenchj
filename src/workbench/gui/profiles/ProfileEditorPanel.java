@@ -250,7 +250,7 @@ public class ProfileEditorPanel
 		ConnectionMgr conn = WbManager.getInstance().getConnectionMgr();
 		this.connectionEditor.updateProfile();
 		conn.setProfiles(this.model.getValues());
-		conn.saveXmlProfiles();
+		conn.saveProfiles();
 	}
 
 	public int getProfileCount()

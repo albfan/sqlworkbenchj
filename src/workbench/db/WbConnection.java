@@ -63,10 +63,8 @@ public class WbConnection
 		try
 		{
 			this.metaData = new DbMetadata(this);
-			
-
 		}
-		catch (SQLException e)
+		catch (Exception e)
 		{
 			LogMgr.logError(this, "Error initializing DB Meta Data", e);
 		}

@@ -11,6 +11,7 @@ import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.KeyStroke;
@@ -29,6 +30,7 @@ import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.TextContainer;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.LineTokenizer;
 import workbench.util.StringUtil;
 
 
@@ -96,6 +98,90 @@ public class EditorPanel extends JEditTextArea implements ClipboardSupport, Font
 		}
 	}
 	
+	/**
+	 *	Make the current selection suitable for a SQL IN statement with
+	 *	character datatype.
+	 *	e.g. 
+	 *<pre>
+	 *1234
+	 *5678
+	 *</pre>
+	 *will be converted to 
+	 *<pre>  
+	 *('1234',
+	 *'4456')
+	 *</pre>
+	 */
+	public void makeInListForChar()
+	{
+		int startline = this.getSelectionStartLine();
+		int endline = this.getSelectionEndLine();
+		StringBuffer newText = new StringBuffer((endline - startline + 1) * 80);
+		for (int i=startline; i <= endline; i++)
+		{
+			String line = this.getLineText(i);
+			StringBuffer newline = new StringBuffer(line.length() + 10);
+			if (i > startline) 
+			{
+				newText.append('\n');
+				newline.append(' ');
+			}
+			else
+			{
+				newline.append("(");
+			}
+			newline.append('\'');
+			newline.append(line);
+			newline.append('\'');
+			if (i < endline) 
+			{
+				newline.append(',');
+			}
+			else
+			{
+				newline.append(')');
+			}
+			newText.append(newline);
+		}
+		this.setSelectedText(newText.toString());
+	}
+	
+	public void makeInListForNonChar()
+	{
+		String selectedText = this.getSelectedText();
+		if (selectedText == null || selectedText.length() == 0) return;
+		LineTokenizer tok = new LineTokenizer(selectedText, " \n");
+		int tokens = tok.countTokens();
+		StringBuffer newText = new StringBuffer(selectedText.length() + tokens * 4);
+		boolean afterFirst = false;
+		while (tok.hasMoreTokens())
+		{
+			String line = tok.nextToken();
+			StringBuffer newline = new StringBuffer(line.length() + 10);
+			if (afterFirst) 
+			{
+				newline.append(' ');
+			}
+			else
+			{
+				newline.append("(");
+				afterFirst = true;
+			}
+			newline.append(line);
+			if (tok.hasMoreTokens()) 
+			{
+				newline.append(',');
+			}
+			else
+			{
+				newline.append(')');
+			}
+			newText.append(newline);
+			if (newText.length() > 40) newText.append('\n');
+		}
+		this.setSelectedText(newText.toString());
+	}
+	
 	public AnsiSQLTokenMarker getSqlTokenMarker()
 	{
 		return this.tokenMarker;
@@ -149,11 +235,14 @@ public class EditorPanel extends JEditTextArea implements ClipboardSupport, Font
 		}
 	}
 	
-	public void closeFile()
+	public boolean closeFile()
 	{
+    if (this.currentFile == null) return false;
 		this.currentFile = null;
 		this.setText("");
 		this.clearUndoBuffer();
+		this.resetModified();
+    return true;
 	}
 	
 	public boolean openFile()
@@ -200,6 +289,7 @@ public class EditorPanel extends JEditTextArea implements ClipboardSupport, Font
 			this.currentFile = aFile;
 			result = true;
 			this.clearUndoBuffer();
+			this.resetModified();
 		}
 		catch (IOException e)
 		{
@@ -263,6 +353,7 @@ public class EditorPanel extends JEditTextArea implements ClipboardSupport, Font
 			}
 			writer.close();
 			this.currentFile = aFile;
+			this.resetModified();
 			return true;
 		}
 		catch (Exception e)

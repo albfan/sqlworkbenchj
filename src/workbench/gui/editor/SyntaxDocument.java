@@ -22,7 +22,7 @@ import javax.swing.undo.UndoableEdit;
  * system.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxDocument.java,v 1.3 2002-08-31 11:47:14 thomas Exp $
+ * @version $Id: SyntaxDocument.java,v 1.4 2002-10-12 09:23:15 thomas Exp $
  */
 public class SyntaxDocument 
 	extends PlainDocument
@@ -52,6 +52,10 @@ public class SyntaxDocument
 		return tokenMarker;
 	}
 
+	public void isModified()
+	{
+	}
+	
 	/**
 	 * Sets the token marker that is to be used to split lines of
 	 * this document up into tokens. May throw an exception if

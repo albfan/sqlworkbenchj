@@ -6,7 +6,13 @@
 
 package workbench.storage;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.lang.ArrayIndexOutOfBoundsException;
 import java.lang.Boolean;
+import java.lang.CloneNotSupportedException;
 import java.lang.Number;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -29,12 +35,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
 import workbench.log.LogMgr;
+import workbench.util.LineTokenizer;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -43,6 +52,9 @@ import workbench.util.SqlUtil;
  */
 public class DataStore
 {
+	/*
+	 *	Needed for the status display in the table model
+	 */	
 	public static final Integer ROW_MODIFIED = new Integer(RowData.MODIFIED);
 	public static final Integer ROW_NEW = new Integer(RowData.NEW);
 	public static final Integer ROW_ORIGINAL = new Integer(RowData.NOT_MODIFIED);
@@ -103,6 +115,19 @@ public class DataStore
 		this.originalConnection = aConn;
 		this.initData(aResultSet);
   }
+
+	/**
+	 *	Create a DataStore based on the given ResultSet but do not 
+	 *	add the data yet
+	 */
+	public DataStore(ResultSet aResult)
+		throws SQLException
+	{
+		ResultSetMetaData metaData = aResult.getMetaData();
+		this.initMetaData(metaData);
+		this.data = new ArrayList(100);
+	}
+	
 	
 	/**
 	 * Create an empty DataStore based on the information given in the MetaData 
@@ -132,7 +157,55 @@ public class DataStore
 		}
 	}
 	
-  
+	public DataStore createCopy(boolean withData)
+	{
+		DataStore ds = new DataStore(this.columnNames, this.columnTypes, this.columnSizes);
+		ds.updateTable = this.updateTable;
+		ds.sql = this.sql;
+		ds.columnClassNames = this.columnClassNames;
+		ds.pkColumns = this.pkColumns;
+		ds.originalConnection = this.originalConnection;
+		ds.resetStatus();
+		ds.updateTableColumns = (ArrayList)this.updateTableColumns.clone();
+		if (withData)
+		{
+			this.copyData(ds, 0, this.getRowCount());
+		}
+		return ds;
+	}
+	
+	public void copyData(DataStore target, int beginRow, int endRow)
+	{
+		for (int i=beginRow; i <= endRow; i++)
+		{
+			RowData rowData = this.getRow(i).createCopy();
+			int row = target.addRow();
+			target.data.set(row, rowData);
+		}
+	}
+	
+	public void copyData(DataStore target, int[] rows)
+	{
+		for (int i=0; i < rows.length; i++)
+		{
+			int sourceRow = rows[i];
+			int targetRow = target.addRow();
+			RowData data = this.getRow(sourceRow).createCopy();
+			target.data.set(targetRow, data);
+		}
+	}
+	
+	public List getColumnValues(int aColumn)
+	{
+		int rowCount = this.getRowCount();
+		ArrayList result = new ArrayList(rowCount);
+		for (int i=0; i < rowCount; i++)
+		{
+			result.add(this.getValue(i, aColumn));
+		}
+		return result;
+	}
+	
   public int getRowCount() { return this.data.size(); }
 	public int getColumnCount() { return this.colCount; }
 	
@@ -445,7 +518,9 @@ public class DataStore
 		StringBuffer result = new StringBuffer(this.colCount * 30);
 		for (int i=0; i < colCount; i++)
 		{
-			result.append(this.getColumnName(i));
+			String colName = this.getColumnName(i);
+			if (colName == null || colName.trim().length() == 0) colName = "Col" + i;
+			result.append(colName);
 			if (i < colCount - 1) result.append(aFieldDelimiter);
 		}
 		return result;
@@ -541,8 +616,15 @@ public class DataStore
 			String name = metaData.getColumnName(i + 1);
 			this.columnTypes[i] = metaData.getColumnType(i + 1);
 			this.columnSizes[i] = metaData.getColumnDisplaySize(i + 1);
-			if (name != null && name.trim().length() > 0) this.realColumns ++;
-			this.columnNames[i] = name;
+			if (name != null && name.trim().length() > 0) 
+			{
+				this.realColumns ++;
+				this.columnNames[i] = name;
+			}
+			else
+			{
+				this.columnNames[i] = "Col" + (i+1);
+			}
 		}
 	}
 	
@@ -653,6 +735,119 @@ public class DataStore
 			script.append(aLineTerminator);
 		}
 		return script.toString();
+	}
+	
+	/**
+	 *	Import a text file (tab separated) with a header row and no column mapping
+	 *	into this datastore
+	 * @param aFilename - The text file to import
+	 */
+	public void importData(String aFilename)
+		throws FileNotFoundException
+	{
+		this.importData(aFilename, true, "\t", Collections.EMPTY_MAP);
+	}
+	
+	/** 
+	 * Import a text file (tab separated) with no column mapping
+	 * into this datastore.
+	 *
+	 * @param aFilename - The text file to import
+	 * @param hasHeader - wether the text file has a header row
+	 */
+	public void importData(String aFilename, boolean hasHeader)
+		throws FileNotFoundException
+	{
+		this.importData(aFilename, hasHeader, "\t", Collections.EMPTY_MAP);
+	}
+
+	/**
+	 * Set all values in the given row to NULL
+	 */
+	public void setRowNull(int aRow)
+	{
+		for (int i=0; i < this.colCount; i++)
+		{
+			this.setNull(aRow, i);
+		}
+	}
+	/** 	
+	 *	Import a text file into this datastore.
+	 * @param aFilename - The text file to import
+	 * @param hasHeader - wether the text file has a header row
+	 * @param aColSeparator - the separator for column data
+	 * @param aColumnMapping - a mapping between columns in the text file and the datastore
+	 */
+	public void importData(String aFilename, boolean hasHeader, String aColSeparator, Map aColumnMapping)
+		throws FileNotFoundException
+	{
+		BufferedReader in = new BufferedReader(new FileReader(aFilename));
+		String line;
+		List data;
+		Object colData;
+		boolean doMapping = (aColumnMapping != null && aColumnMapping.size() > 0);
+		int col;
+		int row;
+		
+		try
+		{
+			line = in.readLine();
+			if (hasHeader) line = in.readLine();
+		}
+		catch (IOException e)
+		{
+			line = null;
+		}
+		while (line != null)
+		{
+			data = StringUtil.stringToList(line, aColSeparator);
+			row = this.addRow();
+			this.setRowNull(row);
+			
+			int count = data.size();
+			for (int i=0; i < count; i++)
+			{
+				if (doMapping)
+				{
+					Integer key = new Integer(i);
+					Integer target = (Integer)aColumnMapping.get(key);
+					if (target != null)
+					{
+						col = target.intValue();
+					}
+					else
+					{
+						col = -1;
+					}
+				}
+				else
+				{
+					col = i;
+				}
+				if (col > -1)
+				{
+					try
+					{
+						colData = this.convertCellValue(data.get(i), col);
+						this.setValue(row, col, colData);
+					}
+					catch (Exception e)
+					{
+					}
+				}
+			}
+			
+			try
+			{
+				line = in.readLine();
+			}
+			catch (IOException e)
+			{
+				line = null;
+			}
+		}
+		
+		try { in.close(); } catch (IOException e) {}
 	}
 	
 	/**
@@ -985,6 +1180,11 @@ public class DataStore
 	
 	private DmlStatement createUpdateStatement(RowData aRow)
 	{
+		return this.createUpdateStatement(aRow, false, "");
+	}
+	
+	private DmlStatement createUpdateStatement(RowData aRow, boolean ignoreStatus, String lineEnd)
+	{
 		boolean first = true;
 		DmlStatement dml;
 		
@@ -997,7 +1197,7 @@ public class DataStore
 		first = true;
 		for (int col=0; col < this.colCount; col ++)
 		{
-			if (aRow.isColumnModified(col))
+			if (aRow.isColumnModified(col) || ignoreStatus)
 			{
 				if (first)
 				{

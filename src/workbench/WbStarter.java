@@ -18,6 +18,7 @@ public class WbStarter
 	 */
 	public static void main(String[] args)
 	{
+		//System.out.println("WbStarter.main()");
 		String version = System.getProperty("java.version", null);
 		if (version == null)
 		{

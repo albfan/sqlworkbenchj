@@ -283,7 +283,7 @@ public class ConnectionMgr
 	
 	public void writeSettings()
 	{
-		this.saveXmlProfiles();
+		this.saveProfiles();
 		this.saveDrivers();
 	}
 	
@@ -325,27 +325,27 @@ public class ConnectionMgr
 		}
 	}
 
-	/*
-	public DataStore getTableDefinition(String aTable)
-	{
-		if (this.currentConnection == null) return null;
-		try
-		{
-			return this.currentConnection.getMetadata().getTableDefinition(aTable);
-		}
-		catch (Exception e)
-		{
-			return null;
-		}
-	}
-	*/
-	
 	public void readProfiles()
 	{
-		this.readXmlProfiles();
+		//System.out.println("ConnectionMgr.readProfiles()");
+		Object result = WbPersistence.readObject("WbProfiles.xml");
+		if (result instanceof Collection)
+		{
+			this.setProfiles((Collection)result);
+		}
+		else if (result instanceof Object[])
+		{
+			Object[] l = (Object[])result;
+			this.profiles = new HashMap(20);
+			for (int i=0; i < l.length; i++)
+			{
+				ConnectionProfile prof = (ConnectionProfile)l[i];
+				this.profiles.put(prof.getName(), prof);
+			}
+		}
 	}
 
-	public void saveXmlProfiles()
+	public void saveProfiles()
 	{
 		if (this.profiles != null)
 		{
@@ -368,25 +368,6 @@ public class ConnectionMgr
 		{
 			ConnectionProfile prof = (ConnectionProfile)itr.next();
 			this.profiles.put(prof.getName(), prof);
-		}
-	}
-	
-	public void readXmlProfiles()
-	{
-		Object result = WbPersistence.readObject("WbProfiles.xml");
-		if (result instanceof Collection)
-		{
-			this.setProfiles((Collection)result);
-		}
-		else if (result instanceof Object[])
-		{
-			Object[] l = (Object[])result;
-			this.profiles = new HashMap(20);
-			for (int i=0; i < l.length; i++)
-			{
-				ConnectionProfile prof = (ConnectionProfile)l[i];
-				this.profiles.put(prof.getName(), prof);
-			}
 		}
 	}
 		

@@ -127,6 +127,10 @@ public class DbDriver
 			if (user != null) props.put("user", user);
 			if (password != null) props.put("password", password);
 			c = this.driverClassInstance.connect(url, props);
+			if (c == null)
+			{
+				throw new WbException("Driver did not return a connection!");
+			}
 		}
 		catch (WbException e)
 		{

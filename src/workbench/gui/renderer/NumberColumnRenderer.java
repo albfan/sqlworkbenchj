@@ -77,7 +77,6 @@ public class NumberColumnRenderer
 			super.setBackground(this.unselectedBackground);
 		}
 	
-		
 		if (value instanceof Number)
 		{
 			String nr = null;
@@ -93,6 +92,12 @@ public class NumberColumnRenderer
 			this.setValue(nr);
 			this.setToolTipText(value.toString());
 		}
+		else 
+		{
+			this.setText((value == null ? "" : value.toString()));
+			this.setToolTipText(null);
+		}
+
 		return this;
 	}
 	

@@ -61,7 +61,8 @@ public class DbMetadata
 	//private List tableListColumns;
 	private WbConnection dbConnection;
 	
-	private List serversWhichNeedReconnect = Collections.EMPTY_LIST;
+	private static List serversWhichNeedReconnect = WbManager.getSettings().getCancelWithReconnectServers();
+  private static List caseSensitiveServers = WbManager.getSettings().getCaseSensitivServers();
 	
 	// These Hashmaps contains templates 
 	// for object creation
@@ -73,9 +74,10 @@ public class DbMetadata
 	private HashMap idxStatements;
 	private HashMap fkStatements;
 	private HashMap dateLiteralFormatter;
-
 	private DbmsOutput oraOutput;
-	
+  private boolean needsReconnect;
+  private boolean caseSensitive;
+  
 	/** Creates a new instance of DbMetadata */
 	public DbMetadata(WbConnection aConnection)
 		throws SQLException
@@ -116,7 +118,8 @@ public class DbMetadata
 				this.oraOutput = null;
 			}
 		}
-		this.serversWhichNeedReconnect = WbManager.getSettings().getCancelWithReconnectServers();
+    this.needsReconnect = serversWhichNeedReconnect.contains(this.productName);
+    this.caseSensitive = caseSensitiveServers.contains(this.productName);
 	}
 
 	private HashMap readStatementTemplates(String aFilename)
@@ -351,9 +354,14 @@ public class DbMetadata
 		}
 	}
 
+  public boolean isStringComparisonCaseSensitve()
+  {
+    return this.caseSensitive;
+  }
+  
 	public boolean cancelNeedsReconnect()
 	{
-		return this.serversWhichNeedReconnect.contains(this.productName);
+		return this.needsReconnect;
 	}
 	
 	public DataStoreTableModel getProcedureColumns(String aCatalog, String aSchema, String aProcname)
@@ -430,7 +438,7 @@ public class DbMetadata
 				{
 					display = aTypeName;
 				}
-				else if (aTypeName.indexOf('(') == -1)
+				else if ((aTypeName.indexOf('(') == -1) && digits > 0)
 				{
 					display = aTypeName + "(" + size + "," + digits + ")";
 				}
@@ -623,13 +631,14 @@ public class DbMetadata
 	public final static int COLUMN_IDX_TABLE_DEFINITION_NULLABLE = 3;
 	public final static int COLUMN_IDX_TABLE_DEFINITION_DEFAULT = 4;
 	public final static int COLUMN_IDX_TABLE_DEFINITION_REMARKS = 5;
+	public final static int COLUMN_IDX_TABLE_DEFINITION_TYPE_ID = 6;
 	
 	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable)
 		throws SQLException, WbException
 	{
-		final String cols[] = {"COLUMN_NAME", "TYPE_NAME", "PK", "NULLABLE", "DEFAULT", "REMARKS"};
-		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		final int sizes[] =   {20, 18, 5, 8, 10, 50};
+		final String cols[] = {"COLUMN_NAME", "TYPE_NAME", "PK", "NULLABLE", "DEFAULT", "REMARKS", "TYPE_ID"};
+		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER};
+		final int sizes[] =   {20, 18, 5, 8, 10, 50, 4};
 		DataStore ds = new DataStore(cols, types, sizes);
 		
 		ArrayList keys = new ArrayList();
@@ -672,6 +681,7 @@ public class DbMetadata
 
 			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DEFAULT, def);
 			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_REMARKS, rem);
+			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_TYPE_ID, new Integer(sqlType));
 		}
 		rs.close();
 		return ds;
@@ -1249,7 +1259,6 @@ public class DbMetadata
 			StringTokenizer tok = new StringTokenizer(definition, ",");
 			String col;
 			int pos;
-			System.out.println("processing index definition");
 			while (tok.hasMoreTokens())
 			{
 				col = tok.nextToken().trim();

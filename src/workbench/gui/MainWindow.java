@@ -7,6 +7,7 @@
 package workbench.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
@@ -18,6 +19,9 @@ import java.util.HashMap;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import workbench.WbManager;
@@ -120,6 +124,32 @@ public class MainWindow
 	
 	public String getWindowId() { return this.windowId; }
 
+	public void addFilenameChangeListener(FilenameChangeListener aListener)
+	{
+		for (int i=0; i < this.sqlTab.getTabCount(); i++)
+		{
+			MainPanel panel = this.getSqlPanel(i);
+			if (panel instanceof SqlPanel)
+			{
+				SqlPanel sql = (SqlPanel)panel;
+				sql.addFilenameChangeListener(aListener);
+			}
+		}
+	}
+
+	public void removeFilenameChangeListener(FilenameChangeListener aListener)
+	{
+		for (int i=0; i < this.sqlTab.getTabCount(); i++)
+		{
+			MainPanel panel = this.getSqlPanel(i);
+			if (panel instanceof SqlPanel)
+			{
+				SqlPanel sql = (SqlPanel)panel;
+				sql.removeFilenameChangeListener(aListener);
+			}
+		}
+	}
+	
 	private void initMenu()
 	{
 		this.dbExplorerAction = new ShowDbExplorerAction(this);
@@ -155,7 +185,7 @@ public class MainWindow
 		menu.add(item);
 		action = new FileNewWindowAction();
 		menu.add(action.getMenuItem());
-		menu.addSeparator();
+		//menu.addSeparator();
 
 		// now create the menus for the current tab
 		List actions = aPanel.getActions();
@@ -169,10 +199,17 @@ public class MainWindow
 
 		menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_VIEW));
 		menu.setName(ResourceMgr.MNU_TXT_VIEW);
-		menu.setVisible(false);
+		menu.setVisible(true);
 		menuBar.add(menu);
 		menus.put(ResourceMgr.MNU_TXT_VIEW, menu);
 
+		int tabCount = this.sqlTab.getTabCount();
+		for (int i=0; i < tabCount; i ++)
+		{
+			action = new SelectTabAction(this.sqlTab, i);
+			menu.add(action.getMenuItem());
+		}
+		
 		menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_DATA));
 		menu.setName(ResourceMgr.MNU_TXT_DATA);
 		menu.setVisible(false);
@@ -216,17 +253,6 @@ public class MainWindow
 		menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_FILE);
 		menu.addSeparator();
 		menu.add(action.getMenuItem());
-
-		// now put the tabs into the view menu
-		menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_VIEW);
-		menu.setVisible(true);
-
-		int tabCount = this.sqlTab.getTabCount();
-		for (int i=0; i < tabCount; i ++)
-		{
-			action = new SelectTabAction(this.sqlTab, i);
-			menu.add(action.getMenuItem());
-		}
 
 		menuBar.add(this.buildToolsMenu());
 		menuBar.add(this.buildHelpMenu());
@@ -287,11 +313,22 @@ public class MainWindow
 		}
 		this.doLayout();
 	}
-
+	
+	public void restoreState()
+	{
+		String state = WbManager.getSettings().getProperty(this.getClass().getName(), "state", "0");
+		int i = 0;
+		try { i = Integer.parseInt(state); } catch (Exception e) { i = 0; }
+		if (i == MAXIMIZED_BOTH)
+		{
+			this.setExtendedState(i);
+		}
+	}
+	
 	public void restorePosition()
 	{
 		Settings s = WbManager.getSettings();
-
+		
 		if (!s.restoreWindowSize(this))
 		{
 			this.setSize(500,500);
@@ -313,8 +350,13 @@ public class MainWindow
 			MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
 			sql.saveSettings();
 		}
-		WbManager.getSettings().storeWindowPosition(this);
-		WbManager.getSettings().storeWindowSize(this);
+		int state = this.getExtendedState();
+		WbManager.getSettings().setProperty(this.getClass().getName(), "state", state);
+		if (state != MAXIMIZED_BOTH)
+		{
+			WbManager.getSettings().storeWindowPosition(this);
+			WbManager.getSettings().storeWindowSize(this);
+		}
 		if (dbExplorerPanel != null && !WbManager.getSettings().getShowDbExplorerInMainWindow())
 		{
 			this.dbExplorerPanel.saveSettings();
@@ -469,12 +511,23 @@ public class MainWindow
 		{
 			JMenu view = this.getViewMenu(i);
 			
-			// insert at the correct position
+			// insert the item at the correct index
+      // (if it is a SelectTabAction)
+      // otherwise insert it after the last SelectTabAction
 			int count = view.getItemCount();
 			int inserted = -1; 
 			for (int k=0; k < count; k++)
 			{
-				SelectTabAction a = (SelectTabAction)view.getItem(k).getAction();
+        JMenuItem item = view.getItem(k);
+        if (item == null) continue;
+        Action ac = item.getAction();
+        if (ac == null) continue;
+        if (!(ac instanceof SelectTabAction)) 
+				{
+					break;
+				}
+        SelectTabAction a = (SelectTabAction)ac;
+        
 				if (a.getIndex() >= anAction.getIndex())
 				{
 					view.insert(anAction.getMenuItem(), k);
@@ -487,9 +540,12 @@ public class MainWindow
 			{
 				// no index found which is greate or equal than the new one
 				// so add it to the end
+        if (!(view.getItem(count -1).getAction() instanceof SelectTabAction))
+          view.addSeparator();
+        
 				view.add(anAction.getMenuItem());
 			}
-			else
+			else 
 			{
 				// renumber the shortcuts for the remaining actions
 				int newIndex = anAction.getIndex() + 1;
@@ -508,6 +564,7 @@ public class MainWindow
 		if (this.dbExplorerPanel == null)
 		{
 			this.dbExplorerPanel = new DbExplorerPanel(this);
+			this.dbExplorerPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
 			this.dbExplorerPanel.restoreSettings();
 		}
 		JMenuBar dbmenu = this.getMenuForPanel(this.dbExplorerPanel);

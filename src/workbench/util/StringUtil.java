@@ -7,6 +7,9 @@ package workbench.util;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  *
@@ -76,6 +79,17 @@ public class StringUtil
 		return result;
 	}
 
+	public static List stringToList(String aString, String aDelimiter)
+	{
+    if (aString == null || aString.length() == 0) return Collections.EMPTY_LIST;
+		LineTokenizer tok = new LineTokenizer(aString, aDelimiter);
+		ArrayList result = new ArrayList(tok.countTokens());
+		while (tok.hasMoreTokens())
+		{
+			result.add(tok.nextToken());
+		}
+		return result;
+	}
 	public static String makeJavaString(String aString)
 	{
 		StringBuffer result = new StringBuffer("String sql=");

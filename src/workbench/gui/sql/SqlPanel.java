@@ -24,6 +24,8 @@ import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.*;
+import workbench.gui.actions.ExpandEditorAction;
+import workbench.gui.actions.ExpandResultAction;
 import workbench.gui.components.*;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.menu.TextPopup;
@@ -99,6 +101,7 @@ public class SqlPanel
 	private ImageIcon loadingIcon;
 	private Icon dummyIcon;
 	private boolean dummyIconFetched = false;
+	private int lastDividerLocation = -1;
 	
 	/** Creates new SqlPanel */
 	public SqlPanel(int anId)
@@ -138,6 +141,8 @@ public class SqlPanel
 		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
 		this.contentPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.contentPanel.setOneTouchExpandable(true);
+		this.contentPanel.setContinuousLayout(true);
+		
 		this.add(this.contentPanel, BorderLayout.CENTER);
 		
 		this.initActions();
@@ -194,7 +199,7 @@ public class SqlPanel
 
 	public void addToToolbar(WbAction anAction, boolean withSeperator)
 	{
-		this.toolbar.add(anAction.getToolbarButton(), this.toolbar.getComponentCount() - 1);
+		this.toolbar.add(anAction.getToolbarButton(true), this.toolbar.getComponentCount() - 1);
 		if (withSeperator) this.toolbar.add(new WbToolbarSeparator(), this.toolbar.getComponentCount() - 1);
 	}
 	
@@ -244,11 +249,29 @@ public class SqlPanel
 			}
 		}
 	}
-
+	
+	public void undoExpand()
+	{
+		int newLoc = (int)(this.getHeight() / 2);
+		this.contentPanel.setDividerLocation(newLoc);
+	}
+	
+	public void expandEditor()
+	{
+		this.contentPanel.setDividerLocation(this.getHeight());
+	}
+	
+	public void expandResultTable()
+	{
+		this.contentPanel.setDividerLocation(0);
+	}
+	
 	public void closeFile()
 	{
-		this.editor.closeFile();
-		this.fireFilenameChanged();
+		if (this.editor.closeFile());
+    {
+      this.fireFilenameChanged();
+    }
 	}
 	
 	public void fireFilenameChanged()
@@ -275,6 +298,7 @@ public class SqlPanel
 	}
 	private void initActions()
 	{
+		WbAction a;
 		ExecuteSql e = new ExecuteSql();
 		this.executeAll = new ExecuteAllAction(e);
 
@@ -292,14 +316,16 @@ public class SqlPanel
 
 		TextPopup pop = (TextPopup)this.editor.getRightClickPopup();
 
-		this.actions.add(new FileOpenAction(this));
+		a = new FileOpenAction(this);
+		a.setCreateMenuSeparator(true);
+		this.actions.add(a);
 		this.actions.add(new FileSaveAction(this));
 		this.actions.add(new FileSaveAsAction(this));
 		this.actions.add(new FileDiscardAction(this));
 
 		this.undo = new UndoAction(this.editor);
 		this.actions.add(undo);
-		WbAction a = pop.getCutAction();
+		a = pop.getCutAction();
 		a.setCreateMenuSeparator(true);
 		this.actions.add(a);
 		this.actions.add(pop.getCopyAction());
@@ -313,6 +339,8 @@ public class SqlPanel
 		makeLower.setCreateMenuSeparator(true);
 		this.actions.add(makeLower);
 		this.actions.add(makeUpper);
+		this.actions.add(new MakeInListAction(this.editor));
+		this.actions.add(new MakeNonCharInListAction(this.editor));
 		
 		this.startEditAction = new StartEditAction(this);
 		this.actions.add(this.startEditAction);
@@ -332,6 +360,11 @@ public class SqlPanel
 		this.actions.add(sea);
 		SelectResultAction r = new SelectResultAction(this);
 		this.actions.add(r);
+		a = new ExpandEditorAction(this);
+		a.setCreateMenuSeparator(true);
+		this.actions.add(a);
+		this.actions.add(new ExpandResultAction(this));
+		this.actions.add(new UndoExpandAction(this));
 		
 		this.dataToClipboard = this.data.getTable().getDataToClipboardAction();
 		this.dataToClipboard.setEnabled(false);
@@ -684,6 +717,7 @@ public class SqlPanel
 		WbManager.getSettings().setLastSqlDividerLocation(this.internalId, last);
 		String fname = this.editor.getCurrentFileName();
 		WbManager.getSettings().setEditorFile(this.internalId, fname);
+		this.storeInHistory(this.editor.getText());
 		this.saveSqlStatementHistory();
 	}
 	
@@ -715,6 +749,8 @@ public class SqlPanel
 	public void setStatementText(String aStatement)
 	{
 		this.storeInHistory(this.editor.getText());
+		if (this.editor.getCurrentFile() != null) this.editor.saveCurrentFile();
+		this.editor.closeFile();
 		this.editor.setText(aStatement);
 	}
 	

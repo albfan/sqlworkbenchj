@@ -19,7 +19,7 @@ import java.io.*;
  * It is more sophisticated than the StringTokenizer and less complex than
  * StreamTokenizer.
  *
- * @version $Id: LineTokenizer.java,v 1.1 2002-09-20 17:55:28 thomas Exp $
+ * @version $Id: LineTokenizer.java,v 1.2 2002-10-12 09:25:01 thomas Exp $
  * @author Jean-Paul Le Fèvre
  * @see java.io.StreamTokenizer
  */
@@ -162,6 +162,7 @@ public class LineTokenizer extends StringTokenizer
 	{
 		String line = "desc \"VISA Servers$\"";
 		LineTokenizer ltk = new LineTokenizer(line, " ");
+		System.out.println("count=" + ltk.countTokens());
 		while(ltk.hasMoreTokens())
 		{
 			System.out.println(ltk.nextToken());
