@@ -43,7 +43,7 @@ public class FindPanel extends JPanel implements Searchable
 		this.toolbar.add(this.findAction);
 		this.toolbar.add(this.findAgainAction);
 		this.toolbar.setMargin(new Insets(0,0,0,0));
-		this.toolbar.setRollover(false);
+		this.toolbar.setRollover(true);
 		//Border b = new CompoundBorder(new EmptyBorder(1,0,1,0), new EtchedBorder());
 		//toolbar.setBorder(b);
 		toolbar.setBorderPainted(true);
@@ -93,6 +93,7 @@ public class FindPanel extends JPanel implements Searchable
 
 	public void findData()
 	{
+		if (this.searchTable.getRowCount() <= 0) return;
 		Window parent = SwingUtilities.getWindowAncestor(this);
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		this.searchTable.search(this.findField.getText().trim());
@@ -101,6 +102,8 @@ public class FindPanel extends JPanel implements Searchable
 
 	public void findNext()
 	{
+		if (this.searchTable.getRowCount() <= 0) return;
+		if (!this.searchTable.canSearchAgain()) return;
 		Window parent = SwingUtilities.getWindowAncestor(this);
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		this.searchTable.searchNext();

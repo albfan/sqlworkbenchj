@@ -13,7 +13,7 @@ import java.util.*;
  * An instance of this class represents a pattern of the SQL operator LIKE.
  *
  * @author  <a href="mailto:ey@inweb.de?subject=Like Operator">Christian Ey</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Like {
 
@@ -80,6 +80,9 @@ public class Like {
     }
 
     private void init( String pattern, String escape, boolean ignoreCase) {
+        if (pattern == null) {
+            pattern = "";
+        }
         this.ignoreCase = ignoreCase;
         this.pattern = pattern;
         pattern = (ignoreCase) ? pattern.toLowerCase() : pattern;
@@ -175,10 +178,14 @@ public class Like {
      * @return <code>true</code> if <code>s</code> matches this pattern
      */
     public boolean like( String s) {
-        if (ignoreCase) {
-            s = s.toLowerCase();
+        if (s != null) {
+            if (ignoreCase) {
+                s = s.toLowerCase();
+            }
+            return next( s, s.length(), 0, 0);
+        } else {
+            return false;
         }
-        return next( s, s.length(), 0, 0);
     }
 
     private boolean next( String s, int length, int cursor, int element) {
@@ -272,4 +279,3 @@ public class Like {
         }
     }
 }
-

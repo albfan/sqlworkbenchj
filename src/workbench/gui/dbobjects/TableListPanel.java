@@ -15,11 +15,18 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import workbench.WbManager;
+import workbench.db.DataSpooler;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
@@ -29,6 +36,7 @@ import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.components.*;
+import workbench.gui.dbobjects.TableDependencyTreeDisplay;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.FilenameChangeListener;
@@ -36,6 +44,7 @@ import workbench.interfaces.Reloadable;
 import workbench.interfaces.Spooler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.util.SqlUtil;
 
 
 /**
@@ -57,19 +66,22 @@ public class TableListPanel
 	private WbTable importedKeys;
 	private WbTable exportedKeys;
 	private WbScrollPane importedPanel;
-	private WbScrollPane exportedPanel;
+	private TableDependencyTreeDisplay tableTree;
+	//private WbScrollPane exportedPanel;
+	private WbSplitPane exportedPanel;
 	private WbScrollPane indexPanel;
 	private TriggerDisplayPanel triggers;
 	private EditorPanel tableSource;
 	private JTabbedPane displayTab;
-	private JSplitPane splitPane;
+	private WbSplitPane splitPane;
 	//private DbMetadata meta;
 	private Object retrieveLock = new Object();
 	private JComboBox tableTypes = new JComboBox();
 	private String currentSchema;
 	private String currentCatalog;
 	private SpoolDataAction spoolData;
-
+	private WbMenuItem dropTableItem;
+	
 	private MainWindow parentWindow;
 	
 	private String selectedCatalog;
@@ -83,25 +95,29 @@ public class TableListPanel
 	private boolean shouldRetrieveTriggers;
 	private boolean shouldRetrieveIndexes;
 	private boolean shouldRetrieveKeys;
+	private boolean shouldRetrieveTree;
 	private boolean busy;
 
+	private static final String DROP_CMD = "drop-table";
 	private JMenu showDataMenu;
 	
 	// holds a reference to other WbTables which 
 	// need to display the same table list
 	// e.g. the table search panel
 	private List tableListClients;
-	
+
 	public TableListPanel(MainWindow aParent)
 		throws Exception
 	{
 		this.parentWindow = aParent;
+		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.displayTab = new JTabbedPane();
 		this.displayTab.setTabPlacement(JTabbedPane.BOTTOM);
+		this.displayTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		
 		this.tableDefinition = new WbTable();
 		this.tableDefinition.setAdjustToColumnLabel(false);
-
-		JScrollPane scroll = new WbScrollPane(this.tableDefinition);
+		WbScrollPane scroll = new WbScrollPane(this.tableDefinition);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), scroll);
 
 		this.indexes = new WbTable();
@@ -117,11 +133,18 @@ public class TableListPanel
 		this.importedKeys = new WbTable();
 		this.importedKeys.setAdjustToColumnLabel(false);
 		this.importedPanel = new WbScrollPane(this.importedKeys);
-
+		
 		this.exportedKeys = new WbTable();
 		this.exportedKeys.setAdjustToColumnLabel(false);
-		this.exportedPanel = new WbScrollPane(this.exportedKeys);
-
+		scroll = new WbScrollPane(this.exportedKeys);
+		this.exportedPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT);
+		this.exportedPanel.setDividerLocation(100);
+		this.exportedPanel.setTopComponent(scroll);
+		this.tableTree = new TableDependencyTreeDisplay();
+		this.exportedPanel.setBottomComponent(this.tableTree);
+		
+		//this.exportedPanel = new WbScrollPane(this.exportedKeys);
+		
 		this.triggers = new TriggerDisplayPanel();
 
 		this.listPanel = new JPanel();
@@ -131,7 +154,7 @@ public class TableListPanel
 		this.tableList.setColumnSelectionAllowed(false);
 		this.tableList.setRowSelectionAllowed(true);
 		this.tableList.getSelectionModel().addListSelectionListener(this);
-		this.tableList.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		this.tableList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.tableList.setAdjustToColumnLabel(false);
 
 		this.spoolData = new SpoolDataAction(this);
@@ -165,9 +188,13 @@ public class TableListPanel
 		scroll = new WbScrollPane(this.tableList);
 
 		this.listPanel.add(scroll, BorderLayout.CENTER);
+		this.listPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
+		//this.splitPane.set
 		this.splitPane.setLeftComponent(this.listPanel);
 		this.splitPane.setRightComponent(displayTab);
+		this.splitPane.setDividerSize(8);
+		this.splitPane.setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setLayout(new BorderLayout());
 		this.add(splitPane, BorderLayout.CENTER);
 
@@ -190,13 +217,18 @@ public class TableListPanel
 		String[] panels = this.parentWindow.getPanelLabels();
 		for (int i=0; i < panels.length; i++)
 		{
-			JMenuItem item = new WbMenuItem(panels[i]);
+			WbMenuItem item = new WbMenuItem(panels[i]);
 			item.setActionCommand("panel-" + i);
 			item.addActionListener(this);
 			this.showDataMenu.add(item);
 		}
 		popup.addSeparator();
 		popup.add(showDataMenu);
+		this.dropTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDropDbObject"));
+		this.dropTableItem.setActionCommand(DROP_CMD);
+		this.dropTableItem.addActionListener(this);
+		this.dropTableItem.setEnabled(false);
+		popup.add(this.dropTableItem);
 	}
 
 	private void updateShowDataMenu()
@@ -256,6 +288,7 @@ public class TableListPanel
 		this.tableSource.setText("");
 		this.invalidateData();
 		this.updateDisplayClients();
+		this.tableTree.reset();
 	}
 	
 	private void invalidateData()
@@ -264,11 +297,13 @@ public class TableListPanel
 		this.shouldRetrieveTriggers = true;
 		this.shouldRetrieveIndexes = true;
 		this.shouldRetrieveKeys = true;
+		this.shouldRetrieveTree = true;
 	}
 	
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
+		this.tableTree.setConnection(aConnection);
 		//this.meta = aConnection.getMetadata();
 		this.tableTypes.removeActionListener(this);
 		this.triggers.setConnection(aConnection);
@@ -351,6 +386,7 @@ public class TableListPanel
 	{
 		this.triggers.saveSettings();
 		WbManager.getSettings().setProperty(this.getClass().getName(), "divider", this.splitPane.getDividerLocation());
+		WbManager.getSettings().setProperty(this.getClass().getName(), "treedivider", this.exportedPanel.getDividerLocation());
 	}
 
 	public void restoreSettings()
@@ -358,18 +394,27 @@ public class TableListPanel
 		int loc = WbManager.getSettings().getIntProperty(this.getClass().getName(), "divider");
 		if (loc == 0) loc = 200;
 		this.splitPane.setDividerLocation(loc);
+		
+		loc = WbManager.getSettings().getIntProperty(this.getClass().getName(), "treedivider");
+		if (loc == 0) loc = 200;
+		this.exportedPanel.setDividerLocation(loc);
+		
 		this.triggers.restoreSettings();
 	}
 
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
-		if (this.tableList.getSelectedRowCount() > 1) 
+		int count = this.tableList.getSelectedRowCount();
+		if (count > 1) 
 		{
 			this.showDataMenu.setEnabled(false);
+			this.dropTableItem.setEnabled(true);
 			return;
 		}
-		this.showDataMenu.setEnabled(true);
+		this.showDataMenu.setEnabled(count == 1);
+		this.dropTableItem.setEnabled(count > 0);
+		
 		int row = this.tableList.getSelectedRow();
 		if (row < 0) return;
 		
@@ -432,7 +477,7 @@ public class TableListPanel
 	private void startRetrieveCurrentPanel()
 	{
 		final Component caller = this;
-		new Thread(new Runnable()
+		new Thread()
 		{
 			public void run()
 			{
@@ -440,13 +485,15 @@ public class TableListPanel
 				retrieveCurrentPanel();	
 				WbSwingUtilities.showDefaultCursor(caller);
 			}
-		}).start();
+		}.start();
 	}
 
 	private void retrieveCurrentPanel()
 	{
 		synchronized (retrieveLock)
 		{
+			if (this.tableList.getSelectedRowCount() <= 0) return;
+			
 			this.busy = true;
 			try
 			{
@@ -464,6 +511,7 @@ public class TableListPanel
 					case 3:
 					case 4:
 						if (this.shouldRetrieveKeys) this.retrieveFkInformation();
+						if (this.shouldRetrieveTree) this.retrieveFkTree();
 						break;
 					case 5:
 						if (this.shouldRetrieveTriggers) this.retrieveTriggers();
@@ -509,6 +557,12 @@ public class TableListPanel
 		this.shouldRetrieveKeys = false;
 	}
 
+	private void retrieveFkTree()
+	{
+		tableTree.readTree(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+		this.shouldRetrieveTree = false;
+	}
+	
 	public void reload()
 	{
 		this.reset();
@@ -518,6 +572,7 @@ public class TableListPanel
 	private String buildSqlForTable()
 	{
 		if (this.selectedTableName == null || this.selectedTableName.length() == 0) return null;
+		String table = SqlUtil.quoteObjectname(this.selectedTableName);
 		
 		if (this.tableDefinition.getRowCount() == 0) 
 		{
@@ -534,19 +589,14 @@ public class TableListPanel
 		if (colCount == 0) return null;
 		StringBuffer sql = new StringBuffer(colCount * 80);
 		sql.append("SELECT ");
-		Pattern p = Pattern.compile("[$ ]");		
-		Matcher m;
 		boolean quote = false;
 		for (int i=0; i < colCount; i++)
 		{
 			String column = this.tableDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-			m = p.matcher(column);
+			column = SqlUtil.quoteObjectname(column);
 			if (i > 0 && i < colCount) sql.append(",\n");
 			if (i > 0) sql.append("       ");
-			quote = m.find();
-			if (quote) sql.append('"');
 			sql.append(column);
-			if (quote) sql.append('"');
 		}
 		sql.append("\nFROM ");
 		if (this.selectedSchema != null && this.selectedSchema.trim().length() > 0)
@@ -555,12 +605,7 @@ public class TableListPanel
 			sql.append(".");
 		}	
 		
-		m = p.matcher(this.selectedTableName);
-		quote = m.find();
-		
-		if (quote) sql.append('"');
-		sql.append(this.selectedTableName);
-		if (quote) sql.append('"');
+		sql.append(table);
 		
 		return sql.toString();
 	}
@@ -602,6 +647,11 @@ public class TableListPanel
 				{
 					ex.printStackTrace();
 				}
+			}
+			else if (command.equals(DROP_CMD))
+			{
+				System.out.println("drop-table");
+				this.dropTables();
 			}
 		}
 	}
@@ -646,14 +696,57 @@ public class TableListPanel
 		if (this.tableListClients == null) return;
 		this.tableListClients.remove(aClient);
 	}
+
+	private void dropTables()
+	{
+		if (this.tableList.getSelectedRowCount() == 0) return;
+		int rows[] = this.tableList.getSelectedRows();
+		int count = rows.length;
+		if (count == 0) return;
+		
+		ArrayList names = new ArrayList(count);
+		ArrayList types = new ArrayList(count);
+		for (int i=0; i < count; i ++)
+		{
+			String name = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+			String schema = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+      if (schema.length() > 0)
+      {
+        name = SqlUtil.quoteObjectname(schema) + "." + SqlUtil.quoteObjectname(name);
+      }
+      else
+      {
+        name = SqlUtil.quoteObjectname(name);
+      }
+			String type = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+			names.add(name);
+			types.add(type);
+		}
+		ObjectDropperUI ui = new ObjectDropperUI();
+		ui.setObjects(names, types);
+		ui.setConnection(this.dbConnection);
+		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
+		ui.showDialog(f);
+		if (!ui.dialogWasCancelled())
+		{
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					reload();	
+				}
+			});
+		}
+	}
 	
 	public void spoolData()
 	{
 		int row = this.tableList.getSelectedRow();
 		if (row < 0) return;
 		String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-		String sql = "SELECT * FROM " + table;
-		this.spoolData.execute(this.dbConnection, sql);
+		String sql = "SELECT * FROM " + SqlUtil.quoteObjectname(table);
+		DataSpooler spooler = new DataSpooler();
+		spooler.executeStatement(this.parentWindow, this.dbConnection, sql);
 	}
 
 	public Window getParentWindow()
@@ -672,43 +765,6 @@ public class TableListPanel
 	public void fileNameChanged(Object sender, String newFilename)
 	{
 		this.updateShowDataMenu();
-	}
-	
-	public static void main(String args[])
-	{
-		Connection con = null;
-		try
-		{
-			//JFrame f = new JFrame("Test");
-			//Class.forName("com.inet.tds.TdsDriver");
-			//Class.forName("oracle.jdbc.OracleDriver");
-			Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
-			//final Connection con = DriverManager.getConnection("jdbc:inetdae:demsqlvisa02:1433?database=visa_cpl_test", "visa", "savivisa");
-			//final Connection con = DriverManager.getConnection("jdbc:oracle:thin:@DEMRDB34:1521:SBL1", "sadmin", "sadmin");
-			//con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:oradb", "auto", "auto");
-			con = DriverManager.getConnection("jdbc:odbc:Auto", "auto", "auto");
-
-			DatabaseMetaData meta = con.getMetaData();
-			System.out.println(meta.getDatabaseProductName());
-			System.out.println(meta.getCatalogTerm());
-			/*
-			ResultSet rs;
-			rs = meta.getImportedKeys(null, "AUTO", "EXPENSE");
-			while (rs.next())
-			{
-				System.out.println("column=" + rs.getString(4) + ", fk_table=" + rs.getString(7) + ", fk_col=" + rs.getString(8));
-			}
-			rs.close();
-			*/
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			try { con.close(); } catch (Throwable th) {}
-		}
 	}
 	
 }

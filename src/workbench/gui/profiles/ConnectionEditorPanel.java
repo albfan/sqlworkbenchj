@@ -8,6 +8,8 @@ package workbench.gui.profiles;
 
 import java.awt.Component;
 import java.awt.Frame;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -35,7 +37,7 @@ import workbench.resource.ResourceMgr;
  */
 public class ConnectionEditorPanel 
 	extends JPanel
-	implements PropertyChangeListener
+	implements PropertyChangeListener, FocusListener
 {
 	private ConnectionProfile currentProfile;
 	private List drivers;
@@ -51,7 +53,7 @@ public class ConnectionEditorPanel
 		// we only monitor changes to the name, because that needs
 		// to be updated immediately on the list. The other
 		// property are only updated when the parent requests this
-		this.tfProfileName.addPropertyChangeListener(tfProfileName.getName(), this);
+		//this.tfProfileName.addPropertyChangeListener(tfProfileName.getName(), this);
 		WbTraversalPolicy policy = new WbTraversalPolicy();
 		policy.addComponent(tfProfileName);
 		policy.addComponent(cbDrivers);
@@ -62,6 +64,7 @@ public class ConnectionEditorPanel
 		policy.setDefaultComponent(tfProfileName);
 		this.setFocusTraversalPolicy(policy);
 		this.setFocusCycleRoot(true);
+		//this.addFocusListener(this);
 	}
 	
 	private void initEditorList()
@@ -73,6 +76,8 @@ public class ConnectionEditorPanel
 			if (c instanceof SimplePropertyEditor)
 			{
 				this.editors.add(c);
+				c.addPropertyChangeListener(c.getName(), this);
+        ((SimplePropertyEditor)c).setImmediateUpdate(true);
 			}
 		}
 	}
@@ -363,11 +368,23 @@ public class ConnectionEditorPanel
 	 */
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (evt.getSource() == this.tfProfileName)
-		{
-			this.updateProfile();
-			this.sourceModel.profileChanged(this.currentProfile);
-		}
+		//this.updateProfile();
+		this.sourceModel.profileChanged(this.currentProfile);
 	}	
 
+	/** Invoked when a component gains the keyboard focus.
+	 *
+	 */
+	public void focusGained(FocusEvent e)
+	{
+	}
+	
+	/** Invoked when a component loses the keyboard focus.
+	 *
+	 */
+	public void focusLost(FocusEvent e)
+	{
+		this.updateProfile();
+	}
+	
 }

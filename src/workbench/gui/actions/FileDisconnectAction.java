@@ -1,8 +1,10 @@
 package workbench.gui.actions;
 
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.lang.Runnable;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import workbench.gui.MainWindow;
@@ -21,6 +23,6 @@ public class FileDisconnectAction extends WbAction
 
 	public void actionPerformed(ActionEvent e)
 	{
-		this.window.disconnect();
+		window.disconnect();
 	}
 }

@@ -32,6 +32,7 @@ public class ConnectionProfile
 	private boolean autocommit;
 	private String description;
 	private int id;
+  private String identifier;
 	private static int nextId = 1;
 	private boolean changed;
 	private boolean isNew;
@@ -44,6 +45,9 @@ public class ConnectionProfile
 	public ConnectionProfile()
 	{
 		this.id = getNextId();
+    this.identifier = String.valueOf(this.id);
+    this.isNew = true;
+    this.changed = true;
 	}
 
 	private static synchronized int getNextId()
@@ -62,6 +66,11 @@ public class ConnectionProfile
 		this.changed = false;
 	}
 	
+  public String getIdentifier()
+  {
+    return this.identifier;
+  }
+  
 	public ConnectionProfile(String aName, String driverClass, String url, String userName, String pwd)
 	{
 		this();
@@ -76,7 +85,7 @@ public class ConnectionProfile
 	/**
 	 *	Sets the current password. If the password
 	 *	is not already encrypted, it will be encrypted
-	 *
+	 *B
 	 *	@see #getPassword()
 	 *	@see workbench.util.WbCipher#encryptString(String)
 	 */
@@ -238,11 +247,8 @@ public class ConnectionProfile
 	public String getUrl() { return this.url; }
 	public void setUrl(String aUrl) 
 	{ 
-		if (aUrl == null || !aUrl.equals(this.url))
-		{
-			this.url = aUrl; 
-			this.changed = true;
-		}
+		this.url = aUrl; 
+		this.changed = true;
 	}
 	
 	public String getDriverclass() { return this.driverclass; }

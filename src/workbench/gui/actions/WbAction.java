@@ -1,8 +1,10 @@
 package workbench.gui.actions;
 
+import java.awt.EventQueue;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.lang.Runnable;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
 import javax.swing.Action;
@@ -22,7 +24,8 @@ import workbench.resource.ResourceMgr;
 /**
  *	@author  workbench@kellerer.org
  */
-public abstract class WbAction extends AbstractAction
+public abstract class WbAction 
+	extends AbstractAction
 {
 	public static final String ADD_TO_TOOLBAR = "AddToToolbar";
 	public static final String MAIN_MENU_ITEM = "MainMenuItem";
@@ -188,4 +191,24 @@ public abstract class WbAction extends AbstractAction
 		}
 	}
 
+	public void removeIcon()
+	{
+		this.putValue(Action.SMALL_ICON, null);
+	}
+	
+	public void actionPerformed(final ActionEvent e)
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				executeAction(e);
+			}
+		});
+	}
+	
+	public void executeAction(ActionEvent e)
+	{
+	}
+	
 }

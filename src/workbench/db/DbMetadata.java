@@ -164,7 +164,30 @@ public class DbMetadata
 	{
 		return getDefaultLiteral(aValue, null);
 	}
+
+	public String getCascadeConstraintsVerb()
+	{
+		if (this.productName.toLowerCase().indexOf("oracle") >= 0)
+		{
+			return "CASCADE CONSTRAINTS";
+		}
+		else
+		{
+			return "";
+		}
+	}
 	
+	public String getUserName()
+	{
+		try
+		{
+			return this.metaData.getUserName();
+		}
+		catch (Exception e)
+		{
+			return "";
+		}
+	}
 	public static String getDefaultLiteral(Object aValue, DbDateFormatter formatter)
 	{
 		if (aValue == null) return "NULL";
@@ -979,17 +1002,23 @@ public class DbMetadata
 		return this.getKeyList(aCatalog, aSchema, aTable, false);
 	}
 	
+	public static final int COLUMN_IDX_FK_DEF_FK_NAME = 0;
+	public static final int COLUMN_IDX_FK_DEF_COLUMN_NAME = 1;
+	public static final int COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME = 2;
+	public static final int COLUMN_IDX_FK_DEF_UPDATE_RULE = 3;
+	public static final int COLUMN_IDX_FK_DEF_DELETE_RULE = 4;	
+	
 	private DataStore getKeyList(String aCatalog, String aSchema, String aTable, boolean getOwnFk)
 	{
 		String cols[];
 		
 		if (getOwnFk) 
-			cols = new String[] { "FK_NAME", "COLUMN_NAME", "REFERENCES"};
+			cols = new String[] { "FK_NAME", "COLUMN", "REFERENCES", "UPDATE_RULE", "DELETE_RULE"};
 		else
-			cols = new String[] { "FK_NAME", "COLUMN_NAME", "REFERENCED BY"};
+			cols = new String[] { "FK_NAME", "COLUMN", "REFERENCED BY", "UPDATE_RULE", "DELETE_RULE"};
 			
-		int types[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		int sizes[] = {15, 15, 40};
+		int types[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+		int sizes[] = {25, 10, 30, 12, 12};
 		DataStore ds = new DataStore(cols, types, sizes);
 		try
 		{
@@ -1003,22 +1032,32 @@ public class DbMetadata
 			int fkNameCol;
 			int colCol;
 			int fkColCol;
+			int deleteActionCol;
+			int updateActionCol;
+			int schemaCol;
+			
 			ResultSet rs;
 			if (getOwnFk)
 			{
 				rs = this.metaData.getImportedKeys(aCatalog, aSchema, aTable);
 				tableCol = 3;
+				schemaCol = 2;
 				fkNameCol = 12;
 				colCol = 8;
 				fkColCol = 4;
+				updateActionCol = 10;
+				deleteActionCol = 11;
 			}
 			else
 			{
 				rs = this.metaData.getExportedKeys(aCatalog, aSchema, aTable);
 				tableCol = 7;
+				schemaCol = 6;
 				fkNameCol = 12;
 				colCol = 4;
 				fkColCol = 8;
+				updateActionCol = 10;
+				deleteActionCol = 11;
 			}
 			while (rs.next())
 			{
@@ -1026,18 +1065,58 @@ public class DbMetadata
 				String fk_col = rs.getString(fkColCol);
 				String col = rs.getString(colCol);
 				String fk_name = rs.getString(fkNameCol);
+				String schema = rs.getString(schemaCol);
+				if (schema != null && !rs.wasNull() && schema.length() > 0 && !schema.equals(this.getUserName()))
+				{
+					schema = schema + ".";
+				}
+				else
+				{
+					schema = "";
+				}
+				int updateAction = rs.getInt(updateActionCol);
+				String updActionDesc = this.ruleTypeDisplay(updateAction);
+				int deleteAction = rs.getInt(deleteActionCol);
+				String delActionDesc = this.ruleTypeDisplay(deleteAction);
 				int row = ds.addRow();
-				ds.setValue(row, 0, fk_name);
-				ds.setValue(row, 1, col);
-				ds.setValue(row, 2, table + "." + fk_col);
+				ds.setValue(row, COLUMN_IDX_FK_DEF_FK_NAME, fk_name);
+				ds.setValue(row, COLUMN_IDX_FK_DEF_COLUMN_NAME, col);
+				ds.setValue(row, COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME, table + "." + fk_col);
+				ds.setValue(row, COLUMN_IDX_FK_DEF_UPDATE_RULE, updActionDesc);
+				ds.setValue(row, COLUMN_IDX_FK_DEF_DELETE_RULE, delActionDesc);
 			}
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError(this, "Could not retrieve FK information", e);
+			//LogMgr.logError(this, "Could not retrieve FK information", e);
 			ds.reset();
 		}
 		return ds;
+	}
+
+	private String ruleTypeDisplay(int aRule)
+	{
+		switch (aRule)
+		{
+			case DatabaseMetaData.importedKeyNoAction:
+				return "NO ACTION";
+			case DatabaseMetaData.importedKeyRestrict:
+				return "RESTRICT";
+			case DatabaseMetaData.importedKeySetNull:
+				return "SET NULL";
+			case DatabaseMetaData.importedKeyCascade:
+				return "CASCADE";
+			case DatabaseMetaData.importedKeySetDefault:
+				return "SET DEFAULT";
+			case DatabaseMetaData.importedKeyInitiallyDeferred:
+				return "INITIALLY DEFERRED";
+			case DatabaseMetaData.importedKeyInitiallyImmediate:
+				return "INITIALLY IMMEDIATE";				
+			case DatabaseMetaData.importedKeyNotDeferrable:
+				return "NOT DEFERRABLE";				
+			default:
+				return "UNKNOWN";
+		}
 	}
 	
 	private String getPkIndexName(DataStore anIndexDef)
@@ -1105,7 +1184,7 @@ public class DbMetadata
 				result.append(" NOT NULL");
 			if (def != null && def.length() > 0)
 			{
-				result.append(" DEFAULT");
+				result.append(" DEFAULT ");
 				result.append(def);
 			}
 			if (i < count - 1) result.append(',');
@@ -1163,9 +1242,9 @@ public class DbMetadata
 		for (int i=0; i < count; i++)
 		{
 			//"FK_NAME", "COLUMN_NAME", "REFERENCES"};
-			name = aFkDef.getValue(i, 0).toString();
-			col = aFkDef.getValue(i, 1).toString();
-			fkCol = aFkDef.getValue(i, 2).toString();
+			name = aFkDef.getValue(i, COLUMN_IDX_FK_DEF_FK_NAME).toString();
+			col = aFkDef.getValue(i, COLUMN_IDX_FK_DEF_COLUMN_NAME).toString();
+			fkCol = aFkDef.getValue(i, COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME).toString();
 			entry = (String)fkCols.get(name);
 			if (entry == null)
 			{
@@ -1211,7 +1290,7 @@ public class DbMetadata
 			while (tok.hasMoreTokens())
 			{
 				col = tok.nextToken();
-				int pos = col.indexOf('.');
+				int pos = col.lastIndexOf('.');
 				if (targetTable == null)
 				{
 					targetTable = col.substring(0, pos);

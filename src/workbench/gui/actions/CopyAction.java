@@ -1,8 +1,3 @@
-/*
- * ClearAction.java
- *
- * Created on December 2, 2001, 1:32 AM
- */
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;

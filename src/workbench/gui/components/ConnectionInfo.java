@@ -10,6 +10,7 @@ import java.awt.Color;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import workbench.db.WbConnection;
+import workbench.resource.ResourceMgr;
 
 /**
  *
@@ -32,8 +33,16 @@ public class ConnectionInfo
 	
 	public void setConnection(WbConnection aConnection)
 	{
-		this.setText(aConnection.getDisplayString());
-		this.setToolTipText(aConnection.getDatabaseProductName());
+		if (aConnection != null)
+		{
+			this.setText(aConnection.getDisplayString());
+			this.setToolTipText(aConnection.getDatabaseProductName());
+		}
+		else
+		{
+			this.setText(ResourceMgr.getString("TxtNotConnected"));
+			this.setToolTipText(null);
+		}
 	}
 	
 }

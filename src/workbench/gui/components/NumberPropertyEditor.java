@@ -4,6 +4,8 @@
 package workbench.gui.components;
 
 import java.awt.BorderLayout;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
@@ -21,17 +23,19 @@ import workbench.interfaces.SimplePropertyEditor;
  */
 public class NumberPropertyEditor 
 	extends NumberField
-	implements DocumentListener, SimplePropertyEditor
+	implements DocumentListener, SimplePropertyEditor, FocusListener
 {
 	private Object source;
 	private Method setter;
 	private Method getter;
 	private String propName;
 	private boolean changed;
+	private boolean immediateUpdate = false;
 	
 	public NumberPropertyEditor()
 	{
 		super();
+		this.addFocusListener(this);
 	}
 	
 	public void setSourceObject(Object aSource, String aProperty)
@@ -84,16 +88,36 @@ public class NumberPropertyEditor
 	public void changedUpdate(DocumentEvent e)
 	{
 		this.changed = true;
+		if (this.immediateUpdate)
+		{
+			this.applyChanges();
+		}
+		firePropertyChange(this.propName, null, null);
 	}
 	
 	public void insertUpdate(DocumentEvent e)
 	{
 		this.changed = true;
+		if (this.immediateUpdate)
+		{
+			this.applyChanges();
+		}
+		firePropertyChange(this.propName, null, null);
 	}
 	
 	public void removeUpdate(DocumentEvent e)
 	{
 		this.changed = true;
+		if (this.immediateUpdate)
+		{
+			this.applyChanges();
+		}
+		this.changed = true;
+		if (this.immediateUpdate)
+		{
+			this.applyChanges();
+		}
+		firePropertyChange(this.propName, null, null);
 	}
 	
 	public boolean isChanged()
@@ -101,5 +125,30 @@ public class NumberPropertyEditor
 		return this.changed;
 	}
 
+	public void setImmediateUpdate(boolean aFlag)
+	{
+		this.immediateUpdate = aFlag;
+		if (aFlag) this.applyChanges();
+	}
+	
+	public boolean getImmediateUpdate()
+	{
+		return this.immediateUpdate;
+	}
+	
+	/** Invoked when a component gains the keyboard focus.
+	 *
+	 */
+	public void focusGained(FocusEvent e)
+	{
+	}
+	
+	/** Invoked when a component loses the keyboard focus.
+	 *
+	 */
+	public void focusLost(FocusEvent e)
+	{
+		if (!this.immediateUpdate) this.applyChanges();
+	}
 }
 

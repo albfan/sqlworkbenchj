@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import javax.swing.*;
+import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -43,7 +44,8 @@ import workbench.util.StringUtil;
 
 public class WbTable 
 extends JTable 
-	implements ActionListener, FocusListener, MouseListener, Exporter, FontChangedListener, Searchable
+	implements ActionListener, FocusListener, MouseListener, 
+	           Exporter, FontChangedListener, Searchable
 {
 	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.yellow);
 	private JPopupMenu popup;
@@ -130,7 +132,7 @@ extends JTable
 		
 		this.dataToClipboard = new DataToClipboardAction(this);
 		this.exportDataAction = new SaveDataAsAction(this);
-		
+		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.addPopupAction(this.exportDataAction, false);
 		this.addPopupAction(this.dataToClipboard, false);
 		this.addPopupAction(this.findAction, true);

@@ -13,9 +13,12 @@ import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 import workbench.db.ConnectionMgr;
@@ -23,6 +26,7 @@ import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.interfaces.FontChangedListener;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.WbCipher;
@@ -44,14 +48,20 @@ public class WbManager
 	
 	private WbManager() 
 	{
+		long start,end;
+		//start = System.currentTimeMillis();
 		this.setLookAndFeel();
-		this.initFonts();
+		//end = System.currentTimeMillis();
+		//System.out.println("setLookAndFeel()=" + (end - start));
+		//start = System.currentTimeMillis();
+		this.initUI();
+		//end = System.currentTimeMillis();
+		//System.out.println("initUI=" + (end - start));
 		this.settings.addFontChangedListener(this);
 	}
 
 	public WbCipher getDesCipher()
 	{
-		System.out.println("WbManager.getDesCipher()");
 		if (desCipher == null)
 		{
 			try
@@ -151,7 +161,7 @@ public class WbManager
 		}
 		catch (Exception e)
 		{
-			System.out.println("Could not set look and feel");
+			LogMgr.logInfo("Settings.setLookAndFeel()", "Could not set look and feel", e);
 		}
 		
 		try
@@ -163,46 +173,68 @@ public class WbManager
 		}
 	}
 	
-	private void initFonts() 
+	private void initUI() 
 	{
+		long start,end;
+		UIDefaults def = UIManager.getDefaults();
+		
 		Font stdFont = this.settings.getStandardFont();
-		UIManager.put("Button.font", stdFont);
-		UIManager.put("CheckBox.font", stdFont);
-		UIManager.put("CheckBoxMenuItem.font", stdFont);
-		UIManager.put("ColorChooser.font", stdFont);
-		UIManager.put("ComboBox.font", stdFont);
-		UIManager.put("EditorPane.font", stdFont);
-		UIManager.put("FileChooser.font", stdFont);
-		UIManager.put("InternalFrame.font", stdFont);
-		UIManager.put("Label.font", stdFont);
-		UIManager.put("List.font", stdFont);
-		UIManager.put("Menu.font", stdFont);
-		UIManager.put("MenuItem.font", stdFont);
-		UIManager.put("OptionPane.font", stdFont);
-		UIManager.put("Panel.font", stdFont);
-		UIManager.put("PasswordField.font", stdFont);
-		UIManager.put("PopupMenu.font", stdFont);
-		UIManager.put("ProgressBar.font", stdFont);
-		UIManager.put("RadioButton.font", stdFont);
-		UIManager.put("TabbedPane.font", stdFont);
-		UIManager.put("TextArea.font", stdFont);
-		UIManager.put("TextField.font", stdFont);
-		UIManager.put("TextPane.font", stdFont);
-		UIManager.put("TitledBorder.font", stdFont);
-		UIManager.put("ToggleButton.font", stdFont);
-		UIManager.put("ToolBar.font", stdFont);
-		UIManager.put("ToolTip.font", stdFont);
-		UIManager.put("Tree.font", stdFont);
-		UIManager.put("ViewPort.font", stdFont);
-		UIManager.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
+		
+		def.put("Button.font", stdFont);
+		def.put("CheckBox.font", stdFont);
+		def.put("CheckBoxMenuItem.font", stdFont);
+		def.put("ColorChooser.font", stdFont);
+		def.put("ComboBox.font", stdFont);
+		def.put("EditorPane.font", stdFont);
+		def.put("FileChooser.font", stdFont);
+		def.put("InternalFrame.font", stdFont);
+		def.put("Label.font", stdFont);
+		def.put("List.font", stdFont);
+		def.put("Menu.font", stdFont);
+		def.put("MenuItem.font", stdFont);
+		def.put("OptionPane.font", stdFont);
+		def.put("Panel.font", stdFont);
+		def.put("PasswordField.font", stdFont);
+		def.put("PopupMenu.font", stdFont);
+		def.put("ProgressBar.font", stdFont);
+		def.put("RadioButton.font", stdFont);
+		def.put("TabbedPane.font", stdFont);
+		def.put("TextArea.font", stdFont);
+		def.put("TextField.font", stdFont);
+		def.put("TextPane.font", stdFont);
+		def.put("TitledBorder.font", stdFont);
+		def.put("ToggleButton.font", stdFont);
+		def.put("ToolBar.font", stdFont);
+		def.put("ToolTip.font", stdFont);
+		def.put("Tree.font", stdFont);
+		def.put("ViewPort.font", stdFont);
 		
 		Font dataFont = this.settings.getDataFont();
-		UIManager.put("Table.font", dataFont);
-		UIManager.put("TableHeader.font", dataFont);
+		
+		def.put("Table.font", dataFont);
+		def.put("TableHeader.font", dataFont);
+
+		def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
+		def.put("SplitPaneUI", "com.sun.java.swing.plaf.windows.WindowsSplitPaneUI");
+		
+		/*
+		try
+		{
+			// always use the Windows SplitPaneUI (because it does not display 
+			// those strange "bumps" on the divider... :-)
+			Class.forName("com.sun.java.swing.plaf.windows.WindowsSplitPaneUI");
+			def.put("SplitPaneUI", "com.sun.java.swing.plaf.windows.WindowsSplitPaneUI");
+		}
+		catch (ClassNotFoundException cnf)
+		{
+		}
+		*/
+		
 		if (settings.getShowMnemonics())
-			UIManager.put("Button.showMnemonics", Boolean.TRUE);
+			def.put("Button.showMnemonics", Boolean.TRUE);
 		else
-			UIManager.put("Button.showMnemonics", Boolean.FALSE);
+			def.put("Button.showMnemonics", Boolean.FALSE);
+		
 	}
 
 	public MainWindow createWindow()
@@ -226,33 +258,47 @@ public class WbManager
 		{
 			w = (MainWindow)this.mainWindows.get(i);
 			if (w == null) continue;
+      // If there are multiple Windows open, we only save the 
+      // settings for the currently active window
 			if (w.isFocused()) 
 			{
+        if (!this.checkProfiles(w)) return;
 				w.saveSettings();
 			}
+      this.mainWindows.remove(w);
 			w.setVisible(false);
 			w.dispose();
 		}
 		this.settings.saveSettings();
+		LogMgr.shutdown();
 		System.exit(0);
 	}
 	
+  private boolean checkProfiles(MainWindow win)
+  {
+    if (getConnectionMgr().profilesChanged())
+    {
+      int answer = JOptionPane.showConfirmDialog(win, ResourceMgr.getString("MsgConfirmUnsavedProfiles"), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_CANCEL_OPTION);
+      if (answer == JOptionPane.OK_OPTION)
+      {
+        this.getConnectionMgr().saveProfiles();
+        return true;
+      }
+      else if (answer == JOptionPane.NO_OPTION)
+      {
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+    }
+    return true;
+  }
 	public void windowClosing(MainWindow win)
 	{
-		if (win != null)
-		{
-			this.mainWindows.remove(win);
-		}
-		if (this.mainWindows.size() == 0)
+		if (this.mainWindows.size() == 1)
     {
-      if (getConnectionMgr().profilesChanged())
-      {
-        int answer = JOptionPane.showConfirmDialog(win, ResourceMgr.getString("MsgConfirmUnsavedProfiles"), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION);
-        if (answer == JOptionPane.OK_OPTION)
-        {
-          this.getConnectionMgr().saveProfiles();
-        }
-      }
 			this.exitWorkbench();
     }
 	}

@@ -10,8 +10,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.io.*;
-import java.io.PrintWriter;
-import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.KeyStroke;
@@ -28,18 +26,21 @@ import workbench.gui.menu.TextPopup;
 import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.TextContainer;
+import workbench.interfaces.TextFileContainer;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.LineTokenizer;
-import workbench.util.StringUtil;
 
 
 /**
  *
- * @author  thomas
+ * @author  workbench@kellerer.org
  * @version
  */
-public class EditorPanel extends JEditTextArea implements ClipboardSupport, FontChangedListener, TextContainer
+public class EditorPanel 
+	extends JEditTextArea 
+	implements ClipboardSupport, FontChangedListener, 
+						 TextContainer, TextFileContainer
 {
 	private TextPopup popup = new TextPopup(this);
 	private AnsiSQLTokenMarker tokenMarker;
@@ -121,23 +122,23 @@ public class EditorPanel extends JEditTextArea implements ClipboardSupport, Font
 		{
 			String line = this.getLineText(i);
 			StringBuffer newline = new StringBuffer(line.length() + 10);
-			if (i > startline) 
+			if (line != null && line.length() > 0) 
 			{
-				newText.append('\n');
-				newline.append(' ');
+				if (i > startline) 
+				{
+					if (i < endline) newText.append(',');
+					newText.append('\n');
+					newline.append(' ');
+				}
+				else
+				{
+					newline.append("(");
+				}
+				newline.append('\'');
+				newline.append(line);
+				newline.append('\'');
 			}
-			else
-			{
-				newline.append("(");
-			}
-			newline.append('\'');
-			newline.append(line);
-			newline.append('\'');
-			if (i < endline) 
-			{
-				newline.append(',');
-			}
-			else
+			if (i == endline)
 			{
 				newline.append(')');
 			}
@@ -239,6 +240,7 @@ public class EditorPanel extends JEditTextArea implements ClipboardSupport, Font
 	{
     if (this.currentFile == null) return false;
 		this.currentFile = null;
+		this.setCaretPosition(0);
 		this.setText("");
 		this.clearUndoBuffer();
 		this.resetModified();

@@ -70,11 +70,24 @@ public class ProfileEditorPanel
 		this.addKeyListener(this);
 		this.connectionEditor.setSourceList(this.model);
 		WbTraversalPolicy policy = new WbTraversalPolicy();
+		this.setFocusCycleRoot(true);
 		policy.addComponent(this.jList1);
 		policy.addComponent(this.connectionEditor);
+		policy.setDefaultComponent(this.jList1);
 		this.setFocusTraversalPolicy(policy);
 	}
 
+	public void setInitialFocus()
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				jList1.requestFocus();
+			}
+		});
+	}
+	
 	private void fillDrivers()
 	{
 		List drivers = WbManager.getInstance().getConnectionMgr().getDriverClasses();
@@ -98,18 +111,17 @@ public class ProfileEditorPanel
   private void initComponents()//GEN-BEGIN:initComponents
   {
     jSplitPane1 = new WbSplitPane();
-    
-    
+
     listPanel = new javax.swing.JPanel();
     jScrollPane1 = new javax.swing.JScrollPane();
     jList1 = new javax.swing.JList();
-    
+
     setLayout(new java.awt.BorderLayout());
-    
+
     jSplitPane1.setBorder(new javax.swing.border.EtchedBorder());
     jSplitPane1.setDividerLocation(110);
     listPanel.setLayout(new java.awt.BorderLayout());
-    
+
     jScrollPane1.setPreferredSize(null);
     jList1.setFont(WbManager.getSettings().getStandardFont());
     jList1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
@@ -122,7 +134,7 @@ public class ProfileEditorPanel
         jList1ValueChanged(evt);
       }
     });
-    
+
     jList1.addMouseListener(new java.awt.event.MouseAdapter()
     {
       public void mouseClicked(java.awt.event.MouseEvent evt)
@@ -130,15 +142,15 @@ public class ProfileEditorPanel
         jList1MouseClicked(evt);
       }
     });
-    
+
     jScrollPane1.setViewportView(jList1);
-    
+
     listPanel.add(jScrollPane1, java.awt.BorderLayout.CENTER);
-    
+
     jSplitPane1.setLeftComponent(listPanel);
-    
+
     add(jSplitPane1, java.awt.BorderLayout.CENTER);
-    
+
   }//GEN-END:initComponents
 
 	private void jList1MouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_jList1MouseClicked
@@ -159,11 +171,6 @@ public class ProfileEditorPanel
 		if (this.connectionEditor == null) return;
 		if (evt.getSource() == this.jList1)
 		{
-			if (lastIndex > -1 && lastIndex < this.model.getSize())
-			{
-				ConnectionProfile current = this.connectionEditor.getProfile();
-				this.model.putProfile(lastIndex, current);
-			}
 			ConnectionProfile newProfile = (ConnectionProfile)this.jList1.getSelectedValue();
 			if (newProfile != null)
 			{
@@ -222,8 +229,12 @@ public class ProfileEditorPanel
 	public void deleteItem() throws WbException
 	{
 		int index = this.jList1.getSelectedIndex();
-		if (index > 0) this.jList1.setSelectedIndex(index - 1);
-		this.model.deleteProfile(index);
+    if (index >= 0)
+    {
+      this.model.deleteProfile(index);
+    }
+    if (index > 0) index --;
+    this.jList1.setSelectedIndex(index);
 	}
 
 	/**
@@ -232,16 +243,19 @@ public class ProfileEditorPanel
 	 */
 	public void newItem(boolean createCopy) throws WbException
 	{
-		ConnectionProfile current = (ConnectionProfile)this.jList1.getSelectedValue();
-		ConnectionProfile cp;
-		if (current != null && createCopy)
+		ConnectionProfile cp = null;
+    
+		if (createCopy)
 		{
+  		ConnectionProfile current = (ConnectionProfile)this.jList1.getSelectedValue();
 			cp = current.createCopy();
 		}
-		else
+    
+		if (cp == null)
 		{
 			cp = new ConnectionProfile();
 		}
+    cp.setNew();
 		cp.setName(ResourceMgr.getString("TxtEmptyProfileName"));
 		this.model.addProfile(cp);
 		this.selectProfile(cp.getName());
@@ -250,8 +264,7 @@ public class ProfileEditorPanel
 	public void saveItem() throws WbException
 	{
 		ConnectionMgr conn = WbManager.getInstance().getConnectionMgr();
-		this.connectionEditor.updateProfile();
-		//conn.setProfiles(this.model.getValues());
+		//this.connectionEditor.updateProfile();
 		conn.saveProfiles();
 	}
 
@@ -268,7 +281,6 @@ public class ProfileEditorPanel
 	public void keyPressed(KeyEvent e)
 	{
 		this.ctrlPressed = ((e.getModifiers() & KeyEvent.CTRL_DOWN_MASK) == KeyEvent.CTRL_DOWN_MASK);
-		System.out.println(ctrlPressed);
 	}
 
 	/** Invoked when a key has been released.
@@ -279,7 +291,6 @@ public class ProfileEditorPanel
 	public void keyReleased(KeyEvent e)
 	{
 		this.ctrlPressed = ((e.getModifiers() & KeyEvent.CTRL_MASK) == 0);
-		System.out.println(ctrlPressed);
 	}
 
 	/** Invoked when a key has been typed.

@@ -43,32 +43,5 @@ public class SpoolDataAction extends WbAction
 	{
 		this.client.spoolData();
 	}
-	
-	public void execute(WbConnection aConnection, String aSql)
-	{
-		List tables = SqlUtil.getTables(aSql);
-		boolean includeSqlExport = (tables.size() == 1);
-		String filename = WbManager.getInstance().getExportFilename(this.client.getParentWindow(), includeSqlExport);
-		if (filename != null)
-		{
-			DataSpooler spool = new DataSpooler();
-			spool.setShowProgress(true);
-			try
-			{
-				if (ExtensionFileFilter.hasSqlExtension(filename))
-				{
-					spool.exportDataAsSqlInsert(aConnection, aSql, filename);
-				}
-				else
-				{
-					spool.exportDataAsText(aConnection, aSql, filename, true);
-				}
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("DataSpoolThread", "Could not export data", e);
-			}
-		}
-	}
-	
+
 }

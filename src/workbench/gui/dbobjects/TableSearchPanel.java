@@ -10,6 +10,8 @@ import java.awt.*;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -19,8 +21,11 @@ import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.TableSearcher;
 import workbench.db.WbConnection;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.*;
+import workbench.gui.components.WbScrollPane;
+import workbench.gui.components.WbSplitPane;
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.TableSearchDisplay;
 import workbench.resource.ResourceMgr;
@@ -31,7 +36,7 @@ import workbench.util.Like;
 
 /**
  *
- * @author  kellererth
+ * @author  workbench@kellerer.org
  */
 public class TableSearchPanel 
 	extends JPanel
@@ -62,6 +67,8 @@ public class TableSearchPanel
 		tables.setAdjustToColumnLabel(false);
 
 		WbToolbarButton reload = (WbToolbarButton)this.reloadButton;
+		Border b = reload.getBorder();
+		reload.setBorder(new CompoundBorder(b, new EmptyBorder(1,1,1,1)));
 		reload.setAction(new ReloadAction(this.tableListSource));
 		reload.setToolTipText(ResourceMgr.getString("TxtRefreshTableList"));
 		
@@ -70,6 +77,7 @@ public class TableSearchPanel
 		//this.searchResult.setFont(WbManager.getSettings().getMsgLogFont());
 		this.tableNames.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.fixedStatusText = ResourceMgr.getString("TxtSearchingTable") + " ";
+		((WbSplitPane)this.jSplitPane1).setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
 	}
 	
 	/** This method is called from within the constructor to
@@ -83,9 +91,9 @@ public class TableSearchPanel
 
     buttonGroup1 = new javax.swing.ButtonGroup();
     jSplitPane1 = new WbSplitPane();
-    resultScrollPane = new javax.swing.JScrollPane();
+    resultScrollPane = new WbScrollPane();
     resultPanel = new javax.swing.JPanel();
-    tableListScrollPane = new javax.swing.JScrollPane();
+    tableListScrollPane = new WbScrollPane();
     tableNames = new WbTable();
     statusInfo = new javax.swing.JLabel();
     jPanel1 = new javax.swing.JPanel();
@@ -102,7 +110,6 @@ public class TableSearchPanel
 
     jSplitPane1.setBorder(new javax.swing.border.EmptyBorder(new java.awt.Insets(1, 1, 1, 1)));
     jSplitPane1.setDividerLocation(150);
-    resultScrollPane.setBorder(new javax.swing.border.EmptyBorder(new java.awt.Insets(1, 1, 1, 1)));
     resultScrollPane.setHorizontalScrollBarPolicy(javax.swing.JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     resultPanel.setLayout(new java.awt.GridBagLayout());
 

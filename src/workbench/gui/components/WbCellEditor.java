@@ -53,7 +53,6 @@ public class WbCellEditor
 	
 	public Object getCellEditorValue()
 	{
-		System.out.println("getCellEditorValue()");
 		return editor.getText();
 	}
 	
@@ -100,7 +99,6 @@ public class WbCellEditor
 	
 	public boolean stopCellEditing()
 	{
-		System.out.println("stopCellEditing()");
 		this.fireEditingStopped(); 
 		return true;
 	}

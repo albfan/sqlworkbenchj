@@ -38,12 +38,6 @@ public class ShowDbExplorerAction extends WbAction
 
 	public void actionPerformed(ActionEvent e)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				mainWin.showDbExplorer();
-			}
-		});
+		mainWin.showDbExplorer();
 	}
 }

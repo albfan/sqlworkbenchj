@@ -3,10 +3,12 @@
  */
 package workbench.gui.components;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 
@@ -17,7 +19,6 @@ import javax.swing.UIManager;
 public class WbMenuItem 
 	extends JMenuItem
 {
-
 	private int additionalVerticalSpace = 0;
 	
 	public WbMenuItem()
@@ -60,12 +61,13 @@ public class WbMenuItem
 		super.updateUI();
 		this.checkSpacing();
 	}
+  
 	private void checkSpacing()
 	{
 		LookAndFeel lnf = UIManager.getLookAndFeel();	
 		if (lnf.getClass() == com.sun.java.swing.plaf.windows.WindowsLookAndFeel.class)
 		{
-			this.additionalVerticalSpace = 2;
+			this.additionalVerticalSpace = 3;
 		}
 		else
 		{
@@ -76,7 +78,11 @@ public class WbMenuItem
 	public Dimension getPreferredSize()
 	{
 		Dimension pref = super.getPreferredSize();
-		pref.height += this.additionalVerticalSpace;
+    Component parent = this.getParent();
+    if (!(parent instanceof JPopupMenu))
+    {
+  		pref.height += this.additionalVerticalSpace;
+    }
 		return pref;
 	}
 	
@@ -87,15 +93,21 @@ public class WbMenuItem
 		if (pos > -1)
 		{
 			char mnemonic = aText.charAt(pos + 1);
-			aText = aText.substring(0, pos) + aText.substring(pos + 1);
-			super.setText(aText);
-			this.setMnemonic((int)mnemonic);
-			try
+			if (mnemonic != ' ')
 			{
-				this.setDisplayedMnemonicIndex(pos);
+				aText = aText.substring(0, pos) + aText.substring(pos + 1);
 			}
-			catch (Exception e)
+			super.setText(aText);
+			if (mnemonic != ' ' && mnemonic != '&')
 			{
+				this.setMnemonic((int)mnemonic);
+				try
+				{
+					this.setDisplayedMnemonicIndex(pos);
+				}
+				catch (Exception e)
+				{
+				}
 			}
 		}
 		else
@@ -103,4 +115,5 @@ public class WbMenuItem
 			super.setText(aText);
 		}
 	}	
+
 }

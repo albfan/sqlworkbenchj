@@ -1,10 +1,3 @@
-/*
- * @(#)MetalToolTipUI.java	1.23 01/12/03
- *
- * Copyright 2002 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- */
-
 package workbench.gui.components;
 
 
@@ -19,27 +12,25 @@ import javax.swing.plaf.metal.MetalLookAndFeel;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbToolbarButton;
 
-
 /**
- * A Metal L&F extension of BasicToolTipUI.
- * <p>
- * <strong>Warning:</strong>
- * Serialized objects of this class will not be compatible with
- * future Swing releases. The current serialization support is
- * appropriate for short term storage or RMI between applications running
- * the same version of Swing.  As of 1.4, support for long term storage
- * of all JavaBeans<sup><font size="-2">TM</font></sup>
- * has been added to the <code>java.beans</code> package.
- * Please see {@link java.beans.XMLEncoder}.
+ *	A copy of Sun's original MetalToolTipUI.
  *
- * @version 1.23 12/03/01
- * @author Steve Wilson
+ *	This UI fixes a problem with the incorrect display of shortcuts
+ *	in the tooltip. If the shortcut for a menu item does not contain
+ *	a modifief (e.g. when the shortcut is F5) the original tooltip will 
+ *	display an incorrect shortcut (e.g. Alt-e).
+ *	This class fixes this bug.
+ *	To enable this ToolTipUI use:
+ *	<code>
+ *	UIManager.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
+ *	</code>
  */
 public class WbToolTipUI extends BasicToolTipUI
 {
 	
 	static WbToolTipUI sharedInstance = new WbToolTipUI();
 	private Font smallFont;
+	
 	// Refer to note in getAcceleratorString about this field.
 	private JToolTip tip;
 	public static final int padSpaceBetweenStrings = 12;

@@ -3,8 +3,12 @@ package workbench.gui.menu;
 import javax.swing.JPopupMenu;
 import workbench.gui.MainWindow;
 import workbench.gui.actions.AddTabAction;
+import workbench.gui.actions.FileDiscardAction;
+import workbench.gui.actions.FileOpenAction;
 import workbench.gui.actions.RemoveTabAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.sql.SqlPanel;
+import workbench.interfaces.MainPanel;
 
 /**
  *
@@ -24,6 +28,17 @@ public class SqlTabPopup extends JPopupMenu
 		this.add(add.getMenuItem());
 		this.remove = new RemoveTabAction(aClient);
 		this.add(remove.getMenuItem());
+		MainPanel panel = aClient.getCurrentPanel();
+		if (panel instanceof SqlPanel)
+		{
+			this.addSeparator();
+			FileOpenAction open = new FileOpenAction((SqlPanel)panel);
+			open.removeIcon();
+			this.add(open.getMenuItem());
+			FileDiscardAction discard = new FileDiscardAction((SqlPanel)panel);
+			discard.removeIcon();
+			this.add(discard.getMenuItem());
+		}
 	}
 	
 	public void addAction(WbAction anAction, boolean withSep)

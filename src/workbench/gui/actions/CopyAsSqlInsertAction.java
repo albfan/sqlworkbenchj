@@ -42,10 +42,7 @@ public class CopyAsSqlInsertAction extends WbAction
 
 	public void actionPerformed(ActionEvent e)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()	{ client.copyAsSqlInsert(); }
-		});
+		client.copyAsSqlInsert();
 	}
 
 }

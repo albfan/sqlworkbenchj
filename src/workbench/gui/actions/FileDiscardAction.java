@@ -21,6 +21,7 @@ public class FileDiscardAction extends WbAction
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtFileDiscard"));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_FILE);
 		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.CTRL_MASK));
+		this.setEnabled(aClient.hasFileLoaded());
 	}
 
 	public void actionPerformed(ActionEvent e)

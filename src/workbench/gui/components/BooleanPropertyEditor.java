@@ -17,13 +17,16 @@ import workbench.interfaces.SimplePropertyEditor;
  *
  * @author  workbench@kellerer.org
  */
-public class BooleanPropertyEditor extends JCheckBox implements ItemListener, SimplePropertyEditor
+public class BooleanPropertyEditor 
+	extends JCheckBox 
+	implements ItemListener, SimplePropertyEditor
 {
 	private Object source;
 	private Method setter;
 	private Method getter;
 	private boolean changed;
 	private String propName;
+	private boolean immediateUpdate = false;
 	
 	public BooleanPropertyEditor()
 	{
@@ -75,6 +78,10 @@ public class BooleanPropertyEditor extends JCheckBox implements ItemListener, Si
 	public void itemStateChanged(ItemEvent evt)
 	{
 		this.changed = true;
+		if (this.immediateUpdate)
+		{
+			this.applyChanges();
+		}
 		firePropertyChanged();
 	}
 	
@@ -99,12 +106,19 @@ public class BooleanPropertyEditor extends JCheckBox implements ItemListener, Si
 	}
 
 	private ArrayList propListeners;
-	public void addPropertyChangeListener(PropertyChangeListener l)
+		public void addPropertyChangeListener(PropertyChangeListener l)
 	{
 		if (this.propListeners == null) this.propListeners = new ArrayList();
 		this.propListeners.add(l);
 	}
-	
+
+  public void setImmediateUpdate(boolean aFlag)
+  {
+    this.immediateUpdate = aFlag;
+  }
+  
+  public boolean getImmediateUpdate() { return this.immediateUpdate; }
+  
 	public void removePropertyChangeListener(PropertyChangeListener l)
 	{
 		if (this.propListeners == null) return;
@@ -128,4 +142,3 @@ public class BooleanPropertyEditor extends JCheckBox implements ItemListener, Si
 	}
 	
 }
-

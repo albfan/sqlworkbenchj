@@ -10,51 +10,28 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.ArrayIndexOutOfBoundsException;
-import java.lang.Boolean;
-import java.lang.CloneNotSupportedException;
-import java.lang.Number;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.Date;
+import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
 import workbench.log.LogMgr;
-import workbench.util.LineTokenizer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
+
 /**
- *
  * @author  workbench@kellerer.org
- * @version
  */
 public class DataStore
 {
-	/*
-	 *	Needed for the status display in the table model
-	 */	
+	// Needed for the status display in the table model
 	public static final Integer ROW_MODIFIED = new Integer(RowData.MODIFIED);
 	public static final Integer ROW_NEW = new Integer(RowData.NEW);
 	public static final Integer ROW_ORIGINAL = new Integer(RowData.NOT_MODIFIED);
@@ -116,16 +93,29 @@ public class DataStore
 		this.initData(aResultSet);
   }
 
+	public DataStore(ResultSet aResult)
+		throws SQLException
+	{
+		this(aResult, false);
+	}
 	/**
 	 *	Create a DataStore based on the given ResultSet but do not 
 	 *	add the data yet
 	 */
-	public DataStore(ResultSet aResult)
+	public DataStore(ResultSet aResult, boolean readData)
 		throws SQLException
 	{
-		ResultSetMetaData metaData = aResult.getMetaData();
-		this.initMetaData(metaData);
-		this.data = new ArrayList(100);
+		if (readData)
+		{
+			this.originalConnection = null;
+			this.initData(aResult);
+		}
+		else
+		{
+			ResultSetMetaData metaData = aResult.getMetaData();
+			this.initMetaData(metaData);
+			this.data = new ArrayList(100);
+		}
 	}
 	
 	
@@ -237,7 +227,7 @@ public class DataStore
 			case Types.VARCHAR:
 				return String.class;
 			case Types.DATE:
-				return Date.class;
+				return java.sql.Date.class;
 			case Types.TIMESTAMP:
 				return Timestamp.class;
 			default:
@@ -415,6 +405,17 @@ public class DataStore
 		RowData row = this.getRow(aRow);
 		return row.getValue(aColumn);
 	}
+  
+	public String getValueAsString(int aRow, int aColumn)
+		throws IndexOutOfBoundsException
+	{
+		RowData row = this.getRow(aRow);
+		Object value = row.getValue(aColumn);
+    if (value == null || value instanceof NullValue)
+      return null;
+    else 
+      return value.toString();
+	}
 	
 	public void setValue(int aRow, int aColumn, Object aValue)
 		throws IndexOutOfBoundsException
@@ -502,7 +503,7 @@ public class DataStore
 			RowData row = this.getRow(aRow);
 			Object value = row.getValue(c);
 			if (value != null) result.append(value.toString());
-			if (c < count) result.append(aDelimiter);
+			if (c < count - 1) result.append(aDelimiter);
 		}
 		return result;
 	}	
@@ -576,7 +577,7 @@ public class DataStore
 	public boolean isModified() { return this.modified;  }
 	public boolean isUpdateable()
 	{
-		return (this.updateTable != null);
+		return (this.updateTable != null && this.hasUpdateableColumns());
 	}
 	
 	/* Private methods */
@@ -778,7 +779,10 @@ public class DataStore
 	 * @param aColSeparator - the separator for column data
 	 * @param aColumnMapping - a mapping between columns in the text file and the datastore
 	 */
-	public void importData(String aFilename, boolean hasHeader, String aColSeparator, Map aColumnMapping)
+	public void importData(String aFilename
+	                     , boolean hasHeader
+											 , String aColSeparator
+											 , Map aColumnMapping)
 		throws FileNotFoundException
 	{
 		BufferedReader in = new BufferedReader(new FileReader(aFilename));
@@ -901,8 +905,9 @@ public class DataStore
 	
 	public int compareRowsByColumn(RowData row1, RowData row2, int column)
 	{
-		Object     o1 = row1.getValue(column);
-		Object     o2 = row2.getValue(column);
+		Object o1 = row1.getValue(column);
+		Object o2 = row2.getValue(column);
+		
 		// If both values are null, return 0.
 		if (o1 == null && o2 == null)
 		{
@@ -916,7 +921,9 @@ public class DataStore
 		{
 			return 1;
 		}
-		
+
+		// first we try if the two objects implement
+		// the comparable interface.
 		try
 		{
 			int result = ((Comparable)o1).compareTo(o2);
@@ -926,15 +933,15 @@ public class DataStore
 		{
 		}
 
-		if (o1 instanceof NullValue && o2 instanceof NullValue) return 0;
-		if (o1 instanceof NullValue) return -1;
-		if (o2 instanceof NullValue) return 2;
+		// if we wind up here, at least one of them did not implement
+		// the comparable interface. This shouldn't actually happen but if it does,
+		// we want to make sure they are compared in a decent manner.
 
 		if (this.currentSortColumnClass.getSuperclass() == java.lang.Number.class)
 		{
-			Number n1 = (Number)row1.getValue(column);
+			Number n1 = (Number)o1;
 			double d1 = n1.doubleValue();
-			Number n2 = (Number)row2.getValue(column);
+			Number n2 = (Number)o2;
 			double d2 = n2.doubleValue();
 			if (d1 < d2)
 			{
@@ -949,11 +956,11 @@ public class DataStore
 				return 0;
 			}
 		}
-		else if (this.currentSortColumnClass == Date.class)
+		else if (this.currentSortColumnClass.isAssignableFrom(java.util.Date.class))
 		{
-			Date d1 = (Date)row1.getValue(column);
+			java.util.Date d1 = (java.util.Date)o1;;
 			long n1 = d1.getTime();
-			Date d2 = (Date)row2.getValue(column);
+			java.util.Date d2 = (java.util.Date)o2;
 			long n2 = d2.getTime();
 			if (n1 < n2)
 			{
@@ -970,27 +977,15 @@ public class DataStore
 		}
 		else if (this.currentSortColumnClass == String.class)
 		{
-			String s1 = (String)row1.getValue(column);
-			String s2 = (String)row2.getValue(column);
-			int    result = s1.compareTo(s2);
-			if (result < 0)
-			{
-				return -1;
-			}
-			else if (result > 0)
-			{
-				return 1;
-			}
-			else
-			{
-				return 0;
-			}
+			String s1 = (String)o1;
+			String s2 = (String)o2;
+			return s1.compareTo(s2);
 		}
 		else if (this.currentSortColumnClass == Boolean.class)
 		{
-			Boolean bool1 = (Boolean)row1.getValue(column);
+			Boolean bool1 = (Boolean)o1;
 			boolean b1 = bool1.booleanValue();
-			Boolean bool2 = (Boolean)row2.getValue(column);
+			Boolean bool2 = (Boolean)o2;
 			boolean b2 = bool2.booleanValue();
 			if (b1 == b2)
 			{
@@ -1007,29 +1002,9 @@ public class DataStore
 		}
 		else
 		{
-			Object v1 = row1.getValue(column);
-			Comparable comp = null;
-			if (v1 instanceof Comparable)
-			{
-				comp = (Comparable)v1;
-			}
-			else
-			{
-				comp = v1.toString();
-			}
-			int result = comp.compareTo(o2);
-			if (result < 0)
-			{
-				return -1;
-			}
-			else if (result > 0)
-			{
-				return 1;
-			}
-			else
-			{
-				return 0;
-			}
+			String v1 = o1.toString();
+			String v2 = o2.toString();
+			return v1.compareTo(v2);
 		}
 	}
 	
@@ -1192,7 +1167,7 @@ public class DataStore
 		ArrayList values = new ArrayList();
 		StringBuffer sql = new StringBuffer("UPDATE ");
 		
-		sql.append(this.updateTable);
+		sql.append(SqlUtil.quoteObjectname(this.updateTable));
 		sql.append(" SET ");
 		first = true;
 		for (int col=0; col < this.colCount; col ++)
@@ -1207,7 +1182,8 @@ public class DataStore
 				{
 					sql.append(", ");
 				}
-				sql.append(this.getColumnName(col));
+				String colName = SqlUtil.quoteObjectname(this.getColumnName(col));
+				sql.append(colName);
 				Object value = aRow.getValue(col);
 				if (value instanceof NullValue)
 				{
@@ -1233,7 +1209,7 @@ public class DataStore
 			{
 				sql.append(" AND ");
 			}
-			sql.append(this.getColumnName(pkcol));
+			sql.append(SqlUtil.quoteObjectname(this.getColumnName(pkcol)));
 			Object value = aRow.getOriginalValue(pkcol);
 			if (value instanceof NullValue)
 			{
@@ -1281,7 +1257,7 @@ public class DataStore
 		ArrayList values = new ArrayList();
 		StringBuffer sql = new StringBuffer("INSERT INTO ");
 		StringBuffer valuePart = new StringBuffer();
-		sql.append(this.updateTable);
+		sql.append(SqlUtil.quoteObjectname(this.updateTable));
 		if (ignoreStatus) sql.append(lineEnd);
 		sql.append('(');
 		if (newLineAfterColumn) sql.append(lineEnd);
@@ -1301,7 +1277,10 @@ public class DataStore
 					sql.append("  ");
 					valuePart.append("  ");
 				}
-				sql.append(this.getColumnName(col));
+				
+				String colName = SqlUtil.quoteObjectname(this.getColumnName(col));
+				sql.append(colName);
+				
 				valuePart.append('?');
 				if (ignoreStatus && newLineAfterColumn) 
 				{
@@ -1351,7 +1330,7 @@ public class DataStore
 		
 		ArrayList values = new ArrayList();
 		StringBuffer sql = new StringBuffer("DELETE FROM ");
-		sql.append(this.updateTable);
+		sql.append(SqlUtil.quoteObjectname(this.updateTable));
 		sql.append(" WHERE ");
 		first = true;
 		for (int j=0; j < this.pkColumns.size(); j++)
@@ -1365,7 +1344,9 @@ public class DataStore
 			{
 				sql.append(" AND ");
 			}
-			sql.append(this.getColumnName(pkcol));
+			String colName = SqlUtil.quoteObjectname(this.getColumnName(pkcol));
+			sql.append(colName);
+			
 			Object value = aRow.getOriginalValue(pkcol);
 			if (value instanceof NullValue)
 			{

@@ -19,7 +19,8 @@ import workbench.storage.DataStore;
  *
  * @author  thomas.kellerer@mgm-edv.de
  */
-public class RowStatusRenderer extends DefaultTableCellRenderer
+public class RowStatusRenderer 
+	extends DefaultTableCellRenderer
 {
 	private static final ImageIcon STATUS_MODIFIED_ICON = ResourceMgr.getPicture("modifiedrow");
 	private static final ImageIcon STATUS_NOT_MODIFIED_ICON = ResourceMgr.getPicture("blank");
@@ -48,19 +49,23 @@ public class RowStatusRenderer extends DefaultTableCellRenderer
 			if (status == DataStore.ROW_NEW)
 			{
 				this.label.setIcon(STATUS_NEW_ICON);
+				this.label.setToolTipText(ResourceMgr.getString("TxtRowNew"));
 			}
 			else if (status == DataStore.ROW_MODIFIED)
 			{
 				this.label.setIcon(STATUS_MODIFIED_ICON);
+				this.label.setToolTipText(ResourceMgr.getString("TxtRowModified"));
 			}
 			else
 			{
 				this.label.setIcon(STATUS_NOT_MODIFIED_ICON);
+				this.label.setToolTipText(ResourceMgr.getString("TxtRowNotModified"));
 			}			
 		}
 		catch (Exception e)
 		{
 			this.label.setIcon(STATUS_NOT_MODIFIED_ICON);
+			this.label.setToolTipText(ResourceMgr.getString("TxtRowNotModified"));
 		}
 		return this.label;
 	}

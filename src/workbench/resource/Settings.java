@@ -12,10 +12,14 @@ import java.awt.Font;
 import java.awt.Point;
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.CodeSource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -61,6 +65,7 @@ public class Settings
 			BufferedInputStream in = new BufferedInputStream(new FileInputStream(this.filename));
 			this.props.load(in);
 			in.close();
+			LogMgr.setOutputFile(this.props.getProperty("workbench.log.filename", "System.out"));
 		}
 		catch (IOException e)
 		{
@@ -647,6 +652,16 @@ public class Settings
 		this.props.setProperty("workbench.profiles.encryptpassword", Boolean.toString(useEncryption));
 	}
 
+	public boolean getRetrieveDbExplorer()
+	{
+		return "true".equalsIgnoreCase(this.props.getProperty("workbench.dbexplorer.retrieveonopen", "false"));
+	}
+	
+	public void setRetrieveDbExplorer(boolean aFlag)
+	{
+		this.props.setProperty("workbench.dbexplorer.retrieveonopen", Boolean.toString(aFlag));
+	}
+	
 	public boolean getUseDynamicLayout()
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.gui.dynamiclayout", "false"));
@@ -684,6 +699,37 @@ public class Settings
     return StringUtil.stringToList(list, ",");
 	}
 
+	public String getInstallDir()
+	{
+		CodeSource source = Settings.class.getProtectionDomain().getCodeSource();
+		
+		if (source == null) return null;
+		
+		File installDir;
+		
+		try
+		{
+			URI sourceURI = new URI(source.getLocation().toString());
+			installDir = new File(sourceURI);
+		}
+		catch (URISyntaxException e)
+		{
+			return null;
+		}
+		catch (IllegalArgumentException e)
+		{
+			return null;
+		}
+		
+		if (!installDir.isDirectory())
+		{
+			installDir = installDir.getParentFile();
+		}
+		
+		return installDir.getAbsolutePath();
+	}
+
+	
 	public String getProfileFileName()
 	{
 		String file = System.getProperty("workbench.profilestorage", "");

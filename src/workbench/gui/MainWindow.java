@@ -66,11 +66,9 @@ public class MainWindow
 	private DbExplorerPanel dbExplorerPanel;
 
 	private JMenuBar currentMenu;
-	private FileConnectAction connectAction;
 	private FileDisconnectAction disconnectAction;
 	private ShowDbExplorerAction dbExplorerAction;
 
-	private ProfileSelectionDialog profileDialog;
 	private JTabbedPane sqlTab = new JTabbedPane();
 	private WbToolbar currentToolbar;
 	private ArrayList panelMenus = new ArrayList(5);
@@ -88,6 +86,9 @@ public class MainWindow
 		int tabCount = WbManager.getSettings().getDefaultTabCount();
 		if (tabCount <= 0) tabCount = 1;
 
+		this.disconnectAction = new FileDisconnectAction(this);
+		this.disconnectAction.setEnabled(false);
+    
 		ImageIcon dummy = ResourceMgr.getPicture("small_blank");
 		for (int i=0; i < tabCount; i++)
 		{
@@ -99,7 +100,7 @@ public class MainWindow
 		this.initMenu();
 
 		this.getContentPane().add(this.sqlTab, BorderLayout.CENTER);
-		this.setTitle(ResourceMgr.getString("MsgNotConnected"));
+		this.setDisplayTitle(null);//setTitle(ResourceMgr.getString("MsgNotConnected"));
 		this.sqlTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.restorePosition();
 		this.setIconImage(ResourceMgr.getPicture("workbench16").getImage());
@@ -182,11 +183,10 @@ public class MainWindow
 		WbAction action;
 		JMenuItem item;
 
-		this.connectAction = new FileConnectAction(this);
-		this.disconnectAction = new FileDisconnectAction(this);
-		this.disconnectAction.setEnabled(false);
-		this.connectAction.addToMenu(menu);
+		action = new FileConnectAction(this);
+		action.addToMenu(menu);
 		this.disconnectAction.addToMenu(menu);
+    
 		action = new FileNewWindowAction();
 		action.addToMenu(menu);
 		//menu.addSeparator();
@@ -285,7 +285,8 @@ public class MainWindow
 		}
 		return result;
 	}
-	private MainPanel getCurrentPanel()
+	
+	public MainPanel getCurrentPanel()
 	{
 		int index = this.sqlTab.getSelectedIndex();
 		return this.getSqlPanel(index);
@@ -349,19 +350,31 @@ public class MainWindow
 		int index = this.sqlTab.getSelectedIndex();
 		WbManager.getSettings().setLastSqlTab(index);
 		int tabCount = this.sqlTab.getTabCount();
+		int tabs = tabCount;
+    Settings sett = WbManager.getSettings();
+		if (this.dbExplorerPanel != null)
+		{
+			if (this.dbExplorerPanel.getWindow() == null)
+			{
+				tabs --;
+			}
+		}
+    sett.setDefaultTabCount(tabs);
+    
 		for (int i=0; i < tabCount; i++)
 		{
 			MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
 			sql.saveSettings();
 		}
 		int state = this.getExtendedState();
-		WbManager.getSettings().setProperty(this.getClass().getName(), "state", state);
+		sett.setProperty(this.getClass().getName(), "state", state);
+    
 		if (state != MAXIMIZED_BOTH)
 		{
-			WbManager.getSettings().storeWindowPosition(this);
-			WbManager.getSettings().storeWindowSize(this);
+			sett.storeWindowPosition(this);
+			sett.storeWindowSize(this);
 		}
-		if (dbExplorerPanel != null && !WbManager.getSettings().getShowDbExplorerInMainWindow())
+		if (dbExplorerPanel != null)
 		{
 			this.dbExplorerPanel.saveSettings();
 		}
@@ -414,7 +427,7 @@ public class MainWindow
 
 	public void windowClosing(WindowEvent windowEvent)
 	{
-		this.saveSettings();
+		//this.saveSettings();
 		WbManager.getInstance().windowClosing(this);
 	}
 
@@ -456,10 +469,29 @@ public class MainWindow
 		if (this.dbExplorerPanel != null)
 		{
 			this.dbExplorerPanel.disconnect();
+			DbExplorerWindow w = this.dbExplorerPanel.getWindow();
+			if (w != null)
+			{
+				w.setVisible(false);
+				w.dispose();
+			}
 		}
+		this.setDisplayTitle(null);
 		this.disconnectAction.setEnabled(false);
+		if (this.dbExplorerAction != null) this.dbExplorerAction.setEnabled(false);
 	}
-	
+
+	private void setDisplayTitle(WbConnection con)
+	{
+		if (con == null)
+		{
+			this.setTitle(ResourceMgr.TXT_PRODUCT_NAME + " [" + ResourceMgr.getString("TxtNotConnected") + "]");
+		}
+		else
+		{
+			this.setTitle(ResourceMgr.TXT_PRODUCT_NAME + " [" + con.getProfile().getName() + "]");
+		}
+	}
 	public void setConnection(WbConnection con)
 	{
 		for (int i=0; i < this.sqlTab.getTabCount(); i++)
@@ -469,7 +501,8 @@ public class MainWindow
 		}
 		this.currentConnection = con;
 		this.dbExplorerAction.setEnabled(true);
-
+		this.setDisplayTitle(con);
+		
 		if (this.dbExplorerPanel != null)
 		{
 			try
@@ -483,28 +516,39 @@ public class MainWindow
 				this.dbExplorerPanel = null;
 			}
 		}
-		this.disconnectAction.setEnabled(true);
+		//SwingUtilities.invokeLater(new Runnable()
+    //{
+    //  public void run()
+    //  {
+        disconnectAction.setEnabled(true);
+    //  }
+    //});
 	}
 
 	public void selectConnection()
 	{
 		WbSwingUtilities.showWaitCursor(this);
-		if (this.profileDialog == null)
-		{
-			this.profileDialog = new ProfileSelectionDialog(this, true);
-		}
-		WbSwingUtilities.center(this.profileDialog, this);
+		ProfileSelectionDialog dialog = new ProfileSelectionDialog(this, true);
+		WbSwingUtilities.center(dialog, this);
 		WbSwingUtilities.showDefaultCursor(this);
-		this.profileDialog.setVisible(true);
-		if (!this.profileDialog.isCancelled())
+		dialog.setVisible(true);
+		try
 		{
-			ConnectionProfile prof = this.profileDialog.getSelectedProfile();
-			if (prof != null)
-			{
-				this.currentProfileName = prof.getName();
-				this.connectTo(prof);
-				WbManager.getSettings().setLastConnection(this.currentProfileName);
-			}
+      if (!dialog.isCancelled())
+      {
+        ConnectionProfile prof = dialog.getSelectedProfile();
+        if (prof != null)
+        {
+          this.currentProfileName = prof.getName();
+          this.connectTo(prof);
+          WbManager.getSettings().setLastConnection(this.currentProfileName);
+        }
+      }
+			if (dialog != null) dialog.dispose();
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError("MainWindow.selectConnection()", "Error when disposing dialog", th);
 		}
 	}
 
@@ -635,7 +679,6 @@ public class MainWindow
 				ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
 				WbConnection conn = mgr.getConnection(aProfile, this.windowId);
 				this.setConnection(conn);
-				this.setTitle(ResourceMgr.TXT_PRODUCT_NAME + " [" + aProfile.getName() + "]");
 				this.getCurrentPanel().clearLog();
 				this.getCurrentPanel().showResultPanel();
 			}
@@ -657,6 +700,7 @@ public class MainWindow
 				ExceptionUtil.getDisplay(e, true);
 			}
 			this.showLogMessage("Could not connect\n" + msg);
+			LogMgr.logError("MainWindow.connectTo()", "Could not connect", e);
 		}
 		this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	}
@@ -738,13 +782,13 @@ public class MainWindow
 		sql.setConnection(this.currentConnection);
 		this.sqlTab.add(sql, index);
 		this.sqlTab.setTitleAt(index, ResourceMgr.getString("LabelTabStatement") + " " + Integer.toString(index+1));
-
+		this.sqlTab.doLayout();
 		SelectTabAction a = new SelectTabAction(this.sqlTab, index);
 		this.addToViewMenu(a);
 		JMenuBar menuBar = this.getMenuForPanel(sql);
 		this.panelMenus.add(index, menuBar);
+		sql.initDefaults();
 		this.sqlTab.setSelectedIndex(index);
-		//WbManager.getSettings().setDefaultTabCount(index + 1);
 	}
 	
 	/**
@@ -846,7 +890,7 @@ public class MainWindow
 		if (e.getSource() == this.sqlTab && e.getButton() == MouseEvent.BUTTON3)
 		{
 			MainPanel p = this.getCurrentPanel();
-			if (! (p instanceof DbExplorerPanel))
+			if (p instanceof SqlPanel)
 			{
 				SqlTabPopup pop = new SqlTabPopup(this);
 				RemoveTabAction a = pop.getRemoveAction();

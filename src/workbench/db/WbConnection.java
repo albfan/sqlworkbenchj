@@ -20,7 +20,7 @@ import workbench.log.LogMgr;
 public class WbConnection
 {
 	private boolean oraOutput = false;
-	//private Connection sqlConnection;
+  
 	private Connection sqlConnection;
 	private DbMetadata metaData;
 	private ConnectionProfile profile;

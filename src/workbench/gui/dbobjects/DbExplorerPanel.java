@@ -8,9 +8,11 @@ package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.lang.Runnable;
 import java.util.Collections;
 import java.util.List;
 import javax.swing.JComboBox;
@@ -21,6 +23,7 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
 import workbench.gui.actions.WbAction;
@@ -114,6 +117,7 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 
 	public void readSchemas()
 	{
+		String currentSchema = null;
 		try
 		{
 			this.schemaSelector.removeActionListener(this);
@@ -122,47 +126,31 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 			s.setCharAt(0, Character.toUpperCase(s.charAt(0)));
 			this.schemaLabel.setText(s.toString());
 			List schemas = this.dbConnection.getMetadata().getSchemas();
+			String user = this.dbConnection.getMetadata().getUserName();
 			this.schemaSelector.removeAllItems();
 			this.schemaSelector.addItem("*");
 			for (int i=0; i < schemas.size(); i++)
 			{
-				this.schemaSelector.addItem(schemas.get(i));
+				String schema = (String)schemas.get(i);
+				this.schemaSelector.addItem(schema);
+				if (user.equalsIgnoreCase(schema)) currentSchema = schema;
 			}
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError(this, "Could not retrieve list of schemas", e);
 		}
-		this.schemaSelector.setSelectedItem(null);
+		if (currentSchema == null)
+		{
+			this.schemaSelector.setSelectedItem(null);
+		}
+		else if (WbManager.getSettings().getRetrieveDbExplorer())
+		{
+			schemaSelector.setSelectedItem(currentSchema);
+		}
 		this.schemaSelector.addActionListener(this);
 	}
 
-	/*
-	public void readCatalogs()
-	{
-		this.catalogSelector.removeActionListener(this);
-		this.catalogSelector.removeAllItems();
-		List catalogs = this.dbConnection.getMetadata().getCatalogs();
-		if (catalogs.size() > 0)
-		{
-			StringBuffer s = new StringBuffer(this.dbConnection.getMetadata().getCatalogTerm());
-			s.setCharAt(0, Character.toUpperCase(s.charAt(0)));
-			this.catalogLabel.setText(s.toString());
-			this.catalogSelector.addItem("*");
-			for (int i=0; i < catalogs.size(); i++)
-			{
-				this.catalogSelector.addItem(catalogs.get(i));
-			}
-			this.catalogSelector.setSelectedItem(null);
-			this.catalogSelector.addActionListener(this);
-		}
-		else
-		{
-			this.catalogLabel.setVisible(false);
-			this.catalogSelector.setVisible(false);
-		}
-	}
-	*/
 
 	public void setConnection(WbConnection aConnection, String aProfilename)
 	{
@@ -179,6 +167,16 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 			this.window.setProfileName(aProfilename);
 		}
 		this.connectionInfo.setConnection(aConnection);
+		if (WbManager.getSettings().getRetrieveDbExplorer())
+		{
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					fireSchemaChanged();
+				}
+			});
+		}
 	}
 
 	public void disconnect()
@@ -211,24 +209,29 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 	{
 		if (e.getSource() == this.schemaSelector)
 		{
-			try
-			{
-				String schema = (String)schemaSelector.getSelectedItem();
-				String cat = null;
-				if (catalogSelector != null)
-				{
-					cat = (String)catalogSelector.getSelectedItem();
-				}
-				tables.setCatalogAndSchema(cat, schema);
-				procs.setCatalogAndSchema(cat, schema);
-			}
-			catch (Exception ex)
-			{
-				LogMgr.logError(this, "Could not set schema", ex);
-			}
+			fireSchemaChanged();
 		}
 	}
 
+	private void fireSchemaChanged()
+	{
+		try
+		{
+			String schema = (String)schemaSelector.getSelectedItem();
+			String cat = null;
+			if (catalogSelector != null)
+			{
+				cat = (String)catalogSelector.getSelectedItem();
+			}
+			tables.setCatalogAndSchema(cat, schema);
+			procs.setCatalogAndSchema(cat, schema);
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError(this, "Could not set schema", ex);
+		}
+	}
+	
 	public void openWindow(String aProfileName)
 	{
 		if (this.window == null)

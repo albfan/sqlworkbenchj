@@ -24,6 +24,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.OneLineTableModel;
 import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.log.LogMgr;
@@ -100,6 +101,17 @@ public class DwPanel extends JPanel
 
 	}
 	
+	public void disconnect()
+	{
+		try
+		{
+			this.setConnection(null);
+		}
+		catch (Exception e)
+		{
+		}
+	}
+	
 	/**
 	 *	Defines the connection for this DBPanel.
 	 *	@see setSqlStatement(String)
@@ -107,11 +119,12 @@ public class DwPanel extends JPanel
 	public void setConnection(WbConnection aConn)
 		throws SQLException, WbException
 	{
+		this.clearContent();
 		this.sql = null;
 		this.lastStatement = null;
 		this.lastMessage = null;
-		this.clearContent();
 		this.dbConnection = aConn;
+		this.hasResultSet = false;
 	}
 
 	public int saveChanges(WbConnection aConnection)
@@ -183,21 +196,21 @@ public class DwPanel extends JPanel
 	
 	public boolean checkUpdateTable()
 	{
+		if (this.realModel == null || this.realModel.getDataStore() == null) return false;
+		if (this.dbConnection == null) return false;
+		if (this.sql == null) return false;
 		return this.realModel.getDataStore().checkUpdateTable(this.sql, this.dbConnection);
 	}
 	
 	public boolean isUpdateable()
 	{
 		if (this.realModel == null) return false;
-		if (this.realModel.getDataStore().hasUpdateableColumns())
-			return this.realModel.isUpdateable();
-		else
-			return false;
+		return this.realModel.isUpdateable();
 	}
 
 	public boolean hasUpdateableColumns()
 	{
-		if (this.realModel == null) return false;
+		if (this.realModel == null || this.realModel.getDataStore() == null) return false;
 		return this.realModel.getDataStore().hasUpdateableColumns();
 	}
 	
@@ -466,6 +479,8 @@ public class DwPanel extends JPanel
 		int selectedRow = this.infoTable.getSelectedRow();
 		final int newRow;
 		
+		this.infoTable.stopEditing();
+		
 		if (selectedRow == -1)
 		{
 			newRow = this.realModel.addRow();
@@ -537,7 +552,7 @@ public class DwPanel extends JPanel
 		this.statusBar = new DwStatusBar();
 		this.statusBar.setFocusable(false);
 		this.setFocusable(false);
-		this.scrollPane = new JScrollPane(this.infoTable);
+		this.scrollPane = new WbScrollPane(this.infoTable);
 		this.add(this.scrollPane, BorderLayout.CENTER);
 		this.add(this.statusBar, BorderLayout.SOUTH);
 		this.infoTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -567,6 +582,11 @@ public class DwPanel extends JPanel
 	public void clearContent()
 	{
 		this.infoTable.reset();
+		this.realModel = null;
+		this.hasResultSet = false;
+		this.cancelled = false;
+		this.lastMessage = null;
+		this.sql = null;
 		this.statusBar.clearRowcount();
 	}
 	

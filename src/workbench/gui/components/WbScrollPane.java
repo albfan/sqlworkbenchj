@@ -6,12 +6,17 @@
 
 package workbench.gui.components;
 
+import java.awt.Color;
 import java.awt.Component;
+import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import workbench.gui.WbSwingUtilities;
 
 /**
  *
@@ -20,6 +25,14 @@ import javax.swing.border.EtchedBorder;
 public class WbScrollPane extends JScrollPane
 {
 
+	private static Border scrollBorder = new CompoundBorder(new EmptyBorder(1,1,2,1), WbSwingUtilities.BEVEL_BORDER);
+	public static final JPanel CORNER;
+	static
+	{
+		CORNER = new JPanel();
+		CORNER.setBackground(Color.RED);
+		CORNER.setBorder(new EtchedBorder());
+	}
 	/** Creates a new instance of WbScrollPane */
 	public WbScrollPane()
 	{
@@ -45,8 +58,9 @@ public class WbScrollPane extends JScrollPane
 
 	private void initDefaults()
 	{
-		Border scrollBorder = new CompoundBorder(new EtchedBorder(), new EmptyBorder(1,1,1,1) );
 		this.setBorder(scrollBorder);
+		//this.setViewportBorder(WbSwingUtilities.EMPTY_BORDER);
+		//this.setCorner(JScrollPane.UPPER_RIGHT_CORNER, CORNER);
 	}
 
 

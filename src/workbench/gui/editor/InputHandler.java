@@ -25,7 +25,7 @@ import javax.swing.KeyStroke;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.4 2002-08-31 11:47:14 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.5 2002-10-23 16:04:44 thomas Exp $
  * @see org.gjt.sp.jedit.textarea.DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
@@ -604,8 +604,7 @@ public abstract class InputHandler extends KeyAdapter
 			int lineStart = textArea.getLineStartOffset(line);
 			int caret = start - lineStart;
 
-			String lineText = textArea.getLineText(textArea
-				.getCaretLine());
+			String lineText = textArea.getLineText(textArea.getCaretLine());
 
 			if(caret == lineText.length())
 			{
@@ -649,24 +648,27 @@ public abstract class InputHandler extends KeyAdapter
 
 			int caret = textArea.getCaretPosition();
 
-			int lastOfLine = textArea.getLineEndOffset(
-				textArea.getCaretLine()) - 1;
-			int lastVisibleLine = textArea.getFirstLine()
-				+ textArea.getVisibleLines();
+			int lastOfLine = textArea.getLineEndOffset(textArea.getCaretLine()) - 1;
+			int lastVisibleLine = textArea.getFirstLine()	+ textArea.getVisibleLines();
 			if(lastVisibleLine >= textArea.getLineCount())
 			{
-				lastVisibleLine = Math.min(textArea.getLineCount() - 1,
-					lastVisibleLine);
+				lastVisibleLine = Math.min(textArea.getLineCount() - 1,lastVisibleLine);
 			}
 			else
+			{
 				lastVisibleLine -= (textArea.getElectricScroll() + 1);
-
+			}
+			
 			int lastVisible = textArea.getLineEndOffset(lastVisibleLine) - 1;
 			int lastDocument = textArea.getDocumentLength();
 
 			if(caret == lastDocument)
 			{
 				textArea.getToolkit().beep();
+				if (!select)
+				{
+					textArea.selectNone();
+				}
 				return;
 			}
 			else if(!Boolean.TRUE.equals(textArea.getClientProperty(
@@ -699,11 +701,14 @@ public abstract class InputHandler extends KeyAdapter
 		{
 			JEditTextArea textArea = getTextArea(evt);
 			if(select)
-				textArea.select(textArea.getMarkPosition(),
-					textArea.getDocumentLength());
+			{
+				textArea.select(textArea.getMarkPosition(),textArea.getDocumentLength());
+			}
 			else
-				textArea.setCaretPosition(textArea
-					.getDocumentLength());
+			{
+				textArea.selectNone();
+				textArea.setCaretPosition(textArea.getDocumentLength());
+			}
 		}
 	}
 
@@ -724,20 +729,17 @@ public abstract class InputHandler extends KeyAdapter
 
 			int firstLine = textArea.getFirstLine();
 
-			int firstOfLine = textArea.getLineStartOffset(
-				textArea.getCaretLine());
-			int firstVisibleLine = (firstLine == 0 ? 0 :
-				firstLine + textArea.getElectricScroll());
-			int firstVisible = textArea.getLineStartOffset(
-				firstVisibleLine);
+			int firstOfLine = textArea.getLineStartOffset(textArea.getCaretLine());
+			int firstVisibleLine = (firstLine == 0 ? 0 : firstLine + textArea.getElectricScroll());
+			int firstVisible = textArea.getLineStartOffset(firstVisibleLine);
 
 			if(caret == 0)
 			{
 				textArea.getToolkit().beep();
+				if (!select) textArea.selectNone();
 				return;
 			}
-			else if(!Boolean.TRUE.equals(textArea.getClientProperty(
-				SMART_HOME_END_PROPERTY)))
+			else if(!Boolean.TRUE.equals(textArea.getClientProperty(SMART_HOME_END_PROPERTY)))
 				caret = firstOfLine;
 			else if(caret == firstVisible)
 				caret = 0;
@@ -747,9 +749,14 @@ public abstract class InputHandler extends KeyAdapter
 				caret = firstOfLine;
 
 			if(select)
+			{
 				textArea.select(textArea.getMarkPosition(),caret);
+			}
 			else
+			{
+				textArea.selectNone();
 				textArea.setCaretPosition(caret);
+			}
 		}
 	}
 
@@ -820,6 +827,7 @@ public abstract class InputHandler extends KeyAdapter
 			if(caret == textArea.getDocumentLength())
 			{
 				textArea.getToolkit().beep();
+				if (!select) textArea.selectNone();
 				return;
 			}
 
@@ -849,6 +857,7 @@ public abstract class InputHandler extends KeyAdapter
 			if(line == textArea.getLineCount() - 1)
 			{
 				textArea.getToolkit().beep();
+				if (!select) textArea.selectNone();
 				return;
 			}
 
@@ -972,6 +981,7 @@ public abstract class InputHandler extends KeyAdapter
 			if(caret == 0)
 			{
 				textArea.getToolkit().beep();
+				if (!select) textArea.selectNone();
 				return;
 			}
 
@@ -1001,6 +1011,7 @@ public abstract class InputHandler extends KeyAdapter
 			if(line == 0)
 			{
 				textArea.getToolkit().beep();
+				if (!select) textArea.selectNone();
 				return;
 			}
 

@@ -3,12 +3,10 @@
  */
 package workbench.gui.components;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import javax.swing.JPasswordField;
-import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import workbench.interfaces.SimplePropertyEditor;
@@ -19,17 +17,20 @@ import workbench.interfaces.SimplePropertyEditor;
  * @author  workbench@kellerer.org
  */
 public class PasswordPropertyEditor 
-	extends JPasswordField implements DocumentListener, SimplePropertyEditor
+	extends JPasswordField 
+	implements DocumentListener, SimplePropertyEditor, FocusListener
 {
 	private Object source;
 	private Method setter;
 	private Method getter;
 	private boolean changed;
 	private String propName;
+	private boolean immediateUpdate = false;
 	
 	public PasswordPropertyEditor()
 	{
 		super();
+		this.addFocusListener(this);
 	}
 	
 	public void setSourceObject(Object aSource, String aProperty)
@@ -81,22 +82,60 @@ public class PasswordPropertyEditor
 	
 	public boolean isChanged() { return this.changed; }
 	
-	public void changedUpdate(DocumentEvent e)
+		public void changedUpdate(DocumentEvent e)
 	{
 		this.changed = true;
-		super.firePropertyChange(this.propName, null, null);
+		if (this.immediateUpdate)
+		{
+			this.applyChanges();
+		}
+		firePropertyChange(this.propName, null, null);
 	}
 	
 	public void insertUpdate(DocumentEvent e)
 	{
 		this.changed = true;
-		super.firePropertyChange(this.propName, null, null);
+		if (this.immediateUpdate)
+		{
+			this.applyChanges();
+		}
+		firePropertyChange(this.propName, null, null);
 	}
 	
 	public void removeUpdate(DocumentEvent e)
 	{
 		this.changed = true;
-		super.firePropertyChange(this.propName, null, null);
+		if (this.immediateUpdate)
+		{
+			this.applyChanges();
+		}
+		firePropertyChange(this.propName, null, null);
+	}
+
+	public void setImmediateUpdate(boolean aFlag)
+	{
+		this.immediateUpdate = aFlag;
+		if (aFlag) this.applyChanges();
+	}
+	
+	public boolean getImmediateUpdate()
+	{
+		return this.immediateUpdate;
+	}
+	
+	/** Invoked when a component gains the keyboard focus.
+	 *
+	 */
+	public void focusGained(FocusEvent e)
+	{
+	}
+	
+	/** Invoked when a component loses the keyboard focus.
+	 *
+	 */
+	public void focusLost(FocusEvent e)
+	{
+		if (!this.immediateUpdate) this.applyChanges();
 	}
 	
 }

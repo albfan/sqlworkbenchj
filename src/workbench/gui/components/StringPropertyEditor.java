@@ -3,6 +3,8 @@
  */
 package workbench.gui.components;
 
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
@@ -17,17 +19,22 @@ import workbench.interfaces.SimplePropertyEditor;
  *
  * @author  workbench@kellerer.org
  */
-public class StringPropertyEditor extends JTextField implements DocumentListener, SimplePropertyEditor
+public class StringPropertyEditor 
+	extends JTextField 
+	implements DocumentListener, SimplePropertyEditor, FocusListener
 {
 	private Object source;
 	private Method setter;
 	private Method getter;
 	private boolean changed;
+	private boolean immediateUpdate = false;
+	
 	private String propName;
 	
 	public StringPropertyEditor()
 	{
 		super();
+		this.addFocusListener(this);
 	}
 	
 	public void setSourceObject(Object aSource, String aProperty)
@@ -82,19 +89,57 @@ public class StringPropertyEditor extends JTextField implements DocumentListener
 	public void changedUpdate(DocumentEvent e)
 	{
 		this.changed = true;
-		super.firePropertyChange(this.propName, null, null);
+		if (this.immediateUpdate)
+		{
+			this.applyChanges();
+		}
+		firePropertyChange(this.propName, null, null);
 	}
 	
 	public void insertUpdate(DocumentEvent e)
 	{
 		this.changed = true;
-		super.firePropertyChange(this.propName, null, null);
+		if (this.immediateUpdate)
+		{
+			this.applyChanges();
+		}
+		firePropertyChange(this.propName, null, null);
 	}
 	
 	public void removeUpdate(DocumentEvent e)
 	{
 		this.changed = true;
-		super.firePropertyChange(this.propName, null, null);
+		if (this.immediateUpdate)
+		{
+			this.applyChanges();
+		}
+		firePropertyChange(this.propName, null, null);
+	}
+
+	public void setImmediateUpdate(boolean aFlag)
+	{
+		this.immediateUpdate = aFlag;
+		if (aFlag) this.applyChanges();
+	}
+	
+	public boolean getImmediateUpdate()
+	{
+		return this.immediateUpdate;
+	}
+	
+	/** Invoked when a component gains the keyboard focus.
+	 *
+	 */
+	public void focusGained(FocusEvent e)
+	{
+	}
+	
+	/** Invoked when a component loses the keyboard focus.
+	 *
+	 */
+	public void focusLost(FocusEvent e)
+	{
+		if (!this.immediateUpdate) this.applyChanges();
 	}
 	
 }

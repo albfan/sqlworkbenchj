@@ -7,11 +7,13 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.EtchedBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.WbScrollPane;
@@ -39,9 +41,14 @@ public class TriggerDisplayPanel
 	{
 		this.triggers = new WbTable();
 		WbScrollPane scroll = new WbScrollPane(this.triggers);
+		scroll.setBorder(new EtchedBorder());
+		
 		this.source = new EditorPanel();
 		this.source.addPopupMenuItem(new FileSaveAsAction(this.source), true);
 		this.source.setEditable(false);
+		this.source.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		this.setBorder(WbSwingUtilities.BEVEL_BORDER);
+		
 		this.setLayout(new BorderLayout());
 		this.splitPane = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, scroll, this.source);
 		this.add(splitPane, BorderLayout.CENTER);

@@ -111,7 +111,7 @@ public class ProfileSelectionDialog extends JDialog implements ActionListener, W
     getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 		getRootPane().setDefaultButton(okButton);
 		setTitle(ResourceMgr.getString(ResourceMgr.TXT_SELECT_PROFILE));
-		this.setFocusTraversalPolicy(null);
+		//this.setFocusTraversalPolicy(null);
 		this.restoreSize();
   }
 
@@ -120,7 +120,7 @@ public class ProfileSelectionDialog extends JDialog implements ActionListener, W
 	{
 		this.profiles.saveSettings();
 		this.setVisible(false);
-		this.dispose();
+		//this.dispose();
 	}
 
 	public ConnectionProfile getSelectedProfile()
@@ -162,6 +162,11 @@ public class ProfileSelectionDialog extends JDialog implements ActionListener, W
 			});
 		}
 	}
+	public void setInitialFocus()
+	{
+		profiles.setInitialFocus();
+	}
+	
 	/** Invoked when an action occurs.
 	 */
 	public void actionPerformed(ActionEvent e)
@@ -189,6 +194,14 @@ public class ProfileSelectionDialog extends JDialog implements ActionListener, W
 	{
 	}
 
+	public void setVisible(boolean aFlag)
+	{
+		super.setVisible(aFlag);
+		if (aFlag) 
+		{
+			this.setInitialFocus();
+		}
+	}
 	public void windowClosed(WindowEvent e)
 	{
 	}
@@ -214,6 +227,7 @@ public class ProfileSelectionDialog extends JDialog implements ActionListener, W
 	public void windowOpened(WindowEvent e)
 	{
 		this.cancelled = true;
+		this.setInitialFocus();
 	}
 
 }

@@ -33,7 +33,7 @@ public class StopAction extends WbAction
 		this.setCreateMenuSeparator(true);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		this.panel.cancelExecution();
 	}

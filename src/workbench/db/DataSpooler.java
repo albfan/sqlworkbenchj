@@ -19,15 +19,18 @@ import java.io.PrintWriter;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.dbobjects.SpoolerProgressPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 
@@ -276,6 +279,38 @@ public class DataSpooler
 			this.progressWindow.hide();
 			this.progressWindow.dispose();
 			this.progressPanel = null;
+		}
+	}
+	
+	public void executeStatement(WbConnection aConnection, String aSql)
+	{
+		this.executeStatement(null, aConnection, aSql);
+	}
+	
+	public void executeStatement(Window aParent, WbConnection aConnection, String aSql)
+	{
+		List tables = SqlUtil.getTables(aSql);
+		boolean includeSqlExport = (tables.size() == 1);
+		String filename = WbManager.getInstance().getExportFilename(aParent, includeSqlExport);
+		if (filename != null)
+		{
+			DataSpooler spool = new DataSpooler();
+			spool.setShowProgress(true);
+			try
+			{
+				if (ExtensionFileFilter.hasSqlExtension(filename))
+				{
+					spool.exportDataAsSqlInsert(aConnection, aSql, filename);
+				}
+				else
+				{
+					spool.exportDataAsText(aConnection, aSql, filename, true);
+				}
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("DataSpoolThread", "Could not export data", e);
+			}
 		}
 	}
 	

@@ -3,16 +3,15 @@
  */
 package workbench.gui.components;
 
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import javax.swing.ComboBoxEditor;
 import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
 import workbench.interfaces.SimplePropertyEditor;
+
 
 
 /**
@@ -20,17 +19,21 @@ import workbench.interfaces.SimplePropertyEditor;
  *	for the field can also be selected by a dropdown
  * @author  workbench@kellerer.org
  */
-public class ComboStringPropertyEditor extends JComboBox implements ItemListener, SimplePropertyEditor
+public class ComboStringPropertyEditor 
+	extends JComboBox 
+	implements ItemListener, SimplePropertyEditor, FocusListener
 {
 	private Object source;
 	private Method setter;
 	private Method getter;
 	private boolean changed;
 	private String propName;
+	private boolean immediateUpdate = false;
 	
 	public ComboStringPropertyEditor()
 	{
 		super();
+		this.addFocusListener(this);
 	}
 	
 	public void setSourceObject(Object aSource, String aProperty)
@@ -124,6 +127,35 @@ public class ComboStringPropertyEditor extends JComboBox implements ItemListener
 		{
 			this.changed = true;
 		}
+		if (this.immediateUpdate)
+		{
+			this.applyChanges();
+		}
+	}
+	public void setImmediateUpdate(boolean aFlag)
+	{
+		this.immediateUpdate = aFlag;
+		if (aFlag) this.applyChanges();
+	}
+	
+	public boolean getImmediateUpdate()
+	{
+		return this.immediateUpdate;
+	}
+	
+	/** Invoked when a component gains the keyboard focus.
+	 *
+	 */
+	public void focusGained(FocusEvent e)
+	{
+	}
+	
+	/** Invoked when a component loses the keyboard focus.
+	 *
+	 */
+	public void focusLost(FocusEvent e)
+	{
+		if (!this.immediateUpdate) this.applyChanges();
 	}
 	
 }

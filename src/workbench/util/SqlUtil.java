@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import workbench.WbManager;
 import workbench.db.DbDateFormatter;
 import workbench.storage.DataStore;
@@ -14,12 +16,26 @@ import workbench.storage.NullValue;
 
 public class SqlUtil
 {
+	private static Pattern specialCharPattern = Pattern.compile("[$ ]");		
 
 	/** Creates a new instance of SqlUtil */
 	private SqlUtil()
 	{
 	}
 
+	public static String quoteObjectname(String aColname)
+	{
+		if (aColname == null) return null;
+		Matcher m = specialCharPattern.matcher(aColname);
+		boolean b = m.find();
+		if (!b) return aColname;
+		StringBuffer col = new StringBuffer(aColname.length() + 5);
+		col.append('"');
+		col.append(aColname);
+		col.append('"');
+		return col.toString();
+	}
+	
 	public static String getSqlVerb(String aStatement)
 	{
 		StringTokenizer tok = new StringTokenizer(aStatement.trim());
@@ -322,13 +338,19 @@ public class SqlUtil
 			System.out.println(commands.get(i).toString());
 			System.out.println("-----");
 		}
-		*/
 		String sql = "select bp.productid, from visa_bidproduct bp ,visa_config c ,visa_bid b where c.bidid = bp.bidid and   c.configid = bp.configid and  bp.bidid = b.bidid and b.bidref = 'VGB0042304-02'";
 		List tables = getTables(sql);
 		for (int i=0; i < tables.size(); i++)
 		{
 			System.out.println("table=" + tables.get(i));
 		}
+		*/
+		String col = "test col";
+		Pattern p = Pattern.compile("[$ ]");		
+		Matcher m;
+		m = p.matcher(col);
+		System.out.println("find()=" + m.find());
+		System.out.println(quoteObjectname(col));
 	}
 
 }

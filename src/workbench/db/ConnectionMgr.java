@@ -81,10 +81,15 @@ public class ConnectionMgr
 			{
 				// some drivers do not support this, so
 				// we just ignore the error :-)
+        LogMgr.logInfo("ConnectionMgr.connect()", "Driver (" + drv.getDriverClass() + ") does not support the autocommit property!");
+				if (th.getMessage() != null)
+				{
+					LogMgr.logInfo("ConnectionMgr.connect()", "(" + th.getMessage() + ")");
+				}					
 			}
 			return sql;
 		}
-		catch (WbException e)
+		catch (Exception e)
 		{
 			throw new NoConnectionException(e.getMessage());
 		}
@@ -93,11 +98,11 @@ public class ConnectionMgr
 	public void reconnect(WbConnection aConn)
 		throws ClassNotFoundException, SQLException, NoConnectionException
 	{
-		aConn.close();
-		// use the stored profile to reconnect as the SQL connection
-		// does not contain information about the username & password
-		Connection sql = this.connect(aConn.getProfile());
-		aConn.setSqlConnection(sql);
+    aConn.close();
+    // use the stored profile to reconnect as the SQL connection
+    // does not contain information about the username & password
+    Connection sql = this.connect(aConn.getProfile());
+    aConn.setSqlConnection(sql);
 	}
 	
 	public DbMetadata getMetaDataForConnection(Connection aConn)
@@ -121,26 +126,26 @@ public class ConnectionMgr
 		{
 			this.readDrivers();
 		}
-		DbDriver db = null;
-		for (int i=0; i < this.drivers.size(); i ++)
-		{
-			db = (DbDriver)this.drivers.get(i);
-			if (db.getDriverClass().equals(drvClassName)) return db;
-		}
-		if (db == null)
-		{
-			// maybe it's present in the normal classpath...
-			try
-			{
-				Class drvcls = Class.forName(drvClassName);
-				Driver drv = (Driver)drvcls.newInstance();
-				db = new DbDriver(drv);
-			}
-			catch (Exception cnf)
-			{
-				db = null;
-			}
-		}
+    DbDriver db = null;
+     
+    try
+    {
+      for (int i=0; i < this.drivers.size(); i ++)
+      {
+        db = (DbDriver)this.drivers.get(i);
+        if (db.getDriverClass().equals(drvClassName)) return db;
+      }
+      
+      // not found --> maybe it's present in the normal classpath...
+      Class drvcls = Class.forName(drvClassName);
+      Driver drv = (Driver)drvcls.newInstance();
+      db = new DbDriver(drv);
+    }
+    catch (Exception cnf)
+    {
+      LogMgr.logError("ConnectionMgr.findDriver()", "Error when searching for driver " + drvClassName, cnf);
+      db = null;
+    }
 		return db;
 	}
 	
@@ -260,7 +265,7 @@ public class ConnectionMgr
 	}
 	
 	/**
-	 *	Disconnect the connection with the given key
+	 *	Disconnect the connection with the given (window) id
 	 */
 	public void disconnect(String anId)
 	{
@@ -327,7 +332,6 @@ public class ConnectionMgr
 
 	public void readProfiles()
 	{
-		//System.out.println("ConnectionMgr.readProfiles()");
 		Object result = WbPersistence.readObject(WbManager.getSettings().getProfileFileName());
 		if (result instanceof Collection)
 		{
@@ -342,7 +346,7 @@ public class ConnectionMgr
 			{
 				ConnectionProfile prof = (ConnectionProfile)l[i];
 				prof.reset();
-				this.profiles.put(prof.getName(), prof);
+				this.profiles.put(prof.getIdentifier(), prof);
 			}
 		}
 	}
@@ -362,6 +366,7 @@ public class ConnectionMgr
         ConnectionProfile profile = (ConnectionProfile)values.next();
         profile.reset();
       }
+      this.profilesChanged = false;
 		}
 	}
 	
@@ -405,7 +410,8 @@ public class ConnectionMgr
 	 */
 	public void addProfile(ConnectionProfile aProfile)
 	{
-		this.profiles.put(aProfile.getName(), aProfile);
+		this.profiles.put(aProfile.getIdentifier(), aProfile);
+    this.profilesChanged = true;
 	}
 	
 	/**
@@ -413,7 +419,7 @@ public class ConnectionMgr
 	 */
 	public void removeProfile(ConnectionProfile aProfile)
 	{
-		this.profiles.remove(aProfile.getName());
+		this.profiles.remove(aProfile.getIdentifier());
 		// deleting a new profile should not change the status to changed
 		if (!aProfile.isNew())
 		{
@@ -435,7 +441,7 @@ public class ConnectionMgr
 		while (itr.hasNext())
 		{
 			ConnectionProfile prof = (ConnectionProfile)itr.next();
-			this.profiles.put(prof.getName(), prof);
+			this.profiles.put(prof.getIdentifier(), prof);
 		}
 	}
 		

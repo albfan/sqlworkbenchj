@@ -87,6 +87,7 @@ public class ToolTipRenderer
 		else
 		{
 			display = value.toString();
+			
 			if (display.length() > 0)
 			{
 				Matcher m = CRLF.matcher(display);
@@ -106,8 +107,12 @@ public class ToolTipRenderer
 			}
 			else
 			{
+				// there is a difference in setting the tooltip to null
+				// or to an empty string. If you set it to an empty string
+				// it will display an ugly looking very small empty tooltip window!
 				toolTip = null;
 			}
+
 		}
 		this.setToolTipText(toolTip);
 		this.setText(display);

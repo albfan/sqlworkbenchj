@@ -148,7 +148,11 @@ public class DataStoreTableModel
 	
 	public boolean getShowStatusColumn() { return this.showStatusColumn; }
 	
-	public boolean isUpdateable() { return this.dataCache.isUpdateable(); }
+	public boolean isUpdateable() 
+	{ 
+		if (this.dataCache == null) return false;
+		return this.dataCache.isUpdateable(); 
+	}
 	
 	public void setValueAt(Object aValue, int row, int column)
 	{
@@ -184,8 +188,7 @@ public class DataStoreTableModel
 		}
 		catch (Exception e)
 		{
-			System.err.println("Error in setValueAt");
-			e.printStackTrace(System.err);
+			LogMgr.logError("DataStoreTableModel.setValueAt()", "Error when setting new value " + aValue + " at " + row + "/" + column, e);
 		}
 	}
 	

@@ -5,7 +5,11 @@ package workbench.gui.components;
 
 import java.awt.Component;
 import javax.swing.JSplitPane;
+import javax.swing.border.Border;
 import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.basic.BasicSplitPaneDivider;
+import javax.swing.plaf.basic.BasicSplitPaneUI;
+import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 
 /**
@@ -65,6 +69,39 @@ public class WbSplitPane
 	{
 		this.setDividerSize(DEFAULT_DIVIDER_SIZE);
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		//this.setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
+		this.setContinuousLayout(true);
+	}
+	
+	public Border getDividerBorder()
+	{
+		Border result = null;
+		try
+		{		
+			int divider = this.getDividerSize();
+			BasicSplitPaneUI ui = (BasicSplitPaneUI)this.getUI();
+			BasicSplitPaneDivider div = ui.getDivider();
+			result = div.getBorder();
+		}
+		catch (Exception e)
+		{
+			result = null;
+		}
+		return result;
+	}	
+	public void setDividerBorder(Border newBorder)
+	{
+		try
+		{		
+			int divider = this.getDividerSize();
+			BasicSplitPaneUI ui = (BasicSplitPaneUI)this.getUI();
+			BasicSplitPaneDivider div = ui.getDivider();
+			div.setBorder(newBorder);
+			this.setDividerSize(divider);
+		}
+		catch (Exception e)
+		{
+		}
 	}
 }
 
