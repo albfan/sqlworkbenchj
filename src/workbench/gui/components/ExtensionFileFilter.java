@@ -139,6 +139,18 @@ public class ExtensionFileFilter
 		}
 		return textFileFilter;
 	}
+	
+	public static FileFilter getJavaFileFilter()
+	{
+		if (textFileFilter == null)
+		{
+			ArrayList ext = new ArrayList();
+			ext.add("java");
+			String desc = ResourceMgr.getString("TxtFileFilterJava");
+			textFileFilter = new ExtensionFileFilter(desc, ext, true);
+		}
+		return textFileFilter;
+	}
 
 	public static FileFilter getHtmlFileFilter()
 	{

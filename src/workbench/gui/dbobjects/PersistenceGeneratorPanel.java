@@ -401,8 +401,33 @@ public class PersistenceGeneratorPanel
 		return this.tableNames;
 	}
 
+	private boolean checkOutputDir(String aDir)
+	{
+		String msg1 = ResourceMgr.getString("MsgDirectoryNotFound").replaceAll("%dir%", aDir);
+		String msg2 = ResourceMgr.getString("MsgNoDirectory").replaceAll("%dir%", aDir);
+		
+		File f = new File(aDir);
+		if (!f.exists())
+		{
+			WbManager.getInstance().showErrorMessage(this, msg1);
+			return false;
+		}
+		
+		if (!f.isDirectory())
+		{
+			WbManager.getInstance().showErrorMessage(this, msg2);
+			return false;
+		}
+		return true;
+	}
+	
 	private void generate()
 	{
+		String dir = null;
+		dir = this.outputDir.getText();
+		if (!this.checkOutputDir(this.outputDir.getText())) return;
+		if (!this.checkOutputDir(this.valueOutputDir.getText())) return;
+			
 		if (this.tableNames.getSelectedRowCount() <= 0) return;
 		WbSwingUtilities.showWaitCursor(this);
 		

@@ -16,7 +16,9 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
+import javax.swing.filechooser.FileFilter;
 import workbench.WbManager;
+import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.editor.AnsiSQLTokenMarker;
@@ -100,6 +102,7 @@ public class EditorPanel
 		
 		this.setTabSize(WbManager.getSettings().getEditorTabWidth());
 		this.setCaretBlinkEnabled(true);
+		this.addPopupMenuItem(new FileSaveAsAction(this), true);
 	
 		if (aMarker == null)
 		{
@@ -324,16 +327,44 @@ public class EditorPanel
 	public boolean saveFile()
 	{
 		boolean result = false;
-		String lastDir = WbManager.getSettings().getLastSqlDir();
+		String lastDir;
+		FileFilter ff = null;
+		if (this.editorType == SQL_EDITOR)
+		{
+			lastDir = WbManager.getSettings().getLastSqlDir();
+			ff = ExtensionFileFilter.getSqlFileFilter();
+		}
+		else if (this.editorType == JAVA_EDITOR)
+		{
+			lastDir = WbManager.getSettings().getLastJavaDir();
+			ff = ExtensionFileFilter.getJavaFileFilter();
+		}
+		else 
+		{
+			lastDir = WbManager.getSettings().getLastEditorDir();
+			ff = ExtensionFileFilter.getTextFileFilter();
+		}
 		JFileChooser fc = new JFileChooser(lastDir);
 		fc.setSelectedFile(this.currentFile);
-		fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
+		fc.addChoosableFileFilter(ff);
 		int answer = fc.showSaveDialog(SwingUtilities.getWindowAncestor(this));
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
 			result = this.saveFile(fc.getSelectedFile());
 			lastDir = fc.getCurrentDirectory().getAbsolutePath();
-			WbManager.getSettings().setLastSqlDir(lastDir);
+			if (this.editorType == SQL_EDITOR)
+			{
+				WbManager.getSettings().setLastSqlDir(lastDir);
+			}
+			else if (this.editorType == JAVA_EDITOR)
+			{
+				WbManager.getSettings().setLastJavaDir(lastDir);
+			}
+			else
+			{
+				WbManager.getSettings().setLastEditorDir(lastDir);
+			}
+				
 		}
 		return result;
 	}

@@ -158,11 +158,13 @@ public class DwPanel extends JPanel
 			DataStore ds = this.infoTable.getDataStore();
 			if (WbManager.getSettings().getDbDebugMode())
 			{
-				Dimension max = new Dimension(400,400);
-				JTextArea preview = new JTextArea();
-				preview.setLineWrap(false);
-				preview.setColumns(60);
-				preview.setPreferredSize(null);
+				Dimension max = new Dimension(800,600);
+				Dimension pref = new Dimension(400, 300);
+				EditorPanel preview = EditorPanel.createSqlEditor();
+				//preview.setLineWrap(false);
+				//preview.setColumns(60);
+				preview.setBorder(WbSwingUtilities.EMPTY_BORDER);
+				preview.setPreferredSize(pref);
 				preview.setMaximumSize(max);
 				JScrollPane scroll = new JScrollPane(preview);
 				scroll.setMaximumSize(max);
@@ -170,13 +172,15 @@ public class DwPanel extends JPanel
 				for (int i=0; i < stmts.size(); i++)
 				{
 					DmlStatement dml = (DmlStatement)stmts.get(i);
-					preview.append(dml.getExecutableStatement(aConnection));
-					preview.append(";\n");
+					preview.appendLine(dml.getExecutableStatement(aConnection));
+					preview.appendLine(";\n");
 				}
+				/*
 				if (stmts.size() > 20)
 				{
 					scroll.setPreferredSize(max);
 				}
+				*/
 				Window win = SwingUtilities.getWindowAncestor(this);
 				int choice = JOptionPane.showConfirmDialog(win, scroll, "Please confirm updates", JOptionPane.OK_CANCEL_OPTION);
 				if (choice == JOptionPane.CANCEL_OPTION) return 0;

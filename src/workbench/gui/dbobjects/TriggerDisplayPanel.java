@@ -44,7 +44,6 @@ public class TriggerDisplayPanel
 		scroll.setBorder(new EtchedBorder());
 		
 		this.source = new EditorPanel();
-		this.source.addPopupMenuItem(new FileSaveAsAction(this.source), true);
 		this.source.setEditable(false);
 		this.source.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setBorder(WbSwingUtilities.BEVEL_BORDER);

@@ -87,7 +87,7 @@ public class ProcedureListPanel
 		
 		this.source = new EditorPanel();
 		this.source.setEditable(false);
-		this.source.addPopupMenuItem(new FileSaveAsAction(this.source), true);
+		//this.source.addPopupMenuItem(new FileSaveAsAction(this.source), true);
 		//this.source.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.source);

@@ -1101,7 +1101,7 @@ public class SqlPanel
 			EditorPanel editor = new EditorPanel();
 			editor.setText(script);
 			editor.setCaretPosition(0);
-			editor.addPopupMenuItem(new FileSaveAsAction(editor), true);
+			//editor.addPopupMenuItem(new FileSaveAsAction(editor), true);
 
 			f.getContentPane().add(editor);
 			if (!WbManager.getSettings().restoreWindowSize(f, id))

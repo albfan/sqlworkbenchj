@@ -336,7 +336,27 @@ public class Settings
 		this.props.setProperty("workbench.sql.lastscriptdir", aDir);
 	}
 
+	public String getLastJavaDir()
+	{
+		return this.props.getProperty("workbench.editor.java.lastdir","");
+	}
 
+	public void setLastJavaDir(String aDir)
+	{
+		this.props.setProperty("workbench.editor.java.lastdir", aDir);
+	}
+
+	public String getLastEditorDir()
+	{
+		return this.props.getProperty("workbench.editor.lastdir","");
+	}
+
+	public void setLastEditorDir(String aDir)
+	{
+		this.props.setProperty("workbench.editor.lastdir", aDir);
+	}
+
+	
 	public String toString()
 	{
 		return "[Settings]";

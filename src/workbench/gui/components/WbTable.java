@@ -234,7 +234,9 @@ extends JTable
 		if (this.dwModel != null)
 		{
 			this.dwModel.removeTableModelListener(this.changeListener);
+			this.dwModel.removeTableModelListener(this);
 			this.dwModel.dispose();
+			this.dwModel = null;
 		}
 
 		JTableHeader header = this.getTableHeader();
@@ -243,7 +245,6 @@ extends JTable
 			header.removeMouseListener(this);
 		}
 
-		this.dwModel = null;
 		if (aModel instanceof DataStoreTableModel)
 		{
 			this.dwModel = (DataStoreTableModel)aModel;
@@ -303,7 +304,6 @@ extends JTable
 	{
 		Object value = this.getValueAt(row, column);
 		if (value == null) return null;
-		if (value instanceof String) return (String)value;
 		if (value instanceof NullValue) return null;
 		return value.toString();
 	}
@@ -489,11 +489,6 @@ extends JTable
 	public void restoreColumnSizes()
 	{
 		if (this.savedColumnSizes == null || this.savedColumnSizes.size() == 0) return;
-		if (this.savedColumnSizes.size() != this.getColumnCount())
-		{
-			this.savedColumnSizes = null;
-			return;
-		}
 		Iterator itr = this.savedColumnSizes.entrySet().iterator();
 		while (itr.hasNext())
 		{
@@ -779,9 +774,6 @@ extends JTable
 	{
 	}
 
-	/** Invoked when an action occurs.
-	 *
-	 */
 	public void actionPerformed(ActionEvent e)
 	{
 		TableColumnModel columnModel = this.getColumnModel();
@@ -797,18 +789,15 @@ extends JTable
 		}
 		else if (e.getSource() == this.optimizeCol)
 		{
-			new Thread(new Runnable()
+			new Thread()
 			{
 				public void run()	{ optimizeColWidth(column); }
-			}).start();
+			}.start();
 
 		}
 		else if (e.getSource() == this.optimizeAllCol)
 		{
-			new Thread(new Runnable()
-			{
-				public void run()	{ optimizeAllColWidth(); }
-			}).start();
+			new Thread() { 	public void run()	{ optimizeAllColWidth(); } }.start();
 		}
 		else if (e.getSource() == this.setColWidth)
 		{

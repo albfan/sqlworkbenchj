@@ -146,7 +146,7 @@ public class TableListPanel
 
 		this.tableSource = new EditorPanel();
 		this.tableSource.setEditable(false);
-		this.tableSource.addPopupMenuItem(new FileSaveAsAction(this.tableSource), true);
+		//this.tableSource.addPopupMenuItem(new FileSaveAsAction(this.tableSource), true);
 		
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.tableSource);
 
