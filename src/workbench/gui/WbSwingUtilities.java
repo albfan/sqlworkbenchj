@@ -8,6 +8,7 @@ import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.Window;
+import javax.swing.JDialog;
 
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
@@ -128,6 +129,29 @@ public class WbSwingUtilities
 	public static void showErrorMessage(Component aCaller, String aMessage)
 	{
 		JOptionPane.showMessageDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.ERROR_MESSAGE);
+	}
+
+	public static boolean getYesNo(Component aCaller, String aMessage)
+	{
+		int result = JOptionPane.showConfirmDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+		return (result == JOptionPane.YES_OPTION);
+	}
+	
+	public static final int IGNORE_ALL = JOptionPane.YES_OPTION + JOptionPane.NO_OPTION + JOptionPane.CANCEL_OPTION + 1;
+	
+	public static int getYesNoIgnoreAll(Component aCaller, String aMessage)
+	{
+		String[] options = new String[] { ResourceMgr.getString("LabelYes"), ResourceMgr.getString("LabelNo"), ResourceMgr.getString("LabelIgnoreAll")};
+		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
+		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);
+		dialog.show();
+		dialog.dispose();
+		Object result = ignorePane.getValue();
+		if (result == null) return JOptionPane.YES_OPTION;
+		else if (result.equals(options[0])) return JOptionPane.YES_OPTION;
+		else if (result.equals(options[1])) return JOptionPane.NO_OPTION;
+		else if (result.equals(options[2])) return IGNORE_ALL;
+		else return JOptionPane.NO_OPTION;
 	}
 	
 	public static String getUserInput(Component caller, String aTitle, String initialValue)

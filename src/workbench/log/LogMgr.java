@@ -88,6 +88,7 @@ public class LogMgr
 		{
 			if (logOut != null && logOut != System.out && logOut != System.err)
 			{
+				System.out.println("closing output stream " + logOut);
 				logOut.close();
 			}
 			outputOpened = true;
@@ -99,6 +100,7 @@ public class LogMgr
 		{
 			if (logOut != null && logOut != System.out && logOut != System.err)
 			{
+				System.out.println("closing output stream " + logOut);
 				logOut.close();
 			}
 			outputOpened = true;
@@ -125,6 +127,7 @@ public class LogMgr
 		{
 			if (logOut != null && logOut != System.out && logOut != System.err)
 			{
+				System.out.println("closing output stream " + logOut);
 				logOut.close();
 			}
       if (WbManager.trace) System.out.println("LogMgr.checkOutput() - Opening logfile " + outputfile);

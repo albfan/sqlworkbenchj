@@ -144,14 +144,9 @@ public class StatementRunnerResult
 				ResultSet rs = (ResultSet)this.results.get(i);
 				if (rs != null)
 				{
-					try
-					{
-						rs.clearWarnings();
-						rs.close();
-					}
-					catch (Exception e)
-					{
-					}
+					try { rs.clearWarnings(); } catch (Throwable th) {}
+					try { rs.close(); } catch (Throwable th) {}
+					rs = null;
 				}
 			}
 			this.results.clear();
@@ -167,6 +162,7 @@ public class StatementRunnerResult
 		this.clearResultSets();
 		if (this.messages != null) this.messages.clear();
 		if (this.updateCounts !=null) this.updateCounts.clear();
+		this.sourceCommand = null;
 	}
 	
 }

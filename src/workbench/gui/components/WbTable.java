@@ -19,6 +19,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.BufferedOutputStream;
@@ -37,17 +38,18 @@ import javax.swing.CellEditor;
 import javax.swing.DefaultCellEditor;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolTip;
-import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -93,7 +95,7 @@ extends JTable
 	private String lastSearchCriteria;
 	private int lastFoundRow = -1;
 
-	private WbCellEditor defaultEditor;
+	private WbTextCellEditor defaultEditor;
 	private DefaultCellEditor defaultNumberEditor;
 	private JTextField numberEditorTextField;
 	
@@ -154,8 +156,11 @@ extends JTable
 		Font dataFont = this.getFont();
 		if (dataFont == null) dataFont = (Font)UIManager.get("Table.font");
 
-		this.defaultEditor = new WbCellEditor();
-
+		JTextField text = new JTextField();
+		text.setFont(dataFont);
+		this.defaultEditor = WbTextCellEditor.createInstance();
+		this.defaultEditor.setFont(dataFont);
+		
 		numberEditorTextField = new JTextField();
 		if (dataFont != null)  numberEditorTextField.setFont(dataFont);
 		numberEditorTextField.setBorder(WbSwingUtilities.EMPTY_BORDER);
@@ -607,7 +612,7 @@ extends JTable
 	{
 		if (this.getModel() == null) return;
 		Font f = this.getFont();
-		FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(f);
+		FontMetrics fm = this.getFontMetrics(f);
 		int charWidth = fm.stringWidth("n");
 		TableColumnModel colMod = this.getColumnModel();
 		if (colMod == null) return;
@@ -650,7 +655,7 @@ extends JTable
 		if (aColumn < 0 || aColumn > this.getColumnCount() - 1) return;
 
 		Font f = this.getFont();
-		FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(f);
+		FontMetrics fm = this.getFontMetrics(f);
 		TableColumnModel colMod = this.getColumnModel();
 		TableColumn col = colMod.getColumn(aColumn);
 		int addWidth = this.getAdditionalColumnSpace(0, aColumn);
@@ -1084,7 +1089,7 @@ extends JTable
 		{
 			this.setFont(newFont);
 			this.getTableHeader().setFont(newFont);
-			this.defaultEditor.setFont(newFont);
+			//this.defaultEditor.setFont(newFont);
 			this.numberEditorTextField.setFont(newFont);
 		}
 	}

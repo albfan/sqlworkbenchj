@@ -20,6 +20,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import javax.swing.JOptionPane;
 import workbench.WbManager;
+import workbench.db.DbMetadata;
 import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
 import workbench.util.StringUtil;
@@ -97,6 +98,11 @@ public class Settings
       System.err.println("Error initializing Log system!");
       e.printStackTrace(System.err);
     }
+
+		if (WbManager.trace) System.out.println("Setting server lists for MetaData");
+		DbMetadata.setServersWhichNeedReconnect(this.getCancelWithReconnectServers());
+		DbMetadata.setCaseSensitiveServers(this.getCaseSensitivServers());
+		if (WbManager.trace) System.out.println("Done setting server lists for MetaData");
 
 		String level = this.props.getProperty("workbench.log.level", "INFO");
 		LogMgr.setLevel(level);
@@ -324,7 +330,7 @@ public class Settings
 	{
 		this.props.setProperty("workbench.import.dateformat", aFormat);
 	}
-	
+
 	public String getLastImportDir()
 	{
 		return this.props.getProperty("workbench.import.lastdir", this.getLastExportDir());

@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.exception.WbException;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -22,15 +23,15 @@ import workbench.sql.StatementRunnerResult;
  */
 public class SelectCommand extends SqlCommand
 {
-	
+
 	public static final String VERB = "SELECT";
 	private int maxRows = 0;
-	
+
 	public SelectCommand()
 	{
 	}
-	
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql) 
+
+	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException, WbException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
@@ -39,9 +40,16 @@ public class SelectCommand extends SqlCommand
 			this.currentStatement = aConnection.createStatement();
 			this.currentStatement.setMaxRows(this.maxRows);
 			ResultSet rs = this.currentStatement.executeQuery(aSql);
-			result.addResultSet(rs);
+			if (rs != null)
+			{
+				result.addResultSet(rs);
+			}
+			else
+			{
+				throw new WbException(ResourceMgr.getString("MsgReceivedNullResultSet"));
+			}
 			StringBuffer warnings = new StringBuffer();
-			
+
 			this.appendSuccessMessage(result);
 			if (this.appendWarnings(aConnection, this.currentStatement, warnings))
 			{
@@ -49,7 +57,7 @@ public class SelectCommand extends SqlCommand
 			}
 			result.setSuccess();
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			result.clear();
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
@@ -58,20 +66,23 @@ public class SelectCommand extends SqlCommand
 		}
 		return result;
 	}
-	
+
 	public String getVerb()
 	{
 		return VERB;
 	}
-	
+
 	public boolean supportsMaxRows()
 	{
 		return true;
 	}
-	
+
 	public void setMaxRows(int max)
 	{
-		this.maxRows = max;
+		if (max >= 0)
+			this.maxRows = max;
+		else
+			this.maxRows = 0;
 	}
-	
+
 }

@@ -6,13 +6,7 @@
 
 package workbench.gui.sql;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -22,93 +16,25 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import javax.swing.Action;
-import javax.swing.ActionMap;
-import javax.swing.ComponentInputMap;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.InputMap;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-
 import workbench.WbManager;
 import workbench.db.DataSpooler;
 import workbench.db.DeleteScriptGenerator;
 import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.CleanJavaCodeAction;
-import workbench.gui.actions.CopyAsSqlInsertAction;
-import workbench.gui.actions.CreateDeleteScriptAction;
-import workbench.gui.actions.CreateSnippetAction;
-import workbench.gui.actions.DataToClipboardAction;
-import workbench.gui.actions.DeleteRowAction;
-import workbench.gui.actions.ExecuteAllAction;
-import workbench.gui.actions.ExecuteSelAction;
-import workbench.gui.actions.ExpandEditorAction;
-import workbench.gui.actions.ExpandResultAction;
-import workbench.gui.actions.FileDiscardAction;
-import workbench.gui.actions.FileOpenAction;
-import workbench.gui.actions.FileSaveAction;
-import workbench.gui.actions.FileSaveAsAction;
-import workbench.gui.actions.FindAction;
-import workbench.gui.actions.FindAgainAction;
-import workbench.gui.actions.ImportFileAction;
-import workbench.gui.actions.InsertRowAction;
-import workbench.gui.actions.MakeInListAction;
-import workbench.gui.actions.MakeLowerCaseAction;
-import workbench.gui.actions.MakeNonCharInListAction;
-import workbench.gui.actions.MakeUpperCaseAction;
-import workbench.gui.actions.NextStatementAction;
-import workbench.gui.actions.OptimizeAllColumnsAction;
-import workbench.gui.actions.PrevStatementAction;
-import workbench.gui.actions.RedoAction;
-import workbench.gui.actions.SaveDataAsAction;
-import workbench.gui.actions.SaveSqlHistoryAction;
-import workbench.gui.actions.SelectEditorAction;
-import workbench.gui.actions.SelectMaxRowsAction;
-import workbench.gui.actions.SelectResultAction;
-import workbench.gui.actions.SpoolDataAction;
-import workbench.gui.actions.StartEditAction;
-import workbench.gui.actions.StopAction;
-import workbench.gui.actions.UndoAction;
-import workbench.gui.actions.UndoExpandAction;
-import workbench.gui.actions.UpdateDatabaseAction;
-import workbench.gui.actions.WbAction;
-import workbench.gui.components.ConnectionInfo;
-import workbench.gui.components.DataStoreTableModel;
-import workbench.gui.components.ExtensionFileFilter;
-import workbench.gui.components.ImportFileOptionsPanel;
-import workbench.gui.components.TabbedPaneUIFactory;
-import workbench.gui.components.TextComponentMouseListener;
-import workbench.gui.components.WbScrollPane;
-import workbench.gui.components.WbSplitPane;
-import workbench.gui.components.WbTable;
-import workbench.gui.components.WbToolbar;
-import workbench.gui.components.WbToolbarSeparator;
-import workbench.gui.components.WbTraversalPolicy;
+
+import workbench.gui.actions.*;
+import workbench.gui.components.*;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.menu.TextPopup;
-import workbench.interfaces.FilenameChangeListener;
-import workbench.interfaces.FontChangedListener;
-import workbench.interfaces.MainPanel;
-import workbench.interfaces.Spooler;
-import workbench.interfaces.TextFileContainer;
+import workbench.interfaces.*;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -116,6 +42,7 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
+
 
 
 /**
@@ -220,7 +147,6 @@ public class SqlPanel
 		pol.setDefaultComponent(data.getTable());
 		pol.addComponent(data.getTable());
 		this.resultTab.setFocusTraversalPolicy(pol);
-		//this.alternateDelimiter = WbManager.getSettings().getAlternateDelimiter();
 
 		this.editor = new EditorPanel();
 		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
@@ -757,7 +683,7 @@ public class SqlPanel
 		this.suspendThread();
 		this.background = new Thread(this);
 		this.background.setDaemon(true);
-		this.background.setName("SQL execution thread");
+		this.background.setName("SQL execution thread - " + this.internalId);
 		this.background.start();
 	}
 
@@ -945,7 +871,7 @@ public class SqlPanel
 	}
 
 	public boolean isRequestFocusEnabled() { return true; }
-	public boolean isFocusTraversable() { return true; }
+	//public boolean isFocusTraversable() { return true; }
 
 	public void suspendThread()
 	{
@@ -963,7 +889,7 @@ public class SqlPanel
 		if (this.statementHistory == null) return;
 		if (aStatement == null) return;
 
-		// if this statement is alread in the history
+		// if this statement is already in the history
 		// delete the old one, and put it at first position
 		int index = this.statementHistory.indexOf(aStatement);
 		if (index >= 0)
@@ -1003,14 +929,14 @@ public class SqlPanel
 	 */
 	public void setActionState(final Action anAction, final boolean aFlag)
 	{
-		EventQueue.invokeLater(
-			new Runnable()
-			{
-				public void run()
-				{
+//		EventQueue.invokeLater(
+//			new Runnable()
+//			{
+//				public void run()
+//				{
 					anAction.setEnabled(aFlag);
-				}
-			});
+//				}
+//			});
 	}
 
 	public void setActionState(final Action[] anActionList, final boolean aFlag)
@@ -1130,6 +1056,9 @@ public class SqlPanel
 			int count = sqls.size();
 			msg = StringUtil.replace(msg, "%total%", Integer.toString(count));
 			this.log.setText("");
+			
+			boolean onErrorAsk = true;
+			
 			for (int i=0; i < count; i++)
 			{
 				StringBuffer logmsg = new StringBuffer(200);
@@ -1147,9 +1076,27 @@ public class SqlPanel
 				{
 					this.showLogPanel();
 				}
+				// in case of a batch execution we need to make sure that
+				// this thread can actually be interrupted!
 				Thread.yield();
 				if (suspended) break;
 				sqls.set(i, null);
+				if (count > 1 && !this.data.wasSuccessful() && onErrorAsk)
+				{
+					String question = ResourceMgr.getString("MsgScriptStatementError");
+					question = StringUtil.replace(question, "%nr%", Integer.toString(i+1));
+					question = StringUtil.replace(question, "%count%", Integer.toString(count));
+					int choice = WbSwingUtilities.getYesNoIgnoreAll(this, question);
+					
+					if (choice == JOptionPane.NO_OPTION)
+					{
+						break;
+					}
+					if (choice == WbSwingUtilities.IGNORE_ALL)
+					{
+						onErrorAsk = false;
+					}
+				}
 			}
 			if (this.data.hasResultSet())
 			{
@@ -1159,7 +1106,8 @@ public class SqlPanel
 			else
 			{
 				this.showLogPanel();
-			}
+			}							
+
 			if (count > 1)
 			{
 				StringBuffer logmsg = new StringBuffer(200);
@@ -1342,6 +1290,7 @@ public class SqlPanel
 			else
 			{
 				Toolkit.getDefaultToolkit().beep();
+				LogMgr.logWarning("SqlExecutionThread", "actionPerformed called while thread is busy!");
 			}
 		}
 
@@ -1358,6 +1307,7 @@ public class SqlPanel
 			else
 			{
 				Toolkit.getDefaultToolkit().beep();
+				LogMgr.logWarning("SqlExecutionThread", "actionPerformed called while thread is busy!");
 			}
 		}
 

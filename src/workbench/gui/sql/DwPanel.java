@@ -8,30 +8,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-
-import javax.swing.DefaultCellEditor;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-
 import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.exception.WbException;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.DataStoreTableModel;
-import workbench.gui.components.OneLineTableModel;
-import workbench.gui.components.TextComponentMouseListener;
-import workbench.gui.components.WbScrollPane;
-import workbench.gui.components.WbTable;
-import workbench.gui.components.WbTraversalPolicy;
+
+
+import workbench.gui.components.*;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunner;
@@ -39,6 +27,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 import workbench.storage.DmlStatement;
 import workbench.util.StringUtil;
+
 
 
 /**
@@ -67,7 +56,7 @@ public class DwPanel extends JPanel
 	private static int nextId = 0;
 	private WbConnection lastConnection;
 	private boolean cancelled;
-	
+	private boolean success = false;
 	private StatementRunner stmtRunner;
 	
 	public DwPanel()
@@ -228,6 +217,7 @@ public class DwPanel extends JPanel
 		}
 		
 		this.lastConnection = aConnection;
+		this.success = false;
 		StatementRunnerResult result = null;
 		
 		try
@@ -235,12 +225,6 @@ public class DwPanel extends JPanel
 			long start, end, sqlTime = 0;
 			this.clearContent();
 			
-			/*
-			if (aSql.endsWith(";")) aSql = aSql.substring(0, aSql.length() - 1);
-			String alternate = WbManager.getSettings().getAlternateDelimiter();
-			if (aSql.endsWith(alternate)) 
-				aSql = aSql.substring(0, aSql.length() - alternate.length());
-			*/	
 			boolean repeatLast = aSql.equals(this.sql);
 			this.sql = aSql;
 		
@@ -252,7 +236,8 @@ public class DwPanel extends JPanel
 			result = this.stmtRunner.getResult();
 			this.hasResultSet = false;
 			DataStore newData = null;
-		
+			this.success = result.isSuccess();
+			
 			if (result.isSuccess() && result.hasData())
 			{
 				this.hasResultSet = true;
@@ -300,6 +285,7 @@ public class DwPanel extends JPanel
 			}
 			else 
 			{
+				this.hasResultSet = false;
 				this.setMessageDisplayModel(this.getErrorTableModel());
 				this.lastMessage = ResourceMgr.getString("MsgExecuteError") + "\r\n";
 			}
@@ -317,16 +303,16 @@ public class DwPanel extends JPanel
 			}
 			this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgExecTime") + " " + (((double)sqlTime) / 1000.0) + "s";
 		}
-		catch (SQLException sql)
+		catch (SQLException sqle)
 		{
+			LogMgr.logError(this, "SQL error when executing statement: \r\n" + this.sql, sqle);
 			this.setMessageDisplayModel(this.getErrorTableModel());
 			this.lastMessage = ResourceMgr.getString("MsgExecuteError") + "\r\n";
-			this.lastMessage = this.lastMessage + ExceptionUtil.getDisplay(sql);
-			throw sql;
+			this.lastMessage = this.lastMessage + ExceptionUtil.getDisplay(sqle);
+			throw sqle;
 		}
 		catch (Throwable e)
 		{
-			e.printStackTrace();
 			LogMgr.logError(this, "Error executing statement: \r\n" + this.sql, e);
 			this.setMessageDisplayModel(this.getErrorTableModel());
 			this.lastMessage = ResourceMgr.getString("MsgExecuteError") + "\r\n";
@@ -336,10 +322,16 @@ public class DwPanel extends JPanel
 		}
 		finally
 		{
+			result = null;
 			this.stmtRunner.done();
 		}
   }
 
+	public boolean wasSuccessful()
+	{
+		return this.success;
+	}
+	
   public void dataChanged()
   {
 		this.statusBar.setRowcount(this.infoTable.getRowCount());

@@ -4,11 +4,13 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -31,6 +33,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -91,6 +94,8 @@ public class TableListPanel
 	private WbTable importedKeys;
 	private WbTable exportedKeys;
 
+	private TableDataPanel tableData;
+
 	private TableDependencyTreeDisplay importedTableTree;
 	private WbSplitPane importedPanel;
 
@@ -105,6 +110,7 @@ public class TableListPanel
 
 	private Object retrieveLock = new Object();
 	private JComboBox tableTypes = new JComboBox();
+	//private JComboBox catalogs = new JComboBox();
 	private String currentSchema;
 	private String currentCatalog;
 	private SpoolDataAction spoolData;
@@ -126,6 +132,8 @@ public class TableListPanel
 	private boolean shouldRetrieveImportedKeys;
 	private boolean shouldRetrieveExportedTree;
 	private boolean shouldRetrieveImportedTree;
+	private boolean shouldRetrieveTableDataCount;
+
 	private boolean busy;
 
 	private static final String DROP_CMD = "drop-table";
@@ -160,6 +168,7 @@ public class TableListPanel
 		//this.tableSource.addPopupMenuItem(new FileSaveAsAction(this.tableSource), true);
 
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.tableSource);
+		this.tableData = new TableDataPanel();
 
 		this.importedKeys = new WbTable();
 		this.importedKeys.setAdjustToColumnLabel(false);
@@ -200,18 +209,31 @@ public class TableListPanel
 		this.spoolData = new SpoolDataAction(this);
 		this.tableList.addPopupAction(spoolData, true);
 		this.extendPopupMenu();
-		JPanel topPanel = new JPanel();
 		this.findPanel = new FindPanel(this.tableList);
 
 		ReloadAction a = new ReloadAction(this);
 		a.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshTableList"));
 		this.findPanel.addToToolbar(a, true, false);
 
-		topPanel.setLayout(new GridBagLayout());
+		JPanel selectPanel = new JPanel();
+		selectPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		//selectPanel.setBorder(new LineBorder(Color.RED));
+		//selectPanel.setMinimumSize(new Dimension(100, 18));
+
 		this.tableTypes.setMaximumSize(new Dimension(32768, 18));
-		this.tableTypes.setMaximumSize(new Dimension(80, 18));
+		this.tableTypes.setMinimumSize(new Dimension(80, 18));
+		//selectPanel.add(this.tableTypes);
+
+		//this.catalogs.setMaximumSize(new Dimension(32768, 18));
+		//this.catalogs.setMinimumSize(new Dimension(80, 18));
+		//selectPanel.add(this.catalogs);
+
+		JPanel topPanel = new JPanel();
+		topPanel.setLayout(new GridBagLayout());
 		GridBagConstraints constr = new GridBagConstraints();
 		constr.anchor = GridBagConstraints.WEST;
+		constr.gridx = 0;
+
 		topPanel.add(this.tableTypes, constr);
 
 		constr = new GridBagConstraints();
@@ -268,24 +290,24 @@ public class TableListPanel
 
 	private Font boldFont = null;
 	private Font standardFont = null;
-	
+
 	private void initFonts()
 	{
 		this.standardFont = WbManager.getSettings().getStandardFont();
 		this.boldFont = new Font(this.standardFont.getName(), Font.BOLD, this.standardFont.getSize());
 	}
-	
+
 	private void updateShowDataMenu()
 	{
 		String[] panels = this.parentWindow.getPanelLabels();
 		int current = this.parentWindow.getCurrentPanelIndex();
 		int newCount = panels.length;
 		int currentCount = this.showDataMenu.getItemCount();
-		
+
 		if (this.showDataMenu == null) return;
 		if (this.boldFont == null) this.initFonts();
 		JMenuItem item = null;
-		
+
 		for (int i=0; i < newCount; i++)
 		{
 			if (i >= currentCount)
@@ -320,6 +342,7 @@ public class TableListPanel
 	private void addTablePanels()
 	{
 		if (this.displayTab.getComponentCount() > 2) return;
+		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerData"), this.tableData);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerIndexes"), this.indexPanel);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerFkColumns"), this.importedPanel);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerReferencedColumns"), this.exportedPanel);
@@ -330,10 +353,16 @@ public class TableListPanel
 	{
 		if (this.displayTab.getComponentCount() == 2) return;
 		this.displayTab.setSelectedIndex(0);
+		this.displayTab.remove(this.tableData);
+		this.tableData.reset();
 		this.displayTab.remove(this.indexPanel);
+		this.indexes.reset();
 		this.displayTab.remove(this.importedPanel);
+		this.importedKeys.reset();
 		this.displayTab.remove(this.exportedPanel);
+		this.exportedKeys.reset();
 		this.displayTab.remove(this.triggers);
+		this.triggers.reset();
 	}
 
 	public void setInitialFocus()
@@ -366,6 +395,7 @@ public class TableListPanel
 		//this.updateDisplayClients();
 		this.importedTableTree.reset();
 		this.exportedTableTree.reset();
+		this.tableData.reset();
 	}
 
 	private void invalidateData()
@@ -377,6 +407,7 @@ public class TableListPanel
 		this.shouldRetrieveImportedKeys = true;
 		this.shouldRetrieveExportedTree = true;
 		this.shouldRetrieveImportedTree = true;
+		this.shouldRetrieveTableDataCount = true;
 	}
 
 	public void setConnection(WbConnection aConnection)
@@ -384,8 +415,11 @@ public class TableListPanel
 		this.dbConnection = aConnection;
 		this.importedTableTree.setConnection(aConnection);
 		this.exportedTableTree.setConnection(aConnection);
+		this.tableData.setConnection(aConnection);
 
 		this.tableTypes.removeActionListener(this);
+		//this.catalogs.removeActionListener(this);
+
 		this.triggers.setConnection(aConnection);
 		this.tableSource.getSqlTokenMarker().initDatabaseKeywords(aConnection.getSqlConnection());
 		this.reset();
@@ -403,6 +437,25 @@ public class TableListPanel
 		catch (Exception e)
 		{
 		}
+
+		/*
+		try
+		{
+			List cat = this.dbConnection.getMetadata().getCatalogs();
+			this.catalogs.removeAllItems();
+			this.catalogs.addItem("*");
+			for (int i=0; i < cat.size(); i++)
+			{
+				this.catalogs.addItem(cat.get(i));
+			}
+			this.catalogs.setSelectedItem(null);
+		}
+		catch (Exception e)
+		{
+		}
+		this.catalogs.addActionListener(this);
+		*/
+
 		this.tableTypes.addActionListener(this);
 		this.displayTab.addChangeListener(this);
 	}
@@ -475,6 +528,7 @@ public class TableListPanel
 	public void saveSettings()
 	{
 		this.triggers.saveSettings();
+		this.tableData.saveSettings();
 		Settings s = WbManager.getSettings();
 		s.setProperty(this.getClass().getName(), "divider", this.splitPane.getDividerLocation());
 		s.setProperty(this.getClass().getName(), "exportedtreedivider", this.exportedPanel.getDividerLocation());
@@ -499,6 +553,7 @@ public class TableListPanel
 		String s = WbManager.getSettings().getProperty(this.getClass().getName(), "lastsearch", "");
 		this.findPanel.setSearchString(s);
 		this.triggers.restoreSettings();
+		this.tableData.restoreSettings();
 	}
 
 	public void valueChanged(ListSelectionEvent e)
@@ -517,8 +572,8 @@ public class TableListPanel
 		int row = this.tableList.getSelectedRow();
 		if (row < 0) return;
 
-		//synchronized (retrieveLock)
-		//{
+		synchronized (retrieveLock)
+		{
 			this.selectedCatalog = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
 			this.selectedSchema = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
 			this.selectedTableName = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
@@ -543,9 +598,10 @@ public class TableListPanel
 				this.showDataMenu.setEnabled(false);
 			}
 
+			this.tableData.setTable(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
 			this.retrieveCurrentPanel();
-			//this.startRetrieveCurrentPanel();
-		//}
+			this.startRetrieveCurrentPanel();
+		}
 	}
 
 	private void retrieveTableDefinition()
@@ -615,10 +671,10 @@ public class TableListPanel
 			if (this.tableList.getSelectedRowCount() <= 0) return;
 			WbSwingUtilities.showWaitCursorOnWindow(this);
 			this.busy = true;
+			int index = this.displayTab.getSelectedIndex();
+
 			try
 			{
-				int index = this.displayTab.getSelectedIndex();
-
 				switch (index)
 				{
 					case 0:
@@ -626,23 +682,26 @@ public class TableListPanel
 						if (this.shouldRetrieveTable) this.retrieveTableDefinition();
 						break;
 					case 2:
-						if (this.shouldRetrieveIndexes) this.retrieveIndexes();
+						if (this.shouldRetrieveTableDataCount) this.tableData.showData();
 						break;
 					case 3:
+						if (this.shouldRetrieveIndexes) this.retrieveIndexes();
+						break;
+					case 4:
 						if (this.shouldRetrieveImportedKeys) this.retrieveImportedTables();
 						if (this.shouldRetrieveImportedTree) this.retrieveImportedTree();
 						break;
-					case 4:
+					case 5:
 						if (this.shouldRetrieveExportedKeys) this.retrieveExportedTables();
 						if (this.shouldRetrieveExportedTree) this.retrieveExportedTree();
 						break;
-					case 5:
+					case 6:
 						if (this.shouldRetrieveTriggers) this.retrieveTriggers();
 				}
 			}
 			catch (Throwable ex)
 			{
-				ex.printStackTrace();
+				LogMgr.logError("TableListPanel.retrieveCurrentPanel()", "Error retrieving panel " + index, ex);
 			}
 			finally
 			{
@@ -848,7 +907,7 @@ public class TableListPanel
 		{
 			String name = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 			String schema = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-      if (schema.length() > 0)
+      if (schema!= null && schema.length() > 0)
       {
         name = SqlUtil.quoteObjectname(schema) + "." + SqlUtil.quoteObjectname(name);
       }

@@ -8,6 +8,7 @@ package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
 
+import javax.swing.JPanel;
 import javax.swing.JToolBar;
 
 import workbench.WbManager;
@@ -16,10 +17,13 @@ import workbench.db.DbDriver;
 import workbench.exception.WbException;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
+import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.FileActions;
 import workbench.resource.ResourceMgr;
 
-public class DriverlistEditorPanel extends javax.swing.JPanel implements FileActions
+public class DriverlistEditorPanel 
+	extends JPanel 
+	implements FileActions
 {
 	private DriverListModel model;
 	private JToolBar toolbar;
@@ -37,8 +41,12 @@ public class DriverlistEditorPanel extends javax.swing.JPanel implements FileAct
 	{
 		initComponents();
 		this.fillDriverList();
-		driverList.setNextFocusableComponent(driverEditor);
-		this.driverEditor.setNextFocusableComponent(driverList);
+		WbTraversalPolicy policy = new WbTraversalPolicy();
+		policy.addComponent(driverList);
+		policy.addComponent(driverEditor);
+		policy.setDefaultComponent(driverList);
+		//driverList.setNextFocusableComponent(driverEditor);
+		//this.driverEditor.setNextFocusableComponent(driverList);
 		this.toolbar = new WbToolbar();
 		this.toolbar.add(new NewListEntryAction(this));
 		this.toolbar.add(new DeleteListEntryAction(this));

@@ -103,6 +103,9 @@ public class StatementRunner
 	public void runStatement(String aSql, int maxRows)
 		throws SQLException, WbException
 	{
+		// make sure everything's cleaned up from the previous call
+		this.done();
+		
 		String cleanSql = SqlUtil.makeCleanSql(aSql, false);
 		if (cleanSql == null || cleanSql.length() == 0)
 		{
@@ -117,12 +120,9 @@ public class StatementRunner
 		
 		String verb = SqlUtil.getSqlVerb(cleanSql).toUpperCase();
 		
-		// clean up the result from the last statement
-		if (this.result != null) this.result.clear();
-		
 		this.currentCommand = (SqlCommand)this.cmdDispatch.get(verb);
 		
-		// if not mapping is found use the default implementation
+		// if no mapping is found use the default implementation
 		if (this.currentCommand == null) 
 		{
 			this.currentCommand = (SqlCommand)this.cmdDispatch.get("*");
@@ -162,10 +162,13 @@ public class StatementRunner
 	public void done()
 	{
 		if (this.result != null) this.result.clear();
+		this.result = null;
 		if (this.currentCommand != null && this.currentCommand != this.currentConsumer) 
 		{
 			this.currentCommand.done();
+			this.currentCommand = null;
 		}
+		this.currentConsumer = null;
 	}
 	
 }

@@ -6,14 +6,11 @@
 
 package workbench.gui.components;
 
-import com.sun.java.swing.plaf.motif.MotifLookAndFeel;
-import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
 import java.awt.Insets;
 import javax.swing.JTabbedPane;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.plaf.TabbedPaneUI;
-import javax.swing.plaf.metal.MetalLookAndFeel;
 
 /**
  *
@@ -47,22 +44,34 @@ public class TabbedPaneUIFactory
 	public static TabbedPaneUI getBorderLessUI()
 	{
 		LookAndFeel lnf = UIManager.getLookAndFeel();
-		if (lnf instanceof MetalLookAndFeel)
+		String lnfClass = lnf.getClass().getName();
+		if (lnfClass.equals("javax.swing.plaf.metal.MetalLookAndFeel"))
 		{
 			return getClassInstance("workbench.gui.components.BorderLessMetalTabbedPaneUI");
 		}
-		else if (lnf instanceof WindowsLookAndFeel)
+		else if (lnfClass.equals("com.sun.java.swing.plaf.windows.WindowsLookAndFeel"))
 		{
 			return getClassInstance("workbench.gui.components.BorderLessWindowsTabbedPaneUI");
 		}
-		else if (lnf instanceof MotifLookAndFeel)
+		else if (lnfClass.equals("com.sun.java.swing.plaf.motif.MotifLookAndFeel"))
 		{
 			return getClassInstance("workbench.gui.components.BorderLessMotifTabbedPaneUI");
 		}
 		else
 		{
-			JTabbedPane pane = new JTabbedPane();
-			return (TabbedPaneUI)UIManager.getUI(pane);
+			TabbedPaneUI uiInstance = null;
+			String uiClass = (String)UIManager.getDefaults().get("TabbedPaneUI");
+			try
+			{
+				Class ui = Class.forName(uiClass);
+				uiInstance = (TabbedPaneUI)ui.newInstance();
+			}
+			catch (Throwable e)
+			{
+				JTabbedPane pane = new JTabbedPane();
+				uiInstance = (TabbedPaneUI)UIManager.getUI(pane);
+			}
+			return uiInstance;
 		}
 	}
 	

@@ -5,13 +5,16 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EventObject;
 
 import javax.swing.AbstractAction;
-import javax.swing.DefaultCellEditor;
+import javax.swing.AbstractCellEditor;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
@@ -25,6 +28,7 @@ import javax.swing.table.TableCellEditor;
 import workbench.gui.WbSwingUtilities;
 
 public class WbCellEditor 
+	extends AbstractCellEditor
 	implements TableCellEditor
 {
 	private TextAreaEditor editor;
@@ -166,11 +170,15 @@ public class WbCellEditor
 		}
 	}
 	
-	class TextAreaEditor extends JTextArea
+	class TextAreaEditor 
+		extends JTextArea
+		implements ItemListener
 	{
 		public TextAreaEditor()
 		{
 			super();
+			this.setFocusCycleRoot(false);
+			//this.setFocusTraversalKeys(WHEN_FOCUSED, Collections.EMPTY_SET);
 			Object tabAction = this.getInputMap().get(TAB);
 			
 			this.getInputMap().put(TAB, "wb-do-nothing-at-all");
@@ -199,45 +207,53 @@ public class WbCellEditor
 
 		}
 
-		public boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed)
-		{
-//			if (ks.equals(ctrlTab))
+//		public boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed)
+//		{
+//			if (ks.equals(TAB))
 //			{
-//				System.out.println("Control-TAB pressed");
-//				int pos = this.getCaretPosition();
-//				this.insert("\t", pos);
+//				//System.out.println("TAB pressed");
+//				//int pos = this.getCaretPosition();
+//				//this.insert("\t", pos);
 //				e.consume();
 //				return true;
 //			}
-//			else
-//			{
-//				return super.processKeyBinding(ks, e, condition, pressed);
-//			}
-			return super.processKeyBinding(ks, e, condition, pressed);
+//			return super.processKeyBinding(ks, e, condition, pressed);
+//		}
+
+		/* (non-Javadoc)
+		 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+		 */
+		public void itemStateChanged(ItemEvent e)
+		{
+			stopCellEditing();
 		}
 
-		public boolean isManagingFocus() { return false; }
+		//public boolean isManagingFocus() { return false; }
 	}
 	
-	public class TextAreaScrollPane extends JScrollPane
+	public class TextAreaScrollPane 
+		extends JScrollPane
+		implements ItemListener
 	{
 		TextAreaEditor editor;
 		
 		public TextAreaScrollPane(Component content)
 		{
 			super(content);
+			this.setFocusCycleRoot(false);
+			this.setFocusTraversalKeys(WHEN_FOCUSED, Collections.EMPTY_SET);
 			if (content instanceof TextAreaEditor)
 			{
 				editor = (TextAreaEditor)content;
 			}
 		}
 
-		public boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed)
-		{
-			return editor.processKeyBinding(ks, e, condition, pressed);
-		}
+//		public boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed)
+//		{
+//			return editor.processKeyBinding(ks, e, condition, pressed);
+//		}
 
-		public boolean isManagingFocus() { return false; }
+		//public boolean isManagingFocus() { return false; }
 		public void requestFocus()
 		{
 			this.editor.requestFocus();
@@ -246,6 +262,14 @@ public class WbCellEditor
 		public boolean requestFocusInWindow()
 		{
 			return this.editor.requestFocusInWindow();
+		}
+
+		/* (non-Javadoc)
+		 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+		 */
+		public void itemStateChanged(ItemEvent e)
+		{
+			stopCellEditing();
 		}
 		
 	}

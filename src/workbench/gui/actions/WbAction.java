@@ -108,7 +108,6 @@ public abstract class WbAction
 	public JMenuItem getMenuItem()
 	{
 		this.menuItem = new WbMenuItem();
-		this.menuItem.setMargin(new Insets(0,0,0,0));
 		this.menuItem.setAction(this);
 		this.menuItem.setAccelerator(this.getAccelerator());
 		Integer index = (Integer)this.getValue(WbAction.MNEMONIC_INDEX);

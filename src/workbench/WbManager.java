@@ -15,6 +15,7 @@ import java.io.File;
 import java.util.ArrayList;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -231,9 +232,17 @@ public class WbManager implements FontChangedListener
 
 		def.put("Table.font", dataFont);
 		def.put("TableHeader.font", dataFont);
-
-		def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
-		def.put("SplitPaneUI", "com.sun.java.swing.plaf.windows.WindowsSplitPaneUI");
+		
+		LookAndFeel lnf = UIManager.getLookAndFeel();
+		String lnfClass = lnf.getClass().getName();
+		
+		if (lnfClass.equals("javax.swing.plaf.metal.MetalLookAndFeel") ||
+		    lnfClass.equals("com.sun.java.swing.plaf.windows.WindowsLookAndFeel") ||
+		    lnfClass.equals("com.sun.java.swing.plaf.motif.MotifLookAndFeel"))
+		{
+			def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
+			def.put("SplitPaneUI", "com.sun.java.swing.plaf.windows.WindowsSplitPaneUI");
+		}
 
 		if (settings.getShowMnemonics())
 		{

@@ -3,6 +3,7 @@
  */
 package workbench.gui.components;
 
+import java.awt.Insets;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JMenuItem;
@@ -19,8 +20,7 @@ import javax.swing.border.EmptyBorder;
 public class WbMenuItem 
 	extends JMenuItem
 {
-	//private int additionalVerticalSpace = 0;
-	Border originalBorder;
+	private static final Insets WIN_INSETS = new Insets(0,0,2,0);
 	
 	public WbMenuItem()
 	{
@@ -65,29 +65,26 @@ public class WbMenuItem
   
 	private void checkSpacing()
 	{
+		/*
 		LookAndFeel lnf = UIManager.getLookAndFeel();	
-		if (lnf.getClass() == com.sun.java.swing.plaf.windows.WindowsLookAndFeel.class)
+		if (lnf.getClass().getName().equals("com.sun.java.swing.plaf.windows.WindowsLookAndFeel"))
 		{
-			if (this.originalBorder == null)
-			{
-				this.originalBorder = this.getBorder();
-			}
-			EmptyBorder e = new EmptyBorder(0,0,2,0);
-			Border nb = new CompoundBorder(this.originalBorder, e);
-			this.setBorder(nb);
+			this.setMargin(WIN_INSETS);
+			
 		}
-		else if (this.originalBorder != null)
+		else 
 		{
-			this.setBorder(this.originalBorder);
+			this.removeExtraSpacing();
 		}
+		*/
 	}
 
 	public void removeExtraSpacing()
 	{
-		if (this.originalBorder != null)
-		{
-			this.setBorder(this.originalBorder);
-		}	
+		/*
+		Insets i = UIManager.getInsets("MenuItem.margin");
+		this.setMargin(i);
+		*/
 	}
 	
 	/*

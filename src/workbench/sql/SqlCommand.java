@@ -13,9 +13,11 @@ import java.sql.Statement;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.exception.WbException;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.util.LineTokenizer;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -69,6 +71,15 @@ public class SqlCommand
 				msg.append("\n\n");
 				warnings = true;
 			}
+			warn = aConn.getSqlConnection().getWarnings();
+			warnings = warnings || (warn != null);
+			while (warn != null)
+			{
+				msg.append('\n');
+				msg.append(warn.getMessage());
+				warn = warn.getNextWarning();
+			}
+			
 			aStmt.clearWarnings();
 			aConn.clearWarnings();
 			return warnings;
@@ -109,6 +120,15 @@ public class SqlCommand
 		try
 		{
 			boolean hasResult = this.currentStatement.execute(aSql);
+			
+			// Postgres obviously clears the warnings if the getMoreResults()
+			// and stuff is called, so we add the warnings right at the beginning
+			// this shouldn't affect other DBMSs (hopefully :-)
+			StringBuffer warnings = new StringBuffer();
+			if (appendWarnings(aConnection, this.currentStatement, warnings))
+			{
+				result.addMessage(warnings.toString());
+			}
 			int updateCount = -1;
 
 			// fallback hack for JDBC drivers which do not reset the value
@@ -141,20 +161,20 @@ public class SqlCommand
 					rs  = this.currentStatement.getResultSet();
 					ds = new DataStore(rs, aConnection);
 					result.addDataStore(ds);
+					moreResults = this.currentStatement.getMoreResults();
 				}
 
 				if (updateCount > -1)
 				{
 					result.addMessage(updateCount + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
+					updateCount = this.currentStatement.getUpdateCount();
 				}
-				moreResults = this.currentStatement.getMoreResults();
-				updateCount = this.currentStatement.getUpdateCount();
-			}			
-
+			}						
 			result.setSuccess();
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("SqlCommand.execute()", ExceptionUtil.getDisplay(e), e);
 			result.clear();
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
 			result.addMessage(ExceptionUtil.getDisplay(e));
@@ -172,7 +192,7 @@ public class SqlCommand
 	 */
 	public String getVerb()
 	{
-		return ""; 
+		return StringUtil.EMPTY_STRING; 
 	}
 
 	public void setMaxRows(int maxRows) { }
