@@ -9,7 +9,7 @@
  * To contact the author please send an email to: info@sql-workbench.net
  *
  */
-package workbench.db;
+package workbench.db.datacopy;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,6 +28,8 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
+import workbench.util.WbThread;
+import workbench.db.*;
 
 /**
  *
@@ -437,15 +439,13 @@ public class DataCopier
 
 	public void startBackgroundCopy()
 	{
-		Thread t = new Thread()
+		Thread t = new WbThread("DataCopier Thread")
 		{
 			public void run()
 			{
-				try { DataCopier.this.start(); } catch (Throwable th) {}
+				try { start(); } catch (Throwable th) {}
 			}
 		};
-		t.setName("WbCopy Thread");
-		t.setDaemon(true);
 		t.start();
 	}
 
