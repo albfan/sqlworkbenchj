@@ -10,6 +10,8 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.BufferedOutputStream;
@@ -41,13 +43,12 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.NullValue;
+import workbench.util.StringUtil;
 
 
-
-
-public class WbTable 
+public class WbTable
 	extends JTable 
-	implements ActionListener, MouseListener, Exporter, FontChangedListener, Searchable
+	implements ActionListener, MouseListener, Exporter, FontChangedListener, Searchable, FocusListener
 {
 	private JPopupMenu popup;
 	private JPopupMenu headerPopup;
@@ -560,6 +561,29 @@ public class WbTable
 		return addWidth;
 	}
 	
+	public void cancelEditing()
+	{
+		if (this.isEditing())
+		{
+			CellEditor editor = this.getCellEditor();
+			if(editor != null)
+			{
+				editor.cancelCellEditing();
+			}
+		}
+	}
+	
+	public boolean stopEditing()
+	{
+		if (!this.isEditing()) return false;
+		CellEditor editor = this.getCellEditor();
+		if(editor != null)
+		{
+			return editor.stopCellEditing();
+		}
+		return false;
+	}
+	
 	public void tableChanged(TableModelEvent evt)
 	{
 		super.tableChanged(evt);
@@ -608,7 +632,7 @@ public class WbTable
 			}
 		}
 		else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1 
-		         && this.dwModel != null)
+		         && this.dwModel != null && e.getSource() instanceof JTableHeader)
 		{
 			TableColumnModel columnModel = this.getColumnModel();
 			int viewColumn = columnModel.getColumnIndexAtX(e.getX());
@@ -733,7 +757,7 @@ public class WbTable
 		{
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 			WbSwingUtilities.showWaitCursorOnWindow(this);
-			String data = getDataString("\r", includeheaders);
+			String data = getDataString("\n", includeheaders);
 			StringSelection sel = new StringSelection(data);
 			clp.setContents(sel, sel);
 		}
@@ -780,7 +804,7 @@ public class WbTable
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			String contents = ds.getDataAsSqlInsert().replaceAll("\n", "\r\n");
+			String contents = ds.getDataAsSqlInsert(StringUtil.LINE_TERMINATOR);
 			out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(aFilename)));
 			out.print(contents);
 			out.close();
@@ -828,43 +852,27 @@ public class WbTable
 			JFileChooser fc = new JFileChooser(lastDir);
 			fc.addChoosableFileFilter(ExtensionFileFilter.getTextFileFilter());
 			DataStore ds = this.dwModel.getDataStore();
-			if (ds != null && ds.canSaveAsSqlInsert())
+			boolean sql = (ds != null && ds.canSaveAsSqlInsert());
+			String filename = WbManager.getInstance().getExportFilename(this, sql);
+			if (filename != null)
 			{
-				System.out.println("adding sql filter");
-				fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
-			}
-			int answer = fc.showSaveDialog(SwingUtilities.getWindowAncestor(this));
-			if (answer == JFileChooser.APPROVE_OPTION)
-			{
-				File fl = fc.getSelectedFile();
-				FileFilter ff = fc.getFileFilter();
-				if (ff == ExtensionFileFilter.getSqlFileFilter())
+				String ext = ExtensionFileFilter.getExtension(new File(filename));
+				final String name = filename;
+				if (ExtensionFileFilter.hasSqlExtension(filename))
 				{
-					String filename = fl.getAbsolutePath();
-					
-					String ext = ExtensionFileFilter.getExtension(fl);
-					if (ext.length() == 0)
-					{
-						if (!filename.endsWith(".")) filename = filename + ".";
-						filename = filename + "sql";
-					}
-					final String name = filename;
-					EventQueue.invokeLater(new Runnable()
+					new Thread(new Runnable()
 					{
 						public void run() { saveAsSqlInsert(name); }
-					});
+					}).start();
 				}
-				else
+				else if (ExtensionFileFilter.hasTxtExtension(filename))
 				{
-					final String name = fl.getAbsolutePath();
-					EventQueue.invokeLater(new Runnable()
+					new Thread(new Runnable()
 					{
 						public void run() { saveAsAscii(name); }
-					});
+					}).start();
 				}
 				
-				lastDir = fc.getCurrentDirectory().getAbsolutePath();
-				WbManager.getSettings().setLastExportDir(lastDir);
 			}
 		}
 		catch (Exception e)
@@ -873,22 +881,6 @@ public class WbTable
 		}
 	}
 
-	/*
-	public TableCellEditor getCellEditor(int row, int column)
-	{
-		this.currentRow = row;
-		this.currentColumn = column;
-		return super.getCellEditor(row, column);
-	}
-
-	public TableCellRenderer getCellRenderer(int row, int column)
-	{
-		//this.currentRow = row;
-		//this.currentColumn = column;
-		return super.getCellRenderer(row, column);
-	}
-	*/
-	
 	public int getMaxColWidth()
 	{
 		return maxColWidth;
@@ -922,5 +914,15 @@ public class WbTable
 	{
 		return getClass().getName() + '@' + Integer.toHexString(hashCode());
 	}
+	
+	public void focusGained(FocusEvent e)
+	{
+	}
+	
+	public void focusLost(FocusEvent e)
+	{
+		this.stopEditing();
+	}
+	
 }
 

@@ -117,11 +117,14 @@ public class DwPanel extends JPanel
 		this.clearContent();
 		this.dbConnection = aConn;
 	}
-	
+
 	public int saveChanges(WbConnection aConnection)
 		throws WbException, SQLException
 	{
 		int rows = 0;
+		
+		this.infoTable.stopEditing();
+		
 		try
 		{
 			DataStore ds = this.realModel.getDataStore();
@@ -234,13 +237,14 @@ public class DwPanel extends JPanel
 			boolean repeatLast = false;
 			repeatLast = aSql.equals(this.sql);
 			cleanSql = SqlUtil.makeCleanSql(aSql, false).trim();
-			
+			//this.realModel = null;
 			this.sql = null;
 			
 			String verb = SqlUtil.getSqlVerb(cleanSql).toUpperCase();
 			Connection sqlcon = aConnection.getSqlConnection();
 			ResultSet rs = null;
 			List keepColumns = null;
+			DataStore newData = null;
 			
 			this.hasResultSet = false;
 			this.statusBar.clearRowcount();
@@ -259,21 +263,21 @@ public class DwPanel extends JPanel
 					table = table.substring(pos + 1);
 				}
 				this.hasResultSet = true;
-				this.realModel = aConnection.getMetadata().getTableDefinitionModel(null, schema, table);
+				newData = aConnection.getMetadata().getTableDefinition(null, schema, table);
 			}
 			else if (verb.equalsIgnoreCase("LIST"))
 			{
 				this.hasResultSet = true;
-				this.realModel = aConnection.getMetadata().getListOfTables();
+				newData = aConnection.getMetadata().getTables();
 			}
 			else if (verb.equalsIgnoreCase("LISTPROCS"))
 			{
-				this.realModel = aConnection.getMetadata().getListOfProcedures();
+				newData = aConnection.getMetadata().getProcedures(null, null);
 				this.hasResultSet = true;
 			}
 			else if (verb.equalsIgnoreCase("LISTDB"))
 			{
-				this.realModel = aConnection.getMetadata().getListOfCatalogs();
+				newData = aConnection.getMetadata().getCatalogInformation();
 				this.hasResultSet = true;
 			}
 			else
@@ -297,8 +301,8 @@ public class DwPanel extends JPanel
 				if (rs != null)
 				{
 					this.hasResultSet = true;
-					this.realModel = new DataStoreTableModel(rs, null);
-					this.realModel.getDataStore().checkUpdateTable();
+					newData = new DataStore(rs);
+					newData.checkUpdateTable();
 					rs.close();
 				}
 				else
@@ -314,9 +318,19 @@ public class DwPanel extends JPanel
 				{
 					this.infoTable.saveColumnSizes();
 				}
-				this.setVisible(false);
+				this.infoTable.setVisible(false);
 				this.infoTable.setAutoCreateColumnsFromModel(true);
-				this.infoTable.setModel(this.realModel, true);
+				//if (this.realModel == null)
+				//{
+					this.realModel = null;
+					this.realModel = new DataStoreTableModel(newData);
+					this.infoTable.setModel(this.realModel, true);
+				//}
+				//else
+				//{
+				//	this.realModel.setDataStore(newData);
+				//}
+				
 				if (repeatLast)
 				{
 					this.infoTable.restoreColumnSizes();
@@ -325,7 +339,7 @@ public class DwPanel extends JPanel
 				{
 					this.infoTable.adjustColumns();
 				}
-				this.setVisible(true);
+				this.infoTable.setVisible(true);
 				this.infoTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 				this.lastMessage = ResourceMgr.getString(ResourceMgr.MSG_SQL_EXCUTE_OK);
 				this.statusBar.setRowcount(this.infoTable.getModel().getRowCount());
@@ -417,6 +431,7 @@ public class DwPanel extends JPanel
 			newRow = this.realModel.insertRow(selectedRow);
 		}
 		this.infoTable.getSelectionModel().setSelectionInterval(newRow, newRow);
+		this.infoTable.scrollToRow(newRow);
 		infoTable.grabFocus();
 		infoTable.setEditingRow(newRow);
 		infoTable.setEditingColumn(1);

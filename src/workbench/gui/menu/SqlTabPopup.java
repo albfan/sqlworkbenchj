@@ -1,9 +1,3 @@
-/*
- * LogPanelPopup.java
- *
- * Created on November 28, 2001, 11:24 PM
- */
-
 package workbench.gui.menu;
 
 import javax.swing.JPopupMenu;

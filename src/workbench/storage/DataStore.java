@@ -6,6 +6,8 @@
 
 package workbench.storage;
 
+import java.lang.Boolean;
+import java.lang.Number;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Connection;
@@ -22,6 +24,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -45,6 +49,7 @@ public class DataStore
 	private boolean modified;
 	private int colCount;
 	private int realColumns;
+	
 	private ArrayList data;
 	private ArrayList pkColumns;
 	private ArrayList deletedRows;
@@ -59,6 +64,9 @@ public class DataStore
 	private String updateTable;
 	private ArrayList updateTableColumns;
 
+	// used during sorting to speed up comparison
+	private Class currentSortColumnClass;
+	
 	
 	public DataStore(String[] aColNames, int[] colTypes)
 	{
@@ -81,6 +89,21 @@ public class DataStore
 		}
 		this.setColumnSizes(colSizes);
 	}
+
+	/**
+	 *	Create a DataStore based on the contents of the given
+	 *	ResultSet. All columns of that ResultSet will be cached/used.
+	 */
+  public DataStore (ResultSet aResultSet)
+		throws SQLException
+  {
+		if (aResultSet == null) return;
+		this.initData(aResultSet);
+  }
+	
+	public DataStore(ResultSetMetaData metaData)
+	{
+	}
 	
 	public void setColumnSizes(int[] sizes)
 	{
@@ -92,26 +115,7 @@ public class DataStore
 			this.columnSizes[i] = sizes[i];
 		}
 	}
-	/**
-	 *	Create a DataStore based on the contents of the given
-	 *	ResultSet. All columns of that ResultSet will be cached/used.
-	 */
-	public DataStore(ResultSet aResultSet)
-		throws SQLException
-	{
-		this(aResultSet, null);
-	}
 	
-	/**
-	 *	Create a DataStore where only those columns are used
-	 *	which are listed in the given List
-	 */
-  public DataStore (ResultSet aResultSet, List aColumnList)
-		throws SQLException
-  {
-		if (aResultSet == null) return;
-		this.initData(aResultSet, aColumnList);
-  }
   
   public int getRowCount() { return this.data.size(); }
 	public int getColumnCount() { return this.colCount; }
@@ -122,6 +126,36 @@ public class DataStore
 		return this.columnTypes[aColumn];
 	}
 
+	public Class getColumnClass(int aColumn)
+	{
+		int type = this.getColumnType(aColumn);
+		switch (type)
+		{
+			case Types.BIGINT:
+			case Types.INTEGER:
+				return BigInteger.class;
+			case Types.SMALLINT:
+				return Integer.class;
+			case Types.NUMERIC:
+			case Types.DECIMAL:
+				return BigDecimal.class;
+			case Types.DOUBLE:
+				return Double.class;
+			case Types.REAL:
+			case Types.FLOAT:
+				return Float.class;
+			case Types.CHAR:
+			case Types.VARCHAR:
+				return String.class;
+			case Types.DATE:
+				return Date.class;
+			case Types.TIMESTAMP:
+				return Timestamp.class;
+			default:
+				return Object.class;
+		}
+	}
+	
 	public void deleteRow(int aRow)
 		throws IndexOutOfBoundsException
 	{
@@ -286,6 +320,45 @@ public class DataStore
 		RowData row = this.getRow(aRow);
 		return row.isNew();
 	}
+
+	public StringBuffer getRowDataAsString(int aRow)
+	{
+		int count = this.getColumnCount();
+		StringBuffer result = new StringBuffer(count * 20);
+		int start = 0;
+		for (int c=0; c < count; c++)
+		{
+			RowData row = this.getRow(aRow);
+			Object value = row.getValue(c);
+			if (value != null) result.append(value.toString());
+			if (c < count) result.append('\t');
+		}
+		return result;
+	}	
+	
+	public String getDataString(String aLineTerminator, boolean includeHeaders)
+	{
+		int colCount = this.getColumnCount();
+		int count = this.getRowCount();
+		StringBuffer result = new StringBuffer(count * 250);
+		if (includeHeaders)
+		{
+			// Start loop at 1 --> ignore status column
+			for (int i=0; i < colCount; i++)
+			{
+				result.append(this.getColumnName(i));
+				if (i < colCount - 1) result.append('\t');
+			}
+			result.append(aLineTerminator);
+		}
+		for (int i=0; i < count; i++)
+		{
+			result.append(this.getRowDataAsString(i));
+			result.append(aLineTerminator);
+		}
+		return result.toString();
+	}
+	
 	
 	public void reset()
 	{
@@ -293,7 +366,7 @@ public class DataStore
 		this.deletedRows = null;
 		this.modified = false;
 	}
-	
+
 	public boolean hasUpdateableColumns()
 	{
 		if (this.updateTableColumns == null)
@@ -335,59 +408,46 @@ public class DataStore
 		return (RowData)this.data.get(aRow);
 	}
 	
-	private void initData(ResultSet aResultSet, List aColumnList)
+	private void initMetaData(ResultSetMetaData metaData)
+		throws SQLException
+	{
+		this.colCount = metaData.getColumnCount();
+		int col = 0;
+		this.columnTypes = new int[this.colCount];
+		this.columnSizes = new int[this.colCount];
+		this.columnNames = new String[this.colCount];
+
+		for (int i=0; i < this.colCount; i++)
+		{
+			String name = metaData.getColumnName(i + 1);
+			this.columnTypes[i] = metaData.getColumnType(i + 1);
+			this.columnSizes[i] = metaData.getColumnDisplaySize(i + 1);
+			if (name != null && name.trim().length() > 0) this.realColumns ++;
+			this.columnNames[i] = name;
+		}
+	}
+	
+	private void initData(ResultSet aResultSet)
 	{
 		try
 		{
 			ResultSetMetaData metaData = aResultSet.getMetaData();
-			int realColCount = metaData.getColumnCount();
-			if (aColumnList == null)
-			{
-				this.colCount = realColCount;
-			}
-			else
-			{
-				this.colCount = aColumnList.size();
-			}
-			int col = 0;
-			this.columnTypes = new int[this.colCount];
-			this.columnSizes = new int[this.colCount];
-			this.columnNames = new String[this.colCount];
-			int[] colmapping = new int[realColCount];
-			
-			for (int i=0; i < realColCount; i++)
-			{
-				colmapping[i] = -1;
-				String name = metaData.getColumnName(i + 1);
-				if (aColumnList  == null || aColumnList.contains(name))
-				{
-					colmapping[i] = col;
-					this.columnTypes[col] = metaData.getColumnType(i + 1);
-					this.columnSizes[col] = metaData.getColumnDisplaySize(i + 1);
-					if (name != null && name.trim().length() > 0) this.realColumns ++;
-					this.columnNames[col] = name;
-					col ++;
-				}
-			}
+			this.initMetaData(metaData);
 			
 			this.data = new ArrayList(150);
 			while (aResultSet.next())
 			{
 				RowData row = new RowData(this.colCount);
-				for (int i=0; i < realColCount; i++)
+				for (int i=0; i < this.colCount; i++)
 				{
-					if (colmapping[i] > -1)
+					Object value = aResultSet.getObject(i + 1);
+					if (aResultSet.wasNull() || value == null)
 					{
-						Object value = aResultSet.getObject(i + 1);
-						int realCol = colmapping[i];
-						if (aResultSet.wasNull() || value == null)
-						{
-							row.setNull(realCol, this.columnTypes[realCol]);
-						}
-						else
-						{
-							row.setValue(realCol, value);
-						}
+						row.setNull(i, this.columnTypes[i]);
+					}
+					else
+					{
+						row.setValue(i, value);
 					}
 				}
 				row.resetStatus();
@@ -432,13 +492,18 @@ public class DataStore
 	public String getDataAsSqlInsert()
 		throws WbException, SQLException
 	{
+		return this.getDataAsSqlInsert("\n");
+	}
+	public String getDataAsSqlInsert(String aLineTerminator)
+		throws WbException, SQLException
+	{
 		if (!this.canSaveAsSqlInsert()) return "";
 		StringBuffer script = new StringBuffer(this.getRowCount() * 100);
 		int count = this.getRowCount();
 		for (int row = 0; row < count; row ++)
 		{
 			RowData data = this.getRow(row);
-			DmlStatement stmt = this.createInsertStatement(data, true); 
+			DmlStatement stmt = this.createInsertStatement(data, true, aLineTerminator); 
 			String sql = stmt.getExecutableStatement();
 			script.append(sql);
 			script.append(";");
@@ -446,6 +511,7 @@ public class DataStore
 		}
 		return script.toString();
 	}
+	
 	/**
 	 * Save the changes to this datastore to the database.
 	 * The changes are applied in the following order
@@ -493,6 +559,163 @@ public class DataStore
 			RowData row = this.getRow(i);
 			row.resetStatus();
 		}
+	}
+	
+	public int compareRowsByColumn(RowData row1, RowData row2, int column)
+	{
+		Object     o1 = row1.getValue(column);
+		Object     o2 = row2.getValue(column);
+		// If both values are null, return 0.
+		if (o1 == null && o2 == null)
+		{
+			return 0;
+		}
+		else if (o1 == null)
+		{// Define null less than everything.
+			return -1;
+		}
+		else if (o2 == null)
+		{
+			return 1;
+		}
+		
+		try
+		{
+			int result = ((Comparable)o1).compareTo(o2);
+			return result;
+		}
+		catch (Exception e)
+		{
+		}
+
+		if (o1 instanceof NullValue && o2 instanceof NullValue) return 0;
+		if (o1 instanceof NullValue) return -1;
+		if (o2 instanceof NullValue) return 2;
+
+		if (this.currentSortColumnClass.getSuperclass() == java.lang.Number.class)
+		{
+			Number n1 = (Number)row1.getValue(column);
+			double d1 = n1.doubleValue();
+			Number n2 = (Number)row2.getValue(column);
+			double d2 = n2.doubleValue();
+			if (d1 < d2)
+			{
+				return -1;
+			}
+			else if (d1 > d2)
+			{
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		else if (this.currentSortColumnClass == Date.class)
+		{
+			Date d1 = (Date)row1.getValue(column);
+			long n1 = d1.getTime();
+			Date d2 = (Date)row2.getValue(column);
+			long n2 = d2.getTime();
+			if (n1 < n2)
+			{
+				return -1;
+			}
+			else if (n1 > n2)
+			{
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		else if (this.currentSortColumnClass == String.class)
+		{
+			String s1 = (String)row1.getValue(column);
+			String s2 = (String)row2.getValue(column);
+			int    result = s1.compareTo(s2);
+			if (result < 0)
+			{
+				return -1;
+			}
+			else if (result > 0)
+			{
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		else if (this.currentSortColumnClass == Boolean.class)
+		{
+			Boolean bool1 = (Boolean)row1.getValue(column);
+			boolean b1 = bool1.booleanValue();
+			Boolean bool2 = (Boolean)row2.getValue(column);
+			boolean b2 = bool2.booleanValue();
+			if (b1 == b2)
+			{
+				return 0;
+			}
+			else if (b1)
+			{// Define false < true
+				return 1;
+			}
+			else
+			{
+				return -1;
+			}
+		}
+		else
+		{
+			Object v1 = row1.getValue(column);
+			Comparable comp = null;
+			if (v1 instanceof Comparable)
+			{
+				comp = (Comparable)v1;
+			}
+			else
+			{
+				comp = v1.toString();
+			}
+			int result = comp.compareTo(o2);
+			if (result < 0)
+			{
+				return -1;
+			}
+			else if (result > 0)
+			{
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+	}
+	
+	/**    Compare two rows.  All sorting columns will be sorted.
+	 *
+	 * @param row1 Row 1
+	 * @param row2 Row 2
+	 * @return 1, 0, or -1
+	 */
+	public int compare(RowData row1, RowData row2, int column, boolean ascending)
+	{
+		int result = compareRowsByColumn(row1, row2, column);
+		if (result != 0)
+		{
+			return ascending ? result : -result;
+		}
+		return 0;
+	}
+	
+	
+	public void sortByColumn(int aColumn, boolean ascending)
+	{
+		this.currentSortColumnClass = this.getColumnClass(aColumn);
+		Collections.sort(this.data, new ColumnComparator(aColumn, ascending));
 	}
 	
 	public Object convertCellValue(Object aValue, int aColumn)
@@ -691,20 +914,25 @@ public class DataStore
 		return dml;
 	}
 	
+	private DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus)
+	{
+		return this.createInsertStatement(aRow, ignoreStatus, "\n");
+	}
+	
 	/**
 	 *	Generate an insert statement for the given row
 	 *	When creating a script for the DataStore the ignoreStatus
 	 *	will be passed as true, thus ignoring the row status and
 	 *	some basic formatting will be applied to the SQL Statement
 	 */
-	private DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus)
+	private DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus, String lineEnd)
 	{
 		boolean first = true;
 		DmlStatement dml;
 		
 		if (!ignoreStatus && !aRow.isModified()) return null;
 		//String lineEnd = System.getProperty("line.separator", "\r\n");
-		String lineEnd = "\n";
+		//String lineEnd = "\n";
 		boolean newLineAfterColumn = false; //this.colCount > 5;
 		
 		ArrayList values = new ArrayList();
@@ -720,6 +948,11 @@ public class DataStore
 		{
 			if (ignoreStatus || aRow.isColumnModified(col))
 			{
+				if (col > 0)
+				{
+					sql.append(',');
+					valuePart.append(',');
+				}
 				if (ignoreStatus && newLineAfterColumn)
 				{
 					sql.append("  ");
@@ -727,11 +960,6 @@ public class DataStore
 				}
 				sql.append(this.getColumnName(col));
 				valuePart.append('?');
-				if (col < this.colCount - 2)
-				{
-					sql.append(',');
-					valuePart.append(',');
-				}
 				if (ignoreStatus && newLineAfterColumn) 
 				{
 					valuePart.append(lineEnd);
@@ -924,6 +1152,33 @@ public class DataStore
 			e.printStackTrace();
 		}
 	}
+	
+	class ColumnComparator implements Comparator
+	{
+		int column;
+		boolean ascending;
+		public ColumnComparator(int col, boolean asc)
+		{
+			this.column = col;
+			this.ascending = asc;
+		}
+		
+		public int compare(Object o1, Object o2)
+		{
+			try
+			{
+				RowData row1 = (RowData)o1;
+				RowData row2 = (RowData)o2;
+				return DataStore.this.compare(row1, row2, this.column, this.ascending);
+			}
+			catch (ClassCastException e)
+			{
+				// cannot happen
+			}
+			return 0;
+		}
+	}	
+
 
 }
 

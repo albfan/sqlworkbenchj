@@ -7,6 +7,8 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Toolkit;
@@ -27,6 +29,7 @@ import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.*;
 import workbench.gui.components.*;
+import workbench.gui.components.LoadingIcon;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.FilenameChangeListener;
@@ -98,6 +101,8 @@ public class SqlPanel
 	private WbConnection dbConnection;
 	private boolean updating = false;
 	private String alternateDelimiter = "./";
+	
+	private LoadingIcon loadingIndicatorIcon;
 	
 	/** Creates new SqlPanel */
 	public SqlPanel(int anId)
@@ -243,6 +248,7 @@ public class SqlPanel
 		this.editor.closeFile();
 		this.fireFilenameChanged();
 	}
+	
 	public void fireFilenameChanged()
 	{
 		if (this.filenameChangeListeners == null) return;
@@ -788,7 +794,7 @@ public class SqlPanel
 			});
 	}
 	
-	
+
 	public void runSql()
 	{
 		this.setCancelState(true);
@@ -915,9 +921,39 @@ public class SqlPanel
 		}
 	}
 
-	private synchronized void setBusy(boolean value)
+	private LoadingIcon getLoadingIndicator()
 	{
-		this.threadBusy = value;
+		if (this.loadingIndicatorIcon == null)
+		{
+			this.loadingIndicatorIcon = new LoadingIcon((Component)this.getParent());
+		}
+		return this.loadingIndicatorIcon;
+	}
+	private synchronized void setBusy(boolean busy)
+	{
+		/*
+		Container parent = this.getParent();
+		if (parent instanceof JTabbedPane)
+		{
+			JTabbedPane tab = (JTabbedPane)parent;
+			int index = tab.indexOfComponent(this);
+			if (index >= 0)
+			{
+				if (busy)
+				{
+					tab.setIconAt(index, this.getLoadingIndicator());
+					this.loadingIndicatorIcon.start();
+				}
+				else
+				{
+					if (this.loadingIndicatorIcon != null)
+						this.loadingIndicatorIcon.stop();
+					tab.setIconAt(index, null);
+				}
+			}
+		}
+		*/
+		this.threadBusy = busy;
 	}
 	
 	private synchronized boolean isBusy() { return this.threadBusy; }

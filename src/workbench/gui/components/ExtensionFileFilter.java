@@ -25,7 +25,9 @@ public class ExtensionFileFilter
 
 	private List extensions;
 	private String desc;
-
+	private static final String SQL_EXT = "sql";
+	private static final String TXT_EXT = "txt";
+	
 	private boolean ignoreCase = true;
 
 	public ExtensionFileFilter(String aDescription, List anExtensionList)
@@ -42,8 +44,11 @@ public class ExtensionFileFilter
 
 	public static String getExtension(File f)
 	{
+		return getExtension(f.getName());
+	}
+	public static String getExtension(String s)
+	{
 		String ext = "";
-		String s = f.getName();
 		int i = s.lastIndexOf('.');
 
 		if (i > 0 &&  i < s.length() - 1)
@@ -53,6 +58,18 @@ public class ExtensionFileFilter
 		return ext;
 	}
 
+	public static boolean hasSqlExtension(String aFilename)
+	{
+		String ext = getExtension(aFilename);
+		return SQL_EXT.equalsIgnoreCase(ext);
+	}
+	
+	public static boolean hasTxtExtension(String aFilename)
+	{
+		String ext = getExtension(aFilename);
+		return TXT_EXT.equalsIgnoreCase(ext);
+	}
+	
 	public boolean accept(File f)
 	{
 		if (f.isDirectory())

@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.io.PrintWriter;
 import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.KeyStroke;
@@ -236,8 +237,25 @@ public class EditorPanel extends JEditTextArea implements ClipboardSupport, Font
 		try
 		{
 			String filename = aFile.getAbsolutePath();
-			BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
-			writer.write(this.getText());
+			PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(filename)));
+			int count = this.getLineCount();
+			String line;
+			int trimLen;
+			for (int i=0; i < count; i++)
+			{
+				line = this.getLineText(i);
+				if (line.endsWith("\r\n") || line.endsWith("\n\r"))
+					trimLen = 2;
+				else if (line.endsWith("\n") || line.endsWith("\r"))
+					trimLen = 1;
+				else
+					trimLen = 0;
+
+				if (trimLen > 0)
+					writer.println(line.substring(0, line.length() - trimLen));
+				else
+					writer.println(line);
+			}
 			writer.close();
 			this.currentFile = aFile;
 			return true;

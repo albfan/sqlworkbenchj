@@ -6,11 +6,17 @@
 
 package workbench;
 
+import java.awt.Component;
 import java.awt.Font;
+import java.io.File;
+import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.filechooser.FileFilter;
 import workbench.db.ConnectionMgr;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.ExtensionFileFilter;
 import workbench.interfaces.FontChangedListener;
 import workbench.resource.Settings;
 import workbench.util.WbCipher;
@@ -58,6 +64,45 @@ public class WbManager
 		return this.cipher;
 	}
 
+	public String getExportFilename(Component caller, boolean includeSqlType)
+	{
+		String lastDir = settings.getLastExportDir();
+		JFileChooser fc = new JFileChooser(lastDir);
+		fc.addChoosableFileFilter(ExtensionFileFilter.getTextFileFilter());
+		if (includeSqlType)
+		{
+			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
+		}
+		String filename = null;
+
+		int answer = fc.showSaveDialog(SwingUtilities.getWindowAncestor(caller));
+		if (answer == JFileChooser.APPROVE_OPTION)
+		{
+			File fl = fc.getSelectedFile();
+			FileFilter ff = fc.getFileFilter();
+			if (ff == ExtensionFileFilter.getSqlFileFilter())
+			{
+				filename = fl.getAbsolutePath();
+
+				String ext = ExtensionFileFilter.getExtension(fl);
+				if (ext.length() == 0)
+				{
+					if (!filename.endsWith(".")) filename = filename + ".";
+					filename = filename + "sql";
+				}
+			}
+			else
+			{
+				filename = fl.getAbsolutePath();
+			}
+
+			lastDir = fc.getCurrentDirectory().getAbsolutePath();
+			settings.setLastExportDir(lastDir);
+		}
+
+		return filename;
+	}
+	
 	public void fontChanged(String aFontKey, Font newFont)
 	{
 		if (aFontKey.equals(Settings.DATA_FONT_KEY))

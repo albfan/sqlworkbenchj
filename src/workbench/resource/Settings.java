@@ -347,6 +347,16 @@ public class Settings
 	}
 
 
+	public void setLastSqlDividerLocation(int aDividerId, int y)
+	{
+		this.props.setProperty("workbench.gui.sql.lastdivider" + aDividerId, Integer.toString(y));
+	}
+
+	public int getLastSqlDividerLocation(int aDividerId)
+	{
+		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.sql.lastdivider" + aDividerId, "-1"));
+	}
+	
 	public void setSqlDividerLocation(int aDividerId, int y)
 	{
 		this.props.setProperty("workbench.gui.sql.divider" + aDividerId, Integer.toString(y));

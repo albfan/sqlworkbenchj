@@ -51,20 +51,15 @@ public class DataStoreTableModel
 	private boolean sortAscending = true;
 	private int sortColumn = -1;
 	
-	public DataStoreTableModel(ResultSet aResultSet) throws SQLException, WbException
-	{
-		this(aResultSet, null);
-	}
-	
 	public DataStoreTableModel(DataStore aDataStore) throws NullPointerException
 	{
 		if (aDataStore == null) throw new NullPointerException("DataStore cannot be null");
 		this.setDataStore(aDataStore);
 	}
 	
-	public DataStoreTableModel(ResultSet aResultSet, List aColumnList) throws SQLException, WbException
+	public DataStoreTableModel(ResultSet aResultSet) throws SQLException, WbException
 	{
-		DataStore ds = new DataStore(aResultSet, aColumnList);
+		DataStore ds = new DataStore(aResultSet);
 		this.setDataStore(ds);
 	}
 	
