@@ -200,14 +200,21 @@ public class WbConnection
 	}
 
 	public boolean getAutoCommit()
-		throws SQLException
 	{
-		return this.sqlConnection.getAutoCommit();
+		try
+		{
+			return this.sqlConnection.getAutoCommit();
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logWarning("WbConnection.getAutoCommit()", "Error when retrieving autoCommit attribute", e);
+			return false;
+		}
 	}
 
 	public void close()
 	{
-		this.rollback();
+		//this.rollback();
 		
 		try
 		{

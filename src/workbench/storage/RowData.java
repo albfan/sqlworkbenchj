@@ -13,6 +13,7 @@ class RowData
 	public static final int NEW = 2;
 	
 	private int status = NOT_MODIFIED;
+	private boolean dmlSent = false;
 	
 	private Object[] colData;
 	private Object[] originalData;
@@ -122,6 +123,7 @@ class RowData
 	public void resetStatus()
 	{
 		this.status = NOT_MODIFIED;
+		this.dmlSent = false;
 		this.originalData = null;
 	}
 
@@ -173,4 +175,10 @@ class RowData
 		this.status = this.status | MODIFIED;
 	}
 
+	public void setDmlSent(boolean aFlag)
+	{
+		this.dmlSent = aFlag;
+	}
+	
+	public boolean isDmlSent() { return this.dmlSent; }
 }

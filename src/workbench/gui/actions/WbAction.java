@@ -51,6 +51,11 @@ public class WbAction
 	}
 
 
+	public void setTooltip(String aText)
+	{
+		this.putValue(Action.SHORT_DESCRIPTION, aText);
+	}
+	
 	public void clearAccelerator()
 	{
 		this.putValue(Action.ACCELERATOR_KEY, null);
@@ -171,6 +176,16 @@ public class WbAction
 		}
 	}
 
+	public void removeFromInputMap(InputMap im, ActionMap am)
+	{
+		am.remove(this.getActionName());
+		im.remove(this.getAccelerator());
+		KeyStroke alternate = this.getAlternateAccelerator();
+		if (alternate != null)
+		{
+			im.remove(alternate);
+		}
+	}
 	public void putValue(String key, Object newValue)
 	{
 		if (Action.NAME.equals(key) && (newValue instanceof String) && (newValue != null))

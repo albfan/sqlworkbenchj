@@ -134,7 +134,6 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		
 		tfLibrary.setColumns(10);
 		tfLibrary.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-		tfLibrary.setToolTipText("null");
 		tfLibrary.addMouseListener(new TextComponentMouseListener());
 		tfLibrary.addFocusListener(new java.awt.event.FocusAdapter()
 		{
@@ -265,16 +264,16 @@ public class DriverEditorPanel extends javax.swing.JPanel
 	}
 	
 	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.JPanel jPanel1;
 	private javax.swing.JButton jButton1;
-	private javax.swing.JTextField tfLibrary;
+	private javax.swing.JPanel jPanel1;
+	private javax.swing.JLabel lblClassName;
 	private javax.swing.JLabel lblLibrary;
 	private javax.swing.JLabel lblName;
+	private javax.swing.JLabel lblSample;
+	private javax.swing.JTextField tfClassName;
+	private javax.swing.JTextField tfLibrary;
 	private javax.swing.JTextField tfName;
 	private javax.swing.JTextField tfSampleUrl;
-	private javax.swing.JTextField tfClassName;
-	private javax.swing.JLabel lblClassName;
-	private javax.swing.JLabel lblSample;
 	// End of variables declaration//GEN-END:variables
 
 	public static void main(String args[])

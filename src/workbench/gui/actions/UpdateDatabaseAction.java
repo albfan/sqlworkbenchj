@@ -5,12 +5,11 @@
  */
 package workbench.gui.actions;
 
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
+import workbench.interfaces.DbUpdater;
 
-import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -19,9 +18,9 @@ import workbench.resource.ResourceMgr;
  */
 public class UpdateDatabaseAction extends WbAction
 {
-	private SqlPanel panel;
+	private DbUpdater panel;
 	
-	public UpdateDatabaseAction(SqlPanel aPanel)
+	public UpdateDatabaseAction(DbUpdater aPanel)
 	{
 		super();
 		this.panel = aPanel;
@@ -35,13 +34,11 @@ public class UpdateDatabaseAction extends WbAction
 
 	public void actionPerformed(ActionEvent e)
 	{
-		Thread t = new Thread()
-		{
-			public void run()
-			{
-				panel.saveChangesToDatabase();
-			}
-		};
-		t.start();
+		panel.saveChangesToDatabase();
+	}
+	
+	public void setClient(DbUpdater aPanel)
+	{
+		this.panel = aPanel;
 	}
 }

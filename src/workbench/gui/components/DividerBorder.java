@@ -2,8 +2,10 @@ package workbench.gui.components;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
+import javax.swing.JPanel;
 
 import javax.swing.border.AbstractBorder;
 
@@ -99,5 +101,14 @@ public class DividerBorder extends AbstractBorder
 	}
 	
 
+	public static JPanel createSpacer(int aType, int aWidth)
+	{
+		JPanel p = new JPanel();
+		Dimension d = new Dimension(aWidth, 32768);
+		p.setMaximumSize(d);
+		p.setMinimumSize(d);
+		p.setBorder(new DividerBorder(aType));
+		return p;
+	}
 }
 

@@ -6,6 +6,7 @@
 
 package workbench.gui.sql;
 
+import workbench.log.LogMgr;
 
 /**
  *
@@ -50,7 +51,7 @@ public class SqlHistoryEntry
 		this.selectionEnd = -1;
 	}
 
-	public String toString() { return this.text; }
+	//public String toString() { return this.text; }
 	public String getText() { return this.text; }
 	public int getCursorPosition() { return this.cursorPos; }
 	public int getSelectionStart() { return this.selectionStart; }
@@ -59,14 +60,27 @@ public class SqlHistoryEntry
 	public void applyTo(EditorPanel editor)
 	{
 		if (editor == null) return;
-		editor.setText(this.text);
-		if (this.cursorPos > -1) editor.setCaretPosition(this.cursorPos);
-		if (this.selectionStart > -1 && this.selectionEnd > this.selectionStart)
+		try
 		{
-			editor.setSelectionStart(this.selectionStart);
-			editor.setSelectionEnd(this.selectionEnd);
+			editor.setText(this.text);
+			if (this.cursorPos > -1) editor.setCaretPosition(this.cursorPos);
+			if (this.selectionStart > -1 && this.selectionEnd > this.selectionStart && this.selectionStart < editor.getCaretPosition())
+			{
+				editor.setSelectionStart(this.selectionStart);
+				editor.setSelectionEnd(this.selectionEnd);
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("SqlHistoryEntry.applyTo()", "Error applying " + this.toString(), e);
 		}
 	}
+	
+	public String toString() 
+	{
+		return "{" + this.text.substring(0, 10) + "..., Cursor=" + this.cursorPos + ",Selection=[" + this.selectionStart + "," + this.selectionEnd + "] }";
+	}
+
 
 	public boolean equals(Object o)
 	{
@@ -99,18 +113,4 @@ public class SqlHistoryEntry
 		return input.substring(0, len + 1);
 	}
 	
-	public static void main(String args[])
-	{
-		try
-		{
-			String test = "    test\r\ntest2\r\n\r\n";
-			System.out.println(">" + trimEmptyLines(test) + "<");
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		System.out.println("done.");
-		System.exit(0);
-	}
 }

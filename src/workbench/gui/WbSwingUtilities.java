@@ -146,6 +146,7 @@ public class WbSwingUtilities
 		String[] options = new String[] { ResourceMgr.getString("LabelYes"), ResourceMgr.getString("LabelNo"), ResourceMgr.getString("LabelIgnoreAll")};
 		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
 		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);
+		dialog.setResizable(true);
 		dialog.show();
 		dialog.dispose();
 		Object result = ignorePane.getValue();
@@ -154,6 +155,24 @@ public class WbSwingUtilities
 		else if (result.equals(options[1])) return JOptionPane.NO_OPTION;
 		else if (result.equals(options[2])) return IGNORE_ALL;
 		else return JOptionPane.NO_OPTION;
+	}
+
+	public static final int DO_COMMIT = 0;
+	public static final int DO_ROLLBACK = 1;
+	
+	public static int getCommitRollbackQuestion(Component aCaller, String aMessage)
+	{
+		String[] options = new String[] { ResourceMgr.getString("LabelCommit"), ResourceMgr.getString("LabelRollback")};
+		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, null, options);
+		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);
+		dialog.setResizable(true);
+		dialog.show();
+		dialog.dispose();
+		Object result = ignorePane.getValue();
+		if (result == null) return DO_ROLLBACK;
+		else if (result.equals(options[0])) return DO_COMMIT;
+		else if (result.equals(options[1])) return DO_ROLLBACK;
+		else return DO_ROLLBACK;
 	}
 	
 	public static String getUserInput(Component caller, String aTitle, String initialValue)

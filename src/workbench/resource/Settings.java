@@ -829,6 +829,12 @@ public class Settings
 		return this.props.getProperty(aClass + "." + aProperty.toLowerCase(), aDefault);
 	}
 
+	public int getIntProperty(String aClass, String aProperty, int aDefault)
+	{
+		String value = this.getProperty(aClass, aProperty, Integer.toString(aDefault));
+		return StringUtil.getIntValue(value);
+	}
+	
 	public int getIntProperty(String aClass, String aProperty)
 	{
 		String value = this.getProperty(aClass, aProperty, "0");

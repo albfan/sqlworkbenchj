@@ -9,6 +9,7 @@ package workbench.gui.sql;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import javax.swing.JLabel;
 
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -34,13 +35,7 @@ public class DwStatusBar extends javax.swing.JPanel
 	private static final int BAR_HEIGHT = 22;
 	private static final int FIELD_HEIGHT = 18;
 
-	/** Creates new form DwStatusBar */
 	public DwStatusBar()
-	{
-		initComponents();
-	}
-
-	private void initComponents()
 	{
 		Dimension d = new Dimension(40, FIELD_HEIGHT);
 		this.tfRowCount = new JTextField();
@@ -53,7 +48,6 @@ public class DwStatusBar extends javax.swing.JPanel
 		this.tfMaxRows.setToolTipText(ResourceMgr.getDescription("TxtMaxRows"));
 		this.tfMaxRows.setHorizontalAlignment(SwingConstants.RIGHT);
 		this.tfMaxRows.addMouseListener(new TextComponentMouseListener());
-
 		JPanel p = new JPanel();
 		p.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		FlowLayout fl = new FlowLayout(FlowLayout.RIGHT);
@@ -89,6 +83,8 @@ public class DwStatusBar extends javax.swing.JPanel
 		tfStatus.setEditable(false);
 
 		this.add(tfStatus, BorderLayout.CENTER);
+		JLabel l = new JLabel(" " + ResourceMgr.getString("LabelMaxRows") + " ");
+		p.add(l);
 		p.add(tfMaxRows);
 		p.add(tfRowCount);
 		this.add(p, BorderLayout.EAST);
@@ -99,9 +95,24 @@ public class DwStatusBar extends javax.swing.JPanel
 		this.clearStatusMessage();
 	}
 
-	public void setRowcount(int maxRow)
+	public void setReadyMsg(String aMsg)
 	{
-		this.tfRowCount.setText(Integer.toString(maxRow));
+		if (aMsg == null)
+		{
+			this.readyMsg = StringUtil.EMPTY_STRING;
+		}
+		else
+		{
+			this.readyMsg = aMsg;
+		}
+	}
+	public void setRowcount(int count)
+	{
+		this.tfRowCount.setText(Integer.toString(count));
+	}
+	public void setMaxRows(int max)
+	{
+		this.tfMaxRows.setText(Integer.toString(max));
 	}
 
 	public void clearRowcount()
@@ -130,6 +141,7 @@ public class DwStatusBar extends javax.swing.JPanel
 
 	public int getMaxRows()
 	{
+		if (this.tfMaxRows == null) return 0;
 		return StringUtil.getIntValue(this.tfMaxRows.getText(), 0);
 	}
   
@@ -141,7 +153,7 @@ public class DwStatusBar extends javax.swing.JPanel
 	
 	private void doRepaint()
 	{
-		this.paint(this.getGraphics());
+		this.repaint();
 	}
 	
 }

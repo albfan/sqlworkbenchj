@@ -107,6 +107,7 @@ public class TableListPanel
 	private boolean shouldRetrieveTableDataCount;
 
 	private boolean busy;
+	private boolean ignoreStateChanged = false;
 
 	private static final String DROP_CMD = "drop-table";
 	private JMenu showDataMenu;
@@ -273,12 +274,20 @@ public class TableListPanel
 
 	private void updateShowDataMenu()
 	{
+		if (this.showDataMenu == null)
+		{
+			this.showDataMenu = new WbMenu(ResourceMgr.getString("MnuTxtShowTableData"));
+		}
+		
 		String[] panels = this.parentWindow.getPanelLabels();
+		if (panels == null) return;
+		
 		int current = this.parentWindow.getCurrentPanelIndex();
 		int newCount = panels.length;
+		if (current > newCount - 1) return;
+		
 		int currentCount = this.showDataMenu.getItemCount();
 
-		if (this.showDataMenu == null) return;
 		if (this.boldFont == null) this.initFonts();
 		JMenuItem item = null;
 
@@ -315,39 +324,55 @@ public class TableListPanel
 
 	private void addTablePanels()
 	{
-		if (this.displayTab.getComponentCount() > 3) return;
-		if (this.displayTab.getComponentCount() == 2) this.addDataPanel();
-		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerIndexes"), this.indexPanel);
-		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerFkColumns"), this.importedPanel);
-		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerReferencedColumns"), this.exportedPanel);
-		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTriggers"), this.triggers);
+		try
+		{
+			if (this.displayTab.getComponentCount() > 3) return;
+			this.ignoreStateChanged = true;
+			if (this.displayTab.getComponentCount() == 2) this.addDataPanel();
+			this.displayTab.add(ResourceMgr.getString("TxtDbExplorerIndexes"), this.indexPanel);
+			this.displayTab.add(ResourceMgr.getString("TxtDbExplorerFkColumns"), this.importedPanel);
+			this.displayTab.add(ResourceMgr.getString("TxtDbExplorerReferencedColumns"), this.exportedPanel);
+			this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTriggers"), this.triggers);
+		}
+		finally
+		{
+			this.ignoreStateChanged = false;
+		}
 	}
 
 	private void removeTablePanels(boolean includeDataPanel)
 	{
-		int index = this.displayTab.getSelectedIndex();
-
-		//if (this.displayTab.getTabCount() == 2) return;
-
-		this.displayTab.setSelectedIndex(0);
-
-		int count = this.displayTab.getTabCount();
-		if (count < 3 && includeDataPanel) return;
-		if (count < 2 && !includeDataPanel) return;
-
-		if (count == 3 && includeDataPanel) this.removeDataPanel();
-
-		this.displayTab.remove(this.indexPanel);
-		this.indexes.reset();
-		this.displayTab.remove(this.importedPanel);
-		this.importedKeys.reset();
-		this.displayTab.remove(this.exportedPanel);
-		this.exportedKeys.reset();
-		this.displayTab.remove(this.triggers);
-		this.triggers.reset();
-		if (index < this.displayTab.getTabCount())
+		try
 		{
-			this.displayTab.setSelectedIndex(index);
+			int index = this.displayTab.getSelectedIndex();
+			this.ignoreStateChanged = true;
+
+			//if (this.displayTab.getTabCount() == 2) return;
+
+			this.displayTab.setSelectedIndex(0);
+
+			int count = this.displayTab.getTabCount();
+			if (count < 3 && includeDataPanel) return;
+			if (count < 2 && !includeDataPanel) return;
+
+			if (count == 3 && includeDataPanel) this.removeDataPanel();
+
+			this.displayTab.remove(this.indexPanel);
+			this.indexes.reset();
+			this.displayTab.remove(this.importedPanel);
+			this.importedKeys.reset();
+			this.displayTab.remove(this.exportedPanel);
+			this.exportedKeys.reset();
+			this.displayTab.remove(this.triggers);
+			this.triggers.reset();
+			if (index < this.displayTab.getTabCount())
+			{
+				this.displayTab.setSelectedIndex(index);
+			}
+		}
+		finally
+		{
+			this.ignoreStateChanged = false;
 		}
 	}
 
@@ -370,6 +395,8 @@ public class TableListPanel
 	public void disconnect()
 	{
 		this.dbConnection = null;
+		this.tableTypes.removeActionListener(this);
+		this.displayTab.removeChangeListener(this);
 		this.reset();
 	}
 
@@ -380,7 +407,7 @@ public class TableListPanel
 		this.invalidateData();
 	}
 
-	private void resetDetails()
+	public void resetDetails()
 	{
 		this.tableDefinition.reset();
 		this.importedKeys.reset();
@@ -434,24 +461,6 @@ public class TableListPanel
 		catch (Exception e)
 		{
 		}
-
-		/*
-		try
-		{
-			List cat = this.dbConnection.getMetadata().getCatalogs();
-			this.catalogs.removeAllItems();
-			this.catalogs.addItem("*");
-			for (int i=0; i < cat.size(); i++)
-			{
-				this.catalogs.addItem(cat.get(i));
-			}
-			this.catalogs.setSelectedItem(null);
-		}
-		catch (Exception e)
-		{
-		}
-		this.catalogs.addActionListener(this);
-		*/
 
 		this.tableTypes.addActionListener(this);
 		this.displayTab.addChangeListener(this);
@@ -563,6 +572,11 @@ public class TableListPanel
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
+		this.updateDisplay();
+	}
+	
+	public void updateDisplay()
+	{
 		int count = this.tableList.getSelectedRowCount();
 
 		this.showDataMenu.setEnabled(count == 1);
@@ -580,16 +594,18 @@ public class TableListPanel
 			this.selectedTableName = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 			this.selectedObjectType = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE).toLowerCase();
 			this.resetDetails();
+			boolean dataVisible = false;
+			
 			if (this.selectedObjectType.indexOf("table") > -1)
 			{
 				addTablePanels();
+				dataVisible = true;
 			}
 			else
 			{
-				if (this.selectedObjectType.indexOf("view") > -1 ||
-				    this.selectedObjectType.indexOf("synonym") > -1 ||
-				    (this.selectedObjectType.indexOf("sequence") > 1 || this.dbConnection.getMetadata().isPostgres()))
+				if (isTableType(this.selectedObjectType))
 				{
+					dataVisible = true;
 					if (this.displayTab.getTabCount() == 2)
 					{
 						this.addDataPanel();
@@ -604,17 +620,34 @@ public class TableListPanel
 					removeTablePanels(true);
 				}
 			}
+			if (dataVisible)
+			{
+				this.tableData.setReadOnly(!maybeUpdateable(this.selectedObjectType));
+				this.tableData.setTable(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+			}
+			else
+			{
+				this.tableData.reset();
+			}
 			this.showDataMenu.setEnabled(this.isTableType(selectedObjectType));
-			this.tableData.setTable(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
 			this.startRetrieveCurrentPanel();
 		}
 	}
 
+	private boolean maybeUpdateable(String aType)
+	{
+		if (aType == null) return false;
+		return (aType.indexOf("table") > -1 || aType.indexOf("view") > -1);
+	}
+	
 	private boolean isTableType(String aType)
 	{
 		if (aType == null) return false;
-		aType = aType.toLowerCase();
-		return (aType.indexOf("table") > -1 || aType.indexOf("view") > -1 || aType.indexOf("synonym") > -1);
+		return (aType.indexOf("table") > -1 || 
+		        aType.indexOf("view") > -1 || 
+						aType.indexOf("synonym") > -1 ||
+						(this.selectedObjectType.indexOf("sequence") > -1 && this.dbConnection.getMetadata().isPostgres())
+					);
 	}
 
 	private String extendViewSource(String aSource, String aName, DataStore viewDefinition)
@@ -653,7 +686,8 @@ public class TableListPanel
 		result.append(aSource);
 		return result.toString();
 	}
-	private void retrieveTableDefinition()
+	
+	private synchronized void retrieveTableDefinition()
 		throws SQLException, WbException
 	{
 		DbMetadata meta = this.dbConnection.getMetadata();
@@ -712,57 +746,58 @@ public class TableListPanel
 		{
 			public void run()
 			{
-				WbSwingUtilities.showWaitCursor(caller);
 				retrieveCurrentPanel();
-				WbSwingUtilities.showDefaultCursor(caller);
 			}
 		}.start();
 	}
 
-	private void retrieveCurrentPanel()
+	private synchronized void retrieveCurrentPanel()
 	{
-		synchronized (retrieveLock)
+		if (this.busy) return;
+		
+		if (this.tableList.getSelectedRowCount() <= 0) return;
+		WbSwingUtilities.showWaitCursorOnWindow(this);
+		this.busy = true;
+		int index = this.displayTab.getSelectedIndex();
+		try
 		{
-			if (this.tableList.getSelectedRowCount() <= 0) return;
-			WbSwingUtilities.showWaitCursorOnWindow(this);
-			this.busy = true;
-			int index = this.displayTab.getSelectedIndex();
-
-			try
+			switch (index)
 			{
-				switch (index)
-				{
-					case 0:
-					case 1:
-						if (this.shouldRetrieveTable) this.retrieveTableDefinition();
-						break;
-					case 2:
-						if (this.shouldRetrieveTableDataCount) this.tableData.showData(!this.shiftDown);
-						break;
-					case 3:
-						if (this.shouldRetrieveIndexes) this.retrieveIndexes();
-						break;
-					case 4:
-						if (this.shouldRetrieveImportedKeys) this.retrieveImportedTables();
-						if (this.shouldRetrieveImportedTree) this.retrieveImportedTree();
-						break;
-					case 5:
-						if (this.shouldRetrieveExportedKeys) this.retrieveExportedTables();
-						if (this.shouldRetrieveExportedTree) this.retrieveExportedTree();
-						break;
-					case 6:
-						if (this.shouldRetrieveTriggers) this.retrieveTriggers();
-				}
-			}
-			catch (Throwable ex)
-			{
-				LogMgr.logError("TableListPanel.retrieveCurrentPanel()", "Error retrieving panel " + index, ex);
-			}
-			finally
-			{
-				this.busy = false;
+				case 0:
+				case 1:
+					if (this.shouldRetrieveTable) this.retrieveTableDefinition();
+					break;
+				case 2:
+					if (this.shouldRetrieveTableDataCount) 
+					{
+						this.tableData.showData(!this.shiftDown);
+						this.shouldRetrieveTableDataCount = false;
+					}
+					break;
+				case 3:
+					if (this.shouldRetrieveIndexes) this.retrieveIndexes();
+					break;
+				case 4:
+					if (this.shouldRetrieveImportedKeys) this.retrieveImportedTables();
+					if (this.shouldRetrieveImportedTree) this.retrieveImportedTree();
+					break;
+				case 5:
+					if (this.shouldRetrieveExportedKeys) this.retrieveExportedTables();
+					if (this.shouldRetrieveExportedTree) this.retrieveExportedTree();
+					break;
+				case 6:
+					if (this.shouldRetrieveTriggers) this.retrieveTriggers();
 			}
 		}
+		catch (Throwable ex)
+		{
+			LogMgr.logError("TableListPanel.retrieveCurrentPanel()", "Error retrieving panel " + index, ex);
+		}
+		finally
+		{
+			this.busy = false;
+		}
+
 		WbSwingUtilities.showDefaultCursorOnWindow(this);
 	}
 
@@ -773,7 +808,7 @@ public class TableListPanel
 		this.shouldRetrieveTriggers = false;
 	}
 
-	private void retrieveIndexes()
+	private synchronized void retrieveIndexes()
 		throws SQLException
 	{
 		DbMetadata meta = this.dbConnection.getMetadata();
@@ -782,7 +817,7 @@ public class TableListPanel
 		this.shouldRetrieveIndexes = false;
 	}
 
-	private void retrieveExportedTables()
+	private synchronized void retrieveExportedTables()
 		throws SQLException
 	{
 		DbMetadata meta = this.dbConnection.getMetadata();
@@ -792,7 +827,7 @@ public class TableListPanel
 		this.shouldRetrieveExportedKeys = false;
 	}
 
-	private void retrieveImportedTables()
+	private synchronized void retrieveImportedTables()
 		throws SQLException
 	{
 		DbMetadata meta = this.dbConnection.getMetadata();
@@ -901,7 +936,6 @@ public class TableListPanel
 			}
 			else if (command.equals(DROP_CMD))
 			{
-				System.out.println("drop-table");
 				this.dropTables();
 			}
 		}
@@ -1072,7 +1106,7 @@ public class TableListPanel
 	 */
 	public void stateChanged(ChangeEvent e)
 	{
-		//System.out.println("stateChanged, source=" + e.getSource().getClass().getName());
+		if (this.ignoreStateChanged) return;
     if (e.getSource() == this.displayTab)
     {
       this.startRetrieveCurrentPanel();
@@ -1096,7 +1130,18 @@ public class TableListPanel
 
 	public void fileNameChanged(Object sender, String newFilename)
 	{
-		this.updateShowDataMenu();
+		try
+		{
+			this.updateShowDataMenu();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("TableListPanel.fileNameChanged()", "Error when updating the popup menu", e);
+			
+			// re-initialize the menu from scratch
+			
+			try { this.updateShowDataMenu(); } catch (Throwable th) {}
+		}
 	}
 
 	public void mouseClicked(MouseEvent e)

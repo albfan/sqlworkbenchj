@@ -13,9 +13,12 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import workbench.exception.WbException;
+import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
 
 /**
@@ -119,13 +122,72 @@ public class DbDriver
 	public Connection connect(String url, String user, String password)
 		throws WbException, SQLException
 	{
+		return this.connect(url, user, password, null);
+	}
+	
+	public Connection connect(String url, String user, String password, String id)
+		throws WbException, SQLException
+	{
+		return this.connect(url, user, password, id, null);
+	}
+	
+	public Connection connect(String url, String user, String password, String id, Properties connProps)
+		throws WbException, SQLException
+	{
 		Connection c = null;
 		try
 		{
 			this.loadDriverClass();
+			if (!this.driverClassInstance.acceptsURL(url))
+			{
+				String msg = ResourceMgr.getString("ErrorInvalidUrl");
+				msg = msg.replaceAll("%driver%", this.driverClass);
+				msg = msg + " " + url;
+				throw new SQLException(msg);
+			}
+			
 			Properties props = new Properties();
 			if (user != null) props.put("user", user);
 			if (password != null) props.put("password", password);
+			
+			if (connProps != null)
+			{
+				Iterator itr = props.keySet().iterator();
+				while (itr.hasNext())
+				{
+					Map.Entry entry = (Map.Entry)itr.next();
+					if (!props.containsKey(entry.getKey()))
+					{
+						props.put(entry.getKey(), entry.getValue());
+					}
+				}
+			}
+			
+			// identify the program name when connecting
+			// this is different for each DBMS...
+			String propName = null;
+			if (url.startsWith("jdbc:oracle")) 
+			{
+				propName = "v$session.program";
+				if (id != null) props.put("v$session.terminal", id);
+			}
+			else if (url.startsWith("jdbc:inetdae"))
+			{
+				propName = "appname";
+			}
+			else if (url.startsWith("jdbc:jtds"))
+			{
+				propName = "APPNAME";
+			}
+			else if (url.startsWith("jdbc:microsoft:sqlserver"))
+			{
+				propName = "ProgramName";
+			}
+			if (propName != null && !props.containsKey(propName)) 
+			{
+				props.put(propName, ResourceMgr.TXT_PRODUCT_NAME);
+			}
+			
 			c = this.driverClassInstance.connect(url, props);
 			if (c == null)
 			{

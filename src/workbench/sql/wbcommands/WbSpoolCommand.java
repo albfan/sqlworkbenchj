@@ -18,15 +18,15 @@ import workbench.util.StringUtil;
  *
  * @author  workbench@kellerer.org
  */
-public class WbSpoolCommand 
+public class WbSpoolCommand
 	extends SelectCommand
 {
 	public static final String VERB = "SPOOL";
 	public DataSpooler spooler;
 	private int instance;
-	
+
 	private ArgumentParser cmdLine;
-	
+
 	public WbSpoolCommand()
 	{
 		cmdLine = new ArgumentParser();
@@ -41,23 +41,25 @@ public class WbSpoolCommand
 		cmdLine.addArgument("cleancr");
 		cmdLine.addArgument("charfunc");
 		cmdLine.addArgument("concat");
+		cmdLine.addArgument("commitevery");
+		cmdLine.addArgument("header");
+		cmdLine.addArgument("createtable");
+		cmdLine.addArgument("nodata");
 	}
 
 	public String getVerb() { return VERB; }
-	
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql) 
+
+	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException, WbException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
 		int pos = aSql.indexOf(' ');
-		aSql = aSql.substring(pos);
-		String type = null;
-		String file = null;
-		String table = null;
-		String delimiter = null;
-		String cleancr = null;
-		this.spooler = new DataSpooler();
+		if (pos > -1) 
+			aSql = aSql.substring(pos);
+		else 
+			aSql = "";
+		
 		try
 		{
 			cmdLine.parse(aSql);
@@ -68,55 +70,71 @@ public class WbSpoolCommand
 			result.setFailure();
 			return result;
 		}
+
+		String type = null;
+		String file = null;
+		
+		String cleancr = null;
+		this.spooler = new DataSpooler();
 		
 		type = cmdLine.getValue("type");
 		file = cmdLine.getValue("file");
-		table = cmdLine.getValue("table");
-		delimiter = cmdLine.getValue("delimiter");
-		if (type == null || file == null) 
+		
+		if (type == null || file == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrorSpoolWrongParameters"));
 			result.setFailure();
 			return result;
 		}
+
+		String table = cmdLine.getValue("table");
 		
 		if ("text".equalsIgnoreCase(type))
 		{
+			
 			spooler.setOutputTypeText();
+			String delimiter = cmdLine.getValue("delimiter");
 			if (delimiter != null) spooler.setTextDelimiter(delimiter);
+			
 			String quote = cmdLine.getValue("quotechar");
 			System.out.println("quote=" + quote);
 			if (quote != null) spooler.setTextQuoteChar(quote);
-			
+
 			String format = cmdLine.getValue("dateformat");
 			if (format != null) spooler.setTextDateFormat(format);
-			
+
 			format = cmdLine.getValue("timestampformat");
 			if (format != null) spooler.setTextTimestampFormat(format);
-			
+
 			format = cmdLine.getValue("decimal");
 			if (format != null) spooler.setDecimalSymbol(format);
-			
+
+			String header = cmdLine.getValue("header");
+			spooler.setExportHeaders(StringUtil.stringToBool(header));
 			spooler.setCleanCarriageReturns(cmdLine.getBoolean("cleancr"));
 		}
 		else if ("sql".equalsIgnoreCase(type))
 		{
 			spooler.setOutputTypeSqlInsert();
+			String create = cmdLine.getValue("createtable");
+			spooler.setIncludeCreateTable(StringUtil.stringToBool(create));
 			spooler.setChrFunction(cmdLine.getValue("charfunc"));
 			spooler.setConcatString(cmdLine.getValue("concat"));
+			int commit = StringUtil.getIntValue(cmdLine.getValue("commitevery"),-1);
+			spooler.setCommitEvery(commit);
 			if (table != null) spooler.setTableName(table);
 		}
 		else if ("xml".equalsIgnoreCase(type))
 		{
 			String format = cmdLine.getValue("dateformat");
 			if (format != null) spooler.setTextDateFormat(format);
-			
+
 			format = cmdLine.getValue("timestampformat");
 			if (format != null) spooler.setTextTimestampFormat(format);
-			
+
 			format = cmdLine.getValue("decimal");
 			if (format != null) spooler.setDecimalSymbol(format);
-			
+
 			spooler.setOutputTypeXml();
 			if (table != null) spooler.setTableName(table);
 		}
@@ -135,13 +153,13 @@ public class WbSpoolCommand
 		//msg = msg + " quote=" + spooler.getTextQuoteChar();
 		result.addMessage(msg);
 		return result;
-	}	
-	
+	}
+
 	public boolean isResultSetConsumer()
 	{
 		return true;
 	}
-	
+
 	public void consumeResult(StatementRunnerResult aResult)
 	{
 		try
@@ -151,8 +169,8 @@ public class WbSpoolCommand
 				ResultSet[] data = aResult.getResultSets();
 				this.spooler.setSql(aResult.getSourceCommand());
 				this.spooler.startExport(data[0]);
-				
-				
+
+
 				String msg = null;
 
 				if (spooler.isSuccess())
@@ -170,7 +188,7 @@ public class WbSpoolCommand
 					}
 					aResult.addMessage("");
 				}
-				
+
 				String warn = ResourceMgr.getString("TxtWarning");
 				spoolMsg = this.spooler.getWarnings();
 				if (spoolMsg.length > 0)
@@ -180,7 +198,7 @@ public class WbSpoolCommand
 						aResult.addMessage(warn + ": " + spoolMsg[i]);
 					}
 					aResult.addMessage("");
-				}				
+				}
 				msg = ResourceMgr.getString("MsgSpoolSource") + " " + aResult.getSourceCommand();
 				aResult.addMessage(msg);
 				msg = ResourceMgr.getString("MsgSpoolTarget") + " " + this.spooler.getOutputFilename();

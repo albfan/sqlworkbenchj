@@ -357,29 +357,41 @@ public class MainWindow
 
 	private void checkConnectionForPanel(MainPanel aPanel)
 	{
-		WbConnection conn = aPanel.getConnection();
-		if (conn == null)
+		this.checkConnectionForPanel(aPanel, true);
+	}
+	
+	private void checkConnectionForPanel(MainPanel aPanel, boolean createConnection)
+	{
+		try
 		{
-			if (this.currentProfile != null && this.currentProfile.getUseSeperateConnectionPerTab())
+			WbConnection conn = aPanel.getConnection();
+			if (conn == null)
 			{
-				WbSwingUtilities.showWaitCursor(this);
-				try
+				if (this.currentProfile != null && this.currentProfile.getUseSeperateConnectionPerTab() && createConnection)
 				{
-					aPanel.showStatusMessage(ResourceMgr.getString("MsgConnecting"));
-					aPanel.setConnection(this.getConnectionForTab());
+					WbSwingUtilities.showWaitCursor(this);
+					try
+					{
+						aPanel.showStatusMessage(ResourceMgr.getString("MsgConnecting"));
+						aPanel.setConnection(this.getConnectionForTab());
+					}
+					catch (Exception e)
+					{
+						LogMgr.logError("MainWindow.checkConnectionForPanel()", "Error setting up connection for selected panel", e);
+						WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("ErrorNoConnectionAvailable"));
+					}
+					aPanel.showStatusMessage("");
+					WbSwingUtilities.showDefaultCursor(this);
 				}
-				catch (Exception e)
+				else if (this.currentConnection != null)
 				{
-					LogMgr.logError("MainWindow.tabSelected()", "Error setting up connection for selected panel", e);
-					WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("ErrorNoConnectionAvailable"));
+					aPanel.setConnection(this.currentConnection);
 				}
-				aPanel.showStatusMessage("");
-				WbSwingUtilities.showDefaultCursor(this);
 			}
-			else if (this.currentConnection != null)
-			{
-				aPanel.setConnection(this.currentConnection);
-			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("MainWindow.checkConnectionForPanel()", "Error when checking connection", e);
 		}
 	}
 	private void tabSelected(int anIndex)
@@ -542,11 +554,14 @@ public class MainWindow
 			this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			this.showStatusMessage(ResourceMgr.getString("MsgConnecting"));
 			this.paint(this.getGraphics());
+			
 			try
 			{
 				ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
 				WbConnection conn = null;
 
+				this.loadWorkspaceForProfile(aProfile);
+				
 				if (aProfile.getUseSeperateConnectionPerTab())
 				{
 					// getConnectionForTab() checks these variables
@@ -555,7 +570,8 @@ public class MainWindow
 					this.currentConnection = null;
 					this.currentProfile = aProfile;
 					MainPanel p = this.getCurrentPanel();
-					p.setConnection(this.getConnectionForTab());
+					conn = this.getConnectionForTab();
+					p.setConnection(conn);
 				}
 				else
 				{
@@ -573,33 +589,6 @@ public class MainWindow
 				
 				this.currentProfile = aProfile;
 				connected = true;
-
-				String file = this.currentProfile.getWorkspaceFile();
-				String realFilename = WbManager.getInstance().replaceConfigDir(file);
-				if (realFilename != null && realFilename.length() > 0)
-				{
-					File f = new File(realFilename);
-					if (!f.exists())
-					{
-						boolean open = WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgProfileWorkspaceNotFound"));
-						if (open)
-						{
-							file = WbManager.getInstance().getWorkspaceFilename(this, false, true);
-							this.currentProfile.setWorkspaceFile(file);
-						}
-					}
-					if (file != null)
-					{
-						// loadWorkspace will replace the %ConfigDir% placeholder,
-						// so we need to pass the original filename
-						this.loadWorkspace(file);
-						this.isProfileWorkspace = true;
-					}
-				}
-				else
-				{
-					this.loadDefaultWorkspace();
-				}
 			}
 			catch (ClassNotFoundException cnf)
 			{
@@ -616,6 +605,7 @@ public class MainWindow
 				this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_CONNECTION_ERROR) + "\r\n\n" + e.toString());
 				LogMgr.logError("MainWindow.connectTo()", "Error during connect", e);
 			}
+			
 			this.dbExplorerAction.setEnabled(true);
 			this.disconnectAction.setEnabled(true);
 		}
@@ -642,6 +632,45 @@ public class MainWindow
 		return connected;
 	}
 
+	private void loadWorkspaceForProfile(ConnectionProfile aProfile)
+	{
+		String realFilename = null;
+		try
+		{
+			String file = aProfile.getWorkspaceFile();
+			realFilename = WbManager.getInstance().replaceConfigDir(file);
+			if (realFilename != null && realFilename.length() > 0)
+			{
+				File f = new File(realFilename);
+				if (!f.exists())
+				{
+					boolean open = WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgProfileWorkspaceNotFound"));
+					if (open)
+					{
+						file = WbManager.getInstance().getWorkspaceFilename(this, false, true);
+						aProfile.setWorkspaceFile(file);
+					}
+				}
+				if (file != null)
+				{
+					// loadWorkspace will replace the %ConfigDir% placeholder,
+					// so we need to pass the original filename
+					this.loadWorkspace(file);
+					this.isProfileWorkspace = true;
+				}
+			}
+			else
+			{
+				this.loadDefaultWorkspace();
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("MainWindow.loadCurrentWorkspace()", "Error reading workspace " + realFilename, e);
+			this.loadDefaultWorkspace();
+		}
+	}
+	
 	public void disconnect()
 	{
 		this.disconnect(true);
@@ -662,6 +691,7 @@ public class MainWindow
 			if (conn != null) mgr.disconnect(conn.getId());
 			sql.disconnect();
 		}
+		
 		if (this.dbExplorerPanel != null)
 		{
 			// the Explorer panel might still be connected if
@@ -689,6 +719,29 @@ public class MainWindow
 		if (this.dbExplorerAction != null) this.dbExplorerAction.setEnabled(false);
 	}
 
+	public boolean abortAll()
+	{
+		boolean success = true;
+		try
+		{
+			for (int i=0; i < this.sqlTab.getTabCount(); i++)
+			{
+				MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
+				if (sql instanceof SqlPanel)
+				{
+					SqlPanel sp = (SqlPanel)sql;
+					success = success && sp.abortExecution();
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("MainWindow.abortAll()", "Error stopping execution",e);
+			success = false;
+		}
+		return success;
+	}
+	
 	public void selectCurrentEditorLater()
 	{
 		EventQueue.invokeLater(new Runnable()
@@ -741,7 +794,11 @@ public class MainWindow
 		this.setTitle(title.toString());
 	}
 
-	public void setConnection(WbConnection con)
+	/**
+	 * used internally to store the current connection 
+	 * if one connection for all tabs is used
+	 */
+	private void setConnection(WbConnection con)
 	{
 		boolean explorerIncluded = false;
 		for (int i=0; i < this.sqlTab.getTabCount(); i++)
@@ -767,7 +824,7 @@ public class MainWindow
 			}
 		}
 	}
-
+	
 	private boolean connecting = false;
 
 	public void selectConnection()
@@ -788,17 +845,15 @@ public class MainWindow
         if (prof != null)
         {
 					this.currentProfile = prof;
-          if (this.connectTo(prof))
-					{
-						WbManager.getSettings().setLastConnection(this.currentProfile.getName());
-					}
+					WbManager.getSettings().setLastConnection(this.currentProfile.getName());
+          this.connectTo(prof);
         }
       }
 			if (dialog != null) dialog.dispose();
 		}
 		catch (Throwable th)
 		{
-			LogMgr.logError("MainWindow.selectConnection()", "Error when disposing dialog", th);
+			LogMgr.logError("MainWindow.selectConnection()", "Error during connect", th);
 		}
 		finally
 		{
@@ -1071,6 +1126,7 @@ public class MainWindow
 		if (filename == null) return;
 		this.loadWorkspace(filename);
 		this.isProfileWorkspace = this.checkMakeProfileWorkspace();
+		this.updateWindowTitle();
 	}
 
 	private boolean checkMakeProfileWorkspace()
@@ -1104,7 +1160,6 @@ public class MainWindow
 		{
 			for (int i=0; i < (tabCount - newCount); i++)
 			{
-				System.out.println("removing tab " + i);
 				this.removeLastTab();
 			}
 		}
@@ -1315,7 +1370,7 @@ public class MainWindow
 		}
 		SqlPanel sql = new SqlPanel(index + 1);
 
-		this.checkConnectionForPanel(sql);
+		this.checkConnectionForPanel(sql, false);
 		sql.addFilenameChangeListener(this);
 		this.sqlTab.add(sql, index);
 		this.setTabTitle(index, ResourceMgr.getString("LabelTabStatement") + " ");
@@ -1401,7 +1456,7 @@ public class MainWindow
 		if (this.currentProfile != null && this.currentProfile.getUseSeperateConnectionPerTab())
 		{
 			WbConnection conn = panel.getConnection();
-			if (this.currentConnection != conn)
+			if (conn != null)
 			{
 				WbManager.getInstance().getConnectionMgr().disconnect(conn.getId());
 			}
@@ -1424,21 +1479,6 @@ public class MainWindow
 		}
 		int newTab = this.sqlTab.getSelectedIndex();
 		this.tabSelected(newTab);
-	}
-
-	public void listMenus()
-	{
-		for (int i=0; i < this.panelMenus.size(); i ++)
-		{
-			JMenuBar bar = (JMenuBar)this.panelMenus.get(i);
-			System.out.print("Menu " + i  + "=");
-			for (int k=0; k < bar.getComponentCount(); k++)
-			{
-				JMenuItem item = (JMenuItem)bar.getComponent(k);
-				System.out.print("/" + item.getText());
-			}
-			System.out.println("");
-		}
 	}
 
 	/**

@@ -7,7 +7,7 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import javax.swing.Action;
-import workbench.gui.sql.SqlPanel;
+import workbench.interfaces.DbData;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -16,9 +16,9 @@ import workbench.resource.ResourceMgr;
  */
 public class DeleteRowAction extends WbAction
 {
-	private SqlPanel client;
+	private DbData client;
 
-	public DeleteRowAction(SqlPanel aClient)
+	public DeleteRowAction(DbData aClient)
 	{
 		super();
 		this.client = aClient;

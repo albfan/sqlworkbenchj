@@ -10,6 +10,12 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.SwingConstants;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import workbench.WbManager;
 
@@ -17,7 +23,11 @@ import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.DividerBorder;
+import workbench.gui.components.WbButton;
 import workbench.gui.components.WbTable;
+import workbench.gui.components.WbToolbar;
+import workbench.gui.sql.DwPanel;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -36,14 +46,15 @@ public class TableDataPanel
 	implements Reloadable, ActionListener
 {
 	private WbConnection dbConnection;
-	private WbTable dataTable;
+	private DwPanel dataDisplay;
+	//private WbTable dataTable;
 
 	private Object retrieveLock = new Object();
 
 	private JButton config;
-	private JTextField maxRowField;
+	//private JTextField maxRowField;
 	private JLabel rowCountLabel;
-	private JLabel maxRowsLabel;
+	//private JLabel maxRowsLabel;
 	private JCheckBox autoRetrieve;
 
 	private long warningThreshold = -1;
@@ -53,6 +64,8 @@ public class TableDataPanel
 	private String catalog;
 	private String schema;
 	private String tableName;
+	private ImageIcon loadingIcon;
+	private Image loadingImage;
 
 	public TableDataPanel() throws Exception
 	{
@@ -60,39 +73,85 @@ public class TableDataPanel
 		this.setLayout(new BorderLayout());
     JPanel topPanel = new JPanel();
 		topPanel.setMaximumSize(new Dimension(32768, 32768));
-		topPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
-
+		//topPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
+		BoxLayout box = new BoxLayout(topPanel, BoxLayout.X_AXIS);
+		topPanel.setLayout(box);
+		
 		ReloadAction a = new ReloadAction(this);
-		JButton b = a.getToolbarButton();
-		b.setBorder(new EtchedBorder());
-		b.setToolTipText(ResourceMgr.getDescription("TxtLoadTableData"));
-		topPanel.add(b);
+		a.setTooltip(ResourceMgr.getDescription("TxtLoadTableData"));
+		
+		WbToolbar toolbar = new WbToolbar();
+		toolbar.addDefaultBorder();
+		topPanel.add(toolbar);
+		toolbar.add(a);
+		toolbar.addSeparator();
+		
+		//JButton b = a.getToolbarButton();
+		//b.setBorder(new EtchedBorder());
+		//b.setToolTipText(ResourceMgr.getDescription("TxtLoadTableData"));
+		//topPanel.add(b);
+		
+		topPanel.add(Box.createHorizontalStrut(15));
 
 		autoRetrieve = new JCheckBox(ResourceMgr.getString("LabelAutoRetrieveTableData"));
+		autoRetrieve.setToolTipText(ResourceMgr.getDescription("LabelAutoRetrieveTableData"));
+		autoRetrieve.setHorizontalTextPosition(SwingConstants.LEFT);
 		topPanel.add(autoRetrieve);
 
+		topPanel.add(Box.createHorizontalStrut(10));
+		
 		rowCountLabel = new JLabel(ResourceMgr.getString("LabelTableDataRowCount"));
+		rowCountLabel.setToolTipText(ResourceMgr.getDescription("LabelTableDataRowCount"));
 		Font std = WbManager.getSettings().getStandardFont();
 		Font bold = std.deriveFont(Font.BOLD);
 		rowCountLabel.setFont(bold);
+		rowCountLabel.setHorizontalTextPosition(SwingConstants.LEFT);
 		topPanel.add(rowCountLabel);
 
-		maxRowsLabel = new JLabel(ResourceMgr.getString("LabelTableDataMaxRows"));
-		topPanel.add(maxRowsLabel);
+		topPanel.add(Box.createHorizontalStrut(10));
 
-		this.maxRowField = new JTextField(4);
-		topPanel.add(this.maxRowField);
-
-		this.config = new JButton(ResourceMgr.getString("LabelConfigureWarningThreshold"));
+		topPanel.add(Box.createHorizontalGlue());
+		this.config = new WbButton(ResourceMgr.getString("LabelConfigureWarningThreshold"));
 		this.config.addActionListener(this);
+		Border border = new CompoundBorder(new EtchedBorder(), new EmptyBorder(1,6,1,6));
+		this.config.setBorder(border);
 		topPanel.add(this.config);
 		
+		//maxRowsLabel = new JLabel(ResourceMgr.getString("LabelTableDataMaxRows"));
+		//topPanel.add(maxRowsLabel);
+
+		//this.maxRowField = new JTextField(4);
+		//topPanel.add(this.maxRowField);
+
 		this.add(topPanel, BorderLayout.NORTH);
-		this.dataTable = new WbTable();
-		JScrollPane scroll = new JScrollPane(this.dataTable);
-		this.add(scroll, BorderLayout.CENTER);
+		
+		this.dataDisplay = new DwPanel();
+		this.dataDisplay.setManageActions(true);
+		this.dataDisplay.setShowLoadProcess(true);
+		this.dataDisplay.setDefaultStatusMessage("");
+		this.dataDisplay.getTable().setMaxColWidth(WbManager.getSettings().getMaxColumnWidth());
+		this.dataDisplay.getTable().setMinColWidth(WbManager.getSettings().getMinColumnWidth());
+		
+		toolbar.add(this.dataDisplay.getUpdateDatabaseAction());
+		toolbar.addSeparator();
+		toolbar.add(this.dataDisplay.getInsertRowAction());
+		toolbar.add(this.dataDisplay.getDeleteRowAction());
+		
+		//this.dataTable = this.dataDisplay.getTable();
+		//JScrollPane scroll = new JScrollPane(this.dataTable);
+		this.add(dataDisplay, BorderLayout.CENTER);
 	}
 
+	private ImageIcon getLoadingIndicator()
+	{
+		if (this.loadingIcon == null)
+		{
+			this.loadingImage = ResourceMgr.getPicture("wait").getImage();
+			this.loadingIcon = new ImageIcon(this.loadingImage);
+		}
+		return this.loadingIcon;
+	}
+	
 	public void disconnect()
 	{
 		this.dbConnection = null;
@@ -101,34 +160,34 @@ public class TableDataPanel
 
 	private int getMaxRows()
 	{
-		int rows;
-		try
-		{
-			rows = Integer.parseInt(this.maxRowField.getText());
-		}
-		catch (Exception e)
-		{
-			rows = 0;
-		}
-		finally
-		{
-		}
-		return rows;
+		return this.dataDisplay.getMaxRows();
 	}
 
 	public void reset()
 	{
-		if (this.dataTable != null) this.dataTable.reset();
+		this.dataDisplay.clearContent();
 	}
 
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
+		try
+		{
+			this.dataDisplay.setConnection(aConnection);
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError("TableDataPanel.setConnection()", "Error when setting connection", th);
+		}
 	}
 
 	public long showRowCount()
 	{
 		if (this.dbConnection == null) return -1;
+		this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount"));
+		this.rowCountLabel.setIcon(this.getLoadingIndicator());
+		this.repaint();
+		this.rowCountLabel.repaint();
 		String sql = this.buildSqlForTable(true);
 		if (sql == null) return -1;
 
@@ -148,10 +207,13 @@ public class TableDataPanel
 		}
 		catch (Exception e)
 		{
+			this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount") + " " + ResourceMgr.getString("TxtError"));
 			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.tableName, e);
 		}
 		finally
 		{
+			if (this.loadingImage != null) this.loadingImage.flush();
+			this.rowCountLabel.setIcon(null);
 			try { rs.close(); } catch (Throwable th) {}
 			try { stmt.close(); } catch (Throwable th) {}
 		}
@@ -186,7 +248,7 @@ public class TableDataPanel
 		return sql.toString();
 	}
 
-	public void retrieve()
+	public synchronized void retrieve()
 	{
     final String sql = this.buildSqlForTable(false);
     if (sql == null) return;
@@ -194,7 +256,7 @@ public class TableDataPanel
 		final Container parent = this.getParent();
 		final int maxRows = this.getMaxRows();
 
-		new Thread(new Runnable()
+		Thread t = new Thread()
 		{
 			public void run()
 			{
@@ -202,17 +264,11 @@ public class TableDataPanel
 				{
 					synchronized (retrieveLock)
 					{
-            Statement stmt = dbConnection.createStatement();
-						ResultSet rs = null;
 						try
 						{
-							WbSwingUtilities.showWaitCursor(parent);
-							reset();
-							stmt.setMaxRows(maxRows);
-							rs = stmt.executeQuery(sql);
-							DataStore ds = new DataStore(rs, true);
-							DataStoreTableModel model = new DataStoreTableModel(ds);
-							dataTable.setModel(model, true);
+							dataDisplay.scriptStarting();
+							dataDisplay.setMaxRows(maxRows);
+							dataDisplay.runStatement(sql);
 						}
 						catch (Exception e)
 						{
@@ -221,8 +277,7 @@ public class TableDataPanel
 						finally
 						{
 							WbSwingUtilities.showDefaultCursor(parent);
-							try { rs.close(); } catch (Throwable th) {}
-							try { stmt.close(); } catch (Throwable th) {}
+							dataDisplay.scriptFinished();
 						}
 					}
 				}
@@ -235,12 +290,14 @@ public class TableDataPanel
 					LogMgr.logError("TableListPanel.retrieve()", "Error retrieving table list", e);
 				}
 			}
-		}).start();
+		};
+		t.setDaemon(true);
+		t.start();
 	}
 
 	public void saveSettings()
 	{
-		WbManager.getSettings().setProperty(TableDataPanel.class.getName(), "maxrows", this.maxRowField.getText());
+		WbManager.getSettings().setProperty(TableDataPanel.class.getName(), "maxrows", this.getMaxRows());
 		String auto = Boolean.toString(this.autoRetrieve.isSelected());
 		WbManager.getSettings().setProperty(TableDataPanel.class.getName(), "autoretrieve", auto);
 		WbManager.getSettings().setProperty(TableDataPanel.class.getName(), "warningthreshold", Long.toString(this.warningThreshold));
@@ -248,7 +305,8 @@ public class TableDataPanel
 
 	public void restoreSettings()
 	{
-		this.maxRowField.setText(WbManager.getSettings().getProperty(TableDataPanel.class.getName(), "maxrows", "0"));
+		int max = WbManager.getSettings().getIntProperty(TableDataPanel.class.getName(), "maxrows");
+		this.dataDisplay.setMaxRows(max);
 		boolean auto = "true".equals(WbManager.getSettings().getProperty(TableDataPanel.class.getName(), "autoretrieve", "false"));
 		this.autoRetrieve.setSelected(auto);
 		
@@ -270,6 +328,7 @@ public class TableDataPanel
 	
 	public void showData(boolean includeData)
 	{
+		this.reset();
 		long rows = this.showRowCount();
 		if (this.autoRetrieve.isSelected() && includeData)
 		{
@@ -284,7 +343,7 @@ public class TableDataPanel
 				int choice = JOptionPane.showConfirmDialog(this, msg, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION);
 				if (choice == JOptionPane.NO_OPTION) return;
 			}
-			this.reload();
+			this.retrieve();
 		}
 	}
 
@@ -313,6 +372,10 @@ public class TableDataPanel
 				this.warningThreshold = p.getThresholdValue();
 			}
 		}
+	}
+	public void setReadOnly(boolean aFlag)
+	{
+		this.dataDisplay.setReadOnly(aFlag);
 	}
 	
 }

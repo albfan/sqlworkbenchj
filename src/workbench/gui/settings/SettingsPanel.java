@@ -34,10 +34,10 @@ public class SettingsPanel extends javax.swing.JPanel
 	public SettingsPanel()
 	{
 		initComponents();
-		this.fontsComboBox.addItem(new FontListEntry(Settings.STANDARD_FONT_KEY));
-		this.fontsComboBox.addItem(new FontListEntry(Settings.EDITOR_FONT_KEY));
-		this.fontsComboBox.addItem(new FontListEntry(Settings.MSGLOG_FONT_KEY));
 		this.fontsComboBox.addItem(new FontListEntry(Settings.DATA_FONT_KEY));
+		this.fontsComboBox.addItem(new FontListEntry(Settings.EDITOR_FONT_KEY));
+		this.fontsComboBox.addItem(new FontListEntry(Settings.STANDARD_FONT_KEY));
+		this.fontsComboBox.addItem(new FontListEntry(Settings.MSGLOG_FONT_KEY));
 		this.fontsComboBox.setSelectedIndex(0);
 	}
 	

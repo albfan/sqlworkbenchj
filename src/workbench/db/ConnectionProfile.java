@@ -6,6 +6,10 @@
 package workbench.db;
 
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
 
 import workbench.WbManager;
 import workbench.util.WbCipher;
@@ -36,6 +40,7 @@ public class ConnectionProfile
 	private boolean isNew;
 	private boolean storePassword = true;
 	private boolean seperateConnection = false;
+	private Properties connectionProperties = null;
 
 	private String workspaceFile = null;
 	
@@ -330,6 +335,16 @@ public class ConnectionProfile
 		result.setWorkspaceFile(this.workspaceFile);
 		result.setIgnoreDropErrors(this.ignoreDropErrors);
 		result.setUseSeperateConnectionPerTab(this.seperateConnection);
+		if (this.connectionProperties != null)
+		{
+			Iterator itr = this.connectionProperties.keySet().iterator();
+			result.connectionProperties = new Properties();
+			while (itr.hasNext())
+			{
+				Map.Entry entry = (Map.Entry)itr.next();
+				result.connectionProperties.put(entry.getKey(), entry.getValue());
+			}
+		}
 		result.changed = false;
 		return result;
 	}
@@ -390,5 +405,24 @@ public class ConnectionProfile
 		this.workspaceFile = aWorkspaceFile;
     this.changed = true;
 	}
+
+	public void addConnectionProterty(String aKey, String aValue)
+	{
+		if (aKey == null) return;
+		if (this.connectionProperties == null)
+		{
+			this.connectionProperties = new Properties();
+		}
+		this.connectionProperties.put(aKey, aValue);
+	}
 	
+	public Properties getConnectionProperties()
+	{
+		return this.connectionProperties;
+	}
+	
+	public void setConnectionProperties(Properties props)
+	{
+		this.connectionProperties = props;
+	}
 }

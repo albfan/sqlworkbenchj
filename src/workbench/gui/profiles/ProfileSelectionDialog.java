@@ -151,7 +151,7 @@ public class ProfileSelectionDialog extends JDialog implements ActionListener, W
 	{
 		if (!WbManager.getSettings().restoreWindowSize(this))
 		{
-			this.setSize(600,500);
+			this.setSize(700,600);
 		}
 	}
 

@@ -7,7 +7,7 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import javax.swing.Action;
-import workbench.gui.sql.SqlPanel;
+import workbench.interfaces.DbData;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -16,9 +16,9 @@ import workbench.resource.ResourceMgr;
  */
 public class InsertRowAction extends WbAction
 {
-	private SqlPanel client;
+	private DbData client;
 
-	public InsertRowAction(SqlPanel aClient)
+	public InsertRowAction(DbData aClient)
 	{
 		super();
 		this.client = aClient;
@@ -30,6 +30,6 @@ public class InsertRowAction extends WbAction
 
 	public void actionPerformed(ActionEvent e)
 	{
-		this.client.insertRow();
+		this.client.addRow();
 	}
 }

@@ -60,6 +60,7 @@ public class DataSpooler
 	private int exportType;
 	private boolean exportHeaders;
 	private boolean includeCreateTable = false;
+	private boolean headerOnly = false;
 	private String tableName;
 	
 	private String delimiter = "\t";
@@ -69,6 +70,7 @@ public class DataSpooler
 	private char decimalSymbol = '.';
 	private String chrFunc = null;
 	private String concatString = "||";
+	private int commitEvery=0;
 	
 	/** If true, then cr/lf characters will be removed from
 	 *  character columns
@@ -149,6 +151,11 @@ public class DataSpooler
 	{
 		this.tableName = aTablename;
 	}
+
+	public void setExportHeaderOnly(boolean aFlag) { this.headerOnly = aFlag; }
+	public boolean getExportHeaderOnly() { return this.headerOnly; }
+	public void setCommitEvery(int aCount) { this.commitEvery = aCount; }
+	public int getCommitEvery() { return this.commitEvery; }
 	
 	public void setShowProgress(boolean aFlag) { this.showProgress = aFlag; }
 	public boolean getShowProgress() { return this.showProgress; }
@@ -410,11 +417,15 @@ public class DataSpooler
 					dateTimeFormatter = null;
 				}
 			}
-			DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-			symbols.setDecimalSeparator(this.decimalSymbol);
-			numberFormatter = new DecimalFormat("#.#", symbols);
-			numberFormatter.setGroupingUsed(false);
-			ds.setDefaultNumberFormatter(numberFormatter);
+			
+			if (this.decimalSymbol != 0)
+			{
+				DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+				symbols.setDecimalSeparator(this.decimalSymbol);
+				numberFormatter = new DecimalFormat("#.#", symbols);
+				numberFormatter.setGroupingUsed(false);
+				ds.setDefaultNumberFormatter(numberFormatter);
+			}
 		}
 		
 		try
@@ -482,6 +493,15 @@ public class DataSpooler
 						pw.write(line.toString());
 						pw.newLine();
 						pw.newLine();
+						if (this.commitEvery > 0)
+						{
+							if ((currentRow % this.commitEvery) == 0)
+							{
+								pw.write("COMMIT;");
+								pw.newLine();
+								pw.newLine();
+							}
+						}
 					}
 				}
 				else if (this.exportType == EXPORT_XML)
@@ -491,9 +511,9 @@ public class DataSpooler
 					ds.discardRow(row);
 					if (line != null)
 					{
+						// the line returned by getRowDataAsXml() already contains
+						// a NEWLINE, so we don't need to create it here
 						pw.write(line.toString());
-						pw.newLine();
-						pw.newLine();
 					}
 				}
 				else 

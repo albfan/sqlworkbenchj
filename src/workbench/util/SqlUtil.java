@@ -395,7 +395,7 @@ public class SqlUtil
 		return null;
 	}
 	
-	public static final String getJavaClass(int aSqlType, int aSize, int aPrecision)
+	public static final String getJavaClass(int aSqlType, int aScale, int aPrecision)
 	{
 		if (aSqlType == Types.BIGINT)
 			return "java.math.BigInteger";
@@ -406,19 +406,19 @@ public class SqlUtil
 		else if (aSqlType == Types.DATE)
 			return "java.util.Date";
 		else if (aSqlType == Types.DECIMAL)
-			return getDecimalClass(aSqlType, aSize, aPrecision);
+			return getDecimalClass(aSqlType, aScale, aPrecision);
 		else if (aSqlType == Types.DOUBLE)
-			return getDecimalClass(aSqlType, aSize, aPrecision);
+			return getDecimalClass(aSqlType, aScale, aPrecision);
 		else if (aSqlType == Types.FLOAT)
-			return getDecimalClass(aSqlType, aSize, aPrecision);
+			return getDecimalClass(aSqlType, aScale, aPrecision);
 		else if (aSqlType == Types.INTEGER)
 			return "Integer";
 		else if (aSqlType == Types.JAVA_OBJECT)
 			return "Object";
 		else if (aSqlType == Types.NUMERIC)
-			return getDecimalClass(aSqlType, aSize, aPrecision);
+			return getDecimalClass(aSqlType, aScale, aPrecision);
 		else if (aSqlType == Types.REAL)
-			return getDecimalClass(aSqlType, aSize, aPrecision);
+			return getDecimalClass(aSqlType, aScale, aPrecision);
 		else if (aSqlType == Types.SMALLINT)
 			return "Integer";
 		else if (aSqlType == Types.TIME)
@@ -433,15 +433,15 @@ public class SqlUtil
 			return null;
 	}
 
-	private static final String getDecimalClass(int aSqlType, int aSize, int aPrecision)
+	private static final String getDecimalClass(int aSqlType, int aScale, int aPrecision)
 	{
 		if (aPrecision == 0)
 		{
-			if (aSize < 11)
+			if (aScale < 11)
 			{
 				return "java.lang.Integer";
 			}
-			if (aSize >= 11 && aSize < 18)
+			if (aScale >= 11 && aScale < 18)
 			{
 				return "java.lang.Long";
 			}
@@ -452,11 +452,11 @@ public class SqlUtil
 		}
 		else
 		{
-			if (aSize < 11)
+			if (aScale < 11)
 			{
 				return "java.lang.Float";
 			}
-			if (aSize >= 11 && aSize < 18)
+			if (aScale >= 11 && aScale < 18)
 			{
 				return "java.lang.Double";
 			}
@@ -480,6 +480,22 @@ public class SqlUtil
 		return getDecimalClass(aSqlType, aSize, aPrecision);
 	}
 
+	public static final boolean isDecimalType(int aSqlType, int aScale, int aPrecision)
+	{
+		if (aSqlType == Types.DECIMAL ||
+						aSqlType == Types.DOUBLE ||
+					  aSqlType == Types.FLOAT ||
+					  aSqlType == Types.NUMERIC ||
+					  aSqlType == Types.REAL)
+		{
+			return (aScale > 0);
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
 	public static final boolean isNumberType(int aSqlType)
 	{
 		return (aSqlType == Types.BIGINT ||

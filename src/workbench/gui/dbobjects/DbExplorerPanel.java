@@ -314,6 +314,10 @@ public class DbExplorerPanel
 		{
 			this.window = new DbExplorerWindow(this, aProfileName);
 		}
+		if (this.tabPane.getSelectedComponent() == this.tables)
+		{
+			//this.tables.updateDisplay();
+		}
 		this.window.show();
 	}
 
@@ -355,8 +359,9 @@ public class DbExplorerPanel
 	public void explorerWindowClosed()
 	{
 		this.window = null;
+		if (this.tables != null) this.tables.resetDetails();
 	}
-
+	
 	public void mainWindowDeiconified()
 	{
 		//if (this.window != null && this.restoreWindow) this.window.show();

@@ -19,6 +19,7 @@ import javax.swing.border.EmptyBorder;
 
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.sql.SqlPanel;
+import workbench.interfaces.DbData;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -27,7 +28,7 @@ import workbench.resource.ResourceMgr;
  */
 public class StartEditAction extends WbAction
 {
-	private SqlPanel client;
+	private DbData client;
 	private Border enabledBorder = new CompoundBorder(new BevelBorder(BevelBorder.LOWERED), new EmptyBorder(2,2,2,2));
 	private Border originalBorder;
 
@@ -35,7 +36,7 @@ public class StartEditAction extends WbAction
 	private JToggleButton toggleButton;
 	private JCheckBoxMenuItem toggleMenu;
 
-	public StartEditAction(SqlPanel aClient)
+	public StartEditAction(DbData aClient)
 	{
 		super();
 		this.client = aClient;

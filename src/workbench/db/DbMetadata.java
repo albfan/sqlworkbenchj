@@ -764,7 +764,7 @@ public class DbMetadata
 	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, String aType, boolean adjustNames)
 		throws SQLException, WbException
 	{
-		final String cols[] = {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "java.sql.Types", "SCALE", "PRECISION"};
+		final String cols[] = {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "java.sql.Types", "SCALE/SIZE", "PRECISION"};
 		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER};
 		final int sizes[] =   {20, 18, 5, 8, 10, 25, 18, 2, 2};
 		DataStore ds = new DataStore(cols, types, sizes);
@@ -857,27 +857,33 @@ public class DbMetadata
 		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 		final int sizes[] =   {40, 7, 6, 50};
 		DataStore idxData = new DataStore(cols, types, sizes);
-
+		ResultSet idxRs = null;
+		
 		try
 		{
 			// Retrieve the name of the PK index
 			String pkName = "";
+			ResultSet keysRs = null;
 			try
 			{
-				ResultSet keysRs = this.metaData.getPrimaryKeys(aCatalog, aSchema, this.adjustObjectname(aTable));
+				keysRs = this.metaData.getPrimaryKeys(aCatalog, aSchema, this.adjustObjectname(aTable));
 				while (keysRs.next())
 				{
 					pkName = keysRs.getString("PK_NAME");
 				}
-				keysRs.close();
 			}
 			catch (Exception e)
 			{
+				LogMgr.logWarning("DbMetadata.getTableIndexInformatioN()", "Error retrieving PK information", e);
+			}
+			finally 
+			{
+				try { keysRs.close(); } catch (Throwable th) {}
 			}
 
 			HashMap idxInfo = new HashMap();
 
-			ResultSet idxRs = this.metaData.getIndexInfo(aCatalog, aSchema, this.adjustObjectname(aTable), false, true);
+			idxRs = this.metaData.getIndexInfo(aCatalog, aSchema, this.adjustObjectname(aTable), false, true);
 			while (idxRs.next())
 			{
 				boolean unique = idxRs.getBoolean("NON_UNIQUE");
@@ -901,7 +907,7 @@ public class DbMetadata
 				else
 					colInfo.add(colName);
 			}
-			idxRs.close();
+			
 			Iterator itr = idxInfo.entrySet().iterator();
 			while (itr.hasNext())
 			{
@@ -935,8 +941,13 @@ public class DbMetadata
 		}
 		catch (Exception e)
 		{
+			LogMgr.logWarning("DbMetadata.getTableIndexInformation()", "Could not retrieve indexes!", e);
 			// clear any entries which might have made into the DataStore
 			idxData.reset();
+		}
+		finally
+		{
+			try { idxRs.close(); } catch (Throwable th) {}
 		}
 		return idxData;
 	}
@@ -1439,7 +1450,8 @@ public class DbMetadata
 	{
 		if (aTableDef == null) return "";
 
-		StringBuffer result = new StringBuffer("CREATE TABLE " + aTablename + "\n(\n");
+		StringBuffer result = new StringBuffer(1000);
+		result.append("CREATE TABLE " + aTablename + "\n(\n");
 		int count = aTableDef.getRowCount();
 		StringBuffer pkCols = new StringBuffer(1000);
 		int maxColLength = 0;

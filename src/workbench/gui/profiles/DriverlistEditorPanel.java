@@ -204,9 +204,10 @@ public class DriverlistEditorPanel
 	public void restoreSettings()
 	{
 		int location = WbManager.getSettings().getIntProperty(this.getClass().getName(), "divider");
-		if (location > 0)
+		if (location <= 0)
 		{
-			this.jSplitPane1.setDividerLocation(location);
+			location = 140;
 		}
+		this.jSplitPane1.setDividerLocation(location);
 	}
 }

@@ -106,6 +106,8 @@ extends JTable
 		this.sortDescending.setEnabled(false);
 		this.optimizeCol = new OptimizeColumnWidthAction(this);
 		this.optimizeAllCol = new OptimizeAllColumnsAction(this);
+		this.optimizeAllCol.setEnabled(true);
+		this.optimizeAllCol.enableShortCut();
 		this.setColWidth = new SetColumnWidthAction(this);
 
 		this.headerPopup = new JPopupMenu();
@@ -160,6 +162,7 @@ extends JTable
 		this.findAgainAction.addToInputMap(im, am);
 		this.dataToClipboard.addToInputMap(im, am);
 		this.exportDataAction.addToInputMap(im, am);
+		this.optimizeAllCol.addToInputMap(im, am);
 		WbManager.getSettings().addFontChangedListener(this);
 	}
 
@@ -835,7 +838,6 @@ extends JTable
 		TableColumnModel columnModel = this.getColumnModel();
 		int viewColumn = columnModel.getColumnIndexAtX(this.headerPopupX);
 		final int column = this.convertColumnIndexToModel(viewColumn);
-		System.out.println("new sort column = " + column);
 		if (e.getSource() == this.sortAscending && this.dwModel != null)
 		{
 			this.dwModel.sortInBackground(this, column, true);

@@ -342,7 +342,8 @@ public class WbManager implements FontChangedListener
 		//boolean first = true;
 		if (!this.batchMode)
 		{
-			MainWindow w;
+			MainWindow w = null;
+			boolean aborted = false;
 			for (int i=0; i < mainWindows.size(); i ++)
 			{
 				w = (MainWindow)this.mainWindows.get(i);
@@ -354,17 +355,30 @@ public class WbManager implements FontChangedListener
 					if (!this.checkProfiles(w)) return;
 					w.saveSettings();
 				}
-				this.getConnectionMgr().disconnectAll();
+				aborted = w.abortAll();
+				if (!aborted)
+				{
+					if (!checkAbort(w)) return;
+				}
+				else
+				{
+					w.disconnect();
+				}
 				this.mainWindows.remove(w);
 				w.setVisible(false);
 				w.dispose();
 			}
+			if (aborted) this.getConnectionMgr().disconnectAll();
 			this.settings.saveSettings();
 		}
 		LogMgr.shutdown();
 		System.exit(0);
 	}
 
+	private boolean checkAbort(MainWindow win)
+	{
+		return WbSwingUtilities.getYesNo(win, ResourceMgr.getString("MsgAbortRunningSql"));
+	}
   private boolean checkProfiles(MainWindow win)
   {
     if (getConnectionMgr().profilesChanged())

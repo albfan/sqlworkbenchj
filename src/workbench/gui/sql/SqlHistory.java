@@ -35,10 +35,20 @@ public class SqlHistory
 
 	public void addContent(EditorPanel editor)
 	{
-		SqlHistoryEntry entry = new SqlHistoryEntry(editor.getText(), editor.getCaretPosition(), editor.getSelectionStart(), editor.getSelectionEnd());
-		SqlHistoryEntry top = this.getTopEntry();
-		if (top != null && top.equals(entry)) return;
-		this.addEntry(entry);
+		String text = editor.getText();
+		if (text == null || text.length() == 0) return;
+
+		try
+		{
+			SqlHistoryEntry entry = new SqlHistoryEntry(text, editor.getCaretPosition(), editor.getSelectionStart(), editor.getSelectionEnd());
+			SqlHistoryEntry top = this.getTopEntry();
+			if (top != null && top.equals(entry)) return;
+			this.addEntry(entry);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("SqlHistory.addContent(editor)", "Could not add entry", e);
+		}
 	}
 
 	public void addEntry(SqlHistoryEntry entry)

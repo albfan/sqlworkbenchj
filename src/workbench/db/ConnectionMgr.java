@@ -46,7 +46,7 @@ public class ConnectionMgr
 		this.disconnect(anId);
 
 		WbConnection conn = new WbConnection(anId);
-		Connection sql = this.connect(aProfile);
+		Connection sql = this.connect(aProfile, anId);
 		conn.setSqlConnection(sql);
 		conn.setProfile(aProfile.createCopy());
 		this.activeConnections.put(anId, conn);
@@ -54,7 +54,7 @@ public class ConnectionMgr
 		return conn;
 	}
 
-	Connection connect(ConnectionProfile aProfile)
+	Connection connect(ConnectionProfile aProfile, String anId)
 		throws ClassNotFoundException, SQLException, Exception
 	{
 		// The DriverManager refuses to use a driver which was not loaded
@@ -66,9 +66,10 @@ public class ConnectionMgr
 		{
 			throw new NoConnectionException("Driver class not registered");
 		}
+		
 		try
 		{
-			Connection sql = drv.connect(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword());
+			Connection sql = drv.connect(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword(), anId, aProfile.getConnectionProperties());
 
 			try
 			{
@@ -98,7 +99,7 @@ public class ConnectionMgr
     aConn.close();
     // use the stored profile to reconnect as the SQL connection
     // does not contain information about the username & password
-    Connection sql = this.connect(aConn.getProfile());
+    Connection sql = this.connect(aConn.getProfile(), aConn.getId());
     aConn.setSqlConnection(sql);
 	}
 

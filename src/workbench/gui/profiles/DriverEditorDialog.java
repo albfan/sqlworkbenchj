@@ -48,7 +48,7 @@ public class DriverEditorDialog extends JDialog
 		
 		if (!WbManager.getSettings().restoreWindowSize(this))
 		{
-			this.setSize(300,300);
+			this.setSize(600,400);
 		}
 		driverListPanel.restoreSettings();
 	}

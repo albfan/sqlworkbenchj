@@ -4,11 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Window;
+import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
@@ -17,16 +20,24 @@ import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.exception.WbException;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.DeleteRowAction;
+import workbench.gui.actions.InsertRowAction;
+import workbench.gui.actions.OptimizeAllColumnsAction;
+import workbench.gui.actions.StartEditAction;
+import workbench.gui.actions.UpdateDatabaseAction;
 
 
 import workbench.gui.components.*;
+import workbench.interfaces.DbData;
+import workbench.interfaces.DbUpdater;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
-import workbench.storage.RowActionMonitor;
 import workbench.storage.DmlStatement;
+import workbench.storage.RowActionMonitor;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 
@@ -36,7 +47,7 @@ import workbench.util.StringUtil;
  */
 public class DwPanel 
 	extends JPanel
-	implements RowActionMonitor
+	implements TableModelListener, ListSelectionListener, RowActionMonitor, DbData, DbUpdater
 {
 	private WbTable infoTable;
 	private DwStatusBar statusBar;
@@ -52,18 +63,25 @@ public class DwPanel
 	private DefaultCellEditor defaultEditor;
 	private DefaultCellEditor defaultNumberEditor;
 	private int maxRows = 0;
-	private int objectId;
 	
-	private static int nextId = 0;
 	private WbConnection lastConnection;
 	private boolean cancelled;
 	private boolean success = false;
-	private StatementRunner stmtRunner;
+	private boolean showLoadProgress = false;
+
+	private UpdateDatabaseAction updateAction = null;
+	private InsertRowAction insertRow = null;
+	private DeleteRowAction deleteRow = null;
+	private StartEditAction startEdit = null;
+	private boolean editingStarted = false;
+	private boolean batchUpdate = false;
+	private boolean manageUpdateAction = false;
+	private boolean readOnly = false;
 	
+	private StatementRunner stmtRunner;
+
 	public DwPanel()
 	{
-		this.objectId = nextId++;
-		
 		JTextField stringField = new JTextField();
 		stringField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		stringField.addMouseListener(new TextComponentMouseListener());
@@ -84,6 +102,36 @@ public class DwPanel
 		this.setFocusTraversalPolicy(pol);
 		this.setDoubleBuffered(true);
 		this.stmtRunner = new StatementRunner();
+		this.infoTable.addTableModelListener(this);	
+		
+		this.updateAction = new UpdateDatabaseAction(this);
+		this.insertRow = new InsertRowAction(this);
+		this.deleteRow = new DeleteRowAction(this);
+		this.startEdit = new StartEditAction(this);
+		
+		//infoTable.addPopupAction(this.startEdit, true);
+		infoTable.addPopupAction(this.updateAction, true);
+		infoTable.addPopupAction(this.insertRow, true);
+		infoTable.addPopupAction(this.deleteRow, false);
+		
+	}
+
+	public void setManageActions(boolean aFlag)
+	{
+		this.manageUpdateAction = aFlag;
+		if (aFlag)
+		{
+			infoTable.getSelectionModel().addListSelectionListener(this);
+		}
+		else
+		{
+			infoTable.getSelectionModel().removeListSelectionListener(this);
+		}
+	}
+	
+	public void setDefaultStatusMessage(String aMessage)
+	{
+		this.statusBar.setReadyMsg(aMessage);
 	}
 	
 	public void disconnect()
@@ -96,24 +144,52 @@ public class DwPanel
 		{
 		}
 	}
+
+	public void setShowLoadProcess(boolean aFlag)
+	{
+		this.showLoadProgress = aFlag;
+	}
 	
 	private String updateMsg;
-	private int monitorType;
+	private int monitorType = -1;
 	
+	private void clearRowMonitorSettings()
+	{
+		this.updateMsg = null;
+		this.monitorType = -1;
+	}
+
 	public void setMonitorType(int aType) 
 	{ 
 		this.monitorType = aType; 
-		if (this.monitorType == RowActionMonitor.MONITOR_INSERT)
-			this.updateMsg = ResourceMgr.getString("MsgImportingRow");
-		else
-			this.updateMsg = ResourceMgr.getString("MsgUpdatingRow");
+		try
+		{
+			switch (aType)
+			{
+				case RowActionMonitor.MONITOR_INSERT:
+					this.updateMsg = ResourceMgr.getString("MsgImportingRow") + " ";
+					break;
+				case RowActionMonitor.MONITOR_UPDATE:
+					this.updateMsg = ResourceMgr.getString("MsgUpdatingRow") + " ";
+					break;
+				case RowActionMonitor.MONITOR_LOAD:
+					this.updateMsg = ResourceMgr.getString("MsgLoadingRow") + " ";
+					break;
+				default:
+					clearRowMonitorSettings();
+			}
+		}
+		catch (Exception e)
+		{
+			clearRowMonitorSettings();
+		}
 	}
 	
 	public void setCurrentRow(int currentRow, int totalRows)
 	{
+		if (this.monitorType < 0) return;
 		StringBuffer msg = new StringBuffer(40);
 		msg.append(this.updateMsg);
-		msg.append(' ');
 		msg.append(currentRow);
 		if (totalRows > 0)
 		{
@@ -141,6 +217,30 @@ public class DwPanel
 		this.stmtRunner.setConnection(aConn);
 	}
 
+	public void setUpdateDelegate(DbUpdater aDelegate)
+	{
+		this.updateAction.setClient(aDelegate);
+	}
+	
+	public synchronized void saveChangesToDatabase()
+	{
+		if (this.dbConnection == null) return;
+		try
+		{
+			WbSwingUtilities.showWaitCursor(this);
+			this.saveChanges(dbConnection);
+		}
+		catch (Exception e)
+		{
+			String msg = ResourceMgr.getString("ErrorUpdatingDb");
+			WbManager.getInstance().showErrorMessage(this, msg + "\n" + e.getMessage());
+		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursor(this);
+		}
+	}
+	
 	public synchronized int saveChanges(WbConnection aConnection)
 		throws WbException, SQLException
 	{
@@ -213,12 +313,13 @@ public class DwPanel
 		}
 		catch (Throwable th)
 		{
-			th.printStackTrace();
+			LogMgr.logError("DwPanel.saveChanges()", "Error when saving changes to the database", th);
 		}
 		finally
 		{
       WbSwingUtilities.showDefaultCursor(this);
 			this.clearStatusMessage();
+			this.endEdit();
 		}
 		this.repaint();
 		
@@ -234,9 +335,28 @@ public class DwPanel
 	{
 		this.infoTable.getDataStore().setUpdateTable(aTable);
 	}
+
+	public void setReadOnly(boolean aFlag) 
+	{ 
+		this.readOnly = aFlag; 
+		if (this.readOnly && this.editingStarted)
+		{
+			this.endEdit();
+			this.insertRow.setEnabled(false);
+			this.deleteRow.setEnabled(false);
+			this.updateAction.setEnabled(false);
+			this.restoreOriginalValues();
+		}
+		else
+		{
+			this.insertRow.setEnabled(true);
+		}
+	}
+	public boolean isReadOnly() { return this.readOnly; }
 	
 	public boolean checkUpdateTable()
 	{
+		if (this.readOnly) return false;
 		DataStore ds = this.infoTable.getDataStore();
 		if (ds == null) return false;
 		if (this.dbConnection == null) return false;
@@ -254,6 +374,15 @@ public class DwPanel
 	{
 		if (this.infoTable.getDataStore() == null) return false;
 		return this.infoTable.getDataStore().hasUpdateableColumns();
+	}
+
+	public int getMaxRows()
+	{
+		return this.statusBar.getMaxRows();
+	}
+	public void setMaxRows(int aMax)
+	{
+		this.statusBar.setMaxRows(aMax);
 	}
 	
 	public void runStatement(String aSql)
@@ -289,6 +418,7 @@ public class DwPanel
 			this.sql = aSql;
 		
 			final long start = System.currentTimeMillis();
+			
 			this.stmtRunner.runStatement(aSql, this.statusBar.getMaxRows());
 			end = System.currentTimeMillis();
 			sqlTime = (end - start);
@@ -311,10 +441,22 @@ public class DwPanel
 					// the resultset will be closed when stmtRunner.done() is called
 					// in the finally block
 					ResultSet rs = result.getResultSets()[0];
-					newData = new DataStore(rs, true);
+					if (this.showLoadProgress) 
+					{
+						newData = new DataStore(rs, true, this);
+					}
+					else
+					{
+						newData = new DataStore(rs, true);
+					}
 					newData.setOriginalStatement(aSql);
 					newData.setSourceConnection(this.dbConnection);
 					newData.checkUpdateTable();
+					newData.setProgressMonitor(null);
+					if (this.showLoadProgress)
+					{
+						this.clearStatusMessage();
+					}
 				}
 				end = System.currentTimeMillis();
 				
@@ -337,6 +479,12 @@ public class DwPanel
 				}
 				this.infoTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 				this.infoTable.setRowSelectionAllowed(true);
+				
+				if (this.manageUpdateAction)
+				{
+					boolean update = this.isUpdateable();
+					this.insertRow.setEnabled(true);
+				}
         this.dataChanged();
 			}
 			else if (result.isSuccess())
@@ -420,6 +568,8 @@ public class DwPanel
   
 	public void deleteRow()
 	{
+		if (this.readOnly) return;
+		
 		DataStoreTableModel ds = this.infoTable.getDataStoreTableModel();
 		if (ds == null) return;
 		
@@ -436,10 +586,11 @@ public class DwPanel
     this.dataChanged();
 	}
 	
-	public void addRow()
+	public long addRow()
 	{
+		if (this.readOnly) return -1;
 		DataStoreTableModel ds = this.infoTable.getDataStoreTableModel();
-		if (ds == null) return;
+		if (ds == null) return -1;
 		
 		int selectedRow = this.infoTable.getSelectedRow();
 		final int newRow;
@@ -466,38 +617,11 @@ public class DwPanel
 			edit.requestFocus();
 		}
     this.dataChanged();
+		return newRow;
 	}
 
 	public boolean cancelExecution()
 	{
-		/*
-		if (this.lastStatement != null)
-		{
-			try
-			{
-				LogMgr.logDebug(this, "Trying to cancel the current statement...");
-				this.lastStatement.cancel();
-				this.lastStatement.close();
-				this.cancelled = true;
-				if (this.lastConnection != null && this.lastConnection.cancelNeedsReconnect())
-				{
-					LogMgr.logInfo(this, "Cancelling needs a reconnect to the database for this DBMS...");
-					this.lastConnection.reconnect();
-				}
-				LogMgr.logDebug(this, "Cancelling succeeded.");
-				return true;
-			}
-			catch (Exception e)
-			{
-				LogMgr.logWarning(this, "Error while cancelling SQL execution!", e);
-				return false;
-			}
-		}
-		else
-		{
-			return false;
-		}
-		*/
 		if (this.stmtRunner != null)
 		{
 			this.stmtRunner.cancel();
@@ -562,6 +686,7 @@ public class DwPanel
 	public void clearContent()
 	{
 		this.infoTable.reset();
+		this.endEdit();
 		this.hasResultSet = false;
 		this.cancelled = false;
 		this.lastMessage = StringUtil.EMPTY_STRING;
@@ -602,4 +727,102 @@ public class DwPanel
 	{
 		this.paint(this.getGraphics());
 	}
+
+	public void endEdit()
+	{
+		this.editingStarted = false;
+		this.infoTable.setShowStatusColumn(false);
+		this.updateAction.setEnabled(false);
+		this.insertRow.setEnabled(false);
+		this.deleteRow.setEnabled(false);
+		this.startEdit.setSwitchedOn(false);
+		this.restoreOriginalValues();
+	}
+	
+	public boolean startEdit()
+	{
+		if (this.readOnly) return false;
+		this.editingStarted = false;
+		
+		// if the result is not yet updateable (automagically)
+		// then try to find the table. If the table cannot be
+		// determined, then ask the user
+		if (!this.isUpdateable())
+		{
+			if (!this.checkUpdateTable())
+			{
+				String sql = this.getCurrentSql();
+				List tables = SqlUtil.getTables(sql);
+				String table = null;
+
+				if (tables.size() > 1)
+				{
+					table = (String)JOptionPane.showInputDialog(this,
+							null, ResourceMgr.getString("MsgEnterUpdateTable"),
+							JOptionPane.QUESTION_MESSAGE,
+							null,tables.toArray(),null);
+				}
+
+				if (table != null)
+				{
+					this.setUpdateTable(table);
+				}
+			}
+		}
+		boolean update = this.isUpdateable();
+		if (update)
+		{
+			this.infoTable.setShowStatusColumn(true);
+			if (this.updateAction != null)
+			{
+				if (this.infoTable.getDataStore().isModified())
+				{
+					this.updateAction.setEnabled(true);
+				}
+			}
+
+			this.editingStarted = true;
+			this.startEdit.setSwitchedOn(true);
+		}
+		if (this.insertRow != null) this.insertRow.setEnabled(update);
+		if (this.deleteRow != null) this.deleteRow.setEnabled(update);
+
+		return update;
+	}
+	
+	public InsertRowAction getInsertRowAction() { return this.insertRow; }
+	public DeleteRowAction getDeleteRowAction() { return this.deleteRow; }
+	public UpdateDatabaseAction getUpdateDatabaseAction() { return this.updateAction; }
+	public StartEditAction getStartEditAction() { return this.startEdit; }
+
+	public void setBatchUpdate(boolean aFlag)
+	{
+		this.batchUpdate = aFlag;
+	}
+
+	public void tableChanged(TableModelEvent e)
+	{
+		if (this.batchUpdate) return;
+		if (this.readOnly) return;
+		
+		if (e.getFirstRow() != TableModelEvent.ALL_COLUMNS && this.isModified())
+		{
+			if (!this.editingStarted)
+			{
+				this.startEdit();
+			}
+			else
+			{
+				if (this.updateAction != null) this.updateAction.setEnabled(true);
+			}
+		}
+	}
+	
+	public void valueChanged(javax.swing.event.ListSelectionEvent e)
+	{
+		if (this.readOnly) return;
+		long rows = this.infoTable.getSelectedRowCount();
+		this.deleteRow.setEnabled( (rows == 1) );
+	}
+	
 }

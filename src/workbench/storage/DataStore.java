@@ -7,6 +7,7 @@
 package workbench.storage;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -54,6 +55,8 @@ public class DataStore
 	// Cached ResultSetMetaData information
 	private int[] columnTypes;
   private int[] columnSizes;
+	private int[] columnPrecision;
+	private int[] columnScale;
 	private String[] columnNames;
 	private String[] columnClassNames;
 	
@@ -116,6 +119,13 @@ public class DataStore
 	public DataStore(ResultSet aResult, boolean readData)
 		throws SQLException
 	{
+		this(aResult, readData, null);
+		
+	}
+	public DataStore(ResultSet aResult, boolean readData, RowActionMonitor aMonitor)
+		throws SQLException
+	{
+		this.rowActionMonitor = aMonitor;
 		if (readData)
 		{
 			this.originalConnection = null;
@@ -766,12 +776,16 @@ public class DataStore
 		this.columnTypes = new int[this.colCount];
 		this.columnSizes = new int[this.colCount];
 		this.columnNames = new String[this.colCount];
+		this.columnPrecision = new int[this.colCount];
+		this.columnScale = new int[this.colCount];
 
 		for (int i=0; i < this.colCount; i++)
 		{
 			String name = metaData.getColumnName(i + 1);
 			this.columnTypes[i] = metaData.getColumnType(i + 1);
 			this.columnSizes[i] = metaData.getColumnDisplaySize(i + 1);
+			this.columnPrecision[i] = metaData.getPrecision(i + 1);
+			this.columnScale[i] = metaData.getScale(i + 1);
 			if (name != null && name.trim().length() > 0) 
 			{
 				this.realColumns ++;
@@ -797,12 +811,24 @@ public class DataStore
 			LogMgr.logError(this, "Error while retrieving ResultSetMetaData", e);
 			throw e;
 		}
-			
+		
+		if (this.rowActionMonitor != null)
+		{
+			this.rowActionMonitor.setMonitorType(RowActionMonitor.MONITOR_LOAD);
+		}
+
 		try
 		{
+			int rowCount = 0;
 			this.data = new ArrayList(500);
 			while (aResultSet.next())
 			{
+				if (this.rowActionMonitor != null)
+				{
+					rowCount ++;
+					this.rowActionMonitor.setCurrentRow(rowCount, -1);
+				}
+				
 				RowData row = new RowData(this.colCount);
 				for (int i=0; i < this.colCount; i++)
 				{
@@ -887,7 +913,8 @@ public class DataStore
 		
 		for (int row=0; row < count; row++)
 		{
-			xml.append(this.getRowDataAsXml(row, rowTag, colTag, indent));
+			StringBuffer rowData = this.getRowDataAsXml(row, rowTag, colTag, indent);
+			xml.append(rowData);
 		}
 		
 		xml.append("</table>");
@@ -914,16 +941,51 @@ public class DataStore
 		for (int c=0; c < colCount; c ++)
 		{
 			String value = this.getValueAsFormattedString(aRow, c);
+
 			if (indent) xml.append(anIndent);
 			xml.append("  <");
 			xml.append(aColTag);
 			xml.append(" name=\"");
 			xml.append(this.getColumnName(c));
-			xml.append("\" null=\"" + (value == null) + "\">");
+			xml.append('"');
+			if (value == null)
+			{
+				xml.append(" null=\"true\"");
+			}
+			else if (value.length() == 0)
+			{
+				xml.append(" null=\"false\"");
+			}
+			int type = this.getColumnType(c);
+			if (SqlUtil.isDateType(type) )
+			{
+				if (type == Types.TIMESTAMP && this.defaultTimestampFormatter != null)
+				{
+					xml.append(" datetimeformat=\"");
+					xml.append(this.defaultTimestampFormatter.toPattern());
+					xml.append('"');
+				}
+				else if (this.defaultDateFormatter != null)
+				{
+					xml.append(" dateformat=\"");
+					xml.append(this.defaultDateFormatter.toPattern());
+					xml.append('"');
+				}
+			}
+			else if (SqlUtil.isDecimalType(type, this.columnScale[c], this.columnPrecision[c]))
+			{
+				if (this.defaultNumberFormatter != null)
+				{
+					xml.append(" numberformat=\"");
+					xml.append(this.defaultNumberFormatter.toPattern());
+					xml.append('"');
+				}
+			}
+			xml.append('>');
 			if (value != null) xml.append(value);
 			xml.append("</");
 			xml.append(aColTag);
-			xml.append(">");
+			xml.append('>');
 			xml.append(StringUtil.LINE_TERMINATOR);
 		}
 		if (indent) xml.append(anIndent);
@@ -1082,6 +1144,18 @@ public class DataStore
 		this.importData(aFilename, hasHeader, aColSeparator, aQuoteChar, Collections.EMPTY_MAP);
 	}
 	
+	private boolean cancelUpdate = false;
+	private boolean cancelImport = false;
+	
+	public void cancelUpdate()
+	{
+		this.cancelUpdate = true;
+	}
+	public void cancelImport()
+	{
+		this.cancelImport = true;
+	}
+	
 	/** 	
 	 *	Import a text file into this datastore.
 	 * @param aFilename - The text file to import
@@ -1096,13 +1170,17 @@ public class DataStore
 											 , Map aColumnMapping)
 		throws FileNotFoundException
 	{
-		BufferedReader in = new BufferedReader(new FileReader(aFilename));
+		File f = new File(aFilename);
+		long fileSize = f.length();
+		BufferedReader in = new BufferedReader(new FileReader(aFilename),1024*512);
 		String line;
-		List data;
+		List lineData;
 		Object colData;
 		boolean doMapping = (aColumnMapping != null && aColumnMapping.size() > 0);
 		int col;
 		int row;
+		this.cancelImport = false;
+		
 		if ("\\t".equals(aColSeparator))
     {
       aColSeparator = "\t";
@@ -1121,24 +1199,38 @@ public class DataStore
 		{
 			this.rowActionMonitor.setMonitorType(RowActionMonitor.MONITOR_INSERT);
 		}
-		
+
+		// if the data store is empty, we tried to initialize the 
+		// data array to an approx. size. As we don't know how many lines 
+		// we really have in the file, we take the length of the first line
+		// as the average, and calculate the expected number of lines from
+		// this length. 
+		// Event if we don't get the number of lines correct, this method should be better 
+		// then not initializing the array at all.
+		if (line != null && this.data.size() == 0)
+		{
+			int initialSize = (int)(fileSize / line.length());
+			this.data = new ArrayList(initialSize);
+		}
+		lineData = new ArrayList(this.colCount);
 		WbStringTokenizer tok = new WbStringTokenizer(aColSeparator.charAt(0), "", false);
+		int importRow = 0;
 		while (line != null)
 		{
-			//data = StringUtil.stringToList(line, aColSeparator);
+			lineData.clear();
 			tok.setSourceString(line);
-			data = new ArrayList(this.colCount);
 			while (tok.hasMoreTokens())
 			{
-				data.add(tok.nextToken());
+				lineData.add(tok.nextToken());
 			}
 
 			row = this.addRow();
-			this.updateProgressMonitor(row + 1, -1);
+			importRow ++;
+			this.updateProgressMonitor(importRow, -1);
 			
 			this.setRowNull(row);
 			
-			int count = data.size();
+			int count = lineData.size();
 			for (int i=0; i < count; i++)
 			{
 				if (doMapping)
@@ -1163,7 +1255,7 @@ public class DataStore
 					Object value = null;
 					try
 					{
-						value = data.get(i);
+						value = lineData.get(i);
 						if (value == null)
 						{
 							this.setNull(row, col);
@@ -1179,8 +1271,10 @@ public class DataStore
 						LogMgr.logWarning("DataStore.importData()","Error reading line #" + row + ",col #" + col + ",colValue=" + value, e);
 					}
 				}
-				
 			}
+			
+			Thread.yield();
+			if (this.cancelImport) break;
 			
 			try
 			{
@@ -1202,6 +1296,49 @@ public class DataStore
 			this.rowActionMonitor.setCurrentRow(currentRow, totalRows);
 		}
 	}
+
+	/**
+	 * Returns a List of {@link #DmlStatements } which 
+	 * would be executed in order to store the current content
+	 * of the DataStore.
+	 */
+	public List getUpdateStatements(WbConnection aConnection)
+		throws SQLException
+	{
+		if (this.updateTable == null) throw new NullPointerException("No update table defined!");
+		this.updatePkInformation(aConnection);
+		
+		ArrayList stmt = new ArrayList(this.getModifiedCount());
+		this.resetUpdateRowCounters();
+		DmlStatement dml = null;
+		RowData row = null;
+		
+		row = this.getNextDeletedRow();
+		while (row != null)
+		{
+			dml = this.createDeleteStatement(row);
+			stmt.add(dml);
+			row = this.getNextDeletedRow();
+		}
+
+		row = this.getNextChangedRow();
+		while (row != null)
+		{
+			dml = this.createUpdateStatement(row);
+			stmt.add(dml);
+			row = this.getNextChangedRow();
+		}
+
+		row = this.getNextInsertedRow();
+		while (row != null)
+		{
+			dml = this.createInsertStatement(row, false, "\n");
+			stmt.add(dml);
+			row = this.getNextInsertedRow();
+		}
+		this.resetUpdateRowCounters();
+		return stmt;
+	}	
 	
 	/**
 	 * Save the changes to this datastore to the database.
@@ -1227,31 +1364,53 @@ public class DataStore
 		try
 		{
 			this.resetUpdateRowCounters();
-			DmlStatement dml = this.getNextDeleteStatement();
-			while (dml != null)
+			RowData row = this.getNextDeletedRow();
+			DmlStatement dml = null;
+			while (row != null)
 			{
 				currentRow ++;
 				this.updateProgressMonitor(currentRow, totalRows);
-				rows += dml.execute(aConnection);
-				dml = this.getNextDeleteStatement();
+				if (!row.isDmlSent())
+				{
+					dml = this.createDeleteStatement(row);
+					rows += dml.execute(aConnection);
+					row.setDmlSent(true);
+				}
+				Thread.yield();
+				if (this.cancelUpdate) return rows;
+				row = this.getNextDeletedRow();
 			}
 			
-			dml = this.getNextUpdateStatement();
-			while (dml != null)
+			row = this.getNextChangedRow();
+			while (row != null)
 			{
 				currentRow ++;
 				this.updateProgressMonitor(currentRow, totalRows);
-				rows += dml.execute(aConnection);
-				dml = this.getNextUpdateStatement();
+				if (!row.isDmlSent())
+				{
+					dml = this.createUpdateStatement(row, false, "\r\n");
+					rows += dml.execute(aConnection);
+					row.setDmlSent(true);
+				}
+				Thread.yield();
+				if (this.cancelUpdate) return rows;
+				row = this.getNextChangedRow();
 			}
 		
-			dml = this.getNextInsertStatement();
-			while (dml != null)
+			row = this.getNextInsertedRow();
+			while (row != null)
 			{
 				currentRow ++;
 				this.updateProgressMonitor(currentRow, totalRows);
-				rows += dml.execute(aConnection);
-				dml = this.getNextInsertStatement();
+				if (!row.isDmlSent())
+				{
+					dml = this.createInsertStatement(row, false);
+					rows += dml.execute(aConnection);
+					row.setDmlSent(true);
+				}
+				Thread.yield();
+				if (this.cancelUpdate) return rows;
+				row = this.getNextInsertedRow();
 			}
 			
 			if (!aConnection.getAutoCommit() && rows > 0) aConnection.commit();
@@ -1269,6 +1428,53 @@ public class DataStore
 		return rows;
 	}
 
+	public void resetDmlSentStatus()
+	{
+		int rows = this.getRowCount();
+		for (int i=0; i < rows; i++)
+		{
+			RowData row = this.getRow(i);
+			row.setDmlSent(false);
+		}
+		if (this.deletedRows != null)
+		{
+			rows = this.deletedRows.size();
+			for (int i=0; i < rows; i++)
+			{
+				RowData row = (RowData)this.deletedRows.get(i);
+			row.setDmlSent(false);
+			}
+		}
+	}
+	
+	public void resetStatusForSentRow()
+	{
+		int rows = this.getRowCount();
+		for (int i=0; i < rows; i++)
+		{
+			RowData row = this.getRow(i);
+			if (row.isDmlSent())
+			{
+				row.resetStatus();
+			}
+		}
+		if (this.deletedRows != null)
+		{
+			ArrayList newDeleted = new ArrayList(this.deletedRows.size());
+			rows = this.deletedRows.size();
+			for (int i=0; i < rows; i++)
+			{
+				RowData row = (RowData)this.deletedRows.get(i);
+				if (!row.isDmlSent())
+				{
+					newDeleted.add(row);
+				}
+			}
+			this.deletedRows.clear();
+			this.deletedRows = newDeleted;
+		}
+	}
+	
 	public void resetStatus()
 	{
 		this.deletedRows = null;
@@ -1617,42 +1823,7 @@ public class DataStore
 		DmlStatement result = this.createInsertStatement(row, true, aLineTerminator);
 		return result;
 	}
-	/**
-	 * Returns a List of {@link #DmlStatements } which 
-	 * would be executed in order to store the current content
-	 * of the DataStore.
-	 */
-	public List getUpdateStatements(WbConnection aConnection)
-		throws SQLException
-	{
-		if (this.updateTable == null) throw new NullPointerException("No update table defined!");
-		this.updatePkInformation(aConnection);
-		
-		ArrayList stmt = new ArrayList(this.getModifiedCount());
-		this.resetUpdateRowCounters();
-		DmlStatement dml = this.getNextDeleteStatement();
-		
-		while (dml != null)
-		{
-			stmt.add(dml);
-			dml = this.getNextDeleteStatement();
-		}
 
-		dml = this.getNextUpdateStatement();
-		while (dml != null)
-		{
-			stmt.add(dml);
-			dml = this.getNextUpdateStatement();
-		}
-
-		dml = this.getNextInsertStatement();
-		while (dml != null)
-		{
-			stmt.add(dml);
-			dml = this.getNextInsertStatement();
-		}
-		return stmt;
-	}
 	
 	private int currentUpdateRow = 0;
 	private int currentInsertRow = 0;
@@ -1665,7 +1836,7 @@ public class DataStore
 		currentDeleteRow = 0;
 	}
 	
-	private DmlStatement getNextUpdateStatement()
+	private RowData getNextChangedRow()
 	{
 		if (this.currentUpdateRow >= this.getRowCount()) return null;
 		RowData row = null;
@@ -1677,13 +1848,12 @@ public class DataStore
 			row = this.getRow(this.currentUpdateRow);
 			this.currentUpdateRow ++;
 			
-			if (row.isModified() && !row.isNew())
-				return this.createUpdateStatement(row);
+			if (row.isModified() && !row.isNew()) return row;
 		}
 		return null;
 	}
 	
-	private DmlStatement getNextDeleteStatement()
+	private RowData getNextDeletedRow()
 	{
 		if (this.deletedRows == null || this.deletedRows.size() == 0) return null;
 		int count = this.deletedRows.size();
@@ -1696,12 +1866,12 @@ public class DataStore
 		{
 			row = (RowData)this.deletedRows.get(this.currentDeleteRow);
 			this.currentDeleteRow ++;
-			return this.createDeleteStatement(row);
+			return row;
 		}
 		return null;
 	}
 	
-	private DmlStatement getNextInsertStatement()
+	private RowData getNextInsertedRow()
 	{
 		int count = this.getRowCount();
 		if (this.currentInsertRow >= count) return null;
@@ -1712,9 +1882,10 @@ public class DataStore
 		{
 			row = this.getRow(this.currentInsertRow);
 			this.currentInsertRow ++;
-			
 			if (row.isNew() && row.isModified())
-				return this.createInsertStatement(row, false);
+			{
+				return row;
+			}
 		}
 		return null;
 	}
