@@ -16,5 +16,5 @@ public interface FileActions
 {
 	void saveItem() throws WbException;
 	void deleteItem() throws WbException;
-	void newItem() throws WbException;
+	void newItem(boolean copyCurrent) throws WbException;
 }

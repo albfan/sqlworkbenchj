@@ -96,8 +96,18 @@ public class DbDriver
 		}
 		catch (Exception e)
 		{
+			this.classLoader = null;
 			throw new WbException("Could not load driver class " + this.driverClass);
 		}
+	}
+	
+	public DbDriver createCopy()
+	{
+		DbDriver copy = new DbDriver();
+		copy.driverClass = this.driverClass;
+		copy.library = this.library;
+		copy.sampleUrl = this.sampleUrl;
+		return copy;
 	}
 	
 	public Connection connect(String url, String user, String password)
@@ -128,6 +138,7 @@ public class DbDriver
 		try
 		{
 			DbDriver o = (DbDriver)other;
+			if (o == null) return false;
 			return (
 			         (o.driverClass.equals(this.driverClass)) && 
 							 (this.name.equalsIgnoreCase(o.name))

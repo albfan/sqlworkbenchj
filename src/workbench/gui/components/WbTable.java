@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import javax.swing.*;
+import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
@@ -109,12 +110,17 @@ public class WbTable extends JTable
 		this.headerPopup.add(this.optimizeCol.getMenuItem());
 		this.headerPopup.add(this.setColWidth.getMenuItem());
 		
+		Font dataFont = this.getFont();
+		if (dataFont == null) dataFont = (Font)UIManager.get("Table.font");
+		
 		JTextField stringField = new JTextField();
+		if (dataFont != null) stringField.setFont(dataFont);
 		stringField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		stringField.addMouseListener(new TextComponentMouseListener());
 		this.defaultEditor = new DefaultCellEditor(stringField);
 		
 		JTextField numberField = new JTextField();
+		if (dataFont != null)  numberField.setFont(dataFont);
 		numberField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		numberField.setHorizontalAlignment(SwingConstants.RIGHT);
 		numberField.addMouseListener(new TextComponentMouseListener());
@@ -227,6 +233,7 @@ public class WbTable extends JTable
 		if (this.changeListener != null && this.dwModel != null) 
 				this.dwModel.addTableModelListener(this.changeListener);
 		
+		this.initDefaultRenderers();
 		this.currentRow = -1;
 		this.currentColumn = -1;
 	}
@@ -264,12 +271,26 @@ public class WbTable extends JTable
 		this.adjustToColumnLabel = aFlag;
 	}
 	
+	public int getSortColum()
+	{
+		if (this.sortModel == null) return -1;
+		return this.sortModel.getSortColumn();
+	}
+	
 	public void setShowStatusColumn(boolean aFlag)
 	{
 		if (this.dwModel == null) return;
 		if (aFlag == this.dwModel.getShowStatusColumn()) return;
-		int row = this.getSelectedRow();
 		int column = this.getSelectedColumn();
+		int row = this.getSelectedRow();
+		int sortColumn = -1;
+		boolean asc = false;
+		if (this.sortModel != null)
+		{
+			sortColumn = sortModel.getSortColumn();
+			asc = this.sortModel.isAscending();
+		}
+			
 		this.saveColumnSizes();
 
 		if (row == -1) row = this.currentRow;
@@ -283,8 +304,16 @@ public class WbTable extends JTable
 			col.setMinWidth(20);
 			col.setPreferredWidth(20);
 		}
-		this.setDefaultRenderersAndEditors();
+		this.initDefaultEditors();
 		this.restoreColumnSizes();
+		if (sortColumn > -1 && this.sortModel != null)
+		{
+			if (aFlag) 
+				sortColumn ++;
+			else
+				sortColumn --;
+			this.sortModel.sortByColumn(sortColumn, asc);
+		}
 		if (row >= 0) 
 		{
 			this.getSelectionModel().setSelectionInterval(row, row);
@@ -444,10 +473,10 @@ public class WbTable extends JTable
 		this.savedColumnSizes = null;
 	}
 	
-	public void setDefaultRenderersAndEditors()
+	public void initDefaultRenderers()
 	{
-		if (this.getModel() == null) return;
-		TableCellRenderer rend = this.getDefaultRenderer(Integer.class);
+		if (this.defaultRenderersByColumnClass == null)
+			this.createDefaultRenderers();
 		
 		String format = WbManager.getSettings().getDefaultDateFormat();
 		this.setDefaultRenderer(Date.class, new DateColumnRenderer(format));
@@ -455,7 +484,14 @@ public class WbTable extends JTable
 		if (maxDigits == -1) maxDigits = 10;
 		this.setDefaultRenderer(Number.class, new NumberColumnRenderer(maxDigits));
 		this.setDefaultRenderer(Object.class, new ToolTipRenderer());
+	}
+	
+	public void initDefaultEditors()
+	{
+		if (this.dwModel == null) return;
+		
 		TableColumnModel colMod = this.getColumnModel();
+		
 		for (int i=0; i < colMod.getColumnCount(); i++)
 		{
 			TableColumn col = colMod.getColumn(i);
@@ -562,7 +598,7 @@ public class WbTable extends JTable
 		super.tableChanged(evt);
 		if (evt.getFirstRow() == TableModelEvent.HEADER_ROW)
 		{
-			//this.setDefaultRenderersAndEditors();
+			this.initDefaultEditors();
 		}
 	}
 	public void addTableModelListener(TableModelListener aListener)

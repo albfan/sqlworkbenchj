@@ -65,7 +65,7 @@ public class ProfileSelectionDialog extends JDialog implements ActionListener, W
 		{
 			try
 			{
-				this.profiles.newItem();
+				this.profiles.newItem(false);
 			}
 			catch (Exception e)
 			{

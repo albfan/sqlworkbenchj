@@ -255,6 +255,10 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 	public void showStatusMessage(String aMsg)
 	{
 	}
+	public void clearLog() {}
+	
+	public void showLogPanel() {}
+	public void showResultPanel() {}
 
 	public void addToToolbar(WbAction anAction, boolean aFlag)
 	{

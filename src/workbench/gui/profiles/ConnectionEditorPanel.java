@@ -293,8 +293,12 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		{
 			if (this.tfURL.getText() == null || this.tfURL.getText().trim().length() == 0)
 			{
-				DbDriver newDriver = (DbDriver)this.cbDrivers.getSelectedItem();
-				this.tfURL.setText(newDriver.getSampleUrl());
+				Object selected = this.cbDrivers.getSelectedItem();
+				if (selected instanceof DbDriver)
+				{
+					DbDriver newDriver = (DbDriver)selected;
+					this.tfURL.setText(newDriver.getSampleUrl());
+				}
 			}
 		}
 	}//GEN-LAST:event_cbDriversItemStateChanged
@@ -420,6 +424,10 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 				DbDriver drv = new DbDriver();
 				this.cbDrivers.addItem(drv);
 				this.cbDrivers.setSelectedIndex(this.cbDrivers.getItemCount() - 1);
+			}
+			else
+			{
+				this.cbDrivers.setSelectedItem(null);
 			}
 		}
 	}

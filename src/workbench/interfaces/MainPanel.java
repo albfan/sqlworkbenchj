@@ -27,6 +27,9 @@ public interface MainPanel
 	void saveSettings();
 	void showStatusMessage(String aMsg);
 	void showLogMessage(String aMsg);
+	void clearLog();
+	void showLogPanel();
+	void showResultPanel();
 	void setConnection(WbConnection aConnection);
 	void addToToolbar(WbAction anAction, boolean aFlag);
 	void setFont(Font aFont);

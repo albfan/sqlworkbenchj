@@ -46,6 +46,8 @@ public class WbTableSorter
 		model.addTableModelListener(this);
 		reallocateIndexes();
 	}
+
+	public int getSortColumn() { return this.column; }
 	
 	/**    Get the value at the given row and column.
 	 *
@@ -127,10 +129,7 @@ public class WbTableSorter
 	public void tableChanged(TableModelEvent e)
 	{
 		reallocateIndexes();
-		if (column >= 0)
-		{
-			sortByColumn(column, ascending);
-		}
+		this.column = -1;
 		fireTableChanged(e);
 	}
 	

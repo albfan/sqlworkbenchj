@@ -499,6 +499,8 @@ public class MainWindow
 				WbConnection conn = mgr.getConnection(aProfile);
 				this.setConnection(conn);
 				this.setTitle(ResourceMgr.TXT_PRODUCT_NAME + " [" + aProfile.getName() + "]");
+				this.getCurrentPanel().clearLog();
+				this.getCurrentPanel().showResultPanel();
 			}
 			catch (ClassNotFoundException cnf)
 			{

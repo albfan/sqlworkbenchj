@@ -21,6 +21,7 @@ public class ExtensionFileFilter
 {
 	private static FileFilter textFileFilter;
 	private static FileFilter sqlFileFilter;
+	private static FileFilter jarFileFilter;
 
 	private List extensions;
 	private String desc;
@@ -78,6 +79,19 @@ public class ExtensionFileFilter
 		return false;
 	}
 
+	public static FileFilter getJarFileFilter()
+	{
+		if (jarFileFilter == null)
+		{
+			ArrayList ext = new ArrayList();
+			ext.add("jar");
+			ext.add("zip");
+			String desc = ResourceMgr.getString("TxtArchivesFilterName");
+			jarFileFilter = new ExtensionFileFilter(desc, ext, true);
+		}
+		return jarFileFilter;
+	}
+	
 	public static FileFilter getSqlFileFilter()
 	{
 		if (sqlFileFilter == null)

@@ -139,7 +139,7 @@ public class DataStoreTableModel extends AbstractTableModel
 				{
 					try
 					{
-						Object realValue = this.convertCellValue(aValue, column);
+						Object realValue = this.dataCache.convertCellValue(aValue, column - this.statusOffset);
 						this.dataCache.setValue(row, column - this.statusOffset, realValue);
 					}
 					catch (Exception ce)
@@ -162,16 +162,6 @@ public class DataStoreTableModel extends AbstractTableModel
 		}
 	}
 	
-	/**
-	 *	Convert a String to the internal storage class for this cell.
-	 *	An empty string will be converted to DataStore.NULL_VALUE.
-	 */
-	private Object convertCellValue(Object aValue, int aColumn)
-		throws Exception
-	{
-		return this.dataCache.convertCellValue(aValue, aColumn - this.statusOffset);
-	}
-		
 	/**
 	 *	Return the number of columns in the model.
 	 */

@@ -83,10 +83,7 @@ class ProfileListModel implements ListModel
 
 	public void putProfile(int index, ConnectionProfile aProfile)
 	{
-		ConnectionProfile last = (ConnectionProfile)this.profiles.get(index);
 		this.profiles.set(index, aProfile);
-		ConnectionProfile newp = (ConnectionProfile)this.profiles.get(index);
-		index = 1;
 	}
 
 	public Collection getValues()

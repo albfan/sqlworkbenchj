@@ -58,10 +58,10 @@ public class ProfileEditorPanel
 		jList1.setNextFocusableComponent(connectionEditor);
 		this.connectionEditor.setNextFocusableComponent(jList1);
 		this.toolbar = new WbToolbar();
-		this.toolbar.add(new NewProfileAction(this));
-		this.toolbar.add(new SaveProfileAction(this));
+		this.toolbar.add(new NewListEntryAction(this));
+		this.toolbar.add(new SaveProfilesAction(this));
 		this.toolbar.addSeparator();
-		this.toolbar.add(new DeleteProfileAction(this));
+		this.toolbar.add(new DeleteListEntryAction(this));
 		this.listPanel.add(this.toolbar, BorderLayout.NORTH);
 		int pos = WbManager.getSettings().getProfileDividerLocation();
 		if (pos > -1)
@@ -94,18 +94,18 @@ public class ProfileEditorPanel
 	private void initComponents()//GEN-BEGIN:initComponents
 	{
 		jSplitPane1 = new WbSplitPane();
-
-
+		
+		
 		listPanel = new javax.swing.JPanel();
 		jScrollPane1 = new javax.swing.JScrollPane();
 		jList1 = new javax.swing.JList();
-
+		
 		setLayout(new java.awt.BorderLayout());
-
+		
 		jSplitPane1.setBorder(new javax.swing.border.EtchedBorder());
 		jSplitPane1.setDividerLocation(110);
 		listPanel.setLayout(new java.awt.BorderLayout());
-
+		
 		jScrollPane1.setPreferredSize(null);
 		jList1.setFont(WbManager.getSettings().getStandardFont());
 		jList1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
@@ -118,7 +118,7 @@ public class ProfileEditorPanel
 				jList1ValueChanged(evt);
 			}
 		});
-
+		
 		jList1.addMouseListener(new java.awt.event.MouseAdapter()
 		{
 			public void mouseClicked(java.awt.event.MouseEvent evt)
@@ -126,15 +126,15 @@ public class ProfileEditorPanel
 				jList1MouseClicked(evt);
 			}
 		});
-
+		
 		jScrollPane1.setViewportView(jList1);
-
+		
 		listPanel.add(jScrollPane1, java.awt.BorderLayout.CENTER);
-
+		
 		jSplitPane1.setLeftComponent(listPanel);
-
+		
 		add(jSplitPane1, java.awt.BorderLayout.CENTER);
-
+		
 	}//GEN-END:initComponents
 
 	private void jList1MouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_jList1MouseClicked
@@ -161,7 +161,10 @@ public class ProfileEditorPanel
 				this.model.putProfile(lastIndex, current);
 			}
 			ConnectionProfile newProfile = (ConnectionProfile)this.jList1.getSelectedValue();
-			this.connectionEditor.setProfile(newProfile);
+			if (newProfile != null)
+			{
+				this.connectionEditor.setProfile(newProfile);
+			}
 			lastIndex = this.jList1.getSelectedIndex();
 		}
 	}//GEN-LAST:event_jList1ValueChanged
@@ -226,11 +229,11 @@ public class ProfileEditorPanel
 	 *	Create a new profile. This will only be
 	 *	created in the ListModel.
 	 */
-	public void newItem() throws WbException
+	public void newItem(boolean createCopy) throws WbException
 	{
 		ConnectionProfile current = (ConnectionProfile)this.jList1.getSelectedValue();
 		ConnectionProfile cp;
-		if (current != null)
+		if (current != null && createCopy)
 		{
 			cp = current.createCopy();
 		}
@@ -241,6 +244,7 @@ public class ProfileEditorPanel
 		cp.setName(ResourceMgr.getString("TxtEmptyProfileName"));
 		this.model.addProfile(cp);
 		this.selectProfile(cp.getName());
+		// if I call repaint() the list disappears :-(
 		this.jList1.updateUI();
 	}
 

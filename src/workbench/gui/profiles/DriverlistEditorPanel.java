@@ -47,8 +47,8 @@ public class DriverlistEditorPanel extends javax.swing.JPanel implements FileAct
 		driverList.setNextFocusableComponent(driverEditor);
 		this.driverEditor.setNextFocusableComponent(driverList);
 		this.toolbar = new WbToolbar();
-		this.toolbar.add(new NewProfileAction(this));
-		this.toolbar.add(new DeleteProfileAction(this));
+		this.toolbar.add(new NewListEntryAction(this));
+		this.toolbar.add(new DeleteListEntryAction(this));
 		this.listPanel.add(this.toolbar, BorderLayout.NORTH);
 	}
 
@@ -105,8 +105,11 @@ public class DriverlistEditorPanel extends javax.swing.JPanel implements FileAct
 				this.model.putDriver(lastIndex, current);
 			}
 			int index = this.driverList.getSelectedIndex();
-			DbDriver newDriver = this.model.getDriver(index);
-			this.driverEditor.setDriver(newDriver);
+			if (index > -1)
+			{
+				DbDriver newDriver = this.model.getDriver(index);
+				this.driverEditor.setDriver(newDriver);
+			}
 			lastIndex = index;
 		}
 	}
@@ -151,18 +154,32 @@ public class DriverlistEditorPanel extends javax.swing.JPanel implements FileAct
 	public void deleteItem() throws WbException
 	{
 		int index = this.driverList.getSelectedIndex();
-		if (index > 0) this.driverList.setSelectedIndex(index - 1);
+		this.driverList.clearSelection();
+		this.driverEditor.reset();
 		this.model.deleteDriver(index);
-		this.driverList.updateUI();
+		
+		// check if the last driver was deleted
+		if (index > this.model.getSize() - 1) index--;
+		
+		this.driverList.setSelectedIndex(index);
+		this.driverList.repaint();
 	}
 
 	/**
 	 *	Create a new profile. This will only be
 	 *	created in the ListModel.
 	 */
-	public void newItem() throws WbException
+	public void newItem(boolean copyCurrent) throws WbException
 	{
-		DbDriver drv = new DbDriver();
+		DbDriver drv;
+		if (copyCurrent)
+		{
+			drv = this.getSelectedDriver().createCopy();
+		}
+		else
+		{
+			drv = new DbDriver();
+		}
 		drv.setName(ResourceMgr.getString("TxtEmptyDriverName"));
 		this.model.addDriver(drv);
 		this.selectDriver(drv.getName());
@@ -172,6 +189,7 @@ public class DriverlistEditorPanel extends javax.swing.JPanel implements FileAct
 	public void saveItem() throws WbException
 	{
 		ConnectionMgr conn = WbManager.getInstance().getConnectionMgr();
+		this.driverEditor.updateDriver();
 		conn.setDrivers(this.model.getValues());
 		conn.saveDrivers();
 	}
