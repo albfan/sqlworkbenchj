@@ -36,6 +36,7 @@ public class TextOptionsPanel
 		Settings s = Settings.getInstance();
 		s.setBoolProperty("workbench.export.text.cleanup", this.getCleanupCarriageReturns());
 		s.setBoolProperty("workbench.export.text.includeheader", this.getExportHeaders());
+		s.setBoolProperty("workbench.export.text.quotealways", this.getQuoteAlways());
 		s.setDefaultTextDelimiter(this.getTextDelimiter());
 		s.setQuoteChar(this.getTextQuoteChar());
 	}
@@ -45,6 +46,7 @@ public class TextOptionsPanel
 		Settings s = Settings.getInstance();
 		this.setCleanupCarriageReturns(s.getBoolProperty("workbench.export.text.cleanup"));
 		this.setExportHeaders(s.getBoolProperty("workbench.export.text.includeheader"));
+		this.setQuoteAlways(s.getBoolProperty("workbench.export.text.quotealways"));
 		this.setTextQuoteChar(s.getQuoteChar());
 		this.setTextDelimiter(s.getDefaultTextDelimiter(true));
 	}
@@ -89,6 +91,16 @@ public class TextOptionsPanel
 		this.quoteChar.setText(quote);
 	}
 
+	public boolean getQuoteAlways()
+	{
+		return this.quoteAlways.isSelected();
+	}
+	
+	public void setQuoteAlways(boolean flag)
+	{
+		this.quoteAlways.setSelected(flag);
+	}
+	
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -105,13 +117,14 @@ public class TextOptionsPanel
     quoteChar = new javax.swing.JTextField();
     cleanupCRLF = new javax.swing.JCheckBox();
     jPanel1 = new javax.swing.JPanel();
+    quoteAlways = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
     delimiterLabel.setText(java.util.ResourceBundle.getBundle("language/wbstrings").getString("LabelFieldDelimiter"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
@@ -119,7 +132,7 @@ public class TextOptionsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
@@ -137,7 +150,7 @@ public class TextOptionsPanel
     quoteCharLabel.setText(java.util.ResourceBundle.getBundle("language/wbstrings").getString("LabelQuoteChar"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 4);
@@ -145,7 +158,7 @@ public class TextOptionsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
@@ -162,9 +175,17 @@ public class TextOptionsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
+
+    quoteAlways.setText(java.util.ResourceBundle.getBundle("language/wbstrings").getString("LabelExportQuoteAlways"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    add(quoteAlways, gridBagConstraints);
 
   }//GEN-END:initComponents
 	
@@ -175,6 +196,7 @@ public class TextOptionsPanel
   private javax.swing.JLabel delimiterLabel;
   private javax.swing.JCheckBox exportHeaders;
   private javax.swing.JPanel jPanel1;
+  private javax.swing.JCheckBox quoteAlways;
   private javax.swing.JTextField quoteChar;
   private javax.swing.JLabel quoteCharLabel;
   // End of variables declaration//GEN-END:variables

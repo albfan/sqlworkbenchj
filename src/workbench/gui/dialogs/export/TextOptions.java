@@ -26,4 +26,6 @@ public interface TextOptions
 	void setTextQuoteChar(String quote);
 	boolean getCleanupCarriageReturns();
 	void setCleanupCarriageReturns(boolean flag);
+	void setQuoteAlways(boolean flag);
+	boolean getQuoteAlways();
 }
