@@ -9,6 +9,7 @@ package workbench.sql.formatter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -114,7 +115,8 @@ public class SqlFormatter
 	private StringBuffer indent = null;
 	private int realLength = 0;
 	private int maxSubselectLength = 60;
-
+	private Set dbFunctions;
+	
 	public SqlFormatter(String aScript, int maxLength)
 	{
 		this(aScript, 0, maxLength);
@@ -134,6 +136,14 @@ public class SqlFormatter
 		this.maxSubselectLength = maxSubselectLength;
 	}
 
+	public void setDBFunctions(Set functionNames)
+	{
+		if (functionNames != null)
+			this.dbFunctions = functionNames;
+		else
+			this.dbFunctions = Collections.EMPTY_SET;
+	}
+	
 	public String format()
 		throws Exception
 	{
@@ -801,7 +811,8 @@ public class SqlFormatter
 					if (t == null) return null;
 					continue;
 				}
-				if (!lastToken.isSeparator()) this.appendText(' ');
+				if (lastWord != null) lastWord = lastWord.toUpperCase();
+				if (!lastToken.isSeparator() && !this.dbFunctions.contains(lastWord)) this.appendText(' ');
 				this.appendText(t.getContents());
 			}
 			else
@@ -1391,7 +1402,7 @@ public class SqlFormatter
 //           "      WHERE NAME= 'city' \n" +
 //           "      ) city \n";
 //					String sql = "update bla set col1 = (select x from y)";
-			String sql = "select * from (SELECT x,y,z FROM tab1,tab2,tab3 minus SELECT x2 from tab2,tab2,tab4 WHERE x=1)";
+//			String sql = "select * from (SELECT x,y,z FROM tab1,tab2,tab3 minus SELECT x2 from tab2,tab2,tab4 WHERE x=1)";
 //			String sql = "SELECT  x , y , z   FROM   tab1 , tab2 , tab3  MINUS   SELECT   x2   FROM   tab2 , tab2 , tab4   WHERE   x = 1";
 			//String sql = "UPDATE bla set column1='test',col2=NULL, col4=222 where xyz=42 AND ab in (SELECT x from t\nWHERE x = 6) OR y = 5;commit;";
 //			String sql="SELECT city.id, \n" +
@@ -1406,7 +1417,11 @@ public class SqlFormatter
 //			String sql = "create index tk_test_idx on tk_test (col1, col2)";
 //			String sql = "/* testing \n testing line 2 \n*/\nCREATE TABLE test (nr integer);";
 //			String sql = "create index TK_TEST on bla ( upper(eins), FUENF, sechs)" ;
+			String sql = "select count(*) from test where ucase(surname) like 'BLA%'";
 			SqlFormatter f = new SqlFormatter(sql,60);
+			Set s = new HashSet();
+			s.add("UCASE");
+			f.setDBFunctions(s);
 			System.out.println(sql);
 			System.out.println("----------");
 			System.out.println(f.format());

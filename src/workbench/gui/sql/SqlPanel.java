@@ -1227,8 +1227,7 @@ public class SqlPanel
 
 		if (aConnection != null)
 		{
-			AnsiSQLTokenMarker token = this.editor.getSqlTokenMarker();
-			if (token != null) token.initDatabaseKeywords(aConnection.getSqlConnection());
+			this.editor.initDatabaseKeywords(aConnection);
 		}
 
 		this.checkResultSetActions();

@@ -9,11 +9,11 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
 /**
- * This class implements a wrapper for Oracle's SET command
- * Oracle's SET command is only valid from within SQL*Plus.
- * By supplying an implementation for the Workbench, we can ignore the errors
- * reported by the JDBC interface, so that SQL scripts intended for SQL*Plus
- * can also be run from within the workbench
+ * This class simply ignores the command and does not send it to the DBMS
+ * 
+ * Thus scripts e.g. intended for SQL*Plus (containing WHENEVER or EXIT) 
+ * can be executed from within the workbench.
+ * The commands to be ignored can be configured in workbench.settings
  *
  * @author  workbench@kellerer.org
  */
@@ -30,29 +30,10 @@ public class IgnoredCommand extends SqlCommand
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
-		try
-		{
-			this.currentStatement = aConnection.createStatement();
-			this.currentStatement.execute(aSql);
-
-			StringBuffer warnings = new StringBuffer();
-			if (this.appendWarnings(aConnection, this.currentStatement , warnings))
-			{
-				result.addMessage(warnings.toString());
-			}
-			this.currentStatement.close();
-		}
-		catch (Exception e)
-		{
-			result.clear();
-			result.addMessage(ResourceMgr.getString("MsgSetErrorIgnored") + ": " + e.getMessage());
-		}
-		finally
-		{
-			result.setSuccess();
-			this.done();
-		}
-
+		String msg = ResourceMgr.getString("MsgCommandIgnored").replaceAll("%verb%", this.verb);
+		result.addMessage(msg);
+		result.setSuccess();
+		this.done();
 		return result;
 	}
 
@@ -60,11 +41,5 @@ public class IgnoredCommand extends SqlCommand
 	{
 		return verb;
 	}
-	public static SqlCommand[] getCommandsToIgnoreForOracle()
-	{
-		SqlCommand[] result = new SqlCommand[2];
-		result[0] = new IgnoredCommand("PROMPT");
-		result[1] = new IgnoredCommand("WHENEVER");
-		return result;
-	}
+	
 }

@@ -121,7 +121,8 @@ public class TableListPanel
 	private static final String DELETE_TABLE_CMD = "delete-table-data";
 
 	private JMenu showDataMenu;
-
+	private String[] availableTableTypes;
+	
 	// holds a reference to other WbTables which
 	// need to display the same table list
 	// e.g. the table search panel
@@ -426,6 +427,8 @@ public class TableListPanel
 		this.dbConnection = null;
 		this.tableTypes.removeActionListener(this);
 		this.displayTab.removeChangeListener(this);
+		this.availableTableTypes = null;
+		this.tableTypes.removeAllItems();
 		this.reset();
 	}
 
@@ -491,6 +494,7 @@ public class TableListPanel
 			String preferredType = WbManager.getSettings().getProperty("workbench.dbexplorer", "defTableType", null);
 			if (preferredType != null && preferredType.length() == 0) preferredType = null;
 			List types = this.dbConnection.getMetadata().getTableTypes();
+			this.availableTableTypes = new String[types.size()];
 			this.tableTypes.removeAllItems();
 			this.tableTypes.addItem("*");
 			int preferredIndex = -1;
@@ -503,6 +507,7 @@ public class TableListPanel
 					preferredIndex = i + 1;
 				}
 				this.tableTypes.addItem(type);
+				this.availableTableTypes[i] = type;
 			}
 
 			if (preferredIndex > -1)
@@ -581,9 +586,28 @@ public class TableListPanel
 					{
 						parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 						reset();
-						String table = (String)tableTypes.getSelectedItem();
-						//LogMgr.logDebug("TableListPanel.retrieve()", "Retrieving table list for type " + table);
-						DataStoreTableModel rs = dbConnection.getMetadata().getListOfTables(currentCatalog, currentSchema, table);
+						
+						// Some JDBC drivers (e.g. PostgreSQL) return a selection
+						// of table types to the user when passing null to getTables()
+						// But we really might want to see all tables! 
+						// So if the app settings tells us to do, we'll use the list
+						// of types provided by the driver instead of using null as the type
+						String[] types = null;
+						String type = (String)tableTypes.getSelectedItem();
+						if ("*".equals(type))
+						{
+							if (WbManager.getSettings().getUseTableTypeList())
+							{
+								types = availableTableTypes;
+							}
+						}
+						else
+						{
+							types = new String[1];
+							types[0] = type;
+						}
+						DataStore ds = dbConnection.getMetadata().getTables(currentCatalog, currentSchema, types);
+						DataStoreTableModel rs = new DataStoreTableModel(ds);
 						tableList.setModel(rs, true);
 						tableList.adjustColumns();
 						SwingUtilities.invokeLater(new Runnable()

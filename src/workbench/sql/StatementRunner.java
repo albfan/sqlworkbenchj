@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import workbench.db.DbMetadata;
 
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -34,6 +36,7 @@ import workbench.sql.wbcommands.WbExport;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 import workbench.sql.commands.IgnoredCommand;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -139,13 +142,6 @@ public class StatementRunner
 			this.dbSpecificCommands.add(set.getVerb());
 			this.dbSpecificCommands.add(WbOraExecute.EXEC.getVerb());
 			this.dbSpecificCommands.add(WbOraExecute.EXECUTE.getVerb());
-
-			SqlCommand[] ignore = IgnoredCommand.getCommandsToIgnoreForOracle();
-			for (int i=0; i < ignore.length; i++)
-			{
-				this.cmdDispatch.put(ignore[i].getVerb(), ignore[i]);
-				this.dbSpecificCommands.add(ignore[i].getVerb());
-			}
 		}
 		else if (this.dbConnection.getMetadata().isSqlServer())
 		{
@@ -153,6 +149,19 @@ public class StatementRunner
 			this.cmdDispatch.put(cmd.getVerb(), cmd);
 			this.dbSpecificCommands.add(cmd.getVerb());
 		}
+		
+		String verbs = this.dbConnection.getMetadata().getVerbsToIgnore();
+		List l = StringUtil.stringToList(verbs, ",");
+		for (int i=0; i < l.size(); i++)
+		{
+			String verb = (String)l.get(i);
+			if (verb == null) continue;
+			verb = verb.toUpperCase();
+			IgnoredCommand cmd = new IgnoredCommand(verb);
+			this.cmdDispatch.put(verb, cmd);
+			this.dbSpecificCommands.add(verb);
+		}
+		
 	}
 
 	public StatementRunnerResult getResult()
@@ -180,7 +189,7 @@ public class StatementRunner
 			return;
 		}
 
-		String verb = SqlUtil.getSqlVerb(cleanSql).toUpperCase();
+		String verb = this.getRealVerb(cleanSql);
 
 		this.currentCommand = (SqlCommand)this.cmdDispatch.get(verb);
 
@@ -188,6 +197,11 @@ public class StatementRunner
 		if (this.currentCommand == null)
 		{
 			this.currentCommand = (SqlCommand)this.cmdDispatch.get("*");
+		}
+
+		if (this.dbConnection.getMetadata().isInformix())
+		{
+			LogMgr.logDebug("StatementRunner.runStatement()", "Using command instance " + this.currentCommand.getClass().getName() + " to execute the statement: " + aSql);
 		}
 
 		this.currentCommand.setConsumerWaiting(this.currentConsumer != null);
@@ -209,6 +223,28 @@ public class StatementRunner
 			}
 		}
 
+	}
+
+	/**
+	 *	Check for a SELECT ... INTO syntax for Informix which actually
+	 *  creates a table. In that case we will simply pretend it's a
+	 *  CREATE statement
+	 */
+	private String getRealVerb(String cleanSql)
+	{
+		String verb = SqlUtil.getSqlVerb(cleanSql).toUpperCase();
+		DbMetadata meta = this.dbConnection.getMetadata();
+		if (!meta.supportsSelectIntoNewTable()) return verb;
+
+		if (meta.isSelectIntoNewTable(cleanSql))
+		{
+			LogMgr.logDebug("StatementRunner.getRealVerb()", "Found 'SELECT ... INTO new_table'");
+			return "*";
+		}
+		else
+		{
+			return verb;
+		}
 	}
 
 	public void statementDone()

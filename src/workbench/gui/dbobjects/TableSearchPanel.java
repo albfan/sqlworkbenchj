@@ -136,14 +136,12 @@ public class TableSearchPanel
     jPanel2 = new javax.swing.JPanel();
     selectNoneButton = new javax.swing.JButton();
     statusInfo = new javax.swing.JLabel();
-    jPanel1 = new javax.swing.JPanel();
     entryPanel = new javax.swing.JPanel();
     startButton = new javax.swing.JButton();
     searchText = new javax.swing.JTextField();
     jLabel1 = new javax.swing.JLabel();
     reloadButton = new WbToolbarButton();
     columnFunction = new javax.swing.JTextField();
-    optionPanel = new javax.swing.JPanel();
     labelRowCount = new javax.swing.JLabel();
     rowCount = new javax.swing.JTextField();
 
@@ -208,8 +206,6 @@ public class TableSearchPanel
     statusInfo.setPreferredSize(new java.awt.Dimension(4, 22));
     add(statusInfo, java.awt.BorderLayout.SOUTH);
 
-    jPanel1.setLayout(new java.awt.GridBagLayout());
-
     entryPanel.setLayout(new java.awt.GridBagLayout());
 
     startButton.setText(ResourceMgr.getString("LabelStartSearch"));
@@ -225,6 +221,7 @@ public class TableSearchPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 1);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     entryPanel.add(startButton, gridBagConstraints);
 
     searchText.setColumns(20);
@@ -234,7 +231,6 @@ public class TableSearchPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 4;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.weightx = 1.0;
     entryPanel.add(searchText, gridBagConstraints);
@@ -255,8 +251,8 @@ public class TableSearchPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 0);
     entryPanel.add(reloadButton, gridBagConstraints);
 
     columnFunction.setColumns(8);
@@ -265,51 +261,31 @@ public class TableSearchPanel
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
     entryPanel.add(columnFunction, gridBagConstraints);
 
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
-    jPanel1.add(entryPanel, gridBagConstraints);
-
-    optionPanel.setLayout(new java.awt.GridBagLayout());
-
-    optionPanel.setBorder(new DividerBorder(DividerBorder.TOP));
     labelRowCount.setLabelFor(rowCount);
-    labelRowCount.setText(ResourceMgr.getString("LabelLimitSearchTableRows"));
+    labelRowCount.setText(ResourceMgr.getString("LabelMaxRows"));
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridx = 5;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
-    optionPanel.add(labelRowCount, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    entryPanel.add(labelRowCount, gridBagConstraints);
 
     rowCount.setColumns(4);
     rowCount.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
     rowCount.setText("0");
     rowCount.setMinimumSize(new java.awt.Dimension(30, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridx = 6;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(2, 4, 2, 4);
-    optionPanel.add(rowCount, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 5);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    entryPanel.add(rowCount, gridBagConstraints);
 
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    jPanel1.add(optionPanel, gridBagConstraints);
-
-    add(jPanel1, java.awt.BorderLayout.NORTH);
+    add(entryPanel, java.awt.BorderLayout.NORTH);
 
   }//GEN-END:initComponents
 
@@ -605,11 +581,9 @@ public class TableSearchPanel
   private javax.swing.JTextField columnFunction;
   private javax.swing.JPanel entryPanel;
   private javax.swing.JLabel jLabel1;
-  private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanel2;
   private javax.swing.JSplitPane jSplitPane1;
   private javax.swing.JLabel labelRowCount;
-  private javax.swing.JPanel optionPanel;
   private javax.swing.JButton reloadButton;
   private javax.swing.JPanel resultPanel;
   private javax.swing.JScrollPane resultScrollPane;

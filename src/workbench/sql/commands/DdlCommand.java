@@ -11,6 +11,7 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.SqlUtil;
+import workbench.log.LogMgr;
 
 /**
  *
@@ -103,6 +104,7 @@ public class DdlCommand extends SqlCommand
 			result.addMessage(ExceptionUtil.getDisplay(e));
       this.addExtendErrorInfo(aConnection, aSql, result);
 			result.setFailure();
+			LogMgr.logDebug("SelectCommand.execute()", "Error executing statement", e);
 		}
 		finally
 		{

@@ -44,6 +44,8 @@ public class WbImport extends SqlCommand
 		cmdLine.addArgument("columns");
 		cmdLine.addArgument("mode");
 		cmdLine.addArgument("keycolumns");
+		cmdLine.addArgument("usebatch");
+		cmdLine.addArgument("deletetarget");
 	}
 
 	public String getVerb() { return VERB; }
@@ -202,6 +204,11 @@ public class WbImport extends SqlCommand
 			msg += ": " + table.toUpperCase();
 		}
 		result.addMessage(msg);
+		
+		boolean useBatch = cmdLine.getBoolean("usebatch");
+		boolean delete = cmdLine.getBoolean("deletetarget");
+		imp.setUseBatch(useBatch);
+		imp.setDeleteTarget(delete);
 
 		try
 		{

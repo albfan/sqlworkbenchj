@@ -42,6 +42,7 @@ public class WbCopy
 	public static final String PARAM_KEYS = "keycolumns";
 	public static final String PARAM_DROPTARGET = "droptarget";
 	public static final String PARAM_CREATETARGET = "createtarget";
+	public static final String PARAM_USEBATCH = "usebatch";
 
 	private ArgumentParser cmdLine;
 	private DataCopier copier;
@@ -63,6 +64,7 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_KEYS);
 		cmdLine.addArgument(PARAM_DROPTARGET);
 		cmdLine.addArgument(PARAM_CREATETARGET);
+		cmdLine.addArgument(PARAM_USEBATCH);
 	}
 
 	public String getVerb() { return VERB; }
@@ -184,10 +186,11 @@ public class WbCopy
 				return result;
 			}
 		}
-		boolean delete = "true".equalsIgnoreCase(cmdLine.getValue(PARAM_DELETETARGET));
-		boolean cont = "true".equalsIgnoreCase(cmdLine.getValue(PARAM_CONTINUE));
-		boolean createTable = "true".equals(cmdLine.getValue(PARAM_CREATETARGET));
-		boolean dropTable = "true".equals(cmdLine.getValue(PARAM_DROPTARGET));
+		boolean delete = cmdLine.getBoolean(PARAM_DELETETARGET);
+		boolean cont = cmdLine.getBoolean(PARAM_CONTINUE);
+		boolean createTable = cmdLine.getBoolean(PARAM_CREATETARGET);
+		boolean dropTable = cmdLine.getBoolean(PARAM_DROPTARGET);
+		boolean useBatch = cmdLine.getBoolean(PARAM_USEBATCH);
 		String keys = cmdLine.getValue(PARAM_KEYS);
 
 		this.copier = new DataCopier();
@@ -205,7 +208,7 @@ public class WbCopy
 		copier.setRowActionMonitor(this.rowMonitor);
 		copier.setContinueOnError(cont);
 		copier.setCommitEvery(commit);
-
+		copier.setUseBatch(useBatch);
 		copier.setDeleteTarget(delete);
 
 		TableIdentifier targetId = new TableIdentifier(targettable);
@@ -239,12 +242,6 @@ public class WbCopy
 
 			copier.start();
 			result.setSuccess();
-
-			String s = copier.getErrorMessage();
-			if (s != null) result.addMessage(s);
-
-			this.addErrorsFromImporter(result);
-			this.addWarningsFromImporter(result);
 
 			result.addMessage(copier.getAllMessages());
 		}

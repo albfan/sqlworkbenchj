@@ -1197,19 +1197,34 @@ public class Settings
 		this.props.setProperty("workbench.dbexplorer.visible", Boolean.toString(aFlag));
 	}
 
+	public boolean getDbExplorerClearDataOnClose()
+	{
+		return "true".equals(this.props.getProperty("workbench.dbexplorer.cleardata", "true"));
+	}
+
 	public boolean getDbExplorerVisible()
 	{
 		return "true".equals(this.props.getProperty("workbench.dbexplorer.visible", "false"));
 	}
 
-	public boolean getShowDbExplorerInMainWindow()
+	public boolean getUseTableTypeList()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty("workbench.dbexplorer.mainwindow", "true"));
+		return "true".equalsIgnoreCase(this.props.getProperty("workbench.dbexplorer.usetypelist", "true"));
+	}
+
+	public void setUseTableTypeList(boolean flag)
+	{
+		this.props.setProperty("workbench.dbexplorer.usetypelist", Boolean.toString(flag));
 	}
 
 	public void setShowDbExplorerInMainWindow(boolean showWindow)
 	{
 		this.props.setProperty("workbench.dbexplorer.mainwindow", Boolean.toString(showWindow));
+	}
+
+	public boolean getShowDbExplorerInMainWindow()
+	{
+		return "true".equalsIgnoreCase(this.props.getProperty("workbench.dbexplorer.mainwindow", "false"));
 	}
 
 	public boolean getUseEncryption()

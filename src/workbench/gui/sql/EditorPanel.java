@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
@@ -37,6 +38,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
 
 import workbench.WbManager;
+import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ColumnSelectionAction;
@@ -189,6 +191,15 @@ public class EditorPanel
 	{
 		this.fileOpen = anAction;
 	}
+
+	private Set dbFunctions = null;
+	
+	public void initDatabaseKeywords(WbConnection aConnection)
+	{
+		AnsiSQLTokenMarker token = this.getSqlTokenMarker();
+		if (token != null) token.initDatabaseKeywords(aConnection.getSqlConnection());
+		this.dbFunctions = aConnection.getMetadata().getDbFunctions();
+	}
 	
 	public void fontChanged(String aKey, Font aFont)
 	{
@@ -269,11 +280,12 @@ public class EditorPanel
 		{
 			String command = (String)commands.get(i);
 			SqlFormatter f = new SqlFormatter(command, WbManager.getSettings().getMaxSubselectLength());
+			f.setDBFunctions(this.dbFunctions);
 			try
 			{
 				String formattedSql = f.format().trim();
 				newSql.append(formattedSql);
-				if (command.trim().endsWith(delimit))
+				if (!command.trim().endsWith(delimit))
 				{
 					newSql.append(formattedDelimit);
 				}

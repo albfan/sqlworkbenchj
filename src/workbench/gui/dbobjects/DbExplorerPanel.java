@@ -66,7 +66,7 @@ public class DbExplorerPanel
 	private boolean restoreWindow = false;
 	private boolean retrievePending = false;
 	private int internalId = 0;
-	
+
 	public DbExplorerPanel(MainWindow aParent, int index)
 	{
 		this.parentWindow = aParent;
@@ -80,16 +80,16 @@ public class DbExplorerPanel
 			tabPane.setUI(TabbedPaneUIFactory.getBorderLessUI());
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerTables"), tables);
 			tabPane.setToolTipTextAt(0, ResourceMgr.getDescription("TxtDbExplorerTables"));
-			
+
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerProcs"), procs);
 			tabPane.setToolTipTextAt(1, ResourceMgr.getDescription("TxtDbExplorerProcs"));
-			
+
 			tabPane.add(ResourceMgr.getString("TxtSearchTables"), this.searchPanel);
 			tabPane.setToolTipTextAt(2, ResourceMgr.getDescription("TxtSearchTables"));
-			
+
 			//tabPane.add(ResourceMgr.getString("TxtPersistenceGenerator"), new JPanel());
 			tabPane.setFocusable(false);
-			
+
 			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 			this.setLayout(new BorderLayout());
 			Dimension d = new Dimension(32768, 20);
@@ -133,7 +133,7 @@ public class DbExplorerPanel
 	{
 		return false;
 	}
-	
+
 	public String getId()
 	{
 		return "WbExp-" + Integer.toString(this.internalId);
@@ -167,7 +167,7 @@ public class DbExplorerPanel
 		this.tabPane.setComponentAt(index, this.generator);
 	}
 	*/
-	
+
 	public void readSchemas()
 	{
 		String currentSchema = null;
@@ -254,7 +254,7 @@ public class DbExplorerPanel
 			else
 			{
 				// if we are not visible just store the information
-				// that we need to retrieve the table list. 
+				// that we need to retrieve the table list.
 				// this will be evaluated by the (overwritten) setVisible() method
 				// There is no need in retrieving the information if we are not visible
 				this.retrievePending = true;
@@ -268,7 +268,7 @@ public class DbExplorerPanel
 		super.setVisible(flag);
 		if (!wasVisible && flag && retrievePending)
 		{
-			// retrievePending will be true, if the connection has 
+			// retrievePending will be true, if the connection has
 			// been set already, the DbExplorer should be retrieved automatically
 			// and the panel was not visible when the connection was provided
 			retrievePending = false;
@@ -279,14 +279,14 @@ public class DbExplorerPanel
 					fireSchemaChanged();
 				}
 			});
-		}			
+		}
 	}
-	
+
 	public void startRetrieve()
 	{
 		this.fireSchemaChanged();
 	}
-	
+
 	public WbConnection getConnection()
 	{
 		return this.dbConnection;
@@ -311,7 +311,7 @@ public class DbExplorerPanel
 		if (this.searchPanel != null) this.searchPanel.saveSettings();
 		//if (this.generator != null) this.generator.saveSettings();
 	}
-	
+
 	public void restoreSettings()
 	{
 		tables.restoreSettings();
@@ -332,7 +332,7 @@ public class DbExplorerPanel
 	{
 		this.fireSchemaChanged(true);
 	}
-	
+
 	private void fireSchemaChanged(boolean retrieve)
 	{
 		try
@@ -351,7 +351,7 @@ public class DbExplorerPanel
 	{
 		tab.setTitleAt(index, ResourceMgr.getString("LabelDbExplorer"));
 	}
-	
+
 	public void closeWindow()
 	{
 		if (this.window != null)
@@ -361,7 +361,7 @@ public class DbExplorerPanel
 			this.window = null;
 		}
 	}
-	
+
 	public void openWindow(String aProfileName)
 	{
 		if (this.window == null)
@@ -409,7 +409,7 @@ public class DbExplorerPanel
 	public void explorerWindowClosed()
 	{
 		this.window = null;
-		if (this.tables != null) this.tables.clearTableData();
+		if (WbManager.getSettings().getDbExplorerClearDataOnClose() && this.tables != null) this.tables.clearTableData();
 	}
 
 	public void mainWindowDeiconified()
@@ -419,7 +419,7 @@ public class DbExplorerPanel
 	public void mainWindowIconified()
 	{
 	}
-	
+
 	public void updateUI()
 	{
 		super.updateUI();
@@ -428,7 +428,7 @@ public class DbExplorerPanel
 			this.toolbar.updateUI();
 			this.toolbar.repaint();
 		}
-		if (this.procs != null) 
+		if (this.procs != null)
 		{
 			this.procs.updateUI();
 			this.procs.repaint();
@@ -445,10 +445,10 @@ public class DbExplorerPanel
 			}
 		}
 	}
-	
+
 	public void dispose()
 	{
 		this.tables.reset();
 	}
-	
+
 }

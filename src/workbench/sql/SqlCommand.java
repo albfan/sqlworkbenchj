@@ -201,42 +201,18 @@ public class SqlCommand
 					result.addMessage(updateCount + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
 				}
 			}
+			// we are not checking for further results as we
+			// won't support them anyway :)
 
-			boolean moreResults = false;
-
-			moreResults = this.currentStatement.getMoreResults();
-
-			//while ( (moreResults || (updateCount != -1 && zeroUpdates < 2) ) && (loopcounter < maxLoops) )
-			while (moreResults)
-			{
-				if (moreResults)
-				{
-					rs  = this.currentStatement.getResultSet();
-					ds = new DataStore(rs, aConnection);
-					result.addDataStore(ds);
-					moreResults = this.currentStatement.getMoreResults();
-				}
-
-				/*
-				if (updateCount > -1)
-				{
-					result.addMessage(updateCount + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
-					updateCount = this.currentStatement.getUpdateCount();
-					if (updateCount == 0) zeroUpdates ++;
-				}
-				*/
-				loopcounter ++;
-				if (loopcounter > maxLoops) break;
-			}
 			result.setSuccess();
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("SqlCommand.execute()", ExceptionUtil.getDisplay(e), e);
+			LogMgr.logDebug("SqlCommand.execute()", "Error executing sql statement", e);
 			result.clear();
 			StringBuffer msg = new StringBuffer(50);
-			msg.append(ResourceMgr.getString("MsgExecuteError") + ": ");
-			int maxLen = 20;
+			msg.append(ResourceMgr.getString("MsgExecuteError") + ":\n----------\n");
+			int maxLen = 80;
 			if (aSql.trim().length() > maxLen)
 			{
 				msg.append(aSql.trim().substring(0, maxLen));
@@ -246,6 +222,7 @@ public class SqlCommand
 			{
 				msg.append(aSql.trim());
 			}
+			msg.append("\n----------\n");
 			result.addMessage(msg.toString());
 			result.addMessage(ExceptionUtil.getDisplay(e));
 			result.setFailure();

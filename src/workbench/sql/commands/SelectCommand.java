@@ -132,6 +132,7 @@ public class SelectCommand extends SqlCommand
 			{
 				result.addMessage(warnings.toString());
 			}
+			LogMgr.logDebug("SelectCommand.execute()", "Error executing statement", e);
 			result.setFailure();
 		}
 

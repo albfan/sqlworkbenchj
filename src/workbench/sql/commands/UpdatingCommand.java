@@ -13,6 +13,7 @@ import workbench.exception.ExceptionUtil;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.log.LogMgr;
 
 /**
  * @author  workbench@kellerer.org
@@ -53,6 +54,7 @@ public class UpdatingCommand extends SqlCommand
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
 			result.addMessage(ExceptionUtil.getDisplay(e));
 			result.setFailure();
+			LogMgr.logDebug("UpdatingCommnad.execute()", "Error executing statement", e);
 		}
 		finally
 		{

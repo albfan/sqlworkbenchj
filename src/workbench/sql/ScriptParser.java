@@ -125,7 +125,7 @@ public class ScriptParser
 		this.delimiter = ";";
 
 		String cleanSql = SqlUtil.makeCleanSql(this.originalScript, false).trim();
-		String alternate = "/"; //WbManager.getSettings().getAlternateDelimiter();
+		String alternate = WbManager.getSettings().getAlternateDelimiter();
 		if (cleanSql.endsWith(alternate))
 		{
 			this.delimiter = this.alternateDelimiter;
@@ -259,7 +259,11 @@ public class ScriptParser
 		int currentIndex = -1;
 		int pos = -1;
 
-		pos = this.originalScript.indexOf(this.delimiter);
+		if (this.delimiter.toUpperCase().equals(this.delimiter.toLowerCase()))
+			pos = this.originalScript.indexOf(this.delimiter);
+		else
+			pos = this.originalScript.toUpperCase().indexOf(this.delimiter.toUpperCase());
+		
 		if (pos == -1 || pos == this.originalScript.length() - this.delimiterLength)
 		{
 			this.addCommand(0, -1);
@@ -268,7 +272,7 @@ public class ScriptParser
 
 		for (pos = 0; pos < scriptLen; pos++)
 		{
-			currChar = this.originalScript.substring(pos, pos + 1);
+			currChar = this.originalScript.substring(pos, pos + 1).toUpperCase();
 
 			// ignore quotes in comments
 			if (!commentOn && currChar.charAt(0) == '\'' || currChar.charAt(0) == '"')
@@ -399,6 +403,8 @@ public class ScriptParser
 		}
 
 		String clean = SqlUtil.makeCleanSql(value, false);
+		if (clean.equalsIgnoreCase(this.delimiter)) return -1;
+		
 		if (clean.length() > 0)
 		{
 			this.commands.add(value.trim());
