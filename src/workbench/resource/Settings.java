@@ -52,14 +52,33 @@ public class Settings
 	private Font dataFont;
 	private String filename;
 	private ArrayList fontChangeListeners = new ArrayList();
-	
+	private String configDir;
+		
 	public Settings()
 	{
 		//System.out.println("Settings.<init>");
 		this.props = new Properties();
-		this.filename = System.getProperty("workbench.settings.file", "workbench.settings");
-
+		this.filename = System.getProperty("workbench.settings.file", null);
 		fillDefaults();
+		
+		this.configDir = this.props.getProperty("workbench.configdir", null);
+		if (configDir == null)
+		{
+			this.configDir = System.getProperty("workbench.configdir", "");
+		}
+		
+		if (configDir == null) configDir = "";
+		if (configDir.length() > 0)
+		{
+			String sep = System.getProperty("file.separator");
+			if (!this.configDir.endsWith(sep))
+			{
+				configDir = configDir + sep;
+			}
+		}
+		System.out.println("configDir = " + configDir);
+		if (filename == null) this.filename = this.configDir + "workbench.settings";
+		
 		try
 		{
 			BufferedInputStream in = new BufferedInputStream(new FileInputStream(this.filename));
@@ -81,6 +100,16 @@ public class Settings
     }
 	}
 
+	public String getConfigDir() { return this.configDir; }
+	public String getProfileFileName()
+	{
+		return this.configDir + "WbProfiles.xml";
+	}
+	
+	public String getDriverConfigFileName()
+	{
+		return this.configDir + "WbDrivers.xml";
+	}
 	public void showOptionsDialog()
 	{
 		JOptionPane.showMessageDialog(null, "Not yet implemented. Please edit workbench.settings");
@@ -838,17 +867,4 @@ public class Settings
 	}
 
 	
-	public String getProfileFileName()
-	{
-		String file = System.getProperty("workbench.profilestorage", "");
-		if (file.length() == 0)
-		{
-			file = this.props.getProperty("workbench.profilesstorage", "");
-		}
-		if (file.length() == 0)
-		{
-			file = "WbProfiles.xml";
-		}
-		return file;
-	}
 }

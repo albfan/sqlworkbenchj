@@ -306,7 +306,7 @@ public class WbManager
 	}
 	
 	
-	public static void startup()
+	public static void startup(String[] args)
 	{
 		WbSplash splash = null;
 		if (wb.settings.getShowSplash())
@@ -325,6 +325,6 @@ public class WbManager
 
 	public static void main(String args[])
 	{
-		startup();
+		startup(args);
 	}
 }

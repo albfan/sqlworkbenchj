@@ -294,14 +294,14 @@ public class ConnectionMgr
 	
 	public void saveDrivers()
 	{
-		WbPersistence.writeObject(this.drivers, "WbDrivers.xml");
+		WbPersistence.writeObject(this.drivers, WbManager.getSettings().getDriverConfigFileName());
 	}
 	
 	private void readDrivers()
 	{
 		try
 		{
-			Object result = WbPersistence.readObject("WbDrivers.xml");
+			Object result = WbPersistence.readObject(WbManager.getSettings().getDriverConfigFileName());
 			if (result == null) 
 			{
 				this.drivers = new ArrayList();

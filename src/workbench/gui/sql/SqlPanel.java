@@ -173,7 +173,7 @@ public class SqlPanel
 	public void setId(int anId)
 	{
 		this.internalId = anId;
-		this.historyFilename = "WbStatements" + Integer.toString(this.internalId) + ".xml";
+		this.historyFilename = WbManager.getSettings().getConfigDir() + "WbStatements" + Integer.toString(this.internalId) + ".xml";
 	}
 
 	public void initDefaults()
