@@ -25,7 +25,6 @@ import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 
 import workbench.WbManager;
-import workbench.exception.WbException;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
 import workbench.resource.ResourceMgr;
@@ -40,20 +39,20 @@ public class DriverEditorDialog extends JDialog
 	private JButton cancelButton;
   private boolean cancelled = true;
 	private EscAction escAction;
-	
+
 	/** Creates new form DriverEditorDialog */
 	public DriverEditorDialog(Frame parent, boolean modal)
 	{
 		super(parent, modal);
 		initComponents();
-		
+
 		this.getRootPane().setDefaultButton(this.okButton);
 		InputMap im = this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 		ActionMap am = this.getRootPane().getActionMap();
 		escAction = new EscAction(this);
 		im.put(escAction.getAccelerator(), escAction.getActionName());
 		am.put(escAction.getActionName(), escAction);
-		
+
 		if (!WbManager.getSettings().restoreWindowSize(this))
 		{
 			this.setSize(600,400);
@@ -127,14 +126,14 @@ public class DriverEditorDialog extends JDialog
       this.cancelled = false;
 			this.closeDialog();
 		}
-		catch (WbException e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
 	}
 
   public boolean isCancelled() { return this.cancelled; }
-  
+
 	/** Closes the dialog */
 	private void closeDialog(WindowEvent evt)
 	{

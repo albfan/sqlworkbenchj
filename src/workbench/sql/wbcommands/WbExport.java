@@ -6,7 +6,6 @@ import java.util.List;
 
 import workbench.db.DataSpooler;
 import workbench.db.WbConnection;
-import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
@@ -48,12 +47,13 @@ public class WbExport extends SqlCommand
 		cmdLine.addArgument("showprogress");
 		cmdLine.addArgument("sqlinsert");
 		cmdLine.addArgument("sqlupdate");
+		cmdLine.addArgument("append");
 	}
 
 	public String getVerb() { return VERB; }
 
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
-		throws SQLException, WbException
+		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
@@ -130,8 +130,10 @@ public class WbExport extends SqlCommand
 			if (format != null) spooler.setDecimalSymbol(format);
 
 			String header = cmdLine.getValue("header");
-			spooler.setExportHeaders(StringUtil.stringToBool(header));
+			spooler.setExportHeaders(cmdLine.getBoolean("header"));
 			spooler.setCleanCarriageReturns(cmdLine.getBoolean("cleancr"));
+
+			spooler.setAppendToFile(cmdLine.getBoolean("append"));
 		}
 		else if (type.startsWith("sql"))
 		{
@@ -145,12 +147,12 @@ public class WbExport extends SqlCommand
 				spooler.setOutputTypeSqlUpdate();
 				typeDisplay = "SQL UPDATE";
 			}
-			String create = cmdLine.getValue("createtable");
-			spooler.setIncludeCreateTable(StringUtil.stringToBool(create));
+			spooler.setIncludeCreateTable(cmdLine.getBoolean("createtable"));
 			spooler.setChrFunction(cmdLine.getValue("charfunc"));
 			spooler.setConcatString(cmdLine.getValue("concat"));
 			int commit = StringUtil.getIntValue(cmdLine.getValue("commitevery"),-1);
 			spooler.setCommitEvery(commit);
+			spooler.setAppendToFile(cmdLine.getBoolean("append"));
 			if (table != null) spooler.setTableName(table);
 		}
 		else if ("xml".equalsIgnoreCase(type))

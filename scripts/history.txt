@@ -1,5 +1,55 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh:  The EXPORT command now supports the -append parameter to append text of
+      SQL output to an already existing file
+Enh:  When printing, the page now contains a header identifying the source of
+      the data (e.g. the table's name when printing its definition or the
+      beginning of the select statement)
+Enh:  Reworked the layout of the DataPumper
+Enh:  Errors reported from Oracle's SET command are now ignored. Thus scripts
+      intended for SQL*Plus containing things like SET LINESIZE can be executed
+      without an error message.
+Enh:  Column/Table level constraints defined with the check() keyword are now
+      displayed in the SQL source for a table. Currently this is implemented for
+      Firebird, Postgres, SQL Server, Oracle, Adaptive Server Anywhere and
+      HSQLDB >= 1.7.2 RC2
+Enh:  The DatabaseExplorer now shows Sequences for Oracle
+Enh:  The connection info can now be configured with the property 
+      workbench.gui.connectiondisplay
+      The value for that property can contain the following placeholders:
+      %username%, %url%, %profile%, %catalog%
+      The placeholders are case sensitiv!
+      If this property is not set, the old display will be shown. The following
+      entry would re-created the old display: User=%username%, URL=%url%
+
+Fix:  Oracle: VARCHAR columns with UTF8 and nls_length_semantics = char are now
+      displayed correctly
+Fix:  The setting to disable/enable the DBMS_OUTPUT package by default for
+      Oracle was not saved (so it was enabled always)
+Fix:  Oracle: When retrieving LONG columns with DBMS_OUTPUT support enabled,
+      the whole statement would fail
+Fix:  If a workspace was closed, the first tab was not renamed correctly
+Fix:  SQL Workbench/J changed the color of the grid lines to a light gray which
+      causes problems for some background/foreground color combinations. The
+      grid color can now be configured. To get the default dark gray back, add
+
+      workbench.table.gridcolor=128,128,128
+
+      to your workbench.settings
+Fix:  The shortcut for the DatabaseExplorer (Ctrl-D) could not be
+      remapped correctly
+Fix:  "Match Bracket" did not show up in the shortcut list (and on the menu)
+Fix:  The display was not scrolled properly when jumping to the end of a line
+      which does not fit into the editor horizontally
+Fix:  Creating a new Connection Profile did not always work
+Fix:  Fixed some problems with SQL Server, because the MS JDBC driver did not
+      allow for multiple concurrent statement objects to be created.
+Fix:  -mode=update,insert did not work for the COPY command because the
+      parameter for the key columns was not parsed
+Fix:  When an error occurred during the update of the database, the message
+      was not displayed correctly (missing key in the resource file)
+Fix:  If an error occurred when saving the contents of the SQL editor to a
+      file, no message was displayed to the user.
 
 Build 69, 01.02.2004
 --------------------
@@ -23,8 +73,8 @@ Enh:  The status bar is now always displayed in the main window (not only when
       the result panel is visible)
 Enh:  Data can now be saved as SQL UPDATE statements as well (if the table
       has a primary key defined)
-Enh:  IMPORT, COPY and the DataPumper can now optionally update existing records 
-Enh:  When using "Execute Current" the editor now (optionally) jumps to the next 
+Enh:  IMPORT, COPY and the DataPumper can now optionally update existing records
+Enh:  When using "Execute Current" the editor now (optionally) jumps to the next
       statement.
 Enh:  The COPY command does not require a profile any more. If neither source nor
       target profile are specified the current connection will be used for both.

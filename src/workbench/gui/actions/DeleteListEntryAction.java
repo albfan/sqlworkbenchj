@@ -7,7 +7,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import workbench.exception.WbException;
 import workbench.interfaces.FileActions;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -24,7 +23,7 @@ public class DeleteListEntryAction extends WbAction
 	{
 		this(aClient, "LabelDeleteListEntry");
 	}
-	
+
 	public DeleteListEntryAction(FileActions aClient, String aKey)
 	{
 		this.client = aClient;
@@ -38,7 +37,7 @@ public class DeleteListEntryAction extends WbAction
 		{
 			this.client.deleteItem();
 		}
-		catch (WbException ex)
+		catch (Exception ex)
 		{
 			LogMgr.logError(this, "Error saving profiles", ex);
 		}

@@ -22,6 +22,8 @@ import workbench.log.LogMgr;
 public class OracleConstraintReader
 	extends AbstractConstraintReader
 {
+	private PreparedStatement statement;
+	
 	private static final String TABLE_SQL =
 	         "SELECT search_condition \n" +
            "FROM all_constraints cons   \n" +
@@ -56,15 +58,17 @@ public class OracleConstraintReader
 		String sql = this.getTableConstraintSql();
 		if (sql == null) return null;
 		StringBuffer result = new StringBuffer(100);
-		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try
 		{
-			stmt = dbConnection.prepareStatement(sql);
-			stmt.setString(1, aTable.getSchema());
-			stmt.setString(2, aTable.getTable());
+			if (this.statement == null)
+			{
+				this.statement = dbConnection.prepareStatement(sql);
+			}
+			this.statement.setString(1, aTable.getSchema());
+			this.statement.setString(2, aTable.getTable());
 
-			rs = stmt.executeQuery();
+			rs = this.statement.executeQuery();
 			int count = 0;
 			while (rs.next())
 			{
@@ -92,10 +96,16 @@ public class OracleConstraintReader
 		finally
 		{
 			try { rs.close(); } catch (Throwable th) {}
-			try { stmt.close(); } catch (Throwable th) {}
+			//try { stmt.close(); } catch (Throwable th) {}
 		}
 		return result.toString();
 	}
   
-
+	public void done()
+	{
+		if (this.statement != null)
+		{
+			try { this.statement.close(); } catch (Throwable th) {}
+		}
+	}
 }

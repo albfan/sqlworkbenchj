@@ -20,8 +20,8 @@ import workbench.util.WbPersistence;
 public class DbDateFormatter
 {
 	public static final String DATE_PLACEHOLDER = "%formatted_date_literal%";
-	public static DbDateFormatter DEFAULT_FORMATTER = new DbDateFormatter("yyyy-MM-dd HH:mm:ss");
-	
+	public static final DbDateFormatter DEFAULT_FORMATTER = new DbDateFormatter("yyyy-MM-dd HH:mm:ss");
+
 	private SimpleDateFormat formatter;
 	private String format;
 
@@ -37,7 +37,7 @@ public class DbDateFormatter
 		this.setFormat(aFormat);
 		this.setFunctionCall(null);
 	}
-	
+
 	public String getFormat()
 	{
 		return this.format;
@@ -90,7 +90,7 @@ public class DbDateFormatter
 		format.setFormat("yyyy-MM-dd HH:mm:ss");
 		format.setFunctionCall(null);
 
-		
+
 		m.put("Microsoft SQL Server", format);
 		WbPersistence.writeObject(m, "../src/workbench/storage/DateLiteralFormats.xml");
 

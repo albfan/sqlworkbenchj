@@ -13,7 +13,6 @@ import java.sql.Types;
 import java.util.List;
 import workbench.WbManager;
 import workbench.db.WbConnection;
-import workbench.exception.WbException;
 import workbench.interfaces.TableSearchDisplay;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -36,14 +35,14 @@ public class TableSearcher
 	private Statement query = null;
 	private Thread searchThread;
 	private int maxRows = 0;
-	
+
 	public TableSearcher()
 	{
 		this.createThread();
-	}		
-	
+	}
+
 	private Thread createThread()
-	{	
+	{
 		Thread t = new Thread()
 		{
 			public void run()
@@ -55,14 +54,14 @@ public class TableSearcher
 		t.setDaemon(true);
 		return t;
 	}
-	
+
 	public void search()
 	{
 		this.cancelSearch = false;
 		this.searchThread = this.createThread();
 		this.searchThread.start();
 	}
-	
+
 	public void cancelSearch()
 	{
 		this.cancelSearch = true;
@@ -83,7 +82,7 @@ public class TableSearcher
 		{
 		}
 	}
-	
+
 	private synchronized void setRunning(boolean aFlag)
 	{
 		this.isRunning = aFlag;
@@ -94,10 +93,10 @@ public class TableSearcher
 		}
 		if (!aFlag) this.cancelSearch = false;
 	}
-	
+
 	public synchronized boolean isRunning() { return this.isRunning; }
-	
-	
+
+
 	private void doSearch()
 	{
 		if (this.tableNames == null || this.tableNames.size() == 0) return;
@@ -115,7 +114,7 @@ public class TableSearcher
 		{
 			LogMgr.logError("TableSearcher.doSearch()", "Error searching database", th);
 		}
-		finally 
+		finally
 		{
 			this.setRunning(false);
 		}
@@ -129,7 +128,7 @@ public class TableSearcher
 			String sql = this.buildSqlForTable(aTable);
 			if (sql == null) return;
 			if (this.display != null) this.display.setCurrentTable(aTable, sql);
-			
+
 			this.query = this.connection.getSqlConnection().createStatement();
 			this.query.setMaxRows(this.maxRows);
 			//LogMgr.logInfo("TableSearcher", "Using SQL:\n" + sql);
@@ -172,7 +171,7 @@ public class TableSearcher
 	}
 
 	private String buildSqlForTable(String aTable)
-		throws SQLException, WbException
+		throws SQLException
 	{
 		DbMetadata meta = this.connection.getMetadata();
 		String tablename = aTable;
@@ -183,7 +182,7 @@ public class TableSearcher
 			tablename = aTable.substring(pos + 1);
 			schema = aTable.substring(0, pos);
 		}
-		
+
 		DataStore def = meta.getTableDefinition(null, schema, tablename);
 		int cols = def.getRowCount();
 		StringBuffer sql = new StringBuffer(cols * 120);
@@ -201,7 +200,7 @@ public class TableSearcher
 			if (isChar)
 			{
 				colcount ++;
-				if (!first) 
+				if (!first)
 				{
 					sql.append(" OR ");
 				}
@@ -231,7 +230,7 @@ public class TableSearcher
 		if (this.columnFunction == null) return false;
 		if (this.criteria == null) return false;
 		String func = this.columnFunction.toLowerCase();
-		
+
 		// upper() lower() is for Oracle, Postgres, Firebird/Interbase and MS SQL Server
 		// lcase, ucase is for Access and HSQLDB
 		if (func.indexOf("upper") > -1 || func.indexOf("ucase") > -1)
@@ -248,7 +247,7 @@ public class TableSearcher
 	{
 		this.columnFunction = null;
 		boolean result = false;
-		if (aColFunc != null && aColFunc.trim().length() > 0) 
+		if (aColFunc != null && aColFunc.trim().length() > 0)
 		{
 			if (aColFunc.equalsIgnoreCase("$col$"))
 			{
@@ -268,7 +267,7 @@ public class TableSearcher
 		}
 		return result;
 	}
-	
+
 	/** Getter for property tableNames.
 	 * @return Value of property tableNames.
 	 *
@@ -277,7 +276,7 @@ public class TableSearcher
 	{
 		return tableNames;
 	}
-	
+
 	/** Setter for property tableNames.
 	 * @param tableNames New value of property tableNames.
 	 *
@@ -286,7 +285,7 @@ public class TableSearcher
 	{
 		this.tableNames = tableNames;
 	}
-	
+
 	/** Getter for property display.
 	 * @return Value of property display.
 	 *
@@ -295,7 +294,7 @@ public class TableSearcher
 	{
 		return display;
 	}
-	
+
 	/** Setter for property display.
 	 * @param display New value of property display.
 	 *
@@ -304,7 +303,7 @@ public class TableSearcher
 	{
 		this.display = display;
 	}
-	
+
 	/** Getter for property criteria.
 	 * @return Value of property criteria.
 	 *
@@ -313,7 +312,7 @@ public class TableSearcher
 	{
 		return criteria;
 	}
-	
+
 	/** Setter for property criteria.
 	 * @param criteria New value of property criteria.
 	 *
@@ -334,7 +333,7 @@ public class TableSearcher
     }
     return;
 	}
-	
+
 	/** Getter for property connection.
 	 * @return Value of property connection.
 	 *
@@ -343,7 +342,7 @@ public class TableSearcher
 	{
 		return connection;
 	}
-	
+
 	/** Setter for property connection.
 	 * @param connection New value of property connection.
 	 *
@@ -352,8 +351,8 @@ public class TableSearcher
 	{
 		this.connection = connection;
 	}
-	
-	
+
+
 	/** Getter for property maxRows.
 	 * @return Value of property maxRows.
 	 *
@@ -362,7 +361,7 @@ public class TableSearcher
 	{
 		return maxRows;
 	}
-	
+
 	/** Setter for property maxRows.
 	 * @param maxRows New value of property maxRows.
 	 *
@@ -371,5 +370,5 @@ public class TableSearcher
 	{
 		this.maxRows = maxRows;
 	}
-	
+
 }

@@ -25,7 +25,7 @@ public class StatementRunnerResult
 	private String sourceCommand;
 
 	private boolean success = true;
-	
+
 	public StatementRunnerResult(String aCmd)
 	{
 		this.sourceCommand = aCmd;
@@ -35,58 +35,58 @@ public class StatementRunnerResult
 	public void setFailure() { this.success = false; }
 	public boolean isSuccess() { return this.success; }
 	public String getSourceCommand() { return this.sourceCommand; }
-	
+
 	public int addDataStore(DataStore ds)
 	{
 		if (this.datastores == null) this.datastores = new ArrayList();
 		this.datastores.add(ds);
 		return this.datastores.size();
 	}
-	
-	public int addResultSet(ResultSet rs, int maxRows)
+
+	public int addResultSet(ResultSet rs)
 	{
 		if (this.results == null) this.results = new ArrayList();
 		this.results.add(rs);
 		return this.results.size();
 	}
-	
+
 	public void addUpdateCount(int aCount)
 	{
 		if (this.updateCounts == null) this.updateCounts = new ArrayList();
 		this.updateCounts.add(new Integer(aCount));
 	}
-	
+
 	public void addMessage(String aMessage)
 	{
 		if (this.messages == null) this.messages = new ArrayList();
 		this.messages.add(aMessage);
 	}
-	
+
 	public boolean hasData()
 	{
 		return (this.hasResultSets() || this.hasDataStores());
 	}
-	
+
 	public boolean hasMessages()
 	{
 		return (this.messages != null && this.messages.size() > 0);
 	}
-	
-	public boolean hasUpdateCounts() 
+
+	public boolean hasUpdateCounts()
 	{
 		return (this.updateCounts != null && this.updateCounts.size() > 0);
 	}
-	
+
 	public boolean hasResultSets()
 	{
 		return (this.results != null && this.results.size() > 0);
 	}
-	
+
 	public boolean hasDataStores()
 	{
 		return (this.datastores != null && this.datastores.size() > 0);
 	}
-	
+
 	public DataStore[] getDataStores()
 	{
 		if (this.datastores == null) return null;
@@ -98,11 +98,11 @@ public class StatementRunnerResult
 		}
 		return ds;
 	}
-	
+
 	public ResultSet[] getResultSets()
 	{
 		if (this.results == null) return null;
-		
+
 		int size = this.results.size();
 		ResultSet[] rs = new ResultSet[size];
 		for (int i=0; i< size; i++)
@@ -111,7 +111,7 @@ public class StatementRunnerResult
 		}
 		return rs;
 	}
-	
+
 	public String[] getMessages()
 	{
 		if (this.messages == null) return null;
@@ -123,7 +123,7 @@ public class StatementRunnerResult
 		}
 		return msgs;
 	}
-	
+
 	public long getTotalUpdateCount()
 	{
 		if (this.updateCounts == null) return 0;
@@ -135,7 +135,7 @@ public class StatementRunnerResult
 		}
 		return result;
 	}
-	
+
 	public int[] getUpdateCounts()
 	{
 		if (this.updateCounts == null) return new int[0];
@@ -147,7 +147,7 @@ public class StatementRunnerResult
 		}
 		return counts;
 	}
-	
+
 	public void clearResultSets()
 	{
 		if (this.results != null)
@@ -165,7 +165,7 @@ public class StatementRunnerResult
 			this.results.clear();
 		}
 	}
-	
+
 	public void clear()
 	{
 		if (this.datastores != null)
@@ -177,5 +177,5 @@ public class StatementRunnerResult
 		if (this.updateCounts !=null) this.updateCounts.clear();
 		this.sourceCommand = null;
 	}
-	
+
 }

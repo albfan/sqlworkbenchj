@@ -11,7 +11,6 @@ import workbench.db.TableIdentifier;
 
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
-import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
@@ -41,8 +40,8 @@ public class WbCopy
 	public static final String PARAM_DELETETARGET = "deletetarget";
 	public static final String PARAM_MODE = "mode";
 	public static final String PARAM_KEYS = "keycolumns";
-	//public static final String PARAM_DROPTARGET = "droptarget";
-	//public static final String PARAM_CREATETARGET = "createtarget";
+	public static final String PARAM_DROPTARGET = "droptarget";
+	public static final String PARAM_CREATETARGET = "createtarget";
 
 	private ArgumentParser cmdLine;
 	private DataCopier copier;
@@ -62,14 +61,14 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_DELETETARGET);
 		cmdLine.addArgument(PARAM_MODE);
 		cmdLine.addArgument(PARAM_KEYS);
-		//cmdLine.addArgument(PARAM_DROPTARGET);
-		//cmdLine.addArgument(PARAM_CREATETARGET);
+		cmdLine.addArgument(PARAM_DROPTARGET);
+		cmdLine.addArgument(PARAM_CREATETARGET);
 	}
 
 	public String getVerb() { return VERB; }
 
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
-		throws SQLException, WbException
+		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
@@ -145,7 +144,7 @@ public class WbCopy
 
 		WbConnection targetCon = null;
 		WbConnection sourceCon = null;
-		if (targetProfile == null)
+		if (targetProfile == null || aConnection.getProfile().getName().equals(targetProfile))
 		{
 			targetCon = aConnection;
 		}
@@ -163,7 +162,7 @@ public class WbCopy
 			}
 		}
 
-		if (sourceProfile == null)
+		if (sourceProfile == null || aConnection.getProfile().getName().equals(sourceProfile))
 		{
 			sourceCon = aConnection;
 		}
@@ -187,10 +186,12 @@ public class WbCopy
 		}
 		boolean delete = "true".equalsIgnoreCase(cmdLine.getValue(PARAM_DELETETARGET));
 		boolean cont = "true".equalsIgnoreCase(cmdLine.getValue(PARAM_CONTINUE));
-		//boolean createTable = "true".equals(cmdLine.getValue(PARAM_CREATETARGET));
-		//boolean dropTable = "true".equals(cmdLine.getValue(PARAM_DROPTARGET));
+		boolean createTable = "true".equals(cmdLine.getValue(PARAM_CREATETARGET));
+		boolean dropTable = "true".equals(cmdLine.getValue(PARAM_DROPTARGET));
+		String keys = cmdLine.getValue(PARAM_KEYS);
 
 		this.copier = new DataCopier();
+		copier.setKeyColumns(keys);
 
 		String mode = cmdLine.getValue(PARAM_MODE);
 		if (mode != null)

@@ -36,6 +36,7 @@ import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
+import java.awt.Color;
 
 
 /**
@@ -366,6 +367,25 @@ public class Settings
 		return result;
 	}
 
+	public Color getColor(String aColorKey)
+	{
+		String value = this.getProperty(aColorKey, null);
+		if (value == null) return null;
+		String[] colors = value.split(",");
+		if (colors.length != 3) return null;
+		try
+		{
+			int r = StringUtil.getIntValue(colors[0]);
+			int g = StringUtil.getIntValue(colors[1]);
+			int b = StringUtil.getIntValue(colors[2]);
+			return new Color(r,g,b);
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+
+	}
 	public PageFormat getPageFormat()
 	{
 		double leftmargin = this.getPrintMarginLeft();
@@ -555,9 +575,14 @@ public class Settings
 		this.props.setProperty("workbench.editor.autojumpnext", Boolean.toString(show));
 	}
 
+	public String getConnectionDisplayModel()
+	{
+		return this.props.getProperty("workbench.gui.connectiondisplay", "");
+	}
+
 	public boolean getEnableDbmsOutput()
 	{
-		return StringUtil.stringToBool(this.props.getProperty(PROPERTY_SHOW_LINE_NUMBERS, "false"));
+		return StringUtil.stringToBool(this.props.getProperty("workbench.sql.enable_dbms_output", "false"));
 	}
 
 	public void setEnableDbmsOutput(boolean aFlag)
@@ -569,6 +594,7 @@ public class Settings
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.dbms_output.defaultbuffer", "-1"));
 	}
+
 	public void setDbmsOutputDefaultBuffer(int aSize)
 	{
 		this.props.setProperty("workbench.sql.dbms_output.defaultbuffer", Integer.toString(aSize));
@@ -683,6 +709,16 @@ public class Settings
 	public String toString()
 	{
 		return "[Settings]";
+	}
+
+	public boolean getAutoConnectDataPumper()
+	{
+		return "true".equals(this.props.getProperty("workbench.datapumper.autoconnect", "true"));
+	}
+
+	public void setAutoConnectDataPumper(boolean flag)
+	{
+		this.props.setProperty("workbench.datapumper.autoconnect", Boolean.toString(flag));
 	}
 
 	public void storeWindowPosition(Component target)

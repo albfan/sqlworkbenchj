@@ -7,37 +7,55 @@
 package workbench.gui.components;
 
 import java.awt.Color;
-
+import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.GridLayout;
+import javax.swing.JComponent;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeListener;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
+
 
 /**
  *
  * @author  tkellerer
  */
 public class ConnectionInfo
-	extends JTextField
+	extends JComponent
 	implements ChangeListener
 {
-	
+	private JTextField display;
 	private WbConnection sourceConnection;
-	
+
 	/** Creates a new instance of ConnectionInfo */
 	public ConnectionInfo(Color aBackground)
 	{
-		this.setBackground(aBackground);
-		this.setEditable(false);
+		super();
 		EmptyBorder border = new EmptyBorder(0, 2, 0, 2);
 		this.setBorder(border);
-		this.addMouseListener(new TextComponentMouseListener());
-		this.setDisabledTextColor(Color.black);
-		this.setHorizontalAlignment(JTextField.LEFT);
+
+		this.display = new JTextField();
+		FontMetrics fm = this.display.getFontMetrics(this.display.getFont());
+		int height = fm.getHeight() + 1;
+		Dimension d = new Dimension(32768, height);
+		this.display.setPreferredSize(d);
+		this.display.setMaximumSize(d);
+		this.setPreferredSize(d);
+		this.setMaximumSize(d);
+
+		this.setLayout(new GridLayout(1,1));
+		this.add(this.display);
+
+		this.display.setBackground(aBackground);
+		this.display.setEditable(false);
+		this.display.setBorder(null);
+		this.display.addMouseListener(new TextComponentMouseListener());
 	}
-	
+
 	public void setConnection(WbConnection aConnection)
 	{
 		if (this.sourceConnection != null)
@@ -51,27 +69,27 @@ public class ConnectionInfo
 		}
 		this.updateDisplay();
 	}
-	
+
 	private void updateDisplay()
 	{
 		if (this.sourceConnection != null)
 		{
-			this.setText(this.sourceConnection.getDisplayString());
-			this.setToolTipText(this.sourceConnection.getDatabaseProductName());
+			this.display.setText(this.sourceConnection.getDisplayString());
+			this.display.setToolTipText(this.sourceConnection.getDatabaseProductName());
 		}
 		else
 		{
-			this.setText(ResourceMgr.getString("TxtNotConnected"));
-			this.setToolTipText(null);
+			this.display.setText(ResourceMgr.getString("TxtNotConnected"));
+			this.display.setToolTipText(null);
 		}
-		this.setCaretPosition(0);
+		//this.setCaretPosition(0);
 	}
-	public void stateChanged(javax.swing.event.ChangeEvent e)
+	public void stateChanged(ChangeEvent e)
 	{
 		if (e.getSource() == this.sourceConnection)
 		{
 			this.updateDisplay();
 		}
-	}	
-	
+	}
+
 }

@@ -30,7 +30,6 @@ import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.OracleMetaData;
 import workbench.db.oracle.SynonymReader;
 import workbench.exception.ExceptionUtil;
-import workbench.exception.WbException;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
@@ -74,7 +73,7 @@ public class DbMetadata
 	private static List ddlNeedsCommitServers = Collections.EMPTY_LIST;
 	private static List serverNeedsJdbcCommit = Collections.EMPTY_LIST;
 	private static List serversWithInlineConstraints = Collections.EMPTY_LIST;
-	
+
 	// These Hashmaps contains templates
 	// for object creation
 	private HashMap procSourceSql;
@@ -98,7 +97,9 @@ public class DbMetadata
 	private boolean isSqlServer;
 	private boolean isMySql;
 	private boolean createInlineConstraints = false;
-	
+
+	private AbstractConstraintReader constraintReader = null;
+
 	private List keywords;
 	private String quoteCharacter;
 
@@ -167,24 +168,33 @@ public class DbMetadata
 		{
 			this.isOracle = true;
 			this.oracleMetaData = new OracleMetaData(this.dbConnection.getSqlConnection());
+			this.constraintReader = new OracleConstraintReader();
 		}
-		else if (productLower.toLowerCase().indexOf("postgres") > - 1)
+		else if (productLower.indexOf("postgres") > - 1)
 		{
 			this.isPostgres = true;
+			this.constraintReader = new PostgresConstraintReader();
 		}
-		else if (productLower.toLowerCase().indexOf("hsql") > -1)
+		else if (productLower.indexOf("hsql") > -1)
 		{
 			this.isHsql = true;
+			this.constraintReader = new HsqlConstraintReader();
 		}
-		else if (productLower.toLowerCase().indexOf("firebird") > -1)
+		else if (productLower.indexOf("firebird") > -1)
 		{
 			this.isFirebird = true;
+			this.constraintReader = new FirebirdConstraintReader();
 		}
-		else if (productLower.toLowerCase().indexOf("sql server") > -1)
+		else if (productLower.indexOf("sql server") > -1)
 		{
 			this.isSqlServer = true;
+			this.constraintReader = new SqlServerConstraintReader();
 		}
-		else if (productLower.toLowerCase().indexOf("mysql") > -1)
+		else if (productLower.indexOf("adaptive server") > -1)
+		{
+			this.constraintReader = new ASAConstraintReader();
+		}
+		else if (productLower.indexOf("mysql") > -1)
 		{
 			this.isMySql = true;
 		}
@@ -378,20 +388,20 @@ public class DbMetadata
 	}
 
 	public String getExtendedViewSource(String aCatalog, String aSchema, String aView, boolean includeDrop)
-		throws SQLException, WbException
+		throws SQLException
 	{
 		return this.getExtendedViewSource(aCatalog, aSchema, aView, null, includeDrop);
 	}
 
 	public String getExtendedViewSource(String aCatalog, String aSchema, String aView, DataStore viewTableDefinition, boolean includeDrop)
-		throws SQLException, WbException
+		throws SQLException
 	{
 		if (viewTableDefinition == null)
 		{
 			viewTableDefinition = this.getTableDefinition(aCatalog, aSchema, aView);
 		}
 		String source = this.getViewSource(aCatalog, aSchema, aView);
-		
+
 		// ThinkSQL returns the full CREATE VIEW statement
 		if (source.toLowerCase().startsWith("create")) return source;
 
@@ -522,7 +532,7 @@ public class DbMetadata
 				}
 				else
 				{
-					if (added > 0) 
+					if (added > 0)
 					{
 						source.append(",");
 					}
@@ -550,7 +560,7 @@ public class DbMetadata
 		}
 		return source;
 	}
-	
+
 	private StringBuffer getPostgresProcedureHeader(String aCatalog, String aSchema, String aProcname)
 	{
 		StringBuffer source = new StringBuffer(50);
@@ -589,7 +599,7 @@ public class DbMetadata
 		}
 		return source;
 	}
-	
+
 	public String getProcedureSource(String aCatalog, String aSchema, String aProcname)
 	{
 		if (aProcname == null) return null;
@@ -602,7 +612,7 @@ public class DbMetadata
 			aProcname = aProcname.substring(0, i);
 
 		StringBuffer source = new StringBuffer(4000);
-		
+
 		// Postgres and Firebird do not store the CREATE PROCEDURE part
 		// of the source, so we have to recreate it "manually"
 		if (this.isPostgres)
@@ -700,6 +710,15 @@ public class DbMetadata
 				isKeyword = this.keywords.contains(aName.trim().toUpperCase());
 			}
 
+			// HSQL does not allow identifiers starting with a number!
+			if (this.isHsql)
+			{
+				char c = aName.charAt(0);
+				if (Character.isDigit(c))
+				{
+					return this.quoteCharacter + aName.trim() + this.quoteCharacter;
+				}
+			}
 			// if the given name is a keyword, then we need to quote it!
 			if (isKeyword)
 			{
@@ -832,6 +851,23 @@ public class DbMetadata
 			result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, rem);
 		}
 		tableRs.close();
+
+		if (this.isOracle)
+		{
+			List seq = this.oracleMetaData.getSequenceList(aSchema);
+			int count = seq.size();
+			for (int i=0; i < 0; i++)
+			{
+				int row = result.addRow();
+
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, (String)seq.get(i));
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_TYPE, "SEQUENCE");
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, null);
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, aSchema);
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, null);
+			}
+		}
+
 		return result;
 	}
 
@@ -868,7 +904,7 @@ public class DbMetadata
 	}
 
 	public DataStoreTableModel getProcedureColumns(String aCatalog, String aSchema, String aProcname)
-		throws SQLException, WbException
+		throws SQLException
 	{
 		return new DataStoreTableModel(this.getProcedureColumnInformation(aCatalog, aSchema, aProcname));
 	}
@@ -1100,6 +1136,7 @@ public class DbMetadata
 			try
 			{
 				this.oraOutput.disable();
+        this.oraOutput = null;
 			}
 			catch (Throwable e)
 			{
@@ -1129,6 +1166,8 @@ public class DbMetadata
 	public void close()
 	{
 		if (this.oraOutput != null) this.oraOutput.close();
+		if (this.oracleMetaData != null) this.oracleMetaData.done();
+		if (this.constraintReader != null) this.constraintReader.done();
 	}
 
 	public boolean storesLowerCaseIdentifiers()
@@ -1144,13 +1183,13 @@ public class DbMetadata
 	}
 
 	public DataStoreTableModel getListOfTables()
-		throws SQLException, WbException
+		throws SQLException
 	{
 		return this.getListOfTables(null, null, null);
 	}
 
 	public DataStoreTableModel getListOfTables(String aCatalog, String aSchema, String aType)
-		throws SQLException, WbException
+		throws SQLException
 	{
 		return new DataStoreTableModel(this.getTables(aCatalog, aSchema, aType));
 	}
@@ -1243,7 +1282,6 @@ public class DbMetadata
 	 * @param aType The type of the table
 	 * @param adjustNames If true the object names will be quoted if necessary
 	 * @throws SQLException
-	 * @throws WbException
 	 * @return A DataStore with the table definition.
 	 * The individual columns should be accessed using the
 	 * COLUMN_IDX_TABLE_DEFINITION_xxx constants.
@@ -1274,6 +1312,11 @@ public class DbMetadata
 			aTable = this.adjustObjectname(aTable);
 		}
 
+		if (this.isOracle && "SEQUENCE".equalsIgnoreCase(aType))
+		{
+			return this.oracleMetaData.getSequenceDefinition(aSchema, aTable);
+		}
+
 		if ("SYNONYM".equalsIgnoreCase(aType))
 		{
 			TableIdentifier id = this.getSynonymTable(aSchema, aTable);
@@ -1301,46 +1344,68 @@ public class DbMetadata
 
 		boolean hasEnums = false;
 
-		ResultSet rs = this.metaData.getColumns(aCatalog, aSchema, aTable, "%");
-		while (rs.next())
-		{
-			int row = ds.addRow();
+		ResultSet rs = null;
 
-			String colName = rs.getString("COLUMN_NAME");
-			int sqlType = rs.getInt("DATA_TYPE");
-			String typeName = rs.getString("TYPE_NAME");
-			if (this.isMySql && !hasEnums)
+		try
+		{
+			if (this.oracleMetaData != null)
 			{
-				hasEnums = typeName.startsWith("enum") || typeName.startsWith("set");
+				rs = this.oracleMetaData.getColumns(aCatalog, aSchema, aTable, "%");
+			}
+			else
+			{
+				rs = this.metaData.getColumns(aCatalog, aSchema, aTable, "%");
 			}
 
-			int size = rs.getInt("COLUMN_SIZE");
-			int digits = rs.getInt("DECIMAL_DIGITS");
-			String rem = rs.getString("REMARKS");
-			String def = rs.getString("COLUMN_DEF");
-			String nul = rs.getString("IS_NULLABLE");
+			while (rs.next())
+			{
+				int row = ds.addRow();
 
-			String display = this.getSqlTypeDisplay(typeName, sqlType, size, digits);
-			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_COL_NAME, colName);
-			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE, display);
-			if (keys.contains(colName.toLowerCase()))
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG, "YES");
-			else
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG, "NO");
+				String colName = rs.getString("COLUMN_NAME");
+				int sqlType = rs.getInt("DATA_TYPE");
+				String typeName = rs.getString("TYPE_NAME");
+				if (this.isMySql && !hasEnums)
+				{
+					hasEnums = typeName.startsWith("enum") || typeName.startsWith("set");
+				}
 
-			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_NULLABLE, nul);
+				int size = rs.getInt("COLUMN_SIZE");
+				int digits = rs.getInt("DECIMAL_DIGITS");
+				String rem = rs.getString("REMARKS");
+				String def = rs.getString("COLUMN_DEF");
+				String nul = rs.getString("IS_NULLABLE");
 
-			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DEFAULT, def);
-			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_REMARKS, rem);
-			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, new Integer(sqlType));
-			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_SIZE, new Integer(size));
-			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DIGITS, new Integer(digits));
+				String display = this.getSqlTypeDisplay(typeName, sqlType, size, digits);
+				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_COL_NAME, colName);
+				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE, display);
+				if (keys.contains(colName.toLowerCase()))
+					ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG, "YES");
+				else
+					ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG, "NO");
+
+				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_NULLABLE, nul);
+
+				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DEFAULT, def);
+				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_REMARKS, rem);
+				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, new Integer(sqlType));
+				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_SIZE, new Integer(size));
+				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DIGITS, new Integer(digits));
+			}
 		}
-		rs.close();
+		finally
+		{
+			try { rs.close(); } catch (Throwable th) {}
+			if (this.oracleMetaData != null)
+			{
+				this.oracleMetaData.closeStatement();
+			}
+		}
+
 		if (hasEnums)
 		{
 			EnumReader.updateEnumDefinition(aTable, ds, this.dbConnection);
 		}
+
 		return ds;
 	}
 
@@ -1786,6 +1851,10 @@ public class DbMetadata
 				if (!result.contains(type)) result.add(type);
 			}
 			rs.close();
+			if (this.isOracle)
+			{
+				result.add("SEQUENCE");
+			}
 		}
 		catch (Exception e)
 		{
@@ -2019,12 +2088,39 @@ public class DbMetadata
 		return name;
 	}
 
+	public String getSequenceSource(String fullName)
+	{
+		String sequenceName = fullName;
+		String schema = null;
+
+		int pos = fullName.indexOf('.');
+		if (pos > 0)
+		{
+			sequenceName = fullName.substring(pos);
+			schema = fullName.substring(0, pos - 1);
+		}
+		return this.getSequenceSource(null, schema, sequenceName);
+	}
+
+	public String getSequenceSource(String aCatalog, String aSchema, String aSequence)
+	{
+		if (this.isOracle && this.oracleMetaData != null)
+		{
+			return this.oracleMetaData.getSequenceSource(aSchema, aSequence);
+		}
+		else if (this.isPostgres)
+		{
+			return this.getPostgresSequenceSource(aSequence);
+		}
+		return "";
+	}
+
 	/**
 	 *	Return the source SQL for a PostgreSQL sequence definition.
 	 *
 	 *	@return The SQL to recreate the sequence if the current DBMS is Postgres. An empty String otherwise
 	 */
-	public String getSequenceSource(String aSequence)
+	private String getPostgresSequenceSource(String aSequence)
 	{
 		if (!this.isPostgres) return "";
 		if (aSequence == null) return "";
@@ -2134,10 +2230,9 @@ public class DbMetadata
 	 * @param table The name of the table
 	 * @param includeDrop If true, a DROP TABLE statement will be included in the generated SQL script.
 	 * @throws SQLException
-	 * @throws WbException
 	 */
 	public String getTableSource(String catalog, String schema, String table, boolean includeDrop)
-		throws SQLException, WbException
+		throws SQLException
 	{
 		DataStore tableDef = this.getTableDefinition(catalog, schema, table, true);
 		DataStore index = this.getTableIndexInformation(catalog, schema, table);
@@ -2185,6 +2280,13 @@ public class DbMetadata
 			result.append(";\n");
 		}
 
+		TableIdentifier table = new TableIdentifier(aCatalog, aSchema, aTablename);
+		Map columnConstraints = Collections.EMPTY_MAP;
+		if (this.constraintReader != null)
+		{
+			columnConstraints = this.constraintReader.getColumnConstraints(this.dbConnection.getSqlConnection(), table);
+		}
+
 		result.append("CREATE TABLE " + aTablename + "\n(\n");
 		int count = aTableDef.getRowCount();
 		StringBuffer pkCols = new StringBuffer(1000);
@@ -2221,8 +2323,8 @@ public class DbMetadata
 			result.append(type);
 			for (int k=0; k < maxTypeLength - type.length(); k++) result.append(' ');
 
-			// Oracle needs the default value before the NULL/NOT NULL qualifier
-			if (this.isOracle && def != null && def.length() > 0)
+			// Firbird and Oracle need the default value before the NULL/NOT NULL qualifier
+			if ((this.isOracle || this.isFirebird) && def != null && def.length() > 0)
 			{
 				result.append(" DEFAULT ");
 				result.append(def.trim());
@@ -2236,28 +2338,45 @@ public class DbMetadata
 				result.append(" NOT NULL");
 			}
 
-			if (!this.isOracle && def != null && def.length() > 0)
+			if (!(this.isOracle || this.isFirebird) && def != null && def.length() > 0)
 			{
 				result.append(" DEFAULT ");
 				result.append(def.trim());
 			}
+			String constraint = (String)columnConstraints.get(colName);
+			if (constraint != null && constraint.length() > 0)
+			{
+				result.append(' ');
+				result.append(constraint);
+			}
 			if (i < count - 1) result.append(',');
 			result.append('\n');
 		}
+
+		if (this.constraintReader != null)
+		{
+			String cons = this.constraintReader.getTableConstraints(dbConnection.getSqlConnection(), table, "   ");
+			if (cons != null && cons.length() > 0)
+			{
+				result.append("   ,");
+				result.append(cons);
+				result.append('\n');
+			}
+		}
+
 		if (this.createInlineConstraints && pkCols.length() > 0)
 		{
-			result.append('\n');
-			result.append("   ,PRIMARY KEY (");
+			result.append("\n   ,PRIMARY KEY (");
 			result.append(pkCols.toString());
 			result.append(")\n");
-			
+
 			StringBuffer fk = this.getFkSource(aTablename, aFkDef);
 			if (fk.length() > 0)
 			{
 				result.append(fk);
-			}				
+			}
 		}
-		
+
 		result.append(");\n");
 		if (!this.createInlineConstraints && pkCols.length() > 0)
 		{
@@ -2608,7 +2727,7 @@ public class DbMetadata
 	{
 		serversWithInlineConstraints = aList;
 	}
-	
+
 	public static void setServersWhereDDLNeedsCommit(List aList)
 	{
 		ddlNeedsCommitServers = aList;
@@ -2653,21 +2772,15 @@ public class DbMetadata
     sql.append(this.adjustObjectname(schema));
     sql.append('\'');
 
-    if (objectType != null)
-    {
-      sql.append(" AND ");
-      sql.append(" type='");
-      sql.append(this.adjustObjectname(objectType));
-      sql.append('\'');
-    }
+    sql.append(" AND ");
+    sql.append(" type='");
+    sql.append(this.adjustObjectname(objectType));
+    sql.append('\'');
 
-    if (objectName != null)
-    {
-      sql.append(" AND ");
-      sql.append(" name='");
-      sql.append(this.adjustObjectname(objectName));
-      sql.append('\'');
-    }
+    sql.append(" AND ");
+    sql.append(" name='");
+    sql.append(this.adjustObjectname(objectName));
+    sql.append('\'');
 
     Statement stmt = null;
     ResultSet rs = null;

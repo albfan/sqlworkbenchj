@@ -18,7 +18,6 @@ import workbench.db.ColumnIdentifier;
 
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
-import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.ValueConverter;
@@ -36,28 +35,28 @@ public class TextFileParser
 	private String encoding = "8859_1";
 	private String delimiter = "\t";
 	private String quoteChar = "\"";
-	
+
 	private int colCount = -1;
 	private ColumnIdentifier[] columns;
 	private Object[] rowData;
-	
+
 	private boolean withHeader = true;
 	private boolean cancelImport = false;
 	private RowDataReceiver receiver;
 	private String dateFormat;
 	private String timestampFormat;
 	private char decimalChar;
-	
+
 	private WbConnection connection;
 
 	private ValueConverter converter;
-	
+
 	/** Creates a new instance of TextFileParser */
 	public TextFileParser(String aFile)
 	{
 		this.filename = aFile;
 	}
-	
+
 	public void setReceiver(RowDataReceiver rec)
 	{
 		this.receiver = rec;
@@ -66,14 +65,14 @@ public class TextFileParser
 	{
 		this.tableName = aName;
 	}
-	
+
 	public void setColumns(List columnList)
 		throws Exception
 	{
 		if (columnList == null || columnList.size()  == 0) return;
 		this.readColumnDefinitions(columnList);
 	}
-	
+
 	public void setConnection(WbConnection aConn)
 	{
 		this.connection = aConn;
@@ -98,7 +97,7 @@ public class TextFileParser
 		Thread.yield();
 		return this.cancelImport;
 	}
-	
+
 	public void cancel()
 	{
 		this.cancelImport = true;
@@ -108,22 +107,22 @@ public class TextFileParser
 	{
 		this.dateFormat = aFormat;
 	}
-	
+
 	public void setTimeStampFormat(String aFormat)
 	{
 		this.timestampFormat = aFormat;
 	}
-	
+
 	public void setContainsHeader(boolean aFlag)
 	{
 		this.withHeader = aFlag;
 	}
-	
+
 	public void setQuoteChar(String aChar)
 	{
 		this.quoteChar = aChar;
 	}
-	
+
 	public void setDecimalChar(String aChar)
 	{
 		if (aChar != null && aChar.trim().length() > 0)
@@ -131,26 +130,26 @@ public class TextFileParser
 			this.decimalChar = aChar.trim().charAt(0);
 		}
 	}
-	
+
 	public void start()
 		throws Exception
 	{
 		this.cancelImport = false;
 		File f = new File(this.filename);
 		long fileSize = f.length();
-		
+
 		InputStream inStream = new FileInputStream(f);
 		BufferedReader in = new BufferedReader(new InputStreamReader(inStream, this.encoding),1024*256);
 
 		this.converter = new ValueConverter(this.dateFormat, this.timestampFormat);
 		this.converter.setDecimalCharacter(this.decimalChar);
-		
+
 		String line;
 		List lineData;
 		Object colData;
 		int col;
 		int row;
-		
+
 		try
 		{
 			line = in.readLine();
@@ -164,27 +163,27 @@ public class TextFileParser
 		{
 			line = null;
 		}
-		
-		if (this.colCount <= 0) 
+
+		if (this.colCount <= 0)
 		{
-			throw new WbException("Cannot import file without a column definition");
+			throw new Exception("Cannot import file without a column definition");
 		}
 
 		this.receiver.setTargetTable(this.tableName, this.columns);
-		
+
 		lineData = new ArrayList(this.colCount);
 		Object value = null;
 		this.rowData = new Object[this.colCount];
 		WbStringTokenizer tok = new WbStringTokenizer(delimiter.charAt(0), "", false);
 		int importRow = 0;
-		
+
 		while (line != null)
 		{
 			if (this.doCancel()) break;
-			
+
 			this.clearRowData();
 			lineData.clear();
-			
+
 			tok.setSourceString(line);
 			while (tok.hasMoreTokens())
 			{
@@ -192,7 +191,7 @@ public class TextFileParser
 			}
 
 			importRow ++;
-			
+
 			for (int i=0; i < this.colCount; i++)
 			{
 				try
@@ -211,9 +210,9 @@ public class TextFileParser
 			}
 
 			if (this.doCancel()) break;
-			
+
 			this.receiver.processRow(rowData);
-			
+
 			try
 			{
 				line = in.readLine();
@@ -222,12 +221,12 @@ public class TextFileParser
 			{
 				line = null;
 			}
-			
+
 			if (this.doCancel()) break;
 		}
-		
+
 		try { in.close(); } catch (IOException e) {}
-		
+
 		if (!this.cancelImport)
 		{
 			this.receiver.importFinished();
@@ -245,7 +244,7 @@ public class TextFileParser
 			this.rowData[i] = null;
 		}
 	}
-	
+
 	private void readColumns(String headerLine)
 		throws Exception
 	{
@@ -259,7 +258,7 @@ public class TextFileParser
 		}
 		this.readColumnDefinitions(cols);
 	}
-	
+
 	private void readColumnDefinitions(List cols)
 		throws Exception
 	{
@@ -292,6 +291,6 @@ public class TextFileParser
 			this.columns = null;
 		}
 	}
-	
-	
+
+
 }

@@ -18,7 +18,6 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import workbench.WbManager;
-import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
@@ -81,7 +80,7 @@ public class DbDriver
 	}
 
 	public String getDriverClass() {  return this.driverClass; }
-	
+
 	public void setDriverClass(String driverClass)
 	{
 		this.driverClass = driverClass;
@@ -103,11 +102,11 @@ public class DbDriver
 		}
 		return this.identifier;
 	}
-	
+
 	public String getLibrary() { return this.library; }
-	public void setLibrary(String library) 
-	{ 
-		this.library = library; 
+	public void setLibrary(String library)
+	{
+		this.library = library;
 		this.driverClassInstance = null;
 		this.classLoader = null;
 	}
@@ -122,7 +121,7 @@ public class DbDriver
 		}
 		return true;
 	}
-	
+
 	public String toString()
 	{
 		return this.getIdentifier();
@@ -132,7 +131,7 @@ public class DbDriver
 	public String getSampleUrl() { return this.sampleUrl; }
 
 	private void loadDriverClass()
-		throws ClassNotFoundException, WbException
+		throws ClassNotFoundException, Exception
 	{
 		if (this.driverClassInstance != null) return;
 		try
@@ -160,7 +159,7 @@ public class DbDriver
 		{
 			this.classLoader = null;
 			LogMgr.logError("DbDriver.loadDriverClass()", "Error loading driver class", e);
-			throw new WbException("Could not load driver class " + this.driverClass);
+			throw new Exception("Could not load driver class " + this.driverClass);
 		}
 	}
 
@@ -174,19 +173,19 @@ public class DbDriver
 	}
 
 	public Connection connect(String url, String user, String password)
-		throws ClassNotFoundException, WbException, SQLException
+		throws ClassNotFoundException, SQLException, Exception
 	{
 		return this.connect(url, user, password, null);
 	}
 
 	public Connection connect(String url, String user, String password, String id)
-		throws ClassNotFoundException, WbException, SQLException
+		throws ClassNotFoundException, SQLException, Exception
 	{
 		return this.connect(url, user, password, id, null);
 	}
 
 	public Connection connect(String url, String user, String password, String id, Properties connProps)
-		throws ClassNotFoundException, WbException, SQLException
+		throws ClassNotFoundException, SQLException, Exception
 	{
 		Connection c = null;
 		try
@@ -275,14 +274,10 @@ public class DbDriver
 			c = this.driverClassInstance.connect(url, props);
 			if (c == null)
 			{
-				throw new WbException("Driver did not return a connection!");
+				throw new Exception("Driver did not return a connection!");
 			}
 		}
 		catch (ClassNotFoundException e)
-		{
-			throw e;
-		}
-		catch (WbException e)
 		{
 			throw e;
 		}
@@ -292,7 +287,7 @@ public class DbDriver
 		}
 		catch (Throwable th)
 		{
-			throw new WbException("Error connecting to database. (" + th.getClass().getName() + " - " + th.getMessage() + ")");
+			throw new Exception("Error connecting to database. (" + th.getClass().getName() + " - " + th.getMessage() + ")");
 		}
 
 		return c;

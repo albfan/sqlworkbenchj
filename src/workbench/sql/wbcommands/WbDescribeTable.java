@@ -3,7 +3,6 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 
 import workbench.db.WbConnection;
-import workbench.exception.WbException;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -18,21 +17,21 @@ public class WbDescribeTable extends SqlCommand
 {
 	public static final String VERB = "DESC";
   public static final String VERB_LONG = "DESCRIBE";
-	
+
 	public WbDescribeTable()
 	{
 	}
-	
+
 	public String getVerb() { return VERB; }
-	
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql) 
-		throws SQLException, WbException
+
+	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		LineTokenizer tok = new LineTokenizer(aSql.trim(), " ");
-		String verb = tok.nextToken(); 
-		if (!VERB.equalsIgnoreCase(verb) && 
-        !VERB_LONG.equalsIgnoreCase(verb)) throw new WbException("Wrong syntax. " + VERB + " expected!");
+		String verb = tok.nextToken();
+		if (!VERB.equalsIgnoreCase(verb) &&
+        !VERB_LONG.equalsIgnoreCase(verb)) throw new SQLException("Wrong syntax. " + VERB + " expected!");
 		String table = tok.nextToken();
 		String schema = null;
 		int pos = table.indexOf('.');
@@ -41,7 +40,7 @@ public class WbDescribeTable extends SqlCommand
 			schema = table.substring(0, pos);
 			table = table.substring(pos + 1);
 		}
-		
+
     if (schema == null && aConnection.getMetadata().isOracle())
     {
       schema = aConnection.getMetadata().getUserName();
@@ -60,6 +59,6 @@ public class WbDescribeTable extends SqlCommand
   		result.addDataStore(ds);
     }
 		return result;
-	}	
-	
+	}
+
 }

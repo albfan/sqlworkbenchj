@@ -22,7 +22,7 @@ import javax.swing.text.Segment;
  * cached.
  *
  * @author Slava Pestov
- * @version $Id: TokenMarker.java,v 1.3 2003-08-30 15:57:09 thomas Exp $
+ * @version $Id: TokenMarker.java,v 1.4 2004-03-05 20:04:00 thomas Exp $
  *
  * @see org.gjt.sp.jedit.syntax.Token
  */
@@ -43,17 +43,21 @@ public abstract class TokenMarker
 
 		lastToken = null;
 
-		LineInfo info = lineInfo[lineIndex];
-		LineInfo prev;
+		//LineInfo info = lineInfo[lineIndex];
+		byte oldToken = lineInfo[lineIndex];
+
+		//LineInfo prev;
+		byte prev;
 		if(lineIndex == 0)
-			prev = null;
+			prev = Token.NULL;
 		else
 			prev = lineInfo[lineIndex - 1];
 
-		byte oldToken = info.token;
-		byte token = markTokensImpl(prev == null ?	Token.NULL : prev.token,line,lineIndex);
+		//byte oldToken = info.token;
+		//byte token = markTokensImpl(prev == null ?	Token.NULL : prev.token,line,lineIndex);
+		byte token = markTokensImpl(prev,line,lineIndex);
 
-		info.token = token;
+		//info.token = token;
 
 		/*
 		 * This is a foul hack. It stops nextLineRequested
@@ -109,7 +113,7 @@ public abstract class TokenMarker
 	 * add syntax tokens to the token list. Then, it should return
 	 * the initial token type for the next line.<p>
 	 *
-	 * For example if the current line contains the start of a 
+	 * For example if the current line contains the start of a
 	 * multiline comment that doesn't end on that line, this method
 	 * should return the comment token type so that it continues on
 	 * the next line.
@@ -142,7 +146,7 @@ public abstract class TokenMarker
 	 * the document. This inserts a gap in the <code>lineInfo</code>
 	 * array.
 	 * @param index The first line number
-	 * @param lines The number of lines 
+	 * @param lines The number of lines
 	 */
 	public void insertLines(int index, int lines)
 	{
@@ -155,10 +159,10 @@ public abstract class TokenMarker
 
 		for(int i = index + lines - 1; i >= index; i--)
 		{
-			lineInfo[i] = new LineInfo();
+			lineInfo[i] = Token.NULL; //new LineInfo();
 		}
 	}
-	
+
 	/**
 	 * Informs the token marker that line have been deleted from
 	 * the document. This removes the lines in question from the
@@ -168,8 +172,7 @@ public abstract class TokenMarker
 	 */
 	public void deleteLines(int index, int lines)
 	{
-		if (lines <= 0)
-			return;
+		if (lines <= 0)	return;
 		int len = index + lines;
 		length -= lines;
 		System.arraycopy(lineInfo,len,lineInfo,index,lineInfo.length - len);
@@ -212,7 +215,8 @@ public abstract class TokenMarker
 	 * shrunk automatically by the <code>insertLines()</code> and
 	 * <code>deleteLines()</code> methods.
 	 */
-	protected LineInfo[] lineInfo;
+	//protected LineInfo[] lineInfo;
+	protected byte[] lineInfo;
 
 	/**
 	 * The number of lines in the model being tokenized. This can be
@@ -255,11 +259,15 @@ public abstract class TokenMarker
 	{
 		if(lineInfo == null)
 		{
-			lineInfo = new LineInfo[index + 1];
+			//lineInfo = new LineInfo[index + 1];
+			lineInfo = new byte[index + 1];
 		}
 		else if(lineInfo.length <= index)
 		{
-			LineInfo[] lineInfoN = new LineInfo[(index + 1) * 2];
+			int newSize = (index + (int)index/3);
+			//System.out.println("Growing array to " + newSize);
+			//LineInfo[] lineInfoN = new LineInfo[newSize];
+			byte[] lineInfoN = new byte[newSize];
 			System.arraycopy(lineInfo,0,lineInfoN,0,lineInfo.length);
 			lineInfo = lineInfoN;
 		}
@@ -302,40 +310,4 @@ public abstract class TokenMarker
 		}
 	}
 
-	/**
-	 * Inner class for storing information about tokenized lines.
-	 */
-	public class LineInfo
-	{
-		/**
-		 * Creates a new LineInfo object with token = Token.NULL
-		 * and obj = null.
-		 */
-		public LineInfo()
-		{
-		}
-
-		/**
-		 * Creates a new LineInfo object with the specified
-		 * parameters.
-		 */
-		public LineInfo(byte token, Object obj)
-		{
-			this.token = token;
-			this.obj = obj;
-		}
-
-		/**
-		 * The id of the last token of the line.
-		 */
-		public byte token;
-
-		/**
-		 * This is for use by the token marker implementations
-		 * themselves. It can be used to store anything that
-		 * is an object and that needs to exist on a per-line
-		 * basis.
-		 */
-		public Object obj;
-	}
 }

@@ -26,7 +26,6 @@ import workbench.db.DataSpooler;
 import workbench.db.DbMetadata;
 import workbench.db.ObjectScripter;
 import workbench.db.WbConnection;
-import workbench.exception.WbException;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
@@ -88,11 +87,11 @@ public class TableListPanel
 	private String currentSchema;
 	private String currentCatalog;
 	private SpoolDataAction spoolData;
-	
-	
+
+
 	private WbMenuItem dropTableItem;
 	private WbMenuItem scriptTablesItem;
-	
+
 	private MainWindow parentWindow;
 
 	private String selectedCatalog;
@@ -118,7 +117,7 @@ public class TableListPanel
 
 	private static final String DROP_CMD = "drop-table";
 	private static final String SCRIPT_CMD = "create-scripts";
-	
+
 	private JMenu showDataMenu;
 
 	// holds a reference to other WbTables which
@@ -148,7 +147,7 @@ public class TableListPanel
 		this.tableSource = EditorPanel.createSqlEditor();
 		this.tableSource.setEditable(false);
 		this.tableSource.showFindOnPopupMenu();
-		
+
 		//this.tableSource.addPopupMenuItem(new FileSaveAsAction(this.tableSource), true);
 
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.tableSource);
@@ -274,7 +273,7 @@ public class TableListPanel
 		this.scriptTablesItem.addActionListener(this);
 		this.scriptTablesItem.setEnabled(true);
 		popup.add(this.scriptTablesItem);
-		
+
 		this.showDataMenu = new WbMenu(ResourceMgr.getString("MnuTxtShowTableData"));
 		this.showDataMenu.setEnabled(false);
 		this.updateShowDataMenu();
@@ -297,14 +296,14 @@ public class TableListPanel
 		{
 			this.showDataMenu = new WbMenu(ResourceMgr.getString("MnuTxtShowTableData"));
 		}
-		
+
 		String[] panels = this.parentWindow.getPanelLabels();
 		if (panels == null) return;
-		
+
 		int current = this.parentWindow.getCurrentPanelIndex();
 		int newCount = panels.length;
 		if (current > newCount - 1) return;
-		
+
 		int currentCount = this.showDataMenu.getItemCount();
 
 		if (this.boldFont == null) this.initFonts();
@@ -435,7 +434,7 @@ public class TableListPanel
 		this.tableData.reset();
 		this.shouldRetrieveTableDataCount = true;
 	}
-	
+
 	public void resetDetails()
 	{
 		this.tableDefinition.reset();
@@ -485,7 +484,7 @@ public class TableListPanel
 			this.tableTypes.removeAllItems();
 			this.tableTypes.addItem("*");
 			int preferredIndex = -1;
-			
+
 			for (int i=0; i < types.size(); i++)
 			{
 				String type = types.get(i).toString();
@@ -495,7 +494,7 @@ public class TableListPanel
 				}
 				this.tableTypes.addItem(type);
 			}
-			
+
 			if (preferredIndex > -1)
 			{
 				try
@@ -545,7 +544,7 @@ public class TableListPanel
 	public void retrieve()
 	{
 		if (busy) return;
-		
+
 		try
 		{
 			if (dbConnection == null || dbConnection.isClosed())
@@ -559,7 +558,7 @@ public class TableListPanel
 			LogMgr.logError("TableListPanel.retrieve()", "Error checking connection", e);
 			return;
 		}
-		
+
 		final Container parent = this.getParent();
 		Thread t = new Thread()
 		{
@@ -652,7 +651,7 @@ public class TableListPanel
 		if (e.getValueIsAdjusting()) return;
 		this.updateDisplay();
 	}
-	
+
 	public void updateDisplay()
 	{
 		int count = this.tableList.getSelectedRowCount();
@@ -714,23 +713,23 @@ public class TableListPanel
 		if (aType == null) return false;
 		return (aType.indexOf("table") > -1 || aType.indexOf("view") > -1);
 	}
-	
+
 	private boolean isTableType(String aType)
 	{
 		if (aType == null) return false;
-		return (aType.indexOf("table") > -1 || 
-		        aType.indexOf("view") > -1 || 
+		return (aType.indexOf("table") > -1 ||
+		        aType.indexOf("view") > -1 ||
 						aType.indexOf("synonym") > -1 ||
 						(aType.indexOf("sequence") > -1 && this.dbConnection.getMetadata().isPostgres())
 					);
 	}
 
 	private synchronized void retrieveTableSource()
-		throws SQLException, WbException
+		throws SQLException
 	{
 		WbSwingUtilities.showWaitCursor(this);
 		WbSwingUtilities.showWaitCursor(this.tableSource);
-		
+
 		try
 		{
 			DbMetadata meta = this.dbConnection.getMetadata();
@@ -752,7 +751,7 @@ public class TableListPanel
 			}
 			else if ("sequence".equals(this.selectedObjectType))
 			{
-				String seqSource = meta.getSequenceSource(this.selectedTableName);
+				String seqSource = meta.getSequenceSource(this.selectedCatalog, this.selectedSchema,this.selectedTableName);
 				tableSource.setText(seqSource);
 				tableSource.setCaretPosition(0);
 			}
@@ -775,9 +774,9 @@ public class TableListPanel
 		}
 		shouldRetrieveTableSource = false;
 	}
-	
+
 	private synchronized void retrieveTableDefinition()
-		throws SQLException, WbException
+		throws SQLException
 	{
 		WbSwingUtilities.showWaitCursorOnWindow(this);
 
@@ -786,20 +785,23 @@ public class TableListPanel
 			DbMetadata meta = this.dbConnection.getMetadata();
 			DataStore def = meta.getTableDefinition(this.selectedCatalog, this.selectedSchema, this.selectedTableName, this.selectedObjectType, false);
 			DataStoreTableModel model = new DataStoreTableModel(def);
+			tableDefinition.setPrintHeader(this.selectedTableName);
 			tableDefinition.setModel(model, true);
 			tableDefinition.adjustColumns();
-			TableColumnModel colmod = tableDefinition.getColumnModel();
-			TableColumn col = colmod.getColumn(DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
-			col.setCellRenderer(new SqlTypeRenderer());
 
-			// remove the last two columns...
+			// remove the last two columns if we are not displaying a SEQUENCE for Oracle
+			if (!(meta.isOracle() && "SEQUENCE".equalsIgnoreCase(this.selectedObjectType)))
+			{
+				TableColumnModel colmod = tableDefinition.getColumnModel();
+				TableColumn col = colmod.getColumn(DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
+				col.setCellRenderer(new SqlTypeRenderer());
 
-			col = colmod.getColumn(colmod.getColumnCount() - 1);
-			colmod.removeColumn(col);
+				col = colmod.getColumn(colmod.getColumnCount() - 1);
+				colmod.removeColumn(col);
 
-			col = colmod.getColumn(colmod.getColumnCount() - 1);
-			colmod.removeColumn(col);
-
+				col = colmod.getColumn(colmod.getColumnCount() - 1);
+				colmod.removeColumn(col);
+			}
 		}
 		finally
 		{
@@ -827,7 +829,7 @@ public class TableListPanel
 	{
 		if (this.tableList.getSelectedRowCount() <= 0) return;
 		int index = this.displayTab.getSelectedIndex();
-		
+
 		WbSwingUtilities.showWaitCursorOnWindow(this);
 		//this.setBusy(true);
 		try
@@ -841,7 +843,7 @@ public class TableListPanel
 					if (this.shouldRetrieveTableSource) this.retrieveTableSource();
 					break;
 				case 2:
-					if (this.shouldRetrieveTableDataCount) 
+					if (this.shouldRetrieveTableDataCount)
 					{
 						this.tableData.showData(!this.shiftDown);
 						this.shouldRetrieveTableDataCount = false;
@@ -877,7 +879,7 @@ public class TableListPanel
 	{
 		this.busy = aFlag;
 	}
-	
+
 	private void retrieveTriggers()
 		throws SQLException
 	{
@@ -966,12 +968,12 @@ public class TableListPanel
 				return null;
 			}
 		}
-		
+
 		int colCount = this.tableDefinition.getRowCount();
 		if (colCount == 0) return null;
-		
+
 		StringBuffer sql = new StringBuffer(colCount * 80);
-		
+
 		sql.append("SELECT ");
 		boolean quote = false;
 		for (int i=0; i < colCount; i++)
@@ -990,7 +992,7 @@ public class TableListPanel
 		}
 
 		sql.append(table);
-		
+
 		return sql.toString();
 	}
 	/**
@@ -1054,7 +1056,7 @@ public class TableListPanel
 			String owner = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
 			String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 			String type = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-			
+
 			if (owner != null)
 			{
 				tables.put(owner + "." + table, type);
@@ -1068,7 +1070,7 @@ public class TableListPanel
 		ObjectScripterUI ui = new ObjectScripterUI(s);
 		ui.show(SwingUtilities.getWindowAncestor(this));
 	}
-	
+
 	private boolean isClientVisible()
 	{
 		if (this.tableListClients == null) return false;
@@ -1274,9 +1276,9 @@ public class TableListPanel
 		catch (Exception e)
 		{
 			LogMgr.logError("TableListPanel.fileNameChanged()", "Error when updating the popup menu", e);
-			
+
 			// re-initialize the menu from scratch
-			
+
 			try { this.updateShowDataMenu(); } catch (Throwable th) {}
 		}
 	}

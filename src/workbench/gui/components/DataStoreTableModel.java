@@ -19,12 +19,12 @@ import workbench.util.SqlUtil;
 
 
 
-/** 
+/**
  * TableModel for displaying the contents of a {@link workbench.storage.DataStore }
  * @author workbench@kellerer.org
  *
  */
-public class DataStoreTableModel 
+public class DataStoreTableModel
 	extends AbstractTableModel
 {
 	private DataStore dataCache;
@@ -37,18 +37,18 @@ public class DataStoreTableModel
 	private boolean sortAscending = true;
 	private int sortColumn = -1;
 	private boolean allowEditing = true;
-	
+
 	public DataStoreTableModel(DataStore aDataStore) throws IllegalArgumentException
 	{
 		if (aDataStore == null) throw new IllegalArgumentException("DataStore cannot be null");
 		this.setDataStore(aDataStore);
 	}
-	
+
 	public DataStore getDataStore()
 	{
 		return this.dataCache;
 	}
-	
+
 	public synchronized void setDataStore(DataStore newData)
 	{
 		this.dispose();
@@ -58,7 +58,7 @@ public class DataStoreTableModel
 		this.sortColumn = -1;
 		this.fireTableStructureChanged();
 	}
-	
+
 	/**
 	 *	Return the contents of the field at the given position
 	 *	in the result set.
@@ -71,7 +71,7 @@ public class DataStoreTableModel
 		{
 			return this.dataCache.getRowStatus(row);
 		}
-		
+
 		try
 		{
 			Object result;
@@ -88,7 +88,7 @@ public class DataStoreTableModel
 			msg.append(ExceptionUtil.getDisplay(e));
 			return msg.toString();
 		}
-	}	
+	}
 
 	public int findColumn(String aColname)
 	{
@@ -103,15 +103,15 @@ public class DataStoreTableModel
 		}
 		return index;
 	}
-	
+
 	public void setUpdateTable(String aTable)
 	{
 		this.dataCache.setUpdateTable(aTable);
 	}
-	
+
 	/**
 	 *	Shows or hides the status column.
-	 *	The status column will display an indicator if the row has 
+	 *	The status column will display an indicator if the row has
 	 *  been modified or was inserted
 	 */
 	public void setShowStatusColumn(boolean aFlag)
@@ -122,32 +122,32 @@ public class DataStoreTableModel
 		{
 			this.statusOffset = 1;
 		}
-		else 
+		else
 		{
 			this.statusOffset = 0;
 		}
 		this.fireTableStructureChanged();
 	}
-	
+
 	public boolean getShowStatusColumn() { return this.showStatusColumn; }
-	
-	public boolean isUpdateable() 
-	{ 
+
+	public boolean isUpdateable()
+	{
 		if (this.dataCache == null) return false;
-		return this.dataCache.isUpdateable(); 
+		return this.dataCache.isUpdateable();
 	}
-	
+
 	public void setValueAt(Object aValue, int row, int column)
 	{
 		if (this.showStatusColumn && column == 0) return;
-		
+
 		if (this.isUpdateable())
 		{
-			if (aValue == null || aValue.toString().length() == 0) 
+			if (aValue == null || aValue.toString().length() == 0)
 			{
 				this.dataCache.setNull(row, column - this.statusOffset);
 			}
-			else 
+			else
 			{
 				try
 				{
@@ -167,10 +167,10 @@ public class DataStoreTableModel
 			fireTableDataChanged();
 		}
 	}
-	
+
 	/**
 	 *	Return the number of columns in the model.
-	 *	This will return the number of columns of the underlying DataStore (plus one 
+	 *	This will return the number of columns of the underlying DataStore (plus one
 	 *  if the status column is enabled)
 	 */
 	public int getColumnCount()
@@ -180,7 +180,7 @@ public class DataStoreTableModel
 
 	/**
 	 *	Returns the current width of the given column.
-	 *	It returns the value of {@link workbench.storage.DataStore#getColumnDisplaySize(int)} 
+	 *	It returns the value of {@link workbench.storage.DataStore#getColumnDisplaySize(int)}
 	 *  for every column which is not the status column.
 	 */
 	public int getColumnWidth(int aColumn)
@@ -198,7 +198,7 @@ public class DataStoreTableModel
 	}
 
 	/**
-	 *	Returns the name of the datatype (according to java.sql.Types) of the 
+	 *	Returns the name of the datatype (according to java.sql.Types) of the
 	 *  given column.
 	 */
 	public String getColumnTypeName(int aColumn)
@@ -206,7 +206,7 @@ public class DataStoreTableModel
 		if (aColumn == 0) return "";
 		return SqlUtil.getTypeName(this.getColumnType(aColumn));
 	}
-	
+
 	/**
 	 *	Returns the type (java.sql.Types) of the given column.
 	 */
@@ -214,7 +214,7 @@ public class DataStoreTableModel
 	{
 		if (this.dataCache == null) return Types.NULL;
 		if (this.showStatusColumn && aColumn == 0) return 0;
-		
+
 		try
 		{
 			return this.dataCache.getColumnType(aColumn - this.statusOffset);
@@ -224,13 +224,13 @@ public class DataStoreTableModel
 			e.printStackTrace();
 			return Types.VARCHAR;
 		}
-	}		
+	}
 
 	/**
 	 *	Number of rows in the result set
 	 */
-	public int getRowCount() 
-	{ 
+	public int getRowCount()
+	{
 		if (this.dataCache == null) return 0;
 		return this.dataCache.getRowCount();
 	}
@@ -241,14 +241,14 @@ public class DataStoreTableModel
 		if (this.showStatusColumn && aColumn == 0) return Integer.class;
 		return this.dataCache.getColumnClass(aColumn - this.statusOffset);
 	}
-	
+
 	public int insertRow(int afterRow)
 	{
 		int row = this.dataCache.insertRowAfter(afterRow);
 		this.fireTableRowsInserted(row, row);
 		return row;
 	}
-	
+
 	public int addRow()
 	{
 		int row = this.dataCache.addRow();
@@ -260,12 +260,12 @@ public class DataStoreTableModel
 		this.dataCache.deleteRow(aRow);
 		this.fireTableRowsDeleted(aRow, aRow);
 	}
-	
+
 	public void importFile(String aFilename, boolean hasHeader, String colSep)
 		throws FileNotFoundException
 	{
 		this.importFile(aFilename, hasHeader, colSep, "\"");
-		
+
 	}
 	public void importFile(String aFilename, boolean hasHeader, String colSep, String quoteChar)
 		throws FileNotFoundException
@@ -275,7 +275,7 @@ public class DataStoreTableModel
 		int row = this.getRowCount();
 		this.fireTableRowsInserted(0, row - 1);
 	}
-	
+
 	/**
 	 *	Clears the EventListenerList and empties the DataStore
 	 */
@@ -288,18 +288,18 @@ public class DataStoreTableModel
 			this.dataCache = null;
 		}
 	}
-	
-	public void finalize()
+
+	protected void finalize()
 	{
 		this.dispose();
 	}
-	
+
 	/** Return the name of the column as defined by the ResultSetData.
-	 */	
+	 */
 	public String getColumnName(int aColumn)
 	{
 		if (this.showStatusColumn && aColumn == 0) return " ";
-		
+
 		try
 		{
 			String name = this.dataCache.getColumnName(aColumn - this.statusOffset);
@@ -310,7 +310,7 @@ public class DataStoreTableModel
 			return NOT_AVAILABLE;
 		}
 	}
-	
+
 	public StringBuffer getRowData(int aRow)
 	{
 		return this.dataCache.getRowDataAsString(aRow);
@@ -328,7 +328,7 @@ public class DataStoreTableModel
 	{
 		this.allowEditing = aFlag;
 	}
-	
+
 	/**    Return true if the data is sorted in ascending order.
 	 *
 	 * @return True if sorted in ascending order
@@ -337,20 +337,20 @@ public class DataStoreTableModel
 	{
 		return sortAscending;
 	}
-	
-	public int getSortColumn() 
-	{ 
+
+	public int getSortColumn()
+	{
 		if (this.sortColumn == -1) return -1;
-		return this.sortColumn; 
+		return this.sortColumn;
 	}
-	
+
 	public void sortByColumn(int column)
 	{
 		boolean ascending = true;
 		if (this.sortColumn == column) ascending = !this.sortAscending;
 		sortByColumn(column, ascending);
 	}
-	
+
 	public void sortByColumn(int aColumn, boolean ascending)
 	{
 		this.sortAscending = ascending;
@@ -365,24 +365,24 @@ public class DataStoreTableModel
 		}
 		fireTableChanged(new TableModelEvent(this));
 	}
-	
+
 	private boolean sortingInProgress = false;
-	
+
 	public void sortInBackground(WbTable table, int aColumn)
 	{
 		if (sortingInProgress) return;
-		
-		if (aColumn < 0 && aColumn >= this.getColumnCount()) 
+
+		if (aColumn < 0 && aColumn >= this.getColumnCount())
 		{
 			LogMgr.logWarning("DataStoreTableModel", "Wrong column index specified!");
 			return;
 		}
-		
+
 		boolean ascending = true;
 		if (this.sortColumn == aColumn) ascending = !this.sortAscending;
 		sortInBackground(table, aColumn, ascending);
 	}
-	
+
 	/**
 	 *	Start a new thread to sort the data.
 	 *	Any call to this method while the thread is running, will be ignored
@@ -390,7 +390,7 @@ public class DataStoreTableModel
 	public void sortInBackground(final WbTable table, final int aColumn, final boolean ascending)
 	{
 		if (sortingInProgress) return;
-		
+
 		final DataStoreTableModel model = this;
 		Thread t = new Thread()
 		{
@@ -405,7 +405,7 @@ public class DataStoreTableModel
 				table.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				table.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				// repaint the header so that the icon is displayed...
-				table.getTableHeader().repaint(); 
+				table.getTableHeader().repaint();
 				sortingInProgress = false;
 			}
 		};

@@ -12,11 +12,11 @@ import java.sql.SQLException;
 import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
-import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.storage.DataStore;
 
 /**
  *
@@ -33,7 +33,7 @@ public class SelectCommand extends SqlCommand
 	}
 
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
-		throws SQLException, WbException
+		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		try
@@ -48,8 +48,15 @@ public class SelectCommand extends SqlCommand
 			{
 				LogMgr.logWarning("SelectCommand.execute()", "The JDBC driver does not support the setMaxRows() function! (" +e.getMessage() + ")");
 			}
-
-			int fetchSize = WbManager.getSettings().getDefaultFetchSize();
+			int fetchSize = 0;
+			try
+			{
+				fetchSize = WbManager.getSettings().getDefaultFetchSize();
+			}
+			catch (Exception e)
+			{
+				fetchSize = 0;
+			}
 			if (fetchSize > 0 && fetchSize < this.maxRows)
 			{
 				try
@@ -64,9 +71,36 @@ public class SelectCommand extends SqlCommand
 
 			this.isCancelled = false;
 			ResultSet rs = this.currentStatement.executeQuery(aSql);
+
 			if (rs != null)
 			{
-				result.addResultSet(rs, this.maxRows);
+				// if a ResultSetConsumer is waiting, we have to store the
+				// result set, so that not all the data is read into memory
+				// when exporting data
+				// If the result set is not consume, we can create the DataStore
+				// right away. This is necessary, because with Oracle, the stream to
+				// read LONG columns would be closed, if any other statement
+				// is executed before the result set is retrieved.
+				// (The result set itself can be retrieved but access to the LONG columns
+				// would cause an error)
+				if (this.getConsumerWaiting())
+				{
+					result.addResultSet(rs);
+				}
+				else
+				{
+					DataStore ds = new DataStore(rs, true, this.rowMonitor, maxRows);
+					result.addDataStore(ds);
+					try
+					{
+						rs.close();
+					}
+					catch (Exception e)
+					{
+						LogMgr.logError("SelectCommand.execute()", "Error closing result set", e);
+					}
+				}
+
 				StringBuffer warnings = new StringBuffer();
 
 				this.appendSuccessMessage(result);
@@ -84,7 +118,7 @@ public class SelectCommand extends SqlCommand
 			}
 			else
 			{
-				throw new WbException(ResourceMgr.getString("MsgReceivedNullResultSet"));
+				throw new Exception(ResourceMgr.getString("MsgReceivedNullResultSet"));
 			}
 		}
 		catch (Throwable e)

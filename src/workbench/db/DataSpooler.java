@@ -33,7 +33,6 @@ import javax.swing.JOptionPane;
 import workbench.WbManager;
 import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.RowDataReceiver;
-import workbench.exception.WbException;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.dbobjects.ProgressPanel;
@@ -77,12 +76,12 @@ public class DataSpooler
 	private String chrFunc = null;
 	private String concatString = "||";
 	private int commitEvery=0;
-	private int maxDigits=340;
 
 	/** If true, then cr/lf characters will be removed from
 	 *  character columns
 	 */
 	private boolean cleancr = false;
+	private boolean append = false;
 
 	private boolean showProgress = false;
 	private ProgressPanel progressPanel;
@@ -92,9 +91,6 @@ public class DataSpooler
 	private int pendingJobs = 0;
 	private boolean jobsRunning = false;
 	private RowActionMonitor rowMonitor;
-
-	private boolean success = false;
-	private boolean hasWarning = false;
 
 	private ArrayList warnings = new ArrayList();
 	private ArrayList errors = new ArrayList();
@@ -184,6 +180,7 @@ public class DataSpooler
 		}
 	}
 
+	public void setAppendToFile(boolean aFlag) { this.append = aFlag; }
 	public void setExportHeaderOnly(boolean aFlag) { this.headerOnly = aFlag; }
 	public boolean getExportHeaderOnly() { return this.headerOnly; }
 	public void setCommitEvery(int aCount) { this.commitEvery = aCount; }
@@ -322,7 +319,7 @@ public class DataSpooler
 	}
 
 	public void startExport()
-		throws IOException, SQLException, WbException
+		throws IOException, SQLException
 	{
 		Statement stmt = this.dbConn.createStatement();
 		ResultSet rs = null;
@@ -387,7 +384,7 @@ public class DataSpooler
 	 *	the SQL scripting built into that object.
 	 */
 	public long startExport(ResultSet rs)
-		throws IOException, SQLException, WbException
+		throws IOException, SQLException, Exception
 	{
 		int interval = 1;
 		int currentRow = 0;
@@ -412,7 +409,7 @@ public class DataSpooler
 			{
 				if (!ds.useUpdateTableFromSql(this.sql, this.useSqlUpdate))
 				{
-					throw new WbException(ResourceMgr.getString("ErrorSpoolSqlNotPossible"));
+					throw new Exception(ResourceMgr.getString("ErrorSpoolSqlNotPossible"));
 				}
 			}
 			else
@@ -511,7 +508,7 @@ public class DataSpooler
 			}
 			else
 			{
-				pw = new BufferedWriter(new FileWriter(f), 16*1024);
+				pw = new BufferedWriter(new FileWriter(f,this.append), 16*1024);
 			}
 
 			if (exportType == EXPORT_TXT && exportHeaders)
@@ -752,16 +749,6 @@ public class DataSpooler
 	{
 		private String outputFile;
 		private String sqlStatement;
-	}
-
-	public static void main(String[] args)
-	{
-		BigDecimal d = new BigDecimal(123.456);
-		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-		symbols.setDecimalSeparator('.');
-		DecimalFormat f = new DecimalFormat("#.#", symbols);
-		FieldPosition p = new FieldPosition(0);
-		System.out.println("d=" + f.format(d, new StringBuffer(), p));
 	}
 
 }

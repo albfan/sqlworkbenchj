@@ -159,6 +159,7 @@ public class WbTable
 	private TableModelListener changeListener;
 	private JScrollPane scrollPane;
 
+	private String defaultPrintHeader = null;
 	private boolean showRowNumbers = false;
 	private JList rowHeader = null;
 	private boolean showPopup = true;
@@ -383,6 +384,16 @@ public class WbTable
 		PrintPreview preview = new PrintPreview(parent, printer);
 	}
 
+	public void setPrintHeader(String aHeader)
+	{
+		this.defaultPrintHeader = aHeader;
+	}
+
+	public String getPrintHeader()
+	{
+		return this.defaultPrintHeader;
+	}
+
 	public void print()
 	{
 		this.getTablePrinter().startPrint();
@@ -393,6 +404,10 @@ public class WbTable
 		PageFormat format = WbManager.getSettings().getPageFormat();
 		Font printerFont = WbManager.getSettings().getPrinterFont();
 		TablePrinter printer = new TablePrinter(this, format, printerFont);
+		if (this.defaultPrintHeader != null)
+		{
+			printer.setHeaderText(this.defaultPrintHeader);
+		}
 		printer.setFooterText(ResourceMgr.getString("TxtPageFooter"));
 		return printer;
 	}
@@ -429,6 +444,8 @@ public class WbTable
 			DataStore ds = this.dwModel.getDataStore();
 			if (ds != null)
 			{
+				// The underlying DataStore needs to know the date format in order
+				// to convert input strings to dates
 				ds.setDefaultDateFormat(WbManager.getSettings().getDefaultDateFormat());
 			}
 			else
@@ -779,10 +796,10 @@ public class WbTable
 		ToolTipRenderer rend = new ToolTipRenderer();
 		this.setDefaultRenderer(Object.class, rend);
 
+		/*
 		InputMap mymap = this.getInputMap(WHEN_FOCUSED);
 		InputMap im = defaultNumberRenderer.getInputMap(WHEN_FOCUSED);
 
-		/*
 		im.setParent(mymap);
 		im = rend.getInputMap(WHEN_FOCUSED);
 		im.setParent(mymap);

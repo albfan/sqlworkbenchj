@@ -27,6 +27,8 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
 
 import workbench.WbManager;
+import workbench.exception.ExceptionUtil;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ColumnSelectionAction;
 import workbench.gui.actions.FileOpenAction;
 import workbench.gui.actions.FileSaveAsAction;
@@ -40,8 +42,8 @@ import workbench.gui.components.ReplacePanel;
 import workbench.gui.components.SearchCriteriaPanel;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.editor.JEditTextArea;
-import workbench.gui.editor.JavaTokenMarker;
 import workbench.gui.editor.SyntaxStyle;
+import workbench.gui.editor.SyntaxDocument;
 import workbench.gui.editor.Token;
 import workbench.gui.editor.TokenMarker;
 import workbench.interfaces.ClipboardSupport;
@@ -59,6 +61,8 @@ import workbench.sql.formatter.SqlFormatter;
 import workbench.util.LineTokenizer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.gui.actions.MatchBracketAction;
+import workbench.gui.editor.SyntaxDocument;
 
 
 /**
@@ -86,6 +90,7 @@ public class EditorPanel
 	private FormatSqlAction formatSql;
 	private FileOpenAction fileOpen;
 	private ColumnSelectionAction columnSelection;
+	private MatchBracketAction matchBracket;
 
   private static final SyntaxStyle[] SYNTAX_COLORS;
   static
@@ -113,20 +118,12 @@ public class EditorPanel
 		return p;
 	}
 
-	public static EditorPanel createJavaEditor()
-	{
-		EditorPanel p = new EditorPanel(new JavaTokenMarker());
-		p.editorType = JAVA_EDITOR;
-		return p;
-	}
-
 	public static EditorPanel createTextEditor()
 	{
 		EditorPanel p = new EditorPanel(null);
-		p.editorType = JAVA_EDITOR;
+		p.editorType = TEXT_EDITOR;
 		return p;
 	}
-
 
 	private EditorPanel()
 	{
@@ -166,6 +163,8 @@ public class EditorPanel
 		this.setShowLineNumbers(WbManager.getSettings().getShowLineNumbers());
 
 		this.columnSelection = new ColumnSelectionAction(this);
+		this.matchBracket = new MatchBracketAction(this);
+		this.addKeyBinding(this.matchBracket);
 
 		//this.setSelectionRectangular(true);
 		WbManager.getSettings().addFontChangedListener(this);
@@ -189,6 +188,11 @@ public class EditorPanel
 		this.addPopupMenuItem(this.findAction, true);
 		this.addPopupMenuItem(this.findAgainAction, false);
 		this.addPopupMenuItem(this.replaceAction, false);
+	}
+
+	public MatchBracketAction getMatchBracketAction()
+	{
+		return this.matchBracket;
 	}
 
 	public ColumnSelectionAction getColumnSelection()
@@ -224,7 +228,7 @@ public class EditorPanel
 		parser.setScript(sql);
 		List commands = parser.getCommands();
 		String delimit = parser.getDelimiter();
-		
+
 		int count = commands.size();
 		StringBuffer newSql = new StringBuffer(sql.length() + 100);
 		String formattedDelimit = "";
@@ -328,7 +332,7 @@ public class EditorPanel
 			{
 				if (i > startline)
 				{
-					if (i < endline) newText.append(',');
+					newText.append(',');
 					if ( (quoteElements && count > 5) || (!quoteElements && count > 15)) newText.append('\n');
 					newline.append(' ');
 				}
@@ -369,6 +373,13 @@ public class EditorPanel
 		return this.getText();
 	}
 
+	public void dispose()
+	{
+		this.clearUndoBuffer();
+		this.popup.removeAll();
+		this.popup = null;
+		this.setDocument(new SyntaxDocument());
+	}
 	/**
 	 *	Return the selected text of the editor
 	 */
@@ -423,6 +434,7 @@ public class EditorPanel
 		boolean result = false;
 		try
 		{
+			this.setText(""); // clear memory!
 			String filename = aFile.getAbsolutePath();
 			BufferedReader reader = new BufferedReader(new FileReader(filename));
 			StringBuffer content = new StringBuffer((int)aFile.length() + 500);
@@ -447,6 +459,7 @@ public class EditorPanel
 		}
 		catch (OutOfMemoryError mem)
 		{
+			mem.printStackTrace();
 			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
 		}
 		this.setCaretPosition(0);
@@ -455,14 +468,24 @@ public class EditorPanel
 
 	public boolean saveCurrentFile()
 	{
-		if (this.currentFile != null)
+		boolean result = false;
+		try
 		{
-			return this.saveFile(this.currentFile);
+			if (this.currentFile != null)
+			{
+				this.saveFile(this.currentFile);
+				result = true;
+			}
+			else
+			{
+				this.saveFile();
+			}
 		}
-		else
+		catch (IOException e)
 		{
-			return this.saveFile();
+			result = false;
 		}
+		return result;
 	}
 
 	public boolean saveFile()
@@ -491,26 +514,34 @@ public class EditorPanel
 		int answer = fc.showSaveDialog(SwingUtilities.getWindowAncestor(this));
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
-			result = this.saveFile(fc.getSelectedFile());
-			lastDir = fc.getCurrentDirectory().getAbsolutePath();
-			if (this.editorType == SQL_EDITOR)
+			try
 			{
-				WbManager.getSettings().setLastSqlDir(lastDir);
+				this.saveFile(fc.getSelectedFile());
+				lastDir = fc.getCurrentDirectory().getAbsolutePath();
+				if (this.editorType == SQL_EDITOR)
+				{
+					WbManager.getSettings().setLastSqlDir(lastDir);
+				}
+				else if (this.editorType == JAVA_EDITOR)
+				{
+					WbManager.getSettings().setLastJavaDir(lastDir);
+				}
+				else
+				{
+					WbManager.getSettings().setLastEditorDir(lastDir);
+				}
 			}
-			else if (this.editorType == JAVA_EDITOR)
+			catch (IOException e)
 			{
-				WbManager.getSettings().setLastJavaDir(lastDir);
+				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrorSavingFile") + "\n" + ExceptionUtil.getDisplay(e));
+				result = false;
 			}
-			else
-			{
-				WbManager.getSettings().setLastEditorDir(lastDir);
-			}
-
 		}
 		return result;
 	}
 
-	public boolean saveFile(File aFile)
+	public void saveFile(File aFile)
+		throws IOException
 	{
 		try
 		{
@@ -537,13 +568,12 @@ public class EditorPanel
 			writer.close();
 			this.currentFile = aFile;
 			this.resetModified();
-			return true;
 		}
-		catch (Exception e)
+		catch (IOException e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("EditorPanel.saveFile()", "Error saving file", e);
+			throw e;
 		}
-		return false;
 	}
 
 	public File getCurrentFile() { return this.currentFile; }

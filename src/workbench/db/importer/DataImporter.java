@@ -38,8 +38,6 @@ public class DataImporter
 	private String insertSql;
 	private String updateSql;
 
-	//private String tableName;
-
 	private RowDataProducer source;
 	private PreparedStatement insertStatement;
 	private PreparedStatement updateStatement;
@@ -48,14 +46,12 @@ public class DataImporter
 
 	private int commitEvery = 0;
 
-	private boolean keepRunning = true;
-
-	private boolean success = false;
-	private boolean hasWarning = false;
 	private boolean deleteTarget = false;
 	private boolean continueOnError = false;
 
 	private long totalRows = 0;
+	private long updatedRows = 0;
+	private long insertedRows = 0;
 	private int currentImportRow = 0;
 	private int mode = MODE_INSERT;
 
@@ -123,6 +119,11 @@ public class DataImporter
 	public void setModeUpdate() { this.mode = MODE_UPDATE; }
 	public void setModeInsertUpdate() { this.mode = MODE_INSERT_UPDATE; }
 	public void setModeUpdateInsert() { this.mode = MODE_UPDATE_INSERT; }
+
+	public boolean isModeInsert() { return (this.mode == MODE_INSERT); }
+	public boolean isModeUpdate() { return (this.mode == MODE_UPDATE); }
+	public boolean isModeInsertUpdate() { return (this.mode == MODE_INSERT_UPDATE); }
+	public boolean isModeUpdateInsert() { return (this.mode == MODE_UPDATE_INSERT); }
 
 	/**
 	 *	Define the mode by supplying keywords.
@@ -249,8 +250,10 @@ public class DataImporter
 	public boolean isRunning() { return this.isRunning; }
 	public boolean isSuccess() { return this.errors.size() == 0; }
 	public boolean hasWarning() { return this.warnings.size() > 0; }
-	public long getAffectedRow() { return this.totalRows; }
+	public long getAffectedRows() { return this.totalRows; }
 
+	public long getInsertedRows() { return this.insertedRows; }
+	public long getUpdatedRows() { return this.updatedRows; }
 	/**
 	 *	Return the error messages which where collected during the import.
 	 */
@@ -291,7 +294,6 @@ public class DataImporter
 	public void cancelExecution()
 	{
 		this.isRunning = false;
-		this.keepRunning = false;
 		this.source.cancel();
 		this.warnings.add(ResourceMgr.getString("MsgImportCancelled"));
 		if (this.progressMonitor != null) this.progressMonitor.jobFinished();
@@ -430,6 +432,7 @@ public class DataImporter
 			}
 		}
 		int rows = this.insertStatement.executeUpdate();
+		this.insertedRows += rows;
 		return rows;
 	}
 
@@ -455,6 +458,7 @@ public class DataImporter
 			}
 		}
 		int rows = this.updateStatement.executeUpdate();
+		this.updatedRows += rows;
 		return rows;
 	}
 
@@ -502,7 +506,7 @@ public class DataImporter
 		StringBuffer parms = new StringBuffer(targetColumns.length * 20);
 
 		text.append("INSERT INTO ");
-		text.append(this.targetTable);
+		text.append(this.dbConn.getMetadata().quoteObjectname(this.targetTable));
 		text.append(" (");
 		for (int i=0; i < this.colCount; i++)
 		{
@@ -556,7 +560,7 @@ public class DataImporter
 		StringBuffer sql = new StringBuffer(this.colCount * 20 + 80);
 		StringBuffer where = new StringBuffer(this.keyColumns.size() * 10);
 		sql.append("UPDATE ");
-		sql.append(this.targetTable);
+		sql.append(this.dbConn.getMetadata().quoteObjectname(this.targetTable));
 		sql.append(" SET ");
 		where.append(" WHERE ");
 		boolean pkAdded = false;

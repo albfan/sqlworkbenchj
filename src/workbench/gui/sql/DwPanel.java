@@ -30,7 +30,6 @@ import javax.swing.table.TableModel;
 import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
-import workbench.exception.WbException;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteRowAction;
 import workbench.gui.actions.InsertRowAction;
@@ -78,8 +77,6 @@ public class DwPanel
 	private DefaultCellEditor defaultNumberEditor;
 	private int maxRows = 0;
 
-	private WbConnection lastConnection;
-	private boolean cancelled;
 	private boolean success = false;
 	private boolean showLoadProgress = false;
 
@@ -138,6 +135,8 @@ public class DwPanel
 		infoTable.addPopupAction(this.updateAction, true);
 		infoTable.addPopupAction(this.insertRow, true);
 		infoTable.addPopupAction(this.deleteRow, false);
+		this.infoTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		this.infoTable.setRowSelectionAllowed(true);
 	}
 
 	public void setManageActions(boolean aFlag)
@@ -232,6 +231,11 @@ public class DwPanel
 		this.statusBar.setStatusMessage(msg.toString());
 	}
 
+	public void setPrintHeader(String header)
+	{
+		this.infoTable.setPrintHeader(header);
+	}
+
 	/**
 	 *	Enables or disables the display of error messages.
 	 */
@@ -244,7 +248,7 @@ public class DwPanel
 	 *	Defines the connection for this DwPanel.
 	 */
 	public void setConnection(WbConnection aConn)
-		throws SQLException, WbException
+		throws SQLException
 	{
 		this.clearContent();
 		this.sql = null;
@@ -445,25 +449,18 @@ public class DwPanel
 		return rowsAffectedByScript;
 	}
 
-	public void runStatement(String aSql)
-		throws SQLException, WbException
-	{
-		this.runStatement(aSql, this.dbConnection);
-	}
-
 	/**
 	 *	Execute the given SQL statement.
 	 */
-	public void runStatement(String aSql, WbConnection aConnection)
-		throws SQLException, WbException
+	public void runStatement(String aSql)
+		throws SQLException, Exception
 	{
-		if (aSql == null || aConnection == null || aConnection.isClosed())
+		if (aSql == null)
 		{
-			LogMgr.logInfo(this, "No connection given or connection closed!");
+			LogMgr.logError(this, "No sql statement given!", null);
 			return;
 		}
 
-		this.lastConnection = aConnection;
 		this.success = false;
 		StatementRunnerResult result = null;
 
@@ -488,7 +485,7 @@ public class DwPanel
 			DataStore newData = null;
 			this.success = result.isSuccess();
 
-			if (result.isSuccess() && result.hasData())
+			if (this.success && result.hasData())
 			{
 				this.hasResultSet = true;
 
@@ -499,7 +496,7 @@ public class DwPanel
 				else
 				{
 					// the resultset will be closed when stmtRunner.done() is called
-					// in the finally block
+					// in scriptFinished()
 					ResultSet rs = result.getResultSets()[0];
 
 					// passing the maxrows to the datastore is a workaround for JDBC drivers
@@ -513,15 +510,14 @@ public class DwPanel
 					{
 						newData = new DataStore(rs, true, this.getMaxRows());
 					}
-					newData.setOriginalStatement(aSql);
-					newData.setSourceConnection(this.dbConnection);
-					newData.checkUpdateTable();
-					newData.setProgressMonitor(null);
-					if (this.showLoadProgress)
-					{
-						this.clearStatusMessage();
-					}
 				}
+				this.stmtRunner.statementDone();
+
+				newData.setOriginalStatement(aSql);
+				newData.setSourceConnection(this.dbConnection);
+				newData.setProgressMonitor(null);
+				this.clearStatusMessage();
+
 				end = System.currentTimeMillis();
 
 				if (repeatLast)
@@ -541,8 +537,10 @@ public class DwPanel
 				{
 					this.infoTable.adjustColumns();
 				}
-				this.infoTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-				this.infoTable.setRowSelectionAllowed(true);
+
+				this.setStatusMessage(ResourceMgr.getString("MsgCheckingUpdateTable"));
+				this.checkUpdateTable();
+				this.clearStatusMessage();
 
 				if (this.manageUpdateAction)
 				{
@@ -622,7 +620,7 @@ public class DwPanel
 			this.lastMessage = ResourceMgr.getString("MsgExecuteError") + "\r\n";
 			String s = ExceptionUtil.getDisplay(e);
 			this.lastMessage = this.lastMessage + s;
-			throw new WbException(s);
+			throw new Exception(s);
 		}
 		finally
 		{
@@ -848,7 +846,6 @@ public class DwPanel
 		this.infoTable.reset();
 		this.endEdit();
 		this.hasResultSet = false;
-		this.cancelled = false;
 		this.lastMessage = StringUtil.EMPTY_STRING;
 		this.sql = null;
 		this.statusBar.clearRowcount();

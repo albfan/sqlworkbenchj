@@ -50,12 +50,12 @@ public class ColumnMapper
 	private JComboBox sourceDropDown;
 	private static final MapDataModel EMPTY_DATA_MODEL = new MapDataModel(new ColumnMapRow[0]);
 	private MapDataModel data;
-	
+
 	private boolean allowTargetEditing = false;
 	private boolean allowSourceEditing = false;
-	
+
 	public static final SkipColumnIndicator SKIP_COLUMN = new SkipColumnIndicator();
-	
+
 	public ColumnMapper()
 	{
 		this.setLayout(new BorderLayout());
@@ -84,10 +84,10 @@ public class ColumnMapper
 			this.columnDisplay.setModel(EMPTY_DATA_MODEL);
 		}
 	}
-	
+
 	private JTable createMappingTable()
 	{
-		// Create a specialized JTable which enables or 
+		// Create a specialized JTable which enables or
 		// disables the editing of the sourceDropDown based on the
 		// current value of the column (if the value is set to "Skip column"
 		// then it may not be edited even if source editing is allowed
@@ -113,13 +113,13 @@ public class ColumnMapper
 		};
 		return t;
 	}
-	
+
 	public void defineColumns(List source, List target)
 	{
 		if (source == null || target == null) throw new IllegalArgumentException("Both column lists have to be specified");
 		this.sourceColumns = source;
 		this.targetColumns = target;
-		
+
 		// we cannot have more mapping entries then the number of columns in the target
 		int numTargetCols = this.targetColumns.size();
 		int numSourceCols = this.sourceColumns.size();
@@ -134,13 +134,13 @@ public class ColumnMapper
 			row.setSource(sourceCol);
 			this.mapping[i] = row;
 		}
-		
+
 		this.data = new MapDataModel(this.mapping);
 		this.data.setAllowTargetEditing(this.allowTargetEditing);
 		this.columnDisplay.setModel(this.data);
 		TableColumnModel colMod = this.columnDisplay.getColumnModel();
 		TableColumn col = colMod.getColumn(0);
-		
+
 		this.sourceDropDown = this.createDropDown(this.sourceColumns, true);
 		Component c = this.sourceDropDown.getEditor().getEditorComponent();
 		if (c != null && c instanceof JComponent)
@@ -150,7 +150,7 @@ public class ColumnMapper
 		}
 		DefaultCellEditor edit = new DefaultCellEditor(this.sourceDropDown);
 		col.setCellEditor(edit);
-	
+
 		this.targetEditor = new JTextField();
 		this.targetEditor.setFont(WbManager.getSettings().getDataFont());
 		this.targetEditor.setBorder(WbSwingUtilities.EMPTY_BORDER);
@@ -161,7 +161,7 @@ public class ColumnMapper
 		this.adjustKeyColumn();
 		this.columnDisplay.setRowHeight(20);
 	}
-	
+
 	public ColumnIdentifier findSourceColumnByName(String aName)
 	{
 		int count = this.sourceColumns.size();
@@ -172,13 +172,13 @@ public class ColumnMapper
 		}
 		return null;
 	}
-	
+
 	public void setAllowSourceEditing(boolean aFlag)
 	{
 		this.allowSourceEditing = aFlag;
 		this.sourceDropDown.setEditable(aFlag);
 	}
-	
+
 	public void setAllowTargetEditing(boolean aFlag)
 	{
 		this.allowTargetEditing = true;
@@ -187,7 +187,7 @@ public class ColumnMapper
 			this.data.setAllowTargetEditing(aFlag);
 		}
 	}
-	
+
 	private JComboBox createDropDown(List cols, boolean allowEditing)
 	{
 		JComboBox result = new JComboBox();
@@ -201,7 +201,7 @@ public class ColumnMapper
 		}
 		return result;
 	}
-	
+
 	public MappingDefinition getMapping()
 	{
 		int count = this.mapping.length;
@@ -210,7 +210,7 @@ public class ColumnMapper
 		{
 			ColumnMapRow row = this.mapping[i];
 			String s = null;
-			
+
 			if (row.getSource() != null)
 			{
 				s = row.getSource().getColumnName();
@@ -227,7 +227,7 @@ public class ColumnMapper
 		{
 			ColumnMapRow row = this.mapping[i];
 			String s = null;
-			
+
 			if (row.getSource() != null)
 			{
 				s = row.getSource().getColumnName();
@@ -239,8 +239,8 @@ public class ColumnMapper
 		}
 		return def;
 	}
-	
-	class MappingDefinition
+
+	static class MappingDefinition
 	{
 		public ColumnIdentifier[] sourceColumns;
 		public ColumnIdentifier[] targetColumns;
@@ -255,24 +255,24 @@ class MapDataModel
 	private ColumnMapRow[] data;
 	private final String sourceColName = ResourceMgr.getString("LabelSourceColumn");
 	private final String targetColName = ResourceMgr.getString("LabelTargetColumn");
-	
+
 	public MapDataModel(ColumnMapRow[] data)
 	{
 		this.data = data;
 	}
-	
+
 	public Class getColumnClass(int columnIndex)
 	{
 		if (columnIndex == 2)
 			return Boolean.class;
 		return ColumnIdentifier.class;
 	}
-	
+
 	public int getColumnCount()
 	{
 		return 3;
 	}
-	
+
 	public String getColumnName(int columnIndex)
 	{
 		switch (columnIndex)
@@ -286,19 +286,19 @@ class MapDataModel
 		}
 		return "";
 	}
-	
+
 	public int getRowCount()
 	{
 		return this.data.length;
 	}
-	
+
 	public Object getValueAt(int rowIndex, int columnIndex)
 	{
 		ColumnMapRow row = this.data[rowIndex];
 		if (row == null) return "(error)";
-		
+
 		Object value = null;
-		
+
 		switch (columnIndex)
 		{
 			case 0:
@@ -324,12 +324,12 @@ class MapDataModel
 		}
 		return value;
 	}
-	
+
 	public void setAllowTargetEditing(boolean flag)
 	{
 		this.allowTargetEditing = flag;
 	}
-	
+
 	public boolean isCellEditable(int rowIndex, int columnIndex)
 	{
 		if (rowIndex < 0 || rowIndex > this.getRowCount() -1) return false;
@@ -343,13 +343,13 @@ class MapDataModel
 		}
 		return true;
 	}
-	
+
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex)
 	{
 		ColumnMapRow row = this.data[rowIndex];
 		if (row == null) return;
 		if (aValue == null) return;
-		
+
 		switch (columnIndex)
 		{
 			case 0:
@@ -383,7 +383,7 @@ class MapDataModel
 					LogMgr.logWarning("ColumnMapper.setValueAt()", "Unsupported data type " + aValue.getClass().getName());
 				}
 				break;
-				
+
 			case 1:
 				if (aValue instanceof ColumnIdentifier)
 				{
@@ -399,7 +399,7 @@ class MapDataModel
 					LogMgr.logWarning("ColumnMapper.setValueAt()", "Unsupported data type " + aValue.getClass().getName());
 				}
 				break;
-				
+
 			case 2:
 				if (aValue instanceof Boolean)
 				{
@@ -408,23 +408,23 @@ class MapDataModel
 				}
 		}
 	}
-	
+
 }
 class ColumnMapRow
 {
 	private ColumnIdentifier source;
 	private ColumnIdentifier target;
-	
+
 	public void setTarget(ColumnIdentifier id)
 	{
 		this.target = id;
 	}
-	
+
 	public void setSource(ColumnIdentifier o)
 	{
 		this.source = o;
 	}
-	
+
 	public ColumnIdentifier getSource() { return this.source; }
 	public ColumnIdentifier getTarget() { return this.target; }
 
@@ -437,7 +437,7 @@ class ColumnMapRow
 class SkipColumnIndicator
 {
 	private final String display = ResourceMgr.getString("LabelDPDoNotCopyColumns");
-	
+
 	public SkipColumnIndicator()
 	{
 	}

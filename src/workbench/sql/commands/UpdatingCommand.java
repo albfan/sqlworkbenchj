@@ -10,7 +10,6 @@ import java.sql.SQLException;
 
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
-import workbench.exception.WbException;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -22,17 +21,17 @@ public class UpdatingCommand extends SqlCommand
 {
 	public static final SqlCommand UPDATE = new UpdatingCommand("UPDATE");
 	public static final SqlCommand DELETE = new UpdatingCommand("DELETE");
-	public static final SqlCommand INSERT = new UpdatingCommand("INSERT");	
-	
+	public static final SqlCommand INSERT = new UpdatingCommand("INSERT");
+
 	private String verb;
-	
+
 	public UpdatingCommand(String aVerb)
 	{
 		this.verb = aVerb;
 	}
-	
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql) 
-		throws SQLException, WbException
+
+	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		try
@@ -45,7 +44,7 @@ public class UpdatingCommand extends SqlCommand
 			this.appendSuccessMessage(result);
 			result.addMessage(updateCount + " " + ResourceMgr.getString("MsgRowsAffected"));
 			if (hasWarnings) result.addMessage(warnings.toString());
-			
+
 			result.setSuccess();
 		}
 		catch (Exception e)
@@ -61,10 +60,10 @@ public class UpdatingCommand extends SqlCommand
 		}
 		return result;
 	}
-	
+
 	public String getVerb()
 	{
 		return verb;
 	}
-	
+
 }

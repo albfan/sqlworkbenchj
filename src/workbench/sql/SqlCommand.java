@@ -13,7 +13,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
-import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
@@ -30,34 +29,35 @@ public class SqlCommand
 	protected Statement currentStatement;
 	protected WbConnection currentConnection;
 	protected boolean isCancelled = false;
+	private boolean consumerWaiting = false;
 	protected RowActionMonitor rowMonitor;
-	
+
 	/**
-	 *	Checks if the verb of the given SQL script 
+	 *	Checks if the verb of the given SQL script
 	 *	is the same as registered for this SQL command.
 	 */
 	protected boolean checkVerb(String aSql)
-		throws WbException
+		throws Exception
 	{
 		LineTokenizer tok = new LineTokenizer(aSql, " ");
-		String verb = tok.nextToken(); 
+		String verb = tok.nextToken();
 		String thisVerb = this.getVerb();
-		if (!thisVerb.equalsIgnoreCase(verb)) throw new WbException("Syntax error! " + thisVerb + " expected");
+		if (!thisVerb.equalsIgnoreCase(verb)) throw new Exception("Syntax error! " + thisVerb + " expected");
 		return true;
 	}
-	
+
 	public void setRowMonitor(RowActionMonitor monitor)
 	{
 		this.rowMonitor = monitor;
 	}
-	
+
 	protected void appendSuccessMessage(StatementRunnerResult result)
 	{
 		result.addMessage(this.getVerb() + " " + ResourceMgr.getString("MsgKnownStatementOK"));
 	}
-	
+
 	/**
-	 *	Append any warnings from the given Statement and Connection to the given 
+	 *	Append any warnings from the given Statement and Connection to the given
 	 *	StringBuffer. If the connection is a connection to Oracle
 	 *	then any messages written with dbms_output are appended as well
 	 *  This behaviour is then similar to MS SQL Server where any messages
@@ -67,15 +67,15 @@ public class SqlCommand
 	{
 		try
 		{
-			// some DBMS return warnings on the connection rather then on the 
+			// some DBMS return warnings on the connection rather then on the
 			// statement. We need to check them here as well. Then some of
-			// the DBMS return the same warnings on the Statement AND the 
-			// Connection object. 
+			// the DBMS return the same warnings on the Statement AND the
+			// Connection object.
 			// For this we keep a list of warnings which have been added
 			// from the statement. They will not be added when the Warnings from
 			// the connection are retrieved
 			ArrayList added = new ArrayList();
-			
+
 			String s = null;
 			SQLWarning warn = aStmt.getWarnings();
 			boolean hasWarnings = warn != null;
@@ -98,7 +98,7 @@ public class SqlCommand
 				if (!s.endsWith("\n")) msg.append("\n");
 				hasWarnings = true;
 			}
-			
+
 			warn = aConn.getSqlConnection().getWarnings();
 			hasWarnings = hasWarnings || (warn != null);
 			while (warn != null)
@@ -111,11 +111,11 @@ public class SqlCommand
 				}
 				warn = warn.getNextWarning();
 			}
-			
+
 			// make sure the warnings are cleared from both objects!
 			aStmt.clearWarnings();
 			aConn.clearWarnings();
-			
+
 			return hasWarnings;
 		}
 		catch (Exception e)
@@ -123,7 +123,7 @@ public class SqlCommand
 			return false;
 		}
 	}
-	
+
 	public void cancel()
 		throws SQLException
 	{
@@ -151,23 +151,23 @@ public class SqlCommand
 		this.currentStatement = null;
 		this.isCancelled = false;
 	}
-	
+
 	/**
-	 *	Should be overridden by a specialised SqlCommand 
+	 *	Should be overridden by a specialised SqlCommand
 	 */
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql) 	
-		throws SQLException, WbException
+	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+		throws SQLException, Exception
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		ResultSet rs = null;
 		this.currentStatement = aConnection.createStatement();
 		this.currentConnection = aConnection;
 		this.isCancelled = false;
-		
+
 		try
 		{
 			boolean hasResult = this.currentStatement.execute(aSql);
-			
+
 			// Postgres obviously clears the warnings if the getMoreResults()
 			// and stuff is called, so we add the warnings right at the beginning
 			// this shouldn't affect other DBMSs (hopefully :-)
@@ -180,12 +180,12 @@ public class SqlCommand
 
 			// fallback hack for JDBC drivers which do not reset the value
 			// returned by getUpdateCount() after it is called
-			int maxLoops = 25; 
+			int maxLoops = 25;
 			int loopcounter = 0;
 
 			DataStore ds = null;
-			
-			if (hasResult) 
+
+			if (hasResult)
 			{
 				rs = this.currentStatement.getResultSet();
 				ds = new DataStore(rs, aConnection);
@@ -196,13 +196,13 @@ public class SqlCommand
 				updateCount = this.currentStatement.getUpdateCount();
 				//result.addUpdateCount(updateCount);
 				if (updateCount > -1)
-				{	
+				{
 					result.addMessage(updateCount + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
 				}
 			}
 
-			boolean moreResults = false; 
-			
+			boolean moreResults = false;
+
 			moreResults = this.currentStatement.getMoreResults();
 
 			//while ( (moreResults || (updateCount != -1 && zeroUpdates < 2) ) && (loopcounter < maxLoops) )
@@ -226,7 +226,7 @@ public class SqlCommand
 				*/
 				loopcounter ++;
 				if (loopcounter > maxLoops) break;
-			}						
+			}
 			result.setSuccess();
 		}
 		catch (Exception e)
@@ -257,15 +257,30 @@ public class SqlCommand
 	}
 
 	/**
-	 *	Should be overridden by a specialised SqlCommand 
+	 *	Should be overridden by a specialised SqlCommand
 	 */
 	public String getVerb()
 	{
-		return StringUtil.EMPTY_STRING; 
+		return StringUtil.EMPTY_STRING;
+	}
+
+	/**
+	 * 	The commands producing a result set need this flag.
+	 * 	If no consumer is waiting, the can directly produce a DataStore
+	 * 	for the result.
+	 */
+	public void setConsumerWaiting(boolean flag)
+	{
+		this.consumerWaiting = flag;
+	}
+
+	public boolean getConsumerWaiting()
+	{
+		return this.consumerWaiting;
 	}
 
 	public void setMaxRows(int maxRows) { }
 	public boolean isResultSetConsumer() { return false; }
 	public void consumeResult(StatementRunnerResult aResult) {}
-	
+
 }

@@ -10,8 +10,6 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
 
-import workbench.exception.WbException;
-
 /**
  *
  * @author  workbench@kellerer.org
@@ -22,26 +20,26 @@ public class ObjectScripter
 	{
 		void currentTable(String aTableName);
 	}
-	
+
 	private Map objectList;
 	private DbMetadata meta;
 	private StringBuffer script;
 	private ScriptGenerationMonitor progressMonitor;
-	
+
 	public ObjectScripter(Map objectList, WbConnection aConnection)
 	{
 		this.objectList = objectList;
 		this.meta = aConnection.getMetadata();
 	}
-	
+
 	public void setProgressMonitor(ScriptGenerationMonitor aMonitor)
 	{
 		this.progressMonitor = aMonitor;
 	}
-	
+
 	public String getScript()
 	{
-		if (this.script == null) 
+		if (this.script == null)
 		{
 			this.script = new StringBuffer(this.objectList.size() * 500);
 			this.appendObjectType("sequence");
@@ -51,7 +49,7 @@ public class ObjectScripter
 		}
 		return this.script.toString();
 	}
-	
+
 	private void appendObjectType(String typeFilter)
 	{
 		Iterator itr = this.objectList.entrySet().iterator();
@@ -102,7 +100,7 @@ public class ObjectScripter
 	}
 
 	private String getSynonymSource(String tableName)
-		throws SQLException, WbException
+		throws SQLException
 	{
 		String table = tableName;
 		String owner = null;
@@ -113,10 +111,10 @@ public class ObjectScripter
 			table = tableName.substring(pos + 1);
 		}
 		return this.meta.getSynonymSource(owner, table);
-	}	
-	
+	}
+
 	private String getTableScript(String tableName)
-		throws SQLException, WbException
+		throws SQLException
 	{
 		String table = tableName;
 		String owner = null;
@@ -129,9 +127,9 @@ public class ObjectScripter
 		String source = this.meta.getTableSource(null, owner, table, true);
 		return source;
 	}
-	
+
 	private String getViewSource(String viewName)
-		throws SQLException, WbException
+		throws SQLException
 	{
 		String view = viewName;
 		String owner = null;
@@ -143,6 +141,5 @@ public class ObjectScripter
 		}
 		return this.meta.getExtendedViewSource(null, owner, view, false);
 	}
-	
-}
 
+}

@@ -7,7 +7,6 @@ import java.util.StringTokenizer;
 
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
-import workbench.exception.WbException;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -50,7 +49,7 @@ public class DdlCommand extends SqlCommand
 	}
 
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
-		throws SQLException, WbException
+		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		try

@@ -26,7 +26,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import workbench.WbManager;
-import workbench.exception.WbException;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.FormatSqlAction;
@@ -134,7 +133,7 @@ public class MacroManagerGui
 	}
 
 	public void deleteItem()
-		throws WbException
+		throws Exception
 	{
 		int index = this.macroList.getSelectedIndex();
 		if (index < 0) return;
@@ -159,7 +158,7 @@ public class MacroManagerGui
 	 *	Create a new profile. This will only be
 	 *	created in the ListModel.
 	 */
-	public void newItem(boolean copyCurrent) throws WbException
+	public void newItem(boolean copyCurrent) throws Exception
 	{
 		String key;
 		String text;
@@ -199,7 +198,7 @@ public class MacroManagerGui
 		});
 	}
 
-	public void saveItem() throws WbException
+	public void saveItem() throws Exception
 	{
 		int index = this.macroList.getSelectedIndex();
 		if (index >= 0)
@@ -277,14 +276,14 @@ public class MacroManagerGui
 		MacroEntry entry = (MacroEntry)this.model.getElementAt(this.lastIndex);
 		this.showMacro(entry);
 	}
-	
+
 	private void showMacro(MacroEntry entry)
 	{
 		this.currentEntry = entry;
 		this.macroNameField.setSourceObject(this.currentEntry, "name", entry.getName());
 		this.macroNameField.setImmediateUpdate(true);
 		this.macroEditor.setText(entry.getText());
-		this.macroEditor.setCaretPosition(0);	
+		this.macroEditor.setCaretPosition(0);
 	}
 
 	public void propertyChange(java.beans.PropertyChangeEvent evt)

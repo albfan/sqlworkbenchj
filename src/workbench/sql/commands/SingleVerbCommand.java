@@ -4,7 +4,6 @@ import java.sql.SQLException;
 
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
-import workbench.exception.WbException;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -17,16 +16,16 @@ public class SingleVerbCommand extends SqlCommand
 {
 	public static final SqlCommand COMMIT = new SingleVerbCommand("COMMIT");
 	public static final SqlCommand ROLLBACK = new SingleVerbCommand("ROLLBACK");
-	
+
 	private String verb;
 
 	public SingleVerbCommand(String aVerb)
 	{
 		this.verb = aVerb;
 	}
-	
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql) 
-		throws SQLException, WbException
+
+	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		try
@@ -47,7 +46,7 @@ public class SingleVerbCommand extends SqlCommand
 				this.currentStatement = aConnection.createStatement();
 				this.currentStatement.execute(aSql);
 			}
-			
+
 			result.addMessage(this.verb + " " + ResourceMgr.getString("MsgKnownStatementOK"));
 			StringBuffer warnings = new StringBuffer();
 			if (this.appendWarnings(aConnection, this.currentStatement , warnings))
@@ -67,13 +66,13 @@ public class SingleVerbCommand extends SqlCommand
 		{
 			this.done();
 		}
-		
+
 		return result;
 	}
-	
+
 	public String getVerb()
 	{
 		return verb;
 	}
-	
+
 }

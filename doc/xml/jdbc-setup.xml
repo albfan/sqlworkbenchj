@@ -13,22 +13,27 @@
       <itemizedlist><listitem><para>the driver&apos;s class name</para></listitem>
       <listitem><para>the library where to find the classes</para></listitem></itemizedlist>
 
-			<para>The name of the library has to contain the full path to the driver&apos;s jar file, so that
-			&wb-productname; can find it. If a driver requires more than one library,
-			select all necessary libraries in the file open dialog, or enter all the
-			filenames separated by a semicolon.</para>
+      <para>The name of the library has to contain the full path to the driver&apos;s jar file, so that
+      &wb-productname; can find it. If a driver requires more than one library,
+      select all necessary libraries in the file open dialog, or enter all the
+      filenames separated by a semicolon. There is no need </para>
 
-			<note><para>You do not need to add the jar file containing the driver to the
-			classpath of the JVM! This is handled by the application automatically.</para>
-			</note>
+      <note><para>When using the JDBC-ODBC bridge you do not need to specify a library as
+      the necessary drivers are already part of the Java runtime.</para>
 
-			<para>You can assign a sample URL to each driver, which will be put into
-			the URL property of the profile, when the driver class is selected.</para>
+      <!--<para>When you specify a library, you do not need to add it to the
+      classpath of the JVM (e.g. using a startup script for &wb-productname;). 
+      This is handled by the application automatically.</para>-->
+      </note>
 
-			<para>&wb-productname; comes with some sample URLs pre-configured.
-			Some of these sample URLs use brackets to indicate a parameters that need
-			to be replaced with the actual value for your connection: (servername)</para>
-			<para>In this case the entire sequence including the brackets need to be replaced with the actual servername.</para>
+      <para>You can assign a sample URL to each driver, which will be put into
+      the URL property of the profile, when the driver class is selected.</para>
+
+      <para>&wb-productname; comes with some sample URLs pre-configured.
+      Some of these sample URLs use brackets to indicate a parameters that need
+      to be replaced with the actual value for your connection: (servername)</para>
+      <para>In this case the entire sequence including the brackets need to be replaced with the actual servername.</para>
+      
     </section>
 
     <section id="jdbc-drivers">
@@ -56,96 +61,96 @@
             <entry> <para>Oracle</para> </entry>
             <entry> <para>oracle.jdbc.OracleDriver</para> </entry>
             <entry>
-										<simplelist columns="1">
-											<member>ojdbc4.jar (JDBC 2.x, for JDK 1.4)</member>
-                    	<member><ulink url="http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html"/></member>
-										</simplelist>
+                    <simplelist columns="1">
+                      <member>ojdbc4.jar (JDBC 2.x, for JDK 1.4)</member>
+                      <member><ulink url="http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html"/></member>
+                    </simplelist>
             </entry>
           </row>
           <row>
             <entry> <para>PostgreSQL</para> </entry>
             <entry> <para>org.postgresql.Driver</para> </entry>
             <entry> <simplelist columns="1">
-										<member>pg73jdbc3.jar (exact name depends on PostgreSQL version)</member>
+                    <member>pg73jdbc3.jar (exact name depends on PostgreSQL version)</member>
                     <member><ulink url="http://jdbc.postgresql.org"/></member>
-										</simplelist>
+                    </simplelist>
             </entry>
           </row>
           <row>
             <entry> <para>HSQLDB</para> </entry>
             <entry> <para>org.hsqldb.jdbcDriver</para> </entry>
             <entry>
-							<simplelist columns="1">
-								<member>hsqldb.jar</member>
+              <simplelist columns="1">
+                <member>hsqldb.jar</member>
                 <member><ulink url="http://hsqldb.sourceforge.net"/></member>
-							</simplelist>
-						</entry>
+              </simplelist>
+            </entry>
           </row>
           <row>
             <entry> <para>Firebird SQL</para> </entry>
             <entry> <para>org.firebirdsql.jdbc.FBDriver</para> </entry>
             <entry>
-							<simplelist columns="1">
-								<member>firebirdsql-full.jar</member>
+              <simplelist columns="1">
+                <member>firebirdsql-full.jar</member>
                 <member><ulink url="http://firebird.sourceforge.net"/></member>
-							</simplelist>
-						</entry>
+              </simplelist>
+            </entry>
           </row>
           <row>
             <entry> <para>FirstSQL/J</para> </entry>
             <entry> <para>COM.FirstSQL.Dbcp.DbcpDriver</para> </entry>
             <entry>
-							<simplelist columns="1">
-								<member>fsjclient.jar</member>
+              <simplelist columns="1">
+                <member>fsjclient.jar</member>
                 <member><ulink url="http://www.firstsql.com"/></member>
-							</simplelist>
-						</entry>
+              </simplelist>
+            </entry>
           </row>
           <row>
             <entry> <para>ThinkSQL</para> </entry>
             <entry> <para>uk.co.thinksql.ThinkSQLDriver</para> </entry>
             <entry>
-							<simplelist columns="1">
-								<member>ThinkSQLDriver.jar</member>
+              <simplelist columns="1">
+                <member>ThinkSQLDriver.jar</member>
                 <member><ulink url="http://www.thinksql.co.uk"/></member>
-							</simplelist>
-						</entry>
+              </simplelist>
+            </entry>
           </row>
           <row>
             <entry> <para>SQL Server 2000</para> </entry>
             <entry> <para>com.microsoft.jdbc.sqlserver.SQLServerDriver</para></entry>
             <entry> <simplelist columns="1">
-										<member>msbase.jar;mssqlserver.jar;msutil.jar</member>
+                    <member>msbase.jar;mssqlserver.jar;msutil.jar</member>
                     <member><ulink url="http://www.microsoft.com/sql/default.asp"/></member>
-										</simplelist>
-						</entry>
+                    </simplelist>
+            </entry>
           </row>
           <row>
             <entry> <para>SQL Server </para> </entry>
             <entry> <para>net.sourceforge.jtds.jdbc.Driver</para> </entry>
             <entry>
-							<simplelist columns="1">
-								<member><ulink url="http://jtds.sourceforge.net"/></member>
-							</simplelist>
-						</entry>
+              <simplelist columns="1">
+                <member><ulink url="http://jtds.sourceforge.net"/></member>
+              </simplelist>
+            </entry>
           </row>
           <row>
             <entry> <para>MySQL</para> </entry>
             <entry> <para>com.mysql.jdbc.Driver</para> </entry>
             <entry>
-							<simplelist columns="1">
-								<member>mysql-jdbc.jar</member>
+              <simplelist columns="1">
+                <member>mysql-jdbc.jar</member>
                 <member><ulink url="http://www.mysql.com"/></member>
-							</simplelist>
-						</entry>
+              </simplelist>
+            </entry>
           </row>
           <row>
             <entry> <para>ODBC Bridge</para></entry>
             <entry> <para>sun.jdbc.odbc.JdbcOdbcDriver</para> </entry>
             <entry><simplelist columns="1">
-							<member>Included in the JDK</member>
-							</simplelist>
-						</entry>
+              <member>Included in the JDK</member>
+              </simplelist>
+            </entry>
           </row>
         </tbody>
       </tgroup>

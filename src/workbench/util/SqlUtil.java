@@ -67,8 +67,8 @@ public class SqlUtil
 		}
 		if (fromPos == -1) return Collections.EMPTY_LIST;
 		int fromEnd = aSql.indexOf(" WHERE ", fromPos);
-		if (fromEnd == -1) fromEnd = aSql.indexOf(" ORDER ", fromPos);
 		if (fromEnd == -1) fromEnd = aSql.indexOf(" GROUP ", fromPos);
+		if (fromEnd == -1) fromEnd = aSql.indexOf(" ORDER ", fromPos);
 		if (fromEnd == -1) fromEnd = aSql.length();
 		String fromList = orgSql.substring(fromPos + FROM.length(), fromEnd);
 		StringTokenizer tok = new StringTokenizer(fromList, ",");

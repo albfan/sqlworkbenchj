@@ -27,21 +27,19 @@ public class TableDependency
 	private String schema;
 	private DependencyNode tableRoot;
 	private DbMetadata wbMetadata;
-	private DatabaseMetaData dbMetadata;
 	private ArrayList leafs;
-	
+
 	public TableDependency()
 	{
 	}
-	
+
 	public void setConnection(WbConnection aConn)
 		throws SQLException
 	{
 		this.connection = aConn;
 		this.wbMetadata = this.connection.getMetadata();
-		this.dbMetadata = this.connection.getSqlConnection().getMetaData();
 	}
-	
+
 	public void setTableName(String aCatalog, String aSchema, String aTable)
 	{
 		this.tablename = this.wbMetadata.adjustObjectname(aTable);
@@ -61,10 +59,10 @@ public class TableDependency
 		this.tableRoot = new DependencyNode(this.catalog, this.schema, this.tablename);
 		this.readTree(this.tableRoot, exportedKeys);
 	}
-	
+
 	/**
 	 *	Create the dependency tree.
-	 *	If treeParent is passed as null, the TreeNode for a display in a JTree 
+	 *	If treeParent is passed as null, the TreeNode for a display in a JTree
 	 *	are not created.
 	 */
 	private int readTree(DependencyNode parent, boolean exportedKeys)
@@ -72,7 +70,7 @@ public class TableDependency
 		String parentcatalog = parent.getCatalog();
 		String parentschema = parent.getSchema();
 		String parenttable = parent.getTable();
-		
+
 		/* for debugging !
 		int indent = 0;
 		DependencyNode n = parent.getParent();
@@ -84,7 +82,7 @@ public class TableDependency
 		StringBuffer indentString = new StringBuffer(indent * 2);
 		for (int i=0; i < indent; i++) indentString.append("  ");
 		*/
-		
+
 		try
 		{
 			ResultSet rs = null;
@@ -96,7 +94,7 @@ public class TableDependency
 			int tablecolumncol;
 			int parentcolumncol;
 			int parenttablecol;
-			
+
 			if (exportedKeys)
 			{
 				catalogcol = 4;
@@ -119,7 +117,7 @@ public class TableDependency
 				parenttablecol = 6;
 				ds = this.wbMetadata.getImportedKeys(parentcatalog, parentschema, parenttable);
 			}
-			
+
 			DependencyNode child = null;
 			String currentfk = null;
 			String currenttable = null;
@@ -139,12 +137,12 @@ public class TableDependency
 				schema = ds.getValueAsString(i, schemacol);
 				table = ds.getValueAsString(i, tablecol);
         fkname = ds.getValueAsString(i, fknamecol);
-				
+
 				child = parent.addChild(catalog, schema, table, fkname);
 				String tablecolumn = ds.getValueAsString(i, tablecolumncol); // the column in "table" referencing the other table
-				String parentcolumn = ds.getValueAsString(i, parentcolumncol); // the column in the parent table 
+				String parentcolumn = ds.getValueAsString(i, parentcolumncol); // the column in the parent table
 				String parenttable2 = ds.getValueAsString(i, parenttablecol);
-				
+
 				int update = ds.getValueAsInt(i, 9, -1);
 				int delete = ds.getValueAsInt(i, 10, -1);
 				child.setUpdateAction(this.wbMetadata.getRuleTypeDisplay(update));
@@ -177,5 +175,5 @@ public class TableDependency
 
 	public List getLeafs() { return this.leafs; }
   public DependencyNode getRootNode() { return this.tableRoot; }
-  
+
 }

@@ -203,6 +203,8 @@ public class ConnectionMgr
 	{
     DbDriver db = this.findRegisteredDriver(drvClassName);
 
+		LogMgr.logDebug("ConnectionMgr.findDriverByName()", "Searching for DriverClass=" + drvClassName);
+
 		if (db == null)
 		{
 			LogMgr.logWarning("ConnectionMgr.findDriver()", "Did not find a registered driver with classname = ["+drvClassName+"]");
@@ -299,6 +301,8 @@ public class ConnectionMgr
 	public static String getDisplayString(WbConnection con)
 	{
 		String displayString = null;
+		String model = WbManager.getSettings().getConnectionDisplayModel();
+		if (model != null && model.length() > 0) return getDisplayStringFromModel(con);
 
 		try
 		{
@@ -326,12 +330,35 @@ public class ConnectionMgr
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("ConnectionMgr", "Could not retrieve connection information", e);
+			LogMgr.logError("ConnectionMgr.getDisplayString()", "Could not retrieve connection information", e);
 			displayString = "n/a";
 		}
 		return displayString;
 	}
 
+	private static String getDisplayStringFromModel(WbConnection con)
+	{
+		String displayString = WbManager.getSettings().getConnectionDisplayModel();
+		try
+		{
+			DatabaseMetaData data = con.getSqlConnection().getMetaData();
+			displayString = displayString.replaceAll("%username%", data.getUserName());
+
+			String catalog = con.getMetadata().getCurrentCatalog();
+			displayString = displayString.replaceAll("%catalog%", catalog == null ? "" : catalog);
+
+			displayString = displayString.replaceAll("%url%", data.getURL());
+			String prof = con.getProfile().getName();
+			displayString = displayString.replaceAll("%profile%", prof == null ? "" : prof);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("ConnectionMgr.getDisplayStringFromModel()", "Could not retrieve connection information", e);
+			displayString = "n/a";
+		}
+		return displayString;
+
+	}
 	/**
 	 *	Disconnects all connections
 	 */
@@ -392,6 +419,7 @@ public class ConnectionMgr
 		try
 		{
 			Statement stmt = con.createStatement();
+			LogMgr.logInfo("ConnectionMgr.disconnect()", "Local HSQL connection detected. Sending SHUTDOWN to the engine before disconnecting()");
 			stmt.executeUpdate("SHUTDOWN");
 		}
 		catch (Exception e)
@@ -538,6 +566,8 @@ public class ConnectionMgr
 		}
 		else if (result instanceof Object[])
 		{
+			// This is to support the very first version of the profile storage
+			// probably obsolete by know, but you never know...
 			Object[] l = (Object[])result;
 			this.profiles = new HashMap(20);
 			for (int i=0; i < l.length; i++)

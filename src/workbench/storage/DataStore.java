@@ -52,6 +52,7 @@ import workbench.util.WbStringTokenizer;
 public class DataStore
 {
 	// Needed for the status display in the table model
+	// as RowData is only package visible. Thus we need to provide the objects here
 	public static final Integer ROW_MODIFIED = new Integer(RowData.MODIFIED);
 	public static final Integer ROW_NEW = new Integer(RowData.NEW);
 	public static final Integer ROW_ORIGINAL = new Integer(RowData.NOT_MODIFIED);
@@ -109,6 +110,7 @@ public class DataStore
 	/**
 	 *	Create a DataStore which is not based on a result set
 	 *	and contains the columns defined in the given array
+	 *	The column types need to be SQL types from java.sql.Types
 	 */
 	public DataStore(String[] aColNames, int[] colTypes, int[] colSizes)
 	{
@@ -146,19 +148,36 @@ public class DataStore
 	}
 
 	/**
-	 *	Create a DataStore based on the given ResultSet but do not
-	 *	add the data yet
+	 *	Create a DataStore based on the given ResultSet. 
+	 *	@param aResult the result set to use
+	 *  @param readData if true the data from the ResultSet should be read into memory, otherwise only MetaData information is read
+	 *  @param maxRows limit number of rows to maxRows if the JDBC driver does not already limit them 
 	 */
 	public DataStore(ResultSet aResult, boolean readData, int maxRows) throws SQLException
 	{
 		this(aResult, readData, null, maxRows);
-
 	}
+	
+	/**
+	 *	Create a DataStore based on the given ResultSet. 
+	 *	@param aResult the result set to use
+	 *  @param readData if true the data from the ResultSet should be read into memory, otherwise only MetaData information is read
+	 *  @param RowActionMonitor if not null, the loading process is displayed through this monitor
+	 */
 	public DataStore(ResultSet aResult, boolean readData, RowActionMonitor aMonitor)
 		throws SQLException
 	{
 		this(aResult, readData, aMonitor, -1);
 	}
+	
+	
+	/**
+	 *	Create a DataStore based on the given ResultSet. 
+	 *	@param aResult the result set to use
+	 *  @param readData if true the data from the ResultSet should be read into memory, otherwise only MetaData information is read
+	 *  @param RowActionMonitor if not null, the loading process is displayed through this monitor
+	 *  @param maxRows limit number of rows to maxRows if the JDBC driver does not already limit them 
+	 */
 	public DataStore(ResultSet aResult, boolean readData, RowActionMonitor aMonitor, int maxRows) throws SQLException
 	{
 		this.rowActionMonitor = aMonitor;
@@ -186,12 +205,12 @@ public class DataStore
 		this.initMetaData(metaData);
 		this.reset();
 	}
-
+	
 	public void setSourceConnection(WbConnection aConn)
 	{
 		this.originalConnection = aConn;
 	}
-
+	
 	public void setColumnSizes(int[] sizes)
 	{
 		if (sizes == null) return;
@@ -340,7 +359,7 @@ public class DataStore
 
 	/**
 	 *	Removes the row from the DataStore without putting
-	 *	it into the delete buffer. So now DELETE statement
+	 *	it into the delete buffer. So no DELETE statement
 	 *	will be generated for that row, when updating the
 	 *	DataStore.
 	 *	The internal modification state will not be modified.
@@ -350,6 +369,7 @@ public class DataStore
 	{
 		this.data.remove(aRow);
 	}
+	
 	/**
 	 *	Deletes the given row and saves it in the delete buffer
 	 *	in order to be able to generate a DELETE statement if
@@ -441,9 +461,9 @@ public class DataStore
 
 	public boolean useUpdateTableFromSql(String aSql)
 	{
-
 		return this.useUpdateTableFromSql(aSql, false);
 	}
+	
 	public boolean useUpdateTableFromSql(String aSql, boolean retrievePk)
 	{
 		this.updateTable = null;
@@ -499,6 +519,13 @@ public class DataStore
 		}
 	}
 
+	/**
+	 * Sets the table to be updated for this DataStore.
+	 * Upon setting the table, the column definition for the table
+	 * will be retrieved using {@link workbench.db.DbMetadata}
+	 * @param aTablename
+	 * @param aConn
+	 */
 	public void setUpdateTable(String aTablename, WbConnection aConn)
 	{
 		if (aTablename == null)
@@ -545,11 +572,20 @@ public class DataStore
 		}
 	}
 
+	/**
+	 * Returns the current table to be updated
+	 * @return The current update table
+	 */	
 	public String getUpdateTable()
 	{
 		return this.updateTable;
 	}
 
+	/**
+	 * Return the name of the given column
+	 * @param aColumn The index of the column in this DataStore. The first column index is 0
+	 * @return The name of the column
+	 */	
 	public String getColumnName(int aColumn)
 		throws IndexOutOfBoundsException
 	{
@@ -567,10 +603,13 @@ public class DataStore
 	{
 		RowData row = this.getRow(aRow);
 		return row.getValue(aColumn);
-		//return row.colData[aColumn]; //getValue(aColumn);
-		//return ((RowData)this.data.elementData[aRow]).colData[aColumn];
 	}
 
+	/**
+	 * Returns the value of the given row/column as a String.
+	 * The value's toString() method is used to convert the value to a String value.
+	 * @return Null if the column is null, or the column's value as a String
+	 */	
 	public String getValueAsString(int aRow, int aColumn)
 		throws IndexOutOfBoundsException
 	{
@@ -582,6 +621,20 @@ public class DataStore
       return value.toString();
 	}
 
+	/**
+	 * Return the column's value as a formatted String.
+	 * Especially for Date objects this is different then getValueAsString()
+	 * as a default formatter can be defined.
+	 * @param aRow The requested row
+	 * @param aColumn The column in aRow for which the value should be formatted
+	 * @return The formatted value as a String
+	 * @see #setDefaultDateFormatter(SimpleDateFormat)
+	 * @see #setDefaultTimestampFormatter(SimpleDateFormat)
+	 * @see #setDefaultNumberFormatter(SimpleDateFormat)
+	 * @see #setDefaultDateFormat(String)
+	 * @see #setDefaultTimestampFormat(String)
+	 * @see #setDefaultNumberFormat(String)
+	 */	
 	public String getValueAsFormattedString(int aRow, int aColumn)
 		throws IndexOutOfBoundsException
 	{
@@ -615,15 +668,26 @@ public class DataStore
 	}
 
 
+	/**
+	 * Return the value of a column as an int value.
+	 * If the object stored in the DataStore is an instance of Number
+	 * the intValue() of that object will be returned, otherwise the String value
+	 * of the column will be converted to an integer.
+	 * If it cannot be converted to an int, the default value will be returned
+	 * @param aRow The row
+	 * @param aColumn The column to be returned
+	 * @param aDefault The default value that will be returned if the the column's value cannot be converted to an int
+	 */	
 	public int getValueAsInt(int aRow, int aColumn, int aDefault)
 	{
 		RowData row = this.getRow(aRow);
 		Object value = row.getValue(aColumn);
     if (value == null || value instanceof NullValue)
+		{
       return aDefault;
+		}
     else if (value instanceof Number)
 		{
-      //return value.toString();
 			return ((Number)value).intValue();
 		}
 		else
@@ -634,6 +698,16 @@ public class DataStore
 		}
 	}
 
+	/**
+	 * Return the value of a column as an long value.
+	 * If the object stored in the DataStore is an instance of Number
+	 * the longValue() of that object will be returned, otherwise the String value
+	 * of the column will be converted to a long.
+	 * If it cannot be converted to an long, the default value will be returned
+	 * @param aRow The row
+	 * @param aColumn The column to be returned
+	 * @param aDefault The default value that will be returned if the the column's value cannot be converted to a long
+	 */	
 	public long getValueAsLong(int aRow, int aColumn, long aDefault)
 	{
 		RowData row = this.getRow(aRow);
@@ -653,6 +727,12 @@ public class DataStore
 		}
 	}
 
+	/**
+	 * Set the value for the given column. This will change the internal state of the DataStore to modified.
+	 * @param aRow
+	 * @param aColumn
+	 * @param aValue The value to be set
+	 */	
 	public void setValue(int aRow, int aColumn, Object aValue)
 		throws IndexOutOfBoundsException
 	{
@@ -672,24 +752,45 @@ public class DataStore
 		this.modified = row.isModified();
 	}
 
+	/**
+	 * Set the given column to null. This is the same as calling setValue(aRow, aColumn, null).
+	 * @param aRow
+	 * @param aColumn
+	 * @see #setValue(int, int, Object)
+	 */	
 	public void setNull(int aRow, int aColumn)
 	{
 		NullValue nul = NullValue.getInstance(this.columnTypes[aColumn]);
 		this.setValue(aRow, aColumn, nul);
 	}
 
+	/**
+	 * Returns the index of the column with the given name.
+	 * @param aName The column's name to search for
+	 * @return The column's index (first column starts at 0)
+	 */	
 	public int getColumnIndex(String aName)
 		throws SQLException
 	{
 		return this.findColumn(aName);
 	}
 
+	/**
+	 * Returns true if the given row has been modified.
+	 * A new row is considered modified only if setValue() has been called at least once.
+	 * @param aRow The row to check
+	 */	
 	public boolean isRowModified(int aRow)
 	{
 		RowData row = this.getRow(aRow);
 		return (row.isNew() && row.isModified() || row.isModified());
 	}
 
+	/**
+	 * Restore the original values as retrieved from the database.
+	 * This will have no effect if {@link #isModified()} returns <code>false</code>
+	 * @see #setValue(int, int, Object)
+	 */	
 	public void restoreOriginalValues()
 	{
 		RowData row;
@@ -988,7 +1089,17 @@ public class DataStore
 				RowData row = new RowData(this.colCount);
 				for (int i=0; i < this.colCount; i++)
 				{
-					Object value = aResultSet.getObject(i + 1);
+					Object value = null;
+					try
+					{
+						value = aResultSet.getObject(i + 1);
+					}
+					catch (SQLException e)
+					{
+						LogMgr.logError("DataStore.initData", "Error when retrieving column " + this.getColumnName(i) + " for row " + rowCount, e);
+						value = null;
+					}
+
 					if (value == null)// || aResultSet.wasNull() )
 					{
 						row.setValue(i, NullValue.getInstance(this.columnTypes[i]));
@@ -1047,16 +1158,23 @@ public class DataStore
 		return true;
 	}
 
-	public StringBuffer getMetaDataAsXml()
-	{
-		return this.getMetaDataAsXml(null);
-	}
-
 	public StringBuffer getXmlStart()
 	{
 		return this.getXmlStart("UTF-8");
 	}
 
+	/**
+	 *	Return the opening root xml tag for the whole DataStore.
+	 * A valid XML document can be created with <br>
+	 * {@link #getXmlStart()} <br>
+	 * {@link #getMetaDataAsXml(String)} <br>
+	 * Call {@link #getRowDataAsXml(int)} for each row <br>
+	 * {@link #getXmlEnd()} <br>
+	 *
+	 * @see #getMetaDataAsXml(String)
+	 * @see #getDataAsXml()
+	 * @see #getXmlEnd()
+	 */
 	public StringBuffer getXmlStart(String encoding)
 	{
 		StringBuffer xml = new StringBuffer(1000 + colCount * 50);
@@ -1071,6 +1189,18 @@ public class DataStore
 		return xml;
 	}
 
+	/**
+	 *	Return the closing root xml tag for the whole DataStore.
+	 * A valid XML document can be created with 
+	 * {@link #getXmlStart()}
+	 * {@link #getMetaDataAsXml()}
+	 * Call {@link #getRowDataAsXml()} for each row
+	 * {@link #getXmlEnd()}
+	 *
+	 * @see #getXmlStart()
+	 * @see #getMetaDataAsXml(String)
+	 * @see getDataAsXml()
+	 */
 	public StringBuffer getXmlEnd()
 	{
 		StringBuffer xml = new StringBuffer(100);
@@ -1081,6 +1211,24 @@ public class DataStore
 		return xml;
 	}
 
+	public StringBuffer getMetaDataAsXml()
+	{
+		return this.getMetaDataAsXml(null);
+	}
+
+	/**
+	 * Return the metadata for this DataStore as an XML definition.
+	 * A valid XML document can be created with <br>
+	 * {@link #getXmlStart()} <br>
+	 * {@link #getMetaDataAsXml()} <br>
+	 * Call {@link #getRowDataAsXml(int)} for each row <br>
+	 * {@link #getXmlEnd()} <br>
+	 *
+	 * @see #getDataAsXml()
+	 * @see #getXmlStart()
+	 * @see #getXmlEnd()
+	 * @param anIndent Defines an indention to be used when creating the XML string
+	 */
 	public StringBuffer getMetaDataAsXml(String anIndent)
 	{
 		boolean indent = (anIndent != null && anIndent.length() > 0);
@@ -1299,6 +1447,19 @@ public class DataStore
 		return result;
 	}
 
+	/** 
+	 * Return the complete data of this DataStore as an XML document.
+	 * This is equivalent to calling:<br>
+	 * {@link #getXmlStart()} <br>
+	 * {@link #getMetaDataAsXml(String)} <br>
+	 * Call {@link #getRowDataAsXml(int)} for each row <br>
+	 * {@link #getXmlEnd()} <br>
+	 *
+	 * @see #getXmlStart()
+	 * @see #getMetaDataAsXml(String)
+	 * @see #getXmlEnd()
+	 * @see #getRowDataAsXml(int)
+	 */
 	public String getDataAsXml()
 	{
 		int count = this.getRowCount();
@@ -1334,16 +1495,42 @@ public class DataStore
 		pw.write(this.getXmlEnd().toString());
 	}
 
+	/**
+	 * Returns the data contained in the given row as an XML tag.
+	 * The display row index will be on greater then the internal one.
+	 * The XML will not be indented
+	 * @param aRow the internal row number for which the XML data should be returned (starting with 0)
+	 * 
+	 * @return a StringBuffer with a single &lt;row-data&gt; tag 
+	 * @see #getRowDataAsXml(int, String)
+	 * @see #getRowDataAsXml(int, String, int)
+	 */
 	public StringBuffer getRowDataAsXml(int aRow)
 	{
 		return this.getRowDataAsXml(aRow, null);
 	}
 
+	/**
+	 * Returns the data contained in the given row as an XML tag.
+	 * The display row index will be on greater then the internal one.
+	 * @param aRow the internal row number for which the XML data should be returned (starting with 0)
+	 * @param anIndent a String which is used to define the base indention for the XML 
+	 * 
+	 * @return a StringBuffer with a single &lt;row-data&gt; tag 
+	 * @see #getRowDataAsXml(int, String, int)
+	 */
 	public StringBuffer getRowDataAsXml(int aRow, String anIndent)
 	{
 		return this.getRowDataAsXml(aRow, anIndent, aRow + 1);
 	}
 
+	/**
+	 * Returns the data contained in the given row as an XML tag.
+	 * @param aRow the internal row number for which the XML data should be returned (starting with 0)
+	 * @param anIndent a String which is used to define the base indention for the XML 
+	 * @param displayRowIndex the actual row index to be written into the attribute row-num
+	 * @return a StringBuffer with a single &lt;row-data&gt; tag 
+	 */
 	public StringBuffer getRowDataAsXml(int aRow, String anIndent, int displayRowIndex)
 	{
 		boolean indent = (anIndent != null && anIndent.length() > 0);
@@ -1472,6 +1659,14 @@ public class DataStore
 		html.write("</table>\n");
 	}
 
+	/**
+	 *	Returns true if the current data can be converted to SQL INSERT statements.
+	 *	The data can be saved as SQL INSERTs if an update table is defined. 
+	 *	If no update table is defined, then this method will call {@link #checkUpdateTable()}
+	 *  and try to determine the table from the used SQL statement.
+	 *
+	 *  @return true if an update table is defined
+	 */
 	public boolean canSaveAsSqlInsert()
 	{
 		if (this.updateTable == null)
@@ -1481,16 +1676,57 @@ public class DataStore
 	}
 
 	// =========== SQL Insert generation ================
+	
+	/**
+	 * Returns the given row as an INSERT statement.
+	 * \n will be used as the line terminator
+	 * @param aRow the row to be returned
+	 * @param aConn the connection object to be used to retrieve MetaData information
+	 * @return a StringBuffer with a single INSERT statement.
+	 * @see #getRowDataAsSqlInsert(int, String, WbConnection)
+	 */
 	public StringBuffer getRowDataAsSqlInsert(int aRow, WbConnection aConn)
 	{
 		return this.getRowDataAsSqlInsert(aRow, "\n", aConn);
 	}
 
+	/**
+	 * Returns the given row as an INSERT statement.
+	 * 
+	 * @param aRow the row to be returned
+	 * @param aLineTerminator the line terminator to be used
+	 * @param aConn the connection object to be used to retrieve MetaData information
+	 * @return a StringBuffer with a single INSERT statement.
+	 * @see #getRowDataAsSqlInsert(int, WbConnection)
+	 * @see #getRowDataAsSqlInsert(int, String, WbConnection, String, String)
+	 */
 	public StringBuffer getRowDataAsSqlInsert(int aRow, String aLineTerminator, WbConnection aConn)
 	{
 		return this.getRowDataAsSqlInsert(aRow, aLineTerminator, aConn, null, null);
 	}
 
+	/**
+	 * Returns the given row as an INSERT statement.
+	 * If aCharFunc and aConcatString are not null, then all non-printable characters
+	 * in character data are replaced with a call to the passed function. <br>
+	 * Example:<br>
+	 * A character column contains a carriage return character (ASCII 13) and 
+	 * aCharFunc is passed as "CHR" and aConcatString is passed as "||". The generated
+	 * SQL will look like this: <br>
+	 * <code>
+	 * INSERT INTO table (col1, character_column) 
+	 * VALUES
+	 * (1, "Hello, "||chr(13)||"world");
+	 * </code> 
+	 * @param aRow the row to be returned
+	 * @param aLineTerminator the line terminator to be used
+	 * @param aConn the connection object to be used to retrieve MetaData information
+	 * @param aCharFunc the SQL function to be used for non printable characters
+	 * @param aConcatString the operator to be used for string concatenation
+	 * @return a StringBuffer with a single INSERT statement.
+	 * @see #getRowDataAsSqlInsert(int, WbConnection)
+	 * @see #getRowDataAsSqlInsert(int, String, WbConnection)
+	 */
 	public StringBuffer getRowDataAsSqlInsert(int aRow, String aLineTerminator, WbConnection aConn, String aCharFunc, String aConcatString)
 	{
 		if (!this.canSaveAsSqlInsert()) return null;
@@ -1567,11 +1803,16 @@ public class DataStore
 	public String getDataAsSqlUpdate(String aLineTerminator)
 		throws Exception, SQLException
 	{
+		return this.getDataAsSqlUpdate(aLineTerminator, null, null);
+	}
+
+	public String getDataAsSqlUpdate(String aLineTerminator, String aCharFunc, String aConcatString)
+	{
 		if (!this.canSaveAsSqlInsert()) return "";
 		StringWriter script = new StringWriter(this.getRowCount() * 150);
 		try
 		{
-			this.writeDataAsSqlUpdate(script, aLineTerminator);
+			this.writeDataAsSqlUpdate(script, aLineTerminator, aCharFunc, aConcatString);
 		}
 		catch (Exception e)
 		{
@@ -1580,7 +1821,7 @@ public class DataStore
 		}
 		return script.toString();
 	}
-
+	
 	public void writeDataAsSqlUpdate(Writer out, String aLineTerminator)
 		throws IOException
 	{
@@ -1638,6 +1879,26 @@ public class DataStore
 		return this.getRowDataAsSqlUpdate(aRow, aLineTerminator, aConn, null, null);
 	}
 
+	/**
+	 * Returns the given row as an UPDATE statement.
+	 * If aCharFunc and aConcatString are not null, then all non-printable characters
+	 * in character data are replaced with a call to the passed function. <br>
+	 * Example:<br>
+	 * A character column contains a carriage return character (ASCII 13) and 
+	 * aCharFunc is passed as "CHR" and aConcatString is passed as "||". The generated
+	 * SQL will look like this: <br>
+	 * <code>
+	 * UPDATE table set character_column = "Hello, "||chr(13)||"world";
+	 * </code> 
+	 * @param aRow the row to be returned
+	 * @param aLineTerminator the line terminator to be used
+	 * @param aConn to the WbConnection to be used to retrieve the metadata
+	 * @param aCharFunc the SQL function to be used for non printable characters
+	 * @param aConcatString the operator to be used for string concatenation
+	 * @return a StringBuffer with a single INSERT statement.
+	 * @see #getRowDataAsSqlUpdate()
+	 * @see #getRowDataAsSqlInsert(int, String, WbConnection)
+	 */
 	public StringBuffer getRowDataAsSqlUpdate(int aRow, String aLineTerminator, WbConnection aConn, String aCharFunc, String aConcatString)
 	{
 		if (!this.canSaveAsSqlInsert()) return null;

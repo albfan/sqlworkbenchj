@@ -42,7 +42,7 @@ import workbench.resource.ResourceMgr;
  *
  * @author  workbench@kellerer.org
  */
-public class ConnectionEditorPanel 
+public class ConnectionEditorPanel
 	extends JPanel
 	implements PropertyChangeListener, ActionListener
 {
@@ -51,11 +51,11 @@ public class ConnectionEditorPanel
 	private ProfileListModel sourceModel;
 	private boolean init;
 	private List editors;
-	
+
 	public ConnectionEditorPanel()
 	{
 		this.initComponents();
-		
+
 		WbTraversalPolicy policy = new WbTraversalPolicy();
 		policy.addComponent(tfProfileName);
 		policy.addComponent(cbDrivers);
@@ -68,15 +68,15 @@ public class ConnectionEditorPanel
 		policy.addComponent(cbIgnoreDropErrors);
 		policy.addComponent(tfWorkspaceFile);
 		policy.setDefaultComponent(tfProfileName);
-		
+
 		this.setFocusCycleRoot(true);
 		this.setFocusTraversalPolicy(policy);
-		
+
 		this.initEditorList();
-		
+
 		this.selectWkspButton.addActionListener(this);
 	}
-	
+
 	private void initEditorList()
 	{
 		this.editors = new ArrayList(10);
@@ -408,17 +408,27 @@ public class ConnectionEditorPanel
 		if (this.init) return;
 		if (evt.getStateChange() == ItemEvent.SELECTED)
 		{
-			String oldDriver = this.currentProfile.getDriverName();
-			DbDriver newDriver = (DbDriver)this.cbDrivers.getSelectedItem();
-			if(this.currentProfile != null)
+			String oldDriver = null;
+			DbDriver newDriver = null;
+			try
 			{
-				this.currentProfile.setDriverclass(newDriver.getDriverClass());
-				this.currentProfile.setDriverName(newDriver.getName());
+				oldDriver = this.currentProfile.getDriverName();
+				newDriver = (DbDriver)this.cbDrivers.getSelectedItem();
+				if(this.currentProfile != null)
+				{
+					this.currentProfile.setDriverclass(newDriver.getDriverClass());
+					this.currentProfile.setDriverName(newDriver.getName());
+				}
+				if (oldDriver == null || !oldDriver.equals(newDriver.getName()))
+				{
+					this.tfURL.setText(newDriver.getSampleUrl());
+				}
 			}
-			if (oldDriver == null || !oldDriver.equals(newDriver.getName()))
+			catch (Exception e)
 			{
-				this.tfURL.setText(newDriver.getSampleUrl());
+				LogMgr.logError("ConnectionProfilePanel.cbDriversItemStateChanged()", "Error changing driver", e);
 			}
+
 			if (!newDriver.canReadLibrary())
 			{
 				SwingUtilities.invokeLater(
@@ -481,9 +491,20 @@ public class ConnectionEditorPanel
 		if (aDriverList != null)
 		{
 			this.init = true;
-			Collections.sort(aDriverList, DbDriver.getDriverClassComparator());
-			this.cbDrivers.setModel(new DefaultComboBoxModel(aDriverList.toArray()));
-			this.init = false;
+			try
+			{
+				Collections.sort(aDriverList, DbDriver.getDriverClassComparator());
+				this.cbDrivers.setModel(new DefaultComboBoxModel(aDriverList.toArray()));
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("ConnectionEditorPanel.setDrivers()", "Error when setting new driver list", e);
+			}
+			finally
+			{
+				this.init = false;
+			}
+
 		}
 	}
 
@@ -495,7 +516,7 @@ public class ConnectionEditorPanel
 		Dimension d = new Dimension(200,200);
 		editor.setMinimumSize(d);
 		editor.setPreferredSize(d);
-		
+
 		int choice = JOptionPane.showConfirmDialog(this, editor, ResourceMgr.getString("TxtEditConnPropsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 		if (choice == JOptionPane.OK_OPTION)
 		{
@@ -508,19 +529,19 @@ public class ConnectionEditorPanel
 		if (filename == null) return;
 		this.tfWorkspaceFile.setText(filename);
 	}
-	
+
 	public void setSourceList(ProfileListModel aSource)
 	{
 		this.sourceModel = aSource;
 	}
-	
+
 	public void updateProfile()
 	{
 		if (this.init) return;
 		if (this.currentProfile == null) return;
 		if (this.editors == null) return;
 		boolean changed = false;
-		
+
 		for (int i=0; i < this.editors.size(); i++)
 		{
 			SimplePropertyEditor editor = (SimplePropertyEditor)this.editors.get(i);
@@ -539,12 +560,12 @@ public class ConnectionEditorPanel
 		this.updateProfile();
 		return this.currentProfile;
 	}
-	
+
 	private void initPropertyEditors()
 	{
 		if (this.editors == null) return;
 		if (this.currentProfile == null) return;
-		
+
 		for (int i=0; i < this.editors.size(); i++)
 		{
 			SimplePropertyEditor editor = (SimplePropertyEditor)this.editors.get(i);
@@ -556,25 +577,37 @@ public class ConnectionEditorPanel
 			}
 		}
 	}
-	
+
 	public void setProfile(ConnectionProfile aProfile)
 	{
 		if (aProfile == null) return;
-		
-		this.init = true;
+
 		this.currentProfile = aProfile;
 		this.initPropertyEditors();
+
 		String drvClass = aProfile.getDriverclass();
-		if (drvClass == null) return;
-		
-		String name = aProfile.getDriverName();
-		
-		long start = System.currentTimeMillis();
-		DbDriver drv = WbManager.getInstance().getConnectionMgr().findDriverByName(drvClass, name);
-		long end = System.currentTimeMillis();
-		//LogMgr.logDebug("ConnectionEditorPanel.setProfile()", "FindDriver took " + (end - start) + " ms");
-		cbDrivers.setSelectedItem(drv);
-		this.init = false;
+		DbDriver drv = null;
+		if (drvClass != null)
+		{
+			String name = aProfile.getDriverName();
+			long start = System.currentTimeMillis();
+			drv = WbManager.getInstance().getConnectionMgr().findDriverByName(drvClass, name);
+			long end = System.currentTimeMillis();
+		}
+
+		try
+		{
+			this.init = true;
+			cbDrivers.setSelectedItem(drv);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("ConnectionEditorPanel.setProfile()", "Error setting profile", e);
+		}
+		finally
+		{
+			this.init = false;
+		}
 	}
 
 	/** This method gets called when a bound property is changed.
@@ -586,7 +619,7 @@ public class ConnectionEditorPanel
 	{
 		//this.updateProfile();
     if (!this.init)	this.sourceModel.profileChanged(this.currentProfile);
-	}	
+	}
 
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
@@ -595,5 +628,5 @@ public class ConnectionEditorPanel
 			this.selectWorkspace();
 		}
 	}
-	
+
 }

@@ -14,7 +14,6 @@ import java.util.Properties;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import workbench.exception.WbException;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.components.DataStoreTableModel;
@@ -34,15 +33,15 @@ public class ConnectionPropertiesEditor
 {
 	private DataStore propData;
 	private WbTable propTable;
-	
+
 	private NewListEntryAction newItem;
 	private DeleteListEntryAction deleteItem;
-	
+
 	public ConnectionPropertiesEditor(Properties source)
 	{
 		String[] cols = new String[] { ResourceMgr.getString("TxtConnDataPropName"), ResourceMgr.getString("TxtConnDataPropValue") };
 		int[] types = new int[] { Types.VARCHAR, Types.VARCHAR };
-		
+
 		this.propData = new DataStore(cols, types);
 		this.propData.setAllowUpdates(true);
 		if (source != null)
@@ -56,15 +55,15 @@ public class ConnectionPropertiesEditor
 				this.propData.setValue(row, 0, key);
 				this.propData.setValue(row, 1, value);
 			}
-		}		
+		}
 		this.propTable = new WbTable();
-		
+
 		this.propTable.setModel(new DataStoreTableModel(this.propData));
-		
-		
+
+
 		this.setLayout(new BorderLayout());
 		JScrollPane scroll = new JScrollPane(this.propTable);
-		
+
 		WbToolbar toolbar = new WbToolbar();
 		toolbar.addDefaultBorder();
 		this.newItem = new NewListEntryAction(this);
@@ -88,22 +87,22 @@ public class ConnectionPropertiesEditor
 		}
 		return props;
 	}
-	
-	public void deleteItem() 
-		throws WbException
+
+	public void deleteItem()
+		throws Exception
 	{
 		this.propTable.deleteRow();
 	}
-	
-	public void newItem(boolean copyCurrent) 
-		throws WbException
+
+	public void newItem(boolean copyCurrent)
+		throws Exception
 	{
 		this.propTable.addRow();
 	}
-	
-	public void saveItem() 
-		throws WbException
+
+	public void saveItem()
+		throws Exception
 	{
 	}
-	
+
 }

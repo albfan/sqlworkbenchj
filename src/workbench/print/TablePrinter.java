@@ -361,6 +361,13 @@ public class TablePrinter
 
     pg.drawString(footer.toString(), (int)((wPage - len)/2), (int)(hPage - lineSpacing) );
 
+		if (this.headerText != null)
+		{
+			bounds = fm.getStringBounds(this.headerText, pg);
+			len = bounds.getWidth();
+			pg.drawString(this.headerText, (int)((wPage - len)/2), (int)(lineSpacing));
+			pg.translate(0,(int)(lineSpacing  + 5));
+		}
 		p.print(pg);
 
 		pg.setTransform(oldTransform);

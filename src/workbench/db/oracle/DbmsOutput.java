@@ -27,7 +27,7 @@ public class DbmsOutput
 	private CallableStatement disable_stmt;
 	private CallableStatement show_stmt;
 
-	private boolean enabled;
+	private boolean enabled = false;
 	private long lastSize;
 
 /*
@@ -81,7 +81,7 @@ public class DbmsOutput
 		enable_stmt.executeUpdate();
 		this.enabled = true;
 		this.lastSize = size;
-		//LogMgr.logDebug("DbmsOutput.enable()", "Support for DBMS_OUTPUT package enabled (buffer size=" + size + ")");
+		LogMgr.logDebug("DbmsOutput.enable()", "Support for DBMS_OUTPUT package enabled (buffer size=" + size + ")");
 	}
 
 	public void enable()
@@ -112,6 +112,7 @@ public class DbmsOutput
 		throws SQLException
 	{
 		int done = 0;
+    if (!this.enabled) return "";
 
 		show_stmt.registerOutParameter( 2, Types.INTEGER );
 		show_stmt.registerOutParameter( 3, Types.VARCHAR );
@@ -142,7 +143,7 @@ public class DbmsOutput
 		try { show_stmt.close(); } catch (Throwable th) {}
 	}
 
-	public void finalize()
+	protected void finalize()
 	{
 		this.close();
 	}

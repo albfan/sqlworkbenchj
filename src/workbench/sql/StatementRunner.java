@@ -7,16 +7,19 @@
 package workbench.sql;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import workbench.db.WbConnection;
-import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.sql.MacroManager;
 import workbench.sql.commands.DdlCommand;
 import workbench.sql.commands.SelectCommand;
+import workbench.sql.commands.SetCommand;
 import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.commands.UpdatingCommand;
+import workbench.sql.commands.UseCommand;
 import workbench.sql.wbcommands.WbCopy;
 import workbench.sql.wbcommands.WbDescribeTable;
 import workbench.sql.wbcommands.WbDisableOraOutput;
@@ -30,6 +33,7 @@ import workbench.sql.wbcommands.WbOraExecute;
 import workbench.sql.wbcommands.WbExport;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
+import workbench.sql.commands.IgnoredCommand;
 
 /**
  *
@@ -41,6 +45,7 @@ public class StatementRunner
 	private StatementRunnerResult result;
 
 	private HashMap cmdDispatch;
+	private ArrayList dbSpecificCommands;
 
 	private SqlCommand currentCommand;
 	private SqlCommand currentConsumer;
@@ -105,15 +110,48 @@ public class StatementRunner
 			sql = (SqlCommand)DdlCommand.DDL_COMMANDS.get(i);
 			cmdDispatch.put(sql.getVerb(), sql);
 		}
+
+		this.dbSpecificCommands = new ArrayList();
 	}
 
 	public void setConnection(WbConnection aConn)
 	{
+
+		if (this.dbConnection != null)
+		{
+			int count = this.dbSpecificCommands.size();
+			for (int i=0; i < count; i++)
+			{
+				this.cmdDispatch.remove(this.dbSpecificCommands.get(i));
+			}
+			this.dbSpecificCommands.clear();
+		}
+
 		this.dbConnection = aConn;
+
 		if (this.dbConnection.getMetadata().isOracle())
 		{
 			this.cmdDispatch.put(WbOraExecute.EXEC.getVerb(), WbOraExecute.EXEC);
 			this.cmdDispatch.put(WbOraExecute.EXECUTE.getVerb(), WbOraExecute.EXECUTE);
+
+			SetCommand set = new SetCommand();
+			this.cmdDispatch.put(set.getVerb(), set);
+			this.dbSpecificCommands.add(set.getVerb());
+			this.dbSpecificCommands.add(WbOraExecute.EXEC.getVerb());
+			this.dbSpecificCommands.add(WbOraExecute.EXECUTE.getVerb());
+
+			SqlCommand[] ignore = IgnoredCommand.getCommandsToIgnoreForOracle();
+			for (int i=0; i < ignore.length; i++)
+			{
+				this.cmdDispatch.put(ignore[i].getVerb(), ignore[i]);
+				this.dbSpecificCommands.add(ignore[i].getVerb());
+			}
+		}
+		else if (this.dbConnection.getMetadata().isSqlServer())
+		{
+			UseCommand cmd = new UseCommand();
+			this.cmdDispatch.put(cmd.getVerb(), cmd);
+			this.dbSpecificCommands.add(cmd.getVerb());
 		}
 	}
 
@@ -128,7 +166,7 @@ public class StatementRunner
 	}
 
 	public void runStatement(String aSql, int maxRows)
-		throws SQLException, WbException
+		throws SQLException, Exception
 	{
 		String cleanSql = SqlUtil.makeCleanSql(aSql, false);
 		if (cleanSql == null || cleanSql.length() == 0)
@@ -142,20 +180,6 @@ public class StatementRunner
 			return;
 		}
 
-		String macro = MacroManager.getInstance().getMacroText(cleanSql);
-		if (macro != null)
-		{
-			aSql = macro;
-			cleanSql = SqlUtil.makeCleanSql(macro, false);
-		}
-
-		String oldCatalog = null;
-		String newCatalog = null;
-
-		// store the old catalog name, because in SQL Server this could change
-		// when executing a SQL statement (e.g. USE)
-		oldCatalog = this.dbConnection.getMetadata().getCurrentCatalog();
-
 		String verb = SqlUtil.getSqlVerb(cleanSql).toUpperCase();
 
 		this.currentCommand = (SqlCommand)this.cmdDispatch.get(verb);
@@ -166,6 +190,7 @@ public class StatementRunner
 			this.currentCommand = (SqlCommand)this.cmdDispatch.get("*");
 		}
 
+		this.currentCommand.setConsumerWaiting(this.currentConsumer != null);
 		this.currentCommand.setRowMonitor(this.rowMonitor);
 		this.currentCommand.setMaxRows(maxRows);
 		this.result = this.currentCommand.execute(this.dbConnection, aSql);
@@ -178,19 +203,12 @@ public class StatementRunner
 		{
 			if (this.currentConsumer != null)
 			{
+				this.currentCommand.setConsumerWaiting(false);
 				this.currentConsumer.consumeResult(this.result);
 				this.currentConsumer = null;
 			}
 		}
 
-		// get the catalog which is active now. If the catalog has changed
-		// notify the connection display, so it can be updated
-		newCatalog = this.dbConnection.getMetadata().getCurrentCatalog();
-
-		if (!oldCatalog.equals(newCatalog))
-		{
-			this.dbConnection.connectionStateChanged();
-		}
 	}
 
 	public void statementDone()

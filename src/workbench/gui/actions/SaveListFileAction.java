@@ -7,7 +7,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import workbench.exception.WbException;
 import workbench.interfaces.FileActions;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -33,7 +32,7 @@ public class SaveListFileAction extends WbAction
 		{
 			this.client.saveItem();
 		}
-		catch (WbException ex)
+		catch (Exception ex)
 		{
 			LogMgr.logError(this, "Error saving profiles", ex);
 		}

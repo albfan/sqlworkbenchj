@@ -403,7 +403,12 @@ public class WbManager
 		String lnfClass = lnf.getClass().getName();
 
 		// Polish up the standard look & feel settings
-		def.put("Table.gridColor", Color.LIGHT_GRAY);
+		Color c = this.settings.getColor("workbench.table.gridcolor");
+		if (c == null)
+		{
+			c = Color.LIGHT_GRAY;
+		}
+		def.put("Table.gridColor", c);
 
 		// use our own classes for some GUI elements
 		def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
@@ -820,6 +825,7 @@ public class WbManager
 		LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
 		LogMgr.logInfo("WbManager.init()", "Using Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") );
 		LogMgr.logDebug("WbManager.init()", "Use -Dworkbench.startuptrace=true to display trace messages during startup");
+    if (this.cmdLine == null) this.initCmdLine(null);
 		if (this.cmdLine.hasUnknownArguments())
 		{
 			LogMgr.logWarning("WbManager.init()", "Ignoring unknown argument(s) " + StringUtil.listToString(this.cmdLine.getUnknownArguments(), ','));
@@ -966,7 +972,7 @@ public class WbManager
 	 */
 	public void run()
 	{
-		LogMgr.logDebug("WbManager.run()", "Shutdownhook activated!");
+		LogMgr.logDebug("WbManager.run()", "Shutdownhook called!");
 		this.saveSettings();
 	}
 

@@ -19,7 +19,6 @@ public class ConnectionProfile
 	private String name;
 	private String url;
 	private String driverclass;
-	private String driverlib;
 	private String username;
 	private String password;
 	private String driverName;

@@ -208,7 +208,7 @@ public class TableDataPanel
 		this.rowCountLabel.setIcon(this.getLoadingIndicator());
 
 		this.reloadAction.setEnabled(false);
-
+		this.dataDisplay.setStatusMessage(ResourceMgr.getString("MsgCalculatingRowCount"));
 		this.repaint();
 		this.rowCountLabel.repaint();
 		String sql = this.buildSqlForTable(true);
@@ -237,6 +237,7 @@ public class TableDataPanel
 		}
 		finally
 		{
+			this.dataDisplay.setStatusMessage("");
 			if (this.loadingImage != null) this.loadingImage.flush();
 			this.rowCountLabel.setIcon(null);
 			try { rs.close(); } catch (Throwable th) {}
@@ -327,6 +328,9 @@ public class TableDataPanel
 					dataDisplay.scriptStarting();
 					dataDisplay.setMaxRows(maxRows);
 					dataDisplay.runStatement(sql);
+					String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + tableName;
+					dataDisplay.setPrintHeader(header);
+					dataDisplay.setStatusMessage("");
 				}
 				catch (OutOfMemoryError mem)
 				{

@@ -19,7 +19,6 @@ import javax.swing.ListModel;
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
-import workbench.exception.WbException;
 import workbench.gui.actions.CopyProfileAction;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
@@ -87,7 +86,7 @@ public class ProfileEditorPanel
 			}
 		});
 	}
-	
+
 	private void fillDrivers()
 	{
 		List drivers = WbManager.getInstance().getConnectionMgr().getDrivers();
@@ -222,10 +221,10 @@ public class ProfileEditorPanel
 
 	/**
 	 *	Remove an item from the listmodel.
-	 *	This will also remove the profile from the ConnectionMgr's 
+	 *	This will also remove the profile from the ConnectionMgr's
 	 *	profile list.
 	 */
-	public void deleteItem() throws WbException
+	public void deleteItem() throws Exception
 	{
 		int index = this.jList1.getSelectedIndex();
     if (index >= 0)
@@ -240,20 +239,20 @@ public class ProfileEditorPanel
 	 *	Create a new profile. This will be added to the ListModel and the
 	 *	ConnectionMgr's profile list.
 	 */
-	public void newItem(boolean createCopy) throws WbException
+	public void newItem(boolean createCopy) throws Exception
 	{
 		ConnectionProfile cp = null;
-    
+
 		if (createCopy)
 		{
   		ConnectionProfile current = (ConnectionProfile)this.jList1.getSelectedValue();
   		if (current != null)
-  		{	
+  		{
   			cp = current.createCopy();
   			cp.setName(ResourceMgr.getString("TxtCopyOfProfile") + " " + current.getName());
   		}
 		}
-    
+
 		if (cp == null)
 		{
 			cp = new ConnectionProfile();
@@ -264,7 +263,7 @@ public class ProfileEditorPanel
 		this.selectProfile(cp.getName());
 	}
 
-	public void saveItem() throws WbException
+	public void saveItem() throws Exception
 	{
 		ConnectionMgr conn = WbManager.getInstance().getConnectionMgr();
 		this.connectionEditor.updateProfile();

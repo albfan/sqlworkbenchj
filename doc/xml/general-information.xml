@@ -1,44 +1,48 @@
 <section id="information">
-	<title>General Information</title>
+  <title>General Information</title>
 
-	<section id="license">
-		<title>Software license</title>
+  <section id="license">
+    <title>Software license</title>
 
-		<para>Copyright (c) 2002-2003, Thomas Kellerer</para>
+    <para>Copyright (c) 2002-2004, Thomas Kellerer</para>
 
-		<para>This software is released to the public domain.</para>
+    <para>This software is released to the public domain.</para>
 
-		<para>Permission is hereby granted, free of charge, to any person
-		obtaining a copy of this software and associated documentation files (the
-		&#34;Software&#34;), to deal in the Software without restriction,
-		including without limitation the rights to use, copy, modify, merge,
-		publish, distribute, and to permit persons to whom the Software is
-		furnished to do so, subject to the following conditions:</para>
+    <para>Permission is hereby granted, free of charge, to any person
+    obtaining a copy of this software and associated documentation files (the
+    &#34;Software&#34;), to deal in the Software without restriction,
+    including without limitation the rights to use, copy, modify, merge,
+    publish, distribute, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:</para>
 
-		<para>The above copyright notice and this permission notice shall be
-		included in all copies or substantial portions of the Software.</para>
+    <para>The above copyright notice and this permission notice shall be
+    included in all copies or substantial portions of the Software.</para>
 
-		<para>In order to ensure that this software stays free, selling, licensing
-		or charging for the use of this software is prohibited. The right to
-		include this software in a commercial product (bundling) is still granted
-		as long as this software is not the major functionality delivered.</para>
+    <para>In order to ensure that this software stays free, selling, licensing
+    or charging for the use of this software is prohibited. The right to
+    include this software in a commercial product (bundling) is still granted
+    as long as this software is not the major functionality delivered.</para>
 
-		<para>Disclaimer</para>
+    <para>Disclaimer</para>
 
-		<para>THE SOFTWARE IS PROVIDED &#34;AS IS&#34;, WITHOUT WARRANTY OF ANY
-		KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-		MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN
-		NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-		DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-		OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-		USE OR OTHER DEALINGS IN THE SOFTWARE.</para>
-	</section>
+    <para>The software is provided &#34;as is&#34;, without warranty of any
+    kind, express or implied, including but not limited to the warranties of merchantability,
+    fitness for a particular purpose and noninfringement. In no event shall the author (Thomas Kellerer),
+    be liable for any direct, indirect, incidental, special, exemplary, or consequential
+    damages (including, but not limited to, procurement of substitute goods or services; loss
+    of use, data, or profits; or business interruption) however caused and on any theory of
+    liability, whether in contract, strict liability, or tort (including negligence or
+    otherwise) arising in any way out of the use of this software, even if advised of the
+    possibility of such damage.
+    </para>
+    <para>In other words: use it at your own risk, and don't blame me if you accidently delete your database!</para>
+  </section>
 
 
-	<section id="version">
-		<title>Program version</title>
+  <section id="version">
+    <title>Program version</title>
 
-		<para>This document describes build @BUILD_NUMBER@ of the &wb-productname;</para>
-	</section>
+    <para>This document describes build @BUILD_NUMBER@ of the &wb-productname;</para>
+  </section>
 
 </section>

@@ -2,6 +2,7 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import javax.swing.SwingUtilities;
+import workbench.WbManager;
 
 import workbench.db.ConnectionProfile;
 import workbench.gui.MainWindow;
@@ -17,7 +18,7 @@ import workbench.resource.ResourceMgr;
 public class DataPumperAction extends WbAction
 {
 	private MainWindow parent;
-	
+
 	public DataPumperAction(MainWindow parent)
 	{
 		super();
@@ -29,7 +30,7 @@ public class DataPumperAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		if (parent == null) 
+		if (parent == null)
 		{
 			return;
 		}
@@ -38,12 +39,16 @@ public class DataPumperAction extends WbAction
 			public void run()
 			{
 				WbSwingUtilities.showWaitCursor(parent);
-				ConnectionProfile profile = parent.getCurrentProfile();
+				ConnectionProfile profile = null;
+				if (WbManager.getSettings().getAutoConnectDataPumper())
+				{
+					profile = parent.getCurrentProfile();
+				}
 				DataPumper p = new DataPumper(profile, null);
 				p.showWindow(parent);
 				WbSwingUtilities.showDefaultCursor(parent);
 			}
 		});
 	}
-	
+
 }

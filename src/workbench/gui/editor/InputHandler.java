@@ -32,7 +32,7 @@ import javax.swing.text.Document;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.11 2004-01-20 18:11:46 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.12 2004-03-05 20:04:00 thomas Exp $
  * @see org.gjt.sp.jedit.textarea.DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
@@ -83,7 +83,7 @@ public abstract class InputHandler extends KeyAdapter
 	public static final ActionListener MAKE_LOWER_CASE = new make_lower();
 	public static final ActionListener UNDO = new undo();
 	public static final ActionListener REDO = new redo();
-	public static final ActionListener MATCH_BRACKET = new match_bracket();
+	//public static final ActionListener MATCH_BRACKET = new match_bracket();
 
 	// Default action
 	public static final ActionListener INSERT_CHAR = new insert_char();
@@ -127,7 +127,7 @@ public abstract class InputHandler extends KeyAdapter
 		actions.put("repeat",REPEAT);
 		actions.put("toggle-rect",TOGGLE_RECT);
 		actions.put("insert-char",INSERT_CHAR);
-		actions.put("match-bracket", MATCH_BRACKET);
+		//actions.put("match-bracket", MATCH_BRACKET);
 		//actions.put("make-upper", MAKE_UPPER_CASE);
 		//actions.put("make-lower", MAKE_LOWER_CASE);
 	}
@@ -453,7 +453,7 @@ public abstract class InputHandler extends KeyAdapter
 		}
 	}
 
-	
+
 	public static class make_lower implements ActionListener
 	{
 		public void actionPerformed(ActionEvent evt)
@@ -474,22 +474,6 @@ public abstract class InputHandler extends KeyAdapter
 				sel = sel.toLowerCase();
 				textArea.setSelectedText(sel);
 				textArea.select(start, end);
-			}
-		}
-	}
-	public static class match_bracket implements ActionListener
-	{
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-
-			int bracket = textArea.getBracketPosition();
-			int line = textArea.getBracketLine();
-			int caret = textArea.getLineStartOffset(line) + bracket;
-			Document doc = textArea.getDocument();
-			if (caret > -1)
-			{
-				textArea.setCaretPosition(caret);
 			}
 		}
 	}

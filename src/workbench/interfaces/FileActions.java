@@ -6,15 +6,13 @@
 
 package workbench.interfaces;
 
-import workbench.exception.WbException;
-
 /**
  *
  * @author  workbench@kellerer.org
  */
 public interface FileActions
 {
-	void saveItem() throws WbException;
-	void deleteItem() throws WbException;
-	void newItem(boolean copyCurrent) throws WbException;
+	void saveItem() throws Exception;
+	void deleteItem() throws Exception;
+	void newItem(boolean copyCurrent) throws Exception;
 }

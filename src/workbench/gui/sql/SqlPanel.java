@@ -176,7 +176,7 @@ public class SqlPanel
 		DwStatusBar statusBar = new DwStatusBar();
 		Border b = BorderFactory.createCompoundBorder(new EmptyBorder(2, 1, 0, 1), new EtchedBorder());
 		statusBar.setBorder(b);
-		
+
 		this.data = new DwPanel(statusBar);
 		this.data.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.log = new JTextArea();
@@ -561,6 +561,7 @@ public class SqlPanel
 		makeLower.setCreateMenuSeparator(true);
 		this.actions.add(makeLower);
 		this.actions.add(makeUpper);
+		this.actions.add(this.editor.getMatchBracketAction());
 
 		this.actions.add(this.data.getStartEditAction());
 		this.actions.add(this.data.getUpdateDatabaseAction());
@@ -1227,7 +1228,7 @@ public class SqlPanel
 		if (aConnection != null)
 		{
 			AnsiSQLTokenMarker token = this.editor.getSqlTokenMarker();
-			token.initDatabaseKeywords(aConnection.getSqlConnection());
+			if (token != null) token.initDatabaseKeywords(aConnection.getSqlConnection());
 		}
 
 		this.checkResultSetActions();
@@ -1478,7 +1479,6 @@ public class SqlPanel
 		this.fireDbExecEnd();
 		this.selectEditorLater();
 
-
 		/*
 		if (sql.trim().toLowerCase().startsWith("shutdown") && WbManager.getSettings().getProcessHsqlShutdown())
 		{
@@ -1635,6 +1635,7 @@ public class SqlPanel
 		boolean editorCommand = true;
 		boolean highlightError = true;
 		int startOffset = 0;
+
 		if (aSql == null)
 		{
 			// the flags to run the current command, the selected text, or everything
@@ -1701,6 +1702,10 @@ public class SqlPanel
 			{
 				StringBuffer logmsg = new StringBuffer(200);
 				String sql = scriptParser.getCommand(i);
+				StringBuffer header = new StringBuffer(80);
+				header.append(ResourceMgr.getString("TxtPrintHeaderResultFrom"));
+				header.append(sql);
+				this.data.setPrintHeader(header.toString());
 				this.data.runStatement(sql);
 
 				if (!compressLog || !this.data.wasSuccessful())
@@ -1791,7 +1796,6 @@ public class SqlPanel
 			if (this.data.hasResultSet())
 			{
 				this.showResultPanel();
-				this.data.checkUpdateTable();
 			}
 			else
 			{
@@ -2070,7 +2074,7 @@ public class SqlPanel
 		Container parent = this.getParent();
 		if (parent instanceof JTabbedPane)
 		{
-			JTabbedPane tab = (JTabbedPane)parent;
+			final JTabbedPane tab = (JTabbedPane)parent;
 			int index = tab.indexOfComponent(this);
 			if (index >= 0 && index < tab.getTabCount())
 			{
@@ -2098,16 +2102,30 @@ public class SqlPanel
 				{
 					LogMgr.logWarning("SqlPanel.setBusy()", "Error when setting busy icon!", th);
 				}
+				SwingUtilities.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						tab.repaint();
+					}
+				});
 			}
 		}
 	}
 
-	private synchronized void setBusy(boolean busy)
+	private synchronized void setBusy(final boolean busy)
 	{
 		if (busy == this.threadBusy) return;
 		this.threadBusy = busy;
-		this.showBusyIcon(busy);
 		this.setExecuteActionStates(!busy);
+//		SwingUtilities.invokeLater(new Runnable()
+//			{
+//				public void run()
+//				{
+//					showBusyIcon(busy);
+//				}
+//			});
+		this.showBusyIcon(busy);
 	}
 
 
@@ -2180,8 +2198,11 @@ public class SqlPanel
 
 	public void dispose()
 	{
-		this.data.clearContent();
 		WbManager.getSettings().removeChangeLister(this);
+		this.data.clearContent();
+		this.data = null;
+		this.editor.dispose();
+		this.editor = null;
 		this.abortExecution();
 		this.background = null;
 	}

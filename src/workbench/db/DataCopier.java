@@ -46,9 +46,7 @@ public class DataCopier
 	private Statement retrieveStatement;
 	private String retrieveSql;
 	private boolean keepRunning = true;
-	private boolean isRunning = false;
 	private String addWhere;
-	private boolean success = false;
 
 	// used when the source is a SQL and not a table
 	private boolean useQuery = false;
@@ -142,13 +140,11 @@ public class DataCopier
 				LogMgr.logError("DataCopier.copyFromTable()", "Error when creating target table", e);
 				this.addError(ResourceMgr.getString("MsgCopyErrorCreatTable").replaceAll("%name%", aTargetTable.getTable()));
 				this.addError(ExceptionUtil.getDisplay(e));
-				this.success = false;
 				throw e;
 			}
 		}
 		else
 		{
-			this.success = false;
 			throw new SQLException("Table " + aTargetTable.getTable() + " not found in target connection");
 		}
 		this.initImporterForTable();
@@ -286,7 +282,6 @@ public class DataCopier
 			LogMgr.logError("DataCopier.copyFromTable()", "Error when creating target table", e);
 			this.addError(ResourceMgr.getString("MsgCopyErrorCreatTable").replaceAll("%name%", targetTable.getTable()));
 			this.addError(ExceptionUtil.getDisplay(e));
-			this.success = false;
 			throw e;
 		}
 	}
@@ -406,9 +401,9 @@ public class DataCopier
 		t.start();
 	}
 
-	public long getAffectedRow()
+	public long getAffectedRows()
 	{
-		return this.importer.getAffectedRow();
+		return this.importer.getAffectedRows();
 	}
 
 	public boolean isSuccess()
@@ -440,7 +435,7 @@ public class DataCopier
 	public void start() throws Exception
 	{
 		ResultSet rs = null;
-		this.isRunning = true;
+		//this.isRunning = true;
 		try
 		{
 			this.retrieveStatement = this.sourceConnection.createStatement();
@@ -457,24 +452,46 @@ public class DataCopier
 				if (this.keepRunning) this.importer.processRow(rowData);
 			}
 			this.importer.importFinished();
-			long rows = this.getAffectedRow();
-			String msg = rows + " " + ResourceMgr.getString("MsgCopyNumRows");
-			this.addMessage(msg);
-			LogMgr.logInfo("DataCopier.start()", "Copying of data finished. " + this.importer.getAffectedRow() + " row(s) copied.");
-			this.success = true;
+			String msg = this.getRowsInsertedMessage();
+			if (msg.length() > 0) this.addMessage(msg);
+			msg = this.getRowsUpdatedMessage();
+			if (msg.length() > 0) this.addMessage(msg);
+
+			LogMgr.logInfo("DataCopier.start()", "Copying of data finished. " + this.importer.getInsertedRows() + " row(s) inserted." + this.importer.getUpdatedRows() + " row(s) updated.");
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("DataCopier.copy()", "Error when copying data", e);
 			this.importer.importCancelled();
-			this.success = false;
 		}
 		finally
 		{
 			try { rs.close(); } catch (Throwable th) {}
 			try { this.retrieveStatement.close(); } catch (Throwable th) {}
-			this.isRunning = false;
 		}
+	}
+
+	public String getRowsUpdatedMessage()
+	{
+		String msg = "";
+		long rows = this.importer.getUpdatedRows();
+		if (rows > 0)
+		{
+			msg = rows + " " + ResourceMgr.getString("MsgCopyNumRowsUpdated");
+		}
+		return msg;
+	}
+
+	public String getRowsInsertedMessage()
+	{
+		long rows = this.importer.getInsertedRows();
+		String msg = "";
+
+		if (rows > 0)
+		{
+			msg = rows + " " + ResourceMgr.getString("MsgCopyNumRowsInserted");
+		}
+		return msg;
 	}
 
 	public void setReceiver(RowDataReceiver receiver)

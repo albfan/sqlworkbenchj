@@ -83,7 +83,6 @@ import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.gui.settings.SettingsPanel;
 import workbench.gui.settings.ShortcutEditor;
 import workbench.gui.sql.SqlPanel;
-import workbench.gui.tools.DataPumper;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.FilenameChangeListener;
 import workbench.interfaces.MacroChangeListener;
@@ -615,6 +614,7 @@ public class MainWindow
 	{
 		Container content = this.getContentPane();
 		MainPanel current = this.getCurrentPanel();
+		if (current == null) return;
 
 		JMenuBar menu = (JMenuBar)this.panelMenus.get(anIndex);
 		this.setJMenuBar(menu);
@@ -857,6 +857,8 @@ public class MainWindow
 		}
 
 		final WbConnection usedConnection = conn;
+		this.showStatusMessage("");
+
 		try
 		{
 			if (connected)
@@ -1542,6 +1544,7 @@ public class MainWindow
 				// that here, so that the a separate thread can be used
 				this.dbExplorerTabVisible = true;
 			}
+			this.sqlTab.setSelectedIndex(this.sqlTab.getTabCount() - 1);
 		}
 		else
 		{
@@ -1871,6 +1874,8 @@ public class MainWindow
 			MainPanel p = this.getSqlPanel(i);
 			if (p instanceof SqlPanel)
 			{
+				SqlPanel sql = (SqlPanel)p;
+				sql.closeFile(true);
 				this.setTabTitle(i, defaultTitle);
 			}
 		}
@@ -2230,7 +2235,7 @@ public class MainWindow
 				this.dbExplorerTabVisible = false;
 				this.dbExplorerPanel = null;
 			}
-			
+
 			panel.disconnect();
 			panel.dispose();
 

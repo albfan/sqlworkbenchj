@@ -8,7 +8,6 @@ import workbench.db.importer.DataImporter;
 import workbench.db.importer.TextFileParser;
 import workbench.db.importer.XmlDataFileParser;
 import workbench.exception.ExceptionUtil;
-import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
@@ -50,18 +49,18 @@ public class WbImport extends SqlCommand
 	public String getVerb() { return VERB; }
 
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
-		throws SQLException, WbException
+		throws SQLException
 	{
 		imp = new DataImporter();
 
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
 		int pos = aSql.indexOf(' ');
-		if (pos > -1) 
+		if (pos > -1)
 			aSql = aSql.substring(pos);
-		else 
+		else
 			aSql = "";
-		
+
 		try
 		{
 			cmdLine.parse(aSql);
@@ -87,14 +86,14 @@ public class WbImport extends SqlCommand
 			result.setFailure();
 			return result;
 		}
-		
+
 		String type = null;
 		String file = null;
 		String cleancr = null;
-		
+
 		type = cmdLine.getValue("type");
 		file = cmdLine.getValue("file");
-		
+
 		if (type == null || file == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrorImportWrongParameters"));
@@ -104,9 +103,9 @@ public class WbImport extends SqlCommand
 
 		int commit = StringUtil.getIntValue(cmdLine.getValue("commitevery"),-1);
 		imp.setCommitEvery(commit);
-		
+
 		String table = cmdLine.getValue("table");
-		
+
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
 			if (table == null)
@@ -115,14 +114,14 @@ public class WbImport extends SqlCommand
 				result.setFailure();
 				return result;
 			}
-			
+
 			TextFileParser textParser = new TextFileParser(file);
 			textParser.setTableName(table);
 			textParser.setConnection(aConnection);
-			
+
 			String delimiter = cmdLine.getValue("delimiter");
 			if (delimiter != null) textParser.setDelimiter(delimiter);
-			
+
 			String quote = cmdLine.getValue("quotechar");
 			if (quote != null) textParser.setQuoteChar(quote);
 
@@ -140,7 +139,7 @@ public class WbImport extends SqlCommand
 
 			String encoding = cmdLine.getValue("encoding");
 			if (encoding != null) textParser.setEncoding(encoding);
-			
+
 			String columns = cmdLine.getValue("columns");
 			if (columns != null)
 			{
@@ -155,7 +154,7 @@ public class WbImport extends SqlCommand
 					result.setFailure();
 					return result;
 				}
-					
+
 			}
 			if (!"true".equals(header) && columns == null)
 			{
@@ -169,7 +168,7 @@ public class WbImport extends SqlCommand
 		{
 			XmlDataFileParser xmlParser = new XmlDataFileParser(file);
 			if (table != null) xmlParser.setTableName(table);
-			
+
 			String encoding = cmdLine.getValue("encoding");
 			if (encoding != null) xmlParser.setEncoding(encoding);
 			imp.setProducer(xmlParser);
@@ -186,7 +185,7 @@ public class WbImport extends SqlCommand
 		String mode = cmdLine.getValue("mode");
 		if (mode != null)
 		{
-			
+
 			if (!imp.setMode(mode))
 			{
 				result.addMessage(ResourceMgr.getString("ErrorInvalidModeIgnored").replaceAll("%mode%", mode));
@@ -194,7 +193,7 @@ public class WbImport extends SqlCommand
 		}
 		String keyColumns = cmdLine.getValue("keycolumns");
 		imp.setKeyColumns(keyColumns);
-		
+
 		String msg = ResourceMgr.getString("MsgImportingFile");
 		msg += " " + file;
 		if (table != null)
@@ -203,7 +202,7 @@ public class WbImport extends SqlCommand
 			msg += ": " + table.toUpperCase();
 		}
 		result.addMessage(msg);
-		
+
 		try
 		{
 			imp.startImport();
@@ -217,10 +216,12 @@ public class WbImport extends SqlCommand
 		}
 		this.addWarnings(result);
 		this.addErrors(result);
-		long rows = imp.getAffectedRow();
-		msg = rows + " " + ResourceMgr.getString("MsgImportNumRows");
+		long rows = imp.getInsertedRows();
+		msg = rows + " " + ResourceMgr.getString("MsgCopyNumRowsInserted");
 		result.addMessage(msg);
-		
+		rows = imp.getUpdatedRows();
+		msg = rows + " " + ResourceMgr.getString("MsgCopyNumRowsUpdated");
+		result.addMessage(msg);
 		return result;
 	}
 
@@ -232,7 +233,7 @@ public class WbImport extends SqlCommand
 			result.addMessage(err[i]);
 		}
 	}
-	
+
 	private void addErrors(StatementRunnerResult result)
 	{
 		String[] warn = imp.getErrors();
@@ -246,7 +247,7 @@ public class WbImport extends SqlCommand
 			result.addMessage("");
 		}
 	}
-	
+
 	public void done()
 	{
 		super.done();

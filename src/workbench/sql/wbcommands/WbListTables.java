@@ -9,7 +9,6 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 
 import workbench.db.WbConnection;
-import workbench.exception.WbException;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
@@ -21,21 +20,21 @@ import workbench.storage.DataStore;
 public class WbListTables extends SqlCommand
 {
 	public static final String VERB = "LIST";
-	
+
 	/** Creates a new instance of WbListTables */
 	public WbListTables()
 	{
 	}
 
 	public String getVerb() { return VERB; }
-	
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql) 
-		throws SQLException, WbException
+
+	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		DataStore ds = aConnection.getMetadata().getTables();
 		result.addDataStore(ds);
 		return result;
-	}	
-	
+	}
+
 }

@@ -20,13 +20,12 @@ import javax.swing.undo.UndoableEdit;
  * system.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxDocument.java,v 1.7 2003-12-16 21:58:36 thomas Exp $
+ * @version $Id: SyntaxDocument.java,v 1.8 2004-03-05 20:04:00 thomas Exp $
  */
 public class SyntaxDocument
 	extends PlainDocument
 	implements UndoableEditListener
 {
-	private ArrayList undoList = new ArrayList();
 	private UndoManager undoManager = new UndoManager();
 
 	public SyntaxDocument()
@@ -35,6 +34,7 @@ public class SyntaxDocument
 		this.addUndoableEditListener(this);
 		this.initDefaultProperties();
 	}
+	
 	public SyntaxDocument(AbstractDocument.Content aContent)
 	{
 		super(aContent);
@@ -54,10 +54,6 @@ public class SyntaxDocument
 	public TokenMarker getTokenMarker()
 	{
 		return tokenMarker;
-	}
-
-	public void isModified()
-	{
 	}
 
 	/**
@@ -82,6 +78,11 @@ public class SyntaxDocument
 		}
 	}
 
+	public void dispose()
+	{
+		this.clearUndoBuffer();
+	}
+	
 	public void clearUndoBuffer()
 	{
 		this.undoManager.discardAllEdits();
@@ -192,13 +193,10 @@ public class SyntaxDocument
 	{
 		if(tokenMarker != null)
 		{
-			DocumentEvent.ElementChange ch = evt.getChange(
-				getDefaultRootElement());
+			DocumentEvent.ElementChange ch = evt.getChange(getDefaultRootElement());
 			if(ch != null)
 			{
-				tokenMarker.insertLines(ch.getIndex() + 1,
-					ch.getChildrenAdded().length -
-					ch.getChildrenRemoved().length);
+				tokenMarker.insertLines(ch.getIndex() + 1,ch.getChildrenAdded().length - ch.getChildrenRemoved().length);
 			}
 		}
 
@@ -214,13 +212,10 @@ public class SyntaxDocument
 	{
 		if(tokenMarker != null)
 		{
-			DocumentEvent.ElementChange ch = evt.getChange(
-				getDefaultRootElement());
+			DocumentEvent.ElementChange ch = evt.getChange(getDefaultRootElement());
 			if(ch != null)
 			{
-				tokenMarker.deleteLines(ch.getIndex() + 1,
-					ch.getChildrenRemoved().length -
-					ch.getChildrenAdded().length);
+				tokenMarker.deleteLines(ch.getIndex() + 1,ch.getChildrenRemoved().length - ch.getChildrenAdded().length);
 			}
 		}
 

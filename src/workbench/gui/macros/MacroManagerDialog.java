@@ -30,7 +30,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ListSelectionListener;
 
 import workbench.WbManager;
-import workbench.exception.WbException;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
@@ -38,8 +37,8 @@ import workbench.gui.components.WbCheckBox;
 import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
 
-public class MacroManagerDialog 
-	extends JDialog 
+public class MacroManagerDialog
+	extends JDialog
 	implements ActionListener, ListSelectionListener, MouseListener
 {
 	private JPanel dummyPanel;
@@ -63,7 +62,7 @@ public class MacroManagerDialog
 		boolean connected = this.client.isConnected();
 		this.runButton.setEnabled(connected);
 		this.runButton.setVisible(connected);
-		
+
 		this.replaceEditorText.setVisible(connected);
 		this.replaceEditorText.setEnabled(connected);
 		this.initKeys();
@@ -80,10 +79,10 @@ public class MacroManagerDialog
 		boolean replace = "true".equals(WbManager.getSettings().getProperty("workbench.gui.macros", "replaceOnRun", "false"));
 		this.replaceEditorText.setSelected(replace);
 	}
-	
+
 	private void initKeys()
 	{
-		if (this.runButton.isEnabled()) 
+		if (this.runButton.isEnabled())
 		{
 			this.getRootPane().setDefaultButton(this.runButton);
 		}
@@ -97,17 +96,17 @@ public class MacroManagerDialog
 		im.put(escAction.getAccelerator(), escAction.getActionName());
 		am.put(escAction.getActionName(), escAction);
 	}
-	
+
 	private void initComponents()
 	{
 		macroPanel = new MacroManagerGui();
 		buttonPanel = new JPanel();
 		runButton = new WbButton(ResourceMgr.getString("LabelRunMacro"));
 		runButton.setToolTipText(ResourceMgr.getDescription("LabelManageMacrosRun"));
-		
+
 		okButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_OK));
 		okButton.setToolTipText(ResourceMgr.getDescription("LabelManageMacrosOK"));
-		
+
 		cancelButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));
 		cancelButton.setToolTipText(ResourceMgr.getDescription("LabelManageMacrosCancel"));
 		dummyPanel = new JPanel();
@@ -128,23 +127,23 @@ public class MacroManagerDialog
 
 		this.replaceEditorText = new WbCheckBox(ResourceMgr.getString("LabelReplaceCurrentSql"));
 		this.replaceEditorText.setToolTipText(ResourceMgr.getDescription("LabelReplaceCurrentSql"));
-		
+
 		JPanel p = new JPanel();
 		p.setLayout(new FlowLayout(FlowLayout.LEFT));
 		p.add(this.replaceEditorText);
 		p.add(new JPanel());
-		
+
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		buttonPanel.add(p);
-		
+
 		runButton.addActionListener(this);
 		runButton.setEnabled(false);
 		buttonPanel.add(runButton);
-		
+
 		okButton.addActionListener(this);
 		//okButton.setEnabled(false);
 		buttonPanel.add(okButton);
-		
+
 		cancelButton.addActionListener(this);
 		buttonPanel.add(cancelButton);
 
@@ -193,12 +192,12 @@ public class MacroManagerDialog
 			this.cancelled = false;
 			this.closeDialog();
 		}
-		catch (WbException e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void runButtonActionPerformed(ActionEvent evt)
 	{
 		this.runSelectedMacro();
@@ -217,14 +216,14 @@ public class MacroManagerDialog
 				this.client.executeMacro(name, this.replaceEditorText.isSelected());
 			}
 		}
-		catch (WbException e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
 	}
-	
+
   public boolean isCancelled() { return this.cancelled; }
-  
+
 	/** Closes the dialog */
 	private void closeDialog(WindowEvent evt)
 	{
@@ -238,7 +237,7 @@ public class MacroManagerDialog
 		WbManager.getSettings().setProperty("workbench.gui.macros", "replaceOnRun", Boolean.toString(this.replaceEditorText.isSelected()));
 		setVisible(false);
 	}
-	
+
 	public void valueChanged(javax.swing.event.ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
@@ -246,7 +245,7 @@ public class MacroManagerDialog
 		//this.okButton.setEnabled(selected);
 		this.runButton.setEnabled(selected);
 	}
-	
+
 	public void mouseClicked(java.awt.event.MouseEvent e)
 	{
 		if (e.getSource() == this.macroList)
@@ -257,21 +256,21 @@ public class MacroManagerDialog
 			}
 		}
 	}
-	
+
 	public void mouseEntered(java.awt.event.MouseEvent e)
 	{
 	}
-	
+
 	public void mouseExited(java.awt.event.MouseEvent e)
 	{
 	}
-	
+
 	public void mousePressed(java.awt.event.MouseEvent e)
 	{
 	}
-	
+
 	public void mouseReleased(java.awt.event.MouseEvent e)
 	{
 	}
-	
+
 }

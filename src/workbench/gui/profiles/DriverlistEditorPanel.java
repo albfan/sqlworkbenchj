@@ -14,7 +14,6 @@ import javax.swing.JToolBar;
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.DbDriver;
-import workbench.exception.WbException;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.components.WbSplitPane;
@@ -23,8 +22,8 @@ import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.FileActions;
 import workbench.resource.ResourceMgr;
 
-public class DriverlistEditorPanel 
-	extends JPanel 
+public class DriverlistEditorPanel
+	extends JPanel
 	implements FileActions
 {
 	private DriverListModel model;
@@ -151,16 +150,16 @@ public class DriverlistEditorPanel
 	/**
 	 *	Remove an item from the listmodel
 	 */
-	public void deleteItem() throws WbException
+	public void deleteItem() throws Exception
 	{
 		int index = this.driverList.getSelectedIndex();
 		this.driverList.clearSelection();
 		this.driverEditor.reset();
 		this.model.deleteDriver(index);
-		
+
 		// check if the last driver was deleted
 		if (index > this.model.getSize() - 1) index--;
-		
+
 		this.driverList.setSelectedIndex(index);
 		this.driverList.repaint();
 	}
@@ -169,7 +168,7 @@ public class DriverlistEditorPanel
 	 *	Create a new profile. This will only be
 	 *	created in the ListModel.
 	 */
-	public void newItem(boolean copyCurrent) throws WbException
+	public void newItem(boolean copyCurrent) throws Exception
 	{
 		DbDriver drv;
 		if (copyCurrent)
@@ -186,7 +185,7 @@ public class DriverlistEditorPanel
 		this.driverList.updateUI();
 	}
 
-	public void saveItem() throws WbException
+	public void saveItem() throws Exception
 	{
 		ConnectionMgr conn = WbManager.getInstance().getConnectionMgr();
 		this.driverEditor.updateDriver();
@@ -199,7 +198,7 @@ public class DriverlistEditorPanel
 		int location = this.jSplitPane1.getDividerLocation();
 		WbManager.getSettings().setProperty(this.getClass().getName(), "divider", location);
 	}
-	
+
 	public void restoreSettings()
 	{
 		int location = WbManager.getSettings().getIntProperty(this.getClass().getName(), "divider");

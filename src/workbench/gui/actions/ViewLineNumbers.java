@@ -21,8 +21,6 @@ import workbench.resource.ResourceMgr;
  */
 public class ViewLineNumbers extends WbAction
 {
-	private Border originalBorder;
-
 	private boolean switchedOn = false;
 	private JCheckBoxMenuItem toggleMenu;
 
@@ -70,5 +68,5 @@ public class ViewLineNumbers extends WbAction
 		}
 		aMenu.add(this.toggleMenu);
 	}
-	
+
 }
