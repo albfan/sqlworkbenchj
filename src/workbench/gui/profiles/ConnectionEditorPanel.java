@@ -397,7 +397,8 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		for (int i=0; i < count; i++)
 		{
 			driver = (DbDriver)this.cbDrivers.getItemAt(i);
-			if (driver.getDriverClass().equals(this.currentProfile.getDriverclass()))
+			String driverClass = driver.getDriverClass();
+			if (driverClass != null && driverClass.equals(this.currentProfile.getDriverclass()))
 			{
 				newIndex = i;
 				break;

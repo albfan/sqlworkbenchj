@@ -44,6 +44,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 		am.put(escAction.getActionName(), escAction);
 		this.getRootPane().setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
 		this.getRootPane().setActionMap(am);
+		this.labelContact.setVisible(false);
 	}
 	
 	/** This method is called from within the constructor to

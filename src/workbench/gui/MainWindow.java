@@ -72,7 +72,6 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		this.tabCount = WbManager.getSettings().getDefaultTabCount();
 		if (tabCount <= 0) tabCount = 1;
 
-		
 		for (int i=0; i < tabCount; i++)
 		{
 			SqlPanel sql = new SqlPanel(i + 1);
@@ -83,7 +82,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		
 		this.getContentPane().add(this.sqlTab, BorderLayout.CENTER);
 		this.setTitle(ResourceMgr.getString("MsgNotConnected"));
-		this.sqlTab.setBorder(null);
+		this.sqlTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.restorePosition();
 		this.setIconImage(ResourceMgr.getPicture("workbench16").getImage());
 
@@ -127,6 +126,24 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			List actions = sql.getActions();
 
 			HashMap menus = new HashMap(10);
+			
+			// Create the menus in the correct order
+			menu = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_EDIT));
+			menuBar.add(menu);
+			menus.put(ResourceMgr.MNU_TXT_EDIT, menu);
+
+			menu = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_VIEW));
+			menuBar.add(menu);
+			menus.put(ResourceMgr.MNU_TXT_VIEW, menu);
+			
+			menu = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_DATA));
+			menuBar.add(menu);
+			menus.put(ResourceMgr.MNU_TXT_DATA, menu);
+			
+			menu = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_SQL));
+			menuBar.add(menu);
+			menus.put(ResourceMgr.MNU_TXT_SQL, menu);
+			
 			for (int i=0; i < actions.size(); i++)
 			{
 				action = (WbAction)actions.get(i);
@@ -140,6 +157,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 				if (menu == null)
 				{
 					menu = new JMenu(ResourceMgr.getString(menuName));
+					menuBar.add(menu);
 					menus.put(menuName, menu);
 				}
 				boolean menuSep = "true".equals((String)action.getValue(WbAction.MENU_SEPARATOR));
@@ -148,13 +166,12 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 				{
 					menu.addSeparator();
 				}
-				menu.add(action.getMenuItem());
+				//menu.add(action.getMenuItem());
+				action.addToMenu(menu);
 			}
-			menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_EDIT);
-			menuBar.add(menu);
-			menus.remove(ResourceMgr.MNU_TXT_EDIT);
 			
-			menu = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_VIEW));
+			// now put the tabs into the view menu
+			menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_VIEW);
 			InputMap im = new ComponentInputMap(this.sqlTab);
 			ActionMap am = new ActionMap();
 			this.sqlTab.setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
@@ -169,14 +186,6 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 					am.put(action.getActionName(), action);
 				}
 				menu.add(action);
-			}
-			menuBar.add(menu);
-			
-			Iterator itr = menus.values().iterator();
-			while (itr.hasNext())
-			{
-				menu = (JMenu)itr.next();
-				menuBar.add(menu);
 			}
 			
 			menuBar.add(this.buildToolsMenu());

@@ -36,8 +36,15 @@ class RowData
 	public void setValue(int aColIndex, Object aValue)
 		throws IndexOutOfBoundsException
 	{
+		if (aValue == null) throw new NullPointerException("No null values allowed. Use setNull() instead");
 		if (!this.isNew())
 		{
+			Object oldValue = this.colData[aColIndex];
+			if (oldValue == null && aValue == null) return;
+			if (oldValue != null && aValue != null)
+			{
+				if (oldValue.equals(aValue)) return;
+			}
 			if (this.originalData == null)
 			{
 				this.originalData = new Object[this.colData.length];
@@ -70,11 +77,32 @@ class RowData
 		return this.originalData[aColumn];
 	}
 	
+	public void restoreOriginalValues()
+	{
+		if (this.originalData == null) return;
+		for (int i=0; i < this.originalData.length; i++)
+		{
+			if (this.originalData[i] != null)
+			{
+				this.colData[i] = this.originalData[i];
+			}
+		}
+		this.originalData = null;
+		this.resetStatus();
+	}
+	
 	public boolean isColumnModified(int aColumn)
 	{
 		if (this.isOriginal()) return false;
-		if (this.originalData == null) return false;
-		return (this.originalData[aColumn] != null);
+		if (this.isNew())
+		{
+			return this.colData[aColumn] != null;
+		}
+		else
+		{
+			if (this.originalData == null) return false;
+			return (this.originalData[aColumn] != null);
+		}
 	}
 	public void setNull(int aColumn)
 	{
@@ -117,7 +145,7 @@ class RowData
 	 */
 	public boolean isModified()
 	{
-		return this.status == MODIFIED;
+		return (this.status & MODIFIED) ==  MODIFIED;
 	}
 
 	/**

@@ -8,6 +8,7 @@ package workbench.gui.components;
 
 import javax.swing.Action;
 import javax.swing.JButton;
+import workbench.gui.actions.WbAction;
 
 /**
  *
@@ -26,7 +27,23 @@ public class WbToolbar
 
 	public JButton add(Action a)
 	{
-		WbToolbarButton button = new WbToolbarButton(a);
+		JButton button;
+		
+		if (a instanceof WbAction)
+		{
+			button = ((WbAction)a).getToolbarButton();
+		}
+		else
+		{
+			button = new WbToolbarButton(a);
+		}
+		this.add(button);
+		return button;
+	}
+	
+	public JButton add(WbAction a)
+	{
+		JButton button = a.getToolbarButton();
 		this.add(button);
 		return button;
 	}

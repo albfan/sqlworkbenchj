@@ -27,7 +27,6 @@ import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 
 import workbench.gui.actions.*;
-import workbench.gui.actions.CreateSnippetAction;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.menu.TextPopup;
 import workbench.log.LogMgr;
@@ -42,13 +41,15 @@ import workbench.util.WbPersistence;
  * @author  thomas
  * @version 1.0
  */
-public class SqlPanel extends JPanel implements Runnable, TableModelListener
+public class SqlPanel 
+	extends JPanel 
+	implements Runnable, TableModelListener
 {
-	private boolean selected = false;
+	private boolean selected;
 	private EditorPanel editor;
 	private SqlResultDisplay result;
 	private JSplitPane contentPanel;
-	private boolean threadBusy = false;
+	private boolean threadBusy;
 	private boolean suspended = true;
 	private Thread background;
 	//private JMenu[] menus = null;
@@ -62,10 +63,14 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 	
 	private NextStatementAction nextStmtAction;
 	private PrevStatementAction prevStmtAction;
-	private StopAction stopAction = null;
+	private StopAction stopAction;
 	private ExecuteAllAction executeAll;
 	private UpdateDatabaseAction updateAction;
 	private ExecuteSelAction executeSelected;
+	private StartEditAction startEditAction;
+	private InsertRowAction insertRowAction;
+	private DeleteRowAction deleteRowAction;
+	
 	private int internalId;
 	private String historyFilename;
 
@@ -113,14 +118,15 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 		toolbar.setBorderPainted(true);
 		for (int i=0; i < this.toolbarActions.size(); i++)
 		{
-			Action a = (Action)toolbarActions.get(i);
+			WbAction a = (WbAction)toolbarActions.get(i);
 			boolean toolbarSep = "true".equals((String)a.getValue(WbAction.TBAR_SEPARATOR));
 			{
 				if (toolbarSep)
 				{
 					toolbar.addSeparator();
 				}
-				toolbar.add(a);
+				//toolbar.add(a);
+				a.addToToolbar(toolbar);
 			}
 		}
 		toolbar.addSeparator();
@@ -157,8 +163,14 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 		this.actions.add(a);
 		this.actions.add(pop.getSelectAllAction());
 
+		this.startEditAction = new StartEditAction(this);
+		this.actions.add(this.startEditAction);
 		this.updateAction = new UpdateDatabaseAction(this);
 		this.actions.add(this.updateAction);
+		this.insertRowAction = new InsertRowAction(this);
+		this.deleteRowAction = new DeleteRowAction(this);
+		this.actions.add(this.insertRowAction);
+		this.actions.add(this.deleteRowAction);
 	
 		SaveDataAsAction save = new SaveDataAsAction(this.result);
 		save.setCreateMenuSeparator(true);
@@ -192,6 +204,9 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 		this.toolbarActions.add(this.prevStmtAction);
 		
 		this.toolbarActions.add(this.updateAction);
+		this.toolbarActions.add(this.startEditAction);
+		this.toolbarActions.add(this.insertRowAction);
+		this.toolbarActions.add(this.deleteRowAction);
 		
 		this.findAction = new FindAction(this);
 		this.findAction.setEnabled(false);
@@ -211,6 +226,8 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 		this.findAction.setCreateMenuSeparator(true);
 		this.actions.add(this.findAction);
 		this.actions.add(this.findAgainAction);
+		
+		this.makeReadOnly();
 	}
 	
 	private void setupActionMap()
@@ -245,7 +262,9 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 	
 	public void saveChangesToDatabase()
 	{
+		this.showStatusMessage(ResourceMgr.getString("MsgUpdatingDatabase"));
 		this.result.saveChangesToDatabase();
+		this.clearStatusMessage();
 	}
 	
 	/**
@@ -277,8 +296,8 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 		String criteria;
 		criteria = JOptionPane.showInputDialog(this, ResourceMgr.getString("EnterSearchCriteria"), this.lastSearchCriteria);
 		int row = this.result.search(criteria);
-		this.findAgainAction.setEnabled(row >= 0);
 		this.lastSearchCriteria = criteria;
+		this.setActionState(this.findAgainAction, (row >= 0));
 	}
 	
 	/**
@@ -297,6 +316,47 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 	public List getActions()
 	{
 		return this.actions;
+	}
+	
+	public void insertRow()
+	{
+		this.result.data.addRow();
+	}
+	
+	public void deleteRow()
+	{
+		this.result.data.deleteRow();
+	}
+	
+	public void makeReadOnly()
+	{
+		this.setActionState(new Action[] {this.updateAction, this.insertRowAction, this.deleteRowAction}, false);
+	}
+	
+	public void endEdit()
+	{
+		this.makeReadOnly();
+		this.result.data.restoreOriginalValues();
+	}
+	
+	public void startEdit()
+	{
+		// if the result is not yet updateable (automagically)
+		// then try to find the table. If the table cannot be
+		// determined, then ask the user
+		if (!this.result.isUpdateable())
+		{
+			if (!this.result.data.checkUpdateTable())
+			{
+				String table = JOptionPane.showInputDialog(this.getParent().getParent(), ResourceMgr.getString("MsgEnterUpdateTable"));
+				if (table != null)
+				{
+					this.result.data.setUpdateTable(table);
+				}
+			}
+		}
+		boolean update = this.result.data.isUpdateable();
+		this.setActionState(new Action[] {this.insertRowAction, this.deleteRowAction}, update);
 	}
 
 	private void initBackgroundThread()
@@ -480,14 +540,30 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 			});
 	}
 	
+	public void setActionState(final Action[] anActionList, final boolean aFlag)
+	{
+		EventQueue.invokeLater(
+			new Runnable()
+			{
+				public void run()
+				{
+					for (int i=0; i < anActionList.length; i++)
+					{
+						anActionList[i].setEnabled(aFlag);
+					}
+				}
+			});
+	}
+	
+	
 	public void runSql()
 	{
 		this.setCancelState(true);
 		this.setBusy(true);
-		//this.editor.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		this.makeReadOnly();
 		
 		this.showStatusMessage(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
-
+		this.startEditAction.setSwitchedOn(false);
 		String sql;
 		
 		if (selected) 
@@ -508,11 +584,11 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 		this.clearStatusMessage();
 		this.setBusy(false);
 		this.setCancelState(false);
-		this.setActionState(this.findAction, this.result.getRowCount() > 0);
-		this.setActionState(this.updateAction, this.result.isUpdateable());
-		//this.editor.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		this.setActionState(this.findAction, this.result.data.hasResultSet());
+		boolean mayEdit = this.result.data.hasResultSet() && this.result.data.hasUpdateableColumns();
+		this.setActionState(this.startEditAction, mayEdit);
 	}
-	
+
 	public void run()
 	{
 		while (true)
@@ -609,7 +685,8 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 	 */
 	public void tableChanged(TableModelEvent e)
 	{
-		this.updateAction.setEnabled(true);
+		if (this.result.data.isModified())
+			this.updateAction.setEnabled(true);
 	}
 	
 }

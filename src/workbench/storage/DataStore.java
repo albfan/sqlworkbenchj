@@ -16,10 +16,12 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
 import workbench.log.LogMgr;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -28,25 +30,37 @@ import workbench.log.LogMgr;
  */
 public class DataStore
 {
+	public static final Integer ROW_MODIFIED = new Integer(RowData.MODIFIED);
+	public static final Integer ROW_NEW = new Integer(RowData.NEW);
+	public static final Integer ROW_ORIGINAL = new Integer(RowData.NOT_MODIFIED);
+
+	private boolean modified;
 	private int colCount;
+	private int realColumns;
 	private ArrayList data;
 	private ArrayList pkColumns;
 	private ArrayList deletedRows;
 	private String updateTable;
+	private String sql;
 	
 	// Cached ResultSetMetaData information
 	private int[] columnTypes;
   private int[] columnSizes;
 	private String[] columnNames;
 	private String tableName;
-	private String[] columnClassNames = null;
+	private String[] columnClassNames;
 
 	public static final Object NULL_VALUE = new NullValue();
 	
-	public DataStore(int aColumnCount)
+	public DataStore(String[] aColNames)
 	{
 		this.data = new ArrayList();
-		this.colCount = aColumnCount;
+		this.colCount = aColNames.length;
+		this.columnNames = new String[this.colCount];
+		for (int i=0; i < this.colCount; i++)
+		{
+			this.columnNames[i] = aColNames[i];
+		}
 	}
 	
 	public DataStore(ResultSet aResultSet)
@@ -69,6 +83,44 @@ public class DataStore
 		throws IndexOutOfBoundsException
 	{
 		return this.columnTypes[aColumn];
+	}
+
+	public void deleteRow(int aRow)
+		throws IndexOutOfBoundsException
+	{
+		Object row = this.data.get(aRow);
+		if (this.deletedRows == null) this.deletedRows = new ArrayList();
+		this.deletedRows.add(row);
+		this.data.remove(aRow);
+		this.modified = true;
+	}
+	
+	public int addRow()
+	{
+		RowData row = new RowData(this.colCount);
+		this.data.add(row);
+		this.modified = true;
+		return this.getRowCount() - 1;
+	}
+	
+	public int insertRowAfter(int anIndex)
+	{
+		RowData row = new RowData(this.colCount);
+		anIndex ++;
+		int newIndex = -1;
+		
+		if (anIndex > this.data.size())
+		{
+			this.data.add(row);
+			newIndex = this.getRowCount();
+		}
+		else
+		{
+			this.data.add(anIndex, row);
+			newIndex = anIndex;
+		}
+		this.modified = true;
+		return newIndex;
 	}
 	
 	public void setUpdateTable(String aTablename)
@@ -111,8 +163,14 @@ public class DataStore
 	public void setValue(int aRow, int aColumn, Object aValue)
 		throws IndexOutOfBoundsException
 	{
+		// do not allow setting the value for columns
+		// which do not have a name. Those columns cannot 
+		// be saved to the database (because most likely they 
+		// are computed columns like count(*) etc)
+		if (this.columnNames[aColumn] == null) return;
 		RowData row = this.getRow(aRow);
 		row.setValue(aColumn,aValue);
+		this.modified = row.isModified();
 	}
 
 	public int getColumnIndex(String aName)
@@ -126,6 +184,27 @@ public class DataStore
 		RowData row = this.getRow(aRow);
 		return row.isNew();
 	}
+
+	public void restoreOriginalValues()
+	{
+		RowData row;
+		if (this.deletedRows != null)
+		{
+			for (int i=0; i < this.deletedRows.size(); i++)
+			{
+				row = (RowData)this.deletedRows.get(i);
+				this.data.add(row);
+			}
+			this.deletedRows.clear();
+			this.deletedRows = null;
+		}
+		for (int i=0; i < this.data.size(); i++)
+		{
+			row = this.getRow(i);
+			row.restoreOriginalValues();
+		}
+		this.resetStatus();
+	}
 	
 	public boolean isRowNew(int aRow)
 		throws IndexOutOfBoundsException
@@ -134,13 +213,12 @@ public class DataStore
 		return row.isNew();
 	}
 	
-	public int appendRow()
+	public boolean hasUpdateableColumns()
 	{
-		RowData row = new RowData(this.colCount);
-		this.data.add(row);
-		return this.getRowCount();
+		return (this.realColumns > 0);
 	}
-
+	
+	public boolean isModified() { return this.modified;  }
 	public boolean isUpdateable()
 	{
 		return (this.updateTable != null);
@@ -198,6 +276,7 @@ public class DataStore
 					colmapping[i] = col;
 					this.columnTypes[col] = metaData.getColumnType(i + 1);
 					this.columnSizes[col] = metaData.getColumnDisplaySize(i + 1);
+					if (name != null && name.trim().length() > 0) this.realColumns ++;
 					this.columnNames[col] = name;
 					col ++;
 				}
@@ -225,7 +304,7 @@ public class DataStore
 				row.resetStatus();
 				this.data.add(row);
 			}
-			
+			this.modified = false;
 		}
 		catch (Exception e)
 		{
@@ -233,6 +312,26 @@ public class DataStore
 		}
 	}
 
+	public void setOriginalStatement(String aSql)
+	{
+		this.sql = aSql;
+	}
+	
+	public boolean checkUpdateTable()
+	{
+		if (this.sql == null) return false;
+		return this.checkUpdateTable(this.sql);
+	}
+			
+	public boolean checkUpdateTable(String aSql)
+	{
+		List tables = SqlUtil.getTables(aSql);
+		if (tables.size() != 1) return false;
+		String table = (String)tables.get(0);
+		this.setUpdateTable(table);
+		return true;
+	}
+	
 	/**
 	 * Save the changes to this datastore to the database.
 	 * The changes are applied in the following order
@@ -247,6 +346,8 @@ public class DataStore
 	{
 		int rows = 0;
 		List statements = this.getUpdateStatements(aConnection);
+		if (statements.size() == 0) return 0;
+		
 		try
 		{
 			for (int i=0; i < statements.size(); i++)
@@ -255,6 +356,7 @@ public class DataStore
 				rows += stmt.execute(aConnection);
 			}
 			if (!aConnection.getAutoCommit()) aConnection.commit();
+			this.resetStatus();
 		}
 		catch (SQLException e)
 		{
@@ -268,9 +370,53 @@ public class DataStore
 		return rows;
 	}
 
+	public void resetStatus()
+	{
+		this.deletedRows = null;
+		this.modified = false;
+		for (int i=0; i < this.data.size(); i++)
+		{
+			RowData row = this.getRow(i);
+			row.resetStatus();
+		}
+	}
+	
+	/**
+	 * Return the status object for the give row.
+	 * The status is one of 
+	 * <ul>
+	 * <li>DataStore.ROW_ORIGINAL</li>
+	 * <li>DataStore.ROW_MODIFIED</li>
+	 * <li>DataStore.ROW_NEW</li>
+	 * <ul>
+	 * The status object is used by the renderer in the result 
+	 * table to display the approriate icon.
+	 */
+	public Integer getRowStatus(int aRow)
+		throws IndexOutOfBoundsException
+	{
+		RowData row = this.getRow(aRow);
+		if (row.isOriginal())
+		{
+			return ROW_ORIGINAL;
+		}
+		else if (row.isNew())
+		{
+			return ROW_NEW;
+		}
+		else if (row.isModified())
+		{
+			return ROW_MODIFIED;
+		}
+		else
+		{
+			return ROW_ORIGINAL;
+		}
+	}
+
 	/**
 	 * Returns a List of {@link #DmlStatements } which 
-	 * would be executed if to store the current content
+	 * would be executed in order to store the current content
 	 * of the DataStore.
 	 */
 	public List getUpdateStatements(WbConnection aConnection)
@@ -278,120 +424,227 @@ public class DataStore
 	{
 		if (this.updateTable == null) throw new WbException("No update table defined!");
 		this.updatePkInformation(aConnection);
-		ArrayList stmt = new ArrayList();
-		stmt.addAll(this.createDeleteStatements());
-		stmt.addAll(this.createUpdateStatements());
-		stmt.addAll(this.createInsertStatements());
-		return stmt;
-	}
-	
-	private List createUpdateStatements()
-	{
-		ArrayList result = new ArrayList();
+		ArrayList deletes  = new ArrayList();
+		ArrayList updates = new ArrayList();
+		ArrayList inserts = new ArrayList();
 		RowData row;
-		boolean first = true;
+		DmlStatement dml;
 		for (int i=0; i < this.getRowCount(); i ++)
 		{
 			row = this.getRow(i);
-			if (row.isModified())
+			if (row.isModified() && !row.isNew())
 			{
-				ArrayList values = new ArrayList();
-				StringBuffer sql = new StringBuffer("UPDATE ");
-				sql.append(this.updateTable);
-				sql.append(" SET ");
-				first = true;
-				for (int col=0; col < this.colCount; col ++)
+				dml = this.createUpdateStatement(row);
+				if (dml != null) updates.add(dml);
+			}
+			else if (row.isNew() && row.isModified())
+			{
+				dml = this.createInsertStatement(row);
+				if (dml != null) inserts.add(dml);
+			}
+		}
+
+		if (this.deletedRows != null && this.deletedRows.size() > 0)
+		{
+			for (int i=0; i < this.deletedRows.size(); i++)
+			{
+				row = (RowData)this.deletedRows.get(i);
+				if (!row.isNew())
 				{
-					if (row.isColumnModified(col))
-					{
-						if (first)
-						{
-							first = false;
-						}
-						else 
-						{
-							sql.append(", ");
-						}
-						sql.append(this.getColumnName(col));
-						sql.append(" = ?");
-						values.add(row.getValue(col));
-					}
-				}
-				sql.append(" WHERE ");
-				first = true;
-				for (int j=0; j < this.pkColumns.size(); j++)
-				{
-					int pkcol = ((Integer)this.pkColumns.get(j)).intValue();
-					if (first) 
-					{
-						first = false;
-					}
-					else
-					{
-						sql.append(" AND ");
-					}
-					sql.append(this.getColumnName(pkcol));
-					sql.append(" = ?");
-					values.add(row.getOriginalValue(pkcol));
-				}
-				try
-				{
-					DmlStatement dml = new DmlStatement(sql.toString(), values);
-					result.add(dml);
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError(this, "Error creating DmlStatement for " + sql.toString(), e);
+					dml = this.createDeleteStatement(row);
+					if (dml != null) deletes.add(dml);
 				}
 			}
 		}
-		return result;
+		ArrayList stmt = new ArrayList();
+		stmt.addAll(deletes);
+		stmt.addAll(updates);
+		stmt.addAll(inserts);
+		return stmt;
 	}
 	
-	private List createInsertStatements()
+	private DmlStatement createUpdateStatement(RowData aRow)
 	{
-		return Collections.EMPTY_LIST;
+		boolean first = true;
+		DmlStatement dml;
+		
+		if (!aRow.isModified()) return null;
+		ArrayList values = new ArrayList();
+		StringBuffer sql = new StringBuffer("UPDATE ");
+		
+		sql.append(this.updateTable);
+		sql.append(" SET ");
+		first = true;
+		for (int col=0; col < this.colCount; col ++)
+		{
+			if (aRow.isColumnModified(col))
+			{
+				if (first)
+				{
+					first = false;
+				}
+				else 
+				{
+					sql.append(", ");
+				}
+				sql.append(this.getColumnName(col));
+				sql.append(" = ?");
+				values.add(aRow.getValue(col));
+			}
+		}
+		sql.append(" WHERE ");
+		first = true;
+		for (int j=0; j < this.pkColumns.size(); j++)
+		{
+			int pkcol = ((Integer)this.pkColumns.get(j)).intValue();
+			if (first) 
+			{
+				first = false;
+			}
+			else
+			{
+				sql.append(" AND ");
+			}
+			sql.append(this.getColumnName(pkcol));
+			sql.append(" = ?");
+			values.add(aRow.getOriginalValue(pkcol));
+		}
+		try
+		{
+			dml = new DmlStatement(sql.toString(), values);
+		}
+		catch (Exception e)
+		{
+			dml = null;
+			LogMgr.logError(this, "Error creating DmlStatement for " + sql.toString(), e);
+		}
+		return dml;
 	}
 	
-	private List createDeleteStatements()
+	private DmlStatement createInsertStatement(RowData aRow)
 	{
-		return Collections.EMPTY_LIST;
+		boolean first = true;
+		DmlStatement dml;
+		
+		if (!aRow.isModified()) return null;
+		ArrayList values = new ArrayList();
+		StringBuffer sql = new StringBuffer("INSERT INTO ");
+		StringBuffer valuePart = new StringBuffer(") VALUES (");
+		sql.append(this.updateTable);
+		sql.append(" (");
+		first = true;
+		for (int col=0; col < this.colCount; col ++)
+		{
+			if (aRow.isColumnModified(col))
+			{
+				if (first)
+				{
+					first = false;
+					valuePart.append('?');
+				}
+				else 
+				{
+					sql.append(", ");
+					valuePart.append(",?");
+				}
+				values.add(aRow.getValue(col));
+				sql.append(this.getColumnName(col));
+			}
+		}
+		valuePart.append(')');
+		sql.append(valuePart);
+		try
+		{
+			dml = new DmlStatement(sql.toString(), values);
+		}
+		catch (Exception e)
+		{
+			dml = null;
+			LogMgr.logError(this, "Error creating DmlStatement for " + sql.toString(), e);
+		}
+		return dml;
+	}
+	
+	private DmlStatement createDeleteStatement(RowData aRow)
+	{
+		if (aRow == null) return null;
+		
+		// don't create a statement for a row which was inserted and 
+		// then deleted
+		if (aRow.isNew()) return null;
+		
+		boolean first = true;
+		DmlStatement dml;
+		
+		ArrayList values = new ArrayList();
+		StringBuffer sql = new StringBuffer("DELETE FROM ");
+		sql.append(this.updateTable);
+		sql.append(" WHERE ");
+		first = true;
+		for (int j=0; j < this.pkColumns.size(); j++)
+		{
+			int pkcol = ((Integer)this.pkColumns.get(j)).intValue();
+			if (first) 
+			{
+				first = false;
+			}
+			else
+			{
+				sql.append(" AND ");
+			}
+			sql.append(this.getColumnName(pkcol));
+			sql.append(" = ?");
+			values.add(aRow.getOriginalValue(pkcol));
+		}
+		try
+		{
+			dml = new DmlStatement(sql.toString(), values);
+		}
+		catch (Exception e)
+		{
+			dml = null;
+			LogMgr.logError(this, "Error creating DELETE Statement for " + sql.toString(), e);
+		}
+		return dml;
 	}
 	
 	private void updatePkInformation(WbConnection aConnection)
 		throws SQLException
 	{
 		if (this.pkColumns != null) return;
-		Connection sqlConn = aConnection.getSqlConnection();
-		DatabaseMetaData meta = sqlConn.getMetaData();
-		if (meta.storesUpperCaseIdentifiers()) 
-		{
-			this.updateTable = this.updateTable.toUpperCase();
-		}
-		else if (meta.storesLowerCaseIdentifiers())
-		{
-			this.updateTable = this.updateTable.toLowerCase();
-		}
-		ResultSet rs = meta.getBestRowIdentifier(null, null, this.updateTable, DatabaseMetaData.bestRowSession, false);
 		this.pkColumns = new ArrayList();
-		int index;
-		String col;
-		while (rs.next())
+		if (aConnection != null)
 		{
-			col = rs.getString("COLUMN_NAME");
-			try
+			Connection sqlConn = aConnection.getSqlConnection();
+			DatabaseMetaData meta = sqlConn.getMetaData();
+			if (meta.storesUpperCaseIdentifiers()) 
 			{
-				index = this.findColumn(col);
-				this.pkColumns.add(new Integer(index));
+				this.updateTable = this.updateTable.toUpperCase();
 			}
-			catch (SQLException e)
+			else if (meta.storesLowerCaseIdentifiers())
 			{
-				LogMgr.logError(this, "Identifier column " + col + " not found in resultset! Using all rows as keys", e);
-				this.pkColumns.clear();
-				break;
+				this.updateTable = this.updateTable.toLowerCase();
 			}
+			ResultSet rs = meta.getBestRowIdentifier(null, null, this.updateTable, DatabaseMetaData.bestRowSession, false);
+			int index;
+			String col;
+			while (rs.next())
+			{
+				col = rs.getString("COLUMN_NAME");
+				try
+				{
+					index = this.findColumn(col);
+					this.pkColumns.add(new Integer(index));
+				}
+				catch (SQLException e)
+				{
+					LogMgr.logError(this, "Identifier column " + col + " not found in resultset! Using all rows as keys", e);
+					this.pkColumns.clear();
+					break;
+				}
+			}
+			rs.close();
 		}
-		rs.close();
 		if (this.pkColumns.size() == 0)
 		{
 			for (int i=0; i < this.colCount; i++)
@@ -421,20 +674,33 @@ public class DataStore
 	{
 		try
 		{
-			Class.forName("oracle.jdbc.OracleDriver");
-			Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:oradb", "test", "test");
-			WbConnection wb = new WbConnection(con);
+			//Class.forName("oracle.jdbc.OracleDriver");
+			//Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:oradb", "test", "test");
+			//WbConnection wb = new WbConnection(con);
 			try
 			{
-				Statement stmt = con.createStatement();
-				ResultSet rs = stmt.executeQuery("select nr, name from test");
-				DataStore ds = new DataStore(rs);
-				rs.close();
-				ds.setUpdateTable("test");
-				ds.setValue(0, 0, new Integer(42));
-				ds.setValue(0, 0, new Integer(22));
-				ds.setValue(0, 1, "Ein neuer name");
-				List l = ds.getUpdateStatements(wb);
+				//Statement stmt = con.createStatement();
+				//ResultSet rs = stmt.executeQuery("select nr, name from test");
+				//DataStore ds = new DataStore(rs);
+				//rs.close();
+				DataStore ds = new DataStore(new String[] { "Column1", "Column2"} );
+				ds.setUpdateTable("mytable");
+				int row = ds.addRow();
+				ds.setValue(row, 0, "Testing");
+				ds.setValue(row, 1, new Integer(42));
+				ds.resetStatus();
+				ds.deleteRow(row);
+				row = ds.addRow();
+				ds.setValue(row, 0, "Second row");
+				ds.setValue(row, 1, new Integer(21));
+				
+				row = ds.addRow();
+				ds.setValue(row, 0, "delete test");
+				ds.deleteRow(row);
+				
+				ds.addRow();
+				
+				List l = ds.getUpdateStatements(null);
 				for (int i=0; i < l.size(); i ++)
 				{
 					System.out.println(l.get(i));
@@ -444,8 +710,8 @@ public class DataStore
 			{
 				e.printStackTrace();
 			}
-			con.commit();
-			con.close();
+			//con.commit();
+			//con.close();
 		}
 		catch (Exception e)
 		{

@@ -9,9 +9,14 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
+import javax.swing.AbstractButton;
 import javax.swing.Action;
+import javax.swing.JButton;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import workbench.gui.components.WbToolbarButton;
 import workbench.interfaces.ClipboardSupport;
 import workbench.resource.ResourceMgr;
 
@@ -26,8 +31,10 @@ public abstract class WbAction extends AbstractAction
 	public static final String MENU_SEPARATOR = "MenuSepBefore";
 	public static final String TBAR_SEPARATOR = "TbarSepBefore";
 	
-	private String actionName = null;
-
+	private String actionName;
+	protected JMenuItem menuItem;
+	protected JButton toolbarButton;
+	
 	public WbAction()
 	{
 		String c = this.getClass().getName();
@@ -46,13 +53,29 @@ public abstract class WbAction extends AbstractAction
 		return (KeyStroke)this.getValue(Action.ACCELERATOR_KEY);
 	}
 
+	public JButton getToolbarButton()
+	{
+		this.toolbarButton = new WbToolbarButton(this);
+		return this.toolbarButton;
+	}
+	
+	public void addToToolbar(JToolBar aToolbar)
+	{
+		aToolbar.add(this.getToolbarButton());
+	}
+	
+	public void addToMenu(JMenu aMenu)
+	{
+		aMenu.add(this.getMenuItem());
+	}
+	
 	public JMenuItem getMenuItem()
 	{
-		JMenuItem item = new JMenuItem();
-		item.setMargin(new Insets(0,0,0,0));
-		item.setAction(this);
-		item.setAccelerator(this.getAccelerator());
-		return item;
+		this.menuItem = new JMenuItem();
+		this.menuItem.setMargin(new Insets(0,0,0,0));
+		this.menuItem.setAction(this);
+		this.menuItem.setAccelerator(this.getAccelerator());
+		return this.menuItem;
 	}
 
 	public void setCreateToolbarSeparator(boolean aFlag)

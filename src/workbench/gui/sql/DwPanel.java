@@ -1,9 +1,12 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,12 +18,15 @@ import java.util.List;
 import java.util.StringTokenizer;
 import javax.swing.CellEditor;
 import javax.swing.DefaultCellEditor;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
@@ -38,6 +44,7 @@ import workbench.gui.components.WbTable;
 import workbench.gui.renderer.DateColumnRenderer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
 
@@ -90,23 +97,42 @@ public class DwPanel extends JPanel
 		this.dbConnection = aConn;
 	}
 	
-	/**
-	 *	Define the SELECT statement for this DBPanel.
-	 *	If the given statement is NOT a SELECT statement
-	 *	an InvalidStatementException is thrown.
-	 */
-	public void setSqlStatement(String aStatement)
-		throws SQLException, InvalidStatementException, WbException
+	public int saveChanges(WbConnection aConnection)
+		throws WbException, SQLException
 	{
-		this.sql = aStatement;
-	}
-	
-	public void saveChangesToDatabase()
-		throws SQLException
-	{
+		int rows = 0;
 		try
 		{
-			this.realModel.saveChangesToDatabase(this.dbConnection);
+			DataStore ds = this.realModel.getDataStore();
+			if (WbManager.getSettings().getDbDebugMode())
+			{
+				Dimension max = new Dimension(300,32768);
+				JTextArea preview = new JTextArea();
+				preview.setLineWrap(false);
+				preview.setColumns(40);
+				preview.setPreferredSize(null);
+				preview.setMaximumSize(max);
+				JScrollPane scroll = new JScrollPane(preview);
+				scroll.setMaximumSize(max);
+				List stmts = ds.getUpdateStatements(aConnection);
+				for (int i=0; i < stmts.size(); i++)
+				{
+					preview.append(stmts.get(i).toString());
+					preview.append(";\r\n");
+				}
+				Window win = SwingUtilities.getWindowAncestor(this);
+				int choice = JOptionPane.showConfirmDialog(win, scroll, "Please confirm updates", JOptionPane.OK_CANCEL_OPTION);
+				if (choice == JOptionPane.CANCEL_OPTION) return 0;
+			}
+			long start, end;
+			start = System.currentTimeMillis();
+			rows = ds.updateDb(aConnection);
+			end = System.currentTimeMillis();
+			long sqlTime = (end - start);
+			this.infoTable.repaint();
+			this.lastMessage = ResourceMgr.getString("MsgUpdateSuccessfull");
+			this.lastMessage = this.lastMessage + "\r\n" + rows + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED);
+			this.lastMessage = this.lastMessage + ResourceMgr.getString("MsgExecTime") + " " + (((double)sqlTime) / 1000.0) + "s";
 		}
 		catch (SQLException e)
 		{
@@ -114,12 +140,32 @@ public class DwPanel extends JPanel
 			this.lastMessage = ExceptionUtil.getDisplay(e);
 			throw e;
 		}
+		return rows;
+	}
+	
+	public void setUpdateTable(String aTable)
+	{
+		this.realModel.setUpdateTable(aTable);
+	}
+	
+	public boolean checkUpdateTable()
+	{
+		return this.realModel.getDataStore().checkUpdateTable(this.sql);
 	}
 	
 	public boolean isUpdateable()
 	{
 		if (this.realModel == null) return false;
-		return this.realModel.isUpdateable();
+		if (this.realModel.getDataStore().hasUpdateableColumns())
+			return this.realModel.isUpdateable();
+		else
+			return false;
+	}
+
+	public boolean hasUpdateableColumns()
+	{
+		if (this.realModel == null) return false;
+		return this.realModel.getDataStore().hasUpdateableColumns();
 	}
 	
 	public void runStatement(String aSql)
@@ -140,6 +186,7 @@ public class DwPanel extends JPanel
 			LogMgr.logInfo(this, "No connection given or connection closed!");
 			return;
 		}
+		this.sql = null;
 		
 		try
 		{
@@ -187,23 +234,7 @@ public class DwPanel extends JPanel
 			}
 			else
 			{
-				this.prepStatement = null;
-				if (verb.equalsIgnoreCase("SELECT"))
-				{
-					try
-					{
-						this.prepStatement = sqlcon.prepareStatement(aSql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-					}
-					catch (Throwable th)
-					{
-						LogMgr.logWarning(this, "Could not create updateable ResultSet!");
-						this.prepStatement = null;
-					}
-				}
-				if (this.prepStatement == null)
-				{
-					this.prepStatement = sqlcon.prepareStatement(aSql);
-				}
+				this.prepStatement = sqlcon.prepareStatement(aSql);
 				start = System.currentTimeMillis();
 				this.prepStatement.execute();
 				end = System.currentTimeMillis();
@@ -215,7 +246,9 @@ public class DwPanel extends JPanel
 			{
 				this.hasResultSet = true;
 				start = System.currentTimeMillis();
+				this.sql = aSql;
 				this.realModel = new ResultSetTableModel(rs, keepColumns);
+				this.realModel.getDataStore().checkUpdateTable();
 				this.setVisible(false);
 				this.infoTable.setAutoCreateColumnsFromModel(true);
 				this.infoTable.setModel(this.realModel, true);
@@ -223,7 +256,7 @@ public class DwPanel extends JPanel
 				this.infoTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 				this.setVisible(true);
 				end = System.currentTimeMillis();
-				System.out.println("populate = " + (end-start));
+				//System.out.println("populate = " + (end-start));
 				this.lastMessage = ResourceMgr.getString(ResourceMgr.MSG_SQL_EXCUTE_OK);
 				rs.close();
 				this.statusBar.setRowcount(this.infoTable.getModel().getRowCount());
@@ -263,6 +296,47 @@ public class DwPanel extends JPanel
 		}
 		
 	}
+	
+	public void deleteRow()
+	{
+		int selectedRow = this.infoTable.getSelectedRow();
+		if (selectedRow != -1)
+		{
+			this.realModel.deleteRow(selectedRow);
+			if (selectedRow >= this.realModel.getRowCount())
+			{
+				selectedRow --;
+			}
+			this.infoTable.getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
+		}
+	}
+	
+	public void addRow()
+	{
+		int selectedRow = this.infoTable.getSelectedRow();
+		final int newRow;
+		
+		if (selectedRow == -1)
+		{
+			newRow = this.realModel.addRow();
+		}
+		else
+		{
+			newRow = this.realModel.insertRow(selectedRow);
+		}
+		this.infoTable.getSelectionModel().setSelectionInterval(newRow, newRow);
+		infoTable.grabFocus();
+		infoTable.setEditingRow(newRow);
+		infoTable.setEditingColumn(1);
+		infoTable.editCellAt(newRow, 1);
+		CellEditor edit = infoTable.getCellEditor();
+		if (edit instanceof DefaultCellEditor)
+		{
+			DefaultCellEditor editor = (DefaultCellEditor)edit;
+			editor.getComponent().requestFocus();
+		}
+	}
+	
 	public boolean cancelExecution()
 	{
 		if (this.prepStatement != null)
@@ -285,9 +359,16 @@ public class DwPanel extends JPanel
 			return false;
 		}
 	}
-	
+
+	public void restoreOriginalValues()
+	{
+		this.realModel.getDataStore().restoreOriginalValues();
+		this.repaint();
+	}
 	public String getLastMessage() { return this.lastMessage; }
 	public boolean hasResultSet() { return this.hasResultSet; }
+
+	public boolean isModified() { return this.realModel.getDataStore().isModified(); }
 
 	private void initColumns()
 	{
@@ -307,7 +388,7 @@ public class DwPanel extends JPanel
 		numberField.setHorizontalAlignment(SwingConstants.RIGHT);
 		DefaultCellEditor numbEditor = new DefaultCellEditor(numberField);
 		
-		for (int i=0; i < colMod.getColumnCount(); i++)
+		for (int i=1; i < colMod.getColumnCount(); i++)
 		{
 			TableColumn col = colMod.getColumn(i);
 			if (Number.class.isAssignableFrom(this.realModel.getColumnClass(i)))

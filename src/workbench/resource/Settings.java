@@ -414,5 +414,9 @@ public class Settings
 		this.props.setProperty("workbench.sql.alternatedelimiter", aDelimit);
 	}
 	
+	public boolean getDbDebugMode()
+	{
+		return "true".equals(this.props.getProperty("workbench.db.debugger", "true"));
+	}
 
 }

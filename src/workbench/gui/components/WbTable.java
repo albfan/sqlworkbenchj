@@ -15,13 +15,16 @@ import javax.swing.JScrollPane;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import workbench.gui.renderer.DateColumnRenderer;
+import workbench.gui.renderer.RowStatusRenderer;
 
 public class WbTable extends javax.swing.JTable
 {
 	private WbTableSorter sortModel;
 	private ResultSetTableModel dwModel;
+	private TableModel originalModel;
 	private int lastFoundRow = -1;
 	private String lastSearchText = null;
 	private TableModelListener changeListener = null;
@@ -44,20 +47,18 @@ public class WbTable extends javax.swing.JTable
 		{
 			super.setModel(aModel);
 			this.sortModel = null;
+			this.originalModel = aModel;
+			this.checkModel();
 		}
 		else
 		{
 			this.setModelForSorting(aModel);
 		}
-		if (aModel instanceof ResultSetTableModel)
-		{
-			this.dwModel = (ResultSetTableModel)aModel;
-			this.dwModel.addTableModelListener(this.changeListener);
-		}
 	}
 	
 	public void setModelForSorting(TableModel aModel)
 	{
+		this.originalModel = aModel;
 		this.sortModel = new WbTableSorter(aModel);
 		super.setModel(this.sortModel);
     JTableHeader header = this.getTableHeader();
@@ -66,8 +67,24 @@ public class WbTable extends javax.swing.JTable
 			header.setDefaultRenderer(new SortHeaderRenderer());
 			this.sortModel.addMouseListenerToHeaderInTable(this);
 		}
+		this.checkModel();
 	}
 
+	private void checkModel()
+	{
+		if (this.originalModel == null) return;
+		if (this.originalModel instanceof ResultSetTableModel)
+		{
+			this.dwModel = (ResultSetTableModel)this.originalModel;
+			if (this.changeListener != null) this.dwModel.addTableModelListener(this.changeListener);
+			TableColumn col = this.getColumnModel().getColumn(0);
+			col.setCellRenderer(new RowStatusRenderer());
+			col.setMaxWidth(20);
+			col.setMinWidth(20);
+			col.setPreferredWidth(20);
+		}
+	}
+	
 	public int getSortedViewColumnIndex()
 	{
 		if (this.sortModel == null) return -1;
@@ -179,11 +196,13 @@ public class WbTable extends javax.swing.JTable
 	public void addTableModelListener(TableModelListener aListener)
 	{
 		this.changeListener = aListener;
+		if (this.dwModel != null) this.dwModel.addTableModelListener(aListener);
 	}
 
 	public void removeTableModelListener(TableModelListener aListener)
 	{
-		this.dwModel.removeTableModelListener(aListener);
+		this.changeListener = null;
+		if (this.dwModel != null) this.dwModel.removeTableModelListener(aListener);
 	}
 	
 	public void scrollToRow(int aRow)

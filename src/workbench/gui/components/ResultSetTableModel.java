@@ -23,8 +23,9 @@ import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 
 
-/** 	TableModel for displaying the contents of a ResultSet.
- * 	The data is cached in a DataStore.
+/** 
+ * TableModel for displaying the contents of a ResultSet.
+ * The data is cached in a {@link workbench.storage.DataStore }
  */
 public class ResultSetTableModel 
 	extends AbstractTableModel
@@ -43,7 +44,11 @@ public class ResultSetTableModel
 	{
 		this.dataCache = new DataStore(aResultSet, aColumnList);
 	}
-		
+	
+	public DataStore getDataStore()
+	{
+		return this.dataCache;
+	}
 	/**
 	 *	Return the contents of the field at the given position
 	 *	in the result set.
@@ -52,10 +57,14 @@ public class ResultSetTableModel
 	 */
 	public Object getValueAt(int row, int col)
 	{
+		if (col == 0)
+		{
+			return this.dataCache.getRowStatus(row);
+		}
 		try
 		{
 			Object result;
-			result = this.dataCache.getValue(row, col);
+			result = this.dataCache.getValue(row, col - 1);
 			return result;
 		}
 		catch (Exception e)
@@ -90,6 +99,12 @@ public class ResultSetTableModel
 		}
 		return index;
 	}
+	
+	public void setUpdateTable(String aTable)
+	{
+		this.dataCache.setUpdateTable(aTable);
+	}
+	
 	public boolean isUpdateable() { return this.dataCache.isUpdateable(); }
 	
 	public void setValueAt(Object aValue, int row, int column)
@@ -99,7 +114,7 @@ public class ResultSetTableModel
 			if (this.isUpdateable())
 			{
 				Object realValue = this.convertCellValue(aValue, row, column);
-				this.dataCache.setValue(row, column, realValue);
+				this.dataCache.setValue(row, column - 1, realValue);
 				fireTableDataChanged();
 			}
 		}
@@ -151,14 +166,15 @@ public class ResultSetTableModel
 	 */
 	public int getColumnCount()
 	{
-		return this.dataCache.getColumnCount();
+		return this.dataCache.getColumnCount() + 1;
 	}
 
 	public int getColumnWidth(int aColumn)
 	{
+		if (aColumn == 0) return 18;
 		try
 		{
-			return this.dataCache.getColumnDisplaySize(aColumn);
+			return this.dataCache.getColumnDisplaySize(aColumn - 1);
 		}
 		catch (Exception e)
 		{
@@ -169,9 +185,11 @@ public class ResultSetTableModel
 	
 	public int getColumnType(int aColumn)
 	{
+		if (aColumn == 0) return 0;
+		
 		try
 		{
-			return this.dataCache.getColumnType(aColumn);
+			return this.dataCache.getColumnType(aColumn - 1);
 		}
 		catch (Exception e)
 		{
@@ -190,6 +208,8 @@ public class ResultSetTableModel
 
 	public Class getColumnClass(int aColumn)
 	{
+		if (aColumn == 0) return Integer.class;
+		
 		int type = this.getColumnType(aColumn);
 		switch (type)
 		{
@@ -218,6 +238,24 @@ public class ResultSetTableModel
 		}
 	}
 	
+	public int insertRow(int afterRow)
+	{
+		int row = this.dataCache.insertRowAfter(afterRow);
+		this.fireTableRowsInserted(row, row);
+		return row;
+	}
+	
+	public int addRow()
+	{
+		int row = this.dataCache.addRow();
+		this.fireTableRowsInserted(row, row);
+		return row;
+	}
+	public void deleteRow(int aRow)
+	{
+		this.dataCache.deleteRow(aRow);
+		this.fireTableRowsDeleted(aRow, aRow);
+	}
 	
 	public void dispose()
 	{
@@ -233,12 +271,14 @@ public class ResultSetTableModel
 	 */	
 	public String getColumnName(int aColumn)
 	{
+		if (aColumn == 0) return " ";
+		
 		try
 		{
-			String name = this.dataCache.getColumnName(aColumn);
+			String name = this.dataCache.getColumnName(aColumn - 1);
 			if (name == null || name.length() == 0)
 			{
-				name = "Col" + (aColumn + 1);
+				name = "Col" + aColumn;
 			}
 			return name;
 		}
@@ -252,7 +292,7 @@ public class ResultSetTableModel
 	{
 		int count = this.getColumnCount();
 		StringBuffer result = new StringBuffer(count * 20);
-		for (int c=0; c < count; c++)
+		for (int c=1; c < count; c++)
 		{
 			Object value = this.getValueAt(aRow, c);
 			if (value != null) result.append(value.toString());
@@ -263,13 +303,7 @@ public class ResultSetTableModel
 	
 	public boolean isCellEditable(int row, int column)
 	{
-		return true;
-	}
-	
-	public void saveChangesToDatabase(WbConnection aConnection)
-		throws SQLException
-	{
-		//this.dataCache.acceptChanges(this.dbConnection.getSqlConnection());
+		return (column != 0);
 	}
 	
 }

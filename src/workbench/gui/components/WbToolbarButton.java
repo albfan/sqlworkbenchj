@@ -17,18 +17,14 @@ import javax.swing.Action;
 public class WbToolbarButton extends javax.swing.JButton
 {
 
+	public static final Insets MARGIN = new Insets(1,1,1,1);
+	
 	/** Creates a new instance of WbToolbarButton */
 	public WbToolbarButton(Action a)
 	{
 		super(a);
 		this.setText(null);
-		//Dimension d = new Dimension(24,24);
-		//this.setMaximumSize(d);
-		//this.setPreferredSize(d);
-		//this.setMinimumSize(d);
-		Insets m = new Insets(1,1,1,1);
-		this.setMargin(m);
-		//this.setRolloverEnabled(true);
+		this.setMargin(MARGIN);
 	}
 
 }

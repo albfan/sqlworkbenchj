@@ -43,7 +43,7 @@ import workbench.util.SqlUtil;
  */
 public class SqlResultDisplay extends JPanel implements Exporter
 {
-	private DwPanel data;
+	DwPanel data;
 	private JTextArea log;
 	private JTabbedPane tab;
 	private WbConnection dbConnection;
@@ -137,11 +137,12 @@ public class SqlResultDisplay extends JPanel implements Exporter
 	{
 		try
 		{
-			this.log.setText(ResourceMgr.getString("UpdatingDatabase"));
-			this.data.saveChangesToDatabase();
-			this.log.append("\r\n" + ResourceMgr.getString("SuccessfullUpdate"));
+			this.log.setText(ResourceMgr.getString("MsgUpdatingDatabase"));
+			long start, end;
+			int rows = this.data.saveChanges(this.dbConnection);
+			this.log.append(this.data.getLastMessage());
 		}
-		catch (SQLException e)
+		catch (Exception e)
 		{
 			this.showLogMessage(this.data.getLastMessage());
 		}
@@ -220,6 +221,14 @@ public class SqlResultDisplay extends JPanel implements Exporter
 	}
 
 
+	public boolean checkUpdateTable()
+	{
+		return this.data.checkUpdateTable();
+	}
+	public void setUpdateTable(String aTable)
+	{
+		this.data.setUpdateTable(aTable);
+	}
 	public boolean isUpdateable()
 	{
 		return this.data.isUpdateable();
