@@ -9,7 +9,7 @@
  * To contact the author please send an email to: info@sql-workbench.net
  *
  */
-package workbench.gui.dialogs;
+package workbench.gui.dialogs.export;
 
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
