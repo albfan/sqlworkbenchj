@@ -421,4 +421,9 @@ public class DbExplorerPanel
 		}
 	}
 
+	public void dispose()
+	{
+		this.tables.reset();
+	}
+	
 }

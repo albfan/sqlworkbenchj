@@ -662,7 +662,6 @@ public class MainWindow
 			{
 				ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
 				WbConnection conn = null;
-				
 
 				if (aProfile.getUseSeperateConnectionPerTab())
 				{
@@ -707,6 +706,8 @@ public class MainWindow
 				this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_CONNECTION_ERROR) + "\r\n\n" + e.toString());
 				LogMgr.logError("MainWindow.connectTo()", "Error during connect", e);
 			}
+			
+			WbManager.getSettings().setLastConnection(this.currentProfile.getName());
 			
 			this.dbExplorerAction.setEnabled(true);
 			this.disconnectAction.setEnabled(true);
@@ -924,7 +925,7 @@ public class MainWindow
 			explorerIncluded = (sql instanceof DbExplorerPanel);
 		}
 		this.currentConnection = con;
-		this.currentProfile = con.getProfile();
+		if (this.currentProfile == null) this.currentProfile = con.getProfile();
 
 		if (this.dbExplorerPanel != null && !explorerIncluded)
 		{
@@ -958,8 +959,6 @@ public class MainWindow
         ConnectionProfile prof = dialog.getSelectedProfile();
         if (prof != null)
         {
-					this.currentProfile = prof;
-					WbManager.getSettings().setLastConnection(this.currentProfile.getName());
           this.connectTo(prof);
         }
       }
@@ -1287,14 +1286,11 @@ public class MainWindow
 	private boolean checkMakeProfileWorkspace()
 	{
 		boolean assigned = false;
-		if (this.isProfileWorkspace)
+		boolean saveIt = WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgAttachWorkspaceToProfile"));
+		if (saveIt)
 		{
-			boolean saveIt = WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgAttachWorkspaceToProfile"));
-			if (saveIt)
-			{
-				this.assignWorkspace();
-				assigned = false;
-			}
+			this.assignWorkspace();
+			assigned = true;
 		}
 		return assigned;
 	}
@@ -1378,6 +1374,7 @@ public class MainWindow
 		{
 			this.sqlTab.setSelectedIndex(index);
 		}
+
 		this.workspaceLoaded = true;
 		this.updateWindowTitle();
 		this.checkWorkspaceActions();
@@ -1432,7 +1429,9 @@ public class MainWindow
 	{
 		if (this.currentWorkspaceFile == null) return;
 		if (this.currentProfile == null) return;
+		System.out.println("using profile=" + this.currentProfile.toString());
 		String filename = WbManager.getInstance().putConfigDirKey(this.currentWorkspaceFile);
+		ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
 		this.currentProfile.setWorkspaceFile(filename);
 		this.isProfileWorkspace = true;
 		this.updateWindowTitle();
@@ -1655,6 +1654,8 @@ public class MainWindow
 			this.dbExplorerTabVisible = false;
 		}
 
+		panel.dispose();
+		
 		this.panelMenus.remove(index);
 		this.sqlTab.remove(index);
 		this.removeFromViewMenu(index);

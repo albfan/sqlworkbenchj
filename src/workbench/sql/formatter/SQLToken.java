@@ -173,7 +173,14 @@ public class SQLToken extends Token
 	 */
 	public String getContents()
 	{
-		return (new String(contents));
+		if (this.isReservedWord())
+		{
+			return contents.toUpperCase();
+		}
+		else
+		{
+			return contents;
+		}
 	}
 
 	/**

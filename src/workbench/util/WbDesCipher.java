@@ -28,7 +28,7 @@ public class WbDesCipher
 		}
 		catch (Exception e)
 		{
-			LogMgr.logWarning("ConnectionProfile", "No encryption available!");
+			LogMgr.logWarning("WbDesCipher.init()", "No encryption available!");
 			DesCipher = null;
 		}
 	}

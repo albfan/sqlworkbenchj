@@ -50,7 +50,7 @@ public class ConnectionMgr
 		WbConnection conn = new WbConnection(anId);
 		Connection sql = this.connect(aProfile, anId);
 		conn.setSqlConnection(sql);
-		conn.setProfile(aProfile.createCopy());
+		conn.setProfile(aProfile);
 		this.activeConnections.put(anId, conn);
 
 		return conn;

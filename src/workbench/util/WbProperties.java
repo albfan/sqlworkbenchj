@@ -6,12 +6,15 @@
 
 package workbench.util;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 import workbench.log.LogMgr;
@@ -23,7 +26,9 @@ import workbench.log.LogMgr;
 public class WbProperties
 	extends Properties
 {
-	int distinctSections = 2;
+	private int distinctSections = 2;
+
+	private ArrayList changeListeners = new ArrayList();
 	
 	public WbProperties()
 	{
@@ -57,7 +62,8 @@ public class WbProperties
 
 			if (lastKey != null)
 			{
-				String k1, k2;
+				String k1 = null;
+				String k2 = null;
 				k1 = getSections(lastKey, this.distinctSections); //getFirstTwoSections(lastKey);
 				k2 = getSections(key, this.distinctSections); //getFirstTwoSections(key);
 				if (!k1.equals(k2))
@@ -126,6 +132,36 @@ public class WbProperties
 		result = aString.substring(0, pos);
 		return result;
 	}
+
+	public void addChangeListener(PropertyChangeListener aListener)
+	{
+		this.changeListeners.add(aListener);
+	}
+	
+	public void removeChangeListener(PropertyChangeListener aListener)
+	{
+		this.changeListeners.remove(aListener);
+	}
+	
+	private void firePropertyChanged(String name, String oldValue, String newValue)
+	{
+		int count = this.changeListeners.size();
+		if (count == 0) return;
+		PropertyChangeEvent evt = new PropertyChangeEvent(this, name, oldValue, newValue);
+		for (int i=0; i < count; i++)
+		{
+			PropertyChangeListener l = (PropertyChangeListener)this.changeListeners.get(i);
+			if (l != null) l.propertyChange(evt);
+		}
+	}
+	
+	public Object setProperty(String name, String value)
+	{
+		Object oldValue = super.setProperty(name, value);
+		this.firePropertyChanged(name, (String)oldValue, value);
+		return oldValue;
+	}
+	
 	
 	public static void main(String args[])
 	{

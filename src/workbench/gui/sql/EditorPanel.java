@@ -28,6 +28,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.actions.FindAction;
 import workbench.gui.actions.FindAgainAction;
+import workbench.gui.actions.FormatSqlAction;
 import workbench.gui.actions.ReplaceAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.ExtensionFileFilter;
@@ -48,6 +49,7 @@ import workbench.interfaces.TextFileContainer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.sql.formatter.SqlFormatter;
 import workbench.util.LineTokenizer;
 
 
@@ -140,7 +142,7 @@ public class EditorPanel
 		this.findAgainAction.setEnabled(false);
 
 		this.replaceAction = new ReplaceAction(this);
-		
+
 		if (aMarker != null) this.setTokenMarker(aMarker);
 
 		/*
@@ -170,6 +172,38 @@ public class EditorPanel
 	public AnsiSQLTokenMarker getSqlTokenMarker()
 	{
 		return this.sqlTokenMarker;
+	}
+	
+	public void reformatSql()
+	{
+		String sql = this.getSelectedStatement();
+		SqlFormatter f = new SqlFormatter(sql);
+		String newSql = null;
+		try
+		{
+			newSql = f.format().trim();
+		}
+		catch (Exception e)
+		{
+			newSql = null;
+		}
+		
+		if (newSql == null) return;
+		int caret = -1;
+
+		if (this.isTextSelected())
+		{
+			caret = this.getSelectionStart();
+			this.setSelectedText(newSql);
+			this.select(caret, caret + newSql.length());
+		}
+		else
+		{
+			caret = this.getCaretPosition();
+			this.setText(newSql);
+			if (caret > 0 && caret < this.getText().length()) this.setCaretPosition(caret);
+		}
+		
 	}
 	
 	/**

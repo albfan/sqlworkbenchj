@@ -234,7 +234,7 @@ public class ConnectionProfile
 	/**
 	 *	Returns the name of the Profile
 	 */
-	public String toString() { return this.name; }
+	public String toString() { return this.name + " - " + super.toString(); }
 
 	/** Two connection profiles are equal if:
 	 *  <ul>

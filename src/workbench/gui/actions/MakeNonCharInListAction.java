@@ -27,7 +27,7 @@ public class MakeNonCharInListAction extends WbAction implements TextSelectionLi
 		this.client = aClient;
 		this.client.addSelectionListener(this);
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtMakeNonCharInList"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_EDIT);
+		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtMakeNonCharInList"));
 		this.setEnabled(false);
 	}

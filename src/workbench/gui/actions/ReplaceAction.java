@@ -26,7 +26,7 @@ public class ReplaceAction extends WbAction
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtReplace"));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_EDIT);
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtReplace"));
-		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK));
+		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_H, InputEvent.CTRL_MASK));
 	}
 
 	public void actionPerformed(ActionEvent e)

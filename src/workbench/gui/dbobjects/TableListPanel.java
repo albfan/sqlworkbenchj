@@ -417,7 +417,7 @@ public class TableListPanel
 		this.reset();
 	}
 
-	private void reset()
+	public void reset()
 	{
 		this.tableList.reset();
 		this.resetDetails();

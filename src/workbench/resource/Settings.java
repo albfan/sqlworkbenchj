@@ -12,6 +12,7 @@ import java.awt.Point;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
 import java.awt.print.PrinterJob;
+import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -42,6 +43,8 @@ import workbench.util.WbProperties;
  */
 public class Settings
 {
+	public static final String ANIMATED_ICONS_KEY = "workbench.gui.animatedicon";
+	
 	public static final String EDITOR_FONT_KEY = "editor";
 	public static final String STANDARD_FONT_KEY = "standard";
 	public static final String MSGLOG_FONT_KEY = "msglog";
@@ -160,6 +163,16 @@ public class Settings
 		this.fontChangeListeners.remove(aListener);
 	}
 
+	public void addChangeListener(PropertyChangeListener l)
+	{
+		this.props.addChangeListener(l);
+	}
+	
+	public void removeChangeLister(PropertyChangeListener l)
+	{
+		this.props.removeChangeListener(l);
+	}
+	
 	public void saveSettings()
 	{
 		this.removeObsolete();
@@ -1064,6 +1077,16 @@ public class Settings
 		this.props.setProperty("workbench.dbexplorer.retrieveonopen", Boolean.toString(aFlag));
 	}
 
+	public boolean getUseAnimatedIcon()
+	{
+		return "true".equalsIgnoreCase(this.props.getProperty(ANIMATED_ICONS_KEY, "true"));
+	}
+	
+	public void setUseAnimatedIcon(boolean flag)
+	{
+		this.props.setProperty(ANIMATED_ICONS_KEY, Boolean.toString(flag));
+	}
+	
 	public boolean getUseDynamicLayout()
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.gui.dynamiclayout", "false"));

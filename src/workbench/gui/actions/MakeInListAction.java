@@ -27,7 +27,7 @@ public class MakeInListAction extends WbAction implements TextSelectionListener
 		this.client = aClient;
 		this.client.addSelectionListener(this);
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtMakeCharInList"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_EDIT);
+		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtMakeCharInList"));
 		this.setEnabled(false);
 	}

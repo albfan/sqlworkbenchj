@@ -317,7 +317,7 @@ public class DwPanel
 		}
 		catch (OutOfMemoryError mem)
 		{
-			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
+			WbManager.getInstance().showErrorMessage(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("MsgOutOfMemoryError"));
 		}
 		catch (Throwable th)
 		{
@@ -546,7 +546,7 @@ public class DwPanel
 			{
 				//this.setMessageDisplayModel(this.getEmptyMsgTableModel());
 				this.setMessageDisplayModel(this.getErrorTableModel(sqle.getMessage()));
-				WbManager.getInstance().showErrorMessage(this, this.lastMessage);
+				WbManager.getInstance().showErrorMessage(SwingUtilities.getWindowAncestor(this), this.lastMessage);
 			}
 			else
 			{
@@ -558,7 +558,7 @@ public class DwPanel
 		{
 			if (e instanceof OutOfMemoryError)
 			{
-				WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
+				WbManager.getInstance().showErrorMessage(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("MsgOutOfMemoryError"));
 			}
 			LogMgr.logError(this, "Error executing statement: \r\n" + this.sql, e);
 			this.setMessageDisplayModel(this.getErrorTableModel(e.getMessage()));

@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -57,6 +58,7 @@ import workbench.util.WbWorkspace;
 public class SqlPanel
 	extends JPanel
 	implements Runnable, FontChangedListener, ActionListener, TextSelectionListener, TextChangeListener, 
+				    PropertyChangeListener, 
 						MainPanel, Spooler, TextFileContainer, DbUpdater, Interruptable
 {
 	private boolean runSelectedCommand;
@@ -98,7 +100,8 @@ public class SqlPanel
 	private PrintPreviewAction printPreviewAction;
 	
 	private OptimizeAllColumnsAction optimizeAllCol;
-
+	private FormatSqlAction formatSql;
+	
 	private SpoolDataAction spoolData;
 	private UndoAction undo;
 	private RedoAction redo;
@@ -185,6 +188,8 @@ public class SqlPanel
 
 		this.editor.addTextChangeListener(this);
 		this.data.setUpdateDelegate(this);
+		
+		WbManager.getSettings().addChangeListener(this);
 	}
 
 	public String getId()
@@ -480,9 +485,6 @@ public class SqlPanel
 		makeLower.setCreateMenuSeparator(true);
 		this.actions.add(makeLower);
 		this.actions.add(makeUpper);
-		
-		this.actions.add(new MakeInListAction(this.editor));
-		this.actions.add(new MakeNonCharInListAction(this.editor));
 
 		this.actions.add(this.data.getStartEditAction());
 		this.actions.add(this.data.getUpdateDatabaseAction());
@@ -569,12 +571,20 @@ public class SqlPanel
 		this.findDataAction.setCreateMenuSeparator(true);
 		this.findDataAgainAction = this.data.getTable().getFindAgainAction();
 		this.findDataAgainAction.setEnabled(false);
+
+		this.formatSql = new FormatSqlAction(this);
+		this.formatSql.setCreateMenuSeparator(true);
+		this.actions.add(this.formatSql);
 		
-		WbAction action = new CreateSnippetAction(this.editor);
-		action.setCreateMenuSeparator(true);
-		this.actions.add(action);
-		action = new CleanJavaCodeAction(this.editor);
-		this.actions.add(action);
+		a = new CreateSnippetAction(this.editor);
+		this.actions.add(a);
+		a = new CleanJavaCodeAction(this.editor);
+		this.actions.add(a);
+
+		a = new MakeInListAction(this.editor);
+		a.setCreateMenuSeparator(true);
+		this.actions.add(a);
+		this.actions.add(new MakeNonCharInListAction(this.editor));
 		
 		this.addMacro = new AddMacroAction(this.editor);
 		this.addMacro.setCreateMenuSeparator(true);
@@ -622,6 +632,14 @@ public class SqlPanel
 			}
 		});
 	}
+	
+	public void reformatSql()
+	{
+		this.storeStatementInHistory();
+		this.editor.reformatSql();
+		this.selectEditorLater();
+	}
+	
 	public void selectEditor()
 	{
 		editor.requestFocusInWindow();
@@ -667,7 +685,7 @@ public class SqlPanel
 		}
 		catch (OutOfMemoryError mem)
 		{
-			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
+			WbManager.getInstance().showErrorMessage(this.getParentWindow(), ResourceMgr.getString("MsgOutOfMemoryError"));
 		}
 		finally
 		{
@@ -1185,13 +1203,6 @@ public class SqlPanel
 	
 	public void runSql()
 	{
-		this.setBusy(true);
-		this.setCancelState(true);
-		this.makeReadOnly();
-
-		this.showStatusMessage(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
-		this.data.getStartEditAction().setSwitchedOn(false);
-		
 		String sql;
 
 		if (runSelectedCommand)
@@ -1203,6 +1214,16 @@ public class SqlPanel
 			sql = this.editor.getStatement();
 		}
 
+		if (sql == null) return;
+		
+		if (background.interrupted()) return;
+		this.setBusy(true);
+		this.setCancelState(true);
+		this.makeReadOnly();
+
+		this.showStatusMessage(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
+		this.data.getStartEditAction().setSwitchedOn(false);
+		
 		this.storeStatementInHistory();
 		this.checkStatementActions();
 
@@ -1225,7 +1246,7 @@ public class SqlPanel
 		this.setCancelState(false);
 		this.checkResultSetActions();
 
-		if (sql != null && sql.trim().toLowerCase().startsWith("shutdown"))
+		if (sql.trim().toLowerCase().startsWith("shutdown"))
 		{
 			String url = this.dbConnection.getUrl();
 			if (url != null)
@@ -1236,7 +1257,7 @@ public class SqlPanel
 					win.disconnect();
 					String msg = ResourceMgr.getString("MsgShutdownHsqlDb");
 					this.showLogMessage(msg);
-					WbManager.getInstance().showErrorMessage(this, msg);
+					WbManager.getInstance().showErrorMessage(this.getParentWindow(), msg);
 				}
 			}
 		}
@@ -1586,18 +1607,27 @@ public class SqlPanel
 			}
 			catch(InterruptedException e)
 			{
-				LogMgr.logDebug("SqlPanel.run()", "Thread has been interrupted");
+				LogMgr.logDebug("SqlPanel.run()", "Thread " + this.internalId + " has been interrupted");
+				return;
 			}
 			runSql();
 			suspendThread();
 		}
 	}
 
+	
 	private ImageIcon getLoadingIndicator()
 	{
 		if (this.loadingIcon == null)
 		{
-			this.loadingIcon = ResourceMgr.getPicture("loading");
+			if (WbManager.getSettings().getUseAnimatedIcon())
+			{
+				this.loadingIcon = ResourceMgr.getPicture("loading");
+			}
+			else
+			{
+				this.loadingIcon = ResourceMgr.getPicture("loading-static");
+			}
 		}
 		return this.loadingIcon;
 	}
@@ -1608,7 +1638,14 @@ public class SqlPanel
 	{
 		if (this.cancelIcon == null)
 		{
-			this.cancelIcon = ResourceMgr.getPicture("cancelling");
+			if (WbManager.getSettings().getUseAnimatedIcon())
+			{
+				this.cancelIcon = ResourceMgr.getPicture("cancelling");
+			}
+			else
+			{
+				this.cancelIcon = ResourceMgr.getPicture("cancelling-static");
+			}
 		}
 		return this.cancelIcon;
 	}
@@ -1689,7 +1726,7 @@ public class SqlPanel
 		{
 			JTabbedPane tab = (JTabbedPane)parent;
 			int index = tab.indexOfComponent(this);
-			if (index >= 0)
+			if (index >= 0 && index < tab.getTabCount())
 			{
 				try
 				{
@@ -1814,6 +1851,31 @@ public class SqlPanel
 		if (this.hasFileLoaded())
 		{
 			this.showFileIcon();
+		}
+	}
+	
+	public void dispose()
+	{
+		this.data.clearContent();
+		WbManager.getSettings().removeChangeLister(this);
+		this.abortExecution();
+		this.background = null;
+	}
+	
+	public void propertyChange(java.beans.PropertyChangeEvent evt)
+	{
+		if (evt.getPropertyName().equals(Settings.ANIMATED_ICONS_KEY))
+		{
+			if (this.cancelIcon != null)
+			{
+				this.cancelIcon.getImage().flush();
+				this.cancelIcon = null;
+			}
+			if (this.loadingIcon != null)
+			{
+				this.loadingIcon.getImage().flush();
+				this.loadingIcon = null;
+			}
 		}
 	}
 	
