@@ -29,6 +29,7 @@ import javax.swing.table.*;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.*;
+import workbench.gui.components.MultiLineToolTip;
 import workbench.gui.renderer.DateColumnRenderer;
 import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RowStatusRenderer;
@@ -43,16 +44,16 @@ import workbench.storage.DataStore;
 import workbench.storage.NullValue;
 import workbench.util.StringUtil;
 
-public class WbTable 
-extends JTable 
-	implements ActionListener, FocusListener, MouseListener, 
+public class WbTable
+extends JTable
+	implements ActionListener, FocusListener, MouseListener,
 	           Exporter, FontChangedListener, Searchable
 {
-	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.yellow);
+	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.YELLOW);
 	private JPopupMenu popup;
-	
+
 	private JPopupMenu headerPopup;
-	
+
 	private DataStoreTableModel dwModel;
 	private String lastSearchCriteria;
 	private int lastFoundRow = -1;
@@ -64,12 +65,12 @@ extends JTable
 	private OptimizeColumnWidthAction optimizeCol;
 	private OptimizeAllColumnsAction optimizeAllCol;
 	private SetColumnWidthAction setColWidth;
-	
+
 	private FindAction findAction;
 	private FindAgainAction findAgainAction;
 	private DataToClipboardAction dataToClipboard;
 	private SaveDataAsAction exportDataAction;
-	
+
 	private boolean adjustToColumnLabel = false;
 	private int headerPopupY = -1;
 	private int headerPopupX = -1;
@@ -78,26 +79,31 @@ extends JTable
 	private int minColWidth = 10;
 	private static final TableModel EMPTY_MODEL = new EmptyTableModel();
 	private SortHeaderRenderer sortRenderer = new SortHeaderRenderer();
+
 	private ToolTipRenderer defaultTooltipRenderer = new ToolTipRenderer();
+	private DateColumnRenderer defaultDateRenderer;
+	private NumberColumnRenderer defaultNumberRenderer;
+	private NumberColumnRenderer defaultIntegerRenderer = new NumberColumnRenderer(0);
+
 	private RowHeightResizer rowResizer;
 	//private List changeListener;
 	private TableModelListener changeListener;
-	
+
 	public WbTable()
 	{
 		super(EMPTY_MODEL);
 		this.setMinimumSize(null);
 		this.setMaximumSize(null);
 		this.setPreferredSize(null);
-		
+
 		this.sortAscending = new SortAscendingAction(this);
 		this.sortAscending.setEnabled(false);
 		this.sortDescending = new SortDescendingAction(this);
-		this.sortDescending.setEnabled(false);		
+		this.sortDescending.setEnabled(false);
 		this.optimizeCol = new OptimizeColumnWidthAction(this);
 		this.optimizeAllCol = new OptimizeAllColumnsAction(this);
 		this.setColWidth = new SetColumnWidthAction(this);
-		
+
 		this.headerPopup = new JPopupMenu();
 		this.headerPopup.add(this.sortAscending.getMenuItem());
 		this.headerPopup.add(this.sortDescending.getMenuItem());
@@ -105,19 +111,14 @@ extends JTable
 		this.headerPopup.add(this.optimizeCol.getMenuItem());
 		this.headerPopup.add(this.optimizeAllCol.getMenuItem());
 		this.headerPopup.add(this.setColWidth.getMenuItem());
-		
+
+		this.setDoubleBuffered(true);
+
 		Font dataFont = this.getFont();
 		if (dataFont == null) dataFont = (Font)UIManager.get("Table.font");
-		
-		/*
-		JTextField stringField = new JTextField();
-		if (dataFont != null) stringField.setFont(dataFont);
-		stringField.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		stringField.addMouseListener(new TextComponentMouseListener());
-		this.defaultEditor = new DefaultCellEditor(stringField);
-		*/
+
 		this.defaultEditor = new WbCellEditor();
-		
+
 		JTextField numberField = new JTextField();
 		if (dataFont != null)  numberField.setFont(dataFont);
 		numberField.setBorder(WbSwingUtilities.EMPTY_BORDER);
@@ -127,14 +128,14 @@ extends JTable
 		this.addMouseListener(this);
 		this.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		JTableHeader th = this.getTableHeader();
-		th.addMouseListener(this);	
-		
+		th.addMouseListener(this);
+
 		this.findAction = new FindAction(this);
 		this.findAction.setEnabled(false);
 		this.findAction.setCreateMenuSeparator(true);
 		this.findAgainAction = new FindAgainAction(this);
 		this.findAgainAction.setEnabled(false);
-		
+
 		this.dataToClipboard = new DataToClipboardAction(this);
 		this.exportDataAction = new SaveDataAsAction(this);
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
@@ -170,27 +171,35 @@ extends JTable
 			 this.rowResizer = null;
 		}
 	}
-	
+
+	public JToolTip createToolTip()
+	{
+		JToolTip tip = new MultiLineToolTip();
+		tip.setComponent(this);
+		return tip;
+	}
+
+
 	public SaveDataAsAction getExportAction()
 	{
 		return this.exportDataAction;
 	}
-	
+
 	public DataToClipboardAction getDataToClipboardAction()
 	{
 		return this.dataToClipboard;
 	}
-	
+
 	public FindAction getFindAction()
 	{
 		return this.findAction;
 	}
-	
+
 	public FindAgainAction getFindAgainAction()
 	{
 		return this.findAgainAction;
 	}
-	
+
 	public void reset()
 	{
 		if (this.dwModel != null)
@@ -201,38 +210,39 @@ extends JTable
 		}
 		this.setModel(EMPTY_MODEL, false);
 	}
-	
+
 	public JPopupMenu getPopupMenu()
 	{
 		return this.popup;
 	}
-	
+
 	public void addPopupAction(WbAction anAction, boolean withSep)
 	{
 		if (this.popup == null) this.popup = new JPopupMenu();
 		if (withSep) this.popup.addSeparator();
 		this.popup.add(anAction.getMenuItem());
 	}
-	
-	
+
+
 	public void setModel(TableModel aModel)
 	{
 		this.setModel(aModel, false);
 	}
-	
+
 	public void setModel(TableModel aModel, boolean sortIt)
 	{
 		if (this.dwModel != null)
 		{
 			this.dwModel.removeTableModelListener(this.changeListener);
+			this.dwModel.dispose();
 		}
-		
+
 		JTableHeader header = this.getTableHeader();
-		if (header != null) 
+		if (header != null)
 		{
 			header.removeMouseListener(this);
 		}
-		
+
 		this.dwModel = null;
 		if (aModel instanceof DataStoreTableModel)
 		{
@@ -243,25 +253,39 @@ extends JTable
 				header.addMouseListener(this);
 			}
 			DataStore ds = this.dwModel.getDataStore();
-			ds.setDefaultDateFormat(WbManager.getSettings().getDefaultDateFormat());
+			if (ds != null)
+			{
+				ds.setDefaultDateFormat(WbManager.getSettings().getDefaultDateFormat());
+			}
+			else
+			{
+				Exception e = new NullPointerException();
+				LogMgr.logError("WbTable.setModel()", "Received a DataStoreTableModel without a DataStore", e);
+			}
 		}
 		if (this.sortAscending != null) this.sortAscending.setEnabled(sortIt);
 		if (this.sortDescending != null) this.sortDescending.setEnabled(sortIt);
-		
+
 		if (this.changeListener != null && this.dwModel != null)
 		{
 			this.dwModel.addTableModelListener(this.changeListener);
 		}
-		
+
+		super.setModel(aModel);
+
 		this.initDefaultRenderers();
 		this.initDefaultEditors();
-		super.setModel(aModel);
 		if (aModel == EMPTY_MODEL)
 		{
 			this.createDefaultColumnsFromModel();
 		}
 	}
-	
+
+	public DataStoreTableModel getDataStoreTableModel()
+	{
+		return this.dwModel;
+	}
+
 	public DataStore getDataStore()
 	{
 		if (this.dwModel != null)
@@ -273,7 +297,7 @@ extends JTable
 			return null;
 		}
 	}
-	
+
 	public String getValueAsString(int row, int column)
 		throws IndexOutOfBoundsException
 	{
@@ -283,31 +307,31 @@ extends JTable
 		if (value instanceof NullValue) return null;
 		return value.toString();
 	}
-	
-	public boolean getShowStatusColumn() 
-	{ 
+
+	public boolean getShowStatusColumn()
+	{
 		if (this.dwModel == null) return false;
 		return this.dwModel.getShowStatusColumn();
 	}
-	
+
 	public void setAdjustToColumnLabel(boolean aFlag)
 	{
 		this.adjustToColumnLabel = aFlag;
 	}
-	
+
 	public int getSortColum()
 	{
 		if (this.dwModel == null) return -1;
 		return this.dwModel.getSortColumn();
 	}
-	
+
 	public void setShowStatusColumn(boolean aFlag)
 	{
 		if (this.dwModel == null) return;
 		if (aFlag == this.dwModel.getShowStatusColumn()) return;
 		int column = this.getSelectedColumn();
 		int row = this.getSelectedRow();
-		
+
 		int sortColumn = -1;
 		boolean asc = false;
 		if (this.dwModel != null)
@@ -315,7 +339,7 @@ extends JTable
 			sortColumn = dwModel.getSortColumn();
 			asc = this.dwModel.isSortAscending();
 		}
-			
+
 		this.saveColumnSizes();
 
 		this.dwModel.setShowStatusColumn(aFlag);
@@ -336,30 +360,30 @@ extends JTable
 				model.removeColumn(col);
 			}
 		}
-		
+
 		this.initDefaultEditors();
 		this.restoreColumnSizes();
 		if (sortColumn > -1 && this.dwModel != null)
 		{
-			if (aFlag) 
+			if (aFlag)
 				sortColumn ++;
 			else
 				sortColumn --;
 			this.dwModel.sortByColumn(sortColumn, asc);
 		}
-		if (row >= 0) 
+		if (row >= 0)
 		{
 			this.getSelectionModel().setSelectionInterval(row, row);
 			int newColumn = column;
-			if (aFlag) 
+			if (aFlag)
 				newColumn ++;
 			else
 				newColumn --;
-			
+
 			if (newColumn >= 0) this.changeSelection(row, newColumn, true, true);
 		}
 	}
-	
+
 
 	public int getSortedViewColumnIndex()
 	{
@@ -368,13 +392,13 @@ extends JTable
 		int viewIndex = this.convertColumnIndexToView(modelIndex);
 		return viewIndex;
 	}
-	
+
 	public boolean isSortedColumnAscending()
 	{
 		if (this.dwModel == null) return true;
 		return this.dwModel.isSortAscending();
 	}
-	
+
 	public synchronized void sortingStarted()
 	{
 		this.setIgnoreRepaint(true);
@@ -384,34 +408,34 @@ extends JTable
 	{
 		this.setIgnoreRepaint(false);
 	}
-	
+
 	public String getDataString(String aLineTerminator)
 	{
 		return this.getDataString(aLineTerminator, true);
 	}
-	
+
 	public String getDataString(String aLineTerminator, boolean includeHeaders)
 	{
 		if (this.dwModel == null) return "";
 		DataStore ds = this.dwModel.getDataStore();
 		return ds.getDataString(aLineTerminator, includeHeaders);
 	}
-	
+
 	public boolean canSearchAgain()
 	{
 		return this.lastFoundRow >= 0;
 	}
-	
+
 	public int search(String aText)
 	{
 		return this.search(aText, false);
 	}
-	
+
 	public int searchNext()
 	{
 		return this.search(this.lastSearchCriteria, true);
 	}
-	
+
 	public int search(String aText, boolean doContinue)
 	{
 		if (aText == null) return -1;
@@ -423,13 +447,13 @@ extends JTable
 		{
 			start = this.lastFoundRow  + 1;
 		}
-	
+
 		for (int i=start; i < this.dwModel.getRowCount(); i++)
 		{
 			//int row = sortModel.getRealIndex(i);
 			String rowString = this.dwModel.getRowData(i).toString();
 			if (rowString == null) continue;
-			
+
 			if (rowString.toLowerCase().indexOf(aText) > -1)
 			{
 				this.getSelectionModel().setSelectionInterval(i,i);
@@ -444,15 +468,15 @@ extends JTable
 		{
 			this.scrollToRow(foundRow);
 		}
-			
+
 		return foundRow;
 	}
-	
+
 	public void saveColumnSizes()
 	{
 		TableColumnModel colMod = this.getColumnModel();
 		int count = colMod.getColumnCount();
-		this.savedColumnSizes = new HashMap();
+		this.savedColumnSizes = new HashMap(count);
 		for (int i=0; i < count; i++)
 		{
 			TableColumn col = colMod.getColumn(i);
@@ -461,10 +485,15 @@ extends JTable
 			this.savedColumnSizes.put(name, width);
 		}
 	}
-	
+
 	public void restoreColumnSizes()
 	{
 		if (this.savedColumnSizes == null || this.savedColumnSizes.size() == 0) return;
+		if (this.savedColumnSizes.size() != this.getColumnCount())
+		{
+			this.savedColumnSizes = null;
+			return;
+		}
 		Iterator itr = this.savedColumnSizes.entrySet().iterator();
 		while (itr.hasNext())
 		{
@@ -482,40 +511,48 @@ extends JTable
 		}
 		this.savedColumnSizes = null;
 	}
-	
+
 	public void initDefaultRenderers()
 	{
 		// need to let JTable do some initialization stuff
-		// otherwise setDefaultRenderer() bombs out with 
+		// otherwise setDefaultRenderer() bombs out with
 		// a NullPointerException
+
 		if (this.defaultRenderersByColumnClass == null) this.createDefaultRenderers();
-		
-		String format = WbManager.getSettings().getDefaultDateFormat();
-		DateColumnRenderer dateRend = new DateColumnRenderer(format);
 
-		this.setDefaultRenderer(Date.class, dateRend);
-		int maxDigits = WbManager.getSettings().getMaxFractionDigits();
-		if (maxDigits == -1) maxDigits = 10;
-		NumberColumnRenderer numRend = new NumberColumnRenderer(maxDigits);
+		if (this.defaultDateRenderer == null)
+		{
+			String format = WbManager.getSettings().getDefaultDateFormat();
+			defaultDateRenderer = new DateColumnRenderer(format);
+		}
+		defaultDateRenderer.clearDisplayCache();
+		this.setDefaultRenderer(Date.class, defaultDateRenderer);
 
-		this.setDefaultRenderer(Number.class, numRend);
-		this.setDefaultRenderer(Double.class, numRend);
-		this.setDefaultRenderer(Float.class, numRend);
-		this.setDefaultRenderer(BigDecimal.class, numRend);
-		
-		NumberColumnRenderer intRend = new NumberColumnRenderer(0);
-		this.setDefaultRenderer(BigInteger.class, intRend);
-		this.setDefaultRenderer(Integer.class, intRend);
-		
-		this.setDefaultRenderer(Object.class, this.defaultTooltipRenderer);
+		if (this.defaultNumberRenderer == null)
+		{
+			int maxDigits = WbManager.getSettings().getMaxFractionDigits();
+			if (maxDigits == -1) maxDigits = 10;
+			defaultNumberRenderer = new NumberColumnRenderer(maxDigits);
+		}
+		defaultNumberRenderer.clearDisplayCache();
+
+		this.setDefaultRenderer(Number.class, defaultNumberRenderer);
+		this.setDefaultRenderer(Double.class, defaultNumberRenderer);
+		this.setDefaultRenderer(Float.class, defaultNumberRenderer);
+		this.setDefaultRenderer(BigDecimal.class, defaultNumberRenderer);
+
+		this.setDefaultRenderer(BigInteger.class, defaultIntegerRenderer);
+		this.setDefaultRenderer(Integer.class, defaultIntegerRenderer);
+
+		this.setDefaultRenderer(Object.class, ToolTipRenderer.DEFAULT_TEXT_RENDERER);
 	}
-	
+
 	public void initDefaultEditors()
 	{
 		if (this.dwModel == null) return;
-		
+
 		TableColumnModel colMod = this.getColumnModel();
-		
+
 		for (int i=0; i < colMod.getColumnCount(); i++)
 		{
 			TableColumn col = colMod.getColumn(i);
@@ -529,7 +566,7 @@ extends JTable
 			}
 		}
 	}
-	
+
 	public void adjustColumns()
 	{
 		if (this.getModel() == null) return;
@@ -537,7 +574,8 @@ extends JTable
 		FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(f);
 		int charWidth = fm.stringWidth("n");
 		TableColumnModel colMod = this.getColumnModel();
-		
+		if (colMod == null) return;
+
 		for (int i=0; i < colMod.getColumnCount(); i++)
 		{
 			TableColumn col = colMod.getColumn(i);
@@ -559,7 +597,7 @@ extends JTable
 				col.setPreferredWidth(w);
 			}
 		}
-	}	
+	}
 
 	public synchronized void optimizeAllColWidth()
 	{
@@ -569,12 +607,12 @@ extends JTable
 			this.optimizeColWidth(i);
 		}
 	}
-	
+
 	public synchronized void optimizeColWidth(int aColumn)
 	{
 		if (this.dwModel == null) return;
 		if (aColumn < 0 || aColumn > this.getColumnCount() - 1) return;
-		
+
 		Font f = this.getFont();
 		FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(f);
 		TableColumnModel colMod = this.getColumnModel();
@@ -592,8 +630,8 @@ extends JTable
 		{
 			col.setPreferredWidth(optWidth);
 		}
-	}	
-	
+	}
+
 	private int getAdditionalColumnSpace(int aRow, int aColumn)
 	{
 		TableColumn col = this.getColumnModel().getColumn(aColumn);
@@ -602,11 +640,11 @@ extends JTable
 			rend = col.getHeaderRenderer();
 		else
 			rend = col.getCellRenderer();
-		
+
 		int addWidth = this.getIntercellSpacing().width * 2;
 		if (this.getShowVerticalLines()) addWidth += 4;
-		
-		if (rend == null) 
+
+		if (rend == null)
 		{
 			rend = this.getDefaultRenderer(this.getColumnClass(aColumn));
 		}
@@ -625,7 +663,7 @@ extends JTable
 		}
 		return addWidth;
 	}
-	
+
 	public void cancelEditing()
 	{
 		if (this.isEditing())
@@ -637,7 +675,7 @@ extends JTable
 			}
 		}
 	}
-	
+
 	public boolean stopEditing()
 	{
 		if (!this.isEditing()) return false;
@@ -648,7 +686,7 @@ extends JTable
 		}
 		return false;
 	}
-	
+
 	public void tableChanged(TableModelEvent evt)
 	{
 		super.tableChanged(evt);
@@ -670,13 +708,13 @@ extends JTable
 		if (this.dwModel != null) this.dwModel.removeTableModelListener(aListener);
 	}
 
-	
+
 	public void scrollToRow(int aRow)
 	{
 		Rectangle rect = this.getCellRect(aRow, 1, true);
 		this.scrollRectToVisible(rect);
 	}
-	
+
 	/** Invoked when the mouse button has been clicked (pressed
 	 * and released) on a component.
 	 *
@@ -698,7 +736,7 @@ extends JTable
 				this.popup.show(this, e.getX(), e.getY());
 			}
 		}
-		else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1 
+		else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1
 		         && this.dwModel != null && e.getSource() instanceof JTableHeader)
 		{
 			TableColumnModel columnModel = this.getColumnModel();
@@ -712,35 +750,35 @@ extends JTable
 			}
 		}
 	}
-	
+
 	/** Invoked when the mouse enters a component.
 	 *
 	 */
 	public void mouseEntered(MouseEvent e)
 	{
 	}
-	
+
 	/** Invoked when the mouse exits a component.
 	 *
 	 */
 	public void mouseExited(MouseEvent e)
 	{
 	}
-	
+
 	/** Invoked when a mouse button has been pressed on a component.
 	 *
 	 */
 	public void mousePressed(MouseEvent e)
 	{
 	}
-	
+
 	/** Invoked when a mouse button has been released on a component.
 	 *
 	 */
 	public void mouseReleased(MouseEvent e)
 	{
 	}
-	
+
 	/** Invoked when an action occurs.
 	 *
 	 */
@@ -763,7 +801,7 @@ extends JTable
 			{
 				public void run()	{ optimizeColWidth(column); }
 			}).start();
-			
+
 		}
 		else if (e.getSource() == this.optimizeAllCol)
 		{
@@ -799,7 +837,7 @@ extends JTable
 	{
 		this.popup = null;
 	}
-	
+
 	/**
 	 *	Open the Find dialog for searching strings in the result set
 	 */
@@ -812,7 +850,7 @@ extends JTable
 		this.lastSearchCriteria = criteria;
 		this.findAgainAction.setEnabled(row >= 0);
 	}
-	
+
 	public void findNext()
 	{
 		this.searchNext();
@@ -822,11 +860,11 @@ extends JTable
 	{
 		this.copyDataToClipboard(true);
 	}
-	
+
 	public void copyDataToClipboard(final boolean includeheaders)
 	{
 		if (this.getRowCount() <= 0) return;
-		
+
 		try
 		{
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -845,11 +883,11 @@ extends JTable
 	public void copyAsSqlInsert()
 	{
 		if (this.getRowCount() <= 0) return;
-		
+
 		DataStore ds = this.dwModel.getDataStore();
 		if (ds == null) return;
 		if (!ds.canSaveAsSqlInsert()) return;
-		
+
 		try
 		{
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -864,7 +902,7 @@ extends JTable
 		}
 		WbSwingUtilities.showDefaultCursorOnWindow(this);
 	}
-	
+
 	public void saveAsSqlInsert(String aFilename)
 	{
 		if (this.getRowCount() <= 0) return;
@@ -874,7 +912,7 @@ extends JTable
 		if (!ds.canSaveAsSqlInsert()) return;
 
 		PrintWriter out = null;
-		
+
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
@@ -893,13 +931,13 @@ extends JTable
 		}
 		WbSwingUtilities.showDefaultCursor(this);
 	}
-	
+
 	public void saveAsHtml(String aFilename)
 	{
 		if (this.dwModel == null) return;
-		
+
 		PrintWriter out = null;
-		
+
 		WbSwingUtilities.showWaitCursor(this.getParent());
 		try
 		{
@@ -918,13 +956,13 @@ extends JTable
 		}
 		WbSwingUtilities.showDefaultCursor(this.getParent());
 	}
-	
+
 	public void saveAsAscii(String aFilename)
 	{
 		if (this.dwModel == null) return;
-		
+
 		PrintWriter out = null;
-		
+
 		WbSwingUtilities.showWaitCursor(this.getParent());
 		try
 		{
@@ -942,7 +980,7 @@ extends JTable
 		}
 		WbSwingUtilities.showDefaultCursor(this.getParent());
 	}
-	
+
 	public void saveAs()
 	{
 		try
@@ -953,7 +991,7 @@ extends JTable
 			if (filename != null)
 			{
 				String ext = ExtensionFileFilter.getExtension(new File(filename));
-				
+
 				final String name = filename;
 				if (ExtensionFileFilter.hasSqlExtension(filename))
 				{
@@ -988,22 +1026,22 @@ extends JTable
 	{
 		return maxColWidth;
 	}
-	
+
 	public void setMaxColWidth(int maxColWidth)
 	{
 		this.maxColWidth = maxColWidth;
 	}
-	
+
 	public int getMinColWidth()
 	{
 		return minColWidth;
 	}
-	
+
 	public void setMinColWidth(int minColWidth)
 	{
 		this.minColWidth = minColWidth;
 	}
-	
+
 	public void fontChanged(String aFontId, Font newFont)
 	{
 		if (aFontId.equals(Settings.DATA_FONT_KEY))
@@ -1017,15 +1055,15 @@ extends JTable
 	{
 		return getClass().getName() + '@' + Integer.toHexString(hashCode());
 	}
-	
+
 	public void focusGained(FocusEvent e)
 	{
 	}
-	
+
 	public void focusLost(FocusEvent e)
 	{
 		this.stopEditing();
 	}
-	
+
 }
 

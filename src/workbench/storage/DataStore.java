@@ -58,10 +58,8 @@ public class DataStore
 	
 	private WbConnection originalConnection;
 
-	// used during sorting to speed up comparison
-	private Class currentSortColumnClass;
-	
 	private SimpleDateFormat defaultFormatter;
+	private ColumnComparator comparator;
 	
 	public DataStore(String[] aColNames, int[] colTypes)
 	{
@@ -1010,23 +1008,21 @@ public class DataStore
 	{
 		Object o1 = row1.getValue(column);
 		Object o2 = row2.getValue(column);
-		
-		// If both values are null, return 0.
-		if (o1 == null && o2 == null)
+
+		if ( (o1 == null && o2 == null) ||
+		     (o1 instanceof NullValue && o2 instanceof NullValue) )
 		{
 			return 0;
 		}
-		else if (o1 == null)
-		{// Define null less than everything.
-			return -1;
-		}
-		else if (o2 == null)
+		else if (o1 == null || o1 instanceof NullValue)
 		{
-			return 1;
+			return 2;
+		}
+		else if (o2 == null || o2 instanceof NullValue)
+		{
+			return -2;
 		}
 
-		// first we try if the two objects implement
-		// the comparable interface.
 		try
 		{
 			int result = ((Comparable)o1).compareTo(o2);
@@ -1036,79 +1032,12 @@ public class DataStore
 		{
 		}
 
-		// if we wind up here, at least one of them did not implement
-		// the comparable interface. This shouldn't actually happen but if it does,
-		// we want to make sure they are compared in a decent manner.
-
-		if (this.currentSortColumnClass.getSuperclass() == java.lang.Number.class)
-		{
-			Number n1 = (Number)o1;
-			double d1 = n1.doubleValue();
-			Number n2 = (Number)o2;
-			double d2 = n2.doubleValue();
-			if (d1 < d2)
-			{
-				return -1;
-			}
-			else if (d1 > d2)
-			{
-				return 1;
-			}
-			else
-			{
-				return 0;
-			}
-		}
-		else if (this.currentSortColumnClass.isAssignableFrom(java.util.Date.class))
-		{
-			java.util.Date d1 = (java.util.Date)o1;;
-			long n1 = d1.getTime();
-			java.util.Date d2 = (java.util.Date)o2;
-			long n2 = d2.getTime();
-			if (n1 < n2)
-			{
-				return -1;
-			}
-			else if (n1 > n2)
-			{
-				return 1;
-			}
-			else
-			{
-				return 0;
-			}
-		}
-		else if (this.currentSortColumnClass == String.class)
-		{
-			String s1 = (String)o1;
-			String s2 = (String)o2;
-			return s1.compareTo(s2);
-		}
-		else if (this.currentSortColumnClass == Boolean.class)
-		{
-			Boolean bool1 = (Boolean)o1;
-			boolean b1 = bool1.booleanValue();
-			Boolean bool2 = (Boolean)o2;
-			boolean b2 = bool2.booleanValue();
-			if (b1 == b2)
-			{
-				return 0;
-			}
-			else if (b1)
-			{// Define false < true
-				return 1;
-			}
-			else
-			{
-				return -1;
-			}
-		}
-		else
-		{
-			String v1 = o1.toString();
-			String v2 = o2.toString();
-			return v1.compareTo(v2);
-		}
+		// Fallback sorting...
+		// if the values didn't implement Comparable
+		// the use normale String comparison
+		String v1 = o1.toString();
+		String v2 = o2.toString();
+		return v1.compareTo(v2);
 	}
 	
 	/**    Compare two rows.  All sorting columns will be sorted.
@@ -1120,17 +1049,25 @@ public class DataStore
 	public int compare(RowData row1, RowData row2, int column, boolean ascending)
 	{
 		int result = compareRowsByColumn(row1, row2, column);
-		if (result != 0)
-		{
+		if (result == 0) return 0;
+		
+		if (result == -2 || result == 2) 
+			return result;
+		else
 			return ascending ? result : -result;
-		}
-		return 0;
 	}
 	
 	public void sortByColumn(int aColumn, boolean ascending)
 	{
-		this.currentSortColumnClass = this.getColumnClass(aColumn);
-		Collections.sort(this.data, new ColumnComparator(aColumn, ascending));
+		synchronized (this)
+		{
+			if (this.comparator == null)
+			{
+				this.comparator = new ColumnComparator();
+			}
+			this.comparator.setMode(aColumn, ascending);
+			Collections.sort(this.data, this.comparator);
+		}
 	}
 	
 	public void setDefaultDateFormat(String aFormat)
@@ -1694,10 +1631,15 @@ public class DataStore
 	{
 		int column;
 		boolean ascending;
-		public ColumnComparator(int col, boolean asc)
+		
+		public ColumnComparator()
 		{
-			this.column = col;
-			this.ascending = asc;
+		}
+
+		public void setMode(int aCol, boolean aFlag)
+		{
+			this.column = aCol;
+			this.ascending = aFlag;
 		}
 		
 		public int compare(Object o1, Object o2)

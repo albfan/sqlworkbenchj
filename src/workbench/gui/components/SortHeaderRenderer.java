@@ -12,15 +12,18 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 public class SortHeaderRenderer extends DefaultTableCellRenderer
 {
-	private Border headerBorder;
+	private static Border DEFAULT_HEADER_BORDER;
+	static
+	{
+		Border empty = new EmptyBorder(0, 1, 0, 1);
+		DEFAULT_HEADER_BORDER = new CompoundBorder(UIManager.getBorder("TableHeader.cellBorder"), empty);
+	}
 	
   public SortHeaderRenderer()
   {
     setHorizontalTextPosition(LEFT);
     setHorizontalAlignment(LEFT);
-		Border empty = new EmptyBorder(0, 1, 0, 1);
-		headerBorder = new CompoundBorder(UIManager.getBorder("TableHeader.cellBorder"), empty);
-    setBorder(headerBorder);
+    setBorder(DEFAULT_HEADER_BORDER);
   }
   
   public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col)

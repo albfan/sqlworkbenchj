@@ -36,6 +36,8 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		text = text.replaceAll("%path_sep%", StringUtil.PATH_SEPARATOR);
 		lblLibrary.setToolTipText(text);
 		tfLibrary.setToolTipText(text);
+    text = ResourceMgr.getDescription("SelectDriverLibrary");
+    jButton1.setToolTipText(text);
 	}
 
 	/** This method is called from within the constructor to

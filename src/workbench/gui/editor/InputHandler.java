@@ -25,7 +25,7 @@ import javax.swing.KeyStroke;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.5 2002-10-23 16:04:44 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.6 2002-12-03 20:14:28 thomas Exp $
  * @see org.gjt.sp.jedit.textarea.DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
@@ -76,7 +76,7 @@ public abstract class InputHandler extends KeyAdapter
 	public static final ActionListener MAKE_LOWER_CASE = new make_lower();
 	public static final ActionListener UNDO = new undo();
 	public static final ActionListener REDO = new redo();
-	
+
 	// Default action
 	public static final ActionListener INSERT_CHAR = new insert_char();
 
@@ -172,7 +172,7 @@ public abstract class InputHandler extends KeyAdapter
 	 * @param action The action
 	 */
 	public abstract void addKeyBinding(String keyBinding, ActionListener action);
-	
+
 	public abstract void addKeyBinding(KeyStroke aKey, ActionListener action);
 
 	/**
@@ -411,7 +411,7 @@ public abstract class InputHandler extends KeyAdapter
 			textArea.getDocument().redo();
 		}
 	}
-	
+
 	public static class undo implements ActionListener
 	{
 		public void actionPerformed(ActionEvent evt)
@@ -420,7 +420,7 @@ public abstract class InputHandler extends KeyAdapter
 			textArea.getDocument().undo();
 		}
 	}
-	
+
 	public static class make_upper implements ActionListener
 	{
 		public void actionPerformed(ActionEvent evt)
@@ -468,7 +468,7 @@ public abstract class InputHandler extends KeyAdapter
 			}
 		}
 	}
-	
+
 	public static class backspace implements ActionListener
 	{
 		public void actionPerformed(ActionEvent evt)
@@ -658,7 +658,7 @@ public abstract class InputHandler extends KeyAdapter
 			{
 				lastVisibleLine -= (textArea.getElectricScroll() + 1);
 			}
-			
+
 			int lastVisible = textArea.getLineEndOffset(lastVisibleLine) - 1;
 			int lastDocument = textArea.getDocumentLength();
 
@@ -929,8 +929,7 @@ public abstract class InputHandler extends KeyAdapter
 			int lineStart = textArea.getLineStartOffset(line);
 			caret -= lineStart;
 
-			String lineText = textArea.getLineText(textArea
-				.getCaretLine());
+			String lineText = textArea.getLineText(textArea.getCaretLine());
 
 			if(caret == lineText.length())
 			{

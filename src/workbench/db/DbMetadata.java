@@ -229,6 +229,7 @@ public class DbMetadata
 		try
 		{
 			GetMetaDataSql sql = (GetMetaDataSql)this.viewSourceSql.get(this.productName);
+			if (sql == null) return StringUtil.EMPTY_STRING;
 			aViewname = this.adjustObjectname(aViewname);
 			sql.setSchema(aSchema);
 			sql.setObjectName(aViewname);

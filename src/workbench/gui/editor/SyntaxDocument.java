@@ -22,26 +22,32 @@ import javax.swing.undo.UndoableEdit;
  * system.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxDocument.java,v 1.4 2002-10-12 09:23:15 thomas Exp $
+ * @version $Id: SyntaxDocument.java,v 1.5 2002-12-03 20:14:28 thomas Exp $
  */
-public class SyntaxDocument 
+public class SyntaxDocument
 	extends PlainDocument
 	implements UndoableEditListener
 {
 	private ArrayList undoList = new ArrayList();
 	private UndoManager undoManager = new UndoManager();
-	
+
 	public SyntaxDocument()
 	{
 		super();
 		this.addUndoableEditListener(this);
+		this.initDefaultProperties();
 	}
 	public SyntaxDocument(AbstractDocument.Content aContent)
 	{
 		super(aContent);
 		this.addUndoableEditListener(this);
+		this.initDefaultProperties();
 	}
 
+	protected void initDefaultProperties()
+	{
+		this.putProperty("noWordSep", "_");
+	}
 	/**
 	 * Returns the token marker that is to be used to split lines
 	 * of this document up into tokens. May return null if this
@@ -55,7 +61,7 @@ public class SyntaxDocument
 	public void isModified()
 	{
 	}
-	
+
 	/**
 	 * Sets the token marker that is to be used to split lines of
 	 * this document up into tokens. May throw an exception if
@@ -72,7 +78,7 @@ public class SyntaxDocument
 		tokenizeLines();
 	}
 
-	public void undoableEditHappened(UndoableEditEvent e) 
+	public void undoableEditHappened(UndoableEditEvent e)
 	{
 		if (e.getEdit().isSignificant())
 		{
@@ -84,28 +90,28 @@ public class SyntaxDocument
 	{
 		this.undoManager.discardAllEdits();
 	}
-	
+
 	public void redo()
 	{
 		try
-		{ 
-			undoManager.redo(); 
+		{
+			undoManager.redo();
 		}
 		catch (CannotRedoException cre)
-		{ 
-			//cre.printStackTrace(); 
+		{
+			//cre.printStackTrace();
 		}
 	}
-	
+
 	public void undo()
 	{
 		try
-		{ 
-			undoManager.undo(); 
+		{
+			undoManager.undo();
 		}
 		catch (CannotUndoException cre)
-		{ 
-			//cre.printStackTrace(); 
+		{
+			//cre.printStackTrace();
 		}
 	}
 	/**
@@ -175,7 +181,7 @@ public class SyntaxDocument
 	 *
 	 * @since jEdit 2.2pre1
 	 */
-	public void addUndoableEdit(UndoableEdit edit) 
+	public void addUndoableEdit(UndoableEdit edit)
 	{
 	}
 
@@ -203,7 +209,7 @@ public class SyntaxDocument
 
 		super.fireInsertUpdate(evt);
 	}
-	
+
 	/**
 	 * We overwrite this method to update the token marker
 	 * state immediately so that any event listeners get a

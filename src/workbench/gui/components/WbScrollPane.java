@@ -8,9 +8,14 @@ package workbench.gui.components;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.JViewport;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -24,12 +29,13 @@ import workbench.gui.WbSwingUtilities;
  */
 public class WbScrollPane extends JScrollPane
 {
-	public static final JPanel CORNER;
+	public static final JComponent CORNER;
 	static
 	{
 		CORNER = new JPanel();
-		CORNER.setBackground(Color.RED);
-		CORNER.setBorder(new EtchedBorder());
+		//CORNER.setBackground(Color.RED);
+		CORNER.setBorder(new DividerBorder(DividerBorder.LEFT));
+		//CORNER.setPreferredSize(new Dimension(15,15));
 	}
 	/** Creates a new instance of WbScrollPane */
 	public WbScrollPane()
@@ -58,8 +64,22 @@ public class WbScrollPane extends JScrollPane
 	{
 		this.setBorder(WbSwingUtilities.BEVEL_BORDER);
 		//this.setViewportBorder(WbSwingUtilities.EMPTY_BORDER);
-		//this.setCorner(JScrollPane.UPPER_RIGHT_CORNER, CORNER);
 	}
-
+	
+	public void updateCorner()
+	{
+		System.out.println("update corner...");
+		JViewport header = this.getColumnHeader();
+		Dimension visiblesize = header.getExtentSize();
+		Dimension realsize = header.getViewSize();
+		if (visiblesize.getWidth() < realsize.getWidth())
+		{
+			this.setCorner(JScrollPane.UPPER_RIGHT_CORNER, CORNER);
+		}
+		else
+		{
+			this.setCorner(JScrollPane.UPPER_RIGHT_CORNER, CORNER);
+		}
+	}
 
 }

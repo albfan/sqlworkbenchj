@@ -3,13 +3,13 @@ package workbench.storage;
 import java.lang.Comparable;
 import java.sql.Types;
 import java.util.HashMap;
+import workbench.util.StringUtil;
 
 public class NullValue
 	implements Comparable
 {
 	private static HashMap valueCache = new HashMap();
 	private int type;
-	private static final String EMPTY_STRING = "";
 	
 	public static NullValue getInstance(int aType)
 	{
@@ -28,7 +28,7 @@ public class NullValue
 		this.type = aType;
 	}
 	public int getType() { return this.type; }
-	public String toString() { return EMPTY_STRING; }
+	public String toString() { return StringUtil.EMPTY_STRING; }
 	
 	public int compareTo(Object other)
 	{
@@ -39,7 +39,7 @@ public class NullValue
 		}
 		else
 		{
-			return -1;
+			return 1;
 		}
 	}
 	

@@ -14,6 +14,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import workbench.WbManager;
 import workbench.gui.actions.WbAction;
@@ -44,6 +45,7 @@ public class EditorPanel
 	implements ClipboardSupport, FontChangedListener, 
 						 TextContainer, TextFileContainer
 {
+	private static final Border DEFAULT_BORDER = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
 	private AnsiSQLTokenMarker sqlTokenMarker;
 	private File currentFile;
 	private static final int JAVA_EDITOR = 1;
@@ -87,13 +89,12 @@ public class EditorPanel
 		this(null);
 	}
 	
-	/** Creates new EditorPanel */
 	public EditorPanel(TokenMarker aMarker)
 	{
 		super();
-		this.setDoubleBuffered(false);
+		this.setDoubleBuffered(true);
 		this.setFont(WbManager.getSettings().getEditorFont());
-		this.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+		this.setBorder(DEFAULT_BORDER);
 		
 		this.getPainter().setStyles(SYNTAX_COLORS);
 		
@@ -241,13 +242,16 @@ public class EditorPanel
 			return text;
 	}
 	
-	public boolean closeFile()
+	public boolean closeFile(boolean clearText)
 	{
     if (this.currentFile == null) return false;
 		this.currentFile = null;
-		this.setCaretPosition(0);
-		this.setText("");
-		this.clearUndoBuffer();
+		if (clearText)
+		{
+			this.setCaretPosition(0);
+			this.setText("");
+			this.clearUndoBuffer();
+		}
 		this.resetModified();
     return true;
 	}

@@ -10,11 +10,22 @@ import javax.swing.border.Border;
 
 import java.awt.Component;
 import java.awt.Color;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.Rectangle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.Icon;
 import javax.swing.JComponent;
+import javax.swing.JToolTip;
+import javax.swing.SwingUtilities;
+import javax.swing.plaf.basic.BasicGraphicsUtils;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.text.View;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.MultiLineToolTip;
+import workbench.gui.components.MultiLineToolTipUI;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTable;
 import workbench.util.StringUtil;
@@ -23,21 +34,54 @@ import workbench.util.StringUtil;
  * Displays a string in a table cell and shows a tool
  * tip if the string is too long to fit in the cell.
  */
-public class ToolTipRenderer 
-	extends DefaultTableCellRenderer 
+public class ToolTipRenderer
+	extends JComponent
+	implements TableCellRenderer
 {
+	protected String[] displayResult = new String[] { StringUtil.EMPTY_STRING, null };
 
 	private Color selectedForeground;
 	private Color selectedBackground;
 	private Color unselectedForeground;
 	private Color unselectedBackground;
 
+	private Rectangle paintIconR = new Rectangle();
+	private Rectangle paintTextR = new Rectangle();
+	private Rectangle paintViewR = new Rectangle();
+	private Insets paintViewInsets = new Insets(0, 0, 0, 0);
+	private Insets emptyInsets = new Insets(0, 0, 0, 0);
+	
+	public static final ToolTipRenderer DEFAULT_TEXT_RENDERER = new ToolTipRenderer();
+	
+	private static Insets focusedInsets;
+	static
+	{
+		int thick = WbTable.FOCUSED_CELL_BORDER.getThickness();
+		focusedInsets = new Insets(thick, thick, thick, thick);
+	}
+
+	private String displayText = StringUtil.EMPTY_STRING;
+	private boolean selected;
+	private boolean focus;
+	private int valign = SwingConstants.TOP; 
+	private int halign = SwingConstants.LEFT;
+	
+	public static final String[] EMPTY_DISPLAY = new String[] { StringUtil.EMPTY_STRING, null };
+	
 	public ToolTipRenderer()
 	{
-		this.setVerticalAlignment(SwingConstants.TOP);
-		this.setHorizontalAlignment(SwingConstants.LEFT);
 	}
 	
+	public void setVerticalAlignment(int align)
+	{
+		this.valign = align;
+	}
+	
+	public void setHorizontalAlignment(int align)
+	{
+		this.halign = align;
+	}
+
 	public Component getTableCellRendererComponent(	JTable table,
 																									Object value,
 																									boolean isSelected,
@@ -45,47 +89,115 @@ public class ToolTipRenderer
 																									int row,
 																									int col)
 	{
-		if (hasFocus)
-		{
-			this.setBorder(WbTable.FOCUSED_CELL_BORDER);
-		}
-		else
-		{
-			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		}
-		
+		this.focus = hasFocus;
 		if (isSelected)
 		{
 			if (selectedForeground == null)
 			{
-				this.selectedForeground = table.getSelectionForeground();
-				this.selectedBackground = table.getSelectionBackground();
+				selectedForeground = table.getSelectionForeground();
+				selectedBackground = table.getSelectionBackground();
 			}
-			super.setForeground(this.selectedForeground);
-			super.setBackground(this.selectedBackground);
 		}
 		else
 		{
 			if (selectedForeground == null)
 			{
-				this.unselectedForeground = table.getForeground();
-				this.unselectedBackground = table.getBackground();
+				unselectedForeground = table.getForeground();
+				unselectedBackground = table.getBackground();
 			}
-			super.setForeground(this.unselectedForeground);
-			super.setBackground(this.unselectedBackground);
 		}
-
-		String display;
-		String toolTip;
+		this.selected = isSelected;
 		
-		if (value == null)
+		String[] displayValue = this.getDisplay(value);
+		this.setToolTipText(displayValue[1]);
+		this.displayText = displayValue[0];
+		return this;
+	}
+	
+	public void paint(Graphics g)
+	{
+		FontMetrics fm = g.getFontMetrics();
+
+		Insets insets;
+		
+		if (focus)
 		{
-			toolTip = null;
-			display = "";
+			insets = focusedInsets;
 		}
 		else
 		{
-			display = value.toString().trim();
+			insets = emptyInsets;
+		}
+			
+		int w = this.getWidth();
+		int h = this.getHeight();
+		paintViewR.x = insets.left;
+		paintViewR.y = insets.top;
+		paintViewR.width = w - (insets.left + insets.right);
+		paintViewR.height = h - (insets.top + insets.bottom);
+		
+		
+		paintIconR.x = paintIconR.y = paintIconR.width = paintIconR.height = 0;
+		paintTextR.x = paintTextR.y = paintTextR.width = paintTextR.height = 0;
+		
+		Icon ic = null;
+		
+		String clippedText = 
+        SwingUtilities.layoutCompoundLabel(this,fm,this.displayText,ic
+						,this.valign
+						,this.halign
+						,SwingConstants.TOP
+						,SwingConstants.RIGHT
+						,paintViewR, paintIconR, paintTextR, 0);
+		
+		int textX = paintTextR.x;
+		int textY = paintTextR.y + fm.getAscent();
+		
+		
+		if (this.selected)
+		{
+			g.setColor(selectedBackground);
+			g.fillRect(0,0, w, h);
+			g.setColor(selectedForeground);
+		}
+		else 
+		{
+			g.setColor(unselectedBackground);
+			g.fillRect(0,0, w, h);
+			g.setColor(unselectedForeground);
+		}
+		g.drawString(clippedText, textX, textY);
+		if (focus) 
+		{
+			WbTable.FOCUSED_CELL_BORDER.paintBorder(this, g, 0, 0, w, h);
+		}
+	}
+	
+  protected void firePropertyChange(String propertyName, Object oldValue, Object newValue) {}
+  public boolean isOpaque() { return true; }
+	
+	public String[] getDisplay(Object aValue)
+	{
+		if (aValue == null)
+		{
+			return EMPTY_DISPLAY;
+		}
+		else
+		{
+			String display;
+			String tooltip = null;
+			
+			display = aValue.toString();
+			if (display.trim().length() == 0)
+				tooltip = null;
+			else
+				tooltip = display;
+			/* HTML parsing no longer need as we are using 
+			 * MultiLineToolTip now which (I think) is 
+			 * faster than building a new StringBuffer with 
+			 * HTML code
+			 */
+			/*
 			int len = display.length();
 			if (len > 0 && len < 100)
 			{
@@ -96,27 +208,18 @@ public class ToolTipRenderer
 					tip.append("<html>");
 					tip.append(m.replaceAll("<br>"));
 					tip.append("</html>");
-					toolTip = tip.toString();
-					display = toolTip;
+					tooltip = tip.toString();
 				}
 				else
 				{
-					toolTip = display;
+					tooltip = display;
 				}
 			}
-			else
-			{
-				// there is a difference in setting the tooltip to null
-				// or to an empty string. If you set it to an empty string
-				// it will display an ugly looking very small empty tooltip window!
-				toolTip = null;
-			}
-
+			*/
+			displayResult[0] = display;
+			displayResult[1] = tooltip;
 		}
-		this.setToolTipText(toolTip);
-		this.setText(display);
-		
-		return this;
+		return displayResult;
 	}
 	
 }

@@ -20,85 +20,72 @@ import javax.swing.table.TableCellRenderer;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbTable;
+import workbench.util.StringUtil;
 
 /**
  *
  * @author  thomas.kellerer@mgm-edv.de
  */
 public class NumberColumnRenderer
-	extends DefaultTableCellRenderer
+	extends ToolTipRenderer
 {
-	public DecimalFormat formatter;
-	private HashMap displayCache = new HashMap(1000);
-	private Color selectedForeground;
-	private Color selectedBackground;
-	private Color unselectedForeground;
-	private Color unselectedBackground;
+	private static DecimalFormat decimalFormatter;
+	private HashMap displayCache = new HashMap(500);
 	
-	/** Creates a new instance of NumberColumnRenderer */
 	public NumberColumnRenderer(int maxDigits)
 	{
-		this.setHorizontalAlignment(SwingConstants.RIGHT);
 		String sep = WbManager.getSettings().getDecimalSymbol();
 		DecimalFormatSymbols symb = new DecimalFormatSymbols();
 		symb.setDecimalSeparator(sep.charAt(0));
-		formatter = new DecimalFormat("0.#", symb);
-		this.formatter.setMaximumFractionDigits(maxDigits);
+		decimalFormatter = new DecimalFormat("0.#", symb);
+		decimalFormatter.setMaximumFractionDigits(maxDigits);
+		this.setHorizontalAlignment(SwingConstants.RIGHT);
 	}
 	
-	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
+	public void clearDisplayCache() 
 	{
-		if (hasFocus)
-		{
-			this.setBorder(WbTable.FOCUSED_CELL_BORDER);
-		}
-		else
-		{
-			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		}
-		if (isSelected)
-		{
-			if (selectedForeground == null)
-			{
-				this.selectedForeground = table.getSelectionForeground();
-				this.selectedBackground = table.getSelectionBackground();
-			}
-			super.setForeground(this.selectedForeground);
-			super.setBackground(this.selectedBackground);
-		}
-		else
-		{
-			if (selectedForeground == null)
-			{
-				this.unselectedForeground = table.getForeground();
-				this.unselectedBackground = table.getBackground();
-			}
-			super.setForeground(this.unselectedForeground);
-			super.setBackground(this.unselectedBackground);
-		}
+		this.displayCache.clear();
+	}
 	
-		if (value instanceof Number)
+	public String[] getDisplay(Object aValue)
+	{
+		if (aValue == null)
+		{
+			return ToolTipRenderer.EMPTY_DISPLAY;
+		}
+		else
 		{
 			String nr = null;
-			double d = 0.0;
-			Number n = (Number) value;
-			nr = (String)this.displayCache.get(n);
-			if (nr == null)
+			String str = aValue.toString();
+			try
 			{
-				d = n.doubleValue();
-				if (!Double.isNaN(d)) nr = formatter.format(d);
-				this.displayCache.put(n, nr);
+				Number n = (Number) aValue;
+				nr = (String)this.displayCache.get(n);
+				if (nr == null)
+				{
+					double d = n.doubleValue();
+					if (!Double.isNaN(d))
+					{
+						nr = decimalFormatter.format(d);
+					}
+					else
+					{
+						nr = StringUtil.EMPTY_STRING;
+						str = null;
+					}
+					
+					this.displayCache.put(n, nr);
+				}
+				displayResult[0] = nr;
+				displayResult[1] = str;
 			}
-			this.setValue(nr);
-			this.setToolTipText(value.toString());
+			catch (Throwable th)
+			{
+				displayResult[0] = str; 
+				displayResult[1] = null;
+			}
 		}
-		else 
-		{
-			this.setText((value == null ? "" : value.toString()));
-			this.setToolTipText(null);
-		}
-
-		return this;
+		return displayResult;
 	}
 	
 }

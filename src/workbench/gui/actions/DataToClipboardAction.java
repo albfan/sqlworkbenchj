@@ -36,7 +36,7 @@ public class DataToClipboardAction extends WbAction
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
 		String desc = ResourceMgr.getDescription("MnuTxtDataToClipboard");
 		String shift = KeyEvent.getKeyModifiersText(KeyEvent.SHIFT_MASK);
-		desc = StringUtil.replace(desc, "%s", shift);
+		desc = StringUtil.replace(desc, "%shift%", shift);
 		this.putValue(Action.SHORT_DESCRIPTION, desc);
 		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
 	}

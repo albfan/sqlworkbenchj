@@ -35,6 +35,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 import workbench.WbManager;
 import workbench.db.DataSpooler;
 import workbench.db.DbMetadata;
@@ -341,7 +342,7 @@ public class TableListPanel
 		this.triggers.reset();
 		this.tableSource.setText("");
 		this.invalidateData();
-		this.updateDisplayClients();
+		//this.updateDisplayClients();
 		this.importedTableTree.reset();
 		this.exportedTableTree.reset();
 	}
@@ -495,8 +496,8 @@ public class TableListPanel
 		int row = this.tableList.getSelectedRow();
 		if (row < 0) return;
 		
-		synchronized (retrieveLock)
-		{
+		//synchronized (retrieveLock)
+		//{
 			this.selectedCatalog = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
 			this.selectedSchema = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
 			this.selectedTableName = tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
@@ -521,8 +522,9 @@ public class TableListPanel
 				this.showDataMenu.setEnabled(false);
 			}
 			
-			this.startRetrieveCurrentPanel();
-		}
+			this.retrieveCurrentPanel();
+			//this.startRetrieveCurrentPanel();
+		//}
 	}
 
 	private void retrieveTableDefinition()
@@ -582,7 +584,7 @@ public class TableListPanel
 		synchronized (retrieveLock)
 		{
 			if (this.tableList.getSelectedRowCount() <= 0) return;
-			
+			WbSwingUtilities.showWaitCursorOnWindow(this);
 			this.busy = true;
 			try
 			{
@@ -618,6 +620,7 @@ public class TableListPanel
 				this.busy = false;
 			}
 		}
+		WbSwingUtilities.showDefaultCursorOnWindow(this);
 	}
 	
 	private void retrieveTriggers()
@@ -775,12 +778,13 @@ public class TableListPanel
 	private void updateDisplayClients()
 	{
 		if (this.tableListClients == null) return;
+		TableModel model = this.tableList.getModel();
 		for (int i=0; i < this.tableListClients.size(); i++)
 		{
 			JTable table = (JTable)this.tableListClients.get(i);
-			if (table != null)
+			if (table != null && model != null)
 			{
-				table.setModel(this.tableList.getModel());
+				table.setModel(model);
 				if (table instanceof WbTable)
 				{
 					WbTable t = (WbTable)table;

@@ -31,6 +31,7 @@ import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.gui.actions.*;
 import workbench.gui.actions.FileDisconnectAction;
+import workbench.gui.actions.ManageDriversAction;
 import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbMenuItem;
@@ -192,6 +193,7 @@ public class MainWindow
 		action = new FileNewWindowAction();
 		action.addToMenu(menu);
 		//menu.addSeparator();
+		menu.add(new ManageDriversAction(this));
 
 		// now create the menus for the current tab
 		List actions = aPanel.getActions();

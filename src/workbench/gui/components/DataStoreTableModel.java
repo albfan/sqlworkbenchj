@@ -66,12 +66,14 @@ public class DataStoreTableModel
 	
 	public synchronized void setDataStore(DataStore newData)
 	{
+		this.dispose();
 		this.dataCache = newData;
 		this.showStatusColumn = false;
 		this.statusOffset = 0;
 		this.sortColumn = -1;
 		this.fireTableStructureChanged();
 	}
+	
 	/**
 	 *	Return the contents of the field at the given position
 	 *	in the result set.
@@ -241,6 +243,7 @@ public class DataStoreTableModel
 
 	public Class getColumnClass(int aColumn)
 	{
+		if (this.dataCache == null) return null;
 		if (this.showStatusColumn && aColumn == 0) return Integer.class;
 		return this.dataCache.getColumnClass(aColumn - this.statusOffset);
 	}
@@ -325,15 +328,14 @@ public class DataStoreTableModel
 	
 	public int getSortColumn() { return this.sortColumn; }
 	
-	public synchronized void sortByColumn(int column)
+	public void sortByColumn(int column)
 	{
 		boolean ascending = true;
-		if (this.sortColumn == column)
-			ascending = !this.sortAscending;
+		if (this.sortColumn == column) ascending = !this.sortAscending;
 		sortByColumn(column, ascending);
 	}
 	
-	public void sortByColumn(int aColumn, boolean ascending)
+	public synchronized void sortByColumn(int aColumn, boolean ascending)
 	{
 		this.sortAscending = ascending;
 		this.sortColumn = aColumn;
@@ -357,29 +359,28 @@ public class DataStoreTableModel
 		}
 		
 		boolean ascending = true;
-		if (this.sortColumn == aColumn)
-			ascending = !this.sortAscending;
+		if (this.sortColumn == aColumn) ascending = !this.sortAscending;
 		sortInBackground(table, aColumn, ascending);
 	}
 	
 	public void sortInBackground(final WbTable table, final int aColumn, final boolean ascending)
 	{
-		final DataStoreTableModel sorter = this;
-		new Thread(new Runnable()
+		final DataStoreTableModel model = this;
+		new Thread()
 		{
 			public void run()
 			{
 				table.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				table.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				sorter.sortByColumn(aColumn, ascending);
+				model.sortByColumn(aColumn, ascending);
 				table.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				table.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				table.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				// repaint the header so that the icon is displayed...
 				table.getTableHeader().repaint(); 
 			}
-		}).start();
+		}.start();
 	}
 
 

@@ -10,5 +10,5 @@ public interface TextFileContainer
 	boolean saveFile();
 	boolean saveCurrentFile();
 	boolean openFile();
-	boolean closeFile();
+	boolean closeFile(boolean clearText);
 }

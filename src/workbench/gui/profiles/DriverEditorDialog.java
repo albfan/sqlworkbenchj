@@ -15,9 +15,10 @@ public class DriverEditorDialog extends javax.swing.JDialog
 	private javax.swing.JPanel dummyPanel;
 	private javax.swing.JPanel buttonPanel;
 	private javax.swing.JButton okButton;
-	private workbench.gui.profiles.DriverlistEditorPanel driverListPanel;
+	private DriverlistEditorPanel driverListPanel;
 	private javax.swing.JButton cancelButton;
-
+  private boolean cancelled = true;
+  
 	/** Creates new form DriverEditorDialog */
 	public DriverEditorDialog(java.awt.Frame parent, boolean modal)
 	{
@@ -27,6 +28,7 @@ public class DriverEditorDialog extends javax.swing.JDialog
 		{
 			this.setSize(300,300);
 		}
+		driverListPanel.restoreSettings();
 	}
 
 	private void initComponents()
@@ -89,6 +91,7 @@ public class DriverEditorDialog extends javax.swing.JDialog
 
 	private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt)
 	{
+    this.cancelled = true;
 		this.closeDialog();
 	}
 
@@ -97,6 +100,7 @@ public class DriverEditorDialog extends javax.swing.JDialog
 		try
 		{
 			this.driverListPanel.saveItem();
+      this.cancelled = false;
 			this.closeDialog();
 		}
 		catch (WbException e)
@@ -105,6 +109,8 @@ public class DriverEditorDialog extends javax.swing.JDialog
 		}
 	}
 
+  public boolean isCancelled() { return this.cancelled; }
+  
 	/** Closes the dialog */
 	private void closeDialog(java.awt.event.WindowEvent evt)
 	{
@@ -114,8 +120,8 @@ public class DriverEditorDialog extends javax.swing.JDialog
 	public void closeDialog()
 	{
 		WbManager.getSettings().storeWindowSize(this);
+		driverListPanel.saveSettings();
 		setVisible(false);
-		dispose();
 	}
 	/**
 	 * @param args the command line arguments

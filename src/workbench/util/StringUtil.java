@@ -6,6 +6,7 @@
 package workbench.util;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.StringReader;
 import java.lang.Character;
 import java.util.ArrayList;
@@ -21,9 +22,11 @@ import java.util.regex.Pattern;
 public class StringUtil
 {
 	public static Pattern PATTERN_CRLF = Pattern.compile("(\r\n|\n\r|\r|\n)");
-	
+
 	public static final String LINE_TERMINATOR = System.getProperty("line.separator");
 	public static final String PATH_SEPARATOR = System.getProperty("path.separator");
+	public static final StringBuffer EMPTY_STRINGBUFFER = new StringBuffer("");
+	public static final String EMPTY_STRING = "";
 	
 	public static final String replace(String aString, String aValue, String aReplacement)
 	{
@@ -71,7 +74,7 @@ public class StringUtil
 	{
 		return getIntValue(aValue, 0);
 	}
-	
+
 	public static int getIntValue(String aValue, int aDefault)
 	{
 		int result = aDefault;
@@ -96,19 +99,22 @@ public class StringUtil
 		}
 		return result;
 	}
-	
+
 	public static final String makeJavaString(String aString)
 	{
 		StringBuffer result = new StringBuffer("String sql=");
 		BufferedReader reader = new BufferedReader(new StringReader(aString));
+		boolean first = true;
 		try
 		{
 			String line = reader.readLine();
 			while (line != null)
 			{
+				if (first) first = false;
+				else result.append("           ");
 				result.append('"');
 				result.append(line);
-				result.append(" \"");
+				result.append(" \\n\"");
 				//result.append();
 				line = reader.readLine();
 				if (line != null)
@@ -131,6 +137,7 @@ public class StringUtil
 
 	public static final String cleanJavaString(String aString)
 	{
+		Pattern newline = Pattern.compile("\\\\n|\\\\r");
 		if (aString == null || aString.trim().length() == 0) return "";
 		List lines = getTextLines(aString);
 		StringBuffer result = new StringBuffer(aString.length());
@@ -140,36 +147,87 @@ public class StringUtil
 			String l = (String)lines.get(i);
 			int start = l.indexOf('"');
 			int end = l.lastIndexOf('"');
-			result.append(l.substring(start + 1, end));
+			if (start > -1)
+			{
+				l = l.substring(start + 1, end);
+			}
+			Matcher m = newline.matcher(l);
+			l = m.replaceAll("");
+			result.append(l);
 			if (i < count - 1) result.append('\n');
 		}
 		return result.toString();
 	}
-	
+
 	public static List getTextLines(String aScript)
 	{
-		List result = new ArrayList(100);
+		ArrayList l = new ArrayList(100);
+		getTextLines(l, aScript);
+		return l;
+	}
+	
+	public static void getTextLines(List aList, String aScript)
+	{
+		if (aScript == null) return;
+		if (aScript.length() > 100) 
+		{
+			// the solution with the StringReader performs
+			// better on long Strings, for short strings 
+			// using regex is faster
+			readTextLines(aList, aScript);
+			return;
+		}
+		
+		if (aList == null) return;
+		aList.clear();
 		Matcher m = StringUtil.PATTERN_CRLF.matcher(aScript);
 		int start = 0;
-		boolean notone = true;
+		boolean notOne = true;
 		while (m.find())
 		{
-			notone = false;
+			notOne = false;
 			String line = aScript.substring(start, m.start());
 			if (line != null)
 			{
-				result.add(line.trim());
+				aList.add(line.trim());
 			}
 			start = m.end();
 		}
-		
-		if (notone) result.add(aScript);
+
+		if (notOne) 
+			aList.add(aScript);
 		else if (start < aScript.length())
-		{
-			result.add(aScript.substring(start));
-		}
-		return result;
+			aList.add(aScript.substring(start));
 	}
+
+	private static void readTextLines(List aList, String aScript)
+	{
+		aList.clear();
+		if (aScript.indexOf('\n') < 0)
+		{
+			aList.add(aScript);
+			return;
+		}
+		
+		BufferedReader br = new BufferedReader(new StringReader(aScript));
+		String line;
+		try
+		{
+			while ((line = br.readLine()) != null)
+			{
+				aList.add(line.trim());
+			}
+		} 
+		catch (IOException ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			try { br.close(); } catch (Throwable th) {}
+		}
+	}
+	
 	
 	public static final String capitalize(String aString)
 	{
@@ -178,26 +236,26 @@ public class StringUtil
 		result.setCharAt(0, Character.toUpperCase(ch));
 		return result.toString();
 	}
-	
+
 	public static final String cleanupUnderscores(String aString, boolean capitalize)
 	{
 		if (aString == null) return null;
 		int pos = aString.indexOf('_');
-		
+
 		int len = aString.length();
 		StringBuffer result = new StringBuffer(len);
-		
+
 		if (capitalize)
 			result.append(Character.toUpperCase(aString.charAt(0)));
 		else
 			result.append(aString.charAt(0));
-		
+
 		for (int i=1; i < len; i++)
 		{
 			char c = aString.charAt(i);
-			if (c == '_') 
+			if (c == '_')
 			{
-				if (i < len - 1) 
+				if (i < len - 1)
 				{
 					i++;
 					c = Character.toUpperCase(aString.charAt(i));
@@ -211,8 +269,8 @@ public class StringUtil
 		}
 		return result.toString();
 	}
-	
-	
+
+
 	public static final String escapeHTML(String s)
 	{
 		if (s == null) return null;
@@ -268,13 +326,13 @@ public class StringUtil
 
 				// be carefull with this one (non-breaking whitee space)
 				//case ' ': sb.append("&nbsp;");break;
-				
+
 				default:  sb.append(c); break;
 			}
 		}
 		return sb.toString();
 	}
-	
+
 	public static final String unescapeHTML(String s)
 	{
 		String [][] escape =
@@ -321,9 +379,9 @@ public class StringUtil
 			{  "&nbsp;"   , " " } ,
 			{  "&reg;"    , "\u00a9" } ,
 			{  "&copy;"   , "\u00ae" } ,
-			{  "&euro;"   , "\u20a0" } 
+			{  "&euro;"   , "\u20a0" }
 		};
-		
+
 		int i, j, k, l ;
 
 		i = s.indexOf("&");
@@ -349,10 +407,10 @@ public class StringUtil
 		}
 		return s;
 	}
-	
+
 	public static void main(String args[])
 	{
-		String test = "String sql = \"SELECT column \" + \n\"  FROM test \" + \n\"  WHERE x= 10\"; ";
+		String test = "String sql = \"SELECT column \\n\" + \n\"  FROM test \\r\" + \n\"  WHERE x= 10\"; ";
 		System.out.println(cleanJavaString(test));
 	}
 }

@@ -194,4 +194,18 @@ public class DriverlistEditorPanel extends javax.swing.JPanel implements FileAct
 		conn.saveDrivers();
 	}
 
+	public void saveSettings()
+	{
+		int location = this.jSplitPane1.getDividerLocation();
+		WbManager.getSettings().setProperty(this.getClass().getName(), "divider", location);
+	}
+	
+	public void restoreSettings()
+	{
+		int location = WbManager.getSettings().getIntProperty(this.getClass().getName(), "divider");
+		if (location > 0)
+		{
+			this.jSplitPane1.setDividerLocation(location);
+		}
+	}
 }

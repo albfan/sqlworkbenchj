@@ -20,7 +20,7 @@ extends MouseInputAdapter
 	
 	private static final int PIXELS = 5;
 	private Cursor lastCursor;
-	private Cursor resizeCursor = Cursor.getPredefinedCursor(Cursor.S_RESIZE_CURSOR);
+	private static Cursor resizeCursor = Cursor.getPredefinedCursor(Cursor.S_RESIZE_CURSOR);
 	
 	public RowHeightResizer(JTable table)
 	{
@@ -38,7 +38,7 @@ extends MouseInputAdapter
 			{
 				this.lastCursor = this.table.getCursor();
 			}
-			this.table.setCursor(this.resizeCursor);
+			this.table.setCursor(resizeCursor);
 		}
 		else
 		{

@@ -13,85 +13,76 @@ import java.util.Date;
 import java.util.HashMap;
 import javax.swing.JComponent;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbTable;
+import workbench.util.StringUtil;
 
 /**
  *
  * @author  workbench@kellerer.org
  */
 public class DateColumnRenderer
-	extends DefaultTableCellRenderer
+	extends ToolTipRenderer
 {
-	private SimpleDateFormat formatter;
-	private HashMap displayCache = new HashMap();
+	private SimpleDateFormat dateFormatter;
+
 	public static final String DEFAULT_FORMAT = "yyyy-MM-dd";
+	private HashMap displayCache = new HashMap(500);
 	public DateColumnRenderer()
 	{
 		this(DEFAULT_FORMAT);
 	}
-	/** Creates a new instance of DateColumnRenderer */
+
 	public DateColumnRenderer(String aDateFormat)
 	{
 		if (aDateFormat == null)
 		{
 			aDateFormat = DEFAULT_FORMAT;
 		}
-		this.formatter = new SimpleDateFormat(aDateFormat);
-    this.setHorizontalAlignment(DefaultTableCellRenderer.RIGHT);
+		this.dateFormatter = new SimpleDateFormat(aDateFormat);
+    this.setHorizontalAlignment(SwingConstants.RIGHT);
 	}
 
-  public void setValue(Object value)
+	public void clearDisplayCache() 
 	{
-		Date aDate = null;
+		this.displayCache.clear();
+	}
+	
+  public String[] getDisplay(Object value)
+	{
+		Date d = null;
 		String newVal = null;
 		String tip = null;
 
-		if (value != null )
+		if (value == null )
+		{
+			return ToolTipRenderer.EMPTY_DISPLAY;
+		}
+		else
 		{
 			try
 			{
-				aDate = (Date)value;
-				tip = aDate.toString();
-				newVal = (String)this.displayCache.get(aDate);
+				d = (Date)value;
+				tip = d.toString();
+				newVal = (String)this.displayCache.get(d);
 				if (newVal == null)
 				{
-					newVal = this.formatter.format(aDate);
-					this.displayCache.put(aDate, newVal);
+					newVal = this.dateFormatter.format(d);
+					this.displayCache.put(d, newVal);
 				}
 			}
 			catch (ClassCastException cc)
 			{
-				newVal = "";
-				tip = "";
+				newVal = StringUtil.EMPTY_STRING;
+				tip = null;
 			}
 		}
-		else
-		{
-			newVal = "";
-			tip = "";
-		}
-		this.setToolTipText(tip);
-		super.setValue(newVal);
+		displayResult[0] = newVal;
+		displayResult[1] = tip;
+		
+		return displayResult;
   }
-	public Component getTableCellRendererComponent(	JTable table,
-																									Object value,
-																									boolean isSelected,
-																									boolean hasFocus,
-																									int row,
-																									int col)
-	{
-		Component result = super.getTableCellRendererComponent(table, value, isSelected, false, row, col);
-		if (hasFocus)
-		{
-			this.setBorder(WbTable.FOCUSED_CELL_BORDER);
-		}
-		else
-		{
-			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		}
-		return result;
-	}
-
+	
 }

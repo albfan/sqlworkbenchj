@@ -43,7 +43,6 @@ public class DwPanel extends JPanel
 	private WbTable infoTable;
 	private DwStatusBar statusBar;
 	
-	private DataStoreTableModel realModel;
 	private String sql;
 	private String lastMessage;
 	private WbConnection dbConnection;
@@ -53,7 +52,7 @@ public class DwPanel extends JPanel
 	//private PreparedStatement prepStatement;
 	private Statement lastStatement;
 	
-	private JScrollPane scrollPane;
+	private WbScrollPane scrollPane;
 	private DefaultCellEditor defaultEditor;
 	private DefaultCellEditor defaultNumberEditor;
 	private int maxRows = 0;
@@ -118,7 +117,7 @@ public class DwPanel extends JPanel
 		pol.addComponent(infoTable);
 		pol.addComponent(statusBar.tfMaxRows);
 		this.setFocusTraversalPolicy(pol);
-
+		this.setDoubleBuffered(true);
 	}
 	
 	public void disconnect()
@@ -156,7 +155,7 @@ public class DwPanel extends JPanel
 		
 		try
 		{
-			DataStore ds = this.realModel.getDataStore();
+			DataStore ds = this.infoTable.getDataStore();
 			if (WbManager.getSettings().getDbDebugMode())
 			{
 				Dimension max = new Dimension(400,400);
@@ -215,27 +214,28 @@ public class DwPanel extends JPanel
 	
 	public void setUpdateTable(String aTable)
 	{
-		this.realModel.setUpdateTable(aTable);
+		this.infoTable.getDataStore().setUpdateTable(aTable);
 	}
 	
 	public boolean checkUpdateTable()
 	{
-		if (this.realModel == null || this.realModel.getDataStore() == null) return false;
+		DataStore ds = this.infoTable.getDataStore();
+		if (ds == null) return false;
 		if (this.dbConnection == null) return false;
 		if (this.sql == null) return false;
-		return this.realModel.getDataStore().checkUpdateTable(this.sql, this.dbConnection);
+		return ds.checkUpdateTable(this.sql, this.dbConnection);
 	}
 	
 	public boolean isUpdateable()
 	{
-		if (this.realModel == null) return false;
-		return this.realModel.isUpdateable();
+		if (this.infoTable.getDataStore() == null) return false;
+		return this.infoTable.getDataStore().isUpdateable();
 	}
 
 	public boolean hasUpdateableColumns()
 	{
-		if (this.realModel == null || this.realModel.getDataStore() == null) return false;
-		return this.realModel.getDataStore().hasUpdateableColumns();
+		if (this.infoTable.getDataStore() == null) return false;
+		return this.infoTable.getDataStore().hasUpdateableColumns();
 	}
 	
 	public void runStatement(String aSql)
@@ -264,7 +264,6 @@ public class DwPanel extends JPanel
 			StringBuffer msg = new StringBuffer(500);
 			
 			this.lastMessage = "";
-			this.realModel = null;
 			
 			if (aSql.endsWith(";"))
 				aSql = aSql.substring(0, aSql.length() - 1);
@@ -433,19 +432,12 @@ public class DwPanel extends JPanel
 				newData.setOriginalStatement(aSql);
 				newData.setSourceConnection(this.dbConnection);
 				newData.checkUpdateTable();
-				this.infoTable.setVisible(false);
-				this.infoTable.setAutoCreateColumnsFromModel(true);
-				if (this.realModel == null)
-				{
-					this.realModel = null;
-					this.realModel = new DataStoreTableModel(newData);
-				}
-				else
-				{
-					this.realModel.setDataStore(newData);
-				}
-				this.infoTable.setModel(this.realModel, true);
 				
+				this.infoTable.reset();
+				this.infoTable.setAutoCreateColumnsFromModel(true);
+				this.infoTable.setModel(new DataStoreTableModel(newData), true);
+
+				/*
 				if (repeatLast)
 				{
 					this.infoTable.restoreColumnSizes();
@@ -454,10 +446,10 @@ public class DwPanel extends JPanel
 				{
 					this.infoTable.adjustColumns();
 				}
-				this.infoTable.setVisible(true);
+				*/
 				this.infoTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 				this.infoTable.setRowSelectionAllowed(true);
-				this.statusBar.setRowcount(this.infoTable.getModel().getRowCount());
+				this.statusBar.setRowcount(this.infoTable.getRowCount());
 			}
 			else if (this.lastStatement != null)
 			{
@@ -512,11 +504,14 @@ public class DwPanel extends JPanel
 	
 	public void deleteRow()
 	{
+		DataStoreTableModel ds = this.infoTable.getDataStoreTableModel();
+		if (ds == null) return;
+		
 		int selectedRow = this.infoTable.getSelectedRow();
 		if (selectedRow != -1)
 		{
-			this.realModel.deleteRow(selectedRow);
-			if (selectedRow >= this.realModel.getRowCount())
+			ds.deleteRow(selectedRow);
+			if (selectedRow >= ds.getRowCount())
 			{
 				selectedRow --;
 			}
@@ -526,6 +521,9 @@ public class DwPanel extends JPanel
 	
 	public void addRow()
 	{
+		DataStoreTableModel ds = this.infoTable.getDataStoreTableModel();
+		if (ds == null) return;
+		
 		int selectedRow = this.infoTable.getSelectedRow();
 		final int newRow;
 		
@@ -533,11 +531,11 @@ public class DwPanel extends JPanel
 		
 		if (selectedRow == -1)
 		{
-			newRow = this.realModel.addRow();
+			newRow = ds.addRow();
 		}
 		else
 		{
-			newRow = this.realModel.insertRow(selectedRow);
+			newRow = ds.insertRow(selectedRow);
 		}
 		this.infoTable.getSelectionModel().setSelectionInterval(newRow, newRow);
 		this.infoTable.scrollToRow(newRow);
@@ -584,14 +582,21 @@ public class DwPanel extends JPanel
 
 	public void restoreOriginalValues()
 	{
-		this.realModel.getDataStore().restoreOriginalValues();
+		DataStore ds = this.infoTable.getDataStore();
+		if (ds == null) return;
+		ds.restoreOriginalValues();
 		this.repaint();
 	}
 	
 	public String getLastMessage() { return this.lastMessage; }
 	public boolean hasResultSet() { return this.hasResultSet; }
 
-	public boolean isModified() { return this.realModel.getDataStore().isModified(); }
+	public boolean isModified() 
+	{ 
+		DataStore ds = this.infoTable.getDataStore();
+		if (ds == null) return false;
+		else return ds.isModified();
+	}
 
 	private void initLayout()
 	{
@@ -605,7 +610,7 @@ public class DwPanel extends JPanel
 		this.scrollPane = new WbScrollPane(this.infoTable);
 		this.add(this.scrollPane, BorderLayout.CENTER);
 		this.add(this.statusBar, BorderLayout.SOUTH);
-		this.infoTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		//this.infoTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		this.infoTable.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.infoTable.setDoubleBuffered(true);
 		this.infoTable.setAdjustToColumnLabel(true);
@@ -632,7 +637,6 @@ public class DwPanel extends JPanel
 	public void clearContent()
 	{
 		this.infoTable.reset();
-		this.realModel = null;
 		this.hasResultSet = false;
 		this.cancelled = false;
 		this.lastMessage = null;
