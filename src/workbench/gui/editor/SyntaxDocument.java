@@ -18,7 +18,7 @@ import javax.swing.undo.UndoableEdit;
  * system.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxDocument.java,v 1.9 2004-10-07 18:53:16 thomas Exp $
+ * @version $Id: SyntaxDocument.java,v 1.10 2004-10-09 13:32:49 thomas Exp $
  */
 public class SyntaxDocument
 	extends PlainDocument

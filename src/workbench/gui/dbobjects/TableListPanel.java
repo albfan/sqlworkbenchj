@@ -935,7 +935,7 @@ public TableListPanel(MainWindow aParent)
 			final String sql;
 
 			DbMetadata meta = this.dbConnection.getMetadata();
-			if (tableDefinition.getRowCount() == 0)
+			if (this.shouldRetrieveTable || tableDefinition.getRowCount() == 0)
 			{
 				this.retrieveTableDefinition();
 			}

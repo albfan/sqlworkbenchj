@@ -34,7 +34,7 @@ import workbench.util.WbPersistence;
 
 /**
  * @author  info@sql-workbench.net
- * @version  $Revision: 1.43 $
+ * @version  $Revision: 1.44 $
  */
 public class ConnectionMgr
 {

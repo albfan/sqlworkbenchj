@@ -30,7 +30,7 @@ import javax.swing.text.Utilities;
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.13 2004-10-07 18:53:16 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.14 2004-10-09 13:32:49 thomas Exp $
  */
 public class TextAreaPainter extends JComponent implements TabExpander
 {

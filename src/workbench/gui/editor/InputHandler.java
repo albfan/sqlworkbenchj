@@ -31,7 +31,7 @@ import javax.swing.text.BadLocationException;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.13 2004-10-07 18:53:16 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.14 2004-10-09 13:32:49 thomas Exp $
  * @see org.gjt.sp.jedit.textarea.DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
