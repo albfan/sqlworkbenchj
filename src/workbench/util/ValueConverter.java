@@ -37,7 +37,8 @@ public class ValueConverter
 														"yyyy-MM-dd",
 														"dd.MM.yyyy",
 														"MM/dd/yy",
-														"MM/dd/yyyy"
+														"MM/dd/yyyy",
+														"dd-MMM-yyyy"
 													};
 
 	private String defaultDateFormat;
@@ -104,6 +105,7 @@ public class ValueConverter
 			case Types.TIMESTAMP:
 				if (aValue.toString().length() == 0) return null;
 				java.sql.Date d = this.parseDate((String)aValue);
+				if (d == null) throw new Exception("Could not parse date " + aValue);
 				Timestamp t = new Timestamp(d.getTime());
 				return t;
 			default:

@@ -46,6 +46,7 @@ public class BatchRunner
 	private String errorScript;
 	private String delimiter = ";";
 	private boolean showResultSets = false;
+	private boolean showTiming = true;
 	private boolean success = true;
 	private ConnectionProfile profile;
 	private ResultLogger resultDisplay;
@@ -304,6 +305,7 @@ public class BatchRunner
 		int count = statements.size();
 		int executedCount = 0;
 		long start, end;
+
 		start = System.currentTimeMillis();
 		
 		for (int i=0; i < count; i++)
@@ -316,7 +318,9 @@ public class BatchRunner
 			try
 			{
 				if (this.resultDisplay == null) LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchExecutingStatement") + " "  + sql);
+				long verbstart = System.currentTimeMillis();
 				this.stmtRunner.runStatement(sql, 0);
+				long verbend = System.currentTimeMillis();
 				result = this.stmtRunner.getResult();
 				if (result.hasMessages() && (this.stmtRunner.getVerboseLogging() || !result.isSuccess()))
 				{
@@ -327,6 +331,11 @@ public class BatchRunner
 					}
 				}
 				executedCount ++;
+				
+				if (this.showTiming)
+				{
+					this.printMessage(ResourceMgr.getString("MsgSqlVerbTime") + " " + (((double)(verbend - verbstart)) / 1000.0) + "s");
+				}
 				
 				if (this.cancelExecution) 
 				{
@@ -363,12 +372,12 @@ public class BatchRunner
 		String msg = "\n" + executedCount + " " + ResourceMgr.getString("MsgTotalStatementsExecuted");
 		this.printMessage(msg);
 
-//		if (this.stmtRunner.getVerboseLogging())
-//		{
-//			long execTime = (end - start);
-//			msg = ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s";
-//			this.printMessage(msg);
-//		}
+		if (this.showTiming)
+		{
+			long execTime = (end - start);
+			msg = ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s";
+			this.printMessage(msg);
+		}
 		
 		return error;
 	}
@@ -413,7 +422,7 @@ public class BatchRunner
 		
 		String profilename = cmdLine.getValue(WbManager.ARG_PROFILE);
 		String errorHandling = cmdLine.getValue(WbManager.ARG_ABORT);
-		boolean showResult = StringUtil.stringToBool(cmdLine.getValue(WbManager.ARG_DISPLAY_RESULT));
+		boolean showResult = cmdLine.getBoolean(WbManager.ARG_DISPLAY_RESULT);
 		boolean abort = true;
 		if (errorHandling != null)
 		{
@@ -453,6 +462,7 @@ public class BatchRunner
 		runner.setErrorScript(error);
 		runner.setSuccessScript(success);
 		runner.setProfile(profile);
+		runner.showTiming = cmdLine.getBoolean(WbManager.ARG_SHOW_TIMING, true);
 		
 		return runner;
 	}

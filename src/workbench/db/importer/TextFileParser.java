@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
@@ -33,6 +34,9 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
 import workbench.util.WbStringTokenizer;
+import java.util.HashMap;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  *
@@ -49,6 +53,8 @@ public class TextFileParser
 	private boolean decodeUnicode = false;
 
 	private int colCount = -1;
+	private int importColCount = -1;
+
 	private ColumnIdentifier[] columns;
 	private Object[] rowData;
 
@@ -63,10 +69,21 @@ public class TextFileParser
 	private boolean abortOnError = false;
 	private WbConnection connection;
 
+	// for each column from columns
+	// the value for the respective index
+	// defines its real index
+	// if the value is -1 then the column
+	// will not be imported
+	private int[] columnMap;
+	private List pendingImportColumns;
 	private ValueConverter converter;
 	private StringBuffer messages = new StringBuffer(100);
 
-	/** Creates a new instance of TextFileParser */
+	// If a filter for the input file is defined
+	// this will hold the regular expressions per column
+	private Pattern[] columnFilter;
+	private Pattern lineFilter;
+
 	public TextFileParser(String aFile)
 	{
 		this.filename = aFile;
@@ -76,11 +93,139 @@ public class TextFileParser
 	{
 		this.receiver = rec;
 	}
+
 	public void setTableName(String aName)
 	{
 		this.tableName = aName;
 	}
 
+	public void importAllColumns()
+	{
+		this.columnMap = new int[this.colCount];
+		for (int i=0; i < this.colCount; i++) this.columnMap[i] = i;
+		this.importColCount = this.colCount;
+	}
+
+	public void setLineFilter(String regex)
+	{
+		try
+		{
+			this.lineFilter = Pattern.compile(regex);
+		}
+		catch (Exception e)
+		{
+			this.lineFilter = null;
+			LogMgr.logError("TextFileParser.addColumnFilter()", "Error compiling regular expression " + regex, e);
+		}
+	}
+
+	public boolean hasColumnFilter()
+	{
+		if (this.columnFilter == null) return false;
+		for (int i=0; i < this.columnFilter.length; i++)
+		{
+			if (this.columnFilter[i] != null) return true;
+		}
+		return false;
+	}
+
+	public void addColumnFilter(String colname, String regex)
+	{
+		int index = this.getColumnIndex(colname);
+		if (index == -1) return;
+		if (this.columnFilter == null) this.columnFilter = new Pattern[this.colCount];
+		try
+		{
+			Pattern p = Pattern.compile(regex);
+			this.columnFilter[index] = p;
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("TextFileParser.addColumnFilter()", "Error compiling regular expression " + regex + " for column " + colname, e);
+			this.columnFilter[index] = null;
+		}
+	}
+
+	/**
+	 * 	Define the columns that should be imported.
+	 * 	If this is not defined, then all columns will be imported
+	 */
+	public void setImportColumns(List columnList)
+	{
+		if (this.columns == null && this.withHeader)
+		{
+			// store the list so that when the columns
+			// are retrieved from the header row, the import columns
+			// can be defined
+			this.pendingImportColumns = columnList;
+			return;
+		}
+
+		if (columnList == null)
+		{
+			this.importAllColumns();
+			return;
+		}
+
+		int count = columnList.size();
+		if (count == 0)
+		{
+			this.importAllColumns();
+			return;
+		}
+
+		this.columnMap = new int[this.colCount];
+		for (int i=0; i < this.colCount; i++) this.columnMap[i] = -1;
+		this.importColCount = 0;
+
+		for (int i=0; i < count; i++)
+		{
+			Object o = columnList.get(i);
+			String columnName = o.toString();
+			int index = this.getColumnIndex(columnName);
+			if (index > -1)
+			{
+				this.columnMap[index] = i;
+				this.importColCount ++;
+			}
+		}
+	}
+
+	private ColumnIdentifier[] getColumnsToImport()
+	{
+		if (this.columnMap == null) return this.columns;
+		if (this.importColCount == this.colCount) return this.columns;
+		ColumnIdentifier[] result = new ColumnIdentifier[this.importColCount];
+		int col = 0;
+		for (int i=0; i < this.colCount; i++)
+		{
+			if (this.columnMap[i] != -1)
+			{
+				result[col] = this.columns[i];
+				col++;
+			}
+		}
+		return result;
+	}
+	/**
+	 *	Return the index of the specified column
+	 *  in the import file
+	 */
+	private int getColumnIndex(String colName)
+	{
+		if (colName == null) return -1;
+		if (this.colCount < 1) return -1;
+		if (this.columns == null) return -1;
+		for (int i=0; i < this.colCount; i++)
+		{
+			if (this.columns[i] != null && colName.equalsIgnoreCase(this.columns[i].getColumnName())) return i;
+		}
+		return -1;
+	}
+
+	/**
+	 * 	Define the columns in the input file.
+	 */
 	public void setColumns(List columnList)
 		throws Exception
 	{
@@ -199,16 +344,22 @@ public class TextFileParser
 			throw new Exception("Cannot import file without a column definition");
 		}
 
-		this.receiver.setTargetTable(this.tableName, this.columns);
+		ColumnIdentifier[] cols = this.getColumnsToImport();
+		this.receiver.setTargetTable(this.tableName, cols);
 
-		Object value = null;
-		this.rowData = new Object[this.colCount];
+		String value = null;
+		this.rowData = new Object[this.importColCount];
 		int importRow = 0;
 
 		CsvLineParser tok = new CsvLineParser(delimiter.charAt(0), (quoteChar == null ? 0 : quoteChar.charAt(0)));
+		tok.setReturnEmptyStrings(true);
 
 		try
 		{
+			boolean includeLine = true;
+			boolean hasColumnFilter = this.hasColumnFilter();
+			boolean hasLineFilter = this.lineFilter != null;
+
 			while (line != null)
 			{
 				if (this.doCancel()) break;
@@ -227,11 +378,31 @@ public class TextFileParser
 					continue;
 				}
 
+				if (hasLineFilter)
+				{
+					Matcher m = this.lineFilter.matcher(line);
+					if (!m.matches())
+					{
+						try
+						{
+							line = in.readLine();
+						}
+						catch (IOException e)
+						{
+							line = null;
+						}
+						continue;
+					}
+				}
+				
 				this.clearRowData();
 				importRow ++;
 
-				tok.setLine(line);
 
+				tok.setLine(line);
+				includeLine = true;
+
+				// Build row data
 				for (int i=0; i < this.colCount; i++)
 				{
 					try
@@ -239,15 +410,35 @@ public class TextFileParser
 						if (tok.hasNext())
 						{
 							value = tok.getNext();
+
+							if (hasColumnFilter && this.columnFilter[i] != null)
+							{
+								if (value == null)
+								{
+									includeLine = false;
+									break;
+								}
+								Matcher m = this.columnFilter[i].matcher(value);
+								if (!m.matches())
+								{
+									includeLine = false;
+									break;
+								}
+							}
+
+							int targetIndex = this.columnMap[i];
+							if (targetIndex == -1) continue;
+
 							if (this.decodeUnicode && SqlUtil.isCharacterType(this.columns[i].getDataType()))
 							{
 								value = StringUtil.decodeUnicode((String)value);
 							}
-							rowData[i] = converter.convertValue(value, this.columns[i].getDataType());
+							rowData[targetIndex] = converter.convertValue(value, this.columns[i].getDataType());
+
 							if (this.emptyStringIsNull && SqlUtil.isCharacterType(this.columns[i].getDataType()))
 							{
-								String s = (String)rowData[i];
-								if (s != null && s.length() == 0) rowData[i] = null;
+								String s = (String)rowData[targetIndex];
+								if (s != null && s.length() == 0) rowData[targetIndex] = null;
 							}
 						}
 					}
@@ -270,7 +461,7 @@ public class TextFileParser
 
 				try
 				{
-					this.receiver.processRow(rowData);
+					if (includeLine) this.receiver.processRow(rowData);
 				}
 				catch (Exception e)
 				{
@@ -306,16 +497,25 @@ public class TextFileParser
 
 	}
 
+	/*
+	private int mapInputColumnIndex(int i)
+	{
+		if (this.columnMap == null) return i;
+		return this.columnMap[i];
+	}
+	*/
+
 	private void clearRowData()
 	{
-		// this is nearly as fast as using System.arrayCopy()
-		// with a blank array...
-		for (int i=0; i < this.colCount; i++)
+		for (int i=0; i < this.importColCount; i++)
 		{
 			this.rowData[i] = null;
 		}
 	}
 
+	/**
+	 * 	Retrieve the column definitions from the header line
+	 */
 	private void readColumns(String headerLine)
 		throws Exception
 	{
@@ -328,21 +528,43 @@ public class TextFileParser
 			cols.add(column.toUpperCase());
 		}
 		this.readColumnDefinitions(cols);
+		if (this.pendingImportColumns != null)
+		{
+			this.setImportColumns(this.pendingImportColumns);
+			this.pendingImportColumns = null;
+		}
 	}
 
+	/**
+	 * 	Read the column definitions from the database.
+	 * 	@parm cols a List of column names (String)
+	 */
 	private void readColumnDefinitions(List cols)
 		throws Exception
 	{
+
 		try
 		{
 			ArrayList myCols = new ArrayList(cols);
 			this.colCount = myCols.size();
 			this.columns = new ColumnIdentifier[this.colCount];
 
+			boolean skipPresent = false;
+			ArrayList realCols = new ArrayList(this.colCount);
+
 			for (int i=0; i < this.colCount; i++)
 			{
 				String colname = ((String)myCols.get(i)).trim();
-				this.columns[i] = new ColumnIdentifier(colname);
+				if ("$wb_skip$".equalsIgnoreCase(colname))
+				{
+					this.columns[i] = null;
+					skipPresent = true;
+				}
+				else
+				{
+					this.columns[i] = new ColumnIdentifier(colname);
+					realCols.add(colname);
+				}
 				myCols.set(i, colname.toUpperCase());
 			}
 			DbMetadata meta = this.connection.getMetadata();
@@ -354,11 +576,14 @@ public class TextFileParser
 				ColumnIdentifier id = (ColumnIdentifier)colIds.get(i);
 				String column = id.getColumnName().toUpperCase();
 				int index = myCols.indexOf(column);
-				if (index >= 0)
+				if (index >= 0 && this.columns[index] != null)
 				{
 					this.columns[index].setDataType(id.getDataType());
 				}
 			}
+			// reset mapping
+			this.importAllColumns();
+			if (skipPresent) this.setImportColumns(realCols);
 		}
 		catch (Exception e)
 		{
@@ -366,6 +591,7 @@ public class TextFileParser
 			this.colCount = -1;
 			this.columns = null;
 		}
+
 	}
 
 	/**

@@ -24,6 +24,7 @@ public class CsvLineParser
 	private int current = 0;
 	private char delimiter;
 	private char quoteChar = 0;
+	private boolean returnEmptyStrings = false;
 	
 	public CsvLineParser(char delimit)
 	{
@@ -49,6 +50,12 @@ public class CsvLineParser
 		this.len = this.lineData.length();
 		this.current = 0;
 	}
+	
+	public void setReturnEmptyStrings(boolean flag)
+	{
+		this.returnEmptyStrings = flag;
+	}
+	
 	
 	public boolean hasNext()
 	{
@@ -81,9 +88,14 @@ public class CsvLineParser
 			current ++;
 		}
 		
-		String next = this.lineData.substring(beginField, current - endOffset);
-		this.current ++; // skip the delimiter
+		String next = null;
+		if (current - endOffset > beginField)
+		{
+			next = this.lineData.substring(beginField, current - endOffset);
+		}
 		
+		this.current ++; // skip the delimiter
+		if (this.returnEmptyStrings && next == null) next = StringUtil.EMPTY_STRING;
 		return next;
 	}
 	
@@ -91,8 +103,8 @@ public class CsvLineParser
 	{
 		try
 		{
-			CsvLineParser p = new CsvLineParser('\t');
-			p.setLine("field1\tDazu sagt A. immer: \"schön\"\tfield3");
+			CsvLineParser p = new CsvLineParser('\t', '"');
+			p.setLine("field1\t\"test\"\tfield3");
 			while (p.hasNext())
 				System.out.println(p.getNext());
 		}

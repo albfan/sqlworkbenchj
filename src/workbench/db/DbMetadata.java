@@ -149,8 +149,10 @@ public class DbMetadata
 	private String quoteCharacter;
 	private String dbVersion;
 
-	private static final String SELECT_INTO_PG = "(?i)SELECT.*INTO\\s*TABLE\\s*\\p{Print}*\\s*FROM.*";
-	private static final String SELECT_INTO_INFORMIX = "(?i)SELECT.*FROM.*INTO\\s*\\p{Print}*";
+	//private static final String SELECT_INTO_PG = "(?i)SELECT.*INTO\\s*TABLE\\s*\\p{Print}*\\s*FROM.*";
+	// the TABLE word is not mandatory...
+	private static final String SELECT_INTO_PG = "(?i)(?s)SELECT.*INTO\\p{Print}*\\s*FROM.*";
+	private static final String SELECT_INTO_INFORMIX = "(?i)(?s)SELECT.*FROM.*INTO\\s*\\p{Print}*";
 	private Pattern selectIntoPattern = null;
 
 	/** Creates a new instance of DbMetadata */
@@ -999,6 +1001,7 @@ public class DbMetadata
 			{
 				needQuote = true;
 			}
+			
 			if (this.storesUpperCaseIdentifiers() && !aName.toUpperCase().equals(aName))
 			{
 				needQuote = true;
@@ -1227,6 +1230,7 @@ public class DbMetadata
 		}
 		return false;
 	}
+	
 	public boolean tableExists(TableIdentifier aTable)
 	{
 		if (aTable == null) return false;
@@ -1234,7 +1238,10 @@ public class DbMetadata
 		ResultSet rs = null;
 		try
 		{
-			rs = this.metaData.getTables(this.adjustObjectname(aTable.getCatalog()), this.adjustObjectname(aTable.getSchema()), this.adjustObjectname(aTable.getTable()), new String[] { "TABLE" });
+			String c = this.adjustObjectname(aTable.getCatalog());
+			String s = this.adjustObjectname(aTable.getSchema());
+			String t = this.adjustObjectname(aTable.getTable());
+			rs = this.metaData.getTables(c, s, t, new String[] { "TABLE" });
 			exists = rs.next();
 		}
 		catch (Exception e)

@@ -68,12 +68,6 @@ public class StartEditAction
 			}
 		};
 		t.start();
-		/*
-		if (this.switchedOn)
-			this.client.startEdit();
-		else
-			this.client.endEdit();
-		*/
 	}
 
 	public boolean isSwitchedOn() { return this.switchedOn; }

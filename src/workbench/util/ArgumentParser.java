@@ -149,6 +149,11 @@ public class ArgumentParser
 		value = StringUtil.trimQuotes(value);
 		return value;
 	}
+	
+	public int getIntValue(String key, int def)
+	{
+		return StringUtil.getIntValue(this.getValue(key),def);
+	}
 
 	public static void main(String[] args)
 	{

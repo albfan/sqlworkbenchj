@@ -115,7 +115,9 @@ public class DataExporter
 	private boolean createFullHtmlPage = true;
 	private boolean verboseFormat = true;
 
-	private boolean showProgress = false;
+	private boolean showProgressWindow = false;
+	private boolean showProgress = true;
+	
 	private ProgressPanel progressPanel;
 	private JFrame progressWindow;
 	private boolean keepRunning = true;
@@ -272,14 +274,27 @@ public class DataExporter
 	public void setCommitEvery(int aCount) { this.commitEvery = aCount; }
 	public int getCommitEvery() { return this.commitEvery; }
 
-	public void setShowProgress(boolean aFlag)
+	/**
+	 * Control the progress display in the RowActionMonitor
+	 * This is used by the WBEXPORT command to turn off the row
+	 * progress display. Turning off the display will speed up 
+	 * the export because the GUI does not need to be updated
+	 */
+	public void setShowProgress(boolean flag) { this.showProgress = flag; }
+	public boolean getShowProgress() { return this.showProgress; }
+	
+	
+	/** Control the display of a progress window. This is used
+	 *  from within the DbExplorer
+	 */
+	public void setShowProgressWindow(boolean aFlag)
 	{
 	  if (!WbManager.getInstance().isBatchMode())
 	  {
-	    this.showProgress = aFlag;
+	    this.showProgressWindow = aFlag;
 	  }
 	}
-	public boolean getShowProgress() { return this.showProgress; }
+	public boolean getShowProgressWindow() { return this.showProgressWindow; }
 
 	public void setXsltTransformation(String xsltFileName)
 	{
@@ -516,10 +531,6 @@ public class DataExporter
 
 	public void setCurrentRow(int currentRow)
 	{
-		if (showProgress)
-		{
-			progressPanel.setRowInfo(currentRow);
-		}
 		if (this.rowMonitor != null)
 		{
 			this.rowMonitor.setCurrentRow(currentRow, -1);
@@ -550,7 +561,7 @@ public class DataExporter
 		{
 			this.addError(ExceptionUtil.getDisplay(e));
 			LogMgr.logError("DataExporter.startExport()", "Could not execute SQL statement: " + e.getMessage(), e);
-			if (this.showProgress)
+			if (this.showProgressWindow)
 			{
 				if (!jobsRunning) this.closeProgress();
 				WbSwingUtilities.showErrorMessage(this.parentWindow, ResourceMgr.getString("MsgExecuteError") + ": " + e.getMessage());
@@ -700,14 +711,7 @@ public class DataExporter
 		{
 			exporter.setTableToUse(this.tableName);
 		}
-		exporter.setRowMonitor(this.rowMonitor);
-
-		if (this.showProgress)
-		{
-			if (this.progressPanel == null) this.openProgressMonitor();
-			exporter.setRowMonitor(this.progressPanel);
-		}
-
+		
 		BufferedWriter pw = null;
 
 		try
@@ -750,6 +754,25 @@ public class DataExporter
 		finally
 		{
 		}
+		
+		if (this.showProgress)
+		{
+			exporter.setRowMonitor(this.rowMonitor);
+		}
+		else if (this.rowMonitor != null)
+		{
+			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+			String msg = ResourceMgr.getString("MsgExportingData") + " " + this.fullOutputFileName;
+			this.rowMonitor.setCurrentObject(msg, -1, -1);
+			Thread.yield();
+		}
+
+		if (this.showProgressWindow)
+		{
+			if (this.progressPanel == null) this.openProgressMonitor();
+			exporter.setRowMonitor(this.progressPanel);
+		}
+		
 		return exporter;
 	}
 
@@ -784,7 +807,7 @@ public class DataExporter
 			{
 				this.setConnection(aConnection);
 				dialog.setExporterOptions(this);
-				this.setShowProgress(true);
+				this.setShowProgressWindow(true);
 				this.openProgressMonitor();
 				this.startBackgroundThread();
 			}

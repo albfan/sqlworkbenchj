@@ -24,6 +24,7 @@ public interface RowActionMonitor
 	final int MONITOR_COPY = 4;
 	final int MONITOR_PROCESS_TABLE = 5;
 	final int MONITOR_PROCESS = 6;
+	final int MONITOR_PLAIN = 7;
 
 	void setMonitorType(int aType);
 	void setCurrentObject(String object, int number, int totalObjects);

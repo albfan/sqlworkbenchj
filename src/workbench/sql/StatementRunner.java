@@ -365,9 +365,9 @@ public class StatementRunner
 	private SqlCommand getCommandToUse(String sql)
 	{
 		String verb = SqlUtil.getSqlVerb(sql);
-		if (!this.supportsSelectInto && this.dbConnection.getMetadata().isSelectIntoNewTable(sql))
+		if (this.supportsSelectInto && this.dbConnection.getMetadata().isSelectIntoNewTable(sql))
 		{
-			LogMgr.logDebug("StatementRunner.getRealVerb()", "Found 'SELECT ... INTO new_table'");
+			LogMgr.logDebug("StatementRunner.getCommandToUse()", "Found 'SELECT ... INTO new_table'");
 			// use the generic SqlCommand implementation for this.
 			return (SqlCommand)this.cmdDispatch.get("*");
 		}

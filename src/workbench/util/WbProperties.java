@@ -177,8 +177,17 @@ public class WbProperties
 	
 	public Object setProperty(String name, String value)
 	{
-		Object oldValue = super.setProperty(name, value);
-		this.firePropertyChanged(name, (String)oldValue, value);
+		String oldValue = (String)super.setProperty(name, value);
+		
+		// Only fire propertyChanged event if something has changed!
+		if ( oldValue == null && value == null) return oldValue;
+		
+		if ( (oldValue == null && value != null) || 
+			   (oldValue != null && value == null) ||
+			   !oldValue.equals(value))
+		{
+			this.firePropertyChanged(name, oldValue, value);
+		}
 		return oldValue;
 	}
 

@@ -29,7 +29,9 @@ import javax.swing.border.LineBorder;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.WbTextLabel;
 import workbench.resource.ResourceMgr;
+import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 
@@ -41,7 +43,9 @@ public class DwStatusBar extends JPanel
 {
 	private JTextField tfRowCount;
 
-	private JTextField tfStatus;
+	//private JLabel tfStatus;
+	private WbTextLabel tfStatus;
+	
 	JTextField tfMaxRows;
 	private String readyMsg;
 	private JTextField tfTimeout;
@@ -60,7 +64,6 @@ public class DwStatusBar extends JPanel
 	{
 		Dimension d = new Dimension(40, FIELD_HEIGHT);
 		this.tfRowCount = new JTextField();
-		this.tfStatus = new JTextField();
 		this.tfMaxRows = new JTextField(6);
 		this.tfMaxRows.setEditable(true);
 		this.tfMaxRows.setMaximumSize(d);
@@ -87,17 +90,14 @@ public class DwStatusBar extends JPanel
 		tfRowCount.setPreferredSize(null);
 		tfRowCount.setAutoscrolls(false);
 		tfRowCount.setEnabled(false);
-
-		tfStatus.setHorizontalAlignment(JTextField.LEFT);
-		tfStatus.setBorder(new DividerBorder(DividerBorder.RIGHT));
-		tfStatus.setDisabledTextColor(Color.BLACK);
+		
+		JLabel l = null;
+		this.tfStatus = new WbTextLabel();
 		tfStatus.setMaximumSize(new Dimension(32768, FIELD_HEIGHT));
 		tfStatus.setMinimumSize(new Dimension(80, FIELD_HEIGHT));
 		tfStatus.setPreferredSize(null);
-		tfStatus.setAutoscrolls(false);
-		tfStatus.setEnabled(false);
-		tfStatus.setEditable(false);
-
+		//tfStatus.setBorder(new DividerBorder(DividerBorder.RIGHT));		
+		
 		JPanel p = new JPanel();
 		p.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		FlowLayout fl = new FlowLayout(FlowLayout.RIGHT);
@@ -107,10 +107,10 @@ public class DwStatusBar extends JPanel
 		p.setMaximumSize(new Dimension(300, FIELD_HEIGHT));
 		
 		this.add(tfStatus, BorderLayout.CENTER);
-		JLabel l = null;
 		if (showTimeout)
 		{
 			l = new JLabel(" " + ResourceMgr.getString("LabelQueryTimeout") + " ");
+			l.setBorder(new DividerBorder(DividerBorder.LEFT));		
 			p.add(l);
 			this.tfTimeout = new JTextField(4);
 			this.tfTimeout.setBorder(b);
@@ -121,16 +121,16 @@ public class DwStatusBar extends JPanel
 			l.setToolTipText(this.tfTimeout.getToolTipText());
 			p.add(this.tfTimeout);
 		}
-		
 		l = new JLabel(" " + ResourceMgr.getString("LabelMaxRows") + " ");
+		if (!showTimeout)
+		{
+			l.setBorder(new DividerBorder(DividerBorder.LEFT));		
+		}
 		l.setToolTipText(this.tfRowCount.getToolTipText());
 		p.add(l);
 		p.add(tfMaxRows);
 		p.add(tfRowCount);
 		this.add(p, BorderLayout.EAST);
-
-		//this.add(tfMaxRows, BorderLayout.EAST);
-		//this.add(tfRowCount, BorderLayout.EAST);
 
 		this.readyMsg = ResourceMgr.getString(ResourceMgr.STAT_READY);
 		this.clearStatusMessage();
@@ -163,9 +163,6 @@ public class DwStatusBar extends JPanel
 			s.append(count);
 		}
 		this.tfRowCount.setText(s.toString());
-		this.doLayout();
-		this.updateUI();
-		this.doRepaint();
 	}
 	
 	public void clearRowcount()
@@ -176,15 +173,7 @@ public class DwStatusBar extends JPanel
 
 	public void setStatusMessage(String aMsg)
 	{
-		if (aMsg == null || aMsg.length() == 0)
-		{
-			this.clearStatusMessage();
-		}
-		else
-		{
-			this.tfStatus.setText(aMsg);
-			this.doRepaint();
-		}
+		this.tfStatus.setText(aMsg);
 	}
 
 	public void clearStatusMessage()

@@ -16,13 +16,16 @@ import java.awt.event.ActionEvent;
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
 import javax.swing.border.Border;
+import workbench.gui.components.WbToolbarButton;
 
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
+ *	Action to ignore errors when executing scripts
  *	@author  info@sql-workbench.net
  */
 public class IgnoreErrorsAction extends WbAction
@@ -31,13 +34,14 @@ public class IgnoreErrorsAction extends WbAction
 
 	private boolean switchedOn = false;
 	private JCheckBoxMenuItem toggleMenu;
+	private JToggleButton toggleButton;
 
 	public IgnoreErrorsAction()
 	{
 		super();
 		this.initMenuDefinition("MnuTxtIgnoreErrors");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.switchedOn = Settings.getInstance().getAutoJumpNextStatement();
+		this.switchedOn = Settings.getInstance().getIgnoreErrors();
 	}
 
 	public void executeAction(ActionEvent e)
@@ -45,12 +49,29 @@ public class IgnoreErrorsAction extends WbAction
 		this.setSwitchedOn(!this.switchedOn);
 	}
 
+	public JToggleButton createButton()
+	{
+		this.toggleButton = new JToggleButton(this);
+		this.toggleButton.setText(null);
+		this.toggleButton.setMargin(WbToolbarButton.MARGIN);
+		this.toggleButton.setIcon(ResourceMgr.getPicture("IgnoreError"));
+		this.toggleButton.setSelected(this.switchedOn);
+		return this.toggleButton;
+	}
+	
+	public void addToToolbar(JToolBar aToolbar)
+	{
+		if (this.toggleButton == null) this.createButton();
+		aToolbar.add(this.toggleButton);
+	}
+	
 	public boolean isSwitchedOn() { return this.switchedOn; }
 
 	public void setSwitchedOn(boolean aFlag)
 	{
 		this.switchedOn = aFlag;
 		if (this.toggleMenu != null) this.toggleMenu.setSelected(aFlag);
+		if (this.toggleButton != null) this.toggleButton.setSelected(aFlag);
 		Settings.getInstance().setIgnoreErrors(this.switchedOn);
 	}
 

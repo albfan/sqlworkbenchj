@@ -10,49 +10,56 @@
  *
  */
 package workbench.gui.components;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import javax.swing.JComponent;
 import javax.swing.UIManager;
-import workbench.util.StringUtil;
+
 
 
 /**
  *  Displays a Label left aligned with no further overhead in painting
- *  (Faster then JLabel) this is used to in DwStatusBar because during
- *  loading and importing the status display would be too slow.
+ *  (Faster then JLabel) this is used to in DwStatusBar to speed
+ *  up processes that do give a lot of feedback (e.g. import)
  */
 public class WbTextLabel
 	extends JComponent
 {
-	protected String text = StringUtil.EMPTY_STRING;
-
+	private String text;
+	private final Color textColor;
+	private final int textX = 2;
+	private int textY;
+	
 	public WbTextLabel()
 	{
 		this.setDoubleBuffered(true);
-		this.setForeground(UIManager.getColor("Label.foreground"));
 		this.setBackground(UIManager.getColor("Label.background")); 	
+		this.textColor = UIManager.getColor("Label.foreground");
+		this.setForeground(textColor);
+		this.setOpaque(false);
+		Font f = UIManager.getFont("Label.font");
+		FontMetrics fm = this.getFontMetrics(f);
+		textY = fm.getAscent() + 2;
 	}
 	
+	public void setFont(Font f)
+	{
+		super.setFont(f);
+		FontMetrics fm = this.getFontMetrics(f);
+		textY = fm.getAscent() + 2;
+	}
+
 	public void setText(String label)
 	{
-		if (label == null) this.text = StringUtil.EMPTY_STRING;
-		else this.text = label;
+		this.text = label;
 		this.repaint();
 	}
 	
-	public String getText() { return this.text; }
-	
 	public void paint(Graphics g)
 	{
-		final int w = this.getWidth();
-		final int h = this.getHeight();
-		FontMetrics fm = g.getFontMetrics();
-		
-		final int textX = 2;
-		final int textY = fm.getAscent() + 2;
-		
-		g.setColor(this.getForeground());
+		g.setColor(this.textColor);
 		g.drawString(this.text, textX, textY);
 	}
 

@@ -240,13 +240,17 @@ public class StringUtil
 		return result;
 	}
 
+	public static final List stringToList(String aString, String aDelimiter)
+	{
+		return stringToList(aString, aDelimiter, false);
+	}
 	/**
 	 *	Parses the given String and creates a List containing the elements
 	 *  of the string that are separated by <tt>aDelimiter</aa>
 	 *  @param String the separated input to parse
 	 *  @param String the delimiter to user
 	 */
-	public static final List stringToList(String aString, String aDelimiter)
+	public static final List stringToList(String aString, String aDelimiter, boolean removeEmpty)
 	{
     if (aString == null || aString.length() == 0) return Collections.EMPTY_LIST;
 		WbStringTokenizer tok = new WbStringTokenizer(aString, aDelimiter);
@@ -255,6 +259,7 @@ public class StringUtil
 		{
 			String element = tok.nextToken();
 			if (element == null) continue;
+			if (removeEmpty && element.trim().length() == 0) continue;
 			result.add(element);
 		}
 		return result;

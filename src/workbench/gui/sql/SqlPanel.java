@@ -744,7 +744,8 @@ public class SqlPanel
 		this.actions.add(a);
 		this.checkPreparedAction = new CheckPreparedStatementsAction();
 		this.actions.add(this.checkPreparedAction);
-		this.actions.add(new IgnoreErrorsAction());
+		IgnoreErrorsAction ignore = new IgnoreErrorsAction();
+		this.actions.add(ignore);
 		this.executeAll.setEnabled(false);
 		this.executeSelected.setEnabled(false);
 
@@ -764,6 +765,8 @@ public class SqlPanel
 		this.commitAction.setCreateToolbarSeparator(true);
 		this.toolbarActions.add(this.commitAction);
 		this.toolbarActions.add(this.rollbackAction);
+		ignore.setCreateToolbarSeparator(true);
+		this.toolbarActions.add(ignore);
 
 		this.findDataAction = this.data.getTable().getFindAction();
 		this.findDataAction.setEnabled(false);
@@ -1607,6 +1610,7 @@ public class SqlPanel
 				runStatement(sql, offset, commandAtIndex, highlight);
 			}
 		});
+		this.executionThread.setPriority(Thread.MAX_PRIORITY);
 		this.executionThread.setDaemon(true);
 		this.executionThread.setName("SQL Execution Thread " + this.getId());
 		this.executionThread.start();
@@ -2398,7 +2402,7 @@ public class SqlPanel
 					{
 						if (this.hasFileLoaded())
 						{
-							tab.setIconAt(index, this.getFileIcon());
+							tab.setIconAt(index, getFileIcon());
 						}
 						else
 						{

@@ -281,6 +281,9 @@ public class DwPanel
 				case RowActionMonitor.MONITOR_PROCESS_TABLE:
 					this.updateMsg = ResourceMgr.getString("MsgProcessTable") + " ";
 					break;
+				case RowActionMonitor.MONITOR_PLAIN:
+					this.updateMsg = null;
+					break;
 				default:
 					clearRowMonitorSettings();
 			}
@@ -291,7 +294,7 @@ public class DwPanel
 		}
 	}
 
-	private final String objectMsg = ResourceMgr.getString("MsgProcessObject");
+	private final String objectMsg = ResourceMgr.getString("MsgProcessObject") + " ";
 
 	/**
 	 *	Callback method from the {@link workbench.interfaces.ScriptGenerationMonitor}
@@ -306,22 +309,28 @@ public class DwPanel
 	 */
 	public void setCurrentObject(String name, int number, int total)
 	{
-		StringBuffer msg = new StringBuffer(objectMsg);
-		msg.append(" ");
-		msg.append(name);
-		if (number > 0)
+		if (this.monitorType == RowActionMonitor.MONITOR_PLAIN)
 		{
-			msg.append(" (");
-			msg.append(number);
-			if (total > 0)
-			{
-				msg.append("/");
-				msg.append(total);
-			}
-			msg.append(")");
+			statusBar.setStatusMessage(name);
 		}
-
-		statusBar.setStatusMessage(msg.toString());
+		else
+		{
+			StringBuffer msg = new StringBuffer(40);
+			msg.append(objectMsg);
+			msg.append(name);
+			if (number > 0)
+			{
+				msg.append(" (");
+				msg.append(number);
+				if (total > 0)
+				{
+					msg.append('/');
+					msg.append(total);
+				}
+				msg.append(')');
+			}
+			statusBar.setStatusMessage(msg.toString());
+		}
 	}
 
 	/**
@@ -329,14 +338,12 @@ public class DwPanel
 	 */
 	public void setCurrentRow(int currentRow, int totalRows)
 	{
-		if (this.monitorType < 0) return;
-		if (this.cancel) return;
-		StringBuffer msg = new StringBuffer(80);
+		StringBuffer msg = new StringBuffer(40);
 		msg.append(this.updateMsg);
 		msg.append(currentRow);
 		if (totalRows > 0)
 		{
-			msg.append("/");
+			msg.append('/');
 			msg.append(totalRows);
 		}
 		statusBar.setStatusMessage(msg.toString());

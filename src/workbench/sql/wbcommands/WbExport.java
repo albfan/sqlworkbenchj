@@ -45,6 +45,7 @@ public class WbExport
 	private List tablesToExport = null;
 	private String currentTable;
 	private String defaultExtension;
+	private boolean showProgress = true;
 
 	public WbExport()
 	{
@@ -145,8 +146,8 @@ public class WbExport
 
 		type = cmdLine.getValue("type");
 		file = cmdLine.getValue("file");
-		String outputdir = cmdLine.getValue("outputdir");
 		String tables = cmdLine.getValue("sourcetable");
+		String outputdir = cmdLine.getValue("outputdir");
 
 		if (type == null)
 		{
@@ -372,11 +373,13 @@ public class WbExport
 
 		this.exporter.setConnection(aConnection);
 
-		String progress = cmdLine.getValue("showprogress");
-		this.exporter.setShowProgress("true".equalsIgnoreCase(progress));
+		this.showProgress = cmdLine.getBoolean("showprogress", true);
+		
 		if (!this.directExport)
 		{
 			this.exporter.setRowMonitor(this.rowMonitor);
+			this.exporter.setShowProgress(showProgress);
+			
 			String msg = ResourceMgr.getString("MsgSpoolInit");
 			msg = StringUtil.replace(msg, "%type%", typeDisplay);
 			msg = StringUtil.replace(msg, "%file%", file);
@@ -390,6 +393,11 @@ public class WbExport
 		}
 		else
 		{
+			if (outputdir == null || outputdir.trim().length() == 0)
+			{
+				result.setFailure();
+				result.addMessage(ResourceMgr.getString("ErrorExportOutputDirRequired"));
+			}
 			this.runTableExports(result, outputdir);
 		}
 		return result;
@@ -416,7 +424,6 @@ public class WbExport
 			outdir = new File(outputdir);
 			if (!outdir.isDirectory())
 			{
-				result.setFailure();
 				msg = ResourceMgr.getString("ErrorExportOutputDirNotDir");
 				msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
 				result.addMessage(msg);
@@ -426,7 +433,6 @@ public class WbExport
 
 			if (!outdir.exists())
 			{
-				result.setFailure();
 				msg = ResourceMgr.getString("ErrorExportOutputDirNotFound");
 				msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
 				result.addMessage(msg);
@@ -463,6 +469,7 @@ public class WbExport
 				exporter.setOutputFilename(outfile);
 			}
 			this.currentTable = table;
+			this.setCurrentObject(table, -1, -1);
 			String stmt = "SELECT * FROM " + SqlUtil.quoteObjectname(table);
 			exporter.setSql(stmt);
 			long rows = 0;
@@ -595,11 +602,15 @@ public class WbExport
 	public void setCurrentObject(String object, int number, int total)
 	{
 		this.currentTable = object;
+		if (!this.showProgress)
+		{
+			this.rowMonitor.setCurrentObject(this.currentTable, -1, -1);
+		}
 	}
 
 	public void setCurrentRow(int currentRow, int totalRows)
 	{
-		if (this.rowMonitor != null && this.currentTable != null)
+		if (this.showProgress && this.rowMonitor != null && this.currentTable != null)
 		{
 			this.rowMonitor.setCurrentObject(this.currentTable, currentRow, -1);
 		}

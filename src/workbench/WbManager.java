@@ -633,7 +633,8 @@ public class WbManager
 	public static final String ARG_DISPLAY_RESULT = "displayresult";
 	public static final String ARG_SUCCESS_SCRIPT = "cleanupsuccess";
 	public static final String ARG_ERROR_SCRIPT = "cleanuperror";
-
+	public static final String ARG_SHOW_TIMING = "showtiming";
+	
 	// Other parameters
 	public static final String ARG_PROFILE = "profile";
 	private static final String ARG_CONFIGDIR = "configdir";
@@ -665,6 +666,7 @@ public class WbManager
 		cmdLine.addArgument(ARG_IGNORE_DROP);
 		cmdLine.addArgument(ARG_DISPLAY_RESULT);
 		cmdLine.addArgument(ARG_SHOW_DBEXP);
+		cmdLine.addArgument(ARG_SHOW_TIMING);
 
 		try
 		{

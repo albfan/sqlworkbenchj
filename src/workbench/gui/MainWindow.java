@@ -169,6 +169,7 @@ public class MainWindow
 
 		this.sqlTab.setUI(TabbedPaneUIFactory.getBorderLessUI());
 		this.sqlTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		this.sqlTab.setDoubleBuffered(true);
 
 		this.currentProfile = null;
 
@@ -911,7 +912,7 @@ public class MainWindow
 	}
 
 	/**
-	 *	Callback function which gets executed on the AWT thread after
+	 *	Call back function which gets executed on the AWT thread after
 	 *  the initial connection has been completed
 	 */
 	public void connected(WbConnection conn)
@@ -948,8 +949,17 @@ public class MainWindow
 		this.updateWindowTitle();
 		this.dbExplorerAction.setEnabled(false);
 		this.disconnectAction.setEnabled(false);
-		String msg = ResourceMgr.getString("ErrorConnectFailed").replaceAll("%msg%", error.trim());
-		WbSwingUtilities.showErrorMessage(this, msg);
+		try
+		{
+			String msg = ResourceMgr.getString("ErrorConnectFailed");
+			msg = StringUtil.replace(msg, "%msg%", error.trim());
+			WbSwingUtilities.showErrorMessage(this, msg);
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError("MainWindow.connectFailed()", "Could not display connection error!", th);
+			WbSwingUtilities.showErrorMessage(this, error);
+		}
 	}
 
 	public void connectCancelled()
@@ -1090,32 +1100,33 @@ public class MainWindow
 		String realFilename = null;
 		try
 		{
-			String file = aProfile.getWorkspaceFile();
+			String workspaceFilename = aProfile.getWorkspaceFile();
 			FileDialogUtil util = new FileDialogUtil();
-			realFilename = util.replaceConfigDir(file);
+			realFilename = util.replaceConfigDir(workspaceFilename);
 			if (realFilename == null) realFilename = "";
-
+			
 			File f = new File(realFilename);
-			if (!f.exists())
+			if (realFilename.length() > 0 && !f.exists())
 			{
 				int action = this.checkNonExistingWorkspace();
 				if (action == LOAD_OTHER_WORKSPACE)
 				{
-					file = util.getWorkspaceFilename(this, false, true);
-					aProfile.setWorkspaceFile(file);
+					workspaceFilename = util.getWorkspaceFilename(this, false, true);
+					aProfile.setWorkspaceFile(workspaceFilename);
 				}
 				else if (action == IGNORE_MISSING_WORKSPACE)
 				{
-					file = null;
+					workspaceFilename = null;
 					aProfile.setWorkspaceFile(null);
 				}
 			}
-			if (file != null)
+			
+			if (workspaceFilename != null && workspaceFilename.trim().length() > 0)
 			{
 				// loadWorkspace will replace the %ConfigDir% placeholder,
 				// so we need to pass the original filename
 				this.isProfileWorkspace = true;
-				this.loadWorkspace(file);
+				this.loadWorkspace(workspaceFilename);
 			}
 			else
 			{
@@ -1817,22 +1828,30 @@ public class MainWindow
 	 */
 	private void adjustTabCount(int newCount)
 	{
-		int tabCount = this.sqlTab.getTabCount();
-		if (this.dbExplorerTabVisible) tabCount --;
-
-		if (newCount > tabCount)
+		this.sqlTab.setSuspendRepaint(true);
+		try
 		{
-			for (int i=0; i < (newCount - tabCount); i++)
+			int tabCount = this.sqlTab.getTabCount();
+			if (this.dbExplorerTabVisible) tabCount --;
+
+			if (newCount > tabCount)
 			{
-				this.addTab(false, false);
+				for (int i=0; i < (newCount - tabCount); i++)
+				{
+					this.addTab(false, false);
+				}
+			}
+			else if (newCount < tabCount)
+			{
+				for (int i=0; i < (tabCount - newCount); i++)
+				{
+					this.removeLastTab();
+				}
 			}
 		}
-		else if (newCount < tabCount)
+		finally
 		{
-			for (int i=0; i < (tabCount - newCount); i++)
-			{
-				this.removeLastTab();
-			}
+			this.sqlTab.setSuspendRepaint(false);
 		}
 	}
 
@@ -1874,7 +1893,6 @@ public class MainWindow
 		this.workspaceLoaded = false;
 		try
 		{
-			this.sqlTab.setSuspendRepaint(true);
 			this.adjustTabCount(1);
 			this.resetTabTitles();
 			SqlPanel sql = (SqlPanel)this.getSqlPanel(0);
@@ -1883,10 +1901,6 @@ public class MainWindow
 		catch (Exception e)
 		{
 			LogMgr.logError("MainWindow.closeWorkspace()", "Error when resetting workspace", e);
-		}
-		finally
-		{
-			this.sqlTab.setSuspendRepaint(false);
 		}
 		this.updateWindowTitle();
 		this.checkWorkspaceActions();

@@ -1497,7 +1497,7 @@ public class Settings
 
 	public boolean getUseAnimatedIcon()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty(ANIMATED_ICONS_KEY, "true"));
+		return "true".equalsIgnoreCase(this.props.getProperty(ANIMATED_ICONS_KEY, "false"));
 	}
 
 	public void setUseAnimatedIcon(boolean flag)

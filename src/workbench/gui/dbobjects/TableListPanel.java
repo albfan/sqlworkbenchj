@@ -1891,10 +1891,10 @@ public class TableListPanel
 		{
 			String fdir = dialog.getSelectedFilename();
 
-			DataExporter spooler = new DataExporter();
-			dialog.setExporterOptions(spooler);
-			spooler.setConnection(this.dbConnection);
-			spooler.setShowProgress(true);
+			DataExporter exporter = new DataExporter();
+			dialog.setExporterOptions(exporter);
+			exporter.setConnection(this.dbConnection);
+			exporter.setShowProgressWindow(true);
 			String ext = null;
 			int type = dialog.getExportType();
 
@@ -1928,9 +1928,9 @@ public class TableListPanel
 				String stmt = "SELECT * FROM " + SqlUtil.quoteObjectname(table);
 				String fname = StringUtil.makeFilename(table);
 				File f = new File(fdir, fname + ext);
-				spooler.addJob(f.getAbsolutePath(), stmt);
+				exporter.addJob(f.getAbsolutePath(), stmt);
 			}
-			spooler.startExportJobs();
+			exporter.startExportJobs();
 		}
 	}
 
