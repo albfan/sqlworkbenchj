@@ -30,7 +30,7 @@ public class UpdateDatabaseAction extends AbstractAction
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_SAVE));
 		this.putValue(WbActionConstants.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
 		this.putValue(WbActionConstants.ADD_TO_TOOLBAR, "false");
-		this.putValue(WbActionConstants.TBAR_SEPARATOR, "false");
+		this.putValue(WbActionConstants.TBAR_SEPARATOR, "true");
 	}
 
 	public void actionPerformed(ActionEvent e)

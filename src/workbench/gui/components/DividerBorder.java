@@ -13,6 +13,7 @@ public class DividerBorder extends AbstractBorder
 	public static final int RIGHT = 1;
 	public static final int TOP = 2;
 	public static final int BOTTOM = 3;
+	public static final int MIDDLE = 4;
 	
 	protected int type;
 	protected int thickness;
@@ -81,6 +82,13 @@ public class DividerBorder extends AbstractBorder
 				g.setColor(light);
 				g.drawLine(x + 1, y, x + 1, y + height);
 				break;
+			case MIDDLE:
+				int w2 = (int)width / 2;
+				g.drawLine(x + w2, y, x + w2, y + height);
+				g.setColor(light);
+				g.drawLine(x + w2 + 1, y, x + w2 + 1, y + height);
+				break;
+				
 		}
 		
 		g.setColor(oldColor);
