@@ -9,12 +9,13 @@
  * To contact the author please send an email to: info@sql-workbench.net
  *
  */
-package workbench.db.oracle;
+package workbench.db.ingres;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import workbench.db.SynonymReader;
 
 import workbench.db.TableIdentifier;
 
@@ -22,9 +23,15 @@ import workbench.db.TableIdentifier;
  *
  * @author  info@sql-workbench.net
  */
-public class SynonymReader
+public class IngresSynonymReader
+	implements SynonymReader
+	
 {
-	public static TableIdentifier getSynonymTable(Connection con, String anOwner, String aSynonym)
+	public IngresSynonymReader()
+	{
+	}
+	
+	public TableIdentifier getSynonymTable(Connection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
 		StringBuffer sql = new StringBuffer(200);
@@ -71,4 +78,3 @@ public class SynonymReader
 	}
 
 }
-
