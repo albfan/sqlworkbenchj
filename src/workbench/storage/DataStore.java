@@ -146,6 +146,8 @@ public class DataStore
 			this.columnSizes[i] = sizes[i];
 		}
 	}
+
+	public int[] getColumnTypes() { return this.columnTypes; }
 	
 	public DataStore createCopy(boolean withData)
 	{
@@ -415,6 +417,44 @@ public class DataStore
       return null;
     else 
       return value.toString();
+	}
+	
+	public int getValueAsInt(int aRow, int aColumn, int aDefault)
+	{
+		RowData row = this.getRow(aRow);
+		Object value = row.getValue(aColumn);
+    if (value == null || value instanceof NullValue)
+      return aDefault;
+    else if (value instanceof Number)
+		{
+      //return value.toString();
+			return ((Number)value).intValue();
+		}
+		else
+		{
+			int result = aDefault;
+			try { result = Integer.parseInt(value.toString()); } catch (Exception e) {}
+			return result;
+		}
+	}
+	
+	public long getValueAsLong(int aRow, int aColumn, long aDefault)
+	{
+		RowData row = this.getRow(aRow);
+		Object value = row.getValue(aColumn);
+    if (value == null || value instanceof NullValue)
+      return aDefault;
+    else if (value instanceof Number)
+		{
+      //return value.toString();
+			return ((Number)value).longValue();
+		}
+		else
+		{
+			long result = aDefault;
+			try { result = Long.parseLong(value.toString()); } catch (Exception e) {}
+			return result;
+		}
 	}
 	
 	public void setValue(int aRow, int aColumn, Object aValue)
