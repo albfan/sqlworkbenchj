@@ -13,7 +13,7 @@ package workbench.gui.sql;
 
 import java.util.Set;
 
-import workbench.sql.SqlParameterPool;
+import workbench.sql.VariablePool;
 import workbench.storage.DataStore;
 
 /**
@@ -23,7 +23,7 @@ import workbench.storage.DataStore;
 public class VariablePrompter
 {
 	private Set toPrompt = null;
-	private	SqlParameterPool pool = SqlParameterPool.getInstance();
+	private	VariablePool pool = VariablePool.getInstance();
 	private String sql;
 
 	public VariablePrompter(String input)

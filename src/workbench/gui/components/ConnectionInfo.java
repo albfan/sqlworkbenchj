@@ -15,6 +15,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.GridLayout;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.JComponent;
 import javax.swing.JTextField;
@@ -32,7 +34,7 @@ import workbench.resource.ResourceMgr;
  */
 public class ConnectionInfo
 	extends JComponent
-	implements ChangeListener
+	implements PropertyChangeListener
 {
 	private JTextField display;
 	private WbConnection sourceConnection;
@@ -90,9 +92,11 @@ public class ConnectionInfo
 		}
 		//this.setCaretPosition(0);
 	}
-	public void stateChanged(ChangeEvent e)
+
+	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (e.getSource() == this.sourceConnection)
+		if (evt.getSource() == this.sourceConnection 
+			  && WbConnection.PROP_CATALOG.equals(evt.getPropertyName()))
 		{
 			this.updateDisplay();
 		}

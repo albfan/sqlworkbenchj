@@ -66,7 +66,7 @@ public class StatementRunner
 {
 	private WbConnection dbConnection;
 	private StatementRunnerResult result;
-	private SqlParameterPool parameterPool;
+	private VariablePool parameterPool;
 
 	private HashMap cmdDispatch;
 	private ArrayList dbSpecificCommands;
@@ -174,7 +174,7 @@ public class StatementRunner
 		}
 
 		this.dbSpecificCommands = new ArrayList();
-		this.parameterPool = SqlParameterPool.getInstance();
+		this.parameterPool = VariablePool.getInstance();
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)

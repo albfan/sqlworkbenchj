@@ -16,7 +16,7 @@ import java.sql.SQLException;
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
-import workbench.sql.SqlParameterPool;
+import workbench.sql.VariablePool;
 import workbench.sql.StatementRunnerResult;
 
 /**
@@ -47,7 +47,7 @@ public class WbRemoveVar extends SqlCommand
 		}
 		else
 		{
-			boolean removed = SqlParameterPool.getInstance().removeValue(var);
+			boolean removed = VariablePool.getInstance().removeValue(var);
 			if (removed)
 			{
 				msg = ResourceMgr.getString("MsgVarDefVariableRemoved");

@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -180,6 +181,15 @@ public class SchemaReporter
 		}
 	}
 
+	/**
+	 *	Return a List of ReportTable objects
+	 */
+	public List getTables()
+	{
+		if (this.tables == null || this.tables.size() == 0) this.retrieveTables();
+		return Collections.unmodifiableList(this.tables);
+	}
+	
 	/**
 	 *	Write the XML into the supplied output
 	 */

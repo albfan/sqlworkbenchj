@@ -984,8 +984,8 @@ public class DbMetadata
 				isKeyword = this.keywords.contains(aName.trim().toUpperCase());
 			}
 
-			// HSQL does not allow identifiers starting with a number!
-			if (this.isHsql)
+			// Oracle and HSQL require identifiers starting with a number to be quoted 
+			if (this.isHsql || isOracle)
 			{
 				char c = aName.charAt(0);
 				if (Character.isDigit(c))

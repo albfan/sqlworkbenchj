@@ -55,6 +55,7 @@ import workbench.db.exporter.DataExporter;
 import workbench.exception.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.AutoJumpNextStatement;
+import workbench.gui.actions.CheckPreparedStatementsAction;
 import workbench.gui.actions.CleanJavaCodeAction;
 import workbench.gui.actions.CommitAction;
 import workbench.gui.actions.CopyAsSqlDeleteInsertAction;
@@ -115,6 +116,7 @@ import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarSeparator;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.menu.TextPopup;
+import workbench.gui.preparedstatement.ParameterEditor;
 import workbench.interfaces.Commitable;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.DbUpdater;
@@ -134,8 +136,10 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.MacroManager;
 import workbench.sql.ScriptParser;
-import workbench.sql.SqlParameterPool;
+import workbench.sql.VariablePool;
 import workbench.sql.commands.SingleVerbCommand;
+import workbench.sql.preparedstatement.PreparedStatementPool;
+import workbench.sql.preparedstatement.StatementParameters;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
@@ -156,7 +160,7 @@ public class SqlPanel
 	implements FontChangedListener, ActionListener, TextChangeListener,
 				    PropertyChangeListener,
 						MainPanel, Spooler, TextFileContainer, DbUpdater, Interruptable, FormattableSql, Commitable,
-						JobErrorHandler, FilenameChangeListener, ExecutionController, ChangeListener, ResultLogger
+						JobErrorHandler, FilenameChangeListener, ExecutionController, ResultLogger
 {
 	EditorPanel editor;
 	private DwPanel data;
@@ -731,10 +735,11 @@ public class SqlPanel
 		this.actions.add(this.lastStmtAction);
 
 		this.actions.add(new AutoJumpNextStatement());
-		WbAction hi = new HighlightCurrentStatement();
-		hi.setCreateMenuSeparator(false);
-		this.actions.add(hi);
-
+		a = new HighlightCurrentStatement();
+		a.setCreateMenuSeparator(false);
+		this.actions.add(a);
+		a = new CheckPreparedStatementsAction();
+		this.actions.add(a);
 		this.executeAll.setEnabled(false);
 		this.executeSelected.setEnabled(false);
 
@@ -1851,8 +1856,9 @@ public class SqlPanel
 		boolean jumpToNext = (commandAtIndex > -1 && Settings.getInstance().getAutoJumpNextStatement());
 		boolean highlightCurrent = false;
 		boolean restoreSelection = false;
+		boolean checkPreparedStatement = Settings.getInstance().getCheckPreparedStatements();
 		boolean shouldRestoreSelection = Settings.getInstance().getBoolProperty("workbench.gui.sql.restoreselection", true);
-		boolean parametersPresent = (SqlParameterPool.getInstance().getParameterCount() > 0);
+		boolean parametersPresent = (VariablePool.getInstance().getParameterCount() > 0);
 		this.executeAllStatements = false;
 		ExecutionController control = null;
 		if (this.dbConnection.getProfile().isConfirmUpdates())
@@ -1957,6 +1963,17 @@ public class SqlPanel
 					}
 				}
 
+				if (goOn && checkPreparedStatement)
+				{
+					PreparedStatementPool pool = this.dbConnection.getPreparedStatementPool();
+					if (pool.isRegistered(lastSql) || pool.addPreparedStatement(lastSql))
+					{
+						StatementParameters parms = pool.getParameters(lastSql);
+						this.showBusyIcon(false);
+						goOn = ParameterEditor.showParameterDialog(parms);
+						this.showBusyIcon(true);
+					}
+				} 
 				if (!goOn)
 				{
 					String cancelMsg = ResourceMgr.getString("MsgSqlCancelledDuringPrompt");
@@ -2491,18 +2508,14 @@ public class SqlPanel
 				this.loadingIcon = null;
 			}
 		}
-		if (evt.getSource() == this.data && evt.getPropertyName().equals("updateTable"))
+		else if (evt.getSource() == this.dbConnection && WbConnection.PROP_AUTOCOMMIT.equals(evt.getPropertyName()))
+		{
+			this.checkAutocommit();
+		}
+		else if (evt.getSource() == this.data && evt.getPropertyName().equals("updateTable"))
 		{
 			this.checkResultSetActions();
 		}
-	}
-
-	/**
-	 *	This is triggered when the connection changes somehow
-	 */
-	public void stateChanged(javax.swing.event.ChangeEvent e)
-	{
-		this.checkAutocommit();
 	}
 
 }

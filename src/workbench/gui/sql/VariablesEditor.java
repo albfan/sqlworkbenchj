@@ -38,7 +38,7 @@ import workbench.interfaces.FileActions;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.sql.SqlParameterPool;
+import workbench.sql.VariablePool;
 import workbench.storage.DataStore;
 
 /**
@@ -47,13 +47,10 @@ import workbench.storage.DataStore;
  */
 public class VariablesEditor 
 	extends JPanel 
-	implements FileActions, ValidatingComponent
+	implements ValidatingComponent
 {
 	private DataStore varData;
 	private WbTable variablesTable;
-
-	private NewListEntryAction newItem;
-	private DeleteListEntryAction deleteItem;
 
 	public VariablesEditor(DataStore data)
 	{
@@ -84,49 +81,8 @@ public class VariablesEditor
 		Border b2 = BorderFactory.createCompoundBorder(b, scroll.getBorder());
 		scroll.setBorder(b2);
 		
-		//WbToolbar toolbar = new WbToolbar();
-		//toolbar.addDefaultBorder();
-		this.newItem = new NewListEntryAction(this);
-		this.deleteItem = new DeleteListEntryAction(this);
-
-		//toolbar.add(this.newItem);
-		//toolbar.add(this.deleteItem);
-		//this.add(toolbar, BorderLayout.NORTH);
 		this.add(l, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
-	}
-
-	public Properties getProperties()
-	{
-		Properties props = new Properties();
-		this.variablesTable.stopEditing();
-		int count = this.varData.getRowCount();
-		for (int row=0; row < count; row++)
-		{
-			String key = this.varData.getValueAsString(row, 0);
-			String value = this.varData.getValueAsString(row, 1);
-			props.setProperty(key, value);
-		}
-		return props;
-	}
-
-	public void deleteItem()
-		throws Exception
-	{
-		this.variablesTable.deleteRow();
-	}
-
-	public void newItem(boolean copyCurrent)
-		throws Exception
-	{
-		this.variablesTable.addRow();
-		this.variablesTable.getSelectionModel().clearSelection();
-	}
-
-	public void saveItem()
-		throws Exception
-	{
-		this.varData.updateDb(null);
 	}
 
 	public void componentDisplayed()
@@ -150,7 +106,7 @@ public class VariablesEditor
 		for (int i=0; i < rows; i++)
 		{
 			String varName = this.varData.getValueAsString(i, 0);
-			if (!SqlParameterPool.getInstance().isValidVariableName(varName))
+			if (!VariablePool.getInstance().isValidVariableName(varName))
 			{
 				String msg = ResourceMgr.getString("ErrorIllegalVariableName");
 				msg = msg.replaceAll("%varname%", varName);

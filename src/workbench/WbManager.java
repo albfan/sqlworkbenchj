@@ -48,7 +48,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.BatchRunner;
 import workbench.sql.MacroManager;
-import workbench.sql.SqlParameterPool;
+import workbench.sql.VariablePool;
 import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 import workbench.util.WbCipher;
@@ -698,7 +698,7 @@ public class WbManager
 			{
 				try
 				{
-					SqlParameterPool.getInstance().readDefinition(StringUtil.trimQuotes(value));
+					VariablePool.getInstance().readDefinition(StringUtil.trimQuotes(value));
 				}
 				catch (IOException e)
 				{

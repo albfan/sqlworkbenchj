@@ -142,6 +142,7 @@ public class ReportTable
 	{
 		this.schemaNameToUse = name;
 	}
+	
 	public void writeXml(Writer out)
 		throws IOException
 	{
@@ -179,4 +180,6 @@ public class ReportTable
 		this.columns = null;
 		this.index.done();
 	}
+	
+	
 }

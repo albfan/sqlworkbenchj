@@ -403,21 +403,6 @@ public class SqlUtil
 		}
 	}
 
-	private static String getDoubleClass(int aSqlType, int aSize, int aPrecision)
-	{
-		return getDecimalClass(aSqlType, aSize, aPrecision);
-	}
-
-	private static String getFloatClass(int aSqlType, int aSize, int aPrecision)
-	{
-		return getDecimalClass(aSqlType, aSize, aPrecision);
-	}
-
-	private static String getNumericClass(int aSqlType, int aSize, int aPrecision)
-	{
-		return getDecimalClass(aSqlType, aSize, aPrecision);
-	}
-
 	/**
 	 * returns true if the passed data type (from java.sql.Types)
 	 * indicates a data type which can hold numeric values with
@@ -571,8 +556,4 @@ public class SqlUtil
 			return "UNKNOWN";
 	}
 
-	public static void main(String args[])
-	{
-		System.out.println(quoteObjectname("3P_TEST"));
-	}
 }

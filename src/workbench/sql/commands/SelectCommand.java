@@ -11,6 +11,7 @@
  */
 package workbench.sql.commands;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -21,6 +22,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.storage.DataStore;
 
 /**
@@ -50,7 +52,18 @@ public class SelectCommand extends SqlCommand
 		try
 		{
 			this.currentConnection = aConnection;
-			this.currentStatement = aConnection.createStatement();
+			boolean isPrepared = false;
+			
+			if (Settings.getInstance().getCheckPreparedStatements() 
+				  && aConnection.getPreparedStatementPool().isRegistered(aSql))
+			{
+				this.currentStatement = aConnection.getPreparedStatementPool().prepareStatement(aSql);
+				isPrepared = true;
+			}
+			else
+			{
+				this.currentStatement = aConnection.createStatement();
+			}
 			try { this.currentStatement.setQueryTimeout(this.queryTimeout); } catch (Throwable th) {}
 			
 			try
@@ -82,7 +95,16 @@ public class SelectCommand extends SqlCommand
 				}
 			}
 
-			ResultSet rs = this.currentStatement.executeQuery(aSql);
+			
+			ResultSet rs = null;
+			if (isPrepared)
+			{
+				rs = ((PreparedStatement)this.currentStatement).executeQuery();
+			}
+			else
+			{
+				rs = this.currentStatement.executeQuery(aSql);
+			}
 
 			if (rs != null)
 			{

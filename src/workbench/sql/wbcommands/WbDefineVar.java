@@ -20,7 +20,7 @@ import workbench.exception.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
-import workbench.sql.SqlParameterPool;
+import workbench.sql.VariablePool;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
@@ -73,7 +73,7 @@ public class WbDefineVar extends SqlCommand
 				try
 				{
 					File f = new File(value);
-					SqlParameterPool.getInstance().readFromFile(value);
+					VariablePool.getInstance().readFromFile(value);
 					msg = ResourceMgr.getString("MsgVarDefFileLoaded");
 					msg = StringUtil.replace(msg, "%file%", f.getAbsolutePath());
 					result.addMessage(msg);
@@ -125,10 +125,10 @@ public class WbDefineVar extends SqlCommand
 			msg = ResourceMgr.getString("MsgVarDefVariableDefined");
 			try
 			{
-				SqlParameterPool.getInstance().setParameterValue(var, value);
+				VariablePool.getInstance().setParameterValue(var, value);
 				msg = StringUtil.replace(msg, "%var%", var);
 				msg = StringUtil.replace(msg, "%value%", value);
-				msg = StringUtil.replace(msg, "%varname%", SqlParameterPool.getInstance().buildVarName(var, false));
+				msg = StringUtil.replace(msg, "%varname%", VariablePool.getInstance().buildVarName(var, false));
 			}
 			catch (IllegalArgumentException e)
 			{
@@ -160,7 +160,7 @@ public class WbDefineVar extends SqlCommand
 	{
 		ResultSet rs = null;
 		String result = StringUtil.EMPTY_STRING;
-		SqlParameterPool parameterPool = SqlParameterPool.getInstance();
+		VariablePool parameterPool = VariablePool.getInstance();
 		String realSql = parameterPool.replaceAllParameters(sql);
 
 		try

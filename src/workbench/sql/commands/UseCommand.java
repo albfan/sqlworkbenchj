@@ -52,7 +52,7 @@ public class UseCommand extends SqlCommand
 			String newCatalog = aConnection.getMetadata().getCurrentCatalog();
 			if (oldCatalog != null && !oldCatalog.equals(newCatalog))
 			{
-				aConnection.connectionStateChanged();
+				aConnection.catalogChanged(oldCatalog, newCatalog);
 			}
 			result.setSuccess();
 		}

@@ -11,6 +11,8 @@
  */
 package workbench.db;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -21,12 +23,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import workbench.db.report.TagWriter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -36,10 +36,17 @@ import workbench.util.StringUtil;
  */
 public class WbConnection
 {
+	public static final String PROP_CATALOG = "catalog";
+	public static final String PROP_AUTOCOMMIT = "autocommit";
+	public static final String PROP_CONNECTION_STATE = "state";
+	public static final String CONNECTION_CLOSED = "closed";
+	public static final String CONNECTION_OPEN = "open";
+	
   private String id;
 	private Connection sqlConnection;
 	private DbMetadata metaData;
 	private ConnectionProfile profile;
+	private PreparedStatementPool pool;
 
 	private boolean ddlNeedsCommit;
 	private boolean cancelNeedsReconnect = false;
@@ -73,6 +80,15 @@ public class WbConnection
 		}
 	}
 
+	public PreparedStatementPool getPreparedStatementPool()
+	{
+		if (this.pool == null)
+		{
+			this.pool = new PreparedStatementPool(this);
+		}
+		return this.pool;
+	}
+	
 	public String getCurrentUser()
 	{
 		if (this.metaData == null) return null;
@@ -229,7 +245,7 @@ public class WbConnection
 		if (old != flag)
 		{
 			this.sqlConnection.setAutoCommit(flag);
-			fireConnectionStateChanged();
+			fireConnectionStateChanged(PROP_AUTOCOMMIT, Boolean.toString(old), Boolean.toString(flag));
 		}
 	}
 
@@ -256,6 +272,11 @@ public class WbConnection
 	public void disconnect()
 	{
 		ConnectionMgr.getInstance().disconnect(this.id);
+		if (this.pool != null) 
+		{
+			this.pool.done();
+		}
+		fireConnectionStateChanged(PROP_CONNECTION_STATE, CONNECTION_OPEN, CONNECTION_CLOSED);
 	}
 
 	/**
@@ -407,35 +428,35 @@ public class WbConnection
 		return this.metaData.getDDLNeedsCommit();
 	}
 
-	public void addChangeListener(ChangeListener l)
+	public void addChangeListener(PropertyChangeListener l)
 	{
 		if (this.listeners == null) this.listeners = new ArrayList();
 		this.listeners.add(l);
 	}
 
-	public void removeChangeListener(ChangeListener l)
+	public void removeChangeListener(PropertyChangeListener l)
 	{
 		if (this.listeners == null) return;
 		this.listeners.remove(l);
 	}
 
-	private void fireConnectionStateChanged()
+	private void fireConnectionStateChanged(String property, String oldValue, String newValue)
 	{
 		if (this.listeners != null)
 		{
 			int count = this.listeners.size();
-			ChangeEvent evt = new ChangeEvent(this);
+			PropertyChangeEvent evt = new PropertyChangeEvent(this, property, oldValue, newValue);
 			for (int i=0; i < count; i++)
 			{
-				ChangeListener l = (ChangeListener)this.listeners.get(i);
-				l.stateChanged(evt);
+				PropertyChangeListener l = (PropertyChangeListener)this.listeners.get(i);
+				l.propertyChange(evt);
 			}
 		}
 	}
 
-	public void connectionStateChanged()
+	public void catalogChanged(String oldCatalog, String newCatalog)
 	{
-		this.fireConnectionStateChanged();
+		this.fireConnectionStateChanged(PROP_CATALOG, oldCatalog, newCatalog);
 	}
 
 }

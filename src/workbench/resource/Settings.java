@@ -693,6 +693,15 @@ public class Settings
 		this.props.setProperty("workbench.editor.autojumpnext", Boolean.toString(show));
 	}
 
+	public boolean getCheckPreparedStatements()
+	{
+		return StringUtil.stringToBool(this.props.getProperty("workbench.sql.checkprepared", "false"));
+	}
+	public void setCheckPreparedStatements(boolean show)
+	{
+		this.props.setProperty("workbench.sql.checkprepared", Boolean.toString(show));
+	}
+	
 	public boolean getHighlightCurrentStatement()
 	{
 		return StringUtil.stringToBool(this.props.getProperty("workbench.editor.highlightcurrent", "false"));

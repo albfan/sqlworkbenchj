@@ -11,12 +11,14 @@
  */
 package workbench.sql.commands;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -43,8 +45,27 @@ public class UpdatingCommand extends SqlCommand
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		try
 		{
-			this.currentStatement = aConnection.createStatement();
-			int updateCount = this.currentStatement.executeUpdate(aSql);
+			boolean isPrepared = false;
+			if (Settings.getInstance().getCheckPreparedStatements() &&
+					aConnection.getPreparedStatementPool().isRegistered(aSql))
+			{
+				this.currentStatement = aConnection.getPreparedStatementPool().prepareStatement(aSql);
+				isPrepared = true;
+			}
+			else
+			{
+				this.currentStatement = aConnection.createStatement();
+			}
+
+			int updateCount = -1;
+			if (isPrepared)
+			{
+				updateCount = ((PreparedStatement)this.currentStatement).executeUpdate();
+			}
+			else
+			{
+				updateCount = this.currentStatement.executeUpdate(aSql);
+			}
 			result.addUpdateCount(updateCount);
 			StringBuffer warnings = new StringBuffer();
 			boolean hasWarnings = this.appendWarnings(aConnection, this.currentStatement, warnings);

@@ -15,7 +15,7 @@ import java.sql.SQLException;
 
 import workbench.db.WbConnection;
 import workbench.sql.SqlCommand;
-import workbench.sql.SqlParameterPool;
+import workbench.sql.VariablePool;
 import workbench.sql.StatementRunnerResult;
 
 /**
@@ -34,7 +34,7 @@ public class WbListVars extends SqlCommand
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(getVerb());
-		result.addDataStore(SqlParameterPool.getInstance().getVariablesDataStore());
+		result.addDataStore(VariablePool.getInstance().getVariablesDataStore());
 		result.setSuccess();
 		return result;
 	}
