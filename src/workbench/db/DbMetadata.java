@@ -55,7 +55,7 @@ public class DbMetadata
 	private String catalogTerm;
 	String productName;
 	private DatabaseMetaData metaData;
-	private List tableListColumns;
+	//private List tableListColumns;
 	private WbConnection dbConnection;
 	
 	private List serversWhichNeedReconnect = Collections.EMPTY_LIST;
@@ -78,8 +78,8 @@ public class DbMetadata
 		Connection c = aConnection.getSqlConnection();
 		this.dbConnection = aConnection;
 		this.metaData = c.getMetaData();
-		String[] cols = {"TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "TABLE_TYPE"};
-		this.tableListColumns = Collections.unmodifiableList(Arrays.asList(cols));
+		//String[] cols = {"TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "TABLE_TYPE"};
+		//this.tableListColumns = Collections.unmodifiableList(Arrays.asList(cols));
 
 		this.procSourceSql = this.readStatementTemplates("ProcSourceStatements.xml");
 		this.viewSourceSql = this.readStatementTemplates("ViewSourceStatements.xml");
@@ -140,7 +140,7 @@ public class DbMetadata
 		return format;
 	}
 	
-	public List getTableListColumns() { return this.tableListColumns; }
+	//public List getTableListColumns() { return this.tableListColumns; }
 	
 	public String getViewSource(String aCatalog, String aSchema, String aViewname)
 	{
@@ -238,10 +238,10 @@ public class DbMetadata
 		return this.getTables(null, null, null);
 	}
 	
-	public final static int COLUMN_IDX_TABLE_LIST_CATALOG = 0;
-	public final static int COLUMN_IDX_TABLE_LIST_SCHEMA = 1;
-	public final static int COLUMN_IDX_TABLE_LIST_NAME = 2;
-	public final static int COLUMN_IDX_TABLE_LIST_TYPE = 3;
+	public final static int COLUMN_IDX_TABLE_LIST_NAME = 0;
+	public final static int COLUMN_IDX_TABLE_LIST_TYPE = 1;
+	public final static int COLUMN_IDX_TABLE_LIST_CATALOG = 2;
+	public final static int COLUMN_IDX_TABLE_LIST_SCHEMA = 3;
 	public final static int COLUMN_IDX_TABLE_LIST_REMARKS = 4;
 	
 	public DataStore getTables(String aCatalog, String aSchema, String aType)
@@ -258,9 +258,9 @@ public class DbMetadata
 		}
 		if ("*".equals(aSchema) || "%".equals(aSchema)) aSchema = null;
 		
-		String[] cols = new String[] {catalogTerm.toUpperCase(), schemaTerm.toUpperCase(), "NAME", "TYPE", "REMARKS"};
+		String[] cols = new String[] {"NAME", "TYPE", catalogTerm.toUpperCase(), schemaTerm.toUpperCase(), "REMARKS"};
 		int coltypes[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		int sizes[] = {10,10,30,12,20};
+		int sizes[] = {30,12,10,10,20};
 		
 		DataStore result = new DataStore(cols, coltypes, sizes);
 		
@@ -273,11 +273,11 @@ public class DbMetadata
 			String ttype = tableRs.getString(4);
 			String rem = tableRs.getString(5);
 			int row = result.addRow();
-			result.setValue(row, 0, cat);
-			result.setValue(row, 1, schem);
-			result.setValue(row, 2, name);
-			result.setValue(row, 3, ttype);
-			result.setValue(row, 4, rem);
+			result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, name);
+			result.setValue(row, COLUMN_IDX_TABLE_LIST_TYPE, ttype);
+			result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, cat);
+			result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, schem);
+			result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, rem);
 		}
 		tableRs.close();
 		return result;
@@ -399,19 +399,19 @@ public class DbMetadata
 		return new DataStoreTableModel(this.getProcedures(aCatalog, aSchema));
 	}
 	
-	public static final int COLUMN_IDX_PROC_LIST_CATALOG = 0;
-	public static final int COLUMN_IDX_PROC_LIST_SCHEMA = 1;
-	public static final int COLUMN_IDX_PROC_LIST_NAME = 2;
-	public static final int COLUMN_IDX_PROC_LIST_TYPE = 3;
+	public static final int COLUMN_IDX_PROC_LIST_NAME = 0;
+	public static final int COLUMN_IDX_PROC_LIST_TYPE = 1;
+	public static final int COLUMN_IDX_PROC_LIST_CATALOG = 2;
+	public static final int COLUMN_IDX_PROC_LIST_SCHEMA = 3;
 	public static final int COLUMN_IDX_PROC_LIST_REMARKS = 4;
 	
 	public DataStore getProcedures(String aCatalog, String aSchema)
 		throws SQLException
 	{
 		String catalog = this.dbConnection.getSqlConnection().getCatalog();
-		String[] cols = new String[] {catalogTerm.toUpperCase(), schemaTerm.toUpperCase(), "PROCEDURE_NAME", "TYPE", "REMARKS"};
+		String[] cols = new String[] {"PROCEDURE_NAME", "TYPE", catalogTerm.toUpperCase(), schemaTerm.toUpperCase(), "REMARKS"};
 		final int types[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		final int sizes[] = {10,10,30,12,20};
+		final int sizes[] = {30,12,10,10,20};
 
 		DataStore ds = new DataStore(cols, types, sizes);
 		
@@ -447,11 +447,11 @@ public class DbMetadata
 				}
 				int row = ds.addRow();
 
-				ds.setValue(row, 0, cat);
-				ds.setValue(row, 1, schema);
-				ds.setValue(row, 2, name);
-				ds.setValue(row, 3, sType);
-				ds.setValue(row, 4, remark);
+				ds.setValue(row, COLUMN_IDX_PROC_LIST_CATALOG, cat);
+				ds.setValue(row, COLUMN_IDX_PROC_LIST_SCHEMA, schema);
+				ds.setValue(row, COLUMN_IDX_PROC_LIST_NAME, name);
+				ds.setValue(row, COLUMN_IDX_PROC_LIST_TYPE, sType);
+				ds.setValue(row, COLUMN_IDX_PROC_LIST_REMARKS, remark);
 			}
 			rs.close();
 		}

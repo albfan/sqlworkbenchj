@@ -16,7 +16,7 @@ import workbench.gui.WbSwingUtilities;
 public class WbSplitPane
 	extends JSplitPane
 {
-	public int DEFAULT_DIVIDER_SIZE = 6;
+	public int DEFAULT_DIVIDER_SIZE = 7;
 	public WbSplitPane()
 	{
 		super();

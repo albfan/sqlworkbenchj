@@ -203,6 +203,13 @@ public class SqlUtil
 		return result;
 	}
 
+	/**
+	 *	Replaces all white space characters with ' ' (But not inside
+	 *	string literals)
+	 *	@param String - The sql script to "clean out"
+	 *  @param boolean - if true, newline characters (\n) are kept
+	 *	@returns String
+	 */
 	public static String makeCleanSql(String aSql, boolean keepNewlines)
 	{
 		int count = aSql.length();
@@ -234,7 +241,11 @@ public class SqlUtil
 				}
 				else
 				{						
-					if ( (c != '\n' && keepNewlines) && (c < 32 || (c > 126 && c < 145) || c == 255))
+					if (c == '\n' && !keepNewlines)
+					{
+						newSql.append(' ');
+					}
+					else if (c < 32 || (c > 126 && c < 145) || c == 255)
 					{
 						newSql.append(' ');
 					}

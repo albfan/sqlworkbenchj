@@ -139,7 +139,7 @@ public class DwPanel extends JPanel
 				for (int i=0; i < stmts.size(); i++)
 				{
 					preview.append(stmts.get(i).toString());
-					preview.append(";\r\n");
+					preview.append(";\n");
 				}
 				Window win = SwingUtilities.getWindowAncestor(this);
 				int choice = JOptionPane.showConfirmDialog(win, scroll, "Please confirm updates", JOptionPane.OK_CANCEL_OPTION);
@@ -152,7 +152,7 @@ public class DwPanel extends JPanel
 			long sqlTime = (end - start);
 			this.infoTable.repaint();
 			this.lastMessage = ResourceMgr.getString("MsgUpdateSuccessfull");
-			this.lastMessage = this.lastMessage + "\r\n" + rows + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED);
+			this.lastMessage = this.lastMessage + "\n" + rows + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED);
 			this.lastMessage = this.lastMessage + ResourceMgr.getString("MsgExecTime") + " " + (((double)sqlTime) / 1000.0) + "s";
 		}
 		catch (SQLException e)
@@ -347,7 +347,9 @@ public class DwPanel extends JPanel
 				{
 					if (knownSqlVerbs.contains(verb))
 					{
-						msg.append(verb.toUpperCase() + ResourceMgr.getString("MsgKnownStatementOK"));
+						msg.append(verb.toUpperCase());
+						msg.append(' ');
+						msg.append(ResourceMgr.getString("MsgKnownStatementOK"));
 					}
 					else
 					{

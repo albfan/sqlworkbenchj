@@ -727,7 +727,7 @@ public class DataStore
 				}
 				sql.append(this.getColumnName(col));
 				valuePart.append('?');
-				if (col < this.colCount - 1)
+				if (col < this.colCount - 2)
 				{
 					sql.append(',');
 					valuePart.append(',');

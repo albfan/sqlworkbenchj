@@ -26,10 +26,6 @@ import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.*;
-import workbench.gui.actions.CopyAsSqlInsertAction;
-import workbench.gui.actions.FileCloseAction;
-import workbench.gui.actions.FileSaveAction;
-
 import workbench.gui.components.*;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.menu.TextPopup;
@@ -52,8 +48,9 @@ import workbench.util.WbPersistence;
  * @author  workbench@kellerer.org
  * @version 1.0
  */
-public class SqlPanel extends JPanel 
-	implements Runnable, TableModelListener, MainPanel, FontChangedListener
+public class SqlPanel 
+	extends JPanel 
+	implements Runnable, TableModelListener, FontChangedListener, MainPanel
 {
 	private boolean selected;
 	EditorPanel editor;
@@ -118,6 +115,7 @@ public class SqlPanel extends JPanel
 		this.log.setEditable(false);
 		this.log.setLineWrap(true);
 		this.log.setWrapStyleWord(true);
+		this.log.addMouseListener(new TextComponentMouseListener());
 	
 		this.resultTab = new JTabbedPane();
 		this.resultTab.setTabPlacement(JTabbedPane.TOP);
@@ -138,11 +136,14 @@ public class SqlPanel extends JPanel
 		this.editor = new EditorPanel();
 		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
 		this.contentPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		this.contentPanel.setOneTouchExpandable(true);
 		this.add(this.contentPanel, BorderLayout.CENTER);
 		
 		int loc = WbManager.getSettings().getSqlDividerLocation(this.internalId);
 		if (loc <= 0) loc = 200;
 		this.contentPanel.setDividerLocation(loc);
+		loc = WbManager.getSettings().getLastSqlDividerLocation(this.internalId);
+		if (loc > 0) this.contentPanel.setLastDividerLocation(loc);
 		
 		this.initActions();
 		this.initToolbar();
@@ -422,7 +423,7 @@ public class SqlPanel extends JPanel
 		try
 		{
 			this.log.setText(ResourceMgr.getString("MsgUpdatingDatabase"));
-			long start, end;
+			this.log.append("\n");
 			int rows = this.data.saveChanges(this.dbConnection);
 			this.log.append(this.data.getLastMessage());
 		}
@@ -660,7 +661,10 @@ public class SqlPanel extends JPanel
 	
 	public void saveSettings()
 	{
-		WbManager.getSettings().setSqlDividerLocation(this.internalId, this.contentPanel.getDividerLocation());
+		int location = this.contentPanel.getDividerLocation();
+		int last = this.contentPanel.getLastDividerLocation();
+		WbManager.getSettings().setSqlDividerLocation(this.internalId, location);
+		WbManager.getSettings().setLastSqlDividerLocation(this.internalId, last);
 		this.saveSqlStatementHistory();
 	}
 	
