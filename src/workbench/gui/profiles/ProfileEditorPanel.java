@@ -59,6 +59,11 @@ public class ProfileEditorPanel
 		this.toolbar.addSeparator();
 		this.toolbar.add(new DeleteProfileAction(this));
 		this.listPanel.add(this.toolbar, BorderLayout.NORTH);
+		int pos = WbManager.getSettings().getProfileDividerLocation();
+		if (pos > -1)
+		{
+			this.jSplitPane1.setDividerLocation(pos);
+		}
 	}
 
 	private void fillDrivers()
@@ -67,6 +72,10 @@ public class ProfileEditorPanel
 		this.connectionEditor.setDrivers(drivers);
 	}
 
+	public void saveSettings()
+	{
+		WbManager.getSettings().setProfileDividerLocation(this.jSplitPane1.getDividerLocation());
+	}
 	private void fillProfiles()
 	{
 		this.model = new ProfileListModel(WbManager.getInstance().getConnectionMgr().getProfiles());

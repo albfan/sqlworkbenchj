@@ -64,15 +64,6 @@ public class ProfileSelectionDialog
     okButton = new javax.swing.JButton();
     cancelButton = new javax.swing.JButton();
 
-		/*
-    addWindowListener(new java.awt.event.WindowAdapter()
-    {
-      public void windowClosing(java.awt.event.WindowEvent evt)
-      {
-        closeDialog(evt);
-      }
-    });
-		*/
 		addWindowListener(this);
     buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
@@ -106,8 +97,9 @@ public class ProfileSelectionDialog
   }
 
 	/** Closes the dialog */
-	private void closeDialog(java.awt.event.WindowEvent evt)
+	private void closeDialog()
 	{
+		this.profiles.saveSettings();
 		this.setVisible(false);
 		this.dispose();
 	}
@@ -135,8 +127,7 @@ public class ProfileSelectionDialog
 	{
 		this.selectedProfile = this.profiles.getSelectedProfile();
 		this.cancelled = false;
-		this.setVisible(false);
-		this.dispose();
+		this.closeDialog();
 	}
 
 	public void profileListClicked(MouseEvent evt)
@@ -164,8 +155,7 @@ public class ProfileSelectionDialog
 						e.getActionCommand().equals(escActionCommand))
 		{
 			this.selectedProfile = null;
-			this.cancelled = true;
-			this.setVisible(false);
+			this.closeDialog();
 		}
 		else
 		{
@@ -195,7 +185,7 @@ public class ProfileSelectionDialog
 	public void windowClosing(WindowEvent e)
 	{
 		this.cancelled = true;
-    this.closeDialog(e);
+    this.closeDialog();
 	}
 
 	/** Invoked when a Window is no longer the active Window. Only a Frame or a
@@ -234,4 +224,3 @@ public class ProfileSelectionDialog
 	}
 
 }
-

@@ -1,6 +1,7 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -329,11 +330,10 @@ public class DwPanel extends JPanel
 		infoTable.setEditingRow(newRow);
 		infoTable.setEditingColumn(1);
 		infoTable.editCellAt(newRow, 1);
-		CellEditor edit = infoTable.getCellEditor();
-		if (edit instanceof DefaultCellEditor)
+		Component edit = infoTable.getEditorComponent();
+		if (edit != null)
 		{
-			DefaultCellEditor editor = (DefaultCellEditor)edit;
-			editor.getComponent().requestFocus();
+			edit.requestFocus();
 		}
 	}
 	

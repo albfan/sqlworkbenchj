@@ -24,6 +24,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import workbench.db.DbDriver;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.TextComponentMouseListener;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -82,6 +83,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		tfUserName.setMinimumSize(new java.awt.Dimension(40, 20));
 		tfUserName.setNextFocusableComponent(tfPwd);
 		tfUserName.setPreferredSize(new java.awt.Dimension(100, 20));
+		tfUserName.addMouseListener(new TextComponentMouseListener());
 		tfUserName.addFocusListener(new java.awt.event.FocusAdapter()
 		{
 			public void focusGained(java.awt.event.FocusEvent evt)
@@ -168,6 +170,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		tfURL.setMinimumSize(new java.awt.Dimension(40, 20));
 		tfURL.setNextFocusableComponent(tfUserName);
 		tfURL.setPreferredSize(new java.awt.Dimension(100, 20));
+		tfURL.addMouseListener(new TextComponentMouseListener());
 		tfURL.addFocusListener(new java.awt.event.FocusAdapter()
 		{
 			public void focusLost(java.awt.event.FocusEvent evt)
@@ -234,6 +237,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		
 		tfProfileName.setFont(null);
 		tfProfileName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+		tfProfileName.addMouseListener(new TextComponentMouseListener());
 		tfProfileName.addFocusListener(new java.awt.event.FocusAdapter()
 		{
 			public void focusLost(java.awt.event.FocusEvent evt)
