@@ -27,7 +27,7 @@ public class StopAction extends WbAction
 		this.panel = aPanel;
 		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_STOP_STMT));
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription(ResourceMgr.TXT_STOP_STMT));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("StopIE"));
+		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("Stop"));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
 		this.putValue(WbAction.ADD_TO_TOOLBAR, "true");
 		this.setCreateMenuSeparator(true);

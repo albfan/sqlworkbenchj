@@ -31,6 +31,8 @@ public class ConnectionMgr
 	private HashMap profiles;
 	private List drivers;
 	private boolean profilesChanged;
+	private boolean readTemplates = true;
+	private boolean templatesImported;
 
 	/** Creates new ConnectionMgr */
 	public ConnectionMgr()
@@ -141,36 +143,54 @@ public class ConnectionMgr
 		return firstMatch;
 	}
 	
-	public DbDriver findDriver(String drvClassName)
+	public DbDriver findRegisteredDriver(String drvClassName)
 	{
 		if (this.drivers == null)
 		{
 			this.readDrivers();
 		}
     DbDriver db = null;
+		
 
 		for (int i=0; i < this.drivers.size(); i ++)
 		{
 			db = (DbDriver)this.drivers.get(i);
 			if (db.getDriverClass().equals(drvClassName)) return db;
 		}
-		
-    try
-    {
-      // not found --> maybe it's present in the normal classpath...
-			// eg the ODBC bridge
-      Class drvcls = Class.forName(drvClassName);
-      Driver drv = (Driver)drvcls.newInstance();
-      db = new DbDriver(drv);
-    }
-    catch (Exception cnf)
-    {
-      LogMgr.logError("ConnectionMgr.findDriver()", "Error when searching for driver " + drvClassName, cnf);
-      db = null;
-    }
+		return null;
+	}
+	
+	public DbDriver findDriver(String drvClassName)
+	{
+    DbDriver db = this.findRegisteredDriver(drvClassName);
+
+		if (db == null)
+		{
+			try
+			{
+				// not found --> maybe it's present in the normal classpath...
+				// eg the ODBC bridge
+				Class drvcls = Class.forName(drvClassName);
+				Driver drv = (Driver)drvcls.newInstance();
+				db = new DbDriver(drv);
+			}
+			catch (Exception cnf)
+			{
+				LogMgr.logError("ConnectionMgr.findDriver()", "Error when searching for driver " + drvClassName, cnf);
+				db = null;
+			}
+		}
 		return db;
 	}
 
+	public void registerDriver(String drvClassName, String jarFile)
+	{
+		if (this.drivers == null) this.readDrivers();
+		
+		DbDriver drv = new DbDriver("JdbcDriver", drvClassName, jarFile);
+		this.drivers.add(drv);
+	}
+	
 	/**
 	 *	Returns a List of registered drivers.
 	 *	This list is read from WbDrivers.xml
@@ -353,38 +373,51 @@ public class ConnectionMgr
 			{
 				this.drivers = (ArrayList)result;
 			}
-
-			// now read the templates and append them to the driver list
-			InputStream in = null;
-			try
-			{
-				in = this.getClass().getResourceAsStream("DriverTemplates.xml");
-				ArrayList templates = (ArrayList)WbPersistence.readObject(in);
-				for (int i=0; i < templates.size(); i++)
-				{
-					Object drv = templates.get(i);
-					if (!this.drivers.contains(drv))
-					{
-						this.drivers.add(drv);
-					}
-				}
-			}
-			catch (Throwable io)
-			{
-				LogMgr.logWarning("ConectionMgr.readDrivers()", "Could not read driver templates!");
-			}
-			finally
-			{
-				try { in.close(); } catch (Throwable ignore) {}
-			}
 		}
 		catch (Exception e)
 		{
 			LogMgr.logWarning(this, "Could not load driver definitions!", e);
-			this.drivers = Collections.EMPTY_LIST;
+			this.drivers = new ArrayList();
+		}
+		if (this.readTemplates) 
+		{
+			this.importTemplateDrivers();
 		}
 	}
 
+	public void setReadTemplates(boolean aFlag) { this.readTemplates = aFlag; }
+	
+	private void importTemplateDrivers()
+	{
+		if (this.templatesImported) return;
+		
+		if (this.drivers == null) this.readDrivers();
+		
+		// now read the templates and append them to the driver list
+		InputStream in = null;
+		try
+		{
+			in = this.getClass().getResourceAsStream("DriverTemplates.xml");
+			ArrayList templates = (ArrayList)WbPersistence.readObject(in);
+			for (int i=0; i < templates.size(); i++)
+			{
+				Object drv = templates.get(i);
+				if (!this.drivers.contains(drv))
+				{
+					this.drivers.add(drv);
+				}
+			}
+		}
+		catch (Throwable io)
+		{
+			LogMgr.logWarning("ConectionMgr.readDrivers()", "Could not read driver templates!");
+		}
+		finally
+		{
+			try { in.close(); } catch (Throwable ignore) {}
+		}
+		this.templatesImported = true;
+	}
 	public void readProfiles()
 	{
 		Object result = WbPersistence.readObject(WbManager.getSettings().getProfileFileName());

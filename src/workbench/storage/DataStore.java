@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.*;
+import java.text.Collator;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -74,6 +75,15 @@ public class DataStore
 	
 	private String defaultExportDelimiter = "\t";
 	private boolean allowUpdates = false;
+
+	private static final Collator defaultCollator;
+	static 
+	{
+		String lang = System.getProperty("org.kellerer.sort.language", System.getProperty("user.language"));
+		String country = System.getProperty("org.kellerer.sort.country", System.getProperty("user.country"));
+		Locale l = new Locale(lang, country);
+		defaultCollator = Collator.getInstance(l);
+	}
 	
 	public DataStore(String[] aColNames, int[] colTypes)
 	{
@@ -1494,6 +1504,7 @@ public class DataStore
 		this.resetUpdateRowCounters();
 	}
 	
+	
 	public int compareRowsByColumn(RowData row1, RowData row2, int column)
 	{
 		Object o1 = row1.getValue(column);
@@ -1513,6 +1524,11 @@ public class DataStore
 			return -1;
 		}
 
+		if (o1 instanceof String && o2 instanceof String)
+		{
+			return defaultCollator.compare(o1, o2);
+		}
+		
 		try
 		{
 			int result = ((Comparable)o1).compareTo(o2);

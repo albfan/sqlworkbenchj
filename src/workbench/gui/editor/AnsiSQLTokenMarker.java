@@ -27,33 +27,40 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 			String keys = null;
 			
 			keys = meta.getSQLKeywords();
-				
-			//System.out.println("sql keywords = "+ keys);
 			this.addKeywordList(keys, Token.KEYWORD1);
+			//System.out.println("keys=" + keys);
+			
 			if (meta.getDatabaseProductName().toLowerCase().indexOf("oracle") > -1)
 			{
 				keywords.add("START", Token.KEYWORD1);
 				keywords.add("SYNONYM", Token.KEYWORD1);
 				keywords.add("WHILE", Token.KEYWORD1);
 				keywords.add("LOOP", Token.KEYWORD1);
+				
+				keywords.add("SYSDATE", Token.KEYWORD3);
 				keywords.add("INSTR", Token.KEYWORD3);
 				keywords.add("SUBSTR", Token.KEYWORD3);
 				keywords.add("INSTRB", Token.KEYWORD3);
 				keywords.add("SUBSTRB", Token.KEYWORD3);
 				keywords.add("LPAD", Token.KEYWORD3);
 				keywords.add("RPAD", Token.KEYWORD3);
+				keywords.add("CONTINUE", Token.KEYWORD3);
 			}
 
 			keys = meta.getStringFunctions();
+			//System.out.println("string funcs=" + keys);
 			this.addKeywordList(keys, Token.KEYWORD3);
 
 			keys = meta.getNumericFunctions();
+			//System.out.println("num funcs=" + keys);
 			this.addKeywordList(keys, Token.KEYWORD3);
 
 			keys = meta.getTimeDateFunctions();
+			//System.out.println("date func=" + keys);
 			this.addKeywordList(keys, Token.KEYWORD3);
 
 			keys = meta.getSystemFunctions();
+			//System.out.println("sys funcs=" + keys);
 			this.addKeywordList(keys, Token.KEYWORD3);
 
 		}

@@ -245,7 +245,7 @@ public class TableDataPanel
 	private String buildSqlForTable(boolean forRowCount)
 	{
 		if (this.tableName == null || this.tableName.length() == 0) return null;
-		String table = SqlUtil.quoteObjectname(this.tableName);
+		String table = this.dbConnection.getMetadata().quoteObjectname(this.tableName);
 
 		StringBuffer sql = new StringBuffer(100);
 		if (forRowCount)

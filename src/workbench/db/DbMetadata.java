@@ -84,6 +84,8 @@ public class DbMetadata
   private boolean isOracle;
 	private boolean isPostgres;
 
+	private List keywords;
+	
 	/** Creates a new instance of DbMetadata */
 	public DbMetadata(WbConnection aConnection)
 		throws SQLException
@@ -251,6 +253,19 @@ public class DbMetadata
 		return source.toString();
 	}
 
+	private void readKeywords()
+	{
+		try
+		{
+			String keys = this.metaData.getSQLKeywords();
+			this.keywords = StringUtil.stringToList(keys, ",");
+		}
+		catch (Exception e)
+		{
+			this.keywords = Collections.EMPTY_LIST;
+		}
+	}
+	
 	public String getProcedureSource(String aCatalog, String aSchema, String aProcname)
 	{
 		if (aProcname == null) return null;
@@ -310,6 +325,41 @@ public class DbMetadata
 		return source.toString();
 	}
 
+
+	public String quoteObjectname(String aName)
+	{
+		if (aName == null) return null;
+		if (this.keywords == null)
+		{
+			this.readKeywords();
+		}
+		try
+		{
+			boolean isKeyword = false;
+			if (this.storesLowerCaseIdentifiers())
+			{
+				isKeyword = this.keywords.contains(aName.trim().toLowerCase());
+			}
+			if (!isKeyword && this.storesUpperCaseIdentifiers())
+			{
+				isKeyword = this.keywords.contains(aName.trim().toUpperCase());
+			}
+			if (!isKeyword && this.productName.equalsIgnoreCase("ACCESS"))
+			{
+				isKeyword = this.keywords.contains(aName.trim().toUpperCase());
+			}
+			if (isKeyword)
+			{
+				return "\"" + aName.trim() + "\"";
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("DbMetadata.quoteObjectName()", "Error when retrieving DB information", e);
+		}
+		return SqlUtil.quoteObjectname(aName);
+	}
+	
 	public String adjustObjectname(String aTable)
 	{
 		if (aTable == null) return null;
