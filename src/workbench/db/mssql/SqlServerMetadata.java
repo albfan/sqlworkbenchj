@@ -25,14 +25,14 @@ import workbench.util.StrBuffer;
  *
  * @author  info@sql-workbench.net
  */
-public class MsSqlMetaData
+public class SqlServerMetadata
 	implements ProcedureReader
 {
 	private Connection dbConn = null;
 	private DbMetadata meta = null;
 	private PreparedStatement procStatement = null;
 
-	public MsSqlMetaData(DbMetadata db)
+	public SqlServerMetadata(DbMetadata db)
 	{
 		this.dbConn = db.getSqlConnection();
 		this.meta = db;
@@ -43,6 +43,13 @@ public class MsSqlMetaData
 		return StrBuffer.EMPTY_BUFFER;
 	}
 
+	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
+		throws SQLException
+	{
+		JdbcProcedureReader reader = new JdbcProcedureReader(this.meta);
+		return reader.getProcedureColumns(aCatalog, aSchema, aProcname);
+	}
+	
 	/**
 	 *	The MS JDBC driver does not return the PROCEDURE_TYPE column correctly
 	 *  so we implement it ourselves (MS always returns RESULT which is
@@ -52,7 +59,7 @@ public class MsSqlMetaData
 	public DataStore getProcedures(String catalog, String schema)
 		throws SQLException
 	{
-		this.procStatement = this.dbConn.prepareStatement(MsSqlMetaData.GET_PROC_SQL);
+		this.procStatement = this.dbConn.prepareStatement(SqlServerMetadata.GET_PROC_SQL);
 		if (schema == null)
 		{
 			this.procStatement.setString(1, "%");
