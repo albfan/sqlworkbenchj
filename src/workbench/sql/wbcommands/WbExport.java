@@ -83,6 +83,7 @@ public class WbExport
 		cmdLine.addArgument("quotealways");
 		cmdLine.addArgument("lineending");
 		cmdLine.addArgument("showencodings");
+		cmdLine.addArgument("verbosexml");
 	}
 
 	public String getVerb() { return VERB; }
@@ -278,6 +279,9 @@ public class WbExport
 			String xsl = cmdLine.getValue(WbXslt.ARG_STYLESHEET);
 			String output = cmdLine.getValue(WbXslt.ARG_OUTPUT);
 
+			boolean verbose = cmdLine.getBoolean("verbosexml", true);
+			exporter.setUseVerboseFormat(verbose);
+			
 			if (xsl != null && output != null)
 			{
 				File f = new File(xsl);
@@ -338,13 +342,15 @@ public class WbExport
 		{
 			if ("crlf".equalsIgnoreCase(ending) ||
 			    "dos".equalsIgnoreCase(ending) ||
-			    "win".equalsIgnoreCase(ending))
+			    "win".equalsIgnoreCase(ending) || 
+				  "\\r\\n".equals(ending))
 			{
 				exporter.setLineEnding("\r\n");
 			}
 			else if ("lf".equalsIgnoreCase(ending) ||
 			    "unix".equalsIgnoreCase(ending) ||
-			    "linux".equalsIgnoreCase(ending))
+			    "linux".equalsIgnoreCase(ending) ||
+				  "\\n".equals(ending))
 			{
 				exporter.setLineEnding("\n");
 			}

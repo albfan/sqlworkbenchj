@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 <java version="1.4.0_01" class="java.beans.XMLDecoder"> 
  <object class="java.util.HashMap"> 
+ 
   <void method="put"> 
    <string>Oracle</string> 
    <object class="workbench.db.GetMetaDataSql"> 
@@ -21,6 +22,7 @@
     </void> 
    </object> 
   </void> 
+  
   <void method="put"> 
    <string>ThinkSQL Relational Database Management System</string> 
    <object class="workbench.db.GetMetaDataSql"> 
@@ -73,6 +75,7 @@
     </void> 
    </object> 
   </void> 
+  
   <void method="put"> 
    <string>PostgreSQL</string> 
    <object class="workbench.db.GetMetaDataSql"> 
@@ -87,6 +90,7 @@ where p.prolang = l.oid
     </void> 
    </object> 
   </void> 
+  
   <void method="put"> 
    <string>Firebird</string> 
    <object class="workbench.db.GetMetaDataSql"> 
@@ -101,6 +105,7 @@ where p.prolang = l.oid
     </void> 
    </object> 
   </void> 
+  
   <void method="put"> 
    <string>Adaptive Server Anywhere</string> 
    <object class="workbench.db.GetMetaDataSql"> 
@@ -141,6 +146,5 @@ and  sysobjects.type = &apos;P&apos;</string>
   </void> 
   
  </object> 
- 
  
 </java> 

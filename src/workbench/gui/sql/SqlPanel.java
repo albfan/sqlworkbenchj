@@ -246,7 +246,7 @@ public class SqlPanel
 		this.data.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.data.setDoubleBuffered(true);
 		this.data.setResultLogger(this);
-		
+
 		this.log = new JTextArea();
 		this.log.setDoubleBuffered(true);
 		this.log.setBorder(new EmptyBorder(0,2,0,0));
@@ -843,21 +843,21 @@ public class SqlPanel
 
 	private boolean editorFocusPending = false;
 	private Component currentFocus = null;
-	
+
 	public void checkFocus()
 	{
 		this.currentFocus = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
 		//this.editorFocusPending = (this.currentFocus == this.editor);
 	}
-	
+
 	public void selectEditor()
 	{
-		// make sure the panel and its window are really visible 
-		// before requesting the focus, otherwise the window 
+		// make sure the panel and its window are really visible
+		// before requesting the focus, otherwise the window
 		// will be put into front.
 		Window w = SwingUtilities.getWindowAncestor(this);
 		if (w == null) return;
-		
+
 		if (w.isActive() && w.isVisible() && w.isFocused() && this.isVisible() && this.isCurrentTab() && editor != null)
 		{
 			editor.requestFocusInWindow();
@@ -883,7 +883,7 @@ public class SqlPanel
 		}
 		this.currentFocus = null;
 	}
-	
+
 	public void selectResult()
 	{
 		if (this.isVisible() && this.isCurrentTab())
@@ -1312,7 +1312,7 @@ public class SqlPanel
 		{
 			this.dbConnection.removeChangeListener(this);
 		}
-		
+
 		this.dbConnection = aConnection;
 		try
 		{
@@ -1335,10 +1335,10 @@ public class SqlPanel
 		{
 			this.dbConnection.addChangeListener(this);
 		}
-		
+
 		this.checkResultSetActions();
 		this.checkAutocommit();
-		
+
 		//this.doLayout();
 	}
 
@@ -1355,7 +1355,7 @@ public class SqlPanel
 			this.rollbackAction.setEnabled(false);
 		}
 	}
-	
+
 	public boolean isRequestFocusEnabled() { return true; }
 	//public boolean isFocusTraversable() { return true; }
 
@@ -1842,6 +1842,7 @@ public class SqlPanel
 		boolean jumpToNext = (commandAtIndex > -1 && Settings.getInstance().getAutoJumpNextStatement());
 		boolean highlightCurrent = false;
 		boolean restoreSelection = false;
+		boolean shouldRestoreSelection = Settings.getInstance().getBoolProperty("workbench.gui.sql.restoreselection", true);
 		boolean parametersPresent = (SqlParameterPool.getInstance().getParameterCount() > 0);
 		this.executeAllStatements = false;
 		ExecutionController control = null;
@@ -1876,7 +1877,7 @@ public class SqlPanel
 
 			compressLog = !this.data.getVerboseLogging() && (count > 1);
 			logWasCompressed = logWasCompressed || compressLog;
-			
+
 			if (commandAtIndex > -1)
 			{
 				int pos = this.editor.getCaretPosition();
@@ -1907,7 +1908,7 @@ public class SqlPanel
 			{
 				oldSelectionStart = this.editor.getSelectionStart();
 				oldSelectionEnd = this.editor.getSelectionEnd();
-				restoreSelection = true;
+				restoreSelection = shouldRestoreSelection;
 			}
 
 			long displayTime = 0;
@@ -1961,12 +1962,12 @@ public class SqlPanel
 				}
 
 				this.data.runStatement(lastSql, control);
-				
+
 				// the SET FEEDBACK command might change the feedback level
 				// so it needs to be checked each time.
 				compressLog = !this.data.getVerboseLogging() && (count > 1);
 				logWasCompressed = logWasCompressed || compressLog;
-				
+
 				Thread.yield();
 				if (cancelExecution) break;
 
@@ -2006,7 +2007,7 @@ public class SqlPanel
 					// panel, even if compressLog is enabled (if it is not enabled
 					// the messages have been appended to the log already)
 					if (compressLog) this.appendToLog(this.data.getLastMessage());
-					
+
 					if (count > 1 && onErrorAsk && (i < (count - 1)))
 					{
 						// the animated gif needs to be turned off when a
@@ -2100,6 +2101,16 @@ public class SqlPanel
 						editor.select(selstart, selend);
 					}
 				});
+			}
+
+			if (highlightCurrent && !restoreSelection)
+			{
+				int startPos = scriptParser.getStartPosForCommand(endIndex - 1);
+				startPos = scriptParser.findNextLineStart(startPos);
+				if (startPos > -1 && startPos < this.editor.getText().length())
+				{
+					this.editor.setCaretPosition(startPos);
+				}
 			}
 
 			if (commandWithError == -1 && jumpToNext)

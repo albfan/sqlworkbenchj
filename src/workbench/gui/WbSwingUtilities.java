@@ -239,6 +239,7 @@ public class WbSwingUtilities
 	}
 
 	public static final int IGNORE_ALL = JOptionPane.YES_OPTION + JOptionPane.NO_OPTION + JOptionPane.CANCEL_OPTION + 1;
+	public static final int EXECUTE_ALL = JOptionPane.YES_OPTION + JOptionPane.NO_OPTION + JOptionPane.CANCEL_OPTION + 2;
 
 	public static int getYesNoIgnoreAll(Component aCaller, String aMessage)
 	{
@@ -254,6 +255,23 @@ public class WbSwingUtilities
 		else if (result.equals(options[0])) return JOptionPane.YES_OPTION;
 		else if (result.equals(options[1])) return JOptionPane.NO_OPTION;
 		else if (result.equals(options[2])) return IGNORE_ALL;
+		else return JOptionPane.NO_OPTION;
+	}
+	
+	public static int getYesNoExecuteAll(Component aCaller, String aMessage)
+	{
+		String[] options = new String[] { ResourceMgr.getString("LabelYes"), ResourceMgr.getString("LabelNo"), ResourceMgr.getString("LabelExecuteAll")};
+		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
+		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);
+		dialog.setResizable(true);
+		dialog.pack();
+		dialog.show();
+		dialog.dispose();
+		Object result = ignorePane.getValue();
+		if (result == null) return JOptionPane.YES_OPTION;
+		else if (result.equals(options[0])) return JOptionPane.YES_OPTION;
+		else if (result.equals(options[1])) return JOptionPane.NO_OPTION;
+		else if (result.equals(options[2])) return EXECUTE_ALL;
 		else return JOptionPane.NO_OPTION;
 	}
 

@@ -11,6 +11,7 @@
  */
 package workbench.gui;
 
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -37,6 +38,10 @@ public class WbAboutDialog extends javax.swing.JDialog
 	{
 		super(parent, modal);
 		initComponents();
+		homepageLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		mailToLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		jLabel1.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		
 		getRootPane().setDefaultButton(closeButton);
 		InputMap im = this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 		ActionMap am = this.getRootPane().getActionMap();
@@ -97,14 +102,6 @@ public class WbAboutDialog extends javax.swing.JDialog
     getContentPane().add(buttonPanel, java.awt.BorderLayout.SOUTH);
 
     contentPanel.setLayout(new java.awt.GridBagLayout());
-
-    contentPanel.addMouseListener(new java.awt.event.MouseAdapter()
-    {
-      public void mouseClicked(java.awt.event.MouseEvent evt)
-      {
-        contentPanelMouseClicked(evt);
-      }
-    });
 
     logo.setFont(null);
     logo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/workbench/resource/images/hitchguide.gif")));
@@ -212,6 +209,14 @@ public class WbAboutDialog extends javax.swing.JDialog
     contentPanel.add(homepageLabel, gridBagConstraints);
 
     mailToLabel.setText("info@sql-workbench.net");
+    mailToLabel.addMouseListener(new java.awt.event.MouseAdapter()
+    {
+      public void mouseClicked(java.awt.event.MouseEvent evt)
+      {
+        mailToLabelMouseClicked(evt);
+      }
+    });
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 6;
@@ -225,22 +230,23 @@ public class WbAboutDialog extends javax.swing.JDialog
     pack();
   }//GEN-END:initComponents
 
-	private void contentPanelMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_contentPanelMouseClicked
-	{//GEN-HEADEREND:event_contentPanelMouseClicked
+	private void mailToLabelMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_mailToLabelMouseClicked
+	{//GEN-HEADEREND:event_mailToLabelMouseClicked
 		try
 		{
-			if (evt.getClickCount() == 2) BrowserLauncher.openURL("mailto:info@sql-workbench.net");
+			if (evt.getClickCount() == 1) BrowserLauncher.openURL("mailto:info@sql-workbench.net");
 		}
 		catch (Exception e)
 		{
 		}
-	}//GEN-LAST:event_contentPanelMouseClicked
+
+	}//GEN-LAST:event_mailToLabelMouseClicked
 
 	private void homepageLabelMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_homepageLabelMouseClicked
 	{//GEN-HEADEREND:event_homepageLabelMouseClicked
 		try
 		{
-			if (evt.getClickCount() >= 2) BrowserLauncher.openURL("http://www.sql-workbench.net");
+			if (evt.getClickCount() == 1) BrowserLauncher.openURL("http://www.sql-workbench.net");
 		}
 		catch (Exception e)
 		{
@@ -251,7 +257,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 	{//GEN-HEADEREND:event_jLabel1MouseClicked
 		try
 		{
-			if (evt.getClickCount() == 2) BrowserLauncher.openURL("http://www.netbeans.org");
+			if (evt.getClickCount() == 1) BrowserLauncher.openURL("http://www.netbeans.org");
 		}
 		catch (Exception e)
 		{

@@ -769,7 +769,7 @@ public class Settings
 	{
 		this.setBoolProperty("workbench.import.decode", flag);
 	}
-	
+
 	public String getLastImportQuoteChar()
 	{
 		return this.props.getProperty("workbench.import.quotechar", "\"");
@@ -961,14 +961,16 @@ public class Settings
 		return StringUtil.getIntValue(this.props.getProperty(windowClass + ".height", "0"));
 	}
 
+	public static final String PROPERTY_EDITOR_TAB_WIDTH = "workbench.editor.tabwidth";
+
 	public int getEditorTabWidth()
 	{
-		return StringUtil.getIntValue(this.props.getProperty("workbench.editor.tabwidth", "2"));
+		return StringUtil.getIntValue(this.props.getProperty(PROPERTY_EDITOR_TAB_WIDTH, "2"));
 	}
 
 	public void setEditorTabWidth(int aWidth)
 	{
-		this.props.setProperty("workbench.editor.tabwidth", Integer.toString(aWidth));
+		this.props.setProperty(PROPERTY_EDITOR_TAB_WIDTH, Integer.toString(aWidth));
 	}
 
 	public String getLastConnection(String key)
@@ -1181,22 +1183,22 @@ public class Settings
 	{
 		return this.props.getProperty("workbench.file.data.encoding", "UTF-8");
 	}
-	
+
 	public void setDefaultDataEncoding(String enc)
 	{
 		this.props.setProperty("workbench.file.data.encoding", enc);
 	}
-	
+
 	public String getDefaultFileEncoding()
 	{
 		return this.props.getProperty("workbench.file.encoding", "UTF-8");
 	}
-	
+
 	public void setDefaultFileEncoding(String enc)
 	{
 		this.props.setProperty("workbench.file.encoding", enc);
 	}
-	
+
 	public String getDefaultTextDelimiter(boolean readable)
 	{
 		String del = this.props.getProperty("workbench.export.text.fielddelimiter", "\\t");
@@ -1315,12 +1317,19 @@ public class Settings
 	{
 		return "true".equals(this.getProperty(property, ""));
 	}
-	
+
+	public boolean getBoolProperty(String property, boolean defaultValue)
+	{
+		String value = this.getProperty(property, null);
+		if (value == null) return defaultValue;
+		return "true".equals(value);
+	}
+
 	public void setBoolProperty(String property, boolean value)
 	{
 		this.setProperty(property, Boolean.toString(value));
 	}
-	
+
 	public void setProperty(String aProperty, String aValue)
 	{
 		this.props.setProperty(aProperty, aValue);
@@ -1330,7 +1339,7 @@ public class Settings
 	{
 		this.props.setProperty(aProperty, Integer.toString(aValue));
 	}
-	
+
 	public void setProperty(String aClass, String aProperty, String aValue)
 	{
 		this.props.setProperty(aClass + "." + aProperty.toLowerCase(), aValue);
@@ -1362,7 +1371,7 @@ public class Settings
 		String value = this.getProperty(aProperty, Integer.toString(defaultValue));
 		return StringUtil.getIntValue(value);
 	}
-	
+
 	public int getIntProperty(String aClass, String aProperty)
 	{
 		String value = this.getProperty(aClass, aProperty, "0");

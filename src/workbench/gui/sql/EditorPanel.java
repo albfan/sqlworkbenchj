@@ -545,6 +545,10 @@ public class EditorPanel
 			String msg = ResourceMgr.getString("MsgConfirmUnsavedEditorFile");
 			msg = StringUtil.replace(msg, "%filename%", this.getCurrentFileName());
 			result = WbSwingUtilities.getYesNoCancel(this, msg);
+			if (result == JOptionPane.YES_OPTION) 
+			{
+				this.saveCurrentFile();
+			}
 		}
 		return result;
 	}
@@ -961,6 +965,11 @@ public class EditorPanel
 		if (Settings.PROPERTY_SHOW_LINE_NUMBERS.equals(evt.getPropertyName()))
 		{
 			this.setShowLineNumbers(Settings.getInstance().getShowLineNumbers());
+			this.repaint();
+		}
+		else if (Settings.PROPERTY_EDITOR_TAB_WIDTH.equals(evt.getPropertyName()))
+		{
+			this.setTabSize(Settings.getInstance().getEditorTabWidth());
 			this.repaint();
 		}
 	}

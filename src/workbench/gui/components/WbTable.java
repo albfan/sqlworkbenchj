@@ -499,7 +499,7 @@ public class WbTable
 		}
 		this.checkMouseListener();
 	}
-	
+
 	private void checkMouseListener()
 	{
 		JTableHeader th = this.getTableHeader();
@@ -568,14 +568,20 @@ public class WbTable
 		{
 			this.dwModel.removeTableModelListener(this.changeListener);
 			this.dwModel.removeTableModelListener(this);
-			this.dwModel.dispose();
-			this.dwModel = null;
 		}
 
 		JTableHeader header = this.getTableHeader();
 		if (header != null)
 		{
 			header.removeMouseListener(this);
+		}
+
+		super.setModel(aModel);
+
+		if (this.dwModel != null)
+		{
+			this.dwModel.dispose();
+			this.dwModel = null;
 		}
 
 		if (aModel instanceof DataStoreTableModel)
@@ -607,8 +613,6 @@ public class WbTable
 		{
 			this.dwModel.addTableModelListener(this.changeListener);
 		}
-
-		super.setModel(aModel);
 
 		this.initDefaultRenderers();
 		this.initDefaultEditors();
@@ -761,7 +765,7 @@ public class WbTable
 				else
 					newColumn = column - 1;
 
-				if (newColumn >= 0) 
+				if (newColumn >= 0)
 				{
 					SwingUtilities.invokeLater(new Runnable()
 					{

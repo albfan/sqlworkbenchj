@@ -15,6 +15,12 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -23,6 +29,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,6 +55,7 @@ import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+import workbench.exception.ExceptionUtil;
 import workbench.gui.actions.AddMacroAction;
 import workbench.gui.actions.AddTabAction;
 import workbench.gui.actions.AssignWorkspaceAction;
@@ -92,6 +100,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.MacroManager;
 import workbench.util.FileDialogUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
 import workbench.gui.actions.FileSaveProfiles;
@@ -104,7 +113,7 @@ import workbench.gui.actions.FileSaveProfiles;
  */
 public class MainWindow
 	extends JFrame
-	implements ActionListener, MouseListener, WindowListener, ChangeListener,
+	implements ActionListener, MouseListener, WindowListener, ChangeListener, DropTargetListener, 
 						FilenameChangeListener, MacroChangeListener, DbExecutionListener, Connectable
 {
 	private static final String DEFAULT_WORKSPACE = "%ConfigDir%/Default.wksp";
@@ -204,6 +213,8 @@ public class MainWindow
 		//this.sqlTab.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
 		MacroManager.getInstance().addChangeListener(this);
+		
+		new DropTarget(this.sqlTab, DnDConstants.ACTION_COPY, this);
 	}
 
 	public String getWindowId() { return this.windowId; }
@@ -264,12 +275,12 @@ public class MainWindow
 		for (int tab=0; tab < tabCount; tab ++)
 		{
 			MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(tab);
-			JMenuBar menuBar = this.getMenuForPanel(sql);
+			JMenuBar menuBar = this.createMenuForPanel(sql);
 			this.panelMenus.add(menuBar);
 		}
 	}
 
-	private JMenuBar getMenuForPanel(MainPanel aPanel)
+	private JMenuBar createMenuForPanel(MainPanel aPanel)
 	{
 		HashMap menus = new HashMap(10);
 
@@ -780,10 +791,38 @@ public class MainWindow
 
 	public void windowDeactivated(WindowEvent windowEvent)
 	{
+		SqlPanel p = this.getCurrentSqlPanel();
+		if (p != null) p.checkFocus();
 	}
 
 	public void windowActivated(WindowEvent windowEvent)
 	{
+		JMenu m1 = null;
+		int index = this.getCurrentPanelIndex();
+		if (this.panelMenus != null && index > -1)
+		{
+			JMenuBar b = (JMenuBar)this.panelMenus.get(index);
+			if (b != null)
+			{
+				try
+				{
+					m1 = b.getMenu(0);
+				}
+				catch (Throwable th)
+				{
+					m1 = null;
+				}
+			}
+		}
+		final SqlPanel p = this.getCurrentSqlPanel();
+		final JMenu m = m1;
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				if (m != null) m.setSelected(false);
+				if (p != null) p.restoreFocus();			}
+		});
 	}
 
 	public void windowIconified(WindowEvent windowEvent)
@@ -817,6 +856,8 @@ public class MainWindow
 		}
 		disconnect(false, false);
 		this.currentProfile = aProfile;
+		Settings.getInstance().setLastConnection(this.currentProfile.getName());
+		
 		showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
 
 		// it is important to set this flag, otherwise
@@ -860,14 +901,13 @@ public class MainWindow
 	}
 
 	/**
-	 *	Call back functioin which gets executed on the AWT thread after
+	 *	Call back function which gets executed on the AWT thread after
 	 *  the initial connection has been completed
 	 */
 	public void connected(WbConnection conn)
 	{
 		this.showStatusMessage("");
 		this.currentProfile = conn.getProfile();
-		Settings.getInstance().setLastConnection(this.currentProfile.getName());
 		if (this.currentProfile.getUseSeperateConnectionPerTab())
 		{
 			this.getCurrentPanel().setConnection(conn);
@@ -1423,7 +1463,7 @@ public class MainWindow
 	public void addDbExplorerTab()
 	{
 		this.createDbExplorerPanel();
-		JMenuBar dbmenu = this.getMenuForPanel(this.dbExplorerPanel);
+		JMenuBar dbmenu = this.createMenuForPanel(this.dbExplorerPanel);
 
 		this.sqlTab.add(this.dbExplorerPanel);
 		this.dbExplorerPanel.setTabTitle(this.sqlTab, this.sqlTab.getTabCount() - 1);
@@ -1487,26 +1527,18 @@ public class MainWindow
 	{
 		try
 		{
-			final WbConnection conn = this.getConnectionForTab(this.dbExplorerPanel);
+			WbConnection conn = this.getConnectionForTab(this.dbExplorerPanel);
 
-			// make sure the setConnection is called on the AWT thread, so that the
-			// GUI update will work properly
-//			SwingUtilities.invokeLater(new Runnable()
-//			{
-//				public void run()
-//				{
-					dbExplorerPanel.setConnection(conn);
-					if (dbExplorerTabVisible)
-					{
-						sqlTab.setSelectedIndex(sqlTab.getTabCount() - 1);
-						if (Settings.getInstance().getRetrieveDbExplorer())
-						{
-							dbExplorerPanel.startRetrieve();
-						}
-					}
-					dbExplorerPanel.updateUI();
-//				}
-//			});
+			dbExplorerPanel.setConnection(conn);
+			if (dbExplorerTabVisible)
+			{
+				sqlTab.setSelectedIndex(sqlTab.getTabCount() - 1);
+				if (Settings.getInstance().getRetrieveDbExplorer())
+				{
+					dbExplorerPanel.startRetrieve();
+				}
+			}
+			dbExplorerPanel.updateUI();
 		}
 		catch (Exception e)
 		{
@@ -1646,14 +1678,19 @@ public class MainWindow
 		}
 	}
 
-
 	public void loadWorkspace()
 	{
 		FileDialogUtil dialog = new FileDialogUtil();
 		String filename = dialog.getWorkspaceFilename(this, false, true);
 		if (filename == null) return;
-		this.loadWorkspace(filename);
-		this.isProfileWorkspace = this.checkMakeProfileWorkspace();
+		if (this.loadWorkspace(filename))
+		{
+			this.isProfileWorkspace = this.checkMakeProfileWorkspace();
+		}
+		else
+		{
+			this.isProfileWorkspace = false;
+		}
 		//this.updateWindowTitle();
 	}
 
@@ -1757,11 +1794,17 @@ public class MainWindow
 			}
 			this.workspaceLoaded = true;
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
-			LogMgr.logWarning("MainWindow.loadWorkspace()", "Error loading workspace  " + filename + ": " + e.getMessage(), e);
-			String error = e.getMessage();
-			String msg = ResourceMgr.getString("ErrorLoadingWorkspace").replaceAll("%error%", error);
+			String error = ExceptionUtil.getDisplay(e);
+			String msg = StringUtil.replace(ResourceMgr.getString("ErrorLoadingWorkspace"), "%error%", error);
+			if (e instanceof OutOfMemoryError)
+			{
+				// try to free memory...
+				System.gc();
+				msg = ResourceMgr.getString("MsgOutOfMemoryError");
+			}
+			LogMgr.logWarning("MainWindow.loadWorkspace()", "Error loading workspace  " + filename + ": " + error, e);
 			boolean create = WbSwingUtilities.getYesNo(this, msg);
 			if (create)
 			{
@@ -2037,7 +2080,7 @@ public class MainWindow
 		this.sqlTab.add(sql, index);
 		this.setTabTitle(index, ResourceMgr.getString("LabelTabStatement"));
 
-		JMenuBar menuBar = this.getMenuForPanel(sql);
+		JMenuBar menuBar = this.createMenuForPanel(sql);
 		this.panelMenus.add(index, menuBar);
 
 		SelectTabAction a = new SelectTabAction(this.sqlTab, index);
@@ -2330,4 +2373,59 @@ public class MainWindow
 		this.updateWindowTitle();
 	}
 
+	public void dragEnter(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
+	{
+		dropTargetDragEvent.acceptDrag (DnDConstants.ACTION_COPY);
+	}
+
+	public void dragExit(java.awt.dnd.DropTargetEvent dropTargetEvent)
+	{
+	}
+
+	public void dragOver(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
+	{
+	}
+
+	public void drop(java.awt.dnd.DropTargetDropEvent dropTargetDropEvent)
+	{
+		try
+		{
+			Transferable tr = dropTargetDropEvent.getTransferable();
+			if (tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
+			{
+				dropTargetDropEvent.acceptDrop(DnDConstants.ACTION_COPY);
+				java.util.List fileList = (java.util.List)tr.getTransferData(DataFlavor.javaFileListFlavor);
+				if (fileList != null)
+				{
+					int files = fileList.size();
+					for (int i=0; i < files; i++)
+					{
+						File file = (File)fileList.get(i);
+						this.addTab(true);
+						SqlPanel sql = this.getCurrentSqlPanel();
+						sql.readFile(file.getAbsolutePath(), null);
+					}
+				}
+			}
+			else
+			{
+				dropTargetDropEvent.rejectDrop();
+			}
+		}
+		catch (IOException io)
+		{
+			io.printStackTrace();
+			dropTargetDropEvent.rejectDrop();
+		}
+		catch (UnsupportedFlavorException ufe)
+		{
+			ufe.printStackTrace();
+			dropTargetDropEvent.rejectDrop();
+		}
+	}
+
+	public void dropActionChanged(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
+	{
+	}
+	
 }

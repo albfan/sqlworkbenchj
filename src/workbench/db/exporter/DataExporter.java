@@ -36,6 +36,7 @@ import javax.swing.JFrame;
 import workbench.WbManager;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.exception.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.ProgressPanel;
 import workbench.gui.dialogs.export.ExportFileDialog;
@@ -110,6 +111,7 @@ public class DataExporter
 	private boolean append = false;
 	private boolean escapeHtml = true;
 	private boolean createFullHtmlPage = true;
+	private boolean verboseFormat = true;
 
 	private boolean showProgress = false;
 	private ProgressPanel progressPanel;
@@ -509,6 +511,7 @@ public class DataExporter
 		}
 		catch (Exception e)
 		{
+			this.addError(ExceptionUtil.getDisplay(e));
 			LogMgr.logError("DataExporter.startExport()", "Could not execute SQL statement: " + e.getMessage(), e);
 			if (this.showProgress)
 			{
@@ -879,6 +882,16 @@ public class DataExporter
 	public String getLineEnding()
 	{
 		return this.lineEnding;
+	}
+
+	public boolean getUseVerboseFormat()
+	{
+		return verboseFormat;
+	}
+
+	public void setUseVerboseFormat(boolean flag)
+	{
+		this.verboseFormat = flag;
 	}
 
 }

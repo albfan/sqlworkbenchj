@@ -254,8 +254,6 @@ public class ScriptParser
 					 Pattern.compile("(?mi)^\\s*SET\\s*TRANSACTION\\s*READ\\s*((WRITE)|(ONLY))\\s*;?\\s*$")
 	       };
 
-	//private static final Pattern GO_PATTERN = Pattern.compile("(?mi)^\\s*go\\s*$");
-
 	/**
 	 *	Parse the given SQL Script into a List of single SQL statements.
 	 *	Returns the index of the statement indicated by the currentCursorPos
@@ -570,7 +568,7 @@ class CommandBoundary
 {
 	public int startPos;
 	public int endPos;
-
+	
 	public CommandBoundary(int start, int end)
 	{
 		this.startPos = start;

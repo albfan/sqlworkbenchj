@@ -33,6 +33,7 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.exporter.XmlRowDataConverter;
 import workbench.log.LogMgr;
 
 /**
@@ -59,7 +60,8 @@ public class XmlDataFileParser
 	private RowDataReceiver receiver;
 	private boolean ignoreCurrentRow = false;
 	private boolean abortOnError = false;
-
+	private boolean verboseFormat = false;
+	
 	/** Define the tags for which the characters surrounded by the
 	 *  tag should be collected
 	 */
@@ -72,7 +74,8 @@ public class XmlDataFileParser
 		DATA_TAGS.add("data-format");
 		DATA_TAGS.add("table-name");
 		DATA_TAGS.add("column-name");
-		DATA_TAGS.add("column-data");
+		DATA_TAGS.add(XmlRowDataConverter.LONG_COLUMN_TAG);
+		DATA_TAGS.add(XmlRowDataConverter.SHORT_COLUMN_TAG);
 		DATA_TAGS.add("column-count");
 	}
 
@@ -82,7 +85,9 @@ public class XmlDataFileParser
 	private boolean isNull = false;
 	private StringBuffer chars;
 	private boolean keepRunning;
-
+	private String rowTag = XmlRowDataConverter.LONG_ROW_TAG;
+	private String columnTag = XmlRowDataConverter.LONG_COLUMN_TAG;
+	
 	private HashMap constructors = new HashMap();
 
 	public XmlDataFileParser(String inputFile)
@@ -146,6 +151,7 @@ public class XmlDataFileParser
 		{
 			this.currentRow[i] = null;
 		}
+		this.currentColIndex = 0;
 	}
 
 	public void setEncoding(String enc)
@@ -183,7 +189,7 @@ public class XmlDataFileParser
 			this.chars = new StringBuffer();
 		}
 
-		if (qName.equals("row-data"))
+		if (qName.equals(this.rowTag))
 		{
 			this.clearRowData();
 		}
@@ -200,7 +206,7 @@ public class XmlDataFileParser
 				throw new SAXException("Could not read columnn index");
 			}
 		}
-		else if (qName.equals("column-data"))
+		else if (qName.equals(this.columnTag))
 		{
 			hasLongValue = false;
 			String attrValue = attrs.getValue("longValue");
@@ -216,15 +222,18 @@ public class XmlDataFileParser
 					hasLongValue = false;
 				}
 			}
-			try
+			if (this.verboseFormat)
 			{
-				attrValue = attrs.getValue("index");
-				this.currentColIndex = Integer.parseInt(attrValue);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("XmlDataFileParser.endElement()", "Could not read columnn index!", e);
-				throw new SAXException("Could not read columnn index");
+				try
+				{
+					attrValue = attrs.getValue("index");
+					this.currentColIndex = Integer.parseInt(attrValue);
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("XmlDataFileParser.endElement()", "Could not read columnn index!", e);
+					throw new SAXException("Could not read columnn index");
+				}
 			}
 
 			attrValue = attrs.getValue("null");
@@ -236,7 +245,7 @@ public class XmlDataFileParser
 		throws SAXException
 	{
 		if (!this.keepRunning) throw new ParsingInterruptedException();
-		if (qName.equals("row-data"))
+		if (qName.equals(this.rowTag))
 		{
 			if (!this.ignoreCurrentRow)
 			{
@@ -253,6 +262,11 @@ public class XmlDataFileParser
 			this.ignoreCurrentRow = false;
 			this.clearRowData();
 			this.currentRowNumber ++;
+		}
+		else if (qName.equals(this.columnTag))
+		{
+			this.buildColumnData();
+			if (!this.verboseFormat) this.currentColIndex ++;
 		}
 		else if (qName.equals("wb-export"))
 		{
@@ -276,10 +290,6 @@ public class XmlDataFileParser
 				LogMgr.logError("XmlDataFileParser.endElement()", "Error when setting target table", sql);
 				throw new SAXException("Could not initialize target table");
 			}
-		}
-		else if (qName.equals("column-data"))
-		{
-			this.buildColumnData();
 		}
 		else if (qName.equals("column-count"))
 		{
@@ -563,4 +573,24 @@ public class XmlDataFileParser
 		return "";
 	}
 
+	public boolean getUseVerboseFormat()
+	{
+		return verboseFormat;
+	}
+
+	public void setUseVerboseFormat(boolean flag)
+	{
+		this.verboseFormat = flag;
+		if (this.verboseFormat)
+		{
+			rowTag = XmlRowDataConverter.LONG_ROW_TAG;
+			columnTag = XmlRowDataConverter.LONG_COLUMN_TAG;
+		}
+		else
+		{
+			rowTag = XmlRowDataConverter.SHORT_ROW_TAG;
+			columnTag = XmlRowDataConverter.SHORT_COLUMN_TAG;
+		}
+	}
+	
 }

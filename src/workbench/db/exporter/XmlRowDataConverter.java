@@ -30,14 +30,43 @@ import workbench.util.StringUtil;
 public class XmlRowDataConverter
 	extends RowDataConverter
 {
+	public static final String LONG_ROW_TAG  = "row-data";
+	public static final String LONG_COLUMN_TAG = "column-data";
+	public static final String SHORT_ROW_TAG = "rd";
+	public static final String SHORT_COLUMN_TAG = "cd";
 	private boolean useCData = false;
-	private String lineEnding = this.lineEnding;
-
+	private boolean verboseFormat = true;
+	private String lineEnding = "\n";
+	private String coltag = LONG_COLUMN_TAG;
+	private String rowtag = LONG_ROW_TAG;
+	private String numAttrib = "row-num";
+	private String startColTag = "  <" + coltag + " index=\"";
+	private String closeColTag = "</" + coltag + ">";
+	private String closeRowTag = "</" + rowtag + ">";
+		
 	public XmlRowDataConverter(ResultInfo info)
 	{
 		super(info);
 	}
 
+	public void setUseVerboseFormat(boolean flag)
+	{
+		this.verboseFormat = flag;
+		if (flag)
+		{
+			coltag = LONG_COLUMN_TAG;
+			rowtag = LONG_ROW_TAG;
+			startColTag = "  <" + coltag + " index=\"";
+		}
+		else
+		{
+			coltag = SHORT_COLUMN_TAG;
+			rowtag = SHORT_ROW_TAG;
+			startColTag = "<" + coltag;
+		} 
+		closeColTag = "</" + coltag + ">";
+		closeRowTag = "</" + rowtag + ">";
+	}
 	public StrBuffer convertData()
 	{
 		return null;
@@ -55,7 +84,8 @@ public class XmlRowDataConverter
 		xml.append(this.lineEnding);
 		xml.append(this.getMetaDataAsXml("  "));
 		xml.append(this.lineEnding);
-		xml.append("  <data>");
+		if (this.verboseFormat) xml.append("  ");
+		xml.append("<data>");
 		xml.append(this.lineEnding);
 		return xml;
 	}
@@ -64,7 +94,8 @@ public class XmlRowDataConverter
 	public StrBuffer getEnd(long totalRows)
 	{
 		StrBuffer xml = new StrBuffer(100);
-		xml.append("  </data>");
+		if (this.verboseFormat) xml.append("  ");
+		xml.append("</data>");
 		xml.append(this.lineEnding);
 		xml.append("</wb-export>");
 		xml.append(this.lineEnding);
@@ -97,17 +128,29 @@ public class XmlRowDataConverter
 		StrBuffer indent = new StrBuffer("    ");
 		int colCount = this.metaData.getColumnCount();
 		StrBuffer xml = new StrBuffer(colCount * 100);
-		tagWriter.appendOpenTag(xml, indent, "row-data", "row-num", Long.toString(rowIndex + 1));
-		xml.append(this.lineEnding);
+		
+		if (this.verboseFormat)
+		{
+			tagWriter.appendOpenTag(xml, indent, rowtag, numAttrib, Long.toString(rowIndex + 1));
+		}
+		else
+		{
+			tagWriter.appendOpenTag(xml, null, rowtag);
+		}
+		
+		if (verboseFormat) xml.append(this.lineEnding);
 		for (int c=0; c < colCount; c ++)
 		{
 			String value = this.getValueAsFormattedString(row, c);
 			Object data = row.getValue(c);
 
-			xml.append(indent);
-			xml.append("  <column-data index=\"");
-			xml.append(c);
-			xml.append('"');
+			if (this.verboseFormat) xml.append(indent);
+			xml.append(startColTag);
+			if (this.verboseFormat)
+			{
+				xml.append(c);
+				xml.append('"');
+			}
 			if (value == null)
 			{
 				xml.append(" null=\"true\"");
@@ -153,11 +196,11 @@ public class XmlRowDataConverter
 					xml.append(value);
 				}
 			}
-			xml.append("</column-data>");
-			xml.append(this.lineEnding);
+			xml.append(closeColTag);
+			if (this.verboseFormat) xml.append(this.lineEnding);
 		}
-		xml.append(indent);
-		xml.append("</row-data>");
+		if (this.verboseFormat) xml.append(indent);
+		xml.append(closeRowTag);
 		xml.append(this.lineEnding);
 		return xml;
 	}

@@ -12,6 +12,7 @@
 package workbench.gui.tools;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -24,6 +25,7 @@ import javax.swing.Timer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.BrowserLauncher;
+import workbench.util.WbThread;
 import workbench.util.WbVersionReader;
 
 /**
@@ -53,15 +55,13 @@ public class VersionCheckDialog extends javax.swing.JDialog
 
 	public void startRetrieveVersions()
 	{
-		this.readThread = new Thread()
+		this.readThread = new WbThread("WbVersionCheck Thread")
 		{
 			public void run()
 			{
 				readVersion();
 			}
 		};
-		readThread.setName("WbVersionCheck Thread");
-		readThread.setDaemon(true);
 		readThread.start();
 
 		this.timeout = new Timer(60 * 1000, this);
@@ -73,7 +73,6 @@ public class VersionCheckDialog extends javax.swing.JDialog
 	{
 		try
 		{
-			LogMgr.logDebug("VersionCheckDialog.readVersion()", "Retrieving versions from the website...");
 			this.versionReader = new WbVersionReader();
 
 			this.stableVersion.setText(" " + ResourceMgr.getString("LabelVersionNotAvailable"));
@@ -103,6 +102,7 @@ public class VersionCheckDialog extends javax.swing.JDialog
 				this.timeout = null;
 			}
 			this.headingLabel.setText(ResourceMgr.getString("LabelVersionsAvailable"));
+			this.headingLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		}
 	}
 
@@ -228,9 +228,9 @@ public class VersionCheckDialog extends javax.swing.JDialog
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 6;
-    gridBagConstraints.insets = new java.awt.Insets(10, 0, 5, 5);
     gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHEAST;
     gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(10, 0, 5, 5);
     getContentPane().add(closeButton, gridBagConstraints);
 
     stableVersionLabel.setText(ResourceMgr.getString("LabelStableVersion"));
@@ -342,7 +342,7 @@ public class VersionCheckDialog extends javax.swing.JDialog
 	{
 		if (e.getSource() == this.headingLabel &&
 				e.getButton() == MouseEvent.BUTTON1 &&
-				e.getClickCount() == 2)
+				e.getClickCount() == 1)
 		{
 			try
 			{

@@ -287,7 +287,7 @@ public class WbManager
 
 	private JDialog closeMessage;
 
-	private boolean saveSettings()
+	private boolean saveWindowSettings()
 	{
 		MainWindow w = this.getCurrentWindow();
 		boolean settingsSaved = false;
@@ -336,7 +336,9 @@ public class WbManager
 
 	public void exitWorkbench(JFrame window)
 	{
-		boolean canExit = this.saveSettings();
+		// saveSettings() will also prompt if any modified 
+		// files should be changed
+		boolean canExit = this.saveWindowSettings();
 		if (!canExit) return;
 		shutdownInProgress = true;
 		if (window == null)
@@ -345,11 +347,7 @@ public class WbManager
 			this.doShutdown();
 			return;
 		}
-		if (window instanceof MainWindow)
-		{
-			if (!((MainWindow)window).saveWorkspace(false)) return;
-		}
-
+		
 		// When disconnecting it can happen that the disconnect itself
 		// takes some time. Because of this, a small window is displayed
 		// that the disconnect takes place, and the actual disconnect is
@@ -483,12 +481,12 @@ public class WbManager
 	
 	private void doShutdown(int errorCode)
 	{
+		Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
 		this.shutdownInProgress = true;
 		this.closeAllWindows();
 		if (!this.isBatchMode()) settings.saveSettings();
 		LogMgr.logInfo("WbManager.doShutdown()", "Stopping " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
 		LogMgr.shutdown();
-		Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
 		System.exit(errorCode);
 	}
 
@@ -544,6 +542,7 @@ public class WbManager
 	{
 		if (this.mainWindows.size() == 1)
     {
+			// If only one window is present, shut down the application
 			this.exitWorkbench(win);
     }
 		else
@@ -554,8 +553,9 @@ public class WbManager
 			{
 				public void run()
 				{
-					// no need to do the disconnect the window in a
+					// First parameter tells the window to disconnect the window in a
 					// separate thread as we are already in a background thread
+					// second parameter tells the window not to save the workspace
 					win.disconnect(false, false);
 					win.hide();
 					win.dispose();
@@ -832,12 +832,12 @@ public class WbManager
 	}
 
 	/**
-	 *  this is only to support the thread for the shutdownhook
+	 *  this is for the shutdownhook
 	 */
 	public void run()
 	{
 		LogMgr.logDebug("WbManager.run()", "Shutdownhook called!");
-		this.saveSettings();
+		Settings.getInstance().saveSettings();
 	}
 
 }

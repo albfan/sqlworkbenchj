@@ -218,8 +218,6 @@ public class TableListPanel
 		this.tableSource.setEditable(false);
 		this.tableSource.showFindOnPopupMenu();
 
-		//this.tableSource.addPopupMenuItem(new FileSaveAsAction(this.tableSource), true);
-
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.tableSource);
 		this.tableData = new TableDataPanel();
 
@@ -953,6 +951,7 @@ public class TableListPanel
 
 		try
 		{
+			WbSwingUtilities.showWaitCursor(this);
 			final String sql;
 
 			DbMetadata meta = this.dbConnection.getMetadata();
@@ -1001,6 +1000,10 @@ public class TableListPanel
 			tableSource.setText(ExceptionUtil.getDisplay(e));
 			throw e;
 		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursor(this);
+		}
 	}
 
 	private void retrieveTableDefinition()
@@ -1008,6 +1011,7 @@ public class TableListPanel
 	{
 		try
 		{
+			WbSwingUtilities.showWaitCursor(this);
 			tableDefinition.setIgnoreRepaint(true);
 			DbMetadata meta = this.dbConnection.getMetadata();
 			DataStore def = meta.getTableDefinition(this.selectedCatalog, this.selectedSchema, this.selectedTableName, this.selectedObjectType, false);
@@ -1048,6 +1052,7 @@ public class TableListPanel
 		}
 		finally
 		{
+			WbSwingUtilities.showDefaultCursor(this);
 			tableDefinition.setIgnoreRepaint(false);
 		}
 	}
@@ -1179,7 +1184,6 @@ public class TableListPanel
 
 		try
 		{
-			WbSwingUtilities.showWaitCursor(this);
 			switch (index)
 			{
 				case 0:
@@ -1237,6 +1241,7 @@ public class TableListPanel
 	{
 		try
 		{
+			WbSwingUtilities.showDefaultCursor(this);
 			triggers.readTriggers(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
 			this.shouldRetrieveTriggers = false;
 		}
@@ -1246,6 +1251,10 @@ public class TableListPanel
 			LogMgr.logError("TableListPanel.retrieveTriggers()", "Error retrieving triggers", th);
 			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(th));
 		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursor(this);
+		}
 	}
 
 	private void retrieveIndexes()
@@ -1253,6 +1262,7 @@ public class TableListPanel
 	{
 		try
 		{
+			WbSwingUtilities.showWaitCursor(this);
 			DbMetadata meta = this.dbConnection.getMetadata();
 			indexes.setModel(meta.getTableIndexes(this.selectedCatalog, this.selectedSchema, this.selectedTableName), true);
 			indexes.adjustColumns();
@@ -1263,6 +1273,10 @@ public class TableListPanel
 			this.shouldRetrieveIndexes = true;
 			LogMgr.logError("TableListPanel.retrieveIndexes()", "Error retrieving indexes", th);
 			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(th));
+		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursor(this);
 		}
 	}
 
@@ -1290,6 +1304,7 @@ public class TableListPanel
 	{
 		try
 		{
+			WbSwingUtilities.showWaitCursor(this);
 			DbMetadata meta = this.dbConnection.getMetadata();
 			DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(this.selectedCatalog, this.selectedSchema, this.selectedTableName));
 			importedKeys.setModel(model, true);
@@ -1302,12 +1317,17 @@ public class TableListPanel
 			LogMgr.logError("TableListPanel.retrieveImportedTables()", "Error retrieving table references", th);
 			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(th));
 		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursor(this);
+		}
 	}
 
 	private void retrieveImportedTree()
 	{
 		try
 		{
+			WbSwingUtilities.showWaitCursor(this);
 			TableIdentifier id = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
 			importedTableTree.readTree(id, false);
 			this.shouldRetrieveImportedTree = false;
@@ -1318,12 +1338,17 @@ public class TableListPanel
 			LogMgr.logError("TableListPanel.retrieveImportedTree()", "Error retrieving table references", th);
 			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(th));
 		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursor(this);
+		}
 	}
 
 	private void retrieveExportedTree()
 	{
 		try
 		{
+			WbSwingUtilities.showWaitCursor(this);
 			TableIdentifier id = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
 			exportedTableTree.readTree(id, true);
 			this.shouldRetrieveExportedTree = false;
@@ -1333,6 +1358,10 @@ public class TableListPanel
 			LogMgr.logError("TableListPanel.retrieveImportedTree()", "Error retrieving table references", th);
 			this.shouldRetrieveExportedTree = true;
 			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(th));
+		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursor(this);
 		}
 	}
 

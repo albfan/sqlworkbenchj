@@ -56,6 +56,7 @@ import workbench.resource.Settings;
 import workbench.util.WbThread;
 import workbench.interfaces.JobErrorHandler;
 import java.awt.Cursor;
+import javax.swing.JComponent;
 
 /**
  *
@@ -405,6 +406,14 @@ public class TableDataPanel
 			cancelRetrieve.setEnabled(false);
 			reloadAction.setEnabled(true);
 			this.retrieveEnd();
+			final JComponent th = this;
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					WbSwingUtilities.showDefaultCursor(th);
+				}
+			});
 		}
 	}
 

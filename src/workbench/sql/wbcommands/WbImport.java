@@ -61,6 +61,7 @@ public class WbImport extends SqlCommand
 		cmdLine.addArgument("emptystringnull");
 		cmdLine.addArgument("continueonerror");
 		cmdLine.addArgument("decode");
+		cmdLine.addArgument("verbosexml");
 		this.isUpdatingCommand = true;
 	}
 
@@ -70,6 +71,7 @@ public class WbImport extends SqlCommand
 		throws SQLException
 	{
 		imp = new DataImporter();
+		this.imp.setConnection(aConnection);
 
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
@@ -199,6 +201,10 @@ public class WbImport extends SqlCommand
 
 			String encoding = cmdLine.getValue("encoding");
 			if (encoding != null) xmlParser.setEncoding(encoding);
+			
+			boolean verbose = cmdLine.getBoolean("verbosexml", true);
+			xmlParser.setUseVerboseFormat(verbose);
+				
 			imp.setProducer(xmlParser);
 		}
 		else
@@ -208,7 +214,7 @@ public class WbImport extends SqlCommand
 			return result;
 		}
 		file = StringUtil.trimQuotes(file);
-		this.imp.setConnection(aConnection);
+		
 		this.imp.setRowActionMonitor(this.rowMonitor);
 		String mode = cmdLine.getValue("mode");
 		if (mode != null)
@@ -250,12 +256,15 @@ public class WbImport extends SqlCommand
 		}
 		this.addWarnings(result);
 		this.addErrors(result);
-		long rows = imp.getInsertedRows();
-		msg = rows + " " + ResourceMgr.getString("MsgCopyNumRowsInserted");
-		result.addMessage(msg);
-		rows = imp.getUpdatedRows();
-		msg = rows + " " + ResourceMgr.getString("MsgCopyNumRowsUpdated");
-		result.addMessage(msg);
+		if (result.isSuccess())
+		{
+			long rows = imp.getInsertedRows();
+			msg = rows + " " + ResourceMgr.getString("MsgCopyNumRowsInserted");
+			result.addMessage(msg);
+			rows = imp.getUpdatedRows();
+			msg = rows + " " + ResourceMgr.getString("MsgCopyNumRowsUpdated");
+			result.addMessage(msg);
+		}
 		return result;
 	}
 

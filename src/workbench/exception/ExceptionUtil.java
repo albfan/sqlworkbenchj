@@ -16,6 +16,7 @@ import java.io.StringWriter;
 import java.sql.SQLException;
 
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 
 /**
  *
@@ -30,22 +31,26 @@ public class ExceptionUtil
 
 	public static StringBuffer getSqlStateString(SQLException se)
 	{
-		StringBuffer result = new StringBuffer("SQL State=");
+		StringBuffer result = new StringBuffer(30);
 		try
 		{
 			String state = se.getSQLState();
 			if (state != null && state.length() > 0)
 			{
+				result.append("SQL State=");
 				result.append(state);
-				result.append(", ");
 			}
 			int error = se.getErrorCode();
-			result.append("DB Errorcode=");
-			result.append(Integer.toString(error));
+			if (error != 0)
+			{
+				if (result.length() > 0) result.append(", ");
+				result.append("DB Errorcode=");
+				result.append(Integer.toString(error));
+			}
 		}
 		catch (Throwable th)
 		{
-			result.append("(unknown)");
+			//result.append("(unknown)");
 		}
 		return result;
 	}
@@ -72,9 +77,13 @@ public class ExceptionUtil
 			if (th instanceof SQLException)
 			{
 				SQLException se = (SQLException)th;
-				result.append(" [");
-				result.append(getSqlStateString(se));
-				result.append("] ");
+				StringBuffer state = getSqlStateString(se);
+				if (state.length() > 0)
+				{
+					result.append(" [");
+					result.append(state);
+					result.append("] ");
+				}
 			}
 
 			if (includeStackTrace)

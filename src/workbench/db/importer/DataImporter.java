@@ -60,7 +60,8 @@ public class DataImporter
 
 	private boolean deleteTarget = false;
 	private boolean continueOnError = true;
-
+	private boolean useLongTags = true;
+	
 	private long totalRows = 0;
 	private long updatedRows = 0;
 	private long insertedRows = 0;
@@ -160,6 +161,16 @@ public class DataImporter
 		}
 	}
 
+	public boolean getUseLongTags()
+	{
+		return useLongTags;
+	}
+
+	public void setUseLongTags(boolean flag)
+	{
+		this.useLongTags = flag;
+	}
+	
 	public boolean getUseBatch()
 	{
 		 return this.useBatch;
@@ -648,7 +659,10 @@ public class DataImporter
 		this.targetColumns = columns;
 
 		this.colCount = this.targetColumns.length;
-
+		if (this.dbConn != null)
+		{
+			this.checkTable();
+		}
 		if (this.mode != MODE_UPDATE)
 		{
 			this.prepareInsertStatement();
@@ -671,6 +685,17 @@ public class DataImporter
 		}
 	}
 
+	private void checkTable()
+		throws SQLException
+	{
+		if (this.dbConn == null) return;
+		if (this.targetTable == null) return;
+		
+		TableIdentifier tbl = new TableIdentifier(this.targetTable);
+		boolean exists = this.dbConn.getMetadata().tableExists(tbl);
+		if (!exists) throw new SQLException("Table " + this.targetTable + " not found!");
+	}
+	
 	/**
 	 * 	Prepare the statement to be used for inserts.
 	 * 	targetTable and targetColumns have to be initialized before calling this!
