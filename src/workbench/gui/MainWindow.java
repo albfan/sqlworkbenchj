@@ -75,6 +75,8 @@ public class MainWindow
 	private WbToolbar currentToolbar;
 	private ArrayList panelMenus = new ArrayList(5);
 
+	private boolean dbExplorerTabVisible = false;
+	
 	/** Creates new MainWindow */
 	public MainWindow()
 	{
@@ -97,22 +99,25 @@ public class MainWindow
 		{
 			SqlPanel sql = new SqlPanel(i + 1);
 			sql.addFilenameChangeListener(this);
-			this.sqlTab.addTab(ResourceMgr.getString("LabelTabStatement") + " " + Integer.toString(i+1), null, sql);
+			char c = Integer.toString(i+1).charAt(0);
+			this.sqlTab.addTab(ResourceMgr.getString("LabelTabStatement") + " " + c, null, sql);
+			this.sqlTab.setMnemonicAt(i, c);
 			sql.restoreSettings();
 		}
 		this.initMenu();
 
 		this.getContentPane().add(this.sqlTab, BorderLayout.CENTER);
-		this.setDisplayTitle(null);//setTitle(ResourceMgr.getString("MsgNotConnected"));
+		this.setDisplayTitle(null);
 		this.sqlTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.restorePosition();
 		this.setIconImage(ResourceMgr.getPicture("workbench16").getImage());
 
-		if (WbManager.getSettings().getShowDbExplorerInMainWindow())
+		if (WbManager.getSettings().getShowDbExplorerInMainWindow() &&
+				WbManager.getSettings().getDbExplorerVisible())
 		{
 			this.addDbExplorerTab();
 		}
-
+		
 		int lastIndex = WbManager.getSettings().getLastSqlTab();
 		if (lastIndex < 0 || lastIndex > this.sqlTab.getTabCount() - 1)
 		{
@@ -156,6 +161,16 @@ public class MainWindow
 		}
 	}
 
+  public void addIndexChangeListener(ChangeListener aListener)
+  {
+    this.sqlTab.addChangeListener(aListener);
+  }
+  
+  public void removeIndexChangeListener(ChangeListener aListener)
+  {
+    this.sqlTab.removeChangeListener(aListener);
+  }
+  
 	private void initMenu()
 	{
 		this.dbExplorerAction = new ShowDbExplorerAction(this);
@@ -265,11 +280,9 @@ public class MainWindow
 		menuBar.add(this.buildToolsMenu());
 		menuBar.add(this.buildHelpMenu());
 
-		if (!WbManager.getSettings().getShowDbExplorerInMainWindow())
-		{
-			WbToolbar tool = aPanel.getToolbar();
-			aPanel.addToToolbar(this.dbExplorerAction, true);
-		}
+		WbToolbar tool = aPanel.getToolbar();
+		aPanel.addToToolbar(this.dbExplorerAction, true);
+		
 		return menuBar;
 	}
 
@@ -281,7 +294,7 @@ public class MainWindow
 	public String[] getPanelLabels()
 	{
 		int tabCount = this.sqlTab.getTabCount();
-		if (WbManager.getSettings().getShowDbExplorerInMainWindow())
+		if (WbManager.getSettings().getShowDbExplorerInMainWindow() && this.dbExplorerPanel != null)
 		{
 			tabCount --;
 		}
@@ -358,16 +371,15 @@ public class MainWindow
 	{
 		int index = this.sqlTab.getSelectedIndex();
 		WbManager.getSettings().setLastSqlTab(index);
+		WbManager.getSettings().setDbExplorerVisible(this.dbExplorerTabVisible);
 		int tabCount = this.sqlTab.getTabCount();
 		int tabs = tabCount;
-    Settings sett = WbManager.getSettings();
-		if (this.dbExplorerPanel != null)
+		Object tab = this.sqlTab.getComponentAt(tabCount - 1);
+		if (tab instanceof DbExplorerPanel)
 		{
-			if (this.dbExplorerPanel.getWindow() == null)
-			{
-				tabs --;
-			}
+			tabs --;
 		}
+    Settings sett = WbManager.getSettings();
     sett.setDefaultTabCount(tabs);
 
 		for (int i=0; i < tabCount; i++)
@@ -649,7 +661,6 @@ public class MainWindow
 		if (this.dbExplorerPanel == null)
 		{
 			this.dbExplorerPanel = new DbExplorerPanel(this);
-			//this.dbExplorerPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
 			this.dbExplorerPanel.restoreSettings();
 		}
 		JMenuBar dbmenu = this.getMenuForPanel(this.dbExplorerPanel);
@@ -676,12 +687,14 @@ public class MainWindow
 			if (!(c instanceof DbExplorerPanel))
 			{
 				this.addDbExplorerTab();
+				this.dbExplorerTabVisible = true;
 			}
 			this.sqlTab.setSelectedIndex(this.sqlTab.getTabCount() - 1);
 		}
 		else
 		{
 			this.dbExplorerPanel.openWindow(this.currentProfileName);
+			this.dbExplorerTabVisible = false;
 		}
 	}
 
@@ -751,11 +764,8 @@ public class MainWindow
 		JMenu result = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_TOOLS));
 		result.setName(ResourceMgr.MNU_TXT_TOOLS);
 
-		if (!WbManager.getSettings().getShowDbExplorerInMainWindow())
-		{
-			result.add(this.dbExplorerAction);
-			result.addSeparator();
-		}
+		result.add(this.dbExplorerAction);
+		result.addSeparator();
 
 		JMenuItem options = new WbMenuItem(ResourceMgr.getString(ResourceMgr.MNU_TXT_OPTIONS));
 		options.setName(ResourceMgr.MNU_TXT_OPTIONS);
@@ -821,7 +831,11 @@ public class MainWindow
 	 */
 	public void removeTab()
 	{
-		if (this.getCurrentPanel() instanceof DbExplorerPanel) return;
+		if (this.getCurrentPanel() instanceof DbExplorerPanel) 
+		{
+			this.dbExplorerTabVisible = false;
+		}
+		
 		int index = this.sqlTab.getSelectedIndex();
 		this.sqlTab.remove(index);
 		this.panelMenus.remove(index);
@@ -926,13 +940,8 @@ public class MainWindow
 		if (e.getSource() == this.sqlTab && e.getButton() == MouseEvent.BUTTON3)
 		{
 			MainPanel p = this.getCurrentPanel();
-			if (p instanceof SqlPanel)
-			{
-				SqlTabPopup pop = new SqlTabPopup(this);
-				//RemoveTabAction a = pop.getRemoveAction();
-				//a.setEnabled(this.sqlTab.getSelectedIndex() == this.getLastSqlIndex());
-				pop.show(this.sqlTab,e.getX(),e.getY());
-			}
+			SqlTabPopup pop = new SqlTabPopup(this);
+			pop.show(this.sqlTab,e.getX(),e.getY());
 		}
 	}
 

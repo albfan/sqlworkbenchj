@@ -97,5 +97,37 @@
     </void>
    </object>
   </void>
+  <void method="add"> 
+   <object class="workbench.db.DbDriver"> 
+    <void property="driverClass"> 
+     <string>de.sag.jdbc.adabasd.ADriver</string> 
+    </void> 
+    <void property="library"> 
+     <string>adabasd.jar</string> 
+    </void> 
+    <void property="name"> 
+     <string>Adabas</string> 
+    </void> 
+    <void property="sampleUrl"> 
+     <string>jdbc:adabasd://&lt;server&gt;/&lt;database&gt;</string> 
+    </void> 
+   </object> 
+  </void> 
+  <void method="add"> 
+   <object class="workbench.db.DbDriver"> 
+    <void property="driverClass"> 
+     <string>sun.jdbc.odbc.JdbcOdbcDriver</string> 
+    </void> 
+    <void property="library"> 
+     <string></string> 
+    </void> 
+    <void property="name"> 
+     <string>Access</string> 
+    </void> 
+    <void property="sampleUrl"> 
+     <string>jdbc:odbc:DRIVER={Microsoft Access Driver (*.mdb)};DBQ=&lt;filename&gt;</string> 
+    </void> 
+   </object> 
+  </void> 
  </object>
 </java>

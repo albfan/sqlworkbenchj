@@ -5,7 +5,6 @@ import java.awt.Graphics;
 import java.awt.Insets;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
-import javax.swing.plaf.basic.BasicTabbedPaneUI;
 import javax.swing.plaf.metal.MetalTabbedPaneUI;
 
 public class BorderLessMetalTabbedPaneUI extends MetalTabbedPaneUI
@@ -78,4 +77,5 @@ public class BorderLessMetalTabbedPaneUI extends MetalTabbedPaneUI
 				break;
 		}
 	}
+   
 }

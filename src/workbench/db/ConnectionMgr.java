@@ -44,7 +44,7 @@ public class ConnectionMgr
 	 *	Return a new connection specified by the profile
 	 */
 	public WbConnection getConnection(ConnectionProfile aProfile, String anId)
-		throws ClassNotFoundException, SQLException, NoConnectionException
+		throws ClassNotFoundException, SQLException, Exception
 	{
 		this.disconnect(anId);
 		
@@ -58,7 +58,7 @@ public class ConnectionMgr
 	}
 
 	Connection connect(ConnectionProfile aProfile)
-		throws ClassNotFoundException, SQLException, NoConnectionException
+		throws ClassNotFoundException, SQLException, Exception
 	{
 		// The DriverManager refuses to use a driver which was not loaded
 		// from the system classloader, so the connection has to be 
@@ -91,12 +91,12 @@ public class ConnectionMgr
 		}
 		catch (Exception e)
 		{
-			throw new NoConnectionException(e.getMessage());
+			throw e;
 		}
 	}
 	
 	public void reconnect(WbConnection aConn)
-		throws ClassNotFoundException, SQLException, NoConnectionException
+		throws ClassNotFoundException, SQLException, Exception
 	{
     aConn.close();
     // use the stored profile to reconnect as the SQL connection

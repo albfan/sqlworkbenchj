@@ -11,12 +11,8 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.Window;
-import java.awt.event.WindowEvent;
 import java.io.File;
-import java.lang.Runnable;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -37,14 +33,12 @@ import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 import workbench.util.WbCipher;
 import workbench.util.WbNullCipher;
-import workbench.util.WbPersistence;
 
 /**
  * The main application "controller" for the jWorkbench
  * @author  workbench@kellerer.org
  */
-public class WbManager
-	implements FontChangedListener
+public class WbManager implements FontChangedListener
 {
 	private static WbManager wb = new WbManager();
 	private Settings settings;
@@ -312,13 +306,16 @@ public class WbManager
 			this.exitWorkbench();
     }
 	}
-	
+
+	// open a new window, but do not check any command line 
+	// parameters. This methode will be called from the GUI
+	// when the user requests a new window
 	public void openNewWindow()
 	{
 		this.openNewWindow(false);
 	}
 	
-	public void openNewWindow(boolean checkCmdLine)
+	private void openNewWindow(boolean checkCmdLine)
 	{
 		if (trace) System.err.println("WbManager.openNewWindow()");
 		final MainWindow main = this.createWindow();
@@ -336,11 +333,15 @@ public class WbManager
 				ConnectionProfile prof = connMgr.getProfile(profilename);
 				if (prof != null)
 				{
+					// try to connect to the profile passed on the 
+					// command line. If this fails the connection 
+					// dialog will be show to the user
 					connected = main.connectTo(prof);
 				}
 			}
 		}
-		
+
+		// no connection, display the connection dialog
 		if (!connected)
 		{
 			EventQueue.invokeLater(new Runnable()
@@ -358,10 +359,13 @@ public class WbManager
 	private static final String ARG_CONFIGDIR = "configdir";
 	private static final String ARG_SCRIPT = "script";
 	private static final String ARG_LOGFILE = "logfile";
+	private static final String ARG_ABORT = "abortonerror";
+	private static final String ARG_SUCCESS_SCRIPT = "cleanupsuccess";
+	private static final String ARG_ERROR_SCRIPT = "cleanuperror";
 	
 	private void initCmdLine(String[] args)
 	{
-		if (trace) System.err.println("WbManager.initCmdLine()");
+		if (trace) System.err.println("WbManager.initCmdLine() - start");
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(ARG_PROFILE);
 		cmdLine.addArgument(ARG_CONFIGDIR);
@@ -397,24 +401,28 @@ public class WbManager
 		catch (Exception e)
 		{
 		}
+		if (trace) System.err.println("WbManager.initCmdLine() - done");
 	}
 
 	public void init()
 	{
-		if (trace) System.err.println("WbManager.init()");
+		if (trace) System.err.println("WbManager.init() - start");
 		this.settings = new Settings();
 		if (!this.batchMode)
 		{
 			WbSplash splash = null;
 			if (wb.settings.getShowSplash())
 			{
+				if (trace) System.err.println("WbManager.init() - opening splash window");
 				splash = new WbSplash(null, false);
 				splash.setVisible(true);
 			}
+			if (trace) System.err.println("WbManager.init() - initializing UI defaults");
 			this.initUI();
 			this.openNewWindow(true);
 			if (splash != null)
 			{
+				if (trace) System.err.println("WbManager.init() - closing splash window");
 				splash.setVisible(false);
 				splash.dispose();
 			}
@@ -423,12 +431,30 @@ public class WbManager
 		{
 			String scripts = cmdLine.getValue(ARG_SCRIPT);
 			String profilename = cmdLine.getValue(ARG_PROFILE);
+			String errorHandling = cmdLine.getValue(ARG_ABORT);
+			boolean abort = true;
+			if (errorHandling != null)
+			{
+				abort = StringUtil.stringToBool(errorHandling);
+			}
+			
+			String success = cmdLine.getValue(ARG_SUCCESS_SCRIPT);
+			String error = cmdLine.getValue(ARG_ERROR_SCRIPT);
 			if (scripts != null && profilename != null)
 			{
+				if (trace) System.err.println("WbManager.init() - initializing BatchRunner");
 				BatchRunner runner = new BatchRunner(scripts);
 				try
 				{
+					runner.setAbortOnError(abort);
+					runner.setErrorScript(error);
+					runner.setSuccessScript(success);
+					// set profile will connect to the database using the 
+					// connection manager. It will throw an exception
+					// if the connection fails.
+					if (trace) System.err.println("WbManager.init() - connecting BatchRunner");
 					runner.setProfile(StringUtil.trimQuotes(profilename));
+					if (trace) System.err.println("WbManager.init() - starting BatchRunner");
 					runner.execute();
 				}
 				catch (Exception e)
@@ -441,6 +467,7 @@ public class WbManager
 				}
 			}
 		}
+		if (trace) System.err.println("WbManager.init() - done.");
 	}
 
 	public static void main(String args[])
