@@ -14,13 +14,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import workbench.WbManager;
 import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.SynonymReader;
 import workbench.exception.WbException;
@@ -29,6 +29,7 @@ import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.storage.DbDateFormatter;
 import workbench.storage.SqlSyntaxFormatter;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 
@@ -60,8 +61,8 @@ public class DbMetadata
 	//private List tableListColumns;
 	private WbConnection dbConnection;
 
-	private static List serversWhichNeedReconnect = WbManager.getSettings().getCancelWithReconnectServers();
-	private static List caseSensitiveServers = WbManager.getSettings().getCaseSensitivServers();
+	private static List serversWhichNeedReconnect = Collections.EMPTY_LIST;
+	private static List caseSensitiveServers = Collections.EMPTY_LIST;
 
 	// These Hashmaps contains templates
 	// for object creation
@@ -117,7 +118,7 @@ public class DbMetadata
 
   public boolean isOracle() { return this.isOracle; }
 
-	
+
 	private HashMap readStatementTemplates(String aFilename)
 	{
 		HashMap result = null;
@@ -145,7 +146,7 @@ public class DbMetadata
 		}
 		return result;
 	}
-	
+
 	public String getCascadeConstraintsVerb()
 	{
 		if (this.productName.toLowerCase().indexOf("oracle") >= 0)
@@ -169,7 +170,7 @@ public class DbMetadata
 			return "";
 		}
 	}
-	
+
 	public DbDateFormatter getDateLiteralFormatter()
 	{
 		return SqlSyntaxFormatter.getDateLiteralFormatter(this.productName);
@@ -458,7 +459,7 @@ public class DbMetadata
 
 	private String getSqlTypeDisplay(String aTypeName, int sqlType, int size, int digits)
 	{
-		String display = null;
+		String display = aTypeName;
 
 		switch (sqlType)
 		{
@@ -480,20 +481,13 @@ public class DbMetadata
 					{
 						display = aTypeName + "(" + size + "," + digits + ")";
 					}
-					else if (size > 0)
+					else if (size > 0 && "NUMBER".equals(aTypeName)) // Oracle specific
 					{
-						if ("NUMBER".equals(aTypeName)) // Oracle specific
-							display = aTypeName + "(" + size + ")";
-						else
-							display = aTypeName;
+						display = aTypeName + "(" + size + ")";
 					}
 				}
-				else
-				{
-					display = aTypeName;
-				}
-
 				break;
+
 			default:
 				display = aTypeName;
 				break;
@@ -709,7 +703,7 @@ public class DbMetadata
 	{
 		return this.getTableDefinition(aCatalog, aSchema, aTable, "TABLE", adjustNames);
 	}
-	
+
 	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable)
 		throws SQLException, WbException
 	{
@@ -721,7 +715,7 @@ public class DbMetadata
 	{
 		return this.getTableDefinition(aCatalog, aSchema, aTable, aType, true);
 	}
-	
+
 	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, String aType, boolean adjustNames)
 		throws SQLException, WbException
 	{
@@ -736,7 +730,7 @@ public class DbMetadata
 			aSchema = this.adjustObjectname(aSchema);
 			aTable = this.adjustObjectname(aTable);
 		}
-		
+
 		if ("SYNONYM".equalsIgnoreCase(aType))
 		{
 			try
@@ -1326,10 +1320,10 @@ public class DbMetadata
 		{
 			//{"COLUMN_NAME", "TYPE_NAME", "PK", "NULLABLE", "DEFAULT", "REMARKS"};
 			String colName = (String)aTableDef.getValue(i, COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-			String type = (String)aTableDef.getValue(i, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
+			String type = aTableDef.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
 			String pk = (String)aTableDef.getValue(i, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG);
 			String nul = (String)aTableDef.getValue(i, COLUMN_IDX_TABLE_DEFINITION_NULLABLE);
-			String def = aTableDef.getValue(i, COLUMN_IDX_TABLE_DEFINITION_DEFAULT).toString();
+			String def = aTableDef.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_DEFAULT);
 			result.append("   ");
 			result.append(colName);
 			if ("YES".equalsIgnoreCase(pk))
@@ -1539,6 +1533,15 @@ public class DbMetadata
 		return idx;
 	}
 
+	public static void setServersWhichNeedReconnect(List aList)
+	{
+		serversWhichNeedReconnect = aList;
+	}
+
+	public static void setCaseSensitiveServers(List aList)
+	{
+		caseSensitiveServers = aList;
+	}
   public String getExtendedErrorInfo(String schema, String objectType, String objectName)
   {
     if (!this.isOracle) return "";

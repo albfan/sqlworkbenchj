@@ -7,9 +7,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import workbench.db.TableIdentifier;
-import workbench.exception.WbException;
-import workbench.storage.DataStore;
 
 /**
  *
