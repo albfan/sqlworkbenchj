@@ -1,9 +1,14 @@
 /*
- * RepositoryReporter.java
+ * SchemaReporter.java
  *
- * Created on 12. August 2004, 23:09
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db.report;
 
 import java.awt.event.WindowAdapter;
@@ -13,29 +18,29 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
 import javax.swing.JFrame;
+
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.ProgressPanel;
 import workbench.interfaces.Interruptable;
-import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.storage.RowActionMonitor;
 import workbench.util.StrBuffer;
 import workbench.util.StrWriter;
-import workbench.util.StringUtil;
-import java.util.ArrayList;
-import java.util.List;
-import workbench.storage.RowActionMonitor;
 
 
 /**
  * Generate an report from a selection of database tables
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  *
  */
 public class SchemaReporter
@@ -77,10 +82,20 @@ public class SchemaReporter
 		this.tables = new ArrayList();
 		for (int i=0; i < tableList.length; i++)
 		{
-			this.tables.add(tableList[i]);
+			if (tableList[i].getTable().indexOf('%') > -1)
+			{
+				List tlist = retrieveWildcardTables(tableList[i].getTable());
+				if (tlist != null)
+				{
+					this.tables.addAll(tlist);
+				}
+			}
+			else
+			{
+				this.tables.add(tableList[i]);
+			}
 		}
 	}
-
 
 	/**
 	 *	Define the table types to be retrieved if no tables
@@ -330,6 +345,37 @@ public class SchemaReporter
 			this.monitor.setCurrentObject(null, -1, -1);
 		}
 	}
+
+	private List retrieveWildcardTables(String name)
+	{
+		try
+		{
+			if (this.cancel) return null;
+			DataStore ds = this.dbConn.getMetadata().getTables(null, null, name, this.types);
+			int count = ds.getRowCount();
+			ArrayList result = new ArrayList(count);
+			for (int i=0; i < count; i++)
+			{
+				if (this.cancel) return null;
+
+				String type = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+				if (type.indexOf("TABLE") > -1)
+				{
+					String table = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+					String catalog = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
+					String schema = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+					result.add(new TableIdentifier(catalog, schema, table));
+				}
+			}
+			return result;
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("SchemaReporter.retrieveWildcardTables()", "Error retrieving tables", e);
+		}
+		return null;
+	}
+
 
 	/**
 	 *	Retrieve all tables for the current user.

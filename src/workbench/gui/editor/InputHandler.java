@@ -21,7 +21,6 @@ import java.util.Hashtable;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 
 /**
  * An input handler converts the user's key strokes into concrete actions.
@@ -32,7 +31,7 @@ import javax.swing.text.Document;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.12 2004-03-05 20:04:00 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.13 2004-10-07 18:53:16 thomas Exp $
  * @see org.gjt.sp.jedit.textarea.DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter

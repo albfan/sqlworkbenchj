@@ -1,12 +1,18 @@
 /*
  * ConfigureWarningThreshold.java
  *
- * Created on May 12, 2003, 9:05 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.dbobjects;
 
 import java.awt.event.ActionListener;
+
 import workbench.resource.ResourceMgr;
 
 /**

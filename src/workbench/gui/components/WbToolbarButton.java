@@ -1,9 +1,14 @@
 /*
  * WbToolbarButton.java
  *
- * Created on 10. Juli 2002, 10:37
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.components;
 
 import java.awt.Insets;
@@ -13,7 +18,7 @@ import javax.swing.Icon;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class WbToolbarButton extends javax.swing.JButton
 {

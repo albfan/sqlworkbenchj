@@ -1,9 +1,14 @@
 /*
  * MsSqlMetaData.java
  *
- * Created on May 5, 2004, 5:59 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db.mssql;
 
 import java.sql.Connection;
@@ -13,7 +18,7 @@ import java.sql.SQLException;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class MsSqlMetaData
 {
@@ -35,7 +40,7 @@ public class MsSqlMetaData
 	public ResultSet getProcedures(String catalog, String schema)
 		throws SQLException
 	{
-		this.procStatement = this.dbConn.prepareStatement(this.GET_PROC_SQL);
+		this.procStatement = this.dbConn.prepareStatement(MsSqlMetaData.GET_PROC_SQL);
 		if (schema == null)
 		{
 			this.procStatement.setString(1, "%");

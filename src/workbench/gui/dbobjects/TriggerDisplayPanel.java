@@ -1,5 +1,13 @@
 /*
- * Created on 10. August 2002, 15:40
+ * TriggerDisplayPanel.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.gui.dbobjects;
 
@@ -12,7 +20,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -21,11 +28,12 @@ import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.sql.EditorPanel;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class TriggerDisplayPanel
 	extends JPanel
@@ -58,12 +66,12 @@ public class TriggerDisplayPanel
 
 	public void saveSettings()
 	{
-		WbManager.getSettings().setProperty(this.getClass().getName(), "divider", this.splitPane.getDividerLocation());
+		Settings.getInstance().setProperty(this.getClass().getName(), "divider", this.splitPane.getDividerLocation());
 	}
 	
 	public void restoreSettings()
 	{
-		int loc = WbManager.getSettings().getIntProperty(this.getClass().getName(), "divider");
+		int loc = Settings.getInstance().getIntProperty(this.getClass().getName(), "divider");
 		if (loc == 0) loc = 200;
 		this.splitPane.setDividerLocation(loc);
 	}

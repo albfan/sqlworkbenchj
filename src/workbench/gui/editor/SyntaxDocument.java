@@ -1,7 +1,5 @@
 package workbench.gui.editor;
 
-import java.util.ArrayList;
-
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
@@ -20,7 +18,7 @@ import javax.swing.undo.UndoableEdit;
  * system.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxDocument.java,v 1.8 2004-03-05 20:04:00 thomas Exp $
+ * @version $Id: SyntaxDocument.java,v 1.9 2004-10-07 18:53:16 thomas Exp $
  */
 public class SyntaxDocument
 	extends PlainDocument

@@ -1,9 +1,14 @@
 /*
  * TableSearchPanel.java
  *
- * Created on October 4, 2002, 9:53 AM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.dbobjects;
 
 import java.awt.Color;
@@ -25,6 +30,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -34,7 +40,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
-import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSearcher;
@@ -42,7 +47,6 @@ import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.DataStoreTableModel;
-import workbench.gui.components.DividerBorder;
 import workbench.gui.components.EmptyTableModel;
 import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbScrollPane;
@@ -56,12 +60,11 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.Like;
-import javax.swing.UIManager;
 
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class TableSearchPanel
 	extends JPanel
@@ -107,7 +110,7 @@ public class TableSearchPanel
 
 		this.searcher = new TableSearcher();
 		this.searcher.setDisplay(this);
-		//this.searchResult.setFont(WbManager.getSettings().getMsgLogFont());
+		//this.searchResult.setFont(Settings.getInstance().getMsgLogFont());
 		this.tableNames.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.fixedStatusText = ResourceMgr.getString("TxtSearchingTable") + " ";
 		((WbSplitPane)this.jSplitPane1).setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
@@ -502,7 +505,7 @@ public class TableSearchPanel
 
 	public void saveSettings()
 	{
-		Settings s = WbManager.getSettings();
+		Settings s = Settings.getInstance();
 		String cl = this.getClass().getName();
 		s.setProperty(cl, "divider", this.jSplitPane1.getDividerLocation());
 		s.setProperty(cl, "criteria", this.searchText.getText());
@@ -512,7 +515,7 @@ public class TableSearchPanel
 
 	public void restoreSettings()
 	{
-		Settings s = WbManager.getSettings();
+		Settings s = Settings.getInstance();
 		String cl = this.getClass().getName();
 		int loc = s.getIntProperty(cl, "divider");
 		if (loc == 0) loc = 200;

@@ -1,9 +1,14 @@
 /*
  * DbDriver.java
  *
- * Created on January 25, 2002, 11:41 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db;
 
 import java.io.File;
@@ -17,9 +22,9 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import workbench.WbManager;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
@@ -199,7 +204,7 @@ public class DbDriver
 		try
 		{
 			this.loadDriverClass();
-			boolean verify = WbManager.getSettings().getVerifyDriverUrl();
+			boolean verify = Settings.getInstance().getVerifyDriverUrl();
 			if (!this.driverClassInstance.acceptsURL(url))
 			{
 				String msg = ResourceMgr.getString("ErrorInvalidUrl");
@@ -268,7 +273,7 @@ public class DbDriver
 			{
 				String appName = ResourceMgr.TXT_PRODUCT_NAME;
 
-				if (WbManager.getSettings().getShowBuildInConnectionId())
+				if (Settings.getInstance().getShowBuildInConnectionId())
 				{
 					String build = ResourceMgr.getString("TxtBuildNumber");
 					if (build.startsWith("["))

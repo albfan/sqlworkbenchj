@@ -1,14 +1,17 @@
 /*
- * SpoolerProgress.java
+ * ProgressPanel.java
  *
- * Created on August 28, 2002, 3:10 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.dbobjects;
 
-import java.awt.Color;
 import java.io.File;
-import javax.swing.border.LineBorder;
 
 import workbench.gui.components.WbButton;
 import workbench.interfaces.Interruptable;
@@ -16,7 +19,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  *
- * @author  tkellerer
+ * @author  info@sql-workbench.net
  */
 public class ProgressPanel extends javax.swing.JPanel
 {

@@ -1,15 +1,19 @@
 /*
  * SelectCommand.java
  *
- * Created on 16. November 2002, 16:40
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.sql.commands;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.log.LogMgr;
@@ -21,7 +25,7 @@ import workbench.storage.DataStore;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class SelectCommand extends SqlCommand
 {
@@ -41,6 +45,8 @@ public class SelectCommand extends SqlCommand
 		this.isCancelled = false;
 
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		result.setWarning(false);
+
 		try
 		{
 			this.currentConnection = aConnection;
@@ -95,18 +101,37 @@ public class SelectCommand extends SqlCommand
 				{
 					try
 					{
+						// An exception in the constructor should leead to a real error
 						this.data = new DataStore(rs, false, this.rowMonitor, maxRows, this.currentConnection);
-						// Not reading the data in the constructor enables us
-						// to cancel the retrieval of the data from the ResultSet
-						// without using statement.cancel()
-						// The DataStore checks for the cancel flag during processing
-						// of the ResulSet
-						this.data.initData(rs, maxRows);
-						result.addDataStore(data);
+						try
+						{
+							// Not reading the data in the constructor enables us
+							// to cancel the retrieval of the data from the ResultSet
+							// without using statement.cancel()
+							// The DataStore checks for the cancel flag during processing
+							// of the ResulSet
+							this.data.initData(rs, maxRows);
+						}
+						catch (SQLException e)
+						{
+							// Errors during loading should not throw away the
+							// rows retrieved until then
+							if (this.data != null && this.data.getRowCount() > 0)
+							{
+								result.addMessage(ResourceMgr.getString("MsgErrorDuringRetrieve"));
+								result.addMessage(ExceptionUtil.getDisplay(e));
+								result.setWarning(true);
+							}
+						}
 					}
 					finally
 					{
 						try { rs.close(); } catch (Throwable th) {}
+					}
+
+					if (data != null)
+					{
+						result.addDataStore(data);
 					}
 				}
 

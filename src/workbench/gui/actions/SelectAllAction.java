@@ -1,7 +1,13 @@
 /*
- * ClearAction.java
+ * SelectAllAction.java
  *
- * Created on December 2, 2001, 1:32 AM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.gui.actions;
 
@@ -16,7 +22,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  *	Action to clear the contents of a entry field
- *	@author  workbench@kellerer.org
+ *	@author  info@sql-workbench.net
  */
 public class SelectAllAction extends WbAction
 {

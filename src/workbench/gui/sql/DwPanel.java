@@ -1,3 +1,14 @@
+/*
+ * DwPanel.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
+ */
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
@@ -6,16 +17,29 @@ import java.awt.Window;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import javax.swing.*;
+
+import javax.swing.BorderFactory;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
-
-import javax.swing.event.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-import workbench.WbManager;
+
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
@@ -25,8 +49,12 @@ import workbench.gui.actions.InsertRowAction;
 import workbench.gui.actions.SelectKeyColumnsAction;
 import workbench.gui.actions.StartEditAction;
 import workbench.gui.actions.UpdateDatabaseAction;
-
-import workbench.gui.components.*;
+import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.OneLineTableModel;
+import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.WbScrollPane;
+import workbench.gui.components.WbTable;
+import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.DbData;
 import workbench.interfaces.DbUpdater;
 import workbench.interfaces.Interruptable;
@@ -46,9 +74,10 @@ import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
- *	A Panel which displays the result of a SELECT statement.
+ *	A Panel which displays the result of a SELECT statement and 
+ *  can save changes to the database
  *
- *	@author workbench@kellerer.org
+ *	@author info@sql-workbench.net
  */
 public class DwPanel
 	extends JPanel
@@ -72,6 +101,7 @@ public class DwPanel
 	private int maxRows = 0;
 
 	private boolean success = false;
+	private boolean hasWarning = false;
 	private boolean showLoadProgress = false;
 
 	private UpdateDatabaseAction updateAction = null;
@@ -86,6 +116,7 @@ public class DwPanel
 	private boolean manageUpdateAction = false;
 	private boolean showErrorMessages = false;
 	private boolean readOnly = false;
+	private boolean automaticUpdateTableCheck = true;
 
 	private long rowsAffectedByScript = -1;
 	private boolean scriptRunning = false;
@@ -415,7 +446,7 @@ public class DwPanel
 			preview.setText(text.toString());
 			preview.setCaretPosition(0);
 			WbSwingUtilities.showDefaultCursor(this);
-			int choice = JOptionPane.showConfirmDialog(win, scroll, ResourceMgr.getString("MsgConfirmUpdates"), JOptionPane.OK_CANCEL_OPTION);
+			int choice = JOptionPane.showConfirmDialog(win, scroll, ResourceMgr.getString("MsgConfirmUpdates"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 			if (choice == JOptionPane.CANCEL_OPTION) doSave = false;
 		}
 		catch (SQLException e)
@@ -482,8 +513,10 @@ public class DwPanel
 
 	public void setUpdateTable(String aTable)
 	{
+		this.setStatusMessage(ResourceMgr.getString("MsgRetrieveUpdateTableInfo"));
 		this.infoTable.getDataStore().setUpdateTable(aTable);
 		this.fireUpdateTableChanged();
+		this.clearStatusMessage();
 	}
 
 	private void fireUpdateTableChanged()
@@ -577,6 +610,8 @@ public class DwPanel
 
 		this.success = false;
 		this.cancel = false;
+		this.hasWarning = false;
+
 		StatementRunnerResult result = null;
 
 		try
@@ -598,6 +633,7 @@ public class DwPanel
 
 			this.hasResultSet = false;
 			this.success = result.isSuccess();
+			this.hasWarning = result.hasWarning();
 
 			if (this.success && result.hasData())
 			{
@@ -638,7 +674,7 @@ public class DwPanel
 				this.infoTable.setModel(new DataStoreTableModel(newData), true);
 				this.infoTable.adjustColumns();
 
-				if (!this.dbConnection.getProfile().getDisableUpdateTableCheck())
+				if (automaticUpdateTableCheck)
 				{
 					long updStart, updEnd;
 					updStart = System.currentTimeMillis();
@@ -767,6 +803,11 @@ public class DwPanel
 	public boolean wasSuccessful()
 	{
 		return this.success;
+	}
+
+	public boolean hasWarning()
+	{
+		return this.hasWarning;
 	}
 
 	/**
@@ -964,8 +1005,8 @@ public class DwPanel
 	 */
 	public void clearContent()
 	{
-		this.infoTable.reset();
 		this.endEdit();
+		this.infoTable.reset();
 		this.hasResultSet = false;
 		this.lastMessage = StringUtil.EMPTY_STRING;
 		this.sql = null;
@@ -1247,6 +1288,11 @@ public class DwPanel
 
 	public void jobFinished()
 	{
+	}
+
+	public void setAutomaticUpdateTableCheck(boolean flag)
+	{
+		this.automaticUpdateTableCheck = flag;
 	}
 
 }

@@ -1,9 +1,14 @@
 /*
  * WbConnection.java
  *
- * Created on 6. Juli 2002, 19:36
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db;
 
 import java.lang.reflect.Field;
@@ -15,10 +20,10 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import workbench.WbManager;
 import workbench.db.report.TagWriter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -27,7 +32,7 @@ import workbench.util.StringUtil;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class WbConnection
 {

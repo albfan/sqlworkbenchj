@@ -1,9 +1,14 @@
 /*
  * SqlCommand.java
  *
- * Created on 16. November 2002, 15:31
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.sql;
 
 import java.sql.ResultSet;
@@ -12,6 +17,7 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
+
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.log.LogMgr;
@@ -22,7 +28,7 @@ import workbench.util.StringUtil;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class SqlCommand
 {
@@ -224,19 +230,11 @@ public class SqlCommand
 		{
 			LogMgr.logDebug("SqlCommand.execute()", "Error executing sql statement", e);
 			result.clear();
-			StringBuffer msg = new StringBuffer(50);
-			msg.append(ResourceMgr.getString("MsgExecuteError") + ":\n----------\n");
-			int maxLen = 80;
-			if (aSql.trim().length() > maxLen)
-			{
-				msg.append(aSql.trim().substring(0, maxLen));
-				msg.append(" ...");
-			}
-			else
-			{
-				msg.append(aSql.trim());
-			}
-			msg.append("\n----------\n");
+			StringBuffer msg = new StringBuffer(150);
+			msg.append(ResourceMgr.getString("MsgExecuteError") + "\n");
+			int maxLen = 150;
+			msg.append(StringUtil.getMaxSubstring(aSql.trim(), maxLen, "..."));
+			msg.append("\n");
 			result.addMessage(msg.toString());
 			result.addMessage(ExceptionUtil.getDisplay(e));
 			result.setFailure();

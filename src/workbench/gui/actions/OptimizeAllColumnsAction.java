@@ -1,22 +1,28 @@
 /*
- * ClearAction.java
+ * OptimizeAllColumnsAction.java
  *
- * Created on December 2, 2001, 1:32 AM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.KeyStroke;
-import workbench.gui.components.WbTable;
-import javax.swing.InputMap;
 import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.KeyStroke;
+
+import workbench.gui.components.WbTable;
 
 /**
- *	@author  workbench@kellerer.org
+ *	@author  info@sql-workbench.net
  */
 public class OptimizeAllColumnsAction extends WbAction
 {

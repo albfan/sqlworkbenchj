@@ -1,3 +1,14 @@
+/*
+ * CreateSnippetAction.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
+ */
 package workbench.gui.actions;
 
 import java.awt.Toolkit;
@@ -9,14 +20,14 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
-import workbench.WbManager;
 import workbench.interfaces.TextContainer;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
  *	Action to clear the contents of a entry field
- *	@author  workbench@kellerer.org
+ *	@author  info@sql-workbench.net
  */
 public class CreateSnippetAction extends WbAction
 {
@@ -37,8 +48,8 @@ public class CreateSnippetAction extends WbAction
 		{
 			sql = this.client.getText();
 		}
-		boolean includeNewLine = WbManager.getSettings().getIncludeNewLineInCodeSnippet();
-		String prefix = WbManager.getSettings().getCodeSnippetPrefix();
+		boolean includeNewLine = Settings.getInstance().getIncludeNewLineInCodeSnippet();
+		String prefix = Settings.getInstance().getCodeSnippetPrefix();
 		String code = StringUtil.makeJavaString(sql, prefix, includeNewLine);
 		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 		StringSelection sel = new StringSelection(code);

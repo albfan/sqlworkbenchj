@@ -1,28 +1,34 @@
 /*
  * ConnectionInfo.java
  *
- * Created on August 9, 2002, 4:26 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.components;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.GridLayout;
+
 import javax.swing.JComponent;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
-
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 
 
 /**
  *
- * @author  tkellerer
+ * @author  info@sql-workbench.net
  */
 public class ConnectionInfo
 	extends JComponent

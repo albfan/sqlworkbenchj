@@ -1,5 +1,13 @@
 /*
- * Created on December 9, 2002, 2:01 PM
+ * BatchRunner.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.sql;
 
@@ -8,20 +16,23 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.db.DbDriver;
 import workbench.db.WbConnection;
+import workbench.exception.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
-import workbench.util.SqlUtil;
+import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
-import workbench.util.WbStringTokenizer;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class BatchRunner
 {
@@ -33,6 +44,8 @@ public class BatchRunner
 	private String errorScript;
 	private String delimiter = ";";
 	private boolean showResultSets = false;
+	private boolean success = true;
+	private ConnectionProfile profile;
 	
 	public BatchRunner(String aFilelist)
 	{
@@ -43,9 +56,8 @@ public class BatchRunner
 	{
 		this.showResultSets = flag;
 	}
-	
+
 	public void setProfile(String aProfilename)
-		throws Exception
 	{
 		LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchConnecting") + " [" + aProfilename + "]");
 		ConnectionMgr mgr = ConnectionMgr.getInstance();
@@ -59,19 +71,38 @@ public class BatchRunner
 	}
 
 	public void setProfile(ConnectionProfile aProfile)
+	{
+		this.profile = aProfile;
+	}
+	
+	public void connect()
 		throws Exception
 	{
-		if (aProfile == null)
+		if (this.profile == null)
 		{
 			LogMgr.logWarning("BatchRunner.setProfile()", "Called with a <null> profile!");
 			return;
 		}
+		try
+		{
+			ConnectionMgr mgr = ConnectionMgr.getInstance();
+			this.connection = mgr.getConnection(this.profile, "BatchRunner");
+			this.stmtRunner = new StatementRunner();
+			this.stmtRunner.setConnection(this.connection);
+			LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchConnectOk"));
+			System.out.println(ResourceMgr.getString("MsgBatchConnectOk"));
+		}
+		catch (Exception e)
+		{
+			success = false;
+			LogMgr.logError("BatchRunner", ResourceMgr.getString("MsgBatchConnectError") + ": " + ExceptionUtil.getDisplay(e), null);
+			System.out.println(ResourceMgr.getString("MsgBatchConnectError") + ":\n" + ExceptionUtil.getDisplay(e));
+		}
+	}
 
-		ConnectionMgr mgr = ConnectionMgr.getInstance();
-		this.connection = mgr.getConnection(aProfile, "BatchRunner");
-		this.stmtRunner = new StatementRunner();
-		this.stmtRunner.setConnection(this.connection);
-		LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchConnectOk"));
+	public boolean isSuccess()
+	{
+		return this.success;
 	}
 
 	public void setSuccessScript(String aFilename)
@@ -122,6 +153,7 @@ public class BatchRunner
 		}
 		return content.toString();
 	}
+
 	public void execute()
 		throws IOException
 	{
@@ -149,8 +181,10 @@ public class BatchRunner
 			}
 		}
 
+
 		if (abortOnError && error)
 		{
+			this.success = false;
 			try
 			{
 				if (this.errorScript != null)
@@ -167,6 +201,7 @@ public class BatchRunner
 		}
 		else
 		{
+			this.success = true;
 			try
 			{
 				if (this.successScript != null)
@@ -188,7 +223,7 @@ public class BatchRunner
 		boolean error = false;
 		StatementRunnerResult result = null;
 		ScriptParser parser = new ScriptParser();
-		parser.setAlternateDelimiter(WbManager.getSettings().getAlternateDelimiter());
+		parser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
 		parser.setScript(aScript);
 		List statements = parser.getCommands();
 		String sql = null;
@@ -255,4 +290,54 @@ public class BatchRunner
 		this.abortOnError = aFlag;
 	}
 
+	public static BatchRunner initFromCommandLine(ArgumentParser cmdLine)
+	{
+		String scripts = cmdLine.getValue(WbManager.ARG_SCRIPT);
+		if (scripts == null || scripts.trim().length() == 0) return null;
+		
+		String profilename = cmdLine.getValue(WbManager.ARG_PROFILE);
+		String errorHandling = cmdLine.getValue(WbManager.ARG_ABORT);
+		boolean showResult = StringUtil.stringToBool(cmdLine.getValue(WbManager.ARG_DISPLAY_RESULT));
+		boolean abort = true;
+		if (errorHandling != null)
+		{
+			abort = StringUtil.stringToBool(errorHandling);
+		}
+
+		ConnectionProfile profile = null;
+		if (profilename == null)
+		{
+			// No connection profile given, create a temporary profile
+			// to be used for the batch runner.
+			String url = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_URL));
+			String driver = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_DRIVER));
+			String user = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_USER));
+			String pwd = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_PWD));
+			String jar = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_JAR));
+			DbDriver drv = ConnectionMgr.getInstance().findRegisteredDriver(driver);
+			if (drv == null)
+			{
+				ConnectionMgr.getInstance().registerDriver(driver, jar);
+			}
+			profile = new ConnectionProfile(driver, url, user, pwd);
+		}
+		else
+		{
+			profile = ConnectionMgr.getInstance().getProfile(StringUtil.trimQuotes(profilename));
+		}
+		boolean ignoreDrop = "true".equalsIgnoreCase(cmdLine.getValue(WbManager.ARG_IGNORE_DROP));
+		profile.setIgnoreDropErrors(ignoreDrop);
+
+		String success = cmdLine.getValue(WbManager.ARG_SUCCESS_SCRIPT);
+		String error = cmdLine.getValue(WbManager.ARG_ERROR_SCRIPT);
+		
+		BatchRunner runner = new BatchRunner(scripts);
+		runner.showResultSets(showResult);
+		runner.setAbortOnError(abort);
+		runner.setErrorScript(error);
+		runner.setSuccessScript(success);
+		runner.setProfile(profile);
+		
+		return runner;
+	}
 }

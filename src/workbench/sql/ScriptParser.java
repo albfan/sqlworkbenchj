@@ -1,9 +1,14 @@
 /*
  * ScriptParser.java
  *
- * Created on January 17, 2004, 1:12 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.sql;
 
 import java.io.BufferedReader;
@@ -12,14 +17,18 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import workbench.WbManager;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class ScriptParser
 {
@@ -29,7 +38,8 @@ public class ScriptParser
 	private ArrayList commandBoundaries = null;
 	private String delimiter = ";";
 	private int delimiterLength = -1;
-	private String alternateDelimiter = null;
+	private String alternateDelimiter;
+	private	Matcher crlfMatcher;
 
 	/** Create a ScriptParser
 	 *
@@ -84,7 +94,7 @@ public class ScriptParser
 		{
 			try { in.close(); } catch (Throwable th) {}
 		}
-		this.originalScript = content.toString();
+		this.setScript(content.toString());
 	}
 
 	/**
@@ -112,6 +122,8 @@ public class ScriptParser
 		this.findDelimiterToUse();
 		this.commands = null;
 		this.commandBoundaries = null;
+		
+		this.crlfMatcher = StringUtil.PATTERN_CRLF.matcher(this.originalScript);
 	}
 
 	/**
@@ -126,8 +138,11 @@ public class ScriptParser
 		this.delimiter = ";";
 
 		String cleanSql = SqlUtil.makeCleanSql(this.originalScript, false).trim();
-		String alternate = WbManager.getSettings().getAlternateDelimiter();
-		if (cleanSql.endsWith(alternate))
+		if (this.alternateDelimiter == null)
+		{
+			this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter();
+		}
+		if (cleanSql.endsWith(this.alternateDelimiter))
 		{
 			this.delimiter = this.alternateDelimiter;
 		}
@@ -250,6 +265,8 @@ public class ScriptParser
 		boolean commentOn = false;
 		boolean blockComment = false;
 		boolean singleLineComment = false;
+		boolean startOfLine = true;
+		
 		String value = null;
 		int oldPos = -1;
 		String currChar = null;
@@ -274,7 +291,7 @@ public class ScriptParser
 		for (pos = 0; pos < scriptLen; pos++)
 		{
 			currChar = this.originalScript.substring(pos, pos + 1).toUpperCase();
-
+			
 			// ignore quotes in comments
 			if (!commentOn && currChar.charAt(0) == '\'' || currChar.charAt(0) == '"')
 			{
@@ -309,12 +326,6 @@ public class ScriptParser
 
 				if (!commentOn)
 				{
-					// set the last character to a newline
-					// if pos == 0, we "fake" a a new line for
-					// the single line comment test further down
-					char last = '\r';
-					if (pos > 1)  last = this.originalScript.charAt(pos - 1);
-
 					char next = this.originalScript.charAt(pos + 1);
 
 					if (toTest == '/' && next == '*')
@@ -323,7 +334,7 @@ public class ScriptParser
 						singleLineComment = false;
 						commentOn = true;
 					}
-					else if ((last == '\n' || last == '\r') && (toTest == '#' || (toTest == '-' && next == '-')))
+					else if (startOfLine && (toTest == '#' || (toTest == '-' && next == '-')))
 					{
 						singleLineComment = true;
 						blockComment = false;
@@ -339,6 +350,7 @@ public class ScriptParser
 							singleLineComment = false;
 							blockComment = false;
 							commentOn = false;
+							startOfLine = true;
 							continue;
 						}
 					}
@@ -367,8 +379,22 @@ public class ScriptParser
 				{
 					this.addCommand(lastPos, pos);
 					lastPos = pos + this.delimiterLength;
+					startOfLine = true;
+					
+					// skip the startOfLine test.
+					continue;
 				}
 			}
+			
+			if (currChar.charAt(0) == '\n' || currChar.charAt(0) == '\n' )
+			{
+				startOfLine = true;
+			}
+			else
+			{
+				startOfLine = Character.isWhitespace(currChar.charAt(0));
+			}
+			
 		}
 
 		if (lastPos < pos)
@@ -377,10 +403,8 @@ public class ScriptParser
 			int endpos = this.originalScript.length();
 			if (value.endsWith(this.delimiter))
 			{
-				//value = value.substring(0, value.length() - this.delimiterLength);
 				endpos = endpos - this.delimiterLength;
 			}
-			//if (SqlUtil.makeCleanSql(value, false).length() > 0) this.commands.add(value);
 			this.addCommand(lastPos, endpos);
 		}
 	}
@@ -388,6 +412,9 @@ public class ScriptParser
 	private int addCommand(int startPos, int endPos)
 	{
 		String value = null;
+		startPos = this.getRealStartPos(startPos, endPos);
+		//endPos = this.getRealEndPos(startPos, endPos);
+		
 		if (endPos == -1)
 		{
 			value = this.originalScript.substring(startPos).trim();
@@ -408,20 +435,80 @@ public class ScriptParser
 		
 		if (clean.length() > 0)
 		{
-			this.commands.add(value.trim());
+			this.commands.add(value);
 			CommandBoundary b = new CommandBoundary(startPos, endPos);
 			this.commandBoundaries.add(b);
 		}
 		return this.commands.size() - 1;
 	}
 
+	/**
+	 *	Check for the real beginning of the statement identified by 
+	 *	startPos/endPos. This method will return the actual start of the
+	 *	command with leading comments trimmed
+	 */
+	private int getRealStartPos(int startPos, int endPos)
+	{
+		if (startPos + 2 > this.originalScript.length()) return startPos;
+		
+		if (endPos == -1) endPos = this.originalScript.length();
+		
+		int start = startPos;
+		
+		while (start + 2 < endPos)
+		{
+			String s = this.originalScript.substring(start, start + 2).trim();
+			if ("/*".equals(s))
+			{
+				int pos = this.originalScript.indexOf("*/", start);
+				if (pos > -1) start = pos + 2;
+				startPos = start;
+			}
+			else if ("--".equals(s))
+			{
+				if (crlfMatcher.find(start))
+				{
+					start = crlfMatcher.start();
+					startPos = start;
+				}
+			}
+			else if (s.length() > 0 && s.matches("\\w*"))
+			{
+				break;
+			}
+			start ++;
+		}
+		return startPos;
+	}
+
+	/**
+	 *	Find the real end for the given command, trimming 
+	 *	any possible comments after the real statement
+	 */
+	private int getRealEndPos(int startPos, int endPos)
+	{
+		if (endPos == -1) return endPos;
+		
+		String value = this.originalScript.substring(startPos, endPos);
+		Pattern p = Pattern.compile("[^\\*]" + this.delimiter);
+		Matcher m = p.matcher(value);
+		int last = -1;
+		while (m.find())
+		{
+			last = m.start();
+		}
+		if (last == -1)  return endPos;
+		
+		return startPos + last + this.delimiterLength;
+	}
+	
 	public static void main(String args[])
 	{
 		try
 		{
-			String sql = "select * from test;\nGO\nupdate test set col = 1\nGO";
-			File f = new File("d:/projects/jworkbench/dist/script-test.sql");
-			ScriptParser p = new ScriptParser(f);
+			String sql = "--bbbb\ncreate procedure bla/* create the procedure */\nas\nset x = 5;\nend/--'\ncommit/\n--";
+			//String sql = "  --'\ncommit/\n--";
+			ScriptParser p = new ScriptParser(sql);
 			List l = p.getCommands();
 			for (int i=0; i < l.size(); i++)
 			{
@@ -433,6 +520,7 @@ public class ScriptParser
 		{
 			e.printStackTrace();
 		}
+
 		System.out.println("*** Done.");
 	}
 

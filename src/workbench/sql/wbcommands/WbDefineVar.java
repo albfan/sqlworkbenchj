@@ -1,10 +1,20 @@
+/*
+ * WbDefineVar.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
+ */
 package workbench.sql.wbcommands;
 
 import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.log.LogMgr;
@@ -17,7 +27,7 @@ import workbench.util.WbStringTokenizer;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class WbDefineVar extends SqlCommand
 {
@@ -94,16 +104,31 @@ public class WbDefineVar extends SqlCommand
 		{
 			if (value.startsWith("@"))
 			{
-				String valueSql = value.substring(1);
-				value = this.evaluateSql(aConnection, valueSql);
+				String valueSql = null;
+				try
+				{
+					valueSql = value.substring(1);
+					value = this.evaluateSql(aConnection, valueSql);
+				}
+				catch (SQLException e)
+				{
+					LogMgr.logError("WbDefineVar.execute()", "Error retrieving variable value using SQL: " + valueSql, e);
+					msg = ResourceMgr.getString("ErrorReadingVarSql");
+					msg = StringUtil.replace(msg, "%sql%", valueSql);
+					msg = msg + "\n\n" + ExceptionUtil.getDisplay(e);
+					result.addMessage(msg);
+					result.setFailure();
+					return result;
+				}
 			}
+			
 			msg = ResourceMgr.getString("MsgVarDefVariableDefined");
 			try
 			{
 				SqlParameterPool.getInstance().setParameterValue(var, value);
-				msg = msg.replaceAll("%var%", var);
-				msg = msg.replaceAll("%value%", value);
-				msg = msg.replaceAll("%varname%", StringUtil.quoteRegexMeta(SqlParameterPool.getInstance().buildVarName(var, false)));
+				msg = StringUtil.replace(msg, "%var%", var);
+				msg = StringUtil.replace(msg, "%value%", value);
+				msg = StringUtil.replace(msg, "%varname%", SqlParameterPool.getInstance().buildVarName(var, false));
 			}
 			catch (IllegalArgumentException e)
 			{
@@ -131,6 +156,7 @@ public class WbDefineVar extends SqlCommand
 	 *	If the SQL gives an error, an empty string will be returned
 	 */
 	private String evaluateSql(WbConnection conn, String sql)
+		throws SQLException
 	{
 		ResultSet rs = null;
 		String result = StringUtil.EMPTY_STRING;
@@ -147,11 +173,6 @@ public class WbDefineVar extends SqlCommand
 			{
 				result = rs.getString(1);
 			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("WbDefineVar.evaluateSql()", "Error executing SQL: " + sql, e);
-			result = StringUtil.EMPTY_STRING;
 		}
 		finally
 		{

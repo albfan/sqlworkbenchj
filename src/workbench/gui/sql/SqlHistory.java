@@ -1,9 +1,14 @@
 /*
  * SqlHistory.java
  *
- * Created on June 4, 2003, 6:26 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.sql;
 
 import java.io.BufferedReader;
@@ -17,13 +22,16 @@ import java.util.ArrayList;
 
 import workbench.log.LogMgr;
 import workbench.util.StringUtil;
+import java.io.UnsupportedEncodingException;
 
 /**
  *
- * @author  thomas
+ * @author  info@sql-workbench.net
  */
 public class SqlHistory
 {
+	private static final String LIST_DELIMITER = "----------- WbStatement -----------";
+
 	private ArrayList history;
 	private int currentEntry;
 	private int maxSize;
@@ -43,7 +51,7 @@ public class SqlHistory
 		try
 		{
 			SqlHistoryEntry entry = null;
-			if (editor.currentSelectionIsError())
+			if (editor.currentSelectionIsTemporary())
 			{
 				entry = new SqlHistoryEntry(text, editor.getCaretPosition(), 0, 0);
 			}
@@ -156,7 +164,15 @@ public class SqlHistory
 
 	public void writeToStream(OutputStream out)
 	{
-		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+		BufferedWriter writer = null;
+		try
+		{
+			writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			// cannot happen!
+		}
 		try
 		{
 			int count = this.history.size();
@@ -165,20 +181,20 @@ public class SqlHistory
 				SqlHistoryEntry entry = (SqlHistoryEntry)this.history.get(i);
 				writer.write(KEY_POS);
 				writer.write(Integer.toString(entry.getCursorPosition()));
-				writer.write(StringUtil.LINE_TERMINATOR);
+				writer.write('\n');
 
 				writer.write(KEY_START);
 				writer.write(Integer.toString(entry.getSelectionStart()));
-				writer.write(StringUtil.LINE_TERMINATOR);
+				writer.write('\n');
 
 				writer.write(KEY_END);
 				writer.write(Integer.toString(entry.getSelectionEnd()));
-				writer.write(StringUtil.LINE_TERMINATOR);
+				writer.write('\n');
 
 				writer.write(entry.getText());
-				writer.write(StringUtil.LINE_TERMINATOR);
-				writer.write(StringUtil.LIST_DELIMITER);
-				writer.write(StringUtil.LINE_TERMINATOR);
+				writer.write('\n');
+				writer.write(LIST_DELIMITER);
+				writer.write('\n');
 			}
 			writer.flush();
 			this.changed = false;
@@ -196,7 +212,16 @@ public class SqlHistory
 
 	public void readFromStream(InputStream in)
 	{
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		BufferedReader reader = null;
+		try
+		{
+			reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			// cannot happen!
+		}
+
 		StringBuffer content = new StringBuffer(500);
 		int pos = 0;
 		int start = -1;
@@ -206,7 +231,7 @@ public class SqlHistory
 			String line = reader.readLine();
 			while(line != null)
 			{
-				if (line.equals(StringUtil.LIST_DELIMITER))
+				if (line.equals(LIST_DELIMITER))
 				{
 					try
 					{

@@ -1,20 +1,20 @@
 /*
  * ColumnMapper.java
  *
- * Created on December 21, 2003, 1:09 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.tools;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -25,19 +25,17 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
-import workbench.WbManager;
+
 import workbench.db.ColumnIdentifier;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbScrollPane;
-import workbench.gui.components.WbTable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.storage.NullValue;
+import workbench.resource.Settings;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class ColumnMapper
 	extends JPanel
@@ -152,7 +150,7 @@ public class ColumnMapper
 		col.setCellEditor(edit);
 
 		this.targetEditor = new JTextField();
-		this.targetEditor.setFont(WbManager.getSettings().getDataFont());
+		this.targetEditor.setFont(Settings.getInstance().getDataFont());
 		this.targetEditor.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		edit = new DefaultCellEditor(this.targetEditor);
 		col = colMod.getColumn(1);
@@ -191,7 +189,7 @@ public class ColumnMapper
 	private JComboBox createDropDown(List cols, boolean allowEditing)
 	{
 		JComboBox result = new JComboBox();
-		result.setFont(WbManager.getSettings().getDataFont());
+		result.setFont(Settings.getInstance().getDataFont());
 		result.setEditable(allowEditing);
 		int count = cols.size();
 		if (allowEditing) result.addItem(SKIP_COLUMN);

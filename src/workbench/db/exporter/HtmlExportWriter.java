@@ -1,18 +1,21 @@
 /*
  * HtmlExportWriter.java
  *
- * Created on August 26, 2004, 10:37 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db.exporter;
 
-import workbench.db.exporter.HtmlRowDataConverter;
 import workbench.storage.ResultInfo;
-import workbench.db.exporter.RowDataConverter;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class HtmlExportWriter
 	extends ExportWriter

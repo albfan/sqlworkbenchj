@@ -1,24 +1,40 @@
 /*
  * TablePrinter.java
  *
- * Created on July 22, 2003, 6:28 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.print;
 
-import java.awt.*;
-/**
- *
- * @author  thomas
- */
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
+import java.awt.print.PageFormat;
+import java.awt.print.Pageable;
+import java.awt.print.Printable;
+import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
+
+import javax.swing.Icon;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.RepaintManager;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
-import java.awt.print.*;
-import javax.swing.*;
-import javax.swing.table.TableCellRenderer;
 import workbench.gui.renderer.ToolTipRenderer;
 
 /**

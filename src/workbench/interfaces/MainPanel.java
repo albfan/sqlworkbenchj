@@ -1,9 +1,14 @@
 /*
  * MainPanel.java
  *
- * Created on August 9, 2002, 4:15 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.interfaces;
 
 import java.awt.Font;
@@ -16,7 +21,7 @@ import workbench.gui.components.WbToolbar;
 
 /**
  *
- * @author  tkellerer
+ * @author  info@sql-workbench.net
  */
 public interface MainPanel
 {

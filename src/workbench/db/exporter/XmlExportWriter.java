@@ -1,23 +1,23 @@
 /*
  * XmlExportWriter.java
  *
- * Created on August 26, 2004, 10:37 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db.exporter;
 
-import java.io.Writer;
-import java.sql.ResultSet;
-import javax.xml.transform.TransformerException;
 import workbench.log.LogMgr;
 import workbench.storage.ResultInfo;
-import workbench.db.exporter.RowDataConverter;
-import workbench.db.exporter.XmlRowDataConverter;
 import workbench.util.XsltTransformer;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class XmlExportWriter
 	extends ExportWriter

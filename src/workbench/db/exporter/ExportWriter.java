@@ -1,25 +1,29 @@
 /*
  * ExportWriter.java
  *
- * Created on September 8, 2004, 11:36 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db.exporter;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
+
 import workbench.storage.ResultInfo;
-import workbench.storage.RowData;
-import workbench.db.exporter.RowDataConverter;
 import workbench.storage.RowActionMonitor;
+import workbench.storage.RowData;
 import workbench.util.StrBuffer;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public abstract class ExportWriter
 {

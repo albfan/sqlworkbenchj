@@ -1,9 +1,14 @@
 /*
- * ProfileListModel.java
+ * DriverListModel.java
  *
- * Created on 5. Juli 2002, 23:40
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.profiles;
 
 import java.util.ArrayList;
@@ -17,7 +22,7 @@ import workbench.db.DbDriver;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 class DriverListModel 
 	implements ListModel

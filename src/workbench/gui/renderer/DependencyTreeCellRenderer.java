@@ -1,9 +1,14 @@
 /*
  * DependencyTreeCellRenderer.java
  *
- * Created on October 24, 2002, 11:30 AM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.renderer;
 
 import java.awt.Color;
@@ -18,15 +23,15 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeCellRenderer;
-import workbench.WbManager;
 
 import workbench.db.DependencyNode;
 import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class DependencyTreeCellRenderer
 	extends JLabel
@@ -51,7 +56,7 @@ public class DependencyTreeCellRenderer
 		this.selectedBackground = UIManager.getColor("Tree.selectionBackground");
 		this.unselectedForeground = UIManager.getColor("Tree.textForeground");
 		this.unselectedBackground = UIManager.getColor("Tree.textBackground");
-		this.setFont(WbManager.getSettings().getStandardFont());
+		this.setFont(Settings.getInstance().getStandardFont());
 	}
 	
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus)

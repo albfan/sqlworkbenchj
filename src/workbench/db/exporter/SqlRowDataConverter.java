@@ -1,30 +1,32 @@
 /*
  * SqlRowDataConverter.java
  *
- * Created on August 26, 2004, 10:54 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db.exporter;
 
 import java.sql.SQLException;
-import java.sql.Types;
-import java.text.SimpleDateFormat;
 import java.util.List;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-import workbench.db.report.ReportColumn;
-import workbench.db.report.ReportTable;
 import workbench.log.LogMgr;
-import workbench.util.SqlUtil;
+import workbench.storage.DmlStatement;
+import workbench.storage.ResultInfo;
+import workbench.storage.RowData;
+import workbench.storage.StatementFactory;
 import workbench.util.StrBuffer;
-import workbench.util.StringUtil;
-import workbench.storage.*;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class SqlRowDataConverter
 	extends RowDataConverter
@@ -46,7 +48,7 @@ public class SqlRowDataConverter
 		super(info);
 		this.factory = new StatementFactory(info);
 	}
-	
+
 	public StrBuffer convertData()
 	{
 		return null;
@@ -59,7 +61,7 @@ public class SqlRowDataConverter
 		{
 			writeCommit = false;
 		}
-		
+
 		StrBuffer end = null;
 		if (writeCommit)
 		{
@@ -94,7 +96,7 @@ public class SqlRowDataConverter
 		dml.setConcatFunction(this.concatFunction);
 		result.append(dml.getExecutableStatement());
 		result.append(";\n\n");
-		
+
 		if (this.commitEvery > 0 && ((rowIndex + 1) % commitEvery) == 0)
 		{
 			result.append("COMMIT;\n\n");
@@ -132,7 +134,7 @@ public class SqlRowDataConverter
 				for (int i=0; i < keyCount; i++)
 				{
 					int col = this.metaData.findColumn((String)this.keyColumnsToUse.get(i));
-					if (col == -1) 
+					if (col == -1)
 					{
 						keysPresent = false;
 						break;
@@ -142,14 +144,14 @@ public class SqlRowDataConverter
 				{
 					// make sure the default key columns are not used
 					this.metaData.resetPkColumns();
-					
+
 					for (int i=0; i < keyCount; i++)
 					{
 						this.metaData.setIsPkColumn((String)this.keyColumnsToUse.get(i), true);
 					}
 				}
 			}
-			
+
 			if (!keysPresent)
 			{
 				try
@@ -193,7 +195,7 @@ public class SqlRowDataConverter
 	{
 		this.concatFunction = func;
 	}
-	
+
 	public String getChrFunction()
 	{
 		return chrFunction;
@@ -212,7 +214,7 @@ public class SqlRowDataConverter
 	{
 		return sql;
 	}
-	
+
 	/**
 	 * Setter for property sql.
 	 * @param sql New value of property sql.
@@ -221,7 +223,7 @@ public class SqlRowDataConverter
 	{
 		this.sql = sql;
 	}
-	
+
 	/**
 	 * Getter for property createTable.
 	 * @return Value of property createTable.
@@ -230,7 +232,7 @@ public class SqlRowDataConverter
 	{
 		return createTable;
 	}
-	
+
 	/**
 	 * Setter for property createTable.
 	 * @param createTable New value of property createTable.
@@ -239,7 +241,7 @@ public class SqlRowDataConverter
 	{
 		this.createTable = flag;
 	}
-	
+
 	/**
 	 * Getter for property alternateUpdateTable.
 	 * @return Value of property alternateUpdateTable.
@@ -248,7 +250,7 @@ public class SqlRowDataConverter
 	{
 		return alternateUpdateTable;
 	}
-	
+
 	/**
 	 * Setter for property alternateUpdateTable.
 	 * @param alternateUpdateTable New value of property alternateUpdateTable.
@@ -258,7 +260,7 @@ public class SqlRowDataConverter
 		this.alternateUpdateTable = table;
 		this.factory.setTableToUse(this.alternateUpdateTable);
 	}
-	
+
 	/**
 	 * Getter for property keyColumnsToUse.
 	 * @return Value of property keyColumnsToUse.
@@ -267,7 +269,7 @@ public class SqlRowDataConverter
 	{
 		return keyColumnsToUse;
 	}
-	
+
 	/**
 	 * Setter for property keyColumnsToUse.
 	 * @param keyColumnsToUse New value of property keyColumnsToUse.
@@ -276,5 +278,5 @@ public class SqlRowDataConverter
 	{
 		this.keyColumnsToUse = keyColumnsToUse;
 	}
-	
+
 }

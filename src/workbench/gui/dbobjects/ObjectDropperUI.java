@@ -1,9 +1,14 @@
 /*
  * ObjectDropperUI.java
  *
- * Created on October 21, 2002, 1:30 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.dbobjects;
 
 import java.awt.Frame;
@@ -12,7 +17,6 @@ import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.WindowConstants;
 
-import workbench.WbManager;
 import workbench.db.ObjectDropper;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -22,7 +26,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class ObjectDropperUI
 	extends javax.swing.JPanel

@@ -1,23 +1,30 @@
 /*
  * FileDialogUtil.java
  *
- * Created on 16. September 2004, 09:47
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.util;
 
 import java.awt.Component;
 import java.awt.Window;
 import java.io.File;
+
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
+
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.resource.Settings;
 
 /**
  *
- * @author tkellerer
+ * @author info@sql-workbench.net
  */
 public class FileDialogUtil
 {
@@ -30,7 +37,7 @@ public class FileDialogUtil
 
 	private int lastFileType = FILE_TYPE_UNKNOWN;
 	private Settings settings = Settings.getInstance();
-	private static final String CONFIG_DIR_KEY = "%ConfigDir%/";
+	private static final String CONFIG_DIR_KEY = "%ConfigDir%";
 	
 	/** Creates a new instance of FileDialogUtil */
 	public FileDialogUtil()
@@ -203,7 +210,7 @@ public class FileDialogUtil
 		File config = new File(this.settings.getConfigDir());
 		if (dir.equals(config))
 		{
-			return CONFIG_DIR_KEY + fname;
+			return CONFIG_DIR_KEY + StringUtil.FILE_SEPARATOR + fname;
 		}
 		else
 		{
@@ -214,7 +221,8 @@ public class FileDialogUtil
 	public String replaceConfigDir(String aPathname)
 	{
 		if (aPathname == null) return null;
-		return StringUtil.replace(aPathname, CONFIG_DIR_KEY, this.settings.getConfigDir());
+		String dir = this.settings.getConfigDir();
+		return StringUtil.replace(aPathname, CONFIG_DIR_KEY, dir);
 	}
 
 	

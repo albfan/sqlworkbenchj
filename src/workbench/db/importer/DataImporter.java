@@ -1,5 +1,13 @@
 /*
- * Created on 27. August 2002, 21:17
+ * DataImporter.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.db.importer;
 
@@ -9,9 +17,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import workbench.db.ColumnIdentifier;
-import workbench.db.DbMetadata;
 
+import workbench.db.ColumnIdentifier;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.interfaces.Interruptable;
@@ -19,13 +27,11 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
 import workbench.util.StringUtil;
-import workbench.db.TableIdentifier;
-import workbench.util.SqlUtil;
 
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class DataImporter
 	implements Interruptable, RowDataReceiver
@@ -58,7 +64,6 @@ public class DataImporter
 	private boolean useBatch = false;
 	private boolean supportsBatch = false;
 	private boolean canCommitInBatch = true;
-
 	private int colCount;
 	private ArrayList warnings = new ArrayList();
 	private ArrayList errors = new ArrayList();
@@ -848,4 +853,5 @@ public class DataImporter
 			try { this.updateStatement.close();	} catch (Throwable th) {}
 		}
 	}
+	
 }

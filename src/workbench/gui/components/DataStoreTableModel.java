@@ -1,3 +1,14 @@
+/*
+ * DataStoreTableModel.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
+ */
 package workbench.gui.components;
 
 import java.awt.Cursor;
@@ -10,22 +21,19 @@ import javax.swing.event.EventListenerList;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 
-import workbench.WbManager;
-import workbench.exception.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
+import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
-import workbench.interfaces.JobErrorHandler;
-import workbench.util.StrBuffer;
 import workbench.util.WbThread;
 
 
 
 /**
  * TableModel for displaying the contents of a {@link workbench.storage.DataStore }
- * @author workbench@kellerer.org
+ * @author info@sql-workbench.net
  *
  */
 public class DataStoreTableModel
@@ -297,11 +305,6 @@ public class DataStoreTableModel
 			this.dataCache.reset();
 			this.dataCache = null;
 		}
-	}
-
-	protected void finalize()
-	{
-		this.dispose();
 	}
 
 	/** Return the name of the column as defined by the ResultSetData.

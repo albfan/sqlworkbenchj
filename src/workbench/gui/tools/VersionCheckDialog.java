@@ -1,9 +1,14 @@
 /*
  * VersionCheckDialog.java
  *
- * Created on January 6, 2004, 5:13 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.tools;
 
 import java.awt.Color;
@@ -13,9 +18,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import javax.swing.SwingUtilities;
+
 import javax.swing.Timer;
-import workbench.gui.components.DividerBorder;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.BrowserLauncher;
@@ -23,7 +28,7 @@ import workbench.util.WbVersionReader;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class VersionCheckDialog extends javax.swing.JDialog
 	implements ActionListener, MouseListener
@@ -341,7 +346,7 @@ public class VersionCheckDialog extends javax.swing.JDialog
 		{
 			try
 			{
-				BrowserLauncher.openURL("http://www.kellerer.org/workbench");
+				BrowserLauncher.openURL("http://www.sql-workbench.net");
 			}
 			catch (Exception ex)
 			{

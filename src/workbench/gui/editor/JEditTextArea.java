@@ -10,6 +10,7 @@ package workbench.gui.editor;
  */
 
 import java.awt.AWTEvent;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -22,14 +23,6 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DragGestureListener;
-import java.awt.dnd.DragSource;
-import java.awt.dnd.DragSourceListener;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
@@ -45,16 +38,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.io.File;
-import java.io.IOException;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.swing.ActionMap;
-import javax.swing.ComponentInputMap;
-import javax.swing.InputMap;
 
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
@@ -77,12 +64,14 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEdit;
 
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.TextChangeListener;
 import workbench.interfaces.TextSelectionListener;
 import workbench.interfaces.Undoable;
+import workbench.resource.ResourceMgr;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -114,12 +103,21 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.25 2004-09-17 22:45:57 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.26 2004-10-07 18:53:16 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
 	implements MouseWheelListener, Undoable, ClipboardSupport
 {
+
+	private Pattern lastSearchPattern;
+	private String lastSearchExpression;
+	private int lastSearchPos = -1;
+	private boolean lastSearchOptionWholeWords;
+	private Color alternateSelectionColor;
+	private static final Color ERROR_COLOR = Color.RED.brighter();
+	private static final Color TEMP_COLOR = Color.GREEN.brighter();
+	private boolean currentSelectionIsTemporary;
 
 	/**
 	 * Adding components with this name to the text area will place
@@ -310,16 +308,7 @@ public class JEditTextArea
 		{
 			document.endCompoundEdit();
 		}
-//		this.setSelectedText(newText.toString());
-//		int startPos = this.getLineStartOffset(startline);
-//		int endPos = this.getLineEndOffset(realEndline);
-//		this.select(startPos, endPos - 1);
 	}
-
-	private Pattern lastSearchPattern;
-	private String lastSearchExpression;
-	private int lastSearchPos = -1;
-	private boolean lastSearchOptionWholeWords;
 
 	public int findText(String anExpression, boolean ignoreCase)
 	{
@@ -387,6 +376,9 @@ public class JEditTextArea
 		{
 			this.lastSearchPos = -1;
 			Toolkit.getDefaultToolkit().beep();
+			String msg = ResourceMgr.getString("MsgEditorCriteriaNotFound");
+			msg = StringUtil.replace(msg, "%value%", anExpression);
+			WbSwingUtilities.showMessage(this, msg);
 		}
 		return this.lastSearchPos;
 	}
@@ -1438,17 +1430,22 @@ public class JEditTextArea
 		this.document.redo();
 	}
 
+	public boolean currentSelectionIsTemporary()
+	{
+		return currentSelectionIsTemporary;
+	}
+
 	public void selectError(int start, int end)
 	{
-		this.selectCommand(start, end, true);
+		this.selectCommand(start, end, ERROR_COLOR);
 	}
-	
-	public void selectStatement(int start, int end)
+
+	public void selectStatementTemporary(int start, int end)
 	{
-		this.selectCommand(start, end, false);
+		this.selectCommand(start, end, TEMP_COLOR);
 	}
-	
-	private void selectCommand(int start, int end, boolean useErrorColor)
+
+	private void selectCommand(int start, int end, Color alternateColor)
 	{
 		if (start >= end) return;
 
@@ -1476,11 +1473,12 @@ public class JEditTextArea
 			c = text.charAt(maxIndex - pos);
 		}
 		int newEnd = end - pos;
-		this.select(newStart, newEnd, useErrorColor);
+		this.select(newStart, newEnd, alternateColor);
 	}
+
 	public void select(int start, int end)
 	{
-		this.select(start, end, false);
+		this.select(start, end, null);
 	}
 
 	/**
@@ -1491,13 +1489,12 @@ public class JEditTextArea
 	 * @param start The start offset
 	 * @param end The end offset
 	 */
-	private void select(int start, int end, boolean userErrorColor)
+	private void select(int start, int end, Color alternateColor)
 	{
 		int newStart, newEnd;
 		boolean newBias;
-		this.currentSelectionIsError = false;
 
-		if(start <= end)
+		if (start <= end)
 		{
 			newStart = start;
 			newEnd = end;
@@ -1515,13 +1512,15 @@ public class JEditTextArea
 			throw new IllegalArgumentException("Bounds out of"+ " range: " + newStart + "," +	newEnd);
 		}
 
+
 		// If the new position is the same as the old, we don't
 		// do all this crap, however we still do the stuff at
 		// the end (clearing magic position, scrolling)
 		if(newStart != selectionStart || newEnd != selectionEnd
 			|| newBias != biasLeft)
 		{
-			this.currentSelectionIsError = userErrorColor;
+			this.alternateSelectionColor = alternateColor;
+			this.currentSelectionIsTemporary = (alternateColor != null);
 
 			int newStartLine = getLineOfOffset(newStart);
 			int newEndLine = getLineOfOffset(newEnd);
@@ -1563,9 +1562,9 @@ public class JEditTextArea
 		fireSelectionEvent();
 	}
 
-	public boolean currentSelectionIsError()
+	public Color getAlternateSelectionColor()
 	{
-		return this.currentSelectionIsError;
+		return this.alternateSelectionColor;
 	}
 
 	/**
@@ -2094,7 +2093,8 @@ public class JEditTextArea
 	protected int selectionEnd;
 	protected int selectionEndLine;
 	protected boolean biasLeft;
-	protected boolean currentSelectionIsError = false;
+	//protected boolean currentSelectionIsError = false;
+	protected Color currentColor = null;
 
 	protected int bracketPosition;
 	protected int bracketLine;

@@ -1,30 +1,51 @@
 /*
  * WbManager.java
  *
- * Created on November 25, 2001, 3:48 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import javax.swing.*;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.LookAndFeel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
-import workbench.db.DbDriver;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.help.HtmlViewer;
 import workbench.gui.tools.DataPumper;
 import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.resource.ShortcutManager;
 import workbench.sql.BatchRunner;
 import workbench.sql.MacroManager;
 import workbench.sql.SqlParameterPool;
@@ -32,11 +53,12 @@ import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 import workbench.util.WbCipher;
 import workbench.util.WbNullCipher;
+import workbench.util.WbThread;
 
 
 /**
  * The main application "controller" for the jWorkbench
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class WbManager
 	implements FontChangedListener, Runnable
@@ -50,7 +72,8 @@ public class WbManager
 	private boolean batchMode = false;
 	public static boolean trace = "true".equalsIgnoreCase(System.getProperty("workbench.startuptrace", "false"));
 	private HtmlViewer helpWindow;
-
+	private boolean shutdownInProgress = false;
+	
 	private Thread shutdownHook = new Thread(this);
 
 	private WbManager()
@@ -104,7 +127,7 @@ public class WbManager
 		}
 		return null;
 	}
-	
+
 	public void registerToolWindow(Window aWindow)
 	{
 		this.toolWindows.add(aWindow);
@@ -120,10 +143,17 @@ public class WbManager
 		}
 		if (this.toolWindows.size() == 0 && this.mainWindows.size() == 0)
 		{
-			this.exitWorkbench();
+			if (aWindow instanceof JFrame)
+			{
+				this.exitWorkbench((JFrame)aWindow);
+			}
+			else
+			{
+				this.exitWorkbench();
+			}
 		}
-
 	}
+
 	private void closeToolWindows()
 	{
 		int count = this.toolWindows.size();
@@ -261,20 +291,35 @@ public class WbManager
 	private boolean saveSettings()
 	{
 		MainWindow w = this.getCurrentWindow();
-		if (w == null) return true;
-		w.saveSettings();
-
-		if (w.isBusy())
+		boolean settingsSaved = false;
+		
+		// the settings (i.e. size and position) should only be saved 
+		// for the first visible window
+		if (w != null)
 		{
-			if (!this.checkAbort(w)) return false;
+			w.saveSettings();
+			settingsSaved = true;
 		}
+		
 		if (!this.checkProfiles(w)) return false;
 
 		int count = this.mainWindows.size();
+		boolean result = true;
 		for (int i=0; i < count; i++)
 		{
 			w = (MainWindow)this.mainWindows.get(i);
-			w.saveWorkspace();
+			if (w == null) continue;
+			if (i == 0 && !settingsSaved)
+			{
+				w.saveSettings();
+				settingsSaved = true;
+			}
+			if (w.isBusy())
+			{
+				if (!this.checkAbort(w)) return false;
+			}
+			result = w.saveWorkspace();
+			if (!result) return false;
 		}
 		return true;
 	}
@@ -286,51 +331,52 @@ public class WbManager
 
 	public void exitWorkbench()
 	{
-		//boolean first = true;
-		if (!this.batchMode)
-		{
-			MainWindow w = this.getCurrentWindow();
-			if (w == null)
-			{
-				ConnectionMgr.getInstance().disconnectAll();
-				this.doShutdown();
-				return;
-			}
-
-			boolean canExit = this.saveSettings();
-			if (!canExit) return;
-
-			// When disconnecting it can happen that the disconnect itself
-			// takes some time. Because of this, a small window is displayed
-			// that the disconnect takes place, and the actual disconnect is
-			// carried out in a different thread to not block the AWT thread.
-
-			// If it takes too long the user can still abort the JVM ...
-			this.createCloseMessageWindow(w);
-			if (this.closeMessage != null) this.closeMessage.show();
-
-			MacroManager.getInstance().saveMacros();
-			Thread t = new Thread()
-			{
-				public void run()
-				{
-					disconnectWindows();
-					ConnectionMgr.getInstance().disconnectAll();
-					disconnected();
-				}
-			};
-			t.setName("WbManager exit disconnect thread");
-			t.setDaemon(false);
-			t.start();
-		}
-		else
-		{
-			ConnectionMgr.getInstance().disconnectAll();
-			doShutdown();
-		}
+		MainWindow w = this.getCurrentWindow();
+		this.exitWorkbench(w);
 	}
 
-	private void createCloseMessageWindow(MainWindow parent)
+	public void exitWorkbench(JFrame window)
+	{
+		boolean canExit = this.saveSettings();
+		if (!canExit) return;
+		shutdownInProgress = true;
+		if (window == null)
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+			this.doShutdown();
+			return;
+		}
+		if (window instanceof MainWindow)
+		{
+			if (!((MainWindow)window).saveWorkspace()) return;
+		}
+
+		// When disconnecting it can happen that the disconnect itself
+		// takes some time. Because of this, a small window is displayed
+		// that the disconnect takes place, and the actual disconnect is
+		// carried out in a different thread to not block the AWT thread.
+
+		// If it takes too long the user can still abort the JVM ...
+		this.createCloseMessageWindow(window);
+		if (this.closeMessage != null) this.closeMessage.show();
+
+		MacroManager.getInstance().saveMacros();
+		Thread t = new WbThread("WbManager disconnect")
+		{
+			public void run()
+			{
+				disconnectWindows();
+				ConnectionMgr.getInstance().disconnectAll();
+				disconnected();
+			}
+		};
+		t.setDaemon(false);
+		t.start();
+	}
+
+	public boolean isShutdownInProgress() { return this.shutdownInProgress; }
+	
+	private void createCloseMessageWindow(JFrame parent)
 	{
 		if (parent == null) return;
 		this.closeMessage = new JDialog(parent, false);
@@ -433,12 +479,18 @@ public class WbManager
 
 	private void doShutdown()
 	{
+		doShutdown(0);
+	}
+	
+	private void doShutdown(int errorCode)
+	{
+		this.shutdownInProgress = true;
 		this.closeAllWindows();
 		if (!this.isBatchMode()) settings.saveSettings();
 		LogMgr.logInfo("WbManager.doShutdown()", "Stopping " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
 		LogMgr.shutdown();
 		Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
-		System.exit(0);
+		System.exit(errorCode);
 	}
 
 	private boolean checkAbort(MainWindow win)
@@ -493,24 +545,23 @@ public class WbManager
 	{
 		if (this.mainWindows.size() == 1)
     {
-			this.exitWorkbench();
+			this.exitWorkbench(win);
     }
 		else
 		{
+			if (!win.saveWorkspace()) return;
 			this.mainWindows.remove(win);
-			Thread t = new Thread()
+			Thread t = new WbThread("WbManager Window Disconnect")
 			{
 				public void run()
 				{
-					// no need to do the disconnect on the window in its
-					// own thread as we are already in a background thread
+					// no need to do the disconnect the window in a
+					// separate thread as we are already in a background thread
 					win.disconnect(false, false);
 					win.hide();
 					win.dispose();
 				}
 			};
-			t.setName("WbManager window disconnect thread");
-			t.setDaemon(true);
 			t.start();
 		}
 
@@ -569,24 +620,29 @@ public class WbManager
 	}
 
 	private ArgumentParser cmdLine;
-	private static final String ARG_PROFILE = "profile";
+
+	// Parameters for batch execution used by BatchRunner
+	public static final String ARG_SCRIPT = "script";
+	public static final String ARG_ABORT = "abortonerror";
+
+	public static final String ARG_CONN_URL = "url";
+	public static final String ARG_CONN_DRIVER = "driver";
+	public static final String ARG_CONN_JAR = "driverjar";
+	public static final String ARG_CONN_USER = "username";
+	public static final String ARG_CONN_PWD = "password";
+	public static final String ARG_IGNORE_DROP = "ignoredroperrors";
+	public static final String ARG_DISPLAY_RESULT = "displayresult";
+	public static final String ARG_SUCCESS_SCRIPT = "cleanupsuccess";
+	public static final String ARG_ERROR_SCRIPT = "cleanuperror";
+
+	// Other parameters
+	public static final String ARG_PROFILE = "profile";
 	private static final String ARG_CONFIGDIR = "configdir";
-	private static final String ARG_SCRIPT = "script";
 	private static final String ARG_LOGFILE = "logfile";
-	private static final String ARG_ABORT = "abortonerror";
-	private static final String ARG_SUCCESS_SCRIPT = "cleanupsuccess";
-	private static final String ARG_ERROR_SCRIPT = "cleanuperror";
 	private static final String ARG_VARDEF = "vardef";
 
-	private static final String ARG_CONN_URL = "url";
-	private static final String ARG_CONN_DRIVER = "driver";
-	private static final String ARG_CONN_JAR = "driverjar";
-	private static final String ARG_CONN_USER = "username";
-	private static final String ARG_CONN_PWD = "password";
-	private static final String ARG_IGNORE_DROP = "ignoredroperrors";
-	private static final String ARG_DISPLAY_RESULT = "displayresult";
-
 	private static final String ARG_SHOW_PUMPER = "datapumper";
+	private static final String ARG_SHOW_DBEXP = "dbexplorer";
 
 	private void initCmdLine(String[] args)
 	{
@@ -609,6 +665,7 @@ public class WbManager
 		cmdLine.addArgument(ARG_SHOW_PUMPER);
 		cmdLine.addArgument(ARG_IGNORE_DROP);
 		cmdLine.addArgument(ARG_DISPLAY_RESULT);
+		cmdLine.addArgument(ARG_SHOW_DBEXP);
 
 		try
 		{
@@ -642,7 +699,7 @@ public class WbManager
 			{
 				try
 				{
-					SqlParameterPool.getInstance().readFromFile(value);
+					SqlParameterPool.getInstance().readDefinition(StringUtil.trimQuotes(value));
 				}
 				catch (IOException e)
 				{
@@ -654,11 +711,6 @@ public class WbManager
 		{
 		}
 		if (trace) System.out.println("WbManager.initCmdLine() - done");
-	}
-
-	public static Settings getSettings()
-	{
-		return wb.settings;
 	}
 
 	public void init()
@@ -685,11 +737,16 @@ public class WbManager
 			}
 			if (trace) System.out.println("WbManager.init() - initializing UI defaults");
 			this.initUI();
-			boolean pumper = "true".equals(cmdLine.getValue(ARG_SHOW_PUMPER));
+			boolean pumper = cmdLine.isArgPresent(ARG_SHOW_PUMPER);
+			boolean explorer = cmdLine.isArgPresent(ARG_SHOW_DBEXP);
 			if (pumper)
 			{
 				DataPumper p = new DataPumper(null, null);
 				p.showWindow(null);
+			}
+			else if (explorer)
+			{
+				DbExplorerWindow.showWindow();
 			}
 			else
 			{
@@ -704,73 +761,30 @@ public class WbManager
 		}
 		else
 		{
-			String scripts = cmdLine.getValue(ARG_SCRIPT);
-			String profilename = cmdLine.getValue(ARG_PROFILE);
-			String errorHandling = cmdLine.getValue(ARG_ABORT);
-			boolean showResult = StringUtil.stringToBool(cmdLine.getValue(ARG_DISPLAY_RESULT));
-			boolean abort = true;
-			if (errorHandling != null)
-			{
-				abort = StringUtil.stringToBool(errorHandling);
-			}
+			int exitCode = 0;
+			BatchRunner runner = BatchRunner.initFromCommandLine(cmdLine);
 
-			ConnectionProfile profile = null;
-			if (profilename == null)
+			if (runner != null)
 			{
-				String url = StringUtil.trimQuotes(cmdLine.getValue(ARG_CONN_URL));
-				String driver = StringUtil.trimQuotes(cmdLine.getValue(ARG_CONN_DRIVER));
-				String user = StringUtil.trimQuotes(cmdLine.getValue(ARG_CONN_USER));
-				String pwd = StringUtil.trimQuotes(cmdLine.getValue(ARG_CONN_PWD));
-				String jar = StringUtil.trimQuotes(cmdLine.getValue(ARG_CONN_JAR));
-				DbDriver drv = ConnectionMgr.getInstance().findRegisteredDriver(driver);
-				if (drv == null)
-				{
-					ConnectionMgr.getInstance().registerDriver(driver, jar);
-				}
-				profile = new ConnectionProfile(driver, url, user, pwd);
-			}
-			else
-			{
-				profile = ConnectionMgr.getInstance().getProfile(StringUtil.trimQuotes(profilename));
-			}
-			boolean ignoreDrop = "true".equalsIgnoreCase(cmdLine.getValue(ARG_IGNORE_DROP));
-			profile.setIgnoreDropErrors(ignoreDrop);
-
-			String success = cmdLine.getValue(ARG_SUCCESS_SCRIPT);
-			String error = cmdLine.getValue(ARG_ERROR_SCRIPT);
-
-			// we will allow a null profile now, as the script
-			// could potentially contain a COPY command which kicks
-			// off its own connection to source and target profile
-			// if the script does need a connection, it will throw an exception later
-			if (scripts != null /*&& profile != null*/)
-			{
-				if (trace) System.out.println("WbManager.init() - initializing BatchRunner");
-				BatchRunner runner = new BatchRunner(scripts);
 				try
 				{
-					runner.showResultSets(showResult);
-					runner.setAbortOnError(abort);
-					runner.setErrorScript(error);
-					runner.setSuccessScript(success);
-					// set profile will connect to the database using the
-					// connection manager. It will throw an exception
-					// if the connection fails.
-					if (trace) System.out.println("WbManager.init() - connecting BatchRunner");
-					runner.setProfile(profile);
-					if (trace) System.out.println("WbManager.init() - starting BatchRunner");
+					runner.connect();
 					runner.execute();
 				}
 				catch (Exception e)
 				{
+					exitCode = 1;
 					LogMgr.logError("WbManager", "Could not initialize the batch runner\n", e);
 				}
 				finally
 				{
+					// disconnects everything
 					runner.done();
 				}
+				if (!runner.isSuccess()) exitCode = 1;
 			}
-			this.exitWorkbench();
+
+			this.doShutdown(exitCode);
 		}
 		if (trace) System.out.println("WbManager.init() - done.");
 	}

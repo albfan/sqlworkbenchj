@@ -1,9 +1,14 @@
 /*
- * DriverEditorDialog.java
+ * MacroManagerDialog.java
  *
- * Created on 9. Juli 2002, 13:10
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.macros;
 
 import java.awt.BorderLayout;
@@ -29,13 +34,13 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ListSelectionListener;
 
-import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbCheckBox;
 import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 public class MacroManagerDialog
 	extends JDialog
@@ -70,13 +75,13 @@ public class MacroManagerDialog
 
 	private void initWindow(Frame parent)
 	{
-		if (!WbManager.getSettings().restoreWindowSize(this))
+		if (!Settings.getInstance().restoreWindowSize(this))
 		{
 			this.setSize(600,400);
 		}
 		WbSwingUtilities.center(this, parent);
 		macroPanel.restoreSettings();
-		boolean replace = "true".equals(WbManager.getSettings().getProperty("workbench.gui.macros", "replaceOnRun", "false"));
+		boolean replace = "true".equals(Settings.getInstance().getProperty("workbench.gui.macros", "replaceOnRun", "false"));
 		this.replaceEditorText.setSelected(replace);
 	}
 
@@ -232,9 +237,9 @@ public class MacroManagerDialog
 
 	public void closeDialog()
 	{
-		WbManager.getSettings().storeWindowSize(this);
+		Settings.getInstance().storeWindowSize(this);
 		macroPanel.saveSettings();
-		WbManager.getSettings().setProperty("workbench.gui.macros", "replaceOnRun", Boolean.toString(this.replaceEditorText.isSelected()));
+		Settings.getInstance().setProperty("workbench.gui.macros", "replaceOnRun", Boolean.toString(this.replaceEditorText.isSelected()));
 		setVisible(false);
 	}
 

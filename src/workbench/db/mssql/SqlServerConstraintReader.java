@@ -1,24 +1,21 @@
 /*
- * FirebirdColumnConstraintReader.java
+ * SqlServerConstraintReader.java
  *
- * Created on February 14, 2004, 1:35 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db.mssql;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import workbench.db.AbstractConstraintReader;
-import workbench.log.LogMgr;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class SqlServerConstraintReader extends AbstractConstraintReader
 {

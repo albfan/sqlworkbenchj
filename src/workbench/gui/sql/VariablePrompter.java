@@ -1,18 +1,24 @@
 /*
  * VariablePrompter.java
  *
- * Created on August 21, 2004, 11:53 AM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.sql;
 
 import java.util.Set;
+
 import workbench.sql.SqlParameterPool;
 import workbench.storage.DataStore;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class VariablePrompter
 {

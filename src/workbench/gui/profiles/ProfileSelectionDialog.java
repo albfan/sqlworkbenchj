@@ -1,9 +1,14 @@
 /*
  * ProfileSelectionDialog.java
  *
- * Created on 1. Juli 2002, 22:55
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
@@ -26,18 +31,17 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 
-import workbench.WbManager;
 import workbench.db.ConnectionProfile;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.gui.WbSwingUtilities;
 
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class ProfileSelectionDialog
 	extends JDialog implements ActionListener, WindowListener
@@ -153,7 +157,7 @@ public class ProfileSelectionDialog
 
 	public void restoreSize()
 	{
-		if (!WbManager.getSettings().restoreWindowSize(this))
+		if (!Settings.getInstance().restoreWindowSize(this))
 		{
 			this.setSize(640,480);
 		}
@@ -161,7 +165,7 @@ public class ProfileSelectionDialog
 
 	public void saveSize()
 	{
-		Settings s = WbManager.getSettings();
+		Settings s = Settings.getInstance();
 		s.storeWindowSize(this);
 	}
 

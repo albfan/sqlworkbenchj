@@ -1,16 +1,21 @@
 /*
- * CsvLinerParser.java
+ * CsvLineParser.java
  *
- * Created on March 13, 2004, 11:40 AM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.util;
 
 /**
  * A class to efficiently parse a delimited line of data. 
  * A quoted delimiter is recognized, line data spanning multiple lines (i.e.
  * data with embedded \n) is not recognized
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class CsvLineParser
 {
@@ -76,21 +81,4 @@ public class CsvLineParser
 		
 		return next;
 	}
-	public static void main(String args[])
-	{
-		try
-		{
-			CsvLineParser parser = new CsvLineParser("hello,\"data, with sep\",is,a,test", ',', '"');
-			while (parser.hasNext())
-			{
-				System.out.println("element = " + parser.getNext());
-			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		System.out.println("*** Done.");
-	}
-	
 }

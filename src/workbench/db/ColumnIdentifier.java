@@ -1,16 +1,21 @@
 /*
  * ColumnIdentifier.java
  *
- * Created on December 20, 2003, 1:18 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db;
 
 import java.sql.Types;
 
 /**
  * An object containing the definition for a table column.
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class ColumnIdentifier
 {

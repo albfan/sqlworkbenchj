@@ -1,9 +1,14 @@
 /*
- * ProfileEditor.java
+ * DriverlistEditorPanel.java
  *
- * Created on 1. Juli 2002, 18:34
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
@@ -11,7 +16,6 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 
-import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.DbDriver;
 import workbench.gui.actions.DeleteListEntryAction;
@@ -21,6 +25,7 @@ import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.FileActions;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 public class DriverlistEditorPanel
 	extends JPanel
@@ -196,12 +201,12 @@ public class DriverlistEditorPanel
 	public void saveSettings()
 	{
 		int location = this.jSplitPane1.getDividerLocation();
-		WbManager.getSettings().setProperty(this.getClass().getName(), "divider", location);
+		Settings.getInstance().setProperty(this.getClass().getName(), "divider", location);
 	}
 
 	public void restoreSettings()
 	{
-		int location = WbManager.getSettings().getIntProperty(this.getClass().getName(), "divider");
+		int location = Settings.getInstance().getIntProperty(this.getClass().getName(), "divider");
 		if (location <= 0)
 		{
 			location = 140;

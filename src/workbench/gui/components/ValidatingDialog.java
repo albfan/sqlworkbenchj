@@ -1,9 +1,14 @@
 /*
  * ValidatingDialog.java
  *
- * Created on August 21, 2004, 12:47 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.components;
 
 import java.awt.BorderLayout;
@@ -13,8 +18,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import javax.swing.*;
+
+import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.JRootPane;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.interfaces.ValidatingComponent;
@@ -23,7 +38,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class ValidatingDialog
 	extends JDialog

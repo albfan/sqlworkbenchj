@@ -1,25 +1,30 @@
 /*
  * WbTextCellEditor.java
  *
- * Created on March 1, 2003, 4:46 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.components;
 
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.EventObject;
 
 import javax.swing.DefaultCellEditor;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
-import java.util.EventObject;
-import javax.swing.JTable;
-import java.awt.Component;
 
 /**
  *

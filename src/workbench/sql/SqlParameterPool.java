@@ -1,21 +1,30 @@
 /*
  * SqlParameterPool.java
  *
- * Created on August 17, 2004, 8:47 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.sql;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import workbench.db.WbConnection;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
@@ -25,11 +34,12 @@ import workbench.storage.DataStore;
 import workbench.storage.RowData;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
+import workbench.util.WbProperties;
 
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class SqlParameterPool
 {
@@ -117,7 +127,9 @@ public class SqlParameterPool
 	
 	private Set getPromptVariables(String sql, boolean includeConditional)
 	{
+		if (sql == null) return Collections.EMPTY_SET;
 		Matcher m = this.promptPattern.matcher(sql);
+		if (m == null) return Collections.EMPTY_SET;
 		Set variables = new TreeSet();
 		while (m.find())
 		{
@@ -216,11 +228,30 @@ public class SqlParameterPool
 			String value = (String)this.data.get(name);
 			if (value == null) continue;
 			if (LogMgr.isDebugEnabled()) LogMgr.logDebug("SqlParameterPool", "Using value=[" + value + "] for parameter=" + name);
-			newSql = newSql.replaceAll(var, value);
+			newSql = replaceVarValue(newSql, var, value);
 		}
 		return newSql;
 	}
 	
+	/**
+	 *	Replaces the variable defined through pattern with the replacement string
+	 * inside the string original. 
+	 * String.replaceAll() cannot be used, because it parses escape sequences
+	 */
+	private String replaceVarValue(String original, String pattern, String replacement)
+	{
+		StringBuffer result = new StringBuffer(original);
+		Pattern p = Pattern.compile(pattern);
+		Matcher m = p.matcher(original);
+		while (m.find())
+		{
+			int start = m.start();
+			int end = m.end();
+			result.replace(start, end, replacement);
+		}
+		return result.toString();
+	}
+		
 	public String buildVarName(String varName, boolean forPrompt)
 	{
 		StrBuffer result = new StrBuffer(varName.length() + this.prefixLen + this.suffixLen + 1);
@@ -273,7 +304,7 @@ public class SqlParameterPool
 		else
 		{
 			String msg = ResourceMgr.getString("ErrorIllegalVariableName");
-			msg = msg.replaceAll("%varname%", varName);
+			msg = StringUtil.replace(msg, "%varname%", varName);
 			msg = msg + "\n" + ResourceMgr.getString("ErrorVarDefWrongName");
 			throw new IllegalArgumentException(msg);
 		}
@@ -284,20 +315,55 @@ public class SqlParameterPool
 		return this.validNamePattern.matcher(varName).matches();
 	}
 	
+	/**
+	 *	Initialize the variables from a commandline parameter.
+	 *	If the parameter starts with the # character
+	 *  assumed that the parameter contains a list of variable definitions
+	 *  enclosed in brackets. e.g. 
+	 *  -vardef="#var1=value1,var2=value2"
+	 *  The list needs to be quoted on the commandline!
+	 */
+	public void readDefinition(String parameter)
+		throws Exception
+	{
+		if (parameter == null || parameter.trim().length() == 0) return;
+		if (parameter.startsWith("#"))
+		{
+			readNameList(parameter.substring(1));
+		}
+		else
+		{
+			readFromFile(parameter);
+		}
+	}
+	
+	public void readNameList(String list)
+	{
+		List defs = StringUtil.stringToList(list, ",");
+		for (int i=0; i < defs.size(); i++)
+		{
+			String line = (String)defs.get(i);
+			int pos = line.indexOf("=");
+			if (pos == -1) return;
+			String key = line.substring(0, pos);
+			String value = line.substring(pos + 1);
+			try
+			{
+				this.setParameterValue(key, value);
+			}
+			catch (IllegalArgumentException e)
+			{
+				LogMgr.logWarning("SqlParameterPool.readNameList()", "Ignoring definition: "+ line);
+			}
+		}
+	}
+	
 	public void readFromFile(String filename)
 		throws IOException
 	{
-		Properties props = new Properties();
+		WbProperties props = new WbProperties();
 		File f = new File(filename);
-		InputStream in = new FileInputStream(f);
-		try
-		{
-			props.load(in);
-		}
-		finally
-		{
-			try { in.close(); } catch (Throwable th) {}
-		}
+		props.loadTextFile(filename);
 		Iterator itr = props.entrySet().iterator();
 		while (itr.hasNext())
 		{
@@ -313,27 +379,6 @@ public class SqlParameterPool
 		msg = StringUtil.replace(msg, "%file%", f.getAbsolutePath());
 		LogMgr.logInfo("SqlParameterPool.readFromFile", msg);
 	}
-	
-	public static void main(String args[])
-	{
-		try
-		{
-			SqlParameterPool pool = getInstance();
-			pool.setParameterValue("myvar", "42");
-			pool.setParameterValue("second_var", "84");
-			String sql = "select * from test where y = $[&myvar] and x = $[second_var]";
-			System.out.println(pool.hasPrompts(sql));
-			sql = pool.replacePrompts(sql);
-			System.out.println(sql);
-			//System.out.println(pool.replaceAllParameters(sql));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		System.out.println("*** Done.");
-	}
-	
 
 }
 
@@ -388,4 +433,5 @@ class VariableDataStore
 		this.resetStatus();
 		return rowcount;
 	}
+	
 }

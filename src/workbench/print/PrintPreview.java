@@ -1,9 +1,14 @@
 /*
  * PrintPreview.java
  *
- * Created on July 23, 2003, 3:38 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.print;
 
 import java.awt.BasicStroke;
@@ -29,27 +34,23 @@ import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 
+import javax.print.attribute.PrintRequestAttributeSet;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.border.MatteBorder;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
 
-import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbFontChooser;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarButton;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import javax.swing.SwingUtilities;
-import javax.print.attribute.PrintRequestAttributeSet;
-import javax.print.attribute.HashPrintRequestAttributeSet;
+import workbench.resource.Settings;
 
 
 public class PrintPreview
@@ -84,11 +85,11 @@ public class PrintPreview
 	{
 		super(owner, ResourceMgr.getString("TxtPrintPreviewWindowTitle"), true);
 
-		if (!WbManager.getSettings().restoreWindowSize(this))
+		if (!Settings.getInstance().restoreWindowSize(this))
 		{
 			setSize(500, 600);
 		}
-		if (!WbManager.getSettings().restoreWindowPosition(this))
+		if (!Settings.getInstance().restoreWindowPosition(this))
 		{
 			WbSwingUtilities.center(this, owner);
 		}
@@ -104,7 +105,7 @@ public class PrintPreview
 
 		tb.addSeparator();
 
-		this.chooseFontButton = new WbToolbarButton(ResourceMgr.getString("LabelSetectPrintFont"));
+		this.chooseFontButton = new WbToolbarButton(ResourceMgr.getString("LabelSelectPrintFont"));
 		this.chooseFontButton.addActionListener(this);
 		tb.add(this.chooseFontButton);
 
@@ -180,7 +181,7 @@ public class PrintPreview
 		if (f != null)
 		{
 			this.printTarget.setFont(f);
-			WbManager.getSettings().setPrintFont(f);
+			Settings.getInstance().setPrintFont(f);
 			final PrintPreview preview = this;
 			Thread t = new Thread()
 			{
@@ -234,12 +235,12 @@ public class PrintPreview
 			catch (PrinterException e)
 			{
 				LogMgr.logError("PrintPreview.updateDisplay()", "Error when creating preview", e);
-				WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgPrintPreviewError") + "\n" + e.getMessage());
+				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgPrintPreviewError") + "\n" + e.getMessage());
 			}
 		}
 		catch (OutOfMemoryError e)
 		{
-			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
+			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
 			this.pageDisplay.setImage(0,0,null);
 		}
 		finally
@@ -312,7 +313,7 @@ public class PrintPreview
 
 		if (!PrintUtil.pageFormatEquals(newFormat, oldFormat))
 		{
-			WbManager.getSettings().setPageFormat(newFormat);
+			Settings.getInstance().setPageFormat(newFormat);
 			this.printTarget.setPageFormat(newFormat);
 			showCurrentPage();
 			this.doLayout();
@@ -321,7 +322,7 @@ public class PrintPreview
 
 	public void doPageSetup()
 	{
-		if (WbManager.getSettings().getShowNativePageDialog())
+		if (Settings.getInstance().getShowNativePageDialog())
 		{
 			// the native dialog is shown in it's own thread
 			// because otherwise the repainting of the preview window
@@ -455,8 +456,8 @@ public class PrintPreview
 
 	public void saveSettings()
 	{
-		WbManager.getSettings().storeWindowSize(this);
-		WbManager.getSettings().storeWindowPosition(this);
+		Settings.getInstance().storeWindowSize(this);
+		Settings.getInstance().storeWindowPosition(this);
 	}
 
 	public void windowActivated(WindowEvent e)
@@ -626,43 +627,6 @@ public class PrintPreview
 				paintBorder(g);
 			}
 		}
-	}
-
-	public static void main(String[] args)
-	{
-		int cols = 7;
-		int rows = 150;
-
-		DefaultTableModel data = new DefaultTableModel(rows, cols);
-		for (int row = 0; row < rows; row ++)
-		{
-			for (int c = 0; c < cols; c++)
-			{
-				data.setValueAt("Test" + row + "/" + c, row, c);
-			}
-		}
-		JTable tbl = new JTable(data);
-		TableColumnModel mod = tbl.getColumnModel();
-		for (int c = 0; c < cols; c++)
-		{
-			mod.getColumn(c).setWidth(85);
-		}
-
-		try
-		{
-			WbManager.getInstance().initSettings();
-			PrinterJob pj=PrinterJob.getPrinterJob();
-			PageFormat page = pj.defaultPage();
-			TablePrinter printer = new TablePrinter(tbl, page, new Font("Courier New", Font.PLAIN, 12));
-			printer.setFooterText("Page");
-			PrintPreview preview = new PrintPreview((JFrame)null, printer);
-			System.out.println("done.");
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		System.exit(0);
 	}
 
 }

@@ -1,3 +1,14 @@
+/*
+ * WbSwingUtilities.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
+ */
 package workbench.gui;
 
 import java.awt.Color;
@@ -5,28 +16,25 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.Window;
 
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.resource.ResourceMgr;
-import java.awt.Container;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import javax.swing.JFrame;
-import javax.swing.JPasswordField;
-import javax.swing.UIManager;
-import javax.swing.border.LineBorder;
 
 
 public class WbSwingUtilities
@@ -213,6 +221,11 @@ public class WbSwingUtilities
 		JOptionPane.showMessageDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
 	}
 
+	public static void showMessageKey(Component aCaller, String aKey)
+	{
+		JOptionPane.showMessageDialog(aCaller, ResourceMgr.getString(aKey), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
+	}
+
 	public static boolean getYesNo(Component aCaller, String aMessage)
 	{
 		int result = JOptionPane.showConfirmDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
@@ -338,6 +351,6 @@ public class WbSwingUtilities
 		}
 		System.out.println("*** Done.");
 	}
-	
+
 
 }

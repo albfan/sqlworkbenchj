@@ -1,9 +1,14 @@
 /*
  * SettingsPanel.java
  *
- * Created on August 20, 2002, 3:07 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.settings;
 
 import java.awt.Font;
@@ -16,7 +21,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
-import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.NumberField;
 import workbench.gui.components.WbButton;
@@ -128,7 +132,7 @@ public class SettingsPanel
     generalPanel.add(dbExplorerLabel, gridBagConstraints);
 
     showDbExplorer.setFont(null);
-    showDbExplorer.setSelected(WbManager.getSettings().getShowDbExplorerInMainWindow());
+    showDbExplorer.setSelected(Settings.getInstance().getShowDbExplorerInMainWindow());
     showDbExplorer.setText("");
     showDbExplorer.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     showDbExplorer.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -162,7 +166,7 @@ public class SettingsPanel
     generalPanel.add(useEncryptionLabel, gridBagConstraints);
 
     useEncryption.setFont(null);
-    useEncryption.setSelected(WbManager.getSettings().getUseEncryption());
+    useEncryption.setSelected(Settings.getInstance().getUseEncryption());
     useEncryption.setText("");
     useEncryption.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     useEncryption.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -188,7 +192,7 @@ public class SettingsPanel
     generalPanel.add(dateFormatLabel, gridBagConstraints);
 
     dateFormatTextField.setFont(getFont());
-    dateFormatTextField.setText(WbManager.getSettings().getDefaultDateFormat());
+    dateFormatTextField.setText(Settings.getInstance().getDefaultDateFormat());
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 9;
@@ -207,7 +211,7 @@ public class SettingsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
     generalPanel.add(altDelimLabel, gridBagConstraints);
 
-    altDelimitTextField.setText(WbManager.getSettings().getAlternateDelimiter());
+    altDelimitTextField.setText(Settings.getInstance().getAlternateDelimiter());
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 10;
@@ -226,7 +230,7 @@ public class SettingsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
     generalPanel.add(historySizeLabel, gridBagConstraints);
 
-    historySizeField.setText(Integer.toString(WbManager.getSettings().getMaxHistorySize()));
+    historySizeField.setText(Integer.toString(Settings.getInstance().getMaxHistorySize()));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 11;
@@ -245,7 +249,7 @@ public class SettingsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
     generalPanel.add(decimalLabel, gridBagConstraints);
 
-    decimalField.setText(WbManager.getSettings().getDecimalSymbol());
+    decimalField.setText(Settings.getInstance().getDecimalSymbol());
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 12;
@@ -264,7 +268,7 @@ public class SettingsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
     generalPanel.add(maxDigitsLabel, gridBagConstraints);
 
-    maxDigitsField.setText(Integer.toString(WbManager.getSettings().getMaxFractionDigits()));
+    maxDigitsField.setText(Integer.toString(Settings.getInstance().getMaxFractionDigits()));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 13;
@@ -283,7 +287,7 @@ public class SettingsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
     generalPanel.add(maxColSizeLabel, gridBagConstraints);
 
-    maxColSizeField.setText(Integer.toString(WbManager.getSettings().getMaxColumnWidth()));
+    maxColSizeField.setText(Integer.toString(Settings.getInstance().getMaxColumnWidth()));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 14;
@@ -303,7 +307,7 @@ public class SettingsPanel
     generalPanel.add(textDelimiterLabel, gridBagConstraints);
 
     textDelimiterField.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-    textDelimiterField.setText(WbManager.getSettings().getDefaultTextDelimiter(true));
+    textDelimiterField.setText(Settings.getInstance().getDefaultTextDelimiter(true));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 15;
@@ -323,7 +327,7 @@ public class SettingsPanel
     generalPanel.add(quoteCharLabel, gridBagConstraints);
 
     quoteCharField.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-    quoteCharField.setText(WbManager.getSettings().getQuoteChar());
+    quoteCharField.setText(Settings.getInstance().getQuoteChar());
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 16;
@@ -340,7 +344,7 @@ public class SettingsPanel
     generalPanel.add(jPanel1, gridBagConstraints);
 
     retrieveDbExplorer.setFont(null);
-    retrieveDbExplorer.setSelected(WbManager.getSettings().getRetrieveDbExplorer());
+    retrieveDbExplorer.setSelected(Settings.getInstance().getRetrieveDbExplorer());
     retrieveDbExplorer.setText("");
     retrieveDbExplorer.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     retrieveDbExplorer.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -392,7 +396,7 @@ public class SettingsPanel
     generalPanel.add(previewDmlLabel, gridBagConstraints);
 
     previewDml.setFont(null);
-    previewDml.setSelected(WbManager.getSettings().getDbDebugMode());
+    previewDml.setSelected(Settings.getInstance().getDbDebugMode());
     previewDml.setText("");
     previewDml.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     previewDml.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -426,7 +430,7 @@ public class SettingsPanel
     generalPanel.add(enableDbmsOutputLabel, gridBagConstraints);
 
     enableDbmsOutput.setFont(null);
-    enableDbmsOutput.setSelected(WbManager.getSettings().getEnableDbmsOutput());
+    enableDbmsOutput.setSelected(Settings.getInstance().getEnableDbmsOutput());
     enableDbmsOutput.setText("");
     enableDbmsOutput.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     enableDbmsOutput.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -457,7 +461,7 @@ public class SettingsPanel
     generalPanel.add(enableAnimatedIconLabel, gridBagConstraints);
 
     enableAnimatedIcon.setFont(null);
-    enableAnimatedIcon.setSelected(WbManager.getSettings().getUseAnimatedIcon());
+    enableAnimatedIcon.setSelected(Settings.getInstance().getUseAnimatedIcon());
     enableAnimatedIcon.setText("");
     enableAnimatedIcon.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     enableAnimatedIcon.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -482,7 +486,7 @@ public class SettingsPanel
     generalPanel.add(defTableTypeLabel, gridBagConstraints);
 
     defTableTypeField.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-    defTableTypeField.setText(WbManager.getSettings().getProperty("workbench.dbexplorer", "defTableType", null));
+    defTableTypeField.setText(Settings.getInstance().getProperty("workbench.dbexplorer", "defTableType", null));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 17;
@@ -511,7 +515,7 @@ public class SettingsPanel
     generalPanel.add(consolidateLogLabel, gridBagConstraints);
 
     consolidateLog.setFont(null);
-    consolidateLog.setSelected(WbManager.getSettings().getConsolidateLogMsg());
+    consolidateLog.setSelected(Settings.getInstance().getConsolidateLogMsg());
     consolidateLog.setText("");
     consolidateLog.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     consolidateLog.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -526,7 +530,7 @@ public class SettingsPanel
     gridBagConstraints.weightx = 1.0;
     generalPanel.add(consolidateLog, gridBagConstraints);
 
-    defaultBufferSize.setText(Integer.toString(WbManager.getSettings().getDbmsOutputDefaultBuffer()));
+    defaultBufferSize.setText(Integer.toString(Settings.getInstance().getDbmsOutputDefaultBuffer()));
     defaultBufferSize.setMaximumSize(new java.awt.Dimension(2147483647, 21));
     defaultBufferSize.setMinimumSize(new java.awt.Dimension(100, 21));
     defaultBufferSize.setPreferredSize(new java.awt.Dimension(120, 21));
@@ -567,7 +571,7 @@ public class SettingsPanel
     generalPanel.add(autoAdvanceLabel, gridBagConstraints);
 
     autoAdvance.setFont(null);
-    autoAdvance.setSelected(WbManager.getSettings().getAutoJumpNextStatement());
+    autoAdvance.setSelected(Settings.getInstance().getAutoJumpNextStatement());
     autoAdvance.setText("");
     autoAdvance.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     autoAdvance.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -728,7 +732,7 @@ public class SettingsPanel
 	
 	private boolean saveSettings()
 	{
-		Settings set = WbManager.getSettings();
+		Settings set = Settings.getInstance();
 		set.setShowDbExplorerInMainWindow(this.showDbExplorer.isSelected());
 		set.setAlternateDelimiter(this.altDelimitTextField.getText());
 		set.setDefaultDateFormat(this.dateFormatTextField.getText());
@@ -769,7 +773,7 @@ public class SettingsPanel
 		this.dialog.setTitle(ResourceMgr.getString("TxtSettingsDialogTitle"));
 		this.dialog.getContentPane().add(this);
 		this.dialog.pack();
-		int width = WbManager.getSettings().getWindowWidth(this.getClass().getName());
+		int width = Settings.getInstance().getWindowWidth(this.getClass().getName());
 		if (width > 0)
 		{
 			this.dialog.setSize(width, this.dialog.getHeight());
@@ -783,7 +787,7 @@ public class SettingsPanel
 
 	private void closeWindow()
 	{
-		WbManager.getSettings().setWindowSize(this.getClass().getName(), this.dialog.getWidth(), this.dialog.getHeight());
+		Settings.getInstance().setWindowSize(this.getClass().getName(), this.dialog.getWidth(), this.dialog.getHeight());
 		this.dialog.dispose();
 	}
 	
@@ -855,7 +859,7 @@ public class SettingsPanel
 		{
 			this.displayName = ResourceMgr.getString("Label"+ aKey + "Font");
 			this.key = aKey;
-			this.currentFont = WbManager.getSettings().getFont(aKey);
+			this.currentFont = Settings.getInstance().getFont(aKey);
 			this.tooltip = ResourceMgr.getDescription("Label"+ aKey + "Font");
 		}
 		public String toString() { return this.displayName; }

@@ -1,9 +1,14 @@
 /*
  * WbAboutDialog.java
  *
- * Created on 17. Juli 2002, 21:37
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui;
 
 import java.awt.event.ActionEvent;
@@ -13,14 +18,14 @@ import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 
-import workbench.WbManager;
 import workbench.gui.actions.EscAction;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.BrowserLauncher;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class WbAboutDialog extends javax.swing.JDialog
 	implements ActionListener
@@ -65,7 +70,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 
     setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
     setTitle(ResourceMgr.getString("TxtAbout") + " " + ResourceMgr.TXT_PRODUCT_NAME);
-    setFont(new java.awt.Font("Academy Engraved LET", 0, 10));
+    setFont(new java.awt.Font("Dialog", 0, 10));
     setName("AboutDialog");
     addWindowListener(new java.awt.event.WindowAdapter()
     {
@@ -77,7 +82,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 
     buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-    closeButton.setFont(null);
+    closeButton.setFont(Settings.getInstance().getStandardFont());
     closeButton.setText(ResourceMgr.getString("LabelClose"));
     closeButton.addActionListener(new java.awt.event.ActionListener()
     {
@@ -127,7 +132,6 @@ public class WbAboutDialog extends javax.swing.JDialog
     gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 4);
     contentPanel.add(labelTitel, gridBagConstraints);
 
-    labelDesc.setFont(WbManager.getSettings().getStandardFont());
     labelDesc.setText(ResourceMgr.getString("TxtProductDescription"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -137,7 +141,6 @@ public class WbAboutDialog extends javax.swing.JDialog
     gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
     contentPanel.add(labelDesc, gridBagConstraints);
 
-    labelVersion.setFont(WbManager.getSettings().getStandardFont());
     labelVersion.setText(ResourceMgr.getBuildInfo());
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -147,7 +150,6 @@ public class WbAboutDialog extends javax.swing.JDialog
     gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
     contentPanel.add(labelVersion, gridBagConstraints);
 
-    labelCopyright.setFont(WbManager.getSettings().getStandardFont());
     labelCopyright.setText(ResourceMgr.getString("TxtCopyright"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -157,7 +159,6 @@ public class WbAboutDialog extends javax.swing.JDialog
     gridBagConstraints.insets = new java.awt.Insets(12, 8, 0, 4);
     contentPanel.add(labelCopyright, gridBagConstraints);
 
-    jLabel1.setFont(new java.awt.Font("Dialog", 0, 11));
     jLabel1.setText("<html>Built with NetBeans (<u>www.netbeans.org</u>)</html>");
     jLabel1.addMouseListener(new java.awt.event.MouseAdapter()
     {
@@ -175,7 +176,6 @@ public class WbAboutDialog extends javax.swing.JDialog
     gridBagConstraints.insets = new java.awt.Insets(4, 5, 0, 4);
     contentPanel.add(jLabel1, gridBagConstraints);
 
-    jLabel2.setFont(new java.awt.Font("Dialog", 0, 11));
     jLabel2.setText("The editor is based on jEdit's 2.2.1 syntax highlighting package");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -185,7 +185,6 @@ public class WbAboutDialog extends javax.swing.JDialog
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 4);
     contentPanel.add(jLabel2, gridBagConstraints);
 
-    jdkVersion.setFont(WbManager.getSettings().getStandardFont());
     jdkVersion.setText(ResourceMgr.getString("TxtJavaVersion") + " " + System.getProperty("java.version"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -195,8 +194,7 @@ public class WbAboutDialog extends javax.swing.JDialog
     gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
     contentPanel.add(jdkVersion, gridBagConstraints);
 
-    homepageLabel.setFont(WbManager.getSettings().getStandardFont());
-    homepageLabel.setText("<html><u>www.kellerer.org/workbench</u></html>");
+    homepageLabel.setText("<html><u>www.sql-workbench.net</u></html>");
     homepageLabel.addMouseListener(new java.awt.event.MouseAdapter()
     {
       public void mouseClicked(java.awt.event.MouseEvent evt)
@@ -213,8 +211,7 @@ public class WbAboutDialog extends javax.swing.JDialog
     gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
     contentPanel.add(homepageLabel, gridBagConstraints);
 
-    mailToLabel.setFont(WbManager.getSettings().getStandardFont());
-    mailToLabel.setText("workbench@kellerer.org");
+    mailToLabel.setText("info@sql-workbench.net");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 6;
@@ -232,7 +229,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 	{//GEN-HEADEREND:event_contentPanelMouseClicked
 		try
 		{
-			if (evt.getClickCount() == 2) BrowserLauncher.openURL("mailto:workbench@kellerer.org");
+			if (evt.getClickCount() == 2) BrowserLauncher.openURL("mailto:info@sql-workbench.net");
 		}
 		catch (Exception e)
 		{
@@ -243,7 +240,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 	{//GEN-HEADEREND:event_homepageLabelMouseClicked
 		try
 		{
-			if (evt.getClickCount() >= 2) BrowserLauncher.openURL("http://www.kellerer.org/workbench");
+			if (evt.getClickCount() >= 2) BrowserLauncher.openURL("http://www.sql-workbench.net");
 		}
 		catch (Exception e)
 		{

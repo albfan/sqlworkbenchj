@@ -1,9 +1,14 @@
 /*
  * WbScrollPane.java
  *
- * Created on August 9, 2002, 12:11 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.components;
 
 import java.awt.Component;
@@ -21,7 +26,7 @@ import workbench.gui.WbSwingUtilities;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class WbScrollPane extends JScrollPane
 {

@@ -1,12 +1,18 @@
 /*
  * StatementFactory.java
  *
- * Created on September 10, 2004, 10:02 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.storage;
 
 import java.util.ArrayList;
+
 import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
@@ -14,28 +20,28 @@ import workbench.util.StringUtil;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class StatementFactory
 {
 	private ResultInfo resultInfo;
 	private String tableToUse;
-	
+
 	public StatementFactory(ResultInfo metaData)
 	{
 		this.resultInfo = metaData;
 	}
-	
+
 	public DmlStatement createUpdateStatement(RowData aRow)
 	{
-		return this.createUpdateStatement(aRow, false, StringUtil.LINE_TERMINATOR);
+		return this.createUpdateStatement(aRow, false, "\n");
 	}
 
 	public DmlStatement createUpdateStatement(RowData aRow, boolean ignoreStatus)
 	{
-		return this.createUpdateStatement(aRow, ignoreStatus, StringUtil.LINE_TERMINATOR);
+		return this.createUpdateStatement(aRow, ignoreStatus, "\n");
 	}
-	
+
 	public DmlStatement createUpdateStatement(RowData aRow, boolean ignoreStatus, String lineEnd)
 	{
 		if (aRow == null) return null;
@@ -126,7 +132,7 @@ public class StatementFactory
 
 	public DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus)
 	{
-		return this.createInsertStatement(aRow, ignoreStatus, StringUtil.LINE_TERMINATOR);
+		return this.createInsertStatement(aRow, ignoreStatus, "\n");
 	}
 
 	/**
@@ -141,7 +147,7 @@ public class StatementFactory
 		DmlStatement dml;
 
 		if (!ignoreStatus && !aRow.isModified()) return null;
-		
+
 		int cols = this.resultInfo.getColumnCount();
 		boolean newLineAfterColumn = (cols > 5);
 
@@ -281,7 +287,7 @@ public class StatementFactory
 	{
 		String name = null;
 		TableIdentifier updateTable = this.resultInfo.getUpdateTable();
-		if (this.tableToUse != null || updateTable == null ) 
+		if (this.tableToUse != null || updateTable == null )
 		{
 			name = this.tableToUse;
 		}
@@ -291,7 +297,7 @@ public class StatementFactory
 		}
 		return SqlUtil.quoteObjectname(name);
 	}
-	
+
 	/**
 	 * Getter for property tableToUse.
 	 * @return Value of property tableToUse.
@@ -300,7 +306,7 @@ public class StatementFactory
 	{
 		return tableToUse;
 	}
-	
+
 	/**
 	 * Setter for property tableToUse.
 	 * @param tableToUse New value of property tableToUse.
@@ -309,5 +315,5 @@ public class StatementFactory
 	{
 		this.tableToUse = tableToUse;
 	}
-	
+
 }

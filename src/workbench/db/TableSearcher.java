@@ -1,9 +1,14 @@
 /*
  * TableSearcher.java
  *
- * Created on October 4, 2002, 10:16 AM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db;
 
 import java.sql.ResultSet;
@@ -11,8 +16,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.List;
-import workbench.WbManager;
-import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.interfaces.TableSearchDisplay;
 import workbench.log.LogMgr;

@@ -1,12 +1,22 @@
 /*
  * SqlPanel.java
  *
- * Created on November 25, 2001, 2:17 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.sql;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -18,21 +28,102 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.swing.*;
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
+import javax.swing.ComponentInputMap;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.InputMap;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
-import workbench.WbManager;
-import workbench.db.exporter.DataExporter;
+
 import workbench.db.DeleteScriptGenerator;
 import workbench.db.WbConnection;
+import workbench.db.exporter.DataExporter;
 import workbench.exception.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.*;
-
-import workbench.gui.components.*;
+import workbench.gui.actions.AutoJumpNextStatement;
+import workbench.gui.actions.CleanJavaCodeAction;
+import workbench.gui.actions.CommitAction;
+import workbench.gui.actions.CopyAsSqlInsertAction;
+import workbench.gui.actions.CopyAsSqlUpdateAction;
+import workbench.gui.actions.CreateDeleteScriptAction;
+import workbench.gui.actions.CreateSnippetAction;
+import workbench.gui.actions.DataToClipboardAction;
+import workbench.gui.actions.ExecuteAllAction;
+import workbench.gui.actions.ExecuteCurrentAction;
+import workbench.gui.actions.ExecuteSelAction;
+import workbench.gui.actions.ExpandEditorAction;
+import workbench.gui.actions.ExpandResultAction;
+import workbench.gui.actions.FileDiscardAction;
+import workbench.gui.actions.FileOpenAction;
+import workbench.gui.actions.FileReloadAction;
+import workbench.gui.actions.FileSaveAction;
+import workbench.gui.actions.FileSaveAsAction;
+import workbench.gui.actions.FindAction;
+import workbench.gui.actions.FindDataAction;
+import workbench.gui.actions.FindDataAgainAction;
+import workbench.gui.actions.FirstStatementAction;
+import workbench.gui.actions.FormatSqlAction;
+import workbench.gui.actions.HighlightCurrentStatement;
+import workbench.gui.actions.ImportFileAction;
+import workbench.gui.actions.LastStatementAction;
+import workbench.gui.actions.MakeInListAction;
+import workbench.gui.actions.MakeLowerCaseAction;
+import workbench.gui.actions.MakeNonCharInListAction;
+import workbench.gui.actions.MakeUpperCaseAction;
+import workbench.gui.actions.NextStatementAction;
+import workbench.gui.actions.OptimizeAllColumnsAction;
+import workbench.gui.actions.PrevStatementAction;
+import workbench.gui.actions.PrintAction;
+import workbench.gui.actions.PrintPreviewAction;
+import workbench.gui.actions.RedoAction;
+import workbench.gui.actions.RollbackAction;
+import workbench.gui.actions.SaveDataAsAction;
+import workbench.gui.actions.SelectEditorAction;
+import workbench.gui.actions.SelectMaxRowsAction;
+import workbench.gui.actions.SelectResultAction;
+import workbench.gui.actions.SpoolDataAction;
+import workbench.gui.actions.StopAction;
+import workbench.gui.actions.UndoAction;
+import workbench.gui.actions.UndoExpandAction;
+import workbench.gui.actions.WbAction;
+import workbench.gui.components.ConnectionInfo;
+import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.ExtensionFileFilter;
+import workbench.gui.components.ImportFileOptionsPanel;
+import workbench.gui.components.TabbedPaneUIFactory;
+import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.WbMenu;
+import workbench.gui.components.WbScrollPane;
+import workbench.gui.components.WbSplitPane;
+import workbench.gui.components.WbTable;
+import workbench.gui.components.WbToolbar;
+import workbench.gui.components.WbToolbarSeparator;
+import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.menu.TextPopup;
-import workbench.interfaces.*;
+import workbench.interfaces.Commitable;
+import workbench.interfaces.DbExecutionListener;
+import workbench.interfaces.DbUpdater;
+import workbench.interfaces.FilenameChangeListener;
+import workbench.interfaces.FontChangedListener;
+import workbench.interfaces.FormattableSql;
+import workbench.interfaces.Interruptable;
+import workbench.interfaces.JobErrorHandler;
+import workbench.interfaces.MainPanel;
+import workbench.interfaces.Spooler;
+import workbench.interfaces.TextChangeListener;
+import workbench.interfaces.TextFileContainer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -51,7 +142,7 @@ import workbench.util.WbWorkspace;
  *	A panel with an SQL editor (EditorPanel), a log panel and
  *	a panel for displaying SQL results (DwPanel)
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  * @version 1.0
  */
 public class SqlPanel
@@ -214,7 +305,7 @@ public class SqlPanel
 	public void setId(int anId)
 	{
 		this.internalId = anId;
-		this.historyFilename = Settings.getInstance().getConfigDir() + "WbStatements" + Integer.toString(this.internalId);
+		this.historyFilename = "WbStatements" + Integer.toString(this.internalId);
 	}
 
 	public void initDefaults()
@@ -349,6 +440,8 @@ public class SqlPanel
 
 	public boolean reloadFile()
 	{
+		Exception e = new Exception();
+		e.printStackTrace();
 		if (this.editor.reloadFile())
 		{
 			this.showFileIcon();
@@ -357,18 +450,10 @@ public class SqlPanel
 		return false;
 	}
 
-	public void checkAndSaveFile()
+	public boolean checkAndSaveFile()
 	{
-		if (!this.hasFileLoaded()) return;
-		if (this.editor.isModified())
-		{
-			String filename = this.editor.getCurrentFileName().replaceAll("\\\\", "\\\\\\\\");
-			String msg = ResourceMgr.getString("MsgConfirmUnsavedEditorFile").replaceAll("%filename%", filename);
-			if (WbSwingUtilities.getYesNo(this, msg))
-			{
-				this.editor.saveCurrentFile();
-			}
-		}
+		int result = this.editor.checkAndSaveFile();
+		return (result != JOptionPane.CANCEL_OPTION);
 	}
 
 	public EditorPanel getEditor()
@@ -1070,9 +1155,9 @@ public class SqlPanel
 	 *  This is to ensure a corrupted workspace due to interrupting the saving
 	 *  because of the check for unsaved changes in the current editor file
 	 */
-	public void prepareWorkspaceSaving()
+	public boolean prepareWorkspaceSaving()
 	{
-		this.checkAndSaveFile();
+		return this.checkAndSaveFile();
 	}
 
 	public void saveToWorkspace(WbWorkspace w)
@@ -1180,24 +1265,6 @@ public class SqlPanel
 		// panels, isClosed() will block the entire AWT thread!
 
 		return (this.dbConnection != null);
-
-		/*
-		// check isBusy() first! This is very important, because
-		// Connection.isClosed() will be blocked until the current
-		// statement is finished!
-		if (this.isBusy()) return true;
-
-		if (this.dbConnection == null) return false;
-		return true;
-		try
-		{
-			return !this.dbConnection.isClosed();
-		}
-		catch (Throwable e)
-		{
-			return false;
-		}
-		*/
 	}
 
 	public void setConnection(WbConnection aConnection)
@@ -1217,6 +1284,7 @@ public class SqlPanel
 		if (aConnection != null)
 		{
 			this.editor.initDatabaseKeywords(aConnection);
+			this.data.setAutomaticUpdateTableCheck(!aConnection.getProfile().getDisableUpdateTableCheck());
 		}
 
 		this.checkResultSetActions();
@@ -1428,11 +1496,13 @@ public class SqlPanel
 	{
 		String sql = this.editor.getSelectedStatement();
 		int offset = 0;
+		boolean highlight = true;
 		if (this.editor.isTextSelected())
 		{
 			offset = this.editor.getSelectionStart();
+			highlight = false;
 		}
-		this.startExecution(sql, offset, -1, true);
+		this.startExecution(sql, offset, -1, highlight);
 	}
 
 	public void commit()
@@ -1678,12 +1748,12 @@ public class SqlPanel
 		boolean jumpToNext = (commandAtIndex > -1 && Settings.getInstance().getAutoJumpNextStatement());
 		boolean highlightCurrent = false;
 		boolean restoreSelection = false;
-		
+
 		ScriptParser scriptParser = new ScriptParser();
 		scriptParser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
 		int oldSelectionStart = -1;
 		int oldSelectionEnd = -1;
-		
+
 		try
 		{
 			this.log.setText("");
@@ -1722,21 +1792,26 @@ public class SqlPanel
 			this.data.scriptStarting();
 			this.showResultPanel();
 
-			highlightCurrent = (count > 1 && Settings.getInstance().getHighlightCurrentStatement());
-			
+			highlightCurrent = ( (count > 1 || commandAtIndex > -1) && Settings.getInstance().getHighlightCurrentStatement());
+
 			if (highlightCurrent)
 			{
 				oldSelectionStart = this.editor.getSelectionStart();
 				oldSelectionEnd = this.editor.getSelectionEnd();
 				restoreSelection = true;
 			}
-			
+
 			long startTime = System.currentTimeMillis();
 
 			for (int i=startIndex; i < endIndex; i++)
 			{
 				StrBuffer logmsg = new StrBuffer();
 				String sql = scriptParser.getCommand(i);
+				if (sql == null)
+				{
+					this.appendToLog(ResourceMgr.getString("ErrorNoCurrentStatement"));
+					break;
+				}
 
 				// in case of a batch execution we need to make sure that
 				// this thread can actually be interrupted!
@@ -1852,7 +1927,7 @@ public class SqlPanel
 				this.appendToLog(msg);
 			}
 
-			if (this.data.hasResultSet())
+			if (this.data.hasResultSet() && !this.data.hasWarning())
 			{
 				this.showResultPanel();
 			}
@@ -1915,14 +1990,16 @@ public class SqlPanel
 		int endPos = scriptParser.getEndPosForCommand(command) + startOffset;
 		int line = this.editor.getLineOfOffset(startPos);
 		this.editor.scrollTo(line, 0);
-		this.editor.selectStatement(startPos, endPos);
+		this.editor.selectStatementTemporary(startPos, endPos);
 	}
+	
 	private void highlightError(ScriptParser scriptParser, int commandWithError, int startOffset)
 	{
 		if (this.editor == null) return;
 		int startPos = scriptParser.getStartPosForCommand(commandWithError) + startOffset;
 		int endPos = scriptParser.getEndPosForCommand(commandWithError) + startOffset;
 		int line = this.editor.getLineOfOffset(startPos);
+		this.editor.select(0, 0);
 		this.editor.scrollTo(line, 0);
 		this.editor.selectError(startPos, endPos);
 	}

@@ -1,7 +1,13 @@
 /*
  * StringUtil.java
  *
- * Created on December 2, 2001, 9:35 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.util;
 
@@ -27,11 +33,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import workbench.log.LogMgr;
 
 /**
  *
- *	@author  workbench@kellerer.org
+ *	@author  info@sql-workbench.net
  */
 public class StringUtil
 {
@@ -56,17 +63,17 @@ public class StringUtil
 	{
 		return ISO_DATE_FORMATTER.format(now());
 	}
-	
+
 	public static final String getCurrentTimestampString()
 	{
 		return ISO_TIMESTAMP_FORMATTER.format(now());
 	}
-	
+
 	public static final String getCurrentTimestampWithTZString()
 	{
 		return ISO_TZ_TIMESTAMP_FORMATTER.format(now());
 	}
-	
+
 	private static final java.util.Date now()
 	{
 		return new java.util.Date(System.currentTimeMillis());
@@ -80,7 +87,7 @@ public class StringUtil
 	{
 		return input.replaceAll("[\t\\:\\\\/\\?\\*\\|<>]", "").toLowerCase();
 	}
-	
+
 	public static final StringBuffer replaceToBuffer(StringBuffer target, String aString, String aValue, String aReplacement)
 	{
 		if (target == null)
@@ -242,7 +249,9 @@ public class StringUtil
 		ArrayList result = new ArrayList(150);
 		while (tok.hasMoreTokens())
 		{
-			result.add(tok.nextToken());
+			String element = tok.nextToken();
+			if (element == null) continue;
+			result.add(element);
 		}
 		return result;
 	}
@@ -445,14 +454,14 @@ public class StringUtil
 		Matcher m = PATTERN_EMPTY_LINE.matcher(input);
 		return m.replaceAll("");
 	}
-	
+
 	public static final String trimQuotes(String input)
 	{
 		//System.out.println("toTrim=" + input);
 		if (input == null) return null;
 		if (input.length() == 0) return EMPTY_STRING;
 		if (input.length() == 1) return input;
-		
+
 		String result = input.trim();
 		int first = 0;
 		int len = result.length();
@@ -675,9 +684,6 @@ public class StringUtil
 			j = s.indexOf(";");
 			if (j > i)
 			{
-				// ok this is not most optimized way to
-				// do it, a StringBuffer would be better,
-				// this is left as an exercise to the reader!
 				String temp = s.substring(i , j + 1);
 				// search in escape[][] if temp is there
 				k = 0;
@@ -701,8 +707,9 @@ public class StringUtil
 
 	public static List split(String aString, String delim, boolean singleDelimiter, String quoteChars, boolean keepQuotes)
 	{
+		if (aString == null) return Collections.EMPTY_LIST;
 		WbStringTokenizer tok = new WbStringTokenizer(delim, singleDelimiter, quoteChars, keepQuotes);
-		tok.setSourceString(aString);
+		tok.setSourceString(aString.trim());
 
 		List result = new ArrayList();
 		String token = null;
@@ -714,106 +721,19 @@ public class StringUtil
 		return result;
 	}
 
-	public static final String LIST_DELIMITER = "----------- WbStatement -----------";
-
-	public static ArrayList readStringList(String aFilename)
-		throws IOException
+	public static final String getMaxSubstring(String s, int maxLen, String cont)
 	{
-		File f = new File(aFilename);
-		if (!f.exists()) throw new FileNotFoundException(aFilename);
-	  Reader in = new FileReader(f);
-		return readStringList(in);
-	}
-
-	public static ArrayList readStringList(InputStream aStream)
-		throws IOException
-	{
-		Reader in = new InputStreamReader(aStream);
-		return readStringList(in);
-	}
-
-	public static ArrayList readStringList(Reader aReader)
-		throws IOException
-	{
-		ArrayList result = new ArrayList(25);
-		long start,end;
-		BufferedReader in = new BufferedReader(aReader, 65536);
-		StringBuffer content = new StringBuffer(500);
-		try
-		{
-			String line = in.readLine();
-			while(line != null)
-			{
-				if (line.equals(LIST_DELIMITER))
-				{
-					result.add(content.toString());
-					content = new StringBuffer(500);
-				}
-				else
-				{
-					content.append(line);
-					content.append('\n');
-				}
-				line = in.readLine();
-			}
-		}
-		finally
-		{
-			try { in.close(); } catch (Throwable th) {}
-		}
-		if (content.length() > 0)
-		{
-			result.add(content.toString());
-		}
-		return result;
-	}
-
-	public static void writeStringList(List aList, String aFilename)
-		throws IOException
-	{
-		Writer out = new FileWriter(aFilename);
-		writeStringList(aList, out, true);
-	}
-
-	public static void writeStringList(List aList, OutputStream out)
-		throws IOException
-	{
-		Writer w = new OutputStreamWriter(out);
-		writeStringList(aList, w, false);
-	}
-
-	public static void writeStringList(List aList, Writer aWriter, boolean closeStream)
-		throws IOException
-	{
-		if (aList == null) return;
-		BufferedWriter out = null;
-		try
-		{
-			out = new BufferedWriter(aWriter);
-			for (int i=0; i < aList.size(); i++)
-			{
-				String content = (String)aList.get(i);
-				if (content != null && content.trim().length() > 0)
-				{
-					out.write(content.trim());
-					out.write(LINE_TERMINATOR);
-					out.write(LIST_DELIMITER);
-					out.write(LINE_TERMINATOR);
-				}
-			}
-			out.flush();
-		}
-		finally
-		{
-			if (closeStream)
-			{
-				try { out.close(); } catch (Throwable th) {}
-			}
-		}
+		if (s == null) return null;
+		if (s.length() < maxLen) return s;
+		return s.substring(0, maxLen - 1) + cont;
 	}
 
 	public static final String REGEX_SPECIAL_CHARS = "\\[](){}.*+?$^|";
 
+	/**
+	 * 	Quote the characters in a String that have a special meaning
+	 *  in regular expression.
+	 */
 	public static String quoteRegexMeta(String str)
 	{
 		if (str == null) return null;
@@ -839,6 +759,7 @@ public class StringUtil
 	{
 		return findPattern(regex, data);
 	}
+
 	public static int findPattern(String regex, String data, int startAt)
 	{
 		Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
@@ -848,16 +769,4 @@ public class StringUtil
 		return result;
 	}
 
-	public static void main(String args[])
-	{
-		try
-		{
-			String test = "SELECT x,y\n      FROM test \n     WHERE x=1".replaceAll(" *\n *", " ");;
-			System.out.println(test);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
 }

@@ -1,22 +1,26 @@
 /*
  * SqlExportWriter.java
  *
- * Created on August 26, 2004, 10:39 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db.exporter;
 
 import workbench.storage.ResultInfo;
-import workbench.db.exporter.RowDataConverter;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class SqlExportWriter
 	extends ExportWriter
 {
-	
+
 	/** Creates a new instance of SqlExportWriter */
 	public SqlExportWriter(DataExporter exp)
 	{
@@ -39,5 +43,5 @@ public class SqlExportWriter
 		converter.setCreateTable(exporter.isIncludeCreateTable());
 		return converter;
 	}
-	
+
 }

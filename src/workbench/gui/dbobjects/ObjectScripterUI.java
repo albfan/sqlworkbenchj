@@ -1,9 +1,14 @@
 /*
  * ObjectScripterUI.java
  *
- * Created on September 4, 2003, 5:45 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
@@ -16,19 +21,18 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 
-import workbench.WbManager;
-import workbench.db.ObjectScripter;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.CreateSnippetAction;
 import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
 import workbench.resource.ResourceMgr;
-import workbench.gui.actions.CreateSnippetAction;
+import workbench.resource.Settings;
 import workbench.util.WbThread;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class ObjectScripterUI
 	extends JPanel
@@ -91,12 +95,12 @@ public class ObjectScripterUI
 			this.window.getContentPane().setLayout(new BorderLayout());
 			this.window.getContentPane().add(this, BorderLayout.CENTER);
 			this.window.setIconImage(ResourceMgr.getImage("script").getImage());
-			if (!WbManager.getSettings().restoreWindowSize(this.window, ObjectScripterUI.class.getName()))
+			if (!Settings.getInstance().restoreWindowSize(this.window, ObjectScripterUI.class.getName()))
 			{
 				this.window.setSize(500,400);
 			}
 
-			if (!WbManager.getSettings().restoreWindowPosition(this.window, ObjectScripterUI.class.getName()))
+			if (!Settings.getInstance().restoreWindowPosition(this.window, ObjectScripterUI.class.getName()))
 			{
 				WbSwingUtilities.center(this.window, aParent);
 			}
@@ -122,8 +126,8 @@ public class ObjectScripterUI
 			this.scripter = null;
 			this.worker = null;
 		}
-		WbManager.getSettings().storeWindowPosition(this.window, ObjectScripterUI.class.getName());
-		WbManager.getSettings().storeWindowSize(this.window, ObjectScripterUI.class.getName());
+		Settings.getInstance().storeWindowPosition(this.window, ObjectScripterUI.class.getName());
+		Settings.getInstance().storeWindowSize(this.window, ObjectScripterUI.class.getName());
 		this.window.hide();
 		this.window.dispose();
 	}

@@ -1,5 +1,13 @@
 /*
- * Created on December 14, 2002, 10:11 PM
+ * WbStringTokenizer.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.util;
 
@@ -8,12 +16,11 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.StreamTokenizer;
 import java.io.StringReader;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class WbStringTokenizer
 {
@@ -21,10 +28,10 @@ public class WbStringTokenizer
 	private boolean singleWordDelimiter;
 	private String quoteChars;
 	private boolean keepQuotes;
-	private StreamTokenizer tokenizer;
-	private int lastToken;
 	private int maxDelim;
-
+	private Reader input;
+	private boolean endOfInput = false;
+	
 	public WbStringTokenizer()
 	{
 	}
@@ -62,6 +69,16 @@ public class WbStringTokenizer
 		this.keepQuotes = keepQuotes;
 		this.maxDelim = this.delimit.length() - 1;		
 	}
+	
+	public WbStringTokenizer(String input, String aDelim, boolean isSingleDelimiter, String quoteChars, boolean keepQuotes)
+	{
+		this.delimit = aDelim;
+		this.singleWordDelimiter = isSingleDelimiter;
+		this.quoteChars = quoteChars;
+		this.keepQuotes = keepQuotes;
+		this.maxDelim = this.delimit.length() - 1;		
+		this.setSourceString(input);
+	}
 
 	public void setDelimiter(String aDelimiter, boolean isSingleWord)
 	{
@@ -83,135 +100,160 @@ public class WbStringTokenizer
 		throws IOException, FileNotFoundException
 	{
 		BufferedReader reader = new BufferedReader(new FileReader(aFilename));
-		this.initTokenizer(reader);
+		this.setReader(reader);
 	}
 
 	public void setSourceString(String aString)
 	{
 		StringReader reader = new StringReader(aString);
-		this.initTokenizer(reader);
+		this.setReader(reader);
 	}
-
-	private void initTokenizer(Reader aReader)
+	
+	private void setReader(Reader aReader)
 	{
-		this.lastToken = 0;
-		this.tokenizer = new StreamTokenizer(aReader);
-		this.tokenizer.resetSyntax();
-		this.tokenizer.wordChars(0,255);
-		
-		for (int i=0; i< this.delimit.length(); i++)
-		{
-			this.tokenizer.ordinaryChar(this.delimit.charAt(i));
-		}
-		for (int i=0; i< this.quoteChars.length(); i++)
-		{
-			this.tokenizer.quoteChar(this.quoteChars.charAt(i));
-		}
-		this.tokenizer.eolIsSignificant(false);
+		this.endOfInput = false;
+		this.input = aReader;
 	}
 
 	public boolean hasMoreTokens()
 	{
-		return this.lastToken != StreamTokenizer.TT_EOF;
+		return !this.endOfInput;
 	}
-
+	
+	private static final char[] buf = new char[1];
+	
 	public String nextToken()
 	{
-		int token;
-		String value = null;
-		StringBuffer next = null;
-		boolean inDelimit = false;
-		int delimIndex = 0;
+		boolean inQuotes = false;
 		StringBuffer current = null;
-		boolean tokenFound = false;
-		String result = null;
+		String value = null;
+		int delimIndex = 0;
+		char lastQuote = 0;
 
-		try
+		// the loop will be exited if a complete "word" is built
+		// or the Reader is at the end of the file
+		while (true)
 		{
-			while (true)
+			try
 			{
-				token = this.tokenizer.nextToken();
-				this.lastToken = token;
-
-				switch (token)
+				// Reader.read() does not seem to throw an EOFException 
+				// when using a StringReader, but the method with checking
+				// the return value of read(char[]) seems to be reliable for 
+				// a StringReader as well.
+				int num = this.input.read(buf);
+				this.endOfInput = (num == -1);
+		
+				// EOF detected
+				if (endOfInput) 
 				{
-					case StreamTokenizer.TT_EOF:
-						if (current != null)
-							return current.toString();
-						else
-							return null;
-					case StreamTokenizer.TT_WORD:
-						if (current == null) current = new StringBuffer();
-						current.append(this.tokenizer.sval);
-						break;
-					default:
-						if (quoteChars.indexOf(token) > -1)
+					if (current != null) return current.toString();
+					else return null;
+				}
+				
+				char token = buf[0];
+
+				// Check for quote character
+				if (quoteChars.indexOf(token) > -1)
+				{
+					if (inQuotes)
+					{
+						// Make sure its the same quote character that started quoting
+						if (token == lastQuote)
 						{
+							inQuotes = false;
+							lastQuote = 0;
+							if (keepQuotes) 
+							{
+								if (current == null) current = new StringBuffer();
+								current.append(token);
+							}
+						}
+						else
+						{
+							// quote character inside another quote character
+							// we need to add it 
 							if (current == null) current = new StringBuffer();
-							if (keepQuotes) current.append((char)token);
-							current.append(this.tokenizer.sval);
-							if (quoteChars.length() == 1)
-							{
-								if (keepQuotes) current.append((char)token);
-							}
+							current.append(token);
 						}
-						else if (this.delimit.indexOf((char)token) > -1)
-						{
-							if (this.singleWordDelimiter)
-							{
-								if (token == this.delimit.charAt(delimIndex))
-								{
-									if (delimIndex < maxDelim )
-									{
-										delimIndex ++;
-										inDelimit = true;
-										value = null;
-									}
-									else
-									{
-										delimIndex = 0;
-										inDelimit = false;
-										value = current.toString();
-										return value;
-									}
-								}
-							}
-							else
-							{
-								if (current != null) value = current.toString();
-								return value;
-							}
-							break;
-						}
-						else
+					}
+					else
+					{
+						// start quote mode
+						lastQuote = token;
+						inQuotes = true;
+						if (keepQuotes) 
 						{
 							if (current == null) current = new StringBuffer();
 							current.append(token);
 						}
-						break;
+					}
+					continue;
+				}
+				
+				if (inQuotes)
+				{
+					// inside quotes, anything has to be added.
+					if (current == null) current = new StringBuffer();
+					current.append(token);
+					continue;
+				}
+				
+				if (this.delimit.indexOf(token) > -1)
+				{
+					if (this.singleWordDelimiter)
+					{
+						if (token == this.delimit.charAt(delimIndex))
+						{
+							// advance the "pointer" until the end of the delimiter word
+							if (delimIndex < maxDelim )
+							{
+								delimIndex ++;
+								value = null;
+							}
+							else
+							{
+								delimIndex = 0;
+								value = current.toString();
+								return value;
+							}
+						}
+					}
+					else
+					{
+						if (current != null) 
+						{
+							value = current.toString();
+							return value;
+						}
+					}
+				}
+				else
+				{
+					if (current == null) current = new StringBuffer();
+					current.append(token);
 				}
 			}
+			catch (IOException e)
+			{
+				this.endOfInput = true;
+				break;
+			}
 		}
-		catch (IOException e)
-		{
-			return null;
-		}
-
+		if (current == null) return null;
+		return current.toString();
 	}
-
+	
 	public static void main(String[] args)
 	{
-		String test = "spool -t type \t-f \"file name.sql\" -b tablename;select * from test where name='test';";
-		//split(test, " \t", false, "\"'", true);
-		//System.out.println("---");
-		//test = "spool -t type \t-f \"file name.sql\" -b tablename./select * from test where name='test'./";
-		//test = "spool /type=text /file=\"file name.sql\" /table=tablename";
+		String test = "select something;\n\nselect another thing;";
 		try
 		{
-			WbStringTokenizer tok = new WbStringTokenizer("FROM",true, "\"'", true);
-			tok.setSourceString("SELECT 'from', col1, col2 \r\nFROM test WHERE x=u");
-			System.out.println(tok.nextToken());
-			System.out.println(tok.nextToken());
+			WbStringTokenizer tok = new WbStringTokenizer(test, ";", false, "\"'", false);
+			while (tok.hasMoreTokens()) 
+			{
+				System.out.println(tok.nextToken());
+				System.out.println("----------------------------");
+			}
 		}
 		catch (Exception e)
 		{

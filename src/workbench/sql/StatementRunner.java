@@ -1,30 +1,54 @@
 /*
  * StatementRunner.java
  *
- * Created on 16. November 2002, 13:43
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.sql;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import workbench.db.DbMetadata;
 
+import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
-import workbench.gui.sql.VariablePrompter;
 import workbench.log.LogMgr;
-import workbench.sql.commands.*;
-import workbench.sql.wbcommands.*;
+import workbench.sql.commands.DdlCommand;
+import workbench.sql.commands.IgnoredCommand;
+import workbench.sql.commands.SelectCommand;
+import workbench.sql.commands.SetCommand;
+import workbench.sql.commands.SingleVerbCommand;
+import workbench.sql.commands.UpdatingCommand;
+import workbench.sql.commands.UseCommand;
+import workbench.sql.wbcommands.WbCopy;
+import workbench.sql.wbcommands.WbDefineVar;
+import workbench.sql.wbcommands.WbDescribeTable;
+import workbench.sql.wbcommands.WbDisableOraOutput;
+import workbench.sql.wbcommands.WbEnableOraOutput;
+import workbench.sql.wbcommands.WbExport;
+import workbench.sql.wbcommands.WbHelp;
+import workbench.sql.wbcommands.WbImport;
+import workbench.sql.wbcommands.WbListCatalogs;
+import workbench.sql.wbcommands.WbListProcedures;
+import workbench.sql.wbcommands.WbListTables;
+import workbench.sql.wbcommands.WbListVars;
+import workbench.sql.wbcommands.WbOraExecute;
+import workbench.sql.wbcommands.WbRemoveVar;
+import workbench.sql.wbcommands.WbSchemaReport;
+import workbench.sql.wbcommands.WbXslt;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class StatementRunner
 {
@@ -91,11 +115,11 @@ public class StatementRunner
 		sql = new WbImport();
 		cmdDispatch.put(sql.getVerb(), sql);
 		cmdDispatch.put("IMP", sql);
-		cmdDispatch.put("WBIMPORT", sql);
+		cmdDispatch.put("IMPORT", sql);
 
 		sql = new WbCopy();
 		cmdDispatch.put(sql.getVerb(), sql);
-		
+
 		sql = new WbSchemaReport();
 		cmdDispatch.put(sql.getVerb(), sql);
 
@@ -193,6 +217,8 @@ public class StatementRunner
 		throws SQLException, Exception
 	{
 		String cleanSql = SqlUtil.makeCleanSql(aSql, false);
+		
+		// Silently ignore empty statements
 		if (cleanSql == null || cleanSql.length() == 0)
 		{
 			this.result = new StatementRunnerResult("");
@@ -207,11 +233,6 @@ public class StatementRunner
 		if (this.currentCommand == null)
 		{
 			this.currentCommand = (SqlCommand)this.cmdDispatch.get("*");
-		}
-
-		if (this.dbConnection.getMetadata().isInformix())
-		{
-			LogMgr.logDebug("StatementRunner.runStatement()", "Using command instance " + this.currentCommand.getClass().getName() + " to execute the statement: " + aSql);
 		}
 
 		this.currentCommand.setConsumerWaiting(this.currentConsumer != null);
@@ -280,6 +301,7 @@ public class StatementRunner
 			{
 				this.isCancelled = true;
 				this.currentCommand.cancel();
+				this.currentCommand.done();
 			}
 		}
 		catch (Throwable th)

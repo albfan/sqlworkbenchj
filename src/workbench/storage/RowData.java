@@ -1,7 +1,13 @@
 /*
  * RowData.java
  *
- * Created on 15. September 2001, 16:03
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.storage;
 
@@ -11,8 +17,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.DecimalFormat;
+
 import workbench.log.LogMgr;
-import workbench.util.StrBuffer;
 
 /**
  *	A class to hold the data for a single row retrieved from the database.

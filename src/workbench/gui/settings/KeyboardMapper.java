@@ -1,9 +1,14 @@
 /*
  * KeyboardMapper.java
  *
- * Created on December 4, 2003, 8:58 AM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.settings;
 
 import java.awt.BorderLayout;
@@ -20,7 +25,7 @@ import javax.swing.KeyStroke;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class KeyboardMapper
 	extends JPanel

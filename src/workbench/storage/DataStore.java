@@ -1,9 +1,14 @@
 /*
  * DataStore.java
  *
- * Created on 15. September 2001, 11:29
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.storage;
 
 import java.io.BufferedReader;
@@ -13,11 +18,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Clob;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -35,28 +36,25 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
-import workbench.interfaces.JobErrorHandler;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.exception.ExceptionUtil;
+import workbench.db.exporter.HtmlRowDataConverter;
+import workbench.db.exporter.RowDataConverter;
+import workbench.db.exporter.XmlRowDataConverter;
+import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.CsvLineParser;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
-import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
-import workbench.util.WbStringTokenizer;
-import workbench.db.exporter.RowDataConverter;
-import workbench.db.exporter.HtmlRowDataConverter;
-import workbench.db.exporter.XmlRowDataConverter;
 
 
 
 /**
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class DataStore
 {
@@ -342,10 +340,19 @@ public class DataStore
 		throws IndexOutOfBoundsException
 	{
 		RowData row = this.data.get(aRow);
-		if (this.deletedRows == null) this.deletedRows = createData();
-		this.deletedRows.add(row);
-		this.data.remove(aRow);
-		this.modified = true;
+		// new rows (not read from the database) 
+		// do not need to be put into the deleted buffer
+		if (row.isNew())
+		{
+			this.data.remove(aRow);
+		}
+		else
+		{
+			if (this.deletedRows == null) this.deletedRows = createData();
+			this.deletedRows.add(row);
+			this.data.remove(aRow);
+			this.modified = true;
+		}
 	}
 
 	/**
@@ -425,11 +432,6 @@ public class DataStore
 		return newIndex;
 	}
 
-	public void setUpdateTable(String aTablename)
-	{
-		this.setUpdateTable(aTablename, this.originalConnection);
-	}
-
 	public boolean useUpdateTableFromSql(String aSql)
 	{
 		return this.useUpdateTableFromSql(aSql, false);
@@ -487,6 +489,11 @@ public class DataStore
 				LogMgr.logError("DataStore.useUpdateTable()", "Could not retrieve PK information", e);
 			}
 		}
+	}
+
+	public void setUpdateTable(String aTablename)
+	{
+		this.setUpdateTable(aTablename, this.originalConnection);
 	}
 
 	/**
@@ -775,14 +782,14 @@ public class DataStore
 
 	public StringBuffer getRowDataAsString(int aRow)
 	{
-		String delimit = WbManager.getSettings().getDefaultTextDelimiter();
+		String delimit = Settings.getInstance().getDefaultTextDelimiter();
 		return this.getRowDataAsString(aRow, delimit);
 	}
 
 	public StringBuffer getRowDataAsString(int aRow, String aDelimiter)
 	{
 		RowData row = this.getRow(aRow);
-		DecimalFormat formatter = WbManager.getSettings().getDefaultDecimalFormatter();
+		DecimalFormat formatter = Settings.getInstance().getDefaultDecimalFormatter();
 		return row.getDataAsString(aDelimiter, formatter);
 	}
 
@@ -807,7 +814,7 @@ public class DataStore
 
 	public String getDataString(String aLineTerminator, boolean includeHeaders)
 	{
-		return this.getDataString(WbManager.getSettings().getDefaultTextDelimiter(), aLineTerminator, includeHeaders);
+		return this.getDataString(Settings.getInstance().getDefaultTextDelimiter(), aLineTerminator, includeHeaders);
 	}
 
 	public String getDataString(String aFieldDelimiter, String aLineTerminator, boolean includeHeaders)
@@ -973,21 +980,32 @@ public class DataStore
 				RowData row = new RowData(cols);
 				row.read(aResultSet, this.resultInfo);
 				this.data.add(row);
-
 				if (this.cancelRetrieve) break;
 				if (maxRows > 0 && rowCount > maxRows) break;
 			}
-			this.modified = false;
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("DataStore.initData()", "Error while retrieving ResultSet: " + ExceptionUtil.getDisplay(e), null);
-			//throw e;
+			if (this.cancelRetrieve)
+			{
+				// some JDBC drivers will throw an exception when cancel() is called
+				// as we silently want to use the data that has been retrieved so far
+				// the Exception should not be passed to the caller
+				LogMgr.logInfo("DataStore.initData()", "Retrieve cancelled");
+			}
+			else
+			{
+				throw e;
+			}
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError(this, "Error while retrieving ResultSet", e);
-			//throw new SQLException(e.getMessage());
+			throw new SQLException(e.getMessage());
+		}
+		finally
+		{
+			this.modified = false;
+			this.cancelRetrieve = false;
 		}
 	}
 

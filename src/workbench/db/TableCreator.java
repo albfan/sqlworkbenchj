@@ -1,25 +1,25 @@
 /*
  * TableCreator.java
  *
- * Created on December 28, 2003, 12:25 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
-import java.util.HashMap;
 import java.util.List;
+
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.storage.DataStore;
-import workbench.util.SqlUtil;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class TableCreator
 {

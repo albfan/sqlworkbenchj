@@ -1,17 +1,21 @@
 /*
  * ReportTable.java
  *
- * Created on September 9, 2004, 6:21 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db.report;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.List;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
@@ -22,7 +26,7 @@ import workbench.util.StrWriter;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class ReportTable
 {

@@ -1,23 +1,26 @@
 /*
  * TextRowDataConverter.java
  *
- * Created on August 26, 2004, 10:54 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db.exporter;
 
-import java.sql.Types;
 import java.text.SimpleDateFormat;
-import workbench.db.report.ReportColumn;
-import workbench.db.report.ReportTable;
-import workbench.util.SqlUtil;
+
+import workbench.storage.ResultInfo;
+import workbench.storage.RowData;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
-import workbench.storage.*;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class TextRowDataConverter
 	extends RowDataConverter
@@ -28,17 +31,17 @@ public class TextRowDataConverter
 	private String quoteCharacter = "\"";
 	private boolean writeHeader = true;
 	private boolean cleanCR = false;
-	
+
 	public TextRowDataConverter(ResultInfo info)
 	{
 		super(info);
 	}
-	
+
 	public void setCleanNonPrintable(boolean flag)
 	{
 		this.cleanCR = flag;
 	}
-	
+
 	public StrBuffer convertData()
 	{
 		return null;
@@ -68,11 +71,11 @@ public class TextRowDataConverter
 			if (value == null) value = "";
 			boolean needQuote = (value.indexOf(this.delimiter) > -1);
 			if (needQuote) result.append(this.quoteCharacter);
-			
+
 			result.append(value);
-			
+
 			if (needQuote) result.append(this.quoteCharacter);
-			
+
 			if (c < count - 1) result.append(this.getDelimiter());
 		}
 		result.append("\n");
@@ -81,8 +84,8 @@ public class TextRowDataConverter
 
 	public StrBuffer getStart()
 	{
-		if (this.isWriteHeader()) return null;
-		
+		if (!this.isWriteHeader()) return null;
+
 		StrBuffer result = new StrBuffer();
 		int colCount = this.metaData.getColumnCount();
 		for (int c=0; c < colCount; c ++)
@@ -90,7 +93,7 @@ public class TextRowDataConverter
 			String name = this.metaData.getColumnName(c);
 			result.append(name);
 			if (c < colCount - 1) result.append(this.getDelimiter());
-		}		
+		}
 		result.append("\n");
 		return result;
 	}

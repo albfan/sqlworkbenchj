@@ -1,9 +1,14 @@
 /*
- * SearchCriteriaPanel.java
+ * ReplaceCriteriaPanel.java
  *
- * Created on August 20, 2003, 11:20 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.components;
 
 import java.awt.BorderLayout;
@@ -18,9 +23,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import workbench.WbManager;
 import workbench.interfaces.Replaceable;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 /**
  *
@@ -46,7 +51,7 @@ public class ReplaceCriteriaPanel extends JPanel
 	{
 		this.client = aClient;
 		this.ignoreCase = new JCheckBox(ResourceMgr.getString("LabelSearchIgnoreCase"));
-		this.ignoreCase.setSelected("true".equals(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_CASE, "true")));
+		this.ignoreCase.setSelected("true".equals(Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_CASE, "true")));
 	
 		JLabel label = new JLabel(ResourceMgr.getString("LabelSearchCriteria"));
 		this.criteria = new JTextField();
@@ -126,7 +131,7 @@ public class ReplaceCriteriaPanel extends JPanel
 		JDialog d = new JDialog();
 		d.getContentPane().add(this, BorderLayout.CENTER);
 		d.show();
-		//WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_CASE, Boolean.toString(this.getIgnoreCase()));
+		//Settings.getInstance().setProperty(PROP_CLASS, PROP_KEY_CASE, Boolean.toString(this.getIgnoreCase()));
 		//if (choice == JOptionPane.CANCEL_OPTION) return false;
 		return true;
 	}

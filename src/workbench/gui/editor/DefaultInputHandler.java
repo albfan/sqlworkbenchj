@@ -21,7 +21,7 @@ import javax.swing.KeyStroke;
  * The default input handler. It maps sequences of keystrokes into actions
  * and inserts key typed events into the text area.
  * @author Slava Pestov
- * @version $Id: DefaultInputHandler.java,v 1.12 2004-03-05 20:04:00 thomas Exp $
+ * @version $Id: DefaultInputHandler.java,v 1.13 2004-10-07 18:53:16 thomas Exp $
  */
 public class DefaultInputHandler extends InputHandler
 {
@@ -187,7 +187,7 @@ public class DefaultInputHandler extends InputHandler
 
 			if (keyCode == KeyEvent.VK_TAB)
 			{
-				JEditTextArea area = this.getTextArea(evt);
+				JEditTextArea area = getTextArea(evt);
 				int start = area.getSelectionStart();
 				int end = area.getSelectionEnd();
 				if (start < end)

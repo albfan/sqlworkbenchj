@@ -1,21 +1,20 @@
 /*
- * CloudscapeColumnConstraintReader.java
+ * CloudscapeConstraintReader.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
  *
  */
-
 package workbench.db;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import workbench.log.LogMgr;
 
 /**
  * Constraint reader for Cloudscape database
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class CloudscapeConstraintReader extends AbstractConstraintReader
 {

@@ -1,9 +1,14 @@
 /*
  * DriverEditorPanel.java
  *
- * Created on 8. Juli 2002, 21:39
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.profiles;
 
 import java.awt.Frame;
@@ -13,16 +18,16 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 
-import workbench.WbManager;
 import workbench.db.DbDriver;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class DriverEditorPanel extends javax.swing.JPanel
 {
@@ -211,7 +216,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 
 	private void selectLibrary(java.awt.event.ActionEvent evt)//GEN-FIRST:event_selectLibrary
 	{//GEN-HEADEREND:event_selectLibrary
-		String lastDir = WbManager.getSettings().getLastLibraryDir();
+		String lastDir = Settings.getInstance().getLastLibraryDir();
 		JFileChooser jf = new JFileChooser(lastDir);
 		jf.setMultiSelectionEnabled(true);
 		jf.setFileFilter(ExtensionFileFilter.getJarFileFilter());
@@ -227,7 +232,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 			}
 			this.tfLibrary.setText(path.toString());
 			this.updateDriver();
-			WbManager.getSettings().setLastLibraryDir(jf.getCurrentDirectory().getAbsolutePath());
+			Settings.getInstance().setLastLibraryDir(jf.getCurrentDirectory().getAbsolutePath());
 		}
 	}//GEN-LAST:event_selectLibrary
 
@@ -286,7 +291,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		editor.setDriver(test);
 		d.pack();
 		d.show();
-		//WbManager.getSettings().saveSettings();
+		//Settings.getInstance().saveSettings();
 	}
 
 }

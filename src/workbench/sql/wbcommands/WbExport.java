@@ -1,3 +1,14 @@
+/*
+ * WbExport.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
+ */
 package workbench.sql.wbcommands;
 
 import java.io.File;
@@ -7,7 +18,6 @@ import java.util.List;
 
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
-import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
@@ -19,7 +29,7 @@ import workbench.util.StringUtil;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class WbExport
 	extends SqlCommand
@@ -121,9 +131,12 @@ public class WbExport
 		if (type == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrorExportTypeRequired"));
+			result.addMessage("");
+			result.addMessage(ResourceMgr.getString("ErrorSpoolWrongParameters"));
 			result.setFailure();
 			return result;
 		}
+
 		if (file == null && outputdir == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrorExportFileRequired"));
@@ -137,6 +150,9 @@ public class WbExport
 		type = type.toLowerCase();
 
 		String typeDisplay = null;
+
+		String encoding = cmdLine.getValue("encoding");
+		if (encoding != null) exporter.setEncoding(encoding);
 
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
@@ -158,7 +174,6 @@ public class WbExport
 			format = cmdLine.getValue("decimal");
 			if (format != null) exporter.setDecimalSymbol(format);
 
-			String header = cmdLine.getValue("header");
 			exporter.setExportHeaders(cmdLine.getBoolean("header"));
 			exporter.setCleanupCarriageReturns(cmdLine.getBoolean("cleancr"));
 
@@ -199,9 +214,6 @@ public class WbExport
 			typeDisplay = "XML";
 			String format = cmdLine.getValue("dateformat");
 			if (format != null) exporter.setDateFormat(format);
-
-			String encoding = cmdLine.getValue("encoding");
-			if (encoding != null) exporter.setEncoding(encoding);
 
 			format = cmdLine.getValue("timestampformat");
 			if (format != null) exporter.setTimestampFormat(format);

@@ -1,9 +1,14 @@
 /*
- * ProfileEditor.java
+ * MacroManagerGui.java
  *
- * Created on 1. Juli 2002, 18:34
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.macros;
 
 import java.awt.BorderLayout;
@@ -25,10 +30,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteListEntryAction;
-import workbench.gui.actions.FormatSqlAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.actions.SaveListFileAction;
 import workbench.gui.components.StringPropertyEditor;
@@ -38,6 +41,7 @@ import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.FileActions;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.MacroManager;
 
 public class MacroManagerGui
@@ -211,23 +215,23 @@ public class MacroManagerGui
 	public void saveSettings()
 	{
 		int location = this.jSplitPane1.getDividerLocation();
-		WbManager.getSettings().setProperty(this.getClass().getName(), "divider", location);
+		Settings.getInstance().setProperty(this.getClass().getName(), "divider", location);
 		String macro = this.getSelectedMacroName();
 		if (macro != null)
 		{
-			WbManager.getSettings().setProperty(this.getClass().getName(), "lastmacro", macro);
+			Settings.getInstance().setProperty(this.getClass().getName(), "lastmacro", macro);
 		}
 	}
 
 	public void restoreSettings()
 	{
-		int location = WbManager.getSettings().getIntProperty(this.getClass().getName(), "divider");
+		int location = Settings.getInstance().getIntProperty(this.getClass().getName(), "divider");
 		if (location <= 0)
 		{
 			location = 140;
 		}
 		this.jSplitPane1.setDividerLocation(location);
-		String macro = WbManager.getSettings().getProperty(this.getClass().getName(), "lastmacro", null);
+		String macro = Settings.getInstance().getProperty(this.getClass().getName(), "lastmacro", null);
 		this.selectMacro(macro);
 		this.selectListLater();
 	}

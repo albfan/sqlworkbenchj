@@ -1,19 +1,37 @@
 /*
  * DbMetadata.java
  *
- * Created on 16. Juli 2002, 13:09
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import workbench.WbManager;
+
 import workbench.db.mssql.MsSqlMetaData;
 import workbench.db.mssql.SqlServerConstraintReader;
 import workbench.db.mysql.EnumReader;
@@ -24,6 +42,7 @@ import workbench.db.oracle.SynonymReader;
 import workbench.exception.ExceptionUtil;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.DbDateFormatter;
 import workbench.storage.SqlSyntaxFormatter;
@@ -34,7 +53,7 @@ import workbench.util.WbPersistence;
 
 
 /**
- *  @author  workbench@kellerer.org
+ *  @author  info@sql-workbench.net
  */
 public class DbMetadata
 {
@@ -104,6 +123,7 @@ public class DbMetadata
 	private boolean isASA = false; // Adaptive Server Anywhere
 	private boolean isInformix = false;
 	private boolean isCloudscape = false;
+	private boolean isApacheDerby = false;
 
 	private boolean createInlineConstraints = false;
 
@@ -220,6 +240,11 @@ public class DbMetadata
 			this.isCloudscape = true;
 			this.constraintReader = new CloudscapeConstraintReader();
 		}
+		else if (productLower.indexOf("derby") > -1)
+		{
+			this.isApacheDerby = true;
+			this.constraintReader = new CloudscapeConstraintReader();
+		}
 
 		try
 		{
@@ -275,7 +300,7 @@ public class DbMetadata
 	 */
 	public String getVerbsToIgnore()
 	{
-		String list = WbManager.getSettings().getProperty("workbench.db.ignore." + this.getDbId(), "");
+		String list = Settings.getInstance().getProperty("workbench.db.ignore." + this.getDbId(), "");
 		return list;
 	}
 
@@ -333,9 +358,9 @@ public class DbMetadata
 	 */
 	public boolean acceptsColumnNullKeyword()
 	{
-		// currently I know only of Firebird which does not accept
-		// the keyword NULL in the column definition
-		return !this.isFirebird;
+		// Cloudscape and Firebird do not accept the NULL keyword
+		// in the column definition
+		return !this.isFirebird && !this.isCloudscape && !this.isApacheDerby;
 	}
 
 	public boolean isInformix() { return this.isInformix; }
@@ -346,6 +371,7 @@ public class DbMetadata
 	public boolean isFirebird() { return this.isFirebird; }
 	public boolean isSqlServer() { return this.isSqlServer; }
 	public boolean isCloudscape() { return this.isCloudscape; }
+	public boolean isApacheDerby() { return this.isApacheDerby; }
 
 	/**
 	 *	Return a list of datatype as returned from DatabaseMetaData.getTypeInfo()
@@ -357,31 +383,31 @@ public class DbMetadata
 		String types = null;
 		if (this.isMySql)
 		{
-			types = WbManager.getSettings().getProperty("workbench.ignoretypes.mysql", null);
+			types = Settings.getInstance().getProperty("workbench.ignoretypes.mysql", null);
 		}
 		else if (this.isFirebird)
 		{
-			types = WbManager.getSettings().getProperty("workbench.ignoretypes.firebird", null);
+			types = Settings.getInstance().getProperty("workbench.ignoretypes.firebird", null);
 		}
 		else if (this.isOracle)
 		{
-			types = WbManager.getSettings().getProperty("workbench.ignoretypes.oracle", null);
+			types = Settings.getInstance().getProperty("workbench.ignoretypes.oracle", null);
 		}
 		else if (this.isPostgres)
 		{
-			types = WbManager.getSettings().getProperty("workbench.ignoretypes.postgres", null);
+			types = Settings.getInstance().getProperty("workbench.ignoretypes.postgres", null);
 		}
 		else if (this.isHsql)
 		{
-			types = WbManager.getSettings().getProperty("workbench.ignoretypes.hsqldb", null);
+			types = Settings.getInstance().getProperty("workbench.ignoretypes.hsqldb", null);
 		}
 		else if (this.isSqlServer)
 		{
-			types = WbManager.getSettings().getProperty("workbench.ignoretypes.sqlserver", null);
+			types = Settings.getInstance().getProperty("workbench.ignoretypes.sqlserver", null);
 		}
 		else
 		{
-			types = WbManager.getSettings().getProperty("workbench.ignoretypes.other", null);
+			types = Settings.getInstance().getProperty("workbench.ignoretypes.other", null);
 		}
 
 		return StringUtil.stringToList(types, ",");
@@ -622,6 +648,8 @@ public class DbMetadata
 		if (aViewname.length() == 0) return null;
 
 		StrBuffer source = new StrBuffer(500);
+		Statement stmt = null;
+		ResultSet rs = null;
 		try
 		{
 			GetMetaDataSql sql = (GetMetaDataSql)viewSourceSql.get(this.productName);
@@ -630,13 +658,13 @@ public class DbMetadata
 			sql.setSchema(aSchema);
 			sql.setObjectName(aViewname);
 			sql.setCatalog(aCatalog);
-			Statement stmt = this.dbConnection.getSqlConnection().createStatement();
+			stmt = this.dbConnection.getSqlConnection().createStatement();
 			String query = sql.getSql();
-			if (WbManager.getSettings().getDebugMetadataSql())
+			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logInfo("DbMetadata.getTableTriggers()", "Using query=\n" + query);
+				LogMgr.logInfo("DbMetadata.getViewSource()", "Using query=\n" + query);
 			}
-			ResultSet rs = stmt.executeQuery(query);
+			rs = stmt.executeQuery(query);
 			while (rs.next())
 			{
 				String line = rs.getString(1);
@@ -645,8 +673,6 @@ public class DbMetadata
 					source.append(line.replaceAll("\r", ""));
 				}
 			}
-			rs.close();
-			stmt.close();
 			source.rtrim();
 			if (!source.endsWith(';')) source.append(';');
 		}
@@ -654,6 +680,10 @@ public class DbMetadata
 		{
 			LogMgr.logWarning("DbMetadata.getViewSource()", "Could not retrieve view definition for " + aViewname, e);
 			source = new StrBuffer(ExceptionUtil.getDisplay(e));
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
 		}
 		return source.toString();
 	}
@@ -784,16 +814,25 @@ public class DbMetadata
 		{
 			source.append(this.getFirebirdProcedureHeader(aCatalog, aSchema, aProcname));
 		}
+		else if (this.isOracle)
+		{
+			source.append("CREATE OR REPLACE ");
+		}
+
+		Statement stmt = null;
+		ResultSet rs = null;
+    int linecount = 0;
+		GetMetaDataSql sql = null;
+
 		try
 		{
-			GetMetaDataSql sql = (GetMetaDataSql)procSourceSql.get(this.productName);
+			sql = (GetMetaDataSql)procSourceSql.get(this.productName);
 			aProcname = this.adjustObjectname(aProcname);
 			sql.setSchema(aSchema);
 			sql.setObjectName(aProcname);
 			sql.setCatalog(aCatalog);
-			Statement stmt = this.dbConnection.getSqlConnection().createStatement();
-			ResultSet rs = stmt.executeQuery(sql.getSql());
-      int linecount = 0;
+			stmt = this.dbConnection.getSqlConnection().createStatement();
+			rs = stmt.executeQuery(sql.getSql());
 			while (rs.next())
 			{
 				String line = rs.getString(1);
@@ -803,9 +842,19 @@ public class DbMetadata
           source.append(line);
         }
 			}
-			rs.close();
-			stmt.close();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DbMetadata.getProcedureSource()", "Error retrieving procedure source", e);
+			source = new StrBuffer(ExceptionUtil.getDisplay(e));
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
 
+		try
+		{
       if (this.isOracle && linecount == 0)
       {
         // this might be a procedure from a package. Then wie need
@@ -820,14 +869,18 @@ public class DbMetadata
           String line = rs.getString(1);
           if (line != null) source.append(line);
         }
-        rs.close();
-        stmt.close();
       }
 		}
 		catch (Exception e)
 		{
-			source = new StrBuffer(e.getMessage());
+			LogMgr.logError("DbMetadata.getProcedureSource()", "Error retrieving package source", e);
+			source = new StrBuffer(ExceptionUtil.getDisplay(e));
 		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+
 		if (!source.endsWith(';'))
 		{
 			source.append(";");
@@ -925,32 +978,45 @@ public class DbMetadata
 		String schema = this.adjustObjectname(this.getUserName());
 		ResultSet rs = this.metaData.getTables(null, schema, aTablename, null);
 		String table = null;
-		if (rs.next())
+		try
 		{
-			table = rs.getString(2);
-		}
-		else
-		{
-			schema = null;
-		}
-		rs.close();
-		if (table == null)
-		{
-			// ok, no table found for the current user, so let's
-			// try to find the table without the schema qualifier...
-			rs = this.metaData.getTables(null, schema, aTablename, null);
 			if (rs.next())
 			{
-				schema = rs.getString(2);
+				table = rs.getString(2);
 			}
-			// check if there are more rows in the result set
-			// if yes, we have no way of identifying the real
-			// schema name, so we'll return null
-			if (rs.next())
+			else
 			{
 				schema = null;
 			}
-			rs.close();
+		}
+		finally
+		{
+			SqlUtil.closeResult(rs);
+		}
+
+		if (table == null)
+		{
+			try
+			{
+				// ok, no table found for the current user, so let's
+				// try to find the table without the schema qualifier...
+				rs = this.metaData.getTables(null, schema, aTablename, null);
+				if (rs.next())
+				{
+					schema = rs.getString(2);
+				}
+				// check if there are more rows in the result set
+				// if yes, we have no way of identifying the real
+				// schema name, so we'll return null
+				if (rs.next())
+				{
+					schema = null;
+				}
+			}
+			finally
+			{
+				SqlUtil.closeResult(rs);
+			}
 		}
 		return schema;
 	}
@@ -967,7 +1033,7 @@ public class DbMetadata
 	public DataStore getTables(String schema, String[] type)
 		throws SQLException
 	{
-		return this.getTables(null, schema, type);
+		return this.getTables(null, schema, null, type);
 	}
 
 	public final static int COLUMN_IDX_TABLE_LIST_NAME = 0;
@@ -988,13 +1054,20 @@ public class DbMetadata
 		{
 			types = new String[] { aType.trim() };
 		}
-		return this.getTables(aCatalog, aSchema, types);
+		return this.getTables(aCatalog, aSchema, null, types);
 	}
 
 	public DataStore getTables(String aCatalog, String aSchema, String[] types)
 		throws SQLException
 	{
+		return getTables(aCatalog, aSchema, null, types);
+	}
+
+	public DataStore getTables(String aCatalog, String aSchema, String tables, String[] types)
+		throws SQLException
+	{
 		if ("*".equals(aSchema) || "%".equals(aSchema)) aSchema = null;
+		if ("*".equals(tables) || "%".equals(tables)) tables = null;
 
 		String[] cols = new String[] {"NAME", "TYPE", catalogTerm.toUpperCase(), schemaTerm.toUpperCase(), "REMARKS"};
 		int coltypes[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
@@ -1004,29 +1077,36 @@ public class DbMetadata
 		aSchema = adjustObjectname(aSchema);
 		aCatalog = adjustObjectname(aCatalog);
 
-		ResultSet tableRs = this.metaData.getTables(aCatalog, aSchema, null, types);
-		while (tableRs.next())
+		ResultSet tableRs = null;
+		try
 		{
-			String cat = tableRs.getString(1);
-			String schem = tableRs.getString(2);
-			String name = tableRs.getString(3);
-			if (name == null) continue;
-			// filter out "internal" synonyms for Oracle
-			if (this.isOracle && name.startsWith("/")) continue;
-			String ttype = tableRs.getString(4);
-			String rem = tableRs.getString(5);
-			int row = result.addRow();
-			result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, name);
-			result.setValue(row, COLUMN_IDX_TABLE_LIST_TYPE, ttype);
-			result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, cat);
-			result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, schem);
-			result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, rem);
+			tableRs = this.metaData.getTables(aCatalog, aSchema, tables, types);
+			while (tableRs.next())
+			{
+				String cat = tableRs.getString(1);
+				String schem = tableRs.getString(2);
+				String name = tableRs.getString(3);
+				if (name == null) continue;
+				// filter out "internal" synonyms for Oracle
+				if (this.isOracle && name.startsWith("/")) continue;
+				String ttype = tableRs.getString(4);
+				String rem = tableRs.getString(5);
+				int row = result.addRow();
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, name);
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_TYPE, ttype);
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, cat);
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, schem);
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, rem);
+			}
 		}
-		tableRs.close();
+		finally
+		{
+			SqlUtil.closeResult(tableRs);
+		}
 
 		// It seems that Oracle does return the sequences, so we don't
 		// need that anymore...
-		if (this.isOracle && "true".equals(WbManager.getSettings().getProperty("workbench.db.oracle.retrieve_sequence", "false")))
+		if (this.isOracle && "true".equals(Settings.getInstance().getProperty("workbench.db.oracle.retrieve_sequence", "false")))
 		{
 			LogMgr.logDebug("DbMetadata.getTables()", "Retrieving sequences...");
 			List seq = this.oracleMetaData.getSequenceList(aSchema);
@@ -1062,7 +1142,7 @@ public class DbMetadata
 		}
 		finally
 		{
-			try { rs.close(); } catch (Throwable th) {}
+			SqlUtil.closeResult(rs);
 		}
 		return exists;
 	}
@@ -1097,40 +1177,48 @@ public class DbMetadata
 		final int sizes[] =   {20, 10, 18, 30};
 		DataStore ds = new DataStore(cols, types, sizes);
 
-		ResultSet rs = this.metaData.getProcedureColumns(aCatalog, aSchema, this.adjustObjectname(aProcname), "%");
-		while (rs.next())
+		ResultSet rs = null;
+		try
 		{
-			int row = ds.addRow();
-			String colName = rs.getString("COLUMN_NAME");
-			ds.setValue(row, 0, colName);
-			int colType = rs.getInt("COLUMN_TYPE");
-			String stype;
+			rs = this.metaData.getProcedureColumns(aCatalog, aSchema, this.adjustObjectname(aProcname), "%");
+			while (rs.next())
+			{
+				int row = ds.addRow();
+				String colName = rs.getString("COLUMN_NAME");
+				ds.setValue(row, 0, colName);
+				int colType = rs.getInt("COLUMN_TYPE");
+				String stype;
 
-			if (colType == DatabaseMetaData.procedureColumnIn)
-				stype = "IN";
-			else if (colType == DatabaseMetaData.procedureColumnInOut)
-				stype = "INOUT";
-			else if (colType == DatabaseMetaData.procedureColumnOut)
-				stype = "OUT";
-			else if (colType == DatabaseMetaData.procedureColumnResult)
-				stype = "RESULTSET";
-			else if (colType == DatabaseMetaData.procedureColumnReturn)
-				stype = "RETURN";
-			else
-				stype = "";
-			ds.setValue(row, 1, stype);
+				if (colType == DatabaseMetaData.procedureColumnIn)
+					stype = "IN";
+				else if (colType == DatabaseMetaData.procedureColumnInOut)
+					stype = "INOUT";
+				else if (colType == DatabaseMetaData.procedureColumnOut)
+					stype = "OUT";
+				else if (colType == DatabaseMetaData.procedureColumnResult)
+					stype = "RESULTSET";
+				else if (colType == DatabaseMetaData.procedureColumnReturn)
+					stype = "RETURN";
+				else
+					stype = "";
+				ds.setValue(row, 1, stype);
 
-			int sqlType = rs.getInt("DATA_TYPE");
-			String typeName = rs.getString("TYPE_NAME");
-			int digits = rs.getInt("PRECISION");
-			int size = rs.getInt("LENGTH");
-			String rem = rs.getString("REMARKS");
+				int sqlType = rs.getInt("DATA_TYPE");
+				String typeName = rs.getString("TYPE_NAME");
+				int digits = rs.getInt("PRECISION");
+				int size = rs.getInt("LENGTH");
+				String rem = rs.getString("REMARKS");
 
-			String display = this.getSqlTypeDisplay(typeName, sqlType, size, digits);
-			ds.setValue(row, 2, display);
-			ds.setValue(row, 3, rem);
+				String display = getSqlTypeDisplay(typeName, sqlType, size, digits);
+				ds.setValue(row, 2, display);
+				ds.setValue(row, 3, rem);
+			}
 		}
-		rs.close();
+		finally
+		{
+			SqlUtil.closeResult(rs);
+		}
+
 		return ds;
 	}
 
@@ -1269,7 +1357,7 @@ public class DbMetadata
 		}
 		finally
 		{
-			if (rs != null) rs.close();
+			SqlUtil.closeResult(rs);
 			if (this.msSqlMetaData != null) this.msSqlMetaData.closeStatement();
 		}
 		return ds;
@@ -1431,14 +1519,14 @@ public class DbMetadata
 			ColumnIdentifier ci = new ColumnIdentifier(col, type, pk);
 			int size = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_SIZE, 0);
 			int digits = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_DIGITS, 0);
-			int nullable = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_NULLABLE, 1);
+			String nullable = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_NULLABLE);
 			int position = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_POSITION, 0);
 			String dbmstype = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
 			String comment = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_REMARKS);
 			String def = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_DEFAULT);
 			ci.setColumnSize(size);
 			ci.setDecimalDigits(digits);
-			ci.setIsNullable(nullable == DatabaseMetaData.columnNullable);
+			ci.setIsNullable(StringUtil.stringToBool(nullable));
 			ci.setDbmsType(dbmstype);
 			ci.setComment(comment);
 			ci.setDefaultValue(def);
@@ -1596,17 +1684,22 @@ public class DbMetadata
 		}
 
 		ArrayList keys = new ArrayList();
+		ResultSet keysRs = null;
 		try
 		{
-			ResultSet keysRs = this.metaData.getPrimaryKeys(aCatalog, aSchema, aTable);
+			keysRs = this.metaData.getPrimaryKeys(aCatalog, aSchema, aTable);
 			while (keysRs.next())
 			{
 				keys.add(keysRs.getString("COLUMN_NAME").toLowerCase());
 			}
-			keysRs.close();
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("DbMetaData.getTableDefinition()", "Error retrieving key columns", e);
+		}
+		finally
+		{
+			SqlUtil.closeResult(keysRs);
 		}
 
 		boolean hasEnums = false;
@@ -1663,7 +1756,7 @@ public class DbMetadata
 		}
 		finally
 		{
-			try { rs.close(); } catch (Throwable th) {}
+			SqlUtil.closeResult(rs);
 			if (this.oracleMetaData != null)
 			{
 				this.oracleMetaData.closeStatement();
@@ -1875,8 +1968,7 @@ public class DbMetadata
 			}
 			finally
 			{
-				try { rs.close(); } catch (Throwable th) {}
-				try { stmt.close(); } catch (Throwable th) {}
+				SqlUtil.closeAll(rs, stmt);
 			}
 		}
 
@@ -1990,7 +2082,7 @@ public class DbMetadata
 		sql.setObjectName(aTable);
 		Statement stmt = this.dbConnection.getSqlConnection().createStatement();
 		String query = sql.getSql();
-		if (WbManager.getSettings().getDebugMetadataSql())
+		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo("DbMetadata.getTableTriggers()", "Using query=\n" + query);
 		}
@@ -2013,11 +2105,8 @@ public class DbMetadata
 		}
 		finally
 		{
-			try { rs.close(); } catch (Throwable th) {}
-			try { stmt.close(); } catch (Throwable th) {}
+			SqlUtil.closeAll(rs, stmt);
 		}
-
-
 		return result;
 	}
 
@@ -2048,22 +2137,27 @@ public class DbMetadata
 		sql.setObjectName(aTriggername);
 		Statement stmt = this.dbConnection.getSqlConnection().createStatement();
 		String query = sql.getSql();
-		if (WbManager.getSettings().getDebugMetadataSql())
+		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo("DbMetadata.getTriggerSource()", "Using query=\n" + query);
 		}
 
 		ResultSet rs = stmt.executeQuery(query);
 		int colCount = rs.getMetaData().getColumnCount();
-		while (rs.next())
+		try
 		{
-			for (int i=1; i <= colCount; i++)
+			while (rs.next())
 			{
-				result.append(rs.getString(i));
+				for (int i=1; i <= colCount; i++)
+				{
+					result.append(rs.getString(i));
+				}
 			}
 		}
-		rs.close();
-		stmt.close();
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
 
 		if (this.isCloudscape)
 		{
@@ -2087,17 +2181,21 @@ public class DbMetadata
 	public List getCatalogs()
 	{
 		ArrayList result = new ArrayList();
+		ResultSet rs = null;
 		try
 		{
-			ResultSet rs = this.metaData.getCatalogs();
+			rs = this.metaData.getCatalogs();
 			while (rs.next())
 			{
 				result.add(rs.getString(1));
 			}
-			rs.close();
 		}
 		catch (Exception e)
 		{
+		}
+		finally
+		{
+			SqlUtil.closeResult(rs);
 		}
 		return result;
 	}
@@ -2108,17 +2206,21 @@ public class DbMetadata
 	public List getSchemas()
 	{
 		ArrayList result = new ArrayList();
+		ResultSet rs = null;
 		try
 		{
-			ResultSet rs = this.metaData.getSchemas();
+			rs = this.metaData.getSchemas();
 			while (rs.next())
 			{
 				result.add(rs.getString(1));
 			}
-			rs.close();
 		}
 		catch (Exception e)
 		{
+		}
+		finally
+		{
+			SqlUtil.closeResult(rs);
 		}
 		if (this.isOracle)
 		{
@@ -2195,27 +2297,32 @@ public class DbMetadata
 			rs = this.metaData.getImportedKeys(aCatalog, aSchema, aTable);
 
 		DataStore ds = new DataStore(rs, false);
-
-		while (rs.next())
+		try
 		{
-			int row = ds.addRow();
-			ds.setValue(row, 0, rs.getString(1));
-			ds.setValue(row, 1, rs.getString(2));
-			ds.setValue(row, 2, rs.getString(3));
-			ds.setValue(row, 3, rs.getString(4));
-			ds.setValue(row, 4, rs.getString(5));
-			ds.setValue(row, 5, rs.getString(6));
-			ds.setValue(row, 6, rs.getString(7));
-			ds.setValue(row, 7, rs.getString(8));
-			ds.setValue(row, 8, new Integer(rs.getInt(9)));
-			ds.setValue(row, 9, new Integer(rs.getInt(10)));
-			ds.setValue(row, 10, rs.getString(11));
-			String fk_name = this.fixFKName(rs.getString(12));
-			ds.setValue(row, 11, fk_name);
-			ds.setValue(row, 12, rs.getString(13));
-			ds.setValue(row, 13, new Integer(rs.getInt(14)));
+			while (rs.next())
+			{
+				int row = ds.addRow();
+				ds.setValue(row, 0, rs.getString(1));
+				ds.setValue(row, 1, rs.getString(2));
+				ds.setValue(row, 2, rs.getString(3));
+				ds.setValue(row, 3, rs.getString(4));
+				ds.setValue(row, 4, rs.getString(5));
+				ds.setValue(row, 5, rs.getString(6));
+				ds.setValue(row, 6, rs.getString(7));
+				ds.setValue(row, 7, rs.getString(8));
+				ds.setValue(row, 8, new Integer(rs.getInt(9)));
+				ds.setValue(row, 9, new Integer(rs.getInt(10)));
+				ds.setValue(row, 10, rs.getString(11));
+				String fk_name = this.fixFKName(rs.getString(12));
+				ds.setValue(row, 11, fk_name);
+				ds.setValue(row, 12, rs.getString(13));
+				ds.setValue(row, 13, new Integer(rs.getInt(14)));
+			}
 		}
-		rs.close();
+		finally
+		{
+			SqlUtil.closeResult(rs);
+		}
 		return ds;
 	}
 
@@ -2468,8 +2575,7 @@ public class DbMetadata
 		}
 		finally
 		{
-			try { rs.close(); } catch (Throwable th) {}
-			try { stmt.close(); } catch (Throwable th) {}
+			SqlUtil.closeAll(rs, stmt);
 		}
 		return result;
 	}
@@ -2670,8 +2776,6 @@ public class DbMetadata
 		{
 			String colName = columns[i].getColumnName();//(String)aTableDef.getValue(i, COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
 			String type = columns[i].getDbmsType();//aTableDef.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
-			//String pk = (String)aTableDef.getValue(i, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG);
-			//String nul = (String)aTableDef.getValue(i, COLUMN_IDX_TABLE_DEFINITION_NULLABLE);
 			String def = columns[i].getDefaultValue(); //aTableDef.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_DEFAULT);
 
 			result.append("   ");
@@ -2742,7 +2846,7 @@ public class DbMetadata
 		result.append(");\n");
 		if (!this.createInlineConstraints && pkCols.length() > 0)
 		{
-			String template = this.getSqlTemplate(this.pkStatements);
+			String template = this.getSqlTemplate(DbMetadata.pkStatements);
 			template = StringUtil.replace(template, TABLE_NAME_PLACEHOLDER, aTablename);
 			template = StringUtil.replace(template, COLUMNLIST_PLACEHOLDER, pkCols.toString());
 			String name = this.getPkIndexName(aIndexDef);
@@ -2781,7 +2885,7 @@ public class DbMetadata
 
 	public String getTableColumnCommentsSql(String aCatalog, String aSchema, String aTablename, ColumnIdentifier[] columns)
 	{
-		String columnStatement = (String)this.columnCommentStatements.get(this.productName);
+		String columnStatement = (String)columnCommentStatements.get(this.productName);
 		if (columnStatement == null || columnStatement.trim().length() == 0) return null;
 		StrBuffer result = new StrBuffer(500);
 		int cols = columns.length;
@@ -2801,7 +2905,7 @@ public class DbMetadata
 
 	public String getTableCommentSql(String aCatalog, String aSchema, String aTablename)
 	{
-		String commentStatement = (String)this.tableCommentStatements.get(this.productName);
+		String commentStatement = (String)tableCommentStatements.get(this.productName);
 		if (commentStatement == null || commentStatement.trim().length() == 0) return null;
 
 		String comment = this.getTableComment(aCatalog, aSchema, aTablename);
@@ -2857,17 +2961,17 @@ public class DbMetadata
 		int count = aFkDef.getRowCount();
 		if (count == 0) return StrBuffer.EMPTY_BUFFER;
 
-		String template = (String)this.fkStatements.get(this.productName);
+		String template = (String)DbMetadata.fkStatements.get(this.productName);
 
 		if (template == null)
 		{
 			if (this.createInlineConstraints)
 			{
-				template = (String)this.fkStatements.get("All-Inline");
+				template = (String)DbMetadata.fkStatements.get("All-Inline");
 			}
 			else
 			{
-				template = (String)this.fkStatements.get(GENERAL_SQL);
+				template = (String)DbMetadata.fkStatements.get(GENERAL_SQL);
 			}
 		}
 		// collects all columns from the base table mapped to the
@@ -3015,7 +3119,7 @@ public class DbMetadata
 		if (columnList == null) return StringUtil.EMPTY_STRING;
 		int count = columnList.length;
 		if (count == 0) return StringUtil.EMPTY_STRING;
-		String template = this.getSqlTemplate(this.idxStatements);
+		String template = this.getSqlTemplate(DbMetadata.idxStatements);
 		StrBuffer cols = new StrBuffer(count * 25);
 
 		for (int i=0; i < count; i++)
@@ -3048,7 +3152,7 @@ public class DbMetadata
 
 		StrBuffer pk = new StrBuffer();
 		StrBuffer idx = new StrBuffer();
-		String template = this.getSqlTemplate(this.idxStatements);
+		String template = this.getSqlTemplate(DbMetadata.idxStatements);
 		String sql;
 		int idxCount = 0;
 		for (int i = 0; i < count; i++)

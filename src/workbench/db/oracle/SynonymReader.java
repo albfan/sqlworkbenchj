@@ -1,5 +1,13 @@
 /*
- * Created on 3. Dezember 2002, 23:31
+ * SynonymReader.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.db.oracle;
 
@@ -12,7 +20,7 @@ import workbench.db.TableIdentifier;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class SynonymReader
 {

@@ -1,15 +1,22 @@
 /*
  * WbProperties.java
  *
- * Created on June 3, 2003, 6:07 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.util;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -174,20 +181,61 @@ public class WbProperties
 		this.firePropertyChanged(name, (String)oldValue, value);
 		return oldValue;
 	}
+
+	/**
+	 *	Adds a property definition in the form key=value
+	 *	Lines starting with # are ignored
+	 *	Lines that do not contain a = character are ignored
+	 *  Any text after a # sign in the value is ignored
+	 */
+	public void addPropertyDefinition(String line)
+	{
+		if (line == null) return;
+		if (line.trim().length() == 0) return;
+		if (line.startsWith("#")) return;
+		int pos = line.indexOf("=");
+		if (pos == -1) return;
+		String key = line.substring(0, pos);
+		String value = line.substring(pos + 1);
+		pos = value.indexOf('#');
+		if (pos > -1)
+		{
+			value = value.substring(0, pos);
+		}
+		this.setProperty(key, value.trim());
+	}
 	
+	/**
+	 *	Read the content of the file without replacing the 
+	 *	usual Java escape sequences. This method does not 
+	 *  support Unicode sequences nor line continuation!
+	 */
+	public void loadTextFile(String filename)
+		throws IOException
+	{
+		BufferedReader in = new BufferedReader(new FileReader(filename));
+		String line = in.readLine();
+		while (line != null)
+		{
+			this.addPropertyDefinition(line);
+			line = in.readLine();
+		}
+	}
 	
 	public static void main(String args[])
 	{
 		try
 		{
-			WbProperties props = new WbProperties(1);
-			System.out.println(props.getSections("first.second.third.fourth", 2));
+			WbProperties p = new WbProperties();
+			p.loadTextFile("d:/Projects/jworkbench/dist/vars.def");
+			//System.out.println(p.getProperty("dir"));
+			p.list(System.out);
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
-		System.out.println("done.");
-		System.exit(0);
+		System.out.println("*** Done.");
 	}
+	
 }

@@ -1,16 +1,25 @@
+/*
+ * TypeMapper.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
+ */
 package workbench.db;
 
-import java.util.Map;
-import java.sql.Connection;
-import java.util.List;
-import workbench.util.SqlUtil;
-import workbench.log.LogMgr;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Collections;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
-import workbench.resource.ResourceMgr;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+
+import workbench.log.LogMgr;
+import workbench.util.SqlUtil;
 
 public class TypeMapper
 {

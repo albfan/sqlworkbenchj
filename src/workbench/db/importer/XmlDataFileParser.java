@@ -1,9 +1,14 @@
 /*
  * XmlDataFileParser.java
  *
- * Created on October 15, 2003, 11:59 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db.importer;
 
 import java.io.BufferedReader;
@@ -15,10 +20,8 @@ import java.math.BigInteger;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -28,14 +31,13 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
-import workbench.db.ColumnIdentifier;
 
+import workbench.db.ColumnIdentifier;
 import workbench.log.LogMgr;
-import workbench.util.ValueConverter;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class XmlDataFileParser
 	extends DefaultHandler

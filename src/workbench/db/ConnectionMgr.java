@@ -1,7 +1,13 @@
 /*
  * ConnectionMgr.java
  *
- * Created on November 25, 2001, 4:18 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.db;
 
@@ -23,12 +29,12 @@ import workbench.exception.ExceptionUtil;
 import workbench.exception.NoConnectionException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.util.WbPersistence;
 import workbench.resource.Settings;
+import workbench.util.WbPersistence;
 
 /**
- * @author  workbench@kellerer.org
- * @version  $Revision: 1.42 $
+ * @author  info@sql-workbench.net
+ * @version  $Revision: 1.43 $
  */
 public class ConnectionMgr
 {
@@ -184,7 +190,7 @@ public class ConnectionMgr
 		if (aName == null || aName.length() == 0) return this.findDriver(drvClassName);
 		if (this.drivers == null) this.readDrivers();
 
-		LogMgr.logDebug("ConnectionMgr.findDriverByName()", "Searching for DriverClass=" + drvClassName + ",DriverName=" + aName);
+		//LogMgr.logDebug("ConnectionMgr.findDriverByName()", "Searching for DriverClass=" + drvClassName + ",DriverName=" + aName);
 
 		for (int i=0; i < this.drivers.size(); i ++)
 		{
@@ -201,7 +207,7 @@ public class ConnectionMgr
 				}
 			}
 		}
-		LogMgr.logWarning("ConnectionMgr.findDriverByName()", "Did not find driverclass with name="+ aName);
+		//LogMgr.logWarning("ConnectionMgr.findDriverByName()", "Did not find driverclass with name="+ aName);
 
 		return firstMatch;
 	}
@@ -413,7 +419,7 @@ public class ConnectionMgr
 
 		try
 		{
-			if (conn.getMetadata().isCloudscape())
+			if (conn.getMetadata().isCloudscape() || conn.getMetadata().isApacheDerby())
 			{
 				ConnectionProfile prof = conn.getProfile();
 				boolean shutdown = this.canShutdownCloudscape(conn);
@@ -494,6 +500,7 @@ public class ConnectionMgr
 			if (c.getId().equals(id)) continue;
 
 			String u = c.getUrl();
+			if (u == null) continue;
 			// we found one connection with the same URL --> do not shutdown this one!
 			if (u.equals(url)) return false;
 		}
@@ -509,35 +516,54 @@ public class ConnectionMgr
 		String drvClass = prof.getDriverclass();
 		String drvName = prof.getDriverName();
 
+		String url = prof.getUrl();
+		String command = null;
+		String shutdown = ";shutdown=true";
+		
+		int pos = url.indexOf(";");
+		if (pos > -1)
+		{
+			command = url.substring(0, pos) + shutdown;
+		}
+		else
+		{
+			command = url + shutdown;
+		}
 		try
 		{
 			DbDriver drv = this.findDriverByName(drvClass, drvName);
 			LogMgr.logInfo("ConnectionMgr.shutdownCloudscape()", "Local Cloudscape connection detected. Shutting down engine...");
-			drv.commandConnect("jdbc:cloudscape:;shutdown=true");
+			drv.commandConnect(command);
 		}
 		catch (SQLException e)
 		{
-			// this exception is expected. Cloudscape reports success through
-			// the exception message!!!!!
+			// This exception is expected!
+			// Cloudscape reports the shutdown success through an exception
 			LogMgr.logInfo("ConnectionMgr.shutdownCloudscape()", ExceptionUtil.getDisplay(e));
 		}
 		catch (Throwable th)
 		{
-			LogMgr.logError("ConnectionMgr.shutdownCloudscape()", "Error when shutting down Cloudscape", th);
+			LogMgr.logError("ConnectionMgr.shutdownCloudscape()", "Error when shutting down Cloudscape/Derby", th);
 		}
 	}
 
 	private boolean canShutdownCloudscape(WbConnection aConn)
 	{
-		if (!aConn.getMetadata().isCloudscape()) return true;
+		if (!aConn.getMetadata().isCloudscape() && !aConn.getMetadata().isApacheDerby()) return true;
 
 		String url = aConn.getUrl();
+		String prefix;
+		if (aConn.getMetadata().isCloudscape())
+			prefix = "jdbc:cloudscape:";
+		else
+			prefix = "jdbc:derby:";
+
 
 		// check for cloudscape connection
-		if (!url.startsWith("jdbc:cloudscape:")) return true;
+		if (!url.startsWith(prefix)) return true;
 
 		// do not shutdown server connections!
-		if (url.startsWith("jdbc:cloudscape:net:")) return false;
+		if (url.startsWith(prefix + "net:")) return false;
 
 		String id = aConn.getId();
 

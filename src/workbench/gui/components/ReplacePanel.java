@@ -1,9 +1,14 @@
 /*
  * ReplacePanel.java
  *
- * Created on August 28, 2003, 8:17 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.components;
 
 import java.awt.Component;
@@ -19,10 +24,10 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
-import workbench.WbManager;
 import workbench.gui.actions.EscAction;
 import workbench.interfaces.Replaceable;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 /**
  *
@@ -243,7 +248,7 @@ public class ReplacePanel
 			this.dialog.getContentPane().add(this);
 			this.dialog.pack();
 			this.dialog.setResizable(false);
-			if (!WbManager.getSettings().restoreWindowPosition(this.dialog, PROP_CLASS + ".window"))
+			if (!Settings.getInstance().restoreWindowPosition(this.dialog, PROP_CLASS + ".window"))
 			{
 				this.dialog.setLocationRelativeTo(caller);
 			}
@@ -353,22 +358,22 @@ public class ReplacePanel
 	
 	private void saveSettings()
 	{
-		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_CASE, Boolean.toString(this.ignoreCaseCheckBox.isSelected()));
-		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_WHOLE_WORD, Boolean.toString(this.wordsOnlyCheckBox.isSelected()));
-		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_SELECTED, Boolean.toString(this.selectedTextCheckBox.isSelected()));
-		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_USE_REGEX, Boolean.toString(this.useRegexCheckBox.isSelected()));
+		Settings.getInstance().setProperty(PROP_CLASS, PROP_KEY_CASE, Boolean.toString(this.ignoreCaseCheckBox.isSelected()));
+		Settings.getInstance().setProperty(PROP_CLASS, PROP_KEY_WHOLE_WORD, Boolean.toString(this.wordsOnlyCheckBox.isSelected()));
+		Settings.getInstance().setProperty(PROP_CLASS, PROP_KEY_SELECTED, Boolean.toString(this.selectedTextCheckBox.isSelected()));
+		Settings.getInstance().setProperty(PROP_CLASS, PROP_KEY_USE_REGEX, Boolean.toString(this.useRegexCheckBox.isSelected()));
 		
-		WbManager.getSettings().storeWindowPosition(this.dialog, PROP_CLASS + ".window");
+		Settings.getInstance().storeWindowPosition(this.dialog, PROP_CLASS + ".window");
 	}
 	
 	private void restoreSettings()
 	{
-		this.ignoreCaseCheckBox.setSelected("true".equals(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_CASE, "true")));
-		this.wordsOnlyCheckBox.setSelected("true".equals(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_WHOLE_WORD, "false")));
-		this.selectedTextCheckBox.setSelected("true".equals(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_SELECTED, "false")));
-		this.useRegexCheckBox.setSelected("true".equals(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_USE_REGEX, "true")));
-		//this.criteriaTextField.setText(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_SEARCH, ""));
-		//this.replaceValueTextField.setText(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_REPLACE, ""));
+		this.ignoreCaseCheckBox.setSelected("true".equals(Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_CASE, "true")));
+		this.wordsOnlyCheckBox.setSelected("true".equals(Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_WHOLE_WORD, "false")));
+		this.selectedTextCheckBox.setSelected("true".equals(Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_SELECTED, "false")));
+		this.useRegexCheckBox.setSelected("true".equals(Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_USE_REGEX, "true")));
+		//this.criteriaTextField.setText(Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_SEARCH, ""));
+		//this.replaceValueTextField.setText(Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_REPLACE, ""));
 	}
 	
 	public void windowActivated(java.awt.event.WindowEvent e)

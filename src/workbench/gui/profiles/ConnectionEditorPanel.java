@@ -1,9 +1,14 @@
 /*
  * ConnectionEditorPanel.java
  *
- * Created on January 25, 2002, 11:27 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.profiles;
 
 import java.awt.Component;
@@ -24,7 +29,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
@@ -42,7 +46,7 @@ import workbench.util.FileDialogUtil;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class ConnectionEditorPanel
 	extends JPanel

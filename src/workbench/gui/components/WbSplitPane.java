@@ -1,5 +1,13 @@
 /*
- * Created on 7. August 2002, 20:33
+ * WbSplitPane.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.gui.components;
 
@@ -17,7 +25,7 @@ import workbench.gui.WbSwingUtilities;
 /**
  * A JSplitPane which restores the divider size after a UI Change
  * and an updateUI()
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class WbSplitPane
 	extends JSplitPane

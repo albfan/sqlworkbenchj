@@ -1,10 +1,17 @@
 /*
  * Settings.java
  *
- * Created on December 1, 2001, 7:00 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.resource;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -28,22 +35,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import javax.swing.JOptionPane;
-
 import workbench.WbManager;
 import workbench.db.DbMetadata;
+import workbench.exception.ExceptionUtil;
+import workbench.gui.actions.ActionRegistration;
 import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
-import java.awt.Color;
-import workbench.exception.ExceptionUtil;
-import workbench.gui.actions.ActionRegistration;
 
 
 /**
  *
- *	@author  workbench@kellerer.org
+ *	@author  info@sql-workbench.net
  */
 public class Settings
 {
@@ -91,23 +95,31 @@ public class Settings
 			this.configDir = System.getProperty("workbench.configdir", "");
 		}
 
+		File cf;
 		if (configDir == null || configDir.trim().length() == 0)
 		{
-			File f = new File("");
-			configDir = f.getAbsolutePath();
+			// use the current working directory as the configuration directory
+			cf = new File("");
 		}
+		else
+		{
+			// "normalize" the directory name based on the platform
+			cf = new File(configDir); 
+		}
+		configDir = cf.getAbsolutePath();
 
 		if (WbManager.trace) System.out.println("Settings.<init> - using configDir: " + configDir);
 		String sep = System.getProperty("file.separator");
-		if (!this.configDir.endsWith(sep))
+
+		if (filename == null) 
 		{
-			configDir = configDir + sep;
+			File f = new File(this.configDir, "workbench.settings");
+			this.filename = f.getAbsolutePath();
+			if (WbManager.trace) System.out.println("Settings.<init> - using configfile: " + this.filename);
 		}
 
-		if (filename == null) this.filename = this.configDir + "workbench.settings";
-
 	  if (WbManager.trace) System.out.println("Settings.<init> - Reading settings");
-		try
+	  try
 		{
 
 			BufferedInputStream in = new BufferedInputStream(new FileInputStream(this.filename));
@@ -122,6 +134,12 @@ public class Settings
 	  if (WbManager.trace) System.out.println("Settings.<init> - Done reading settings. Initializing LogMgr");
 
 		boolean logSysErr = StringUtil.stringToBool(this.props.getProperty("workbench.log.console", "false"));
+		String sysLog = System.getProperty("workbench.log.console", null);
+		if (sysLog != null)
+		{
+			logSysErr = "true".equals(sysLog);
+		}
+
 		LogMgr.logToSystemError(logSysErr);
 
 		String format = this.props.getProperty("workbench.log.format", "{type} {timestamp} {message} {error}");
@@ -130,14 +148,16 @@ public class Settings
 		String level = this.props.getProperty("workbench.log.level", "info");
 		LogMgr.setLevel(level);
 
+		String logfile = null;
     try
     {
-			String logfile = System.getProperty("workbench.log.filename", null);
+			logfile = System.getProperty("workbench.log.filename", null);
 			if (logfile == null)
 			{
-				logfile = this.props.getProperty("workbench.log.filename", "Workbench.log");
+				logfile = this.props.getProperty("workbench.log.filename", "workbench.log");
 			}
 			int maxSize = this.getMaxLogfileSize();
+			logfile = StringUtil.replace(logfile, "%configdir%", configDir);
 			LogMgr.setOutputFile(logfile, maxSize);
     }
     catch (Throwable e)
@@ -146,7 +166,7 @@ public class Settings
       e.printStackTrace(System.err);
     }
 
-		LogMgr.logInfo("Settings.<init>", "Using configDir: " + configDir);
+		LogMgr.logInfo("Settings.<init>", "Using configdir: " + configDir);
 
 		if (WbManager.trace) System.out.println("Setting server lists for MetaData");
 		//DbMetadata.setServersWhichNeedReconnect(this.getCancelWithReconnectServers());
@@ -193,22 +213,17 @@ public class Settings
 
 	private String getShortcutFilename()
 	{
-		return this.configDir + "WbShortcuts.xml";
+		return new File(this.configDir, "WbShortcuts.xml").getAbsolutePath();
 	}
 
 	public String getProfileFileName()
 	{
-		return this.configDir + "WbProfiles.xml";
+		return new File(this.configDir, "WbProfiles.xml").getAbsolutePath();
 	}
 
 	public String getDriverConfigFileName()
 	{
-		return this.configDir + "WbDrivers.xml";
-	}
-
-	public void showOptionsDialog()
-	{
-		JOptionPane.showMessageDialog(null, "Not yet implemented. Please edit workbench.settings");
+		return new File(this.configDir, "WbDrivers.xml").getAbsolutePath();
 	}
 
 	public void addFontChangedListener(FontChangedListener aListener)
@@ -666,7 +681,7 @@ public class Settings
 	{
 		this.props.setProperty(PROPERTY_SHOW_LINE_NUMBERS, Boolean.toString(show));
 	}
-	
+
 	public boolean getAutoJumpNextStatement()
 	{
 		return StringUtil.stringToBool(this.props.getProperty("workbench.editor.autojumpnext", "false"));
@@ -684,7 +699,7 @@ public class Settings
 	{
 		this.props.setProperty("workbench.editor.highlightcurrent", Boolean.toString(show));
 	}
-	
+
 	public String getConnectionDisplayModel()
 	{
 		return this.props.getProperty("workbench.gui.connectiondisplay", "");
@@ -957,6 +972,12 @@ public class Settings
 		return this.getLastConnection("workbench.connection.last");
 	}
 
+	public void setLastExplorerConnection(String aName)
+	{
+		if (aName == null) aName = "";
+		this.props.setProperty("workbench.dbexplorer.connection.last", aName);
+	}
+	
 	public void setLastConnection(String aName)
 	{
 		if (aName == null) aName = "";

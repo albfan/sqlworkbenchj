@@ -1,15 +1,25 @@
+/*
+ * WbCopy.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
+ */
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import workbench.WbManager;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.DataCopier;
 import workbench.db.TableIdentifier;
-
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.log.LogMgr;
@@ -23,7 +33,7 @@ import workbench.util.StringUtil;
 /**
  * A command to copy data from one DBMS to another. This is the commandline
  * version of the DataPumper.
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class WbCopy
 	extends SqlCommand

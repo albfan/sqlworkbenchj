@@ -1,35 +1,38 @@
 /*
  * TableSelectorPanel.java
  *
- * Created on December 20, 2003, 9:54 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.tools;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
+
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
-
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.WbMenuItem;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class TableSelectorPanel
 	extends JPanel
@@ -49,7 +52,6 @@ public class TableSelectorPanel
 	/** Creates new form TableSelectorPanel */
 	public TableSelectorPanel()
 	{
-		this.tablesOnly = tablesOnly;
 		initComponents();
 		this.schemaLabel.setText(ResourceMgr.getString("LabelSchema"));
 		this.tableLabel.setText(ResourceMgr.getString("LabelTable"));

@@ -1,7 +1,13 @@
 /*
- * DwTable.java
+ * WbTable.java
  *
- * Created on December 1, 2001, 11:41 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.gui.components;
 
@@ -15,9 +21,11 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
@@ -32,41 +40,42 @@ import java.awt.print.PageFormat;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
-import javax.swing.AbstractListModel;
 
+import javax.swing.AbstractListModel;
 import javax.swing.ActionMap;
 import javax.swing.CellEditor;
-import javax.swing.DefaultCellEditor;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolTip;
 import javax.swing.JViewport;
+import javax.swing.ListCellRenderer;
+import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.JPopupMenu.Separator;
-import javax.swing.JScrollBar;
-import javax.swing.ListCellRenderer;
-import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.JTableHeader;
@@ -76,8 +85,13 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
-import workbench.WbManager;
+import workbench.db.ColumnIdentifier;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.CopyAsSqlInsertAction;
+import workbench.gui.actions.CopyAsSqlUpdateAction;
+import workbench.gui.actions.CopySelectedAsSqlInsertAction;
+import workbench.gui.actions.CopySelectedAsSqlUpdateAction;
+import workbench.gui.actions.CopySelectedAsTextAction;
 import workbench.gui.actions.DataToClipboardAction;
 import workbench.gui.actions.FindDataAction;
 import workbench.gui.actions.FindDataAgainAction;
@@ -109,21 +123,6 @@ import workbench.storage.DataStore;
 import workbench.storage.NullValue;
 import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
-import workbench.gui.actions.CopyAsSqlInsertAction;
-import workbench.gui.actions.CopyAsSqlUpdateAction;
-import java.awt.RenderingHints;
-import java.awt.Graphics2D;
-import java.io.StringWriter;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import workbench.gui.actions.CopySelectedAsSqlInsertAction;
-import workbench.gui.actions.CopySelectedAsSqlUpdateAction;
-import workbench.gui.actions.CopySelectedAsTextAction;
-import java.util.ArrayList;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import workbench.db.ColumnIdentifier;
-import workbench.util.WbThread;
 
 
 public class WbTable
@@ -221,7 +220,7 @@ public class WbTable
 		Font dataFont = this.getFont();
 		if (dataFont == null) dataFont = (Font)UIManager.get("Table.font");
 
-		boolean autoSelect = WbManager.getSettings().getAutoSelectTableEditor();
+		boolean autoSelect = Settings.getInstance().getAutoSelectTableEditor();
 
 		JTextField text = new JTextField();
 		text.setFont(dataFont);
@@ -277,7 +276,7 @@ public class WbTable
 		this.dataToClipboard.addToInputMap(im, am);
 		this.exportDataAction.addToInputMap(im, am);
 		this.optimizeAllCol.addToInputMap(im, am);
-		WbManager.getSettings().addFontChangedListener(this);
+		Settings.getInstance().addFontChangedListener(this);
 	}
 
 
@@ -545,8 +544,8 @@ public class WbTable
 
 	private TablePrinter getTablePrinter()
 	{
-		PageFormat format = WbManager.getSettings().getPageFormat();
-		Font printerFont = WbManager.getSettings().getPrinterFont();
+		PageFormat format = Settings.getInstance().getPageFormat();
+		Font printerFont = Settings.getInstance().getPrinterFont();
 		TablePrinter printer = new TablePrinter(this, format, printerFont);
 		if (this.defaultPrintHeader != null)
 		{
@@ -590,7 +589,7 @@ public class WbTable
 			{
 				// The underlying DataStore needs to know the date format in order
 				// to convert input strings to dates
-				ds.setDefaultDateFormat(WbManager.getSettings().getDefaultDateFormat());
+				ds.setDefaultDateFormat(Settings.getInstance().getDefaultDateFormat());
 			}
 			else
 			{
@@ -733,7 +732,7 @@ public class WbTable
 		try
 		{
 			int column = this.getSelectedColumn();
-			int row = this.getSelectedRow();
+			final int row = this.getSelectedRow();
 
 			int sortColumn = -1;
 			boolean asc = false;
@@ -782,13 +781,22 @@ public class WbTable
 			if (row >= 0)
 			{
 				this.getSelectionModel().setSelectionInterval(row, row);
-				int newColumn = column;
+				final int newColumn;
 				if (aFlag)
-					newColumn ++;
+					newColumn = column + 1;
 				else
-					newColumn --;
+					newColumn = column - 1;
 
-				if (newColumn >= 0) this.changeSelection(row, newColumn, true, true);
+				if (newColumn >= 0) 
+				{
+					SwingUtilities.invokeLater(new Runnable()
+					{
+						public void run()
+						{
+							changeSelection(row, newColumn, true, true);
+						}
+					});
+				}
 			}
 		}
 		finally
@@ -1828,7 +1836,7 @@ public class WbTable
 		{
 			out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(aFilename)));
 			DataStore ds = this.getDataStore();
-			ds.writeDataString(out, WbManager.getSettings().getDefaultTextDelimiter(), StringUtil.LINE_TERMINATOR, true);
+			ds.writeDataString(out, Settings.getInstance().getDefaultTextDelimiter(), StringUtil.LINE_TERMINATOR, true);
 		}
 		catch (Throwable th)
 		{

@@ -1,5 +1,13 @@
 /*
- * Created on 28. August 2002, 23:40
+ * ComboStringPropertyEditor.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.gui.components;
 
@@ -19,7 +27,7 @@ import workbench.interfaces.SimplePropertyEditor;
 /**
  *	A property editor for a String property, where the values
  *	for the field can also be selected by a dropdown
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class ComboStringPropertyEditor 
 	extends JComboBox 

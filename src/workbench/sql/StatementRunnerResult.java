@@ -1,9 +1,14 @@
 /*
  * StatementRunnerResult.java
  *
- * Created on 16. November 2002, 13:44
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.sql;
 
 import java.sql.ResultSet;
@@ -13,7 +18,7 @@ import workbench.storage.DataStore;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class StatementRunnerResult
 {
@@ -25,6 +30,7 @@ public class StatementRunnerResult
 	private String sourceCommand;
 
 	private boolean success = true;
+	private boolean hasWarning = false;
 
 	public StatementRunnerResult(String aCmd)
 	{
@@ -33,6 +39,9 @@ public class StatementRunnerResult
 
 	public void setSuccess() { this.success = true; }
 	public void setFailure() { this.success = false; }
+	public void setWarning(boolean flag) { this.hasWarning = flag; }
+	public boolean hasWarning() { return this.hasWarning; }
+
 	public boolean isSuccess() { return this.success; }
 	public String getSourceCommand() { return this.sourceCommand; }
 
@@ -65,7 +74,7 @@ public class StatementRunnerResult
 			this.messages.add(msg[i]);
 		}
 	}
-	
+
 	public void addMessage(String aMessage)
 	{
 		if (this.messages == null) this.messages = new ArrayList();
@@ -186,6 +195,7 @@ public class StatementRunnerResult
 		if (this.messages != null) this.messages.clear();
 		if (this.updateCounts !=null) this.updateCounts.clear();
 		this.sourceCommand = null;
+		this.hasWarning = false;
 	}
 
 }

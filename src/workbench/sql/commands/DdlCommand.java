@@ -1,3 +1,14 @@
+/*
+ * DdlCommand.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
+ */
 package workbench.sql.commands;
 
 import java.sql.SQLException;
@@ -7,15 +18,16 @@ import java.util.StringTokenizer;
 
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.SqlUtil;
-import workbench.log.LogMgr;
+import workbench.util.StringUtil;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class DdlCommand extends SqlCommand
 {
@@ -101,8 +113,16 @@ public class DdlCommand extends SqlCommand
 		catch (Exception e)
 		{
 			result.clear();
-			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
+			
+			StringBuffer msg = new StringBuffer(150);
+			msg.append(ResourceMgr.getString("MsgExecuteError") + "\n");
+			int maxLen = 150;
+			msg.append(StringUtil.getMaxSubstring(aSql.trim(), maxLen, "..."));
+			msg.append("\n");
+			
+			result.addMessage(msg.toString());
 			result.addMessage(ExceptionUtil.getDisplay(e));
+			
       this.addExtendErrorInfo(aConnection, aSql, result);
 			result.setFailure();
 			LogMgr.logDebug("DdlCommand.execute()", "Error executing statement", e);

@@ -1,32 +1,39 @@
 /*
  * TableDeleterUI.java
  *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.dbobjects;
 
 import java.awt.Frame;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.WindowConstants;
+import workbench.db.TableIdentifier;
 
-import workbench.WbManager;
-import workbench.db.ObjectDropper;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.NoSelectionModel;
 import workbench.gui.components.WbButton;
+import workbench.interfaces.TableDeleteListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.WbThread;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class TableDeleterUI extends javax.swing.JPanel
 {
@@ -36,6 +43,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 	private boolean cancelled;
 	private WbConnection connection;
 	private Thread deleteThread;
+	private List deleteListener;
 
 	public TableDeleterUI()
 	{
@@ -254,7 +262,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 		boolean useTruncate = this.useTruncateCheckBox.isSelected();
 		if (useTruncate) commitEach = false;
 		boolean hasError = false;
-
+		List tables = new ArrayList();
 		int count = this.objectNames.size();
 		String table = null;
 		for (int i=0; i < count; i++)
@@ -265,6 +273,8 @@ public class TableDeleterUI extends javax.swing.JPanel
 			try
 			{
 				this.deleteTable(table, useTruncate, commitEach);
+				TableIdentifier tid = new TableIdentifier(table);
+				tables.add(tid);
 			}
 			catch (Exception ex)
 			{
@@ -295,6 +305,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 			}
 		}
 
+		this.fireTableDeleted(tables);
 		boolean commit = true;
 		try
 		{
@@ -322,7 +333,6 @@ public class TableDeleterUI extends javax.swing.JPanel
 
 			WbSwingUtilities.showErrorMessage(this.dialog, msg);
 		}
-
 		this.statusLabel.setText("");
 		if (!hasError)
 		{
@@ -393,6 +403,28 @@ public class TableDeleterUI extends javax.swing.JPanel
 		this.dialog.setVisible(true);
 	}
 
+	public void addDeleteListener(TableDeleteListener listener)
+	{
+		if (this.deleteListener == null) this.deleteListener = new ArrayList();
+		this.deleteListener.add(listener);
+	}
+	
+	public void removeDeleteListener(TableDeleteListener listener)
+	{
+		if (this.deleteListener == null) return;
+		this.deleteListener.remove(listener);
+	}
+	
+	public void fireTableDeleted(List tables)
+	{
+		if (this.deleteListener == null) return;
+		for (int i=0; i<this.deleteListener.size(); i++)
+		{
+			TableDeleteListener l = (TableDeleteListener)this.deleteListener.get(i);
+			l.tableDataDeleted(tables);
+		}
+	}
+	
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.ButtonGroup buttonGroup1;
   private javax.swing.JPanel buttonPanel;

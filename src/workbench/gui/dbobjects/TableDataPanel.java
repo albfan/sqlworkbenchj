@@ -1,10 +1,17 @@
 /*
- * Created on 5. August 2002, 21:06
+ * TableDataPanel.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
@@ -14,6 +21,7 @@ import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -30,7 +38,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
-import workbench.WbManager;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
@@ -42,23 +49,22 @@ import workbench.gui.components.WbToolbar;
 import workbench.gui.sql.DwPanel;
 import workbench.interfaces.Interruptable;
 import workbench.interfaces.Reloadable;
+import workbench.interfaces.TableDeleteListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.util.SqlUtil;
-import java.awt.Cursor;
-import workbench.util.StrBuffer;
+import workbench.resource.Settings;
 import workbench.util.WbThread;
 
 
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  *
  */
 public class TableDataPanel
   extends JPanel
-	implements Reloadable, ActionListener, Interruptable
+	implements Reloadable, ActionListener, Interruptable, TableDeleteListener
 {
 	private WbConnection dbConnection;
 	private DwPanel dataDisplay;
@@ -90,8 +96,8 @@ public class TableDataPanel
 		this.dataDisplay.setShowLoadProcess(true);
 		this.dataDisplay.setDefaultStatusMessage("");
 		this.dataDisplay.setShowErrorMessages(true);
-		this.dataDisplay.getTable().setMaxColWidth(WbManager.getSettings().getMaxColumnWidth());
-		this.dataDisplay.getTable().setMinColWidth(WbManager.getSettings().getMinColumnWidth());
+		this.dataDisplay.getTable().setMaxColWidth(Settings.getInstance().getMaxColumnWidth());
+		this.dataDisplay.getTable().setMinColWidth(Settings.getInstance().getMinColumnWidth());
 		this.dataDisplay.setSaveChangesInBackground(true);
 
     JPanel topPanel = new JPanel();
@@ -130,7 +136,7 @@ public class TableDataPanel
 
 		rowCountLabel = new JLabel(ResourceMgr.getString("LabelTableDataRowCount"));
 		rowCountLabel.setToolTipText(ResourceMgr.getDescription("LabelTableDataRowCount"));
-		Font std = WbManager.getSettings().getStandardFont();
+		Font std = Settings.getInstance().getStandardFont();
 		Font bold = std.deriveFont(Font.BOLD);
 		rowCountLabel.setFont(bold);
 		rowCountLabel.setHorizontalTextPosition(SwingConstants.LEFT);
@@ -187,7 +193,10 @@ public class TableDataPanel
 
 	public void reset()
 	{
+		if (this.isRetrieving()) return;
 		this.dataDisplay.clearContent();
+		this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount"));
+		this.clearLoadingImage();
 	}
 
 	public void setConnection(WbConnection aConnection)
@@ -223,8 +232,6 @@ public class TableDataPanel
 
 		try
 		{
-			WbSwingUtilities.showWaitCursor(this);
-
 			stmt = this.dbConnection.createStatement();
 			rs = stmt.executeQuery(sql);
 			if (rs.next())
@@ -246,10 +253,8 @@ public class TableDataPanel
 		}
 		finally
 		{
-			WbSwingUtilities.showDefaultCursorOnWindow(this);
 			this.dataDisplay.setStatusMessage("");
-			if (this.loadingImage != null) this.loadingImage.flush();
-			this.rowCountLabel.setIcon(null);
+			this.clearLoadingImage();
 			try { if (rs != null) rs.close(); } catch (Throwable th) {}
 			try { if (stmt != null) stmt.close(); } catch (Throwable th) {}
 			this.reloadAction.setEnabled(true);
@@ -259,7 +264,7 @@ public class TableDataPanel
 
 	public void setTable(TableIdentifier aTable)
 	{
-		this.reset();
+		if (!this.isRetrieving()) reset();
 		this.table = aTable;
 	}
 
@@ -278,6 +283,12 @@ public class TableDataPanel
 		sql.append(this.table.getTableExpression());
 
 		return sql.toString();
+	}
+
+	private void clearLoadingImage()
+	{
+		if (this.loadingImage != null) this.loadingImage.flush();
+		this.rowCountLabel.setIcon(null);
 	}
 
 	public boolean confirmCancel() { return true; }
@@ -333,22 +344,22 @@ public class TableDataPanel
 	{
 		if (this.isRetrieving()) return;
 
-    final String sql = this.buildSqlForTable(false);
+    String sql = this.buildSqlForTable(false);
     if (sql == null) return;
-		this.retrieveStart();
 
-		final int maxRows = this.getMaxRows();
+		this.retrieveStart();
 
 		this.cancelRetrieve.setEnabled(true);
 		this.reloadAction.setEnabled(false);
 		try
 		{
-			WbSwingUtilities.showWaitCursorOnWindow(dataDisplay);
-			//dataDisplay.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			//WbSwingUtilities.showWaitCursor(this);
 			dataDisplay.setShowErrorMessages(true);
+			dataDisplay.setAutomaticUpdateTableCheck(false);
 			dataDisplay.scriptStarting();
-			dataDisplay.setMaxRows(maxRows);
+			dataDisplay.setMaxRows(this.getMaxRows());
 			dataDisplay.runStatement(sql);
+			dataDisplay.setUpdateTable(this.table.getTableExpression());
 			String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
 			dataDisplay.setPrintHeader(header);
 			dataDisplay.setStatusMessage("");
@@ -365,14 +376,11 @@ public class TableDataPanel
 		}
 		catch (Throwable e)
 		{
-			LogMgr.logError("TableDataPanel.retrieve()", "Error retrieving table data", e);
+			LogMgr.logError("TableDataPanel.doRetrieve()", "Error retrieving table data", e);
 		}
 		finally
 		{
-			WbSwingUtilities.showDefaultCursorOnWindow(dataDisplay);
-			//dataDisplay.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-			//WbSwingUtilities.showDefaultCursor(dataDisplay);
-			//dataDisplay.getTable().setCursor(null);
+			//WbSwingUtilities.showDefaultCursor(this);
 			dataDisplay.scriptFinished();
 			cancelRetrieve.setEnabled(false);
 			reloadAction.setEnabled(true);
@@ -394,22 +402,22 @@ public class TableDataPanel
 
 	public void saveSettings()
 	{
-		WbManager.getSettings().setProperty(TableDataPanel.class.getName(), "maxrows", this.getMaxRows());
+		Settings.getInstance().setProperty(TableDataPanel.class.getName(), "maxrows", this.getMaxRows());
 		String auto = Boolean.toString(this.autoRetrieve.isSelected());
-		WbManager.getSettings().setProperty(TableDataPanel.class.getName(), "autoretrieve", auto);
-		WbManager.getSettings().setProperty(TableDataPanel.class.getName(), "warningthreshold", Long.toString(this.warningThreshold));
+		Settings.getInstance().setProperty(TableDataPanel.class.getName(), "autoretrieve", auto);
+		Settings.getInstance().setProperty(TableDataPanel.class.getName(), "warningthreshold", Long.toString(this.warningThreshold));
 	}
 
 	public void restoreSettings()
 	{
-		int max = WbManager.getSettings().getIntProperty(TableDataPanel.class.getName(), "maxrows", 500);
+		int max = Settings.getInstance().getIntProperty(TableDataPanel.class.getName(), "maxrows", 500);
 		this.dataDisplay.setMaxRows(max);
-		boolean auto = "true".equals(WbManager.getSettings().getProperty(TableDataPanel.class.getName(), "autoretrieve", "false"));
+		boolean auto = "true".equals(Settings.getInstance().getProperty(TableDataPanel.class.getName(), "autoretrieve", "false"));
 		this.autoRetrieve.setSelected(auto);
 
 		try
 		{
-			String v = WbManager.getSettings().getProperty(TableDataPanel.class.getName(), "warningthreshold", "1500");
+			String v = Settings.getInstance().getProperty(TableDataPanel.class.getName(), "warningthreshold", "1500");
 			this.warningThreshold = Long.parseLong(v);
 		}
 		catch (Exception e)
@@ -475,6 +483,22 @@ public class TableDataPanel
 	public void setReadOnly(boolean aFlag)
 	{
 		this.dataDisplay.setReadOnly(aFlag);
+	}
+
+	public void tableDataDeleted(List tables)
+	{
+		if (tables == null) return;
+		if (this.table == null) return;
+		int count = tables.size();
+		for (int i=0; i < count; i++)
+		{
+			TableIdentifier tid = (TableIdentifier)tables.get(i);
+			if (this.table.equals(tid))
+			{
+				this.reset();
+				break;
+			}
+		}
 	}
 
 }

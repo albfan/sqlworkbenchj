@@ -1,28 +1,29 @@
 /*
- * TableReferenceTree.java
+ * TableDependencyTreeDisplay.java
  *
- * Created on October 22, 2002, 5:13 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
-import workbench.WbManager;
 
 import workbench.db.DependencyNode;
 import workbench.db.TableDependency;
@@ -37,7 +38,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class TableDependencyTreeDisplay 
   extends JPanel

@@ -1,9 +1,14 @@
 /*
- * TestFrame.java
+ * WhatsNewViewer.java
  *
- * Created on November 26, 2001, 11:22 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.help;
 
 import java.awt.BorderLayout;
@@ -17,9 +22,9 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 
-import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 
 public class WhatsNewViewer extends JDialog 
@@ -38,12 +43,12 @@ public class WhatsNewViewer extends JDialog
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(scroll, BorderLayout.CENTER);
 
-		if (!WbManager.getSettings().restoreWindowSize(this))
+		if (!Settings.getInstance().restoreWindowSize(this))
 		{
 			setSize(800,600);
 		}
 		
-		if (!WbManager.getSettings().restoreWindowPosition(this))
+		if (!Settings.getInstance().restoreWindowPosition(this))
 		{
 			WbSwingUtilities.center(this, owner);
 		}
@@ -83,8 +88,8 @@ public class WhatsNewViewer extends JDialog
 
 	private void saveSettings()
 	{
-		WbManager.getSettings().storeWindowPosition(this);
-		WbManager.getSettings().storeWindowSize(this);
+		Settings.getInstance().storeWindowPosition(this);
+		Settings.getInstance().storeWindowSize(this);
 	}
 
 }

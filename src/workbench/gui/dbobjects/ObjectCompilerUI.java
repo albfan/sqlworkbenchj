@@ -1,35 +1,36 @@
 /*
- * ObjectScripterUI.java
+ * ObjectCompilerUI.java
  *
- * Created on September 4, 2003, 5:45 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.WindowListener;
 import java.sql.SQLException;
 import java.util.List;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.EtchedBorder;
 
-import workbench.WbManager;
-import workbench.db.ObjectScripter;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleObjectCompiler;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.EditorPanel;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.WbThread;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class ObjectCompilerUI
 	extends JPanel
@@ -94,12 +95,12 @@ public class ObjectCompilerUI
 			this.window.getContentPane().setLayout(new BorderLayout());
 			this.window.getContentPane().add(this, BorderLayout.CENTER);
 			this.window.setIconImage(ResourceMgr.getImage("workbench").getImage());
-			if (!WbManager.getSettings().restoreWindowSize(this.window, ObjectCompilerUI.class.getName()))
+			if (!Settings.getInstance().restoreWindowSize(this.window, ObjectCompilerUI.class.getName()))
 			{
 				this.window.setSize(500,400);
 			}
 
-			if (!WbManager.getSettings().restoreWindowPosition(this.window, ObjectCompilerUI.class.getName()))
+			if (!Settings.getInstance().restoreWindowPosition(this.window, ObjectCompilerUI.class.getName()))
 			{
 				WbSwingUtilities.center(this.window, aParent);
 			}
@@ -126,8 +127,8 @@ public class ObjectCompilerUI
 			this.compiler = null;
 			this.worker = null;
 		}
-		WbManager.getSettings().storeWindowPosition(this.window, ObjectCompilerUI.class.getName());
-		WbManager.getSettings().storeWindowSize(this.window, ObjectCompilerUI.class.getName());
+		Settings.getInstance().storeWindowPosition(this.window, ObjectCompilerUI.class.getName());
+		Settings.getInstance().storeWindowSize(this.window, ObjectCompilerUI.class.getName());
 		this.window.hide();
 		this.window.dispose();
 	}

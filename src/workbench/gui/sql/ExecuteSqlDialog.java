@@ -1,34 +1,41 @@
 /*
  * ExecuteSqlDialog.java
  *
- * Created on June 24, 2004, 10:41 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
 import java.sql.Statement;
+
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
-import workbench.WbManager;
+
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbButton;
 import workbench.resource.ResourceMgr;
-import java.awt.EventQueue;
+import workbench.resource.Settings;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class ExecuteSqlDialog
 	extends JDialog
@@ -69,7 +76,7 @@ public class ExecuteSqlDialog
 		mainPanel.add(this.statusMessage, BorderLayout.SOUTH);
 		this.getContentPane().add(mainPanel, BorderLayout.CENTER);
 		this.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-		if (!WbManager.getSettings().restoreWindowSize(this, this.getClass().getName()))
+		if (!Settings.getInstance().restoreWindowSize(this, this.getClass().getName()))
 		{
 			this.setSize(500,400);
 		}
@@ -111,7 +118,7 @@ public class ExecuteSqlDialog
 			this.worker.interrupt();
 			this.worker = null;
 		}
-		WbManager.getSettings().storeWindowSize(this, this.getClass().getName());
+		Settings.getInstance().storeWindowSize(this, this.getClass().getName());
 		this.hide();
 		this.dispose();
 	}

@@ -1,9 +1,14 @@
 /*
  * SearchCriteriaPanel.java
  *
- * Created on August 20, 2003, 11:20 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.components;
 
 import java.awt.BorderLayout;
@@ -17,8 +22,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import workbench.WbManager;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 /**
  *
@@ -48,15 +53,15 @@ public class SearchCriteriaPanel
 	{
 		this.ignoreCase = new JCheckBox(ResourceMgr.getString("LabelSearchIgnoreCase"));
 		this.ignoreCase.setToolTipText(ResourceMgr.getDescription("LabelSearchIgnoreCase"));
-		this.ignoreCase.setSelected("true".equals(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_CASE, "true")));
+		this.ignoreCase.setSelected("true".equals(Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_CASE, "true")));
 		
 		this.wholeWord = new JCheckBox(ResourceMgr.getString("LabelSearchWordsOnly"));
 		this.wholeWord.setToolTipText(ResourceMgr.getDescription("LabelSearchWordsOnly"));
-		this.wholeWord.setSelected("true".equals(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_WHOLE_WORD, "false")));
+		this.wholeWord.setSelected("true".equals(Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_WHOLE_WORD, "false")));
 
 		this.useRegEx = new JCheckBox(ResourceMgr.getString("LabelSearchRegEx"));
 		this.useRegEx.setToolTipText(ResourceMgr.getDescription("LabelSearchRegEx"));
-		this.useRegEx.setSelected("true".equals(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_REGEX, "false")));
+		this.useRegEx.setSelected("true".equals(Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_REGEX, "false")));
 		
 		this.label = new JLabel(ResourceMgr.getString("LabelSearchCriteria"));
 		this.criteria = new JTextField();
@@ -65,7 +70,7 @@ public class SearchCriteriaPanel
 		{
 			this.criteria.setText(initialValue);
 			this.criteria.selectAll();
-			//initialValue = WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_CRIT, null);
+			//initialValue = Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_CRIT, null);
 		}
 		
 		this.criteria.addMouseListener(new TextComponentMouseListener());
@@ -124,10 +129,10 @@ public class SearchCriteriaPanel
 		});
 		String title = ResourceMgr.getString("TxtWindowTitleSearchText");
 		int choice = JOptionPane.showConfirmDialog(caller, this, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_CASE, Boolean.toString(this.getIgnoreCase()));
-		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_CRIT, this.getCriteria());
-		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_WHOLE_WORD, Boolean.toString(this.getWholeWordOnly()));
-		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_REGEX, Boolean.toString(this.getUseRegex()));
+		Settings.getInstance().setProperty(PROP_CLASS, PROP_KEY_CASE, Boolean.toString(this.getIgnoreCase()));
+		Settings.getInstance().setProperty(PROP_CLASS, PROP_KEY_CRIT, this.getCriteria());
+		Settings.getInstance().setProperty(PROP_CLASS, PROP_KEY_WHOLE_WORD, Boolean.toString(this.getWholeWordOnly()));
+		Settings.getInstance().setProperty(PROP_CLASS, PROP_KEY_REGEX, Boolean.toString(this.getUseRegex()));
 		if (choice == JOptionPane.CANCEL_OPTION) return false;
 		return true;
 	}

@@ -1,21 +1,27 @@
 /*
  * ObjectScripter.java
  *
- * Created on September 4, 2003, 5:26 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db;
 
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
+
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
 import workbench.util.StrBuffer;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class ObjectScripter
 	implements Scripter

@@ -1,3 +1,14 @@
+/*
+ * SqlUtil.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
+ */
 package workbench.util;
 
 import java.sql.ResultSet;
@@ -12,10 +23,8 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
 
 public class SqlUtil
 {
@@ -263,7 +272,9 @@ public class SqlUtil
 				}
 			}
 		}
-		return newSql.toString();
+		String s = newSql.toString().trim();
+		if (s.endsWith(";")) s = s.substring(0, s.length() - 1);
+		return s;
 	}
 
 	private static final int skipQuotes(String aString, int aStartpos)
@@ -429,6 +440,15 @@ public class SqlUtil
 						aSqlType == Types.SMALLINT ||
 						aSqlType == Types.TINYINT);
 	}
+	
+	public static final boolean isCharacterType(int aSqlType)
+	{
+		return (aSqlType == Types.VARCHAR || 
+		        aSqlType == Types.CHAR ||
+						aSqlType == Types.CLOB ||
+						aSqlType == Types.LONGVARCHAR);
+	}
+	
 	/**
 	 * 	Returns true if the passed datatype (from java.sql.Types)
 	 *  can hold a numeric value (either with or without decimals)
@@ -449,6 +469,34 @@ public class SqlUtil
 	{
 		return (aSqlType == Types.DATE ||
 						aSqlType == Types.TIMESTAMP);
+	}
+
+	/**
+	 *	Convenience method to close a ResultSet without a possible
+	 *  SQLException
+	 */
+	public static void closeResult(ResultSet rs)
+	{
+		try { rs.close(); } catch (Throwable th) {}
+	}
+
+	/**
+	 *	Convenience method to close a Statement without a possible
+	 *  SQLException
+	 */
+	public static void closeStatement(Statement stmt)
+	{
+		try { stmt.close(); } catch (Throwable th) {}
+	}
+
+	/**
+	 *	Convenience method to close a ResultSet and a Statement without
+	 *  a possible SQLException
+	 */
+	public static void closeAll(ResultSet rs, Statement stmt)
+	{
+		closeResult(rs);
+		closeStatement(stmt);
 	}
 
 	public static final String getTypeName(int aSqlType)
@@ -521,14 +569,7 @@ public class SqlUtil
 
 	public static void main(String args[])
 	{
-		String sql = "select 'analyze '|| object_type || ' '||owner||'.'||object_name||' compute statistics;'  \n" +
-                                 "from all_objects \n" +
-                                 "where owner in ('SYS') \n" +
-                                 "and object_type in ('TABLE') \n" +
-                                 "and object_name not like 'I_SNAP$%' \n" +
-                                 "order by owner, object_type desc";
-    List tables = getTables(sql);
-		for (int i=0; i < tables.size(); i++)
-			System.out.println(tables.get(i));
+		String sql = "  -- '\ncommit;--";
+		System.out.println("clean=" + makeCleanSql(sql, false, false, '\''));
 	}
 }

@@ -1,19 +1,25 @@
 /*
  * Like.java
  *
- * Created on 11. Oktober 2002, 15:02
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 /**
  * SQL comparison operator <i>like</i>.
  * An instance of this class represents a pattern of the SQL operator LIKE.
  *
  * @author  <a href="mailto:ey@inweb.de?subject=Like Operator">Christian Ey</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Like {
 

@@ -1,12 +1,21 @@
+/*
+ * WbLineBorder.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
+ */
 package workbench.gui.components;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
 
-import javax.swing.JPanel;
 import javax.swing.border.AbstractBorder;
 
 public class WbLineBorder extends AbstractBorder

@@ -1,28 +1,34 @@
 /*
- * DataStoreExporter.java
+ * RowDataConverter.java
  *
- * Created on 12. August 2004, 22:07
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db.exporter;
 
 import java.sql.Clob;
 import java.sql.SQLException;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import workbench.db.TableIdentifier;
+
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.storage.NullValue;
+import workbench.storage.ResultInfo;
+import workbench.storage.RowData;
 import workbench.util.StrBuffer;
-import workbench.storage.*;
 import workbench.util.StringUtil;
 
 /**
  * Interface for classes that can take objects of type {@link RowData}
  * and convert them to e.g. text, XML, HTML
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public abstract class RowDataConverter
 {

@@ -1,9 +1,14 @@
 /*
  * EditorPanel.java
  *
- * Created on November 25, 2001, 1:54 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.sql;
 
 import java.awt.Color;
@@ -30,14 +35,12 @@ import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
 
-import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
@@ -47,6 +50,7 @@ import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.actions.FindAction;
 import workbench.gui.actions.FindAgainAction;
 import workbench.gui.actions.FormatSqlAction;
+import workbench.gui.actions.MatchBracketAction;
 import workbench.gui.actions.ReplaceAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.ExtensionFileFilter;
@@ -54,11 +58,12 @@ import workbench.gui.components.ReplacePanel;
 import workbench.gui.components.SearchCriteriaPanel;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.editor.JEditTextArea;
-import workbench.gui.editor.SyntaxStyle;
 import workbench.gui.editor.SyntaxDocument;
+import workbench.gui.editor.SyntaxStyle;
 import workbench.gui.editor.Token;
 import workbench.gui.editor.TokenMarker;
 import workbench.interfaces.ClipboardSupport;
+import workbench.interfaces.FilenameChangeListener;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.FormattableSql;
 import workbench.interfaces.Replaceable;
@@ -70,17 +75,13 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.ScriptParser;
 import workbench.sql.formatter.SqlFormatter;
-import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
-import workbench.gui.actions.MatchBracketAction;
-import workbench.gui.editor.SyntaxDocument;
-import workbench.interfaces.FilenameChangeListener;
 
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  * @version
  */
 public class EditorPanel
@@ -149,12 +150,12 @@ public class EditorPanel
 	{
 		super();
 		this.setDoubleBuffered(true);
-		this.setFont(WbManager.getSettings().getEditorFont());
+		this.setFont(Settings.getInstance().getEditorFont());
 		this.setBorder(DEFAULT_BORDER);
 
 		this.getPainter().setStyles(SYNTAX_COLORS);
 
-		this.setTabSize(WbManager.getSettings().getEditorTabWidth());
+		this.setTabSize(Settings.getInstance().getEditorTabWidth());
 		this.setCaretBlinkEnabled(true);
 		this.addPopupMenuItem(new FileSaveAsAction(this), true);
 		this.fileOpen = new FileOpenAction(this);
@@ -175,15 +176,15 @@ public class EditorPanel
 
 		this.setMaximumSize(null);
 		this.setPreferredSize(null);
-		this.setShowLineNumbers(WbManager.getSettings().getShowLineNumbers());
+		this.setShowLineNumbers(Settings.getInstance().getShowLineNumbers());
 
 		this.columnSelection = new ColumnSelectionAction(this);
 		this.matchBracket = new MatchBracketAction(this);
 		this.addKeyBinding(this.matchBracket);
 
 		//this.setSelectionRectangular(true);
-		WbManager.getSettings().addFontChangedListener(this);
-		WbManager.getSettings().addChangeListener(this);
+		Settings.getInstance().addFontChangedListener(this);
+		Settings.getInstance().addChangeListener(this);
 
 		new DropTarget(this, DnDConstants.ACTION_COPY, this);
 	}
@@ -255,7 +256,7 @@ public class EditorPanel
 	{
 		String sql = this.getSelectedStatement();
 		ScriptParser parser = new ScriptParser();
-		parser.setAlternateDelimiter(WbManager.getSettings().getAlternateDelimiter());
+		parser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
 		parser.setScript(sql);
 		List commands = parser.getCommands();
 		String delimit = parser.getDelimiter();
@@ -280,7 +281,7 @@ public class EditorPanel
 		for (int i=0; i < count; i++)
 		{
 			String command = (String)commands.get(i);
-			SqlFormatter f = new SqlFormatter(command, WbManager.getSettings().getMaxSubselectLength());
+			SqlFormatter f = new SqlFormatter(command, Settings.getInstance().getMaxSubselectLength());
 			f.setDBFunctions(this.dbFunctions);
 			try
 			{
@@ -480,7 +481,7 @@ public class EditorPanel
 			return false;
 		}
 
-		String lastDir = WbManager.getSettings().getLastSqlDir();
+		String lastDir = Settings.getInstance().getLastSqlDir();
 		JFileChooser fc = new JFileChooser(lastDir);
 		fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
 		int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(this));
@@ -488,7 +489,7 @@ public class EditorPanel
 		{
 			result = this.readFile(fc.getSelectedFile());
 			lastDir = fc.getCurrentDirectory().getAbsolutePath();
-			WbManager.getSettings().setLastSqlDir(lastDir);
+			Settings.getInstance().setLastSqlDir(lastDir);
 		}
 		return result;
 	}
@@ -500,8 +501,8 @@ public class EditorPanel
 
 		if (this.isModified())
 		{
-			String filename = this.getCurrentFileName().replaceAll("\\\\", "\\\\\\\\");
-			String msg = ResourceMgr.getString("MsgConfirmUnsavedReload").replaceAll("%filename%", filename);
+			String msg = ResourceMgr.getString("MsgConfirmUnsavedReload");
+			msg = StringUtil.replace(msg, "%filename%", this.getCurrentFileName());
 			boolean reload = WbSwingUtilities.getYesNo(this, msg);
 			if (!reload) return false;
 		}
@@ -522,22 +523,33 @@ public class EditorPanel
 		return (file != null) && (file.length() > 0);
 	}
 
+	public int checkAndSaveFile()
+	{
+		if (!this.hasFileLoaded()) return JOptionPane.YES_OPTION;
+		int result = JOptionPane.YES_OPTION;
+
+		if (this.isModified())
+		{
+			String msg = ResourceMgr.getString("MsgConfirmUnsavedEditorFile");
+			msg = StringUtil.replace(msg, "%filename%", this.getCurrentFileName());
+			result = WbSwingUtilities.getYesNoCancel(this, msg);
+		}
+		return result;
+	}
+
 	public boolean canCloseFile()
 	{
 		if (!this.hasFileLoaded()) return true;
-		boolean result = true;
-		if (this.isModified())
+		if (!this.isModified()) return true;
+		int choice = this.checkAndSaveFile();
+		if (choice == JOptionPane.YES_OPTION)
 		{
-			String filename = this.getCurrentFileName().replaceAll("\\\\", "\\\\\\\\");
-			String msg = ResourceMgr.getString("MsgConfirmUnsavedEditorFile").replaceAll("%filename%", filename);
-			int choice = WbSwingUtilities.getYesNoCancel(this, msg);
-			if (choice == JOptionPane.YES_OPTION)
-			{
-				this.saveCurrentFile();
-			}
-			result = (choice != JOptionPane.CANCEL_OPTION);
+			return true;
 		}
-		return result;
+		else
+		{
+			return false;
+		}
 	}
 
 	public boolean readFile(File aFile)
@@ -554,9 +566,17 @@ public class EditorPanel
 		{
 			this.setText(""); // clear memory!
 			String filename = aFile.getAbsolutePath();
+			// Reading the text into a StringBuffer before
+			// putting it into the editor is faster then
+			// then calling this.appendLine() for each line
+			// in the file.
+			// Using a StrBuffer would make the creation and filling
+			// of the buffer faster, but would duplicate the memory usage
+			// as StrBuffer.toString() effectively copies the char array
+			// whereas StringBuffer.toString() re-uses the internal buffer
+			// for the new String object
 			BufferedReader reader = new BufferedReader(new FileReader(filename));
-			StrBuffer content = new StrBuffer((int)aFile.length() + 500);
-			this.setText("");
+			StringBuffer content = new StringBuffer((int)aFile.length() + 500);
 			String line = reader.readLine();
 			while (line != null)
 			{
@@ -615,17 +635,17 @@ public class EditorPanel
 		FileFilter ff = null;
 		if (this.editorType == SQL_EDITOR)
 		{
-			lastDir = WbManager.getSettings().getLastSqlDir();
+			lastDir = Settings.getInstance().getLastSqlDir();
 			ff = ExtensionFileFilter.getSqlFileFilter();
 		}
 		else if (this.editorType == JAVA_EDITOR)
 		{
-			lastDir = WbManager.getSettings().getLastJavaDir();
+			lastDir = Settings.getInstance().getLastJavaDir();
 			ff = ExtensionFileFilter.getJavaFileFilter();
 		}
 		else
 		{
-			lastDir = WbManager.getSettings().getLastEditorDir();
+			lastDir = Settings.getInstance().getLastEditorDir();
 			ff = ExtensionFileFilter.getTextFileFilter();
 		}
 		JFileChooser fc = new JFileChooser(lastDir);
@@ -641,15 +661,15 @@ public class EditorPanel
 				lastDir = fc.getCurrentDirectory().getAbsolutePath();
 				if (this.editorType == SQL_EDITOR)
 				{
-					WbManager.getSettings().setLastSqlDir(lastDir);
+					Settings.getInstance().setLastSqlDir(lastDir);
 				}
 				else if (this.editorType == JAVA_EDITOR)
 				{
-					WbManager.getSettings().setLastJavaDir(lastDir);
+					Settings.getInstance().setLastJavaDir(lastDir);
 				}
 				else
 				{
-					WbManager.getSettings().setLastEditorDir(lastDir);
+					Settings.getInstance().setLastEditorDir(lastDir);
 				}
 			}
 			catch (IOException e)
@@ -850,7 +870,7 @@ public class EditorPanel
 	{
 		if (Settings.PROPERTY_SHOW_LINE_NUMBERS.equals(evt.getPropertyName()))
 		{
-			this.setShowLineNumbers(WbManager.getSettings().getShowLineNumbers());
+			this.setShowLineNumbers(Settings.getInstance().getShowLineNumbers());
 			this.repaint();
 		}
 	}

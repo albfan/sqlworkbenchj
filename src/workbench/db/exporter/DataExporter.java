@@ -1,5 +1,13 @@
 /*
- * Created on 27. August 2002, 21:17
+ * DataExporter.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.db.exporter;
 
@@ -13,51 +21,37 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.xml.transform.TransformerException;
 
 import workbench.WbManager;
-import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.db.importer.RowDataProducer;
-import workbench.db.importer.RowDataReceiver;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.dbobjects.ProgressPanel;
 import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.util.FileDialogUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
-import workbench.util.XsltTransformer;
 
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class DataExporter
 	implements Interruptable

@@ -1,7 +1,13 @@
 /*
- * ClearAction.java
+ * ViewLineNumbers.java
  *
- * Created on December 2, 2001, 1:32 AM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.gui.actions;
 
@@ -10,14 +16,13 @@ import java.awt.event.ActionEvent;
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
-import javax.swing.border.Border;
 
-import workbench.WbManager;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
- *	@author  workbench@kellerer.org
+ *	@author  info@sql-workbench.net
  */
 public class ViewLineNumbers extends WbAction
 {
@@ -30,7 +35,7 @@ public class ViewLineNumbers extends WbAction
 		this.initMenuDefinition("MnuTxtShowLineNumbers");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 		this.setIcon(null);
-		this.switchedOn = WbManager.getSettings().getShowLineNumbers();
+		this.switchedOn = Settings.getInstance().getShowLineNumbers();
 	}
 
 	public void executeAction(ActionEvent e)
@@ -44,7 +49,7 @@ public class ViewLineNumbers extends WbAction
 	{
 		this.switchedOn = aFlag;
 		if (this.toggleMenu != null) this.toggleMenu.setSelected(aFlag);
-		WbManager.getSettings().setShowLineNumbers(this.switchedOn);
+		Settings.getInstance().setShowLineNumbers(this.switchedOn);
 	}
 
 	public void addToMenu(JMenu aMenu)

@@ -1,34 +1,34 @@
 /*
  * DataPumper.java
  *
- * Created on December 20, 2003, 7:05 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.tools;
 
 import java.awt.BorderLayout;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
 import java.beans.PropertyChangeListener;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import javax.swing.Box;
-import javax.swing.JDialog;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
@@ -36,7 +36,6 @@ import workbench.db.ConnectionProfile;
 import workbench.db.DataCopier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.db.importer.DataImporter;
 import workbench.exception.ExceptionUtil;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
@@ -54,10 +53,11 @@ import workbench.sql.wbcommands.WbCopy;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbThread;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class DataPumper
 	extends JPanel
@@ -77,7 +77,7 @@ public class DataPumper
 	private EditorPanel sqlEditor;
 	private MainWindow mainWindow;
 	private boolean supportsBatch = false;
-	boolean allowCreateTable = true; //"true".equals(WbManager.getSettings().getProperty("workbench.datapumper.allowcreate", "true"));
+	boolean allowCreateTable = true; //"true".equals(Settings.getInstance().getProperty("workbench.datapumper.allowcreate", "true"));
 
 	/** Creates new form DataPumper */
 	public DataPumper(ConnectionProfile source, ConnectionProfile target)
@@ -138,7 +138,7 @@ public class DataPumper
 
 	public void saveSettings()
 	{
-		Settings s = WbManager.getSettings();
+		Settings s = Settings.getInstance();
 		if (this.source != null)
 		{
 			s.setProperty("workbench.datapumper.source", "lastprofile", this.source.getName());
@@ -169,7 +169,7 @@ public class DataPumper
 
 	public void restoreSettings()
 	{
-		Settings s = WbManager.getSettings();
+		Settings s = Settings.getInstance();
 		boolean delete = "true".equals(s.getProperty("workbench.datapumper.target", "deletetable", "false"));
 		boolean cont = "true".equals(s.getProperty("workbench.datapumper", "continue", "false"));
 		boolean drop = "true".equals(s.getProperty("workbench.datapumper", "droptable", "false"));
@@ -895,7 +895,7 @@ public class DataPumper
 
 		if (aParent == null)
 		{
-			if (!WbManager.getSettings().restoreWindowPosition(this.window, "workbench.datapumper.window"))
+			if (!Settings.getInstance().restoreWindowPosition(this.window, "workbench.datapumper.window"))
 			{
 				WbSwingUtilities.center(this.window, null);
 			}
@@ -995,7 +995,7 @@ public class DataPumper
 				prof = dialog.getSelectedProfile();
 				if (prof != null)
 				{
-					WbManager.getSettings().setProperty(lastProfileKey, prof.getName());
+					Settings.getInstance().setProperty(lastProfileKey, prof.getName());
 				}
 				else
 				{
@@ -1171,7 +1171,7 @@ public class DataPumper
 		this.columnMapper.resetData();
 		this.columnMapper = null;
 
-		Thread t = new Thread()
+		Thread t = new WbThread("DataPumper disconnect thread")
 		{
 			public void run()
 			{
@@ -1180,8 +1180,6 @@ public class DataPumper
 				disconnectDone();
 			}
 		};
-		t.setName("DataPumper disconnect thread");
-		t.setDaemon(true);
 		t.start();
 	}
 

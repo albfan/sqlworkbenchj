@@ -1,6 +1,13 @@
 /*
- * Created on 06.12.2003
- * 
+ * ShortcutEditor.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.gui.settings;
 
@@ -30,7 +37,6 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.DividerBorder;
@@ -44,7 +50,7 @@ import workbench.resource.StoreableKeyStroke;
 import workbench.storage.DataStore;
 
 /**
- * @author workbench@kellerer.org
+ * @author info@sql-workbench.net
  *
  */
 public class ShortcutEditor
@@ -176,7 +182,7 @@ public class ShortcutEditor
 		this.add(contentPanel, BorderLayout.CENTER);
 		
 		window.getContentPane().add(this);
-		if (!WbManager.getSettings().restoreWindowSize(this.window, KEY_WINDOW_SIZE))
+		if (!Settings.getInstance().restoreWindowSize(this.window, KEY_WINDOW_SIZE))
 		{	
 			window.setSize(600,400);
 		}
@@ -243,7 +249,7 @@ public class ShortcutEditor
 
 	private void saveSettings()
 	{
-		WbManager.getSettings().storeWindowSize(this.window, KEY_WINDOW_SIZE);
+		Settings.getInstance().storeWindowSize(this.window, KEY_WINDOW_SIZE);
 	}
 
 	private void saveShortcuts()

@@ -1,12 +1,18 @@
 /*
  * TextFileParser.java
  *
- * Created on November 22, 2003, 3:04 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db.importer;
 
 import java.io.BufferedReader;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -14,23 +20,22 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import workbench.db.ColumnIdentifier;
 
+import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.storage.DataStore;
 import workbench.util.CsvLineParser;
+import workbench.util.SqlUtil;
 import workbench.util.ValueConverter;
 import workbench.util.WbStringTokenizer;
-import java.io.EOFException;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class TextFileParser
 	implements RowDataProducer
@@ -47,10 +52,12 @@ public class TextFileParser
 
 	private boolean withHeader = true;
 	private boolean cancelImport = false;
+	private boolean emptyStringIsNull = false;
+	
 	private RowDataReceiver receiver;
 	private String dateFormat;
 	private String timestampFormat;
-	private char decimalChar;
+	private char decimalChar = '.';
 
 	private WbConnection connection;
 
@@ -207,6 +214,11 @@ public class TextFileParser
 					{
 						value = tok.getNext();
 						rowData[i] = converter.convertValue(value, this.columns[i].getDataType());
+						if (this.emptyStringIsNull && SqlUtil.isCharacterType(this.columns[i].getDataType()))
+						{
+							String s = (String)rowData[i];
+							if (s != null && s.length() == 0) rowData[i] = null;
+						}
 					}
 				}
 				catch (Exception e)
@@ -286,7 +298,7 @@ public class TextFileParser
 
 			for (int i=0; i < this.colCount; i++)
 			{
-				String colname = (String)myCols.get(i);
+				String colname = ((String)myCols.get(i)).trim();
 				this.columns[i] = new ColumnIdentifier(colname);
 				myCols.set(i, colname.toUpperCase());
 			}
@@ -313,5 +325,22 @@ public class TextFileParser
 		}
 	}
 
+	/**
+	 * Getter for property emptyStringIsNull.
+	 * @return Value of property emptyStringIsNull.
+	 */
+	public boolean isEmptyStringIsNull()
+	{
+		return emptyStringIsNull;
+	}	
 
+	/**
+	 * Setter for property emptyStringIsNull.
+	 * @param emptyStringIsNull New value of property emptyStringIsNull.
+	 */
+	public void setEmptyStringIsNull(boolean emptyStringIsNull)
+	{
+		this.emptyStringIsNull = emptyStringIsNull;
+	}
+	
 }

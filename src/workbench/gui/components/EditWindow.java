@@ -1,9 +1,14 @@
 /*
  * EditWindow.java
  *
- * Created on March 29, 2003, 12:34 AM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.components;
 
 import java.awt.BorderLayout;
@@ -22,11 +27,11 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 
-import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.sql.EditorPanel;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 
 /**
@@ -107,7 +112,7 @@ public class EditWindow
 		this.getRootPane().setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
 		this.getRootPane().setActionMap(am);
 		
-		if (!WbManager.getSettings().restoreWindowSize(this, settingsId))
+		if (!Settings.getInstance().restoreWindowSize(this, settingsId))
 		{
 			this.setSize(500,400);
 		}
@@ -153,7 +158,7 @@ public class EditWindow
 	
 	public void windowClosed(java.awt.event.WindowEvent e)
 	{
-		WbManager.getSettings().storeWindowSize(this, this.settingsId);
+		Settings.getInstance().storeWindowSize(this, this.settingsId);
 	}
 	
 	public void windowClosing(java.awt.event.WindowEvent e)

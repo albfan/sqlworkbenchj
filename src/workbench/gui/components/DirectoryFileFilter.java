@@ -1,9 +1,14 @@
 /*
- * ExtensionFileFilter.java
+ * DirectoryFileFilter.java
  *
- * Created on August 13, 2002, 12:47 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.components;
 
 import java.io.File;
@@ -12,7 +17,7 @@ import javax.swing.filechooser.FileFilter;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class DirectoryFileFilter extends FileFilter
 {

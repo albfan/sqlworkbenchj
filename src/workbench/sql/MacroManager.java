@@ -1,9 +1,14 @@
 /*
  * MacroManager.java
  *
- * Created on July 5, 2003, 10:55 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.sql;
 
 import java.awt.Frame;
@@ -15,14 +20,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
 import javax.swing.SwingUtilities;
-import workbench.WbManager;
+
 import workbench.gui.macros.MacroManagerDialog;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.MacroChangeListener;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.WbPersistence;
-import java.io.FileNotFoundException;
 
 /**
  *
@@ -142,7 +148,7 @@ public class MacroManager
 
 	private File getMacroFile()
 	{
-		String configDir = WbManager.getSettings().getConfigDir();
+		String configDir = Settings.getInstance().getConfigDir();
 		File f = new File(configDir, "WbMacros.xml");
 		return f;
 	}

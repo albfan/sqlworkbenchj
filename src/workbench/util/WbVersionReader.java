@@ -1,34 +1,31 @@
 /*
  * WbVersionReader.java
  *
- * Created on January 5, 2004, 6:59 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.util;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.jar.Attributes;
-import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import java.net.InetAddress;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class WbVersionReader
 {
@@ -75,7 +72,7 @@ public class WbVersionReader
 	{
 		try
 		{
-			URL url = new URL("http://www.kellerer.org/workbench/Workbench.jar");
+			URL url = new URL("http://www.sql-workbench.net/Workbench.jar");
 			LogMgr.logDebug("WbVersionReader.readDevBuildInfo", "Retrieving development version information...");
 			URLConnection conn = url.openConnection();
 			conn.setRequestProperty("User-Agent", this.userAgent);
@@ -112,7 +109,7 @@ public class WbVersionReader
 		try
 		{
 			LogMgr.logDebug("WbVersionReader.readDevBuildInfo", "Retrieving release version information...");
-			URL url = new URL("http://www.kellerer.org/workbench/workbench.zip");
+			URL url = new URL("http://www.sql-workbench.net/workbench.zip");
 			URLConnection conn = url.openConnection();
 			conn.setRequestProperty("User-Agent", this.userAgent);
 			InputStream zipStream = conn.getInputStream();

@@ -1,9 +1,14 @@
 /*
- * ProfileEditor.java
+ * ProfileEditorPanel.java
  *
- * Created on 1. Juli 2002, 18:34
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
@@ -16,7 +21,6 @@ import java.util.List;
 import javax.swing.JToolBar;
 import javax.swing.ListModel;
 
-import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.gui.actions.CopyProfileAction;
@@ -28,10 +32,11 @@ import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.FileActions;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class ProfileEditorPanel
 	extends javax.swing.JPanel
@@ -52,7 +57,7 @@ public class ProfileEditorPanel
 		this.connectionEditor = new ConnectionEditorPanel();
 		this.jSplitPane1.setRightComponent(this.connectionEditor);
 		this.fillDrivers();
-		String last = WbManager.getSettings().getLastConnection(lastProfileKey);
+		String last = Settings.getInstance().getLastConnection(lastProfileKey);
 		this.selectProfile(last);
 		this.toolbar = new WbToolbar();
 		this.toolbar.add(new NewListEntryAction(this, "LabelNewProfile"));
@@ -61,7 +66,7 @@ public class ProfileEditorPanel
 		this.toolbar.addSeparator();
 		this.toolbar.add(new DeleteListEntryAction(this, "LabelDeleteProfile"));
 		this.listPanel.add(this.toolbar, BorderLayout.NORTH);
-		int pos = WbManager.getSettings().getProfileDividerLocation();
+		int pos = Settings.getInstance().getProfileDividerLocation();
 		if (pos > -1)
 		{
 			this.jSplitPane1.setDividerLocation(pos);
@@ -95,7 +100,7 @@ public class ProfileEditorPanel
 
 	public void saveSettings()
 	{
-		WbManager.getSettings().setProfileDividerLocation(this.jSplitPane1.getDividerLocation());
+		Settings.getInstance().setProfileDividerLocation(this.jSplitPane1.getDividerLocation());
 	}
 	private void fillProfiles()
 	{
@@ -122,7 +127,7 @@ public class ProfileEditorPanel
     listPanel.setLayout(new java.awt.BorderLayout());
 
     jScrollPane1.setPreferredSize(null);
-    jList1.setFont(WbManager.getSettings().getStandardFont());
+    jList1.setFont(Settings.getInstance().getStandardFont());
     jList1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
     jList1.setVisibleRowCount(10);
     this.fillProfiles();

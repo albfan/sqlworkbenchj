@@ -1,38 +1,39 @@
 /*
  * DeleteScriptGenerator.java
  *
- * Created on October 23, 2002, 2:59 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import workbench.WbManager;
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.ObjectScripterUI;
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.formatter.SqlFormatter;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
-import workbench.log.LogMgr;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.TreeSet;
 
 /**
  *	Generates a SQL script to delete a record from the given table and
  *	any dependent tables.
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class DeleteScriptGenerator
 	implements Scripter
@@ -133,7 +134,7 @@ public class DeleteScriptGenerator
 		sql.append(';');
 		try
 		{
-			int max = WbManager.getSettings().getMaxSubselectLength();
+			int max = Settings.getInstance().getMaxSubselectLength();
 			SqlFormatter format = new SqlFormatter(sql.toString(), max);
 			return format.format().trim();
 		}
@@ -316,7 +317,7 @@ public class DeleteScriptGenerator
 
 		int numRows = rows.length;
 		StringBuffer script = new StringBuffer(numRows * 150);
-		int max = WbManager.getSettings().getMaxSubselectLength();
+		int max = Settings.getInstance().getMaxSubselectLength();
 		StringBuffer sep = new StringBuffer(max + 2);
 		sep.append('\n');
 		for (int i=0; i < max; i++) sep.append('=');

@@ -1,6 +1,13 @@
 /*
- * Created on 06.12.2003
- * 
+ * StoreableKeyStroke.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.resource;
 
@@ -11,7 +18,7 @@ import javax.swing.KeyStroke;
 /**
  * A class which wraps keyStroke and can be serialized 
  * using the XMLDecode/XMLEncoder classes
- * @author workbench@kellerer.org
+ * @author info@sql-workbench.net
  *
  */
 public class StoreableKeyStroke

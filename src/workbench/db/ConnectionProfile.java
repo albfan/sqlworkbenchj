@@ -1,7 +1,13 @@
 /*
- * ConnectionInfo.java
+ * ConnectionProfile.java
  *
- * Created on December 26, 2001, 3:32 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.db;
 
@@ -10,6 +16,7 @@ import java.util.Enumeration;
 import java.util.Properties;
 
 import workbench.WbManager;
+import workbench.resource.Settings;
 import workbench.util.WbCipher;
 import workbench.util.WbPersistence;
 
@@ -123,7 +130,7 @@ public class ConnectionProfile
 		aPwd = aPwd.trim();
 
 		// check encryption settings when reading the profiles...
-		if (WbManager.getSettings().getUseEncryption())
+		if (Settings.getInstance().getUseEncryption())
 		{
 			if (!this.isEncrypted(aPwd))
 			{
@@ -232,7 +239,7 @@ public class ConnectionProfile
 
 	private String encryptPassword(String aPwd)
 	{
-		if (WbManager.getSettings().getUseEncryption())
+		if (Settings.getInstance().getUseEncryption())
 		{
 			if (!this.isEncrypted(aPwd))
 			{

@@ -1,10 +1,17 @@
 /*
- * Created on 5. August 2002, 21:06
+ * ProcedureListPanel.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.EventQueue;
@@ -26,7 +33,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -42,13 +48,14 @@ import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.WbThread;
 
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  *
  */
 public class ProcedureListPanel
@@ -290,17 +297,17 @@ public class ProcedureListPanel
 
 	public void saveSettings()
 	{
-		WbManager.getSettings().setProperty(this.getClass().getName(), "divider", this.splitPane.getDividerLocation());
-		WbManager.getSettings().setProperty(this.getClass().getName(), "lastsearch", this.findPanel.getSearchString());
+		Settings.getInstance().setProperty(this.getClass().getName(), "divider", this.splitPane.getDividerLocation());
+		Settings.getInstance().setProperty(this.getClass().getName(), "lastsearch", this.findPanel.getSearchString());
 	}
 
 	public void restoreSettings()
 	{
-		int loc = WbManager.getSettings().getIntProperty(this.getClass().getName(), "divider");
+		int loc = Settings.getInstance().getIntProperty(this.getClass().getName(), "divider");
 		if (loc == 0) loc = 200;
 		this.splitPane.setDividerLocation(loc);
 
-		String s = WbManager.getSettings().getProperty(this.getClass().getName(), "lastsearch", "");
+		String s = Settings.getInstance().getProperty(this.getClass().getName(), "lastsearch", "");
 		this.findPanel.setSearchString(s);
 	}
 

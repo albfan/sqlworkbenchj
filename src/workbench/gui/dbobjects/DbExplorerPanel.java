@@ -1,9 +1,14 @@
 /*
- * DbExplorerWindow.java
+ * DbExplorerPanel.java
  *
- * Created on August 6, 2002, 1:11 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
@@ -15,6 +20,8 @@ import java.awt.event.ActionListener;
 import java.util.Collections;
 import java.util.List;
 
+import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -26,12 +33,12 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.ConnectionInfo;
+import workbench.gui.components.ConnectionSelector;
 import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbToolbar;
 import workbench.interfaces.MainPanel;
@@ -43,13 +50,12 @@ import workbench.util.WbThread;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class DbExplorerPanel
 	extends JPanel
 	implements ActionListener, MainPanel, ChangeListener
 {
-	private MainWindow parentWindow;
 	private JTabbedPane tabPane;
 	private TableListPanel tables;
 	private TableSearchPanel searchPanel;
@@ -68,10 +74,16 @@ public class DbExplorerPanel
 	private boolean restoreWindow = false;
 	private boolean retrievePending = false;
 	private int internalId = 0;
-
+	private ConnectionSelector connectionSelector;
+	private JButton selectConnectionButton;
+	
+	public DbExplorerPanel(int index)
+	{
+		this(null, index);
+	}
+	
 	public DbExplorerPanel(MainWindow aParent, int index)
 	{
-		this.parentWindow = aParent;
 		this.internalId = index;
 		try
 		{
@@ -103,7 +115,7 @@ public class DbExplorerPanel
 
 			this.selectorPanel.add(schemaLabel);
 			this.schemaSelector = new JComboBox();
-			d = new Dimension(150, 20);
+			d = new Dimension(250, 20);
 			this.schemaSelector.setMaximumSize(d);
 
 			this.selectorPanel.add(this.schemaSelector);
@@ -131,6 +143,19 @@ public class DbExplorerPanel
 		//this.tabPane.addChangeListener(this);
 	}
 
+	public void showConnectButton(ConnectionSelector selector)
+	{
+		this.connectionSelector = selector;
+		this.selectConnectionButton = new JButton(ResourceMgr.getString("LabelSelectConnection"));
+		Border b = new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED), new EmptyBorder(1, 10, 1, 10));
+		this.selectConnectionButton.setBorder(b);
+		//Dimension d = new Dimension(150, 22);
+		//this.selectConnectionButton.setMaximumSize(d);
+		this.selectConnectionButton.addActionListener(this);
+		this.selectorPanel.add(Box.createHorizontalStrut(15));
+		this.selectorPanel.add(this.selectConnectionButton);
+	}
+	
 	public boolean isBusy()
 	{
 		return false;
@@ -155,20 +180,6 @@ public class DbExplorerPanel
 		int index = this.tabPane.getTabCount() - 2;
 		this.tabPane.setComponentAt(index, this.searchPanel);
 	}
-
-	/*
-	private void initGenerator()
-	{
-		this.generator = new PersistenceGeneratorPanel(this.tables);
-		if (this.dbConnection != null)
-		{
-			this.generator.setConnection(this.dbConnection);
-		}
-		this.generator.restoreSettings();
-		int index = this.tabPane.getTabCount() - 1;
-		this.tabPane.setComponentAt(index, this.generator);
-	}
-	*/
 
 	public void readSchemas()
 	{
@@ -223,7 +234,11 @@ public class DbExplorerPanel
 
 	public void setConnection(WbConnection aConnection, String aProfilename)
 	{
-		if (aConnection == null) return;
+		if (aConnection == null) 
+		{
+			this.reset();
+			return;
+		}
 		this.dbConnection = aConnection;
 		this.tables.setConnection(aConnection);
 		this.procs.setConnection(aConnection);
@@ -239,7 +254,7 @@ public class DbExplorerPanel
 		}
 		this.connectionInfo.setConnection(aConnection);
 
-		if (WbManager.getSettings().getRetrieveDbExplorer())
+		if (Settings.getInstance().getRetrieveDbExplorer())
 		{
 			if (this.isVisible())
 			{
@@ -294,7 +309,7 @@ public class DbExplorerPanel
 		return this.dbConnection;
 	}
 
-	public void disconnect()
+	private void reset()
 	{
 		this.dbConnection = null;
 		this.tables.disconnect();
@@ -303,6 +318,11 @@ public class DbExplorerPanel
 
 		int count = this.tabPane.getTabCount();
 		this.tabPane.setSelectedIndex(0);
+	}
+	
+	public void disconnect()
+	{
+		this.reset();
 		this.closeWindow();
 	}
 
@@ -327,6 +347,10 @@ public class DbExplorerPanel
 		if (e.getSource() == this.schemaSelector)
 		{
 			fireSchemaChanged();
+		}
+		else if (e.getSource() == this.selectConnectionButton)
+		{
+			this.connectionSelector.selectConnection();
 		}
 	}
 

@@ -1,5 +1,13 @@
 /*
- * Created on December 14, 2002, 2:38 PM
+ * ArgumentParser.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.util;
 
@@ -9,17 +17,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import workbench.log.LogMgr;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class ArgumentParser
 {
-
+	private static final String ARG_PRESENT = "$__ARG_PRESENT__$";
 	private Map arguments = new HashMap();
 	private ArrayList unknownParameters = new ArrayList();
+	private ArrayList suppliedParameters = new ArrayList();
 	private int argCount = 0;
 
 	public ArgumentParser()
@@ -53,20 +61,25 @@ public class ArgumentParser
 		for (int i=0; i < count; i++)
 		{
 			String word = (String)words.get(i);
+			if (word.length() == 0) continue;
 			String arg = null;
 			String value = null;
 			int pos = word.indexOf('=');
 			if (pos > -1)
 			{
-				arg = word.substring(0, pos).trim();
+				arg = word.substring(0, pos).trim().toLowerCase();
 				value = word.substring(pos + 1).trim();
 			}
 			else
 			{
-				// ignore parameters without a value
-				continue;
+				arg = word.trim().toLowerCase();
 			}
-			arg = arg.toLowerCase();
+			
+			if (value == null)
+			{
+				value = ARG_PRESENT;
+			}
+			
 			if (arguments.containsKey(arg))
 			{
 				arguments.put(arg, value);
@@ -83,6 +96,7 @@ public class ArgumentParser
 	{
 		return this.argCount > 0;
 	}
+	
 	public int getArgumentCount()
 	{
 		return this.argCount;
@@ -97,6 +111,14 @@ public class ArgumentParser
 	{
 		return Collections.unmodifiableList(this.unknownParameters);
 	}
+	
+	public boolean isArgPresent(String arg)
+	{
+		if (arg == null) return false;
+		Object value = this.arguments.get(arg);
+		return (value != null);
+	}
+	
 	public void reset()
 	{
 		Iterator keys = this.arguments.keySet().iterator();
@@ -108,6 +130,7 @@ public class ArgumentParser
 		this.argCount = 0;
 		this.unknownParameters.clear();
 	}
+	
 	public boolean getBoolean(String key)
 	{
 		String value = this.getValue(key);
@@ -117,6 +140,7 @@ public class ArgumentParser
 	public String getValue(String key)
 	{
 		String value = (String)this.arguments.get(key.toLowerCase());
+		if (value == ARG_PRESENT) return null;
 		value = StringUtil.trimQuotes(value);
 		return value;
 	}
@@ -126,12 +150,13 @@ public class ArgumentParser
 		//String test = "spool /type=sql /file=\"d:/temp/test.sql\" /table=my_table;";
 		//String test = "/profile=\"HSQLDB - Test Server\" /script=\"d:/temp/test.sql\"";
 		//String test = "-quotechar='\"' -file=\"d:/temp/export test.txt\" -delimiter=\" \" -dateformat=dd.MMM.yyyy";
-		String test = "-driverjar=\"mysql-jdbc.jar\"";
+		String test = "-arg1=one -vardef=one-two";
 		ArgumentParser parser = new ArgumentParser();
-		parser.addArgument("driverjar");
+		parser.addArgument("arg1");
+		parser.addArgument("vardef");
 		parser.parse(test);
-		System.out.println("driverjar=>" + parser.getValue("driverjar") + "<");
-		System.out.println("done.");
+		System.out.println("arg1=" + parser.getValue("arg1"));
+		System.out.println("vardef=" + parser.getValue("vardef"));
 	}
 
 }

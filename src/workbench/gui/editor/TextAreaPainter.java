@@ -14,7 +14,9 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JComponent;
@@ -23,14 +25,12 @@ import javax.swing.text.PlainDocument;
 import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 
 /**
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.12 2004-08-22 14:38:40 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.13 2004-10-07 18:53:16 thomas Exp $
  */
 public class TextAreaPainter extends JComponent implements TabExpander
 {
@@ -696,9 +696,10 @@ public class TextAreaPainter extends JComponent implements TabExpander
 		}
 		else
 		{
-			if (this.textArea.currentSelectionIsError())
+			Color c = this.textArea.getAlternateSelectionColor();
+			if (c != null)
 			{
-				gfx.setColor(errorColor);
+				gfx.setColor(c);
 			}
 			else
 			{

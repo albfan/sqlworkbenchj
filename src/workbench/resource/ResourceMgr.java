@@ -1,25 +1,27 @@
 /*
  * ResourceMgr.java
  *
- * Created on November 25, 2001, 4:47 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
 package workbench.resource;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 import javax.swing.ImageIcon;
+
 import workbench.log.LogMgr;
 
 

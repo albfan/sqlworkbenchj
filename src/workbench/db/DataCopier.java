@@ -1,33 +1,37 @@
 /*
  * DataCopier.java
  *
- * Created on December 20, 2003, 10:37 AM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.db;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.RowDataReceiver;
 import workbench.exception.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class DataCopier
 	implements RowDataProducer

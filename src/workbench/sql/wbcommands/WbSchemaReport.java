@@ -1,20 +1,27 @@
+/*
+ * WbSchemaReport.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
+ */
 package workbench.sql.wbcommands;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
-import workbench.db.ConnectionProfile;
 
+import workbench.db.ConnectionProfile;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.report.SchemaReporter;
 import workbench.interfaces.ScriptGenerationMonitor;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -25,7 +32,7 @@ import workbench.util.StringUtil;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class WbSchemaReport
 	extends SqlCommand

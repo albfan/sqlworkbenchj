@@ -1,9 +1,14 @@
 /*
- * ResultMetaData.java
+ * ResultInfo.java
  *
- * Created on August 26, 2004, 10:32 PM
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
  */
-
 package workbench.storage;
 
 import java.math.BigDecimal;
@@ -15,6 +20,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
@@ -24,7 +30,7 @@ import workbench.util.SqlUtil;
 
 /**
  * A class to cache the meta information of a ResultSet
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class ResultInfo
 {

@@ -1,6 +1,18 @@
+/*
+ * WbImport.java
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ *
+ * Copyright 2002-2004, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: info@sql-workbench.net
+ *
+ */
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.List;
 
 import workbench.db.WbConnection;
@@ -18,7 +30,7 @@ import workbench.util.StringUtil;
 
 /**
  *
- * @author  workbench@kellerer.org
+ * @author  info@sql-workbench.net
  */
 public class WbImport extends SqlCommand
 {
@@ -46,6 +58,7 @@ public class WbImport extends SqlCommand
 		cmdLine.addArgument("keycolumns");
 		cmdLine.addArgument("usebatch");
 		cmdLine.addArgument("deletetarget");
+		cmdLine.addArgument("emptystringnull");
 	}
 
 	public String getVerb() { return VERB; }
@@ -136,8 +149,8 @@ public class WbImport extends SqlCommand
 			format = cmdLine.getValue("decimal");
 			if (format != null) textParser.setDecimalChar(format);
 
-			String header = cmdLine.getValue("header");
-			textParser.setContainsHeader(StringUtil.stringToBool(header));
+			boolean header = cmdLine.getBoolean("header");
+			textParser.setContainsHeader(header);
 
 			String encoding = cmdLine.getValue("encoding");
 			if (encoding != null) textParser.setEncoding(encoding);
@@ -148,6 +161,12 @@ public class WbImport extends SqlCommand
 				List cols = StringUtil.stringToList(columns, ",");
 				try
 				{
+					Iterator itr = cols.iterator();
+					while (itr.hasNext())
+					{
+						String s = (String)itr.next();
+						if (s == null || s.trim().length() == 0) itr.remove();
+					}
 					textParser.setColumns(cols);
 				}
 				catch (Exception e)
@@ -156,9 +175,9 @@ public class WbImport extends SqlCommand
 					result.setFailure();
 					return result;
 				}
-
+				textParser.setEmptyStringIsNull(cmdLine.getBoolean("emptystringnull"));
 			}
-			if (!"true".equals(header) && columns == null)
+			if (header && columns == null)
 			{
 				result.addMessage(ResourceMgr.getString("ErrorHeaderOrColumnDefRequired"));
 				result.setFailure();
