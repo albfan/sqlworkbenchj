@@ -15,7 +15,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  *	Action to paste the contents of the clipboard into the entry field
- *	@author  sql.workbench@freenet.de
+ *	@author  workbench@kellerer.org
  */
 public class FileConnectAction extends WbAction
 {

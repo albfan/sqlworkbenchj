@@ -6,80 +6,75 @@
 
 package workbench.gui.components;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.FocusTraversalPolicy;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import javax.swing.ActionMap;
-import javax.swing.ComponentInputMap;
-import javax.swing.InputMap;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
-import javax.swing.border.EtchedBorder;
+import javax.swing.*;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FindAction;
 import workbench.gui.actions.FindAgainAction;
-import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.actions.WbAction;
 import workbench.interfaces.Searchable;
-import workbench.resource.ResourceMgr;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
-public class FindPanel 
-	extends JPanel
-	implements Searchable
+public class FindPanel extends JPanel implements Searchable
 {
 	private WbTable searchTable;
 	private JTextField findField;
 	public WbToolbar toolbar;
 	private FindAction findAction;
 	private FindAgainAction findAgainAction;
-	
-	/** Creates a new instance of FindPanel */
+
 	public FindPanel(WbTable aTable)
 	{
+		GridBagConstraints gridBagConstraints;
 		this.searchTable = aTable;
-		FlowLayout fl = new FlowLayout(FlowLayout.LEFT);
-		fl.setHgap(5);
-		fl.setVgap(0);
-		this.setLayout(fl);
-		this.findField = new JTextField(15);
+		this.setLayout(new GridBagLayout());
+		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
+
+		this.findField = new JTextField();
+		this.findField.addMouseListener(new TextComponentMouseListener());
+
 		this.toolbar = new WbToolbar();
 		this.findAction = new FindAction(this);
 		this.findAgainAction = new FindAgainAction(this);
 		this.toolbar.add(this.findAction);
 		this.toolbar.add(this.findAgainAction);
-		this.add(toolbar);
-		this.add(this.findField);
-		
-		Dimension d = new Dimension(32768, 18);
+		this.toolbar.setMargin(new Insets(0,0,0,0));
+		this.toolbar.setRollover(false);
+		//Border b = new CompoundBorder(new EmptyBorder(1,0,1,0), new EtchedBorder());
+		//toolbar.setBorder(b);
+		toolbar.setBorderPainted(true);
+
+		Dimension d = new Dimension(32768, 20);
 		this.setMaximumSize(d);
 		this.findField.setMaximumSize(d);
-		this.findField.addMouseListener(new TextComponentMouseListener());
+		this.findField.setPreferredSize(new Dimension(50,20));
 		this.toolbar.setMaximumSize(d);
-		
-		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
+
+		gridBagConstraints = new GridBagConstraints();
+		gridBagConstraints.anchor = GridBagConstraints.WEST;
+		this.add(toolbar, gridBagConstraints);
+
+		gridBagConstraints = new GridBagConstraints();
+		gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
+		gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.weightx = 1.0;
+
+		this.add(findField, gridBagConstraints);
+
+
 		InputMap im = new ComponentInputMap(this);
 		ActionMap am = new ActionMap();
 		this.setInputMap(this.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, im);
 		this.setActionMap(am);
-		
+
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), this.findAction.getActionName());
 		im.put(this.findAction.getAccelerator(), this.findAction.getActionName());
 		am.put(this.findAction.getActionName(), this.findAction);
-		
+
 		im.put(this.findAgainAction.getAccelerator(), this.findAgainAction.getActionName());
 		am.put(this.findAgainAction.getActionName(), this.findAgainAction);
 
@@ -90,17 +85,20 @@ public class FindPanel
 		pol.addComponent(findAgainAction.getToolbarButton());
 		this.setFocusTraversalPolicy(pol);
 	}
-	
+
 	public void setFocusToEntryField()
 	{
 		this.findField.grabFocus();
 	}
-	
+
 	public void findData()
 	{
-		this.searchTable.search(this.findField.getText());
+		Window parent = SwingUtilities.getWindowAncestor(this);
+		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		this.searchTable.search(this.findField.getText().trim());
+		parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	}
-	
+
 	public void findNext()
 	{
 		Window parent = SwingUtilities.getWindowAncestor(this);
@@ -108,5 +106,24 @@ public class FindPanel
 		this.searchTable.searchNext();
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	}
-	
+
+
+	public void addToToolbar(WbAction anAction)
+	{
+		this.addToToolbar(anAction, false, true);
+	}
+	public void addToToolbar(WbAction anAction, boolean atFront, boolean withSep)
+	{
+		JButton button = anAction.getToolbarButton();
+		if (atFront)
+		{
+			this.toolbar.add(button, 0);
+			if (withSep) this.toolbar.addSeparator(1);
+		}
+		else
+		{
+			this.toolbar.addSeparator();
+			if (withSep) this.toolbar.add(button);
+		}
+	}
 }

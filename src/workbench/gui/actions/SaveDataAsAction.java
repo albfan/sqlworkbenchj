@@ -15,7 +15,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
- *	@author  sql.workbench@freenet.de
+ *	@author  workbench@kellerer.org
  */
 public class SaveDataAsAction extends WbAction
 {
@@ -33,6 +33,6 @@ public class SaveDataAsAction extends WbAction
 
 	public void actionPerformed(ActionEvent e)
 	{
-		this.client.saveAsAscii();
+		this.client.saveAs();
 	}
 }

@@ -77,8 +77,6 @@ public class ResourceMgr
 	public static final String		MNU_TXT_HELP = "MnuTxtHelp";
 	public static final String		MNU_TXT_OPTIONS = "MnuTxtOptions";
 
-	
-	// Messages from the ResultPanel
 	public static final String		MSG_EXEC_SQL = "MsgExecutingSql";
 	public static final String    MSG_WARN_NO_RESULT = "MsgWarningNoResultSet";
 	public static final String    MSG_SQL_EXCUTE_OK = "MsgStatementOK";

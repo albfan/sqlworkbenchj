@@ -1,11 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?> 
-<java version="1.4.0_01" class="java.beans.XMLDecoder"> 
- <object class="java.util.HashMap"> 
-  <void method="put"> 
-   <string>Oracle</string> 
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.4.0_01" class="java.beans.XMLDecoder">
+ <object class="java.util.HashMap">
+  <void method="put">
+   <string>Oracle</string>
    <string>ALTER TABLE %tablename%
   ADD CONSTRAINT %constraintname% FOREIGN KEY (%columnlist%)
- REFERENCES %targettable% (%targetcolumnlist%)</string> 
-  </void> 
- </object> 
-</java> 
+  REFERENCES %targettable% (%targetcolumnlist%)</string>
+  </void>
+<void method="put">
+   <string>All</string>
+   <string>ALTER TABLE %tablename%
+  ADD CONSTRAINT %constraintname% FOREIGN KEY (%columnlist%)
+  REFERENCES %targettable% (%targetcolumnlist%)</string>
+  </void>
+ </object>
+</java>

@@ -25,7 +25,7 @@ import workbench.resource.Settings;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 public class DbExplorerWindow
 	extends JFrame
@@ -33,7 +33,7 @@ public class DbExplorerWindow
 {
 	DbExplorerPanel panel;
 	boolean connected;
-	
+
 	/** Creates a new instance of DbExplorerWindow */
 	public DbExplorerWindow(DbExplorerPanel aPanel, String aProfileName)
 	{
@@ -46,12 +46,12 @@ public class DbExplorerWindow
 		this.setProfileName(aProfileName);
 		this.restorePosition();
 	}
-	
+
 	public void setProfileName(String aProfileName)
 	{
 		this.setTitle(ResourceMgr.getString("TxtDbExplorerTitel") + " - [" + aProfileName + "]");
 	}
-	
+
 	public void restorePosition()
 	{
 		Settings s = WbManager.getSettings();
@@ -66,22 +66,22 @@ public class DbExplorerWindow
 			WbSwingUtilities.center(this, null);
 		}
 	}
-	
+
 	public void windowActivated(WindowEvent e)
 	{
-	}	
-	
+	}
+
 	public void windowClosed(WindowEvent e)
 	{
 		WbManager.getSettings().storeWindowPosition(this);
 		WbManager.getSettings().storeWindowSize(this);
 		this.panel.saveSettings();
-	}	
-	
+	}
+
 	public void windowClosing(WindowEvent e)
 	{
 	}
-	
+
 	public void windowDeactivated(WindowEvent e)
 	{
 	}
@@ -89,13 +89,13 @@ public class DbExplorerWindow
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
-	
+
 	public void windowIconified(WindowEvent e)
 	{
 	}
-	
+
 	public void windowOpened(WindowEvent e)
 	{
 	}
-	
+
 }

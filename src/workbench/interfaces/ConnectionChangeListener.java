@@ -4,7 +4,7 @@ import workbench.db.WbConnection;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 public interface ConnectionChangeListener
 {

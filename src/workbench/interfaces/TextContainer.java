@@ -8,7 +8,7 @@ package workbench.interfaces;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 public interface TextContainer
 {

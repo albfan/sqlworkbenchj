@@ -13,12 +13,12 @@ import javax.swing.KeyStroke;
 
 /**
  *	Action to clear the contents of a entry field
- *	@author  sql.workbench@freenet.de
+ *	@author  workbench@kellerer.org
  */
 public class EscAction extends WbAction
 {
 	private ActionListener client;
-	
+
 	public EscAction(ActionListener aClient)
 	{
 		super();

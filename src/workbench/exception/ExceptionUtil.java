@@ -11,7 +11,7 @@ import java.sql.SQLException;
 
 /**
  *
- *	@author  sql.workbench@freenet.de
+ *	@author  workbench@kellerer.org
  */
 public class ExceptionUtil
 {

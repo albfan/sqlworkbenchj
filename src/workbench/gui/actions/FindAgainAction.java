@@ -17,7 +17,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  *	Action to clear the contents of a entry field
- *	@author  sql.workbench@freenet.de
+ *	@author  workbench@kellerer.org
  */
 public class FindAgainAction extends WbAction
 {

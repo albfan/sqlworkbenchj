@@ -4,15 +4,15 @@ import javax.swing.JOptionPane;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 public class WbStarter
 {
-	
+
 	public WbStarter()
 	{
 	}
-	
+
 	/**
 	 * @param args the command line arguments
 	 */
@@ -28,8 +28,8 @@ public class WbStarter
 			JOptionPane.showMessageDialog(null, "JDK/JRE 1.4 or later is needed to run this application!");
 			System.err.println("A JDK or JRE 1.4 or later is needed to run this application!");
 			System.exit(1);
-		}			
+		}
 		workbench.WbManager.startup();
 	}
-	
+
 }

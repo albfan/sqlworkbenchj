@@ -45,26 +45,33 @@ public class GetMetaDataSql
 
 	private String getSelectSql()
 	{
+		boolean needsAnd;
 		StringBuffer sql = new StringBuffer(baseSql);
 		if (baseSql.toLowerCase().indexOf("where") == -1)
 		{
 			sql.append(" WHERE ");
+			needsAnd = false;
 		}
 		else
 		{
-			sql.append(" AND ");
+			needsAnd = true;
 		}	
 		if (schema != null && schemaField != null)
 		{
+			if (needsAnd) sql.append(" AND ");
 			sql.append(schemaField + " = '" + schema + "'");
+			needsAnd = true;
 		}
 		if (catalog != null && catalogField != null)
 		{
-			sql.append(" AND " + catalogField + " = '" + catalog + "'");
+			if (needsAnd) sql.append(" AND ");
+			sql.append(catalogField + " = '" + catalog + "'");
+			needsAnd = true;
 		}
 		if (objectName != null && objectNameField != null)
 		{
-			sql.append(" AND " + objectNameField + " = '" + objectName + "'");
+			if (needsAnd) sql.append(" AND ");
+			sql.append(objectNameField + " = '" + objectName + "'");
 		}
 		if (this.orderBy != null)
 		{

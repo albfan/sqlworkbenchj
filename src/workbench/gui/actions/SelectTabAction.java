@@ -18,13 +18,13 @@ import workbench.resource.ResourceMgr;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
- *	@author  sql.workbench@freenet.de
+ *	@author  workbench@kellerer.org
  */
 public class SelectTabAction extends WbAction
 {
 	private JTabbedPane client;
 	private int index;
-	
+
 	public SelectTabAction(JTabbedPane aPane, int anIndex)
 	{
 		this(aPane, anIndex, null);
@@ -67,7 +67,7 @@ public class SelectTabAction extends WbAction
 		this.setActionName("SelectTab" + (anIndex+1));
 		if (aName == null)
 		{
-			this.putValue(Action.NAME, ResourceMgr.getString("LabelTabStatement") + " " + Integer.toString(anIndex+1));
+			this.putValue(Action.NAME, ResourceMgr.getString("LabelTabStatement") + " &" + Integer.toString(anIndex+1));
 		}
 		else
 		{

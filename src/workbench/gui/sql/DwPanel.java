@@ -41,7 +41,6 @@ import workbench.util.SqlUtil;
  *	of the resulting JTable
  */
 public class DwPanel extends JPanel
-	implements TableModelListener
 {
 	private WbTable infoTable;
 	private DwStatusBar statusBar;
@@ -52,16 +51,20 @@ public class DwPanel extends JPanel
 	private WbConnection dbConnection;
 	private DefaultTableModel errorModel;
 	private DefaultTableModel emptyModel;
-	private int maxWidth = 250;
 	private boolean hasResultSet = false;
 	private PreparedStatement prepStatement;
 	private JScrollPane scrollPane;
 	private DefaultCellEditor defaultEditor;
 	private DefaultCellEditor defaultNumberEditor;
 	private int maxRows = 0;
+	private int objectId;
+	
+	private static int nextId = 0;
 	
 	public DwPanel()
 	{
+		this.objectId = nextId++;
+		
 		JTextField stringField = new JTextField();
 		stringField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		stringField.addMouseListener(new TextComponentMouseListener());
@@ -83,8 +86,8 @@ public class DwPanel extends JPanel
 		//this.setFocusCycleRoot(true);
 	}
 	
-	public void setMaxColWidth(int aWidth) { this.maxWidth = aWidth; }
-	public int getMaxColWidth() { return this.maxWidth; }
+	//public void setMaxColWidth(int aWidth) { this.maxWidth = aWidth; }
+	//public int getMaxColWidth() { return this.maxWidth; }
 
 	/**
 	 *	Defines the connection for this DBPanel.
@@ -149,6 +152,11 @@ public class DwPanel extends JPanel
 		}
 		return rows;
 	}
+	
+	public String getCurrentSql()
+	{
+		return this.sql;
+	}
 
 	public void setMaxRows(int aRowCount)
 	{
@@ -187,6 +195,7 @@ public class DwPanel extends JPanel
 	{
 		this.runStatement(aSql, this.dbConnection);
 	}
+
 	/**
 	 *	Execute the given SQL statement.
 	 */
@@ -198,7 +207,6 @@ public class DwPanel extends JPanel
 			LogMgr.logInfo(this, "No connection given or connection closed!");
 			return;
 		}
-		this.sql = null;
 		
 		try
 		{
@@ -209,11 +217,16 @@ public class DwPanel extends JPanel
 			{
 				aSql = aSql.substring(0, aSql.length() - 1);
 			}
+			boolean repeatLast = false;
+			repeatLast = aSql.equals(this.sql);
+			this.sql = null;
+			
 			String verb = SqlUtil.getSqlVerb(aSql);
 			Connection sqlcon = aConnection.getSqlConnection();
 			ResultSet rs = null;
 			List keepColumns = null;
 			
+			this.hasResultSet = false;
 			this.statusBar.clearRowcount();
 			this.setMaxRows(this.statusBar.getMaxRows());
 			
@@ -263,7 +276,12 @@ public class DwPanel extends JPanel
 				this.prepStatement.execute();
 				end = System.currentTimeMillis();
 				sqlTime = (end - start);
-				rs = this.prepStatement.getResultSet();
+				if (this.prepStatement != null)
+				{
+					// the statement object can be set to null
+					// by the cancelExecution() method
+					rs = this.prepStatement.getResultSet();
+				}
 				if (rs != null)
 				{
 					this.hasResultSet = true;
@@ -277,22 +295,29 @@ public class DwPanel extends JPanel
 			}
 			if (this.hasResultSet)
 			{
-				start = System.currentTimeMillis();
 				this.sql = aSql;
-				this.realModel.addTableModelListener(this);
+				if (repeatLast)
+				{
+					this.infoTable.saveColumnSizes();
+				}
 				this.realModel.getDataStore().checkUpdateTable();
-				this.infoTable.setVisible(false);
 				this.infoTable.setAutoCreateColumnsFromModel(true);
+				this.setVisible(false);
 				this.infoTable.setModel(this.realModel, true);
-				this.initColumns();
+				if (repeatLast)
+				{
+					this.infoTable.restoreColumnSizes();
+				}
+				else
+				{
+					this.initColumns();
+				}
+				this.setVisible(true);
 				this.infoTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-				this.infoTable.setVisible(true);
-				end = System.currentTimeMillis();
-				//System.out.println("populate = " + (end-start));
 				this.lastMessage = ResourceMgr.getString(ResourceMgr.MSG_SQL_EXCUTE_OK);
 				this.statusBar.setRowcount(this.infoTable.getModel().getRowCount());
 			}
-			else
+			else if (this.prepStatement != null)
 			{
 				StringBuffer msg = new StringBuffer(verb.toUpperCase() + " executed successfully.\r\n");
 				this.hasResultSet = false;
@@ -376,8 +401,7 @@ public class DwPanel extends JPanel
 				LogMgr.logDebug(this, "Trying to cancel the current statement...");
 				this.prepStatement.cancel();
 				this.prepStatement.close();
-				this.prepStatement = null;
-				LogMgr.logDebug(this, "Call of cancel() finished.");
+				LogMgr.logDebug(this, "Cancelling succeeded.");
 				return true;
 			}
 			catch (Exception e)
@@ -405,12 +429,13 @@ public class DwPanel extends JPanel
 
 	private void initColumns()
 	{
-		this.infoTable.adjustColumns(this.maxWidth);
+		this.infoTable.adjustColumns();
 	}
 	
 	private void initLayout()
 	{
 		this.setLayout(new BorderLayout());
+		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.infoTable = new WbTable();
 		this.statusBar = new DwStatusBar();
 		this.statusBar.setFocusable(false);
@@ -419,9 +444,9 @@ public class DwPanel extends JPanel
 		this.add(this.scrollPane, BorderLayout.CENTER);
 		this.add(this.statusBar, BorderLayout.SOUTH);
 		this.infoTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		//this.infoTable.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		this.infoTable.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.infoTable.setDoubleBuffered(true);
-		this.maxWidth = WbManager.getSettings().getMaxColumnWidth();
+		this.infoTable.setAdjustToColumnLabel(true);
 	}
 	
 	public void setStatusMessage(String aMsg)
@@ -476,17 +501,5 @@ public class DwPanel extends JPanel
 	}
 
 	public WbTable getTable() { return this.infoTable; }
-	
-	/** This fine grain notification tells listeners the exact range
-	 * of cells, rows, or columns that changed.
-	 *
-	 */
-	public void tableChanged(TableModelEvent e)
-	{
-		if (e.getFirstRow() == TableModelEvent.HEADER_ROW)
-		{
-			this.initColumns();
-		}
-	}
 	
 }

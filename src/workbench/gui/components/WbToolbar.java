@@ -12,7 +12,7 @@ import workbench.gui.actions.WbAction;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 public class WbToolbar
 	extends javax.swing.JToolBar
@@ -28,7 +28,7 @@ public class WbToolbar
 	public JButton add(Action a)
 	{
 		JButton button;
-		
+
 		if (a instanceof WbAction)
 		{
 			button = ((WbAction)a).getToolbarButton();
@@ -40,7 +40,7 @@ public class WbToolbar
 		this.add(button);
 		return button;
 	}
-	
+
 	public JButton add(WbAction a)
 	{
 		JButton button = a.getToolbarButton();
@@ -50,8 +50,12 @@ public class WbToolbar
 
 	public void addSeparator()
 	{
+		this.addSeparator(this.getComponentCount());
+	}
+	public void addSeparator(int index)
+	{
 		if (isRollover())
-			this.add(new WbToolbarSeparator());
+			this.add(new WbToolbarSeparator(), index);
 		else
 			super.addSeparator();
 	}

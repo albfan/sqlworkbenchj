@@ -25,7 +25,7 @@ import workbench.util.StringUtil;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 public class DwStatusBar extends javax.swing.JPanel
 {
@@ -56,7 +56,7 @@ public class DwStatusBar extends javax.swing.JPanel
 		this.tfMaxRows.setToolTipText(ResourceMgr.getDescription("TxtMaxRows"));
 		this.tfMaxRows.setHorizontalAlignment(SwingConstants.RIGHT);
 		this.tfMaxRows.addMouseListener(new TextComponentMouseListener());
-		
+
 		JPanel p = new JPanel();
 		p.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		FlowLayout fl = new FlowLayout(FlowLayout.RIGHT);
@@ -64,7 +64,7 @@ public class DwStatusBar extends javax.swing.JPanel
 		fl.setVgap(0);
 		p.setLayout(fl);
 		p.setMaximumSize(new java.awt.Dimension(85, FIELD_HEIGHT));
-		
+
 		this.setLayout(new java.awt.BorderLayout());
 		this.setBorder(new javax.swing.border.EtchedBorder());
 		this.setMaximumSize(new java.awt.Dimension(32768, BAR_HEIGHT));
@@ -129,7 +129,7 @@ public class DwStatusBar extends javax.swing.JPanel
 		this.tfStatus.setText(this.readyMsg);
 	}
 
-	public int getMaxRows() 
+	public int getMaxRows()
 	{
 		return StringUtil.getIntValue(this.tfMaxRows.getText(), 0);
 	}

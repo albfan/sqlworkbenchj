@@ -10,16 +10,16 @@ import java.io.StringReader;
 
 /**
  *
- *	@author  sql.workbench@freenet.de
+ *	@author  workbench@kellerer.org
  */
 public class StringUtil
 {
 	public static final String LINE_TERMINATOR = System.getProperty("line.separator");
-	
+
 	public static String replace(String aString, String aValue, String aReplacement)
 	{
 		if (aReplacement == null) return aString;
-		
+
 		int pos = aString.indexOf(aValue);
 		if (pos == -1) return aString;
 
@@ -74,7 +74,7 @@ public class StringUtil
 		}
 		return result;
 	}
-	
+
 	public static String makeJavaString(String aString)
 	{
 		StringBuffer result = new StringBuffer("String sql=");
@@ -89,7 +89,7 @@ public class StringUtil
 				result.append(" \"");
 				//result.append();
 				line = reader.readLine();
-				if (line != null) 
+				if (line != null)
 				{
 					result.append(" + \r");
 				}

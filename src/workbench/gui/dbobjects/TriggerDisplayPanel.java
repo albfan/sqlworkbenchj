@@ -62,6 +62,7 @@ public class TriggerDisplayPanel
 	public void setConnection(WbConnection aConnection)
 	{
 		this.metaData = aConnection.getMetadata();
+		this.source.getSqlTokenMarker().initDatabaseKeywords(aConnection.getSqlConnection());
 		this.reset();
 	}
 	
@@ -79,7 +80,7 @@ public class TriggerDisplayPanel
 		{
 			DataStore trg = this.metaData.getTableTriggers(aCatalog, aSchema, aTable);
 			ResultSetTableModel rs = new ResultSetTableModel(trg);
-			triggers.setModelForSorting(rs);
+			triggers.setModel(rs, true);
 			triggers.adjustColumns();
 			this.triggerCatalog = aCatalog;
 			this.triggerSchema = aSchema;

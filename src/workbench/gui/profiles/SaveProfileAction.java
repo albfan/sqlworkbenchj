@@ -16,7 +16,7 @@ import workbench.log.LogMgr;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
- *	@author  sql.workbench@freenet.de
+ *	@author  workbench@kellerer.org
  */
 public class SaveProfileAction extends AbstractAction
 {

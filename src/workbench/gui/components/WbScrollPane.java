@@ -15,18 +15,18 @@ import javax.swing.border.EtchedBorder;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 public class WbScrollPane extends JScrollPane
 {
-	
+
 	/** Creates a new instance of WbScrollPane */
 	public WbScrollPane()
 	{
 		super();
 		this.initDefaults();
 	}
-	
+
 	public WbScrollPane(Component view)
 	{
 		super(view);
@@ -42,12 +42,12 @@ public class WbScrollPane extends JScrollPane
 		super(vsbPolicy, hsbPolicy);
 		this.initDefaults();
 	}
-	
+
 	private void initDefaults()
 	{
 		Border scrollBorder = new CompoundBorder(new EtchedBorder(), new EmptyBorder(1,1,1,1) );
 		this.setBorder(scrollBorder);
 	}
-	
-	
+
+
 }

@@ -6,6 +6,8 @@
 
 package workbench.storage;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -14,6 +16,10 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,7 +33,7 @@ import workbench.util.SqlUtil;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  * @version
  */
 public class DataStore
@@ -281,6 +287,13 @@ public class DataStore
 		return row.isNew();
 	}
 	
+	public void reset()
+	{
+		this.data = new ArrayList(50);
+		this.deletedRows = null;
+		this.modified = false;
+	}
+	
 	public boolean hasUpdateableColumns()
 	{
 		if (this.updateTableColumns == null)
@@ -408,6 +421,31 @@ public class DataStore
 		return true;
 	}
 	
+	public boolean canSaveAsSqlInsert()
+	{
+		if (this.updateTable == null)
+			return this.checkUpdateTable();
+		else
+			return true;
+	}
+	
+	public String getDataAsSqlInsert()
+		throws WbException, SQLException
+	{
+		if (!this.canSaveAsSqlInsert()) return "";
+		StringBuffer script = new StringBuffer(this.getRowCount() * 100);
+		int count = this.getRowCount();
+		for (int row = 0; row < count; row ++)
+		{
+			RowData data = this.getRow(row);
+			DmlStatement stmt = this.createInsertStatement(data, true); 
+			String sql = stmt.getExecutableStatement();
+			script.append(sql);
+			script.append(";");
+			script.append("\n\n");
+		}
+		return script.toString();
+	}
 	/**
 	 * Save the changes to this datastore to the database.
 	 * The changes are applied in the following order
@@ -454,6 +492,38 @@ public class DataStore
 		{
 			RowData row = this.getRow(i);
 			row.resetStatus();
+		}
+	}
+	
+	public Object convertCellValue(Object aValue, int aColumn)
+		throws Exception
+	{
+		int type = this.getColumnType(aColumn);
+		switch (type)
+		{
+			case Types.BIGINT:
+				return new BigInteger(((String)aValue).trim());
+			case Types.INTEGER:
+			case Types.SMALLINT:
+				return Integer.valueOf(((String)aValue).trim());
+			case Types.NUMERIC:
+			case Types.DECIMAL:
+				return new BigDecimal(((String)aValue).trim());
+			case Types.DOUBLE:
+				return new Double(((String)aValue).trim());
+			case Types.REAL:
+			case Types.FLOAT:
+				return new Float(((String)aValue).trim());
+			case Types.CHAR:
+			case Types.VARCHAR:
+				return (String)aValue;
+			case Types.DATE:
+				DateFormat df = new SimpleDateFormat();
+				return df.parse(((String)aValue).trim());
+			case Types.TIMESTAMP:
+				return Timestamp.valueOf(((String)aValue).trim());
+			default:
+				return aValue;
 		}
 	}
 	
@@ -515,7 +585,7 @@ public class DataStore
 			}
 			else if (row.isNew() && row.isModified())
 			{
-				dml = this.createInsertStatement(row);
+				dml = this.createInsertStatement(row, false);
 				if (dml != null) inserts.add(dml);
 			}
 		}
@@ -613,38 +683,70 @@ public class DataStore
 		return dml;
 	}
 	
-	private DmlStatement createInsertStatement(RowData aRow)
+	/**
+	 *	Generate an insert statement for the given row
+	 *	When creating a script for the DataStore the ignoreStatus
+	 *	will be passed as true, thus ignoring the row status and
+	 *	some basic formatting will be applied to the SQL Statement
+	 */
+	private DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus)
 	{
 		boolean first = true;
 		DmlStatement dml;
 		
-		if (!aRow.isModified()) return null;
+		if (!ignoreStatus && !aRow.isModified()) return null;
+		//String lineEnd = System.getProperty("line.separator", "\r\n");
+		String lineEnd = "\n";
+		boolean newLineAfterColumn = false; //this.colCount > 5;
+		
 		ArrayList values = new ArrayList();
 		StringBuffer sql = new StringBuffer("INSERT INTO ");
-		StringBuffer valuePart = new StringBuffer(") VALUES (");
+		StringBuffer valuePart = new StringBuffer();
 		sql.append(this.updateTable);
-		sql.append(" (");
+		if (ignoreStatus) sql.append(lineEnd);
+		sql.append('(');
+		if (newLineAfterColumn) sql.append(lineEnd);
+		
 		first = true;
 		for (int col=0; col < this.colCount; col ++)
 		{
-			if (aRow.isColumnModified(col))
+			if (ignoreStatus || aRow.isColumnModified(col))
 			{
-				if (first)
+				if (ignoreStatus && newLineAfterColumn)
 				{
-					first = false;
-					valuePart.append('?');
+					sql.append("  ");
+					valuePart.append("  ");
 				}
-				else 
-				{
-					sql.append(", ");
-					valuePart.append(",?");
-				}
-				values.add(aRow.getValue(col));
 				sql.append(this.getColumnName(col));
+				valuePart.append('?');
+				if (col < this.colCount - 1)
+				{
+					sql.append(',');
+					valuePart.append(',');
+				}
+				if (ignoreStatus && newLineAfterColumn) 
+				{
+					valuePart.append(lineEnd);
+					sql.append(lineEnd);
+				}					
+				values.add(aRow.getValue(col));
 			}
 		}
-		valuePart.append(')');
+		sql.append(')');
+		if (ignoreStatus) 
+		{
+			sql.append(lineEnd);
+			sql.append("VALUES");
+			sql.append(lineEnd);
+			sql.append('(');
+			if (newLineAfterColumn) sql.append(lineEnd);
+		}
+		else
+		{
+			sql.append(" VALUES (");
+		}
 		sql.append(valuePart);
+		sql.append(')');
 		try
 		{
 			dml = new DmlStatement(sql.toString(), values);
@@ -663,7 +765,7 @@ public class DataStore
 		
 		// don't create a statement for a row which was inserted and 
 		// then deleted
-		if (aRow.isNew()) return null;
+		//if (aRow.isNew()) return null;
 		
 		boolean first = true;
 		DmlStatement dml;

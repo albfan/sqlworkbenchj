@@ -123,6 +123,22 @@ public class DbDriver
 		return c;
 	}
 
+	public boolean equals(Object other)
+	{
+		try
+		{
+			DbDriver o = (DbDriver)other;
+			return (
+			         (o.driverClass.equals(this.driverClass)) && 
+							 (this.name.equalsIgnoreCase(o.name))
+							);
+		}
+		catch (ClassCastException e)
+		{
+			return false;
+		}
+	}
+	
 	public static Comparator getNameComparator()
 	{
 		return new Comparator()

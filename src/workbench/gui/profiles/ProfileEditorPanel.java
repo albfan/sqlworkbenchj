@@ -8,6 +8,8 @@ package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.util.Arrays;
 import java.util.List;
@@ -30,11 +32,11 @@ import workbench.resource.ResourceMgr;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 public class ProfileEditorPanel
 	extends javax.swing.JPanel
-	implements FileActions
+	implements FileActions, KeyListener
 {
 	//private ConnectionEditorPanel connectionEditor;
 	private ProfileListModel model;
@@ -42,6 +44,7 @@ public class ProfileEditorPanel
 	private int lastIndex = -1;
 	private ConnectionEditorPanel connectionEditor;
 	private MouseListener listMouseListener;
+	private boolean ctrlPressed = false;
 
 	/** Creates new form ProfileEditor */
 	public ProfileEditorPanel()
@@ -65,6 +68,7 @@ public class ProfileEditorPanel
 		{
 			this.jSplitPane1.setDividerLocation(pos);
 		}
+		this.addKeyListener(this);
 	}
 
 	private void fillDrivers()
@@ -90,18 +94,18 @@ public class ProfileEditorPanel
 	private void initComponents()//GEN-BEGIN:initComponents
 	{
 		jSplitPane1 = new WbSplitPane();
-		
-		
+
+
 		listPanel = new javax.swing.JPanel();
 		jScrollPane1 = new javax.swing.JScrollPane();
 		jList1 = new javax.swing.JList();
-		
+
 		setLayout(new java.awt.BorderLayout());
-		
+
 		jSplitPane1.setBorder(new javax.swing.border.EtchedBorder());
 		jSplitPane1.setDividerLocation(110);
 		listPanel.setLayout(new java.awt.BorderLayout());
-		
+
 		jScrollPane1.setPreferredSize(null);
 		jList1.setFont(WbManager.getSettings().getStandardFont());
 		jList1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
@@ -114,7 +118,7 @@ public class ProfileEditorPanel
 				jList1ValueChanged(evt);
 			}
 		});
-		
+
 		jList1.addMouseListener(new java.awt.event.MouseAdapter()
 		{
 			public void mouseClicked(java.awt.event.MouseEvent evt)
@@ -122,15 +126,15 @@ public class ProfileEditorPanel
 				jList1MouseClicked(evt);
 			}
 		});
-		
+
 		jScrollPane1.setViewportView(jList1);
-		
+
 		listPanel.add(jScrollPane1, java.awt.BorderLayout.CENTER);
-		
+
 		jSplitPane1.setLeftComponent(listPanel);
-		
+
 		add(jSplitPane1, java.awt.BorderLayout.CENTER);
-		
+
 	}//GEN-END:initComponents
 
 	private void jList1MouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_jList1MouseClicked
@@ -250,6 +254,37 @@ public class ProfileEditorPanel
 	public int getProfileCount()
 	{
 		return this.jList1.getModel().getSize();
+	}
+
+	/** Invoked when a key has been pressed.
+	 * See the class description for {@link KeyEvent} for a definition of
+	 * a key pressed event.
+	 *
+	 */
+	public void keyPressed(KeyEvent e)
+	{
+		this.ctrlPressed = ((e.getModifiers() & KeyEvent.CTRL_DOWN_MASK) == KeyEvent.CTRL_DOWN_MASK);
+		System.out.println(ctrlPressed);
+	}
+
+	/** Invoked when a key has been released.
+	 * See the class description for {@link KeyEvent} for a definition of
+	 * a key released event.
+	 *
+	 */
+	public void keyReleased(KeyEvent e)
+	{
+		this.ctrlPressed = ((e.getModifiers() & KeyEvent.CTRL_MASK) == 0);
+		System.out.println(ctrlPressed);
+	}
+
+	/** Invoked when a key has been typed.
+	 * See the class description for {@link KeyEvent} for a definition of
+	 * a key typed event.
+	 *
+	 */
+	public void keyTyped(KeyEvent e)
+	{
 	}
 
 }

@@ -21,7 +21,7 @@ import workbench.gui.MainWindow;
 
 /**
  *	Action to paste the contents of the clipboard into the entry field
- *	@author  sql.workbench@freenet.de
+ *	@author  workbench@kellerer.org
  */
 public class ShowDbExplorerAction extends WbAction
 {
@@ -38,7 +38,7 @@ public class ShowDbExplorerAction extends WbAction
 
 	public void actionPerformed(ActionEvent e)
 	{
-		EventQueue.invokeLater(new Runnable() 
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{

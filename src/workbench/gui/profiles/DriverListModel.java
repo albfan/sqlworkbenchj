@@ -18,7 +18,7 @@ import workbench.db.DbDriver;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 class DriverListModel implements ListModel
 {

@@ -14,7 +14,7 @@ import workbench.WbManager;
 
 /**
  *	Action to paste the contents of the clipboard into the entry field
- *	@author  sql.workbench@freenet.de
+ *	@author  workbench@kellerer.org
  */
 public class FileExitAction extends WbAction
 {

@@ -10,7 +10,7 @@ import java.awt.Dimension;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 public class WbToolbarSeparator extends javax.swing.JPanel
 {

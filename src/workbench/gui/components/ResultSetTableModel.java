@@ -98,7 +98,7 @@ public class ResultSetTableModel
 		int index = -1;
 		try
 		{
-			index = this.dataCache.getColumnIndex(aColname);
+			index = this.dataCache.getColumnIndex(aColname) + this.statusOffset;
 		}
 		catch (SQLException e)
 		{
@@ -143,7 +143,7 @@ public class ResultSetTableModel
 				{
 					try
 					{
-						Object realValue = this.convertCellValue(aValue, row, column);
+						Object realValue = this.convertCellValue(aValue, column);
 						this.dataCache.setValue(row, column - this.statusOffset, realValue);
 					}
 					catch (Exception ce)
@@ -170,38 +170,10 @@ public class ResultSetTableModel
 	 *	Convert a String to the internal storage class for this cell.
 	 *	An empty string will be converted to DataStore.NULL_VALUE.
 	 */
-	private Object convertCellValue(Object aValue, int aRow, int aColumn)
+	private Object convertCellValue(Object aValue, int aColumn)
 		throws Exception
 	{
-		Object lastValue = this.getValueAt(aRow, aColumn);
-		String current = (String)aValue;
-		int type = this.getColumnType(aColumn);
-		switch (type)
-		{
-			case Types.BIGINT:
-				return new BigInteger(((String)aValue).trim());
-			case Types.INTEGER:
-			case Types.SMALLINT:
-				return Integer.valueOf(((String)aValue).trim());
-			case Types.NUMERIC:
-			case Types.DECIMAL:
-				return new BigDecimal(((String)aValue).trim());
-			case Types.DOUBLE:
-				return new Double(((String)aValue).trim());
-			case Types.REAL:
-			case Types.FLOAT:
-				return new Float(((String)aValue).trim());
-			case Types.CHAR:
-			case Types.VARCHAR:
-				return (String)aValue;
-			case Types.DATE:
-				DateFormat df = new SimpleDateFormat();
-				return df.parse(((String)aValue).trim());
-			case Types.TIMESTAMP:
-				return Timestamp.valueOf(((String)aValue).trim());
-			default:
-				return aValue;
-		}
+		return this.dataCache.convertCellValue(aValue, aColumn);
 	}
 		
 	/**

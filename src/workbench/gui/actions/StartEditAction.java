@@ -32,18 +32,18 @@ import workbench.resource.ResourceMgr;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
- *	@author  sql.workbench@freenet.de
+ *	@author  workbench@kellerer.org
  */
 public class StartEditAction extends WbAction
 {
 	private SqlPanel client;
 	private Border enabledBorder = new CompoundBorder(new BevelBorder(BevelBorder.LOWERED), new EmptyBorder(2,2,2,2));
 	private Border originalBorder;
-	
+
 	private boolean switchedOn = false;
 	private JToggleButton toggleButton;
 	private JCheckBoxMenuItem toggleMenu;
-	
+
 	public StartEditAction(SqlPanel aClient)
 	{
 		super();
@@ -63,19 +63,19 @@ public class StartEditAction extends WbAction
 		else
 			this.client.endEdit();
 	}
-	
+
 	public boolean isSwitchedOn() { return this.switchedOn; }
-	
+
 	public void setSwitchedOn(boolean aFlag)
 	{
 		this.switchedOn = aFlag;
 		if (this.toggleMenu != null) this.toggleMenu.setSelected(aFlag);
-		if (this.toggleButton != null) 
+		if (this.toggleButton != null)
 		{
 			this.toggleButton.setSelected(aFlag);
 		}
 	}
-	
+
 	public JToggleButton createButton()
 	{
 		this.toggleButton = new JToggleButton(this);
@@ -83,22 +83,33 @@ public class StartEditAction extends WbAction
 		this.toggleButton.setMargin(WbToolbarButton.MARGIN);
 		return this.toggleButton;
 	}
-	
+
 	public void addToToolbar(JToolBar aToolbar)
 	{
 		if (this.toggleButton == null) this.createButton();
 		aToolbar.add(this.toggleButton);
 	}
-	
+
 	public void addToMenu(JMenu aMenu)
 	{
 		if (this.toggleMenu == null)
 		{
-			this.toggleMenu= new JCheckBoxMenuItem(this);
+			this.toggleMenu= new JCheckBoxMenuItem();
+			this.toggleMenu.setAction(this);
+			String text = this.getValue(Action.NAME).toString();
+			int pos = text.indexOf('&');
+			if (pos > -1)
+			{
+				char mnemonic = text.charAt(pos + 1);
+				text = text.substring(0, pos) + text.substring(pos + 1);
+				this.toggleMenu.setMnemonic((int)mnemonic);
+			}
+			this.toggleMenu.setText(text);
 			this.toggleMenu.setIcon(null);
+
 		}
 		aMenu.add(this.toggleMenu);
-	}		
+	}
 	public void setEnabled(boolean aFlag)
 	{
 		boolean last = this.isEnabled();

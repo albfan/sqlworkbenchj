@@ -13,7 +13,7 @@ import javax.swing.Action;
 
 /**
  *	Action to clear the contents of a entry field
- *	@author  sql.workbench@freenet.de
+ *	@author  workbench@kellerer.org
  */
 public class ClearAction
 	extends WbAction
@@ -26,6 +26,7 @@ public class ClearAction
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_CLEAR));
     this.putValue(ACTION_COMMAND_KEY, "ClearAction");
+		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription(ResourceMgr.TXT_CLEAR));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_EDIT);
 	}
 

@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 public class WbTraversalPolicy
 	extends FocusTraversalPolicy
@@ -21,7 +21,7 @@ public class WbTraversalPolicy
 
 	private ArrayList components = new ArrayList();
 	private Component defaultComponent = null;
-	
+
 	/** Creates a new instance of WbTraversalPolicy */
 	public WbTraversalPolicy()
 	{
@@ -31,13 +31,13 @@ public class WbTraversalPolicy
 	{
 		this.defaultComponent = aComp;
 	}
-	
+
 	public void addComponent(Component aComp)
 	{
 		if (!this.components.contains(aComp))
 			this.components.add(aComp);
 	}
-	
+
 	/** Returns the Component that should receive the focus after aComponent.
 	 * focusCycleRoot must be a focus cycle root of aComponent.
 	 *
@@ -58,7 +58,7 @@ public class WbTraversalPolicy
 		if (index < 0 || index == this.components.size() - 1) return (Component)this.components.get(0);
 		else return (Component)this.components.get(index + 1);
 	}
-	
+
 	/** Returns the Component that should receive the focus before aComponent.
 	 * focusCycleRoot must be a focus cycle root of aComponent.
 	 *
@@ -79,7 +79,7 @@ public class WbTraversalPolicy
 		if (index <= 0) return (Component)this.components.get(this.components.size() - 1);
 		else return (Component)this.components.get(index - 1);
 	}
-	
+
 	/** Returns the default Component to focus. This Component will be the first
 	 * to receive focus when traversing down into a new focus traversal cycle
 	 * rooted at focusCycleRoot.
@@ -97,10 +97,10 @@ public class WbTraversalPolicy
 		if (this.defaultComponent != null) return this.defaultComponent;
 		if (this.components.size() > 0)
 			return (Component)this.components.get(0);
-		else 
+		else
 			return null;
 	}
-	
+
 	/** Returns the first Component in the traversal cycle. This method is used
 	 * to determine the next Component to focus when traversal wraps in the
 	 * forward direction.
@@ -120,7 +120,7 @@ public class WbTraversalPolicy
 		else
 			return null;
 	}
-	
+
 	/** Returns the last Component in the traversal cycle. This method is used
 	 * to determine the next Component to focus when traversal wraps in the
 	 * reverse direction.
@@ -140,5 +140,5 @@ public class WbTraversalPolicy
 		else
 			return null;
 	}
-	
+
 }

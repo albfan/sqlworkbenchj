@@ -13,6 +13,7 @@ import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.resource.Settings;
 import workbench.util.WbCipher;
+import workbench.util.WbPersistence;
 
 /**
  *	The main application "controller" for the jWorkbench
@@ -100,6 +101,8 @@ public class WbManager
 		UIManager.put("ToolTip.font", stdFont);
 		UIManager.put("Tree.font", stdFont);
 		UIManager.put("ViewPort.font", stdFont);
+		UIManager.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
+		//UIManager.put("Button.showMnemonics", Boolean.TRUE);
 		end = System.currentTimeMillis();
 		//System.out.println("initFonts=" + (end - start));
 	}

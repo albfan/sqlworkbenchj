@@ -15,7 +15,7 @@ import workbench.interfaces.Reloadable;
 import workbench.resource.ResourceMgr;
 
 /**
- *	@author  sql.workbench@freenet.de
+ *	@author  workbench@kellerer.org
  */
 public class ReloadAction extends WbAction
 {

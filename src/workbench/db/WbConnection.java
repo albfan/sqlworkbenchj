@@ -14,7 +14,7 @@ import workbench.log.LogMgr;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 public class WbConnection
 {
@@ -27,14 +27,14 @@ public class WbConnection
 	public WbConnection()
 	{
 	}
-	
+
 	public WbConnection(Connection aConn)
 	{
 		this.setSqlConnection(aConn);
 	}
-	
-	void setSqlConnection(Connection aConn) 
-	{ 
+
+	void setSqlConnection(Connection aConn)
+	{
 		this.sqlConnection = aConn;
 		try
 		{
@@ -72,24 +72,37 @@ public class WbConnection
 			LogMgr.logError(this, "Rollback failed!", th);
 		}
 	}
-	
+
 	public void setAutoCommit(boolean aFlag)
 		throws SQLException
 	{
 		this.sqlConnection.setAutoCommit(aFlag);
 	}
-	
+
 	public boolean getAutoCommit()
 		throws SQLException
 	{
 		return this.sqlConnection.getAutoCommit();
 	}
-	
+
 	public void close()
-		throws SQLException
 	{
-		this.rollback();
-		this.sqlConnection.close();
+		try
+		{
+			this.rollback();
+		}
+		catch (Throwable th)
+		{
+			// we will ignore this. What can we do :-)
+		}
+		try
+		{
+			this.sqlConnection.close();
+		}
+		catch (Throwable th)
+		{
+			// see above...
+		}
 	}
 
 	public boolean isClosed()
@@ -113,4 +126,10 @@ public class WbConnection
 	{
 		return ConnectionMgr.getDisplayString(this);
 	}
+
+	public String getDatabaseProductName()
+	{
+		return this.metaData.productName;
+	}
+
 }

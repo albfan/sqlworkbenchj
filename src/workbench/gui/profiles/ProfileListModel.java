@@ -16,7 +16,7 @@ import workbench.db.ConnectionProfile;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 class ProfileListModel implements ListModel
 {

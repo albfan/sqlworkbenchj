@@ -8,11 +8,11 @@ package workbench.interfaces;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 public interface Exporter
 {
-	void saveAsAscii();
+	void saveAs();
 	void copyDataToClipboard();
 	void copyDataToClipboard(boolean includeHeaders);
 }

@@ -19,6 +19,7 @@ import javax.swing.table.TableModel;
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
+import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.FindPanel;
 import workbench.gui.components.WbScrollPane;
@@ -27,16 +28,19 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.editor.JEditTextArea;
 import workbench.gui.sql.EditorPanel;
+import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 
 /**
  *
- * @author  sql.workbench@freenet.de
- *	
+ * @author  workbench@kellerer.org
+ *
  */
-public class ProcedureListPanel extends JPanel implements ListSelectionListener
+public class ProcedureListPanel
+	extends JPanel
+	implements ListSelectionListener, Reloadable
 {
 	private WbConnection dbConnection;
 	private JPanel listPanel;
@@ -51,12 +55,12 @@ public class ProcedureListPanel extends JPanel implements ListSelectionListener
 	private String currentSchema;
 	private String currentCatalog;
 	private boolean shouldRetrieve;
-	
+
 	public ProcedureListPanel() throws Exception
 	{
 		this.displayTab = new JTabbedPane();
 		this.displayTab.setTabPlacement(JTabbedPane.BOTTOM);
-		
+
 		this.procColumns = new WbTable();
 		this.procColumns.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		this.procColumns.setCellSelectionEnabled(false);
@@ -67,13 +71,12 @@ public class ProcedureListPanel extends JPanel implements ListSelectionListener
 		this.procColumns.setAdjustToColumnLabel(false);
 		JScrollPane scroll = new WbScrollPane(this.procColumns);
 
-		
 		this.source = new EditorPanel();
 		this.source.setEditable(false);
-		
+
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.source);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), scroll);
-		
+
 		this.listPanel = new JPanel();
 		this.procList = new WbTable();
 		this.procList.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -83,21 +86,22 @@ public class ProcedureListPanel extends JPanel implements ListSelectionListener
 		this.procList.getSelectionModel().addListSelectionListener(this);
 		this.procList.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		this.procList.setAdjustToColumnLabel(false);
-		
+
 		this.findPanel = new FindPanel(this.procList);
-		this.findPanel.toolbar.setBorder(new DividerBorder(DividerBorder.RIGHT));
+		this.findPanel.addToToolbar(new ReloadAction(this), true, false);
+		//this.findPanel.toolbar.setBorder(new DividerBorder(DividerBorder.RIGHT));
 		this.listPanel.setLayout(new BorderLayout());
 		this.listPanel.add(findPanel, BorderLayout.NORTH);
-		
+
 		this.splitPane = new WbSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		scroll = new WbScrollPane(this.procList);
 		this.listPanel.add(scroll, BorderLayout.CENTER);
-		
+
 		this.splitPane.setLeftComponent(this.listPanel);
 		this.splitPane.setRightComponent(displayTab);
 		this.setLayout(new BorderLayout());
 		this.add(splitPane, BorderLayout.CENTER);
-		
+
 		WbTraversalPolicy pol = new WbTraversalPolicy();
 		pol.setDefaultComponent(findPanel);
 		pol.addComponent(this.procList);
@@ -112,21 +116,22 @@ public class ProcedureListPanel extends JPanel implements ListSelectionListener
 		this.meta = null;
 		this.reset();
 	}
-	
+
 	public void reset()
 	{
 		this.procList.reset();
 		this.procColumns.reset();
 		this.source.setText("");
 	}
-	
+
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
 		this.meta = aConnection.getMetadata();
+		this.source.getSqlTokenMarker().initDatabaseKeywords(aConnection.getSqlConnection());
 		this.reset();
 	}
-	
+
 	public void setCatalogAndSchema(String aCatalog, String aSchema)
 		throws Exception
 	{
@@ -142,7 +147,7 @@ public class ProcedureListPanel extends JPanel implements ListSelectionListener
 	public void retrieve()
 	{
 		final Container parent = this.getParent();
-		
+
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
@@ -167,39 +172,39 @@ public class ProcedureListPanel extends JPanel implements ListSelectionListener
 			}
 		});
 	}
-	
+
 	public void setVisible(boolean aFlag)
 	{
 		super.setVisible(aFlag);
 		if (this.shouldRetrieve)
 			this.retrieve();
 	}
-	
+
 	public void saveSettings()
 	{
 		WbManager.getSettings().setProperty(this.getClass().getName(), "divider", this.splitPane.getDividerLocation());
 	}
-		
+
 	public void restoreSettings()
 	{
 		int loc = WbManager.getSettings().getIntProperty(this.getClass().getName(), "divider");
 		if (loc == 0) loc = 200;
 		this.splitPane.setDividerLocation(loc);
 	}
-	
+
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
 		final Container parent = this.getParent();
 		int row = this.procList.getSelectedRow();
-		
+
 		if (row < 0) return;
-		
+
 		final String proc = this.procList.getValueAsString(row, DbMetadata.COLUMN_IDX_PROC_LIST_NAME);
 		final String schema = this.procList.getValueAsString(row, DbMetadata.COLUMN_IDX_PROC_LIST_SCHEMA);
 		final String catalog = this.procList.getValueAsString(row, DbMetadata.COLUMN_IDX_PROC_LIST_CATALOG);
 
-		EventQueue.invokeLater(new Runnable() 
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
@@ -237,5 +242,11 @@ public class ProcedureListPanel extends JPanel implements ListSelectionListener
 			}
 		});
 	}
-	
+
+	public void reload()
+	{
+		this.reset();
+		this.retrieve();
+	}
+
 }

@@ -5,9 +5,11 @@
  */
 package workbench.gui.actions;
 
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.lang.Runnable;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -41,14 +43,15 @@ public class DataToClipboardAction extends WbAction
 
 	public void actionPerformed(ActionEvent e)
 	{
-		if ( (e.getModifiers() & e.SHIFT_MASK) == e.SHIFT_MASK)
-		{
-			this.client.copyDataToClipboard(false);
-		}
-		else
-		{
-			this.client.copyDataToClipboard(true);
-		}
+		final boolean shiftPressed = ((e.getModifiers() & e.SHIFT_MASK) == e.SHIFT_MASK);
+		
+		EventQueue.invokeLater(new Runnable()
+		{ 
+			public void run()
+			{ 
+				client.copyDataToClipboard(!shiftPressed); 
+			} 
+		});
 	}
 	
 	public void addToInputMap(InputMap im, ActionMap am)

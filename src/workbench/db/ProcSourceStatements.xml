@@ -22,6 +22,26 @@
    </object> 
   </void> 
   <void method="put"> 
+   <string>Oracle8</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>SELECT text FROM all_source</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>name</string> 
+    </void> 
+    <void property="orderBy"> 
+     <string>ORDER BY line</string> 
+    </void> 
+    <void property="schemaField"> 
+     <string>owner</string> 
+    </void> 
+    <void property="useUpperCase"> 
+     <boolean>true</boolean> 
+    </void> 
+   </object> 
+  </void> 
+  <void method="put"> 
    <string>Microsoft SQL Server</string> 
    <object class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 

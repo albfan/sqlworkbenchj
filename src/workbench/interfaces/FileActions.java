@@ -10,7 +10,7 @@ import workbench.exception.WbException;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 public interface FileActions
 {

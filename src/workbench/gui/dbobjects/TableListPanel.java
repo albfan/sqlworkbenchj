@@ -6,8 +6,11 @@ package workbench.gui.dbobjects;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
@@ -23,9 +26,11 @@ import javax.swing.table.DefaultTableModel;
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
+import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.*;
 import workbench.gui.components.ResultSetTableModel;
 import workbench.gui.sql.EditorPanel;
+import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
@@ -33,10 +38,12 @@ import workbench.storage.DataStore;
 
 /**
  *
- * @author  sql.workbench@freenet.de
- *	
+ * @author  workbench@kellerer.org
+ *
  */
-public class TableListPanel extends JPanel implements ActionListener, ListSelectionListener
+public class TableListPanel
+	extends JPanel
+	implements ActionListener, ListSelectionListener, Reloadable
 {
 	private WbConnection dbConnection;
 	private JPanel listPanel;
@@ -59,7 +66,7 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 	private String currentSchema;
 	private String currentCatalog;
 	private boolean shouldRetrieve;
-	
+
 	public TableListPanel()
 		throws Exception
 	{
@@ -70,14 +77,15 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 
 		JScrollPane scroll = new WbScrollPane(this.tableDefinition);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), scroll);
-		
+
 		this.indexes = new WbTable();
+		this.indexes.setAdjustToColumnLabel(false);
 		this.indexPanel = new WbScrollPane(this.indexes);
-		
+
 		this.tableSource = new EditorPanel();
 		this.tableSource.setEditable(false);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.tableSource);
-		
+
 		this.importedKeys = new WbTable();
 		this.importedKeys.setAdjustToColumnLabel(false);
 		this.importedPanel = new WbScrollPane(this.importedKeys);
@@ -97,28 +105,38 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 		this.tableList.getSelectionModel().addListSelectionListener(this);
 		this.tableList.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		this.tableList.setAdjustToColumnLabel(false);
-		
+
 		JPanel topPanel = new JPanel();
 		this.findPanel = new FindPanel(this.tableList);
-		FlowLayout fl = new FlowLayout(FlowLayout.LEFT, 3, 0);
-		topPanel.setLayout(fl);
-		topPanel.add(this.tableTypes);
-		this.findPanel.toolbar.setBorder(new DividerBorder(DividerBorder.LEFT_RIGHT));
-		topPanel.add(this.findPanel);
+		this.findPanel.addToToolbar(new ReloadAction(this), true, false);
+
+		topPanel.setLayout(new GridBagLayout());
+		this.tableTypes.setMaximumSize(new Dimension(32768, 18));
+		this.tableTypes.setMaximumSize(new Dimension(80, 18));
+		GridBagConstraints constr = new GridBagConstraints();
+		constr.anchor = GridBagConstraints.WEST;
+		topPanel.add(this.tableTypes, constr);
+		//this.findPanel.toolbar.setBorder(new DividerBorder(DividerBorder.LEFT_RIGHT));
+		constr = new GridBagConstraints();
+		constr.anchor = GridBagConstraints.WEST;
+		constr.gridwidth = GridBagConstraints.REMAINDER;
+		constr.fill = GridBagConstraints.HORIZONTAL;
+		constr.weightx = 1.0;
+		topPanel.add(this.findPanel, constr);
 
 		this.listPanel.setLayout(new BorderLayout());
 		this.listPanel.add(topPanel, BorderLayout.NORTH);
-		
+
 		this.splitPane = new WbSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		scroll = new WbScrollPane(this.tableList);
 
 		this.listPanel.add(scroll, BorderLayout.CENTER);
-		
+
 		this.splitPane.setLeftComponent(this.listPanel);
 		this.splitPane.setRightComponent(displayTab);
 		this.setLayout(new BorderLayout());
 		this.add(splitPane, BorderLayout.CENTER);
-		
+
 		WbTraversalPolicy pol = new WbTraversalPolicy();
 		pol.setDefaultComponent(findPanel);
 		pol.addComponent(findPanel);
@@ -136,7 +154,7 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerReferencedColumns"), this.exportedPanel);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTriggers"), this.triggers);
 	}
-	
+
 	private void removeTablePanels()
 	{
 		if (this.displayTab.getComponentCount() == 2) return;
@@ -146,12 +164,12 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 		this.displayTab.remove(this.exportedPanel);
 		this.displayTab.remove(this.triggers);
 	}
-	
+
 	public void setInitialFocus()
 	{
 		this.findPanel.setFocusToEntryField();
 	}
-	
+
 	public void disconnect()
 	{
 		this.dbConnection = null;
@@ -169,13 +187,14 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 		this.triggers.reset();
 		this.tableSource.setText("");
 	}
-	
+
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
 		this.meta = aConnection.getMetadata();
 		this.tableTypes.removeActionListener(this);
 		this.triggers.setConnection(aConnection);
+		this.tableSource.getSqlTokenMarker().initDatabaseKeywords(aConnection.getSqlConnection());
 		this.reset();
 		try
 		{
@@ -193,7 +212,7 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 		}
 		this.tableTypes.addActionListener(this);
 	}
-	
+
 	public void setCatalogAndSchema(String aCatalog, String aSchema)
 		throws Exception
 	{
@@ -230,20 +249,20 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 			}
 		});
 	}
-	
+
 	public void setVisible(boolean aFlag)
 	{
 		super.setVisible(aFlag);
 		if (this.shouldRetrieve)
 			this.retrieve();
 	}
-	
+
 	public void saveSettings()
 	{
 		this.triggers.saveSettings();
 		WbManager.getSettings().setProperty(this.getClass().getName(), "divider", this.splitPane.getDividerLocation());
 	}
-		
+
 	public void restoreSettings()
 	{
 		int loc = WbManager.getSettings().getIntProperty(this.getClass().getName(), "divider");
@@ -251,15 +270,15 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 		this.splitPane.setDividerLocation(loc);
 		this.triggers.restoreSettings();
 	}
-	
+
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
 		final int row = this.tableList.getSelectedRow();
 		if (row < 0) return;
 		final Container parent = this.getParent();
-		
-		EventQueue.invokeLater(new Runnable() 
+
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
@@ -290,6 +309,10 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 					}
 					else if (type.toLowerCase().indexOf("table") > -1)
 					{
+						// the table information has to be retrieved before
+						// the table source, because otherwise the DataStores
+						// passed to getTableSource() would be empty
+						retrieveTableInformation(catalog, schema, table);
 						String sql = meta.getTableSource(table, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore());
 						tableSource.setText(sql);
 						tableSource.setCaretPosition(0);
@@ -299,47 +322,38 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 					{
 						tableSource.setText("");
 					}
-
-					if (isTable)
-					{
-						addTablePanels();
-						triggers.readTriggers(catalog, schema, table);
-
-						try
-						{
-							ResultSetTableModel model = new ResultSetTableModel(meta.getForeignKeys(catalog, schema, table));
-							importedKeys.setModel(model, true);
-							importedKeys.adjustColumns();
-							model = new ResultSetTableModel(meta.getReferencedBy(catalog, schema, table));
-							exportedKeys.setModel(model, true);
-							exportedKeys.adjustColumns();
-						}
-						catch (Exception e)
-						{
-							importedKeys.reset();
-							exportedKeys.reset();
-						}
-						try
-						{
-							indexes.setModel(meta.getTableIndexes(catalog, schema, table));
-							indexes.adjustColumns();
-						}
-						catch (Exception ex)
-						{
-							indexes.reset();
-							// they might be due to privileges missing
-						}
-					}
-					else
+					if (!isTable)
 					{
 						removeTablePanels();
 					}
+
 					parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				}
 			}
 		});
 	}
 
+	private void retrieveTableInformation(String catalog, String schema, String table)
+	{
+		addTablePanels();
+		triggers.readTriggers(catalog, schema, table);
+
+		ResultSetTableModel model = new ResultSetTableModel(meta.getForeignKeys(catalog, schema, table));
+		importedKeys.setModel(model, true);
+		importedKeys.adjustColumns();
+		model = new ResultSetTableModel(meta.getReferencedBy(catalog, schema, table));
+		exportedKeys.setModel(model, true);
+		exportedKeys.adjustColumns();
+
+		indexes.setModel(meta.getTableIndexes(catalog, schema, table), true);
+		indexes.adjustColumns();
+	}
+
+	public void reload()
+	{
+		this.reset();
+		this.retrieve();
+	}
 	/** Invoked when an action occurs.
 	 *
 	 */
@@ -349,7 +363,7 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 		{
 			try { this.retrieve(); } catch (Exception ex) {}
 		}
-	}	
+	}
 	public static void main(String args[])
 	{
 		Connection con = null;
@@ -357,14 +371,17 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 		{
 			//JFrame f = new JFrame("Test");
 			//Class.forName("com.inet.tds.TdsDriver");
-			Class.forName("oracle.jdbc.OracleDriver");
+			//Class.forName("oracle.jdbc.OracleDriver");
+			Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
 			//final Connection con = DriverManager.getConnection("jdbc:inetdae:demsqlvisa02:1433?database=visa_cpl_test", "visa", "savivisa");
 			//final Connection con = DriverManager.getConnection("jdbc:oracle:thin:@DEMRDB34:1521:SBL1", "sadmin", "sadmin");
-			con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:oradb", "auto", "auto");
+			//con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:oradb", "auto", "auto");
+			con = DriverManager.getConnection("jdbc:odbc:Auto", "auto", "auto");
 
 			DatabaseMetaData meta = con.getMetaData();
 			System.out.println(meta.getDatabaseProductName());
 			System.out.println(meta.getCatalogTerm());
+			/*
 			ResultSet rs;
 			rs = meta.getImportedKeys(null, "AUTO", "EXPENSE");
 			while (rs.next())
@@ -372,6 +389,7 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 				System.out.println("column=" + rs.getString(4) + ", fk_table=" + rs.getString(7) + ", fk_col=" + rs.getString(8));
 			}
 			rs.close();
+			*/
 		}
 		catch (Exception e)
 		{
@@ -382,6 +400,6 @@ public class TableListPanel extends JPanel implements ActionListener, ListSelect
 			try { con.close(); } catch (Throwable th) {}
 		}
 	}
-	
+
 
 }

@@ -33,6 +33,7 @@ public class ConnectionInfo
 	public void setConnection(WbConnection aConnection)
 	{
 		this.setText(aConnection.getDisplayString());
+		this.setToolTipText(aConnection.getDatabaseProductName());
 	}
 	
 }

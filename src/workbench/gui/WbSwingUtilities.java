@@ -95,21 +95,27 @@ public class WbSwingUtilities
 		return new Point(x, y);
 	}
 	
-	public static void showWaitCursor(JComponent caller)
+	public static void showWaitCursorOnWindow(Component caller)
 	{
-		//RootPaneContainer rpc = (RootPaneContainer)SwingUtilities.getWindowAncestor(caller);
-		//if (rpc == null) return;
-		//rpc.getGlassPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		//rpc.getGlassPane().setVisible(true);
-		caller.getTopLevelAncestor().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		Window parent = SwingUtilities.getWindowAncestor(caller);
+		showWaitCursor(caller);
+		showWaitCursor(parent);
+	}
+	public static void showDefaultCursorOnWindow(Component caller)
+	{
+		Window parent = SwingUtilities.getWindowAncestor(caller);
+		showDefaultCursor(caller);
+		showDefaultCursor(parent);
 	}
 	
-	public static void showDefaultCursor(JComponent caller)
+	public static void showWaitCursor(Component caller)
 	{
-		//RootPaneContainer rpc = (RootPaneContainer)SwingUtilities.getWindowAncestor(caller);
-		//if (rpc == null) return;
-		//rpc.getGlassPane().setVisible(false);
-		caller.getTopLevelAncestor().setCursor(null);
+		caller.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+	}
+	
+	public static void showDefaultCursor(Component caller)
+	{
+		caller.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	}
 	
 	public static void showErrorMessage(Component aCaller, String aMessage)

@@ -15,7 +15,7 @@ import workbench.util.StringUtil;
 
 /**
  *	Action to clear the contents of a entry field
- *	@author  sql.workbench@freenet.de
+ *	@author  workbench@kellerer.org
  */
 public class CreateSnippetAction extends WbAction
 {

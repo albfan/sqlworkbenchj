@@ -20,7 +20,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
- *	@author  sql.workbench@freenet.de
+ *	@author  workbench@kellerer.org
  */
 public class MakeLowerCaseAction extends WbAction
 	implements TextSelectionListener
@@ -43,10 +43,10 @@ public class MakeLowerCaseAction extends WbAction
 	{
 		this.client.toLowerCase();
 	}
-	
+
 	public void selectionChanged(int newStart, int newEnd)
 	{
 		this.setEnabled(newEnd > newStart);
 	}
-	
+
 }

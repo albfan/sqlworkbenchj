@@ -22,7 +22,7 @@ import workbench.resource.Settings;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 public class ProfileSelectionDialog extends JDialog implements ActionListener, WindowListener
 {
@@ -48,14 +48,14 @@ public class ProfileSelectionDialog extends JDialog implements ActionListener, W
 		am.put(esc.getActionName(), esc);
 		this.profiles.setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
 		this.profiles.setActionMap(am);
-		EventQueue.invokeLater(new Runnable() 
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
 				checkProfiles();
 			}
 		});
-		
+
 	}
 
 	private void checkProfiles()
@@ -72,7 +72,7 @@ public class ProfileSelectionDialog extends JDialog implements ActionListener, W
 			}
 		}
 	}
-	
+
   private void initComponents()
   {
 		profiles = new ProfileEditorPanel();
@@ -100,8 +100,8 @@ public class ProfileSelectionDialog extends JDialog implements ActionListener, W
 			{
 				profileListClicked(evt);
 			}
-		});		
-		
+		});
+
 		BorderLayout bl = new BorderLayout();
 		this.getContentPane().setLayout(bl);
 		getContentPane().add(dummy, BorderLayout.NORTH);
@@ -150,7 +150,7 @@ public class ProfileSelectionDialog extends JDialog implements ActionListener, W
 	{
 		if (evt.getClickCount() == 2)
 		{
-			EventQueue.invokeLater(new Runnable() 
+			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
@@ -167,7 +167,7 @@ public class ProfileSelectionDialog extends JDialog implements ActionListener, W
 		{
 			this.selectProfile();
 		}
-		else if (e.getSource() == this.cancelButton || 
+		else if (e.getSource() == this.cancelButton ||
 						e.getActionCommand().equals(escActionCommand))
 		{
 			this.selectedProfile = null;

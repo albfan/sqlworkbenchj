@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.StringTokenizer;
+import workbench.WbManager;
+import workbench.db.DbDateFormatter;
 import workbench.storage.DataStore;
 import workbench.storage.NullValue;
 
@@ -115,7 +117,15 @@ public class SqlUtil
 		}
 		else if (aValue instanceof Date)
 		{
-			return "'" + aValue.toString() + "'";
+			DbDateFormatter format = WbManager.getInstance().getConnectionMgr().getDateLiteralFormatter();
+			if (format == null)
+			{
+				return "'" + aValue.toString() + "'";
+			}
+			else
+			{
+				return format.getLiteral((Date)aValue);
+			}
 		}
 		else if (aValue instanceof NullValue)
 		{
@@ -136,7 +146,7 @@ public class SqlUtil
 		boolean inQotes = false;
 		boolean fromFound = false;
 		String orgSql = makeCleanSql(aSql);
-		aSql = aSql.toUpperCase();
+		aSql = orgSql.toUpperCase();
 		
 		final String FROM = " FROM ";
 		int fromPos = aSql.indexOf(FROM);
@@ -185,7 +195,7 @@ public class SqlUtil
 		for (int i=0; i < count; i++)
 		{
 			char c = aSql.charAt(i);
-			if (Character.isWhitespace(c) || Character.isISOControl(c) )
+			if (c < 32 || (c > 126 && c < 145) || c == 255)
 			{
 				newSql.append(' ');
 			}
@@ -286,7 +296,7 @@ public class SqlUtil
 			System.out.println("-----");
 		}
 		*/
-		String sql = "select *,'hallo FROM' from testing t, person p where x='1'";
+		String sql = "select bp.productid, from visa_bidproduct bp ,visa_config c ,visa_bid b where c.bidid = bp.bidid and   c.configid = bp.configid and  bp.bidid = b.bidid and b.bidref = 'VGB0042304-02'";
 		List tables = getTables(sql);
 		for (int i=0; i < tables.size(); i++)
 		{

@@ -31,8 +31,7 @@ import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 
 /**
- *
- * @author  sql.workbench@freenet.de
+ *  @author  workbench@kellerer.org
  */
 public class DbMetadata
 {
@@ -43,25 +42,34 @@ public class DbMetadata
 //	public static String PROC_CATALOG_PLACEHOLDER = "%schemaname%";
 
 	public static final String TABLE_NAME_PLACEHOLDER = "%tablename%";
+	public static final String INDEX_NAME_PLACEHOLDER = "%indexname%";
+	public static final String PK_NAME_PLACEHOLDER = "%pk_name%";
+	public static final String UNIQUE_PLACEHOLDER = "%unique_key% ";
+	public static final String COLUMNLIST_PLACEHOLDER = "%columnlist%";
 	public static final String FK_NAME_PLACEHOLDER = "%constraintname%";
-	public static final String FK_COLUMNS_PLACEHOLDER = "%columnlist%";
 	public static final String FK_TARGET_TABLE_PLACEHOLDER = "%targettable%";
 	public static final String FK_TARGET_COLUMNS_PLACEHOLDER = "%targetcolumnlist%";
 	
+	public static final String GENERAL_SQL = "All";
+	private static final String LINE_TERMINATOR = "\r\n";
+	
 	private String schemaTerm; 
 	private String catalogTerm;
-
-	private String productName;
+	String productName;
 	private DatabaseMetaData metaData;
 	private List tableListColumns;
 	private WbConnection dbConnection;
 	
+	// These Hashmaps contains templates 
+	// for object creation
 	private HashMap procSourceSql;
 	private HashMap viewSourceSql;
 	private HashMap triggerSourceSql;
 	private HashMap triggerList;
-	
+	private HashMap pkStatements;
+	private HashMap idxStatements;
 	private HashMap fkStatements;
+	private HashMap dateLiteralFormatter;
 	
 	/** Creates a new instance of DbMetadata */
 	public DbMetadata(WbConnection aConnection)
@@ -76,8 +84,12 @@ public class DbMetadata
 		this.procSourceSql = this.readStatementTemplates("ProcSourceStatements.xml");
 		this.viewSourceSql = this.readStatementTemplates("ViewSourceStatements.xml");
 		this.fkStatements = this.readStatementTemplates("CreateFkStatements.xml");
+		this.pkStatements = this.readStatementTemplates("CreatePkStatements.xml");
+		this.idxStatements = this.readStatementTemplates("CreateIndexStatements.xml");
 		this.triggerList = this.readStatementTemplates("ListTriggersStatements.xml");
 		this.triggerSourceSql = this.readStatementTemplates("TriggerSourceStatements.xml");
+		this.dateLiteralFormatter = this.readStatementTemplates("DateLiteralFormats.xml");
+		
 		this.schemaTerm = this.metaData.getSchemaTerm();
 		
 		if (this.schemaTerm == null || this.schemaTerm.length() == 0)
@@ -118,6 +130,15 @@ public class DbMetadata
 		return result;
 	}
 	
+	public DbDateFormatter getDateLiteralFormatter()
+	{
+		Object value = this.dateLiteralFormatter.get(this.productName);
+		if (value == null)
+			value = this.dateLiteralFormatter.get(GENERAL_SQL);
+		DbDateFormatter format = (DbDateFormatter)value;
+		return format;
+	}
+	
 	public List getTableListColumns() { return this.tableListColumns; }
 	
 	public String getViewSource(String aCatalog, String aSchema, String aViewname)
@@ -137,7 +158,11 @@ public class DbMetadata
 			ResultSet rs = stmt.executeQuery(sql.getSql());
 			while (rs.next())
 			{
-				source.append(rs.getString(1));
+				String line = rs.getString(1);
+				if (line != null)
+				{
+					source.append(line.replaceAll("\r", ""));
+				}
 			}
 			rs.close();
 			stmt.close();
@@ -161,7 +186,7 @@ public class DbMetadata
 			aProcname = aProcname.substring(0, i);
 		
 		
-		StringBuffer source = new StringBuffer(500);
+		StringBuffer source = new StringBuffer(1000);
 		try
 		{
 			GetMetaDataSql sql = (GetMetaDataSql)this.procSourceSql.get(this.productName);
@@ -173,7 +198,8 @@ public class DbMetadata
 			ResultSet rs = stmt.executeQuery(sql.getSql());
 			while (rs.next())
 			{
-				source.append(rs.getString(1));
+				String line = rs.getString(1);
+				if (line != null) source.append(line.replaceAll("\r", ""));
 			}
 			rs.close();
 			stmt.close();
@@ -338,10 +364,15 @@ public class DbMetadata
 			case Types.DOUBLE:
 			case Types.NUMERIC:
 			case Types.FLOAT:
-				if (aTypeName.indexOf('(') == -1)
+				if (aTypeName.equalsIgnoreCase("money"))
+				{
+					display = aTypeName;
+				}
+				else if (aTypeName.indexOf('(') == -1)
 				{
 					display = aTypeName + "(" + size + "," + digits + ")";
 				}
+				
 				break;
 			default:
 				display = aTypeName;
@@ -517,13 +548,11 @@ public class DbMetadata
 	}
 	
 	public ResultSetTableModel getTableIndexes(String aTable)
-		throws SQLException
 	{
 		return new ResultSetTableModel(this.getTableIndexInformation(null, null, aTable));
 	}
 	
 	public ResultSetTableModel getTableIndexes(String aCatalog, String aSchema, String aTable)
-		throws SQLException
 	{
 		return new ResultSetTableModel(this.getTableIndexInformation(aCatalog, aSchema, aTable));
 	}
@@ -534,80 +563,87 @@ public class DbMetadata
 	public static final int COLUMN_IDX_TABLE_INDEXLIST_COL_DEF = 3;
 	
 	public DataStore getTableIndexInformation(String aCatalog, String aSchema, String aTable)
-		throws SQLException
 	{
 		String[] cols = {"INDEX_NAME", "UNIQUE", "PK", "DEFINITION"};
 		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		final int sizes[] =   {40, 10, 10, 100};
-
-		String pkName = "";
-		if (WbManager.getSettings().getRetrievePKList())
-		{
-			ResultSet keysRs = this.metaData.getPrimaryKeys(aCatalog, aSchema, this.adjustObjectname(aTable));
-			while (keysRs.next())
-			{
-				pkName = keysRs.getString("PK_NAME");
-			}
-			keysRs.close();
-		}
-			
-		HashMap idxInfo = new HashMap();
+		final int sizes[] =   {40, 7, 6, 50};
 		DataStore idxData = new DataStore(cols, types, sizes);
-		
-		ResultSet idxRs = this.metaData.getIndexInfo(aCatalog, aSchema, this.adjustObjectname(aTable), false, true);
-		while (idxRs.next())
+
+		try
 		{
-			boolean unique = idxRs.getBoolean("NON_UNIQUE");
-			String indexName = idxRs.getString("INDEX_NAME");
-			if (idxRs.wasNull()) continue;
-			if (indexName == null) continue;
-			String colName = idxRs.getString("COLUMN_NAME");
-			String dir = idxRs.getString("ASC_OR_DESC");
-			ArrayList colInfo = (ArrayList)idxInfo.get(indexName);
-			if (colInfo == null)
+			String pkName = "";
+			if (WbManager.getSettings().getRetrievePKList())
 			{
-				colInfo = new ArrayList(10);
-				idxInfo.put(indexName, colInfo);
-				if (unique)
-					colInfo.add("NO");
-				else
-					colInfo.add("YES");
+				ResultSet keysRs = this.metaData.getPrimaryKeys(aCatalog, aSchema, this.adjustObjectname(aTable));
+				while (keysRs.next())
+				{
+					pkName = keysRs.getString("PK_NAME");
+				}
+				keysRs.close();
 			}
-			if (dir != null)
-				colInfo.add(colName + " " + dir);
-			else
-				colInfo.add(colName);
+
+			HashMap idxInfo = new HashMap();
+
+			ResultSet idxRs = this.metaData.getIndexInfo(aCatalog, aSchema, this.adjustObjectname(aTable), false, true);
+			while (idxRs.next())
+			{
+				boolean unique = idxRs.getBoolean("NON_UNIQUE");
+				String indexName = idxRs.getString("INDEX_NAME");
+				if (idxRs.wasNull()) continue;
+				if (indexName == null) continue;
+				String colName = idxRs.getString("COLUMN_NAME");
+				String dir = idxRs.getString("ASC_OR_DESC");
+				ArrayList colInfo = (ArrayList)idxInfo.get(indexName);
+				if (colInfo == null)
+				{
+					colInfo = new ArrayList(10);
+					idxInfo.put(indexName, colInfo);
+					if (unique)
+						colInfo.add("NO");
+					else
+						colInfo.add("YES");
+				}
+				if (dir != null)
+					colInfo.add(colName + " " + dir);
+				else
+					colInfo.add(colName);
+			}
+			idxRs.close();
+			Iterator itr = idxInfo.entrySet().iterator();
+			while (itr.hasNext())
+			{
+				Map.Entry entry = (Map.Entry)itr.next();
+				ArrayList colist = (ArrayList)entry.getValue();
+				String index = (String)entry.getKey();
+				int row = idxData.addRow();
+				if (colist != null && colist.size() > 1)
+				{
+					idxData.setValue(row, 0, index);
+
+					String unique = (String)colist.get(0);
+					idxData.setValue(row, 1, unique);
+					StringBuffer def = new StringBuffer(100);
+					for (int i=1; i < colist.size(); i++)
+					{
+						if (i > 1) def.append(", ");
+						def.append((String)colist.get(i));
+					}
+					if (pkName != null && pkName.equalsIgnoreCase(index)) 
+					{
+						idxData.setValue(row, 2, "YES");
+					}
+					else
+					{
+						idxData.setValue(row, 2, "NO");
+					}
+					idxData.setValue(row, 3, def.toString());
+				}
+			}
 		}
-		idxRs.close();
-		Iterator itr = idxInfo.entrySet().iterator();
-		while (itr.hasNext())
+		catch (Exception e)
 		{
-			Map.Entry entry = (Map.Entry)itr.next();
-			ArrayList colist = (ArrayList)entry.getValue();
-			String index = (String)entry.getKey();
-			int row = idxData.addRow();
-			if (colist != null && colist.size() > 1)
-			{
-				idxData.setValue(row, 0, index);
-					
-				String unique = (String)colist.get(0);
-				idxData.setValue(row, 1, unique);
-				StringBuffer def = new StringBuffer(100);
-				for (int i=1; i < colist.size(); i++)
-				{
-					if (i > 1) def.append(", ");
-					def.append((String)colist.get(i));
-				}
-				if (pkName != null && pkName.equalsIgnoreCase(index)) 
-				{
-					idxData.setValue(row, 2, "YES");
-				}
-				else
-				{
-					idxData.setValue(row, 2, "NO");
-				}
-				idxData.setValue(row, 3, def.toString());
-			}
+			// clear any entries which might have made into the DataStore
+			idxData.reset();
 		}
 		return idxData; 
 	}
@@ -654,12 +690,6 @@ public class DbMetadata
 	public static final int COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TYPE = 1;
 	public static final int COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT = 2;
 
-	
-	/*
-SELECT trigger_name
-, trigger_type
-, triggering_event as trigger_event 	
-	 **/
 	public DataStore getTableTriggers(String aCatalog, String aSchema, String aTable)
 		throws SQLException
 	{
@@ -860,8 +890,27 @@ SELECT trigger_name
 		catch (Exception e)
 		{
 			LogMgr.logError(this, "Could not retrieve FK information", e);
+			ds.reset();
 		}
 		return ds;
+	}
+	
+	private String getPkIndexName(DataStore anIndexDef)
+	{
+		if (anIndexDef == null) return null;
+		int count = anIndexDef.getRowCount();
+		
+		String name = null;
+		for (int row = 0; row < count; row ++)
+		{
+			String is_pk = anIndexDef.getValue(row, COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG).toString();
+			if ("YES".equalsIgnoreCase(is_pk))
+			{
+				name = anIndexDef.getValue(row, COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME).toString();
+				break;
+			}
+		}
+		return name;
 	}
 	
 	public String getTableSource(String aTablename, DataStore aTableDef)
@@ -873,8 +922,20 @@ SELECT trigger_name
 	{
 		if (aTableDef == null) return "";
 		
-		StringBuffer result = new StringBuffer("CREATE TABLE " + aTablename + "\r\n(\r\n");
+		StringBuffer result = new StringBuffer("CREATE TABLE " + aTablename + "\n(\n");
 		int count = aTableDef.getRowCount();
+		StringBuffer pkCols = new StringBuffer(1000);
+		int maxColLength = 0;
+		int maxTypeLength = 0;
+		for (int i=0; i < count; i++)
+		{
+			String colName = aTableDef.getValue(i, 0).toString();
+			String type = aTableDef.getValue(i, 1).toString();
+			maxColLength = Math.max(maxColLength, colName.length());
+			maxTypeLength = Math.max(maxTypeLength, type.length());
+		}
+		maxColLength++;
+		maxTypeLength++;
 		for (int i=0; i < count; i++)
 		{
 			//{"COLUMN_NAME", "TYPE_NAME", "PK", "NULLABLE", "DEFAULT", "REMARKS"};
@@ -885,11 +946,16 @@ SELECT trigger_name
 			String def = aTableDef.getValue(i, 4).toString();
 			result.append("   ");
 			result.append(colName);
-			for (int k=0; k < 20 - colName.length(); k++) result.append(' ');
+			if ("YES".equalsIgnoreCase(pk))
+			{
+				if (pkCols.length() > 0) pkCols.append(',');
+				pkCols.append(colName);
+			}
+			for (int k=0; k < maxColLength - colName.length(); k++) result.append(' ');
 			result.append(type);
-			for (int k=0; k < 15 - type.length(); k++) result.append(' ');
+			for (int k=0; k < maxTypeLength - type.length(); k++) result.append(' ');
 			if ("YES".equals(nul))
-				result.append(" NULL     ");
+				result.append(" NULL ");
 			else
 				result.append(" NOT NULL ");
 			if (def != null && def.length() > 0)
@@ -898,11 +964,23 @@ SELECT trigger_name
 				result.append(def);
 			}
 			if (i < count - 1) result.append(',');
-			result.append("\r\n");
+			result.append('\n');
 		}
-		result.append(");\r\n");
+		result.append(");");
+		result.append('\n');
+		if (pkCols.length() > 0)
+		{
+			String template = this.getSqlTemplate(this.pkStatements);
+			template = StringUtil.replace(template, TABLE_NAME_PLACEHOLDER, aTablename);
+			template = StringUtil.replace(template, COLUMNLIST_PLACEHOLDER, pkCols.toString());
+			String name = this.getPkIndexName(aIndexDef);
+			if (name == null) name = "pk_" + aTablename.toLowerCase();
+			template = StringUtil.replace(template, PK_NAME_PLACEHOLDER, name);
+			result.append(template);
+			result.append('\n');
+		}
 		result.append(this.getIndexSource(aTablename, aIndexDef));
-		result.append("\r\n");
+		result.append('\n');
 		result.append(this.getFkSource(aTablename, aFkDef));
 		return result.toString();
 	}
@@ -912,13 +990,24 @@ SELECT trigger_name
 		if (aFkDef == null) return "";
 		int count = aFkDef.getRowCount();
 		if (count == 0) return "";
-		
-		// collects all columns from the base table
-		// per foreign key. the fk name is the key
+
+		String template = (String)this.fkStatements.get(this.productName);
+		if (template == null) 
+		{
+			template = (String)this.fkStatements.get(this.GENERAL_SQL);
+		}
+
+		// collects all columns from the base table mapped to the 
+		// defining foreign key constraing.
+		// The fk name is the key.
 		// to the hashtable. The entry will be a comma
 		// separated list of columns
 		HashMap fkCols = new HashMap();
+		
+		// this hashmap contains the columns of the referenced table
 		HashMap fkTarget = new HashMap();
+		
+		// this will contain the 
 		HashMap fks = new HashMap();
 		
 		String name;
@@ -958,15 +1047,17 @@ SELECT trigger_name
 		while (names.hasNext())
 		{
 			name = (String)names.next();
+			
 			String stmt = (String)fks.get(name);
 			if (stmt == null)
 			{
-				stmt = (String)this.fkStatements.get(this.productName);
+				// first time we hit this FK definition in this loop
+				stmt = template;
 			}
 			stmt = StringUtil.replace(stmt, TABLE_NAME_PLACEHOLDER, aTable);
 			stmt = StringUtil.replace(stmt, FK_NAME_PLACEHOLDER, name);
 			entry = (String)fkCols.get(name);
-			stmt = StringUtil.replace(stmt, FK_COLUMNS_PLACEHOLDER, entry);
+			stmt = StringUtil.replace(stmt, COLUMNLIST_PLACEHOLDER, entry);
 			entry = (String)fkTarget.get(name);
 			StringTokenizer tok = new StringTokenizer(entry, ",");
 			StringBuffer colList = new StringBuffer();
@@ -991,13 +1082,14 @@ SELECT trigger_name
 			stmt = StringUtil.replace(stmt, FK_TARGET_COLUMNS_PLACEHOLDER, colList.toString());
 			fks.put(name, stmt);
 		}
-		StringBuffer fk = new StringBuffer();
+		StringBuffer fk = new StringBuffer(500);
 		
 		Iterator values = fks.values().iterator();
 		while (values.hasNext())
 		{
 			fk.append((String)values.next());
-			fk.append(";\r\n");
+			fk.append(';');
+			fk.append(LINE_TERMINATOR);
 		}
 		return fk.toString();
 	}
@@ -1009,36 +1101,44 @@ SELECT trigger_name
 		if (count == 0) return "";
 		
 		StringBuffer pk = new StringBuffer(100);
-		StringBuffer idx = new StringBuffer(100);
+		StringBuffer idx = new StringBuffer(1000);
+		String template = this.getSqlTemplate(this.idxStatements);
+		String sql;
 		for (int i = 0; i < count; i++)
 		{
 			String idx_name = aIndexDef.getValue(i, 0).toString();
 			String unique = aIndexDef.getValue(i, 1).toString();
 			String is_pk  = aIndexDef.getValue(i, 2).toString();
 			String def = aIndexDef.getValue(i, 3).toString();
-			if ("YES".equalsIgnoreCase(is_pk))
+			// PK's have been created with the table source...
+			if ("NO".equalsIgnoreCase(is_pk))
 			{
-				pk.append("ALTER TABLE " + aTable);
-				pk.append(" ADD CONSTRAINT ");
-				pk.append(idx_name);
-				pk.append(" PRIMARY KEY (");
-				pk.append(def);
-				pk.append(");\r\n");
-			}
-			else
-			{
-				idx.append("CREATE");
-				if ("YES".equalsIgnoreCase(unique)) idx.append(" UNIQUE ");
-				idx.append(" INDEX ");
-				idx.append(idx_name);
-				idx.append(" ON ");
-				idx.append(aTable);
-				idx.append(" ( ");
-				idx.append(def);
-				idx.append(");\r\n");
+				sql = StringUtil.replace(template, TABLE_NAME_PLACEHOLDER, aTable);
+				if ("YES".equalsIgnoreCase(unique)) 
+				{
+					sql = StringUtil.replace(sql, UNIQUE_PLACEHOLDER, "UNIQUE ");
+				}
+				else
+				{
+					sql = StringUtil.replace(sql, UNIQUE_PLACEHOLDER, "");
+				}					
+				sql = StringUtil.replace(sql, COLUMNLIST_PLACEHOLDER, def);
+				sql = StringUtil.replace(sql, INDEX_NAME_PLACEHOLDER, idx_name);
+				idx.append(sql);
+				idx.append(LINE_TERMINATOR);
 			}
 		}
-		return (pk.append(idx)).toString();
+		return idx.toString();
+	}
+
+	private String getSqlTemplate(HashMap aMap)
+	{
+		String template = (String)aMap.get(this.productName);
+		if (template == null)
+		{
+			template = (String)aMap.get(this.GENERAL_SQL);
+		}
+		return template;
 	}
 	
 	public static void main(String args[])

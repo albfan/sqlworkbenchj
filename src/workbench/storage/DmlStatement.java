@@ -12,13 +12,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
+import workbench.db.DbDateFormatter;
 import workbench.db.WbConnection;
 import workbench.exception.InvalidStatementException;
 import workbench.util.SqlUtil;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 class DmlStatement
 {
@@ -27,7 +28,7 @@ class DmlStatement
 	private boolean usePrepared = true;
 
 	/**
-	 *	Create a new DmlStatement with the given SQL template string 
+	 *	Create a new DmlStatement with the given SQL template string
 	 *	that has no parameters.
 	 */
 	public DmlStatement(String aStatement)
@@ -36,7 +37,7 @@ class DmlStatement
 		this(aStatement, null);
 	}
 	/**
-	 *	Create a new DmlStatement with the given SQL template string 
+	 *	Create a new DmlStatement with the given SQL template string
 	 *	and the given values.
 	 *
 	 *	The SQL string is expected to contain a ? for each value
@@ -47,7 +48,7 @@ class DmlStatement
 		throws InvalidStatementException
 	{
 		if (aStatement == null) throw new NullPointerException();
-		
+
 		String verb = SqlUtil.getSqlVerb(aStatement);
 		if (! ("insert".equalsIgnoreCase(verb) ||
 		       "update".equalsIgnoreCase(verb) ||
@@ -55,13 +56,13 @@ class DmlStatement
 		{
 			throw new InvalidStatementException("Only UPDATE, DELETE, INSERT allowed");
 		}
-		
+
 		int count = this.countParameters(aStatement);
 		if (count > 0 && aValueList != null && count != aValueList.size())
 		{
 			throw new InvalidStatementException("Number of parameter tokens does not match number of parameters passed.");
 		}
-		
+
 		this.sql = aStatement;
 
 		if (aValueList == null)
@@ -73,16 +74,16 @@ class DmlStatement
 			this.values = aValueList;
 		}
 	}
-	
+
 	public int execute(WbConnection aWbConn)
 		throws SQLException
 	{
 		return this.execute(aWbConn.getSqlConnection());
 	}
-	
+
 	/**
 	 * Execute the statement.
-	 * If setUsePreparedStatement(false) is called before 
+	 * If setUsePreparedStatement(false) is called before
 	 * calling execute(), the statement generated {@link #getExecutableStatement() }
 	 * will be executed directly. Otherwise a prepared statement will be used.
 	 * @param the Connection to be used
@@ -91,9 +92,9 @@ class DmlStatement
 	public int execute(Connection aConnection)
 		throws SQLException
 	{
-		int rows; 
+		int rows;
 		rows = this.executePrepared(aConnection);
-		
+
 		return rows;
 	}
 
@@ -118,7 +119,7 @@ class DmlStatement
 		stmt.close();
 		return rows;
 	}
-	
+
 	/** Execute the DML statement without a prepared statement.
 	 * The statement created by {@link #getExecutableStatement() }
 	 * will be executed
@@ -134,7 +135,7 @@ class DmlStatement
 		stmt.close();
 		return rows;
 	}
-	
+
 	/**
 	 *	Returns true if a prepared statement is used
 	 *	to send the data to the database.
@@ -143,11 +144,11 @@ class DmlStatement
 	{
 		return this.usePrepared;
 	}
-	
+
 	/**
-	 *	Returns a "real" SQL Statement which can be executed 
+	 *	Returns a "real" SQL Statement which can be executed
 	 *	directly. The statement contains the parameter values
-	 *	as literals. No placeholders are used. 
+	 *	as literals. No placeholders are used.
 	 *	This statement is executed after setUsePreparedStatement(false) is called
 	 */
 	public String getExecutableStatement()
@@ -197,12 +198,12 @@ class DmlStatement
 		}
 		return count;
 	}
-	
+
 	public String toString()
 	{
 		return this.getExecutableStatement();
 	}
-	
+
 	public static void main(String args[])
 	{
 		try

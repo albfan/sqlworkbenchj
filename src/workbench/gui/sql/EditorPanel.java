@@ -39,6 +39,8 @@ public class EditorPanel
 	implements ClipboardSupport, TextContainer
 {
 	private TextPopup popup = new TextPopup(this);
+	private AnsiSQLTokenMarker tokenMarker;
+	
 	/** Creates new EditorPanel */
 	public EditorPanel()
 	{
@@ -49,16 +51,16 @@ public class EditorPanel
 		
 		SyntaxStyle[] styles = new SyntaxStyle[Token.ID_COUNT];
 
-		styles[Token.COMMENT1] = new SyntaxStyle(Color.gray,true,false);
-		styles[Token.COMMENT2] = new SyntaxStyle(Color.gray,true,false);
-		styles[Token.KEYWORD1] = new SyntaxStyle(Color.blue,false,false);
-		styles[Token.KEYWORD2] = new SyntaxStyle(Color.magenta,false,false);
+		styles[Token.COMMENT1] = new SyntaxStyle(Color.GRAY,true,false);
+		styles[Token.COMMENT2] = new SyntaxStyle(Color.GRAY,true,false);
+		styles[Token.KEYWORD1] = new SyntaxStyle(Color.BLUE,false,false);
+		styles[Token.KEYWORD2] = new SyntaxStyle(Color.MAGENTA,false,false);
 		styles[Token.KEYWORD3] = new SyntaxStyle(new Color(0x009600),false,false);
 		styles[Token.LITERAL1] = new SyntaxStyle(new Color(0x650099),false,false);
 		styles[Token.LITERAL2] = new SyntaxStyle(new Color(0x650099),false,true);
 		styles[Token.LABEL] = new SyntaxStyle(new Color(0x990033),false,true);
-		styles[Token.OPERATOR] = new SyntaxStyle(Color.black,false,false);
-		styles[Token.INVALID] = new SyntaxStyle(Color.red,false,true);
+		styles[Token.OPERATOR] = new SyntaxStyle(Color.BLACK,false,false);
+		styles[Token.INVALID] = new SyntaxStyle(Color.RED,false,true);
 		
 		this.getPainter().setStyles(styles);
 		
@@ -74,21 +76,27 @@ public class EditorPanel
 		this.addKeyBinding("C+a", this.popup.getSelectAllAction());
 		
 		this.setTabSize(WbManager.getSettings().getEditorTabWidth());
-		this.setTokenMarker(new AnsiSQLTokenMarker());
+		this.tokenMarker = new AnsiSQLTokenMarker();
+		this.setTokenMarker(tokenMarker);
 		this.setCaretBlinkEnabled(true);
 		
 		this.setRightClickPopup(popup);
 		this.setMaximumSize(null);
 		this.setPreferredSize(null);
 	}
+
+	public AnsiSQLTokenMarker getSqlTokenMarker()
+	{
+		return this.tokenMarker;
+	}
 	
-	public void addPopupMenuItem(Action anAction, boolean withSeparator)
+	public void addPopupMenuItem(WbAction anAction, boolean withSeparator)
 	{
 		if (withSeparator)
 		{
 			this.popup.addSeparator();
 		}
-		this.popup.add(anAction);
+		this.popup.add(anAction.getMenuItem());
 	}
 	
 	/**
@@ -109,7 +117,7 @@ public class EditorPanel
 	
 	public void clear()
 	{
-		this.setText("");
+		this.setSelectedText("");
 	}
 	
 	public void addKeyBinding(String aBinding, ActionListener aListener)

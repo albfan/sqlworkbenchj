@@ -10,28 +10,16 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import workbench.exception.NoConnectionException;
+import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-import workbench.WbManager;
-import workbench.exception.WbException;
-import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.storage.DataStore;
 import workbench.util.WbPersistence;
+
 
 /**
  *
@@ -174,8 +162,9 @@ public class ConnectionMgr
 		try
 		{
 			DatabaseMetaData data = con.getMetaData();
-			StringBuffer buff = new StringBuffer();
-			buff.append("User=");
+			StringBuffer buff = new StringBuffer(100);
+			buff.append(ResourceMgr.getString("TxtUser"));
+			buff.append('=');
 			buff.append(data.getUserName());
 			
 			String catName = data.getCatalogTerm();
@@ -261,24 +250,24 @@ public class ConnectionMgr
 		try
 		{
 			Object result = WbPersistence.readObject("WbDrivers.xml");
-			if (result == null)
+			if (result == null) 
 			{
-				InputStream in = this.getClass().getResourceAsStream("DriverTemplates.xml");
-				result = WbPersistence.readObject(in);
+				this.drivers = new ArrayList();
+			}
+			else if (result instanceof ArrayList)
+			{
+				this.drivers = (ArrayList)result;
 			}
 			
-			if (result == null)
+			// now read the templates and append them to the driver list
+			InputStream in = this.getClass().getResourceAsStream("DriverTemplates.xml");
+			ArrayList templates = (ArrayList)WbPersistence.readObject(in);
+			for (int i=0; i < templates.size(); i++)
 			{
-				this.drivers = Collections.EMPTY_LIST;
-			}
-			else if (result instanceof Collection)
-			{
-				Iterator itr = ((Collection)result).iterator();
-				this.drivers = new ArrayList();
-				while (itr.hasNext())
+				Object drv = templates.get(i);
+				if (!this.drivers.contains(drv))
 				{
-					DbDriver driv = (DbDriver)itr.next();
-					this.drivers.add(driv);
+					this.drivers.add(drv);
 				}
 			}
 		}
@@ -353,4 +342,11 @@ public class ConnectionMgr
 		}
 	}
 
+	public DbDateFormatter getDateLiteralFormatter()
+	{
+		if (this.currentConnection == null) return null;
+		return this.currentConnection.getMetadata().getDateLiteralFormatter();
+	}
+	
+		
 }

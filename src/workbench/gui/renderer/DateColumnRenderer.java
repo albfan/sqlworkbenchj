@@ -19,7 +19,7 @@ import workbench.gui.components.WbTable;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 public class DateColumnRenderer
 	extends DefaultTableCellRenderer
@@ -47,7 +47,7 @@ public class DateColumnRenderer
 		Date aDate = null;
 		String newVal = null;
 		String tip = null;
-		
+
 		if (value != null )
 		{
 			try

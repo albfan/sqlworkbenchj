@@ -29,7 +29,7 @@ import workbench.util.StringUtil;
 
 /**
  *
- *	@author  sql.workbench@freenet.de
+ *	@author  workbench@kellerer.org
  */
 public class Settings
 {
@@ -62,9 +62,9 @@ public class Settings
 
 	public void showOptionsDialog()
 	{
-		JOptionPane.showMessageDialog(null, "Not yet implemented. Please edit workbench.settings");	
+		JOptionPane.showMessageDialog(null, "Not yet implemented. Please edit workbench.settings");
 	}
-	
+
 	public void saveSettings()
 	{
 		try
@@ -310,7 +310,7 @@ public class Settings
 	{
 		this.props.setProperty("workbench.editor.tabwidth", Integer.toString(aWidth));
 	}
-	
+
 	public int getLastSqlTab()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.lasttab", "0"));
@@ -375,10 +375,20 @@ public class Settings
 		this.props.setProperty("workbench.sql.preferredcolwidth", Integer.toString(aWidth));
 	}
 
+	public int getMinColumnWidth()
+	{
+		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.mincolwidth", "50"));
+	}
+	public void setMinColumnWidth(int aWidth)
+	{
+		this.props.setProperty("workbench.sql.mincolwidth", Integer.toString(aWidth));
+	}
+
 	public int getMaxColumnWidth()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.maxcolwidth", "500"));
 	}
+
 	public void setMaxColumnWidth(int aWidth)
 	{
 		this.props.setProperty("workbench.sql.maxcolwidth", Integer.toString(aWidth));
@@ -404,16 +414,36 @@ public class Settings
 		this.props.setProperty("workbench.gui.display.maxfractiondigits", Integer.toString(aDigits));
 	}
 
+	public String getDecimalSymbol()
+	{
+		return this.props.getProperty("workbench.gui.display.decimal.separator", ".");
+	}
+
+	public void setDecimalSymbol(String aSep)
+	{
+		this.props.setProperty("workbench.gui.display.decimal.separator", aSep);
+	}
+
+	public String getDecimalGroupingSeparator()
+	{
+		return this.props.getProperty("workbench.gui.display.decimal.groupseparator", ",");
+	}
+
+	public void getDecimalGroupingSeparator(String aSep)
+	{
+		this.props.setProperty("workbench.gui.display.decimal.groupseparator", aSep);
+	}
+
 	public String getAlternateDelimiter()
 	{
 		return this.props.getProperty("workbench.sql.alternatedelimiter", "./");
 	}
-	
+
 	public void setAlternateDelimiter(String aDelimit)
 	{
 		this.props.setProperty("workbench.sql.alternatedelimiter", aDelimit);
 	}
-	
+
 	public boolean getDbDebugMode()
 	{
 		return "true".equals(this.props.getProperty("workbench.db.debugger", "true"));
@@ -423,41 +453,42 @@ public class Settings
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.profiles.divider", "-1"));
 	}
-	
+
 	public void setProfileDividerLocation(int aValue)
 	{
 		this.props.setProperty("workbench.gui.profiles.divider", Integer.toString(aValue));
 	}
-	
+
 	public void setProperty(String aClass, String aProperty, String aValue)
 	{
 		this.props.setProperty(aClass + "." + aProperty.toLowerCase(), aValue);
 	}
-	
+
 	public void setProperty(String aClass, String aProperty, int aValue)
 	{
 		this.props.setProperty(aClass + "." + aProperty.toLowerCase(), Integer.toString(aValue));
 	}
-	
+
 	public String getProperty(String aClass, String aProperty, String aDefault)
 	{
 		return this.props.getProperty(aClass + "." + aProperty.toLowerCase(), aDefault);
 	}
-	
+
 	public int getIntProperty(String aClass, String aProperty)
 	{
 		String value = this.getProperty(aClass, aProperty, "0");
 		return StringUtil.getIntValue(value);
 	}
-	
+
 	public boolean getShowDbExplorerInMainWindow()
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.dbexplorer.mainwindow", "true"));
 	}
-	
+
 	public boolean getRetrievePKList()
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.db.retrievepklist", "true"));
 	}
-	
+
+
 }

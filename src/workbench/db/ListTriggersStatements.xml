@@ -1,25 +1,73 @@
-<?xml version="1.0" encoding="UTF-8"?> 
-<java version="1.4.0_01" class="java.beans.XMLDecoder"> 
- <object class="java.util.HashMap"> 
-  <void method="put"> 
-   <string>Oracle</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>SELECT trigger_name, trigger_type, triggering_event as trigger_event FROM all_triggers</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>table_name</string> 
-    </void> 
-    <void property="orderBy"> 
-     <string>ORDER BY trigger_name</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>owner</string> 
-    </void> 
-    <void property="useUpperCase"> 
-     <boolean>true</boolean> 
-    </void> 
-   </object> 
-  </void> 
- </object> 
-</java> 
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.4.0_01" class="java.beans.XMLDecoder">
+ <object class="java.util.HashMap">
+  <void method="put">
+   <string>Oracle</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT trigger_name, trigger_type, triggering_event as trigger_event FROM all_triggers</string>
+    </void>
+    <void property="objectNameField">
+     <string>table_name</string>
+    </void>
+    <void property="orderBy">
+     <string>ORDER BY trigger_name</string>
+    </void>
+    <void property="schemaField">
+     <string>owner</string>
+    </void>
+    <void property="useUpperCase">
+     <boolean>true</boolean>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>Oracle8</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT trigger_name, trigger_type, triggering_event as trigger_event FROM all_triggers</string>
+    </void>
+    <void property="objectNameField">
+     <string>table_name</string>
+    </void>
+    <void property="orderBy">
+     <string>ORDER BY trigger_name</string>
+    </void>
+    <void property="schemaField">
+     <string>owner</string>
+    </void>
+    <void property="useUpperCase">
+     <boolean>true</boolean>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>Microsoft SQL Server</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+	select tr.name as trigger_name,
+	case 1
+	   when ObjectProperty( tr.id, 'ExecIsAfterTrigger') then 'AFTER'
+	   else 'BEFORE'
+	end  as trigger_type,
+	case 1
+	   when ObjectProperty( tr.id, 'ExecIsUpdateTrigger') then 'UPDATE'
+	   when ObjectProperty( tr.id, 'ExecIsDeleteTrigger') then 'DELETE'
+     when ObjectProperty( tr.id, 'ExecIsInsertTrigger') then 'INSERT'
+  end as trigger_event
+	from sysobjects tr, sysobjects tab
+	where tab.id = tr.parent_obj
+	 and  tr.xtype = 'TR'
+     </string>
+    </void>
+    <void property="objectNameField">
+     <string>tab.name</string>
+    </void>
+    <void property="orderBy">
+     <string>ORDER BY trigger_name</string>
+    </void>
+   </object>
+  </void>
+ </object>
+</java>

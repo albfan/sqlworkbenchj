@@ -8,12 +8,14 @@ package workbench.gui.renderer;
 
 import java.awt.Component;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
+import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbTable;
 
@@ -25,14 +27,17 @@ public class NumberColumnRenderer
 	extends DefaultTableCellRenderer
 {
 	
-	public DecimalFormat formatter = new DecimalFormat("0.##########");
+	public DecimalFormat formatter;
 	
 	/** Creates a new instance of NumberColumnRenderer */
 	public NumberColumnRenderer(int maxDigits)
 	{
-		this.formatter.setMaximumFractionDigits(maxDigits);
-		//this.formatter.setMinimumFractionDigits(maxDigits);
 		this.setHorizontalAlignment(SwingConstants.RIGHT);
+		String sep = WbManager.getSettings().getDecimalSymbol();
+		DecimalFormatSymbols symb = new DecimalFormatSymbols();
+		symb.setDecimalSeparator(sep.charAt(0));
+		formatter = new DecimalFormat("0.#", symb);
+		this.formatter.setMaximumFractionDigits(maxDigits);
 	}
 	
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)

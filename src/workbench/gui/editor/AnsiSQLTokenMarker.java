@@ -1,5 +1,8 @@
 package workbench.gui.editor;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.util.StringTokenizer;
 /*
  * AnsiSQLTokenMarker.java
  *
@@ -8,6 +11,7 @@ package workbench.gui.editor;
  */
 
 import javax.swing.text.Segment;
+import workbench.log.LogMgr;
 
 /**
  * ANSI-SQL token marker.
@@ -20,12 +24,50 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 	{
 		super(getKeywordMap(), true);
 	}
+
+	public void initDatabaseKeywords(Connection aConnection)
+	{
+		try
+		{
+			DatabaseMetaData meta = aConnection.getMetaData();
+			
+			String keys = meta.getSQLKeywords();
+			this.addKeywordList(keys, Token.KEYWORD1);
+			
+			keys = meta.getStringFunctions();
+			this.addKeywordList(keys, Token.KEYWORD3);
+			
+			keys = meta.getNumericFunctions();
+			this.addKeywordList(keys, Token.KEYWORD3);
+			
+			keys = meta.getTimeDateFunctions();
+			this.addKeywordList(keys, Token.KEYWORD3);
+			
+			keys = meta.getSystemFunctions();
+			this.addKeywordList(keys, Token.KEYWORD3);
+			
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning(this, "Could not read database keywords", e);
+		}
+	}	
+	private void addKeywordList(String aList, byte anId)
+	{
+		StringTokenizer tok = new StringTokenizer(aList, ",");
+		while (tok.hasMoreTokens())
+		{
+			String keyword = tok.nextToken();
+			//System.out.println("adding key=" + keyword);
+			keywords.add(keyword.toUpperCase().trim(),anId);
+		}
+	}
 	
 	public static KeywordMap getKeywordMap()
 	{
 		if (keywords == null)
 		{
-			keywords = new KeywordMap(true);
+			keywords = new KeywordMap(true, 80);
 			addKeywords();
 			addDataTypes();
 			addSystemFunctions();
@@ -45,6 +87,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("BEGIN",Token.KEYWORD1);
 		keywords.add("BREAK",Token.KEYWORD1);
 		keywords.add("BY",Token.KEYWORD1);
+		keywords.add("CASE",Token.KEYWORD1);
 		keywords.add("CASCADE",Token.KEYWORD1);
 		keywords.add("CHECK",Token.KEYWORD1);
 		keywords.add("CHECKPOINT",Token.KEYWORD1);
@@ -69,6 +112,8 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("EXEC",Token.KEYWORD1);
 		keywords.add("EXECUTE",Token.KEYWORD1);
 		keywords.add("EXIT",Token.KEYWORD1);
+		keywords.add("END",Token.KEYWORD1);
+		//keywords.add("ELSE",Token.KEYWORD1);
 		keywords.add("FETCH",Token.KEYWORD1);
 		keywords.add("FOR",Token.KEYWORD1);
 		keywords.add("FOREIGN",Token.KEYWORD1);
@@ -85,9 +130,6 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("ISOLATION",Token.KEYWORD1);
 		keywords.add("KEY",Token.KEYWORD1);
 		keywords.add("LEVEL",Token.KEYWORD1);
-		keywords.add("LIST",Token.KEYWORD2);
-		keywords.add("LISTPROCS",Token.KEYWORD2);
-		keywords.add("LISTDB",Token.KEYWORD2);
 		keywords.add("MAX",Token.KEYWORD1);
 		keywords.add("MIN",Token.KEYWORD1);
 		keywords.add("MIRROREXIT",Token.KEYWORD1);
@@ -120,8 +162,14 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("VARYING",Token.KEYWORD1);
 		keywords.add("VIEW",Token.KEYWORD1);
 		keywords.add("WHERE",Token.KEYWORD1);
+		//keywords.add("WHEN",Token.KEYWORD1);
 		keywords.add("WITH",Token.KEYWORD1);
 		keywords.add("WORK",Token.KEYWORD1);
+
+		keywords.add("LIST",Token.KEYWORD2);
+		keywords.add("LISTPROCS",Token.KEYWORD2);
+		keywords.add("LISTDB",Token.KEYWORD2);
+
 	}
 	
 	private static void addDataTypes()
@@ -131,6 +179,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("char",Token.KEYWORD1);
 		keywords.add("character",Token.KEYWORD1);
 		keywords.add("datetime",Token.KEYWORD1);
+		keywords.add("date",Token.KEYWORD1);
 		keywords.add("decimal",Token.KEYWORD1);
 		keywords.add("float",Token.KEYWORD1);
 		keywords.add("image",Token.KEYWORD1);
@@ -138,6 +187,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("integer",Token.KEYWORD1);
 		keywords.add("money",Token.KEYWORD1);
 		keywords.add("name",Token.KEYWORD1);
+		keywords.add("number",Token.KEYWORD1);
 		keywords.add("numeric",Token.KEYWORD1);
 		keywords.add("nchar",Token.KEYWORD1);
 		keywords.add("nvarchar",Token.KEYWORD1);
@@ -152,6 +202,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("uniqueidentifier",Token.KEYWORD1);
 		keywords.add("varbinary",Token.KEYWORD1);
 		keywords.add("varchar",Token.KEYWORD1);
+		keywords.add("varchar2",Token.KEYWORD1);
 	}
 	
 	private static void addSystemFunctions()

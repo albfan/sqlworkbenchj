@@ -12,13 +12,17 @@ import javax.swing.Action;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 public class WbToolbarButton extends javax.swing.JButton
 {
 
 	public static final Insets MARGIN = new Insets(1,1,1,1);
-	
+
+	public WbToolbarButton()
+	{
+		super();
+	}
 	/** Creates a new instance of WbToolbarButton */
 	public WbToolbarButton(Action a)
 	{
@@ -27,4 +31,10 @@ public class WbToolbarButton extends javax.swing.JButton
 		this.setMargin(MARGIN);
 	}
 
+	public void setAction(Action a)
+	{
+		super.setAction(a);
+		this.setMargin(MARGIN);
+		this.setText(null);
+	}
 }

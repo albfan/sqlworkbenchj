@@ -6,14 +6,11 @@
 
 package workbench.gui.sql;
 
-import java.awt.*;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,35 +24,29 @@ import javax.swing.event.TableModelListener;
 import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
-
 import workbench.gui.actions.*;
-import workbench.gui.components.ConnectionInfo;
-import workbench.gui.components.TextComponentMouseListener;
-import workbench.gui.components.WbScrollPane;
-import workbench.gui.components.WbSplitPane;
-import workbench.gui.components.WbTable;
-import workbench.gui.components.WbToolbar;
-import workbench.gui.components.WbToolbarSeparator;
-import workbench.gui.components.WbTraversalPolicy;
+import workbench.gui.actions.CopyAsSqlInsertAction;
+
+import workbench.gui.components.*;
+import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.menu.TextPopup;
-import workbench.interfaces.Exporter;
 import workbench.interfaces.MainPanel;
-import workbench.interfaces.Searchable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
+
 
 
 /**
  *	A panel with an editor (EditorPanel), a log panel and
  *	a display panel.
  *
- * @author  thomas
+ * @author  workbench@kellerer.org
  * @version 1.0
  */
-public class SqlPanel extends JPanel 
-	implements Runnable, TableModelListener, MainPanel
+public class SqlPanel extends JPanel implements Runnable, TableModelListener, MainPanel
 {
 	private boolean selected;
 	EditorPanel editor;
@@ -86,6 +77,7 @@ public class SqlPanel extends JPanel
 	private DeleteRowAction deleteRowAction;
 	private DataToClipboardAction dataToClipboard;
 	private SaveDataAsAction exportDataAction;
+	private CopyAsSqlInsertAction copyAsSqlInsert;
 	
 	private int internalId;
 	private String historyFilename;
@@ -98,6 +90,7 @@ public class SqlPanel extends JPanel
 	private ConnectionInfo connectionInfo;
 	
 	private WbConnection dbConnection;
+	private boolean updating = false;
 	
 	/** Creates new SqlPanel */
 	public SqlPanel(int anId)
@@ -109,7 +102,6 @@ public class SqlPanel extends JPanel
 		this.setLayout(new BorderLayout());
 		this.data = new DwPanel();
 		this.data.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		
 		this.log = new JTextArea();
 		this.log.setBorder(new EmptyBorder(0,2,0,0));
 		this.log.setFont(WbManager.getSettings().getMsgLogFont());
@@ -134,6 +126,7 @@ public class SqlPanel extends JPanel
 		
 		this.editor = new EditorPanel();
 		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
+		this.contentPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.add(this.contentPanel, BorderLayout.CENTER);
 		
 		int loc = WbManager.getSettings().getSqlDividerLocation(this.internalId);
@@ -144,6 +137,8 @@ public class SqlPanel extends JPanel
 		this.initToolbar();
 		this.setupActionMap();
 		this.data.getTable().addTableModelListener(this);
+		this.data.getTable().setMaxColWidth(WbManager.getSettings().getMaxColumnWidth());
+		this.data.getTable().setMinColWidth(WbManager.getSettings().getMinColumnWidth());
 		this.makeReadOnly();
 		this.checkResultSetActions();
 	}
@@ -248,6 +243,9 @@ public class SqlPanel extends JPanel
 		this.dataToClipboard.setEnabled(false);
 		this.actions.add(this.exportDataAction);
 		this.actions.add(this.dataToClipboard);
+		
+		this.copyAsSqlInsert = new CopyAsSqlInsertAction(this.data.getTable());
+		this.actions.add(this.copyAsSqlInsert);
 		
 		this.actions.add(this.executeAll);
 		this.actions.add(this.executeSelected);
@@ -447,10 +445,23 @@ public class SqlPanel extends JPanel
 		{
 			if (!this.data.checkUpdateTable())
 			{
-				String table = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgEnterUpdateTable"), "");
+				String sql = this.data.getCurrentSql();
+				List tables = SqlUtil.getTables(sql);
+				String table = null;
+				
+				if (tables.size() > 1)
+				{
+					table = (String)JOptionPane.showInputDialog(this, 
+							null, ResourceMgr.getString("MsgEnterUpdateTable"), 
+							JOptionPane.QUESTION_MESSAGE,
+							null,tables.toArray(),null);
+				}
+				
 				if (table != null)
 				{
+					this.data.setVisible(false);
 					this.data.setUpdateTable(table);
+					this.data.setVisible(true);
 				}
 			}
 		}
@@ -458,6 +469,14 @@ public class SqlPanel extends JPanel
 		if (update)
 		{
 			this.data.getTable().setShowStatusColumn(true);
+			if (this.data.getTable().getDataStore().isModified())
+			{
+				this.setActionState(this.updateAction, true);
+			}
+		}
+		else
+		{
+			this.startEditAction.setSwitchedOn(false);
 		}
 		this.setActionState(new Action[] {this.insertRowAction, this.deleteRowAction}, update);
 	}
@@ -580,6 +599,8 @@ public class SqlPanel extends JPanel
 		this.updateAction.setEnabled(false);
 		this.findAgainAction.setEnabled(false);
 		this.connectionInfo.setConnection(aConnection);
+		AnsiSQLTokenMarker token = this.editor.getSqlTokenMarker();
+		token.initDatabaseKeywords(aConnection.getSqlConnection());
 	}
 	
 	public boolean isRequestFocusEnabled() { return true; }
@@ -706,7 +727,9 @@ public class SqlPanel extends JPanel
 		{
 			this.log.setText(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
 			List sqls = SqlUtil.getCommands(aSqlScript, ";");
+			String msg = ResourceMgr.getString("TxtScriptStatementFinished");
 			int count = sqls.size();
+			msg = StringUtil.replace(msg, "%total%", Integer.toString(count));
 			this.log.setText("");
 			for (int i=0; i < count; i++)
 			{
@@ -715,7 +738,10 @@ public class SqlPanel extends JPanel
 				this.log.append(this.data.getLastMessage());
 				if (i < count - 1)
 				{
-					this.log.append("\r\n");
+					this.log.append("\n");
+					this.log.append(StringUtil.replace(msg, "%nr%", Integer.toString(i)));
+					this.log.append("\n");
+					this.log.setCaretPosition(this.log.getText().length());
 				}
 				if (i == 0 && !this.data.hasResultSet())
 				{
@@ -725,10 +751,16 @@ public class SqlPanel extends JPanel
 			if (this.data.hasResultSet())
 			{
 				this.showResultPanel();
+				this.data.checkUpdateTable();
 			}
 			else
 			{
 				this.showLogPanel();
+			}
+			if (count > 1)
+			{
+				this.log.append(ResourceMgr.getString("TxtScriptFinished"));
+				this.log.setCaretPosition(this.log.getText().length());
 			}
 		}
 		catch (SQLException e)
@@ -746,6 +778,8 @@ public class SqlPanel extends JPanel
 	{
 		boolean hasResult = this.data.hasResultSet();
 		this.setActionState(new Action[] {this.findAction, this.dataToClipboard, this.exportDataAction}, hasResult);
+		boolean canUpdate = this.data.isUpdateable();
+		this.setActionState(this.copyAsSqlInsert, canUpdate);
 	}
 	
 	public void run()
@@ -812,14 +846,20 @@ public class SqlPanel extends JPanel
 		
 	}
 
-	/** This fine grain notification tells listeners the exact range
-	 * of cells, rows, or columns that changed.
-	 *
-	 */
 	public void tableChanged(TableModelEvent e)
 	{
+		if (this.isBusy()) return;
 		if (e.getFirstRow() != TableModelEvent.ALL_COLUMNS && this.data.isModified())
-			this.updateAction.setEnabled(true);
+		{
+			if (!this.startEditAction.isSwitchedOn())
+			{
+				this.startEdit();
+			}
+			else
+			{
+				this.setActionState(this.updateAction, true);
+			}
+		}
 	}
 	
 

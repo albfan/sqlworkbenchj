@@ -31,7 +31,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  *
- * @author  sql.workbench@freenet.de
+ * @author  workbench@kellerer.org
  */
 public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 {
@@ -48,7 +48,8 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 	private DbExplorerWindow window;
 	private WbToolbar toolbar;
 	private ConnectionInfo connectionInfo;
-	
+	private boolean restoreWindow = false;
+
 	public DbExplorerPanel()
 	{
 		try
@@ -71,25 +72,25 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		this.selectorPanel = new JPanel();
 		this.selectorPanel.setMaximumSize(d);
 		this.selectorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 0));
-		
+
 		this.schemaLabel = new JLabel();
-		
+
 		this.selectorPanel.add(schemaLabel);
 		this.schemaSelector = new JComboBox();
 		d = new Dimension(150, 20);
 		this.schemaSelector.setMaximumSize(d);
-		
+
 		this.selectorPanel.add(this.schemaSelector);
-		
+
 		//this.catalogSelector = new JComboBox();
 		//this.catalogSelector.setMaximumSize(d);
 		//this.catalogLabel = new JLabel();
 		//this.selectorPanel.add(this.catalogLabel);
 		//this.selectorPanel.add(this.catalogSelector);
-		
+
 		this.add(this.selectorPanel, BorderLayout.NORTH);
 		this.add(tabPane, BorderLayout.CENTER);
-		
+
 		this.toolbar = new WbToolbar();
 		Border b = new CompoundBorder(new EmptyBorder(1,0,1,0), new EtchedBorder());
 		this.toolbar.setBorder(b);
@@ -101,7 +102,7 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		this.connectionInfo.setMinimumSize(d);
 		this.toolbar.add(this.connectionInfo);
 	}
-	
+
 	public void setConnection(WbConnection aConnection)
 	{
 		this.setConnection(aConnection, null);
@@ -112,7 +113,7 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		try
 		{
 			this.schemaSelector.removeActionListener(this);
-			
+
 			StringBuffer s = new StringBuffer(this.dbConnection.getMetadata().getSchemaTerm());
 			s.setCharAt(0, Character.toUpperCase(s.charAt(0)));
 			this.schemaLabel.setText(s.toString());
@@ -158,7 +159,7 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		}
 	}
 	*/
-	
+
 	public void setConnection(WbConnection aConnection, String aProfilename)
 	{
 		if (aConnection == null) return;
@@ -167,7 +168,7 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		this.procs.setConnection(aConnection);
 		//this.readCatalogs();
 		this.readSchemas();
-		
+
 		if (this.window != null && aProfilename != null)
 		{
 			this.window.setProfileName(aProfilename);
@@ -185,18 +186,18 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		tables.disconnect();
 		procs.disconnect();
 	}
-	
+
 	public boolean isConnected()
 	{
 		return this.dbConnection != null;
 	}
-	
+
 	public void saveSettings()
 	{
 		this.tables.saveSettings();
 		this.procs.saveSettings();
-	}	
-	
+	}
+
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.schemaSelector)
@@ -205,7 +206,7 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 			{
 				String schema = (String)schemaSelector.getSelectedItem();
 				String cat = null;
-				if (catalogSelector != null) 
+				if (catalogSelector != null)
 				{
 					cat = (String)catalogSelector.getSelectedItem();
 				}
@@ -218,7 +219,7 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 			}
 		}
 	}
-	
+
 	public void openWindow(String aProfileName)
 	{
 		if (this.window == null)
@@ -227,38 +228,50 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		}
 		this.window.show();
 	}
-	
+
 	public DbExplorerWindow getWindow()
 	{
 		return this.window;
 	}
-	
+
 	public void addToActionMap(WbAction anAction)
 	{
 	}
-	
+
 	public List getActions()
 	{
 		return Collections.EMPTY_LIST;
 	}
-	
+
 	public WbToolbar getToolbar()
 	{
 		return this.toolbar;
 	}
-	
+
 	public void showLogMessage(String aMsg)
 	{
 	}
-	
+
 	public void showStatusMessage(String aMsg)
 	{
 	}
-	
+
 	public void addToToolbar(WbAction anAction, boolean aFlag)
 	{
 	}
+	public void mainWindowDeiconified()
+	{
+		if (this.window != null && this.restoreWindow) this.window.show();
+	}
 
+	public void mainWindowIconified()
+	{
+		if (this.window != null)
+		{
+			this.restoreWindow = this.window.isVisible();
+			this.window.hide();
+		}
+	}
 	public void updateUI()
 	{
 		super.updateUI();
@@ -267,5 +280,5 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 			this.toolbar.updateUI();
 			this.toolbar.repaint();
 		}
-	}	
+	}
 }

@@ -4,6 +4,22 @@
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
+     <string>org.hsqldb.jdbcDriver</string>
+    </void>
+    <void property="library">
+     <string>hsqldb.jar</string>
+    </void>
+    <void property="name">
+     <string>HSQLDB Local</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:hsqldb:(path to dababase file)</string>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
      <string>com.inet.tds.TdsDriver</string>
     </void>
     <void property="library">
@@ -14,6 +30,22 @@
     </void>
     <void property="sampleUrl">
      <string>jdbc:inetdae:(servername):1433?database=(dbname)</string>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>org.gjt.mm.mysql.Driver</string>
+    </void>
+    <void property="library">
+     <string>mm.mysql-2.0.4-bin.jar</string>
+    </void>
+    <void property="name">
+     <string>MySQL</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:mysql://&lt;HOST>:&lt;PORT>/&lt;DB></string>
     </void>
    </object>
   </void>
@@ -33,21 +65,21 @@
     </void>
    </object>
   </void>
-  <void method="add"> 
-   <object class="workbench.db.DbDriver"> 
-    <void property="driverClass"> 
-     <string>sun.jdbc.odbc.JdbcOdbcDriver</string> 
-    </void> 
-    <void property="library"> 
-     <string></string> 
-    </void> 
-    <void property="name"> 
-     <string>ODBC Bridge</string> 
-    </void> 
-    <void property="sampleUrl"> 
-     <string>jdbc:odbc:&lt;dsn name></string> 
-    </void> 
-   </object> 
-  </void> 
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>sun.jdbc.odbc.JdbcOdbcDriver</string>
+    </void>
+    <void property="library">
+     <string></string>
+    </void>
+    <void property="name">
+     <string>ODBC Bridge</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:odbc:&lt;dsn name></string>
+    </void>
+   </object>
+  </void>
  </object>
 </java>
