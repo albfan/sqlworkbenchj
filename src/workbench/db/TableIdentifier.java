@@ -64,39 +64,52 @@ public class TableIdentifier
 		if (this.expression == null) this.initExpression();
 		return this.expression;
 	}
+	
+	public String getTableExpression(WbConnection conn)
+	{
+		return this.buildTableExpression(conn);
+	}
 
 	private void initExpression()
+	{
+		this.expression = this.buildTableExpression(null);
+	}
+	
+	private String buildTableExpression(WbConnection conn)
 	{
 		if (this.isNewTable)
 		{
 			if (this.tablename == null)
 			{
-				this.expression = ResourceMgr.getString("TxtNewTableIdentifier");
+				return ResourceMgr.getString("TxtNewTableIdentifier");
 			}
 			else
 			{
-				this.expression = this.tablename;
+				return this.tablename;
 			}
-			return;
 		}
 
 		StringBuffer result = new StringBuffer(30);
-		if (this.schema != null)
+		if (conn == null)
 		{
-			if (this.schema.indexOf("_") == -1)
+			if (this.schema != null)
 			{
 				result.append(SqlUtil.quoteObjectname(this.schema));
+				result.append('.');
 			}
-			else
-			{
-				result.append('"');
-				result.append(this.schema);
-				result.append('"');
-			}
-			result.append('.');
+			result.append(SqlUtil.quoteObjectname(this.tablename));
 		}
-		result.append(SqlUtil.quoteObjectname(this.tablename));
-		this.expression = result.toString();
+		else
+		{
+			DbMetadata meta = conn.getMetadata();
+			if (this.schema != null)
+			{
+				result.append(meta.quoteObjectname(this.schema));
+				result.append('.');
+			}
+			result.append(meta.quoteObjectname(this.tablename));
+		}
+		return result.toString();
 	}
 
 	public String getTable() { return this.tablename; }

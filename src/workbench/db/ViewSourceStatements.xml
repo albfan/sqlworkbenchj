@@ -193,6 +193,25 @@ catalog_definition_schema.sysschema
     </void> 
    </object> 
   </void> 
+
+  <void method="put"> 
+   <string>Informix Dynamic Server</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>SELECT V.viewtext, V.seqno FROM informix.sysviews V,informix.systables T where V.tabid=T.tabid</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>T.tabname</string> 
+    </void> 
+    <void property="schemaField"> 
+     <string>T.owner</string> 
+    </void> 
+     <void property="orderBy"> 
+     <string>order by V.seqno</string> 
+    </void> 
+   </object> 
+  </void> 
+
     
  </object> 
 </java> 

@@ -23,24 +23,24 @@ import javax.swing.SwingUtilities;
 public class WbTabbedPane
 	extends JTabbedPane
 {
-	
+
 	private boolean suspendRepaint = false;
-	
+
 	/** Creates a new instance of WbTabbedPane */
 	public WbTabbedPane()
 	{
 		super();
 		this.putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
 	}
-	
+
 	public synchronized void setSuspendRepaint(boolean aFlag)
 	{
 		boolean suspend = this.suspendRepaint;
 		this.suspendRepaint = aFlag;
-		
+
 		// if repainting was re-enabled, then queue
 		// a repaint event right away
-		// I'm using invokeLater() to make sure, that 
+		// I'm using invokeLater() to make sure, that
 		// this is executed on the AWT thread.
 		if (suspend && !aFlag)
 		{
@@ -54,13 +54,18 @@ public class WbTabbedPane
 			});
 		}
 	}
-	
+
+	public boolean isRepaintSuspended()
+	{
+		 return this.suspendRepaint;
+	}
+
 	public void repaint()
 	{
 		if (this.suspendRepaint) return;
 		super.repaint();
 	}
-	
+
 //	public void paintComponent(Graphics g)
 //	{
 //		if (this.suspendRepaint) return;
@@ -72,5 +77,5 @@ public class WbTabbedPane
 		if (this.suspendRepaint) return;
 		super.paintComponents(g);
 	}
-	
+
 }

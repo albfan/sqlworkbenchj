@@ -181,6 +181,7 @@ public class TableListPanel
 	private WbAction dropIndexAction;
 	private WbAction createIndexAction;
 	private WbAction createDummyInsertAction;
+	private WbAction createDefaultSelect;
 
 	private ToggleTableSourceAction toggleTableSource;
 
@@ -263,7 +264,12 @@ public class TableListPanel
 		this.createDummyInsertAction.setEnabled(true);
 		this.createDummyInsertAction.initMenuDefinition("MnuTxtCreateDummyInsert");
 
+		this.createDefaultSelect = new WbAction(this, "create-default-select");
+		this.createDefaultSelect.setEnabled(true);
+		this.createDefaultSelect.initMenuDefinition("MnuTxtCreateDefaultSelect");
+
 		this.tableList.addPopupAction(this.createDummyInsertAction, false);
+		this.tableList.addPopupAction(this.createDefaultSelect, false);
 
 		this.extendPopupMenu();
 		this.findPanel = new FindPanel(this.tableList);
@@ -390,11 +396,14 @@ public class TableListPanel
 		item.setEnabled(true);
 		popup.add(item);
 
-		this.showDataMenu = new WbMenu(ResourceMgr.getString("MnuTxtShowTableData"));
-		this.showDataMenu.setEnabled(false);
-		this.updateShowDataMenu();
-		popup.addSeparator();
-		popup.add(this.showDataMenu);
+		if (this.parentWindow != null)
+		{
+			this.showDataMenu = new WbMenu(ResourceMgr.getString("MnuTxtShowTableData"));
+			this.showDataMenu.setEnabled(false);
+			this.updateShowDataMenu();
+			popup.addSeparator();
+			popup.add(this.showDataMenu);
+		}
 	}
 
 	private Font boldFont = null;
@@ -855,7 +864,7 @@ public class TableListPanel
 	}
 
 	private boolean suspendTableSelection = false;
-	
+
 	public void suspendTableSelection(boolean flag)
 	{
 		boolean wasSuspended = this.suspendTableSelection;
@@ -887,7 +896,6 @@ public class TableListPanel
 	{
 		int count = this.tableList.getSelectedRowCount();
 
-		this.showDataMenu.setEnabled(count == 1);
 		this.dropTableItem.setEnabled(count > 0);
 		this.spoolData.setEnabled(count > 0);
 
@@ -935,8 +943,14 @@ public class TableListPanel
 		TableIdentifier id = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
 		this.tableData.setTable(id);
 
-		this.showDataMenu.setEnabled(this.isTableType(selectedObjectType));
+		this.setShowDataMenuStatus(this.isTableType(selectedObjectType));
+
 		this.startRetrieveCurrentPanel();
+	}
+
+	private void setShowDataMenuStatus(boolean flag)
+	{
+		if (this.showDataMenu != null) this.showDataMenu.setEnabled(flag);
 	}
 
 	private boolean maybeUpdateable(String aType)
@@ -1382,6 +1396,25 @@ public class TableListPanel
 		this.retrieve();
 	}
 
+	private void showTableData(int panelIndex)
+	{
+		final SqlPanel panel = (SqlPanel)this.parentWindow.getSqlPanel(panelIndex);
+		String sql = this.buildSqlForTable();
+		if (sql != null)
+		{
+			panel.setStatementText(sql);
+			this.parentWindow.show();
+			this.parentWindow.selectTab(panelIndex);
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					panel.selectEditor();
+				}
+			});
+		}
+	}
+	
 	private String buildSqlForTable()
 	{
 		if (this.selectedTableName == null || this.selectedTableName.length() == 0) return null;
@@ -1446,25 +1479,18 @@ public class TableListPanel
 
 			if (command.startsWith("panel-") && this.parentWindow != null)
 			{
-				int panelIndex = 0;
 				try
 				{
-					panelIndex = Integer.parseInt(command.substring(6));
-					final SqlPanel panel = (SqlPanel)this.parentWindow.getSqlPanel(panelIndex);
-					String sql = this.buildSqlForTable();
-					if (sql != null)
+					final int panelIndex = Integer.parseInt(command.substring(6));
+					// Allow the selection change to finish so that
+					// we have the correct table name in the instance variables
+					SwingUtilities.invokeLater(new Runnable()
 					{
-						panel.setStatementText(sql);
-						this.parentWindow.show();
-						this.parentWindow.selectTab(panelIndex);
-						EventQueue.invokeLater(new Runnable()
+						public void run()
 						{
-							public void run()
-							{
-								panel.selectEditor();
-							}
-						});
-					}
+							showTableData(panelIndex);
+						}
+					});
 				}
 				catch (Exception ex)
 				{
@@ -1498,6 +1524,10 @@ public class TableListPanel
 			else if (e.getSource() == this.createDummyInsertAction)
 			{
 				this.createDummyInserts();
+			}
+			else if (e.getSource() == this.createDefaultSelect)
+			{
+				this.createDefaultSelects();
 			}
 		}
 	}
@@ -1625,17 +1655,8 @@ public class TableListPanel
 
 			String name = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 			String schema = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-
-			if (schema!= null && schema.length() > 0)
-			{
-				name = SqlUtil.quoteObjectname(schema) + "." + SqlUtil.quoteObjectname(name);
-			}
-			else
-			{
-				name = SqlUtil.quoteObjectname(name);
-			}
-
-			names.add(name);
+			TableIdentifier tbl = new TableIdentifier(schema, name);
+			names.add(tbl.getTableExpression(this.dbConnection));
 		}
 		TableDeleterUI deleter = new TableDeleterUI();
 		deleter.addDeleteListener(this.tableData);
@@ -1655,6 +1676,22 @@ public class TableListPanel
 			int row = rows[i];
 			String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 			tables.put(table, "INSERT");
+		}
+		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
+		ObjectScripterUI ui = new ObjectScripterUI(s);
+		ui.show(SwingUtilities.getWindowAncestor(this));
+	}
+
+	private void createDefaultSelects()
+	{
+		int[] rows = this.tableList.getSelectedRows();
+		int count = rows.length;
+		HashMap tables = new HashMap(count);
+		for (int i=0; i < count; i++)
+		{
+			int row = rows[i];
+			String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+			tables.put(table, "SELECT");
 		}
 		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
 		ObjectScripterUI ui = new ObjectScripterUI(s);
@@ -1702,22 +1739,20 @@ public class TableListPanel
 
 		ArrayList names = new ArrayList(count);
 		ArrayList types = new ArrayList(count);
+
 		for (int i=0; i < count; i ++)
 		{
 			String name = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 			String schema = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-      if (schema!= null && schema.length() > 0)
-      {
-        name = SqlUtil.quoteObjectname(schema) + "." + SqlUtil.quoteObjectname(name);
-      }
-      else
-      {
-        name = SqlUtil.quoteObjectname(name);
-      }
 			String type = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-			names.add(name);
+
+			TableIdentifier id = new TableIdentifier(schema, name);
+			String table = id.getTableExpression(this.dbConnection);
+
+			names.add(table);
 			types.add(type);
 		}
+
 		ObjectDropperUI ui = new ObjectDropperUI();
 		ui.setObjects(names, types);
 		ui.setConnection(this.dbConnection);

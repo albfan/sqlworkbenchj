@@ -693,6 +693,16 @@ public class Settings
 		this.props.setProperty("workbench.editor.autojumpnext", Boolean.toString(show));
 	}
 
+	public boolean getIgnoreErrors()
+	{
+		return StringUtil.stringToBool(this.props.getProperty("workbench.sql.ignoreerror", "false"));
+	}
+	
+	public void setIgnoreErrors(boolean ignore)
+	{
+		this.props.setProperty("workbench.sql.ignoreerror", Boolean.toString(ignore));
+	}
+	
 	public boolean getCheckPreparedStatements()
 	{
 		return StringUtil.stringToBool(this.props.getProperty("workbench.sql.checkprepared", "false"));

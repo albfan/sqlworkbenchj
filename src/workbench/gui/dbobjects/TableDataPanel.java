@@ -301,7 +301,7 @@ public class TableDataPanel
 		else
 			sql.append("SELECT * FROM ");
 
-		sql.append(this.table.getTableExpression());
+		sql.append(this.table.getTableExpression(this.dbConnection));
 
 		return sql.toString();
 	}
@@ -380,7 +380,7 @@ public class TableDataPanel
 			dataDisplay.scriptStarting();
 			dataDisplay.setMaxRows(this.getMaxRows());
 			dataDisplay.runStatement(sql);
-			dataDisplay.setUpdateTable(this.table.getTableExpression());
+			dataDisplay.setUpdateTable(this.table.getTableExpression(this.dbConnection));
 			String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
 			dataDisplay.setPrintHeader(header);
 			dataDisplay.setStatusMessage("");

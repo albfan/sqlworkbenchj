@@ -822,6 +822,7 @@ public class EditorPanel
 			}
 			writer.close();
 			this.currentFile = aFile;
+			this.fileEncoding = encoding;
 			this.resetModified();
 		}
 		catch (IOException e)

@@ -72,7 +72,7 @@ public class WbManager
 	public static boolean trace = "true".equalsIgnoreCase(System.getProperty("workbench.startuptrace", "false"));
 	private HtmlViewer helpWindow;
 	private boolean shutdownInProgress = false;
-	
+
 	private Thread shutdownHook = new Thread(this);
 
 	private WbManager()
@@ -291,15 +291,15 @@ public class WbManager
 	{
 		MainWindow w = this.getCurrentWindow();
 		boolean settingsSaved = false;
-		
-		// the settings (i.e. size and position) should only be saved 
+
+		// the settings (i.e. size and position) should only be saved
 		// for the first visible window
 		if (w != null)
 		{
 			w.saveSettings();
 			settingsSaved = true;
 		}
-		
+
 		if (!this.checkProfiles(w)) return false;
 
 		int count = this.mainWindows.size();
@@ -336,7 +336,7 @@ public class WbManager
 
 	public void exitWorkbench(JFrame window)
 	{
-		// saveSettings() will also prompt if any modified 
+		// saveSettings() will also prompt if any modified
 		// files should be changed
 		boolean canExit = this.saveWindowSettings();
 		if (!canExit) return;
@@ -347,7 +347,7 @@ public class WbManager
 			this.doShutdown();
 			return;
 		}
-		
+
 		// When disconnecting it can happen that the disconnect itself
 		// takes some time. Because of this, a small window is displayed
 		// that the disconnect takes place, and the actual disconnect is
@@ -372,7 +372,7 @@ public class WbManager
 	}
 
 	public boolean isShutdownInProgress() { return this.shutdownInProgress; }
-	
+
 	private void createCloseMessageWindow(JFrame parent)
 	{
 		if (parent == null) return;
@@ -478,7 +478,7 @@ public class WbManager
 	{
 		doShutdown(0);
 	}
-	
+
 	private void doShutdown(int errorCode)
 	{
 		Runtime.getRuntime().removeShutdownHook(this.shutdownHook);

@@ -160,6 +160,7 @@ public class WbSwingUtilities
 
 	private static void showCursor(Cursor cursor, final Component caller, final boolean includeParents)
 	{
+		if (caller == null) return;
 		caller.setCursor(cursor);
 		if (includeParents)
 		{
@@ -257,7 +258,7 @@ public class WbSwingUtilities
 		else if (result.equals(options[2])) return IGNORE_ALL;
 		else return JOptionPane.NO_OPTION;
 	}
-	
+
 	public static int getYesNoExecuteAll(Component aCaller, String aMessage)
 	{
 		String[] options = new String[] { ResourceMgr.getString("LabelYes"), ResourceMgr.getString("LabelNo"), ResourceMgr.getString("LabelExecuteAll")};

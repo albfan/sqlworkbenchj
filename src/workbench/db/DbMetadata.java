@@ -968,6 +968,7 @@ public class DbMetadata
 		}
 		try
 		{
+			boolean needQuote = false;
 			boolean isKeyword = false;
 			if (this.storesLowerCaseIdentifiers())
 			{
@@ -984,17 +985,27 @@ public class DbMetadata
 				isKeyword = this.keywords.contains(aName.trim().toUpperCase());
 			}
 
-			// Oracle and HSQL require identifiers starting with a number to be quoted 
-			if (this.isHsql || isOracle)
+			// Oracle and HSQL require identifiers starting with a number to be quoted
+			if (this.isHsql || this.isOracle)
 			{
 				char c = aName.charAt(0);
 				if (Character.isDigit(c))
 				{
-					return this.quoteCharacter + aName.trim() + this.quoteCharacter;
+					needQuote = true;
 				}
 			}
+
+			if (this.storesLowerCaseIdentifiers() && !aName.toLowerCase().equals(aName))
+			{
+				needQuote = true;
+			}
+			if (this.storesUpperCaseIdentifiers() && !aName.toUpperCase().equals(aName))
+			{
+				needQuote = true;
+			}
+
 			// if the given name is a keyword, then we need to quote it!
-			if (isKeyword)
+			if (isKeyword || needQuote)
 			{
 				return this.quoteCharacter + aName.trim() + this.quoteCharacter;
 			}
@@ -2703,6 +2714,42 @@ public class DbMetadata
 			sql.append(dummyvalue);
 		}
 		sql.append("\n);\n");
+		return sql.toString();
+	}
+
+	/**
+	 *	Return a default SELECT statement for the given table.
+	 */
+	public String getDefaultSelect(String catalog, String schema, String table)
+		throws SQLException
+	{
+		DataStore tableDef = this.getTableDefinition(catalog, schema, table, true);
+
+		if (tableDef.getRowCount() == 0) return "";
+		int colCount = tableDef.getRowCount();
+		if (colCount == 0) return "";
+
+		StrBuffer sql = new StrBuffer(colCount * 80);
+
+		sql.append("SELECT ");
+
+		boolean quote = false;
+		for (int i=0; i < colCount; i++)
+		{
+			String column = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+			//column = SqlUtil.quoteObjectname(column);
+			if (i > 0) 
+			{
+				sql.append(",\n");
+				sql.append("       ");
+			}
+			
+			sql.append(column);
+		}
+		sql.append("\nFROM ");
+		sql.append(table);
+		sql.append(";\n");
+
 		return sql.toString();
 	}
 

@@ -759,6 +759,17 @@ public class StringUtil
 		return buf.toString();
 	}
 
+	public static int findFirstWhiteSpace(String data)
+	{
+		if (data == null) return -1;
+		int count = data.length();
+		for (int i=0; i < count; i++)
+		{
+			if (Character.isWhitespace(data.charAt(i))) return i;
+		}
+		return -1;
+	}
+	
 	public static int findPattern(String regex, String data)
 	{
 		return findPattern(regex, data);

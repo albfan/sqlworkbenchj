@@ -144,6 +144,24 @@ and  sysobjects.type = &apos;P&apos;</string>
     </void> 
    </object> 
   </void> 
+
+  <void method="put"> 
+   <string>Informix Dynamic Server</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string> SELECT B.data, B.seqno FROM informix.sysprocedures P,informix.sysprocbody  B WHERE P.procid=B.procid and B.datakey = 'T' </string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>P.procname</string> 
+    </void> 
+    <void property="schemaField"> 
+     <string>P.owner</string> 
+    </void> 
+    <void property="orderBy"> 
+     <string>order by B.seqno</string> 
+    </void> 
+   </object> 
+  </void> 
   
  </object> 
  

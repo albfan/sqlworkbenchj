@@ -29,7 +29,8 @@ import workbench.db.WbConnection;
 public class SqlUtil
 {
 	private static Pattern specialCharPattern = Pattern.compile("[$ ]");
-
+	private static Pattern whiteSpacePattern = Pattern.compile("\\s");
+	
 	/** Creates a new instance of SqlUtil */
 	private SqlUtil()
 	{
@@ -54,8 +55,7 @@ public class SqlUtil
 		String s = aStatement.trim();
 		if (s.length() == 0) return "";
 		if (s.charAt(0) == '@') return "@";
-		int pos = s.indexOf(' ');
-		if (pos == -1) pos = s.indexOf('\t');
+		int pos = StringUtil.findFirstWhiteSpace(s);
 		if (pos > -1)
 		{
 			return s.substring(0, pos).trim().toUpperCase();

@@ -22,7 +22,8 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
+ *	Action to toggle the automatic jump to the next statement 
+ *  if "Execute current" statement is used
  *	@author  info@sql-workbench.net
  */
 public class AutoJumpNextStatement extends WbAction
@@ -32,7 +33,7 @@ public class AutoJumpNextStatement extends WbAction
 	private boolean switchedOn = false;
 	private JCheckBoxMenuItem toggleMenu;
 
-	public static final AutoJumpNextStatement AUTO_JUMP_ACTION = new AutoJumpNextStatement();
+	//public static final AutoJumpNextStatement AUTO_JUMP_ACTION = new AutoJumpNextStatement();
 	
 	public AutoJumpNextStatement()
 	{

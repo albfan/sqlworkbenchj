@@ -52,6 +52,7 @@ public class ObjectScripter
 			this.appendObjectType("view");
 			this.appendObjectType("synonym");
 			this.appendObjectType("insert");
+			this.appendObjectType("select");
 		}
 		return this.script.toString();
 	}
@@ -92,6 +93,10 @@ public class ObjectScripter
 					else if ("insert".equalsIgnoreCase(type))
 					{
 						source = this.meta.getEmptyInsert(null, null, object);
+					}
+					else if ("select".equalsIgnoreCase(type))
+					{
+						source = this.meta.getDefaultSelect(null, null, object);
 					}
 				}
 				catch (Exception e)

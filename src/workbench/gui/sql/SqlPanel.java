@@ -80,6 +80,7 @@ import workbench.gui.actions.FindDataAgainAction;
 import workbench.gui.actions.FirstStatementAction;
 import workbench.gui.actions.FormatSqlAction;
 import workbench.gui.actions.HighlightCurrentStatement;
+import workbench.gui.actions.IgnoreErrorsAction;
 import workbench.gui.actions.ImportFileAction;
 import workbench.gui.actions.LastStatementAction;
 import workbench.gui.actions.MakeInListAction;
@@ -198,6 +199,7 @@ public class SqlPanel
 	private ImportFileAction importFileAction;
 	private PrintAction printDataAction;
 	private PrintPreviewAction printPreviewAction;
+	private CheckPreparedStatementsAction checkPreparedAction;
 
 	private WbMenu copySelectedMenu;
 	private CommitAction commitAction;
@@ -464,6 +466,7 @@ public class SqlPanel
 
 	public boolean checkAndSaveFile()
 	{
+		if (this.editor == null) return true;
 		int result = this.editor.checkAndSaveFile();
 		return (result != JOptionPane.CANCEL_OPTION);
 	}
@@ -520,6 +523,7 @@ public class SqlPanel
 
 	public boolean closeFile(boolean emptyEditor)
 	{
+		if (this.editor == null) return true;
 		this.checkAndSaveFile();
 		if (this.editor.closeFile(emptyEditor))
     {
@@ -738,8 +742,9 @@ public class SqlPanel
 		a = new HighlightCurrentStatement();
 		a.setCreateMenuSeparator(false);
 		this.actions.add(a);
-		a = new CheckPreparedStatementsAction();
-		this.actions.add(a);
+		this.checkPreparedAction = new CheckPreparedStatementsAction();
+		this.actions.add(this.checkPreparedAction);
+		this.actions.add(new IgnoreErrorsAction());
 		this.executeAll.setEnabled(false);
 		this.executeSelected.setEnabled(false);
 
@@ -1912,7 +1917,8 @@ public class SqlPanel
 
 			String currentMsg = null;
 
-			boolean onErrorAsk = true;
+			boolean onErrorAsk = !Settings.getInstance().getIgnoreErrors();
+			
 			if (count == 1) compressLog = false;
 
 			this.data.scriptStarting();
@@ -1966,14 +1972,24 @@ public class SqlPanel
 				if (goOn && checkPreparedStatement)
 				{
 					PreparedStatementPool pool = this.dbConnection.getPreparedStatementPool();
-					if (pool.isRegistered(lastSql) || pool.addPreparedStatement(lastSql))
+					try
 					{
-						StatementParameters parms = pool.getParameters(lastSql);
-						this.showBusyIcon(false);
-						goOn = ParameterEditor.showParameterDialog(parms);
-						this.showBusyIcon(true);
+						if (pool.isRegistered(lastSql) || pool.addPreparedStatement(lastSql))
+						{
+							StatementParameters parms = pool.getParameters(lastSql);
+							this.showBusyIcon(false);
+							goOn = ParameterEditor.showParameterDialog(parms);
+							this.showBusyIcon(true);
+						}
 					}
-				} 
+					catch (SQLException e)
+					{
+							this.showBusyIcon(false);
+							msg = ResourceMgr.getString("ErrorCheckPreparedStatement").replaceAll("%error%", ExceptionUtil.getDisplay(e));
+							WbSwingUtilities.showErrorMessage(this, msg);
+							this.showBusyIcon(true);
+					}
+				}
 				if (!goOn)
 				{
 					String cancelMsg = ResourceMgr.getString("MsgSqlCancelledDuringPrompt");
@@ -2246,7 +2262,7 @@ public class SqlPanel
 		this.findDataAgainAction.setEnabled(findNext);
 
 		this.data.getTable().checkKeyActions();
-		
+
 		boolean canUpdate = this.data.hasKeyColumns();
 		//this.copyAsSqlUpdate.setEnabled(canUpdate);
 		this.importFileAction.setEnabled(canUpdate);

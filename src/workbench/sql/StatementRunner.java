@@ -77,14 +77,14 @@ public class StatementRunner
 	private int maxRows;
 	private boolean isCancelled;
 	private boolean batchMode = false;
-	private boolean supportsSelectIntoNewTable = false;
 
 	private RowActionMonitor rowMonitor;
 	private ExecutionController controller;
 	private WbStartBatch batchCommand;
 	private ResultLogger resultLogger;
 	private boolean verboseLogging;
-
+	private boolean supportsSelectInto = false;
+	
 	public StatementRunner()
 	{
 		this.verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
@@ -253,8 +253,14 @@ public class StatementRunner
 			this.cmdDispatch.put(verb, cmd);
 			this.dbSpecificCommands.add(verb);
 		}
-
-		this.supportsSelectIntoNewTable = !meta.supportsSelectIntoNewTable();
+		
+		// this is stored in an instance variable for performance
+		// reasons, so we can skip the call to isSelectIntoNewTable() in 
+		// getCommandToUse()
+		// For a single call this doesn't matter, but when executing 
+		// huge scripts the repeated call to getCommandToUse should
+		// be as quick as possible
+		this.supportsSelectInto = meta.supportsSelectIntoNewTable();
 	}
 
 	public StatementRunnerResult getResult()
@@ -359,12 +365,7 @@ public class StatementRunner
 	private SqlCommand getCommandToUse(String sql)
 	{
 		String verb = SqlUtil.getSqlVerb(sql);
-		if (!supportsSelectIntoNewTable)
-		{
-			return (SqlCommand)this.cmdDispatch.get(verb);
-		}
-
-		if (this.dbConnection.getMetadata().isSelectIntoNewTable(sql))
+		if (!this.supportsSelectInto && this.dbConnection.getMetadata().isSelectIntoNewTable(sql))
 		{
 			LogMgr.logDebug("StatementRunner.getRealVerb()", "Found 'SELECT ... INTO new_table'");
 			// use the generic SqlCommand implementation for this.

@@ -37,10 +37,10 @@ public class WbWorkspace
 	private ZipOutputStream zout;
 	private ZipFile archive;
 	private ZipEntry[] entries;
-	
+
 	private boolean isReadOnly;
 	private WbProperties tabInfo = new WbProperties(1);
-	
+
 	public WbWorkspace(String archiveName, boolean createNew)
 		throws IOException
 	{
@@ -64,7 +64,7 @@ public class WbWorkspace
 			{
 				ZipEntry entry = (ZipEntry)e.nextElement();
 				String filename = entry.getName().toLowerCase();
-				
+
 				if (filename.endsWith("txt"))
 				{
 					tempEntries.add(entry);
@@ -74,27 +74,33 @@ public class WbWorkspace
 					this.readTabInfo(entry);
 				}
 			}
-			
+
 			int count = tempEntries.size();
 			this.entries = new ZipEntry[count];
 
 			for (int i=0; i < count; i++)
 			{
+				int ind = -1;
+				int realIndex = -1;
 				try
 				{
 					ZipEntry entry = (ZipEntry)tempEntries.get(i);
 					String filename = entry.getName().toLowerCase();
 					int pos = filename.indexOf('.');
-					int ind = -1;
 					try { ind = Integer.parseInt(filename.substring(12,pos)); } catch (Throwable th) {ind = -1;}
-					if (ind != -1)
+					realIndex = ind - 1;
+					if (realIndex >= 0 && realIndex < count)
 					{
-						entries[ind - 1] = entry;
+						entries[realIndex] = entry;
+					}
+					else
+					{
+						LogMgr.logError("WbWorkspace.<init>", "Wrong index " + realIndex + " retrieved from workspace file (" + count + " entries)", null);
 					}
 				}
-				catch (Exception ex)
+				catch (Throwable ex)
 				{
-					LogMgr.logError("WbWorkspace.<init>", "Error when reading history data", ex);
+						LogMgr.logError("WbWorkspace.<init>", "Error reading history data for index " + realIndex + " (of " + count + " entries)", ex);
 				}
 			}
 		}
@@ -104,7 +110,7 @@ public class WbWorkspace
 		throws IOException
 	{
 		if (this.isReadOnly) throw new IllegalStateException("Workspace is opened for reading. addHistoryEntry() may not be called");
-		
+
 		File f = new File(aFilename);
 		String filename = f.getName();
 		ZipEntry entry = new ZipEntry(filename);
@@ -119,7 +125,7 @@ public class WbWorkspace
 		if (this.entries == null) return 0;
 		return this.entries.length;
 	}
-	
+
 	public void readHistoryData(int anIndex, SqlHistory history)
 		throws IOException
 	{
@@ -137,12 +143,12 @@ public class WbWorkspace
 		}
 		return;
 	}
-	
+
 	public Properties getSettings()
 	{
 		return this.tabInfo;
 	}
-	
+
 	public void close()
 		throws IOException
 	{
@@ -184,17 +190,17 @@ public class WbWorkspace
 			this.tabInfo = new WbProperties();
 		}
 	}
-	
+
 	public void setSelectedTab(int anIndex)
 	{
 		this.tabInfo.setProperty("tab.selected", Integer.toString(anIndex));
 	}
-	
+
 	public int getSelectedTab()
 	{
 		return StringUtil.getIntValue(this.tabInfo.getProperty("tab.selected", "0"));
 	}
-	
+
 	public void setTabTitle(int index, String name)
 	{
 		String key = "tab" + index + ".title";
@@ -208,7 +214,7 @@ public class WbWorkspace
 		String value = (String)this.tabInfo.get(key);
 		return value;
 	}
-	
+
 	public int getExternalFileCursorPos(int tabIndex)
 	{
 		if (this.tabInfo == null) return -1;
@@ -224,7 +230,7 @@ public class WbWorkspace
 		{
 			result = -1;
 		}
-		
+
 		return result;
 	}
 
@@ -233,7 +239,7 @@ public class WbWorkspace
 		String key = "tab" + index + ".timeout";
 		this.tabInfo.setProperty(key, Integer.toString(timeout));
 	}
-	
+
 	public int getQueryTimeout(int index)
 	{
 		if (this.tabInfo == null) return 0;
@@ -251,7 +257,7 @@ public class WbWorkspace
 		}
 		return result;
 	}
-	
+
 	public void setMaxRows(int index, int numRows)
 	{
 		String key = "tab" + index + ".maxrows";
@@ -275,7 +281,7 @@ public class WbWorkspace
 		}
 		return result;
 	}
-	
+
 	public String getExternalFileName(int tabIndex)
 	{
 		if (this.tabInfo == null) return null;
@@ -290,19 +296,19 @@ public class WbWorkspace
 		String value = (String)this.tabInfo.get(key);
 		return value;
 	}
-	
+
 	public void setExternalFileCursorPos(int tabIndex, int cursor)
 	{
 		String key = "tab" + tabIndex + ".file.cursorpos";
 		this.tabInfo.setProperty(key, Integer.toString(cursor));
 	}
-	
+
 	public void setExternalFileName(int tabIndex, String filename)
 	{
 		String key = "tab" + tabIndex + ".filename";
 		this.tabInfo.setProperty(key, filename);
 	}
-	
+
 	public void setExternalFileEncoding(int tabIndex, String encoding)
 	{
 		String key = "tab" + tabIndex + ".encoding";
