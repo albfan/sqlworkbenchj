@@ -28,6 +28,7 @@ public class ExecuteSelAction extends WbAction
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
 		this.putValue(WbAction.ADD_TO_TOOLBAR, "true");
 		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
+		this.putValue(ALTERNATE_ACCELERATOR, KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0));
 	}
 
 	public void actionPerformed(ActionEvent e)

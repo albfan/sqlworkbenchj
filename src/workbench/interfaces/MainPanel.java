@@ -25,6 +25,7 @@ public interface MainPanel
 	List getActions();
 	WbToolbar getToolbar();
 	void saveSettings();
+	void restoreSettings();
 	void showStatusMessage(String aMsg);
 	void showLogMessage(String aMsg);
 	void clearLog();

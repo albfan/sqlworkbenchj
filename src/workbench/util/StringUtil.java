@@ -15,7 +15,8 @@ import java.io.StringReader;
 public class StringUtil
 {
 	public static final String LINE_TERMINATOR = System.getProperty("line.separator");
-
+	public static final String PATH_SEPARATOR = System.getProperty("path.separator");
+	
 	public static String replace(String aString, String aValue, String aReplacement)
 	{
 		if (aReplacement == null) return aString;
@@ -105,5 +106,10 @@ public class StringUtil
 			try { reader.close(); } catch (Exception e) {}
 		}
 		return result.toString();
+	}
+	
+	public static void main(String args[])
+	{
+		System.getProperties().list(System.out);
 	}
 }

@@ -22,6 +22,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import workbench.db.WbConnection;
+import workbench.gui.MainWindow;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.WbToolbar;
@@ -35,6 +36,7 @@ import workbench.resource.ResourceMgr;
  */
 public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 {
+	private MainWindow parentWindow;
 	private JTabbedPane tabPane;
 	private TableListPanel tables;
 	private ProcedureListPanel procs;
@@ -50,11 +52,12 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 	private ConnectionInfo connectionInfo;
 	private boolean restoreWindow = false;
 
-	public DbExplorerPanel()
+	public DbExplorerPanel(MainWindow aParent)
 	{
+		this.parentWindow = aParent;
 		try
 		{
-			tables = new TableListPanel();
+			tables = new TableListPanel(aParent);
 			procs = new ProcedureListPanel();
 			tabPane = new JTabbedPane(JTabbedPane.TOP);
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerTables"), tables);

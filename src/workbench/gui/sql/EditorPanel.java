@@ -153,6 +153,7 @@ public class EditorPanel extends JEditTextArea implements ClipboardSupport, Font
 	{
 		this.currentFile = null;
 		this.setText("");
+		this.clearUndoBuffer();
 	}
 	
 	public boolean openFile()
@@ -177,7 +178,7 @@ public class EditorPanel extends JEditTextArea implements ClipboardSupport, Font
 		if (!aFile.exists()) return false;
 		if (aFile.length() > Integer.MAX_VALUE) 
 		{
-			WbManager.getInstance().showErrorMessage(ResourceMgr.getString("MsgFileTooBig"));
+			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgFileTooBig"));
 			return false;
 		}
 		boolean result = false;
@@ -185,20 +186,20 @@ public class EditorPanel extends JEditTextArea implements ClipboardSupport, Font
 		{
 			String filename = aFile.getAbsolutePath();
 			BufferedReader reader = new BufferedReader(new FileReader(filename));
-			StringBuffer content = new StringBuffer((int)aFile.length());
+			StringBuffer content = new StringBuffer((int)aFile.length() + 500);
 			this.setText("");
 			String line = reader.readLine();
 			while (line != null)
 			{
 				content.append(line);
-				content.append(StringUtil.LINE_TERMINATOR);
-				//this.appendLine(line);
+				content.append('\n');
 				line = reader.readLine();
 			}
 			this.setText(content.toString());
 			reader.close();
 			this.currentFile = aFile;
 			result = true;
+			this.clearUndoBuffer();
 		}
 		catch (IOException e)
 		{

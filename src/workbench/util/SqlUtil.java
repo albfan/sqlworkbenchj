@@ -41,11 +41,16 @@ public class SqlUtil
 		// Handle MS SQL GO's
 		if (aScript.indexOf("\nGO\n") > -1)
 		{
-			aScript = StringUtil.replace(aScript, "\nGO\n", "\n");
+			aScript = StringUtil.replace(aScript, "\nGO\n", ";\n");
 		}
-		else
+		else 
 		{
-			aScript = StringUtil.replace(aScript, StringUtil.LINE_TERMINATOR + "GO" + StringUtil.LINE_TERMINATOR, StringUtil.LINE_TERMINATOR);
+			aScript = StringUtil.replace(aScript, StringUtil.LINE_TERMINATOR + "GO" + StringUtil.LINE_TERMINATOR, ";" + StringUtil.LINE_TERMINATOR);
+		}
+		
+		if (aScript.endsWith("GO"))
+		{
+			aScript = aScript.substring(0, aScript.length() - 2) + ";";
 		}
 		pos = aScript.indexOf(aDelimiter);
 		if (pos == -1 || pos == aScript.length() - 1)
@@ -117,44 +122,6 @@ public class SqlUtil
 	}
 
 	/**
-	 *	Returns a literal which can be used directly in a SQL statement.
-	 *	This method will quote character datatypes and convert
-	 *	Date datatypes to the correct format.
-	 */
-	public static String getLiteral(Object aValue)
-	{
-		if (aValue == null) return "NULL";
-
-		if (aValue instanceof String)
-		{
-			// Single quotes in a String must be "quoted"...
-			String realValue = StringUtil.replace((String)aValue, "'", "''");
-			return "'" + realValue + "'";
-		}
-		else if (aValue instanceof Date)
-		{
-			DbDateFormatter format = WbManager.getInstance().getConnectionMgr().getDateLiteralFormatter();
-			if (format == null)
-			{
-				return "'" + aValue.toString() + "'";
-			}
-			else
-			{
-				return format.getLiteral((Date)aValue);
-			}
-		}
-		else if (aValue instanceof NullValue)
-		{
-			return "NULL";
-		}
-		else
-		{
-			return aValue.toString();
-		}
-
-	}
-
-	/**
 	 * Return the list of tables which are in the FROM list of the given SQL statement.
 	 */
 	public static List getTables(String aSql)
@@ -212,8 +179,8 @@ public class SqlUtil
 	 */
 	public static String makeCleanSql(String aSql, boolean keepNewlines)
 	{
-		int count = aSql.length();
 		aSql = aSql.trim();
+		int count = aSql.length();
 		boolean inComment = false;
 		boolean inQuotes = false;
 		

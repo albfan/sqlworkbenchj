@@ -90,9 +90,7 @@ public class WbToolTipUI extends BasicToolTipUI
 		{  // only draw control key if there is one
 			g.setFont(smallFont);
 			g.setColor( MetalLookAndFeel.getPrimaryControlDarkShadow() );
-			g.drawString(keyText,
-			metrics.stringWidth(tipText) + padSpaceBetweenStrings,
-			2 + metrics.getAscent());
+			g.drawString(keyText,metrics.stringWidth(tipText) + padSpaceBetweenStrings,2 + metrics.getAscent());
 		}
 	}
 	

@@ -53,7 +53,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.7 2002-08-31 11:47:14 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.8 2002-09-20 17:59:29 thomas Exp $
  */
 public class JEditTextArea 
 	extends JComponent
@@ -1604,10 +1604,7 @@ public class JEditTextArea
 			{
 				// The MacOS MRJ doesn't convert \r to \n,
 				// so do it here
-				String selection = ((String)clipboard
-					.getContents(this).getTransferData(
-					DataFlavor.stringFlavor))
-					.replace('\r','\n');
+				String selection = ((String)clipboard.getContents(this).getTransferData(DataFlavor.stringFlavor)).replaceAll("\r\n","\n");
 
 				int repeatCount = inputHandler.getRepeatCount();
 				StringBuffer buf = new StringBuffer();

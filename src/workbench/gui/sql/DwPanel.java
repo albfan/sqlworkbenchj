@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
@@ -23,12 +22,15 @@ import workbench.exception.ExceptionUtil;
 import workbench.exception.WbException;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.OneLineTableModel;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.storage.DmlStatement;
+import workbench.util.LineTokenizer;
 import workbench.util.SqlUtil;
 
 
@@ -44,8 +46,8 @@ public class DwPanel extends JPanel
 	private String sql;
 	private String lastMessage;
 	private WbConnection dbConnection;
-	private DefaultTableModel errorModel;
-	private DefaultTableModel emptyModel;
+	private TableModel errorModel;
+	private TableModel resultEmptyMsgModel;
 	private boolean hasResultSet = false;
 	//private PreparedStatement prepStatement;
 	private Statement lastStatement;
@@ -59,6 +61,7 @@ public class DwPanel extends JPanel
 	private static int nextId = 0;
 	private WbConnection lastConnection;
 	private static final ArrayList knownSqlVerbs;
+	private boolean cancelled;
 	
 	static
 	{
@@ -94,18 +97,11 @@ public class DwPanel extends JPanel
 		pol.addComponent(infoTable);
 		pol.addComponent(statusBar.tfMaxRows);
 		this.setFocusTraversalPolicy(pol);
-		//this.setFocusCycleRoot(true);
+
 	}
 	
-	//public void setMaxColWidth(int aWidth) { this.maxWidth = aWidth; }
-	//public int getMaxColWidth() { return this.maxWidth; }
-
 	/**
 	 *	Defines the connection for this DBPanel.
-	 *	If the statement is already defined this method
-	 *	will initialize the complete panel and display
-	 *	the result set of the statement.
-	 *
 	 *	@see setSqlStatement(String)
 	 */
 	public void setConnection(WbConnection aConn)
@@ -141,7 +137,8 @@ public class DwPanel extends JPanel
 				List stmts = ds.getUpdateStatements(aConnection);
 				for (int i=0; i < stmts.size(); i++)
 				{
-					preview.append(stmts.get(i).toString());
+					DmlStatement dml = (DmlStatement)stmts.get(i);
+					preview.append(dml.getExecutableStatement(aConnection));
 					preview.append(";\n");
 				}
 				Window win = SwingUtilities.getWindowAncestor(this);
@@ -186,7 +183,7 @@ public class DwPanel extends JPanel
 	
 	public boolean checkUpdateTable()
 	{
-		return this.realModel.getDataStore().checkUpdateTable(this.sql);
+		return this.realModel.getDataStore().checkUpdateTable(this.sql, this.dbConnection);
 	}
 	
 	public boolean isUpdateable()
@@ -228,7 +225,7 @@ public class DwPanel extends JPanel
 			long start, end, sqlTime = 0;
 			String cleanSql = null;
 			
-			this.lastMessage = null;
+			this.lastMessage = "";
 			this.realModel = null;
 			if (aSql.endsWith(";"))
 			{
@@ -237,7 +234,6 @@ public class DwPanel extends JPanel
 			boolean repeatLast = false;
 			repeatLast = aSql.equals(this.sql);
 			cleanSql = SqlUtil.makeCleanSql(aSql, false).trim();
-			//this.realModel = null;
 			this.sql = null;
 			
 			String verb = SqlUtil.getSqlVerb(cleanSql).toUpperCase();
@@ -245,14 +241,14 @@ public class DwPanel extends JPanel
 			ResultSet rs = null;
 			List keepColumns = null;
 			DataStore newData = null;
-			
+		
+			this.clearContent();
 			this.hasResultSet = false;
-			this.statusBar.clearRowcount();
 			this.setMaxRows(this.statusBar.getMaxRows());
 			
 			if (verb.equalsIgnoreCase("DESC"))
 			{
-				StringTokenizer tok = new StringTokenizer(aSql, " ");
+				LineTokenizer tok = new LineTokenizer(aSql, " ");
 				tok.nextToken();
 				String table = tok.nextToken();
 				String schema = null;
@@ -280,9 +276,36 @@ public class DwPanel extends JPanel
 				newData = aConnection.getMetadata().getCatalogInformation();
 				this.hasResultSet = true;
 			}
+			else if (verb.equalsIgnoreCase("ENABLEOUT"))
+			{
+				StringTokenizer tok = new StringTokenizer(aSql, " ");
+				long limit = -1;
+				tok.nextToken(); // skip the verb
+				if (tok.hasMoreTokens())
+				{
+					String value = tok.nextToken();
+					try
+					{
+						limit = Long.parseLong(value);
+					}
+					catch (NumberFormatException nfe)
+					{
+						limit = -1;
+					}
+				}
+				this.dbConnection.getMetadata().enableOutput(limit);
+				this.hasResultSet = false;
+				this.lastStatement = null;
+			}
+			else if (verb.equalsIgnoreCase("DISABLEOUT"))
+			{
+				this.dbConnection.getMetadata().enableOutput();
+				this.hasResultSet = false;
+				this.lastStatement = null;
+			}
 			else
 			{
-				this.lastStatement = sqlcon.createStatement();//prepareStatement(aSql);
+				this.lastStatement = sqlcon.createStatement();
 
 				if (verb.equalsIgnoreCase("SELECT"))
 				{
@@ -294,22 +317,27 @@ public class DwPanel extends JPanel
 				}					
 				start = System.currentTimeMillis();
 				this.lastStatement.execute(aSql);
-				end = System.currentTimeMillis();
 				rs = this.lastStatement.getResultSet();
-				sqlTime = (end - start);
 				
 				if (rs != null)
 				{
 					this.hasResultSet = true;
-					newData = new DataStore(rs);
-					newData.checkUpdateTable();
+					long s,e;
+					s = System.currentTimeMillis();
+					newData = new DataStore(rs, this.dbConnection);
+					e = System.currentTimeMillis();
+					LogMgr.logInfo("DwPanel.runStatement()", "Create of DataStore took " + (e - s) + "ms");
 					rs.close();
 				}
 				else
 				{
 					this.hasResultSet = false;
 				}
+				end = System.currentTimeMillis();
+				sqlTime = (end - start);
 			}
+
+			StringBuffer msg = new StringBuffer(500);
 			
 			if (this.hasResultSet)
 			{
@@ -318,18 +346,21 @@ public class DwPanel extends JPanel
 				{
 					this.infoTable.saveColumnSizes();
 				}
+				newData.setOriginalStatement(aSql);
+				newData.setSourceConnection(this.dbConnection);
+				newData.checkUpdateTable();
 				this.infoTable.setVisible(false);
 				this.infoTable.setAutoCreateColumnsFromModel(true);
-				//if (this.realModel == null)
-				//{
+				if (this.realModel == null)
+				{
 					this.realModel = null;
 					this.realModel = new DataStoreTableModel(newData);
-					this.infoTable.setModel(this.realModel, true);
-				//}
-				//else
-				//{
-				//	this.realModel.setDataStore(newData);
-				//}
+				}
+				else
+				{
+					this.realModel.setDataStore(newData);
+				}
+				this.infoTable.setModel(this.realModel, true);
 				
 				if (repeatLast)
 				{
@@ -341,13 +372,13 @@ public class DwPanel extends JPanel
 				}
 				this.infoTable.setVisible(true);
 				this.infoTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+				this.infoTable.setRowSelectionAllowed(true);
 				this.lastMessage = ResourceMgr.getString(ResourceMgr.MSG_SQL_EXCUTE_OK);
 				this.statusBar.setRowcount(this.infoTable.getModel().getRowCount());
 			}
 			else if (this.lastStatement != null)
 			{
-				StringBuffer msg = new StringBuffer(500);
-				this.setMessageDisplayModel(this.getEmptyTableModel());
+				this.setMessageDisplayModel(this.getEmptyMsgTableModel());
 				SQLWarning warn = this.lastStatement.getWarnings();
 				boolean warnings = warn != null;
 				while (warn != null)
@@ -356,7 +387,13 @@ public class DwPanel extends JPanel
 					msg.append(warn.getMessage());
 					warn = warn.getNextWarning();
 				}
-				msg.append('\n');
+				if (warnings) msg.append('\n');
+				String outMsg = this.lastConnection.getOutputMessages();
+				if (outMsg.length() > 0)
+				{
+					msg.append(outMsg);
+					msg.append("\n\n");
+				}
 				if (!warnings)
 				{
 					if (knownSqlVerbs.contains(verb))
@@ -380,9 +417,16 @@ public class DwPanel extends JPanel
 				}
 				this.lastMessage = msg.toString();
 			}
+			else
+			{
+				msg.append(verb.toUpperCase());
+				msg.append(' ');
+				msg.append(ResourceMgr.getString("MsgKnownStatementOK"));
+				this.lastMessage = msg.toString();
+			}
+			this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgExecTime") + " " + (((double)sqlTime) / 1000.0) + "s";
 			if (this.lastStatement != null) this.lastStatement.close();
 			this.lastStatement = null;
-			this.lastMessage = this.lastMessage + "\r\n" + ResourceMgr.getString("MsgExecTime") + " " + (((double)sqlTime) / 1000.0) + "s";
 		}
 		catch (SQLException sql)
 		{
@@ -452,8 +496,10 @@ public class DwPanel extends JPanel
 				LogMgr.logDebug(this, "Trying to cancel the current statement...");
 				this.lastStatement.cancel();
 				this.lastStatement.close();
+				this.cancelled = true;
 				if (this.lastConnection != null && this.lastConnection.cancelNeedsReconnect())
 				{
+					LogMgr.logInfo(this, "Cancelling needs a reconnect to the database for this DBMS...");
 					this.lastConnection.reconnect();
 				}
 				LogMgr.logDebug(this, "Cancelling succeeded.");
@@ -487,6 +533,7 @@ public class DwPanel extends JPanel
 		this.setLayout(new BorderLayout());
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.infoTable = new WbTable();
+		this.infoTable.setRowResizeAllowed(true);
 		this.statusBar = new DwStatusBar();
 		this.statusBar.setFocusable(false);
 		this.setFocusable(false);
@@ -519,24 +566,19 @@ public class DwPanel extends JPanel
 
 	public void clearContent()
 	{
-		if (this.realModel != null)
-		{
-			this.realModel.dispose();
-			this.realModel = null;
-		}
 		this.infoTable.reset();
 		this.statusBar.clearRowcount();
 	}
 	
-	private TableModel getEmptyTableModel()
+	private TableModel getEmptyMsgTableModel()
 	{
-		if (this.emptyModel == null)
+		if (this.resultEmptyMsgModel == null)
 		{
 			String msg = ResourceMgr.getString(ResourceMgr.MSG_WARN_NO_RESULT);
 			String title = ResourceMgr.getString(ResourceMgr.TXT_ERROR_MSG_TITLE);
-			this.emptyModel = new DefaultTableModel(new Object[][] { {msg} } , new String[] {title});
+			this.resultEmptyMsgModel = new OneLineTableModel(title, msg);
 		}
-		return this.emptyModel;
+		return this.resultEmptyMsgModel;
 	}
 	
 	private TableModel getErrorTableModel()
@@ -545,7 +587,7 @@ public class DwPanel extends JPanel
 		{
 			String msg = ResourceMgr.getString(ResourceMgr.TXT_ERROR_MSG_DATA);
 			String title = ResourceMgr.getString(ResourceMgr.TXT_ERROR_MSG_TITLE);
-			this.errorModel = new DefaultTableModel(new Object[][] { {msg} } , new String[] {title});
+			this.errorModel = new OneLineTableModel(title, msg);
 		}
 		return this.errorModel;
 	}

@@ -26,10 +26,26 @@
      <string>Una2000.jar</string>
     </void>
     <void property="name">
-     <string>MS SQL Server</string>
+     <string>iNet MS SQL Driver</string>
     </void>
     <void property="sampleUrl">
      <string>jdbc:inetdae:(servername):1433?database=(dbname)</string>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.microsoft.jdbc.sqlserver.SQLServerDriver</string>
+    </void>
+    <void property="library">
+     <string>msbase.jar;mssqlserver.jar;msutil.jar</string>
+    </void>
+    <void property="name">
+     <string>Microsoft JDBC Driver</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:microsoft:sqlserver://(server):(port);DatabaseName=(dbname)</string>
     </void>
    </object>
   </void>

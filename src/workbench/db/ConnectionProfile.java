@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.StringTokenizer;
 import workbench.WbManager;
 import workbench.log.LogMgr;
+import workbench.util.WbCipher;
 import workbench.util.WbPersistence;
 
 /**
@@ -33,6 +34,11 @@ public class ConnectionProfile
 	private int id;
 	private static int nextId = 1;
 	private boolean changed;
+
+	static
+	{
+		WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
+	}
 	
 	public ConnectionProfile()
 	{
@@ -75,11 +81,30 @@ public class ConnectionProfile
 	 */
 	public void setPassword(String aPwd)
 	{
-		if (aPwd != null && !aPwd.startsWith(CRYPT_PREFIX))
+		if (aPwd == null) 
 		{
-			aPwd = CRYPT_PREFIX + this.encryptPassword(aPwd);
+			this.password = null;
+			this.changed = true;
+			return;
 		}
-		if (aPwd == null || !aPwd.equals(this.password))
+		
+		// check encryption settings when reading the profiles...
+		if (WbManager.getSettings().getUseEncryption())
+		{
+			if (!this.isEncrypted(aPwd))
+			{
+				aPwd = this.encryptPassword(aPwd);
+			}				
+		}
+		else
+		{
+			if (this.isEncrypted(aPwd))
+			{
+				aPwd = this.decryptPassword(aPwd);
+			}
+		}
+			
+		if (!aPwd.equals(this.password))
 		{
 			this.password = aPwd;
 			this.changed = true;
@@ -91,8 +116,20 @@ public class ConnectionProfile
 	 *	Returns the encrypted version of the password.
 	 *	@see #decryptPassword(String)
 	 */
-	public String getPassword() { return this.password; }
+	public String getPassword() 
+	{ 
+		return this.password; 
+	}
 	
+	public String getInputPassword()
+	{
+		return this.decryptPassword();
+	}
+	
+	public void setInputPassword(String aPassword)
+	{
+		this.setPassword(aPassword);
+	}
 
 	/**
 	 *	Returns the plain text version of the
@@ -125,13 +162,27 @@ public class ConnectionProfile
 		}
 		else
 		{
-			return WbManager.getInstance().getCipher().decryptString(aPwd.substring(CRYPT_PREFIX.length()));
+			WbCipher des = WbManager.getInstance().getDesCipher();
+			return des.decryptString(aPwd.substring(CRYPT_PREFIX.length()));
 		}
 	}
 
+	public boolean isEncrypted(String aPwd)
+	{
+		return aPwd.startsWith(CRYPT_PREFIX);
+	}
+	
 	private String encryptPassword(String aPwd)
 	{
-		return WbManager.getInstance().getCipher().encryptString(aPwd);
+		if (WbManager.getSettings().getUseEncryption())
+		{
+			if (!this.isEncrypted(aPwd))
+			{
+				WbCipher des = WbManager.getInstance().getDesCipher();
+				aPwd = CRYPT_PREFIX + des.encryptString(aPwd);
+			}				
+		}
+		return aPwd;
 	}
 	
 	/**
@@ -177,19 +228,43 @@ public class ConnectionProfile
 	}
 	
 	public String getDriverclass() { return this.driverclass; }
-	public void setDriverclass(String aDriverclass) { this.driverclass = aDriverclass; }
+	public void setDriverclass(String aDriverclass) 
+	{ 
+		this.driverclass = aDriverclass; 
+		this.changed = true;
+	}
 	
 	public String getUsername() { return this.username; }
-	public void setUsername(java.lang.String aUsername) { this.username = aUsername; }
+	public void setUsername(java.lang.String aUsername) 
+	{ 
+		this.username = aUsername; 
+		this.changed = true;
+	}
 
 	public boolean getAutocommit() { return this.autocommit; }
-	public void setAutocommit(boolean autocommit) { this.autocommit = autocommit; }
+	public void setAutocommit(boolean aFlag) 
+	{ 
+		if (aFlag != this.autocommit)
+		{
+			this.autocommit = aFlag;
+			this.changed = true;
+		}
+	}
 	
 	public String getName() { return this.name; }
-	public void setName(String aName) { this.name = aName;	}
+	public void setName(String aName) 
+	{ 
+		this.name = aName;	
+		this.changed = true;
+	}
 	
 	public String getDescription() { return this.description; }
-	public void setDescription(String description) { this.description = description; }
+	
+	public void setDescription(String description) 
+	{ 
+		this.changed = true;
+		this.description = description; 
+	}
 	
 	public ConnectionProfile createCopy()
 	{
@@ -201,6 +276,7 @@ public class ConnectionProfile
 		result.setPassword(this.getPassword());
 		result.setUrl(this.url);
 		result.setUsername(this.username);
+		result.changed = false;
 		return result;
 	}
 	

@@ -19,6 +19,8 @@ import workbench.util.WbPersistence;
 public class DbDateFormatter
 {
 	public static final String DATE_PLACEHOLDER = "%formatted_date_literal%";
+	public static DbDateFormatter DEFAULT_FORMATTER = new DbDateFormatter("yyyy-MM-dd HH:mm:ss");
+	
 	private SimpleDateFormat formatter;
 	private String format;
 
@@ -29,6 +31,12 @@ public class DbDateFormatter
 	{
 	}
 
+	public DbDateFormatter(String aFormat)
+	{
+		this.setFormat(aFormat);
+		this.setFunctionCall(null);
+	}
+	
 	public String getFormat()
 	{
 		return this.format;

@@ -16,6 +16,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
@@ -23,10 +24,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import workbench.WbManager;
+import workbench.db.oracle.DbmsOutput;
 import workbench.exception.WbException;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
+import workbench.storage.NullValue;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 
@@ -70,6 +73,8 @@ public class DbMetadata
 	private HashMap idxStatements;
 	private HashMap fkStatements;
 	private HashMap dateLiteralFormatter;
+
+	private DbmsOutput oraOutput;
 	
 	/** Creates a new instance of DbMetadata */
 	public DbMetadata(WbConnection aConnection)
@@ -100,6 +105,17 @@ public class DbMetadata
 			this.catalogTerm = "Catalog";
 		
 		this.productName = this.metaData.getDatabaseProductName();
+		if (this.productName.toLowerCase().indexOf("oracle") > -1)
+		{
+			try
+			{
+				this.oraOutput = new DbmsOutput(c);
+			}
+			catch (Throwable th)
+			{
+				this.oraOutput = null;
+			}
+		}
 		this.serversWhichNeedReconnect = WbManager.getSettings().getCancelWithReconnectServers();
 	}
 
@@ -131,6 +147,47 @@ public class DbMetadata
 		return result;
 	}
 	
+	/**
+	 *	Returns a literal which can be used directly in a SQL statement.
+	 *	This method will quote character datatypes and convert
+	 *	Date datatypes to the correct format.
+	 */
+	public String getLiteral(Object aValue)
+	{
+		return getDefaultLiteral(aValue, getDateLiteralFormatter());
+	}
+	
+	public static String getDefaultLiteral(Object aValue)
+	{
+		return getDefaultLiteral(aValue, null);
+	}
+	
+	public static String getDefaultLiteral(Object aValue, DbDateFormatter formatter)
+	{
+		if (aValue == null) return "NULL";
+
+		if (aValue instanceof String)
+		{
+			// Single quotes in a String must be "quoted"...
+			String realValue = StringUtil.replace((String)aValue, "'", "''");
+			return "'" + realValue + "'";
+		}
+		else if (aValue instanceof Date)
+		{
+			if (formatter == null) formatter = DbDateFormatter.DEFAULT_FORMATTER;
+			return formatter.getLiteral((Date)aValue);
+		}
+		else if (aValue instanceof NullValue)
+		{
+			return "NULL";
+		}
+		else
+		{
+			return aValue.toString();
+		}
+
+	}
+
 	public DbDateFormatter getDateLiteralFormatter()
 	{
 		Object value = this.dateLiteralFormatter.get(this.productName);
@@ -185,9 +242,8 @@ public class DbMetadata
 		int i = aProcname.indexOf(';');
 		if (i > -1)
 			aProcname = aProcname.substring(0, i);
-		
-		
-		StringBuffer source = new StringBuffer(1000);
+			
+		StringBuffer source = new StringBuffer(4000);
 		try
 		{
 			GetMetaDataSql sql = (GetMetaDataSql)this.procSourceSql.get(this.productName);
@@ -200,7 +256,7 @@ public class DbMetadata
 			while (rs.next())
 			{
 				String line = rs.getString(1);
-				if (line != null) source.append(line.replaceAll("\r", ""));
+				if (line != null) source.append(line);
 			}
 			rs.close();
 			stmt.close();
@@ -378,6 +434,10 @@ public class DbMetadata
 				{
 					display = aTypeName + "(" + size + "," + digits + ")";
 				}
+				else
+				{
+					display = aTypeName;
+				}
 				
 				break;
 			default:
@@ -461,6 +521,60 @@ public class DbMetadata
 		}
 		return ds;
 	}
+
+	public void enableOutput()
+	{
+		this.enableOutput(-1);
+	}
+	
+	public void enableOutput(long aLimit)
+	{
+		if (this.oraOutput != null)
+		{
+			try
+			{
+				this.oraOutput.enable(aLimit);
+			}
+			catch (Throwable e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void disableOutput()
+	{
+		if (this.oraOutput != null)
+		{
+			try
+			{
+				this.oraOutput.disable();
+			}
+			catch (Throwable e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
+	public String getOutputMessages()
+	{
+		String result = "";
+		
+		if (this.oraOutput != null)
+		{
+			try
+			{
+				result = this.oraOutput.getResult();
+			}
+			catch (Throwable th)
+			{
+				result = "";
+			}
+		}
+		return result;
+	}
+
+	
 	
 	public boolean storesLowerCaseIdentifiers()
 	{
@@ -519,7 +633,7 @@ public class DbMetadata
 		DataStore ds = new DataStore(cols, types, sizes);
 		
 		ArrayList keys = new ArrayList();
-		if (WbManager.getSettings().getRetrievePKList())
+		try
 		{
 			ResultSet keysRs = this.metaData.getPrimaryKeys(aCatalog, aSchema, this.adjustObjectname(aTable));
 			while (keysRs.next())
@@ -527,6 +641,10 @@ public class DbMetadata
 				keys.add(keysRs.getString("COLUMN_NAME").toLowerCase());
 			}
 			keysRs.close();
+		}
+		catch (Exception e)
+		{
+			// getPrimaryKeys() probably not supported...
 		}
 		
 		ResultSet rs = this.metaData.getColumns(this.adjustObjectname(aCatalog), this.adjustObjectname(aSchema), this.adjustObjectname(aTable), "%");
@@ -583,8 +701,9 @@ public class DbMetadata
 
 		try
 		{
+			// Retrieve the name of the PK index
 			String pkName = "";
-			if (WbManager.getSettings().getRetrievePKList())
+			try
 			{
 				ResultSet keysRs = this.metaData.getPrimaryKeys(aCatalog, aSchema, this.adjustObjectname(aTable));
 				while (keysRs.next())
@@ -592,6 +711,9 @@ public class DbMetadata
 					pkName = keysRs.getString("PK_NAME");
 				}
 				keysRs.close();
+			}
+			catch (Exception e)
+			{
 			}
 
 			HashMap idxInfo = new HashMap();
@@ -823,7 +945,8 @@ public class DbMetadata
 			ResultSet rs = this.metaData.getTableTypes();
 			while (rs.next())
 			{
-				result.add(rs.getString(1));
+				String type = rs.getString(1);
+				if (!result.contains(type)) result.add(type);
 			}
 			rs.close();
 		}
@@ -951,11 +1074,11 @@ public class DbMetadata
 		for (int i=0; i < count; i++)
 		{
 			//{"COLUMN_NAME", "TYPE_NAME", "PK", "NULLABLE", "DEFAULT", "REMARKS"};
-			String colName = aTableDef.getValue(i, 0).toString();
-			String type = aTableDef.getValue(i, 1).toString();
-			String pk = aTableDef.getValue(i, 2).toString();
-			String nul = aTableDef.getValue(i, 3).toString();
-			String def = aTableDef.getValue(i, 4).toString();
+			String colName = aTableDef.getValue(i, COLUMN_IDX_TABLE_DEFINITION_COL_NAME).toString();
+			String type = aTableDef.getValue(i, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE).toString();
+			String pk = aTableDef.getValue(i, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG).toString();
+			String nul = aTableDef.getValue(i, COLUMN_IDX_TABLE_DEFINITION_NULLABLE).toString();
+			String def = aTableDef.getValue(i, COLUMN_IDX_TABLE_DEFINITION_DEFAULT).toString();
 			result.append("   ");
 			result.append(colName);
 			if ("YES".equalsIgnoreCase(pk))
@@ -967,12 +1090,12 @@ public class DbMetadata
 			result.append(type);
 			for (int k=0; k < maxTypeLength - type.length(); k++) result.append(' ');
 			if ("YES".equals(nul))
-				result.append(" NULL ");
+				result.append(" NULL");
 			else
-				result.append(" NOT NULL ");
+				result.append(" NOT NULL");
 			if (def != null && def.length() > 0)
 			{
-				result.append(" DEFAULT ");
+				result.append(" DEFAULT");
 				result.append(def);
 			}
 			if (i < count - 1) result.append(',');
@@ -1121,7 +1244,27 @@ public class DbMetadata
 			String idx_name = aIndexDef.getValue(i, 0).toString();
 			String unique = aIndexDef.getValue(i, 1).toString();
 			String is_pk  = aIndexDef.getValue(i, 2).toString();
-			String def = aIndexDef.getValue(i, 3).toString();
+			String definition = aIndexDef.getValue(i, 3).toString();
+			StringBuffer columns = new StringBuffer(100);
+			StringTokenizer tok = new StringTokenizer(definition, ",");
+			String col;
+			int pos;
+			System.out.println("processing index definition");
+			while (tok.hasMoreTokens())
+			{
+				col = tok.nextToken().trim();
+				if (col == null || col.length() == 0) continue;
+				if (columns.length() > 0) columns.append(',');
+				pos = col.indexOf(' ');
+				if (pos > -1)
+				{
+					columns.append(col.substring(0, pos));
+				}
+				else
+				{
+					columns.append(col);
+				}
+			}
 			// PK's have been created with the table source...
 			if ("NO".equalsIgnoreCase(is_pk))
 			{
@@ -1134,7 +1277,7 @@ public class DbMetadata
 				{
 					sql = StringUtil.replace(sql, UNIQUE_PLACEHOLDER, "");
 				}					
-				sql = StringUtil.replace(sql, COLUMNLIST_PLACEHOLDER, def);
+				sql = StringUtil.replace(sql, COLUMNLIST_PLACEHOLDER, columns.toString());
 				sql = StringUtil.replace(sql, INDEX_NAME_PLACEHOLDER, idx_name);
 				idx.append(sql);
 				idx.append(LINE_TERMINATOR);

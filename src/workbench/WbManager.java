@@ -9,7 +9,9 @@ package workbench;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Window;
+import java.awt.event.WindowEvent;
 import java.io.File;
+import java.util.ArrayList;
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -21,12 +23,12 @@ import workbench.gui.components.ExtensionFileFilter;
 import workbench.interfaces.FontChangedListener;
 import workbench.resource.Settings;
 import workbench.util.WbCipher;
+import workbench.util.WbNullCipher;
 import workbench.util.WbPersistence;
 
 /**
- *	The main application "controller" for the jWorkbench
- * @author  thomas
- * @version
+ * The main application "controller" for the jWorkbench
+ * @author  workbench@kellerer.org
  */
 public class WbManager
 	implements FontChangedListener
@@ -34,17 +36,34 @@ public class WbManager
 	private static WbManager wb = new WbManager();
 	private Settings settings = new Settings();
 	private ConnectionMgr connMgr = new ConnectionMgr();
-	private MainWindow mainWindow;
-	private WbCipher cipher = null;
+	private ArrayList mainWindows = new ArrayList();
+	private WbCipher desCipher = null;
 	
 	private WbManager() 
 	{
 		this.setLookAndFeel();
 		this.initFonts();
-		this.cipher = new WbCipher();
 		this.settings.addFontChangedListener(this);
 	}
 
+	public WbCipher getDesCipher()
+	{
+		if (desCipher == null)
+		{
+			try
+			{
+				Class des = Class.forName("workbench.util.WbDesCipher");
+				this.desCipher = (WbCipher)des.newInstance();
+			}
+			catch (Exception e)
+			{
+				this.desCipher = new WbNullCipher();
+			}
+		}
+		return desCipher;
+	}
+
+	
 	public static WbManager getInstance()
 	{
 		return wb;
@@ -60,15 +79,11 @@ public class WbManager
 		return this.connMgr;
 	}
 	
-	public WbCipher getCipher()
-	{
-		return this.cipher;
-	}
-
 	public String getExportFilename(boolean includeSqlType)
 	{
 		return this.getExportFilename(null, includeSqlType);
 	}
+	
 	public String getExportFilename(Component caller, boolean includeSqlType)
 	{
 		String lastDir = settings.getLastExportDir();
@@ -81,10 +96,7 @@ public class WbManager
 		String filename = null;
 
 		Window parent;
-		if (caller == null)
-			parent = this.mainWindow;
-		else
-			parent = SwingUtilities.getWindowAncestor(caller);
+		parent = SwingUtilities.getWindowAncestor(caller);
 		
 		int answer = fc.showSaveDialog(parent);
 		if (answer == JFileChooser.APPROVE_OPTION)
@@ -180,28 +192,62 @@ public class WbManager
 
 	public MainWindow createWindow()
 	{
-		this.mainWindow = new MainWindow();
-		return this.mainWindow;
+		MainWindow win = new MainWindow();
+		this.mainWindows.add(win);
+		return win;
 	}
 	
-	public void showErrorMessage(String aMsg)
+	public void showErrorMessage(Component aCaller, String aMsg)
 	{
-		WbSwingUtilities.showErrorMessage(this.mainWindow, aMsg);
+		Window w = SwingUtilities.getWindowAncestor(aCaller);
+		WbSwingUtilities.showErrorMessage(aCaller, aMsg);
 	}
 	public void exitWorkbench()
 	{
 		this.getConnectionMgr().disconnectAll();
-		this.mainWindow.saveSettings();
-		this.mainWindow.dispose();
+		boolean first = true;
+		MainWindow w;
+		for (int i=0; i < mainWindows.size(); i ++)
+		{
+			w = (MainWindow)this.mainWindows.get(i);
+			if (w == null) continue;
+			if (w.isFocused()) 
+			{
+				w.saveSettings();
+			}
+			w.setVisible(false);
+			w.dispose();
+		}
 		this.settings.saveSettings();
 		System.exit(0);
 	}
 	
-	public static void startup()
+	public void windowClosing(MainWindow win)
 	{
-		MainWindow main = wb.createWindow();
+		if (win != null)
+		{
+			this.mainWindows.remove(win);
+		}
+		if (this.mainWindows.size() == 0)
+			this.exitWorkbench();
+		//WbManager.getInstance().windowClosed(e);//exitWorkbench();
+	}
+	
+	public void openNewWindow()
+	{
+		MainWindow main = this.createWindow();
 		main.show();
 		main.selectConnection();
+	}
+	
+	
+	public static void startup()
+	{
+		//WbSplash splash = new WbSplash(null, false);
+		//splash.setVisible(true);
+		wb.openNewWindow();
+		//splash.setVisible(false);
+		//splash.dispose();
 	}
 
 	public static void main(String args[])

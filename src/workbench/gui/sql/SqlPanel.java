@@ -6,15 +6,10 @@
 
 package workbench.gui.sql;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.Toolkit;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +21,10 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import workbench.WbManager;
-import workbench.db.DataSpooler;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.*;
 import workbench.gui.components.*;
-import workbench.gui.components.LoadingIcon;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.FilenameChangeListener;
@@ -44,8 +37,6 @@ import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
-
-
 
 /**
  *	A panel with an editor (EditorPanel), a log panel and
@@ -67,8 +58,6 @@ public class SqlPanel
 	private boolean threadBusy;
 	private boolean suspended = true;
 	private Thread background;
-	//private JMenu[] menus = null;
-	//private WindowStatusBar winStatusBar = null;
 	private ArrayList statementHistory;
 	private int currentHistoryEntry = -1;
 	private int maxHistorySize = 10;
@@ -91,22 +80,25 @@ public class SqlPanel
 	private SaveDataAsAction exportDataAction;
 	private CopyAsSqlInsertAction copyAsSqlInsert;
 	private SpoolDataAction spoolData;
+	private UndoAction undo;
+	private RedoAction redo;
 	
 	private int internalId;
 	private String historyFilename;
 
 	private FindAction findAction;
 	private FindAgainAction findAgainAction;
-	private static final int DIVIDER_SIZE = 5;
 	private String lastSearchCriteria;
 	private WbToolbar toolbar;
 	private ConnectionInfo connectionInfo;
 	
 	private WbConnection dbConnection;
-	private boolean updating = false;
-	private String alternateDelimiter = "./";
+	private boolean updating;
+	private String alternateDelimiter;
 	
-	private LoadingIcon loadingIndicatorIcon;
+	private ImageIcon loadingIcon;
+	private Icon dummyIcon;
+	private boolean dummyIconFetched = false;
 	
 	/** Creates new SqlPanel */
 	public SqlPanel(int anId)
@@ -148,15 +140,10 @@ public class SqlPanel
 		this.contentPanel.setOneTouchExpandable(true);
 		this.add(this.contentPanel, BorderLayout.CENTER);
 		
-		int loc = WbManager.getSettings().getSqlDividerLocation(this.internalId);
-		if (loc <= 0) loc = 200;
-		this.contentPanel.setDividerLocation(loc);
-		loc = WbManager.getSettings().getLastSqlDividerLocation(this.internalId);
-		if (loc > 0) this.contentPanel.setLastDividerLocation(loc);
-		
 		this.initActions();
 		this.initToolbar();
 		this.setupActionMap();
+		
 		this.data.getTable().addTableModelListener(this);
 		this.data.getTable().setMaxColWidth(WbManager.getSettings().getMaxColumnWidth());
 		this.data.getTable().setMinColWidth(WbManager.getSettings().getMinColumnWidth());
@@ -165,6 +152,17 @@ public class SqlPanel
 		WbManager.getSettings().addFontChangedListener(this);
 	}
 
+	public void restoreSettings()
+	{
+		int loc = WbManager.getSettings().getSqlDividerLocation(this.internalId);
+		if (loc <= 0) loc = 200;
+		this.contentPanel.setDividerLocation(loc);
+		loc = WbManager.getSettings().getLastSqlDividerLocation(this.internalId);
+		if (loc > 0) this.contentPanel.setLastDividerLocation(loc);
+		this.initStatementHistory(true);
+		this.restoreLastEditorFile();
+	}
+	
 	public WbToolbar getToolbar()
 	{
 		return this.toolbar;
@@ -292,19 +290,22 @@ public class SqlPanel
 		this.editor.addPopupMenuItem(this.executeSelected, true);
 		this.editor.addPopupMenuItem(this.executeAll, false);
 
-
 		TextPopup pop = (TextPopup)this.editor.getRightClickPopup();
 
 		this.actions.add(new FileOpenAction(this));
 		this.actions.add(new FileSaveAction(this));
 		this.actions.add(new FileSaveAsAction(this));
-		this.actions.add(new FileCloseAction(this));
-		
-		this.actions.add(pop.getCutAction());
+		this.actions.add(new FileDiscardAction(this));
+
+		this.undo = new UndoAction(this.editor);
+		this.actions.add(undo);
+		WbAction a = pop.getCutAction();
+		a.setCreateMenuSeparator(true);
+		this.actions.add(a);
 		this.actions.add(pop.getCopyAction());
 		this.actions.add(pop.getPasteAction());
 		
-		WbAction a = pop.getClearAction();
+		a = pop.getClearAction();
 		a.setCreateMenuSeparator(true);
 		this.actions.add(a);
 		this.actions.add(pop.getSelectAllAction());
@@ -612,6 +613,8 @@ public class SqlPanel
 				if (this.currentHistoryEntry > -1)
 				{
 					this.editor.setText(this.statementHistory.get(currentHistoryEntry).toString());
+					this.editor.setCaretPosition(0);
+					this.editor.clearUndoBuffer();
 				}
 			}
 			else
@@ -669,6 +672,7 @@ public class SqlPanel
 		this.currentHistoryEntry = anIndex;
 		String stmt = this.statementHistory.get(this.currentHistoryEntry).toString();
 		this.editor.setText(stmt);
+		this.editor.setCaretPosition(0);
 		this.checkStatementActions();
 	}
 	
@@ -678,6 +682,8 @@ public class SqlPanel
 		int last = this.contentPanel.getLastDividerLocation();
 		WbManager.getSettings().setSqlDividerLocation(this.internalId, location);
 		WbManager.getSettings().setLastSqlDividerLocation(this.internalId, last);
+		String fname = this.editor.getCurrentFileName();
+		WbManager.getSettings().setEditorFile(this.internalId, fname);
 		this.saveSqlStatementHistory();
 	}
 	
@@ -693,11 +699,26 @@ public class SqlPanel
 		}
 	}
 	
-	public void setConnection(WbConnection aConnection)
+	private void restoreLastEditorFile()
 	{
-		this.setConnection(aConnection, true);
+		String filename = WbManager.getSettings().getEditorFile(this.internalId);
+		if (filename != null && filename.length() > 0)
+		{
+			File f = new File(filename);
+			if (f.exists())
+			{
+				if (this.editor.readFile(f)) this.fireFilenameChanged();
+			}
+		}
 	}
-	public void setConnection(WbConnection aConnection, boolean readStatementHistory)
+
+	public void setStatementText(String aStatement)
+	{
+		this.storeInHistory(this.editor.getText());
+		this.editor.setText(aStatement);
+	}
+	
+	public void setConnection(WbConnection aConnection)//, boolean readStatementHistory)
 	{
 		this.dbConnection = aConnection;
 		try
@@ -707,7 +728,6 @@ public class SqlPanel
 		catch (Exception e)
 		{
 		}
-		this.initStatementHistory(readStatementHistory);
 		this.executeAll.setEnabled(true);
 		this.executeSelected.setEnabled(true);
 		this.updateAction.setEnabled(false);
@@ -844,7 +864,7 @@ public class SqlPanel
 			this.log.setText(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
 			String delimit = ";";
 			
-			if (aSqlScript.endsWith(this.alternateDelimiter))
+			if (aSqlScript.trim().endsWith(this.alternateDelimiter))
 			{
 				delimit = this.alternateDelimiter;
 			}
@@ -930,17 +950,17 @@ public class SqlPanel
 		}
 	}
 
-	private LoadingIcon getLoadingIndicator()
+	private ImageIcon getLoadingIndicator()
 	{
-		if (this.loadingIndicatorIcon == null)
+		if (this.loadingIcon == null)
 		{
-			this.loadingIndicatorIcon = new LoadingIcon((Component)this.getParent());
+			this.loadingIcon = new ImageIcon(ResourceMgr.getPicture("loading").getImage());
 		}
-		return this.loadingIndicatorIcon;
+		return this.loadingIcon;
 	}
+
 	private synchronized void setBusy(boolean busy)
 	{
-		/*
 		Container parent = this.getParent();
 		if (parent instanceof JTabbedPane)
 		{
@@ -948,20 +968,22 @@ public class SqlPanel
 			int index = tab.indexOfComponent(this);
 			if (index >= 0)
 			{
+				if (!this.dummyIconFetched)
+				{
+					this.dummyIcon = tab.getIconAt(index);
+					this.dummyIconFetched = true;
+				}
 				if (busy)
 				{
-					tab.setIconAt(index, this.getLoadingIndicator());
-					this.loadingIndicatorIcon.start();
+					tab.setIconAt(index, getLoadingIndicator());
 				}
 				else
 				{
-					if (this.loadingIndicatorIcon != null)
-						this.loadingIndicatorIcon.stop();
-					tab.setIconAt(index, null);
+					tab.setIconAt(index, this.dummyIcon);
 				}
+				tab.repaint();
 			}
 		}
-		*/
 		this.threadBusy = busy;
 	}
 	

@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import workbench.WbManager;
+import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
 import workbench.log.LogMgr;
@@ -63,6 +64,8 @@ public class DataStore
 	
 	private String updateTable;
 	private ArrayList updateTableColumns;
+	
+	private WbConnection originalConnection;
 
 	// used during sorting to speed up comparison
 	private Class currentSortColumnClass;
@@ -91,18 +94,31 @@ public class DataStore
 	}
 
 	/**
-	 *	Create a DataStore based on the contents of the given
-	 *	ResultSet. All columns of that ResultSet will be cached/used.
+	 *	Create a DataStore based on the contents of the given	ResultSet. 
 	 */
-  public DataStore (ResultSet aResultSet)
+  public DataStore (final ResultSet aResultSet, WbConnection aConn)
 		throws SQLException
   {
 		if (aResultSet == null) return;
+		this.originalConnection = aConn;
 		this.initData(aResultSet);
   }
 	
-	public DataStore(ResultSetMetaData metaData)
+	/**
+	 * Create an empty DataStore based on the information given in the MetaData 
+	 * object. The datastore can be populated with the {@link #addRow(ResultSet)} method.
+	 */
+	public DataStore(ResultSetMetaData metaData, WbConnection aConn)
+		throws SQLException
 	{
+		this.originalConnection = aConn;
+		this.initMetaData(metaData);
+		this.reset();
+	}
+	
+	public void setSourceConnection(WbConnection aConn)
+	{
+		this.originalConnection = aConn;
 	}
 	
 	public void setColumnSizes(int[] sizes)
@@ -156,6 +172,23 @@ public class DataStore
 		}
 	}
 	
+	/**
+	 *	Removes the row from the DataStore without putting
+	 *	it into the delete buffer. So now DELETE statement
+	 *	will be generated for that row, when updating the
+	 *	DataStore. 
+	 *	The internal modification state will not be modified.
+	 */
+	public void discardRow(int aRow)
+		throws IndexOutOfBoundsException
+	{
+		this.data.remove(aRow);
+	}
+	/**
+	 *	Deletes the given row and saves it in the delete buffer
+	 *	in order to be able to generate a DELETE statement if 
+	 *	this DataStore needs updating
+	 */
 	public void deleteRow(int aRow)
 		throws IndexOutOfBoundsException
 	{
@@ -165,7 +198,41 @@ public class DataStore
 		this.data.remove(aRow);
 		this.modified = true;
 	}
+
+	/**
+	 *	Adds the next row from the result set
+	 *	to the DataStore. No check will be done
+	 *	if the ResultSet matches the current
+	 *	column structure!!
+	 *	@return int - the new row number
+	 *	The new row will be marked as "Not modified".
+	 */
+	public int addRow(ResultSet data)
+		throws SQLException
+	{
+		RowData row = new RowData(this.colCount);
+		this.data.add(row);
+		for (int i=0; i < this.colCount; i++)
+		{
+			Object value = data.getObject(i + 1);
+			if (data.wasNull() || value == null)
+			{
+				row.setNull(i, this.columnTypes[i]);
+			}
+			else
+			{
+				row.setValue(i, value);
+			}
+		}
+		row.resetStatus();
+		return this.getRowCount() - 1;
+	}
 	
+	/**
+	 *	Adds a new empty row to the DataStore.
+	 *	The new row will be marked as Modified
+	 *	@return int - the new row number
+	 */
 	public int addRow()
 	{
 		RowData row = new RowData(this.colCount);
@@ -174,13 +241,20 @@ public class DataStore
 		return this.getRowCount() - 1;
 	}
 	
+	/**
+	 *	Inserts a row after the given row number.
+	 *	If the new Index is greater then the current
+	 *	row count or the new index is < 0 the new
+	 *	row will be added at the end.
+	 *	@return int - the new row number
+	 */
 	public int insertRowAfter(int anIndex)
 	{
 		RowData row = new RowData(this.colCount);
 		anIndex ++;
 		int newIndex = -1;
 		
-		if (anIndex > this.data.size())
+		if (anIndex > this.data.size() || anIndex < 0)
 		{
 			this.data.add(row);
 			newIndex = this.getRowCount();
@@ -193,15 +267,20 @@ public class DataStore
 		this.modified = true;
 		return newIndex;
 	}
-	
+
 	public void setUpdateTable(String aTablename)
+	{
+		this.setUpdateTable(aTablename, this.originalConnection);
+	}
+	
+	public void setUpdateTable(String aTablename, WbConnection aConn)
 	{
 		if (aTablename == null)
 		{
 			this.updateTable = null;
 			this.updateTableColumns = null;
 		}
-		else if (!aTablename.equalsIgnoreCase(this.updateTable))
+		else if (!aTablename.equalsIgnoreCase(this.updateTable) && aConn != null)
 		{
 			this.pkColumns = null;
 			this.updateTable = null;
@@ -212,17 +291,30 @@ public class DataStore
 			// note that this does not work, if the 
 			// columns were renamed via an alias in the 
 			// select statement
-			DataStore columns = WbManager.getInstance().getConnectionMgr().getTableDefinition(aTablename);
-			if (columns == null) 
+			try
 			{
-				return;
+				DbMetadata meta = this.originalConnection.getMetadata();
+				if (meta == null) return;
+				
+				DataStore columns = meta.getTableDefinition(aTablename);
+				if (columns == null) 
+				{
+					return;
+				}
+				this.updateTable = aTablename;
+				this.updateTableColumns = new ArrayList();
+				for (int i=0; i < columns.getRowCount(); i++)
+				{
+					String table = columns.getValue(i, 0).toString();
+					this.updateTableColumns.add(table.toLowerCase());
+				}
 			}
-			this.updateTable = aTablename;
-			this.updateTableColumns = new ArrayList();
-			for (int i=0; i < columns.getRowCount(); i++)
+			catch (Exception e)
 			{
-				String table = columns.getValue(i, 0).toString();
-				this.updateTableColumns.add(table.toLowerCase());
+				this.pkColumns = null;
+				this.updateTable = null;
+				this.updateTableColumns = null;
+				LogMgr.logError("DataStore.setUpdateTable()", "Could not read table definition", e);
 			}
 		}
 	}
@@ -323,6 +415,12 @@ public class DataStore
 
 	public StringBuffer getRowDataAsString(int aRow)
 	{
+		String delimit = WbManager.getSettings().getDefaultTextDelimiter();
+		return this.getRowDataAsString(aRow, delimit);
+	}
+	
+	public StringBuffer getRowDataAsString(int aRow, String aDelimiter)
+	{
 		int count = this.getColumnCount();
 		StringBuffer result = new StringBuffer(count * 20);
 		int start = 0;
@@ -331,38 +429,59 @@ public class DataStore
 			RowData row = this.getRow(aRow);
 			Object value = row.getValue(c);
 			if (value != null) result.append(value.toString());
-			if (c < count) result.append('\t');
+			if (c < count) result.append(aDelimiter);
 		}
 		return result;
 	}	
 	
+	public StringBuffer getHeaderString()
+	{
+		String delimit = WbManager.getSettings().getDefaultTextDelimiter();
+		return this.getHeaderString(delimit);
+	}
+	
+	public StringBuffer getHeaderString(String aFieldDelimiter)
+	{
+		StringBuffer result = new StringBuffer(this.colCount * 30);
+		for (int i=0; i < colCount; i++)
+		{
+			result.append(this.getColumnName(i));
+			if (i < colCount - 1) result.append(aFieldDelimiter);
+		}
+		return result;
+	}
+	
 	public String getDataString(String aLineTerminator, boolean includeHeaders)
+	{
+		return this.getDataString("\t", aLineTerminator, includeHeaders);
+	}
+	
+	public String getDataString(String aFieldDelimiter, String aLineTerminator, boolean includeHeaders)
 	{
 		int colCount = this.getColumnCount();
 		int count = this.getRowCount();
 		StringBuffer result = new StringBuffer(count * 250);
 		if (includeHeaders)
 		{
-			// Start loop at 1 --> ignore status column
-			for (int i=0; i < colCount; i++)
-			{
-				result.append(this.getColumnName(i));
-				if (i < colCount - 1) result.append('\t');
-			}
+			result.append(this.getHeaderString(aFieldDelimiter));
 			result.append(aLineTerminator);
 		}
 		for (int i=0; i < count; i++)
 		{
-			result.append(this.getRowDataAsString(i));
+			result.append(this.getRowDataAsString(i, aFieldDelimiter));
 			result.append(aLineTerminator);
 		}
 		return result.toString();
 	}
 	
-	
 	public void reset()
 	{
-		this.data = new ArrayList(50);
+		this.reset(50);
+	}
+	
+	public void reset(int initialCapacity)
+	{
+		this.data = new ArrayList(initialCapacity);
 		this.deletedRows = null;
 		this.modified = false;
 	}
@@ -434,16 +553,16 @@ public class DataStore
 			ResultSetMetaData metaData = aResultSet.getMetaData();
 			this.initMetaData(metaData);
 			
-			this.data = new ArrayList(150);
+			this.data = new ArrayList(500);
 			while (aResultSet.next())
 			{
 				RowData row = new RowData(this.colCount);
 				for (int i=0; i < this.colCount; i++)
 				{
 					Object value = aResultSet.getObject(i + 1);
-					if (aResultSet.wasNull() || value == null)
+					if (value == null)// || aResultSet.wasNull() )
 					{
-						row.setNull(i, this.columnTypes[i]);
+						row.setValue(i, NullValue.getInstance(this.columnTypes[i]));
 					}
 					else
 					{
@@ -466,18 +585,25 @@ public class DataStore
 		this.sql = aSql;
 	}
 	
+	public boolean checkUpdateTable(WbConnection aConn)
+	{
+		if (this.sql == null) return false;
+		return this.checkUpdateTable(this.sql, aConn);
+	}
+	
 	public boolean checkUpdateTable()
 	{
 		if (this.sql == null) return false;
-		return this.checkUpdateTable(this.sql);
+		if (this.originalConnection == null) return false;
+		return this.checkUpdateTable(this.sql, this.originalConnection);
 	}
 			
-	public boolean checkUpdateTable(String aSql)
+	public boolean checkUpdateTable(String aSql, WbConnection aConn)
 	{
 		List tables = SqlUtil.getTables(aSql);
 		if (tables.size() != 1) return false;
 		String table = (String)tables.get(0);
-		this.setUpdateTable(table);
+		this.setUpdateTable(table, aConn);
 		return true;
 	}
 	
@@ -489,11 +615,27 @@ public class DataStore
 			return true;
 	}
 	
+	public StringBuffer getRowDataAsSqlInsert(int aRow, WbConnection aConn)
+	{
+		return this.getRowDataAsSqlInsert(aRow, "\n", aConn);
+	}
+	
+	public StringBuffer getRowDataAsSqlInsert(int aRow, String aLineTerminator, WbConnection aConn)
+	{
+		if (!this.canSaveAsSqlInsert()) return null;
+		RowData data = this.getRow(aRow);
+		DmlStatement stmt = this.createInsertStatement(data, true, aLineTerminator); 
+		StringBuffer sql = new StringBuffer(stmt.getExecutableStatement(aConn));
+		sql.append(";");
+		return sql;
+	}
+	
 	public String getDataAsSqlInsert()
 		throws WbException, SQLException
 	{
 		return this.getDataAsSqlInsert("\n");
 	}
+	
 	public String getDataAsSqlInsert(String aLineTerminator)
 		throws WbException, SQLException
 	{
@@ -504,10 +646,11 @@ public class DataStore
 		{
 			RowData data = this.getRow(row);
 			DmlStatement stmt = this.createInsertStatement(data, true, aLineTerminator); 
-			String sql = stmt.getExecutableStatement();
+			String sql = stmt.getExecutableStatement(this.originalConnection);
 			script.append(sql);
 			script.append(";");
-			script.append("\n\n");
+			script.append(aLineTerminator);
+			script.append(aLineTerminator);
 		}
 		return script.toString();
 	}
@@ -726,7 +869,7 @@ public class DataStore
 		{
 			return NullValue.getInstance(type);
 		}
-		System.out.println("converting " + aValue.getClass().getName());
+		
 		switch (type)
 		{
 			case Types.BIGINT:
@@ -1096,63 +1239,6 @@ public class DataStore
 		if (aColumn < 0 || aColumn > this.colCount - 1) throw new IndexOutOfBoundsException("Column index " + aColumn + " out of range ([0," + this.colCount + "])");
 	}
 
-	public static void main(String args[])
-	{
-		try
-		{
-			Class.forName("oracle.jdbc.OracleDriver");
-			Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:oradb", "test", "test");
-			WbConnection wb = new WbConnection(con);
-			try
-			{
-				//Statement stmt = con.createStatement();
-				//ResultSet rs = stmt.executeQuery("select nr, name from test");
-				PreparedStatement stmt = con.prepareStatement("insert into test (nr, name) values (?,?)");
-				stmt.setObject(1, new Integer(10));
-				stmt.setNull(2, java.sql.Types.VARCHAR);
-				stmt.executeUpdate();
-				con.commit();
-				stmt.close();
-				/*
-				//DataStore ds = new DataStore(rs);
-				//rs.close();
-				DataStore ds = new DataStore(new String[] { "Column1", "Column2"} );
-				ds.setUpdateTable("mytable");
-				int row = ds.addRow();
-				ds.setValue(row, 0, "Testing");
-				ds.setValue(row, 1, new Integer(42));
-				ds.resetStatus();
-				ds.deleteRow(row);
-				row = ds.addRow();
-				ds.setValue(row, 0, "Second row");
-				ds.setValue(row, 1, new Integer(21));
-				
-				row = ds.addRow();
-				ds.setValue(row, 0, "delete test");
-				ds.deleteRow(row);
-				
-				ds.addRow();
-				
-				List l = ds.getUpdateStatements(null);
-				for (int i=0; i < l.size(); i ++)
-				{
-					System.out.println(l.get(i));
-				}
-				 */
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-			con.commit();
-			con.close();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-	
 	class ColumnComparator implements Comparator
 	{
 		int column;

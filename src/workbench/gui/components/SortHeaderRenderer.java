@@ -1,28 +1,16 @@
-/*
-=====================================================================
-
-  SortHeaderRenderer.java
-  
-  Created by Claude Duguay
-  Copyright (c) 2002
-  
-=====================================================================
-*/
-
 package workbench.gui.components;
 
-import java.awt.EventQueue;
+import java.awt.Component;
 import javax.swing.Icon;
+import javax.swing.JTable;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import workbench.gui.components.WbTable;
-import workbench.gui.components.SortArrowIcon;
+import javax.swing.table.DefaultTableCellRenderer;
 
 
-public class SortHeaderRenderer 
-	extends javax.swing.table.DefaultTableCellRenderer
+public class SortHeaderRenderer extends DefaultTableCellRenderer
 {
 	private Border headerBorder;
 	
@@ -35,9 +23,8 @@ public class SortHeaderRenderer
     setBorder(headerBorder);
   }
   
-  public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col)
+  public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col)
   {
-		int column = col;
     int index = -1;
     boolean ascending = true;
     if (table instanceof WbTable)
@@ -46,9 +33,9 @@ public class SortHeaderRenderer
       index = sortTable.getSortedViewColumnIndex();
       ascending = sortTable.isSortedColumnAscending();
     }
-		Icon icon = ascending ? SortArrowIcon.ARROW_DOWN : SortArrowIcon.ARROW_UP;
-		if (column == index)
+		if (col == index)
 		{
+			Icon icon = ascending ? SortArrowIcon.ARROW_DOWN : SortArrowIcon.ARROW_UP;
 			this.setIcon(icon);
 		}
 		else

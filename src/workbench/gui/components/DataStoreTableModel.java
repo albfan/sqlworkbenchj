@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import javax.swing.event.EventListenerList;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
@@ -51,18 +52,19 @@ public class DataStoreTableModel
 	private boolean sortAscending = true;
 	private int sortColumn = -1;
 	
-	public DataStoreTableModel(DataStore aDataStore) throws NullPointerException
+	public DataStoreTableModel(DataStore aDataStore) throws IllegalArgumentException
 	{
-		if (aDataStore == null) throw new NullPointerException("DataStore cannot be null");
+		if (aDataStore == null) throw new IllegalArgumentException("DataStore cannot be null");
 		this.setDataStore(aDataStore);
 	}
 	
+	/*
 	public DataStoreTableModel(ResultSet aResultSet) throws SQLException, WbException
 	{
 		DataStore ds = new DataStore(aResultSet);
 		this.setDataStore(ds);
 	}
-	
+	*/
 	public DataStore getDataStore()
 	{
 		return this.dataCache;
@@ -173,7 +175,7 @@ public class DataStoreTableModel
 						Toolkit.getDefaultToolkit().beep();
 						String msg = ResourceMgr.getString("MsgConvertError");
 						msg = msg + "\r\n" + ce.getLocalizedMessage();
-						WbManager.getInstance().showErrorMessage(msg);
+						WbManager.getInstance().showErrorMessage(parentTable, msg);
 						return;
 					}
 				}
@@ -267,6 +269,7 @@ public class DataStoreTableModel
 	
 	public void dispose()
 	{
+		this.listenerList = new EventListenerList();
 		this.dataCache = null;
 	}
 	

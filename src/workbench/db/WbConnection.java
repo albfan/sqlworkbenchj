@@ -19,7 +19,7 @@ import workbench.log.LogMgr;
  */
 public class WbConnection
 {
-
+	private boolean oraOutput = false;
 	//private Connection sqlConnection;
 	private Connection sqlConnection;
 	private DbMetadata metaData;
@@ -63,6 +63,8 @@ public class WbConnection
 		try
 		{
 			this.metaData = new DbMetadata(this);
+			
+
 		}
 		catch (SQLException e)
 		{
@@ -159,6 +161,11 @@ public class WbConnection
 	public String getDatabaseProductName()
 	{
 		return this.metaData.productName;
+	}
+	
+	public String getOutputMessages()
+	{
+		return this.metaData.getOutputMessages();
 	}
 
 }

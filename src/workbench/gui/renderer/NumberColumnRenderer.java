@@ -6,10 +6,12 @@
 
 package workbench.gui.renderer;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.util.HashMap;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
@@ -26,8 +28,12 @@ import workbench.gui.components.WbTable;
 public class NumberColumnRenderer
 	extends DefaultTableCellRenderer
 {
-	
 	public DecimalFormat formatter;
+	private HashMap displayCache = new HashMap(1000);
+	private Color selectedForeground;
+	private Color selectedBackground;
+	private Color unselectedForeground;
+	private Color unselectedBackground;
 	
 	/** Creates a new instance of NumberColumnRenderer */
 	public NumberColumnRenderer(int maxDigits)
@@ -42,17 +48,6 @@ public class NumberColumnRenderer
 	
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
 	{
-		Component result = super.getTableCellRendererComponent(table,value,isSelected, false, row, column);
-		//JLabel label = (JLabel)result;
-		if (value instanceof Number)
-		{
-			String nr = null;
-			Number n = (Number) value;
-			double d = n.doubleValue();
-			if (!Double.isNaN(d)) nr = formatter.format(d);
-			this.setValue(nr);
-			this.setToolTipText(Double.toString(d));
-		}
 		if (hasFocus)
 		{
 			this.setBorder(WbTable.FOCUSED_CELL_BORDER);
@@ -61,7 +56,44 @@ public class NumberColumnRenderer
 		{
 			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		}
-		return result;
+		if (isSelected)
+		{
+			if (selectedForeground == null)
+			{
+				this.selectedForeground = table.getSelectionForeground();
+				this.selectedBackground = table.getSelectionBackground();
+			}
+			super.setForeground(this.selectedForeground);
+			super.setBackground(this.selectedBackground);
+		}
+		else
+		{
+			if (selectedForeground == null)
+			{
+				this.unselectedForeground = table.getForeground();
+				this.unselectedBackground = table.getBackground();
+			}
+			super.setForeground(this.unselectedForeground);
+			super.setBackground(this.unselectedBackground);
+		}
+	
+		
+		if (value instanceof Number)
+		{
+			String nr = null;
+			double d = 0.0;
+			Number n = (Number) value;
+			nr = (String)this.displayCache.get(n);
+			if (nr == null)
+			{
+				d = n.doubleValue();
+				if (!Double.isNaN(d)) nr = formatter.format(d);
+				this.displayCache.put(n, nr);
+			}
+			this.setValue(nr);
+			this.setToolTipText(value.toString());
+		}
+		return this;
 	}
 	
 }

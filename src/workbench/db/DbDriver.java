@@ -14,7 +14,9 @@ import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import workbench.exception.WbException;
+import workbench.util.StringUtil;
 
 /**
  *	Represents a JDBC Driver definition.
@@ -86,8 +88,12 @@ public class DbDriver
 		{
 			if (this.classLoader == null)
 			{
-				URL[] url = new URL[1];
-				url[0] = new File(this.library).toURL();
+				StringTokenizer tok = new StringTokenizer(this.library, StringUtil.PATH_SEPARATOR);
+				URL[] url = new URL[tok.countTokens()];
+				for (int i=0; tok.hasMoreTokens(); i++)
+				{
+					url[i] = new File(tok.nextToken().trim()).toURL();
+				}
 				this.classLoader = new URLClassLoader(url);
 			}
 			
@@ -118,8 +124,8 @@ public class DbDriver
 		{
 			this.loadDriverClass();
 			Properties props = new Properties();
-			props.put("user", user);
-			props.put("password", password);
+			if (user != null) props.put("user", user);
+			if (password != null) props.put("password", password);
 			c = this.driverClassInstance.connect(url, props);
 		}
 		catch (WbException e)
@@ -130,21 +136,36 @@ public class DbDriver
 		{
 			throw e;
 		}
+		catch (Throwable th)
+		{
+			throw new WbException("Error connecting to database. (" + th.getClass().getName() + " - " + th.getMessage() + ")");
+		}
+		
 		return c;
 	}
 
 	public boolean equals(Object other)
 	{
-		try
+		if (other == null) return false;
+		if (this.driverClass == null) return false;
+		
+		if (other instanceof DbDriver)
 		{
 			DbDriver o = (DbDriver)other;
-			if (o == null) return false;
-			return (
-			         (o.driverClass.equals(this.driverClass)) && 
-							 (this.name.equalsIgnoreCase(o.name))
-							);
+			if (o.driverClass != null && o.driverClass.equals(this.driverClass))
+			{
+				return (this.name != null && this.name.equalsIgnoreCase(o.name));
+			}
+			else
+			{
+				return false;
+			}
 		}
-		catch (ClassCastException e)
+		else if (other instanceof String)
+		{
+			return (this.driverClass != null && this.driverClass.equals((String)other));
+		}
+		else
 		{
 			return false;
 		}

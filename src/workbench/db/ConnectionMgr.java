@@ -3,7 +3,6 @@
  *
  * Created on November 25, 2001, 4:18 PM
  */
-
 package workbench.db;
 
 import java.io.InputStream;
@@ -12,24 +11,27 @@ import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.*;
+import workbench.WbManager;
 
 import workbench.exception.NoConnectionException;
 import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.util.WbCipher;
 import workbench.util.WbPersistence;
 
 
 /**
- *
- * @author  thomas
+ * @author  workbench@kellerer.org
  * @version
  */
 public class ConnectionMgr
 {
-	private WbConnection currentConnection;
-	private Map profiles;
+	//private WbConnection currentConnection;
+	private HashMap activeConnections = new HashMap();
+	
+	private HashMap profiles;
 	private List drivers;
 	
 	/** Creates new ConnectionMgr */
@@ -38,19 +40,19 @@ public class ConnectionMgr
 	}
 	
 	/**
-	 *	Return a new connection specified by the profile, for the
-	 *	given window id
+	 *	Return a new connection specified by the profile
 	 */
-	public WbConnection getConnection(ConnectionProfile aProfile)
+	public WbConnection getConnection(ConnectionProfile aProfile, String anId)
 		throws ClassNotFoundException, SQLException, NoConnectionException
 	{
-		this.disconnect();
+		this.disconnect(anId);
 		
 		WbConnection conn = new WbConnection();
 		Connection sql = this.connect(aProfile);
 		conn.setSqlConnection(sql);
-		conn.setProfile(aProfile);
-		this.currentConnection = conn;
+		conn.setProfile(aProfile.createCopy());
+		//this.currentConnection = conn;
+		this.activeConnections.put(anId, conn);
 		
 		return conn;
 	}
@@ -91,14 +93,29 @@ public class ConnectionMgr
 	public void reconnect(WbConnection aConn)
 		throws ClassNotFoundException, SQLException, NoConnectionException
 	{
-		this.disconnect();
-		
+		aConn.close();
+		// use the stored profile to reconnect as the SQL connection
+		// does not contain information about the username & password
 		Connection sql = this.connect(aConn.getProfile());
 		aConn.setSqlConnection(sql);
-		this.currentConnection = aConn;
 	}
 	
-	private DbDriver findDriver(String drvName)
+	public DbMetadata getMetaDataForConnection(Connection aConn)
+	{
+		Iterator itr = this.activeConnections.entrySet().iterator();
+		while (itr.hasNext())
+		{
+			java.util.Map.Entry e = (Map.Entry)itr.next();
+			WbConnection c = (WbConnection)e.getValue();
+			if (c.getSqlConnection().equals(aConn)) 
+			{
+				return c.getMetadata();
+			}
+		}
+		return null;
+	}
+	
+	public DbDriver findDriver(String drvClassName)
 	{
 		if (this.drivers == null)
 		{
@@ -108,14 +125,14 @@ public class ConnectionMgr
 		for (int i=0; i < this.drivers.size(); i ++)
 		{
 			db = (DbDriver)this.drivers.get(i);
-			if (db.getDriverClass().equals(drvName)) return db;
+			if (db.getDriverClass().equals(drvClassName)) return db;
 		}
 		if (db == null)
 		{
 			// maybe it's present in the normal classpath...
 			try
 			{
-				Class drvcls = Class.forName(drvName);
+				Class drvcls = Class.forName(drvClassName);
 				Driver drv = (Driver)drvcls.newInstance();
 				db = new DbDriver(drv);
 			}
@@ -129,7 +146,7 @@ public class ConnectionMgr
 	
 	/**
 	 *	Returns a List of registered drivers.
-	 *	This list is read from the workbench.settings file
+	 *	This list is read from WbDrivers.xml
 	 */
 	public List getDrivers()
 	{
@@ -139,23 +156,45 @@ public class ConnectionMgr
 		}
 		return this.drivers;
 	}
+	
+	/**
+	 *	Return a list of driverclasses
+	 */
+	public List getDriverClasses()
+	{
+		if (this.drivers == null) this.readDrivers();
+		ArrayList result = new ArrayList();
+		String drvClass;
+		
+		for (int i=0; i < this.drivers.size(); i++)
+		{
+			drvClass = ((DbDriver)this.drivers.get(i)).getDriverClass();
+			if (!result.contains(drvClass))
+			{
+				result.add(drvClass);
+			}
+		}
+		return result;
+	}
 
 	public void setDrivers(List aDriverList)
 	{
 		this.drivers = aDriverList;
 	}
-	
+
+	/**
+	 *	Returns a Map with the current profiles.
+	 *	The key to the map is the profile name, the value is the actual profile
+	 */
 	public Map getProfiles()
 	{
 		if (this.profiles == null) this.readProfiles();
 		return this.profiles;
 	}
 
-	public String getDisplayString()
-	{
-		return getDisplayString(this.currentConnection);
-	}
-	
+	/**
+	 *	Returns a descriptive String for the given connection.
+	 */
 	public static String getDisplayString(WbConnection con)
 	{
 		try
@@ -212,32 +251,24 @@ public class ConnectionMgr
 	 */
 	public void disconnectAll()
 	{
-		this.disconnect();
-		/*
 		Iterator itr = this.activeConnections.keySet().iterator();
 		while (itr.hasNext())
 		{
-			String key = itr.next().toString();
+			String key = (String)itr.next();
 			this.disconnect(key);
-			this.activeConnections.put(key, null);
 		}
-		*/
 	}
 	
 	/**
 	 *	Disconnect the connection with the given key
 	 */
-	public void disconnect()
+	public void disconnect(String anId)
 	{
 		try
 		{
-			//WbConnection con = (WbConnection)this.activeConnections.get(anId);
-			if (this.currentConnection != null) 
-			{
-				this.currentConnection.close();
-				this.currentConnection = null;
-			}
-			//this.activeConnections.put(anId, null);
+			WbConnection con = (WbConnection)this.activeConnections.get(anId);
+			if (con != null && !con.isClosed()) con.close();
+			this.activeConnections.put(anId, null);
 		}
 		catch (Exception e)
 		{
@@ -294,6 +325,7 @@ public class ConnectionMgr
 		}
 	}
 
+	/*
 	public DataStore getTableDefinition(String aTable)
 	{
 		if (this.currentConnection == null) return null;
@@ -306,6 +338,7 @@ public class ConnectionMgr
 			return null;
 		}
 	}
+	*/
 	
 	public void readProfiles()
 	{
@@ -338,7 +371,6 @@ public class ConnectionMgr
 		}
 	}
 	
-	
 	public void readXmlProfiles()
 	{
 		Object result = WbPersistence.readObject("WbProfiles.xml");
@@ -357,12 +389,5 @@ public class ConnectionMgr
 			}
 		}
 	}
-
-	public DbDateFormatter getDateLiteralFormatter()
-	{
-		if (this.currentConnection == null) return null;
-		return this.currentConnection.getMetadata().getDateLiteralFormatter();
-	}
-	
 		
 }

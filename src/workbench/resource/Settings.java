@@ -635,6 +635,16 @@ public class Settings
 		this.props.setProperty("workbench.dbexplorer.mainwindow", Boolean.toString(showWindow));
 	}
 
+	public boolean getUseEncryption()
+	{
+		return "true".equalsIgnoreCase(this.props.getProperty("workbench.profiles.encryptpassword", "true"));
+	}
+	
+	public void setUseEncryption(boolean useEncryption)
+	{
+		this.props.setProperty("workbench.profiles.encryptpassword", Boolean.toString(useEncryption));
+	}
+
 	public boolean getRetrievePKList()
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.db.retrievepklist", "true"));

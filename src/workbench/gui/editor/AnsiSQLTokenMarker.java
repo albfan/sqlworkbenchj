@@ -169,7 +169,8 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("LIST",Token.KEYWORD2);
 		keywords.add("LISTPROCS",Token.KEYWORD2);
 		keywords.add("LISTDB",Token.KEYWORD2);
-
+		keywords.add("ENABLEOUT",Token.KEYWORD2);
+		keywords.add("DISABLEOUT",Token.KEYWORD2);
 	}
 	
 	private static void addDataTypes()

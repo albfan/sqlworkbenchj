@@ -159,7 +159,7 @@ public class ProfileEditorPanel
 		if (this.connectionEditor == null) return;
 		if (evt.getSource() == this.jList1)
 		{
-			if (lastIndex > -1)
+			if (lastIndex > -1 && lastIndex < this.model.getSize())
 			{
 				ConnectionProfile current = this.connectionEditor.getProfile();
 				this.model.putProfile(lastIndex, current);
@@ -220,7 +220,7 @@ public class ProfileEditorPanel
 	public void deleteItem() throws WbException
 	{
 		int index = this.jList1.getSelectedIndex();
-		//if (index > 0) this.jList1.setSelectedIndex(index - 1);
+		if (index > 0) this.jList1.setSelectedIndex(index - 1);
 		this.model.deleteProfile(index);
 	}
 

@@ -29,7 +29,7 @@ public class WbStarter
 			System.err.println("A JDK or JRE 1.4 or later is needed to run this application!");
 			System.exit(1);
 		}
-		workbench.WbManager.startup();
+		WbManager.startup();
 	}
 
 }

@@ -18,6 +18,7 @@ import workbench.db.DbDriver;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.resource.ResourceMgr;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -31,6 +32,10 @@ public class DriverEditorPanel extends javax.swing.JPanel
 	public DriverEditorPanel()
 	{
 		initComponents();
+		String text = ResourceMgr.getDescription("LabelDriverLibrary");
+		text = text.replaceAll("%path_sep%", StringUtil.PATH_SEPARATOR);
+		lblLibrary.setToolTipText(text);
+		tfLibrary.setToolTipText(text);
 	}
 
 	/** This method is called from within the constructor to
@@ -127,6 +132,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		
 		tfLibrary.setColumns(10);
 		tfLibrary.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+		tfLibrary.setToolTipText("null");
 		tfLibrary.addMouseListener(new TextComponentMouseListener());
 		tfLibrary.addFocusListener(new java.awt.event.FocusAdapter()
 		{
@@ -206,11 +212,19 @@ public class DriverEditorPanel extends javax.swing.JPanel
 	{//GEN-HEADEREND:event_selectLibrary
 		String lastDir = WbManager.getSettings().getLastLibraryDir();
 		JFileChooser jf = new JFileChooser(lastDir);
+		jf.setMultiSelectionEnabled(true);
 		jf.setFileFilter(ExtensionFileFilter.getJarFileFilter());
 		int answer = jf.showOpenDialog(SwingUtilities.getWindowAncestor(this));
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
-			this.tfLibrary.setText(jf.getSelectedFile().getAbsolutePath());
+			File[] f = jf.getSelectedFiles();
+			StringBuffer path = new StringBuffer(f.length * 100);
+			for (int i=0; i < f.length; i++)
+			{
+				if (i>0) path.append(StringUtil.PATH_SEPARATOR);
+				path.append(f[i].getAbsolutePath().trim());
+			}
+			this.tfLibrary.setText(path.toString());
 			this.updateDriver();
 			WbManager.getSettings().setLastLibraryDir(jf.getCurrentDirectory().getAbsolutePath());
 		}

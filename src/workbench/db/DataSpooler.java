@@ -8,10 +8,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.sql.*;
 import java.text.DateFormat;
@@ -37,7 +40,7 @@ public class DataSpooler
 	public static final int EXPORT_SQL = 1;
 	public static final int EXPORT_TXT = 2;
 
-	private Connection dbConn;
+	private WbConnection dbConn;
 	private String sql;
 	private String outputfile;
 	private int exportType;
@@ -59,6 +62,9 @@ public class DataSpooler
 	
 	public boolean getShowProgress() { return this.showProgress; }
 	
+	/**
+	 *	Open the progress monitor window.
+	 */
 	private void openProgressMonitor()
 	{
 		File f = new File(this.outputfile);
@@ -71,15 +77,17 @@ public class DataSpooler
 		this.progressWindow.getContentPane().add(progressPanel);
 		this.progressWindow.pack();
 		this.progressWindow.setTitle(ResourceMgr.getString("MsgSpoolWindowTitle"));
-		this.progressWindow.setIconImage(ResourceMgr.getPicture("workbench16").getImage());
+		this.progressWindow.setIconImage(ResourceMgr.getPicture("SpoolData16").getImage());
+		this.progressWindow.addWindowListener(new WindowAdapter()
+		{
+			public void windowClosing(WindowEvent e)
+			{
+				keepRunning = false;
+			}
+		});
 		
 		WbSwingUtilities.center(this.progressWindow, null);
-		this.progressPanel.startProgressBar();
 		this.progressWindow.show();
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run() { progressPanel.startExport(); }
-		});
 	}
 
 	public void exportDataAsText(WbConnection aConnection
@@ -88,7 +96,7 @@ public class DataSpooler
 															, boolean includeHeaders)
 		throws IOException, SQLException
 	{
-		this.dbConn = aConnection.getSqlConnection();
+		this.dbConn = aConnection;
 		this.sql = aSql;
 		this.outputfile = anOutputfile;
 		this.exportHeaders = includeHeaders;
@@ -97,10 +105,10 @@ public class DataSpooler
 		{
 			this.openProgressMonitor();
 		}
-		else
+		EventQueue.invokeLater(new Runnable()
 		{
-			startExport();
-		}
+			public void run() { startBackgroundThread(); }
+		});
 	}
 	
 	public void stopExport() 
@@ -111,7 +119,7 @@ public class DataSpooler
 	public void exportDataAsSqlInsert(WbConnection aConnection, String aSql, String anOutputfile)
 		throws IOException, SQLException
 	{
-		this.dbConn = aConnection.getSqlConnection();
+		this.dbConn = aConnection;
 		this.sql = aSql;
 		this.outputfile = anOutputfile;
 		this.exportHeaders = false;
@@ -120,72 +128,54 @@ public class DataSpooler
 		{
 			this.openProgressMonitor();
 		}
-		else
+		EventQueue.invokeLater(new Runnable()
 		{
-			startExport();
-		}
+			public void run() { startBackgroundThread(); }
+		});
 	}
 	
 
 	private void startBackgroundThread()
 	{
-		new Thread(new Runnable()
+		Thread t = new Thread()
 		{
 			public void run()
 			{
 				try { startExport(); } catch (Throwable th) {}
 			}
-		}).start();
+		};
+		t.setPriority(Thread.MIN_PRIORITY);
+		t.start();
 	}
 	
 	/**
 	 *	Export a table to an external file.
 	 *	The data will be "piped" through a DataStore in order to use 
-	 *	the SQL scripting built into that object
+	 *	the SQL scripting built into that object.
 	 */
 	public void startExport()
 		throws IOException, SQLException
 	{
 		Statement stmt = this.dbConn.createStatement();
-		try
-		{
-			stmt.setFetchSize(1);
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logWarning("DataSpooler", "Could not set fetch size");
-		}
-		try
-		{
-		stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logWarning("DataSpooler", "Could not set fetch direction");
-		}
-		
-		try
-		{
-			stmt.setCursorName("TableExporterCursor");
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logWarning("DataSpooler", "Could not set cursor name");
-		}
 		
 		stmt.execute(this.sql);
 		ResultSet rs = stmt.getResultSet();
+		
 		int interval = 1;
+		int currentRow = 0;
 		
 		StringBuffer line = null;
 		ResultSetMetaData meta = rs.getMetaData();
-		DataStore ds = new DataStore(meta);
+		DataStore ds = new DataStore(meta, this.dbConn);
+		if (this.exportType == EXPORT_SQL)
+		{
+			ds.checkUpdateTable(this.sql, this.dbConn);
+		}
 		int row = 0;
-		int rsRow = 0;
-		IOException ioError = null;
-		SQLException sqlError = null;
-		PrintWriter pw = null;
+
+		BufferedWriter pw = null;
 		String fieldDelimit = WbManager.getSettings().getDefaultTextDelimiter();
+		
 		int colCount = meta.getColumnCount();
 		int types[] = new int[colCount];
 		for (int i=0; i < colCount; i++)
@@ -200,93 +190,92 @@ public class DataSpooler
 		{
 			this.progressPanel.setInfoText(ResourceMgr.getString("MsgSpoolingRow"));
 		}
+
+		byte[] quoteBytes = quoteChar.getBytes();
+		byte[] lineEnd = StringUtil.LINE_TERMINATOR.getBytes();
+		byte[] fieldBytes = fieldDelimit.getBytes();
 		
 		try
 		{
 			Object value = null;
 			boolean quote = false;
 			
-			pw = new PrintWriter(new BufferedWriter(new FileWriter(this.outputfile), 2048));
+			pw = new BufferedWriter(new FileWriter(this.outputfile), 16*1024);
 			
 			if (exportHeaders && exportType == EXPORT_TXT)
 			{
-				pw.println(ds.getHeaderString().toString());
+				pw.write(ds.getHeaderString().toString());
+				pw.newLine();
 			}
 			
 			while (rs.next())
 			{
-				rsRow ++;
+				currentRow ++;
 				if (showProgress)
 				{
-					if (interval == 1 && rsRow > 1000 ) interval = 1000;
-					else if (interval == 1000 && rsRow > 10000) interval = 5000;
-					if ( (rsRow % interval) == 0)
-						progressPanel.setRowInfo(rsRow);
+//					if (interval == 1 && rsRow > 1000 ) interval = 1000;
+//					else if (interval == 1000 && rsRow > 10000) interval = 5000;
+//					if ( (rsRow % interval) == 0)
+					progressPanel.setRowInfo(currentRow);
 				}
 
 				if (this.exportType == EXPORT_SQL)
 				{
 					row = ds.addRow(rs);
-					line = ds.getRowDataAsSqlInsert(row, StringUtil.LINE_TERMINATOR);
+					line = ds.getRowDataAsSqlInsert(row, StringUtil.LINE_TERMINATOR, this.dbConn);
 					ds.discardRow(row);
-					if (line != null) pw.println(line);
+					if (line != null)
+					{
+						pw.write(line.toString());
+						pw.newLine();
+					}
 				}
 				else 
 				{
-					// don't use the DataStore when exporting to text for performance reasons
+					// we don't use the DataStore when exporting to text for performance reasons
 					for (int i=0; i < colCount; i++)
 					{
 						value = rs.getObject(i+1);
 						quote = useQuotes && (types[i] == Types.VARCHAR || types[i] == Types.CHAR);
-						if (quote)
-						{
-							pw.print(quoteChar);
-						}
+						if (quote) pw.write(quoteChar);
+						
 						if (value != null && !rs.wasNull())
 						{
-							pw.print(value.toString());
+							pw.write(value.toString());
 						}
-						if (quote)
-						{
-							pw.print(quoteChar);
-						}
-						if (i < colCount - 1) pw.print(fieldDelimit);
+						if (quote) pw.write(quoteChar); 
+						
+						if (i < colCount - 1) pw.write(fieldDelimit);
 					}
-					pw.println();
+					pw.newLine();
 				}
-				Thread.currentThread().yield();
 				if (!this.keepRunning) break;
 			}
 		}
 		catch (IOException e)
 		{
-			ioError = e;
+			LogMgr.logError("DataSpooler", "Error writing data file", e);
 		}
 		catch (SQLException e)
 		{
-			sqlError = e;
+			LogMgr.logError("DataSpooler", "SQL Error", e);
 		}
 		finally 
 		{
 			try { if (pw != null) pw.close(); } catch (Throwable th) {}
 			try { rs.close(); } catch (Throwable th) {}
 			try { stmt.close(); } catch (Throwable th) {}
+			this.closeProgress();
 		}
-	
-		this.closeProgress();
-		
-		//if (ioError != null) throw ioError;
-		//if (sqlError != null) throw sqlError;
 	}
 
 	public void closeProgress()
 	{
 		if (this.progressWindow != null)
 		{
-			this.progressPanel.stopProgressBar();
-			this.progressPanel = null;
 			this.progressWindow.hide();
 			this.progressWindow.dispose();
+			this.progressPanel = null;
 		}
 	}
 	

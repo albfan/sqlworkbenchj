@@ -295,7 +295,9 @@ public class ConnectionEditorPanel
 	{
 		if (aDriverList != null)
 		{
+			this.init = true;
 			this.cbDrivers.setModel(new DefaultComboBoxModel(aDriverList.toArray()));
+			this.init = false;
 		}
 	}
 

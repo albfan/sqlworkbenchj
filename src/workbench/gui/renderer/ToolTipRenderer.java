@@ -10,6 +10,8 @@ import javax.swing.border.Border;
 
 import java.awt.Component;
 import java.awt.Color;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JComponent;
 import javax.swing.table.DefaultTableCellRenderer;
 import workbench.gui.WbSwingUtilities;
@@ -24,6 +26,19 @@ public class ToolTipRenderer
 	extends DefaultTableCellRenderer 
 {
 
+	private Color selectedForeground;
+	private Color selectedBackground;
+	private Color unselectedForeground;
+	private Color unselectedBackground;
+
+	private static Pattern CRLF = Pattern.compile("(\r\n|\r|\n|\n\r)");
+	
+	public ToolTipRenderer()
+	{
+		this.setVerticalAlignment(SwingConstants.TOP);
+		this.setHorizontalAlignment(SwingConstants.LEFT);
+	}
+	
 	public Component getTableCellRendererComponent(	JTable table,
 																									Object value,
 																									boolean isSelected,
@@ -31,15 +46,6 @@ public class ToolTipRenderer
 																									int row,
 																									int col)
 	{
-		Component result = super.getTableCellRendererComponent(table, value, isSelected, false, row, col);
-
-		String display;
-		if (value == null)
-			display = "";
-		else
-			display = value.toString();
-
-		this.setToolTipText(display);
 		if (hasFocus)
 		{
 			this.setBorder(WbTable.FOCUSED_CELL_BORDER);
@@ -49,6 +55,64 @@ public class ToolTipRenderer
 			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		}
 		
-		return result;
+		if (isSelected)
+		{
+			if (selectedForeground == null)
+			{
+				this.selectedForeground = table.getSelectionForeground();
+				this.selectedBackground = table.getSelectionBackground();
+			}
+			super.setForeground(this.selectedForeground);
+			super.setBackground(this.selectedBackground);
+		}
+		else
+		{
+			if (selectedForeground == null)
+			{
+				this.unselectedForeground = table.getForeground();
+				this.unselectedBackground = table.getBackground();
+			}
+			super.setForeground(this.unselectedForeground);
+			super.setBackground(this.unselectedBackground);
+		}
+
+		String display;
+		String toolTip;
+		
+		if (value == null)
+		{
+			toolTip = null;
+			display = "";
+		}
+		else
+		{
+			display = value.toString();
+			if (display.length() > 0)
+			{
+				Matcher m = CRLF.matcher(display);
+				if (m.find())
+				{
+					StringBuffer tip = new StringBuffer(display.length() + 50);
+					tip.append("<html><body>");
+					tip.append(m.replaceAll("<br>"));
+					tip.append("</body></html>");
+					toolTip = tip.toString();
+					display = toolTip;
+				}
+				else
+				{
+					toolTip = display;
+				}
+			}
+			else
+			{
+				toolTip = null;
+			}
+		}
+		this.setToolTipText(toolTip);
+		this.setText(display);
+		
+		return this;
 	}
+	
 }

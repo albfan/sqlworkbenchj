@@ -53,6 +53,7 @@ public class MainWindow
 	implements ActionListener, MouseListener, WindowListener, 
 						ChangeListener, FilenameChangeListener
 {
+	private static int instanceCount;
 	private String windowId;
 	private String currentProfileName;
 	private WbConnection currentConnection;
@@ -72,6 +73,8 @@ public class MainWindow
 	public MainWindow()
 	{
 		super(ResourceMgr.TXT_PRODUCT_NAME);
+		instanceCount ++;
+		this.windowId = "MainWindow" + Integer.toString(instanceCount);
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.addWindowListener(this);
 		this.sqlTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
@@ -114,6 +117,8 @@ public class MainWindow
 		this.sqlTab.addChangeListener(this);
 		this.sqlTab.addMouseListener(this);
 	}
+	
+	public String getWindowId() { return this.windowId; }
 
 	private void initMenu()
 	{
@@ -148,6 +153,8 @@ public class MainWindow
 		this.connectAction = new FileConnectAction(this);
 		item = this.connectAction.getMenuItem();
 		menu.add(item);
+		action = new FileNewWindowAction();
+		menu.add(action.getMenuItem());
 		menu.addSeparator();
 
 		// now create the menus for the current tab
@@ -232,17 +239,38 @@ public class MainWindow
 		return menuBar;
 	}
 
+	public String[] getPanelLabels()
+	{
+		int tabCount = this.sqlTab.getTabCount();
+		if (WbManager.getSettings().getShowDbExplorerInMainWindow())
+		{
+			tabCount --;
+		}
+		
+		String[] result = new String[tabCount];
+		
+		for (int i=0; i < tabCount; i++)
+		{
+			result[i] = this.sqlTab.getTitleAt(i);
+		}
+		return result;
+	}
 	private MainPanel getCurrentPanel()
 	{
 		int index = this.sqlTab.getSelectedIndex();
 		return this.getSqlPanel(index);
 	}
 
-	private MainPanel getSqlPanel(int anIndex)
+	public MainPanel getSqlPanel(int anIndex)
 	{
 		return (MainPanel)this.sqlTab.getComponentAt(anIndex);
 	}
 
+	public void selectTab(int anIndex)
+	{
+		this.sqlTab.setSelectedIndex(anIndex);
+	}
+	
 	private void tabSelected(int anIndex)
 	{
 		Container content = this.getContentPane();
@@ -327,7 +355,7 @@ public class MainWindow
 
 	public void windowClosed(WindowEvent e)
 	{
-		WbManager.getInstance().exitWorkbench();
+		//WbManager.getInstance().windowClosed(e);//exitWorkbench();
 	}
 
 	public void windowDeiconified(WindowEvent windowEvent)
@@ -341,6 +369,7 @@ public class MainWindow
 	public void windowClosing(WindowEvent windowEvent)
 	{
 		this.saveSettings();
+		WbManager.getInstance().windowClosing(this);
 	}
 
 	public void windowDeactivated(WindowEvent windowEvent)
@@ -398,11 +427,13 @@ public class MainWindow
 
 	public void selectConnection()
 	{
+		WbSwingUtilities.showWaitCursor(this);
 		if (this.profileDialog == null)
 		{
 			this.profileDialog = new ProfileSelectionDialog(this, true);
 		}
 		WbSwingUtilities.center(this.profileDialog, this);
+		WbSwingUtilities.showDefaultCursor(this);
 		this.profileDialog.setVisible(true);
 		if (!this.profileDialog.isCancelled())
 		{
@@ -476,7 +507,7 @@ public class MainWindow
 	{
 		if (this.dbExplorerPanel == null)
 		{
-			this.dbExplorerPanel = new DbExplorerPanel();
+			this.dbExplorerPanel = new DbExplorerPanel(this);
 			this.dbExplorerPanel.restoreSettings();
 		}
 		JMenuBar dbmenu = this.getMenuForPanel(this.dbExplorerPanel);
@@ -493,8 +524,9 @@ public class MainWindow
 	{
 		if (this.dbExplorerPanel == null)
 		{
-			this.dbExplorerPanel = new DbExplorerPanel();
+			this.dbExplorerPanel = new DbExplorerPanel(this);
 			this.dbExplorerPanel.setConnection(this.currentConnection);
+			this.dbExplorerPanel.restoreSettings();
 		}
 		if (WbManager.getSettings().getShowDbExplorerInMainWindow())
 		{
@@ -525,7 +557,7 @@ public class MainWindow
 			try
 			{
 				ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
-				WbConnection conn = mgr.getConnection(aProfile);
+				WbConnection conn = mgr.getConnection(aProfile, this.windowId);
 				this.setConnection(conn);
 				this.setTitle(ResourceMgr.TXT_PRODUCT_NAME + " [" + aProfile.getName() + "]");
 				this.getCurrentPanel().clearLog();

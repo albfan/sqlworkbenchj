@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 import workbench.db.DbDateFormatter;
+import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.exception.InvalidStatementException;
 import workbench.util.SqlUtil;
@@ -21,7 +22,7 @@ import workbench.util.SqlUtil;
  *
  * @author  workbench@kellerer.org
  */
-class DmlStatement
+public class DmlStatement
 {
 	private String sql;
 	private List values;
@@ -121,17 +122,17 @@ class DmlStatement
 	}
 
 	/** Execute the DML statement without a prepared statement.
-	 * The statement created by {@link #getExecutableStatement() }
+	 * The statement created by {@link #getExecutableStatement(WbConnection) }
 	 * will be executed
 	 * @param aConnection
 	 * @throws SQLException
 	 * @return number of rows affected
 	 */
-	private int executeDirect(Connection aConnection)
+	private int executeDirect(WbConnection aConnection)
 		throws SQLException
 	{
 		Statement stmt = aConnection.createStatement();
-		int rows = stmt.executeUpdate(this.getExecutableStatement());
+		int rows = stmt.executeUpdate(this.getExecutableStatement(aConnection));
 		stmt.close();
 		return rows;
 	}
@@ -144,6 +145,10 @@ class DmlStatement
 	{
 		return this.usePrepared;
 	}
+	public String getExecutableStatement()
+	{
+		return this.getExecutableStatement(null);
+	}
 
 	/**
 	 *	Returns a "real" SQL Statement which can be executed
@@ -151,10 +156,12 @@ class DmlStatement
 	 *	as literals. No placeholders are used.
 	 *	This statement is executed after setUsePreparedStatement(false) is called
 	 */
-	public String getExecutableStatement()
+	public String getExecutableStatement(WbConnection aConn)
 	{
 		if (this.values.size() > 0)
 		{
+			DbMetadata meta = null;
+			if (aConn != null) meta = aConn.getMetadata();
 			StringBuffer result = new StringBuffer(this.sql.length() + this.values.size() * 10);
 			boolean inQuotes = false;
 			int parmIndex = 0;
@@ -165,7 +172,17 @@ class DmlStatement
 				if (c == '\'') inQuotes = !inQuotes;
 				if (c == '?' && !inQuotes && parmIndex < this.values.size())
 				{
-					result.append(SqlUtil.getLiteral(this.values.get(parmIndex)));
+					Object v = this.values.get(parmIndex);
+					String literal;
+					if (meta != null) 
+					{
+						literal = meta.getLiteral(v);
+					}
+					else 
+					{
+						literal = DbMetadata.getDefaultLiteral(v);
+					}
+					result.append(literal);
 					parmIndex ++;
 				}
 				else
@@ -201,7 +218,7 @@ class DmlStatement
 
 	public String toString()
 	{
-		return this.getExecutableStatement();
+		return sql;
 	}
 
 	public static void main(String args[])
@@ -218,7 +235,7 @@ class DmlStatement
 				values.add(new java.sql.Date(new java.util.Date().getTime()));
 				DmlStatement dml = new DmlStatement(sql, values);
 				//int rows = dml.execute(con);
-				System.out.println(dml.getExecutableStatement());
+				//System.out.println(dml.getExecutableStatement());
 			}
 			catch (Exception e)
 			{

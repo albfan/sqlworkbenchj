@@ -19,7 +19,7 @@ import java.awt.*;
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.4 2002-07-19 15:37:21 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.5 2002-09-20 17:59:24 thomas Exp $
  */
 public class TextAreaPainter extends JComponent implements TabExpander
 {
@@ -358,9 +358,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	 */
 	public void paint(Graphics gfx)
 	{
-		tabSize = fm.charWidth(' ') * ((Integer)textArea
-			.getDocument().getProperty(
-			PlainDocument.tabSizeAttribute)).intValue();
+		tabSize = fm.charWidth(' ') * ((Integer)textArea.getDocument().getProperty(PlainDocument.tabSizeAttribute)).intValue();
 
 		Rectangle clipRect = gfx.getClipBounds();
 
@@ -379,8 +377,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 
 		try
 		{
-			TokenMarker tokenMarker = textArea.getDocument()
-				.getTokenMarker();
+			TokenMarker tokenMarker = textArea.getDocument().getTokenMarker();
 			int x = textArea.getHorizontalOffset();
 
 			for(int line = firstInvalid; line <= lastInvalid; line++)

@@ -28,7 +28,8 @@ public abstract class WbAction extends AbstractAction
 	public static final String MAIN_MENU_ITEM = "MainMenuItem";
 	public static final String MENU_SEPARATOR = "MenuSepBefore";
 	public static final String TBAR_SEPARATOR = "TbarSepBefore";
-
+	public static final String ALTERNATE_ACCELERATOR = "AlternateAccelerator";
+	
 	private String actionName;
 	protected JMenuItem menuItem;
 	protected JButton toolbarButton;
@@ -52,6 +53,11 @@ public abstract class WbAction extends AbstractAction
 		this.actionName = aName;
 	}
 
+	public KeyStroke getAlternateAccelerator()
+	{
+		return (KeyStroke)this.getValue(ALTERNATE_ACCELERATOR);
+	}
+	
 	public KeyStroke getAccelerator()
 	{
 		return (KeyStroke)this.getValue(Action.ACCELERATOR_KEY);
@@ -124,6 +130,12 @@ public abstract class WbAction extends AbstractAction
 	{
 		im.put(this.getAccelerator(), this.getActionName());
 		am.put(this.getActionName(), this);
+		
+		KeyStroke alternate = this.getAlternateAccelerator();
+		if (alternate != null)
+		{
+			im.put(alternate, this.getActionName());
+		}
 	}
 
 	public void putValue(String key, Object newValue)

@@ -8,12 +8,7 @@ package workbench.gui.components;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,7 +21,6 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.table.*;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
@@ -45,12 +39,13 @@ import workbench.storage.DataStore;
 import workbench.storage.NullValue;
 import workbench.util.StringUtil;
 
-
-public class WbTable
-	extends JTable 
-	implements ActionListener, MouseListener, Exporter, FontChangedListener, Searchable, FocusListener
+public class WbTable 
+extends JTable 
+	implements ActionListener, FocusListener, MouseListener, Exporter, FontChangedListener, Searchable
 {
+	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.yellow);
 	private JPopupMenu popup;
+	
 	private JPopupMenu headerPopup;
 	
 	private DataStoreTableModel dwModel;
@@ -58,7 +53,7 @@ public class WbTable
 	private int lastFoundRow = -1;
 	private TableModelListener changeListener;
 
-	private DefaultCellEditor defaultEditor;
+	private TableCellEditor defaultEditor;
 	private DefaultCellEditor defaultNumberEditor;
 	private SortAscendingAction sortAscending;
 	private SortDescendingAction sortDescending;
@@ -71,19 +66,19 @@ public class WbTable
 	private SaveDataAsAction exportDataAction;
 	
 	private boolean adjustToColumnLabel = false;
-	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.yellow);
 	private int headerPopupY = -1;
 	private int headerPopupX = -1;
 	private HashMap savedColumnSizes;
-	private int currentRow = -1;
-	private int currentColumn = -1;
 	private int maxColWidth = 32768;
 	private int minColWidth = 10;
-	private static final DefaultTableModel EMPTY_MODEL = new DefaultTableModel();
+	private static final TableModel EMPTY_MODEL = new EmptyTableModel();
+	private SortHeaderRenderer sortRenderer = new SortHeaderRenderer();
+	private ToolTipRenderer defaultTooltipRenderer = new ToolTipRenderer();
+	private RowHeightResizer rowResizer;
 	
 	public WbTable()
 	{
-		super();
+		super(EMPTY_MODEL);
 		this.setMinimumSize(null);
 		this.setMaximumSize(null);
 		this.setPreferredSize(null);
@@ -105,11 +100,14 @@ public class WbTable
 		Font dataFont = this.getFont();
 		if (dataFont == null) dataFont = (Font)UIManager.get("Table.font");
 		
+		/*
 		JTextField stringField = new JTextField();
 		if (dataFont != null) stringField.setFont(dataFont);
 		stringField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		stringField.addMouseListener(new TextComponentMouseListener());
 		this.defaultEditor = new DefaultCellEditor(stringField);
+		*/
+		this.defaultEditor = new WbCellEditor();
 		
 		JTextField numberField = new JTextField();
 		if (dataFont != null)  numberField.setFont(dataFont);
@@ -144,6 +142,25 @@ public class WbTable
 		this.exportDataAction.addToInputMap(im, am);
 		WbManager.getSettings().addFontChangedListener(this);
 	}
+
+	public void setRowResizeAllowed(boolean aFlag)
+	{
+		if (aFlag && this.rowResizer == null)
+		{
+			this.rowResizer = new RowHeightResizer(this);
+			this.addMouseListener(this.rowResizer);
+			this.addMouseMotionListener(this.rowResizer);
+		}
+		else if (!aFlag)
+		{
+			 if (this.rowResizer != null)
+			 {
+					this.removeMouseListener(this.rowResizer);
+					this.removeMouseMotionListener(this.rowResizer);
+			 }
+			 this.rowResizer = null;
+		}
+	}
 	
 	public SaveDataAsAction getExportAction()
 	{
@@ -169,11 +186,16 @@ public class WbTable
 	{
 		if (this.dwModel != null)
 		{
+			this.dwModel.removeTableModelListener(this.changeListener);
 			this.dwModel.dispose();
 			this.dwModel = null;
-			//this.sortModel = null;
 		}
 		this.setModel(EMPTY_MODEL, false);
+	}
+	
+	public JPopupMenu getPopupMenu()
+	{
+		return this.popup;
 	}
 	
 	public void addPopupAction(WbAction anAction, boolean withSep)
@@ -191,27 +213,29 @@ public class WbTable
 	
 	public void setModel(TableModel aModel, boolean sortIt)
 	{
-		DataStoreTableModel oldModel = this.dwModel;
-		
 		if (this.dwModel != null)
 		{
-			if (this.dwModel != null && this.changeListener != null)
-			{
-				this.dwModel.removeTableModelListener(this.changeListener);
-			}
+			this.dwModel.removeTableModelListener(this.changeListener);
+		}
+		
+		JTableHeader header = this.getTableHeader();
+		if (header != null) 
+		{
+			header.removeMouseListener(this);
 		}
 		
 		this.dwModel = null;
 		super.setModel(aModel);
-
-		JTableHeader header = this.getTableHeader();
-		
+		if (aModel == EMPTY_MODEL)
+		{
+			this.createDefaultColumnsFromModel();
+		}
 		if (sortIt && aModel instanceof DataStoreTableModel)
 		{
 			this.dwModel = (DataStoreTableModel)aModel;
 			if (header != null)
 			{
-				header.setDefaultRenderer(new SortHeaderRenderer());
+				header.setDefaultRenderer(this.sortRenderer);
 				header.addMouseListener(this);
 			}
 		}
@@ -225,8 +249,6 @@ public class WbTable
 		
 		this.initDefaultRenderers();
 		this.initDefaultEditors();
-		this.currentRow = -1;
-		this.currentColumn = -1;
 	}
 	
 	public DataStore getDataStore()
@@ -285,8 +307,6 @@ public class WbTable
 			
 		this.saveColumnSizes();
 
-		if (row == -1) row = this.currentRow;
-		if (column == -1) column = this.currentColumn;
 		this.dwModel.setShowStatusColumn(aFlag);
 		if (aFlag)
 		{
@@ -296,6 +316,16 @@ public class WbTable
 			col.setMinWidth(20);
 			col.setPreferredWidth(20);
 		}
+		else
+		{
+			TableColumnModel model = this.getTableHeader().getColumnModel();
+			if (model.getColumnCount() > this.dwModel.getColumnCount())
+			{
+				TableColumn col = model.getColumn(0);
+				model.removeColumn(col);
+			}
+		}
+		
 		this.initDefaultEditors();
 		this.restoreColumnSizes();
 		if (sortColumn > -1 && this.dwModel != null)
@@ -444,15 +474,21 @@ public class WbTable
 	
 	public void initDefaultRenderers()
 	{
-		if (this.defaultRenderersByColumnClass == null)
-			this.createDefaultRenderers();
+		// need to let JTable do some initialization stuff
+		// otherwise setDefaultRenderer() bombs out with 
+		// a NullPointerException
+		if (this.defaultRenderersByColumnClass == null) this.createDefaultRenderers();
 		
 		String format = WbManager.getSettings().getDefaultDateFormat();
-		this.setDefaultRenderer(Date.class, new DateColumnRenderer(format));
+		DateColumnRenderer dateRend = new DateColumnRenderer(format);
+
+		this.setDefaultRenderer(Date.class, dateRend);
 		int maxDigits = WbManager.getSettings().getMaxFractionDigits();
 		if (maxDigits == -1) maxDigits = 10;
-		this.setDefaultRenderer(Number.class, new NumberColumnRenderer(maxDigits));
-		this.setDefaultRenderer(Object.class, new ToolTipRenderer());
+		NumberColumnRenderer numRend = new NumberColumnRenderer(maxDigits);
+
+		this.setDefaultRenderer(Number.class, numRend);
+		this.setDefaultRenderer(Object.class, this.defaultTooltipRenderer);
 	}
 	
 	public void initDefaultEditors()
@@ -548,7 +584,7 @@ public class WbTable
 		}
 		if (rend != null)
 		{
-			Component c = rend.getTableCellRendererComponent(this, "", false, false, aRow, aColumn);
+			Component c = rend.getTableCellRendererComponent(this, null, false, false, aRow, aColumn);
 			if (c instanceof JComponent)
 			{
 				JComponent jc = (JComponent)c;
