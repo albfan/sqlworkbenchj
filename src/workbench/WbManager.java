@@ -12,7 +12,7 @@ import java.sql.Connection;
 import java.util.Iterator;
 import javax.swing.UIManager;
 
-import workbench.gui.display.MainWindow;
+import workbench.gui.sql.MainWindow;
 import workbench.db.ConnectionMgr;
 import workbench.resource.Settings;
 import java.util.List;
