@@ -6,6 +6,10 @@
 package workbench.util;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -18,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import workbench.log.LogMgr;
 
 /**
  *
@@ -433,6 +438,12 @@ public class StringUtil
 		}
 		return s;
 	}
+
+	public static boolean stringToBool(String aString)
+	{
+		if (aString == null) return false;
+		return ("yes".equalsIgnoreCase(aString) || "1".equals(aString) || "true".equalsIgnoreCase(aString));
+	}
 	
 	public static List split(String aString, String delim, boolean singleDelimiter, String quoteChars, boolean keepQuotes)
 	{
@@ -447,6 +458,72 @@ public class StringUtil
 			if (token != null) result.add(token);
 		}
 		return result;
+	}
+	
+	private static final String LIST_DELIMITER = "----------- WbStatement -----------";
+	
+	public static ArrayList readStringList(String aFilename)
+		throws IOException
+	{
+		File f = new File(aFilename);
+		ArrayList result = new ArrayList(25);
+		if (!f.exists()) return result;
+		BufferedReader in = null;
+		long start,end;
+		start = System.currentTimeMillis();
+		try
+		{
+			in = new BufferedReader(new FileReader(f), 65536);
+			String line = in.readLine();
+			StringBuffer content = new StringBuffer(500);
+			while(line != null)
+			{
+				if (line.equals(LIST_DELIMITER))
+				{
+					result.add(content.toString());
+					content = new StringBuffer(500);
+				}
+				else
+				{
+					content.append(line);
+					content.append('\n');
+				}
+				line = in.readLine();
+			}
+		}
+		finally
+		{
+			try { in.close(); } catch (Throwable th) {}
+		}
+		end = System.currentTimeMillis();
+		//LogMgr.logDebug("StringUtil.readStringList()", "Time = " + (end - start));
+		return result;
+	}
+	
+	public static void writeStringList(List aList, String aFilename)
+		throws IOException
+	{
+		if (aList == null) return;
+		BufferedWriter out = null;
+		try
+		{
+			out = new BufferedWriter(new FileWriter(aFilename));
+			for (int i=0; i < aList.size(); i++)
+			{
+				String content = (String)aList.get(i);
+				if (content != null && content.trim().length() > 0)
+				{
+					out.write(content);
+					out.write(LINE_TERMINATOR);
+					out.write(LIST_DELIMITER);
+					out.write(LINE_TERMINATOR);
+				}
+			}
+		}
+		finally
+		{
+			try { out.close(); } catch (Throwable th) {}
+		}
 	}
 	
 	public static void main(String args[])

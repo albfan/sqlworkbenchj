@@ -4,6 +4,8 @@ package workbench.gui.components;
 import java.awt.Component;
 import java.awt.event.*;
 import java.awt.AWTEvent;
+import java.awt.Font;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.lang.Boolean;
 import javax.swing.table.*;
@@ -15,6 +17,9 @@ import java.util.ArrayList;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
@@ -36,6 +41,7 @@ public class WbCellEditor
 	public WbCellEditor()
 	{
 		editor = new TextAreaEditor();
+    setDefaultCopyPasteKeys(editor);
 		scroll = new TextAreaScrollPane(editor);
 		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 		scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -46,6 +52,33 @@ public class WbCellEditor
 		editor.addMouseListener(new TextComponentMouseListener());
 	}
 	
+  public static void setDefaultCopyPasteKeys(JComponent editor)
+  {
+    InputMap im = editor.getInputMap();
+    KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK);
+    KeyStroke ksnew = KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, InputEvent.CTRL_MASK);
+    
+    Object cmd = im.get(ks);
+    im.put(ksnew, cmd);
+    
+    ks = KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK);
+    ksnew = KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, InputEvent.SHIFT_MASK);
+
+    cmd = im.get(ks);
+    im.put(ksnew, cmd);
+
+    ks = KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_MASK);
+    ksnew = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.SHIFT_MASK);
+
+    cmd = im.get(ks);
+    im.put(ksnew, cmd);
+  }
+  
+	public void setFont(Font aFont)
+	{
+		this.editor.setFont(aFont);
+	}
+  
 	public Component getComponent()
 	{
 		return scroll;

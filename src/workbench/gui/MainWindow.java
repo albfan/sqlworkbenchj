@@ -370,23 +370,22 @@ public class MainWindow
 	public void saveSettings()
 	{
 		int index = this.sqlTab.getSelectedIndex();
-		WbManager.getSettings().setLastSqlTab(index);
-		WbManager.getSettings().setDbExplorerVisible(this.dbExplorerTabVisible);
-		int tabCount = this.sqlTab.getTabCount();
-		int tabs = tabCount;
-		Object tab = this.sqlTab.getComponentAt(tabCount - 1);
-		if (tab instanceof DbExplorerPanel)
-		{
-			tabs --;
-		}
     Settings sett = WbManager.getSettings();
-    sett.setDefaultTabCount(tabs);
+		sett.setLastSqlTab(index);
+		sett.setDbExplorerVisible(this.dbExplorerTabVisible);
+		
+		int tabCount = this.sqlTab.getTabCount();
+		int realTabs = 0;
+		
 
 		for (int i=0; i < tabCount; i++)
 		{
 			MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
 			sql.saveSettings();
+			if (sql instanceof SqlPanel) realTabs++;
 		}
+    sett.setDefaultTabCount(realTabs);
+		
 		int state = this.getExtendedState();
 		sett.setProperty(this.getClass().getName(), "state", state);
 

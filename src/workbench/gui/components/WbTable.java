@@ -58,8 +58,10 @@ extends JTable
 	private String lastSearchCriteria;
 	private int lastFoundRow = -1;
 
-	private TableCellEditor defaultEditor;
+	private WbCellEditor defaultEditor;
 	private DefaultCellEditor defaultNumberEditor;
+	private JTextField numberEditorTextField;
+	
 	private SortAscendingAction sortAscending;
 	private SortDescendingAction sortDescending;
 	private OptimizeColumnWidthAction optimizeCol;
@@ -119,12 +121,14 @@ extends JTable
 
 		this.defaultEditor = new WbCellEditor();
 
-		JTextField numberField = new JTextField();
-		if (dataFont != null)  numberField.setFont(dataFont);
-		numberField.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		numberField.setHorizontalAlignment(SwingConstants.RIGHT);
-		numberField.addMouseListener(new TextComponentMouseListener());
-		this.defaultNumberEditor = new DefaultCellEditor(numberField);
+		numberEditorTextField = new JTextField();
+		if (dataFont != null)  numberEditorTextField.setFont(dataFont);
+		numberEditorTextField.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		numberEditorTextField.setHorizontalAlignment(SwingConstants.RIGHT);
+		numberEditorTextField.addMouseListener(new TextComponentMouseListener());
+    WbCellEditor.setDefaultCopyPasteKeys(numberEditorTextField);
+    
+		this.defaultNumberEditor = new DefaultCellEditor(numberEditorTextField);
 		this.addMouseListener(this);
 		this.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		JTableHeader th = this.getTableHeader();
@@ -1038,6 +1042,8 @@ extends JTable
 		{
 			this.setFont(newFont);
 			this.getTableHeader().setFont(newFont);
+			this.defaultEditor.setFont(newFont);
+			this.numberEditorTextField.setFont(newFont);
 		}
 	}
 

@@ -19,7 +19,7 @@ import java.util.StringTokenizer;
  * The default input handler. It maps sequences of keystrokes into actions
  * and inserts key typed events into the text area.
  * @author Slava Pestov
- * @version $Id: DefaultInputHandler.java,v 1.5 2002-12-16 20:49:36 thomas Exp $
+ * @version $Id: DefaultInputHandler.java,v 1.6 2003-01-19 18:55:05 thomas Exp $
  */
 public class DefaultInputHandler extends InputHandler
 {

@@ -87,8 +87,8 @@ public class Settings
 		}
 		catch (IOException e)
 		{
-			LogMgr.logInfo(this, "Settings file '" + filename + "' not found! ");
-			LogMgr.logInfo(this, "Using defaults");
+			//LogMgr.logInfo(this, "Settings file '" + filename + "' not found! ");
+			//LogMgr.logInfo(this, "Using defaults");
 			fillDefaults();
 		}
 		
@@ -97,13 +97,17 @@ public class Settings
 			String logfile = System.getProperty("workbench.log.filename", null);
 			if (logfile == null)
 			{
-				logfile = this.props.getProperty("workbench.log.filename", "System.out");
+				logfile = this.props.getProperty("workbench.log.filename", "Workbench.log");
 			}
 			LogMgr.setOutputFile(logfile);
     }
     catch (Exception e)
     {
     }
+		
+		String level = this.props.getProperty("workbench.log.level", "INFO");
+		LogMgr.setLevel(level);
+		
 		if (WbManager.trace) System.err.println("Settings.<init> - done");
 	}
 
@@ -366,7 +370,6 @@ public class Settings
 	{
 		this.props.setProperty("workbench.persistence.cleanupunderscores", Boolean.toString(useEncryption));
 	}
-	
 	
 	public String getLastSqlDir()
 	{
@@ -782,6 +785,16 @@ public class Settings
 		return StringUtil.getIntValue(value);
 	}
 
+	public void setDbExplorerVisible(boolean aFlag)
+	{
+		this.props.setProperty("workbench.dbexplorer.visible", Boolean.toString(aFlag));
+	}
+	
+	public boolean getDbExplorerVisible()
+	{
+		return "true".equals(this.props.getProperty("workbench.dbexplorer.visible", "false"));
+	}
+	
 	public boolean getShowDbExplorerInMainWindow()
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.dbexplorer.mainwindow", "true"));

@@ -45,8 +45,12 @@ public class StatementRunner
 		
 		sql = new WbDescribeTable();
 		cmdDispatch.put(sql.getVerb(), sql);
+    cmdDispatch.put("DESCRIBE", sql);
 		
 		sql = new WbEnableOraOutput();
+		cmdDispatch.put(sql.getVerb(), sql);
+
+		sql = new WbDisableOraOutput();
 		cmdDispatch.put(sql.getVerb(), sql);
 		
 		sql = new SelectCommand();
@@ -75,6 +79,11 @@ public class StatementRunner
 	public void setConnection(WbConnection aConn)
 	{
 		this.dbConnection = aConn;
+		if (this.dbConnection.getMetadata().isOracle())
+		{
+			this.cmdDispatch.put(WbOraExecute.EXEC.getVerb(), WbOraExecute.EXEC);
+			this.cmdDispatch.put(WbOraExecute.EXECUTE.getVerb(), WbOraExecute.EXECUTE);
+		}
 	}
 	
 	public StatementRunnerResult getResult()

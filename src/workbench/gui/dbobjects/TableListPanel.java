@@ -236,16 +236,35 @@ public class TableListPanel
 		this.setFocusTraversalPolicy(pol);
 		this.reset();
 		this.parentWindow.addFilenameChangeListener(this);
+    this.parentWindow.addIndexChangeListener(this);
 	}
 
 	private void extendPopupMenu()
 	{
 		JPopupMenu popup = this.tableList.getPopupMenu();
+		popup.addSeparator();
+		this.dropTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDropDbObject"));
+		this.dropTableItem.setActionCommand(DROP_CMD);
+		this.dropTableItem.addActionListener(this);
+		this.dropTableItem.setEnabled(false);
+		popup.add(this.dropTableItem);
 		
 		this.showDataMenu = new WbMenu(ResourceMgr.getString("MnuTxtShowTableData"));
 		this.showDataMenu.setEnabled(false);
+		this.updateShowDataMenu();
+		popup.addSeparator();
+		popup.add(this.showDataMenu);
+	}
+
+	private void updateShowDataMenu()
+	{
 		String[] panels = this.parentWindow.getPanelLabels();
 		int current = this.parentWindow.getCurrentPanelIndex();
+		
+		if (this.showDataMenu != null)
+		{
+			this.showDataMenu.removeAll();
+		}
 		for (int i=0; i < panels.length; i++)
 		{
 			WbMenuItem item = new WbMenuItem();
@@ -265,35 +284,6 @@ public class TableListPanel
 			item.setActionCommand("panel-" + i);
 			item.addActionListener(this);
 			this.showDataMenu.add(item);
-		}
-		popup.addSeparator();
-		popup.add(showDataMenu);
-		this.dropTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDropDbObject"));
-		this.dropTableItem.setActionCommand(DROP_CMD);
-		this.dropTableItem.addActionListener(this);
-		this.dropTableItem.setEnabled(false);
-		popup.add(this.dropTableItem);
-	}
-
-	private void updateShowDataMenu()
-	{
-		String[] panels = this.parentWindow.getPanelLabels();
-		int current = this.parentWindow.getCurrentPanelIndex();
-		for (int i=0; i < panels.length; i++)
-		{
-			JMenuItem item = this.showDataMenu.getItem(i);
-			if (i == current)
-			{
-				StringBuffer b = new StringBuffer(20);
-				b.append("<html><b>");
-				b.append(panels[i]);
-				b.append("</html></b>");
-				item.setText(b.toString());
-			}
-			else
-			{
-				item.setText(panels[i]);
-			}
 		}
 	}
 	
@@ -877,7 +867,26 @@ public class TableListPanel
 	 */
 	public void stateChanged(ChangeEvent e)
 	{
-		this.startRetrieveCurrentPanel();
+		//System.out.println("stateChanged, source=" + e.getSource().getClass().getName());
+    if (e.getSource() == this.displayTab)
+    {
+      this.startRetrieveCurrentPanel();
+    }
+    else 
+    {
+			// Updating the showDataMenu needs to be posted because
+			// the EhangeEvent is also triggered when a tab has been 
+			// removed (thus implicitely changing the index) 
+			// but the changeEvent occurs <b>before</b> the actual
+			// pane is removed from the control.
+      EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					updateShowDataMenu();
+				}
+			});
+    }
 	}
 	
 	public void fileNameChanged(Object sender, String newFilename)

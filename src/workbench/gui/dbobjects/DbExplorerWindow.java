@@ -38,7 +38,7 @@ public class DbExplorerWindow
 	public DbExplorerWindow(DbExplorerPanel aPanel, String aProfileName)
 	{
 		super(ResourceMgr.getString("TxtDbExplorerTitel") + " - [" + aProfileName + "]");
-		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.panel = aPanel;
 		this.addWindowListener(this);
 		this.getContentPane().add(this.panel);
@@ -80,6 +80,10 @@ public class DbExplorerWindow
 
 	public void windowClosed(WindowEvent e)
 	{
+		if (this.panel != null)
+		{
+			panel.explorerWindowClosed();
+		}
 	}
 
 	public void windowClosing(WindowEvent e)

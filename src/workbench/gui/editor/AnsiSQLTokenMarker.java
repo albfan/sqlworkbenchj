@@ -117,6 +117,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("DELETE",Token.KEYWORD1);
 		keywords.add("DENY",Token.KEYWORD1);
 		keywords.add("DESC",Token.KEYWORD2);
+		keywords.add("DESCRIBE",Token.KEYWORD2);
 		keywords.add("DISTINCT",Token.KEYWORD1);
 		keywords.add("DROP",Token.KEYWORD1);
 		keywords.add("EXEC",Token.KEYWORD1);

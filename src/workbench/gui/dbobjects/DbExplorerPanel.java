@@ -283,6 +283,12 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 	public void addToToolbar(WbAction anAction, boolean aFlag)
 	{
 	}
+	
+	public void explorerWindowClosed()
+	{
+		this.window = null;
+	}
+	
 	public void mainWindowDeiconified()
 	{
 		if (this.window != null && this.restoreWindow) this.window.show();

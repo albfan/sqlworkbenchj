@@ -109,8 +109,8 @@ public class SqlPanel
 
 	private WbConnection dbConnection;
 	private boolean updating;
-	private String alternateDelimiter;
-
+	private boolean cancelExecution;
+	
 	private ImageIcon loadingIcon;
 	private Icon dummyIcon;
 	private boolean dummyIconFetched = false;
@@ -148,7 +148,7 @@ public class SqlPanel
 		pol.setDefaultComponent(data.getTable());
 		pol.addComponent(data.getTable());
 		this.resultTab.setFocusTraversalPolicy(pol);
-		this.alternateDelimiter = WbManager.getSettings().getAlternateDelimiter();
+		//this.alternateDelimiter = WbManager.getSettings().getAlternateDelimiter();
 
 		this.editor = new EditorPanel();
 		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
@@ -173,7 +173,7 @@ public class SqlPanel
 	public void setId(int anId)
 	{
 		this.internalId = anId;
-		this.historyFilename = WbManager.getSettings().getConfigDir() + "WbStatements" + Integer.toString(this.internalId) + ".xml";
+		this.historyFilename = WbManager.getSettings().getConfigDir() + "WbStatements" + Integer.toString(this.internalId);
 	}
 
 	public void initDefaults()
@@ -409,6 +409,8 @@ public class SqlPanel
 		this.actions.add(sea);
 		SelectResultAction r = new SelectResultAction(this);
 		this.actions.add(r);
+    this.actions.add(new SelectMaxRowsAction(this));
+    
 		a = new ExpandEditorAction(this);
 		a.setCreateMenuSeparator(true);
 		this.actions.add(a);
@@ -702,7 +704,17 @@ public class SqlPanel
 		{
 			Object data = null;
 			if (readFromFile)
-				data = WbPersistence.readObject(this.historyFilename);
+			{
+				File f = new File(this.historyFilename + ".xml");
+				if (f.exists())
+				{
+					data = WbPersistence.readObject(this.historyFilename + ".xml");
+				}
+				else
+				{
+					data = StringUtil.readStringList(this.historyFilename + ".txt");
+				}
+			}
 			if (data != null && data instanceof ArrayList)
 			{
 				this.statementHistory = (ArrayList)data;
@@ -789,7 +801,15 @@ public class SqlPanel
 	{
 		try
 		{
-			WbPersistence.writeObject(this.statementHistory, this.historyFilename);
+			if (this.statementHistory.size() > 0)
+			{
+				StringUtil.writeStringList(this.statementHistory, this.historyFilename + ".txt");
+			}
+			File f = new File(this.historyFilename + ".xml");
+			if (f.exists())
+			{
+				f.delete();
+			}
 		}
 		catch (Exception e)
 		{
@@ -887,6 +907,7 @@ public class SqlPanel
 		this.data.cancelExecution();
 		this.setCancelState(false);
 		this.clearStatusMessage();
+		this.suspendThread();
 	}
 
 	/**
@@ -999,6 +1020,18 @@ public class SqlPanel
     this.data.dataChanged();
 	}
 
+	private void appendToLog(final String aString)
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				log.append(aString);
+				log.setCaretPosition(log.getDocument().getLength());
+			}
+		});
+	}
+	
 	private void displayResult(String aSqlScript)
 	{
 		try
@@ -1006,9 +1039,9 @@ public class SqlPanel
 			this.log.setText(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
 			String delimit = ";";
 
-			if (aSqlScript.trim().endsWith(this.alternateDelimiter))
+			if (aSqlScript.trim().endsWith(WbManager.getSettings().getAlternateDelimiter()))
 			{
-				delimit = this.alternateDelimiter;
+				delimit = WbManager.getSettings().getAlternateDelimiter();
 			}
 
 			List sqls = SqlUtil.getCommands(aSqlScript, delimit);
@@ -1018,20 +1051,24 @@ public class SqlPanel
 			this.log.setText("");
 			for (int i=0; i < count; i++)
 			{
+				StringBuffer logmsg = new StringBuffer(200);
 				String sql = (String)sqls.get(i);
 				this.data.runStatement(sql);
-				this.log.append(this.data.getLastMessage());
+				logmsg.append(this.data.getLastMessage());
 				if (count > 1)
 				{
-					this.log.append("\n");
-					this.log.append(StringUtil.replace(msg, "%nr%", Integer.toString(i + 1)));
-					this.log.append("\n\n");
-					this.log.setCaretPosition(this.log.getText().length());
+					logmsg.append("\n");
+					logmsg.append(StringUtil.replace(msg, "%nr%", Integer.toString(i + 1)));
+					logmsg.append("\n\n");
 				}
+				this.appendToLog(logmsg.toString());
 				if (i == 0 && !this.data.hasResultSet())
 				{
 					this.showLogPanel();
 				}
+				Thread.yield();
+				if (suspended) break;
+				sqls.set(i, null);
 			}
 			if (this.data.hasResultSet())
 			{
@@ -1044,9 +1081,10 @@ public class SqlPanel
 			}
 			if (count > 1)
 			{
-				this.log.append("\n");
-				this.log.append(ResourceMgr.getString("TxtScriptFinished"));
-				this.log.setCaretPosition(this.log.getText().length());
+				StringBuffer logmsg = new StringBuffer(200);
+				logmsg.append("\n");
+				logmsg.append(ResourceMgr.getString("TxtScriptFinished"));
+				this.appendToLog(logmsg.toString());
 			}
 		}
 		catch (SQLException e)
@@ -1118,6 +1156,11 @@ public class SqlPanel
 		}
 	}
 
+  public void selectMaxRowsField()
+  {
+    this.data.selectMaxRowsField();
+  }
+  
 	private void checkResultSetActions()
 	{
 		boolean hasResult = this.data.hasResultSet();

@@ -24,11 +24,14 @@ public class SqlTabPopup extends JPopupMenu
 	/** Creates new LogPanelPopup */
 	public SqlTabPopup(MainWindow aClient)
 	{
-		this.add = new AddTabAction(aClient);
-		this.add(add.getMenuItem());
+		MainPanel panel = aClient.getCurrentPanel();
+		if (panel instanceof SqlPanel)
+		{
+			this.add = new AddTabAction(aClient);
+			this.add(add.getMenuItem());
+		}
 		this.remove = new RemoveTabAction(aClient);
 		this.add(remove.getMenuItem());
-		MainPanel panel = aClient.getCurrentPanel();
 		if (panel instanceof SqlPanel)
 		{
 			this.addSeparator();

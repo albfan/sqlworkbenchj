@@ -233,6 +233,9 @@ public class DwPanel extends JPanel
 			this.clearContent();
 			
 			if (aSql.endsWith(";")) aSql = aSql.substring(0, aSql.length() - 1);
+			String alternate = WbManager.getSettings().getAlternateDelimiter();
+			if (aSql.endsWith(alternate)) 
+				aSql = aSql.substring(0, aSql.length() - alternate.length());
 				
 			boolean repeatLast = aSql.equals(this.sql);
 			this.sql = aSql;
@@ -337,6 +340,7 @@ public class DwPanel extends JPanel
   {
 		this.statusBar.setRowcount(this.infoTable.getRowCount());
   }
+  
 	public void deleteRow()
 	{
 		DataStoreTableModel ds = this.infoTable.getDataStoreTableModel();
@@ -503,6 +507,11 @@ public class DwPanel extends JPanel
 		return this.errorModel;
 	}
 
+  public void selectMaxRowsField()
+  {
+    this.statusBar.selectMaxRowsField();
+  }
+  
 	public WbTable getTable() { return this.infoTable; }
 	
 }

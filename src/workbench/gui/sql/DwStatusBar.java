@@ -133,4 +133,10 @@ public class DwStatusBar extends javax.swing.JPanel
 	{
 		return StringUtil.getIntValue(this.tfMaxRows.getText(), 0);
 	}
+  
+  public void selectMaxRowsField()
+  {
+		this.tfMaxRows.selectAll();
+    this.tfMaxRows.requestFocusInWindow();
+  }
 }

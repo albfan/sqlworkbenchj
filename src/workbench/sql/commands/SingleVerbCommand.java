@@ -33,7 +33,7 @@ public class SingleVerbCommand extends SqlCommand
 		try
 		{
 			this.currentStatement = aConnection.createStatement();
-			this.currentStatement .execute(aSql);
+			this.currentStatement.execute(aSql);
 			result.addMessage(this.verb + " " + ResourceMgr.getString("MsgKnownStatementOK"));
 			StringBuffer warnings = new StringBuffer();
 			if (this.appendWarnings(aConnection, this.currentStatement , warnings))

@@ -3,6 +3,7 @@
  */
 package workbench.sql;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import workbench.WbManager;
@@ -47,12 +48,20 @@ public class BatchRunner
 
 	public void setSuccessScript(String aFilename)
 	{
-		this.successScript = aFilename;
+		File f = new File(aFilename);
+		if (f.exists() && !f.isDirectory())
+			this.successScript = aFilename;
+		else
+			this.successScript = null;
 	}
 	
 	public void setErrorScript(String aFilename)
 	{
-		this.errorScript = aFilename;
+		File f = new File(aFilename);
+		if (f.exists() && !f.isDirectory())
+			this.errorScript = aFilename;
+		else
+			this.errorScript = null;
 	}
 	
 	public void execute()
@@ -170,23 +179,6 @@ public class BatchRunner
 	public void setAbortOnError(boolean aFlag)
 	{
 		this.abortOnError = aFlag;
-	}
-	
-	public static void main(String[] args)
-	{
-		//WbManager.getInstance().initForBatch();
-		BatchRunner runner = new BatchRunner("d:/projects/java/jworkbench/sql/test.sql");
-		try
-		{
-			runner.setProfile("HSQLDB - Test Server");
-			runner.execute();
-			//runner.done();
-		}
-		catch (Throwable th)
-		{
-			th.printStackTrace();
-		}
-		WbManager.getInstance().exitWorkbench();
 	}
 	
 }
