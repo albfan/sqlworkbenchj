@@ -840,6 +840,7 @@ public class SqlPanel
 	}
 
 	private final String DEFAULT_TAB_NAME = ResourceMgr.getString("LabelTabStatement");
+	
 	public void setTabTitle(JTabbedPane tab, int index)
 	{
 		String fname = null;
@@ -1007,6 +1008,23 @@ public class SqlPanel
 		this.setCancelState(false);
 	}
 
+	public void forceAbort()
+	{
+		if (!this.isBusy()) return;
+		try
+		{
+			this.background.interrupt();
+			this.background = null;
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("SqlPanel.forceAbort()", "Error when trying to kill background thread",e);
+		}
+		finally
+		{
+		}
+	}
+	
 	public boolean abortExecution()
 	{
 		if (!this.isBusy()) return true;
@@ -1528,27 +1546,22 @@ public class SqlPanel
 		}
 	}
 
-  private Image loadingImage = null;
-
 	private ImageIcon getLoadingIndicator()
 	{
 		if (this.loadingIcon == null)
 		{
-      loadingImage = ResourceMgr.getPicture("loading").getImage();
-			this.loadingIcon = new ImageIcon(loadingImage);
+			this.loadingIcon = ResourceMgr.getPicture("loading");
 		}
 		return this.loadingIcon;
 	}
 	
-	private Image cancelImage = null;
 	private ImageIcon cancelIcon = null;
 	
 	private ImageIcon getCancelIndicator()
 	{
 		if (this.cancelIcon == null)
 		{
-      cancelImage = ResourceMgr.getPicture("cancelling").getImage();
-			this.cancelIcon = new ImageIcon(cancelImage);
+			this.cancelIcon = ResourceMgr.getPicture("cancelling");
 		}
 		return this.cancelIcon;
 	}
@@ -1600,9 +1613,9 @@ public class SqlPanel
 					}
 					else
 					{
-						if (this.loadingImage != null) this.loadingImage.flush();
-						if (this.cancelImage != null) this.cancelImage.flush();
 						tab.setIconAt(index, null);
+						if (this.loadingIcon != null) this.loadingIcon.getImage().flush();
+						if (this.cancelIcon != null) this.cancelIcon.getImage().flush();
 					}
 				}
 				catch (Throwable th)

@@ -98,6 +98,7 @@ public class TableListPanel
 	private boolean shouldRetrieve;
 
 	private boolean shouldRetrieveTable;
+	private boolean shouldRetrieveTableSource;
 	private boolean shouldRetrieveTriggers;
 	private boolean shouldRetrieveIndexes;
 	private boolean shouldRetrieveExportedKeys;
@@ -425,6 +426,7 @@ public class TableListPanel
 	private void invalidateData()
 	{
 		this.shouldRetrieveTable = true;
+		this.shouldRetrieveTableSource = true;
 		this.shouldRetrieveTriggers = true;
 		this.shouldRetrieveIndexes = true;
 		this.shouldRetrieveExportedKeys = true;
@@ -702,34 +704,24 @@ public class TableListPanel
 		return result.toString();
 	}
 	
-	private synchronized void retrieveTableDefinition()
+	private synchronized void retrieveTableSource()
 		throws SQLException, WbException
 	{
 		WbSwingUtilities.showWaitCursor(this);
-
+		WbSwingUtilities.showWaitCursor(this.tableSource);
+		
+		
 		try
 		{
 			DbMetadata meta = this.dbConnection.getMetadata();
-			DataStore def = meta.getTableDefinition(this.selectedCatalog, this.selectedSchema, this.selectedTableName, this.selectedObjectType, false);
-			DataStoreTableModel model = new DataStoreTableModel(def);
-			tableDefinition.setModel(model, true);
-			tableDefinition.adjustColumns();
-			TableColumnModel colmod = tableDefinition.getColumnModel();
-			TableColumn col = colmod.getColumn(DbMetadata.COLUMN_IDX_TABLE_DEFINITION_TYPE_ID);
-			col.setCellRenderer(new SqlTypeRenderer());
-
-			// remove the last two columns...
-
-			col = colmod.getColumn(colmod.getColumnCount() - 1);
-			colmod.removeColumn(col);
-
-			col = colmod.getColumn(colmod.getColumnCount() - 1);
-			colmod.removeColumn(col);
-
+			if (tableDefinition.getRowCount() == 0)
+			{
+				this.retrieveTableDefinition();
+			}
 			if (this.selectedObjectType.indexOf("view") > -1)
 			{
 				String viewSource = meta.getViewSource(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
-				tableSource.setText(this.extendViewSource(viewSource, this.selectedTableName, def));
+				tableSource.setText(this.extendViewSource(viewSource, this.selectedTableName, tableDefinition.getDataStore()));
 				tableSource.setCaretPosition(0);
 			}
 			else if ("synonym".equals(this.selectedObjectType))
@@ -758,7 +750,40 @@ public class TableListPanel
 		}
 		finally
 		{
+			WbSwingUtilities.showDefaultCursor(tableSource);
 			WbSwingUtilities.showDefaultCursor(this);
+		}
+		shouldRetrieveTableSource = false;
+	}
+	
+	private synchronized void retrieveTableDefinition()
+		throws SQLException, WbException
+	{
+		WbSwingUtilities.showWaitCursorOnWindow(this);
+
+		try
+		{
+			DbMetadata meta = this.dbConnection.getMetadata();
+			DataStore def = meta.getTableDefinition(this.selectedCatalog, this.selectedSchema, this.selectedTableName, this.selectedObjectType, false);
+			DataStoreTableModel model = new DataStoreTableModel(def);
+			tableDefinition.setModel(model, true);
+			tableDefinition.adjustColumns();
+			TableColumnModel colmod = tableDefinition.getColumnModel();
+			TableColumn col = colmod.getColumn(DbMetadata.COLUMN_IDX_TABLE_DEFINITION_TYPE_ID);
+			col.setCellRenderer(new SqlTypeRenderer());
+
+			// remove the last two columns...
+
+			col = colmod.getColumn(colmod.getColumnCount() - 1);
+			colmod.removeColumn(col);
+
+			col = colmod.getColumn(colmod.getColumnCount() - 1);
+			colmod.removeColumn(col);
+
+		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursorOnWindow(this);
 		}
 		shouldRetrieveTable = false;
 	}
@@ -788,8 +813,10 @@ public class TableListPanel
 			switch (index)
 			{
 				case 0:
-				case 1:
 					if (this.shouldRetrieveTable) this.retrieveTableDefinition();
+					break;
+				case 1:
+					if (this.shouldRetrieveTableSource) this.retrieveTableSource();
 					break;
 				case 2:
 					if (this.shouldRetrieveTableDataCount) 

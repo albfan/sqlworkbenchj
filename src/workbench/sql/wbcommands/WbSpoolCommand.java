@@ -199,7 +199,7 @@ public class WbSpoolCommand
 				}
 				msg = ResourceMgr.getString("MsgSpoolSource") + " " + aResult.getSourceCommand();
 				aResult.addMessage(msg);
-				msg = ResourceMgr.getString("MsgSpoolTarget") + " " + this.spooler.getOutputFilename();
+				msg = ResourceMgr.getString("MsgSpoolTarget") + " " + this.spooler.getFullOutputFilename();
 				aResult.addMessage(msg);
 				aResult.clearResultSets();
 				aResult.setSuccess();

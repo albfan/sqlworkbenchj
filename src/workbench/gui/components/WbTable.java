@@ -167,10 +167,11 @@ extends JTable
 		this.addPopupAction(this.findAgainAction, false);
 
 		this.printDataAction = new PrintAction(this);
+		this.printPreviewAction = new PrintPreviewAction(this);
 		this.popup.addSeparator();
 		this.popup.add(this.printDataAction.getMenuItem());
+		this.popup.add(this.printPreviewAction.getMenuItem());
 		
-		this.printPreviewAction = new PrintPreviewAction(this);
 		
 		InputMap im = this.getInputMap(WHEN_FOCUSED);
 		ActionMap am = this.getActionMap();
@@ -256,9 +257,9 @@ extends JTable
 			
 			if (withSep)
 			{
-				this.popup.add(new JPopupMenu.Separator(), this.popup.getComponentCount() - 2);
+				this.popup.add(new JPopupMenu.Separator(), this.popup.getComponentCount() - 3);
 			}
-			this.popup.add(anAction.getMenuItem(), this.popup.getComponentCount() - 2);
+			this.popup.add(anAction.getMenuItem(), this.popup.getComponentCount() - 3);
 		}
 		else
 		{

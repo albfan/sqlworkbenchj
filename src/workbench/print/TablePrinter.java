@@ -50,8 +50,9 @@ public class TablePrinter
 	private String headerText = null;
 	private TablePrintPage[] pages = null;
 
+	private int pagesAcross = 0;
 	private int lineSpacing = 5;
-	private int colSpacing = 2;
+	private int colSpacing = 6;
 	
 	public TablePrinter(JTable toPrint, PageFormat aFormat, Font aFont)
 	{
@@ -109,10 +110,75 @@ public class TablePrinter
 		pt.start();
 	}
 
+	public int getPagesAcross()
+	{
+		return this.pagesAcross;
+	}
+
+	public int getPreviousVerticalPage(int index)
+	{
+		if (index < 1) return -1;
+		if (index >= this.pageCount) return -1;
+		if (this.pagesAcross == 1)
+		{
+			return index - 1;
+		}
+		else
+		{
+			int pageDown = this.pages[index].getPageNumberDown();
+			for (int i=index; i > 0; i--)
+			{
+				int pd = this.pages[i].getPageNumberDown();
+				if (pd < pageDown) return i;
+			}
+			return -1;
+		}
+	}
+	
+	public int getNextVerticalPage(int index)
+	{
+		if (index < 0) return -1;
+		if (index >= this.pageCount - 1) return -1;
+		if (this.pagesAcross == 1)
+		{
+			return index + 1;
+		}
+		else
+		{
+			int pageDown = this.pages[index].getPageNumberDown();
+			for (int i=index; i < this.pageCount; i++)
+			{
+				int pd = this.pages[i].getPageNumberDown();
+				if (pd > pageDown) return i;
+			}
+			return -1;
+		}
+	}
+	
+	public int getNextHorizontalPage(int index)
+	{
+		if (this.pagesAcross == 1) return -1;
+		if (index < 0) return -1;
+		if (index >= this.pageCount - 1) return -1;
+		int currentAcross = this.pages[index].getPageNumberAcross();
+		if (currentAcross == this.pagesAcross) return -1;
+		return index + 1;
+	}
+	
+	public int getPreviousHorizontalPage(int index)
+	{
+		if (this.pagesAcross == 1) return -1;
+		if (index < 1) return -1;
+		int currentAcross = this.pages[index].getPageNumberAcross();
+		if (currentAcross == 1) return -1;
+		return index - 1;
+	}
+	
 	public PageFormat getPageFormat()
 	{
 		return this.format;
 	}
+	
 	public void setPageFormat(PageFormat aFormat)
 	{
 		this.format = aFormat;
@@ -154,7 +220,7 @@ public class TablePrinter
 		int[] colPageBreaks = new int[colCount]; 
 		this.colHeaders = new String[colCount];
 		int[] colHeaderX = new int[colCount];
-		int pagesAcross = 1;
+		this.pagesAcross = 1;
 		
 		Rectangle paintIconR = new Rectangle();
 		Rectangle paintTextR = new Rectangle();
@@ -260,6 +326,7 @@ public class TablePrinter
     double wPage = pageFormat.getImageableWidth();
     double hPage = pageFormat.getImageableHeight();
 		
+		pg.setClip((int)startx, (int)starty, (int)wPage, (int)hPage);
 		pg.translate(startx, starty);
 		AffineTransform oldTransform= pg.getTransform();
 		
@@ -267,16 +334,35 @@ public class TablePrinter
 		pg.setFont(this.printFont);
 		TablePrintPage p = this.pages[pageIndex];
 		
-		String footer = this.footerText + " " + p.getPageIndexDisplay() + "/" + (this.pageCount);
+		StringBuffer footer = new StringBuffer(100);
+		footer.append(this.footerText);
+		footer.append(" ");
+		if (pagesAcross > 1)
+		{
+			footer.append("(");
+			footer.append(p.getPageIndexDisplay());
+			footer.append("/");
+			footer.append(this.pagesAcross);
+			footer.append(")");
+		}
+		else
+		{
+			footer.append(p.getPageIndexDisplay());
+		}
+		footer.append("/");
+		footer.append(this.pageCount);
+		
+		//String footer = this.footerText + " " +  + + (this.pageCount);
 		FontMetrics fm = pg.getFontMetrics(this.printFont);
-		Rectangle2D bounds = fm.getStringBounds(footer, pg);
+		Rectangle2D bounds = fm.getStringBounds(footer.toString(), pg);
 		double len = bounds.getWidth();
 		
-    pg.drawString(footer, (int)((wPage - len)/2), (int)(hPage - lineSpacing) );
+    pg.drawString(footer.toString(), (int)((wPage - len)/2), (int)(hPage - lineSpacing) );
 		
 		p.print(pg);
 		
 		pg.setTransform(oldTransform);
+		pg.setClip(null);
 
     return PAGE_EXISTS;
   }

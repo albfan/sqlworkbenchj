@@ -2232,7 +2232,11 @@ public class DataStore
 			{
 				col = rs.getString("COLUMN_NAME");
 				index = this.findColumn(col);
-				result.add(new Integer(index));
+				Integer idx = new Integer(index);
+				if (!result.contains(idx))
+				{
+					result.add(new Integer(index));
+				}
 			}
 		}
 		catch (SQLException e)

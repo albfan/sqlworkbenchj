@@ -124,6 +124,7 @@ public class DbDriver
 				for (int i=0; tok.hasMoreTokens(); i++)
 				{
 					url[i] = new File(tok.nextToken().trim()).toURL();
+					LogMgr.logDebug("DbDriver.loadDriverClass()", "Adding ClassLoader URL=" + url[i].toString());
 				}
 				this.classLoader = new URLClassLoader(url);
 			}
@@ -134,6 +135,7 @@ public class DbDriver
 		catch (Exception e)
 		{
 			this.classLoader = null;
+			LogMgr.logError("DbDriver.loadDriverClass()", "Error loading driver class", e);
 			throw new WbException("Could not load driver class " + this.driverClass);
 		}
 	}

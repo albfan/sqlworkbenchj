@@ -76,7 +76,7 @@ public class DbExplorerPanel
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerTables"), tables);
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerProcs"), procs);
 			tabPane.add(ResourceMgr.getString("TxtSearchTables"), this.searchPanel);
-			tabPane.add(ResourceMgr.getString("TxtPersistenceGenerator"), new JPanel());
+			//tabPane.add(ResourceMgr.getString("TxtPersistenceGenerator"), new JPanel());
 			tabPane.setFocusable(false);
 		}
 		catch (Exception e)
@@ -120,14 +120,14 @@ public class DbExplorerPanel
 		this.connectionInfo.setMinimumSize(d);
 		this.toolbar.add(this.connectionInfo);
 
-		this.tabPane.addChangeListener(this);
+		//this.tabPane.addChangeListener(this);
 	}
 
 	public String getId()
 	{
 		return "DbExp";
 	}
-	
+
 	private void initSearchPanel()
 	{
 		if (this.searchPanel != null) return;
@@ -306,7 +306,7 @@ public class DbExplorerPanel
 			LogMgr.logError(this, "Could not set schema", ex);
 		}
 	}
-	
+
 	public void setTabTitle(JTabbedPane tab, int index)
 	{
 		tab.setTitleAt(index, ResourceMgr.getString("LabelDbExplorer"));
@@ -373,7 +373,7 @@ public class DbExplorerPanel
 		this.window = null;
 		if (this.tables != null) this.tables.resetDetails();
 	}
-	
+
 	public void mainWindowDeiconified()
 	{
 		//if (this.window != null && this.restoreWindow) this.window.show();
@@ -405,6 +405,7 @@ public class DbExplorerPanel
 		{
 			int newIndex = this.tabPane.getSelectedIndex();
 			int count = this.tabPane.getTabCount();
+			/*
 			if (newIndex == count - 1)
 			{
 				if (this.generator == null)
@@ -416,6 +417,7 @@ public class DbExplorerPanel
 			{
 				this.initSearchPanel();
 			}
+			*/
 		}
 	}
 

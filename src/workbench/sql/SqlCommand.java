@@ -198,7 +198,19 @@ public class SqlCommand
 		{
 			LogMgr.logError("SqlCommand.execute()", ExceptionUtil.getDisplay(e), e);
 			result.clear();
-			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
+			StringBuffer msg = new StringBuffer(50);
+			msg.append(ResourceMgr.getString("MsgExecuteError") + ": ");
+			int maxLen = 20;
+			if (aSql.trim().length() > maxLen)
+			{
+				msg.append(aSql.trim().substring(0, maxLen));
+				msg.append(" ...");
+			}
+			else
+			{
+				msg.append(aSql.trim());
+			}
+			result.addMessage(msg.toString());
 			result.addMessage(ExceptionUtil.getDisplay(e));
 			result.setFailure();
 		}

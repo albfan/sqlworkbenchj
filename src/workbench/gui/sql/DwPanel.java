@@ -607,7 +607,7 @@ public class DwPanel
 		return newRow;
 	}
 
-	public void cancelExecution()
+	public synchronized void cancelExecution()
 	{
 		if (this.stmtRunner != null)
 		{
@@ -756,7 +756,7 @@ public class DwPanel
 
 				if (tables.size() > 1)
 				{
-					table = (String)JOptionPane.showInputDialog(this,
+					table = (String)JOptionPane.showInputDialog(SwingUtilities.getWindowAncestor(this),
 							null, ResourceMgr.getString("MsgEnterUpdateTable"),
 							JOptionPane.QUESTION_MESSAGE,
 							null,tables.toArray(),null);

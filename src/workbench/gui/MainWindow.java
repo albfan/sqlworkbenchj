@@ -31,7 +31,8 @@ import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.dbobjects.DbExplorerPanel;
 import workbench.gui.dbobjects.DbExplorerWindow;
-import workbench.gui.html.HtmlViewer;
+import workbench.gui.help.HtmlViewer;
+import workbench.gui.help.WhatsNewViewer;
 import workbench.gui.menu.SqlTabPopup;
 import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.gui.settings.SettingsPanel;
@@ -779,6 +780,10 @@ public class MainWindow
 		for (int i=0; i < this.sqlTab.getTabCount(); i++)
 		{
 			MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
+			if (sql instanceof SqlPanel)
+			{
+				((SqlPanel)sql).abortExecution();
+			}
 			conn = sql.getConnection();
 			if (conn != null) mgr.disconnect(conn.getId());
 			sql.disconnect();
@@ -1141,6 +1146,7 @@ public class MainWindow
 
 		this.panelMenus.add(dbmenu);
 		this.addToViewMenu(action);
+		this.dbExplorerTabVisible = true;
 	}
 
 	public void showDbExplorer()
@@ -1203,10 +1209,16 @@ public class MainWindow
 		JMenu result = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_HELP));
 		result.setName(ResourceMgr.MNU_TXT_HELP);
 		JMenuItem item = new WbMenuItem(ResourceMgr.getString("MnuTxtHelpContents"));
+		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1,0));
 		item.putClientProperty("command", "helpContents");
 		item.addActionListener(this);
 		result.add(item);
 
+		item = new WbMenuItem(ResourceMgr.getString("MnuTxtWhatsNew"));
+		item.putClientProperty("command", "whatsNew");
+		item.addActionListener(this);
+		result.add(item);
+		
 		item = new WbMenuItem(ResourceMgr.getString("MnuTxtAbout"));
 		item.putClientProperty("command", "helpAbout");
 		item.addActionListener(this);
@@ -1318,10 +1330,14 @@ public class MainWindow
 
 			for (int i=0; i < entryCount; i++)
 			{
-				SqlPanel sql = (SqlPanel)this.getSqlPanel(i);
-				sql.closeFile(true);
-				sql.readFromWorkspace(w);
-				sql.setTabTitle(this.sqlTab, i);
+				MainPanel p = this.getSqlPanel(i);
+				if (p instanceof SqlPanel)
+				{
+					SqlPanel sql = (SqlPanel)p;
+					sql.closeFile(true);
+					sql.readFromWorkspace(w);
+					sql.setTabTitle(this.sqlTab, i);
+				}
 			}
 			this.currentWorkspaceFile = realFilename;
 			index = w.getSelectedTab();
@@ -1352,8 +1368,11 @@ public class MainWindow
 		int count = this.sqlTab.getTabCount();
 		for (int i=0; i < count; i++)
 		{
-			SqlPanel sql = (SqlPanel)this.getSqlPanel(i);
-			this.setTabTitle(i, defaultTitle);
+			MainPanel p = this.getSqlPanel(i);
+			if (p instanceof SqlPanel)
+			{
+				this.setTabTitle(i, defaultTitle);
+			}
 		}
 	}
 
@@ -1651,6 +1670,10 @@ public class MainWindow
 				{
 					LogMgr.logError(this, "Could not change look and feel", ex);
 				}
+			}
+			else if ("whatsNew".equals(command))
+			{
+				new WhatsNewViewer(this).show();
 			}
 			else if ("optionsDialog".equals(command))
 			{

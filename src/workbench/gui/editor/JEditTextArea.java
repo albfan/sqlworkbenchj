@@ -95,7 +95,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.12 2003-07-05 23:57:50 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.13 2003-08-12 19:39:01 thomas Exp $
  */
 public class JEditTextArea 
 	extends JComponent
@@ -1809,8 +1809,7 @@ public class JEditTextArea
 
 		try
 		{
-			int offset = TextUtilities.findMatchingBracket(
-				document,newCaretPosition - 1);
+			int offset = TextUtilities.findMatchingBracket(document,newCaretPosition - 1);
 			if(offset != -1)
 			{
 				bracketLine = getLineOfOffset(offset);

@@ -57,6 +57,7 @@ public class DataSpooler
 	private WbConnection dbConn;
 	private String sql;
 	private String outputfile;
+	private String fullOutputFileName;
 	private int exportType;
 	private boolean exportHeaders;
 	private boolean includeCreateTable = false;
@@ -188,6 +189,8 @@ public class DataSpooler
 	
 	public void setOutputFilename(String aFilename) { this.outputfile = aFilename; }
 	public String getOutputFilename() { return this.outputfile; }
+	public String getFullOutputFilename() { return this.fullOutputFileName; }
+	
 	
 	public void setCleanCarriageReturns(boolean aFlag)
 	{
@@ -443,8 +446,10 @@ public class DataSpooler
 		{
 			Object value = null;
 			boolean quote = false;
-			
-			pw = new BufferedWriter(new FileWriter(this.outputfile), 16*1024);
+	
+			File f = new File(this.outputfile);
+			this.fullOutputFileName = f.getAbsolutePath();
+			pw = new BufferedWriter(new FileWriter(f), 16*1024);
 			
 			if (exportType == EXPORT_TXT && exportHeaders)
 			{

@@ -9,6 +9,7 @@ package workbench.gui.components;
 import java.awt.Insets;
 
 import javax.swing.Action;
+import javax.swing.Icon;
 
 /**
  *
@@ -36,6 +37,12 @@ public class WbToolbarButton extends javax.swing.JButton
 		this.setMargin(MARGIN);
 	}
 
+	public WbToolbarButton(Icon icon)
+	{
+		this.setIcon(icon);
+		this.setText(null);
+	}
+	
 	public void setAction(Action a)
 	{
 		super.setAction(a);
