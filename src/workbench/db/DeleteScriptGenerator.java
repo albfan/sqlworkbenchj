@@ -205,7 +205,8 @@ public class DeleteScriptGenerator
 			Map.Entry entry = (Map.Entry)itr.next();
 			String column = (String)entry.getKey();
 			column = this.meta.adjustObjectname(column);
-			String value = (String)entry.getValue();
+			Object data = entry.getValue();
+      String value = data.toString();
 			int type = this.getColumnType(tableDefinition, column);
 			if (!first) 
 			{

@@ -132,7 +132,13 @@ public class SqlUtil
 			{
 				value = value.substring(0, value.length() - delimitLen);
 			}
-			result.add(value);
+
+			// only add stuff which really contains a statement.
+			// if it's empty after a clean, ignore it...
+			// note, that this doesn't affect statements with 
+			// comments such as /* bla */select ... ;
+			String clean = makeCleanSql(value, false);
+			if (clean != null && clean.length() > 0) result.add(value);
 		}
 		return result;
 	}

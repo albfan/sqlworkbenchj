@@ -135,35 +135,32 @@ public class DwPanel extends JPanel
 				Dimension max = new Dimension(800,600);
 				Dimension pref = new Dimension(400, 300);
 				EditorPanel preview = EditorPanel.createSqlEditor();
-				//preview.setLineWrap(false);
-				//preview.setColumns(60);
 				preview.setBorder(WbSwingUtilities.EMPTY_BORDER);
 				preview.setPreferredSize(pref);
 				preview.setMaximumSize(max);
 				JScrollPane scroll = new JScrollPane(preview);
 				scroll.setMaximumSize(max);
 				List stmts = ds.getUpdateStatements(aConnection);
+        StringBuffer text = new StringBuffer(stmts.size() * 80);
 				for (int i=0; i < stmts.size(); i++)
 				{
 					DmlStatement dml = (DmlStatement)stmts.get(i);
-					preview.appendLine(dml.getExecutableStatement(aConnection));
-					preview.appendLine(";\n");
+          text.append(dml.getExecutableStatement(aConnection));
+          text.append(";\n");
 				}
-				/*
-				if (stmts.size() > 20)
-				{
-					scroll.setPreferredSize(max);
-				}
-				*/
+        preview.setText(text.toString());
+        preview.setCaretPosition(0);
 				Window win = SwingUtilities.getWindowAncestor(this);
 				int choice = JOptionPane.showConfirmDialog(win, scroll, "Please confirm updates", JOptionPane.OK_CANCEL_OPTION);
 				if (choice == JOptionPane.CANCEL_OPTION) return 0;
 			}
 			long start, end;
+      WbSwingUtilities.showWaitCursorOnWindow(this);
 			start = System.currentTimeMillis();
 			rows = ds.updateDb(aConnection);
 			end = System.currentTimeMillis();
 			long sqlTime = (end - start);
+      WbSwingUtilities.showDefaultCursorOnWindow(this);
 			this.infoTable.repaint();
 			this.lastMessage = ResourceMgr.getString("MsgUpdateSuccessfull");
 			this.lastMessage = this.lastMessage + "\n" + rows + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED);
@@ -288,7 +285,7 @@ public class DwPanel extends JPanel
 				}
 				this.infoTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 				this.infoTable.setRowSelectionAllowed(true);
-				this.statusBar.setRowcount(this.infoTable.getRowCount());
+        this.dataChanged();
 			}
 			else 
 			{
@@ -330,9 +327,12 @@ public class DwPanel extends JPanel
 		{
 			this.stmtRunner.done();
 		}
-		
-	}
-	
+  }
+
+  public void dataChanged()
+  {
+		this.statusBar.setRowcount(this.infoTable.getRowCount());
+  }
 	public void deleteRow()
 	{
 		DataStoreTableModel ds = this.infoTable.getDataStoreTableModel();
@@ -348,6 +348,7 @@ public class DwPanel extends JPanel
 			}
 			this.infoTable.getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
 		}
+    this.dataChanged();
 	}
 	
 	public void addRow()
@@ -379,6 +380,7 @@ public class DwPanel extends JPanel
 		{
 			edit.requestFocus();
 		}
+    this.dataChanged();
 	}
 
 	public boolean cancelExecution()

@@ -996,6 +996,7 @@ public class SqlPanel
 			}
 			optionPanel.saveSettings();
 		}
+    this.data.dataChanged();
 	}
 
 	private void displayResult(String aSqlScript)

@@ -891,7 +891,11 @@ public class DataStore
 		boolean doMapping = (aColumnMapping != null && aColumnMapping.size() > 0);
 		int col;
 		int row;
-		
+		if ("\\t".equals(aColSeparator))
+    {
+      aColSeparator = "\t";
+    }
+    
 		try
 		{
 			line = in.readLine();
@@ -1214,10 +1218,12 @@ public class DataStore
 			return ROW_ORIGINAL;
 		}
 	}
+  
 	public Map getPkValues(int aRow)
 	{
 		return this.getPkValues(this.originalConnection, aRow);
 	}
+  
 	public Map getPkValues(WbConnection aConnection, int aRow)
 	{
 		if (aConnection == null) return Collections.EMPTY_MAP;
@@ -1262,18 +1268,23 @@ public class DataStore
 		ArrayList inserts = new ArrayList();
 		RowData row;
 		DmlStatement dml;
-		for (int i=0; i < this.getRowCount(); i ++)
+    int count = this.getRowCount();
+    int modifiedCount = 0;
+    
+		for (int i=0; i < count; i ++)
 		{
 			row = this.getRow(i);
 			if (row.isModified() && !row.isNew())
 			{
 				dml = this.createUpdateStatement(row);
 				if (dml != null) updates.add(dml);
+        modifiedCount ++;
 			}
 			else if (row.isNew() && row.isModified())
 			{
 				dml = this.createInsertStatement(row, false);
 				if (dml != null) inserts.add(dml);
+        modifiedCount ++;
 			}
 		}
 
@@ -1285,11 +1296,15 @@ public class DataStore
 				if (!row.isNew())
 				{
 					dml = this.createDeleteStatement(row);
-					if (dml != null) deletes.add(dml);
+					if (dml != null) 
+          {
+            deletes.add(dml);
+            modifiedCount++;
+          }
 				}
 			}
 		}
-		ArrayList stmt = new ArrayList();
+		ArrayList stmt = new ArrayList(modifiedCount);
 		stmt.addAll(deletes);
 		stmt.addAll(updates);
 		stmt.addAll(inserts);
@@ -1395,40 +1410,46 @@ public class DataStore
 		if (!ignoreStatus && !aRow.isModified()) return null;
 		//String lineEnd = System.getProperty("line.separator", "\r\n");
 		//String lineEnd = "\n";
-		boolean newLineAfterColumn = false; //this.colCount > 5;
+		boolean newLineAfterColumn = (this.colCount > 5);
 		
 		ArrayList values = new ArrayList();
-		StringBuffer sql = new StringBuffer("INSERT INTO ");
-		StringBuffer valuePart = new StringBuffer();
+		StringBuffer sql = new StringBuffer(250);
+    sql.append("INSERT INTO ");
+		StringBuffer valuePart = new StringBuffer(250);
+
 		sql.append(SqlUtil.quoteObjectname(this.updateTable));
 		if (ignoreStatus) sql.append(lineEnd);
 		sql.append('(');
-		if (newLineAfterColumn) sql.append(lineEnd);
+		if (newLineAfterColumn) 
+		{
+			sql.append(lineEnd);
+			sql.append("  ");
+			valuePart.append(lineEnd);
+			valuePart.append("  ");
+		}
 		
 		first = true;
+    String colName = null;
 		for (int col=0; col < this.colCount; col ++)
 		{
 			if (ignoreStatus || aRow.isColumnModified(col))
 			{
 				if (col > 0)
 				{
-					sql.append(',');
-					valuePart.append(',');
-				}
-				if (ignoreStatus && newLineAfterColumn)
-				{
-					sql.append("  ");
-					valuePart.append("  ");
+					sql.append(", ");
+					valuePart.append(", ");
 				}
 				
-				String colName = SqlUtil.quoteObjectname(this.getColumnName(col));
+				colName = SqlUtil.quoteObjectname(this.getColumnName(col));
 				sql.append(colName);
-				
 				valuePart.append('?');
+				
 				if (ignoreStatus && newLineAfterColumn) 
 				{
-					valuePart.append(lineEnd);
 					sql.append(lineEnd);
+					sql.append("  ");
+					valuePart.append(lineEnd);
+					valuePart.append("  ");
 				}					
 				values.add(aRow.getValue(col));
 			}
@@ -1440,7 +1461,6 @@ public class DataStore
 			sql.append("VALUES");
 			sql.append(lineEnd);
 			sql.append('(');
-			if (newLineAfterColumn) sql.append(lineEnd);
 		}
 		else
 		{
@@ -1472,7 +1492,8 @@ public class DataStore
 		DmlStatement dml;
 		
 		ArrayList values = new ArrayList();
-		StringBuffer sql = new StringBuffer("DELETE FROM ");
+		StringBuffer sql = new StringBuffer(250);
+    sql.append("DELETE FROM ");
 		sql.append(SqlUtil.quoteObjectname(this.updateTable));
 		sql.append(" WHERE ");
 		first = true;

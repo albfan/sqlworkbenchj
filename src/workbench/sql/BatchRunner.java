@@ -3,6 +3,7 @@
  */
 package workbench.sql;
 
+import java.io.IOException;
 import java.util.List;
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
@@ -17,13 +18,14 @@ import workbench.util.StringUtil;
  */
 public class BatchRunner
 {
-	private List statements;
+	private List files;
 	private StatementRunner stmtRunner;
 	private WbConnection connection;
+	private boolean abortOnError = false;
 	
 	public BatchRunner(String aFilelist)
 	{
-		this.statements = StringUtil.stringToList(aFilelist, ",");
+		this.files = StringUtil.stringToList(aFilelist, ",");
 	}
 
 	public void setProfile(String aProfilename)
@@ -40,27 +42,51 @@ public class BatchRunner
 	{
 		StatementRunnerResult result;
 		String sql;
-		for (int i=0; i < this.statements.size(); i++)
+		String file;
+		boolean error = false;
+		for (int i=0; i < this.files.size(); i++)
 		{
-			sql = (String)this.statements.get(i);
+			if (error && abortOnError) break; 
+			file = (String)this.files.get(i);
 			try
 			{
-				this.stmtRunner.runStatement(sql, 0);
-				result = this.stmtRunner.getResult();
-				if (result.hasMessages())
+				ScriptReader reader = new ScriptReader(file);
+				sql = reader.getNextStatement();
+				while (sql != null)
 				{
-					String[] msg = result.getMessages();
-					for (int m=0; m < msg.length; m++)
+					try
 					{
-						LogMgr.logInfo("BatchRunner", msg[m]);
+						this.stmtRunner.runStatement(sql, 0);
+						result = this.stmtRunner.getResult();
+						if (result.hasMessages())
+						{
+							String[] msg = result.getMessages();
+							for (int m=0; m < msg.length; m++)
+							{
+								LogMgr.logInfo("BatchRunner", msg[m]);
+							}
+						}
+					}
+					catch (Throwable e)
+					{
+						LogMgr.logError("BatchRunner", "Error executing " + sql, e);
+						error = false;
+						break;
 					}
 				}
+				try { reader.close(); } catch (Throwable th) {}
 			}
-			catch (Throwable e)
+			catch (IOException e)
 			{
-				LogMgr.logError("BatchRunner", "Error executing " + sql, e);
+				LogMgr.logError("BatchRunner", "Error reading script file " + file, e);
+				break;
 			}
 		}
+	}
+	
+	public void setAbortOnError(boolean aFlag)
+	{
+		this.abortOnError = aFlag;
 	}
 	
 }
