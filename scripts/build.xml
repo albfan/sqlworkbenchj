@@ -16,6 +16,7 @@
   <property name="srczipname" value="WorkbenchSrc.zip"/>
   <property name="srczip" value="${root}/${srczipname}"/>
   <property name="packagezip" value="${root}/release/workbench.zip"/>
+  <property name="packagetar" value="${root}/release/workbench.tar.gz"/>
   <property name="doczip" value="${root}/release/html-manual.zip"/>
 
   <!-- location of the docbook installation and the FOP installation -->
@@ -97,7 +98,7 @@
         <exclude name="workbench/test/**"/>
     </javac>
   </target>
-  
+
   <!-- Manual related tasks -->
 
   <!-- Create the FO file which will in turn be transformed
@@ -352,7 +353,8 @@
         <exclude name="docbook/**/*.*"/>
         <exclude name="manual/**/*.*"/>
         <exclude name="jhelp/**/*.*"/>
-        <exclude name="pdf/**/*.*"/>
+        <exclude name="**/*pdf*/*.*"/>
+        <exclude name="dtd/**/*.*"/>
       </zipfileset>
     </zip>
   </target>
@@ -428,6 +430,10 @@
 
       <zipfileset dir="${scriptsrc}" prefix="scripts">
         <include name="build.xml"/>
+        <include name="history.txt"/>
+        <include name="build.number"/>
+        <include name="history.header"/>
+        <include name="jworkbench"/>
       </zipfileset>
 
       <zipfileset dir="${doc}" prefix="doc">
@@ -446,8 +452,22 @@
       </zipfileset>
     </zip>
 
+    <delete file="${packagetar}"/>
+    <tar destfile="${packagetar}" compression="gzip">
+      <tarfileset dir="${root}/release">
+        <include name="Workbench.jar"/>
+        <include name="history.txt"/>
+      </tarfileset>
+      <tarfileset dir="${root}/scripts" mode="755">
+          <include name="jworkbench"/>
+      </tarfileset>
+      <tarfileset dir="${html-outdir}" prefix="manual">
+        <include name="**/*.*"/>
+      </tarfileset>
+    </tar>
+    
   </target>
-
+  
   <target  name="src" depends="make-src-zip"/>
   <target name="dj" depends="make-dev-jar" />
 

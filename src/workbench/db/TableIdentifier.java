@@ -20,25 +20,14 @@ public class TableIdentifier
 	private String catalog;
 	private String expression;
 	private boolean isNewTable = false;
-	
+
 	public TableIdentifier(String aName)
 	{
 		this.expression = null;
 		this.isNewTable = false;
-		int pos = aName.indexOf(".");
-		
-		if (pos > -1)
-		{
-			this.setSchema(aName.substring(0, pos));
-			this.setTable(aName.substring(pos + 1));
-		}
-		else
-		{
-			this.setTable(aName);
-			this.setSchema(null);
-		}
+		this.setTable(aName);
 	}
-	
+
 	/**
 	 *	Initialize a TableIdentifier for a new (to be defined) table
 	 */
@@ -57,7 +46,7 @@ public class TableIdentifier
 		this.setTable(aTable);
 		this.setSchema(aSchema);
 	}
-	
+
 	public TableIdentifier(String aCatalog, String aSchema, String aTable)
 	{
 		this.setTable(aTable);
@@ -70,11 +59,11 @@ public class TableIdentifier
 		if (this.expression == null) this.initExpression();
 		return this.expression;
 	}
-	
+
 	private void initExpression()
 	{
-		if (this.isNewTable) 
-		{ 
+		if (this.isNewTable)
+		{
 			if (this.tablename == null)
 			{
 				this.expression = ResourceMgr.getString("TxtNewTableIdentifier");
@@ -85,46 +74,42 @@ public class TableIdentifier
 			}
 			return;
 		}
-		
+
 		StringBuffer result = new StringBuffer(30);
 		if (this.schema != null)
 		{
 			result.append(SqlUtil.quoteObjectname(this.schema));
 			result.append('.');
 		}
-		/*
-		if (this.catalog != null)
-		{
-			result.append(SqlUtil.quoteObjectname(this.catalog));
-			result.append('.');
-		}
-		*/
 		result.append(SqlUtil.quoteObjectname(this.tablename));
 		this.expression = result.toString();
 	}
-	
+
 	public String getTable() { return this.tablename; }
-	
+
 	public void setTable(String aTable)
 	{
-		if (!this.isNewTable && (aTable == null || aTable.trim().length() == 0)) 
+		if (!this.isNewTable && (aTable == null || aTable.trim().length() == 0))
 			throw new IllegalArgumentException("Table name may not be null");
-		if (aTable.indexOf('.') > 0)
+		
+		int pos = aTable.indexOf('.');
+		if (pos > -1)
 		{
-			this.tablename = aTable.substring(aTable.lastIndexOf('.') + 1);
+			this.schema = aTable.substring(0, pos).trim();
+			this.tablename = aTable.substring(pos + 1).trim();
 		}
 		else
 		{
-			this.tablename = aTable;
+			this.tablename = aTable.trim();
 		}
 		this.expression = null;
 	}
-	
+
 	public String getSchema() { return this.schema; }
 	public void setSchema(String aSchema)
 	{
 		if (this.isNewTable) return;
-		
+
 		if (aSchema != null && aSchema.trim().length() == 0)
 		{
 			this.schema = null;
@@ -140,7 +125,7 @@ public class TableIdentifier
 	public void setCatalog(String aCatalog)
 	{
 		if (this.isNewTable) return;
-		
+
 		if (aCatalog != null && aCatalog.trim().length() == 0)
 		{
 			this.catalog = null;
@@ -151,9 +136,9 @@ public class TableIdentifier
 		}
 		this.expression = null;
 	}
-	
-	public String toString() 
-	{ 
+
+	public String toString()
+	{
 		if (this.isNewTable)
 		{
 			if (this.tablename == null)
@@ -167,26 +152,37 @@ public class TableIdentifier
 		}
 		else
 		{
-			return this.getTableExpression(); 
+			return this.getTableExpression();
 		}
 	}
 	public boolean isNewTable() { return this.isNewTable; }
-	
+
 	public void setNewTable(boolean flag)
 	{
 		this.expression = null;
 		this.isNewTable = flag;
 	}
-	
+
 	public boolean equals(Object other)
 	{
 		if (other instanceof TableIdentifier)
 		{
+			boolean result = false;
 			TableIdentifier t = (TableIdentifier)other;
-			if (this.isNewTable && t.isNewTable) return true;
-			if (this.isNewTable || t.isNewTable) return false;
-			return this.getTableExpression().equals(t.getTableExpression());
+			if (this.isNewTable && t.isNewTable)
+			{
+				result = true;
+			}
+			else if (this.isNewTable || t.isNewTable)
+			{
+				result = false;
+			}
+			else
+			{
+				result = this.getTableExpression().equals(t.getTableExpression());
+			}
+			return result;
 		}
 		return false;
 	}
-}	
+}

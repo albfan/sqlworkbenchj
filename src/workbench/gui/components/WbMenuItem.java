@@ -44,11 +44,6 @@ public class WbMenuItem
 		super(text, icon);
 	}
 
-	public void updateUI()
-	{
-		super.updateUI();
-	}
-  
 	public void setText(String aText)
 	{
 		if (aText == null) return;

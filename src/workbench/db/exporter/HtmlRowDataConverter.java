@@ -25,8 +25,6 @@ public class HtmlRowDataConverter
 	private String pageTitle;
 	private boolean createFullPage = true;
 	private boolean escapeHtml = false;
-	private SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-	private SimpleDateFormat timestampFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SS");
 
 	public HtmlRowDataConverter(ResultInfo info)
 	{
@@ -38,7 +36,7 @@ public class HtmlRowDataConverter
 		return null;
 	}
 
-	public StrBuffer getEnd()
+	public StrBuffer getEnd(long totalRows)
 	{
 		StrBuffer html = new StrBuffer("</table>\n");
 		if (createFullPage) html.append("</body>\n</html>\n");
@@ -64,7 +62,7 @@ public class HtmlRowDataConverter
 		return "HTML";
 	}
 
-	public StrBuffer convertRowData(RowData row, int rowIndex)
+	public StrBuffer convertRowData(RowData row, long rowIndex)
 	{
 		int count = this.metaData.getColumnCount();
 		StrBuffer result = new StrBuffer(count * 30);
@@ -72,18 +70,25 @@ public class HtmlRowDataConverter
 		for (int c=0; c < count; c ++)
 		{
 			String value = this.getValueAsFormattedString(row, c);
-			int type = this.metaData.getColumnType(c);
-			if (SqlUtil.isDateType(type))
+			if (createFullPage)
 			{
-				result.append("<td class=\"date-cell\">");
-			}
-			else if (SqlUtil.isNumberType(type) || SqlUtil.isDateType(type))
-			{
-				result.append("<td class=\"number-cell\">");
+				int type = this.metaData.getColumnType(c);
+				if (SqlUtil.isDateType(type))
+				{
+					result.append("<td class=\"date-cell\">");
+				}
+				else if (SqlUtil.isNumberType(type) || SqlUtil.isDateType(type))
+				{
+					result.append("<td class=\"number-cell\">");
+				}
+				else
+				{
+					result.append("<td class=\"text-cell\">");
+				}
 			}
 			else
 			{
-				result.append("<td class=\"text-cell\">");
+				result.append("<td>");
 			}
 
 			if (value == null)
@@ -135,9 +140,11 @@ public class HtmlRowDataConverter
 		result.append("  <tr>\n      ");
 		for (int c=0; c < this.metaData.getColumnCount(); c ++)
 		{
-			result.append("<td><b>");
+			result.append("<td>");
+			if (createFullPage) result.append("<b>");
 			result.append(this.metaData.getColumnName(c));
-			result.append("</b></td>");
+			if (createFullPage) result.append("</b>");
+			result.append("</td>");
 		}
 		result.append("\n  </tr>\n");
 

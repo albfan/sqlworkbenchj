@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -34,6 +35,7 @@ import javax.xml.transform.TransformerException;
 
 import workbench.WbManager;
 import workbench.db.DbMetadata;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.RowDataReceiver;
@@ -48,6 +50,7 @@ import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbThread;
 import workbench.util.XsltTransformer;
 
 
@@ -76,7 +79,8 @@ public class DataExporter
 	private boolean headerOnly = false;
 	private boolean useSqlUpdate = false;
 	private String tableName;
-	private String encoding = "UTF-8";
+	private String sqlTable;
+	private String encoding;
 
 	private String delimiter = "\t";
 	private String quoteChar = null;
@@ -85,6 +89,7 @@ public class DataExporter
 	private char decimalSymbol = '.';
 	private String chrFunc = null;
 	private String concatString = "||";
+	private String concatFunction = null;
 	private int commitEvery=0;
 
 	private SimpleDateFormat dateFormatter = null;
@@ -108,6 +113,8 @@ public class DataExporter
 	private boolean jobsRunning = false;
 	private RowActionMonitor rowMonitor;
 
+	private List keyColumnsToUse;
+	
 	private ArrayList warnings = new ArrayList();
 	private ArrayList errors = new ArrayList();
 	private ArrayList jobQueue;
@@ -145,6 +152,19 @@ public class DataExporter
 		this.progressWindow.show();
 	}
 
+	public void addTableExportJob(String anOutputfile, String table)
+	{
+		if (this.jobQueue == null)
+		{
+			this.jobQueue = new ArrayList();
+		}
+		JobEntry job = new DataExporter.JobEntry();
+		job.tableName = table;
+		job.outputFile = anOutputfile;
+		job.sqlStatement = "SELECT * FROM " + table;
+		this.jobQueue.add(job);
+	}
+	
 	public void addJob(String anOutputfile, String aStatement)
 	{
 		if (this.jobQueue == null)
@@ -157,6 +177,11 @@ public class DataExporter
 		this.jobQueue.add(job);
 	}
 
+	public WbConnection getConnection()
+	{
+		return this.dbConn;
+	}
+	
 	public void setConnection(WbConnection aConn)
 	{
 		this.dbConn = aConn;
@@ -230,7 +255,10 @@ public class DataExporter
 	public boolean getExportHeaders() { return this.exportHeaders; }
 
 	public void setCreateFullHtmlPage(boolean aFlag) { this.createFullHtmlPage = aFlag; }
+	public boolean getCreateFullHtmlPage() { return this.createFullHtmlPage; }
+	
 	public void setEscapeHtml(boolean aFlag) { this.escapeHtml = aFlag; }
+	public boolean getEscapeHtml() { return this.escapeHtml; }
 
 	public void setTextDelimiter(String aDelimiter) { this.delimiter = aDelimiter; }
 	public String getTextDelimiter() { return this.delimiter; }
@@ -255,7 +283,7 @@ public class DataExporter
 		}
 	}
 	
-	public DateFormat getDateFormatter() 
+	public SimpleDateFormat getDateFormatter() 
 	{
 		return this.dateFormatter;
 	}
@@ -283,7 +311,7 @@ public class DataExporter
 	}
 	
 	public String getTimestampFormat() { return this.dateTimeFormat; }
-	public DateFormat getTimestampFormatter()
+	public SimpleDateFormat getTimestampFormatter()
 	{
 		return this.dateTimeFormatter;
 	}
@@ -307,6 +335,8 @@ public class DataExporter
 		this.useSqlUpdate = true;
 	}
 
+	public boolean getCreateSqlInsert() { return !this.useSqlUpdate; }
+	
 	public void setOutputFilename(String aFilename) { this.outputfile = aFilename; }
 	
 	public String getOutputFilename() { return this.outputfile; }
@@ -319,6 +349,7 @@ public class DataExporter
 	{
 		if (aConcatString == null) return;
 		this.concatString = aConcatString;
+		this.concatFunction = null;
 	}
 	public String getConcatString() { return this.concatString; }
 	
@@ -349,40 +380,45 @@ public class DataExporter
 	public char getDecimalSymbol() { return this.decimalSymbol; }
 	
 
-	public void setSql(String aSql) { this.sql = aSql; }
+	public void setSql(String aSql) 
+	{ 
+		this.sql = aSql; 
+		String cleanSql = SqlUtil.makeCleanSql(aSql, false);
+		List tables = SqlUtil.getTables(cleanSql);
+		if (tables.size() == 1);
+		{
+			this.sqlTable = (String)tables.get(0);
+		}
+	}
+	
 	public String getSql() { return this.sql; }
 
 	private void startBackgroundThread()
 	{
-		Thread t = new Thread()
+		Thread t = new WbThread("Export")
 		{
 			public void run()
 			{
 				try { startExport(); } catch (Throwable th) {}
 			}
 		};
-		t.setDaemon(true);
-		t.setName("WbExport Thread");
-		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
 	}
 
 	public void startExportJobs()
 	{
-		Thread t = new Thread()
+		Thread t = new WbThread("Export Jobs")
 		{
 			public void run()
 			{
 				try { runJobs(); } catch (Throwable th) {}
 			}
 		};
-		t.setDaemon(true);
-		t.setName("WbExport Job Thread");
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
 	}
 
-	private void runJobs()
+	public void runJobs()
 	{
 		if (this.jobQueue == null) return;
 		int count = this.jobQueue.size();
@@ -399,13 +435,19 @@ public class DataExporter
 				this.progressPanel.setFilename(this.outputfile);
 				this.progressPanel.setRowInfo(0);
 			}
+			if (this.rowMonitor != null && job.tableName != null)
+			{
+				this.rowMonitor.setCurrentObject(job.tableName);
+			}
+			
 			try
 			{
 				this.startExport();
 			}
 			catch (Throwable th)
 			{
-				LogMgr.logError("DataSpooler.runJobs()", "Error spooling data for [" + this.sql + "] to file: " + this.outputfile, th);
+				LogMgr.logError("DataExporter.runJobs()", "Error exporting data for [" + this.sql + "] to file: " + this.outputfile, th);
+				this.addError(th.getMessage());
 			}
 			this.pendingJobs --;
 			if (this.cancelJobs) break;
@@ -426,12 +468,13 @@ public class DataExporter
 			this.rowMonitor.setCurrentRow(currentRow, -1);
 		}
 	}
-	public void startExport()
+	
+	public long startExport()
 		throws IOException, SQLException
 	{
 		Statement stmt = this.dbConn.createStatement();
 		ResultSet rs = null;
-
+		long rows = 0;
 		try
 		{
 			stmt.setFetchSize(1500);
@@ -444,11 +487,11 @@ public class DataExporter
 		{
 			stmt.execute(this.sql);
 			rs = stmt.getResultSet();
-			this.startExport(rs);
+			rows = this.startExport(rs);
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("DataSpooler.startExport()", "Could not execute SQL statement: " + e.getMessage(), e);
+			LogMgr.logError("DataExporter.startExport()", "Could not execute SQL statement: " + e.getMessage(), e);
 			if (this.showProgress)
 			{
 				WbManager.getInstance().showErrorMessage(this.progressWindow, ResourceMgr.getString("MsgExecuteError") + ": " + e.getMessage());
@@ -459,11 +502,13 @@ public class DataExporter
 			try { rs.close(); } catch (Throwable th) {}
 			try { stmt.close(); } catch (Throwable th) {}
 		}
+		return rows;
 	}
 
 	public boolean isSuccess() { return this.errors.size() == 0; }
 	public boolean hasWarning() { return this.warnings.size() > 0; }
-
+	public boolean hasError() { return this.errors.size() > 0; }
+	
 	public String[] getErrors()
 	{
 		int count = this.errors.size();
@@ -498,20 +543,33 @@ public class DataExporter
 		this.errors.add(msg);
 	}
 	
+	private String getDefaultEncoding()
+	{
+		String enc = System.getProperty("file.encoding");
+		// We prefer a standard encoding instead of the windows encoding
+		if ("Cp1252".equals(enc)) return "ISO-8859-15";
+		return enc;
+	}
 	/**
 	 *	Export a table to an external file.
-	 *	The data will be "piped" through a DataStore in order to use
-	 *	the SQL scripting built into that object.
 	 */
-	public void startExport(ResultSet rs)
+	public long startExport(ResultSet rs)
 		throws IOException, SQLException, Exception
 	{
-		this.warnings.clear();
-		this.errors.clear();
-
+		if (!jobsRunning)
+		{
+			this.warnings.clear();
+			this.errors.clear();
+		}
 		ResultSetMetaData meta = rs.getMetaData();
-		ResultInfo info = new ResultInfo(meta);
+		ResultInfo info = new ResultInfo(meta, this.dbConn);
+		if (this.sqlTable != null)
+		{
+			info.setUpdateTable(new TableIdentifier(this.sqlTable));
+		}
+		
 		ExportWriter exporter = null;
+		if (this.encoding == null) this.encoding = getDefaultEncoding();
 		
 		switch (this.exportType)
 		{
@@ -528,6 +586,12 @@ public class DataExporter
 				exporter = new XmlExportWriter(this);
 		}
 
+		if (this.tableName != null)
+		{
+			exporter.setTableToUse(this.tableName);
+		}
+		exporter.setRowMonitor(this.rowMonitor);
+		
 		if (this.showProgress)
 		{
 			if (this.progressPanel == null) this.openProgressMonitor();
@@ -539,12 +603,28 @@ public class DataExporter
 		{
 			File f = new File(this.outputfile);
 			this.fullOutputFileName = f.getAbsolutePath();
+
+			// first try to open the file using the current encoding
 			if (this.encoding != null)
 			{
-				OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(f), this.encoding);
-				pw = new BufferedWriter(out);
+				try
+				{
+					OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(f), this.encoding);
+					pw = new BufferedWriter(out);
+				}
+				catch (UnsupportedEncodingException e)
+				{
+					pw = null;
+					String msg = ResourceMgr.getString("ErrorExportWronEncoding");
+					msg = StringUtil.replace(msg, "%encoding%", this.encoding);
+					this.encoding = null;
+					this.addWarning(msg);
+				}
 			}
-			else
+			
+			// if opening the file with an encoding failed, open the file
+			// without encoding (thus using the 
+			if (pw == null)
 			{
 				pw = new BufferedWriter(new FileWriter(f,this.append), 16*1024);
 			}
@@ -553,13 +633,13 @@ public class DataExporter
 		catch (IOException e)
 		{
 			this.errors.add(e.getMessage());
-			LogMgr.logError("DataSpooler", "Error writing data file", e);
+			LogMgr.logError("DataExporter", "Error writing data file", e);
 			throw e;
 		}
 		catch (SQLException e)
 		{
 			this.errors.add(e.getMessage());
-			LogMgr.logError("DataSpooler", "SQL Error", e);
+			LogMgr.logError("DataExporter", "SQL Error", e);
 			throw e;
 		}
 		finally
@@ -569,6 +649,8 @@ public class DataExporter
 			if (!jobsRunning) this.closeProgress();
 		}
 		exporter.exportFinished();
+		long numRows = exporter.getNumberOfRecords();
+		return numRows;
 	}
 
 	public void closeProgress()
@@ -588,14 +670,8 @@ public class DataExporter
 
 	public void executeStatement(Window aParent, WbConnection aConnection, String aSql)
 	{
-		String cleanSql = SqlUtil.makeCleanSql(aSql, false);
-		List tables = SqlUtil.getTables(cleanSql);
-		boolean includeSqlExport = (tables.size() == 1);
-		String tablename = null;
-		if (includeSqlExport)
-		{
-			tablename = (String)tables.get(0);
-		}
+		this.setSql(aSql);
+		boolean includeSqlExport = this.sqlTable != null;
 		String filename = WbManager.getInstance().getExportFilename(aParent, includeSqlExport);
 		if (filename != null)
 		{
@@ -604,17 +680,14 @@ public class DataExporter
 				this.setConnection(aConnection);
 				this.setOutputFilename(filename);
 				this.setShowProgress(true);
-				this.setSql(cleanSql);
 
 				if (ExtensionFileFilter.hasSqlExtension(filename))
 				{
 					this.setOutputTypeSqlInsert();
-					this.setTableName(tablename);
 				}
 				else if (ExtensionFileFilter.hasXmlExtension(filename))
 				{
 					this.setOutputTypeXml();
-					this.setTableName(tablename);
 				}
 				else
 				{
@@ -624,7 +697,7 @@ public class DataExporter
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("DataSpoolThread", "Could not export data", e);
+				LogMgr.logError("DataExporter.executeStatement()", "Could not export data", e);
 			}
 		}
 	}
@@ -639,10 +712,48 @@ public class DataExporter
 		this.includeCreateTable = includeCreateTable;
 	}
 
+	/**
+	 * Getter for property keyColumnsToUse.
+	 * @return Value of property keyColumnsToUse.
+	 */
+	public java.util.List getKeyColumnsToUse()
+	{
+		return keyColumnsToUse;
+	}
+	
+	/**
+	 * Setter for property keyColumnsToUse.
+	 * @param keyColumnsToUse New value of property keyColumnsToUse.
+	 */
+	public void setKeyColumnsToUse(java.util.List keyColumnsToUse)
+	{
+		this.keyColumnsToUse = keyColumnsToUse;
+	}
+	
+	/**
+	 * Getter for property concatFunction.
+	 * @return Value of property concatFunction.
+	 */
+	public java.lang.String getConcatFunction()
+	{
+		return concatFunction;
+	}
+	
+	/**
+	 * Setter for property concatFunction.
+	 * @param concatFunction New value of property concatFunction.
+	 */
+	public void setConcatFunction(java.lang.String func)
+	{
+		this.concatFunction = func;
+		this.concatString = null;
+	}
+	
 	private class JobEntry
 	{
 		private String outputFile;
 		private String sqlStatement;
+		private String tableName;
 	}
 
 }

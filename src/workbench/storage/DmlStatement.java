@@ -27,9 +27,9 @@ public class DmlStatement
 	private List values;
 	private boolean usePrepared = true;
 	
-	private String chrFunc = null;
-	private String concatString = "||";
-
+	private String chrFunc;
+	private String concatString;
+	private String concatFunction;
 	/**
 	 *	Create a new DmlStatement with the given SQL template string
 	 *	that has no parameters.
@@ -163,6 +163,13 @@ public class DmlStatement
 	public void setConcatString(String aConcatString)
 	{
 		this.concatString = aConcatString;
+		this.concatFunction = null;
+	}
+	
+	public void setConcatFunction(String func)
+	{
+		this.concatFunction = func;
+		this.concatString = null;
 	}
 	
 	public void setChrFunction(String aFunc)
@@ -218,27 +225,67 @@ public class DmlStatement
 	{
 		if (aValue == null) return null;
 		if (this.chrFunc == null) return aValue;
-		if (this.concatString == null) this.concatString = "||";
+		boolean useFunc = (this.concatFunction != null);
+		
+		if (!useFunc && this.concatString == null) this.concatString = "||";
 		StrBuffer result = new StrBuffer();
+		boolean funcAppended = false;
+		boolean quotePending = false;
+		
 		int len = aValue.length();
 		for (int i=0; i < len; i++)
 		{
 			char c = aValue.charAt(i);
 			if (c < 32)
 			{
-				result.append('\'');
-				result.append(this.concatString);
-				result.append(this.chrFunc);
-				result.append('(');
-				result.append(Integer.toString((int)c));
-				result.append(')');
-				result.append(this.concatString);
-				result.append('\'');
+				if (useFunc)
+				{
+					if (!funcAppended)
+					{
+						StrBuffer temp = new StrBuffer(concatFunction);
+						temp.append('(');
+						temp.append(result);
+						result = temp;
+						funcAppended = true;
+					}
+					if (quotePending)
+					{
+						result.append(",\'");
+					}
+					result.append('\'');
+					result.append(',');
+					result.append(this.chrFunc);
+					result.append('(');
+					result.append(Integer.toString((int)c));
+					result.append(')');
+					quotePending = true;
+				}
+				else
+				{
+					if (quotePending) result.append('\'');
+					result.append(this.concatString);
+					result.append(this.chrFunc);
+					result.append('(');
+					result.append(Integer.toString((int)c));
+					result.append(')');
+					result.append(this.concatString);
+					quotePending = true;
+				}
 			}
 			else
 			{
+				if (quotePending)
+				{
+					if (useFunc) result.append(',');
+					result.append('\'');
+				}
 				result.append(c);
+				quotePending = false;
 			}
+		}
+		if (funcAppended)
+		{
+			result.append(')');
 		}
 		return result.toString();
 	}

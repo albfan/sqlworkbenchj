@@ -24,6 +24,7 @@ public class ConnectionProfile
 	private String driverName;
 	private boolean autocommit;
 	private boolean disableUpdateTableCheck;
+	private boolean rollbackBeforeDisconnect;
 	private String description;
 	private int id;
   private String identifier;
@@ -88,8 +89,19 @@ public class ConnectionProfile
 
 	public void setUseSeperateConnectionPerTab(boolean aFlag)
 	{
+		if (this.seperateConnection != aFlag) this.changed = true;
 		this.seperateConnection = aFlag;
-		this.changed = true;
+	}
+
+	public boolean getRollbackBeforeDisconnect()
+	{
+		return this.rollbackBeforeDisconnect;
+	}
+
+	public void setRollbackBeforeDisconnect(boolean flag)
+	{
+		if (flag != this.rollbackBeforeDisconnect) this.changed = true;
+		this.rollbackBeforeDisconnect = flag;
 	}
 
 	/**
@@ -149,7 +161,10 @@ public class ConnectionProfile
 
 	public String getInputPassword()
 	{
-		return this.decryptPassword();
+		if (this.storePassword)
+			return this.decryptPassword();
+		else
+			return "";
 	}
 
 	public void setInputPassword(String aPassword)
@@ -326,6 +341,7 @@ public class ConnectionProfile
 		result.setWorkspaceFile(this.workspaceFile);
 		result.setIgnoreDropErrors(this.ignoreDropErrors);
 		result.setUseSeperateConnectionPerTab(this.seperateConnection);
+		result.setRollbackBeforeDisconnect(this.rollbackBeforeDisconnect);
 		if (this.connectionProperties != null)
 		{
 			Enumeration keys = this.connectionProperties.propertyNames();

@@ -46,16 +46,18 @@
     </section>
 
     <section id="command-spool">
-      <title>EXPORT (EXP)</title>
+      <title>WBEXPORT</title>
 
       <para>Exports the result of the <emphasis role="bold">next</emphasis>
       SQL statement (which has to produce a result set) to a file without
       loading the data into memory. This is
       equivalent to the menu item
       <menuchoice><guimenu>SQL</guimenu><guimenuitem>Spool Data</guimenuitem></menuchoice>.
-      The export command gives you more control over the format of the created file, then the
-      menu.</para>
-
+      The WBEXPORT command gives you more control over the format of the created file.</para>
+      <para>If you want to simply export the contents of one or more tables, the <literal>-sourcetable</literal>
+      switch can be used to specify the tables. In this case no additional SELECT statement
+      is necessary. 
+      </para>
       <para>The command supports the following parameters:</para>
 
       <informaltable frame="all">
@@ -75,9 +77,12 @@
 
               <entry><para>Defines the type of the output file. <literal>sqlinsert</literal>
               will create the necessary <literal>INSERT</literal> statements to put
-              the data into a table. Specifying sql is the same as specifying sqlinsert.
-              <literal>sqlupdate</literal> will generate UPDATE statements that update
-              all non-key columns of the table.
+              the data into a table. <literal>sqlupdate</literal> will generate UPDATE 
+              statements that update all non-key columns of the table. This will only
+              generate valid <literal>UPDATE</literal> statements if at least one key
+              column is present. If the table does not have key columns defined, or you 
+              want to use different columns, they can be specified using the <literal>-keycolumns</literal>
+              switch.
               </para></entry>
             </row>
 
@@ -86,12 +91,33 @@
 
               <entry><para>Defines the output file </para></entry>
             </row>
+            
+            <row>
+              <entry><para>-sourcetable=table1,table2</para></entry>
+              <entry><para>Defines the table(s) to be exportet. If this
+              switch is used, <literal>-outputdir</literal> is also required
+              unless exactly one table is specified. If one table is 
+              specified, the -file parameter is used to generate the file
+              for the table. If more then one table is specified, the 
+              <literal>-outputdir</literal> parameter is used to defined
+              the directory where the generated files should be stored. 
+              Each file will be named as the exported table with the approriate
+              extension (.xml, .sql, etc)</para></entry>
+            </row>
+            <row>
+              <entry><para>-outputdir=directory</para></entry>
+              <entry><para>When using the <literal>-sourcetable</literal> switch
+              with multiple tables, this parameter is mandatory and defines
+              the directory where the generated files should be stored.
+              </para></entry>
+            </row>
+            
           </tbody>
         </tgroup>
       </informaltable>
 
       <section id="spool-sql-parameters">
-        <title>Additional parameters for type SQL</title>
+        <title>Additional parameters for type SQLUPDATE or SQLINSERT</title>
 
         <informaltable frame="all">
           <tgroup cols="2" align="left">
@@ -108,11 +134,11 @@
               <row>
                 <entry><para>-table</para></entry>
 
-                <entry><para>If the type is SQL the given
-                tablename will be used to create the INSERT statements. This
-                is useful when the data is retrieved from several different
-                tables, and should be inserted into one target table (e.g.
-                when migrating data from one DBMS to another)</para></entry>
+                <entry><para>Define the tablename to be used for the UPDATE or INSERT 
+                statements. This parameter is required if the SELECT statement has 
+                multiple tables in the FROM list. It can be used if only the data
+                is retrieved from only one table to UPDATE or INSERT into a different
+                table.</para></entry>
               </row>
 
               <row>
@@ -148,20 +174,35 @@
                 <entry><para>-commitevery</para></entry>
 
                 <entry><para>A numeric value which identifies
-                the number of <literal>INSERT</literal> statements after which a <literal>COMMIT</literal>
-                is put into the generated SQL script.</para>
+                the number of <literal>INSERT</literal> or <literal>UPDATE</literal> statements 
+                after which a <literal>COMMIT</literal> is put into the generated SQL script.</para>
                 <para>-commitevery=100</para>
-                <para>will create a <literal>COMMIT;</literal> after every 100 <literal>INSERT</literal>&#39;s</para>
+                <para>will create a <literal>COMMIT;</literal> after every 100th statement.</para>
                 </entry>
               </row>
 
               <row>
-                <entry><para>-createtable==[true|false]</para></entry>
+                <entry><para>-createtable=[true|false]</para></entry>
 
                 <entry><para>If this parameter is set to true,
                 the necessary <literal>CREATE TABLE</literal> command is put into the output
-                file.</para></entry>
+                file. This parameter is ignored when creating <literal>UPDATE</literal>
+                statements.</para>
+                </entry>
               </row>
+              
+              <row>
+                <entry><para>-keycolumns=column1, column2, ...</para></entry>
+
+                <entry><para>
+                If the table does not have key columns, or the source SELECT statement uses
+                a join over several tables, or you do not want to use the key columns defined 
+                in the database, this key can be used to define the key columns to be used
+                for the UPDATE statements. This key overrides any key columns defined on the
+                base table of the SELECT statement.
+                </para></entry>
+              </row>
+              
             </tbody>
           </tgroup>
         </informaltable>
@@ -306,14 +347,14 @@
         <section id="export-examples">
           <title>Examples:</title>
 
-          <programlisting>EXPORT -type=text -file=&#34;c:/data/data.txt&#34; -delimiter=&#34;|&#34; -decimal=&#34;,&#34;;
+          <programlisting>WBEXPORT -type=text -file=&#34;c:/data/data.txt&#34; -delimiter=&#34;|&#34; -decimal=&#34;,&#34;;
 SELECT * FROM data_table;</programlisting>
 
         <para>Will create a text file with the data from data_table. Each
         column will be separated with the character | Each fractional number
           will be written with a comma as the decimal separator.</para>
 
-        <programlisting>EXPORT -type=sql -file=&#34;c:/data/newtable.sql&#34; -table=newtable;
+        <programlisting>WBEXPORT -type=sql -file=&#34;c:/data/newtable.sql&#34; -table=newtable;
 SELECT * FROM table1, table2
 WHERE table1.column1 = table2.column1;</programlisting>
 
@@ -328,14 +369,14 @@ WHERE table1.column1 = table2.column1;</programlisting>
     </section>
 
     <section id="command-import">
-      <title>IMPORT (IMP)</title>
-      <para>The IMPORT command can read and parse XML files generated by the
-      <link linkend="command-spool">EXPORT</link> command&apos;s XML format.
+      <title>WBIMPORT</title>
+      <para>The WBIMPORT command can read and parse XML files generated by the
+      <link linkend="command-spool">WBEXPORT</link> command&apos;s XML format.
       It is the recommended way to transfer files from one system to another because
       those commands do not need to read all the data into memory.
       </para>
 
-      <para>The IMPORT command has the following syntax</para>
+      <para>The WBIMPORT command has the following syntax</para>
       <informaltable frame="all">
         <tgroup cols="2" align="left">
           <colspec colname="c1" colwidth="4cm" />
@@ -470,7 +511,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
           </tgroup>
         </informaltable>
         <para>Example:</para>
-        <programlisting>IMPORT -file=c:/temp/contacts.txt
+        <programlisting>WBIMPORT -file=c:/temp/contacts.txt
        -table=person
        -columns=lastname,firstname,birthday
        -dateformat=yyyy-MM-dd;</programlisting>
@@ -730,14 +771,14 @@ WHERE table1.column1 = table2.column1;</programlisting>
       <section id="copy-examples">
         <title>Examples:</title>
         <para>Copy all columns from a table to a table with the same columns:</para>
-        <programlisting>COPY -sourceprofile=ProfileA
+        <programlisting>WBCOPY -sourceprofile=ProfileA
      -targerprofile=ProfileB
      -sourcetable=the_table
      -targettable=the_other_table</programlisting>
 
         <para>Copy all columns from a table to a table with the same columns, but
               only certain rows.</para>
-        <programlisting>COPY -sourceprofile=ProfileA
+        <programlisting>WBCOPY -sourceprofile=ProfileA
      -targerprofile=ProfileB
      -sourcetable=the_table
      -sourcewhere="lastname LIKE 'D%'
@@ -746,7 +787,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
         <para>Copy only selected columns to a table with different column names. Before the
         copy is started all rows are deleted from the target table:
         </para>
-        <programlisting>COPY -sourceprofile=ProfileA
+        <programlisting>WBCOPY -sourceprofile=ProfileA
      -targerprofile=ProfileB
      -sourcetable=the_table
      -targettable=the_other_table
@@ -755,7 +796,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 
         <para>Copy data based on a SQL query, matching the columns
         from the query to the corresponding columns from the target table:</para>
-        <programlisting>COPY -sourceprofile=ProfileA
+        <programlisting>WBCOPY -sourceprofile=ProfileA
      -targerprofile=ProfileB
      -sourcewhere="SELECT firstname, lastname, birthday FROM person"
      -targettable=the_other_table

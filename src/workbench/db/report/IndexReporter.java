@@ -20,8 +20,7 @@ import workbench.util.StrBuffer;
  */
 public class IndexReporter
 {
-	public static final String TAG_INDEX_DEFS = "index-definitions";
-	public static final String TAG_INDEX_START = "index";
+	public static final String TAG_INDEX = "index-def";
 	
 	public static final String TAG_INDEX_NAME = "name";
 	public static final String TAG_INDEX_UNIQUE = "unique";
@@ -40,17 +39,12 @@ public class IndexReporter
 		int numIndex = this.indexList.getRowCount();
 		if (numIndex == 0) return null;
 		StrBuffer result = new StrBuffer(numIndex * 100);
-		StrBuffer idxIndent = new StrBuffer(indent);
-		idxIndent.append(indent);
 		StrBuffer defIndent = new StrBuffer(indent);
-		defIndent.append(indent);
-		defIndent.append(indent);
+		defIndent.append("    ");
 		
-		tagWriter.appendOpenTag(result, indent, TAG_INDEX_DEFS);
-		result.append('\n');
 		for (int i=0; i < numIndex; i ++)
 		{
-			tagWriter.appendOpenTag(result, idxIndent, TAG_INDEX_START);
+			tagWriter.appendOpenTag(result, indent, TAG_INDEX);
 			result.append('\n');
 			
 			String value = this.indexList.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
@@ -65,9 +59,8 @@ public class IndexReporter
 			value = this.indexList.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG);
 			tagWriter.appendTag(result, defIndent, TAG_INDEX_PK, String.valueOf("YES".equals(value)));
 			
-			tagWriter.appendCloseTag(result, idxIndent, TAG_INDEX_START);
+			tagWriter.appendCloseTag(result, indent, TAG_INDEX);
 		}
-		tagWriter.appendCloseTag(result, indent, TAG_INDEX_DEFS);
 		return result;
 	}
 

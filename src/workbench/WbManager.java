@@ -250,20 +250,47 @@ public class WbManager
 
 	public String getExportFilename(Component caller, boolean includeSqlType)
 	{
-		String lastDir = settings.getLastExportDir();
-		this.lastFileType = FILE_TYPE_UNKNOWN;
-		JFileChooser fc = new JFileChooser(lastDir);
 		FileFilter text = ExtensionFileFilter.getTextFileFilter();
-		fc.addChoosableFileFilter(text);
-		fc.addChoosableFileFilter(ExtensionFileFilter.getHtmlFileFilter());
+		FileFilter[] filters;
+		int index = 0;
 		if (includeSqlType)
 		{
-			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
-			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlUpdateFileFilter());
+			filters = new FileFilter[5];
 		}
-		fc.addChoosableFileFilter(ExtensionFileFilter.getXmlFileFilter());
-
-		fc.setFileFilter(text);
+		else
+		{
+			filters = new FileFilter[3];
+		}
+		
+		filters[index++] = text;
+		filters[index++] = ExtensionFileFilter.getHtmlFileFilter();
+		if (includeSqlType)
+		{
+			filters[index++] = ExtensionFileFilter.getSqlFileFilter();
+			filters[index++] = ExtensionFileFilter.getSqlUpdateFileFilter();
+		}
+		filters[index++] = ExtensionFileFilter.getXmlFileFilter();
+		String lastDir = settings.getLastExportDir();
+		return getFilename(caller, filters, 0, "workbench.export.lastdir");
+	}
+	
+	public String getXmlReportFilename(Component caller)
+	{
+		FileFilter[] filter = new FileFilter[1];
+		filter[0] = ExtensionFileFilter.getXmlFileFilter();
+		return getFilename(caller, filter, 0, "workbench.xmlreport.lastdir");
+	}
+	
+	private String getFilename(Component caller, FileFilter[] filters, int defaultFilter, String dirProperty)
+	{
+		this.lastFileType = FILE_TYPE_UNKNOWN;
+		String lastDir = settings.getProperty(dirProperty, null);
+		JFileChooser fc = new JFileChooser(lastDir);
+		for (int i=0; i < filters.length; i++)
+		{
+			fc.addChoosableFileFilter(filters[i]);
+		}
+		fc.setFileFilter(filters[defaultFilter]);
 		String filename = null;
 
 		Window parent;
@@ -312,7 +339,7 @@ public class WbManager
 			}
 
 			lastDir = fc.getCurrentDirectory().getAbsolutePath();
-			settings.setLastExportDir(lastDir);
+			settings.setProperty(dirProperty, lastDir);
 		}
 
 		return filename;
@@ -413,7 +440,8 @@ public class WbManager
 
 		// use our own classes for some GUI elements
 		def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
-		def.put("SplitPaneUI", "com.sun.java.swing.plaf.windows.WindowsSplitPaneUI");
+		//def.put("SplitPaneUI", "com.sun.java.swing.plaf.windows.WindowsSplitPaneUI");
+		def.put("SplitPaneUI", "workbench.gui.components.WbSplitPaneUI");
 
 		if (settings.getShowMnemonics())
 		{
@@ -558,7 +586,8 @@ public class WbManager
 			w = (MainWindow)this.mainWindows.get(i);
 			if (w == null) continue;
 			aborted = w.abortAll();
-			w.doDisconnect();
+			//w.doDisconnect();
+			w.disconnect(false, true);
 		}
 	}
 
@@ -821,7 +850,7 @@ public class WbManager
 				this.batchMode = true;
 				this.connMgr.setReadTemplates(false);
 			}
-			
+
 			value = cmdLine.getValue(ARG_VARDEF);
 			if (value != null && value.length() > 0)
 			{
@@ -845,7 +874,7 @@ public class WbManager
 	{
 		return wb.settings;
 	}
-	
+
 	public void init()
 	{
 		if (trace) System.out.println("WbManager.init() - start");

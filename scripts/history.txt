@@ -1,27 +1,76 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
-Enh:  The logging has been improved. Logging to the console can 
+Enh:  An XML report of the database tables can now be generated using 
+      the WBREPORT command or from within the table list of the database
+      explorer.
+Enh:  If a table does not have primary key columns defined, the key columns
+      that should be used for updating the table can now be defined
+      (implicitely all columns were used before)
+Enh:  Several WBEXPORT enhancements: 
+      The command now supports the -keycolumns switch, to define
+      the key columns to be used when generating UPDATE statements
+      (to either override the definition from the database, or defined
+      key columns if the table does not have any)
+
+      The command now supports the -sourcetable switch, to directly
+      export one or more tables without the need of an additional 
+      SELECT statement. Using the -sourcetable switch requires the 
+      -outputdir switch, to define the target directory of the generated files
+
+      The command now supports the -concatfunc switch which allows to set 
+      a function that concatenates strings. This is needed for e.g. for MySQL
+      which does not support any (standard) concatenation operator at all.
+      The -concat switch and the -concatfunc switch are mutually exclusive.
+
+      The command now supports transforming the resulting XML file
+      through XSLT. Two new parameters (-stylesheet and -trans) have been
+      added to support this. The transformation will be executed after
+      the XML file has been created.
+      The transformation can also be executed "standalone" by using
+      the new command XSLT
+
+Enh:  Cancelling a SELECT statement now works also for JDBC drivers that 
+      do not support the cancel() operation.
+Enh:  The source display in the DbExplorer can now be expanded to cover the 
+      full width by using Ctrl-Shift-T (or the little arrows in the split 
+      display). The shortcut actually toggles the display between full width
+      and split display
+Enh:  Only selected rows can now be copied to the clipboard (as text, INSERT
+      or UPDATE statements)
+Enh:  If the password should not be stored for a profile, the user is now
+      prompted to enter the password when trying to connect using that profile
+Enh:  For Oracle, table and column comments are now also created in the
+      SQL statement to recreate a table. This requires that the Oracle
+      JDBC driver returns the comments. See the online help for details
+      on how to configure the connection to Oracle to show comments
+Enh:  A new option has been added to the connection profile "Rollback before
+      disconnect". Some DBMS (e.g. Cloudscape) require that all pending
+      transactions are ended before disconnecting. Cloudscape already starts
+      a transaction during a SELECT statement, and requires all transactions
+      to be ended before disconnecting. If this option is enabled
+      SQL Workbench/J will issue a rollback before doing the actual disconnect
+Enh:  The logging has been improved. Logging to the console can
       now be disabled (workbench.log.console=false). If enabled
       it will now log to System.err (instead of System.out).
       The format of the log message can now be defined through
-      workbench.log.format 
-      Valid placeholders are: 
+      workbench.log.format
+      Valid placeholders are:
       {type}        DEBUG, INFO etc
-      {timestamp}    
+      {timestamp}
       {message}     The actual log message
       {error}       The error message from the exception (if present)
       {source}      Where the error occurred
       {stacktrace}  The exception stacktrace if any (will always be displayed
-                    after the log message regardless of the position in the 
+                    after the log message regardless of the position in the
                     format string
       If the level is set to debug, the stacktrace will always be displayed
-Enh:  The batch runner now displays the messages returned from the individual 
-      commands to System.out and doesn't use the logging facility any more. 
+Enh:  The batch runner now displays the messages returned from the individual
+      commands to System.out and doesn't use the logging facility any more.
       Combined with workbench.log.console=false the output of a batch run
       is now very similar to the messages printed in the GUI.
       Additionally result sets (if available) can now be printed to the console
       using the commandline switch -displayresult=true
-Enh:  Views and triggers are now displayed for Cloudscape in the 
+Enh:  Views and triggers are now displayed for Cloudscape in the
       Database Explorer
 Enh:  Added the commandline switch -ignoredroperrors for batch mode.
       This sets the "Ignore errors from DROP commands" property for the
@@ -29,20 +78,24 @@ Enh:  Added the commandline switch -ignoredroperrors for batch mode.
       behaviour is enabled)
 Enh:  Variable subsitution is now supported. Variables can be defined
       interactively (using WBVARDEF) from a file or as the result
-      of a SQL query. 
+      of a SQL query.
       A variable can be referenced so that Workbench prompts never, only once
-      or always for a value. 
+      or always for a value.
       For details see the online help.
-Enh:  The EXPORT command now supports transforming the resulting XML file
-      through XSLT. Two new parameters (-stylesheet and -trans) have been
-      added to support this. The transformation will be executed after
-      the XML file has been created.
-      The transformation can also be executed "standalon" by using
-      the new command XSLT
 Enh:  When pressing Shift while selecting one of the "Optimize Column Width"
       menu items, the column label will be taken into account for the
       optimal size. Ctrl-Shift-W will optimize all columns with respecting
       to the column's name. This shortcut cannot be remapped currently.
+Fix:  If a workspace could not be loaded (due to an error), the user is asked 
+      if he wants to create a new workspace with that name.
+Fix:  When an error occurred during an import into the current result set
+      choosing "Cancel" or "Ignore all" had no effect, the import would
+      continue in either case.
+Fix:  When clicking quickly in the list of tables in the DbExplorer, it 
+      could happen, that the application locked up (when the DB responded
+      to slowly)
+Fix:  SQL Statements that contained german umlauts (and possibly other
+      non ASCII characters) would fail to execute
 Fix:  When importing a text file empty values for numeric fields gave an error.
       They are now treated as NULL.
 Fix:  When trying to delete multiple rows before switching to edit mode, only

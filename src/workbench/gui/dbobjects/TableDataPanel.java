@@ -46,6 +46,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.SqlUtil;
 import java.awt.Cursor;
+import workbench.util.StrBuffer;
 
 
 
@@ -60,9 +61,7 @@ public class TableDataPanel
 {
 	private WbConnection dbConnection;
 	private DwPanel dataDisplay;
-	//private WbTable dataTable;
 
-	private Object retrieveLock = new Object();
 	private ReloadAction reloadAction;
 
 	private JButton config;
@@ -72,6 +71,7 @@ public class TableDataPanel
 	private long warningThreshold = -1;
 
 	private boolean shiftDown = false;
+	private boolean retrieveRunning = false;
 
 	private TableIdentifier table;
 	private ImageIcon loadingIcon;
@@ -224,16 +224,14 @@ public class TableDataPanel
 		{
 			WbSwingUtilities.showWaitCursor(this);
 
-			synchronized (this.retrieveLock)
+			stmt = this.dbConnection.createStatement();
+			rs = stmt.executeQuery(sql);
+			if (rs.next())
 			{
-				stmt = this.dbConnection.createStatement();
-				rs = stmt.executeQuery(sql);
-				if (rs.next())
-				{
-					rowCount = rs.getLong(1);
-				}
-				this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount") + " " + rowCount);
+				rowCount = rs.getLong(1);
 			}
+			this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount") + " " + rowCount);
+
 		}
 		catch (SQLException e)
 		{
@@ -244,17 +242,6 @@ public class TableDataPanel
 		{
 			this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount") + " " + ResourceMgr.getString("TxtError"));
 			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.table.getTableExpression(), e);
-			/*
-			final Component caller = this;
-			final String msg = ResourceMgr.getString("ErrorRetrievingRowCount") + "\n" + e.getMessage();
-			SwingUtilities.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					WbManager.getInstance().showErrorMessage(caller, msg);
-				}
-			});
-			*/
 		}
 		finally
 		{
@@ -293,6 +280,19 @@ public class TableDataPanel
 	}
 
 	public boolean confirmCancel() { return true; }
+
+	/**
+	 * 	Directly cancel the retrieval (in the same thread)
+	 */
+	public void cancelRetrieve()
+	{
+		dataDisplay.cancelExecution();
+	}
+
+	/**
+	 * 	Implementation of the Interruptable interface.
+	 * 	This will kick off a Thread that cancels the retrieval.
+	 */
 	public void cancelExecution()
 	{
 		Thread t = new Thread()
@@ -315,59 +315,79 @@ public class TableDataPanel
 		t.start();
 	}
 
-
-	public void retrieve()
+	private synchronized void retrieveStart()
 	{
+		this.retrieveRunning = true;
+	}
+
+	private synchronized void retrieveEnd()
+	{
+		this.retrieveRunning = false;
+	}
+
+	public synchronized boolean isRetrieving()
+	{
+		return this.retrieveRunning;
+	}
+
+	private void doRetrieve()
+	{
+		if (this.isRetrieving()) return;
+
     final String sql = this.buildSqlForTable(false);
     if (sql == null) return;
+		this.retrieveStart();
 
 		final int maxRows = this.getMaxRows();
 
 		this.cancelRetrieve.setEnabled(true);
 		this.reloadAction.setEnabled(false);
+		try
+		{
+			//WbSwingUtilities.showWaitCursor(dataDisplay);
+			//dataDisplay.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			dataDisplay.setShowErrorMessages(true);
+			dataDisplay.scriptStarting();
+			dataDisplay.setMaxRows(maxRows);
+			dataDisplay.runStatement(sql);
+			String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
+			dataDisplay.setPrintHeader(header);
+			dataDisplay.setStatusMessage("");
+		}
+		catch (OutOfMemoryError mem)
+		{
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					WbManager.getInstance().showErrorMessage(TableDataPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
+				}
+			});
+		}
+		catch (Throwable e)
+		{
+			LogMgr.logError("TableDataPanel.retrieve()", "Error retrieving table data", e);
+		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursor(dataDisplay);
+			//dataDisplay.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			//WbSwingUtilities.showDefaultCursor(dataDisplay);
+			//dataDisplay.getTable().setCursor(null);
+			dataDisplay.scriptFinished();
+			cancelRetrieve.setEnabled(false);
+			reloadAction.setEnabled(true);
+			this.retrieveEnd();
+		}
+	}
+
+	public void retrieve()
+	{
 		Thread t = new Thread()
 		{
 			public void run()
 			{
-				try
-				{
-					//WbSwingUtilities.showWaitCursor(dataDisplay);
-					//dataDisplay.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					synchronized (retrieveLock)
-					{
-						dataDisplay.setShowErrorMessages(true);
-						dataDisplay.scriptStarting();
-						dataDisplay.setMaxRows(maxRows);
-						dataDisplay.runStatement(sql);
-						String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
-						dataDisplay.setPrintHeader(header);
-						dataDisplay.setStatusMessage("");
-					}
-				}
-				catch (OutOfMemoryError mem)
-				{
-					SwingUtilities.invokeLater(new Runnable()
-					{
-						public void run()
-						{
-							WbManager.getInstance().showErrorMessage(TableDataPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
-						}
-					});
-				}
-				catch (Throwable e)
-				{
-					LogMgr.logError("TableDataPanel.retrieve()", "Error retrieving table data", e);
-				}
-				finally
-				{
-					WbSwingUtilities.showDefaultCursor(dataDisplay);
-					//dataDisplay.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-					//WbSwingUtilities.showDefaultCursor(dataDisplay);
-					//dataDisplay.getTable().setCursor(null);
-					dataDisplay.scriptFinished();
-					cancelRetrieve.setEnabled(false);
-					reloadAction.setEnabled(true);
-				}
+				doRetrieve();
 			}
 		};
 		t.setName("TableDataPanel - retrieve thread");
@@ -408,6 +428,8 @@ public class TableDataPanel
 
 	public void showData(boolean includeData)
 	{
+		if (this.isRetrieving()) return;
+
 		this.reset();
 		long rows = this.showRowCount();
 		if (this.autoRetrieve.isSelected() && includeData)
@@ -423,7 +445,7 @@ public class TableDataPanel
 				int choice = JOptionPane.showConfirmDialog(this, msg, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION);
 				if (choice == JOptionPane.NO_OPTION) return;
 			}
-			this.retrieve();
+			this.doRetrieve();
 		}
 	}
 

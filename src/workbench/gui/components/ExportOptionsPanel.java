@@ -35,6 +35,8 @@ public class ExportOptionsPanel
 
 	private JRadioButton typeSql;
 	private JRadioButton typeText;
+	private JRadioButton typeXml;
+	
 	private JCheckBox createTableOption;
 	private JCheckBox includeHeadersOption;
 	private JTextField commitEvery;
@@ -49,12 +51,15 @@ public class ExportOptionsPanel
 		this.typeSql = new JRadioButton(ResourceMgr.getString("LabelExportTypeSql"));
 		
 		this.typeText = new JRadioButton(ResourceMgr.getString("LabelExportTypeText"));
+		this.typeXml = new JRadioButton(ResourceMgr.getString("LabelExportTypeXml"));
 		
 		this.typeSql.addActionListener(this);
 		this.typeText.addActionListener(this);
+		this.typeXml.addActionListener(this);
 
 		type.add(typeSql);
 		type.add(typeText);
+		type.add(typeXml);
 		
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.gridx = 0;
@@ -96,6 +101,12 @@ public class ExportOptionsPanel
 		gbc.gridy++;
 		this.add(this.includeHeadersOption, gbc);
 
+		gbc.gridx--;
+		gbc.gridwidth = 2;
+		gbc.gridy++;
+		gbc.insets = emptyInsets;
+		this.add(this.typeXml, gbc);
+		
 		gbc.gridx = 0;
 		gbc.gridy ++;
 		gbc.weightx = 1.0;
@@ -107,6 +118,11 @@ public class ExportOptionsPanel
 		this.includeHeadersOption.setSelected(false);
 		this.includeHeadersOption.setEnabled(false);
 		
+	}
+	
+	public boolean isTypeXml()
+	{
+		return this.typeXml.isSelected();
 	}
 	
 	public boolean isTypeSql()

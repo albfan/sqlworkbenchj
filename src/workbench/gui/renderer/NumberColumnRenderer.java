@@ -12,6 +12,7 @@ import java.text.DecimalFormatSymbols;
 import javax.swing.SwingConstants;
 
 import workbench.WbManager;
+import workbench.resource.Settings;
 
 /**
  * @author  workbench@kellerer.org
@@ -25,7 +26,7 @@ public class NumberColumnRenderer
 
 	public NumberColumnRenderer()
 	{
-		String sep = WbManager.getSettings().getDecimalSymbol();
+		String sep = Settings.getInstance().getDecimalSymbol();
 		this.symb.setDecimalSeparator(sep.charAt(0));
 		decimalFormatter = new DecimalFormat("0.#", symb);
 		this.setMaxDigits(4);
@@ -34,7 +35,7 @@ public class NumberColumnRenderer
 
 	public NumberColumnRenderer(int maxDigits)
 	{
-		String sep = WbManager.getSettings().getDecimalSymbol();
+		String sep = Settings.getInstance().getDecimalSymbol();
 		this.symb.setDecimalSeparator(sep.charAt(0));
 		decimalFormatter = new DecimalFormat("0.#", symb);
 		this.setMaxDigits(maxDigits);

@@ -31,7 +31,7 @@ public class StatementRunner
 	private WbConnection dbConnection;
 	private StatementRunnerResult result;
 	private SqlParameterPool parameterPool;
-	
+
 	private HashMap cmdDispatch;
 	private ArrayList dbSpecificCommands;
 
@@ -75,13 +75,13 @@ public class StatementRunner
 
 		cmdDispatch.put(WbDefineVar.DEFINE_LONG.getVerb(), WbDefineVar.DEFINE_LONG);
 		cmdDispatch.put( WbDefineVar.DEFINE_SHORT.getVerb(), WbDefineVar.DEFINE_SHORT);
-		
+
 		sql = new WbRemoveVar();
 		cmdDispatch.put(sql.getVerb(), sql);
 
 		sql = new WbListVars();
 		cmdDispatch.put(sql.getVerb(), sql);
-		
+
 		sql = new WbExport();
 		cmdDispatch.put(sql.getVerb(), sql);
 		cmdDispatch.put("EXP", sql);
@@ -91,8 +91,12 @@ public class StatementRunner
 		sql = new WbImport();
 		cmdDispatch.put(sql.getVerb(), sql);
 		cmdDispatch.put("IMP", sql);
+		cmdDispatch.put("WBIMPORT", sql);
 
-		sql = new WbCopy(WbCopy.ALT_VERB);
+		sql = new WbCopy();
+		cmdDispatch.put(sql.getVerb(), sql);
+		
+		sql = new WbSchemaReport();
 		cmdDispatch.put(sql.getVerb(), sql);
 
 		cmdDispatch.put(WbListCatalogs.LISTCAT.getVerb(), WbListCatalogs.LISTCAT);
@@ -156,9 +160,9 @@ public class StatementRunner
 			// PGSQL has it's own COPY command. Oracle's COPY command
 			// is a SQL*Plus command and cannot be used through JDBC,
 			// so we do not need to take care of that
-			SqlCommand copy = new WbCopy();
-			this.cmdDispatch.put(copy.getVerb(), copy);
-			this.dbSpecificCommands.add(copy.getVerb());
+			SqlCommand copy = (SqlCommand)this.cmdDispatch.get(WbCopy.VERB);
+			this.cmdDispatch.put("COPY", copy);
+			this.dbSpecificCommands.add("COPY");
 		}
 
 		String verbs = this.dbConnection.getMetadata().getVerbsToIgnore();
@@ -191,10 +195,7 @@ public class StatementRunner
 		String cleanSql = SqlUtil.makeCleanSql(aSql, false);
 		if (cleanSql == null || cleanSql.length() == 0)
 		{
-			if (this.result == null)
-			{
-				this.result = new StatementRunnerResult("");
-			}
+			this.result = new StatementRunnerResult("");
 			this.result.clear();
 			this.result.setSuccess();
 			return;
@@ -245,7 +246,7 @@ public class StatementRunner
 	{
 		String verb = SqlUtil.getSqlVerb(cleanSql).toUpperCase();
 		DbMetadata meta = this.dbConnection.getMetadata();
-		if (!meta.supportsSelectIntoNewTable()) 
+		if (!meta.supportsSelectIntoNewTable())
 		{
 			return (SqlCommand)this.cmdDispatch.get(verb);
 		}

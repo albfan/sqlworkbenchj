@@ -16,6 +16,7 @@ import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.util.StrBuffer;
 import workbench.storage.*;
+import workbench.util.StringUtil;
 
 /**
  * Interface for classes that can take objects of type {@link RowData}
@@ -25,14 +26,14 @@ import workbench.storage.*;
  */
 public abstract class RowDataConverter
 {
-	protected String encoding = "UTF-8";
+	protected String encoding;
 	protected WbConnection originalConnection;
 	protected String generatingSql;
 	protected ResultInfo metaData;
 	
-	private DateFormat defaultDateFormatter;
-	private DecimalFormat defaultNumberFormatter;
-	private DateFormat defaultTimestampFormatter;
+	protected SimpleDateFormat defaultDateFormatter = StringUtil.ISO_DATE_FORMATTER;
+	protected DecimalFormat defaultNumberFormatter;
+	protected SimpleDateFormat defaultTimestampFormatter = StringUtil.ISO_TIMESTAMP_FORMATTER;
 
 	/**
 	 *	The metadata for the result set that should be exported
@@ -62,11 +63,15 @@ public abstract class RowDataConverter
 	/**
 	 *	Set the encoding for the output string.
 	 *	This might not be used by all implemented Converters
-	 *	The default encoding is UTF-8
 	 */
 	public void setEncoding(String enc)
 	{
 		this.encoding = enc;
+	}
+
+	public String getEncoding()
+	{
+		return this.encoding;
 	}
 	
 	/**
@@ -89,7 +94,7 @@ public abstract class RowDataConverter
 	 *	Returns the data for one specific row as a String in the 
 	 *  correct format
 	 */
-	public abstract StrBuffer convertRowData(RowData row, int rowIndex);
+	public abstract StrBuffer convertRowData(RowData row, long rowIndex);
 	
 	/**
 	 *	Returns the String sequence needed in before the actual data part.
@@ -101,15 +106,17 @@ public abstract class RowDataConverter
 	 *	Returns the String sequence needed in before the actual data part.
 	 *  (might be an empty string)
 	 */
-	public abstract StrBuffer getEnd();
+	public abstract StrBuffer getEnd(long totalRows);
 	
-	public void setDefaultTimestampFormatter(DateFormat formatter)
+	public void setDefaultTimestampFormatter(SimpleDateFormat formatter)
 	{
+		if (formatter == null) return;
 		this.defaultTimestampFormatter = formatter;
 	}
 	
-	public void setDefaultDateFormatter(DateFormat formatter)
+	public void setDefaultDateFormatter(SimpleDateFormat formatter)
 	{
+		if (formatter == null) return;
 		this.defaultDateFormatter = formatter;
 	}
 

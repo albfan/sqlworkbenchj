@@ -28,7 +28,7 @@ import workbench.util.WbPersistence;
 
 /**
  * @author  workbench@kellerer.org
- * @version  $Revision: 1.40 $
+ * @version  $Revision: 1.41 $
  */
 public class ConnectionMgr
 {
@@ -67,7 +67,7 @@ public class ConnectionMgr
 		Connection sql = this.connect(aProfile, anId);
 		conn.setSqlConnection(sql);
 		conn.setProfile(aProfile);
-		
+
 		String version = null;
 		try
 		{
@@ -79,9 +79,9 @@ public class ConnectionMgr
 		{
 			version = "n/a";
 		}
-		
+
 		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" + sql.getMetaData().getDatabaseProductName() + "], Database version: [" + conn.getMetadata().getDbVersion() + "], Driver version: [" + version + "]");
-		
+
 		try
 		{
 			if (WbManager.getSettings().getEnableDbmsOutput())
@@ -403,7 +403,7 @@ public class ConnectionMgr
 	private void disconnect(WbConnection conn)
 	{
 		if (conn == null) return;
-		
+
 		try
 		{
 			if (conn.getMetadata().isCloudscape())
@@ -411,7 +411,7 @@ public class ConnectionMgr
 				ConnectionProfile prof = conn.getProfile();
 				boolean shutdown = this.canShutdownCloudscape(conn);
 				conn.close();
-				if (shutdown) 
+				if (shutdown)
 				{
 					this.shutdownCloudscape(prof);
 				}
@@ -421,7 +421,7 @@ public class ConnectionMgr
 				this.shutdownHsql(conn);
 				conn.close();
 			}
-			else 
+			else
 			{
 				LogMgr.logInfo("ConnectionMgr.disconnect()", "Disconnecting: [" + conn.getProfile().getName() + "], ID=" + conn.getId());
 				conn.close();
@@ -501,7 +501,7 @@ public class ConnectionMgr
 	{
 		String drvClass = prof.getDriverclass();
 		String drvName = prof.getDriverName();
-		
+
 		try
 		{
 			DbDriver drv = this.findDriverByName(drvClass, drvName);
@@ -510,7 +510,7 @@ public class ConnectionMgr
 		}
 		catch (SQLException e)
 		{
-			// this exception is expected. Cloudscape reports success through 
+			// this exception is expected. Cloudscape reports success through
 			// the exception message!!!!!
 			LogMgr.logInfo("ConnectionMgr.shutdownCloudscape()", ExceptionUtil.getDisplay(e));
 		}
@@ -525,10 +525,10 @@ public class ConnectionMgr
 		if (!aConn.getMetadata().isCloudscape()) return true;
 
 		String url = aConn.getUrl();
-		
+
 		// check for cloudscape connection
 		if (!url.startsWith("jdbc:cloudscape:")) return true;
-		
+
 		// do not shutdown server connections!
 		if (url.startsWith("jdbc:cloudscape:net:")) return false;
 
@@ -549,7 +549,7 @@ public class ConnectionMgr
 
 		return true;
 	}
-	
+
 	public void writeSettings()
 	{
 		this.saveProfiles();

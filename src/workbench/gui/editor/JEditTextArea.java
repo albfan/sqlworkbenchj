@@ -114,7 +114,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.23 2004-08-22 14:38:40 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.24 2004-09-12 15:54:58 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -268,7 +268,7 @@ public class JEditTextArea
 		int endline = realEndline;
 		int tabSize = this.getTabSize();
 		StrBuffer buff = new StrBuffer(tabSize);
-		for (int i=0; i < tabSize; i++) buff.append(" ");
+		for (int i=0; i < tabSize; i++) buff.append(' ');
 		String spacer = buff.toString();
 
 		int pos = this.getSelectionEnd(endline) - this.getLineStartOffset(endline);
@@ -1583,7 +1583,7 @@ public class JEditTextArea
 				start = tmp;
 			}
 
-			StringBuffer buf = new StringBuffer();
+			StrBuffer buf = new StrBuffer();
 			Segment seg = new Segment();
 
 			for(int i = selectionStartLine; i <= selectionEndLine; i++)
@@ -1945,12 +1945,12 @@ public class JEditTextArea
 
 			String selection = getSelectedText();
 
-			int repeatCount = inputHandler.getRepeatCount();
-			StrBuffer buf = new StrBuffer();
-			for(int i = 0; i < repeatCount; i++)
-				buf.append(selection);
+			//int repeatCount = inputHandler.getRepeatCount();
+			//StrBuffer buf = new StrBuffer();
+			//for(int i = 0; i < repeatCount; i++)
+			//	buf.append(selection);
 
-			clipboard.setContents(new StringSelection(buf.toString()),null);
+			clipboard.setContents(new StringSelection(selection),null);
 		}
 	}
 
@@ -1968,13 +1968,13 @@ public class JEditTextArea
 				// so do it here
 				String selection = ((String)clipboard.getContents(this).getTransferData(DataFlavor.stringFlavor)).replaceAll("\r\n","\n");
 
-				int repeatCount = inputHandler.getRepeatCount();
-				StringBuffer buf = new StringBuffer(selection.length() * repeatCount);
-				for(int i = 0; i < repeatCount; i++)
-				{
-					buf.append(selection);
-				}
-				selection = buf.toString();
+//				int repeatCount = inputHandler.getRepeatCount();
+//				StringBuffer buf = new StringBuffer(selection.length() * repeatCount);
+//				for(int i = 0; i < repeatCount; i++)
+//				{
+//					buf.append(selection);
+//				}
+//				selection = buf.toString();
 				setSelectedText(selection);
 			}
 			catch(Exception e)

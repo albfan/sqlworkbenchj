@@ -11,8 +11,8 @@ import java.sql.ResultSet;
 import javax.xml.transform.TransformerException;
 import workbench.log.LogMgr;
 import workbench.storage.ResultInfo;
-import workbench.storage.RowDataConverter;
-import workbench.storage.XmlRowDataConverter;
+import workbench.db.exporter.RowDataConverter;
+import workbench.db.exporter.XmlRowDataConverter;
 import workbench.util.XsltTransformer;
 
 /**
@@ -22,7 +22,6 @@ import workbench.util.XsltTransformer;
 public class XmlExportWriter
 	extends ExportWriter
 {
-	
 	public XmlExportWriter(DataExporter exp)
 	{
 		super(exp);
@@ -30,7 +29,8 @@ public class XmlExportWriter
 	
 	public RowDataConverter createConverter(ResultInfo info)
 	{
-		return new XmlRowDataConverter(info);
+		XmlRowDataConverter converter = new XmlRowDataConverter(info);
+		return converter;
 	}
 
 	public void exportFinished()

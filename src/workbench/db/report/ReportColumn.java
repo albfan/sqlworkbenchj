@@ -8,7 +8,7 @@ package workbench.db.report;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
-import workbench.storage.XmlRowDataConverter;
+import workbench.db.exporter.XmlRowDataConverter;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 
@@ -18,6 +18,13 @@ import workbench.util.StrBuffer;
  */
 public class ReportColumn
 {
+	public static final String TAG_COLUMN_DEFINITION = "column-def";
+	public static final String TAG_COLUMN_NAME = "column-name";
+	public static final String TAG_COLUMN_DBMS_TYPE = "dbms-data-type";
+	public static final String TAG_COLUMN_JAVA_TYPE_NAME = "java-sql-type-name";
+	public static final String TAG_COLUMN_JAVA_TYPE = "java-sql-type";
+	public static final String TAG_COLUMN_JAVA_CLASS = "java-class";
+	
 	public static final String TAG_COLUMN_SIZE = "dbms-data-size";
 	public static final String TAG_COLUMN_DIGITS = "dbms-data-digits";
 	public static final String TAG_COLUMN_POSITION = "dbms-position";
@@ -26,38 +33,50 @@ public class ReportColumn
 	public static final String TAG_COLUMN_PK = "primary-key";
 	public static final String TAG_COLUMN_COMMENT = "comment";
 	
-	private TableIdentifier table;
+	private ColumnReference fk;
 	private ColumnIdentifier column;
-	private String xmlNamespace = null;
+	private TagWriter tagWriter = new TagWriter();
 	
 	/** Creates a new instance of ReportColumn */
-	public ReportColumn(ColumnIdentifier col, TableIdentifier tbl)
+	public ReportColumn(ColumnIdentifier col)
 	{
 		this.column = col;
-		this.table = tbl;
 	}
 
+	public ColumnIdentifier getColumn()
+	{
+		return this.column;
+	}
+	
+	public void setForeignKeyReference(ColumnReference ref)
+	{
+		this.fk = ref;
+		if (this.fk != null)
+		{
+			this.fk.setNamespace(this.tagWriter.getNamespace());
+		}
+	}
 	public StrBuffer getXml(StrBuffer indent)
 	{
 		StrBuffer result = new StrBuffer(100);
 		StrBuffer myindent = new StrBuffer(indent);
 		
-		myindent.append(indent);
-		appendOpenTag(result, indent, XmlRowDataConverter.TAG_COLUMN_DEFINITION);
+		myindent.append("  ");
+		tagWriter.appendOpenTag(result, indent, TAG_COLUMN_DEFINITION);
 		result.append('\n');
 		
-		appendTag(result, myindent, TAG_COLUMN_POSITION, this.column.getPosition());
-		appendTag(result, myindent, XmlRowDataConverter.TAG_COLUMN_NAME, this.column.getColumnName());
-		appendTag(result, myindent, XmlRowDataConverter.TAG_COLUMN_DBMS_TYPE, this.column.getDbmsType());
-		appendTag(result, myindent, TAG_COLUMN_PK, String.valueOf(this.column.isPkColumn()));
-		appendTag(result, myindent, TAG_COLUMN_NULLABLE, String.valueOf(this.column.isNullable()));
-		appendTag(result, myindent, TAG_COLUMN_DEFAULT, this.column.getDefaultValue());
-		appendTag(result, myindent, TAG_COLUMN_SIZE, this.column.getColumnSize());
-		appendTag(result, myindent, TAG_COLUMN_DIGITS, this.column.getDecimalDigits());
-		appendTag(result, myindent, XmlRowDataConverter.TAG_COLUMN_JAVA_TYPE, this.column.getDataType());
-		appendTag(result, myindent, XmlRowDataConverter.TAG_COLUMN_JAVA_TYPE_NAME, SqlUtil.getTypeName(this.column.getDataType()));
+		tagWriter.appendTag(result, myindent, TAG_COLUMN_POSITION, this.column.getPosition());
+		tagWriter.appendTag(result, myindent, TAG_COLUMN_NAME, this.column.getColumnName());
+		tagWriter.appendTag(result, myindent, TAG_COLUMN_DBMS_TYPE, this.column.getDbmsType());
+		tagWriter.appendTag(result, myindent, TAG_COLUMN_PK, this.column.isPkColumn());
+		tagWriter.appendTag(result, myindent, TAG_COLUMN_NULLABLE, this.column.isNullable());
+		tagWriter.appendTag(result, myindent, TAG_COLUMN_DEFAULT, this.column.getDefaultValue());
+		tagWriter.appendTag(result, myindent, TAG_COLUMN_SIZE, this.column.getColumnSize());
+		tagWriter.appendTag(result, myindent, TAG_COLUMN_DIGITS, this.column.getDecimalDigits());
+		tagWriter.appendTag(result, myindent, TAG_COLUMN_JAVA_TYPE, this.column.getDataType());
+		tagWriter.appendTag(result, myindent, TAG_COLUMN_JAVA_TYPE_NAME, SqlUtil.getTypeName(this.column.getDataType()));
 	
-		appendOpenTag(result, myindent, TAG_COLUMN_COMMENT);
+		tagWriter.appendOpenTag(result, myindent, TAG_COLUMN_COMMENT);
 		String comment = this.column.getComment();
 		if (comment != null && comment.trim().length() > 0)
 		{
@@ -65,66 +84,23 @@ public class ReportColumn
 			result.append(comment);
 			result.append("]]>");
 		}
-		appendCloseTag(result, null, TAG_COLUMN_COMMENT);
-		appendCloseTag(result, indent, XmlRowDataConverter.TAG_COLUMN_DEFINITION);
+		tagWriter.appendCloseTag(result, null, TAG_COLUMN_COMMENT);
 		
+		if (this.fk != null)
+		{
+			result.append(fk.getXml(myindent));
+		}
+		tagWriter.appendCloseTag(result, indent, TAG_COLUMN_DEFINITION);
 		return result;
 	}
 	
-	private void appendTag(StrBuffer target, StrBuffer indent, String tag, int value)
+	public void setNamespace(String namespace)
 	{
-		this.appendTag(target, indent, tag, String.valueOf(value));
-	}
-	
-	private void appendTag(StrBuffer target, StrBuffer indent, String tag, String value)
-	{
-		appendOpenTag(target, indent, tag);
-		target.append(value);
-		appendCloseTag(target, null, tag);
-	}
-	
-	private void appendOpenTag(StrBuffer target, StrBuffer indent, String tag)
-	{
-		if (indent != null) target.append(indent);
-		target.append('<');
-		if (this.xmlNamespace != null)
+		this.tagWriter.setNamespace(namespace);
+		if (this.fk != null)
 		{
-			target.append(xmlNamespace);
-			target.append(':');
+			this.fk.setNamespace(namespace);
 		}
-		target.append(tag);
-		target.append('>');
-	}
-
-	private void appendCloseTag(StrBuffer target, StrBuffer indent, String tag)
-	{
-		if (indent != null) target.append(indent);
-		target.append("</");
-		if (this.xmlNamespace != null)
-		{
-			target.append(xmlNamespace);
-			target.append(':');
-		}
-		target.append(tag);
-		target.append(">\n");
-	}
-	
-	/**
-	 * Getter for property namespace.
-	 * @return Value of property namespace.
-	 */
-	public java.lang.String getNamespace()
-	{
-		return xmlNamespace;
-	}
-	
-	/**
-	 * Setter for property namespace.
-	 * @param namespace New value of property namespace.
-	 */
-	public void setNamespace(java.lang.String namespace)
-	{
-		this.xmlNamespace = namespace;
 	}
 	
 }

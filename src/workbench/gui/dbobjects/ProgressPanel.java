@@ -6,7 +6,9 @@
 
 package workbench.gui.dbobjects;
 
+import java.awt.Color;
 import java.io.File;
+import javax.swing.border.LineBorder;
 
 import workbench.gui.components.WbButton;
 import workbench.interfaces.Interruptable;
@@ -28,12 +30,17 @@ public class ProgressPanel extends javax.swing.JPanel
 		initComponents();
 	}
 	
-	public synchronized void setRowInfo(long aRow)
+	public void setRowInfo(long aRow)
 	{
 		this.rowInfo.setText(Long.toString(aRow));
 	}
 	
-	public synchronized void setInfoText(String aText)
+	public void setRowInfo(String info)
+	{
+		this.rowInfo.setText(info);
+	}
+	
+	public void setInfoText(String aText)
 	{
 		this.progressInfoText.setText(aText);
 	}
@@ -46,6 +53,15 @@ public class ProgressPanel extends javax.swing.JPanel
 		this.fileNameField.setText(fullName);
 	}
 	
+	public void setRowSize(int cols)
+	{
+		this.rowInfo.setColumns(cols);
+	}
+	
+	public void setInfoSize(int cols)
+	{
+		this.progressInfoText.setColumns(cols);
+	}
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is

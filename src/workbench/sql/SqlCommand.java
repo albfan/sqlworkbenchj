@@ -131,8 +131,22 @@ public class SqlCommand
 		if (this.currentStatement != null)
 		{
 			this.isCancelled = true;
-			this.currentStatement.cancel();
-			this.currentStatement.close();
+			try
+			{
+				LogMgr.logDebug("SqlCommand.cancel()", "Cancelling statement execution...");
+				this.currentStatement.cancel();
+//				if (this.currentConnection.getMetadata().isOracle())
+//				{
+//					// for some reasons Oracle does not always cancel the statement
+//					// when cancel() is called. Closing the statement does this "the hard way"
+//					this.currentStatement.close();
+//				}
+			}
+			catch (Throwable th)
+			{
+				LogMgr.logWarning("SqlCommand.cancel()", "Error when cancelling statement", th);
+			}
+
 			if (this.currentConnection != null && this.currentConnection.cancelNeedsReconnect())
 			{
 				LogMgr.logInfo(this, "Cancelling needs a reconnect to the database for this DBMS...");
@@ -252,7 +266,7 @@ public class SqlCommand
 		this.consumerWaiting = flag;
 	}
 
-	public boolean getConsumerWaiting()
+	public boolean isConsumerWaiting()
 	{
 		return this.consumerWaiting;
 	}

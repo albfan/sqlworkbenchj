@@ -21,6 +21,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,11 +45,42 @@ public class StringUtil
 	public static final StringBuffer EMPTY_STRINGBUFFER = new StringBuffer("");
 	public static final String EMPTY_STRING = "";
 
+	public static final SimpleDateFormat ISO_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
+	public static final SimpleDateFormat ISO_TIMESTAMP_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SS");
+	public static final SimpleDateFormat ISO_TZ_TIMESTAMP_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SS z");
+
+	/**
+	 *	Returns the current date formatted as yyyy-MM-dd
+	 */
+	public static final String getCurrentDateString()
+	{
+		return ISO_DATE_FORMATTER.format(now());
+	}
+	
+	public static final String getCurrentTimestampString()
+	{
+		return ISO_TIMESTAMP_FORMATTER.format(now());
+	}
+	
+	public static final String getCurrentTimestampWithTZString()
+	{
+		return ISO_TZ_TIMESTAMP_FORMATTER.format(now());
+	}
+	
+	private static final java.util.Date now()
+	{
+		return new java.util.Date(System.currentTimeMillis());
+	}
 	public static final StringBuffer replaceToBuffer(String aString, String aValue, String aReplacement)
 	{
 		return replaceToBuffer(null, aString, aValue, aReplacement);
 	}
 
+	public static final String makeFilename(String input)
+	{
+		return input.replaceAll("[\t\\:\\\\/\\?\\*\\|<>]", "").toLowerCase();
+	}
+	
 	public static final StringBuffer replaceToBuffer(StringBuffer target, String aString, String aValue, String aReplacement)
 	{
 		if (target == null)
@@ -96,10 +128,10 @@ public class StringUtil
 
 		return temp.toString();
 	}
-	
+
 	public static final StringBuffer replaceBuffer(StringBuffer haystack, String needle, String replacement)
 	{
-		
+
 		int pos = haystack.indexOf(needle);
 		if (pos == -1)
 		{
@@ -123,7 +155,7 @@ public class StringUtil
 		}
 		return result;
 	}
-	
+
 
 	public static final String getStartingWhiteSpace(final String aLine)
 	{
@@ -197,6 +229,12 @@ public class StringUtil
 		return result;
 	}
 
+	/**
+	 *	Parses the given String and creates a List containing the elements
+	 *  of the string that are separated by <tt>aDelimiter</aa>
+	 *  @param String the separated input to parse
+	 *  @param String the delimiter to user
+	 */
 	public static final List stringToList(String aString, String aDelimiter)
 	{
     if (aString == null || aString.length() == 0) return Collections.EMPTY_LIST;
@@ -407,16 +445,19 @@ public class StringUtil
 		Matcher m = PATTERN_EMPTY_LINE.matcher(input);
 		return m.replaceAll("");
 	}
+	
 	public static final String trimQuotes(String input)
 	{
 		//System.out.println("toTrim=" + input);
 		if (input == null) return null;
 		if (input.length() == 0) return EMPTY_STRING;
-
+		if (input.length() == 1) return input;
+		
 		String result = input.trim();
 		int first = 0;
 		int len = result.length();
 		if (len == 0) return EMPTY_STRING;
+		if (len == 1) return input;
 
 		char firstChar = result.charAt(0);
 		char lastChar = result.charAt(len - 1);
@@ -793,7 +834,20 @@ public class StringUtil
 		}
 		return buf.toString();
 	}
-	
+
+	public static int findPattern(String regex, String data)
+	{
+		return findPattern(regex, data);
+	}
+	public static int findPattern(String regex, String data, int startAt)
+	{
+		Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+		Matcher m = p.matcher(data);
+		int result = -1;
+		if (m.find(startAt)) result = m.start();
+		return result;
+	}
+
 	public static void main(String args[])
 	{
 		try

@@ -32,13 +32,14 @@ import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.gui.WbSwingUtilities;
 
 
 /**
  *
  * @author  workbench@kellerer.org
  */
-public class ProfileSelectionDialog 
+public class ProfileSelectionDialog
 	extends JDialog implements ActionListener, WindowListener
 {
   private JPanel buttonPanel;
@@ -59,20 +60,20 @@ public class ProfileSelectionDialog
 	{
 		super(parent, modal);
 		initComponents(lastProfileKey);
-		
+
 		JRootPane root = this.getRootPane();
-		root.setDefaultButton(okButton);		
+		root.setDefaultButton(okButton);
 		InputMap im = root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 		ActionMap am = root.getActionMap();
 		EscAction esc = new EscAction(this);
 		escActionCommand = esc.getActionName();
 		im.put(esc.getAccelerator(), esc.getActionName());
 		am.put(esc.getActionName(), esc);
-		
+
 		//this.getRootPane().setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
 		//this.getRootPane().setActionMap(am);
-		
-		
+
+
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
@@ -130,8 +131,8 @@ public class ProfileSelectionDialog
 		getContentPane().add(dummy, BorderLayout.NORTH);
 		getContentPane().add(profiles, BorderLayout.CENTER);
     getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-		
-		
+
+
 		setTitle(ResourceMgr.getString(ResourceMgr.TXT_SELECT_PROFILE));
 		//this.setFocusTraversalPolicy(null);
 		this.restoreSize();
@@ -167,10 +168,24 @@ public class ProfileSelectionDialog
 	public void selectProfile()
 	{
 		this.selectedProfile = this.profiles.getSelectedProfile();
-		this.cancelled = false;
-		this.closeDialog();
+		if (this.checkPassword())
+		{
+			this.cancelled = false;
+			this.closeDialog();
+		}
 	}
 
+	private boolean checkPassword()
+	{
+		if (this.selectedProfile == null) return false;
+		if (!this.selectedProfile.getStorePassword())
+		{
+			String pwd = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgInputPwdWindowTitle"), "", true);
+			if (pwd == null) return false;
+			this.selectedProfile.setPassword(pwd);
+		}
+		return true;
+	}
 	public void profileListClicked(MouseEvent evt)
 	{
 		if (evt.getClickCount() == 2)
@@ -188,7 +203,7 @@ public class ProfileSelectionDialog
 	{
 		profiles.setInitialFocus();
 	}
-	
+
 	/** Invoked when an action occurs.
 	 */
 	public void actionPerformed(ActionEvent e)
@@ -215,7 +230,7 @@ public class ProfileSelectionDialog
 	public void setVisible(boolean aFlag)
 	{
 		super.setVisible(aFlag);
-		if (aFlag) 
+		if (aFlag)
 		{
 			this.setInitialFocus();
 		}

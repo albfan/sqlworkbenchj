@@ -15,4 +15,5 @@ public interface Exporter
 	void saveAs();
 	void copyDataToClipboard();
 	void copyDataToClipboard(boolean includeHeaders);
+	void copyDataToClipboard(boolean includeHeaders, boolean selectedOnly);
 }

@@ -7,20 +7,19 @@
 package workbench.gui.components;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.border.Border;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.EscAction;
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
+
 
 /**
  *
@@ -34,6 +33,7 @@ public class ValidatingDialog
 	private JButton okButton;
 	private JButton cancelButton;
 	private boolean isCancelled = true;
+	private EscAction esc;
 	
 	/** Creates a new instance of ValidatingDialog */
 	public ValidatingDialog(Frame owner, String title, JPanel editor)
@@ -48,6 +48,21 @@ public class ValidatingDialog
 		this.okButton.addActionListener(this);
 		this.cancelButton = new WbButton(ResourceMgr.getString("LabelCancel"));
 		this.cancelButton.addActionListener(this);
+		
+		JRootPane root = this.getRootPane();
+		root.setDefaultButton(okButton);		
+
+		InputMap im = root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+		ActionMap am = root.getActionMap();
+		this.esc = new EscAction(this);
+		im.put(esc.getAccelerator(), esc.getActionName());
+		am.put(esc.getActionName(), esc);
+
+		im = editor.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+		am = editor.getActionMap();
+		im.put(esc.getAccelerator(), esc.getActionName());
+		am.put(esc.getActionName(), esc);
+		
 		JPanel content = new JPanel();
 		content.setLayout(new BorderLayout());
 		Border b = BorderFactory.createEmptyBorder(10,10,10,10);
@@ -85,32 +100,32 @@ public class ValidatingDialog
 		this.dispose();
 	}
 	
-	public void windowActivated(java.awt.event.WindowEvent e)
+	public void windowActivated(WindowEvent e)
 	{
 	}
 	
-	public void windowClosed(java.awt.event.WindowEvent e)
+	public void windowClosed(WindowEvent e)
 	{
 	}
 	
-	public void windowClosing(java.awt.event.WindowEvent e)
+	public void windowClosing(WindowEvent e)
 	{
 		this.close();
 	}
 	
-	public void windowDeactivated(java.awt.event.WindowEvent e)
+	public void windowDeactivated(WindowEvent e)
 	{
 	}
 	
-	public void windowDeiconified(java.awt.event.WindowEvent e)
+	public void windowDeiconified(WindowEvent e)
 	{
 	}
 	
-	public void windowIconified(java.awt.event.WindowEvent e)
+	public void windowIconified(WindowEvent e)
 	{
 	}
 	
-	public void windowOpened(java.awt.event.WindowEvent e)
+	public void windowOpened(WindowEvent e)
 	{
 		SwingUtilities.invokeLater(new Runnable()
 		{
@@ -121,9 +136,9 @@ public class ValidatingDialog
 		});
 	}
 	
-	public void actionPerformed(java.awt.event.ActionEvent e)
+	public void actionPerformed(ActionEvent e)
 	{
-		if (e.getSource() == this.cancelButton)
+		if (e.getSource() == this.cancelButton || e.getSource() == this.esc)
 		{
 			this.isCancelled = true;
 			this.close();

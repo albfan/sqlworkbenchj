@@ -19,7 +19,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import workbench.WbManager;
+import workbench.db.report.TagWriter;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
+import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -34,7 +37,8 @@ public class WbConnection
 	private ConnectionProfile profile;
 
 	private boolean ddlNeedsCommit;
-
+	private boolean cancelNeedsReconnect = false;
+	
 	private List listeners;
 
 	/** Creates a new instance of WbConnection */
@@ -56,6 +60,12 @@ public class WbConnection
 	public void setProfile(ConnectionProfile aProfile)
 	{
 		this.profile = aProfile;
+		String driverClass = aProfile.getDriverclass();
+		List drivers = Settings.getInstance().getCancelWithReconnectDrivers();
+		if (drivers.contains(driverClass))
+		{
+			this.cancelNeedsReconnect = true;
+		}
 	}
 
 	public ConnectionProfile getProfile()
@@ -238,6 +248,18 @@ public class WbConnection
 	 */
 	void close()
 	{
+		if (this.profile != null && this.profile.getRollbackBeforeDisconnect())
+		{
+			try
+			{
+				this.rollback();
+			}
+			catch (Exception e)
+			{
+				LogMgr.logWarning("WbConnection.close()", "Error reported when doing rollback before disconnect", e);
+			}
+		}
+		
 		try
 		{
 			this.metaData.close();
@@ -270,7 +292,7 @@ public class WbConnection
 
 	public boolean cancelNeedsReconnect()
 	{
-		return this.metaData.cancelNeedsReconnect();
+		return this.cancelNeedsReconnect;
 	}
 
 	public DbMetadata getMetadata()
@@ -314,14 +336,18 @@ public class WbConnection
 		return false;
 	}
 
+	public StrBuffer getDatabaseInfoAsXml(StrBuffer indent)
+	{
+		return this.getDatabaseInfoAsXml(indent, null);
+	}
+	
 	/**
 	 *	Returns information about the DBMS and the JDBC driver
 	 *	in the XML format used for the XML export
 	 */
-	public StringBuffer getDatabaseInfoAsXml(String anIndent)
+	public StrBuffer getDatabaseInfoAsXml(StrBuffer indent, String namespace)
 	{
-		boolean indent = (anIndent != null && anIndent.length() > 0);
-		StringBuffer dbInfo = new StringBuffer(200);
+		StrBuffer dbInfo = new StrBuffer(200);
 		DatabaseMetaData db = null;
 		try
 		{
@@ -329,43 +355,27 @@ public class WbConnection
 		}
 		catch (Exception e)
 		{
-			return new StringBuffer("");
+			return new StrBuffer("");
 		}
 
-		/* The JDBC is version does not seem to be supported by most of the drivers
-		   so we'll leave it out here.
-		if (indent) dbInfo.append(anIndent);
-		dbInfo.append("  <jdbc-version><major-version>");
-		try { dbInfo.append(db.getJDBCMajorVersion()); }  catch (Throwable e) { dbInfo.append("n/a"); }
-		dbInfo.append("</major-version><minor-version>");
-		try { dbInfo.append(db.getJDBCMinorVersion()); } catch (Throwable e) { dbInfo.append("n/a"); }
-		dbInfo.append("</minor-version></jdbc-version>" + StringUtil.LINE_TERMINATOR);
-		*/
+		TagWriter tagWriter = new TagWriter(namespace);
+		String value = null;
+		
+		tagWriter.appendTag(dbInfo, indent, "created", StringUtil.getCurrentTimestampWithTZString());
+		
+		try { value = db.getDriverName(); } catch (Throwable th) { value = "n/a"; }
+		tagWriter.appendTag(dbInfo, indent, "jdbc-driver", value);
+		
+		try { value = db.getDriverVersion(); } catch (Throwable th) { value = "n/a"; }
+		tagWriter.appendTag(dbInfo, indent, "jdbc-driver-version", value);
+		
+		tagWriter.appendTag(dbInfo, indent, "connection", this.getDisplayString());
 
-		if (indent) dbInfo.append(anIndent);
-		dbInfo.append("  <jdbc-driver>");
-		try { dbInfo.append(db.getDriverName());  } catch (Throwable e) { dbInfo.append("n/a"); }
-		dbInfo.append("</jdbc-driver>"  + StringUtil.LINE_TERMINATOR);
+		try { value = db.getDatabaseProductName(); } catch (Throwable th) { value = "n/a"; }
+		tagWriter.appendTag(dbInfo, indent, "database-product-name", value);
 
-		if (indent) dbInfo.append(anIndent);
-		dbInfo.append("  <jdbc-driver-version>");
-		try { dbInfo.append(db.getDriverVersion()); } catch (Throwable th) {dbInfo.append("n/a");}
-		dbInfo.append("</jdbc-driver-version>"  + StringUtil.LINE_TERMINATOR);
-
-		if (indent) dbInfo.append(anIndent);
-		dbInfo.append("  <connection>");
-		dbInfo.append(this.getDisplayString());
-		dbInfo.append("</connection>"  + StringUtil.LINE_TERMINATOR);
-
-		if (indent) dbInfo.append(anIndent);
-		dbInfo.append("  <database-product-name>");
-		try { dbInfo.append(db.getDatabaseProductName()); } catch (Throwable th) { dbInfo.append("n/a"); }
-		dbInfo.append("</database-product-name>" + StringUtil.LINE_TERMINATOR);
-
-		if (indent) dbInfo.append(anIndent);
-		dbInfo.append("  <database-product-version>");
-		try { dbInfo.append(db.getDatabaseProductVersion()); } catch (Throwable th) {dbInfo.append("n/a"); }
-		dbInfo.append("</database-product-version>" + StringUtil.LINE_TERMINATOR);
+		try { value = db.getDatabaseProductVersion(); } catch (Throwable th) { value = "n/a"; }
+		tagWriter.appendTag(dbInfo, indent, "database-product-version", value);
 
 		return dbInfo;
 	}

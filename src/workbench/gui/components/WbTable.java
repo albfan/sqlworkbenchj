@@ -112,12 +112,23 @@ import workbench.gui.actions.CopyAsSqlInsertAction;
 import workbench.gui.actions.CopyAsSqlUpdateAction;
 import java.awt.RenderingHints;
 import java.awt.Graphics2D;
+import java.io.StringWriter;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import workbench.gui.actions.CopySelectedAsSqlInsertAction;
+import workbench.gui.actions.CopySelectedAsSqlUpdateAction;
+import workbench.gui.actions.CopySelectedAsTextAction;
+import java.util.ArrayList;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+import workbench.db.ColumnIdentifier;
+import workbench.util.WbThread;
 
 
 public class WbTable
 	extends JTable
 	implements ActionListener, FocusListener, MouseListener,
-	           Exporter, FontChangedListener, Searchable, PrintableComponent
+	           Exporter, FontChangedListener, Searchable, PrintableComponent, ListSelectionListener
 {
 	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.YELLOW);
 	private JPopupMenu popup;
@@ -144,6 +155,11 @@ public class WbTable
 	private SaveDataAsAction exportDataAction;
 	private CopyAsSqlInsertAction copyInsertAction;
 	private CopyAsSqlUpdateAction copyUpdateAction;
+
+	private CopySelectedAsTextAction copySelectedAsTextAction;
+	private CopySelectedAsSqlInsertAction copySelectedAsInsertAction;
+	private CopySelectedAsSqlUpdateAction copySelectedAsUpdateAction;
+	private ArrayList copySelectedMenus = new ArrayList();
 
 	private PrintAction printDataAction;
 	private PrintPreviewAction printPreviewAction;
@@ -231,11 +247,16 @@ public class WbTable
 		this.copyInsertAction = new CopyAsSqlInsertAction(this);
 		this.copyUpdateAction = new CopyAsSqlUpdateAction(this);
 		this.exportDataAction = new SaveDataAsAction(this);
+
+
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.addPopupAction(this.exportDataAction, false);
 		this.addPopupAction(this.dataToClipboard, true);
 		this.addPopupAction(this.copyUpdateAction, false);
 		this.addPopupAction(this.copyInsertAction, false);
+
+		WbMenu copy = this.getCopySelectedMenu();
+		this.addPopupSubMenu(copy, true);
 
 		this.addPopupAction(this.findAction, true);
 		this.addPopupAction(this.findAgainAction, false);
@@ -287,6 +308,50 @@ public class WbTable
 		return tip;
 	}
 
+	public CopySelectedAsTextAction getCopySelectedAsTextAction()
+	{
+		return this.copySelectedAsTextAction;
+	}
+
+	public CopySelectedAsSqlInsertAction getCopySelectedAsSqlInsertAction()
+	{
+		return this.copySelectedAsInsertAction;
+	}
+
+	public CopySelectedAsSqlUpdateAction getCopySelectedAsSqlUpdateAction()
+	{
+		return this.copySelectedAsUpdateAction;
+	}
+
+	public WbMenu getCopySelectedMenu()
+	{
+		WbMenu copyMenu = new WbMenu(ResourceMgr.getString("MnuTxtCopySelected"));
+		//copyMenu.setEnabled(false);
+		copyMenu.setIcon(ResourceMgr.getImage("blank"));
+		copyMenu.setParentMenuId(ResourceMgr.MNU_TXT_DATA);
+
+		if (copySelectedAsTextAction == null)
+		{
+			copySelectedAsTextAction = new CopySelectedAsTextAction(this);
+		}
+
+		if (copySelectedAsInsertAction == null)
+		{
+			copySelectedAsInsertAction = new CopySelectedAsSqlInsertAction(this);
+		}
+
+		if (copySelectedAsUpdateAction == null)
+		{
+			copySelectedAsUpdateAction = new CopySelectedAsSqlUpdateAction(this);
+		}
+
+		copyMenu.add(this.copySelectedAsTextAction);
+		copyMenu.add(copySelectedAsUpdateAction);
+		copyMenu.add(copySelectedAsInsertAction);
+		this.copySelectedMenus.add(copyMenu);
+
+		return copyMenu;
+	}
 
 	public CopyAsSqlInsertAction getCopyAsInsertAction()
 	{
@@ -341,6 +406,16 @@ public class WbTable
 		return this.popup;
 	}
 
+	private void addPopupSubMenu(WbMenu submenu, boolean withSep)
+	{
+		if (this.popup == null) this.popup = new JPopupMenu();
+		if (withSep)
+		{
+			this.popup.addSeparator();
+		}
+		this.popup.add(submenu);
+	}
+
 	public void addPopupAction(WbAction anAction, boolean withSep)
 	{
 		if (this.popup == null) this.popup = new JPopupMenu();
@@ -363,6 +438,42 @@ public class WbTable
 		}
 	}
 
+	public void valueChanged(ListSelectionEvent e)
+	{
+		super.valueChanged(e);
+		if (e.getValueIsAdjusting()) return;
+
+		boolean selected = this.getSelectedRowCount() > 0;
+		boolean update = false;
+
+		if (selected)
+		{
+			DataStore ds = this.getDataStore();
+			update = (ds == null ? false : ds.isUpdateable());
+		}
+//		if (this.copySelectedMenus != null)
+//		{
+//			for (int i=0; i < this.copySelectedMenus.size(); i++)
+//			{
+//				WbMenu menu = (WbMenu)this.copySelectedMenus.get(i);
+//				if (menu != null) menu.setEnabled(selected);
+//			}
+//		}
+
+		if (this.copySelectedAsTextAction != null)
+		{
+			this.copySelectedAsTextAction.setEnabled(selected);
+		}
+
+		if (this.copySelectedAsInsertAction != null)
+		{
+			this.copySelectedAsInsertAction.setEnabled(selected && update);
+		}
+		if (this.copySelectedAsUpdateAction != null)
+		{
+			this.copySelectedAsUpdateAction.setEnabled(selected & update);
+		}
+	}
 
 	protected void configureEnclosingScrollPane()
 	{
@@ -807,7 +918,7 @@ public class WbTable
 		for (int i=start; i < this.dwModel.getRowCount(); i++)
 		{
 			//int row = sortModel.getRealIndex(i);
-			String rowString = this.dwModel.getRowData(i).toString();
+			String rowString = this.getDataStore().getRowDataAsString(i).toString();
 			if (rowString == null) continue;
 
 			if (rowString.toLowerCase().indexOf(aText) > -1)
@@ -886,15 +997,16 @@ public class WbTable
 		// otherwise setDefaultRenderer() bombs out with a NullPointerException
 		if (this.defaultRenderersByColumnClass == null) this.createDefaultRenderers();
 
+		Settings sett = Settings.getInstance();
 		if (this.defaultDateRenderer == null)
 		{
-			String format = WbManager.getSettings().getDefaultDateFormat();
+			String format = sett.getDefaultDateFormat();
 			defaultDateRenderer = new DateColumnRenderer(format);
 		}
 		this.setDefaultRenderer(Date.class, defaultDateRenderer);
 
-		int maxDigits = WbManager.getSettings().getMaxFractionDigits();
-		char sep = WbManager.getSettings().getDecimalSymbol().charAt(0);
+		int maxDigits = sett.getMaxFractionDigits();
+		char sep = sett.getDecimalSymbol().charAt(0);
 
 		if (this.defaultNumberRenderer == null)
 		{
@@ -1119,6 +1231,7 @@ public class WbTable
 
 	public void tableChanged(TableModelEvent evt)
 	{
+		if (this.suspendRepaint) return;
 		super.tableChanged(evt);
 		if (evt.getFirstRow() == TableModelEvent.HEADER_ROW)
 		{
@@ -1440,21 +1553,118 @@ public class WbTable
 		WbSwingUtilities.showDefaultCursorOnWindow(this);
 	}
 
+	public void copyDataToClipboard(boolean includeHeaders, boolean selectedOnly)
+	{
+		if (!selectedOnly)
+		{
+			copyDataToClipboard(includeHeaders);
+		}
+		else
+		{
+			try
+			{
+				DataStore ds = this.dwModel.getDataStore();
+				int[] rows = this.getSelectedRows();
+				StringWriter out = new StringWriter(rows.length * 250);
+				ds.writeDataString(out, "\t", "\n", includeHeaders, rows);
+
+				Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
+				WbSwingUtilities.showWaitCursorOnWindow(this);
+				StringSelection sel = new StringSelection(out.toString());
+				clp.setContents(sel, sel);
+			}
+			catch (Throwable e)
+			{
+				LogMgr.logError(this, "Could not copy text data to clipboard", e);
+			}
+			WbSwingUtilities.showDefaultCursorOnWindow(this);
+		}
+	}
+
+
 	public void copyAsSqlUpdate()
 	{
-		this.copyAsSql(true);
+		copyAsSqlUpdate(false);
+	}
+	
+	public void copyAsSqlUpdate(boolean selectedOnly)
+	{
+		// we need decent PK columns in order to create update statements
+		if (!this.checkPkColumns()) return;
+		
+		this.copyAsSql(true, selectedOnly);
 	}
 
 	public void copyAsSqlInsert()
 	{
-		this.copyAsSql(false);
+		copyAsSqlInsert(false);
+	}
+	
+	public void copyAsSqlInsert(boolean selectedOnly)
+	{
+		this.copyAsSql(false, selectedOnly);
 	}
 
+	/**
+	 *	Display dialog window to let the user
+	 *	select the key columns for the current update table
+	 */
+	public boolean selectKeyColumns()
+	{
+		DataStore ds = this.getDataStore();
+		ColumnIdentifier[] originalCols = ds.getColumns();
+		KeyColumnSelectorPanel panel = new KeyColumnSelectorPanel(originalCols, ds.getUpdateTable());
+		int choice = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(this), panel, ResourceMgr.getString("MsgSelectKeyColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION);
+		
+		// KeyColumnSelectorPanel works on a copy of the ColumnIdentifiers so
+		// we need to copy the PK flag back to the original ones..
+		if (choice == JOptionPane.OK_OPTION)
+		{
+			ds.setPKColumns(panel.getColumns());
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean detectDefinedPkColumns()
+	{
+		DataStore ds = this.getDataStore();
+		if (ds == null) return false;
+		if (ds.hasPkColumns()) return true;
+		try
+		{
+			ds.checkDefinedPkColumns();
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 *	Check for any defined PK columns.
+	 *	If no key columns can be found, the user
+	 *  is prompted for the key columns
+	 *
+	 *	@see #detectDefinedPkColumns()
+	 *	@see #selectKeyColumns()
+	 */
+	public boolean checkPkColumns()
+	{
+		DataStore ds = this.getDataStore();
+		if (ds == null) return false;
+		if (ds.hasPkColumns()) return true;
+		detectDefinedPkColumns();
+		
+		return this.selectKeyColumns();
+	}
+	
 	/**
 	 * 	Copy the data of this table into the clipboard using SQL statements
 	 *
 	 */
-	private void copyAsSql(boolean useUpdate)
+	private void copyAsSql(boolean useUpdate, boolean selectedOnly)
 	{
 		if (this.getRowCount() <= 0) return;
 
@@ -1466,14 +1676,17 @@ public class WbTable
 		{
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 			WbSwingUtilities.showWaitCursorOnWindow(this);
+			int rows[] = null;
+			if (selectedOnly) rows = this.getSelectedRows();
+
 			String data;
 			if (useUpdate)
 			{
-				data = ds.getDataAsSqlUpdate();
+				data = ds.getDataAsSqlUpdate(rows);
 			}
 			else
 			{
-				data = ds.getDataAsSqlInsert();
+				data = ds.getDataAsSqlInsert(rows);
 			}
 			StringSelection sel = new StringSelection(data);
 			clp.setContents(sel, sel);

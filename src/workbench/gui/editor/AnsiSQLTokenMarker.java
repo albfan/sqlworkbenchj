@@ -202,6 +202,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("DESCRIBE",Token.KEYWORD2);
 		keywords.add("XSLT",Token.KEYWORD2);
 		keywords.add("SPOOL",Token.KEYWORD2);
+		keywords.add("WBEXPORT",Token.KEYWORD2);
 		keywords.add("EXPORT",Token.KEYWORD2);
 		keywords.add("EXP",Token.KEYWORD2);
 		keywords.add("LIST",Token.KEYWORD2);
@@ -209,14 +210,16 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("LISTDB",Token.KEYWORD2);
 		keywords.add("ENABLEOUT",Token.KEYWORD2);
 		keywords.add("DISABLEOUT",Token.KEYWORD2);
-		keywords.add("IMP",Token.KEYWORD2);
 		keywords.add("IMPORT",Token.KEYWORD2);
+		keywords.add("IMP",Token.KEYWORD2);
+		keywords.add("WBIMPORT",Token.KEYWORD2);
 		keywords.add("COPY",Token.KEYWORD2);
 		keywords.add("WBCOPY",Token.KEYWORD2);
 		keywords.add("WBVARDEF",Token.KEYWORD2);
 		keywords.add("WBVARDEFINE",Token.KEYWORD2);
 		keywords.add("WBVARLIST",Token.KEYWORD2);
 		keywords.add("WBVARDELETE",Token.KEYWORD2);
+		keywords.add("WBREPORT",Token.KEYWORD2);
 	}
 
 	private static void addDataTypes()

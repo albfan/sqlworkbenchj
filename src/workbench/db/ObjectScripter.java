@@ -63,7 +63,7 @@ public class ObjectScripter
 			{
 				if (this.progressMonitor != null)
 				{
-					this.progressMonitor.currentObject(object);
+					this.progressMonitor.setCurrentObject(object);
 				}
 				try
 				{

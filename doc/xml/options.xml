@@ -80,7 +80,7 @@
 
       <para>When this option is enabled, the statements which are sent to the
       database when saving changes to result set table, are displayed before
-      execution. The update can be canceled at that point if the statements
+      execution. The update can be cancelled at that point if the statements
       are not correct. The generated statements can also be saved to a file
       from that window.</para>
 
@@ -442,8 +442,14 @@
                 </entry>
                 <entry><para>workbench.db.ignore.oracle =prompt, exit, whenever</para></entry>
               </row>
+              <row>
+                <entry><para>workbench.db.cancelneedsreconnect</para></entry>
+                <entry><para>A list of JDBC driver classes, that require a reconnect after cancelling 
+                a statement. </para>
+                </entry>
+                <entry><para>PostgreSQL,Firebird</para></entry>
+              </row>
               
-
             </tbody>
           </tgroup>
         </informaltable>

@@ -37,6 +37,7 @@ import workbench.gui.components.WbToolbar;
 import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 
 /**
@@ -370,6 +371,7 @@ public class DbExplorerPanel
 			this.window.dispose();
 			this.window = null;
 		}
+
 	}
 
 	public void openWindow(String aProfileName)
@@ -419,7 +421,21 @@ public class DbExplorerPanel
 	public void explorerWindowClosed()
 	{
 		this.window = null;
-		if (WbManager.getSettings().getDbExplorerClearDataOnClose() && this.tables != null) this.tables.clearTableData();
+		if (Settings.getInstance().getDbExplorerClearDataOnClose() && this.tables != null) this.tables.clearTableData();
+		if (this.dbConnection != null &&
+		    Settings.getInstance().disconnectDbExplorerOnClose() &&
+		    this.dbConnection.getProfile().getUseSeperateConnectionPerTab())
+		{
+			try
+			{
+				this.dbConnection.disconnect();
+			}
+			catch (Throwable th)
+			{
+				LogMgr.logWarning("DbExplorerPanel.dispose()", "Error when closing connection", th);
+			}
+
+		}
 	}
 
 	public void mainWindowDeiconified()

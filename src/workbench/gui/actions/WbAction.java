@@ -2,6 +2,7 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -13,6 +14,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import javax.swing.UIManager;
 
 import workbench.WbManager;
 import workbench.gui.components.WbMenuItem;
@@ -352,7 +354,6 @@ public class WbAction
 		}
 		*/
 	}
-
 	
 	public void setDefaultAccelerator(KeyStroke key)
 	{
@@ -386,5 +387,28 @@ public class WbAction
 			this.delegate.actionPerformed(e);
 		}
 	}
+
+	public String getTooltipTextWithKeys()
+	{
+		String tooltip = (String)getValue(Action.SHORT_DESCRIPTION);
+		return tooltip + " (" + this.getAcceleratorDisplay() + ")";
+	}
 	
+	private String getAcceleratorDisplay()
+	{
+		String acceleratorDelimiter = UIManager.getString( "MenuItem.acceleratorDelimiter" );
+		if ( acceleratorDelimiter == null )
+		{ 
+			acceleratorDelimiter = "-"; 
+		}
+		KeyStroke key = getDefaultAccelerator();
+		int mod = key.getModifiers();
+		int keycode = key.getKeyCode();
+			
+		String display = KeyEvent.getKeyModifiersText(mod) +
+										acceleratorDelimiter + 
+										KeyEvent.getKeyText(keycode);
+    return display;
+		
+	}
 }

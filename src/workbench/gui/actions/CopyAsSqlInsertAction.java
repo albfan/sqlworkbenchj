@@ -21,7 +21,7 @@ import workbench.resource.ResourceMgr;
 public class CopyAsSqlInsertAction extends WbAction
 {
 	private WbTable client;
-
+	
 	public CopyAsSqlInsertAction(WbTable aClient)
 	{
 		super();
@@ -32,7 +32,7 @@ public class CopyAsSqlInsertAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		client.copyAsSqlInsert();
+		client.copyAsSqlInsert(false);
 	}
 
 }

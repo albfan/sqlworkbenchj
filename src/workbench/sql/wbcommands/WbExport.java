@@ -5,12 +5,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import workbench.db.DataSpooler;
 import workbench.db.WbConnection;
+import workbench.db.exporter.DataExporter;
+import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -19,13 +21,18 @@ import workbench.util.StringUtil;
  *
  * @author  workbench@kellerer.org
  */
-public class WbExport extends SqlCommand
+public class WbExport 
+	extends SqlCommand
+	implements RowActionMonitor
 {
-	public static final String VERB = "EXPORT";
-	public DataSpooler spooler;
-
+	public static final String VERB = "WBEXPORT";
+	public DataExporter exporter;
+	private int maxRows = 0;
 	private ArgumentParser cmdLine;
-
+	private boolean directExport = false;
+	private List tablesToExport = null;
+	private String currentTable;
+	
 	public WbExport()
 	{
 		cmdLine = new ArgumentParser();
@@ -41,6 +48,7 @@ public class WbExport extends SqlCommand
 		cmdLine.addArgument("cleancr");
 		cmdLine.addArgument("charfunc");
 		cmdLine.addArgument("concat");
+		cmdLine.addArgument("concatfunc");
 		cmdLine.addArgument("commitevery");
 		cmdLine.addArgument("header");
 		cmdLine.addArgument("createtable");
@@ -49,11 +57,14 @@ public class WbExport extends SqlCommand
 		cmdLine.addArgument("showprogress");
 		cmdLine.addArgument("sqlinsert");
 		cmdLine.addArgument("sqlupdate");
+		cmdLine.addArgument("keycolumns");
 		cmdLine.addArgument("append");
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 		cmdLine.addArgument("escapehtml");
 		cmdLine.addArgument("createfullhtml");
+		cmdLine.addArgument("sourcetable");
+		cmdLine.addArgument("outputdir");
 	}
 
 	public String getVerb() { return VERB; }
@@ -62,6 +73,7 @@ public class WbExport extends SqlCommand
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		this.currentConnection = aConnection;
 		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
 		int pos = aSql.indexOf(' ');
 		if (pos > -1)
@@ -98,12 +110,17 @@ public class WbExport extends SqlCommand
 		String type = null;
 		String file = null;
 
-		this.spooler = new DataSpooler();
-
+		this.exporter = new DataExporter();
+		
 		type = cmdLine.getValue("type");
 		file = cmdLine.getValue("file");
-
-		if (type == null || file == null)
+		String outputdir = cmdLine.getValue("outputdir");
+		String tables = cmdLine.getValue("sourcetable");
+		
+		if (
+				(type == null) || 
+				(file == null && outputdir == null) 
+			 )
 		{
 			result.addMessage(ResourceMgr.getString("ErrorSpoolWrongParameters"));
 			result.setFailure();
@@ -119,65 +136,72 @@ public class WbExport extends SqlCommand
 		{
 			// change the contents of type in order to display it properly
 			typeDisplay = "Text";
-			spooler.setOutputTypeText();
+			exporter.setOutputTypeText();
 			String delimiter = cmdLine.getValue("delimiter");
-			if (delimiter != null) spooler.setTextDelimiter(delimiter);
+			if (delimiter != null) exporter.setTextDelimiter(delimiter);
 
 			String quote = cmdLine.getValue("quotechar");
-			if (quote != null) spooler.setTextQuoteChar(quote);
+			if (quote != null) exporter.setTextQuoteChar(quote);
 
 			String format = cmdLine.getValue("dateformat");
-			if (format != null) spooler.setTextDateFormat(format);
+			if (format != null) exporter.setDateFormat(format);
 
 			format = cmdLine.getValue("timestampformat");
-			if (format != null) spooler.setTextTimestampFormat(format);
+			if (format != null) exporter.setTimestampFormat(format);
 
 			format = cmdLine.getValue("decimal");
-			if (format != null) spooler.setDecimalSymbol(format);
+			if (format != null) exporter.setDecimalSymbol(format);
 
 			String header = cmdLine.getValue("header");
-			spooler.setExportHeaders(cmdLine.getBoolean("header"));
-			spooler.setCleanCarriageReturns(cmdLine.getBoolean("cleancr"));
+			exporter.setExportHeaders(cmdLine.getBoolean("header"));
+			exporter.setCleanupCarriageReturns(cmdLine.getBoolean("cleancr"));
 
-			spooler.setAppendToFile(cmdLine.getBoolean("append"));
+			exporter.setAppendToFile(cmdLine.getBoolean("append"));
 		}
 		else if (type.startsWith("sql"))
 		{
 			if (type.equals("sql") || type.equals("sqlinsert"))
 			{
-				spooler.setOutputTypeSqlInsert();
+				exporter.setOutputTypeSqlInsert();
 				typeDisplay = "SQL INSERT";
 			}
 			else if (type.equals("sqlupdate"))
 			{
-				spooler.setOutputTypeSqlUpdate();
+				exporter.setOutputTypeSqlUpdate();
 				typeDisplay = "SQL UPDATE";
 			}
-			spooler.setIncludeCreateTable(cmdLine.getBoolean("createtable"));
-			spooler.setChrFunction(cmdLine.getValue("charfunc"));
-			spooler.setConcatString(cmdLine.getValue("concat"));
+			exporter.setIncludeCreateTable(cmdLine.getBoolean("createtable"));
+			exporter.setChrFunction(cmdLine.getValue("charfunc"));
+			exporter.setConcatFunction(cmdLine.getValue("concatfunc"));
+			exporter.setConcatString(cmdLine.getValue("concat"));
 			int commit = StringUtil.getIntValue(cmdLine.getValue("commitevery"),-1);
-			spooler.setCommitEvery(commit);
-			spooler.setAppendToFile(cmdLine.getBoolean("append"));
-			if (table != null) spooler.setTableName(table);
+			exporter.setCommitEvery(commit);
+			exporter.setAppendToFile(cmdLine.getBoolean("append"));
+			if (table != null) exporter.setTableName(table);
+			String c = cmdLine.getValue("keycolumns");
+			if (c != null)
+			{
+				List cols = StringUtil.stringToList(c, ",");
+				exporter.setKeyColumnsToUse(cols);
+			}
 		}
 		else if ("xml".equalsIgnoreCase(type))
 		{
 			// change the contents of type in order to display it properly
 			typeDisplay = "XML";
 			String format = cmdLine.getValue("dateformat");
-			if (format != null) spooler.setTextDateFormat(format);
+			if (format != null) exporter.setDateFormat(format);
 
 			String encoding = cmdLine.getValue("encoding");
-			if (encoding != null) spooler.setXmlEncoding(encoding);
+			if (encoding != null) exporter.setEncoding(encoding);
 
 			format = cmdLine.getValue("timestampformat");
-			if (format != null) spooler.setTextTimestampFormat(format);
+			if (format != null) exporter.setTimestampFormat(format);
 
 			format = cmdLine.getValue("decimal");
-			if (format != null) spooler.setDecimalSymbol(format);
+			if (format != null) exporter.setDecimalSymbol(format);
 
-			spooler.setOutputTypeXml();
+			exporter.setOutputTypeXml();
 
 			String xsl = cmdLine.getValue(WbXslt.ARG_STYLESHEET);
 			String output = cmdLine.getValue(WbXslt.ARG_OUTPUT);
@@ -187,8 +211,8 @@ public class WbExport extends SqlCommand
 				File f = new File(xsl);
 				if (f.exists())
 				{
-					spooler.setXsltTransformation(xsl);
-					spooler.setXsltTransformationOutput(output);
+					exporter.setXsltTransformation(xsl);
+					exporter.setXsltTransformationOutput(output);
 				}
 				else
 				{
@@ -198,36 +222,36 @@ public class WbExport extends SqlCommand
 				}
 			}
 
-			if (table != null) spooler.setTableName(table);
+			if (table != null) exporter.setTableName(table);
 		}
 		else if ("html".equalsIgnoreCase(type))
 		{
 			// change the contents of type in order to display it properly
 			typeDisplay = "HTML";
 			String format = cmdLine.getValue("dateformat");
-			if (format != null) spooler.setTextDateFormat(format);
+			if (format != null) exporter.setDateFormat(format);
 
 			format = cmdLine.getValue("timestampformat");
-			if (format != null) spooler.setTextTimestampFormat(format);
+			if (format != null) exporter.setTimestampFormat(format);
 
 			format = cmdLine.getValue("decimal");
-			if (format != null) spooler.setDecimalSymbol(format);
+			if (format != null) exporter.setDecimalSymbol(format);
 
-			spooler.setHtmlTitle(cmdLine.getValue("title"));
+			exporter.setHtmlTitle(cmdLine.getValue("title"));
 
 			String value = cmdLine.getValue("escapehtml");
 			if (value != null)
 			{
-				spooler.setEscapeHtml("true".equalsIgnoreCase(value));
+				exporter.setEscapeHtml("true".equalsIgnoreCase(value));
 			}
 			value = cmdLine.getValue("createfullhtml");
 			if (value != null)
 			{
-				spooler.setCreateFullHtmlPage("true".equalsIgnoreCase(value));
+				exporter.setCreateFullHtmlPage("true".equalsIgnoreCase(value));
 			}
 
-			spooler.setOutputTypeHtml();
-			if (table != null) spooler.setTableName(table);
+			exporter.setOutputTypeHtml();
+			if (table != null) exporter.setTableName(table);
 		}
 		else
 		{
@@ -235,27 +259,147 @@ public class WbExport extends SqlCommand
 			result.setFailure();
 			return result;
 		}
+		
 		file = StringUtil.trimQuotes(file);
-		this.spooler.setOutputFilename(file);
-		this.spooler.setConnection(aConnection);
-		this.spooler.setRowMonitor(this.rowMonitor);
+		this.exporter.setOutputFilename(file);
+		
+		if (tables != null)
+		{
+			this.tablesToExport = StringUtil.stringToList(tables, ",");
+			this.directExport = (this.tablesToExport.size() > 0);
+		}
+		
+		this.exporter.setConnection(aConnection);
 
 		String progress = cmdLine.getValue("showprogress");
-		this.spooler.setShowProgress("true".equalsIgnoreCase(progress));
-
-		String msg = ResourceMgr.getString("MsgSpoolInit");
-		msg = StringUtil.replace(msg, "%type%", typeDisplay);
-		msg = StringUtil.replace(msg, "%file%", file);
-		//msg = msg + " quote=" + spooler.getTextQuoteChar();
-		result.addMessage(msg);
+		this.exporter.setShowProgress("true".equalsIgnoreCase(progress));
+		if (!this.directExport)
+		{
+			this.exporter.setRowMonitor(this.rowMonitor);
+			String msg = ResourceMgr.getString("MsgSpoolInit");
+			msg = StringUtil.replace(msg, "%type%", typeDisplay);
+			msg = StringUtil.replace(msg, "%file%", file);
+			//msg = msg + " quote=" + exporter.getTextQuoteChar();
+			result.addMessage(msg);
+			if (this.maxRows > 0)
+			{
+				msg = ResourceMgr.getString("MsgExportMaxRowsWarning").replaceAll("%maxrows%", Integer.toString(maxRows));
+				result.addMessage(msg);
+			}
+		}
+		else
+		{
+			this.runTableExports(result, outputdir);
+		}
 		return result;
 	}
 
+	private void runTableExports(StatementRunnerResult result, String outputdir)
+	{
+		if (this.tablesToExport == null || this.tablesToExport.size() == 0)
+		{
+			this.directExport = false;
+			return;
+		}
+
+		result.setSuccess();
+		
+		int count = this.tablesToExport.size();
+		
+		File outdir = null;
+		String outfile = exporter.getOutputFilename();
+		String msg = null;
+		
+		if (count > 1)
+		{
+			outdir = new File(outputdir);
+			if (!outdir.isDirectory())
+			{
+				result.setFailure();
+				msg = ResourceMgr.getString("ErrorExportOutputDirNotDir");
+				msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
+				result.addMessage(msg);
+				result.setFailure();
+				return;
+			}
+
+			if (!outdir.exists())
+			{
+				result.setFailure();
+				msg = ResourceMgr.getString("ErrorExportOutputDirNotFound");
+				msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
+				result.addMessage(msg);
+				result.setFailure();
+				return;
+			}
+		}
+			
+		exporter.setRowMonitor(this);
+		if (count > 1 || outfile == null)
+		{
+			for (int i = 0; i < count; i ++)
+			{
+				String table = (String)this.tablesToExport.get(i);
+				if (table == null) continue;
+
+				String stmt = "SELECT * FROM " + SqlUtil.quoteObjectname(table);
+				String fname = StringUtil.makeFilename(table);
+				File f = new File(outdir, fname + ".xml");
+				this.currentTable = table;
+				exporter.addJob(f.getAbsolutePath(), stmt);
+			}
+			exporter.runJobs();	
+			msg = ResourceMgr.getString("MsgExportNumTables");
+			msg = msg.replaceAll("%numtables%", Integer.toString(count));
+			msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
+			result.addMessage(msg);
+		}
+		else
+		{
+			String table = (String)this.tablesToExport.get(0);
+			String stmt = "SELECT * FROM " + SqlUtil.quoteObjectname(table);
+			exporter.setSql(stmt);
+			long rows = 0;
+			try
+			{
+				rows = exporter.startExport();
+			}
+			catch (Exception e)
+			{
+				result.setFailure();
+				result.addMessage(e.getMessage());
+			}
+			if (exporter.isSuccess())
+			{
+				msg = ResourceMgr.getString("MsgExportTableExported");
+				msg = StringUtil.replace(msg, "%file%", outfile);
+				msg = StringUtil.replace(msg, "%tablename%", table);
+				msg = StringUtil.replace(msg, "%rows%", Long.toString(rows));
+				result.addMessage(msg);
+			}			
+		}
+		
+		if (exporter.hasWarning())
+		{
+			result.addMessages(exporter.getWarnings());
+		}
+		if (exporter.hasError())
+		{
+			result.addMessages(exporter.getErrors());
+		}
+		result.addMessage("");
+	}
+	
 	public boolean isResultSetConsumer()
 	{
-		return true;
+		return !this.directExport;
 	}
 
+	public void setMaxRows(int rows)
+	{
+		this.maxRows = rows;
+	}
+	
 	public void consumeResult(StatementRunnerResult aResult)
 	{
 		try
@@ -264,18 +408,18 @@ public class WbExport extends SqlCommand
 			{
 				ResultSet[] data = aResult.getResultSets();
 				String sql = aResult.getSourceCommand();
-				this.spooler.setSql(sql);
-				long rowCount = this.spooler.startExport(data[0]);
+				this.exporter.setSql(sql);
+				long rowCount = this.exporter.startExport(data[0]);
 
 				String msg = null;
 
-				if (spooler.isSuccess())
+				if (exporter.isSuccess())
 				{
 					msg = ResourceMgr.getString("MsgSpoolOk").replaceAll("%rows%", Long.toString(rowCount));
 					aResult.addMessage(""); // force new line in output
 					aResult.addMessage(msg);
 				}
-				String[] spoolMsg = this.spooler.getErrors();
+				String[] spoolMsg = this.exporter.getErrors();
 				if (spoolMsg.length > 0)
 				{
 					for (int i=0; i < spoolMsg.length; i++)
@@ -286,7 +430,7 @@ public class WbExport extends SqlCommand
 				}
 
 				String warn = ResourceMgr.getString("TxtWarning");
-				spoolMsg = this.spooler.getWarnings();
+				spoolMsg = this.exporter.getWarnings();
 				if (spoolMsg.length > 0)
 				{
 					for (int i=0; i < spoolMsg.length; i++)
@@ -297,7 +441,7 @@ public class WbExport extends SqlCommand
 				}
 				//msg = ResourceMgr.getString("MsgSpoolSource") + " " + aResult.getSourceCommand();
 				//aResult.addMessage(msg);
-				msg = ResourceMgr.getString("MsgSpoolTarget") + " " + this.spooler.getFullOutputFilename();
+				msg = ResourceMgr.getString("MsgSpoolTarget") + " " + this.exporter.getFullOutputFilename();
 				aResult.addMessage(msg);
 				aResult.clearResultSets();
 				aResult.setSuccess();
@@ -313,23 +457,45 @@ public class WbExport extends SqlCommand
 				msg = StringUtil.getStackTrace(e);
 			}
 			aResult.addMessage(msg);
-			LogMgr.logError("WbSpoolCommand.consumeResult()", "Error spooling data", e);
+			LogMgr.logError("WbExportCommand.consumeResult()", "Error spooling data", e);
 		}
 	}
 
 	public void done()
 	{
 		super.done();
-		this.spooler = null;
+		this.exporter = null;
 	}
 
 	public void cancel()
 		throws SQLException
 	{
 		super.cancel();
-		if (this.spooler != null)
+		if (this.exporter != null)
 		{
-			this.spooler.cancelExecution();
+			this.exporter.cancelExecution();
 		}
 	}
+	
+	public void jobFinished()
+	{
+	}
+	
+	public void setCurrentObject(String object)
+	{
+		this.currentTable = object;
+	}
+		
+	public void setCurrentRow(int currentRow, int totalRows)
+	{
+		if (this.rowMonitor != null && this.currentTable != null)
+		{
+			this.rowMonitor.setCurrentObject(this.currentTable + " " + currentRow);
+		}
+	}
+	
+	public void setMonitorType(int aType)
+	{
+	}
+	
 }

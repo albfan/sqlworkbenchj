@@ -1614,6 +1614,10 @@ public class DataPumper
 		}
 	}
 
+	public void setCurrentObject(String object)
+	{
+	}
+	
 	public void setCurrentRow(int currentRow, int totalRows)
 	{
 		if (currentRow == 1) this.updateWindowTitle();

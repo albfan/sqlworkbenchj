@@ -34,21 +34,23 @@ public class KeyColumnSelectorPanel
 		this.setLayout(new BorderLayout());
 		this.selectTable = new JTable();
 		this.selectTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		this.selectTable.setRowSelectionAllowed(false);
+		this.selectTable.setColumnSelectionAllowed(false);
 		this.model = new KeySelectTableModel(columns);
 		this.selectTable.setModel(this.model);
 		TableColumnModel colMod = this.selectTable.getColumnModel();
 		TableColumn col = colMod.getColumn(0);
-		col.setPreferredWidth(200);
-		col.setMinWidth(200);
+		col.setPreferredWidth(150);
+		col.setMinWidth(50);
 		col = colMod.getColumn(1);
-		col.setPreferredWidth(120);
-		col.setMinWidth(120);
+		col.setPreferredWidth(100);
+		col.setMinWidth(50);
 		WbScrollPane scroll = new WbScrollPane(this.selectTable);
 		String msg = ResourceMgr.getString("MsgSelectKeyColumns").replaceAll("%tablename%", table);
 		JLabel info = new JLabel(msg);
 		this.add(info, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
-		Dimension d = new Dimension(340, 200);
+		Dimension d = new Dimension(280, 160);
 		this.setPreferredSize(d);
 	}
 

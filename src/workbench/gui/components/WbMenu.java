@@ -13,7 +13,9 @@ import javax.swing.JMenu;
 public class WbMenu
 	extends JMenu
 {
-
+	private String parentMenuId = null;
+	private boolean createSeparator = false;
+	
 	public WbMenu()
 	{
 		super();
@@ -34,6 +36,24 @@ public class WbMenu
 		super(anAction);
 	}
 
+	public void setParentMenuId(String id)
+	{
+		this.parentMenuId = id;
+	}
+	public String getParentMenuId() 
+	{
+		return this.parentMenuId;
+	}
+	
+	public void setCreateMenuSeparator(boolean aFlag)
+	{
+		this.createSeparator = aFlag;
+	}
+	public boolean getCreateMenuSeparator()
+	{
+		return this.createSeparator;
+	}
+	
 	public void setText(String aText)
 	{
 		int pos = aText.indexOf('&');

@@ -7,6 +7,7 @@
 package workbench.storage;
 
 import java.util.ArrayList;
+import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -18,6 +19,7 @@ import workbench.util.StringUtil;
 public class StatementFactory
 {
 	private ResultInfo resultInfo;
+	private String tableToUse;
 	
 	public StatementFactory(ResultInfo metaData)
 	{
@@ -47,7 +49,7 @@ public class StatementFactory
 		ArrayList values = new ArrayList();
 		StringBuffer sql = new StringBuffer("UPDATE ");
 
-		sql.append(SqlUtil.quoteObjectname(this.resultInfo.getUpdateTable().getTable()));
+		sql.append(getTableNameToUse());
 		sql.append("\n   SET ");
 		first = true;
 		for (int col=0; col < cols; col ++)
@@ -148,7 +150,7 @@ public class StatementFactory
     sql.append("INSERT INTO ");
 		StringBuffer valuePart = new StringBuffer(250);
 
-		sql.append(SqlUtil.quoteObjectname(this.resultInfo.getUpdateTable().getTable()));
+		sql.append(getTableNameToUse());
 		if (ignoreStatus) sql.append(lineEnd);
 		sql.append('(');
 		if (newLineAfterColumn)
@@ -234,7 +236,7 @@ public class StatementFactory
 		ArrayList values = new ArrayList();
 		StringBuffer sql = new StringBuffer(250);
     sql.append("DELETE FROM ");
-		sql.append(SqlUtil.quoteObjectname(this.resultInfo.getUpdateTable().getTable()));
+		sql.append(getTableNameToUse());
 		sql.append(" WHERE ");
 		first = true;
 		int count = this.resultInfo.getColumnCount();
@@ -273,6 +275,39 @@ public class StatementFactory
 			LogMgr.logError(this, "Error creating DELETE Statement for " + sql.toString(), e);
 		}
 		return dml;
+	}
+
+	private String getTableNameToUse()
+	{
+		String name = null;
+		TableIdentifier updateTable = this.resultInfo.getUpdateTable();
+		if (this.tableToUse != null || updateTable == null ) 
+		{
+			name = this.tableToUse;
+		}
+		else
+		{
+			name = updateTable.getTableExpression();
+		}
+		return SqlUtil.quoteObjectname(name);
+	}
+	
+	/**
+	 * Getter for property tableToUse.
+	 * @return Value of property tableToUse.
+	 */
+	public java.lang.String getTableToUse()
+	{
+		return tableToUse;
+	}
+	
+	/**
+	 * Setter for property tableToUse.
+	 * @param tableToUse New value of property tableToUse.
+	 */
+	public void setTableToUse(java.lang.String tableToUse)
+	{
+		this.tableToUse = tableToUse;
 	}
 	
 }

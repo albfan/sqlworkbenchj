@@ -151,7 +151,7 @@ public class DwStatusBar extends JPanel
 		this.doRepaint();
 	}
 
-	public synchronized void setStatusMessage(String aMsg)
+	public void setStatusMessage(String aMsg)
 	{
 		if (aMsg == null || aMsg.length() == 0)
 		{

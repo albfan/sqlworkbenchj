@@ -13,12 +13,13 @@ import javax.swing.KeyStroke;
 
 import workbench.gui.MainWindow;
 import workbench.resource.ResourceMgr;
+import javax.swing.SwingUtilities;
 
 /**
  *	Action to paste the contents of the clipboard into the entry field
  *	@author  workbench@kellerer.org
  */
-public class ShowDbExplorerAction 
+public class ShowDbExplorerAction
 	extends WbAction
 {
 	private MainWindow mainWin;
@@ -32,6 +33,12 @@ public class ShowDbExplorerAction
 
 	public void executeAction(ActionEvent e)
 	{
-		mainWin.showDbExplorer();
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				mainWin.showDbExplorer();
+			}
+		});
 	}
 }

@@ -27,8 +27,7 @@ import workbench.util.StringUtil;
 public class WbCopy
 	extends SqlCommand
 {
-	public static final String VERB = "COPY";
-	public static final String ALT_VERB = "WBCOPY";
+	public static final String VERB = "WBCOPY";
 
 	public static final String PARAM_SOURCETABLE = "sourcetable";
 	public static final String PARAM_SOURCEQUERY = "sourcequery";
@@ -48,13 +47,6 @@ public class WbCopy
 
 	private ArgumentParser cmdLine;
 	private DataCopier copier;
-	private String usedVerb = VERB;
-
-	public WbCopy(String verbToUse)
-	{
-		this();
-		this.usedVerb = verbToUse;
-	}
 
 	public WbCopy()
 	{
@@ -76,7 +68,7 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_USEBATCH);
 	}
 
-	public String getVerb() { return usedVerb; }
+	public String getVerb() { return VERB; }
 
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException

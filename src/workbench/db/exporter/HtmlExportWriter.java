@@ -6,8 +6,9 @@
 
 package workbench.db.exporter;
 
+import workbench.db.exporter.HtmlRowDataConverter;
 import workbench.storage.ResultInfo;
-import workbench.storage.RowDataConverter;
+import workbench.db.exporter.RowDataConverter;
 
 /**
  *
@@ -24,7 +25,11 @@ public class HtmlExportWriter
 
 	public RowDataConverter createConverter(ResultInfo info)
 	{
-		return null;
+		HtmlRowDataConverter converter = new HtmlRowDataConverter(info);
+		converter.setPageTitle(this.exporter.getHtmlTitle());
+		converter.setCreateFullPage(exporter.getCreateFullHtmlPage());
+		converter.setEscapeHtml(exporter.getEscapeHtml());
+		return converter;
 	}
 	
 }

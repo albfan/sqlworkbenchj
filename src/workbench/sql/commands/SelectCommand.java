@@ -14,6 +14,7 @@ import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
@@ -27,6 +28,7 @@ public class SelectCommand extends SqlCommand
 
 	public static final String VERB = "SELECT";
 	private int maxRows = 0;
+	private DataStore data;
 
 	public SelectCommand()
 	{
@@ -35,6 +37,9 @@ public class SelectCommand extends SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
+		this.data = null;
+		this.isCancelled = false;
+
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		try
 		{
@@ -51,13 +56,13 @@ public class SelectCommand extends SqlCommand
 			int fetchSize = 0;
 			try
 			{
-				fetchSize = WbManager.getSettings().getDefaultFetchSize();
+				fetchSize = Settings.getInstance().getDefaultFetchSize();
 			}
 			catch (Exception e)
 			{
 				fetchSize = 0;
 			}
-			if (fetchSize > 0 && fetchSize < this.maxRows)
+			if (fetchSize > 0)
 			{
 				try
 				{
@@ -69,7 +74,6 @@ public class SelectCommand extends SqlCommand
 				}
 			}
 
-			this.isCancelled = false;
 			ResultSet rs = this.currentStatement.executeQuery(aSql);
 
 			if (rs != null)
@@ -83,21 +87,26 @@ public class SelectCommand extends SqlCommand
 				// is executed before the result set is retrieved.
 				// (The result set itself can be retrieved but access to the LONG columns
 				// would cause an error)
-				if (this.getConsumerWaiting())
+				if (this.isConsumerWaiting())
 				{
 					result.addResultSet(rs);
 				}
 				else
 				{
-					DataStore ds = new DataStore(rs, true, this.rowMonitor, maxRows);
-					result.addDataStore(ds);
 					try
 					{
-						rs.close();
+						this.data = new DataStore(rs, false, this.rowMonitor, maxRows, this.currentConnection);
+						// Not reading the data in the constructor enables us
+						// to cancel the retrieval of the data from the ResultSet
+						// without using statement.cancel()
+						// The DataStore checks for the cancel flag during processing
+						// of the ResulSet
+						this.data.initData(rs, maxRows);
+						result.addDataStore(data);
 					}
-					catch (Exception e)
+					finally
 					{
-						LogMgr.logError("SelectCommand.execute()", "Error closing result set", e);
+						try { rs.close(); } catch (Throwable th) {}
 					}
 				}
 
@@ -143,11 +152,22 @@ public class SelectCommand extends SqlCommand
 			result.setFailure();
 		}
 
-		// we cannot close the statement here, as the ResultSet will be processed
-		// somewhere else! (e.g. Export command, DwPanel to display the result!
-
 		return result;
 	}
+
+	public void cancel()
+		throws SQLException
+	{
+		if (this.data != null)
+		{
+			this.data.cancelRetrieve();
+		}
+		else
+		{
+			super.cancel();
+		}
+	}
+
 
 	public String getVerb()
 	{

@@ -23,12 +23,14 @@ public class DbmsOutput
  * using system.out
  *
  */
+	private Connection conn;
 	private CallableStatement enable_stmt;
 	private CallableStatement disable_stmt;
 	private CallableStatement show_stmt;
 
 	private boolean enabled = false;
 	private long lastSize;
+	private boolean initDone = false;
 
 /*
  * our constructor simply prepares the three
@@ -45,7 +47,13 @@ public class DbmsOutput
  * from getting yet another line but it will not chunk up a line.
  *
  */
-	public DbmsOutput( Connection conn )
+	public DbmsOutput(Connection aConn)
+		throws SQLException
+	{
+		this.conn = aConn;
+	}
+
+	private void init()
 		throws SQLException
 	{
 		enable_stmt  = conn.prepareCall( "begin dbms_output.enable(:1); end;" );
@@ -65,8 +73,9 @@ public class DbmsOutput
 		" :done := l_done; " +
 		" :buffer := l_buffer; " +
 		"end;" );
+		this.initDone = true;
 	}
-
+	
 	/*
 	 * enable simply sets your size and executes
 	 * the dbms_output.enable call
@@ -75,7 +84,7 @@ public class DbmsOutput
 	public void enable(long size) throws SQLException
 	{
 		if (this.enabled && size == this.lastSize) return;
-
+		if (!this.initDone) this.init();
 		//this.disable();
 		enable_stmt.setLong( 1, size );
 		enable_stmt.executeUpdate();
@@ -95,6 +104,7 @@ public class DbmsOutput
 	 */
 	public void disable() throws SQLException
 	{
+		if (!this.initDone) this.init();
 		disable_stmt.executeUpdate();
 		this.enabled = false;
 		//LogMgr.logDebug("DbmsOutput.disable()", "Support for DBMS_OUTPUT package disabled");
@@ -113,6 +123,7 @@ public class DbmsOutput
 	{
 		int done = 0;
     if (!this.enabled) return "";
+		if (!this.initDone) this.init();
 
 		show_stmt.registerOutParameter( 2, Types.INTEGER );
 		show_stmt.registerOutParameter( 3, Types.VARCHAR );
@@ -137,6 +148,7 @@ public class DbmsOutput
  */
 	public void close()
 	{
+		if (!this.initDone) return;
 		try { this.disable(); } catch (Throwable th) {}
 		try { enable_stmt.close(); } catch (Throwable th) {}
 		try { disable_stmt.close(); } catch (Throwable th) {}

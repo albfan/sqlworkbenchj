@@ -8,11 +8,17 @@ package workbench.storage;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import workbench.db.ColumnIdentifier;
+import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 
@@ -23,143 +29,202 @@ import workbench.util.SqlUtil;
 public class ResultInfo
 {
 	// Cached ResultSetMetaData information
-	int[] columnTypes;
-  int[] columnSizes;
-	int[] columnPrecision;
-	int[] columnScale;
-	String[] columnNames;
-	String[] columnClassNames;
-	String[] columnTypeNames;
-	int colCount;
-	int realColumns;
-	
+	private ColumnIdentifier[] columns;
+	private int colCount;
+	private int realColumns;
+	private boolean hasPkColumns;
+	private boolean pkFlagValid = false;
+	private boolean pkColumnsAreReal = true;
 	private TableIdentifier updateTable;
 	
 	public ResultInfo(String[] colNames, int[] colTypes, int[] colSizes)
 	{
-		this(colNames, colTypes, colSizes, null, null, null);
+		this(colNames, colTypes, colSizes, null);
 	}
 	
-	public ResultInfo(String[] colNames, int[] colTypes, int[] colSizes, int[] columnPrecision, int[] columnScale, String[] columnClasses)
+	public ResultInfo(String[] colNames, int[] colTypes, int[] colSizes, String[] columnClasses)
 	{
-		//if (colNames.length != colTypes.length) throw new IllegalArgumentException("Size of arrays must match");
-		//if (colNames.length != colSizes.length) throw new IllegalArgumentException("Size of arrays must match");
-		//if (colTypes.length != colSizes.length) throw new IllegalArgumentException("Size of arrays must match");
-		
 		this.colCount = colNames.length;
-		this.columnTypes = colTypes;
-		if (colSizes == null)
+		this.columns = new ColumnIdentifier[this.colCount];
+		for (int i=0; i < colCount; i++)
 		{
-			this.columnSizes = new int[colCount];
-		}
-		else
-		{
-			this.columnSizes = colSizes;
-		}
-		this.columnNames = colNames;
-		this.columnTypeNames = new String[this.columnTypes.length];
-		if (columnClasses != null)
-		{
-			this.columnClassNames = columnClasses;
-		}
-		else
-		{
-			this.columnClassNames = new String[columnTypes.length];
-			for (int i=0; i < this.columnTypes.length; i++)
-			{
-				this.columnTypeNames[i] = SqlUtil.getTypeName(this.columnTypes[i]);
-				int precision = (columnPrecision != null ? columnPrecision[i] : 0);
-				int scale = (columnScale != null ? columnScale[i] : 0);
-				this.columnClassNames[i] = SqlUtil.getJavaClass(this.columnTypes[i], precision, scale);
-			}
+			ColumnIdentifier col = new ColumnIdentifier(colNames[i]);
+			if (colSizes != null) col.setColumnSize(colSizes[i]);
+			col.setDataType(colTypes[i]);
+			if (columnClasses != null) col.setColumnClass(columnClasses[i]);
+			this.columns[i] = col;
 		}
 	}
 
 	/** Creates a new instance of ResultMetaData */
-	public ResultInfo(ResultSetMetaData metaData) throws SQLException
+	public ResultInfo(ResultSetMetaData metaData, WbConnection sourceConnection) 
+		throws SQLException
 	{
 		this.colCount = metaData.getColumnCount();
-		int col = 0;
-		this.columnTypes = new int[this.colCount];
-		this.columnTypeNames = new String[this.colCount];
-		this.columnSizes = new int[this.colCount];
-		this.columnNames = new String[this.colCount];
-		this.columnClassNames = new String[this.colCount];
-		this.columnPrecision = new int[this.colCount];
-		this.columnScale = new int[this.colCount];
+		this.columns = new ColumnIdentifier[this.colCount];
 
 		for (int i=0; i < this.colCount; i++)
 		{
 			String name = metaData.getColumnName(i + 1);
-			this.columnTypes[i] = metaData.getColumnType(i + 1);
+			boolean realColumn = true;
+			if (name != null && name.trim().length() > 0)
+			{
+				this.realColumns ++;
+			}
+			else
+			{
+				name = "Col" + (i+1);
+				realColumn = false;
+			}
+			
+			int type = metaData.getColumnType(i + 1);
+			ColumnIdentifier col = new ColumnIdentifier(name);
+			col.setDataType(type);
+			col.setUpdateable(realColumn);
 
+			String typename = null;
 			try
 			{
-				this.columnTypeNames[i] = metaData.getColumnTypeName(i + 1);
-				if ("LONG".equals(this.columnTypeNames[i]))
+				typename = metaData.getColumnTypeName(i + 1);
+				col.setColumnTypeName(typename);
+				if ("LONG".equals(typename))
 				{
-					this.columnTypes[i] = SqlUtil.LONG_TYPE;
+					col.setDataType(SqlUtil.LONG_TYPE);
 				}
 			}
 			catch (Exception e)
 			{
-				this.columnTypeNames[i] = SqlUtil.getTypeName(this.columnTypes[i]);
-				LogMgr.logWarning("ResultMetaData.<init>", "The JDBC driver does not support getColumnTypeName() " + e.getMessage());
+				col.setColumnTypeName(SqlUtil.getTypeName(col.getDataType()));
 			}
 
 			try
 			{
-				this.columnSizes[i] = metaData.getColumnDisplaySize(i + 1);
+				int scale = metaData.getScale(i + 1);
+				int prec = metaData.getPrecision(i + 1);
+				String dbmsType = DbMetadata.getSqlTypeDisplay(typename, col.getDataType(), prec, scale);
+				col.setDbmsType(dbmsType);
+				col.setDecimalDigits(scale);
+				if (type == Types.VARCHAR)
+				{
+					if (sourceConnection != null && sourceConnection.getMetadata().reportsRealSizeAsDisplaySize())
+					{
+						// HSQL reports the VARCHAR size in displaySize()
+						int size = metaData.getColumnDisplaySize(i + 1);
+						col.setColumnSize(size);
+					}
+					else
+					{
+						// all others seem to report the VARCHAR size in precision
+						col.setColumnSize(prec);
+					}
+				}
+				else
+				{
+					col.setColumnSize(prec);
+				}
 			}
-			catch (Exception e)
+			catch (SQLException e)
 			{
-				this.columnSizes[i] = 0;
-				LogMgr.logWarning("ResultMetaData.<init>", "The JDBC driver does not support getColumnDisplaySize() " + e.getMessage());
-			}
-
-
-			if (name != null && name.trim().length() > 0)
-			{
-				this.realColumns ++;
-				this.columnNames[i] = name;
-			}
-			else
-			{
-				this.columnNames[i] = "Col" + (i+1);
+				col.setDbmsType(typename);
 			}
 			
 			try
 			{
-				this.columnClassNames[i] = metaData.getColumnClassName(i + 1);
+				col.setColumnClass(metaData.getColumnClassName(i + 1));
 			}
 			catch (Throwable e)
 			{
-				LogMgr.logWarning("ResultInfo.<init>", "Error when retrieving class name for column " + i + " (" + e.getClass().getName() + ")");
-				this.columnClassNames[i] = "java.lang.Object";
+				col.setColumnClass("java.lang.Object");
 			}
-
-			try
-			{
-				this.columnPrecision[i] = metaData.getPrecision(i + 1);
-			}
-			catch (Throwable e)
-			{
-				LogMgr.logWarning("ResultInfo.<init>", "Error when retrieving precision for column " + i + " (" + e.getClass().getName() + ")");
-				this.columnPrecision[i] = 0;
-			}
-
-			try
-			{
-				this.columnScale[i] = metaData.getScale(i + 1);
-			}
-			catch (Throwable e)
-			{
-				LogMgr.logWarning("ResultInfo.<init>", "Error when retrieving scale for column " + i + " (" + e.getClass().getName() + ")");
-				this.columnScale[i] = 0;
-			}
+			this.columns[i] = col;
 		}
 	}
 
+	public ColumnIdentifier[] getColumns()
+	{
+		return this.columns;
+	}
+	
+	public void resetPkColumns()
+	{
+		for (int i=0; i < this.colCount; i++)
+		{
+			this.columns[i].setIsPkColumn(false);
+		}
+		this.hasPkColumns = false;
+		this.pkFlagValid = true;
+	}
+	public void setIsPkColumn(String column, boolean flag)
+	{
+		int index = this.findColumn(column);
+		if (index > -1) this.setIsPkColumn(index, flag);
+	}
+	
+	public void setIsPkColumn(int col, boolean flag)
+	{
+		if (flag) 
+		{
+			this.hasPkColumns = true;
+			this.pkFlagValid = true;
+			this.pkColumnsAreReal = true;
+		}
+		this.columns[col].setIsPkColumn(flag);
+	}
+	
+	public boolean hasUpdateableColumns()
+	{
+		return this.realColumns > 0;
+	}
+	
+	public boolean isUpdateable(int col)
+	{
+		return this.columns[col].isUpdateable();
+	}
+	
+	public void setUpdateable(int col, boolean flag)
+	{
+		this.columns[col].setUpdateable(flag);
+	}
+
+	public boolean isPkColumn(int col)
+	{
+		return this.columns[col].isPkColumn();
+	}
+	
+	public void setPKColumns(ColumnIdentifier[] cols)
+	{
+		this.hasPkColumns = false;
+		for (int i=0; i < cols.length; i++)
+		{
+			String name = cols[i].getColumnName();
+			int col = this.findColumn(name);
+			if (col > -1)
+			{
+				this.columns[col].setIsPkColumn(cols[i].isPkColumn());
+				if (cols[i].isPkColumn()) this.hasPkColumns = true;
+			}
+		}
+		this.pkColumnsAreReal = true;
+		this.pkFlagValid = true;
+	}
+	
+	public boolean hasPkColumns()
+	{
+		if (this.pkFlagValid) return this.hasPkColumns;
+		this.hasPkColumns = false;
+		for (int i=0; i < this.colCount; i++)
+		{
+			if (this.columns[i].isPkColumn())
+			{
+				this.pkFlagValid = true;
+				this.hasPkColumns = true;
+				break;
+			}
+		}
+		return this.hasPkColumns;
+	}
+	
+	
 	public void setUpdateTable(TableIdentifier table)
 	{
 		this.updateTable = table;
@@ -169,24 +234,32 @@ public class ResultInfo
 	{
 		return this.updateTable;
 	}
+
+	public int getColumnSize(int col)
+	{
+		return this.columns[col].getColumnSize();
+	}
 	
 	public void setColumnSizes(int[] sizes)
 	{
 		if (sizes == null) return;
 		if (sizes.length != this.colCount) return;
-		this.columnSizes = sizes;
+		for (int i=0; i < this.colCount; i++)
+		{
+			this.columns[i].setColumnSize(sizes[i]);
+		}
 	}	
 	
-	public int getColumnType(int i) { return this.columnTypes[i]; }
+	public int getColumnType(int i) { return this.columns[i].getDataType(); }
 	public String getColumnClassName(int i) 
 	{ 
-		if (this.columnClassNames != null) return this.columnClassNames[i]; 
-		if (this.columnClassNames[i] != null) return this.columnClassNames[i];
+		String className = this.columns[i].getColumnClass();
+		if (className != null) return className;
 		return this.getColumnClass(i).getName();
 	}
 	
-	public String getColumnName(int i) { return this.columnNames[i]; }
-	public String getDbmsTypeName(int i) { return this.columnTypeNames[i]; }
+	public String getColumnName(int i) { return this.columns[i].getColumnName(); }
+	public String getDbmsTypeName(int i) { return this.columns[i].getDbmsType(); }
 	public int getColumnCount() { return this.colCount; }
 	
 	public Class getColumnClass(int aColumn)
@@ -217,6 +290,95 @@ public class ResultInfo
 			default:
 				return Object.class;
 		}
+	}
+
+	public boolean hasRealPkColumns()
+	{
+		return this.pkColumnsAreReal;
+	}
+	
+	public void readPkDefinition(WbConnection aConnection)
+		throws SQLException
+	{
+		this.readPkDefinition(aConnection, true);
+	}
+	
+	public void readPkDefinition(WbConnection aConnection, boolean useAll)
+		throws SQLException
+	{
+		if (aConnection == null) return;
+		if (this.hasPkColumns()) return;
+		if (this.updateTable == null) return;
+
+		Connection sqlConn = aConnection.getSqlConnection();
+		DatabaseMetaData meta = sqlConn.getMetaData();
+		String table = aConnection.getMetadata().adjustObjectname(this.updateTable.getTable());
+		String schema = this.updateTable.getSchema();
+
+		ResultSet rs = meta.getPrimaryKeys(null, schema, table);
+		boolean found = this.readPkColumns(rs);
+
+		// no primary keys found --> try the bestRowIdentifier...
+		if (!found)
+		{
+			rs = meta.getBestRowIdentifier(null, schema, table, DatabaseMetaData.bestRowSession, false);
+			found = this.readPkColumns(rs);
+		}
+
+		// if we didn't find any columns, use all columns as the identifier
+		if (!found && useAll)
+		{
+			for (int i=0; i < this.getColumnCount(); i++)
+			{
+				this.setIsPkColumn(i, true);
+			}
+		}
+		this.pkColumnsAreReal = found;
+	}
+	
+	public int findColumn(String name)
+	{
+		if (name == null) return -1;
+
+		for (int i = 0; i < this.colCount; i++)
+		{
+			String col = this.getColumnName(i);
+			if (col != null && name.equalsIgnoreCase(col))
+			{
+				return i;
+			}
+		}
+
+		return -1;
+	}
+
+	private boolean readPkColumns(ResultSet rs)
+	{
+		String col = null;
+		int index = 0;
+		boolean found = false;
+		try
+		{
+			while (rs.next())
+			{
+				col = rs.getString("COLUMN_NAME");
+				index = this.findColumn(col);
+				if (index > -1)
+				{
+					this.setIsPkColumn(index, true);
+					found = true;
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError(this, "Identifier column " + col + " not found in resultset! Using all rows as keys", e);
+		}
+		finally
+		{
+			try { rs.close(); } catch (Exception e) {}
+		}
+		return found;
 	}
 	
 }

@@ -17,6 +17,7 @@ import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.interfaces.JobErrorHandler;
+import workbench.util.StrBuffer;
 
 
 
@@ -82,13 +83,7 @@ public class DataStoreTableModel
 		}
 		catch (Exception e)
 		{
-			StringBuffer msg = new StringBuffer("Error @");
-			msg.append(row);
-			msg.append('/');
-			msg.append(col);
-			msg.append(" - ");
-			msg.append(ExceptionUtil.getDisplay(e));
-			return msg.toString();
+			return "Error";
 		}
 	}
 
@@ -119,18 +114,15 @@ public class DataStoreTableModel
 	public void setShowStatusColumn(boolean aFlag)
 	{
 		if (aFlag == this.showStatusColumn) return;
-		synchronized (this)
+		if (aFlag)
 		{
-			this.showStatusColumn = aFlag;
-			if (this.showStatusColumn)
-			{
-				this.statusOffset = 1;
-			}
-			else
-			{
-				this.statusOffset = 0;
-			}
+			this.statusOffset = 1;
 		}
+		else
+		{
+			this.statusOffset = 0;
+		}
+		this.showStatusColumn = aFlag;
 		this.fireTableStructureChanged();
 	}
 
@@ -321,11 +313,6 @@ public class DataStoreTableModel
 		{
 			return NOT_AVAILABLE;
 		}
-	}
-
-	public StringBuffer getRowData(int aRow)
-	{
-		return this.dataCache.getRowDataAsString(aRow);
 	}
 
 	public boolean isCellEditable(int row, int column)

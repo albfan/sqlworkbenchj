@@ -20,6 +20,7 @@ import javax.swing.border.EmptyBorder;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.resource.ResourceMgr;
 import java.awt.Container;
+import javax.swing.JPasswordField;
 
 
 public class WbSwingUtilities
@@ -284,9 +285,18 @@ public class WbSwingUtilities
 
 	public static String getUserInput(Component caller, String aTitle, String initialValue)
 	{
+		return getUserInput(caller, aTitle, initialValue, false);
+	}
+	public static String getUserInput(Component caller, String aTitle, String initialValue, boolean hideInput)
+	{
 		Component parent = SwingUtilities.getWindowAncestor(caller);
 
-		final JTextField input = new JTextField();
+		final JTextField input;
+		if (hideInput)
+			input = new JPasswordField();
+		else
+		 input = new JTextField();
+
 		input.setColumns(40);
 		input.setText(initialValue);
 		if (initialValue != null)
@@ -305,5 +315,6 @@ public class WbSwingUtilities
 		String value = input.getText();
 		return value;
 	}
+
 
 }

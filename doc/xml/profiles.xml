@@ -123,6 +123,8 @@
       option <link linkend="options-encrypt-password">Encrypt Passwords</link>
       is selected, then the password will be stored encrypted,
       otherwise it will be stored in plain text!</para>
+      <para>If you choose not to store the password, you will be prompted for it each
+      time you connect using the profile.</para>
     </section>
 
     <section id="profile-separate-connection">
@@ -172,6 +174,19 @@
       </para>
     </section>
 
+    <section id="profile-rollback-before-disconnect">
+      <title>Rollback before disconnect</title>
+
+      <para>Some DBMS require that all open transactions are closed before actually
+      closing the connection to the server. If this option is enabled, &wb-productname; 
+      will send a <literal>ROLLBACK</literal> to the backend server before
+      closing the connection. This is e.g. required for Cloudscape because executing
+      a <literal>SELECT</literal> query already starts a transaction. If you see
+      errors in your log file while disconnecting, you might need to enable this
+      for your database as well.
+      </para>
+    </section>
+    
     <section id="profile-workspace-file">
       <title>Workspace</title>
 

@@ -20,7 +20,7 @@ import workbench.log.LogMgr;
 public class SqlUtil
 {
 	public static final int LONG_TYPE = -50000;
-	
+
 	private static Pattern specialCharPattern = Pattern.compile("[$ ]");
 
 	/** Creates a new instance of SqlUtil */
@@ -91,11 +91,12 @@ public class SqlUtil
 	{
 		boolean inQotes = false;
 		boolean fromFound = false;
-		String orgSql = makeCleanSql(aSql, false);
-		aSql = orgSql.toUpperCase();
 
-		final String FROM = " FROM ";
-		int fromPos = aSql.indexOf(FROM);
+		Pattern fromPattern = Pattern.compile("\\sFROM\\s", Pattern.CASE_INSENSITIVE);
+		Matcher m = fromPattern.matcher(aSql);
+		if (!m.find()) return Collections.EMPTY_LIST;
+
+		int fromPos = m.start();
 		if (fromPos == -1) return Collections.EMPTY_LIST;
 
 		int quotePos = aSql.indexOf('\'');
@@ -105,20 +106,31 @@ public class SqlUtil
 			while (!fromFound)
 			{
 				pos = skipQuotes(aSql, quotePos + 1);
-				fromPos = aSql.indexOf(FROM, pos);
+				//fromPos = aSql.indexOf(FROM, pos);
+				if (m.find(pos))
+				{
+					fromPos = m.start();
+				}
+				else
+				{
+					fromPos = -1;
+				}
 				if (fromPos == -1) break;
 				quotePos = aSql.indexOf('\'', pos);
 				fromFound = (quotePos == -1 || (quotePos > fromPos));
 			}
 		}
 		if (fromPos == -1) return Collections.EMPTY_LIST;
-		int fromEnd = aSql.indexOf(" WHERE ", fromPos);
-		if (fromEnd == -1) fromEnd = aSql.indexOf(" GROUP ", fromPos);
-		if (fromEnd == -1) fromEnd = aSql.indexOf(" ORDER ", fromPos);
-		if (fromEnd == -1) fromEnd = aSql.length();
-		String fromList = orgSql.substring(fromPos + FROM.length(), fromEnd);
+		int fromEnd = m.end();
 
-		boolean joinSyntax = (aSql.indexOf(" JOIN ", fromPos) > -1);
+		int nextVerb = StringUtil.findPattern("\\sWHERE\\s", aSql, fromPos);
+
+		if (nextVerb == -1) nextVerb = StringUtil.findPattern("\\sGROUP\\s", aSql, fromPos);
+		if (nextVerb == -1) nextVerb = StringUtil.findPattern("\\sORDER\\s", aSql, fromPos);
+		if (nextVerb == -1) nextVerb = aSql.length();
+		String fromList = aSql.substring(fromEnd, nextVerb);
+
+		boolean joinSyntax = (StringUtil.findPattern("\\sJOIN\\s", aSql, fromPos) > -1);
 		ArrayList result = new ArrayList();
 		if (joinSyntax)
 		{
@@ -182,29 +194,30 @@ public class SqlUtil
 	 */
 	public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments, char quote)
 	{
+		if (aSql == null) return null;
 		aSql = aSql.trim();
 		int count = aSql.length();
 		if (count == 0) return aSql;
 		boolean inComment = false;
 		boolean inQuotes = false;
 		boolean lineComment = false;
-		
+
 		StringBuffer newSql = new StringBuffer(count);
 
 		// remove trailing semicolon
 		if (aSql.charAt(count - 1) == ';') count --;
 		char last = ' ';
-		
+
 		for (int i=0; i < count; i++)
 		{
 			char c = aSql.charAt(i);
-			
+
 			inQuotes = c == quote;
 			if (!inQuotes && (last == '\n' || last == '\r' || i == 0 ) && (c == '#'))
 			{
 				lineComment = true;
 			}
-			
+
 			if (!(inComment || lineComment) || keepComments)
 			{
 				if ( c == '/' && i < count - 1 && aSql.charAt(i+1) == '*' & !inQuotes)
@@ -244,7 +257,7 @@ public class SqlUtil
 					inComment = false;
 					i++;
 				}
-				else if (c == '\n' || c == '\r' && lineComment) 
+				else if (c == '\n' || c == '\r' && lineComment)
 				{
 					lineComment = false;
 				}
@@ -508,16 +521,14 @@ public class SqlUtil
 
 	public static void main(String args[])
 	{
-		try
-		{
-			String sql = "# test\nselect bla from table1 left outer join table2 on (x=y) inner join table3 on (x=y2);";
-			System.out.println(makeCleanSql(sql, false));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		System.out.println("*** Done.");
+		String sql = "select 'analyze '|| object_type || ' '||owner||'.'||object_name||' compute statistics;'  \n" +
+                                 "from all_objects \n" +
+                                 "where owner in ('SYS') \n" +
+                                 "and object_type in ('TABLE') \n" +
+                                 "and object_name not like 'I_SNAP$%' \n" +
+                                 "order by owner, object_type desc";
+    List tables = getTables(sql);
+		for (int i=0; i < tables.size(); i++)
+			System.out.println(tables.get(i));
 	}
-
 }

@@ -27,10 +27,16 @@ public class TextRowDataConverter
 	private String delimiter = "\t";
 	private String quoteCharacter = "\"";
 	private boolean writeHeader = true;
+	private boolean cleanCR = false;
 	
 	public TextRowDataConverter(ResultInfo info)
 	{
 		super(info);
+	}
+	
+	public void setCleanNonPrintable(boolean flag)
+	{
+		this.cleanCR = flag;
 	}
 	
 	public StrBuffer convertData()
@@ -38,7 +44,7 @@ public class TextRowDataConverter
 		return null;
 	}
 
-	public StrBuffer getEnd()
+	public StrBuffer getEnd(long totalRows)
 	{
 		return null;
 	}
@@ -48,14 +54,17 @@ public class TextRowDataConverter
 		return "Text";
 	}
 
-	public StrBuffer convertRowData(RowData row, int rowIndex)
+	public StrBuffer convertRowData(RowData row, long rowIndex)
 	{
 		int count = this.metaData.getColumnCount();
 		StrBuffer result = new StrBuffer(count * 30);
 		for (int c=0; c < count; c ++)
 		{
 			String value = this.getValueAsFormattedString(row, c);
-			
+			if (this.cleanCR)
+			{
+				value = StringUtil.cleanNonPrintable(value);
+			}
 			if (value == null) value = "";
 			boolean needQuote = (value.indexOf(this.delimiter) > -1);
 			if (needQuote) result.append(this.quoteCharacter);

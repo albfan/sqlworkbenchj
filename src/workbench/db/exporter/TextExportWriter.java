@@ -7,7 +7,7 @@
 package workbench.db.exporter;
 
 import workbench.storage.ResultInfo;
-import workbench.storage.RowDataConverter;
+import workbench.db.exporter.RowDataConverter;
 
 /**
  *
@@ -25,7 +25,12 @@ public class TextExportWriter
 	
 	public RowDataConverter createConverter(ResultInfo info)
 	{
-		return null;
+		TextRowDataConverter converter = new TextRowDataConverter(info);
+		converter.setDelimiter(exporter.getTextDelimiter());
+		converter.setWriteHeader(exporter.getExportHeaders());
+		converter.setQuoteCharacter(exporter.getTextQuoteChar());
+		converter.setCleanNonPrintable(exporter.getCleanupCarriageReturns());
+		return converter;
 	}
 	
 }

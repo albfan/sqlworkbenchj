@@ -20,6 +20,14 @@ public class ColumnIdentifier
 	private boolean isPk = false;
 	private boolean isExpression = false;
 	private boolean isNullable = true;
+	private boolean isUpdateable = true;
+	private String dbmsType = null;
+	private String comment = null;
+	private String defaultValue = null;
+	private String columnClass = null;
+	private String columnTypeName = null;
+	
+	private int position;
 	
 	private int size; // for VARCHAR's etc
 	private int digits; // for DECIMAL types
@@ -74,6 +82,9 @@ public class ColumnIdentifier
 	public void setIsNullable(boolean flag) { this.isNullable = flag; }
 	public boolean isNullable() { return this.isNullable; }
 	
+	public void setDbmsType(String type) { this.dbmsType = type; }
+	public String getDbmsType() { return this.dbmsType; }
+	
 	/**
 	 *	Define this column to be an expression. 
 	 *	The major difference to setColumnName() is, that the name will internally
@@ -98,6 +109,13 @@ public class ColumnIdentifier
 		result.isPk = this.isPk;
 		result.size = this.size;
 		result.type = this.type;
+		result.dbmsType = this.dbmsType;
+		result.isUpdateable = this.isUpdateable;
+		result.comment = this.comment;
+		result.defaultValue = this.defaultValue;
+		result.columnClass = this.columnClass;
+		result.columnTypeName = this.columnTypeName;
+		result.position = this.position;
 		return result;
 	}
 	
@@ -142,6 +160,114 @@ public class ColumnIdentifier
 			return this.type == cd.type && this.name.equals(cd.name);
 		}
 		return false;
+	}
+	
+	/**
+	 * Getter for property comment.
+	 * @return Value of property comment.
+	 */
+	public java.lang.String getComment()
+	{
+		return comment;
+	}
+	
+	/**
+	 * Setter for property comment.
+	 * @param comment New value of property comment.
+	 */
+	public void setComment(java.lang.String comment)
+	{
+		this.comment = comment;
+	}
+	
+	/**
+	 * Getter for property defaultValue.
+	 * @return Value of property defaultValue.
+	 */
+	public java.lang.String getDefaultValue()
+	{
+		return defaultValue;
+	}
+	
+	/**
+	 * Setter for property defaultValue.
+	 * @param defaultValue New value of property defaultValue.
+	 */
+	public void setDefaultValue(java.lang.String defaultValue)
+	{
+		this.defaultValue = defaultValue;
+	}
+	
+	/**
+	 * Getter for property position.
+	 * @return Value of property position.
+	 */
+	public int getPosition()
+	{
+		return position;
+	}
+	
+	/**
+	 * Setter for property position.
+	 * @param position New value of property position.
+	 */
+	public void setPosition(int position)
+	{
+		this.position = position;
+	}
+	
+	/**
+	 * Getter for property columnClass.
+	 * @return Value of property columnClass.
+	 */
+	public java.lang.String getColumnClass()
+	{
+		return columnClass;
+	}
+	
+	/**
+	 * Setter for property columnClass.
+	 * @param columnClass New value of property columnClass.
+	 */
+	public void setColumnClass(java.lang.String columnClass)
+	{
+		this.columnClass = columnClass;
+	}
+	
+	/**
+	 * Getter for property columnTypeName.
+	 * @return Value of property columnTypeName.
+	 */
+	public java.lang.String getColumnTypeName()
+	{
+		return columnTypeName;
+	}
+	
+	/**
+	 * Setter for property columnTypeName.
+	 * @param columnTypeName New value of property columnTypeName.
+	 */
+	public void setColumnTypeName(java.lang.String columnTypeName)
+	{
+		this.columnTypeName = columnTypeName;
+	}
+	
+	/**
+	 * Getter for property isUpdateable.
+	 * @return Value of property isUpdateable.
+	 */
+	public boolean isUpdateable()
+	{
+		return isUpdateable;
+	}
+	
+	/**
+	 * Setter for property isUpdateable.
+	 * @param isUpdateable New value of property isUpdateable.
+	 */
+	public void setUpdateable(boolean isUpdateable)
+	{
+		this.isUpdateable = isUpdateable;
 	}
 	
 }

@@ -5,7 +5,24 @@
  */
 package workbench.storage;
 
+import java.math.BigDecimal;
+import java.sql.Clob;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.text.DecimalFormat;
+import workbench.log.LogMgr;
+import workbench.util.StrBuffer;
 
+/**
+ *	A class to hold the data for a single row retrieved from the database.
+ *	It will also save the originally retrieved information in case the
+ *  data is changed.
+ *	A row can be in three different status: 
+ *	NEW          - the row has not been retrieved from the database
+ *  MODIFIED     - the row has been retrieved but has been changed since then
+ *  NOT_MODIFIED - The row has not been changed since it has been retrieved
+ */
 public class RowData
 {
 	public static final int NOT_MODIFIED = 0;
@@ -13,9 +30,15 @@ public class RowData
 	public static final int NEW = 2;
 
 	private int status = NOT_MODIFIED;
+	
+	/**
+	 *	This flag will be used by the {@link DataStore}
+	 *	to store the information for which rows the SQL statements
+	 *  have been sent to the database during the update process
+	 */
 	private boolean dmlSent = false;
 
-	Object[] colData;
+	private Object[] colData;
 	private Object[] originalData;
 
 	/** Creates new RowData */
@@ -25,6 +48,54 @@ public class RowData
 		this.setNew();
 	}
 
+	/**
+	 *	Read the row data from the supplied ResultSet
+	 */
+	public void read(ResultSet rs, ResultInfo info)
+	{
+		int colCount = this.colData.length;
+		for (int i=0; i < colCount; i++)
+		{
+			Object value = null;
+			int type = info.getColumnType(i);
+			try
+			{
+				value = rs.getObject(i + 1);
+				if (type == Types.CLOB)
+				{
+					try
+					{
+						Clob clob = (Clob)value;
+						int len = (int)clob.length();
+						value = clob.getSubString(1, len);
+					}
+					catch (Exception e)
+					{
+						value = null;
+					}
+				}
+			}
+			catch (SQLException e)
+			{
+				value = null;
+			}
+
+			if (value == null)
+			{
+				this.colData[i] = NullValue.getInstance(type);
+			}
+			else
+			{
+				this.colData[i] = value;
+			}
+		}
+		this.resetStatus();
+	}
+	
+	/**
+	 *	Create a deep copy of this object.
+	 *	The status of the new row will be NOT_MODIFIED
+	 */
 	public RowData createCopy()
 	{
 		RowData result = new RowData(this.colData.length);
@@ -185,4 +256,44 @@ public class RowData
 	}
 
 	public boolean isDmlSent() { return this.dmlSent; }
+	
+	public StringBuffer getDataAsString(String aDelimiter, DecimalFormat formatter)
+	{
+		int count = this.colData.length;
+		StringBuffer result = new StringBuffer(count * 20);
+		int start = 0;
+		
+		for (int c=0; c < count; c++)
+		{
+			Object value = this.getValue(c);
+			if (value != null)
+			{
+				if ((value instanceof Double ||
+				    value instanceof Float ||
+						value instanceof BigDecimal) && formatter != null)
+				{
+					Number num = (Number)value;
+					result.append(formatter.format(num.doubleValue()));
+				}
+				else
+				{
+					String v = value.toString();
+					if (v.indexOf((char)0) > 0)
+					{
+						LogMgr.logWarning("RowData.getDataAsString()", "Found a zero byte in the data! Replacing with space char.");
+						byte[] d = v.getBytes();
+						int len = d.length;
+						for (int i=0; i < len; i++)
+						{
+							if (d[i] == 0) d[i] = 20;
+						}
+						v = new String(d);
+					}
+					result.append(v);
+				}
+			}
+			if (c < count - 1) result.append(aDelimiter);
+		}
+		return result;
+	}	
 }

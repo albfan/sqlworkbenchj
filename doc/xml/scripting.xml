@@ -189,7 +189,7 @@
           you can optionally display the results to the console using the parameter 
           <literal>-displayresult=true</literal>. If this parameter is not passed or set
           to false, results sets will not be visible (for a <literal>SELECT</literal> statement
-          you will simply see a <literal>SELECT executed successfully</literal>
+          you will simply see the message '<literal>SELECT executed successfully</literal>'.
           </para>
           
           <para>

@@ -25,6 +25,9 @@ import workbench.sql.formatter.SqlFormatter;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.log.LogMgr;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.TreeSet;
 
 /**
  *	Generates a SQL script to delete a record from the given table and
@@ -42,7 +45,8 @@ public class DeleteScriptGenerator
 	private TableIdentifier rootTable = null;
 	private WbTable sourceTable = null;
 	private ScriptGenerationMonitor monitor;
-	
+	private List visitedTables = new ArrayList();
+
 	public DeleteScriptGenerator(WbConnection aConnection)
 		throws SQLException
 	{
@@ -56,7 +60,7 @@ public class DeleteScriptGenerator
 	{
 		this.sourceTable = aTable;
 	}
-	
+
 	public void setTable(String aCatalog, String aSchema, String aTable)
 		throws SQLException
 	{
@@ -77,7 +81,7 @@ public class DeleteScriptGenerator
 		}
 		aSchema = this.meta.adjustObjectname(aSchema);
 		this.rootTable = new TableIdentifier(aCatalog, aSchema, aTable);
-		
+
 		this.dependency.setTable(this.rootTable);
 		this.tableDefinition = this.meta.getTableDefinition(this.rootTable);
 	}
@@ -97,7 +101,9 @@ public class DeleteScriptGenerator
 		for (int i=0; i < leafs.size(); i++)
 		{
 			node = (DependencyNode)leafs.get(i);
+			if (this.visitedTables.contains(node)) continue;
 			this.addDeleteStatement(sql, node);
+			this.visitedTables.add(node);
 			p = node.getParent();
 			while (p != null)
 			{
@@ -109,12 +115,16 @@ public class DeleteScriptGenerator
 			}
 			sql.append("\n\n");
 		}
+
 		for (int i=0; i < parents.size(); i++)
 		{
 			p = (DependencyNode)parents.get(i);
+			if (this.visitedTables.contains(p)) continue;
 			this.addDeleteStatement(sql, p);
+			this.visitedTables.add(p);
 			sql.append("\n");
 		}
+
 		DependencyNode root = this.dependency.getRootNode();
 		sql.append("DELETE FROM ");
 		sql.append(root.getTableId().getTableExpression());
@@ -286,7 +296,7 @@ public class DeleteScriptGenerator
 	{
 		this.monitor = aMonitor;
 	}
-	
+
 	public String getScript()
 	{
 		if (this.sourceTable == null) return "";
@@ -311,7 +321,7 @@ public class DeleteScriptGenerator
 		sep.append('\n');
 		for (int i=0; i < max; i++) sep.append('=');
 		sep.append('\n');
-		
+
 		try
 		{
 			for (int i=0; i < numRows; i++)
@@ -319,7 +329,7 @@ public class DeleteScriptGenerator
 				Map pkvalues = ds.getPkValues(rows[i]);
 				this.setTable(null, schema, updatetable);
 				this.setValues(pkvalues);
-				this.monitor.currentObject(ResourceMgr.getString("MsgGeneratingScriptForRow") + " " + i);
+				this.monitor.setCurrentObject(ResourceMgr.getString("MsgGeneratingScriptForRow") + " " + i);
 				String rowScript = this.createScript();
 				if (i > 0) script.append(sep);
 				script.append(rowScript);

@@ -184,12 +184,12 @@ public class WbSchemaReport
 		}
 	}
 	
-	public void currentObject(String anObject)
+	public void setCurrentObject(String anObject)
 	{
 		this.currentTable ++;
 		if (this.scriptMonitor != null)
 		{
-			this.scriptMonitor.currentObject(anObject);
+			this.scriptMonitor.setCurrentObject(anObject);
 		}
 		else if (this.rowMonitor != null)
 		{

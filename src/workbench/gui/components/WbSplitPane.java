@@ -8,6 +8,7 @@ import java.awt.Component;
 import javax.swing.JSplitPane;
 import javax.swing.border.Border;
 import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.SplitPaneUI;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 
@@ -55,7 +56,10 @@ public class WbSplitPane
 	public void updateUI()
 	{
 		int divider = this.getDividerSize();
-		super.updateUI();
+		//super.updateUI();
+		super.setUI(new WbSplitPaneUI());
+		revalidate();
+		
 		this.setDividerSize(divider);
 	}
 	
@@ -66,6 +70,14 @@ public class WbSplitPane
 		this.setDividerSize(divider);
 	}
 
+	public void setOneTouchTooltip(String tip)
+	{
+		SplitPaneUI ui = getUI();
+		if (ui instanceof WbSplitPaneUI)
+		{
+			((WbSplitPaneUI)ui).setOneTouchTooltip(tip);
+		}
+	}
 	private void initDefaults()
 	{
 		this.setDividerSize(DEFAULT_DIVIDER_SIZE);

@@ -7,7 +7,7 @@
 package workbench.db.exporter;
 
 import workbench.storage.ResultInfo;
-import workbench.storage.RowDataConverter;
+import workbench.db.exporter.RowDataConverter;
 
 /**
  *
@@ -25,7 +25,19 @@ public class SqlExportWriter
 
 	public RowDataConverter createConverter(ResultInfo info)
 	{
-		return null;
+		SqlRowDataConverter converter = new SqlRowDataConverter(info);
+		converter.setOriginalConnection(exporter.getConnection());
+		converter.setCommitEvery(exporter.getCommitEvery());
+		converter.setChrFunction(exporter.getChrFunction());
+		converter.setConcatString(exporter.getConcatString());
+		converter.setConcatFunction(exporter.getConcatFunction());
+		// the key columns need to be set before the createInsert flag!
+		converter.setKeyColumnsToUse(exporter.getKeyColumnsToUse());
+		converter.setCreateInsert(exporter.getCreateSqlInsert());
+		converter.setSql(exporter.getSql());
+		converter.setAlternateUpdateTable(exporter.getTableName());
+		converter.setCreateTable(exporter.isIncludeCreateTable());
+		return converter;
 	}
 	
 }

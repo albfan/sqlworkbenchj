@@ -26,6 +26,7 @@ import workbench.util.StrWriter;
  */
 public class ReportTable
 {
+	public static final String TAG_TABLE_DEF = "table-def";
 	public static final String TAG_TABLE_NAME = "table-name";
 	public static final String TAG_TABLE_CATALOG = "table-catalog";
 	public static final String TAG_TABLE_SCHEMA = "table-schema";
@@ -34,15 +35,15 @@ public class ReportTable
 	private List referencedTables;
 	private TableIdentifier table;
 	private ReportColumn[] columns;
+	private IndexReporter index;
 	private String tableComment;
-	private String xmlNamespace;
+	private TagWriter tagWriter = new TagWriter();
 	
 	/** Creates a new instance of ReportTable */
 	public ReportTable(TableIdentifier tbl, WbConnection conn, String namespace)
 		throws SQLException
 	{
 		this.table = tbl;
-		this.xmlNamespace = namespace;
 		List cols = conn.getMetadata().getTableColumns(tbl);
 		this.tableComment = conn.getMetadata().getTableComment(this.table);
 		
@@ -51,9 +52,62 @@ public class ReportTable
 		for (int i=0; i < numCols; i++)
 		{
 			ColumnIdentifier col = (ColumnIdentifier)cols.get(i);
-			this.columns[i] = new ReportColumn(col, this.table);
-			this.columns[i].setNamespace(this.xmlNamespace);
+			this.columns[i] = new ReportColumn(col);
+			this.columns[i].setNamespace(namespace);
 		}
+		this.index = new IndexReporter(tbl, conn);
+		this.index.setNamespace(namespace);
+		this.tagWriter.setNamespace(namespace);
+		this.readForeignKeys(conn);
+	}
+	
+	private void readForeignKeys(WbConnection conn)
+	{
+		DataStore ds = conn.getMetadata().getForeignKeys(this.table.getCatalog(), this.table.getSchema(), this.table.getTable());
+		int keys = ds.getRowCount();
+		if (keys == 0) return;
+		
+		for (int i=0; i < keys; i++)
+		{
+			String col = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_COLUMN_NAME);
+			ReportColumn rcol = this.findColumn(col);
+			if (rcol != null)
+			{
+				ColumnReference ref = new ColumnReference();
+				ref.setConstraintName(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_FK_NAME));
+				ref.setDeleteRule(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_DELETE_RULE));
+				ref.setUpdateRule(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_UPDATE_RULE));
+				String colExpr = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
+				String table = null;
+				String column = null;
+				int pos = colExpr.indexOf(".");
+				if (pos  > -1)
+				{
+					table = colExpr.substring(0, pos);
+					column = colExpr.substring(pos + 1);
+				}
+				ref.setForeignTable(table);
+				ref.setForeignColumn(column);
+				rcol.setForeignKeyReference(ref);
+			}
+		}
+	}
+	
+	private ReportColumn findColumn(String col)
+	{
+		if (col == null) return null;
+		
+		ReportColumn result = null;
+		int numCols = this.columns.length;
+		for (int i=0; i < numCols; i++)
+		{
+			if (col.equalsIgnoreCase(columns[i].getColumn().getColumnName()))
+			{
+				result = columns[i];
+				break;
+			}
+		}
+		return result;
 	}
 	
 	public String getXml()
@@ -77,14 +131,13 @@ public class ReportTable
 		StrBuffer colindent = new StrBuffer(indent);
 		colindent.append(indent);
 		
-		appendOpenTag(line, indent, "table-definition");
+		tagWriter.appendOpenTag(line, indent, TAG_TABLE_DEF);
 		line.append('\n');
 		
-		appendTag(line, colindent, TAG_TABLE_CATALOG, this.table.getCatalog());
-		appendTag(line, colindent, TAG_TABLE_SCHEMA, this.table.getSchema());
-		appendTag(line, colindent, TAG_TABLE_NAME, this.table.getTable());
-		appendTag(line, colindent, TAG_TABLE_COMMENT, this.tableComment);
-		line.append('\n');
+		tagWriter.appendTag(line, colindent, TAG_TABLE_CATALOG, this.table.getCatalog());
+		tagWriter.appendTag(line, colindent, TAG_TABLE_SCHEMA, this.table.getSchema());
+		tagWriter.appendTag(line, colindent, TAG_TABLE_NAME, this.table.getTable());
+		tagWriter.appendTag(line, colindent, TAG_TABLE_COMMENT, this.tableComment);
 		
 		line.writeTo(out);
 		
@@ -94,56 +147,16 @@ public class ReportTable
 			StrBuffer col = this.columns[i].getXml(colindent);
 			col.writeTo(out);
 		}
+		StrBuffer idx = this.index.getXml(colindent);
+		if (idx != null)
+		{
+			line = new StrBuffer();
+			line.append(idx);
+			line.writeTo(out);
+		}
 		line = new StrBuffer();
-		appendCloseTag(line, indent, "table-definition");
+		tagWriter.appendCloseTag(line, indent, TAG_TABLE_DEF);
 		line.writeTo(out);
-	}
-	
-	private void appendTag(StrBuffer target, StrBuffer indent, String tag, int value)
-	{
-		this.appendTag(target, indent, tag, String.valueOf(value));
-	}
-	
-	private void appendTag(StrBuffer target, StrBuffer indent, String tag, String value)
-	{
-		appendOpenTag(target, indent, tag);
-		target.append(value);
-		appendCloseTag(target, null, tag);
-	}
-	
-	private void appendOpenTag(StrBuffer target, StrBuffer indent, String tag)
-	{
-		if (indent != null) target.append(indent);
-		target.append('<');
-		if (this.xmlNamespace != null)
-		{
-			target.append(xmlNamespace);
-			target.append(':');
-		}
-		target.append(tag);
-		target.append('>');
-	}
-
-	private void appendCloseTag(StrBuffer target, StrBuffer indent, String tag)
-	{
-		if (indent != null) target.append(indent);
-		target.append("</");
-		if (this.xmlNamespace != null)
-		{
-			target.append(xmlNamespace);
-			target.append(':');
-		}
-		target.append(tag);
-		target.append(">\n");
-	}
-	
-	/**
-	 * Getter for property xmlNamespace.
-	 * @return Value of property xmlNamespace.
-	 */
-	public String getNamespace()
-	{
-		return xmlNamespace;
 	}
 	
 	/**
@@ -152,7 +165,7 @@ public class ReportTable
 	 */
 	public void setNamespace(String namespace)
 	{
-		this.xmlNamespace = namespace;
+		this.tagWriter.setNamespace(namespace);
 	}
 	
 }

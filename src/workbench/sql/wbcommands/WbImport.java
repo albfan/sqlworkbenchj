@@ -22,7 +22,7 @@ import workbench.util.StringUtil;
  */
 public class WbImport extends SqlCommand
 {
-	public static final String VERB = "IMPORT";
+	public static final String VERB = "WBIMPORT";
 	private DataImporter imp;
 
 	private ArgumentParser cmdLine;

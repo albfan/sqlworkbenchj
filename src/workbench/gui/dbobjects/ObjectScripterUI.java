@@ -77,7 +77,7 @@ public class ObjectScripterUI
 		this.statusMessage.setText("");
 	}
 
-	public void currentObject(String aTableName)
+	public void setCurrentObject(String aTableName)
 	{
 		this.statusMessage.setText(aTableName);
 		this.statusMessage.repaint();

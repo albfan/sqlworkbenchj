@@ -343,10 +343,28 @@ public class MainWindow
 		menu.addSeparator();
 		menu.add(this.assignWorkspaceAction);
 
+		WbMenu submenu = null;
+		String menuName = null;
 		for (int i=0; i < actions.size(); i++)
 		{
-			action = (WbAction)actions.get(i);
-			String menuName = (String)action.getValue(WbAction.MAIN_MENU_ITEM);
+			submenu = null;
+			action = null;
+			menuName = null;
+			Object entry = actions.get(i);
+			boolean menuSep = false;
+			if (entry instanceof WbAction)
+			{
+				action = (WbAction)actions.get(i);
+				menuName = (String)action.getValue(WbAction.MAIN_MENU_ITEM);
+				menuSep = "true".equals((String)action.getValue(WbAction.MENU_SEPARATOR));
+			}
+			else if (entry instanceof WbMenu)
+			{
+				submenu = (WbMenu)entry;
+				menuName = submenu.getParentMenuId();
+				menuSep = submenu.getCreateMenuSeparator();
+			}
+
 			if (menuName == null)
 			{
 				LogMgr.logWarning(this, "Action " + action.getClass() + " does not define a main menu entry!");
@@ -359,13 +377,19 @@ public class MainWindow
 				menuBar.add(menu);
 				menus.put(menuName, menu);
 			}
-			boolean menuSep = "true".equals((String)action.getValue(WbAction.MENU_SEPARATOR));
 
 			if (menuSep)
 			{
 				menu.addSeparator();
 			}
-			action.addToMenu(menu);
+			if (action != null)
+			{
+				action.addToMenu(menu);
+			}
+			else if (submenu != null)
+			{
+				menu.add(submenu);
+			}
 			menu.setVisible(true);
 		}
 
@@ -823,7 +847,7 @@ public class MainWindow
 	{
 		return "Wb" + this.instanceCount + "-" + p.getId();
 	}
-	
+
 	private void doConnect(final boolean showSelectDialogOnError)
 	{
 		boolean connected = false;
@@ -857,7 +881,7 @@ public class MainWindow
 		{
 			this.currentProfile = null;
 			error = se.getMessage();
-			
+
 			StrBuffer logmsg = new StrBuffer(200);
 			logmsg.append(se.getMessage());
 			SQLException next = se.getNextException();
@@ -1093,14 +1117,7 @@ public class MainWindow
 					}
 				});
 				if (conn != null) mgr.disconnect(conn.getId());
-				// make sure this is executed on the AWT Thread!
-				SwingUtilities.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						sql.disconnect();
-					}
-				});
+				sql.disconnect();
 			}
 
 			if (this.dbExplorerPanel != null)
@@ -1589,24 +1606,23 @@ public class MainWindow
 		{
 			this.dbExplorerPanel.openWindow(this.currentProfile.getName());
 			this.dbExplorerTabVisible = false;
-		}
 
-		// connecting can be pretty time consuming on a slow system
-		// so move it into its own thread...
-		if (!this.dbExplorerPanel.isConnected())
-		{
-			Thread t = new Thread()
+			// connecting can be pretty time consuming on a slow system
+			// so move it into its own thread...
+			if (!this.dbExplorerPanel.isConnected())
 			{
-				public void run()
+				Thread t = new Thread()
 				{
-					setConnectionForDbExplorer();
-				}
-			};
-			t.setDaemon(true);
-			t.setName("DbExplorer connection thread");
-			t.start();
+					public void run()
+					{
+						setConnectionForDbExplorer();
+					}
+				};
+				t.setDaemon(true);
+				t.setName("DbExplorer connection thread");
+				t.start();
+			}
 		}
-
 	}
 
 	/**
@@ -1884,11 +1900,24 @@ public class MainWindow
 			{
 				this.sqlTab.setSelectedIndex(index);
 			}
+			this.workspaceLoaded = true;
 		}
 		catch (Exception e)
 		{
 			LogMgr.logWarning("MainWindow.loadWorkspace()", "Error loading workspace  " + filename + ": " + e.getMessage(), e);
-			this.currentWorkspaceFile = null;
+			String error = e.getMessage();
+			String msg = ResourceMgr.getString("ErrorLoadingWorkspace").replaceAll("%error%", error);
+			boolean create = WbSwingUtilities.getYesNo(this, msg);
+			if (create)
+			{
+				this.currentWorkspaceFile = realFilename;
+				this.workspaceLoaded = true;
+			}
+			else
+			{
+				this.workspaceLoaded = false;
+				this.currentWorkspaceFile = null;
+			}
 		}
 		finally
 		{
@@ -1896,7 +1925,6 @@ public class MainWindow
 			this.sqlTab.setSuspendRepaint(false);
 		}
 
-		this.workspaceLoaded = true;
 		this.updateWindowTitle();
 		this.checkWorkspaceActions();
 		this.updateAddMacroAction();

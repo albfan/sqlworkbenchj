@@ -30,6 +30,14 @@ public class TagWriter
 		appendTag(target, indent, tag, String.valueOf(value));
 	}
 	
+	public void appendTag(StrBuffer target, StrBuffer indent, String tag, boolean value)
+	{
+		if (value)
+			appendTag(target, indent, tag, "true");
+		else
+			appendTag(target, indent, tag, "false");
+	}
+	
 	public  void appendTag(StrBuffer target, StrBuffer indent, String tag, String value)
 	{
 		appendOpenTag(target, indent, tag);
@@ -39,6 +47,19 @@ public class TagWriter
 	
 	public  void appendOpenTag(StrBuffer target, StrBuffer indent, String tag)
 	{
+		this.appendOpenTag(target, indent, tag, (String[])null, (String[])null);
+	}
+	
+	public  void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, String attribute, String attValue)
+	{
+		String[] attr = new String[1];
+		String[] values = new String[1];
+		attr[0] = attribute;
+		values[0] = attValue;
+		this.appendOpenTag(target, indent, tag, attr, values);
+	}
+	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, String[] attributes, String[] values)
+	{
 		if (indent != null) target.append(indent);
 		target.append('<');
 		if (this.xmlNamespace != null)
@@ -47,6 +68,20 @@ public class TagWriter
 			target.append(':');
 		}
 		target.append(tag);
+		if (attributes != null && values != null)
+		{
+			for (int i=0; i < attributes.length; i++)
+			{
+				if (attributes[i] != null && values[i] != null)
+				{
+					target.append(' ');
+					target.append(attributes[i]);
+					target.append("=\"");
+					target.append(values[i]);
+					target.append('"');
+				}
+			}
+		}
 		target.append('>');
 	}
 

@@ -56,6 +56,16 @@ public class StatementRunnerResult
 		this.updateCounts.add(new Integer(aCount));
 	}
 
+	public void addMessages(String[] msg)
+	{
+		if (this.messages == null) this.messages = new ArrayList();
+		if (msg == null || msg.length == 0) return;
+		for (int i=0; i < msg.length; i++)
+		{
+			this.messages.add(msg[i]);
+		}
+	}
+	
 	public void addMessage(String aMessage)
 	{
 		if (this.messages == null) this.messages = new ArrayList();
