@@ -12,22 +12,21 @@ import workbench.resource.ResourceMgr;
 /**
  *	@author  workbench@kellerer.org
  */
-public class FileSaveAction extends WbAction
+public class FileSaveAsAction extends WbAction
 {
 	private SqlPanel client;
 
-	public FileSaveAction(SqlPanel aClient)
+	public FileSaveAsAction(SqlPanel aClient)
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtFileSave"));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtFileSave"));
+		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtFileSaveAs"));
+		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtFileSaveAs"));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_FILE);
-		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
 	}
 
 	public void actionPerformed(ActionEvent e)
 	{
-		this.client.saveCurrentFile();
+		this.client.saveFile();
 	}
 }
