@@ -36,6 +36,11 @@ public abstract class WbAction extends AbstractAction
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("blank"));
 	}
 
+	protected void setActionName(String aName)
+	{
+		this.actionName = aName;
+	}
+	
 	public KeyStroke getAccelerator()
 	{
 		return (KeyStroke)this.getValue(Action.ACCELERATOR_KEY);

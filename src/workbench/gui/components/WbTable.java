@@ -16,19 +16,21 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
-import workbench.gui.sql.DwTableModel;
 import workbench.gui.renderer.DateColumnRenderer;
 
 public class WbTable extends javax.swing.JTable
 {
 	private WbTableSorter sortModel;
-	private DwTableModel dwModel;
+	private ResultSetTableModel dwModel;
 	private int lastFoundRow = -1;
 	private String lastSearchText = null;
 	private TableModelListener changeListener = null;
 	
 	public WbTable()
 	{
+		this.setMinimumSize(null);
+		this.setMaximumSize(null);
+		this.setPreferredSize(null);
 	}
 	
 	public void setModel(TableModel aModel)
@@ -47,9 +49,9 @@ public class WbTable extends javax.swing.JTable
 		{
 			this.setModelForSorting(aModel);
 		}
-		if (aModel instanceof DwTableModel)
+		if (aModel instanceof ResultSetTableModel)
 		{
-			this.dwModel = (DwTableModel)aModel;
+			this.dwModel = (ResultSetTableModel)aModel;
 			this.dwModel.addTableModelListener(this.changeListener);
 		}
 	}

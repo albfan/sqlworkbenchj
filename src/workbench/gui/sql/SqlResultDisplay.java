@@ -8,6 +8,7 @@ package workbench.gui.sql;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
+import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
@@ -15,18 +16,24 @@ import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TableModelListener;
 import workbench.WbManager;
 import workbench.db.WbConnection;
+import workbench.gui.WbSwingUtilities;
 import workbench.interfaces.Exporter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.util.SqlUtil;
 
 
 /**
@@ -46,27 +53,35 @@ public class SqlResultDisplay extends JPanel implements Exporter
 		this.tab = new JTabbedPane();
 		this.tab.setTabPlacement(JTabbedPane.TOP);
 		this.tab.setDoubleBuffered(true);
-		this.tab.setBorder(new EmptyBorder(0,0,0,0));
+		this.tab.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		
 		this.log = new JTextArea();
-		//this.log.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
-		this.log.setBorder(new EmptyBorder(0,0,0,0));
+		//this.log.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		this.log.setBorder(new EmptyBorder(0,2,0,0));
 		this.log.setFont(WbManager.getSettings().getMsgLogFont());
 		this.log.setEditable(false);
+		this.log.setLineWrap(true);
+		this.log.setWrapStyleWord(true);
+		//this.log.setMargin(new Insets(0, 10, 0, 0));
+		
 		this.data = new DwPanel();
-		this.data.setBorder(new EmptyBorder(0,0,0,0));
+		this.data.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.tab.addTab(ResourceMgr.getString(ResourceMgr.TAB_LABEL_RESULT), data);
-		this.tab.addTab(ResourceMgr.getString(ResourceMgr.TAB_LABEL_MSG), log);
+		JScrollPane scroll = new JScrollPane(log);
+		this.tab.addTab(ResourceMgr.getString(ResourceMgr.TAB_LABEL_MSG), scroll);
+		this.tab.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		
+		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setLayout(new BorderLayout());
 		this.add(tab, BorderLayout.CENTER);
 		this.setPreferredSize(null);
-		this.tab.setBorder(new EmptyBorder(0,0,0,0));
-		this.setBorder(new EmptyBorder(0,0,0,0));
 		this.showResultPanel();
 	}
 
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
+		this.clearLog();
 		try
 		{
 			this.data.setConnection(this.dbConnection);
@@ -132,14 +147,28 @@ public class SqlResultDisplay extends JPanel implements Exporter
 		}
 	}
 
-	public void displayResult(String aSqlStatement)
+	public void displayResult(String aSqlScript)
 	{
 		try
 		{
 			this.log.setText(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
-			this.data.setSqlStatement(aSqlStatement);
-			this.data.runStatement();
-			this.log.setText(this.data.getLastMessage());
+			List sqls = SqlUtil.getCommands(aSqlScript, ";");
+			int count = sqls.size();
+			this.log.setText("");
+			for (int i=0; i < count; i++)
+			{
+				String sql = (String)sqls.get(i);
+				this.data.runStatement(sql);
+				this.log.append(this.data.getLastMessage());
+				if (i < count - 1)
+				{
+					this.log.append("\r\n");
+				}
+				if (i == 0 && !this.data.hasResultSet())
+				{
+					this.showLogPanel();
+				}
+			}
 			if (this.data.hasResultSet())
 			{
 				this.showResultPanel();

@@ -271,14 +271,14 @@ public class Settings
 	}
 
 
-	public void setSqlDividerLocation(int y)
+	public void setSqlDividerLocation(int aDividerId, int y)
 	{
-		this.props.setProperty("workbench.gui.sql.divider", Integer.toString(y));
+		this.props.setProperty("workbench.gui.sql.divider" + aDividerId, Integer.toString(y));
 	}
 
-	public int getSqlDividerLocation()
+	public int getSqlDividerLocation(int aDividerId)
 	{
-		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.sql.divider", "-1"));
+		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.sql.divider" + aDividerId, "-1"));
 	}
 
 	public int getWindowPosX(String windowClass)
@@ -404,5 +404,15 @@ public class Settings
 		this.props.setProperty("workbench.gui.display.maxfractiondigits", Integer.toString(aDigits));
 	}
 
+	public String getAlternateDelimiter()
+	{
+		return this.props.getProperty("workbench.sql.alternatedelimiter", "./");
+	}
+	
+	public void setAlternateDelimiter(String aDelimit)
+	{
+		this.props.setProperty("workbench.sql.alternatedelimiter", aDelimit);
+	}
+	
 
 }

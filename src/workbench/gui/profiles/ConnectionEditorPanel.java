@@ -20,6 +20,7 @@ import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import workbench.db.DbDriver;
 import workbench.gui.WbSwingUtilities;
@@ -83,6 +84,10 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		tfUserName.setPreferredSize(new java.awt.Dimension(100, 20));
 		tfUserName.addFocusListener(new java.awt.event.FocusAdapter()
 		{
+			public void focusGained(java.awt.event.FocusEvent evt)
+			{
+				fieldFocusGained(evt);
+			}
 			public void focusLost(java.awt.event.FocusEvent evt)
 			{
 				fieldFocusLost(evt);
@@ -183,6 +188,10 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		tfPwd.setFont(null);
 		tfPwd.addFocusListener(new java.awt.event.FocusAdapter()
 		{
+			public void focusGained(java.awt.event.FocusEvent evt)
+			{
+				fieldFocusGained(evt);
+			}
 			public void focusLost(java.awt.event.FocusEvent evt)
 			{
 				fieldFocusLost(evt);
@@ -265,6 +274,15 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		
 	}//GEN-END:initComponents
 
+	private void fieldFocusGained(java.awt.event.FocusEvent evt)//GEN-FIRST:event_fieldFocusGained
+	{//GEN-HEADEREND:event_fieldFocusGained
+		if (evt.getSource() instanceof JTextField)
+		{
+			JTextField field = (JTextField)evt.getSource();
+			field.selectAll();
+		}
+	}//GEN-LAST:event_fieldFocusGained
+
 	private void cbDriversItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_cbDriversItemStateChanged
 	{//GEN-HEADEREND:event_cbDriversItemStateChanged
 		if (evt.getStateChange() == ItemEvent.SELECTED)
@@ -285,6 +303,8 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		DriverEditorDialog d = new DriverEditorDialog(parent, true);
 		WbSwingUtilities.center(d,parent);
 		d.show();
+		List drivers = WbManager.getInstance().getConnectionMgr().getDrivers();
+		this.setDrivers(drivers);
 	}//GEN-LAST:event_showDriverEditorDialog
 
 	private void cbAutocommitItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_cbAutocommitItemStateChanged
@@ -319,7 +339,8 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		if (aDriverList != null)
 		{
 			this.cbDrivers.setModel(new DefaultComboBoxModel(aDriverList.toArray()));
-			this.cbDrivers.setSelectedItem(null);
+			//this.cbDrivers.setSelectedItem(null);
+			this.checkDriverDropDown();
 		}
 	}
 
@@ -338,7 +359,6 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		this.currentProfile.setUsername(tfUserName.getText());
 		this.currentProfile.setAutocommit(cbAutocommit.isSelected());
 		this.currentProfile.setName(tfProfileName.getText());
-
 
 		// dirty trick to update the list display
 		// if I update the parent, the divider size gets reset :-(
@@ -364,13 +384,20 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		this.tfURL.setCaretPosition(0);
 		this.tfPwd.setText(aProfile.decryptPassword());
 		this.cbAutocommit.setSelected(aProfile.getAutocommit());
+		this.checkDriverDropDown();
+		this.init = false;
+	}
+
+	private void checkDriverDropDown()
+	{
+		if (this.currentProfile == null) return;
 		DbDriver driver;
 		int newIndex = -1;
 		int count = this.cbDrivers.getItemCount();
 		for (int i=0; i < count; i++)
 		{
 			driver = (DbDriver)this.cbDrivers.getItemAt(i);
-			if (driver.getDriverClass().equals(aProfile.getDriverclass()))
+			if (driver.getDriverClass().equals(this.currentProfile.getDriverclass()))
 			{
 				newIndex = i;
 				break;
@@ -382,7 +409,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		}
 		else
 		{
-			String cls = aProfile.getDriverclass();
+			String cls = this.currentProfile.getDriverclass();
 			if (cls != null && cls.length() > 0)
 			{
 				DbDriver drv = new DbDriver();
@@ -390,7 +417,5 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 				this.cbDrivers.setSelectedIndex(this.cbDrivers.getItemCount() - 1);
 			}
 		}
-		this.init = false;
 	}
-
 }

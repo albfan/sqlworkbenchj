@@ -16,9 +16,13 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 
 public class WbSwingUtilities
 {
+
+	public static final Border EMPTY_BORDER = new EmptyBorder(0,0,0,0);
 	
 	private WbSwingUtilities()
 	{

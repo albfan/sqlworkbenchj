@@ -21,7 +21,7 @@ public class StringUtil
 		int pos = aString.indexOf(aValue);
 		if (pos == -1) return aString;
 
-		StringBuffer temp = new StringBuffer();
+		StringBuffer temp = new StringBuffer(aString.length());
 
 		int lastpos = 0;
 		int len = aValue.length();

@@ -29,6 +29,7 @@ public class DataToClipboardAction extends WbAction
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtDataToClipboard"));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
+		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtDataToClipboard"));
 		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
 	}
 

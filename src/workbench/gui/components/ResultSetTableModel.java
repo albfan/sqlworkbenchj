@@ -23,10 +23,11 @@ import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 
 
-/**
- *	Table model for displaying the contents of a SQL statement
+/** 	TableModel for displaying the contents of a ResultSet.
+ * 	The data is cached in a DataStore.
  */
-public class ResultSetTableModel extends AbstractTableModel
+public class ResultSetTableModel 
+	extends AbstractTableModel
 {
 	private DataStore dataCache;
 	public static final String NOT_AVAILABLE = "(n/a)";
@@ -34,7 +35,13 @@ public class ResultSetTableModel extends AbstractTableModel
 	public ResultSetTableModel(ResultSet aResultSet) 
 		throws SQLException, WbException
 	{
-		this.dataCache = new DataStore(aResultSet);
+		this(aResultSet, null);
+	}
+	
+	public ResultSetTableModel(ResultSet aResultSet, List aColumnList) 
+		throws SQLException, WbException
+	{
+		this.dataCache = new DataStore(aResultSet, aColumnList);
 	}
 		
 	/**
@@ -156,7 +163,7 @@ public class ResultSetTableModel extends AbstractTableModel
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			return 10;
+			return 100;
 		}
 	}
 	
@@ -169,26 +176,10 @@ public class ResultSetTableModel extends AbstractTableModel
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			return -1;
+			return Types.VARCHAR;
 		}
 	}		
 
-	/**
-	 *	Return type of the column as a string.
-	 */
-//	public String getColumnTypeName(int aColumn)
-//	{
-//		try
-//		{
-//			return this.dataCache.getColumnTypeName(aColumn);
-//		}
-//		catch (Exception e)
-//		{
-//			e.printStackTrace();
-//			return NOT_AVAILABLE;
-//		}
-//	}
-	
 	/**
 	 *	Number of rows in the result set
 	 */

@@ -44,14 +44,21 @@ public class DateColumnRenderer
     this.setHorizontalAlignment(DefaultTableCellRenderer.RIGHT);
 		Date aDate = null;
 		String newVal = null;
-		if (value != null)
+		if (value != null )
 		{
-			aDate = (Date)value;
-			newVal = (String)this.displayCache.get(aDate);
-			if (newVal == null)
+			try
 			{
-				newVal = this.formatter.format(aDate);
-				this.displayCache.put(aDate, newVal);
+				aDate = (Date)value;
+				newVal = (String)this.displayCache.get(aDate);
+				if (newVal == null)
+				{
+					newVal = this.formatter.format(aDate);
+					this.displayCache.put(aDate, newVal);
+				}
+			}
+			catch (ClassCastException cc)
+			{
+				newVal = "";
 			}
 		}
 		else

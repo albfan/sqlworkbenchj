@@ -61,6 +61,8 @@ public class SelectTabAction extends WbAction
 				break;
 		}
 		this.setActionName("SelectTab" + (anIndex+1));
+		this.putValue(Action.NAME, ResourceMgr.getString("LabelTabStatement") + " " + Integer.toString(anIndex+1));
+		this.putValue(Action.SMALL_ICON, null);
 	}
 
 	public void actionPerformed(ActionEvent e)

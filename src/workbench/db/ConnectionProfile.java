@@ -32,6 +32,7 @@ public class ConnectionProfile
 	private String description;
 	private int id;
 	private static int nextId = 1;
+	private boolean changed;
 	
 	public ConnectionProfile()
 	{
@@ -42,6 +43,7 @@ public class ConnectionProfile
 	{
 		return nextId++;
 	}
+	
 	public ConnectionProfile(String driverClass, String url, String userName, String pwd)
 	{
 		this();
@@ -50,6 +52,7 @@ public class ConnectionProfile
 		this.setUsername(userName);
 		this.setPassword(pwd);
 		this.setName(url);
+		this.changed = false;
 	}
 	
 	public ConnectionProfile(String aName, String driverClass, String url, String userName, String pwd)
@@ -60,6 +63,7 @@ public class ConnectionProfile
 		this.setUsername(userName);
 		this.setPassword(pwd);
 		this.setName(aName);
+		this.changed = false;
 	}
 	
 	/**
@@ -71,13 +75,14 @@ public class ConnectionProfile
 	 */
 	public void setPassword(String aPwd)
 	{
-		if (!aPwd.startsWith(CRYPT_PREFIX))
+		if (aPwd != null && !aPwd.startsWith(CRYPT_PREFIX))
 		{
-			this.password = CRYPT_PREFIX + this.encryptPassword(aPwd);
+			aPwd = CRYPT_PREFIX + this.encryptPassword(aPwd);
 		}
-		else
+		if (aPwd == null || !aPwd.equals(this.password))
 		{
 			this.password = aPwd;
+			this.changed = true;
 		}
 	}
 
@@ -162,7 +167,14 @@ public class ConnectionProfile
 	}
 	
 	public String getUrl() { return this.url; }
-	public void setUrl(String aUrl) { this.url = aUrl; }
+	public void setUrl(String aUrl) 
+	{ 
+		if (aUrl == null || !aUrl.equals(this.url))
+		{
+			this.url = aUrl; 
+			this.changed = true;
+		}
+	}
 	
 	public String getDriverclass() { return this.driverclass; }
 	public void setDriverclass(String aDriverclass) { this.driverclass = aDriverclass; }
@@ -178,6 +190,19 @@ public class ConnectionProfile
 	
 	public String getDescription() { return this.description; }
 	public void setDescription(String description) { this.description = description; }
+	
+	public ConnectionProfile createCopy()
+	{
+		ConnectionProfile result = new ConnectionProfile();
+		result.setAutocommit(this.autocommit);
+		result.setDescription(this.description);
+		result.setDriverclass(this.driverclass);
+		result.setName(this.name);
+		result.setPassword(this.getPassword());
+		result.setUrl(this.url);
+		result.setUsername(this.username);
+		return result;
+	}
 	
 	public static Comparator getNameComparator()
 	{

@@ -8,6 +8,7 @@ package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -63,6 +64,7 @@ public class ProfileSelectionDialog
     okButton = new javax.swing.JButton();
     cancelButton = new javax.swing.JButton();
 
+		/*
     addWindowListener(new java.awt.event.WindowAdapter()
     {
       public void windowClosing(java.awt.event.WindowEvent evt)
@@ -70,7 +72,8 @@ public class ProfileSelectionDialog
         closeDialog(evt);
       }
     });
-
+		*/
+		addWindowListener(this);
     buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
     okButton.setText(ResourceMgr.getString(ResourceMgr.TXT_OK));
@@ -105,7 +108,8 @@ public class ProfileSelectionDialog
 	/** Closes the dialog */
 	private void closeDialog(java.awt.event.WindowEvent evt)
 	{
-		setVisible(false);
+		this.setVisible(false);
+		this.dispose();
 	}
 
 	public ConnectionProfile getSelectedProfile()
@@ -132,13 +136,20 @@ public class ProfileSelectionDialog
 		this.selectedProfile = this.profiles.getSelectedProfile();
 		this.cancelled = false;
 		this.setVisible(false);
+		this.dispose();
 	}
 
 	public void profileListClicked(MouseEvent evt)
 	{
 		if (evt.getClickCount() == 2)
 		{
-			this.selectProfile();
+			EventQueue.invokeLater(new Runnable() 
+			{
+				public void run()
+				{
+					selectProfile();
+				}
+			});
 		}
 	}
 	/** Invoked when an action occurs.
@@ -165,13 +176,6 @@ public class ProfileSelectionDialog
 
 	public boolean isCancelled() { return this.cancelled;	}
 
-	/** Invoked when the Window is set to be the active Window. Only a Frame or
-	 * a Dialog can be the active Window. The native windowing system may
-	 * denote the active Window or its children with special decorations, such
-	 * as a highlighted title bar. The active Window is always either the
-	 * focused Window, or the first Frame or Dialog that is an owner of the
-	 * focused Window.
-	 */
 	public void windowActivated(WindowEvent e)
 	{
 	}
@@ -190,6 +194,8 @@ public class ProfileSelectionDialog
 	 */
 	public void windowClosing(WindowEvent e)
 	{
+		this.cancelled = true;
+    this.closeDialog(e);
 	}
 
 	/** Invoked when a Window is no longer the active Window. Only a Frame or a

@@ -27,6 +27,7 @@ public class FindAction extends WbAction
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtFind"));
 		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK));
+		this.setCreateToolbarSeparator(true);
 	}
 
 	public void actionPerformed(ActionEvent e)

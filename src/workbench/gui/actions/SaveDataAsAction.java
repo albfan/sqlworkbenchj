@@ -27,6 +27,7 @@ public class SaveDataAsAction extends WbAction
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtSaveDataAs"));
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_SAVE_AS));
+		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtSaveDataAs"));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
 	}
 

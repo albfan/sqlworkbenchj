@@ -24,6 +24,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import workbench.WbManager;
 import workbench.db.WbConnection;
+import workbench.gui.WbSwingUtilities;
 
 import workbench.gui.actions.*;
 import workbench.gui.actions.CreateSnippetAction;
@@ -33,9 +34,6 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
-
-
-
 
 /**
  *	A panel with an editor (EditorPanel), a log panel and
@@ -82,18 +80,17 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 	{
 		this.internalId = anId;
 		this.setDoubleBuffered(true);
-		this.setBorder(null);
+		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.historyFilename = "WbStatements" + Integer.toString(this.internalId) + ".xml";
 		this.setLayout(new BorderLayout());
 		this.result = new SqlResultDisplay();
 		this.editor = new EditorPanel();
 		this.contentPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.result);
 		this.contentPanel.setDividerSize(DIVIDER_SIZE);
-		this.contentPanel.setBorder(null);
-		this.result.setBorder(null);
+		this.contentPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.add(this.contentPanel, BorderLayout.CENTER);
 		
-		int loc = WbManager.getSettings().getSqlDividerLocation();
+		int loc = WbManager.getSettings().getSqlDividerLocation(this.internalId);
 		if (loc <= 0) loc = 200;
 		this.contentPanel.setDividerLocation(loc);
 		
@@ -205,6 +202,9 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 		WbAction action = new CreateSnippetAction(this.editor);
 		action.setCreateMenuSeparator(true);
 		this.actions.add(action);
+
+		action = new SaveSqlHistoryAction(this);
+		this.actions.add(action);
 		
 		this.toolbarActions.add(this.findAction);
 		this.toolbarActions.add(this.findAgainAction);
@@ -248,6 +248,11 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 		this.result.saveChangesToDatabase();
 	}
 	
+	/**
+	 *	When the SqlPanel becomse visible (i.e. the tab is 
+	 *	selected in the main windows) we set the focus to
+	 *	the editor component.
+	 */
 	public void setVisible(boolean aFlag)
 	{
 		super.setVisible(aFlag);
@@ -264,6 +269,9 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 		}
 	}
 
+	/**
+	 *	Open the Find dialog for searching strings in the result set
+	 */
 	public void findData()
 	{
 		String criteria;
@@ -273,6 +281,9 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 		this.lastSearchCriteria = criteria;
 	}
 	
+	/**
+	 *	Find the next occurance after findData() has been called.
+	 */
 	public void findNext()
 	{
 		this.result.searchNext();
@@ -352,12 +363,12 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 		}
 	}
 	
-	public synchronized void showNextStatement()
+	public void showNextStatement()
 	{
 		this.showStatementFromHistory(this.currentHistoryEntry + 1);
 	}
 	
-	public synchronized void showPrevStatement()
+	public void showPrevStatement()
 	{
 		this.showStatementFromHistory(this.currentHistoryEntry - 1);
 	}
@@ -372,21 +383,14 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 		this.checkStatementActions();
 	}
 	
-
-	/*
-	public void setStatusbar(WindowStatusBar aStatusBar)
-	{
-		this.winStatusBar = aStatusBar;
-	}
-	*/
 	public void storeSettings()
 	{
-		// Divider location will only be saved for the first panel...
-		if (this.internalId == 0)
-		{
-			WbManager.getSettings().setSqlDividerLocation(this.contentPanel.getDividerLocation());
-		}
-		
+		WbManager.getSettings().setSqlDividerLocation(this.internalId, this.contentPanel.getDividerLocation());
+		this.saveSqlStatementHistory();
+	}
+	
+	public void saveSqlStatementHistory()
+	{
 		try
 		{
 			WbPersistence.writeObject(this.statementHistory, this.historyFilename);
@@ -443,7 +447,7 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 	
 	public void cancelExecution()
 	{
-		this.showStatusMessage(ResourceMgr.getString("CancellingStmt"));
+		this.showStatusMessage(ResourceMgr.getString("MsgCancellingStmt"));
 		this.result.cancelExecution();
 		this.setCancelState(false);
 		this.clearStatusMessage();
@@ -458,6 +462,12 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 		this.setActionState(this.stopAction, aFlag);
 	}
 	
+	/**
+	 *	Modify the enabled state of the given action.
+	 *	This is done in a separate thread because the enabled
+	 *	flag is reflected in a change of the associated toolbar
+	 *	button/menu item and this should be changed in a background thread
+	 */
 	public void setActionState(final Action anAction, final boolean aFlag)
 	{
 		EventQueue.invokeLater(

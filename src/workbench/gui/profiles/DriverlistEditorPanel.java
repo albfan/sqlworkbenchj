@@ -131,7 +131,7 @@ public class DriverlistEditorPanel extends javax.swing.JPanel implements FileAct
 
 			for (int i=0; i < count; i++)
 			{
-				DbDriver drv = (DbDriver)this.model.getElementAt(i);
+				DbDriver drv = (DbDriver)this.model.getDriver(i);
 				if (drv.getName().equals(aDriverName))
 				{
 					this.driverList.setSelectedIndex(i);
@@ -164,7 +164,7 @@ public class DriverlistEditorPanel extends javax.swing.JPanel implements FileAct
 	public void newItem() throws WbException
 	{
 		DbDriver drv = new DbDriver();
-		drv.setName(ResourceMgr.getString("EmptyDriverName"));
+		drv.setName(ResourceMgr.getString("TxtEmptyDriverName"));
 		this.model.addDriver(drv);
 		this.selectDriver(drv.getName());
 		this.driverList.updateUI();

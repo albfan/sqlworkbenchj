@@ -156,9 +156,10 @@ public class ProfileEditorPanel
 	public ConnectionProfile getSelectedProfile()
 	{
 		this.repaint();
-		this.connectionEditor.updateProfile();
-		ConnectionProfile prof = (ConnectionProfile)jList1.getSelectedValue();
-		return prof;
+		//this.connectionEditor.updateProfile();
+		return this.connectionEditor.getProfile();
+		//ConnectionProfile prof = (ConnectionProfile)jList1.getSelectedValue();
+		//return prof;
 	}
 
 

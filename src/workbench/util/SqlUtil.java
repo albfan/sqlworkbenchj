@@ -2,8 +2,10 @@ package workbench.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.StringTokenizer;
+import workbench.storage.DataStore;
 
 public class SqlUtil
 {
@@ -93,6 +95,32 @@ public class SqlUtil
 		return result;
 	}
 	
+	/**
+	 *	Returns a literal which can be used directly in a SQL statement.
+	 *	This method will quote character datatypes and convert
+	 *	Date datatypes to the correct format.
+	 */
+	public static String getLiteral(Object aValue)
+	{
+		if (aValue == null) return "NULL";
+		if (aValue == DataStore.NULL_VALUE) return "NULL";
+		
+		if (aValue instanceof String)
+		{
+			// Single quotes in a String must be "quoted"...
+			String realValue = StringUtil.replace((String)aValue, "'", "''");
+			return "'" + realValue + "'";
+		}
+		else if (aValue instanceof Date)
+		{
+			return "'" + aValue.toString() + "'";
+		}
+		else 
+		{
+			return aValue.toString();
+		}
+		
+	}
 	public static void main(String args[])
 	{
 		//String script = "select 'testing'';''', test.spalte1 from test;\r\n                ;\r\nupdate test set blba='xx';";

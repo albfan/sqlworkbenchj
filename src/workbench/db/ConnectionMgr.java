@@ -38,10 +38,10 @@ import workbench.util.WbPersistence;
  */
 public class ConnectionMgr
 {
-	private Map activeConnections = new HashMap();
+	//private Map activeConnections = new HashMap();
+	private WbConnection currentConnection;
 	private Map profiles;
 	private List drivers;
-	private JARClassLoader driverLoader;
 
 	/** Creates new ConnectionMgr */
 	public ConnectionMgr()
@@ -49,34 +49,14 @@ public class ConnectionMgr
 	}
 	
 	/**
-	 *	Return a connection for the given windowId
-	 *	@param ID the windowId for window which is requesting the connection
-	 *	@throws NoConnectionException
-	 *	@see workbench.gui.MainWindow#getWindowId()
-	 *	@see #releaseConnection(String)
-	 *	@see #disconnectAll()
-	 */
-	private WbConnection getConnection(String aWindowId)
-		throws NoConnectionException
-	{
-		WbConnection conn = (WbConnection)this.activeConnections.get(aWindowId);
-		if (conn == null)
-		{
-			throw new NoConnectionException(ResourceMgr.getString(ResourceMgr.ERROR_NO_CONNECTION_AVAIL));
-		}
-		return conn;
-	}
-
-	/**
 	 *	Return a new connection specified by the profile, for the
 	 *	given window id
 	 */
-	public WbConnection getConnection(String aWindowId, ConnectionProfile aProfile)
+	public WbConnection getConnection(ConnectionProfile aProfile)
 		throws ClassNotFoundException, SQLException, NoConnectionException
 	{
-		this.disconnect(aWindowId);
+		this.disconnect();
 		
-		//Class.forName(aProfile.getDriverclass());
 		String drvName = aProfile.getDriverclass();
 		DbDriver drv = this.findDriver(drvName);
 		if (drv == null)
@@ -86,14 +66,16 @@ public class ConnectionMgr
 		
 		WbConnection conn = new WbConnection();
 		Connection sql;
-		//Connection sql = DriverManager.getConnection(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword());
+		// The DriverManager refuses to use a driver which was not loaded
+		// from the system classloader, so the connection has to be 
+		// established directly from the driver.
 		try
 		{
 			sql = drv.connect(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword());
 		
 			sql.setAutoCommit(aProfile.getAutocommit());
 			conn.setSqlConnection(sql);
-			this.activeConnections.put(aWindowId, conn);
+			this.currentConnection = conn;
 		}
 		catch (WbException e)
 		{
@@ -155,6 +137,11 @@ public class ConnectionMgr
 		if (this.profiles == null) this.readProfiles();
 		return this.profiles;
 	}
+
+	public String getDisplayString()
+	{
+		return getDisplayString(this.currentConnection);
+	}
 	
 	public static String getDisplayString(WbConnection con)
 	{
@@ -200,6 +187,8 @@ public class ConnectionMgr
 	 */
 	public void disconnectAll()
 	{
+		this.disconnect();
+		/*
 		Iterator itr = this.activeConnections.keySet().iterator();
 		while (itr.hasNext())
 		{
@@ -207,25 +196,27 @@ public class ConnectionMgr
 			this.disconnect(key);
 			this.activeConnections.put(key, null);
 		}
+		*/
 	}
 	
 	/**
 	 *	Disconnect the connection with the given key
 	 */
-	public void disconnect(String anId)
+	public void disconnect()
 	{
 		try
 		{
-			WbConnection con = (WbConnection)this.activeConnections.get(anId);
-			if (con != null) 
+			//WbConnection con = (WbConnection)this.activeConnections.get(anId);
+			if (this.currentConnection != null) 
 			{
-				con.close();
+				this.currentConnection.close();
+				this.currentConnection = null;
 			}
-			this.activeConnections.put(anId, null);
+			//this.activeConnections.put(anId, null);
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError(this, ResourceMgr.getString(ResourceMgr.ERROR_DISCONNECT) + " " + anId, e);
+			LogMgr.logError(this, ResourceMgr.getString(ResourceMgr.ERROR_DISCONNECT), e);
 		}
 	}
 	

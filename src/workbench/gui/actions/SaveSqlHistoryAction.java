@@ -28,7 +28,7 @@ public class SaveSqlHistoryAction extends WbAction
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtSaveSqlHistory"));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtCreateSnippet"));
+		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtSaveSqlHistory"));
 		//this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.ALT_MASK));
 	}
 

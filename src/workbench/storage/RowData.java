@@ -5,6 +5,8 @@
  */
 package workbench.storage;
 
+import workbench.db.WbConnection;
+
 class RowData
 {
 	public static final int NOT_MODIFIED = 0;
@@ -20,6 +22,7 @@ class RowData
 	public RowData(int aColCount)
 	{
 		this.colData = new Object[aColCount];
+		this.setNew();
 	}
 
 	/**
@@ -33,13 +36,16 @@ class RowData
 	public void setValue(int aColIndex, Object aValue)
 		throws IndexOutOfBoundsException
 	{
-		if (this.originalData == null)
+		if (!this.isNew())
 		{
-			this.originalData = new Object[this.colData.length];
-		}
-		if (this.originalData[aColIndex] == null)
-		{
-			this.originalData[aColIndex] = this.colData[aColIndex];
+			if (this.originalData == null)
+			{
+				this.originalData = new Object[this.colData.length];
+			}
+			if (this.originalData[aColIndex] == null)
+			{
+				this.originalData[aColIndex] = this.colData[aColIndex];
+			}
 		}
 		this.colData[aColIndex] = aValue;
 		this.setModified();
@@ -56,6 +62,25 @@ class RowData
 		return this.colData[aColumn];
 	}
 
+	public Object getOriginalValue(int aColumn)
+		throws IndexOutOfBoundsException
+	{
+		if (this.originalData == null) return this.getValue(aColumn);
+		if (this.originalData[aColumn] == null) return this.getValue(aColumn);
+		return this.originalData[aColumn];
+	}
+	
+	public boolean isColumnModified(int aColumn)
+	{
+		if (this.isOriginal()) return false;
+		if (this.originalData == null) return false;
+		return (this.originalData[aColumn] != null);
+	}
+	public void setNull(int aColumn)
+	{
+		this.setValue(aColumn, DataStore.NULL_VALUE);
+	}
+	
 	/**	
 	 *	Resets the internal status. After a call to resetStatus()
 	 *	isModified() will return false, and isOriginal() will return true.
@@ -63,6 +88,7 @@ class RowData
 	public void resetStatus()
 	{
 		this.status = NOT_MODIFIED;
+		this.originalData = null;
 	}
 
 	/**
@@ -74,8 +100,7 @@ class RowData
 	}
 
 	/**
-	 *	Returns true if the row is neither modified nor is a new
-	 *	row. Is the same as isNew() || isModified()
+	 *	Returns true if the row is neither modified nor is a new row. 
 	 *
 	 *	@returns true if the row has not been altered since retrieval
 	 */
@@ -103,21 +128,15 @@ class RowData
 	 */
 	public boolean isNew()
 	{
-		return this.status == NEW;
+		return (this.status & NEW) == NEW;
 	}
 
 	/**
 	 *	Set the status to modified. 
-	 *	The status will not be set to modified for new rows!
 	 */
 	public void setModified()
 	{
-		// The status will only be set to modified
-		// if the row has not been modified and is not a new row
-		if (this.status == NOT_MODIFIED)
-		{
-			this.status = MODIFIED;
-		}
+		this.status = this.status | MODIFIED;
 	}
 
 }

@@ -16,21 +16,20 @@ import java.awt.event.WindowListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.UIManager.LookAndFeelInfo;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FileConnectAction;
 import workbench.gui.actions.FileExitAction;
+import workbench.gui.actions.SelectTabAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.profiles.ProfileSelectionDialog;
@@ -68,11 +67,12 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		this.windowId = id;
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.addWindowListener(this);
-		this.sqlTab.setBorder(null);
+		this.sqlTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		this.tabCount = WbManager.getSettings().getDefaultTabCount();
 		if (tabCount <= 0) tabCount = 1;
 
+		
 		for (int i=0; i < tabCount; i++)
 		{
 			SqlPanel sql = new SqlPanel(i + 1);
@@ -80,12 +80,12 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			this.sqlTab.addTab(ResourceMgr.getString("LabelTabStatement") + " " + Integer.toString(i+1), sql);
 		}
 		this.initMenu();
-
+		
 		this.getContentPane().add(this.sqlTab, BorderLayout.CENTER);
 		this.setTitle(ResourceMgr.getString("MsgNotConnected"));
 		this.sqlTab.setBorder(null);
 		this.restorePosition();
-		this.setIconImage(ResourceMgr.getPicture("workbench").getImage());
+		this.setIconImage(ResourceMgr.getPicture("workbench16").getImage());
 
 		int lastIndex = WbManager.getSettings().getLastSqlTab();
 		if (lastIndex < 0 || lastIndex > this.sqlTab.getTabCount())
@@ -140,7 +140,6 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 				if (menu == null)
 				{
 					menu = new JMenu(ResourceMgr.getString(menuName));
-					menuBar.add(menu);
 					menus.put(menuName, menu);
 				}
 				boolean menuSep = "true".equals((String)action.getValue(WbAction.MENU_SEPARATOR));
@@ -151,6 +150,35 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 				}
 				menu.add(action.getMenuItem());
 			}
+			menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_EDIT);
+			menuBar.add(menu);
+			menus.remove(ResourceMgr.MNU_TXT_EDIT);
+			
+			menu = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_VIEW));
+			InputMap im = new ComponentInputMap(this.sqlTab);
+			ActionMap am = new ActionMap();
+			this.sqlTab.setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
+			this.sqlTab.setActionMap(am);
+			for (int i=0; i < this.tabCount; i ++)
+			{
+				action = new SelectTabAction(this.sqlTab, i);
+				KeyStroke key = action.getAccelerator();
+				if (key != null)
+				{
+					im.put(key, action.getActionName());
+					am.put(action.getActionName(), action);
+				}
+				menu.add(action);
+			}
+			menuBar.add(menu);
+			
+			Iterator itr = menus.values().iterator();
+			while (itr.hasNext())
+			{
+				menu = (JMenu)itr.next();
+				menuBar.add(menu);
+			}
+			
 			menuBar.add(this.buildToolsMenu());
 			menuBar.add(this.buildHelpMenu());
 			this.panelMenus.add(menuBar);
@@ -263,8 +291,6 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		{
 			this.profileDialog = new ProfileSelectionDialog(this, true);
 		}
-		this.getGlassPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-
 		WbSwingUtilities.center(this.profileDialog, this);
 		this.profileDialog.setVisible(true);
 		if (!this.profileDialog.isCancelled())
@@ -284,12 +310,11 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		try
 		{
 			this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			this.showStatusMessage("Connecting...");
+			this.showStatusMessage(ResourceMgr.getString("MsgConnecting"));
 			try
 			{
 				ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
-				mgr.disconnect(this.windowId);
-				WbConnection conn = WbManager.getInstance().getConnectionMgr().getConnection(this.getWindowId(), aProfile);
+				WbConnection conn = mgr.getConnection(aProfile);
 				this.setConnection(conn);
 			}
 			catch (ClassNotFoundException cnf)
