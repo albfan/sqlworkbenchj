@@ -25,18 +25,21 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 			DatabaseMetaData meta = aConnection.getMetaData();
 
 			String keys = null;
-			
+
 			keys = meta.getSQLKeywords();
 			this.addKeywordList(keys, Token.KEYWORD1);
 			//System.out.println("keys=" + keys);
-			
+
 			if (meta.getDatabaseProductName().toLowerCase().indexOf("oracle") > -1)
 			{
 				keywords.add("START", Token.KEYWORD1);
 				keywords.add("SYNONYM", Token.KEYWORD1);
 				keywords.add("WHILE", Token.KEYWORD1);
 				keywords.add("LOOP", Token.KEYWORD1);
-				
+				keywords.add("REFRESH", Token.KEYWORD1);
+
+				keywords.add("SNAPSHOT", Token.KEYWORD1);
+
 				keywords.add("SYSDATE", Token.KEYWORD3);
 				keywords.add("INSTR", Token.KEYWORD3);
 				keywords.add("SUBSTR", Token.KEYWORD3);
@@ -135,7 +138,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("EXECUTE",Token.KEYWORD1);
 		keywords.add("EXIT",Token.KEYWORD1);
 		keywords.add("END",Token.KEYWORD1);
-		//keywords.add("ELSE",Token.KEYWORD1);
+		keywords.add("ELSE",Token.KEYWORD1);
 		keywords.add("FETCH",Token.KEYWORD1);
 		keywords.add("FOR",Token.KEYWORD1);
 		keywords.add("FOREIGN",Token.KEYWORD1);
@@ -187,7 +190,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("VARYING",Token.KEYWORD1);
 		keywords.add("VIEW",Token.KEYWORD1);
 		keywords.add("WHERE",Token.KEYWORD1);
-		//keywords.add("WHEN",Token.KEYWORD1);
+		keywords.add("WHEN",Token.KEYWORD1);
 		keywords.add("WITH",Token.KEYWORD1);
 		keywords.add("WORK",Token.KEYWORD1);
 
@@ -239,7 +242,6 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("ASIN",Token.KEYWORD3);
 		keywords.add("ATAN",Token.KEYWORD3);
 		keywords.add("ATN2",Token.KEYWORD3);
-		keywords.add("CASE",Token.KEYWORD3);
 		keywords.add("CAST",Token.KEYWORD3);
 		keywords.add("CEILING",Token.KEYWORD3);
 		keywords.add("COS",Token.KEYWORD3);

@@ -83,19 +83,12 @@ public class ArgumentParser
 	{
 		//String test = "spool /type=sql /file=\"d:/temp/test.sql\" /table=my_table;";
 		//String test = "/profile=\"HSQLDB - Test Server\" /script=\"d:/temp/test.sql\"";
-		String test = "-quotechar='\"' -file=\"d:/temp/export test.txt\" -delimiter=\" \" -dateformat=dd.MMM.yyyy";
+		//String test = "-quotechar='\"' -file=\"d:/temp/export test.txt\" -delimiter=\" \" -dateformat=dd.MMM.yyyy";
+		String test = "-driverjar=\"mysql-jdbc.jar\"";
 		ArgumentParser parser = new ArgumentParser();
-		parser.addArgument("type");
-		parser.addArgument("file");
-		parser.addArgument("table");
-		parser.addArgument("delimiter");
-		parser.addArgument("quotechar");
-		parser.addArgument("dateformat");
-		parser.addArgument("cleancr");
+		parser.addArgument("driverjar");
 		parser.parse(test);
-		System.out.println("delimiter=>" + parser.getValue("delimiter") + "<");
-		System.out.println("file=" + parser.getValue("file"));
-		System.out.println("quote=>" + parser.getValue("quotechar") + "<");
+		System.out.println("driverjar=>" + parser.getValue("driverjar") + "<");
 		System.out.println("done.");
 	} 
 

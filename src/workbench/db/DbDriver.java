@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import workbench.WbManager;
 import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -168,12 +169,20 @@ public class DbDriver
 		try
 		{
 			this.loadDriverClass();
+			boolean verify = WbManager.getSettings().getVerifyDriverUrl();
 			if (!this.driverClassInstance.acceptsURL(url))
 			{
 				String msg = ResourceMgr.getString("ErrorInvalidUrl");
 				msg = msg.replaceAll("%driver%", this.driverClass);
 				msg = msg + " " + url;
-				throw new SQLException(msg);
+				if (verify)
+				{
+					throw new SQLException(msg);
+				}
+				else
+				{
+					LogMgr.logWarning("DbDriver.connect()", "The driver class " + this.driverClass  + " reports that it does not accept the given URL!");
+				}
 			}
 			
 			Properties props = new Properties();

@@ -13,6 +13,7 @@ import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Insets;
@@ -38,6 +39,8 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.Enumeration;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
@@ -95,7 +98,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.13 2003-08-12 19:39:01 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.14 2003-08-30 15:57:09 thomas Exp $
  */
 public class JEditTextArea 
 	extends JComponent
@@ -200,6 +203,91 @@ public class JEditTextArea
 	public void toUpperCase()
 	{
 		this.changeCase(false);
+	}
+	
+	private Pattern lastSearchPattern;
+	private String lastSearchExpression;
+	private int lastSearchPos = 0;
+	
+	public int findText(String anExpression, boolean ignoreCase)
+	{
+		return this.findText(anExpression, ignoreCase, false);
+	}
+	
+	protected String getSearchExpression(String anExpression, boolean ignoreCase, boolean wholeWord)
+	{
+		String regex = anExpression;
+		
+		if (wholeWord)
+		{
+			regex = "\\b" + anExpression;
+		}
+		
+		if (ignoreCase)
+		{
+			regex = "(?i)" + regex;
+		}
+
+		return regex;
+	}
+	
+	public boolean isCurrentSearchCriteria(String aValue, boolean ignoreCase, boolean wholeWord)
+	{
+		if (this.lastSearchExpression == null) return false;
+		if (aValue == null) return false;
+		String regex = this.getSearchExpression(aValue, ignoreCase, wholeWord);
+		return regex.equals(this.lastSearchExpression);
+	}
+
+	public int findText(String anExpression, boolean ignoreCase, boolean wholeWord)
+	{
+		String regex = this.getSearchExpression(anExpression, ignoreCase, wholeWord);
+		
+		int start = -1;
+		int end = -1;
+		this.lastSearchPattern = Pattern.compile(regex);
+		Matcher m = this.lastSearchPattern.matcher(this.getText());
+
+		if (m.find(this.getCaretPosition()))
+		{
+			this.lastSearchPos = m.start();
+			end = m.end();
+			this.select(this.lastSearchPos, end);
+		}
+		else
+		{
+			this.lastSearchPos = -1;
+			Toolkit.getDefaultToolkit().beep();
+		}
+		return this.lastSearchPos;
+	}
+	
+		
+	public int findNextText()
+	{
+		if (this.lastSearchPattern == null) return -1;
+		if (this.lastSearchPos == -1) return -1;
+		String search = null;
+	
+		Matcher m = this.lastSearchPattern.matcher(this.getText());
+		if (m.find(this.lastSearchPos + 1))
+		{
+			this.lastSearchPos = m.start();
+			int end = m.end();
+			this.select(this.lastSearchPos, end);
+		}
+		else
+		{
+			this.lastSearchPos = 0;
+			Toolkit.getDefaultToolkit().beep();
+		}
+		return this.lastSearchPos;
+	}
+	
+	public boolean searchPatternMatchesSelectedText()
+	{
+		Matcher m = this.lastSearchPattern.matcher(this.getSelectedText());
+		return m.matches();
 	}
 	
 	public void addKeyBinding(String aBinding, ActionListener aListener)
@@ -527,8 +615,7 @@ public class JEditTextArea
 	public int lineToY(int line)
 	{
 		FontMetrics fm = painter.getFontMetrics();
-		return (line - firstLine) * fm.getHeight()
-			- (fm.getLeading() + fm.getMaxDescent());
+		return (line - firstLine) * fm.getHeight() - (fm.getLeading() + fm.getMaxDescent());
 	}
 
 	/**
@@ -1172,6 +1259,13 @@ public class JEditTextArea
 	public final void selectAll()
 	{
 		select(0,getDocumentLength());
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				requestFocusInWindow();
+			}
+		});
 	}
 
 	/**
@@ -2058,8 +2152,7 @@ public class JEditTextArea
 			int newStart;
 			int newEnd;
 
-			if(selectionStart > offset || (selectionStart 
-				== selectionEnd && selectionStart == offset))
+			if(selectionStart > offset || (selectionStart == selectionEnd && selectionStart == offset))
 				newStart = selectionStart + length;
 			else
 				newStart = selectionStart;
@@ -2117,8 +2210,7 @@ public class JEditTextArea
 			if(popup != null && popup.isVisible())
 				return;
 
-			setSelectionRectangular((evt.getModifiers()
-				& InputEvent.CTRL_MASK) != 0);
+			setSelectionRectangular((evt.getModifiers()	& InputEvent.CTRL_MASK) != 0);
 			select(getMarkPosition(),xyToOffset(evt.getX(),evt.getY()));
 		}
 
@@ -2230,23 +2322,18 @@ public class JEditTextArea
 			char ch = lineText.charAt(Math.max(0,offset - 1));
 
 			String noWordSep = (String)document.getProperty("noWordSep");
-			if(noWordSep == null)
-				noWordSep = "";
+			if(noWordSep == null)	noWordSep = "";
 
 			// If the user clicked on a non-letter char,
 			// we select the surrounding non-letters
-			boolean selectNoLetter = (!Character
-				.isLetterOrDigit(ch)
-				&& noWordSep.indexOf(ch) == -1);
+			boolean selectNoLetter = (!Character.isLetterOrDigit(ch) && noWordSep.indexOf(ch) == -1);
 
 			int wordStart = 0;
 
 			for(int i = offset - 1; i >= 0; i--)
 			{
 				ch = lineText.charAt(i);
-				if(selectNoLetter ^ (!Character
-					.isLetterOrDigit(ch) &&
-					noWordSep.indexOf(ch) == -1))
+				if(selectNoLetter ^ (!Character.isLetterOrDigit(ch) && noWordSep.indexOf(ch) == -1))
 				{
 					wordStart = i + 1;
 					break;
@@ -2257,9 +2344,7 @@ public class JEditTextArea
 			for(int i = offset; i < lineText.length(); i++)
 			{
 				ch = lineText.charAt(i);
-				if(selectNoLetter ^ (!Character
-					.isLetterOrDigit(ch) &&
-					noWordSep.indexOf(ch) == -1))
+				if(selectNoLetter ^ (!Character.isLetterOrDigit(ch) && noWordSep.indexOf(ch) == -1))
 				{
 					wordEnd = i;
 					break;

@@ -12,6 +12,6 @@ package workbench.interfaces;
  */
 public interface Searchable
 {
-	void findData();
-	void findNext();
+	int find();
+	int findNext();
 }

@@ -1,6 +1,7 @@
 package workbench.gui.editor;
 
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 /*
  * SyntaxDocument.java - Document that can be tokenized
  * Copyright (C) 1999 Slava Pestov
@@ -22,7 +23,7 @@ import javax.swing.undo.UndoableEdit;
  * system.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxDocument.java,v 1.5 2002-12-03 20:14:28 thomas Exp $
+ * @version $Id: SyntaxDocument.java,v 1.6 2003-08-30 15:57:09 thomas Exp $
  */
 public class SyntaxDocument
 	extends PlainDocument
@@ -71,10 +72,8 @@ public class SyntaxDocument
 	public void setTokenMarker(TokenMarker tm)
 	{
 		tokenMarker = tm;
-		if(tm == null)
-			return;
-		tokenMarker.insertLines(0,getDefaultRootElement()
-			.getElementCount());
+		if(tm == null) return;
+		tokenMarker.insertLines(0,getDefaultRootElement().getElementCount());
 		tokenizeLines();
 	}
 
@@ -147,8 +146,7 @@ public class SyntaxDocument
 			{
 				Element lineElement = map.getElement(i);
 				int lineStart = lineElement.getStartOffset();
-				getText(lineStart,lineElement.getEndOffset()
-					- lineStart - 1,lineSegment);
+				getText(lineStart,lineElement.getEndOffset() - lineStart - 1,lineSegment);
 				tokenMarker.markTokens(lineSegment,i);
 			}
 		}

@@ -120,7 +120,7 @@ public class MainWindow
 		this.getContentPane().add(this.sqlTab, BorderLayout.CENTER);
 		this.setIconImage(ResourceMgr.getPicture("workbench16").getImage());
 
-		this.addTab(false);
+		this.addTab(false, false);
 
 		if (WbManager.getSettings().getShowDbExplorerInMainWindow() &&
 				WbManager.getSettings().getDbExplorerVisible())
@@ -135,7 +135,7 @@ public class MainWindow
 		this.restorePosition();
 
 		this.sqlTab.setSelectedIndex(0);
-		this.tabSelected(0);
+		this.updateGuiForTab(0);
 
 		SqlPanel sql = (SqlPanel)this.getSqlPanel(0);
 		sql.initDefaults();
@@ -316,10 +316,18 @@ public class MainWindow
 		menu.add(new ManageMacrosAction(this));
 		menu.add(new ManageDriversAction(this));
 		menu.addSeparator();
-		
+
 		action = new FileExitAction();
 		menu.add(action.getMenuItem());
 
+		menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_VIEW);
+		AddTabAction add = new AddTabAction(this);
+		menu.addSeparator();
+		menu.add(add.getMenuItem());
+		
+		RemoveTabAction rem = new RemoveTabAction(this);
+		menu.add(rem.getMenuItem());
+		
 		menuBar.add(this.buildToolsMenu());
 		menuBar.add(this.buildHelpMenu());
 
@@ -475,12 +483,11 @@ public class MainWindow
 			LogMgr.logError("MainWindow.checkConnectionForPanel()", "Error when checking connection", e);
 		}
 	}
-	private void tabSelected(int anIndex)
+	
+	private void updateGuiForTab(int anIndex)
 	{
 		Container content = this.getContentPane();
 		MainPanel current = this.getCurrentPanel();
-
-		this.checkConnectionForPanel(current);
 
 		JMenuBar menu = (JMenuBar)this.panelMenus.get(anIndex);
 		this.setJMenuBar(menu);
@@ -492,6 +499,15 @@ public class MainWindow
 			content.add(this.currentToolbar, BorderLayout.NORTH);
 		}
 		this.doLayout();
+	}
+	
+	private void tabSelected(int anIndex)
+	{
+		Container content = this.getContentPane();
+		MainPanel current = this.getCurrentPanel();
+
+		if (!this.connecting) this.checkConnectionForPanel(current);
+		this.updateGuiForTab(anIndex);
 	}
 
 	public void restoreState()
@@ -637,6 +653,7 @@ public class MainWindow
 			this.isProfileWorkspace = false;
 			
 			this.showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
+			this.currentProfile = aProfile;
 			this.loadWorkspaceForProfile(aProfile);
 			
 			this.showStatusMessage(ResourceMgr.getString("MsgConnecting"));
@@ -653,7 +670,6 @@ public class MainWindow
 					// so they have to be initialized before setting
 					// up the different connections
 					this.currentConnection = null;
-					this.currentProfile = aProfile;
 					MainPanel p = this.getCurrentPanel();
 					conn = this.getConnectionForTab(p.getId());
 					p.setConnection(conn);
@@ -671,22 +687,23 @@ public class MainWindow
 				{
 					this.getCurrentPanel().showLogMessage(warn);
 				}
-				
-				this.currentProfile = aProfile;
 				connected = true;
 			}
 			catch (ClassNotFoundException cnf)
 			{
+				this.currentProfile = null;
 				this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_DRIVER_NOT_FOUND));
 				LogMgr.logError("MainWindow.connectTo()", "Error when connecting", cnf);
 			}
 			catch (SQLException se)
 			{
+				this.currentProfile = null;
 				this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_CONNECTION_ERROR) + "\r\n\n" + se.toString());
 				LogMgr.logError("MainWindow.connectTo()", "SQL Exception when connecting", se);
 			}
 			catch (Throwable e)
 			{
+				this.currentProfile = null;
 				this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_CONNECTION_ERROR) + "\r\n\n" + e.toString());
 				LogMgr.logError("MainWindow.connectTo()", "Error during connect", e);
 			}
@@ -696,6 +713,7 @@ public class MainWindow
 		}
 		catch (Exception e)
 		{
+			this.currentProfile = null;
 			String msg = e.getMessage();
 			if (msg == null)
 			{
@@ -1055,6 +1073,8 @@ public class MainWindow
 		int panelCount = this.panelMenus.size();
 		int lastActionIndex = -1;
 
+		SelectTabAction lastAction = null;
+		
 		for (int i=0; i < panelCount; i++)
 		{
 			JMenu view = this.getViewMenu(i);
@@ -1075,9 +1095,10 @@ public class MainWindow
 					break;
 				}
         SelectTabAction a = (SelectTabAction)ac;
+				lastAction = a;
 				lastActionIndex = k;
 
-				if (a.getIndex() >= anAction.getIndex())
+				if (a.getIndex() > anAction.getIndex())
 				{
 					view.insert(anAction.getMenuItem(), k);
 					inserted = k;
@@ -1096,11 +1117,12 @@ public class MainWindow
 
 					view.add(anAction.getMenuItem());
 				}
-				else
+				else if (lastAction != null && lastAction.getIndex() != anAction.getIndex())
 				{
 					// we found at least one SelectTabAction, so we'll
 					// insert the new one right behind the last one.
 					// (there might be other items in the view menu!)
+					
 					view.insert(anAction.getMenuItem(), lastActionIndex + 1);
 				}
 			}
@@ -1286,7 +1308,7 @@ public class MainWindow
 		{
 			for (int i=0; i < (newCount - tabCount); i++)
 			{
-				this.addTab(false);
+				this.addTab(false, false);
 			}
 		}
 		else if (newCount < tabCount)
@@ -1448,6 +1470,7 @@ public class MainWindow
 
 					if (sql.hasFileLoaded())
 					{
+						sql.checkAndSaveFile();
 						w.setExternalFileName(i, sql.getCurrentFileName());
 					}
 					else
@@ -1503,6 +1526,10 @@ public class MainWindow
 	 */
 	public void addTab(boolean selectNew)
 	{
+		this.addTab(selectNew, true);
+	}
+	public void addTab(boolean selectNew, boolean checkConnection)
+	{
 		int index = this.sqlTab.getTabCount();
 
 		if (index > 0 && this.getSqlPanel(index - 1) instanceof DbExplorerPanel)
@@ -1512,7 +1539,7 @@ public class MainWindow
 		SqlPanel sql = new SqlPanel(index + 1);
 
 		sql.addFilenameChangeListener(this);
-		this.checkConnectionForPanel(sql, false);
+		if (checkConnection) this.checkConnectionForPanel(sql, false);
 		this.sqlTab.add(sql, index);
 		this.setTabTitle(index, ResourceMgr.getString("LabelTabStatement") + " ");
 
@@ -1568,7 +1595,16 @@ public class MainWindow
 	public boolean canRenameTab()
 	{
 		boolean canRename = (this.currentWorkspaceFile != null);
-		canRename = canRename && (this.getCurrentPanel() instanceof SqlPanel);
+		MainPanel p = this.getCurrentPanel();
+		if (p instanceof SqlPanel)
+		{
+			SqlPanel sql = (SqlPanel)p;
+			canRename = canRename && (!sql.hasFileLoaded());
+		}
+		else
+		{
+			canRename = false;
+		}
 		return canRename;
 	}
 
@@ -1684,7 +1720,6 @@ public class MainWindow
 			{
 				try
 				{
-					//BrowserLauncher.openURL("www.kellerer.org/workbench/manual/SQL Workbench Manual.html");
 					if (this.helpWindow == null)
 					{
 						this.helpWindow = new HtmlViewer(this);
@@ -1695,6 +1730,7 @@ public class MainWindow
 				}
 				catch (Exception ex)
 				{
+					LogMgr.logError("MainWindow", "Error when displaying HTML help", ex);
 					JOptionPane.showMessageDialog(this, "The documentation is currently available at www.kellerer.org/workbench");
 				}
 			}

@@ -44,7 +44,9 @@ public class SqlUtil
 		parseCommands(aScript, aDelimiter, -1, result);
 		return result;
 	}
-	
+
+	private static final Pattern GO_PATTERN = Pattern.compile("(?mi)^\\s*go\\s*$");
+
 	public static int parseCommands(String aScript, String aDelimiter, int currentCursorPos, List result)
 	{
 		if (result == null) return -1;
@@ -53,7 +55,6 @@ public class SqlUtil
 		{
 			result.clear();
 			return -1;
-			//return Collections.EMPTY_LIST;
 		}
 		int count, pos, scriptLen, cmdNr, lastPos, delimitLen;
 		boolean quoteOn = false;
@@ -66,20 +67,11 @@ public class SqlUtil
 		String currChar;
 		String lastQuote = null;
 
-		aScript = aScript.trim();
 		// Handle MS SQL GO's
-		if (aScript.indexOf("\nGO\n") > -1)
+		Matcher m = GO_PATTERN.matcher(aScript);
+		if (m.find())
 		{
-			aScript = StringUtil.replace(aScript, "\nGO\n", ";\n");
-		}
-		else 
-		{
-			aScript = StringUtil.replace(aScript, StringUtil.LINE_TERMINATOR + "GO" + StringUtil.LINE_TERMINATOR, ";" + StringUtil.LINE_TERMINATOR);
-		}
-		
-		if (aScript.endsWith("GO"))
-		{
-			aScript = aScript.substring(0, aScript.length() - 2) + ";";
+			aScript = m.replaceAll(";\n");
 		}
 		
 		cmdNr = 0;
@@ -140,14 +132,14 @@ public class SqlUtil
 					char next = aScript.charAt(pos + 1);
 					if (toTest == '/' && next == '*')
 					{
-						System.out.println("turning on blockcomment at pos = " + pos);
+						//System.out.println("turning on blockcomment at pos = " + pos);
 						blockComment = true;
 						singleLineComment = false;
 						commentOn = true;
 					}
 					else if (toTest == '-' && next == '-')
 					{
-						System.out.println("turning on line comment at pos = " + pos);
+						//System.out.println("turning on line comment at pos = " + pos);
 						singleLineComment = true;
 						blockComment = false;
 						commentOn = true;
@@ -280,14 +272,21 @@ public class SqlUtil
 	{
 		return makeCleanSql(aSql, keepNewlines, '\'');
 	}
+
+	
+	public static String makeCleanSql(String aSql, boolean keepNewlines, char quote)
+	{
+		return makeCleanSql(aSql, keepNewlines, false, quote);
+	}
+	
 	/**
 	 *	Replaces all white space characters with ' ' (But not inside
-	 *	string literals), removes -- style and Java style comments
+	 *	string literals) and removes -- style and Java style comments
 	 *	@param String - The sql script to "clean out"
 	 *  @param boolean - if true, newline characters (\n) are kept
 	 *	@returns String
 	 */
-	public static String makeCleanSql(String aSql, boolean keepNewlines, char quote)
+	public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments, char quote)
 	{
 		aSql = aSql.trim();
 		int count = aSql.length();
@@ -305,7 +304,7 @@ public class SqlUtil
 			char c = aSql.charAt(i);
 			inQuotes = c == quote;
 			
-			if (!inComment)
+			if (!inComment || keepComments)
 			{
 				if ( c == '/' && i < count - 1 && aSql.charAt(i+1) == '*' & !inQuotes)
 				{
@@ -609,20 +608,14 @@ public class SqlUtil
 		*/
 		try
 		{
-			StringBuffer s = new StringBuffer(5000);
-			BufferedReader in = new BufferedReader(new FileReader("c:/temp/t.sql"));
-			String line = in.readLine();
-			while (line != null)
+			Pattern p = Pattern.compile("(?mi)^\\s*go\\s*$");
+			//Pattern p = Pattern.compile("(?i)^\\s*go");
+			String sql = "SELECT *, 'GO' from test\n  GO";
+			Matcher m = p.matcher(sql);
+			if (m.find())
 			{
-				s.append(line);
-				s.append("\r\n");
-				line = in.readLine();
+				System.out.println("sql=" + m.replaceAll(";\n"));
 			}
-			//System.out.println(s);
-			in.close();
-			String script = s.toString();//"/* comment */\r\nselect * from test;/*line*/end;\r\n/";
-			List commands = getCommands(script, "/");
-			System.out.println("first = >\n" + commands.get(0) + "<");
 		}
 		catch (Exception e)
 		{

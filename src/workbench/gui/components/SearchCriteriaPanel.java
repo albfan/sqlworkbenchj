@@ -29,8 +29,10 @@ public class SearchCriteriaPanel
 {
 	private static final String PROP_CLASS = "workbench.sql.search";
 	private static final String PROP_KEY_CASE = "ignoreCase";
+	private static final String PROP_KEY_WHOLE_WORD = "wholeWord";
 	private static final String PROP_KEY_CRIT = "lastValue";
 	private JCheckBox ignoreCase;
+	private JCheckBox wholeWord;
 	
 	private JTextField criteria;
 	private JLabel label;
@@ -44,19 +46,20 @@ public class SearchCriteriaPanel
 	{
 		this.ignoreCase = new JCheckBox(ResourceMgr.getString("LabelSearchIgnoreCase"));
 		this.ignoreCase.setSelected("true".equals(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_CASE, "true")));
+		
+		this.wholeWord = new JCheckBox(ResourceMgr.getString("LabelSearchWholeWord"));
+		this.wholeWord.setSelected("true".equals(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_WHOLE_WORD, "false")));
 	
 		this.label = new JLabel(ResourceMgr.getString("LabelSearchCriteria"));
 		this.criteria = new JTextField();
 		this.criteria.setColumns(40);
-		if (initialValue == null)
-		{
-			initialValue = WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_CRIT, null);
-		}
-		this.criteria.setText(initialValue);
 		if (initialValue != null)
 		{
+			this.criteria.setText(initialValue);
 			this.criteria.selectAll();
+			//initialValue = WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_CRIT, null);
 		}
+		
 		this.criteria.addMouseListener(new TextComponentMouseListener());
 		
 		this.setLayout(new BorderLayout());
@@ -65,12 +68,22 @@ public class SearchCriteriaPanel
 		p.add(this.label, BorderLayout.WEST);
 		p.add(this.criteria, BorderLayout.CENTER);
 		this.add(p,BorderLayout.CENTER);
-		this.add(this.ignoreCase, BorderLayout.SOUTH);
+		p = new JPanel();
+		p.setLayout(new GridLayout(2,1));
+		p.add(this.ignoreCase);
+		p.add(this.wholeWord);
+		
+		this.add(p, BorderLayout.SOUTH);
 	}
 
 	public String getCriteria()
 	{
 		return this.criteria.getText();
+	}
+	
+	public boolean getWholeWordOnly()
+	{
+		return this.wholeWord.isSelected();
 	}
 	
 	public boolean getIgnoreCase()
@@ -99,6 +112,7 @@ public class SearchCriteriaPanel
 		int choice = JOptionPane.showConfirmDialog(caller, this, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_CASE, Boolean.toString(this.getIgnoreCase()));
 		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_CRIT, this.getCriteria());
+		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_WHOLE_WORD, Boolean.toString(this.getWholeWordOnly()));
 		if (choice == JOptionPane.CANCEL_OPTION) return false;
 		return true;
 	}

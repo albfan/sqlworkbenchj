@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Properties;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.TableModelEvent;
 
 import workbench.WbManager;
 import workbench.db.DataSpooler;
@@ -104,8 +105,8 @@ public class SqlPanel
 	private String historyFilename;
 
 	private FileDiscardAction fileDiscardAction;
-	private FindAction findAction;
-	private FindAgainAction findAgainAction;
+	private FindDataAction findDataAction;
+	private FindDataAgainAction findDataAgainAction;
 	private String lastSearchCriteria;
 	private WbToolbar toolbar;
 	private ConnectionInfo connectionInfo;
@@ -269,6 +270,7 @@ public class SqlPanel
 
 	public boolean readFile(String aFilename)
 	{
+		if (aFilename == null) return false;
 		boolean result = false;
 		File f = new File(aFilename);
 		if (!f.exists()) return false;
@@ -279,6 +281,11 @@ public class SqlPanel
       this.fireFilenameChanged(this.editor.getCurrentFileName());
 			this.selectEditor();
 			result = true;
+			this.showFileIcon();
+		}
+		else
+		{
+			this.removeTabIcon();
 		}
 		return result;
 	}
@@ -295,6 +302,11 @@ public class SqlPanel
 	      this.fireFilenameChanged(this.editor.getCurrentFileName());
 				this.selectEditorLater();
 			}
+			this.showFileIcon();
+		}
+		else
+		{
+			this.removeTabIcon();
 		}
 		return true;
 	}
@@ -305,6 +317,19 @@ public class SqlPanel
 		return (file != null) && (file.length() > 0);
 	}
 
+	public void checkAndSaveFile()
+	{
+		if (this.editor.isModified())
+		{
+			String filename = this.editor.getCurrentFileName().replaceAll("\\\\", "\\\\\\\\");
+			String msg = ResourceMgr.getString("MsgConfirmUnsavedEditorFile").replaceAll("%filename%", filename);
+			if (WbSwingUtilities.getYesNo(this, msg))
+			{
+				this.editor.saveCurrentFile();
+			}
+		}
+	}
+	
 	public boolean saveCurrentFile()
 	{
 		String oldFile = this.editor.getCurrentFileName();
@@ -348,6 +373,7 @@ public class SqlPanel
     {
 			this.fileDiscardAction.setEnabled(false);
       this.fireFilenameChanged(this.tabName);
+			this.removeTabIcon();
 			this.selectEditorLater();
 			return true;
     }
@@ -438,10 +464,17 @@ public class SqlPanel
 		a.setCreateMenuSeparator(true);
 		this.actions.add(a);
 		this.actions.add(pop.getSelectAllAction());
+		
+		FindAction f = this.editor.getFindAction();
+		f.setCreateMenuSeparator(true);
+		this.actions.add(f);
+		this.actions.add(this.editor.getFindAgainAction());
+		this.actions.add(this.editor.getReplaceAction());
 
 		makeLower.setCreateMenuSeparator(true);
 		this.actions.add(makeLower);
 		this.actions.add(makeUpper);
+		
 		this.actions.add(new MakeInListAction(this.editor));
 		this.actions.add(new MakeNonCharInListAction(this.editor));
 
@@ -525,13 +558,12 @@ public class SqlPanel
 		this.toolbarActions.add(this.data.getInsertRowAction());
 		this.toolbarActions.add(this.data.getDeleteRowAction());
 
-		this.findAction = this.data.getTable().getFindAction();
-		this.findAction.setEnabled(false);
-		this.findAction.setCreateMenuSeparator(true);
-		this.findAgainAction = this.data.getTable().getFindAgainAction();
-		this.findAgainAction.setEnabled(false);
+		this.findDataAction = this.data.getTable().getFindAction();
+		this.findDataAction.setEnabled(false);
+		this.findDataAction.setCreateMenuSeparator(true);
+		this.findDataAgainAction = this.data.getTable().getFindAgainAction();
+		this.findDataAgainAction.setEnabled(false);
 		
-
 		WbAction action = new CreateSnippetAction(this.editor);
 		action.setCreateMenuSeparator(true);
 		this.actions.add(action);
@@ -542,19 +574,13 @@ public class SqlPanel
 		this.addMacro.setCreateMenuSeparator(true);
 		this.actions.add(this.addMacro);
 		
-
-//		action = new SaveSqlHistoryAction(this);
-//		action.setCreateMenuSeparator(true);
-//		this.actions.add(action);
-
-		this.toolbarActions.add(this.findAction);
-		this.toolbarActions.add(this.findAgainAction);
-		this.findAction.setCreateMenuSeparator(true);
-		this.actions.add(this.findAction);
-		this.actions.add(this.findAgainAction);
+		this.findDataAction.setCreateMenuSeparator(true);
+		this.actions.add(this.findDataAction);
+		this.actions.add(this.findDataAgainAction);
 		this.printDataAction.setCreateMenuSeparator(true);
 		this.actions.add(this.printDataAction);
 		this.actions.add(this.printPreviewAction);
+		
 	}
 	
 	private void setupActionMap()
@@ -799,11 +825,13 @@ public class SqlPanel
 			this.tabName = null;
 		}
 		
+		boolean fileLoaded = false;
 		if (filename != null)
 		{
-			this.readFile(filename);
+			fileLoaded = this.readFile(filename);
 		}
-		else
+		
+		if (!fileLoaded)
 		{
 			this.showCurrentHistoryStatement();
 			this.fireFilenameChanged(this.tabName);
@@ -997,7 +1025,7 @@ public class SqlPanel
 						WbSwingUtilities.showErrorMessage(this, msg);
 					}
 				}
-				this.data.dataChanged();
+				this.data.rowCountChanged();
 				this.repaint();
 			}
 			else
@@ -1162,6 +1190,8 @@ public class SqlPanel
 		this.storeStatementInHistory();
 		this.checkStatementActions();
 
+		this.data.setBatchUpdate(true);
+		
 		if (runCurrentCommand)
 		{
 			this.displayResult(sql, this.editor.getCaretPosition());
@@ -1170,6 +1200,8 @@ public class SqlPanel
 		{
 			this.displayResult(sql, -1);
 		}
+		
+		this.data.setBatchUpdate(false);
 
 		this.setBusy(false);
 
@@ -1281,12 +1313,10 @@ public class SqlPanel
 						try
 						{
 							importRunning = true;
-							data.setBatchUpdate(true);
 							ds.setProgressMonitor(data);
 							model.importFile(fname, header, delimit, quote);
-							data.dataChanged();
+							data.rowCountChanged();
 							importRunning = false;
-							data.setBatchUpdate(false);
 						}
 						catch (Exception e)
 						{
@@ -1502,20 +1532,21 @@ public class SqlPanel
 
   public void selectMaxRowsField()
   {
+		this.showResultPanel();
     this.data.selectMaxRowsField();
   }
 
 	private void checkResultSetActions()
 	{
 		boolean hasResult = this.data.hasResultSet();
-		this.setActionState(new Action[] {this.findAction, this.dataToClipboard, this.exportDataAction, this.optimizeAllCol}, hasResult);
+		this.setActionState(new Action[] {this.findDataAction, this.dataToClipboard, this.exportDataAction, this.optimizeAllCol}, hasResult);
 		
 		boolean mayEdit = hasResult && this.data.hasUpdateableColumns();
 		this.setActionState(this.data.getStartEditAction(), mayEdit);
 		this.setActionState(this.createDeleteScript, mayEdit);
 
 		boolean findNext = hasResult && (this.data.getTable() != null && this.data.getTable().canSearchAgain());
-		this.setActionState(this.findAgainAction, findNext);
+		this.setActionState(this.findDataAgainAction, findNext);
 
 		boolean canUpdate = this.data.isUpdateable();
 		this.setActionState(this.copyAsSqlInsert, canUpdate);
@@ -1584,15 +1615,38 @@ public class SqlPanel
 	
 	private synchronized void showCancelIcon()
 	{
+		this.showTabIcon(this.getCancelIndicator());
+	}
+	
+	private ImageIcon fileIcon = null;
+	
+	private ImageIcon getFileIcon()
+	{
+		if (this.fileIcon == null)
+		{
+			this.fileIcon = ResourceMgr.getPicture("file-icon");
+		}
+		return this.fileIcon;
+	}
+	
+	private void removeTabIcon()
+	{
+		this.showTabIcon(null);
+	}
+	
+	private void showFileIcon()
+	{
+		this.showTabIcon(this.getFileIcon());
+	}
+	private void showTabIcon(ImageIcon icon)
+	{
+		if (this.isBusy()) return;
 		Container parent = this.getParent();
 		if (parent instanceof JTabbedPane)
 		{
 			JTabbedPane tab = (JTabbedPane)parent;
 			int index = tab.indexOfComponent(this);
-			if (index >= 0)
-			{
-				tab.setIconAt(index, getCancelIndicator());
-			}
+			tab.setIconAt(index, icon);
 		}
 	}
 	
@@ -1613,7 +1667,14 @@ public class SqlPanel
 					}
 					else
 					{
-						tab.setIconAt(index, null);
+						if (this.hasFileLoaded())
+						{
+							tab.setIconAt(index, this.getFileIcon());
+						}
+						else
+						{
+							tab.setIconAt(index, null);
+						}
 						if (this.loadingIcon != null) this.loadingIcon.getImage().flush();
 						if (this.cancelIcon != null) this.cancelIcon.getImage().flush();
 					}
@@ -1625,7 +1686,6 @@ public class SqlPanel
 			}
 		}
 		this.threadBusy = busy;
-		this.data.setBatchUpdate(busy);
 		this.setExecuteActionStates(!busy);
 	}
 

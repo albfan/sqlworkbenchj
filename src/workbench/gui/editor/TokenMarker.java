@@ -22,7 +22,7 @@ import javax.swing.text.Segment;
  * cached.
  *
  * @author Slava Pestov
- * @version $Id: TokenMarker.java,v 1.2 2003-02-26 21:42:00 thomas Exp $
+ * @version $Id: TokenMarker.java,v 1.3 2003-08-30 15:57:09 thomas Exp $
  *
  * @see org.gjt.sp.jedit.syntax.Token
  */
@@ -38,8 +38,7 @@ public abstract class TokenMarker
 	{
 		if(lineIndex >= length)
 		{
-			throw new IllegalArgumentException("Tokenizing invalid line: "
-				+ lineIndex);
+			throw new IllegalArgumentException("Tokenizing invalid line: "	+ lineIndex);
 		}
 
 		lastToken = null;
@@ -52,8 +51,7 @@ public abstract class TokenMarker
 			prev = lineInfo[lineIndex - 1];
 
 		byte oldToken = info.token;
-		byte token = markTokensImpl(prev == null ?
-			Token.NULL : prev.token,line,lineIndex);
+		byte token = markTokensImpl(prev == null ?	Token.NULL : prev.token,line,lineIndex);
 
 		info.token = token;
 
@@ -153,8 +151,7 @@ public abstract class TokenMarker
 		length += lines;
 		ensureCapacity(length);
 		int len = index + lines;
-		System.arraycopy(lineInfo,index,lineInfo,len,
-			lineInfo.length - len);
+		System.arraycopy(lineInfo,index,lineInfo,len,lineInfo.length - len);
 
 		for(int i = index + lines - 1; i >= index; i--)
 		{
@@ -175,8 +172,7 @@ public abstract class TokenMarker
 			return;
 		int len = index + lines;
 		length -= lines;
-		System.arraycopy(lineInfo,len,lineInfo,
-			index,lineInfo.length - len);
+		System.arraycopy(lineInfo,len,lineInfo,index,lineInfo.length - len);
 	}
 
 	/**
@@ -258,12 +254,13 @@ public abstract class TokenMarker
 	protected void ensureCapacity(int index)
 	{
 		if(lineInfo == null)
+		{
 			lineInfo = new LineInfo[index + 1];
+		}
 		else if(lineInfo.length <= index)
 		{
 			LineInfo[] lineInfoN = new LineInfo[(index + 1) * 2];
-			System.arraycopy(lineInfo,0,lineInfoN,0,
-					 lineInfo.length);
+			System.arraycopy(lineInfo,0,lineInfoN,0,lineInfo.length);
 			lineInfo = lineInfoN;
 		}
 	}

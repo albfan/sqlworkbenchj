@@ -29,10 +29,9 @@ public class FindAgainAction extends WbAction
 		super();
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtFindAgain"));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("FindAgain"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
+		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_EDIT);
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtFindAgain"));
-		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_MASK));
+		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0));
 	}
 
 	public void actionPerformed(ActionEvent e)

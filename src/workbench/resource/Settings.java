@@ -519,7 +519,7 @@ public class Settings
 	
 	public String getLastWorkspaceDir()
 	{
-		return this.props.getProperty("workbench.workspace.lastdir", this.getLastSqlDir());
+		return this.props.getProperty("workbench.workspace.lastdir", this.getConfigDir());
 	}
 
 	public void setLastWorkspaceDir(String aDir)
@@ -604,8 +604,11 @@ public class Settings
 
 	public void storeWindowPosition(Component target)
 	{
+		this.storeWindowPosition(target, target.getClass().getName());
+	}
+	public void storeWindowPosition(Component target, String id)
+	{
 		Point p = target.getLocation();
-		String id = target.getClass().getName();
 		this.setWindowPosition(id, p.x, p.y);
 	}
 
@@ -651,8 +654,12 @@ public class Settings
 
 	public boolean restoreWindowPosition(Component target)
 	{
+		return this.restoreWindowPosition(target, target.getClass().getName());
+	}
+	
+	public boolean restoreWindowPosition(Component target, String id)
+	{
 		boolean result = false;
-		String id = target.getClass().getName();
 		int x = this.getWindowPosX(id);
 		int y = this.getWindowPosY(id);
 		if (x > 0 && y > 0)
@@ -1067,6 +1074,10 @@ public class Settings
 		this.props.setProperty("workbench.gui.dynamiclayout", Boolean.toString(useEncryption));
 	}
 
+	public boolean getVerifyDriverUrl()
+	{
+		return "true".equalsIgnoreCase(this.props.getProperty("workbench.db.verifydriverurl", "true"));
+	}
 	public boolean getShowMnemonics()
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.gui.showmnemonics", "true"));

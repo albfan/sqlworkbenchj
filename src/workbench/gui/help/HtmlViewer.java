@@ -4,9 +4,10 @@
  * Created on November 26, 2001, 11:22 PM
  */
 
-package workbench.gui.html;
+package workbench.gui.help;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,6 +27,7 @@ import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.HTMLFrameHyperlinkEvent;
+import javax.swing.text.html.StyleSheet;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
@@ -36,13 +38,14 @@ public class HtmlViewer
 	extends JDialog 
 	implements HyperlinkListener 
 {
-	JTextPane display;
+	JEditorPane display;
 	
 	public HtmlViewer(JFrame owner)
 	{
 		
 		super(owner, ResourceMgr.getString("TxtHelpWindowTitle"), false);
-		display = new JTextPane();
+		display = new JEditorPane();
+		display.setFont(new Font("SansSerif", Font.PLAIN, 14));
 		JScrollPane scroll = new JScrollPane(display);
 		
 		getContentPane().setLayout(new BorderLayout());
@@ -58,10 +61,28 @@ public class HtmlViewer
 			WbSwingUtilities.center(this, owner);
 		}
 		
-//		setSize(800, 600);
-		
 		HTMLEditorKit kit = new HTMLEditorKit();
-		HTMLDocument htmlDoc = new HTMLDocument();
+		StyleSheet style = new StyleSheet();
+		HTMLDocument htmlDoc = null;
+		try
+		{
+			URL file = this.getClass().getClassLoader().getResource("help/html-internal.css");
+			if (file != null)
+			{
+				style.importStyleSheet(file);
+				htmlDoc = new HTMLDocument(style);
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("HtmlViewer", "Error loading style sheet html-internal.css", e);
+		}
+
+		if (htmlDoc == null)
+		{
+			htmlDoc = new HTMLDocument();
+		}
+		
 		display.setEditable(false);
 		display.setEditorKit(kit);
 		display.setDocument(htmlDoc);
@@ -69,10 +90,10 @@ public class HtmlViewer
 		try
 		{
 
-			URL file = this.getClass().getClassLoader().getResource("help/SQL Workbench Manual.html");
+			URL file = this.getClass().getClassLoader().getResource("help/index.html");
 			if (file == null)
 			{
-				file = this.getClass().getClassLoader().getResource("workbench/gui/html/NotFound.html");
+				file = this.getClass().getClassLoader().getResource("workbench/gui/help/NotFound.html");
 			}
 			
 			if (file != null)

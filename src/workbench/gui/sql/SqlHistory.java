@@ -173,12 +173,19 @@ public class SqlHistory
 			{
 				if (line.equals(StringUtil.LIST_DELIMITER))
 				{
-					SqlHistoryEntry entry = new SqlHistoryEntry(content.toString(), pos, start, end);
-					this.addEntry(entry);
-					pos = 0;
-					start = -1;
-					end = -1;
-					content = new StringBuffer(500);
+					try
+					{
+						SqlHistoryEntry entry = new SqlHistoryEntry(content.toString(), pos, start, end);
+						this.addEntry(entry);
+						pos = 0;
+						start = -1;
+						end = -1;
+						content = new StringBuffer(500);
+					}
+					catch (Exception e)
+					{
+						LogMgr.logError("SqlHistory.readFromStream()", "Error when creating SqlHistoryEntry", e);
+					}
 				}
 				else if (line.startsWith(KEY_POS))
 				{

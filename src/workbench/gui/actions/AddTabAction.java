@@ -1,8 +1,11 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 
 import javax.swing.Action;
+import javax.swing.KeyStroke;
 
 import workbench.gui.MainWindow;
 import workbench.resource.ResourceMgr;
@@ -21,6 +24,7 @@ public class AddTabAction extends WbAction
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtAddTab"));
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtAddTab"));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_VIEW);
+		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_MASK));
 		this.putValue(Action.SMALL_ICON, null);
 	}
 

@@ -40,6 +40,7 @@ public class SelectCommand extends SqlCommand
 			this.currentConnection = aConnection;
 			this.currentStatement = aConnection.createStatement();
 			this.currentStatement.setMaxRows(this.maxRows);
+			this.isCancelled = false;
 			ResultSet rs = this.currentStatement.executeQuery(aSql);
 			if (rs != null)
 			{

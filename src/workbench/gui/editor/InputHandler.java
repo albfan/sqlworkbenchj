@@ -25,7 +25,7 @@ import javax.swing.KeyStroke;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.7 2003-08-12 19:39:01 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.8 2003-08-30 15:57:09 thomas Exp $
  * @see org.gjt.sp.jedit.textarea.DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter

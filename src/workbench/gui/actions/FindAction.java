@@ -23,8 +23,8 @@ public class FindAction extends WbAction
 		super();
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtFind"));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_FIND));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
+		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("search"));
+		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_EDIT);
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtFind"));
 		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK));
 		this.setCreateToolbarSeparator(true);
@@ -32,6 +32,6 @@ public class FindAction extends WbAction
 
 	public void actionPerformed(ActionEvent e)
 	{
-		this.client.findData();
+		this.client.find();
 	}
 }

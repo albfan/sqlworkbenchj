@@ -493,7 +493,7 @@ public class DwPanel
 					boolean update = this.isUpdateable();
 					this.insertRow.setEnabled(true);
 				}
-        this.dataChanged();
+        this.rowCountChanged();
 			}
 			else if (result.isSuccess())
 			{
@@ -587,7 +587,7 @@ public class DwPanel
 		return this.success;
 	}
 	
-  public void dataChanged()
+  public void rowCountChanged()
   {
 		this.statusBar.setRowcount(this.infoTable.getRowCount());
   }
@@ -596,14 +596,14 @@ public class DwPanel
 	{
 		if (this.readOnly) return;
 		this.infoTable.deleteRow();
-    this.dataChanged();
+    this.rowCountChanged();
 	}
 	
 	public long addRow()
 	{
 		if (this.readOnly) return -1;
 		long newRow = this.infoTable.addRow();
-		if (newRow > -1) this.dataChanged();
+		if (newRow > -1) this.rowCountChanged();
 		return newRow;
 	}
 
@@ -804,16 +804,15 @@ public class DwPanel
 		if (this.batchUpdate) return;
 		if (this.readOnly) return;
 		
-		if (e.getFirstRow() != TableModelEvent.ALL_COLUMNS && this.isModified())
+		if (e.getFirstRow() != TableModelEvent.ALL_COLUMNS &&
+		    e.getFirstRow() != TableModelEvent.HEADER_ROW &&
+				this.isModified() )
 		{
 			if (!this.editingStarted)
 			{
 				this.startEdit();
 			}
-			else
-			{
-				if (this.updateAction != null) this.updateAction.setEnabled(true);
-			}
+			if (this.updateAction != null) this.updateAction.setEnabled(true);
 		}
 	}
 	

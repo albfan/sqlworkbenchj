@@ -126,6 +126,7 @@ public class SqlCommand
 		try { this.currentStatement.clearBatch(); } catch (Throwable th) {}
 		try { this.currentStatement.close(); } catch (Throwable th) {}
 		this.currentStatement = null;
+		this.isCancelled = false;
 	}
 	
 	/**
@@ -138,6 +139,7 @@ public class SqlCommand
 		ResultSet rs = null;
 		this.currentStatement = aConnection.createStatement();
 		this.currentConnection = aConnection;
+		this.isCancelled = false;
 		
 		try
 		{

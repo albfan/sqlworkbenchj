@@ -225,11 +225,19 @@ public class StringUtil
 		for (int i=0; i < count; i ++)
 		{
 			String l = (String)lines.get(i);
-			int start = l.indexOf('"');
-			int end = l.lastIndexOf('"');
-			if (start > -1)
+			if ( l == null) continue;
+			if (l.trim().startsWith("//")) 
 			{
-				l = l.substring(start + 1, end);
+				l = l.replaceFirst("//", "--");
+			}
+			else
+			{
+				int start = l.indexOf('"');
+				int end = l.lastIndexOf('"');
+				if (start > -1)
+				{
+					l = l.substring(start + 1, end);
+				}
 			}
 			Matcher m = newline.matcher(l);
 			l = m.replaceAll("");

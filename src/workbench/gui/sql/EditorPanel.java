@@ -24,9 +24,15 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
 
 import workbench.WbManager;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FileSaveAsAction;
+import workbench.gui.actions.FindAction;
+import workbench.gui.actions.FindAgainAction;
+import workbench.gui.actions.ReplaceAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.ExtensionFileFilter;
+import workbench.gui.components.ReplacePanel;
+import workbench.gui.components.SearchCriteriaPanel;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.editor.JEditTextArea;
 import workbench.gui.editor.JavaTokenMarker;
@@ -35,6 +41,8 @@ import workbench.gui.editor.Token;
 import workbench.gui.editor.TokenMarker;
 import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.FontChangedListener;
+import workbench.interfaces.Replaceable;
+import workbench.interfaces.Searchable;
 import workbench.interfaces.TextContainer;
 import workbench.interfaces.TextFileContainer;
 import workbench.log.LogMgr;
@@ -51,7 +59,7 @@ import workbench.util.LineTokenizer;
 public class EditorPanel 
 	extends JEditTextArea 
 	implements ClipboardSupport, FontChangedListener, 
-						 TextContainer, TextFileContainer
+						 TextContainer, TextFileContainer, Replaceable, Searchable
 {
 	private static final Border DEFAULT_BORDER = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
 	private AnsiSQLTokenMarker sqlTokenMarker;
@@ -60,7 +68,12 @@ public class EditorPanel
 	private static final int JAVA_EDITOR = 1;
 	private static final int TEXT_EDITOR = 2;
 	private int editorType;
+	private String lastSearchCriteria;
 
+	private FindAction findAction;
+	private FindAgainAction findAgainAction;
+	private ReplaceAction replaceAction;
+	
   private static final SyntaxStyle[] SYNTAX_COLORS;
   static
   {
@@ -121,6 +134,13 @@ public class EditorPanel
 		this.setCaretBlinkEnabled(true);
 		this.addPopupMenuItem(new FileSaveAsAction(this), true);
 
+		this.findAction = new FindAction(this);
+		this.findAction.setEnabled(true);
+		this.findAgainAction = new FindAgainAction(this);
+		this.findAgainAction.setEnabled(false);
+
+		this.replaceAction = new ReplaceAction(this);
+		
 		if (aMarker != null) this.setTokenMarker(aMarker);
 
 		/*
@@ -434,6 +454,130 @@ public class EditorPanel
 	{ 
 		if (this.currentFile == null) return null;
 		return this.currentFile.getAbsolutePath(); 
+	}
+
+	public FindAction getFindAction() { return this.findAction; }
+	public FindAgainAction getFindAgainAction() { return this.findAgainAction; }
+	
+	public ReplaceAction getReplaceAction() { return this.replaceAction; }
+	
+	public int find()
+	{
+		String crit = this.lastSearchCriteria;
+		if (crit == null) crit = this.getSelectedText();
+		SearchCriteriaPanel p = new SearchCriteriaPanel(crit);
+		boolean doFind = p.showFindDialog(this);
+		if (!doFind) return -1;
+		String criteria = p.getCriteria();
+		boolean ignoreCase = p.getIgnoreCase();
+		boolean wholeWord = p.getWholeWordOnly();
+		int pos = this.findText(criteria, ignoreCase, wholeWord);
+		this.lastSearchCriteria = criteria;
+		this.findAgainAction.setEnabled(pos > -1);
+		return pos;
+	}
+	
+	public int findNext()
+	{
+		return this.findNextText();
+	}
+
+	public int findFirst(String aValue, boolean ignoreCase, boolean wholeWord)
+	{
+		int pos = this.findText(aValue, ignoreCase, wholeWord);
+		return pos;
+	}
+	
+	public int find(String aValue, boolean ignoreCase, boolean wholeWord)
+	{
+		if (this.isCurrentSearchCriteria(aValue, ignoreCase, wholeWord))
+		{
+			return this.findNext();
+		}
+		else
+		{
+			return this.findFirst(aValue, ignoreCase, wholeWord);
+		}
+	}
+	private ReplacePanel replacePanel = null;
+	
+	public void replace()
+	{
+		if (this.replacePanel == null)
+		{
+			
+			this.replacePanel = new ReplacePanel(this);
+		}
+		this.replacePanel.showReplaceDialog(this, this.getSelectedText());
+	}
+
+	/**
+	 *	Find and replace the next occurance of the current search string
+	 */
+	public boolean replaceNext(String aReplacement)
+	{
+		int pos = this.findNext();
+		if (pos > -1)
+		{
+			this.setSelectedText(aReplacement);
+		}
+		return (pos > -1);
+	}
+	
+	public boolean isTextSelected()
+	{
+		int selStart = this.getSelectionStart();
+		int selEnd = this.getSelectionEnd();
+		return (selStart > -1 && selEnd > selStart);
+	}
+	public int replaceAll(String value, String replacement, boolean selectedText, boolean ignoreCase, boolean wholeWord)
+	{
+		String old = null;
+		if (selectedText)
+		{
+			old = this.getSelectedText();
+		}
+		else
+		{
+			old = this.getText();
+		}
+		int cursor = this.getCaretPosition();
+		int selStart = this.getSelectionStart();
+		int selEnd = this.getSelectionEnd();
+		int newLen = -1;
+		String regex = this.getSearchExpression(value, ignoreCase, wholeWord);
+		String newText = old.replaceAll(regex, replacement);
+		if (selectedText)
+		{
+			this.setSelectedText(newText);
+			newLen = this.getText().length();
+		}
+		else
+		{
+			this.setText(newText);
+			newLen = this.getText().length();
+			selStart = -1;
+			selEnd = -1;
+		}
+		if (cursor < newLen)
+		{
+			this.setCaretPosition(cursor);
+		}
+		if (selStart > -1 && selEnd > selStart && selStart < newLen && selEnd < newLen)
+		{
+			this.select(selStart, selEnd);
+		}
+		return 0;
+	}
+	
+	public boolean replaceCurrent(String aReplacement)
+	{
+		if (this.searchPatternMatchesSelectedText())
+		{
+			this.setSelectedText(aReplacement);
+			return true;
+		}
+		return false;
 	}
 	
 }

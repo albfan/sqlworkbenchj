@@ -974,19 +974,20 @@ extends JTable
 	/**
 	 *	Open the Find dialog for searching strings in the result set
 	 */
-	public void find()
+	public int find()
 	{
 		String criteria;
 		criteria = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgEnterSearchCriteria"), this.lastSearchCriteria);
-		if (criteria == null) return;
+		if (criteria == null) return -1;
 		int row = this.search(criteria, false);
 		this.lastSearchCriteria = criteria;
 		this.findAgainAction.setEnabled(row >= 0);
+		return row;
 	}
 
-	public void findNext()
+	public int findNext()
 	{
-		this.searchNext();
+		return this.searchNext();
 	}
 
 	public void copyDataToClipboard()

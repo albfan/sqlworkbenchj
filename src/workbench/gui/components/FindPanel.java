@@ -93,23 +93,25 @@ public class FindPanel
 		this.findField.grabFocus();
 	}
 
-	public void find()
+	public int find()
 	{
-		if (this.searchTable.getRowCount() <= 0) return;
+		if (this.searchTable.getRowCount() <= 0) return -1;
 		Window parent = SwingUtilities.getWindowAncestor(this);
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		this.searchTable.search(this.findField.getText().trim());
+		int row = this.searchTable.search(this.findField.getText().trim());
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		return row;
 	}
 
-	public void findNext()
+	public int findNext()
 	{
-		if (this.searchTable.getRowCount() <= 0) return;
-		if (!this.searchTable.canSearchAgain()) return;
+		if (this.searchTable.getRowCount() <= 0) return -1;
+		if (!this.searchTable.canSearchAgain()) return -1;
 		Window parent = SwingUtilities.getWindowAncestor(this);
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		this.searchTable.searchNext();
+		int row = this.searchTable.searchNext();
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		return row;
 	}
 
 	public void setSearchString(String aText)

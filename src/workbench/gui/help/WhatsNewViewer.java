@@ -35,6 +35,7 @@ public class WhatsNewViewer extends JDialog
 		super(owner, ResourceMgr.getString("TxtWhatsNewWindowTitle"), false);
 		display = new JTextPane();
 		display.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		display.setEditable(false);
 		JScrollPane scroll = new JScrollPane(display);
 		
 		getContentPane().setLayout(new BorderLayout());
