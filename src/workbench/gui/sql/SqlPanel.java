@@ -65,7 +65,7 @@ public class SqlPanel
 	EditorPanel editor;
 	private DwPanel data;
 	private SqlHistory sqlHistory;
-	
+
 	private JTextArea log;
 	private JTabbedPane resultTab;
 	private JSplitPane contentPanel;
@@ -428,7 +428,7 @@ public class SqlPanel
 		this.editor.addPopupMenuItem(this.executeSelected, true);
 		this.editor.addPopupMenuItem(this.executeAll, false);
 		this.editor.addPopupMenuItem(this.executeCurrent, false);
-		
+
 		TextPopup pop = (TextPopup)this.editor.getRightClickPopup();
 
 		a = new FileOpenAction(this);
@@ -517,13 +517,13 @@ public class SqlPanel
 		this.stopAction.setEnabled(false);
 		this.actions.add(this.stopAction);
 
-		this.nextStmtAction = new NextStatementAction(this);
-		this.nextStmtAction.setEnabled(false);
-		this.actions.add(this.nextStmtAction);
-
 		this.prevStmtAction = new PrevStatementAction(this);
 		this.prevStmtAction.setEnabled(false);
 		this.actions.add(this.prevStmtAction);
+
+		this.nextStmtAction = new NextStatementAction(this);
+		this.nextStmtAction.setEnabled(false);
+		this.actions.add(this.nextStmtAction);
 
 		this.executeAll.setEnabled(false);
 		this.executeSelected.setEnabled(false);
@@ -531,8 +531,8 @@ public class SqlPanel
 
 		this.toolbarActions.add(this.executeSelected);
 		this.toolbarActions.add(this.stopAction);
-		this.toolbarActions.add(this.nextStmtAction);
 		this.toolbarActions.add(this.prevStmtAction);
+		this.toolbarActions.add(this.nextStmtAction);
 
 		this.toolbarActions.add(this.updateAction);
 		this.toolbarActions.add(this.startEditAction);
@@ -844,25 +844,28 @@ public class SqlPanel
 	{
 		this.sqlHistory.showNext(this.editor);
 		this.checkStatementActions();
+		this.selectEditor();
 	}
 
 	public synchronized void showPrevStatement()
 	{
 		this.sqlHistory.showPrevious(editor);
 		this.checkStatementActions();
+		this.selectEditor();
 	}
-	
+
 	public void showCurrentHistoryStatement()
 	{
 		this.sqlHistory.showCurrent(editor);
 		this.checkStatementActions();
+		this.selectEditor();
 	}
-	
+
 	public SqlHistory getSqlHistory()
 	{
 		return this.sqlHistory;
 	}
-	
+
 
 //	private synchronized void showStatementFromHistory(int anIndex)
 //	{
@@ -912,7 +915,7 @@ public class SqlPanel
 	{
 		return this.editor.getCurrentFileName();
 	}
-	
+
 	public void setStatementText(String aStatement)
 	{
 		this.storeStatementInHistory();
@@ -1075,6 +1078,7 @@ public class SqlPanel
 				}
 			}
 		}
+		this.selectEditor();
 	}
 
 	public void spoolData()
@@ -1144,6 +1148,7 @@ public class SqlPanel
 			}
 			this.checkResultSetActions();
 		}
+		this.selectEditor();
 	}
 
 	private void appendToLog(final String aString)
@@ -1507,5 +1512,5 @@ public class SqlPanel
 		}
 	}
 
-	
+
 }

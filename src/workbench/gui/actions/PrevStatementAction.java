@@ -29,9 +29,11 @@ public class PrevStatementAction extends WbAction
 		this.panel = aPanel;
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtPrevStatement"));
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtPrevStatement"));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_UP));
+		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("Back"));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
-		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK));
+		this.setCreateToolbarSeparator(true);
+		//this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK));
+		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.ALT_MASK));
 	}
 
 	public void actionPerformed(ActionEvent e)

@@ -44,6 +44,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.BrowserLauncher;
+import workbench.util.StringUtil;
 import workbench.util.WbWorkspace;
 
 
@@ -1083,6 +1084,7 @@ public class MainWindow
 	{
 		String filename = WbManager.getInstance().getWorkspaceFilename(this, false, true);
 		if (filename == null) return;
+		if (this.currentWorkspaceFile != null) this.saveWorkspace(this.currentWorkspaceFile);
 		this.loadWorkspace(filename);
 		if (this.isProfileWorkspace)
 		{
@@ -1251,11 +1253,12 @@ public class MainWindow
 	public void saveWorkspace(String filename)
 	{
 		WbWorkspace w = null;
-
+		boolean newWorkspace = false;
 		if (filename == null)
 		{
 			filename = WbManager.getInstance().getWorkspaceFilename(this, true);
 			if (filename == null) return;
+			newWorkspace = true;
 		}
 
 		String realFilename = WbManager.getInstance().replaceConfigDir(filename);
@@ -1305,6 +1308,13 @@ public class MainWindow
 			try { w.close(); } catch (Throwable th) {}
 		}
 		this.currentWorkspaceFile = filename;
+		if (newWorkspace)
+		{
+			if (WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgAttachWorkspaceToProfile")))
+			{
+				this.assignWorkspace();
+			}
+		}
 		this.updateWindowTitle();
 		this.checkWorkspaceActions();
 	}

@@ -28,11 +28,12 @@ public class NextStatementAction extends WbAction
 		this.panel = aPanel;
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtNextStatement"));
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtNextStatement"));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_DOWN));
+		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("Forward"));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
 		this.setCreateMenuSeparator(true);
-		this.setCreateToolbarSeparator(true);
-		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK));
+		this.setCreateToolbarSeparator(false);
+		//this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK));
+		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.ALT_MASK));
 	}
 
 	public void actionPerformed(ActionEvent e)

@@ -195,6 +195,14 @@ public class StringUtil
 		return result.toString();
 	}
 
+	public static final boolean isEmpty(String aString)
+	{
+		if (aString == null) return true;
+		if (aString.length() == 0) return true;
+		if (aString.trim().length() == 0) return true;
+		return false;
+	}
+	
 	public static final String cleanJavaString(String aString)
 	{
 		Pattern newline = Pattern.compile("\\\\n|\\\\r");

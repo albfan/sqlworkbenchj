@@ -76,7 +76,7 @@ public class DbMetadata
 	private HashMap pkStatements;
 	private HashMap idxStatements;
 	private HashMap fkStatements;
-	
+
 	//private HashMap dateLiteralFormatter;
 	private DbmsOutput oraOutput;
   private boolean needsReconnect;
@@ -122,7 +122,7 @@ public class DbMetadata
 			LogMgr.logWarning("DbMetadata.<init>", "Could not retrieve Catalog term", e);
 			this.catalogTerm = "Catalog";
 		}
-		
+
 		if (this.schemaTerm == null || this.schemaTerm.length() == 0)
 			this.schemaTerm = "Schema";
 
@@ -138,7 +138,7 @@ public class DbMetadata
 			LogMgr.logWarning("DbMetadata.<init>", "Could not retrieve Database Product name", e);
 			this.productName = aConnection.getProfile().getDriverclass();
 		}
-		
+
 		if (this.productName.toLowerCase().indexOf("oracle") > -1)
 		{
 			this.isOracle = true;
@@ -147,7 +147,7 @@ public class DbMetadata
 		{
 			this.isPostgres = true;
 		}
-		
+
 		this.needsReconnect = serversWhichNeedReconnect.contains(this.productName);
 		this.caseSensitive = caseSensitiveServers.contains(this.productName);
 	}
@@ -636,7 +636,7 @@ public class DbMetadata
         this.oraOutput = null;
       }
     }
-		
+
     if (this.oraOutput != null)
     {
 			try
@@ -1006,11 +1006,11 @@ public class DbMetadata
 		aTable = this.adjustObjectname(aTable);
 
 		GetMetaDataSql sql = (GetMetaDataSql)this.triggerList.get(this.productName);
-		if (sql == null) 
+		if (sql == null)
 		{
 			return result;
 		}
-		
+
 		sql.setSchema(aSchema);
 		sql.setCatalog(aCatalog);
 		sql.setObjectName(aTable);
@@ -1053,7 +1053,7 @@ public class DbMetadata
 		sql.setObjectName(aTriggername);
 		Statement stmt = this.dbConnection.getSqlConnection().createStatement();
 		String query = sql.getSql();
-		
+
 		ResultSet rs = stmt.executeQuery(query);
 		int colCount = rs.getMetaData().getColumnCount();
 		while (rs.next())
@@ -1199,9 +1199,9 @@ public class DbMetadata
 		if (!this.isPostgres) return aName;
 		if (aName.indexOf("\\000") > -1)
 		{
-			// the Postgres JDBC driver seems to have a bug here, 
+			// the Postgres JDBC driver seems to have a bug here,
 			// because it appends the whole FK information to the fk name!
-			// the actual FK name ends at the first \000 
+			// the actual FK name ends at the first \000
 			return aName.substring(0, aName.indexOf("\\000"));
 		}
 		return aName;
@@ -1285,10 +1285,8 @@ public class DbMetadata
 					schema = "";
 				}
 				String catalog = rs.getString(1);
-				System.out.println("pktable_cat=" + catalog);
 				catalog = rs.getString(5);
-				System.out.println("fktable_cat=" + catalog);
-				
+
 				int updateAction = rs.getInt(updateActionCol);
 				String updActionDesc = this.getRuleTypeDisplay(updateAction);
 				int deleteAction = rs.getInt(deleteActionCol);
@@ -1352,8 +1350,63 @@ public class DbMetadata
 		return name;
 	}
 
+	public String getSequenceSource(String aSequence)
+	{
+		if (!this.isPostgres) return "";
+		if (aSequence == null) return "";
+		Statement stmt = null;
+		ResultSet rs = null;
+		String result = "";
+		try
+		{
+			String sql = "SELECT sequence_name, max_value, min_value, increment_by, cache_value, is_cycled FROM " + aSequence;
+			stmt = this.dbConnection.createStatement();
+			rs = stmt.executeQuery(sql);
+			if (rs.next())
+			{
+				String name = rs.getString(1);;
+				long maxValue = rs.getLong(2);
+				long minValue = rs.getLong(3);
+				String max = Long.toString(maxValue);
+				String min = Long.toString(minValue);
+				String inc = rs.getString(4);
+				String cache = rs.getString(5);
+				String cycle = rs.getString(6);
+
+				StringBuffer buf = new StringBuffer(250);
+				buf.append("CREATE SEQUENCE ");
+				buf.append(name);
+				buf.append("\n INCREMENT ");
+				buf.append(inc);
+				buf.append("\n MINVALUE ");
+				buf.append(min);
+				buf.append("\n MAXVALUE ");
+				buf.append(max);
+				buf.append("\n CACHE ");
+				buf.append(cache);
+				if ("true".equalsIgnoreCase(cycle))
+				{
+					buf.append("\n CYCLE");
+				}
+				buf.append(";");
+				result = buf.toString();
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DbMetadata.getSequenceSource()", "Error reading sequence definition", e);
+			result = "";
+		}
+		finally
+		{
+			try { rs.close(); } catch (Throwable th) {}
+			try { stmt.close(); } catch (Throwable th) {}
+		}
+		return result;
+	}
 	public String getSynonymSource(String anOwner, String aSynonym)
 	{
+		if (!this.isOracle) return "";
 		String result = null;
 		try
 		{
@@ -1481,7 +1534,7 @@ public class DbMetadata
 				fkCols.put(name, colList);
 			}
 			colList.add(col);
-			
+
 			colList = (HashSet)fkTarget.get(name);
 			if (colList == null)
 			{
@@ -1490,7 +1543,7 @@ public class DbMetadata
 			}
 			colList.add(fkCol);
 		}
-		
+
 		// now put the real statements together
 		Iterator names = fkCols.keySet().iterator();
 		while (names.hasNext())
@@ -1511,7 +1564,7 @@ public class DbMetadata
 			stmt = StringUtil.replace(stmt, COLUMNLIST_PLACEHOLDER, entry);
 			colList = (HashSet)fkTarget.get(name);
 			entry = this.setToList(colList);
-			
+
 			StringTokenizer tok = new StringTokenizer(entry, ",");
 			StringBuffer colListBuffer = new StringBuffer(30);
 			String targetTable = null;
@@ -1640,7 +1693,7 @@ public class DbMetadata
 	{
 		return ddlNeedsCommit.contains(this.productName);
 	}
-	
+
 	public static void setCaseSensitiveServers(List aList)
 	{
 		caseSensitiveServers = aList;

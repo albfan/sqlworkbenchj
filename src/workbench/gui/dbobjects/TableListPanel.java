@@ -326,7 +326,7 @@ public class TableListPanel
 	private void removeTablePanels(boolean includeDataPanel)
 	{
 		int index = this.displayTab.getSelectedIndex();
-		
+
 		//if (this.displayTab.getTabCount() == 2) return;
 
 		this.displayTab.setSelectedIndex(0);
@@ -334,9 +334,9 @@ public class TableListPanel
 		int count = this.displayTab.getTabCount();
 		if (count < 3 && includeDataPanel) return;
 		if (count < 2 && !includeDataPanel) return;
-		
+
 		if (count == 3 && includeDataPanel) this.removeDataPanel();
-		
+
 		this.displayTab.remove(this.indexPanel);
 		this.indexes.reset();
 		this.displayTab.remove(this.importedPanel);
@@ -355,13 +355,13 @@ public class TableListPanel
 	{
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerData"), this.tableData);
 	}
-	
+
 	private void removeDataPanel()
 	{
 		this.displayTab.remove(this.tableData);
 		this.tableData.reset();
 	}
-	
+
 	public void setInitialFocus()
 	{
 		this.findPanel.setFocusToEntryField();
@@ -564,14 +564,11 @@ public class TableListPanel
 	{
 		if (e.getValueIsAdjusting()) return;
 		int count = this.tableList.getSelectedRowCount();
-		if (count > 1)
-		{
-			this.showDataMenu.setEnabled(false);
-			this.dropTableItem.setEnabled(true);
-			return;
-		}
+
 		this.showDataMenu.setEnabled(count == 1);
 		this.dropTableItem.setEnabled(count > 0);
+
+		if (count > 1) return;
 
 		int row = this.tableList.getSelectedRow();
 		if (row < 0) return;
@@ -589,10 +586,16 @@ public class TableListPanel
 			}
 			else
 			{
-				if (this.selectedObjectType.indexOf("view") > -1)
+				if (this.isTableType(this.selectedObjectType))
 				{
-					if (this.displayTab.getTabCount() == 2) this.addDataPanel();
-					else this.removeTablePanels(false);
+					if (this.displayTab.getTabCount() == 2)
+					{
+						this.addDataPanel();
+					}
+					else
+					{
+						this.removeTablePanels(false);
+					}
 				}
 				else
 				{
@@ -609,14 +612,16 @@ public class TableListPanel
 	{
 		if (aType == null) return false;
 		aType = aType.toLowerCase();
-		return (aType.indexOf("table") > -1 || aType.indexOf("view") > -1 || aType.indexOf("synonym") > -1);
+		return (aType.indexOf("table") > -1 || aType.indexOf("view") > -1 || 
+						aType.indexOf("synonym") > -1 ||
+						(this.dbConnection.getMetadata().isPostgres() && aType.indexOf("sequence") > -1) );
 	}
-	
+
 	private String extendViewSource(String aSource, String aName, DataStore viewDefinition)
 	{
 		if (aSource == null) return "";
 		if (aSource.length() == 0) return "";
-		
+
 		StringBuffer result = new StringBuffer(aSource.length() + 100);
 
 		if (this.dbConnection.getMetadata().isOracle())
@@ -678,6 +683,12 @@ public class TableListPanel
 		{
 			String synSource = meta.getSynonymSource(this.selectedSchema, this.selectedTableName);
 			tableSource.setText(synSource);
+			tableSource.setCaretPosition(0);
+		}
+		else if ("sequence".equals(this.selectedObjectType))
+		{
+			String seqSource = meta.getSequenceSource(this.selectedTableName);
+			tableSource.setText(seqSource);
 			tableSource.setCaretPosition(0);
 		}
 		else if (this.selectedObjectType.indexOf("table") > -1)
@@ -1005,11 +1016,11 @@ public class TableListPanel
 		JFileChooser fc = new JFileChooser(lastDir);
 		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		//fc.setApproveButtonText(ResourceMgr.getString("LabelSelectDirButton"));
-		
+
 		fc.setDialogTitle(ResourceMgr.getString("LabelSelectDirTitle"));
 		ExportOptionsPanel options = new ExportOptionsPanel();
 		fc.setAccessory(options);
-		
+
 		int answer = fc.showDialog(SwingUtilities.getWindowAncestor(this), null);
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
@@ -1030,16 +1041,16 @@ public class TableListPanel
 				spooler.setExportHeaders(options.getIncludeTextHeader());
 				ext = ".txt";
 			}
-			
+
 			fc = null;
-			
+
 			int[] rows = this.tableList.getSelectedRows();
 			for (int i = 0; i < rows.length; i ++)
 			{
 				if (rows[i] < 0) continue;
 				String table = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 				if (table == null) continue;
-				
+
 				String ttype = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
 				if (!this.isTableType(ttype)) continue;
 				String stmt = "SELECT * FROM " + SqlUtil.quoteObjectname(table);
@@ -1092,21 +1103,21 @@ public class TableListPanel
 	{
 		this.shiftDown = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
 	}
-	
+
 	public void mouseEntered(MouseEvent e)
 	{
 	}
-	
+
 	public void mouseExited(MouseEvent e)
 	{
 	}
-	
+
 	public void mousePressed(MouseEvent e)
 	{
 	}
-	
+
 	public void mouseReleased(MouseEvent e)
 	{
 	}
-	
+
 }
