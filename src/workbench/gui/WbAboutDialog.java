@@ -209,8 +209,8 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 5;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
 		contentPanel.add(homepageLabel, gridBagConstraints);
 		
 		mailToLabel.setText("workbench@kellerer.org");
@@ -218,8 +218,8 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 6;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
 		contentPanel.add(mailToLabel, gridBagConstraints);
 		
 		getContentPane().add(contentPanel, java.awt.BorderLayout.CENTER);
@@ -292,19 +292,19 @@ public class WbAboutDialog extends javax.swing.JDialog
 	}
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.JLabel labelVersion;
-	private javax.swing.JLabel jLabel1;
-	private javax.swing.JLabel logo;
-	private javax.swing.JLabel labelCopyright;
-	private javax.swing.JLabel jLabel2;
-	private javax.swing.JLabel homepageLabel;
-	private javax.swing.JLabel labelDesc;
-	private javax.swing.JLabel mailToLabel;
 	private javax.swing.JPanel buttonPanel;
 	private javax.swing.JButton closeButton;
-	private javax.swing.JLabel labelTitel;
-	private javax.swing.JLabel jdkVersion;
 	private javax.swing.JPanel contentPanel;
+	private javax.swing.JLabel homepageLabel;
+	private javax.swing.JLabel jLabel1;
+	private javax.swing.JLabel jLabel2;
+	private javax.swing.JLabel jdkVersion;
+	private javax.swing.JLabel labelCopyright;
+	private javax.swing.JLabel labelDesc;
+	private javax.swing.JLabel labelTitel;
+	private javax.swing.JLabel labelVersion;
+	private javax.swing.JLabel logo;
+	private javax.swing.JLabel mailToLabel;
 	// End of variables declaration//GEN-END:variables
 
 }
