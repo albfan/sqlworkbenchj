@@ -11,9 +11,9 @@ package workbench.exception;
  * @author  thomas
  * @version
  */
-public class NoConnectionException extends WbException
+public class NoConnectionException extends Exception
 {
-	
+
 	/**
 	 * Constructs an <code>InvalidStatementException</code> with the specified detail message.
 	 * @param msg the detail message.
@@ -23,5 +23,4 @@ public class NoConnectionException extends WbException
 		super(msg);
 	}
 }
-
 
