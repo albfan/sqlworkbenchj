@@ -351,6 +351,7 @@ public class TableSearchPanel
 	public void disconnect()
 	{
 		this.resetResult();
+		this.tableListSource.removeTableListDisplayClient(this.tableNames);
 	}
 	
 	private void resetResult()
@@ -375,8 +376,8 @@ public class TableSearchPanel
 		for (int i=0; i < selectedTables.length; i++)
 		{
 			StringBuffer table = new StringBuffer(100);
-			String schema = (String)tables.getValue(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-			String tablename = (String)tables.getValue(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+			String schema = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+			String tablename = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 			if (schema != null && schema.length() > 0)
 			{
 				table.append(schema);

@@ -7,40 +7,27 @@
 package workbench.storage;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
-import workbench.exception.WbException;
+//import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.util.LineTokenizer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
+
 
 
 /**
@@ -910,13 +897,13 @@ public class DataStore
 	}
 
 	public String getDataAsSqlInsert()
-		throws WbException, SQLException
+		throws Exception, SQLException
 	{
 		return this.getDataAsSqlInsert("\n");
 	}
 	
 	public String getDataAsSqlInsert(String aLineTerminator)
-		throws WbException, SQLException
+		throws Exception, SQLException
 	{
 		if (!this.canSaveAsSqlInsert()) return "";
 		StringBuffer script = new StringBuffer(this.getRowCount() * 100);
@@ -1088,6 +1075,14 @@ public class DataStore
 		try { in.close(); } catch (IOException e) {}
 	}
 	
+	private void updateProgressMonitor(int currentRow, int totalRows)
+	{
+		if (this.rowActionMonitor != null)
+		{
+			this.rowActionMonitor.setCurrentRow(currentRow, totalRows);
+		}
+	}
+	
 	/**
 	 * Save the changes to this datastore to the database.
 	 * The changes are applied in the following order
@@ -1097,45 +1092,8 @@ public class DataStore
 	 * <li>Update statements</li>
 	 * </ul>
 	 */
-	public int _updateDb(WbConnection aConnection)
-		throws WbException, SQLException
-	{
-		int rows = 0;
-		List statements = this.getUpdateStatements(aConnection);
-		if (statements.size() == 0) return 0;
-		
-		try
-		{
-			for (int i=0; i < statements.size(); i++)
-			{
-				DmlStatement stmt = (DmlStatement)statements.get(i);
-				rows += stmt.execute(aConnection);
-			}
-			if (!aConnection.getAutoCommit()) aConnection.commit();
-			this.resetStatus();
-		}
-		catch (SQLException e)
-		{
-			if (!aConnection.getAutoCommit())
-			{
-				aConnection.rollback();
-			}
-			throw e;
-		}
-		
-		return rows;
-	}
-
-	private void updateProgressMonitor(int currentRow, int totalRows)
-	{
-		if (this.rowActionMonitor != null)
-		{
-			this.rowActionMonitor.setCurrentRow(currentRow, totalRows);
-		}
-	}
-	
 	public synchronized int updateDb(WbConnection aConnection)
-		throws WbException, SQLException, Exception
+		throws Exception, SQLException, Exception
 	{
 		int rows = 0;
 		this.updatePkInformation(aConnection);
@@ -1538,54 +1496,11 @@ public class DataStore
 	 * of the DataStore.
 	 */
 	public List getUpdateStatements(WbConnection aConnection)
-		throws WbException, SQLException
+		throws SQLException
 	{
-		if (this.updateTable == null) throw new WbException("No update table defined!");
+		if (this.updateTable == null) throw new NullPointerException("No update table defined!");
 		this.updatePkInformation(aConnection);
-		/*
-		ArrayList deletes  = new ArrayList();
-		ArrayList updates = new ArrayList();
-		ArrayList inserts = new ArrayList();
-		RowData row;
-		DmlStatement dml;
-    int count = this.getRowCount();
-    int modifiedCount = 0;
-    
 		
-		for (int i=0; i < count; i ++)
-		{
-			row = this.getRow(i);
-			if (row.isModified() && !row.isNew())
-			{
-				dml = this.createUpdateStatement(row);
-				if (dml != null) updates.add(dml);
-        modifiedCount ++;
-			}
-			else if (row.isNew() && row.isModified())
-			{
-				dml = this.createInsertStatement(row, false);
-				if (dml != null) inserts.add(dml);
-        modifiedCount ++;
-			}
-		}
-
-		if (this.deletedRows != null && this.deletedRows.size() > 0)
-		{
-			for (int i=0; i < this.deletedRows.size(); i++)
-			{
-				row = (RowData)this.deletedRows.get(i);
-				if (!row.isNew())
-				{
-					dml = this.createDeleteStatement(row);
-					if (dml != null) 
-          {
-            deletes.add(dml);
-            modifiedCount++;
-          }
-				}
-			}
-		}
-		*/
 		ArrayList stmt = new ArrayList(this.getModifiedCount());
 		this.resetUpdateRowCounters();
 		DmlStatement dml = this.getNextDeleteStatement();
@@ -1609,13 +1524,9 @@ public class DataStore
 			stmt.add(dml);
 			dml = this.getNextInsertStatement();
 		}
-		
-		//stmt.addAll(deletes);
-		//stmt.addAll(updates);
-		//stmt.addAll(inserts);
-		
 		return stmt;
 	}
+	
 	private int currentUpdateRow = 0;
 	private int currentInsertRow = 0;
 	private int currentDeleteRow = 0;
@@ -1683,7 +1594,7 @@ public class DataStore
 	
 	private DmlStatement createUpdateStatement(RowData aRow)
 	{
-		return this.createUpdateStatement(aRow, false, "");
+		return this.createUpdateStatement(aRow, false, System.getProperty("line.separator"));
 	}
 	
 	private DmlStatement createUpdateStatement(RowData aRow, boolean ignoreStatus, String lineEnd)

@@ -473,7 +473,7 @@ public class StringUtil
 	public static boolean stringToBool(String aString)
 	{
 		if (aString == null) return false;
-		return ("yes".equalsIgnoreCase(aString) || "1".equals(aString) || "true".equalsIgnoreCase(aString));
+		return ("y".equalsIgnoreCase(aString) || "yes".equalsIgnoreCase(aString) || "1".equals(aString) || "true".equalsIgnoreCase(aString));
 	}
 
 	public static List split(String aString, String delim, boolean singleDelimiter, String quoteChars, boolean keepQuotes)

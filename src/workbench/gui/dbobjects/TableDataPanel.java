@@ -77,7 +77,8 @@ public class TableDataPanel
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setLayout(new BorderLayout());
     JPanel topPanel = new JPanel();
-		topPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		topPanel.setMaximumSize(new Dimension(32768, 32768));
+		topPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
 
 		ReloadAction a = new ReloadAction(this);
 		JButton b = a.getToolbarButton();
@@ -94,24 +95,18 @@ public class TableDataPanel
 		rowCountLabel.setFont(bold);
 		topPanel.add(rowCountLabel);
 
-
-		JLabel dummy = new JLabel(" ");
-		dummy.setMinimumSize(new Dimension(50,0));
-		topPanel.add(dummy);
-
 		maxRowsLabel = new JLabel(ResourceMgr.getString("LabelTableDataMaxRows"));
 		topPanel.add(maxRowsLabel);
-		
 
-		this.maxRowField = new JTextField(10);
+		this.maxRowField = new JTextField(4);
 		topPanel.add(this.maxRowField);
 
 		this.config = new JButton(ResourceMgr.getString("LabelConfigureWarningThreshold"));
 		this.config.addActionListener(this);
 		topPanel.add(this.config);
 		
-		this.dataTable = new WbTable();
 		this.add(topPanel, BorderLayout.NORTH);
+		this.dataTable = new WbTable();
 		JScrollPane scroll = new JScrollPane(this.dataTable);
 		this.add(scroll, BorderLayout.CENTER);
 	}
@@ -296,7 +291,7 @@ public class TableDataPanel
 		long rows = this.showRowCount();
 		if (this.autoRetrieve.isSelected() && includeData)
 		{
-			if (this.warningThreshold > 0 && rows > this.warningThreshold)
+			if (this.warningThreshold > 0 && rows > this.warningThreshold && this.warningThreshold < this.getMaxRows())
 			{
 				String msg = ResourceMgr.getString("MsgDataDisplayWarningThreshold");
 				msg = msg.replaceAll("%rows%", Long.toString(rows));

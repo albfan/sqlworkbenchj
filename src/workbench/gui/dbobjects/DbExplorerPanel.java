@@ -12,7 +12,6 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.Runnable;
 import java.util.Collections;
 import java.util.List;
 import javax.swing.JComboBox;
@@ -23,6 +22,8 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
@@ -35,11 +36,14 @@ import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+
 /**
  *
  * @author  workbench@kellerer.org
  */
-public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
+public class DbExplorerPanel 
+	extends JPanel 
+	implements ActionListener, MainPanel, ChangeListener
 {
 	private MainWindow parentWindow;
 	private JTabbedPane tabPane;
@@ -66,14 +70,12 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		{
 			tables = new TableListPanel(aParent);
 			procs = new ProcedureListPanel();
-			searchPanel = new TableSearchPanel(tables);
-			generator = new PersistenceGeneratorPanel(tables);
 			tabPane = new JTabbedPane(JTabbedPane.TOP);
 			tabPane.setUI(TabbedPaneUIFactory.getBorderLessUI());
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerTables"), tables);
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerProcs"), procs);
-			tabPane.add(ResourceMgr.getString("TxtSearchTables"), searchPanel);
-			tabPane.add(ResourceMgr.getString("TxtPersistenceGenerator"), generator);
+			tabPane.add(ResourceMgr.getString("TxtSearchTables"), new JPanel());
+			tabPane.add(ResourceMgr.getString("TxtPersistenceGenerator"), new JPanel());
 			tabPane.setFocusable(false);
 		}
 		catch (Exception e)
@@ -115,8 +117,35 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		this.connectionInfo = new ConnectionInfo(this.toolbar.getBackground());
 		this.connectionInfo.setMinimumSize(d);
 		this.toolbar.add(this.connectionInfo);
+		
+		this.tabPane.addChangeListener(this);
 	}
 
+	private void initSearchPanel()
+	{
+		this.searchPanel = new TableSearchPanel(tables);
+
+		if (this.dbConnection != null)
+		{
+			this.searchPanel.setConnection(this.dbConnection);
+		}
+		this.searchPanel.restoreSettings();
+		int index = this.tabPane.getTabCount() - 2;
+		this.tabPane.setComponentAt(index, this.searchPanel);
+	}
+	
+	private void initGenerator()
+	{
+		this.generator = new PersistenceGeneratorPanel(this.tables);
+		if (this.dbConnection != null)
+		{
+			this.generator.setConnection(this.dbConnection);
+		}
+		this.generator.restoreSettings();
+		int index = this.tabPane.getTabCount() - 1;
+		this.tabPane.setComponentAt(index, this.generator);
+	}
+	
 	public void setConnection(WbConnection aConnection)
 	{
 		this.setConnection(aConnection, null);
@@ -161,8 +190,8 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		this.dbConnection = aConnection;
 		this.tables.setConnection(aConnection);
 		this.procs.setConnection(aConnection);
-		this.searchPanel.setConnection(aConnection);
-		this.generator.setConnection(aConnection);
+		if (this.searchPanel != null) this.searchPanel.setConnection(aConnection);
+		if (this.generator != null) this.generator.setConnection(aConnection);
 		this.schemaLabel.setText(aConnection.getMetadata().getSchemaTerm());
 		this.schemaSelector.doLayout();
 		this.readSchemas();
@@ -194,8 +223,25 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		this.dbConnection = null;
 		this.tables.disconnect();
 		this.procs.disconnect();
-		this.searchPanel.disconnect();
-		this.generator.disconnect();
+		
+		int count = this.tabPane.getTabCount();
+		this.tabPane.setSelectedIndex(0);
+		
+		if (this.searchPanel != null) 
+		{
+			this.tabPane.setComponentAt(count - 2, new JPanel());
+			this.searchPanel.disconnect();
+			this.searchPanel = null;
+		}
+		
+		if (this.generator != null) 
+		{
+			this.tabPane.setComponentAt(count - 1, new JPanel());
+			this.generator.disconnect();
+			this.generator = null;
+		}
+		
+		this.closeWindow();
 	}
 
 	public boolean isConnected()
@@ -207,15 +253,15 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 	{
 		this.tables.saveSettings();
 		this.procs.saveSettings();
-		this.searchPanel.saveSettings();
-		this.generator.saveSettings();
+		if (this.searchPanel != null) this.searchPanel.saveSettings();
+		if (this.generator != null) this.generator.saveSettings();
 	}
 	public void restoreSettings()
 	{
 		tables.restoreSettings();
 		procs.restoreSettings();
-		this.searchPanel.restoreSettings();
-		this.generator.restoreSettings();
+		if (this.searchPanel != null) searchPanel.restoreSettings();
+		if (this.generator != null) this.generator.restoreSettings();
 	}
 
 	public void actionPerformed(ActionEvent e)
@@ -245,6 +291,15 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		}
 	}
 	
+	public void closeWindow()
+	{
+		if (this.window != null)
+		{
+			this.window.setVisible(false);
+			this.window.dispose();
+			this.window = null;
+		}
+	}
 	public void openWindow(String aProfileName)
 	{
 		if (this.window == null)
@@ -296,16 +351,18 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 	
 	public void mainWindowDeiconified()
 	{
-		if (this.window != null && this.restoreWindow) this.window.show();
+		//if (this.window != null && this.restoreWindow) this.window.show();
 	}
 
 	public void mainWindowIconified()
 	{
+		/*
 		if (this.window != null)
 		{
 			this.restoreWindow = this.window.isVisible();
 			this.window.hide();
 		}
+	  */
 	}
 	public void updateUI()
 	{
@@ -316,4 +373,25 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 			this.toolbar.repaint();
 		}
 	}
+	
+	public void stateChanged(ChangeEvent e)
+	{
+		if (e.getSource() == this.tabPane)
+		{
+			int newIndex = this.tabPane.getSelectedIndex();
+			int count = this.tabPane.getTabCount();
+			if (newIndex == count - 1)
+			{
+				if (this.generator == null)
+				{
+					this.initGenerator();
+				}
+			}
+			else if (newIndex == count - 2)
+			{
+				this.initSearchPanel();
+			}
+		}
+	}
+	
 }

@@ -325,7 +325,6 @@ public class WbManager implements FontChangedListener
 
 	public void exitWorkbench()
 	{
-		this.getConnectionMgr().disconnectAll();
 		//boolean first = true;
 		if (!this.batchMode)
 		{
@@ -341,6 +340,7 @@ public class WbManager implements FontChangedListener
 					if (!this.checkProfiles(w)) return;
 					w.saveSettings();
 				}
+				this.getConnectionMgr().disconnectAll();
 				this.mainWindows.remove(w);
 				w.setVisible(false);
 				w.dispose();
@@ -378,6 +378,14 @@ public class WbManager implements FontChangedListener
     {
 			this.exitWorkbench();
     }
+		else
+		{
+			this.mainWindows.remove(win);
+			win.disconnect();
+			win.hide();
+			win.dispose();
+		}
+			
 	}
 
 	// open a new window, but do not check any command line

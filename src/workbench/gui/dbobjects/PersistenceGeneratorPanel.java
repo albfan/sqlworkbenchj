@@ -494,6 +494,13 @@ public class PersistenceGeneratorPanel
 	public void disconnect()
 	{
 		this.tableListSource.removeTableListDisplayClient(this.tableNames);
+		int count = this.editorTab.getTabCount();
+		for (int i=0; i < count; i++)
+		{
+			EditorPanel p = (EditorPanel)this.editorTab.getComponentAt(i);
+			p.closeFile(true);
+		}
+		this.editorTab.removeAll();
 	}
 	
 	private void getSelectedTables()

@@ -87,7 +87,7 @@ public class MainWindow
 		super(ResourceMgr.TXT_PRODUCT_NAME);
 		instanceCount ++;
 		this.windowId = "MainWindow" + Integer.toString(instanceCount);
-		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		this.addWindowListener(this);
 
 		this.sqlTab.setUI(TabbedPaneUIFactory.getBorderLessUI());
@@ -662,13 +662,6 @@ public class MainWindow
 			if (conn != null) mgr.disconnect(conn.getId());
 
 			this.dbExplorerPanel.disconnect();
-			DbExplorerWindow w = this.dbExplorerPanel.getWindow();
-			if (w != null)
-			{
-				w.setVisible(false);
-				w.dispose();
-				w = null;
-			}
 		}
 		this.currentProfile = null;
 		this.updateWindowTitle();
