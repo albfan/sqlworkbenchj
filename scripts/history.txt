@@ -1,5 +1,37 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+
+Build 69, 01.02.2004
+--------------------
+Fix:  When using a DBMS with schemas, the DbExplorer would not always
+      retrieve the data correctly
+Fix:  When running scripts with a large number of CREATE statements, a "Maximum
+      number of open cursors exceeded" could occur with Oracle
+Fix:  Workaround for JDBC drivers that do not support the setMaxRows() function
+Fix:  When saving data from the result set, the export type was determined by
+      the extension and not by the selected file filter. Thus an export into
+      a text file with an extension other then txt did not work.
+Fix:  The macro manager could not be closed if no macro was defined
+Fix:  The Oracle data types NVARCHAR2 and NCHAR were not displayed
+      correctly in the table definition
+Fix:  The COPY command always required a -targetprofile
+Fix:  The source for functions in PostgreSQL is not displayed correctly
+Enh:  Added support for ThinkSQL
+Enh:  Added support for DBMS which only allows definition of foreign and
+      primary keys inside the CREATE TABLE statement
+Enh:  The status bar is now always displayed in the main window (not only when
+      the result panel is visible)
+Enh:  Data can now be saved as SQL UPDATE statements as well (if the table
+      has a primary key defined)
+Enh:  IMPORT, COPY and the DataPumper can now optionally update existing records 
+Enh:  When using "Execute Current" the editor now (optionally) jumps to the next 
+      statement.
+Enh:  The COPY command does not require a profile any more. If neither source nor
+      target profile are specified the current connection will be used for both.
+
+
+Build 68, 20.01.2004
+--------------------
 Fix:  Spooling of more then one table from within the DbExplorer did not work
 
 
@@ -13,7 +45,7 @@ Enh:  Column selection mode can now also be activated by keyboard.
       selecting with the mouse
 Enh:  Jump to first statement and jump to last statement are now
       available for the statement history.
-Enh:  If a statement fails (while executing several statements), 
+Enh:  If a statement fails (while executing several statements),
       it is now highlighted in the editor
 Fix:  When cancelling an update, or an error occured during the update
       of changes made directly in the result set, the changes were lost.

@@ -60,7 +60,6 @@
     <delete file="${scriptsrc}/history.new" failonerror="false" />
     <mkdir dir="${build}"/>
     <mkdir dir="${distdir}"/>
-    
   </target>
     
   <target name="clean">
@@ -145,10 +144,10 @@
   -->
   <target name="fop" depends="init">
     <copy overwrite="true" todir="${doc}/pdf">
-			<fileset dir="${doc}/xml">
-				<include name="*.xml"/>
-			</fileset>
-			
+      <fileset dir="${doc}/xml">
+        <include name="*.xml"/>
+      </fileset>
+      
       <filterset begintoken="@" endtoken="@">
         <filter token="BUILD_DATE" value="${build_date}"/>
         <filter token="BUILD_NUMBER" value="${build.number}"/>
@@ -165,9 +164,9 @@
       <param name="margin.right" expression="2cm"/>
     </xslt>
     <delete>
-			<fileset dir="${doc}/pdf">
-				<include name="*.xml"/>
-			</fileset>
+      <fileset dir="${doc}/pdf">
+        <include name="*.xml"/>
+      </fileset>
     </delete>
   </target>
   
@@ -196,10 +195,10 @@
     <echo message="Generating HTML Help"/>
     <!-- copy overwrite="true" todir="${build}/help" file="${doc}/xml/docbookx.dtd"/ -->
     <copy overwrite="true" todir="${build}/help">
-			<fileset dir="${doc}/xml">
-				<include name="*.xml"/>
-			</fileset>
-			
+      <fileset dir="${doc}/xml">
+        <include name="*.xml"/>
+      </fileset>
+      
       <filterset begintoken="@" endtoken="@">
         <filter token="BUILD_DATE" value="${build_date}"/>
         <filter token="BUILD_NUMBER" value="${build.number}"/>
@@ -238,9 +237,9 @@
     <!-- delete file="${build}/help/docbookx.dtd"/ -->
     <delete file="${build}/help/Manual.html"/>
     <delete>
-			<fileset dir="${build}/help">
-				<include name="*.xml"/>
-			</fileset>
+      <fileset dir="${build}/help">
+        <include name="*.xml"/>
+      </fileset>
     </delete>
     
     <copy overwrite="true" todir="${build}/help" file="${doc}/css/html-internal.css"/>
@@ -294,11 +293,11 @@
     <!-- copy overwrite="true" todir="${html-outdir}" file="${doc}/xml/docbookx.dtd"/ -->
     
     <copy overwrite="true" todir="${html-outdir}">
-			<fileset dir="${doc}/xml">
-				<include name="*.xml"/>
-			</fileset>
-			
-  		<filterset begintoken="@" endtoken="@">
+      <fileset dir="${doc}/xml">
+        <include name="*.xml"/>
+      </fileset>
+      
+      <filterset begintoken="@" endtoken="@">
         <filter token="BUILD_DATE" value="${build_date}"/>
         <filter token="BUILD_NUMBER" value="${build.number}"/>
         <filter token="IMAGE_DIR" value="${html-resource-dir}"/>
@@ -341,9 +340,9 @@
     <!-- delete file="${html-outdir}/docbookx.dtd"/ -->
     <delete file="${html-outdir}/Manual.html"/>
     <delete>
-			<fileset dir="${html-outdir}">
-				<include name="*.xml"/>
-			</fileset>
+      <fileset dir="${html-outdir}">
+        <include name="*.xml"/>
+      </fileset>
     </delete>
     
     <delete file="${html-outdir}/Manual.xml"/>
@@ -365,7 +364,6 @@
       </fileset>
     </jar>
     
-    <copy file="${scriptsrc}/history.new" tofile="${distdir}/history.txt"/>
   </target>
 
   <target name="cleanup">
@@ -376,7 +374,7 @@
 
   <target  name="dev-release" depends="set-dev-build, clean, copy-history, prepare, compile, build-help, make-jar, clean-history"/>
   
-  <target name="make-dev-jar" depends="set-dev-build, clean, copy-history, prepare, compile-dbg, make-jar"/>
+  <target name="make-dev-jar" depends="set-dev-build, clean, copy-history, prepare, compile, make-jar"/>
   <target name="dji" depends="prepare,compile-dbg,make-jar"/>
   
   <target name="make-src-zip">
@@ -392,11 +390,12 @@
         <exclude name="**/*.dfPackage"/>
         <exclude name="**/tags"/>
         <exclude name="help/*.*"/>
+        <exclude name="**/TestTrigger.java"/>
         <exclude name="**/*.tws"/>
       </zipfileset>
       
       <zipfileset dir="${scriptsrc}" prefix="scripts">
-        <exclude name="**/.nbattrs"/>
+        <exclude name="**/.nb*"/>
         <exclude name="**/.new"/>
       </zipfileset>
       
@@ -441,7 +440,9 @@
     
     <copy file="${doc}/pdf/SQLWorkbench-Manual.pdf" overwrite="true" todir="${root}/release"/>
     <copy file="${distdir}/JWorkbench.exe" overwrite="true" todir="${root}/release"/>
-    <copy todir="${root}/release">
+    
+    <delete dir="${root}/release/manual"/>
+    <copy todir="${root}/release/manual">
         <fileset dir="${html-outdir}"/>
     </copy>
     <delete file="${packagezip}"/>
@@ -459,9 +460,9 @@
     </zip>
     
     <delete>
-    	<fileset dir="${root}/release">
-    		<include name="WorkbenchSrc*.zip"/>
-    	</fileset>
+      <fileset dir="${root}/release">
+        <include name="WorkbenchSrc*.zip"/>
+      </fileset>
     </delete>
 
     <zip zipfile="${root}/release/WorkbenchSrc-Build${build.number}.zip">
