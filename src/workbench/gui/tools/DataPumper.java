@@ -36,6 +36,7 @@ import workbench.db.DataCopier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.DataImporter;
+import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.EditWindow;
@@ -72,6 +73,7 @@ public class DataPumper
 	private DataCopier copier;
 	private StringBuffer copyLog;
 	private EditorPanel sqlEditor;
+	private MainWindow mainWindow;
 	boolean allowCreateTable = "true".equals(WbManager.getSettings().getProperty("workbench.datapumper.allowcreate", "false"));
 
 	/** Creates new form DataPumper */
@@ -762,8 +764,9 @@ public class DataPumper
   private javax.swing.JPanel wherePanel;
   // End of variables declaration//GEN-END:variables
 
-	public void showWindow(JFrame aParent)
+	public void showWindow(MainWindow aParent)
 	{
+		this.mainWindow = aParent;
 		this.window  = new JFrame(ResourceMgr.getString("TxtWindowTitleDataPumper"))
 		{
 			public void hide()
@@ -830,6 +833,7 @@ public class DataPumper
 	private void disconnectSource()
 	{
 		if (this.sourceConnection == null) return;
+		
 		try
 		{
 			String label = ResourceMgr.getString("MsgDisconnecting");
@@ -1194,6 +1198,8 @@ public class DataPumper
 			s = id.getTableExpression();
 		result.append("\n     -" + WbCopy.PARAM_TARGETTABLE + "=");
 		result.append(s);
+		
+		/*
 		if (id.isNewTable())
 		{
 			result.append("\n     -" + WbCopy.PARAM_CREATETARGET + "=true");
@@ -1202,6 +1208,7 @@ public class DataPumper
 				result.append("\n     -" + WbCopy.PARAM_DROPTARGET + "=true");
 			}
 		}
+		*/
 		
 		ColumnMapper.MappingDefinition colMapping = this.columnMapper.getMapping();
 		if (colMapping == null) return;
@@ -1428,13 +1435,14 @@ public class DataPumper
 		this.copyRunning = false;
 		if (this.copier.isSuccess())
 		{
+			String copied = this.copier.getAffectedRow() + " " + ResourceMgr.getString("MsgCopyNumRows");
 			if (this.copier.hasWarnings())
 			{
-				this.statusLabel.setText(ResourceMgr.getString("MsgCopyFinishedWithWarning"));
+				this.statusLabel.setText(ResourceMgr.getString("MsgCopyFinishedWithWarning") + " (" + copied + ")");
 			}
 			else
 			{
-				this.statusLabel.setText(ResourceMgr.getString("MsgCopyFinishedWithSuccess"));
+				this.statusLabel.setText(ResourceMgr.getString("MsgCopyFinishedWithSuccess") + " (" + copied + ")");
 			}
 		}
 		else
@@ -1471,14 +1479,19 @@ public class DataPumper
 		String errmsg = this.copier.getErrorMessage();
 		if (errmsg != null) log.append(errmsg);
 		
-		String[] msg = this.copier.getWarnings();
+		
+		String s = this.copier.getMessages();
+		log.append(s);
+		if (s != null) log.append("\n");
+
+		String[] msg = this.copier.getImportWarnings();
 		int count = msg.length;
 		for (int i=0; i < count; i++)
 		{
 			log.append(msg[i]);
 			log.append("\n");
 		}
-		msg = this.copier.getErrors();
+		msg = this.copier.getImportErrors();
 		count = msg.length;
 		if (count > 0) log.append("\n");
 		for (int i=0; i < count; i++)

@@ -336,12 +336,13 @@ public class ConnectionMgr
 	 */
 	public void disconnectAll()
 	{
-		Iterator itr = this.activeConnections.keySet().iterator();
+		Iterator itr = this.activeConnections.values().iterator();
 		while (itr.hasNext())
 		{
-			String key = (String)itr.next();
-			this.disconnect(key);
+			WbConnection con = (WbConnection)itr.next();
+			this.disconnect(con);
 		}
+		this.activeConnections.clear();
 	}
 
 	/**
@@ -349,17 +350,24 @@ public class ConnectionMgr
 	 */
 	public void disconnect(String anId)
 	{
+		WbConnection con = (WbConnection)this.activeConnections.get(anId);
+		this.disconnect(con);
+		this.activeConnections.remove(anId);
+	}
+
+	/**
+	 *	Disconnect the given connection
+	 */
+	private void disconnect(WbConnection conn)
+	{
 		try
 		{
-			WbConnection con = (WbConnection)this.activeConnections.get(anId);
-
-			if (con != null)
+			if (conn != null && this.canDisconnectHsql(conn))
 			{
-				LogMgr.logInfo("ConnectionMgr.disconnect()", "Disconnecting: " + con.getProfile().getName() + " with ID=" + anId);
-				this.disconnectLocalHsql(con);
-				con.close();
+				LogMgr.logInfo("ConnectionMgr.disconnect()", "Disconnecting: " + conn.getProfile().getName() + " with ID=" + conn.getId());
+				this.disconnectLocalHsql(conn);
+				conn.close();
 			}
-			this.activeConnections.put(anId, null);
 		}
 		catch (Exception e)
 		{
@@ -392,6 +400,40 @@ public class ConnectionMgr
 
 	}
 
+	/**
+	 *	Check if the given (HSQLDB) connection can be safely closed.
+	 *	A in-memory HSQLDB engine allows the creation of several connections
+	 *	to the same database (from within the same JVM) 
+	 *	But the connections may not be closed except for the last one, because
+	 *	they seem to "share" something in the driver and closing one
+	 *	will close the others as well.
+	 */
+	private boolean canDisconnectHsql(WbConnection aConn)
+	{
+		if (!aConn.getMetadata().isHsql()) return true;
+		
+		// a HSQLDB server connection can always be closed!
+		if (aConn.getUrl().startsWith("jdbc:hsqldb:hsql:")) return true;
+		
+		String url = aConn.getUrl();
+		String id = aConn.getId();
+		
+		Iterator itr = this.activeConnections.values().iterator();
+		while (itr.hasNext())
+		{
+			WbConnection c = (WbConnection)itr.next();
+			if (c == null) continue;
+			
+			if (c.getId().equals(id)) continue;
+			
+			String u = c.getUrl();
+			// we found one connection with the same URL --> do not connect this one!
+			if (u.equals(url)) return false;
+		}
+		
+		return true;
+	}
+	
 	public void writeSettings()
 	{
 		this.saveProfiles();

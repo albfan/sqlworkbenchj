@@ -413,12 +413,12 @@ public class DataCopier
 		return this.errors.toString();
 	}
 	
-	public String[] getErrors()
+	public String[] getImportErrors()
 	{
 		return this.importer.getErrors();
 	}
 
-	public String[] getWarnings()
+	public String[] getImportWarnings()
 	{
 		return this.importer.getWarnings();
 	}

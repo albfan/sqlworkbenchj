@@ -219,7 +219,7 @@ public class WbConnection
 		WbManager.getInstance().getConnectionMgr().disconnect(this.id);
 	}
 	
-	public void close()
+	void close()
 	{
 		try
 		{

@@ -383,7 +383,7 @@ public class DbMetadata
 			result.append(";\nCREATE VIEW " + aView);
 		}
 
-		// currently HSQLDB does not support a column list in the view definition
+		// currently (as of version 1.7.2) HSQLDB does not support a column list in the view definition
 		if (!isHsql())
 		{
 			result.append("\n(\n");
@@ -400,10 +400,10 @@ public class DbMetadata
 					result.append(" ,");
 				}
 				result.append(colName);
-				result.append("\n");
+				result.append("\n)");
 			}
 		}
-		result.append(")\nAS \n");
+		result.append("\nAS \n");
 		result.append(source);
 		result.append("\n");
 		return result.toString();

@@ -39,8 +39,8 @@ public class WbCopy
 	public static final String PARAM_COMMITEVERY = "commitevery";
 	public static final String PARAM_CONTINUE = "continue";
 	public static final String PARAM_DELETETARGET = "deletetarget";
-	public static final String PARAM_DROPTARGET = "droptarget";
-	public static final String PARAM_CREATETARGET = "createtarget";
+	//public static final String PARAM_DROPTARGET = "droptarget";
+	//public static final String PARAM_CREATETARGET = "createtarget";
 	
 	private ArgumentParser cmdLine;
 	private DataCopier copier;
@@ -58,8 +58,8 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_COMMITEVERY);
 		cmdLine.addArgument(PARAM_CONTINUE);
 		cmdLine.addArgument(PARAM_DELETETARGET);
-		cmdLine.addArgument(PARAM_DROPTARGET);
-		cmdLine.addArgument(PARAM_CREATETARGET);
+		//cmdLine.addArgument(PARAM_DROPTARGET);
+		//cmdLine.addArgument(PARAM_CREATETARGET);
 	}
 
 	public String getVerb() { return VERB; }
@@ -178,16 +178,15 @@ public class WbCopy
 		}
 		boolean delete = "true".equalsIgnoreCase(cmdLine.getValue(PARAM_DELETETARGET));
 		boolean cont = "true".equalsIgnoreCase(cmdLine.getValue(PARAM_CONTINUE));
-		boolean createTable = "true".equals(cmdLine.getValue(PARAM_CREATETARGET));
-		boolean dropTable = "true".equals(cmdLine.getValue(PARAM_DROPTARGET));
+		//boolean createTable = "true".equals(cmdLine.getValue(PARAM_CREATETARGET));
+		//boolean dropTable = "true".equals(cmdLine.getValue(PARAM_DROPTARGET));
 
 		this.copier = new DataCopier();
 		copier.setRowActionMonitor(this.rowMonitor);
 		copier.setContinueOnError(cont);
 		copier.setCommitEvery(commit);
 
-		// no need to delete the data in the target table if it's beeing dropped anyway...
-		copier.setDeleteTarget(delete && !dropTable);
+		copier.setDeleteTarget(delete);
 
 		TableIdentifier targetId = new TableIdentifier(targettable);
 
@@ -199,17 +198,17 @@ public class WbCopy
 				String where = cmdLine.getValue(PARAM_SOURCEWHERE);
 				String columns = cmdLine.getValue(PARAM_COLUMNS);
 				boolean containsMapping = (columns.indexOf('/') > -1);
+				
 				if (containsMapping)
 				{
 					Map mapping = this.parseMapping();
-					copier.copyFromTable(sourceCon, targetCon, srcTable, targetId, mapping, where, createTable, dropTable);
+					copier.copyFromTable(sourceCon, targetCon, srcTable, targetId, mapping, where, false, false);
 				}
 				else
 				{
 					ColumnIdentifier[] cols = this.parseColumns();
 					copier.copyToNewTable(sourceCon, targetCon, srcTable, targetId, cols, where);
 				}
-
 			}
 			else
 			{
@@ -219,10 +218,12 @@ public class WbCopy
 
 			copier.start();
 			result.setSuccess();
-			String s = copier.getMessages();
+			
+			String s = copier.getErrorMessage();
 			if (s != null) result.addMessage(s);
-			this.addWarnings(result);
-			this.addErrors(result);
+			this.addErrorsFromImporter(result);
+			result.addMessage(copier.getMessages());
+			this.addWarningsFromImporter(result);
 		}
 		catch (SQLException e)
 		{
@@ -301,18 +302,18 @@ public class WbCopy
 	}
 
 
-	private void addWarnings(StatementRunnerResult result)
+	private void addWarningsFromImporter(StatementRunnerResult result)
 	{
-		String[] err = copier.getWarnings();
+		String[] err = copier.getImportWarnings();
 		for (int i=0; i < err.length; i++)
 		{
 			result.addMessage(err[i]);
 		}
 	}
 
-	private void addErrors(StatementRunnerResult result)
+	private void addErrorsFromImporter(StatementRunnerResult result)
 	{
-		String[] warn = copier.getErrors();
+		String[] warn = copier.getImportErrors();
 		for (int i=0; i < warn.length; i++)
 		{
 			result.addMessage(warn[i]);
