@@ -17,6 +17,7 @@ import workbench.WbManager;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import workbench.interfaces.ClipboardSupport;
+import workbench.interfaces.TextContainer;
 import workbench.gui.menu.TextPopup;
 import javax.swing.Action;
 import javax.swing.JTextPane;
@@ -33,7 +34,7 @@ import workbench.gui.editor.Token;
  */
 public class EditorPanel 
 	extends JEditTextArea
-	implements ClipboardSupport
+	implements ClipboardSupport, TextContainer
 {
 	private TextPopup popup = new TextPopup(this);
 	/** Creates new EditorPanel */

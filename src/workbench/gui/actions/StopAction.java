@@ -30,7 +30,7 @@ public class StopAction extends WbAction
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_STOP));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
 		this.putValue(WbAction.ADD_TO_TOOLBAR, "true");
-		this.putValue(WbAction.MENU_SEPARATOR, "true");
+		this.setCreateMenuSeparator(true);
 	}
 
 	public void actionPerformed(ActionEvent e)

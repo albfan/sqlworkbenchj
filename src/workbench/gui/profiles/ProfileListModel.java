@@ -21,13 +21,16 @@ import workbench.db.ConnectionProfile;
 class ProfileListModel implements ListModel
 {
 
-	ArrayList profiles;
+	private ArrayList profiles;
 	/** Creates a new instance of ProfileListModel */
 	public ProfileListModel(Map aProfileList)
 	{
-		this.profiles = new ArrayList(aProfileList.size());
-		this.profiles.addAll(aProfileList.values());
-		Collections.sort(this.profiles, ConnectionProfile.getNameComparator());
+		this.profiles = new ArrayList();
+		if (aProfileList != null)
+		{
+			this.profiles.addAll(aProfileList.values());
+			Collections.sort(this.profiles, ConnectionProfile.getNameComparator());
+		}
 	}
 
 	/** Adds a listener to the list that's notified each time a change

@@ -30,8 +30,8 @@ public class NextStatementAction extends WbAction
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtNextStatement"));
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_DOWN));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
-		this.putValue(WbAction.MENU_SEPARATOR, "true");
-		this.putValue(WbAction.TBAR_SEPARATOR, "true");
+		this.setCreateMenuSeparator(true);
+		this.setCreateToolbarSeparator(true);
 		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK));
 	}
 

@@ -16,6 +16,7 @@ import workbench.gui.actions.ClearAction;
 import workbench.gui.actions.CopyAction;
 import workbench.gui.actions.PasteAction;
 import workbench.gui.actions.SelectAllAction;
+import workbench.gui.actions.WbAction;
 
 /**
  *
@@ -54,9 +55,9 @@ public class TextPopup extends JPopupMenu
 	}
 	
 
-	public Action getCopyAction() { return this.copy; }
-	public Action getCutAction() { return this.cut; }
-	public Action getPasteAction() { return this.paste; }
-	public Action getSelectAllAction() { return this.selectAll; }
-	public Action getClearAction() { return this.clear; }
+	public WbAction getCopyAction() { return this.copy; }
+	public WbAction getCutAction() { return this.cut; }
+	public WbAction getPasteAction() { return this.paste; }
+	public WbAction getSelectAllAction() { return this.selectAll; }
+	public WbAction getClearAction() { return this.clear; }
 }

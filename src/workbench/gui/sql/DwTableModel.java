@@ -28,9 +28,6 @@ public class DwTableModel
 {
 	//private ResultSet dbData;
 	private DataStore dataCache;
-	private int rowCount = -1;
-	private int colCount = -1;
-	private ResultSetMetaData metaData = null;
 	public static final String NOT_AVAILABLE = "(n/a)";
 	private WbConnection dbConnection;
 	private boolean isUpdateable = false;
@@ -44,17 +41,8 @@ public class DwTableModel
 	public DwTableModel(ResultSet aResultSet, WbConnection aConnection) 
 		throws SQLException, WbException
 	{
-		this.rowCount = -1;
-		this.colCount = -1;
-		this.metaData = null;
-		
 		this.dataCache = new DataStore(aResultSet);
-		//this.dataCache.populate(aResultSet);
-		this.metaData = aResultSet.getMetaData();
-		this.rowCount = this.dataCache.getRowCount();
 		this.dbConnection = aConnection;
-		this.colCount = this.dataCache.getColumnCount();
-		this.checkUpdateable();
 	}
 		
 	/**
@@ -91,34 +79,6 @@ public class DwTableModel
 		}
 	}	
 
-	private void checkUpdateable()
-	{
-		try
-		{
-			String tableName = this.metaData.getTableName(1);
-			if (tableName == null || tableName.length() == 0) 
-			{
-				this.isUpdateable = false;
-				return;
-			}
-			for (int i=2; i <= this.colCount; i++)
-			{
-				String s = this.metaData.getTableName(i);
-				if (s == null || !s.equalsIgnoreCase(tableName)) 
-				{
-					this.isUpdateable = false;
-					return;
-				}
-			}
-			this.isUpdateable = true;
-			//this.dataCache.setTableName(tableName);
-		}
-		catch (SQLException e)
-		{
-			this.isUpdateable = false;
-		}
-	}
-
 	public int findColumn(String aColname)
 	{
 		int index = -1;
@@ -132,7 +92,7 @@ public class DwTableModel
 		}
 		return index;
 	}
-	public boolean isUpdateable() { return this.isUpdateable; }
+	public boolean isUpdateable() { return this.dataCache.isUpdateable(); }
 	
 	public void setValueAt(Object aValue, int row, int column)
 	{
@@ -156,7 +116,7 @@ public class DwTableModel
 	 */
 	public int getColumnCount()
 	{
-		return this.colCount;
+		return this.dataCache.getColumnCount();
 	}
 
 	public int getColumnWidth(int aColumn)
@@ -206,22 +166,9 @@ public class DwTableModel
 	 */
 	public int getRowCount() 
 	{ 
-		return this.rowCount;
+		return this.dataCache.getRowCount();
 	}
 
-	public String getColumnClassName(int aColumn)
-	{
-		try
-		{
-			return this.metaData.getColumnClassName(aColumn + 1);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			return NOT_AVAILABLE;
-		}
-	}
-	
 	public Class getColumnClass(int aColumn)
 	{
 		int type = this.getColumnType(aColumn);
@@ -265,7 +212,7 @@ public class DwTableModel
 	{
 		try
 		{
-			String name = this.metaData.getColumnName(aColumn + 1);
+			String name = this.dataCache.getColumnName(aColumn);
 			if (name == null || name.length() == 0)
 			{
 				name = "Col" + (aColumn + 1);
@@ -280,12 +227,13 @@ public class DwTableModel
 	
 	public StringBuffer getRowData(int aRow)
 	{
-		StringBuffer result = new StringBuffer(this.colCount * 20);
-		for (int c=0; c < this.colCount; c++)
+		int count = this.getColumnCount();
+		StringBuffer result = new StringBuffer(count * 20);
+		for (int c=0; c < count; c++)
 		{
 			Object value = this.getValueAt(aRow, c);
 			if (value != null) result.append(value.toString());
-			if (c < colCount) result.append('\t');
+			if (c < count) result.append('\t');
 		}
 		return result;
 	}

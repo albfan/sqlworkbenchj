@@ -303,12 +303,22 @@ public class Settings
 
 	public int getEditorTabWidth()
 	{
-		return StringUtil.getIntValue(this.props.getProperty("editortabwidth", "4"));
+		return StringUtil.getIntValue(this.props.getProperty("workbench.editor.tabwidth", "4"));
 	}
 
 	public void setEditorTabWidth(int aWidth)
 	{
-		this.props.setProperty("editor.tabwidth", Integer.toString(aWidth));
+		this.props.setProperty("workbench.editor.tabwidth", Integer.toString(aWidth));
+	}
+	
+	public int getLastSqlTab()
+	{
+		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.lasttab", "0"));
+	}
+
+	public void setLastSqlTab(int anIndex)
+	{
+		this.props.setProperty("workbench.sql.lasttab", Integer.toString(anIndex));
 	}
 
 	public String getLastConnection()

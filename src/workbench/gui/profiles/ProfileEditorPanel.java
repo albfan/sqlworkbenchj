@@ -8,6 +8,7 @@ package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.event.MouseListener;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,8 @@ public class ProfileEditorPanel
 	private JToolBar toolbar;
 	private int lastIndex = -1;
 	private ConnectionEditorPanel connectionEditor;
-
+	private MouseListener listMouseListener;
+	
 	/** Creates new form ProfileEditor */
 	public ProfileEditorPanel()
 	{
@@ -104,6 +106,14 @@ public class ProfileEditorPanel
 			}
 		});
 		
+		jList1.addMouseListener(new java.awt.event.MouseAdapter()
+		{
+			public void mouseClicked(java.awt.event.MouseEvent evt)
+			{
+				jList1MouseClicked(evt);
+			}
+		});
+		
 		jScrollPane1.setViewportView(jList1);
 		
 		listPanel.add(jScrollPane1, java.awt.BorderLayout.CENTER);
@@ -114,6 +124,19 @@ public class ProfileEditorPanel
 		
 	}//GEN-END:initComponents
 
+	private void jList1MouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_jList1MouseClicked
+	{//GEN-HEADEREND:event_jList1MouseClicked
+		if (this.listMouseListener != null)
+		{
+			this.listMouseListener.mouseClicked(evt);
+		}
+	}//GEN-LAST:event_jList1MouseClicked
+
+	public void addListMouseListener(MouseListener aListener)
+	{
+		this.listMouseListener = aListener;
+	}
+	
 	private void jList1ValueChanged(javax.swing.event.ListSelectionEvent evt)//GEN-FIRST:event_jList1ValueChanged
 	{//GEN-HEADEREND:event_jList1ValueChanged
 		if (this.connectionEditor == null) return;
@@ -132,7 +155,7 @@ public class ProfileEditorPanel
 
 	public ConnectionProfile getSelectedProfile()
 	{
-		this.updateUI();
+		this.repaint();
 		this.connectionEditor.updateProfile();
 		ConnectionProfile prof = (ConnectionProfile)jList1.getSelectedValue();
 		return prof;
@@ -191,8 +214,16 @@ public class ProfileEditorPanel
 	public void newItem() throws WbException
 	{
 		ConnectionProfile current = (ConnectionProfile)this.jList1.getSelectedValue();
-		ConnectionProfile cp = current.createCopy();
-		cp.setName(ResourceMgr.getString("EmptyProfileName"));
+		ConnectionProfile cp;
+		if (current != null)
+		{
+			cp = current.createCopy();
+		}
+		else
+		{
+			cp = new ConnectionProfile();
+		}
+		cp.setName(ResourceMgr.getString("TxtEmptyProfileName"));
 		this.model.addProfile(cp);
 		this.selectProfile(cp.getName());
 		this.jList1.updateUI();

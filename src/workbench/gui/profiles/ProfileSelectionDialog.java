@@ -10,11 +10,17 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import javax.swing.ActionMap;
+import javax.swing.ComponentInputMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import workbench.WbManager;
 import workbench.db.ConnectionProfile;
+import workbench.gui.actions.EscAction;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -33,12 +39,21 @@ public class ProfileSelectionDialog
 	private ConnectionProfile selectedProfile;
 	private int selectedIndex = -1;
 	private boolean cancelled = false;
+	private String escActionCommand;
 
 	/** Creates new form ProfileSelectionDialog */
 	public ProfileSelectionDialog(java.awt.Frame parent, boolean modal)
 	{
 		super(parent, modal);
 		initComponents();
+		InputMap im = new ComponentInputMap(this.profiles);
+		ActionMap am = new ActionMap();
+		EscAction esc = new EscAction(this);
+		escActionCommand = esc.getActionName();
+		im.put(esc.getAccelerator(), esc.getActionName());
+		am.put(esc.getActionName(), esc);
+		this.profiles.setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
+		this.profiles.setActionMap(am);
 	}
 
   private void initComponents()
@@ -69,7 +84,14 @@ public class ProfileSelectionDialog
 		// dummy panel to create small top border...
 		JPanel dummy = new JPanel();
 		dummy.setMinimumSize(new Dimension(1, 1));
-
+		profiles.addListMouseListener(new java.awt.event.MouseAdapter()
+		{
+			public void mouseClicked(java.awt.event.MouseEvent evt)
+			{
+				profileListClicked(evt);
+			}
+		});		
+		
 		BorderLayout bl = new BorderLayout();
 		this.getContentPane().setLayout(bl);
 		getContentPane().add(dummy, BorderLayout.NORTH);
@@ -105,22 +127,38 @@ public class ProfileSelectionDialog
 		s.storeWindowSize(this);
 	}
 
+	public void selectProfile()
+	{
+		this.selectedProfile = this.profiles.getSelectedProfile();
+		this.cancelled = false;
+		this.setVisible(false);
+	}
 
+	public void profileListClicked(MouseEvent evt)
+	{
+		if (evt.getClickCount() == 2)
+		{
+			this.selectProfile();
+		}
+	}
 	/** Invoked when an action occurs.
 	 */
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.okButton)
 		{
-			this.selectedProfile = this.profiles.getSelectedProfile();
-			this.cancelled = false;
-			this.setVisible(false);
+			this.selectProfile();
 		}
-		else if (e.getSource() == this.cancelButton)
+		else if (e.getSource() == this.cancelButton || 
+						e.getActionCommand().equals(escActionCommand))
 		{
 			this.selectedProfile = null;
 			this.cancelled = true;
 			this.setVisible(false);
+		}
+		else
+		{
+			System.out.println("command=" + e.getActionCommand());
 		}
 		this.saveSize();
 	}

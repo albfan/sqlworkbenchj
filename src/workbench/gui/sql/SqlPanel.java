@@ -10,20 +10,28 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import workbench.WbManager;
 import workbench.db.WbConnection;
 
 import workbench.gui.actions.*;
+import workbench.gui.actions.CreateSnippetAction;
+import workbench.gui.components.WbToolbar;
 import workbench.gui.menu.TextPopup;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 
 
@@ -67,6 +75,7 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 	private FindAgainAction findAgainAction = null;
 	private static final int DIVIDER_SIZE = 5;
 	private String lastSearchCriteria;
+	private WbToolbar toolbar;
 	
 	/** Creates new SqlPanel */
 	public SqlPanel(int anId)
@@ -87,12 +96,48 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 		int loc = WbManager.getSettings().getSqlDividerLocation();
 		if (loc <= 0) loc = 200;
 		this.contentPanel.setDividerLocation(loc);
-	
+		
 		this.initActions();
+		this.initToolbar();
 		this.setupActionMap();
 		this.initListener();
 	}
 
+	public WbToolbar getToolbar()
+	{
+		return this.toolbar;
+	}
+	
+	private void initToolbar()
+	{
+		this.toolbar = new WbToolbar();
+		Border b = new CompoundBorder(new EmptyBorder(1,0,1,0), new EtchedBorder());
+		toolbar.setBorder(b);
+		toolbar.setBorderPainted(true);
+		for (int i=0; i < this.toolbarActions.size(); i++)
+		{
+			Action a = (Action)toolbarActions.get(i);
+			boolean toolbarSep = "true".equals((String)a.getValue(WbAction.TBAR_SEPARATOR));
+			{
+				if (toolbarSep)
+				{
+					toolbar.addSeparator();
+				}
+				toolbar.add(a);
+			}
+		}
+		toolbar.addSeparator();
+	}
+
+	public void updateUI()
+	{
+		super.updateUI();
+		if (this.toolbar != null)
+		{
+			this.toolbar.updateUI();
+		}
+	}
+	
 	private void initActions()
 	{
 		ExecuteSql e = new ExecuteSql();
@@ -110,8 +155,8 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 		this.actions.add(pop.getCopyAction());
 		this.actions.add(pop.getPasteAction());
 		
-		Action a = pop.getClearAction();
-		a.putValue(WbAction.MENU_SEPARATOR, "true");
+		WbAction a = pop.getClearAction();
+		a.setCreateMenuSeparator(true);
 		this.actions.add(a);
 		this.actions.add(pop.getSelectAllAction());
 
@@ -119,7 +164,7 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 		this.actions.add(this.updateAction);
 	
 		SaveDataAsAction save = new SaveDataAsAction(this.result);
-		save.putValue(WbAction.MENU_SEPARATOR, "true");
+		save.setCreateMenuSeparator(true);
 
 		DataToClipboardAction clp = new DataToClipboardAction(this.result);
 		this.actions.add(save);
@@ -153,13 +198,17 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 		
 		this.findAction = new FindAction(this);
 		this.findAction.setEnabled(false);
-		this.findAction.putValue(WbAction.TBAR_SEPARATOR, "true");
+		this.findAction.setCreateMenuSeparator(true);
 		this.findAgainAction = new FindAgainAction(this);
 		this.findAgainAction.setEnabled(false);
+
+		WbAction action = new CreateSnippetAction(this.editor);
+		action.setCreateMenuSeparator(true);
+		this.actions.add(action);
 		
 		this.toolbarActions.add(this.findAction);
 		this.toolbarActions.add(this.findAgainAction);
-		this.findAction.putValue(WbAction.MENU_SEPARATOR, "true");
+		this.findAction.setCreateMenuSeparator(true);
 		this.actions.add(this.findAction);
 		this.actions.add(this.findAgainAction);
 	}
@@ -517,6 +566,7 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener
 		}
 		
 	}
+
 
 	/**
 	 *	Display a message in the message area of the result display

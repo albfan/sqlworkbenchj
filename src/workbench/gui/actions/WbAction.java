@@ -5,6 +5,7 @@
  */
 package workbench.gui.actions;
 
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
@@ -32,6 +33,7 @@ public abstract class WbAction extends AbstractAction
 		String c = this.getClass().getName();
 		this.actionName = c.substring(c.lastIndexOf('.')  + 1);
     this.putValue(ACTION_COMMAND_KEY, this.actionName);
+		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("blank"));
 	}
 
 	public KeyStroke getAccelerator()
@@ -42,11 +44,35 @@ public abstract class WbAction extends AbstractAction
 	public JMenuItem getMenuItem()
 	{
 		JMenuItem item = new JMenuItem();
+		item.setMargin(new Insets(0,0,0,0));
 		item.setAction(this);
 		item.setAccelerator(this.getAccelerator());
 		return item;
 	}
 
+	public void setCreateToolbarSeparator(boolean aFlag)
+	{
+		if (aFlag)
+		{
+			this.putValue(WbAction.TBAR_SEPARATOR, "true");
+		}
+		else
+		{
+			putValue(WbAction.TBAR_SEPARATOR, "false");
+		}
+	}
+	public void setCreateMenuSeparator(boolean aFlag)
+	{
+		if (aFlag)
+		{
+			this.putValue(WbAction.MENU_SEPARATOR, "true");
+		}
+		else
+		{
+			putValue(WbAction.MENU_SEPARATOR, "false");
+		}
+	}
+	
 	public String getActionName()
 	{
 		return this.actionName;

@@ -27,6 +27,7 @@ public class FileConnectAction extends WbAction
 		this.window = aWindow;
 		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.MNU_TXT_CONNECT));
 		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_MASK));
+		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("Connect"));
 	}
 
 	public void actionPerformed(ActionEvent e)

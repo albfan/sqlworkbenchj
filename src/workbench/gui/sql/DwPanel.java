@@ -1,30 +1,24 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
-import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Toolkit;
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.Math;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.StringTokenizer;
+import javax.swing.CellEditor;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
@@ -34,11 +28,11 @@ import workbench.exception.ExceptionUtil;
 import workbench.exception.InvalidStatementException;
 import workbench.exception.WbException;
 import workbench.gui.components.WbTable;
-import workbench.gui.components.WbTableSorter;
 import workbench.gui.renderer.DateColumnRenderer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.SqlUtil;
+
 
 
 /**
@@ -72,9 +66,6 @@ public class DwPanel extends JPanel
 	public void setMaxColWidth(int aWidth) { this.maxWidth = aWidth; }
 	public int getMaxColWidth() { return this.maxWidth; }
 
-	//public int getPreferredColWidth() { return this.maxWidth; }
-	//public void setPreferredColWidth(int aWidth) { this.preferredWidth = aWidth; }
-	
 	/**
 	 *	Defines the connection for this DBPanel.
 	 *	If the statement is already defined this method
@@ -132,13 +123,7 @@ public class DwPanel extends JPanel
 		this.runStatement(this.sql, this.dbConnection);
 	}
 	/**
-	 *	Initialize the reader.
-	 *	This method is called whenever the SQL statement
-	 *	or the connection is set.
-	 *	If both properties are present, this method
-	 *	will send the statement to the database (via
-	 *	a DBReader) and construct a TableModel from
-	 *	the result set.
+	 *	Execute the given SQL statement.
 	 */
 	public void runStatement(String aSql, WbConnection aConnection)
 		throws SQLException, WbException
@@ -215,8 +200,11 @@ public class DwPanel extends JPanel
 				this.hasResultSet = false;
 				int count = 0;
 				count = this.prepStatement.getUpdateCount();
-				msg.append("\r\n");
-				msg.append(count + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
+				if (count >= 0)
+				{
+					msg.append("\r\n");
+					msg.append(count + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
+				}
 				this.setMessageDisplayModel(this.getEmptyTableModel());
 				this.lastMessage = msg.toString();
 			}
@@ -272,7 +260,15 @@ public class DwPanel extends JPanel
 		FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(f);
 		int charWidth = fm.stringWidth("n");
 		TableColumnModel colMod = this.infoTable.getColumnModel();
-		this.infoTable.setDefaultRenderer(java.util.Date.class, new DateColumnRenderer());
+		String format = WbManager.getSettings().getDefaultDateFormat();
+		CellEditor ce = this.infoTable.getDefaultEditor(Number.class);
+		if (ce == null)
+			System.out.println("No default CellEditor");
+		else
+			System.out.println("ce=" + ce.toString());
+		
+//		this.
+		this.infoTable.setDefaultRenderer(Date.class, new DateColumnRenderer(format));
 
 		List tbr = new ArrayList();
 		if (keepColumns != null)
@@ -317,7 +313,6 @@ public class DwPanel extends JPanel
 		this.infoTable.setBorder(null);
 		this.infoTable.setDoubleBuffered(true);
 		this.maxWidth = WbManager.getSettings().getMaxColumnWidth();
-		//this.preferredWidth = WbManager.getSettings().getPreferredColumnWidth();
 	}
 	
 	public void setStatusMessage(String aMsg)

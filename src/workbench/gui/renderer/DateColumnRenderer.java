@@ -24,14 +24,18 @@ public class DateColumnRenderer
 {
 	private SimpleDateFormat formatter;
 	private HashMap displayCache = new HashMap();
-
+	public static final String DEFAULT_FORMAT = "yyyy-MM-dd";
 	public DateColumnRenderer()
 	{
-		this("yyyy-MM-dd");
+		this(DEFAULT_FORMAT);
 	}
 	/** Creates a new instance of DateColumnRenderer */
 	public DateColumnRenderer(String aDateFormat)
 	{
+		if (aDateFormat == null)
+		{
+			aDateFormat = DEFAULT_FORMAT;
+		}
 		this.formatter = new SimpleDateFormat(aDateFormat);
 	}
 
@@ -56,30 +60,5 @@ public class DateColumnRenderer
 		}
 		super.setValue(newVal);
   }
-	/*
-	public Component getTableCellRendererComponent(
-			JTable aTable,
-			Object aValue,
-			boolean isSelected,
-			boolean hasFocus,
-			int aRow,
-			int aColumn)
-	{
-		JComponent jcomp = (JComponent)super.getTableCellRendererComponent(aTable, aValue, isSelected, hasFocus, aRow, aColumn);
-		if(isSelected)
-		{
-			jcomp.setBackground(aTable.getSelectionBackground());
-			jcomp.setForeground(aTable.getSelectionForeground());
-		}
-		else
-		{
-			jcomp.setBackground(Color.white);
-			jcomp.setForeground(Color.black);
-		}
-		jcomp.setOpaque(true);
-
-		return jcomp;
-	}
-	 */
 
 }

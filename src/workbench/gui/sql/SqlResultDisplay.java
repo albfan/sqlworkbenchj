@@ -7,7 +7,9 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
@@ -217,12 +219,15 @@ public class SqlResultDisplay extends JPanel implements Exporter
 
 	public void copyDataToClipboard()
 	{
+		Window parent = SwingUtilities.getWindowAncestor(this);
 		try
 		{
+			parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			String data = this.data.getTable().getDataString("\r");
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 			StringSelection sel = new StringSelection(data);
 			clp.setContents(sel, sel);
+			parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		}
 		catch (Exception e)
 		{

@@ -8,32 +8,32 @@ package workbench.interfaces;
 
 /**
  *
- * @author  thomas.kellerer@web.de
+ * @author  sql.workbench@freenet.de
  */
 public interface ClipboardSupport
 {
 	/**
-	 *	Copy the currently selected contents into the clipboard 
+	 *	Copy the currently selected contents into the clipboard
 	 */
 	void copy();
-	
-	/** 
+
+	/**
 	 *	Select the entire Text
 	 */
 	void selectAll();
-	
+
 	/**
-	 *	Delete the currently selected text without copying it 
+	 *	Delete the currently selected text without copying it
 	 *	into the system clipboard
 	 */
 	void clear();
-	
+
 	/**
 	 *	Delete the currently selected text and put it into
 	 *	the clipboard
 	 */
 	void cut();
-	
+
 	/**
 	 *	Paste the contents of the clipboard into
 	 *	the component

@@ -22,7 +22,7 @@ public class LogMgr
 	private static final int EXC_TYPE_MSG = 1;
 	private static final int EXC_TYPE_BRIEF = 2;
 	private static final int EXC_TYPE_COMPLETE = 3;
-	private static int exceptionType = EXC_TYPE_BRIEF;
+	private static int exceptionType = EXC_TYPE_COMPLETE;
 	
 	private static SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 	

@@ -30,7 +30,7 @@ public class UpdateDatabaseAction extends WbAction
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtUpdateDatabase"));
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_SAVE));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
-		this.putValue(WbAction.TBAR_SEPARATOR, "true");
+		this.setCreateToolbarSeparator(true);
 		this.setEnabled(false);
 	}
 

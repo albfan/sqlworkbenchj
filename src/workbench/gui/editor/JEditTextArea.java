@@ -50,7 +50,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.3 2002-07-17 21:04:29 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.4 2002-07-19 15:37:21 thomas Exp $
  */
 public class JEditTextArea extends JComponent
 {
@@ -90,9 +90,14 @@ public class JEditTextArea extends JComponent
 
 		// Initialize the GUI
 		setLayout(new ScrollLayout());
+		//setLayout(new BorderLayout());
+		//JScrollPane scroll = new JScrollPane(painter);
 		add(CENTER,painter);
+		//this.add(scroll, BorderLayout.CENTER);
 		add(RIGHT,vertical = new JScrollBar(JScrollBar.VERTICAL));
 		add(BOTTOM,horizontal = new JScrollBar(JScrollBar.HORIZONTAL));
+		//vertical = scroll.getVerticalScrollBar();
+		//horizontal = scroll.getHorizontalScrollBar();
 
 		// Add some event listeners
 		vertical.addAdjustmentListener(new AdjustHandler());

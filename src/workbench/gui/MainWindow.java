@@ -40,26 +40,25 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 
-
 /**
  *
- * @author  thomas
+ * @author  sql.workbench@freenet.de
  * @version
  */
 public class MainWindow extends JFrame implements ActionListener, WindowListener, ChangeListener
 {
 	private String windowId;
 
-	private JToolBar currentToolbar;
+	//private JToolBar currentToolbar;
 	private JMenuBar currentMenu;
 	private FileConnectAction connectAction;
 	
 	//private WindowStatusBar statusBar;
 	private ProfileSelectionDialog profileDialog;
 	private JTabbedPane sqlTab = new JTabbedPane();
+	private WbToolbar currentToolbar;
 	private List sqlPanels = new ArrayList(10);
 	private List panelMenus = new ArrayList(10);
-	private List panelToolbars = new ArrayList(10);
 	private int tabCount = 0;
 
 	/** Creates new MainWindow */
@@ -80,33 +79,33 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			this.sqlPanels.add(sql);
 			this.sqlTab.addTab(ResourceMgr.getString("LabelTabStatement") + " " + Integer.toString(i+1), sql);
 		}
-		long start, end;
-		start = System.currentTimeMillis();
 		this.initMenu();
-		end = System.currentTimeMillis();
-		//System.out.println("initMenu()=" + (end - start));
 
 		this.getContentPane().add(this.sqlTab, BorderLayout.CENTER);
-		this.getContentPane().add(this.currentToolbar, BorderLayout.NORTH);
 		this.setTitle(ResourceMgr.getString("MsgNotConnected"));
-		this.sqlTab.addChangeListener(this);
 		this.sqlTab.setBorder(null);
 		this.restorePosition();
+		this.setIconImage(ResourceMgr.getPicture("workbench").getImage());
+
+		int lastIndex = WbManager.getSettings().getLastSqlTab();
+		if (lastIndex < 0 || lastIndex > this.sqlTab.getTabCount())
+		{
+			lastIndex = 0;
+		}
+		this.sqlTab.setSelectedIndex(lastIndex);
+		this.tabSelected(lastIndex);
+		
+		// now that we have setup the SplitPane we can add the
+		// change listener
+		this.sqlTab.addChangeListener(this);
 	}
 
 	private void initMenu()
 	{
 		for (int tab=0; tab < this.tabCount; tab ++)
 		{
-			JToolBar toolbar = new WbToolbar();
 			JMenuBar menuBar = new JMenuBar();
 			menuBar.setBorderPainted(false);
-			//menuBar.setBorder(new DividerBorder(DividerBorder.BOTTOM));
-
-			//toolbar.setBorder(new DividerBorder(DividerBorder.BOTTOM));
-			Border b = new CompoundBorder(new EmptyBorder(1,0,1,0), new EtchedBorder());
-			toolbar.setBorder(b);
-			toolbar.setBorderPainted(true);
 
 			// Create the file menu for all tabs
 			JMenu menu = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_FILE));
@@ -126,7 +125,6 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			
 			// now create the menus for the current tab
 			List actions = sql.getActions();
-			List toolbarActions = sql.getToolbarActions();
 
 			HashMap menus = new HashMap(10);
 			for (int i=0; i < actions.size(); i++)
@@ -153,25 +151,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 				}
 				menu.add(action.getMenuItem());
 			}
-			for (int i=0; i < toolbarActions.size(); i++)
-			{
-				Action a = (Action)toolbarActions.get(i);
-				boolean toolbarSep = "true".equals((String)a.getValue(WbAction.TBAR_SEPARATOR));
-				{
-					if (toolbarSep)
-					{
-						toolbar.addSeparator();
-					}
-					toolbar.add(a);
-				}
-			}
-			toolbar.addSeparator();
 			menuBar.add(this.buildToolsMenu());
 			menuBar.add(this.buildHelpMenu());
 			this.panelMenus.add(menuBar);
-			this.panelToolbars.add(toolbar);
 		}
-		this.tabSelected(0);
 	}
 
 	private SqlPanel getCurrentSqlPanel()
@@ -186,7 +169,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		this.setJMenuBar(currentMenu);
 		Container content = this.getContentPane();
 		if (this.currentToolbar != null) content.remove(this.currentToolbar);
-		this.currentToolbar = (JToolBar)this.panelToolbars.get(anIndex);
+		this.currentToolbar = this.getCurrentSqlPanel().getToolbar();
 		content.add(this.currentToolbar, BorderLayout.NORTH);
 		this.doLayout();
 	}
@@ -208,6 +191,8 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 
 	public void saveSettings()
 	{
+		int index = this.sqlTab.getSelectedIndex();
+		WbManager.getSettings().setLastSqlTab(index);
 		for (int i=0; i < this.tabCount; i++)
 		{
 			SqlPanel sql = (SqlPanel)this.sqlPanels.get(i);
@@ -394,10 +379,6 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 				{
 					UIManager.setLookAndFeel(className);
 					SwingUtilities.updateComponentTreeUI(this);
-					for (int i=0; i < this.panelToolbars.size(); i++)
-					{
-						SwingUtilities.updateComponentTreeUI((JToolBar)this.panelToolbars.get(i));
-					}
 					WbManager.getSettings().setLookAndFeelClass(className);
 				}
 				catch (Exception ex)

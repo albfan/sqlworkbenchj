@@ -92,8 +92,15 @@ public class WbTable extends javax.swing.JTable
 	
 	public String getDataString(String aLineTerminator)
 	{
+		int colCount = this.sortModel.getColumnCount();
 		int count = this.sortModel.getRowCount();
 		StringBuffer result = new StringBuffer(count * 250);
+		for (int i=0; i < colCount; i++)
+		{
+			result.append(this.sortModel.getColumnName(i));
+			if (i < colCount - 1) result.append('\t');
+		}
+		result.append(aLineTerminator);
 		for (int i=0; i < count; i++)
 		{
 			int row = this.sortModel.getRealIndex(i);

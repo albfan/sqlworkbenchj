@@ -6,6 +6,19 @@
 
 package workbench.gui;
 
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.lang.Runtime;
+import javax.swing.ActionMap;
+import javax.swing.ComponentInputMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.border.LineBorder;
+import workbench.gui.actions.EscAction;
+import workbench.gui.components.UnderlineBorder;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -13,13 +26,24 @@ import workbench.resource.ResourceMgr;
  * @author  sql.workbench@freenet.de
  */
 public class WbAboutDialog extends javax.swing.JDialog
+	implements ActionListener
 {
+	private EscAction escAction;
 	
 	/** Creates new form WbAboutDialog */
 	public WbAboutDialog(java.awt.Frame parent, boolean modal)
 	{
 		super(parent, modal);
 		initComponents();
+		getRootPane().setDefaultButton(closeButton);
+		this.labelContact.setBorder(new UnderlineBorder(this.labelContact));
+		InputMap im = new ComponentInputMap(this.getRootPane());
+		ActionMap am = new ActionMap();
+		escAction = new EscAction(this);
+		im.put(escAction.getAccelerator(), escAction.getActionName());
+		am.put(escAction.getActionName(), escAction);
+		this.getRootPane().setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
+		this.getRootPane().setActionMap(am);
 	}
 	
 	/** This method is called from within the constructor to
@@ -71,12 +95,12 @@ public class WbAboutDialog extends javax.swing.JDialog
 		contentPanel.setLayout(new java.awt.GridBagLayout());
 		
 		logo.setFont(null);
-		logo.setIcon(ResourceMgr.getPicture("greenguy"));
+		logo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/workbench/resource/images/hitchguide.gif")));
 		logo.setBorder(new javax.swing.border.EtchedBorder());
 		logo.setIconTextGap(0);
-		logo.setMaximumSize(new java.awt.Dimension(129, 138));
-		logo.setMinimumSize(new java.awt.Dimension(129, 138));
-		logo.setPreferredSize(new java.awt.Dimension(129, 138));
+		logo.setMaximumSize(new java.awt.Dimension(172, 128));
+		logo.setMinimumSize(new java.awt.Dimension(172, 128));
+		logo.setPreferredSize(new java.awt.Dimension(172, 128));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 0;
@@ -92,7 +116,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
 		gridBagConstraints.weightx = 1.0;
-		gridBagConstraints.insets = new java.awt.Insets(6, 3, 0, 5);
+		gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 8);
 		contentPanel.add(labelTitel, gridBagConstraints);
 		
 		labelDesc.setFont(null);
@@ -102,7 +126,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.gridy = 1;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 3, 0, 5);
+		gridBagConstraints.insets = new java.awt.Insets(2, 8, 0, 8);
 		contentPanel.add(labelDesc, gridBagConstraints);
 		
 		labelVersion.setFont(null);
@@ -112,24 +136,44 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.gridy = 2;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 3, 0, 5);
+		gridBagConstraints.insets = new java.awt.Insets(2, 8, 0, 8);
 		contentPanel.add(labelVersion, gridBagConstraints);
 		
 		labelContact.setFont(null);
 		labelContact.setForeground(java.awt.Color.blue);
 		labelContact.setText(ResourceMgr.getString("TxtContact"));
+		labelContact.addMouseListener(new java.awt.event.MouseAdapter()
+		{
+			public void mouseClicked(java.awt.event.MouseEvent evt)
+			{
+				labelContactMouseClicked(evt);
+			}
+		});
+		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 3;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		gridBagConstraints.insets = new java.awt.Insets(12, 3, 0, 5);
+		gridBagConstraints.insets = new java.awt.Insets(12, 8, 0, 8);
 		contentPanel.add(labelContact, gridBagConstraints);
 		
 		getContentPane().add(contentPanel, java.awt.BorderLayout.CENTER);
 		
 		pack();
 	}//GEN-END:initComponents
+
+	private void labelContactMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_labelContactMouseClicked
+	{//GEN-HEADEREND:event_labelContactMouseClicked
+		try
+		{
+			//Runtime.getRuntime().exec("mailto:sql.workbench@freenet.de");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}//GEN-LAST:event_labelContactMouseClicked
 
 	private void closeButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_closeButtonActionPerformed
 	{//GEN-HEADEREND:event_closeButtonActionPerformed
@@ -151,6 +195,16 @@ public class WbAboutDialog extends javax.swing.JDialog
 		new WbAboutDialog(new javax.swing.JFrame(), true).show();
 	}
 	
+	/** Invoked when an action occurs.
+	 *
+	 */
+	public void actionPerformed(ActionEvent e)
+	{
+		if (e.getActionCommand().equals(escAction.getActionName()))
+		{
+			closeDialog(null);
+		}
+	}
 	
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JLabel labelTitel;

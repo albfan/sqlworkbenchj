@@ -317,7 +317,10 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 	{
 		this.drivers = aDriverList;
 		if (aDriverList != null)
+		{
 			this.cbDrivers.setModel(new DefaultComboBoxModel(aDriverList.toArray()));
+			this.cbDrivers.setSelectedItem(null);
+		}
 	}
 
 	public void updateProfile()
@@ -340,8 +343,9 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		// dirty trick to update the list display
 		// if I update the parent, the divider size gets reset :-(
 		JSplitPane parent = (JSplitPane)this.getParent();
-		JComponent list = (JComponent)parent.getLeftComponent();
-		list.updateUI();
+		parent.repaint();
+		//JComponent list = (JComponent)parent.getLeftComponent();
+		//list.updateUI();
 	}
 
 	public ConnectionProfile getProfile()
@@ -378,9 +382,13 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		}
 		else
 		{
-			DbDriver drv = new DbDriver(aProfile.getDriverclass());
-			this.cbDrivers.addItem(drv);
-			this.cbDrivers.setSelectedIndex(this.cbDrivers.getItemCount() - 1);
+			String cls = aProfile.getDriverclass();
+			if (cls != null && cls.length() > 0)
+			{
+				DbDriver drv = new DbDriver();
+				this.cbDrivers.addItem(drv);
+				this.cbDrivers.setSelectedIndex(this.cbDrivers.getItemCount() - 1);
+			}
 		}
 		this.init = false;
 	}
