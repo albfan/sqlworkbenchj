@@ -830,7 +830,7 @@ public class DataStore
 		if (!this.canSaveAsSqlInsert()) return null;
 		RowData data = this.getRow(aRow);
 		DmlStatement stmt = this.createInsertStatement(data, true, aLineTerminator); 
-		StringBuffer sql = new StringBuffer(stmt.getExecutableStatement(aConn));
+		StringBuffer sql = new StringBuffer(stmt.getExecutableStatement(aConn.getSqlConnection()));
 		sql.append(";");
 		return sql;
 	}
@@ -851,7 +851,7 @@ public class DataStore
 		{
 			RowData data = this.getRow(row);
 			DmlStatement stmt = this.createInsertStatement(data, true, aLineTerminator); 
-			String sql = stmt.getExecutableStatement(this.originalConnection);
+			String sql = stmt.getExecutableStatement(this.originalConnection.getSqlConnection());
 			script.append(sql);
 			script.append(";");
 			script.append(aLineTerminator);

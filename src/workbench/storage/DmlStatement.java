@@ -12,10 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
-import workbench.db.DbDateFormatter;
-import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
-import workbench.exception.InvalidStatementException;
 import workbench.util.SqlUtil;
 
 /**
@@ -33,7 +30,7 @@ public class DmlStatement
 	 *	that has no parameters.
 	 */
 	public DmlStatement(String aStatement)
-		throws InvalidStatementException
+		throws IllegalArgumentException
 	{
 		this(aStatement, null);
 	}
@@ -46,7 +43,7 @@ public class DmlStatement
 	 *	using a prepared statement.
 	 */
 	public DmlStatement(String aStatement, List aValueList)
-		throws InvalidStatementException
+		throws IllegalArgumentException
 	{
 		if (aStatement == null) throw new NullPointerException();
 
@@ -55,13 +52,13 @@ public class DmlStatement
 		       "update".equalsIgnoreCase(verb) ||
 					 "delete".equalsIgnoreCase(verb)))
 		{
-			throw new InvalidStatementException("Only UPDATE, DELETE, INSERT allowed");
+			throw new IllegalArgumentException("Only UPDATE, DELETE, INSERT allowed");
 		}
 
 		int count = this.countParameters(aStatement);
 		if (count > 0 && aValueList != null && count != aValueList.size())
 		{
-			throw new InvalidStatementException("Number of parameter tokens does not match number of parameters passed.");
+			throw new IllegalArgumentException("Number of parameter tokens does not match number of parameters passed.");
 		}
 
 		this.sql = aStatement;
@@ -121,22 +118,6 @@ public class DmlStatement
 		return rows;
 	}
 
-	/** Execute the DML statement without a prepared statement.
-	 * The statement created by {@link #getExecutableStatement(WbConnection) }
-	 * will be executed
-	 * @param aConnection
-	 * @throws SQLException
-	 * @return number of rows affected
-	 */
-	private int executeDirect(WbConnection aConnection)
-		throws SQLException
-	{
-		Statement stmt = aConnection.createStatement();
-		int rows = stmt.executeUpdate(this.getExecutableStatement(aConnection));
-		stmt.close();
-		return rows;
-	}
-
 	/**
 	 *	Returns true if a prepared statement is used
 	 *	to send the data to the database.
@@ -145,23 +126,40 @@ public class DmlStatement
 	{
 		return this.usePrepared;
 	}
+	
 	public String getExecutableStatement()
 	{
-		return this.getExecutableStatement(null);
+		return this.getExecutableStatement((String)null);
 	}
-
+	
+	public String getExecutableStatement(Connection aConn)
+	{
+		String dbproduct = null;
+		if (aConn != null) 
+		{
+			try
+			{
+				dbproduct = aConn.getMetaData().getDatabaseProductName();
+			}
+			catch (Exception e)
+			{
+				dbproduct = null;
+			}
+		}
+		return this.getExecutableStatement(dbproduct);	
+	}
 	/**
 	 *	Returns a "real" SQL Statement which can be executed
 	 *	directly. The statement contains the parameter values
 	 *	as literals. No placeholders are used.
 	 *	This statement is executed after setUsePreparedStatement(false) is called
 	 */
-	public String getExecutableStatement(WbConnection aConn)
+	public String getExecutableStatement(String dbproduct)
 	{
 		if (this.values.size() > 0)
 		{
-			DbMetadata meta = null;
-			if (aConn != null) meta = aConn.getMetadata();
+			DbDateFormatter dateFormat = SqlSyntaxFormatter.getDateLiteralFormatter(dbproduct);
+			
 			StringBuffer result = new StringBuffer(this.sql.length() + this.values.size() * 10);
 			boolean inQuotes = false;
 			int parmIndex = 0;
@@ -173,15 +171,7 @@ public class DmlStatement
 				if (c == '?' && !inQuotes && parmIndex < this.values.size())
 				{
 					Object v = this.values.get(parmIndex);
-					String literal;
-					if (meta != null) 
-					{
-						literal = meta.getLiteral(v);
-					}
-					else 
-					{
-						literal = DbMetadata.getDefaultLiteral(v);
-					}
+					String literal = SqlSyntaxFormatter.getDefaultLiteral(v, dateFormat);
 					result.append(literal);
 					parmIndex ++;
 				}

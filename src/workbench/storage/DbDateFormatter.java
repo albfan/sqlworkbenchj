@@ -4,7 +4,7 @@
  * Created on August 14, 2002, 3:36 PM
  */
 
-package workbench.db;
+package workbench.storage;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -89,10 +89,11 @@ public class DbDateFormatter
 		format.setFormat("yyyy-MM-dd HH:mm:ss");
 		format.setFunctionCall(null);
 
+		
 		m.put("Microsoft SQL Server", format);
-		WbPersistence.writeObject(m, "./src/workbench/db/DateLiteralFormats.xml");
+		WbPersistence.writeObject(m, "../src/workbench/storage/DateLiteralFormats.xml");
 
-		m.put(DbMetadata.GENERAL_SQL, format);
+		m.put(SqlSyntaxFormatter.GENERAL_SQL, format);
 
 	}
 }
