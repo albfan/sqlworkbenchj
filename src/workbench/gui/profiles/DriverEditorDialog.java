@@ -6,24 +6,48 @@
 
 package workbench.gui.profiles;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import javax.swing.*;
+import javax.swing.border.EtchedBorder;
 import workbench.WbManager;
 import workbench.exception.WbException;
+import workbench.gui.actions.EscAction;
+import workbench.gui.components.WbButton;
 import workbench.resource.ResourceMgr;
 
-public class DriverEditorDialog extends javax.swing.JDialog
+public class DriverEditorDialog extends JDialog
+	implements ActionListener
 {
-	private javax.swing.JPanel dummyPanel;
-	private javax.swing.JPanel buttonPanel;
-	private javax.swing.JButton okButton;
+	private JPanel dummyPanel;
+	private JPanel buttonPanel;
+	private JButton okButton;
 	private DriverlistEditorPanel driverListPanel;
-	private javax.swing.JButton cancelButton;
+	private JButton cancelButton;
   private boolean cancelled = true;
-  
+	private EscAction escAction;
+	
 	/** Creates new form DriverEditorDialog */
-	public DriverEditorDialog(java.awt.Frame parent, boolean modal)
+	public DriverEditorDialog(Frame parent, boolean modal)
 	{
 		super(parent, modal);
 		initComponents();
+		
+		InputMap im = new ComponentInputMap(this.getRootPane());
+		ActionMap am = new ActionMap();
+		escAction = new EscAction(this);
+		im.put(escAction.getAccelerator(), escAction.getActionName());
+		am.put(escAction.getActionName(), escAction);
+
+		this.getRootPane().setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
+		this.getRootPane().setActionMap(am);
+		
 		if (!WbManager.getSettings().restoreWindowSize(this))
 		{
 			this.setSize(300,300);
@@ -34,68 +58,62 @@ public class DriverEditorDialog extends javax.swing.JDialog
 	private void initComponents()
 	{
 		driverListPanel = new workbench.gui.profiles.DriverlistEditorPanel();
-		buttonPanel = new javax.swing.JPanel();
-		okButton = new javax.swing.JButton();
-		cancelButton = new javax.swing.JButton();
-		dummyPanel = new javax.swing.JPanel();
+		buttonPanel = new JPanel();
+		okButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_OK));
+		cancelButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));
+		dummyPanel = new JPanel();
 
 		setTitle(ResourceMgr.getString("TxtDriverEditorWindowTitle"));
 		setModal(true);
 		setName("DriverEditorDialog");
-		addWindowListener(new java.awt.event.WindowAdapter()
+		addWindowListener(new WindowAdapter()
 		{
-			public void windowClosing(java.awt.event.WindowEvent evt)
+			public void windowClosing(WindowEvent evt)
 			{
 				closeDialog(evt);
 			}
 		});
 
 
-		driverListPanel.setBorder(new javax.swing.border.EtchedBorder());
-		getContentPane().add(driverListPanel, java.awt.BorderLayout.CENTER);
+		driverListPanel.setBorder(new EtchedBorder());
+		getContentPane().add(driverListPanel, BorderLayout.CENTER);
 
-		buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
 		okButton.setFont(null);
-		okButton.setMnemonic('O');
-		okButton.setText(ResourceMgr.getString(ResourceMgr.TXT_OK));
-		okButton.addActionListener(new java.awt.event.ActionListener()
-		{
-			public void actionPerformed(java.awt.event.ActionEvent evt)
-			{
-				okButtonActionPerformed(evt);
-			}
-		});
-
+		okButton.addActionListener(this);
 		buttonPanel.add(okButton);
 
-		cancelButton.setText(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));
-		cancelButton.addActionListener(new java.awt.event.ActionListener()
-		{
-			public void actionPerformed(java.awt.event.ActionEvent evt)
-			{
-				cancelButtonActionPerformed(evt);
-			}
-		});
-
+		cancelButton.addActionListener(this);
 		buttonPanel.add(cancelButton);
 
-		getContentPane().add(buttonPanel, java.awt.BorderLayout.SOUTH);
+		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
-		dummyPanel.setMaximumSize(new java.awt.Dimension(2, 2));
-		dummyPanel.setMinimumSize(new java.awt.Dimension(1, 1));
-		dummyPanel.setPreferredSize(new java.awt.Dimension(2, 2));
-		getContentPane().add(dummyPanel, java.awt.BorderLayout.NORTH);
+		dummyPanel.setMaximumSize(new Dimension(2, 2));
+		dummyPanel.setMinimumSize(new Dimension(1, 1));
+		dummyPanel.setPreferredSize(new Dimension(2, 2));
+		getContentPane().add(dummyPanel, BorderLayout.NORTH);
 
 	}
 
-	private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt)
+	public void actionPerformed(ActionEvent e)
+	{
+		if (e.getSource() == okButton)
+		{
+			okButtonActionPerformed(e);
+		}
+		else if (e.getSource() == cancelButton || e.getActionCommand().equals(escAction.getActionName()))
+		{
+			cancelButtonActionPerformed(e);
+		}
+	}
+	private void cancelButtonActionPerformed(ActionEvent evt)
 	{
     this.cancelled = true;
 		this.closeDialog();
 	}
 
-	private void okButtonActionPerformed(java.awt.event.ActionEvent evt)
+	private void okButtonActionPerformed(ActionEvent evt)
 	{
 		try
 		{
@@ -112,7 +130,7 @@ public class DriverEditorDialog extends javax.swing.JDialog
   public boolean isCancelled() { return this.cancelled; }
   
 	/** Closes the dialog */
-	private void closeDialog(java.awt.event.WindowEvent evt)
+	private void closeDialog(WindowEvent evt)
 	{
 		this.closeDialog();
 	}
@@ -128,6 +146,6 @@ public class DriverEditorDialog extends javax.swing.JDialog
 	 */
 	public static void main(String args[])
 	{
-		new DriverEditorDialog(new javax.swing.JFrame(), true).show();
+		new DriverEditorDialog(new JFrame(), true).show();
 	}
 }

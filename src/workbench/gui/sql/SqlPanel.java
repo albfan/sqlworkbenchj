@@ -57,7 +57,9 @@ public class SqlPanel
 	implements Runnable, TableModelListener, FontChangedListener, ActionListener,
 						MainPanel, Spooler, TextFileContainer
 {
-	private boolean selected;
+	private boolean runSelectedCommand;
+	private boolean runCurrentCommand;
+	
 	EditorPanel editor;
 	private DwPanel data;
 	private JTextArea log;
@@ -79,6 +81,7 @@ public class SqlPanel
 	private PrevStatementAction prevStmtAction;
 	private StopAction stopAction;
 	private ExecuteAllAction executeAll;
+	private ExecuteCurrentAction executeCurrent;
 	private UpdateDatabaseAction updateAction;
 	private ExecuteSelAction executeSelected;
 	private StartEditAction startEditAction;
@@ -348,6 +351,9 @@ public class SqlPanel
 		ExecuteSelectedSql se = new ExecuteSelectedSql();
 		this.executeSelected = new ExecuteSelAction(se);
 
+		ExecuteCurrentSql c = new ExecuteCurrentSql();
+		this.executeCurrent = new ExecuteCurrentAction(c);
+		
 		MakeLowerCaseAction makeLower = new MakeLowerCaseAction(this.editor);
 		MakeUpperCaseAction makeUpper = new MakeUpperCaseAction(this.editor);
 
@@ -436,6 +442,8 @@ public class SqlPanel
 
 		this.actions.add(this.executeAll);
 		this.actions.add(this.executeSelected);
+		this.actions.add(this.executeCurrent);
+		
 		this.spoolData = new SpoolDataAction(this);
 		this.actions.add(this.spoolData);
 
@@ -954,7 +962,6 @@ public class SqlPanel
 		//	});
 	}
 
-
 	public void runSql()
 	{
 		this.setCancelState(true);
@@ -965,7 +972,7 @@ public class SqlPanel
 		this.startEditAction.setSwitchedOn(false);
 		String sql;
 
-		if (selected)
+		if (runSelectedCommand)
 		{
 			sql = this.editor.getSelectedStatement();
 		}
@@ -975,7 +982,16 @@ public class SqlPanel
 		}
 
 		this.storeInHistory(sql);
-		this.displayResult(sql);
+		
+		if (runCurrentCommand)
+		{
+			this.displayResult(sql, this.editor.getCaretPosition());
+		}
+		else
+		{
+			this.displayResult(sql, -1);
+		}
+		
 		this.setBusy(false);
 
 		this.clearStatusMessage();
@@ -1039,7 +1055,7 @@ public class SqlPanel
 		});
 	}
 
-	private void displayResult(String aSqlScript)
+	private void displayResult(String aSqlScript, int currentCursorPos)
 	{
 		try
 		{
@@ -1051,7 +1067,16 @@ public class SqlPanel
 				delimit = WbManager.getSettings().getAlternateDelimiter();
 			}
 
-			List sqls = SqlUtil.getCommands(aSqlScript, delimit);
+			List sqls = new ArrayList();
+			int currentCommand = SqlUtil.parseCommands(aSqlScript, delimit, currentCursorPos, sqls);
+
+			if (currentCursorPos > -1 && currentCommand > -1)
+			{
+				String s = (String)sqls.get(currentCommand);
+				sqls = new ArrayList();
+				sqls.add(s);
+			}
+			
 			String msg = ResourceMgr.getString("TxtScriptStatementFinished");
 			int count = sqls.size();
 			msg = StringUtil.replace(msg, "%total%", Integer.toString(count));
@@ -1278,13 +1303,32 @@ public class SqlPanel
 
 	private synchronized boolean isBusy() { return this.threadBusy; }
 
+	public class ExecuteCurrentSql implements ActionListener
+	{
+		public void actionPerformed(ActionEvent actionEvent)
+		{
+			if (!isBusy())
+			{
+				runSelectedCommand = false;
+				runCurrentCommand = true;
+				resumeThread();
+			}
+			else
+			{
+				Toolkit.getDefaultToolkit().beep();
+				LogMgr.logWarning("SqlExecutionThread", "actionPerformed called while thread is busy!");
+			}
+		}
+	}
+
 	public class ExecuteSql implements ActionListener
 	{
 		public void actionPerformed(ActionEvent actionEvent)
 		{
 			if (!isBusy())
 			{
-				selected = false;
+				runSelectedCommand = false;
+				runCurrentCommand = false;
 				resumeThread();
 			}
 			else
@@ -1301,7 +1345,8 @@ public class SqlPanel
 		{
 			if (!isBusy())
 			{
-				selected = true;
+				runSelectedCommand = true;
+				runCurrentCommand = false;
 				resumeThread();
 			}
 			else

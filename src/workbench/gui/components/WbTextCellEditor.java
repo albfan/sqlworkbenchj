@@ -7,11 +7,15 @@
 package workbench.gui.components;
 
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.EditWindow;
+import workbench.resource.ResourceMgr;
 
 /**
  *
@@ -37,6 +41,7 @@ public class WbTextCellEditor
 		this.textField = aTextField;
 		this.textField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.textField.addMouseListener(this);
+		this.textField.addMouseListener(new TextComponentMouseListener());
 	}
 	
 	public void setFont(Font aFont)
@@ -70,5 +75,14 @@ public class WbTextCellEditor
 
 	private void openEditWindow()
 	{
+		Frame owner = (Frame)SwingUtilities.getWindowAncestor(this.textField);
+		String title = ResourceMgr.getString("TxtEditWindowTitle");
+		EditWindow w = new EditWindow(owner, title, this.textField.getText());
+		w.show();
+		if (!w.isCancelled())
+		{
+			this.textField.setText(w.getText());
+		}
+		w.dispose();
 	}
 }

@@ -29,6 +29,7 @@ import javax.swing.JPanel;
 import workbench.WbManager;
 import workbench.db.ConnectionProfile;
 import workbench.gui.actions.EscAction;
+import workbench.gui.components.WbButton;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -54,14 +55,16 @@ public class ProfileSelectionDialog extends JDialog implements ActionListener, W
 	{
 		super(parent, modal);
 		initComponents();
-		InputMap im = new ComponentInputMap(this.profiles);
+		
+		InputMap im = new ComponentInputMap(this.getRootPane());
 		ActionMap am = new ActionMap();
 		EscAction esc = new EscAction(this);
 		escActionCommand = esc.getActionName();
 		im.put(esc.getAccelerator(), esc.getActionName());
 		am.put(esc.getActionName(), esc);
-		this.profiles.setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
-		this.profiles.setActionMap(am);
+		this.getRootPane().setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
+		this.getRootPane().setActionMap(am);
+		
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
@@ -91,17 +94,15 @@ public class ProfileSelectionDialog extends JDialog implements ActionListener, W
   {
 		profiles = new ProfileEditorPanel();
     buttonPanel = new JPanel();
-    okButton = new JButton();
-    cancelButton = new JButton();
+    okButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_OK));
+    cancelButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));
 
 		addWindowListener(this);
     buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
-    okButton.setText(ResourceMgr.getString(ResourceMgr.TXT_OK));
     buttonPanel.add(okButton);
 		okButton.addActionListener(this);
 
-    cancelButton.setText(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));
     buttonPanel.add(cancelButton);
 		cancelButton.addActionListener(this);
 
@@ -192,10 +193,6 @@ public class ProfileSelectionDialog extends JDialog implements ActionListener, W
 		{
 			this.selectedProfile = null;
 			this.closeDialog();
-		}
-		else
-		{
-			LogMgr.logWarning("ProfileSelectionDialog.actionPerformed()", "Unexpected command received=" + e.getActionCommand());
 		}
 		this.saveSize();
 	}

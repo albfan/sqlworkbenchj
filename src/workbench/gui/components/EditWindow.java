@@ -19,6 +19,7 @@ import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.components.WbButton;
 import workbench.gui.sql.EditorPanel;
 import workbench.resource.ResourceMgr;
 
@@ -33,8 +34,8 @@ public class EditWindow
 {
 	
 	private EditorPanel editor;
-	private JButton okButton = new JButton(ResourceMgr.getString("LabelOK"));
-	private JButton cancelButton = new JButton(ResourceMgr.getString("LabelCancel"));
+	private JButton okButton = new WbButton(ResourceMgr.getString("LabelOK"));
+	private JButton cancelButton = new WbButton(ResourceMgr.getString("LabelCancel"));
 	private boolean isCancelled = true;
 	
 	public EditWindow(Frame owner, String title, String text)
@@ -67,14 +68,6 @@ public class EditWindow
 		im.put(escAction.getAccelerator(), escAction.getActionName());
 		am.put(escAction.getActionName(), escAction);
 		
-		/*
-		WbAction okAction = new WbAction(this);
-		okAction.setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
-		//this.getRootPane().setDefaultButton(okButton);
-
-		im.put(okAction.getAccelerator(), "edit-ok");
-		am.put("edit-ok", okAction);
-		*/
 		this.getRootPane().setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
 		this.getRootPane().setActionMap(am);
 		
@@ -89,13 +82,9 @@ public class EditWindow
 		{
 			this.isCancelled = false;
 		}
-		else if (e.getSource() instanceof WbAction)
+		else if ("edit-ok".equals(e.getActionCommand()))
 		{
-			WbAction a = (WbAction)e.getSource();
-			if ("edit-ok".equals(a.getActionName()))
-			{
-				this.isCancelled = false;
-			}
+			this.isCancelled = false;
 		}
 		this.hide();
 	}

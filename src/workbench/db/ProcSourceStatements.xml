@@ -55,5 +55,16 @@
     </void> 
    </object> 
   </void> 
+  <void method="put"> 
+   <string>PostgreSQL</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>SELECT prosrc FROM pg_proc</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>proname</string> 
+    </void> 
+   </object> 
+  </void> 
  </object> 
 </java> 

@@ -604,12 +604,48 @@ public class TableListPanel
 		}
 	}
 
+	private String extendViewSource(String aSource, String aName, DataStore viewDefinition)
+	{
+		if (aSource == null) return "";
+		if (aSource.length() == 0) return "";
+		
+		StringBuffer result = new StringBuffer(aSource.length() + 100);
+
+		if (this.dbConnection.getMetadata().isOracle())
+		{
+			result.append("CREATE OR REPLACE VIEW " + aName);
+		}
+		else
+		{
+			result.append("DROP VIEW " + aName + ";\r\n");
+			result.append("CREATE VIEW " + aName);
+		}
+		result.append("\r\n(\r\n");
+		int rows = viewDefinition.getRowCount();
+		for (int i=0; i < rows; i++)
+		{
+			String colName = viewDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+			if (i == 0)
+			{
+				result.append("  ");
+			}
+			else
+			{
+				result.append(" ,");
+			}
+			result.append(colName);
+			result.append("\r\n");
+		}
+		result.append(") AS \r\n");
+		result.append(aSource);
+		return result.toString();
+	}
 	private void retrieveTableDefinition()
 		throws SQLException, WbException
 	{
 		DbMetadata meta = this.dbConnection.getMetadata();
-		DataStore ds = meta.getTableDefinition(this.selectedCatalog, this.selectedSchema, this.selectedTableName, this.selectedObjectType, false);
-		DataStoreTableModel model = new DataStoreTableModel(ds);
+		DataStore def = meta.getTableDefinition(this.selectedCatalog, this.selectedSchema, this.selectedTableName, this.selectedObjectType, false);
+		DataStoreTableModel model = new DataStoreTableModel(def);
 		tableDefinition.setModel(model, true);
 		tableDefinition.adjustColumns();
 		TableColumnModel colmod = tableDefinition.getColumnModel();
@@ -627,7 +663,7 @@ public class TableListPanel
 		if (this.selectedObjectType.indexOf("view") > -1)
 		{
 			String viewSource = meta.getViewSource(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
-			tableSource.setText(viewSource);
+			tableSource.setText(this.extendViewSource(viewSource, this.selectedTableName, def));
 			tableSource.setCaretPosition(0);
 		}
 		else if ("synonym".equals(this.selectedObjectType))

@@ -37,6 +37,8 @@ public class ConnectionProfile
 	private boolean storePassword = true;
 	private boolean seperateConnection = false;
 
+	private boolean ignoreDropErrors = true;
+	
 	static
 	{
 		WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
@@ -342,4 +344,22 @@ public class ConnectionProfile
 		};
 	}
 
+	/** Getter for property ignoreDropErrors.
+	 * @return Value of property ignoreDropErrors.
+	 *
+	 */
+	public boolean getIgnoreDropErrors()
+	{
+		return ignoreDropErrors;
+	}
+	
+	/** Setter for property ignoreDropErrors.
+	 * @param ignoreDropErrors New value of property ignoreDropErrors.
+	 *
+	 */
+	public void setIgnoreDropErrors(boolean ignoreDropErrors)
+	{
+		this.ignoreDropErrors = ignoreDropErrors;
+	}
+	
 }

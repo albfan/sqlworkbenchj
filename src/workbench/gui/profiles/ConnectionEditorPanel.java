@@ -27,6 +27,7 @@ import workbench.gui.components.ComboStringPropertyEditor;
 import workbench.gui.components.PasswordPropertyEditor;
 import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.WbButton;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.resource.ResourceMgr;
@@ -105,8 +106,9 @@ public class ConnectionEditorPanel
 		tfProfileName = new StringPropertyEditor();
 		cbStorePassword = new BooleanPropertyEditor();
 		cbSeperateConnections = new BooleanPropertyEditor();
+		cbIgnoreDropErrors = new BooleanPropertyEditor();
 		jSeparator1 = new javax.swing.JSeparator();
-		manageDriversButton = new javax.swing.JButton();
+		manageDriversButton = new WbButton();
 		
 		setLayout(new java.awt.GridBagLayout());
 		
@@ -116,8 +118,8 @@ public class ConnectionEditorPanel
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 3;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
 		add(lblUsername, gridBagConstraints);
 		
 		tfUserName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
@@ -132,8 +134,8 @@ public class ConnectionEditorPanel
 		gridBagConstraints.gridy = 3;
 		gridBagConstraints.gridwidth = 2;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		add(tfUserName, gridBagConstraints);
 		
 		lblPwd.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_PASSWORD));
@@ -141,8 +143,8 @@ public class ConnectionEditorPanel
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 4;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
 		add(lblPwd, gridBagConstraints);
 		
 		jLabel1.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_DRIVER));
@@ -150,8 +152,8 @@ public class ConnectionEditorPanel
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 1;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
 		add(jLabel1, gridBagConstraints);
 		
 		cbDrivers.setEditable(true);
@@ -173,9 +175,9 @@ public class ConnectionEditorPanel
 		gridBagConstraints.gridy = 1;
 		gridBagConstraints.gridwidth = 2;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.weightx = 0.5;
+		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		add(cbDrivers, gridBagConstraints);
 		
 		jLabel2.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_URL));
@@ -183,8 +185,8 @@ public class ConnectionEditorPanel
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 2;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
 		add(jLabel2, gridBagConstraints);
 		
 		tfURL.setHorizontalAlignment(javax.swing.JTextField.LEFT);
@@ -198,8 +200,8 @@ public class ConnectionEditorPanel
 		gridBagConstraints.gridy = 2;
 		gridBagConstraints.gridwidth = 2;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		add(tfURL, gridBagConstraints);
 		
 		tfPwd.setName("password");
@@ -208,8 +210,8 @@ public class ConnectionEditorPanel
 		gridBagConstraints.gridy = 4;
 		gridBagConstraints.gridwidth = 2;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		add(tfPwd, gridBagConstraints);
 		
 		cbAutocommit.setText("Autocommit");
@@ -217,8 +219,8 @@ public class ConnectionEditorPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 5;
-		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		add(cbAutocommit, gridBagConstraints);
 		
 		tfProfileName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
@@ -229,9 +231,9 @@ public class ConnectionEditorPanel
 		gridBagConstraints.gridy = 0;
 		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.weightx = 1.0;
+		gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
 		add(tfProfileName, gridBagConstraints);
 		
 		cbStorePassword.setSelected(true);
@@ -241,8 +243,8 @@ public class ConnectionEditorPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 6;
-		gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
 		add(cbStorePassword, gridBagConstraints);
 		
 		cbSeperateConnections.setText(ResourceMgr.getString("LabelSeperateConnections"));
@@ -251,13 +253,24 @@ public class ConnectionEditorPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 7;
-		gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
 		add(cbSeperateConnections, gridBagConstraints);
+		
+		cbIgnoreDropErrors.setSelected(true);
+		cbIgnoreDropErrors.setText(ResourceMgr.getString("LabelIgnoreDropErrors"));
+		cbIgnoreDropErrors.setToolTipText(ResourceMgr.getDescription("LabelIgnoreDropErrors"));
+		cbIgnoreDropErrors.setName("ignoreDropErrors");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 8;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+		add(cbIgnoreDropErrors, gridBagConstraints);
 		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 8;
+		gridBagConstraints.gridy = 9;
 		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHWEST;
@@ -279,11 +292,11 @@ public class ConnectionEditorPanel
 		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 9;
+		gridBagConstraints.gridy = 10;
 		gridBagConstraints.gridwidth = 2;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(5, 5, 6, 0);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHEAST;
+		gridBagConstraints.insets = new java.awt.Insets(5, 5, 6, 0);
 		add(manageDriversButton, gridBagConstraints);
 		
 	}//GEN-END:initComponents
@@ -319,20 +332,21 @@ public class ConnectionEditorPanel
 	}//GEN-LAST:event_showDriverEditorDialog
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.JLabel jLabel1;
-	private javax.swing.JTextField tfURL;
-	private javax.swing.JLabel lblUsername;
-	private javax.swing.JTextField tfProfileName;
-	private javax.swing.JLabel jLabel2;
-	private javax.swing.JPasswordField tfPwd;
 	private javax.swing.JCheckBox cbAutocommit;
-	private javax.swing.JButton manageDriversButton;
+	private javax.swing.JComboBox cbDrivers;
+	private javax.swing.JCheckBox cbIgnoreDropErrors;
+	private javax.swing.JCheckBox cbSeperateConnections;
 	private javax.swing.JCheckBox cbStorePassword;
+	private javax.swing.JLabel jLabel1;
+	private javax.swing.JLabel jLabel2;
 	private javax.swing.JSeparator jSeparator1;
 	private javax.swing.JLabel lblPwd;
+	private javax.swing.JLabel lblUsername;
+	private javax.swing.JButton manageDriversButton;
+	private javax.swing.JTextField tfProfileName;
+	private javax.swing.JPasswordField tfPwd;
+	private javax.swing.JTextField tfURL;
 	private javax.swing.JTextField tfUserName;
-	private javax.swing.JCheckBox cbSeperateConnections;
-	private javax.swing.JComboBox cbDrivers;
 	// End of variables declaration//GEN-END:variables
 
 	public void setDrivers(List aDriverList)

@@ -69,5 +69,35 @@
     </void>
    </object>
   </void>
+  <void method="put"> 
+   <string>PostgreSQL</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>select trg.tgname,  
+       case trg.tgtype &amp; cast(2 as int2) 
+         when 0 then &apos;AFTER&apos; 
+         else &apos;BEFORE&apos; 
+       end as trigger_type, 
+       case trg.tgtype &amp; cast(28 as int2) 
+         when 16 then &apos;UPDATE&apos; 
+         when 8 then &apos;DELETE&apos; 
+         when 4 then &apos;INSERT&apos; 
+         when 20 then &apos;INSERT, UPDATE&apos; 
+         when 28 then &apos;INSERT, UPDATE, DELETE&apos; 
+         when 24 then &apos;UPDATE, DELETE&apos; 
+         when 12 then &apos;INSERT, DELETE&apos; 
+       end as trigger_event 
+from pg_trigger trg, pg_class tbl 
+where trg.tgrelid = tbl.oid 
+</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>tbl.relname</string> 
+    </void> 
+    <void property="orderBy"> 
+     <string>order by 1</string> 
+    </void> 
+   </object> 
+  </void> 
  </object>
 </java>

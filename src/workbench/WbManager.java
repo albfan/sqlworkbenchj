@@ -41,7 +41,7 @@ import workbench.util.WbNullCipher;
  */
 public class WbManager implements FontChangedListener
 {
-	private static WbManager wb = new WbManager();
+	private static WbManager wb;
 	private Settings settings;
 	private ConnectionMgr connMgr = new ConnectionMgr();
 	private ArrayList mainWindows = new ArrayList();
@@ -49,6 +49,13 @@ public class WbManager implements FontChangedListener
 	private boolean batchMode = false;
 	public static boolean trace = "true".equalsIgnoreCase(System.getProperty("workbench.startuptrace", "false"));
 
+	static
+	{
+		wb = new WbManager();
+		wb.connMgr = new ConnectionMgr();
+		wb.settings = new Settings();
+	}
+	
 	private WbManager()
 	{
 	}
@@ -430,7 +437,7 @@ public class WbManager implements FontChangedListener
 	public void init()
 	{
 		if (trace) System.out.println("WbManager.init() - start");
-		this.settings = new Settings();
+		//this.settings = new Settings();
 		if (!this.batchMode)
 		{
 			WbSplash splash = null;

@@ -21,7 +21,7 @@ import javax.swing.KeyStroke;
  * The default input handler. It maps sequences of keystrokes into actions
  * and inserts key typed events into the text area.
  * @author Slava Pestov
- * @version $Id: DefaultInputHandler.java,v 1.7 2003-02-26 21:41:59 thomas Exp $
+ * @version $Id: DefaultInputHandler.java,v 1.8 2003-03-29 01:06:06 thomas Exp $
  */
 public class DefaultInputHandler extends InputHandler
 {
@@ -76,7 +76,7 @@ public class DefaultInputHandler extends InputHandler
 		addKeyBinding("DOWN",NEXT_LINE);
 		addKeyBinding("S+DOWN",SELECT_NEXT_LINE);
 
-		addKeyBinding("C+ENTER",REPEAT);
+		//addKeyBinding("C+ENTER",REPEAT);
 		addKeyBinding("C+U", MAKE_UPPER_CASE);
 		addKeyBinding("C+L", MAKE_LOWER_CASE);
 		addKeyBinding("C+Z", UNDO);

@@ -22,6 +22,7 @@ public class GetMetaDataSql
 	private String objectName;
 	private String objectNameField;
 	private String orderBy;
+	
 	private boolean useUpperCase;
 	private boolean useLowerCase;
 	
@@ -436,6 +437,70 @@ public class GetMetaDataSql
 		this.argumentsNeedParanthesis = argumentsNeedParanthesis;
 	}
 
+	public static void createTriggerSourceStatements()
+	{
+		GetMetaDataSql pgTrgSource = new GetMetaDataSql();
+	}
+	
+	public static void createListTriggerStatements()
+	{
+		GetMetaDataSql listOraTrigs = new GetMetaDataSql();
+		listOraTrigs.setUseUpperCase(true);
+		listOraTrigs.setBaseSql("SELECT trigger_name, trigger_type, triggering_event as trigger_event FROM all_triggers");
+		listOraTrigs.setCatalogField(null);
+		listOraTrigs.setObjectNameField("table_name");
+		listOraTrigs.setSchemaField("owner");
+		listOraTrigs.setOrderBy("ORDER BY trigger_name");
+
+		GetMetaDataSql listPostgresTrigs = new GetMetaDataSql();
+		String sql="select trg.tgname,  \n" + 
+           "       case trg.tgtype & cast(2 as int2) \n" + 
+           "         when 0 then 'AFTER' \n" + 
+           "         else 'BEFORE' \n" + 
+           "       end as trigger_type, \n" + 
+           "       case trg.tgtype & cast(28 as int2) \n" + 
+           "         when 16 then 'UPDATE' \n" + 
+           "         when 8 then 'DELETE' \n" + 
+           "         when 4 then 'INSERT' \n" + 
+           "         when 20 then 'INSERT, UPDATE' \n" + 
+           "         when 28 then 'INSERT, UPDATE, DELETE' \n" + 
+           "         when 24 then 'UPDATE, DELETE' \n" + 
+           "         when 12 then 'INSERT, DELETE' \n" + 
+           "       end as trigger_event \n" + 
+           "from pg_trigger trg, pg_class tbl \n" + 
+           "where trg.tgrelid = tbl.oid \n";
+
+		listPostgresTrigs.setBaseSql(sql);
+		listPostgresTrigs.setObjectNameField("tbl.relname");
+		listPostgresTrigs.setOrderBy("trg.name");
+		
+		GetMetaDataSql listMsSqlTrigs = new GetMetaDataSql();
+		sql="	select tr.name as trigger_name, \n" + 
+           "	case 1 \n" + 
+           "	   when ObjectProperty( tr.id, 'ExecIsAfterTrigger') then 'AFTER' \n" + 
+           "	   else 'BEFORE' \n" + 
+           "	end  as trigger_type, \n" + 
+           "	case 1 \n" + 
+           "	   when ObjectProperty( tr.id, 'ExecIsUpdateTrigger') then 'UPDATE' \n" + 
+           "	   when ObjectProperty( tr.id, 'ExecIsDeleteTrigger') then 'DELETE' \n" + 
+           "     when ObjectProperty( tr.id, 'ExecIsInsertTrigger') then 'INSERT' \n" + 
+           "  end as trigger_event \n" + 
+           "	from sysobjects tr, sysobjects tab \n" + 
+           "	where tab.id = tr.parent_obj \n" + 
+           "	 and  tr.xtype = 'TR' \n";		
+		listMsSqlTrigs.setBaseSql(sql);
+		listMsSqlTrigs.setObjectNameField("tab.name");
+		listMsSqlTrigs.setOrderBy("trigger_name");
+		
+		HashMap trgStatements = new HashMap();
+		trgStatements.put("Oracle", listOraTrigs);
+		trgStatements.put("Oracle8", listOraTrigs);
+		trgStatements.put("PostgreSQL", listPostgresTrigs);
+		trgStatements.put("Microsoft SQL Server", listMsSqlTrigs);
+		
+		WbPersistence.writeObject(trgStatements, "ListTriggersStatements.xml");
+	}
+	
 	public static void createDefaultStatements()
 	{
 		System.out.println("Generating default statements...");
@@ -446,7 +511,6 @@ public class GetMetaDataSql
 		oracleProc.setCatalogField(null);
 		oracleProc.setSchemaField("owner");
 		oracleProc.setOrderBy("ORDER BY line");
-		
 		
 		GetMetaDataSql mssProc = new GetMetaDataSql();
 		mssProc.setBaseSql("exec sp_helptext");
@@ -461,18 +525,6 @@ public class GetMetaDataSql
 		procStatements.put("Microsoft SQL Server", mssProc);
 		WbPersistence.writeObject(procStatements, "ProcSourceStatements.xml");
 		
-		GetMetaDataSql listOraTrigs = new GetMetaDataSql();
-		listOraTrigs.setUseUpperCase(true);
-		listOraTrigs.setBaseSql("SELECT trigger_name, trigger_type, triggering_event as trigger_event FROM all_triggers");
-		listOraTrigs.setCatalogField(null);
-		listOraTrigs.setObjectNameField("table_name");
-		listOraTrigs.setSchemaField("owner");
-		listOraTrigs.setOrderBy("ORDER BY trigger_name");
-		
-		HashMap trgStatements = new HashMap();
-		trgStatements.put("Oracle", listOraTrigs);
-		WbPersistence.writeObject(trgStatements, "ListTriggersStatements.xml");
-
 		GetMetaDataSql oraTrigSrc = new GetMetaDataSql();
 		oraTrigSrc.setUseUpperCase(true);
 		oraTrigSrc.setBaseSql("SELECT 'CREATE OR REPLACE TRIGGER '|| description, trigger_body FROM all_triggers");
@@ -481,14 +533,15 @@ public class GetMetaDataSql
 		oraTrigSrc.setSchemaField("owner");
 		
 		HashMap trgSrcStatements = new HashMap();
-		trgStatements.put("Oracle", oraTrigSrc);
-		WbPersistence.writeObject(trgStatements, "TriggerSourceStatements.xml");
-		System.out.println("Done.");
+		trgSrcStatements.put("Oracle", oraTrigSrc);
+		WbPersistence.writeObject(trgSrcStatements, "TriggerSourceStatements.xml");
 	}
 
 	public static void main(String args[])
 	{
-		createDefaultStatements();
+		//createDefaultStatements();
+		createListTriggerStatements();
+		System.out.println("Done.");
 	}
 	
 }

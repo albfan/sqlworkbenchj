@@ -50,28 +50,44 @@ public class DdlCommand extends SqlCommand
 		try
 		{
 			this.currentStatement = aConnection.createStatement();
-			this.currentStatement.execute(aSql);
+			
 			String msg = null;
 			
-			if ("DROP".equals(verb))
+			if ("DROP".equals(verb) && aConnection.getIgnoreDropErrors())
 			{
-				msg = ResourceMgr.getString("MsgDropSuccess");
-			}
-			else if ("CREATE".equals(verb))
-			{
-				msg = ResourceMgr.getString("MsgCreateSuccess");
+				try
+				{
+					this.currentStatement.execute(aSql);
+				}
+				catch (Throwable th)
+				{
+					result.addMessage(ResourceMgr.getString("MsgDropWarning"));
+					result.addMessage(ExceptionUtil.getDisplay(th));
+				}
 			}
 			else
 			{
-				msg = this.verb + " " + ResourceMgr.getString("MsgKnownStatementOK");
-			}
-			result.addMessage(msg);
-			
-			StringBuffer warnings = new StringBuffer();
-			if (this.appendWarnings(aConnection, this.currentStatement, warnings))
-			{
-				result.addMessage(warnings.toString());
-        this.addExtendErrorInfo(aConnection, aSql, result);
+				this.currentStatement.execute(aSql);
+				if ("DROP".equals(verb))
+				{
+					msg = ResourceMgr.getString("MsgDropSuccess");
+				}
+				else if ("CREATE".equals(verb))
+				{
+					msg = ResourceMgr.getString("MsgCreateSuccess");
+				}
+				else
+				{
+					msg = this.verb + " " + ResourceMgr.getString("MsgKnownStatementOK");
+				}
+				result.addMessage(msg);
+
+				StringBuffer warnings = new StringBuffer();
+				if (this.appendWarnings(aConnection, this.currentStatement, warnings))
+				{
+					result.addMessage(warnings.toString());
+					this.addExtendErrorInfo(aConnection, aSql, result);
+				}
 			}
 			result.setSuccess();
 		}
@@ -96,6 +112,7 @@ public class DdlCommand extends SqlCommand
     TYPES.add("PROCEDURE");
     TYPES.add("FUNCTION");
     TYPES.add("PACKAGE");
+		TYPES.add("VIEW");
   }
   
   private boolean addExtendErrorInfo(WbConnection aConnection, String sql, StatementRunnerResult result)
@@ -124,7 +141,12 @@ public class DdlCommand extends SqlCommand
       }
     }
 		if (type == null || name == null) return false;
-		
+		// get rid off any paranthesis at the end of the word
+
+		if (name.endsWith("("))
+		{
+			name = name.substring(0, name.length() - 1);
+		}
     String msg = aConnection.getMetadata().getExtendedErrorInfo(null, type, name);
 		if (msg != null && msg.length() > 0)
 		{

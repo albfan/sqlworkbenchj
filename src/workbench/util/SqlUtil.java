@@ -38,8 +38,21 @@ public class SqlUtil
 
 	public static List getCommands(String aScript, String aDelimiter)
 	{
-		if (aScript == null || aScript.trim().length() == 0) return Collections.EMPTY_LIST;
 		ArrayList result = new ArrayList();
+		parseCommands(aScript, aDelimiter, -1, result);
+		return result;
+	}
+	
+	public static int parseCommands(String aScript, String aDelimiter, int currentCursorPos, List result)
+	{
+		if (result == null) return -1;
+		
+		if (aScript == null || aScript.trim().length() == 0) 
+		{
+			result.clear();
+			return -1;
+			//return Collections.EMPTY_LIST;
+		}
 		int count, pos, scriptLen, cmdNr, lastPos, delimitLen;
 		boolean quoteOn;
 		ArrayList emptyList, commands;
@@ -68,6 +81,7 @@ public class SqlUtil
 		delimit = aDelimiter.trim().toUpperCase();
 		delimitLen = delimit.length();
 		lastPos = 0;
+		int currentIndex = -1;
 		
 		pos = aScript.indexOf(aDelimiter);
 		if (pos == -1 || pos == aScript.length() - 1)
@@ -76,9 +90,10 @@ public class SqlUtil
 				result.add(aScript.substring(0, aScript.length() - delimitLen));
 			else
 				result.add(aScript);
-			return result;
+			return 0;
 		}
-		
+
+		boolean isCurrent = false;
 		for (pos = 0; pos < scriptLen; pos++)
 		{
 
@@ -97,26 +112,35 @@ public class SqlUtil
 
 				if ((currChar.equals(delimit) || (pos == scriptLen)))
 				{
+					/*
 					if (pos == scriptLen)
 					{
 						value = aScript.substring(lastPos, pos).trim();
-						if (value.substring(value.length() - 1, value.length()).equals(";"))
+						int l = value.length();
+						if (value.substring(l - 1, l).equals(";"))
 						{
-							value = value.substring(0, value.length() - 2);
+							value = value.substring(0, l - 2);
 						}
 					}
 					else
 					{
 						value = aScript.substring(lastPos, pos).trim();
 					}
-					if (value.length() > 0)
+					*/
+					value = aScript.substring(lastPos, pos).trim();
+					isCurrent = (lastPos <= currentCursorPos) && (pos >= currentCursorPos);
+					int l = value.length();
+					if (l > 0)
 					{
 						if (value.endsWith(aDelimiter))
 						{
-							value = value.substring(0, value.length() - delimitLen);
+							value = value.substring(0, l - delimitLen);
 						}
-						
 						result.add(value);
+						if (isCurrent)
+						{
+							currentIndex = result.size() - 1;
+						}
 					}
 					lastPos = pos + delimitLen;
 				}
@@ -132,8 +156,14 @@ public class SqlUtil
 			}
 			if (makeCleanSql(value, false).length() > 0) 
 				result.add(value);
+			
+			if ((lastPos <= currentCursorPos) && (pos >= currentCursorPos))
+			{
+				currentIndex = result.size() - 1;
+			}
 		}
-		return result;
+		//return result;
+		return currentIndex;
 	}
 
 	/**

@@ -36,6 +36,70 @@
    </object>
   </void>
   <void method="put">
+   <string>-PostgreSQL</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+select 'create trigger '|| trg.tgname || '\r\non ' || tbl.relname || '\r\n for each row execute procedure '||src.proname ||'();\r\n--- Source for '|| src.proname||' ---\r\n'|| src.prosrc 
+from pg_trigger trg, pg_class tbl, pg_proc src
+where trg.tgrelid = tbl.oid 
+ AND trg.tgfoid = src.oid
+      </string>
+    </void>
+    <void property="objectNameField">
+     <string>trg.tgname</string>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>Microsoft SQL Server</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>exec sp_helptext</string>
+    </void>
+    <void property="isProcedureCall">
+     <boolean>true</boolean>
+    </void>
+    <void property="objectNameArgumentPos">
+     <int>1</int>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <string>PostgreSQL</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT 'create trigger '|| trg.tgname || ' '||
+       case trg.tgtype &amp; cast(2 as int2) 
+         when 0 then &apos;AFTER&apos; 
+         else &apos;BEFORE&apos; 
+       end || ' ' ||
+       case trg.tgtype &amp; cast(28 as int2) 
+         when 16 then &apos;UPDATE&apos; 
+         when 8 then &apos;DELETE&apos; 
+         when 4 then &apos;INSERT&apos; 
+         when 20 then &apos;INSERT OR UPDATE&apos; 
+         when 28 then &apos;INSERT OR UPDATE OR DELETE&apos; 
+         when 24 then &apos;UPDATE OR DELETE&apos; 
+         when 12 then &apos;INSERT OR DELETE&apos; 
+       end || '\r\non ' || tbl.relname 
+       || ' for each row execute procedure '
+       ||src.proname 
+       || '();\r\n\r\n--- Source for '
+       || src.proname
+       || ' ---\r\n'
+       || src.prosrc 
+from pg_trigger trg, pg_class tbl, pg_proc src
+where trg.tgrelid = tbl.oid 
+ AND trg.tgfoid = src.oid
+</string> 
+    </void>
+    <void property="objectNameField">
+     <string>trg.tgname</string>
+    </void>
+   </object>
+  </void>
+  <void method="put">
    <string>Microsoft SQL Server</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">

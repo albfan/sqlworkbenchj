@@ -130,7 +130,6 @@ public class ProfileEditorPanel
 				jList1ValueChanged(evt);
 			}
 		});
-		
 		jList1.addMouseListener(new java.awt.event.MouseAdapter()
 		{
 			public void mouseClicked(java.awt.event.MouseEvent evt)
@@ -183,9 +182,9 @@ public class ProfileEditorPanel
 
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
+	private javax.swing.JList jList1;
 	private javax.swing.JScrollPane jScrollPane1;
 	private javax.swing.JSplitPane jSplitPane1;
-	private javax.swing.JList jList1;
 	private javax.swing.JPanel listPanel;
 	// End of variables declaration//GEN-END:variables
 

@@ -27,6 +27,8 @@ public class WbConnection
 	private Connection sqlConnection;
 	private DbMetadata metaData;
 	private ConnectionProfile profile;
+
+	private boolean ignoreDropErrors = false;
 	
 	/** Creates a new instance of WbConnection */
 	public WbConnection(String anId)
@@ -147,6 +149,18 @@ public class WbConnection
 		}
 	}
 
+	public boolean getIgnoreDropErrors()
+	{
+		if (this.profile != null)
+		{
+			return this.profile.getIgnoreDropErrors();
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
 	public void setAutoCommit(boolean aFlag)
 		throws SQLException
 	{

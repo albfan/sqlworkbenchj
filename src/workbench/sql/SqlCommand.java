@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.ArrayList;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.exception.WbException;
@@ -55,13 +56,17 @@ public class SqlCommand
 	{
 		try
 		{
+			ArrayList added = new ArrayList();
+			String s = null;
 			SQLWarning warn = aStmt.getWarnings();
 			boolean warnings = warn != null;
 			while (warn != null)
 			{
+				s = warn.getMessage();
 				msg.append('\n');
-				msg.append(warn.getMessage());
+				msg.append(s);
 				warn = warn.getNextWarning();
+				added.add(s);
 			}
 			if (warnings) msg.append('\n');
 			String outMsg = aConn.getOutputMessages();
@@ -75,8 +80,12 @@ public class SqlCommand
 			warnings = warnings || (warn != null);
 			while (warn != null)
 			{
-				msg.append('\n');
-				msg.append(warn.getMessage());
+				s = warn.getMessage();
+				if (!added.contains(s))
+				{
+					msg.append('\n');
+					msg.append(s);
+				}
 				warn = warn.getNextWarning();
 			}
 			

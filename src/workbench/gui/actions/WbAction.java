@@ -3,6 +3,7 @@ package workbench.gui.actions;
 import java.awt.EventQueue;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -21,7 +22,7 @@ import workbench.resource.ResourceMgr;
 /**
  *	@author  workbench@kellerer.org
  */
-public abstract class WbAction 
+public class WbAction 
 	extends AbstractAction
 {
 	public static final String ADD_TO_TOOLBAR = "AddToToolbar";
@@ -34,11 +35,17 @@ public abstract class WbAction
 	private String actionName;
 	protected JMenuItem menuItem;
 	protected JButton toolbarButton;
-
+	private ActionListener delegate = null;
+	
+	public WbAction(ActionListener l)
+	{
+		this();
+		this.delegate = l;
+	}
 	public WbAction()
 	{
 		String c = this.getClass().getName();
-		this.actionName = c.substring(c.lastIndexOf('.')  + 1);
+		this.actionName = "wb-" + c.substring(c.lastIndexOf('.')  + 1);
     this.putValue(ACTION_COMMAND_KEY, this.actionName);
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("blank"));
 	}
@@ -187,6 +194,11 @@ public abstract class WbAction
 		}
 	}
 
+	public void setAcceleratorKey(KeyStroke key)
+	{
+		this.putValue(Action.ACCELERATOR_KEY, key);
+	}
+	
 	public void removeIcon()
 	{
 		this.putValue(Action.SMALL_ICON, null);
@@ -194,17 +206,21 @@ public abstract class WbAction
 	
 	public void actionPerformed(final ActionEvent e)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
+//		EventQueue.invokeLater(new Runnable()
+//		{
+//			public void run()
+//			{
 				executeAction(e);
-			}
-		});
+//			}
+//		});
 	}
 	
 	public void executeAction(ActionEvent e)
 	{
+		if (this.delegate != null)
+		{
+			this.delegate.actionPerformed(e);
+		}
 	}
 	
 }

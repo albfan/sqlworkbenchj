@@ -961,11 +961,17 @@ public class DbMetadata
 		aTable = this.adjustObjectname(aTable);
 
 		GetMetaDataSql sql = (GetMetaDataSql)this.triggerList.get(this.productName);
+		if (sql == null) 
+		{
+			return result;
+		}
+		
 		sql.setSchema(aSchema);
 		sql.setCatalog(aCatalog);
 		sql.setObjectName(aTable);
 		Statement stmt = this.dbConnection.getSqlConnection().createStatement();
-		ResultSet rs = stmt.executeQuery(sql.getSql());
+		String query = sql.getSql();
+		ResultSet rs = stmt.executeQuery(query);
 		while (rs.next())
 		{
 			int row = result.addRow();
@@ -1001,7 +1007,9 @@ public class DbMetadata
 		sql.setCatalog(aCatalog);
 		sql.setObjectName(aTriggername);
 		Statement stmt = this.dbConnection.getSqlConnection().createStatement();
-		ResultSet rs = stmt.executeQuery(sql.getSql());
+		String query = sql.getSql();
+		
+		ResultSet rs = stmt.executeQuery(query);
 		int colCount = rs.getMetaData().getColumnCount();
 		while (rs.next())
 		{
