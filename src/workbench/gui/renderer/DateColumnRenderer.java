@@ -17,14 +17,14 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 /**
  *
- * @author  thomas.kellerer@web.de
+ * @author  sql.workbench@freenet.de
  */
 public class DateColumnRenderer
 	extends DefaultTableCellRenderer
 {
 	private SimpleDateFormat formatter;
 	private HashMap displayCache = new HashMap();
-	
+
 	public DateColumnRenderer()
 	{
 		this("yyyy-MM-dd");
@@ -34,7 +34,7 @@ public class DateColumnRenderer
 	{
 		this.formatter = new SimpleDateFormat(aDateFormat);
 	}
-	
+
   public void setValue(Object value)
 	{
     this.setHorizontalAlignment(DefaultTableCellRenderer.RIGHT);

@@ -28,35 +28,29 @@ public class ResourceMgr
 
 	public static final String    ERROR_DISCONNECT = "ErrorOnDiscconect";
 	public static final String    ERROR_NO_CONNECTION_AVAIL = "ErrorNoConnectionAvailable";
-	public static final String    TAB_LABEL_RESULT = "Result";
-	public static final String    TAB_LABEL_MSG = "Messages";
+	public static final String    TAB_LABEL_RESULT = "LabelTabResult";
+	public static final String    TAB_LABEL_MSG = "LabelTabMessages";
 	public static final String    TXT_PRODUCT_NAME = "SQL Workbench/J";
 	public static final String    TXT_ERROR_MSG_DATA = "ErrorMessageData";
 	public static final String    TXT_ERROR_MSG_TITLE = "ErrorMessageTitle";
 	
-	// Messages from the ResultPanel
-	public static final String    TXT_WARN_NO_RESULT = "WarningNoResultSet";
-	public static final String    TXT_SQL_EXCUTE_OK = "StatementOK";
-	public static final String    TXT_ROWS_AFFECTED = "RowsAffected";
-	public static final String    TXT_EXECUTING_SQL = "ExecutingSql";
-	
-	public static final String    TXT_COPY = "Copy";
-	public static final String    TXT_CUT = "Cut";
-	public static final String    TXT_PASTE = "Paste";
-	public static final String    TXT_CLEAR = "Clear";
-	public static final String    TXT_SELECTALL = "SelectAll";
-	public static final String    TXT_EXECUTE_SEL = "ExecuteSel";
-	public static final String    TXT_EXECUTE_ALL = "ExecuteAll";
-	public static final String    TXT_STOP_STMT = "StopStmt";
-	public static final String    TXT_DB_DRIVER = "Driver";
-	public static final String    TXT_DB_USERNAME = "Username";
-	public static final String    TXT_DB_URL = "DbURL";
-	public static final String    TXT_DB_PASSWORD = "Password";
-	public static final String    TXT_SELECT_PROFILE = "SelectProfile";
-	public static final String    TXT_SAVE_PROFILE = "SaveProfile";
-	public static final String    TXT_SAVE = "Save";
-	public static final String    TXT_OK = "OK";
-	public static final String    TXT_CANCEL = "Cancel";
+	public static final String    TXT_COPY = "MnuTxtCopy";
+	public static final String    TXT_CUT = "MnuTxtCut";
+	public static final String    TXT_PASTE = "MnuTxtPaste";
+	public static final String    TXT_CLEAR = "MnuTxtClear";
+	public static final String    TXT_SELECTALL = "MnuTxtSelectAll";
+	public static final String    TXT_EXECUTE_SEL = "MnuTxtExecuteSel";
+	public static final String    TXT_EXECUTE_ALL = "MnuTxtExecuteAll";
+	public static final String    TXT_STOP_STMT = "MnuTxtStopStmt";
+	public static final String    TXT_DB_DRIVER = "LabelDriver";
+	public static final String    TXT_DB_USERNAME = "LabelUsername";
+	public static final String    TXT_DB_URL = "LabelDbURL";
+	public static final String    TXT_DB_PASSWORD = "LabelPassword";
+	public static final String    TXT_SELECT_PROFILE = "LabelSelectProfile";
+	public static final String    TXT_SAVE_PROFILE = "LabelSaveProfile";
+	public static final String    TXT_SAVE = "LabelSave";
+	public static final String    TXT_OK = "LabelOK";
+	public static final String    TXT_CANCEL = "LabelCancel";
 	
 	public static final String    IMG_COPY = "Copy";
 	public static final String    IMG_CUT = "Cut";
@@ -70,17 +64,24 @@ public class ResourceMgr
 	public static final String    IMG_DELETE = "Delete";
 	public static final String		IMG_UP = "Up";
 	public static final String		IMG_DOWN = "Down";
+	public static final String		IMG_FIND = "Find";
 	
-	public static final String    MNU_TXT_FILE = "File";
-	public static final String    MNU_TXT_SQL = "SQL";
-	public static final String    MNU_TXT_EDIT = "Edit";
-	public static final String    MNU_TXT_DATA = "Data";
-	public static final String    MNU_TXT_CONNECT = "Connect";
-	public static final String    MNU_TXT_EXIT = "Exit";
+	public static final String    MNU_TXT_FILE = "MnuTxtFile";
+	public static final String    MNU_TXT_SQL = "MnuTxtSQL";
+	public static final String    MNU_TXT_EDIT = "MnuTxtEdit";
+	public static final String    MNU_TXT_DATA = "MnuTxtData";
+	public static final String    MNU_TXT_CONNECT = "MnuTxtConnect";
+	public static final String    MNU_TXT_EXIT = "MnuTxtExit";
 	
-	public static final String    STAT_READY = "Ready";
-	public static final String    ERR_DRIVER_NOT_FOUND = "ErrDriverNotFound";
-	public static final String    ERR_CONNECTION_ERROR = "ErrConnectionError";
+	// Messages from the ResultPanel
+	public static final String		MSG_EXEC_SQL = "MsgExecutingSql";
+	public static final String    MSG_WARN_NO_RESULT = "MsgWarningNoResultSet";
+	public static final String    MSG_SQL_EXCUTE_OK = "MsgStatementOK";
+	public static final String    MSG_ROWS_AFFECTED = "MsgRowsAffected";
+	
+	public static final String    STAT_READY = "MsgReady";	
+	public static final String    ERR_DRIVER_NOT_FOUND = "ErrorDriverNotFound";
+	public static final String    ERR_CONNECTION_ERROR = "ErrorConnectionError";
 	private static ResourceBundle resources = ResourceBundle.getBundle("workbench/resource/wbstrings");
 	private static HashMap        images = new HashMap();
 	
@@ -129,6 +130,11 @@ public class ResourceMgr
 	public static ImageIcon getImage(String aKey)
 	{
 		return retrieveImage(aKey + "16");
+	}
+	
+	public static ImageIcon getPicture(String aName)
+	{
+		return retrieveImage(aName);
 	}
 	
 	private static ImageIcon retrieveImage(String aKey)

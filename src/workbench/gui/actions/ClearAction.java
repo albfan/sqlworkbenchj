@@ -13,21 +13,22 @@ import javax.swing.Action;
 
 /**
  *	Action to clear the contents of a entry field
- *	@author  thomas.kellerer@web.de
+ *	@author  sql.workbench@freenet.de
  */
 public class ClearAction
-	extends AbstractAction
+	extends WbAction
 {
 	private ClipboardSupport client;
-	
+
 	public ClearAction(ClipboardSupport aClient)
 	{
+		super();
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_CLEAR));
     this.putValue(ACTION_COMMAND_KEY, "ClearAction");
-		this.putValue(WbActionConstants.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_EDIT);
+		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_EDIT);
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
 		this.client.clear();

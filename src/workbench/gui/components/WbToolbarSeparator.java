@@ -10,11 +10,11 @@ import java.awt.Dimension;
 
 /**
  *
- * @author  thomas.kellerer@web.de
+ * @author  sql.workbench@freenet.de
  */
 public class WbToolbarSeparator extends javax.swing.JPanel
 {
-	
+
 	/** Creates a new instance of ToolbarSeperator */
 	public WbToolbarSeparator()
 	{
@@ -24,5 +24,5 @@ public class WbToolbarSeparator extends javax.swing.JPanel
 		this.setMaximumSize(new Dimension(9, 24));
 		this.setBorder(new DividerBorder(DividerBorder.MIDDLE));
 	}
-	
+
 }

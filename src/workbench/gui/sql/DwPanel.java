@@ -14,9 +14,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringTokenizer;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
@@ -147,18 +152,46 @@ public class DwPanel extends JPanel
 		
 		try
 		{
+			long start, end;
 			this.lastMessage = null;
 			String verb = SqlUtil.getSqlVerb(aSql);
-			this.statusBar.clearRowcount();
 			Connection sqlcon = aConnection.getSqlConnection();
-			//this.prepStatement = sqlcon.prepareStatement(aSql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-			this.prepStatement = sqlcon.prepareStatement(aSql);
-			long start, end;
-			start = System.currentTimeMillis();
-			this.prepStatement.execute();
-			end = System.currentTimeMillis();
-			System.out.println("retrieve " + (end - start));
-			ResultSet rs = this.prepStatement.getResultSet();
+			ResultSet rs = null;
+			List keepColumns = null;
+			
+			this.statusBar.clearRowcount();
+			
+			if (verb.equalsIgnoreCase("DESC"))
+			{
+				StringTokenizer tok = new StringTokenizer(aSql, " ");
+				tok.nextToken();
+				String table = tok.nextToken();
+				rs = sqlcon.getMetaData().getColumns(null, null, table, "%");
+				final String[] cols = {"COLUMN_NAME", "TYPE_NAME","COLUMN_SIZE","COLUMN_DEF","IS_NULLABLE"};
+				keepColumns = Arrays.asList(cols);
+			}
+			else if (verb.equalsIgnoreCase("LIST"))
+			{
+				rs = sqlcon.getMetaData().getTables(null, null, null, null);
+				final String[] cols = {"TABLE_CAT", "TABLE_NAME", "TABLE_TYPE"};
+				keepColumns = Arrays.asList(cols);
+			}
+			else if (verb.equalsIgnoreCase("LISTPROCS"))
+			{
+				rs = sqlcon.getMetaData().getProcedures(null, null,"%");
+				final String[] cols = {"PROCEDURE_CAT", "PROCEDURE_NAME", "PROCEDURE_TYPE"};
+				keepColumns = Arrays.asList(cols);
+			}
+			else
+			{
+				this.prepStatement = sqlcon.prepareStatement(aSql);
+				start = System.currentTimeMillis();
+				this.prepStatement.execute();
+				end = System.currentTimeMillis();
+				System.out.println("retrieve " + (end - start));
+				rs = this.prepStatement.getResultSet();
+				keepColumns = null;
+			}
 			if (rs != null)
 			{
 				this.hasResultSet = true;
@@ -167,11 +200,12 @@ public class DwPanel extends JPanel
 				this.setVisible(false);
 				this.infoTable.setAutoCreateColumnsFromModel(true);
 				this.infoTable.setModel(this.realModel, true);
-				this.initColumns();
+				this.initColumns(keepColumns);
+				this.infoTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 				this.setVisible(true);
 				end = System.currentTimeMillis();
 				System.out.println("populate = " + (end-start));
-				this.lastMessage = ResourceMgr.getString(ResourceMgr.TXT_SQL_EXCUTE_OK);
+				this.lastMessage = ResourceMgr.getString(ResourceMgr.MSG_SQL_EXCUTE_OK);
 				rs.close();
 				this.statusBar.setRowcount(this.infoTable.getModel().getRowCount());
 			}
@@ -182,16 +216,16 @@ public class DwPanel extends JPanel
 				int count = 0;
 				count = this.prepStatement.getUpdateCount();
 				msg.append("\r\n");
-				msg.append(count + " " + ResourceMgr.getString(ResourceMgr.TXT_ROWS_AFFECTED));
+				msg.append(count + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
 				this.setMessageDisplayModel(this.getEmptyTableModel());
 				this.lastMessage = msg.toString();
 			}
-			this.prepStatement.close();
+			if (this.prepStatement != null) this.prepStatement.close();
 		}
 		catch (SQLException sql)
 		{
 			this.setMessageDisplayModel(this.getErrorTableModel());
-			this.lastMessage = ResourceMgr.getString("ExecuteError") + "\r\n";
+			this.lastMessage = ResourceMgr.getString("MsgExecuteError") + "\r\n";
 			this.lastMessage = this.lastMessage + ExceptionUtil.getDisplay(sql);
 			throw sql;
 		}
@@ -199,7 +233,7 @@ public class DwPanel extends JPanel
 		{
 			LogMgr.logError(this, "Error executing statement: \r\n" + this.sql, e);
 			this.setMessageDisplayModel(this.getErrorTableModel());
-			this.lastMessage = ResourceMgr.getString("ExecuteError") + "\r\n";
+			this.lastMessage = ResourceMgr.getString("MsgExecuteError") + "\r\n";
 			String s = ExceptionUtil.getDisplay(e);
 			this.lastMessage = this.lastMessage + s;
 			throw new WbException(s);
@@ -231,28 +265,43 @@ public class DwPanel extends JPanel
 	
 	public String getLastMessage() { return this.lastMessage; }
 	public boolean hasResultSet() { return this.hasResultSet; }
-	
-	private void initColumns()
+
+	private void initColumns(List keepColumns)
 	{
 		Font f = this.infoTable.getFont();
 		FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(f);
 		int charWidth = fm.stringWidth("n");
 		TableColumnModel colMod = this.infoTable.getColumnModel();
 		this.infoTable.setDefaultRenderer(java.util.Date.class, new DateColumnRenderer());
-		
+
+		List tbr = new ArrayList();
+		if (keepColumns != null)
+		{
+			for (int i=0; i < colMod.getColumnCount(); i++)
+			{
+				String s = this.realModel.getColumnName(i);
+				if (keepColumns != null && !keepColumns.contains(s))
+				{
+					TableColumn col = colMod.getColumn(i);
+					tbr.add(col);
+				}
+			}
+			
+			for (int i=0; i < tbr.size(); i++)
+			{
+				colMod.removeColumn((TableColumn)tbr.get(i));
+			}
+		}
 		for (int i=0; i < colMod.getColumnCount(); i++)
 		{
 			TableColumn col = colMod.getColumn(i);
-			int width = this.realModel.getColumnWidth(i) * charWidth;
 			String s = this.realModel.getColumnName(i);
+			int width = this.realModel.getColumnWidth(i) * charWidth;
 			int lblWidth = fm.stringWidth(s) + (charWidth * 3);
 			int w = Math.max(width, lblWidth);
 			w = Math.min(w, maxWidth);
 			col.setPreferredWidth(w);
-			//col.setMinWidth(lblWidth);
-			//col.setMaxWidth(this.maxWidth);
 		}
-		this.infoTable.setColumnModel(colMod);
 	}
 	
 	private void initLayout()
@@ -303,7 +352,7 @@ public class DwPanel extends JPanel
 	{
 		if (this.emptyModel == null)
 		{
-			String msg = ResourceMgr.getString(ResourceMgr.TXT_WARN_NO_RESULT);
+			String msg = ResourceMgr.getString(ResourceMgr.MSG_WARN_NO_RESULT);
 			String title = ResourceMgr.getString(ResourceMgr.TXT_ERROR_MSG_TITLE);
 			this.emptyModel = new DefaultTableModel(new Object[][] { {msg} } , new String[] {title});
 		}

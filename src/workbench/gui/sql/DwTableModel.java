@@ -13,12 +13,11 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
-import sun.jdbc.rowset.CachedRowSet;
 
-import workbench.db.WbDataStore;
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
 import workbench.log.LogMgr;
+import workbench.storage.DataStore;
 
 
 /**
@@ -28,13 +27,19 @@ public class DwTableModel
 	extends AbstractTableModel
 {
 	//private ResultSet dbData;
-	private CachedRowSet dataCache;
+	private DataStore dataCache;
 	private int rowCount = -1;
 	private int colCount = -1;
 	private ResultSetMetaData metaData = null;
 	public static final String NOT_AVAILABLE = "(n/a)";
 	private WbConnection dbConnection;
 	private boolean isUpdateable = false;
+	
+	public DwTableModel(ResultSet aResultSet)
+		throws SQLException, WbException
+	{
+		this(aResultSet, null);
+	}
 	
 	public DwTableModel(ResultSet aResultSet, WbConnection aConnection) 
 		throws SQLException, WbException
@@ -43,12 +48,12 @@ public class DwTableModel
 		this.colCount = -1;
 		this.metaData = null;
 		
-		this.dataCache = new CachedRowSet();
-		this.dataCache.populate(aResultSet);
-		this.metaData = this.dataCache.getMetaData();
-		this.rowCount = this.dataCache.size();
+		this.dataCache = new DataStore(aResultSet);
+		//this.dataCache.populate(aResultSet);
+		this.metaData = aResultSet.getMetaData();
+		this.rowCount = this.dataCache.getRowCount();
 		this.dbConnection = aConnection;
-		this.colCount = this.metaData.getColumnCount();
+		this.colCount = this.dataCache.getColumnCount();
 		this.checkUpdateable();
 	}
 		
@@ -63,8 +68,8 @@ public class DwTableModel
 		try
 		{
 			Object result;
-			this.dataCache.absolute(row + 1);
-			result = this.dataCache.getObject(col + 1);
+			//this.dataCache.absolute(row + 1);
+			result = this.dataCache.getValue(row, col);
 			return result;
 		}
 		catch (Exception e)
@@ -106,7 +111,7 @@ public class DwTableModel
 				}
 			}
 			this.isUpdateable = true;
-			this.dataCache.setTableName(tableName);
+			//this.dataCache.setTableName(tableName);
 		}
 		catch (SQLException e)
 		{
@@ -114,6 +119,19 @@ public class DwTableModel
 		}
 	}
 
+	public int findColumn(String aColname)
+	{
+		int index = -1;
+		try
+		{
+			index = this.dataCache.getColumnIndex(aColname);
+		}
+		catch (SQLException e)
+		{
+			index = -1;
+		}
+		return index;
+	}
 	public boolean isUpdateable() { return this.isUpdateable; }
 	
 	public void setValueAt(Object aValue, int row, int column)
@@ -122,9 +140,7 @@ public class DwTableModel
 		{
 			if (this.isUpdateable)
 			{
-				this.dataCache.absolute(row + 1);
-				this.dataCache.updateObject(column + 1, aValue);
-				this.dataCache.updateRow();
+				this.dataCache.setValue(row, column, aValue);
 				fireTableDataChanged();
 			}
 		}
@@ -147,10 +163,11 @@ public class DwTableModel
 	{
 		try
 		{
-			return this.metaData.getColumnDisplaySize(aColumn + 1);
+			return this.dataCache.getColumnDisplaySize(aColumn);
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 			return 10;
 		}
 	}
@@ -159,10 +176,11 @@ public class DwTableModel
 	{
 		try
 		{
-			return this.metaData.getColumnType(aColumn + 1);
+			return this.dataCache.getColumnType(aColumn);
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 			return -1;
 		}
 	}		
@@ -174,10 +192,11 @@ public class DwTableModel
 	{
 		try
 		{
-			return this.metaData.getColumnTypeName(aColumn + 1);
+			return this.dataCache.getColumnTypeName(aColumn);
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 			return NOT_AVAILABLE;
 		}
 	}
@@ -198,6 +217,7 @@ public class DwTableModel
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 			return NOT_AVAILABLE;
 		}
 	}
@@ -229,50 +249,9 @@ public class DwTableModel
 	}
 	
 	
-	/*
-	public Object getTypedValue(int aColumn)
-		throws SQLException
-	{
-		int type = this.getColumnType(aColumn);
-		switch (type)
-		{
-			case Types.SMALLINT:
-			case Types.INTEGER:
-			case Types.BIGINT:
-				return BigInteger.valueOf(this.dbData.getInt(aColumn + 1));
-			case Types.DECIMAL:
-			case Types.DOUBLE:
-			case Types.FLOAT:
-			case Types.NUMERIC:
-			case Types.REAL:
-				return this.dbData.getBigDecimal(aColumn + 1);
-			case Types.CHAR:
-			case Types.VARCHAR:
-				return this.dbData.getString(aColumn + 1);
-			case Types.DATE:
-				return this.dbData.getDate(aColumn + 1);
-			case Types.TIMESTAMP:
-				return this.dbData.getTimestamp(aColumn + 1);
-			default:
-				return "";
-		}
-	}
-	*/
-	
 	public void dispose()
 	{
-		try
-		{
-			if (this.dataCache != null)
-			{
-				this.dataCache.close();
-				this.dataCache = null;
-			}
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError(this, "Error cleaning up dataCache", e);
-		}
+		this.dataCache = null;
 	}
 	
 	public void finalize()
@@ -286,7 +265,12 @@ public class DwTableModel
 	{
 		try
 		{
-			return this.metaData.getColumnName(aColumn + 1);
+			String name = this.metaData.getColumnName(aColumn + 1);
+			if (name == null || name.length() == 0)
+			{
+				name = "Col" + (aColumn + 1);
+			}
+			return name;
 		}
 		catch (Exception e)
 		{
@@ -297,7 +281,7 @@ public class DwTableModel
 	public StringBuffer getRowData(int aRow)
 	{
 		StringBuffer result = new StringBuffer(this.colCount * 20);
-		for (int c=1; c <= this.colCount; c++)
+		for (int c=0; c < this.colCount; c++)
 		{
 			Object value = this.getValueAt(aRow, c);
 			if (value != null) result.append(value.toString());
@@ -314,7 +298,7 @@ public class DwTableModel
 	public void saveChangesToDatabase()
 		throws SQLException
 	{
-		this.dataCache.acceptChanges(this.dbConnection.getSqlConnection());
+		//this.dataCache.acceptChanges(this.dbConnection.getSqlConnection());
 	}
 	
 }

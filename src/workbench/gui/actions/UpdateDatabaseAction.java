@@ -16,20 +16,21 @@ import workbench.resource.ResourceMgr;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
- *	@author  thomas.kellerer@web.de
+ *	
  */
-public class UpdateDatabaseAction extends AbstractAction
+public class UpdateDatabaseAction extends WbAction
 {
 	private SqlPanel panel;
 	
 	public UpdateDatabaseAction(SqlPanel aPanel)
 	{
+		super();
 		this.panel = aPanel;
-		this.putValue(Action.NAME, ResourceMgr.getString("UpdateDatabase"));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("UpdateDatabase"));
+		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtUpdateDatabase"));
+		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtUpdateDatabase"));
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_SAVE));
-		this.putValue(WbActionConstants.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
-		this.putValue(WbActionConstants.TBAR_SEPARATOR, "true");
+		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
+		this.putValue(WbAction.TBAR_SEPARATOR, "true");
 		this.setEnabled(false);
 	}
 

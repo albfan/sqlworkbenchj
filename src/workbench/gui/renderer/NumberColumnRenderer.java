@@ -4,7 +4,7 @@
  * Created on 1. Juli 2002, 13:22
  */
 
-package autokosten.gui;
+package workbench.gui.renderer;
 
 import java.awt.Component;
 import java.text.DecimalFormat;

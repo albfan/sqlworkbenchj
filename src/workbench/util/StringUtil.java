@@ -8,7 +8,7 @@ package workbench.util;
 
 /**
  *
- *	@author  thomas.kellerer@web.de
+ *	@author  sql.workbench@freenet.de
  */
 public class StringUtil
 {

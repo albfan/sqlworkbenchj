@@ -13,13 +13,12 @@ import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-import javax.swing.border.EtchedBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.TableModelListener;
 import workbench.WbManager;
 import workbench.db.WbConnection;
@@ -30,7 +29,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  *
- * @author  thomas.kellerer@web.de
+ * @author  sql.workbench@freenet.de
  * @version
  */
 public class SqlResultDisplay extends JPanel implements Exporter
@@ -39,27 +38,30 @@ public class SqlResultDisplay extends JPanel implements Exporter
 	private JTextArea log;
 	private JTabbedPane tab;
 	private WbConnection dbConnection;
-	
+
 	public SqlResultDisplay()
 	{
 		this.tab = new JTabbedPane();
 		this.tab.setTabPlacement(JTabbedPane.TOP);
 		this.tab.setDoubleBuffered(true);
+		this.tab.setBorder(new EmptyBorder(0,0,0,0));
 		this.log = new JTextArea();
-		this.log.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+		//this.log.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+		this.log.setBorder(new EmptyBorder(0,0,0,0));
 		this.log.setFont(WbManager.getSettings().getMsgLogFont());
 		this.log.setEditable(false);
 		this.data = new DwPanel();
+		this.data.setBorder(new EmptyBorder(0,0,0,0));
 		this.tab.addTab(ResourceMgr.getString(ResourceMgr.TAB_LABEL_RESULT), data);
 		this.tab.addTab(ResourceMgr.getString(ResourceMgr.TAB_LABEL_MSG), log);
 		this.setLayout(new BorderLayout());
 		this.add(tab, BorderLayout.CENTER);
 		this.setPreferredSize(null);
-		this.tab.setBorder(null);
-		this.setBorder(null);
+		this.tab.setBorder(new EmptyBorder(0,0,0,0));
+		this.setBorder(new EmptyBorder(0,0,0,0));
 		this.showResultPanel();
 	}
-	
+
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
@@ -72,7 +74,7 @@ public class SqlResultDisplay extends JPanel implements Exporter
 			LogMgr.logError(this, "Error when setting connection for SqlResultDisplay", e);
 		}
 	}
-	
+
 	public WbConnection getConnection()
 	{
 		return this.dbConnection;
@@ -83,12 +85,12 @@ public class SqlResultDisplay extends JPanel implements Exporter
 		this.showLogPanel();
 		this.log.setText(aMsg);
 	}
-	
+
 	public void clearLog()
 	{
 		this.log.setText("");
 	}
-	
+
 	public void showLogPanel()
 	{
 		this.tab.setSelectedIndex(1);
@@ -103,17 +105,17 @@ public class SqlResultDisplay extends JPanel implements Exporter
 	{
 		this.data.cancelExecution();
 	}
-	
+
 	public void setStatusMessage(String aMsg)
 	{
 		this.data.setStatusMessage(aMsg);
 	}
-	
+
 	public void clearStatusMessage()
 	{
 		this.data.clearStatusMessage();
-	}	
-	
+	}
+
 	public void saveChangesToDatabase()
 	{
 		try
@@ -127,16 +129,16 @@ public class SqlResultDisplay extends JPanel implements Exporter
 			this.showLogMessage(this.data.getLastMessage());
 		}
 	}
-	
+
 	public void displayResult(String aSqlStatement)
 	{
 		try
 		{
-			this.log.setText(ResourceMgr.getString("ExecutingSql"));
+			this.log.setText(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
 			this.data.setSqlStatement(aSqlStatement);
 			this.data.runStatement();
 			this.log.setText(this.data.getLastMessage());
-			if (this.data.hasResultSet()) 
+			if (this.data.hasResultSet())
 			{
 				this.showResultPanel();
 			}
@@ -155,7 +157,7 @@ public class SqlResultDisplay extends JPanel implements Exporter
 			LogMgr.logError(this, "Error executing statement", e);
 		}
 	}
-	
+
 	public void saveAsAscii()
 	{
 		try
@@ -185,34 +187,34 @@ public class SqlResultDisplay extends JPanel implements Exporter
 	{
 		this.data.getTable().removeTableModelListener(aListener);
 	}
-	
 
-	public boolean isUpdateable() 
+
+	public boolean isUpdateable()
 	{
 		return this.data.isUpdateable();
 	}
-	
+
 	public int getRowCount()
 	{
 		return this.data.getTable().getRowCount();
 	}
-	
+
 	public int search(String aCriteria)
 	{
 		return this.data.getTable().search(aCriteria, false);
 	}
-	
+
 	public int searchNext()
 	{
 		return this.data.getTable().searchNext();
 	}
-	
+
 	public void saveAsAscii(String aFilename)
 		throws IOException
 	{
 		this.data.getTable().saveAsAscii(aFilename);
 	}
-	
+
 	public void copyDataToClipboard()
 	{
 		try
@@ -227,5 +229,5 @@ public class SqlResultDisplay extends JPanel implements Exporter
 			LogMgr.logError(this, "Could not access clipboard", e);
 		}
 	}
-	
+
 }

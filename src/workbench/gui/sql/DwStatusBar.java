@@ -19,7 +19,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  *
- * @author  thomas.kellerer@web.de
+ * @author  sql.workbench@freenet.de
  */
 public class DwStatusBar extends javax.swing.JPanel
 {
@@ -29,7 +29,7 @@ public class DwStatusBar extends javax.swing.JPanel
 
 	private static final int BAR_HEIGHT = 22;
 	private static final int FIELD_HEIGHT = 18;
-	
+
 	/** Creates new form DwStatusBar */
 	public DwStatusBar()
 	{
@@ -40,7 +40,7 @@ public class DwStatusBar extends javax.swing.JPanel
 	{
 		this.tfRowCount = new JTextField();
 		this.tfStatus = new JTextField();
-		
+
 		this.setLayout(new java.awt.BorderLayout());
 		this.setBorder(new javax.swing.border.EtchedBorder());
 		this.setMaximumSize(new java.awt.Dimension(32768, BAR_HEIGHT));
@@ -67,10 +67,10 @@ public class DwStatusBar extends javax.swing.JPanel
 		tfStatus.setAutoscrolls(false);
 		tfStatus.setEnabled(false);
 		tfStatus.setEditable(false);
-		
+
 		this.add(tfStatus, BorderLayout.CENTER);
 		this.add(tfRowCount, BorderLayout.EAST);
-		
+
 		this.readyMsg = ResourceMgr.getString(ResourceMgr.STAT_READY);
 		this.clearStatusMessage();
 	}
@@ -96,10 +96,10 @@ public class DwStatusBar extends javax.swing.JPanel
 			this.tfStatus.setText(aMsg);
 		}
 	}
-	
+
 	public void clearStatusMessage()
 	{
 		this.tfStatus.setText(this.readyMsg);
 	}
-	
+
 }

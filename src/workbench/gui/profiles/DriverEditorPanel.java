@@ -19,7 +19,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  *
- * @author  thomas.kellerer@web.de
+ * @author  sql.workbench@freenet.de
  */
 public class DriverEditorPanel extends javax.swing.JPanel
 {
@@ -63,6 +63,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 7);
 		add(lblName, gridBagConstraints);
 
+		tfName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
 		tfName.setMinimumSize(new java.awt.Dimension(50, 20));
 		tfName.setPreferredSize(new java.awt.Dimension(100, 20));
 		tfName.addFocusListener(new java.awt.event.FocusAdapter()
@@ -93,6 +94,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		add(lblClassName, gridBagConstraints);
 
 		tfClassName.setColumns(10);
+		tfClassName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
 		tfClassName.addFocusListener(new java.awt.event.FocusAdapter()
 		{
 			public void focusLost(java.awt.event.FocusEvent evt)
@@ -120,6 +122,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		add(lblLibrary, gridBagConstraints);
 
 		tfLibrary.setColumns(10);
+		tfLibrary.setHorizontalAlignment(javax.swing.JTextField.LEFT);
 		tfLibrary.addFocusListener(new java.awt.event.FocusAdapter()
 		{
 			public void focusLost(java.awt.event.FocusEvent evt)
@@ -133,9 +136,9 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.gridy = 2;
 		gridBagConstraints.gridwidth = 4;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 3);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.weightx = 1.0;
+		gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 3);
 		add(tfLibrary, gridBagConstraints);
 
 		gridBagConstraints = new java.awt.GridBagConstraints();
@@ -170,19 +173,20 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 3;
-		gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 7);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 7);
 		add(lblSample, gridBagConstraints);
 
 		tfSampleUrl.setColumns(10);
 		tfSampleUrl.setFont(null);
+		tfSampleUrl.setHorizontalAlignment(javax.swing.JTextField.LEFT);
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 3;
 		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 3);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 3);
 		add(tfSampleUrl, gridBagConstraints);
 
 	}//GEN-END:initComponents
@@ -248,10 +252,11 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		DriverEditorPanel editor = new DriverEditorPanel();
 		d.getContentPane().add(editor);
 		DbDriver test = new DbDriver();
+		test.setLibrary("this is a very long string path to a library");
 		editor.setDriver(test);
 		d.pack();
 		d.show();
-		WbManager.getSettings().saveSettings();
+		//WbManager.getSettings().saveSettings();
 	}
 	private class JarFileFilter extends FileFilter
 	{

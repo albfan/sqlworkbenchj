@@ -46,7 +46,7 @@ public class SortHeaderRenderer
     if (table instanceof WbTable)
     {
       WbTable sortTable = (WbTable)table;
-      index = sortTable.getSortedColumnIndex();
+      index = sortTable.getSortedViewColumnIndex();
       ascending = sortTable.isSortedColumnAscending();
     }
 		/*

@@ -6,6 +6,8 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
@@ -15,20 +17,21 @@ import workbench.resource.ResourceMgr;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
- *	@author  thomas.kellerer@web.de
+ *	@author  sql.workbench@freenet.de
  */
-public class PrevStatementAction extends AbstractAction
+public class PrevStatementAction extends WbAction
 {
 	private SqlPanel panel;
 
 	public PrevStatementAction(SqlPanel aPanel)
 	{
+		super();
 		this.panel = aPanel;
-		this.putValue(Action.NAME, ResourceMgr.getString("PrevStatement"));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("PrevStatement"));
+		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtPrevStatement"));
+		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtPrevStatement"));
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_UP));
-		this.putValue(WbActionConstants.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
-		this.putValue(WbActionConstants.ADD_TO_TOOLBAR, "true");
+		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
+		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK));
 	}
 
 	public void actionPerformed(ActionEvent e)

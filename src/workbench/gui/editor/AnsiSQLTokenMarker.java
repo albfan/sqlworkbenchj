@@ -63,7 +63,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("DEFAULT",Token.KEYWORD1);
 		keywords.add("DELETE",Token.KEYWORD1);
 		keywords.add("DENY",Token.KEYWORD1);
-		keywords.add("DESC",Token.KEYWORD1);
+		keywords.add("DESC",Token.KEYWORD2);
 		keywords.add("DISTINCT",Token.KEYWORD1);
 		keywords.add("DROP",Token.KEYWORD1);
 		keywords.add("EXEC",Token.KEYWORD1);
@@ -85,6 +85,8 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("ISOLATION",Token.KEYWORD1);
 		keywords.add("KEY",Token.KEYWORD1);
 		keywords.add("LEVEL",Token.KEYWORD1);
+		keywords.add("LIST",Token.KEYWORD2);
+		keywords.add("LISTPROCS",Token.KEYWORD2);
 		keywords.add("MAX",Token.KEYWORD1);
 		keywords.add("MIN",Token.KEYWORD1);
 		keywords.add("MIRROREXIT",Token.KEYWORD1);

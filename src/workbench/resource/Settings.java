@@ -24,27 +24,28 @@ import java.util.List;
 import workbench.log.LogMgr;
 import java.util.NoSuchElementException;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import workbench.util.StringUtil;
 
 /**
  *
- *	@author  thomas.kellerer@web.de
+ *	@author  sql.workbench@freenet.de
  */
 public class Settings
 {
-	
+
 	private Properties props;
 	private Font standardFont;
 	private Font editorFont;
 	private Font msgLogFont;
 	private Font dataFont;
 	private String filename;
-	
+
 	public Settings()
 	{
 		this.props = new Properties();
 		this.filename = System.getProperty("workbench.settings.file", "workbench.settings");
-		
+
 		try
 		{
 			BufferedInputStream in = new BufferedInputStream(new FileInputStream(this.filename));
@@ -57,6 +58,11 @@ public class Settings
 			LogMgr.logInfo(this, "Using defaults");
 			fillDefaults();
 		}
+	}
+
+	public void showOptionsDialog()
+	{
+		JOptionPane.showMessageDialog(null, "Not yet implemented. Please edit workbench.settings");	
 	}
 	
 	public void saveSettings()
@@ -72,7 +78,7 @@ public class Settings
 			for (int i=0; i < keys.length; i++)
 			{
 				key = (String)keys[i];
-				
+
 				if (lastKey != null)
 				{
 					String k1, k2;
@@ -100,10 +106,10 @@ public class Settings
 	{
 		int pos1 = aString.indexOf(".");
 		String result;
-		if (pos1 > -1) 
+		if (pos1 > -1)
 		{
 			int pos2 = aString.indexOf(".", pos1 + 1);
-			if (pos2 > -1) 
+			if (pos2 > -1)
 			{
 				result = aString.substring(0, pos2);
 			}
@@ -116,9 +122,9 @@ public class Settings
 		else
 		{
 			return aString;
-		}		
+		}
 	}
-	
+
 	private void fillDefaults()
 	{
 		try
@@ -130,7 +136,7 @@ public class Settings
 			LogMgr.logError(this, "Could not read default settings", e);
 		}
 	}
-	
+
 	public Font getStandardFont()
 	{
 		if (this.standardFont == null)
@@ -139,7 +145,7 @@ public class Settings
 		}
 		return this.standardFont;
 	}
-	
+
 	public Font getEditorFont()
 	{
 		if (this.editorFont == null)
@@ -148,7 +154,7 @@ public class Settings
 		}
 		return editorFont;
 	}
-	
+
 	public Font getMsgLogFont()
 	{
 		if (this.msgLogFont == null)
@@ -157,7 +163,7 @@ public class Settings
 		}
 		return this.msgLogFont;
 	}
-	
+
 	public Font getDataFont()
 	{
 		if (this.dataFont == null)
@@ -173,7 +179,7 @@ public class Settings
 	private Font getFont(String aFontName)
 	{
 		Font result;
-		
+
 		String baseKey = new StringBuffer("workbench.font.").append(aFontName).toString();
 		String name = this.props.getProperty(baseKey + ".name", "Dialog");
 		String sizeS = this.props.getProperty(baseKey + ".size", "11");
@@ -193,12 +199,12 @@ public class Settings
 		result = new Font(name, style, size);
 		return result;
 	}
-	
+
 	public String getLastExportDir()
 	{
 		return this.props.getProperty("workbench.export.lastdir","");
 	}
-	
+
 	public void setLastExportDir(String aDir)
 	{
 		this.props.setProperty("workbench.export.lastdir", aDir);
@@ -209,21 +215,21 @@ public class Settings
 	{
 		return "[Settings]";
 	}
-	
+
 	public void storeWindowPosition(Component target)
 	{
 		Point p = target.getLocation();
 		String id = target.getClass().getName();
 		this.setWindowPosition(id, p.x, p.y);
 	}
-	
+
 	public void storeWindowSize(Component target)
 	{
 		Dimension d = target.getSize();
 		String id = target.getClass().getName();
 		this.setWindowSize(id, d.width, d.height);
 	}
-	
+
 	public void setWindowPosition(String windowClass, int x, int y)
 	{
 		this.props.setProperty(windowClass + ".x", Integer.toString(x));
@@ -235,14 +241,14 @@ public class Settings
 		this.props.setProperty(windowClass + ".width", Integer.toString(width));
 		this.props.setProperty(windowClass + ".height", Integer.toString(height));
 	}
-	
+
 	public boolean restoreWindowSize(Component target)
 	{
 		boolean result = false;
 		String id = target.getClass().getName();
 		int w = this.getWindowWidth(id);
 		int h = this.getWindowHeight(id);
-		if (w > 0 && h > 0) 
+		if (w > 0 && h > 0)
 		{
 			target.setSize(new Dimension(w, h));
 			result = true;
@@ -256,59 +262,59 @@ public class Settings
 		String id = target.getClass().getName();
 		int x = this.getWindowPosX(id);
 		int y = this.getWindowPosY(id);
-		if (x > 0 && y > 0) 
+		if (x > 0 && y > 0)
 		{
 			target.setLocation(new Point(x, y));
 			result = true;
 		}
 		return result;
 	}
-	
-	
+
+
 	public void setSqlDividerLocation(int y)
 	{
 		this.props.setProperty("workbench.gui.sql.divider", Integer.toString(y));
 	}
-	
+
 	public int getSqlDividerLocation()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.sql.divider", "-1"));
 	}
-	
+
 	public int getWindowPosX(String windowClass)
 	{
 		return StringUtil.getIntValue(this.props.getProperty(windowClass + ".x", "0"));
 	}
-	
+
 	public int getWindowPosY(String windowClass)
 	{
 		return StringUtil.getIntValue(this.props.getProperty(windowClass + ".y", "0"));
 	}
-	
+
 	public int getWindowWidth(String windowClass)
 	{
 		return StringUtil.getIntValue(this.props.getProperty(windowClass + ".width", "0"));
 	}
-	
+
 	public int getWindowHeight(String windowClass)
 	{
 		return StringUtil.getIntValue(this.props.getProperty(windowClass + ".height", "0"));
 	}
-	
+
 	public int getEditorTabWidth()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("editortabwidth", "4"));
 	}
-	
+
 	public void setEditorTabWidth(int aWidth)
 	{
 		this.props.setProperty("editor.tabwidth", Integer.toString(aWidth));
 	}
-	
+
 	public String getLastConnection()
 	{
 		return this.props.getProperty("connection.last");
-	}		
+	}
 
 	public void setLastConnection(String aName)
 	{
@@ -324,12 +330,12 @@ public class Settings
 	{
 		this.props.setProperty("drivers.lastlibdir", aDir);
 	}
-	
+
 	public int getMaxHistorySize()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.historysize", "15"));
 	}
-	
+
 	public int getDefaultTabCount()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.defaulttabcount", "4"));
@@ -344,7 +350,7 @@ public class Settings
 	{
 		this.props.setProperty("workbench.gui.lookandfeelclass", aClassname);
 	}
-	
+
 	public String getLookAndFeelClass()
 	{
 		return this.props.getProperty("workbench.gui.lookandfeelclass", "");
@@ -358,7 +364,7 @@ public class Settings
 	{
 		this.props.setProperty("workbench.sql.preferredcolwidth", Integer.toString(aWidth));
 	}
-	
+
 	public int getMaxColumnWidth()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.maxcolwidth", "500"));
@@ -367,26 +373,26 @@ public class Settings
 	{
 		this.props.setProperty("workbench.sql.maxcolwidth", Integer.toString(aWidth));
 	}
-	
+
 	public String getDefaultDateFormat()
 	{
 		return this.props.getProperty("workbench.gui.display.dateformat", null);
 	}
-	
+
 	public void setDefaultDateFormat(String aFormat)
 	{
 		this.props.setProperty("workbench.gui.display.dateformat", aFormat);
 	}
-	
+
 	public int getMaxFractionDigits()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.display.maxfractiondigits", "-1"));
 	}
-	
+
 	public void setDefaultDateFormat(int aDigits)
 	{
 		this.props.setProperty("workbench.gui.display.maxfractiondigits", Integer.toString(aDigits));
 	}
-	
-	
+
+
 }

@@ -20,6 +20,11 @@ import workbench.resource.ResourceMgr;
  */
 public abstract class WbAction extends AbstractAction
 {
+	public static final String ADD_TO_TOOLBAR = "AddToToolbar";
+	public static final String MAIN_MENU_ITEM = "MainMenuItem";
+	public static final String MENU_SEPARATOR = "MenuSepBefore";
+	public static final String TBAR_SEPARATOR = "TbarSepBefore";
+	
 	private String actionName = null;
 
 	public WbAction()

@@ -20,7 +20,9 @@ import workbench.interfaces.ClipboardSupport;
 import workbench.gui.menu.TextPopup;
 import javax.swing.Action;
 import javax.swing.JTextPane;
+import javax.swing.KeyStroke;
 import javax.swing.border.EtchedBorder;
+import workbench.gui.actions.WbAction;
 import workbench.gui.editor.SyntaxStyle;
 import workbench.gui.editor.Token;
 
@@ -68,15 +70,10 @@ public class EditorPanel
 		
 		this.addKeyBinding("C+a", this.popup.getSelectAllAction());
 		
-		//Border o = BorderFactory.createLineBorder(Color.lightGray, 2);
-		//Border b = BorderFactory.createEtchedBorder(BevelBorder.RAISED);
-		//this.setBorder(BorderFactory.createCompoundBorder(o, b));
-		//this.setBorder(o);
 		this.setTabSize(WbManager.getSettings().getEditorTabWidth());
 		this.setTokenMarker(new AnsiSQLTokenMarker());
 		this.setCaretBlinkEnabled(true);
-		//this.setRequestFocusEnabled(true);
-		//this.requestDefaultFocus();
+		
 		this.setRightClickPopup(popup);
 		this.setMaximumSize(null);
 		this.setPreferredSize(null);
@@ -115,6 +112,15 @@ public class EditorPanel
 	public void addKeyBinding(String aBinding, ActionListener aListener)
 	{
 		this.getInputHandler().addKeyBinding(aBinding, aListener);
+	}
+	
+	public void addKeyBinding(WbAction anAction)
+	{
+		KeyStroke key = anAction.getAccelerator();
+		if (key != null)
+		{
+			this.getInputHandler().addKeyBinding(key, anAction);
+		}
 	}
 
 }

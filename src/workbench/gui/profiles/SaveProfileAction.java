@@ -16,7 +16,7 @@ import workbench.log.LogMgr;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
- *	@author  thomas.kellerer@web.de
+ *	@author  sql.workbench@freenet.de
  */
 public class SaveProfileAction extends AbstractAction
 {
@@ -25,8 +25,8 @@ public class SaveProfileAction extends AbstractAction
 	public SaveProfileAction(FileActions aClient)
 	{
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("SaveProfile"));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("SaveProfile"));
+		this.putValue(Action.NAME, ResourceMgr.getString("LabelSaveProfile"));
+		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("LabelSaveProfile"));
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_SAVE));
 	}
 

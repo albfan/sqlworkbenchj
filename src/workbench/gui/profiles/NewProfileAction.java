@@ -16,7 +16,7 @@ import workbench.log.LogMgr;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
- *	@author  thomas.kellerer@web.de
+ *	@author  sql.workbench@freenet.de
  */
 public class NewProfileAction extends AbstractAction
 {
@@ -25,8 +25,8 @@ public class NewProfileAction extends AbstractAction
 	public NewProfileAction(FileActions aClient)
 	{
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("NewProfile"));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("NewProfile"));
+		this.putValue(Action.NAME, ResourceMgr.getString("LabelNewProfile"));
+		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("LabelNewProfile"));
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_NEW));
 	}
 

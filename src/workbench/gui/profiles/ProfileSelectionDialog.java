@@ -20,7 +20,7 @@ import workbench.resource.Settings;
 
 /**
  *
- * @author  thomas.kellerer@web.de
+ * @author  sql.workbench@freenet.de
  */
 public class ProfileSelectionDialog
 	extends javax.swing.JDialog

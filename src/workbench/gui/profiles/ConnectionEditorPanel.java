@@ -48,7 +48,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 	private void initComponents()//GEN-BEGIN:initComponents
 	{
 		java.awt.GridBagConstraints gridBagConstraints;
-
+		
 		lblUsername = new javax.swing.JLabel();
 		tfUserName = new javax.swing.JTextField();
 		lblPwd = new javax.swing.JLabel();
@@ -61,9 +61,9 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		dummy = new javax.swing.JPanel();
 		tfProfileName = new javax.swing.JTextField();
 		manageDriversButton = new javax.swing.JButton();
-
+		
 		setLayout(new java.awt.GridBagLayout());
-
+		
 		setMinimumSize(new java.awt.Dimension(200, 200));
 		lblUsername.setFont(null);
 		lblUsername.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_USERNAME));
@@ -73,7 +73,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
 		add(lblUsername, gridBagConstraints);
-
+		
 		tfUserName.setFont(null);
 		tfUserName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
 		tfUserName.setToolTipText("");
@@ -88,7 +88,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 				fieldFocusLost(evt);
 			}
 		});
-
+		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 3;
@@ -97,7 +97,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		add(tfUserName, gridBagConstraints);
-
+		
 		lblPwd.setFont(null);
 		lblPwd.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_PASSWORD));
 		gridBagConstraints = new java.awt.GridBagConstraints();
@@ -106,7 +106,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
 		add(lblPwd, gridBagConstraints);
-
+		
 		jLabel1.setFont(null);
 		jLabel1.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_DRIVER));
 		gridBagConstraints = new java.awt.GridBagConstraints();
@@ -115,7 +115,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
 		add(jLabel1, gridBagConstraints);
-
+		
 		cbDrivers.setEditable(true);
 		cbDrivers.setFont(null);
 		cbDrivers.setMaximumSize(new java.awt.Dimension(32767, 20));
@@ -129,7 +129,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 				fieldFocusLost(evt);
 			}
 		});
-
+		
 		cbDrivers.addItemListener(new java.awt.event.ItemListener()
 		{
 			public void itemStateChanged(java.awt.event.ItemEvent evt)
@@ -137,7 +137,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 				cbDriversItemStateChanged(evt);
 			}
 		});
-
+		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 1;
@@ -147,7 +147,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.weightx = 0.5;
 		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 4);
 		add(cbDrivers, gridBagConstraints);
-
+		
 		jLabel2.setFont(null);
 		jLabel2.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_URL));
 		gridBagConstraints = new java.awt.GridBagConstraints();
@@ -156,7 +156,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
 		add(jLabel2, gridBagConstraints);
-
+		
 		tfURL.setFont(null);
 		tfURL.setHorizontalAlignment(javax.swing.JTextField.LEFT);
 		tfURL.setMaximumSize(new java.awt.Dimension(2147483647, 20));
@@ -170,7 +170,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 				fieldFocusLost(evt);
 			}
 		});
-
+		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 2;
@@ -179,7 +179,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		add(tfURL, gridBagConstraints);
-
+		
 		tfPwd.setFont(null);
 		tfPwd.addFocusListener(new java.awt.event.FocusAdapter()
 		{
@@ -188,7 +188,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 				fieldFocusLost(evt);
 			}
 		});
-
+		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 4;
@@ -197,7 +197,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		add(tfPwd, gridBagConstraints);
-
+		
 		cbAutocommit.setFont(null);
 		cbAutocommit.setText("Autocommit");
 		cbAutocommit.addItemListener(new java.awt.event.ItemListener()
@@ -207,14 +207,14 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 				cbAutocommitItemStateChanged(evt);
 			}
 		});
-
+		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 5;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		add(cbAutocommit, gridBagConstraints);
-
+		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 6;
@@ -222,7 +222,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
 		gridBagConstraints.weighty = 1.0;
 		add(dummy, gridBagConstraints);
-
+		
 		tfProfileName.setFont(null);
 		tfProfileName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
 		tfProfileName.addFocusListener(new java.awt.event.FocusAdapter()
@@ -232,7 +232,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 				fieldFocusLost(evt);
 			}
 		});
-
+		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 0;
@@ -242,9 +242,9 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.weightx = 1.0;
 		gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
 		add(tfProfileName, gridBagConstraints);
-
+		
 		manageDriversButton.setFont(null);
-		manageDriversButton.setText(ResourceMgr.getString("EditDrivers"));
+		manageDriversButton.setText(ResourceMgr.getString("LabelEditDrivers"));
 		manageDriversButton.setMaximumSize(new java.awt.Dimension(200, 20));
 		manageDriversButton.setMinimumSize(new java.awt.Dimension(70, 20));
 		manageDriversButton.setPreferredSize(new java.awt.Dimension(100, 20));
@@ -255,14 +255,14 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 				showDriverEditorDialog(evt);
 			}
 		});
-
+		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 3;
 		gridBagConstraints.gridy = 1;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 0, 1, 6);
 		add(manageDriversButton, gridBagConstraints);
-
+		
 	}//GEN-END:initComponents
 
 	private void cbDriversItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_cbDriversItemStateChanged

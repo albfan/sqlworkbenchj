@@ -5,29 +5,32 @@
  */
 package workbench.gui.actions;
 
-import workbench.interfaces.ClipboardSupport;
-import javax.swing.AbstractAction;
 import java.awt.event.ActionEvent;
-import workbench.resource.ResourceMgr;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.KeyStroke;
 import workbench.gui.sql.SqlPanel;
+import workbench.resource.ResourceMgr;
 
 /**
  *	Action to clear the contents of a entry field
- *	@author  thomas.kellerer@web.de
+ *	@author  sql.workbench@freenet.de
  */
-public class FindAgainAction extends AbstractAction
+public class FindAgainAction extends WbAction
 {
 	private SqlPanel client;
 
 	public FindAgainAction(SqlPanel aClient)
 	{
+		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("FindAgain"));
+		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtFindAgain"));
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("FindAgain"));
-    this.putValue(ACTION_COMMAND_KEY, "FindData");
-		this.putValue(WbActionConstants.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("FindAgain"));
+		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
+		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtFindAgain"));
+		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_MASK));
 	}
 
 	public void actionPerformed(ActionEvent e)

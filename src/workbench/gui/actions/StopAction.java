@@ -15,21 +15,22 @@ import workbench.resource.ResourceMgr;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
- *	@author  thomas.kellerer@web.de
+ *	@author  sql.workbench@freenet.de
  */
-public class StopAction extends AbstractAction
+public class StopAction extends WbAction
 {
 	private SqlPanel panel;
 
 	public StopAction(SqlPanel aPanel)
 	{
+		super();
 		this.panel = aPanel;
 		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_STOP_STMT));
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription(ResourceMgr.TXT_STOP_STMT));
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_STOP));
-		this.putValue(WbActionConstants.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
-		this.putValue(WbActionConstants.ADD_TO_TOOLBAR, "true");
-		this.putValue(WbActionConstants.MENU_SEPARATOR, "true");
+		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
+		this.putValue(WbAction.ADD_TO_TOOLBAR, "true");
+		this.putValue(WbAction.MENU_SEPARATOR, "true");
 	}
 
 	public void actionPerformed(ActionEvent e)

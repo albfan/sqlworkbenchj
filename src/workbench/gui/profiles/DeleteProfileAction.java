@@ -16,7 +16,7 @@ import workbench.log.LogMgr;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
- *	@author  thomas.kellerer@web.de
+ *	@author  sql.workbench@freenet.de
  */
 public class DeleteProfileAction extends AbstractAction
 {
@@ -25,8 +25,8 @@ public class DeleteProfileAction extends AbstractAction
 	public DeleteProfileAction(FileActions aClient)
 	{
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("DeleteProfile"));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("DeleteProfile"));
+		this.putValue(Action.NAME, ResourceMgr.getString("LabelDeleteProfile"));
+		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("LabelDeleteProfile"));
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_DELETE));
 	}
 

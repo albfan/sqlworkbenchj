@@ -14,15 +14,16 @@ import workbench.WbManager;
 
 /**
  *	Action to paste the contents of the clipboard into the entry field
- *	@author  thomas.kellerer@web.de
+ *	@author  sql.workbench@freenet.de
  */
-public class FileExitAction extends AbstractAction
+public class FileExitAction extends WbAction
 {
 	public FileExitAction()
 	{
+		super();
 		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.MNU_TXT_EXIT));
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
 		WbManager.getInstance().exitWorkbench();

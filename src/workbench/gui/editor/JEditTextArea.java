@@ -50,7 +50,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.2 2002-07-10 23:40:15 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.3 2002-07-17 21:04:29 thomas Exp $
  */
 public class JEditTextArea extends JComponent
 {
@@ -1588,6 +1588,10 @@ public class JEditTextArea extends JComponent
 		case KeyEvent.KEY_RELEASED:
 			inputHandler.keyReleased(evt);
 			break;
+		}
+		if (!evt.isConsumed())
+		{
+			super.processKeyEvent(evt);
 		}
 	}
 

@@ -20,12 +20,15 @@ import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.exception.WbException;
+import workbench.gui.components.WbToolbar;
+import workbench.gui.components.WbToolbarButton;
+import workbench.gui.components.WbToolbarSeparator;
 import workbench.interfaces.FileActions;
 import workbench.resource.ResourceMgr;
 
 /**
  *
- * @author  thomas.kellerer@inline-skate.com
+ * @author  sql.workbench@freenet.de
  */
 public class ProfileEditorPanel
 	extends javax.swing.JPanel
@@ -48,8 +51,7 @@ public class ProfileEditorPanel
 		this.selectProfile(last);
 		jList1.setNextFocusableComponent(connectionEditor);
 		this.connectionEditor.setNextFocusableComponent(jList1);
-		this.toolbar = new JToolBar();
-		this.toolbar.setFloatable(false);
+		this.toolbar = new WbToolbar();
 		this.toolbar.add(new NewProfileAction(this));
 		this.toolbar.add(new SaveProfileAction(this));
 		this.toolbar.addSeparator();
@@ -76,19 +78,23 @@ public class ProfileEditorPanel
 	private void initComponents()//GEN-BEGIN:initComponents
 	{
 		jSplitPane1 = new javax.swing.JSplitPane();
-
-
+		
+		
 		listPanel = new javax.swing.JPanel();
+		jScrollPane1 = new javax.swing.JScrollPane();
 		jList1 = new javax.swing.JList();
-
+		
 		setLayout(new java.awt.BorderLayout());
-
+		
 		jSplitPane1.setBorder(new javax.swing.border.EtchedBorder());
-		jSplitPane1.setDividerLocation(100);
+		jSplitPane1.setDividerLocation(110);
 		jSplitPane1.setDividerSize(4);
 		listPanel.setLayout(new java.awt.BorderLayout());
-
-		jList1.setFont(null);
+		
+		jScrollPane1.setPreferredSize(null);
+		jList1.setFont(WbManager.getSettings().getStandardFont());
+		jList1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+		jList1.setVisibleRowCount(10);
 		this.fillProfiles();
 		jList1.addListSelectionListener(new javax.swing.event.ListSelectionListener()
 		{
@@ -97,13 +103,15 @@ public class ProfileEditorPanel
 				jList1ValueChanged(evt);
 			}
 		});
-
-		listPanel.add(jList1, java.awt.BorderLayout.CENTER);
-
+		
+		jScrollPane1.setViewportView(jList1);
+		
+		listPanel.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+		
 		jSplitPane1.setLeftComponent(listPanel);
-
+		
 		add(jSplitPane1, java.awt.BorderLayout.CENTER);
-
+		
 	}//GEN-END:initComponents
 
 	private void jList1ValueChanged(javax.swing.event.ListSelectionEvent evt)//GEN-FIRST:event_jList1ValueChanged
@@ -132,6 +140,7 @@ public class ProfileEditorPanel
 
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
+	private javax.swing.JScrollPane jScrollPane1;
 	private javax.swing.JSplitPane jSplitPane1;
 	private javax.swing.JList jList1;
 	private javax.swing.JPanel listPanel;

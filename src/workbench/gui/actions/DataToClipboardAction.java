@@ -6,6 +6,8 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
@@ -15,17 +17,19 @@ import workbench.resource.ResourceMgr;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
- *	@author  thomas.kellerer@web.de
+ *	@author  sql.workbench@freenet.de
  */
-public class DataToClipboardAction extends AbstractAction
+public class DataToClipboardAction extends WbAction
 {
 	private Exporter client;
-	
+
 	public DataToClipboardAction(Exporter aClient)
 	{
+		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("DataToClipboard"));
-		this.putValue(WbActionConstants.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
+		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtDataToClipboard"));
+		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
+		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
 	}
 
 	public void actionPerformed(ActionEvent e)

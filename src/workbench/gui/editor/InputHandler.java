@@ -14,6 +14,7 @@ import javax.swing.JPopupMenu;
 import java.awt.event.*;
 import java.awt.Component;
 import java.util.*;
+import javax.swing.KeyStroke;
 
 /**
  * An input handler converts the user's key strokes into concrete actions.
@@ -24,7 +25,7 @@ import java.util.*;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.1 2001-12-11 19:07:23 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.2 2002-07-17 21:04:29 thomas Exp $
  * @see org.gjt.sp.jedit.textarea.DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
@@ -165,6 +166,8 @@ public abstract class InputHandler extends KeyAdapter
 	 * @param action The action
 	 */
 	public abstract void addKeyBinding(String keyBinding, ActionListener action);
+	
+	public abstract void addKeyBinding(KeyStroke aKey, ActionListener action);
 
 	/**
 	 * Removes a key binding from this input handler.

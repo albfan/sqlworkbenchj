@@ -66,10 +66,12 @@ public class WbTable extends javax.swing.JTable
 		}
 	}
 
-	public int getSortedColumnIndex()
+	public int getSortedViewColumnIndex()
 	{
 		if (this.sortModel == null) return -1;
-		return this.sortModel.getColumn();
+		int modelIndex = this.sortModel.getColumn();
+		int viewIndex = this.convertColumnIndexToView(modelIndex);
+		return viewIndex;
 	}
 	
 	public boolean isSortedColumnAscending()

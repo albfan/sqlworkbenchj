@@ -409,10 +409,6 @@ public class WbTableSorter
 	}
 
 
-	// There is no-where else to put this.
-	// Add a mouse listener to the Table to trigger a table sort
-	// when a column heading is clicked in the JTable.
-	
 	/**    Add a MouseListener to the given table which will cause the table
 	 * to be sorted when the header is clicked.  The table will be sorted
 	 * in ascending order initially.  If the table was already sorted in

@@ -6,6 +6,8 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
@@ -15,21 +17,22 @@ import workbench.resource.ResourceMgr;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
- *	@author  thomas.kellerer@web.de
+ *	@author  sql.workbench@freenet.de
  */
-public class NextStatementAction extends AbstractAction
+public class NextStatementAction extends WbAction
 {
 	private SqlPanel panel;
 	public NextStatementAction(SqlPanel aPanel)
 	{
+		super();
 		this.panel = aPanel;
-		this.putValue(Action.NAME, ResourceMgr.getString("NextStatement"));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("NextStatement"));
+		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtNextStatement"));
+		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtNextStatement"));
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_DOWN));
-		this.putValue(WbActionConstants.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
-		this.putValue(WbActionConstants.ADD_TO_TOOLBAR, "true");
-		this.putValue(WbActionConstants.MENU_SEPARATOR, "true");
-		this.putValue(WbActionConstants.TBAR_SEPARATOR, "true");
+		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
+		this.putValue(WbAction.MENU_SEPARATOR, "true");
+		this.putValue(WbAction.TBAR_SEPARATOR, "true");
+		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK));
 	}
 
 	public void actionPerformed(ActionEvent e)

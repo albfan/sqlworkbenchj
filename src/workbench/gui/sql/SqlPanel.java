@@ -14,10 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.Action;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
+import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import workbench.WbManager;
@@ -31,6 +28,7 @@ import workbench.util.WbPersistence;
 
 
 
+
 /**
  *	A panel with an editor (EditorPanel), a log panel and
  *	a display panel.
@@ -38,9 +36,7 @@ import workbench.util.WbPersistence;
  * @author  thomas
  * @version 1.0
  */
-public class SqlPanel 
-	extends JPanel 
-	implements Runnable, TableModelListener
+public class SqlPanel extends JPanel implements Runnable, TableModelListener
 {
 	private boolean selected = false;
 	private EditorPanel editor;
@@ -69,7 +65,7 @@ public class SqlPanel
 
 	private FindAction findAction = null;
 	private FindAgainAction findAgainAction = null;
-	private static final int DIVIDER_SIZE = 4;
+	private static final int DIVIDER_SIZE = 5;
 	private String lastSearchCriteria;
 	
 	/** Creates new SqlPanel */
@@ -77,6 +73,7 @@ public class SqlPanel
 	{
 		this.internalId = anId;
 		this.setDoubleBuffered(true);
+		this.setBorder(null);
 		this.historyFilename = "WbStatements" + Integer.toString(this.internalId) + ".xml";
 		this.setLayout(new BorderLayout());
 		this.result = new SqlResultDisplay();
@@ -84,8 +81,20 @@ public class SqlPanel
 		this.contentPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.result);
 		this.contentPanel.setDividerSize(DIVIDER_SIZE);
 		this.contentPanel.setBorder(null);
+		this.result.setBorder(null);
 		this.add(this.contentPanel, BorderLayout.CENTER);
+		
+		int loc = WbManager.getSettings().getSqlDividerLocation();
+		if (loc <= 0) loc = 200;
+		this.contentPanel.setDividerLocation(loc);
 	
+		this.initActions();
+		this.setupActionMap();
+		this.initListener();
+	}
+
+	private void initActions()
+	{
 		ExecuteSql e = new ExecuteSql();
 		this.executeAll = new ExecuteAllAction(e);
 
@@ -95,13 +104,6 @@ public class SqlPanel
 		this.editor.addPopupMenuItem(this.executeSelected, true);
 		this.editor.addPopupMenuItem(this.executeAll, false);
 
-		this.editor.addKeyBinding("C+E", this.executeSelected);
-		
-		int loc = WbManager.getSettings().getSqlDividerLocation();
-		if (loc <= 0) loc = 200;
-		this.contentPanel.setDividerLocation(loc);
-		//this.result.showLogPanel();
-		
 		TextPopup pop = (TextPopup)this.editor.getRightClickPopup();
 		
 		this.actions.add(pop.getCutAction());
@@ -109,7 +111,7 @@ public class SqlPanel
 		this.actions.add(pop.getPasteAction());
 		
 		Action a = pop.getClearAction();
-		a.putValue(WbActionConstants.MENU_SEPARATOR, "true");
+		a.putValue(WbAction.MENU_SEPARATOR, "true");
 		this.actions.add(a);
 		this.actions.add(pop.getSelectAllAction());
 
@@ -117,7 +119,7 @@ public class SqlPanel
 		this.actions.add(this.updateAction);
 	
 		SaveDataAsAction save = new SaveDataAsAction(this.result);
-		save.putValue(WbActionConstants.MENU_SEPARATOR, "true");
+		save.putValue(WbAction.MENU_SEPARATOR, "true");
 
 		DataToClipboardAction clp = new DataToClipboardAction(this.result);
 		this.actions.add(save);
@@ -132,12 +134,10 @@ public class SqlPanel
 		
 		this.nextStmtAction = new NextStatementAction(this);
 		this.nextStmtAction.setEnabled(false);
-		this.editor.addKeyBinding("C+N", this.nextStmtAction);
 		this.actions.add(this.nextStmtAction);
 		
 		this.prevStmtAction = new PrevStatementAction(this);
 		this.prevStmtAction.setEnabled(false);
-		this.editor.addKeyBinding("C+P", this.prevStmtAction);
 		this.actions.add(this.prevStmtAction);
 		
 		this.executeAll.setEnabled(false);
@@ -153,17 +153,42 @@ public class SqlPanel
 		
 		this.findAction = new FindAction(this);
 		this.findAction.setEnabled(false);
-		this.editor.addKeyBinding("C+F", this.findAction);
-		this.findAction.putValue(WbActionConstants.TBAR_SEPARATOR, "true");
+		this.findAction.putValue(WbAction.TBAR_SEPARATOR, "true");
 		this.findAgainAction = new FindAgainAction(this);
-		this.editor.addKeyBinding("C+G", this.findAgainAction);
 		this.findAgainAction.setEnabled(false);
 		
 		this.toolbarActions.add(this.findAction);
 		this.toolbarActions.add(this.findAgainAction);
-		this.initListener();
+		this.findAction.putValue(WbAction.MENU_SEPARATOR, "true");
+		this.actions.add(this.findAction);
+		this.actions.add(this.findAgainAction);
 	}
+	
+	private void setupActionMap()
+	{
+		InputMap im = new ComponentInputMap(this);
+		ActionMap am = new ActionMap();
+		this.setInputMap(WHEN_IN_FOCUSED_WINDOW, im);
+		this.setActionMap(am);
 
+		for (int i=0; i < this.actions.size(); i++)
+		{
+			this.addToActionMap((WbAction)this.actions.get(i));
+		}
+	}
+	
+	public void addToActionMap(WbAction anAction)
+	{
+		InputMap in = this.getInputMap();
+		ActionMap am = this.getActionMap();
+		KeyStroke key = anAction.getAccelerator();
+		if (key != null)
+		{
+			in.put(key, anAction.getActionName());
+			am.put(anAction.getActionName(), anAction);
+		}
+	}
+	
 	private void initListener()
 	{
 		this.result.addTableModelListener(this);
@@ -402,7 +427,7 @@ public class SqlPanel
 		this.setBusy(true);
 		//this.editor.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		
-		this.showStatusMessage(ResourceMgr.getString("ExecutingSql"));
+		this.showStatusMessage(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
 
 		String sql;
 		

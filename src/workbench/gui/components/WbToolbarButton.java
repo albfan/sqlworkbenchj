@@ -12,11 +12,11 @@ import javax.swing.Action;
 
 /**
  *
- * @author  thomas.kellerer@inline-skate.com
+ * @author  sql.workbench@freenet.de
  */
 public class WbToolbarButton extends javax.swing.JButton
 {
-	
+
 	/** Creates a new instance of WbToolbarButton */
 	public WbToolbarButton(Action a)
 	{
@@ -26,9 +26,9 @@ public class WbToolbarButton extends javax.swing.JButton
 		//this.setMaximumSize(d);
 		//this.setPreferredSize(d);
 		//this.setMinimumSize(d);
-		Insets m = new Insets(2,2,2,2);
+		Insets m = new Insets(1,1,1,1);
 		this.setMargin(m);
 		//this.setRolloverEnabled(true);
 	}
-	
+
 }

@@ -1,33 +1,32 @@
-/*
- * ClearAction.java
- *
- * Created on December 2, 2001, 1:32 AM
- */
 package workbench.gui.actions;
 
-import workbench.interfaces.ClipboardSupport;
 import javax.swing.AbstractAction;
 import java.awt.event.ActionEvent;
-import workbench.resource.ResourceMgr;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import javax.swing.Action;
+import javax.swing.KeyStroke;
 import workbench.gui.sql.SqlPanel;
+import workbench.interfaces.ClipboardSupport;
+import workbench.resource.ResourceMgr;
 
 /**
  *	Action to clear the contents of a entry field
- *	@author  thomas.kellerer@web.de
+ *	@author  sql.workbench@freenet.de
  */
-public class FindAction extends AbstractAction
+public class FindAction extends WbAction
 {
 	private SqlPanel client;
 
 	public FindAction(SqlPanel aClient)
 	{
+		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("Find"));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("Find"));
-    this.putValue(ACTION_COMMAND_KEY, "Find");
-		this.putValue(WbActionConstants.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("Find"));
+		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtFind"));
+		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_FIND));
+		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
+		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtFind"));
+		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK));
 	}
 
 	public void actionPerformed(ActionEvent e)
