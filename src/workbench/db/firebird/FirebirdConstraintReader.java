@@ -9,11 +9,13 @@
  * To contact the author please send an email to: info@sql-workbench.net
  *
  */
-package workbench.db;
+package workbench.db.firebird;
+
+import workbench.db.*;
 
 
 /**
- *
+ * An implementation of {@link AbstractConstraintReader} for the Firebird database server
  * @author  info@sql-workbench.net
  */
 public class FirebirdConstraintReader extends AbstractConstraintReader
