@@ -7,7 +7,7 @@
 package workbench.gui.menu;
 
 import javax.swing.JPopupMenu;
-import workbench.gui.ClipboardSupport;
+import workbench.interfaces.ClipboardSupport;
 import java.awt.MenuItem;
 import workbench.gui.actions.CutAction;
 import javax.swing.Action;

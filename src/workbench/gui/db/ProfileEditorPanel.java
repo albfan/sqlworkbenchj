@@ -26,7 +26,7 @@ import workbench.resource.ResourceMgr;
  *
  * @author  thomas.kellerer@inline-skate.com
  */
-public class ProfileEditorPanel 
+public class ProfileEditorPanel
 	extends javax.swing.JPanel
 	implements FileActions
 {
@@ -34,7 +34,7 @@ public class ProfileEditorPanel
 	private ProfileListModel model;
 	private JToolBar toolbar;
 	private int lastIndex = -1;
-	
+
 	/** Creates new form ProfileEditor */
 	public ProfileEditorPanel()
 	{
@@ -53,13 +53,13 @@ public class ProfileEditorPanel
 		this.toolbar.add(new DeleteProfileAction(this));
 		this.listPanel.add(this.toolbar, BorderLayout.NORTH);
 	}
-	
+
 	private void fillDrivers()
 	{
 		List drivers = WbManager.getInstance().getConnectionMgr().getDrivers();
 		this.connectionEditor.setDrivers(drivers);
 	}
-	
+
 	private void fillProfiles()
 	{
 		this.model = new ProfileListModel(WbManager.getInstance().getConnectionMgr().getProfiles());
@@ -83,7 +83,7 @@ public class ProfileEditorPanel
 		
 		jSplitPane1.setBorder(new javax.swing.border.EtchedBorder());
 		jSplitPane1.setDividerLocation(100);
-		jSplitPane1.setDividerSize(5);
+		jSplitPane1.setDividerSize(4);
 		listPanel.setLayout(new java.awt.BorderLayout());
 		
 		jList1.setFont(null);
@@ -101,6 +101,7 @@ public class ProfileEditorPanel
 		jSplitPane1.setLeftComponent(listPanel);
 		
 		
+		connectionEditor.setFont(null);
 		jSplitPane1.setRightComponent(connectionEditor);
 		
 		add(jSplitPane1, java.awt.BorderLayout.CENTER);
@@ -111,7 +112,7 @@ public class ProfileEditorPanel
 	{//GEN-HEADEREND:event_jList1ValueChanged
 		if (evt.getSource() == this.jList1)
 		{
-			if (lastIndex > -1) 
+			if (lastIndex > -1)
 			{
 				ConnectionProfile current = this.connectionEditor.getProfile();
 				this.model.putProfile(lastIndex, current);
@@ -121,41 +122,33 @@ public class ProfileEditorPanel
 			lastIndex = this.jList1.getSelectedIndex();
 		}
 	}//GEN-LAST:event_jList1ValueChanged
-	
+
 	public ConnectionProfile getSelectedProfile()
 	{
-		ConnectionProfile prof = this.connectionEditor.getProfile();
-		ConnectionProfile prof2 = (ConnectionProfile)jList1.getSelectedValue();
-		// two profiles are equal if their driver, url and username are equal
-		// in this case 
-		if (prof.equals(prof2)) 
-		{
-			return prof2;
-		}
-		else
-		{
-			return prof;
-		}
+		this.updateUI();
+		this.connectionEditor.updateProfile();
+		ConnectionProfile prof = (ConnectionProfile)jList1.getSelectedValue();
+		return prof;
 	}
-	
-	
+
+
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private workbench.gui.db.ConnectionEditorPanel connectionEditor;
 	private javax.swing.JSplitPane jSplitPane1;
 	private javax.swing.JList jList1;
 	private javax.swing.JPanel listPanel;
 	// End of variables declaration//GEN-END:variables
-	
+
 
 	private void selectProfile(String aProfileName)
 	{
 		if (aProfileName == null) return;
-		
+
 		try
 		{
 			ListModel m = jList1.getModel();
 			int count = m.getSize();
-			
+
 			for (int i=0; i < count; i++)
 			{
 				ConnectionProfile prof = (ConnectionProfile)m.getElementAt(i);
@@ -172,7 +165,7 @@ public class ProfileEditorPanel
 			jList1.setSelectedIndex(0);
 		}
 	}
-	
+
 	/**
 	 *	Remove an item from the listmodel
 	 */
@@ -182,11 +175,11 @@ public class ProfileEditorPanel
 		if (index > 0) this.jList1.setSelectedIndex(index - 1);
 		this.model.deleteProfile(index);
 		this.jList1.updateUI();
-	}	
-	
+	}
+
 	/**
-	 *	Create a new profile. This will only be 
-	 *	created in the ListModel. 
+	 *	Create a new profile. This will only be
+	 *	created in the ListModel.
 	 */
 	public void newItem() throws WbException
 	{
@@ -196,7 +189,7 @@ public class ProfileEditorPanel
 		this.selectProfile(cp.getName());
 		this.jList1.updateUI();
 	}
-	
+
 	public void saveItem() throws WbException
 	{
 		ConnectionMgr conn = WbManager.getInstance().getConnectionMgr();

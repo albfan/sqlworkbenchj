@@ -75,6 +75,7 @@ public class ProfileSelectionDialog
 		getContentPane().add(dummy, BorderLayout.NORTH);
 		getContentPane().add(profiles, BorderLayout.CENTER);
     getContentPane().add(buttonPanel, java.awt.BorderLayout.SOUTH);
+		getRootPane().setDefaultButton(okButton);
 		setTitle(ResourceMgr.getString(ResourceMgr.TXT_SELECT_PROFILE));
 		this.restoreSize();
   }
