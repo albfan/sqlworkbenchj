@@ -58,6 +58,7 @@ import workbench.interfaces.Spooler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
 
@@ -531,7 +532,9 @@ public class TableListPanel
 		throws SQLException, WbException
 	{
 		DbMetadata meta = this.dbConnection.getMetadata();
-		tableDefinition.setModel(meta.getTableDefinitionModel(this.selectedCatalog, this.selectedSchema, this.selectedTableName), true);
+		DataStore ds = meta.getTableDefinition(this.selectedCatalog, this.selectedSchema, this.selectedTableName, this.selectedObjectType);
+		DataStoreTableModel model = new DataStoreTableModel(ds);
+		tableDefinition.setModel(model, true);
 		tableDefinition.adjustColumns();
 		TableColumnModel colmod = tableDefinition.getColumnModel();
 		TableColumn col = colmod.getColumn(DbMetadata.COLUMN_IDX_TABLE_DEFINITION_TYPE_ID);
@@ -549,6 +552,12 @@ public class TableListPanel
 		{
 			String viewSource = meta.getViewSource(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
 			tableSource.setText(viewSource);
+			tableSource.setCaretPosition(0);
+		}
+		else if ("synonym".equals(this.selectedObjectType))
+		{
+			String synSource = meta.getSynonymSource(this.selectedSchema, this.selectedTableName);
+			tableSource.setText(synSource);
 			tableSource.setCaretPosition(0);
 		}
 		else if (this.selectedObjectType.indexOf("table") > -1)

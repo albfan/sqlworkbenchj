@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import workbench.WbManager;
 import workbench.db.oracle.DbmsOutput;
+import workbench.db.oracle.SynonymReader;
 import workbench.exception.WbException;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.log.LogMgr;
@@ -246,6 +247,7 @@ public class DbMetadata
 			}
 			rs.close();
 			stmt.close();
+			if (source.indexOf(";") < 0) source.append(';');
 		}
 		catch (Exception e)
 		{
@@ -739,11 +741,34 @@ public class DbMetadata
 	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable)
 		throws SQLException, WbException
 	{
+		return this.getTableDefinition(aCatalog, aSchema, aTable, "TABLE");
+	}
+	
+	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, String aType)
+		throws SQLException, WbException
+	{
 		final String cols[] = {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "java.sql.Types", "SCALE", "PRECISION"};
 		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER};
 		final int sizes[] =   {20, 18, 5, 8, 10, 25, 18, 2, 2};
 		DataStore ds = new DataStore(cols, types, sizes);
 
+		if ("SYNONYM".equalsIgnoreCase(aType))
+		{
+			try
+			{
+				TableIdentifier id = SynonymReader.getSynonymTable(this.dbConnection.getSqlConnection(), aSchema, aTable);
+				if (id != null)
+				{
+					aSchema = id.getSchema();
+					aTable = id.getTable();
+					aCatalog = null;
+				}
+			}
+			catch (Exception e)
+			{
+			}
+		}
+		
 		ArrayList keys = new ArrayList();
 		try
 		{
@@ -1271,6 +1296,21 @@ public class DbMetadata
 		}
 		return name;
 	}
+	
+	public String getSynonymSource(String anOwner, String aSynonym)
+	{
+		String result = null;
+		try
+		{
+			result = SynonymReader.getSynonymSource(this.dbConnection.getSqlConnection(), anOwner, aSynonym);
+		}
+		catch (Exception e)
+		{
+			result = "";
+		}
+		return result;
+	}
+	
 
 	public String getTableSource(String aTablename, DataStore aTableDef)
 	{

@@ -55,9 +55,9 @@ import workbench.resource.Settings;
  * @author  workbench@kellerer.org
  * @version
  */
-public class MainWindow 
-	extends JFrame 
-	implements ActionListener, MouseListener, WindowListener, 
+public class MainWindow
+	extends JFrame
+	implements ActionListener, MouseListener, WindowListener,
 						ChangeListener, FilenameChangeListener
 {
 	private static int instanceCount;
@@ -91,13 +91,13 @@ public class MainWindow
 
 		this.disconnectAction = new FileDisconnectAction(this);
 		this.disconnectAction.setEnabled(false);
-    
-		ImageIcon dummy = ResourceMgr.getPicture("small_blank");
+
+		//ImageIcon dummy = ResourceMgr.getPicture("small_blank");
 		for (int i=0; i < tabCount; i++)
 		{
 			SqlPanel sql = new SqlPanel(i + 1);
 			sql.addFilenameChangeListener(this);
-			this.sqlTab.addTab(ResourceMgr.getString("LabelTabStatement") + " " + Integer.toString(i+1), dummy, sql);
+			this.sqlTab.addTab(ResourceMgr.getString("LabelTabStatement") + " " + Integer.toString(i+1), null, sql);
 			sql.restoreSettings();
 		}
 		this.initMenu();
@@ -127,7 +127,7 @@ public class MainWindow
 		this.sqlTab.addChangeListener(this);
 		this.sqlTab.addMouseListener(this);
 	}
-	
+
 	public String getWindowId() { return this.windowId; }
 
 	public void addFilenameChangeListener(FilenameChangeListener aListener)
@@ -155,7 +155,7 @@ public class MainWindow
 			}
 		}
 	}
-	
+
 	private void initMenu()
 	{
 		this.dbExplorerAction = new ShowDbExplorerAction(this);
@@ -173,7 +173,7 @@ public class MainWindow
 	private JMenuBar getMenuForPanel(MainPanel aPanel)
 	{
 		HashMap menus = new HashMap(10);
-		
+
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setBorderPainted(false);
 
@@ -182,14 +182,14 @@ public class MainWindow
 		menu.setName(ResourceMgr.MNU_TXT_FILE);
 		menuBar.add(menu);
 		menus.put(ResourceMgr.MNU_TXT_FILE, menu);
-		
+
 		WbAction action;
 		JMenuItem item;
 
 		action = new FileConnectAction(this);
 		action.addToMenu(menu);
 		this.disconnectAction.addToMenu(menu);
-    
+
 		action = new FileNewWindowAction();
 		action.addToMenu(menu);
 		//menu.addSeparator();
@@ -217,7 +217,7 @@ public class MainWindow
 			action = new SelectTabAction(this.sqlTab, i);
 			menu.add(action.getMenuItem());
 		}
-		
+
 		menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_DATA));
 		menu.setName(ResourceMgr.MNU_TXT_DATA);
 		menu.setVisible(false);
@@ -255,8 +255,8 @@ public class MainWindow
 			action.addToMenu(menu);
 			menu.setVisible(true);
 		}
-		
-		
+
+
 		action = new FileExitAction();
 		menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_FILE);
 		menu.addSeparator();
@@ -277,7 +277,7 @@ public class MainWindow
 	{
 		return this.sqlTab.getSelectedIndex();
 	}
-	
+
 	public String[] getPanelLabels()
 	{
 		int tabCount = this.sqlTab.getTabCount();
@@ -285,16 +285,16 @@ public class MainWindow
 		{
 			tabCount --;
 		}
-		
+
 		String[] result = new String[tabCount];
-		
+
 		for (int i=0; i < tabCount; i++)
 		{
 			result[i] = this.sqlTab.getTitleAt(i);
 		}
 		return result;
 	}
-	
+
 	public MainPanel getCurrentPanel()
 	{
 		int index = this.sqlTab.getSelectedIndex();
@@ -310,7 +310,7 @@ public class MainWindow
 	{
 		this.sqlTab.setSelectedIndex(anIndex);
 	}
-	
+
 	private void tabSelected(int anIndex)
 	{
 		Container content = this.getContentPane();
@@ -327,7 +327,7 @@ public class MainWindow
 		}
 		this.doLayout();
 	}
-	
+
 	public void restoreState()
 	{
 		String state = WbManager.getSettings().getProperty(this.getClass().getName(), "state", "0");
@@ -338,11 +338,11 @@ public class MainWindow
 			this.setExtendedState(i);
 		}
 	}
-	
+
 	public void restorePosition()
 	{
 		Settings s = WbManager.getSettings();
-		
+
 		if (!s.restoreWindowSize(this))
 		{
 			this.setSize(500,500);
@@ -369,7 +369,7 @@ public class MainWindow
 			}
 		}
     sett.setDefaultTabCount(tabs);
-    
+
 		for (int i=0; i < tabCount; i++)
 		{
 			MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
@@ -377,7 +377,7 @@ public class MainWindow
 		}
 		int state = this.getExtendedState();
 		sett.setProperty(this.getClass().getName(), "state", state);
-    
+
 		if (state != MAXIMIZED_BOTH)
 		{
 			sett.storeWindowPosition(this);
@@ -407,8 +407,8 @@ public class MainWindow
 			}
 		}
 		if (index == -1) return;
-		
-		if (newFilename == null) 
+
+		if (newFilename == null)
 		{
 			fname = ResourceMgr.getString("LabelTabStatement") + " " + (index + 1);
 		}
@@ -515,7 +515,7 @@ public class MainWindow
 		this.currentConnection = con;
 		this.dbExplorerAction.setEnabled(true);
 		this.setDisplayTitle(con);
-		
+
 		if (this.dbExplorerPanel != null)
 		{
 			try
@@ -586,24 +586,24 @@ public class MainWindow
 		for (int i=0; i < this.panelMenus.size(); i++)
 		{
 			JMenu view = this.getViewMenu(i);
-			
+
 			// insert the item at the correct index
       // (if it is a SelectTabAction)
       // otherwise insert it after the last SelectTabAction
 			int count = view.getItemCount();
-			int inserted = -1; 
+			int inserted = -1;
 			for (int k=0; k < count; k++)
 			{
         JMenuItem item = view.getItem(k);
         if (item == null) continue;
         Action ac = item.getAction();
         if (ac == null) continue;
-        if (!(ac instanceof SelectTabAction)) 
+        if (!(ac instanceof SelectTabAction))
 				{
 					break;
 				}
         SelectTabAction a = (SelectTabAction)ac;
-        
+
 				if (a.getIndex() >= anAction.getIndex())
 				{
 					view.insert(anAction.getMenuItem(), k);
@@ -611,17 +611,17 @@ public class MainWindow
 					break;
 				}
 			}
-			
+
 			if (inserted == -1)
 			{
 				// no index found which is greate or equal than the new one
 				// so add it to the end
         if (!(view.getItem(count -1).getAction() instanceof SelectTabAction))
           view.addSeparator();
-        
+
 				view.add(anAction.getMenuItem());
 			}
-			else 
+			else
 			{
 				// renumber the shortcuts for the remaining actions
 				int newIndex = anAction.getIndex() + 1;
@@ -630,7 +630,7 @@ public class MainWindow
 					SelectTabAction a = (SelectTabAction)view.getItem(k).getAction();
 					a.setNewIndex(newIndex);
 					newIndex ++;
-				}					
+				}
 			}
 		}
 	}
@@ -786,7 +786,7 @@ public class MainWindow
 	public void addTab()
 	{
 		int index = this.sqlTab.getTabCount();
-		
+
 		if (this.getSqlPanel(index - 1) instanceof DbExplorerPanel)
 		{
 			index --;
@@ -803,7 +803,7 @@ public class MainWindow
 		sql.initDefaults();
 		this.sqlTab.setSelectedIndex(index);
 	}
-	
+
 	/**
 	 *	Removes the last SQL Tab. The DbExplorer will not be removed!
 	 */
@@ -813,7 +813,7 @@ public class MainWindow
 		int index = this.sqlTab.getSelectedIndex();
 		this.sqlTab.remove(index);
 		this.panelMenus.remove(index);
-		
+
 		int count = this.sqlTab.getTabCount();
 		for (int i=index; i < count; i++)
 		{
@@ -832,7 +832,7 @@ public class MainWindow
 		if (this.getSqlPanel(lastIndex) instanceof DbExplorerPanel) lastIndex --;
 		return lastIndex;
 	}
-	
+
 	public void listMenus()
 	{
 		for (int i=0; i < this.panelMenus.size(); i ++)
@@ -847,7 +847,7 @@ public class MainWindow
 			System.out.println("");
 		}
 	}
-	
+
 	/**
 	 *	Invoked when any of the main window menu commands are
 	 *
@@ -923,21 +923,21 @@ public class MainWindow
 			}
 		}
 	}
-	
+
 	public void mouseEntered(MouseEvent e)
 	{
 	}
-	
+
 	public void mouseExited(MouseEvent e)
 	{
 	}
-	
+
 	public void mousePressed(MouseEvent e)
 	{
 	}
-	
+
 	public void mouseReleased(MouseEvent e)
 	{
 	}
-	
+
 }

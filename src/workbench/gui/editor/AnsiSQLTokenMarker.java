@@ -9,7 +9,6 @@ import java.util.StringTokenizer;
  *	Copied from TSQLTokenMarker and modified for ANSI SQL
  *
  */
-
 import javax.swing.text.Segment;
 import workbench.log.LogMgr;
 
@@ -32,18 +31,26 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 			DatabaseMetaData meta = aConnection.getMetaData();
 
 			String keys = meta.getSQLKeywords();
+			//System.out.println("sql keywords = "+ keys);
 			this.addKeywordList(keys, Token.KEYWORD1);
-
-			keys = meta.getStringFunctions();
+			if (meta.getDatabaseProductName().toLowerCase().indexOf("oracle") > -1)
+			{
+				keywords.add("SYNONYM", Token.KEYWORD1);
+			}
+			//keys = meta.getStringFunctions();
+			System.out.println("string functions = "+ keys);
 			this.addKeywordList(keys, Token.KEYWORD3);
 
-			keys = meta.getNumericFunctions();
+			//keys = meta.getNumericFunctions();
+			System.out.println("numeric functions = "+ keys);
 			this.addKeywordList(keys, Token.KEYWORD3);
 
-			keys = meta.getTimeDateFunctions();
+			//keys = meta.getTimeDateFunctions();
+			System.out.println("timedate functions = "+ keys);
 			this.addKeywordList(keys, Token.KEYWORD3);
 
-			keys = meta.getSystemFunctions();
+			//keys = meta.getSystemFunctions();
+			System.out.println("system functions = " +keys);
 			this.addKeywordList(keys, Token.KEYWORD3);
 
 		}

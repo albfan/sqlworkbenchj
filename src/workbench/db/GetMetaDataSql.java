@@ -485,7 +485,7 @@ public class GetMetaDataSql
 		WbPersistence.writeObject(trgStatements, "TriggerSourceStatements.xml");
 		System.out.println("Done.");
 	}
-	
+
 	public static void main(String args[])
 	{
 		createDefaultStatements();
