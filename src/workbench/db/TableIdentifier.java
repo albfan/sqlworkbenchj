@@ -107,7 +107,7 @@ public class TableIdentifier
 	
 	public void setTable(String aTable)
 	{
-		if (aTable == null || aTable.trim().length() == 0 && !this.isNewTable) 
+		if (!this.isNewTable && (aTable == null || aTable.trim().length() == 0)) 
 			throw new IllegalArgumentException("Table name may not be null");
 		this.tablename = aTable;
 		this.expression = null;
@@ -164,6 +164,12 @@ public class TableIdentifier
 		}
 	}
 	public boolean isNewTable() { return this.isNewTable; }
+	
+	public void setNewTable(boolean flag)
+	{
+		this.expression = null;
+		this.isNewTable = flag;
+	}
 	
 	public boolean equals(Object other)
 	{

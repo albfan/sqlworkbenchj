@@ -3,7 +3,8 @@
  <object class="java.util.HashMap">
   <void method="put">
    <string>All</string>
-   <string>CREATE %unique_key% INDEX %indexname% ON %tablename% (%columnlist%)</string>
+   <string>CREATE %unique_key% INDEX %indexname% 
+    ON %tablename% (%columnlist%)</string>
   </void>
  </object>
 </java>

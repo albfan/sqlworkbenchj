@@ -160,7 +160,7 @@ public class WbConnection
 				// the following line is equivalent to:
 				//   OracleConnection con = (OracleConnection)this.sqlConnection;
 				//   con.db_access.setWarnings(null);
-				clearSettings.invoke(dbAccess, new Object[] { null });
+				if (clearSettings != null) clearSettings.invoke(dbAccess, new Object[] { null });
 			}
 		}
 		catch (Throwable th)

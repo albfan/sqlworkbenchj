@@ -30,6 +30,9 @@ public class ObjectScripterUI
 	extends JPanel
 	implements Runnable, WindowListener, ObjectScripter.ScriptGenerationMonitor
 {
+	public static final int TPYE_CREATE = 1;
+	public static final int TYPE_INSERT = 2;
+	
 	private ObjectScripter scripter;
 	private Thread worker;
 	private JLabel statusMessage;

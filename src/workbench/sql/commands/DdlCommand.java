@@ -64,6 +64,7 @@ public class DdlCommand extends SqlCommand
 				try
 				{
 					this.currentStatement.executeUpdate(aSql);
+					result.addMessage(ResourceMgr.getString("MsgDropSuccess"));
 				}
 				catch (Throwable th)
 				{

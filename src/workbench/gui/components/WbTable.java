@@ -61,6 +61,7 @@ import javax.swing.JPopupMenu.Separator;
 import javax.swing.JScrollBar;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -89,6 +90,7 @@ import workbench.gui.actions.SetColumnWidthAction;
 import workbench.gui.actions.SortAscendingAction;
 import workbench.gui.actions.SortDescendingAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.renderer.ClobColumnRenderer;
 import workbench.gui.renderer.DateColumnRenderer;
 import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RowStatusRenderer;
@@ -106,6 +108,8 @@ import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.NullValue;
 import workbench.util.StringUtil;
+import workbench.gui.actions.CopyAsSqlInsertAction;
+import workbench.gui.actions.CopyAsSqlUpdateAction;
 
 
 public class WbTable
@@ -123,7 +127,7 @@ public class WbTable
 	private int lastFoundRow = -1;
 
 	private WbTextCellEditor defaultEditor;
-	private DefaultCellEditor defaultNumberEditor;
+	private WbTextCellEditor defaultNumberEditor;
 	private JTextField numberEditorTextField;
 
 	private SortAscendingAction sortAscending;
@@ -136,6 +140,8 @@ public class WbTable
 	private FindDataAgainAction findAgainAction;
 	private DataToClipboardAction dataToClipboard;
 	private SaveDataAsAction exportDataAction;
+	private CopyAsSqlInsertAction copyInsertAction;
+	private CopyAsSqlUpdateAction copyUpdateAction;
 
 	private PrintAction printDataAction;
 	private PrintPreviewAction printPreviewAction;
@@ -154,6 +160,7 @@ public class WbTable
 	private NumberColumnRenderer defaultNumberRenderer;
 	private NumberColumnRenderer defaultIntegerRenderer = new NumberColumnRenderer(0);
 	private StringColumnRenderer defaultStringRenderer = new StringColumnRenderer();
+	private ClobColumnRenderer defaultClobRenderer = new ClobColumnRenderer();
 
 	private RowHeightResizer rowResizer;
 	//private List changeListener;
@@ -195,19 +202,18 @@ public class WbTable
 		Font dataFont = this.getFont();
 		if (dataFont == null) dataFont = (Font)UIManager.get("Table.font");
 
+		boolean autoSelect = WbManager.getSettings().getAutoSelectTableEditor();
+
 		JTextField text = new JTextField();
 		text.setFont(dataFont);
-		this.defaultEditor = WbTextCellEditor.createInstance(this);
+		this.defaultEditor = WbTextCellEditor.createInstance(this, autoSelect);
 		this.defaultEditor.setFont(dataFont);
 
+		// Create a separate editor for numbers that is right alligned
 		numberEditorTextField = new JTextField();
-		if (dataFont != null)  numberEditorTextField.setFont(dataFont);
-		numberEditorTextField.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		numberEditorTextField.setFont(dataFont);
 		numberEditorTextField.setHorizontalAlignment(SwingConstants.RIGHT);
-		numberEditorTextField.addMouseListener(new TextComponentMouseListener());
-    WbCellEditor.setDefaultCopyPasteKeys(numberEditorTextField);
-
-		this.defaultNumberEditor = new DefaultCellEditor(numberEditorTextField);
+		this.defaultNumberEditor = new WbTextCellEditor(this, numberEditorTextField, autoSelect);
 
 		this.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		//JTableHeader th = this.getTableHeader();
@@ -220,10 +226,15 @@ public class WbTable
 		this.findAgainAction.setEnabled(false);
 
 		this.dataToClipboard = new DataToClipboardAction(this);
+		this.copyInsertAction = new CopyAsSqlInsertAction(this);
+		this.copyUpdateAction = new CopyAsSqlUpdateAction(this);
 		this.exportDataAction = new SaveDataAsAction(this);
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.addPopupAction(this.exportDataAction, false);
-		this.addPopupAction(this.dataToClipboard, false);
+		this.addPopupAction(this.dataToClipboard, true);
+		this.addPopupAction(this.copyUpdateAction, false);
+		this.addPopupAction(this.copyInsertAction, false);
+
 		this.addPopupAction(this.findAction, true);
 		this.addPopupAction(this.findAgainAction, false);
 
@@ -275,6 +286,15 @@ public class WbTable
 	}
 
 
+	public CopyAsSqlInsertAction getCopyAsInsertAction()
+	{
+		 return this.copyInsertAction;
+	}
+	public CopyAsSqlUpdateAction getCopyAsUpdateAction()
+	{
+		return this.copyUpdateAction;
+	}
+
 	public SaveDataAsAction getExportAction()
 	{
 		return this.exportDataAction;
@@ -297,6 +317,11 @@ public class WbTable
 
 	public void setSelectOnRightButtonClick(boolean flag) { this.selectOnRightButtonClick = flag; }
 	public boolean getSelectOnRightButtonClick() { return this.selectOnRightButtonClick; }
+	public void setAutoSelectOnEdit(boolean aFlag)
+	{
+		if (this.defaultEditor != null) this.defaultEditor.setAutoSelect(aFlag);
+		if (this.defaultNumberEditor != null) this.defaultNumberEditor.setAutoSelect(aFlag);
+	}
 
 	public void reset()
 	{
@@ -417,12 +442,12 @@ public class WbTable
 		return printer;
 	}
 
-	public synchronized void setModel(TableModel aModel)
+	public void setModel(TableModel aModel)
 	{
 		this.setModel(aModel, false);
 	}
 
-	public synchronized void setModel(TableModel aModel, boolean sortIt)
+	public void setModel(TableModel aModel, boolean sortIt)
 	{
 		if (this.dwModel != null)
 		{
@@ -548,6 +573,31 @@ public class WbTable
 	{
 		if (this.dwModel == null) return false;
 		return this.dwModel.getShowStatusColumn();
+	}
+
+	public void setCursor(Cursor newCursor)
+	{
+		super.setCursor(newCursor);
+		if (this.defaultClobRenderer != null)
+		{
+			this.defaultClobRenderer.setCursor(newCursor);
+		}
+		if (this.defaultDateRenderer != null)
+		{
+			this.defaultDateRenderer.setCursor(newCursor);
+		}
+		if (this.defaultStringRenderer != null)
+		{
+			this.defaultStringRenderer.setCursor(newCursor);
+		}
+		if (this.defaultIntegerRenderer != null)
+		{
+			this.defaultIntegerRenderer.setCursor(newCursor);
+		}
+		if (this.defaultNumberRenderer != null)
+		{
+			this.defaultNumberRenderer.setCursor(newCursor);
+		}
 	}
 
 	public void setAdjustToColumnLabel(boolean aFlag)
@@ -832,7 +882,7 @@ public class WbTable
 			defaultNumberRenderer.setMaxDigits(maxDigits);
 			defaultNumberRenderer.setDecimalSymbol(sep);
 		}
-
+		this.setDefaultRenderer(java.sql.Clob.class, defaultClobRenderer);
 		this.setDefaultRenderer(Number.class, defaultNumberRenderer);
 		this.setDefaultRenderer(Double.class, defaultNumberRenderer);
 		this.setDefaultRenderer(Float.class, defaultNumberRenderer);
@@ -1150,15 +1200,38 @@ public class WbTable
 			}
 			else if (this.showPopup && this.popup != null)
 			{
-				int row = this.rowAtPoint(e.getPoint());
+				final int row = this.rowAtPoint(e.getPoint());
 				int selected = this.getSelectedRowCount();
 				if (selected <= 1 && row >= 0 && this.selectOnRightButtonClick)
 				{
-					this.getSelectionModel().setSelectionInterval(row, row);
+					int selectedRow = this.getSelectedRow();
+					if (row != selectedRow)
+					{
+						final ListSelectionModel model = this.getSelectionModel();
+						SwingUtilities.invokeLater(new Runnable()
+						{
+							public void run()
+							{
+								model.setSelectionInterval(row, row);
+							}
+						});
+					}
 				}
-				this.findAction.setEnabled(this.getRowCount() > 0);
-				this.findAgainAction.setEnabled(this.lastFoundRow > 0);
-				this.popup.show(this, e.getX(), e.getY());
+
+				final boolean findEnabled = (this.getRowCount() > 0);
+				final boolean findAgainEnabled = (this.lastFoundRow > 0);
+				final int x = e.getX();
+				final int y = e.getY();
+
+				SwingUtilities.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						findAction.setEnabled(findEnabled);
+						findAgainAction.setEnabled(findAgainEnabled);
+						popup.show(WbTable.this, x,y);
+					}
+				});
 			}
 		}
 		else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1

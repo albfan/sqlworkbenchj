@@ -37,6 +37,7 @@ import workbench.log.LogMgr;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
 import java.awt.Color;
+import workbench.exception.ExceptionUtil;
 
 
 /**
@@ -137,19 +138,33 @@ public class Settings
 		String level = this.props.getProperty("workbench.log.level", "INFO");
 		LogMgr.setLevel(level);
 
-		// init settings for datastore
-		System.setProperty("org.kellerer.sort.language", this.getSortLanguage());
-		System.setProperty("org.kellerer.sort.country", this.getSortCountry());
-
-		if (WbManager.trace) System.out.println("Initializing ShortcutManager");
-		this.keyManager = new ShortcutManager(this.getShortcutFilename());
-
 		this.renameOldProps();
 
+		// init settings for datastore sort feature
+		if (WbManager.trace) System.out.println("Setting default sort properties for WbTable");
+		try
+		{
+			System.setProperty("org.kellerer.sort.language", this.getSortLanguage());
+			System.setProperty("org.kellerer.sort.country", this.getSortCountry());
+		}
+		catch (Exception e)
+		{
+			if (WbManager.trace)
+			{
+				System.out.println("Error setting default sort properties for WbTable: " + ExceptionUtil.getDisplay(e));
+			}
+		}
 		if (WbManager.trace) System.out.println("Settings.<init> - done");
 	}
 
-	public ShortcutManager getShortcutManager() { return this.keyManager; }
+	public ShortcutManager getShortcutManager()
+	{
+		if (this.keyManager == null)
+		{
+			this.keyManager = new ShortcutManager(this.getShortcutFilename());
+		}
+		return this.keyManager;
+	}
 
 	public String getConfigDir() { return this.configDir; }
 	public void setConfigDir(String aDir) { this.configDir = aDir; }
@@ -210,6 +225,8 @@ public class Settings
 
 	private void renameOldProps()
 	{
+		this.renameProperty("sort.language", "workbench.sort.language");
+		this.renameProperty("sort.country", "workbench.sort.country");
 		this.renameProperty("connection.last", "workbench.connection.last");
 		this.renameProperty("drivers.lastlibdir", "workbench.drivers.lastlibdir");
 	}
@@ -249,6 +266,7 @@ public class Settings
 			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.pattern.table");
 			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.pattern.value");
 			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.tables");
+
 		}
 		catch (Throwable e)
 		{
@@ -556,9 +574,29 @@ public class Settings
 		}
 	}
 
+	public boolean getAutoSelectTableEditor()
+	{
+		return "true".equals(this.props.getProperty("workbench.table.edit.autoselect", "true"));
+	}
+	public void setAutoSelectTableEditor(boolean aFlag)
+	{
+		this.props.setProperty("workbench.table.edit.autoselect", Boolean.toString(aFlag));
+	}
+
 	public int getMaxLogfileSize()
 	{
 		return this.getIntProperty("workbench.log", "maxfilesize", 30000);
+	}
+
+	public String getCodeSnippetPrefix()
+	{
+		String value = this.props.getProperty("workbench.editor.codeprefix", "String sql = ");
+		return value;
+	}
+
+	public void setCodeSnippetPrefix(String prefix)
+	{
+		this.props.setProperty("workbench.editor.codeprefix", prefix);
 	}
 
 	public static final String PROPERTY_SHOW_LINE_NUMBERS = "workbench.editor.showlinenumber";
@@ -1096,12 +1134,12 @@ public class Settings
 
 	public String getSortLanguage()
 	{
-		return this.props.getProperty("sort.language", System.getProperty("user.language"));
+		return this.props.getProperty("workbench.sort.language", System.getProperty("user.language"));
 	}
 
 	public String getSortCountry()
 	{
-		return this.props.getProperty("sort.country", System.getProperty("user.country"));
+		return this.props.getProperty("workbench.sort.country", System.getProperty("user.country"));
 	}
 
 	public void setLastImportDelimiter(String aDelimit)
@@ -1274,7 +1312,7 @@ public class Settings
 
 	public boolean getUseDynamicLayout()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty("workbench.gui.dynamiclayout", "false"));
+		return "true".equalsIgnoreCase(this.props.getProperty("workbench.gui.dynamiclayout", "true"));
 	}
 
 	public void setUseDynamicLayout(boolean useEncryption)
@@ -1303,30 +1341,30 @@ public class Settings
 
 	public List getServersWhereDDLNeedsCommit()
 	{
-		String list = this.props.getProperty("workbench.db.ddlneedscommit", null);
+		String list = this.props.getProperty("workbench.db.ddlneedscommit", "PostgreSQL,Firebird");
     return StringUtil.stringToList(list, ",");
 	}
 
 	public List getServersWithInlineConstraints()
 	{
-		String list = this.props.getProperty("workbench.db.inlineconstraints", null);
+		String list = this.props.getProperty("workbench.db.inlineconstraints", "FirstSQL/J");
     return StringUtil.stringToList(list, ",");
 	}
 	public List getServersWhichNeedJdbcCommit()
 	{
-		String list = this.props.getProperty("workbench.db.usejdbccommit", null);
+		String list = this.props.getProperty("workbench.db.usejdbccommit", "Firebird");
     return StringUtil.stringToList(list, ",");
 	}
 
   public List getCaseSensitivServers()
   {
-		String list = this.props.getProperty("workbench.db.casesensitive", null);
+		String list = this.props.getProperty("workbench.db.casesensitive", "Oracle");
     return StringUtil.stringToList(list, ",");
   }
 
 	public List getCancelWithReconnectServers()
 	{
-		String list = this.props.getProperty("workbench.db.cancelwithreconnect", null);
+		String list = this.props.getProperty("workbench.db.cancelwithreconnect", "Microsoft SQL Server");
     return StringUtil.stringToList(list, ",");
 	}
 

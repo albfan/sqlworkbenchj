@@ -38,6 +38,7 @@ public class ValueConverter
 	private String defaultDateFormat;
 	private String defaultTimestampFormat;
 	private char decimalCharacter = '.';
+	private SimpleDateFormat formatter = new SimpleDateFormat();
 	
 	public ValueConverter()
 	{
@@ -100,16 +101,25 @@ public class ValueConverter
 		}
 	}
 
+	public String getDatePattern()
+	{
+		return this.defaultDateFormat;
+	}
+	
+	public String getTimestampPattern()
+	{
+		return this.defaultTimestampFormat;
+	}
+	
   public java.sql.Date parseDate(String aDate)
   {
 		java.util.Date result = null;
-		SimpleDateFormat formatter = new SimpleDateFormat();
 		if (this.defaultDateFormat != null)
 		{
-			formatter.applyPattern(this.defaultDateFormat);
+			this.formatter.applyPattern(this.defaultDateFormat);
 			try
 			{
-				result = formatter.parse(aDate);
+				result = this.formatter.parse(aDate);
 			}
 			catch (Exception e)
 			{
@@ -119,10 +129,10 @@ public class ValueConverter
 		
 		if (result == null && this.defaultTimestampFormat != null)
 		{
-			formatter.applyPattern(this.defaultTimestampFormat);
+			this.formatter.applyPattern(this.defaultTimestampFormat);
 			try
 			{
-				result = formatter.parse(aDate);
+				result = this.formatter.parse(aDate);
 			}
 			catch (Exception e)
 			{
@@ -136,8 +146,8 @@ public class ValueConverter
 			{
 				try
 				{
-					formatter.applyPattern(dateFormats[i]);
-					result = formatter.parse(aDate);
+					this.formatter.applyPattern(dateFormats[i]);
+					result = this.formatter.parse(aDate);
 					break;
 				}
 				catch (Exception e)

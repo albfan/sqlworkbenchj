@@ -22,7 +22,7 @@ public class WbStarter
 			version = System.getProperty("java.runtime.version");
 		}
 		boolean is14 = false;
-		System.out.println("Workbench: Using Java version=" + version);
+		//System.out.println("Workbench: Using Java version=" + version);
 		try
 		{
 			int majorversion = Integer.parseInt(version.substring(0,1));
@@ -34,26 +34,34 @@ public class WbStarter
 			e.printStackTrace();
 			is14 = false;
 		}
-	
+
 		if (!is14)
 		{
-			JOptionPane.showMessageDialog(null, "JDK/JRE 1.4 or later is needed to run this application!");
-			System.err.println("A JDK or JRE 1.4 or later is needed to run this application!");
-			Toolkit.getDefaultToolkit().beep();
-			Toolkit.getDefaultToolkit().beep();
-			Toolkit.getDefaultToolkit().beep();
+			String error = "A JVM version 1.4 or higher is needed to run SQL Workbench/J (Found: " + version + ")";
+			try
+			{
+				JOptionPane.showMessageDialog(null, error);
+				Toolkit.getDefaultToolkit().beep();
+				Toolkit.getDefaultToolkit().beep();
+				Toolkit.getDefaultToolkit().beep();
+			}
+			catch (Throwable e)
+			{
+				// ignore ...
+			}
+			System.err.println(error);
 			System.exit(1);
 		}
 		try
 		{
-			// Make this class can be loaded even with JDK < 1.4
-			// so no compile time reference to WbManager should occur here.
+			// Create an instance using reflection, so that this class can be
+			// loaded even with JDK < 1.4 (because now reference to WbManager is
+			// in the class)
 			Class manager = Class.forName("workbench.WbManager");
 			Class[] parms = {String[].class};
 			Method main = manager.getDeclaredMethod("main", parms);
 			Object[] para = new Object[] { args };
 			main.invoke(null, para);
-			//WbManager.main(args);
 		}
 		catch (Exception e)
 		{

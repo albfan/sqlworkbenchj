@@ -19,6 +19,7 @@ import javax.swing.border.EmptyBorder;
 
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.resource.ResourceMgr;
+import java.awt.Container;
 
 
 public class WbSwingUtilities
@@ -29,10 +30,10 @@ public class WbSwingUtilities
 		BevelBorder b = new BevelBorder(BevelBorder.LOWERED);
 		Color c = Color.LIGHT_GRAY;
 		//c.darker();
-		BEVEL_BORDER = new BevelBorder(BevelBorder.LOWERED, 
-					b.getHighlightOuterColor(), 
+		BEVEL_BORDER = new BevelBorder(BevelBorder.LOWERED,
+					b.getHighlightOuterColor(),
 					c,//b.getShadowOuterColor(),
-					b.getHighlightInnerColor(), 
+					b.getHighlightInnerColor(),
 					b.getShadowInnerColor());
 	}
 
@@ -42,19 +43,19 @@ public class WbSwingUtilities
 		BevelBorder b = new BevelBorder(BevelBorder.RAISED);
 		Color c = Color.LIGHT_GRAY;
 		//c.darker();
-		BEVEL_BORDER_RAISED = new BevelBorder(BevelBorder.RAISED, 
-					b.getHighlightOuterColor(), 
+		BEVEL_BORDER_RAISED = new BevelBorder(BevelBorder.RAISED,
+					b.getHighlightOuterColor(),
 					c,//b.getShadowOuterColor(),
-					b.getHighlightInnerColor(), 
+					b.getHighlightInnerColor(),
 					b.getShadowInnerColor());
 	}
-	
+
 	public static final Border EMPTY_BORDER = new EmptyBorder(0,0,0,0);
-	
+
 	private WbSwingUtilities()
 	{
 	}
-	
+
 	/**
 	 *	Centers the given window either agains anotherone on the screen
 	 *	If a second window is passed the first window is centered
@@ -69,7 +70,7 @@ public class WbSwingUtilities
 		Point location = getLocationToCenter(aWinToCenter, aReference);
 		aWinToCenter.setLocation(location);
 	}
-	
+
 	public static Point getLocationToCenter(Window aWinToCenter, Window aReference)
 	{
 		int screenWidth, screenHeight;
@@ -95,9 +96,9 @@ public class WbSwingUtilities
 			winWidth = aWinToCenter.getWidth();
 			winHeight = aWinToCenter.getHeight();
 		}
-		
+
 		int x = 1, y = 1;
-		
+
 		// Get center points
 		if (screenWidth > winWidth)
 		{
@@ -107,29 +108,27 @@ public class WbSwingUtilities
 		{
 			y = (int)((screenHeight/ 2) - (winHeight / 2));
 		}
-		
+
 		if (aReference != null)
 		{
 			x += aReference.getX();
 			y += aReference.getY();
 		}
-		
+
 		return new Point(x, y);
 	}
-	
+
 	public static void showWaitCursorOnWindow(Component caller)
 	{
 		Window parent = SwingUtilities.getWindowAncestor(caller);
-		showWaitCursor(caller);
+		//showWaitCursor(caller);
 		if (parent != null) showWaitCursor(parent);
 	}
 	public static void showDefaultCursorOnWindow(Component caller)
 	{
-		Window parent = SwingUtilities.getWindowAncestor(caller);
-		showDefaultCursor(caller);
-		if (parent != null) showDefaultCursor(parent);
+		showDefaultCursor(caller, true);
 	}
-	
+
 	public static void showWaitCursor(final Component caller)
 	{
 		if (SwingUtilities.isEventDispatchThread())
@@ -147,12 +146,25 @@ public class WbSwingUtilities
 			});
 		}
 	}
-	
+
 	public static void showDefaultCursor(final Component caller)
+	{
+		showDefaultCursor(caller, false);
+	}
+	public static void showDefaultCursor(final Component caller, final boolean includeParents)
 	{
 		if (SwingUtilities.isEventDispatchThread())
 		{
-			caller.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			caller.setCursor(null);
+			if (includeParents)
+			{
+				Container c = caller.getParent();
+				while (c != null)
+				{
+					c.setCursor(null);
+					c = c.getParent();
+				}
+			}
 		}
 		else
 		{
@@ -160,15 +172,29 @@ public class WbSwingUtilities
 			{
 				public void run()
 				{
-					caller.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+					caller.setCursor(null);
+					if (includeParents)
+					{
+						Container c = caller.getParent();
+						while (c != null)
+						{
+							c.setCursor(null);
+							c = c.getParent();
+						}
+					}
 				}
 			});
 		}
 	}
-	
+
 	public static void showErrorMessage(Component aCaller, String aMessage)
 	{
 		JOptionPane.showMessageDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.ERROR_MESSAGE);
+	}
+
+	public static void showMessage(Component aCaller, String aMessage)
+	{
+		JOptionPane.showMessageDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	public static boolean getYesNo(Component aCaller, String aMessage)
@@ -176,15 +202,15 @@ public class WbSwingUtilities
 		int result = JOptionPane.showConfirmDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 		return (result == JOptionPane.YES_OPTION);
 	}
-	
+
 	public static int getYesNoCancel(Component aCaller, String aMessage)
 	{
 		int result = JOptionPane.showConfirmDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
 		return result;
 	}
-	
+
 	public static final int IGNORE_ALL = JOptionPane.YES_OPTION + JOptionPane.NO_OPTION + JOptionPane.CANCEL_OPTION + 1;
-	
+
 	public static int getYesNoIgnoreAll(Component aCaller, String aMessage)
 	{
 		String[] options = new String[] { ResourceMgr.getString("LabelYes"), ResourceMgr.getString("LabelNo"), ResourceMgr.getString("LabelIgnoreAll")};
@@ -216,10 +242,10 @@ public class WbSwingUtilities
 		else if (result.equals(options[1])) return 1;
 		else return -1;
 	}
-	
+
 	public static final int DO_COMMIT = 0;
 	public static final int DO_ROLLBACK = 1;
-	
+
 	public static int getCommitRollbackQuestion(Component aCaller, String aMessage)
 	{
 		String[] options = new String[] { ResourceMgr.getString("LabelCommit"), ResourceMgr.getString("LabelRollback")};
@@ -234,11 +260,11 @@ public class WbSwingUtilities
 		else if (result.equals(options[1])) return DO_ROLLBACK;
 		else return DO_ROLLBACK;
 	}
-	
+
 	public static String getUserInput(Component caller, String aTitle, String initialValue)
 	{
 		Component parent = SwingUtilities.getWindowAncestor(caller);
-		
+
 		final JTextField input = new JTextField();
 		input.setColumns(40);
 		input.setText(initialValue);
@@ -258,5 +284,5 @@ public class WbSwingUtilities
 		String value = input.getText();
 		return value;
 	}
-	
+
 }

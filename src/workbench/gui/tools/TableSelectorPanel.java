@@ -64,6 +64,16 @@ public class TableSelectorPanel
 	public void setTablesOnly(boolean tablesOnly) { this.tablesOnly = tablesOnly; }
 	public boolean getTablesOnly() { return this.tablesOnly; }
 	
+	public void resetNewTableItem()
+	{
+		if (this.newTableId != null)
+		{
+			this.newTableId.setNewTable(true);
+			this.newTableId.setTable(null);
+			this.repaint();
+		}
+	}
+	
 	public void allowNewTable(boolean flag)
 	{
 		this.allowNewTable = flag;
@@ -237,7 +247,6 @@ public class TableSelectorPanel
 			TableIdentifier old = this.currentTable;
 			this.currentTable = null;
 			this.firePropertyChange(old, null);
-			//this.tableSelector.addItemListener(this);
 			this.tableSelector.addItemListener(this);
 		}
 		catch (Exception e)
@@ -265,6 +274,33 @@ public class TableSelectorPanel
 		
 		if (table == null || table.trim().length() == 0) return null;
 		return new TableIdentifier(schema, table);
+	}
+	
+	public void findAndSelectTable(String aTable)
+	{
+		if (aTable == null) return;
+		
+		int count = this.tableSelector.getItemCount();
+		for (int i=0; i < count; i++)
+		{
+			String table = null;
+			Object item = this.tableSelector.getItemAt(i);
+			if (item instanceof TableIdentifier)
+			{
+				table = ((TableIdentifier)item).getTable();
+			}
+			else
+			{
+				table = (String)item;
+			}
+			if (table == null) continue;
+			
+			if (aTable.equalsIgnoreCase(table)) 
+			{
+				this.tableSelector.setSelectedIndex(i);
+				break;
+			}
+		}
 	}
 	
 	public void itemStateChanged(ItemEvent e)

@@ -46,6 +46,7 @@ public class ObjectScripter
 			this.appendObjectType("table");
 			this.appendObjectType("view");
 			this.appendObjectType("synonym");
+			this.appendObjectType("insert");
 		}
 		return this.script.toString();
 	}
@@ -83,6 +84,10 @@ public class ObjectScripter
 					{
 						source = this.meta.getSequenceSource(object);
 					}
+					else if ("insert".equalsIgnoreCase(type))
+					{
+						source = this.meta.getEmptyInsert(null, null, object);
+					}
 				}
 				catch (Exception e)
 				{
@@ -90,9 +95,9 @@ public class ObjectScripter
 				}
 				if (source != null && source.length() > 0)
 				{
-					this.script.append("-- BEGIN " + type + " " + object + "\n");
+					if (!type.equalsIgnoreCase("insert")) this.script.append("-- BEGIN " + type + " " + object + "\n");
 					this.script.append(source);
-					this.script.append("-- END " + type + " " + object + "\n");
+					if (!type.equalsIgnoreCase("insert")) this.script.append("-- END " + type + " " + object + "\n");
 					this.script.append("\n");
 				}
 			}

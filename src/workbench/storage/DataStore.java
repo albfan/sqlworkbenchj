@@ -15,6 +15,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -52,6 +53,7 @@ import workbench.util.WbStringTokenizer;
  */
 public class DataStore
 {
+	
 	// Needed for the status display in the table model
 	// as RowData is only package visible. Thus we need to provide the objects here
 	public static final Integer ROW_MODIFIED = new Integer(RowData.MODIFIED);
@@ -98,9 +100,28 @@ public class DataStore
 	private static final Collator defaultCollator;
 	static
 	{
-		String lang = System.getProperty("org.kellerer.sort.language", System.getProperty("user.language"));
-		String country = System.getProperty("org.kellerer.sort.country", System.getProperty("user.country"));
-		Locale l = new Locale(lang, country);
+		Locale l = null;
+		String lang = null;
+		String country = null;
+		try
+		{
+			lang = System.getProperty("org.kellerer.sort.language", System.getProperty("user.language", "en"));
+			country = System.getProperty("org.kellerer.sort.country", System.getProperty("user.country", null));
+		}
+		catch (Exception e)
+		{
+			l = Locale.ENGLISH;
+		}
+
+		if (lang != null && country != null)
+		{
+			l = new Locale(lang, country);
+		}
+		else if (lang != null && country == null)
+		{
+			l = new Locale(lang);
+		}
+
 		defaultCollator = Collator.getInstance(l);
 	}
 
@@ -630,9 +651,29 @@ public class DataStore
 		RowData row = this.getRow(aRow);
 		Object value = row.getValue(aColumn);
     if (value == null || value instanceof NullValue)
+		{
       return null;
+		}
     else
-      return value.toString();
+		{
+			if (value instanceof Clob)
+			{
+				try
+				{
+					Clob lob = (Clob)value;
+					long len = lob.length();
+					return lob.getSubString(1, (int)len);
+				}
+				catch (Exception e)
+				{
+					return null;
+				}
+			}
+			else
+			{
+				return value.toString();
+			}
+		}
 	}
 
 	/**
@@ -672,6 +713,10 @@ public class DataStore
 			else if (value instanceof Number && this.defaultNumberFormatter != null)
 			{
 				result = this.defaultNumberFormatter.format(value);
+			}
+			else if (value instanceof Clob)
+			{
+				return getValueAsString(aRow, aColumn);
 			}
 			else
 			{
@@ -1012,8 +1057,31 @@ public class DataStore
 		{
 			String name = metaData.getColumnName(i + 1);
 			this.columnTypes[i] = metaData.getColumnType(i + 1);
-			this.columnTypeNames[i] = metaData.getColumnTypeName(i + 1);
-			this.columnSizes[i] = metaData.getColumnDisplaySize(i + 1);
+
+			try
+			{
+				this.columnTypeNames[i] = metaData.getColumnTypeName(i + 1);
+				if ("LONG".equals(this.columnTypeNames[i]))
+				{
+					this.columnTypes[i] = SqlUtil.LONG_TYPE;
+				}
+			}
+			catch (Exception e)
+			{
+				this.columnTypeNames[i] = SqlUtil.getTypeName(this.columnTypes[i]);
+				LogMgr.logWarning("DataStore.initMetaData()", "The JDBC driver does not support getColumnTypeName() " + e.getMessage());
+			}
+
+			try
+			{
+				this.columnSizes[i] = metaData.getColumnDisplaySize(i + 1);
+			}
+			catch (Exception e)
+			{
+				this.columnSizes[i] = 0;
+				LogMgr.logWarning("DataStore.initMetaData()", "The JDBC driver does not support getColumnDisplaySize() " + e.getMessage());
+			}
+
 
 			if (name != null && name.trim().length() > 0)
 			{
@@ -1107,6 +1175,20 @@ public class DataStore
 					try
 					{
 						value = aResultSet.getObject(i + 1);
+						if (this.columnTypes[i] == Types.CLOB)
+						{
+							try
+							{
+								Clob clob = (Clob)value;
+								int len = (int)clob.length();
+								String data = clob.getSubString(1, len);
+								value = data;
+							}
+							catch (Exception e)
+							{
+								LogMgr.logError("DataStore.initData()", "Error converting CLOB value", e);
+							}
+						}
 					}
 					catch (SQLException e)
 					{
@@ -2277,7 +2359,10 @@ public class DataStore
 				}
 				if (abort) throw e;
 			}
-			LogMgr.logError("DataStore.executeGuarded()", "Error executing statement " + dml.getExecutableStatement() + " for row = " + row, e);
+			else
+			{
+				LogMgr.logError("DataStore.executeGuarded()", "Error executing statement " + dml.getExecutableStatement() + " for row = " + row + ", error: " + e.getMessage(), null);
+			}
 		}
 		return rowsUpdated;
 	}
@@ -2367,7 +2452,7 @@ public class DataStore
 			{
 				aConnection.rollback();
 			}
-			LogMgr.logError("DataStore.updateDb()", "Error when saving data (row = " + row + ")", e);
+			LogMgr.logError("DataStore.updateDb()", "Error when saving data for row=" + currentRow + ", error: " + e.getMessage(), null);
 			throw e;
 		}
 
@@ -2609,7 +2694,7 @@ public class DataStore
 
 		if (result == null)
 		{
-			LogMgr.logWarning("DataStore.parseDate()", "Could not parse date " + aDate);
+			LogMgr.logWarning("DataStore.parseDate()", "Could not parse date " + aDate + " with formatter " + converter.getDatePattern());
 		}
 		return result;
   }
@@ -2804,7 +2889,14 @@ public class DataStore
 				else
 				{
 					sql.append(" = ?");
-					values.add(value);
+					if (this.columnTypes[col] == SqlUtil.LONG_TYPE)
+					{
+						values.add(new OracleLongType(value.toString()));
+					}
+					else
+					{
+						values.add(value);
+					}
 				}
 			}
 		}

@@ -56,19 +56,20 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.Like;
+import javax.swing.UIManager;
 
 
 /**
  *
  * @author  workbench@kellerer.org
  */
-public class TableSearchPanel 
+public class TableSearchPanel
 	extends JPanel
 	implements TableSearchDisplay, ListSelectionListener, KeyListener
 {
 	private DataStore tableList;
 	private TableModel tableListModel;
-	private String currentTable;
+	//private String currentTable;
 	private String currentSql;
 	private TableSearcher searcher;
 	private WbConnection connection;
@@ -79,10 +80,11 @@ public class TableSearchPanel
 	private Dimension maxTableSize = new Dimension(32768, 150);
 	private WbTable currentDisplayTable;
 	private JScrollPane currentScrollPane;
+	private TitledBorder currentBorder;
 	private Like searchPattern;
 	private WbTable firstTable;
 	private EditorPanel sqlDisplay;
-	
+
 	public TableSearchPanel(ShareableDisplay aTableListSource)
 	{
 		this.tableListModel = new EmptyTableModel();
@@ -93,7 +95,7 @@ public class TableSearchPanel
 
 		sqlDisplay = EditorPanel.createSqlEditor();
 		this.resultTabPane.addTab(ResourceMgr.getString("LabelTableSearchSqlLog"), sqlDisplay);
-		
+
 		WbTable tables = (WbTable)this.tableNames;
 		tables.setAdjustToColumnLabel(false);
 
@@ -102,7 +104,7 @@ public class TableSearchPanel
 		reload.setBorder(new CompoundBorder(b, new EmptyBorder(1,1,1,1)));
 		reload.setAction(new ReloadAction(this.tableListSource));
 		reload.setToolTipText(ResourceMgr.getString("TxtRefreshTableList"));
-		
+
 		this.searcher = new TableSearcher();
 		this.searcher.setDisplay(this);
 		//this.searchResult.setFont(WbManager.getSettings().getMsgLogFont());
@@ -112,8 +114,11 @@ public class TableSearchPanel
 		tables.getSelectionModel().addListSelectionListener(this);
 		this.startButton.setEnabled(false);
 		this.searchText.addKeyListener(this);
+		Border eb = new EmptyBorder(0,2,0,0);
+		CompoundBorder b2 = new CompoundBorder(this.statusInfo.getBorder(), eb);
+		this.statusInfo.setBorder(b2);
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -320,13 +325,16 @@ public class TableSearchPanel
 			int height = this.currentDisplayTable.getRowHeight();
 			int width = this.resultScrollPane.getWidth();
 			// Recycle the Dimension object from the ScrollPane
+			String label = this.currentBorder.getTitle();
+			label = label + " (" + rows + " " + (rows == 1 ? ResourceMgr.getString("TxtFoundRow") : ResourceMgr.getString("TxtFoundRows")) + ")";
+			this.currentBorder.setTitle(label);
 			Dimension size = this.currentScrollPane.getPreferredSize();
 			if (rows > 25) rows = 25;
 			size.setSize(width - 20, (rows + 4) * height );
 			this.currentScrollPane.setPreferredSize(size);
 		}
 	}
-	
+
 	public synchronized void addResultRow(String aTablename, ResultSet aResult)
 	{
 		try
@@ -350,13 +358,14 @@ public class TableSearchPanel
 				this.currentDisplayTable.setModel(model, true);
 				this.currentScrollPane  = new ParentWidthScrollPane(this.currentDisplayTable);
 				TitledBorder b = new TitledBorder(aTablename);
+				this.currentBorder = b;
 				Font f = b.getTitleFont();
 				f = f.deriveFont(Font.BOLD);
 				b.setTitleFont(f);
 				b.setBorder(new EtchedBorder());
 				this.currentScrollPane.setBorder(b);
 				GridBagConstraints constraints = new GridBagConstraints();
-				constraints.gridx = 0;				
+				constraints.gridx = 0;
 				constraints.fill = GridBagConstraints.HORIZONTAL;
 				constraints.weightx = 1.0;
 				constraints.anchor = GridBagConstraints.WEST;
@@ -369,23 +378,22 @@ public class TableSearchPanel
 		{
 			e.printStackTrace();
 		}
-	}	
-	
+	}
+
 	/**
 	 *	Call back function from the table searcher...
 	 */
 	public synchronized void setCurrentTable(String aTablename, String aSql)
 	{
-		this.currentTable = aTablename;
+		//this.currentTable = aTablename;
 		this.currentSql = aSql;
 		this.tableLogged = false;
-		this.currentTable = null;
 		this.currentResult = null;
 		this.statusInfo.setText(this.fixedStatusText + aTablename);
 		this.sqlDisplay.appendLine(aSql);
 		this.sqlDisplay.appendLine(";\n\n");
-	}	
-	
+	}
+
 	public void setStatusText(String aStatustext)
 	{
 		this.statusInfo.setText(aStatustext);
@@ -398,7 +406,7 @@ public class TableSearchPanel
 	{
 		return connection;
 	}
-	
+
 	/** Setter for property connection.
 	 * @param connection New value of property connection.
 	 *
@@ -409,13 +417,13 @@ public class TableSearchPanel
 		this.searcher.setConnection(connection);
 		this.tableListSource.addTableListDisplayClient(this.tableNames);
 	}
-	
+
 	public void disconnect()
 	{
 		this.resetResult();
 		this.tableListSource.removeTableListDisplayClient(this.tableNames);
 	}
-	
+
 	private void resetResult()
 	{
     // resultPanel.removeAll() does not work
@@ -427,7 +435,7 @@ public class TableSearchPanel
 		this.sqlDisplay.setText("");
 		this.firstTable = null;
 	}
-	
+
 	public void searchData()
 	{
 		if (!searcher.setColumnFunction(this.columnFunction.getText()))
@@ -435,10 +443,10 @@ public class TableSearchPanel
 			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgErrorColFunction"));
 			return;
 		}
-		
+
 		if (this.tableNames.getSelectedRowCount() == 0) return;
 		this.resetResult();
-    
+
 		int[] selectedTables = this.tableNames.getSelectedRows();
 		ArrayList searchTables = new ArrayList(this.tableNames.getSelectedRowCount());
 		DataStore tables = ((WbTable)(this.tableNames)).getDataStore();
@@ -446,7 +454,7 @@ public class TableSearchPanel
 		{
 			StringBuffer table = new StringBuffer(100);
 			String type = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-			
+
 			String schema = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
 			String tablename = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 
@@ -459,8 +467,8 @@ public class TableSearchPanel
 					tablename = id.getTable();
 				}
 			}
-			
-			
+
+
 			if (schema != null && schema.length() > 0)
 			{
 				table.append(schema);
@@ -491,7 +499,7 @@ public class TableSearchPanel
 		searcher.setTableNames(searchTables);
 		searcher.search(); // starts the background thread
 	}
-	
+
 	public void saveSettings()
 	{
 		Settings s = WbManager.getSettings();
@@ -501,7 +509,7 @@ public class TableSearchPanel
 		s.setProperty(cl, "maxrows", this.rowCount.getText());
 		s.setProperty(cl, "column-function", this.columnFunction.getText());
 	}
-	
+
 	public void restoreSettings()
 	{
 		Settings s = WbManager.getSettings();
@@ -513,7 +521,7 @@ public class TableSearchPanel
 		this.rowCount.setText(s.getProperty(cl, "maxrows", "0"));
 		this.columnFunction.setText(s.getProperty(cl, "column-function", "$col$"));
 	}
-	
+
 	public void searchEnded()
 	{
 		this.adjustDataTable();
@@ -532,29 +540,28 @@ public class TableSearchPanel
 		constraints.weighty = 1.0;
 		constraints.anchor = GridBagConstraints.WEST;
 		this.resultPanel.add(new JPanel(), constraints);
-		
+
 		this.resultPanel.doLayout();
 		this.searchText.setEnabled(true);
 		this.columnFunction.setEnabled(true);
 		startButton.setText(ResourceMgr.getString("LabelStartSearch"));
 		this.statusInfo.setText("");
 	}
-	
+
 	public void searchStarted()
 	{
 		this.searchText.setEnabled(false);
 		this.columnFunction.setEnabled(false);
 		startButton.setText(ResourceMgr.getString("LabelCancelSearch"));
 	}
-	
+
 	public void valueChanged(javax.swing.event.ListSelectionEvent e)
 	{
 		this.startButton.setEnabled(this.tableNames.getSelectedRowCount() > 0);
 	}
-	
+
 	public void keyPressed(java.awt.event.KeyEvent e)
 	{
-		System.out.println("keyPressed!");
 		if (e.getKeyCode() == KeyEvent.VK_ENTER)
 		{
 			SwingUtilities.invokeLater(new Runnable()
@@ -567,15 +574,15 @@ public class TableSearchPanel
 			);
 		}
 	}
-	
+
 	public void keyReleased(java.awt.event.KeyEvent e)
 	{
 	}
-	
+
 	public void keyTyped(java.awt.event.KeyEvent e)
 	{
 	}
-	
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.ButtonGroup buttonGroup1;
   private javax.swing.JTextField columnFunction;
@@ -599,7 +606,7 @@ public class TableSearchPanel
   private javax.swing.JTable tableNames;
   private javax.swing.JPanel tablePane;
   // End of variables declaration//GEN-END:variables
-	
+
 	class ParentWidthScrollPane
 		extends JScrollPane
 	{
@@ -617,42 +624,51 @@ public class TableSearchPanel
 			return this.preferredSize;
 		}
 	}
-	
+
 	class ResultHighlightingRenderer
 		extends DefaultTableCellRenderer
 	{
 		private Like pattern;
+		private Color background = UIManager.getColor("Table.background");
+		private Color foreground = UIManager.getColor("Table.foreground");
+		private Color selectBack = UIManager.getColor("Table.selectionBackground");
+		private Color selectText = UIManager.getColor("Table.selectionForeground");
+
 		public ResultHighlightingRenderer(Like aPattern)
 		{
 			this.pattern = aPattern;
 		}
-		
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) 
+
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
 		{
 			JLabel result = (JLabel)super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			try
 			{
-				if (!isSelected)
+				if (!isSelected && value != null && value instanceof String && this.pattern.like((String)value))
 				{
-					String content = (String)value;
-					if (content != null && this.pattern.like(content))
-					{
-						result.setBackground(Color.YELLOW);
-					}
-					else
-					{
-						result.setBackground(Color.WHITE);
-					}
+					result.setBackground(Color.YELLOW);
+					result.setForeground(Color.BLACK);
+				}
+				else if (isSelected)
+				{
+					result.setBackground(selectBack);
+					result.setForeground(selectText);
+				}
+				else
+				{
+					result.setBackground(background);
+					result.setForeground(foreground);
 				}
 			}
 			catch (Exception e)
 			{
-				result.setBackground(Color.WHITE);
+				result.setBackground(background);
+				result.setForeground(foreground);
 			}
 			return result;
 		}
-		
- 
+
+
 	}
-	
+
 }

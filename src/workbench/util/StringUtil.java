@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import workbench.log.LogMgr;
 
 /**
  *
@@ -179,7 +180,7 @@ public class StringUtil
 		}
 		return result;
 	}
-	
+
 	public static final String listToString(List aList, char aDelimiter)
 	{
 		if (aList == null || aList.size() == 0) return "";
@@ -190,7 +191,7 @@ public class StringUtil
 		{
 			Object o = aList.get(i);
 			if (o == null) continue;
-			if (numElements > 0) 
+			if (numElements > 0)
 			{
 				result.append(aDelimiter);
 				result.append(' ');
@@ -200,17 +201,29 @@ public class StringUtil
 		}
 		return result.toString();
 	}
-	
+
 
 	public static final String makeJavaString(String aString)
 	{
 		return makeJavaString(aString, true);
 	}
 
-	public static final String makeJavaString(String aString, boolean includeNewLines)
+	public static final String makeJavaString(String sql, boolean includeNewLine)
 	{
-		StringBuffer result = new StringBuffer("String sql=");
-		BufferedReader reader = new BufferedReader(new StringReader(aString));
+		return makeJavaString(sql, "String sql = ", true);
+	}
+
+	public static final String makeJavaString(String sql, String prefix, boolean includeNewLines)
+	{
+		if (sql == null) return "";
+		if (prefix == null) prefix = "";
+		StringBuffer result = new StringBuffer(sql.length() + prefix.length() + 10);
+		result.append(prefix);
+		if (prefix.endsWith("=")) result.append(" ");
+		int k = result.length();
+		StringBuffer indent = new StringBuffer(k);
+		for (int i=0; i < k; i++) indent.append(' ');
+		BufferedReader reader = new BufferedReader(new StringReader(sql));
 		boolean first = true;
 		try
 		{
@@ -218,29 +231,39 @@ public class StringUtil
 			while (line != null)
 			{
 				if (first) first = false;
-				else result.append("           ");
+				else result.append(indent);
 				result.append('"');
+				if (line.endsWith(";"))
+				{
+					System.out.println("line=" + line);
+					line = line.substring(0, line.length() - 1);
+				}
 				result.append(line);
-				if (includeNewLines)
-				{
-					result.append(" \\n\"");
-				}
-				else
-				{
-					result.append(" \"");
-				}
-				//result.append();
+
 				line = reader.readLine();
 				if (line != null)
 				{
+					if (includeNewLines)
+					{
+						result.append(" \\n\"");
+					}
+					else
+					{
+						result.append(" \"");
+					}
 					result.append(" + \n");
+				}
+				else
+				{
+					result.append("\"");
 				}
 			}
 			result.append(';');
 		}
 		catch (Exception e)
 		{
-			result.append("(Error)");
+			result.append("(Error when creating Java code, see logfile for details)");
+			LogMgr.logError("StringUtil.makeJavaString()", "Error creating Java String", e);
 		}
 		finally
 		{

@@ -39,6 +39,8 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 import java.sql.ResultSetMetaData;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import workbench.db.mssql.MsSqlMetaData;
 
 /**
@@ -68,12 +70,12 @@ public class DbMetadata
 	private DatabaseMetaData metaData;
 	//private List tableListColumns;
 	private WbConnection dbConnection;
-	
+
 	// Specialized classes to retrieve metadata that is either not
 	// supported by JDBC or where the JDBC driver does not work properly
 	private OracleMetaData oracleMetaData;
 	private MsSqlMetaData msSqlMetaData;
-	
+
 	private static List serversWhichNeedReconnect = Collections.EMPTY_LIST;
 	private static List caseSensitiveServers = Collections.EMPTY_LIST;
 	private static List ddlNeedsCommitServers = Collections.EMPTY_LIST;
@@ -103,6 +105,8 @@ public class DbMetadata
 	private boolean isSqlServer = false;
 	private boolean isMySql = false;
 	private boolean isASA = false; // Adaptive Server Anywhere
+	private boolean isInformix = false;
+
 	private boolean createInlineConstraints = false;
 
 	private AbstractConstraintReader constraintReader = null;
@@ -110,6 +114,10 @@ public class DbMetadata
 	private List keywords;
 	private String quoteCharacter;
 	private String dbVersion;
+
+	private static final String SELECT_INTO_PG = "(?i)SELECT.*INTO\\s*TABLE\\s*\\p{Print}*\\s*FROM.*";
+	private static final String SELECT_INTO_INFORMIX = "(?i)SELECT.*FROM.*INTO\\s*\\p{Print}*";
+	private Pattern selectIntoPattern = null;
 
 	/** Creates a new instance of DbMetadata */
 	public DbMetadata(WbConnection aConnection)
@@ -181,6 +189,7 @@ public class DbMetadata
 		else if (productLower.indexOf("postgres") > - 1)
 		{
 			this.isPostgres = true;
+			this.selectIntoPattern = Pattern.compile(SELECT_INTO_PG);
 			this.constraintReader = new PostgresConstraintReader();
 		}
 		else if (productLower.indexOf("hsql") > -1)
@@ -207,6 +216,11 @@ public class DbMetadata
 		else if (productLower.indexOf("mysql") > -1)
 		{
 			this.isMySql = true;
+		}
+		else if (productLower.indexOf("informix") > -1)
+		{
+			this.isInformix = true;
+			this.selectIntoPattern = Pattern.compile(SELECT_INTO_INFORMIX);
 		}
 
 		try
@@ -235,11 +249,49 @@ public class DbMetadata
 		this.createInlineConstraints = serversWithInlineConstraints.contains(this.productName);
 	}
 
+	/**
+	 *	Returns a comma separated list of SQL verbs that should
+	 *  be ignored during execution for this DBMS.
+	 *	This can be configured in workbench.properties:
+	 *	workbench.db.ignore.<dbms-name>=
+	 */
+	public String getVerbsToIgnore()
+	{
+		String dbms = this.productName.replaceAll(" ", "_");
+
+		String list = WbManager.getSettings().getProperty("workbench.db.ignore." + dbms, "");
+		return list;
+	}
+
 	public String getDbVersion() { return this.dbVersion; }
 	public boolean getDDLNeedsCommit() { return ddlNeedsCommit; }
 	public boolean getUseJdbcCommit() { return this.useJdbcCommit; }
   public boolean isStringComparisonCaseSensitive() { return this.caseSensitive; }
 	public boolean cancelNeedsReconnect() { return this.needsReconnect; }
+
+	/**
+	 *	Returns true if the current DBMS supports a SELECT syntax
+	 *	which creates a new table (e.g. SELECT .. INTO new_table FROM old_table)
+	 */
+	public boolean supportsSelectIntoNewTable()
+	{
+		return this.isInformix || this.isPostgres;
+	}
+
+	/**
+	 *	Checks if the given SQL string is actually some kind of table
+	 *	creation "disguised" as a SELECT. This will always return false
+	 *	if supportsSelectIntoNewTable() returns false.
+	 *	Otherwise it will check for the DB specific syntax.
+	 */
+	public boolean isSelectIntoNewTable(String sql)
+	{
+		if (sql == null || sql.length() == 0) return false;
+		if (!this.supportsSelectIntoNewTable()) return false;
+		if (this.selectIntoPattern == null) return false;
+		Matcher m = this.selectIntoPattern.matcher(sql);
+		return m.find();
+	}
 
 	/**
 	 *	Returns if the current DBMS understands the NULL
@@ -253,6 +305,7 @@ public class DbMetadata
 		return !this.isFirebird;
 	}
 
+	public boolean isInformix() { return this.isInformix; }
 	public boolean isMySql() { return this.isMySql; }
 	public boolean isPostgres() { return this.isPostgres; }
   public boolean isOracle() { return this.isOracle; }
@@ -351,6 +404,18 @@ public class DbMetadata
 		return result;
 	}
 
+	public boolean supportsBatchUpdates()
+	{
+		try
+		{
+			return this.metaData.supportsBatchUpdates();
+		}
+		catch (SQLException e)
+		{
+			return false;
+		}
+	}
+
 	/**
 	 *	Return the verb which does a DROP ... CASCADE for the given
 	 *  object type. If the current DBMS does not support cascaded dropping
@@ -370,6 +435,46 @@ public class DbMetadata
 		}
 
 		return null;
+	}
+
+	private Set dbFunctions;
+
+	public Set getDbFunctions()
+	{
+		if (this.dbFunctions == null)
+		{
+			this.dbFunctions = new HashSet();
+			try
+			{
+				String funcs = this.metaData.getSystemFunctions();
+				this.addStringList(this.dbFunctions, funcs);
+
+				funcs = this.metaData.getStringFunctions();
+				this.addStringList(this.dbFunctions, funcs);
+
+				funcs = this.metaData.getNumericFunctions();
+				this.addStringList(this.dbFunctions, funcs);
+
+				funcs = this.metaData.getTimeDateFunctions();
+				this.addStringList(this.dbFunctions, funcs);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+		return this.dbFunctions;
+	}
+
+	private void addStringList(Set target, String list)
+	{
+		if (list == null) return;
+		StringTokenizer tok = new StringTokenizer(list, ",");
+		while (tok.hasMoreTokens())
+		{
+			String keyword = tok.nextToken();
+			target.add(keyword.toUpperCase().trim());
+		}
 	}
 
 	public void dropTable(TableIdentifier aTable)
@@ -872,8 +977,11 @@ public class DbMetadata
 		}
 		tableRs.close();
 
-		if (this.isOracle)
+		// It seems that Oracle does return the sequences, so we don't
+		// need that anymore...
+		if (this.isOracle && "true".equals(WbManager.getSettings().getProperty("workbench.db.oracle.retrieve_sequence", "false")))
 		{
+			LogMgr.logDebug("DbMetadata.getTables()", "Retrieving sequences...");
 			List seq = this.oracleMetaData.getSequenceList(aSchema);
 			int count = seq.size();
 			for (int i=0; i < 0; i++)
@@ -1067,7 +1175,7 @@ public class DbMetadata
 		{
 			aSchema = null;
 		}
-		
+
 		ResultSet rs = null;
 		try
 		{
@@ -1114,7 +1222,7 @@ public class DbMetadata
 		}
 		finally
 		{
-			rs.close();
+			if (rs != null) rs.close();
 			if (this.msSqlMetaData != null) this.msSqlMetaData.closeStatement();
 		}
 		return ds;
@@ -2308,7 +2416,58 @@ public class DbMetadata
 		return result;
 	}
 
+	/**
+	 *	Return an "empty" INSERT statement for the given table.
+	 */
+	public String getEmptyInsert(String catalog, String schema, String table)
+		throws SQLException
+	{
+		DataStore tableDef = this.getTableDefinition(catalog, schema, table, true);
 
+		if (tableDef.getRowCount() == 0) return "";
+		int colCount = tableDef.getRowCount();
+		if (colCount == 0) return "";
+
+		StringBuffer sql = new StringBuffer(colCount * 80);
+
+		sql.append("INSERT INTO ");
+		sql.append(table);
+		sql.append("\n(\n");
+		
+		boolean quote = false;
+		for (int i=0; i < colCount; i++)
+		{
+			String column = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+			column = SqlUtil.quoteObjectname(column);
+			if (i > 0 && i < colCount) sql.append(",\n");
+			sql.append("   ");
+			sql.append(column);
+		}
+		sql.append("\n)\nVALUES\n(\n");
+		
+		for (int i=0; i < colCount; i++)
+		{
+			String dummyvalue = "";
+			String type = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
+			String name = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+			if (type != null || type.length() > 0) 
+			{
+				type = type.toLowerCase();
+				dummyvalue = name + "_" + type;
+				if (type.indexOf("char") > -1)
+				{
+					dummyvalue = "'" + dummyvalue + "'";
+				}
+			}
+			
+			if (i > 0 && i < colCount) sql.append(",\n");
+			sql.append("   ");
+			sql.append(dummyvalue);
+		}
+		sql.append("\n);\n");
+		return sql.toString();
+	}
+	
 	/** 	Return the SQL statement to re-create the given table. (in the dialect for the
 	 *  current DBMS)
 	 * @return the SQL statement to create the given table.
@@ -2644,6 +2803,43 @@ public class DbMetadata
 			result.append((String)itr.next());
 		}
 		return result.toString();
+	}
+
+	/**
+	 * 	Build the SQL statement to create an Index on the given table.
+	 * 	@param aTable - The table name for which the index should be constructed
+	 * 	@param indexName - The name of the Index
+	 * 	@param unique - Should the index be unique
+	 *  @param columnList - The columns that should build the index
+	 */
+	public String buildIndexSource(TableIdentifier aTable, String indexName, boolean unique, String[] columnList)
+	{
+		if (columnList == null) return StringUtil.EMPTY_STRING;
+		int count = columnList.length;
+		if (count == 0) return StringUtil.EMPTY_STRING;
+		String template = this.getSqlTemplate(this.idxStatements);
+		StringBuffer cols = new StringBuffer(count * 25);
+
+		for (int i=0; i < count; i++)
+		{
+			if (columnList[i] == null || columnList[i].length() == 0) continue;
+			if (cols.length() > 0) cols.append(',');
+			cols.append(columnList[i]);
+		}
+
+		String sql = StringUtil.replace(template, TABLE_NAME_PLACEHOLDER, aTable.getTableExpression());
+		if (unique)
+		{
+			sql = StringUtil.replace(sql, UNIQUE_PLACEHOLDER, "UNIQUE ");
+		}
+		else
+		{
+			sql = StringUtil.replace(sql, UNIQUE_PLACEHOLDER, "");
+		}
+		sql = StringUtil.replace(sql, COLUMNLIST_PLACEHOLDER, cols.toString());
+		sql = StringUtil.replace(sql, INDEX_NAME_PLACEHOLDER, indexName);
+
+		return sql;
 	}
 
 	public StringBuffer getIndexSource(String aTable, DataStore aIndexDef)

@@ -445,7 +445,7 @@ public class MainWindow
 		Collections.sort(macros);
 		int count = macros.size();
 		RunMacroAction run = null;
-		for (int i=0; (i < count && i < 10); i++)
+		for (int i=0; (i < count && i < 9); i++)
 		{
 			String name = (String)macros.get(i);
 			run = new RunMacroAction(this, name, i+1);
@@ -577,7 +577,7 @@ public class MainWindow
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("MainWindow.connectPanel()", "Error when connecting SQL panel " + aPanel.getId(), e);
 		}
 	}
 
@@ -636,6 +636,12 @@ public class MainWindow
 
 		if (!this.connectInProgress)	this.checkConnectionForPanel(current);
 		this.updateGuiForTab(anIndex);
+		this.updateAddMacroAction();
+	}
+
+	private void updateAddMacroAction()
+	{
+		MainPanel current = this.getCurrentPanel();
 		if (current instanceof SqlPanel)
 		{
 			SqlPanel sql = (SqlPanel)current;
@@ -773,6 +779,7 @@ public class MainWindow
 	{
 		this.connectTo(aProfile, false);
 	}
+
 	public void connectTo(final ConnectionProfile aProfile, final boolean showDialogOnError)
 	{
 		if (this.connectInProgress) return;
@@ -782,41 +789,40 @@ public class MainWindow
 			this.saveWorkspace(this.currentWorkspaceFile);
 		}
 
-		try
-		{
-			this.showConnectingInfo();
+		this.showConnectingInfo();
 
-			Thread t = new Thread()
+		Thread t = new Thread()
+		{
+			public void run()
 			{
-				public void run()
+				disconnect(false, false);
+				currentProfile = aProfile;
+				setConnectInProgress();
+				showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
+				loadWorkspaceForProfile(aProfile);
+				showStatusMessage(ResourceMgr.getString("MsgConnecting"));
+				Thread.yield();
+				SwingUtilities.invokeLater(new Runnable()
 				{
-					disconnect(false, false);
-					currentProfile = aProfile;
-					setConnectInProgress();
-					showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
-					loadWorkspaceForProfile(aProfile);
-					showStatusMessage(ResourceMgr.getString("MsgConnecting"));
-					Thread.yield();
-					SwingUtilities.invokeLater(new Runnable()
+					public void run()
 					{
-						public void run()
-						{
-							repaint();
-						}
-					});
-					Thread.yield();
-					doConnect(showDialogOnError);
-				}
-			};
-			t.setName("MainWindow connection thread");
-			t.start();
-
-		}
-		catch (Exception e)
-		{
-		}
+						repaint();
+					}
+				});
+				Thread.yield();
+				doConnect(showDialogOnError);
+			}
+		};
+		t.setName("MainWindow connection thread");
+		t.setDaemon(true);
+		t.start();
 	}
 
+	private String getConnectionIdForPanel(MainPanel p)
+	{
+		return "Wb" + this.instanceCount + "-" + p.getId();
+	}
+	
 	private void doConnect(final boolean showSelectDialogOnError)
 	{
 		boolean connected = false;
@@ -828,13 +834,14 @@ public class MainWindow
 			ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
 
 			String id = this.getWindowId();
-			
+
 			if (this.currentProfile.getUseSeperateConnectionPerTab())
 			{
 				this.currentConnection = null;
 				MainPanel p = this.getCurrentPanel();
-				id = p.getId();
+				id = this.getConnectionIdForPanel(p);
 			}
+			WbSwingUtilities.showWaitCursor(this);
 			conn = mgr.getConnection(this.currentProfile, id);
 			connected = true;
 		}
@@ -858,6 +865,10 @@ public class MainWindow
 			this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_CONNECTION_ERROR) + "\r\n\n" + e.toString());
 			LogMgr.logError("MainWindow.connectTo()", "Error during connect", e);
 			error = ExceptionUtil.getDisplay(e);
+		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursor(this);
 		}
 
 		final WbConnection usedConnection = conn;
@@ -893,7 +904,7 @@ public class MainWindow
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("MainWindow.doConnect()", "Error when displaying connection dialog", e);
 		}
 	}
 
@@ -1210,6 +1221,8 @@ public class MainWindow
 	{
 		if (this.connectingInfo != null)
 		{
+			WbSwingUtilities.showDefaultCursor(this);
+			WbSwingUtilities.showDefaultCursor(this.connectingInfo);
 			this.connectLabel = null;
 			this.connectingInfo.setVisible(false);
 			this.connectingInfo.dispose();
@@ -1253,6 +1266,8 @@ public class MainWindow
 		this.connectingInfo.setSize(200,50);
 		WbSwingUtilities.center(this.connectingInfo, this);
 		this.connectingInfo.show();
+		WbSwingUtilities.showWaitCursor(this);
+		WbSwingUtilities.showWaitCursor(this.connectingInfo);
 		Thread.yield();
 	}
 	/**
@@ -1499,10 +1514,19 @@ public class MainWindow
 		throws Exception
 	{
 		if (this.currentConnection != null) return this.currentConnection;
-		String id = aPanel.getId();
+		String id = this.getConnectionIdForPanel(aPanel);;
 		aPanel.showStatusMessage(ResourceMgr.getString("MsgConnectingTo") + " " + this.currentProfile.getName() + " ...");
 		ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
-		WbConnection conn = mgr.getConnection(this.currentProfile, id);
+		WbConnection conn = null;
+		try
+		{
+			WbSwingUtilities.showWaitCursor(this);
+			conn = mgr.getConnection(this.currentProfile, id);
+		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursor(this);
+		}
 		return conn;
 	}
 
@@ -1749,7 +1773,7 @@ public class MainWindow
 		if (filename == null) return;
 		this.loadWorkspace(filename);
 		this.isProfileWorkspace = this.checkMakeProfileWorkspace();
-		this.updateWindowTitle();
+		//this.updateWindowTitle();
 	}
 
 	private boolean checkMakeProfileWorkspace()
@@ -1864,6 +1888,7 @@ public class MainWindow
 		this.workspaceLoaded = true;
 		this.updateWindowTitle();
 		this.checkWorkspaceActions();
+		this.updateAddMacroAction();
 		return result;
 	}
 

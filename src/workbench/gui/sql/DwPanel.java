@@ -293,7 +293,6 @@ public class DwPanel
 	{
 		try
 		{
-			WbSwingUtilities.showWaitCursor(this);
 			this.saveChanges(dbConnection, this);
 		}
 		catch (Exception e)
@@ -301,12 +300,8 @@ public class DwPanel
 			String msg = ResourceMgr.getString("ErrorUpdatingDb");
 			WbManager.getInstance().showErrorMessage(this, msg + "\n" + e.getMessage());
 		}
-		finally
-		{
-			WbSwingUtilities.showDefaultCursor(this);
-		}
-
 	}
+
 	private void startBackgroundSave()
 	{
 		Thread t = new Thread()
@@ -330,7 +325,6 @@ public class DwPanel
 
 		boolean doSave = true;
 
-		WbSwingUtilities.showWaitCursor(this);
 		Window win = SwingUtilities.getWindowAncestor(this);
 		try
 		{
@@ -370,10 +364,6 @@ public class DwPanel
 			int choice = JOptionPane.showConfirmDialog(win, msg, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION);
 			if (choice == JOptionPane.NO_OPTION) doSave = false;
 		}
-		finally
-		{
-			WbSwingUtilities.showDefaultCursorOnWindow(this);
-		}
 		return doSave;
 	}
 
@@ -390,7 +380,6 @@ public class DwPanel
 		{
 			DataStore ds = this.infoTable.getDataStore();
 			long start, end;
-      WbSwingUtilities.showWaitCursor(this);
 			ds.setProgressMonitor(this);
 			start = System.currentTimeMillis();
 			rows = ds.updateDb(aConnection, errorHandler);
@@ -398,7 +387,7 @@ public class DwPanel
 			ds.setProgressMonitor(null);
 			long sqlTime = (end - start);
 			this.lastMessage = ResourceMgr.getString("MsgUpdateSuccessfull");
-			this.lastMessage = this.lastMessage + "\n" + rows + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED);
+			this.lastMessage = this.lastMessage + "\n" + rows + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED) + "\n";
 			this.lastMessage = this.lastMessage + ResourceMgr.getString("MsgExecTime") + " " + (((double)sqlTime) / 1000.0) + "s";
 			this.endEdit();
 		}
@@ -409,7 +398,6 @@ public class DwPanel
 		}
 		finally
 		{
-    	WbSwingUtilities.showDefaultCursor(this);
 			this.clearStatusMessage();
     }
 		this.repaint();
@@ -430,7 +418,14 @@ public class DwPanel
 
 	private void fireUpdateTableChanged()
 	{
-		firePropertyChange("updateTable", null, this.getTable().getDataStore().getUpdateTable());
+		String table = null;
+
+		if (this.getTable() != null)
+		{
+			DataStore ds = this.getTable().getDataStore();
+			if (ds != null) table = ds.getUpdateTable();
+		}
+		if (table != null) firePropertyChange("updateTable", null, table);
 	}
 
 	public void setReadOnly(boolean aFlag)
@@ -615,7 +610,6 @@ public class DwPanel
 				{
 					this.setMessageDisplayModel(this.getErrorTableModel());
 				}
-				this.lastMessage = ResourceMgr.getString("MsgExecuteError") + "\n";
 			}
 			execTime = (end - start);
 			this.rowsAffectedByScript += result.getTotalUpdateCount();
@@ -704,6 +698,7 @@ public class DwPanel
 	{
 		this.scriptRunning = false;
 		this.stmtRunner.done();
+    WbSwingUtilities.showDefaultCursor(this);
 	}
 
 	public boolean wasSuccessful()
@@ -938,15 +933,32 @@ public class DwPanel
 	public int getActionOnError(int errorRow, int errorColumn, String data, String errorMessage)
 	{
 		String msg = ResourceMgr.getString("ErrorUpdateSqlError");
-		msg = msg.replaceAll("%statement%", (data == null ? "" : data.substring(0, 50) + "..."));
-		msg = msg.replaceAll("%message%", errorMessage);
-
-		String r = "";
-		if (errorRow > -1)
+		try
 		{
-			r = ResourceMgr.getString("TxtErrorRow").replaceAll("%row%", Integer.toString(errorRow));
+			String d = "";
+			if (data != null)
+			{
+				if (data.length() > 50)
+					d = data.substring(0, 50) + "...";
+				else
+					d = data;
+			}
+
+			msg = msg.replaceAll("%statement%", d);
+			msg = msg.replaceAll("%message%", errorMessage);
+
+			String r = "";
+			if (errorRow > -1)
+			{
+				r = ResourceMgr.getString("TxtErrorRow").replaceAll("%row%", Integer.toString(errorRow));
+			}
+			msg = msg.replaceAll("%row%", r);
 		}
-		msg = msg.replaceAll("%row%", r);
+		catch (Exception e)
+		{
+			LogMgr.logError("DwPanel.getActionOnError()", "Error while building error message", e);
+			msg = "An error occurred during update: \n" + errorMessage;
+		}
 
 		Window w = SwingUtilities.getWindowAncestor(this);
 		int choice = WbSwingUtilities.getYesNoIgnoreAll(w, msg);

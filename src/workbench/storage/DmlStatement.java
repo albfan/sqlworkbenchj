@@ -3,6 +3,8 @@
  */
 package workbench.storage;
 
+import java.io.Reader;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -109,6 +111,12 @@ public class DmlStatement
 			{
 				NullValue nv = (NullValue)value;
 				stmt.setNull(i+1, nv.getType());
+			}
+			else if (value instanceof OracleLongType)
+			{
+				OracleLongType longValue = (OracleLongType)value;
+				Reader in = new StringReader(longValue.getValue());
+				stmt.setCharacterStream(1, in, longValue.getLength());
 			}
 			else
 			{
@@ -261,24 +269,24 @@ public class DmlStatement
 	{
 		try
 		{
-			Class.forName("oracle.jdbc.OracleDriver");
-			Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:oradb", "test", "test");
+			//Class.forName("oracle.jdbc.OracleDriver");
+			//Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:oradb", "test", "test");
 			try
 			{
-				String sql = "insert into test (nr, name, datum) values (?,'test?',?)";
+				String sql = "insert into test (id, data) values (?,?)";
 				ArrayList values = new ArrayList();
 				values.add(new Integer(4));
-				values.add(new java.sql.Date(new java.util.Date().getTime()));
+				values.add(new OracleLongType("Test"));
 				DmlStatement dml = new DmlStatement(sql, values);
 				//int rows = dml.execute(con);
-				//System.out.println(dml.getExecutableStatement());
+				System.out.println(dml.getExecutableStatement());
 			}
 			catch (Exception e)
 			{
 				e.printStackTrace();
 			}
-			con.commit();
-			con.close();
+			//con.commit();
+			//con.close();
 		}
 		catch (Exception e)
 		{

@@ -194,6 +194,7 @@ public class ConnectionEditorPanel
     add(tfUserName, gridBagConstraints);
 
     tfPwd.setName("password");
+    tfPwd.setNextFocusableComponent(cbAutocommit);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
@@ -308,8 +309,8 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 12;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
     add(workspaceFileLabel, gridBagConstraints);
 
     tfWorkspaceFile.setHorizontalAlignment(javax.swing.JTextField.LEFT);
@@ -322,8 +323,8 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridy = 12;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(0, 6, 2, 29);
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 6, 2, 29);
     add(tfWorkspaceFile, gridBagConstraints);
 
     selectWkspButton.setText("...");
@@ -398,8 +399,8 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 11;
-    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
     add(disableTableCheck, gridBagConstraints);
 
   }//GEN-END:initComponents
@@ -424,14 +425,14 @@ public class ConnectionEditorPanel
 			DbDriver newDriver = null;
 			try
 			{
-				oldDriver = this.currentProfile.getDriverName();
+				oldDriver = this.currentProfile.getDriverclass();
 				newDriver = (DbDriver)this.cbDrivers.getSelectedItem();
 				if(this.currentProfile != null)
 				{
 					this.currentProfile.setDriverclass(newDriver.getDriverClass());
 					this.currentProfile.setDriverName(newDriver.getName());
 				}
-				if (oldDriver == null || !oldDriver.equals(newDriver.getName()))
+				if (oldDriver == null || !oldDriver.equals(newDriver.getDriverClass()))
 				{
 					this.tfURL.setText(newDriver.getSampleUrl());
 				}
@@ -504,10 +505,15 @@ public class ConnectionEditorPanel
 		if (aDriverList != null)
 		{
 			this.init = true;
+			Object currentDriver = this.cbDrivers.getSelectedItem();
 			try
 			{
 				Collections.sort(aDriverList, DbDriver.getDriverClassComparator());
 				this.cbDrivers.setModel(new DefaultComboBoxModel(aDriverList.toArray()));
+				if (currentDriver != null)
+				{
+					this.cbDrivers.setSelectedItem(currentDriver);
+				}
 			}
 			catch (Exception e)
 			{

@@ -37,7 +37,9 @@ public class CreateSnippetAction extends WbAction
 		{
 			sql = this.client.getText();
 		}
-		String code = StringUtil.makeJavaString(sql, WbManager.getSettings().getIncludeNewLineInCodeSnippet());
+		boolean includeNewLine = WbManager.getSettings().getIncludeNewLineInCodeSnippet();
+		String prefix = WbManager.getSettings().getCodeSnippetPrefix();
+		String code = StringUtil.makeJavaString(sql, prefix, includeNewLine);
 		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 		StringSelection sel = new StringSelection(code);
 		clp.setContents(sel, sel);

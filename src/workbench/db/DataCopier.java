@@ -224,7 +224,20 @@ public class DataCopier
 	private void initNewTable(ColumnIdentifier[] sourceColumns)
 		throws SQLException
 	{
-		List sourceCols = this.sourceConnection.getMetadata().getTableColumns(this.sourceTable);
+		List sourceCols = null;
+		if (this.sourceTable != null)
+		{
+			sourceCols = this.sourceConnection.getMetadata().getTableColumns(this.sourceTable);
+		}
+		else
+		{
+			int count = this.targetColumnsForQuery.length;
+			sourceCols = new ArrayList(count);
+			for (int i=0; i < count; i++)
+			{
+				sourceCols.add(this.targetColumnsForQuery[i]);
+			}
+		}
 
 		// the names of the target columns are copied into
 		// a List, in order to preserver the column order
@@ -270,6 +283,10 @@ public class DataCopier
 		{
 			TableCreator creator = new TableCreator(this.targetConnection, this.targetTable, realCols);
 			creator.createTable();
+			
+			// no need to delete rows from a newly created table
+			this.setDeleteTarget(false);
+			
 			String msg = creator.getMessages();
 			if (msg != null)
 			{
@@ -289,10 +306,10 @@ public class DataCopier
 	/**
 	 *	Copy data from a SQL SELECT result to the given target table.
 	 */
-	public void copyFromQuery(WbConnection source, WbConnection target, String aSourceQuery, TableIdentifier aTargetTable, ColumnIdentifier[] targetColumns)
+	public void copyFromQuery(WbConnection source, WbConnection target, String aSourceQuery, TableIdentifier aTargetTable, ColumnIdentifier[] queryColumns)
 		throws SQLException
 	{
-		if (targetColumns == null || targetColumns.length == 0)
+		if (queryColumns == null || queryColumns.length == 0)
 		{
 			throw new IllegalArgumentException("Source and target column identifiers must be specified when using a SQL query!");
 		}
@@ -303,7 +320,15 @@ public class DataCopier
 		this.targetTable = aTargetTable;
 		this.retrieveSql = aSourceQuery;
 		this.useQuery = true;
-		this.targetColumnsForQuery = targetColumns;
+		this.targetColumnsForQuery = queryColumns;
+		
+		if (aTargetTable.isNewTable())
+		{
+			if (!target.getMetadata().tableExists(aTargetTable))
+			{
+				this.initNewTable(targetColumnsForQuery);
+			}
+		}
 		this.initImporterForQuery();
 	}
 
@@ -351,7 +376,7 @@ public class DataCopier
 		}
 		else
 		{
-			this.addWhere = SqlUtil.makeCleanSql(aWhere, false);
+			this.addWhere = aWhere; //SqlUtil.makeCleanSql(aWhere, false);
 			String verb = SqlUtil.getSqlVerb(this.addWhere).toUpperCase();
 			if ("SELECT".equals(verb))
 			{
@@ -382,6 +407,10 @@ public class DataCopier
 		return this.addWhere;
 	}
 
+	public void setUseBatch(boolean flag)
+	{
+		this.importer.setUseBatch(flag);
+	}
 	public void setCommitEvery(int interval)
 	{
 		this.importer.setCommitEvery(interval);
@@ -453,15 +482,15 @@ public class DataCopier
 			}
 			this.importer.importFinished();
 			String msg = this.getRowsInsertedMessage();
-			if (msg.length() > 0) this.addMessage(msg);
+			if (msg != null) this.addMessage(msg);
 			msg = this.getRowsUpdatedMessage();
-			if (msg.length() > 0) this.addMessage(msg);
+			if (msg != null) this.addMessage(msg);
 
-			LogMgr.logInfo("DataCopier.start()", "Copying of data finished. " + this.importer.getInsertedRows() + " row(s) inserted." + this.importer.getUpdatedRows() + " row(s) updated.");
+			LogMgr.logInfo("DataCopier.start()", "Copying of data finished. " + this.importer.getInsertedRows() + " row(s) inserted. " + this.importer.getUpdatedRows() + " row(s) updated.");
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("DataCopier.copy()", "Error when copying data", e);
+			LogMgr.logError("DataCopier.start()", "Error when copying data", e);
 			this.importer.importCancelled();
 		}
 		finally
@@ -473,7 +502,7 @@ public class DataCopier
 
 	public String getRowsUpdatedMessage()
 	{
-		String msg = "";
+		String msg = null;
 		long rows = this.importer.getUpdatedRows();
 		if (rows > 0)
 		{
@@ -485,7 +514,7 @@ public class DataCopier
 	public String getRowsInsertedMessage()
 	{
 		long rows = this.importer.getInsertedRows();
-		String msg = "";
+		String msg = null;
 
 		if (rows > 0)
 		{
@@ -659,7 +688,6 @@ public class DataCopier
 					sourceCols.add(cols.get(index));
 				}
 			}
-
 		}
 		else
 		{
@@ -728,10 +756,7 @@ public class DataCopier
 
 		String errmsg = this.getErrorMessage();
 		if (errmsg != null) log.append(errmsg);
-
-		String s = this.getMessages();
-		log.append(s);
-		if (s != null) log.append("\n");
+		
 		return log.toString();
 	}
 }

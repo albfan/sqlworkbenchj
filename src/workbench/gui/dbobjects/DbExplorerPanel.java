@@ -333,18 +333,27 @@ public class DbExplorerPanel
 		this.fireSchemaChanged(true);
 	}
 
-	private void fireSchemaChanged(boolean retrieve)
+	private void fireSchemaChanged(final boolean retrieve)
 	{
-		try
+		final String schema = (String)schemaSelector.getSelectedItem();
+		Thread t = new Thread()
 		{
-			String schema = (String)schemaSelector.getSelectedItem();
-			tables.setCatalogAndSchema(null, schema, retrieve);
-			procs.setCatalogAndSchema(null, schema, retrieve);
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logError(this, "Could not set schema", ex);
-		}
+			public void run()
+			{
+				try
+				{
+					tables.setCatalogAndSchema(null, schema, retrieve);
+					procs.setCatalogAndSchema(null, schema, retrieve);
+				}
+				catch (Exception ex)
+				{
+					LogMgr.logError(this, "Could not set schema", ex);
+				}
+			}
+		};
+		t.setDaemon(true);
+		t.setName("DbExplorerPanel schema change thread");
+		t.start();
 	}
 
 	public void setTabTitle(JTabbedPane tab, int index)

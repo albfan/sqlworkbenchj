@@ -95,7 +95,7 @@ public class StatementRunner
 		cmdDispatch.put(sql.getVerb(), sql);
 		cmdDispatch.put("IMP", sql);
 
-		sql = new WbCopy();
+		sql = new WbCopy(WbCopy.ALT_VERB);
 		cmdDispatch.put(sql.getVerb(), sql);
 
 		cmdDispatch.put(WbListCatalogs.LISTCAT.getVerb(), WbListCatalogs.LISTCAT);
@@ -148,6 +148,19 @@ public class StatementRunner
 			UseCommand cmd = new UseCommand();
 			this.cmdDispatch.put(cmd.getVerb(), cmd);
 			this.dbSpecificCommands.add(cmd.getVerb());
+		}
+
+		
+		if (!this.dbConnection.getMetadata().isPostgres())
+		{
+			// for non-PostgreSQL connections we can use the
+			// COPY command. For PGSQL we cannot use the verb COPY, as
+			// PGSQL has it's own COPY command. Oracle's COPY command
+			// is a SQL*Plus command and cannot be used through JDBC, 
+			// so we do not need to take care of that
+			SqlCommand copy = new WbCopy();
+			this.cmdDispatch.put(copy.getVerb(), copy);
+			this.dbSpecificCommands.add(copy.getVerb());
 		}
 		
 		String verbs = this.dbConnection.getMetadata().getVerbsToIgnore();

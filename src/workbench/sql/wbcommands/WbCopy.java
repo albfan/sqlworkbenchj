@@ -28,6 +28,8 @@ public class WbCopy
 	extends SqlCommand
 {
 	public static final String VERB = "COPY";
+	public static final String ALT_VERB = "WBCOPY";
+	
 	public static final String PARAM_SOURCETABLE = "sourcetable";
 	public static final String PARAM_SOURCEQUERY = "sourcequery";
 	public static final String PARAM_TARGETTABLE = "targettable";
@@ -46,7 +48,14 @@ public class WbCopy
 
 	private ArgumentParser cmdLine;
 	private DataCopier copier;
-
+	private String usedVerb = VERB;
+	
+	public WbCopy(String verbToUse)
+	{
+		this();
+		this.usedVerb = verbToUse;
+	}
+	
 	public WbCopy()
 	{
 		cmdLine = new ArgumentParser();
@@ -67,13 +76,29 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_USEBATCH);
 	}
 
-	public String getVerb() { return VERB; }
+	public String getVerb() { return usedVerb; }
 
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		/* when using makeCleanSql, a SQL query as the source will
+		 * be modified (i.e. comments will be stripped, which is not good
+		 * if the query contains Oracle hints. We actually only need to make 
+		 * sure that the COPY or WBCOPY verb is stripped off the full command
+		 * in order to make the commandline parser work properly
+		 */
+		
+		/*
 		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
+		int pos = aSql.indexOf(' ');
+		if (pos > -1)
+			aSql = aSql.substring(pos);
+		else
+			aSql = "";
+		*/
+		
+		aSql = aSql.trim();
 		int pos = aSql.indexOf(' ');
 		if (pos > -1)
 			aSql = aSql.substring(pos);
@@ -212,6 +237,7 @@ public class WbCopy
 		copier.setDeleteTarget(delete);
 
 		TableIdentifier targetId = new TableIdentifier(targettable);
+		targetId.setNewTable(createTable);
 
 		try
 		{
@@ -236,7 +262,8 @@ public class WbCopy
 			}
 			else
 			{
-				ColumnIdentifier[] cols = this.parseColumns();
+				ColumnIdentifier[] cols = this.parseColumns(sourcequery, sourceCon);
+				//if (createTable) targetId.
 				copier.copyFromQuery(sourceCon, targetCon, sourcequery, targetId, cols);
 			}
 
@@ -287,6 +314,42 @@ public class WbCopy
 			}
 		}
 
+		return result;
+	}
+
+	private ColumnIdentifier[] parseColumns(String sourceQuery, WbConnection sourceCon)
+	{
+		// First read the defined columns from the passed parameter
+		String cols = cmdLine.getValue(PARAM_COLUMNS);
+		List l = StringUtil.stringToList(cols, ",");
+		int count = l.size();
+		ColumnIdentifier[] result = new ColumnIdentifier[count];
+		for (int i=0; i < count; i++)
+		{
+			String c = (String)l.get(i);
+			result[i] = new ColumnIdentifier(c);
+		}
+		
+		// now try to read the column definitions from the query
+		// if a matching column is found, the definition from the query 
+		// is used (because it will/should contain the correct datatype information 
+		try
+		{
+			List colsFromQuery = SqlUtil.getResultSetColumns(sourceQuery, sourceCon);
+			for (int i=0; i < count; i++)
+			{
+				int idx = colsFromQuery.indexOf(result[i]);
+				if (idx > -1)
+				{
+					ColumnIdentifier c = (ColumnIdentifier)colsFromQuery.get(idx);
+					result[i] = c;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("WbCopy.parseColumns()", "Error retrieving column definition from source query", e);
+		}
 		return result;
 	}
 

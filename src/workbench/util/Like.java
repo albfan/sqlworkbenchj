@@ -13,7 +13,7 @@ import java.util.*;
  * An instance of this class represents a pattern of the SQL operator LIKE.
  *
  * @author  <a href="mailto:ey@inweb.de?subject=Like Operator">Christian Ey</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Like {
 
@@ -30,8 +30,8 @@ public class Like {
 		public static void main( String[] args) throws Exception
 		{
 
-			Like pattern = new Like("'%product.jsp%'", false);
-			boolean wowThisMatches = pattern.like("/product.jsp");
+			Like pattern = new Like("'%request%'", false);
+			boolean wowThisMatches = pattern.like(" ");
 			System.out.println( "matches: " + wowThisMatches);
 		}
 

@@ -274,8 +274,10 @@ public class SqlFormatter
 	private boolean needsWhitespace(SQLToken last, SQLToken current, boolean ignoreStartOfline)
 	{
 		char lastChar = last.getContents().charAt(0);
+		char currChar = current.getContents().charAt(0);
 		if (!ignoreStartOfline && this.isStartOfLine()) return false;
-		if (current.getContents().equals("=")) return true;
+		if ( (lastChar == '<' || lastChar == '>') && (currChar == '=' || currChar == '<' || currChar == '>')) return false;
+		if (currChar == '=') return true;
 		if (lastChar == '=') return true;
 		if (lastChar == '\"') return false;
 		if (lastChar == '.' && current.isIdentifier()) return false;
@@ -1417,7 +1419,7 @@ public class SqlFormatter
 //			String sql = "create index tk_test_idx on tk_test (col1, col2)";
 //			String sql = "/* testing \n testing line 2 \n*/\nCREATE TABLE test (nr integer);";
 //			String sql = "create index TK_TEST on bla ( upper(eins), FUENF, sechs)" ;
-			String sql = "select count(*) from test where ucase(surname) like 'BLA%'";
+			String sql = "select count(*) from test where ucase(surname) like 'BLA%' and x >= 500 and y=10";
 			SqlFormatter f = new SqlFormatter(sql,60);
 			Set s = new HashSet();
 			s.add("UCASE");

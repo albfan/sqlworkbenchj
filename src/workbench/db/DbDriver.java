@@ -237,6 +237,11 @@ public class DbDriver
 			{
 				propName = "v$session.program";
 				if (id != null) props.put("v$session.terminal", id);
+				/*
+				user = System.getProperty("user.name");
+				System.out.println("user = " + user);
+				props.put("v$session.osuser", user);
+				*/
 			}
 			else if (url.startsWith("jdbc:inetdae"))
 			{

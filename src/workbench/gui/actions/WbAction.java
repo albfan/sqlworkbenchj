@@ -45,6 +45,13 @@ public class WbAction
 		this.delegate = l;
 	}
 	
+	public WbAction(ActionListener l, String aName)
+	{
+		this();
+		this.delegate = l;
+		this.actionName = "wb-" + aName;
+	}
+	
 	public WbAction()
 	{
 		String c = this.getClass().getName();
@@ -375,6 +382,7 @@ public class WbAction
 	{
 		if (this.delegate != null)
 		{
+			e.setSource(this);
 			this.delegate.actionPerformed(e);
 		}
 	}

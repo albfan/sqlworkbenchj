@@ -605,12 +605,12 @@ public class WbManager
 
 	private void closeAllWindows()
 	{
-		for (int i=0; i < mainWindows.size(); i ++)
+		int size = this.mainWindows.size();
+		for (int i=0; i < size; i ++)
 		{
 			MainWindow w = (MainWindow)this.mainWindows.get(i);
 			if (w != null)
 			{
-				this.mainWindows.remove(w);
 				w.setVisible(false);
 				w.dispose();
 			}

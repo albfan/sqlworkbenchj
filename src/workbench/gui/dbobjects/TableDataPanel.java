@@ -4,6 +4,7 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
@@ -11,6 +12,7 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 import javax.swing.Box;
@@ -31,6 +33,7 @@ import javax.swing.border.EtchedBorder;
 import workbench.WbManager;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.exception.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.StopAction;
@@ -224,28 +227,47 @@ public class TableDataPanel
 		{
 			WbSwingUtilities.showWaitCursor(this);
 
-			stmt = this.dbConnection.createStatement();
-			rs = stmt.executeQuery(sql);
-			if (rs.next())
+			synchronized (this.retrieveLock)
 			{
-				rowCount = rs.getLong(1);
+				stmt = this.dbConnection.createStatement();
+				rs = stmt.executeQuery(sql);
+				if (rs.next())
+				{
+					rowCount = rs.getLong(1);
+				}
+				this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount") + " " + rowCount);
 			}
-			this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount") + " " + rowCount);
+		}
+		catch (SQLException e)
+		{
+			this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount") + " " + ResourceMgr.getString("TxtError"));
+			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.tableName + ": " + ExceptionUtil.getDisplay(e), null);
 		}
 		catch (Exception e)
 		{
 			this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount") + " " + ResourceMgr.getString("TxtError"));
 			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.tableName, e);
+			/*
+			final Component caller = this;
+			final String msg = ResourceMgr.getString("ErrorRetrievingRowCount") + "\n" + e.getMessage();
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					WbManager.getInstance().showErrorMessage(caller, msg);
+				}
+			});
+			*/
 		}
 		finally
 		{
+			WbSwingUtilities.showDefaultCursorOnWindow(this);
 			this.dataDisplay.setStatusMessage("");
 			if (this.loadingImage != null) this.loadingImage.flush();
 			this.rowCountLabel.setIcon(null);
-			try { rs.close(); } catch (Throwable th) {}
-			try { stmt.close(); } catch (Throwable th) {}
+			try { if (rs != null) rs.close(); } catch (Throwable th) {}
+			try { if (stmt != null) stmt.close(); } catch (Throwable th) {}
 			this.reloadAction.setEnabled(true);
-			WbSwingUtilities.showDefaultCursor(this);
 		}
 		return rowCount;
 	}
@@ -326,17 +348,27 @@ public class TableDataPanel
 				try
 				{
 					WbSwingUtilities.showWaitCursor(dataDisplay);
-					dataDisplay.setShowErrorMessages(true);
-					dataDisplay.scriptStarting();
-					dataDisplay.setMaxRows(maxRows);
-					dataDisplay.runStatement(sql);
-					String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + tableName;
-					dataDisplay.setPrintHeader(header);
-					dataDisplay.setStatusMessage("");
+					synchronized (retrieveLock)
+					{
+						dataDisplay.setShowErrorMessages(true);
+						dataDisplay.scriptStarting();
+						dataDisplay.setMaxRows(maxRows);
+						dataDisplay.runStatement(sql);
+						String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + tableName;
+						dataDisplay.setPrintHeader(header);
+						dataDisplay.setStatusMessage("");
+            WbSwingUtilities.showDefaultCursor(dataDisplay);
+					}
 				}
 				catch (OutOfMemoryError mem)
 				{
-					WbManager.getInstance().showErrorMessage(TableDataPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
+					SwingUtilities.invokeLater(new Runnable()
+					{
+						public void run()
+						{
+							WbManager.getInstance().showErrorMessage(TableDataPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
+						}
+					});
 				}
 				catch (Throwable e)
 				{
@@ -344,14 +376,16 @@ public class TableDataPanel
 				}
 				finally
 				{
+					WbSwingUtilities.showDefaultCursorOnWindow(dataDisplay);
 					WbSwingUtilities.showDefaultCursor(dataDisplay);
+					dataDisplay.getTable().setCursor(null);
 					dataDisplay.scriptFinished();
 					cancelRetrieve.setEnabled(false);
 					reloadAction.setEnabled(true);
 				}
 			}
 		};
-		t.setName("TableDataPanel retrieve thread");
+		t.setName("TableDataPanel - retrieve thread");
 		t.setDaemon(true);
 		t.start();
 	}

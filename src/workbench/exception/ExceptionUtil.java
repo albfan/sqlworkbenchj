@@ -34,7 +34,7 @@ public class ExceptionUtil
 				result.append(", ");
 			}
 			int error = se.getErrorCode();
-			result.append("Errorcode=");
+			result.append("DB Errorcode=");
 			result.append(Integer.toString(error));
 		}
 		catch (Throwable th)
@@ -60,15 +60,15 @@ public class ExceptionUtil
 			}
 			else
 			{
-				result = new StringBuffer(th.getMessage());
+				result = new StringBuffer(th.getMessage().trim());
 			}
 			
 			if (th instanceof SQLException)
 			{
 				SQLException se = (SQLException)th;
-				result.append("\r\n(");
+				result.append(" [");
 				result.append(getSqlStateString(se));
-				result.append(") ");
+				result.append("] ");
 			}
 
 			if (includeStackTrace)

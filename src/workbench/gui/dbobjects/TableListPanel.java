@@ -30,7 +30,7 @@ import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.SpoolDataAction;
-
+import workbench.gui.actions.WbAction;
 
 import workbench.gui.components.*;
 import workbench.gui.dbobjects.ObjectScripterUI;
@@ -45,6 +45,8 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import workbench.db.TableIdentifier;
+import workbench.gui.sql.ExecuteSqlDialog;
 
 
 
@@ -122,7 +124,10 @@ public class TableListPanel
 
 	private JMenu showDataMenu;
 	private String[] availableTableTypes;
-	
+	private WbAction dropIndexAction;
+	private WbAction createIndexAction;
+	private WbAction createDummyInsertAction;
+
 	// holds a reference to other WbTables which
 	// need to display the same table list
 	// e.g. the table search panel
@@ -140,12 +145,14 @@ public class TableListPanel
 
 		this.tableDefinition = new WbTable();
 		this.tableDefinition.setAdjustToColumnLabel(false);
+		this.tableDefinition.setSelectOnRightButtonClick(true);
 		WbScrollPane scroll = new WbScrollPane(this.tableDefinition);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), scroll);
 
 		this.indexes = new WbTable();
 		this.indexes.setAdjustToColumnLabel(false);
 		this.indexPanel = new WbScrollPane(this.indexes);
+		this.indexes.getSelectionModel().addListSelectionListener(this);
 
 		this.tableSource = EditorPanel.createSqlEditor();
 		this.tableSource.setEditable(false);
@@ -195,6 +202,13 @@ public class TableListPanel
 
 		this.spoolData = new SpoolDataAction(this);
 		this.tableList.addPopupAction(spoolData, true);
+
+		this.createDummyInsertAction = new WbAction(this, "create-dummy-insert");
+		this.createDummyInsertAction.setEnabled(true);
+		this.createDummyInsertAction.initMenuDefinition("MnuTxtCreateDummyInsert");
+
+		this.tableList.addPopupAction(this.createDummyInsertAction, false);
+
 		this.extendPopupMenu();
 		this.findPanel = new FindPanel(this.tableList);
 
@@ -257,6 +271,19 @@ public class TableListPanel
     this.parentWindow.addIndexChangeListener(this);
 		this.displayTab.addMouseListener(this);
 		this.tableList.addMouseListener(this);
+
+		this.dropIndexAction = new WbAction(this,"drop-index");
+		this.dropIndexAction.setEnabled(false);
+		this.indexes.setSelectOnRightButtonClick(true);
+		this.dropIndexAction.initMenuDefinition("MnuTxtDropIndex");
+		this.indexes.addPopupAction(this.dropIndexAction, true);
+
+		this.createIndexAction = new WbAction(this, "create-index");
+		this.createIndexAction.setEnabled(false);
+		this.createIndexAction.initMenuDefinition("MnuTxtCreateIndex");
+		this.tableDefinition.getSelectionModel().addListSelectionListener(this);
+		this.tableDefinition.addPopupAction(this.createIndexAction, true);
+
 	}
 
 	private void extendPopupMenu()
@@ -574,65 +601,72 @@ public class TableListPanel
 			return;
 		}
 
-		final Container parent = this.getParent();
+		try
+		{
+			WbSwingUtilities.showWaitCursor(this);
+			setBusy(true);
+			synchronized (retrieveLock)
+			{
+				reset();
+
+				// Some JDBC drivers (e.g. PostgreSQL) return a selection
+				// of table types to the user when passing null to getTables()
+				// But we really might want to see all tables!
+				// So if the app settings tells us to do, we'll use the list
+				// of types provided by the driver instead of using null as the type
+				String[] types = null;
+				String type = (String)tableTypes.getSelectedItem();
+				if ("*".equals(type))
+				{
+					if (WbManager.getSettings().getUseTableTypeList())
+					{
+						types = availableTableTypes;
+					}
+				}
+				else
+				{
+					types = new String[1];
+					types[0] = type;
+				}
+				DataStore ds = dbConnection.getMetadata().getTables(currentCatalog, currentSchema, types);
+				DataStoreTableModel rs = new DataStoreTableModel(ds);
+				tableList.setModel(rs, true);
+				tableList.adjustColumns();
+				SwingUtilities.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						updateDisplayClients();
+					}
+				});
+				shouldRetrieve = false;
+			}
+		}
+		catch (OutOfMemoryError mem)
+		{
+			WbManager.getInstance().showErrorMessage(TableListPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
+		}
+		catch (Throwable e)
+		{
+			LogMgr.logError("TableListPanel.retrieve()", "Error retrieving table list", e);
+		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursor(this);
+			setBusy(false);
+		}
+	}
+
+	/**
+	 *	Starts the retrieval of the tables in a background thread
+	 */
+	public void startRetrieve()
+	{
 		Thread t = new Thread()
 		{
 			public void run()
 			{
-				try
-				{
-					setBusy(true);
-					synchronized (retrieveLock)
-					{
-						parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-						reset();
-						
-						// Some JDBC drivers (e.g. PostgreSQL) return a selection
-						// of table types to the user when passing null to getTables()
-						// But we really might want to see all tables! 
-						// So if the app settings tells us to do, we'll use the list
-						// of types provided by the driver instead of using null as the type
-						String[] types = null;
-						String type = (String)tableTypes.getSelectedItem();
-						if ("*".equals(type))
-						{
-							if (WbManager.getSettings().getUseTableTypeList())
-							{
-								types = availableTableTypes;
-							}
-						}
-						else
-						{
-							types = new String[1];
-							types[0] = type;
-						}
-						DataStore ds = dbConnection.getMetadata().getTables(currentCatalog, currentSchema, types);
-						DataStoreTableModel rs = new DataStoreTableModel(ds);
-						tableList.setModel(rs, true);
-						tableList.adjustColumns();
-						SwingUtilities.invokeLater(new Runnable()
-						{
-							public void run()
-							{
-								updateDisplayClients();
-							}
-						});
-						parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-						shouldRetrieve = false;
-					}
-				}
-				catch (OutOfMemoryError mem)
-				{
-					WbManager.getInstance().showErrorMessage(TableListPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
-				}
-				catch (Throwable e)
-				{
-					LogMgr.logError("TableListPanel.retrieve()", "Error retrieving table list", e);
-				}
-				finally
-				{
-					setBusy(false);
-				}
+				retrieve();
 			}
 		};
 		t.setDaemon(true);
@@ -683,7 +717,18 @@ public class TableListPanel
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
-		this.updateDisplay();
+		if (e.getSource() == this.tableList.getSelectionModel())
+		{
+			this.updateDisplay();
+		}
+		else if (e.getSource() == this.indexes.getSelectionModel())
+		{
+			this.dropIndexAction.setEnabled(this.indexes.getSelectedRowCount() > 0);
+		}
+		else if (e.getSource() == this.tableDefinition.getSelectionModel())
+		{
+			this.createIndexAction.setEnabled(this.tableDefinition.getSelectedRowCount() > 0);
+		}
 	}
 
 	public void updateDisplay()
@@ -758,11 +803,10 @@ public class TableListPanel
 					);
 	}
 
-	private synchronized void retrieveTableSource()
+	private void retrieveTableSource()
 		throws SQLException
 	{
-		WbSwingUtilities.showWaitCursor(this);
-		WbSwingUtilities.showWaitCursor(this.tableSource);
+		WbSwingUtilities.showWaitCursorOnWindow(this);
 
 		try
 		{
@@ -803,13 +847,12 @@ public class TableListPanel
 		}
 		finally
 		{
-			WbSwingUtilities.showDefaultCursor(tableSource);
-			WbSwingUtilities.showDefaultCursor(this);
+			WbSwingUtilities.showDefaultCursorOnWindow(this);
 		}
 		shouldRetrieveTableSource = false;
 	}
 
-	private synchronized void retrieveTableDefinition()
+	private void retrieveTableDefinition()
 		throws SQLException
 	{
 		WbSwingUtilities.showWaitCursorOnWindow(this);
@@ -861,11 +904,12 @@ public class TableListPanel
 
 	private void retrieveCurrentPanel()
 	{
+		if (this.busy) return;
+
 		if (this.tableList.getSelectedRowCount() <= 0) return;
 		int index = this.displayTab.getSelectedIndex();
 
-		WbSwingUtilities.showWaitCursorOnWindow(this);
-		//this.setBusy(true);
+		this.setBusy(true);
 		try
 		{
 			switch (index)
@@ -904,8 +948,9 @@ public class TableListPanel
 		}
 		finally
 		{
-			//this.setBusy(false);
-			WbSwingUtilities.showDefaultCursorOnWindow(this);
+			this.setBusy(false);
+			WbSwingUtilities.showDefaultCursor(this);
+			WbSwingUtilities.showDefaultCursor(this.tableData);
 		}
 	}
 
@@ -939,44 +984,96 @@ public class TableListPanel
 	private void retrieveExportedTables()
 		throws SQLException
 	{
-		synchronized (retrieveLock)
+		WbSwingUtilities.showWaitCursorOnWindow(this);
+
+		try
 		{
-			DbMetadata meta = this.dbConnection.getMetadata();
-			DataStoreTableModel model = new DataStoreTableModel(meta.getReferencedBy(this.selectedCatalog, this.selectedSchema, this.selectedTableName));
-			exportedKeys.setModel(model, true);
-			exportedKeys.adjustColumns();
-			this.shouldRetrieveExportedKeys = false;
+			synchronized (retrieveLock)
+			{
+				DbMetadata meta = this.dbConnection.getMetadata();
+				DataStoreTableModel model = new DataStoreTableModel(meta.getReferencedBy(this.selectedCatalog, this.selectedSchema, this.selectedTableName));
+				exportedKeys.setModel(model, true);
+				exportedKeys.adjustColumns();
+				this.shouldRetrieveExportedKeys = false;
+			}
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError("TableListPanel.retrieveExportedTables()", "Error retrieving table references", th);
+		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursorOnWindow(this);
 		}
 	}
 
 	private void retrieveImportedTables()
 		throws SQLException
 	{
-		synchronized (retrieveLock)
+		WbSwingUtilities.showWaitCursorOnWindow(this);
+
+		try
 		{
-			DbMetadata meta = this.dbConnection.getMetadata();
-			DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(this.selectedCatalog, this.selectedSchema, this.selectedTableName));
-			importedKeys.setModel(model, true);
-			importedKeys.adjustColumns();
-			this.shouldRetrieveImportedKeys = false;
+			synchronized (retrieveLock)
+			{
+				DbMetadata meta = this.dbConnection.getMetadata();
+				DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(this.selectedCatalog, this.selectedSchema, this.selectedTableName));
+				importedKeys.setModel(model, true);
+				importedKeys.adjustColumns();
+				this.shouldRetrieveImportedKeys = false;
+			}
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError("TableListPanel.retrieveImportedTables()", "Error retrieving table references", th);
+		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursorOnWindow(this);
 		}
 	}
 
 	private void retrieveImportedTree()
 	{
-		synchronized (retrieveLock)
+		WbSwingUtilities.showWaitCursorOnWindow(this);
+
+		try
 		{
-			importedTableTree.readTree(this.selectedCatalog, this.selectedSchema, this.selectedTableName, false);
-			this.shouldRetrieveImportedTree = false;
+			synchronized (retrieveLock)
+			{
+				importedTableTree.readTree(this.selectedCatalog, this.selectedSchema, this.selectedTableName, false);
+				this.shouldRetrieveImportedTree = false;
+			}
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError("TableListPanel.retrieveImportedTree()", "Error retrieving table references", th);
+		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursorOnWindow(this);
 		}
 	}
 
 	private void retrieveExportedTree()
 	{
-		synchronized (retrieveLock)
+		WbSwingUtilities.showWaitCursorOnWindow(this);
+
+		try
 		{
-			exportedTableTree.readTree(this.selectedCatalog, this.selectedSchema, this.selectedTableName, true);
-			this.shouldRetrieveExportedTree = false;
+			synchronized (retrieveLock)
+			{
+				exportedTableTree.readTree(this.selectedCatalog, this.selectedSchema, this.selectedTableName, true);
+				this.shouldRetrieveExportedTree = false;
+			}
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError("TableListPanel.retrieveImportedTree()", "Error retrieving table references", th);
+		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursorOnWindow(this);
 		}
 	}
 
@@ -1065,7 +1162,7 @@ public class TableListPanel
 				}
 				catch (Exception ex)
 				{
-					ex.printStackTrace();
+					LogMgr.logError("TableListPanel().actionPerformed()", "Error when accessing editor tab", ex);
 				}
 			}
 			else if (command.equals(DELETE_TABLE_CMD))
@@ -1080,6 +1177,57 @@ public class TableListPanel
 			{
 				this.createScript();
 			}
+			else if (e.getSource() == this.dropIndexAction)
+			{
+				this.dropIndexes();
+			}
+			else if (e.getSource() == this.createIndexAction)
+			{
+				this.createIndex();
+			}
+			else if (e.getSource() == this.createDummyInsertAction)
+			{
+				this.createDummyInserts();
+			}
+		}
+	}
+
+	private void dropIndexes()
+	{
+		if (this.indexes.getSelectedRowCount() == 0) return;
+		int rows[] = this.indexes.getSelectedRows();
+		int count = rows.length;
+		if (count == 0) return;
+
+		ArrayList names = new ArrayList(count);
+		ArrayList types = new ArrayList(count);
+		for (int i=0; i < count; i ++)
+		{
+			String name = this.indexes.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
+			names.add(this.selectedSchema + "." + name);
+			types.add("INDEX");
+		}
+		ObjectDropperUI ui = new ObjectDropperUI();
+		ui.setObjects(names, types);
+		ui.setConnection(this.dbConnection);
+		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
+		ui.showDialog(f);
+		if (!ui.dialogWasCancelled())
+		{
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					try
+					{
+						retrieveIndexes();
+					}
+					catch (Exception e)
+					{
+						LogMgr.logError("TableListPanel.dropIndex()", "Error re-retrieving indexes", e);
+					}
+				}
+			});
 		}
 	}
 
@@ -1168,14 +1316,14 @@ public class TableListPanel
 			String name = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 			String schema = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
 
-      if (schema!= null && schema.length() > 0)
-      {
-        name = SqlUtil.quoteObjectname(schema) + "." + SqlUtil.quoteObjectname(name);
-      }
-      else
-      {
-        name = SqlUtil.quoteObjectname(name);
-      }
+			if (schema!= null && schema.length() > 0)
+			{
+				name = SqlUtil.quoteObjectname(schema) + "." + SqlUtil.quoteObjectname(name);
+			}
+			else
+			{
+				name = SqlUtil.quoteObjectname(name);
+			}
 
 			names.add(name);
 		}
@@ -1184,6 +1332,54 @@ public class TableListPanel
 		deleter.setConnection(this.dbConnection);
 		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
 		deleter.showDialog(f);
+	}
+
+	private void createDummyInserts()
+	{
+		int[] rows = this.tableList.getSelectedRows();
+		int count = rows.length;
+		HashMap tables = new HashMap(count);
+		for (int i=0; i < count; i++)
+		{
+			int row = rows[i];
+			String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+			tables.put(table, "INSERT");
+		}
+		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
+		ObjectScripterUI ui = new ObjectScripterUI(s);
+		ui.show(SwingUtilities.getWindowAncestor(this));
+	}
+
+
+	private void createIndex()
+	{
+		if (this.tableDefinition.getSelectedRowCount() <= 0) return;
+		int rows[] = this.tableDefinition.getSelectedRows();
+		int count = rows.length;
+		String[] columns = new String[count];
+
+		String msg = ResourceMgr.getString("LabelInputIndexName");
+		String indexName = ResourceMgr.getString("TxtNewIndexName");
+		//String indexName = WbSwingUtilities.getUserInput(this, msg, defaultName);
+		if (indexName == null || indexName.trim().length() == 0) return;
+
+		for (int i=0; i < count; i++)
+		{
+			columns[i] = this.tableDefinition.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME).toLowerCase();
+		}
+		TableIdentifier table = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+		String sql = this.dbConnection.getMetadata().buildIndexSource(table, indexName, false, columns);
+		String title = ResourceMgr.getString("TxtWindowTitleCreateIndex");
+		Window parent = SwingUtilities.getWindowAncestor(this);
+		Frame owner = null;
+		if (parent != null && parent instanceof Frame)
+		{
+			owner = (Frame)parent;
+		}
+		ExecuteSqlDialog dialog = new ExecuteSqlDialog(owner, title, sql, indexName, this.dbConnection);
+		dialog.setStartButtonText(ResourceMgr.getString("TxtCreateIndex"));
+		dialog.show();
+		this.shouldRetrieveIndexes = true;
 	}
 
 	private void dropTables()
@@ -1326,7 +1522,7 @@ public class TableListPanel
     else
     {
 			// Updating the showDataMenu needs to be posted because
-			// the EhangeEvent is also triggered when a tab has been
+			// the ChangeEvent is also triggered when a tab has been
 			// removed (thus implicitely changing the index)
 			// but the changeEvent occurs <b>before</b> the actual
 			// pane is removed from the control.

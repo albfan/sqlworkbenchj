@@ -10,6 +10,8 @@ import workbench.gui.actions.RenameTabAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.MainPanel;
+import workbench.gui.actions.FileReloadAction;
+import workbench.gui.actions.FileSaveAction;
 
 /**
  *
@@ -44,14 +46,26 @@ public class SqlTabPopup extends JPopupMenu
 
 		if (panel instanceof SqlPanel)
 		{
+			SqlPanel spanel = (SqlPanel)panel;
 			this.addSeparator();
-			FileOpenAction open = new FileOpenAction((SqlPanel)panel);
+
+			FileSaveAction save = new FileSaveAction(spanel);
+			save.removeIcon();
+			this.add(save.getMenuItem());
+
+			FileOpenAction open = new FileOpenAction(spanel);
 			open.removeIcon();
 			this.add(open.getMenuItem());
-			FileDiscardAction discard = new FileDiscardAction((SqlPanel)panel);
+
+			FileReloadAction reload = new FileReloadAction(spanel);
+			reload.removeIcon();
+			this.add(reload.getMenuItem());
+			this.addSeparator();
+			FileDiscardAction discard = new FileDiscardAction(spanel);
 			discard.removeIcon();
 			this.add(discard.getMenuItem());
 			this.remove.setEnabled(aClient.canCloseTab());
+
 		}
 	}
 

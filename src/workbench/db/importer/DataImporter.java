@@ -55,6 +55,9 @@ public class DataImporter
 	private long insertedRows = 0;
 	private int currentImportRow = 0;
 	private int mode = MODE_INSERT;
+	private boolean useBatch = false;
+	private boolean supportsBatch = false;
+	private boolean canCommitInBatch = true;
 
 	private int colCount;
 	private ArrayList warnings = new ArrayList();
@@ -83,6 +86,8 @@ public class DataImporter
 	public void setConnection(WbConnection aConn)
 	{
 		this.dbConn = aConn;
+		this.supportsBatch = this.dbConn.getMetadata().supportsBatchUpdates();
+		this.useBatch = this.useBatch && supportsBatch;
 	}
 
 	public void setRowActionMonitor(RowActionMonitor rowMonitor)
@@ -107,6 +112,8 @@ public class DataImporter
 	public void setContinueOnError(boolean flag) { this.continueOnError = flag; }
 
 	public boolean getDeleteTarget() { return deleteTarget; }
+
+
 	/**
 	 *	Controls deletion of the target table.
 	 */
@@ -116,10 +123,47 @@ public class DataImporter
 	}
 
 
+	/**
+	 * 	Use batch updates if the driver supports this
+	 */
+	public void setUseBatch(boolean flag)
+	{
+		if (this.isModeInsertUpdate() || this.isModeUpdateInsert()) return;
+
+		if (!this.supportsBatch)
+		{
+			LogMgr.logWarning("DataImporter.setUseBatch()", "JDBC driver does not support batch updates. Ignoring request to use batch updates");
+		}
+
+		if (this.dbConn != null)
+		{
+			this.useBatch = flag && this.supportsBatch;
+		}
+		else
+		{
+			// we cannot yet decide if the driver supports batch updates.
+			// this will be checked if the connection is set
+			this.useBatch = flag;
+		}
+	}
+
+	public boolean getUseBatch()
+	{
+		 return this.useBatch;
+	}
 	public void setModeInsert() { this.mode = MODE_INSERT; }
 	public void setModeUpdate() { this.mode = MODE_UPDATE; }
-	public void setModeInsertUpdate() { this.mode = MODE_INSERT_UPDATE; }
-	public void setModeUpdateInsert() { this.mode = MODE_UPDATE_INSERT; }
+
+	public void setModeInsertUpdate()
+	{
+		this.mode = MODE_INSERT_UPDATE;
+		this.useBatch = false;
+	}
+	public void setModeUpdateInsert()
+	{
+		this.mode = MODE_UPDATE_INSERT;
+		this.useBatch = false;
+	}
 
 	public boolean isModeInsert() { return (this.mode == MODE_INSERT); }
 	public boolean isModeUpdate() { return (this.mode == MODE_UPDATE); }
@@ -231,6 +275,7 @@ public class DataImporter
 	{
 		if (this.source == null) return;
 		this.isRunning = true;
+		this.canCommitInBatch = true;
 		this.source.start();
 	}
 
@@ -276,10 +321,9 @@ public class DataImporter
 	{
 		int count = this.warnings.size();
 		String msg = this.source.getMessages();
-		
-		
+
 		String[] result = null;
-		if (msg.length() == 0) 
+		if (msg != null && msg.length() == 0)
 		{
 			result = new String[count];
 		}
@@ -288,7 +332,7 @@ public class DataImporter
 			result = new String[count + 1];
 			result[count] = msg;
 		}
-		
+
 		for (int i=0; i < count; i++)
 		{
 			result[i] = (String)this.warnings.get(i);
@@ -322,6 +366,12 @@ public class DataImporter
 	{
 		if (row == null) return;
 		if (row.length != this.colCount) return;
+
+		// a bit paranoid :)
+		if (this.useBatch && (this.isModeInsertUpdate() || this.isModeUpdateInsert()))
+		{
+			this.useBatch = false;
+		}
 
 		currentImportRow++;
 		if (this.progressMonitor != null)
@@ -393,8 +443,42 @@ public class DataImporter
 		{
 			try
 			{
-				LogMgr.logDebug("DataImporter.processRow()", "Committing changes (commitEvery=" + this.commitEvery + ")");
-				this.dbConn.commit();
+				if (this.useBatch)
+				{
+					if (this.canCommitInBatch)
+					{
+						PreparedStatement stmt = null;
+						if (this.isModeInsert())
+						{
+							stmt = this.insertStatement;
+						}
+						else if (this.isModeUpdate())
+						{
+							stmt = this.updateStatement;
+						}
+
+						// Oracle seems to have a problem with adding a SQL statement
+						// to the batch of a prepared Statement (works fine with PostgreSQL)
+						// as I don't know how other DBMS behave, adding the COMMIT will
+						// be disabled as soon as a problem occurs here
+						try
+						{
+							if (stmt != null) stmt.addBatch("COMMIT");
+						}
+						catch (Exception e)
+						{
+							LogMgr.logWarning("DataImporter.processRow()", "Error when adding COMMIT to batch. This does not seem to be supported by the server: " + ExceptionUtil.getDisplay(e));
+							String msg = ResourceMgr.getString("ErrorCommitInBatch").replaceAll("%error%", e.getMessage());
+							this.warnings.add(msg);
+							this.canCommitInBatch = false;
+						}
+					}
+				}
+				else
+				{
+					//LogMgr.logDebug("DataImporter.processRow()", "Committing changes (commitEvery=" + this.commitEvery + ")");
+					this.dbConn.commit();
+				}
 			}
 			catch (SQLException e)
 			{
@@ -423,6 +507,7 @@ public class DataImporter
 				values.append(row[i].toString());
 			}
 		}
+		values.append("]");
 		return values.toString();
 	}
 
@@ -434,7 +519,8 @@ public class DataImporter
 	private int insertRow(Object[] row)
 		throws SQLException
 	{
-		this.insertStatement.clearParameters();
+		//this.insertStatement.clearParameters();
+
 		for (int i=0; i < row.length; i++)
 		{
 			if (row[i] == null)
@@ -446,8 +532,17 @@ public class DataImporter
 				this.insertStatement.setObject(i + 1, row[i]);
 			}
 		}
-		int rows = this.insertStatement.executeUpdate();
-		this.insertedRows += rows;
+
+		int rows = 0;
+		if (this.useBatch && this.isModeInsert())
+		{
+			this.insertStatement.addBatch();
+		}
+		else
+		{
+			rows = this.insertStatement.executeUpdate();
+			this.insertedRows += rows;
+		}
 		return rows;
 	}
 
@@ -458,7 +553,8 @@ public class DataImporter
 	private int updateRow(Object[] row)
 		throws SQLException
 	{
-		this.updateStatement.clearParameters();
+		//this.updateStatement.clearParameters();
+
 		int count = row.length;
 		for (int i=0; i < count; i++)
 		{
@@ -472,8 +568,16 @@ public class DataImporter
 				this.updateStatement.setObject(realIndex, row[i]);
 			}
 		}
-		int rows = this.updateStatement.executeUpdate();
-		this.updatedRows += rows;
+		int rows = 0;
+		if (this.useBatch && this.isModeUpdate())
+		{
+			this.updateStatement.addBatch();
+		}
+		else
+		{
+			rows = this.updateStatement.executeUpdate();
+			this.updatedRows += rows;
+		}
 		return rows;
 	}
 
@@ -661,6 +765,36 @@ public class DataImporter
 	{
 		try
 		{
+			if (this.useBatch)
+			{
+				if (this.isModeInsert())
+				{
+					int rows[] = this.insertStatement.executeBatch();
+					if (rows != null)
+					{
+						for (int i=0; i < rows.length; i++)
+						{
+							// Oracle does not seem to report the correct number
+							// so, if we get a SUCCESS_NO_INFO status, we'll simply
+							// assume that one row has been inserted
+							if (rows[i] == Statement.SUCCESS_NO_INFO)	this.insertedRows ++;
+							else if (rows[i] >= 0) this.insertedRows += rows[i];
+						}
+					}
+				}
+				else if (this.isModeUpdate())
+				{
+					int rows[] = this.updateStatement.executeBatch();
+					if (rows != null)
+					{
+						for (int i=0; i < rows.length; i++)
+						{
+							if (rows[i] == Statement.SUCCESS_NO_INFO) this.updatedRows ++;
+							else if (rows[i] >= 0) this.updatedRows += rows[i];
+						}
+					}
+				}
+			}
 			this.closeStatements();
 			if (!this.dbConn.getAutoCommit())
 			{

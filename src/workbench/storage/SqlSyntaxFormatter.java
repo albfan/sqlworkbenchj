@@ -109,10 +109,10 @@ public class SqlSyntaxFormatter
 	{
 		if (aValue == null) return "NULL";
 
-		if (aValue instanceof String)
+		if (aValue instanceof String || aValue instanceof OracleLongType)
 		{
 			// Single quotes in a String must be "quoted"...
-			String t = (String)aValue;
+			String t = aValue.toString();
 			StringBuffer realValue = new StringBuffer(t.length() + 10);
 			realValue.append('\'');
 			StringUtil.replaceToBuffer(realValue, t, "'", "''");

@@ -118,6 +118,7 @@ public class ObjectDropperUI
 		{
 			ObjectDropper dropper = new ObjectDropper(this.objectNames, this.objectTypes);
 			dropper.setConnection(this.connection);
+			dropper.setCascadeConstraints(this.checkBoxCascadeConstraints.isSelected());
 			dropper.execute();
 			WbSwingUtilities.showDefaultCursor(this.dialog);
 		}

@@ -67,8 +67,20 @@ public class ConnectionMgr
 		conn.setSqlConnection(sql);
 		conn.setProfile(aProfile);
 		
-		LogMgr.logInfo("ConnectionMgr.connect()", "Connected to: [" + sql.getMetaData().getDatabaseProductName() + "], " + conn.getMetadata().getDbVersion());
-
+		String version = null;
+		try
+		{
+			int minor = sql.getMetaData().getDriverMinorVersion();
+			int major = sql.getMetaData().getDriverMajorVersion();
+			version = minor + "." + major;
+		}
+		catch (Throwable th)
+		{
+			version = "n/a";
+		}
+		
+		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" + sql.getMetaData().getDatabaseProductName() + "], Database version: [" + conn.getMetadata().getDbVersion() + "], Driver version: [" + version + "]");
+		
 		try
 		{
 			if (WbManager.getSettings().getEnableDbmsOutput())
@@ -411,8 +423,9 @@ public class ConnectionMgr
 	 */
 	private void disconnectLocalHsql(WbConnection con)
 	{
+		if (con == null) return;
 		String url = con.getUrl();
-		if (!url.startsWith("jdbc:hsqldb")) return;
+		if (url != null && !url.startsWith("jdbc:hsqldb")) return;
 
 		// this is a HSQL server connection. Do not shut down this!
 		if (url.startsWith("jdbc:hsqldb:hsql:")) return;
@@ -420,7 +433,7 @@ public class ConnectionMgr
 		try
 		{
 			Statement stmt = con.createStatement();
-			LogMgr.logInfo("ConnectionMgr.disconnect()", "Local HSQL connection detected. Sending SHUTDOWN to the engine before disconnecting()");
+			LogMgr.logInfo("ConnectionMgr.disconnect()", "Local HSQL connection detected. Sending SHUTDOWN to the engine before disconnecting");
 			stmt.executeUpdate("SHUTDOWN");
 		}
 		catch (Exception e)

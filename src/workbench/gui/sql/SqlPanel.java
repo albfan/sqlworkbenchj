@@ -148,6 +148,7 @@ public class SqlPanel
 	private String historyFilename;
 
 	private FileDiscardAction fileDiscardAction;
+	private FileReloadAction fileReloadAction;
 	private FindDataAction findDataAction;
 	private FindDataAgainAction findDataAgainAction;
 	private String lastSearchCriteria;
@@ -158,10 +159,9 @@ public class SqlPanel
 	private boolean updating;
 	private boolean cancelExecution;
 	private boolean updateRunning;
-
 	private boolean textModified = false;
 	private String tabName = null;
-
+	private String macroToExecute = null;
 	private ImageIcon loadingIcon;
 	private Icon dummyIcon;
 	//private boolean dummyIconFetched = false;
@@ -241,7 +241,7 @@ public class SqlPanel
 
 	public String getId()
 	{
-		return "Wb-" + Integer.toString(this.internalId);
+		return Integer.toString(this.internalId);
 	}
 
 	public void setId(int anId)
@@ -333,6 +333,7 @@ public class SqlPanel
 		if (this.editor.readFile(f))
 		{
 			this.fileDiscardAction.setEnabled(true);
+			this.fileReloadAction.setEnabled(true);
       this.fireFilenameChanged(this.editor.getCurrentFileName());
 			this.selectEditor();
 			result = true;
@@ -359,6 +360,7 @@ public class SqlPanel
 			if (newFile != null && !newFile.equals(oldFile))
 			{
 				this.fileDiscardAction.setEnabled(true);
+				this.fileReloadAction.setEnabled(true);
 	      this.fireFilenameChanged(this.editor.getCurrentFileName());
 				this.selectEditorLater();
 			}
@@ -371,6 +373,16 @@ public class SqlPanel
 	public boolean hasFileLoaded()
 	{
 		return this.editor.hasFileLoaded();
+	}
+
+	public boolean reloadFile()
+	{
+		if (this.editor.reloadFile())
+		{
+			this.showFileIcon();
+			return true;
+		}
+		return false;
 	}
 
 	public void checkAndSaveFile()
@@ -443,6 +455,7 @@ public class SqlPanel
 		if (this.editor.closeFile(emptyEditor))
     {
 			this.fileDiscardAction.setEnabled(false);
+			this.fileReloadAction.setEnabled(false);
       this.fireFilenameChanged(this.tabName);
 			this.removeTabIcon();
 			this.selectEditorLater();
@@ -530,6 +543,8 @@ public class SqlPanel
 		this.actions.add(new FileSaveAsAction(this));
 		this.fileDiscardAction = new FileDiscardAction(this);
 		this.actions.add(this.fileDiscardAction);
+		this.fileReloadAction = new FileReloadAction(this);
+		this.actions.add(this.fileReloadAction);
 
 		this.undo = new UndoAction(this.editor);
 		this.actions.add(undo);
@@ -597,10 +612,10 @@ public class SqlPanel
 		this.actions.add(this.exportDataAction);
 		this.actions.add(this.dataToClipboard);
 
-		this.copyAsSqlInsert = new CopyAsSqlInsertAction(this.data.getTable());
+		this.copyAsSqlInsert = this.data.getTable().getCopyAsInsertAction();
 		this.actions.add(this.copyAsSqlInsert);
 
-		this.copyAsSqlUpdate = new CopyAsSqlUpdateAction(this.data.getTable());
+		this.copyAsSqlUpdate = this.data.getTable().getCopyAsUpdateAction();
 		this.actions.add(this.copyAsSqlUpdate);
 
 		this.importFileAction = new ImportFileAction(this);
@@ -808,7 +823,8 @@ public class SqlPanel
 	{
 		String errorMessage = null;
 		boolean success = false;
-
+		boolean wasUpdate = this.updateRunning;
+		
 		try
 		{
 			this.log.setText(ResourceMgr.getString("MsgUpdatingDatabase"));
@@ -838,6 +854,7 @@ public class SqlPanel
 			this.updateRunning = false;
 			this.setCancelState(false);
 			this.setBusy(false);
+			WbSwingUtilities.showDefaultCursor(this);
 		}
 
 		this.enableExecuteActions();
@@ -847,7 +864,7 @@ public class SqlPanel
 			this.clearStatusMessage();
 			this.checkResultSetActions();
 		}
-		else
+		else if (!wasUpdate)
 		{
 			final String msg = errorMessage;
 			// Make sure the error dialog is displayed on the AWT
@@ -1507,24 +1524,27 @@ public class SqlPanel
 
 	public void executeMacro(final String macroName, final boolean replaceText)
 	{
+		if (isBusy()) return;
+
 		final String sql = MacroManager.getInstance().getMacroText(macroName);
 		if (sql == null || sql.trim().length() == 0) return;
+
+		this.runSelectedCommand = false;
+		this.runCurrentCommand = false;
+
 		if (replaceText)
 		{
+			this.macroToExecute = null;
 			this.storeStatementInHistory();
 			this.editor.setText(sql);
 			this.storeStatementInHistory();
+			resumeThread();
 		}
-		Thread t = new Thread()
+		else
 		{
-			public void run()
-			{
-				runStatement(sql);
-			}
-		};
-		t.setName("SqlPanel - Macro execution thread");
-		t.setDaemon(true);
-		t.start();
+			this.macroToExecute = sql;
+			resumeThread();
+		}
 	}
 
 	public void spoolData()
@@ -1693,14 +1713,25 @@ public class SqlPanel
 		boolean highlightError = true;
 		int startOffset = 0;
 
-		if (aSql == null)
+		if (this.macroToExecute != null)
+		{
+			script = this.macroToExecute;
+			this.macroToExecute = null;
+		}
+		else if (aSql == null)
 		{
 			// the flags to run the current command, the selected text, or everything
 			// are set in the nested classes ExecuteSql, ExcecuteCurrentSql, ExecuteSelectedSql
 			if (this.runSelectedCommand)
 			{
 				script = this.editor.getSelectedStatement();
-				startOffset = this.editor.getSelectionStart();
+
+				// getSelectionStart() returns the current caret position
+				// if no text is selected!
+				if (this.editor.isTextSelected())
+				{
+					startOffset = this.editor.getSelectionStart();
+				}
 			}
 			else
 			{
@@ -1765,8 +1796,14 @@ public class SqlPanel
 				this.data.setPrintHeader(header.toString());
 				this.data.runStatement(sql);
 
-				if (!compressLog || !this.data.wasSuccessful())
+				if (!compressLog /*|| !this.data.wasSuccessful()*/)
 				{
+					/*
+					if (!this.data.wasSuccessful())
+					{
+						logmsg.append(ResourceMgr.getString("MsgExecuteError") + "\n");
+					}
+					*/
 					logmsg.append(this.data.getLastMessage());
 					if (count > 1)
 					{
@@ -1792,24 +1829,22 @@ public class SqlPanel
 				{
 					commandWithError = i;
 				}
+
 				if (count > 1 && !this.data.wasSuccessful() && onErrorAsk && (i < (count - 1)))
 				{
-					final ScriptParser p = scriptParser;
-					final int command = commandWithError;
-					final int offset = startOffset;
+					// the animated gif needs to be turned off when a
+					// dialog is displayed, otherwise Swing uses too much CPU
+					this.showBusyIcon(false);
 
-					SwingUtilities.invokeLater(new Runnable()
-					{
-						public void run()
-						{
-							highlightError(p, command, offset);
-						}
-					});
+					this.highlightError(scriptParser, commandWithError, startOffset);
+
+					// force a refresh in order to display the selection
+					this.repaint();
+					Thread.yield();
 
 					String question = ResourceMgr.getString("MsgScriptStatementError");
 					question = StringUtil.replace(question, "%nr%", Integer.toString(i+1));
 					question = StringUtil.replace(question, "%count%", Integer.toString(count));
-					this.showBusyIcon(false);
 					int choice = WbSwingUtilities.getYesNoIgnoreAll(this, question);
 					this.showBusyIcon(true);
 
@@ -1822,7 +1857,7 @@ public class SqlPanel
 						onErrorAsk = false;
 					}
 				}
-			}
+			} // end for loop
 
 			if (commandWithError > -1 && highlightError)
 			{
@@ -1869,7 +1904,7 @@ public class SqlPanel
 				this.appendToLog(s);
 			}
 
-			if (this.runCurrentCommand && WbManager.getSettings().getAutoJumpNextStatement())
+			if (commandWithError == -1 && this.runCurrentCommand && WbManager.getSettings().getAutoJumpNextStatement())
 			{
 				int nextCommand = startIndex + 1;
 				int startPos = scriptParser.getStartPosForCommand(nextCommand);
@@ -2229,10 +2264,9 @@ public class SqlPanel
 	public void textStatusChanged(boolean modified)
 	{
 		this.textModified = modified;
-		if (this.hasFileLoaded())
-		{
-			this.showFileIcon();
-		}
+		// Make sure the icon for the file is updated to reflect
+		// the modidified status
+		if (this.hasFileLoaded()) this.showFileIcon();
 	}
 
 	public void addDbExecutionListener(DbExecutionListener l)

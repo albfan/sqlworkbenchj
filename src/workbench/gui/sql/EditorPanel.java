@@ -103,7 +103,7 @@ public class EditorPanel
 	private FileOpenAction fileOpen;
 	private ColumnSelectionAction columnSelection;
 	private MatchBracketAction matchBracket;
-	
+
 	private List filenameChangeListeners;
 
   private static final SyntaxStyle[] SYNTAX_COLORS;
@@ -183,7 +183,7 @@ public class EditorPanel
 		//this.setSelectionRectangular(true);
 		WbManager.getSettings().addFontChangedListener(this);
 		WbManager.getSettings().addChangeListener(this);
-		
+
 		new DropTarget(this, DnDConstants.ACTION_COPY, this);
 	}
 
@@ -193,14 +193,14 @@ public class EditorPanel
 	}
 
 	private Set dbFunctions = null;
-	
+
 	public void initDatabaseKeywords(WbConnection aConnection)
 	{
 		AnsiSQLTokenMarker token = this.getSqlTokenMarker();
 		if (token != null) token.initDatabaseKeywords(aConnection.getSqlConnection());
 		this.dbFunctions = aConnection.getMetadata().getDbFunctions();
 	}
-	
+
 	public void fontChanged(String aKey, Font aFont)
 	{
 		if (aKey.equals(Settings.EDITOR_FONT_KEY))
@@ -468,7 +468,7 @@ public class EditorPanel
 		if (this.filenameChangeListeners == null) return;
 		this.filenameChangeListeners.remove(aListener);
 	}
-	
+
 	public boolean openFile()
 	{
 		boolean result = false;
@@ -478,7 +478,7 @@ public class EditorPanel
 			this.requestFocusInWindow();
 			return false;
 		}
-		
+
 		String lastDir = WbManager.getSettings().getLastSqlDir();
 		JFileChooser fc = new JFileChooser(lastDir);
 		fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
@@ -492,12 +492,35 @@ public class EditorPanel
 		return result;
 	}
 
+	public boolean reloadFile()
+	{
+		if (!this.hasFileLoaded()) return false;
+		if (this.currentFile == null) return false;
+
+		if (this.isModified())
+		{
+			String filename = this.getCurrentFileName().replaceAll("\\\\", "\\\\\\\\");
+			String msg = ResourceMgr.getString("MsgConfirmUnsavedReload").replaceAll("%filename%", filename);
+			boolean reload = WbSwingUtilities.getYesNo(this, msg);
+			if (!reload) return false;
+		}
+		boolean result = false;
+		int caret = this.getCaretPosition();
+		result = this.readFile(currentFile);
+		if (result)
+		{
+			this.setCaretPosition(caret);
+		}
+		return result;
+	}
+
+
 	public boolean hasFileLoaded()
 	{
 		String file = this.getCurrentFileName();
 		return (file != null) && (file.length() > 0);
 	}
-	
+
 	public boolean canCloseFile()
 	{
 		if (!this.hasFileLoaded()) return true;
@@ -514,13 +537,13 @@ public class EditorPanel
 			result = (choice != JOptionPane.CANCEL_OPTION);
 		}
 		return result;
-	}	
-	
+	}
+
 	public boolean readFile(File aFile)
 	{
 		if (aFile == null) return false;
 		if (!aFile.exists()) return false;
-		if (aFile.length() > Integer.MAX_VALUE)
+		if (aFile.length() >= Integer.MAX_VALUE)
 		{
 			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgFileTooBig"));
 			return false;
@@ -841,15 +864,15 @@ public class EditorPanel
 			dropTargetDragEvent.rejectDrag();
 		}
 	}
-	
+
 	public void dragExit(java.awt.dnd.DropTargetEvent dropTargetEvent)
 	{
 	}
-	
+
 	public void dragOver(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
 	{
 	}
-	
+
 	public void drop(java.awt.dnd.DropTargetDropEvent dropTargetDropEvent)
 	{
 		try
@@ -886,27 +909,27 @@ public class EditorPanel
 						}
 					});
 				}
-			} 
+			}
 			else
 			{
 				dropTargetDropEvent.rejectDrop();
 			}
-		} 
+		}
 		catch (IOException io)
 		{
 			io.printStackTrace();
 			dropTargetDropEvent.rejectDrop();
-		} 
+		}
 		catch (UnsupportedFlavorException ufe)
 		{
 			ufe.printStackTrace();
 			dropTargetDropEvent.rejectDrop();
 		}
 	}
-	
-	
+
+
 	public void dropActionChanged(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
 	{
 	}
-	
+
 }

@@ -1,5 +1,9 @@
 package workbench.util;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,9 +13,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import workbench.WbManager;
+import workbench.db.ColumnIdentifier;
+import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 
 public class SqlUtil
 {
+	public static final int LONG_TYPE = -50000;
+	
 	private static Pattern specialCharPattern = Pattern.compile("[$ ]");
 
 	/** Creates a new instance of SqlUtil */
@@ -37,6 +46,42 @@ public class SqlUtil
 		StringTokenizer tok = new StringTokenizer(aStatement.trim());
 		if (!tok.hasMoreTokens()) return "";
 		return tok.nextToken(" \t");
+	}
+
+	public static List getResultSetColumns(String sql, WbConnection conn)
+		throws SQLException
+	{
+		if (conn == null) return null;
+
+		ResultSet rs = null;
+		Statement stmt = null;
+		ArrayList result = null;
+
+		try
+		{
+			stmt = conn.createStatement();
+			stmt.setMaxRows(1);
+			rs = stmt.executeQuery(sql);
+			ResultSetMetaData meta = rs.getMetaData();
+			int count = meta.getColumnCount();
+			result = new ArrayList(count);
+			for (int i=0; i < count; i++)
+			{
+				String name = meta.getColumnName(i + 1);
+				if (name == null) name = meta.getColumnLabel(i + 1);
+				if (name == null) continue;
+
+				int type = meta.getColumnType(i + 1);
+				ColumnIdentifier col = new ColumnIdentifier(name, type);
+				result.add(col);
+			}
+		}
+		finally
+		{
+			try { rs.close(); } catch (Throwable th) {}
+			try { stmt.close(); } catch (Throwable th) {}
+		}
+		return result;
 	}
 
 	/**
@@ -142,18 +187,25 @@ public class SqlUtil
 		if (count == 0) return aSql;
 		boolean inComment = false;
 		boolean inQuotes = false;
-
+		boolean lineComment = false;
+		
 		StringBuffer newSql = new StringBuffer(count);
 
 		// remove trailing semicolon
 		if (aSql.charAt(count - 1) == ';') count --;
-
+		char last = ' ';
+		
 		for (int i=0; i < count; i++)
 		{
 			char c = aSql.charAt(i);
+			
 			inQuotes = c == quote;
-
-			if (!inComment || keepComments)
+			if (!inQuotes && (last == '\n' || last == '\r' || i == 0 ) && (c == '#'))
+			{
+				lineComment = true;
+			}
+			
+			if (!(inComment || lineComment) || keepComments)
 			{
 				if ( c == '/' && i < count - 1 && aSql.charAt(i+1) == '*' & !inQuotes)
 				{
@@ -191,6 +243,10 @@ public class SqlUtil
 				{
 					inComment = false;
 					i++;
+				}
+				else if (c == '\n' || c == '\r' && lineComment) 
+				{
+					lineComment = false;
 				}
 			}
 		}
@@ -276,6 +332,8 @@ public class SqlUtil
 		else if (aSqlType == Types.TINYINT)
 			return "Integer";
 		else if (aSqlType == Types.VARCHAR)
+			return "String";
+		else if (aSqlType == LONG_TYPE)
 			return "String";
 		else
 			return null;
@@ -442,6 +500,8 @@ public class SqlUtil
 			return "VARBINARY";
 		else if (aSqlType == Types.VARCHAR)
 			return "VARCHAR";
+		else if (aSqlType == LONG_TYPE)
+			return "LONG";
 		else
 			return "UNKNOWN";
 	}
@@ -450,12 +510,8 @@ public class SqlUtil
 	{
 		try
 		{
-			String sql = "select bla from table1 left outer join table2 on (x=y) inner join table3 on (x=y2);";
-			List l = getTables(sql);
-			for (int i=0; i < l.size(); i++)
-			{
-				System.out.println("table=" + l.get(i));
-			}
+			String sql = "# test\nselect bla from table1 left outer join table2 on (x=y) inner join table3 on (x=y2);";
+			System.out.println(makeCleanSql(sql, false));
 		}
 		catch (Exception e)
 		{

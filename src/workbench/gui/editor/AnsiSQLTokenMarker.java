@@ -38,7 +38,10 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 				keywords.add("SYNONYM", Token.KEYWORD1);
 				keywords.add("WHILE", Token.KEYWORD1);
 				keywords.add("LOOP", Token.KEYWORD1);
+				keywords.add("ELSIF", Token.KEYWORD1);
 				keywords.add("REFRESH", Token.KEYWORD1);
+				keywords.add("NCHAR", Token.KEYWORD1);
+				keywords.add("NVARCHAR", Token.KEYWORD1);
 
 				keywords.add("SNAPSHOT", Token.KEYWORD1);
 

@@ -205,39 +205,45 @@ public class ProcedureListPanel
 		if (this.shouldRetrieve) this.retrieve();
 	}
 
-	public void retrieve()
+	public void startRetrieve()
 	{
-		final Component current = this;
-
-		//LogMgr.logDebug("ProcedureListPanel.retrieve()", "Starting retrieve for procedures...");
-		Thread t = new Thread(new Runnable()
+		Thread t = new Thread()
 		{
 			public void run()
 			{
-				synchronized (retrieveLock)
-				{
-					try
-					{
-						DbMetadata meta = dbConnection.getMetadata();
-						WbSwingUtilities.showWaitCursorOnWindow(current);
-						procList.setModel(meta.getListOfProcedures(currentCatalog, currentSchema), true);
-						procList.adjustColumns();
-						WbSwingUtilities.showDefaultCursorOnWindow(current);
-						shouldRetrieve = false;
-					}
-					catch (OutOfMemoryError mem)
-					{
-						WbManager.getInstance().showErrorMessage(ProcedureListPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
-					}
-					catch (Throwable e)
-					{
-						LogMgr.logError("ProcedureListPanel.retrieve() thread", "Could not retrieve procedure list", e);
-					}
-				}
+				retrieve();
 			}
-		});
+		};
+		t.setDaemon(true);
 		t.setName("ProcedureListPanel retrieve thread");
 		t.start();
+	}
+
+	public void retrieve()
+	{
+		synchronized (retrieveLock)
+		{
+			try
+			{
+				DbMetadata meta = dbConnection.getMetadata();
+				WbSwingUtilities.showWaitCursorOnWindow(this);
+				procList.setModel(meta.getListOfProcedures(currentCatalog, currentSchema), true);
+				procList.adjustColumns();
+				shouldRetrieve = false;
+			}
+			catch (OutOfMemoryError mem)
+			{
+				WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
+			}
+			catch (Throwable e)
+			{
+				LogMgr.logError("ProcedureListPanel.retrieve() thread", "Could not retrieve procedure list", e);
+			}
+			finally
+			{
+				WbSwingUtilities.showDefaultCursorOnWindow(this);
+			}
+		}
 	}
 
 	private void dropObjects()

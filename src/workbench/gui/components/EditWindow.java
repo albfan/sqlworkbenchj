@@ -48,12 +48,30 @@ public class EditWindow
 	{
 		this(owner, title, text, null);
 	}
+	
 	public EditWindow(Frame owner, String title, String text, String settingsId)
 	{
-		super(owner, title, true);
+		this(owner, title, text, settingsId, false);
+	}
+	
+	public EditWindow(Frame owner, String title, String text, String settingsId, boolean createSqlEditor)
+	{
+		this(owner, title, text, settingsId, createSqlEditor, true);
+	}
+	
+	public EditWindow(Frame owner, String title, String text, String settingsId, boolean createSqlEditor, boolean modal)
+	{
+		super(owner, title, modal);
 		this.settingsId = settingsId;
 		this.getContentPane().setLayout(new BorderLayout());
-		this.editor = EditorPanel.createTextEditor();
+		if (createSqlEditor)
+		{
+			this.editor = EditorPanel.createSqlEditor();
+		}
+		else
+		{
+			this.editor = EditorPanel.createTextEditor();
+		}
 		this.editor.showFindOnPopupMenu();
 		this.editor.showFormatSql();
 		
@@ -98,6 +116,12 @@ public class EditWindow
 		
 		// pack() needs to be called before center() !!!
 		WbSwingUtilities.center(this, owner);
+	}
+
+	public void hideCancelButton()
+	{
+		this.cancelButton.removeActionListener(this);
+		this.cancelButton.setVisible(false);
 	}
 	
 	public void actionPerformed(ActionEvent e)

@@ -98,7 +98,7 @@ public class ArgumentParser
 	public boolean getBoolean(String key)
 	{
 		String value = this.getValue(key);
-		return "true".equalsIgnoreCase(value);
+		return "true".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value);
 	}
 	
 	public String getValue(String key)

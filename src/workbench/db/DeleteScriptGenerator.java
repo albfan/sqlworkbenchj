@@ -139,24 +139,24 @@ public class DeleteScriptGenerator
 		try
 		{
 			DependencyNode parent = node.getParent();
-			if (parent != null && !isMasterTable(parent))
-			{
-				sql.append(" (");
-				String parentTable = parent.getTable();
-				String parentSchema = parent.getSchema();
-				String parentCatalog = parent.getCatalog();
+			sql.append(" (");
+			String parentTable = parent.getTable();
+			String parentSchema = parent.getSchema();
+			String parentCatalog = parent.getCatalog();
 
-				Map columns = node.getColumns();
-				Iterator itr = columns.entrySet().iterator();
-				int count = 0;
-				while (itr.hasNext())
+			Map columns = node.getColumns();
+			Iterator itr = columns.entrySet().iterator();
+			int count = 0;
+			while (itr.hasNext())
+			{
+				Map.Entry entry = (Map.Entry)itr.next();
+				String column = (String)entry.getKey();
+				column = this.meta.adjustObjectname(column);
+				String parentColumn = (String)entry.getValue();
+				if (nodeColumn != null && !nodeColumn.equals(column)) continue;
+				if (count > 0) sql.append("\n          AND ");
+				if (parent != null && !isMasterTable(parent))
 				{
-					Map.Entry entry = (Map.Entry)itr.next();
-					String column = (String)entry.getKey();
-					column = this.meta.adjustObjectname(column);
-					String parentColumn = (String)entry.getValue();
-					if (nodeColumn != null && !nodeColumn.equals(column)) continue;
-					if (count > 0) sql.append("\n          AND ");
 					sql.append("(");
 					sql.append(column);
 					sql.append(" IN ( SELECT ");
@@ -168,12 +168,13 @@ public class DeleteScriptGenerator
 					sql.append(")) ");
 					count ++;
 				}
-				sql.append(" )");
+				else
+				{
+					this.addRootTableWhere(sql, parentColumn, column);
+				}
+
 			}
-			else
-			{
-				this.addRootTableWhere(sql);
-			}
+			sql.append(")");
 		}
 		catch (Throwable th)
 		{
@@ -191,6 +192,7 @@ public class DeleteScriptGenerator
 		if (table == null) table = "";
 		return (schema.equals(this.schemaname) && table.equals(this.tablename));
 	}
+
 	private void addRootTableWhere(StringBuffer sql)
 	{
 		Iterator itr = this.columnValues.entrySet().iterator();
@@ -227,6 +229,29 @@ public class DeleteScriptGenerator
 			}
 		}
 	}
+
+	private void addRootTableWhere(StringBuffer sql, String parentColumn, String childColumn)
+	{
+		Object data = this.columnValues.get(parentColumn);
+		parentColumn = this.meta.adjustObjectname(parentColumn);
+
+		int type = this.getColumnType(tableDefinition, parentColumn);
+		sql.append(SqlUtil.quoteObjectname(childColumn));
+		if (data == null)
+		{
+			sql.append(" IS NULL");
+		}
+		else
+		{
+	     String value = data.toString();
+			sql.append(" = ");
+			boolean charType = (type == Types.VARCHAR || type == Types.CHAR);
+			if (charType)	sql.append('\'');
+			sql.append(value);
+			if (charType)	sql.append('\'');
+		}
+	}
+
 	private StringBuffer createTableExpression(String aCatalog, String aSchema, String aTable)
 	{
 		StringBuffer buff = new StringBuffer(100);
@@ -253,37 +278,6 @@ public class DeleteScriptGenerator
 			}
 		}
 		return -1;
-	}
-
-	public static void main(String args[])
-	{
-		Connection con = null;
-		try
-		{
-			//Class.forName("com.inet.tds.TdsDriver");
-			Class.forName("org.postgresql.Driver");
-			//Class.forName("oracle.jdbc.OracleDriver");
-			//con = DriverManager.getConnection("jdbc:inetdae:demsqlvisa02:1433?database=visa_cpl_test", "visa", "savivisa");
-			//con = DriverManager.getConnection("jdbc:inetdae:reosqlpro08:1433?database=visa", "visa", "savivisa");
-			//con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:oradb", "auto", "auto");
-			con = DriverManager.getConnection("jdbc:postgresql://techdata/techdata", "techdata", "techdata");
-			WbConnection wb = new WbConnection(con);
-			DeleteScriptGenerator gen = new DeleteScriptGenerator(wb);
-			HashMap m = new HashMap();
-			m.put("pip3a4_id", "6");
-			gen.setTable(null, null, "pip3a4");
-			gen.setValues(m);
-			String sql = gen.createScript();
-			System.out.println(sql);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			try { con.close(); } catch (Throwable th) {}
-		}
 	}
 
 }

@@ -124,7 +124,7 @@ public class SelectCommand extends SqlCommand
 		catch (Throwable e)
 		{
 			result.clear();
-			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
+			//result.addMessage(ResourceMgr.getString("MsgExecuteError"));
 			result.addMessage(ExceptionUtil.getDisplay(e));
 
 			StringBuffer warnings = new StringBuffer();
@@ -132,11 +132,18 @@ public class SelectCommand extends SqlCommand
 			{
 				result.addMessage(warnings.toString());
 			}
-			LogMgr.logDebug("SelectCommand.execute()", "Error executing statement", e);
+			if (e instanceof SQLException)
+			{
+				LogMgr.logDebug("SelectCommand.execute()", "Error executing statement: " + ExceptionUtil.getDisplay(e));
+			}
+			else
+			{
+				LogMgr.logError("SelectCommand.execute()", "Error executing statement", e);
+			}
 			result.setFailure();
 		}
 
-		// we cannot close the statement here, as the result will be processed
+		// we cannot close the statement here, as the ResultSet will be processed
 		// somewhere else! (e.g. Export command, DwPanel to display the result!
 
 		return result;
