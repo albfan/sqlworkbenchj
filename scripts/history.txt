@@ -1,5 +1,71 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Fix:  When trying to delete multiple rows before switching to edit mode, only 
+      the first row was deleted (because switching to edit mode resets the 
+      row selection)
+Fix:  Generate Delete Script wasn't working if 
+      "Disable automatic update table check" was turned on for the profile
+
+
+Build 73, 02.08.2004
+--------------------
+Enh:  The TableSearcher now displays the number of rows for each table
+Enh:  The resource file with translations is now also searched in the
+      subdirectory language (relative to the location of workbench.jar)
+      Thus it is possible to install other languages without re-compiling
+      the application.
+Enh:  When starting to edit data in the result set, the text is now
+      automatically seleted. This can be set to old behaviour
+      by workbench.table.edit.autoselect=false in workbench.settings
+Enh:  The shortcut for the Redo command can now be configured
+Enh:  Indexes can now be dropped and created from within the DbExplorer
+Enh:  CLOB columns are now displayed properly (only tested for Oracle),
+      they still cannot be updated.
+Enh:  LONG columns for Oracle can now be read and written
+Enh:  The variable prefix when creating a code snippet can now be defined
+      in workbench.settings. The property name is workbench.editor.codeprefix
+Enh:  A SQL file can now be reloaded
+Enh:  From the table list in the DbExplorer an empty INSERT statement can now
+      be generated for the selected table(s).
+Enh:  When creating a Java Code snippet, a trailing ; will be removed from
+      the Java String
+Enh:  The COPY command and the DataPumper now allow creating a table when
+      a source query is used. If the JDBC driver of the source system does
+      not provide the correct column information for the source columns, this
+      will not work properly.
+Fix:  Workaround for a bug in the HP/UX Java implementation when setting
+      a system property
+Fix:  When switching the selected table quickly in the DbExplorer
+      the data display would stop working.
+Fix:  The COPY command can now also be invoked using WBCOPY. This is
+      necessary for PostgreSQL as it has its own COPY command.
+Fix:  When retrieving long VARCHAR columns from a Sybase Server, the
+      Sybase JDBC driver would trow an exception while retrieving the
+      MetaData for the ResultSet.
+Fix:  The formatter would split up >= <= with a space which does not work
+      for some DBMS
+Fix:  Copying data in the DataPumper would fail if the target table should be
+      created on the fly.
+Fix:  DbExplorer: with MS SQL Server the Owner selection did not work for the
+      procedure tab.
+Fix:  DbExplorer: Fixed a problem when retrieving procedures
+Fix:  Fixed a small problem with parsing scripts that contain # style comments
+Fix:  Cleaned up the code for setting the wait (hourglass) cursor to make it
+      more robust.
+Fix:  Added elsif as an keyword for the editor syntax highlighting
+Fix:  If a macro contained more then one statement, only the first one was
+      executed
+Fix:  The "Include Constraints" option wasn't working when dropping tables
+      from within the DbExplorer
+Fix:  If a statement produced an error, the statement not always selected
+      correctly in the editor
+Fix:  Fixed a deadlock in the DbExplorer when right clicking immediately after
+      clicking in the table list (while the table definition was still beeing
+      retrieved)
+Fix:  When an error occurred during updating the result set, the message to
+      continue/abort was not always displayed.
+Fix:  Comments in the source query for the COPY command are now preserved
+Fix:  Delete scripts where not generated correctly
 
 Build 72, 13.05.2004
 --------------------
@@ -20,20 +86,20 @@ Enh:  When using the EXPORT command -createtable now also works for SQL
       CREATE TABLE which matches the result set structure as close as possible
 Enh:  SELECT ... FROM table INTO temp_table now works with Informix
       and for PostgreSQL (slightly different syntax)
-Enh:  The database explorer now optionally uses the list of table types 
+Enh:  The database explorer now optionally uses the list of table types
       returned by the driver when selecting the type *
-      The Postgres JDBC driver returns only certain types (e.g. not the system 
-      tables) even when all table types are requested. This behaviour can 
-      be controlled through the property workbench.dbexplorer.usetypelist 
+      The Postgres JDBC driver returns only certain types (e.g. not the system
+      tables) even when all table types are requested. This behaviour can
+      be controlled through the property workbench.dbexplorer.usetypelist
       (true or false)
-Enh:  The SQL formatter does not add a space between a function and the 
+Enh:  The SQL formatter does not add a space between a function and the
       following opening bracket. The function names which are included in this
-      check are retrieved from the JDBC driver. 
-      The space would break SQL statements for MySQL as it does not comply with 
+      check are retrieved from the JDBC driver.
+      The space would break SQL statements for MySQL as it does not comply with
       the SQL standard.
 Enh:  Batch updates are now supported for the DataPumper, the COPY and IMPORT
       commands (depending on the support by the JDBC driver of course)
-Enh:  SQL Workbench/J can now be configured to ignore certain SQL commands. 
+Enh:  SQL Workbench/J can now be configured to ignore certain SQL commands.
       This is useful for e.g. scripts that are written for SQL*Plus and contain
       SQL*Plus specific statements (e.g. EXIT, WHENEVER)
 Fix:  Importing a text file did not work for data types other then VARCHAR
@@ -46,14 +112,14 @@ Fix:  A single quote character in a comment would break the parser to
       recognize the individual statements
 Fix:  When using several windows, only the workspace for the active
       window was saved when closing the application
-Fix:  The procedure display for SQL Server was not correct (it would always 
-      show "RESULT" as the type even if it really was a procedure) therefor the 
+Fix:  The procedure display for SQL Server was not correct (it would always
+      show "RESULT" as the type even if it really was a procedure) therefor the
       generated DROP statements weren't correct.
 Fix:  Using GO as the delimiter for SQL Server did not work any longer
-Fix:  When using "New Window" to open a new window with a different connection 
+Fix:  When using "New Window" to open a new window with a different connection
       the connection from the first window was broken
-Fix:  When opening the driver manager dialog from the connection dialog, 
-      and closing the driver manager with OK, the selected driver class in 
+Fix:  When opening the driver manager dialog from the connection dialog,
+      and closing the driver manager with OK, the selected driver class in
       the current profile was changed back to the first driver (Thanks Meikel!)
 Fix:  The SQL formatter was removing the semicolon at the end of a statement
 

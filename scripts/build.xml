@@ -17,10 +17,10 @@
   <property name="srczip" value="${root}/${srczipname}"/>
   <property name="packagezip" value="${root}/release/workbench.zip"/>
   <property name="doczip" value="${root}/release/html-manual.zip"/>
-  
+
   <!-- location of the docbook installation and the FOP installation -->
   <property name="docbook.root" value="${doc}/docbook"/>
-  <property name="fop.root" value="c:/etc/fop"/>  
+  <property name="fop.root" value="c:/etc/fop"/>
 
   <target name="init">
     <tstamp>
@@ -36,20 +36,20 @@
     <pathelement location="c:/etc/xalan/bin/xercesImpl.jar"/>
     <pathelement location="${docbook.root}/extensions/xalan2.jar"/>
     <pathelement path="${classpath}"/>
-  </path>  
-  
+  </path>
+
   <path id="fop.path">
     <fileset dir="${fop.root}/lib">
       <include name="**/*.jar"/>
     </fileset>
     <pathelement location="${fop.root}/build/fop.jar"/>
   </path>
-  
+
   <target name="set-build-number" depends="init">
     <buildnumber file="build.number"/>
     <echo message="Build number is ${build.number}"/>
   </target>
-  
+
   <target name="set-dev-build" depends="init">
     <property name="build.number" value="[Dev]"/>
     <echo message="Build number is ${build.number}"/>
@@ -57,6 +57,8 @@
 
   <target name="clean">
     <delete dir="${build}/workbench" failonerror="false"/>
+    <delete dir="${build}/language" failonerror="false"/>
+    <delete dir="${build}/help" failonerror="false"/>
     <delete file="${scriptsrc}/history.new" failonerror="false" />
     <mkdir dir="${build}"/>
     <mkdir dir="${distdir}"/>
@@ -81,7 +83,7 @@
         <filter token="BUILD_NUMBER" value="${build.number}"/>
       </filterset>
     </copy>
-    
+
     <copy todir="${build}">
       <fileset dir="${src}">
         <include name="**/BaseValueObject.java"/>
@@ -91,15 +93,14 @@
   </target>
 
   <target name="compile" depends="prepare">
-    <javac debug="off" debuglevel="source,lines" destdir="${build}" optimize="on" srcdir="${src}" >
+    <javac debug="on" debuglevel="source,lines" destdir="${build}" optimize="on" srcdir="${src}" >
         <exclude name="workbench/test/**"/>
     </javac>
   </target>
-
-
-  <!-- Manual related tasks -->
   
-  <!-- Create the FO file which will in turn be transformed 
+  <!-- Manual related tasks -->
+
+  <!-- Create the FO file which will in turn be transformed
        into the PDF manual by the target "pdf"
   -->
   <target name="fop" depends="init">
@@ -107,14 +108,14 @@
       <fileset dir="${doc}/xml">
         <include name="*.xml"/>
       </fileset>
-      
+
       <filterset begintoken="@" endtoken="@">
         <filter token="BUILD_DATE" value="${build_date}"/>
         <filter token="BUILD_NUMBER" value="${build.number}"/>
         <filter token="IMAGE_DIR" value="${src}/workbench/resource/images"/>
       </filterset>
     </copy>
-    
+
     <xslt in="${doc}/pdf/Manual.xml" out="${doc}/pdf/manual.fo" style="${doc}/xsl/workbench-pdf.xsl">
       <param name="paper.type" expression="A4"/>
       <param name="page.orientation" expression="portrait"/>
@@ -129,7 +130,7 @@
       </fileset>
     </delete>
   </target>
-  
+
   <!-- Create the pdf version of the manual -->
   <target name="pdf" depends="fop">
     <java classname="org.apache.fop.apps.Fop" classpathref="fop.path">
@@ -139,10 +140,10 @@
     <delete file="${doc}/pdf/manual.fo"/>
   </target>
 
-  <!-- Create the html help files for putting them into the 
-       distribution jar 
+  <!-- Create the html help files for putting them into the
+       distribution jar
   -->
- 
+
   <target name="build-help" depends="prepare">
     <delete dir="${build}/help" failonerror="false"/>
     <mkdir dir="${build}/help"/>
@@ -152,27 +153,27 @@
       <fileset dir="${doc}/xml">
         <include name="*.xml"/>
       </fileset>
-      
+
       <filterset begintoken="@" endtoken="@">
         <filter token="BUILD_DATE" value="${build_date}"/>
         <filter token="BUILD_NUMBER" value="${build.number}"/>
         <filter token="IMAGE_DIR" value="../workbench/resource/images"/>
       </filterset>
     </copy>
-    
+
     <xslt basedir="${build}/help" includes="Manual.xml" style="${doc}/docbook/html/chunk.xsl" destdir="${build}/help">
       <xmlcatalog>
         <dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN"
              location="${doc}/dtd/docbookx.dtd"/>
       </xmlcatalog>
-    
+
       <param name="root.filename" expression="index"/>
       <param name="html.stylesheet" expression="html-internal.css"/>
       <param name="admon.graphics.path" expression="../workbench/resource/images/"/>
       <param name="admon.graphics.extension" expression=".gif"/>
       <param name="admon.graphics" expression="1"/>
       <param name="admon.textlabel" expression="0"/>
-      <param name="chunk.first.sections" expression="1"/>      
+      <param name="chunk.first.sections" expression="1"/>
       <param name="chunker.output.indent" expression="yes"/>
       <param name="chunk.quietly" expression="1"/>
       <param name="chunk.fast" expression="1"/>
@@ -195,10 +196,10 @@
         <include name="*.xml"/>
       </fileset>
     </delete>
-    
+
     <copy overwrite="true" todir="${build}/help" file="${doc}/css/html-internal.css"/>
   </target>
-  
+
   <target name="init-help">
     <property name="html-stylesheet" value="html-internal.css"/>
     <property name="html-outdir" value="${build}/help"/>
@@ -209,18 +210,18 @@
 
   <!-- Create the HTML files suitable for publishing on the website -->
   <target name="publish" depends="init-publish,build-html"/>
-  
+
   <target name="init-publish">
     <property name="html-stylesheet" value="html-publish.css"/>
     <property name="html-outdir" value="${distdir}/manual"/>
     <property name="html-resource-dir" value="./images"/>
     <property name="index-file-name" value="workbench-manual"/>
     <property name="html-css-tables" value="1"/>
-    
+
     <delete dir="${html-outdir}" failonerror="false"/>
     <mkdir dir="${html-outdir}"/>
     <mkdir dir="${html-outdir}/images"/>
-    
+
     <copy todir="${html-outdir}/${html-resource-dir}" flatten="true">
       <fileset dir="${src}/workbench/resource/images">
         <include name="New16.gif"/>
@@ -232,40 +233,40 @@
   </target>
 
   <target name="build-html" depends="prepare">
-  
+
     <echo message="Generating HTML in ${html-outdir}"/>
     <!-- copy overwrite="true" todir="${html-outdir}" file="${doc}/xml/docbookx.dtd"/ -->
-    
+
     <copy overwrite="true" todir="${html-outdir}">
       <fileset dir="${doc}/xml">
         <include name="*.xml"/>
       </fileset>
-      
+
       <filterset begintoken="@" endtoken="@">
         <filter token="BUILD_DATE" value="${build_date}"/>
         <filter token="BUILD_NUMBER" value="${build.number}"/>
         <filter token="IMAGE_DIR" value="${html-resource-dir}"/>
       </filterset>
     </copy>
-    
+
     <copy overwrite="true" tofile="${html-outdir}/history.txt" file="${scriptsrc}/history.new"/>
-    
-    <xslt basedir="${html-outdir}" includes="Manual.xml" style="${doc}/docbook/html/chunk.xsl" 
-          processor="trax" 
+
+    <xslt basedir="${html-outdir}" includes="Manual.xml" style="${doc}/docbook/html/chunk.xsl"
+          processor="trax"
           destdir="${html-outdir}" classpathref="docbook.extensions.path">
       <xmlcatalog>
         <dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN"
              location="${doc}/dtd/docbookx.dtd"/>
       </xmlcatalog>
       <param name="use.extensions" expression="0"/>
-      <param name="textinsert.extension" expression="1"/>     
+      <param name="textinsert.extension" expression="1"/>
       <param name="root.filename" expression="${index-file-name}"/>
       <param name="html.stylesheet" expression="${html-stylesheet}"/>
       <param name="admon.graphics.path" expression="${html-resource-dir}/"/>
       <param name="admon.graphics.extension" expression=".gif"/>
       <param name="admon.graphics" expression="1"/>
       <param name="admon.textlabel" expression="0"/>
-      <param name="chunk.first.sections" expression="1"/>      
+      <param name="chunk.first.sections" expression="1"/>
       <param name="chunker.output.indent" expression="yes"/>
       <param name="chunk.quietly" expression="1"/>
       <param name="chunk.fast" expression="1"/>
@@ -288,20 +289,21 @@
         <include name="*.xml"/>
       </fileset>
     </delete>
-    
+
     <delete file="${html-outdir}/Manual.xml"/>
     <copy overwrite="true" todir="${html-outdir}" file="${doc}/css/${html-stylesheet}"/>
   </target>
-  
+
   <!-- End Manual related tasks -->
-  
+
   <target name="make-jar" depends="prepare">
     <copy failonerror="false" overwrite="true" file="${scriptsrc}/history.new" tofile="${build}/help/history.txt" />
     <copy failonerror="false" overwrite="true" file="${scriptsrc}/history.new" tofile="${distdir}/history.txt" />
-    
+
     <jar compress="true" jarfile="${distdir}/${jarfile}">
       <manifest>
         <attribute name="Main-Class" value="workbench.WbStarter"/>
+        <attribute name="Class-Path" value="."/>
         <attribute name="Created-By" value="workbench@kellerer.org"/>
         <attribute name="WbBuild-Number" value="${build.number}"/>
         <attribute name="WbBuild-Date" value="${build_date}"/>
@@ -309,15 +311,15 @@
       <fileset dir="${build}">
       </fileset>
     </jar>
-    
+
   </target>
 
   <target name="publish-dev" depends="set-dev-build, copy-history, publish, clean-history"/>
 
-  <target  name="dev-release" depends="set-dev-build, clean, copy-history, prepare, compile, build-help, make-jar, clean-history"/>
-  
+  <target name="dev-release" depends="set-dev-build, clean, copy-history, prepare, compile, build-help, make-jar, clean-history"/>
+
   <target name="make-dev-jar" depends="set-dev-build, clean, copy-history, prepare, compile, make-jar, clean-history"/>
-  
+
   <target name="make-src-zip">
     <delete file="${srczip}"/>
 
@@ -332,15 +334,15 @@
         <exclude name="**/*.dfPackage"/>
         <exclude name="**/tags"/>
         <exclude name="help/*.*"/>
-        <exclude name="**/TestTrigger.java"/>
+        <exclude name="**/Test/*"/>
         <exclude name="**/*.tws"/>
       </zipfileset>
-      
+
       <zipfileset dir="${scriptsrc}" prefix="scripts">
         <exclude name="**/.nb*"/>
         <exclude name="**/.new"/>
       </zipfileset>
-      
+
       <zipfileset dir="${doc}" prefix="doc">
         <include name="**/*.*"/>
         <exclude name="**/.nb*"/>
@@ -355,8 +357,8 @@
     </zip>
   </target>
 
-  <!-- build a full relase with documentation and source distribution -->  
-  <target name="release" 
+  <!-- build a full relase with documentation and source distribution -->
+  <target name="release"
       depends="clean, set-build-number, copy-history, build-help, compile, make-jar, pdf, publish, release-package, restart-history, clean-history"
   />
 
@@ -371,21 +373,21 @@
 
   <target name="restart-history">
     <concat destfile="${scriptsrc}/history.txt">
-      <filelist dir="${scriptsrc}" files="history.header,history.new"/>    
+      <filelist dir="${scriptsrc}" files="history.header,history.new"/>
     </concat>
   </target>
   <target name="clean-history">
     <delete file="${scriptsrc}/history.new" failonerror="false"/>
   </target>
-    
+
   <target name="release-package" depends="init">
-  
+
     <copy file="${distdir}/${jarfile}" overwrite="true" todir="${root}/release"/>
     <copy file="${scriptsrc}/history.new" overwrite="true" tofile="${root}/release/history.txt"/>
-    
+
     <copy file="${doc}/pdf/SQLWorkbench-Manual.pdf" overwrite="true" todir="${root}/release"/>
     <copy file="${distdir}/JWorkbench.exe" overwrite="true" todir="${root}/release"/>
-    
+
     <delete dir="${root}/release/manual"/>
     <copy todir="${root}/release/manual">
         <fileset dir="${html-outdir}"/>
@@ -403,7 +405,7 @@
         <include name="**/*.*"/>
       </zipfileset>
     </zip>
-    
+
     <delete>
       <fileset dir="${root}/release">
         <include name="WorkbenchSrc*.zip"/>
@@ -414,6 +416,7 @@
       <zipfileset dir="${src}" prefix="src">
         <include name="**/*.*"/>
         <exclude name="**/workbench.settings"/>
+        <exclude name="**/test/*"/>
         <exclude name="**/CVS/*"/>
         <exclude name="**/.cvsignore"/>
         <exclude name="**/.nb*"/>
@@ -422,11 +425,11 @@
         <exclude name="help/*.*"/>
         <exclude name="**/*.tws"/>
       </zipfileset>
-      
+
       <zipfileset dir="${scriptsrc}" prefix="scripts">
         <include name="build.xml"/>
       </zipfileset>
-      
+
       <zipfileset dir="${doc}" prefix="doc">
         <include name="css/*.*"/>
         <include name="xml/*.*"/>
@@ -442,10 +445,10 @@
         <include name="history.txt"/>
       </zipfileset>
     </zip>
-    
+
   </target>
 
   <target  name="src" depends="make-src-zip"/>
   <target name="dj" depends="make-dev-jar" />
-  
+
 </project>
