@@ -13,10 +13,14 @@ package workbench.db;
 
 import java.beans.PropertyChangeListener;
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.Reader;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
@@ -35,6 +39,7 @@ import java.util.regex.Pattern;
 import javax.swing.event.ChangeListener;
 import workbench.db.hsqldb.HsqlSequenceReader;
 import workbench.db.ingres.IngresMetaData;
+import workbench.db.mckoi.McKoiMetadata;
 
 import workbench.db.mssql.MsSqlMetaData;
 import workbench.db.mssql.SqlServerConstraintReader;
@@ -80,7 +85,6 @@ public class DbMetadata
 	public static final String COMMENT_PLACEHOLDER = "%comment%";
 
 	public static final String GENERAL_SQL = "All";
-	private static final String LINE_TERMINATOR = "\r\n";
 
 	private String schemaTerm;
 	private String catalogTerm;
@@ -96,6 +100,7 @@ public class DbMetadata
 	private OracleMetaData oracleMetaData;
 	private MsSqlMetaData msSqlMetaData;
 	private IngresMetaData ingresMetaData;
+	private McKoiMetadata mckoiMetaData;
 
 	private static List caseSensitiveServers = Collections.EMPTY_LIST;
 	private static List ddlNeedsCommitServers = Collections.EMPTY_LIST;
@@ -131,13 +136,15 @@ public class DbMetadata
 	private boolean isCloudscape = false;
 	private boolean isApacheDerby = false;
 	private boolean isIngres = false;
+	private boolean isMcKoi = false;
 
 	private boolean createInlineConstraints = false;
+	private boolean useNullKeyword = true;
 
 	private AbstractConstraintReader constraintReader = null;
 	private SynonymReader synonymReader = null;
 	private SequenceReader sequenceReader = null;
-	
+
 	private List keywords;
 	private String quoteCharacter;
 	private String dbVersion;
@@ -208,6 +215,8 @@ public class DbMetadata
 			this.oracleMetaData = new OracleMetaData(this.dbConnection.getSqlConnection());
 			this.constraintReader = new OracleConstraintReader();
 			this.synonymReader = new workbench.db.oracle.OracleSynonymReader();
+
+			// check for changes to the "enable dbms output" property
 			Settings.getInstance().addPropertyChangeListener(this);
 			this.sequenceReader = this.oracleMetaData;
 		}
@@ -266,7 +275,19 @@ public class DbMetadata
 			this.synonymReader = this.ingresMetaData;
 			this.sequenceReader = this.ingresMetaData;
 		}
-		
+		else if (productLower.indexOf("mckoi") > -1)
+		{
+			this.isMcKoi = true;
+			// McKoi reports the version in the database product name
+			// which makes setting up the meta data stuff lookups
+			// too complicated, so we'll strip the version info
+			int pos = this.productName.indexOf('(');
+			if (pos == -1) pos = this.productName.length() - 1;
+			this.productName = this.productName.substring(0, pos).trim();
+			this.mckoiMetaData = new McKoiMetadata(this.dbConnection.getSqlConnection());
+			this.sequenceReader = this.mckoiMetaData;
+		}
+
 		try
 		{
 			this.quoteCharacter = this.metaData.getIdentifierQuoteString();
@@ -290,6 +311,13 @@ public class DbMetadata
 		this.useJdbcCommit = serverNeedsJdbcCommit.contains(this.productName);
 		this.ddlNeedsCommit = ddlNeedsCommitServers.contains(this.productName);
 		this.createInlineConstraints = serversWithInlineConstraints.contains(this.productName);
+
+		List ids = Settings.getInstance().getServersWithNoNullKeywords();
+		if (ids != null)
+		{
+			this.useNullKeyword = !ids.contains(this.getDbId());
+		}
+
 	}
 
 	/**
@@ -334,6 +362,7 @@ public class DbMetadata
 	{
 		return this.isHsql;
 	}
+
 	private static void readTemplates()
 	{
 		procSourceSql = readStatementTemplates("ProcSourceStatements.xml");
@@ -345,7 +374,11 @@ public class DbMetadata
 		triggerSourceSql = readStatementTemplates("TriggerSourceStatements.xml");
 		columnCommentStatements = readStatementTemplates("ColumnCommentStatements.xml");
 		tableCommentStatements = readStatementTemplates("TableCommentStatements.xml");
-		templatesRead = true;
+		synchronized (GENERAL_SQL)
+		{
+			templatesRead = true;
+		}
+
 	}
 
 	/**
@@ -379,9 +412,7 @@ public class DbMetadata
 	 */
 	public boolean acceptsColumnNullKeyword()
 	{
-		// Cloudscape and Firebird do not accept the NULL keyword
-		// in the column definition
-		return !this.isFirebird && !this.isCloudscape && !this.isApacheDerby;
+		return this.useNullKeyword;
 	}
 
 	public boolean isInformix() { return this.isInformix; }
@@ -692,6 +723,8 @@ public class DbMetadata
 				LogMgr.logInfo("DbMetadata.getViewSource()", "Using query=\n" + query);
 			}
 			rs = stmt.executeQuery(query);
+			ResultSetMetaData meta = rs.getMetaData();
+			int type = meta.getColumnType(1);
 			while (rs.next())
 			{
 				String line = rs.getString(1);
@@ -1104,7 +1137,7 @@ public class DbMetadata
 		aSchema = adjustObjectname(aSchema);
 		aCatalog = adjustObjectname(aCatalog);
 		boolean sequencesReturned = false;
-		
+
 		ResultSet tableRs = null;
 		try
 		{
@@ -1151,7 +1184,7 @@ public class DbMetadata
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, null);
 			}
 		}
-		
+
 		if (this.isIngres && typeIncluded("SYNONYM", types) && "true".equals(Settings.getInstance().getProperty("workbench.db.ingres.retrieve_synonyms", "true")))
 		{
 			LogMgr.logDebug("DbMetadata.getTables()", "Retrieving Ingres synonyms...");
@@ -1499,6 +1532,7 @@ public class DbMetadata
 		if (this.oracleMetaData != null) this.oracleMetaData.done();
 		if (this.msSqlMetaData != null) this.msSqlMetaData.done();
 		if (this.constraintReader != null) this.constraintReader.done();
+		if (this.mckoiMetaData != null) this.mckoiMetaData.done();
 	}
 
 	public boolean storesLowerCaseIdentifiers()
@@ -2581,7 +2615,7 @@ public class DbMetadata
 	/**
 	 *	Return the underlying table of a synonym.
 	 *
-	 *	@return the table to which the synonym points. 
+	 *	@return the table to which the synonym points.
 	 */
 	public TableIdentifier getSynonymTable(String anOwner, String aSynonym)
 	{
@@ -2600,13 +2634,13 @@ public class DbMetadata
 
 	/**
 	 *	Return the SQL statement to recreate the given synonym.
-	 *	@return the SQL to create the synonym. 
+	 *	@return the SQL to create the synonym.
 	 */
 	public String getSynonymSource(String anOwner, String aSynonym)
 	{
 		if (this.synonymReader == null) return "";
 		String result = null;
-			
+
 		try
 		{
 			result = this.synonymReader.getSynonymSource(this.dbConnection.getSqlConnection(), anOwner, aSynonym);
@@ -2615,7 +2649,7 @@ public class DbMetadata
 		{
 			result = "";
 		}
-		
+
 		return result;
 	}
 
@@ -2795,14 +2829,14 @@ public class DbMetadata
 				result.append(" DEFAULT ");
 				result.append(def.trim());
 			}
-			
+
 			if (columns[i].isNullable() )
 			{
 				if (this.isIngres)
 				{
 					result.append(" WITH NULL");
 				}
-				else if (this.acceptsColumnNullKeyword()) 
+				else if (this.acceptsColumnNullKeyword())
 				{
 					result.append(" NULL");
 				}
@@ -2817,7 +2851,7 @@ public class DbMetadata
 				result.append(" DEFAULT ");
 				result.append(def.trim());
 			}
-			
+
 			String constraint = (String)columnConstraints.get(colName);
 			if (constraint != null && constraint.length() > 0)
 			{

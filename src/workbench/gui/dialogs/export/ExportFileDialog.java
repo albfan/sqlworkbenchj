@@ -16,6 +16,7 @@ import java.awt.Window;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
@@ -25,6 +26,7 @@ import workbench.db.exporter.DataExporter;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.storage.ResultInfo;
 
 
 /**
@@ -48,10 +50,19 @@ public class ExportFileDialog
 	
 	public ExportFileDialog(Component caller)
 	{
-		this.exportOptions = new ExportOptionsPanel();
+		this(caller, null);
+	}
+	public ExportFileDialog(Component caller, ResultInfo columns)
+	{
+		this.exportOptions = new ExportOptionsPanel(columns);
 		this.parentComponent = caller;
 	}
 
+	public List getColumnsToExport()
+	{
+		return this.exportOptions.getColumnsToExport();
+	}
+	
 	public void saveSettings()
 	{
 		exportOptions.saveSettings();

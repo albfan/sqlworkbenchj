@@ -143,7 +143,7 @@ public class DataImporter
 	{
 		if (this.isModeInsertUpdate() || this.isModeUpdateInsert()) return;
 
-		if (!this.supportsBatch)
+		if (flag && !this.supportsBatch)
 		{
 			LogMgr.logWarning("DataImporter.setUseBatch()", "JDBC driver does not support batch updates. Ignoring request to use batch updates");
 			this.warnings.add(ResourceMgr.getString("MsgJDBCDriverNoBatch"));

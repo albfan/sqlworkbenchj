@@ -23,7 +23,7 @@ import workbench.resource.ResourceMgr;
 public class CopySelectedAsSqlInsertAction extends WbAction
 {
 	private WbTable client;
-	
+
 	public CopySelectedAsSqlInsertAction(WbTable aClient)
 	{
 		super();
@@ -36,7 +36,9 @@ public class CopySelectedAsSqlInsertAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		client.copyAsSqlInsert(true);
+		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
+		ctrlPressed = ctrlPressed && ((e.getModifiers() & ActionEvent.MOUSE_EVENT_MASK) == ActionEvent.MOUSE_EVENT_MASK);
+		client.copyAsSqlInsert(true, ctrlPressed);
 	}
 
 }

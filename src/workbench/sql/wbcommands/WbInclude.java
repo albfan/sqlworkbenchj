@@ -27,6 +27,8 @@ public class WbInclude
 {
 	public static final WbInclude INCLUDE_LONG = new WbInclude("WBINCLUDE");
 	public static final WbInclude INCLUDE_SHORT = new WbInclude("@");
+	public static final WbInclude INCLUDE_FB = new WbInclude("INPUT");
+	
 	private final String verb;
 	private BatchRunner batchRunner;
 	

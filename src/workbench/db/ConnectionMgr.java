@@ -34,7 +34,7 @@ import workbench.util.WbPersistence;
 
 /**
  * @author  info@sql-workbench.net
- * @version  $Revision: 1.45 $
+ * @version  $Revision: 1.46 $
  */
 public class ConnectionMgr
 {
@@ -143,16 +143,13 @@ public class ConnectionMgr
 			{
 				// some drivers do not support this, so
 				// we just ignore the error :-)
-        LogMgr.logInfo("ConnectionMgr.connect()", "Driver (" + drv.getDriverClass() + ") does not support the autocommit property!");
-				if (th.getMessage() != null)
-				{
-					LogMgr.logInfo("ConnectionMgr.connect()", "(" + th.getMessage() + ")");
-				}
+        LogMgr.logInfo("ConnectionMgr.connect()", "Driver (" + drv.getDriverClass() + ") does not support the autocommit property: " + ExceptionUtil.getDisplay(th));
 			}
 			return sql;
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("ConnectionMgr.connect()", "Error when creating connection", e);
 			throw e;
 		}
 	}
@@ -190,8 +187,6 @@ public class ConnectionMgr
 		if (aName == null || aName.length() == 0) return this.findDriver(drvClassName);
 		if (this.drivers == null) this.readDrivers();
 
-		//LogMgr.logDebug("ConnectionMgr.findDriverByName()", "Searching for DriverClass=" + drvClassName + ",DriverName=" + aName);
-
 		for (int i=0; i < this.drivers.size(); i ++)
 		{
 			db = (DbDriver)this.drivers.get(i);
@@ -207,7 +202,7 @@ public class ConnectionMgr
 				}
 			}
 		}
-		//LogMgr.logWarning("ConnectionMgr.findDriverByName()", "Did not find driverclass with name="+ aName);
+		LogMgr.logDebug("ConnectionMgr.findDriverByName()", "Did not find driver with name="+ aName + ", using " + (firstMatch == null ? "(n/a)" : firstMatch.getName()));
 
 		return firstMatch;
 	}
@@ -519,7 +514,7 @@ public class ConnectionMgr
 		String url = prof.getUrl();
 		String command = null;
 		String shutdown = ";shutdown=true";
-		
+
 		int pos = url.indexOf(";");
 		if (pos > -1)
 		{

@@ -47,6 +47,7 @@ public class SqlRowDataConverter
 	{
 		super(info);
 		this.factory = new StatementFactory(info);
+		this.needsUpdateTable = info.getUpdateTable() == null;
 	}
 
 	public StrBuffer convertData()
@@ -85,11 +86,11 @@ public class SqlRowDataConverter
 		DmlStatement dml = null;
 		if (this.createInsert)
 		{
-			dml = this.factory.createInsertStatement(row, true);
+			dml = this.factory.createInsertStatement(row, true, "\n", this.exportColumns);
 		}
 		else
 		{
-			dml = this.factory.createUpdateStatement(row, true);
+			dml = this.factory.createUpdateStatement(row, true, "\n", this.exportColumns);
 		}
 		dml.setChrFunction(this.chrFunction);
 		dml.setConcatString(this.concatString);
@@ -253,8 +254,17 @@ public class SqlRowDataConverter
 	 */
 	public void setAlternateUpdateTable(String table)
 	{
-		this.alternateUpdateTable = table;
-		this.factory.setTableToUse(this.alternateUpdateTable);
+		if (table != null && table.trim().length() > 0) 
+		{
+			this.alternateUpdateTable = table;
+			this.needsUpdateTable = false;
+			this.factory.setTableToUse(this.alternateUpdateTable);
+		}
+		else
+		{
+			this.alternateUpdateTable = null;
+			this.needsUpdateTable = true;
+		}
 	}
 
 	/**

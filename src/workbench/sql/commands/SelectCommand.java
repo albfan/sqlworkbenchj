@@ -51,6 +51,8 @@ public class SelectCommand extends SqlCommand
 		{
 			this.currentConnection = aConnection;
 			this.currentStatement = aConnection.createStatement();
+			try { this.currentStatement.setQueryTimeout(this.queryTimeout); } catch (Throwable th) {}
+			
 			try
 			{
 				this.currentStatement.setMaxRows(this.maxRows);

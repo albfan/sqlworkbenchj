@@ -27,6 +27,7 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 
 import workbench.gui.actions.EscAction;
@@ -63,6 +64,18 @@ public class DriverEditorDialog extends JDialog
 			this.setSize(600,400);
 		}
 		driverListPanel.restoreSettings();
+		
+		// when invoked from the connection dialog, it seems that under
+		// Linux the dialog is not visible (because it's behind the connection
+		// dialog), so we're trying to make this window visible
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				toFront();
+				requestFocus();
+			}
+		});
 	}
 
 	private void initComponents()

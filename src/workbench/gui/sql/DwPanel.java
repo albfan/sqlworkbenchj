@@ -553,9 +553,19 @@ public class DwPanel
 	public void setUpdateTable(String aTable)
 	{
 		this.setStatusMessage(ResourceMgr.getString("MsgRetrieveUpdateTableInfo"));
-		this.infoTable.getDataStore().setUpdateTable(aTable);
-		this.fireUpdateTableChanged();
-		this.clearStatusMessage();
+		try
+		{
+			DataStore ds = this.infoTable.getDataStore();
+			if (ds != null)
+			{
+				ds.setUpdateTable(aTable);
+			}
+			this.fireUpdateTableChanged();
+		}
+		finally
+		{
+			this.clearStatusMessage();
+		}
 	}
 
 	private void fireUpdateTableChanged()
@@ -619,6 +629,16 @@ public class DwPanel
 		return this.infoTable.getDataStore().hasUpdateableColumns();
 	}
 
+	public int getQueryTimeout()
+	{
+		return this.statusBar.getQueryTimeout();
+	}
+
+	public void setQueryTimeout(int value)
+	{
+		this.statusBar.setQueryTimeout(value);
+	}
+	
 	public int getMaxRows()
 	{
 		return this.statusBar.getMaxRows();
@@ -676,7 +696,9 @@ public class DwPanel
 
 			long sqlExecStart = System.currentTimeMillis();
 			this.stmtRunner.setExecutionController(controller);
-			this.stmtRunner.runStatement(aSql, this.statusBar.getMaxRows());
+			int max = this.statusBar.getMaxRows();
+			int timeout = this.statusBar.getQueryTimeout();
+			this.stmtRunner.runStatement(aSql, max, timeout);
 
 			long sqlTime = (System.currentTimeMillis() - sqlExecStart);
 			long end = 0, checkUpdateTime = 0;

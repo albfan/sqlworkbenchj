@@ -21,4 +21,5 @@ public interface Exporter
 	void copyDataToClipboard();
 	void copyDataToClipboard(boolean includeHeaders);
 	void copyDataToClipboard(boolean includeHeaders, boolean selectedOnly);
+	void copyDataToClipboard(boolean includeHeaders, boolean selectedOnly, boolean showSelectColumns);
 }

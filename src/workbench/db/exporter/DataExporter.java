@@ -88,6 +88,7 @@ public class DataExporter
 	private String tableName;
 	private String sqlTable;
 	private String encoding;
+	private List columnsToExport;
 
 	private String delimiter = "\t";
 	private String quoteChar = null;
@@ -128,7 +129,8 @@ public class DataExporter
 	private ArrayList errors = new ArrayList();
 	private ArrayList jobQueue;
 	private ExportWriter exportWriter;
-
+	private Window parentWindow;
+	
 	public DataExporter()
 	{
 	}
@@ -143,7 +145,7 @@ public class DataExporter
 
 		progressPanel = new ProgressPanel(this);
 		this.progressPanel.setFilename(this.outputfile);
-		this.progressPanel.setInfoText(ResourceMgr.getString("MsgSpoolingRow"));
+		this.progressPanel.setInfoText(ResourceMgr.getString("MsgSpoolStart"));
 
 		this.progressWindow = new JFrame();
 		this.progressWindow.getContentPane().add(progressPanel);
@@ -235,6 +237,28 @@ public class DataExporter
 		}
 	}
 
+	/**
+	 *	Define the columns that should be exported
+	 *  This is only respected for the export of a DataStore, not
+	 *  for exporting a ResultSet
+	 *
+	 *	@see #startExport(workbench.storage.DataStore)
+	 */
+	public void setColumnsToExport(List columns)
+	{
+		this.columnsToExport = columns;
+	}
+
+	public List getColumnsToExport()
+	{
+		return this.columnsToExport;
+	}
+	
+	public void setExportAllColumns()
+	{
+		this.columnsToExport = null;
+	}
+	
 	public void setUseCDATA(boolean flag) { this.useCDATA = flag; }
 	public boolean getUseCDATA() { return this.useCDATA; }
 
@@ -515,13 +539,15 @@ public class DataExporter
 			LogMgr.logError("DataExporter.startExport()", "Could not execute SQL statement: " + e.getMessage(), e);
 			if (this.showProgress)
 			{
-				WbSwingUtilities.showErrorMessage(this.progressWindow, ResourceMgr.getString("MsgExecuteError") + ": " + e.getMessage());
+				if (!jobsRunning) this.closeProgress();
+				WbSwingUtilities.showErrorMessage(this.parentWindow, ResourceMgr.getString("MsgExecuteError") + ": " + e.getMessage());
 			}
 		}
 		finally
 		{
 			try { rs.close(); } catch (Throwable th) {}
 			try { stmt.close(); } catch (Throwable th) {}
+			if (!jobsRunning) this.closeProgress();
 		}
 		return rows;
 	}
@@ -580,6 +606,7 @@ public class DataExporter
 			ResultSetMetaData meta = rs.getMetaData();
 			ResultInfo info = new ResultInfo(meta, this.dbConn);
 			this.exportWriter = createExportWriter(info);
+			if (this.progressPanel != null) this.progressPanel.setInfoText(ResourceMgr.getString("MsgSpoolingRow"));
 			this.exportWriter.writeExport(rs, info);
 		}
 		catch (SQLException e)
@@ -665,6 +692,7 @@ public class DataExporter
 		if (this.showProgress)
 		{
 			if (this.progressPanel == null) this.openProgressMonitor();
+			exporter.setRowMonitor(this.progressPanel);
 		}
 
 		BufferedWriter pw = null;
@@ -731,6 +759,7 @@ public class DataExporter
 	{
 		this.setSql(aSql);
 		boolean includeSqlExport = this.sqlTable != null;
+		this.parentWindow = aParent;
 		ExportFileDialog dialog = new ExportFileDialog(aParent);
 		dialog.setIncludeSqlInsert(includeSqlExport);
 		dialog.setIncludeSqlUpdate(false);
@@ -743,6 +772,7 @@ public class DataExporter
 				this.setConnection(aConnection);
 				dialog.setExporterOptions(this);
 				this.setShowProgress(true);
+				this.openProgressMonitor();
 				this.startBackgroundThread();
 			}
 			catch (Exception e)
@@ -772,6 +802,7 @@ public class DataExporter
 		}
 		this.setIncludeCreateTable(sqlOptions.getCreateTable());
 		this.setCommitEvery(sqlOptions.getCommitEvery());
+		this.setTableName(sqlOptions.getAlternateUpdateTable());
 	}
 
 	public void setXmlOptions(XmlOptions xmlOptions)

@@ -26,6 +26,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
+import java.sql.DriverManager;
 
 /**
  *	Represents a JDBC Driver definition.
@@ -39,15 +40,10 @@ public class DbDriver
 	private Driver driverClassInstance;
 	private URLClassLoader classLoader;
 
-	/** Holds value of property name. */
 	private String name;
-
-	/** Holds value of property driverClass. */
 	private String driverClass;
 
 	private String identifier;
-
-	/** Holds value of property library. */
 	private String library;
 
 	private String sampleUrl;
@@ -65,8 +61,8 @@ public class DbDriver
 
 	public DbDriver(String aDriverClassname)
 	{
-		this.driverClass = aDriverClassname;
-		this.name = this.driverClass;
+		this.setDriverClass(aDriverClassname);
+		this.setName(aDriverClassname);
 	}
 
 	/** Creates a new instance of DbDriver */
@@ -86,9 +82,9 @@ public class DbDriver
 
 	public String getDriverClass() {  return this.driverClass; }
 
-	public void setDriverClass(String driverClass)
+	public void setDriverClass(String aClass)
 	{
-		this.driverClass = driverClass;
+		this.driverClass = aClass.trim();
 		this.identifier = null;
 		this.driverClassInstance = null;
 		this.classLoader = null;
@@ -162,15 +158,28 @@ public class DbDriver
 
 			Class drvClass = this.classLoader.loadClass(this.driverClass);
 			this.driverClassInstance = (Driver)drvClass.newInstance();
+			if (Settings.getInstance().getBoolProperty("workbench.db.registerdriver", false))
+			{
+				try
+				{
+					LogMgr.logDebug("DbDriver.loadDriverClass()", "Registering new driver instance for " + this.driverClass + " with DriverManager");
+					DriverManager.registerDriver(this.driverClassInstance);
+				}
+				catch (Throwable th)
+				{
+					LogMgr.logError("DbDriver.loadDriverClass()", "Error registering driver instance with DriverManager", th);
+				}
+			}
 		}
 		catch (ClassNotFoundException e)
 		{
+			LogMgr.logError("DbDriver.loadDriverClass()", "Class not found when loading driver", e);
 			throw e;
 		}
 		catch (Throwable e)
 		{
 			this.classLoader = null;
-			LogMgr.logError("DbDriver.loadDriverClass()", "Error loading driver class", e);
+			LogMgr.logError("DbDriver.loadDriverClass()", "Error loading driver class: " + this.driverClass, e);
 			throw new Exception("Could not load driver class " + this.driverClass);
 		}
 	}
@@ -292,19 +301,23 @@ public class DbDriver
 			c = this.driverClassInstance.connect(url, props);
 			if (c == null)
 			{
+				LogMgr.logError("DbDriver.connect()", "No connection returned by driver " + this.driverClass + " for URL=" + url, null);
 				throw new Exception("Driver did not return a connection for url=" + url);
 			}
 		}
 		catch (ClassNotFoundException e)
 		{
+			LogMgr.logError("DbDriver.connect()", "Driver class not found", e);
 			throw e;
 		}
 		catch (SQLException e)
 		{
+			LogMgr.logError("DbDriver.connect()", "Error connecting to driver " + this.driverClass, e);
 			throw e;
 		}
 		catch (Throwable th)
 		{
+			LogMgr.logError("DbDriver.connect()", "Error connecting to driver " + this.driverClass, th);
 			throw new Exception("Error connecting to database. (" + th.getClass().getName() + " - " + th.getMessage() + ")");
 		}
 

@@ -528,12 +528,15 @@ public class DataStore
 				DbMetadata meta = aConn.getMetadata();
 				if (meta == null) return;
 
+
 				DataStore columns = meta.getTableDefinition(aTablename);
 				if (columns == null)
 				{
 					return;
 				}
+
 				this.updateTable = meta.adjustObjectname(aTablename);
+
 				for (int i=0; i < columns.getRowCount(); i++)
 				{
 					String column = columns.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
@@ -797,6 +800,13 @@ public class DataStore
 		DecimalFormat formatter = Settings.getInstance().getDefaultDecimalFormatter();
 		return row.getDataAsString(aDelimiter, formatter);
 	}
+	
+	public StringBuffer getRowDataAsString(int aRow, String aDelimiter, boolean[] columns)
+	{
+		RowData row = this.getRow(aRow);
+		DecimalFormat formatter = Settings.getInstance().getDefaultDecimalFormatter();
+		return row.getDataAsString(aDelimiter, formatter, columns);
+	}
 
 	public StringBuffer getHeaderString()
 	{
@@ -805,11 +815,21 @@ public class DataStore
 
 	public StringBuffer getHeaderString(String aFieldDelimiter)
 	{
+		return getHeaderString(aFieldDelimiter, null);
+	}
+	
+	public StringBuffer getHeaderString(String aFieldDelimiter, List columns)
+	{
 		int cols = this.resultInfo.getColumnCount();
 		StringBuffer result = new StringBuffer(cols * 30);
 		for (int i=0; i < cols; i++)
 		{
+			if (columns != null)
+			{
+				if (!columns.contains(this.resultInfo.getColumn(i))) continue;
+			}
 			String colName = this.getColumnName(i);
+			
 			if (colName == null || colName.trim().length() == 0) colName = "Col" + i;
 			result.append(colName);
 			if (i < cols - 1) result.append(aFieldDelimiter);
@@ -819,16 +839,26 @@ public class DataStore
 
 	public String getDataString(String aLineTerminator, boolean includeHeaders)
 	{
-		return this.getDataString(Settings.getInstance().getDefaultTextDelimiter(), aLineTerminator, includeHeaders);
+		return this.getDataString(Settings.getInstance().getDefaultTextDelimiter(), aLineTerminator, includeHeaders, null);
+	}	
+	
+	public String getDataString(String aLineTerminator, boolean includeHeaders, List columns)
+	{
+		return this.getDataString(Settings.getInstance().getDefaultTextDelimiter(), aLineTerminator, includeHeaders, columns);
 	}
 
 	public String getDataString(String aFieldDelimiter, String aLineTerminator, boolean includeHeaders)
+	{
+		return this.getDataString(aFieldDelimiter, aLineTerminator, includeHeaders, null);
+	}
+	
+	public String getDataString(String aFieldDelimiter, String aLineTerminator, boolean includeHeaders, List columns)
 	{
 		int count = this.getRowCount();
 		StringWriter result = new StringWriter(count * 250);
 		try
 		{
-			this.writeDataString(result, aFieldDelimiter, aLineTerminator, includeHeaders);
+			this.writeDataString(result, aFieldDelimiter, aLineTerminator, includeHeaders, columns);
 		}
 		catch (Exception e)
 		{
@@ -838,23 +868,41 @@ public class DataStore
 		return result.toString();
 	}
 
+	public void writeDataString(Writer out, String aFieldDelimiter, String aLineTerminator, boolean includeHeaders)
+		throws IOException
+	{
+		this.writeDataString(out, aFieldDelimiter, aLineTerminator, includeHeaders, (List)null);
+	}
 	/**
 	 *	WriteDataString writes the contents of this datastore into the passed Writer.
 	 *	This can be used to write the contents directly to disk without the need
 	 *  to build a complete buffer in memory
 	 */
-	public void writeDataString(Writer out, String aFieldDelimiter, String aLineTerminator, boolean includeHeaders)
+	public void writeDataString(Writer out, String aFieldDelimiter, String aLineTerminator, boolean includeHeaders, List columns)
 		throws IOException
 	{
 		int count = this.getRowCount();
 		if (includeHeaders)
 		{
-			out.write(this.getHeaderString(aFieldDelimiter).toString());
+			out.write(this.getHeaderString(aFieldDelimiter, columns).toString());
 			out.write(aLineTerminator);
+		}
+		int colCount = this.getColumnCount();
+		boolean[] includeColumns = new boolean[colCount];
+		for (int i=0; i < colCount; i++)
+		{
+			if (columns != null) 
+			{
+				includeColumns[i] = columns.contains(this.resultInfo.getColumn(i));
+			}
+			else
+			{
+				includeColumns[i] = true;
+			}
 		}
 		for (int i=0; i < count; i++)
 		{
-			out.write(this.getRowDataAsString(i, aFieldDelimiter).toString());
+			out.write(this.getRowDataAsString(i, aFieldDelimiter, includeColumns).toString());
 			out.write(aLineTerminator);
 		}
 	}
@@ -862,15 +910,34 @@ public class DataStore
 	public void writeDataString(Writer out, String aFieldDelimiter, String aLineTerminator, boolean includeHeaders, int[] rows)
 		throws IOException
 	{
+		writeDataString(out, aFieldDelimiter, aLineTerminator, includeHeaders, rows, null);
+	}
+	
+	public void writeDataString(Writer out, String aFieldDelimiter, String aLineTerminator, boolean includeHeaders, int[] rows, List columns)
+		throws IOException
+	{
 		if (includeHeaders)
 		{
-			out.write(this.getHeaderString(aFieldDelimiter).toString());
+			out.write(this.getHeaderString(aFieldDelimiter, columns).toString());
 			out.write(aLineTerminator);
+		}
+		int colCount = this.getColumnCount();
+		boolean[] includeColumns = new boolean[colCount];
+		for (int i=0; i < colCount; i++)
+		{
+			if (columns != null) 
+			{
+				includeColumns[i] = columns.contains(this.resultInfo.getColumn(i));
+			}
+			else
+			{
+				includeColumns[i] = true;
+			}
 		}
 		int count = rows.length;
 		for (int i=0; i < count; i++)
 		{
-			out.write(this.getRowDataAsString(rows[i], aFieldDelimiter).toString());
+			out.write(this.getRowDataAsString(rows[i], aFieldDelimiter, includeColumns).toString());
 			out.write(aLineTerminator);
 		}
 	}
@@ -1111,6 +1178,17 @@ public class DataStore
 			return true;
 	}
 
+	public boolean sqlHasUpdateTable()
+	{
+		if (this.updateTable != null) return true;
+		if (this.sql == null) return false;
+		List tables = SqlUtil.getTables(this.sql);
+		if (tables.size() != 1) return false;
+		return true;
+	}
+	
+	
+	
 	// =========== SQL Insert generation ================
 
 	/**
@@ -1182,23 +1260,29 @@ public class DataStore
 	public String getDataAsSqlInsert()
 		throws Exception, SQLException
 	{
-		return this.getDataAsSqlInsert("\n", null, null, null);
+		return this.getDataAsSqlInsert("\n", null, null, null, null);
 	}
 
 	public String getDataAsSqlInsert(int[] rows)
 		throws Exception, SQLException
 	{
-		return this.getDataAsSqlInsert("\n", null, null, rows);
+		return this.getDataAsSqlInsert("\n", null, null, rows, null);
 	}
 
-	public String getDataAsSqlInsert(String aLineTerminator, String aCharFunc, String aConcatString, int[] rows)
+	public String getDataAsSqlInsert(int[] rows, List columns)
+		throws Exception, SQLException
+	{
+		return this.getDataAsSqlInsert("\n", null, null, rows, columns);
+	}
+	
+	public String getDataAsSqlInsert(String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns)
 		throws Exception, SQLException
 	{
 		if (!this.canSaveAsSqlInsert()) return "";
 		StringWriter script = new StringWriter(this.getRowCount() * 150);
 		try
 		{
-			this.writeDataAsSqlInsert(script, aLineTerminator, aCharFunc, aConcatString, rows);
+			this.writeDataAsSqlInsert(script, aLineTerminator, aCharFunc, aConcatString, rows, columns);
 		}
 		catch (Exception e)
 		{
@@ -1211,10 +1295,10 @@ public class DataStore
 	public void writeDataAsSqlInsert(Writer out, String aLineTerminator)
 		throws IOException
 	{
-		this.writeDataAsSqlInsert(out, aLineTerminator, null, null, null);
+		this.writeDataAsSqlInsert(out, aLineTerminator, null, null, null, null);
 	}
 
-	public void writeDataAsSqlInsert(Writer out, String aLineTerminator, String aCharFunc, String aConcatString, int[] rows)
+	public void writeDataAsSqlInsert(Writer out, String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns)
 		throws IOException
 	{
 		if (!this.canSaveAsSqlInsert()) return;
@@ -1231,7 +1315,7 @@ public class DataStore
 			if (rows == null) data = this.getRow(row);
 			else data = this.getRow(rows[row]);
 
-			DmlStatement stmt = factory.createInsertStatement(data, true, aLineTerminator);
+			DmlStatement stmt = factory.createInsertStatement(data, true, aLineTerminator, columns);
 			String sql = stmt.getExecutableStatement(this.originalConnection.getSqlConnection());
 			if (aCharFunc != null)
 			{
@@ -1248,26 +1332,26 @@ public class DataStore
 	// =========== SQL Update generation ================
 	public String getDataAsSqlUpdate()
 	{
-		return this.getDataAsSqlUpdate("\n", null, null, null);
+		return this.getDataAsSqlUpdate("\n", null, null, null, null);
 	}
 
-	public String getDataAsSqlUpdate(int[] rows)
+	public String getDataAsSqlUpdate(int[] rows, List columns)
 	{
-		return this.getDataAsSqlUpdate("\n", null, null, rows);
+		return this.getDataAsSqlUpdate("\n", null, null, rows, columns);
 	}
 
 	public String getDataAsSqlUpdate(String aLineTerminator)
 	{
-		return this.getDataAsSqlUpdate(aLineTerminator, null, null, null);
+		return this.getDataAsSqlUpdate(aLineTerminator, null, null, null, null);
 	}
 
-	public String getDataAsSqlUpdate(String aLineTerminator, String aCharFunc, String aConcatString, int[] rows)
+	public String getDataAsSqlUpdate(String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns)
 	{
 		if (!this.canSaveAsSqlInsert()) return "";
 		StringWriter script = new StringWriter(this.getRowCount() * 150);
 		try
 		{
-			this.writeDataAsSqlUpdate(script, aLineTerminator, aCharFunc, aConcatString, rows);
+			this.writeDataAsSqlUpdate(script, aLineTerminator, aCharFunc, aConcatString, rows, columns);
 		}
 		catch (Exception e)
 		{
@@ -1286,14 +1370,12 @@ public class DataStore
 	public void writeDataAsSqlUpdate(Writer out, String aLineTerminator, String aCharFunc, String aConcatString)
 		throws IOException
 	{
-		writeDataAsSqlUpdate(out, aLineTerminator, aCharFunc, aConcatString, null);
+		writeDataAsSqlUpdate(out, aLineTerminator, aCharFunc, aConcatString, null, null);
 	}
 
-	public void writeDataAsSqlUpdate(Writer out, String aLineTerminator, String aCharFunc, String aConcatString, int[] rows)
+	public void writeDataAsSqlUpdate(Writer out, String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns)
 		throws IOException
 	{
-		if (!this.canSaveAsSqlInsert()) return;
-
 		if (!this.pkColumnsRead)
 		{
 			try
@@ -1308,7 +1390,7 @@ public class DataStore
 		}
 		if (!this.resultInfo.hasPkColumns())
 		{
-			LogMgr.logWarning("DataStore.writeDataAsSqlUpdate()", "No PK columns found. Cannot write as SQL Update");
+			LogMgr.logError("DataStore.writeDataAsSqlUpdate()", "No PK columns found. Cannot write as SQL Update", null);
 			return;
 		}
 
@@ -1324,7 +1406,7 @@ public class DataStore
 			if (rows == null) data = this.getRow(row);
 			else data = this.getRow(rows[row]);
 
-			DmlStatement stmt = factory.createUpdateStatement(data, true, aLineTerminator);
+			DmlStatement stmt = factory.createUpdateStatement(data, true, aLineTerminator, columns);
 			if (aCharFunc != null)
 			{
 				stmt.setChrFunction(aCharFunc);

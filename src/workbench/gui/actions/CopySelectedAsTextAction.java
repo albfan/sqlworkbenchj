@@ -25,17 +25,17 @@ import workbench.util.StringUtil;
 public class CopySelectedAsTextAction extends WbAction
 {
 	private Exporter client;
-	
+
 	public CopySelectedAsTextAction(Exporter aClient)
 	{
 		super();
 		this.client = aClient;
-			
+
 		this.setMenuItemName(ResourceMgr.MNU_TXT_COPY_SELECTED);
 		String desc = ResourceMgr.getDescription("MnuTxtCopySelectedAsText");
 		String shift = KeyEvent.getKeyModifiersText(KeyEvent.SHIFT_MASK);
 		desc = StringUtil.replace(desc, "%shift%", shift);
-		
+
 		this.initMenuDefinition(ResourceMgr.getString("MnuTxtCopySelectedAsText"), desc, null);
 		this.setIcon(null);
 		this.setEnabled(false);
@@ -44,6 +44,8 @@ public class CopySelectedAsTextAction extends WbAction
 	public void executeAction(ActionEvent e)
 	{
 		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
-		client.copyDataToClipboard(!shiftPressed, true); 
+		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
+		ctrlPressed = ctrlPressed && ((e.getModifiers() & ActionEvent.MOUSE_EVENT_MASK) == ActionEvent.MOUSE_EVENT_MASK);
+		client.copyDataToClipboard(!shiftPressed, true, ctrlPressed);
 	}
 }

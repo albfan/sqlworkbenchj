@@ -854,10 +854,21 @@ public class TableListPanel
 		this.tableData.restoreSettings();
 	}
 
+	private boolean suspendTableSelection = false;
+	
+	public void suspendTableSelection(boolean flag)
+	{
+		boolean wasSuspended = this.suspendTableSelection;
+		this.suspendTableSelection = flag;
+		if (wasSuspended && !this.suspendTableSelection)
+		{
+			this.updateDisplay();
+		}
+	}
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
-		if (e.getSource() == this.tableList.getSelectionModel())
+		if (e.getSource() == this.tableList.getSelectionModel() && !this.suspendTableSelection)
 		{
 			this.updateDisplay();
 		}

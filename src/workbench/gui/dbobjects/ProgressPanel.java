@@ -16,12 +16,15 @@ import java.io.File;
 import workbench.gui.components.WbButton;
 import workbench.interfaces.Interruptable;
 import workbench.resource.ResourceMgr;
+import workbench.storage.RowActionMonitor;
 
 /**
  *
  * @author  info@sql-workbench.net
  */
-public class ProgressPanel extends javax.swing.JPanel
+public class ProgressPanel 
+	extends javax.swing.JPanel
+	implements RowActionMonitor
 {
 
 	private Interruptable spooler;
@@ -64,6 +67,23 @@ public class ProgressPanel extends javax.swing.JPanel
 	public void setInfoSize(int cols)
 	{
 		this.progressInfoText.setColumns(cols);
+	}
+
+	public void jobFinished()
+	{
+	}
+
+	public void setCurrentObject(String object, int number, int totalObjects)
+	{
+	}
+
+	public void setCurrentRow(int currentRow, int totalRows)
+	{
+		if (currentRow > -1) this.rowInfo.setText(Long.toString(currentRow));
+	}
+
+	public void setMonitorType(int aType)
+	{
 	}
 	/** This method is called from within the constructor to
 	 * initialize the form.
@@ -112,8 +132,8 @@ public class ProgressPanel extends javax.swing.JPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(5, 6, 0, 6);
     gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(5, 6, 0, 6);
     add(infoPanel, gridBagConstraints);
 
     cancelButton.setText(ResourceMgr.getString("LabelCancel"));

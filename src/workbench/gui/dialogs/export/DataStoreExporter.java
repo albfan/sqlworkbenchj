@@ -37,9 +37,9 @@ public class DataStoreExporter
 
 	public void saveAs()
 	{
-		boolean sql = (this.source != null && this.source.canSaveAsSqlInsert());
+		boolean sql = (this.source != null && this.source.sqlHasUpdateTable());
 		boolean update = (source != null && source.hasPkColumns());
-		this.dialog = new ExportFileDialog(this.caller);
+		this.dialog = new ExportFileDialog(this.caller, source.getResultInfo());
 		this.dialog.setIncludeSqlInsert(sql);
 		this.dialog.setIncludeSqlUpdate(update);
 		this.dialog.setSelectDirectoryOnly(false);
@@ -48,16 +48,6 @@ public class DataStoreExporter
 		if (selected)
 		{
 			writeFile();
-			/*
-			Thread t = new WbThread("Export Thread")
-			{
-				public void run()
-				{
-					writeFile();
-				}
-			};
-			t.start();
-			*/
 		}
 	}
 	
@@ -77,6 +67,7 @@ public class DataStoreExporter
 		int type = dialog.getExportType();
 		DataExporter exporter = new DataExporter();
 		exporter.setConnection(this.source.getOriginalConnection());
+		exporter.setColumnsToExport(this.dialog.getColumnsToExport());
 		dialog.setExporterOptions(exporter);
 		try
 		{

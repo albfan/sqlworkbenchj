@@ -83,7 +83,16 @@ public class TableIdentifier
 		StringBuffer result = new StringBuffer(30);
 		if (this.schema != null)
 		{
-			result.append(SqlUtil.quoteObjectname(this.schema));
+			if (this.schema.indexOf("_") == -1)
+			{
+				result.append(SqlUtil.quoteObjectname(this.schema));
+			}
+			else
+			{
+				result.append('"');
+				result.append(this.schema);
+				result.append('"');
+			}
 			result.append('.');
 		}
 		result.append(SqlUtil.quoteObjectname(this.tablename));

@@ -620,9 +620,14 @@ public class MainWindow
 			final int index = this.getIndexForPanel(aPanel);
 			this.tabConnected(aPanel, conn, index);
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			LogMgr.logError("MainWindow.connectPanel()", "Error when connecting SQL panel " + aPanel.getId(), e);
+			closeConnectingInfo();
+			this.showStatusMessage("");
+			String error = ExceptionUtil.getDisplay(e);
+			String msg = ResourceMgr.getString("ErrorConnectFailed").replaceAll("%msg%", error.trim());
+			WbSwingUtilities.showErrorMessage(this, msg);
 		}
 	}
 
@@ -1234,7 +1239,8 @@ public class MainWindow
 	private void setConnection(WbConnection con)
 	{
 		boolean explorerIncluded = false;
-		for (int i=0; i < this.sqlTab.getTabCount(); i++)
+		int count = this.sqlTab.getTabCount();
+		for (int i=0; i < count; i++)
 		{
 			MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
 			sql.setConnection(con);
@@ -1490,7 +1496,7 @@ public class MainWindow
 				this.addDbExplorerTab();
 				// we cannot activate the tab yet, as that will trigger
 				// the connection process, and we want to control
-				// that here, so that the a separate thread can be used
+				// that here, so that a separate thread can be used
 				this.dbExplorerTabVisible = true;
 			}
 			this.sqlTab.setSelectedIndex(this.sqlTab.getTabCount() - 1);
@@ -1542,6 +1548,9 @@ public class MainWindow
 		}
 		catch (Exception e)
 		{
+			String error = ExceptionUtil.getDisplay(e);
+			String msg = ResourceMgr.getString("ErrorExplorerConnectFailed").replaceAll("%msg%", error.trim());
+			WbSwingUtilities.showErrorMessage(this.dbExplorerPanel, msg);
 			LogMgr.logError("MainWindow.showDbExplorer()", "Error getting new connection for DbExplorer tab. Using connection from current panel", e);
 			SwingUtilities.invokeLater(new Runnable()
 			{

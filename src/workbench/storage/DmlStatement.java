@@ -54,10 +54,11 @@ public class DmlStatement
 	 *	using a prepared statement.
 	 */
 	public DmlStatement(String aStatement, List aValueList)
-		throws IllegalArgumentException
+		//throws IllegalArgumentException
 	{
 		if (aStatement == null) throw new NullPointerException();
 
+		/*
 		String verb = SqlUtil.getSqlVerb(aStatement);
 		if (! ("insert".equalsIgnoreCase(verb) ||
 		       "update".equalsIgnoreCase(verb) ||
@@ -65,7 +66,8 @@ public class DmlStatement
 		{
 			throw new IllegalArgumentException("Only UPDATE, DELETE, INSERT allowed");
 		}
-
+		*/
+		
 		int count = this.countParameters(aStatement);
 		if (count > 0 && aValueList != null && count != aValueList.size())
 		{

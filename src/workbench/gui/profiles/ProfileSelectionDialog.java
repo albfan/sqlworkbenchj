@@ -77,7 +77,6 @@ public class ProfileSelectionDialog
 		//this.getRootPane().setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
 		//this.getRootPane().setActionMap(am);
 
-
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()

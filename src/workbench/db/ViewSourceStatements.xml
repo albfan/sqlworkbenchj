@@ -176,6 +176,23 @@ catalog_definition_schema.sysschema
     </void> 
    </object> 
   </void> 
-  
+
+  <void method="put"> 
+   <string>Mckoi SQL Database</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>SELECT substring(i_view_data('query string', query), 12, length(i_view_data('query string', query)) - 16)
+             FROM SYS_INFO.sUSRView
+       </string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>"name"</string> 
+    </void> 
+    <void property="schemaField"> 
+     <string>"schema"</string> 
+    </void> 
+   </object> 
+  </void> 
+    
  </object> 
 </java> 

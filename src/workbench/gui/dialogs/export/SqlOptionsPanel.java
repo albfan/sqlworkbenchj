@@ -45,7 +45,14 @@ public class SqlOptionsPanel
 	
 	public String getAlternateUpdateTable()
 	{
+		String s = alternateTable.getText();
+		if (s != null && s.trim().length() > 0) return s.trim();
 		return null;
+	}
+	
+	public void setAlternateUpdateTable(String table)
+	{
+		this.alternateTable.setText((table == null ? "" : table.trim()));
 	}
 
 	public int getCommitEvery()
@@ -132,6 +139,8 @@ public class SqlOptionsPanel
     createTable = new javax.swing.JCheckBox();
     useUpdate = new javax.swing.JRadioButton();
     useInsert = new javax.swing.JRadioButton();
+    alternateTable = new javax.swing.JTextField();
+    jLabel1 = new javax.swing.JLabel();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -166,7 +175,6 @@ public class SqlOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weighty = 1.0;
     add(useUpdate, gridBagConstraints);
 
     typeGroup.add(useInsert);
@@ -179,13 +187,32 @@ public class SqlOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 0);
     add(useInsert, gridBagConstraints);
 
+    alternateTable.setColumns(15);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(2, 4, 0, 0);
+    add(alternateTable, gridBagConstraints);
+
+    jLabel1.setText(java.util.ResourceBundle.getBundle("language/wbstrings").getString("LabelUseExportTableName"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 0);
+    add(jLabel1, gridBagConstraints);
+
   }//GEN-END:initComponents
 	
 	
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JTextField alternateTable;
   private javax.swing.JTextField commitCount;
   private javax.swing.JLabel commitLabel;
   private javax.swing.JCheckBox createTable;
+  private javax.swing.JLabel jLabel1;
   private javax.swing.ButtonGroup typeGroup;
   private javax.swing.JRadioButton useInsert;
   private javax.swing.JRadioButton useUpdate;

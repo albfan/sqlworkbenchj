@@ -49,6 +49,7 @@ import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ColumnSelectionAction;
+import workbench.gui.actions.CommentAction;
 import workbench.gui.actions.FileOpenAction;
 import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.actions.FindAction;
@@ -56,6 +57,7 @@ import workbench.gui.actions.FindAgainAction;
 import workbench.gui.actions.FormatSqlAction;
 import workbench.gui.actions.MatchBracketAction;
 import workbench.gui.actions.ReplaceAction;
+import workbench.gui.actions.UnCommentAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.EncodingPanel;
 import workbench.gui.components.ExtensionFileFilter;
@@ -109,9 +111,10 @@ public class EditorPanel
 	private FileOpenAction fileOpen;
 	private ColumnSelectionAction columnSelection;
 	private MatchBracketAction matchBracket;
+	private CommentAction commentAction;
+	private UnCommentAction unCommentAction;
 
 	private List filenameChangeListeners;
-
 	private File currentFile;
 	private String fileEncoding;
 
@@ -189,6 +192,11 @@ public class EditorPanel
 		this.matchBracket = new MatchBracketAction(this);
 		this.addKeyBinding(this.matchBracket);
 
+		this.commentAction = new CommentAction(this);
+		this.unCommentAction = new UnCommentAction(this);
+		this.addKeyBinding(this.commentAction);
+		this.addKeyBinding(this.unCommentAction);
+		
 		//this.setSelectionRectangular(true);
 		Settings.getInstance().addFontChangedListener(this);
 		Settings.getInstance().addPropertyChangeListener(this);
@@ -209,6 +217,14 @@ public class EditorPanel
 		AnsiSQLTokenMarker token = this.getSqlTokenMarker();
 		if (token != null) token.initDatabaseKeywords(aConnection.getSqlConnection());
 		this.dbFunctions = aConnection.getMetadata().getDbFunctions();
+		if (aConnection.getMetadata().isMySql())
+		{
+			this.commentChar = "#";
+		}
+		else
+		{
+			this.commentChar = "--";
+		}
 	}
 
 	public void fontChanged(String aKey, Font aFont)
@@ -270,22 +286,26 @@ public class EditorPanel
 		String delimit = parser.getDelimiter();
 
 		int count = commands.size();
+		if (count < 1) return;
+		
 		StringBuffer newSql = new StringBuffer(sql.length() + 100);
-		String formattedDelimit = "";
+		String formattedDelimit = StringUtil.EMPTY_STRING;
 
 		if (count > 1)
 		{
+			// make sure add a delimiter after each statement
+			// if we have more then one
 			formattedDelimit = "\n" + delimit + "\n\n";
-		}
-		else if (sql.endsWith("\n") || sql.endsWith("\r"))
-		{
-			formattedDelimit = delimit + "\n";
 		}
 		else
 		{
-			formattedDelimit = delimit;
+			String s = sql.trim();
+			if (s.endsWith(delimit))
+			{
+				formattedDelimit = delimit;
+			}
 		}
-
+		
 		for (int i=0; i < count; i++)
 		{
 			String command = (String)commands.get(i);
@@ -824,6 +844,9 @@ public class EditorPanel
 		return this.currentFile.getAbsolutePath();
 	}
 
+	public CommentAction getCommentAction() { return this.commentAction; }
+	public UnCommentAction getUnCommentAction() { return this.unCommentAction; }	
+	
 	public FindAction getFindAction() { return this.findAction; }
 	public FindAgainAction getFindAgainAction() { return this.findAgainAction; }
 

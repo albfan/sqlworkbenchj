@@ -52,6 +52,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 
 import javax.swing.AbstractListModel;
@@ -454,14 +455,6 @@ public class WbTable
 			DataStore ds = this.getDataStore();
 			update = (ds == null ? false : ds.isUpdateable());
 		}
-//		if (this.copySelectedMenus != null)
-//		{
-//			for (int i=0; i < this.copySelectedMenus.size(); i++)
-//			{
-//				WbMenu menu = (WbMenu)this.copySelectedMenus.get(i);
-//				if (menu != null) menu.setEnabled(selected);
-//			}
-//		}
 
 		if (this.copySelectedAsTextAction != null)
 		{
@@ -568,6 +561,8 @@ public class WbTable
 		{
 			this.dwModel.removeTableModelListener(this.changeListener);
 			this.dwModel.removeTableModelListener(this);
+			this.dwModel.dispose();
+			this.dwModel = null;
 		}
 
 		JTableHeader header = this.getTableHeader();
@@ -576,12 +571,13 @@ public class WbTable
 			header.removeMouseListener(this);
 		}
 
-		super.setModel(aModel);
-
-		if (this.dwModel != null)
+		try
 		{
-			this.dwModel.dispose();
-			this.dwModel = null;
+			super.setModel(aModel);
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError("WbTable.setModel()", "Error setting table model", th);
 		}
 
 		if (aModel instanceof DataStoreTableModel)
@@ -865,14 +861,14 @@ public class WbTable
 
 	public String getDataString(String aLineTerminator)
 	{
-		return this.getDataString(aLineTerminator, true);
+		return this.getDataString(aLineTerminator, true, null);
 	}
 
-	public String getDataString(String aLineTerminator, boolean includeHeaders)
+	public String getDataString(String aLineTerminator, boolean includeHeaders, List columns)
 	{
 		if (this.dwModel == null) return "";
 		DataStore ds = this.dwModel.getDataStore();
-		return ds.getDataString(aLineTerminator, includeHeaders);
+		return ds.getDataString(aLineTerminator, includeHeaders, columns);
 	}
 
 	public boolean canSearchAgain()
@@ -1040,8 +1036,12 @@ public class WbTable
 
 		for (int i=0; i < colMod.getColumnCount(); i++)
 		{
+			if (this.dwModel == null) return;
 			TableColumn col = colMod.getColumn(i);
-			if (Number.class.isAssignableFrom(this.dwModel.getColumnClass(i)))
+			if (col == null) continue;
+			Class clz = this.dwModel.getColumnClass(i);
+			if (clz == null) continue;
+			if (Number.class.isAssignableFrom(clz))
 			{
 				col.setCellEditor(this.defaultNumberEditor);
 			}
@@ -1523,13 +1523,24 @@ public class WbTable
 
 	public void copyDataToClipboard(final boolean includeheaders)
 	{
+		copyDataToClipboard(includeheaders, null);
+	}
+
+	/**
+	 *	Copy all rows from the table as tab-delimited into the clipboard
+	 *	@param includeHeaders if true, then a header line with the column names is copied as well
+	 *
+	 *  @see #copyDataToClipboard(boolean, boolean)
+	 */
+	public void copyDataToClipboard(final boolean includeheaders, List columns)
+	{
 		if (this.getRowCount() <= 0) return;
 
 		try
 		{
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 			WbSwingUtilities.showWaitCursorOnWindow(this);
-			String data = getDataString("\n", includeheaders);
+			String data = getDataString("\n", includeheaders, columns);
 			StringSelection sel = new StringSelection(data);
 			clp.setContents(sel, sel);
 		}
@@ -1540,11 +1551,28 @@ public class WbTable
 		WbSwingUtilities.showDefaultCursorOnWindow(this);
 	}
 
-	public void copyDataToClipboard(boolean includeHeaders, boolean selectedOnly)
+	public void copyDataToClipboard(final boolean includeHeaders, final boolean selectedOnly)
 	{
+		copyDataToClipboard(includeHeaders, selectedOnly, false);
+	}
+
+	/**
+	 *	Copy data from the table as tab-delimited into the clipboard
+	 *	@param includeHeaders if true, then a header line with the column names is copied as well
+	 *  @param selectedOnly if true, then only selected rows are copied, else all rows
+	 *
+	 *  @see #copyDataToClipboard(boolean)
+	 */
+	public void copyDataToClipboard(final boolean includeHeaders, final boolean selectedOnly, final boolean showSelectColumns)
+	{
+		List columnsToCopy = null;
+		if (showSelectColumns)
+		{
+			columnsToCopy = this.selectColumns();
+		}
 		if (!selectedOnly)
 		{
-			copyDataToClipboard(includeHeaders);
+			copyDataToClipboard(includeHeaders, columnsToCopy);
 		}
 		else
 		{
@@ -1553,7 +1581,7 @@ public class WbTable
 				DataStore ds = this.dwModel.getDataStore();
 				int[] rows = this.getSelectedRows();
 				StringWriter out = new StringWriter(rows.length * 250);
-				ds.writeDataString(out, "\t", "\n", includeHeaders, rows);
+				ds.writeDataString(out, "\t", "\n", includeHeaders, rows, columnsToCopy);
 
 				Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 				WbSwingUtilities.showWaitCursorOnWindow(this);
@@ -1571,37 +1599,72 @@ public class WbTable
 
 	public void copyAsSqlUpdate()
 	{
-		copyAsSqlUpdate(false);
+		copyAsSqlUpdate(false, false);
 	}
 
-	public void copyAsSqlUpdate(boolean selectedOnly)
+	public void copyAsSqlUpdate(boolean selectedOnly, boolean showSelectColumns)
 	{
-		// we need decent PK columns in order to create update statements
-		if (!this.checkPkColumns(false)) return;
+		DataStore ds = this.getDataStore();
+		if (ds == null) return;
 
-		this.copyAsSql(true, selectedOnly);
+		boolean result = true;
+		// we need decent PK columns in order to create update statements
+		if (!ds.hasPkColumns()) detectDefinedPkColumns();
+		if (!ds.hasPkColumns())
+		{
+			result = this.selectKeyColumns();
+		}
+		if (result)
+		{
+			this.copyAsSql(true, selectedOnly, showSelectColumns);
+		}
 	}
 
 	public void copyAsSqlInsert()
 	{
-		copyAsSqlInsert(false);
+		copyAsSqlInsert(false, false);
 	}
 
-	public void copyAsSqlInsert(boolean selectedOnly)
+	public void copyAsSqlInsert(boolean selectedOnly, boolean showSelectColumns)
 	{
-		this.copyAsSql(false, selectedOnly);
+		this.copyAsSql(false, selectedOnly, showSelectColumns);
+	}
+
+	/**
+	 *	A general purpose method to select specific columns from the result set
+	 *  this is e.g. used for copying data to the clipboard
+	 *
+	 *	@return List the selected columns
+	 */
+	public List selectColumns()
+	{
+		DataStore ds = this.getDataStore();
+		if (ds == null) return null;
+
+		ColumnIdentifier[] originalCols = ds.getColumns();
+		ColumnSelectorPanel panel = new ColumnSelectorPanel(originalCols);
+		panel.selectAll();
+		int choice = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(this), panel, ResourceMgr.getString("MsgSelectSelectColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+		if (choice == JOptionPane.OK_OPTION)
+		{
+			return panel.getSelectedColumns();
+		}
+		return null;
 	}
 
 	/**
 	 *	Display dialog window to let the user
 	 *	select the key columns for the current update table
+	 *
+	 *	@return true if the user selected OK, false if the user cancelled the dialog
 	 */
 	public boolean selectKeyColumns()
 	{
 		DataStore ds = this.getDataStore();
 		ColumnIdentifier[] originalCols = ds.getColumns();
 		KeyColumnSelectorPanel panel = new KeyColumnSelectorPanel(originalCols, ds.getUpdateTable());
-		int choice = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(this), panel, ResourceMgr.getString("MsgSelectKeyColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION);
+		int choice = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(this), panel, ResourceMgr.getString("MsgSelectKeyColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
 		// KeyColumnSelectorPanel works on a copy of the ColumnIdentifiers so
 		// we need to copy the PK flag back to the original ones..
@@ -1645,31 +1708,18 @@ public class WbTable
 		if (ds.hasPkColumns()) return true;
 		detectDefinedPkColumns();
 		if (ds.hasPkColumns()) return true;
+		boolean needPk = ds.needPkForUpdate();
+		if (!needPk) return true;
 
-		boolean needPrompt = true;
-		if (promptWhenNeeded)
-		{
-			if (ds.isModified())
-			{
-				boolean updated = ds.hasUpdatedRows();
-				boolean deleted = ds.hasDeletedRows();
-				needPrompt = (updated || deleted);
-			}
-			else
-			{
-				needPrompt = false;
-			}
-		}
 		boolean result = true;
-		if (needPrompt)
+		if (promptWhenNeeded && needPk)
 		{
 			result = this.selectKeyColumns();
 		}
-		else
+		if (!result && needPk)
 		{
-			result = ds.hasPkColumns();
+			LogMgr.logWarning("WbTable.checkPkColumns()", "Could not find key columns for updating table " + ds.getUpdateTable());
 		}
-
 		return result;
 	}
 
@@ -1677,14 +1727,19 @@ public class WbTable
 	 * 	Copy the data of this table into the clipboard using SQL statements
 	 *
 	 */
-	private void copyAsSql(boolean useUpdate, boolean selectedOnly)
+	private void copyAsSql(boolean useUpdate, boolean selectedOnly, boolean showSelectColumns)
 	{
 		if (this.getRowCount() <= 0) return;
 
 		DataStore ds = this.dwModel.getDataStore();
 		if (ds == null) return;
-		if (!ds.canSaveAsSqlInsert()) return;
+		//if (!ds.canSaveAsSqlInsert()) return;
 
+		List columnsToInclude = null;
+		if (showSelectColumns)
+		{
+			columnsToInclude = this.selectColumns();
+		}
 		try
 		{
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -1695,11 +1750,11 @@ public class WbTable
 			String data;
 			if (useUpdate)
 			{
-				data = ds.getDataAsSqlUpdate(rows);
+				data = ds.getDataAsSqlUpdate(rows, columnsToInclude);
 			}
 			else
 			{
-				data = ds.getDataAsSqlInsert(rows);
+				data = ds.getDataAsSqlInsert(rows, columnsToInclude);
 			}
 			StringSelection sel = new StringSelection(data);
 			clp.setContents(sel, sel);

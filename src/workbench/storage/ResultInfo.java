@@ -166,6 +166,11 @@ public class ResultInfo
 		}
 	}
 
+	public ColumnIdentifier getColumn(int i)
+	{
+		return this.columns[i];
+	}
+	
 	public ColumnIdentifier[] getColumns()
 	{
 		return this.columns;

@@ -15,18 +15,22 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeListener;
 import workbench.db.exporter.DataExporter;
+import workbench.gui.components.ColumnSelectorPanel;
 import workbench.gui.components.DividerBorder;
 import workbench.interfaces.EncodingSelector;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.storage.ResultInfo;
 
 /**
  *
@@ -46,13 +50,30 @@ public class ExportOptionsPanel
 	private HtmlOptionsPanel htmlOptions;
 	private XmlOptionsPanel xmlOptions;
 	private int currentType = -1;
+	private boolean allowColumnSelection = false;
+	private ResultInfo columns;
+	private List selectedColumns;
+	private Object columnSelectEventSource;
+	private ColumnSelectorPanel columnSelectorPanel;
+	private ResultInfo dataStoreColumns;
 	
 	public ExportOptionsPanel()
 	{
+		this(null);
+	}
+	
+	public ExportOptionsPanel(ResultInfo columns)
+	{
 		super();
 		this.setLayout(new BorderLayout());
-
+		this.allowColumnSelection = (columns != null);
+		this.dataStoreColumns = columns;
 		this.generalOptions = new GeneralExportOptionsPanel();
+		generalOptions.allowSelectColumns(this.allowColumnSelection );
+		if (this.allowColumnSelection )
+		{
+			this.columnSelectEventSource = generalOptions.addColumnSelectListener(this);
+		}
 		JPanel p = new JPanel();
 		p.setLayout(new BorderLayout());
 		p.add(this.generalOptions, BorderLayout.CENTER);
@@ -96,6 +117,11 @@ public class ExportOptionsPanel
 		this.sqlOptions.setSqlUpdateAvailable(flag);
 	}
 
+	public List getColumnsToExport()
+	{
+		return this.selectedColumns;
+	}
+	
 	public void saveSettings()
 	{
 		this.generalOptions.saveSettings();
@@ -210,19 +236,48 @@ public class ExportOptionsPanel
 
 	public void actionPerformed(ActionEvent event)
 	{
-		String item = typeSelector.getSelectedItem().toString().toLowerCase();
-		int type = -1;
-		
-		this.card.show(this.typePanel, item);
-		
-		if ("text".equals(item))
-			type = DataExporter.EXPORT_TXT;
-		else if ("sql".equals(item))
-			type = DataExporter.EXPORT_SQL;
-		else if ("xml".equals(item))
-			type = DataExporter.EXPORT_XML;
-		else 
-			type = DataExporter.EXPORT_HTML;
-		firePropertyChange("exportType", -1, type);
+		if (event.getSource() == this.typeSelector)
+		{
+			String item = typeSelector.getSelectedItem().toString().toLowerCase();
+			int type = -1;
+
+			this.card.show(this.typePanel, item);
+
+			if ("text".equals(item))
+				type = DataExporter.EXPORT_TXT;
+			else if ("sql".equals(item))
+				type = DataExporter.EXPORT_SQL;
+			else if ("xml".equals(item))
+				type = DataExporter.EXPORT_XML;
+			else 
+				type = DataExporter.EXPORT_HTML;
+			firePropertyChange("exportType", -1, type);
+		}
+		else if (event.getSource() == this.columnSelectEventSource)
+		{
+			this.selectColumns();
+		}
 	}
+	
+	private void selectColumns()
+	{
+		if (this.dataStoreColumns == null) return;
+		if (this.columnSelectorPanel == null) 
+		{
+			this.columnSelectorPanel = new ColumnSelectorPanel(this.dataStoreColumns.getColumns());
+			this.columnSelectorPanel.selectAll();
+		}
+		else
+		{
+			this.columnSelectorPanel.selectColumns(this.selectedColumns);
+		}
+		
+		int choice = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(this), this.columnSelectorPanel, ResourceMgr.getString("MsgSelectSelectColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+		if (choice == JOptionPane.OK_OPTION)
+		{
+			this.selectedColumns = this.columnSelectorPanel.getSelectedColumns();
+		}
+	}
+	
 }

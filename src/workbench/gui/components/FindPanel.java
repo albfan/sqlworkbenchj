@@ -148,6 +148,7 @@ public class FindPanel
 	{
 		this.addToToolbar(anAction, false, true);
 	}
+	
 	public void addToToolbar(WbAction anAction, boolean atFront, boolean withSep)
 	{
 		JButton button = anAction.getToolbarButton();

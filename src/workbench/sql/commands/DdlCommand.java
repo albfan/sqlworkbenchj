@@ -37,7 +37,6 @@ public class DdlCommand extends SqlCommand
 	public static final SqlCommand GRANT = new DdlCommand("GRANT");
 	public static final SqlCommand REVOKE = new DdlCommand("REVOKE");
 
-	// HSQLDB commands...
 	public static final SqlCommand CHECKPOINT = new DdlCommand("CHECKPOINT");
 	public static final SqlCommand SHUTDOWN = new DdlCommand("SHUTDOWN");
 
@@ -56,7 +55,7 @@ public class DdlCommand extends SqlCommand
 
 	private String verb;
 
-	public DdlCommand(String aVerb)
+	private DdlCommand(String aVerb)
 	{
 		this.verb = aVerb;
 		this.isUpdatingCommand = true;

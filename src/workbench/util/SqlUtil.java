@@ -571,4 +571,8 @@ public class SqlUtil
 			return "UNKNOWN";
 	}
 
+	public static void main(String args[])
+	{
+		System.out.println(quoteObjectname("3P_TEST"));
+	}
 }

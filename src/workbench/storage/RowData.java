@@ -17,6 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.DecimalFormat;
+import java.util.List;
 
 import workbench.log.LogMgr;
 
@@ -111,7 +112,7 @@ public class RowData
 		}
 		return result;
 	}
-	
+
 	public int getColumnCount()
 	{
 		if (this.colData == null) return 0;
@@ -289,12 +290,22 @@ public class RowData
 
 	public StringBuffer getDataAsString(String aDelimiter, DecimalFormat formatter)
 	{
+		return this.getDataAsString(aDelimiter, formatter, null);
+	}
+	public StringBuffer getDataAsString(String aDelimiter, DecimalFormat formatter, boolean[] columns)
+	{
 		int count = this.colData.length;
 		StringBuffer result = new StringBuffer(count * 20);
 		int start = 0;
 
+		if (columns != null && count != columns.length) columns = null;
+
 		for (int c=0; c < count; c++)
 		{
+			if (columns != null)
+			{
+				if (!columns[c]) continue;
+			}
 			Object value = this.getValue(c);
 			if (value != null)
 			{

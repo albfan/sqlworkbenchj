@@ -227,6 +227,30 @@ public class WbWorkspace
 		
 		return result;
 	}
+
+	public void setQueryTimeout(int index, int timeout)
+	{
+		String key = "tab" + index + ".timeout";
+		this.tabInfo.setProperty(key, Integer.toString(timeout));
+	}
+	
+	public int getQueryTimeout(int index)
+	{
+		if (this.tabInfo == null) return 0;
+		String key = "tab" + index + ".timeout";
+		String value = (String)this.tabInfo.get(key);
+		if (value == null) return 0;
+		int result = 0;
+		try
+		{
+			result = Integer.parseInt(value);
+		}
+		catch (Exception e)
+		{
+			result = 0;
+		}
+		return result;
+	}
 	
 	public void setMaxRows(int index, int numRows)
 	{

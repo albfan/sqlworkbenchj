@@ -15,6 +15,7 @@ import java.sql.Clob;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -37,18 +38,28 @@ public abstract class RowDataConverter
 	protected String generatingSql;
 	protected ResultInfo metaData;
 	
+	private boolean[] columnsToExport = null;
+	protected List exportColumns = null;
+	
 	protected SimpleDateFormat defaultDateFormatter = StringUtil.ISO_DATE_FORMATTER;
 	protected DecimalFormat defaultNumberFormatter;
 	protected SimpleDateFormat defaultTimestampFormatter = StringUtil.ISO_TIMESTAMP_FORMATTER;
-
+	protected boolean needsUpdateTable = false;
+	
 	/**
 	 *	The metadata for the result set that should be exported
 	 */
 	public RowDataConverter(ResultInfo meta)
 	{
 		this.metaData = meta;
+		int colCount = meta.getColumnCount();
 	}
 
+	public boolean includeColumnInExport(int col)
+	{
+		if (this.columnsToExport == null) return true;
+		return this.columnsToExport[col];
+	}
 
 	/**
 	 *	The connection that was used to generate the source data.
@@ -113,6 +124,8 @@ public abstract class RowDataConverter
 	 *  (might be an empty string)
 	 */
 	public abstract StrBuffer getEnd(long totalRows);
+
+	public boolean needsUpdateTable() { return this.needsUpdateTable; }
 	
 	public void setDefaultTimestampFormatter(SimpleDateFormat formatter)
 	{
@@ -154,6 +167,30 @@ public abstract class RowDataConverter
 		{
 			this.defaultNumberFormatter = null;
 			LogMgr.logWarning("RowDataConverter.setDefaultDateFormat()", "Could not create decimal formatter for format " + aFormat);
+		}
+	}
+
+	/**
+	 *	Set a list of columns that should be exported
+	 *	@param columns the list (of ColumnIdentifier objects) of columns to be exported.
+	 *                 null means export all columns
+	 */
+	public void setColumnsToExport(List columns)
+	{
+		this.exportColumns = columns;
+		if (columns == null)
+		{
+			this.columnsToExport = null;
+			return;
+		}
+		int colCount = this.metaData.getColumnCount();
+		if (this.columnsToExport == null)
+		{
+			this.columnsToExport = new boolean[colCount];
+		}
+		for (int i=0; i < colCount; i++)
+		{
+			this.columnsToExport[i] = columns.contains(this.metaData.getColumn(i));
 		}
 	}
 	

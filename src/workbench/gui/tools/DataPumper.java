@@ -1329,7 +1329,7 @@ public class DataPumper
 		if (!this.hasSource()) return;
 
 		StringBuffer result = new StringBuffer(150);
-		result.append("COPY -" + WbCopy.PARAM_SOURCEPROFILE + "=");
+		result.append(WbCopy.VERB + " -" + WbCopy.PARAM_SOURCEPROFILE + "=");
 		String s = this.source.getName();
 		if (s.indexOf(' ') >-1) result.append('"');
 		result.append(s);

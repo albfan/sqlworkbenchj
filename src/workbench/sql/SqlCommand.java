@@ -41,7 +41,8 @@ public class SqlCommand
 	protected boolean isUpdatingCommand = false;
 	protected ResultLogger resultLogger;
 	protected StatementRunner runner;
-
+	protected int queryTimeout = 0;
+	
 	/**
 	 *	Checks if the verb of the given SQL script
 	 *	is the same as registered for this SQL command.
@@ -303,6 +304,11 @@ public class SqlCommand
 		return this.isUpdatingCommand;
 	}
 
+	public void setQueryTimeout(int timeout) 
+	{
+		this.queryTimeout = timeout;
+	}
+	
 	public void setMaxRows(int maxRows) { }
 	public boolean isResultSetConsumer() { return false; }
 	public void consumeResult(StatementRunnerResult aResult) {}

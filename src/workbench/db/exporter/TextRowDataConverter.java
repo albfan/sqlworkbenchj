@@ -71,6 +71,7 @@ public class TextRowDataConverter
 		boolean shouldQuote = this.quoteCharacter != null;
 		for (int c=0; c < count; c ++)
 		{
+			if (!this.includeColumnInExport(c)) continue;
 			String value = this.getValueAsFormattedString(row, c);
 			if (value == null) value = "";
 			boolean needQuote = false;
@@ -113,11 +114,20 @@ public class TextRowDataConverter
 
 		StrBuffer result = new StrBuffer();
 		int colCount = this.metaData.getColumnCount();
+		boolean first = true;
 		for (int c=0; c < colCount; c ++)
 		{
+			if (!this.includeColumnInExport(c)) continue;
 			String name = this.metaData.getColumnName(c);
+			if (first) 
+			{
+				first = false;
+			}
+			else
+			{
+				result.append(this.getDelimiter());
+			}
 			result.append(name);
-			if (c < colCount - 1) result.append(this.getDelimiter());
 		}
 		result.append(lineEnding);
 		return result;

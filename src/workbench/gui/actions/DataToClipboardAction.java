@@ -30,27 +30,29 @@ import workbench.util.StringUtil;
 public class DataToClipboardAction extends WbAction
 {
 	private Exporter client;
-	
+
 	public DataToClipboardAction(Exporter aClient)
 	{
 		super();
 		this.client = aClient;
-			
+
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		String desc = ResourceMgr.getDescription("MnuTxtDataToClipboard");
-		
+
 		String shift = KeyEvent.getKeyModifiersText(KeyEvent.SHIFT_MASK);
 		desc = StringUtil.replace(desc, "%shift%", shift);
-		
+
 		this.initMenuDefinition(ResourceMgr.getString("MnuTxtDataToClipboard"), desc, KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
 	}
 
 	public void executeAction(ActionEvent e)
 	{
 		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
-		client.copyDataToClipboard(!shiftPressed, false); 
+		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
+		ctrlPressed = ctrlPressed && ((e.getModifiers() & ActionEvent.MOUSE_EVENT_MASK) == ActionEvent.MOUSE_EVENT_MASK);
+		client.copyDataToClipboard(!shiftPressed, false, ctrlPressed);
 	}
-	
+
 	public void addToInputMap(InputMap im, ActionMap am)
 	{
 		super.addToInputMap(im, am);

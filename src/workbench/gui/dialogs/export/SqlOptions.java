@@ -25,5 +25,6 @@ public interface SqlOptions
 	boolean getCreateInsert();
 	void setCreateInsert(boolean flag);
 	String getAlternateUpdateTable();
+	void setAlternateUpdateTable(String table);
 	
 }

@@ -11,6 +11,7 @@
  */
 package workbench.db;
 
+import java.beans.PropertyChangeListener;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -21,6 +22,7 @@ import workbench.util.WbCipher;
 import workbench.util.WbPersistence;
 
 public class ConnectionProfile
+	implements PropertyChangeListener
 {
 	private static final String CRYPT_PREFIX = "@*@";
 	private String name;
@@ -56,6 +58,7 @@ public class ConnectionProfile
     this.identifier = String.valueOf(this.id);
     this.isNew = true;
     this.changed = true;
+		Settings.getInstance().addPropertyChangeListener(this);
 	}
 
 	private static synchronized int getNextId()
@@ -486,6 +489,17 @@ public class ConnectionProfile
 	{
 		if (flag != this.confirmUpdates) this.changed = true;
 		this.confirmUpdates = flag;
+	}
+
+	public void propertyChange(java.beans.PropertyChangeEvent evt)
+	{
+		if (Settings.ENCRYPT_PWD_KEY.equals(evt.getPropertyName()))
+		{
+			String old = this.password;
+			// calling setPassword will encrypt/decrypt the password
+			// according to the current setting
+			this.setPassword(old);
+		}
 	}
 
 }

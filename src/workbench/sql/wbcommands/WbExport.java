@@ -111,7 +111,7 @@ public class WbExport
 			return result;
 		}
 
-		if (cmdLine.isArgPresent("showencodings")) 
+		if (cmdLine.isArgPresent("showencodings"))
 		{
 			result.addMessage(ResourceMgr.getString("MsgAvailableEncodings"));
 			result.addMessage("");
@@ -122,7 +122,7 @@ public class WbExport
 			}
 			return result;
 		}
-		
+
 		if (cmdLine.hasUnknownArguments())
 		{
 			List params = cmdLine.getUnknownArguments();
@@ -281,7 +281,7 @@ public class WbExport
 
 			boolean verbose = cmdLine.getBoolean("verbosexml", true);
 			exporter.setUseVerboseFormat(verbose);
-			
+
 			if (xsl != null && output != null)
 			{
 				File f = new File(xsl);
@@ -342,7 +342,7 @@ public class WbExport
 		{
 			if ("crlf".equalsIgnoreCase(ending) ||
 			    "dos".equalsIgnoreCase(ending) ||
-			    "win".equalsIgnoreCase(ending) || 
+			    "win".equalsIgnoreCase(ending) ||
 				  "\\r\\n".equals(ending))
 			{
 				exporter.setLineEnding("\r\n");

@@ -307,5 +307,39 @@
    </object>
   </void>
 
+  <void method="add"> 
+   <object class="workbench.db.DbDriver"> 
+    <void property="driverClass"> 
+     <string>com.mckoi.JDBCDriver</string> 
+    </void> 
+    <void property="library"> 
+     <string>mkjdbc.jar</string> 
+    </void> 
+    <void property="name"> 
+     <string>McKoi (Server)</string> 
+    </void> 
+    <void property="sampleUrl"> 
+     <string>jdbc:mckoi://servername/</string> 
+    </void> 
+   </object> 
+  </void> 
+  
+  <void method="add"> 
+   <object class="workbench.db.DbDriver"> 
+    <void property="driverClass"> 
+     <string>com.mckoi.JDBCDriver</string> 
+    </void> 
+    <void property="library"> 
+     <string>mkjdbc.jar</string> 
+    </void> 
+    <void property="name"> 
+     <string>McKoi (Embedded)</string> 
+    </void> 
+    <void property="sampleUrl"> 
+     <string>jdbc:mckoi:local://path_to_db.conf</string> 
+    </void> 
+   </object> 
+  </void> 
+  
  </object>
 </java>

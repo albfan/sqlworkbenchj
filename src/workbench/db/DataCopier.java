@@ -88,6 +88,13 @@ public class DataCopier
 		this.targetTable = aTargetTable;
 		this.useQuery = false;
 		this.targetColumnsForQuery = null;
+		
+		if (!this.sourceConnection.getMetadata().tableExists(aSourceTable))
+		{
+			this.addError(ResourceMgr.getString("ErrorCopySourceTableNotFound").replaceAll("%name%", aTargetTable.getTable()));
+			throw new SQLException("Table " + aTargetTable.getTable() + " not found in target connection");
+		}
+		
 		this.setSourceTableWhere(additionalWhere);
 		boolean exists = this.targetConnection.getMetadata().tableExists(aTargetTable);
 
@@ -150,6 +157,7 @@ public class DataCopier
 		}
 		else
 		{
+			this.addError(ResourceMgr.getString("ErrorCopyTargetTableNotFound").replaceAll("%name%", aTargetTable.getTable()));
 			throw new SQLException("Table " + aTargetTable.getTable() + " not found in target connection");
 		}
 		this.initImporterForTable();

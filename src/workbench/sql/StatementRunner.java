@@ -224,7 +224,11 @@ public class StatementRunner
 			this.cmdDispatch.put(cmd.getVerb(), cmd);
 			this.dbSpecificCommands.add(cmd.getVerb());
 		}
-
+		else if (meta.isFirebird())
+		{
+			this.cmdDispatch.put(WbInclude.INCLUDE_FB.getVerb(), WbInclude.INCLUDE_FB);
+			this.dbSpecificCommands.add(WbInclude.INCLUDE_FB.getVerb());
+		}
 
 		if (!meta.isPostgres())
 		{
@@ -271,6 +275,12 @@ public class StatementRunner
 	public void runStatement(String aSql, int maxRows)
 		throws SQLException, Exception
 	{
+		this.runStatement(aSql, maxRows, 0);
+	}
+	
+	public void runStatement(String aSql, int maxRows, int queryTimeout)
+		throws SQLException, Exception
+	{
 		// Silently ignore empty statements
 		if (aSql == null || aSql.trim().length() == 0)
 		{
@@ -293,6 +303,7 @@ public class StatementRunner
 		this.currentCommand.setRowMonitor(this.rowMonitor);
 		this.currentCommand.setResultLogger(this.resultLogger);
 		this.currentCommand.setMaxRows(maxRows);
+		this.currentCommand.setQueryTimeout(queryTimeout);
 		this.currentCommand.setConnection(this.dbConnection);
 
 		String realSql = aSql;

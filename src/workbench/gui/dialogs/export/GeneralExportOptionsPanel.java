@@ -12,6 +12,8 @@
 
 package workbench.gui.dialogs.export;
 
+import java.awt.event.ActionListener;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
@@ -75,6 +77,17 @@ public class GeneralExportOptionsPanel
 		timestampFormat.setText(format);
 	}
 	
+	public void allowSelectColumns(boolean flag)
+	{
+		this.selectColumnsButton.setVisible(flag);
+	}
+	
+	public Object addColumnSelectListener(ActionListener l)
+	{
+		this.selectColumnsButton.addActionListener(l);
+		return this.selectColumnsButton;
+	}
+	
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -90,6 +103,7 @@ public class GeneralExportOptionsPanel
     timestampFormatLabel = new javax.swing.JLabel();
     timestampFormat = new javax.swing.JTextField();
     jPanel1 = new javax.swing.JPanel();
+    selectColumnsButton = new javax.swing.JButton();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -100,7 +114,6 @@ public class GeneralExportOptionsPanel
     gridBagConstraints.weightx = 1.0;
     add(encodingPanel, gridBagConstraints);
 
-    dateFormatLabel.setText(java.util.ResourceBundle.getBundle("language/wbstrings").getString("LabelDateFormat"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -117,7 +130,6 @@ public class GeneralExportOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
     add(dateFormat, gridBagConstraints);
 
-    timestampFormatLabel.setText(java.util.ResourceBundle.getBundle("language/wbstrings").getString("LabelTimestampFormat"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -136,10 +148,18 @@ public class GeneralExportOptionsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
+
+    selectColumnsButton.setText(ResourceMgr.getString("LabelSelectColumns"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 4);
+    add(selectColumnsButton, gridBagConstraints);
 
   }//GEN-END:initComponents
 	
@@ -149,6 +169,7 @@ public class GeneralExportOptionsPanel
   private javax.swing.JLabel dateFormatLabel;
   private workbench.gui.components.EncodingPanel encodingPanel;
   private javax.swing.JPanel jPanel1;
+  private javax.swing.JButton selectColumnsButton;
   private javax.swing.JTextField timestampFormat;
   private javax.swing.JLabel timestampFormatLabel;
   // End of variables declaration//GEN-END:variables

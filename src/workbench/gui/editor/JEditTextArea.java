@@ -71,6 +71,7 @@ import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.TextChangeListener;
 import workbench.interfaces.TextSelectionListener;
 import workbench.interfaces.Undoable;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -103,7 +104,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.28 2004-12-03 19:01:02 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.29 2005-02-02 20:57:10 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -118,6 +119,7 @@ public class JEditTextArea
 	private static final Color ERROR_COLOR = Color.RED.brighter();
 	private static final Color TEMP_COLOR = Color.GREEN.brighter();
 	private boolean currentSelectionIsTemporary;
+	protected String commentChar;
 
 	/**
 	 * Adding components with this name to the text area will place
@@ -230,6 +232,59 @@ public class JEditTextArea
 		this.changeCase(false);
 	}
 
+	public void commentSelection()
+	{
+		doComment(true);
+	}
+	
+	public void unCommentSelection()
+	{
+		doComment(false);
+	}
+	
+	private void doComment(boolean comment)
+	{
+		int startline = this.getSelectionStartLine();
+		int realEndline = this.getSelectionEndLine();
+		int endline = realEndline;
+		if (this.commentChar == null) this.commentChar = "--";
+		int cLength = this.commentChar.length();
+		
+		int pos = this.getSelectionEnd(endline) - this.getLineStartOffset(endline);
+		if (pos == 0) endline --;
+
+		document.beginCompoundEdit();
+		try
+		{
+			for (int line = startline; line <= endline; line ++)
+			{
+				String text = this.getLineText(line);
+				if (text == null || text.trim().length() == 0) continue;
+				int lineStart = this.getLineStartOffset(line);
+				if (comment)
+				{
+					document.insertString(lineStart, this.commentChar, null);
+				}
+				else
+				{
+					pos = text.indexOf(commentChar);
+					if (pos > -1)
+					{
+						document.remove(lineStart, pos + cLength);
+					}
+				}
+			}
+		}
+		catch (BadLocationException e)
+		{
+			LogMgr.logError("JEditTextArea.doComment()", "Error when processing comment", e);
+		}
+		finally
+		{
+			document.endCompoundEdit();
+		}
+	}
+	
 	public void indentSelection()
 	{
 		this.shiftSelection(true);
@@ -302,7 +357,7 @@ public class JEditTextArea
 		}
 		catch (BadLocationException e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("JEditTextArea.doComment()", "Error when shifting selection", e);
 		}
 		finally
 		{

@@ -141,6 +141,7 @@ public class XmlRowDataConverter
 		if (verboseFormat) xml.append(this.lineEnding);
 		for (int c=0; c < colCount; c ++)
 		{
+			if (!this.includeColumnInExport(c)) continue;
 			String value = this.getValueAsFormattedString(row, c);
 			Object data = row.getValue(c);
 
@@ -318,6 +319,7 @@ public class XmlRowDataConverter
 
 		for (int i=0; i < colCount; i++)
 		{
+			if (!this.includeColumnInExport(i)) continue;
 			result.append(indent);
 			result.append("  <");
 			result.append(ReportColumn.TAG_COLUMN_DEFINITION);

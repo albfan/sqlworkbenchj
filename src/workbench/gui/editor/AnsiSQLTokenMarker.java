@@ -25,7 +25,6 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 			DatabaseMetaData meta = aConnection.getMetaData();
 			String product = meta.getDatabaseProductName();
 			this.isMySql = (product.toLowerCase().indexOf("mysql") > -1);
-
 			String keys = null;
 
 			keys = meta.getSQLKeywords();

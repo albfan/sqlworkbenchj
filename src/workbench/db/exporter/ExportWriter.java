@@ -62,13 +62,18 @@ public abstract class ExportWriter
 		converter.setDefaultNumberFormatter(exporter.getDecimalFormatter());
 		converter.setGeneratingSql(exporter.getSql());
 		converter.setOriginalConnection(this.exporter.getConnection());
+		converter.setColumnsToExport(this.exporter.getColumnsToExport());
 	}
-
+	
 	public void writeExport(DataStore ds)
 		throws SQLException, IOException
 	{
 		ResultInfo info = ds.getResultInfo();
 		this.initConverter(info);
+		if (this.converter.needsUpdateTable())
+		{
+			ds.checkUpdateTable();
+		}
 
 		this.cancel = false;
 		this.rows = 0;

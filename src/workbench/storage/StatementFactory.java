@@ -12,9 +12,12 @@
 package workbench.storage;
 
 import java.util.ArrayList;
+import java.util.List;
+import workbench.db.ColumnIdentifier;
 
 import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 
 /**
@@ -43,9 +46,23 @@ public class StatementFactory
 
 	public DmlStatement createUpdateStatement(RowData aRow, boolean ignoreStatus, String lineEnd)
 	{
+		return createUpdateStatement(aRow, ignoreStatus, lineEnd, null);
+	}
+
+	/**
+	 *	Create an UPDATE Statement based on the data provided 
+	 *
+	 *	@param aRow						the RowData that should be used for the UPDATE statement
+	 *	@param ignoreStatus		if set to true all columns will be included (otherwise only modified columns)
+	 *	@param lineEnd				the character sequence to be used as the line ending
+	 *	@param columns				a list of columns to be included. If this is null all columns are included
+	 */
+	public DmlStatement createUpdateStatement(RowData aRow, boolean ignoreStatus, String lineEnd, List columns)
+	{
 		if (aRow == null) return null;
 		boolean first = true;
 		int cols = this.resultInfo.getColumnCount();
+		
 		boolean newLineAfterColumn = (cols > 5);
 
 		DmlStatement dml;
@@ -59,6 +76,11 @@ public class StatementFactory
 		first = true;
 		for (int col=0; col < cols; col ++)
 		{
+			if (columns != null)
+			{
+				if (!columns.contains(this.resultInfo.getColumn(col))) continue;
+			}
+			
 			if (aRow.isColumnModified(col) || (ignoreStatus && !this.resultInfo.isPkColumn(col)))
 			{
 				if (first)
@@ -131,16 +153,26 @@ public class StatementFactory
 
 	public DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus)
 	{
-		return this.createInsertStatement(aRow, ignoreStatus, "\n");
+		return this.createInsertStatement(aRow, ignoreStatus, "\n", null);
 	}
 
+	public DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus, String lineEnd)
+	{
+		return this.createInsertStatement(aRow, ignoreStatus, lineEnd);
+	}
+	
 	/**
 	 *	Generate an insert statement for the given row
 	 *	When creating a script for the DataStore the ignoreStatus
 	 *	will be passed as true, thus ignoring the row status and
 	 *	some basic formatting will be applied to the SQL Statement
+	 *
+	 *	@param aRow the RowData that should be used for the insert statement
+	 *	@param ignoreStatus if set to true all columns will be included (otherwise only modified columns)
+	 *	@param lineEnd the character sequence to be used as the line ending
+	 *	@param columns  a list of columns to be included. If this is null all columns are included
 	 */
-	public DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus, String lineEnd)
+	public DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus, String lineEnd, List columns)
 	{
 		boolean first = true;
 		DmlStatement dml;
@@ -148,15 +180,19 @@ public class StatementFactory
 		if (!ignoreStatus && !aRow.isModified()) return null;
 
 		int cols = this.resultInfo.getColumnCount();
-		boolean newLineAfterColumn = (cols > 5);
-
+		
+		int columnThresholdForNewline = Settings.getInstance().getIntProperty("workbench.sql.generate.insert.newlinethreshold",5);
+		boolean newLineAfterColumn = (cols > columnThresholdForNewline);
+		
+		int colsPerLine = Settings.getInstance().getIntProperty("workbench.sql.generate.insert.colsperline",1);
+		
 		ArrayList values = new ArrayList();
 		StringBuffer sql = new StringBuffer(250);
     sql.append("INSERT INTO ");
 		StringBuffer valuePart = new StringBuffer(250);
 
 		sql.append(getTableNameToUse());
-		if (ignoreStatus) sql.append(lineEnd);
+		sql.append(lineEnd);
 		sql.append('(');
 		if (newLineAfterColumn)
 		{
@@ -164,26 +200,46 @@ public class StatementFactory
 			sql.append("  ");
 			valuePart.append(lineEnd);
 			valuePart.append("  ");
+			if (colsPerLine == 1)
+			{
+				sql.append("  ");
+				valuePart.append("  ");
+			}
+			
 		}
 
 		first = true;
     String colName = null;
 		int includedColumns = 0;
-
+		int colsInThisLine = 0;
+		
 		for (int col=0; col < cols; col ++)
 		{
+			if (columns != null)
+			{
+				if (!columns.contains(this.resultInfo.getColumn(col))) continue;
+			}
 			if (ignoreStatus || aRow.isColumnModified(col))
 			{
-				if (first)
+				if (!first)
 				{
-					first = false;
-				}
-				else
-				{
-					if (newLineAfterColumn)
+					if (newLineAfterColumn && colsInThisLine >= colsPerLine)
 					{
-						sql.append("  , ");
-						valuePart.append("  , ");
+						if (colsPerLine == 1)
+						{
+							sql.append(lineEnd);
+							valuePart.append(lineEnd);
+							sql.append("  , ");
+							valuePart.append("  , ");
+						}
+						else
+						{
+							sql.append(',');
+							valuePart.append(',');
+							sql.append(lineEnd);
+							valuePart.append(lineEnd);
+						}
+						colsInThisLine = 0;
 					}
 					else
 					{
@@ -191,31 +247,30 @@ public class StatementFactory
 						valuePart.append(',');
 					}
 				}
+				else
+				{
+					first = false;
+				}
 
 				colName = SqlUtil.quoteObjectname(this.resultInfo.getColumnName(col));
 				sql.append(colName);
 				valuePart.append('?');
 
-				if (ignoreStatus && newLineAfterColumn)
-				{
-					sql.append(lineEnd);
-					valuePart.append(lineEnd);
-				}
 				values.add(aRow.getValue(col));
 			}
+			colsInThisLine ++;
 		}
+		if (newLineAfterColumn)
+		{
+			sql.append(lineEnd);
+			valuePart.append(lineEnd);
+		}
+
 		sql.append(')');
-		if (ignoreStatus)
-		{
-			sql.append(lineEnd);
-			sql.append("VALUES");
-			sql.append(lineEnd);
-			sql.append('(');
-		}
-		else
-		{
-			sql.append(" VALUES (");
-		}
+		sql.append(lineEnd);
+		sql.append("VALUES");
+		sql.append(lineEnd);
+		sql.append('(');
 		sql.append(valuePart);
 		sql.append(')');
 		try

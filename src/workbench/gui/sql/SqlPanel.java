@@ -238,7 +238,7 @@ public class SqlPanel
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setLayout(new BorderLayout());
 		this.setOpaque(true);
-		DwStatusBar statusBar = new DwStatusBar();
+		DwStatusBar statusBar = new DwStatusBar(true);
 		Border b = BorderFactory.createCompoundBorder(new EmptyBorder(2, 1, 0, 1), new EtchedBorder());
 		statusBar.setBorder(b);
 
@@ -630,6 +630,8 @@ public class SqlPanel
 		makeLower.setCreateMenuSeparator(true);
 		this.actions.add(makeLower);
 		this.actions.add(makeUpper);
+		this.actions.add(this.editor.getCommentAction());
+		this.actions.add(this.editor.getUnCommentAction());
 		this.actions.add(this.editor.getMatchBracketAction());
 
 		this.actions.add(this.data.getStartEditAction());
@@ -896,12 +898,11 @@ public class SqlPanel
 	public void saveChangesToDatabase()
 	{
 		// Make sure we have real PK columns.
-		boolean needPk = this.data.getTable().getDataStore().needPkForUpdate();
 		boolean hasPk = this.data.getTable().checkPkColumns(true);
-		if (needPk && !hasPk) return;
+		if (!hasPk) return;
 
 		// check if we really want to save the data
-		// it fhe "DbDebugger" is not enabled this will
+		// it fhe SQL Preview is not enabled this will
 		// always return true, otherwise it depends on the user's
 		// selection after the SQL preview has been displayed
 		if (!this.data.shouldSaveChanges(this.dbConnection)) return;
@@ -1157,9 +1158,11 @@ public class SqlPanel
 			this.tabName = null;
 		}
 
-		int maxRows = w.getMaxRows(this.internalId - 1);
-		this.data.setMaxRows(maxRows);
-
+		int v = w.getMaxRows(this.internalId - 1);
+		this.data.setMaxRows(v);
+		v = w.getQueryTimeout(this.internalId - 1);
+		this.data.setQueryTimeout(v);
+		
 		boolean fileLoaded = false;
 		if (filename != null)
 		{
@@ -1205,6 +1208,7 @@ public class SqlPanel
 		Properties props = w.getSettings();
 		this.saveSettings(props);
 		w.setMaxRows(this.internalId - 1, this.data.getMaxRows());
+		w.setQueryTimeout(this.internalId - 1, this.data.getQueryTimeout());
 		if (this.hasFileLoaded())
 		{
 			w.setExternalFileName(this.internalId - 1, this.getCurrentFileName());
@@ -1327,8 +1331,8 @@ public class SqlPanel
 
 		if (aConnection != null)
 		{
-			this.editor.initDatabaseKeywords(aConnection);
-			this.data.setAutomaticUpdateTableCheck(!aConnection.getProfile().getDisableUpdateTableCheck());
+			if (this.editor != null) this.editor.initDatabaseKeywords(aConnection);
+			if (this.data != null) this.data.setAutomaticUpdateTableCheck(!aConnection.getProfile().getDisableUpdateTableCheck());
 		}
 
 		if (this.dbConnection != null)
@@ -1968,9 +1972,6 @@ public class SqlPanel
 				compressLog = !this.data.getVerboseLogging() && (count > 1);
 				logWasCompressed = logWasCompressed || compressLog;
 
-				Thread.yield();
-				if (cancelExecution) break;
-
 				StringBuffer b = new StringBuffer(76);
 				b.append(msg1);
 				b.append(i + 1);
@@ -2037,6 +2038,9 @@ public class SqlPanel
 					}
 				}
 				executedCount ++;
+				
+				Thread.yield();
+				if (cancelExecution) break;
 
 			} // end for loop
 

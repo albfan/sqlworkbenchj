@@ -52,6 +52,7 @@ import workbench.util.WbProperties;
 public class Settings
 {
 	public static final String ANIMATED_ICONS_KEY = "workbench.gui.animatedicon";
+	public static final String ENCRYPT_PWD_KEY = "workbench.profiles.encryptpassword";
 
 	public static final String EDITOR_FONT_KEY = "editor";
 	public static final String STANDARD_FONT_KEY = "standard";
@@ -1420,12 +1421,12 @@ public class Settings
 
 	public boolean getUseEncryption()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty("workbench.profiles.encryptpassword", "true"));
+		return "true".equalsIgnoreCase(this.props.getProperty(ENCRYPT_PWD_KEY, "false"));
 	}
 
 	public void setUseEncryption(boolean useEncryption)
 	{
-		this.props.setProperty("workbench.profiles.encryptpassword", Boolean.toString(useEncryption));
+		this.props.setProperty(ENCRYPT_PWD_KEY, Boolean.toString(useEncryption));
 	}
 
 	public boolean getRetrieveDbExplorer()
@@ -1501,7 +1502,7 @@ public class Settings
 	public List getServersWithInlineConstraints()
 	{
 		String list = this.props.getProperty("workbench.db.inlineconstraints", "");
-    return StringUtil.stringToList(list, ",");
+		return StringUtil.stringToList(list, ",");
 	}
 	public List getServersWhichNeedJdbcCommit()
 	{
@@ -1509,16 +1510,21 @@ public class Settings
     return StringUtil.stringToList(list, ",");
 	}
 
-  public List getCaseSensitivServers()
-  {
+	public List getServersWithNoNullKeywords()
+	{
+		String list = this.props.getProperty("workbench.db.nonullkeyword", "");
+		return StringUtil.stringToList(list, ",");
+	}
+	public List getCaseSensitivServers()
+	{
 		String list = this.props.getProperty("workbench.db.casesensitive", "");
-    return StringUtil.stringToList(list, ",");
-  }
+		return StringUtil.stringToList(list, ",");
+	}
 
 	public List getCancelWithReconnectDrivers()
 	{
 		String list = this.props.getProperty("workbench.db.cancelwithreconnect", "");
-    return StringUtil.stringToList(list, ",");
+		return StringUtil.stringToList(list, ",");
 	}
 
 	public String getInstallDir()

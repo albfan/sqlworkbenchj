@@ -309,12 +309,12 @@ public class StringUtil
 			String line = reader.readLine();
 			while (line != null)
 			{
+				line = replace(line, "\"", "\\\"");
 				if (first) first = false;
 				else result.append(indent);
 				result.append('"');
 				if (line.endsWith(";"))
 				{
-					System.out.println("line=" + line);
 					line = line.substring(0, line.length() - 1);
 				}
 				result.append(line);
@@ -377,6 +377,7 @@ public class StringUtil
 			}
 			Matcher m = newline.matcher(l);
 			l = m.replaceAll("");
+			l = replace(l,"\\\"", "\"");
 			result.append(l);
 			if (i < count - 1) result.append('\n');
 		}

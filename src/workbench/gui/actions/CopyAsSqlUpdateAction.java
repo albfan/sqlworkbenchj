@@ -23,7 +23,7 @@ import workbench.resource.ResourceMgr;
 public class CopyAsSqlUpdateAction extends WbAction
 {
 	private WbTable client;
-	
+
 	public CopyAsSqlUpdateAction(WbTable aClient)
 	{
 		super();
@@ -34,7 +34,9 @@ public class CopyAsSqlUpdateAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		client.copyAsSqlUpdate();
+		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
+		ctrlPressed = ctrlPressed && ((e.getModifiers() & ActionEvent.MOUSE_EVENT_MASK) == ActionEvent.MOUSE_EVENT_MASK);
+		client.copyAsSqlUpdate(false, ctrlPressed);
 	}
 
 }
