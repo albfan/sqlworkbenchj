@@ -1,6 +1,11 @@
 package workbench.gui.components;
 
+import java.awt.Cursor;
+import java.awt.EventQueue;
 import java.awt.Toolkit;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.ResultSet;
@@ -9,28 +14,42 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumnModel;
 import workbench.WbManager;
 import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.storage.NullValue;
 import workbench.util.SqlUtil;
 
 
 
 /** 
- * TableModel for displaying the contents of a ResultSet.
- * The data is cached in a {@link workbench.storage.DataStore }
+ * TableModel for displaying the contents of a DataStore or 
+ * a ResultSet. If it's a result set, this will be cached
+ * in a {@link workbench.storage.DataStore }
  */
-public class DataStoreTableModel extends AbstractTableModel
+public class DataStoreTableModel 
+	extends AbstractTableModel
 {
 	private DataStore dataCache;
+	private WbTable parentTable;
 	private boolean showStatusColumn = false;
 	private int statusOffset = 0;
 	public static final String NOT_AVAILABLE = "(n/a)";
+
+	// used for sorting the model
+	private boolean sortAscending = true;
+	private int sortColumn = -1;
 	
 	public DataStoreTableModel(ResultSet aResultSet) throws SQLException, WbException
 	{
@@ -40,17 +59,27 @@ public class DataStoreTableModel extends AbstractTableModel
 	public DataStoreTableModel(DataStore aDataStore) throws NullPointerException
 	{
 		if (aDataStore == null) throw new NullPointerException("DataStore cannot be null");
-		this.dataCache = aDataStore;
+		this.setDataStore(aDataStore);
 	}
 	
 	public DataStoreTableModel(ResultSet aResultSet, List aColumnList) throws SQLException, WbException
 	{
-		this.dataCache = new DataStore(aResultSet, aColumnList);
+		DataStore ds = new DataStore(aResultSet, aColumnList);
+		this.setDataStore(ds);
 	}
 	
 	public DataStore getDataStore()
 	{
 		return this.dataCache;
+	}
+	
+	public synchronized void setDataStore(DataStore newData)
+	{
+		this.dataCache = newData;
+		this.showStatusColumn = false;
+		this.statusOffset = 0;
+		this.sortColumn = -1;
+		this.fireTableStructureChanged();
 	}
 	/**
 	 *	Return the contents of the field at the given position
@@ -64,6 +93,7 @@ public class DataStoreTableModel extends AbstractTableModel
 		{
 			return this.dataCache.getRowStatus(row);
 		}
+		
 		try
 		{
 			Object result;
@@ -218,33 +248,7 @@ public class DataStoreTableModel extends AbstractTableModel
 	public Class getColumnClass(int aColumn)
 	{
 		if (this.showStatusColumn && aColumn == 0) return Integer.class;
-		
-		int type = this.getColumnType(aColumn);
-		switch (type)
-		{
-			case Types.BIGINT:
-			case Types.INTEGER:
-				return BigInteger.class;
-			case Types.SMALLINT:
-				return Integer.class;
-			case Types.NUMERIC:
-			case Types.DECIMAL:
-				return BigDecimal.class;
-			case Types.DOUBLE:
-				return Double.class;
-			case Types.REAL:
-			case Types.FLOAT:
-				return Float.class;
-			case Types.CHAR:
-			case Types.VARCHAR:
-				return String.class;
-			case Types.DATE:
-				return Date.class;
-			case Types.TIMESTAMP:
-				return Timestamp.class;
-			default:
-				return Object.class;
-		}
+		return this.dataCache.getColumnClass(aColumn - this.statusOffset);
 	}
 	
 	public int insertRow(int afterRow)
@@ -299,17 +303,7 @@ public class DataStoreTableModel extends AbstractTableModel
 	
 	public StringBuffer getRowData(int aRow)
 	{
-		int count = this.getColumnCount();
-		StringBuffer result = new StringBuffer(count * 20);
-		int start = 0;
-		if (this.showStatusColumn) start = 1;
-		for (int c=start; c < count; c++)
-		{
-			Object value = this.getValueAt(aRow, c);
-			if (value != null) result.append(value.toString());
-			if (c < count) result.append('\t');
-		}
-		return result;
+		return this.dataCache.getRowDataAsString(aRow);
 	}
 	
 	public boolean isCellEditable(int row, int column)
@@ -319,5 +313,74 @@ public class DataStoreTableModel extends AbstractTableModel
 		else
 			return true;
 	}
+
+	/**    Return true if the data is sorted in ascending order.
+	 *
+	 * @return True if sorted in ascending order
+	 */
+	public boolean isSortAscending()
+	{
+		return sortAscending;
+	}
 	
+	public int getSortColumn() { return this.sortColumn; }
+	
+	public synchronized void sortByColumn(int column)
+	{
+		boolean ascending = true;
+		if (this.sortColumn == column)
+			ascending = !this.sortAscending;
+		sortByColumn(column, ascending);
+	}
+	
+	public void sortByColumn(int aColumn, boolean ascending)
+	{
+		this.sortAscending = ascending;
+		this.sortColumn = aColumn;
+		try
+		{
+			this.dataCache.sortByColumn(aColumn, ascending);
+		}
+		catch (Throwable th)
+		{
+			th.printStackTrace();
+		}
+		fireTableChanged(new TableModelEvent(this));
+	}
+	
+	public void sortInBackground(WbTable table, int aColumn)
+	{
+		if (aColumn < 0) 
+		{
+			System.err.println("Wrong column index specified!");
+			return;
+		}
+		
+		boolean ascending = true;
+		if (this.sortColumn == aColumn)
+			ascending = !this.sortAscending;
+		sortInBackground(table, aColumn, ascending);
+	}
+	
+	public void sortInBackground(final WbTable table, final int aColumn, final boolean ascending)
+	{
+		final DataStoreTableModel sorter = this;
+		new Thread(new Runnable()
+		{
+			public void run()
+			{
+				table.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				table.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				sorter.sortByColumn(aColumn, ascending);
+				table.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				table.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				table.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				// repaint the header so that the icon is displayed...
+				table.getTableHeader().repaint(); 
+			}
+		}).start();
+	}
+
+
 }

@@ -6,36 +6,27 @@
 package workbench.gui.components;
 
 import java.awt.*;
-import java.awt.Font;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.Map.Entry;
 import javax.swing.*;
-import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
-import javax.swing.event.CellEditorListener;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.*;
 import workbench.WbManager;
-import workbench.exception.WbException;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.*;
 import workbench.gui.renderer.DateColumnRenderer;
@@ -53,15 +44,15 @@ import workbench.storage.NullValue;
 
 
 
-public class WbTable extends JTable 
-	implements ActionListener, MouseListener, Exporter, Searchable, FontChangedListener
+
+public class WbTable 
+	extends JTable 
+	implements ActionListener, MouseListener, Exporter, FontChangedListener, Searchable
 {
-	private WbTableSorter sortModel;
 	private JPopupMenu popup;
 	private JPopupMenu headerPopup;
 	
 	private DataStoreTableModel dwModel;
-	private TableModel originalModel;
 	private String lastSearchCriteria;
 	private int lastFoundRow = -1;
 	private TableModelListener changeListener;
@@ -172,11 +163,14 @@ public class WbTable extends JTable
 	{
 		return this.findAgainAction;
 	}
+	
 	public void reset()
 	{
 		if (this.dwModel != null)
 		{
 			this.dwModel.dispose();
+			this.dwModel = null;
+			//this.sortModel = null;
 		}
 		this.setModel(EMPTY_MODEL, false);
 	}
@@ -196,42 +190,37 @@ public class WbTable extends JTable
 	
 	public void setModel(TableModel aModel, boolean sortIt)
 	{
-		if (aModel instanceof DataStoreTableModel)
+		DataStoreTableModel oldModel = this.dwModel;
+		
+		if (this.dwModel != null)
 		{
 			if (this.dwModel != null && this.changeListener != null)
 			{
 				this.dwModel.removeTableModelListener(this.changeListener);
 			}
-			this.dwModel = (DataStoreTableModel)aModel;
-		}
-		else
-		{
-			this.dwModel = null;
 		}
 		
-		if (!sortIt)
+		this.dwModel = null;
+		super.setModel(aModel);
+
+		JTableHeader header = this.getTableHeader();
+		
+		if (sortIt && aModel instanceof DataStoreTableModel)
 		{
-			super.setModel(aModel);
-			this.sortModel = null;
-			if (this.sortAscending != null) this.sortAscending.setEnabled(false);
-			if (this.sortDescending != null) this.sortDescending.setEnabled(false);
-		}
-		else
-		{
-			this.sortModel = new WbTableSorter(aModel);
-			super.setModel(this.sortModel);
-			JTableHeader header = this.getTableHeader();
+			this.dwModel = (DataStoreTableModel)aModel;
 			if (header != null)
 			{
 				header.setDefaultRenderer(new SortHeaderRenderer());
-				this.sortModel.addMouseListenerToHeaderInTable(this);
+				header.addMouseListener(this);
 			}
-			if (this.sortAscending != null) this.sortAscending.setEnabled(true);
-			if (this.sortDescending != null) this.sortDescending.setEnabled(true);
 		}
+		if (this.sortAscending != null) this.sortAscending.setEnabled(sortIt);
+		if (this.sortDescending != null) this.sortDescending.setEnabled(sortIt);
 		
-		if (this.changeListener != null && this.dwModel != null) 
-				this.dwModel.addTableModelListener(this.changeListener);
+		if (this.changeListener != null && this.dwModel != null)
+		{
+			this.dwModel.addTableModelListener(this.changeListener);
+		}
 		
 		this.initDefaultRenderers();
 		this.currentRow = -1;
@@ -273,8 +262,8 @@ public class WbTable extends JTable
 	
 	public int getSortColum()
 	{
-		if (this.sortModel == null) return -1;
-		return this.sortModel.getSortColumn();
+		if (this.dwModel == null) return -1;
+		return this.dwModel.getSortColumn();
 	}
 	
 	public void setShowStatusColumn(boolean aFlag)
@@ -283,12 +272,13 @@ public class WbTable extends JTable
 		if (aFlag == this.dwModel.getShowStatusColumn()) return;
 		int column = this.getSelectedColumn();
 		int row = this.getSelectedRow();
+		
 		int sortColumn = -1;
 		boolean asc = false;
-		if (this.sortModel != null)
+		if (this.dwModel != null)
 		{
-			sortColumn = sortModel.getSortColumn();
-			asc = this.sortModel.isAscending();
+			sortColumn = dwModel.getSortColumn();
+			asc = this.dwModel.isSortAscending();
 		}
 			
 		this.saveColumnSizes();
@@ -306,13 +296,13 @@ public class WbTable extends JTable
 		}
 		this.initDefaultEditors();
 		this.restoreColumnSizes();
-		if (sortColumn > -1 && this.sortModel != null)
+		if (sortColumn > -1 && this.dwModel != null)
 		{
 			if (aFlag) 
 				sortColumn ++;
 			else
 				sortColumn --;
-			this.sortModel.sortByColumn(sortColumn, asc);
+			this.dwModel.sortByColumn(sortColumn, asc);
 		}
 		if (row >= 0) 
 		{
@@ -330,16 +320,16 @@ public class WbTable extends JTable
 
 	public int getSortedViewColumnIndex()
 	{
-		if (this.sortModel == null) return -1;
-		int modelIndex = this.sortModel.getColumn();
+		if (this.dwModel == null) return -1;
+		int modelIndex = this.dwModel.getSortColumn();
 		int viewIndex = this.convertColumnIndexToView(modelIndex);
 		return viewIndex;
 	}
 	
 	public boolean isSortedColumnAscending()
 	{
-		if (this.sortModel == null) return true;
-		return this.sortModel.isAscending();
+		if (this.dwModel == null) return true;
+		return this.dwModel.isSortAscending();
 	}
 	
 	public synchronized void sortingStarted()
@@ -357,34 +347,11 @@ public class WbTable extends JTable
 		return this.getDataString(aLineTerminator, true);
 	}
 	
-	
 	public String getDataString(String aLineTerminator, boolean includeHeaders)
 	{
-		if (this.sortModel == null) return "";
 		if (this.dwModel == null) return "";
-		
-		int colCount = this.sortModel.getColumnCount();
-		int count = this.sortModel.getRowCount();
-		StringBuffer result = new StringBuffer(count * 250);
-		if (includeHeaders)
-		{
-			// Start loop at 1 --> ignore status column
-			int start = 0;
-			if (this.dwModel.getShowStatusColumn()) start = 1;
-			for (int i=start; i < colCount; i++)
-			{
-				result.append(this.sortModel.getColumnName(i));
-				if (i < colCount - 1) result.append('\t');
-			}
-			result.append(aLineTerminator);
-		}
-		for (int i=0; i < count; i++)
-		{
-			int row = this.sortModel.getRealIndex(i);
-			result.append(this.dwModel.getRowData(row));
-			result.append(aLineTerminator);
-		}
-		return result.toString();
+		DataStore ds = this.dwModel.getDataStore();
+		return ds.getDataString(aLineTerminator, includeHeaders);
 	}
 	
 	public boolean canSearchAgain()
@@ -414,10 +381,10 @@ public class WbTable extends JTable
 			start = this.lastFoundRow  + 1;
 		}
 	
-		for (int i=start; i < this.sortModel.getRowCount(); i++)
+		for (int i=start; i < this.dwModel.getRowCount(); i++)
 		{
-			int row = sortModel.getRealIndex(i);
-			String rowString = this.dwModel.getRowData(row).toString();
+			//int row = sortModel.getRealIndex(i);
+			String rowString = this.dwModel.getRowData(i).toString();
 			if (rowString == null) continue;
 			
 			if (rowString.toLowerCase().indexOf(aText) > -1)
@@ -458,7 +425,7 @@ public class WbTable extends JTable
 		Iterator itr = this.savedColumnSizes.entrySet().iterator();
 		while (itr.hasNext())
 		{
-			Map.Entry entry = (Map.Entry)itr.next();
+			Entry entry = (Entry)itr.next();
 			try
 			{
 				TableColumn col = this.getColumn(entry.getKey());
@@ -537,7 +504,7 @@ public class WbTable extends JTable
 		}
 	}	
 
-	public void optimizeColWidth(int aColumn)
+	public synchronized void optimizeColWidth(int aColumn)
 	{
 		if (this.dwModel == null) return;
 		if (aColumn < 0 || aColumn > this.getColumnCount() - 1) return;
@@ -640,6 +607,19 @@ public class WbTable extends JTable
 				this.popup.show(this, e.getX(), e.getY());
 			}
 		}
+		else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1 
+		         && this.dwModel != null)
+		{
+			TableColumnModel columnModel = this.getColumnModel();
+			int viewColumn = columnModel.getColumnIndexAtX(e.getX());
+			int realColumn = this.convertColumnIndexToModel(viewColumn);
+
+			if (realColumn >= 0)
+			{
+				//sorter.startSorting(tableView, realColumn, sortAscending);
+				this.dwModel.sortInBackground(this, realColumn);
+			}
+		}
 	}
 	
 	/** Invoked when the mouse enters a component.
@@ -678,20 +658,20 @@ public class WbTable extends JTable
 		TableColumnModel columnModel = this.getColumnModel();
 		int viewColumn = columnModel.getColumnIndexAtX(this.headerPopupX);
 		final int column = this.convertColumnIndexToModel(viewColumn);
-		if (e.getSource() == this.sortAscending && this.sortModel != null)
+		if (e.getSource() == this.sortAscending && this.dwModel != null)
 		{
-			this.sortModel.startSorting(this, column, true);
+			this.dwModel.sortInBackground(this, column, true);
 		}
-		else if (e.getSource() == this.sortDescending && this.sortModel != null)
+		else if (e.getSource() == this.sortDescending && this.dwModel != null)
 		{
-			this.sortModel.startSorting(this, column, false);
+			this.dwModel.sortInBackground(this, column, false);
 		}
 		else if (e.getSource() == this.optimizeCol)
 		{
-			EventQueue.invokeLater(new Runnable()
+			new Thread(new Runnable()
 			{
 				public void run()	{ optimizeColWidth(column); }
-			});
+			}).start();
 			
 		}
 		else if (e.getSource() == this.setColWidth)
@@ -818,7 +798,7 @@ public class WbTable extends JTable
 	
 	public void saveAsAscii(String aFilename)
 	{
-		if (this.sortModel == null || this.dwModel == null) return;
+		if (this.dwModel == null) return;
 		
 		PrintWriter out = null;
 		
@@ -908,37 +888,22 @@ public class WbTable extends JTable
 		return super.getCellRenderer(row, column);
 	}
 	*/
-	/** Getter for property maxColWidth.
-	 * @return Value of property maxColWidth.
-	 *
-	 */
+	
 	public int getMaxColWidth()
 	{
 		return maxColWidth;
 	}
 	
-	/** Setter for property maxColWidth.
-	 * @param maxColWidth New value of property maxColWidth.
-	 *
-	 */
 	public void setMaxColWidth(int maxColWidth)
 	{
 		this.maxColWidth = maxColWidth;
 	}
 	
-	/** Getter for property minColWidth.
-	 * @return Value of property minColWidth.
-	 *
-	 */
 	public int getMinColWidth()
 	{
 		return minColWidth;
 	}
 	
-	/** Setter for property minColWidth.
-	 * @param minColWidth New value of property minColWidth.
-	 *
-	 */
 	public void setMinColWidth(int minColWidth)
 	{
 		this.minColWidth = minColWidth;
@@ -952,6 +917,10 @@ public class WbTable extends JTable
 			this.getTableHeader().setFont(newFont);
 		}
 	}
-	
+
+	public String toString()
+	{
+		return getClass().getName() + '@' + Integer.toHexString(hashCode());
+	}
 }
 

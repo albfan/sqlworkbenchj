@@ -42,6 +42,9 @@ public class WbTableSorter
 	
 	public void setModel(TableModel model)
 	{
+		if (this.model != null)
+			this.model.removeTableModelListener(this);
+		
 		this.model = model;
 		model.addTableModelListener(this);
 		reallocateIndexes();
@@ -302,7 +305,7 @@ public class WbTableSorter
 	{
 		if (indexes.length != model.getRowCount())
 		{
-			// System.err.println("Sorter not informed of a change in model.");
+			System.err.println("Sorter not informed of a change in model.");
 		}
 	}
 	
@@ -394,7 +397,7 @@ public class WbTableSorter
 	 *
 	 * @return True if sorted in ascending order
 	 */
-	public boolean isAscending()
+	public boolean isSortAscending()
 	{
 		return ascending;
 	}
@@ -422,11 +425,11 @@ public class WbTableSorter
 				
 				TableColumnModel columnModel = tableView.getColumnModel();
 				final int viewColumn = columnModel.getColumnIndexAtX(e.getX());
-				final int column = tableView.convertColumnIndexToModel(viewColumn);
+				final int realColumn = tableView.convertColumnIndexToModel(viewColumn);
 
-				if (column != -1)
+				if (realColumn != -1)
 				{
-					if (WbTableSorter.this.column == column)
+					if (WbTableSorter.this.column == realColumn)
 					{
 						ascending = !ascending;
 					}
@@ -435,7 +438,7 @@ public class WbTableSorter
 						ascending = true;
 					}
 					// start sorting in background...
-					sorter.startSorting(tableView, column, ascending);
+					sorter.startSorting(tableView, realColumn, ascending);
 				}
 			}
 		};
