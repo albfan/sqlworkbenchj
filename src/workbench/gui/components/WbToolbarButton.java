@@ -26,8 +26,9 @@ public class WbToolbarButton extends javax.swing.JButton
 		//this.setMaximumSize(d);
 		//this.setPreferredSize(d);
 		//this.setMinimumSize(d);
-		Insets m = new Insets(0,0,0,0);
+		Insets m = new Insets(2,2,2,2);
 		this.setMargin(m);
+		//this.setRolloverEnabled(true);
 	}
 	
 }

@@ -9,28 +9,42 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableModel;
 import workbench.gui.components.TableSorter;
 
-public class DwTable 
-	extends javax.swing.JTable
+public class WbTable extends javax.swing.JTable
 {
 	private TableSorter sortModel;
 	
-	public DwTable()
+	public WbTable()
 	{
 	}
 	
 	public void setModel(TableModel aModel)
 	{
-		super.setModel(aModel);
-		this.sortModel = null;
+		this.setModel(aModel, false);
 	}
 	
-	public void setSortModel(TableModel aModel)
+	public void setModel(TableModel aModel, boolean sortIt)
+	{
+		if (!sortIt)
+		{
+			super.setModel(aModel);
+			this.sortModel = null;
+		}
+		else
+		{
+			this.setModelForSorting(aModel);
+		}
+	}
+	
+	public void setModelForSorting(TableModel aModel)
 	{
 		this.sortModel = new TableSorter(aModel);
 		super.setModel(this.sortModel);
     JTableHeader header = this.getTableHeader();
-		header.setDefaultRenderer(new SortHeaderRenderer());
-		this.sortModel.addMouseListenerToHeaderInTable(this);
+		if (header != null)
+		{
+			header.setDefaultRenderer(new SortHeaderRenderer());
+			this.sortModel.addMouseListenerToHeaderInTable(this);
+		}
 	}
 
 	public int getSortedColumnIndex()

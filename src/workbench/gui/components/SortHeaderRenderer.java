@@ -12,7 +12,11 @@
 package workbench.gui.components;
 
 import javax.swing.Icon;
-import workbench.gui.components.DwTable;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import workbench.gui.components.WbTable;
 import workbench.gui.components.SortArrowIcon;
 
 
@@ -22,20 +26,24 @@ public class SortHeaderRenderer
   public static Icon NONSORTED = new SortArrowIcon(SortArrowIcon.NONE);
   public static Icon ASCENDING = new SortArrowIcon(SortArrowIcon.ASCENDING);
   public static Icon DESCENDING = new SortArrowIcon(SortArrowIcon.DESCENDING);
-  
+	private Border headerBorder;
+	
   public SortHeaderRenderer()
   {
     setHorizontalTextPosition(LEFT);
-    setHorizontalAlignment(CENTER);
+    setHorizontalAlignment(LEFT);
+		Border empty = new EmptyBorder(0, 1, 0, 1);
+		headerBorder = new CompoundBorder(UIManager.getBorder("TableHeader.cellBorder"), empty);
+    setBorder(headerBorder);
   }
   
   public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col)
   {
     int index = -1;
     boolean ascending = true;
-    if (table instanceof DwTable)
+    if (table instanceof WbTable)
     {
-      DwTable sortTable = (DwTable)table;
+      WbTable sortTable = (WbTable)table;
       index = sortTable.getSortedColumnIndex();
       ascending = sortTable.isSortedColumnAscending();
     }
@@ -52,7 +60,6 @@ public class SortHeaderRenderer
     Icon icon = ascending ? ASCENDING : DESCENDING;
     setIcon(col == index ? icon : NONSORTED);
     setText((value == null) ? "" : value.toString());
-    setBorder(javax.swing.UIManager.getBorder("TableHeader.cellBorder"));
     return this;
   }
 }
