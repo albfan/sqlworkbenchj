@@ -123,12 +123,6 @@ public class WbToolTipUI extends BasicToolTipUI
 		return retValue;
 	}
 	
-	// NOTE: This requires the tip field to be set before this is invoked.
-	// As MetalToolTipUI is shared between all JToolTips the tip field is
-	// set appropriately before this is invoked. Unfortunately this means
-	// that subclasses that randomly invoke this method will see varying
-	// results. If this becomes an issue, MetalToolTipUI should no longer be
-	// shared.
 	public String getAcceleratorString()
 	{
 		if (tip == null || isAcceleratorHidden())

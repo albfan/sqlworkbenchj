@@ -30,6 +30,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.gui.actions.*;
+import workbench.gui.actions.FileDisconnectAction;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbToolbar;
@@ -66,6 +67,7 @@ public class MainWindow
 
 	private JMenuBar currentMenu;
 	private FileConnectAction connectAction;
+	private FileDisconnectAction disconnectAction;
 	private ShowDbExplorerAction dbExplorerAction;
 
 	private ProfileSelectionDialog profileDialog;
@@ -181,10 +183,12 @@ public class MainWindow
 		JMenuItem item;
 
 		this.connectAction = new FileConnectAction(this);
-		item = this.connectAction.getMenuItem();
-		menu.add(item);
+		this.disconnectAction = new FileDisconnectAction(this);
+		this.disconnectAction.setEnabled(false);
+		this.connectAction.addToMenu(menu);
+		this.disconnectAction.addToMenu(menu);
 		action = new FileNewWindowAction();
-		menu.add(action.getMenuItem());
+		action.addToMenu(menu);
 		//menu.addSeparator();
 
 		// now create the menus for the current tab
@@ -442,6 +446,20 @@ public class MainWindow
 		if (current != null) current.showLogMessage(aMsg);
 	}
 
+	public void disconnect()
+	{
+		for (int i=0; i < this.sqlTab.getTabCount(); i++)
+		{
+			MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
+			sql.disconnect();
+		}
+		if (this.dbExplorerPanel != null)
+		{
+			this.dbExplorerPanel.disconnect();
+		}
+		this.disconnectAction.setEnabled(false);
+	}
+	
 	public void setConnection(WbConnection con)
 	{
 		for (int i=0; i < this.sqlTab.getTabCount(); i++)
@@ -465,6 +483,7 @@ public class MainWindow
 				this.dbExplorerPanel = null;
 			}
 		}
+		this.disconnectAction.setEnabled(true);
 	}
 
 	public void selectConnection()

@@ -39,6 +39,7 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 	private MainWindow parentWindow;
 	private JTabbedPane tabPane;
 	private TableListPanel tables;
+	private TableSearchPanel searchPanel;
 	private ProcedureListPanel procs;
 	private JComboBox schemaSelector;
 	private JComboBox catalogSelector;
@@ -59,9 +60,11 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		{
 			tables = new TableListPanel(aParent);
 			procs = new ProcedureListPanel();
+			searchPanel = new TableSearchPanel(tables);
 			tabPane = new JTabbedPane(JTabbedPane.TOP);
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerTables"), tables);
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerProcs"), procs);
+			tabPane.add(ResourceMgr.getString("TxtSearchTables"), searchPanel);
 			tabPane.setFocusable(false);
 		}
 		catch (Exception e)
@@ -104,12 +107,6 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		this.toolbar.add(this.connectionInfo);
 	}
 
-	public void restoreSettings()
-	{
-		tables.restoreSettings();
-		procs.restoreSettings();
-	}
-	
 	public void setConnection(WbConnection aConnection)
 	{
 		this.setConnection(aConnection, null);
@@ -173,7 +170,8 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 		this.dbConnection = aConnection;
 		this.tables.setConnection(aConnection);
 		this.procs.setConnection(aConnection);
-		//this.readCatalogs();
+		this.searchPanel.setConnection(aConnection);
+		this.tables.addTableListDisplayClient(this.searchPanel.getTableList());
 		this.readSchemas();
 
 		if (this.window != null && aProfilename != null)
@@ -186,12 +184,9 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 	public void disconnect()
 	{
 		this.dbConnection = null;
-		if (this.window != null)
-		{
-			this.window.dispose();
-		}
 		tables.disconnect();
 		procs.disconnect();
+		this.searchPanel.disconnect();
 	}
 
 	public boolean isConnected()
@@ -203,6 +198,13 @@ public class DbExplorerPanel extends JPanel implements ActionListener, MainPanel
 	{
 		this.tables.saveSettings();
 		this.procs.saveSettings();
+		this.searchPanel.saveSettings();
+	}
+	public void restoreSettings()
+	{
+		tables.restoreSettings();
+		procs.restoreSettings();
+		this.searchPanel.restoreSettings();
 	}
 
 	public void actionPerformed(ActionEvent e)

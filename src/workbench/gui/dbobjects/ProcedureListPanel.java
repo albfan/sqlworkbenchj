@@ -18,6 +18,7 @@ import javax.swing.table.TableModel;
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
+import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.FindPanel;
@@ -49,7 +50,6 @@ public class ProcedureListPanel
 	private EditorPanel source;
 	private JTabbedPane displayTab;
 	private JSplitPane splitPane;
-	private DbMetadata meta;
 	private Object retrieveLock = new Object();
 	private String currentSchema;
 	private String currentCatalog;
@@ -72,6 +72,7 @@ public class ProcedureListPanel
 
 		this.source = new EditorPanel();
 		this.source.setEditable(false);
+		this.source.addPopupMenuItem(new FileSaveAsAction(this.source), true);
 
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.source);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), scroll);
@@ -87,7 +88,9 @@ public class ProcedureListPanel
 		this.procList.setAdjustToColumnLabel(false);
 
 		this.findPanel = new FindPanel(this.procList);
-		this.findPanel.addToToolbar(new ReloadAction(this), true, false);
+		ReloadAction a = new ReloadAction(this);
+		this.findPanel.addToToolbar(a, true, false);
+		a.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshProcedureList"));
 		//this.findPanel.toolbar.setBorder(new DividerBorder(DividerBorder.RIGHT));
 		this.listPanel.setLayout(new BorderLayout());
 		this.listPanel.add(findPanel, BorderLayout.NORTH);
@@ -112,7 +115,6 @@ public class ProcedureListPanel
 	public void disconnect()
 	{
 		this.dbConnection = null;
-		this.meta = null;
 		this.reset();
 	}
 
@@ -126,7 +128,6 @@ public class ProcedureListPanel
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
-		this.meta = aConnection.getMetadata();
 		this.source.getSqlTokenMarker().initDatabaseKeywords(aConnection.getSqlConnection());
 		this.reset();
 	}
@@ -155,6 +156,7 @@ public class ProcedureListPanel
 				{
 					try
 					{
+						DbMetadata meta = dbConnection.getMetadata();
 						procList.setVisible(false);
 						parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 						procList.setModel(meta.getListOfProcedures(currentCatalog, currentSchema), true);
@@ -209,6 +211,7 @@ public class ProcedureListPanel
 			{
 				synchronized (retrieveLock)
 				{
+					DbMetadata meta = dbConnection.getMetadata();
 					parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					try
 					{

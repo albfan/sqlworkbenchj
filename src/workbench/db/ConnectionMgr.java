@@ -33,6 +33,7 @@ public class ConnectionMgr
 	
 	private HashMap profiles;
 	private List drivers;
+	private boolean profilesChanged;
 	
 	/** Creates new ConnectionMgr */
 	public ConnectionMgr()
@@ -51,7 +52,6 @@ public class ConnectionMgr
 		Connection sql = this.connect(aProfile);
 		conn.setSqlConnection(sql);
 		conn.setProfile(aProfile.createCopy());
-		//this.currentConnection = conn;
 		this.activeConnections.put(anId, conn);
 		
 		return conn;
@@ -328,10 +328,11 @@ public class ConnectionMgr
 	public void readProfiles()
 	{
 		//System.out.println("ConnectionMgr.readProfiles()");
-		Object result = WbPersistence.readObject("WbProfiles.xml");
+		Object result = WbPersistence.readObject(WbManager.getSettings().getProfileFileName());
 		if (result instanceof Collection)
 		{
 			this.setProfiles((Collection)result);
+			this.resetProfiles();
 		}
 		else if (result instanceof Object[])
 		{
@@ -340,16 +341,83 @@ public class ConnectionMgr
 			for (int i=0; i < l.length; i++)
 			{
 				ConnectionProfile prof = (ConnectionProfile)l[i];
+				prof.reset();
 				this.profiles.put(prof.getName(), prof);
 			}
 		}
 	}
-
+	
+	
+	/**
+	 *	Reset the changed status on the profiles.
+	 *	Called after saving the profiles.
+	 */
+	private void resetProfiles()
+	{
+		if (this.profiles != null)
+		{
+      Iterator values = this.profiles.values().iterator();
+      while (values.hasNext())
+      {
+        ConnectionProfile profile = (ConnectionProfile)values.next();
+        profile.reset();
+      }
+		}
+	}
+	
+	/**
+	 *	Make the profile list persistent.
+	 *	This will also reset the changed flag for any modified or new 
+	 *	profiles.
+	 */
 	public void saveProfiles()
 	{
 		if (this.profiles != null)
 		{
-			WbPersistence.writeObject(new ArrayList(this.profiles.values()), "WbProfiles.xml");
+			WbPersistence.writeObject(new ArrayList(this.profiles.values()), WbManager.getSettings().getProfileFileName());
+			this.resetProfiles();
+		}
+	}
+
+	/**
+	 *	Returns true if any of the profile definitions has changed.
+	 *	(Or if a profile has been deleted or added)
+	 */
+  public boolean profilesChanged()
+  {
+		if (this.profilesChanged) return true;
+    Iterator values = this.profiles.values().iterator();
+    while (values.hasNext())
+    {
+      ConnectionProfile profile = (ConnectionProfile)values.next();
+      if (profile.isChanged()) 
+			{
+				return true;
+			}
+    }
+    return false;
+  }
+
+	/**
+	 *	This is called from the ProfileListModel when a new profile is added.
+	 *	The caller needs to make sure that the status is set to new if that
+	 *	profile was just created.
+	 */
+	public void addProfile(ConnectionProfile aProfile)
+	{
+		this.profiles.put(aProfile.getName(), aProfile);
+	}
+	
+	/**
+	 *	This is called from the ProfileListModel when a profile has been deleted
+	 */
+	public void removeProfile(ConnectionProfile aProfile)
+	{
+		this.profiles.remove(aProfile.getName());
+		// deleting a new profile should not change the status to changed
+		if (!aProfile.isNew())
+		{
+			this.profilesChanged = true;
 		}
 	}
 	

@@ -13,6 +13,8 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -230,10 +232,10 @@ extends JTable
 		{
 			this.createDefaultColumnsFromModel();
 		}
-		if (sortIt && aModel instanceof DataStoreTableModel)
+		if (aModel instanceof DataStoreTableModel)
 		{
 			this.dwModel = (DataStoreTableModel)aModel;
-			if (header != null)
+			if (sortIt && header != null)
 			{
 				header.setDefaultRenderer(this.sortRenderer);
 				header.addMouseListener(this);
@@ -488,6 +490,14 @@ extends JTable
 		NumberColumnRenderer numRend = new NumberColumnRenderer(maxDigits);
 
 		this.setDefaultRenderer(Number.class, numRend);
+		this.setDefaultRenderer(Double.class, numRend);
+		this.setDefaultRenderer(Float.class, numRend);
+		this.setDefaultRenderer(BigDecimal.class, numRend);
+		
+		NumberColumnRenderer intRend = new NumberColumnRenderer(0);
+		this.setDefaultRenderer(BigInteger.class, intRend);
+		this.setDefaultRenderer(Integer.class, intRend);
+		
 		this.setDefaultRenderer(Object.class, this.defaultTooltipRenderer);
 	}
 	

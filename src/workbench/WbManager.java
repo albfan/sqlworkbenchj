@@ -14,6 +14,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
@@ -22,6 +23,7 @@ import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.interfaces.FontChangedListener;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.WbCipher;
 import workbench.util.WbNullCipher;
@@ -242,12 +244,21 @@ public class WbManager
 			this.mainWindows.remove(win);
 		}
 		if (this.mainWindows.size() == 0)
+    {
+      if (getConnectionMgr().profilesChanged())
+      {
+        int answer = JOptionPane.showConfirmDialog(win, ResourceMgr.getString("MsgConfirmUnsavedProfiles"), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION);
+        if (answer == JOptionPane.OK_OPTION)
+        {
+          this.getConnectionMgr().saveProfiles();
+        }
+      }
 			this.exitWorkbench();
+    }
 	}
 	
 	public void openNewWindow()
 	{
-		//System.out.println("WbManager.openNewWindow()");
 		MainWindow main = this.createWindow();
 		main.show();
 		main.restoreState();

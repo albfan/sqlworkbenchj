@@ -34,6 +34,7 @@ public class ConnectionProfile
 	private int id;
 	private static int nextId = 1;
 	private boolean changed;
+	private boolean isNew;
 
 	static
 	{
@@ -171,7 +172,24 @@ public class ConnectionProfile
 	{
 		return aPwd.startsWith(CRYPT_PREFIX);
 	}
+
+	public void setNew() 
+	{ 
+		this.changed = true; 
+		this.isNew = true;
+	}
+	public boolean isNew() { return this.isNew; }
+  public boolean isChanged() 
+	{ 
+		return this.changed || this.isNew; 
+	}
 	
+  public void reset() 
+	{ 
+		this.changed = false; 
+		this.isNew = false;
+	}
+  
 	private String encryptPassword(String aPwd)
 	{
 		if (WbManager.getSettings().getUseEncryption())

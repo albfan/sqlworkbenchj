@@ -65,7 +65,7 @@ public class WbMenuItem
 		LookAndFeel lnf = UIManager.getLookAndFeel();	
 		if (lnf.getClass() == com.sun.java.swing.plaf.windows.WindowsLookAndFeel.class)
 		{
-			this.additionalVerticalSpace = 3;
+			this.additionalVerticalSpace = 2;
 		}
 		else
 		{
@@ -88,8 +88,19 @@ public class WbMenuItem
 		{
 			char mnemonic = aText.charAt(pos + 1);
 			aText = aText.substring(0, pos) + aText.substring(pos + 1);
+			super.setText(aText);
 			this.setMnemonic((int)mnemonic);
+			try
+			{
+				this.setDisplayedMnemonicIndex(pos);
+			}
+			catch (Exception e)
+			{
+			}
 		}
-		super.setText(aText);
+		else
+		{
+			super.setText(aText);
+		}
 	}	
 }

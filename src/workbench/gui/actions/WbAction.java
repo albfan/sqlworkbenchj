@@ -29,6 +29,7 @@ public abstract class WbAction extends AbstractAction
 	public static final String MENU_SEPARATOR = "MenuSepBefore";
 	public static final String TBAR_SEPARATOR = "TbarSepBefore";
 	public static final String ALTERNATE_ACCELERATOR = "AlternateAccelerator";
+	public static final String MNEMONIC_INDEX = "MnemonicIndex";
 	
 	private String actionName;
 	protected JMenuItem menuItem;
@@ -64,10 +65,25 @@ public abstract class WbAction extends AbstractAction
 	}
 
 	public JButton getToolbarButton()
+  {
+    return this.getToolbarButton(false);
+  }
+	public JButton getToolbarButton(boolean createNew )
 	{
-		this.toolbarButton = new WbToolbarButton();
-		this.toolbarButton.setAction(this);
-		this.toolbarButton.setMnemonic(0);
+    JButton result;
+		if (this.toolbarButton == null || createNew)
+		{
+      WbToolbarButton b = new WbToolbarButton();
+			b.setAction(this);
+			b.setMnemonic(0);
+      if (this.toolbarButton == null) this.toolbarButton = b;
+      result = b;
+		}
+    else
+    {
+      result = this.toolbarButton;
+    }
+    
 		/*
 		KeyStroke stroke = this.getAccelerator();
 		int mod = stroke.getModifiers();
@@ -76,7 +92,7 @@ public abstract class WbAction extends AbstractAction
 								delimit +
 								KeyEvent.getKeyText(stroke.getKeyCode());
 		*/
-		return this.toolbarButton;
+		return result;
 	}
 
 	public void addToToolbar(JToolBar aToolbar)
@@ -95,6 +111,17 @@ public abstract class WbAction extends AbstractAction
 		this.menuItem.setMargin(new Insets(0,0,0,0));
 		this.menuItem.setAction(this);
 		this.menuItem.setAccelerator(this.getAccelerator());
+		Integer index = (Integer)this.getValue(WbAction.MNEMONIC_INDEX);
+		if (index != null)
+		{
+			try
+			{
+				this.menuItem.setDisplayedMnemonicIndex(index.intValue());
+			}
+			catch (Exception e)
+			{
+			}
+		}
 		return this.menuItem;
 	}
 
@@ -149,7 +176,9 @@ public abstract class WbAction extends AbstractAction
 				char mnemonic = name.charAt(pos + 1);
 				name = name.substring(0, pos) + name.substring(pos + 1);
 				Integer keycode = new Integer((int)mnemonic);
+				Integer index = new Integer(pos);
 				this.putValue(Action.MNEMONIC_KEY, keycode);
+				this.putValue(WbAction.MNEMONIC_INDEX, index);
 			}
 			super.putValue(key, name);
 		}

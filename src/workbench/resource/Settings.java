@@ -683,5 +683,18 @@ public class Settings
 		String list = this.props.getProperty("workbench.db.cancelwithreconnect", null);
     return StringUtil.stringToList(list, ",");
 	}
-	
+
+	public String getProfileFileName()
+	{
+		String file = System.getProperty("workbench.profilestorage", "");
+		if (file.length() == 0)
+		{
+			file = this.props.getProperty("workbench.profilesstorage", "");
+		}
+		if (file.length() == 0)
+		{
+			file = "WbProfiles.xml";
+		}
+		return file;
+	}
 }

@@ -14,6 +14,8 @@ import javax.swing.AbstractListModel;
 import javax.swing.ListModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
+import workbench.WbManager;
+import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 
 /**
@@ -25,6 +27,7 @@ class ProfileListModel
 {
 
 	private ArrayList profiles;
+	private boolean changed = false;
 	
 	/** Creates a new instance of ProfileListModel */
 	public ProfileListModel(Map aProfileList)
@@ -69,14 +72,22 @@ class ProfileListModel
 
 	public void addProfile(ConnectionProfile aProfile)
 	{
+		ConnectionMgr conn = WbManager.getInstance().getConnectionMgr();
+		aProfile.setNew();
+		conn.addProfile(aProfile);
 		this.profiles.add(this.profiles.size(), aProfile);
 		this.fireIntervalAdded(this, this.profiles.size() - 1,  this.profiles.size() - 1);
+		this.changed = true;
 	}
 
 	public void deleteProfile(int index)
 	{
+		ConnectionMgr conn = WbManager.getInstance().getConnectionMgr();
+		ConnectionProfile profile = (ConnectionProfile)this.profiles.get(index);
+		conn.removeProfile(profile);
 		this.profiles.remove(index);
 		this.fireIntervalRemoved(this, index, index);
+		this.changed = true;
 	}
 
 	public void putProfile(int index, ConnectionProfile aProfile)
@@ -84,6 +95,16 @@ class ProfileListModel
 		this.profiles.set(index, aProfile);
 	}
 
+	public boolean isChanged()
+	{
+		if (changed) return true;
+		for (int i=0; i < this.profiles.size(); i++)
+		{
+			ConnectionProfile profile = (ConnectionProfile)this.profiles.get(i);
+			if (profile.isChanged()) return true;
+		}
+		return false;
+	}
 	public Collection getValues()
 	{
 		return this.profiles;

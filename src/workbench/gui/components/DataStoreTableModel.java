@@ -287,10 +287,6 @@ public class DataStoreTableModel
 		try
 		{
 			String name = this.dataCache.getColumnName(aColumn - this.statusOffset);
-			if (name == null || name.length() == 0)
-			{
-				name = "Col" + aColumn;
-			}
 			return name;
 		}
 		catch (Exception e)

@@ -7,6 +7,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import workbench.gui.sql.SqlPanel;
+import workbench.interfaces.TextFileContainer;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -14,9 +15,9 @@ import workbench.resource.ResourceMgr;
  */
 public class FileSaveAsAction extends WbAction
 {
-	private SqlPanel client;
+	private TextFileContainer client;
 
-	public FileSaveAsAction(SqlPanel aClient)
+	public FileSaveAsAction(TextFileContainer aClient)
 	{
 		super();
 		this.client = aClient;

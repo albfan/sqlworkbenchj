@@ -6,22 +6,12 @@
 
 package workbench.gui.dbobjects;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
+import java.awt.*;
 import java.sql.ResultSet;
-import java.sql.Types;
 import java.util.ArrayList;
-import java.util.List;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
@@ -30,18 +20,14 @@ import workbench.db.DbMetadata;
 import workbench.db.TableSearcher;
 import workbench.db.WbConnection;
 import workbench.gui.actions.ReloadAction;
-import workbench.gui.components.DataStoreTableModel;
-import workbench.gui.components.EmptyTableModel;
-import workbench.gui.components.TextComponentMouseListener;
-import workbench.gui.components.WbSplitPane;
-import workbench.gui.components.WbTable;
-import workbench.gui.components.WbToolbarButton;
+import workbench.gui.components.*;
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.TableSearchDisplay;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.Like;
+
 
 /**
  *
@@ -65,6 +51,7 @@ public class TableSearchPanel
 	private WbTable currentDisplayTable;
 	private JScrollPane currentScrollPane;
 	private Like searchPattern;
+	private WbTable firstTable;
 	
 	public TableSearchPanel(Reloadable aTableListSource)
 	{
@@ -93,7 +80,7 @@ public class TableSearchPanel
   private void initComponents()//GEN-BEGIN:initComponents
   {
     java.awt.GridBagConstraints gridBagConstraints;
-    
+
     buttonGroup1 = new javax.swing.ButtonGroup();
     jSplitPane1 = new WbSplitPane();
     resultScrollPane = new javax.swing.JScrollPane();
@@ -110,35 +97,36 @@ public class TableSearchPanel
     optionPanel = new javax.swing.JPanel();
     labelRowCount = new javax.swing.JLabel();
     rowCount = new javax.swing.JTextField();
-    
-    
+
     setLayout(new java.awt.BorderLayout());
-    
+
+    jSplitPane1.setBorder(new javax.swing.border.EmptyBorder(new java.awt.Insets(1, 1, 1, 1)));
     jSplitPane1.setDividerLocation(150);
-    resultScrollPane.setBorder(new javax.swing.border.EtchedBorder());
+    resultScrollPane.setBorder(new javax.swing.border.EmptyBorder(new java.awt.Insets(1, 1, 1, 1)));
     resultScrollPane.setHorizontalScrollBarPolicy(javax.swing.JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     resultPanel.setLayout(new java.awt.GridBagLayout());
-    
+
+    resultPanel.setBorder(new javax.swing.border.EmptyBorder(new java.awt.Insets(0, 0, 0, 0)));
     resultScrollPane.setViewportView(resultPanel);
-    
+
     jSplitPane1.setRightComponent(resultScrollPane);
-    
+
     tableNames.setModel(this.tableListModel);
     tableListScrollPane.setViewportView(tableNames);
-    
+
     jSplitPane1.setLeftComponent(tableListScrollPane);
-    
+
     add(jSplitPane1, java.awt.BorderLayout.CENTER);
-    
+
     statusInfo.setBorder(new javax.swing.border.EtchedBorder());
     statusInfo.setMinimumSize(new java.awt.Dimension(4, 22));
     statusInfo.setPreferredSize(new java.awt.Dimension(4, 22));
     add(statusInfo, java.awt.BorderLayout.SOUTH);
-    
+
     jPanel1.setLayout(new java.awt.GridBagLayout());
-    
+
     entryPanel.setLayout(new java.awt.GridBagLayout());
-    
+
     entryPanel.setBorder(new javax.swing.border.EtchedBorder());
     startButton.setText(ResourceMgr.getString("LabelStartSearch"));
     startButton.addActionListener(new java.awt.event.ActionListener()
@@ -148,13 +136,13 @@ public class TableSearchPanel
         startButtonActionPerformed(evt);
       }
     });
-    
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.insets = new java.awt.Insets(5, 13, 3, 0);
     entryPanel.add(startButton, gridBagConstraints);
-    
+
     searchText.setColumns(20);
     searchText.setText("% ... %");
     searchText.setToolTipText(ResourceMgr.getDescription("LabelSearchTableCriteria"));
@@ -164,10 +152,10 @@ public class TableSearchPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(5, 0, 3, 0);
     gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(5, 0, 3, 0);
     entryPanel.add(searchText, gridBagConstraints);
-    
+
     jLabel1.setText(ResourceMgr.getString("LabelSearchTableCriteria"));
     jLabel1.setToolTipText(ResourceMgr.getDescription("LabelSearchTableCriteria"));
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -175,35 +163,35 @@ public class TableSearchPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.insets = new java.awt.Insets(5, 5, 3, 5);
     entryPanel.add(jLabel1, gridBagConstraints);
-    
+
     reloadButton.setText("jButton1");
     reloadButton.setBorder(new javax.swing.border.EtchedBorder());
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 5, 3, 0);
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(5, 5, 3, 0);
     entryPanel.add(reloadButton, gridBagConstraints);
-    
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     jPanel1.add(entryPanel, gridBagConstraints);
-    
+
     optionPanel.setLayout(new java.awt.GridBagLayout());
-    
+
     optionPanel.setBorder(new javax.swing.border.EtchedBorder());
     labelRowCount.setLabelFor(rowCount);
     labelRowCount.setText(ResourceMgr.getString("LabelLimitSearchTableRows"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.insets = new java.awt.Insets(3, 4, 3, 0);
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(3, 4, 3, 0);
     optionPanel.add(labelRowCount, gridBagConstraints);
-    
+
     rowCount.setColumns(4);
     rowCount.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
     rowCount.setText("0");
@@ -211,11 +199,11 @@ public class TableSearchPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.insets = new java.awt.Insets(3, 4, 3, 4);
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(3, 4, 3, 4);
     optionPanel.add(rowCount, gridBagConstraints);
-    
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -223,9 +211,9 @@ public class TableSearchPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     jPanel1.add(optionPanel, gridBagConstraints);
-    
+
     add(jPanel1, java.awt.BorderLayout.NORTH);
-    
+
   }//GEN-END:initComponents
 
 	private void startButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_startButtonActionPerformed
@@ -240,28 +228,49 @@ public class TableSearchPanel
 		}
 	}//GEN-LAST:event_startButtonActionPerformed
 
+	private void adjustDataTable()
+	{
+		if (this.currentDisplayTable != null)
+		{
+			int rows = this.currentDisplayTable.getRowCount();
+			int cols = this.currentDisplayTable.getColumnCount();
+			int height = this.currentDisplayTable.getRowHeight();
+			int width = this.resultScrollPane.getWidth();
+			// Recycle the Dimension object from the ScrollPane
+			Dimension size = this.currentScrollPane.getPreferredSize();
+			if (rows > 25) rows = 25;
+			size.setSize(width - 20, (rows + 4) * height );
+			this.currentScrollPane.setPreferredSize(size);
+		}
+	}
+	
 	public synchronized void addResultRow(String aTablename, ResultSet aResult)
 	{
 		try
 		{
 			if (!this.tableLogged)
 			{
-				if (this.currentDisplayTable != null)
-				{
-					int rows = this.currentDisplayTable.getRowCount();
-					int cols = this.currentDisplayTable.getColumnCount();
-					int height = this.currentDisplayTable.getRowHeight();
-					int width = this.resultScrollPane.getWidth();
-					Dimension size = new Dimension(width - 20, (rows + 4) * height );
-					this.currentScrollPane.setPreferredSize(size);
-				}
+				// Adjust the last table (which is now completed), before creating the new one
+				// Note: this will not adjust the table if only one database table was searched
+				// (or only results from one database table where returned)
+				// therefor it's important to call this in searchEnded() as well
+				this.adjustDataTable();
 				this.currentDisplayTable = new WbTable();
+				if (this.firstTable == null)
+				{
+					this.firstTable = this.currentDisplayTable;
+				}
 				this.currentDisplayTable.setDefaultRenderer(String.class, new ResultHighlightingRenderer(this.searchPattern));
 				this.currentResult = new DataStore(aResult);
 				DataStoreTableModel model = new DataStoreTableModel(this.currentResult);
 				this.currentDisplayTable.setModel(model, true);
 				this.currentScrollPane  = new ParentWidthScrollPane(this.currentDisplayTable);
-				this.currentScrollPane.setBorder(new TitledBorder(aTablename));
+				TitledBorder b = new TitledBorder(aTablename);
+				Font f = b.getTitleFont();
+				f = f.deriveFont(Font.BOLD);
+				b.setTitleFont(f);
+				b.setBorder(new EtchedBorder());
+				this.currentScrollPane.setBorder(b);
 				GridBagConstraints constraints = new GridBagConstraints();
 				constraints.gridx = 0;				
 				constraints.fill = GridBagConstraints.HORIZONTAL;
@@ -296,7 +305,7 @@ public class TableSearchPanel
 	 * @return Value of property connection.
 	 *
 	 */
-	public workbench.db.WbConnection getConnection()
+	public WbConnection getConnection()
 	{
 		return connection;
 	}
@@ -305,7 +314,7 @@ public class TableSearchPanel
 	 * @param connection New value of property connection.
 	 *
 	 */
-	public void setConnection(workbench.db.WbConnection connection)
+	public void setConnection(WbConnection connection)
 	{
 		this.connection = connection;
 		this.searcher.setConnection(connection);
@@ -316,16 +325,26 @@ public class TableSearchPanel
 		return this.tableNames;
 	}
 	
-	public void searchData()
+	public void disconnect()
 	{
-		if (this.tableNames.getSelectedRowCount() == 0) return;
-    
+		this.resetResult();
+	}
+	
+	private void resetResult()
+	{
     // resultPanel.removeAll() does not work
     // the old tables just stay in there
     // so I re-create the actual result panel
 		this.resultPanel = new JPanel();
-    this.resultPanel.setLayout(new java.awt.GridBagLayout());
+    this.resultPanel.setLayout(new GridBagLayout());
     this.resultScrollPane.setViewportView(resultPanel);
+		this.firstTable = null;
+	}
+	
+	public void searchData()
+	{
+		if (this.tableNames.getSelectedRowCount() == 0) return;
+		this.resetResult();
     
 		int[] selectedTables = this.tableNames.getSelectedRows();
 		ArrayList searchTables = new ArrayList(this.tableNames.getSelectedRowCount());
@@ -356,7 +375,7 @@ public class TableSearchPanel
 		searcher.setMaxRows(maxRows);
 		searcher.setCriteria(text);
     boolean sensitive = this.connection.getMetadata().isStringComparisonCaseSensitve();
- 		this.searchPattern = new Like(searcher.getCriteria(), sensitive);
+ 		this.searchPattern = new Like(searcher.getCriteria(), !sensitive);
 		searcher.setTableNames(searchTables);
 		searcher.search(); // starts the background thread
 	}
@@ -383,6 +402,23 @@ public class TableSearchPanel
 	
 	public void searchEnded()
 	{
+		this.adjustDataTable();
+		if (this.firstTable != null)
+		{
+			int height = this.firstTable.getRowHeight();
+			JScrollBar sb = this.resultScrollPane.getVerticalScrollBar();
+			sb.setUnitIncrement(height);
+			sb.setBlockIncrement(height * 5);
+		}
+		// insert a dummy panel at the end which will move
+		// all tables in the pane to the upper border
+		// e.g. when there is only one table
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.gridx = 0;				
+		constraints.weighty = 1.0;
+		constraints.anchor = GridBagConstraints.WEST;
+		this.resultPanel.add(new JPanel(), constraints);
+
 		this.resultPanel.doLayout();
 		this.searchText.setEnabled(true);
 		startButton.setText(ResourceMgr.getString("LabelStartSearch"));
@@ -401,8 +437,8 @@ public class TableSearchPanel
   private javax.swing.JSplitPane jSplitPane1;
   private javax.swing.JPanel entryPanel;
   private javax.swing.JScrollPane resultScrollPane;
-  private javax.swing.JButton reloadButton;
   private javax.swing.JPanel optionPanel;
+  private javax.swing.JButton reloadButton;
   private javax.swing.JPanel resultPanel;
   private javax.swing.JButton startButton;
   private javax.swing.ButtonGroup buttonGroup1;
@@ -449,7 +485,7 @@ public class TableSearchPanel
 				if (!isSelected)
 				{
 					String content = (String)value;
-					if (this.pattern.like(content))
+					if (content != null && this.pattern.like(content))
 					{
 						result.setBackground(Color.YELLOW);
 					}
@@ -461,6 +497,7 @@ public class TableSearchPanel
 			}
 			catch (Exception e)
 			{
+				result.setBackground(Color.WHITE);
 			}
 			return result;
 		}

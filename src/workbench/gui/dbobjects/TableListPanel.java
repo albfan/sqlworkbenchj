@@ -10,7 +10,10 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -22,11 +25,13 @@ import workbench.db.WbConnection;
 import workbench.exception.WbException;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.components.*;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
+import workbench.interfaces.FilenameChangeListener;
 import workbench.interfaces.Reloadable;
 import workbench.interfaces.Spooler;
 import workbench.log.LogMgr;
@@ -40,7 +45,8 @@ import workbench.resource.ResourceMgr;
  */
 public class TableListPanel 
 	extends JPanel 
-	implements ActionListener, ChangeListener, ListSelectionListener, Reloadable, Spooler
+	implements ActionListener, ChangeListener, ListSelectionListener
+						, Reloadable, Spooler, FilenameChangeListener
 {
 	private WbConnection dbConnection;
 	private JPanel listPanel;
@@ -57,7 +63,7 @@ public class TableListPanel
 	private EditorPanel tableSource;
 	private JTabbedPane displayTab;
 	private JSplitPane splitPane;
-	private DbMetadata meta;
+	//private DbMetadata meta;
 	private Object retrieveLock = new Object();
 	private JComboBox tableTypes = new JComboBox();
 	private String currentSchema;
@@ -81,6 +87,11 @@ public class TableListPanel
 
 	private JMenu showDataMenu;
 	
+	// holds a reference to other WbTables which 
+	// need to display the same table list
+	// e.g. the table search panel
+	private List tableListClients;
+	
 	public TableListPanel(MainWindow aParent)
 		throws Exception
 	{
@@ -99,6 +110,8 @@ public class TableListPanel
 
 		this.tableSource = new EditorPanel();
 		this.tableSource.setEditable(false);
+		this.tableSource.addPopupMenuItem(new FileSaveAsAction(this.tableSource), true);
+		
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.tableSource);
 
 		this.importedKeys = new WbTable();
@@ -123,10 +136,13 @@ public class TableListPanel
 
 		this.spoolData = new SpoolDataAction(this);
 		this.tableList.addPopupAction(spoolData, true);
-		this.initShowDataMenu();
+		this.extendPopupMenu();
 		JPanel topPanel = new JPanel();
 		this.findPanel = new FindPanel(this.tableList);
-		this.findPanel.addToToolbar(new ReloadAction(this), true, false);
+		
+		ReloadAction a = new ReloadAction(this);
+		a.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshTableList"));
+		this.findPanel.addToToolbar(a, true, false);
 
 		topPanel.setLayout(new GridBagLayout());
 		this.tableTypes.setMaximumSize(new Dimension(32768, 18));
@@ -162,13 +178,15 @@ public class TableListPanel
 		pol.addComponent(tableDefinition);
 		this.setFocusTraversalPolicy(pol);
 		this.reset();
+		this.parentWindow.addFilenameChangeListener(this);
 	}
 
-	private void initShowDataMenu()
+	private void extendPopupMenu()
 	{
+		JPopupMenu popup = this.tableList.getPopupMenu();
+		
 		this.showDataMenu = new WbMenu(ResourceMgr.getString("MnuTxtShowTableData"));
 		this.showDataMenu.setEnabled(false);
-		JPopupMenu popup = this.tableList.getPopupMenu();
 		String[] panels = this.parentWindow.getPanelLabels();
 		for (int i=0; i < panels.length; i++)
 		{
@@ -179,6 +197,16 @@ public class TableListPanel
 		}
 		popup.addSeparator();
 		popup.add(showDataMenu);
+	}
+
+	private void updateShowDataMenu()
+	{
+		String[] panels = this.parentWindow.getPanelLabels();
+		for (int i=0; i < panels.length; i++)
+		{
+			JMenuItem item = this.showDataMenu.getItem(i);
+			item.setText(panels[i]);
+		}
 	}
 	
 	private void addTablePanels()
@@ -208,7 +236,6 @@ public class TableListPanel
 	public void disconnect()
 	{
 		this.dbConnection = null;
-		this.meta = null;
 		this.reset();
 	}
 
@@ -228,6 +255,7 @@ public class TableListPanel
 		this.triggers.reset();
 		this.tableSource.setText("");
 		this.invalidateData();
+		this.updateDisplayClients();
 	}
 	
 	private void invalidateData()
@@ -241,14 +269,14 @@ public class TableListPanel
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
-		this.meta = aConnection.getMetadata();
+		//this.meta = aConnection.getMetadata();
 		this.tableTypes.removeActionListener(this);
 		this.triggers.setConnection(aConnection);
 		this.tableSource.getSqlTokenMarker().initDatabaseKeywords(aConnection.getSqlConnection());
 		this.reset();
 		try
 		{
-			List types = this.meta.getTableTypes();
+			List types = this.dbConnection.getMetadata().getTableTypes();
 			this.tableTypes.removeAllItems();
 			this.tableTypes.addItem("*");
 			for (int i=0; i < types.size(); i++)
@@ -270,7 +298,7 @@ public class TableListPanel
 		this.reset();
 		this.currentSchema = aSchema;
 		this.currentCatalog = aCatalog;
-		if (this.isVisible())
+		if (this.isVisible() || this.isClientVisible())
 		{
 			this.retrieve();
 		}
@@ -295,9 +323,10 @@ public class TableListPanel
 						parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 						reset();
 						String table = (String)tableTypes.getSelectedItem();
-						DataStoreTableModel rs = meta.getListOfTables(currentCatalog, currentSchema, table);
+						DataStoreTableModel rs = dbConnection.getMetadata().getListOfTables(currentCatalog, currentSchema, table);
 						tableList.setModel(rs, true);
 						tableList.adjustColumns();
+						updateDisplayClients();
 						parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 						shouldRetrieve = false;
 					}
@@ -335,6 +364,12 @@ public class TableListPanel
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
+		if (this.tableList.getSelectedRowCount() > 1) 
+		{
+			this.showDataMenu.setEnabled(false);
+			return;
+		}
+		this.showDataMenu.setEnabled(true);
 		int row = this.tableList.getSelectedRow();
 		if (row < 0) return;
 		
@@ -371,6 +406,7 @@ public class TableListPanel
 	private void retrieveTableDefinition()
 		throws SQLException, WbException
 	{
+		DbMetadata meta = this.dbConnection.getMetadata();
 		tableDefinition.setModel(meta.getTableDefinitionModel(this.selectedCatalog, this.selectedSchema, this.selectedTableName), true);
 		tableDefinition.adjustColumns();
 		if (this.selectedObjectType.indexOf("view") > -1)
@@ -454,6 +490,7 @@ public class TableListPanel
 	private void retrieveIndexes()
 		throws SQLException
 	{
+		DbMetadata meta = this.dbConnection.getMetadata();
 		indexes.setModel(meta.getTableIndexes(this.selectedCatalog, this.selectedSchema, this.selectedTableName), true);
 		indexes.adjustColumns();
 		this.shouldRetrieveIndexes = false;
@@ -462,6 +499,7 @@ public class TableListPanel
 	private void retrieveFkInformation()
 		throws SQLException
 	{
+		DbMetadata meta = this.dbConnection.getMetadata();
 		DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(this.selectedCatalog, this.selectedSchema, this.selectedTableName));
 		importedKeys.setModel(model, true);
 		importedKeys.adjustColumns();
@@ -480,7 +518,8 @@ public class TableListPanel
 	private String buildSqlForTable()
 	{
 		if (this.selectedTableName == null || this.selectedTableName.length() == 0) return null;
-		if (this.shouldRetrieveTable) 
+		
+		if (this.tableDefinition.getRowCount() == 0) 
 		{
 			try
 			{
@@ -495,15 +534,34 @@ public class TableListPanel
 		if (colCount == 0) return null;
 		StringBuffer sql = new StringBuffer(colCount * 80);
 		sql.append("SELECT ");
+		Pattern p = Pattern.compile("[$ ]");		
+		Matcher m;
+		boolean quote = false;
 		for (int i=0; i < colCount; i++)
 		{
 			String column = this.tableDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+			m = p.matcher(column);
 			if (i > 0 && i < colCount) sql.append(",\n");
 			if (i > 0) sql.append("       ");
+			quote = m.find();
+			if (quote) sql.append('"');
 			sql.append(column);
+			if (quote) sql.append('"');
 		}
 		sql.append("\nFROM ");
+		if (this.selectedSchema != null && this.selectedSchema.trim().length() > 0)
+		{
+			sql.append(this.selectedSchema);
+			sql.append(".");
+		}	
+		
+		m = p.matcher(this.selectedTableName);
+		quote = m.find();
+		
+		if (quote) sql.append('"');
 		sql.append(this.selectedTableName);
+		if (quote) sql.append('"');
+		
 		return sql.toString();
 	}
 	/**
@@ -547,6 +605,75 @@ public class TableListPanel
 			}
 		}
 	}
+
+	private boolean isClientVisible()
+	{
+		if (this.tableListClients == null) return false;
+		for (int i=0; i < this.tableListClients.size(); i++)
+		{
+			JTable table = (JTable)this.tableListClients.get(i);
+			if (table.isVisible()) return true;
+		}
+		return false;
+	}
+	
+	private void updateDisplayClients()
+	{
+		if (this.tableListClients == null) return;
+		for (int i=0; i < this.tableListClients.size(); i++)
+		{
+			JTable table = (JTable)this.tableListClients.get(i);
+			if (table != null)
+			{
+				table.setModel(this.tableList.getModel());
+				if (table instanceof WbTable)
+				{
+					WbTable t = (WbTable)table;
+					t.adjustColumns();
+				}
+				table.repaint();
+			}
+		}
+	}
+	
+	public void addTableListDisplayClient(JTable aClient)
+	{
+		if (this.tableListClients == null) this.tableListClients = new ArrayList();
+		if (!this.tableListClients.contains(aClient)) this.tableListClients.add(aClient);
+	}
+	public void removeTableListDisplayClient(JTable aClient)
+	{
+		if (this.tableListClients == null) return;
+		this.tableListClients.remove(aClient);
+	}
+	
+	public void spoolData()
+	{
+		int row = this.tableList.getSelectedRow();
+		if (row < 0) return;
+		String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+		String sql = "SELECT * FROM " + table;
+		this.spoolData.execute(this.dbConnection, sql);
+	}
+
+	public Window getParentWindow()
+	{
+		return SwingUtilities.getWindowAncestor(this);
+	}
+	
+	/** Invoked when the displayed tab has changed.
+	 *	Retrieve table detail information here.
+	 */
+	public void stateChanged(ChangeEvent e)
+	{
+		this.startRetrieveCurrentPanel();
+	}
+	
+	public void fileNameChanged(Object sender, String newFilename)
+	{
+		this.updateShowDataMenu();
+	}
+	
 	public static void main(String args[])
 	{
 		Connection con = null;
@@ -582,28 +709,6 @@ public class TableListPanel
 		{
 			try { con.close(); } catch (Throwable th) {}
 		}
-	}
-
-	public void spoolData()
-	{
-		int row = this.tableList.getSelectedRow();
-		if (row < 0) return;
-		String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-		String sql = "SELECT * FROM " + table;
-		this.spoolData.execute(this.dbConnection, sql);
-	}
-
-	public Window getParentWindow()
-	{
-		return SwingUtilities.getWindowAncestor(this);
-	}
-	
-	/** Invoked when the displayed tab has changed.
-	 *	Retrieve table detail information here.
-	 */
-	public void stateChanged(ChangeEvent e)
-	{
-		this.startRetrieveCurrentPanel();
 	}
 	
 }

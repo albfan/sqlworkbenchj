@@ -8,21 +8,19 @@ import javax.swing.KeyStroke;
 import workbench.gui.MainWindow;
 import workbench.resource.ResourceMgr;
 
-public class FileConnectAction extends WbAction
+public class FileDisconnectAction extends WbAction
 {
 	private MainWindow window;
 
-	public FileConnectAction(MainWindow aWindow)
+	public FileDisconnectAction(MainWindow aWindow)
 	{
 		super();
 		this.window = aWindow;
-		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.MNU_TXT_CONNECT));
-		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_MASK));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("Connect"));
+		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtDisconnect"));
 	}
 
 	public void actionPerformed(ActionEvent e)
 	{
-		this.window.selectConnection();
+		this.window.disconnect();
 	}
 }
