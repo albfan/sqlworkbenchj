@@ -36,7 +36,14 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 			if (meta.getDatabaseProductName().toLowerCase().indexOf("oracle") > -1)
 			{
 				keywords.add("SYNONYM", Token.KEYWORD1);
+				keywords.add("WHILE", Token.KEYWORD1);
+				keywords.add("LOOP", Token.KEYWORD1);
+				keywords.add("INSTR", Token.KEYWORD3);
+				keywords.add("SUBSTR", Token.KEYWORD3);
+				keywords.add("INSTRB", Token.KEYWORD3);
+				keywords.add("SUBSTRB", Token.KEYWORD3);
 			}
+
 			keys = meta.getStringFunctions();
 			//System.out.println("string functions = "+ keys);
 			this.addKeywordList(keys, Token.KEYWORD3);

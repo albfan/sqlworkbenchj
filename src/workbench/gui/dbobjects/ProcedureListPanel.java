@@ -64,17 +64,17 @@ public class ProcedureListPanel
 	private String currentCatalog;
 	private boolean shouldRetrieve;
 	private WbMenuItem dropTableItem;
-	
+
 	private static final String DROP_CMD = "drop-table";
 	private EmptyBorder EMPTY = new EmptyBorder(1,1, 3, 1);
-	
+
 	public ProcedureListPanel() throws Exception
 	{
 		this.displayTab = new JTabbedPane();
 		this.displayTab.setTabPlacement(JTabbedPane.BOTTOM);
 		this.displayTab.setUI(TabbedPaneUIFactory.getBorderLessUI());
 		this.displayTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		
+
 		this.procColumns = new WbTable();
 		this.procColumns.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		this.procColumns.setCellSelectionEnabled(false);
@@ -84,7 +84,7 @@ public class ProcedureListPanel
 		this.procColumns.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		this.procColumns.setAdjustToColumnLabel(false);
 		JScrollPane scroll = new WbScrollPane(this.procColumns);
-		
+
 		this.source = new EditorPanel();
 		this.source.setEditable(false);
 		//this.source.addPopupMenuItem(new FileSaveAsAction(this.source), true);
@@ -112,7 +112,7 @@ public class ProcedureListPanel
 
 		this.splitPane = new WbSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		scroll = new WbScrollPane(this.procList);
-		
+
 		this.listPanel.add(scroll, BorderLayout.CENTER);
 
 		this.splitPane.setLeftComponent(this.listPanel);
@@ -141,7 +141,7 @@ public class ProcedureListPanel
 		this.dropTableItem.setEnabled(false);
 		popup.add(this.dropTableItem);
 	}
-	
+
 	public void disconnect()
 	{
 		this.dbConnection = null;
@@ -215,7 +215,7 @@ public class ProcedureListPanel
 		int rows[] = this.procList.getSelectedRows();
 		int count = rows.length;
 		if (count == 0) return;
-		
+
 		ArrayList names = new ArrayList(count);
 		ArrayList types = new ArrayList(count);
 		for (int i=0; i < count; i ++)
@@ -225,7 +225,7 @@ public class ProcedureListPanel
 			{
 				name = name.substring(0, name.indexOf(';'));
 			}
-			
+
 			String schema = this.procList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_PROC_LIST_SCHEMA);
       if (schema != null && schema.length() > 0)
       {
@@ -235,8 +235,24 @@ public class ProcedureListPanel
       {
         name = SqlUtil.quoteObjectname(name);
       }
-      
+
 			String type = this.procList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_PROC_LIST_TYPE);
+			if (this.dbConnection.getMetadata().isOracle())
+			{
+				String catalog = this.procList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_PROC_LIST_CATALOG);
+				if (catalog != null && catalog.length() > 0)
+				{
+					type = "PACKAGE";
+				}
+      	else if ("RESULT".equalsIgnoreCase(type))
+      	{
+        	type = "FUNCTION";
+				}
+				else if ("NO RESULT".equalsIgnoreCase(type))
+				{
+					type = "PROCEDURE";
+				}
+			}
 			names.add(name);
 			types.add(type);
 		}
@@ -251,12 +267,12 @@ public class ProcedureListPanel
 			{
 				public void run()
 				{
-					reload();	
+					reload();
 				}
 			});
 		}
 	}
-	
+
 	public void setVisible(boolean aFlag)
 	{
 		super.setVisible(aFlag);
@@ -275,7 +291,7 @@ public class ProcedureListPanel
 		int loc = WbManager.getSettings().getIntProperty(this.getClass().getName(), "divider");
 		if (loc == 0) loc = 200;
 		this.splitPane.setDividerLocation(loc);
-		
+
 		String s = WbManager.getSettings().getProperty(this.getClass().getName(), "lastsearch", "");
 		this.findPanel.setSearchString(s);
 	}
@@ -288,7 +304,7 @@ public class ProcedureListPanel
 
 		if (row < 0) return;
 		this.dropTableItem.setEnabled(this.procList.getSelectedRowCount() > 0);
-		
+
 		final String proc = this.procList.getValueAsString(row, DbMetadata.COLUMN_IDX_PROC_LIST_NAME);
 		final String schema = this.procList.getValueAsString(row, DbMetadata.COLUMN_IDX_PROC_LIST_SCHEMA);
 		final String catalog = this.procList.getValueAsString(row, DbMetadata.COLUMN_IDX_PROC_LIST_CATALOG);
@@ -346,5 +362,5 @@ public class ProcedureListPanel
 		{
 			this.dropTables();
 		}
-	}	
+	}
 }

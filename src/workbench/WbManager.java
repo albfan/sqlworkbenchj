@@ -47,8 +47,8 @@ public class WbManager implements FontChangedListener
 	private WbCipher desCipher = null;
 	private boolean batchMode = false;
 	public static boolean trace = "true".equalsIgnoreCase(System.getProperty("workbench.startuptrace", "false"));
-	
-	private WbManager() 
+
+	private WbManager()
 	{
 	}
 
@@ -69,27 +69,27 @@ public class WbManager implements FontChangedListener
 		return desCipher;
 	}
 
-	
+
 	public static WbManager getInstance()
 	{
 		return wb;
 	}
-	
+
 	public static Settings getSettings()
 	{
 		return wb.settings;
 	}
-	
+
 	public ConnectionMgr getConnectionMgr()
 	{
 		return this.connMgr;
 	}
-	
+
 	public String getExportFilename(boolean includeSqlType)
 	{
 		return this.getExportFilename(null, includeSqlType);
 	}
-	
+
 	public String getExportFilename(Component caller, boolean includeSqlType)
 	{
 		String lastDir = settings.getLastExportDir();
@@ -106,7 +106,7 @@ public class WbManager implements FontChangedListener
 
 		Window parent;
 		parent = SwingUtilities.getWindowAncestor(caller);
-		
+
 		int answer = fc.showSaveDialog(parent);
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
@@ -145,7 +145,7 @@ public class WbManager implements FontChangedListener
 
 		return filename;
 	}
-	
+
 	public void fontChanged(String aFontKey, Font newFont)
 	{
 		if (aFontKey.equals(Settings.DATA_FONT_KEY))
@@ -170,7 +170,7 @@ public class WbManager implements FontChangedListener
 		{
 			LogMgr.logInfo("Settings.setLookAndFeel()", "Could not set look and feel", e);
 		}
-		
+
 		try
 		{
 			Toolkit.getDefaultToolkit().setDynamicLayout(settings.getUseDynamicLayout());
@@ -180,15 +180,15 @@ public class WbManager implements FontChangedListener
 		}
 		if (trace) System.err.println("WbManager.setLookAndFeel() - done");
 	}
-	
-	private void initUI() 
+
+	private void initUI()
 	{
 		if (trace) System.err.println("WbManager.initUI() - start");
 		this.setLookAndFeel();
-		
+
 		UIDefaults def = UIManager.getDefaults();
 		Font stdFont = this.settings.getStandardFont();
-		
+
 		def.put("Button.font", stdFont);
 		def.put("CheckBox.font", stdFont);
 		def.put("CheckBoxMenuItem.font", stdFont);
@@ -217,20 +217,20 @@ public class WbManager implements FontChangedListener
 		def.put("ToolTip.font", stdFont);
 		def.put("Tree.font", stdFont);
 		def.put("ViewPort.font", stdFont);
-		
+
 		Font dataFont = this.settings.getDataFont();
-		
+
 		def.put("Table.font", dataFont);
 		def.put("TableHeader.font", dataFont);
 
 		def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
 		def.put("SplitPaneUI", "com.sun.java.swing.plaf.windows.WindowsSplitPaneUI");
-		
+
 		if (settings.getShowMnemonics())
 			def.put("Button.showMnemonics", Boolean.TRUE);
 		else
 			def.put("Button.showMnemonics", Boolean.FALSE);
-		
+
 		this.settings.addFontChangedListener(this);
 		if (trace) System.err.println("WbManager.initUI() - done");
 	}
@@ -243,13 +243,13 @@ public class WbManager implements FontChangedListener
 		if (trace) System.err.println("WbManager.createWindow() - done");
 		return win;
 	}
-	
+
 	public void showErrorMessage(Component aCaller, String aMsg)
 	{
 		Window w = SwingUtilities.getWindowAncestor(aCaller);
 		WbSwingUtilities.showErrorMessage(aCaller, aMsg);
 	}
-	
+
 	public void exitWorkbench()
 	{
 		this.getConnectionMgr().disconnectAll();
@@ -261,9 +261,9 @@ public class WbManager implements FontChangedListener
 			{
 				w = (MainWindow)this.mainWindows.get(i);
 				if (w == null) continue;
-				// If there are multiple Windows open, we only save the 
+				// If there are multiple Windows open, we only save the
 				// settings for the currently active window
-				if (w.isFocused()) 
+				if (w.isFocused())
 				{
 					if (!this.checkProfiles(w)) return;
 					w.saveSettings();
@@ -277,7 +277,7 @@ public class WbManager implements FontChangedListener
 		LogMgr.shutdown();
 		System.exit(0);
 	}
-	
+
   private boolean checkProfiles(MainWindow win)
   {
     if (getConnectionMgr().profilesChanged())
@@ -307,23 +307,23 @@ public class WbManager implements FontChangedListener
     }
 	}
 
-	// open a new window, but do not check any command line 
+	// open a new window, but do not check any command line
 	// parameters. This methode will be called from the GUI
 	// when the user requests a new window
 	public void openNewWindow()
 	{
 		this.openNewWindow(false);
 	}
-	
+
 	private void openNewWindow(boolean checkCmdLine)
 	{
 		if (trace) System.err.println("WbManager.openNewWindow()");
 		final MainWindow main = this.createWindow();
-		
+
 		main.show();
 		main.restoreState();
 		boolean connected = false;
-		
+
 		if (checkCmdLine)
 		{
 			// get profile name from commandline
@@ -333,8 +333,8 @@ public class WbManager implements FontChangedListener
 				ConnectionProfile prof = connMgr.getProfile(profilename);
 				if (prof != null)
 				{
-					// try to connect to the profile passed on the 
-					// command line. If this fails the connection 
+					// try to connect to the profile passed on the
+					// command line. If this fails the connection
 					// dialog will be show to the user
 					connected = main.connectTo(prof);
 				}
@@ -353,7 +353,7 @@ public class WbManager implements FontChangedListener
 			});
 		}
 	}
-	
+
 	private ArgumentParser cmdLine;
 	private static final String ARG_PROFILE = "profile";
 	private static final String ARG_CONFIGDIR = "configdir";
@@ -362,7 +362,7 @@ public class WbManager implements FontChangedListener
 	private static final String ARG_ABORT = "abortonerror";
 	private static final String ARG_SUCCESS_SCRIPT = "cleanupsuccess";
 	private static final String ARG_ERROR_SCRIPT = "cleanuperror";
-	
+
 	private void initCmdLine(String[] args)
 	{
 		if (trace) System.err.println("WbManager.initCmdLine() - start");
@@ -371,7 +371,7 @@ public class WbManager implements FontChangedListener
 		cmdLine.addArgument(ARG_CONFIGDIR);
 		cmdLine.addArgument(ARG_SCRIPT);
 		cmdLine.addArgument(ARG_LOGFILE);
-		
+
 		try
 		{
 			cmdLine.parse(args);
@@ -380,13 +380,13 @@ public class WbManager implements FontChangedListener
 			{
 				System.setProperty("workbench.configdir", value);
 			}
-			
+
 			value = cmdLine.getValue(ARG_LOGFILE);
 			if (value != null && value.length() > 0)
 			{
 				System.setProperty("workbench.log.filename", value);
 			}
-			
+
 			String scriptname = cmdLine.getValue(ARG_SCRIPT);
 			if (scriptname == null || scriptname.length() == 0)
 			{
@@ -437,7 +437,7 @@ public class WbManager implements FontChangedListener
 			{
 				abort = StringUtil.stringToBool(errorHandling);
 			}
-			
+
 			String success = cmdLine.getValue(ARG_SUCCESS_SCRIPT);
 			String error = cmdLine.getValue(ARG_ERROR_SCRIPT);
 			if (scripts != null && profilename != null)
@@ -449,7 +449,7 @@ public class WbManager implements FontChangedListener
 					runner.setAbortOnError(abort);
 					runner.setErrorScript(error);
 					runner.setSuccessScript(success);
-					// set profile will connect to the database using the 
+					// set profile will connect to the database using the
 					// connection manager. It will throw an exception
 					// if the connection fails.
 					if (trace) System.err.println("WbManager.init() - connecting BatchRunner");

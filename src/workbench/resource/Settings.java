@@ -45,7 +45,7 @@ public class Settings
 	public static final String STANDARD_FONT_KEY = "standard";
 	public static final String MSGLOG_FONT_KEY = "msglog";
 	public static final String DATA_FONT_KEY = "data";
-	
+
 	private Properties props;
 	private Font standardFont;
 	private Font editorFont;
@@ -54,20 +54,20 @@ public class Settings
 	private String filename;
 	private ArrayList fontChangeListeners = new ArrayList();
 	private String configDir;
-		
+
 	public Settings()
 	{
 		if (WbManager.trace) System.err.println("Settings.<init> - start");
 		this.props = new Properties();
 		this.filename = System.getProperty("workbench.settings.file", null);
 		fillDefaults();
-		
+
 		this.configDir = this.props.getProperty("workbench.configdir", null);
 		if (configDir == null)
 		{
 			this.configDir = System.getProperty("workbench.configdir", "");
 		}
-		
+
 		if (configDir == null) configDir = "";
 		if (configDir.length() > 0)
 		{
@@ -78,7 +78,8 @@ public class Settings
 			}
 		}
 		if (filename == null) this.filename = this.configDir + "workbench.settings";
-		
+
+	  if (WbManager.trace) System.err.println("Settings.<init> - Reading settings");
 		try
 		{
 			BufferedInputStream in = new BufferedInputStream(new FileInputStream(this.filename));
@@ -87,11 +88,11 @@ public class Settings
 		}
 		catch (IOException e)
 		{
-			//LogMgr.logInfo(this, "Settings file '" + filename + "' not found! ");
-			//LogMgr.logInfo(this, "Using defaults");
 			fillDefaults();
 		}
-		
+
+	  if (WbManager.trace) System.err.println("Settings.<init> - Done reading settings");
+
     try
     {
 			String logfile = System.getProperty("workbench.log.filename", null);
@@ -101,24 +102,26 @@ public class Settings
 			}
 			LogMgr.setOutputFile(logfile);
     }
-    catch (Exception e)
+    catch (Throwable e)
     {
+      System.err.println("Error initializing Log system!");
+      e.printStackTrace(System.err);
     }
-		
+
 		String level = this.props.getProperty("workbench.log.level", "INFO");
 		LogMgr.setLevel(level);
-		
+
 		if (WbManager.trace) System.err.println("Settings.<init> - done");
 	}
 
 	public String getConfigDir() { return this.configDir; }
 	public void setConfigDir(String aDir) { this.configDir = aDir; }
-	
+
 	public String getProfileFileName()
 	{
 		return this.configDir + "WbProfiles.xml";
 	}
-	
+
 	public String getDriverConfigFileName()
 	{
 		return this.configDir + "WbDrivers.xml";
@@ -132,12 +135,12 @@ public class Settings
 	{
 		this.fontChangeListeners.add(aListener);
 	}
-	
+
 	public void removeFontChangedListener(FontChangedListener aListener)
 	{
 		this.fontChangeListeners.remove(aListener);
 	}
-	
+
 	public void saveSettings()
 	{
 		try
@@ -269,7 +272,7 @@ public class Settings
 			if ("bold".equalsIgnoreCase(t)) style = style | Font.BOLD;
 			if ("italic".equalsIgnoreCase(type)) style = style | Font.ITALIC;
 		}
-		
+
 		try
 		{
 			size = Integer.parseInt(sizeS);
@@ -309,10 +312,10 @@ public class Settings
 			this.standardFont = aFont;
 		else if (aFontName.equals(DATA_FONT_KEY))
 			this.dataFont = aFont;
-		
+
 		this.fireFontChangedEvent(aFontName, aFont);
 	}
-	
+
 	public void fireFontChangedEvent(String aKey, Font aFont)
 	{
 		for (int i=0; i < this.fontChangeListeners.size(); i++)
@@ -321,7 +324,7 @@ public class Settings
 			if (listener != null)	listener.fontChanged(aKey, aFont);
 		}
 	}
-	
+
 	public String getLastImportDir()
 	{
 		return this.props.getProperty("workbench.import.lastdir", this.getLastExportDir());
@@ -331,7 +334,7 @@ public class Settings
 	{
 		this.props.setProperty("workbench.import.lastdir", aDir);
 	}
-	
+
 	public String getLastExportDir()
 	{
 		return this.props.getProperty("workbench.export.lastdir","");
@@ -365,12 +368,12 @@ public class Settings
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.persistence.cleanupunderscores", "false"));
 	}
-	
+
 	public void setCleanupUnderscores(boolean useEncryption)
 	{
 		this.props.setProperty("workbench.persistence.cleanupunderscores", Boolean.toString(useEncryption));
 	}
-	
+
 	public String getLastSqlDir()
 	{
 		return this.props.getProperty("workbench.sql.lastscriptdir","");
@@ -401,7 +404,7 @@ public class Settings
 		this.props.setProperty("workbench.editor.lastdir", aDir);
 	}
 
-	
+
 	public String toString()
 	{
 		return "[Settings]";
@@ -478,7 +481,7 @@ public class Settings
 	{
 		return this.props.getProperty("workbench.editor.lastfile" + anEditorId, null);
 	}
-	
+
 	public void setLastSqlDividerLocation(int aDividerId, int y)
 	{
 		this.props.setProperty("workbench.gui.sql.lastdivider" + aDividerId, Integer.toString(y));
@@ -488,7 +491,7 @@ public class Settings
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.sql.lastdivider" + aDividerId, "-1"));
 	}
-	
+
 	public void setSqlDividerLocation(int aDividerId, int y)
 	{
 		this.props.setProperty("workbench.gui.sql.divider" + aDividerId, Integer.toString(y));
@@ -563,7 +566,7 @@ public class Settings
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.historysize", "15"));
 	}
-	
+
 	public void setMaxHistorySize(int aValue)
 	{
 		this.props.setProperty("workbench.sql.historysize", Integer.toString(aValue));
@@ -670,7 +673,7 @@ public class Settings
 	{
 		this.props.setProperty("workbench.sql.alternatedelimiter", aDelimit);
 	}
-	
+
 	public String getDefaultTextDelimiter()
 	{
 		return this.getDefaultTextDelimiter(false);
@@ -685,7 +688,7 @@ public class Settings
 	{
 		this.props.setProperty("workbench.export.text.quotechar", aQuoteChar);
 	}
-	
+
 	public String getDefaultTextDelimiter(boolean readable)
 	{
 		String del = this.props.getProperty("workbench.export.text.fielddelimiter", "\\t");
@@ -700,18 +703,18 @@ public class Settings
 		{
 			if (del.equals("\\t")) del = "\t";
 		}
-		
+
 		return del;
 	}
 
 	public void setDefaultTextDelimiter(String aDelimit)
 	{
 		if (aDelimit.equals("\t")) aDelimit = "\\t";
-		
+
 		this.props.setProperty("workbench.export.text.fielddelimiter", aDelimit);
 	}
 
-	public String getLastImportDelimiter(boolean readable) 
+	public String getLastImportDelimiter(boolean readable)
 	{
 		String del = this.props.getProperty("workbench.import.text.fielddelimiter", "\\t");
 		if (readable)
@@ -725,13 +728,13 @@ public class Settings
 		{
 			if (del.equals("\\t")) del = "\t";
 		}
-		
+
 		return del;
 	}
 	public void setLastImportDelimiter(String aDelimit)
 	{
 		if (aDelimit.equals("\t")) aDelimit = "\\t";
-		
+
 		this.props.setProperty("workbench.import.text.fielddelimiter", aDelimit);
 	}
 
@@ -739,12 +742,12 @@ public class Settings
 	{
 		return "true".equals(this.props.getProperty("workbench.import.text.containsheader", "true"));
 	}
-	
+
 	public void setLastImportWithHeaders(boolean aFlag)
 	{
 		this.props.setProperty("workbench.import.text.containsheader", Boolean.toString(aFlag));
 	}
-	
+
 	public boolean getDbDebugMode()
 	{
 		return "true".equals(this.props.getProperty("workbench.db.debugger", "true"));
@@ -753,7 +756,7 @@ public class Settings
 	{
 		this.props.setProperty("workbench.db.debugger", Boolean.toString(aFlag));
 	}
-	
+
 	public int getProfileDividerLocation()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.profiles.divider", "-1"));
@@ -789,17 +792,17 @@ public class Settings
 	{
 		this.props.setProperty("workbench.dbexplorer.visible", Boolean.toString(aFlag));
 	}
-	
+
 	public boolean getDbExplorerVisible()
 	{
 		return "true".equals(this.props.getProperty("workbench.dbexplorer.visible", "false"));
 	}
-	
+
 	public boolean getShowDbExplorerInMainWindow()
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.dbexplorer.mainwindow", "true"));
 	}
-	
+
 	public void setShowDbExplorerInMainWindow(boolean showWindow)
 	{
 		this.props.setProperty("workbench.dbexplorer.mainwindow", Boolean.toString(showWindow));
@@ -809,7 +812,7 @@ public class Settings
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.profiles.encryptpassword", "true"));
 	}
-	
+
 	public void setUseEncryption(boolean useEncryption)
 	{
 		this.props.setProperty("workbench.profiles.encryptpassword", Boolean.toString(useEncryption));
@@ -819,32 +822,32 @@ public class Settings
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.dbexplorer.retrieveonopen", "false"));
 	}
-	
+
 	public void setRetrieveDbExplorer(boolean aFlag)
 	{
 		this.props.setProperty("workbench.dbexplorer.retrieveonopen", Boolean.toString(aFlag));
 	}
-	
+
 	public boolean getUseDynamicLayout()
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.gui.dynamiclayout", "false"));
 	}
-	
+
 	public void setUseDynamicLayout(boolean useEncryption)
 	{
 		this.props.setProperty("workbench.gui.dynamiclayout", Boolean.toString(useEncryption));
 	}
-	
+
 	public boolean getShowMnemonics()
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.gui.showmnemonics", "true"));
 	}
-	
+
 	public boolean getShowSplash()
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.gui.showsplash", "false"));
 	}
-	
+
 	public boolean getRetrievePKList()
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.db.retrievepklist", "true"));
@@ -855,7 +858,7 @@ public class Settings
 		String list = this.props.getProperty("workbench.db.casesensitive", null);
     return StringUtil.stringToList(list, ",");
   }
-  
+
 	public List getCancelWithReconnectServers()
 	{
 		String list = this.props.getProperty("workbench.db.cancelwithreconnect", null);
@@ -865,11 +868,11 @@ public class Settings
 	public String getInstallDir()
 	{
 		CodeSource source = Settings.class.getProtectionDomain().getCodeSource();
-		
+
 		if (source == null) return null;
-		
+
 		File installDir;
-		
+
 		try
 		{
 			URI sourceURI = new URI(source.getLocation().toString());
@@ -883,14 +886,14 @@ public class Settings
 		{
 			return null;
 		}
-		
+
 		if (!installDir.isDirectory())
 		{
 			installDir = installDir.getParentFile();
 		}
-		
+
 		return installDir.getAbsolutePath();
 	}
 
-	
+
 }

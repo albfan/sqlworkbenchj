@@ -36,7 +36,7 @@ public class StringUtil
 	public static final String PATH_SEPARATOR = System.getProperty("path.separator");
 	public static final StringBuffer EMPTY_STRINGBUFFER = new StringBuffer("");
 	public static final String EMPTY_STRING = "";
-	
+
 	public static final String replace(String aString, String aValue, String aReplacement)
 	{
 		if (aReplacement == null) return aString;
@@ -100,8 +100,8 @@ public class StringUtil
 	public static final List stringToList(String aString, String aDelimiter)
 	{
     if (aString == null || aString.length() == 0) return Collections.EMPTY_LIST;
-		LineTokenizer tok = new LineTokenizer(aString, aDelimiter);
-		ArrayList result = new ArrayList(tok.countTokens());
+		WbStringTokenizer tok = new WbStringTokenizer(aString, aDelimiter);
+		ArrayList result = new ArrayList(150);
 		while (tok.hasMoreTokens())
 		{
 			result.add(tok.nextToken());
@@ -174,19 +174,19 @@ public class StringUtil
 		getTextLines(l, aScript);
 		return l;
 	}
-	
+
 	public static void getTextLines(List aList, String aScript)
 	{
 		if (aScript == null) return;
-		if (aScript.length() > 100) 
+		if (aScript.length() > 100)
 		{
 			// the solution with the StringReader performs
-			// better on long Strings, for short strings 
+			// better on long Strings, for short strings
 			// using regex is faster
 			readTextLines(aList, aScript);
 			return;
 		}
-		
+
 		if (aList == null) return;
 		aList.clear();
 		Matcher m = StringUtil.PATTERN_CRLF.matcher(aScript);
@@ -203,7 +203,7 @@ public class StringUtil
 			start = m.end();
 		}
 
-		if (notOne) 
+		if (notOne)
 			aList.add(aScript);
 		else if (start < aScript.length())
 			aList.add(aScript.substring(start));
@@ -217,7 +217,7 @@ public class StringUtil
 			aList.add(aScript);
 			return;
 		}
-		
+
 		BufferedReader br = new BufferedReader(new StringReader(aScript));
 		String line;
 		try
@@ -226,7 +226,7 @@ public class StringUtil
 			{
 				aList.add(line.trim());
 			}
-		} 
+		}
 		catch (IOException ex)
 		{
 			ex.printStackTrace();
@@ -236,7 +236,7 @@ public class StringUtil
 			try { br.close(); } catch (Throwable th) {}
 		}
 	}
-	
+
 
 	public static final String trimQuotes(String input)
 	{
@@ -252,7 +252,7 @@ public class StringUtil
 		result = result.substring(first, last + 1);
 		return result;
 	}
-	
+
 	public static final String capitalize(String aString)
 	{
 		StringBuffer result = new StringBuffer(aString);
@@ -444,12 +444,12 @@ public class StringUtil
 		if (aString == null) return false;
 		return ("yes".equalsIgnoreCase(aString) || "1".equals(aString) || "true".equalsIgnoreCase(aString));
 	}
-	
+
 	public static List split(String aString, String delim, boolean singleDelimiter, String quoteChars, boolean keepQuotes)
 	{
 		WbStringTokenizer tok = new WbStringTokenizer(delim, singleDelimiter, quoteChars, keepQuotes);
 		tok.setSourceString(aString);
-		
+
 		List result = new ArrayList();
 		String token = null;
 		while (tok.hasMoreTokens())
@@ -459,9 +459,9 @@ public class StringUtil
 		}
 		return result;
 	}
-	
+
 	private static final String LIST_DELIMITER = "----------- WbStatement -----------";
-	
+
 	public static ArrayList readStringList(String aFilename)
 		throws IOException
 	{
@@ -471,11 +471,11 @@ public class StringUtil
 		BufferedReader in = null;
 		long start,end;
 		start = System.currentTimeMillis();
+		StringBuffer content = new StringBuffer(500);
 		try
 		{
 			in = new BufferedReader(new FileReader(f), 65536);
 			String line = in.readLine();
-			StringBuffer content = new StringBuffer(500);
 			while(line != null)
 			{
 				if (line.equals(LIST_DELIMITER))
@@ -495,11 +495,15 @@ public class StringUtil
 		{
 			try { in.close(); } catch (Throwable th) {}
 		}
+		if (content.length() > 0)
+		{
+			result.add(content.toString());
+		}
 		end = System.currentTimeMillis();
 		//LogMgr.logDebug("StringUtil.readStringList()", "Time = " + (end - start));
 		return result;
 	}
-	
+
 	public static void writeStringList(List aList, String aFilename)
 		throws IOException
 	{
@@ -513,7 +517,7 @@ public class StringUtil
 				String content = (String)aList.get(i);
 				if (content != null && content.trim().length() > 0)
 				{
-					out.write(content);
+					out.write(content.trim());
 					out.write(LINE_TERMINATOR);
 					out.write(LIST_DELIMITER);
 					out.write(LINE_TERMINATOR);
@@ -525,22 +529,16 @@ public class StringUtil
 			try { out.close(); } catch (Throwable th) {}
 		}
 	}
-	
+
 	public static void main(String args[])
 	{
-		//String test = "String sql = \"SELECT column \\n\" + \n\"  FROM test \\r\" + \n\"  WHERE x= 10\"; ";
-		//System.out.println(cleanJavaString(test));
-		//String test = "Profile name\"";
-		String test = "spool -t type \t-f \"file name.sql\" -b tablename;select * from test where name='test';";
-		//split(test, " \t", false, "\"'", true);
-		//System.out.println("---");
-		//test = "spool -t type \t-f \"file name.sql\" -b tablename./select * from test where name='test'./";
-		test = "spool /type=text /file=\"file name.sql\" /table=tablename";
-		List result = split(test, "/", false, "\"'", true);
-		System.out.println("--");
-		for (int i=0; i < result.size(); i++)
+		String test = "col1\tcol2\t\tcol4";
+		List l = stringToList(test, "\t");
+		System.out.println(l.size());
+
+		for (int i=0; i < l.size(); i++)
 		{
-			System.out.println("value=" + (String)result.get(i));
+			System.out.println(">" + l.get(i) +  "<");
 		}
 	}
 }

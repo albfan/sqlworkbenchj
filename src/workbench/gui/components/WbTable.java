@@ -619,11 +619,16 @@ extends JTable
 		int addWidth = this.getAdditionalColumnSpace(0, aColumn);
 		String s = null;//this.dwModel.getColumnName(aColumn);
 		int optWidth = 0;
+		int stringWidth = 0;
 		for (int row = 0; row < this.getRowCount(); row ++)
 		{
 			s = this.getValueAsString(row, aColumn);
-			if (s == null || s.length() == 0) continue;
-			optWidth = Math.max(optWidth, fm.stringWidth(s) + addWidth);
+			if (s == null || s.length() == 0) 
+				stringWidth = 0;
+			else
+				stringWidth = fm.stringWidth(s);
+				
+			optWidth = Math.max(optWidth, stringWidth + addWidth);
 		}
 		if (optWidth > 0)
 		{

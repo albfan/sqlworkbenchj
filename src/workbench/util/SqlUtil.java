@@ -68,19 +68,23 @@ public class SqlUtil
 		{
 			aScript = aScript.substring(0, aScript.length() - 2) + ";";
 		}
-		pos = aScript.indexOf(aDelimiter);
-		if (pos == -1 || pos == aScript.length() - 1)
-		{
-			result.add(aScript);
-			return result;
-		}
 		quoteOn = false;
 		cmdNr = 0;
 		scriptLen = aScript.length();
 		delimit = aDelimiter.trim().toUpperCase();
 		delimitLen = delimit.length();
 		lastPos = 0;
-
+		
+		pos = aScript.indexOf(aDelimiter);
+		if (pos == -1 || pos == aScript.length() - 1)
+		{
+			if (aScript.endsWith(aDelimiter))
+				result.add(aScript.substring(0, aScript.length() - delimitLen));
+			else
+				result.add(aScript);
+			return result;
+		}
+		
 		for (pos = 0; pos < scriptLen; pos++)
 		{
 

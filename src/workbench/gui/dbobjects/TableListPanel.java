@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.*;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
@@ -47,6 +48,7 @@ import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.components.*;
+import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.dbobjects.TableDependencyTreeDisplay;
 import workbench.gui.renderer.SqlTypeRenderer;
 import workbench.gui.sql.EditorPanel;
@@ -849,6 +851,15 @@ public class TableListPanel
 	
 	public void spoolData()
 	{
+		int rowCount = this.tableList.getSelectedRowCount();
+		if (rowCount <= 0) return;
+		/*
+		if (rowCount > 1)
+		{
+			this.spoolTables();
+			return;
+		}
+		*/
 		int row = this.tableList.getSelectedRow();
 		if (row < 0) return;
 		String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
@@ -857,6 +868,18 @@ public class TableListPanel
 		spooler.executeStatement(this.parentWindow, this.dbConnection, sql);
 	}
 
+	public void spoolTables()
+	{
+		String lastDir = WbManager.getSettings().getLastExportDir();
+		JFileChooser fc = new JFileChooser(lastDir);
+		ExportOptionsPanel optionPanel = new ExportOptionsPanel();
+		optionPanel.restoreSettings();
+		fc.setAccessory(optionPanel);
+		fc.addChoosableFileFilter(ExtensionFileFilter.getTextFileFilter());
+		fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
+		int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(this));
+	}
+	
 	public Window getParentWindow()
 	{
 		return SwingUtilities.getWindowAncestor(this);

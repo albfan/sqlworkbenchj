@@ -123,6 +123,7 @@ public class DataSpooler
 	{
 		this.tableName = aTablename;
 	}
+	
 	public void exportDataAsSqlInsert(WbConnection aConnection, String aSql, String anOutputfile)
 		throws IOException, SQLException
 	{

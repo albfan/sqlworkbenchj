@@ -110,7 +110,7 @@ public class SqlPanel
 	private WbConnection dbConnection;
 	private boolean updating;
 	private boolean cancelExecution;
-	
+
 	private ImageIcon loadingIcon;
 	private Icon dummyIcon;
 	private boolean dummyIconFetched = false;
@@ -410,7 +410,7 @@ public class SqlPanel
 		SelectResultAction r = new SelectResultAction(this);
 		this.actions.add(r);
     this.actions.add(new SelectMaxRowsAction(this));
-    
+
 		a = new ExpandEditorAction(this);
 		a.setCreateMenuSeparator(true);
 		this.actions.add(a);
@@ -793,12 +793,12 @@ public class SqlPanel
 		WbManager.getSettings().setLastSqlDividerLocation(this.internalId, last);
 		String fname = this.editor.getCurrentFileName();
 		WbManager.getSettings().setEditorFile(this.internalId, fname);
-		this.storeInHistory(this.editor.getText());
 		this.saveSqlStatementHistory();
 	}
 
 	public void saveSqlStatementHistory()
 	{
+		this.storeInHistory(this.editor.getText());
 		try
 		{
 			if (this.statementHistory.size() > 0)
@@ -904,6 +904,7 @@ public class SqlPanel
 	public void cancelExecution()
 	{
 		this.showStatusMessage(ResourceMgr.getString("MsgCancellingStmt"));
+		this.appendToLog(ResourceMgr.getString("MsgCancellingStmt"));
 		this.data.cancelExecution();
 		this.setCancelState(false);
 		this.clearStatusMessage();
@@ -1031,7 +1032,7 @@ public class SqlPanel
 			}
 		});
 	}
-	
+
 	private void displayResult(String aSqlScript)
 	{
 		try
@@ -1160,7 +1161,7 @@ public class SqlPanel
   {
     this.data.selectMaxRowsField();
   }
-  
+
 	private void checkResultSetActions()
 	{
 		boolean hasResult = this.data.hasResultSet();
@@ -1202,8 +1203,8 @@ public class SqlPanel
 		}
 	}
 
-  private Image loadingImage = null; 
-  
+  private Image loadingImage = null;
+
 	private ImageIcon getLoadingIndicator()
 	{
 		if (this.loadingIcon == null)

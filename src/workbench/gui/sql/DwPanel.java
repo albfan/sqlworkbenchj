@@ -232,11 +232,12 @@ public class DwPanel extends JPanel
 			long start, end, sqlTime = 0;
 			this.clearContent();
 			
+			/*
 			if (aSql.endsWith(";")) aSql = aSql.substring(0, aSql.length() - 1);
 			String alternate = WbManager.getSettings().getAlternateDelimiter();
 			if (aSql.endsWith(alternate)) 
 				aSql = aSql.substring(0, aSql.length() - alternate.length());
-				
+			*/	
 			boolean repeatLast = aSql.equals(this.sql);
 			this.sql = aSql;
 		

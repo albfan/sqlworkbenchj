@@ -27,7 +27,7 @@ import workbench.resource.ResourceMgr;
  *
  * @author  workbench@kellerer.org
  */
-public class ObjectDropperUI 
+public class ObjectDropperUI
 	extends javax.swing.JPanel
 {
 	private JDialog dialog;
@@ -36,12 +36,12 @@ public class ObjectDropperUI
 	private WbConnection connection;
 	private boolean cancelled;
 	private boolean typesAreTables;
-	
+
 	public ObjectDropperUI()
 	{
 		initComponents();
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -135,13 +135,13 @@ public class ObjectDropperUI
 		this.dialog = null;
 		this.cancelled = false;
 	}//GEN-LAST:event_dropButtonActionPerformed
-	
+
 	public void setConnection(WbConnection aConn)
 	{
 		this.connection = aConn;
 		if (this.objectTypes != null) this.checkCascade();
 	}
-	
+
 	public boolean dialogWasCancelled()
 	{
 		return this.cancelled;
@@ -151,15 +151,22 @@ public class ObjectDropperUI
 		this.objectNames = objects;
 		this.objectTypes = types;
 		this.typesAreTables = true;
-		for (int i=0; i < this.objectTypes.size(); i ++)
+		int numNames = this.objectNames.size();
+		int numTypes = this.objectTypes.size();
+
+		String[] display = new String[numNames];
+		for (int i=0; i < numNames; i ++)
 		{
+			if (i >= numTypes) continue;
+
 			if (!"table".equalsIgnoreCase( (String)this.objectTypes.get(i)) )
 			{
 				this.typesAreTables = false;
-				break;
+				//break;
 			}
+			display[i] = this.objectTypes.get(i) + " " + this.objectNames.get(i);
 		}
-		this.objectList.setListData(objects.toArray());
+		this.objectList.setListData(display);
 		if (this.connection != null) this.checkCascade();
 	}
 
@@ -177,7 +184,7 @@ public class ObjectDropperUI
 			this.checkBoxCascadeConstraints.setSelected(canCascade);
 		}
 	}
-	
+
 	public void showDialog(Frame aParent)
 	{
 		this.dialog = new JDialog(aParent, ResourceMgr.getString("TxtDropObjectsTitle"), true);
@@ -192,7 +199,7 @@ public class ObjectDropperUI
 		this.cancelled = true;
 		this.dialog.setVisible(true);
 	}
-	
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JButton dropButton;
@@ -203,5 +210,5 @@ public class ObjectDropperUI
   private javax.swing.JPanel buttonPanel;
   private javax.swing.JCheckBox checkBoxCascadeConstraints;
   // End of variables declaration//GEN-END:variables
-	
+
 }

@@ -964,8 +964,16 @@ public class DataStore
 				{
 					try
 					{
-						colData = this.convertCellValue(data.get(i), col);
-						this.setValue(row, col, colData);
+						Object value = data.get(i);
+						if (value == null)
+						{
+							this.setNull(row, col);
+						}
+						else
+						{		
+							colData = this.convertCellValue(value, col);
+							this.setValue(row, col, colData);
+						}
 					}
 					catch (Exception e)
 					{

@@ -9,6 +9,8 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.ArrayList;
 
+import workbench.WbManager;
+
 /**
  *
  * @author  workbench@kellerer.org
@@ -81,6 +83,7 @@ public class LogMgr
 
 	public static void setOutputFile(String aFilename)
 	{
+	  if (WbManager.trace) System.err.println("LogMgr.setOutputFile() - " + aFilename);
 		if (aFilename == null || aFilename.length() == 0) return;
 		if ("System.out".equalsIgnoreCase(aFilename))
 		{
@@ -89,6 +92,7 @@ public class LogMgr
 				logOut.close();
 			}
 			outputOpened = true;
+			outputfile = null;
 			logOut = System.out;
 			return;
 		}
@@ -99,12 +103,14 @@ public class LogMgr
 				logOut.close();
 			}
 			outputOpened = true;
+			outputfile = null;
 			logOut = System.err;
 			return;
 		}
 		outputfile = aFilename;
 		outputOpened = false;
 		checkOutput();
+	  if (WbManager.trace) System.err.println("LogMgr.setOutputFile() - done");
 	}
 
 	private static void checkOutput()
@@ -118,11 +124,11 @@ public class LogMgr
     }
 		try
 		{
-			if (logOut != null)
+			if (logOut != null && logOut != System.out && logOut != System.err)
 			{
 				logOut.close();
 			}
-      //System.out.println("Opening logfile " + outputfile);
+      if (WbManager.trace) System.err.println("LogMgr.checkOutput() - Opening logfile " + outputfile);
 			logOut = new DuplicatingPrintStream(new BufferedOutputStream(new FileOutputStream(outputfile)), System.out);
       outputOpened = true;
       logInfo("LogMgr", "Log started");

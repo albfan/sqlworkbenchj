@@ -816,6 +816,8 @@ public class MainWindow
 		sql.setConnection(this.currentConnection);
 		this.sqlTab.add(sql, index);
 		this.sqlTab.setTitleAt(index, ResourceMgr.getString("LabelTabStatement") + " " + Integer.toString(index+1));
+		char c = Integer.toString(index+1).charAt(0);
+		this.sqlTab.setMnemonicAt(index, c);
 		this.sqlTab.doLayout();
 		SelectTabAction a = new SelectTabAction(this.sqlTab, index);
 		this.addToViewMenu(a);
