@@ -23,11 +23,12 @@ public class WbTableSorter
 {
 	protected TableModel model;
 	RowIndex[]   indexes;
-	Vector  sortingColumns = new Vector();
+	//Vector  sortingColumns = new Vector();
 	boolean ascending = true;
 	int     column = -1;
 	int     compares;
 	ColumnComparator comparator;
+	Class currentSortColumnClass;
 	
 	public WbTableSorter(TableModel model)
 	{
@@ -134,22 +135,9 @@ public class WbTableSorter
 		fireTableChanged(e);
 	}
 	
-	/**    Compare values row by row.  This method can compare Strings, Booleans,
-	 * Dates, or Numbers.  It compares objects by calling each object's toString()
-	 * method and then comparing the Strings.  It can also compare objects which
-	 * implement the <code>java.lang.Comparable</code> interface.
-	 *
-	 * @param row1 Row 1
-	 * @param row2 Row 2
-	 * @param column The column to sort
-	 * @return 1 If row 1 is greater than row 2, -1 if row 1 is less than
-	 * row 2, or 0 if the values match
-	 */
 	public int compareRowsByColumn(int row1, int row2, int column)
 	{
-		Class      type = model.getColumnClass(column);
 		TableModel data = model;
-		// Check for nulls.
 		Object     o1 = data.getValueAt(row1, column);
 		Object     o2 = data.getValueAt(row2, column);
 		// If both values are null, return 0.
@@ -168,29 +156,18 @@ public class WbTableSorter
 		
 		try
 		{
-			//System.out.println("Comparing " + o1 + " to " + o2);
 			int result = ((Comparable)o1).compareTo(o2);
-			//System.out.println("Result=" + result);
 			return result;
 		}
 		catch (Exception e)
 		{
-			//System.out.println("Error while comparing " + o1 + " to " + o2);
-			//System.out.println("o1="+ o1.getClass().getName() + ",o2=" + o2.getClass().getName());
 		}
 
 		if (o1 instanceof NullValue && o2 instanceof NullValue) return 0;
 		if (o1 instanceof NullValue) return -1;
 		if (o2 instanceof NullValue) return 2;
-		/*
-		 * We copy all returned values from the getValue call in case
-		 * an optimised model is reusing one object to return many
-		 * values.  The Number subclasses in the JDK are immutable and
-		 * so will not be used in this way but other subclasses of
-		 * Number might want to do this to save space and avoid
-		 * unnecessary heap allocation.
-		 */
-		if (type.getSuperclass() == java.lang.Number.class)
+
+		if (this.currentSortColumnClass.getSuperclass() == java.lang.Number.class)
 		{
 			Number n1 = (Number)data.getValueAt(row1, column);
 			double d1 = n1.doubleValue();
@@ -209,7 +186,7 @@ public class WbTableSorter
 				return 0;
 			}
 		}
-		else if (type == Date.class)
+		else if (this.currentSortColumnClass == Date.class)
 		{
 			Date d1 = (Date)data.getValueAt(row1, column);
 			long n1 = d1.getTime();
@@ -228,7 +205,7 @@ public class WbTableSorter
 				return 0;
 			}
 		}
-		else if (type == String.class)
+		else if (this.currentSortColumnClass == String.class)
 		{
 			String s1 = (String)data.getValueAt(row1, column);
 			String s2 = (String)data.getValueAt(row2, column);
@@ -246,7 +223,7 @@ public class WbTableSorter
 				return 0;
 			}
 		}
-		else if (type == Boolean.class)
+		else if (this.currentSortColumnClass == Boolean.class)
 		{
 			Boolean bool1 = (Boolean)data.getValueAt(row1, column);
 			boolean b1 = bool1.booleanValue();
@@ -267,7 +244,7 @@ public class WbTableSorter
 		}
 		else
 		{
-			Object     v1 = data.getValueAt(row1, column);
+			Object v1 = data.getValueAt(row1, column);
 			Comparable comp = null;
 			if (v1 instanceof Comparable)
 			{
@@ -301,15 +278,10 @@ public class WbTableSorter
 	 */
 	public int compare(int row1, int row2)
 	{
-		compares++;
-		for (int level = 0; level < sortingColumns.size(); level++)
+		int result = compareRowsByColumn(row1, row2, this.column);
+		if (result != 0)
 		{
-			Integer column = (Integer)sortingColumns.elementAt(level);
-			int     result = compareRowsByColumn(row1, row2, column.intValue());
-			if (result != 0)
-			{
-				return ascending ? result : -result;
-			}
+			return ascending ? result : -result;
 		}
 		return 0;
 	}
@@ -374,10 +346,12 @@ public class WbTableSorter
 	{
 		this.ascending = ascending;
 		this.column = aColumn;
-		sortingColumns.removeAllElements();
-		sortingColumns.addElement(new Integer(column));
+		//sortingColumns.removeAllElements();
+		//sortingColumns.addElement(new Integer(column));
+		this.currentSortColumnClass = model.getColumnClass(aColumn);
 		this.sort(this);
 		fireTableChanged(new TableModelEvent(this));
+		this.currentSortColumnClass = null;
 	}
 
 	public void startSorting(final WbTable table, final int aColumn, final boolean ascending)
@@ -387,10 +361,12 @@ public class WbTableSorter
 		{
 			public void run()
 			{
-				//tableView.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				table.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				table.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				sorter.sortByColumn(aColumn, ascending);
-				//tableView.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				table.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				table.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				table.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				// repaint the header so that the icon is displayed...
 				table.getTableHeader().repaint(); 

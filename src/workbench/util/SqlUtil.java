@@ -64,7 +64,7 @@ public class SqlUtil
 
 			if (!quoteOn)
 			{
-				if (delimitLen > 1)
+				if (delimitLen > 1 && pos + delimitLen < scriptLen)
 				{
 					currChar = aScript.substring(pos, pos + delimitLen).toUpperCase();
 				}
@@ -85,6 +85,11 @@ public class SqlUtil
 					}
 					if (value.length() > 0)
 					{
+						if (value.endsWith(aDelimiter))
+						{
+							value = value.substring(0, value.length() - delimitLen);
+						}
+						
 						result.add(value);
 					}
 					lastPos = pos + delimitLen;
@@ -95,6 +100,10 @@ public class SqlUtil
 		if (lastPos < pos)
 		{
 			value = aScript.substring(lastPos).trim();
+			if (value.endsWith(aDelimiter))
+			{
+				value = value.substring(0, value.length() - delimitLen);
+			}
 			result.add(value);
 		}
 		return result;
@@ -166,9 +175,9 @@ public class SqlUtil
 			}
 		}
 		if (fromPos == -1) return Collections.EMPTY_LIST;
-		int fromEnd = aSql.indexOf(" WHERE ");
-		if (fromEnd == -1) fromEnd = aSql.indexOf(" ORDER ");
-		if (fromEnd == -1) fromEnd = aSql.indexOf(" GROUP ");
+		int fromEnd = aSql.indexOf(" WHERE ", fromPos);
+		if (fromEnd == -1) fromEnd = aSql.indexOf(" ORDER ", fromPos);
+		if (fromEnd == -1) fromEnd = aSql.indexOf(" GROUP ", fromPos);
 		if (fromEnd == -1) fromEnd = aSql.length();
 		String fromList = orgSql.substring(fromPos + FROM.length(), fromEnd);
 		StringTokenizer tok = new StringTokenizer(fromList, ",");

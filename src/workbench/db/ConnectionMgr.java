@@ -46,21 +46,30 @@ public class ConnectionMgr
 	{
 		this.disconnect();
 		
+		WbConnection conn = new WbConnection();
+		Connection sql = this.connect(aProfile);
+		conn.setSqlConnection(sql);
+		conn.setProfile(aProfile);
+		this.currentConnection = conn;
+		
+		return conn;
+	}
+
+	Connection connect(ConnectionProfile aProfile)
+		throws ClassNotFoundException, SQLException, NoConnectionException
+	{
+		// The DriverManager refuses to use a driver which was not loaded
+		// from the system classloader, so the connection has to be 
+		// established directly from the driver.
 		String drvName = aProfile.getDriverclass();
 		DbDriver drv = this.findDriver(drvName);
 		if (drv == null)
 		{
 			throw new NoConnectionException("Driver class not registered");
 		}
-		
-		WbConnection conn = new WbConnection();
-		Connection sql;
-		// The DriverManager refuses to use a driver which was not loaded
-		// from the system classloader, so the connection has to be 
-		// established directly from the driver.
 		try
 		{
-			sql = drv.connect(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword());
+			Connection sql = drv.connect(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword());
 		
 			try
 			{
@@ -71,17 +80,24 @@ public class ConnectionMgr
 				// some drivers do not support this, so
 				// we just ignore the error :-)
 			}
-			conn.setSqlConnection(sql);
-			this.currentConnection = conn;
+			return sql;
 		}
 		catch (WbException e)
 		{
 			throw new NoConnectionException(e.getMessage());
 		}
-		
-		return conn;
 	}
-
+	
+	public void reconnect(WbConnection aConn)
+		throws ClassNotFoundException, SQLException, NoConnectionException
+	{
+		this.disconnect();
+		
+		Connection sql = this.connect(aConn.getProfile());
+		aConn.setSqlConnection(sql);
+		this.currentConnection = aConn;
+	}
+	
 	private DbDriver findDriver(String drvName)
 	{
 		if (this.drivers == null)

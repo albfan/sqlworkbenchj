@@ -24,7 +24,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import workbench.WbManager;
 import workbench.exception.WbException;
-import workbench.gui.components.ResultSetTableModel;
+import workbench.gui.components.DataStoreTableModel;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.StringUtil;
@@ -38,8 +38,6 @@ public class DbMetadata
 	public static final String PROC_RESULT_UNKNOWN = "";
 	public static final String PROC_RESULT_YES = "RESULT";
 	public static final String PROC_RESULT_NO = "NO RESULT";
-//	public static String PROC_SCHEMA_PLACEHOLDER = "%schemaname%";
-//	public static String PROC_CATALOG_PLACEHOLDER = "%schemaname%";
 
 	public static final String TABLE_NAME_PLACEHOLDER = "%tablename%";
 	public static final String INDEX_NAME_PLACEHOLDER = "%indexname%";
@@ -59,6 +57,8 @@ public class DbMetadata
 	private DatabaseMetaData metaData;
 	private List tableListColumns;
 	private WbConnection dbConnection;
+	
+	private List serversWhichNeedReconnect = Collections.EMPTY_LIST;
 	
 	// These Hashmaps contains templates 
 	// for object creation
@@ -100,6 +100,7 @@ public class DbMetadata
 			this.catalogTerm = "Catalog";
 		
 		this.productName = this.metaData.getDatabaseProductName();
+		this.serversWhichNeedReconnect = WbManager.getSettings().getCancelWithReconnectServers();
 	}
 
 	private HashMap readStatementTemplates(String aFilename)
@@ -293,11 +294,16 @@ public class DbMetadata
 			return false;
 		}
 	}
+
+	public boolean cancelNeedsReconnect()
+	{
+		return this.serversWhichNeedReconnect.contains(this.productName);
+	}
 	
-	public ResultSetTableModel getProcedureColumns(String aCatalog, String aSchema, String aProcname)
+	public DataStoreTableModel getProcedureColumns(String aCatalog, String aSchema, String aProcname)
 		throws SQLException, WbException
 	{
-		return new ResultSetTableModel(this.getProcedureColumnInformation(aCatalog, aSchema, aProcname));
+		return new DataStoreTableModel(this.getProcedureColumnInformation(aCatalog, aSchema, aProcname));
 	}
 	
 	public final static int COLUMN_IDX_PROC_COLUMNS_COL_NAME = 0;
@@ -381,16 +387,16 @@ public class DbMetadata
 		return display;
 	}
 	
-	public ResultSetTableModel getListOfProcedures()
+	public DataStoreTableModel getListOfProcedures()
 		throws SQLException
 	{
 		return this.getListOfProcedures(null, null);
 	}
 
-	public ResultSetTableModel getListOfProcedures(String aCatalog, String aSchema)
+	public DataStoreTableModel getListOfProcedures(String aCatalog, String aSchema)
 		throws SQLException
 	{
-		return new ResultSetTableModel(this.getProcedures(aCatalog, aSchema));
+		return new DataStoreTableModel(this.getProcedures(aCatalog, aSchema));
 	}
 	
 	public static final int COLUMN_IDX_PROC_LIST_CATALOG = 0;
@@ -403,50 +409,56 @@ public class DbMetadata
 		throws SQLException
 	{
 		String catalog = this.dbConnection.getSqlConnection().getCatalog();
+		String[] cols = new String[] {catalogTerm.toUpperCase(), schemaTerm.toUpperCase(), "PROCEDURE_NAME", "TYPE", "REMARKS"};
+		final int types[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+		final int sizes[] = {10,10,30,12,20};
+
+		DataStore ds = new DataStore(cols, types, sizes);
 		
 		if ("*".equals(aSchema) || "%".equals(aSchema))
 		{
 			aSchema = null;
 		}
-		ResultSet rs = this.metaData.getProcedures(aCatalog, aSchema, "%");
-		String[] cols = new String[] {catalogTerm.toUpperCase(), schemaTerm.toUpperCase(), "PROCEDURE_NAME", "TYPE", "REMARKS"};
-		final int types[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		final int sizes[] = {10,10,30,12,20};
-		
-		DataStore ds = new DataStore(cols, types);
-		ds.setColumnSizes(sizes);
-		
-		String sType;
-		
-		while (rs.next())
+		try
 		{
-			String cat = rs.getString("PROCEDURE_CAT");
-			String schema = rs.getString("PROCEDURE_SCHEM");
-			String name = rs.getString("PROCEDURE_NAME");
-			String remark = rs.getString("REMARKS");
-			short type = rs.getShort("PROCEDURE_TYPE");
-			if (rs.wasNull())
+			ResultSet rs = this.metaData.getProcedures(aCatalog, aSchema, "%");
+
+			String sType;
+
+			while (rs.next())
 			{
-				sType = "N/A";
+				String cat = rs.getString("PROCEDURE_CAT");
+				String schema = rs.getString("PROCEDURE_SCHEM");
+				String name = rs.getString("PROCEDURE_NAME");
+				String remark = rs.getString("REMARKS");
+				short type = rs.getShort("PROCEDURE_TYPE");
+				if (rs.wasNull())
+				{
+					sType = "N/A";
+				}
+				else
+				{
+					if (type == DatabaseMetaData.procedureNoResult)
+						sType = PROC_RESULT_NO;
+					else if (type == DatabaseMetaData.procedureReturnsResult)
+						sType = PROC_RESULT_YES;
+					else 
+						sType = PROC_RESULT_UNKNOWN;
+				}
+				int row = ds.addRow();
+
+				ds.setValue(row, 0, cat);
+				ds.setValue(row, 1, schema);
+				ds.setValue(row, 2, name);
+				ds.setValue(row, 3, sType);
+				ds.setValue(row, 4, remark);
 			}
-			else
-			{
-				if (type == DatabaseMetaData.procedureNoResult)
-					sType = PROC_RESULT_NO;
-				else if (type == DatabaseMetaData.procedureReturnsResult)
-					sType = PROC_RESULT_YES;
-				else 
-					sType = PROC_RESULT_UNKNOWN;
-			}
-			int row = ds.addRow();
-			
-			ds.setValue(row, 0, cat);
-			ds.setValue(row, 1, schema);
-			ds.setValue(row, 2, name);
-			ds.setValue(row, 3, sType);
-			ds.setValue(row, 4, remark);
+			rs.close();
 		}
-		rs.close();
+		catch (Exception e)
+		{
+			LogMgr.logError("DbMetadata.getProcedures()", "Error while retrieving procedures", e);
+		}
 		return ds;
 	}
 	
@@ -462,27 +474,27 @@ public class DbMetadata
 		}
 	}
 	
-	public ResultSetTableModel getListOfTables()
+	public DataStoreTableModel getListOfTables()
 		throws SQLException, WbException
 	{
 		return this.getListOfTables(null, null, null);
 	}
 	
-	public ResultSetTableModel getListOfTables(String aCatalog, String aSchema, String aType)
+	public DataStoreTableModel getListOfTables(String aCatalog, String aSchema, String aType)
 		throws SQLException, WbException
 	{
-		return new ResultSetTableModel(this.getTables(aCatalog, aSchema, aType));
+		return new DataStoreTableModel(this.getTables(aCatalog, aSchema, aType));
 	}
 
-	public ResultSetTableModel getTableDefinitionModel(String aCatalog, String aSchema, String aTable)
+	public DataStoreTableModel getTableDefinitionModel(String aCatalog, String aSchema, String aTable)
 		throws SQLException, WbException
 	{
-		return new ResultSetTableModel(this.getTableDefinition(aCatalog, aSchema, aTable));
+		return new DataStoreTableModel(this.getTableDefinition(aCatalog, aSchema, aTable));
 	}
-	public ResultSetTableModel getTableDefinitionModel(String aTable)
+	public DataStoreTableModel getTableDefinitionModel(String aTable)
 		throws SQLException, WbException
 	{
-		return new ResultSetTableModel(this.getTableDefinition(null, null, aTable));
+		return new DataStoreTableModel(this.getTableDefinition(null, null, aTable));
 	}
 	
 	public DataStore getTableDefinition(String aTable)
@@ -547,14 +559,14 @@ public class DbMetadata
 		return ds;
 	}
 	
-	public ResultSetTableModel getTableIndexes(String aTable)
+	public DataStoreTableModel getTableIndexes(String aTable)
 	{
-		return new ResultSetTableModel(this.getTableIndexInformation(null, null, aTable));
+		return new DataStoreTableModel(this.getTableIndexInformation(null, null, aTable));
 	}
 	
-	public ResultSetTableModel getTableIndexes(String aCatalog, String aSchema, String aTable)
+	public DataStoreTableModel getTableIndexes(String aCatalog, String aSchema, String aTable)
 	{
-		return new ResultSetTableModel(this.getTableIndexInformation(aCatalog, aSchema, aTable));
+		return new DataStoreTableModel(this.getTableIndexInformation(aCatalog, aSchema, aTable));
 	}
 
 	public static final int COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME = 0;
@@ -762,9 +774,9 @@ public class DbMetadata
 		return result.toString();
 	}
 	
-	public ResultSetTableModel getListOfCatalogs()
+	public DataStoreTableModel getListOfCatalogs()
 	{
-		return new ResultSetTableModel(this.getCatalogInformation());
+		return new DataStoreTableModel(this.getCatalogInformation());
 	}
 	
 	public List getCatalogs()

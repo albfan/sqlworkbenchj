@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -21,7 +23,7 @@ import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.exception.WbException;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.ResultSetTableModel;
+import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
@@ -45,14 +47,16 @@ public class DwPanel extends JPanel
 	private WbTable infoTable;
 	private DwStatusBar statusBar;
 	
-	private ResultSetTableModel realModel;
+	private DataStoreTableModel realModel;
 	private String sql;
 	private String lastMessage;
 	private WbConnection dbConnection;
 	private DefaultTableModel errorModel;
 	private DefaultTableModel emptyModel;
 	private boolean hasResultSet = false;
-	private PreparedStatement prepStatement;
+	//private PreparedStatement prepStatement;
+	private Statement lastStatement;
+	
 	private JScrollPane scrollPane;
 	private DefaultCellEditor defaultEditor;
 	private DefaultCellEditor defaultNumberEditor;
@@ -60,6 +64,7 @@ public class DwPanel extends JPanel
 	private int objectId;
 	
 	private static int nextId = 0;
+	private WbConnection lastConnection;
 	
 	public DwPanel()
 	{
@@ -101,7 +106,7 @@ public class DwPanel extends JPanel
 		throws SQLException, WbException
 	{
 		this.sql = null;
-		this.prepStatement = null;
+		this.lastStatement = null;
 		this.lastMessage = null;
 		this.clearContent();
 		this.dbConnection = aConn;
@@ -207,6 +212,7 @@ public class DwPanel extends JPanel
 			LogMgr.logInfo(this, "No connection given or connection closed!");
 			return;
 		}
+		this.lastConnection = aConnection;
 		
 		try
 		{
@@ -262,30 +268,27 @@ public class DwPanel extends JPanel
 			}
 			else
 			{
-				this.prepStatement = sqlcon.prepareStatement(aSql);
-				// Only set the maxrows parameter for selects
+				this.lastStatement = sqlcon.createStatement();//prepareStatement(aSql);
+
 				if (verb.equalsIgnoreCase("SELECT"))
 				{
-					this.prepStatement.setMaxRows(this.maxRows);
+					this.lastStatement.setMaxRows(this.maxRows);
 				}
 				else
 				{
-					this.prepStatement.setMaxRows(0);
+					this.lastStatement.setMaxRows(0);
 				}					
 				start = System.currentTimeMillis();
-				this.prepStatement.execute();
+				this.lastStatement.execute(aSql);
 				end = System.currentTimeMillis();
+				rs = this.lastStatement.getResultSet();
 				sqlTime = (end - start);
-				if (this.prepStatement != null)
-				{
-					// the statement object can be set to null
-					// by the cancelExecution() method
-					rs = this.prepStatement.getResultSet();
-				}
+				
 				if (rs != null)
 				{
 					this.hasResultSet = true;
-					this.realModel = new ResultSetTableModel(rs, null);
+					this.realModel = new DataStoreTableModel(rs, null);
+					this.realModel.getDataStore().checkUpdateTable();
 					rs.close();
 				}
 				else
@@ -293,6 +296,7 @@ public class DwPanel extends JPanel
 					this.hasResultSet = false;
 				}
 			}
+			
 			if (this.hasResultSet)
 			{
 				this.sql = aSql;
@@ -300,9 +304,8 @@ public class DwPanel extends JPanel
 				{
 					this.infoTable.saveColumnSizes();
 				}
-				this.realModel.getDataStore().checkUpdateTable();
-				this.infoTable.setAutoCreateColumnsFromModel(true);
 				this.setVisible(false);
+				this.infoTable.setAutoCreateColumnsFromModel(true);
 				this.infoTable.setModel(this.realModel, true);
 				if (repeatLast)
 				{
@@ -317,21 +320,35 @@ public class DwPanel extends JPanel
 				this.lastMessage = ResourceMgr.getString(ResourceMgr.MSG_SQL_EXCUTE_OK);
 				this.statusBar.setRowcount(this.infoTable.getModel().getRowCount());
 			}
-			else if (this.prepStatement != null)
+			else if (this.lastStatement != null)
 			{
-				StringBuffer msg = new StringBuffer(verb.toUpperCase() + " executed successfully.\r\n");
 				this.hasResultSet = false;
+				StringBuffer msg = new StringBuffer();
+				this.setMessageDisplayModel(this.getEmptyTableModel());
+				SQLWarning warn = this.lastStatement.getWarnings();
+				boolean warnings = warn != null;
+				while (warn != null)
+				{
+					msg.append('\n');
+					msg.append(warn.getMessage());
+					warn = warn.getNextWarning();
+				}
+				msg.append('\n');
+				if (!warnings)
+				{
+					msg.append(verb.toUpperCase() + " executed successfully.\n");
+				}
 				int count = 0;
-				count = this.prepStatement.getUpdateCount();
+				count = this.lastStatement.getUpdateCount();
 				if (count >= 0)
 				{
-					msg.append("\r\n");
+					msg.append("\n");
 					msg.append(count + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
 				}
-				this.setMessageDisplayModel(this.getEmptyTableModel());
 				this.lastMessage = msg.toString();
 			}
-			if (this.prepStatement != null) this.prepStatement.close();
+			if (this.lastStatement != null) this.lastStatement.close();
+			this.lastStatement = null;
 			this.lastMessage = this.lastMessage + "\r\n" + ResourceMgr.getString("MsgExecTime") + " " + (((double)sqlTime) / 1000.0) + "s";
 		}
 		catch (SQLException sql)
@@ -394,13 +411,17 @@ public class DwPanel extends JPanel
 
 	public boolean cancelExecution()
 	{
-		if (this.prepStatement != null)
+		if (this.lastStatement != null)
 		{
 			try
 			{
 				LogMgr.logDebug(this, "Trying to cancel the current statement...");
-				this.prepStatement.cancel();
-				this.prepStatement.close();
+				this.lastStatement.cancel();
+				this.lastStatement.close();
+				if (this.lastConnection != null && this.lastConnection.cancelNeedsReconnect())
+				{
+					this.lastConnection.reconnect();
+				}
 				LogMgr.logDebug(this, "Cancelling succeeded.");
 				return true;
 			}

@@ -91,6 +91,7 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ma
 	
 	private WbConnection dbConnection;
 	private boolean updating = false;
+	private String alternateDelimiter = "./";
 	
 	/** Creates new SqlPanel */
 	public SqlPanel(int anId)
@@ -123,6 +124,7 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ma
 		pol.setDefaultComponent(data.getTable());
 		pol.addComponent(data.getTable());
 		this.resultTab.setFocusTraversalPolicy(pol);
+		this.alternateDelimiter = WbManager.getSettings().getAlternateDelimiter();
 		
 		this.editor = new EditorPanel();
 		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
@@ -472,6 +474,10 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ma
 			if (this.data.getTable().getDataStore().isModified())
 			{
 				this.setActionState(this.updateAction, true);
+				
+				// Check if the editing mode was started automatically
+				if (!this.startEditAction.isSwitchedOn())
+					this.startEditAction.setSwitchedOn(false);
 			}
 		}
 		else
@@ -726,7 +732,14 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ma
 		try
 		{
 			this.log.setText(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
-			List sqls = SqlUtil.getCommands(aSqlScript, ";");
+			String delimit = ";";
+			
+			if (aSqlScript.endsWith(this.alternateDelimiter))
+			{
+				delimit = this.alternateDelimiter;
+			}
+			
+			List sqls = SqlUtil.getCommands(aSqlScript, delimit);
 			String msg = ResourceMgr.getString("TxtScriptStatementFinished");
 			int count = sqls.size();
 			msg = StringUtil.replace(msg, "%total%", Integer.toString(count));
@@ -736,10 +749,10 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ma
 				String sql = (String)sqls.get(i);
 				this.data.runStatement(sql);
 				this.log.append(this.data.getLastMessage());
-				if (i < count - 1)
+				if (count > 1)
 				{
 					this.log.append("\n");
-					this.log.append(StringUtil.replace(msg, "%nr%", Integer.toString(i)));
+					this.log.append(StringUtil.replace(msg, "%nr%", Integer.toString(i + 1)));
 					this.log.append("\n");
 					this.log.setCaretPosition(this.log.getText().length());
 				}
@@ -759,6 +772,7 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ma
 			}
 			if (count > 1)
 			{
+				this.log.append("\n");
 				this.log.append(ResourceMgr.getString("TxtScriptFinished"));
 				this.log.setCaretPosition(this.log.getText().length());
 			}

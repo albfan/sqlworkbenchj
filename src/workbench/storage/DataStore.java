@@ -499,6 +499,10 @@ public class DataStore
 		throws Exception
 	{
 		int type = this.getColumnType(aColumn);
+		if (aValue == null)
+		{
+			return NullValue.getInstance(type);
+		}
 		switch (type)
 		{
 			case Types.BIGINT:
@@ -508,7 +512,7 @@ public class DataStore
 				return Integer.valueOf(((String)aValue).trim());
 			case Types.NUMERIC:
 			case Types.DECIMAL:
-				return new BigDecimal(((String)aValue).trim());
+				return new BigDecimal((String)aValue);
 			case Types.DOUBLE:
 				return new Double(((String)aValue).trim());
 			case Types.REAL:

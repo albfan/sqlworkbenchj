@@ -34,6 +34,8 @@ public class NumberField extends JTextField
 	private void init()
 	{
 		this.toolkit = Toolkit.getDefaultToolkit();
+		integerFormatter = NumberFormat.getNumberInstance(Locale.getDefault());
+		integerFormatter.setParseIntegerOnly(true);
 	}
 
 	public void setDecimalChar(char aDecChar)
@@ -56,7 +58,8 @@ public class NumberField extends JTextField
 		try
 		{
 			retVal = integerFormatter.parse(getText()).intValue();
-		} catch (ParseException e)
+		} 
+		catch (ParseException e)
 		{
 			// This should never happen because insertString allows
 			// only properly formatted data to get in the field.

@@ -9,6 +9,7 @@ package workbench.db;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import workbench.WbManager;
 import workbench.exception.NoConnectionException;
 import workbench.log.LogMgr;
 
@@ -22,7 +23,8 @@ public class WbConnection
 	//private Connection sqlConnection;
 	private Connection sqlConnection;
 	private DbMetadata metaData;
-
+	private ConnectionProfile profile;
+	
 	/** Creates a new instance of WbConnection */
 	public WbConnection()
 	{
@@ -33,6 +35,28 @@ public class WbConnection
 		this.setSqlConnection(aConn);
 	}
 
+	public void setProfile(ConnectionProfile aProfile)
+	{
+		this.profile = aProfile;
+	}
+	
+	public ConnectionProfile getProfile()
+	{
+		return this.profile;
+	}
+	
+	public void reconnect()
+	{
+		try
+		{
+			WbManager.getInstance().getConnectionMgr().reconnect(this);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("WbConnection.reconnect()", "Error when reconnecting", e);
+		}
+	}
+	
 	void setSqlConnection(Connection aConn)
 	{
 		this.sqlConnection = aConn;
@@ -117,6 +141,11 @@ public class WbConnection
 		return this.sqlConnection.createStatement();
 	}
 
+	public boolean cancelNeedsReconnect()
+	{
+		return this.metaData.cancelNeedsReconnect();
+	}
+	
 	public DbMetadata getMetadata()
 	{
 		return this.metaData;

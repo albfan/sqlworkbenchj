@@ -35,6 +35,7 @@ import workbench.gui.components.WbToolbar;
 import workbench.gui.dbobjects.DbExplorerPanel;
 import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.profiles.ProfileSelectionDialog;
+import workbench.gui.settings.SettingsPanel;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
@@ -599,7 +600,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			}
 			else if ("optionsDialog".equals(command))
 			{
-				JOptionPane.showMessageDialog(this, "Options are not yet implemented\r\n Please edit the file 'workbench.settings'");
+				//JOptionPane.showMessageDialog(this, "Options are not yet implemented\r\n Please edit the file 'workbench.settings'");
+				SettingsPanel panel = new SettingsPanel();
+				panel.showSettingsDialog(this);
 			}
 			else if ("helpContents".equals(command))
 			{

@@ -23,6 +23,7 @@ import java.util.List;
 
 import workbench.log.LogMgr;
 import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import workbench.util.StringUtil;
@@ -33,7 +34,11 @@ import workbench.util.StringUtil;
  */
 public class Settings
 {
-
+	public static final String EDITOR_FONT_KEY = "editor";
+	public static final String STANDARD_FONT_KEY = "standard";
+	public static final String MSGLOG_FONT_KEY = "msglog";
+	public static final String DATA_FONT_KEY = "data";
+	
 	private Properties props;
 	private Font standardFont;
 	private Font editorFont;
@@ -46,6 +51,7 @@ public class Settings
 		this.props = new Properties();
 		this.filename = System.getProperty("workbench.settings.file", "workbench.settings");
 
+		fillDefaults();
 		try
 		{
 			BufferedInputStream in = new BufferedInputStream(new FileInputStream(this.filename));
@@ -141,7 +147,7 @@ public class Settings
 	{
 		if (this.standardFont == null)
 		{
-			this.standardFont = this.getFont("standard");
+			this.standardFont = this.getFont(STANDARD_FONT_KEY);
 		}
 		return this.standardFont;
 	}
@@ -150,7 +156,7 @@ public class Settings
 	{
 		if (this.editorFont == null)
 		{
-			this.editorFont = this.getFont("editor");
+			this.editorFont = this.getFont(EDITOR_FONT_KEY);
 		}
 		return editorFont;
 	}
@@ -159,7 +165,7 @@ public class Settings
 	{
 		if (this.msgLogFont == null)
 		{
-			this.msgLogFont = this.getFont("msglog");
+			this.msgLogFont = this.getFont(MSGLOG_FONT_KEY);
 		}
 		return this.msgLogFont;
 	}
@@ -176,7 +182,7 @@ public class Settings
 	/**
 	 *	Returns the font configured for this keyword
 	 */
-	private Font getFont(String aFontName)
+	public Font getFont(String aFontName)
 	{
 		Font result;
 
@@ -186,8 +192,14 @@ public class Settings
 		String type = this.props.getProperty(baseKey + ".style", "Plain");
 		int style = Font.PLAIN;
 		int size = 11;
-		if ("bold".equalsIgnoreCase(type)) style = Font.BOLD;
-		else if ("italic".equalsIgnoreCase(type)) style = Font.ITALIC;
+		StringTokenizer tok = new StringTokenizer(type);
+		while (tok.hasMoreTokens())
+		{
+			String t = tok.nextToken();
+			if ("bold".equalsIgnoreCase(t)) style = style | Font.BOLD;
+			if ("italic".equalsIgnoreCase(type)) style = style | Font.ITALIC;
+		}
+		
 		try
 		{
 			size = Integer.parseInt(sizeS);
@@ -200,6 +212,34 @@ public class Settings
 		return result;
 	}
 
+	public void setFont(String aFontName, Font aFont)
+	{
+		String baseKey = new StringBuffer("workbench.font.").append(aFontName).toString();
+		String name = aFont.getFontName();
+		String size = Integer.toString(aFont.getSize());
+		int style = aFont.getStyle();
+		this.props.setProperty(baseKey + ".name", name);
+		this.props.setProperty(baseKey + ".size", size);
+		String value = null;
+		if ((style & Font.BOLD) == Font.BOLD)
+			value = "BOLD";
+		if ((style & Font.ITALIC) == Font.ITALIC)
+		{
+			if (value == null) value = "ITALIC";
+			else value = value + ",ITALIC";
+		}
+		if (value == null) value = "PLAIN";
+		this.props.setProperty(baseKey + ".style", value);
+		if (aFontName.equals(EDITOR_FONT_KEY))
+			this.editorFont = aFont;
+		else if (aFontName.equals(MSGLOG_FONT_KEY))
+			this.msgLogFont = aFont;
+		else if (aFontName.equals(STANDARD_FONT_KEY))
+			this.standardFont = aFont;
+		else if (aFontName.equals(DATA_FONT_KEY))
+			this.dataFont = aFont;
+	}
+	
 	public String getLastExportDir()
 	{
 		return this.props.getProperty("workbench.export.lastdir","");
@@ -345,6 +385,11 @@ public class Settings
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.historysize", "15"));
 	}
+	
+	public void setMaxHistorySize(int aValue)
+	{
+		this.props.setProperty("workbench.sql.historysize", Integer.toString(aValue));
+	}
 
 	public int getDefaultTabCount()
 	{
@@ -396,7 +441,7 @@ public class Settings
 
 	public String getDefaultDateFormat()
 	{
-		return this.props.getProperty("workbench.gui.display.dateformat", null);
+		return this.props.getProperty("workbench.gui.display.dateformat", "yyyy-MM-dd");
 	}
 
 	public void setDefaultDateFormat(String aFormat)
@@ -407,6 +452,10 @@ public class Settings
 	public int getMaxFractionDigits()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.display.maxfractiondigits", "2"));
+	}
+	public void setMaxFractionDigits(int aValue)
+	{
+		this.props.setProperty("workbench.gui.display.maxfractiondigits", Integer.toString(aValue));
 	}
 
 	public void setDefaultDateFormat(int aDigits)
@@ -484,6 +533,11 @@ public class Settings
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.dbexplorer.mainwindow", "true"));
 	}
+	
+	public void setShowDbExplorerInMainWindow(boolean showWindow)
+	{
+		this.props.setProperty("workbench.dbexplorer.mainwindow", Boolean.toString(showWindow));
+	}
 
 	public boolean getRetrievePKList()
 	{
@@ -491,4 +545,18 @@ public class Settings
 	}
 
 
+	public List getCancelWithReconnectServers()
+	{
+		String list = this.props.getProperty("workbench.db.cancelwithreconnect", null);
+		if (list == null || list.trim().length() == 0) return Collections.EMPTY_LIST;
+		StringTokenizer tok = new StringTokenizer(list, ";");
+		ArrayList result = new ArrayList(tok.countTokens());
+		while (tok.hasMoreElements())
+		{
+			String server = tok.nextToken();
+			result.add(server);
+		}
+		return result;
+	}
+	
 }

@@ -7,13 +7,16 @@
 package workbench.gui.settings;
 
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Window;
+import java.awt.event.ItemEvent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.NumberField;
+import workbench.gui.components.WbFontChooser;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -24,10 +27,17 @@ import workbench.resource.Settings;
 public class SettingsPanel extends javax.swing.JPanel
 {
 
+	private Frame parent;
+	
 	/** Creates new form SettingsPanel */
 	public SettingsPanel()
 	{
 		initComponents();
+		this.fontsComboBox.addItem(new FontListEntry(Settings.STANDARD_FONT_KEY));
+		this.fontsComboBox.addItem(new FontListEntry(Settings.EDITOR_FONT_KEY));
+		this.fontsComboBox.addItem(new FontListEntry(Settings.MSGLOG_FONT_KEY));
+		this.fontsComboBox.addItem(new FontListEntry(Settings.DATA_FONT_KEY));
+		this.fontsComboBox.setSelectedIndex(0);
 	}
 	
 	/** This method is called from within the constructor to
@@ -58,11 +68,8 @@ public class SettingsPanel extends javax.swing.JPanel
 		maxColSizeLabel = new javax.swing.JLabel();
 		maxColSizeField = new NumberField();
 		fontPanel = new javax.swing.JPanel();
-		editorFontPanel = new javax.swing.JPanel();
-		editorFontSample = new javax.swing.JLabel();
-		editorFontName = new javax.swing.JLabel();
-		editorFontButton = new javax.swing.JButton();
-		jPanel1 = new javax.swing.JPanel();
+		wbFontChooser1 = new workbench.gui.components.WbFontChooser();
+		fontsComboBox = new javax.swing.JComboBox();
 		buttonPanel = new javax.swing.JPanel();
 		okButton = new javax.swing.JButton();
 		cancelButton = new javax.swing.JButton();
@@ -224,46 +231,31 @@ public class SettingsPanel extends javax.swing.JPanel
 		
 		fontPanel.setLayout(new java.awt.GridBagLayout());
 		
-		editorFontPanel.setLayout(new java.awt.GridBagLayout());
-		
-		editorFontPanel.setBorder(new javax.swing.border.EtchedBorder());
-		editorFontSample.setFont(null);
-		editorFontSample.setText(ResourceMgr.getString("LabelEditorFontSample"));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.insets = new java.awt.Insets(5, 6, 0, 0);
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		editorFontPanel.add(editorFontSample, gridBagConstraints);
-		
-		editorFontName.setFont(WbManager.getSettings().getEditorFont());
-		editorFontName.setText(getFontDisplay(WbManager.getSettings().getEditorFont()));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 1;
-		gridBagConstraints.insets = new java.awt.Insets(0, 6, 0, 0);
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		editorFontPanel.add(editorFontName, gridBagConstraints);
-		
-		editorFontButton.setText(ResourceMgr.getString("LabelSelectFont"));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 1;
-		gridBagConstraints.insets = new java.awt.Insets(0, 9, 0, 0);
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.weightx = 1.0;
-		editorFontPanel.add(editorFontButton, gridBagConstraints);
 		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 2;
-		gridBagConstraints.weighty = 1.0;
-		editorFontPanel.add(jPanel1, gridBagConstraints);
-		
-		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridy = 1;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+		gridBagConstraints.insets = new java.awt.Insets(7, 6, 7, 6);
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
 		gridBagConstraints.weightx = 1.0;
 		gridBagConstraints.weighty = 1.0;
-		fontPanel.add(editorFontPanel, gridBagConstraints);
+		fontPanel.add(wbFontChooser1, gridBagConstraints);
+		
+		fontsComboBox.addItemListener(new java.awt.event.ItemListener()
+		{
+			public void itemStateChanged(java.awt.event.ItemEvent evt)
+			{
+				fontsComboBoxItemStateChanged(evt);
+			}
+		});
+		
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 0;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(7, 6, 7, 6);
+		fontPanel.add(fontsComboBox, gridBagConstraints);
 		
 		mainTab.addTab(ResourceMgr.getString("LabelSettingsFontsTab"), fontPanel);
 		
@@ -304,6 +296,22 @@ public class SettingsPanel extends javax.swing.JPanel
 		
 	}//GEN-END:initComponents
 
+	private void fontsComboBoxItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_fontsComboBoxItemStateChanged
+	{//GEN-HEADEREND:event_fontsComboBoxItemStateChanged
+		FontListEntry entry;
+		if (evt.getStateChange() == ItemEvent.DESELECTED)
+		{
+			entry = (FontListEntry)evt.getItem();
+			entry.currentFont = this.wbFontChooser1.getSelectedFont();
+		}
+		else if (evt.getStateChange() == ItemEvent.SELECTED)
+		{
+			entry = (FontListEntry)evt.getItem();
+			this.wbFontChooser1.setSelectedFont(entry.currentFont);
+			this.fontsComboBox.setToolTipText(entry.tooltip);
+		}
+	}//GEN-LAST:event_fontsComboBoxItemStateChanged
+
 	private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_cancelButtonActionPerformed
 	{//GEN-HEADEREND:event_cancelButtonActionPerformed
 		this.closeWindow();
@@ -335,12 +343,21 @@ public class SettingsPanel extends javax.swing.JPanel
 		set.setMaxHistorySize(((NumberField)this.historySizeField).getValue());
 		set.setMaxColumnWidth(((NumberField)this.maxColSizeField).getValue());
 		set.setMaxFractionDigits(((NumberField)this.maxDigitsField).getValue());
+
+		FontListEntry entry = (FontListEntry)this.fontsComboBox.getSelectedItem();
+		entry.currentFont = this.wbFontChooser1.getSelectedFont();
 		
+		for (int i=0; i < this.fontsComboBox.getItemCount(); i++)
+		{
+			entry = (FontListEntry)this.fontsComboBox.getItemAt(i);
+			set.setFont(entry.key, entry.currentFont);
+		}
 		return true;
 	}
 	
 	public void showSettingsDialog(JFrame aReference)
 	{
+		this.parent = aReference;
 		this.dialog = new JDialog(aReference, true);
 		this.dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.dialog.setTitle(ResourceMgr.getString("TxtSettingsDialogTitle"));
@@ -359,16 +376,14 @@ public class SettingsPanel extends javax.swing.JPanel
 	private javax.swing.JLabel historySizeLabel;
 	private javax.swing.JPanel generalPanel;
 	private javax.swing.JCheckBox showDbExplorer;
-	private javax.swing.JPanel jPanel1;
 	private javax.swing.JPanel fontPanel;
 	private javax.swing.JPanel buttonPanel;
+	private workbench.gui.components.WbFontChooser wbFontChooser1;
 	private javax.swing.JTextField maxDigitsField;
 	private javax.swing.JLabel dateFormatLabel;
 	private javax.swing.JButton okButton;
-	private javax.swing.JButton editorFontButton;
 	private javax.swing.JLabel maxDigitsLabel;
 	private javax.swing.JTextField decimalField;
-	private javax.swing.JLabel editorFontSample;
 	private javax.swing.JLabel decimalLabel;
 	private javax.swing.JTextField tabCountField;
 	private javax.swing.JTextField maxColSizeField;
@@ -379,12 +394,28 @@ public class SettingsPanel extends javax.swing.JPanel
 	private javax.swing.JLabel dbExplorerLabel;
 	private javax.swing.JLabel altDelimLabel;
 	private javax.swing.JButton cancelButton;
-	private javax.swing.JPanel editorFontPanel;
 	private javax.swing.JTextField dateFormatTextField;
-	private javax.swing.JLabel editorFontName;
 	private javax.swing.JTextField historySizeField;
+	private javax.swing.JComboBox fontsComboBox;
 	// End of variables declaration//GEN-END:variables
 
 	private JDialog dialog;
+	
+	private class FontListEntry
+	{
+		String displayName;
+		String key;
+		Font currentFont;
+		String tooltip;
+		public FontListEntry(String aKey)
+		{
+			this.displayName = ResourceMgr.getString("Label"+ aKey + "Font");
+			this.key = aKey;
+			this.currentFont = WbManager.getSettings().getFont(aKey);
+			this.tooltip = ResourceMgr.getDescription("Label"+ aKey + "Font");
+		}
+		public String toString() { return this.displayName; }
+	}
+	
 	
 }

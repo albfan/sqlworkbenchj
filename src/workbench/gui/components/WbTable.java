@@ -56,7 +56,7 @@ public class WbTable extends JTable
 	private JPopupMenu popup;
 	private JPopupMenu headerPopup;
 	
-	private ResultSetTableModel dwModel;
+	private DataStoreTableModel dwModel;
 	private TableModel originalModel;
 	private String lastSearchCriteria;
 	private int lastFoundRow = -1;
@@ -185,13 +185,13 @@ public class WbTable extends JTable
 	
 	public void setModel(TableModel aModel, boolean sortIt)
 	{
-		if (aModel instanceof ResultSetTableModel)
+		if (aModel instanceof DataStoreTableModel)
 		{
 			if (this.dwModel != null && this.changeListener != null)
 			{
 				this.dwModel.removeTableModelListener(this.changeListener);
 			}
-			this.dwModel = (ResultSetTableModel)aModel;
+			this.dwModel = (DataStoreTableModel)aModel;
 		}
 		else
 		{
@@ -269,9 +269,7 @@ public class WbTable extends JTable
 
 		if (row == -1) row = this.currentRow;
 		if (column == -1) column = this.currentColumn;
-		System.out.println("colcount before="+ this.getColumnModel().getColumnCount());
 		this.dwModel.setShowStatusColumn(aFlag);
-		System.out.println("colcount after="+ this.getColumnModel().getColumnCount());
 		if (aFlag)
 		{
 			TableColumn col = this.getColumnModel().getColumn(0);
@@ -572,7 +570,7 @@ public class WbTable extends JTable
 			{
 				this.headerPopupX = e.getX();
 				this.headerPopupY = e.getY();
-				this.headerPopup.show(this, e.getX(), e.getY());
+				this.headerPopup.show(this.getTableHeader(), e.getX(), e.getY());
 			}
 			else if (this.popup != null)
 			{
