@@ -10,21 +10,22 @@ import java.io.File;
 
 import workbench.db.DataSpooler;
 import workbench.gui.components.WbButton;
+import workbench.interfaces.Interruptable;
 import workbench.resource.ResourceMgr;
 
 /**
  *
  * @author  tkellerer
  */
-public class SpoolerProgressPanel extends javax.swing.JPanel
+public class ProgressPanel extends javax.swing.JPanel
 {
 
-	private DataSpooler spooler;
+	private Interruptable spooler;
 	
 	/** Creates new form SpoolerProgress */
-	public SpoolerProgressPanel(DataSpooler aSpooler)
+	public ProgressPanel(Interruptable aWorker)
 	{
-		this.spooler = aSpooler;
+		this.spooler = aWorker;
 		initComponents();
 	}
 	
@@ -119,7 +120,7 @@ public class SpoolerProgressPanel extends javax.swing.JPanel
 	{//GEN-HEADEREND:event_cancelButtonActionPerformed
 		if (this.spooler != null) 
 		{
-			this.spooler.stopExport();
+			this.spooler.cancelExecution();
 		}
 	}//GEN-LAST:event_cancelButtonActionPerformed
 	
