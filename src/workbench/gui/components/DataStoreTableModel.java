@@ -25,29 +25,25 @@ import workbench.util.SqlUtil;
  * TableModel for displaying the contents of a ResultSet.
  * The data is cached in a {@link workbench.storage.DataStore }
  */
-public class ResultSetTableModel 
-	extends AbstractTableModel
+public class DataStoreTableModel extends AbstractTableModel
 {
 	private DataStore dataCache;
 	private boolean showStatusColumn = false;
 	private int statusOffset = 0;
 	public static final String NOT_AVAILABLE = "(n/a)";
 	
-	public ResultSetTableModel(ResultSet aResultSet) 
-		throws SQLException, WbException
+	public DataStoreTableModel(ResultSet aResultSet) throws SQLException, WbException
 	{
 		this(aResultSet, null);
 	}
 	
-	public ResultSetTableModel(DataStore aDataStore)
-		throws NullPointerException
+	public DataStoreTableModel(DataStore aDataStore) throws NullPointerException
 	{
 		if (aDataStore == null) throw new NullPointerException("DataStore cannot be null");
 		this.dataCache = aDataStore;
 	}
 	
-	public ResultSetTableModel(ResultSet aResultSet, List aColumnList) 
-		throws SQLException, WbException
+	public DataStoreTableModel(ResultSet aResultSet, List aColumnList) throws SQLException, WbException
 	{
 		this.dataCache = new DataStore(aResultSet, aColumnList);
 	}
@@ -173,7 +169,7 @@ public class ResultSetTableModel
 	private Object convertCellValue(Object aValue, int aColumn)
 		throws Exception
 	{
-		return this.dataCache.convertCellValue(aValue, aColumn);
+		return this.dataCache.convertCellValue(aValue, aColumn - this.statusOffset);
 	}
 		
 	/**
@@ -206,6 +202,7 @@ public class ResultSetTableModel
 	
 	public int getColumnType(int aColumn)
 	{
+		if (this.dataCache == null) return Types.NULL;
 		if (this.showStatusColumn && aColumn == 0) return 0;
 		
 		try
@@ -224,6 +221,7 @@ public class ResultSetTableModel
 	 */
 	public int getRowCount() 
 	{ 
+		if (this.dataCache == null) return 0;
 		return this.dataCache.getRowCount();
 	}
 
