@@ -31,6 +31,10 @@ import workbench.interfaces.EncodingSelector;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.ResultInfo;
+import workbench.interfaces.TextOptions;
+import workbench.interfaces.XmlOptions;
+import workbench.gui.dialogs.XmlOptionsPanel;
+import workbench.gui.dialogs.TextOptionsPanel;
 
 /**
  *

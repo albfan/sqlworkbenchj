@@ -9,13 +9,14 @@
  * To contact the author please send an email to: info@sql-workbench.net
  *
  */
-package workbench.gui.dialogs.export;
+package workbench.gui.dialogs;
 
 import javax.swing.JPanel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.CharacterRange;
 import workbench.util.StringUtil;
+import workbench.interfaces.TextOptions;
 
 /**
  *
