@@ -6,6 +6,7 @@ import java.awt.Window;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import javax.swing.BorderFactory;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JOptionPane;
@@ -15,6 +16,9 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -97,6 +101,11 @@ public class DwPanel
 
 	public DwPanel()
 	{
+		this(null);
+	}
+
+	public DwPanel(DwStatusBar aStatusBar)
+	{
 		JTextField stringField = new JTextField();
 		stringField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		stringField.addMouseListener(new TextComponentMouseListener());
@@ -108,12 +117,12 @@ public class DwPanel
 		numberField.addMouseListener(new TextComponentMouseListener());
 
 		this.defaultNumberEditor = new DefaultCellEditor(numberField);
-		this.initLayout();
+		this.initLayout(aStatusBar);
 
 		WbTraversalPolicy pol = new WbTraversalPolicy();
 		pol.setDefaultComponent(infoTable);
 		pol.addComponent(infoTable);
-		pol.addComponent(statusBar.tfMaxRows);
+		pol.addComponent(this.statusBar.tfMaxRows);
 		this.setFocusTraversalPolicy(pol);
 		this.setDoubleBuffered(true);
 		this.stmtRunner = new StatementRunner();
@@ -492,13 +501,17 @@ public class DwPanel
 					// the resultset will be closed when stmtRunner.done() is called
 					// in the finally block
 					ResultSet rs = result.getResultSets()[0];
+
+					// passing the maxrows to the datastore is a workaround for JDBC drivers
+					// which do not support the setMaxRows() method.
+					// The datastore will make sure that no more rows are read then really requested
 					if (this.showLoadProgress)
 					{
-						newData = new DataStore(rs, true, this);
+						newData = new DataStore(rs, true, this, this.getMaxRows());
 					}
 					else
 					{
-						newData = new DataStore(rs, true);
+						newData = new DataStore(rs, true, this.getMaxRows());
 					}
 					newData.setOriginalStatement(aSql);
 					newData.setSourceConnection(this.dbConnection);
@@ -619,7 +632,7 @@ public class DwPanel
 
 	/**
 	 *	Callback method to tell this component that a script is running.
-	 *  It resets the number of rows which have been affected by the script to zero
+	 *  It resets the total number of rows which have been affected by the script to zero
 	 */
 	public void scriptStarting()
 	{
@@ -648,9 +661,17 @@ public class DwPanel
 	 */
   public void rowCountChanged()
   {
-		int startRow = this.infoTable.getFirstVisibleRow();
-		int endRow = this.infoTable.getLastVisibleRow(startRow);
-		int count = this.infoTable.getRowCount();
+		int startRow = 0;
+		int endRow = 0;
+		int count = 0;
+
+		TableModel model = this.infoTable.getModel();
+	  if (model != resultEmptyMsgModel && model != this.errorModel)
+	  {
+			startRow = this.infoTable.getFirstVisibleRow();
+			endRow = this.infoTable.getLastVisibleRow(startRow);
+			count = this.infoTable.getRowCount();
+		}
 
 		// start row and end row are 0 based
 		this.statusBar.setRowcount(startRow + 1, endRow + 1, count);
@@ -709,20 +730,30 @@ public class DwPanel
 		else return ds.isModified();
 	}
 
-	private void initLayout()
+	private void initLayout(DwStatusBar status)
 	{
 		this.setLayout(new BorderLayout());
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.infoTable = new WbTable();
 		this.infoTable.setRowResizeAllowed(true);
-		this.statusBar = new DwStatusBar();
+		if (status != null)
+		{
+			this.statusBar = status; //new DwStatusBar();
+		}
+		else
+		{
+			this.statusBar = new DwStatusBar();
+			Border b = BorderFactory.createCompoundBorder(new EmptyBorder(2, 0, 0, 0), new EtchedBorder());
+			this.statusBar.setBorder(b);
+			this.add(this.statusBar, BorderLayout.SOUTH);
+		}
+
 		this.statusBar.setFocusable(false);
 		this.setFocusable(false);
 		this.scrollPane = new WbScrollPane(this.infoTable);
 		this.scrollPane.getViewport().addChangeListener(this);
 
 		this.add(this.scrollPane, BorderLayout.CENTER);
-		this.add(this.statusBar, BorderLayout.SOUTH);
 		//this.infoTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		this.infoTable.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.infoTable.setDoubleBuffered(true);
@@ -798,6 +829,7 @@ public class DwPanel
 		TableColumnModel colMod = this.infoTable.getColumnModel();
 		TableColumn col = colMod.getColumn(0);
 		col.setPreferredWidth(this.getWidth() - 10);
+		this.statusBar.setRowcount(0,0,0);
 	}
 
 	/**

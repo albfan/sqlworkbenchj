@@ -63,7 +63,7 @@
         the statement will be written. The currently selected editor tab is
         displayed in bold</para>
 
-        <para><emphasis role="bold">Create SQL Script</emphasis></para>
+        <para><emphasis>Create SQL Script</emphasis></para>
 
         <para>With this command a script for multiple objects can be created. Select
         all the tables, views or other objects in the table list, that you want
@@ -146,11 +146,11 @@
 
       <para>The expression in the column field is sent to the DBMS without
       changes, except the replacement of $col$ with the current column name.
-      The above example would yield a lower(&apos;column_name&apos;) like
-      &apos;%test%&apos; for each text column for the selected tables.</para>
+      The above example would yield a <literal>lower(&lt;column_name&gt;) like
+      &apos;%test%&apos;</literal> for each text column for the selected tables.</para>
 
       <para>The generated SQL statements are logged in the second tab, labelled
-      SQL Statements</para>
+      <literal>SQL Statements</literal>.</para>
 
 			<para>In the resulting tables, &wb-productname; tries to highlight those columns
 			which match the criteria. This might not always work, if you apply a function to the

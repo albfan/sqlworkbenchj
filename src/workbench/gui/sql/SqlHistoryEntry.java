@@ -19,25 +19,23 @@ public class SqlHistoryEntry
 	private int cursorPos;
 	private int selectionStart;
 	private int selectionEnd;
-	
+
 	//private static final Pattern PATTERN_EMPTY_LINE = Pattern.compile("$(\r\n|\n\r|\r|\n)");
 
 	public SqlHistoryEntry(String sql, int pos, int selStart, int selEnd)
 	{
 		this.text = this.trimEmptyLines(sql);
 		int len = this.text.length();
-		if (pos > len) 
+		if (pos > len)
 			this.cursorPos = len - 1;
 		else
 			this.cursorPos = pos;
-		
-		this.selectionStart = selStart;
-		
+
 		if (selStart < 0)
 			this.selectionStart = 0;
 		else
 			this.selectionStart = selStart;
-			
+
 		if (selEnd > len)
 			this.selectionEnd = len - 1;
 		else
@@ -76,8 +74,8 @@ public class SqlHistoryEntry
 			LogMgr.logWarning("SqlHistoryEntry.applyTo()", "Error applying " + this.toString(), e);
 		}
 	}
-	
-	public String toString() 
+
+	public String toString()
 	{
 		return "{" + this.text.substring(0, 25) + "..., Cursor=" + this.cursorPos + ", Selection=[" + this.selectionStart + "," + this.selectionEnd + "]}";
 	}
@@ -98,13 +96,13 @@ public class SqlHistoryEntry
 			return false;
 		}
 	}
-	
+
 	private String trimEmptyLines(String input)
 	{
 		if (input == null) return null;
 		int len = input.length() - 1;
 		if (len <= 0) return null;
-		
+
 		char c = input.charAt(len);
 		while ( (c == '\r' || c == '\n') && len > 0)
 		{
@@ -113,5 +111,5 @@ public class SqlHistoryEntry
 		}
 		return input.substring(0, len + 1);
 	}
-	
+
 }

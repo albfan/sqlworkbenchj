@@ -39,6 +39,8 @@ public class WbCopy
 	public static final String PARAM_COMMITEVERY = "commitevery";
 	public static final String PARAM_CONTINUE = "continue";
 	public static final String PARAM_DELETETARGET = "deletetarget";
+	public static final String PARAM_MODE = "mode";
+	public static final String PARAM_KEYS = "keycolumns";
 	//public static final String PARAM_DROPTARGET = "droptarget";
 	//public static final String PARAM_CREATETARGET = "createtarget";
 
@@ -58,6 +60,8 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_COMMITEVERY);
 		cmdLine.addArgument(PARAM_CONTINUE);
 		cmdLine.addArgument(PARAM_DELETETARGET);
+		cmdLine.addArgument(PARAM_MODE);
+		cmdLine.addArgument(PARAM_KEYS);
 		//cmdLine.addArgument(PARAM_DROPTARGET);
 		//cmdLine.addArgument(PARAM_CREATETARGET);
 	}
@@ -89,11 +93,11 @@ public class WbCopy
 		if (cmdLine.hasUnknownArguments())
 		{
 			List params = cmdLine.getUnknownArguments();
-			StringBuffer msg = new StringBuffer(ResourceMgr.getString("ErrorUnknownParameter"));
+			StringBuffer msg = new StringBuffer(ResourceMgr.getString("ErrorUnknownParameter") + " ");
 			for (int i=0; i < params.size(); i++)
 			{
-				msg.append((String)params.get(i));
 				if (i > 0) msg.append(',');
+				msg.append((String)params.get(i));
 			}
 			result.addMessage(msg.toString());
 			result.addMessage("");
@@ -106,13 +110,16 @@ public class WbCopy
 		String sourceProfile = cmdLine.getValue(PARAM_SOURCEPROFILE);
 		String targetProfile = cmdLine.getValue(PARAM_TARGETPROFILE);
 
-		if (targetProfile == null && targetProfile == null)
+		/*
+		if (sourceProfile == null && targetProfile == null)
 		{
+			result.addMessage(ResourceMgr.getString("ErrorCopyNoProfile"));
+			result.addMessage("");
 			result.addMessage(ResourceMgr.getString("ErrorCopyWrongParameters"));
 			result.setFailure();
 			return result;
 		}
-
+		*/
 		int commit = StringUtil.getIntValue(cmdLine.getValue(PARAM_COMMITEVERY),-1);
 
 		String sourcetable = cmdLine.getValue(PARAM_SOURCETABLE);
@@ -129,7 +136,7 @@ public class WbCopy
 		String targettable = cmdLine.getValue(PARAM_TARGETTABLE);
 		if (targettable == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorCopyNoProfile"));
+			result.addMessage(ResourceMgr.getString("ErrorCopyNoTarget"));
 			result.addMessage(""); // force empty line
 			result.addMessage(ResourceMgr.getString("ErrorCopyWrongParameters"));
 			result.setFailure();
@@ -184,6 +191,16 @@ public class WbCopy
 		//boolean dropTable = "true".equals(cmdLine.getValue(PARAM_DROPTARGET));
 
 		this.copier = new DataCopier();
+
+		String mode = cmdLine.getValue(PARAM_MODE);
+		if (mode != null)
+		{
+			if (!this.copier.setMode(mode))
+			{
+				result.addMessage(ResourceMgr.getString("ErrorInvalidModeIgnored").replaceAll("%mode%", mode));
+			}
+		}
+
 		copier.setRowActionMonitor(this.rowMonitor);
 		copier.setContinueOnError(cont);
 		copier.setCommitEvery(commit);
@@ -228,13 +245,13 @@ public class WbCopy
 			this.addErrorsFromImporter(result);
 			this.addWarningsFromImporter(result);
 
-			result.addMessage(copier.getMessages());
+			result.addMessage(copier.getAllMessages());
 		}
 		catch (SQLException e)
 		{
 			LogMgr.logError("WbCopy.execute()", "SQL Error when copying data", e);
 			result.addMessage(ResourceMgr.getString("ErrorOnCopy"));
-			result.addMessage(ExceptionUtil.getDisplay(e));
+			result.addMessage(copier.getAllMessages());
 			result.setFailure();
 		}
 		catch (Exception e)

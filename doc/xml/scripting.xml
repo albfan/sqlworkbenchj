@@ -112,7 +112,7 @@
         <title>Specifying a logfile</title>
 
         <para>If you don't want to write the messages to the default logfile
-        which is defined in <filename>workbench.properties</filename>
+        which is defined in <filename>workbench.settings</filename>
         an alternate logfile can be specified with <literal>-logfile=&#60;filename&#62;</literal>
         </para>
       </section>
@@ -177,7 +177,8 @@
      -driver=org.postgresql.Driver
      -username=thomas
      -password=welcome
-     -driverjar=C:/Programme/pgsql/pg73jdbc3.jar -script=&quot;test-script&quot;.sql</programlisting>
+     -driverjar=C:/Programme/pgsql/pg73jdbc3.jar 
+     -script=&quot;test-script.sql&quot;</programlisting>
 
         <para>This will start &wb-productname;, connect to the database server
         as specified in the connection parameters and execute the script

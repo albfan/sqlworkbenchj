@@ -140,15 +140,19 @@ public class MacroManagerGui
 		if (index < 0) return;
 		this.macroList.clearSelection();
 		//this.macroList.setValueIsAdjusting(true);
-		this.macroEditor.clear();
+		this.macroEditor.setText("");
+		this.macroNameField.setText("");
 		this.model.removeElementAt(index);
 
 		// check if the last driver was deleted
 		if (index > this.model.getSize() - 1) index--;
 		//this.macroList.setValueIsAdjusting(false);
 
-		this.macroList.setSelectedIndex(index);
-		this.macroList.repaint();
+		if (index >= 0)
+		{
+			this.macroList.setSelectedIndex(index);
+			this.macroList.repaint();
+		}
 	}
 
 	/**
@@ -178,9 +182,10 @@ public class MacroManagerGui
 			key = ResourceMgr.getString("TxtEmptyMacroName");
 			text = "";
 		}
-		this.model.addMacro(key, text);
+		MacroEntry entry = this.model.addMacro(key, text);
 		this.macroList.setSelectedIndex(this.model.getSize() - 1);
 		this.macroList.updateUI();
+		this.showMacro(entry);
 	}
 
 	private void selectListLater()
@@ -209,7 +214,10 @@ public class MacroManagerGui
 		int location = this.jSplitPane1.getDividerLocation();
 		WbManager.getSettings().setProperty(this.getClass().getName(), "divider", location);
 		String macro = this.getSelectedMacroName();
-		WbManager.getSettings().setProperty(this.getClass().getName(), "lastmacro", macro);
+		if (macro != null)
+		{
+			WbManager.getSettings().setProperty(this.getClass().getName(), "lastmacro", macro);
+		}
 	}
 
 	public void restoreSettings()
@@ -267,11 +275,16 @@ public class MacroManagerGui
 		if (this.lastIndex > this.model.getSize() - 1) return;
 
 		MacroEntry entry = (MacroEntry)this.model.getElementAt(this.lastIndex);
+		this.showMacro(entry);
+	}
+	
+	private void showMacro(MacroEntry entry)
+	{
 		this.currentEntry = entry;
 		this.macroNameField.setSourceObject(this.currentEntry, "name", entry.getName());
 		this.macroNameField.setImmediateUpdate(true);
 		this.macroEditor.setText(entry.getText());
-		this.macroEditor.setCaretPosition(0);
+		this.macroEditor.setCaretPosition(0);	
 	}
 
 	public void propertyChange(java.beans.PropertyChangeEvent evt)
@@ -336,11 +349,13 @@ class MacroListModel
 		this.fireContentsChanged(this, index, index);
 	}
 
-	public void addMacro(String aKey, String aText)
+	public MacroEntry addMacro(String aKey, String aText)
 	{
-		this.macros.add(new MacroEntry(aKey, aText));
+		MacroEntry entry = new MacroEntry(aKey, aText);
+		this.macros.add(entry);
 		int size = this.macros.size();
 		this.fireContentsChanged(this, size, size);
+		return entry;
 	}
 
 	public void removeElementAt(int index)

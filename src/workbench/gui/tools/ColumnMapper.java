@@ -65,8 +65,18 @@ public class ColumnMapper
 		WbScrollPane scroll = new WbScrollPane(this.columnDisplay);
 		this.add(scroll, BorderLayout.CENTER);
 		this.columnDisplay.setModel(EMPTY_DATA_MODEL);
+		this.adjustKeyColumn();
 	}
 
+	private void adjustKeyColumn()
+	{
+		TableColumnModel colMod = this.columnDisplay.getColumnModel();
+		TableColumn col = colMod.getColumn(2);
+		int width = 30;
+		col.setMinWidth(width);
+		col.setMaxWidth(width);
+		col.setPreferredWidth(width);
+	}
 	public void resetData()
 	{
 		if (this.columnDisplay.getModel() != EMPTY_DATA_MODEL)
@@ -103,6 +113,7 @@ public class ColumnMapper
 		};
 		return t;
 	}
+	
 	public void defineColumns(List source, List target)
 	{
 		if (source == null || target == null) throw new IllegalArgumentException("Both column lists have to be specified");
@@ -146,7 +157,8 @@ public class ColumnMapper
 		edit = new DefaultCellEditor(this.targetEditor);
 		col = colMod.getColumn(1);
 		col.setCellEditor(edit);
-		
+
+		this.adjustKeyColumn();
 		this.columnDisplay.setRowHeight(20);
 	}
 	
@@ -251,20 +263,28 @@ class MapDataModel
 	
 	public Class getColumnClass(int columnIndex)
 	{
+		if (columnIndex == 2)
+			return Boolean.class;
 		return ColumnIdentifier.class;
 	}
 	
 	public int getColumnCount()
 	{
-		return 2;
+		return 3;
 	}
 	
 	public String getColumnName(int columnIndex)
 	{
-		if (columnIndex == 0)
-			return this.sourceColName;
-		else
-			return this.targetColName;
+		switch (columnIndex)
+		{
+			case 0:
+				return this.sourceColName;
+			case 1:
+				return this.targetColName;
+			case 2:
+				return ResourceMgr.getString("LabelDPKeyColumnTitle");
+		}
+		return "";
 	}
 	
 	public int getRowCount()
@@ -276,18 +296,33 @@ class MapDataModel
 	{
 		ColumnMapRow row = this.data[rowIndex];
 		if (row == null) return "(error)";
-		ColumnIdentifier col = null;
 		
-		if (columnIndex == 0)
+		Object value = null;
+		
+		switch (columnIndex)
 		{
-			col = row.getSource();
-			if (col == null) return ColumnMapper.SKIP_COLUMN;
+			case 0:
+				value = row.getSource();
+				if (value == null) value = ColumnMapper.SKIP_COLUMN;
+				break;
+			case 1:
+				value = row.getTarget();
+				break;
+			case 2:
+				ColumnIdentifier col = row.getTarget();
+				if (col == null)
+				{
+					value = Boolean.FALSE;
+				}
+				else
+				{
+					boolean pk = col.isPkColumn();
+					if (pk) value = Boolean.TRUE;
+					else value = Boolean.FALSE;
+				}
+				break;
 		}
-		else
-		{
-			col = row.getTarget();
-		}
-		return col;
+		return value;
 	}
 	
 	public void setAllowTargetEditing(boolean flag)
@@ -299,10 +334,14 @@ class MapDataModel
 	{
 		if (rowIndex < 0 || rowIndex > this.getRowCount() -1) return false;
 		if (columnIndex == 0) return true;
-		if (!this.allowTargetEditing) return false;
-		ColumnMapRow row = this.data[rowIndex];
+		if (columnIndex == 1)
+		{
+			if (!this.allowTargetEditing) return false;
+			ColumnMapRow row = this.data[rowIndex];
 
-		return (row.getSource() != null && allowTargetEditing);
+			return (row.getSource() != null && allowTargetEditing);
+		}
+		return true;
 	}
 	
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex)
@@ -311,53 +350,62 @@ class MapDataModel
 		if (row == null) return;
 		if (aValue == null) return;
 		
-		if (columnIndex == 0)
+		switch (columnIndex)
 		{
-			if (aValue instanceof ColumnIdentifier)
-			{
-				row.setSource((ColumnIdentifier)aValue);
-			}
-			else if (aValue instanceof String)
-			{
-				ColumnIdentifier col = row.getSource();
-				String s = (String)aValue;
-				if (s.trim().length() > 0)
+			case 0:
+				if (aValue instanceof ColumnIdentifier)
 				{
-					if (col == null)
+					row.setSource((ColumnIdentifier)aValue);
+				}
+				else if (aValue instanceof String)
+				{
+					ColumnIdentifier col = row.getSource();
+					String s = (String)aValue;
+					if (s.trim().length() > 0)
 					{
-						col = new ColumnIdentifier();
-						col.setExpression(s);
-					}
-					else
-					{
-						col.setExpression(s);
+						if (col == null)
+						{
+							col = new ColumnIdentifier();
+							col.setExpression(s);
+						}
+						else
+						{
+							col.setExpression(s);
+						}
 					}
 				}
-			}
-			else if (aValue instanceof SkipColumnIndicator)
-			{
-				row.setSource(null);
-			}
-			else
-			{
-				LogMgr.logWarning("ColumnMapper.setValueAt()", "Unsupported data type " + aValue.getClass().getName());
-			}
-		}
-		else
-		{
-			if (aValue instanceof ColumnIdentifier)
-			{
-				row.setTarget((ColumnIdentifier)aValue);
-			}
-			else if (this.allowTargetEditing && aValue instanceof String)
-			{
-				ColumnIdentifier col = new ColumnIdentifier((String)aValue);
-				row.setTarget(col);
-			}
-			else
-			{
-				LogMgr.logWarning("ColumnMapper.setValueAt()", "Unsupported data type " + aValue.getClass().getName());
-			}
+				else if (aValue instanceof SkipColumnIndicator)
+				{
+					row.setSource(null);
+				}
+				else
+				{
+					LogMgr.logWarning("ColumnMapper.setValueAt()", "Unsupported data type " + aValue.getClass().getName());
+				}
+				break;
+				
+			case 1:
+				if (aValue instanceof ColumnIdentifier)
+				{
+					row.setTarget((ColumnIdentifier)aValue);
+				}
+				else if (this.allowTargetEditing && aValue instanceof String)
+				{
+					ColumnIdentifier col = new ColumnIdentifier((String)aValue);
+					row.setTarget(col);
+				}
+				else
+				{
+					LogMgr.logWarning("ColumnMapper.setValueAt()", "Unsupported data type " + aValue.getClass().getName());
+				}
+				break;
+				
+			case 2:
+				if (aValue instanceof Boolean)
+				{
+					boolean key = ((Boolean)aValue) == Boolean.TRUE;
+					row.getTarget().setIsPkColumn(key);
+				}
 		}
 	}
 	

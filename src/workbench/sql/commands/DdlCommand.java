@@ -24,13 +24,13 @@ public class DdlCommand extends SqlCommand
 	public static final SqlCommand ALTER = new DdlCommand("ALTER");
 	public static final SqlCommand GRANT = new DdlCommand("GRANT");
 	public static final SqlCommand REVOKE = new DdlCommand("REVOKE");
-	
+
 	// HSQLDB commands...
 	public static final SqlCommand CHECKPOINT = new DdlCommand("CHECKPOINT");
 	public static final SqlCommand SHUTDOWN = new DdlCommand("SHUTDOWN");
 
 	public static final List DDL_COMMANDS = new ArrayList();
-	
+
 	static
 	{
 		DDL_COMMANDS.add(DROP);
@@ -41,24 +41,24 @@ public class DdlCommand extends SqlCommand
 		DDL_COMMANDS.add(CHECKPOINT);
 		DDL_COMMANDS.add(SHUTDOWN);
 	}
-	
+
 	private String verb;
 
 	public DdlCommand(String aVerb)
 	{
 		this.verb = aVerb;
 	}
-	
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql) 
+
+	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException, WbException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		try
 		{
 			this.currentStatement = aConnection.createStatement();
-			
+
 			String msg = null;
-			
+
 			if ("DROP".equals(verb) && aConnection.getIgnoreDropErrors())
 			{
 				try
@@ -105,10 +105,16 @@ public class DdlCommand extends SqlCommand
       this.addExtendErrorInfo(aConnection, aSql, result);
 			result.setFailure();
 		}
-		
+		finally
+		{
+			// we know that we don't need the statement any longer, so to make
+			// sure everything is cleaned up, we'll close it here
+			this.done();
+		}
+
 		return result;
 	}
-	
+
 
   private final static List TYPES;
   static
@@ -120,14 +126,14 @@ public class DdlCommand extends SqlCommand
     TYPES.add("PACKAGE");
 		TYPES.add("VIEW");
   }
-  
+
   private boolean addExtendErrorInfo(WbConnection aConnection, String sql, StatementRunnerResult result)
   {
     String cleanSql = SqlUtil.makeCleanSql(sql, false).toUpperCase();
     String sqlverb = SqlUtil.getSqlVerb(cleanSql);
     if (!"CREATE".equals(sqlverb)) return false;
     String type = null;
-    
+
     StringTokenizer tok = new StringTokenizer(cleanSql, " ");
     String word = null;
     String name = null;
@@ -147,14 +153,14 @@ public class DdlCommand extends SqlCommand
       }
     }
 		if (type == null || name == null) return false;
-		
+
 		// remove anything behind the ( to get the real object name
 		tok = new StringTokenizer(name, "(");
 		if (tok.hasMoreTokens())
 		{
 			name = tok.nextToken();
 		}
-		
+
     String msg = aConnection.getMetadata().getExtendedErrorInfo(null, type, name);
 		if (msg != null && msg.length() > 0)
 		{
@@ -165,12 +171,12 @@ public class DdlCommand extends SqlCommand
 		{
 			return false;
 		}
-		
+
   }
-  
+
 	public String getVerb()
 	{
 		return verb;
 	}
-	
+
 }

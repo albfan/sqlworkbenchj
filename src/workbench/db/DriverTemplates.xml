@@ -4,6 +4,38 @@
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
+     <string>COM.FirstSQL.Dbcp.DbcpDriver</string>
+    </void>
+    <void property="library">
+     <string>fsjclient.jar</string>
+    </void>
+    <void property="name">
+     <string>FirstSQL/J</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:dbcp://localhost:8000</string>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>uk.co.thinksql.ThinkSQLDriver</string>
+    </void>
+    <void property="library">
+     <string>ThinkSQLDriver.jar</string>
+    </void>
+    <void property="name">
+     <string>ThinkSQL</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:thinksql://localhost:9075</string>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
      <string>org.hsqldb.jdbcDriver</string>
     </void>
     <void property="library">
@@ -154,7 +186,7 @@
      <string>firebirdsql-full.jar</string>
     </void>
     <void property="name">
-     <string>Firebird</string>
+     <string>FirebirdSQL</string>
     </void>
     <void property="sampleUrl">
      <string>jdbc:firebirdsql://host:port/name_of_database</string>

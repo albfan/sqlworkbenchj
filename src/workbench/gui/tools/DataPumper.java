@@ -119,6 +119,14 @@ public class DataPumper
 			cons.gridy--;
 			grid.setConstraints(this.commitLabel, cons);
 			//grid.layoutContainer(this);
+
+			cons = grid.getConstraints(this.modeLabel);
+			cons.gridy--;
+			grid.setConstraints(this.modeLabel, cons);
+
+			cons = grid.getConstraints(this.modeComboBox);
+			cons.gridy--;
+			grid.setConstraints(this.modeComboBox, cons);
 		}
 	}
 
@@ -400,6 +408,8 @@ public class DataPumper
     showWbCommand = new javax.swing.JButton();
     dropTargetCbx = new javax.swing.JCheckBox();
     helpButton = new javax.swing.JButton();
+    modeComboBox = new javax.swing.JComboBox();
+    modeLabel = new javax.swing.JLabel();
     statusLabel = new javax.swing.JLabel();
 
     setLayout(new java.awt.GridBagLayout());
@@ -596,7 +606,7 @@ public class DataPumper
     gridBagConstraints.gridx = 4;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.gridheight = 4;
+    gridBagConstraints.gridheight = 7;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
     gridBagConstraints.weightx = 1.0;
@@ -619,7 +629,6 @@ public class DataPumper
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridheight = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 6, 0, 0);
@@ -631,7 +640,6 @@ public class DataPumper
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridheight = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(2, 5, 0, 0);
@@ -657,9 +665,9 @@ public class DataPumper
     checkQueryButton.setEnabled(false);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 4;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 0.2;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
     buttonPanel.add(checkQueryButton, gridBagConstraints);
@@ -670,19 +678,20 @@ public class DataPumper
     useQueryCbx.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 5;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 0, 2);
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 0.8;
-    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
     buttonPanel.add(useQueryCbx, gridBagConstraints);
 
     showWbCommand.setText(ResourceMgr.getString("LabelShowWbCopyCommand"));
     showWbCommand.setToolTipText(ResourceMgr.getDescription("LabelShowWbCopyCommand"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 7;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(2, 0, 4, 1);
     buttonPanel.add(showWbCommand, gridBagConstraints);
 
@@ -701,12 +710,32 @@ public class DataPumper
     helpButton.setToolTipText("");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 7;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(2, 0, 4, 1);
     buttonPanel.add(helpButton, gridBagConstraints);
 
-    jSplitPane1.setBottomComponent(buttonPanel);
+    modeComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "insert", "update", "insert,update", "update,insert" }));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(3, 4, 0, 0);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    buttonPanel.add(modeComboBox, gridBagConstraints);
+
+    modeLabel.setText(ResourceMgr.getString("LabelDPMode"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(2, 5, 0, 0);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    buttonPanel.add(modeLabel, gridBagConstraints);
+
+    jSplitPane1.setRightComponent(buttonPanel);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -747,6 +776,8 @@ public class DataPumper
   private javax.swing.JButton helpButton;
   private javax.swing.JSplitPane jSplitPane1;
   private javax.swing.JPanel mapperPanel;
+  private javax.swing.JComboBox modeComboBox;
+  private javax.swing.JLabel modeLabel;
   private javax.swing.JButton selectSourceButton;
   private javax.swing.JButton selectTargetButton;
   private javax.swing.JPanel separatorPanel1;
@@ -1175,6 +1206,23 @@ public class DataPumper
 		this.columnMapper.resetData();
 	}
 
+	private List getKeyColumns()
+	{
+		ColumnMapper.MappingDefinition colMapping = this.columnMapper.getMapping();
+		if (colMapping == null) return Collections.EMPTY_LIST;
+		int count = colMapping.targetColumns.length;
+		List keys = new ArrayList();
+
+		for (int i=0; i < count; i++)
+		{
+			if (colMapping.targetColumns[i].isPkColumn())
+			{
+				keys.add(colMapping.targetColumns[i].getColumnName());
+			}
+		}
+		return keys;
+	}
+
 	private void showWbCommand()
 	{
 		if (this.source == null || this.target == null) return;
@@ -1257,9 +1305,27 @@ public class DataPumper
 				if (i > 0) result.append(", ");
 				result.append(colMapping.sourceColumns[i].getColumnName());
 				result.append("/");
-				result.append(colMapping.targetColumns[i].getColumnName());
+				ColumnIdentifier col = colMapping.targetColumns[i];
+				result.append(col.getColumnName());
 			}
 			result.append('"');
+		}
+
+		String mode = (String)this.modeComboBox.getSelectedItem();
+		if (!"insert".equals(mode))
+		{
+			result.append("\n     -" + WbCopy.PARAM_MODE + "=" + mode);
+			List keys = this.getKeyColumns();
+			if (keys.size() > 0)
+			{
+				int keycount = keys.size();
+				result.append("\n     -" + WbCopy.PARAM_KEYS + "=");
+				for (int i=0; i < keycount; i++)
+				{
+					if (i > 0) result.append(",");
+					result.append((String)keys.get(i));
+				}
+			}
 		}
 
 		result.append("\n     -" + WbCopy.PARAM_DELETETARGET + "=");
@@ -1371,13 +1437,27 @@ public class DataPumper
 		ColumnMapper.MappingDefinition colMapping = this.columnMapper.getMapping();
 		if (colMapping == null) return;
 
+		String mode = (String)this.modeComboBox.getSelectedItem();
+		List keys = this.getKeyColumns();
+
+		if (mode.indexOf("update") > -1 && keys.size() == 0)
+		{
+			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("ErrorDPNoKeyColumns"));
+			return;
+		}
+
 		try
 		{
 			this.copier = new DataCopier();
 			this.copier.setDeleteTarget(this.deleteTargetCbx.isSelected());
 			this.copier.setContinueOnError(this.continueOnErrorCbx.isSelected());
+			this.copier.setMode(mode);
+
+			this.copier.setKeyColumns(StringUtil.listToString(keys,','));
+
 			int commit = StringUtil.getIntValue(this.commitEvery.getText(), -1);
 			this.copier.setCommitEvery(commit);
+
 			if (this.useQueryCbx.isSelected())
 			{
 				this.copier.copyFromQuery(this.sourceConnection, this.targetConnection, this.sqlEditor.getText(), ttable, colMapping.targetColumns);
@@ -1455,6 +1535,8 @@ public class DataPumper
 		}
 
 		this.startButton.setEnabled(true);
+		this.cancelButton.setEnabled(false);
+
 		if (this.copier.hasWarnings() || !this.copier.isSuccess())
 		{
 			this.showLogButton.setEnabled(true);
@@ -1478,32 +1560,9 @@ public class DataPumper
 		{
 			return;
 		}
-		StringBuffer log = new StringBuffer(250);
+		String log = this.copier.getAllMessages();
 
-		String[] msg = this.copier.getImportWarnings();
-		int count = msg.length;
-		for (int i=0; i < count; i++)
-		{
-			log.append(msg[i]);
-			log.append("\n");
-		}
-		msg = this.copier.getImportErrors();
-		count = msg.length;
-		if (count > 0) log.append("\n");
-		for (int i=0; i < count; i++)
-		{
-			log.append(msg[i]);
-			log.append("\n");
-		}
-
-		String errmsg = this.copier.getErrorMessage();
-		if (errmsg != null) log.append(errmsg);
-
-		String s = this.copier.getMessages();
-		log.append(s);
-		if (s != null) log.append("\n");
-
-		EditWindow w = new EditWindow(this.window, ResourceMgr.getString("MsgWindowTitleDPLog"), log.toString(), "workbench.datapumper.logwindow");
+		EditWindow w = new EditWindow(this.window, ResourceMgr.getString("MsgWindowTitleDPLog"), log, "workbench.datapumper.logwindow");
 		w.show();
 		w.dispose();
 	}

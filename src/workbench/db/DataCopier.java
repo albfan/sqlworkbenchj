@@ -49,13 +49,13 @@ public class DataCopier
 	private boolean isRunning = false;
 	private String addWhere;
 	private boolean success = false;
-	
+
 	// used when the source is a SQL and not a table
 	private boolean useQuery = false;
 	private ColumnIdentifier[] targetColumnsForQuery;
 	private StringBuffer messages = null;
 	private StringBuffer errors = null;
-	
+
 	public DataCopier()
 	{
 		this.importer = new DataImporter();
@@ -152,6 +152,20 @@ public class DataCopier
 			throw new SQLException("Table " + aTargetTable.getTable() + " not found in target connection");
 		}
 		this.initImporterForTable();
+	}
+
+	public void setKeyColumns(String aColList)
+	{
+		this.importer.setKeyColumns(aColList);
+	}
+
+	/**
+	 *	Forwards the setMode() call to the DataImporter.
+	 *	@see workbench.db.importer.DataImporter#setMode(String)
+	 */
+	public boolean setMode(String mode)
+	{
+		return this.importer.setMode(mode);
 	}
 
 	/**
@@ -255,7 +269,7 @@ public class DataCopier
 		{
 			realCols[i] = (ColumnIdentifier)targetCols.get(i);
 		}
-		
+
 		try
 		{
 			TableCreator creator = new TableCreator(this.targetConnection, this.targetTable, realCols);
@@ -412,7 +426,7 @@ public class DataCopier
 		if (this.errors == null) return null;
 		return this.errors.toString();
 	}
-	
+
 	public String[] getImportErrors()
 	{
 		return this.importer.getErrors();
@@ -660,8 +674,8 @@ public class DataCopier
 		if (this.errors.length() > 0) this.errors.append('\n');
 		this.errors.append(msg);
 	}
-	
-	
+
+
 	private void addMessage(String msg)
 	{
 		if (this.messages == null) this.messages = new StringBuffer(250);
@@ -674,5 +688,33 @@ public class DataCopier
 		if (this.messages == null) return null;
 		return this.messages.toString();
 	}
-}
 
+	public String getAllMessages()
+	{
+		StringBuffer log = new StringBuffer(250);
+
+		String[] msg = this.getImportWarnings();
+		int count = msg.length;
+		for (int i=0; i < count; i++)
+		{
+			log.append(msg[i]);
+			log.append("\n");
+		}
+		msg = this.getImportErrors();
+		count = msg.length;
+		if (count > 0) log.append("\n");
+		for (int i=0; i < count; i++)
+		{
+			log.append(msg[i]);
+			log.append("\n");
+		}
+
+		String errmsg = this.getErrorMessage();
+		if (errmsg != null) log.append(errmsg);
+
+		String s = this.getMessages();
+		log.append(s);
+		if (s != null) log.append("\n");
+		return log.toString();
+	}
+}

@@ -138,22 +138,34 @@ public class DataStore
 	{
 		this(aResult, false);
 	}
+
+	public DataStore(ResultSet aResult, boolean readData)
+		throws SQLException
+	{
+		this(aResult, readData, null, -1);
+	}
+
 	/**
 	 *	Create a DataStore based on the given ResultSet but do not
 	 *	add the data yet
 	 */
-	public DataStore(ResultSet aResult, boolean readData) throws SQLException
+	public DataStore(ResultSet aResult, boolean readData, int maxRows) throws SQLException
 	{
-		this(aResult, readData, null);
+		this(aResult, readData, null, maxRows);
 
 	}
-	public DataStore(ResultSet aResult, boolean readData, RowActionMonitor aMonitor) throws SQLException
+	public DataStore(ResultSet aResult, boolean readData, RowActionMonitor aMonitor)
+		throws SQLException
+	{
+		this(aResult, readData, aMonitor, -1);
+	}
+	public DataStore(ResultSet aResult, boolean readData, RowActionMonitor aMonitor, int maxRows) throws SQLException
 	{
 		this.rowActionMonitor = aMonitor;
 		if (readData)
 		{
 			this.originalConnection = null;
-			this.initData(aResult);
+			this.initData(aResult, maxRows);
 		}
 		else
 		{
@@ -429,6 +441,11 @@ public class DataStore
 
 	public boolean useUpdateTableFromSql(String aSql)
 	{
+
+		return this.useUpdateTableFromSql(aSql, false);
+	}
+	public boolean useUpdateTableFromSql(String aSql, boolean retrievePk)
+	{
 		this.updateTable = null;
 		this.updateTableColumns = null;
 
@@ -438,10 +455,26 @@ public class DataStore
 
 		String table = (String)tables.get(0);
 		this.useUpdateTable(table);
+		if (retrievePk)
+		{
+			try
+			{
+				this.updatePkInformation(this.originalConnection);
+			}
+			catch (Exception e)
+			{
+				return false;
+			}
+			return (this.pkColumns != null);
+		}
 		return true;
 	}
 
 	public void useUpdateTable(String aTablename)
+	{
+		this.useUpdateTable(aTablename, false);
+	}
+	public void useUpdateTable(String aTablename, boolean updatePk)
 	{
 		// A connection-less update table is used to
 		// create INSERT statements regardless if the
@@ -452,6 +485,17 @@ public class DataStore
 		for (int i=0; i < this.columnNames.length; i++)
 		{
 			this.updateTableColumns.add(this.columnNames[i]);
+		}
+		if (updatePk)
+		{
+			try
+			{
+				this.updatePkInformation(this.originalConnection);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("DataStore.useUpdateTable()", "Could not retrieve PK information", e);
+			}
 		}
 	}
 
@@ -907,6 +951,12 @@ public class DataStore
 	private void initData(ResultSet aResultSet)
 		throws SQLException
 	{
+		this.initData(aResultSet, -1);
+	}
+
+	private void initData(ResultSet aResultSet, int maxRows)
+		throws SQLException
+	{
 		try
 		{
 			ResultSetMetaData metaData = aResultSet.getMetaData();
@@ -929,9 +979,9 @@ public class DataStore
 			this.data = new ArrayList(500);
 			while (aResultSet.next())
 			{
+				rowCount ++;
 				if (this.rowActionMonitor != null)
 				{
-					rowCount ++;
 					this.rowActionMonitor.setCurrentRow(rowCount, -1);
 				}
 
@@ -950,6 +1000,10 @@ public class DataStore
 				}
 				row.resetStatus();
 				this.data.add(row);
+				if (maxRows > 0)
+				{
+					if (rowCount > maxRows) break;
+				}
 			}
 			this.modified = false;
 		}
@@ -1426,6 +1480,7 @@ public class DataStore
 			return true;
 	}
 
+	// =========== SQL Insert generation ================
 	public StringBuffer getRowDataAsSqlInsert(int aRow, WbConnection aConn)
 	{
 		return this.getRowDataAsSqlInsert(aRow, "\n", aConn);
@@ -1435,6 +1490,7 @@ public class DataStore
 	{
 		return this.getRowDataAsSqlInsert(aRow, aLineTerminator, aConn, null, null);
 	}
+
 	public StringBuffer getRowDataAsSqlInsert(int aRow, String aLineTerminator, WbConnection aConn, String aCharFunc, String aConcatString)
 	{
 		if (!this.canSaveAsSqlInsert()) return null;
@@ -1456,23 +1512,6 @@ public class DataStore
 		return this.getDataAsSqlInsert("\n");
 	}
 
-	public void writeDataAsSqlInsert(Writer out, String aLineTerminator)
-		throws IOException
-	{
-		if (!this.canSaveAsSqlInsert()) return;
-		int count = this.getRowCount();
-		for (int row = 0; row < count; row ++)
-		{
-			RowData data = this.getRow(row);
-			DmlStatement stmt = this.createInsertStatement(data, true, aLineTerminator);
-			String sql = stmt.getExecutableStatement(this.originalConnection.getSqlConnection());
-			out.write(sql);
-			out.write(";");
-			out.write(aLineTerminator);
-			out.write(aLineTerminator);
-		}
-	}
-
 	public String getDataAsSqlInsert(String aLineTerminator)
 		throws Exception, SQLException
 	{
@@ -1489,6 +1528,131 @@ public class DataStore
 		}
 		return script.toString();
 	}
+
+	public void writeDataAsSqlInsert(Writer out, String aLineTerminator)
+		throws IOException
+	{
+		this.writeDataAsSqlInsert(out, aLineTerminator, null, null);
+	}
+
+	public void writeDataAsSqlInsert(Writer out, String aLineTerminator, String aCharFunc, String aConcatString)
+		throws IOException
+	{
+		if (!this.canSaveAsSqlInsert()) return;
+		int count = this.getRowCount();
+		for (int row = 0; row < count; row ++)
+		{
+			RowData data = this.getRow(row);
+			DmlStatement stmt = this.createInsertStatement(data, true, aLineTerminator);
+			String sql = stmt.getExecutableStatement(this.originalConnection.getSqlConnection());
+			if (aCharFunc != null)
+			{
+				stmt.setChrFunction(aCharFunc);
+				stmt.setConcatString(aConcatString);
+			}
+			out.write(sql);
+			out.write(";");
+			out.write(aLineTerminator);
+			out.write(aLineTerminator);
+		}
+	}
+
+	// =========== SQL Update generation ================
+	public String getDataAsSqlUpdate()
+		throws Exception, SQLException
+	{
+		return this.getDataAsSqlUpdate("\n");
+	}
+
+	public String getDataAsSqlUpdate(String aLineTerminator)
+		throws Exception, SQLException
+	{
+		if (!this.canSaveAsSqlInsert()) return "";
+		StringWriter script = new StringWriter(this.getRowCount() * 150);
+		try
+		{
+			this.writeDataAsSqlUpdate(script, aLineTerminator);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DataStore.getDataAsSqlInsert()", "Error writing script to StringWriter", e);
+			return "";
+		}
+		return script.toString();
+	}
+
+	public void writeDataAsSqlUpdate(Writer out, String aLineTerminator)
+		throws IOException
+	{
+		this.writeDataAsSqlUpdate(out, aLineTerminator, null, null);
+	}
+
+	public void writeDataAsSqlUpdate(Writer out, String aLineTerminator, String aCharFunc, String aConcatString)
+		throws IOException
+	{
+		if (!this.canSaveAsSqlInsert()) return;
+		int count = this.getRowCount();
+
+		if (this.pkColumns == null)
+		{
+			try
+			{
+				this.updatePkInformation(this.originalConnection);
+			}
+			catch (SQLException e)
+			{
+				LogMgr.logError("DataStore.writeDataAsSqlUpdate()", "Could not retrieve PK columns",e);
+				return;
+			}
+		}
+		if (pkColumns == null)
+		{
+			LogMgr.logWarning("DataStore.writeDataAsSqlUpdate()", "No PK columns found. Cannot write as SQL Update");
+			return;
+		}
+
+		for (int row = 0; row < count; row ++)
+		{
+			RowData data = this.getRow(row);
+			DmlStatement stmt = this.createUpdateStatement(data, true, aLineTerminator);
+			if (aCharFunc != null)
+			{
+				stmt.setChrFunction(aCharFunc);
+				stmt.setConcatString(aConcatString);
+			}
+			String sql = stmt.getExecutableStatement(this.originalConnection.getSqlConnection());
+			out.write(sql);
+			out.write(";");
+			out.write(aLineTerminator);
+			out.write(aLineTerminator);
+		}
+	}
+
+	public StringBuffer getRowDataAsSqlUpdate(int aRow, WbConnection aConn)
+	{
+		return this.getRowDataAsSqlUpdate(aRow, "\n", aConn);
+	}
+
+	public StringBuffer getRowDataAsSqlUpdate(int aRow, String aLineTerminator, WbConnection aConn)
+	{
+		return this.getRowDataAsSqlUpdate(aRow, aLineTerminator, aConn, null, null);
+	}
+
+	public StringBuffer getRowDataAsSqlUpdate(int aRow, String aLineTerminator, WbConnection aConn, String aCharFunc, String aConcatString)
+	{
+		if (!this.canSaveAsSqlInsert()) return null;
+		RowData data = this.getRow(aRow);
+		DmlStatement stmt = this.createUpdateStatement(data, true, aLineTerminator);
+		if (aCharFunc != null)
+		{
+			stmt.setChrFunction(aCharFunc);
+			stmt.setConcatString(aConcatString);
+		}
+		StringBuffer sql = new StringBuffer(stmt.getExecutableStatement(aConn.getSqlConnection()));
+		sql.append(";");
+		return sql;
+	}
+
 
 	/**
 	 *	Import a text file (tab separated) with a header row and no column mapping
@@ -1740,6 +1904,7 @@ public class DataStore
 		throws SQLException
 	{
 		int rows = 0;
+		RowData row = null;
 		this.updatePkInformation(aConnection);
 		int totalRows = this.getModifiedCount();
 		int currentRow = 0;
@@ -1751,7 +1916,7 @@ public class DataStore
 		try
 		{
 			this.resetUpdateRowCounters();
-			RowData row = this.getNextDeletedRow();
+			row = this.getNextDeletedRow();
 			DmlStatement dml = null;
 			while (row != null)
 			{
@@ -1809,6 +1974,7 @@ public class DataStore
 			{
 				aConnection.rollback();
 			}
+			LogMgr.logError("DataStore.updateDb()", "Error when saving data (row = " + row + ")", e);
 			throw e;
 		}
 
@@ -2203,6 +2369,8 @@ public class DataStore
 	{
 		if (aRow == null) return null;
 		boolean first = true;
+		boolean newLineAfterColumn = (this.colCount > 5);
+
 		DmlStatement dml;
 
 		if (!ignoreStatus && !aRow.isModified()) return null;
@@ -2210,11 +2378,11 @@ public class DataStore
 		StringBuffer sql = new StringBuffer("UPDATE ");
 
 		sql.append(SqlUtil.quoteObjectname(this.updateTable));
-		sql.append(" SET ");
+		sql.append("\n   SET ");
 		first = true;
 		for (int col=0; col < this.colCount; col ++)
 		{
-			if (aRow.isColumnModified(col) || ignoreStatus)
+			if (aRow.isColumnModified(col) || (ignoreStatus && !this.isPkColumn(col)))
 			{
 				if (first)
 				{
@@ -2223,6 +2391,7 @@ public class DataStore
 				else
 				{
 					sql.append(", ");
+					if (newLineAfterColumn) sql.append("\n       ");
 				}
 				String colName = SqlUtil.quoteObjectname(this.getColumnName(col));
 				sql.append(colName);
@@ -2238,7 +2407,7 @@ public class DataStore
 				}
 			}
 		}
-		sql.append(" WHERE ");
+		sql.append("\n WHERE ");
 		first = true;
 		for (int j=0; j < this.pkColumns.size(); j++)
 		{
@@ -2506,6 +2675,13 @@ public class DataStore
 				this.pkColumns.add(new Integer(i));
 			}
 		}
+	}
+
+	private boolean isPkColumn(int col)
+	{
+		if (this.pkColumns == null) return false;
+		Integer key = new Integer(col);
+		return this.pkColumns.contains(key);
 	}
 
 	private ArrayList readPkColumns(ResultSet rs)

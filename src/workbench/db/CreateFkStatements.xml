@@ -13,5 +13,11 @@
   ADD CONSTRAINT %constraintname% FOREIGN KEY (%columnlist%)
   REFERENCES %targettable% (%targetcolumnlist%)</string>
   </void>
+ 
+ <void method="put">
+   <string>All-Inline</string>
+   <string>FOREIGN KEY (%columnlist%) REFERENCES %targettable% (%targetcolumnlist%)</string>
+  </void>
  </object>
+ 
 </java>

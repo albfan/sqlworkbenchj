@@ -29,6 +29,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
 import workbench.WbManager;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
@@ -58,6 +59,7 @@ public class TableDataPanel
 	//private WbTable dataTable;
 
 	private Object retrieveLock = new Object();
+	private ReloadAction reloadAction;
 
 	private JButton config;
 	//private JTextField maxRowField;
@@ -66,22 +68,22 @@ public class TableDataPanel
 	private JCheckBox autoRetrieve;
 
 	private long warningThreshold = -1;
-	
+
 	private boolean shiftDown = false;
-	
+
 	private String catalog;
 	private String schema;
 	private String tableName;
 	private ImageIcon loadingIcon;
 	private Image loadingImage;
-	
+
 	private StopAction cancelRetrieve;
 
 	public TableDataPanel() throws Exception
 	{
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setLayout(new BorderLayout());
-		
+
 		this.dataDisplay = new DwPanel();
 		this.dataDisplay.setManageActions(true);
 		this.dataDisplay.setShowLoadProcess(true);
@@ -89,31 +91,32 @@ public class TableDataPanel
 		this.dataDisplay.setShowErrorMessages(true);
 		this.dataDisplay.getTable().setMaxColWidth(WbManager.getSettings().getMaxColumnWidth());
 		this.dataDisplay.getTable().setMinColWidth(WbManager.getSettings().getMinColumnWidth());
-		
+
     JPanel topPanel = new JPanel();
 		topPanel.setMaximumSize(new Dimension(32768, 32768));
 		//topPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
 		BoxLayout box = new BoxLayout(topPanel, BoxLayout.X_AXIS);
 		topPanel.setLayout(box);
-		
-		ReloadAction a = new ReloadAction(this);
-		a.setTooltip(ResourceMgr.getDescription("TxtLoadTableData"));
-		
+
+		this.reloadAction = new ReloadAction(this);
+		this.reloadAction.setTooltip(ResourceMgr.getDescription("TxtLoadTableData"));
+
 		WbToolbar toolbar = new WbToolbar();
 		toolbar.addDefaultBorder();
 		topPanel.add(toolbar);
-		toolbar.add(a);
+		toolbar.add(this.reloadAction);
 		toolbar.addSeparator();
 
 		this.cancelRetrieve = new StopAction(this);
+		this.cancelRetrieve.setEnabled(false);
 		toolbar.add(this.cancelRetrieve);
 		toolbar.addSeparator();
-		
+
 		//JButton b = a.getToolbarButton();
 		//b.setBorder(new EtchedBorder());
 		//b.setToolTipText(ResourceMgr.getDescription("TxtLoadTableData"));
 		//topPanel.add(b);
-		
+
 		topPanel.add(Box.createHorizontalStrut(15));
 
 		autoRetrieve = new JCheckBox(ResourceMgr.getString("LabelAutoRetrieveTableData"));
@@ -122,7 +125,7 @@ public class TableDataPanel
 		topPanel.add(autoRetrieve);
 
 		topPanel.add(Box.createHorizontalStrut(10));
-		
+
 		rowCountLabel = new JLabel(ResourceMgr.getString("LabelTableDataRowCount"));
 		rowCountLabel.setToolTipText(ResourceMgr.getDescription("LabelTableDataRowCount"));
 		Font std = WbManager.getSettings().getStandardFont();
@@ -139,7 +142,7 @@ public class TableDataPanel
 		Border border = new CompoundBorder(new EtchedBorder(), new EmptyBorder(1,6,1,6));
 		this.config.setBorder(border);
 		topPanel.add(this.config);
-		
+
 		//maxRowsLabel = new JLabel(ResourceMgr.getString("LabelTableDataMaxRows"));
 		//topPanel.add(maxRowsLabel);
 
@@ -147,12 +150,12 @@ public class TableDataPanel
 		//topPanel.add(this.maxRowField);
 
 		this.add(topPanel, BorderLayout.NORTH);
-		
+
 		toolbar.add(this.dataDisplay.getUpdateDatabaseAction());
 		toolbar.addSeparator();
 		toolbar.add(this.dataDisplay.getInsertRowAction());
 		toolbar.add(this.dataDisplay.getDeleteRowAction());
-		
+
 		//this.dataTable = this.dataDisplay.getTable();
 		//JScrollPane scroll = new JScrollPane(this.dataTable);
 		this.add(dataDisplay, BorderLayout.CENTER);
@@ -167,7 +170,7 @@ public class TableDataPanel
 		}
 		return this.loadingIcon;
 	}
-	
+
 	public void disconnect()
 	{
 		this.dbConnection = null;
@@ -200,9 +203,12 @@ public class TableDataPanel
 	public long showRowCount()
 	{
 		if (this.dbConnection == null) return -1;
-		
+
 		this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount"));
 		this.rowCountLabel.setIcon(this.getLoadingIndicator());
+
+		this.reloadAction.setEnabled(false);
+
 		this.repaint();
 		this.rowCountLabel.repaint();
 		String sql = this.buildSqlForTable(true);
@@ -215,7 +221,7 @@ public class TableDataPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			
+
 			stmt = this.dbConnection.createStatement();
 			rs = stmt.executeQuery(sql);
 			if (rs.next())
@@ -235,6 +241,7 @@ public class TableDataPanel
 			this.rowCountLabel.setIcon(null);
 			try { rs.close(); } catch (Throwable th) {}
 			try { stmt.close(); } catch (Throwable th) {}
+			this.reloadAction.setEnabled(true);
 			WbSwingUtilities.showDefaultCursor(this);
 		}
 		return rowCount;
@@ -250,6 +257,8 @@ public class TableDataPanel
 
 	private String buildSqlForTable(boolean forRowCount)
 	{
+		//if (this.currentTable == null) return null;
+
 		if (this.tableName == null || this.tableName.length() == 0) return null;
 		String table = this.dbConnection.getMetadata().quoteObjectname(this.tableName);
 
@@ -258,16 +267,19 @@ public class TableDataPanel
 			sql.append("SELECT COUNT(*) FROM ");
 		else
 			sql.append("SELECT * FROM ");
+
 		if (this.schema != null && this.schema.trim().length() > 0)
 		{
-			if (this.dbConnection.getMetadata().isOracle() && !"PUBLIC".equalsIgnoreCase(this.schema))
+			if (!this.dbConnection.getMetadata().isOracle() || (this.dbConnection.getMetadata().isOracle() && !"PUBLIC".equalsIgnoreCase(this.schema)))
 			{
-				sql.append(SqlUtil.quoteObjectname(this.schema));
+				sql.append(this.dbConnection.getMetadata().quoteObjectname(this.schema));
 				sql.append(".");
 			}
 		}
 		sql.append(table);
 
+		//sql.append(this.currentTable.getTableExpression());
+		//LogMgr.logDebug("TableDataPanel.buildSql()", "Using query=" + sql);
 		return sql.toString();
 	}
 
@@ -293,8 +305,8 @@ public class TableDataPanel
 		t.setDaemon(true);
 		t.start();
 	}
-	
-	
+
+
 	public synchronized void retrieve()
 	{
     final String sql = this.buildSqlForTable(false);
@@ -303,6 +315,7 @@ public class TableDataPanel
 		final int maxRows = this.getMaxRows();
 
 		this.cancelRetrieve.setEnabled(true);
+		this.reloadAction.setEnabled(false);
 		Thread t = new Thread()
 		{
 			public void run()
@@ -328,6 +341,7 @@ public class TableDataPanel
 					WbSwingUtilities.showDefaultCursor(dataDisplay);
 					dataDisplay.scriptFinished();
 					cancelRetrieve.setEnabled(false);
+					reloadAction.setEnabled(true);
 				}
 			}
 		};
@@ -350,7 +364,7 @@ public class TableDataPanel
 		this.dataDisplay.setMaxRows(max);
 		boolean auto = "true".equals(WbManager.getSettings().getProperty(TableDataPanel.class.getName(), "autoretrieve", "false"));
 		this.autoRetrieve.setSelected(auto);
-		
+
 		try
 		{
 			String v = WbManager.getSettings().getProperty(TableDataPanel.class.getName(), "warningthreshold", "1500");
@@ -366,7 +380,7 @@ public class TableDataPanel
 	{
 		this.showData(true);
 	}
-	
+
 	public void showData(boolean includeData)
 	{
 		this.reset();
@@ -374,9 +388,9 @@ public class TableDataPanel
 		if (this.autoRetrieve.isSelected() && includeData)
 		{
 			int max = this.getMaxRows();
-			if ( this.warningThreshold > 0 && 
+			if ( this.warningThreshold > 0 &&
 			     rows > this.warningThreshold &&
-			     (max > this.warningThreshold || max == 0) 
+			     (max > this.warningThreshold || max == 0)
 				 )
 			{
 				String msg = ResourceMgr.getString("MsgDataDisplayWarningThreshold");
@@ -399,7 +413,7 @@ public class TableDataPanel
 	{
 		return SwingUtilities.getWindowAncestor(this);
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.config)
@@ -418,5 +432,5 @@ public class TableDataPanel
 	{
 		this.dataDisplay.setReadOnly(aFlag);
 	}
-	
+
 }

@@ -232,11 +232,14 @@
 
         <informaltable frame="all">
           <tgroup cols="3">
+            <colspec colname="c1" colwidth="5.5cm" />
+            <colspec colname="c2" colwidth="7.5cm" />
+            <colspec colname="c3" colwidth="1cm" />
             <thead>
               <row>
                 <entry>Key</entry>
                 <entry>Description</entry>
-                <entry>Default value</entry>
+                <entry>Default</entry>
               </row>
             </thead>
             <tbody valign="top">
@@ -255,7 +258,7 @@
                         driver. Some drivers have been reported to indicate an error
                         in the URL even if they could connect successfully.</para>
                         <para>If you are seeing an error indicating that the URL is not
-                        accepted by the drive, but you are sure that the driver accepts
+                        accepted by the driver, but you are sure that the driver accepts
                         the URL, then set this property to <literal>false</literal>
                         </para>
                 </entry>
@@ -295,6 +298,7 @@
                 </entry>
                 <entry><para>false</para></entry>
               </row>
+							
               <row>
                 <entry><para>workbench.dbmetadata.logsql</para></entry>
                 <entry><para>If this is enabled, the SQL queries used to
@@ -304,6 +308,32 @@
 								for DBMS's which are not (yet) preconfigured.</para>
                 </entry>
                 <entry><para>false</para></entry>
+              </row>
+              <row>
+                <entry><para>workbench.db.fetchsize</para></entry>
+                <entry><para>This setting controls the default fetch size 
+								for data retrieval. If this parameter is set to a value &gt;0 
+								it will be passed to the 
+								<ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/Statement.html#setFetchSize(int)">setFetchSize()</ulink> 
+								method of the <literal>Statement</literal> object.</para>
+                </entry>
+                <entry><para>-1</para></entry>
+              </row>
+              <row>
+                <entry><para>workbench.db.inlineconstraints</para></entry>
+                <entry><para>This setting controls the generation of the <literal>CREATE TABLE</literal>
+								source in the <link linkend="dbexplorer">DbExplorer</link>. This is a comma separated
+								list of DBMS systems that only support defining primary and foreign keys inside
+								the <literal>CREATE TABLE</literal> statement.</para>
+								<para>The values that should be entered to identify the DBMS can be obtained
+								either from the log file - the "product name" will be logged with <literal>Connect to [product name]</literal>
+								Everything between (but no including) the square brackets is the identifier for the DBMS as 
+								reported by the JDBC driver.</para>
+								<para>This product name is also shown in the tooltip for the connection information in the toolbar
+								of the main window. </para>
+								<para>Example for multiple DBMS entries: <literal>FirstSQL/J,Oracle</literal></para>
+                </entry>
+                <entry><para>FirstSQL/J</para></entry>
               </row>
               <row>
                 <entry><para id="formatter-subselect-threshold">workbench.sql.formatter.subselect.maxlength</para></entry>

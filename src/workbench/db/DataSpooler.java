@@ -56,7 +56,7 @@ public class DataSpooler
 	public static final int EXPORT_SQL = 1;
 	public static final int EXPORT_TXT = 2;
 	public static final int EXPORT_XML = 3;
-	
+
 	private WbConnection dbConn;
 	private String sql;
 	private String outputfile;
@@ -65,9 +65,10 @@ public class DataSpooler
 	private boolean exportHeaders;
 	private boolean includeCreateTable = false;
 	private boolean headerOnly = false;
+	private boolean useSqlUpdate = false;
 	private String tableName;
 	private String encoding = "UTF-8";
-	
+
 	private String delimiter = "\t";
 	private String quoteChar = null;
 	private String dateFormat = null;
@@ -77,7 +78,7 @@ public class DataSpooler
 	private String concatString = "||";
 	private int commitEvery=0;
 	private int maxDigits=340;
-	
+
 	/** If true, then cr/lf characters will be removed from
 	 *  character columns
 	 */
@@ -98,7 +99,7 @@ public class DataSpooler
 	private ArrayList warnings = new ArrayList();
 	private ArrayList errors = new ArrayList();
 	private ArrayList jobQueue;
-	
+
 	public DataSpooler()
 	{
 	}
@@ -110,11 +111,11 @@ public class DataSpooler
 	{
 		File f = new File(this.outputfile);
 		String fname = f.getName();
-		
+
 		progressPanel = new ProgressPanel(this);
 		this.progressPanel.setFilename(this.outputfile);
 		this.progressPanel.setInfoText(ResourceMgr.getString("MsgSpoolingRow"));
-	
+
 		this.progressWindow = new JFrame();
 		this.progressWindow.getContentPane().add(progressPanel);
 		this.progressWindow.pack();
@@ -127,7 +128,7 @@ public class DataSpooler
 				keepRunning = false;
 			}
 		});
-		
+
 		WbSwingUtilities.center(this.progressWindow, null);
 		this.progressWindow.show();
 	}
@@ -162,12 +163,12 @@ public class DataSpooler
 		}
 		return true;
 	}
-	
-	public void cancelExecution() 
-	{ 
-		this.keepRunning = false; 
+
+	public void cancelExecution()
+	{
+		this.keepRunning = false;
 	}
-	
+
 	public void setTableName(String aTablename)
 	{
 		this.tableName = aTablename;
@@ -182,17 +183,17 @@ public class DataSpooler
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
 		}
 	}
-	
+
 	public void setExportHeaderOnly(boolean aFlag) { this.headerOnly = aFlag; }
 	public boolean getExportHeaderOnly() { return this.headerOnly; }
 	public void setCommitEvery(int aCount) { this.commitEvery = aCount; }
 	public int getCommitEvery() { return this.commitEvery; }
-	
-	public void setShowProgress(boolean aFlag) 
+
+	public void setShowProgress(boolean aFlag)
 	{
 	  if (!WbManager.getInstance().isBatchMode())
 	  {
-	    this.showProgress = aFlag; 
+	    this.showProgress = aFlag;
 	  }
 	}
 	public boolean getShowProgress() { return this.showProgress; }
@@ -208,39 +209,45 @@ public class DataSpooler
 
 	public void setTextDateFormat(String aFormat) { this.dateFormat = aFormat; }
 	public String getTextDateFormat() { return this.dateFormat; }
-	
+
 	public void setTextTimestampFormat(String aFormat) { this.dateTimeFormat = aFormat; }
 	public String getTextTimestampFormat() { return this.dateTimeFormat; }
 
 	public void setOutputTypeXml() { this.exportType = EXPORT_XML; }
 	public void setOutputTypeText() { this.exportType = EXPORT_TXT; }
-	public void setOutputTypeSqlInsert() { this.exportType = EXPORT_SQL; }
-	
-	public boolean isOutputTypeText() { return this.exportType == EXPORT_TXT; }
-	public boolean isOutputTypeSqlInsert() { return this.exportType == EXPORT_SQL; }
-	public boolean isOutputTypeSqlXml() { return this.exportType == EXPORT_XML; }
-	
+	public void setOutputTypeSqlInsert()
+	{
+		this.exportType = EXPORT_SQL;
+		this.useSqlUpdate = false;
+	}
+
+	public void setOutputTypeSqlUpdate()
+	{
+		this.exportType = EXPORT_SQL;
+		this.useSqlUpdate = true;
+	}
+
 	public void setOutputFilename(String aFilename) { this.outputfile = aFilename; }
 	public String getOutputFilename() { return this.outputfile; }
 	public String getFullOutputFilename() { return this.fullOutputFileName; }
-	
-	
+
+
 	public void setCleanCarriageReturns(boolean aFlag)
 	{
 		this.cleancr = aFlag;
 	}
-	
+
 	public void setConcatString(String aConcatString)
 	{
 		if (aConcatString == null) return;
 		this.concatString = aConcatString;
 	}
-	
+
 	public void setChrFunction(String aFunc)
 	{
 		this.chrFunc = aFunc;
 	}
-	
+
 	public void setDecimalSymbol(char aSymbol)
 	{
 		this.decimalSymbol = aSymbol;
@@ -251,10 +258,10 @@ public class DataSpooler
 		if (aSymbol == null || aSymbol.length() == 0) return;
 		this.decimalSymbol = aSymbol.charAt(0);
 	}
-	
+
 	public void setSql(String aSql) { this.sql = aSql; }
 	public String getSql() { return this.sql; }
-	
+
 	private void startBackgroundThread()
 	{
 		Thread t = new Thread()
@@ -280,7 +287,7 @@ public class DataSpooler
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
 	}
-	
+
 	private void runJobs()
 	{
 		if (this.jobQueue == null) return;
@@ -313,7 +320,7 @@ public class DataSpooler
 		this.jobsRunning = false;
 		this.closeProgress();
 	}
-	
+
 	public void startExport()
 		throws IOException, SQLException, WbException
 	{
@@ -328,7 +335,7 @@ public class DataSpooler
 		{
 			LogMgr.logWarning("DataSpooler.startExport()", "Setting fetch size to 500 failed!");
 		}
-		
+
 		try
 		{
 			stmt.execute(this.sql);
@@ -349,7 +356,7 @@ public class DataSpooler
 			try { stmt.close(); } catch (Throwable th) {}
 		}
 	}
-	
+
 	public boolean isSuccess() { return this.errors.size() == 0; }
 	public boolean hasWarning() { return this.warnings.size() > 0; }
 
@@ -373,10 +380,10 @@ public class DataSpooler
 		}
 		return result;
 	}
-	
+
 	/**
 	 *	Export a table to an external file.
-	 *	The data will be "piped" through a DataStore in order to use 
+	 *	The data will be "piped" through a DataStore in order to use
 	 *	the SQL scripting built into that object.
 	 */
 	public long startExport(ResultSet rs)
@@ -384,33 +391,33 @@ public class DataSpooler
 	{
 		int interval = 1;
 		int currentRow = 0;
-		
+
 		this.warnings.clear();
 		this.errors.clear();
-		
+
 		StringBuffer line = null;
 		ResultSetMetaData meta = rs.getMetaData();
 		DataStore ds = new DataStore(meta, this.dbConn);
 		ds.setOriginalStatement(this.sql);
-		
+
 		if (showProgress)
 		{
 			if (this.progressPanel == null) this.openProgressMonitor();
 		}
-		
-		
+
+
 		if (this.exportType == EXPORT_SQL)
 		{
 			if (this.tableName == null)
 			{
-				if (!ds.useUpdateTableFromSql(this.sql))
+				if (!ds.useUpdateTableFromSql(this.sql, this.useSqlUpdate))
 				{
 					throw new WbException(ResourceMgr.getString("ErrorSpoolSqlNotPossible"));
 				}
 			}
 			else
 			{
-				ds.useUpdateTable(this.tableName);
+				ds.useUpdateTable(this.tableName, this.useSqlUpdate);
 			}
 		}
 		else if (this.exportType == EXPORT_XML)
@@ -426,33 +433,33 @@ public class DataSpooler
 			{
 				ds.useUpdateTable(this.tableName);
 			}
-			
+
 		}
-		
+
 		int row = 0;
 
 		BufferedWriter pw = null;
-		
+
 		int colCount = meta.getColumnCount();
 		int types[] = new int[colCount];
 		for (int i=0; i < colCount; i++)
 		{
 			types[i] = meta.getColumnType(i+1);
 		}
-			
+
 		boolean useQuotes = (this.quoteChar != null) && (this.quoteChar.trim().length() > 0);
-		
+
 		//byte[] quoteBytes = quoteChar.getBytes();
 		//byte[] lineEnd = StringUtil.LINE_TERMINATOR.getBytes();
 		//byte[] fieldBytes = delimiter.getBytes();
-	
+
 		SimpleDateFormat dateFormatter = null;
 		SimpleDateFormat dateTimeFormatter = null;
 		DecimalFormat numberFormatter = null;
-		
+
 		if (this.exportType == EXPORT_TXT || this.exportType == EXPORT_XML)
 		{
-			if (this.dateFormat != null) 
+			if (this.dateFormat != null)
 			{
 				try
 				{
@@ -478,7 +485,7 @@ public class DataSpooler
 					dateTimeFormatter = null;
 				}
 			}
-			
+
 			if (this.decimalSymbol != 0)
 			{
 				DecimalFormatSymbols symbols = new DecimalFormatSymbols();
@@ -489,12 +496,12 @@ public class DataSpooler
 				ds.setDefaultNumberFormatter(numberFormatter);
 			}
 		}
-		
+
 		try
 		{
 			Object value = null;
 			boolean quote = false;
-	
+
 			File f = new File(this.outputfile);
 			this.fullOutputFileName = f.getAbsolutePath();
 			if (this.exportType == EXPORT_XML)
@@ -506,7 +513,7 @@ public class DataSpooler
 			{
 				pw = new BufferedWriter(new FileWriter(f), 16*1024);
 			}
-			
+
 			if (exportType == EXPORT_TXT && exportHeaders)
 			{
 				pw.write(ds.getHeaderString(this.delimiter).toString());
@@ -537,7 +544,7 @@ public class DataSpooler
 			{
 				pw.write(ds.getXmlStart(this.encoding).toString());
 			}
-			
+
 			FieldPosition position = new FieldPosition(0);
 
 			while (rs.next())
@@ -555,7 +562,14 @@ public class DataSpooler
 				if (this.exportType == EXPORT_SQL)
 				{
 					row = ds.addRow(rs);
-					line = ds.getRowDataAsSqlInsert(row, StringUtil.LINE_TERMINATOR, this.dbConn, this.chrFunc, this.concatString);
+					if (this.useSqlUpdate)
+					{
+						line = ds.getRowDataAsSqlUpdate(row, StringUtil.LINE_TERMINATOR, this.dbConn, this.chrFunc, this.concatString);
+					}
+					else
+					{
+						line = ds.getRowDataAsSqlInsert(row, StringUtil.LINE_TERMINATOR, this.dbConn, this.chrFunc, this.concatString);
+					}
 					ds.discardRow(row);
 					if (line != null)
 					{
@@ -585,14 +599,14 @@ public class DataSpooler
 						pw.write(line.toString());
 					}
 				}
-				else 
+				else
 				{
 					// we don't use the DataStore when exporting to text for performance reasons
 					for (int i=0; i < colCount; i++)
 					{
 						value = rs.getObject(i+1);
 						quote = useQuotes && (types[i] == Types.VARCHAR || types[i] == Types.CHAR);
-						
+
 						if (value != null && !rs.wasNull())
 						{
 							//if (currentRow == 1) System.out.println("value.class=" + value.getClass().getName());
@@ -621,7 +635,7 @@ public class DataSpooler
 								{
 									pw.write((String)value);
 								}
-								if (quote) pw.write(quoteChar); 
+								if (quote) pw.write(quoteChar);
 							}
 							else
 							{
@@ -634,7 +648,7 @@ public class DataSpooler
 				}
 				if (!this.keepRunning) break;
 			}
-			
+
 			if (this.exportType == EXPORT_XML)
 			{
 				pw.write(ds.getXmlEnd().toString());
@@ -657,7 +671,7 @@ public class DataSpooler
 			LogMgr.logError("DataSpooler", "SQL Error", e);
 			throw e;
 		}
-		finally 
+		finally
 		{
 			try { if (pw != null) pw.close(); } catch (Throwable th) {}
 			if (!jobsRunning) this.closeProgress();
@@ -674,12 +688,12 @@ public class DataSpooler
 			this.progressPanel = null;
 		}
 	}
-	
+
 	public void executeStatement(WbConnection aConnection, String aSql)
 	{
 		this.executeStatement(null, aConnection, aSql);
 	}
-	
+
 	public void executeStatement(Window aParent, WbConnection aConnection, String aSql)
 	{
 		String cleanSql = SqlUtil.makeCleanSql(aSql, false);
@@ -700,7 +714,7 @@ public class DataSpooler
 				this.setOutputFilename(filename);
 				this.setShowProgress(true);
 				this.setSql(cleanSql);
-				
+
 				if (ExtensionFileFilter.hasSqlExtension(filename))
 				{
 					this.setOutputTypeSqlInsert();
@@ -728,7 +742,7 @@ public class DataSpooler
 	{
 		return includeCreateTable;
 	}
-	
+
 	public void setIncludeCreateTable(boolean includeCreateTable)
 	{
 		this.includeCreateTable = includeCreateTable;
@@ -749,5 +763,5 @@ public class DataSpooler
 		FieldPosition p = new FieldPosition(0);
 		System.out.println("d=" + f.format(d, new StringBuffer(), p));
 	}
-	
+
 }

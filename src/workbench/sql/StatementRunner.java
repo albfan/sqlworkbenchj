@@ -39,17 +39,17 @@ public class StatementRunner
 {
 	private WbConnection dbConnection;
 	private StatementRunnerResult result;
-	
+
 	private HashMap cmdDispatch;
-	
+
 	private SqlCommand currentCommand;
 	private SqlCommand currentConsumer;
-	
+
 	private int maxRows;
 	private boolean isCancelled;
 
 	private RowActionMonitor rowMonitor;
-	
+
 	public StatementRunner()
 	{
 		cmdDispatch = new HashMap();
@@ -57,49 +57,49 @@ public class StatementRunner
 
 		SqlCommand sql = new WbListTables();
 		cmdDispatch.put(sql.getVerb(), sql);
-		
+
 		sql = new WbHelp();
 		cmdDispatch.put(sql.getVerb(), sql);
-		
+
 		sql = new WbListProcedures();
 		cmdDispatch.put(sql.getVerb(), sql);
-		
+
 		sql = new WbDescribeTable();
 		cmdDispatch.put(sql.getVerb(), sql);
     cmdDispatch.put("DESCRIBE", sql);
-		
+
 		sql = new WbEnableOraOutput();
 		cmdDispatch.put(sql.getVerb(), sql);
 
 		sql = new WbDisableOraOutput();
 		cmdDispatch.put(sql.getVerb(), sql);
-		
+
 		sql = new SelectCommand();
 		cmdDispatch.put(sql.getVerb(), sql);
-		
+
 		sql = new WbExport();
 		cmdDispatch.put(sql.getVerb(), sql);
 		cmdDispatch.put("EXP", sql);
 		cmdDispatch.put("EXPORT", sql);
 		cmdDispatch.put("SPOOL", sql);
-		
+
 		sql = new WbImport();
 		cmdDispatch.put(sql.getVerb(), sql);
 		cmdDispatch.put("IMP", sql);
-		
+
 		sql = new WbCopy();
 		cmdDispatch.put(sql.getVerb(), sql);
-		
+
 		cmdDispatch.put(WbListCatalogs.LISTCAT.getVerb(), WbListCatalogs.LISTCAT);
 		cmdDispatch.put(WbListCatalogs.LISTDB.getVerb(), WbListCatalogs.LISTDB);
-		
+
 		cmdDispatch.put(SingleVerbCommand.COMMIT.getVerb(), SingleVerbCommand.COMMIT);
 		cmdDispatch.put(SingleVerbCommand.ROLLBACK.getVerb(), SingleVerbCommand.ROLLBACK);
-		
+
 		cmdDispatch.put(UpdatingCommand.DELETE.getVerb(), UpdatingCommand.DELETE);
 		cmdDispatch.put(UpdatingCommand.INSERT.getVerb(), UpdatingCommand.INSERT);
 		cmdDispatch.put(UpdatingCommand.UPDATE.getVerb(), UpdatingCommand.UPDATE);
-		
+
 		for (int i=0; i < DdlCommand.DDL_COMMANDS.size(); i ++)
 		{
 			sql = (SqlCommand)DdlCommand.DDL_COMMANDS.get(i);
@@ -116,17 +116,17 @@ public class StatementRunner
 			this.cmdDispatch.put(WbOraExecute.EXECUTE.getVerb(), WbOraExecute.EXECUTE);
 		}
 	}
-	
+
 	public StatementRunnerResult getResult()
 	{
 		return this.result;
 	}
-	
+
 	public void setRowMonitor(RowActionMonitor monitor)
 	{
 		this.rowMonitor = monitor;
 	}
-	
+
 	public void runStatement(String aSql, int maxRows)
 		throws SQLException, WbException
 	{
@@ -141,35 +141,35 @@ public class StatementRunner
 			this.result.setSuccess();
 			return;
 		}
-	
+
 		String macro = MacroManager.getInstance().getMacroText(cleanSql);
 		if (macro != null)
 		{
 			aSql = macro;
 			cleanSql = SqlUtil.makeCleanSql(macro, false);
 		}
-		
+
 		String oldCatalog = null;
 		String newCatalog = null;
-		
+
 		// store the old catalog name, because in SQL Server this could change
 		// when executing a SQL statement (e.g. USE)
-		oldCatalog = this.dbConnection.getMetadata().getCurrentCatalog(); 
-		
+		oldCatalog = this.dbConnection.getMetadata().getCurrentCatalog();
+
 		String verb = SqlUtil.getSqlVerb(cleanSql).toUpperCase();
-		
+
 		this.currentCommand = (SqlCommand)this.cmdDispatch.get(verb);
-		
+
 		// if no mapping is found use the default implementation
-		if (this.currentCommand == null) 
+		if (this.currentCommand == null)
 		{
 			this.currentCommand = (SqlCommand)this.cmdDispatch.get("*");
 		}
-		
+
 		this.currentCommand.setRowMonitor(this.rowMonitor);
 		this.currentCommand.setMaxRows(maxRows);
 		this.result = this.currentCommand.execute(this.dbConnection, aSql);
-		
+
 		if (this.currentCommand.isResultSetConsumer())
 		{
 			this.currentConsumer = this.currentCommand;
@@ -179,17 +179,26 @@ public class StatementRunner
 			if (this.currentConsumer != null)
 			{
 				this.currentConsumer.consumeResult(this.result);
+				this.currentConsumer = null;
 			}
-			this.currentConsumer = null;
 		}
-		
+
 		// get the catalog which is active now. If the catalog has changed
 		// notify the connection display, so it can be updated
 		newCatalog = this.dbConnection.getMetadata().getCurrentCatalog();
-		
+
 		if (!oldCatalog.equals(newCatalog))
 		{
 			this.dbConnection.connectionStateChanged();
+		}
+	}
+
+	public void statementDone()
+	{
+		if (this.currentCommand != null && this.currentConsumer != this.currentCommand)
+		{
+			this.currentCommand.done();
+			this.currentCommand = null;
 		}
 	}
 
@@ -208,17 +217,13 @@ public class StatementRunner
 			LogMgr.logDebug("StatementRunner.cancel()", "Error when cancelling statement", th);
 		}
 	}
-	
+
 	public void done()
 	{
 		if (this.result != null) this.result.clear();
 		this.result = null;
-		if (this.currentCommand != null && this.currentCommand != this.currentConsumer) 
-		{
-			this.currentCommand.done();
-			this.currentCommand = null;
-		}
+		this.statementDone();
 		this.currentConsumer = null;
 	}
-	
+
 }

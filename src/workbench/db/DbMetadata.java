@@ -73,6 +73,8 @@ public class DbMetadata
 	private static List caseSensitiveServers = Collections.EMPTY_LIST;
 	private static List ddlNeedsCommitServers = Collections.EMPTY_LIST;
 	private static List serverNeedsJdbcCommit = Collections.EMPTY_LIST;
+	private static List serversWithInlineConstraints = Collections.EMPTY_LIST;
+	
 	// These Hashmaps contains templates
 	// for object creation
 	private HashMap procSourceSql;
@@ -95,7 +97,8 @@ public class DbMetadata
 	private boolean isFirebird;
 	private boolean isSqlServer;
 	private boolean isMySql;
-
+	private boolean createInlineConstraints = false;
+	
 	private List keywords;
 	private String quoteCharacter;
 
@@ -200,6 +203,7 @@ public class DbMetadata
 		this.caseSensitive = caseSensitiveServers.contains(this.productName);
 		this.useJdbcCommit = serverNeedsJdbcCommit.contains(this.productName);
 		this.ddlNeedsCommit = ddlNeedsCommitServers.contains(this.productName);
+		this.createInlineConstraints = serversWithInlineConstraints.contains(this.productName);
 	}
 
 	public boolean getDDLNeedsCommit() { return ddlNeedsCommit; }
@@ -387,6 +391,9 @@ public class DbMetadata
 			viewTableDefinition = this.getTableDefinition(aCatalog, aSchema, aView);
 		}
 		String source = this.getViewSource(aCatalog, aSchema, aView);
+		
+		// ThinkSQL returns the full CREATE VIEW statement
+		if (source.toLowerCase().startsWith("create")) return source;
 
 		if (source == null || source.length() == 0) return "";
 
@@ -493,6 +500,96 @@ public class DbMetadata
 		}
 	}
 
+	private StringBuffer getFirebirdProcedureHeader(String aCatalog, String aSchema, String aProcname)
+	{
+		StringBuffer source = new StringBuffer(50);
+		try
+		{
+			DataStore ds = this.getProcedureColumnInformation(aCatalog, aSchema, aProcname);
+			source.append("CREATE PROCEDURE ");
+			source.append(aProcname);
+			String retType = null;
+			int count = ds.getRowCount();
+			int added = 0;
+			for (int i=0; i < count; i++)
+			{
+				String vartype = ds.getValueAsString(i,COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
+				String name = ds.getValueAsString(i,COLUMN_IDX_PROC_COLUMNS_COL_NAME);
+				String ret = ds.getValueAsString(i,COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+				if ("OUT".equals(ret))
+				{
+					retType = "(" + name + " " + vartype + ")";
+				}
+				else
+				{
+					if (added > 0) 
+					{
+						source.append(",");
+					}
+					else
+					{
+						source.append(" (");
+					}
+					source.append(name);
+					source.append(" ");
+					source.append(vartype);
+					added ++;
+				}
+			}
+			if (added > 0) source.append(")");
+			if (retType != null)
+			{
+				source.append("\nRETURNS ");
+				source.append(retType);
+			}
+			source.append("\nAS");
+		}
+		catch (Exception e)
+		{
+			source = new StringBuffer();
+		}
+		return source;
+	}
+	
+	private StringBuffer getPostgresProcedureHeader(String aCatalog, String aSchema, String aProcname)
+	{
+		StringBuffer source = new StringBuffer(50);
+		try
+		{
+			DataStore ds = this.getProcedureColumnInformation(aCatalog, aSchema, aProcname);
+			source.append("CREATE OR REPLACE FUNCTION ");
+			source.append(aProcname);
+			source.append(" (");
+			String retType = null;
+			int count = ds.getRowCount();
+			int added = 0;
+			for (int i=0; i < count; i++)
+			{
+				String vartype = ds.getValueAsString(i,COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
+				String ret = ds.getValueAsString(i,COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+				if ("RETURN".equals(ret))
+				{
+					retType = vartype;
+				}
+				else
+				{
+					if (added > 0) source.append(",");
+					source.append(vartype);
+					added ++;
+				}
+			}
+			source.append(")");
+			source.append("\nRETURNS ");
+			source.append(retType);
+			source.append("\nAS\n");
+		}
+		catch (Exception e)
+		{
+			source = new StringBuffer();
+		}
+		return source;
+	}
+	
 	public String getProcedureSource(String aCatalog, String aSchema, String aProcname)
 	{
 		if (aProcname == null) return null;
@@ -505,6 +602,17 @@ public class DbMetadata
 			aProcname = aProcname.substring(0, i);
 
 		StringBuffer source = new StringBuffer(4000);
+		
+		// Postgres and Firebird do not store the CREATE PROCEDURE part
+		// of the source, so we have to recreate it "manually"
+		if (this.isPostgres)
+		{
+			source.append(getPostgresProcedureHeader(aCatalog, aSchema, aProcname));
+		}
+		else if (this.isFirebird)
+		{
+			source.append(this.getFirebirdProcedureHeader(aCatalog, aSchema, aProcname));
+		}
 		try
 		{
 			GetMetaDataSql sql = (GetMetaDataSql)this.procSourceSql.get(this.productName);
@@ -548,6 +656,10 @@ public class DbMetadata
 		catch (Exception e)
 		{
 			source = new StringBuffer(e.getMessage());
+		}
+		if (source.charAt(source.length() - 1) != ';')
+		{
+			source.append(";");
 		}
 		return source.toString();
 	}
@@ -762,12 +874,12 @@ public class DbMetadata
 	}
 
 	public final static int COLUMN_IDX_PROC_COLUMNS_COL_NAME = 0;
-	public final static int COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE = 2;
+	public final static int COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE = 1;
 	public final static int COLUMN_IDX_PROC_COLUMNS_DATA_TYPE = 2;
 	public final static int COLUMN_IDX_PROC_COLUMNS_REMARKS = 3;
 
 	public DataStore getProcedureColumnInformation(String aCatalog, String aSchema, String aProcname)
-		throws SQLException, WbException
+		throws SQLException
 	{
 		final String cols[] = {"COLUMN_NAME", "COL_TYPE", "TYPE_NAME", "REMARKS"};
 		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
@@ -842,6 +954,25 @@ public class DbMetadata
 				}
 				break;
 
+			case Types.OTHER:
+				// Oracle specific datatypes
+				if ("NVARCHAR2".equalsIgnoreCase(aTypeName))
+				{
+					display = aTypeName + "(" + size + ")";
+				}
+				else if ("NCHAR".equalsIgnoreCase(aTypeName))
+				{
+					display = aTypeName + "(" + size + ")";
+				}
+				else if ("UROWID".equalsIgnoreCase(aTypeName))
+				{
+					display = aTypeName + "(" + size + ")";
+				}
+				else if ("RAW".equalsIgnoreCase(aTypeName))
+				{
+					display = aTypeName + "(" + size + ")";
+				}
+				break;
 			default:
 				display = aTypeName;
 				break;
@@ -2113,8 +2244,22 @@ public class DbMetadata
 			if (i < count - 1) result.append(',');
 			result.append('\n');
 		}
+		if (this.createInlineConstraints && pkCols.length() > 0)
+		{
+			result.append('\n');
+			result.append("   ,PRIMARY KEY (");
+			result.append(pkCols.toString());
+			result.append(")\n");
+			
+			StringBuffer fk = this.getFkSource(aTablename, aFkDef);
+			if (fk.length() > 0)
+			{
+				result.append(fk);
+			}				
+		}
+		
 		result.append(");\n");
-		if (pkCols.length() > 0)
+		if (!this.createInlineConstraints && pkCols.length() > 0)
 		{
 			String template = this.getSqlTemplate(this.pkStatements);
 			template = StringUtil.replace(template, TABLE_NAME_PLACEHOLDER, aTablename);
@@ -2126,7 +2271,7 @@ public class DbMetadata
 			result.append(";\n\n");
 		}
 		result.append(this.getIndexSource(aTablename, aIndexDef));
-		result.append(this.getFkSource(aTablename, aFkDef));
+		if (!this.createInlineConstraints) result.append(this.getFkSource(aTablename, aFkDef));
 		String grants = this.getTableGrantSource(null, null, aTablename);
 		if (grants.length() > 0)
 		{
@@ -2150,11 +2295,18 @@ public class DbMetadata
 		if (count == 0) return StringUtil.EMPTY_STRINGBUFFER;
 
 		String template = (String)this.fkStatements.get(this.productName);
+
 		if (template == null)
 		{
-			template = (String)this.fkStatements.get(GENERAL_SQL);
+			if (this.createInlineConstraints)
+			{
+				template = (String)this.fkStatements.get("All-Inline");
+			}
+			else
+			{
+				template = (String)this.fkStatements.get(GENERAL_SQL);
+			}
 		}
-
 		// collects all columns from the base table mapped to the
 		// defining foreign key constraing.
 		// The fk name is the key.
@@ -2249,8 +2401,17 @@ public class DbMetadata
 		Iterator values = fks.values().iterator();
 		while (values.hasNext())
 		{
-			fk.append((String)values.next());
-			fk.append(";\n\n");
+			if (this.createInlineConstraints)
+			{
+				fk.append("   ,");
+				fk.append((String)values.next());
+				fk.append("\n");
+			}
+			else
+			{
+				fk.append((String)values.next());
+				fk.append(";\n\n");
+			}
 		}
 		return fk;
 	}
@@ -2443,6 +2604,11 @@ public class DbMetadata
 		return result.toString();
 	}
 
+	public static void setServersWithInlineConstraints(List aList)
+	{
+		serversWithInlineConstraints = aList;
+	}
+	
 	public static void setServersWhereDDLNeedsCommit(List aList)
 	{
 		ddlNeedsCommitServers = aList;

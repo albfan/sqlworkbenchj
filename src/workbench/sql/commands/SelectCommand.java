@@ -13,6 +13,7 @@ import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.exception.WbException;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -39,17 +40,33 @@ public class SelectCommand extends SqlCommand
 		{
 			this.currentConnection = aConnection;
 			this.currentStatement = aConnection.createStatement();
-			this.currentStatement.setMaxRows(this.maxRows);
+			try
+			{
+				this.currentStatement.setMaxRows(this.maxRows);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logWarning("SelectCommand.execute()", "The JDBC driver does not support the setMaxRows() function! (" +e.getMessage() + ")");
+			}
+
 			int fetchSize = WbManager.getSettings().getDefaultFetchSize();
 			if (fetchSize > 0 && fetchSize < this.maxRows)
 			{
-				this.currentStatement.setFetchSize(fetchSize);
+				try
+				{
+					this.currentStatement.setFetchSize(fetchSize);
+				}
+				catch (Throwable th)
+				{
+					LogMgr.logWarning("SelectCommand.execute()", "The JDBC driver does not support the setFetchSize() function! (" +th.getMessage() + ")");
+				}
 			}
+
 			this.isCancelled = false;
 			ResultSet rs = this.currentStatement.executeQuery(aSql);
 			if (rs != null)
 			{
-				result.addResultSet(rs);
+				result.addResultSet(rs, this.maxRows);
 				StringBuffer warnings = new StringBuffer();
 
 				this.appendSuccessMessage(result);
@@ -75,7 +92,7 @@ public class SelectCommand extends SqlCommand
 			result.clear();
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
 			result.addMessage(ExceptionUtil.getDisplay(e));
-			
+
 			StringBuffer warnings = new StringBuffer();
 			if (this.appendWarnings(aConnection, this.currentStatement, warnings))
 			{
@@ -83,6 +100,10 @@ public class SelectCommand extends SqlCommand
 			}
 			result.setFailure();
 		}
+
+		// we cannot close the statement here, as the result will be processed
+		// somewhere else! (e.g. Export command, DwPanel to display the result!
+
 		return result;
 	}
 

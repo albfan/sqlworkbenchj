@@ -46,7 +46,10 @@
 DELETE FROM person| WHERE lastname = 'Dent';
 COMMIT;</programlisting>
 				 <para>When pressing Ctrl-Enter the <literal>DELETE</literal> statement will be exectuted</para>
-
+         <para>You can configure &wb-productname; to automatically jump to the next statement,
+         after executing the current statement. Simply select <menuchoice><guimenu>SQL</guimenu><guimenuitem>Jump to next statement</guimenuitem></menuchoice>
+         The check mark next to the menu item indicates if this option is enabled.
+         </para>
 				 <para><emphasis role="bold">Execute All</emphasis></para>
 				 <para>If you want to execute the complete text in the editor regardless
 				 of the current selection, use the <guimenuitem>Execute all</guimenuitem> command.
@@ -393,7 +396,7 @@ Done.</programlisting>
 
 			<note><para>When you save changes from the result set, &wb-productname; will
 			always send a <literal>ROLLBACK</literal> or <literal>COMMIT</literal> to the database server
-			regardless of the autocommit setting of the connection profile</para></note>
+			regardless of the autocommit setting of the connection profile.</para></note>
 
       <para>Once you issue a new <literal>SELECT</literal> statement the edit mode will be
       disabled. If you try to enable the edit mode for a result set where more

@@ -83,26 +83,30 @@ WHERE p.person_id = a.person_id; </programlisting>
         into a format that's easier to read and understand for a human beeing. This feature is often called pretty-printing.
         Suppose you have the following statement (pasted from a log file)
         </para>
-<programlisting>select user.* from user, user_profile, uprof where user.user_id = user_profile.user_id and
-user_profile.user_id = uprof.user_id and uprof.user_role = 1 and uprof.internal_user = 'F'
-and not exists (select 1 from claim where
-claim.id = uprof.id)</programlisting>
+<programlisting>select user.* from user, user_profile, user_data 
+where user.user_id = user_profile.user_id and 
+user_profile.user_id = uprof.user_id and user_data.user_role = 1 
+and user_data.delete_flag = 'F' and not exists 
+(select 1 from data_detail where data_detail.id = data.id and 
+data_detail.flag = 'X' and data_detail.value > 42)</programlisting>
       <para>this will be reformatted to look like this:</para>
-      <programlisting>SELECT user. *
+      <programlisting>SELECT user.*
 FROM user,
      user_profile,
-     uprof
+     user_data
 WHERE user.user_id = user_profile.user_id
 AND   user_profile.user_id = uprof.user_id
-AND   uprof.user_role = 1
-AND   uprof.hp_internal_user = 'F'
-AND   NOT EXISTS (
-                   SELECT 1
-                   FROM claim
-                   WHERE claim.id = uprof.id
+AND   user_data.user_role = 1
+AND   user_data.delete_flag = 'F'
+AND   NOT EXISTS (SELECT 1
+                  FROM data_detail
+                  WHERE data_detail.id = DATA.id
+                  AND   data_detail.flag = 'x'
+                  AND   data_detail.value &gt; 42
                   )</programlisting>
 
-      <note><para>Please note that currently only <literal>SELECT</literal>, <literal>INSERT</literal>, <literal>UPDATE</literal> and <literal>DELETE</literal> are supported for reformatting.
+      <note><para>Please note that currently only <literal>SELECT</literal>, <literal>INSERT</literal>, <literal>UPDATE</literal>,  
+			<literal>DELETE</literal>, <literal>CREATE TABLE</literal> and <literal>CREATE VIEW</literal>are supported for reformatting.
 			</para></note>
 			<para>You can configure a threshold up to which sub-<literal>SELECT</literal>s will not be reformatted but
 			put into one single line. The default for this threshold is 80 characters. Meaning that any

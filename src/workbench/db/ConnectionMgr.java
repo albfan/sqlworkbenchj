@@ -5,6 +5,7 @@
  */
 package workbench.db;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -120,7 +121,7 @@ public class ConnectionMgr
 					LogMgr.logInfo("ConnectionMgr.connect()", "(" + th.getMessage() + ")");
 				}
 			}
-
+			LogMgr.logInfo("ConnectionMgr.connect()", "Connected to: [" + sql.getMetaData().getDatabaseProductName() + "]");
 			return sql;
 		}
 		catch (Exception e)
@@ -364,7 +365,7 @@ public class ConnectionMgr
 		{
 			if (conn != null && this.canDisconnectHsql(conn))
 			{
-				LogMgr.logInfo("ConnectionMgr.disconnect()", "Disconnecting: " + conn.getProfile().getName() + " with ID=" + conn.getId());
+				LogMgr.logInfo("ConnectionMgr.disconnect()", "Disconnecting: [" + conn.getProfile().getName() + "], ID=" + conn.getId());
 				this.disconnectLocalHsql(conn);
 				conn.close();
 			}
@@ -459,9 +460,14 @@ public class ConnectionMgr
 				this.drivers = (ArrayList)result;
 			}
 		}
+		catch (FileNotFoundException fne)
+		{
+			LogMgr.logDebug("ConnectionMgr.readDrivers()", "WbDrivers.xml not found. Using defaults.");
+			this.drivers = new ArrayList();
+		}
 		catch (Exception e)
 		{
-			LogMgr.logDebug(this, "Could not load driver definitions!", e);
+			LogMgr.logDebug(this, "Could not load driver definitions. Creating new one...", e);
 			this.drivers = new ArrayList();
 		}
 		if (this.readTemplates)
@@ -513,10 +519,17 @@ public class ConnectionMgr
 		{
 			result = WbPersistence.readObject(WbManager.getSettings().getProfileFileName());
 		}
+		catch (FileNotFoundException fne)
+		{
+			LogMgr.logDebug("ConnectionMgr.readProfiles()", "WbProfiles.xml not found. Creating new one.");
+			this.profiles = new HashMap();
+			return;
+		}
 		catch (Exception e)
 		{
 			LogMgr.logError("ConnectionMgr.readProfiles()", "Error when reading connection profiles", e);
-			result = null;
+			this.profiles = new HashMap();
+			return;
 		}
 		if (result instanceof Collection)
 		{

@@ -43,12 +43,13 @@ public class StatementRunnerResult
 		return this.datastores.size();
 	}
 	
-	public int addResultSet(ResultSet rs)
+	public int addResultSet(ResultSet rs, int maxRows)
 	{
 		if (this.results == null) this.results = new ArrayList();
 		this.results.add(rs);
 		return this.results.size();
 	}
+	
 	public void addUpdateCount(int aCount)
 	{
 		if (this.updateCounts == null) this.updateCounts = new ArrayList();

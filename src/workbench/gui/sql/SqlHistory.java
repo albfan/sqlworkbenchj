@@ -42,7 +42,16 @@ public class SqlHistory
 
 		try
 		{
-			SqlHistoryEntry entry = new SqlHistoryEntry(text, editor.getCaretPosition(), editor.getSelectionStart(), editor.getSelectionEnd());
+			SqlHistoryEntry entry = null;
+			if (editor.currentSelectionIsError())
+			{
+				entry = new SqlHistoryEntry(text, editor.getCaretPosition(), 0, 0);
+			}
+			else
+			{
+				entry = new SqlHistoryEntry(text, editor.getCaretPosition(), editor.getSelectionStart(), editor.getSelectionEnd());
+			}
+
 			SqlHistoryEntry top = this.getTopEntry();
 			if (top != null && top.equals(entry)) return;
 			this.addEntry(entry);
@@ -88,7 +97,7 @@ public class SqlHistory
 		SqlHistoryEntry entry = (SqlHistoryEntry)this.history.get(this.currentEntry);
 		entry.applyTo(editor);
 	}
-	
+
 	public void showFirst(EditorPanel editor)
 	{
 		if (this.history.size() == 0) return;
@@ -96,7 +105,7 @@ public class SqlHistory
 		SqlHistoryEntry entry = (SqlHistoryEntry)this.history.get(this.currentEntry);
 		entry.applyTo(editor);
 	}
-		
+
 	public void showCurrent(EditorPanel editor)
 	{
 		if (this.currentEntry >= this.history.size()) return;
@@ -184,7 +193,7 @@ public class SqlHistory
 	{
 		return this.changed;
 	}
-	
+
 	public void readFromStream(InputStream in)
 	{
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));

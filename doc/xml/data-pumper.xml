@@ -115,7 +115,7 @@
 		</section>
 
 		<section id="commit-every">
-			<title>Committing inserts</title>
+			<title>Committing changes</title>
 			<para>By default all changes are committed at the end, when all rows
 			have been copied. By supplying a value in the field "Commit every"
 			&wb-productname; will commit changes every time the specified number of
@@ -124,6 +124,26 @@
 			4 <literal>COMMIT</literal>s to the target database. After inserting
 			row 50, row 100, row 150 and after the last row.</para>
 		</section>
+		
+		<section id="data-pumper-update-mode">
+      <title>Update mode</title>
+      <para>Just like the <link linkend="command-import">IMPORT</link> and
+      <link linkend="command-copy">COPY</link> commands, the data pumper can
+      optionally update the data in the target table. Select the approriate
+      update strategy from the <literal>Mode</literal> drop down. The <literal>UPDATE</literal>
+      command will use the key columns defined in the column mapper to generate the <literal>UPDATE</literal>
+      command. If you do not specify key columns, &wb-productname; will try to retrieve the
+      primary key definition from the target table during the copy process.
+      </para>
+        <para>
+          For maximum performance, choose the update strategy that will result in a succssful
+          first statement more often. As a rule of thumb:
+       		<itemizedlist>
+  			    <listitem><para>Use <literal>-mode=insert,upadte</literal>, if you expect more rows to be inserted then updated.</para></listitem>
+  			    <listitem><para>Use <literal>-mode=update,insert</literal>, if you expect more rows to be updated then inserted.</para></listitem>
+  		    </itemizedlist>
+        </para>
+      </section>
 
 	</section>
 

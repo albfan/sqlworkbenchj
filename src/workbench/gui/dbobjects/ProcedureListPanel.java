@@ -190,7 +190,7 @@ public class ProcedureListPanel
 	{
 		final Component current = this;
 
-		LogMgr.logDebug("ProcedureListPanel.retrieve()", "Starting retrieve for procedures...");
+		//LogMgr.logDebug("ProcedureListPanel.retrieve()", "Starting retrieve for procedures...");
 		Thread t = new Thread(new Runnable()
 		{
 			public void run()
@@ -202,9 +202,9 @@ public class ProcedureListPanel
 						DbMetadata meta = dbConnection.getMetadata();
 						//procList.setVisible(false);
 						WbSwingUtilities.showWaitCursorOnWindow(current);
-						LogMgr.logDebug("ProcedureListPanel.retrieve()", "Retrieving procedure list");
+						//LogMgr.logDebug("ProcedureListPanel.retrieve()", "Retrieving procedure list");
 						procList.setModel(meta.getListOfProcedures(currentCatalog, currentSchema), true);
-						LogMgr.logDebug("ProcedureListPanel.retrieve()", "Procedure list retrieved");
+						//LogMgr.logDebug("ProcedureListPanel.retrieve()", "Procedure list retrieved");
 						procList.adjustColumns();
 						WbSwingUtilities.showDefaultCursorOnWindow(current);
 						//procList.setVisible(true);

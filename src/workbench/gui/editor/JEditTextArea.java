@@ -102,7 +102,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.19 2004-01-20 18:11:46 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.20 2004-02-01 12:52:53 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -1080,13 +1080,11 @@ public class JEditTextArea
 	 */
 	public int getLineLength(int line)
 	{
-		Element lineElement = document.getDefaultRootElement()
-			.getElement(line);
+		Element lineElement = document.getDefaultRootElement().getElement(line);
 		if(lineElement == null)
 			return -1;
 		else
-			return lineElement.getEndOffset()
-				- lineElement.getStartOffset() - 1;
+			return lineElement.getEndOffset() - lineElement.getStartOffset() - 1;
 	}
 
 	/**
@@ -1149,7 +1147,6 @@ public class JEditTextArea
 			document.endCompoundEdit();
 		}
 		int newCount = Integer.toString(this.getLineCount()).length();
-		System.out.println("count=" + count + ", newcount" + newCount);
 		if (newCount > count)
 		{
 			this.repaint();
@@ -1424,8 +1421,12 @@ public class JEditTextArea
 
 	public void selectError(int start, int end)
 	{
+		if (start >= end) return;
+
 		int len = (end - start);
 		String text = this.getText(start, len);
+		if (text == null || text.length() == 0) return;
+
 		len = text.length();
 		int pos = 0;
 		char c = text.charAt(pos);
@@ -1465,6 +1466,8 @@ public class JEditTextArea
 	{
 		int newStart, newEnd;
 		boolean newBias;
+		this.currentSelectionIsError = false;
+
 		if(start <= end)
 		{
 			newStart = start;
@@ -1475,7 +1478,6 @@ public class JEditTextArea
 		{
 			newStart = end;
 			newEnd = start;
-			this.currentSelectionIsError = false;
 			newBias = true;
 		}
 

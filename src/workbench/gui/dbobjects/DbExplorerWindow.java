@@ -59,7 +59,7 @@ public class DbExplorerWindow
 
 		if (!s.restoreWindowSize(this))
 		{
-			this.setSize(500,500);
+			this.setSize(800,600);
 		}
 
 		if (!s.restoreWindowPosition(this))

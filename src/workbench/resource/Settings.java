@@ -129,6 +129,8 @@ public class Settings
 		DbMetadata.setCaseSensitiveServers(this.getCaseSensitivServers());
 		DbMetadata.setServersWhereDDLNeedsCommit(this.getServersWhereDDLNeedsCommit());
 		DbMetadata.setServersWhichNeedJdbcCommit(this.getServersWhichNeedJdbcCommit());
+		DbMetadata.setServersWithInlineConstraints(this.getServersWithInlineConstraints());
+
 		if (WbManager.trace) System.out.println("Done setting server lists for MetaData");
 
 		String level = this.props.getProperty("workbench.log.level", "INFO");
@@ -142,7 +144,7 @@ public class Settings
 		this.keyManager = new ShortcutManager(this.getShortcutFilename());
 
 		this.renameOldProps();
-		
+
 		if (WbManager.trace) System.out.println("Settings.<init> - done");
 	}
 
@@ -210,7 +212,7 @@ public class Settings
 		this.renameProperty("connection.last", "workbench.connection.last");
 		this.renameProperty("drivers.lastlibdir", "workbench.drivers.lastlibdir");
 	}
-	
+
 	private void renameProperty(String oldKey, String newKey)
 	{
 		if (this.props.containsKey(oldKey))
@@ -485,11 +487,11 @@ public class Settings
 	{
 		this.setFont(PRINTER_FONT_KEY, aFont);
 	}
-	
+
 	public void setFont(String aFontName, Font aFont)
 	{
 		if (aFont == null) return;
-		
+
 		String baseKey = new StringBuffer("workbench.font.").append(aFontName).toString();
 		String name = aFont.getFamily();
 		String size = Integer.toString(aFont.getSize());
@@ -544,6 +546,14 @@ public class Settings
 	{
 		this.props.setProperty(PROPERTY_SHOW_LINE_NUMBERS, Boolean.toString(show));
 	}
+	public boolean getAutoJumpNextStatement()
+	{
+		return StringUtil.stringToBool(this.props.getProperty("workbench.editor.autojumpnext", "false"));
+	}
+	public void setAutoJumpNextStatement(boolean show)
+	{
+		this.props.setProperty("workbench.editor.autojumpnext", Boolean.toString(show));
+	}
 
 	public boolean getEnableDbmsOutput()
 	{
@@ -563,7 +573,7 @@ public class Settings
 	{
 		this.props.setProperty("workbench.sql.dbms_output.defaultbuffer", Integer.toString(aSize));
 	}
-	
+
 	public String getLastImportDateFormat()
 	{
 		return this.props.getProperty("workbench.import.dateformat", this.getDefaultDateFormat());
@@ -1083,7 +1093,7 @@ public class Settings
 	{
 		return "true".equals(this.props.getProperty("workbench.db.hsqldb.closeOnShutdown", "false"));
 	}
-	
+
   public boolean getShowBuildInConnectionId()
   {
 		return "true".equals(this.props.getProperty("workbench.db.connection-id.showbuild", "false"));
@@ -1108,7 +1118,7 @@ public class Settings
 	{
 		this.props.setProperty(aProperty, aValue);
 	}
-	
+
 	public void setProperty(String aClass, String aProperty, String aValue)
 	{
 		this.props.setProperty(aClass + "." + aProperty.toLowerCase(), aValue);
@@ -1128,7 +1138,7 @@ public class Settings
 	{
 		return this.props.getProperty(aProperty.toLowerCase(), aDefault);
 	}
-	
+
 	public int getIntProperty(String aClass, String aProperty, int aDefault)
 	{
 		String value = this.getProperty(aClass, aProperty, Integer.toString(aDefault));
@@ -1173,7 +1183,7 @@ public class Settings
 
 	public boolean getRetrieveDbExplorer()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty("workbench.dbexplorer.retrieveonopen", "false"));
+		return "true".equalsIgnoreCase(this.props.getProperty("workbench.dbexplorer.retrieveonopen", "true"));
 	}
 
 	public void setRetrieveDbExplorer(boolean aFlag)
@@ -1241,6 +1251,11 @@ public class Settings
     return StringUtil.stringToList(list, ",");
 	}
 
+	public List getServersWithInlineConstraints()
+	{
+		String list = this.props.getProperty("workbench.db.inlineconstraints", null);
+    return StringUtil.stringToList(list, ",");
+	}
 	public List getServersWhichNeedJdbcCommit()
 	{
 		String list = this.props.getProperty("workbench.db.usejdbccommit", null);

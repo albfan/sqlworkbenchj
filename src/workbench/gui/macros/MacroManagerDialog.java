@@ -138,9 +138,11 @@ public class MacroManagerDialog
 		buttonPanel.add(p);
 		
 		runButton.addActionListener(this);
+		runButton.setEnabled(false);
 		buttonPanel.add(runButton);
 		
 		okButton.addActionListener(this);
+		//okButton.setEnabled(false);
 		buttonPanel.add(okButton);
 		
 		cancelButton.addActionListener(this);
@@ -159,6 +161,7 @@ public class MacroManagerDialog
 
 		this.macroList = macroPanel.getMacroList();
 		this.macroList.addMouseListener(this);
+		this.macroList.addListSelectionListener(this);
 	}
 
 	public void actionPerformed(ActionEvent e)
@@ -239,8 +242,8 @@ public class MacroManagerDialog
 	public void valueChanged(javax.swing.event.ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
-		boolean selected = (e.getFirstIndex() > -1);
-		this.okButton.setEnabled(selected);
+		boolean selected = (e.getFirstIndex() > -1) && this.macroList.getModel().getSize() > 0;
+		//this.okButton.setEnabled(selected);
 		this.runButton.setEnabled(selected);
 	}
 	

@@ -92,11 +92,13 @@ public class TableIdentifier
 			result.append(SqlUtil.quoteObjectname(this.schema));
 			result.append('.');
 		}
+		/*
 		if (this.catalog != null)
 		{
 			result.append(SqlUtil.quoteObjectname(this.catalog));
 			result.append('.');
 		}
+		*/
 		result.append(SqlUtil.quoteObjectname(this.tablename));
 		this.expression = result.toString();
 	}

@@ -112,6 +112,17 @@ public class DbDriver
 		this.classLoader = null;
 	}
 
+	public boolean canReadLibrary()
+	{
+		StringTokenizer tok = new StringTokenizer(this.library, StringUtil.PATH_SEPARATOR);
+		while(tok.hasMoreTokens())
+		{
+			File f = new File(tok.nextToken().trim());
+			if (!f.exists()) return false;
+		}
+		return true;
+	}
+	
 	public String toString()
 	{
 		return this.getIdentifier();

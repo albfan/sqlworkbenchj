@@ -27,7 +27,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 
 import workbench.WbManager;
 import workbench.db.DataSpooler;
@@ -122,6 +124,7 @@ public class SqlPanel
 	private DataToClipboardAction dataToClipboard;
 	private SaveDataAsAction exportDataAction;
 	private CopyAsSqlInsertAction copyAsSqlInsert;
+	private CopyAsSqlUpdateAction copyAsSqlUpdate;
 	private CreateDeleteScriptAction createDeleteScript;
 	private ImportFileAction importFileAction;
 	private PrintAction printDataAction;
@@ -161,7 +164,7 @@ public class SqlPanel
 	private int lastDividerLocation = -1;
 
 	private ArrayList execListener = null;
-	
+
 	/** Creates new SqlPanel */
 	public SqlPanel(int anId)
 	{
@@ -170,7 +173,11 @@ public class SqlPanel
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setLayout(new BorderLayout());
 		this.setOpaque(true);
-		this.data = new DwPanel();
+		DwStatusBar statusBar = new DwStatusBar();
+		Border b = BorderFactory.createCompoundBorder(new EmptyBorder(2, 1, 0, 1), new EtchedBorder());
+		statusBar.setBorder(b);
+		
+		this.data = new DwPanel(statusBar);
 		this.data.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.log = new JTextArea();
 		this.log.setDoubleBuffered(true);
@@ -205,6 +212,7 @@ public class SqlPanel
 		this.contentPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		this.add(this.contentPanel, BorderLayout.CENTER);
+		this.add(statusBar, BorderLayout.SOUTH);
 
 		this.initActions();
 		this.initToolbar();
@@ -594,6 +602,9 @@ public class SqlPanel
 		this.copyAsSqlInsert = new CopyAsSqlInsertAction(this.data.getTable());
 		this.actions.add(this.copyAsSqlInsert);
 
+		this.copyAsSqlUpdate = new CopyAsSqlUpdateAction(this.data.getTable());
+		this.actions.add(this.copyAsSqlUpdate);
+
 		this.importFileAction = new ImportFileAction(this);
 		this.actions.add(this.importFileAction);
 
@@ -605,6 +616,7 @@ public class SqlPanel
 		this.actions.add(this.executeCurrent);
 
 		this.spoolData = new SpoolDataAction(this);
+		this.spoolData.setCreateMenuSeparator(true);
 		this.actions.add(this.spoolData);
 
 		this.stopAction = new StopAction(this);
@@ -622,7 +634,7 @@ public class SqlPanel
 		this.firstStmtAction = new FirstStatementAction(this);
 		this.firstStmtAction.setEnabled(false);
 		this.actions.add(this.firstStmtAction);
-		
+
 		this.prevStmtAction = new PrevStatementAction(this);
 		this.prevStmtAction.setEnabled(false);
 		this.actions.add(this.prevStmtAction);
@@ -634,7 +646,9 @@ public class SqlPanel
 		this.lastStmtAction = new LastStatementAction(this);
 		this.lastStmtAction.setEnabled(false);
 		this.actions.add(this.lastStmtAction);
-		
+
+		this.actions.add(new AutoJumpNextStatement());
+
 		this.executeAll.setEnabled(false);
 		this.executeSelected.setEnabled(false);
 		this.initBackgroundThread();
@@ -808,7 +822,7 @@ public class SqlPanel
 		{
 			// do not show the error message right away
 			// the message dialog should only be shown if the
-			// animated icon is not running! Otherwise 
+			// animated icon is not running! Otherwise
 			// the system might lock
 			this.log.setText(ExceptionUtil.getDisplay(mem));
 			errorMessage = ResourceMgr.getString("MsgOutOfMemoryError");
@@ -888,7 +902,7 @@ public class SqlPanel
 	}
 
 	/**
-	 *	Show a message in the log panel. This will also switch 
+	 *	Show a message in the log panel. This will also switch
 	 *	the display to the log panel (away from the result panel
 	 */
 	public synchronized void showLogMessage(String aMsg)
@@ -921,7 +935,7 @@ public class SqlPanel
 		this.resultTab.setSelectedIndex(0);
 	}
 
-	/**	
+	/**
 	 *	Display a message in the status bar of the DwPanel.
 	 */
 	public void showStatusMessage(String aMsg)
@@ -995,14 +1009,14 @@ public class SqlPanel
 		this.checkStatementActions();
 		this.selectEditor();
 	}
-	
+
 	public void showLastStatement()
 	{
 		this.sqlHistory.showLast(editor);
 		this.checkStatementActions();
 		this.selectEditor();
 	}
-	
+
 	public void showCurrentHistoryStatement()
 	{
 		this.sqlHistory.showCurrent(editor);
@@ -1346,7 +1360,7 @@ public class SqlPanel
 	{
 		return true;
 	}
-	
+
 	/**
 	 *	Implementation of the Interruptable Interface.
 	 */
@@ -1616,9 +1630,10 @@ public class SqlPanel
 
 		ScriptParser scriptParser = new ScriptParser();
 		scriptParser.setAlternateDelimiter(WbManager.getSettings().getAlternateDelimiter());
-		
+
 		String script = null;
 		boolean editorCommand = true;
+		boolean highlightError = true;
 		int startOffset = 0;
 		if (aSql == null)
 		{
@@ -1638,12 +1653,13 @@ public class SqlPanel
 		{
 			script = aSql;
 			editorCommand = false;
+			highlightError = false;
 		}
-		
+
 		try
 		{
 			this.log.setText(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
-			
+
 			String cleanSql = SqlUtil.makeCleanSql(script, false);
 			String macro = MacroManager.getInstance().getMacroText(cleanSql);
 			if (macro != null)
@@ -1654,13 +1670,13 @@ public class SqlPanel
 
 			scriptParser.setScript(script);
 			List sqls = scriptParser.getCommands();
-			
+
 			int commandWithError = -1;
 			int startIndex = 0;
 			int endIndex = sqls.size();
 			int count = sqls.size();
-			
-			if (this.runCurrentCommand) 
+
+			if (this.runCurrentCommand)
 			{
 				int pos = this.editor.getCaretPosition();
 				count = 1;
@@ -1670,30 +1686,36 @@ public class SqlPanel
 
 			String msg = ResourceMgr.getString("TxtScriptStatementFinished");
 			msg = StringUtil.replace(msg, "%total%", Integer.toString(count));
+			String currentMsg = null;
 			this.log.setText("");
 
 			boolean onErrorAsk = true;
 			if (count == 1) compressLog = false;
 
 			this.data.scriptStarting();
+			this.showResultPanel();
+
 			long startTime = System.currentTimeMillis();
 
 			for (int i=startIndex; i < endIndex; i++)
 			{
 				StringBuffer logmsg = new StringBuffer(200);
-				String sql = scriptParser.getCommand(i);//(String)sqls.get(i);
+				String sql = scriptParser.getCommand(i);
 				this.data.runStatement(sql);
+
 				if (!compressLog || !this.data.wasSuccessful())
 				{
 					logmsg.append(this.data.getLastMessage());
 					if (count > 1)
 					{
-						logmsg.append("\n");
-						logmsg.append(StringUtil.replace(msg, "%nr%", Integer.toString(i + 1)));
-						logmsg.append("\n\n");
+						currentMsg = StringUtil.replace(msg, "%nr%", Integer.toString(i + 1));
+						logmsg.append("\n(");
+						logmsg.append(currentMsg);
+						logmsg.append(")\n\n");
 					}
 					this.appendToLog(logmsg.toString());
 				}
+				if (count > 1 && currentMsg != null) this.showStatusMessage(currentMsg);
 
 				if (i == 0 && !this.data.hasResultSet())
 				{
@@ -1703,17 +1725,31 @@ public class SqlPanel
 				// this thread can actually be interrupted!
 				Thread.yield();
 				if (suspended) break;
-				//sqls.set(i, null);
+
 				if (!this.data.wasSuccessful())
 				{
 					commandWithError = i;
 				}
 				if (count > 1 && !this.data.wasSuccessful() && onErrorAsk && (i < (count - 1)))
 				{
+					final ScriptParser p = scriptParser;
+					final int command = commandWithError;
+					final int offset = startOffset;
+
+					SwingUtilities.invokeLater(new Runnable()
+					{
+						public void run()
+						{
+							highlightError(p, command, offset);
+						}
+					});
+
 					String question = ResourceMgr.getString("MsgScriptStatementError");
 					question = StringUtil.replace(question, "%nr%", Integer.toString(i+1));
 					question = StringUtil.replace(question, "%count%", Integer.toString(count));
+					this.showBusyIcon(false);
 					int choice = WbSwingUtilities.getYesNoIgnoreAll(this, question);
+					this.showBusyIcon(true);
 
 					if (choice == JOptionPane.NO_OPTION)
 					{
@@ -1725,17 +1761,22 @@ public class SqlPanel
 					}
 				}
 			}
-			
-			if (commandWithError > -1 && editorCommand)
+
+			if (commandWithError > -1 && highlightError)
 			{
-				int startPos = scriptParser.getStartPosForCommand(commandWithError) + startOffset;
-				int endPos = scriptParser.getEndPosForCommand(commandWithError) + startOffset;
-				int line = this.editor.getLineOfOffset(startPos);
-				this.editor.scrollTo(line, 0);
-				//this.editor.setCaretPosition(startPos + 1);
-				this.editor.selectError(startPos, endPos);
+				final ScriptParser p = scriptParser;
+				final int command = commandWithError;
+				final int offset = startOffset;
+
+				SwingUtilities.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						highlightError(p, command, offset);
+					}
+				});
 			}
-			
+
 			final long end = System.currentTimeMillis();
 
 			if (compressLog)
@@ -1766,6 +1807,17 @@ public class SqlPanel
 				this.appendToLog("\n");
 				this.appendToLog(s);
 			}
+
+			if (this.runCurrentCommand && WbManager.getSettings().getAutoJumpNextStatement())
+			{
+				int nextCommand = startIndex + 1;
+				int startPos = scriptParser.getStartPosForCommand(nextCommand);
+				startPos = scriptParser.findNextLineStart(startPos);
+				if (startPos > -1)
+				{
+					this.editor.setCaretPosition(startPos);
+				}
+			}
 		}
 		catch (SQLException e)
 		{
@@ -1780,6 +1832,15 @@ public class SqlPanel
 		{
 			this.data.scriptFinished();
 		}
+	}
+
+	private void highlightError(ScriptParser scriptParser, int commandWithError, int startOffset)
+	{
+		int startPos = scriptParser.getStartPosForCommand(commandWithError) + startOffset;
+		int endPos = scriptParser.getEndPosForCommand(commandWithError) + startOffset;
+		int line = this.editor.getLineOfOffset(startPos);
+		this.editor.scrollTo(line, 0);
+		this.editor.selectError(startPos, endPos);
 	}
 
 	public void generateDeleteScript()
@@ -1867,6 +1928,7 @@ public class SqlPanel
 
 		boolean canUpdate = this.data.isUpdateable();
 		this.setActionState(this.copyAsSqlInsert, canUpdate);
+		this.setActionState(this.copyAsSqlUpdate, canUpdate);
 		this.setActionState(this.importFileAction, canUpdate);
 	}
 
@@ -2003,9 +2065,8 @@ public class SqlPanel
 		}
 	}
 
-	private synchronized void setBusy(boolean busy)
+	private void showBusyIcon(boolean show)
 	{
-		if (busy == this.threadBusy) return;
 		Container parent = this.getParent();
 		if (parent instanceof JTabbedPane)
 		{
@@ -2015,7 +2076,7 @@ public class SqlPanel
 			{
 				try
 				{
-					if (busy)
+					if (show)
 					{
 						tab.setIconAt(index, getLoadingIndicator());
 					}
@@ -2039,9 +2100,16 @@ public class SqlPanel
 				}
 			}
 		}
+	}
+
+	private synchronized void setBusy(boolean busy)
+	{
+		if (busy == this.threadBusy) return;
 		this.threadBusy = busy;
+		this.showBusyIcon(busy);
 		this.setExecuteActionStates(!busy);
 	}
+
 
 	public synchronized boolean isBusy() { return this.threadBusy; }
 

@@ -237,9 +237,24 @@ public class WbManager
 		return this.getExportFilename(null, includeSqlType);
 	}
 
+	public static final int FILE_TYPE_UNKNOWN = -1;
+	public static final int FILE_TYPE_TXT = 0;
+	public static final int FILE_TYPE_SQL = 1;
+	public static final int FILE_TYPE_XML = 2;
+	public static final int FILE_TYPE_HTML = 3;
+	public static final int FILE_TYPE_SQL_UPDATE = 4;
+
+	private int lastFileType = FILE_TYPE_UNKNOWN;
+
+	public int getLastSelectedFileType()
+	{
+		return this.lastFileType;
+	}
+
 	public String getExportFilename(Component caller, boolean includeSqlType)
 	{
 		String lastDir = settings.getLastExportDir();
+		this.lastFileType = FILE_TYPE_UNKNOWN;
 		JFileChooser fc = new JFileChooser(lastDir);
 		FileFilter text = ExtensionFileFilter.getTextFileFilter();
 		fc.addChoosableFileFilter(text);
@@ -247,6 +262,7 @@ public class WbManager
 		if (includeSqlType)
 		{
 			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
+			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlUpdateFileFilter());
 		}
 		fc.addChoosableFileFilter(ExtensionFileFilter.getXmlFileFilter());
 
@@ -271,6 +287,26 @@ public class WbManager
 				{
 					if (!filename.endsWith(".")) filename = filename + ".";
 					filename = filename + eff.getDefaultExtension();
+				}
+				if (ff == ExtensionFileFilter.getSqlFileFilter())
+				{
+					this.lastFileType = FILE_TYPE_SQL;
+				}
+				else if (ff == ExtensionFileFilter.getSqlUpdateFileFilter())
+				{
+					this.lastFileType = FILE_TYPE_SQL_UPDATE;
+				}
+				else if (ff == ExtensionFileFilter.getXmlFileFilter())
+				{
+					this.lastFileType = FILE_TYPE_XML;
+				}
+				else if (ff == ExtensionFileFilter.getTextFileFilter())
+				{
+					this.lastFileType = FILE_TYPE_TXT;
+				}
+				else if (ff == ExtensionFileFilter.getHtmlFileFilter())
+				{
+					this.lastFileType = FILE_TYPE_HTML;
 				}
 			}
 			else
@@ -564,11 +600,13 @@ public class WbManager
 				w.dispose();
 			}
 		}
+		this.mainWindows.clear();
 		this.closeToolWindows();
 	}
 
 	private void doShutdown()
 	{
+		this.closeAllWindows();
 		if (!this.isBatchMode()) settings.saveSettings();
 		LogMgr.logInfo("WbManager.doShutdown()", "Stopping " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
 		LogMgr.shutdown();

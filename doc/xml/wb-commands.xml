@@ -169,7 +169,6 @@
         <informaltable frame="all">
           <tgroup cols="2"  align="left">
             <colspec colname="c1" colwidth="4cm" />
-
             <colspec colname="c2" />
             <thead>
               <row>
@@ -244,6 +243,8 @@
 
         <informaltable frame="all">
           <tgroup cols="2" align="left">
+            <colspec colname="c1" colwidth="4cm" />
+            <colspec colname="c2" />
             <thead>
               <row>
                 <entry>Parameter</entry>
@@ -344,6 +345,19 @@ WHERE table1.column1 = table2.column1;</programlisting>
               is not passed (or a value of zero or lower), then &wb-productname; will commit everything when
               all rows have been imported. </para></entry>
             </row>
+            <row>
+              <entry><para>-mode</para></entry>
+              <entry><para>Defines how the data should be sent to the database. Possible
+              values are <literal>INSERT</literal>, <literal>UPDATE</literal>,
+              <literal>INSERT,UPDATE</literal> and <literal>UPDATE,INSERT</literal>
+              </para></entry>
+            </row>
+            <row>
+              <entry><para>-keycolumns</para></entry>
+              <entry><para>Defines the key columns for the target table. This parameter
+              is only necessary if import is running in <literal>UPDATE</literal> mode.
+              </para></entry>
+            </row>
 						<row>
 							<entry><para>-table</para></entry>
 							<entry><para>Define the table into which the data should be imported. For
@@ -366,7 +380,6 @@ WHERE table1.column1 = table2.column1;</programlisting>
         <informaltable frame="all">
           <tgroup cols="2"  align="left">
             <colspec colname="c1" colwidth="4cm" />
-
             <colspec colname="c2" />
             <thead>
               <row>
@@ -427,7 +440,10 @@ WHERE table1.column1 = table2.column1;</programlisting>
           </tgroup>
         </informaltable>
 				<para>Example:</para>
-				<programlisting>IMPORT -file=c:/temp/contacts.txt -table=person -columns=lastname,firstname,birthday -dateformat=yyyy-MM-dd;</programlisting>
+				<programlisting>IMPORT -file=c:/temp/contacts.txt
+       -table=person
+       -columns=lastname,firstname,birthday
+       -dateformat=yyyy-MM-dd;</programlisting>
       </section>
 
       <section id="import-xml-parameters">
@@ -445,6 +461,47 @@ WHERE table1.column1 = table2.column1;</programlisting>
 				please see <xref linkend="xml-export-import"/>.</para>
 				-->
 			</section>
+			
+      <section id="import-update-mode">
+        <title>Update mode</title>
+        <para>The <literal>-mode</literal> parameter controls the way the data is sent
+          to the database. The default is <literal>INSERT</literal>. &wb-productname; will
+          generate an <literal>INSERT</literal> statement for each record. If the <literal>INSERT</literal>
+          fails no further processing takes place.
+        </para>
+        <para>If <literal>-mode</literal> is set to <literal>UPDATE</literal>, &wb-productname; will
+          generate an <literal>UPDATE</literal> statement for each row. In order for this to work,
+          the table needs to have a primary key defined, and all columns of the primary key need to
+          be present in the import file. Otherwise the generated <literal>UPDATE</literal> statement
+          will modify rows that should not be modified. This can be used to update existing
+          data in the database based on the data from the export file.
+        </para>
+        <para>To either update or insert data into the table, both keywords can be specified
+          for the <literal>-mode</literal> parameter. The order in which they appear for the parameter
+          defines the order in which the respective statements are sent to the database. If the first
+          statement fails, the second will be executed. For <literal>-mode=insert,update</literal> to
+          work properly a primary or unique key has to be defined on the table. &wb-productname;
+          will catch any exception (=error) when inserting a record, then it will try updating
+          the record, based on the primary key (or specified keycolumns).
+          The <literal>-mode=update,insert</literal> works the other way round. First &wb-productname;
+          will try to update the record based on the primary keys. If the DBMS signals that no rows
+          have been updated, it is assumed that the row does not exist and the record will be inserted
+          into the table. This mode is recommended when no unique key is defined on the table,
+          and an <literal>INSERT</literal> would always work.
+        </para>
+        <para>The keycolumns defined with the <literal>-keycolumns</literal> parameter don't
+        have to match the real primary key, but they should identify one row uniquely.
+        </para>
+        
+        <para>
+          For maximum performance, choose the update strategy that will result in a succssful
+          first statement more often. As a rule of thumb:
+       		<itemizedlist>
+  			    <listitem><para>Use <literal>-mode=insert,upadte</literal>, if you expect more rows to be inserted then updated.</para></listitem>
+  			    <listitem><para>Use <literal>-mode=update,insert</literal>, if you expect more rows to be updated then inserted.</para></listitem>
+  		    </itemizedlist>
+        </para>
+      </section>
 
     </section>
 
@@ -460,8 +517,8 @@ WHERE table1.column1 = table2.column1;</programlisting>
 				<title>General parameters for the <literal>COPY</literal> command.</title>
 				<informaltable frame="all">
 					<tgroup cols="2"  align="left">
-						<colspec colname="c1"/>
-						<colspec colname="c2"/>
+            <colspec colname="c1" colwidth="4cm" />
+            <colspec colname="c2" />
 						<thead>
 							<row>
 								<entry>Parameter</entry>
@@ -490,6 +547,19 @@ WHERE table1.column1 = table2.column1;</programlisting>
 								<entry><para>If this parameter is set to true, all rows are deleted from the
 								target table before copying the data.</para></entry>
 							</row>
+              <row>
+                <entry><para>-mode</para></entry>
+                <entry><para>Defines how the data should be sent to the database. Possible
+                values are <literal>INSERT</literal>, <literal>UPDATE</literal>,
+                <literal>INSERT,UPDATE</literal> and <literal>UPDATE,INSERT</literal>
+                </para></entry>
+              </row>
+              <row>
+                <entry><para>-keycolumns</para></entry>
+                <entry><para>Defines the key columns for the target table. This parameter
+                is only necessary if import is running in <literal>UPDATE</literal> mode.
+                </para></entry>
+              </row>
 						</tbody>
 					</tgroup>
 				</informaltable>
@@ -499,8 +569,8 @@ WHERE table1.column1 = table2.column1;</programlisting>
 				<title>Copying data from a single table.</title>
 				<informaltable frame="all">
 					<tgroup cols="2"  align="left">
-						<colspec colname="c1"/>
-						<colspec colname="c2"/>
+            <colspec colname="c1" colwidth="4cm" />
+            <colspec colname="c2" />
 						<thead>
 							<row>
 								<entry>Parameter</entry>
@@ -564,7 +634,6 @@ WHERE table1.column1 = table2.column1;</programlisting>
 				<informaltable frame="all">
 					<tgroup cols="2"  align="left">
 						<colspec colname="c1" colwidth="4cm" />
-
 						<colspec colname="c2" />
 						<thead>
 							<row>
@@ -587,6 +656,14 @@ WHERE table1.column1 = table2.column1;</programlisting>
 				</informaltable>
 			</section>
 
+      <section id="copy-update-mode">
+        <title>Update mode</title>
+        <para>The <literal>COPY</literal> command understands the same update mode
+        parameter as the <literal>IMPORT</literal> command. For a discussion on
+        the different update modes, please refer to the <link linkend="import-update-mode">IMPORT</link>
+        command.</para>
+      </section>
+      
 			<section id="copy-examples">
 				<title>Examples:</title>
 				<para>Copy all columns from a table to a table with the same columns:</para>

@@ -162,7 +162,7 @@ public class WbTable
 	private boolean showRowNumbers = false;
 	private JList rowHeader = null;
 	private boolean showPopup = true;
-	
+
 	public WbTable()
 	{
 		super(EMPTY_MODEL);
@@ -231,7 +231,7 @@ public class WbTable
 		this.popup.add(this.printPreviewAction.getMenuItem());
 
 		this.addMouseListener(this);
-		
+
 		InputMap im = this.getInputMap(WHEN_FOCUSED);
 		ActionMap am = this.getActionMap();
 		this.findAction.addToInputMap(im, am);
@@ -247,7 +247,7 @@ public class WbTable
 	{
 		this.showPopup = aFlag;
 	}
-	
+
 	public void setRowResizeAllowed(boolean aFlag)
 	{
 		if (aFlag && this.rowResizer == null)
@@ -353,7 +353,7 @@ public class WbTable
 		}
 		this.checkMouseListener();
 	}
-	
+
 	private void checkMouseListener()
 	{
 		JTableHeader th = this.getTableHeader();
@@ -369,7 +369,7 @@ public class WbTable
 		}
 		th.addMouseListener(this);
 	}
-	
+
 	public void printPreview()
 	{
 		TablePrinter printer = this.getTablePrinter();
@@ -437,7 +437,7 @@ public class WbTable
 				LogMgr.logError("WbTable.setModel()", "Received a DataStoreTableModel without a DataStore", e);
 			}
 		}
-		
+
 		if (this.sortAscending != null) this.sortAscending.setEnabled(sortIt);
 		if (this.sortDescending != null) this.sortDescending.setEnabled(sortIt);
 
@@ -467,14 +467,14 @@ public class WbTable
 					return "";
 				}
 			};
-			
+
 			this.rowHeader = new JList(lm);
 			this.rowHeader.setCellRenderer(new RowHeaderRenderer(this));
 			String max = Integer.toString(aModel.getRowCount());
 			FontMetrics fm = this.getFontMetrics(this.getFont());
 			int width = fm.stringWidth(max);
 			this.rowHeader.setFixedCellWidth(width + 10);
-			
+
 			if (this.scrollPane != null)
 			{
 				this.scrollPane.setRowHeaderView(this.rowHeader);
@@ -737,7 +737,7 @@ public class WbTable
 		this.useDefaultStringRenderer = aFlag;
 	}
 	public boolean getUseDefaultStringRenderer() { return this.useDefaultStringRenderer; }
-	
+
 	public void initDefaultRenderers()
 	{
 		// need to let JTable do some initialization stuff
@@ -753,7 +753,7 @@ public class WbTable
 
 		int maxDigits = WbManager.getSettings().getMaxFractionDigits();
 		char sep = WbManager.getSettings().getDecimalSymbol().charAt(0);
-		
+
 		if (this.defaultNumberRenderer == null)
 		{
 			this.defaultNumberRenderer = new NumberColumnRenderer(maxDigits, sep);
@@ -778,7 +778,7 @@ public class WbTable
 
 		ToolTipRenderer rend = new ToolTipRenderer();
 		this.setDefaultRenderer(Object.class, rend);
-		
+
 		InputMap mymap = this.getInputMap(WHEN_FOCUSED);
 		InputMap im = defaultNumberRenderer.getInputMap(WHEN_FOCUSED);
 
@@ -847,7 +847,7 @@ public class WbTable
 	{
 		this.optimizeAllColWidth(0);
 	}
-	
+
 	public void optimizeAllColWidth(int aMinWidth)
 	{
 		int count = this.getColumnCount();
@@ -861,7 +861,7 @@ public class WbTable
 	{
 		this.optimizeColWidth(aColumn, 0);
 	}
-	
+
 	public void optimizeColWidth(int aColumn, int aMinWidth)
 	{
 		if (this.dwModel == null) return;
@@ -1006,20 +1006,20 @@ public class WbTable
 		int row = this.rowAtPoint(p);
 		return row;
 	}
-	
+
 	public int getLastVisibleRow()
 	{
 		return this.getLastVisibleRow(this.getFirstVisibleRow());
 	}
-	
+
 	public int getLastVisibleRow(int first)
 	{
 		int count = this.getRowCount();
 		if (count == 0) return -1;
-		
+
 		JScrollBar bar = this.scrollPane.getVerticalScrollBar();
 		if (bar != null && bar.getValue() == bar.getMaximum()) return count;
-		
+
 		JViewport view = this.scrollPane.getViewport();
 		Point p = view.getViewPosition();
 		Dimension d = view.getExtentSize();
@@ -1029,7 +1029,7 @@ public class WbTable
 		int lastRow = 0;
 		if (this.rowResizer == null)
 		{
-			// if the row height cannot be resized, we can 
+			// if the row height cannot be resized, we can
 			// calculate the number of visible rows
 			rowHeight = this.getRowHeight();
 			int numRows = (int) ((height / rowHeight) - 0.5);
@@ -1049,14 +1049,14 @@ public class WbTable
 
 			lastRow = this.rowAtPoint(p);
 		}
-		
-		// if rowAtPoint() returns a negative number, then all 
+
+		// if rowAtPoint() returns a negative number, then all
 		// rows fit into the current viewport
 		if (lastRow < 0) lastRow = this.getRowCount() - 1;
-		
+
 		return first + lastRow;
 	}
-	
+
 	/** Scroll the given row into view.
 	 */
 	public void scrollToRow(int aRow)
@@ -1065,7 +1065,7 @@ public class WbTable
 		this.scrollRectToVisible(rect);
 	}
 
-	/** 
+	/**
 	 *	Start sorting if the column header has been clicked.
 	 *
 	 */
@@ -1138,7 +1138,7 @@ public class WbTable
 			col.setPreferredWidth(width);
 		}
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
 		TableColumnModel columnModel = this.getColumnModel();
@@ -1240,7 +1240,21 @@ public class WbTable
 		WbSwingUtilities.showDefaultCursorOnWindow(this);
 	}
 
+	public void copyAsSqlUpdate()
+	{
+		this.copyAsSql(true);
+	}
+
 	public void copyAsSqlInsert()
+	{
+		this.copyAsSql(false);
+	}
+
+	/**
+	 * 	Copy the data of this table into the clipboard using SQL statements
+	 *
+	 */
+	private void copyAsSql(boolean useUpdate)
 	{
 		if (this.getRowCount() <= 0) return;
 
@@ -1252,7 +1266,15 @@ public class WbTable
 		{
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 			WbSwingUtilities.showWaitCursorOnWindow(this);
-			String data = ds.getDataAsSqlInsert();
+			String data;
+			if (useUpdate)
+			{
+				data = ds.getDataAsSqlUpdate();
+			}
+			else
+			{
+				data = ds.getDataAsSqlInsert();
+			}
 			StringSelection sel = new StringSelection(data);
 			clp.setContents(sel, sel);
 		}
@@ -1264,6 +1286,16 @@ public class WbTable
 	}
 
 	public void saveAsSqlInsert(String aFilename)
+	{
+		this.saveAsSql(aFilename, false);
+	}
+
+	public void saveAsSqlUpdate(String aFilename)
+	{
+		this.saveAsSql(aFilename, true);
+	}
+
+	private void saveAsSql(String aFilename, boolean useUpdate)
 	{
 		if (this.getRowCount() <= 0) return;
 		if (this.dwModel == null) return;
@@ -1277,7 +1309,14 @@ public class WbTable
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(aFilename)));
-			ds.writeDataAsSqlInsert(out, StringUtil.LINE_TERMINATOR);
+			if (useUpdate)
+			{
+				ds.writeDataAsSqlUpdate(out, StringUtil.LINE_TERMINATOR);
+			}
+			else
+			{
+				ds.writeDataAsSqlInsert(out, StringUtil.LINE_TERMINATOR);
+			}
 		}
 		catch (Throwable th)
 		{
@@ -1373,33 +1412,43 @@ public class WbTable
 			{
 				//String ext = ExtensionFileFilter.getExtension(new File(filename));
 				final String name = filename;
-				if (ExtensionFileFilter.hasSqlExtension(filename))
+				int type = WbManager.getInstance().getLastSelectedFileType();
+
+				Thread t = null;
+				switch (type)
 				{
-					Thread t = new Thread() { public void run() { saveAsSqlInsert(name); } };
-					t.setDaemon(true);
-					t.setName("SaveAsSql Thread");
-					t.start();
-				}
-				else if (ExtensionFileFilter.hasTxtExtension(filename))
-				{
-					Thread t = new Thread() { public void run() { saveAsAscii(name); }};
-					t.setDaemon(true);
-					t.setName("SaveAsAscii Thread");
-					t.start();
-				}
-				else if (ExtensionFileFilter.hasHtmlExtension(filename))
-				{
-					Thread t = new Thread() { public void run() { saveAsHtml(name); }};
-					t.setName("saveAsHtml Thread");
-					t.setDaemon(true);
-					t.start();
-				}
-				else if (ExtensionFileFilter.hasXmlExtension(filename))
-				{
-					Thread t = new Thread() { public void run() { saveAsXml(name); }};
-					t.setDaemon(true);
-					t.setName("SaveAsXml Thread");
-					t.start();
+					case WbManager.FILE_TYPE_SQL:
+						t = new Thread() { public void run() { saveAsSqlInsert(name); } };
+						t.setDaemon(true);
+						t.setName("SaveAsSql Thread");
+						t.start();
+						break;
+					case WbManager.FILE_TYPE_SQL_UPDATE:
+						t = new Thread() { public void run() { saveAsSqlUpdate(name); } };
+						t.setDaemon(true);
+						t.setName("SaveAsSql Thread");
+						t.start();
+						break;
+					case WbManager.FILE_TYPE_TXT:
+						t = new Thread() { public void run() { saveAsAscii(name); }};
+						t.setDaemon(true);
+						t.setName("SaveAsAscii Thread");
+						t.start();
+						break;
+					case WbManager.FILE_TYPE_HTML:
+						t = new Thread() { public void run() { saveAsHtml(name); }};
+						t.setName("saveAsHtml Thread");
+						t.setDaemon(true);
+						t.start();
+						break;
+					case WbManager.FILE_TYPE_XML:
+						t = new Thread() { public void run() { saveAsXml(name); }};
+						t.setDaemon(true);
+						t.setName("SaveAsXml Thread");
+						t.start();
+						break;
+					default:
+						LogMgr.logError("WbTable.saveAs()", "Unknown file type selected", null);
 				}
 			}
 		}
@@ -1538,7 +1587,7 @@ class RowHeaderRenderer
 		setBackground(header.getBackground());
 		setFont(header.getFont());
 	}
-	
+
 	public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
 	{
 		setText(Integer.toString(index + 1));

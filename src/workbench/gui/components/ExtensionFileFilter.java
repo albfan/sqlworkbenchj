@@ -23,19 +23,20 @@ public class ExtensionFileFilter
 {
 	private static FileFilter textFileFilter;
 	private static FileFilter sqlFileFilter;
+	private static FileFilter sqlUpdateFileFilter;
 	private static FileFilter jarFileFilter;
 	private static FileFilter htmlFileFilter;
 	private static FileFilter xmlFileFilter;
 
 	private static FileFilter wkspFileFilter;
-	
+
 	private List extensions;
 	private String desc;
 	public static final String SQL_EXT = "sql";
 	public static final String TXT_EXT = "txt";
 	public static final String WORKSPACE_EXT = "wksp";
 	public static final String XML_EXT = "xml";
-	
+
 	private boolean ignoreCase = true;
 
 	public ExtensionFileFilter(String aDescription, List anExtensionList)
@@ -54,7 +55,7 @@ public class ExtensionFileFilter
 	{
 		return (String)this.extensions.get(0);
 	}
-	
+
 	public static String getExtension(File f)
 	{
 		return getExtension(f.getName());
@@ -76,25 +77,25 @@ public class ExtensionFileFilter
 		String ext = getExtension(aFilename);
 		return SQL_EXT.equalsIgnoreCase(ext);
 	}
-	
+
 	public static boolean hasTxtExtension(String aFilename)
 	{
 		String ext = getExtension(aFilename);
 		return TXT_EXT.equalsIgnoreCase(ext);
 	}
-	
+
 	public static boolean hasHtmlExtension(String aFilename)
 	{
 		String ext = getExtension(aFilename);
 		return "html".equalsIgnoreCase(ext);
 	}
-	
+
 	public static boolean hasXmlExtension(String aFilename)
 	{
 		String ext = getExtension(aFilename);
 		return XML_EXT.equalsIgnoreCase(ext);
 	}
-	
+
 	public boolean accept(File f)
 	{
 		if (f.isDirectory())
@@ -133,7 +134,7 @@ public class ExtensionFileFilter
 		}
 		return jarFileFilter;
 	}
-	
+
 	public static FileFilter getSqlFileFilter()
 	{
 		if (sqlFileFilter == null)
@@ -144,6 +145,18 @@ public class ExtensionFileFilter
 			sqlFileFilter = new ExtensionFileFilter(desc, ext, true);
 		}
 		return sqlFileFilter;
+	}
+
+	public static FileFilter getSqlUpdateFileFilter()
+	{
+		if (sqlUpdateFileFilter == null)
+		{
+			ArrayList ext = new ArrayList();
+			ext.add(SQL_EXT);
+			String desc = ResourceMgr.getString("TxtFileFilterSqlUpdate");
+			sqlUpdateFileFilter = new ExtensionFileFilter(desc, ext, true);
+		}
+		return sqlUpdateFileFilter;
 	}
 
 	public static FileFilter getTextFileFilter()
@@ -169,7 +182,7 @@ public class ExtensionFileFilter
 		}
 		return xmlFileFilter;
 	}
-	
+
 	public static FileFilter getJavaFileFilter()
 	{
 		if (textFileFilter == null)
@@ -193,7 +206,7 @@ public class ExtensionFileFilter
 		}
 		return wkspFileFilter;
 	}
-	
+
 	public static FileFilter getHtmlFileFilter()
 	{
 		if (htmlFileFilter == null)
@@ -205,7 +218,7 @@ public class ExtensionFileFilter
 		}
 		return htmlFileFilter;
 	}
-	
+
 	// The description of this filter
 	public String getDescription()
 	{

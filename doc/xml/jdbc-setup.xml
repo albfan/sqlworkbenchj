@@ -72,6 +72,46 @@
             </entry>
           </row>
           <row>
+            <entry> <para>HSQLDB</para> </entry>
+            <entry> <para>org.hsqldb.jdbcDriver</para> </entry>
+            <entry>
+							<simplelist columns="1">
+								<member>hsqldb.jar</member>
+                <member><ulink url="http://hsqldb.sourceforge.net"/></member>
+							</simplelist>
+						</entry>
+          </row>
+          <row>
+            <entry> <para>Firebird SQL</para> </entry>
+            <entry> <para>org.firebirdsql.jdbc.FBDriver</para> </entry>
+            <entry>
+							<simplelist columns="1">
+								<member>firebirdsql-full.jar</member>
+                <member><ulink url="http://firebird.sourceforge.net"/></member>
+							</simplelist>
+						</entry>
+          </row>
+          <row>
+            <entry> <para>FirstSQL/J</para> </entry>
+            <entry> <para>COM.FirstSQL.Dbcp.DbcpDriver</para> </entry>
+            <entry>
+							<simplelist columns="1">
+								<member>fsjclient.jar</member>
+                <member><ulink url="http://www.firstsql.com"/></member>
+							</simplelist>
+						</entry>
+          </row>
+          <row>
+            <entry> <para>ThinkSQL</para> </entry>
+            <entry> <para>uk.co.thinksql.ThinkSQLDriver</para> </entry>
+            <entry>
+							<simplelist columns="1">
+								<member>ThinkSQLDriver.jar</member>
+                <member><ulink url="http://www.thinksql.co.uk"/></member>
+							</simplelist>
+						</entry>
+          </row>
+          <row>
             <entry> <para>SQL Server 2000</para> </entry>
             <entry> <para>com.microsoft.jdbc.sqlserver.SQLServerDriver</para></entry>
             <entry> <simplelist columns="1">
@@ -90,22 +130,12 @@
 						</entry>
           </row>
           <row>
-            <entry> <para>HSQLDB</para> </entry>
-            <entry> <para>org.hsqldb.jdbcDriver</para> </entry>
+            <entry> <para>MySQL</para> </entry>
+            <entry> <para>com.mysql.jdbc.Driver</para> </entry>
             <entry>
 							<simplelist columns="1">
-								<member>hsqldb.jar</member>
-                <member><ulink url="http://hsqldb.sourceforge.net"/></member>
-							</simplelist>
-						</entry>
-          </row>
-          <row>
-            <entry> <para>Firebird</para> </entry>
-            <entry> <para>org.firebirdsql.jdbc.FBDriver</para> </entry>
-            <entry>
-							<simplelist columns="1">
-								<member>firebirdsql-full.jar</member>
-                <member><ulink url="http://firebird.sourceforge.net"/></member>
+								<member>mysql-jdbc.jar</member>
+                <member><ulink url="http://www.mysql.com"/></member>
 							</simplelist>
 						</entry>
           </row>

@@ -46,6 +46,8 @@ public class WbExport extends SqlCommand
 		cmdLine.addArgument("nodata");
 		cmdLine.addArgument("encoding");
 		cmdLine.addArgument("showprogress");
+		cmdLine.addArgument("sqlinsert");
+		cmdLine.addArgument("sqlupdate");
 	}
 
 	public String getVerb() { return VERB; }
@@ -103,11 +105,14 @@ public class WbExport extends SqlCommand
 		}
 
 		String table = cmdLine.getValue("table");
+		type = type.toLowerCase();
+
+		String typeDisplay = null;
 
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
 			// change the contents of type in order to display it properly
-			type = "Text";
+			typeDisplay = "Text";
 			spooler.setOutputTypeText();
 			String delimiter = cmdLine.getValue("delimiter");
 			if (delimiter != null) spooler.setTextDelimiter(delimiter);
@@ -128,11 +133,18 @@ public class WbExport extends SqlCommand
 			spooler.setExportHeaders(StringUtil.stringToBool(header));
 			spooler.setCleanCarriageReturns(cmdLine.getBoolean("cleancr"));
 		}
-		else if ("sql".equalsIgnoreCase(type))
+		else if (type.startsWith("sql"))
 		{
-			// change the contents of type in order to display it properly
-			type = "SQL";
-			spooler.setOutputTypeSqlInsert();
+			if (type.equals("sql") || type.equals("sqlinsert"))
+			{
+				spooler.setOutputTypeSqlInsert();
+				typeDisplay = "SQL INSERT";
+			}
+			else if (type.equals("sqlupdate"))
+			{
+				spooler.setOutputTypeSqlUpdate();
+				typeDisplay = "SQL UPDATE";
+			}
 			String create = cmdLine.getValue("createtable");
 			spooler.setIncludeCreateTable(StringUtil.stringToBool(create));
 			spooler.setChrFunction(cmdLine.getValue("charfunc"));
@@ -144,7 +156,7 @@ public class WbExport extends SqlCommand
 		else if ("xml".equalsIgnoreCase(type))
 		{
 			// change the contents of type in order to display it properly
-			type = "XML";
+			typeDisplay = "XML";
 			String format = cmdLine.getValue("dateformat");
 			if (format != null) spooler.setTextDateFormat(format);
 
@@ -175,7 +187,7 @@ public class WbExport extends SqlCommand
 		this.spooler.setShowProgress("true".equalsIgnoreCase(progress));
 
 		String msg = ResourceMgr.getString("MsgSpoolInit");
-		msg = StringUtil.replace(msg, "%type%", type);
+		msg = StringUtil.replace(msg, "%type%", typeDisplay);
 		msg = StringUtil.replace(msg, "%file%", file);
 		//msg = msg + " quote=" + spooler.getTextQuoteChar();
 		result.addMessage(msg);
@@ -194,7 +206,8 @@ public class WbExport extends SqlCommand
 			if (aResult.hasResultSets())
 			{
 				ResultSet[] data = aResult.getResultSets();
-				this.spooler.setSql(aResult.getSourceCommand());
+				String sql = aResult.getSourceCommand();
+				this.spooler.setSql(sql);
 				long rowCount = this.spooler.startExport(data[0]);
 
 				String msg = null;

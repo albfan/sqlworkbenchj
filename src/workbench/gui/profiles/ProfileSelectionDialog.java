@@ -154,7 +154,7 @@ public class ProfileSelectionDialog
 	{
 		if (!WbManager.getSettings().restoreWindowSize(this))
 		{
-			this.setSize(700,600);
+			this.setSize(640,480);
 		}
 	}
 

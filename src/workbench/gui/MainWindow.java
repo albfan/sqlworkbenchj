@@ -2224,14 +2224,15 @@ public class MainWindow
 				}
 			}
 
-			panel.disconnect();
-			panel.dispose();
-
 			if (panel instanceof DbExplorerPanel)
 			{
+				((DbExplorerPanel)panel).saveSettings();
 				this.dbExplorerTabVisible = false;
 				this.dbExplorerPanel = null;
 			}
+			
+			panel.disconnect();
+			panel.dispose();
 
 			this.panelMenus.remove(index);
 			this.sqlTab.remove(index);

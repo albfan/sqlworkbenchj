@@ -64,7 +64,8 @@ public class DbExplorerPanel
 	private WbToolbar toolbar;
 	private ConnectionInfo connectionInfo;
 	private boolean restoreWindow = false;
-
+	private boolean retrievePending = false;
+	
 	public DbExplorerPanel(MainWindow aParent)
 	{
 		this.parentWindow = aParent;
@@ -158,11 +159,6 @@ public class DbExplorerPanel
 	}
 	*/
 	
-	public void setConnection(WbConnection aConnection)
-	{
-		this.setConnection(aConnection, null);
-	}
-
 	public void readSchemas()
 	{
 		String currentSchema = null;
@@ -209,6 +205,11 @@ public class DbExplorerPanel
 		}
 	}
 
+	public void setConnection(WbConnection aConnection)
+	{
+		this.setConnection(aConnection, null);
+	}
+
 	public void setConnection(WbConnection aConnection, String aProfilename)
 	{
 		if (aConnection == null) return;
@@ -227,8 +228,41 @@ public class DbExplorerPanel
 		}
 		this.connectionInfo.setConnection(aConnection);
 
-		if (WbManager.getSettings().getRetrieveDbExplorer() && this.isVisible())
+		if (WbManager.getSettings().getRetrieveDbExplorer())
 		{
+			if (this.isVisible())
+			{
+				// if we are visible start the retrieve immediately
+				this.retrievePending = false;
+				EventQueue.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						fireSchemaChanged();
+					}
+				});
+			}
+			else
+			{
+				// if we are not visible just store the information
+				// that we need to retrieve the table list. 
+				// this will be evaluated by the (overwritten) setVisible() method
+				// There is no need in retrieving the information if we are not visible
+				this.retrievePending = true;
+			}
+		}
+	}
+
+	public void setVisible(boolean flag)
+	{
+		boolean wasVisible = this.isVisible();
+		super.setVisible(flag);
+		if (!wasVisible && flag && retrievePending)
+		{
+			// retrievePending will be true, if the connection has 
+			// been set already, the DbExplorer should be retrieved automatically
+			// and the panel was not visible when the connection was provided
+			retrievePending = false;
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
@@ -236,9 +270,9 @@ public class DbExplorerPanel
 					fireSchemaChanged();
 				}
 			});
-		}
+		}			
 	}
-
+	
 	public void startRetrieve()
 	{
 		this.fireSchemaChanged();

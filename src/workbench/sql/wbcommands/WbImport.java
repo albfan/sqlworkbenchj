@@ -43,6 +43,8 @@ public class WbImport extends SqlCommand
 		cmdLine.addArgument("header");
 		cmdLine.addArgument("encoding");
 		cmdLine.addArgument("columns");
+		cmdLine.addArgument("mode");
+		cmdLine.addArgument("keycolumns");
 	}
 
 	public String getVerb() { return VERB; }
@@ -181,6 +183,18 @@ public class WbImport extends SqlCommand
 		file = StringUtil.trimQuotes(file);
 		this.imp.setConnection(aConnection);
 		this.imp.setRowActionMonitor(this.rowMonitor);
+		String mode = cmdLine.getValue("mode");
+		if (mode != null)
+		{
+			
+			if (!imp.setMode(mode))
+			{
+				result.addMessage(ResourceMgr.getString("ErrorInvalidModeIgnored").replaceAll("%mode%", mode));
+			}
+		}
+		String keyColumns = cmdLine.getValue("keycolumns");
+		imp.setKeyColumns(keyColumns);
+		
 		String msg = ResourceMgr.getString("MsgImportingFile");
 		msg += " " + file;
 		if (table != null)
