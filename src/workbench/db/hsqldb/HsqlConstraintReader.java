@@ -9,7 +9,9 @@
  * To contact the author please send an email to: info@sql-workbench.net
  *
  */
-package workbench.db;
+package workbench.db.hsqldb;
+
+import workbench.db.*;
 
 
 /**
