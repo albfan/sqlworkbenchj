@@ -65,6 +65,7 @@ public class DataStore
 
 	private SimpleDateFormat defaultDateFormatter;
 	private DecimalFormat defaultNumberFormatter;
+	private SimpleDateFormat defaultTimestampFormatter;
 	
 	private ColumnComparator comparator;
 	
@@ -491,6 +492,39 @@ public class DataStore
       return value.toString();
 	}
 	
+	public String getValueAsFormattedString(int aRow, int aColumn)
+		throws IndexOutOfBoundsException
+	{
+		RowData row = this.getRow(aRow);
+		Object value = row.getValue(aColumn);
+    if (value == null || value instanceof NullValue)
+		{
+      return null;
+		}
+    else 
+		{
+			String result = null;
+			if (value instanceof java.sql.Timestamp && this.defaultTimestampFormatter != null)
+			{
+				result = this.defaultTimestampFormatter.format(value);
+			}
+			if (value instanceof java.util.Date && this.defaultDateFormatter != null)
+			{
+				result = this.defaultDateFormatter.format(value);
+			}
+			else if (value instanceof Number && this.defaultNumberFormatter != null)
+			{
+				result = this.defaultNumberFormatter.format(value);
+			}
+			else
+			{
+				result = value.toString();
+			}
+      return result;
+		}
+	}
+	
+	
 	public int getValueAsInt(int aRow, int aColumn, int aDefault)
 	{
 		RowData row = this.getRow(aRow);
@@ -540,13 +574,6 @@ public class DataStore
 		
 		// If an updatetable is defined, we only accept
 		// values for columns in that table 
-		/*
-		if (this.updateTableColumns != null)
-		{
-			String col = this.columnNames[aColumn].toLowerCase();
-			if (!this.updateTableColumns.contains(col)) return;
-		}
-		*/
 		RowData row = this.getRow(aRow);
 		if (aValue == null)
 			row.setNull(aColumn, this.columnTypes[aColumn]);
@@ -848,33 +875,32 @@ public class DataStore
 		String updateTable = this.getUpdateTable();
 		String indent = null;
 		boolean hasTable = false;
+		xml.append("<table");
 		if (updateTable != null && updateTable.length() > 0)
 		{
-			xml.append("<table name=\"");
+			xml.append(" name=\"");
 			xml.append(updateTable);
-			xml.append("\">");
-			xml.append(StringUtil.LINE_TERMINATOR);
-			indent = "  ";
-			hasTable = true;
 		}
+		xml.append("\">");
+		xml.append(StringUtil.LINE_TERMINATOR);
+		indent = "  ";
 		
 		for (int row=0; row < count; row++)
 		{
 			xml.append(this.getRowDataAsXml(row, rowTag, colTag, indent));
 		}
 		
-		if (hasTable)
-		{
-			xml.append("</table>");
-			xml.append(StringUtil.LINE_TERMINATOR);
-		}
+		xml.append("</table>");
+		xml.append(StringUtil.LINE_TERMINATOR);
+		
 		return xml.toString();
 	}
 
 	public StringBuffer getRowDataAsXml(int aRow)
 	{
-		return this.getRowDataAsXml(aRow, "table", "row", "column");
+		return this.getRowDataAsXml(aRow, "row", "column", null);
 	}
+	
 	public StringBuffer getRowDataAsXml(int aRow, String aRowTag, String aColTag, String anIndent)
 	{
 		boolean indent = (anIndent != null && anIndent.length() > 0);
@@ -887,7 +913,7 @@ public class DataStore
 		xml.append(StringUtil.LINE_TERMINATOR);
 		for (int c=0; c < colCount; c ++)
 		{
-			String value = this.getValueAsString(aRow, c);
+			String value = this.getValueAsFormattedString(aRow, c);
 			if (indent) xml.append(anIndent);
 			xml.append("  <");
 			xml.append(aColTag);
@@ -1327,31 +1353,14 @@ public class DataStore
 		return this.defaultDateFormatter.toPattern();
 	}
 
-	public String getDefaultNumberFormat()
+	public void setDefaultTimestampFormatter(SimpleDateFormat aFormatter)
 	{
-		if (this.defaultNumberFormatter == null) return null;
-		return this.defaultNumberFormatter.toPattern();
+		this.defaultTimestampFormatter = aFormatter;
 	}
 	
-	public void setDefaultNumberFormat(String aFormat)
+	public void setDefaultDateFormatter(SimpleDateFormat aFormatter)
 	{
-		if (aFormat == null) return;
-		try
-		{
-			if (this.defaultNumberFormatter == null) 
-			{
-				this.defaultNumberFormatter = new DecimalFormat(aFormat);
-			}
-			else
-			{
-				this.defaultNumberFormatter.applyPattern(aFormat);
-			}
-		}
-		catch (Exception e)
-		{
-			this.defaultNumberFormatter = null;
-			LogMgr.logWarning("DataStore.setDefaultDateFormat()", "Could not create decimal formatter for format " + aFormat);
-		}
+		this.defaultDateFormatter = aFormatter;
 	}
 	
 	public void setDefaultDateFormat(String aFormat)
@@ -1359,19 +1368,37 @@ public class DataStore
 		if (aFormat == null) return;
 		try
 		{
-			if (this.defaultDateFormatter == null) 
-			{
-				this.defaultDateFormatter = new SimpleDateFormat(aFormat);
-			}
-			else
-			{
-				this.defaultDateFormatter.applyPattern(aFormat);
-			}
+			this.defaultDateFormatter = new SimpleDateFormat(aFormat);
 		}
 		catch (Exception e)
 		{
 			this.defaultDateFormatter = null;
 			LogMgr.logWarning("DataStore.setDefaultDateFormat()", "Could not create date formatter for format " + aFormat);
+		}
+	}
+
+	public String getDefaultNumberFormat()
+	{
+		if (this.defaultNumberFormatter == null) return null;
+		return this.defaultNumberFormatter.toPattern();
+	}
+	
+	public void setDefaultNumberFormatter(DecimalFormat aFormatter)
+	{
+		this.defaultNumberFormatter = aFormatter;
+	}
+	
+	public void setDefaultNumberFormat(String aFormat)
+	{
+		if (aFormat == null) return;
+		try
+		{
+			this.defaultNumberFormatter = new DecimalFormat(aFormat);
+		}
+		catch (Exception e)
+		{
+			this.defaultNumberFormatter = null;
+			LogMgr.logWarning("DataStore.setDefaultDateFormat()", "Could not create decimal formatter for format " + aFormat);
 		}
 	}
 	

@@ -33,8 +33,10 @@ import java.util.regex.Pattern;
  */
 public class StringUtil
 {
-	public static Pattern PATTERN_CRLF = Pattern.compile("(\r\n|\n\r|\r|\n)");
+	public static final Pattern PATTERN_CRLF = Pattern.compile("(\r\n|\n\r|\r|\n)");
 
+	public static final Pattern PATTERN_EMPTY_LINE = Pattern.compile("$(\r\n|\n\r|\r|\n)");
+	
 	public static final String LINE_TERMINATOR = System.getProperty("line.separator");
 	public static final String PATH_SEPARATOR = System.getProperty("path.separator");
 	public static final String FILE_SEPARATOR = System.getProperty("file.separator");
@@ -195,14 +197,6 @@ public class StringUtil
 		return result.toString();
 	}
 
-	public static final boolean isEmpty(String aString)
-	{
-		if (aString == null) return true;
-		if (aString.length() == 0) return true;
-		if (aString.trim().length() == 0) return true;
-		return false;
-	}
-	
 	public static final String cleanJavaString(String aString)
 	{
 		Pattern newline = Pattern.compile("\\\\n|\\\\r");
@@ -296,6 +290,12 @@ public class StringUtil
 		}
 	}
 
+	public static final String trimEmptyLines(String input)
+	{
+		if (input == null) return null;
+		Matcher m = PATTERN_EMPTY_LINE.matcher(input);
+		return m.replaceAll("");
+	}
 	public static final String trimQuotes(String input)
 	{
 		//System.out.println("toTrim=" + input);

@@ -178,13 +178,13 @@ public class SqlHistory
 				{
 					start = StringUtil.getIntValue(line.substring(KEY_START.length()), -1);
 				}
-				else if (line.startsWith("##sqlwb.selEnd="))
+				else if (line.startsWith(KEY_END))
 				{
 					end = StringUtil.getIntValue(line.substring(KEY_END.length()), -1);
 				}
 				else
 				{
-					content.append(line.trim());
+					content.append(line);
 					content.append('\n');
 				}
 				line = reader.readLine();

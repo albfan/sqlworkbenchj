@@ -32,6 +32,7 @@ import javax.swing.table.TableModel;
 
 import workbench.WbManager;
 import workbench.db.DbMetadata;
+import workbench.db.TableIdentifier;
 import workbench.db.TableSearcher;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -39,10 +40,12 @@ import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.EmptyTableModel;
+import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbarButton;
+import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.ShareableDisplay;
 import workbench.interfaces.TableSearchDisplay;
 import workbench.resource.ResourceMgr;
@@ -74,12 +77,19 @@ public class TableSearchPanel
 	private JScrollPane currentScrollPane;
 	private Like searchPattern;
 	private WbTable firstTable;
+	private EditorPanel sqlDisplay;
 	
 	public TableSearchPanel(ShareableDisplay aTableListSource)
 	{
 		this.tableListModel = new EmptyTableModel();
 		this.tableListSource = aTableListSource;
 		initComponents();
+		this.resultTabPane.setUI(TabbedPaneUIFactory.getBorderLessUI());
+		this.resultTabPane.setBorder(WbSwingUtilities.EMPTY_BORDER);
+
+		sqlDisplay = EditorPanel.createSqlEditor();
+		this.resultTabPane.addTab(ResourceMgr.getString("LabelTableSearchSqlLog"), sqlDisplay);
+		
 		WbTable tables = (WbTable)this.tableNames;
 		tables.setAdjustToColumnLabel(false);
 
@@ -108,10 +118,11 @@ public class TableSearchPanel
 		
 		buttonGroup1 = new javax.swing.ButtonGroup();
 		jSplitPane1 = new WbSplitPane();
-		resultScrollPane = new WbScrollPane();
-		resultPanel = new javax.swing.JPanel();
 		tableListScrollPane = new WbScrollPane();
 		tableNames = new WbTable();
+		resultTabPane = new javax.swing.JTabbedPane();
+		resultScrollPane = new WbScrollPane();
+		resultPanel = new javax.swing.JPanel();
 		statusInfo = new javax.swing.JLabel();
 		jPanel1 = new javax.swing.JPanel();
 		entryPanel = new javax.swing.JPanel();
@@ -119,6 +130,7 @@ public class TableSearchPanel
 		searchText = new javax.swing.JTextField();
 		jLabel1 = new javax.swing.JLabel();
 		reloadButton = new WbToolbarButton();
+		columnFunction = new javax.swing.JTextField();
 		optionPanel = new javax.swing.JPanel();
 		labelRowCount = new javax.swing.JLabel();
 		rowCount = new javax.swing.JTextField();
@@ -128,18 +140,20 @@ public class TableSearchPanel
 		
 		jSplitPane1.setBorder(new javax.swing.border.EmptyBorder(new java.awt.Insets(1, 1, 1, 1)));
 		jSplitPane1.setDividerLocation(150);
+		tableNames.setModel(this.tableListModel);
+		tableListScrollPane.setViewportView(tableNames);
+		
+		jSplitPane1.setLeftComponent(tableListScrollPane);
+		
 		resultScrollPane.setHorizontalScrollBarPolicy(javax.swing.JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		resultPanel.setLayout(new java.awt.GridBagLayout());
 		
 		resultPanel.setBorder(new javax.swing.border.EmptyBorder(new java.awt.Insets(0, 0, 0, 0)));
 		resultScrollPane.setViewportView(resultPanel);
 		
-		jSplitPane1.setRightComponent(resultScrollPane);
+		resultTabPane.addTab(ResourceMgr.getString("LabelTableSearchResultTab"), resultScrollPane);
 		
-		tableNames.setModel(this.tableListModel);
-		tableListScrollPane.setViewportView(tableNames);
-		
-		jSplitPane1.setLeftComponent(tableListScrollPane);
+		jSplitPane1.setRightComponent(resultTabPane);
 		
 		add(jSplitPane1, java.awt.BorderLayout.CENTER);
 		
@@ -164,7 +178,7 @@ public class TableSearchPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 0;
-		gridBagConstraints.insets = new java.awt.Insets(2, 13, 2, 0);
+		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 1);
 		entryPanel.add(startButton, gridBagConstraints);
 		
 		searchText.setColumns(20);
@@ -172,20 +186,19 @@ public class TableSearchPanel
 		searchText.setToolTipText(ResourceMgr.getDescription("LabelSearchTableCriteria"));
 		searchText.setMinimumSize(new java.awt.Dimension(100, 20));
 		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 3;
+		gridBagConstraints.gridx = 4;
 		gridBagConstraints.gridy = 0;
 		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.weightx = 1.0;
-		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
 		entryPanel.add(searchText, gridBagConstraints);
 		
-		jLabel1.setText(ResourceMgr.getString("LabelSearchTableCriteria"));
+		jLabel1.setText("LIKE");
 		jLabel1.setToolTipText(ResourceMgr.getDescription("LabelSearchTableCriteria"));
 		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 2;
+		gridBagConstraints.gridx = 3;
 		gridBagConstraints.gridy = 0;
-		gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 5);
+		gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
 		entryPanel.add(jLabel1, gridBagConstraints);
 		
 		reloadButton.setText("jButton1");
@@ -200,11 +213,22 @@ public class TableSearchPanel
 		gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 0);
 		entryPanel.add(reloadButton, gridBagConstraints);
 		
+		columnFunction.setColumns(8);
+		columnFunction.setText("$col$");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 2;
+		gridBagConstraints.gridy = 0;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+		entryPanel.add(columnFunction, gridBagConstraints);
+		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 0;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
 		jPanel1.add(entryPanel, gridBagConstraints);
 		
 		optionPanel.setLayout(new java.awt.GridBagLayout());
@@ -314,6 +338,9 @@ public class TableSearchPanel
 		}
 	}	
 	
+	/**
+	 *	Call back function from the table searcher...
+	 */
 	public synchronized void setCurrentTable(String aTablename, String aSql)
 	{
 		this.currentTable = aTablename;
@@ -322,6 +349,8 @@ public class TableSearchPanel
 		this.currentTable = null;
 		this.currentResult = null;
 		this.statusInfo.setText(this.fixedStatusText + aTablename);
+		this.sqlDisplay.appendLine(aSql);
+		this.sqlDisplay.appendLine(";\n\n");
 	}	
 	
 	public void setStatusText(String aStatustext)
@@ -367,6 +396,12 @@ public class TableSearchPanel
 	
 	public void searchData()
 	{
+		if (!searcher.setColumnFunction(this.columnFunction.getText()))
+		{
+			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgErrorColFunction"));
+			return;
+		}
+		
 		if (this.tableNames.getSelectedRowCount() == 0) return;
 		this.resetResult();
     
@@ -376,8 +411,22 @@ public class TableSearchPanel
 		for (int i=0; i < selectedTables.length; i++)
 		{
 			StringBuffer table = new StringBuffer(100);
+			String type = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+			
 			String schema = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
 			String tablename = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+
+			if ("synonym".equalsIgnoreCase(type))
+			{
+				TableIdentifier id = this.connection.getMetadata().getSynonymTable(schema, tablename);
+				if (id != null)
+				{
+					schema = id.getSchema();
+					tablename = id.getTable();
+				}
+			}
+			
+			
 			if (schema != null && schema.length() > 0)
 			{
 				table.append(schema);
@@ -398,8 +447,8 @@ public class TableSearchPanel
 		String text = this.searchText.getText();
 		searcher.setMaxRows(maxRows);
 		searcher.setCriteria(text);
-    boolean sensitive = this.connection.getMetadata().isStringComparisonCaseSensitve();
- 		this.searchPattern = new Like(searcher.getCriteria(), !sensitive);
+		boolean sensitive = this.connection.getMetadata().isStringComparisonCaseSensitve();
+		this.searchPattern = new Like(searcher.getCriteria(), !sensitive);
 		searcher.setTableNames(searchTables);
 		searcher.search(); // starts the background thread
 	}
@@ -411,8 +460,9 @@ public class TableSearchPanel
 		s.setProperty(cl, "divider", this.jSplitPane1.getDividerLocation());
 		s.setProperty(cl, "criteria", this.searchText.getText());
 		s.setProperty(cl, "maxrows", this.rowCount.getText());
+		s.setProperty(cl, "column-function", this.columnFunction.getText());
 	}
-
+	
 	public void restoreSettings()
 	{
 		Settings s = WbManager.getSettings();
@@ -422,6 +472,7 @@ public class TableSearchPanel
 		this.jSplitPane1.setDividerLocation(loc);
 		this.searchText.setText(s.getProperty(cl, "criteria", ""));
 		this.rowCount.setText(s.getProperty(cl, "maxrows", "0"));
+		this.columnFunction.setText(s.getProperty(cl, "column-function", "$col$"));
 	}
 	
 	public void searchEnded()
@@ -438,11 +489,11 @@ public class TableSearchPanel
 		// all tables in the pane to the upper border
 		// e.g. when there is only one table
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.gridx = 0;				
+		constraints.gridx = 0;
 		constraints.weighty = 1.0;
 		constraints.anchor = GridBagConstraints.WEST;
 		this.resultPanel.add(new JPanel(), constraints);
-
+		
 		this.resultPanel.doLayout();
 		this.searchText.setEnabled(true);
 		startButton.setText(ResourceMgr.getString("LabelStartSearch"));
@@ -457,6 +508,7 @@ public class TableSearchPanel
 	
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.ButtonGroup buttonGroup1;
+	private javax.swing.JTextField columnFunction;
 	private javax.swing.JPanel entryPanel;
 	private javax.swing.JLabel jLabel1;
 	private javax.swing.JPanel jPanel1;
@@ -466,6 +518,7 @@ public class TableSearchPanel
 	private javax.swing.JButton reloadButton;
 	private javax.swing.JPanel resultPanel;
 	private javax.swing.JScrollPane resultScrollPane;
+	private javax.swing.JTabbedPane resultTabPane;
 	private javax.swing.JTextField rowCount;
 	private javax.swing.JTextField searchText;
 	private javax.swing.JButton startButton;

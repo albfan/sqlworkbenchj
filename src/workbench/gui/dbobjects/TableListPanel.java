@@ -586,7 +586,9 @@ public class TableListPanel
 			}
 			else
 			{
-				if (this.isTableType(this.selectedObjectType))
+				if (this.selectedObjectType.indexOf("view") > -1 ||
+				    this.selectedObjectType.indexOf("synonym") > -1 ||
+				    (this.selectedObjectType.indexOf("sequence") > 1 || this.dbConnection.getMetadata().isPostgres()))
 				{
 					if (this.displayTab.getTabCount() == 2)
 					{
@@ -612,9 +614,7 @@ public class TableListPanel
 	{
 		if (aType == null) return false;
 		aType = aType.toLowerCase();
-		return (aType.indexOf("table") > -1 || aType.indexOf("view") > -1 || 
-						aType.indexOf("synonym") > -1 ||
-						(this.dbConnection.getMetadata().isPostgres() && aType.indexOf("sequence") > -1) );
+		return (aType.indexOf("table") > -1 || aType.indexOf("view") > -1 || aType.indexOf("synonym") > -1);
 	}
 
 	private String extendViewSource(String aSource, String aName, DataStore viewDefinition)

@@ -8,6 +8,7 @@ package workbench.interfaces;
 
 import java.awt.Font;
 import java.util.List;
+import javax.swing.JTabbedPane;
 
 import workbench.db.WbConnection;
 import workbench.gui.actions.WbAction;
@@ -21,8 +22,6 @@ public interface MainPanel
 {
 	List getActions();
 	WbToolbar getToolbar();
-	void saveSettings();
-	void restoreSettings();
 	void showStatusMessage(String aMsg);
 	void showLogMessage(String aMsg);
 	void clearLog();
@@ -33,4 +32,5 @@ public interface MainPanel
 	void addToToolbar(WbAction anAction, boolean aFlag);
 	void setFont(Font aFont);
 	void disconnect();
+	void setTabTitle(JTabbedPane tab, int index);
 }

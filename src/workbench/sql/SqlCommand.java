@@ -27,6 +27,8 @@ import workbench.util.StringUtil;
 public class SqlCommand
 {
 	protected Statement currentStatement;
+	protected WbConnection currentConnection;
+	protected boolean isCancelled = false;
 	
 	/**
 	 *	Checks if the verb of the given SQL script 
@@ -104,7 +106,14 @@ public class SqlCommand
 	{
 		if (this.currentStatement != null)
 		{
+			this.isCancelled = true;
 			this.currentStatement.cancel();
+			this.currentStatement.close();
+			if (this.currentConnection != null && this.currentConnection.cancelNeedsReconnect())
+			{
+				LogMgr.logInfo(this, "Cancelling needs a reconnect to the database for this DBMS...");
+				this.currentConnection.reconnect();
+			}
 		}
 	}
 
@@ -125,6 +134,7 @@ public class SqlCommand
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		ResultSet rs = null;
 		this.currentStatement = aConnection.createStatement();
+		this.currentConnection = aConnection;
 		
 		try
 		{

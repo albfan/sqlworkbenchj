@@ -1,5 +1,7 @@
 package workbench.util;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,7 +56,10 @@ public class SqlUtil
 			//return Collections.EMPTY_LIST;
 		}
 		int count, pos, scriptLen, cmdNr, lastPos, delimitLen;
-		boolean quoteOn;
+		boolean quoteOn = false;
+		boolean commentOn = false;
+		boolean blockComment = false;
+		boolean singleLineComment = false;
 		ArrayList emptyList, commands;
 		String value, ls_OldDelimit, delimit;
 		int oldPos;
@@ -76,7 +81,7 @@ public class SqlUtil
 		{
 			aScript = aScript.substring(0, aScript.length() - 2) + ";";
 		}
-		quoteOn = false;
+		
 		cmdNr = 0;
 		scriptLen = aScript.length();
 		delimit = aDelimiter.trim().toUpperCase();
@@ -97,9 +102,9 @@ public class SqlUtil
 		boolean isCurrent = false;
 		for (pos = 0; pos < scriptLen; pos++)
 		{
-
-			currChar = aScript.substring(pos, pos + 1);
-			if (currChar.equals("\'") || currChar.equals("\""))
+			currChar = aScript.substring(pos, pos + 1); 
+			
+			if (currChar.charAt(0) == '\'' || currChar.charAt(0) == '"')
 			{
 				if (!quoteOn)
 				{
@@ -124,8 +129,57 @@ public class SqlUtil
 					}
 				}
 			}
+			
+			// now check for comment start
+			if (!quoteOn && pos < scriptLen - 1)
+			{
+				char toTest = currChar.charAt(0);
+				
+				if (!commentOn)
+				{
+					char next = aScript.charAt(pos + 1);
+					if (toTest == '/' && next == '*')
+					{
+						System.out.println("turning on blockcomment at pos = " + pos);
+						blockComment = true;
+						singleLineComment = false;
+						commentOn = true;
+					}
+					else if (toTest == '-' && next == '-')
+					{
+						System.out.println("turning on line comment at pos = " + pos);
+						singleLineComment = true;
+						blockComment = false;
+						commentOn = true;
+					}
+				}
+				else
+				{
+					if (singleLineComment)
+					{
+						if (toTest == '\r' || toTest == '\n')
+						{
+							singleLineComment = false;
+							blockComment = false;
+							commentOn = false;
+							continue;
+						}
+					}
+					else if (blockComment)
+					{
+						char last = aScript.charAt(pos - 1);
+						if (toTest == '/' && last == '*')
+						{
+							blockComment = false;
+							singleLineComment = false;
+							commentOn = false;
+							continue;
+						}
+					}
+				}
+			}
 
-			if (!quoteOn)
+			if (!quoteOn && !commentOn)
 			{
 				if (delimitLen > 1 && pos + delimitLen < scriptLen)
 				{
@@ -134,21 +188,6 @@ public class SqlUtil
 
 				if ((currChar.equals(delimit) || (pos == scriptLen)))
 				{
-					/*
-					if (pos == scriptLen)
-					{
-						value = aScript.substring(lastPos, pos).trim();
-						int l = value.length();
-						if (value.substring(l - 1, l).equals(";"))
-						{
-							value = value.substring(0, l - 2);
-						}
-					}
-					else
-					{
-						value = aScript.substring(lastPos, pos).trim();
-					}
-					*/
 					value = aScript.substring(lastPos, pos).trim();
 					isCurrent = (lastPos <= currentCursorPos) && (pos >= currentCursorPos);
 					int l = value.length();
@@ -164,11 +203,12 @@ public class SqlUtil
 							currentIndex = result.size() - 1;
 						}
 					}
+					//System.out.println("added value=" + value);
 					lastPos = pos + delimitLen;
 				}
 			}
-
 		}
+		
 		if (lastPos < pos)
 		{
 			value = aScript.substring(lastPos).trim();
@@ -548,9 +588,33 @@ public class SqlUtil
 		m = p.matcher(col);
 		System.out.println("find()=" + m.find());
 		System.out.println(quoteObjectname(col));
-		*/
 		String sql = "-- this is a test";
 		System.out.println(">" + makeCleanSql(sql, false));
+		*/
+		try
+		{
+			StringBuffer s = new StringBuffer(5000);
+			BufferedReader in = new BufferedReader(new FileReader("c:/temp/t.sql"));
+			String line = in.readLine();
+			while (line != null)
+			{
+				s.append(line);
+				s.append("\r\n");
+				line = in.readLine();
+			}
+			//System.out.println(s);
+			in.close();
+			String script = s.toString();//"/* comment */\r\nselect * from test;/*line*/end;\r\n/";
+			List commands = getCommands(script, "/");
+			System.out.println("first = >\n" + commands.get(0) + "<");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+		}
 	}
 
 }

@@ -778,18 +778,12 @@ public class DbMetadata
 
 		if ("SYNONYM".equalsIgnoreCase(aType))
 		{
-			try
+			TableIdentifier id = this.getSynonymTable(aSchema, aTable);
+			if (id != null)
 			{
-				TableIdentifier id = SynonymReader.getSynonymTable(this.dbConnection.getSqlConnection(), aSchema, aTable);
-				if (id != null)
-				{
-					aSchema = id.getSchema();
-					aTable = id.getTable();
-					aCatalog = null;
-				}
-			}
-			catch (Exception e)
-			{
+				aSchema = id.getSchema();
+				aTable = id.getTable();
+				aCatalog = null;
 			}
 		}
 
@@ -1376,17 +1370,17 @@ public class DbMetadata
 				StringBuffer buf = new StringBuffer(250);
 				buf.append("CREATE SEQUENCE ");
 				buf.append(name);
-				buf.append("\n INCREMENT ");
+				buf.append(" INCREMENT ");
 				buf.append(inc);
-				buf.append("\n MINVALUE ");
+				buf.append(" MINVALUE ");
 				buf.append(min);
-				buf.append("\n MAXVALUE ");
+				buf.append(" MAXVALUE ");
 				buf.append(max);
-				buf.append("\n CACHE ");
+				buf.append(" CACHE ");
 				buf.append(cache);
 				if ("true".equalsIgnoreCase(cycle))
 				{
-					buf.append("\n CYCLE");
+					buf.append(" CYCLE");
 				}
 				buf.append(";");
 				result = buf.toString();
@@ -1404,6 +1398,22 @@ public class DbMetadata
 		}
 		return result;
 	}
+	
+	public TableIdentifier getSynonymTable(String anOwner, String aSynonym)
+	{
+		if (!this.isOracle) return null;
+		TableIdentifier id = null;
+		try
+		{
+			id = SynonymReader.getSynonymTable(this.dbConnection.getSqlConnection(), anOwner, aSynonym);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DbMetadata.getSynonymTable()", "Could not retrieve table for synonym", e);
+		}
+		return id;
+	}
+	
 	public String getSynonymSource(String anOwner, String aSynonym)
 	{
 		if (!this.isOracle) return "";

@@ -23,10 +23,15 @@ import workbench.log.LogMgr;
 public class WbProperties
 	extends Properties
 {
+	int distinctSections = 2;
 	
-	/** Creates a new instance of WbProperties */
 	public WbProperties()
 	{
+	}
+	
+	public WbProperties(int num)
+	{
+		this.distinctSections = num;
 	}
 
 	public void saveToFile(String filename)
@@ -53,8 +58,8 @@ public class WbProperties
 			if (lastKey != null)
 			{
 				String k1, k2;
-				k1 = getFirstTwoSections(lastKey);
-				k2 = getFirstTwoSections(key);
+				k1 = getSections(lastKey, this.distinctSections); //getFirstTwoSections(lastKey);
+				k2 = getSections(key, this.distinctSections); //getFirstTwoSections(key);
 				if (!k1.equals(k2))
 				{
 					bw.newLine();
@@ -75,6 +80,7 @@ public class WbProperties
 		bw.flush();
 	}
 
+	
 	private String getFirstTwoSections(String aString)
 	{
 		int pos1 = aString.indexOf(".");
@@ -98,4 +104,41 @@ public class WbProperties
 		}
 	}
 	
+	private String getSections(String aString, int aNum)
+	{
+		int pos = aString.indexOf(".");
+		String result = null;
+		for (int i=1; i < aNum; i++)
+		{
+			int pos2 = aString.indexOf('.', pos + 1);
+			if (pos2 > -1)
+			{
+				pos = pos2;
+			}
+			else
+			{
+				if (i == (aNum - 1))
+				{
+					pos = aString.length();
+				}
+			}
+		}
+		result = aString.substring(0, pos);
+		return result;
+	}
+	
+	public static void main(String args[])
+	{
+		try
+		{
+			WbProperties props = new WbProperties(1);
+			System.out.println(props.getSections("first.second.third.fourth", 2));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		System.out.println("done.");
+		System.exit(0);
+	}
 }

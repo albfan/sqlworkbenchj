@@ -37,25 +37,32 @@ public class SelectCommand extends SqlCommand
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		try
 		{
+			this.currentConnection = aConnection;
 			this.currentStatement = aConnection.createStatement();
 			this.currentStatement.setMaxRows(this.maxRows);
 			ResultSet rs = this.currentStatement.executeQuery(aSql);
 			if (rs != null)
 			{
 				result.addResultSet(rs);
+				StringBuffer warnings = new StringBuffer();
+
+				this.appendSuccessMessage(result);
+				if (this.appendWarnings(aConnection, this.currentStatement, warnings))
+				{
+					result.addMessage(warnings.toString());
+				}
+				if (this.isCancelled) result.addMessage(ResourceMgr.getString("MsgStatementCancelled"));
+				result.setSuccess();
+			}
+			else if (this.isCancelled)
+			{
+				result.addMessage(ResourceMgr.getString("MsgStatementCancelled"));
+				result.setFailure();
 			}
 			else
 			{
 				throw new WbException(ResourceMgr.getString("MsgReceivedNullResultSet"));
 			}
-			StringBuffer warnings = new StringBuffer();
-
-			this.appendSuccessMessage(result);
-			if (this.appendWarnings(aConnection, this.currentStatement, warnings))
-			{
-				result.addMessage(warnings.toString());
-			}
-			result.setSuccess();
 		}
 		catch (Throwable e)
 		{

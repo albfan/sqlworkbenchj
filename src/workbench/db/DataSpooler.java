@@ -61,6 +61,7 @@ public class DataSpooler
 	private boolean exportHeaders;
 	private boolean includeCreateTable = false;
 	private String tableName;
+	
 	private String delimiter = "\t";
 	private String quoteChar = null;
 	private String dateFormat = null;
@@ -81,7 +82,12 @@ public class DataSpooler
 
 	private boolean jobsRunning = false;
 	
-	
+
+	private boolean success = false;
+	private boolean hasWarning = false;
+
+	private ArrayList warnings = new ArrayList();
+	private ArrayList errors = new ArrayList();
 	private ArrayList jobQueue;
 	
 	public DataSpooler()
@@ -128,44 +134,12 @@ public class DataSpooler
 		job.sqlStatement = aStatement;
 		this.jobQueue.add(job);
 	}
-	
+
 	public void setConnection(WbConnection aConn)
 	{
 		this.dbConn = aConn;
 	}
 
-	public void exportDataAsText(WbConnection aConnection
-	                            ,String aSql
-															,String anOutputfile
-															, boolean includeHeaders)
-		throws IOException, SQLException
-	{
-		this.exportDataAsText(aConnection, aSql, anOutputfile, "\t", includeHeaders);
-	}
-	
-	public void exportDataAsText(WbConnection aConnection
-	                            ,String aSql
-															,String anOutputfile
-															,String aDelimiter
-															, boolean includeHeaders)
-		throws IOException, SQLException
-	{
-		this.dbConn = aConnection;
-		this.sql = aSql;
-		this.outputfile = anOutputfile;
-		this.exportHeaders = includeHeaders;
-		this.exportType = EXPORT_TXT;
-		this.delimiter = aDelimiter;
-		if (this.showProgress)
-		{
-			this.openProgressMonitor();
-		}
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run() { startBackgroundThread(); }
-		});
-	}
-	
 	public void stopExport() 
 	{ 
 		this.keepRunning = false; 
@@ -174,24 +148,6 @@ public class DataSpooler
 	public void setTableName(String aTablename)
 	{
 		this.tableName = aTablename;
-	}
-	
-	public void exportDataAsSqlInsert(WbConnection aConnection, String aSql, String anOutputfile)
-		throws IOException, SQLException
-	{
-		this.dbConn = aConnection;
-		this.sql = aSql;
-		this.outputfile = anOutputfile;
-		this.exportHeaders = false;
-		this.exportType = EXPORT_SQL;
-		if (this.showProgress)
-		{
-			this.openProgressMonitor();
-		}
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run() { startBackgroundThread(); }
-		});
 	}
 	
 	public void setShowProgress(boolean aFlag) { this.showProgress = aFlag; }
@@ -215,6 +171,10 @@ public class DataSpooler
 	public void setOutputTypeXml() { this.exportType = EXPORT_XML; }
 	public void setOutputTypeText() { this.exportType = EXPORT_TXT; }
 	public void setOutputTypeSqlInsert() { this.exportType = EXPORT_SQL; }
+	
+	public void setXmlTags(String tableTag, String rowTag, String columnTag)
+	{
+	}
 	public boolean isOutputTypeText() { return this.exportType == EXPORT_TXT; }
 	public boolean isOutputTypeSqlInsert() { return this.exportType == EXPORT_SQL; }
 	public boolean isOutputTypeSqlXml() { return this.exportType == EXPORT_XML; }
@@ -311,17 +271,50 @@ public class DataSpooler
 	{
 		Statement stmt = this.dbConn.createStatement();
 		ResultSet rs = null;
+		
 		try
 		{
 			stmt.execute(this.sql);
 			rs = stmt.getResultSet();
 			this.startExport(rs);
 		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DataSpooler.startExport()", "Could not execute SQL statement: " + e.getMessage(), e);
+			if (this.showProgress)
+			{
+				WbManager.getInstance().showErrorMessage(this.progressWindow, ResourceMgr.getString("MsgExecuteError") + ": " + e.getMessage());
+			}
+		}
 		finally
 		{
 			try { rs.close(); } catch (Throwable th) {}
 			try { stmt.close(); } catch (Throwable th) {}
 		}
+	}
+	
+	public boolean isSuccess() { return this.errors.size() == 0; }
+	public boolean hasWarning() { return this.warnings.size() > 0; }
+
+	public String[] getErrors()
+	{
+		int count = this.errors.size();
+		String[] result = new String[count];
+		for (int i=0; i < count; i++)
+		{
+			result[i] = (String)this.errors.get(i);
+		}
+		return result;
+	}
+	public String[] getWarnings()
+	{
+		int count = this.warnings.size();
+		String[] result = new String[count];
+		for (int i=0; i < count; i++)
+		{
+			result[i] = (String)this.warnings.get(i);
+		}
+		return result;
 	}
 	
 	/**
@@ -335,10 +328,19 @@ public class DataSpooler
 		int interval = 1;
 		int currentRow = 0;
 		
+		this.warnings.clear();
+		this.errors.clear();
+		
 		StringBuffer line = null;
 		ResultSetMetaData meta = rs.getMetaData();
 		DataStore ds = new DataStore(meta, this.dbConn);
 		ds.setOriginalStatement(this.sql);
+		
+		if (showProgress)
+		{
+			if (this.progressPanel == null) this.openProgressMonitor();
+		}
+		
 		
 		if (this.exportType == EXPORT_SQL)
 		{
@@ -372,11 +374,6 @@ public class DataSpooler
 			
 		boolean useQuotes = (this.quoteChar != null) && (this.quoteChar.trim().length() > 0);
 		
-		if (showProgress)
-		{
-			if (this.progressPanel == null) this.openProgressMonitor();
-		}
-
 		//byte[] quoteBytes = quoteChar.getBytes();
 		//byte[] lineEnd = StringUtil.LINE_TERMINATOR.getBytes();
 		//byte[] fieldBytes = delimiter.getBytes();
@@ -385,16 +382,18 @@ public class DataSpooler
 		SimpleDateFormat dateTimeFormatter = null;
 		DecimalFormat numberFormatter = null;
 		
-		if (this.exportType == EXPORT_TXT)
+		if (this.exportType == EXPORT_TXT || this.exportType == EXPORT_XML)
 		{
 			if (this.dateFormat != null) 
 			{
 				try
 				{
 					dateFormatter = new SimpleDateFormat(this.dateFormat);
+					ds.setDefaultDateFormatter(dateFormatter);
 				}
 				catch (IllegalArgumentException i)
 				{
+					this.warnings.add(ResourceMgr.getString("ErrorWrongDateFormat") + " " + this.dateFormat);
 					dateFormatter = null;
 				}
 			}
@@ -403,9 +402,11 @@ public class DataSpooler
 				try
 				{
 					dateTimeFormatter = new SimpleDateFormat(this.dateTimeFormat);
+					ds.setDefaultTimestampFormatter(dateTimeFormatter);
 				}
 				catch (Exception e)
 				{
+					this.warnings.add(ResourceMgr.getString("ErrorWrongDateFormat") + " " + this.dateTimeFormat);
 					dateTimeFormatter = null;
 				}
 			}
@@ -413,7 +414,9 @@ public class DataSpooler
 			symbols.setDecimalSeparator(this.decimalSymbol);
 			numberFormatter = new DecimalFormat("#.#", symbols);
 			numberFormatter.setGroupingUsed(false);
+			ds.setDefaultNumberFormatter(numberFormatter);
 		}
+		
 		try
 		{
 			Object value = null;
@@ -447,9 +450,20 @@ public class DataSpooler
 					pw.newLine();
 				}
 			}
+			else if (this.exportType == EXPORT_XML)
+			{
+				pw.write("<table");
+				if (this.tableName != null && this.tableName.length() > 0)
+				{
+					pw.write(" name=\"");
+					pw.write(tableName);
+				}
+				pw.write("\">");
+				pw.newLine();
+			}
 			
 			FieldPosition position = new FieldPosition(0);
-			
+
 			while (rs.next())
 			{
 				currentRow ++;
@@ -473,7 +487,7 @@ public class DataSpooler
 				else if (this.exportType == EXPORT_XML)
 				{
 					row = ds.addRow(rs);
-					line = ds.getRowDataAsXml(row);
+					line = ds.getRowDataAsXml(row, "row", "column", "  ");
 					ds.discardRow(row);
 					if (line != null)
 					{
@@ -492,7 +506,7 @@ public class DataSpooler
 						
 						if (value != null && !rs.wasNull())
 						{
-							if (currentRow == 1) System.out.println("value.class=" + value.getClass().getName());
+							//if (currentRow == 1) System.out.println("value.class=" + value.getClass().getName());
 							if (dateFormatter != null && value instanceof Date)
 							{
 								pw.write(dateFormatter.format((Date)value));
@@ -501,20 +515,6 @@ public class DataSpooler
 							{
 								pw.write(dateTimeFormatter.format((Timestamp)value));
 							}
-							/*
-							else if (numberFormatter != null && value instanceof Double)
-							{
-								pw.write(numberFormatter.format(((Double)value).doubleValue()));
-							}
-							else if (numberFormatter != null && value instanceof Float)
-							{
-								pw.write(numberFormatter.format(((Float)value).doubleValue()));
-							}
-							else if (numberFormatter != null && value instanceof BigDecimal)
-							{
-								pw.write(numberFormatter.format(((BigDecimal)value).doubleValue()));
-							}
-							*/
 							else if (value instanceof Number)
 							{
 								position.setBeginIndex(0);
@@ -545,14 +545,22 @@ public class DataSpooler
 				}
 				if (!this.keepRunning) break;
 			}
+			
+			if (this.exportType == EXPORT_XML)
+			{
+				pw.write("</table>");
+				pw.newLine();
+			}
 		}
 		catch (IOException e)
 		{
+			this.errors.add(e.getMessage());
 			LogMgr.logError("DataSpooler", "Error writing data file", e);
 			throw e;
 		}
 		catch (SQLException e)
 		{
+			this.errors.add(e.getMessage());
 			LogMgr.logError("DataSpooler", "SQL Error", e);
 			throw e;
 		}
@@ -580,23 +588,40 @@ public class DataSpooler
 	
 	public void executeStatement(Window aParent, WbConnection aConnection, String aSql)
 	{
-		List tables = SqlUtil.getTables(aSql);
+		String cleanSql = SqlUtil.makeCleanSql(aSql, false);
+		List tables = SqlUtil.getTables(cleanSql);
 		boolean includeSqlExport = (tables.size() == 1);
+		String tablename = null;
+		if (includeSqlExport)
+		{
+			tablename = (String)tables.get(0);
+		}
 		String filename = WbManager.getInstance().getExportFilename(aParent, includeSqlExport);
 		if (filename != null)
 		{
-			DataSpooler spool = new DataSpooler();
-			spool.setShowProgress(true);
+			//DataSpooler spool = new DataSpooler();
 			try
 			{
+				this.setConnection(aConnection);
+				this.setOutputFilename(filename);
+				this.setShowProgress(true);
+				this.setSql(cleanSql);
+				
 				if (ExtensionFileFilter.hasSqlExtension(filename))
 				{
-					spool.exportDataAsSqlInsert(aConnection, aSql, filename);
+					this.setOutputTypeSqlInsert();
+					this.setTableName(tablename);
+				}
+				else if (ExtensionFileFilter.hasXmlExtension(filename))
+				{
+					this.setOutputTypeXml();
+					this.setTableName(tablename);
 				}
 				else
 				{
-					spool.exportDataAsText(aConnection, aSql, filename, true);
+					this.setOutputTypeText();
 				}
+				this.startBackgroundThread();
 			}
 			catch (Exception e)
 			{

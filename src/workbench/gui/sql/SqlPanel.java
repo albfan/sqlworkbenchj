@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
+import workbench.util.WbWorkspace;
 
 
 
@@ -116,6 +118,8 @@ public class SqlPanel
 	private boolean updating;
 	private boolean cancelExecution;
 
+	private String tabName = null;
+	
 	private ImageIcon loadingIcon;
 	private Icon dummyIcon;
 	private boolean dummyIconFetched = false;
@@ -192,34 +196,12 @@ public class SqlPanel
 		this.contentPanel.setDividerLocation(loc);
 	}
 
-	public void saveSettings()
-	{
-//		Settings s = WbManager.getSettings();
-//		int location = this.contentPanel.getDividerLocation();
-//		int last = this.contentPanel.getLastDividerLocation();
-//		s.setSqlDividerLocation(this.internalId, location);
-//		s.setLastSqlDividerLocation(this.internalId, last);
-//		String fname = this.editor.getCurrentFileName();
-//		s.setEditorFile(this.internalId, fname);
-//		//if (!s.getRestoreLastWorkspace()) this.saveSqlStatementHistory();
-	}
-
 	public void saveSettings(Properties props)
 	{
 		int location = this.contentPanel.getDividerLocation();
 		int last = this.contentPanel.getLastDividerLocation();
 		props.setProperty("tab" + (this.internalId - 1) + ".divider.location", Integer.toString(location));
 		props.setProperty("tab" + (this.internalId - 1) + ".divider.lastlocation", Integer.toString(last));
-	}
-
-
-	public void restoreSettings()
-	{
-//		int loc = WbManager.getSettings().getSqlDividerLocation(this.internalId);
-//		if (loc <= 0) loc = 200;
-//		this.contentPanel.setDividerLocation(loc);
-//		loc = WbManager.getSettings().getLastSqlDividerLocation(this.internalId);
-//		if (loc > 0) this.contentPanel.setLastDividerLocation(loc);
 	}
 
 	public void restoreSettings(Properties props)
@@ -291,7 +273,8 @@ public class SqlPanel
 
 		if (this.editor.readFile(f))
 		{
-			this.fireFilenameChanged();
+			this.fileDiscardAction.setEnabled(true);
+      this.fireFilenameChanged(this.editor.getCurrentFileName());
 			this.selectEditor();
 			result = true;
 		}
@@ -306,8 +289,9 @@ public class SqlPanel
 			String newFile = this.editor.getCurrentFileName();
 			if (newFile != null && !newFile.equals(oldFile))
 			{
-				this.fireFilenameChanged();
-				this.selectEditor();
+				this.fileDiscardAction.setEnabled(true);
+	      this.fireFilenameChanged(this.editor.getCurrentFileName());
+				this.selectEditorLater();
 			}
 		}
 		return true;
@@ -327,7 +311,7 @@ public class SqlPanel
 			String newFile = this.editor.getCurrentFileName();
 			if (newFile != null && !newFile.equals(oldFile))
 			{
-				this.fireFilenameChanged();
+	      this.fireFilenameChanged(this.editor.getCurrentFileName());
 				return true;
 			}
 		}
@@ -342,7 +326,7 @@ public class SqlPanel
 			String newFile = this.editor.getCurrentFileName();
 			if (newFile != null && !newFile.equals(oldFile))
 			{
-				this.fireFilenameChanged();
+	      this.fireFilenameChanged(this.editor.getCurrentFileName());
 				return true;
 			}
 		}
@@ -360,23 +344,24 @@ public class SqlPanel
 	{
 		if (this.editor.closeFile(emptyEditor))
     {
-      this.fireFilenameChanged();
-			this.selectEditor();
+			this.fileDiscardAction.setEnabled(false);
+      this.fireFilenameChanged(this.tabName);
+			this.selectEditorLater();
 			return true;
     }
 		return false;
 	}
 
-	public void fireFilenameChanged()
+	public void fireFilenameChanged(String aNewName)
 	{
-		this.fileDiscardAction.setEnabled(this.hasFileLoaded());
 		if (this.filenameChangeListeners == null) return;
 		for (int i=0; i < this.filenameChangeListeners.size(); i++)
 		{
 			FilenameChangeListener l = (FilenameChangeListener)this.filenameChangeListeners.get(i);
-			l.fileNameChanged(this, this.editor.getCurrentFileName());
+			l.fileNameChanged(this, aNewName);
 		}
 	}
+	
 	public void addFilenameChangeListener(FilenameChangeListener aListener)
 	{
 		if (aListener == null) return;
@@ -590,6 +575,16 @@ public class SqlPanel
 		anAction.addToInputMap(im, am);
 	}
 
+	public void selectEditorLater()
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				selectEditor();
+			}
+		});
+	}
 	public void selectEditor()
 	{
 		editor.requestFocusInWindow();
@@ -770,58 +765,8 @@ public class SqlPanel
 		this.background.start();
 	}
 
-//	public void readStatementHistory()
-//	{
-//		try
-//		{
-//			ArrayList history = null;
-//			File f = new File(this.historyFilename + ".xml");
-//			if (f.exists())
-//			{
-//				Object data = WbPersistence.readObject(this.historyFilename + ".xml");
-//				if (data instanceof ArrayList)
-//				{
-//					history = (ArrayList)data;
-//				}
-//			}
-//			else
-//			{
-//				f = new File(this.historyFilename + ".txt");
-//				if (f.exists())
-//				{
-//					history = StringUtil.readStringList(this.historyFilename + ".txt");
-//				}
-//			}
-//			this.initStatementHistory(history);
-//		}
-//		catch (Exception e)
-//		{
-//			LogMgr.logWarning(this, "Error reading the statement history (" + e.getMessage() + ")");
-//			this.initStatementHistory(null);
-//		}
-//	}
-
 	public void initStatementHistory()
 	{
-		/*
-		if (data != null)
-		{
-			this.statementHistory = data;
-			this.checkHistorySize();
-			this.currentHistoryEntry = this.statementHistory.size() - 1;
-			if (this.currentHistoryEntry > -1)
-			{
-				this.editor.setText(this.statementHistory.get(currentHistoryEntry).toString());
-				this.editor.setCaretPosition(0);
-				this.editor.clearUndoBuffer();
-			}
-		}
-		else if (this.statementHistory == null)
-		{
-			this.statementHistory = new ArrayList(this.maxHistorySize);
-			this.currentHistoryEntry = -1;
-		}
-		*/
 		this.sqlHistory = new SqlHistory(this.maxHistorySize);
 		this.checkStatementActions();
 	}
@@ -861,56 +806,104 @@ public class SqlPanel
 		this.selectEditor();
 	}
 
+	public void readFromWorkspace(WbWorkspace w)
+		throws IOException
+	{
+		SqlHistory history = this.getSqlHistory();
+		
+		try
+		{
+			w.readHistoryData(this.internalId - 1, history);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("SqlPanel.readFromWorkspace()", "Could not read history data for index " + (this.internalId - 1));
+			this.clearSqlStatements();
+		}
+		
+		String filename = w.getExternalFileName(this.internalId - 1);
+		this.tabName = w.getTabTitle(this.internalId - 1);
+		if (this.tabName != null && this.tabName.length() == 0)
+		{
+			this.tabName = null;
+		}
+		
+		if (filename != null)
+		{
+			this.readFile(filename);
+		}
+		else
+		{
+			this.showCurrentHistoryStatement();
+			this.fireFilenameChanged(this.tabName);
+		}
+		
+		Properties props = w.getSettings();
+		this.restoreSettings(props);
+	}
+	
+	public void saveToWorkspace(WbWorkspace w)
+		throws IOException
+	{
+		this.saveHistory(w);
+		Properties props = w.getSettings();
+		this.saveSettings(props);
+	}
+	
+	public void saveHistory(WbWorkspace w)
+		throws IOException
+	{
+		this.storeStatementInHistory();
+		w.addHistoryEntry(this.getHistoryFilename(), this.sqlHistory);
+	}
+	
 	public SqlHistory getSqlHistory()
 	{
 		return this.sqlHistory;
 	}
 
 
-//	private synchronized void showStatementFromHistory(int anIndex)
-//	{
-//		if (anIndex < 0) return;
-//		if (anIndex >= this.statementHistory.size()) return;
-//		this.currentHistoryEntry = anIndex;
-//		String stmt = this.statementHistory.get(this.currentHistoryEntry).toString();
-//		this.editor.setText(stmt);
-//		this.editor.setCaretPosition(0);
-//		this.checkStatementActions();
-//	}
-
-//	public void removeHistoryFile()
-//	{
-//		File f = new File(this.historyFilename + ".txt");
-//		if (f.exists())
-//		{
-//			f.delete();
-//		}
-//	}
-
 	public String getHistoryFilename()
 	{
 		return this.historyFilename + ".txt";
 	}
 
-//	public ArrayList getStatementHistory()
-//	{
-//		this.storeStatementInHistory(this.editor.getText());
-//		return this.sqlHistory;
-//	}
-
-	private void restoreLastEditorFile()
+	private final String DEFAULT_TAB_NAME = ResourceMgr.getString("LabelTabStatement");
+	public void setTabTitle(JTabbedPane tab, int index)
 	{
-		String filename = WbManager.getSettings().getEditorFile(this.internalId);
-		if (filename != null && filename.length() > 0)
+		String fname = null;
+		String tooltip = null;
+		
+		fname = this.getCurrentFileName();
+		if (fname != null)
 		{
-			File f = new File(filename);
-			if (f.exists())
-			{
-				if (this.editor.readFile(f)) this.fireFilenameChanged();
-			}
+			File f = new File(fname);
+			fname = f.getName();
+			tooltip = f.getAbsolutePath();
 		}
+		else
+		{
+			fname = this.getTabName();
+		}
+		if (fname == null) fname = DEFAULT_TAB_NAME;
+		char c = Integer.toString(index + 1).charAt(0);
+		fname = fname + " " + c;
+		tab.setTitleAt(index, fname);
+		tab.setToolTipTextAt(index, tooltip);
+		tab.setMnemonicAt(index, c);
 	}
-
+	
+	public String getTabName()
+	{
+		return this.tabName;
+	}
+	
+	public void setTabName(String aName)
+	{
+		this.tabName = aName;
+		this.fireFilenameChanged(aName);
+	}
+	
 	public String getCurrentFileName()
 	{
 		return this.editor.getCurrentFileName();
@@ -979,11 +972,10 @@ public class SqlPanel
 
 	public void cancelExecution()
 	{
-		this.showStatusMessage(ResourceMgr.getString("MsgCancellingStmt"));
-		this.appendToLog(ResourceMgr.getString("MsgCancellingStmt"));
+		this.showStatusMessage(ResourceMgr.getString("MsgCancellingStmt") + "\n");
 		this.data.cancelExecution();
 		this.setCancelState(false);
-		this.clearStatusMessage();
+		//this.clearStatusMessage();
 		this.suspendThread();
 	}
 
@@ -1083,7 +1075,8 @@ public class SqlPanel
 
 	public void spoolData()
 	{
-		String sql = this.editor.getSelectedStatement();
+		String sql = SqlUtil.makeCleanSql(this.editor.getSelectedStatement(),false);
+		
 		DataSpooler spooler = new DataSpooler();
 		spooler.executeStatement(this.getParentWindow(), this.dbConnection, sql);
 	}
@@ -1193,7 +1186,8 @@ public class SqlPanel
 			boolean onErrorAsk = true;
 
 			this.data.scriptStarting();
-
+			long startTime = System.currentTimeMillis();
+			
 			for (int i=0; i < count; i++)
 			{
 				StringBuffer logmsg = new StringBuffer(200);
@@ -1233,6 +1227,8 @@ public class SqlPanel
 					}
 				}
 			}
+			final long end = System.currentTimeMillis();
+			
 			if (this.data.hasResultSet())
 			{
 				this.showResultPanel();
@@ -1245,10 +1241,12 @@ public class SqlPanel
 
 			if (count > 1)
 			{
-				StringBuffer logmsg = new StringBuffer(200);
-				logmsg.append("\n");
-				logmsg.append(ResourceMgr.getString("TxtScriptFinished"));
-				this.appendToLog(logmsg.toString());
+				this.appendToLog("\n");
+				this.appendToLog(ResourceMgr.getString("TxtScriptFinished"));
+				long execTime = (end - startTime);
+				String s = ResourceMgr.getString("MsgScriptExecTime") + " " + (((double)execTime) / 1000.0) + "s";
+				this.appendToLog("\n");
+				this.appendToLog(s);
 			}
 		}
 		catch (SQLException e)

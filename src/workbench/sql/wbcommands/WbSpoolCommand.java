@@ -108,6 +108,15 @@ public class WbSpoolCommand
 		}
 		else if ("xml".equalsIgnoreCase(type))
 		{
+			String format = cmdLine.getValue("dateformat");
+			if (format != null) spooler.setTextDateFormat(format);
+			
+			format = cmdLine.getValue("timestampformat");
+			if (format != null) spooler.setTextTimestampFormat(format);
+			
+			format = cmdLine.getValue("decimal");
+			if (format != null) spooler.setDecimalSymbol(format);
+			
 			spooler.setOutputTypeXml();
 			if (table != null) spooler.setTableName(table);
 		}
@@ -142,9 +151,36 @@ public class WbSpoolCommand
 				ResultSet[] data = aResult.getResultSets();
 				this.spooler.setSql(aResult.getSourceCommand());
 				this.spooler.startExport(data[0]);
-				String msg = ResourceMgr.getString("MsgSpoolOk");
-				aResult.addMessage(""); // force new line in output
-				aResult.addMessage(msg);
+				
+				
+				String msg = null;
+
+				if (spooler.isSuccess())
+				{
+					msg = ResourceMgr.getString("MsgSpoolOk");
+					aResult.addMessage(""); // force new line in output
+					aResult.addMessage(msg);
+				}
+				String[] spoolMsg = this.spooler.getErrors();
+				if (spoolMsg.length > 0)
+				{
+					for (int i=0; i < spoolMsg.length; i++)
+					{
+						aResult.addMessage(spoolMsg[i]);
+					}
+					aResult.addMessage("");
+				}
+				
+				String warn = ResourceMgr.getString("TxtWarning");
+				spoolMsg = this.spooler.getWarnings();
+				if (spoolMsg.length > 0)
+				{
+					for (int i=0; i < spoolMsg.length; i++)
+					{
+						aResult.addMessage(warn + ": " + spoolMsg[i]);
+					}
+					aResult.addMessage("");
+				}				
 				msg = ResourceMgr.getString("MsgSpoolSource") + " " + aResult.getSourceCommand();
 				aResult.addMessage(msg);
 				msg = ResourceMgr.getString("MsgSpoolTarget") + " " + this.spooler.getOutputFilename();
@@ -172,5 +208,14 @@ public class WbSpoolCommand
 		super.done();
 		this.spooler = null;
 	}
-	
+
+	public void cancel()
+		throws SQLException
+	{
+		super.cancel();
+		if (this.spooler != null)
+		{
+			this.spooler.stopExport();
+		}
+	}
 }

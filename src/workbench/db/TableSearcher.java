@@ -18,6 +18,7 @@ import workbench.interfaces.TableSearchDisplay;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -26,6 +27,7 @@ import workbench.storage.DataStore;
 public class TableSearcher
 {
 	private List tableNames;
+	private String columnFunction;
 	private TableSearchDisplay display;
 	private String criteria;
 	private WbConnection connection;
@@ -127,6 +129,7 @@ public class TableSearcher
 			
 			this.query = this.connection.getSqlConnection().createStatement();
 			this.query.setMaxRows(this.maxRows);
+			//LogMgr.logInfo("TableSearcher", "Using SQL:\n" + sql);
 			rs = this.query.executeQuery(sql);
 			while (rs != null && rs.next())
 			{
@@ -164,6 +167,7 @@ public class TableSearcher
 			}
 		}
 	}
+	
 	private String buildSqlForTable(String aTable)
 		throws SQLException, WbException
 	{
@@ -198,11 +202,18 @@ public class TableSearcher
 				{
 					sql.append(" OR ");
 				}
-				sql.append(column);
+				if (this.columnFunction != null)
+				{
+					sql.append(StringUtil.replace(this.columnFunction, "$col$", column));
+				}
+				else
+				{
+					sql.append(column);
+				}
 				sql.append(" LIKE '");
-				//if (this.fullTextSearch) sql.append('%');
 				sql.append(this.criteria);
-				sql.append("'\n");
+				sql.append('\'');
+				if (i < cols - 1) sql.append('\n');
 				first = false;
 			}
 		}
@@ -210,6 +221,31 @@ public class TableSearcher
 			return null;
 		else
 			return sql.toString();
+	}
+	
+	public boolean setColumnFunction(String aColFunc)
+	{
+		this.columnFunction = null;
+		boolean result = false;
+		if (aColFunc != null && aColFunc.trim().length() > 0) 
+		{
+			if (aColFunc.equalsIgnoreCase("$col$"))
+			{
+				this.columnFunction = null;
+				result = true;
+			}
+			else if (aColFunc.indexOf("$col$") > -1)
+			{
+				this.columnFunction = aColFunc;
+				result = true;
+			}
+			else if (aColFunc.indexOf("$COL$") > -1)
+			{
+				this.columnFunction = StringUtil.replace(aColFunc, "$COL$", "$col$");
+				result = true;
+			}
+		}
+		return result;
 	}
 	
 	/** Getter for property tableNames.

@@ -6,8 +6,6 @@
 
 package workbench.gui.sql;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  *
@@ -21,7 +19,7 @@ public class SqlHistoryEntry
 	private int selectionStart;
 	private int selectionEnd;
 	
-	private static final Pattern PATTERN_EMPTY_LINE = Pattern.compile("$(\r\n|\n\r|\r|\n)");
+	//private static final Pattern PATTERN_EMPTY_LINE = Pattern.compile("$(\r\n|\n\r|\r|\n)");
 
 	public SqlHistoryEntry(String sql, int pos, int selStart, int selEnd)
 	{
@@ -32,7 +30,16 @@ public class SqlHistoryEntry
 		else
 			this.cursorPos = pos;
 		this.selectionStart = selStart;
-		this.selectionEnd = selEnd;
+		
+		if (selStart < 0)
+			this.selectionStart = 0;
+		else
+			this.selectionStart = selStart;
+			
+		if (selEnd > len)
+			this.selectionEnd = len;
+		else
+			this.selectionEnd = selEnd;
 	}
 
 	public SqlHistoryEntry(String sql)
@@ -81,6 +88,7 @@ public class SqlHistoryEntry
 	{
 		if (input == null) return null;
 		int len = input.length() - 1;
+		if (len <= 0) return null;
 		
 		char c = input.charAt(len);
 		while ( (c == '\r' || c == '\n') && len > 0)
@@ -95,7 +103,7 @@ public class SqlHistoryEntry
 	{
 		try
 		{
-			String test = "test\r\ntest2\r\n\r\n";
+			String test = "    test\r\ntest2\r\n\r\n";
 			System.out.println(">" + trimEmptyLines(test) + "<");
 		}
 		catch (Exception e)

@@ -47,8 +47,6 @@ public class DwPanel
 	private TableModel errorModel;
 	private TableModel resultEmptyMsgModel;
 	private boolean hasResultSet = false;
-	//private PreparedStatement prepStatement;
-	private Statement lastStatement;
 	
 	private WbScrollPane scrollPane;
 	private DefaultCellEditor defaultEditor;
@@ -135,7 +133,7 @@ public class DwPanel
 	{
 		this.clearContent();
 		this.sql = null;
-		this.lastStatement = null;
+		//this.lastStatement = null;
 		this.lastMessage = null;
 		this.dbConnection = aConn;
 		this.hasResultSet = false;
@@ -282,7 +280,7 @@ public class DwPanel
 		
 		try
 		{
-			long start, end, sqlTime = 0;
+			long end, sqlTime = 0;
 			long execTime = 0;
 			
 			this.clearContent();
@@ -290,7 +288,7 @@ public class DwPanel
 			boolean repeatLast = aSql.equals(this.sql);
 			this.sql = aSql;
 		
-			start = System.currentTimeMillis();
+			final long start = System.currentTimeMillis();
 			this.stmtRunner.runStatement(aSql, this.statusBar.getMaxRows());
 			end = System.currentTimeMillis();
 			sqlTime = (end - start);
@@ -319,7 +317,6 @@ public class DwPanel
 					newData.checkUpdateTable();
 				}
 				end = System.currentTimeMillis();
-				execTime = (end - start);
 				
 				if (repeatLast)
 				{
@@ -344,15 +341,19 @@ public class DwPanel
 			}
 			else if (result.isSuccess())
 			{
+				end = System.currentTimeMillis();
 				this.hasResultSet = false;
 				this.setMessageDisplayModel(this.getEmptyMsgTableModel());
 			}
 			else 
 			{
+				end = System.currentTimeMillis();
 				this.hasResultSet = false;
 				this.setMessageDisplayModel(this.getErrorTableModel());
 				this.lastMessage = ResourceMgr.getString("MsgExecuteError") + "\r\n";
 			}
+			execTime = (end - start);
+			
 			String[] messages = result.getMessages();
 			StringBuffer msg = null;
 			if (messages != null)
@@ -469,6 +470,7 @@ public class DwPanel
 
 	public boolean cancelExecution()
 	{
+		/*
 		if (this.lastStatement != null)
 		{
 			try
@@ -495,6 +497,12 @@ public class DwPanel
 		{
 			return false;
 		}
+		*/
+		if (this.stmtRunner != null)
+		{
+			this.stmtRunner.cancel();
+		}
+		return false;
 	}
 
 	public void restoreOriginalValues()

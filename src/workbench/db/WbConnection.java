@@ -85,6 +85,37 @@ public class WbConnection
 	private Method clearSettings = null;
 	private Object dbAccess = null;
 	
+	public String getWarnings()
+	{
+		return this.getWarnings(true);
+	}
+	
+	public String getWarnings(boolean clearWarnings)
+	{
+		try
+		{
+			SQLWarning warn = this.getSqlConnection().getWarnings();
+			if (warn == null) return null;
+
+			StringBuffer msg = new StringBuffer(200);
+			String s = null;
+			while (warn != null)
+			{
+				s = warn.getMessage();
+				msg.append('\n');
+				msg.append(s);
+				warn = warn.getNextWarning();
+			}
+			if (clearWarnings) this.clearWarnings();
+			return msg.toString();
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("WbConnection.getWarnings()", "Error when retrieving SQL Warnings", e);
+			return null;
+		}
+	}
+	
 	public void clearWarnings()
 	{
 		try

@@ -294,7 +294,11 @@ public class DbExplorerPanel
 			LogMgr.logError(this, "Could not set schema", ex);
 		}
 	}
-
+	
+	public void setTabTitle(JTabbedPane tab, int index)
+	{
+		tab.setTitleAt(index, ResourceMgr.getString("LabelDbExplorer"));
+	}
 	public void closeWindow()
 	{
 		if (this.window != null)

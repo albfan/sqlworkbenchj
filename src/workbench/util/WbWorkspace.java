@@ -36,7 +36,7 @@ public class WbWorkspace
 	private ArrayList entries;
 	
 	private boolean isReadOnly;
-	private WbProperties tabInfo = new WbProperties();
+	private WbProperties tabInfo = new WbProperties(1);
 	
 	public WbWorkspace(String archiveName, boolean createNew)
 		throws IOException
@@ -98,7 +98,7 @@ public class WbWorkspace
 		throws IOException
 	{
 		if (!this.isReadOnly) throw new IllegalStateException("Workspace is opened for writing. Entry count is not available");
-		if (anIndex > this.entries.size()) throw new IndexOutOfBoundsException("Index " + anIndex + " is great then " + (this.entries.size() - 1));
+		if (anIndex > this.entries.size() - 1) throw new IndexOutOfBoundsException("Index " + anIndex + " is great then " + (this.entries.size() - 1));
 		ZipEntry e = (ZipEntry)this.entries.get(anIndex);
 		InputStream in = this.archive.getInputStream(e);
 		history.readFromStream(in);
@@ -142,7 +142,7 @@ public class WbWorkspace
 		try
 		{
 			InputStream in = this.archive.getInputStream(entry);
-			this.tabInfo = new WbProperties();
+			this.tabInfo = new WbProperties(1);
 			this.tabInfo.load(in);
 		}
 		catch (Exception e)
