@@ -19,7 +19,7 @@ import java.awt.*;
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.1 2001-12-11 19:07:23 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.2 2002-06-21 17:02:15 thomas Exp $
  */
 public class TextAreaPainter extends JComponent implements TabExpander
 {
@@ -674,7 +674,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 			int caretX = textArea._offsetToX(line,offset);
 			int caretWidth = ((blockCaret ||
 				textArea.isOverwriteEnabled()) ?
-				fm.charWidth('w') : 1);
+				fm.charWidth('w') : 2);
 			y += fm.getLeading() + fm.getMaxDescent();
 			int height = fm.getHeight();
 			
