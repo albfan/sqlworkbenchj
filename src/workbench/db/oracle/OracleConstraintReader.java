@@ -4,7 +4,7 @@
  * Created on February 14, 2004, 1:35 PM
  */
 
-package workbench.db;
+package workbench.db.oracle;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -23,7 +23,7 @@ public class OracleConstraintReader
 	extends AbstractConstraintReader
 {
 	private PreparedStatement statement;
-	
+
 	private static final String TABLE_SQL =
 	         "SELECT search_condition \n" +
            "FROM all_constraints cons   \n" +
@@ -100,7 +100,7 @@ public class OracleConstraintReader
 		}
 		return result.toString();
 	}
-  
+
 	public void done()
 	{
 		if (this.statement != null)

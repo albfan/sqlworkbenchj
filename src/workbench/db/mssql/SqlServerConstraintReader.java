@@ -4,7 +4,7 @@
  * Created on February 14, 2004, 1:35 PM
  */
 
-package workbench.db;
+package workbench.db.mssql;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
