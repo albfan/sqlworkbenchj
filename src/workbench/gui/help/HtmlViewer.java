@@ -9,6 +9,7 @@ package workbench.gui.help;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.Rectangle;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -42,15 +43,25 @@ public class HtmlViewer
 	
 	public HtmlViewer(JFrame owner)
 	{
-		
+		this(owner, "index.html");
+	}
+	
+	public HtmlViewer(JFrame owner, String aStartFile)
+	{
 		super(owner, ResourceMgr.getString("TxtHelpWindowTitle"), false);
-		display = new JEditorPane();
-		display.setFont(new Font("SansSerif", Font.PLAIN, 14));
-		JScrollPane scroll = new JScrollPane(display);
-		
-		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(scroll, BorderLayout.CENTER);
+		this.initHtml(aStartFile);
+		this.restoreSettings(owner);
+	}
 
+	public HtmlViewer(JDialog owner)
+	{
+		super(owner, ResourceMgr.getString("TxtHelpWindowTitle"), false);
+		this.initHtml(null);
+		this.restoreSettings(owner);
+	}
+	
+	private void restoreSettings(Window owner)
+	{
 		if (!WbManager.getSettings().restoreWindowSize(this))
 		{
 			setSize(800,600);
@@ -60,7 +71,37 @@ public class HtmlViewer
 		{
 			WbSwingUtilities.center(this, owner);
 		}
+	}
+	
+	private void initHtml(String aStartFile)
+	{
+		display = new JEditorPane();
+		display.setFont(new Font("SansSerif", Font.PLAIN, 14));
+		JScrollPane scroll = new JScrollPane(display);
 		
+		getContentPane().setLayout(new BorderLayout());
+		getContentPane().add(scroll, BorderLayout.CENTER);
+		
+		this.initDocument();
+		
+		display.addHyperlinkListener(this);
+		
+		if (aStartFile != null) this.showHtmlFile(aStartFile);
+		
+		addWindowListener(new WindowAdapter()
+		{
+			public void windowClosing(WindowEvent evt)
+			{
+				saveSettings();
+				hide();
+				dispose();
+				//System.exit(1);
+			}
+		});
+	}
+	
+	private void initDocument()
+	{
 		HTMLEditorKit kit = new HTMLEditorKit();
 		StyleSheet style = new StyleSheet();
 		HTMLDocument htmlDoc = null;
@@ -86,11 +127,24 @@ public class HtmlViewer
 		display.setEditable(false);
 		display.setEditorKit(kit);
 		display.setDocument(htmlDoc);
-		display.addHyperlinkListener(this);
+	}
+	
+	public void showProfileHelp()
+	{
+		this.showHtmlFile("profiles.html");
+	}
+	
+	public void showIndex()
+	{
+		this.showHtmlFile("index.html");
+	}
+	
+	private void showHtmlFile(String aFile)
+	{
 		try
 		{
-
-			URL file = this.getClass().getClassLoader().getResource("help/index.html");
+			this.initDocument();
+			URL file = this.getClass().getClassLoader().getResource("help/" + aFile);
 			if (file == null)
 			{
 				file = this.getClass().getClassLoader().getResource("workbench/gui/help/NotFound.html");
@@ -105,24 +159,18 @@ public class HtmlViewer
 				display.setContentType("text/html");
 				display.setText("<h2>Help file not found!</h2>"); 
 			}
+			if (!this.isVisible())
+			{
+				this.setVisible(true);
+				this.requestFocus();
+			}
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
-		
-		addWindowListener(new WindowAdapter()
-		{
-			public void windowClosing(WindowEvent evt)
-			{
-				saveSettings();
-				hide();
-				dispose();
-				//System.exit(1);
-			}
-		});
 	}
-
+	
 	private void saveSettings()
 	{
 		WbManager.getSettings().storeWindowPosition(this);
@@ -187,8 +235,4 @@ public class HtmlViewer
 		}
 	}
 
-	public static void main(String[] args)
-	{
-		new HtmlViewer(null).show();
-	}
 }

@@ -28,7 +28,7 @@ public class WbEnableOraOutput extends SqlCommand
 	{
 		this.checkVerb(aSql);
 		
-		LineTokenizer tok = new LineTokenizer(aSql, " ");
+		LineTokenizer tok = new LineTokenizer(aSql.trim(), " ");
 		long limit = -1;
 		String verb = tok.nextToken(); // skip the verb
 		

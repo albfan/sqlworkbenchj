@@ -45,7 +45,6 @@ public class ObjectScripter
 		{
 			this.script = new StringBuffer(this.objectList.size() * 500);
 			this.appendObjectType("sequence");
-			this.script.append("\n");
 			this.appendObjectType("table");
 			this.appendObjectType("view");
 			this.appendObjectType("synonym");
@@ -61,6 +60,7 @@ public class ObjectScripter
 			Map.Entry entry = (Map.Entry)itr.next();
 			String object = (String)entry.getKey();
 			String type = (String)entry.getValue();
+			String source = null;
 			if (type.equalsIgnoreCase(typeFilter))
 			{
 				if (this.progressMonitor != null)
@@ -71,27 +71,32 @@ public class ObjectScripter
 				{
 					if ("table".equalsIgnoreCase(type))
 					{
-						this.script.append(this.getTableScript(object));
+						source = this.getTableScript(object);
 					}
 					else if ("view".equalsIgnoreCase(type))
 					{
-						this.script.append(this.getViewSource(object));
+						source = this.getViewSource(object);
 					}
 					else if ("synonym".equalsIgnoreCase(type))
 					{
-						this.script.append(this.getSynonymSource(object));
+						source = this.getSynonymSource(object);
 					}
 					else if ("sequence".equalsIgnoreCase(type))
 					{
-						String source = this.meta.getSequenceSource(object);
-						this.script.append(source);
+						source = this.meta.getSequenceSource(object);
 					}
 				}
 				catch (Exception e)
 				{
-					this.script.append("\nError creating script for " + object);
+					this.script.append("\nError creating DDL for " + object);
 				}
-				this.script.append("\n");
+				if (source != null && source.length() > 0)
+				{
+					this.script.append("-- BEGIN " + type + " " + object + "\n");
+					this.script.append(source);
+					this.script.append("-- END " + type + " " + object + "\n");
+					this.script.append("\n");
+				}
 			}
 		}
 	}
@@ -121,7 +126,7 @@ public class ObjectScripter
 			owner = tableName.substring(0, pos);
 			table = tableName.substring(pos + 1);
 		}
-		String source = this.meta.getTableSource(null, owner, table);
+		String source = this.meta.getTableSource(null, owner, table, true);
 		return source;
 	}
 	

@@ -33,6 +33,7 @@ public class ConnectionInfo
 		this.setBorder(border);
 		this.addMouseListener(new TextComponentMouseListener());
 		this.setDisabledTextColor(Color.black);
+		this.setHorizontalAlignment(JTextField.LEFT);
 	}
 	
 	public void setConnection(WbConnection aConnection)
@@ -61,6 +62,7 @@ public class ConnectionInfo
 			this.setText(ResourceMgr.getString("TxtNotConnected"));
 			this.setToolTipText(null);
 		}
+		this.setCaretPosition(0);
 	}
 	public void stateChanged(javax.swing.event.ChangeEvent e)
 	{

@@ -21,10 +21,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import workbench.WbManager;
 
 import workbench.db.oracle.DbmsOutput;
+import workbench.db.oracle.OracleMetaData;
 import workbench.db.oracle.SynonymReader;
 import workbench.exception.ExceptionUtil;
 import workbench.exception.WbException;
@@ -64,7 +66,8 @@ public class DbMetadata
 	private DatabaseMetaData metaData;
 	//private List tableListColumns;
 	private WbConnection dbConnection;
-
+	private OracleMetaData oracleMetaData;
+	
 	private static List serversWhichNeedReconnect = Collections.EMPTY_LIST;
 	private static List caseSensitiveServers = Collections.EMPTY_LIST;
 	private static List ddlNeedsCommitServers = Collections.EMPTY_LIST;
@@ -89,6 +92,7 @@ public class DbMetadata
 	private boolean isPostgres;
 	private boolean isHsql;
 	private boolean isFirebird;
+	private boolean isSqlServer;
 
 	private List keywords;
 	
@@ -150,6 +154,7 @@ public class DbMetadata
 		if (this.productName.toLowerCase().indexOf("oracle") > -1)
 		{
 			this.isOracle = true;
+			this.oracleMetaData = new OracleMetaData(this.dbConnection.getSqlConnection());
 		}
 		else if (this.productName.toLowerCase().indexOf("postgres") > - 1)
 		{
@@ -162,6 +167,10 @@ public class DbMetadata
 		else if (this.productName.toLowerCase().indexOf("firebird") > -1)
 		{
 			this.isFirebird = true;
+		}
+		else if (this.productName.toLowerCase().indexOf("sql server") > -1)
+		{
+			this.isSqlServer = true;
 		}
 
 		this.needsReconnect = serversWhichNeedReconnect.contains(this.productName);
@@ -266,11 +275,11 @@ public class DbMetadata
 		{
 			if (includeDrop) result.append("DROP VIEW " + aView);
 			if (this.isHsql()) result.append(" IF EXISTS");
-			result.append(";\r\nCREATE VIEW " + aView);
+			result.append(";\nCREATE VIEW " + aView);
 		}
 		if (!isHsql())
 		{
-			result.append("\r\n(\r\n");
+			result.append("\n(\n");
 			int rows = viewTableDefinition.getRowCount();
 			for (int i=0; i < rows; i++)
 			{
@@ -284,11 +293,12 @@ public class DbMetadata
 					result.append(" ,");
 				}
 				result.append(colName);
-				result.append("\r\n");
+				result.append("\n");
 			}
 		}
-		result.append(")\r\nAS \r\n");
+		result.append(")\nAS \n");
 		result.append(source);
+		result.append("\n");
 		return result.toString();
 	}
 	
@@ -1000,9 +1010,23 @@ public class DbMetadata
 				try { keysRs.close(); } catch (Throwable th) {}
 			}
 
+			// the idxInfo will hold an ArrayList with 
+			// information for each index. The first entry
+			// int he ArrayList will have the unique/non-unique
+			// flag, the rest will be the column list
 			HashMap idxInfo = new HashMap();
+			HashMap funcIndex = null;
 
-			idxRs = this.metaData.getIndexInfo(aCatalog, aSchema, this.adjustObjectname(aTable), false, true);
+			if (this.isOracle)
+			{
+				idxRs = this.oracleMetaData.getIndexInfo(aCatalog, aSchema, this.adjustObjectname(aTable), false, true);
+				funcIndex = new HashMap();
+			}
+			else
+			{
+				idxRs = this.metaData.getIndexInfo(aCatalog, aSchema, this.adjustObjectname(aTable), false, true);
+			}
+			
 			while (idxRs.next())
 			{
 				boolean unique = idxRs.getBoolean("NON_UNIQUE");
@@ -1025,6 +1049,34 @@ public class DbMetadata
 					colInfo.add(colName + " " + dir);
 				else
 					colInfo.add(colName);
+			
+				if (this.isOracle)
+				{
+					String type = idxRs.getString("INDEX_TYPE");
+					if (type != null && type.startsWith("FUNCTION-BASED"))
+					{
+						if (!funcIndex.containsKey(indexName))
+						{
+							funcIndex.put(indexName, new ArrayList());
+						}
+					}
+				}
+				
+			}
+			
+			if (this.isOracle && funcIndex != null)
+			{
+				this.oracleMetaData.readFunctionIndexDefinition(aSchema, this.adjustObjectname(aTable), funcIndex);
+				Iterator defs = funcIndex.entrySet().iterator();
+				while (defs.hasNext())
+				{
+					Map.Entry entry = (Map.Entry)defs.next();
+					String index = (String)entry.getKey();
+					ArrayList old = (ArrayList)idxInfo.get(index);
+					ArrayList newList = (ArrayList)entry.getValue();
+					newList.add(0, old.get(0));
+					idxInfo.put(index, newList);
+				}
 			}
 			
 			Iterator itr = idxInfo.entrySet().iterator();
@@ -1057,6 +1109,7 @@ public class DbMetadata
 					idxData.setValue(row, 3, def.toString());
 				}
 			}
+			idxData.sortByColumn(0, true);
 		}
 		catch (Exception e)
 		{
@@ -1067,10 +1120,57 @@ public class DbMetadata
 		finally
 		{
 			try { idxRs.close(); } catch (Throwable th) {}
+			if (this.isOracle)
+			{
+				this.oracleMetaData.closeStatement();
+			}
+			
 		}
 		return idxData;
 	}
 
+	public String getCurrentCatalog()
+	{
+		String catalog = null;
+		
+		if (this.isSqlServer)
+		{
+			Statement stmt = null;
+			ResultSet rs = null;
+			try
+			{
+				stmt = this.dbConnection.createStatement();
+				rs = stmt.executeQuery("SELECT db_name()");
+				if (rs.next()) catalog = rs.getString(1);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("DbMetadata.getCurrentCatalog()", "Error retrieving catalog", e);
+				catalog = null;
+			}
+			finally
+			{
+				try { rs.close(); } catch (Throwable th) {}
+				try { stmt.close(); } catch (Throwable th) {}
+			}
+		}
+		
+		if (catalog == null)
+		{
+			try
+			{
+				catalog = this.dbConnection.getSqlConnection().getCatalog();
+			}
+			catch (Exception e)
+			{
+				catalog = "";
+			}
+		}
+		if (catalog == null) catalog = "";
+		
+		return catalog;
+	}
+	
 	public DataStore getCatalogInformation()
 	{
 
@@ -1579,14 +1679,14 @@ public class DbMetadata
 	}
 
 
-	public String getTableSource(String catalog, String schema, String table)
+	public String getTableSource(String catalog, String schema, String table, boolean includeDrop)
 		throws SQLException, WbException
 	{
 		DataStore tableDef = this.getTableDefinition(catalog, schema, table, true);
 		DataStore index = this.getTableIndexInformation(catalog, schema, table);
 		DataStore fkDef = this.getForeignKeys(catalog, schema, table);
 		
-		String source = this.getTableSource(table, tableDef, index, fkDef);
+		String source = this.getTableSource(catalog, schema, table, tableDef, index, fkDef, includeDrop);
 		return source;
 	}
 	
@@ -1597,9 +1697,27 @@ public class DbMetadata
 
 	public String getTableSource(String aTablename, DataStore aTableDef, DataStore aIndexDef, DataStore aFkDef)
 	{
+		return this.getTableSource(null, null, aTablename, aTableDef, aIndexDef, aFkDef, false);
+	}
+	
+	public String getTableSource(String aCatalog, String aSchema, String aTablename, DataStore aTableDef, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop)
+	{
 		if (aTableDef == null) return "";
 
 		StringBuffer result = new StringBuffer(1000);
+		if (includeDrop)
+		{
+			result.append("DROP TABLE " + aTablename);
+			if (this.isHsql)
+			{
+				result.append(" IF EXISTS");
+			}
+			else if (this.isOracle)
+			{
+				result.append(" CASCADE CONSTRAINTS");
+			}
+			result.append(";\n");
+		}
 		result.append("CREATE TABLE " + aTablename + "\n(\n");
 		int count = aTableDef.getRowCount();
 		StringBuffer pkCols = new StringBuffer(1000);
@@ -1614,6 +1732,7 @@ public class DbMetadata
 		}
 		maxColLength++;
 		maxTypeLength++;
+		
 		for (int i=0; i < count; i++)
 		{
 			//{"COLUMN_NAME", "TYPE_NAME", "PK", "NULLABLE", "DEFAULT", "REMARKS"};
@@ -1622,6 +1741,7 @@ public class DbMetadata
 			String pk = (String)aTableDef.getValue(i, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG);
 			String nul = (String)aTableDef.getValue(i, COLUMN_IDX_TABLE_DEFINITION_NULLABLE);
 			String def = aTableDef.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_DEFAULT);
+			
 			result.append("   ");
 			result.append(colName);
 			if ("YES".equalsIgnoreCase(pk))
@@ -1658,6 +1778,11 @@ public class DbMetadata
 		}
 		result.append(this.getIndexSource(aTablename, aIndexDef));
 		result.append(this.getFkSource(aTablename, aFkDef));
+		String grants = this.getTableGrantSource(null, null, aTablename);
+		if (grants.length() > 0)
+		{
+			result.append(grants);
+		}
 		return result.toString();
 	}
 
@@ -1792,6 +1917,7 @@ public class DbMetadata
 		}
 		return result.toString();
 	}
+	
 	public StringBuffer getIndexSource(String aTable, DataStore aIndexDef)
 	{
 		if (aIndexDef == null) return StringUtil.EMPTY_STRINGBUFFER;
@@ -1851,6 +1977,88 @@ public class DbMetadata
 		return idx;
 	}
 
+	public static final int COLUMN_IDX_TABLE_GRANTS_OBJECT_NAME = 0;
+	public static final int COLUMN_IDX_TABLE_GRANTS_GRANTOR = 1;
+	public static final int COLUMN_IDX_TABLE_GRANTS_GRANTEE = 2;
+	public static final int COLUMN_IDX_TABLE_GRANTS_PRIV = 3;
+	public static final int COLUMN_IDX_TABLE_GRANTS_GRANTABLE = 4;
+	
+	public DataStore getTableGrants(String aCatalog, String aSchema, String aTablename)
+	{
+		String[] columns = new String[] { "TABLENAME", "GRANTOR", "GRANTEE", "PRIVILEGE", "GRANTABLE" };
+		int[] colTypes = new int[] { Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR };
+		DataStore result = new DataStore(columns, colTypes);
+		ResultSet rs = null;
+		try
+		{
+			rs = this.metaData.getTablePrivileges(aCatalog, aSchema, aTablename);
+			while (rs.next())
+			{
+				int row = result.addRow();
+				result.setValue(row, COLUMN_IDX_TABLE_GRANTS_OBJECT_NAME, rs.getString(3));
+				result.setValue(row, COLUMN_IDX_TABLE_GRANTS_GRANTOR, rs.getString(4));
+				result.setValue(row, COLUMN_IDX_TABLE_GRANTS_GRANTEE, rs.getString(5));
+				result.setValue(row, COLUMN_IDX_TABLE_GRANTS_PRIV, rs.getString(6));
+				result.setValue(row, COLUMN_IDX_TABLE_GRANTS_GRANTABLE, rs.getString(7));
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DbMetadata.getTableGrants()", "Error when retrieving table privileges",e);
+			result.reset();
+		}
+		finally
+		{
+			try { rs.close(); } catch (Throwable th) {}
+		}
+		return result;
+	}
+
+	public String getTableGrantSource(String aCatalog, String aSchema, String aTablename)
+	{
+		DataStore ds = this.getTableGrants(aCatalog, aSchema, aTablename);
+		StringBuffer result = new StringBuffer(200);
+		int count = ds.getRowCount();
+		
+		// as several grants to several users can be made, we need to collect them 
+		// first, in order to be able to build the complete statements
+		HashMap grants = new HashMap(count);
+		for (int i=0; i < count; i++)
+		{
+			String grantee = ds.getValueAsString(i, COLUMN_IDX_TABLE_GRANTS_GRANTEE); 
+			String priv = ds.getValueAsString(i, COLUMN_IDX_TABLE_GRANTS_PRIV); 
+			StringBuffer privs;
+			if (!grants.containsKey(grantee))
+			{
+				privs = new StringBuffer(priv);
+				grants.put(grantee, privs);
+			}
+			else
+			{
+				privs = (StringBuffer)grants.get(grantee);
+				if (privs == null) privs = new StringBuffer();
+				privs.append(", ");
+				privs.append(priv);
+			}
+		}
+		Set entries = grants.entrySet();
+		Iterator itr = entries.iterator();
+		while (itr.hasNext())
+		{
+			Map.Entry entry = (Map.Entry)itr.next();
+			String grantee = (String)entry.getKey();
+			StringBuffer privs = (StringBuffer)entry.getValue();
+			result.append("GRANT ");
+			result.append(privs);
+			result.append(" ON ");
+			result.append(aTablename);
+			result.append(" TO ");
+			result.append(grantee);
+			result.append(";\n");
+		}
+		return result.toString();
+	}
+	
 	public static void setServersWhereDDLNeedsCommit(List aList)
 	{
 		ddlNeedsCommitServers = aList;

@@ -31,6 +31,7 @@ import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.*;
 import workbench.gui.actions.PrintAction;
+import workbench.gui.actions.RunMacroAction;
 import workbench.gui.components.*;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.menu.TextPopup;
@@ -99,7 +100,8 @@ public class SqlPanel
 	private ImportFileAction importFileAction;
 	private PrintAction printDataAction;
 	private PrintPreviewAction printPreviewAction;
-	
+
+	private RunMacroAction manageMacros;
 	private OptimizeAllColumnsAction optimizeAllCol;
 	private FormatSqlAction formatSql;
 	
@@ -455,8 +457,11 @@ public class SqlPanel
 		MakeLowerCaseAction makeLower = new MakeLowerCaseAction(this.editor);
 		MakeUpperCaseAction makeUpper = new MakeUpperCaseAction(this.editor);
 
-		this.editor.addPopupMenuItem(makeLower, true);
-		this.editor.addPopupMenuItem(makeUpper, false);
+		this.editor.showFindOnPopupMenu();
+		this.editor.showFormatSql();
+		
+		//this.editor.addPopupMenuItem(makeLower, true);
+		//this.editor.addPopupMenuItem(makeUpper, false);
 
 		this.editor.addPopupMenuItem(this.executeSelected, true);
 		this.editor.addPopupMenuItem(this.executeAll, false);
@@ -581,7 +586,7 @@ public class SqlPanel
 		this.findDataAgainAction = this.data.getTable().getFindAgainAction();
 		this.findDataAgainAction.setEnabled(false);
 
-		this.formatSql = new FormatSqlAction(this);
+		this.formatSql = this.editor.getFormatSqlAction();
 		this.formatSql.setCreateMenuSeparator(true);
 		this.actions.add(this.formatSql);
 		
@@ -600,13 +605,20 @@ public class SqlPanel
 		this.addMacro.setEnabled(false);
 		this.actions.add(this.addMacro);
 		
+		// Create the "Manage Macros menu item
+		this.manageMacros = new RunMacroAction(this);
+		this.manageMacros.setEnabled(true);
+		this.actions.add(this.manageMacros);
+		//macroMenu.addSeparator();
+		
 		this.findDataAction.setCreateMenuSeparator(true);
 		this.actions.add(this.findDataAction);
 		this.actions.add(this.findDataAgainAction);
 		this.printDataAction.setCreateMenuSeparator(true);
 		this.actions.add(this.printDataAction);
 		this.actions.add(this.printPreviewAction);
-		
+
+		this.disableExecuteActions();
 	}
 	
 	private void setupActionMap()
@@ -650,9 +662,40 @@ public class SqlPanel
 		this.selectEditorLater();
 	}
 	
+	private JTabbedPane parentTab;
+	private boolean isCurrentTab()
+	{
+		if (this.parentTab == null)
+		{
+			Component p = this.getParent();
+			if (p instanceof JTabbedPane)
+			{
+				this.parentTab = (JTabbedPane)p;
+			}
+		}
+		
+		if (this.parentTab == null) return false;
+		
+//		Window w = SwingUtilities.getWindowAncestor(this);
+//		if (!w.hasFocus()) 
+//		{
+//			System.out.println("parent window does not have focus!");
+//			return false;
+//		}
+		
+		return (this.parentTab.getSelectedComponent() == this);
+	}
+	
 	public void selectEditor()
 	{
-		editor.requestFocusInWindow();
+		// make sure the editor is really visible!
+		//boolean visible = this.isVisible();
+		//boolean current = this.isCurrentTab();
+		//System.out.println("current =" + current +",visible=" + visible);
+		if (this.isVisible() && this.isCurrentTab())
+		{
+			editor.requestFocusInWindow();
+		}
 	}
 
 	public void selectResult()
@@ -867,7 +910,14 @@ public class SqlPanel
 		
 		if (!fileLoaded)
 		{
-			this.showCurrentHistoryStatement();
+			try
+			{
+				this.showCurrentHistoryStatement();
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
 		else
 		{
@@ -939,11 +989,13 @@ public class SqlPanel
 			fname = this.getTabName();
 		}
 		if (fname == null) fname = DEFAULT_TAB_NAME;
-		char c = Integer.toString(index + 1).charAt(0);
-		fname = fname + " " + c;
-		tab.setTitleAt(index, fname);
+		tab.setTitleAt(index, fname+ " " + Integer.toString(index+1));
+		if (index < 9)
+		{
+			char c = Integer.toString(index+1).charAt(0);
+			tab.setMnemonicAt(index, c);
+		}
 		tab.setToolTipTextAt(index, tooltip);
-		tab.setMnemonicAt(index, c);
 	}
 	
 	public String getTabName()
@@ -984,7 +1036,21 @@ public class SqlPanel
 
 	public boolean isConnected()
 	{
+		// I'm only checking if the connection is defined, because
+		// MainWindow will make sure a valid connection is set
+		// for the panel. When using only one connection for all
+		// panels, isClosed() will block the entire AWT thread!
+		
+		return (this.dbConnection != null);
+		
+		/*
+		// check isBusy() first! This is very important, because 
+		// Connection.isClosed() will be blocked until the current
+		// statement is finished!
+		if (this.isBusy()) return true;
+		
 		if (this.dbConnection == null) return false;
+		return true;
 		try
 		{
 			return !this.dbConnection.isClosed();
@@ -993,6 +1059,7 @@ public class SqlPanel
 		{
 			return false;
 		}
+		*/
 	}
 	
 	public void setConnection(WbConnection aConnection)
@@ -1006,8 +1073,8 @@ public class SqlPanel
 		{
 		}
 		boolean enable = (aConnection != null);
-		this.connectionInfo.setConnection(aConnection);
-		this.setActionState( new Action[] {this.executeAll, this.executeSelected, this.spoolData}, enable);
+		if (this.connectionInfo != null) this.connectionInfo.setConnection(aConnection);
+		this.setExecuteActionStates(enable);
 
 		if (aConnection != null)
 		{
@@ -1019,7 +1086,7 @@ public class SqlPanel
 				aConnection.getMetadata().enableOutput();
 			}
 		}
-		this.macroMenu.setEnabled(enable);
+		if (this.macroMenu != null) this.macroMenu.setEnabled(enable);
 		this.checkResultSetActions();
 		this.doLayout();
 	}
@@ -1041,6 +1108,7 @@ public class SqlPanel
 	public synchronized void storeStatementInHistory()
 	{
 		this.sqlHistory.addContent(editor);
+		this.checkStatementActions();
 	}
 
 	public void cancelUpdate()
@@ -1136,6 +1204,8 @@ public class SqlPanel
 	
 	public void cancelExecution()
 	{
+		if (!this.isBusy()) return;
+		
 		this.showStatusMessage(ResourceMgr.getString("MsgCancellingStmt") + "\n");
 		try
 		{
@@ -1230,7 +1300,6 @@ public class SqlPanel
 		this.data.getStartEditAction().setSwitchedOn(false);
 		
 		this.storeStatementInHistory();
-		this.checkStatementActions();
 
 		// the dbStart should be fired *after* updating the 
 		// history, as the history might be saved if the MainWindow
@@ -1277,32 +1346,43 @@ public class SqlPanel
 		}
 		*/
 		this.fireDbExecEnd();
-		this.selectEditor();
+		this.selectEditorLater();
 	}
 
 	public void executeMacro(final String macroName)
+	{
+		this.executeMacro(macroName, false);
+	}
+	public void executeMacro(final String macroName, final boolean replaceText)
 	{
 		Thread t = new Thread()
 		{
 			public void run()
 			{
-				runMacro(macroName);
+				runMacro(macroName, replaceText);
 			}
 		};
 		t.start();
 	}
 	
-	private void runMacro(String macroName)
+	private void runMacro(String macroName, boolean replaceText)
 	{
 		String sql = MacroManager.getInstance().getMacroText(macroName);
 		if (sql == null || sql.trim().length() == 0) return;
 		
+		if (replaceText)
+		{
+			this.storeStatementInHistory();
+			this.editor.setText(sql);
+			this.storeStatementInHistory();
+		}
 		this.setBusy(true);
 		this.setCancelState(true);
 		this.makeReadOnly();
 
 		this.showStatusMessage(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
 		this.data.getStartEditAction().setSwitchedOn(false);
+		this.fireDbExecStart();
 
 		this.displayResult(sql, -1);
 
@@ -1311,7 +1391,7 @@ public class SqlPanel
 		this.clearStatusMessage();
 		this.setCancelState(false);
 		this.checkResultSetActions();
-
+		this.fireDbExecEnd();
 		this.selectEditor();
 	}
 	
@@ -1419,12 +1499,13 @@ public class SqlPanel
 			this.log.setText(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
 			String delimit = ";";
 
-			if (aSqlScript.trim().endsWith(WbManager.getSettings().getAlternateDelimiter()))
+			String cleanSql = SqlUtil.makeCleanSql(aSqlScript, false).trim();
+			String alternate = WbManager.getSettings().getAlternateDelimiter();
+			if (cleanSql.endsWith(alternate))
 			{
 				delimit = WbManager.getSettings().getAlternateDelimiter();
 			}
 
-			String cleanSql = SqlUtil.makeCleanSql(aSqlScript, false);
 			String macro = MacroManager.getInstance().getMacroText(cleanSql);
 			if (macro != null)
 			{
@@ -1696,6 +1777,7 @@ public class SqlPanel
 		this.executeSelected.setEnabled(aFlag);
 		this.executeCurrent.setEnabled(aFlag);
 		this.importFileAction.setEnabled(aFlag);
+		this.spoolData.setEnabled(aFlag);
 	}
 	
 	private synchronized void showCancelIcon()

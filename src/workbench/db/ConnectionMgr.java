@@ -259,37 +259,22 @@ public class ConnectionMgr
 	}
 
 	/**
-	 *	Returns a descriptive String for the given connection.
-	 */
-	public static String getDisplayString(WbConnection con)
-	{
-		try
-		{
-			return getDisplayString(con.getSqlConnection());
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("ConnectionMgr", "getDisplayString() - No java.sql.Connection!", e);
-			return "n/a";
-		}
-	}
-	/**
 	 *	Return a readable display of a connection
 	 */
-	public static String getDisplayString(Connection con)
+	public static String getDisplayString(WbConnection con)
 	{
 		String displayString = null;
 
 		try
 		{
-			DatabaseMetaData data = con.getMetaData();
+			DatabaseMetaData data = con.getSqlConnection().getMetaData();
 			StringBuffer buff = new StringBuffer(100);
 			buff.append(ResourceMgr.getString("TxtUser"));
 			buff.append('=');
 			buff.append(data.getUserName());
 
 			String catName = data.getCatalogTerm();
-			String catalog = con.getCatalog();
+			String catalog = con.getMetadata().getCurrentCatalog();
 			if (catName == null) catName = "Catalog";
 			if (catName != null && catName.length() > 0 &&
 			    catalog != null && catalog.length() > 0)

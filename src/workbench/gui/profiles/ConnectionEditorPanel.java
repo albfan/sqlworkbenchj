@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -34,6 +35,7 @@ import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbTraversalPolicy;
+import workbench.gui.help.HtmlViewer;
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.resource.ResourceMgr;
 
@@ -120,6 +122,7 @@ public class ConnectionEditorPanel
 		selectWkspButton = new javax.swing.JButton();
 		manageDriversButton = new WbButton();
 		extendedProps = new javax.swing.JButton();
+		helpButton = new WbButton();
 		
 		setLayout(new java.awt.GridBagLayout());
 		
@@ -372,7 +375,29 @@ public class ConnectionEditorPanel
 		gridBagConstraints.insets = new java.awt.Insets(1, 4, 2, 6);
 		add(extendedProps, gridBagConstraints);
 		
+		helpButton.setText(ResourceMgr.getString("LabelHelp"));
+		helpButton.addActionListener(new java.awt.event.ActionListener()
+		{
+			public void actionPerformed(java.awt.event.ActionEvent evt)
+			{
+				helpButtonActionPerformed(evt);
+			}
+		});
+		
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 2;
+		gridBagConstraints.gridy = 15;
+		gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 4);
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+		add(helpButton, gridBagConstraints);
+		
 	}//GEN-END:initComponents
+
+	private void helpButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_helpButtonActionPerformed
+	{//GEN-HEADEREND:event_helpButtonActionPerformed
+		HtmlViewer viewer = new HtmlViewer((JDialog)SwingUtilities.getWindowAncestor(this));
+		viewer.showProfileHelp();
+	}//GEN-LAST:event_helpButtonActionPerformed
 
 	private void extendedPropsMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_extendedPropsMouseClicked
 	{//GEN-HEADEREND:event_extendedPropsMouseClicked
@@ -384,14 +409,14 @@ public class ConnectionEditorPanel
 		if (this.init) return;
 		if (evt.getStateChange() == ItemEvent.SELECTED)
 		{
-			String oldDriver = this.currentProfile.getDriverclass();
+			String oldDriver = this.currentProfile.getDriverName();
 			DbDriver newDriver = (DbDriver)this.cbDrivers.getSelectedItem();
 			if(this.currentProfile != null)
 			{
 				this.currentProfile.setDriverclass(newDriver.getDriverClass());
 				this.currentProfile.setDriverName(newDriver.getName());
 			}
-			if (oldDriver == null || !oldDriver.equals(newDriver.getDriverClass()))
+			if (oldDriver == null || !oldDriver.equals(newDriver.getName()))
 			{
 				this.tfURL.setText(newDriver.getSampleUrl());
 			}
@@ -421,6 +446,7 @@ public class ConnectionEditorPanel
 	private javax.swing.JCheckBox cbSeperateConnections;
 	private javax.swing.JCheckBox cbStorePassword;
 	private javax.swing.JButton extendedProps;
+	private javax.swing.JButton helpButton;
 	private javax.swing.JLabel jLabel3;
 	private javax.swing.JSeparator jSeparator1;
 	private javax.swing.JSeparator jSeparator2;

@@ -759,7 +759,7 @@ public class TableListPanel
 				// passed to getTableSource() would be empty
 				this.retrieveIndexes();
 				this.retrieveImportedTables();
-				String sql = meta.getTableSource(this.selectedTableName, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore());
+				String sql = meta.getTableSource(this.selectedCatalog, this.selectedSchema, this.selectedTableName, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore(), true);
 				tableSource.setText(sql);
 				tableSource.setCaretPosition(0);
 			}

@@ -10,6 +10,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -24,6 +25,7 @@ import workbench.exception.WbException;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
+import workbench.gui.components.WbCheckBox;
 import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
 
@@ -34,29 +36,27 @@ public class MacroManagerDialog
 	private JPanel dummyPanel;
 	private JPanel buttonPanel;
 	private JButton okButton;
+	private JButton runButton;
 	private MacroManagerGui macroPanel;
 	private JButton cancelButton;
   private boolean cancelled = true;
 	private EscAction escAction;
-	private boolean runMacro;
 	private SqlPanel client;
-
-	public MacroManagerDialog(Frame parent, boolean modal)
-	{
-		super(parent, modal);
-		this.initComponents(false);
-		this.initKeys();
-		this.initWindow(parent);
-	}
+	private JCheckBox replaceEditorText;
 
 	public MacroManagerDialog(Frame parent, SqlPanel aTarget)
 	{
 		super(parent, true);
-		this.initComponents(true);
-		this.runMacro = true;
+		this.client = aTarget;
+		this.initComponents();
 		this.initKeys();
 		this.initWindow(parent);
-		this.client = aTarget;
+		boolean connected = this.client.isConnected();
+		this.runButton.setEnabled(connected);
+		this.runButton.setVisible(connected);
+		
+		this.replaceEditorText.setVisible(connected);
+		this.replaceEditorText.setEnabled(connected);
 	}
 
 	private void initWindow(Frame parent)
@@ -67,6 +67,8 @@ public class MacroManagerDialog
 		}
 		WbSwingUtilities.center(this, parent);
 		macroPanel.restoreSettings();
+		boolean replace = "true".equals(WbManager.getInstance().getSettings().getProperty("workbench.gui.macros", "replaceOnRun", "false"));
+		this.replaceEditorText.setSelected(replace);
 	}
 	
 	private void initKeys()
@@ -79,19 +81,18 @@ public class MacroManagerDialog
 		am.put(escAction.getActionName(), escAction);
 	}
 	
-	private void initComponents(boolean withRunButton)
+	private void initComponents()
 	{
 		macroPanel = new MacroManagerGui();
 		buttonPanel = new JPanel();
-		if (withRunButton)
-		{
-			okButton = new WbButton(ResourceMgr.getString("LabelRunMacro"));
-		}
-		else
-		{
-			okButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_OK));
-		}
+		runButton = new WbButton(ResourceMgr.getString("LabelRunMacro"));
+		runButton.setToolTipText(ResourceMgr.getDescription("LabelManageMacrosRun"));
+		
+		okButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_OK));
+		okButton.setToolTipText(ResourceMgr.getDescription("LabelManageMacrosOK"));
+		
 		cancelButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));
+		cancelButton.setToolTipText(ResourceMgr.getDescription("LabelManageMacrosCancel"));
 		dummyPanel = new JPanel();
 
 		setTitle(ResourceMgr.getString("TxtMacroManagerWindowTitle"));
@@ -108,14 +109,30 @@ public class MacroManagerDialog
 		macroPanel.setBorder(new CompoundBorder(new EmptyBorder(1,1,1,1), new EtchedBorder()));
 		getContentPane().add(macroPanel, BorderLayout.CENTER);
 
+		this.replaceEditorText = new WbCheckBox(ResourceMgr.getString("LabelReplaceCurrentSql"));
+		this.replaceEditorText.setToolTipText(ResourceMgr.getDescription("LabelReplaceCurrentSql"));
+		
+		JPanel p = new JPanel();
+		p.setLayout(new FlowLayout(FlowLayout.LEFT));
+		p.add(this.replaceEditorText);
+		p.add(new JPanel());
+		
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-
+		buttonPanel.add(p);
+		
+		runButton.addActionListener(this);
+		buttonPanel.add(runButton);
+		
 		okButton.addActionListener(this);
 		buttonPanel.add(okButton);
-
+		
 		cancelButton.addActionListener(this);
 		buttonPanel.add(cancelButton);
 
+//		JPanel bp = new JPanel();
+//		bp.setLayout(new GridLayout(1,0));
+//		bp.add(p);
+//		bp.add(buttonPanel);
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
 		dummyPanel.setMaximumSize(new Dimension(2, 2));
@@ -130,6 +147,10 @@ public class MacroManagerDialog
 		if (e.getSource() == okButton)
 		{
 			okButtonActionPerformed(e);
+		}
+		if (e.getSource() == runButton)
+		{
+			runButtonActionPerformed(e);
 		}
 		else if (e.getSource() == cancelButton || e.getActionCommand().equals(escAction.getActionName()))
 		{
@@ -149,10 +170,23 @@ public class MacroManagerDialog
 			this.macroPanel.saveItem();
 			this.cancelled = false;
 			this.closeDialog();
-			if (this.runMacro && this.client != null)
+		}
+		catch (WbException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	private void runButtonActionPerformed(ActionEvent evt)
+	{
+		try
+		{
+			this.macroPanel.saveItem();
+			this.cancelled = false;
+			this.closeDialog();
+			if (this.client != null)
 			{
 				String name = this.macroPanel.getSelectedMacroName();
-				this.client.executeMacro(name);
+				this.client.executeMacro(name, this.replaceEditorText.isSelected());
 			}
 		}
 		catch (WbException e)
@@ -173,14 +207,16 @@ public class MacroManagerDialog
 	{
 		WbManager.getSettings().storeWindowSize(this);
 		macroPanel.saveSettings();
+		WbManager.getInstance().getSettings().setProperty("workbench.gui.macros", "replaceOnRun", Boolean.toString(this.replaceEditorText.isSelected()));
 		setVisible(false);
 	}
 	
 	public void valueChanged(javax.swing.event.ListSelectionEvent e)
 	{
-		if (!this.runMacro) return;
 		if (e.getValueIsAdjusting()) return;
-		this.okButton.setEnabled(e.getFirstIndex() > -1);
+		boolean selected = (e.getFirstIndex() > -1);
+		this.okButton.setEnabled(selected);
+		this.runButton.setEnabled(selected);
 	}
 	
 }

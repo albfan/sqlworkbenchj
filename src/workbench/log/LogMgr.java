@@ -164,7 +164,11 @@ public class LogMgr
 		if (level > loglevel) return;
 
 		String s = formatMessage(aType, aCaller, aMsg, th);
-		if (logOut != null) logOut.print(s);
+		if (logOut != null) 
+		{
+			logOut.print(s);
+			logOut.flush();
+		}
 		System.out.print(s);
 	}
 	

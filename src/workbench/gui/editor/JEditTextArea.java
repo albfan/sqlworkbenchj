@@ -99,7 +99,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.16 2003-11-02 21:31:38 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.17 2003-11-15 15:26:57 thomas Exp $
  */
 public class JEditTextArea 
 	extends JComponent
@@ -428,14 +428,17 @@ public class JEditTextArea
 			vertical.setValues(firstLine,visibleLines,0,getLineCount());
 			vertical.setUnitIncrement(2);
 			vertical.setBlockIncrement(visibleLines);
+			if (visibleLines > getLineCount())
+			{
+				setFirstLine(0);
+			}
 		}
 
 		int width = painter.getWidth();
 		if(horizontal != null && width != 0)
 		{
 			horizontal.setValues(-horizontalOffset,width,0,width * 5);
-			horizontal.setUnitIncrement(painter.getFontMetrics()
-				.charWidth('w'));
+			horizontal.setUnitIncrement(painter.getFontMetrics().charWidth('w'));
 			horizontal.setBlockIncrement(width / 2);
 		}
 	}
@@ -552,8 +555,7 @@ public class JEditTextArea
 	{
 		int line = getCaretLine();
 		int lineStart = getLineStartOffset(line);
-		int offset = Math.max(0,Math.min(getLineLength(line) - 1,
-			getCaretPosition() - lineStart));
+		int offset = Math.max(0,Math.min(getLineLength(line) - 1, getCaretPosition() - lineStart));
 
 		return scrollTo(line,offset);
 	}
@@ -598,13 +600,11 @@ public class JEditTextArea
 
 		if(x < 0)
 		{
-			newHorizontalOffset = Math.min(0,horizontalOffset
-				- x + width + 5);
+			newHorizontalOffset = Math.min(0,horizontalOffset - x + width + 5);
 		}
 		else if(x + width >= painter.getWidth())
 		{
-			newHorizontalOffset = horizontalOffset +
-				(painter.getWidth() - x) - width - 5;
+			newHorizontalOffset = horizontalOffset + (painter.getWidth() - x) - width - 5;
 		}
 
 		return setOrigin(newFirstLine,newHorizontalOffset);
@@ -1046,6 +1046,7 @@ public class JEditTextArea
 		{
 			document.endCompoundEdit();
 		}
+		updateScrollBars();
 	}
 
 	/**
@@ -1520,6 +1521,7 @@ public class JEditTextArea
 		{
 			document.endCompoundEdit();
 		}
+		updateScrollBars();
 		setCaretPosition(selectionEnd);
 
 	}
@@ -1622,6 +1624,7 @@ public class JEditTextArea
 		{
 			document.endCompoundEdit();
 		}
+		updateScrollBars();
 	}
 
 	/**
@@ -1776,17 +1779,18 @@ public class JEditTextArea
 				String selection = ((String)clipboard.getContents(this).getTransferData(DataFlavor.stringFlavor)).replaceAll("\r\n","\n");
 
 				int repeatCount = inputHandler.getRepeatCount();
-				StringBuffer buf = new StringBuffer();
+				StringBuffer buf = new StringBuffer(selection.length() * repeatCount);
 				for(int i = 0; i < repeatCount; i++)
+				{
 					buf.append(selection);
+				}
 				selection = buf.toString();
 				setSelectedText(selection);
 			}
 			catch(Exception e)
 			{
 				getToolkit().beep();
-				System.err.println("Clipboard does not"
-					+ " contain a string");
+				System.err.println("Clipboard does not contain a string");
 			}
 		}
 	}
@@ -1811,22 +1815,24 @@ public class JEditTextArea
 	{
 		if(inputHandler == null)
 			return;
+		
 		switch(evt.getID())
 		{
-		case KeyEvent.KEY_TYPED:
-			inputHandler.keyTyped(evt);
-			break;
-		case KeyEvent.KEY_PRESSED:
-			inputHandler.keyPressed(evt);
-			break;
-		case KeyEvent.KEY_RELEASED:
-			inputHandler.keyReleased(evt);
-			break;
+			case KeyEvent.KEY_TYPED:
+				inputHandler.keyTyped(evt);
+				break;
+			case KeyEvent.KEY_PRESSED:
+				inputHandler.keyPressed(evt);
+				break;
+			case KeyEvent.KEY_RELEASED:
+				inputHandler.keyReleased(evt);
+				break;
 		}
 		if (!evt.isConsumed())
 		{
 			super.processKeyEvent(evt);
 		}
+		//this.updateScrollBars();
 	}
 
 	// protected members
@@ -1967,7 +1973,6 @@ public class JEditTextArea
 		else
 		{
 			painter.invalidateLineRange(line,firstLine + visibleLines);
-			updateScrollBars();
 		}
 		boolean wasModified = this.modified;
 		this.modified = true;
@@ -1976,7 +1981,7 @@ public class JEditTextArea
 		{
 			this.fireTextStatusChanged(true);
 		}
-		
+		updateScrollBars();
 	}
 
 	public boolean isModified() { return this.modified; }

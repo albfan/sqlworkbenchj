@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import workbench.WbManager;
 
 public class SqlUtil
 {
@@ -38,6 +39,27 @@ public class SqlUtil
 		return tok.nextToken(" \t");
 	}
 
+	public static String getDelimiterToUse(String aSql)
+	{
+		String delimit = ";";
+
+		String cleanSql = makeCleanSql(aSql, false).trim();
+		String alternate = WbManager.getSettings().getAlternateDelimiter();
+		if (cleanSql.endsWith(alternate))
+		{
+			delimit = WbManager.getSettings().getAlternateDelimiter();
+		}
+		return delimit;
+	}
+	
+	public static List getCommands(String aScript)
+	{
+		String delimit = getDelimiterToUse(aScript);
+		ArrayList result = new ArrayList();
+		parseCommands(aScript, delimit, -1, result);
+		return result;
+	}
+	
 	public static List getCommands(String aScript, String aDelimiter)
 	{
 		ArrayList result = new ArrayList();
@@ -71,7 +93,7 @@ public class SqlUtil
 		Matcher m = GO_PATTERN.matcher(aScript);
 		if (m.find())
 		{
-			aScript = m.replaceAll(";\n");
+			aScript = m.replaceAll(aDelimiter + "\n");
 		}
 		
 		cmdNr = 0;

@@ -337,14 +337,14 @@ public class TableDataPanel
 
 	public void restoreSettings()
 	{
-		int max = WbManager.getSettings().getIntProperty(TableDataPanel.class.getName(), "maxrows");
+		int max = WbManager.getSettings().getIntProperty(TableDataPanel.class.getName(), "maxrows", 500);
 		this.dataDisplay.setMaxRows(max);
 		boolean auto = "true".equals(WbManager.getSettings().getProperty(TableDataPanel.class.getName(), "autoretrieve", "false"));
 		this.autoRetrieve.setSelected(auto);
 		
 		try
 		{
-			String v = WbManager.getSettings().getProperty(TableDataPanel.class.getName(), "warningthreshold", "-1");
+			String v = WbManager.getSettings().getProperty(TableDataPanel.class.getName(), "warningthreshold", "1500");
 			this.warningThreshold = Long.parseLong(v);
 		}
 		catch (Exception e)

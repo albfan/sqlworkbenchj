@@ -47,6 +47,7 @@ public class EditWindow
 		this.getContentPane().setLayout(new BorderLayout());
 		this.editor = EditorPanel.createTextEditor();
 		this.editor.showFindOnPopupMenu();
+		this.editor.showFormatSql();
 		
 		this.getContentPane().add(editor, BorderLayout.CENTER);
 		JPanel buttonPanel = new JPanel();
@@ -60,8 +61,7 @@ public class EditWindow
 		this.editor.setPreferredSize(new Dimension(300,200));
 		this.editor.setCaretPosition(0);
 		
-		FormatSqlAction format = new FormatSqlAction(this.editor);
-		this.editor.addPopupMenuItem(format, true);
+		
 		this.okButton.addActionListener(this);
 		this.cancelButton.addActionListener(this);
 		

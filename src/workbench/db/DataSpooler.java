@@ -284,6 +284,15 @@ public class DataSpooler
 	{
 		Statement stmt = this.dbConn.createStatement();
 		ResultSet rs = null;
+
+		try
+		{
+			stmt.setFetchSize(1500);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("DataSpooler.startExport()", "Setting fetch size to 500 failed!");
+		}
 		
 		try
 		{

@@ -33,8 +33,8 @@ public class PrevStatementAction extends WbAction
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
 		this.setCreateMenuSeparator(true);
 		this.setCreateToolbarSeparator(true);
-		//this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK));
 		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.ALT_MASK));
+		this.putValue(ALTERNATE_ACCELERATOR, KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK));
 	}
 
 	public void actionPerformed(ActionEvent e)

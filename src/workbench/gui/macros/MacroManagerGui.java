@@ -7,6 +7,7 @@
 package workbench.gui.macros;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.beans.PropertyChangeListener;
@@ -24,6 +25,8 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.ListModel;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -32,6 +35,7 @@ import workbench.exception.WbException;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteListEntryAction;
+import workbench.gui.actions.FormatSqlAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.actions.SaveListFileAction;
 import workbench.gui.components.StringPropertyEditor;
@@ -82,19 +86,32 @@ public class MacroManagerGui
 		listPanel.add(scroll, java.awt.BorderLayout.CENTER);
 
 		this.macroEditor = EditorPanel.createSqlEditor();
+		this.macroEditor.showFindOnPopupMenu();
+		FormatSqlAction a = new FormatSqlAction(this.macroEditor);
+		this.macroEditor.addPopupMenuItem(a, true);
 		//this.macroEditor.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		jSplitPane1.setLeftComponent(listPanel);
 
 		JPanel namePanel = new JPanel();
-		namePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		namePanel.setLayout(new BorderLayout());
 		JLabel l = new JLabel(ResourceMgr.getString("LabelMacroName"));
+		l.setBorder(new CompoundBorder(new EmptyBorder(0,5,0,5), l.getBorder()));
 		this.macroNameField = new StringPropertyEditor(); //new JTextField(40);
 		this.macroNameField.setColumns(40);
 		this.macroNameField.setImmediateUpdate(true);
 		this.macroNameField.addPropertyChangeListener(this);
-		namePanel.add(l);
-		namePanel.add(this.macroNameField);
+		//this.macroNameField.setBorder(new CompoundBorder(new EmptyBorder(0,0,0,5), this.macroNameField.getBorder()));
+		
+		namePanel.add(l, BorderLayout.WEST);
+		namePanel.add(this.macroNameField, BorderLayout.CENTER);
+		
+		// Create some visiual space above and below the entry field
+		JPanel p = new JPanel();
+		namePanel.add(p, BorderLayout.SOUTH);
+		p = new JPanel();
+		namePanel.add(p, BorderLayout.NORTH);
+		
 		
 		JPanel editor = new JPanel();
 		editor.setLayout(new BorderLayout());

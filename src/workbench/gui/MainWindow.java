@@ -33,10 +33,10 @@ import workbench.gui.actions.*;
 import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbMenuItem;
+import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.dbobjects.DbExplorerPanel;
 import workbench.gui.dbobjects.DbExplorerWindow;
-import workbench.gui.help.HtmlViewer;
 import workbench.gui.help.WhatsNewViewer;
 import workbench.gui.menu.SqlTabPopup;
 import workbench.gui.profiles.ProfileSelectionDialog;
@@ -77,7 +77,7 @@ public class MainWindow
 	private FileDisconnectAction disconnectAction;
 	private ShowDbExplorerAction dbExplorerAction;
 
-	private JTabbedPane sqlTab = new JTabbedPane();
+	private WbTabbedPane sqlTab = new WbTabbedPane();
 	private WbToolbar currentToolbar;
 	private ArrayList panelMenus = new ArrayList(5);
 	private int nextConnectionId = 0;
@@ -99,8 +99,6 @@ public class MainWindow
 	// connecting and disconnecting is done a separate thread
 	// so that slow connections do not block the GUI
 	private boolean connectInProgress = false;
-
-	private HtmlViewer helpWindow;
 
 	/** Creates new MainWindow */
 	public MainWindow()
@@ -154,6 +152,7 @@ public class MainWindow
 
 		this.sqlTab.addChangeListener(this);
 		this.sqlTab.addMouseListener(this);
+		//this.sqlTab.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
 		MacroManager.getInstance().addChangeListener(this);
 	}
@@ -322,7 +321,7 @@ public class MainWindow
 
 		menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_FILE);
 		menu.addSeparator();
-		menu.add(new ManageMacrosAction(this));
+		//menu.add(new ManageMacrosAction(this));
 		menu.add(new ManageDriversAction(this));
 		menu.addSeparator();
 
@@ -391,6 +390,8 @@ public class MainWindow
 
 	private void addMacros(JMenu macroMenu, SqlPanel aClient)
 	{
+		RunMacroAction run = null;
+		
 		List macros = MacroManager.getInstance().getMacroList();
 		if (macros == null || macros.size() == 0) return;
 
@@ -399,13 +400,10 @@ public class MainWindow
 		for (int i=0; (i < count && i < 10); i++)
 		{
 			String name = (String)macros.get(i);
-			RunMacroAction run = new RunMacroAction(aClient, name);
+			run = new RunMacroAction(aClient, name);
 			run.addToMenu(macroMenu);
 		}
 
-		macroMenu.addSeparator();
-		RunMacroAction run = new RunMacroAction(aClient);
-		run.addToMenu(macroMenu);
 	}
 
 	public int getCurrentPanelIndex()
@@ -475,20 +473,6 @@ public class MainWindow
 		{
 			if (this.currentProfile != null && this.currentProfile.getUseSeperateConnectionPerTab() && createConnection)
 			{
-				/*
-				WbSwingUtilities.showWaitCursor(this);
-				try
-				{
-					aPanel.setConnection(this.getConnectionForTab(aPanel));
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError("MainWindow.checkConnectionForPanel()", "Error setting up connection for selected panel", e);
-					WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("ErrorNoConnectionAvailable"));
-				}
-				aPanel.showStatusMessage("");
-				WbSwingUtilities.showDefaultCursor(this);
-				*/
 				Thread t = new Thread(new Runnable()
 				{
 					public void run()
@@ -742,21 +726,18 @@ public class MainWindow
 	{
 		boolean connected = false;
 		WbConnection conn = null;
+		String error = null;
+		
 		try
 		{
 			ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
 
-			String id = this.windowId;
+			String id = "Wb-0";
 
 			if (this.currentProfile.getUseSeperateConnectionPerTab())
 			{
-				// getConnectionForTab() checks these variables
-				// so they have to be initialized before setting
-				// up the different connections
 				this.currentConnection = null;
 				MainPanel p = this.getCurrentPanel();
-				//conn = this.getConnectionForTab(p);
-				//p.setConnection(conn);
 				id = "Wb-" + p.getId();
 			}
 			conn = mgr.getConnection(this.currentProfile, id);
@@ -765,20 +746,23 @@ public class MainWindow
 		catch (ClassNotFoundException cnf)
 		{
 			this.currentProfile = null;
-			this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_DRIVER_NOT_FOUND));
+			this.showLogMessage(ResourceMgr.getString("ErrorDriverNotFoundExtended"));
 			LogMgr.logError("MainWindow.connectTo()", "Error when connecting", cnf);
+			error = ResourceMgr.getString("ErrorDriverNotFound");
 		}
 		catch (SQLException se)
 		{
 			this.currentProfile = null;
 			this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_CONNECTION_ERROR) + "\r\n\n" + se.toString());
 			LogMgr.logError("MainWindow.connectTo()", "SQL Exception when connecting", se);
+			error = se.getMessage();
 		}
 		catch (Throwable e)
 		{
 			this.currentProfile = null;
 			this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_CONNECTION_ERROR) + "\r\n\n" + e.toString());
 			LogMgr.logError("MainWindow.connectTo()", "Error during connect", e);
+			error = ExceptionUtil.getDisplay(e);
 		}
 
 		final WbConnection usedConnection = conn;
@@ -796,11 +780,12 @@ public class MainWindow
 			}
 			else
 			{
+				final String msg = error;
 				SwingUtilities.invokeAndWait(new Runnable()
 				{
 					public void run()
 					{
-						connectFailed();
+						connectFailed(msg);
 					}
 				});
 			}
@@ -843,7 +828,7 @@ public class MainWindow
 		this.closeConnectingInfo();
 	}
 
-	private void connectFailed()
+	private void connectFailed(String error)
 	{
 		this.setMacroMenuEnabled(false);
 		this.updateWindowTitle();
@@ -851,8 +836,30 @@ public class MainWindow
 		this.disconnectAction.setEnabled(false);
 		this.connectInProgress = false;
 		this.closeConnectingInfo();
+		String msg = ResourceMgr.getString("ErrorConnectFailed").replaceAll("%msg%", error.trim());
+		WbManager.getInstance().showErrorMessage(this, msg);
 	}
 
+	private static final int CREATE_WORKSPACE = 0;
+	private static final int LOAD_OTHER_WORKSPACE = 1;
+	private static final int IGNORE_MISSING_WORKSPACE = 2;
+	
+	private int checkNonExistingWorkspace()
+	{
+		String[] options = new String[] { ResourceMgr.getString("LabelCreateWorkspace"), ResourceMgr.getString("LabelLoadWorkspace"), ResourceMgr.getString("LabelIgnore")};
+		JOptionPane ignorePane = new JOptionPane(ResourceMgr.getString("MsgProfileWorkspaceNotFound"), JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
+		JDialog dialog = ignorePane.createDialog(this, ResourceMgr.TXT_PRODUCT_NAME);
+		dialog.setResizable(true);
+		dialog.pack();
+		dialog.show();
+		dialog.dispose();
+		Object result = ignorePane.getValue();
+		if (result == null) return CREATE_WORKSPACE;
+		else if (result.equals(options[0])) return CREATE_WORKSPACE;
+		else if (result.equals(options[1])) return LOAD_OTHER_WORKSPACE;
+		else return IGNORE_MISSING_WORKSPACE;
+	}
+	
 	private void loadWorkspaceForProfile(ConnectionProfile aProfile)
 	{
 		//this.showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
@@ -866,11 +873,16 @@ public class MainWindow
 				File f = new File(realFilename);
 				if (!f.exists())
 				{
-					boolean open = WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgProfileWorkspaceNotFound"));
-					if (open)
+					int action = this.checkNonExistingWorkspace();
+					if (action == LOAD_OTHER_WORKSPACE)
 					{
 						file = WbManager.getInstance().getWorkspaceFilename(this, false, true);
 						aProfile.setWorkspaceFile(file);
+					}
+					else if (action == IGNORE_MISSING_WORKSPACE)
+					{
+						file = null;
+						aProfile.setWorkspaceFile(null);
 					}
 				}
 				if (file != null)
@@ -879,6 +891,10 @@ public class MainWindow
 					// so we need to pass the original filename
 					this.isProfileWorkspace = true;
 					this.loadWorkspace(file);
+				}
+				else 
+				{
+					this.loadDefaultWorkspace();
 				}
 			}
 			else
@@ -1560,6 +1576,7 @@ public class MainWindow
 	 */
 	private void adjustTabCount(int newCount)
 	{
+		this.sqlTab.setSuspendRepaint(true);
 		int tabCount = this.sqlTab.getTabCount();
 		if (this.dbExplorerTabVisible) tabCount --;
 
@@ -1577,7 +1594,6 @@ public class MainWindow
 				this.removeLastTab();
 			}
 		}
-
 	}
 
 	private void loadDefaultWorkspace()
@@ -1596,8 +1612,19 @@ public class MainWindow
 		String realFilename = WbManager.getInstance().replaceConfigDir(filename);
 
 		File f = new File(realFilename);
-	 	if (!f.exists()) return false;
-
+	 	if (!f.exists()) 
+		{
+			// if the file does not exist, we are setting all 
+			// variables as it would. Thus the file will be automatically 
+			// created...
+			this.currentWorkspaceFile = realFilename;
+			this.workspaceLoaded = true;
+			this.updateWindowTitle();
+			this.checkWorkspaceActions();
+			return true;
+		}
+		
+		this.sqlTab.setSuspendRepaint(true);
 		boolean result = false;
 		int index = 0;
 		WbWorkspace w = null;
@@ -1623,6 +1650,11 @@ public class MainWindow
 			this.currentWorkspaceFile = realFilename;
 			index = w.getSelectedTab();
 			result = true;
+			
+			if (index < this.sqlTab.getTabCount())
+			{
+				this.sqlTab.setSelectedIndex(index);
+			}
 		}
 		catch (Exception e)
 		{
@@ -1632,10 +1664,7 @@ public class MainWindow
 		finally
 		{
 			try { w.close(); } catch (Throwable th) {}
-		}
-		if (index < this.sqlTab.getTabCount())
-		{
-			this.sqlTab.setSelectedIndex(index);
+			this.sqlTab.setSuspendRepaint(false);
 		}
 
 		this.workspaceLoaded = true;
@@ -1876,7 +1905,7 @@ public class MainWindow
 		sql.addFilenameChangeListener(this);
 		if (checkConnection) this.checkConnectionForPanel(sql, false);
 		this.sqlTab.add(sql, index);
-		this.setTabTitle(index, ResourceMgr.getString("LabelTabStatement") + " ");
+		this.setTabTitle(index, ResourceMgr.getString("LabelTabStatement"));
 
 		JMenuBar menuBar = this.getMenuForPanel(sql);
 		this.panelMenus.add(index, menuBar);
@@ -1913,11 +1942,12 @@ public class MainWindow
 	 */
 	private void setTabTitle(int anIndex, String aName)
 	{
-		this.sqlTab.setTitleAt(anIndex, aName + " " + Integer.toString(anIndex+1));
-		if (anIndex < 9)
+		MainPanel p = this.getSqlPanel(anIndex);
+		if (p instanceof SqlPanel)
 		{
-			char c = Integer.toString(anIndex+1).charAt(0);
-			this.sqlTab.setMnemonicAt(anIndex, c);
+			SqlPanel sql = (SqlPanel)p;
+			sql.setTabName(aName);
+			sql.setTabTitle(this.sqlTab, anIndex);
 		}
 		this.updateViewMenu(anIndex, aName);
 	}
@@ -2099,21 +2129,7 @@ public class MainWindow
 
 	public void showHelp()
 	{
-		try
-		{
-			if (this.helpWindow == null)
-			{
-				this.helpWindow = new HtmlViewer(this);
-			}
-			this.helpWindow.show();
-			this.helpWindow.requestFocus();
-
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logError("MainWindow", "Error when displaying HTML help", ex);
-			JOptionPane.showMessageDialog(this, "The documentation is currently available at www.kellerer.org/workbench");
-		}
+		WbManager.getInstance().getHelpViewer().showIndex();
 	}
 
 	public void mouseClicked(MouseEvent e)

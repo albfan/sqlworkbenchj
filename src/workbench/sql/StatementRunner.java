@@ -140,8 +140,9 @@ public class StatementRunner
 		String oldCatalog = null;
 		String newCatalog = null;
 		
-		try { oldCatalog = this.dbConnection.getSqlConnection().getCatalog(); } catch (Throwable th) {}
-		if (oldCatalog == null) oldCatalog = "";
+		// store the old catalog name, because in SQL Server this could change
+		// when executing a SQL statement (e.g. USE)
+		oldCatalog = this.dbConnection.getMetadata().getCurrentCatalog(); 
 		
 		String verb = SqlUtil.getSqlVerb(cleanSql).toUpperCase();
 		
@@ -167,8 +168,10 @@ public class StatementRunner
 			}
 			this.currentConsumer = null;
 		}
-		try { newCatalog = this.dbConnection.getSqlConnection().getCatalog(); } catch (Throwable th) {}
-		if (newCatalog == null) newCatalog = "";
+		
+		// get the catalog which is active now. If the catalog has changed
+		// notify the connection display, so it can be updated
+		newCatalog = this.dbConnection.getMetadata().getCurrentCatalog();
 		
 		if (!oldCatalog.equals(newCatalog))
 		{

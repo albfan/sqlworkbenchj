@@ -130,7 +130,6 @@ public class ProcedureListPanel
 		this.setFocusTraversalPolicy(pol);
 		this.reset();
 		this.extendPopupMenu();
-		LogMgr.logDebug("ProcedureListPanel.init()", "ProcedureListPanel created");
 	}
 
 	private void extendPopupMenu()

@@ -113,7 +113,7 @@ public class DbDriver
 	public String getSampleUrl() { return this.sampleUrl; }
 
 	private void loadDriverClass()
-		throws WbException
+		throws ClassNotFoundException, WbException
 	{
 		if (this.driverClassInstance != null) return;
 		try
@@ -133,7 +133,11 @@ public class DbDriver
 			Class drvClass = this.classLoader.loadClass(this.driverClass);
 			this.driverClassInstance = (Driver)drvClass.newInstance();
 		}
-		catch (Exception e)
+		catch (ClassNotFoundException e)
+		{
+			throw e;
+		}
+		catch (Throwable e)
 		{
 			this.classLoader = null;
 			LogMgr.logError("DbDriver.loadDriverClass()", "Error loading driver class", e);
@@ -151,19 +155,19 @@ public class DbDriver
 	}
 
 	public Connection connect(String url, String user, String password)
-		throws WbException, SQLException
+		throws ClassNotFoundException, WbException, SQLException
 	{
 		return this.connect(url, user, password, null);
 	}
 
 	public Connection connect(String url, String user, String password, String id)
-		throws WbException, SQLException
+		throws ClassNotFoundException, WbException, SQLException
 	{
 		return this.connect(url, user, password, id, null);
 	}
 
 	public Connection connect(String url, String user, String password, String id, Properties connProps)
-		throws WbException, SQLException
+		throws ClassNotFoundException, WbException, SQLException
 	{
 		Connection c = null;
 		try
@@ -229,7 +233,20 @@ public class DbDriver
 
 			if (propName != null)
 			{
-				props.put(propName, ResourceMgr.TXT_PRODUCT_NAME); // + "(" + ResourceMgr.getString("TxtBuildNumber") + ")");
+				String appName = ResourceMgr.TXT_PRODUCT_NAME;
+				if (LogMgr.isDebug())
+				{
+					String build = ResourceMgr.getString("TxtBuildNumber");
+					if (build.startsWith("["))
+					{
+						appName = appName + " " +build;
+					}
+					else
+					{
+						appName = appName + " (" + build + ")";
+					}
+				}
+				props.put(propName, appName); 
 			}
 
 			c = this.driverClassInstance.connect(url, props);
@@ -237,6 +254,10 @@ public class DbDriver
 			{
 				throw new WbException("Driver did not return a connection!");
 			}
+		}
+		catch (ClassNotFoundException e)
+		{
+			throw e;
 		}
 		catch (WbException e)
 		{

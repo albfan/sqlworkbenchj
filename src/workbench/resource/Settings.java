@@ -9,6 +9,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
 import java.awt.print.PrinterJob;
@@ -574,12 +575,22 @@ public class Settings
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.persistence.cleanupunderscores", "false"));
 	}
-
+	
 	public void setCleanupUnderscores(boolean useEncryption)
 	{
 		this.props.setProperty("workbench.persistence.cleanupunderscores", Boolean.toString(useEncryption));
 	}
 
+	public boolean getIncludeNewLineInCodeSnippet()
+	{
+		return "true".equalsIgnoreCase(this.props.getProperty("workbench.javacode.includenewline", "true"));
+	}
+	
+	public void setIncludeNewLineInCodeSnippet(boolean useEncryption)
+	{
+		this.props.setProperty("workbench.javacode.includenewline", Boolean.toString(useEncryption));
+	}
+	
 	public String getLastSqlDir()
 	{
 		return this.props.getProperty("workbench.sql.lastscriptdir","");
@@ -653,12 +664,15 @@ public class Settings
 	{
 		return this.restoreWindowSize(target, target.getClass().getName());
 	}
+	
 	public boolean restoreWindowSize(Component target, String id)
 	{
 		boolean result = false;
 		int w = this.getWindowWidth(id);
 		int h = this.getWindowHeight(id);
-		if (w > 0 && h > 0)
+		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+		
+		if (w > 0 && h > 0 && w <= screen.getWidth() && h <= screen.getHeight())
 		{
 			target.setSize(new Dimension(w, h));
 			result = true;
@@ -676,7 +690,9 @@ public class Settings
 		boolean result = false;
 		int x = this.getWindowPosX(id);
 		int y = this.getWindowPosY(id);
-		if (x > 0 && y > 0)
+		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+		
+		if (x > 0 && y > 0 && x <= screen.getWidth() - 20 && y <= screen.getHeight() - 20)
 		{
 			target.setLocation(new Point(x, y));
 			result = true;

@@ -9,6 +9,7 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.Action;
 import javax.swing.KeyStroke;
+import workbench.WbManager;
 
 import workbench.interfaces.TextContainer;
 import workbench.resource.ResourceMgr;
@@ -39,7 +40,7 @@ public class CreateSnippetAction extends WbAction
 		{
 			sql = this.client.getText();
 		}
-		String code = StringUtil.makeJavaString(sql);
+		String code = StringUtil.makeJavaString(sql, WbManager.getSettings().getIncludeNewLineInCodeSnippet());
 		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 		StringSelection sel = new StringSelection(code);
 		clp.setContents(sel, sel);

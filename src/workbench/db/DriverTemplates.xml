@@ -132,6 +132,22 @@
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
+     <string>org.firebirdsql.jdbc.FBDriver</string>
+    </void>
+    <void property="library">
+     <string>firebirdsql-full.jar</string>
+    </void>
+    <void property="name">
+     <string>Firebird</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:firebirdsql://host:port/database</string>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
      <string>sun.jdbc.odbc.JdbcOdbcDriver</string>
     </void>
     <void property="library">
@@ -142,6 +158,22 @@
     </void>
     <void property="sampleUrl">
      <string>jdbc:odbc:DRIVER={Microsoft Access Driver (*.mdb)};DBQ=&lt;filename&gt;</string>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>sun.jdbc.odbc.JdbcOdbcDriver</string>
+    </void>
+    <void property="library">
+     <string></string>
+    </void>
+    <void property="name">
+     <string>dBase</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:odbc:DRIVER={Microsoft dBase Driver (*.dbf)};DefaultDir=(dbf directory)</string>
     </void>
    </object>
   </void>

@@ -842,19 +842,6 @@ public class DataStore
 			this.columnTypeNames[i] = metaData.getColumnTypeName(i + 1);
 			this.columnSizes[i] = metaData.getColumnDisplaySize(i + 1);
 			
-			try
-			{
-				this.columnClassNames[i] = metaData.getColumnClassName(i + 1);
-				this.columnPrecision[i] = metaData.getPrecision(i + 1);
-				this.columnScale[i] = metaData.getScale(i + 1);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logWarning("DataStore.initMetaData()", "Error when retrieving meta data for column " + i + " (" + e.getClass().getName() + ")");
-				this.columnPrecision[i] = 0;
-				this.columnScale[i] = 0;
-			}
-			
 			if (name != null && name.trim().length() > 0) 
 			{
 				this.realColumns ++;
@@ -864,6 +851,42 @@ public class DataStore
 			{
 				this.columnNames[i] = "Col" + (i+1);
 			}
+		}
+		
+		// these methods might not work with certain drivers, so I'll put 
+		// the calls into a separate loop!
+		for (int i=0; i < this.colCount; i++)
+		{
+			try
+			{
+				this.columnClassNames[i] = metaData.getColumnClassName(i + 1);
+			}
+			catch (Throwable e)
+			{
+				LogMgr.logWarning("DataStore.initMetaData()", "Error when retrieving class name for column " + i + " (" + e.getClass().getName() + ")");
+				this.columnClassNames[i] = "java.lang.Object";
+			}
+			
+			try
+			{
+				this.columnPrecision[i] = metaData.getPrecision(i + 1);
+			}
+			catch (Throwable e)
+			{
+				LogMgr.logWarning("DataStore.initMetaData()", "Error when retrieving precision for column " + i + " (" + e.getClass().getName() + ")");
+				this.columnPrecision[i] = 0;
+			}
+			
+			try
+			{
+				this.columnScale[i] = metaData.getScale(i + 1);
+			}
+			catch (Throwable e)
+			{
+				LogMgr.logWarning("DataStore.initMetaData()", "Error when retrieving scale for column " + i + " (" + e.getClass().getName() + ")");
+				this.columnScale[i] = 0;
+			}
+			
 		}
 	}
 	
@@ -2363,11 +2386,17 @@ public class DataStore
 		
 		first = true;
     String colName = null;
+		int includedColumns = 0;
+		
 		for (int col=0; col < this.colCount; col ++)
 		{
 			if (ignoreStatus || aRow.isColumnModified(col))
 			{
-				if (col > 0)
+				if (first)
+				{
+					first = false;
+				}
+				else
 				{
 					if (newLineAfterColumn)
 					{

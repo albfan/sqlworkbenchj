@@ -51,7 +51,7 @@ public class SynonymReader
 		result.append(aSynonym);
 		result.append("\n       FOR ");
 		result.append(id.getTableExpression());
-		result.append(';');
+		result.append(";\n");
 		return result.toString();
 	}
 	

@@ -182,6 +182,10 @@ public class StringUtil
 
 	public static final String makeJavaString(String aString)
 	{
+		return makeJavaString(aString, true);
+	}
+	public static final String makeJavaString(String aString, boolean includeNewLines)
+	{
 		StringBuffer result = new StringBuffer("String sql=");
 		BufferedReader reader = new BufferedReader(new StringReader(aString));
 		boolean first = true;
@@ -194,7 +198,14 @@ public class StringUtil
 				else result.append("           ");
 				result.append('"');
 				result.append(line);
-				result.append(" \\n\"");
+				if (includeNewLines) 
+				{
+					result.append(" \\n\"");
+				}
+				else
+				{
+					result.append(" \"");
+				}
 				//result.append();
 				line = reader.readLine();
 				if (line != null)

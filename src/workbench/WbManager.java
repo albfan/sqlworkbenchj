@@ -24,6 +24,7 @@ import workbench.db.DbDriver;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
+import workbench.gui.help.HtmlViewer;
 import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -50,6 +51,7 @@ public class WbManager implements FontChangedListener
 	private WbCipher desCipher = null;
 	private boolean batchMode = false;
 	public static boolean trace = "true".equalsIgnoreCase(System.getProperty("workbench.startuptrace", "false"));
+	private HtmlViewer helpWindow;
 
 	static
 	{
@@ -430,13 +432,13 @@ public class WbManager implements FontChangedListener
 			});
 
 		JPanel p2 = new JPanel();
-		p2.setLayout(new FlowLayout(FlowLayout.CENTER));
+		p2.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 10));
 		p2.add(b);
 		p.add(p2, BorderLayout.SOUTH);
 		this.closeMessage.getContentPane().setLayout(new BorderLayout());
 		this.closeMessage.getContentPane().add(p, BorderLayout.CENTER);
 		this.closeMessage.setUndecorated(true);
-		this.closeMessage.setSize(200,70);
+		this.closeMessage.setSize(210,80);
 		WbSwingUtilities.center(this.closeMessage, parent);
 	}
 	
@@ -506,6 +508,7 @@ public class WbManager implements FontChangedListener
 	
 	private void doShutdown()
 	{
+		LogMgr.logInfo("WbManager.doShutdown()", "Stopping " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
 		LogMgr.shutdown();
 		System.exit(0);
 	}
@@ -711,6 +714,8 @@ public class WbManager implements FontChangedListener
 	{
 		if (trace) System.out.println("WbManager.init() - start");
 		this.initSettings();
+		LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
+		LogMgr.logDebug("WbManager.init()", "Use -Jworkbench.startuptrace=true to display trace messages during startup");
 		if (!this.batchMode)
 		{
 			WbSplash splash = null;
@@ -791,6 +796,37 @@ public class WbManager implements FontChangedListener
 			}
 		}
 		if (trace) System.out.println("WbManager.init() - done.");
+	}
+
+	private void showHelp(String aFile)
+	{
+		try
+		{
+			if (this.helpWindow == null)
+			{
+				this.helpWindow = new HtmlViewer(this.getCurrentWindow(), aFile);
+			}
+			else
+			{
+				this.helpWindow.showIndex();
+			}
+			if (aFile != null)
+			{
+				this.helpWindow.show();
+				this.helpWindow.requestFocus();
+			}
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError("MainWindow", "Error when displaying HTML help", ex);
+			JOptionPane.showMessageDialog(this.getCurrentWindow(), "The documentation is currently available at www.kellerer.org/workbench");
+		}
+	}
+	
+	public HtmlViewer getHelpViewer()
+	{
+		if (this.helpWindow == null) this.showHelp(null);
+		return this.helpWindow;
 	}
 
 	public static void main(String args[])

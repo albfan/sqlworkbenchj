@@ -1,8 +1,11 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 
 import javax.swing.Action;
+import javax.swing.KeyStroke;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.SqlPanel;
@@ -22,9 +25,10 @@ public class RunMacroAction extends WbAction
 		super();
 		this.client = aClient;
 		this.macroName = null;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtSelectAndRunMacro"));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtSelectAndRunMacro"));
+		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtManageMacros"));
+		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtManageMacros"));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
+		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.CTRL_MASK));
 		this.putValue(Action.SMALL_ICON, null);
 	}
 	

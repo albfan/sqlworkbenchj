@@ -78,7 +78,7 @@ public class SqlHistoryEntry
 	
 	public String toString() 
 	{
-		return "{" + this.text.substring(0, 10) + "..., Cursor=" + this.cursorPos + ",Selection=[" + this.selectionStart + "," + this.selectionEnd + "] }";
+		return "{" + this.text.substring(0, 25) + "..., Cursor=" + this.cursorPos + ", Selection=[" + this.selectionStart + "," + this.selectionEnd + "]}";
 	}
 
 

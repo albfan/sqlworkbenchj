@@ -34,7 +34,7 @@ public class WbOraExecute extends SqlCommand
 		throws SQLException, WbException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
-		LineTokenizer tok = new LineTokenizer(aSql, " ");
+		LineTokenizer tok = new LineTokenizer(aSql.trim(), " ");
 		String verb = tok.nextToken(); 
 		if (!this.sqlcommand.equalsIgnoreCase(verb)) throw new WbException("Wrong syntax. " + sqlcommand + " expected!");
 		

@@ -15,6 +15,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
@@ -52,6 +53,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.formatter.SqlFormatter;
 import workbench.util.LineTokenizer;
+import workbench.util.SqlUtil;
 
 
 /**
@@ -76,6 +78,7 @@ public class EditorPanel
 	private FindAction findAction;
 	private FindAgainAction findAgainAction;
 	private ReplaceAction replaceAction;
+	private FormatSqlAction formatSql;
 	
   private static final SyntaxStyle[] SYNTAX_COLORS;
   static
@@ -92,7 +95,6 @@ public class EditorPanel
 		SYNTAX_COLORS[Token.LABEL] = new SyntaxStyle(new Color(0x990033),false,true);
 		SYNTAX_COLORS[Token.OPERATOR] = new SyntaxStyle(Color.BLACK,false,false);
 		SYNTAX_COLORS[Token.INVALID] = new SyntaxStyle(Color.RED,false,true);
-		
   }
   
 	public static EditorPanel createSqlEditor()
@@ -182,6 +184,17 @@ public class EditorPanel
 		this.addPopupMenuItem(this.replaceAction, false);
 	}
 
+	public FormatSqlAction getFormatSqlAction()
+	{
+		return this.formatSql;
+	}
+	
+	public void showFormatSql()
+	{
+		if (this.formatSql != null) return;
+		this.formatSql = new FormatSqlAction(this);
+		this.addPopupMenuItem(this.formatSql, true);
+	}
 	public void setEditable(boolean editable)
 	{
 		super.setEditable(editable);
@@ -191,30 +204,49 @@ public class EditorPanel
 	public void reformatSql()
 	{
 		String sql = this.getSelectedStatement();
-		SqlFormatter f = new SqlFormatter(sql, WbManager.getSettings().getMaxSubselectLength());
-		String newSql = null;
-		try
+		String delimit = SqlUtil.getDelimiterToUse(sql);
+		List commands = SqlUtil.getCommands(sql, delimit);
+		
+		int count = commands.size();
+		StringBuffer newSql = new StringBuffer(sql.length() + 100);
+		String formattedDelimit = "";
+		
+		if (count > 1) 
 		{
-			newSql = f.format().trim();
+			formattedDelimit = "\n" + delimit + "\n\n";
 		}
-		catch (Exception e)
+		else if (sql.endsWith("\n") ||sql.endsWith("\r"))
 		{
-			newSql = null;
+			formattedDelimit = "\n";
 		}
 		
-		if (newSql == null) return;
+		for (int i=0; i < count; i++)
+		{
+			SqlFormatter f = new SqlFormatter((String)commands.get(i), WbManager.getSettings().getMaxSubselectLength());
+			try
+			{
+				String formattedSql = f.format().trim();
+				newSql.append(formattedSql);
+				newSql.append(formattedDelimit);
+			}
+			catch (Exception e)
+			{
+			}
+		}
+		
+		if (newSql.length() == 0) return;
 		int caret = -1;
 
 		if (this.isTextSelected())
 		{
 			caret = this.getSelectionStart();
-			this.setSelectedText(newSql);
+			this.setSelectedText(newSql.toString());
 			this.select(caret, caret + newSql.length());
 		}
 		else
 		{
 			caret = this.getCaretPosition();
-			this.setText(newSql);
+			this.setText(newSql.toString());
 			if (caret > 0 && caret < this.getText().length()) this.setCaretPosition(caret);
 		}
 		

@@ -29,7 +29,7 @@ import javax.swing.text.Utilities;
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.7 2003-02-26 21:41:59 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.8 2003-11-15 15:26:57 thomas Exp $
  */
 public class TextAreaPainter extends JComponent implements TabExpander
 {
@@ -449,11 +449,21 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	 */
 	public float nextTabStop(float x, int tabOffset)
 	{
+		if (tabSize == 0)
+		{
+			this.calcTabSize();
+		}
 		int offset = textArea.getHorizontalOffset();
 		int ntabs = ((int)x - offset) / tabSize;
 		return (ntabs + 1) * tabSize + offset;
 	}
 
+	private void calcTabSize()
+	{
+		tabSize = fm.charWidth(' ') * ((Integer)textArea.getDocument().getProperty(PlainDocument.tabSizeAttribute)).intValue();
+		if (tabSize == 0) tabSize = TextAreaDefaults.getDefaults().tabSize;
+	}
+	
 	// package-private members
 	int currentLineIndex;
 	Token currentLineTokens;

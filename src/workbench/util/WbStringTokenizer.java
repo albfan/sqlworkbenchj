@@ -150,7 +150,10 @@ public class WbStringTokenizer
 							if (current == null) current = new StringBuffer();
 							if (keepQuotes) current.append((char)token);
 							current.append(this.tokenizer.sval);
-							if (keepQuotes) current.append((char)token);
+							if (quoteChars.length() == 1)
+							{
+								if (keepQuotes) current.append((char)token);
+							}
 						}
 						else if (this.delimit.indexOf((char)token) > -1)
 						{

@@ -178,6 +178,7 @@ public class WbSwingUtilities
 		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
 		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);
 		dialog.setResizable(true);
+		dialog.pack();
 		dialog.show();
 		dialog.dispose();
 		Object result = ignorePane.getValue();

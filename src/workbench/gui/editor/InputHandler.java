@@ -25,7 +25,7 @@ import javax.swing.KeyStroke;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.8 2003-08-30 15:57:09 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.9 2003-11-15 15:26:57 thomas Exp $
  * @see org.gjt.sp.jedit.textarea.DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
@@ -1133,8 +1133,7 @@ public abstract class InputHandler extends KeyAdapter
 			String actionCommand = evt.getActionCommand();
 			if(actionCommand != null)
 			{
-				textArea.getInputHandler().setRepeatCount(
-					Integer.parseInt(actionCommand));
+				textArea.getInputHandler().setRepeatCount(Integer.parseInt(actionCommand));
 			}
 		}
 	}

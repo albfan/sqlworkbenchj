@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import workbench.util.StringUtil;
+import workbench.util.WbStringTokenizer;
 
 /**
  *
@@ -44,7 +45,7 @@ public class SqlFormatter
 	private static final Set LINE_BREAK_AFTER = new HashSet();
 	static
 	{
-		LINE_BREAK_AFTER.add("UNION");
+		//LINE_BREAK_AFTER.add("UNION");
 		LINE_BREAK_AFTER.add("MINUS");
 		LINE_BREAK_AFTER.add("INTERSECT");
 		LINE_BREAK_AFTER.add("AS");
@@ -234,7 +235,11 @@ public class SqlFormatter
 
 	private boolean needsWhitespace(SQLToken last, SQLToken current)
 	{
-		if (this.isStartOfLine()) return false;
+		return this.needsWhitespace(last, current, false);
+	}
+	private boolean needsWhitespace(SQLToken last, SQLToken current, boolean ignoreStartOfline)
+	{
+		if (!ignoreStartOfline && this.isStartOfLine()) return false;
 		if (last.getContents().equals("\"")) return false;
 		if (last.getContents().equals(".") && current.isIdentifier()) return false;
 		if (last.getContents().equals(")") && !current.isSeparator() ) return true;
@@ -570,7 +575,7 @@ public class SqlFormatter
 	private void formatSql()
 		throws Exception
 	{
-		SQLToken t = (SQLToken)this.lexer.getNextToken(false, false);
+		SQLToken t = (SQLToken)this.lexer.getNextToken(true, false);
 		SQLToken lastToken = t;
 		while (t != null)
 		{
@@ -589,6 +594,11 @@ public class SqlFormatter
 				}
 
 				if (LINE_BREAK_AFTER.contains(word))
+				{
+					this.appendNewline();
+				}
+				
+				if (word.equals("ALL") && lastToken.isReservedWord() && lastToken.getContents().equals("UNION"))
 				{
 					this.appendNewline();
 				}
@@ -613,6 +623,12 @@ public class SqlFormatter
 					continue;
 				}
 
+				if (word.equals("CREATE"))
+				{
+					t = this.processCreate(t);
+					if (t == null) return;
+					continue;
+				}
 				if (word.equals("BY") && lastToken.isReservedWord()	&& lastToken.getContents().equals("GROUP"))
 				{
 					t = this.processList(lastToken, "GROUP BY ".length(), BY_TERMINAL);
@@ -658,16 +674,16 @@ public class SqlFormatter
 					if (!isStartOfLine()) this.appendNewline();
 				}
 
-				if (t.isSeparator() && t.getContents().equals("("))
+				if (t.isSeparator() && word.equals("("))
 				{
 					this.appendText(" (");
 					this.processFunctionCall();
 				}
 				else
 				{
-					if (t.isSeparator() && t.getContents().equals(";"))
+					if (t.isSeparator() && word.equals(";"))
 					{
-						this.appendText(t.getContents());
+						this.appendText(word);
 						this.appendNewline();
 						this.appendNewline();
 					}
@@ -681,6 +697,7 @@ public class SqlFormatter
 			lastToken = t;
 			t = (SQLToken)this.lexer.getNextToken(false, false);
 		}
+		this.appendNewline();
 		this.appendNewline();
 	}
 
@@ -806,6 +823,179 @@ public class SqlFormatter
 		}
 	}
 
+	private SQLToken processCreate(SQLToken previous)
+		throws Exception
+	{
+		//this.appendText(previous.getContents());
+		SQLToken t = (SQLToken)this.lexer.getNextToken(true, false);
+		this.appendText(' ');
+		SQLToken last = previous;
+		while (t != null)
+		{
+			String verb = t.getContents().toUpperCase();
+			this.appendText(t.getContents());
+			if (this.needsWhitespace(last, t))
+			{
+				this.appendText(' ');
+			}
+			if (verb.equals("TABLE"))
+			{
+				t = this.processCreateTable(t);
+				return t;
+			}
+			else if (verb.equals("VIEW"))
+			{
+				return this.processCreateView(t);
+			}
+			else 
+			{
+				this.appendText(t.getContents());
+				if (this.needsWhitespace(last, t))
+				{
+					this.appendText(' ');
+				}
+			}
+			t = (SQLToken)this.lexer.getNextToken(true, false);
+		}
+		return t;
+	}
+	
+	private SQLToken processCreateTable(SQLToken previous)
+		throws Exception
+	{
+		SQLToken t = (SQLToken)this.lexer.getNextToken(false, false);
+		SQLToken last = previous;
+		int bracketCount = 0;
+		StringBuffer definition = new StringBuffer(200);
+		
+		while (t != null)
+		{
+			if (t.getContents().equals("(") )
+			{
+				if (bracketCount == 0)
+				{
+					// start of table definition
+					this.appendNewline();
+					this.appendText('(');
+					this.appendNewline();
+				}
+				else
+				{
+					definition.append('(');
+				}
+				bracketCount ++;
+			}
+			else if (t.getContents().equals(")"))
+			{
+				if (bracketCount == 1)
+				{
+					// end of table definition
+					this.outputFormattedColumnDefs(definition);
+					this.appendNewline();
+					//this.appendText(')');
+					//this.appendNewline();
+					return t;
+				}
+				else
+				{
+					definition.append(')');
+				}
+				bracketCount--;
+			}
+			else if (bracketCount > 0)
+			{
+				// collect the table definition so that it's easier to format it 
+				if (this.needsWhitespace(last, t, true))
+				{
+					definition.append(' ');
+				}
+				definition.append(t.getContents());
+			}
+			else
+			{
+				this.appendText(t.getContents());
+				if (this.needsWhitespace(last, t, true))
+				{
+					this.appendText(' ');
+				}
+			}
+			last = t;
+			t = (SQLToken)this.lexer.getNextToken(false, false);
+		}
+		return t;
+	}
+	
+	private void outputFormattedColumnDefs(StringBuffer source)
+	{
+		ArrayList cols = new ArrayList();
+		int size = source.length();
+		int bracketCount = 0;
+		int lastPos = 0;
+		for (int i=0; i < size; i++)
+		{
+			char c = source.charAt(i);
+			if (c == ',' && bracketCount == 0)
+			{
+				cols.add(source.substring(lastPos, i));
+				lastPos = i + 1;
+			}
+			else if (c == '(')
+			{
+				bracketCount ++;
+			}
+			else if (c == ')')
+			{
+				bracketCount --;
+			}
+		}
+		cols.add(source.substring(lastPos, size));
+		
+		// second pass, find the longest column name
+		int count = cols.size();
+		int width = 0;
+		
+		for (int i=0; i < count; i++)
+		{
+			String def = (String)cols.get(i);
+			//System.out.println("def="+ def);
+			int pos = def.indexOf(' ');
+			if (pos > width) width = pos;
+		}
+		width += 2;
+		
+		// third pass, output the definitions aligned to the longest column name
+		for (int i=0; i < count; i++)
+		{
+			String def = (String)cols.get(i);
+			int pos = def.indexOf(' ');
+			String col = def.substring(0, pos);
+			String type = def.substring(pos + 1);
+			this.indent("  ");
+			this.appendText(col);
+			while (pos < width)
+			{
+				this.appendText(' ');
+				pos ++;
+			}
+			this.appendText(type);
+			if (i < count - 1) 
+			{
+				this.appendText(',');
+				this.appendNewline();
+			}
+		}
+	}
+	
+	private SQLToken processCreateView(SQLToken last)
+	{
+		return last;
+	}
+	
+	private SQLToken processCreateOther(SQLToken last)
+	{
+		return last;
+	}
+	
 	public static void main(String[] args)
 	{
 		try
@@ -926,12 +1116,14 @@ public class SqlFormatter
 //           "      WHERE NAME= 'city' \n" + 
 //           "      ) city \n";
 			//String sql = "UPDATE bla set column1='test',col2=NULL, col4=222 where xyz=42 AND ab in (SELECT x from t\nWHERE x = 6) OR y = 5;commit;";
-			String sql="SELECT city.id, \n" + 
-           "       city.value, \n" + 
-           "       state.value \n" + 
-           "FROM (SELECT id, value FROM userprops WHERE NAME= 'city') city LEFT OUTER JOIN \n" + 
-           " (SELECT id, value FROM userprops WHERE NAME= 'state') state ON city.id = state.id  \n" + 
-           " \n";			SqlFormatter f = new SqlFormatter(sql,60);
+//			String sql="SELECT city.id, \n" + 
+//           "       city.value, \n" + 
+//           "       state.value \n" + 
+//           "FROM (SELECT id, value FROM userprops WHERE NAME= 'city') city LEFT OUTER JOIN \n" + 
+//           " (SELECT id, value FROM userprops WHERE NAME= 'state') state ON city.id = state.id  \n" + 
+//           " -- the city\n";			
+			String sql = "create table tk_test (nr integer, name varchar(100), price number(23,4))";
+			SqlFormatter f = new SqlFormatter(sql,60);
 			System.out.println(f.format());
 //			System.out.println("----------------------------------");
 //			"insert into test (col1, col2) values ('x', to_date(2,'XXXX'));commit;" 	 ;
