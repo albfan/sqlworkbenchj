@@ -268,19 +268,26 @@ public class StringUtil
 		}
 	}
 
-
 	public static final String trimQuotes(String input)
 	{
+		//System.out.println("toTrim=" + input);
 		if (input == null) return null;
 		if (input.length() == 0) return EMPTY_STRING;
-		if (input.indexOf('"') < 0) return input;
-		int first=0;
-		int len = input.length();
+		
 		String result = input.trim();
-		while (result.charAt(first) == '"' && first < len) first++;
-		int last = result.length() - 1;
-		while (result.charAt(last) == '"' && last > first) last--;
-		result = result.substring(first, last + 1);
+		int first = 0;
+		int len = result.length();
+		if (len == 0) return EMPTY_STRING;
+
+		char firstChar = result.charAt(0);
+		char lastChar = result.charAt(len - 1);
+		
+		if ( (firstChar == '"' && lastChar == '"') ||
+		     (firstChar == '\'' && lastChar == '\''))
+		{
+			result = result.substring(1, len - 1);
+		}
+		//System.out.println("trimmed=>" + result + "<" );
 		return result;
 	}
 
@@ -591,13 +598,17 @@ public class StringUtil
 
 	public static void main(String args[])
 	{
-		String test = "col1\tcol2\t\tcol4";
-		List l = stringToList(test, "\t");
-		System.out.println(l.size());
-
-		for (int i=0; i < l.size(); i++)
+		try
 		{
-			System.out.println(">" + l.get(i) +  "<");
+			String test = "\"";
+			test = test + "\\\\";
+			test = test + "\"\"";
+			
+			System.out.println("result=>" + trimQuotes(test) + "<");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 }

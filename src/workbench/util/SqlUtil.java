@@ -59,6 +59,7 @@ public class SqlUtil
 		String value, ls_OldDelimit, delimit;
 		int oldPos;
 		String currChar;
+		String lastQuote = null;
 
 		aScript = aScript.trim();
 		// Handle MS SQL GO's
@@ -100,7 +101,28 @@ public class SqlUtil
 			currChar = aScript.substring(pos, pos + 1);
 			if (currChar.equals("\'") || currChar.equals("\""))
 			{
-				quoteOn = !quoteOn;
+				if (!quoteOn)
+				{
+					lastQuote = currChar;
+					quoteOn = true;
+				}
+				else if (currChar.equals(lastQuote))
+				{
+					if (pos > 1)
+					{
+						// check if the current quote char was escaped
+						if (aScript.charAt(pos - 1) != '\\')
+						{
+							lastQuote = null;
+							quoteOn = false;
+						}
+					}
+					else
+					{
+						lastQuote = null;
+						quoteOn = false;
+					}
+				}
 			}
 
 			if (!quoteOn)

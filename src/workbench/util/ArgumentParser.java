@@ -39,7 +39,7 @@ public class ArgumentParser
 	
 	public void parse(String aCmdLine)
 	{
-		List words = StringUtil.split(aCmdLine, "-", false, "\"", true);
+		List words = StringUtil.split(aCmdLine, "-", false, "\"'", true);
 
 		int count = words.size();
 		for (int i=0; i < count; i++)
@@ -68,19 +68,28 @@ public class ArgumentParser
 	
 	public String getValue(String key)
 	{
-		return (String)this.arguments.get(key.toLowerCase());
+		String value = (String)this.arguments.get(key.toLowerCase());
+		value = StringUtil.trimQuotes(value);
+		return value;
 	}
 	
 	public static void main(String[] args)
 	{
 		//String test = "spool /type=sql /file=\"d:/temp/test.sql\" /table=my_table;";
-		String test = "/profile=\"HSQLDB - Test Server\" /script=\"d:/temp/test.sql\"";
+		//String test = "/profile=\"HSQLDB - Test Server\" /script=\"d:/temp/test.sql\"";
+		String test = "-quotechar='\"' -file=\"d:/temp/export test.txt\" -delimiter=\" \" -dateformat=dd.MMM.yyyy";
 		ArgumentParser parser = new ArgumentParser();
-		parser.addArgument("script");
-		parser.addArgument("profile");
+		parser.addArgument("type");
+		parser.addArgument("file");
+		parser.addArgument("table");
+		parser.addArgument("delimiter");
+		parser.addArgument("quotechar");
+		parser.addArgument("dateformat");
+		parser.addArgument("timestampformat");
 		parser.parse(test);
-		System.out.println("script=" + parser.getValue("script"));
-		System.out.println("profile=" + parser.getValue("profile"));
+		System.out.println("delimiter=>" + parser.getValue("delimiter") + "<");
+		System.out.println("file=" + parser.getValue("file"));
+		System.out.println("quote=>" + parser.getValue("quotechar") + "<");
 		System.out.println("done.");
 	} 
 
