@@ -117,6 +117,8 @@ public class DbMetadata
 		this.caseSensitive = caseSensitiveServers.contains(this.productName);
 	}
 
+  public boolean isOracle() { return this.isOracle; }
+  
 	private HashMap readStatementTemplates(String aFilename)
 	{
 		HashMap result = null;
@@ -783,10 +785,12 @@ public class DbMetadata
 		{
 		}
 
+    int rows = 0;
 		ResultSet rs = this.metaData.getColumns(this.adjustObjectname(aCatalog), this.adjustObjectname(aSchema), this.adjustObjectname(aTable), "%");
 		while (rs.next())
 		{
 			int row = ds.addRow();
+      rows ++;
 			String colName = rs.getString("COLUMN_NAME");
 			ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_COL_NAME, colName);
 			int sqlType = rs.getInt("DATA_TYPE");
@@ -1552,6 +1556,71 @@ public class DbMetadata
 		return idx;
 	}
 
+  public String getExtendedErrorInfo(String schema, String objectType, String objectName)
+  {
+    if (!this.isOracle) return "";
+    StringBuffer sql = new StringBuffer(200);
+    
+    sql.append("SELECT line, position, text FROM all_errors WHERE ");
+    if (schema == null)
+    {
+      schema = this.getUserName();
+    }
+    
+    sql.append("owner='");
+    sql.append(this.adjustObjectname(schema));
+    sql.append('\'');
+    
+    if (objectType != null)
+    {
+      sql.append(" AND ");
+      sql.append(" type='");
+      sql.append(this.adjustObjectname(objectType));
+      sql.append('\'');
+    }
+    
+    if (objectName != null)
+    {
+      sql.append(" AND ");
+      sql.append(" name='");
+      sql.append(this.adjustObjectname(objectName));
+      sql.append('\'');
+    }
+
+    Statement stmt = null;
+    ResultSet rs = null;
+    StringBuffer result = new StringBuffer(250);
+    try
+    {
+      stmt = this.dbConnection.getSqlConnection().createStatement();
+      rs = stmt.executeQuery(sql.toString());
+			int count = 0;
+      while (rs.next())
+      {
+				if (count > 0) result.append("\r\n");
+        int line = rs.getInt("LINE");
+        int pos = rs.getInt("POSITION");
+        String msg = rs.getString("TEXT");
+        result.append("Error at line ");
+        result.append(line);
+        result.append(", position ");
+        result.append(pos);
+        result.append(" : ");
+        result.append(msg);
+        count ++;
+      }
+    }
+    catch (SQLException e)
+    {
+    }
+    finally
+    {
+      try { rs.close(); } catch (Exception e) {}
+      try { stmt.close(); } catch (Exception e) {}
+    }
+    return result.toString();
+  }
+  
 	private String getSqlTemplate(HashMap aMap)
 	{
 		String template = (String)aMap.get(this.productName);

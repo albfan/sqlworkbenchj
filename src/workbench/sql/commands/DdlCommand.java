@@ -5,12 +5,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.exception.WbException;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -48,8 +50,8 @@ public class DdlCommand extends SqlCommand
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		try
 		{
-			Statement stmt = aConnection.createStatement();
-			stmt.execute(aSql);
+			this.currentStatement = aConnection.createStatement();
+			this.currentStatement.execute(aSql);
 			String msg = null;
 			
 			if ("DROP".equals(verb))
@@ -67,9 +69,10 @@ public class DdlCommand extends SqlCommand
 			result.addMessage(msg);
 			
 			StringBuffer warnings = new StringBuffer();
-			if (this.appendWarnings(aConnection, stmt, warnings))
+			if (this.appendWarnings(aConnection, this.currentStatement, warnings))
 			{
 				result.addMessage(warnings.toString());
+        this.addExtendErrorInfo(aConnection, aSql, result);
 			}
 			result.setSuccess();
 		}
@@ -78,12 +81,62 @@ public class DdlCommand extends SqlCommand
 			result.clear();
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
 			result.addMessage(ExceptionUtil.getDisplay(e));
+      this.addExtendErrorInfo(aConnection, aSql, result);
 			result.setFailure();
 		}
 		
 		return result;
 	}
 	
+
+  private final static List TYPES;
+  static
+  {
+    TYPES = new ArrayList();
+    TYPES.add("TRIGGER");
+    TYPES.add("PROCEDURE");
+    TYPES.add("FUNCTION");
+    TYPES.add("PACKAGE");
+  }
+  
+  private boolean addExtendErrorInfo(WbConnection aConnection, String sql, StatementRunnerResult result)
+  {
+    String cleanSql = SqlUtil.makeCleanSql(sql, false).toUpperCase();
+    String sqlverb = SqlUtil.getSqlVerb(cleanSql);
+    if (!"CREATE".equals(sqlverb)) return false;
+    String type = null;
+    
+    StringTokenizer tok = new StringTokenizer(cleanSql, " ");
+    String word = null;
+    String name = null;
+    boolean nextTokenIsName = false;
+    while (tok.hasMoreTokens())
+    {
+      word = tok.nextToken();
+      if (nextTokenIsName)
+      {
+        name = word;
+        break;
+      }
+      if (TYPES.contains(word))
+      {
+        type = word;
+        nextTokenIsName = true;
+      }
+    }
+    String msg = aConnection.getMetadata().getExtendedErrorInfo(null, type, name);
+		if (msg != null && msg.length() > 0)
+		{
+			result.addMessage(msg);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+		
+  }
+  
 	public String getVerb()
 	{
 		return verb;

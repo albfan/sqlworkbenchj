@@ -339,6 +339,34 @@ public class DataStore
 		this.setUpdateTable(aTablename, this.originalConnection);
 	}
 	
+	public boolean useUpdateTableFromSql(String aSql)
+	{
+		this.updateTable = null;
+		this.updateTableColumns = null;
+		
+		if (aSql == null) return false;
+		List tables = SqlUtil.getTables(aSql);
+		if (tables.size() != 1) return false;
+		
+		String table = (String)tables.get(0);
+		this.useUpdateTable(table);
+		return true;
+	}
+	
+	public void useUpdateTable(String aTablename)
+	{
+		// A connection-less update table is used to 
+		// create INSERT statements regardless if the
+		// table actually exists, or if it really is a table.
+		// this is used e.g. for creating scripts from result sets
+		this.updateTable = aTablename;
+		this.updateTableColumns = new ArrayList();
+		for (int i=0; i < this.columnNames.length; i++)
+		{
+			this.updateTableColumns.add(this.columnNames[i]);
+		}
+	}
+	
 	public void setUpdateTable(String aTablename, WbConnection aConn)
 	{
 		if (aTablename == null)
@@ -359,7 +387,7 @@ public class DataStore
 			// select statement
 			try
 			{
-				DbMetadata meta = this.originalConnection.getMetadata();
+				DbMetadata meta = aConn.getMetadata();
 				if (meta == null) return;
 				
 				DataStore columns = meta.getTableDefinition(aTablename);
@@ -371,8 +399,8 @@ public class DataStore
 				this.updateTableColumns = new ArrayList();
 				for (int i=0; i < columns.getRowCount(); i++)
 				{
-					String table = columns.getValue(i, 0).toString();
-					this.updateTableColumns.add(table.toLowerCase());
+					String column = columns.getValue(i, 0).toString();
+					this.updateTableColumns.add(column.toLowerCase());
 				}
 			}
 			catch (Exception e)
@@ -726,6 +754,7 @@ public class DataStore
 			
 	public boolean checkUpdateTable(String aSql, WbConnection aConn)
 	{
+		if (aSql == null) return false;
 		List tables = SqlUtil.getTables(aSql);
 		if (tables.size() != 1) return false;
 		String table = (String)tables.get(0);
@@ -1020,11 +1049,11 @@ public class DataStore
 		}
 		else if (o1 == null || o1 instanceof NullValue)
 		{
-			return 2;
+			return 1;
 		}
 		else if (o2 == null || o2 instanceof NullValue)
 		{
-			return -2;
+			return -1;
 		}
 
 		try
@@ -1032,7 +1061,7 @@ public class DataStore
 			int result = ((Comparable)o1).compareTo(o2);
 			return result;
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 		}
 
@@ -1055,10 +1084,10 @@ public class DataStore
 		int result = compareRowsByColumn(row1, row2, column);
 		if (result == 0) return 0;
 		
-		if (result == -2 || result == 2) 
-			return result;
-		else
-			return ascending ? result : -result;
+		//if (result == -2 || result == 2) 
+		//	return result;
+		//else
+		return ascending ? result : -result;
 	}
 	
 	public void sortByColumn(int aColumn, boolean ascending)
@@ -1436,8 +1465,16 @@ public class DataStore
 			{
 				if (col > 0)
 				{
-					sql.append(", ");
-					valuePart.append(", ");
+					if (newLineAfterColumn)
+					{
+						sql.append("  , ");
+						valuePart.append("  , ");
+					}
+					else
+					{
+						sql.append(',');
+						valuePart.append(',');
+					}
 				}
 				
 				colName = SqlUtil.quoteObjectname(this.getColumnName(col));
@@ -1447,9 +1484,7 @@ public class DataStore
 				if (ignoreStatus && newLineAfterColumn) 
 				{
 					sql.append(lineEnd);
-					sql.append("  ");
 					valuePart.append(lineEnd);
-					valuePart.append("  ");
 				}					
 				values.add(aRow.getValue(col));
 			}
@@ -1601,7 +1636,7 @@ public class DataStore
 		}
 		if (this.pkColumns == null) this.pkColumns = new ArrayList();
 		
-		// if we didn't find any columns, so use all columns as the identifier
+		// if we didn't find any columns, use all columns as the identifier
 		if (this.pkColumns.size() == 0)
 		{
 			for (int i=0; i < this.colCount; i++)

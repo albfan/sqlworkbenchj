@@ -29,14 +29,18 @@ import workbench.util.StringUtil;
 public class NumberColumnRenderer
 	extends ToolTipRenderer
 {
-	private static DecimalFormat decimalFormatter;
+	private DecimalFormat decimalFormatter;
 	private HashMap displayCache = new HashMap(500);
-	
+  
 	public NumberColumnRenderer(int maxDigits)
 	{
+		if (maxDigits <= 0) maxDigits = 10;
 		String sep = WbManager.getSettings().getDecimalSymbol();
 		DecimalFormatSymbols symb = new DecimalFormatSymbols();
 		symb.setDecimalSeparator(sep.charAt(0));
+		//StringBuffer format = new StringBuffer(maxDigits + 4);
+		//format.append("0.");
+		//for (int i=0; i < maxDigits; i++) format.append('0');
 		decimalFormatter = new DecimalFormat("0.#", symb);
 		decimalFormatter.setMaximumFractionDigits(maxDigits);
 		this.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -87,5 +91,14 @@ public class NumberColumnRenderer
 		}
 		return displayResult;
 	}
-	
+
+  public static void main(String[] args)
+  {
+    double value = 0.81;
+		DecimalFormatSymbols symb = new DecimalFormatSymbols();
+		symb.setDecimalSeparator('.');
+		DecimalFormat f = new DecimalFormat("0.00", symb);
+		f.setMaximumFractionDigits(4);
+    System.out.println(f.format(value));
+  }
 }

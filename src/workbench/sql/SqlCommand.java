@@ -69,6 +69,8 @@ public class SqlCommand
 				msg.append("\n\n");
 				warnings = true;
 			}
+			aStmt.clearWarnings();
+			aConn.clearWarnings();
 			return warnings;
 		}
 		catch (Exception e)
@@ -88,13 +90,10 @@ public class SqlCommand
 
 	public void done()
 	{
-		try 
-		{ 
-			this.currentStatement.close(); 
-		} 
-		catch (Throwable th) 
-		{
-		}
+		try { this.currentStatement.clearWarnings(); } catch (Throwable th) {}
+		try { this.currentStatement.clearBatch(); } catch (Throwable th) {}
+		try { this.currentStatement.close(); } catch (Throwable th) {}
+		this.currentStatement = null;
 	}
 	
 	/**
@@ -152,9 +151,6 @@ public class SqlCommand
 				updateCount = this.currentStatement.getUpdateCount();
 			}			
 
-			// we add the last ResultSet to the result object
-			// as all the previous ResultSets will be closed
-			// after calling getMoreResults();
 			result.setSuccess();
 		}
 		catch (Exception e)
@@ -182,4 +178,5 @@ public class SqlCommand
 	public void setMaxRows(int maxRows) { }
 	public boolean isResultSetConsumer() { return false; }
 	public void consumeResult(StatementRunnerResult aResult) {}
+	
 }

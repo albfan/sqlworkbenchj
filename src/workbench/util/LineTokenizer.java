@@ -19,7 +19,7 @@ import java.io.*;
  * It is more sophisticated than the StringTokenizer and less complex than
  * StreamTokenizer.
  *
- * @version $Id: LineTokenizer.java,v 1.2 2002-10-12 09:25:01 thomas Exp $
+ * @version $Id: LineTokenizer.java,v 1.3 2002-12-14 15:54:36 thomas Exp $
  * @author Jean-Paul Le Fèvre
  * @see java.io.StreamTokenizer
  */
@@ -87,6 +87,29 @@ public class LineTokenizer extends StringTokenizer
 		 * It is not a quoted token. Simply return it.
 		 */
 		if(token.charAt(0) != qt)	return token;
+
+		// check if the token contains a delimiter
+		// if not, then remove the quote char and 
+		// return the token
+		boolean containsToken = false;
+		for (int i=0; i<this.delim.length(); i++)
+		{
+			if (token.indexOf(this.delim.charAt(i)) > -1)
+			{
+				containsToken = true;
+			}
+		}
+		if (!containsToken)
+		{
+			// remove the quote char
+			int end = 0;
+			if (token.charAt(token.length()-1) == qt)
+			{
+				end = token.length() -1;
+			}
+			token = token.substring(1, end);
+			return token;
+		}
 		
 		/**
 		 * There is just one quoted token :  "abcd"
@@ -113,7 +136,7 @@ public class LineTokenizer extends StringTokenizer
 		 * A quoted token with embedded delimiters : "a b  c"
 		 */
 		StringBuffer buf = new StringBuffer(token.substring(1));
-		
+
 		while(hasMoreTokens())
 		{
 			token = super.nextToken();
@@ -160,7 +183,7 @@ public class LineTokenizer extends StringTokenizer
 	
 	public static void main(String args[])
 	{
-		String line = "desc \"VISA Servers$\"";
+		String line = "spool text \"dasdfasd\" tablename";
 		LineTokenizer ltk = new LineTokenizer(line, " ");
 		System.out.println("count=" + ltk.countTokens());
 		while(ltk.hasMoreTokens())

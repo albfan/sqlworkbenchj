@@ -136,9 +136,13 @@ public class DataStoreTableModel
 		if (aFlag == this.showStatusColumn) return;
 		this.showStatusColumn = aFlag;
 		if (this.showStatusColumn)
+		{
 			this.statusOffset = 1;
+		}
 		else 
+		{
 			this.statusOffset = 0;
+		}
 		this.fireTableStructureChanged();
 	}
 	
@@ -326,7 +330,11 @@ public class DataStoreTableModel
 		return sortAscending;
 	}
 	
-	public int getSortColumn() { return this.sortColumn; }
+	public int getSortColumn() 
+	{ 
+		if (this.sortColumn == -1) return -1;
+		return this.sortColumn; 
+	}
 	
 	public void sortByColumn(int column)
 	{
@@ -341,7 +349,7 @@ public class DataStoreTableModel
 		this.sortColumn = aColumn;
 		try
 		{
-			this.dataCache.sortByColumn(aColumn, ascending);
+			this.dataCache.sortByColumn(aColumn - statusOffset, ascending);
 		}
 		catch (Throwable th)
 		{
@@ -352,9 +360,9 @@ public class DataStoreTableModel
 	
 	public void sortInBackground(WbTable table, int aColumn)
 	{
-		if (aColumn < 0) 
+		if (aColumn < 0 && aColumn >= this.getColumnCount()) 
 		{
-			System.err.println("Wrong column index specified!");
+			LogMgr.logWarning("DataStoreTableModel", "Wrong column index specified!");
 			return;
 		}
 		

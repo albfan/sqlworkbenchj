@@ -132,13 +132,8 @@ public class SqlUtil
 			{
 				value = value.substring(0, value.length() - delimitLen);
 			}
-
-			// only add stuff which really contains a statement.
-			// if it's empty after a clean, ignore it...
-			// note, that this doesn't affect statements with 
-			// comments such as /* bla */select ... ;
-			String clean = makeCleanSql(value, false);
-			if (clean != null && clean.length() > 0) result.add(value);
+			if (makeCleanSql(value, false).length() > 0) 
+				result.add(value);
 		}
 		return result;
 	}
@@ -192,6 +187,10 @@ public class SqlUtil
 		return result;
 	}
 
+	public static String makeCleanSql(String aSql, boolean keepNewlines)
+	{
+		return makeCleanSql(aSql, keepNewlines, '\'');
+	}
 	/**
 	 *	Replaces all white space characters with ' ' (But not inside
 	 *	string literals), removes -- style and Java style comments
@@ -199,7 +198,7 @@ public class SqlUtil
 	 *  @param boolean - if true, newline characters (\n) are kept
 	 *	@returns String
 	 */
-	public static String makeCleanSql(String aSql, boolean keepNewlines)
+	public static String makeCleanSql(String aSql, boolean keepNewlines, char quote)
 	{
 		aSql = aSql.trim();
 		int count = aSql.length();
@@ -214,7 +213,7 @@ public class SqlUtil
 		for (int i=0; i < count; i++)
 		{
 			char c = aSql.charAt(i);
-			inQuotes = c == '\'';
+			inQuotes = c == quote;
 			
 			if (!inComment)
 			{

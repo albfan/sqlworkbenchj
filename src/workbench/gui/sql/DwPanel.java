@@ -243,11 +243,10 @@ public class DwPanel extends JPanel
 			sqlTime = (end - start);
 			
 			result = this.stmtRunner.getResult();
+			this.hasResultSet = false;
 			DataStore newData = null;
 		
-			this.hasResultSet = false;
-		
-			if (result.hasData())
+			if (result.isSuccess() && result.hasData())
 			{
 				this.hasResultSet = true;
 				
@@ -287,10 +286,15 @@ public class DwPanel extends JPanel
 				this.infoTable.setRowSelectionAllowed(true);
         this.dataChanged();
 			}
-			else 
+			else if (result.isSuccess())
 			{
 				this.hasResultSet = false;
 				this.setMessageDisplayModel(this.getEmptyMsgTableModel());
+			}
+			else 
+			{
+				this.setMessageDisplayModel(this.getErrorTableModel());
+				this.lastMessage = ResourceMgr.getString("MsgExecuteError") + "\r\n";
 			}
 			String[] messages = result.getMessages();
 			StringBuffer msg = null;

@@ -38,6 +38,10 @@ public class WbDescribeTable extends SqlCommand
 			table = table.substring(pos + 1);
 		}
 		
+    if (schema == null && aConnection.getMetadata().isOracle())
+    {
+      schema = aConnection.getMetadata().getUserName();
+    }
 		DataStore ds = aConnection.getMetadata().getTableDefinition(null, schema, table);
 		result.addDataStore(ds);
 		return result;

@@ -7,7 +7,10 @@ package workbench.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StreamTokenizer;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.lang.Character;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -252,6 +255,13 @@ public class StringUtil
 		return result.toString();
 	}
 
+	public static String getStackTrace(Throwable th)
+	{
+		StringWriter writer = new StringWriter(500);
+		PrintWriter pw = new PrintWriter(writer);
+		th.printStackTrace(pw);
+		return writer.getBuffer().toString();
+	}
 	public static final String cleanupUnderscores(String aString, boolean capitalize)
 	{
 		if (aString == null) return null;
@@ -423,11 +433,114 @@ public class StringUtil
 		return s;
 	}
 
+	public static List split(String aString, String delim, boolean singleDelimiter, String quoteChars, boolean keepQuotes)
+	{
+		StringReader reader = new StringReader(aString);
+		StreamTokenizer tok = new StreamTokenizer(reader);
+		ArrayList result = new ArrayList(20);
+		tok.resetSyntax();
+		tok.wordChars(0,255);
+		for (int i=0; i<delim.length(); i++)
+		{
+			tok.ordinaryChar(delim.charAt(i));
+		}
+		for (int i=0; i<quoteChars.length(); i++)
+		{
+			tok.quoteChar(quoteChars.charAt(i));
+		}
+		tok.eolIsSignificant(false);
+		int token;
+		int maxDelim = delim.length() - 1;
+		String value = null;
+		StringBuffer next = null;
+		boolean inDelimit = false;
+		int delimIndex = 0;
+		StringBuffer current = null;
+		boolean tokenFound = false;
+		try
+		{
+			while ((token = tok.nextToken()) != StreamTokenizer.TT_EOF)
+			{
+				switch (token)
+				{
+					case StreamTokenizer.TT_WORD:
+						if (current == null) current = new StringBuffer();
+						current.append(tok.sval);
+						break;
+					default:
+						if (quoteChars.indexOf(token) > -1)
+						{
+							if (current == null) current = new StringBuffer();
+							if (keepQuotes) current.append((char)token);
+							current.append(tok.sval);
+							if (keepQuotes) current.append((char)token);
+						}
+						else if (delim.indexOf((char)token) > -1)
+						{
+							if (singleDelimiter)
+							{
+								if (token == delim.charAt(delimIndex))
+								{
+									if (delimIndex < maxDelim ) 
+									{
+										delimIndex ++;
+										inDelimit = true;
+										value = null;
+									}
+									else
+									{
+										delimIndex = 0;
+										inDelimit = false;
+										value = current.toString();
+										current = null;//new StringBuffer();
+									}
+								}
+							}
+							else
+							{
+								if (current != null) value = current.toString();
+								current = null;
+							}
+							break;
+						}
+						else
+						{
+							if (current == null) current = new StringBuffer();
+							current.append(token);
+						}
+						break;
+				}
+				if (value != null) 
+				{
+					result.add(value);
+					tokenFound = true;
+					value = null;
+				}
+			}
+			if (current != null) result.add(current.toString());
+			if (!tokenFound) result.add(aString);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return result;
+	}
 	public static void main(String args[])
 	{
 		//String test = "String sql = \"SELECT column \\n\" + \n\"  FROM test \\r\" + \n\"  WHERE x= 10\"; ";
 		//System.out.println(cleanJavaString(test));
-		String test = "Profile name\"";
-		System.out.println(">" + trimQuotes(test) + "<");
+		//String test = "Profile name\"";
+		String test = "spool -t type \t-f \"file name.sql\" -b tablename;select * from test where name='test';";
+		//split(test, " \t", false, "\"'", true);
+		//System.out.println("---");
+		//test = "spool -t type \t-f \"file name.sql\" -b tablename./select * from test where name='test'./";
+		test = "spool /type=text /file=\"file name.sql\" /table=tablename";
+		List result = split(test, "/", false, "\"'", true);
+		System.out.println("--");
+		for (int i=0; i < result.size(); i++)
+		{
+			System.out.println("value=" + (String)result.get(i));
+		}
 	}
 }

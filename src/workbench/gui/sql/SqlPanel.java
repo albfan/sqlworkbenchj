@@ -1166,6 +1166,7 @@ public class SqlPanel
 		if (this.loadingIcon == null)
 		{
       loadingImage = ResourceMgr.getPicture("loading_smiley").getImage();
+			//loadingImage = ResourceMgr.getPicture("loading_duke2").getImage();
 			this.loadingIcon = new ImageIcon(loadingImage);
 		}
 		return this.loadingIcon;

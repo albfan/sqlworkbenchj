@@ -24,6 +24,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import workbench.WbManager;
+import workbench.exception.WbException;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.dbobjects.SpoolerProgressPanel;
@@ -48,6 +49,7 @@ public class DataSpooler
 	private String outputfile;
 	private int exportType;
 	private boolean exportHeaders;
+	private String tableName;
 	
 	private boolean showProgress = false;
 	private SpoolerProgressPanel progressPanel;
@@ -86,6 +88,11 @@ public class DataSpooler
 		this.progressWindow.show();
 	}
 
+	public void setConnection(WbConnection aConn)
+	{
+		this.dbConn = aConn;
+	}
+	
 	public void exportDataAsText(WbConnection aConnection
 	                            ,String aSql
 															,String anOutputfile
@@ -112,6 +119,10 @@ public class DataSpooler
 		this.keepRunning = false; 
 	}
 	
+	public void setTableName(String aTablename)
+	{
+		this.tableName = aTablename;
+	}
 	public void exportDataAsSqlInsert(WbConnection aConnection, String aSql, String anOutputfile)
 		throws IOException, SQLException
 	{
@@ -161,7 +172,7 @@ public class DataSpooler
 	}
 	
 	public void startExport()
-		throws IOException, SQLException
+		throws IOException, SQLException, WbException
 	{
 		Statement stmt = this.dbConn.createStatement();
 		ResultSet rs = null;
@@ -184,7 +195,7 @@ public class DataSpooler
 	 *	the SQL scripting built into that object.
 	 */
 	public void startExport(ResultSet rs)
-		throws IOException, SQLException
+		throws IOException, SQLException, WbException
 	{
 		int interval = 1;
 		int currentRow = 0;
@@ -192,9 +203,20 @@ public class DataSpooler
 		StringBuffer line = null;
 		ResultSetMetaData meta = rs.getMetaData();
 		DataStore ds = new DataStore(meta, this.dbConn);
+		ds.setOriginalStatement(this.sql);
 		if (this.exportType == EXPORT_SQL)
 		{
-			ds.checkUpdateTable(this.sql, this.dbConn);
+			if (this.tableName == null)
+			{
+				if (!ds.useUpdateTableFromSql(this.sql))
+				{
+					throw new WbException(ResourceMgr.getString("ErrorSpoolSqlNotPossible"));
+				}
+			}
+			else
+			{
+				ds.useUpdateTable(this.tableName);
+			}
 		}
 		int row = 0;
 
@@ -252,6 +274,7 @@ public class DataSpooler
 					if (line != null)
 					{
 						pw.write(line.toString());
+						pw.newLine();
 						pw.newLine();
 					}
 				}

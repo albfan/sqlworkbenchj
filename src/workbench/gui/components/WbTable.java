@@ -779,6 +779,7 @@ extends JTable
 		TableColumnModel columnModel = this.getColumnModel();
 		int viewColumn = columnModel.getColumnIndexAtX(this.headerPopupX);
 		final int column = this.convertColumnIndexToModel(viewColumn);
+		System.out.println("new sort column = " + column);
 		if (e.getSource() == this.sortAscending && this.dwModel != null)
 		{
 			this.dwModel.sortInBackground(this, column, true);

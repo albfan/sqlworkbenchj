@@ -148,6 +148,7 @@ public class StatementRunnerResult
 				{
 					try
 					{
+						rs.clearWarnings();
 						rs.close();
 					}
 					catch (Exception e)

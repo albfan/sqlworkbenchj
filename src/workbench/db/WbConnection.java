@@ -6,8 +6,11 @@
 
 package workbench.db;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.sql.Statement;
 import workbench.WbManager;
 import workbench.exception.NoConnectionException;
@@ -70,6 +73,47 @@ public class WbConnection
 		}
 	}
 
+	private Method clearSettings = null;
+	private Object dbAccess = null;
+	
+	public void clearWarnings()
+	{
+		try
+		{
+			this.sqlConnection.clearWarnings();
+			if (this.metaData.isOracle())
+			{
+				// obviously the Oracle driver does NOT clear the warnings 
+				// (as discovered when looking at the source code)
+				// luckily the instance on the driver which holds the 
+				// warnings is defined as public and thus we can 
+				// reset the warnings there
+				// this is done via reflection so that the Oracle driver 
+				// does not need to be present.
+				
+				if (this.clearSettings == null || dbAccess == null)
+				{
+					Class ora = this.sqlConnection.getClass();
+			
+					if (ora.getName().equals("oracle.jdbc.driver.OracleConnection"))
+					{
+						Field dbAccessField = ora.getField("db_access");
+						Class dbAccessClass = dbAccessField.getType(); 
+						dbAccess = dbAccessField.get(this.sqlConnection);
+						clearSettings = dbAccessClass.getDeclaredMethod("setWarnings", new Class[] {SQLWarning.class} );
+					}
+				}
+				// this is equivalent to 
+				// OracleConnection con = (OracleConnection)this.sqlConnection;
+				// con.db_access.setWarnings(null);
+				clearSettings.invoke(dbAccess, new Object[] { null });
+			}
+		}
+		catch (Throwable th)
+		{
+			th.printStackTrace();
+		}
+	}
 	public Connection getSqlConnection()
 	{
 		return this.sqlConnection;

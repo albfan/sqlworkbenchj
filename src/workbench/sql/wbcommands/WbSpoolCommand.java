@@ -9,7 +9,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.commands.SelectCommand;
-import workbench.util.CmdLineParser;
+import workbench.util.ArgumentParser;
 import workbench.util.LineTokenizer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -25,17 +25,14 @@ public class WbSpoolCommand
 	public DataSpooler spooler;
 	private int instance;
 	
-	private CmdLineParser cmdLine;
-	private CmdLineParser.Option typeOption;
-	private CmdLineParser.Option fileNameOption;
-	private CmdLineParser.Option tableOption;
+	private ArgumentParser cmdLine;
 	
 	public WbSpoolCommand()
 	{
-		cmdLine = new CmdLineParser();
-		typeOption = cmdLine.addStringOption('t', "type");
-		fileNameOption = cmdLine.addStringOption('f', "file");
-		tableOption = cmdLine.addStringOption('b', "table");
+		cmdLine = new ArgumentParser();
+		cmdLine.addArgument("type");
+		cmdLine.addArgument("file");
+		cmdLine.addArgument("table");
 	}
 
 	public String getVerb() { return VERB; }
@@ -54,7 +51,7 @@ public class WbSpoolCommand
 		this.spooler = new DataSpooler();
 		try
 		{
-			cmdLine.parse(new String[] { aSql });
+			cmdLine.parse(aSql);
 		}
 		catch (Exception e)
 		{
@@ -63,9 +60,9 @@ public class WbSpoolCommand
 			return result;
 		}
 		
-		type = (String)cmdLine.getOptionValue(typeOption);
-		file = (String)cmdLine.getOptionValue(fileNameOption);
-		table = (String)cmdLine.getOptionValue(tableOption);
+		type = cmdLine.getValue("type");
+		file = cmdLine.getValue("file");
+		table = cmdLine.getValue("table");
 		if (type == null || file == null) 
 		{
 			result.addMessage(ResourceMgr.getString("ErrorSpoolWrongParameters"));
@@ -88,7 +85,7 @@ public class WbSpoolCommand
 			result.setFailure();
 			return result;
 		}
-		
+		file = StringUtil.trimQuotes(file);
 		this.spooler.setOutputFilename(file);
 		this.spooler.setConnection(aConnection);
 		String msg = ResourceMgr.getString("MsgSpoolInit");
