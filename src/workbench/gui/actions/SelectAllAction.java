@@ -23,6 +23,7 @@ public class SelectAllAction extends AbstractAction
 	{
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_SELECTALL));
+		this.putValue(WbActionConstants.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_EDIT);
 	}
 	
 	public void actionPerformed(ActionEvent e)

@@ -24,6 +24,8 @@ public class ClearAction
 	{
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_CLEAR));
+    this.putValue(ACTION_COMMAND_KEY, "ClearAction");
+		this.putValue(WbActionConstants.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_EDIT);
 	}
 	
 	public void actionPerformed(ActionEvent e)

@@ -25,6 +25,7 @@ public class DataToClipboardAction extends AbstractAction
 	{
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString("DataToClipboard"));
+		this.putValue(WbActionConstants.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
 	}
 
 	public void actionPerformed(ActionEvent e)

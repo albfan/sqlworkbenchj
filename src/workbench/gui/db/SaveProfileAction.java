@@ -27,7 +27,7 @@ public class SaveProfileAction extends AbstractAction
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString("SaveProfile"));
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("SaveProfile"));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_SAVE, false));
+		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_SAVE));
 	}
 	
 	public void actionPerformed(ActionEvent e)

@@ -23,7 +23,11 @@ public class ExecuteSelAction extends AbstractAction
 	{
 		this.target = aListener;
 		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_EXECUTE_SEL));
+		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription(ResourceMgr.TXT_EXECUTE_SEL));
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_EXEC_SEL));
+		this.putValue(WbActionConstants.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
+		this.putValue(WbActionConstants.ADD_TO_TOOLBAR, "true");
+		//this.putValue(Action.MNEMONIC_KEY, (int)'E');
 	}
 	
 	public void actionPerformed(ActionEvent e)

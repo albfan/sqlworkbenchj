@@ -27,7 +27,7 @@ public class DeleteProfileAction extends AbstractAction
 		this.client = aClient;		
 		this.putValue(Action.NAME, ResourceMgr.getString("DeleteProfile"));
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("DeleteProfile"));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_DELETE, false));
+		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_DELETE));
 	}
 	
 	public void actionPerformed(ActionEvent e)

@@ -23,7 +23,9 @@ public class ExecuteAllAction extends AbstractAction
 	{
 		this.client = aListener;
 		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_EXECUTE_ALL));
+		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription(ResourceMgr.TXT_EXECUTE_ALL));
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_EXEC_ALL));
+		this.putValue(WbActionConstants.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
 	}
 	
 	public void actionPerformed(ActionEvent e)

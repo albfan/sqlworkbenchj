@@ -41,7 +41,6 @@ public class ProfileEditorPanel
 		initComponents();
 		this.fillDrivers();
 		String last = WbManager.getSettings().getLastConnection();
-		System.out.println("selecting last profile");
 		this.selectProfile(last);
 		jList1.setNextFocusableComponent(connectionEditor);
 		this.connectionEditor.setNextFocusableComponent(jList1);
@@ -193,7 +192,7 @@ public class ProfileEditorPanel
 	public void saveItem() throws WbException
 	{
 		ConnectionMgr conn = WbManager.getInstance().getConnectionMgr();
-		conn.putProfiles(this.model.getValues());
+		conn.setProfiles(this.model.getValues());
 		conn.saveXmlProfiles();
 	}
 

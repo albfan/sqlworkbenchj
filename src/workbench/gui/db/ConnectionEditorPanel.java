@@ -6,6 +6,8 @@
 
 package workbench.gui.db;
 
+import java.awt.Frame;
+import java.awt.event.ItemEvent;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.WbManager;
@@ -18,7 +20,9 @@ import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.SwingUtilities;
 import workbench.db.DbDriver;
+import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -29,7 +33,8 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 {
 	private ConnectionProfile currentProfile;
 	private List drivers;
-
+	private boolean init;
+	
 	public ConnectionEditorPanel()
 	{
 		this.initComponents();
@@ -55,7 +60,6 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		cbAutocommit = new javax.swing.JCheckBox();
 		dummy = new javax.swing.JPanel();
 		tfProfileName = new javax.swing.JTextField();
-		updateButton = new javax.swing.JButton();
 		manageDriversButton = new javax.swing.JButton();
 		
 		setLayout(new java.awt.GridBagLayout());
@@ -126,14 +130,22 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 			}
 		});
 		
+		cbDrivers.addItemListener(new java.awt.event.ItemListener()
+		{
+			public void itemStateChanged(java.awt.event.ItemEvent evt)
+			{
+				cbDriversItemStateChanged(evt);
+			}
+		});
+		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 1;
 		gridBagConstraints.gridwidth = 2;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 4);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.weightx = 0.5;
+		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 4);
 		add(cbDrivers, gridBagConstraints);
 		
 		jLabel2.setFont(null);
@@ -226,40 +238,54 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.gridy = 0;
 		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.weightx = 1.0;
+		gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
 		add(tfProfileName, gridBagConstraints);
-		
-		updateButton.setText("Update");
-		updateButton.addActionListener(new java.awt.event.ActionListener()
-		{
-			public void actionPerformed(java.awt.event.ActionEvent evt)
-			{
-				updateButtonActionPerformed(evt);
-			}
-		});
-		
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 3;
-		gridBagConstraints.gridy = 5;
-		gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-		add(updateButton, gridBagConstraints);
 		
 		manageDriversButton.setFont(null);
 		manageDriversButton.setText(ResourceMgr.getString("EditDrivers"));
 		manageDriversButton.setMaximumSize(new java.awt.Dimension(200, 20));
 		manageDriversButton.setMinimumSize(new java.awt.Dimension(70, 20));
 		manageDriversButton.setPreferredSize(new java.awt.Dimension(100, 20));
+		manageDriversButton.addActionListener(new java.awt.event.ActionListener()
+		{
+			public void actionPerformed(java.awt.event.ActionEvent evt)
+			{
+				showDriverEditorDialog(evt);
+			}
+		});
+		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 3;
 		gridBagConstraints.gridy = 1;
-		gridBagConstraints.insets = new java.awt.Insets(0, 0, 1, 6);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 0, 1, 6);
 		add(manageDriversButton, gridBagConstraints);
 		
 	}//GEN-END:initComponents
+
+	private void cbDriversItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_cbDriversItemStateChanged
+	{//GEN-HEADEREND:event_cbDriversItemStateChanged
+		if (evt.getStateChange() == ItemEvent.SELECTED)
+		{
+			if (this.tfURL.getText() == null || this.tfURL.getText().trim().length() == 0)
+			{
+				DbDriver newDriver = (DbDriver)this.cbDrivers.getSelectedItem();
+				this.tfURL.setText(newDriver.getSampleUrl());
+			}
+		}		
+	}//GEN-LAST:event_cbDriversItemStateChanged
+
+	private void showDriverEditorDialog(java.awt.event.ActionEvent evt)//GEN-FIRST:event_showDriverEditorDialog
+	{//GEN-HEADEREND:event_showDriverEditorDialog
+		// not really nice, but works until the driver editor can be
+		// called from a different location...
+		Frame parent = (Frame)(SwingUtilities.getWindowAncestor(this)).getParent();
+		DriverEditorDialog d = new DriverEditorDialog(parent, true);
+		WbSwingUtilities.center(d,parent);
+		d.show();
+	}//GEN-LAST:event_showDriverEditorDialog
 
 	private void cbAutocommitItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_cbAutocommitItemStateChanged
 	{//GEN-HEADEREND:event_cbAutocommitItemStateChanged
@@ -271,11 +297,6 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		this.updateProfile();
 	}//GEN-LAST:event_fieldFocusLost
 
-	private void updateButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_updateButtonActionPerformed
-	{//GEN-HEADEREND:event_updateButtonActionPerformed
-		this.updateProfile();
-	}//GEN-LAST:event_updateButtonActionPerformed
-
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JButton manageDriversButton;
@@ -286,7 +307,6 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 	private javax.swing.JLabel lblPwd;
 	private javax.swing.JCheckBox cbAutocommit;
 	private javax.swing.JTextField tfURL;
-	private javax.swing.JButton updateButton;
 	private javax.swing.JLabel jLabel2;
 	private javax.swing.JTextField tfUserName;
 	private javax.swing.JLabel jLabel1;
@@ -302,6 +322,9 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 
 	public void updateProfile()
 	{
+		if (this.init) return;
+		if (this.currentProfile == null) return;
+		
 		Object driver = cbDrivers.getSelectedItem();
 		if (driver != null) 
 		{
@@ -329,6 +352,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 
 	public void setProfile(ConnectionProfile aProfile)
 	{
+		this.init = true;
 		this.currentProfile = aProfile;
 		this.tfProfileName.setText(aProfile.getName());
 		this.tfUserName.setText(aProfile.getUsername());
@@ -358,6 +382,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 			this.cbDrivers.addItem(drv);
 			this.cbDrivers.setSelectedIndex(this.cbDrivers.getItemCount() - 1);
 		}
+		this.init = false;
 	}
 
 }

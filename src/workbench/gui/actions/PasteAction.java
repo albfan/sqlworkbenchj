@@ -26,6 +26,7 @@ public class PasteAction extends AbstractAction
 		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_PASTE));
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_PASTE));
 		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("C+V"));
+		this.putValue(WbActionConstants.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_EDIT);
 	}
 
 	public void actionPerformed(ActionEvent e)

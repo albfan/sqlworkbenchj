@@ -24,6 +24,7 @@ public class CutAction extends AbstractAction
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_CUT));
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_CUT));
+		this.putValue(WbActionConstants.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_EDIT);
 	}
 	
 	public void actionPerformed(ActionEvent e)

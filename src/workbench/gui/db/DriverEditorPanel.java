@@ -48,6 +48,8 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		tfLibrary = new javax.swing.JTextField();
 		jPanel1 = new javax.swing.JPanel();
 		jButton1 = new javax.swing.JButton();
+		lblSample = new javax.swing.JLabel();
+		tfSampleUrl = new javax.swing.JTextField();
 		
 		setLayout(new java.awt.GridBagLayout());
 		
@@ -57,8 +59,8 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 0;
-		gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 7);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 7);
 		add(lblName, gridBagConstraints);
 		
 		tfName.setMinimumSize(new java.awt.Dimension(50, 20));
@@ -76,9 +78,9 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.gridy = 0;
 		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(11, 3, 0, 3);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
 		gridBagConstraints.weightx = 1.0;
+		gridBagConstraints.insets = new java.awt.Insets(11, 3, 0, 3);
 		add(tfName, gridBagConstraints);
 		
 		lblClassName.setFont(null);
@@ -86,8 +88,8 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 1;
-		gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 7);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 7);
 		add(lblClassName, gridBagConstraints);
 		
 		tfClassName.setColumns(10);
@@ -104,8 +106,8 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.gridy = 1;
 		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 3);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 3);
 		add(tfClassName, gridBagConstraints);
 		
 		lblLibrary.setFont(null);
@@ -113,8 +115,8 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 2;
-		gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 7);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 7);
 		add(lblLibrary, gridBagConstraints);
 		
 		tfLibrary.setColumns(10);
@@ -138,7 +140,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 3;
+		gridBagConstraints.gridy = 4;
 		gridBagConstraints.gridheight = java.awt.GridBagConstraints.REMAINDER;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
 		gridBagConstraints.weighty = 1.0;
@@ -162,6 +164,26 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.gridy = 2;
 		gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 3);
 		add(jButton1, gridBagConstraints);
+		
+		lblSample.setFont(null);
+		lblSample.setText(ResourceMgr.getString("LabelSampleUrl"));
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 3;
+		gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 7);
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		add(lblSample, gridBagConstraints);
+		
+		tfSampleUrl.setColumns(10);
+		tfSampleUrl.setFont(null);
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 3;
+		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 3);
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		add(tfSampleUrl, gridBagConstraints);
 		
 	}//GEN-END:initComponents
 
@@ -190,14 +212,22 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		this.tfName.setText(aDriver.getName());
 		this.tfClassName.setText(aDriver.getDriverClass());
 		this.tfLibrary.setText(aDriver.getLibrary());
+		this.tfSampleUrl.setText(aDriver.getSampleUrl());
 	}
-	private void updateDriver()
+	
+	void updateDriver()
 	{
 		this.currentDriver.setName(tfName.getText());
 		this.currentDriver.setDriverClass(tfClassName.getText());
 		this.currentDriver.setLibrary(tfLibrary.getText());
+		this.currentDriver.setSampleUrl(tfSampleUrl.getText());
 	}
 	
+	public DbDriver getDriver()
+	{
+		this.updateDriver();
+		return this.currentDriver;
+	}
 	
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JPanel jPanel1;
@@ -206,8 +236,10 @@ public class DriverEditorPanel extends javax.swing.JPanel
 	private javax.swing.JLabel lblLibrary;
 	private javax.swing.JLabel lblName;
 	private javax.swing.JTextField tfName;
+	private javax.swing.JTextField tfSampleUrl;
 	private javax.swing.JTextField tfClassName;
 	private javax.swing.JLabel lblClassName;
+	private javax.swing.JLabel lblSample;
 	// End of variables declaration//GEN-END:variables
 
 	public static void main(String args[])

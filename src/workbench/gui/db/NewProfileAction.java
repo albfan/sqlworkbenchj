@@ -27,7 +27,7 @@ public class NewProfileAction extends AbstractAction
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString("NewProfile"));
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("NewProfile"));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_NEW, false));
+		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_NEW));
 	}
 	
 	public void actionPerformed(ActionEvent e)
