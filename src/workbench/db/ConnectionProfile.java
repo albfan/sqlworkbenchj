@@ -43,6 +43,7 @@ public class ConnectionProfile
 	private Properties connectionProperties;
 	private String workspaceFile;
 	private boolean ignoreDropErrors;
+	private boolean confirmUpdates;
 
 	static
 	{
@@ -349,6 +350,7 @@ public class ConnectionProfile
 		result.setIgnoreDropErrors(this.ignoreDropErrors);
 		result.setUseSeperateConnectionPerTab(this.seperateConnection);
 		result.setRollbackBeforeDisconnect(this.rollbackBeforeDisconnect);
+		result.setConfirmUpdates(this.confirmUpdates);
 		if (this.connectionProperties != null)
 		{
 			Enumeration keys = this.connectionProperties.propertyNames();
@@ -469,10 +471,21 @@ public class ConnectionProfile
 	 * Setter for property disableUpdateTableCheck.
 	 * @param disableUpdateTableCheck New value of property disableUpdateTableCheck.
 	 */
-	public void setDisableUpdateTableCheck(boolean aFlag)
+	public void setDisableUpdateTableCheck(boolean flag)
 	{
-		if (aFlag != this.disableUpdateTableCheck) this.changed = true;
-		this.disableUpdateTableCheck = aFlag;
+		if (flag != this.disableUpdateTableCheck) this.changed = true;
+		this.disableUpdateTableCheck = flag;
+	}
+
+	public boolean isConfirmUpdates()
+	{
+		return confirmUpdates;
+	}
+
+	public void setConfirmUpdates(boolean flag)
+	{
+		if (flag != this.confirmUpdates) this.changed = true;
+		this.confirmUpdates = flag;
 	}
 
 }

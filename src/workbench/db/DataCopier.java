@@ -57,6 +57,7 @@ public class DataCopier
 	private ColumnIdentifier[] targetColumnsForQuery;
 	private StringBuffer messages = null;
 	private StringBuffer errors = null;
+	private boolean abortOnError = false;
 
 	public DataCopier()
 	{
@@ -152,6 +153,11 @@ public class DataCopier
 			throw new SQLException("Table " + aTargetTable.getTable() + " not found in target connection");
 		}
 		this.initImporterForTable();
+	}
+
+	public void setAbortOnError(boolean flag)
+	{
+		this.abortOnError = flag;
 	}
 
 	public void setKeyColumns(String aColList)

@@ -11,6 +11,7 @@
  */
 package workbench.db;
 
+import java.beans.PropertyChangeListener;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.sql.Connection;
@@ -31,6 +32,9 @@ import java.util.StringTokenizer;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.event.ChangeListener;
+import workbench.db.hsqldb.HsqlSequenceReader;
+import workbench.db.ingres.IngresMetaData;
 
 import workbench.db.mssql.MsSqlMetaData;
 import workbench.db.mssql.SqlServerConstraintReader;
@@ -38,7 +42,8 @@ import workbench.db.mysql.EnumReader;
 import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.OracleConstraintReader;
 import workbench.db.oracle.OracleMetaData;
-import workbench.db.oracle.SynonymReader;
+import workbench.db.postgres.PgSequenceReader;
+import workbench.db.postgres.PostgresConstraintReader;
 import workbench.exception.ExceptionUtil;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.log.LogMgr;
@@ -56,6 +61,7 @@ import workbench.util.WbPersistence;
  *  @author  info@sql-workbench.net
  */
 public class DbMetadata
+	implements PropertyChangeListener
 {
 	public static final String PROC_RESULT_UNKNOWN = "";
 	public static final String PROC_RESULT_YES = "RESULT";
@@ -89,6 +95,7 @@ public class DbMetadata
 	// supported by JDBC or where the JDBC driver does not work properly
 	private OracleMetaData oracleMetaData;
 	private MsSqlMetaData msSqlMetaData;
+	private IngresMetaData ingresMetaData;
 
 	private static List caseSensitiveServers = Collections.EMPTY_LIST;
 	private static List ddlNeedsCommitServers = Collections.EMPTY_LIST;
@@ -108,7 +115,6 @@ public class DbMetadata
 	private static HashMap tableCommentStatements;
 	private static boolean templatesRead = false;
 
-	//private HashMap dateLiteralFormatter;
 	private DbmsOutput oraOutput;
 
   private boolean caseSensitive;
@@ -124,11 +130,14 @@ public class DbMetadata
 	private boolean isInformix = false;
 	private boolean isCloudscape = false;
 	private boolean isApacheDerby = false;
+	private boolean isIngres = false;
 
 	private boolean createInlineConstraints = false;
 
 	private AbstractConstraintReader constraintReader = null;
-
+	private SynonymReader synonymReader = null;
+	private SequenceReader sequenceReader = null;
+	
 	private List keywords;
 	private String quoteCharacter;
 	private String dbVersion;
@@ -198,17 +207,22 @@ public class DbMetadata
 			this.isOracle = true;
 			this.oracleMetaData = new OracleMetaData(this.dbConnection.getSqlConnection());
 			this.constraintReader = new OracleConstraintReader();
+			this.synonymReader = new workbench.db.oracle.OracleSynonymReader();
+			Settings.getInstance().addPropertyChangeListener(this);
+			this.sequenceReader = this.oracleMetaData;
 		}
 		else if (productLower.indexOf("postgres") > - 1)
 		{
 			this.isPostgres = true;
 			this.selectIntoPattern = Pattern.compile(SELECT_INTO_PG);
 			this.constraintReader = new PostgresConstraintReader();
+			this.sequenceReader = new PgSequenceReader(this.dbConnection.getSqlConnection());
 		}
 		else if (productLower.indexOf("hsql") > -1)
 		{
 			this.isHsql = true;
 			this.constraintReader = new HsqlConstraintReader();
+			this.sequenceReader = new HsqlSequenceReader(this.dbConnection.getSqlConnection());
 		}
 		else if (productLower.indexOf("firebird") > -1)
 		{
@@ -245,7 +259,14 @@ public class DbMetadata
 			this.isApacheDerby = true;
 			this.constraintReader = new CloudscapeConstraintReader();
 		}
-
+		else if (productLower.indexOf("ingres") > -1)
+		{
+			this.isIngres = true;
+			this.ingresMetaData = new IngresMetaData(this.dbConnection.getSqlConnection());
+			this.synonymReader = this.ingresMetaData;
+			this.sequenceReader = this.ingresMetaData;
+		}
+		
 		try
 		{
 			this.quoteCharacter = this.metaData.getIdentifierQuoteString();
@@ -373,6 +394,12 @@ public class DbMetadata
 	public boolean isCloudscape() { return this.isCloudscape; }
 	public boolean isApacheDerby() { return this.isApacheDerby; }
 
+  public boolean isOracle8()
+	{
+		if (!this.isOracle) return false;
+		if (this.oracleMetaData == null) return false;
+		return this.oracleMetaData.isOracle8();
+	}
 	/**
 	 *	Return a list of datatype as returned from DatabaseMetaData.getTypeInfo()
 	 *	which we cannot handle. This is used by the TableCreator when searching
@@ -1076,7 +1103,8 @@ public class DbMetadata
 		DataStore result = new DataStore(cols, coltypes, sizes);
 		aSchema = adjustObjectname(aSchema);
 		aCatalog = adjustObjectname(aCatalog);
-
+		boolean sequencesReturned = false;
+		
 		ResultSet tableRs = null;
 		try
 		{
@@ -1097,6 +1125,7 @@ public class DbMetadata
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, cat);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, schem);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, rem);
+				if (!sequencesReturned && "SEQUENCE".equals(ttype)) sequencesReturned = true;
 			}
 		}
 		finally
@@ -1104,14 +1133,14 @@ public class DbMetadata
 			SqlUtil.closeResult(tableRs);
 		}
 
-		// It seems that Oracle does return the sequences, so we don't
-		// need that anymore...
-		if (this.isOracle && "true".equals(Settings.getInstance().getProperty("workbench.db.oracle.retrieve_sequence", "false")))
+		if (this.sequenceReader != null && typeIncluded("SEQUENCE", types) &&
+				"true".equals(Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".retrieve_sequences", "true"))
+				&& !sequencesReturned)
 		{
 			LogMgr.logDebug("DbMetadata.getTables()", "Retrieving sequences...");
-			List seq = this.oracleMetaData.getSequenceList(aSchema);
+			List seq = this.sequenceReader.getSequenceList(aSchema);
 			int count = seq.size();
-			for (int i=0; i < 0; i++)
+			for (int i=0; i < count; i++)
 			{
 				int row = result.addRow();
 
@@ -1122,10 +1151,37 @@ public class DbMetadata
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, null);
 			}
 		}
+		
+		if (this.isIngres && typeIncluded("SYNONYM", types) && "true".equals(Settings.getInstance().getProperty("workbench.db.ingres.retrieve_synonyms", "true")))
+		{
+			LogMgr.logDebug("DbMetadata.getTables()", "Retrieving Ingres synonyms...");
+			List syns = this.ingresMetaData.getSynonymList(aSchema);
+			int count = syns.size();
+			for (int i=0; i < count; i++)
+			{
+				int row = result.addRow();
 
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, (String)syns.get(i));
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_TYPE, "SYNONYM");
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, null);
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, aSchema);
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, null);
+			}
+		}
 		return result;
 	}
 
+	private boolean typeIncluded(String type, String[] types)
+	{
+		if (types == null) return true;
+		if (type == null) return false;
+		int l = types.length;
+		for (int i=0; i < l; i++)
+		{
+			if (type.equalsIgnoreCase(types[i])) return true;
+		}
+		return false;
+	}
 	public boolean tableExists(TableIdentifier aTable)
 	{
 		if (aTable == null) return false;
@@ -1438,6 +1494,7 @@ public class DbMetadata
 
 	public void close()
 	{
+		Settings.getInstance().removePropertyChangeLister(this);
 		if (this.oraOutput != null) this.oraOutput.close();
 		if (this.oracleMetaData != null) this.oracleMetaData.done();
 		if (this.msSqlMetaData != null) this.msSqlMetaData.done();
@@ -1667,9 +1724,10 @@ public class DbMetadata
 			aTable = this.adjustObjectname(aTable);
 		}
 
-		if (this.isOracle && "SEQUENCE".equalsIgnoreCase(aType))
+		if (this.sequenceReader != null && "SEQUENCE".equalsIgnoreCase(aType))
 		{
-			return this.oracleMetaData.getSequenceDefinition(aSchema, aTable);
+			DataStore seqDs = this.sequenceReader.getSequenceDefinition(aSchema, aTable);
+			if (seqDs != null) return seqDs;
 		}
 
 		if ("SYNONYM".equalsIgnoreCase(aType))
@@ -2250,7 +2308,16 @@ public class DbMetadata
 			}
 			if (this.isOracle)
 			{
-				result.add("SEQUENCE");
+				if (!result.contains("SEQUENCE")) result.add("SEQUENCE");
+			}
+			if (this.isIngres)
+			{
+				if (!result.contains("SYNONYM")) result.add("SYNONYM");
+				if (!result.contains("SEQUENCE")) result.add("SEQUENCE");
+			}
+			if (this.isHsql)
+			{
+				if (!result.contains("SEQUENCE")) result.add("SEQUENCE");
 			}
 		}
 		catch (Exception e)
@@ -2504,94 +2571,25 @@ public class DbMetadata
 
 	public String getSequenceSource(String aCatalog, String aSchema, String aSequence)
 	{
-		if (this.isOracle && this.oracleMetaData != null)
+		if (this.sequenceReader != null)
 		{
-			return this.oracleMetaData.getSequenceSource(aSchema, aSequence);
-		}
-		else if (this.isPostgres)
-		{
-			return this.getPostgresSequenceSource(aSequence);
+			return this.sequenceReader.getSequenceSource(aSchema, aSequence);
 		}
 		return "";
 	}
 
 	/**
-	 *	Return the source SQL for a PostgreSQL sequence definition.
+	 *	Return the underlying table of a synonym.
 	 *
-	 *	@return The SQL to recreate the sequence if the current DBMS is Postgres. An empty String otherwise
-	 */
-	private String getPostgresSequenceSource(String aSequence)
-	{
-		if (!this.isPostgres) return "";
-		if (aSequence == null) return "";
-
-		int pos = aSequence.indexOf('.');
-		if (pos > 0)
-		{
-			aSequence = aSequence.substring(pos);
-		}
-		Statement stmt = null;
-		ResultSet rs = null;
-		String result = "";
-		try
-		{
-			String sql = "SELECT sequence_name, max_value, min_value, increment_by, cache_value, is_cycled FROM " + aSequence;
-			stmt = this.dbConnection.createStatement();
-			rs = stmt.executeQuery(sql);
-			if (rs.next())
-			{
-				String name = rs.getString(1);;
-				long maxValue = rs.getLong(2);
-				long minValue = rs.getLong(3);
-				String max = Long.toString(maxValue);
-				String min = Long.toString(minValue);
-				String inc = rs.getString(4);
-				String cache = rs.getString(5);
-				String cycle = rs.getString(6);
-
-				StrBuffer buf = new StrBuffer(250);
-				buf.append("CREATE SEQUENCE ");
-				buf.append(name);
-				buf.append(" INCREMENT ");
-				buf.append(inc);
-				buf.append(" MINVALUE ");
-				buf.append(min);
-				buf.append(" MAXVALUE ");
-				buf.append(max);
-				buf.append(" CACHE ");
-				buf.append(cache);
-				if ("true".equalsIgnoreCase(cycle))
-				{
-					buf.append(" CYCLE");
-				}
-				buf.append(";");
-				result = buf.toString();
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DbMetadata.getSequenceSource()", "Error reading sequence definition", e);
-			result = "";
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return result;
-	}
-
-	/**
-	 *	Return the underlying table of an Oracle synonym.
-	 *
-	 *	@return the table to which the synonym points. If the DBMS is not Oracle an empty String
+	 *	@return the table to which the synonym points. 
 	 */
 	public TableIdentifier getSynonymTable(String anOwner, String aSynonym)
 	{
-		if (!this.isOracle) return null;
+		if (this.synonymReader == null) return null;
 		TableIdentifier id = null;
 		try
 		{
-			id = SynonymReader.getSynonymTable(this.dbConnection.getSqlConnection(), anOwner, aSynonym);
+			id = this.synonymReader.getSynonymTable(this.dbConnection.getSqlConnection(), anOwner, aSynonym);
 		}
 		catch (Exception e)
 		{
@@ -2602,21 +2600,22 @@ public class DbMetadata
 
 	/**
 	 *	Return the SQL statement to recreate the given synonym.
-	 *
-	 *	@return the SQL to create the synonym. If the DBMS is not Oracle an empty String
+	 *	@return the SQL to create the synonym. 
 	 */
 	public String getSynonymSource(String anOwner, String aSynonym)
 	{
-		if (!this.isOracle) return "";
+		if (this.synonymReader == null) return "";
 		String result = null;
+			
 		try
 		{
-			result = SynonymReader.getSynonymSource(this.dbConnection.getSqlConnection(), anOwner, aSynonym);
+			result = this.synonymReader.getSynonymSource(this.dbConnection.getSqlConnection(), anOwner, aSynonym);
 		}
 		catch (Exception e)
 		{
 			result = "";
 		}
+		
 		return result;
 	}
 
@@ -2789,26 +2788,36 @@ public class DbMetadata
 			result.append(type);
 			for (int k=0; k < maxTypeLength - type.length(); k++) result.append(' ');
 
+			boolean defaultBeforeNull = this.isOracle || this.isFirebird || this.isIngres;
 			// Firbird and Oracle need the default value before the NULL/NOT NULL qualifier
-			if ((this.isOracle || this.isFirebird) && def != null && def.length() > 0)
+			if (defaultBeforeNull && def != null && def.length() > 0)
 			{
 				result.append(" DEFAULT ");
 				result.append(def.trim());
 			}
+			
 			if (columns[i].isNullable() )
 			{
-				if (this.acceptsColumnNullKeyword()) result.append(" NULL");
+				if (this.isIngres)
+				{
+					result.append(" WITH NULL");
+				}
+				else if (this.acceptsColumnNullKeyword()) 
+				{
+					result.append(" NULL");
+				}
 			}
 			else
 			{
 				result.append(" NOT NULL");
 			}
 
-			if (!(this.isOracle || this.isFirebird) && def != null && def.length() > 0)
+			if (!defaultBeforeNull && def != null && def.length() > 0)
 			{
 				result.append(" DEFAULT ");
 				result.append(def.trim());
 			}
+			
 			String constraint = (String)columnConstraints.get(colName);
 			if (constraint != null && constraint.length() > 0)
 			{
@@ -3405,6 +3414,22 @@ public class DbMetadata
 			template = (String)aMap.get(GENERAL_SQL);
 		}
 		return template;
+	}
+
+	public void propertyChange(java.beans.PropertyChangeEvent evt)
+	{
+		if ("workbench.sql.enable_dbms_output".equals(evt.getPropertyName()))
+		{
+			boolean enable = Settings.getInstance().getEnableDbmsOutput();
+			if (enable)
+			{
+				this.enableOutput();
+			}
+			else
+			{
+				this.disableOutput();
+			}
+		}
 	}
 
 }

@@ -122,7 +122,7 @@ public class ScriptParser
 		this.findDelimiterToUse();
 		this.commands = null;
 		this.commandBoundaries = null;
-		
+
 		this.crlfMatcher = StringUtil.PATTERN_CRLF.matcher(this.originalScript);
 	}
 
@@ -243,6 +243,17 @@ public class ScriptParser
 		return this.originalScript;
 	}
 
+	// These patterns cover the statements that
+	// can be used in a single line without a delimiter
+	// This is basically to make the parser as Oracle compatible as possible
+	// while not breaking the SQL queries for other servers
+	private static final Pattern[] SLC_PATTERNS =
+         { Pattern.compile("(?m)^\\s*@.*$"),
+					 Pattern.compile("(?mi)^\\s*SET\\s*\\w*\\s*((ON)|(OFF))\\s*;?\\s*$"),
+					 Pattern.compile("(?mi)^\\s*ECHO\\s*((ON)|(OFF))\\s*;?\\s*$"),
+					 Pattern.compile("(?mi)^\\s*SET\\s*TRANSACTION\\s*READ\\s*((WRITE)|(ONLY))\\s*;?\\s*$")
+	       };
+
 	//private static final Pattern GO_PATTERN = Pattern.compile("(?mi)^\\s*go\\s*$");
 
 	/**
@@ -266,75 +277,65 @@ public class ScriptParser
 		boolean blockComment = false;
 		boolean singleLineComment = false;
 		boolean startOfLine = true;
-		
-		String value = null;
+		int lastNewLineStart = 0;
+
 		int oldPos = -1;
 		String currChar = null;
-		String lastQuote = null;
+		char lastQuote = 0;
 
 		final int scriptLen = this.originalScript.length();
 		int lastPos = 0;
 		int currentIndex = -1;
 		int pos = -1;
 
-		if (this.delimiter.toUpperCase().equals(this.delimiter.toLowerCase()))
-			pos = this.originalScript.indexOf(this.delimiter);
-		else
-			pos = this.originalScript.toUpperCase().indexOf(this.delimiter.toUpperCase());
-		
-		if (pos == -1 || pos == this.originalScript.length() - this.delimiterLength)
-		{
-			this.addCommand(0, -1);
-			return;
-		}
-
 		for (pos = 0; pos < scriptLen; pos++)
 		{
 			currChar = this.originalScript.substring(pos, pos + 1).toUpperCase();
-			
+			char firstChar = currChar.charAt(0);
+
 			// ignore quotes in comments
-			if (!commentOn && currChar.charAt(0) == '\'' || currChar.charAt(0) == '"')
+			if (!commentOn && (firstChar == '\'' || firstChar == '"'))
 			{
 				if (!quoteOn)
 				{
-					lastQuote = currChar;
+					lastQuote = firstChar;
 					quoteOn = true;
 				}
-				else if (currChar.equals(lastQuote))
+				else if (firstChar == lastQuote)
 				{
 					if (pos > 1)
 					{
 						// check if the current quote char was escaped
 						if (this.originalScript.charAt(pos - 1) != '\\')
 						{
-							lastQuote = null;
+							lastQuote = 0;
 							quoteOn = false;
 						}
 					}
 					else
 					{
-						lastQuote = null;
+						lastQuote = 0;
 						quoteOn = false;
 					}
 				}
 			}
 
+			if (quoteOn) continue;
+
 			// now check for comment start
 			if (!quoteOn && pos < scriptLen - 1)
 			{
-				char toTest = currChar.charAt(0);
-
 				if (!commentOn)
 				{
 					char next = this.originalScript.charAt(pos + 1);
 
-					if (toTest == '/' && next == '*')
+					if (firstChar == '/' && next == '*')
 					{
 						blockComment = true;
 						singleLineComment = false;
 						commentOn = true;
 					}
-					else if (startOfLine && (toTest == '#' || (toTest == '-' && next == '-')))
+					else if (startOfLine && (firstChar == '#' || (firstChar == '-' && next == '-')))
 					{
 						singleLineComment = true;
 						blockComment = false;
@@ -345,7 +346,7 @@ public class ScriptParser
 				{
 					if (singleLineComment)
 					{
-						if (toTest == '\r' || toTest == '\n')
+						if (firstChar == '\r' || firstChar == '\n')
 						{
 							singleLineComment = false;
 							blockComment = false;
@@ -357,7 +358,7 @@ public class ScriptParser
 					else if (blockComment)
 					{
 						char last = this.originalScript.charAt(pos - 1);
-						if (toTest == '/' && last == '*')
+						if (firstChar == '/' && last == '*')
 						{
 							blockComment = false;
 							singleLineComment = false;
@@ -377,29 +378,55 @@ public class ScriptParser
 
 				if ((currChar.equals(this.delimiter) || (pos == scriptLen)))
 				{
-					this.addCommand(lastPos, pos);
-					lastPos = pos + this.delimiterLength;
+					int index = this.addCommand(lastPos, pos);
 					startOfLine = true;
-					
-					// skip the startOfLine test.
+					lastPos = pos + this.delimiterLength;
 					continue;
 				}
+				else
+				{
+					// check for single line commands...
+					if (firstChar == '\r' || firstChar == '\n' )
+					{
+						String line = this.originalScript.substring(lastNewLineStart, pos).trim();
+						int endPos = lastNewLineStart + line.length();
+						boolean slcFound = false;
+						for (int pi=0; pi < SLC_PATTERNS.length; pi++)
+						{
+							Matcher m = SLC_PATTERNS[pi].matcher(line);
+							if (m.matches())
+							{
+								this.addCommand(lastPos, pos);
+								CommandBoundary bound = new CommandBoundary(lastNewLineStart, endPos);
+								slcFound = true;
+							}
+						}
+
+						lastNewLineStart = pos;
+						startOfLine = true;
+						if (slcFound)
+						{
+							lastPos = pos;
+						}
+						continue;
+					}
+				}
 			}
-			
-			if (currChar.charAt(0) == '\n' || currChar.charAt(0) == '\n' )
+
+			if (firstChar == '\r' || firstChar == '\n' )
 			{
 				startOfLine = true;
 			}
 			else
 			{
-				startOfLine = Character.isWhitespace(currChar.charAt(0));
+				startOfLine = Character.isWhitespace(firstChar);
 			}
-			
-		}
+
+		} // end loop over whole script
 
 		if (lastPos < pos)
 		{
-			value = this.originalScript.substring(lastPos).trim();
+			String value = this.originalScript.substring(lastPos).trim();
 			int endpos = this.originalScript.length();
 			if (value.endsWith(this.delimiter))
 			{
@@ -414,7 +441,7 @@ public class ScriptParser
 		String value = null;
 		startPos = this.getRealStartPos(startPos, endPos);
 		//endPos = this.getRealEndPos(startPos, endPos);
-		
+
 		if (endPos == -1)
 		{
 			value = this.originalScript.substring(startPos).trim();
@@ -432,29 +459,30 @@ public class ScriptParser
 
 		String clean = SqlUtil.makeCleanSql(value, false);
 		if (clean.equalsIgnoreCase(this.delimiter)) return -1;
-		
+
 		if (clean.length() > 0)
 		{
 			this.commands.add(value);
 			CommandBoundary b = new CommandBoundary(startPos, endPos);
 			this.commandBoundaries.add(b);
 		}
+		//System.out.println("Added: >" + value + "<" );
 		return this.commands.size() - 1;
 	}
 
 	/**
-	 *	Check for the real beginning of the statement identified by 
+	 *	Check for the real beginning of the statement identified by
 	 *	startPos/endPos. This method will return the actual start of the
 	 *	command with leading comments trimmed
 	 */
 	private int getRealStartPos(int startPos, int endPos)
 	{
 		if (startPos + 2 > this.originalScript.length()) return startPos;
-		
+
 		if (endPos == -1) endPos = this.originalScript.length();
-		
+
 		int start = startPos;
-		
+
 		while (start + 2 < endPos)
 		{
 			String s = this.originalScript.substring(start, start + 2).trim();
@@ -482,13 +510,13 @@ public class ScriptParser
 	}
 
 	/**
-	 *	Find the real end for the given command, trimming 
+	 *	Find the real end for the given command, trimming
 	 *	any possible comments after the real statement
 	 */
 	private int getRealEndPos(int startPos, int endPos)
 	{
 		if (endPos == -1) return endPos;
-		
+
 		String value = this.originalScript.substring(startPos, endPos);
 		Pattern p = Pattern.compile("[^\\*]" + this.delimiter);
 		Matcher m = p.matcher(value);
@@ -498,22 +526,34 @@ public class ScriptParser
 			last = m.start();
 		}
 		if (last == -1)  return endPos;
-		
+
 		return startPos + last + this.delimiterLength;
 	}
-	
+
 	public static void main(String args[])
 	{
 		try
 		{
-			String sql = "--bbbb\ncreate procedure bla/* create the procedure */\nas\nset x = 5;\nend/--'\ncommit/\n--";
-			//String sql = "  --'\ncommit/\n--";
-			ScriptParser p = new ScriptParser(sql);
-			List l = p.getCommands();
-			for (int i=0; i < l.size(); i++)
+			String sql = "@include.sql\ndelete from person; \n" +
+             "commit\n; \n" +
+             "set transaction read only \n" +
+             "@c:/temp/test_insert.sql \n" +
+    "set feedback off \n" +
+             " \n" +
+             "wbexport -type=text -file=\"d:/temp/test-1.txt\" -delimiter=, -header=true; \n" +
+             "select firstname, lastname, 'test-1' \n" +
+             "from person \n" +
+             "group by firstname, lastname\n;\n" +
+						 "UPDATE table \n SET column=value;\n" +
+				"commit;";
+//		String sql = "select\n;\n from bla\n;\n";
+//			String sql = "select id, region_path(id) from region\n;\n";
+
+		  ScriptParser p = new ScriptParser(sql);
+			List c = p.getCommands();
+			for (int i=0; i < c.size(); i++)
 			{
-				System.out.println("==============");
-				System.out.println(l.get(i));
+				System.out.println(c.get(i) + "\n--------------------------");
 			}
 		}
 		catch (Throwable e)

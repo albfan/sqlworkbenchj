@@ -38,11 +38,19 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.ProgressPanel;
+import workbench.gui.dialogs.export.ExportFileDialog;
+import workbench.gui.dialogs.export.ExportOptions;
+import workbench.gui.dialogs.export.HtmlOptions;
+import workbench.gui.dialogs.export.SqlOptions;
+import workbench.gui.dialogs.export.TextOptions;
+import workbench.gui.dialogs.export.XmlOptions;
 import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
+import workbench.util.CharacterRange;
 import workbench.util.FileDialogUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -73,12 +81,16 @@ public class DataExporter
 	private boolean includeCreateTable = false;
 	private boolean headerOnly = false;
 	private boolean useSqlUpdate = false;
+	private boolean useCDATA = false;
+	private CharacterRange escapeRange = null;
+	private String lineEnding = StringUtil.LINE_TERMINATOR;
 	private String tableName;
 	private String sqlTable;
 	private String encoding;
 
 	private String delimiter = "\t";
 	private String quoteChar = null;
+	private boolean quoteAlways = false;
 	private String dateFormat = null;
 	private String dateTimeFormat = null;
 	private char decimalSymbol = '.';
@@ -113,6 +125,7 @@ public class DataExporter
 	private ArrayList warnings = new ArrayList();
 	private ArrayList errors = new ArrayList();
 	private ArrayList jobQueue;
+	private ExportWriter exportWriter;
 
 	public DataExporter()
 	{
@@ -199,6 +212,10 @@ public class DataExporter
 	public void cancelExecution()
 	{
 		this.keepRunning = false;
+		if (this.exportWriter != null)
+		{
+			this.exportWriter.cancel();
+		}
 	}
 
 	public void setTableName(String aTablename) { this.tableName = aTablename; }
@@ -215,6 +232,9 @@ public class DataExporter
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
 		}
 	}
+
+	public void setUseCDATA(boolean flag) { this.useCDATA = flag; }
+	public boolean getUseCDATA() { return this.useCDATA; }
 
 	public void setAppendToFile(boolean aFlag) { this.append = aFlag; }
 	public boolean getAppendToFile() { return this.append; }
@@ -255,7 +275,10 @@ public class DataExporter
 	public void setEscapeHtml(boolean aFlag) { this.escapeHtml = aFlag; }
 	public boolean getEscapeHtml() { return this.escapeHtml; }
 
-	public void setTextDelimiter(String aDelimiter) { this.delimiter = aDelimiter; }
+	public void setTextDelimiter(String aDelimiter)
+	{
+		if (aDelimiter != null && aDelimiter.trim().length() > 0) this.delimiter = aDelimiter;
+	}
 	public String getTextDelimiter() { return this.delimiter; }
 
 	public void setTextQuoteChar(String aQuote) { this.quoteChar = aQuote; }
@@ -545,10 +568,61 @@ public class DataExporter
 		if ("Cp1252".equals(enc)) return "ISO-8859-15";
 		return enc;
 	}
+
+	public long startExport(ResultSet rs)
+		throws IOException, SQLException, Exception
+	{
+		try
+		{
+			ResultSetMetaData meta = rs.getMetaData();
+			ResultInfo info = new ResultInfo(meta, this.dbConn);
+			this.exportWriter = createExportWriter(info);
+			this.exportWriter.writeExport(rs, info);
+		}
+		catch (SQLException e)
+		{
+			this.errors.add(e.getMessage());
+			LogMgr.logError("DataExporter", "SQL Error", e);
+			throw e;
+		}
+		finally
+		{
+			if (this.exportWriter != null) this.exportWriter.exportFinished();
+			if (!jobsRunning) this.closeProgress();
+			try { rs.close(); } catch (Throwable th) {}
+		}
+		long numRows = this.exportWriter.getNumberOfRecords();
+		return numRows;
+	}
+
+	public long startExport(DataStore ds)
+		throws IOException, SQLException, Exception
+	{
+		try
+		{
+			ResultInfo info = ds.getResultInfo();
+			this.exportWriter = createExportWriter(info);
+			this.exportWriter.writeExport(ds);
+		}
+		catch (SQLException e)
+		{
+			this.errors.add(e.getMessage());
+			LogMgr.logError("DataExporter", "Error when exporting DataStore", e);
+			throw e;
+		}
+		finally
+		{
+			this.exportWriter.exportFinished();
+			if (!jobsRunning) this.closeProgress();
+		}
+		long numRows = this.exportWriter.getNumberOfRecords();
+		return numRows;
+	}
+
 	/**
 	 *	Export a table to an external file.
 	 */
-	public long startExport(ResultSet rs)
+	public ExportWriter createExportWriter(ResultInfo info)
 		throws IOException, SQLException, Exception
 	{
 		if (!jobsRunning)
@@ -556,15 +630,13 @@ public class DataExporter
 			this.warnings.clear();
 			this.errors.clear();
 		}
-		ResultSetMetaData meta = rs.getMetaData();
-		ResultInfo info = new ResultInfo(meta, this.dbConn);
 		if (this.sqlTable != null)
 		{
 			info.setUpdateTable(new TableIdentifier(this.sqlTable));
 		}
 
-		ExportWriter exporter = null;
 		if (this.encoding == null) this.encoding = getDefaultEncoding();
+		ExportWriter exporter = null;
 
 		switch (this.exportType)
 		{
@@ -604,7 +676,7 @@ public class DataExporter
 			{
 				try
 				{
-					OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(f), this.encoding);
+					OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(f, this.append), this.encoding);
 					pw = new BufferedWriter(out);
 				}
 				catch (UnsupportedEncodingException e)
@@ -623,7 +695,7 @@ public class DataExporter
 			{
 				pw = new BufferedWriter(new FileWriter(f,this.append), 16*1024);
 			}
-			exporter.writeExport(pw, rs, info);
+			exporter.setOutput(pw);
 		}
 		catch (IOException e)
 		{
@@ -631,21 +703,10 @@ public class DataExporter
 			LogMgr.logError("DataExporter", "Error writing data file", e);
 			throw e;
 		}
-		catch (SQLException e)
-		{
-			this.errors.add(e.getMessage());
-			LogMgr.logError("DataExporter", "SQL Error", e);
-			throw e;
-		}
 		finally
 		{
-			try { if (pw != null) pw.close(); } catch (Throwable th) {}
-			try { rs.close(); } catch (Throwable th) {}
-			if (!jobsRunning) this.closeProgress();
 		}
-		exporter.exportFinished();
-		long numRows = exporter.getNumberOfRecords();
-		return numRows;
+		return exporter;
 	}
 
 	public void closeProgress()
@@ -667,32 +728,18 @@ public class DataExporter
 	{
 		this.setSql(aSql);
 		boolean includeSqlExport = this.sqlTable != null;
-		FileDialogUtil dialog = new FileDialogUtil();
-		String filename = dialog.getExportFilename(aParent, includeSqlExport);
-		if (filename != null)
+		ExportFileDialog dialog = new ExportFileDialog(aParent);
+		dialog.setIncludeSqlInsert(includeSqlExport);
+		dialog.setIncludeSqlUpdate(false);
+
+		boolean result = dialog.selectOutput();
+		if (result)
 		{
 			try
 			{
 				this.setConnection(aConnection);
-				this.setOutputFilename(filename);
+				dialog.setExporterOptions(this);
 				this.setShowProgress(true);
-				int type = dialog.getLastSelectedFileType();
-				if (type == FileDialogUtil.FILE_TYPE_SQL)
-				{
-					this.setOutputTypeSqlInsert();
-				}
-				else if (type == FileDialogUtil.FILE_TYPE_XML)
-				{
-					this.setOutputTypeXml();
-				}
-				else if (type == FileDialogUtil.FILE_TYPE_HTML)
-				{
-					this.setOutputTypeHtml();
-				}
-				else
-				{
-					this.setOutputTypeText();
-				}
 				this.startBackgroundThread();
 			}
 			catch (Exception e)
@@ -700,6 +747,54 @@ public class DataExporter
 				LogMgr.logError("DataExporter.executeStatement()", "Could not export data", e);
 			}
 		}
+	}
+
+	public void setOptions(ExportOptions options)
+	{
+		this.setEncoding(options.getEncoding());
+		this.setDateFormat(options.getDateFormat());
+		this.setTimestampFormat(options.getTimestampFormat());
+		this.setEncoding(options.getEncoding());
+	}
+
+	public void setSqlOptions(SqlOptions sqlOptions)
+	{
+		if (sqlOptions.getCreateInsert())
+		{
+			this.setOutputTypeSqlInsert();
+		}
+		else
+		{
+			this.setOutputTypeSqlUpdate();
+		}
+		this.setIncludeCreateTable(sqlOptions.getCreateTable());
+		this.setCommitEvery(sqlOptions.getCommitEvery());
+	}
+
+	public void setXmlOptions(XmlOptions xmlOptions)
+	{
+		this.setOutputTypeXml();
+		this.setUseCDATA(xmlOptions.getUseCDATA());
+	}
+
+	public void setHtmlOptions(HtmlOptions html)
+	{
+		this.setOutputTypeHtml();
+		this.setCreateFullHtmlPage(html.getCreateFullPage());
+		this.setHtmlTitle(html.getPageTitle());
+		this.setEscapeHtml(html.getEscapeHtml());
+	}
+
+	public void setTextOptions(TextOptions text)
+	{
+		this.setOutputTypeText();
+		this.setExportHeaders(text.getExportHeaders());
+		this.setCleanupCarriageReturns(text.getCleanupCarriageReturns());
+		this.setTextDelimiter(text.getTextDelimiter());
+		this.setTextQuoteChar(text.getTextQuoteChar());
+		this.setQuoteAlways(text.getQuoteAlways());
+		this.setEscapeRange(text.getEscapeRange());
+		this.setLineEnding(text.getLineEnding());
 	}
 
 	public boolean isIncludeCreateTable()
@@ -754,6 +849,36 @@ public class DataExporter
 		private String outputFile;
 		private String sqlStatement;
 		private String tableName;
+	}
+
+	public boolean getQuoteAlways()
+	{
+		return quoteAlways;
+	}
+
+	public void setQuoteAlways(boolean flag)
+	{
+		this.quoteAlways = flag;
+	}
+
+	public void setEscapeRange(CharacterRange range)
+	{
+		this.escapeRange = range;
+	}
+
+	public CharacterRange getEscapeRange()
+	{
+		return this.escapeRange;
+	}
+
+	public void setLineEnding(String ending)
+	{
+		if (ending != null) this.lineEnding = ending;
+	}
+
+	public String getLineEnding()
+	{
+		return this.lineEnding;
 	}
 
 }

@@ -815,6 +815,8 @@ public class SqlFormatter
 				{
 					this.appendText(" (");
 					t = this.processSubSelect(false);
+					// closing bracket for the subselect has been consumed by processSubSelect
+					bracketCount --;
 					if (t == null) return null;
 					continue;
 				}
@@ -1427,12 +1429,14 @@ public class SqlFormatter
 //			String sql = "select count(*) from test where ucase(surname) like 'BLA%' and x >= 500 and y=10";
 
 			
-			String sql = "SELECT * FROM ( SELECT DISTINCT v.uuid AS value_uuid attr1, attr4  FROM (SELECT * FROM meas meas) M, value v, (SELECT * FROM CHAR) c \n" + 
-             "       WHERE M.uuid = v.meas_uuid \n" + 
-             "       AND   c.uuid = v.char_uuid \n" + 
-             "       AND   M.uuid = ?) sel JOIN (SELECT DISTINCT M.uuid AS meas_uuid FROM (SELECT * FROM meas) M, value v, char c  \n" + 
-             "       WHERE M.uuid = v.meas_uuid AND   c.uuid = v.char_uuid ) sub_sel ON (sel.meas_uuid = sub_sel.meas_uuid), (SELECT uuid, root_uuid, parent_uuid FROM meas) mtree \n" + 
-             " WHERE sel.meas_root_uuid = mtree.root_uuid ";
+//			String sql = "SELECT * FROM ( SELECT DISTINCT v.uuid AS value_uuid attr1, attr4  FROM (SELECT * FROM meas meas) M, value v, (SELECT * FROM CHAR) c \n" + 
+//             "       WHERE M.uuid = v.meas_uuid \n" + 
+//             "       AND   c.uuid = v.char_uuid \n" + 
+//             "       AND   M.uuid = ?) sel JOIN (SELECT DISTINCT M.uuid AS meas_uuid FROM (SELECT * FROM meas) M, value v, char c  \n" + 
+//             "       WHERE M.uuid = v.meas_uuid AND   c.uuid = v.char_uuid ) sub_sel ON (sel.meas_uuid = sub_sel.meas_uuid), (SELECT uuid, root_uuid, parent_uuid FROM meas) mtree \n" + 
+//             " WHERE sel.meas_root_uuid = mtree.root_uuid ";
+//			String sql = "SELECT * from bla where x=1 and test.u= x.u and t.f = b.c and (a = 5 or b in (1,2,3)) and (c=5)";
+			String sql = "SELECT * from bla where (x = 1 or y in (1,2,3)) and y=5";
 			SqlFormatter f = new SqlFormatter(sql,40);
 			System.out.println(sql);
 			System.out.println("----------");

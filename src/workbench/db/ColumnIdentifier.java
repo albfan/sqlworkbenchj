@@ -18,6 +18,7 @@ import java.sql.Types;
  * @author  info@sql-workbench.net
  */
 public class ColumnIdentifier
+	implements Comparable
 {
 	public static final int NO_TYPE = Integer.MIN_VALUE;
 	private String name;
@@ -142,6 +143,10 @@ public class ColumnIdentifier
 		this.type = aType;
 	}
 
+	/**
+	 *	Returns the java.sql.Types data type as returned
+	 *  by the jdbc driver
+	 */
 	public int getDataType()
 	{
 		if (type == NO_TYPE) return Types.OTHER;
@@ -275,4 +280,15 @@ public class ColumnIdentifier
 		this.isUpdateable = isUpdateable;
 	}
 
+	public int compareTo(Object other)
+	{
+		if (other == null) return 1;
+		if (this.name == null) return -1;
+		if (other instanceof ColumnIdentifier)
+		{
+			ColumnIdentifier c = (ColumnIdentifier)other;
+			return this.name.compareToIgnoreCase(c.name);
+		}
+		return 0;
+	}
 }

@@ -93,10 +93,6 @@ public class ResultInfo
 			{
 				typename = metaData.getColumnTypeName(i + 1);
 				col.setColumnTypeName(typename);
-				if ("LONG".equals(typename))
-				{
-					col.setDataType(SqlUtil.LONG_TYPE);
-				}
 			}
 			catch (Exception e)
 			{

@@ -23,7 +23,12 @@ public class CsvLineParser
 	private int len = 0;
 	private int current = 0;
 	private char delimiter;
-	private char quoteChar;
+	private char quoteChar = 0;
+	
+	public CsvLineParser(char delimit)
+	{
+		this.delimiter = delimit;
+	}
 	
 	public CsvLineParser(char delimit, char quote)
 	{
@@ -81,4 +86,21 @@ public class CsvLineParser
 		
 		return next;
 	}
+	
+	public static void main(String args[])
+	{
+		try
+		{
+			CsvLineParser p = new CsvLineParser('\t');
+			p.setLine("field1\tDazu sagt A. immer: \"schön\"\tfield3");
+			while (p.hasNext())
+				System.out.println(p.getNext());
+		}
+		catch (Throwable th)
+		{
+			th.printStackTrace();
+		}
+		System.out.println("Done.");
+	}
+	
 }

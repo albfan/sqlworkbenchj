@@ -38,9 +38,14 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.print.PageFormat;
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -78,6 +83,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -104,6 +110,7 @@ import workbench.gui.actions.SetColumnWidthAction;
 import workbench.gui.actions.SortAscendingAction;
 import workbench.gui.actions.SortDescendingAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.dialogs.export.DataStoreExporter;
 import workbench.gui.renderer.ClobColumnRenderer;
 import workbench.gui.renderer.DateColumnRenderer;
 import workbench.gui.renderer.NumberColumnRenderer;
@@ -186,7 +193,7 @@ public class WbTable
 	private JScrollPane scrollPane;
 
 	private String defaultPrintHeader = null;
-	private boolean showRowNumbers = false;
+	//private boolean showRowNumbers = false;
 	private JList rowHeader = null;
 	private boolean showPopup = true;
 	private boolean selectOnRightButtonClick = false;
@@ -206,6 +213,7 @@ public class WbTable
 		this.optimizeAllCol = new OptimizeAllColumnsAction(this);
 		this.optimizeAllCol.setEnabled(true);
 		this.setColWidth = new SetColumnWidthAction(this);
+		this.setAutoCreateColumnsFromModel(true);
 
 		this.headerPopup = new JPopupMenu();
 		this.headerPopup.add(this.sortAscending.getMenuItem());
@@ -392,12 +400,7 @@ public class WbTable
 
 	public void reset()
 	{
-		if (this.dwModel != null)
-		{
-			this.dwModel.removeTableModelListener(this.changeListener);
-			this.dwModel.dispose();
-			this.dwModel = null;
-		}
+		if (this.getModel() == EMPTY_MODEL) return;
 		this.setModel(EMPTY_MODEL, false);
 	}
 
@@ -484,9 +487,8 @@ public class WbTable
 			Container gp = p.getParent();
 			if (gp instanceof JScrollPane)
 			{
-				// Make certain we are the viewPort's view and not, for
-				// example, the rowHeaderView of the scrollPane -
-				// an implementor of fixed columns might do this.
+				// the scrollpane is needed to check the position
+				// of the scrollbars in getFirstVisibleRow()
 				this.scrollPane = (JScrollPane)gp;
 				JViewport viewport = scrollPane.getViewport();
 				if (viewport == null || viewport.getView() != this)
@@ -497,7 +499,7 @@ public class WbTable
 		}
 		this.checkMouseListener();
 	}
-
+	
 	private void checkMouseListener()
 	{
 		JTableHeader th = this.getTableHeader();
@@ -616,34 +618,6 @@ public class WbTable
 		}
 		if (this.printDataAction != null) this.printDataAction.setEnabled(this.getRowCount() > 0);
 		if (this.printPreviewAction != null) this.printPreviewAction.setEnabled(this.getRowCount() > 0);
-
-		if (this.showRowNumbers && aModel != EMPTY_MODEL)
-		{
-			ListModel lm = new AbstractListModel()
-			{
-				public int getSize() { return getRowCount(); }
-				public Object getElementAt(int index)
-				{
-					return "";
-				}
-			};
-
-			this.rowHeader = new JList(lm);
-			this.rowHeader.setCellRenderer(new RowHeaderRenderer(this));
-			String max = Integer.toString(aModel.getRowCount());
-			FontMetrics fm = this.getFontMetrics(this.getFont());
-			int width = fm.stringWidth(max);
-			this.rowHeader.setFixedCellWidth(width + 10);
-
-			if (this.scrollPane != null)
-			{
-				this.scrollPane.setRowHeaderView(this.rowHeader);
-			}
-		}
-		else if (this.scrollPane != null)
-		{
-			this.scrollPane.setRowHeaderView(null);
-		}
 	}
 
 	public DataStoreTableModel getDataStoreTableModel()
@@ -811,7 +785,7 @@ public class WbTable
 	{
 		boolean suspend = this.suspendRepaint;
 		this.suspendRepaint = aFlag;
-
+		this.setIgnoreRepaint(!aFlag);
 		// if repainting was re-enabled, then queue
 		// a repaint event right away
 		if (suspend && !aFlag)
@@ -1162,7 +1136,7 @@ public class WbTable
 		if (respectColumnName)
 		{
 			s = this.dwModel.getColumnName(aColumn);
-			stringWidth = fm.stringWidth(s);
+			stringWidth = fm.stringWidth(s) + 5;
 			optWidth = Math.max(optWidth, stringWidth + addWidth);
 		}
 		int rowCount = this.getRowCount();
@@ -1733,178 +1707,10 @@ public class WbTable
 		WbSwingUtilities.showDefaultCursorOnWindow(this);
 	}
 
-	public void saveAsSqlInsert(String aFilename)
-	{
-		this.saveAsSql(aFilename, false);
-	}
-
-	public void saveAsSqlUpdate(String aFilename)
-	{
-		this.saveAsSql(aFilename, true);
-	}
-
-	private void saveAsSql(String aFilename, boolean useUpdate)
-	{
-		if (this.getRowCount() <= 0) return;
-		if (this.dwModel == null) return;
-		DataStore ds = this.dwModel.getDataStore();
-		if (ds == null) return;
-		if (!ds.canSaveAsSqlInsert()) return;
-
-		PrintWriter out = null;
-
-		try
-		{
-			WbSwingUtilities.showWaitCursor(this);
-			out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(aFilename)));
-			if (useUpdate)
-			{
-				ds.writeDataAsSqlUpdate(out, StringUtil.LINE_TERMINATOR);
-			}
-			else
-			{
-				ds.writeDataAsSqlInsert(out, StringUtil.LINE_TERMINATOR);
-			}
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logError(this, "Could not save SQL data", th);
-		}
-		finally
-		{
-			try { out.close(); } catch (Throwable th) {}
-		}
-		WbSwingUtilities.showDefaultCursor(this);
-	}
-
-	public void saveAsHtml(String aFilename)
-	{
-		if (this.dwModel == null) return;
-
-		PrintWriter out = null;
-
-		WbSwingUtilities.showWaitCursor(this.getParent());
-		try
-		{
-			out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(aFilename)));
-			DataStore ds = this.getDataStore();
-			ds.writeHtmlData(out);
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logError(this, "Could not save data", th);
-		}
-		finally
-		{
-			try { out.close(); } catch (Throwable th) {}
-		}
-		WbSwingUtilities.showDefaultCursor(this.getParent());
-	}
-
-	public void saveAsXml(String aFilename)
-	{
-		if (this.dwModel == null) return;
-
-		PrintWriter out = null;
-
-		WbSwingUtilities.showWaitCursor(this.getParent());
-		try
-		{
-			out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(aFilename)));
-			DataStore ds = this.getDataStore();
-			ds.writeXmlData(out);
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logError(this, "Could not save data", th);
-		}
-		finally
-		{
-			try { out.close(); } catch (Throwable th) {}
-		}
-		WbSwingUtilities.showDefaultCursor(this.getParent());
-	}
-
-	public void saveAsAscii(String aFilename)
-	{
-		if (this.dwModel == null) return;
-
-		PrintWriter out = null;
-
-		WbSwingUtilities.showWaitCursor(this.getParent());
-		try
-		{
-			out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(aFilename)));
-			DataStore ds = this.getDataStore();
-			ds.writeDataString(out, Settings.getInstance().getDefaultTextDelimiter(), StringUtil.LINE_TERMINATOR, true);
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logError(this, "Could not save data", th);
-		}
-		finally
-		{
-			try { out.close(); } catch (Throwable th) {}
-		}
-		WbSwingUtilities.showDefaultCursor(this.getParent());
-	}
-
 	public void saveAs()
 	{
-		try
-		{
-			DataStore ds = this.dwModel.getDataStore();
-			boolean sql = (ds != null && ds.canSaveAsSqlInsert());
-			FileDialogUtil dialog = new FileDialogUtil();
-			String filename = dialog.getExportFilename(this, sql);
-			if (filename != null)
-			{
-				//String ext = ExtensionFileFilter.getExtension(new File(filename));
-				final String name = filename;
-				int type = dialog.getLastSelectedFileType();
-
-				Thread t = null;
-				switch (type)
-				{
-					case FileDialogUtil.FILE_TYPE_SQL:
-						t = new Thread() { public void run() { saveAsSqlInsert(name); } };
-						t.setDaemon(true);
-						t.setName("SaveAsSql Thread");
-						t.start();
-						break;
-					case FileDialogUtil.FILE_TYPE_SQL_UPDATE:
-						t = new Thread() { public void run() { saveAsSqlUpdate(name); } };
-						t.setDaemon(true);
-						t.setName("SaveAsSql Thread");
-						t.start();
-						break;
-					case FileDialogUtil.FILE_TYPE_TXT:
-						t = new Thread() { public void run() { saveAsAscii(name); }};
-						t.setDaemon(true);
-						t.setName("SaveAsAscii Thread");
-						t.start();
-						break;
-					case FileDialogUtil.FILE_TYPE_HTML:
-						t = new Thread() { public void run() { saveAsHtml(name); }};
-						t.setName("saveAsHtml Thread");
-						t.setDaemon(true);
-						t.start();
-						break;
-					case FileDialogUtil.FILE_TYPE_XML:
-						t = new Thread() { public void run() { saveAsXml(name); }};
-						t.setDaemon(true);
-						t.setName("SaveAsXml Thread");
-						t.start();
-						break;
-					default:
-						LogMgr.logError("WbTable.saveAs()", "Unknown file type selected", null);
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError(this, "Error exporting data", e);
-		}
+		DataStoreExporter exporter = new DataStoreExporter(this.getDataStore(), this);
+		exporter.saveAs();
 	}
 
 	public int getMaxColWidth()

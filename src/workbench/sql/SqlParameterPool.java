@@ -158,6 +158,7 @@ public class SqlParameterPool
 	{
 		return this.promptPattern;
 	}
+	
 	public DataStore getVariablesDataStore()
 	{
 		return this.getVariablesDataStore(Collections.synchronizedSet(this.data.keySet()));
@@ -208,8 +209,18 @@ public class SqlParameterPool
 		return (String)this.data.get(varName);
 	}
 
+	/**
+	 *	Returns the number of parameters currently defined.
+	 */
+	public int getParameterCount()
+	{
+		if (this.data == null) return 0;
+		return this.data.size();
+	}
+	
 	public String replaceAllParameters(String sql)
 	{
+		if (this.data == null || this.data.size() == 0) return sql;
 		Set vars = Collections.synchronizedSet(this.data.keySet());
 		return this.replaceParameters(vars, sql, false);
 	}
@@ -227,7 +238,7 @@ public class SqlParameterPool
 			String var = this.buildVarNamePattern(name, forPrompt);
 			String value = (String)this.data.get(name);
 			if (value == null) continue;
-			if (LogMgr.isDebugEnabled()) LogMgr.logDebug("SqlParameterPool", "Using value=[" + value + "] for parameter=" + name);
+			//if (LogMgr.isDebugEnabled()) LogMgr.logDebug("SqlParameterPool", "Using value=[" + value + "] for parameter=" + name);
 			newSql = replaceVarValue(newSql, var, value);
 		}
 		return newSql;
@@ -243,11 +254,12 @@ public class SqlParameterPool
 		StringBuffer result = new StringBuffer(original);
 		Pattern p = Pattern.compile(pattern);
 		Matcher m = p.matcher(original);
-		while (m.find())
+		while (m != null && m.find())
 		{
 			int start = m.start();
 			int end = m.end();
 			result.replace(start, end, replacement);
+			m = p.matcher(result.toString());
 		}
 		return result.toString();
 	}

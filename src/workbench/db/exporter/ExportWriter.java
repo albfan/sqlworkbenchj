@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import workbench.storage.DataStore;
 
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
@@ -32,48 +33,89 @@ public abstract class ExportWriter
 	protected long rows;
 	protected String tableToUse;
 	protected RowActionMonitor rowMonitor;
+	private RowDataConverter converter;
+	private Writer output;
 
 	public ExportWriter(DataExporter exp)
 	{
 		this.exporter = exp;
 	}
-	
+
 	public abstract RowDataConverter createConverter(ResultInfo info);
-	
+
 	public void setRowMonitor(RowActionMonitor monitor)
 	{
 		this.rowMonitor = monitor;
 	}
-	
+
 	public long getNumberOfRecords()
 	{
 		return rows;
 	}
-	
-	public void writeExport(Writer out, ResultSet rs, ResultInfo info)
-		throws SQLException, IOException
+
+	private void initConverter(ResultInfo info)
 	{
-		RowDataConverter converter = createConverter(info);
+		converter = createConverter(info);
 		converter.setEncoding(exporter.getEncoding());
 		converter.setDefaultDateFormatter(exporter.getDateFormatter());
 		converter.setDefaultTimestampFormatter(exporter.getTimestampFormatter());
 		converter.setDefaultNumberFormatter(exporter.getDecimalFormatter());
 		converter.setGeneratingSql(exporter.getSql());
 		converter.setOriginalConnection(this.exporter.getConnection());
-		
+	}
+
+	public void writeExport(DataStore ds)
+		throws SQLException, IOException
+	{
+		ResultInfo info = ds.getResultInfo();
+		this.initConverter(info);
+
 		this.cancel = false;
 		this.rows = 0;
-	
+
 		if (this.rowMonitor != null)
 		{
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
 		}
-		StrBuffer data = converter.getStart();
-		if (data != null)
+		writeStart();
+		int colCount = info.getColumnCount();
+		int rowCount = ds.getRowCount();
+		StrBuffer data = null;
+		for (int i=0; i < rowCount; i++)
 		{
-			data.writeTo(out);
+			if (this.cancel) break;
+			if (this.rowMonitor != null)
+			{
+				this.rowMonitor.setCurrentRow((int)this.rows, -1);
+			}
+			RowData row = ds.getRow(i);
+			data = converter.convertRowData(row, rows);
+			data.writeTo(this.output);
+			rows ++;
+		}
+		writeEnd(rows);
+	}
+
+	public void setOutput(Writer out)
+	{
+		this.output = out;
+	}
+
+	public void writeExport(ResultSet rs, ResultInfo info)
+		throws SQLException, IOException
+	{
+		this.initConverter(info);
+
+		this.cancel = false;
+		this.rows = 0;
+
+		if (this.rowMonitor != null)
+		{
+			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
 		}
 		int colCount = info.getColumnCount();
+		writeStart();
+		StrBuffer data = null;
 		while (rs.next())
 		{
 			if (this.cancel) break;
@@ -84,41 +126,61 @@ public abstract class ExportWriter
 			RowData row = new RowData(colCount);
 			row.read(rs, info);
 			data = converter.convertRowData(row, rows);
-			data.writeTo(out);
+			data.writeTo(this.output);
 			rows ++;
 		}
-		data = converter.getEnd(rows);
+		writeEnd(rows);
+	}
+
+	private void writeStart()
+		throws IOException
+	{
+		StrBuffer data = converter.getStart();
 		if (data != null)
 		{
-			data.writeTo(out);
+			data.writeTo(this.output);
 		}
 	}
-	
+
+	private void writeEnd(long rows)
+		throws IOException
+	{
+		StrBuffer data = converter.getEnd(rows);
+		if (data != null)
+		{
+			data.writeTo(this.output);
+		}
+	}
+
 	public void exportFinished()
 	{
+		if (this.output != null)
+		{
+			try { this.output.close(); } catch (Throwable th) {}
+		}
 	}
-	
+
 	public void cancel()
 	{
 		this.cancel = true;
 	}
-	
+
 	/**
 	 * Getter for property tableToUse.
 	 * @return Value of property tableToUse.
 	 */
-	public java.lang.String getTableToUse()
+	public String getTableToUse()
 	{
 		return tableToUse;
 	}
-	
+
 	/**
 	 * Setter for property tableToUse.
 	 * @param tableToUse New value of property tableToUse.
 	 */
-	public void setTableToUse(java.lang.String tableToUse)
+	public void setTableToUse(String tableToUse)
 	{
 		this.tableToUse = tableToUse;
 	}
-	
+
 }

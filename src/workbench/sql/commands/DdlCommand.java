@@ -59,6 +59,7 @@ public class DdlCommand extends SqlCommand
 	public DdlCommand(String aVerb)
 	{
 		this.verb = aVerb;
+		this.isUpdatingCommand = true;
 	}
 
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
@@ -113,16 +114,16 @@ public class DdlCommand extends SqlCommand
 		catch (Exception e)
 		{
 			result.clear();
-			
+
 			StringBuffer msg = new StringBuffer(150);
 			msg.append(ResourceMgr.getString("MsgExecuteError") + "\n");
 			int maxLen = 150;
 			msg.append(StringUtil.getMaxSubstring(aSql.trim(), maxLen, "..."));
 			msg.append("\n");
-			
+
 			result.addMessage(msg.toString());
 			result.addMessage(ExceptionUtil.getDisplay(e));
-			
+
       this.addExtendErrorInfo(aConnection, aSql, result);
 			result.setFailure();
 			LogMgr.logDebug("DdlCommand.execute()", "Error executing statement", e);

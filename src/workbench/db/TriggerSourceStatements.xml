@@ -198,6 +198,27 @@ and   t.schemaid = s.schemaid
     </void> 
    </object> 
   </void> 
-  
+
+  <void method="put">
+   <string>INGRES</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select text_segment from iirules</string> 
+    </void>
+    <void property="objectNameField">
+     <string>rule_name</string>
+    </void>
+    <void property="schemaField"> 
+     <string>rule_owner</string> 
+    </void>
+    <void property="orderBy">
+        <string>order by text_sequence</string>
+    </void>
+    <void property="useUpperCase"> 
+     <boolean>false</boolean> 
+    </void> 
+   </object>
+  </void>
+    
  </object>
 </java>

@@ -118,5 +118,29 @@ and  sysobjects.type = &apos;P&apos;</string>
     </void> 
    </object> 
   </void> 
+  
+  <void method="put"> 
+   <string>INGRES</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>SELECT text_segment FROM iiprocedures</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>procedure_name</string> 
+    </void> 
+    <void property="useUpperCase"> 
+     <boolean>false</boolean> 
+    </void> 
+    <void property="schemaField"> 
+     <string>procedure_owner</string> 
+    </void> 
+    <void property="orderBy"> 
+     <string>order by text_sequence</string> 
+    </void> 
+   </object> 
+  </void> 
+  
  </object> 
+ 
+ 
 </java> 

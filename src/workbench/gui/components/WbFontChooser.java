@@ -210,14 +210,7 @@ public class WbFontChooser extends JPanel
 		}
 		return result;
   }
-	public static void main(String args[])
-	{
-		JDialog dialog = new JDialog();
-		dialog.getContentPane().setLayout(new BorderLayout());
-		dialog.getContentPane().add(new WbFontChooser(), BorderLayout.CENTER);
-		dialog.pack();
-		dialog.show();
-	}
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox boldCheckBox;
     private javax.swing.JPanel checkBoxPanel;

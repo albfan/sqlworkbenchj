@@ -30,6 +30,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.CsvLineParser;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
 import workbench.util.WbStringTokenizer;
 
@@ -44,7 +45,8 @@ public class TextFileParser
 	private String tableName;
 	private String encoding = "8859_1";
 	private String delimiter = "\t";
-	private String quoteChar = "\"";
+	private String quoteChar = null;
+	private boolean decodeUnicode = false;
 
 	private int colCount = -1;
 	private ColumnIdentifier[] columns;
@@ -53,12 +55,12 @@ public class TextFileParser
 	private boolean withHeader = true;
 	private boolean cancelImport = false;
 	private boolean emptyStringIsNull = false;
-	
+
 	private RowDataReceiver receiver;
 	private String dateFormat;
 	private String timestampFormat;
 	private char decimalChar = '.';
-
+	private boolean abortOnError = false;
 	private WbConnection connection;
 
 	private ValueConverter converter;
@@ -101,8 +103,14 @@ public class TextFileParser
 		return this.messages.toString();
 	}
 
+	public void setAbortOnError(boolean flag)
+	{
+		this.abortOnError = flag;
+	}
+
 	public void setDelimiter(String delimit)
 	{
+		if (delimit == null) return;
 		this.delimiter = delimit;
 		if ("\\t".equals(this.delimiter))
 		{
@@ -138,6 +146,7 @@ public class TextFileParser
 
 	public void setQuoteChar(String aChar)
 	{
+		if (aChar == null) return;
 		this.quoteChar = aChar;
 	}
 
@@ -195,72 +204,106 @@ public class TextFileParser
 		Object value = null;
 		this.rowData = new Object[this.colCount];
 		int importRow = 0;
-		CsvLineParser tok = new CsvLineParser(delimiter.charAt(0), '"');
 
-		while (line != null)
+		CsvLineParser tok = new CsvLineParser(delimiter.charAt(0), (quoteChar == null ? 0 : quoteChar.charAt(0)));
+
+		try
 		{
-			if (this.doCancel()) break;
-
-			this.clearRowData();
-
-			importRow ++;
-			tok.setLine(line);
-
-			for (int i=0; i < this.colCount; i++)
+			while (line != null)
 			{
-				try
+				if (this.doCancel()) break;
+
+				// silently ignore empty lines...
+				if (line.trim().length() == 0)
 				{
-					if (tok.hasNext())
+					try
 					{
-						value = tok.getNext();
-						rowData[i] = converter.convertValue(value, this.columns[i].getDataType());
-						if (this.emptyStringIsNull && SqlUtil.isCharacterType(this.columns[i].getDataType()))
+						line = in.readLine();
+					}
+					catch (IOException e)
+					{
+						line = null;
+					}
+					continue;
+				}
+
+				this.clearRowData();
+				importRow ++;
+
+				tok.setLine(line);
+
+				for (int i=0; i < this.colCount; i++)
+				{
+					try
+					{
+						if (tok.hasNext())
 						{
-							String s = (String)rowData[i];
-							if (s != null && s.length() == 0) rowData[i] = null;
+							value = tok.getNext();
+							if (this.decodeUnicode && SqlUtil.isCharacterType(this.columns[i].getDataType()))
+							{
+								value = StringUtil.decodeUnicode((String)value);
+							}
+							rowData[i] = converter.convertValue(value, this.columns[i].getDataType());
+							if (this.emptyStringIsNull && SqlUtil.isCharacterType(this.columns[i].getDataType()))
+							{
+								String s = (String)rowData[i];
+								if (s != null && s.length() == 0) rowData[i] = null;
+							}
 						}
 					}
+					catch (Exception e)
+					{
+						rowData[i] = null;
+						String msg = ResourceMgr.getString("ErrorTextfileImport");
+						msg = msg.replaceAll("%row%", Integer.toString(importRow + 1));
+						msg = msg.replaceAll("%col%", this.columns[i].getColumnName());
+						msg = msg.replaceAll("%value%", (value == null ? "(NULL)" : value.toString()));
+						msg = msg.replaceAll("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
+						LogMgr.logWarning("TextFileParser.start()",msg, e);
+						this.messages.append(msg);
+						this.messages.append("\n");
+						if (this.abortOnError) throw e;
+					}
+				}
+
+				if (this.doCancel()) break;
+
+				try
+				{
+					this.receiver.processRow(rowData);
 				}
 				catch (Exception e)
 				{
-					LogMgr.logWarning("TextFileParser.start()","Error in line=" + importRow + "reading col=" + i + ",value=" + value, e);
-					rowData[i] = null;
-					String msg = ResourceMgr.getString("ErrorTextfileImport");
-					msg = msg.replaceAll("%row%", Integer.toString(importRow + 1));
-					msg = msg.replaceAll("%col%", this.columns[i].getColumnName());
-					msg = msg.replaceAll("%value%", (value == null ? "(NULL)" : value.toString()));
-					msg = msg.replaceAll("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
-					this.messages.append(msg);
-					this.messages.append("\n");
+					LogMgr.logError("TextFileParser.start()", "Error sending line " + importRow + ". Aborting...", e);
+					throw e;
 				}
+
+				try
+				{
+					line = in.readLine();
+				}
+				catch (IOException e)
+				{
+					line = null;
+				}
+
+				if (this.doCancel()) break;
 			}
 
-			if (this.doCancel()) break;
-
-			this.receiver.processRow(rowData);
-
-			try
+			if (!this.cancelImport)
 			{
-				line = in.readLine();
+				this.receiver.importFinished();
 			}
-			catch (IOException e)
+			else
 			{
-				line = null;
+				this.receiver.importCancelled();
 			}
-
-			if (this.doCancel()) break;
 		}
-
-		try { in.close(); } catch (IOException e) {}
-
-		if (!this.cancelImport)
+		finally
 		{
-			this.receiver.importFinished();
+			try { in.close(); } catch (IOException e) {}
 		}
-		else
-		{
-			this.receiver.importCancelled();
-		}
+
 	}
 
 	private void clearRowData()
@@ -313,7 +356,7 @@ public class TextFileParser
 				int index = myCols.indexOf(column);
 				if (index >= 0)
 				{
-					this.columns[i].setDataType(id.getDataType());
+					this.columns[index].setDataType(id.getDataType());
 				}
 			}
 		}
@@ -332,7 +375,7 @@ public class TextFileParser
 	public boolean isEmptyStringIsNull()
 	{
 		return emptyStringIsNull;
-	}	
+	}
 
 	/**
 	 * Setter for property emptyStringIsNull.
@@ -342,5 +385,15 @@ public class TextFileParser
 	{
 		this.emptyStringIsNull = emptyStringIsNull;
 	}
-	
+
+	public void setDecodeUnicode(boolean flag)
+	{
+		this.decodeUnicode = flag;
+	}
+
+	public boolean getDecodeUnicode()
+	{
+		return this.decodeUnicode;
+	}
+
 }

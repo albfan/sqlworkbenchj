@@ -34,6 +34,7 @@ public class UpdatingCommand extends SqlCommand
 	public UpdatingCommand(String aVerb)
 	{
 		this.verb = aVerb;
+		this.isUpdatingCommand = true;
 	}
 
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)

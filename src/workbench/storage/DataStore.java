@@ -230,6 +230,11 @@ public class DataStore
 		this.reset();
 	}
 
+	public WbConnection getOriginalConnection()
+	{
+		return this.originalConnection;
+	}
+	
 	public void setSourceConnection(WbConnection aConn)
 	{
 		this.originalConnection = aConn;
@@ -926,7 +931,7 @@ public class DataStore
 		return this.resultInfo.findColumn(name);
 	}
 
-	private RowData getRow(int aRow)
+	public RowData getRow(int aRow)
 		throws IndexOutOfBoundsException
 	{
 		return this.data.get(aRow);
@@ -1040,10 +1045,17 @@ public class DataStore
 	public void writeXmlData(Writer pw)
 		throws IOException
 	{
+		this.writeXmlData(pw, false);
+	}
+	
+	public void writeXmlData(Writer pw, boolean useCdata)
+		throws IOException
+	{
 		int count = this.getRowCount();
 		if (count == 0) return;
 
 		XmlRowDataConverter converter = new XmlRowDataConverter(this.resultInfo);
+		converter.setUseCDATA(useCdata);
 		this.writeConverterData(converter, pw);
 	}
 
@@ -2177,6 +2189,11 @@ public class DataStore
 		this.resultInfo.setPKColumns(pkColumns);
 	}
 
+	public ResultInfo getResultInfo()
+	{
+		return this.resultInfo;
+	}
+	
 	public ColumnIdentifier[] getColumns()
 	{
 		return this.resultInfo.getColumns();

@@ -181,9 +181,11 @@ public class SqlRowDataConverter
 		return concatString;
 	}
 
-	public void setConcatString(String concatString)
+	public void setConcatString(String concat)
 	{
-		this.concatString = concatString;
+		if (concat == null) return;
+		this.concatString = concat;
+		this.concatFunction = null;
 	}
 
 	public String getConcatFunction()
@@ -193,7 +195,9 @@ public class SqlRowDataConverter
 
 	public void setConcatFunction(String func)
 	{
+		if (func == null) return;
 		this.concatFunction = func;
+		this.concatString = null;
 	}
 
 	public String getChrFunction()
@@ -206,20 +210,12 @@ public class SqlRowDataConverter
 		this.chrFunction = chrFunction;
 	}
 
-	/**
-	 * Getter for property sql.
-	 * @return Value of property sql.
-	 */
-	public java.lang.String getSql()
+	public String getSql()
 	{
 		return sql;
 	}
 
-	/**
-	 * Setter for property sql.
-	 * @param sql New value of property sql.
-	 */
-	public void setSql(java.lang.String sql)
+	public void setSql(String sql)
 	{
 		this.sql = sql;
 	}

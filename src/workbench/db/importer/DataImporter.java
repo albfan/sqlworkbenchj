@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +27,11 @@ import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import java.io.StringReader;
+import java.io.Reader;
+import workbench.util.WbThread;
 
 
 /**
@@ -54,7 +59,7 @@ public class DataImporter
 	private int commitEvery = 0;
 
 	private boolean deleteTarget = false;
-	private boolean continueOnError = false;
+	private boolean continueOnError = true;
 
 	private long totalRows = 0;
 	private long updatedRows = 0;
@@ -64,6 +69,7 @@ public class DataImporter
 	private boolean useBatch = false;
 	private boolean supportsBatch = false;
 	private boolean canCommitInBatch = true;
+
 	private int colCount;
 	private ArrayList warnings = new ArrayList();
 	private ArrayList errors = new ArrayList();
@@ -108,6 +114,7 @@ public class DataImporter
 	{
 		this.source = producer;
 		this.source.setReceiver(this);
+		this.source.setAbortOnError(!this.continueOnError);
 	}
 
 	public void setCommitEvery(int aCount) { this.commitEvery = aCount; }
@@ -138,6 +145,7 @@ public class DataImporter
 		if (!this.supportsBatch)
 		{
 			LogMgr.logWarning("DataImporter.setUseBatch()", "JDBC driver does not support batch updates. Ignoring request to use batch updates");
+			this.warnings.add(ResourceMgr.getString("MsgJDBCDriverNoBatch"));
 		}
 
 		if (this.dbConn != null)
@@ -259,15 +267,13 @@ public class DataImporter
 	public void startBackgroundImport()
 	{
 		if (this.source == null) return;
-		Thread t = new Thread()
+		Thread t = new WbThread("WbImport Thread")
 		{
 			public void run()
 			{
 				try { startImport(); } catch (Throwable th) {}
 			}
 		};
-		t.setDaemon(true);
-		t.setName("Wb-Import Thread");
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
 	}
@@ -532,9 +538,28 @@ public class DataImporter
 			{
 				this.insertStatement.setNull(i + 1, this.targetColumns[i].getDataType());
 			}
+			else if ("LONG".equals(this.targetColumns[i].getDbmsType()) ||
+				        this.targetColumns[i].getDataType() == java.sql.Types.LONGVARCHAR)
+			{
+				String value = row[i].toString();
+				int size = value.length();
+				Reader in = new StringReader(value);
+				this.insertStatement.setCharacterStream(i + 1, in, size);
+			}
 			else
 			{
-				this.insertStatement.setObject(i + 1, row[i]);
+				if (this.dbConn.getMetadata().isOracle() && 
+					  this.targetColumns[i].getDataType() == java.sql.Types.DATE &&
+						row[i] instanceof java.sql.Date
+					)
+				{
+					java.sql.Timestamp ts = new java.sql.Timestamp(((java.sql.Date)row[i]).getTime());
+					this.insertStatement.setTimestamp(i + 1, ts);
+				}
+				else
+				{
+					this.insertStatement.setObject(i + 1, row[i]);
+				}
 			}
 		}
 
@@ -568,6 +593,13 @@ public class DataImporter
 			{
 				this.updateStatement.setNull(realIndex, this.targetColumns[i].getDataType());
 			}
+			else if ("LONG".equals(this.targetColumns[i].getDbmsType()) ||
+				      this.targetColumns[i].getDataType() == java.sql.Types.LONGVARCHAR)
+			{
+				String value = row[i].toString();
+				Reader in = new StringReader(value);
+				this.updateStatement.setCharacterStream(realIndex, in, value.length());
+			}
 			else
 			{
 				this.updateStatement.setObject(realIndex, row[i]);
@@ -584,6 +616,26 @@ public class DataImporter
 			this.updatedRows += rows;
 		}
 		return rows;
+	}
+
+	/**
+	 * 	Oracle8 does not seem to support batch updates with the LONG
+	 *  datatype.
+	 */
+	private void checkColumnsForBatch()
+	{
+		if (!this.useBatch) return;
+		if (!this.dbConn.getMetadata().isOracle8()) return;
+
+		for (int i=0; i < this.targetColumns.length; i++)
+		{
+			if ("LONG".equals(this.targetColumns[i].getDbmsType()))
+			{
+				this.supportsBatch = false;
+				this.useBatch = false;
+				this.warnings.add(ResourceMgr.getString("ErrorNoOracle8BatchWithLong"));
+			}
+		}
 	}
 
 	/**
@@ -605,7 +657,7 @@ public class DataImporter
 		{
 			this.prepareUpdateStatement();
 		}
-
+		this.checkColumnsForBatch();
 		if (this.deleteTarget)
 		{
 			try
@@ -853,5 +905,5 @@ public class DataImporter
 			try { this.updateStatement.close();	} catch (Throwable th) {}
 		}
 	}
-	
+
 }

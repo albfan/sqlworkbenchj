@@ -11,6 +11,7 @@
  */
 package workbench.db.postgres;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -60,28 +61,40 @@ public class PgSequenceReader
 			if (rs.next())
 			{
 				String name = rs.getString(1);;
-				long maxValue = rs.getLong(2);
-				long minValue = rs.getLong(3);
-				String max = Long.toString(maxValue);
-				String min = Long.toString(minValue);
-				String inc = rs.getString(4);
-				String cache = rs.getString(5);
+				String max = rs.getString(2);
+				long min = rs.getLong(3);
+				long inc = rs.getLong(4);
+				long cache = rs.getLong(5);
 				String cycle = rs.getString(6);
 
 				StrBuffer buf = new StrBuffer(250);
 				buf.append("CREATE SEQUENCE ");
 				buf.append(name);
-				buf.append(" INCREMENT ");
-				buf.append(inc);
-				buf.append(" MINVALUE ");
-				buf.append(min);
-				buf.append(" MAXVALUE ");
-				buf.append(max);
-				buf.append(" CACHE ");
-				buf.append(cache);
+				if (inc != 1)
+				{
+					buf.append("\n       INCREMENT ");
+					buf.append(inc);
+				}
+				if (min != 1)
+				{
+					buf.append("\n       MINVALUE ");
+					buf.append(min);
+				}
+				final BigInteger bigMax = new BigInteger("9223372036854775807");
+				BigInteger maxV = new BigInteger(max);
+				if (!maxV.equals(bigMax))
+				{
+					buf.append("\n       MAXVALUE ");
+					buf.append(max);
+				}
+				if (cache != 1)
+				{
+					buf.append("\n        CACHE ");
+					buf.append(cache);
+				}
 				if ("true".equalsIgnoreCase(cycle))
 				{
-					buf.append(" CYCLE");
+					buf.append("\n        CYCLE");
 				}
 				buf.append(";");
 				result = buf.toString();

@@ -223,8 +223,8 @@ public class DbDriver
 			// as we are not using the DriverManager, we need to supply username
 			// and password in the connection properties!
 			Properties props = new Properties();
-			if (user != null) props.put("user", user);
-			if (password != null) props.put("password", password);
+			if (user != null && user.trim().length() > 0) props.put("user", user);
+			if (password != null && password.trim().length() > 0) props.put("password", password);
 
 			// copy the user defined connection properties into the actually used ones!
 			if (connProps != null)
@@ -292,7 +292,7 @@ public class DbDriver
 			c = this.driverClassInstance.connect(url, props);
 			if (c == null)
 			{
-				throw new Exception("Driver did not return a connection!");
+				throw new Exception("Driver did not return a connection for url=" + url);
 			}
 		}
 		catch (ClassNotFoundException e)

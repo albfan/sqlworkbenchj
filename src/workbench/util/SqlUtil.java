@@ -28,8 +28,6 @@ import workbench.db.WbConnection;
 
 public class SqlUtil
 {
-	public static final int LONG_TYPE = -50000;
-
 	private static Pattern specialCharPattern = Pattern.compile("[$ ]");
 
 	/** Creates a new instance of SqlUtil */
@@ -52,11 +50,19 @@ public class SqlUtil
 
 	public static String getSqlVerb(String aStatement)
 	{
-		StringTokenizer tok = new StringTokenizer(aStatement.trim());
-		if (!tok.hasMoreTokens()) return "";
-		return tok.nextToken(" \t");
+		if (aStatement == null) return "";
+		String s = aStatement.trim();
+		if (s.length() == 0) return "";
+		if (s.charAt(0) == '@') return "@";
+		int pos = s.indexOf(' ');
+		if (pos == -1) pos = s.indexOf('\t');
+		if (pos > -1)
+		{
+			return s.substring(0, pos).trim().toUpperCase();
+		}
+		return s.toUpperCase();
 	}
-
+	
 	public static List getResultSetColumns(String sql, WbConnection conn)
 		throws SQLException
 	{
@@ -357,7 +363,7 @@ public class SqlUtil
 			return "Integer";
 		else if (aSqlType == Types.VARCHAR)
 			return "String";
-		else if (aSqlType == LONG_TYPE)
+		else if (aSqlType == Types.LONGVARCHAR)
 			return "String";
 		else
 			return null;
@@ -561,15 +567,8 @@ public class SqlUtil
 			return "VARBINARY";
 		else if (aSqlType == Types.VARCHAR)
 			return "VARCHAR";
-		else if (aSqlType == LONG_TYPE)
-			return "LONG";
 		else
 			return "UNKNOWN";
 	}
 
-	public static void main(String args[])
-	{
-		String sql = "  -- '\ncommit;--";
-		System.out.println("clean=" + makeCleanSql(sql, false, false, '\''));
-	}
 }

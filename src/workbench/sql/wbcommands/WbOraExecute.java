@@ -73,7 +73,11 @@ public class WbOraExecute extends SqlCommand
 				ds = new DataStore(rs, aConnection);
 				result.addDataStore(ds);
 			}
-
+			StringBuffer warnings = new StringBuffer();
+			if (this.appendWarnings(aConnection, this.currentStatement, warnings))
+			{
+				result.addMessage(warnings.toString());
+			}
 			result.setSuccess();
 		}
 		catch (Exception e)

@@ -45,7 +45,7 @@ public class WbDefineVar extends SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult(getVerb());
+		StatementRunnerResult result = new StatementRunnerResult();
 		String sql = aSql.trim().substring(this.getVerb().length()).trim();
 
 		String msg = null;
@@ -160,10 +160,16 @@ public class WbDefineVar extends SqlCommand
 	{
 		ResultSet rs = null;
 		String result = StringUtil.EMPTY_STRING;
+		SqlParameterPool parameterPool = SqlParameterPool.getInstance();
+		String realSql = parameterPool.replaceAllParameters(sql);
+
 		try
 		{
 			this.currentStatement = conn.createStatement();
-			this.currentStatement.setMaxRows(1);
+			// HSQL until 1.7.2 has a bug when group functions are used 
+			// together with setMaxRows(). The group function will only
+			// evaluate as many rows as defined via setMaxRows.
+			if (!conn.getMetadata().isHsql()) this.currentStatement.setMaxRows(1);
 			if (sql.endsWith(";"))
 			{
 				sql = sql.substring(0, sql.length() - 1);
@@ -171,11 +177,16 @@ public class WbDefineVar extends SqlCommand
 			rs = this.currentStatement.executeQuery(sql);
 			if (rs.next())
 			{
-				result = rs.getString(1);
+				Object value = rs.getObject(1);
+				if (value != null)
+				{
+					result = value.toString();
+				}
 			}
 		}
 		finally
 		{
+			this.currentStatement.setMaxRows(0);
 			try { rs.close(); } catch (Throwable th) {}
 		}
 		

@@ -54,12 +54,13 @@ public class XmlDataFileParser
 	private String[] colFormats;
 	//private int[] colTypes;
 	private String encoding = "UTF-8";
-	
+
 	private Object[] currentRow;
 	private RowDataReceiver receiver;
 	private boolean ignoreCurrentRow = false;
-	
-	/** Define the tags for which the characters surrounded by the 
+	private boolean abortOnError = false;
+
+	/** Define the tags for which the characters surrounded by the
 	 *  tag should be collected
 	 */
 	private static final HashSet DATA_TAGS = new HashSet();
@@ -67,13 +68,14 @@ public class XmlDataFileParser
 	{
 		DATA_TAGS.add("java-class");
 		DATA_TAGS.add("java-sql-type");
+		DATA_TAGS.add("dbms-data-type");
 		DATA_TAGS.add("data-format");
 		DATA_TAGS.add("table-name");
 		DATA_TAGS.add("column-name");
 		DATA_TAGS.add("column-data");
 		DATA_TAGS.add("column-count");
 	}
-	
+
 	private int currentColIndex = 0;
 	private long columnLongValue = 0;
 	private boolean hasLongValue = false;
@@ -82,7 +84,7 @@ public class XmlDataFileParser
 	private boolean keepRunning;
 
 	private HashMap constructors = new HashMap();
-	
+
 	public XmlDataFileParser(String inputFile)
 	{
 		this.inputFile = inputFile;
@@ -92,7 +94,11 @@ public class XmlDataFileParser
 	{
 		this.tableName = aName;
 	}
-	
+
+	public void setAbortOnError(boolean flag)
+	{
+		this.abortOnError = flag;
+	}
 	public void start()
 		throws Exception
 	{
@@ -116,6 +122,7 @@ public class XmlDataFileParser
 		}
 		catch (Exception e)
 		{
+			this.receiver.importCancelled();
 			throw e;
 		}
 		finally
@@ -123,7 +130,7 @@ public class XmlDataFileParser
 			try { in.close(); } catch (Throwable th) {}
 		}
 	}
-	
+
 	public void cancel()
 	{
 		this.keepRunning = false;
@@ -140,31 +147,31 @@ public class XmlDataFileParser
 			this.currentRow[i] = null;
 		}
 	}
-	
+
 	public void setEncoding(String enc)
 	{
 		this.encoding = enc;
 	}
-	
+
 	public void setReceiver(RowDataReceiver aReceiver)
 	{
 		this.receiver = aReceiver;
 	}
-	
+
 	public void startDocument()
 		throws SAXException
 	{
 		Thread.yield();
 		if (!this.keepRunning) throw new ParsingInterruptedException();
 	}
-	
+
 	public void endDocument()
 		throws SAXException
 	{
 		Thread.yield();
 		if (!this.keepRunning) throw new ParsingInterruptedException();
 	}
-	
+
 	public void startElement(String namespaceURI, String sName, String qName, Attributes attrs)
 		throws SAXException
 	{
@@ -175,7 +182,7 @@ public class XmlDataFileParser
 		{
 			this.chars = new StringBuffer();
 		}
-		
+
 		if (qName.equals("row-data"))
 		{
 			this.clearRowData();
@@ -219,12 +226,12 @@ public class XmlDataFileParser
 				LogMgr.logError("XmlDataFileParser.endElement()", "Could not read columnn index!", e);
 				throw new SAXException("Could not read columnn index");
 			}
-			
+
 			attrValue = attrs.getValue("null");
 			this.isNull = "true".equals(attrValue);
 		}
 	}
-	
+
 	public void endElement(String namespaceURI, String sName, String qName)
 		throws SAXException
 	{
@@ -233,7 +240,15 @@ public class XmlDataFileParser
 		{
 			if (!this.ignoreCurrentRow)
 			{
-				this.sendRowData();
+				try
+				{
+					this.sendRowData();
+				}
+				catch (Exception e)
+				{
+					// don't need to log the error as sendRowData() has already done that.
+					if (this.abortOnError) throw new ParsingInterruptedException();
+				}
 			}
 			this.ignoreCurrentRow = false;
 			this.clearRowData();
@@ -253,7 +268,7 @@ public class XmlDataFileParser
 		else if (qName.equals("table-def"))
 		{
 			try
-			{ 
+			{
 				this.sendTableDefinition();
 			}
 			catch (SQLException sql)
@@ -296,13 +311,24 @@ public class XmlDataFileParser
 		{
 			try
 			{
-				//this.colTypes[this.currentColIndex] = Integer.parseInt(this.chars.toString());
 				this.columns[this.currentColIndex].setDataType(Integer.parseInt(this.chars.toString()));
 			}
 			catch (Exception e)
 			{
 				LogMgr.logError("XmlDataFileParser.endElement()", "Could not read columnn type!", e);
 				throw new SAXException("Could not read columnn type");
+			}
+		}
+		else if (qName.equals("dbms-data-type"))
+		{
+			try
+			{
+				this.columns[this.currentColIndex].setDbmsType(this.chars.toString());
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("XmlDataFileParser.endElement()", "Could not read dbms columnn type!", e);
+				throw new SAXException("Could not read dbms columnn type");
 			}
 		}
 		else if (qName.equals("java-class"))
@@ -317,10 +343,10 @@ public class XmlDataFileParser
 				throw new SAXException("Could not read columnn name");
 			}
 		}
-		
+
 		// Stop collecting characters...
 		this.chars = null;
-		
+
 	}
 
 	public void characters(char buf[], int offset, int len)
@@ -336,18 +362,18 @@ public class XmlDataFileParser
 
 	/**	Only implemented to have even more possibilities for cancelling the import */
 	public void ignorableWhitespace(char[] ch,int start,int length)
-    throws SAXException	
+    throws SAXException
 	{
 		Thread.yield();
 		if (!this.keepRunning) throw new ParsingInterruptedException();
 	}
 	public void processingInstruction(String target,String data)
-		throws SAXException	
+		throws SAXException
 	{
 		Thread.yield();
 		if (!this.keepRunning) throw new ParsingInterruptedException();
 	}
-	
+
 	public void error(SAXParseException e)
 		throws SAXParseException
 	{
@@ -355,7 +381,7 @@ public class XmlDataFileParser
 		this.ignoreCurrentRow = true;
 		if (!this.keepRunning) throw e;
 	}
-	
+
 	public void fatalError(SAXParseException e)
 		throws SAXParseException
 	{
@@ -363,7 +389,7 @@ public class XmlDataFileParser
 		this.ignoreCurrentRow = true;
 		if (!this.keepRunning) throw e;
 	}
-	
+
 	// dump warnings too
 	public void warning(SAXParseException err)
 		throws SAXParseException
@@ -372,9 +398,9 @@ public class XmlDataFileParser
 		System.out.println("   " + err.getMessage());
 		if (!this.keepRunning) throw err;
 	}
-	
+
 	/**
-	 *	Creates the approriate column data object and puts it 
+	 *	Creates the approriate column data object and puts it
 	 *	into rowData[currentColIndex]
 	 */
 	private void buildColumnData()
@@ -389,21 +415,22 @@ public class XmlDataFileParser
 		}
 
 		String value = this.chars.toString();
-		
-		switch (this.columns[this.currentColIndex].getDataType())
+		int type = this.columns[this.currentColIndex].getDataType();
+		switch (type)
 		{
 			case Types.CHAR:
 			case Types.VARCHAR:
+			case Types.LONGVARCHAR:
 				this.currentRow[this.currentColIndex] = value;
 				break;
-				
+
 			case Types.TIME:
 				if (hasLongValue)
 				{
 					this.currentRow[this.currentColIndex] = new java.sql.Time(this.columnLongValue);
 				}
 				break;
-				
+
 			case Types.BIGINT:
 				try
 				{
@@ -418,7 +445,7 @@ public class XmlDataFileParser
 					this.currentRow[this.currentColIndex] = null;
 				}
 				break;
-				
+
 			case Types.SMALLINT:
 			case Types.INTEGER:
 			case Types.TINYINT:
@@ -435,7 +462,7 @@ public class XmlDataFileParser
 					this.currentRow[this.currentColIndex] = null;
 				}
 				break;
-				
+
 			case Types.DATE:
 			case Types.TIMESTAMP:
 				java.sql.Date d = null;
@@ -458,10 +485,10 @@ public class XmlDataFileParser
 						d = null;
 					}
 				}
-				
+
 				if (d != null)
 				{
-					if (this.columns[this.currentColIndex].getDataType() == Types.TIMESTAMP)
+					if (type == Types.TIMESTAMP)
 					{
 						this.currentRow[this.currentColIndex] = new java.sql.Timestamp(d.getTime());
 					}
@@ -471,7 +498,7 @@ public class XmlDataFileParser
 					}
 				}
 				break;
-				
+
 			case Types.DECIMAL:
 			case Types.FLOAT:
 			case Types.DOUBLE:
@@ -481,7 +508,7 @@ public class XmlDataFileParser
 				this.currentRow[this.currentColIndex] = result;
 				break;
 		}
-		
+
 	}
 
 	private Object createNumericType(String aClass, String aValue)
@@ -512,9 +539,9 @@ public class XmlDataFileParser
 	{
 		this.receiver.setTargetTable(this.tableName, this.columns);
 	}
-	
+
 	private void sendRowData()
-		throws SAXException
+		throws SAXException, Exception
 	{
 		if (this.receiver != null)
 		{
@@ -525,14 +552,15 @@ public class XmlDataFileParser
 			catch (Exception e)
 			{
 				LogMgr.logError("XmlDataFileParser.sendRowData()", "Error when sending row data to receiver", e);
+				if (this.abortOnError) throw e;
 			}
 		}
 		if (!this.keepRunning) throw new ParsingInterruptedException();
 	}
-	
+
 	public String getMessages()
 	{
 		return "";
 	}
-	
+
 }

@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 
 /**
  *
@@ -81,7 +80,7 @@ public class StatementFactory
 				else
 				{
 					sql.append(" = ?");
-					if (this.resultInfo.getColumnType(col) == SqlUtil.LONG_TYPE)
+					if ("LONG".equals(this.resultInfo.getDbmsTypeName(col)))
 					{
 						values.add(new OracleLongType(value.toString()));
 					}

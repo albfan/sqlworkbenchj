@@ -44,7 +44,7 @@ public class EmptyTableModel implements TableModel
 
 	public boolean isCellEditable(int row, int column)
 	{
-		return true;
+		return false;
 	}
 
 	public void addTableModelListener(TableModelListener l)

@@ -21,7 +21,9 @@ import workbench.resource.ResourceMgr;
  *	Action to copy the contents of a entry field into the clipboard
  *	@author  info@sql-workbench.net
  */
-public class MakeInListAction extends WbAction implements TextSelectionListener
+public class MakeInListAction
+	extends WbAction
+	implements TextSelectionListener
 {
 	private EditorPanel client;
 

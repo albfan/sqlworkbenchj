@@ -22,4 +22,5 @@ public interface RowDataProducer
 	void start() throws Exception;
 	void cancel();
 	String getMessages();
+	void setAbortOnError(boolean flag);
 }

@@ -13,14 +13,24 @@ package workbench.util;
 
 import java.awt.Component;
 import java.awt.Window;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 
 import javax.swing.JFileChooser;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
+import workbench.db.exporter.DataExporter;
+import workbench.gui.components.EncodingPanel;
 
 import workbench.gui.components.ExtensionFileFilter;
+import workbench.gui.dialogs.export.ExportOptionsPanel;
+import workbench.interfaces.EncodingSelector;
 import workbench.resource.Settings;
+import javax.swing.JComponent;
+//import workbench.gui.components.ExportOptionsPanel;
 
 /**
  *
@@ -38,14 +48,14 @@ public class FileDialogUtil
 	private int lastFileType = FILE_TYPE_UNKNOWN;
 	private Settings settings = Settings.getInstance();
 	private static final String CONFIG_DIR_KEY = "%ConfigDir%";
-	
+	private String encoding = null;
+	private ExportOptionsPanel exportOptions;
+	private JFileChooser chooser;
+	private boolean filterChange = false;
+
 	/** Creates a new instance of FileDialogUtil */
 	public FileDialogUtil()
 	{
-	}
-	public String getExportFilename(boolean includeSqlType)
-	{
-		return this.getExportFilename(null, includeSqlType);
 	}
 
 	public int getLastSelectedFileType()
@@ -53,57 +63,54 @@ public class FileDialogUtil
 		return this.lastFileType;
 	}
 
-	public String getExportFilename(Component caller, boolean includeSqlType)
+	public String getEncoding()
 	{
-		FileFilter text = ExtensionFileFilter.getTextFileFilter();
-		FileFilter[] filters;
-		int index = 0;
-		if (includeSqlType)
-		{
-			filters = new FileFilter[5];
-		}
-		else
-		{
-			filters = new FileFilter[3];
-		}
-
-		filters[index++] = text;
-		filters[index++] = ExtensionFileFilter.getHtmlFileFilter();
-		if (includeSqlType)
-		{
-			filters[index++] = ExtensionFileFilter.getSqlFileFilter();
-			filters[index++] = ExtensionFileFilter.getSqlUpdateFileFilter();
-		}
-		filters[index++] = ExtensionFileFilter.getXmlFileFilter();
-		String lastDir = settings.getLastExportDir();
-		return getFilename(caller, filters, 0, "workbench.export.lastdir");
+		return this.encoding;
 	}
 
 	public String getXmlReportFilename(Component caller)
 	{
-		FileFilter[] filter = new FileFilter[1];
-		filter[0] = ExtensionFileFilter.getXmlFileFilter();
-		return getFilename(caller, filter, 0, "workbench.xmlreport.lastdir");
+		return this.getXmlReportFilename(caller, null);
 	}
 
-	private String getFilename(Component caller, FileFilter[] filters, int defaultFilter, String dirProperty)
+	public String getXmlReportFilename(Component caller, JComponent accessory)
 	{
-		this.lastFileType = FILE_TYPE_UNKNOWN;
-		String lastDir = settings.getProperty(dirProperty, null);
+		String lastDir = settings.getProperty("workbench.xmlreport.lastdir", null);
 		JFileChooser fc = new JFileChooser(lastDir);
-		for (int i=0; i < filters.length; i++)
+		fc.addChoosableFileFilter(ExtensionFileFilter.getXmlFileFilter());
+		fc.setFileFilter(ExtensionFileFilter.getXmlFileFilter());
+
+		if (this.encoding == null)
 		{
-			fc.addChoosableFileFilter(filters[i]);
+			this.encoding = this.settings.getDefaultDataEncoding();
 		}
-		fc.setFileFilter(filters[defaultFilter]);
+
+		EncodingSelector selector = null;
+		if (accessory != null)
+		{
+			fc.setAccessory(accessory);
+			if (accessory instanceof EncodingSelector)
+			{
+				selector = (EncodingSelector)accessory;
+			}
+			selector.setEncoding(this.encoding);
+		}
+		else
+		{
+			EncodingPanel p = new EncodingPanel(this.encoding);
+			selector = p;
+			fc.setAccessory(p);
+		}
+
 		String filename = null;
 
-		Window parent;
-		parent = SwingUtilities.getWindowAncestor(caller);
+		Window parent = SwingUtilities.getWindowAncestor(caller);
 
 		int answer = fc.showSaveDialog(parent);
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
+			this.encoding = selector.getEncoding();
+
 			File fl = fc.getSelectedFile();
 			FileFilter ff = fc.getFileFilter();
 			if (ff instanceof ExtensionFileFilter)
@@ -117,26 +124,7 @@ public class FileDialogUtil
 					if (!filename.endsWith(".")) filename = filename + ".";
 					filename = filename + eff.getDefaultExtension();
 				}
-				if (ff == ExtensionFileFilter.getSqlFileFilter())
-				{
-					this.lastFileType = FILE_TYPE_SQL;
-				}
-				else if (ff == ExtensionFileFilter.getSqlUpdateFileFilter())
-				{
-					this.lastFileType = FILE_TYPE_SQL_UPDATE;
-				}
-				else if (ff == ExtensionFileFilter.getXmlFileFilter())
-				{
-					this.lastFileType = FILE_TYPE_XML;
-				}
-				else if (ff == ExtensionFileFilter.getTextFileFilter())
-				{
-					this.lastFileType = FILE_TYPE_TXT;
-				}
-				else if (ff == ExtensionFileFilter.getHtmlFileFilter())
-				{
-					this.lastFileType = FILE_TYPE_HTML;
-				}
+				this.lastFileType = this.getFileFilterType(ff);
 			}
 			else
 			{
@@ -144,10 +132,35 @@ public class FileDialogUtil
 			}
 
 			lastDir = fc.getCurrentDirectory().getAbsolutePath();
-			settings.setProperty(dirProperty, lastDir);
+			settings.setProperty("workbench.xmlreport.lastdir", lastDir);
 		}
 
 		return filename;
+	}
+
+	private int getFileFilterType(FileFilter ff)
+	{
+		if (ff == ExtensionFileFilter.getSqlFileFilter())
+		{
+			return FILE_TYPE_SQL;
+		}
+		else if (ff == ExtensionFileFilter.getSqlUpdateFileFilter())
+		{
+			return FILE_TYPE_SQL_UPDATE;
+		}
+		else if (ff == ExtensionFileFilter.getXmlFileFilter())
+		{
+			return FILE_TYPE_XML;
+		}
+		else if (ff == ExtensionFileFilter.getTextFileFilter())
+		{
+			return FILE_TYPE_TXT;
+		}
+		else if (ff == ExtensionFileFilter.getHtmlFileFilter())
+		{
+			return FILE_TYPE_HTML;
+		}
+		return FILE_TYPE_UNKNOWN;
 	}
 
 	public String getWorkspaceFilename(Window parent, boolean toSave)
@@ -225,5 +238,4 @@ public class FileDialogUtil
 		return StringUtil.replace(aPathname, CONFIG_DIR_KEY, dir);
 	}
 
-	
 }

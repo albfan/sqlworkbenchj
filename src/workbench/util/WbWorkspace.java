@@ -259,6 +259,13 @@ public class WbWorkspace
 		String value = (String)this.tabInfo.get(key);
 		return value;
 	}
+	public String getExternalFileEncoding(int tabIndex)
+	{
+		if (this.tabInfo == null) return null;
+		String key = "tab" + tabIndex + ".encoding";
+		String value = (String)this.tabInfo.get(key);
+		return value;
+	}
 	
 	public void setExternalFileCursorPos(int tabIndex, int cursor)
 	{
@@ -270,6 +277,12 @@ public class WbWorkspace
 	{
 		String key = "tab" + tabIndex + ".filename";
 		this.tabInfo.setProperty(key, filename);
+	}
+	
+	public void setExternalFileEncoding(int tabIndex, String encoding)
+	{
+		String key = "tab" + tabIndex + ".encoding";
+		this.tabInfo.setProperty(key, encoding);
 	}
 
 	public static void main(String args[])

@@ -153,7 +153,7 @@ public class WbStringTokenizer
 				char token = buf[0];
 
 				// Check for quote character
-				if (quoteChars.indexOf(token) > -1)
+				if (quoteChars != null && quoteChars.indexOf(token) > -1)
 				{
 					if (inQuotes)
 					{

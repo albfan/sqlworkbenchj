@@ -54,8 +54,8 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.WbThread;
-
-
+import workbench.interfaces.JobErrorHandler;
+import java.awt.Cursor;
 
 /**
  *
@@ -79,6 +79,7 @@ public class TableDataPanel
 
 	private boolean shiftDown = false;
 	private boolean retrieveRunning = false;
+	private boolean updateRunning = false;
 
 	private TableIdentifier table;
 	private ImageIcon loadingIcon;
@@ -91,7 +92,25 @@ public class TableDataPanel
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setLayout(new BorderLayout());
 
-		this.dataDisplay = new DwPanel();
+		this.dataDisplay = new DwPanel()
+		{
+			public synchronized int saveChanges(WbConnection aConnection, JobErrorHandler errorHandler)
+				throws SQLException
+			{
+				int result = -1;
+				try
+				{
+					dbUpdateStart();
+					result = super.saveChanges(aConnection, errorHandler);
+				}
+				finally
+				{
+					dbUpdateEnd();
+				}
+				return result;
+			}
+		};
+
 		this.dataDisplay.setManageActions(true);
 		this.dataDisplay.setShowLoadProcess(true);
 		this.dataDisplay.setDefaultStatusMessage("");
@@ -215,6 +234,7 @@ public class TableDataPanel
 	public long showRowCount()
 	{
 		if (this.dbConnection == null) return -1;
+		if (this.isRetrieving()) return -1;
 
 		this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount"));
 		this.rowCountLabel.setIcon(this.getLoadingIndicator());
@@ -335,9 +355,9 @@ public class TableDataPanel
 		this.retrieveRunning = false;
 	}
 
-	public synchronized boolean isRetrieving()
+	public boolean isRetrieving()
 	{
-		return this.retrieveRunning;
+		return this.retrieveRunning || this.updateRunning;
 	}
 
 	private void doRetrieve()
@@ -380,7 +400,7 @@ public class TableDataPanel
 		}
 		finally
 		{
-			//WbSwingUtilities.showDefaultCursor(this);
+			WbSwingUtilities.showDefaultCursor(this);
 			dataDisplay.scriptFinished();
 			cancelRetrieve.setEnabled(false);
 			reloadAction.setEnabled(true);
@@ -388,8 +408,16 @@ public class TableDataPanel
 		}
 	}
 
+	public void setCursor(Cursor newCursor)
+	{
+		super.setCursor(newCursor);
+		this.dataDisplay.setCursor(null);
+	}
+
 	public void retrieve()
 	{
+		if (this.isRetrieving()) return;
+
 		Thread t = new WbThread("TableDataPanel retrieve thread")
 		{
 			public void run()
@@ -500,5 +528,30 @@ public class TableDataPanel
 			}
 		}
 	}
+
+	private void dbUpdateStart()
+	{
+		this.reloadAction.setEnabled(false);
+		synchronized (this)
+		{
+			this.updateRunning = true;
+		}
+	}
+
+	private void dbUpdateEnd()
+	{
+		try
+		{
+			this.reloadAction.setEnabled(true);
+		}
+		finally
+		{
+			synchronized (this)
+			{
+				this.updateRunning = false;
+			}
+		}
+	}
+
 
 }

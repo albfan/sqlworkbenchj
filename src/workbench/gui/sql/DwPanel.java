@@ -57,8 +57,10 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.DbData;
 import workbench.interfaces.DbUpdater;
+import workbench.interfaces.ExecutionController;
 import workbench.interfaces.Interruptable;
 import workbench.interfaces.JobErrorHandler;
+import workbench.interfaces.ResultLogger;
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -72,9 +74,10 @@ import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
+import java.awt.Cursor;
 
 /**
- *	A Panel which displays the result of a SELECT statement and 
+ *	A Panel which displays the result of a SELECT statement and
  *  can save changes to the database
  *
  *	@author info@sql-workbench.net
@@ -92,6 +95,7 @@ public class DwPanel
 	private String lastMessage;
 	private WbConnection dbConnection;
 	private OneLineTableModel errorModel;
+	private OneLineTableModel errorMessageModel;
 	private TableModel resultEmptyMsgModel;
 	private boolean hasResultSet = false;
 
@@ -121,6 +125,8 @@ public class DwPanel
 	private long rowsAffectedByScript = -1;
 	private boolean scriptRunning = false;
 	private boolean cancel = false;
+	private String[] lastResultMessages = null;
+	private String lastTimingMessage = null;
 
 	private StatementRunner stmtRunner;
 
@@ -230,6 +236,12 @@ public class DwPanel
 		}
 	}
 
+	public void setCursor(Cursor newCursor)
+	{
+		super.setCursor(newCursor);
+		this.infoTable.setCursor(newCursor);
+	}
+
 	public void setShowLoadProcess(boolean aFlag)
 	{
 		this.showLoadProgress = aFlag;
@@ -279,13 +291,19 @@ public class DwPanel
 		}
 	}
 
-	private String objectMsg = ResourceMgr.getString("MsgProcessObject");
+	private final String objectMsg = ResourceMgr.getString("MsgProcessObject");
 
+	/**
+	 *	Callback method from the {@link workbench.interfaces.ScriptGenerationMonitor}
+	 */
 	public void setCurrentObject(String name)
 	{
 		statusBar.setStatusMessage(name);
 	}
 
+	/**
+	 *	Callback method from the {@link workbench.interfaces.RowActionMonitor}
+	 */
 	public void setCurrentObject(String name, int number, int total)
 	{
 		StringBuffer msg = new StringBuffer(objectMsg);
@@ -413,7 +431,7 @@ public class DwPanel
 
 	public boolean shouldSaveChanges(WbConnection aConnection)
 	{
-		if (!Settings.getInstance().getDbDebugMode()) return true;
+		if (!Settings.getInstance().getDbDebugMode() && !this.dbConnection.getProfile().isConfirmUpdates()) return true;
 
 		this.infoTable.stopEditing();
 		DataStore ds = this.infoTable.getDataStore();
@@ -476,6 +494,10 @@ public class DwPanel
 		if (errorHandler != null) activeErrorHandler = errorHandler;
 
 		this.infoTable.stopEditing();
+		if (this.manageUpdateAction)
+		{
+			this.disableUpdateActions();
+		}
 
 		try
 		{
@@ -500,10 +522,27 @@ public class DwPanel
 		finally
 		{
 			this.clearStatusMessage();
+			if (this.manageUpdateAction) this.enableUpdateActions();
     }
 		this.repaint();
 
 		return rows;
+	}
+
+	protected void enableUpdateActions()
+	{
+		boolean update = this.isUpdateable();
+		boolean rows = this.infoTable.getSelectedRowCount() > 0;
+		this.insertRow.setEnabled(update);
+		this.duplicateRow.setEnabled(update && rows);
+		this.deleteRow.setEnabled(rows);
+	}
+
+	protected void disableUpdateActions()
+	{
+		this.insertRow.setEnabled(false);
+		this.duplicateRow.setEnabled(false);
+		this.deleteRow.setEnabled(false);
 	}
 
 	public String getCurrentSql()
@@ -595,24 +634,39 @@ public class DwPanel
 		return rowsAffectedByScript;
 	}
 
-	/**
-	 *	Execute the given SQL statement.
-	 */
-	public void runStatement(String aSql)
+	private boolean autoClearStatus = true;
+
+	public void setAutoClearStatus(boolean flag)
+	{
+		this.autoClearStatus = flag;
+	}
+
+	public void setResultLogger(ResultLogger logger)
+	{
+		this.stmtRunner.setResultLogger(logger);
+	}
+
+	public void runStatement(String sql)
 		throws SQLException, Exception
 	{
-		if (aSql == null)
-		{
-			Exception e = new Exception("runStatement requires a SQL statement!");
-			LogMgr.logError(this, "No sql statement given!", e);
-			return;
-		}
-
+		runStatement(sql, null);
+	}
+	/**
+	 *	Execute the given SQL statement. The ExecutionController is
+	 *  used as a callback to confirm statement execution. This is needed
+	 *  when the option "Confirm DB updates" has been selected in the
+	 *  connection profile
+	 */
+	public void runStatement(String aSql, ExecutionController controller)
+		throws SQLException, Exception
+	{
 		this.success = false;
 		this.cancel = false;
 		this.hasWarning = false;
 
 		StatementRunnerResult result = null;
+		this.lastMessage = null;
+		this.lastTimingMessage = null;
 
 		try
 		{
@@ -621,13 +675,11 @@ public class DwPanel
 			this.sql = aSql;
 
 			long sqlExecStart = System.currentTimeMillis();
-
+			this.stmtRunner.setExecutionController(controller);
 			this.stmtRunner.runStatement(aSql, this.statusBar.getMaxRows());
 
 			long sqlTime = (System.currentTimeMillis() - sqlExecStart);
 			long end = 0, checkUpdateTime = 0;
-
-			DataStore newData = null;
 
 			result = this.stmtRunner.getResult();
 
@@ -635,115 +687,61 @@ public class DwPanel
 			this.success = result.isSuccess();
 			this.hasWarning = result.hasWarning();
 
-			if (this.success && result.hasData())
+			if (this.success)
 			{
-				this.hasResultSet = true;
-
-				if (result.hasDataStores())
+				this.hasResultSet = result.hasData();
+				if (result.hasData())
 				{
-					newData = result.getDataStores()[0];
+					checkUpdateTime = this.showData(result);
 				}
 				else
 				{
-					// the resultset will be closed when stmtRunner.done() is called
-					// in scriptFinished()
-					ResultSet rs = result.getResultSets()[0];
-
-					// passing the maxrows to the datastore is a workaround for JDBC drivers
-					// which do not support the setMaxRows() method.
-					// The datastore will make sure that no more rows are read then really requested
-					if (this.showLoadProgress)
-					{
-						newData = new DataStore(rs, true, this, this.getMaxRows(), this.dbConnection);
-					}
-					else
-					{
-						newData = new DataStore(rs, true, null, this.getMaxRows(), this.dbConnection);
-					}
+					this.setMessageDisplayModel(this.getEmptyMsgTableModel());
 				}
-
-				newData.setOriginalStatement(result.getSourceCommand());
-				newData.setSourceConnection(this.dbConnection);
-				newData.setProgressMonitor(null);
-				this.clearStatusMessage();
-
 				end = System.currentTimeMillis();
-
-				this.infoTable.reset();
-				this.infoTable.setAutoCreateColumnsFromModel(true);
-				this.infoTable.setModel(new DataStoreTableModel(newData), true);
-				this.infoTable.adjustColumns();
-
-				if (automaticUpdateTableCheck)
-				{
-					long updStart, updEnd;
-					updStart = System.currentTimeMillis();
-					this.checkUpdateTable();
-					updEnd = System.currentTimeMillis();
-					checkUpdateTime = (updEnd - updStart);
-				}
-				this.clearStatusMessage();
-
-				if (this.manageUpdateAction)
-				{
-					boolean update = this.isUpdateable();
-					this.insertRow.setEnabled(true);
-				}
-				this.rowCountChanged();
-			}
-			else if (result != null && result.isSuccess())
-			{
-				end = System.currentTimeMillis();
-				this.hasResultSet = false;
-				this.setMessageDisplayModel(this.getEmptyMsgTableModel());
 			}
 			else
 			{
 				end = System.currentTimeMillis();
-				this.hasResultSet = false;
-				if (!this.showErrorMessages)
+				if (this.showErrorMessages)
+				{
+					this.setMessageDisplayModel(this.getErrorTableModel(this.getLastMessage()));
+				}
+				else
 				{
 					this.setMessageDisplayModel(this.getErrorTableModel());
 				}
 			}
 			long execTime = (end - sqlExecStart);
-			this.rowsAffectedByScript += result.getTotalUpdateCount();
-
-			String[] messages = result.getMessages();
-			StrBuffer msg = null;
-			if (messages != null)
-			{
-				msg = new StrBuffer(messages.length * 80);
-				for (int i=0; i < messages.length; i++)
-				{
-					msg.append(messages[i]);
-					msg.append(" \n");
-				}
-				this.lastMessage = msg.toString();
-			}
-
-			if (!result.isSuccess() && this.showErrorMessages)
-			{
-				this.setMessageDisplayModel(this.getErrorTableModel(this.lastMessage));
-			}
-
+			this.lastTimingMessage = ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s";
 			if (LogMgr.isDebugEnabled())
 			{
-				this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgSqlVerbTime") + " " + (((double)sqlTime) / 1000.0) + "s";
+				this.lastTimingMessage += "\n" + ResourceMgr.getString("MsgSqlVerbTime") + " " + (((double)sqlTime) / 1000.0) + "s";
+				if (checkUpdateTime > 0)
+				{
+					this.lastTimingMessage += "\n" + ResourceMgr.getString("MsgCheckUpdateTableTime") + " " + (((double)checkUpdateTime) / 1000.0) + "s";
+				}
 			}
-			this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s";
-
-			if (checkUpdateTime > 0 && LogMgr.isDebugEnabled())
-			{
-				this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgCheckUpdateTableTime") + " " + (((double)checkUpdateTime) / 1000.0) + "s";
-			}
-
+			this.rowsAffectedByScript += result.getTotalUpdateCount();
+			this.lastResultMessages = result.getMessages();
 		}
 		catch (SQLException sqle)
 		{
-			LogMgr.logError(this, "SQL error when executing statement: \r\n" + this.sql, sqle);
-			this.lastMessage = ResourceMgr.getString("MsgExecuteError") + "\r\n";
-			this.lastMessage = this.lastMessage + ExceptionUtil.getDisplay(sqle);;
+			this.lastMessage = null;
+			this.lastTimingMessage = null;
+
+			String msg = ExceptionUtil.getDisplay(sqle);
+
+			LogMgr.logWarning("DwPanel.runStatement()", "SQL error when executing statement: \n" + this.sql + "\n" + msg);
+			StringBuffer b = new StringBuffer(100);
+			b.append(ResourceMgr.getString("MsgExecuteError"));
+			b.append('\n');
+			b.append(StringUtil.getMaxSubstring(this.sql, 100, "..."));
+			b.append('\n');
+			b.append(msg);
+
+			this.lastMessage = b.toString();
+
 			if (this.showErrorMessages)
 			{
 				//this.setMessageDisplayModel(this.getEmptyMsgTableModel());
@@ -758,6 +756,9 @@ public class DwPanel
 		}
 		catch (Throwable e)
 		{
+			this.lastMessage = null;
+			this.lastTimingMessage = null;
+
 			if (e instanceof OutOfMemoryError)
 			{
 				WbSwingUtilities.showErrorMessage(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("MsgOutOfMemoryError"));
@@ -773,10 +774,77 @@ public class DwPanel
 		{
 			if (result != null) result.clear();
 			this.stmtRunner.statementDone();
+			if (this.autoClearStatus) this.clearStatusMessage();
 		}
 
   }
 
+	private long showData(StatementRunnerResult result)
+		throws SQLException
+	{
+		this.hasResultSet = true;
+		long checkUpdateTime = -1;
+
+		DataStore newData = null;
+
+		if (result.hasDataStores())
+		{
+			newData = result.getDataStores()[0];
+		}
+		else
+		{
+			// the resultset will be closed when stmtRunner.done() is called
+			// in scriptFinished()
+			ResultSet rs = result.getResultSets()[0];
+
+			// passing the maxrows to the datastore is a workaround for JDBC drivers
+			// which do not support the setMaxRows() method.
+			// The datastore will make sure that no more rows are read then really requested
+			if (this.showLoadProgress)
+			{
+				newData = new DataStore(rs, true, this, this.getMaxRows(), this.dbConnection);
+			}
+			else
+			{
+				newData = new DataStore(rs, true, null, this.getMaxRows(), this.dbConnection);
+			}
+		}
+
+		newData.setOriginalStatement(result.getSourceCommand());
+		newData.setSourceConnection(this.dbConnection);
+		newData.setProgressMonitor(null);
+		this.clearStatusMessage();
+
+		this.infoTable.reset();
+		this.infoTable.setAutoCreateColumnsFromModel(true);
+		this.infoTable.setModel(new DataStoreTableModel(newData), true);
+		this.infoTable.adjustColumns();
+
+		if (automaticUpdateTableCheck)
+		{
+			long updStart, updEnd;
+			updStart = System.currentTimeMillis();
+			this.checkUpdateTable();
+			updEnd = System.currentTimeMillis();
+			checkUpdateTime = (updEnd - updStart);
+		}
+		this.clearStatusMessage();
+
+		if (this.manageUpdateAction)
+		{
+			boolean update = this.isUpdateable();
+			this.insertRow.setEnabled(true);
+		}
+		this.rowCountChanged();
+		return checkUpdateTime;
+	}
+
+	private boolean oldVerboseLogging = true;
+
+	public boolean getVerboseLogging()
+	{
+		return this.stmtRunner.getVerboseLogging();
+	}
 
 	/**
 	 *	Callback method to tell this component that a script is running.
@@ -786,6 +854,7 @@ public class DwPanel
 	{
 		this.rowsAffectedByScript = 0;
 		this.scriptRunning = true;
+		this.oldVerboseLogging = this.stmtRunner.getVerboseLogging();
 	}
 
 	/**
@@ -797,6 +866,7 @@ public class DwPanel
 	{
 		this.scriptRunning = false;
 		this.stmtRunner.done();
+		this.stmtRunner.setVerboseLogging(this.oldVerboseLogging);
     //WbSwingUtilities.showDefaultCursor(this);
 	}
 
@@ -883,7 +953,33 @@ public class DwPanel
 		this.repaint();
 	}
 
-	public String getLastMessage() { return this.lastMessage; }
+	public String getLastMessage()
+	{
+		if (this.lastResultMessages != null)
+		{
+			StringBuffer msg = new StringBuffer(lastResultMessages.length * 80);
+			for (int i=0; i < lastResultMessages.length; i++)
+			{
+				msg.append(lastResultMessages[i]);
+				msg.append(" \n");
+			}
+			this.lastMessage = msg.toString();
+			this.lastResultMessages = null;
+		}
+
+		if (this.lastTimingMessage != null)
+		{
+			if (this.lastMessage == null || this.lastMessage.length() == 0)
+				this.lastMessage = this.lastTimingMessage;
+			else
+				this.lastMessage = this.lastMessage + "\n" + this.lastTimingMessage;
+			this.lastTimingMessage = null;
+		}
+		if (this.lastMessage == null) this.lastMessage = "";
+
+		return this.lastMessage;
+	}
+
 	public boolean hasResultSet() { return this.hasResultSet; }
 
 	/**
@@ -985,6 +1081,7 @@ public class DwPanel
 
 	private void setMessageDisplayModel(TableModel aModel)
 	{
+		if (this.infoTable.getModel() == aModel) return;
 		this.infoTable.setModel(aModel);
 		TableColumnModel colMod = this.infoTable.getColumnModel();
 		TableColumn col = colMod.getColumn(0);
@@ -1008,7 +1105,7 @@ public class DwPanel
 		this.endEdit();
 		this.infoTable.reset();
 		this.hasResultSet = false;
-		this.lastMessage = StringUtil.EMPTY_STRING;
+		this.lastMessage = null;
 		this.sql = null;
 		this.statusBar.clearRowcount();
 		this.selectKeys.setEnabled(false);
@@ -1077,7 +1174,13 @@ public class DwPanel
 
 	private TableModel getErrorTableModel()
 	{
-		return this.getErrorTableModel(null);
+		if (this.errorModel == null)
+		{
+			String msg = ResourceMgr.getString(ResourceMgr.TXT_ERROR_MSG_DATA);
+			String title = ResourceMgr.getString(ResourceMgr.TXT_ERROR_MSG_TITLE);
+			this.errorModel = new OneLineTableModel(title, msg);
+		}
+		return this.errorModel;
 	}
 
 	/**
@@ -1088,21 +1191,16 @@ public class DwPanel
 	 */
 	private TableModel getErrorTableModel(String aMsg)
 	{
-		if (this.errorModel == null)
+		if (this.errorMessageModel == null)
 		{
-			String msg = ResourceMgr.getString(ResourceMgr.TXT_ERROR_MSG_DATA);
 			String title = ResourceMgr.getString(ResourceMgr.TXT_ERROR_MSG_TITLE);
-			this.errorModel = new OneLineTableModel(title, msg);
-		}
-		if (aMsg == null)
-		{
-			this.errorModel.setMessage(ResourceMgr.getString(ResourceMgr.TXT_ERROR_MSG_DATA));
+			this.errorMessageModel = new OneLineTableModel(title, aMsg);
 		}
 		else
 		{
-			this.errorModel.setMessage(aMsg);
+			this.errorMessageModel.setMessage(aMsg);
 		}
-		return this.errorModel;
+		return this.errorMessageModel;
 	}
 
 	/**
@@ -1127,6 +1225,7 @@ public class DwPanel
 	 */
 	public void endEdit()
 	{
+		if (!this.editingStarted) return;
 		this.editingStarted = false;
 		this.infoTable.setShowStatusColumn(false);
 		this.updateAction.setEnabled(false);

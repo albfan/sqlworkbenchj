@@ -33,6 +33,7 @@ public class SingleVerbCommand extends SqlCommand
 	public SingleVerbCommand(String aVerb)
 	{
 		this.verb = aVerb;
+		this.isUpdatingCommand = "COMMIT".equalsIgnoreCase(this.verb);
 	}
 
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)

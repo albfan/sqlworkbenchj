@@ -12,6 +12,8 @@
 
 package workbench.gui.dialogs.export;
 
+import workbench.util.CharacterRange;
+
 /**
  *
  * @author info@sql-workbench.net
@@ -28,4 +30,8 @@ public interface TextOptions
 	void setCleanupCarriageReturns(boolean flag);
 	void setQuoteAlways(boolean flag);
 	boolean getQuoteAlways();
+	void setEscapeRange(CharacterRange range);
+	CharacterRange getEscapeRange();
+	void setLineEnding(String ending);
+	String getLineEnding();
 }

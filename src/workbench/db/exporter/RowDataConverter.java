@@ -186,6 +186,20 @@ public abstract class RowDataConverter
 			{
 				result = this.defaultTimestampFormatter.format(value);
 			}
+			else if (value instanceof java.util.Date && this.originalConnection.getMetadata().isOracle())
+			{
+				// sometimes the Oracle driver create a java.util.Date object, but
+				// DATE columns in Oracle do contain a time part and thus we need to
+				// format it correctly.
+				if (this.defaultTimestampFormatter == null)
+				{
+					result = StringUtil.ISO_TIMESTAMP_FORMATTER.format(value);
+				}
+				else
+				{
+					result = this.defaultTimestampFormatter.format(value);
+				}
+			}
 			else if (value instanceof java.util.Date && this.defaultDateFormatter != null)
 			{
 				result = this.defaultDateFormatter.format(value);

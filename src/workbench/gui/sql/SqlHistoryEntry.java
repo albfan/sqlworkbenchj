@@ -12,6 +12,7 @@
 package workbench.gui.sql;
 
 import workbench.log.LogMgr;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -29,7 +30,7 @@ public class SqlHistoryEntry
 
 	public SqlHistoryEntry(String sql, int pos, int selStart, int selEnd)
 	{
-		this.text = this.trimEmptyLines(sql);
+		this.setText(sql);
 		int len = this.text.length();
 		if (pos > len)
 			this.cursorPos = len - 1;
@@ -49,13 +50,12 @@ public class SqlHistoryEntry
 
 	public SqlHistoryEntry(String sql)
 	{
-		this.text = this.trimEmptyLines(sql);
+		this.setText(sql);
 		this.cursorPos = -1;
 		this.selectionStart = -1;
 		this.selectionEnd = -1;
 	}
 
-	//public String toString() { return this.text; }
 	public String getText() { return this.text; }
 	public int getCursorPosition() { return this.cursorPos; }
 	public int getSelectionStart() { return this.selectionStart; }
@@ -82,7 +82,7 @@ public class SqlHistoryEntry
 
 	public String toString()
 	{
-		return "{" + this.text.substring(0, 25) + "..., Cursor=" + this.cursorPos + ", Selection=[" + this.selectionStart + "," + this.selectionEnd + "]}";
+		return "{" + StringUtil.getMaxSubstring(this.text, 40, "...") + ", Cursor=" + this.cursorPos + ", Selection=[" + this.selectionStart + "," + this.selectionEnd + "]}";
 	}
 
 
@@ -106,7 +106,7 @@ public class SqlHistoryEntry
 	{
 		if (input == null) return null;
 		int len = input.length() - 1;
-		if (len <= 0) return null;
+		if (len <= 0) return "";
 
 		char c = input.charAt(len);
 		while ( (c == '\r' || c == '\n') && len > 0)
@@ -117,4 +117,15 @@ public class SqlHistoryEntry
 		return input.substring(0, len + 1);
 	}
 
+	private void setText(String value)
+	{
+		if (value == null) 
+		{
+			this.text = "";
+		}
+		else 
+		{
+			this.text = this.trimEmptyLines(value);
+		}
+	}
 }

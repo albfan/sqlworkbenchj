@@ -11,18 +11,17 @@
  */
 package workbench.gui.components;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
-import javax.swing.BoxLayout;
+
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import workbench.interfaces.EncodingSelector;
+
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -32,15 +31,17 @@ import workbench.resource.Settings;
  */
 public class EncodingPanel
 		extends JPanel
+		implements EncodingSelector
 {
-	private JComboBox encodings = new JComboBox();
+	protected JComboBox encodings = new JComboBox();
 	private static String[] charsets;
 
 	public EncodingPanel()
 	{
 		this(null);
 	}
-	public EncodingPanel(String encoding)
+
+	public static String[] getEncodings()
 	{
 		if (charsets == null)
 		{
@@ -54,7 +55,12 @@ public class EncodingPanel
 				i++;
 			}
 		}
+		return charsets;
+	}
 
+	public EncodingPanel(String encoding)
+	{
+		getEncodings();
 		int count = charsets.length;
 		for (int i=0; i < count; i++)
 		{
@@ -70,33 +76,38 @@ public class EncodingPanel
 		{
 			encodings.setSelectedItem(encoding);
 		}
-		Dimension d = new Dimension(32000, 22);
+		Dimension d = new Dimension(300, 22);
 		encodings.setMaximumSize(d);
 		this.setLayout(new GridBagLayout());
 		JLabel l =  new JLabel(ResourceMgr.getString("LabelFileEncoding"));
-		
+
 		GridBagConstraints c = new GridBagConstraints();
     c.gridx = 0;
     c.gridy = 0;
 		c.insets = new java.awt.Insets(0, 5, 0, 5);
     c.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    c.anchor = java.awt.GridBagConstraints.NORTHWEST;		
-		
+    c.anchor = java.awt.GridBagConstraints.NORTHWEST;
+
 		this.add(l, c);
-		
+
 		c = new GridBagConstraints();
     c.gridx = 0;
     c.gridy = 1;
 		c.insets = new java.awt.Insets(5, 5, 0, 5);
     c.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    c.anchor = java.awt.GridBagConstraints.NORTHWEST;		
+    c.anchor = java.awt.GridBagConstraints.NORTHWEST;
     c.weightx = 1.0;
     c.weighty = 1.0;
-		
+
 		this.add(encodings, c);
 	}
 
-	public String getSelectedEncoding()
+	public void setEncoding(String enc)
+	{
+		encodings.setSelectedItem(enc);
+	}
+
+	public String getEncoding()
 	{
 		String enc = (String)this.encodings.getSelectedItem();
 		return enc;

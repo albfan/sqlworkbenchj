@@ -36,7 +36,6 @@ import javax.swing.ComponentInputMap;
 import javax.swing.InputMap;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -49,6 +48,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -70,7 +70,6 @@ import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.actions.ToggleTableSourceAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
-import workbench.gui.components.ExportOptionsPanel;
 import workbench.gui.components.FindPanel;
 import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbMenu;
@@ -79,6 +78,7 @@ import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
+import workbench.gui.dialogs.export.ExportFileDialog;
 import workbench.gui.renderer.SqlTypeRenderer;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.ExecuteSqlDialog;
@@ -96,6 +96,9 @@ import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.exception.ExceptionUtil;
+import workbench.gui.components.ReportTypePanel;
+import workbench.db.report.Workbench2Designer;
+import java.awt.Component;
 
 
 
@@ -140,7 +143,6 @@ public class TableListPanel
 	private String currentSchema;
 	private String currentCatalog;
 	private SpoolDataAction spoolData;
-
 
 	private WbMenuItem dropTableItem;
 	private WbMenuItem scriptTablesItem;
@@ -189,8 +191,9 @@ public class TableListPanel
 
 	private JDialog cancelInfoWindow;
 	private JLabel infoLabel;
+	private JLabel tableInfoLabel;
 
-public TableListPanel(MainWindow aParent)
+	public TableListPanel(MainWindow aParent)
 		throws Exception
 	{
 		this.parentWindow = aParent;
@@ -301,6 +304,12 @@ public TableListPanel(MainWindow aParent)
 
 		this.listPanel.setLayout(new BorderLayout());
 		this.listPanel.add(topPanel, BorderLayout.NORTH);
+
+		this.tableInfoLabel = new JLabel("");
+
+		EmptyBorder b = new EmptyBorder(1, 3, 0, 0);
+		this.tableInfoLabel.setBorder(b);
+		this.listPanel.add(this.tableInfoLabel, BorderLayout.SOUTH);
 
 		this.splitPane = new WbSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		scroll = new WbScrollPane(this.tableList);
@@ -494,13 +503,12 @@ public TableListPanel(MainWindow aParent)
 			int index = this.displayTab.getSelectedIndex();
 			this.ignoreStateChanged = true;
 
-			//if (this.displayTab.getTabCount() == 2) return;
-
 			this.displayTab.setSelectedIndex(0);
 
 			int count = this.displayTab.getTabCount();
+
 			if (count < 3 && includeDataPanel) return;
-			if (count < 2 && !includeDataPanel) return;
+			//if (count < 2 && !includeDataPanel) return;
 
 			if (count == 3 && includeDataPanel) this.removeDataPanel();
 
@@ -569,28 +577,29 @@ public TableListPanel(MainWindow aParent)
 
 	public void reset()
 	{
-		if (this.isBusy());
+		if (this.isBusy()) return;
 		this.tableList.reset();
 		this.resetDetails();
-		this.invalidateData();
 	}
 
 	public void clearTableData()
 	{
-		this.tableData.reset();
+		if (!this.tableData.isRetrieving())
+		{
+			this.tableData.reset();
+		}
 		this.shouldRetrieveTableDataCount = true;
 	}
 
 	public void resetDetails()
 	{
+		this.invalidateData();
 		this.tableDefinition.reset();
 		this.importedKeys.reset();
 		this.exportedKeys.reset();
 		this.indexes.reset();
 		this.triggers.reset();
 		this.tableSource.setText("");
-		this.invalidateData();
-		//this.updateDisplayClients();
 		this.importedTableTree.reset();
 		this.exportedTableTree.reset();
 		this.tableData.reset();
@@ -663,6 +672,13 @@ public TableListPanel(MainWindow aParent)
 		this.displayTab.addChangeListener(this);
 	}
 
+	public boolean isReallyVisible()
+	{
+		if (!this.isVisible()) return false;
+		Window w = SwingUtilities.getWindowAncestor(this);
+		return (w.isActive() && w.isFocused() && w.isVisible());
+
+	}
 	public void setCatalogAndSchema(String aCatalog, String aSchema)
 		throws Exception
 	{
@@ -672,19 +688,21 @@ public TableListPanel(MainWindow aParent)
 	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)
 		throws Exception
 	{
-		if (this.isBusy()) return;
-		this.reset();
 		this.currentSchema = aSchema;
 		this.currentCatalog = aCatalog;
+		this.shouldRetrieve = true;
+		this.invalidateData();
+
+		if (this.isBusy()) return;
+		this.reset();
 
 		if (!retrieve) return;
 		if (this.dbConnection == null) return;
 
-		if (this.isVisible() || this.isClientVisible())
+		if (this.isReallyVisible() || this.isClientVisible())
 		{
 			this.retrieve();
 			this.setFocusToTableList();
-
 		}
 		else
 		{
@@ -706,7 +724,11 @@ public TableListPanel(MainWindow aParent)
 
 	public void retrieve()
 	{
-		if (this.isBusy()) return;
+		if (this.isBusy())
+		{
+			this.invalidateData();
+			return;
+		}
 
 		try
 		{
@@ -725,8 +747,10 @@ public TableListPanel(MainWindow aParent)
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			setBusy(true);
 			reset();
+			// do not call setBusy() before reset() because
+			// reset will do nothing if the panel is busy
+			setBusy(true);
 
 			// Some JDBC drivers (e.g. PostgreSQL) return a selection
 			// of table types to the user when passing null to getTables()
@@ -748,6 +772,8 @@ public TableListPanel(MainWindow aParent)
 				types[0] = type;
 			}
 			DataStore ds = dbConnection.getMetadata().getTables(currentCatalog, currentSchema, types);
+			String info = ds.getRowCount() + " " + ResourceMgr.getString("TxtTableListObjects");
+			this.tableInfoLabel.setText(info);
 			DataStoreTableModel rs = new DataStoreTableModel(ds);
 			tableList.setModel(rs, true);
 			tableList.adjustColumns();
@@ -843,7 +869,8 @@ public TableListPanel(MainWindow aParent)
 		}
 		else if (e.getSource() == this.tableDefinition.getSelectionModel())
 		{
-			this.createIndexAction.setEnabled(this.tableDefinition.getSelectedRowCount() > 0);
+			boolean rowsSelected = (this.tableDefinition.getSelectedRowCount() > 0);
+			this.createIndexAction.setEnabled(rowsSelected);
 		}
 	}
 
@@ -853,6 +880,7 @@ public TableListPanel(MainWindow aParent)
 
 		this.showDataMenu.setEnabled(count == 1);
 		this.dropTableItem.setEnabled(count > 0);
+		this.spoolData.setEnabled(count > 0);
 
 		if (count > 1) return;
 
@@ -892,18 +920,12 @@ public TableListPanel(MainWindow aParent)
 				removeTablePanels(true);
 			}
 		}
-		if (dataVisible)
-		{
-			this.tableData.setReadOnly(!maybeUpdateable(this.selectedObjectType));
-			TableIdentifier id = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
-			this.tableData.setTable(id);
-			this.shouldRetrieveTable = true;
-			this.shouldRetrieveTableDataCount = true;
-		}
-		else
-		{
-			this.tableData.reset();
-		}
+
+		this.tableData.reset();
+		this.tableData.setReadOnly(!maybeUpdateable(this.selectedObjectType));
+		TableIdentifier id = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+		this.tableData.setTable(id);
+
 		this.showDataMenu.setEnabled(this.isTableType(selectedObjectType));
 		this.startRetrieveCurrentPanel();
 	}
@@ -927,7 +949,6 @@ public TableListPanel(MainWindow aParent)
 	private void retrieveTableSource()
 		throws SQLException
 	{
-		WbSwingUtilities.showWaitCursorOnWindow(this);
 		tableSource.setText(ResourceMgr.getString("TxtRetrievingSourceCode"));
 
 		try
@@ -962,7 +983,7 @@ public TableListPanel(MainWindow aParent)
 			}
 			else
 			{
-				sql = null;
+				sql = "";
 			}
 			SwingUtilities.invokeLater(new Runnable()
 			{
@@ -973,35 +994,37 @@ public TableListPanel(MainWindow aParent)
 					tableSource.setCaretPosition(0);
 				}
 			});
+			shouldRetrieveTableSource = false;
 		}
 		catch (SQLException e)
 		{
 			tableSource.setText(ExceptionUtil.getDisplay(e));
 			throw e;
 		}
-		finally
-		{
-			WbSwingUtilities.showDefaultCursorOnWindow(this);
-		}
-		shouldRetrieveTableSource = false;
 	}
 
 	private void retrieveTableDefinition()
 		throws SQLException
 	{
-		WbSwingUtilities.showWaitCursorOnWindow(this);
-
 		try
 		{
+			tableDefinition.setIgnoreRepaint(true);
 			DbMetadata meta = this.dbConnection.getMetadata();
 			DataStore def = meta.getTableDefinition(this.selectedCatalog, this.selectedSchema, this.selectedTableName, this.selectedObjectType, false);
 			DataStoreTableModel model = new DataStoreTableModel(def);
 			tableDefinition.setPrintHeader(this.selectedTableName);
 			tableDefinition.setModel(model, true);
-			tableDefinition.adjustColumns();
+			if ("SEQUENCE".equalsIgnoreCase(this.selectedObjectType))
+			{
+				tableDefinition.optimizeAllColWidth(true);
+			}
+			else
+			{
+				tableDefinition.adjustColumns();
+			}
 
-			// remove the last two columns if we are not displaying a SEQUENCE for Oracle
-			if (!(meta.isOracle() && "SEQUENCE".equalsIgnoreCase(this.selectedObjectType)))
+			// remove the last two columns if we are not displaying a SEQUENCE
+			if (!"SEQUENCE".equalsIgnoreCase(this.selectedObjectType))
 			{
 				TableColumnModel colmod = tableDefinition.getColumnModel();
 				TableColumn col = colmod.getColumn(DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
@@ -1016,12 +1039,17 @@ public TableListPanel(MainWindow aParent)
 				col = colmod.getColumn(colmod.getColumnCount() - 1);
 				colmod.removeColumn(col);
 			}
+			shouldRetrieveTable = false;
+		}
+		catch (SQLException e)
+		{
+			shouldRetrieveTable = true;
+			throw e;
 		}
 		finally
 		{
-			WbSwingUtilities.showDefaultCursorOnWindow(this);
+			tableDefinition.setIgnoreRepaint(false);
 		}
-		shouldRetrieveTable = false;
 	}
 
 	private void showCancelMessage()
@@ -1100,6 +1128,8 @@ public TableListPanel(MainWindow aParent)
 				{
 					closeCancelInfo();
 				}
+				setBusy(false);
+				invalidateData();
 				startRetrieveThread();
 			}
 		};
@@ -1111,7 +1141,6 @@ public TableListPanel(MainWindow aParent)
 		if (panelRetrieveThread != null && panelRetrieveThread.isAlive())
 		{
 			startCancelThread();
-			return;
 		}
 		startRetrieveThread();
 	}
@@ -1137,7 +1166,11 @@ public TableListPanel(MainWindow aParent)
 
 	private void retrieveCurrentPanel()
 	{
-		if (this.isBusy()) return;
+		if (this.isBusy())
+		{
+			this.invalidateData();
+			return;
+		}
 
 		if (this.tableList.getSelectedRowCount() <= 0) return;
 		int index = this.displayTab.getSelectedIndex();
@@ -1146,6 +1179,7 @@ public TableListPanel(MainWindow aParent)
 
 		try
 		{
+			WbSwingUtilities.showWaitCursor(this);
 			switch (index)
 			{
 				case 0:
@@ -1160,6 +1194,7 @@ public TableListPanel(MainWindow aParent)
 						this.tableData.showData(!this.shiftDown);
 						this.shouldRetrieveTableDataCount = false;
 					}
+					this.tableData.setCursor(null);
 					break;
 				case 3:
 					if (this.shouldRetrieveIndexes) this.retrieveIndexes();
@@ -1191,6 +1226,7 @@ public TableListPanel(MainWindow aParent)
 	{
 		return this.busy;
 	}
+
 	private synchronized void setBusy(boolean aFlag)
 	{
 		this.busy = aFlag;
@@ -1199,24 +1235,40 @@ public TableListPanel(MainWindow aParent)
 	private void retrieveTriggers()
 		throws SQLException
 	{
-		triggers.readTriggers(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
-		this.shouldRetrieveTriggers = false;
+		try
+		{
+			triggers.readTriggers(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+			this.shouldRetrieveTriggers = false;
+		}
+		catch (Throwable th)
+		{
+			this.shouldRetrieveTriggers = true;
+			LogMgr.logError("TableListPanel.retrieveTriggers()", "Error retrieving triggers", th);
+			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(th));
+		}
 	}
 
 	private void retrieveIndexes()
 		throws SQLException
 	{
-		DbMetadata meta = this.dbConnection.getMetadata();
-		indexes.setModel(meta.getTableIndexes(this.selectedCatalog, this.selectedSchema, this.selectedTableName), true);
-		indexes.adjustColumns();
-		this.shouldRetrieveIndexes = false;
+		try
+		{
+			DbMetadata meta = this.dbConnection.getMetadata();
+			indexes.setModel(meta.getTableIndexes(this.selectedCatalog, this.selectedSchema, this.selectedTableName), true);
+			indexes.adjustColumns();
+			this.shouldRetrieveIndexes = false;
+		}
+		catch (Throwable th)
+		{
+			this.shouldRetrieveIndexes = true;
+			LogMgr.logError("TableListPanel.retrieveIndexes()", "Error retrieving indexes", th);
+			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(th));
+		}
 	}
 
 	private void retrieveExportedTables()
 		throws SQLException
 	{
-		WbSwingUtilities.showWaitCursorOnWindow(this);
-
 		try
 		{
 			DbMetadata meta = this.dbConnection.getMetadata();
@@ -1227,19 +1279,15 @@ public TableListPanel(MainWindow aParent)
 		}
 		catch (Throwable th)
 		{
+			this.shouldRetrieveExportedKeys = true;
 			LogMgr.logError("TableListPanel.retrieveExportedTables()", "Error retrieving table references", th);
-		}
-		finally
-		{
-			WbSwingUtilities.showDefaultCursorOnWindow(this);
+			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(th));
 		}
 	}
 
 	private void retrieveImportedTables()
 		throws SQLException
 	{
-		WbSwingUtilities.showWaitCursorOnWindow(this);
-
 		try
 		{
 			DbMetadata meta = this.dbConnection.getMetadata();
@@ -1250,18 +1298,14 @@ public TableListPanel(MainWindow aParent)
 		}
 		catch (Throwable th)
 		{
+			this.shouldRetrieveImportedKeys = true;
 			LogMgr.logError("TableListPanel.retrieveImportedTables()", "Error retrieving table references", th);
-		}
-		finally
-		{
-			WbSwingUtilities.showDefaultCursorOnWindow(this);
+			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(th));
 		}
 	}
 
 	private void retrieveImportedTree()
 	{
-		WbSwingUtilities.showWaitCursorOnWindow(this);
-
 		try
 		{
 			TableIdentifier id = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
@@ -1270,18 +1314,14 @@ public TableListPanel(MainWindow aParent)
 		}
 		catch (Throwable th)
 		{
+			this.shouldRetrieveImportedTree = true;
 			LogMgr.logError("TableListPanel.retrieveImportedTree()", "Error retrieving table references", th);
-		}
-		finally
-		{
-			WbSwingUtilities.showDefaultCursorOnWindow(this);
+			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(th));
 		}
 	}
 
 	private void retrieveExportedTree()
 	{
-		WbSwingUtilities.showWaitCursorOnWindow(this);
-
 		try
 		{
 			TableIdentifier id = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
@@ -1291,10 +1331,8 @@ public TableListPanel(MainWindow aParent)
 		catch (Throwable th)
 		{
 			LogMgr.logError("TableListPanel.retrieveImportedTree()", "Error retrieving table references", th);
-		}
-		finally
-		{
-			WbSwingUtilities.showDefaultCursorOnWindow(this);
+			this.shouldRetrieveExportedTree = true;
+			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(th));
 		}
 	}
 
@@ -1356,6 +1394,7 @@ public TableListPanel(MainWindow aParent)
 		{
 			try
 			{
+				this.removeTablePanels(true);
 				this.retrieve();
 				this.setFocusToTableList();
 			}
@@ -1680,13 +1719,34 @@ public TableListPanel(MainWindow aParent)
 		if (tables == null) return;
 
 		FileDialogUtil dialog = new FileDialogUtil();
+		//ReportTypePanel p  = new ReportTypePanel();
+
 		String filename = dialog.getXmlReportFilename(this);
 		if (filename == null) return;
 
 		final SchemaReporter reporter = new SchemaReporter(this.dbConnection);
+		final Component caller = this;
 		reporter.setShowProgress(true);
 		reporter.setTableList(tables);
+
+		/*
+		final String outputfile = filename;
+		final String realfile;
+		if (dbDesigner)
+		{
+			File f = new File(filename);
+			String dir = f.getParent();
+			String fname = f.getName();
+			File nf = new File(dir, "__wb_" + fname);
+			realfile = nf.getAbsolutePath();
+		}
+		else
+		{
+			realfile = filename;
+		}
+		*/
 		reporter.setOutputFilename(filename);
+
 		Thread t = new WbThread("Schema Report")
 		{
 			public void run()
@@ -1694,10 +1754,28 @@ public TableListPanel(MainWindow aParent)
 				try
 				{
 					reporter.writeXml();
+					/*
+					if (dbDesigner)
+					{
+						File f = new File(realfile);
+						Workbench2Designer converter = new Workbench2Designer(f);
+						converter.transformWorkbench2Designer();
+						File output = new File(outputfile);
+						converter.writeOutputFile(output);
+					}
+					*/
 				}
-				catch (Exception e)
+				catch (Throwable e)
 				{
 					LogMgr.logError("TableListPanel.saveReport()", "Error writing schema report", e);
+					final String msg = ExceptionUtil.getDisplay(e);
+					SwingUtilities.invokeLater(new Runnable()
+					{
+						public void run()
+						{
+							WbSwingUtilities.showErrorMessage(caller, msg);
+						}
+					});
 				}
 			}
 		};
@@ -1725,50 +1803,42 @@ public TableListPanel(MainWindow aParent)
 
 	public void spoolTables()
 	{
-		String lastDir = Settings.getInstance().getLastExportDir();
-		JFileChooser fc = new JFileChooser(lastDir);
-		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		ExportFileDialog dialog = new ExportFileDialog(this);
+		dialog.setIncludeSqlInsert(true);
+		dialog.setIncludeSqlUpdate(false);
+		dialog.setSelectDirectoryOnly(true);
+		dialog.restoreSettings();
 
-		fc.setDialogTitle(ResourceMgr.getString("LabelSelectDirTitle"));
-		ExportOptionsPanel options = new ExportOptionsPanel();
-		fc.setAccessory(options);
-		int commitEvery = Settings.getInstance().getIntProperty("workbench.dataspooler", "commitevery", -1);
-		if (commitEvery > 0)
-		{
-			options.setCommitEvery(commitEvery);
-		}
+		String title = ResourceMgr.getString("LabelSelectDirTitle");
 
-		int answer = fc.showDialog(SwingUtilities.getWindowAncestor(this), null);
-		if (answer == JFileChooser.APPROVE_OPTION)
+		boolean answer = dialog.selectOutput(title);
+		if (answer)
 		{
-			File fdir = fc.getSelectedFile();
-			Settings.getInstance().setLastExportDir(fdir.getAbsolutePath());
-			commitEvery = options.getCommitEvery();
-			Settings.getInstance().setProperty("workbench.dataspooler.commitevery", Integer.toString(commitEvery));
+			String fdir = dialog.getSelectedFilename();
+
 			DataExporter spooler = new DataExporter();
+			dialog.setExporterOptions(spooler);
 			spooler.setConnection(this.dbConnection);
 			spooler.setShowProgress(true);
 			String ext = null;
-			if (options.isTypeSql())
+			int type = dialog.getExportType();
+
+			if (type == DataExporter.EXPORT_SQL)
 			{
-				spooler.setOutputTypeSqlInsert();
-				spooler.setIncludeCreateTable(options.getCreateTable());
-				spooler.setCommitEvery(commitEvery);
 				ext = ".sql";
 			}
-			else if (options.isTypeXml())
+			else if (type == DataExporter.EXPORT_XML)
 			{
-				spooler.setOutputTypeXml();
 				ext = ".xml";
 			}
-			else if (options.isTypeText())
+			else if (type == DataExporter.EXPORT_TXT)
 			{
-				spooler.setOutputTypeText();
-				spooler.setExportHeaders(options.getIncludeTextHeader());
 				ext = ".txt";
 			}
-
-			fc = null;
+			else if (type == DataExporter.EXPORT_HTML)
+			{
+				ext = ".html";
+			}
 
 			int[] rows = this.tableList.getSelectedRows();
 			for (int i = 0; i < rows.length; i ++)

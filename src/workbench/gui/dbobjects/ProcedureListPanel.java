@@ -51,6 +51,8 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.WbThread;
+import javax.swing.JLabel;
+import workbench.gui.components.DataStoreTableModel;
 
 
 /**
@@ -76,6 +78,7 @@ public class ProcedureListPanel
 	private boolean shouldRetrieve;
 	private WbMenuItem dropTableItem;
 	private WbMenuItem recompileItem;
+	private JLabel infoLabel;
 
 	private static final String DROP_CMD = "drop-object";
 	private static final String COMPILE_CMD = "compile-procedure";
@@ -128,6 +131,11 @@ public class ProcedureListPanel
 		scroll = new WbScrollPane(this.procList);
 
 		this.listPanel.add(scroll, BorderLayout.CENTER);
+
+		this.infoLabel = new JLabel("");
+		EmptyBorder b = new EmptyBorder(1, 3, 0, 0);
+		this.infoLabel.setBorder(b);
+		this.listPanel.add(this.infoLabel, BorderLayout.SOUTH);
 
 		this.splitPane.setLeftComponent(this.listPanel);
 		this.splitPane.setRightComponent(displayTab);
@@ -240,7 +248,11 @@ public class ProcedureListPanel
 			{
 				DbMetadata meta = dbConnection.getMetadata();
 				WbSwingUtilities.showWaitCursorOnWindow(this);
-				procList.setModel(meta.getListOfProcedures(currentCatalog, currentSchema), true);
+				DataStoreTableModel model = meta.getListOfProcedures(currentCatalog, currentSchema);
+				int rows = model.getRowCount();
+				String info = rows + " " + ResourceMgr.getString("TxtTableListObjects");
+				this.infoLabel.setText(info);
+				procList.setModel(model, true);
 				procList.adjustColumns();
 				shouldRetrieve = false;
 			}

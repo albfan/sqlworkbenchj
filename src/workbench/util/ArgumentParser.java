@@ -133,7 +133,12 @@ public class ArgumentParser
 	
 	public boolean getBoolean(String key)
 	{
+		return getBoolean(key, false);
+	}
+	public boolean getBoolean(String key, boolean def)
+	{
 		String value = this.getValue(key);
+		if (value == null || value.trim().length() == 0) return def;
 		return "true".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value);
 	}
 

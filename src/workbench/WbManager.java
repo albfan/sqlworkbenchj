@@ -62,7 +62,6 @@ import workbench.util.WbThread;
  */
 public class WbManager
 	implements FontChangedListener, Runnable
-
 {
 	private static WbManager wb;
 	private Settings settings;
@@ -348,7 +347,7 @@ public class WbManager
 		}
 		if (window instanceof MainWindow)
 		{
-			if (!((MainWindow)window).saveWorkspace()) return;
+			if (!((MainWindow)window).saveWorkspace(false)) return;
 		}
 
 		// When disconnecting it can happen that the disconnect itself

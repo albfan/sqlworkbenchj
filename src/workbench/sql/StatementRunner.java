@@ -11,6 +11,8 @@
  */
 package workbench.sql;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,8 +20,12 @@ import java.util.List;
 
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
+import workbench.interfaces.ResultLogger;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.commands.DdlCommand;
+import workbench.sql.commands.EchoCommand;
 import workbench.sql.commands.IgnoredCommand;
 import workbench.sql.commands.SelectCommand;
 import workbench.sql.commands.SetCommand;
@@ -31,9 +37,11 @@ import workbench.sql.wbcommands.WbDefineVar;
 import workbench.sql.wbcommands.WbDescribeTable;
 import workbench.sql.wbcommands.WbDisableOraOutput;
 import workbench.sql.wbcommands.WbEnableOraOutput;
+import workbench.sql.wbcommands.WbEndBatch;
 import workbench.sql.wbcommands.WbExport;
 import workbench.sql.wbcommands.WbHelp;
 import workbench.sql.wbcommands.WbImport;
+import workbench.sql.wbcommands.WbInclude;
 import workbench.sql.wbcommands.WbListCatalogs;
 import workbench.sql.wbcommands.WbListProcedures;
 import workbench.sql.wbcommands.WbListTables;
@@ -41,16 +49,20 @@ import workbench.sql.wbcommands.WbListVars;
 import workbench.sql.wbcommands.WbOraExecute;
 import workbench.sql.wbcommands.WbRemoveVar;
 import workbench.sql.wbcommands.WbSchemaReport;
+import workbench.sql.wbcommands.WbStartBatch;
 import workbench.sql.wbcommands.WbXslt;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.interfaces.ExecutionController;
+import workbench.sql.wbcommands.WbFeedback;
 
 /**
  *
  * @author  info@sql-workbench.net
  */
 public class StatementRunner
+	implements PropertyChangeListener
 {
 	private WbConnection dbConnection;
 	private StatementRunnerResult result;
@@ -64,11 +76,20 @@ public class StatementRunner
 
 	private int maxRows;
 	private boolean isCancelled;
+	private boolean batchMode = false;
+	private boolean supportsSelectIntoNewTable = false;
 
 	private RowActionMonitor rowMonitor;
+	private ExecutionController controller;
+	private WbStartBatch batchCommand;
+	private ResultLogger resultLogger;
+	private boolean verboseLogging;
 
 	public StatementRunner()
 	{
+		this.verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
+		Settings.getInstance().addPropertyChangeListener(this);
+
 		cmdDispatch = new HashMap();
 		cmdDispatch.put("*", new SqlCommand());
 
@@ -91,6 +112,12 @@ public class StatementRunner
 		sql = new WbDisableOraOutput();
 		cmdDispatch.put(sql.getVerb(), sql);
 
+		sql = new WbStartBatch();
+		cmdDispatch.put(sql.getVerb(), sql);
+
+		sql = new WbEndBatch();
+		cmdDispatch.put(sql.getVerb(), sql);
+
 		sql = new SelectCommand();
 		cmdDispatch.put(sql.getVerb(), sql);
 
@@ -108,13 +135,11 @@ public class StatementRunner
 
 		sql = new WbExport();
 		cmdDispatch.put(sql.getVerb(), sql);
-		cmdDispatch.put("EXP", sql);
 		cmdDispatch.put("EXPORT", sql);
 		cmdDispatch.put("SPOOL", sql);
 
 		sql = new WbImport();
 		cmdDispatch.put(sql.getVerb(), sql);
-		cmdDispatch.put("IMP", sql);
 		cmdDispatch.put("IMPORT", sql);
 
 		sql = new WbCopy();
@@ -122,6 +147,15 @@ public class StatementRunner
 
 		sql = new WbSchemaReport();
 		cmdDispatch.put(sql.getVerb(), sql);
+
+		sql = new SetCommand();
+		cmdDispatch.put(sql.getVerb(), sql);
+
+		sql = new WbFeedback();
+		cmdDispatch.put(sql.getVerb(), sql);
+
+		cmdDispatch.put(WbInclude.INCLUDE_LONG.getVerb(), WbInclude.INCLUDE_LONG);
+		cmdDispatch.put(WbInclude.INCLUDE_SHORT.getVerb(), WbInclude.INCLUDE_SHORT);
 
 		cmdDispatch.put(WbListCatalogs.LISTCAT.getVerb(), WbListCatalogs.LISTCAT);
 		cmdDispatch.put(WbListCatalogs.LISTDB.getVerb(), WbListCatalogs.LISTDB);
@@ -143,6 +177,19 @@ public class StatementRunner
 		this.parameterPool = SqlParameterPool.getInstance();
 	}
 
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if ("workbench.gui.log.consolidate".equals(evt.getPropertyName()))
+		{
+			this.verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
+		}
+	}
+
+	public void setExecutionController(ExecutionController control)
+	{
+		this.controller = control;
+	}
+
 	public void setConnection(WbConnection aConn)
 	{
 
@@ -157,19 +204,21 @@ public class StatementRunner
 		}
 
 		this.dbConnection = aConn;
-
-		if (this.dbConnection.getMetadata().isOracle())
+		DbMetadata meta = this.dbConnection.getMetadata();
+		if (meta.isOracle())
 		{
 			this.cmdDispatch.put(WbOraExecute.EXEC.getVerb(), WbOraExecute.EXEC);
 			this.cmdDispatch.put(WbOraExecute.EXECUTE.getVerb(), WbOraExecute.EXECUTE);
 
-			SetCommand set = new SetCommand();
-			this.cmdDispatch.put(set.getVerb(), set);
-			this.dbSpecificCommands.add(set.getVerb());
+			EchoCommand echo = new EchoCommand();
+			this.cmdDispatch.put(echo.getVerb(), echo);
+
+			//this.dbSpecificCommands.add(set.getVerb());
 			this.dbSpecificCommands.add(WbOraExecute.EXEC.getVerb());
 			this.dbSpecificCommands.add(WbOraExecute.EXECUTE.getVerb());
+			this.dbSpecificCommands.add(echo.getVerb());
 		}
-		else if (this.dbConnection.getMetadata().isSqlServer())
+		else if (meta.isSqlServer())
 		{
 			UseCommand cmd = new UseCommand();
 			this.cmdDispatch.put(cmd.getVerb(), cmd);
@@ -177,7 +226,7 @@ public class StatementRunner
 		}
 
 
-		if (!this.dbConnection.getMetadata().isPostgres())
+		if (!meta.isPostgres())
 		{
 			// for non-PostgreSQL connections we can use the
 			// COPY command. For PGSQL we cannot use the verb COPY, as
@@ -189,7 +238,7 @@ public class StatementRunner
 			this.dbSpecificCommands.add("COPY");
 		}
 
-		String verbs = this.dbConnection.getMetadata().getVerbsToIgnore();
+		String verbs = meta.getVerbsToIgnore();
 		List l = StringUtil.stringToList(verbs, ",");
 		for (int i=0; i < l.size(); i++)
 		{
@@ -201,6 +250,7 @@ public class StatementRunner
 			this.dbSpecificCommands.add(verb);
 		}
 
+		this.supportsSelectIntoNewTable = !meta.supportsSelectIntoNewTable();
 	}
 
 	public StatementRunnerResult getResult()
@@ -213,13 +263,16 @@ public class StatementRunner
 		this.rowMonitor = monitor;
 	}
 
+	public void setResultLogger(ResultLogger logger)
+	{
+		this.resultLogger = logger;
+	}
+
 	public void runStatement(String aSql, int maxRows)
 		throws SQLException, Exception
 	{
-		String cleanSql = SqlUtil.makeCleanSql(aSql, false);
-		
 		// Silently ignore empty statements
-		if (cleanSql == null || cleanSql.length() == 0)
+		if (aSql == null || aSql.trim().length() == 0)
 		{
 			this.result = new StatementRunnerResult("");
 			this.result.clear();
@@ -227,7 +280,7 @@ public class StatementRunner
 			return;
 		}
 
-		this.currentCommand = this.getCommandToUse(cleanSql);
+		this.currentCommand = this.getCommandToUse(aSql);
 
 		// if no mapping is found use the default implementation
 		if (this.currentCommand == null)
@@ -236,12 +289,42 @@ public class StatementRunner
 		}
 
 		this.currentCommand.setConsumerWaiting(this.currentConsumer != null);
+		this.currentCommand.setStatementRunner(this);
 		this.currentCommand.setRowMonitor(this.rowMonitor);
+		this.currentCommand.setResultLogger(this.resultLogger);
 		this.currentCommand.setMaxRows(maxRows);
-		String realSql = parameterPool.replaceAllParameters(aSql);
+		this.currentCommand.setConnection(this.dbConnection);
+
+		String realSql = aSql;
+		if (parameterPool.getParameterCount() > 0)
+		{
+			 realSql = parameterPool.replaceAllParameters(aSql);
+		}
+
+		if (this.controller != null && this.currentCommand.isUpdatingCommand())
+		{
+			boolean doExecute = this.controller.confirmExecution(realSql);
+			if (!doExecute)
+			{
+				this.result = new StatementRunnerResult(realSql);
+				String msg = ResourceMgr.getString("MsgStatementCancelled");
+				this.result.addMessage(msg);
+				this.result.setWarning(true);
+				this.result.setSuccess();
+				return;
+			}
+		}
 		this.result = this.currentCommand.execute(this.dbConnection, realSql);
 
-		if (this.currentCommand.isResultSetConsumer())
+		if (this.currentCommand instanceof WbStartBatch && result.isSuccess())
+		{
+			this.batchCommand = (WbStartBatch)this.currentCommand;
+		}
+		else if (this.batchCommand != null && this.currentCommand instanceof WbEndBatch)
+		{
+			this.result = this.batchCommand.executeBatch();
+		}
+		else if (this.currentCommand != null && this.currentCommand.isResultSetConsumer())
 		{
 			this.currentConsumer = this.currentCommand;
 		}
@@ -254,7 +337,6 @@ public class StatementRunner
 				this.currentConsumer = null;
 			}
 		}
-
 	}
 
 	/**
@@ -263,16 +345,15 @@ public class StatementRunner
 	 *  CREATE statement.
 	 *	In all other casese, the approriate SqlCommand from commanDispatch will be used
 	 */
-	private SqlCommand getCommandToUse(String cleanSql)
+	private SqlCommand getCommandToUse(String sql)
 	{
-		String verb = SqlUtil.getSqlVerb(cleanSql).toUpperCase();
-		DbMetadata meta = this.dbConnection.getMetadata();
-		if (!meta.supportsSelectIntoNewTable())
+		String verb = SqlUtil.getSqlVerb(sql);
+		if (!supportsSelectIntoNewTable)
 		{
 			return (SqlCommand)this.cmdDispatch.get(verb);
 		}
 
-		if (meta.isSelectIntoNewTable(cleanSql))
+		if (this.dbConnection.getMetadata().isSelectIntoNewTable(sql))
 		{
 			LogMgr.logDebug("StatementRunner.getRealVerb()", "Found 'SELECT ... INTO new_table'");
 			// use the generic SqlCommand implementation for this.
@@ -282,6 +363,16 @@ public class StatementRunner
 		{
 			return (SqlCommand)this.cmdDispatch.get(verb);
 		}
+	}
+
+	public void setVerboseLogging(boolean flag)
+	{
+		this.verboseLogging = flag;
+	}
+
+	public boolean getVerboseLogging()
+	{
+		return this.verboseLogging;
 	}
 
 	public void statementDone()
@@ -301,7 +392,6 @@ public class StatementRunner
 			{
 				this.isCancelled = true;
 				this.currentCommand.cancel();
-				this.currentCommand.done();
 			}
 		}
 		catch (Throwable th)
@@ -316,6 +406,7 @@ public class StatementRunner
 		this.result = null;
 		this.statementDone();
 		this.currentConsumer = null;
+		this.dbConnection.clearWarnings();
 	}
 
 }

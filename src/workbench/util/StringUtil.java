@@ -12,21 +12,10 @@
 package workbench.util;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -106,7 +95,7 @@ public class StringUtil
 			target.append(aString);
 			return target;
 		}
-
+		
 
 		int lastpos = 0;
 		int len = aValue.length();
@@ -122,6 +111,21 @@ public class StringUtil
 			target.append(aString.substring(lastpos));
 		}
 		return target;
+	}
+
+	public static final String leftString(String aString, int count, boolean includeDots)
+	{
+		if (aString == null) return null;
+		if (aString.length() <= count) return aString;
+		if (includeDots)
+		{
+			return aString.substring(0, count) + "...";
+		}
+		else
+		{
+			return aString.substring(0, count);
+		}
+
 	}
 
 	public static final String replace(String aString, String aValue, String aReplacement)
@@ -702,7 +706,7 @@ public class StringUtil
 	public static boolean stringToBool(String aString)
 	{
 		if (aString == null) return false;
-		return ("y".equalsIgnoreCase(aString) || "yes".equalsIgnoreCase(aString) || "1".equals(aString) || "true".equalsIgnoreCase(aString));
+		return ("true".equalsIgnoreCase(aString) || "y".equalsIgnoreCase(aString) || "yes".equalsIgnoreCase(aString) || "1".equals(aString));
 	}
 
 	public static List split(String aString, String delim, boolean singleDelimiter, String quoteChars, boolean keepQuotes)
@@ -768,5 +772,137 @@ public class StringUtil
 		if (m.find(startAt)) result = m.start();
 		return result;
 	}
+
+	public static String decodeUnicode(String theString)
+	{
+		char aChar;
+		int len = theString.length();
+		StringBuffer outBuffer = new StringBuffer(len);
+
+		for (int x=0; x<len; )
+		{
+			aChar = theString.charAt(x++);
+			if (aChar == '\\')
+			{
+				aChar = theString.charAt(x++);
+				if (aChar == 'u')
+				{
+					// Read the xxxx
+					int value=0;
+					for (int i=0; i<4; i++)
+					{
+						aChar = theString.charAt(x++);
+						switch (aChar)
+						{
+							case '0': case '1': case '2': case '3': case '4':
+							case '5': case '6': case '7': case '8': case '9':
+								value = (value << 4) + aChar - '0';
+								break;
+							case 'a': case 'b': case 'c':
+							case 'd': case 'e': case 'f':
+								value = (value << 4) + 10 + aChar - 'a';
+								break;
+							case 'A': case 'B': case 'C':
+							case 'D': case 'E': case 'F':
+								value = (value << 4) + 10 + aChar - 'A';
+								break;
+							default:
+								throw new IllegalArgumentException("Malformed \\uxxxx encoding.");
+						}
+					}
+					outBuffer.append((char)value);
+				}
+				else
+				{
+					if (aChar == 't') aChar = '\t';
+					else if (aChar == 'r') aChar = '\r';
+					else if (aChar == 'n') aChar = '\n';
+					else if (aChar == 'f') aChar = '\f';
+					outBuffer.append(aChar);
+				}
+			}
+			else
+			{
+				outBuffer.append(aChar);
+			}
+
+		}
+		return outBuffer.toString();
+	}
+
+	/*
+	 * Converts unicodes to encoded &#92;uxxxx
+	 * and writes out any of the characters in specialSaveChars
+	 * with a preceding slash.
+	 * This has been "borrowed" from the Properties class, because the code
+	 * there is not usable from the outside.
+	 */
+	public static String escapeUnicode(String value, String specialSaveChars, CharacterRange range)
+	{
+		if (value == null) return null;
+		int len = value.length();
+		StringBuffer outBuffer = new StringBuffer(len*2);
+
+		for(int x=0; x<len; x++)
+		{
+			char aChar = value.charAt(x);
+			switch(aChar)
+			{
+				case '\\':
+					outBuffer.append('\\');
+					outBuffer.append('\\');
+					break;
+				case '\t':
+					outBuffer.append('\\');
+					outBuffer.append('t');
+					break;
+				case '\n':
+					outBuffer.append('\\');
+					outBuffer.append('n');
+					break;
+				case '\r':
+					outBuffer.append('\\');
+					outBuffer.append('r');
+					break;
+				case '\f':
+					outBuffer.append('\\');
+					outBuffer.append('f');
+					break;
+				default:
+					if (range.isOutsideRange(aChar))
+					{
+						outBuffer.append('\\');
+						outBuffer.append('u');
+						outBuffer.append(toHex((aChar >> 12) & 0xF));
+						outBuffer.append(toHex((aChar >>  8) & 0xF));
+						outBuffer.append(toHex((aChar >>  4) & 0xF));
+						outBuffer.append(toHex( aChar        & 0xF));
+					}
+					else if (specialSaveChars != null && specialSaveChars.indexOf(aChar) > -1)
+					{
+						outBuffer.append('\\');
+						outBuffer.append('u');
+						outBuffer.append(toHex((aChar >> 12) & 0xF));
+						outBuffer.append(toHex((aChar >>  8) & 0xF));
+						outBuffer.append(toHex((aChar >>  4) & 0xF));
+						outBuffer.append(toHex( aChar        & 0xF));
+					}
+					else
+					{
+						outBuffer.append(aChar);
+					}
+			}
+		}
+		return outBuffer.toString();
+	}
+
+	public static char toHex(int nibble)
+	{
+		return hexDigit[(nibble & 0xF)];
+	}
+
+	private static final char[] hexDigit = {
+		'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
+	};
 
 }

@@ -135,14 +135,19 @@ public class SelectCommand extends SqlCommand
 					}
 				}
 
-				StringBuffer warnings = new StringBuffer();
-
-				this.appendSuccessMessage(result);
-				if (this.appendWarnings(aConnection, this.currentStatement, warnings))
+				if (!isCancelled)
 				{
-					result.addMessage(warnings.toString());
+					StringBuffer warnings = new StringBuffer();
+					this.appendSuccessMessage(result);
+					if (this.appendWarnings(aConnection, this.currentStatement, warnings))
+					{
+						result.addMessage(warnings.toString());
+					}
 				}
-				if (this.isCancelled) result.addMessage(ResourceMgr.getString("MsgStatementCancelled"));
+				else
+				{
+					result.addMessage(ResourceMgr.getString("MsgStatementCancelled"));
+				}
 				result.setSuccess();
 			}
 			else if (this.isCancelled)
@@ -158,7 +163,7 @@ public class SelectCommand extends SqlCommand
 		catch (Throwable e)
 		{
 			result.clear();
-			//result.addMessage(ResourceMgr.getString("MsgExecuteError"));
+			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
 			result.addMessage(ExceptionUtil.getDisplay(e));
 
 			StringBuffer warnings = new StringBuffer();

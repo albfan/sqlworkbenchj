@@ -28,7 +28,7 @@ public class WbInclude
 	public static final WbInclude INCLUDE_LONG = new WbInclude("WBINCLUDE");
 	public static final WbInclude INCLUDE_SHORT = new WbInclude("@");
 	private final String verb;
-	private BatchRunner runner;
+	private BatchRunner batchRunner;
 	
 	private WbInclude(String aVerb)
 	{
@@ -46,11 +46,12 @@ public class WbInclude
 		String file = this.getFilename(aSql);
 		try
 		{
-			runner = new BatchRunner(file);
-			runner.setConnection(aConnection);
-			runner.setResultLogger(this.resultLogger);
-			runner.setRowMonitor(this.rowMonitor);
-			runner.execute();
+			batchRunner = new BatchRunner(file);
+			batchRunner.setConnection(aConnection);
+			batchRunner.setResultLogger(this.resultLogger);
+			batchRunner.setVerboseLogging(this.runner.getVerboseLogging());
+			batchRunner.setRowMonitor(this.rowMonitor);
+			batchRunner.execute();
 			result.setSuccess();
 		}
 		catch (Throwable th)
@@ -65,9 +66,9 @@ public class WbInclude
 		throws SQLException
 	{
 		super.cancel();
-		if (runner != null)
+		if (batchRunner != null)
 		{
-			runner.cancel();
+			batchRunner.cancel();
 		}
 	}
 	

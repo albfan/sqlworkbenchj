@@ -28,10 +28,14 @@ public class StatementRunnerResult
 	private ArrayList messages;
 	private ArrayList datastores;
 	private String sourceCommand;
-
+	
 	private boolean success = true;
 	private boolean hasWarning = false;
 
+	public StatementRunnerResult()
+	{
+	}
+	
 	public StatementRunnerResult(String aCmd)
 	{
 		this.sourceCommand = aCmd;
@@ -197,5 +201,5 @@ public class StatementRunnerResult
 		this.sourceCommand = null;
 		this.hasWarning = false;
 	}
-
+	
 }

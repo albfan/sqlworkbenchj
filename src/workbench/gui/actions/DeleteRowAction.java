@@ -28,6 +28,7 @@ public class DeleteRowAction extends WbAction
 	{
 		super();
 		this.client = aClient;
+		this.setEnabled(false);
 		this.initMenuDefinition("MnuTxtDeleteRow");
 		this.setIcon(ResourceMgr.getImage("Delete"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);

@@ -76,12 +76,12 @@ public class DbExplorerPanel
 	private int internalId = 0;
 	private ConnectionSelector connectionSelector;
 	private JButton selectConnectionButton;
-	
+
 	public DbExplorerPanel(int index)
 	{
 		this(null, index);
 	}
-	
+
 	public DbExplorerPanel(MainWindow aParent, int index)
 	{
 		this.internalId = index;
@@ -106,9 +106,12 @@ public class DbExplorerPanel
 
 			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 			this.setLayout(new BorderLayout());
-			Dimension d = new Dimension(32768, 20);
+			Dimension d = new Dimension(800, 20);
 			this.selectorPanel = new JPanel();
 			this.selectorPanel.setMaximumSize(d);
+			d = new Dimension(250, 20);
+			this.selectorPanel.setPreferredSize(d);
+
 			this.selectorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 0));
 
 			this.schemaLabel = new JLabel();
@@ -117,6 +120,8 @@ public class DbExplorerPanel
 			this.schemaSelector = new JComboBox();
 			d = new Dimension(250, 20);
 			this.schemaSelector.setMaximumSize(d);
+			d = new Dimension(100, 20);
+			this.schemaSelector.setPreferredSize(d);
 
 			this.selectorPanel.add(this.schemaSelector);
 
@@ -155,7 +160,7 @@ public class DbExplorerPanel
 		this.selectorPanel.add(Box.createHorizontalStrut(15));
 		this.selectorPanel.add(this.selectConnectionButton);
 	}
-	
+
 	public boolean isBusy()
 	{
 		return false;
@@ -234,7 +239,7 @@ public class DbExplorerPanel
 
 	public void setConnection(WbConnection aConnection, String aProfilename)
 	{
-		if (aConnection == null) 
+		if (aConnection == null)
 		{
 			this.reset();
 			return;
@@ -319,7 +324,7 @@ public class DbExplorerPanel
 		int count = this.tabPane.getTabCount();
 		this.tabPane.setSelectedIndex(0);
 	}
-	
+
 	public void disconnect()
 	{
 		this.reset();

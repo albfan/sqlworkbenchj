@@ -26,10 +26,12 @@ public class XmlExportWriter
 	{
 		super(exp);
 	}
-	
+
 	public RowDataConverter createConverter(ResultInfo info)
 	{
 		XmlRowDataConverter converter = new XmlRowDataConverter(info);
+		converter.setUseCDATA(this.exporter.getUseCDATA());
+		converter.setLineEnding(exporter.getLineEnding());
 		return converter;
 	}
 

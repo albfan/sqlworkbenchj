@@ -166,14 +166,16 @@ public class DmlStatement
 		return this.getExecutableStatement(dbproduct);	
 	}
 	
-	public void setConcatString(String aConcatString)
+	public void setConcatString(String concat)
 	{
-		this.concatString = aConcatString;
+		if (concat == null) return;
+		this.concatString = concat;
 		this.concatFunction = null;
 	}
 	
 	public void setConcatFunction(String func)
 	{
+		if (func == null) return;
 		this.concatFunction = func;
 		this.concatString = null;
 	}
@@ -268,7 +270,7 @@ public class DmlStatement
 				}
 				else
 				{
-					if (quotePending) result.append('\'');
+					result.append('\'');
 					result.append(this.concatString);
 					result.append(this.chrFunc);
 					result.append('(');

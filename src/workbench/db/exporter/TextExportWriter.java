@@ -20,13 +20,13 @@ import workbench.storage.ResultInfo;
 public class TextExportWriter
 	extends ExportWriter
 {
-	
+
 	/** Creates a new instance of TextExportWriter */
 	public TextExportWriter(DataExporter exp)
 	{
 		super(exp);
 	}
-	
+
 	public RowDataConverter createConverter(ResultInfo info)
 	{
 		TextRowDataConverter converter = new TextRowDataConverter(info);
@@ -34,7 +34,11 @@ public class TextExportWriter
 		converter.setWriteHeader(exporter.getExportHeaders());
 		converter.setQuoteCharacter(exporter.getTextQuoteChar());
 		converter.setCleanNonPrintable(exporter.getCleanupCarriageReturns());
+		converter.setQuoteAlways(exporter.getQuoteAlways());
+		converter.setEscapeRange(exporter.getEscapeRange());
+		converter.setEncodingUsed(exporter.getEncoding());
+		converter.setLineEnding(exporter.getLineEnding());
 		return converter;
 	}
-	
+
 }

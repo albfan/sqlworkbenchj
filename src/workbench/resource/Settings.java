@@ -104,14 +104,14 @@ public class Settings
 		else
 		{
 			// "normalize" the directory name based on the platform
-			cf = new File(configDir); 
+			cf = new File(configDir);
 		}
 		configDir = cf.getAbsolutePath();
 
 		if (WbManager.trace) System.out.println("Settings.<init> - using configDir: " + configDir);
 		String sep = System.getProperty("file.separator");
 
-		if (filename == null) 
+		if (filename == null)
 		{
 			File f = new File(this.configDir, "workbench.settings");
 			this.filename = f.getAbsolutePath();
@@ -236,14 +236,14 @@ public class Settings
 		this.fontChangeListeners.remove(aListener);
 	}
 
-	public void addChangeListener(PropertyChangeListener l)
+	public void addPropertyChangeListener(PropertyChangeListener l)
 	{
-		this.props.addChangeListener(l);
+		this.props.addPropertyChangeListener(l);
 	}
 
-	public void removeChangeLister(PropertyChangeListener l)
+	public void removePropertyChangeLister(PropertyChangeListener l)
 	{
-		this.props.removeChangeListener(l);
+		this.props.removePropertyChangeListener(l);
 	}
 
 	public void saveSettings()
@@ -760,6 +760,16 @@ public class Settings
 		this.props.setProperty("workbench.import.lastdir", aDir);
 	}
 
+	public boolean getLastImportDecode()
+	{
+		return this.getBoolProperty("workbench.import.decode");
+	}
+
+	public void setLastImportDecode(boolean flag)
+	{
+		this.setBoolProperty("workbench.import.decode", flag);
+	}
+	
 	public String getLastImportQuoteChar()
 	{
 		return this.props.getProperty("workbench.import.quotechar", "\"");
@@ -977,7 +987,7 @@ public class Settings
 		if (aName == null) aName = "";
 		this.props.setProperty("workbench.dbexplorer.connection.last", aName);
 	}
-	
+
 	public void setLastConnection(String aName)
 	{
 		if (aName == null) aName = "";
@@ -1167,6 +1177,26 @@ public class Settings
 		this.props.setProperty("workbench.export.text.quotechar", aQuoteChar);
 	}
 
+	public String getDefaultDataEncoding()
+	{
+		return this.props.getProperty("workbench.file.data.encoding", "UTF-8");
+	}
+	
+	public void setDefaultDataEncoding(String enc)
+	{
+		this.props.setProperty("workbench.file.data.encoding", enc);
+	}
+	
+	public String getDefaultFileEncoding()
+	{
+		return this.props.getProperty("workbench.file.encoding", "UTF-8");
+	}
+	
+	public void setDefaultFileEncoding(String enc)
+	{
+		this.props.setProperty("workbench.file.encoding", enc);
+	}
+	
 	public String getDefaultTextDelimiter(boolean readable)
 	{
 		String del = this.props.getProperty("workbench.export.text.fielddelimiter", "\\t");
@@ -1281,11 +1311,26 @@ public class Settings
 		this.props.setProperty("workbench.gui.profiles.divider", Integer.toString(aValue));
 	}
 
+	public boolean getBoolProperty(String property)
+	{
+		return "true".equals(this.getProperty(property, ""));
+	}
+	
+	public void setBoolProperty(String property, boolean value)
+	{
+		this.setProperty(property, Boolean.toString(value));
+	}
+	
 	public void setProperty(String aProperty, String aValue)
 	{
 		this.props.setProperty(aProperty, aValue);
 	}
 
+	public void setProperty(String aProperty, int aValue)
+	{
+		this.props.setProperty(aProperty, Integer.toString(aValue));
+	}
+	
 	public void setProperty(String aClass, String aProperty, String aValue)
 	{
 		this.props.setProperty(aClass + "." + aProperty.toLowerCase(), aValue);
@@ -1312,6 +1357,12 @@ public class Settings
 		return StringUtil.getIntValue(value);
 	}
 
+	public int getIntProperty(String aProperty, int defaultValue)
+	{
+		String value = this.getProperty(aProperty, Integer.toString(defaultValue));
+		return StringUtil.getIntValue(value);
+	}
+	
 	public int getIntProperty(String aClass, String aProperty)
 	{
 		String value = this.getProperty(aClass, aProperty, "0");
@@ -1415,7 +1466,7 @@ public class Settings
 
 	public boolean getVerifyDriverUrl()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty("workbench.db.verifydriverurl", "true"));
+		return "true".equalsIgnoreCase(this.props.getProperty("workbench.db.verifydriverurl", "false"));
 	}
 	public boolean getShowMnemonics()
 	{

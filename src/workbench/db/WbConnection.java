@@ -216,10 +216,15 @@ public class WbConnection
 		}
 	}
 
-	public void setAutoCommit(boolean aFlag)
+	public void setAutoCommit(boolean flag)
 		throws SQLException
 	{
-		this.sqlConnection.setAutoCommit(aFlag);
+		boolean old = this.getAutoCommit();
+		if (old != flag)
+		{
+			this.sqlConnection.setAutoCommit(flag);
+			fireConnectionStateChanged();
+		}
 	}
 
 	public boolean getAutoCommit()

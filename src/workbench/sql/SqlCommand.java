@@ -20,6 +20,7 @@ import java.util.StringTokenizer;
 
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
+import workbench.interfaces.ResultLogger;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
@@ -37,6 +38,9 @@ public class SqlCommand
 	protected boolean isCancelled = false;
 	private boolean consumerWaiting = false;
 	protected RowActionMonitor rowMonitor;
+	protected boolean isUpdatingCommand = false;
+	protected ResultLogger resultLogger;
+	protected StatementRunner runner;
 
 	/**
 	 *	Checks if the verb of the given SQL script
@@ -56,6 +60,11 @@ public class SqlCommand
 	public void setRowMonitor(RowActionMonitor monitor)
 	{
 		this.rowMonitor = monitor;
+	}
+
+	public void setResultLogger(ResultLogger logger)
+	{
+		this.resultLogger = logger;
 	}
 
 	protected void appendSuccessMessage(StatementRunnerResult result)
@@ -97,15 +106,22 @@ public class SqlCommand
 				warn = warn.getNextWarning();
 				added.add(s);
 			}
-			if (hasWarnings) msg.append('\n');
-			s = aConn.getOutputMessages();
-			if (s.length() > 0)
-			{
-				msg.append(s);
-				if (!s.endsWith("\n")) msg.append("\n");
-				hasWarnings = true;
-			}
 
+			// if the statement has been cancelled Oracle
+			// does not seem to like the getting of the
+			// output messages...
+			if (!this.isCancelled)
+			{
+				if (hasWarnings) msg.append('\n');
+
+				s = aConn.getOutputMessages();
+				if (s.length() > 0)
+				{
+					msg.append(s);
+					if (!s.endsWith("\n")) msg.append("\n");
+					hasWarnings = true;
+				}
+			}
 			warn = aConn.getSqlConnection().getWarnings();
 			hasWarnings = hasWarnings || (warn != null);
 			while (warn != null)
@@ -134,19 +150,14 @@ public class SqlCommand
 	public void cancel()
 		throws SQLException
 	{
+		this.isCancelled = true;
 		if (this.currentStatement != null)
 		{
-			this.isCancelled = true;
 			try
 			{
 				LogMgr.logDebug("SqlCommand.cancel()", "Cancelling statement execution...");
 				this.currentStatement.cancel();
-//				if (this.currentConnection.getMetadata().isOracle())
-//				{
-//					// for some reasons Oracle does not always cancel the statement
-//					// when cancel() is called. Closing the statement does this "the hard way"
-//					this.currentStatement.close();
-//				}
+				LogMgr.logDebug("SqlCommand.cancel()", "Cancelled.");
 			}
 			catch (Throwable th)
 			{
@@ -165,12 +176,24 @@ public class SqlCommand
 	{
 		if (this.currentStatement != null)
 		{
-			try { this.currentStatement.clearWarnings(); } catch (Throwable th) {}
-			try { this.currentStatement.clearBatch(); } catch (Throwable th) {}
 			try { this.currentStatement.close(); } catch (Throwable th) {}
+			if (!this.isCancelled)
+			{
+				try { this.currentStatement.clearWarnings(); } catch (Throwable th) {}
+				try { this.currentStatement.clearBatch(); } catch (Throwable th) {}
+			}
+		}
+		if (this.isCancelled)
+		{
+			try { this.currentConnection.rollback(); } catch (Throwable th) {}
 		}
 		this.currentStatement = null;
 		this.isCancelled = false;
+	}
+
+	public void setStatementRunner(StatementRunner r)
+	{
+		this.runner = r;
 	}
 
 	/**
@@ -246,6 +269,11 @@ public class SqlCommand
 		return result;
 	}
 
+	public void setConnection(WbConnection conn)
+	{
+		this.currentConnection = conn;
+	}
+
 	/**
 	 *	Should be overridden by a specialised SqlCommand
 	 */
@@ -264,9 +292,15 @@ public class SqlCommand
 		this.consumerWaiting = flag;
 	}
 
+
 	public boolean isConsumerWaiting()
 	{
 		return this.consumerWaiting;
+	}
+
+	public boolean isUpdatingCommand()
+	{
+		return this.isUpdatingCommand;
 	}
 
 	public void setMaxRows(int maxRows) { }

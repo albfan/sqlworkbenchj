@@ -59,6 +59,9 @@ public class WbImport extends SqlCommand
 		cmdLine.addArgument("usebatch");
 		cmdLine.addArgument("deletetarget");
 		cmdLine.addArgument("emptystringnull");
+		cmdLine.addArgument("continueonerror");
+		cmdLine.addArgument("decode");
+		this.isUpdatingCommand = true;
 	}
 
 	public String getVerb() { return VERB; }
@@ -118,6 +121,8 @@ public class WbImport extends SqlCommand
 
 		int commit = StringUtil.getIntValue(cmdLine.getValue("commitevery"),-1);
 		imp.setCommitEvery(commit);
+		
+		imp.setContinueOnError(cmdLine.getBoolean("continueonerror", true));
 
 		String table = cmdLine.getValue("table");
 
@@ -152,6 +157,8 @@ public class WbImport extends SqlCommand
 			boolean header = cmdLine.getBoolean("header");
 			textParser.setContainsHeader(header);
 
+			textParser.setDecodeUnicode(cmdLine.getBoolean("decode"));
+
 			String encoding = cmdLine.getValue("encoding");
 			if (encoding != null) textParser.setEncoding(encoding);
 
@@ -177,7 +184,7 @@ public class WbImport extends SqlCommand
 				}
 				textParser.setEmptyStringIsNull(cmdLine.getBoolean("emptystringnull"));
 			}
-			if (header && columns == null)
+			if (!header && columns == null)
 			{
 				result.addMessage(ResourceMgr.getString("ErrorHeaderOrColumnDefRequired"));
 				result.setFailure();
@@ -212,6 +219,7 @@ public class WbImport extends SqlCommand
 				result.addMessage(ResourceMgr.getString("ErrorInvalidModeIgnored").replaceAll("%mode%", mode));
 			}
 		}
+
 		String keyColumns = cmdLine.getValue("keycolumns");
 		imp.setKeyColumns(keyColumns);
 

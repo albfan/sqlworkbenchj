@@ -196,5 +196,42 @@ FROM rdb$triggers
     </void> 
    </object> 
   </void> 
+  
+  <void method="put"> 
+   <string>INGRES</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>
+select rdef.rule_name as trigger_name, 
+       'AFTER' as trigger_type,
+       case rdef.rule_statement 
+          when 1 then 'DELETE'
+          when 2 then 'INSERT' 
+          when 4 then 'UPDATE'
+          when 3 then 'INSERT,DELETE'
+          when 6 then 'INSERT,UPDATE'
+          when 5 then 'UPDATE,DELETE'
+          when 7 then 'INSERT,UPDATE,DELETE'
+          else '' 
+       end as trigger_event
+from iirule rdef, iirules rlist
+where rdef.rule_name = rlist.rule_name
+     </string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>rlist.table_name</string> 
+    </void> 
+    <void property="useUpperCase"> 
+     <boolean>false</boolean> 
+    </void> 
+    <void property="schemaField"> 
+     <string>rlist.rule_owner</string> 
+    </void> 
+    <void property="orderBy"> 
+     <string>order by rlist.rule_name</string> 
+    </void> 
+   </object> 
+  </void> 
+    
  </object>
 </java>

@@ -21,6 +21,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.report.SchemaReporter;
+import workbench.db.report.Workbench2Designer;
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
@@ -51,6 +52,8 @@ public class WbSchemaReport
 		cmdLine.addArgument("namespace");
 		cmdLine.addArgument("tables");
 		cmdLine.addArgument("schemas");
+		cmdLine.addArgument("format");
+		cmdLine.addArgument("useschemaname");
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 	}
@@ -60,6 +63,7 @@ public class WbSchemaReport
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
+		boolean dbDesigner = false;
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		this.currentConnection = aConnection;
 		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
@@ -105,7 +109,21 @@ public class WbSchemaReport
 		}
 
 		file = StringUtil.trimQuotes(file);
+		String format = cmdLine.getValue("format");
+		if (format == null || format.length() == 0) format = "xml";
 
+		if ("dbdesigner".equalsIgnoreCase(format))
+		{
+			dbDesigner = true;
+		}
+		else if (!"xml".equalsIgnoreCase(format) &&
+		         !"wb".equalsIgnoreCase(format) &&
+						 !"wbxml".equalsIgnoreCase(format))
+		{
+			result.addMessage(ResourceMgr.getString("ErrorSchemaReportWrongParameters"));
+			result.setFailure();
+			return result;
+		}
 		String namespace = cmdLine.getValue("namespace");
 		this.reporter = new SchemaReporter(aConnection);
 		this.reporter.setNamespace(namespace);
@@ -121,6 +139,9 @@ public class WbSchemaReport
 			List schemas = StringUtil.stringToList(arg, ",");
 			this.reporter.setSchemas(schemas);
 		}
+
+		String alternateSchema = cmdLine.getValue("useschemaname");
+		this.reporter.setSchemaNameToUse(alternateSchema);
 
 		if (this.rowMonitor != null)
 		{
@@ -146,16 +167,29 @@ public class WbSchemaReport
 			}
 		}
 		this.currentTable = 0;
-		this.reporter.setOutputFilename(file);
+		String wbFile = file;
+		if (dbDesigner)
+		{
+			File f = new File(file);
+			String dir = f.getParent();
+			String fname = f.getName();
+			File nf = new File(dir, "__wb_" + fname);
+			wbFile = nf.getAbsolutePath();
+		}
+
+		this.reporter.setOutputFilename(wbFile);
 
 		try
 		{
 			this.reporter.writeXml();
 			String msg = ResourceMgr.getString("MsgSchemaReportTablesWritten");
 			msg = msg.replaceAll("%numtables%", Integer.toString(this.currentTable));
-			File f = new File(file);
-			msg = StringUtil.replace(msg, "%filename%", f.getAbsolutePath());
-			result.addMessage(msg);
+			if (!dbDesigner)
+			{
+				File f = new File(file);
+				msg = StringUtil.replace(msg, "%filename%", f.getAbsolutePath());
+				result.addMessage(msg);
+			}
 			result.setSuccess();
 		}
 		catch (IOException e)
@@ -164,6 +198,27 @@ public class WbSchemaReport
 			result.addMessage(e.getMessage());
 		}
 
+		if (dbDesigner && result.isSuccess())
+		{
+			try
+			{
+				if (this.rowMonitor != null)
+				{
+					this.setCurrentObject(ResourceMgr.getString("MsgConvertReport2Designer"), -1, -1);
+				}
+				File f = new File(wbFile);
+				Workbench2Designer converter = new Workbench2Designer(f);
+				converter.transformWorkbench2Designer();
+				File output = new File(file);
+				converter.writeOutputFile(output);
+			}
+			catch (Exception e)
+			{
+				result.setFailure();
+				result.addMessage(e.getMessage());
+			}
+
+		}
 		return result;
 	}
 

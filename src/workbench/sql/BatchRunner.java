@@ -23,10 +23,12 @@ import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
+import workbench.interfaces.ResultLogger;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
+import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 
@@ -46,6 +48,10 @@ public class BatchRunner
 	private boolean showResultSets = false;
 	private boolean success = true;
 	private ConnectionProfile profile;
+	private ResultLogger resultDisplay;
+	private boolean cancelExecution = false;
+	private RowActionMonitor rowMonitor;
+	private boolean verboseLogging = true;
 	
 	public BatchRunner(String aFilelist)
 	{
@@ -57,6 +63,15 @@ public class BatchRunner
 		this.showResultSets = flag;
 	}
 
+	public void setVerboseLogging(boolean flag)
+	{
+		this.verboseLogging = flag;
+		if (this.stmtRunner != null)
+		{
+			this.stmtRunner.setVerboseLogging(flag);
+		}
+	}
+	
 	public void setProfile(String aProfilename)
 	{
 		LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchConnecting") + " [" + aProfilename + "]");
@@ -75,6 +90,14 @@ public class BatchRunner
 		this.profile = aProfile;
 	}
 	
+	public void setConnection(WbConnection conn)
+	{
+		this.connection = conn;
+		this.stmtRunner = new StatementRunner();
+		this.stmtRunner.setConnection(this.connection);
+		this.stmtRunner.setVerboseLogging(this.verboseLogging);
+	}
+	
 	public void connect()
 		throws Exception
 	{
@@ -86,9 +109,8 @@ public class BatchRunner
 		try
 		{
 			ConnectionMgr mgr = ConnectionMgr.getInstance();
-			this.connection = mgr.getConnection(this.profile, "BatchRunner");
-			this.stmtRunner = new StatementRunner();
-			this.stmtRunner.setConnection(this.connection);
+			WbConnection c = mgr.getConnection(this.profile, "BatchRunner");
+			this.setConnection(c);
 			LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchConnectOk"));
 			System.out.println(ResourceMgr.getString("MsgBatchConnectOk"));
 		}
@@ -132,6 +154,14 @@ public class BatchRunner
 		try
 		{
 			File f = new File(aFilename);
+			if (!f.exists() )
+			{
+				String msg = ResourceMgr.getString("MsgBatchScriptFileNotFound");
+				msg = StringUtil.replace(msg, "%file%", aFilename);
+				LogMgr.logWarning("BatchRunner.readFile()", "Scriptfile not found: "+ aFilename);
+				this.printMessage(msg + "\n");
+				return null;
+			}
 			content = new StringBuffer((int)f.length());
 			in = new BufferedReader(new FileReader(f));
 			String line = in.readLine();
@@ -145,6 +175,7 @@ public class BatchRunner
 		catch (Exception e)
 		{
 			LogMgr.logError("BatchRunner.readFile()", "Error reading file " + aFilename, e);
+			System.err.println(ResourceMgr.getString("MsgBatchScriptFileReadError") + " " + aFilename);
 			content = new StringBuffer();
 		}
 		finally
@@ -154,21 +185,55 @@ public class BatchRunner
 		return content.toString();
 	}
 
+	public void setRowMonitor(RowActionMonitor mon)
+	{
+		this.rowMonitor = mon;
+	}
+	
 	public void execute()
 		throws IOException
 	{
 		String file = null;
 		boolean error = false;
-
-		for (int i=0; i < this.files.size(); i++)
+		int count = this.files.size();
+		
+		if (this.rowMonitor  != null)
+		{
+			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
+		}
+		
+		for (int i=0; i < count; i++)
 		{
 			file = (String)this.files.get(i);
+			if (this.rowMonitor != null)
+			{
+				this.rowMonitor.setCurrentObject(file, i+1, count);
+			}
+			
 			try
 			{
-				LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchProcessingFile") + " " + file);
+				String msg = ResourceMgr.getString("MsgBatchProcessingFile") + " " + file;
+				LogMgr.logInfo("BatchRunner", msg);
+				if (this.resultDisplay != null)
+				{
+					this.resultDisplay.appendToLog("\n");
+					this.resultDisplay.appendToLog(msg);
+					this.resultDisplay.appendToLog("\n\n");
+				}
+				
 				String script = this.readFile(file);
-				error = this.executeScript(script);
-				LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchProcessingFileDone") + " " + file);
+				if (script != null)
+				{
+					error = this.executeScript(script);
+					msg = ResourceMgr.getString("MsgBatchProcessingFileDone") + " " + file;
+					if (this.resultDisplay != null)
+					{
+						this.resultDisplay.appendToLog("\n");
+						this.resultDisplay.appendToLog(msg);
+						this.resultDisplay.appendToLog("\n\n");
+					}
+					LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchProcessingFileDone") + " " + file);
+				}
 			}
 			catch (Exception e)
 			{
@@ -180,7 +245,6 @@ public class BatchRunner
 				break;
 			}
 		}
-
 
 		if (abortOnError && error)
 		{
@@ -218,6 +282,15 @@ public class BatchRunner
 		}
 	}
 
+	public void cancel()
+	{
+		this.cancelExecution = true;
+		if (this.stmtRunner != null)
+		{
+			this.stmtRunner.cancel();
+		}
+	}
+	
 	private boolean executeScript(String aScript)
 	{
 		boolean error = false;
@@ -227,7 +300,12 @@ public class BatchRunner
 		parser.setScript(aScript);
 		List statements = parser.getCommands();
 		String sql = null;
+		this.cancelExecution = false;
 		int count = statements.size();
+		int executedCount = 0;
+		long start, end;
+		start = System.currentTimeMillis();
+		
 		for (int i=0; i < count; i++)
 		{
 			sql = (String)statements.get(i);
@@ -237,20 +315,25 @@ public class BatchRunner
 
 			try
 			{
-				LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchExecutingStatement") + " "  + sql);
+				if (this.resultDisplay == null) LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchExecutingStatement") + " "  + sql);
 				this.stmtRunner.runStatement(sql, 0);
 				result = this.stmtRunner.getResult();
-				if (result.hasMessages())
+				if (result.hasMessages() && (this.stmtRunner.getVerboseLogging() || !result.isSuccess()))
 				{
 					String[] msg = result.getMessages();
 					for (int m=0; m < msg.length; m++)
 					{
-						if (msg[m] != null && msg[m].length() > 0)
-						{
-							System.out.println(msg[m]);
-						}
+						this.printMessage(msg[m]);
 					}
 				}
+				executedCount ++;
+				
+				if (this.cancelExecution) 
+				{
+					this.printMessage(ResourceMgr.getString("MsgStatementCancelled"));
+					break;
+				}
+				
 				if (this.showResultSets && result.isSuccess() && result.hasDataStores())
 				{
 					System.out.println();
@@ -276,6 +359,17 @@ public class BatchRunner
 			}
 			if (error && abortOnError) break;
 		}
+		end = System.currentTimeMillis();
+		String msg = "\n" + executedCount + " " + ResourceMgr.getString("MsgTotalStatementsExecuted");
+		this.printMessage(msg);
+
+//		if (this.stmtRunner.getVerboseLogging())
+//		{
+//			long execTime = (end - start);
+//			msg = ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s";
+//			this.printMessage(msg);
+//		}
+		
 		return error;
 	}
 
@@ -288,6 +382,28 @@ public class BatchRunner
 	public void setAbortOnError(boolean aFlag)
 	{
 		this.abortOnError = aFlag;
+	}
+
+	public void setResultLogger(ResultLogger logger)
+	{
+		this.resultDisplay = logger;
+		if (this.stmtRunner != null)
+		{
+			this.stmtRunner.setResultLogger(logger);
+		}
+	}
+	
+	private void printMessage(String msg)
+	{
+		if (this.resultDisplay == null)
+		{
+			if (msg != null && msg.length() > 0) System.out.println(msg);
+		}
+		else
+		{
+			this.resultDisplay.appendToLog(msg);
+			this.resultDisplay.appendToLog("\n");
+		}
 	}
 
 	public static BatchRunner initFromCommandLine(ArgumentParser cmdLine)

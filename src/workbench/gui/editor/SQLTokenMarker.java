@@ -15,30 +15,30 @@ import javax.swing.text.Segment;
  * SQL token marker.
  *
  * @author mike dillon
- * @version $Id: SQLTokenMarker.java,v 1.3 2004-04-07 22:51:56 thomas Exp $
+ * @version $Id: SQLTokenMarker.java,v 1.4 2004-12-03 19:01:02 thomas Exp $
  */
 public class SQLTokenMarker extends TokenMarker
 {
 	private int offset, lastOffset, lastKeyword, length;
 
-	public SQLTokenMarker(KeywordMap k, boolean tsql)
+	public SQLTokenMarker(KeywordMap k)
 	{
 		keywords = k;
-		isTSQL = tsql;
 	}
 
 	public byte markTokensImpl(byte token, Segment line, int lineIndex)
 	{
+		char[] array = line.array;
 		offset = lastOffset = lastKeyword = line.offset;
 		length = line.count + offset;
-
 loop:
 		for(int i = offset; i < length; i++)
 		{
-			switch(line.array[i])
+			int i1 = i+1;
+			switch(array[i])
 			{
 			case '*':
-				if(token == Token.COMMENT1 && length - i >= 1 && line.array[i+1] == '/')
+				if(token == Token.COMMENT1 && length - i >= 1 && array[i1] == '/')
 				{
 					token = Token.NULL;
 					i++;
@@ -66,7 +66,7 @@ loop:
 				{
 					token = Token.NULL;
 					literalChar = 0;
-					addToken((i + 1) - lastOffset,Token.LITERAL1);
+					addToken(i1 - lastOffset,Token.LITERAL1);
 					lastOffset = i + 1;
 				}
 				break;
@@ -90,19 +90,10 @@ loop:
 					searchBack(line, i, false);
 				}
 				break;
-		  /*
-			case ':':
-				if(token == Token.NULL)
-				{
-					addToken((i+1) - lastOffset,Token.LABEL);
-					lastOffset = i + 1;
-				}
-				break;
-			*/
 			case '/':
 				if(token == Token.NULL)
 				{
-					if (length - i >= 2 && line.array[i + 1] == '*')
+					if (length - i >= 2 && array[i1] == '*')
 					{
 						searchBack(line, i);
 						token = Token.COMMENT1;
@@ -120,7 +111,7 @@ loop:
 			case '-':
 				if(token == Token.NULL)
 				{
-					if (length - i >= 2 && line.array[i+1] == '-')
+					if (length - i >= 2 && array[i1] == '-')
 					{
 						searchBack(line, i);
 						addToken(length - i,Token.COMMENT1);
@@ -146,24 +137,16 @@ loop:
 						break loop;
 					}
 				}
-			case '!':
-				if(isTSQL && token == Token.NULL && length - i >= 2 &&
-				(line.array[i+1] == '=' || line.array[i+1] == '<' || line.array[i+1] == '>'))
-				{
-					searchBack(line, i);
-					addToken(1,Token.OPERATOR);
-					lastOffset = i + 1;
-				}
-				break;
-			case '"': case '\'':
+			case '"': 
+			case '\'':
 				if(token == Token.NULL)
 				{
 					token = Token.LITERAL1;
-					literalChar = line.array[i];
+					literalChar = array[i];
 					addToken(i - lastOffset,Token.NULL);
 					lastOffset = i;
 				}
-				else if(token == Token.LITERAL1 && literalChar == line.array[i])
+				else if(token == Token.LITERAL1 && literalChar == array[i])
 				{
 					token = Token.NULL;
 					literalChar = 0;
@@ -183,7 +166,6 @@ loop:
 	}
 
 	// protected members
-	protected boolean isTSQL = false;
 	protected boolean isMySql = false;
 
 	// private members

@@ -153,12 +153,12 @@ public class WbProperties
 		return result;
 	}
 
-	public void addChangeListener(PropertyChangeListener aListener)
+	public void addPropertyChangeListener(PropertyChangeListener aListener)
 	{
 		this.changeListeners.add(aListener);
 	}
 	
-	public void removeChangeListener(PropertyChangeListener aListener)
+	public void removePropertyChangeListener(PropertyChangeListener aListener)
 	{
 		this.changeListeners.remove(aListener);
 	}

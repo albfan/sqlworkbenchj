@@ -18,12 +18,14 @@ import java.util.List;
 
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
+import workbench.gui.components.EncodingPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
+import workbench.util.CharacterRange;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -76,6 +78,11 @@ public class WbExport
 		cmdLine.addArgument("createfullhtml");
 		cmdLine.addArgument("sourcetable");
 		cmdLine.addArgument("outputdir");
+		cmdLine.addArgument("usecdata");
+		cmdLine.addArgument("escapetext");
+		cmdLine.addArgument("quotealways");
+		cmdLine.addArgument("lineending");
+		cmdLine.addArgument("showencodings");
 	}
 
 	public String getVerb() { return VERB; }
@@ -103,6 +110,18 @@ public class WbExport
 			return result;
 		}
 
+		if (cmdLine.isArgPresent("showencodings")) 
+		{
+			result.addMessage(ResourceMgr.getString("MsgAvailableEncodings"));
+			result.addMessage("");
+			String[] encodings = EncodingPanel.getEncodings();
+			for (int i=0; i < encodings.length; i++)
+			{
+				result.addMessage(encodings[i]);
+			}
+			return result;
+		}
+		
 		if (cmdLine.hasUnknownArguments())
 		{
 			List params = cmdLine.getUnknownArguments();
@@ -153,6 +172,7 @@ public class WbExport
 
 		String encoding = cmdLine.getValue("encoding");
 		if (encoding != null) exporter.setEncoding(encoding);
+		exporter.setAppendToFile(cmdLine.getBoolean("append"));
 
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
@@ -176,8 +196,40 @@ public class WbExport
 
 			exporter.setExportHeaders(cmdLine.getBoolean("header"));
 			exporter.setCleanupCarriageReturns(cmdLine.getBoolean("cleancr"));
+			String escape = cmdLine.getValue("escapetext");
+			if (escape != null)
+			{
+				if ("control".equalsIgnoreCase(escape)
+				   ||"ctrl".equalsIgnoreCase(escape)
+				   )
+				{
+					exporter.setEscapeRange(CharacterRange.RANGE_CONTROL);
+				}
+				else if ("7bit".equalsIgnoreCase(escape))
+				{
+					exporter.setEscapeRange(CharacterRange.RANGE_7BIT);
+				}
+				else if ("8bit".equalsIgnoreCase(escape) || "true".equalsIgnoreCase(escape))
+				{
+					exporter.setEscapeRange(CharacterRange.RANGE_8BIT);
+				}
+				else if ("extended".equalsIgnoreCase(escape))
+				{
+					exporter.setEscapeRange(CharacterRange.RANGE_8BIT_EXTENDED);
+				}
+				else if ("false".equalsIgnoreCase(escape))
+				{
+					exporter.setEscapeRange(null);
+				}
+				else
+				{
+					exporter.setEscapeRange(null);
+					String msg = ResourceMgr.getString("ErrorExportInvalidEscapeRangeIgnored").replaceAll("%value%", escape);
+					result.addMessage(msg);
+				}
+			}
+			exporter.setQuoteAlways(cmdLine.getBoolean("quotealways"));
 
-			exporter.setAppendToFile(cmdLine.getBoolean("append"));
 			this.defaultExtension = ".txt";
 		}
 		else if (type.startsWith("sql"))
@@ -241,7 +293,7 @@ public class WbExport
 					result.addMessage(msg);
 				}
 			}
-
+			this.exporter.setUseCDATA(cmdLine.getBoolean("usecdata"));
 			if (table != null) exporter.setTableName(table);
 			this.defaultExtension = ".xml";
 		}
@@ -280,6 +332,22 @@ public class WbExport
 			result.addMessage(ResourceMgr.getString("ErrorSpoolWrongParameters"));
 			result.setFailure();
 			return result;
+		}
+		String ending = cmdLine.getValue("lineending");
+		if (ending != null)
+		{
+			if ("crlf".equalsIgnoreCase(ending) ||
+			    "dos".equalsIgnoreCase(ending) ||
+			    "win".equalsIgnoreCase(ending))
+			{
+				exporter.setLineEnding("\r\n");
+			}
+			else if ("lf".equalsIgnoreCase(ending) ||
+			    "unix".equalsIgnoreCase(ending) ||
+			    "linux".equalsIgnoreCase(ending))
+			{
+				exporter.setLineEnding("\n");
+			}
 		}
 
 		file = StringUtil.trimQuotes(file);

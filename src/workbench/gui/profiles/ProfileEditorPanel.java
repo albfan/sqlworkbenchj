@@ -172,14 +172,23 @@ public class ProfileEditorPanel
 	private void jList1ValueChanged(javax.swing.event.ListSelectionEvent evt)//GEN-FIRST:event_jList1ValueChanged
 	{//GEN-HEADEREND:event_jList1ValueChanged
 		if (this.connectionEditor == null) return;
+		if (this.jList1.getModel() == null) return;
+		if (this.jList1.getModel().getSize() <= 0) return;
 		if (evt.getSource() == this.jList1)
 		{
-			ConnectionProfile newProfile = (ConnectionProfile)this.jList1.getSelectedValue();
-			if (newProfile != null)
+			try
 			{
-				this.connectionEditor.setProfile(newProfile);
+				ConnectionProfile newProfile = (ConnectionProfile)this.jList1.getSelectedValue();
+				if (newProfile != null)
+				{
+					this.connectionEditor.setProfile(newProfile);
+				}
+				lastIndex = this.jList1.getSelectedIndex();
 			}
-			lastIndex = this.jList1.getSelectedIndex();
+			catch (Exception e)
+			{
+				lastIndex = 0;
+			}
 		}
 	}//GEN-LAST:event_jList1ValueChanged
 

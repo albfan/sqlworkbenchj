@@ -23,12 +23,16 @@ import java.awt.dnd.DropTargetListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -53,6 +57,7 @@ import workbench.gui.actions.FormatSqlAction;
 import workbench.gui.actions.MatchBracketAction;
 import workbench.gui.actions.ReplaceAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.components.EncodingPanel;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.ReplacePanel;
 import workbench.gui.components.SearchCriteriaPanel;
@@ -75,8 +80,8 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.ScriptParser;
 import workbench.sql.formatter.SqlFormatter;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
+import workbench.util.UnicodeReader;
 
 
 /**
@@ -91,7 +96,6 @@ public class EditorPanel
 {
 	private static final Border DEFAULT_BORDER = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
 	private AnsiSQLTokenMarker sqlTokenMarker;
-	private File currentFile;
 	private static final int SQL_EDITOR = 0;
 	private static final int JAVA_EDITOR = 1;
 	private static final int TEXT_EDITOR = 2;
@@ -107,6 +111,9 @@ public class EditorPanel
 	private MatchBracketAction matchBracket;
 
 	private List filenameChangeListeners;
+
+	private File currentFile;
+	private String fileEncoding;
 
   private static final SyntaxStyle[] SYNTAX_COLORS;
   static
@@ -184,7 +191,7 @@ public class EditorPanel
 
 		//this.setSelectionRectangular(true);
 		Settings.getInstance().addFontChangedListener(this);
-		Settings.getInstance().addChangeListener(this);
+		Settings.getInstance().addPropertyChangeListener(this);
 
 		new DropTarget(this, DnDConstants.ACTION_COPY, this);
 	}
@@ -198,6 +205,7 @@ public class EditorPanel
 
 	public void initDatabaseKeywords(WbConnection aConnection)
 	{
+		if (aConnection == null) return;
 		AnsiSQLTokenMarker token = this.getSqlTokenMarker();
 		if (token != null) token.initDatabaseKeywords(aConnection.getSqlConnection());
 		this.dbFunctions = aConnection.getMetadata().getDbFunctions();
@@ -483,13 +491,17 @@ public class EditorPanel
 
 		String lastDir = Settings.getInstance().getLastSqlDir();
 		JFileChooser fc = new JFileChooser(lastDir);
+		EncodingPanel p = new EncodingPanel();
+		fc.setAccessory(p);
 		fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
 		int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(this));
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
-			result = this.readFile(fc.getSelectedFile());
+			String encoding = p.getEncoding();
+			result = this.readFile(fc.getSelectedFile(), encoding);
 			lastDir = fc.getCurrentDirectory().getAbsolutePath();
 			Settings.getInstance().setLastSqlDir(lastDir);
+			Settings.getInstance().setDefaultFileEncoding(encoding);
 		}
 		return result;
 	}
@@ -554,6 +566,11 @@ public class EditorPanel
 
 	public boolean readFile(File aFile)
 	{
+		return this.readFile(aFile, null);
+	}
+
+	public boolean readFile(File aFile, String encoding)
+	{
 		if (aFile == null) return false;
 		if (!aFile.exists()) return false;
 		if (aFile.length() >= Integer.MAX_VALUE)
@@ -562,10 +579,50 @@ public class EditorPanel
 			return false;
 		}
 		boolean result = false;
+
+		if (encoding == null || encoding.trim().length() == 0)
+		{
+			encoding = Settings.getInstance().getDefaultFileEncoding();
+		}
 		try
 		{
 			this.setText(""); // clear memory!
 			String filename = aFile.getAbsolutePath();
+			Reader r = null;
+			FileInputStream in = new FileInputStream(filename);
+			try
+			{
+				if (encoding.toLowerCase().startsWith("utf"))
+				{
+					try
+					{
+						r = new UnicodeReader(in, encoding);
+					}
+					catch (IOException io)
+					{
+						LogMgr.logError("EditorPanel.readFile()", "Error creating UnicodeReader, using default reader", io);
+						r = null;
+					}
+				}
+				
+				if (r == null)
+				{
+					r = new InputStreamReader(in, encoding);
+				}
+			}
+			catch (UnsupportedEncodingException e)
+			{
+				LogMgr.logError("EditorPanel.readFile()", "Unsupported encoding: " + encoding + " requested. Using UTF-8", e);
+				try
+				{
+					encoding = "UTF-8";
+					r = new InputStreamReader(in, "UTF-8");
+				}
+				catch (Throwable ignore) {}
+			}
+
+			BufferedReader reader = new BufferedReader(r);
+			
 			// Reading the text into a StringBuffer before
 			// putting it into the editor is faster then
 			// then calling this.appendLine() for each line
@@ -575,7 +632,7 @@ public class EditorPanel
 			// as StrBuffer.toString() effectively copies the char array
 			// whereas StringBuffer.toString() re-uses the internal buffer
 			// for the new String object
-			BufferedReader reader = new BufferedReader(new FileReader(filename));
+
 			StringBuffer content = new StringBuffer((int)aFile.length() + 500);
 			String line = reader.readLine();
 			while (line != null)
@@ -587,6 +644,7 @@ public class EditorPanel
 			this.setText(content.toString());
 			reader.close();
 			this.currentFile = aFile;
+			this.fileEncoding = encoding;
 			result = true;
 			this.clearUndoBuffer();
 			this.resetModified();
@@ -651,12 +709,16 @@ public class EditorPanel
 		JFileChooser fc = new JFileChooser(lastDir);
 		fc.setSelectedFile(this.currentFile);
 		fc.addChoosableFileFilter(ff);
+		EncodingPanel p = new EncodingPanel(this.fileEncoding);
+		fc.setAccessory(p);
+
 		int answer = fc.showSaveDialog(SwingUtilities.getWindowAncestor(this));
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
 			try
 			{
-				this.saveFile(fc.getSelectedFile());
+				String encoding = p.getEncoding();
+				this.saveFile(fc.getSelectedFile(), encoding);
 	      this.fireFilenameChanged(this.getCurrentFileName());
 				lastDir = fc.getCurrentDirectory().getAbsolutePath();
 				if (this.editorType == SQL_EDITOR)
@@ -684,6 +746,17 @@ public class EditorPanel
 	public void saveFile(File aFile)
 		throws IOException
 	{
+		this.saveFile(aFile, this.fileEncoding);
+	}
+
+	public void saveFile(File aFile, String encoding)
+		throws IOException
+	{
+		if (encoding == null)
+		{
+			encoding = Settings.getInstance().getDefaultFileEncoding();
+		}
+
 		try
 		{
 			String filename = aFile.getAbsolutePath();
@@ -693,7 +766,18 @@ public class EditorPanel
 				filename = filename + ".sql";
 				aFile = new File(filename);
 			}
-			PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(filename)));
+			Writer w = null;
+			FileOutputStream out = new FileOutputStream(filename);
+			try
+			{
+				w = new OutputStreamWriter(out, encoding);
+			}
+			catch (UnsupportedEncodingException e)
+			{
+				LogMgr.logError("EditorPanel.readFile()", "Unsupported encoding: " + encoding + " requested. Using UTF-8", e);
+				try { w = new OutputStreamWriter(out, "UTF-8"); } catch (Throwable ignore) {}
+			}
+			PrintWriter writer = new PrintWriter(w);
 			int count = this.getLineCount();
 			String line;
 			int trimLen;
@@ -724,6 +808,12 @@ public class EditorPanel
 	}
 
 	public File getCurrentFile() { return this.currentFile; }
+
+	public String getCurrentFileEncoding()
+	{
+		if (this.currentFile == null) return null;
+		return this.fileEncoding;
+	}
 	public String getCurrentFileName()
 	{
 		if (this.currentFile == null) return null;
