@@ -4,7 +4,7 @@
  * Created on December 2, 2001, 1:40 AM
  */
 
-package workbench.gui;
+package workbench.interfaces;
 
 /**
  *
