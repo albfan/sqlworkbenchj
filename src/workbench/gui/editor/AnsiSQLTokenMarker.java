@@ -153,41 +153,41 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 	
 	private static void addSystemFunctions()
 	{
-		keywords.add("ABS",Token.KEYWORD2);
-		keywords.add("ACOS",Token.KEYWORD2);
-		keywords.add("ASIN",Token.KEYWORD2);
-		keywords.add("ATAN",Token.KEYWORD2);
-		keywords.add("ATN2",Token.KEYWORD2);
-		keywords.add("CASE",Token.KEYWORD2);
-		keywords.add("CAST",Token.KEYWORD2);
-		keywords.add("CEILING",Token.KEYWORD2);
-		keywords.add("COS",Token.KEYWORD2);
-		keywords.add("COT",Token.KEYWORD2);
-		keywords.add("CURRENT_TIME",Token.KEYWORD2);
-		keywords.add("CURRENT_DATE",Token.KEYWORD2);
-		keywords.add("CURRENT_TIMESTAMP",Token.KEYWORD2);
-		keywords.add("CURRENT_USER",Token.KEYWORD2);
-		keywords.add("DATALENGTH",Token.KEYWORD2);
-		keywords.add("DATEADD",Token.KEYWORD2);
-		keywords.add("DATEDIFF",Token.KEYWORD2);
-		keywords.add("DATENAME",Token.KEYWORD2);
-		keywords.add("DATEPART",Token.KEYWORD2);
-		keywords.add("DAY",Token.KEYWORD2);
-		keywords.add("EXP",Token.KEYWORD2);
-		keywords.add("FLOOR",Token.KEYWORD2);
-		keywords.add("LOG",Token.KEYWORD2);
-		keywords.add("MONTH",Token.KEYWORD2);
-		keywords.add("RIGHT",Token.KEYWORD2);
-		keywords.add("ROUND",Token.KEYWORD2);
-		keywords.add("SIN",Token.KEYWORD2);
-		keywords.add("SOUNDEX",Token.KEYWORD2);
-		keywords.add("SPACE",Token.KEYWORD2);
-		keywords.add("SQRT",Token.KEYWORD2);
-		keywords.add("SQUARE",Token.KEYWORD2);
-		keywords.add("TAN",Token.KEYWORD2);
-		keywords.add("UPPER",Token.KEYWORD2);
-		keywords.add("USER",Token.KEYWORD2);
-		keywords.add("YEAR",Token.KEYWORD2);
+		keywords.add("ABS",Token.KEYWORD3);
+		keywords.add("ACOS",Token.KEYWORD3);
+		keywords.add("ASIN",Token.KEYWORD3);
+		keywords.add("ATAN",Token.KEYWORD3);
+		keywords.add("ATN2",Token.KEYWORD3);
+		keywords.add("CASE",Token.KEYWORD3);
+		keywords.add("CAST",Token.KEYWORD3);
+		keywords.add("CEILING",Token.KEYWORD3);
+		keywords.add("COS",Token.KEYWORD3);
+		keywords.add("COT",Token.KEYWORD3);
+		keywords.add("CURRENT_TIME",Token.KEYWORD3);
+		keywords.add("CURRENT_DATE",Token.KEYWORD3);
+		keywords.add("CURRENT_TIMESTAMP",Token.KEYWORD3);
+		keywords.add("CURRENT_USER",Token.KEYWORD3);
+		keywords.add("DATALENGTH",Token.KEYWORD3);
+		keywords.add("DATEADD",Token.KEYWORD3);
+		keywords.add("DATEDIFF",Token.KEYWORD3);
+		keywords.add("DATENAME",Token.KEYWORD3);
+		keywords.add("DATEPART",Token.KEYWORD3);
+		keywords.add("DAY",Token.KEYWORD3);
+		keywords.add("EXP",Token.KEYWORD3);
+		keywords.add("FLOOR",Token.KEYWORD3);
+		keywords.add("LOG",Token.KEYWORD3);
+		keywords.add("MONTH",Token.KEYWORD3);
+		keywords.add("RIGHT",Token.KEYWORD3);
+		keywords.add("ROUND",Token.KEYWORD3);
+		keywords.add("SIN",Token.KEYWORD3);
+		keywords.add("SOUNDEX",Token.KEYWORD3);
+		keywords.add("SPACE",Token.KEYWORD3);
+		keywords.add("SQRT",Token.KEYWORD3);
+		keywords.add("SQUARE",Token.KEYWORD3);
+		keywords.add("TAN",Token.KEYWORD3);
+		keywords.add("UPPER",Token.KEYWORD3);
+		keywords.add("USER",Token.KEYWORD3);
+		keywords.add("YEAR",Token.KEYWORD3);
 	}
 	
 	private static void addOperators()

@@ -10,24 +10,21 @@ import java.awt.event.ActionEvent;
 import javax.swing.Action;
 import workbench.resource.ResourceMgr;
 import java.awt.event.ActionListener;
+import workbench.WbManager;
 
 /**
  *	Action to paste the contents of the clipboard into the entry field
  *	@author  thomas.kellerer@web.de
  */
-public class ExecuteSelAction extends AbstractAction
+public class FileExitAction extends AbstractAction
 {
-	private ActionListener target;
-	
-	public ExecuteSelAction(ActionListener aListener)
+	public FileExitAction()
 	{
-		this.target = aListener;
-		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_EXECUTE_SEL));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_EXEC_SEL_16));
+		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.MNU_TXT_EXIT));
 	}
 	
 	public void actionPerformed(ActionEvent e)
 	{
-		this.target.actionPerformed(e);
+		WbManager.getInstance().exitWorkbench();
 	}
 }

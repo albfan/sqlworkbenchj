@@ -12,6 +12,28 @@ package workbench.util;
  */
 public class StringUtil
 {
+	public static String replace(String aString, String aValue, String aReplacement)
+	{
+		int pos = aString.indexOf(aValue);
+		if (pos == -1) return aString;
+
+		StringBuffer temp = new StringBuffer();
+
+		int lastpos = 0;
+		int len = aValue.length();
+		while (pos != -1)
+		{
+			temp.append(aString.substring(lastpos, pos));
+			temp.append(aReplacement);
+			lastpos = pos + len;
+			pos = aString.indexOf(aValue, lastpos);
+		}
+		if (lastpos < aString.length())
+		{
+			temp.append(aString.substring(lastpos));
+		}
+		return temp.toString();
+	}
 	
 
 	public static String getStartingWhiteSpace(final String aLine)
@@ -30,5 +52,21 @@ public class StringUtil
 		String result = aLine.substring(0, pos);
 		return result;
 	}
-			
+
+	public static int getIntValue(String aValue)
+	{
+		return getIntValue(aValue, 0);
+	}
+	public static int getIntValue(String aValue, int aDefault)
+	{
+		int result = aDefault;
+		try
+		{
+			result = Integer.parseInt(aValue);
+		}
+		catch (NumberFormatException e)
+		{
+		}
+		return result;
+	}
 }

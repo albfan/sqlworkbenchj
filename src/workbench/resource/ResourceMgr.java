@@ -14,8 +14,8 @@ import javax.swing.ImageIcon;
 
 
 /**
- *
- * @author  thomas
+ *	
+ * @author  thomas.kellerer@inline-skate.com
  * @version
  */
 public class ResourceMgr
@@ -43,6 +43,11 @@ public class ResourceMgr
 	public static final String TXT_EXECUTE_SEL = "ExecuteSel";
 	public static final String TXT_EXECUTE_ALL = "ExecuteAll";
 	
+	public static final String TXT_DB_DRIVER = "Driver";
+	public static final String TXT_DB_USERNAME = "Username";
+	public static final String TXT_DB_URL = "DbURL";
+	public static final String TXT_DB_PASSWORD = "Password";
+	
 	public static final String IMG_COPY_16 = "Copy16";
 	public static final String IMG_COPY_24 = "Copy24";
 	public static final String IMG_CUT_16 = "Cut16";
@@ -54,6 +59,11 @@ public class ResourceMgr
 	public static final String IMG_EXEC_ALL_16 = "ExecuteAll16";
 	public static final String IMG_EXEC_ALL_24 = "ExecuteAll24";
 	
+	public static final String MNU_TXT_FILE = "File";
+	public static final String MNU_TXT_EXIT = "Exit";
+	public static final String MNU_TXT_DATA = "Data";
+	public static final String MNU_TXT_SQL = "SQL";
+
 	private static ResourceBundle resources = ResourceBundle.getBundle("workbench/resource/wbstrings");
 	private static HashMap images = new HashMap();
 	
