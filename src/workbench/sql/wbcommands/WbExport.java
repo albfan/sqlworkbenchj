@@ -1,5 +1,6 @@
 package workbench.sql.wbcommands;
 
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -49,6 +50,8 @@ public class WbExport extends SqlCommand
 		cmdLine.addArgument("sqlinsert");
 		cmdLine.addArgument("sqlupdate");
 		cmdLine.addArgument("append");
+		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
+		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 		cmdLine.addArgument("escapehtml");
 		cmdLine.addArgument("createfullhtml");
 	}
@@ -175,6 +178,26 @@ public class WbExport extends SqlCommand
 			if (format != null) spooler.setDecimalSymbol(format);
 
 			spooler.setOutputTypeXml();
+
+			String xsl = cmdLine.getValue(WbXslt.ARG_STYLESHEET);
+			String output = cmdLine.getValue(WbXslt.ARG_OUTPUT);
+
+			if (xsl != null && output != null)
+			{
+				File f = new File(xsl);
+				if (f.exists())
+				{
+					spooler.setXsltTransformation(xsl);
+					spooler.setXsltTransformationOutput(output);
+				}
+				else
+				{
+					String msg = ResourceMgr.getString("ErrorSpoolXsltNotFound");
+					msg = msg.replaceAll("%xslt%", f.getAbsolutePath());
+					result.addMessage(msg);
+				}
+			}
+
 			if (table != null) spooler.setTableName(table);
 		}
 		else if ("html".equalsIgnoreCase(type))

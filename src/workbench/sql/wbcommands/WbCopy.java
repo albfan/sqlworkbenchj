@@ -29,7 +29,7 @@ public class WbCopy
 {
 	public static final String VERB = "COPY";
 	public static final String ALT_VERB = "WBCOPY";
-	
+
 	public static final String PARAM_SOURCETABLE = "sourcetable";
 	public static final String PARAM_SOURCEQUERY = "sourcequery";
 	public static final String PARAM_TARGETTABLE = "targettable";
@@ -49,13 +49,13 @@ public class WbCopy
 	private ArgumentParser cmdLine;
 	private DataCopier copier;
 	private String usedVerb = VERB;
-	
+
 	public WbCopy(String verbToUse)
 	{
 		this();
 		this.usedVerb = verbToUse;
 	}
-	
+
 	public WbCopy()
 	{
 		cmdLine = new ArgumentParser();
@@ -84,11 +84,11 @@ public class WbCopy
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		/* when using makeCleanSql, a SQL query as the source will
 		 * be modified (i.e. comments will be stripped, which is not good
-		 * if the query contains Oracle hints. We actually only need to make 
+		 * if the query contains Oracle hints. We actually only need to make
 		 * sure that the COPY or WBCOPY verb is stripped off the full command
 		 * in order to make the commandline parser work properly
 		 */
-		
+
 		/*
 		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
 		int pos = aSql.indexOf(' ');
@@ -97,7 +97,7 @@ public class WbCopy
 		else
 			aSql = "";
 		*/
-		
+
 		aSql = aSql.trim();
 		int pos = aSql.indexOf(' ');
 		if (pos > -1)
@@ -269,7 +269,6 @@ public class WbCopy
 
 			copier.start();
 			result.setSuccess();
-
 			result.addMessage(copier.getAllMessages());
 		}
 		catch (SQLException e)
@@ -284,6 +283,7 @@ public class WbCopy
 			LogMgr.logError("WbCopy.execute()", "Error when copying data", e);
 			result.setFailure();
 			result.addMessage(ExceptionUtil.getDisplay(e));
+			result.addMessage(copier.getAllMessages());
 		}
 		finally
 		{
@@ -296,7 +296,7 @@ public class WbCopy
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("WbCopy.execute()", "Errro when disconnecting source connection",e);
+				LogMgr.logError("WbCopy.execute()", "Error when disconnecting source connection",e);
 				result.addMessage(ExceptionUtil.getDisplay(e));
 			}
 
@@ -309,7 +309,7 @@ public class WbCopy
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("WbCopy.execute()", "Errro when disconnecting target connection",e);
+				LogMgr.logError("WbCopy.execute()", "Error when disconnecting target connection",e);
 				result.addMessage(ExceptionUtil.getDisplay(e));
 			}
 		}
@@ -329,10 +329,10 @@ public class WbCopy
 			String c = (String)l.get(i);
 			result[i] = new ColumnIdentifier(c);
 		}
-		
+
 		// now try to read the column definitions from the query
-		// if a matching column is found, the definition from the query 
-		// is used (because it will/should contain the correct datatype information 
+		// if a matching column is found, the definition from the query
+		// is used (because it will/should contain the correct datatype information
 		try
 		{
 			List colsFromQuery = SqlUtil.getResultSetColumns(sourceQuery, sourceCon);

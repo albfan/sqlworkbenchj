@@ -36,7 +36,10 @@ import workbench.sql.wbcommands.WbExport;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 import workbench.sql.commands.IgnoredCommand;
+import workbench.sql.wbcommands.WbDefineVar;
+import workbench.sql.wbcommands.WbListVars;
 import workbench.util.StringUtil;
+import workbench.sql.wbcommands.WbXslt;
 
 /**
  *
@@ -46,7 +49,8 @@ public class StatementRunner
 {
 	private WbConnection dbConnection;
 	private StatementRunnerResult result;
-
+	private SqlParameterPool parameterPool;
+	
 	private HashMap cmdDispatch;
 	private ArrayList dbSpecificCommands;
 
@@ -85,6 +89,15 @@ public class StatementRunner
 		sql = new SelectCommand();
 		cmdDispatch.put(sql.getVerb(), sql);
 
+		sql = new WbXslt();
+		cmdDispatch.put(sql.getVerb(), sql);
+
+		sql = new WbDefineVar();
+		cmdDispatch.put(sql.getVerb(), sql);
+
+		sql = new WbListVars();
+		cmdDispatch.put(sql.getVerb(), sql);
+		
 		sql = new WbExport();
 		cmdDispatch.put(sql.getVerb(), sql);
 		cmdDispatch.put("EXP", sql);
@@ -115,6 +128,7 @@ public class StatementRunner
 		}
 
 		this.dbSpecificCommands = new ArrayList();
+		this.parameterPool = SqlParameterPool.getInstance();
 	}
 
 	public void setConnection(WbConnection aConn)
@@ -150,19 +164,19 @@ public class StatementRunner
 			this.dbSpecificCommands.add(cmd.getVerb());
 		}
 
-		
+
 		if (!this.dbConnection.getMetadata().isPostgres())
 		{
 			// for non-PostgreSQL connections we can use the
 			// COPY command. For PGSQL we cannot use the verb COPY, as
 			// PGSQL has it's own COPY command. Oracle's COPY command
-			// is a SQL*Plus command and cannot be used through JDBC, 
+			// is a SQL*Plus command and cannot be used through JDBC,
 			// so we do not need to take care of that
 			SqlCommand copy = new WbCopy();
 			this.cmdDispatch.put(copy.getVerb(), copy);
 			this.dbSpecificCommands.add(copy.getVerb());
 		}
-		
+
 		String verbs = this.dbConnection.getMetadata().getVerbsToIgnore();
 		List l = StringUtil.stringToList(verbs, ",");
 		for (int i=0; i < l.size(); i++)
@@ -174,7 +188,7 @@ public class StatementRunner
 			this.cmdDispatch.put(verb, cmd);
 			this.dbSpecificCommands.add(verb);
 		}
-		
+
 	}
 
 	public StatementRunnerResult getResult()
@@ -220,7 +234,8 @@ public class StatementRunner
 		this.currentCommand.setConsumerWaiting(this.currentConsumer != null);
 		this.currentCommand.setRowMonitor(this.rowMonitor);
 		this.currentCommand.setMaxRows(maxRows);
-		this.result = this.currentCommand.execute(this.dbConnection, aSql);
+		String realSql = parameterPool.replaceParameter(aSql);
+		this.result = this.currentCommand.execute(this.dbConnection, realSql);
 
 		if (this.currentCommand.isResultSetConsumer())
 		{

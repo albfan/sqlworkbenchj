@@ -6,7 +6,7 @@
 package workbench.storage;
 
 
-class RowData
+public class RowData
 {
 	public static final int NOT_MODIFIED = 0;
 	public static final int MODIFIED = 1;

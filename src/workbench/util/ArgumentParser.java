@@ -19,17 +19,18 @@ public class ArgumentParser
 
 	private Map arguments = new HashMap();
 	private ArrayList unknownParameters = new ArrayList();
-	
+	private int argCount = 0;
+
 	public ArgumentParser()
 	{
 	}
-	
+
 	public void addArgument(String key)
 	{
 		if (key == null) throw new NullPointerException("Key may not be null");
 		this.arguments.put(key.toLowerCase(), null);
 	}
-	
+
 	public void parse(String args[])
 	{
 		this.reset();
@@ -41,7 +42,7 @@ public class ArgumentParser
 		}
 		this.parse(line.toString());
 	}
-	
+
 	public void parse(String aCmdLine)
 	{
 		this.reset();
@@ -68,6 +69,7 @@ public class ArgumentParser
 			if (arguments.containsKey(arg))
 			{
 				arguments.put(arg, value);
+				this.argCount ++;
 			}
 			else
 			{
@@ -76,11 +78,20 @@ public class ArgumentParser
 		}
 	}
 
+	public boolean hasArguments()
+	{
+		return this.argCount > 0;
+	}
+	public int getArgumentCount()
+	{
+		return this.argCount;
+	}
+
 	public boolean hasUnknownArguments()
 	{
 		return this.unknownParameters.size() > 0;
 	}
-	
+
 	public List getUnknownArguments()
 	{
 		return Collections.unmodifiableList(this.unknownParameters);
@@ -93,6 +104,7 @@ public class ArgumentParser
 			String key = (String)keys.next();
 			this.arguments.put(key, null);
 		}
+		this.argCount = 0;
 		this.unknownParameters.clear();
 	}
 	public boolean getBoolean(String key)
@@ -100,14 +112,14 @@ public class ArgumentParser
 		String value = this.getValue(key);
 		return "true".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value);
 	}
-	
+
 	public String getValue(String key)
 	{
 		String value = (String)this.arguments.get(key.toLowerCase());
 		value = StringUtil.trimQuotes(value);
 		return value;
 	}
-	
+
 	public static void main(String[] args)
 	{
 		//String test = "spool /type=sql /file=\"d:/temp/test.sql\" /table=my_table;";
@@ -119,6 +131,6 @@ public class ArgumentParser
 		parser.parse(test);
 		System.out.println("driverjar=>" + parser.getValue("driverjar") + "<");
 		System.out.println("done.");
-	} 
+	}
 
 }

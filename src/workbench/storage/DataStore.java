@@ -53,7 +53,7 @@ import workbench.util.WbStringTokenizer;
  */
 public class DataStore
 {
-	
+
 	// Needed for the status display in the table model
 	// as RowData is only package visible. Thus we need to provide the objects here
 	public static final Integer ROW_MODIFIED = new Integer(RowData.MODIFIED);
@@ -68,7 +68,7 @@ public class DataStore
 
 	private ArrayList data;
 	private ArrayList pkColumns;
-	private ArrayList deletedRows;
+	protected ArrayList deletedRows;
 	private String sql;
 
 	// Cached ResultSetMetaData information
@@ -352,6 +352,7 @@ public class DataStore
 	public int getColumnType(int aColumn)
 		throws IndexOutOfBoundsException
 	{
+		if (aColumn >= this.colCount) return Types.NULL;
 		return this.columnTypes[aColumn];
 	}
 
@@ -360,9 +361,9 @@ public class DataStore
 		if (this.columnClassNames[aColumn] != null) return this.columnClassNames[aColumn];
 		return this.getColumnClass(aColumn).getName();
 	}
+
 	public Class getColumnClass(int aColumn)
 	{
-
 		int type = this.getColumnType(aColumn);
 		switch (type)
 		{
@@ -589,7 +590,7 @@ public class DataStore
 				{
 					return;
 				}
-				this.updateTable = aTablename;
+				this.updateTable = meta.adjustObjectname(aTablename);
 				this.updateTableColumns = new ArrayList();
 				for (int i=0; i < columns.getRowCount(); i++)
 				{
@@ -2785,7 +2786,7 @@ public class DataStore
 	private int currentInsertRow = 0;
 	private int currentDeleteRow = 0;
 
-	private void resetUpdateRowCounters()
+	protected void resetUpdateRowCounters()
 	{
 		currentUpdateRow = 0;
 		currentInsertRow = 0;
@@ -2809,7 +2810,7 @@ public class DataStore
 		return null;
 	}
 
-	private RowData getNextDeletedRow()
+	protected RowData getNextDeletedRow()
 	{
 		if (this.deletedRows == null || this.deletedRows.size() == 0) return null;
 		int count = this.deletedRows.size();
@@ -3125,6 +3126,12 @@ public class DataStore
 
 	public String getRealUpdateTable()
 	{
+		if (this.updateTable == null)
+		{
+			this.checkUpdateTable();
+		}
+		if (this.updateTable == null) return null;
+
 		if (this.updateTable.indexOf('.') > 0)
 		{
 			return this.updateTable.substring(this.updateTable.lastIndexOf('.') + 1);
@@ -3141,6 +3148,7 @@ public class DataStore
 		{
 			Connection sqlConn = aConnection.getSqlConnection();
 			DatabaseMetaData meta = sqlConn.getMetaData();
+			if (this.updateTable == null) this.checkUpdateTable();
 			this.updateTable = aConnection.getMetadata().adjustObjectname(this.updateTable);
 			String schema = this.getUpdateTableSchema(aConnection);
 
