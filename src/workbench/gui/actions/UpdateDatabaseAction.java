@@ -9,7 +9,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
-import workbench.gui.display.SqlPanel;
+import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.Exporter;
 import workbench.resource.ResourceMgr;

@@ -11,7 +11,7 @@ import javax.swing.Action;
 import workbench.resource.ResourceMgr;
 import java.awt.event.ActionListener;
 import workbench.WbManager;
-import workbench.gui.display.MainWindow;
+import workbench.gui.sql.MainWindow;
 
 /**
  *	Action to paste the contents of the clipboard into the entry field
@@ -20,13 +20,13 @@ import workbench.gui.display.MainWindow;
 public class FileConnectAction extends AbstractAction
 {
 	private MainWindow window;
-	
+
 	public FileConnectAction(MainWindow aWindow)
 	{
 		this.window = aWindow;
 		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.MNU_TXT_CONNECT));
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
 		this.window.selectConnection();

@@ -36,7 +36,7 @@ import workbench.gui.actions.WbActionConstants;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.components.WbToolbarSeparator;
-import workbench.gui.db.ProfileSelectionDialog;
+import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;

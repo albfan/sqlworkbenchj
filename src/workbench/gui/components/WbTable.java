@@ -16,7 +16,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
-import workbench.gui.display.DwTableModel;
+import workbench.gui.sql.DwTableModel;
 import workbench.gui.renderer.DateColumnRenderer;
 
 public class WbTable extends javax.swing.JTable
