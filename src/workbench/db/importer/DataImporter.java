@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2004, Thomas Kellerer
+ * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: info@sql-workbench.net
@@ -71,8 +71,8 @@ public class DataImporter
 	private boolean useBatch = false;
 	private boolean supportsBatch = false;
 	private boolean canCommitInBatch = true;
-	private boolean reportProgress = true;
-
+	private int reportInterval = 1;
+	
 	private int colCount;
 	private ArrayList warnings = new ArrayList();
 	private ArrayList errors = new ArrayList();
@@ -291,7 +291,7 @@ public class DataImporter
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
 	}
-
+	
 	/**
 	 *	Start the import
 	 */
@@ -399,15 +399,9 @@ public class DataImporter
 		}
 
 		currentImportRow++;
-		if (this.reportProgress && this.progressMonitor != null)
+		if (this.progressMonitor != null && this.reportInterval > 0 && currentImportRow % reportInterval == 0)
 		{
-			SwingUtilities.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					progressMonitor.setCurrentRow(currentImportRow, -1);
-				}
-			});
+			progressMonitor.setCurrentRow(currentImportRow, -1);
 		}
 		
 		int rows = 0;
@@ -708,7 +702,7 @@ public class DataImporter
 				LogMgr.logError("DataImporter.setTargetTable()", "Could not delete contents of table " + this.targetTable, e);
 			}
 		}
-		if (!this.reportProgress && this.progressMonitor != null)
+		if (this.reportInterval == 0 && this.progressMonitor != null)
 		{
 			this.progressMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 			this.progressMonitor.setCurrentObject(ResourceMgr.getString("MsgImportingTableData") + " " + this.targetTable + " (" + this.getModeString() + ")",-1,-1);
@@ -992,14 +986,16 @@ public class DataImporter
 		}
 	}
 
-    public boolean isReportProgress()
-    {
-        return reportProgress;
-    }
-
-    public void setReportProgress(boolean reportProgress)
-    {
-        this.reportProgress = reportProgress;
-    }
-
+	public void setReportInterval(int interval)
+	{
+		if (interval > 0)
+		{
+			this.reportInterval = interval;
+		}
+		else
+		{
+			this.reportInterval = 0;
+		}
+	}
+	
 }

@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2004, Thomas Kellerer
+ * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: info@sql-workbench.net
@@ -25,6 +25,7 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
+import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -68,6 +69,7 @@ public class WbImport extends SqlCommand
 		cmdLine.addArgument("columnfilter");
 		cmdLine.addArgument("linefilter");
 		cmdLine.addArgument("showprogress");
+		cmdLine.addArgument("progressinterval");
 		
 		this.isUpdatingCommand = true;
 	}
@@ -135,6 +137,7 @@ public class WbImport extends SqlCommand
 			result.setFailure();
 			return result;
 		}
+		file = StringUtil.trimQuotes(file);
 
 		int commit = cmdLine.getIntValue("commitevery",-1);
 		imp.setCommitEvery(commit);
@@ -249,15 +252,31 @@ public class WbImport extends SqlCommand
 			result.setFailure();
 			return result;
 		}
-		file = StringUtil.trimQuotes(file);
 		
 		this.imp.setRowActionMonitor(this.rowMonitor);
-		this.imp.setReportProgress(cmdLine.getBoolean("showprogress",true));
+		String value = cmdLine.getValue("showprogress");
+		if (value == null)
+		{
+			int interval = this.estimateReportInterval(file);
+			imp.setReportInterval(interval);
+		}
+		else if ("true".equalsIgnoreCase(value))
+		{
+			this.imp.setReportInterval(1);
+		}
+		else if ("false".equalsIgnoreCase(value))
+		{
+			this.imp.setReportInterval(0);
+		}
+		else 
+		{
+			int interval = StringUtil.getIntValue(value, 0);
+			this.imp.setReportInterval(interval);
+		}
 		
 		String mode = cmdLine.getValue("mode");
 		if (mode != null)
 		{
-
 			if (!imp.setMode(mode))
 			{
 				result.addMessage(ResourceMgr.getString("ErrorInvalidModeIgnored").replaceAll("%mode%", mode));
@@ -344,6 +363,34 @@ public class WbImport extends SqlCommand
 		}
 	}
 
+	private int estimateReportInterval(String filename)
+	{
+		try 
+		{
+			long records = FileUtil.estimateRecords(filename, 10);
+			if (records < 100)
+			{
+				return 1;
+			}
+			else if (records < 1000)
+			{
+				return 10;
+			}
+			else if (records < 100000)
+			{
+				return 1000;
+			}
+			else 
+			{
+				return 10000;
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("WbImport.estimateReportInterval()", "Error when checking input file", e);
+			return 0;
+		}
+	}
 	private void addErrors(StatementRunnerResult result)
 	{
 		String[] warn = imp.getErrors();

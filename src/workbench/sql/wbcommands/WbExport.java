@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2004, Thomas Kellerer
+ * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: info@sql-workbench.net
@@ -46,6 +46,7 @@ public class WbExport
 	private String currentTable;
 	private String defaultExtension;
 	private boolean showProgress = true;
+	private int progressInterval = 1;
 
 	public WbExport()
 	{
@@ -69,8 +70,6 @@ public class WbExport
 		cmdLine.addArgument("nodata");
 		cmdLine.addArgument("encoding");
 		cmdLine.addArgument("showprogress");
-		//cmdLine.addArgument("sqlinsert");
-		//cmdLine.addArgument("sqlupdate");
 		cmdLine.addArgument("keycolumns");
 		cmdLine.addArgument("append");
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
@@ -373,12 +372,27 @@ public class WbExport
 
 		this.exporter.setConnection(aConnection);
 
-		this.showProgress = cmdLine.getBoolean("showprogress", true);
+		//this.showProgress = cmdLine.getBoolean("showprogress", true);
+		String value = cmdLine.getValue("showprogress");
+		if (value == null || "true".equalsIgnoreCase(value))
+		{
+			this.showProgress = true;
+			this.progressInterval = 1;
+		}
+		else if ("false".equalsIgnoreCase(value))
+		{
+			this.showProgress = false;
+		}
+		else 
+		{
+			this.progressInterval = StringUtil.getIntValue(value, -1);
+			this.showProgress = (this.progressInterval > 0);
+		}
 		
 		if (!this.directExport)
 		{
 			this.exporter.setRowMonitor(this.rowMonitor);
-			this.exporter.setShowProgress(showProgress);
+			this.exporter.setProgressInterval(this.progressInterval);
 			
 			String msg = ResourceMgr.getString("MsgSpoolInit");
 			msg = StringUtil.replace(msg, "%type%", typeDisplay);
@@ -393,11 +407,6 @@ public class WbExport
 		}
 		else
 		{
-			if (outputdir == null || outputdir.trim().length() == 0)
-			{
-				result.setFailure();
-				result.addMessage(ResourceMgr.getString("ErrorExportOutputDirRequired"));
-			}
 			this.runTableExports(result, outputdir);
 		}
 		return result;
@@ -421,6 +430,13 @@ public class WbExport
 
 		if (count > 1)
 		{
+			if (outputdir == null || outputdir.trim().length() == 0)
+			{
+				result.setFailure();
+				result.addMessage(ResourceMgr.getString("ErrorExportOutputDirRequired"));
+				return;
+			}
+			
 			outdir = new File(outputdir);
 			if (!outdir.isDirectory())
 			{
@@ -442,6 +458,7 @@ public class WbExport
 		}
 
 		exporter.setRowMonitor(this);
+		
 		if (count > 1)
 		{
 			for (int i = 0; i < count; i ++)
@@ -552,8 +569,6 @@ public class WbExport
 					}
 					aResult.addMessage("");
 				}
-				//msg = ResourceMgr.getString("MsgSpoolSource") + " " + aResult.getSourceCommand();
-				//aResult.addMessage(msg);
 				msg = ResourceMgr.getString("MsgSpoolTarget") + " " + this.exporter.getFullOutputFilename();
 				aResult.addMessage(msg);
 				aResult.clearResultSets();
@@ -610,7 +625,8 @@ public class WbExport
 
 	public void setCurrentRow(int currentRow, int totalRows)
 	{
-		if (this.showProgress && this.rowMonitor != null && this.currentTable != null)
+		if (this.showProgress && this.rowMonitor != null && this.currentTable != null
+			&& (this.progressInterval == 1 || currentRow % this.progressInterval == 0))
 		{
 			this.rowMonitor.setCurrentObject(this.currentTable, currentRow, -1);
 		}

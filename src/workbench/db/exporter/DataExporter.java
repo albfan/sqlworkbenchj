@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2004, Thomas Kellerer
+ * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: info@sql-workbench.net
@@ -116,7 +116,7 @@ public class DataExporter
 	private boolean verboseFormat = true;
 
 	private boolean showProgressWindow = false;
-	private boolean showProgress = true;
+	private int progressInterval = 1;
 	
 	private ProgressPanel progressPanel;
 	private JFrame progressWindow;
@@ -280,8 +280,14 @@ public class DataExporter
 	 * progress display. Turning off the display will speed up 
 	 * the export because the GUI does not need to be updated
 	 */
-	public void setShowProgress(boolean flag) { this.showProgress = flag; }
-	public boolean getShowProgress() { return this.showProgress; }
+	public void setProgressInterval(int interval) 
+	{ 
+		if (interval <= 0)
+			this.progressInterval = 0;
+		else 
+			this.progressInterval = interval;
+	}
+	public int getProgressInterval() { return this.progressInterval; }
 	
 	
 	/** Control the display of a progress window. This is used
@@ -755,9 +761,10 @@ public class DataExporter
 		{
 		}
 		
-		if (this.showProgress)
+		if (this.progressInterval > 0)
 		{
 			exporter.setRowMonitor(this.rowMonitor);
+			exporter.setProgressInterval(this.progressInterval);
 		}
 		else if (this.rowMonitor != null)
 		{

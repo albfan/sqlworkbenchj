@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2004, Thomas Kellerer
+ * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: info@sql-workbench.net
@@ -35,7 +35,8 @@ public abstract class ExportWriter
 	protected RowActionMonitor rowMonitor;
 	private RowDataConverter converter;
 	private Writer output;
-
+	private int progressInterval = 1;
+	
 	public ExportWriter(DataExporter exp)
 	{
 		this.exporter = exp;
@@ -43,6 +44,14 @@ public abstract class ExportWriter
 
 	public abstract RowDataConverter createConverter(ResultInfo info);
 
+	public void setProgressInterval(int interval)
+	{
+		if (interval <= 0)
+			this.progressInterval = 0;
+		else
+			this.progressInterval = interval;
+	}
+	
 	public void setRowMonitor(RowActionMonitor monitor)
 	{
 		this.rowMonitor = monitor;
@@ -78,7 +87,7 @@ public abstract class ExportWriter
 		this.cancel = false;
 		this.rows = 0;
 
-		if (this.rowMonitor != null)
+		if (this.rowMonitor != null && this.progressInterval > 0)
 		{
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
 		}
@@ -89,7 +98,8 @@ public abstract class ExportWriter
 		for (int i=0; i < rowCount; i++)
 		{
 			if (this.cancel) break;
-			if (this.rowMonitor != null)
+			if (this.rowMonitor != null && this.progressInterval > 0 && 
+				  (this.progressInterval == 1 || this.rows % this.progressInterval == 0))
 			{
 				this.rowMonitor.setCurrentRow((int)this.rows, -1);
 			}
@@ -114,7 +124,7 @@ public abstract class ExportWriter
 		this.cancel = false;
 		this.rows = 0;
 
-		if (this.rowMonitor != null)
+		if (this.rowMonitor != null && this.progressInterval > 0)
 		{
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
 		}
@@ -124,7 +134,8 @@ public abstract class ExportWriter
 		while (rs.next())
 		{
 			if (this.cancel) break;
-			if (this.rowMonitor != null)
+			if (this.rowMonitor != null && this.progressInterval > 0 && 
+				  (this.progressInterval == 1 || this.rows % this.progressInterval == 0))
 			{
 				this.rowMonitor.setCurrentRow((int)this.rows, -1);
 			}
