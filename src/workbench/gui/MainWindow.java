@@ -6,30 +6,67 @@
 
 package workbench.gui;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
-import javax.swing.*;
-import javax.swing.BorderFactory;
+
+import javax.swing.Action;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 import javax.swing.UIManager.LookAndFeelInfo;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
-import workbench.gui.actions.*;
+import workbench.gui.actions.AddMacroAction;
+import workbench.gui.actions.AddTabAction;
+import workbench.gui.actions.AssignWorkspaceAction;
+import workbench.gui.actions.CloseWorkspaceAction;
+import workbench.gui.actions.FileConnectAction;
+import workbench.gui.actions.FileDisconnectAction;
+import workbench.gui.actions.FileExitAction;
+import workbench.gui.actions.FileNewWindowAction;
+import workbench.gui.actions.LoadWorkspaceAction;
+import workbench.gui.actions.ManageDriversAction;
+import workbench.gui.actions.ManageMacroAction;
+import workbench.gui.actions.RemoveTabAction;
+import workbench.gui.actions.RunMacroAction;
+import workbench.gui.actions.SaveAsNewWorkspaceAction;
+import workbench.gui.actions.SaveWorkspaceAction;
+import workbench.gui.actions.SelectTabAction;
+import workbench.gui.actions.ShowDbExplorerAction;
+import workbench.gui.actions.ViewLineNumbers;
+import workbench.gui.actions.WbAction;
 import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbMenuItem;
@@ -41,7 +78,7 @@ import workbench.gui.help.WhatsNewViewer;
 import workbench.gui.menu.SqlTabPopup;
 import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.gui.settings.SettingsPanel;
-import workbench.gui.sql.SqlHistory;
+import workbench.gui.settings.ShortcutEditor;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.FilenameChangeListener;
@@ -51,7 +88,6 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.MacroManager;
-import workbench.util.BrowserLauncher;
 import workbench.util.WbWorkspace;
 
 
@@ -100,7 +136,11 @@ public class MainWindow
 	// so that slow connections do not block the GUI
 	private boolean connectInProgress = false;
 
-	/** Creates new MainWindow */
+	private AddMacroAction createMacro;
+	private ManageMacroAction manageMacros;
+
+	private int runningJobs = 0;
+
 	public MainWindow()
 	{
 		super(ResourceMgr.TXT_PRODUCT_NAME);
@@ -207,6 +247,10 @@ public class MainWindow
 		this.dbExplorerAction = new ShowDbExplorerAction(this);
 		this.dbExplorerAction.setEnabled(false);
 
+		this.createMacro = new AddMacroAction();
+		this.createMacro.setEnabled(false);
+		this.manageMacros = new ManageMacroAction(this);
+
 		int tabCount = this.sqlTab.getTabCount();
 		for (int tab=0; tab < tabCount; tab ++)
 		{
@@ -273,6 +317,16 @@ public class MainWindow
 		menuBar.add(menu);
 		menus.put(ResourceMgr.MNU_TXT_SQL, menu);
 
+		if (aPanel instanceof SqlPanel)
+		{
+			menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_MACRO));
+			menu.setName(ResourceMgr.MNU_TXT_MACRO);
+			menu.setVisible(true);
+			menuBar.add(menu);
+			menus.put(ResourceMgr.MNU_TXT_MACRO, menu);
+			this.buildMacroMenu(menu);
+		}
+
 		menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_WORKSPACE));
 		menu.setName(ResourceMgr.MNU_TXT_WORKSPACE);
 		menuBar.add(menu);
@@ -284,8 +338,6 @@ public class MainWindow
 		menu.add(this.closeWorkspaceAction);
 		menu.addSeparator();
 		menu.add(this.assignWorkspaceAction);
-		//menu.addSeparator();
-		//menu.add(this.clearWorkspace);
 
 		for (int i=0; i < actions.size(); i++)
 		{
@@ -313,15 +365,8 @@ public class MainWindow
 			menu.setVisible(true);
 		}
 
-		if (aPanel instanceof SqlPanel)
-		{
-			menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_SQL);
-			this.appendMacros(menu, (SqlPanel)aPanel);
-		}
-
 		menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_FILE);
 		menu.addSeparator();
-		//menu.add(new ManageMacrosAction(this));
 		menu.add(new ManageDriversAction(this));
 		menu.addSeparator();
 
@@ -335,6 +380,9 @@ public class MainWindow
 
 		RemoveTabAction rem = new RemoveTabAction(this);
 		menu.add(rem.getMenuItem());
+		menu.addSeparator();
+		ViewLineNumbers v = new ViewLineNumbers();
+		v.addToMenu(menu);
 
 		menuBar.add(this.buildToolsMenu());
 		menuBar.add(this.buildHelpMenu());
@@ -349,10 +397,15 @@ public class MainWindow
 		int count = this.sqlTab.getTabCount();
 		for (int i=0; i < count; i++)
 		{
-			JMenuItem sql = this.getSQLMacroMenu(i);
-			if (sql != null)
+			JMenu macro = this.getMacroMenu(i);
+			if (macro != null)
 			{
-				sql.setEnabled(enabled);
+				int itemCount = macro.getItemCount();
+				for (int in=2; in < itemCount; in++)
+				{
+					JMenuItem item = macro.getItem(in);
+					if (item != null) item.setEnabled(enabled);
+				}
 			}
 		}
 	}
@@ -367,43 +420,34 @@ public class MainWindow
 		int count = this.sqlTab.getTabCount();
 		for (int i=0; i < count; i++)
 		{
-			JMenu macros = (JMenu)this.getSQLMacroMenu(i);
-			MainPanel p = this.getSqlPanel(i);
-			if (macros != null && p instanceof SqlPanel)
+			JMenu macros = (JMenu)this.getMacroMenu(i);
+			if (macros != null)
 			{
-				macros.removeAll();
-				this.addMacros(macros, (SqlPanel)p);
-				macros.setEnabled(p.isConnected());
+				this.buildMacroMenu(macros);
 			}
 		}
 	}
 
-	private void appendMacros(JMenu sqlMenu, SqlPanel aClient)
+	private void buildMacroMenu(JMenu macroMenu)
 	{
-		JMenu macroMenu = new WbMenu(ResourceMgr.getString("MnuTxtMacroList"));
-		macroMenu.setName("sql-macros");
-		macroMenu.setIcon(ResourceMgr.getImage("blank"));
-		this.addMacros(macroMenu, aClient);
-		sqlMenu.add(macroMenu);
-		aClient.setMacroMenu(macroMenu);
-	}
+		macroMenu.removeAll();
+		this.createMacro.addToMenu(macroMenu);
+		this.manageMacros.addToMenu(macroMenu);
 
-	private void addMacros(JMenu macroMenu, SqlPanel aClient)
-	{
-		RunMacroAction run = null;
-		
 		List macros = MacroManager.getInstance().getMacroList();
 		if (macros == null || macros.size() == 0) return;
 
+		macroMenu.addSeparator();
+
 		Collections.sort(macros);
 		int count = macros.size();
+		RunMacroAction run = null;
 		for (int i=0; (i < count && i < 10); i++)
 		{
 			String name = (String)macros.get(i);
-			run = new RunMacroAction(aClient, name);
+			run = new RunMacroAction(this, name, i+1);
 			run.addToMenu(macroMenu);
 		}
-
 	}
 
 	public int getCurrentPanelIndex()
@@ -445,6 +489,16 @@ public class MainWindow
 		return this.getSqlPanel(index);
 	}
 
+	public SqlPanel getCurrentSqlPanel()
+	{
+		MainPanel p = this.getCurrentPanel();
+		if (p instanceof SqlPanel)
+		{
+			return (SqlPanel)p;
+		}
+		return null;
+	}
+
 	public MainPanel getSqlPanel(int anIndex)
 	{
 		return (MainPanel)this.sqlTab.getComponentAt(anIndex);
@@ -466,11 +520,21 @@ public class MainWindow
 		this.checkConnectionForPanel(aPanel, true);
 	}
 
+	private void clearConnectInProgress()
+	{
+		synchronized (this)
+		{
+			this.connectInProgress = false;
+		}
+	}
+
+	private synchronized void setConnectInProgress() { this.connectInProgress = true; }
+
 	private void checkConnectionForPanel(final MainPanel aPanel, boolean createConnection)
 	{
 		if (aPanel.isConnected()) return;
 		if (this.connectInProgress) return;
-		
+
 		try
 		{
 			if (this.currentProfile != null && this.currentProfile.getUseSeperateConnectionPerTab() && createConnection)
@@ -518,7 +582,7 @@ public class MainWindow
 	{
 		this.closeConnectingInfo();
 		panel.setConnection(conn);
-		
+
 		if (SwingUtilities.isEventDispatchThread())
 		{
 			this.updateGuiForTab(anIndex);
@@ -532,6 +596,7 @@ public class MainWindow
 					public void run()
 					{
 						updateGuiForTab(anIndex);
+						selectCurrentEditor();
 					}
 				});
 			}
@@ -556,6 +621,7 @@ public class MainWindow
 			this.currentToolbar = current.getToolbar();
 			content.add(this.currentToolbar, BorderLayout.NORTH);
 		}
+		this.setMacroMenuEnabled(current.isConnected());
 		this.doLayout();
 	}
 
@@ -566,6 +632,12 @@ public class MainWindow
 
 		if (!this.connectInProgress)	this.checkConnectionForPanel(current);
 		this.updateGuiForTab(anIndex);
+		if (current instanceof SqlPanel)
+		{
+			SqlPanel sql = (SqlPanel)current;
+			sql.selectEditorLater();
+			this.createMacro.setClient(sql.getEditor());
+		}
 	}
 
 	public void restoreState()
@@ -697,7 +769,7 @@ public class MainWindow
 		{
 			this.saveWorkspace(this.currentWorkspaceFile);
 		}
-		
+
 		try
 		{
 			this.showConnectingInfo();
@@ -706,12 +778,21 @@ public class MainWindow
 			{
 				public void run()
 				{
-					disconnect(false);
+					disconnect(false, false);
 					currentProfile = aProfile;
-					connectInProgress = true;
+					setConnectInProgress();
 					showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
 					loadWorkspaceForProfile(aProfile);
 					showStatusMessage(ResourceMgr.getString("MsgConnecting"));
+					Thread.yield();
+					SwingUtilities.invokeLater(new Runnable()
+					{
+						public void run()
+						{
+							repaint();
+						}
+					});
+					Thread.yield();
 					doConnect();
 				}
 			};
@@ -729,7 +810,7 @@ public class MainWindow
 		boolean connected = false;
 		WbConnection conn = null;
 		String error = null;
-		
+
 		try
 		{
 			ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
@@ -826,7 +907,7 @@ public class MainWindow
 		{
 			this.getCurrentPanel().showLogMessage(warn);
 		}
-		this.connectInProgress = false;
+		this.clearConnectInProgress();
 		this.closeConnectingInfo();
 	}
 
@@ -836,7 +917,7 @@ public class MainWindow
 		this.updateWindowTitle();
 		this.dbExplorerAction.setEnabled(false);
 		this.disconnectAction.setEnabled(false);
-		this.connectInProgress = false;
+		this.clearConnectInProgress();
 		this.closeConnectingInfo();
 		String msg = ResourceMgr.getString("ErrorConnectFailed").replaceAll("%msg%", error.trim());
 		WbManager.getInstance().showErrorMessage(this, msg);
@@ -845,7 +926,7 @@ public class MainWindow
 	private static final int CREATE_WORKSPACE = 0;
 	private static final int LOAD_OTHER_WORKSPACE = 1;
 	private static final int IGNORE_MISSING_WORKSPACE = 2;
-	
+
 	private int checkNonExistingWorkspace()
 	{
 		String[] options = new String[] { ResourceMgr.getString("LabelCreateWorkspace"), ResourceMgr.getString("LabelLoadWorkspace"), ResourceMgr.getString("LabelIgnore")};
@@ -861,7 +942,7 @@ public class MainWindow
 		else if (result.equals(options[1])) return LOAD_OTHER_WORKSPACE;
 		else return IGNORE_MISSING_WORKSPACE;
 	}
-	
+
 	private void loadWorkspaceForProfile(ConnectionProfile aProfile)
 	{
 		//this.showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
@@ -894,7 +975,7 @@ public class MainWindow
 					this.isProfileWorkspace = true;
 					this.loadWorkspace(file);
 				}
-				else 
+				else
 				{
 					this.loadDefaultWorkspace();
 				}
@@ -915,14 +996,10 @@ public class MainWindow
 		}
 	}
 
-	public void disconnect(boolean background)
-	{
-		this.disconnect(background, false);
-	}
 	public void disconnect(boolean background, final boolean closeWorkspace)
 	{
 		if (this.connectInProgress) return;
-		this.connectInProgress = true;
+		this.setConnectInProgress();
 
 		if (background)
 		{
@@ -931,8 +1008,10 @@ public class MainWindow
 				public void run()
 				{
 					if (closeWorkspace) saveWorkspace();
+					showDisconnectInfo();
 					doDisconnect();
 					if (closeWorkspace) closeWorkspace();
+					closeConnectingInfo();
 				}
 			};
 			t.setName("MainWindow - disconnect thread");
@@ -1020,7 +1099,7 @@ public class MainWindow
 		this.updateWindowTitle();
 		this.disconnectAction.setEnabled(false);
 		if (this.dbExplorerAction != null) this.dbExplorerAction.setEnabled(false);
-		this.connectInProgress = false;
+		this.clearConnectInProgress();
 		this.showStatusMessage("");
 	}
 
@@ -1067,7 +1146,12 @@ public class MainWindow
 
 	private void updateWindowTitle()
 	{
-		StringBuffer title = new StringBuffer(ResourceMgr.TXT_PRODUCT_NAME);
+		StringBuffer title = new StringBuffer(50);
+		if (this.runningJobs > 0)
+		{
+			title.append("» ");
+		}
+		title.append(ResourceMgr.TXT_PRODUCT_NAME);
 
 		title.append("  [");
 
@@ -1102,28 +1186,48 @@ public class MainWindow
 
 
 	private JDialog connectingInfo;
+	private JLabel connectLabel;
 
 	private void closeConnectingInfo()
 	{
 		if (this.connectingInfo != null)
 		{
+			this.connectLabel = null;
 			this.connectingInfo.setVisible(false);
 			this.connectingInfo.dispose();
 			this.connectingInfo = null;
+			this.repaint();
 		}
 	}
+
+	private void showDisconnectInfo()
+	{
+		this.showPopupMessagePanel(ResourceMgr.getString("MsgDisconnecting"));
+	}
+
 	/** Display a little PopupWindow to tell the user that the
 	 *  workbench is currently connecting to the DB
 	 */
 	private void showConnectingInfo()
 	{
+		this.showPopupMessagePanel(ResourceMgr.getString("MsgConnecting"));
+	}
+
+	private void showPopupMessagePanel(String aMsg)
+	{
+		if (this.connectingInfo != null)
+		{
+			this.connectLabel.setText(aMsg);
+			this.connectingInfo.repaint();
+			Thread.yield();
+			return;
+		}
 		JPanel p = new JPanel();
 		p.setBorder(WbSwingUtilities.BEVEL_BORDER_RAISED);
 		p.setLayout(new BorderLayout());
-		JLabel l = new JLabel(ResourceMgr.getString("MsgConnecting"));
-		l.setHorizontalAlignment(SwingConstants.CENTER);
-		p.add(l, BorderLayout.CENTER);
-
+		this.connectLabel = new JLabel(aMsg);
+		this.connectLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		p.add(this.connectLabel, BorderLayout.CENTER);
 		this.connectingInfo = new JDialog(this, false);
 		this.connectingInfo.getContentPane().setLayout(new BorderLayout());
 		this.connectingInfo.getContentPane().add(p, BorderLayout.CENTER);
@@ -1211,21 +1315,10 @@ public class MainWindow
 		}
 	}
 
-	public JMenuItem getSQLMacroMenu(int anIndex)
+	public JMenu getMacroMenu(int anIndex)
 	{
-		JMenu menu = this.getMenu(ResourceMgr.MNU_TXT_SQL, anIndex);
-
-		int count = menu.getItemCount();
-		for (int i=0; i< count; i++)
-		{
-			JMenuItem item = menu.getItem(i);
-			if (item == null) continue;
-			if ("sql-macros".equals(item.getName()))
-			{
-				return item;
-			}
-		}
-		return null;
+		JMenu menu = this.getMenu(ResourceMgr.MNU_TXT_MACRO, anIndex);
+		return menu;
 	}
 
 	public JMenu getViewMenu(int anIndex)
@@ -1235,7 +1328,7 @@ public class MainWindow
 
 	public JMenu getMenu(String aName, int anIndex)
 	{
-		if (anIndex < 0 || anIndex > this.panelMenus.size()) return null;
+		if (anIndex < 0 || anIndex >= this.panelMenus.size()) return null;
 		JMenuBar menubar = (JMenuBar)this.panelMenus.get(anIndex);
 		int count = menubar.getMenuCount();
 		for (int k=0; k < count; k++)
@@ -1432,7 +1525,7 @@ public class MainWindow
 			if (!(c instanceof DbExplorerPanel))
 			{
 				this.addDbExplorerTab();
-				// we cannot activate the tab yet, as that will trigger 
+				// we cannot activate the tab yet, as that will trigger
 				// the connection process, and we want to control
 				// that here, so that the a separate thread can be used
 				this.dbExplorerTabVisible = true;
@@ -1546,11 +1639,29 @@ public class MainWindow
 		options.putClientProperty("command", "optionsDialog");
 		options.addActionListener(this);
 		result.add(options);
+
+		JMenuItem shortcuts = new WbMenuItem(ResourceMgr.getString("MnuTxtConfigureShortcuts"));
+		shortcuts.setName("shortcuts");
+		shortcuts.putClientProperty("command", "keyboardDialog");
+		shortcuts.addActionListener(this);
+		result.add(shortcuts);
+
 		JMenu lnf = new WbMenu(ResourceMgr.getString("MnuTxtLookAndFeel"));
+		lnf.setName("lnf");
 		LookAndFeelInfo[] info = UIManager.getInstalledLookAndFeels();
+		String current = UIManager.getLookAndFeel().getClass().getName();
+
 		for (int i=0; i < info.length; i++)
 		{
-			JMenuItem item = new WbMenuItem(info[i].getName());
+			JCheckBoxMenuItem item = new JCheckBoxMenuItem(info[i].getName());
+			if (current.equals(info[i].getClassName()))
+			{
+				item.setSelected(true);
+			}
+			else
+			{
+				item.setSelected(false);
+			}
 			item.putClientProperty("command", "lnf");
 			item.putClientProperty("class", info[i].getClassName());
 			item.addActionListener(this);
@@ -1559,6 +1670,48 @@ public class MainWindow
 		result.add(lnf);
 		return result;
 	}
+
+	public void updateToolsMenu()
+	{
+		int count = this.panelMenus.size();
+		for (int i=0; i < count; i++)
+		{
+			JMenu tools = this.getMenu(ResourceMgr.MNU_TXT_TOOLS, i);
+
+			int toolCount = tools.getItemCount();
+
+			for (int ti = 0; ti < toolCount; ti++)
+			{
+				JMenuItem titem = tools.getItem(ti);
+				if (titem == null) continue;
+				if (!"lnf".equals(titem.getName())) continue;
+				if (!(titem instanceof JMenu)) continue;
+
+				JMenu lnf = (JMenu)titem;
+
+				String current = UIManager.getLookAndFeel().getClass().getName();
+				int items = lnf.getItemCount();
+				for (int j=0; j < items; j++)
+				{
+					JMenuItem item = lnf.getItem(j);
+					if (item instanceof JCheckBoxMenuItem)
+					{
+						String lnfclass = (String)item.getClientProperty("class");
+
+						if (current.equals(lnfclass))
+						{
+							item.setSelected(true);
+						}
+						else
+						{
+							item.setSelected(false);
+						}
+					}
+				}
+			}
+		}
+	}
+
 
 	public void loadWorkspace()
 	{
@@ -1622,10 +1775,10 @@ public class MainWindow
 		String realFilename = WbManager.getInstance().replaceConfigDir(filename);
 
 		File f = new File(realFilename);
-	 	if (!f.exists()) 
+	 	if (!f.exists())
 		{
-			// if the file does not exist, we are setting all 
-			// variables as it would. Thus the file will be automatically 
+			// if the file does not exist, we are setting all
+			// variables as it would. Thus the file will be automatically
 			// created...
 			this.currentWorkspaceFile = realFilename;
 			this.workspaceLoaded = true;
@@ -1633,7 +1786,7 @@ public class MainWindow
 			this.checkWorkspaceActions();
 			return true;
 		}
-		
+
 		this.sqlTab.setSuspendRepaint(true);
 		boolean result = false;
 		int index = 0;
@@ -1660,7 +1813,7 @@ public class MainWindow
 			this.currentWorkspaceFile = realFilename;
 			index = w.getSelectedTab();
 			result = true;
-			
+
 			if (index < this.sqlTab.getTabCount())
 			{
 				this.sqlTab.setSelectedIndex(index);
@@ -1792,15 +1945,18 @@ public class MainWindow
 		String realFilename = WbManager.getInstance().replaceConfigDir(filename);
 
 		File f = new File(realFilename);
-		File bck = new File(realFilename + ".bck");
-		try
+		if (WbManager.getSettings().getCreateWorkspaceBackup())
 		{
-			bck.delete();
-			f.renameTo(bck);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning("MainWindow.saveWorkspace()", "Error when creating backup file!", e);
+			File bck = new File(realFilename + ".bck");
+			try
+			{
+				bck.delete();
+				f.renameTo(bck);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logWarning("MainWindow.saveWorkspace()", "Error when creating backup file!", e);
+			}
 		}
 
 		try
@@ -1929,8 +2085,7 @@ public class MainWindow
 		sql.initDefaults();
 		if (selectNew) sqlTab.setSelectedIndex(index);
 
-		JMenuItem m = this.getSQLMacroMenu(index);
-		if (m != null) m.setEnabled(sql.isConnected());
+		this.setMacroMenuEnabled(sql.isConnected());
 	}
 
 	/**
@@ -2015,17 +2170,17 @@ public class MainWindow
 	{
 		MainPanel panel = this.getSqlPanel(index);
 		int newTab = -1;
-		
-		this.connectInProgress = true;
+
+		this.setConnectInProgress();
 		try
 		{
-			
+
 			if (this.currentProfile != null && this.currentProfile.getUseSeperateConnectionPerTab())
 			{
 				WbConnection conn = panel.getConnection();
 				if (conn != null)
 				{
-					final String id = conn.getId(); 
+					final String id = conn.getId();
 					Thread t = new Thread()
 					{
 						public void run()
@@ -2038,7 +2193,7 @@ public class MainWindow
 					t.start();
 				}
 			}
-			
+
 			panel.disconnect();
 			panel.dispose();
 
@@ -2066,7 +2221,7 @@ public class MainWindow
 		}
 		finally
 		{
-			this.connectInProgress = false;
+			this.clearConnectInProgress();
 		}
 		if (newTab >= 0) this.tabSelected(newTab);
 	}
@@ -2109,6 +2264,14 @@ public class MainWindow
 						JMenuBar menu = (JMenuBar)this.panelMenus.get(i);
 						SwingUtilities.updateComponentTreeUI(menu);
 					}
+					try
+					{
+						this.updateToolsMenu();
+					}
+					catch (Exception upe)
+					{
+						LogMgr.logWarning("MainWindow.actionPerformed()", "Error updating LNF menu", upe);
+					}
 				}
 				catch (Exception ex)
 				{
@@ -2127,6 +2290,17 @@ public class MainWindow
 			else if ("helpContents".equals(command))
 			{
 				this.showHelp();
+			}
+			else if ("keyboardDialog".equals(command))
+			{
+				final ShortcutEditor editor = new ShortcutEditor(this);
+				SwingUtilities.invokeLater(new Runnable()
+					{
+						public void run()
+						{
+							editor.showWindow();
+						}
+					});
 			}
 			else if ("helpAbout".equals(command))
 			{
@@ -2170,6 +2344,8 @@ public class MainWindow
 
 	public void executionEnd(WbConnection conn, Object source)
 	{
+		this.runningJobs --;
+		this.updateWindowTitle();
 	}
 
 	public void executionStart(WbConnection conn, Object source)
@@ -2178,6 +2354,8 @@ public class MainWindow
 		{
 			this.saveWorkspace();
 		}
+		this.runningJobs ++;
+		this.updateWindowTitle();
 	}
 
 }

@@ -72,7 +72,8 @@ public class TableDependency
 		String parentcatalog = parent.getCatalog();
 		String parentschema = parent.getSchema();
 		String parenttable = parent.getTable();
-		/*
+		
+		/* for debugging !
 		int indent = 0;
 		DependencyNode n = parent.getParent();
 		while (n != null)
@@ -83,6 +84,7 @@ public class TableDependency
 		StringBuffer indentString = new StringBuffer(indent * 2);
 		for (int i=0; i < indent; i++) indentString.append("  ");
 		*/
+		
 		try
 		{
 			ResultSet rs = null;

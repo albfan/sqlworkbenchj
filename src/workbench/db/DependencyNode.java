@@ -112,10 +112,10 @@ public class DependencyNode
 	public boolean isInParentTree(DependencyNode aNode)
 	{
 		if (aNode == null) return false;
-		DependencyNode parent = this.getParent();
+		DependencyNode parent = this;//.getParent();
 		while (parent != null)
 		{
-			if (this.table.equals(aNode.table)) return true;
+			if (parent.equals(aNode)) return true;
 			parent = parent.getParent();
 		}
 		return false;

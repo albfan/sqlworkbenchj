@@ -13,7 +13,7 @@
      <string>HSQLDB</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:hsqldb:(path to dababase file)</string>
+     <string>jdbc:hsqldb:full_path_to_database</string>
     </void>
    </object>
   </void>
@@ -29,7 +29,7 @@
      <string>iNet MS SQL Driver</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:inetdae:(servername):1433?database=(dbname)</string>
+     <string>jdbc:inetdae:servername:1433?database=name_of_database</string>
     </void>
    </object>
   </void>
@@ -45,23 +45,39 @@
      <string>Microsoft JDBC Driver</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:microsoft:sqlserver://(server):(port);DatabaseName=(dbname)</string>
+     <string>jdbc:microsoft:sqlserver://server:port;DatabaseName=name_of_database</string>
     </void>
    </object>
   </void>
+  <void method="add"> 
+   <object class="workbench.db.DbDriver"> 
+    <void property="driverClass"> 
+     <string>com.sybase.jdbc2.jdbc.SybDriver</string> 
+    </void> 
+    <void property="library"> 
+     <string>jconn2.jar</string> 
+    </void> 
+    <void property="name"> 
+     <string>Adaptive Server Anywhere</string> 
+    </void> 
+    <void property="sampleUrl"> 
+     <string>jdbc:sybase:Tds:machine-name:port-number</string> 
+    </void> 
+   </object> 
+  </void> 
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
      <string>com.mysql.jdbc.Driver</string>
     </void>
     <void property="library">
-     <string>mm.mysql-2.0.4-bin.jar</string>
+     <string>mysql-jdbc.jar</string>
     </void>
     <void property="name">
      <string>MySQL</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:mysql://&lt;HOST>:&lt;PORT>/&lt;DB></string>
+     <string>jdbc:mysql://hostname:port/name_of_database</string>
     </void>
    </object>
   </void>
@@ -77,7 +93,7 @@
      <string>Oracle</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:oracle:thin:@(host):(port):(sid)</string>
+     <string>jdbc:oracle:thin:@hostname:port:sid</string>
     </void>
    </object>
   </void>
@@ -93,7 +109,7 @@
      <string>ODBC Bridge</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:odbc:&lt;dsn name></string>
+     <string>jdbc:odbc:datasource_name_from_control_panel</string>
     </void>
    </object>
   </void>
@@ -109,7 +125,7 @@
      <string>Adabas</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:adabasd://&lt;server&gt;/&lt;database&gt;</string>
+     <string>jdbc:adabasd://server/name_of_database</string>
     </void>
    </object>
   </void>
@@ -125,7 +141,7 @@
      <string>PostgreSQL</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:postgresql://host:port/database</string>
+     <string>jdbc:postgresql://host:port/name_of_database</string>
     </void>
    </object>
   </void>
@@ -141,7 +157,7 @@
      <string>Firebird</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:firebirdsql://host:port/database</string>
+     <string>jdbc:firebirdsql://host:port/name_of_database</string>
     </void>
    </object>
   </void>
@@ -157,7 +173,7 @@
      <string>Access</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:odbc:DRIVER={Microsoft Access Driver (*.mdb)};DBQ=&lt;filename&gt;</string>
+     <string>jdbc:odbc:DRIVER={Microsoft Access Driver (*.mdb)};DBQ=full_pathname_to_mdb_file</string>
     </void>
    </object>
   </void>
@@ -173,7 +189,7 @@
      <string>dBase</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:odbc:DRIVER={Microsoft dBase Driver (*.dbf)};DefaultDir=(dbf directory)</string>
+     <string>jdbc:odbc:DRIVER={Microsoft dBase Driver (*.dbf)};DefaultDir=full_path_to_dir_with_dbf</string>
     </void>
    </object>
   </void>

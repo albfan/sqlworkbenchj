@@ -9,8 +9,8 @@ package workbench.db;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
+
 import workbench.exception.WbException;
-import workbench.storage.DataStore;
 
 /**
  *

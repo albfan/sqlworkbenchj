@@ -11,14 +11,18 @@ import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
-import workbench.WbManager;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+import workbench.WbManager;
 import workbench.exception.NoConnectionException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.WbPersistence;
-
 
 /**
  * @author  workbench@kellerer.org
@@ -66,12 +70,12 @@ public class ConnectionMgr
 		// established directly from the driver.
 		String drvClass = aProfile.getDriverclass();
 		String drvName = aProfile.getDriverName();
-		DbDriver drv = this.findDriver(drvClass, drvName);
+		DbDriver drv = this.findDriverByName(drvClass, drvName);
 		if (drv == null)
 		{
 			throw new NoConnectionException("Driver class not registered");
 		}
-		
+
 		try
 		{
 			Connection sql = drv.connect(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword(), anId, aProfile.getConnectionProperties());
@@ -123,18 +127,23 @@ public class ConnectionMgr
 		return null;
 	}
 
-	public DbDriver findDriver(String drvClassName, String aName)
+	public DbDriver findDriverByName(String drvClassName, String aName)
 	{
 		DbDriver firstMatch = null;
 		DbDriver db = null;
-		
+
 		if (aName == null || aName.length() == 0) return this.findDriver(drvClassName);
-		
+
+		LogMgr.logDebug("ConnectionMgr.findDriverByName()", "Searching for DriverClass=" + drvClassName + ",DriverName=" + aName);
+
 		for (int i=0; i < this.drivers.size(); i ++)
 		{
 			db = (DbDriver)this.drivers.get(i);
-			if (db.getDriverClass().equals(drvClassName)) 
+			if (db.getDriverClass().equals(drvClassName))
 			{
+				// if the classname and the driver name are the same return the driver immediately
+				// If we don't find a match for the name, we'll use
+				// the first match for the classname
 				if (db.getName().equals(aName)) return db;
 				if (firstMatch == null)
 				{
@@ -142,10 +151,11 @@ public class ConnectionMgr
 				}
 			}
 		}
-		
+		LogMgr.logWarning("ConnectionMgr.findDriverByName()", "Did not find driverclass with name="+ aName);
+
 		return firstMatch;
 	}
-	
+
 	public DbDriver findRegisteredDriver(String drvClassName)
 	{
 		if (this.drivers == null)
@@ -153,7 +163,7 @@ public class ConnectionMgr
 			this.readDrivers();
 		}
     DbDriver db = null;
-		
+
 
 		for (int i=0; i < this.drivers.size(); i ++)
 		{
@@ -162,13 +172,14 @@ public class ConnectionMgr
 		}
 		return null;
 	}
-	
+
 	public DbDriver findDriver(String drvClassName)
 	{
     DbDriver db = this.findRegisteredDriver(drvClassName);
 
 		if (db == null)
 		{
+			LogMgr.logWarning("ConnectionMgr.findDriver()", "Did not find a registered driver with classname = ["+drvClassName+"]");
 			try
 			{
 				// not found --> maybe it's present in the normal classpath...
@@ -179,7 +190,7 @@ public class ConnectionMgr
 			}
 			catch (Exception cnf)
 			{
-				LogMgr.logError("ConnectionMgr.findDriver()", "Error when searching for driver " + drvClassName, cnf);
+				LogMgr.logError("ConnectionMgr.findDriver()", "Error creating instance for driver class [" + drvClassName + "] ", cnf);
 				db = null;
 			}
 		}
@@ -189,11 +200,11 @@ public class ConnectionMgr
 	public void registerDriver(String drvClassName, String jarFile)
 	{
 		if (this.drivers == null) this.readDrivers();
-		
+
 		DbDriver drv = new DbDriver("JdbcDriver", drvClassName, jarFile);
 		this.drivers.add(drv);
 	}
-	
+
 	/**
 	 *	Returns a List of registered drivers.
 	 *	This list is read from WbDrivers.xml
@@ -322,7 +333,7 @@ public class ConnectionMgr
 
 			if (con != null)
 			{
-				LogMgr.logDebug("ConnectionMgr.disconnect()", "Disconnecting: " + con.getProfile().getName() + " with ID=" + anId);
+				LogMgr.logInfo("ConnectionMgr.disconnect()", "Disconnecting: " + con.getProfile().getName() + " with ID=" + anId);
 				this.disconnectLocalHsql(con);
 				con.close();
 			}
@@ -336,17 +347,17 @@ public class ConnectionMgr
 
 	/**
 	 *	Disconnects a local HSQL connection. Beginning with 1.7.2 the local
-	 *  (=in process) engine should be closed down with SHUTDOWN when 
+	 *  (=in process) engine should be closed down with SHUTDOWN when
 	 *  disconnecting. It shouldn't hurt for pre-1.7.2 either :-)
 	 */
 	private void disconnectLocalHsql(WbConnection con)
 	{
 		String url = con.getUrl();
 		if (!url.startsWith("jdbc:hsqldb")) return;
-		
+
 		// this is a HSQL server connection. Do not shut down this!
 		if (url.startsWith("jdbc:hsqldb:hsql:")) return;
-		
+
 		try
 		{
 			Statement stmt = con.createStatement();
@@ -356,7 +367,7 @@ public class ConnectionMgr
 		{
 			LogMgr.logWarning("ConnectionMgr.disconnectLocalHsql()", "Error when executing SHUTDOWN", e);
 		}
-		
+
 	}
 	public String toString()
 	{
@@ -393,26 +404,28 @@ public class ConnectionMgr
 			LogMgr.logWarning(this, "Could not load driver definitions!", e);
 			this.drivers = new ArrayList();
 		}
-		if (this.readTemplates) 
+		if (this.readTemplates)
 		{
 			this.importTemplateDrivers();
 		}
 	}
 
 	public void setReadTemplates(boolean aFlag) { this.readTemplates = aFlag; }
-	
+
 	private void importTemplateDrivers()
 	{
 		if (this.templatesImported) return;
-		
+
 		if (this.drivers == null) this.readDrivers();
-		
+
 		// now read the templates and append them to the driver list
 		InputStream in = null;
 		try
 		{
 			in = this.getClass().getResourceAsStream("DriverTemplates.xml");
-			ArrayList templates = (ArrayList)WbPersistence.readObject(in);
+			// the additional filename is for logging purposes only
+			ArrayList templates = (ArrayList)WbPersistence.readObject(in, "DriverTemplates.xml");
+
 			for (int i=0; i < templates.size(); i++)
 			{
 				Object drv = templates.get(i);
@@ -432,6 +445,7 @@ public class ConnectionMgr
 		}
 		this.templatesImported = true;
 	}
+
 	public void readProfiles()
 	{
 		Object result = WbPersistence.readObject(WbManager.getSettings().getProfileFileName());

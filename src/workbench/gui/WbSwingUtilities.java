@@ -1,14 +1,25 @@
 package workbench.gui;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.Window;
+
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
-
 import javax.swing.JTextField;
+import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.ColorUIResource;
 
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.resource.ResourceMgr;
@@ -170,6 +181,12 @@ public class WbSwingUtilities
 		return (result == JOptionPane.YES_OPTION);
 	}
 	
+	public static int getYesNoCancel(Component aCaller, String aMessage)
+	{
+		int result = JOptionPane.showConfirmDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+		return result;
+	}
+	
 	public static final int IGNORE_ALL = JOptionPane.YES_OPTION + JOptionPane.NO_OPTION + JOptionPane.CANCEL_OPTION + 1;
 	
 	public static int getYesNoIgnoreAll(Component aCaller, String aMessage)
@@ -230,4 +247,5 @@ public class WbSwingUtilities
 		String value = input.getText();
 		return value;
 	}
+	
 }

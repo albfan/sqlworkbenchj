@@ -3,44 +3,20 @@
  */
 package workbench.db;
 
-import java.awt.EventQueue;
-import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.FieldPosition;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 import javax.swing.JFrame;
 
-import workbench.WbManager;
 import workbench.exception.WbException;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.dbobjects.ProgressPanel;
 import workbench.interfaces.Interruptable;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.storage.DataStore;
-import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 
 
 /**

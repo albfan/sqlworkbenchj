@@ -439,7 +439,25 @@ public class GetMetaDataSql
 
 	public static void createTriggerSourceStatements()
 	{
-		GetMetaDataSql pgTrgSource = new GetMetaDataSql();
+		HashMap trgSrcStatements = new HashMap();
+		GetMetaDataSql asaSource = new GetMetaDataSql();
+		asaSource.setBaseSql("select syscomments.text  \n" + 
+           " from sysobjects, syscomments  \n" + 
+           " where sysobjects.id = syscomments.id  \n" + 
+           "and  sysobjects.type = 'TR'");
+		asaSource.setObjectNameField("sysobjects.name");
+		asaSource.setOrderBy(" order by 1");
+
+		GetMetaDataSql oraTrigSrc = new GetMetaDataSql();
+		oraTrigSrc.setUseUpperCase(true);
+		oraTrigSrc.setBaseSql("SELECT 'CREATE OR REPLACE TRIGGER '|| description, trigger_body FROM all_triggers");
+		oraTrigSrc.setCatalogField(null);
+		oraTrigSrc.setObjectNameField("trigger_name");
+		oraTrigSrc.setSchemaField("owner");
+		
+		trgSrcStatements.put("Adaptive Server Anywhere", asaSource);
+		trgSrcStatements.put("Oracle", oraTrigSrc);
+		WbPersistence.writeObject(trgSrcStatements, "d:/temp/TriggerSourceStatements.xml");
 	}
 	
 	public static void createListTriggerStatements()
@@ -497,12 +515,18 @@ public class GetMetaDataSql
 		hsql.setObjectNameField("table_name");
 		hsql.setOrderBy("trigger_name");
 		
+		GetMetaDataSql asa = new GetMetaDataSql();
+		asa.setBaseSql("select trigname as trigger_name, trigtime as trigger_type, event from systriggers");
+		asa.setObjectNameField("tname");
+		asa.setOrderBy("trigger_name");
+		
 		HashMap trgStatements = new HashMap();
 		trgStatements.put("Oracle", listOraTrigs);
 		trgStatements.put("Oracle8", listOraTrigs);
 		trgStatements.put("PostgreSQL", listPostgresTrigs);
 		trgStatements.put("Microsoft SQL Server", listMsSqlTrigs);
 		trgStatements.put("HSQL Database Engine", hsql);
+		trgStatements.put("Adaptive Server Anywhere", asa);
 		
 		WbPersistence.writeObject(trgStatements, "d:/temp/ListTriggersStatements.xml");
 	}
@@ -531,11 +555,20 @@ public class GetMetaDataSql
 		mss.setObjectNameArgumentPos(1);
 		mss.setIsProcedureCall(true);
 		
+		GetMetaDataSql asa = new GetMetaDataSql();
+		asa.setBaseSql("select viewtext from sysviews");
+		asa.setUseUpperCase(true);
+		asa.setObjectNameField("viewname");
+		asa.setCatalogField(null);
+		asa.setSchemaField("vcreator");
+		
+		
 		HashMap viewStatements = new HashMap();
 		viewStatements.put("Oracle", ora);
 		viewStatements.put("Microsoft SQL Server", mss);
 		viewStatements.put("HSQLDB Database Engine", hsql);
-		WbPersistence.writeObject(viewStatements, "d:/temp/test.xml");
+		viewStatements.put("Adaptive Server Anywhere", asa);
+		WbPersistence.writeObject(viewStatements, "d:/temp/ViewSourceStatements.xml");
 	}
 	public static void createDefaultStatements()
 	{
@@ -560,24 +593,14 @@ public class GetMetaDataSql
 		procStatements.put("Oracle", oracleProc);
 		procStatements.put("Microsoft SQL Server", mssProc);
 		WbPersistence.writeObject(procStatements, "ProcSourceStatements.xml");
-		
-		GetMetaDataSql oraTrigSrc = new GetMetaDataSql();
-		oraTrigSrc.setUseUpperCase(true);
-		oraTrigSrc.setBaseSql("SELECT 'CREATE OR REPLACE TRIGGER '|| description, trigger_body FROM all_triggers");
-		oraTrigSrc.setCatalogField(null);
-		oraTrigSrc.setObjectNameField("trigger_name");
-		oraTrigSrc.setSchemaField("owner");
-		
-		HashMap trgSrcStatements = new HashMap();
-		trgSrcStatements.put("Oracle", oraTrigSrc);
-		WbPersistence.writeObject(trgSrcStatements, "TriggerSourceStatements.xml");
 	}
 
 	public static void main(String args[])
 	{
 		//createDefaultStatements();
-		createListTriggerStatements();
-		//createViewStatements();
+		//createListTriggerStatements();
+		createViewStatements();
+		createTriggerSourceStatements();
 		System.out.println("Done.");
 	}
 	

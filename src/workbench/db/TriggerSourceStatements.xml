@@ -125,6 +125,23 @@ where trg.tgrelid = tbl.oid
    </object> 
   </void> 
   <void method="put"> 
+   <string>Adaptive Server Anywhere</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>select syscomments.text  
+ from sysobjects, syscomments  
+ where sysobjects.id = syscomments.id  
+and  sysobjects.type = &apos;TR&apos;</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>sysobjects.name</string> 
+    </void> 
+    <void property="orderBy"> 
+     <string> order by syscomments.colid</string> 
+    </void> 
+   </object> 
+  </void> 
+  <void method="put"> 
    <string>Firebird</string> 
    <object class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 

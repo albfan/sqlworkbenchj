@@ -14,10 +14,9 @@ import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
+
 import workbench.WbManager;
 import workbench.exception.WbException;
 import workbench.log.LogMgr;
@@ -211,7 +210,9 @@ public class DbDriver
 			}
 
 			// identify the program name when connecting
-			// this is different for each DBMS...
+			// this is different for each DBMS.
+			// If nothing is specified, Oracle would only list "JDBC Thin Driver"
+			// as the client program, which isn't very nice.
 			String propName = null;
 			if (url.startsWith("jdbc:oracle"))
 			{
@@ -231,10 +232,11 @@ public class DbDriver
 				propName = "ProgramName";
 			}
 
-			if (propName != null)
+			if (propName != null && !props.containsKey(propName))
 			{
 				String appName = ResourceMgr.TXT_PRODUCT_NAME;
-				if (LogMgr.isDebug())
+
+				if (WbManager.getSettings().getShowBuildInConnectionId())
 				{
 					String build = ResourceMgr.getString("TxtBuildNumber");
 					if (build.startsWith("["))
@@ -243,10 +245,11 @@ public class DbDriver
 					}
 					else
 					{
-						appName = appName + " (" + build + ")";
+						appName = appName + " (B" + build + ")";
 					}
 				}
-				props.put(propName, appName); 
+
+				props.put(propName, appName);
 			}
 
 			c = this.driverClassInstance.connect(url, props);

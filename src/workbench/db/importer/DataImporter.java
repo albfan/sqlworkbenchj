@@ -3,47 +3,18 @@
  */
 package workbench.db.importer;
 
-import java.awt.EventQueue;
-import java.awt.Window;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.FieldPosition;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import javax.swing.JFrame;
-
-import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
-import workbench.exception.WbException;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.ExtensionFileFilter;
-import workbench.gui.dbobjects.ProgressPanel;
 import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.storage.DataStore;
-import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
+import workbench.storage.RowActionMonitor;
 
 
 /**
@@ -56,10 +27,11 @@ public class DataImporter
 	public static final int IMPORT_XML = 1;
 	public static final int IMPORT_TXT = 2;
 	
-	private Connection dbConn;
+	private WbConnection dbConn;
 	private String sql;
 	private String fullInputFileName;
 	private String inputFile;
+	private String encoding = "UTF-8";
 	
 	private int importType;
 	private String tableName;
@@ -77,9 +49,6 @@ public class DataImporter
 	private int commitEvery=0;
 	private int colCount;
 	
-	private boolean showProgress = false;
-	private ProgressPanel progressPanel;
-	private JFrame progressWindow;
 	private boolean keepRunning = true;
 
 	private boolean success = false;
@@ -89,43 +58,22 @@ public class DataImporter
 	private long totalRows = 0;
 	private int currentImportRow = 0;
 	
+	private List columns;
+	
 	private ArrayList warnings = new ArrayList();
 	private ArrayList errors = new ArrayList();
+	private int[] columnTypes = null;
+	
+	private XmlDataFileParser xmlParser;
+	private TextFileParser textParser;
+	
+	private RowActionMonitor progressMonitor;
 	
 	public DataImporter()
 	{
 	}
 
-	/**
-	 *	Open the progress monitor window.
-	 */
-	private void openProgressMonitor()
-	{
-		File f = new File(this.inputFile);
-		String fname = f.getName();
-		
-		progressPanel = new ProgressPanel(this);
-		this.progressPanel.setFilename(this.inputFile);
-		this.progressPanel.setInfoText(ResourceMgr.getString("MsgImportingRecord"));
-	
-		this.progressWindow = new JFrame();
-		this.progressWindow.getContentPane().add(progressPanel);
-		this.progressWindow.pack();
-		this.progressWindow.setTitle(ResourceMgr.getString("MsgImportWindowTitle"));
-		this.progressWindow.setIconImage(ResourceMgr.getPicture("ImportData16").getImage());
-		this.progressWindow.addWindowListener(new WindowAdapter()
-		{
-			public void windowClosing(WindowEvent e)
-			{
-				keepRunning = false;
-			}
-		});
-		
-		WbSwingUtilities.center(this.progressWindow, null);
-		this.progressWindow.show();
-	}
-
-	public void setConnection(Connection aConn)
+	public void setConnection(WbConnection aConn)
 	{
 		this.dbConn = aConn;
 	}
@@ -135,14 +83,34 @@ public class DataImporter
 		this.tableName = aTablename;
 	}
 
+	public void setEncoding(String anEncoding) 
+	{ 
+		if (anEncoding != null)
+		{
+			this.encoding = anEncoding; 
+		}
+	}
+	
+	public void setRowActionMonitor(RowActionMonitor rowMonitor)
+	{
+		this.progressMonitor = rowMonitor;
+		if (this.progressMonitor != null)
+		{
+			this.progressMonitor.setMonitorType(RowActionMonitor.MONITOR_INSERT);
+		}
+	}
+	
 	public void setCommitEvery(int aCount) { this.commitEvery = aCount; }
 	public int getCommitEvery() { return this.commitEvery; }
 	
-	public void setShowProgress(boolean aFlag) { this.showProgress = aFlag; }
-	public boolean getShowProgress() { return this.showProgress; }
-
 	public void setTargetTable(String tableName) { this.targetTable = tableName; }
 	public String getTargetTable() { return this.targetTable; }
+
+	/**
+	 *	Define the columns for a text file import.
+	 *	This is ignored when a an XML import is done.
+	 */
+	public void setTextFileColumns(List aColumnList) { this.columns = aColumnList; }
 	
 	public void setTextDelimiter(String aDelimiter) { this.delimiter = aDelimiter; }
 	public String getTextDelimiter() { return this.delimiter; }
@@ -180,7 +148,7 @@ public class DataImporter
 		this.decimalSymbol = aSymbol.charAt(0);
 	}
 	
-	private void startBackgroundThread()
+	public void startBackgroundImport()
 	{
 		Thread t = new Thread()
 		{
@@ -189,6 +157,8 @@ public class DataImporter
 				try { startImport(); } catch (Throwable th) {}
 			}
 		};
+		t.setDaemon(true);
+		t.setName("Wb-Import Thread");
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
 	}
@@ -196,9 +166,39 @@ public class DataImporter
 	public void startImport()
 		throws IOException, SQLException, Exception
 	{
-		if (this.importType == this.IMPORT_XML)
+		if (this.importType == IMPORT_XML)
 		{
 			this.importXml();
+		}
+		else
+		{
+			this.importText();
+		}
+	}
+	
+	private void importText()
+		throws Exception
+	{
+		try
+		{
+			this.textParser = new TextFileParser(this.inputFile);
+			this.textParser.setEncoding(this.encoding);
+			this.textParser.setTableName(this.tableName);
+			this.textParser.setConnection(this.dbConn);
+			this.textParser.setContainsHeader(this.textWithHeaders);
+			this.textParser.setDelimiter(this.delimiter);
+			this.textParser.setQuoteChar(this.quoteChar);
+			this.textParser.setColumns(this.columns);
+			this.textParser.setDateFormat(this.dateFormat);
+			this.textParser.setTimeStampFormat(this.dateTimeFormat);
+			
+			this.textParser.setReceiver(this);
+			this.textParser.parse();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DataImporter.importText()", "Error when importing", e);
+			throw e;
 		}
 	}
 	
@@ -207,13 +207,22 @@ public class DataImporter
 	{
 		try
 		{
-			XmlDataFileParser parser = new XmlDataFileParser(this.inputFile);
-			parser.setRowDataReceiver(this);
-			parser.parse();
+			this.xmlParser = new XmlDataFileParser(this.inputFile);
+			this.xmlParser.setEncoding(this.encoding);
+			if (this.tableName != null)
+			{
+				this.xmlParser.setTableName(this.tableName);
+			}
+			this.xmlParser.setRowDataReceiver(this);
+			this.xmlParser.parse();
 		}
 		catch (IOException e)
 		{
 			throw e;
+		}
+		catch (ParsingInterruptedException i)
+		{
+			LogMgr.logDebug("DataImporter.importXml()", "Import cancelled");
 		}
 		catch (Exception e)
 		{
@@ -248,19 +257,18 @@ public class DataImporter
 		return result;
 	}
 	
-	public void closeProgress()
-	{
-		if (this.progressWindow != null)
-		{
-			this.progressWindow.hide();
-			this.progressWindow.dispose();
-			this.progressPanel = null;
-		}
-	}
-
 	public void cancelExecution()
 	{
 		this.keepRunning = false;
+		if (this.xmlParser != null)
+		{
+			this.xmlParser.cancel();
+		}
+		else if (this.textParser != null)
+		{
+			this.textParser.cancel();
+		}
+		this.warnings.add(ResourceMgr.getString("MsgImportCancelled"));
 	}
 
 	/**
@@ -276,13 +284,17 @@ public class DataImporter
 		{
 			currentImportRow++;
 			this.updateStatement.clearParameters();
+			if (this.progressMonitor != null)
+			{		
+				progressMonitor.setCurrentRow(currentImportRow, -1);
+			}
 
 			for (int i=0; i < row.length; i++)
 			{
 				if (i > 0) values.append(",");
 				if (row[i] == null)
 				{
-					this.updateStatement.setNull(i + 1, Types.OTHER);
+					this.updateStatement.setNull(i + 1, this.columnTypes[i]);
 					values.append("NULL");
 				}
 				else
@@ -308,6 +320,7 @@ public class DataImporter
 		{
 			try
 			{
+				LogMgr.logDebug("DataImporter.processRow()", "Committing changes (commitEvery=" + this.commitEvery + ")");
 				this.dbConn.commit();
 			}
 			catch (SQLException e)
@@ -321,9 +334,9 @@ public class DataImporter
 	}
 
 	/**
-	 *	Callback function from the import file reader/parser 
+	 *	Callback function from the import file parser 
 	 */
-	public void setTargetTable(String tableName, String[] columns)
+	public void setTargetTable(String tableName, String[] columns, int[] colTypes)
 	{
 		StringBuffer text = new StringBuffer(columns.length * 50);
 		StringBuffer parms = new StringBuffer(columns.length * 20);
@@ -332,6 +345,7 @@ public class DataImporter
 		text.append(tableName);
 		text.append(" (");
 		this.colCount = columns.length;
+		this.columnTypes = colTypes;
 		for (int i=0; i < columns.length; i++)
 		{
 			if (i > 0) 
@@ -348,7 +362,7 @@ public class DataImporter
 		try
 		{
 			this.sql = text.toString();
-			this.updateStatement = this.dbConn.prepareStatement(this.sql);
+			this.updateStatement = this.dbConn.getSqlConnection().prepareStatement(this.sql);
 		}
 		catch (Exception e)
 		{
@@ -361,12 +375,28 @@ public class DataImporter
 	{
 		try
 		{
+			LogMgr.logDebug("DataImporter.importFinished()", "Committing changes");
 			this.dbConn.commit();
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("DataImporter.importFinished()", "Error commiting changes", e);
+			this.errors.add(ExceptionUtil.getDisplay(e));
 		}
 	}	
 
+	public void importCancelled()
+	{
+		try
+		{
+			LogMgr.logDebug("DataImporter.importCancelled()", "Rollback changes");
+			this.dbConn.rollback();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DataImporter.importCancelled()", "Error on rollback", e);
+			this.errors.add(ExceptionUtil.getDisplay(e));
+		}
+	}
+	
 }

@@ -137,7 +137,7 @@ public class WbConnection
 				// warnings is defined as public and thus we can 
 				// reset the warnings there
 				// this is done via reflection so that the Oracle driver 
-				// does not need to be present.
+				// does not need to be present when compiling
 				
 				if (this.clearSettings == null || dbAccess == null)
 				{
@@ -151,9 +151,9 @@ public class WbConnection
 						clearSettings = dbAccessClass.getDeclaredMethod("setWarnings", new Class[] {SQLWarning.class} );
 					}
 				}
-				// this is equivalent to 
-				// OracleConnection con = (OracleConnection)this.sqlConnection;
-				// con.db_access.setWarnings(null);
+				// the following line is equivalent to: 
+				//   OracleConnection con = (OracleConnection)this.sqlConnection;
+				//   con.db_access.setWarnings(null);
 				clearSettings.invoke(dbAccess, new Object[] { null });
 			}
 		}

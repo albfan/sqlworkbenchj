@@ -21,6 +21,20 @@
     </void>
    </object>
   </void>
+  <void method="put"> 
+   <string>Adaptive Server Anywhere</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>select trigname as trigger_name, trigtime as trigger_type, event from systriggers</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>tname</string> 
+    </void> 
+    <void property="orderBy"> 
+     <string>ORDER BY trigger_name</string> 
+    </void> 
+   </object> 
+  </void> 
   <void method="put">
    <string>Oracle8</string>
    <object class="workbench.db.GetMetaDataSql">

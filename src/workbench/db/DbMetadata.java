@@ -7,7 +7,7 @@
 package workbench.db;
 
 import java.io.BufferedInputStream;
-import java.io.FileWriter;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -209,24 +209,40 @@ public class DbMetadata
 		HashMap result = null;
 
 		BufferedInputStream in = new BufferedInputStream(this.getClass().getResourceAsStream(aFilename));
-		Object value = WbPersistence.readObject(in);
+		Object value;
+		try
+		{
+			// filename is for logging purposes only
+			value = WbPersistence.readObject(in, aFilename);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DbMetadata.readStatementTemplate()", "Error reading templates file " + aFilename,e);
+			value = null;
+		}
+		
 		if (value != null && value instanceof HashMap)
 		{
 			result = (HashMap)value;
 		}
 
-		// try to read additional definitions from local file
-		value = WbPersistence.readObject(aFilename);
-		if (value != null && value instanceof HashMap)
-		{
-			HashMap m = (HashMap)value;
-			if (result != null)
+		File f = new File(aFilename);
+		if (f.exists())
+		{	
+			LogMgr.logInfo("DbMetadata.readStatementTemplates()", "Reading user define template file " + aFilename);
+			// try to read additional definitions from local file
+			value = WbPersistence.readObject(aFilename);
+			if (value != null && value instanceof HashMap)
 			{
-				result.putAll(m);
-			}
-			else
-			{
-				result = m;
+				HashMap m = (HashMap)value;
+				if (result != null)
+				{
+					result.putAll(m);
+				}
+				else
+				{
+					result = m;
+				}
 			}
 		}
 		return result;
@@ -350,9 +366,9 @@ public class DbMetadata
 			sql.setCatalog(aCatalog);
 			Statement stmt = this.dbConnection.getSqlConnection().createStatement();
 			String query = sql.getSql();
-			if ("true".equals(WbManager.getSettings().getProperty("workbench.dbmetadata", "logsql", "false")))
+			if (WbManager.getSettings().getDebugMetadataSql())
 			{
-				LogMgr.logInfo("DbMetadata.getViewSource()", "Using query=\n" + query);
+				LogMgr.logInfo("DbMetadata.getTableTriggers()", "Using query=\n" + query);
 			}
 			ResultSet rs = stmt.executeQuery(query);
 			while (rs.next())
@@ -1323,7 +1339,7 @@ public class DbMetadata
 		sql.setObjectName(aTable);
 		Statement stmt = this.dbConnection.getSqlConnection().createStatement();
 		String query = sql.getSql();
-		if ("true".equals(WbManager.getSettings().getProperty("workbench.dbmetadata", "debugmetasql", "false")))
+		if (WbManager.getSettings().getDebugMetadataSql())
 		{
 			LogMgr.logInfo("DbMetadata.getTableTriggers()", "Using query=\n" + query);
 		}
@@ -1366,12 +1382,14 @@ public class DbMetadata
 		aTriggername = this.adjustObjectname(aTriggername);
 
 		GetMetaDataSql sql = (GetMetaDataSql)this.triggerSourceSql.get(this.productName);
+		if (sql == null) return "";
+		
 		sql.setSchema(aSchema);
 		sql.setCatalog(aCatalog);
 		sql.setObjectName(aTriggername);
 		Statement stmt = this.dbConnection.getSqlConnection().createStatement();
 		String query = sql.getSql();
-		if ("true".equals(WbManager.getSettings().getProperty("workbench.dbmetadata", "debugmetasql", "false")))
+		if (WbManager.getSettings().getDebugMetadataSql())
 		{
 			LogMgr.logInfo("DbMetadata.getTriggerSource()", "Using query=\n" + query);
 		}
@@ -1884,11 +1902,19 @@ public class DbMetadata
 			for (int k=0; k < maxColLength - colName.length(); k++) result.append(' ');
 			result.append(type);
 			for (int k=0; k < maxTypeLength - type.length(); k++) result.append(' ');
+			
+			// Oracle needs the default value before the NULL/NOT NULL qualifier
+			if (this.isOracle && def != null && def.length() > 0)
+			{
+				result.append(" DEFAULT ");
+				result.append(def.trim());
+			}
 			if ("YES".equals(nul))
 				result.append(" NULL");
 			else
 				result.append(" NOT NULL");
-			if (def != null && def.length() > 0)
+			
+			if (!this.isOracle && def != null && def.length() > 0)
 			{
 				result.append(" DEFAULT ");
 				result.append(def.trim());

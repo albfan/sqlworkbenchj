@@ -5,9 +5,10 @@
  */
 package workbench.exception;
 
-import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.SQLException;
+
 import workbench.log.LogMgr;
 
 /**

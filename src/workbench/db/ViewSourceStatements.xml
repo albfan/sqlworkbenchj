@@ -74,5 +74,23 @@
     </void> 
    </object> 
   </void> 
+  <void method="put"> 
+   <string>Adaptive Server Anywhere</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>select viewtext from sysviews</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>viewname</string> 
+    </void> 
+    <void property="schemaField"> 
+     <string>vcreator</string> 
+    </void> 
+    <void property="useUpperCase"> 
+     <boolean>true</boolean> 
+    </void> 
+   </object> 
+  </void> 
+  
  </object> 
 </java> 

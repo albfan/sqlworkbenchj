@@ -12,11 +12,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import javax.swing.*;
-import javax.swing.BorderFactory;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -29,6 +24,7 @@ import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.resource.ShortcutManager;
 import workbench.sql.BatchRunner;
 import workbench.sql.MacroManager;
 import workbench.util.ArgumentParser;
@@ -41,7 +37,9 @@ import workbench.util.WbNullCipher;
  * The main application "controller" for the jWorkbench
  * @author  workbench@kellerer.org
  */
-public class WbManager implements FontChangedListener
+public class WbManager 
+	implements FontChangedListener, Runnable
+	
 {
 	private static final String CONFIG_DIR_KEY = "%ConfigDir%/";
 	private static WbManager wb;
@@ -53,10 +51,13 @@ public class WbManager implements FontChangedListener
 	public static boolean trace = "true".equalsIgnoreCase(System.getProperty("workbench.startuptrace", "false"));
 	private HtmlViewer helpWindow;
 
+	private Thread shutdownHook = new Thread(this);
+	
 	static
 	{
 		wb = new WbManager();
 		wb.connMgr = new ConnectionMgr();
+		Runtime.getRuntime().addShutdownHook(wb.shutdownHook);
 	}
 
 	private WbManager()
@@ -98,6 +99,11 @@ public class WbManager implements FontChangedListener
 	public static Settings getSettings()
 	{
 		return wb.settings;
+	}
+	
+	public static ShortcutManager getShortcutManager()
+	{
+		return wb.settings.getShortcutManager();
 	}
 
 	public ConnectionMgr getConnectionMgr()
@@ -268,9 +274,10 @@ public class WbManager implements FontChangedListener
 		}
 		catch (Exception e)
 		{
-			LogMgr.logInfo("Settings.setLookAndFeel()", "Could not set look and feel", e);
+			LogMgr.logWarning("Settings.setLookAndFeel()", "Could not set look and feel", e);
 		}
-
+		
+		
 		try
 		{
 			Toolkit.getDefaultToolkit().setDynamicLayout(settings.getUseDynamicLayout());
@@ -326,14 +333,13 @@ public class WbManager implements FontChangedListener
 		LookAndFeel lnf = UIManager.getLookAndFeel();
 		String lnfClass = lnf.getClass().getName();
 
-		if (lnfClass.equals("javax.swing.plaf.metal.MetalLookAndFeel") ||
-		    lnfClass.equals("com.sun.java.swing.plaf.windows.WindowsLookAndFeel") ||
-		    lnfClass.equals("com.sun.java.swing.plaf.motif.MotifLookAndFeel"))
-		{
-			def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
-			def.put("SplitPaneUI", "com.sun.java.swing.plaf.windows.WindowsSplitPaneUI");
-		}
-
+		// Polish up the standard look & feel settings
+		def.put("Table.gridColor", Color.LIGHT_GRAY);
+		
+		// use our own classes for some GUI elements
+		def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
+		def.put("SplitPaneUI", "com.sun.java.swing.plaf.windows.WindowsSplitPaneUI");
+		
 		if (settings.getShowMnemonics())
 		{
 			def.put("Button.showMnemonics", Boolean.TRUE);
@@ -363,24 +369,32 @@ public class WbManager implements FontChangedListener
 
 	private JDialog closeMessage;
 	
+	private boolean saveSettings()
+	{
+		MainWindow w = this.getCurrentWindow();
+		if (w == null) return true;
+		w.saveSettings();
+		w.saveWorkspace();
+		
+		if (w.isBusy())
+		{
+			if (!this.checkAbort(w)) return false;
+		}
+		if (!this.checkProfiles(w)) return false;
+		return true;
+	}
+	
 	public void exitWorkbench()
 	{
 		//boolean first = true;
 		if (!this.batchMode)
 		{
 			MainWindow w = this.getCurrentWindow();
-
-			if (w.isBusy())
-			{
-				if (!this.checkAbort(w)) return;
-			}
-			if (!this.checkProfiles(w)) return;
-			w.saveSettings();
-			w.saveWorkspace();
-			
+			boolean canExit = this.saveSettings();
+			if (!canExit) return;
 			
 			// When disconnecting it can happen that the disconnect itself
-			// takes several minutes. Because of this, a small window is displayed
+			// takes some time. Because of this, a small window is displayed
 			// that the disconnect takes place, and the actual disconnect is
 			// carried out in a different thread to not block the AWT thread.
 			
@@ -510,6 +524,7 @@ public class WbManager implements FontChangedListener
 	{
 		LogMgr.logInfo("WbManager.doShutdown()", "Stopping " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
 		LogMgr.shutdown();
+		Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
 		System.exit(0);
 	}
 	
@@ -576,7 +591,7 @@ public class WbManager implements FontChangedListener
 				{
 					// no need to do the disconnect on the window in its
 					// own thread as we are already in a background thread
-					win.disconnect(false);
+					win.disconnect(false, false);
 					win.hide();
 					win.dispose();
 				}
@@ -715,7 +730,8 @@ public class WbManager implements FontChangedListener
 		if (trace) System.out.println("WbManager.init() - start");
 		this.initSettings();
 		LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
-		LogMgr.logDebug("WbManager.init()", "Use -Jworkbench.startuptrace=true to display trace messages during startup");
+		LogMgr.logInfo("WbManager.init()", "Using Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") );
+		LogMgr.logDebug("WbManager.init()", "Use -Dworkbench.startuptrace=true to display trace messages during startup");
 		if (!this.batchMode)
 		{
 			WbSplash splash = null;
@@ -836,4 +852,14 @@ public class WbManager implements FontChangedListener
 		wb.init();
 		if (trace) System.out.println("WbManager.main() - done");
 	}
+	
+	/**
+	 *  this is only to support the thread for the shutdownhook
+	 */
+	public void run()
+	{
+		LogMgr.logDebug("WbManager.run()", "Shutdownhook activated!");
+		this.saveSettings();
+	}
+	
 }

@@ -10,11 +10,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.ActionMap;
-import javax.swing.ComponentInputMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
-import workbench.WbManager;
 
+import workbench.WbManager;
 import workbench.gui.actions.EscAction;
 import workbench.resource.ResourceMgr;
 import workbench.util.BrowserLauncher;

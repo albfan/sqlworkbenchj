@@ -3,17 +3,16 @@
  */
 package workbench.db;
 
-import java.awt.EventQueue;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -39,6 +38,7 @@ import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -65,6 +65,7 @@ public class DataSpooler
 	private boolean includeCreateTable = false;
 	private boolean headerOnly = false;
 	private String tableName;
+	private String encoding = "UTF-8";
 	
 	private String delimiter = "\t";
 	private String quoteChar = null;
@@ -87,7 +88,7 @@ public class DataSpooler
 	private boolean keepRunning = true;
 
 	private boolean jobsRunning = false;
-	
+	private RowActionMonitor rowMonitor;
 
 	private boolean success = false;
 	private boolean hasWarning = false;
@@ -156,6 +157,16 @@ public class DataSpooler
 		this.tableName = aTablename;
 	}
 
+	public void setXmlEncoding(String enc) { this.encoding = enc; }
+	public void setRowMonitor(RowActionMonitor monitor)
+	{
+		this.rowMonitor = monitor;
+		if (this.rowMonitor != null)
+		{
+			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
+		}
+	}
+	
 	public void setExportHeaderOnly(boolean aFlag) { this.headerOnly = aFlag; }
 	public boolean getExportHeaderOnly() { return this.headerOnly; }
 	public void setCommitEvery(int aCount) { this.commitEvery = aCount; }
@@ -348,7 +359,7 @@ public class DataSpooler
 		throws IOException, SQLException, WbException
 	{
 		int interval = 1;
-		long currentRow = 0;
+		int currentRow = 0;
 		
 		this.warnings.clear();
 		this.errors.clear();
@@ -462,7 +473,15 @@ public class DataSpooler
 	
 			File f = new File(this.outputfile);
 			this.fullOutputFileName = f.getAbsolutePath();
-			pw = new BufferedWriter(new FileWriter(f), 16*1024);
+			if (this.exportType == EXPORT_XML)
+			{
+				OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(f), this.encoding);
+				pw = new BufferedWriter(out);
+			}
+			else
+			{
+				pw = new BufferedWriter(new FileWriter(f), 16*1024);
+			}
 			
 			if (exportType == EXPORT_TXT && exportHeaders)
 			{
@@ -492,7 +511,7 @@ public class DataSpooler
 			}
 			else if (this.exportType == EXPORT_XML)
 			{
-				pw.write(ds.getXmlStart().toString());
+				pw.write(ds.getXmlStart(this.encoding).toString());
 			}
 			
 			FieldPosition position = new FieldPosition(0);
@@ -503,6 +522,10 @@ public class DataSpooler
 				if (showProgress)
 				{
 					progressPanel.setRowInfo(currentRow);
+				}
+				if (this.rowMonitor != null)
+				{
+					this.rowMonitor.setCurrentRow(currentRow, -1);
 				}
 
 				if (this.exportType == EXPORT_SQL)
