@@ -40,7 +40,8 @@ import workbench.resource.Settings;
  *
  * @author  workbench@kellerer.org
  */
-public class ProfileSelectionDialog extends JDialog implements ActionListener, WindowListener
+public class ProfileSelectionDialog 
+	extends JDialog implements ActionListener, WindowListener
 {
   private JPanel buttonPanel;
   private JButton okButton;

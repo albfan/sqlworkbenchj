@@ -299,6 +299,7 @@ public class MainWindow
 		action = new FileExitAction();
 		menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_FILE);
 		menu.addSeparator();
+		menu.add(new ManageMacrosAction(this));
 		menu.add(new ManageDriversAction(this));
 		menu.addSeparator();
 		menu.add(action.getMenuItem());

@@ -329,11 +329,11 @@ public class DataSpooler
 	 *	The data will be "piped" through a DataStore in order to use 
 	 *	the SQL scripting built into that object.
 	 */
-	public void startExport(ResultSet rs)
+	public long startExport(ResultSet rs)
 		throws IOException, SQLException, WbException
 	{
 		int interval = 1;
-		int currentRow = 0;
+		long currentRow = 0;
 		
 		this.warnings.clear();
 		this.errors.clear();
@@ -589,6 +589,7 @@ public class DataSpooler
 			try { if (pw != null) pw.close(); } catch (Throwable th) {}
 			if (!jobsRunning) this.closeProgress();
 		}
+		return currentRow;
 	}
 
 	public void closeProgress()

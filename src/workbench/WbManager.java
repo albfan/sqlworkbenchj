@@ -21,6 +21,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.BatchRunner;
+import workbench.sql.MacroManager;
 import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 import workbench.util.WbCipher;
@@ -353,6 +354,7 @@ public class WbManager implements FontChangedListener
 				if (w.isFocused())
 				{
 					if (!this.checkProfiles(w)) return;
+					if (!this.checkMacros(w)) return;
 					w.saveSettings();
 				}
 				aborted = w.abortAll();
@@ -370,6 +372,7 @@ public class WbManager implements FontChangedListener
 			}
 			if (aborted) this.getConnectionMgr().disconnectAll();
 			this.settings.saveSettings();
+			MacroManager.getInstance().saveMacros();
 		}
 		LogMgr.shutdown();
 		System.exit(0);
@@ -378,6 +381,28 @@ public class WbManager implements FontChangedListener
 	private boolean checkAbort(MainWindow win)
 	{
 		return WbSwingUtilities.getYesNo(win, ResourceMgr.getString("MsgAbortRunningSql"));
+	}
+	
+	private boolean checkMacros(MainWindow win)
+	{
+		if (MacroManager.getInstance().isModified())
+		{
+      int answer = JOptionPane.showConfirmDialog(win, ResourceMgr.getString("MsgConfirmUnsavedMacros"), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_CANCEL_OPTION);
+      if (answer == JOptionPane.OK_OPTION)
+      {
+        MacroManager.getInstance().saveMacros();
+        return true;
+      }
+      else if (answer == JOptionPane.NO_OPTION)
+      {
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+    }
+    return true;
 	}
   private boolean checkProfiles(MainWindow win)
   {

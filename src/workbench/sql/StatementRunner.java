@@ -11,6 +11,7 @@ import java.util.HashMap;
 
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
+import workbench.sql.MacroManager;
 import workbench.sql.commands.DdlCommand;
 import workbench.sql.commands.SelectCommand;
 import workbench.sql.commands.SingleVerbCommand;
@@ -113,6 +114,13 @@ public class StatementRunner
 			this.result.clear();
 			this.result.setSuccess();
 			return;
+		}
+	
+		String macro = MacroManager.getInstance().getMacroText(cleanSql);
+		if (macro != null)
+		{
+			aSql = macro;
+			cleanSql = SqlUtil.makeCleanSql(macro, false);
 		}
 		
 		String verb = SqlUtil.getSqlVerb(cleanSql).toUpperCase();

@@ -15,6 +15,8 @@ import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.DbDriver;
 import workbench.exception.WbException;
+import workbench.gui.actions.DeleteListEntryAction;
+import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbTraversalPolicy;
@@ -36,7 +38,6 @@ public class DriverlistEditorPanel
 	private javax.swing.JPanel listPanel;
 
 
-	/** Creates new form ProfileEditor */
 	public DriverlistEditorPanel()
 	{
 		initComponents();
@@ -45,8 +46,6 @@ public class DriverlistEditorPanel
 		policy.addComponent(driverList);
 		policy.addComponent(driverEditor);
 		policy.setDefaultComponent(driverList);
-		//driverList.setNextFocusableComponent(driverEditor);
-		//this.driverEditor.setNextFocusableComponent(driverList);
 		this.toolbar = new WbToolbar();
 		this.toolbar.add(new NewListEntryAction(this));
 		this.toolbar.add(new DeleteListEntryAction(this));

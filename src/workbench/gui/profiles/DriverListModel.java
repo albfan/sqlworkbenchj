@@ -19,7 +19,8 @@ import workbench.db.DbDriver;
  *
  * @author  workbench@kellerer.org
  */
-class DriverListModel implements ListModel
+class DriverListModel 
+	implements ListModel
 {
 
 	ArrayList drivers;
@@ -66,11 +67,6 @@ class DriverListModel implements ListModel
 		return this.drivers.size();
 	}
 
-	/** Removes a listener from the list that's notified each time a
-	 * change to the data model occurs.
-	 * @param l the <code>ListDataListener</code> to be removed
-	 *
-	 */
 	public void removeListDataListener(ListDataListener l)
 	{
 	}

@@ -95,7 +95,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.11 2003-02-26 21:41:59 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.12 2003-07-05 23:57:50 thomas Exp $
  */
 public class JEditTextArea 
 	extends JComponent
@@ -1326,8 +1326,7 @@ public class JEditTextArea
 		}
 		else
 		{
-			return getText(selectionStart,
-				selectionEnd - selectionStart);
+			return getText(selectionStart,selectionEnd - selectionStart);
 		}
 	}
 

@@ -38,9 +38,11 @@ import workbench.gui.components.*;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.*;
+import workbench.interfaces.TextSelectionListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.sql.MacroManager;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -58,7 +60,7 @@ import workbench.util.WbWorkspace;
  */
 public class SqlPanel
 	extends JPanel
-	implements Runnable, FontChangedListener, ActionListener,
+	implements Runnable, FontChangedListener, ActionListener, TextSelectionListener, 
 						MainPanel, Spooler, TextFileContainer, DbUpdater
 {
 	private boolean runSelectedCommand;
@@ -88,7 +90,8 @@ public class SqlPanel
 	private ExecuteAllAction executeAll;
 	private ExecuteCurrentAction executeCurrent;
 	private ExecuteSelAction executeSelected;
-	
+
+	private AddMacroAction addMacro;
 	private DataToClipboardAction dataToClipboard;
 	private SaveDataAsAction exportDataAction;
 	private CopyAsSqlInsertAction copyAsSqlInsert;
@@ -159,6 +162,7 @@ public class SqlPanel
 		this.resultTab.setFocusTraversalPolicy(pol);
 
 		this.editor = EditorPanel.createSqlEditor();
+		this.editor.addSelectionListener(this);
 		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
 		this.contentPanel.setOneTouchExpandable(true);
 		this.contentPanel.setContinuousLayout(true);
@@ -528,6 +532,10 @@ public class SqlPanel
 		this.actions.add(action);
 		action = new CleanJavaCodeAction(this.editor);
 		this.actions.add(action);
+		this.addMacro = new AddMacroAction(this.editor);
+		action.setCreateMenuSeparator(true);
+		this.actions.add(this.addMacro);
+		
 
 //		action = new SaveSqlHistoryAction(this);
 //		action.setCreateMenuSeparator(true);
@@ -1068,6 +1076,11 @@ public class SqlPanel
 		//	});
 	}
 
+	public String getCurrentStatement()
+	{
+		return this.editor.getSelectedStatement();
+	}
+	
 	public void runSql()
 	{
 		this.setBusy(true);
@@ -1233,6 +1246,13 @@ public class SqlPanel
 				delimit = WbManager.getSettings().getAlternateDelimiter();
 			}
 
+			String cleanSql = SqlUtil.makeCleanSql(aSqlScript, false);
+			String macro = MacroManager.getInstance().getMacroText(cleanSql);
+			if (macro != null)
+			{
+				aSqlScript = macro;
+			}
+			
 			List sqls = new ArrayList();
 			int currentCommand = SqlUtil.parseCommands(aSqlScript, delimit, currentCursorPos, sqls);
 
@@ -1602,5 +1622,10 @@ public class SqlPanel
 		}
 	}
 
+	public void selectionChanged(int newStart, int newEnd)
+	{
+		boolean selected = (newStart > -1 && newEnd > newStart);
+		this.addMacro.setEnabled(selected);
+	}	
 
 }
