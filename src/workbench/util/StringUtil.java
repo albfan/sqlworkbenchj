@@ -18,6 +18,8 @@ public class StringUtil
 	
 	public static String replace(String aString, String aValue, String aReplacement)
 	{
+		if (aReplacement == null) return aString;
+		
 		int pos = aString.indexOf(aValue);
 		if (pos == -1) return aString;
 

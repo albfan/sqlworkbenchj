@@ -25,7 +25,7 @@ import javax.swing.KeyStroke;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.2 2002-07-17 21:04:29 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.3 2002-08-10 15:57:27 thomas Exp $
  * @see org.gjt.sp.jedit.textarea.DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
@@ -72,7 +72,9 @@ public abstract class InputHandler extends KeyAdapter
 	public static final ActionListener SELECT_PREV_WORD = new prev_word(true);
 	public static final ActionListener REPEAT = new repeat();
 	public static final ActionListener TOGGLE_RECT = new toggle_rect();
-
+	public static final ActionListener MAKE_UPPER_CASE = new make_upper();
+	public static final ActionListener MAKE_LOWER_CASE = new make_lower();
+	
 	// Default action
 	public static final ActionListener INSERT_CHAR = new insert_char();
 
@@ -115,6 +117,8 @@ public abstract class InputHandler extends KeyAdapter
 		actions.put("repeat",REPEAT);
 		actions.put("toggle-rect",TOGGLE_RECT);
 		actions.put("insert-char",INSERT_CHAR);
+		//actions.put("make-upper", MAKE_UPPER_CASE);
+		//actions.put("make-lower", MAKE_LOWER_CASE);
 	}
 
 	/**
@@ -361,8 +365,7 @@ public abstract class InputHandler extends KeyAdapter
 		// resets the repeat count
 		ActionListener _grabAction = grabAction;
 		grabAction = null;
-		executeAction(_grabAction,evt.getSource(),
-			String.valueOf(evt.getKeyChar()));
+		executeAction(_grabAction,evt.getSource(),String.valueOf(evt.getKeyChar()));
 	}
 
 	// protected members
@@ -398,6 +401,54 @@ public abstract class InputHandler extends KeyAdapter
 			String actionCommand);
 	}
 
+	public static class make_upper implements ActionListener
+	{
+		public void actionPerformed(ActionEvent evt)
+		{
+			JEditTextArea textArea = getTextArea(evt);
+
+			if(!textArea.isEditable())
+			{
+				textArea.getToolkit().beep();
+				return;
+			}
+			else
+			{
+				String sel = textArea.getSelectedText();
+				if (sel == null || sel.length() == 0) return;
+				int start = textArea.getSelectionStart();
+				int end = textArea.getSelectionEnd();
+				sel = sel.toUpperCase();
+				textArea.setSelectedText(sel);
+				textArea.select(start, end);
+			}
+		}
+	}
+
+	public static class make_lower implements ActionListener
+	{
+		public void actionPerformed(ActionEvent evt)
+		{
+			JEditTextArea textArea = getTextArea(evt);
+
+			if(!textArea.isEditable())
+			{
+				textArea.getToolkit().beep();
+				return;
+			}
+			else
+			{
+				String sel = textArea.getSelectedText();
+				if (sel == null || sel.length() == 0) return;
+				int start = textArea.getSelectionStart();
+				int end = textArea.getSelectionEnd();
+				sel = sel.toLowerCase();
+				textArea.setSelectedText(sel);
+				textArea.select(start, end);
+			}
+		}
+	}
+	
 	public static class backspace implements ActionListener
 	{
 		public void actionPerformed(ActionEvent evt)

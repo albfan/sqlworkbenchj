@@ -6,6 +6,7 @@
 
 package workbench.gui.components;
 
+import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.text.JTextComponent;
@@ -43,6 +44,7 @@ public class TextComponentMouseListener implements MouseListener
 				pop.getClearAction().setEnabled(edit);
 				pop.getPasteAction().setEnabled(edit);
 				pop.getCopyAction().setEnabled(selected);
+				//Component parent = text.getParent();
 				pop.show(text,e.getX(),e.getY());
 			}
 		}

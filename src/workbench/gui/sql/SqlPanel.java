@@ -29,12 +29,18 @@ import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 
 import workbench.gui.actions.*;
+import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
+import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarSeparator;
+import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.Exporter;
+import workbench.interfaces.MainPanel;
+import workbench.interfaces.Searchable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.SqlUtil;
@@ -48,11 +54,11 @@ import workbench.util.WbPersistence;
  * @author  thomas
  * @version 1.0
  */
-public class SqlPanel extends JPanel implements Runnable, TableModelListener, Exporter
+public class SqlPanel extends JPanel 
+	implements Runnable, TableModelListener, Exporter, Searchable, MainPanel
 {
 	private boolean selected;
-	private EditorPanel editor;
-	//private SqlResultDisplay result;
+	EditorPanel editor;
 	private DwPanel data;
 	private JTextArea log;
 	private JTabbedPane resultTab;
@@ -89,7 +95,7 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ex
 	private static final int DIVIDER_SIZE = 5;
 	private String lastSearchCriteria;
 	private WbToolbar toolbar;
-	private JTextField connectionInfo;
+	private ConnectionInfo connectionInfo;
 	
 	private WbConnection dbConnection;
 	
@@ -118,15 +124,17 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ex
 		this.resultTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		this.resultTab.addTab(ResourceMgr.getString(ResourceMgr.TAB_LABEL_RESULT), this.data);
-		JScrollPane scroll = new JScrollPane(log);
+		JScrollPane scroll = new WbScrollPane(log);
 		this.resultTab.addTab(ResourceMgr.getString(ResourceMgr.TAB_LABEL_MSG), scroll);
 		this.resultTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		
+		WbTraversalPolicy pol = new WbTraversalPolicy();
+		pol.setDefaultComponent(data.getTable());
+		pol.addComponent(data.getTable());
+		this.resultTab.setFocusTraversalPolicy(pol);
+		
 		this.editor = new EditorPanel();
-		//this.editor.setBorder(new EmptyBorder(0, 1, 2,0));
 		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
-		this.contentPanel.setDividerSize(DIVIDER_SIZE);
-		this.contentPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.add(this.contentPanel, BorderLayout.CENTER);
 		
 		int loc = WbManager.getSettings().getSqlDividerLocation(this.internalId);
@@ -166,14 +174,7 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ex
 			}
 		}
 		toolbar.addSeparator();
-		this.connectionInfo = new JTextField();
-		this.connectionInfo.setBackground(this.toolbar.getBackground());
-		this.connectionInfo.setEditable(false);
-		EmptyBorder border = new EmptyBorder(0, 2, 0, 2);
-		this.connectionInfo.setBorder(border);
-		this.connectionInfo.addMouseListener(new TextComponentMouseListener());
-		//this.connectionInfo.setEnabled(false);
-		this.connectionInfo.setDisabledTextColor(Color.black);
+		this.connectionInfo = new ConnectionInfo(this.toolbar.getBackground());
 		toolbar.add(this.connectionInfo);
 		
 	}
@@ -201,6 +202,12 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ex
 
 		ExecuteSelectedSql se = new ExecuteSelectedSql();
 		this.executeSelected = new ExecuteSelAction(se);
+
+		MakeLowerCaseAction makeLower = new MakeLowerCaseAction(this.editor);
+		MakeUpperCaseAction makeUpper = new MakeUpperCaseAction(this.editor);
+
+		this.editor.addPopupMenuItem(makeLower, true);
+		this.editor.addPopupMenuItem(makeUpper, false);
 		
 		this.editor.addPopupMenuItem(this.executeSelected, true);
 		this.editor.addPopupMenuItem(this.executeAll, false);
@@ -215,7 +222,11 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ex
 		a.setCreateMenuSeparator(true);
 		this.actions.add(a);
 		this.actions.add(pop.getSelectAllAction());
-
+		
+		makeLower.setCreateMenuSeparator(true);
+		this.actions.add(makeLower);
+		this.actions.add(makeUpper);
+		
 		this.startEditAction = new StartEditAction(this);
 		this.actions.add(this.startEditAction);
 		this.updateAction = new UpdateDatabaseAction(this);
@@ -287,6 +298,15 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ex
 		this.findAction.setCreateMenuSeparator(true);
 		this.actions.add(this.findAction);
 		this.actions.add(this.findAgainAction);
+		
+		WbTable table = this.data.getTable();
+		table.addPopupAction(this.exportDataAction, false);
+		table.addPopupAction(this.dataToClipboard, false);
+		table.addPopupAction(this.findAction, true);
+		table.addPopupAction(this.findAgainAction, false);
+		table.addPopupAction(this.startEditAction, true);
+		table.addPopupAction(this.insertRowAction, false);
+		table.addPopupAction(this.deleteRowAction, false);
 	}
 	
 	private void setupActionMap()
@@ -300,7 +320,12 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ex
 		{
 			this.addToActionMap((WbAction)this.actions.get(i));
 		}
+		// Add a second keystroke entry for the CopyDataToClipboard action
+		// so that it can be invoked with the shift key as well
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK), this.dataToClipboard.getActionName());
+		
+		editor.getInputMap().setParent(im);
+		editor.getActionMap().setParent(am);
 	}
 	
 	public void addToActionMap(WbAction anAction)
@@ -329,13 +354,13 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ex
 	public void selectResult()
 	{
 		showResultPanel();
-		EventQueue.invokeLater(new Runnable() 
-		{
-			public void run()
-			{
-				data.getTable().requestFocusInWindow();
-			}
-		});
+//		EventQueue.invokeLater(new Runnable() 
+//		{
+//			public void run()
+//			{
+				data.getTable().grabFocus();
+//			}
+//		});
 	}
 	
 	public void saveAsAscii()
@@ -402,7 +427,7 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ex
 	
 	/**
 	 *	When the SqlPanel becomse visible (i.e. the tab is 
-	 *	selected in the main windows) we set the focus to
+	 *	selected in the main window) we set the focus to
 	 *	the editor component.
 	 */
 	public void setVisible(boolean aFlag)
@@ -646,7 +671,7 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ex
 		this.executeSelected.setEnabled(true);
 		this.updateAction.setEnabled(false);
 		this.findAgainAction.setEnabled(false);
-		this.connectionInfo.setText(aConnection.getDisplayString());
+		this.connectionInfo.setConnection(aConnection);
 	}
 	
 	public boolean isRequestFocusEnabled() { return true; }

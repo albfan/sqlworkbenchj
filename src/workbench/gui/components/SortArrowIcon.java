@@ -13,6 +13,7 @@ package workbench.gui.components;
 
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.ImageIcon;
 
 public class SortArrowIcon
   implements Icon
@@ -21,11 +22,15 @@ public class SortArrowIcon
   public static final int UP = 1;
   public static final int DOWN = 2;
 
+	public static final SortArrowIcon ARROW_UP = new SortArrowIcon(UP);
+	public static final SortArrowIcon ARROW_DOWN = new SortArrowIcon(DOWN);
+	public static final SortArrowIcon EMPTY = new SortArrowIcon(NONE);
+	
   protected int direction;
   protected int width = 8;
   protected int height = 8;
   
-  public SortArrowIcon(int direction)
+  private SortArrowIcon(int direction)
   {
     this.direction = direction;
   }
@@ -43,6 +48,7 @@ public class SortArrowIcon
   public void paintIcon(Component c, Graphics g, int x, int y)
   {
     Color bg = c.getBackground();
+		Color fg = c.getForeground();
     Color light = bg.brighter();
     Color shade = bg.darker();
   
@@ -65,6 +71,7 @@ public class SortArrowIcon
       g.drawLine(x, y + h, x + w, y + h);
       g.drawLine(x + m, y, x + w, y + h);
     }
+		g.setColor(fg);
   }
 }
 

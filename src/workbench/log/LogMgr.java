@@ -78,7 +78,7 @@ public class LogMgr
 		logOut.print(aMsg);
 		if (th == null)
 		{
-			logOut.println("");
+			logOut.println();
 		}
 		else
 		{
@@ -90,7 +90,7 @@ public class LogMgr
 			}
 			else if (exceptionType == EXC_TYPE_BRIEF)
 			{
-				logOut.println("");
+				logOut.println();
 				logOut.print("     ");
 				logOut.print(th.getClass());
 				logOut.print(": ");
@@ -98,6 +98,7 @@ public class LogMgr
 			}
 			else if (exceptionType == EXC_TYPE_COMPLETE)
 			{
+				logOut.println();
 				logStackTrace(th);
 			}
 		}

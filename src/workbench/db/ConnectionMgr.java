@@ -30,6 +30,7 @@ import workbench.resource.Settings;
 import workbench.WbManager;
 import workbench.exception.WbException;
 import workbench.gui.dbobjects.DbExplorerWindow;
+import workbench.storage.DataStore;
 import workbench.util.WbPersistence;
 
 /**
@@ -288,7 +289,7 @@ public class ConnectionMgr
 		}
 	}
 
-	public ResultSet getTableDefinition(String aTable)
+	public DataStore getTableDefinition(String aTable)
 	{
 		if (this.currentConnection == null) return null;
 		try

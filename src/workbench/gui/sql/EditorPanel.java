@@ -16,6 +16,8 @@ import java.awt.Dimension;
 import workbench.WbManager;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.TextContainer;
 import workbench.gui.menu.TextPopup;
@@ -123,5 +125,5 @@ public class EditorPanel
 			this.getInputHandler().addKeyBinding(key, anAction);
 		}
 	}
-
+	
 }

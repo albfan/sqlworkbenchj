@@ -31,7 +31,7 @@ public class DwStatusBar extends javax.swing.JPanel
 {
 	private JTextField tfRowCount;
 	private JTextField tfStatus;
-	private JTextField tfMaxRows;
+	JTextField tfMaxRows;
 	private String readyMsg;
 
 	private static final int BAR_HEIGHT = 22;
@@ -48,7 +48,7 @@ public class DwStatusBar extends javax.swing.JPanel
 		Dimension d = new Dimension(40, FIELD_HEIGHT);
 		this.tfRowCount = new JTextField();
 		this.tfStatus = new JTextField();
-		this.tfMaxRows = new JTextField(6);
+		this.tfMaxRows = new JTextField(8);
 		this.tfMaxRows.setEditable(true);
 		this.tfMaxRows.setMaximumSize(d);
 		this.tfMaxRows.setMargin(new java.awt.Insets(0, 2, 0, 2));

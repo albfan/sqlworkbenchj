@@ -14,4 +14,5 @@ public interface Exporter
 {
 	void saveAsAscii();
 	void copyDataToClipboard();
+	void copyDataToClipboard(boolean includeHeaders);
 }

@@ -296,7 +296,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 
 		public String getDescription()
 		{
-			String s = ResourceMgr.getString("ArchivesFilterName");
+			String s = ResourceMgr.getString("MsgArchivesFilterName");
 			return s;
 		}
 

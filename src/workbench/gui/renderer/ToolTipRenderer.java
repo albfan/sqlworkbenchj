@@ -12,6 +12,9 @@ import java.awt.Component;
 import java.awt.Color;
 import javax.swing.JComponent;
 import javax.swing.table.DefaultTableCellRenderer;
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.WbTable;
 
 /**
  * Displays a string in a table cell and shows a tool
@@ -20,6 +23,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class ToolTipRenderer 
 	extends DefaultTableCellRenderer 
 {
+
 	public Component getTableCellRendererComponent(	JTable table,
 																									Object value,
 																									boolean isSelected,
@@ -27,7 +31,7 @@ public class ToolTipRenderer
 																									int row,
 																									int col)
 	{
-		Component result = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+		Component result = super.getTableCellRendererComponent(table, value, isSelected, false, row, col);
 
 		String display;
 		if (value == null)
@@ -35,12 +39,14 @@ public class ToolTipRenderer
 		else
 			display = value.toString();
 
-		try
+		this.setToolTipText(display);
+		if (hasFocus)
 		{
-			((JComponent)result).setToolTipText(display);
+			this.setBorder(WbTable.FOCUSED_CELL_BORDER);
 		}
-		catch (ClassCastException e)
+		else
 		{
+			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		}
 		
 		return result;

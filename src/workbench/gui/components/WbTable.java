@@ -5,22 +5,34 @@
  */
 package workbench.gui.components;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.Math;
 import java.util.Date;
+import javax.swing.Action;
 import javax.swing.DefaultCellEditor;
+import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.border.LineBorder;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -28,16 +40,28 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.OptimizeColumnWidthAction;
+import workbench.gui.actions.SetColumnWidthAction;
+import workbench.gui.actions.SortAscendingAction;
+import workbench.gui.actions.SortDescendingAction;
+import workbench.gui.actions.WbAction;
 import workbench.gui.renderer.DateColumnRenderer;
 import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RowStatusRenderer;
 import workbench.gui.renderer.ToolTipRenderer;
+import workbench.resource.ResourceMgr;
+import workbench.storage.DataStore;
 import workbench.storage.NullValue;
 
 
-public class WbTable extends JTable
+public class WbTable 
+	extends JTable
+	implements MouseListener, ActionListener
 {
 	private WbTableSorter sortModel;
+	private JPopupMenu popup;
+	private JPopupMenu headerPopup;
+	
 	private ResultSetTableModel dwModel;
 	private TableModel originalModel;
 	private int lastFoundRow = -1;
@@ -46,23 +70,70 @@ public class WbTable extends JTable
 
 	private DefaultCellEditor defaultEditor;
 	private DefaultCellEditor defaultNumberEditor;
-
+	private SortAscendingAction sortAscending;
+	private SortDescendingAction sortDescending;
+	private OptimizeColumnWidthAction optimizeCol;
+	private SetColumnWidthAction setColWidth;
+	
 	private boolean adjustToColumnLabel = true;
+	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.yellow);
+	private int headerPopupY = -1;
+	private int headerPopupX = -1;
+	
+	private static final DefaultTableModel EMPTY_MODEL = new DefaultTableModel();
 	
 	public WbTable()
 	{
 		this.setMinimumSize(null);
 		this.setMaximumSize(null);
 		this.setPreferredSize(null);
+		
+		this.sortAscending = new SortAscendingAction(this);
+		this.sortAscending.setEnabled(false);
+		this.sortDescending = new SortDescendingAction(this);
+		this.sortDescending.setEnabled(false);		
+		this.optimizeCol = new OptimizeColumnWidthAction(this);
+		this.setColWidth = new SetColumnWidthAction(this);
+		
+		this.headerPopup = new JPopupMenu();
+		this.headerPopup.add(this.sortAscending.getMenuItem());
+		this.headerPopup.add(this.sortDescending.getMenuItem());
+		this.headerPopup.addSeparator();
+		this.headerPopup.add(this.optimizeCol.getMenuItem());
+		this.headerPopup.add(this.setColWidth.getMenuItem());
+		
 		JTextField stringField = new JTextField();
 		stringField.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		stringField.addMouseListener(new TextComponentMouseListener());
 		this.defaultEditor = new DefaultCellEditor(stringField);
 		
 		JTextField numberField = new JTextField();
 		numberField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		numberField.setHorizontalAlignment(SwingConstants.RIGHT);
+		numberField.addMouseListener(new TextComponentMouseListener());
 		this.defaultNumberEditor = new DefaultCellEditor(numberField);
+		this.addMouseListener(this);
+		this.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		JTableHeader th = this.getTableHeader();
+		th.addMouseListener(this);	
 	}
+	
+	public void reset()
+	{
+		if (this.dwModel != null)
+		{
+			this.dwModel.dispose();
+		}
+		this.setModel(EMPTY_MODEL, false);
+	}
+	
+	public void addPopupAction(WbAction anAction, boolean withSep)
+	{
+		if (this.popup == null) this.popup = new JPopupMenu();
+		if (withSep) this.popup.addSeparator();
+		this.popup.add(anAction.getMenuItem());
+	}
+	
 	
 	public void setModel(TableModel aModel)
 	{
@@ -77,6 +148,8 @@ public class WbTable extends JTable
 			this.sortModel = null;
 			this.originalModel = aModel;
 			this.checkModel();
+			if (this.sortAscending != null) this.sortAscending.setEnabled(false);
+			if (this.sortDescending != null) this.sortDescending.setEnabled(false);
 		}
 		else
 		{
@@ -95,9 +168,22 @@ public class WbTable extends JTable
 			header.setDefaultRenderer(new SortHeaderRenderer());
 			this.sortModel.addMouseListenerToHeaderInTable(this);
 		}
+		this.sortAscending.setEnabled(true);
+		this.sortDescending.setEnabled(true);
 		this.checkModel();
 	}
 
+	public DataStore getDataStore()
+	{
+		if (this.dwModel != null)
+		{
+			return this.dwModel.getDataStore();
+		}
+		else
+		{
+			return null;
+		}
+	}
 	private void checkModel()
 	{
 		if (this.originalModel == null) return;
@@ -133,6 +219,7 @@ public class WbTable extends JTable
 	{
 		if (this.dwModel == null) return;
 		if (aFlag == this.dwModel.getShowStatusColumn()) return;
+		int row = this.getSelectedRow();
 		this.dwModel.setShowStatusColumn(aFlag);
 		if (aFlag)
 		{
@@ -142,6 +229,7 @@ public class WbTable extends JTable
 			col.setMinWidth(20);
 			col.setPreferredWidth(20);
 		}
+		if (row >= 0) this.getSelectionModel().setSelectionInterval(row, row);
 	}
 	
 	public int getSortedViewColumnIndex()
@@ -248,7 +336,6 @@ public class WbTable extends JTable
 			
 			if (rowString.toLowerCase().indexOf(aText) > -1)
 			{
-				//this.infoTable.scrollToRow(i);
 				this.getSelectionModel().setSelectionInterval(i,i);
 				foundRow = i;
 				this.lastSearchText = aText;
@@ -290,6 +377,9 @@ public class WbTable extends JTable
 		if (this.getShowStatusColumn()) start = 1;
 		for (int i=0; i < colMod.getColumnCount(); i++)
 		{
+			int addWidth = this.getAdditionalColumnSpace(0, i);
+			int addHeaderWidth = this.getAdditionalColumnSpace(-1, i);
+			
 			TableColumn col = colMod.getColumn(i);
 			//TableColumn headerCol = headerColMod.getColumn(i);
 			//col.setCellRenderer(new ToolTipRenderer());
@@ -308,9 +398,9 @@ public class WbTable extends JTable
 				if (this.adjustToColumnLabel)
 				{
 					String s = this.dwModel.getColumnName(i);
-					lblWidth = fm.stringWidth(s) + (charWidth * 2);
+					lblWidth = fm.stringWidth(s) + addHeaderWidth;
 				}
-				int width = this.dwModel.getColumnWidth(i) * charWidth;
+				int width = (this.dwModel.getColumnWidth(i) * charWidth) + addWidth;
 				int w = Math.max(width, lblWidth);
 				w	= Math.min(w, maxWidth);
 				col.setPreferredWidth(w);
@@ -318,6 +408,62 @@ public class WbTable extends JTable
 		}
 	}	
 
+	public void optimizeColWidth(int aColumn)
+	{
+		if (this.dwModel == null) return;
+		if (aColumn < 0 || aColumn > this.getColumnCount() - 1) return;
+		
+		Font f = this.getFont();
+		FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(f);
+		TableColumnModel colMod = this.getColumnModel();
+		TableColumn col = colMod.getColumn(aColumn);
+		int addWidth = this.getAdditionalColumnSpace(0, aColumn);
+		String s = null;//this.dwModel.getColumnName(aColumn);
+		int optWidth = 0;
+		for (int row = 0; row < this.getRowCount(); row ++)
+		{
+			s = this.getValueAsString(row, aColumn);
+			if (s == null || s.length() == 0) continue;
+			optWidth = Math.max(optWidth, fm.stringWidth(s) + addWidth);
+		}
+		if (optWidth > 0)
+		{
+			col.setPreferredWidth(optWidth);
+		}
+	}	
+	
+	private int getAdditionalColumnSpace(int aRow, int aColumn)
+	{
+		TableColumn col = this.getColumnModel().getColumn(aColumn);
+		TableCellRenderer rend;
+		if (aRow == -1)
+			rend = col.getHeaderRenderer();
+		else
+			rend = col.getCellRenderer();
+		
+		int addWidth = this.getIntercellSpacing().width * 2;
+		if (this.getShowVerticalLines()) addWidth += 4;
+		
+		if (rend == null) 
+		{
+			rend = this.getDefaultRenderer(this.getColumnClass(aColumn));
+		}
+		if (rend != null)
+		{
+			Component c = rend.getTableCellRendererComponent(this, "", false, false, aRow, aColumn);
+			if (c instanceof JComponent)
+			{
+				JComponent jc = (JComponent)c;
+				Insets ins = jc.getInsets();
+				if (ins != null)
+				{
+					addWidth += ins.left + ins.right;
+				}
+			}
+		}
+		return addWidth;
+	}
+	
 	public void addTableModelListener(TableModelListener aListener)
 	{
 		this.changeListener = aListener;
@@ -334,6 +480,98 @@ public class WbTable extends JTable
 	{
 		Rectangle rect = this.getCellRect(aRow, 1, true);
 		this.scrollRectToVisible(rect);
+	}
+	
+	/** Invoked when the mouse button has been clicked (pressed
+	 * and released) on a component.
+	 *
+	 */
+	public void mouseClicked(MouseEvent e)
+	{
+		if (e.getButton() == MouseEvent.BUTTON3)
+		{
+			if (e.getSource() instanceof JTableHeader)
+			{
+				this.headerPopupX = e.getX();
+				this.headerPopupY = e.getY();
+				this.headerPopup.show(this, e.getX(), e.getY());
+			}
+			else if (this.popup != null)
+			{
+				this.popup.show(this, e.getX(), e.getY());
+			}
+		}
+	}
+	
+	/** Invoked when the mouse enters a component.
+	 *
+	 */
+	public void mouseEntered(MouseEvent e)
+	{
+	}
+	
+	/** Invoked when the mouse exits a component.
+	 *
+	 */
+	public void mouseExited(MouseEvent e)
+	{
+	}
+	
+	/** Invoked when a mouse button has been pressed on a component.
+	 *
+	 */
+	public void mousePressed(MouseEvent e)
+	{
+	}
+	
+	/** Invoked when a mouse button has been released on a component.
+	 *
+	 */
+	public void mouseReleased(MouseEvent e)
+	{
+	}
+	
+	/** Invoked when an action occurs.
+	 *
+	 */
+	public void actionPerformed(ActionEvent e)
+	{
+		TableColumnModel columnModel = this.getColumnModel();
+		int viewColumn = columnModel.getColumnIndexAtX(this.headerPopupX);
+		int column = this.convertColumnIndexToModel(viewColumn);
+		if (e.getSource() == this.sortAscending && this.sortModel != null)
+		{
+			this.sortModel.startSorting(this, column, true);
+		}
+		else if (e.getSource() == this.sortDescending && this.sortModel != null)
+		{
+			this.sortModel.startSorting(this, column, false);
+		}
+		else if (e.getSource() == this.optimizeCol)
+		{
+			this.optimizeColWidth(column);
+		}
+		else if (e.getSource() == this.setColWidth)
+		{
+			try
+			{
+				TableColumn col = this.getColumnModel().getColumn(column);
+				int colWidth = col.getWidth();
+				String s = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgEnterNewColWidth"), Integer.toString(colWidth));
+				if (s != null)
+				{
+					try { colWidth = Integer.parseInt(s); } catch (Exception ex) { colWidth = -1; }
+					if (colWidth > 0)
+					{
+						col.setWidth(colWidth);
+						col.setPreferredWidth(colWidth);
+					}
+				}
+			}
+			catch (Exception ex2)
+			{
+			}
+		}
 	}
 	
 }

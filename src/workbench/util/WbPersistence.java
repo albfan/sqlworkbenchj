@@ -11,6 +11,7 @@ import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import workbench.log.LogMgr;
 
 public class WbPersistence
 {
@@ -50,7 +51,7 @@ public class WbPersistence
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			//e.printStackTrace();
 			return null;
 		}
 	}
@@ -61,16 +62,16 @@ public class WbPersistence
 		try
 		{
 			start = System.currentTimeMillis();
+			// TODO register an ExceptionListener in order to catch
+			// the error messages
 			XMLDecoder e = new XMLDecoder(in);
 			Object result = e.readObject();
 			e.close();
 			end = System.currentTimeMillis();
-			//System.out.println("XMLDecode for " + aFilename + " " + (end - start));
 			return result;
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
-			e.printStackTrace();
 			return null;
 		}
 	}
@@ -87,11 +88,10 @@ public class WbPersistence
 			e.writeObject(aValue);
 			e.close();
 			end = System.currentTimeMillis();
-			//System.out.println("XMLEncode for " + aFilename + " " + (end - start));
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("WbPersistence.writeObject()", "Error writing " + aFilename, e);
 		}
 	}
 	

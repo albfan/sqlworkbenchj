@@ -73,6 +73,10 @@ public class ResourceMgr
 	public static final String    MNU_TXT_CONNECT = "MnuTxtConnect";
 	public static final String    MNU_TXT_EXIT = "MnuTxtExit";
 	public static final String		MNU_TXT_VIEW = "MnuTxtView";
+	public static final String		MNU_TXT_TOOLS = "MnuTxtTools";
+	public static final String		MNU_TXT_HELP = "MnuTxtHelp";
+	public static final String		MNU_TXT_OPTIONS = "MnuTxtOptions";
+
 	
 	// Messages from the ResultPanel
 	public static final String		MSG_EXEC_SQL = "MsgExecutingSql";

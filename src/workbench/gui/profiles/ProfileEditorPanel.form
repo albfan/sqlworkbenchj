@@ -15,9 +15,9 @@
           </Border>
         </Property>
         <Property name="dividerLocation" type="int" value="110"/>
-        <Property name="dividerSize" type="int" value="4"/>
       </Properties>
       <AuxValues>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new WbSplitPane();"/>
         <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="&#xa;"/>
       </AuxValues>
       <Constraints>

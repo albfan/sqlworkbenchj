@@ -24,9 +24,6 @@ import workbench.gui.components.SortArrowIcon;
 public class SortHeaderRenderer 
 	extends javax.swing.table.DefaultTableCellRenderer
 {
-  public static Icon NONSORTED = new SortArrowIcon(SortArrowIcon.NONE);
-  public static Icon ASCENDING = new SortArrowIcon(SortArrowIcon.DOWN);
-  public static Icon DESCENDING = new SortArrowIcon(SortArrowIcon.UP);
 	private Border headerBorder;
 	
   public SortHeaderRenderer()
@@ -49,19 +46,7 @@ public class SortHeaderRenderer
       index = sortTable.getSortedViewColumnIndex();
       ascending = sortTable.isSortedColumnAscending();
     }
-		/*
-    if (table != null)
-    {
-      javax.swing.table.JTableHeader header = table.getTableHeader();
-      if (header != null)
-      {
-        setForeground(header.getForeground());
-        setBackground(header.getBackground());
-        setFont(header.getFont());
-      }
-    }
-		*/
-		Icon icon = ascending ? ASCENDING : DESCENDING;
+		Icon icon = ascending ? SortArrowIcon.ARROW_DOWN : SortArrowIcon.ARROW_UP;
 		if (column == index)
 		{
 			this.setIcon(icon);

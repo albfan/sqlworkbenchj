@@ -9,33 +9,26 @@ package workbench.gui.profiles;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import javax.swing.ActionMap;
-import javax.swing.ComponentInputMap;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.event.*;
+import javax.swing.*;
 import workbench.WbManager;
 import workbench.db.ConnectionProfile;
 import workbench.gui.actions.EscAction;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
+
 /**
  *
  * @author  sql.workbench@freenet.de
  */
-public class ProfileSelectionDialog
-	extends javax.swing.JDialog
-	implements ActionListener, WindowListener
+public class ProfileSelectionDialog extends JDialog implements ActionListener, WindowListener
 {
-  private javax.swing.JPanel buttonPanel;
-  private javax.swing.JButton okButton;
-  private javax.swing.JButton cancelButton;
+  private JPanel buttonPanel;
+  private JButton okButton;
+  private JButton cancelButton;
 	private ProfileEditorPanel profiles;
 	private ConnectionProfile selectedProfile;
 	private int selectedIndex = -1;
@@ -43,7 +36,7 @@ public class ProfileSelectionDialog
 	private String escActionCommand;
 
 	/** Creates new form ProfileSelectionDialog */
-	public ProfileSelectionDialog(java.awt.Frame parent, boolean modal)
+	public ProfileSelectionDialog(Frame parent, boolean modal)
 	{
 		super(parent, modal);
 		initComponents();
@@ -55,17 +48,40 @@ public class ProfileSelectionDialog
 		am.put(esc.getActionName(), esc);
 		this.profiles.setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
 		this.profiles.setActionMap(am);
+		EventQueue.invokeLater(new Runnable() 
+		{
+			public void run()
+			{
+				checkProfiles();
+			}
+		});
+		
 	}
 
+	private void checkProfiles()
+	{
+		int count = this.profiles.getProfileCount();
+		if (count == 0)
+		{
+			try
+			{
+				this.profiles.newItem();
+			}
+			catch (Exception e)
+			{
+			}
+		}
+	}
+	
   private void initComponents()
   {
 		profiles = new ProfileEditorPanel();
-    buttonPanel = new javax.swing.JPanel();
-    okButton = new javax.swing.JButton();
-    cancelButton = new javax.swing.JButton();
+    buttonPanel = new JPanel();
+    okButton = new JButton();
+    cancelButton = new JButton();
 
 		addWindowListener(this);
-    buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+    buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
     okButton.setText(ResourceMgr.getString(ResourceMgr.TXT_OK));
     buttonPanel.add(okButton);
@@ -78,9 +94,9 @@ public class ProfileSelectionDialog
 		// dummy panel to create small top border...
 		JPanel dummy = new JPanel();
 		dummy.setMinimumSize(new Dimension(1, 1));
-		profiles.addListMouseListener(new java.awt.event.MouseAdapter()
+		profiles.addListMouseListener(new MouseAdapter()
 		{
-			public void mouseClicked(java.awt.event.MouseEvent evt)
+			public void mouseClicked(MouseEvent evt)
 			{
 				profileListClicked(evt);
 			}
@@ -90,7 +106,7 @@ public class ProfileSelectionDialog
 		this.getContentPane().setLayout(bl);
 		getContentPane().add(dummy, BorderLayout.NORTH);
 		getContentPane().add(profiles, BorderLayout.CENTER);
-    getContentPane().add(buttonPanel, java.awt.BorderLayout.SOUTH);
+    getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 		getRootPane().setDefaultButton(okButton);
 		setTitle(ResourceMgr.getString(ResourceMgr.TXT_SELECT_PROFILE));
 		this.restoreSize();

@@ -24,6 +24,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ResultSetTableModel;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTable;
+import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.DateColumnRenderer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -73,6 +74,13 @@ public class DwPanel extends JPanel
 		
 		this.defaultNumberEditor = new DefaultCellEditor(numberField);
 		this.initLayout();
+		
+		WbTraversalPolicy pol = new WbTraversalPolicy();
+		pol.setDefaultComponent(infoTable);
+		pol.addComponent(infoTable);
+		pol.addComponent(statusBar.tfMaxRows);
+		this.setFocusTraversalPolicy(pol);
+		//this.setFocusCycleRoot(true);
 	}
 	
 	public void setMaxColWidth(int aWidth) { this.maxWidth = aWidth; }
@@ -216,8 +224,15 @@ public class DwPanel extends JPanel
 				StringTokenizer tok = new StringTokenizer(aSql, " ");
 				tok.nextToken();
 				String table = tok.nextToken();
+				String schema = null;
+				int pos = table.indexOf('.');
+				if (pos > -1)
+				{
+					schema = table.substring(0, pos);
+					table = table.substring(pos + 1);
+				}
 				this.hasResultSet = true;
-				this.realModel = aConnection.getMetadata().getTableDefinitionModel(table);
+				this.realModel = aConnection.getMetadata().getTableDefinitionModel(null, schema, table);
 			}
 			else if (verb.equalsIgnoreCase("LIST"))
 			{
@@ -227,6 +242,11 @@ public class DwPanel extends JPanel
 			else if (verb.equalsIgnoreCase("LISTPROCS"))
 			{
 				this.realModel = aConnection.getMetadata().getListOfProcedures();
+				this.hasResultSet = true;
+			}
+			else if (verb.equalsIgnoreCase("LISTDB"))
+			{
+				this.realModel = aConnection.getMetadata().getListOfCatalogs();
 				this.hasResultSet = true;
 			}
 			else

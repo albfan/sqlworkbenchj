@@ -16,10 +16,12 @@ import javax.swing.*;
 import java.awt.datatransfer.*;
 import java.awt.event.*;
 import java.awt.*;
+import java.awt.event.MouseWheelEvent;
 import java.util.Enumeration;
 import java.util.Vector;
 import javax.swing.border.BevelBorder;
 import javax.swing.BorderFactory;
+import workbench.interfaces.TextSelectionListener;
 import workbench.util.StringUtil;
 
 /**
@@ -50,9 +52,11 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.4 2002-07-19 15:37:21 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.5 2002-08-10 15:57:37 thomas Exp $
  */
-public class JEditTextArea extends JComponent
+public class JEditTextArea 
+	extends JComponent
+	implements MouseWheelListener
 {
 	/**
 	 * Adding components with this name to the text area will place
@@ -90,14 +94,9 @@ public class JEditTextArea extends JComponent
 
 		// Initialize the GUI
 		setLayout(new ScrollLayout());
-		//setLayout(new BorderLayout());
-		//JScrollPane scroll = new JScrollPane(painter);
 		add(CENTER,painter);
-		//this.add(scroll, BorderLayout.CENTER);
 		add(RIGHT,vertical = new JScrollBar(JScrollBar.VERTICAL));
 		add(BOTTOM,horizontal = new JScrollBar(JScrollBar.HORIZONTAL));
-		//vertical = scroll.getVerticalScrollBar();
-		//horizontal = scroll.getHorizontalScrollBar();
 
 		// Add some event listeners
 		vertical.addAdjustmentListener(new AdjustHandler());
@@ -105,6 +104,7 @@ public class JEditTextArea extends JComponent
 		painter.addComponentListener(new ComponentHandler());
 		painter.addMouseListener(new MouseHandler());
 		painter.addMouseMotionListener(new DragHandler());
+		this.addMouseWheelListener(this);
 		addFocusListener(new FocusHandler());
 
 		// Load the defaults
@@ -123,6 +123,30 @@ public class JEditTextArea extends JComponent
 		focusedComponent = this;
 	}
 
+	private void changeCase(boolean toLower)
+	{
+		String sel = this.getSelectedText();
+		if (sel == null || sel.length() == 0) return;
+		int start = this.getSelectionStart();
+		int end = this.getSelectionEnd();
+		if (toLower)
+			sel = sel.toLowerCase();
+		else
+			sel = sel.toUpperCase();
+		this.setSelectedText(sel);
+		this.select(start, end);
+	}
+	
+	public void toLowerCase()
+	{
+		this.changeCase(true);
+	}
+	
+	public void toUpperCase()
+	{
+		this.changeCase(false);
+	}
+	
 	/**
 	 * Returns if this component can be traversed by pressing
 	 * the Tab key. This returns false.
@@ -979,8 +1003,7 @@ public class JEditTextArea extends JComponent
 		else if(rectSelect)
 		{
 			Element map = document.getDefaultRootElement();
-			int end = selectionEnd - map.getElement(selectionEndLine)
-				.getStartOffset();
+			int end = selectionEnd - map.getElement(selectionEndLine).getStartOffset();
 
 			Element lineElement = map.getElement(line);
 			int lineStart = lineElement.getStartOffset();
@@ -1100,9 +1123,7 @@ public class JEditTextArea extends JComponent
 
 		if(newStart < 0 || newEnd > getDocumentLength())
 		{
-			throw new IllegalArgumentException("Bounds out of"
-				+ " range: " + newStart + "," +
-				newEnd);
+			throw new IllegalArgumentException("Bounds out of"+ " range: " + newStart + "," +	newEnd);
 		}
 
 		// If the new position is the same as the old, we don't
@@ -1126,8 +1147,7 @@ public class JEditTextArea extends JComponent
 			painter.invalidateLineRange(selectionStartLine,selectionEndLine);
 			painter.invalidateLineRange(newStartLine,newEndLine);
 
-			document.addUndoableEdit(new CaretUndo(
-				selectionStart,selectionEnd));
+			document.addUndoableEdit(new CaretUndo(selectionStart,selectionEnd));
 
 			selectionStart = newStart;
 			selectionEnd = newEnd;
@@ -1151,6 +1171,7 @@ public class JEditTextArea extends JComponent
 		magicCaret = -1;
 
 		scrollToCaret();
+		fireSelectionEvent();
 	}
 
 	/**
@@ -1467,6 +1488,15 @@ public class JEditTextArea extends JComponent
 		return bracketLine;
 	}
 
+	public final void addSelectionListener(TextSelectionListener l)
+	{
+		listenerList.add(TextSelectionListener.class, l);
+	}
+	public final void removeSelectionListener(TextSelectionListener l)
+	{
+		listenerList.remove(TextSelectionListener.class, l);
+	}
+	
 	/**
 	 * Adds a caret change listener to this text area.
 	 * @param listener The listener
@@ -1651,6 +1681,18 @@ public class JEditTextArea extends JComponent
 	protected boolean overwrite;
 	protected boolean rectSelect;
 
+	protected void fireSelectionEvent()
+	{
+		Object[] listeners = listenerList.getListenerList();
+		for(int i = listeners.length - 2; i >= 0; i--)
+		{
+			if(listeners[i] == TextSelectionListener.class)
+			{
+				((TextSelectionListener)listeners[i+1]).selectionChanged(this.getSelectionStart(), this.getSelectionEnd());
+			}
+		}
+	}
+	
 	protected void fireCaretEvent()
 	{
 		Object[] listeners = listenerList.getListenerList();
@@ -1720,6 +1762,19 @@ public class JEditTextArea extends JComponent
 		}
 	}
 
+	/** Invoked when the mouse wheel is rotated.
+	 * @see MouseWheelEvent
+	 *
+	 */
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
+		if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL)
+		{
+			int totalScrollAmount = e.getUnitsToScroll() * vertical.getUnitIncrement();
+			vertical.setValue(vertical.getValue() + totalScrollAmount);
+		}
+	}
+	
 	class ScrollLayout implements LayoutManager
 	{
 		public void addLayoutComponent(String name, Component comp)

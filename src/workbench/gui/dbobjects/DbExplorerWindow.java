@@ -6,9 +6,12 @@
 
 package workbench.gui.dbobjects;
 
+import java.awt.Cursor;
+import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.lang.Runnable;
 import javax.swing.JFrame;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -16,6 +19,7 @@ import javax.swing.WindowConstants;
 import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -27,30 +31,25 @@ public class DbExplorerWindow
 	extends JFrame
 	implements WindowListener
 {
-	JTabbedPane tabPane;
-	TableListPanel tables;
+	DbExplorerPanel panel;
+	boolean connected;
 	
 	/** Creates a new instance of DbExplorerWindow */
-	public DbExplorerWindow(WbConnection aConnection, String aProfileName)
-		throws Exception
+	public DbExplorerWindow(DbExplorerPanel aPanel, String aProfileName)
 	{
 		super(ResourceMgr.getString("TxtDbExplorerTitel") + " - [" + aProfileName + "]");
-		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		tables = new TableListPanel(aConnection);
-		tables.restoreSettings();
-		tabPane = new JTabbedPane(JTabbedPane.TOP);
-		tabPane.add(ResourceMgr.getString("TxtDbExplorerTables"), tables);
+		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		this.panel = aPanel;
 		this.addWindowListener(this);
-		this.getContentPane().add(tabPane);
+		this.getContentPane().add(this.panel);
 		this.setIconImage(ResourceMgr.getImage("Database").getImage());
+		this.setProfileName(aProfileName);
 		this.restorePosition();
 	}
 	
-	public void setConnection(WbConnection aConnection, String aProfileName)
-		throws Exception
+	public void setProfileName(String aProfileName)
 	{
 		this.setTitle(ResourceMgr.getString("TxtDbExplorerTitel") + " - [" + aProfileName + "]");
-		this.tables.setConnection(aConnection);
 	}
 	
 	public void restorePosition()
@@ -76,7 +75,7 @@ public class DbExplorerWindow
 	{
 		WbManager.getSettings().storeWindowPosition(this);
 		WbManager.getSettings().storeWindowSize(this);
-		this.tables.saveSettings();
+		this.panel.storeSettings();
 	}	
 	
 	public void windowClosing(WindowEvent e)

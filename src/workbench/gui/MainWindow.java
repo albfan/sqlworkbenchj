@@ -7,17 +7,23 @@
 package workbench.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.lang.Runnable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.KeyStroke;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -31,9 +37,11 @@ import workbench.gui.actions.SelectTabAction;
 import workbench.gui.actions.ShowDbExplorerAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbToolbar;
+import workbench.gui.dbobjects.DbExplorerPanel;
 import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.gui.sql.SqlPanel;
+import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -50,7 +58,8 @@ public class MainWindow extends JFrame
 	private String windowId;
 	private String currentProfileName;
 	private WbConnection currentConnection;
-	private DbExplorerWindow dbExplorer;
+	
+	private DbExplorerPanel dbExplorerPanel;
 	
 	//private JToolBar currentToolbar;
 	private JMenuBar currentMenu;
@@ -61,10 +70,10 @@ public class MainWindow extends JFrame
 	private ProfileSelectionDialog profileDialog;
 	private JTabbedPane sqlTab = new JTabbedPane();
 	private WbToolbar currentToolbar;
-	private List sqlPanels = new ArrayList(5);
-	private List panelMenus = new ArrayList(5);
+	private ArrayList sqlPanels = new ArrayList(5);
+	private ArrayList panelMenus = new ArrayList(5);
 	private int tabCount = 0;
-
+	
 	/** Creates new MainWindow */
 	public MainWindow(String id)
 	{
@@ -91,11 +100,17 @@ public class MainWindow extends JFrame
 		this.restorePosition();
 		this.setIconImage(ResourceMgr.getPicture("workbench16").getImage());
 
+		if (WbManager.getSettings().getShowDbExplorerInMainWindow())
+		{
+			this.addDbExplorerTab();
+		}
+		
 		int lastIndex = WbManager.getSettings().getLastSqlTab();
-		if (lastIndex < 0 || lastIndex > this.sqlTab.getTabCount())
+		if (lastIndex < 0 || lastIndex > this.sqlTab.getTabCount() - 1)
 		{
 			lastIndex = 0;
 		}
+		
 		this.sqlTab.setSelectedIndex(lastIndex);
 		this.tabSelected(lastIndex);
 		
@@ -111,120 +126,148 @@ public class MainWindow extends JFrame
 		
 		for (int tab=0; tab < this.tabCount; tab ++)
 		{
-			JMenuBar menuBar = new JMenuBar();
-			menuBar.setBorderPainted(false);
-
-			// Create the file menu for all tabs
-			JMenu menu = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_FILE));
-			WbAction action;
-			JMenuItem item;
-
-			this.connectAction = new FileConnectAction(this);
-			item = this.connectAction.getMenuItem();
-			menu.add(item);
-			menu.addSeparator();
-			
-			action = new FileExitAction();
-			menu.add(action.getMenuItem());
-			menuBar.add(menu);
-			SqlPanel sql = (SqlPanel)this.sqlPanels.get(tab);
-			sql.addToActionMap(this.connectAction);
-			
-			// now create the menus for the current tab
-			List actions = sql.getActions();
-
-			HashMap menus = new HashMap(10);
-			
-			// Create the menus in the correct order
-			menu = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_EDIT));
-			menuBar.add(menu);
-			menus.put(ResourceMgr.MNU_TXT_EDIT, menu);
-
-			menu = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_VIEW));
-			menuBar.add(menu);
-			menus.put(ResourceMgr.MNU_TXT_VIEW, menu);
-			
-			menu = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_DATA));
-			menuBar.add(menu);
-			menus.put(ResourceMgr.MNU_TXT_DATA, menu);
-			
-			menu = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_SQL));
-			menuBar.add(menu);
-			menus.put(ResourceMgr.MNU_TXT_SQL, menu);
-			
-			for (int i=0; i < actions.size(); i++)
-			{
-				action = (WbAction)actions.get(i);
-				String menuName = (String)action.getValue(WbAction.MAIN_MENU_ITEM);
-				if (menuName == null)
-				{
-					LogMgr.logWarning(this, "Action " + action.getClass() + " does not define a main menu entry!");
-					continue;
-				}
-				menu = (JMenu)menus.get(menuName);
-				if (menu == null)
-				{
-					menu = new JMenu(ResourceMgr.getString(menuName));
-					menuBar.add(menu);
-					menus.put(menuName, menu);
-				}
-				boolean menuSep = "true".equals((String)action.getValue(WbAction.MENU_SEPARATOR));
-
-				if (menuSep)
-				{
-					menu.addSeparator();
-				}
-				//menu.add(action.getMenuItem());
-				action.addToMenu(menu);
-			}
-			
-			// now put the tabs into the view menu
-			menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_VIEW);
-			InputMap im = new ComponentInputMap(this.sqlTab);
-			ActionMap am = new ActionMap();
-			this.sqlTab.setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
-			this.sqlTab.setActionMap(am);
-			for (int i=0; i < this.tabCount; i ++)
-			{
-				action = new SelectTabAction(this.sqlTab, i);
-				KeyStroke key = action.getAccelerator();
-				if (key != null)
-				{
-					im.put(key, action.getActionName());
-					am.put(action.getActionName(), action);
-				}
-				menu.add(action);
-			}
-			
-			menuBar.add(this.buildToolsMenu());
-			menuBar.add(this.buildHelpMenu());
+			MainPanel sql = (MainPanel)this.sqlPanels.get(tab);
+			JMenuBar menuBar = this.getMenuForPanel(sql);
 			this.panelMenus.add(menuBar);
-			
-			WbToolbar tool = sql.getToolbar();
-			sql.addToToolbar(this.dbExplorerAction, true);
 		}
 	}
 
-	private SqlPanel getCurrentSqlPanel()
+	private JMenuBar getMenuForPanel(MainPanel aPanel)
+	{
+		JMenuBar menuBar = new JMenuBar();
+		menuBar.setBorderPainted(false);
+
+		// Create the file menu for all tabs
+		JMenu menu = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_FILE));
+		menu.setName(ResourceMgr.MNU_TXT_FILE);
+		WbAction action;
+		JMenuItem item;
+
+		this.connectAction = new FileConnectAction(this);
+		item = this.connectAction.getMenuItem();
+		menu.add(item);
+		menu.addSeparator();
+
+		action = new FileExitAction();
+		menu.add(action.getMenuItem());
+		menuBar.add(menu);
+		aPanel.addToActionMap(this.connectAction);
+
+		// now create the menus for the current tab
+		List actions = aPanel.getActions();
+
+		HashMap menus = new HashMap(10);
+
+		// Create the menus in the correct order
+		menu = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_EDIT));
+		menu.setName(ResourceMgr.MNU_TXT_EDIT);
+		menu.setVisible(false);
+		menuBar.add(menu);
+		menus.put(ResourceMgr.MNU_TXT_EDIT, menu);
+
+		menu = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_VIEW));
+		menu.setName(ResourceMgr.MNU_TXT_VIEW);
+		menu.setVisible(false);
+		menuBar.add(menu);
+		menus.put(ResourceMgr.MNU_TXT_VIEW, menu);
+
+		menu = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_DATA));
+		menu.setName(ResourceMgr.MNU_TXT_DATA);
+		menu.setVisible(false);
+		menuBar.add(menu);
+		menus.put(ResourceMgr.MNU_TXT_DATA, menu);
+
+		menu = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_SQL));
+		menu.setName(ResourceMgr.MNU_TXT_SQL);
+		menu.setVisible(false);
+		menuBar.add(menu);
+		menus.put(ResourceMgr.MNU_TXT_SQL, menu);
+
+		for (int i=0; i < actions.size(); i++)
+		{
+			action = (WbAction)actions.get(i);
+			String menuName = (String)action.getValue(WbAction.MAIN_MENU_ITEM);
+			if (menuName == null)
+			{
+				LogMgr.logWarning(this, "Action " + action.getClass() + " does not define a main menu entry!");
+				continue;
+			}
+			menu = (JMenu)menus.get(menuName);
+			if (menu == null)
+			{
+				menu = new JMenu(ResourceMgr.getString(menuName));
+				menuBar.add(menu);
+				menus.put(menuName, menu);
+			}
+			boolean menuSep = "true".equals((String)action.getValue(WbAction.MENU_SEPARATOR));
+
+			if (menuSep)
+			{
+				menu.addSeparator();
+			}
+			//menu.add(action.getMenuItem());
+			action.addToMenu(menu);
+			menu.setVisible(true);
+		}
+
+		// now put the tabs into the view menu
+		menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_VIEW);
+		menu.setVisible(true);
+		InputMap im = new ComponentInputMap(this.sqlTab);
+		ActionMap am = new ActionMap();
+		this.sqlTab.setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
+		this.sqlTab.setActionMap(am);
+		for (int i=0; i < this.tabCount; i ++)
+		{
+			action = new SelectTabAction(this.sqlTab, i);
+			KeyStroke key = action.getAccelerator();
+			if (key != null)
+			{
+				im.put(key, action.getActionName());
+				am.put(action.getActionName(), action);
+			}
+			menu.add(action);
+		}
+		aPanel.getInputMap().setParent(im);
+		aPanel.getActionMap().setParent(am);
+		
+		menuBar.add(this.buildToolsMenu());
+		menuBar.add(this.buildHelpMenu());
+
+		if (!WbManager.getSettings().getShowDbExplorerInMainWindow())
+		{
+			WbToolbar tool = aPanel.getToolbar();
+			aPanel.addToToolbar(this.dbExplorerAction, true);
+		}
+		return menuBar;
+	}
+	
+	private MainPanel getCurrentPanel()
 	{
 		int index = this.sqlTab.getSelectedIndex();
 		return this.getSqlPanel(index);
 	}
 	
-	private SqlPanel getSqlPanel(int anIndex)
+	private MainPanel getSqlPanel(int anIndex)
 	{
-		return (SqlPanel)this.sqlPanels.get(anIndex);
+		return (MainPanel)this.sqlTab.getComponentAt(anIndex);
 	}		
 	
 	private void tabSelected(int anIndex)
 	{
+		Container content = this.getContentPane();
 		this.currentMenu = (JMenuBar)this.panelMenus.get(anIndex);
 		this.setJMenuBar(currentMenu);
-		Container content = this.getContentPane();
+		
 		if (this.currentToolbar != null) content.remove(this.currentToolbar);
-		this.currentToolbar = this.getCurrentSqlPanel().getToolbar();
-		content.add(this.currentToolbar, BorderLayout.NORTH);
+		MainPanel current = this.getCurrentPanel();
+		if (current != null)
+		{
+			this.currentToolbar = current.getToolbar();
+			content.add(this.currentToolbar, BorderLayout.NORTH);
+		}
 		this.doLayout();
+		//this.repaint();
 	}
 
 	public void restorePosition()
@@ -248,7 +291,7 @@ public class MainWindow extends JFrame
 		WbManager.getSettings().setLastSqlTab(index);
 		for (int i=0; i < this.tabCount; i++)
 		{
-			SqlPanel sql = (SqlPanel)this.sqlPanels.get(i);
+			MainPanel sql = (MainPanel)this.sqlPanels.get(i);
 			sql.storeSettings();
 		}
 		WbManager.getSettings().storeWindowPosition(this);
@@ -292,33 +335,37 @@ public class MainWindow extends JFrame
 
 	public void showStatusMessage(String aMsg)
 	{
-		this.getCurrentSqlPanel().showStatusMessage(aMsg);
+		MainPanel current = this.getCurrentPanel();
+		if (current != null) current.showStatusMessage(aMsg);
 	}
 
 	public void showLogMessage(String aMsg)
 	{
-		this.getCurrentSqlPanel().showLogMessage(aMsg);
+		MainPanel current = this.getCurrentPanel();
+		if (current != null) current.showLogMessage(aMsg);
 	}
 
 	public void setConnection(WbConnection con)
 	{
 		for (int i=0; i < this.tabCount; i++)
 		{
-			SqlPanel sql = (SqlPanel)this.sqlPanels.get(i);
+			MainPanel sql = (MainPanel)this.sqlPanels.get(i);
 			sql.setConnection(con);
 		}
 		this.currentConnection = con;
 		this.dbExplorerAction.setEnabled(true);
-		if (this.dbExplorer != null)
+		
+		if (this.dbExplorerPanel != null)
 		{
 			try
 			{
-				this.dbExplorer.setConnection(con, this.currentProfileName);
+				this.dbExplorerPanel.setConnection(con, this.currentProfileName);
 			}
 			catch (Exception e)
 			{
 				LogMgr.logError(this, "Could not set connection for DbExplorerWindow", e);
-				this.dbExplorer = null;
+				this.dbExplorerPanel.disconnect();
+				this.dbExplorerPanel = null;
 			}
 		}
 	}
@@ -343,23 +390,76 @@ public class MainWindow extends JFrame
 		}
 	}
 
+	public JMenu getViewMenu(int anIndex)
+	{
+		return this.getMenu(ResourceMgr.MNU_TXT_VIEW, anIndex);
+	}
+	
+	public JMenu getMenu(String aName, int anIndex)
+	{
+		JMenuBar menubar = (JMenuBar)this.panelMenus.get(anIndex);
+		for (int k=0; k < menubar.getMenuCount(); k++)
+		{
+			JMenu item = menubar.getMenu(k);
+			if (aName.equals(item.getName())) return item;
+		}
+		return null;
+	}
+	
+	public void addToViewMenu(WbAction anAction)
+	{
+		for (int i=0; i < this.panelMenus.size(); i++)
+		{
+			JMenu view = this.getViewMenu(i);
+			view.add(anAction.getMenuItem());
+		}
+	}
+	
+	public void addDbExplorerTab()
+	{
+		if (this.dbExplorerPanel == null)
+		{
+			this.dbExplorerPanel = new DbExplorerPanel();
+		}
+		JMenuBar dbmenu = this.getMenuForPanel(this.dbExplorerPanel);
+
+		this.sqlTab.addTab(ResourceMgr.getString("MnuTxtDbExplorer"), this.dbExplorerPanel);
+		this.tabCount = this.sqlTab.getTabCount();
+		this.sqlPanels.add(this.dbExplorerPanel);
+
+		InputMap im = this.sqlTab.getInputMap();
+		ActionMap am = this.sqlTab.getActionMap();
+		WbAction action = new SelectTabAction(this.sqlTab, this.tabCount - 1, ResourceMgr.getString("MnuTxtShowDbExplorer"));
+		KeyStroke key = action.getAccelerator();
+		im.put(key, action.getActionName());
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_MASK), action.getActionName());
+		am.put(action.getActionName(), action);
+
+		this.panelMenus.add(dbmenu);
+		this.addToViewMenu(action);
+
+	}
+	
 	public void showDbExplorer()
 	{
-		if (this.dbExplorer == null)
+		if (this.dbExplorerPanel == null)
 		{
-			try
-			{
-				this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				this.dbExplorer = new DbExplorerWindow(this.currentConnection, this.currentProfileName);
-				this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError(this, "Could not initialize DbExplorerWindow", e);
-				this.dbExplorer = null;
-			}
+			this.dbExplorerPanel = new DbExplorerPanel();
+			this.dbExplorerPanel.setConnection(this.currentConnection);
 		}
-		if (this.dbExplorer != null) this.dbExplorer.show();
+		if (WbManager.getSettings().getShowDbExplorerInMainWindow())
+		{
+			Component c = this.sqlTab.getComponentAt(this.tabCount - 1);
+			if (!(c instanceof DbExplorerPanel))
+			{
+				this.addDbExplorerTab();
+			}
+			this.sqlTab.setSelectedIndex(this.tabCount - 1);
+		}
+		else
+		{
+			this.dbExplorerPanel.openWindow(this.currentProfileName);
+		}
 	}
 	
 	public String getCurrentProfileName()
@@ -399,7 +499,8 @@ public class MainWindow extends JFrame
 
 	public JMenu buildHelpMenu()
 	{
-		JMenu result = new JMenu(ResourceMgr.getString("MnuTxtHelp"));
+		JMenu result = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_HELP));
+		result.setName(ResourceMgr.MNU_TXT_HELP);
 		JMenuItem item = new JMenuItem(ResourceMgr.getString("MnuTxtHelpContents"));
 		item.putClientProperty("command", "helpContents");
 		item.addActionListener(this);
@@ -414,11 +515,17 @@ public class MainWindow extends JFrame
 	
 	public JMenu buildToolsMenu()
 	{
-		JMenu result = new JMenu(ResourceMgr.getString("MnuTxtTools"));
-		result.add(this.dbExplorerAction);
-		result.addSeparator();
+		JMenu result = new JMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_TOOLS));
+		result.setName(ResourceMgr.MNU_TXT_TOOLS);
 		
-		JMenuItem options = new JMenuItem(ResourceMgr.getString("MnuTxtOptions"));
+		if (!WbManager.getSettings().getShowDbExplorerInMainWindow())
+		{
+			result.add(this.dbExplorerAction);
+			result.addSeparator();
+		}
+		
+		JMenuItem options = new JMenuItem(ResourceMgr.getString(ResourceMgr.MNU_TXT_OPTIONS));
+		options.setName(ResourceMgr.MNU_TXT_OPTIONS);
 		options.putClientProperty("command", "optionsDialog");
 		options.addActionListener(this);
 		result.add(options);
@@ -452,6 +559,20 @@ public class MainWindow extends JFrame
 	}
 
 
+	public void listMenus()
+	{
+		for (int i=0; i < this.panelMenus.size(); i ++)
+		{
+			JMenuBar bar = (JMenuBar)this.panelMenus.get(i);
+			System.out.print("Menu " + i  + "=");
+			for (int k=0; k < bar.getComponentCount(); k++)
+			{
+				JMenuItem item = (JMenuItem)bar.getComponent(k);
+				System.out.print("/" + item.getText());
+			}
+			System.out.println("");
+		}
+	}
 	/** 
 	 *	Invoked when any of the main window menu commands are 
 	 *
@@ -468,9 +589,21 @@ public class MainWindow extends JFrame
 				String className = (String)item.getClientProperty("class");
 				try
 				{
+					WbManager.getSettings().setLookAndFeelClass(className);
 					UIManager.setLookAndFeel(className);
 					SwingUtilities.updateComponentTreeUI(this);
-					WbManager.getSettings().setLookAndFeelClass(className);
+					if (this.dbExplorerPanel != null)
+					{
+						DbExplorerWindow win = this.dbExplorerPanel.getWindow();
+						if (win != null)
+						{
+							SwingUtilities.updateComponentTreeUI(win);
+						}
+						else
+						{
+							SwingUtilities.updateComponentTreeUI(this.dbExplorerPanel);
+						}
+					}
 					for (int i=0; i < this.tabCount; i ++)
 					{
 						JMenuBar menu = (JMenuBar)this.panelMenus.get(i);
@@ -496,6 +629,7 @@ public class MainWindow extends JFrame
 				WbSwingUtilities.center(about, this);
 				about.show();
 			}
+			
 		}
 	}
 

@@ -48,10 +48,10 @@ public class TextPopup extends JPopupMenu
 		this.add(this.selectAll);
 	}
 	
-	public void addAction(Action anAction, boolean withSep)
+	public void addAction(WbAction anAction, boolean withSep)
 	{
 		if (withSep) this.addSeparator();
-		this.add(anAction);
+		this.add(anAction.getMenuItem());
 	}
 	
 

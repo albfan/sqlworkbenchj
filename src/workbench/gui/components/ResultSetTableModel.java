@@ -17,10 +17,13 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import javax.swing.JOptionPane;
+import workbench.WbManager;
 
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
@@ -154,6 +157,9 @@ public class ResultSetTableModel
 					{
 						LogMgr.logError(this, "Error converting input >" + aValue + "< to column type (" + this.getColumnType(column) + ") ", ce);
 						Toolkit.getDefaultToolkit().beep();
+						String msg = ResourceMgr.getString("MsgConvertError");
+						msg = msg + "\r\n" + ce.getLocalizedMessage();
+						WbManager.getInstance().showErrorMessage(msg);
 						return;
 					}
 				}

@@ -14,6 +14,8 @@ import java.util.HashMap;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.WbTable;
 
 /**
  *
@@ -37,11 +39,11 @@ public class DateColumnRenderer
 			aDateFormat = DEFAULT_FORMAT;
 		}
 		this.formatter = new SimpleDateFormat(aDateFormat);
+    this.setHorizontalAlignment(DefaultTableCellRenderer.RIGHT);
 	}
 
   public void setValue(Object value)
 	{
-    this.setHorizontalAlignment(DefaultTableCellRenderer.RIGHT);
 		Date aDate = null;
 		String newVal = null;
 		String tip = null;
@@ -73,5 +75,23 @@ public class DateColumnRenderer
 		this.setToolTipText(tip);
 		super.setValue(newVal);
   }
+	public Component getTableCellRendererComponent(	JTable table,
+																									Object value,
+																									boolean isSelected,
+																									boolean hasFocus,
+																									int row,
+																									int col)
+	{
+		Component result = super.getTableCellRendererComponent(table, value, isSelected, false, row, col);
+		if (hasFocus)
+		{
+			this.setBorder(WbTable.FOCUSED_CELL_BORDER);
+		}
+		else
+		{
+			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		}
+		return result;
+	}
 
 }

@@ -87,6 +87,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("LEVEL",Token.KEYWORD1);
 		keywords.add("LIST",Token.KEYWORD2);
 		keywords.add("LISTPROCS",Token.KEYWORD2);
+		keywords.add("LISTDB",Token.KEYWORD2);
 		keywords.add("MAX",Token.KEYWORD1);
 		keywords.add("MIN",Token.KEYWORD1);
 		keywords.add("MIRROREXIT",Token.KEYWORD1);

@@ -20,6 +20,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
 import workbench.exception.WbException;
+import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarButton;
 import workbench.interfaces.FileActions;
@@ -63,7 +64,7 @@ public class DriverlistEditorPanel extends javax.swing.JPanel implements FileAct
 
 	private void initComponents()
 	{
-		jSplitPane1 = new javax.swing.JSplitPane();
+		jSplitPane1 = new WbSplitPane();
 
 		listPanel = new javax.swing.JPanel();
 		jScrollPane1 = new javax.swing.JScrollPane();
@@ -72,9 +73,7 @@ public class DriverlistEditorPanel extends javax.swing.JPanel implements FileAct
 
 		setLayout(new java.awt.BorderLayout());
 
-		jSplitPane1.setBorder(null);
 		jSplitPane1.setDividerLocation(100);
-		jSplitPane1.setDividerSize(4);
 		listPanel.setLayout(new java.awt.BorderLayout());
 
 		driverList.addListSelectionListener(new javax.swing.event.ListSelectionListener()

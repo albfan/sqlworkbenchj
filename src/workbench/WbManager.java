@@ -18,6 +18,7 @@ import workbench.resource.Settings;
 import java.util.List;
 import javax.swing.JOptionPane;
 import workbench.db.ConnectionProfile;
+import workbench.gui.WbSwingUtilities;
 import workbench.util.WbCipher;
 
 /**
@@ -30,7 +31,7 @@ public class WbManager
 	private static WbManager wb = new WbManager();
 	private Settings settings = new Settings();
 	private ConnectionMgr connMgr = new ConnectionMgr();
-	private HashMap windowList = new HashMap();
+	private MainWindow mainWindow;
 	private WbCipher cipher = null;
 	
 	private WbManager() 
@@ -112,23 +113,19 @@ public class WbManager
 
 	public MainWindow createWindow()
 	{
-		int count = this.windowList.size() + 1;
-		String key = "jWbWindow_" + count;
-		MainWindow result = new MainWindow(key);
-		this.windowList.put(key, result);
-		return result;
+		this.mainWindow = new MainWindow("MainWindow");
+		return this.mainWindow;
 	}
 	
+	public void showErrorMessage(String aMsg)
+	{
+		WbSwingUtilities.showErrorMessage(this.mainWindow, aMsg);
+	}
 	public void exitWorkbench()
 	{
 		this.getConnectionMgr().disconnectAll();
-		Iterator values = this.windowList.values().iterator();
-		while (values.hasNext())
-		{
-			MainWindow win = (MainWindow)values.next();
-			win.saveSettings();
-			win.dispose();
-		}
+		this.mainWindow.saveSettings();
+		this.mainWindow.dispose();
 		this.settings.saveSettings();
 		System.exit(0);
 	}

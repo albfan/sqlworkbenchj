@@ -53,11 +53,16 @@ public class DataStore
 	private String updateTable;
 	private ArrayList updateTableColumns;
 
+	
+	public DataStore(String[] aColNames, int[] colTypes)
+	{
+		this(aColNames, colTypes, null);
+	}
 	/**
 	 *	Create a DataStore which is not based on a result set
 	 *	and contains the columns defined in the given array
 	 */
-	public DataStore(String[] aColNames, int[] colTypes)
+	public DataStore(String[] aColNames, int[] colTypes, int[] colSizes)
 	{
 		this.data = new ArrayList();
 		this.colCount = aColNames.length;
@@ -68,6 +73,7 @@ public class DataStore
 			this.columnNames[i] = aColNames[i];
 			this.columnTypes[i] = colTypes[i];
 		}
+		this.setColumnSizes(colSizes);
 	}
 	
 	public void setColumnSizes(int[] sizes)
@@ -159,33 +165,24 @@ public class DataStore
 		{
 			this.pkColumns = null;
 			this.updateTable = null;
+			this.updateTableColumns = null;
 			// now check the columns which are in that table
 			// so that we can refuse any changes to columns
 			// which do not derive from that table
 			// note that this does not work, if the 
 			// columns were renamed via an alias in the 
 			// select statement
-			ResultSet columns = WbManager.getInstance().getConnectionMgr().getTableDefinition(aTablename);
+			DataStore columns = WbManager.getInstance().getConnectionMgr().getTableDefinition(aTablename);
 			if (columns == null) 
 			{
 				return;
 			}
 			this.updateTable = aTablename;
 			this.updateTableColumns = new ArrayList();
-			try
+			for (int i=0; i < columns.getRowCount(); i++)
 			{
-				while (columns.next())
-				{
-					String table = columns.getString("COLUMN_NAME");
-					this.updateTableColumns.add(table.toLowerCase());
-				}
-				columns.close();
-			}
-			catch (Exception e)
-			{
-				LogMgr.logWarning(this, "Could not retrieve columns for update table!", e);
-				this.updateTable = null;
-				this.updateTableColumns = null;
+				String table = columns.getValue(i, 0).toString();
+				this.updateTableColumns.add(table.toLowerCase());
 			}
 		}
 	}
@@ -231,7 +228,10 @@ public class DataStore
 			if (!this.updateTableColumns.contains(col)) return;
 		}
 		RowData row = this.getRow(aRow);
-		row.setValue(aColumn,aValue);
+		if (aValue == null)
+			row.setNull(aColumn, this.columnTypes[aColumn]);
+		else
+			row.setValue(aColumn,aValue);
 		this.modified = row.isModified();
 	}
 
@@ -367,7 +367,7 @@ public class DataStore
 					{
 						Object value = aResultSet.getObject(i + 1);
 						int realCol = colmapping[i];
-						if (aResultSet.wasNull())
+						if (aResultSet.wasNull() || value == null)
 						{
 							row.setNull(realCol, this.columnTypes[realCol]);
 						}
@@ -717,7 +717,7 @@ public class DataStore
 		{
 			Connection sqlConn = aConnection.getSqlConnection();
 			DatabaseMetaData meta = sqlConn.getMetaData();
-			this.updateTable = aConnection.getMetadata().adjustTablename(this.updateTable);
+			this.updateTable = aConnection.getMetadata().adjustObjectname(this.updateTable);
 			ResultSet rs = meta.getBestRowIdentifier(null, null, this.updateTable, DatabaseMetaData.bestRowSession, false);
 			int index;
 			String col;

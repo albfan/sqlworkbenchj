@@ -12,7 +12,10 @@ import java.awt.event.ActionEvent;
 import javax.swing.Action;
 import workbench.resource.ResourceMgr;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.lang.Runnable;
+import javax.swing.KeyStroke;
 import workbench.WbManager;
 import workbench.gui.MainWindow;
 
@@ -30,6 +33,7 @@ public class ShowDbExplorerAction extends WbAction
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtShowDbExplorer"));
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("Database"));
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtShowDbExplorer"));
+		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_MASK));
 	}
 
 	public void actionPerformed(ActionEvent e)

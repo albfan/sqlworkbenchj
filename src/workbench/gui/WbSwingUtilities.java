@@ -22,6 +22,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import workbench.gui.components.TextComponentMouseListener;
+import workbench.resource.ResourceMgr;
 
 public class WbSwingUtilities
 {
@@ -111,6 +112,10 @@ public class WbSwingUtilities
 		caller.getTopLevelAncestor().setCursor(null);
 	}
 	
+	public static void showErrorMessage(Component aCaller, String aMessage)
+	{
+		JOptionPane.showMessageDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.ERROR_MESSAGE);
+	}
 	
 	public static String getUserInput(Component caller, String aTitle, String initialValue)
 	{

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.4.0_01" class="java.beans.XMLDecoder"> 
+ <object class="java.util.HashMap"> 
+  <void method="put"> 
+   <string>Oracle</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>SELECT trigger_name, trigger_type, triggering_event as trigger_event FROM all_triggers</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>table_name</string> 
+    </void> 
+    <void property="orderBy"> 
+     <string>ORDER BY trigger_name</string> 
+    </void> 
+    <void property="schemaField"> 
+     <string>owner</string> 
+    </void> 
+    <void property="useUpperCase"> 
+     <boolean>true</boolean> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+</java> 

@@ -14,6 +14,7 @@ public class DividerBorder extends AbstractBorder
 	public static final int TOP = 2;
 	public static final int BOTTOM = 3;
 	public static final int MIDDLE = 4;
+	public static final int LEFT_RIGHT = 5;
 	
 	protected int type;
 	protected int thickness;
@@ -61,6 +62,15 @@ public class DividerBorder extends AbstractBorder
 				g.drawLine(x + width - 1, y, x + width - 1, y + height);
 				break;
 			case LEFT:
+				g.drawLine(x, y, x, y + height);
+				g.setColor(light);
+				g.drawLine(x + 1, y, x + 1, y + height);
+				break;
+			case LEFT_RIGHT:
+				g.drawLine(x + width - 2, y, x + width - 2, y + height);
+				g.setColor(light);
+				g.drawLine(x + width - 1, y, x + width - 1, y + height);
+				g.setColor(shade);
 				g.drawLine(x, y, x, y + height);
 				g.setColor(light);
 				g.drawLine(x + 1, y, x + 1, y + height);

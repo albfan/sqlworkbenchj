@@ -27,7 +27,7 @@ public class WbConnection
 	public WbConnection()
 	{
 	}
-
+	
 	public WbConnection(Connection aConn)
 	{
 		this.setSqlConnection(aConn);

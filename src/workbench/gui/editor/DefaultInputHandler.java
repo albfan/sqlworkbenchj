@@ -19,7 +19,7 @@ import java.util.StringTokenizer;
  * The default input handler. It maps sequences of keystrokes into actions
  * and inserts key typed events into the text area.
  * @author Slava Pestov
- * @version $Id: DefaultInputHandler.java,v 1.2 2002-07-17 21:04:29 thomas Exp $
+ * @version $Id: DefaultInputHandler.java,v 1.3 2002-08-10 15:57:37 thomas Exp $
  */
 public class DefaultInputHandler extends InputHandler
 {
@@ -75,6 +75,8 @@ public class DefaultInputHandler extends InputHandler
 		addKeyBinding("S+DOWN",SELECT_NEXT_LINE);
 
 		addKeyBinding("C+ENTER",REPEAT);
+		addKeyBinding("C+U", MAKE_UPPER_CASE);
+		addKeyBinding("C+L", MAKE_LOWER_CASE);
 	}
 
 	/**
@@ -184,6 +186,7 @@ public class DefaultInputHandler extends InputHandler
 				// key we don't know about unless a
 				// prefix is active. Otherwise it will
 				// beep when caps lock is pressed, etc.
+				/*
 				if(currentBindings != bindings)
 				{
 					Toolkit.getDefaultToolkit().beep();
@@ -192,7 +195,7 @@ public class DefaultInputHandler extends InputHandler
 					repeatCount = 0;
 					repeat = false;
 					evt.consume();
-				}
+				}*/
 				currentBindings = bindings;
 				return;
 			}
@@ -221,13 +224,11 @@ public class DefaultInputHandler extends InputHandler
 	{
 		int modifiers = evt.getModifiers();
 		char c = evt.getKeyChar();
-		if(c != KeyEvent.CHAR_UNDEFINED &&
-			(modifiers & KeyEvent.ALT_MASK) == 0)
+		if(c != KeyEvent.CHAR_UNDEFINED && (modifiers & KeyEvent.ALT_MASK) == 0)
 		{
 			if(c >= 0x20 && c != 0x7f)
 			{
-				KeyStroke keyStroke = KeyStroke.getKeyStroke(
-					Character.toUpperCase(c));
+				KeyStroke keyStroke = KeyStroke.getKeyStroke(Character.toUpperCase(c));
 				Object o = currentBindings.get(keyStroke);
 
 				if(o instanceof Hashtable)
@@ -238,9 +239,7 @@ public class DefaultInputHandler extends InputHandler
 				else if(o instanceof ActionListener)
 				{
 					currentBindings = bindings;
-					executeAction((ActionListener)o,
-						evt.getSource(),
-						String.valueOf(c));
+					executeAction((ActionListener)o,evt.getSource(),String.valueOf(c));
 					return;
 				}
 
@@ -260,8 +259,7 @@ public class DefaultInputHandler extends InputHandler
 					return;
 				}
 
-				executeAction(INSERT_CHAR,evt.getSource(),
-					String.valueOf(evt.getKeyChar()));
+				executeAction(INSERT_CHAR,evt.getSource(),String.valueOf(evt.getKeyChar()));
 
 				repeatCount = 0;
 				repeat = false;

@@ -6,8 +6,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
-import workbench.gui.sql.SqlPanel;
-import workbench.interfaces.ClipboardSupport;
+import workbench.interfaces.Searchable;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -16,9 +15,9 @@ import workbench.resource.ResourceMgr;
  */
 public class FindAction extends WbAction
 {
-	private SqlPanel client;
+	private Searchable client;
 
-	public FindAction(SqlPanel aClient)
+	public FindAction(Searchable aClient)
 	{
 		super();
 		this.client = aClient;

@@ -11,8 +11,9 @@ import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
-import workbench.gui.sql.SqlPanel;
+import workbench.interfaces.Searchable;
 import workbench.resource.ResourceMgr;
+
 
 /**
  *	Action to clear the contents of a entry field
@@ -20,9 +21,9 @@ import workbench.resource.ResourceMgr;
  */
 public class FindAgainAction extends WbAction
 {
-	private SqlPanel client;
+	private Searchable client;
 
-	public FindAgainAction(SqlPanel aClient)
+	public FindAgainAction(Searchable aClient)
 	{
 		super();
 		this.client = aClient;

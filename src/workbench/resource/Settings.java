@@ -303,7 +303,7 @@ public class Settings
 
 	public int getEditorTabWidth()
 	{
-		return StringUtil.getIntValue(this.props.getProperty("workbench.editor.tabwidth", "4"));
+		return StringUtil.getIntValue(this.props.getProperty("workbench.editor.tabwidth", "2"));
 	}
 
 	public void setEditorTabWidth(int aWidth)
@@ -396,7 +396,7 @@ public class Settings
 
 	public int getMaxFractionDigits()
 	{
-		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.display.maxfractiondigits", "-1"));
+		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.display.maxfractiondigits", "2"));
 	}
 
 	public void setDefaultDateFormat(int aDigits)
@@ -419,4 +419,45 @@ public class Settings
 		return "true".equals(this.props.getProperty("workbench.db.debugger", "true"));
 	}
 
+	public int getProfileDividerLocation()
+	{
+		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.profiles.divider", "-1"));
+	}
+	
+	public void setProfileDividerLocation(int aValue)
+	{
+		this.props.setProperty("workbench.gui.profiles.divider", Integer.toString(aValue));
+	}
+	
+	public void setProperty(String aClass, String aProperty, String aValue)
+	{
+		this.props.setProperty(aClass + "." + aProperty.toLowerCase(), aValue);
+	}
+	
+	public void setProperty(String aClass, String aProperty, int aValue)
+	{
+		this.props.setProperty(aClass + "." + aProperty.toLowerCase(), Integer.toString(aValue));
+	}
+	
+	public String getProperty(String aClass, String aProperty, String aDefault)
+	{
+		return this.props.getProperty(aClass + "." + aProperty.toLowerCase(), aDefault);
+	}
+	
+	public int getIntProperty(String aClass, String aProperty)
+	{
+		String value = this.getProperty(aClass, aProperty, "0");
+		return StringUtil.getIntValue(value);
+	}
+	
+	public boolean getShowDbExplorerInMainWindow()
+	{
+		return "true".equalsIgnoreCase(this.props.getProperty("workbench.dbexplorer.mainwindow", "false"));
+	}
+	
+	public boolean getRetrievePKList()
+	{
+		return "true".equalsIgnoreCase(this.props.getProperty("workbench.db.retrievepklist", "true"));
+	}
+	
 }

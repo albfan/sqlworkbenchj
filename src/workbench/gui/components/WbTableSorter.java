@@ -383,7 +383,24 @@ public class WbTableSorter
 		this.sort(this);
 		fireTableChanged(new TableModelEvent(this));
 	}
-	
+
+	public void startSorting(final WbTable table, final int aColumn, final boolean ascending)
+	{
+		final WbTableSorter sorter = this;
+		EventQueue.invokeLater( new Runnable()
+		{
+			public void run()
+			{
+				//tableView.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				sorter.sortByColumn(aColumn, ascending);
+				//tableView.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				table.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				// repaint the header so that the icon is displayed...
+				table.getTableHeader().repaint(); 
+			}
+		});
+	}
 	/**    Get the column which is being sorted.
 	 *
 	 * @return The sorted column
@@ -434,7 +451,7 @@ public class WbTableSorter
 				final int viewColumn = columnModel.getColumnIndexAtX(e.getX());
 				final int column = tableView.convertColumnIndexToModel(viewColumn);
 
-				if (e.getClickCount() == 1 && column != -1)
+				if (e.getButton() == e.BUTTON1 && e.getClickCount() == 1 && column != -1)
 				{
 					if (WbTableSorter.this.column == column)
 					{
@@ -444,19 +461,8 @@ public class WbTableSorter
 					{
 						ascending = true;
 					}
-					EventQueue.invokeLater( new Runnable()
-					{
-						public void run()
-						{
-							tableView.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-							tableView.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-							sorter.sortByColumn(column, ascending);
-							tableView.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-							tableView.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-							// repaint the header so that the icon is displayed...
-							tableView.getTableHeader().repaint(); 
-						}
-					});
+					// start sorting in background...
+					sorter.startSorting(tableView, column, ascending);
 				}
 			}
 		};

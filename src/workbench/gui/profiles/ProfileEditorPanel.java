@@ -21,6 +21,7 @@ import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.exception.WbException;
+import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.components.WbToolbarSeparator;
@@ -41,7 +42,7 @@ public class ProfileEditorPanel
 	private int lastIndex = -1;
 	private ConnectionEditorPanel connectionEditor;
 	private MouseListener listMouseListener;
-	
+
 	/** Creates new form ProfileEditor */
 	public ProfileEditorPanel()
 	{
@@ -88,7 +89,7 @@ public class ProfileEditorPanel
 	 */
 	private void initComponents()//GEN-BEGIN:initComponents
 	{
-		jSplitPane1 = new javax.swing.JSplitPane();
+		jSplitPane1 = new WbSplitPane();
 		
 		
 		listPanel = new javax.swing.JPanel();
@@ -99,7 +100,6 @@ public class ProfileEditorPanel
 		
 		jSplitPane1.setBorder(new javax.swing.border.EtchedBorder());
 		jSplitPane1.setDividerLocation(110);
-		jSplitPane1.setDividerSize(4);
 		listPanel.setLayout(new java.awt.BorderLayout());
 		
 		jScrollPane1.setPreferredSize(null);
@@ -145,7 +145,7 @@ public class ProfileEditorPanel
 	{
 		this.listMouseListener = aListener;
 	}
-	
+
 	private void jList1ValueChanged(javax.swing.event.ListSelectionEvent evt)//GEN-FIRST:event_jList1ValueChanged
 	{//GEN-HEADEREND:event_jList1ValueChanged
 		if (this.connectionEditor == null) return;
@@ -245,6 +245,11 @@ public class ProfileEditorPanel
 		ConnectionMgr conn = WbManager.getInstance().getConnectionMgr();
 		conn.setProfiles(this.model.getValues());
 		conn.saveXmlProfiles();
+	}
+
+	public int getProfileCount()
+	{
+		return this.jList1.getModel().getSize();
 	}
 
 }
