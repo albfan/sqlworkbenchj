@@ -417,9 +417,14 @@ public class Settings
 		return page;
 	}
 
+	public boolean getShowNativePageDialog()
+	{
+		return "true".equals(this.props.getProperty("workbench.print.nativepagedialog", "true"));
+	}
+
 	private int getPrintOrientation()
 	{
-		return StringUtil.getIntValue(this.props.getProperty("print.paper.orientation"), PageFormat.PORTRAIT);
+		return StringUtil.getIntValue(this.props.getProperty("workbench.print.orientation"), PageFormat.PORTRAIT);
 	}
 
 	private void setPrintOrientation(int aValue)

@@ -8,7 +8,7 @@ package workbench.storage;
 
 /**
  *
- * @author  tkellerer
+ * @author  workbench@kellerer.org
  */
 public interface RowActionMonitor
 {
@@ -17,6 +17,7 @@ public interface RowActionMonitor
 	final int MONITOR_LOAD = 2;
 	final int MONITOR_EXPORT = 3;
 	final int MONITOR_COPY = 4;
+
 	void setMonitorType(int aType);
 	void setCurrentRow(int currentRow, int totalRows);
 	void jobFinished();

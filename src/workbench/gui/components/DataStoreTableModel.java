@@ -16,6 +16,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import workbench.interfaces.JobErrorHandler;
 
 
 
@@ -114,7 +115,7 @@ public class DataStoreTableModel
 	 *	The status column will display an indicator if the row has
 	 *  been modified or was inserted
 	 */
-	public void setShowStatusColumn(boolean aFlag)
+	public synchronized void setShowStatusColumn(boolean aFlag)
 	{
 		if (aFlag == this.showStatusColumn) return;
 		this.showStatusColumn = aFlag;
@@ -261,17 +262,17 @@ public class DataStoreTableModel
 		this.fireTableRowsDeleted(aRow, aRow);
 	}
 
-	public void importFile(String aFilename, boolean hasHeader, String colSep)
-		throws FileNotFoundException
-	{
-		this.importFile(aFilename, hasHeader, colSep, "\"");
-
-	}
 	public void importFile(String aFilename, boolean hasHeader, String colSep, String quoteChar)
 		throws FileNotFoundException
 	{
+		this.importFile(aFilename, hasHeader, colSep, quoteChar, null);
+	}
+
+	public void importFile(String aFilename, boolean hasHeader, String colSep, String quoteChar, JobErrorHandler errorHandler)
+		throws FileNotFoundException
+	{
 		if (this.dataCache == null) return;
-		this.dataCache.importData(aFilename, hasHeader, colSep, quoteChar);
+		this.dataCache.importData(aFilename, hasHeader, colSep, quoteChar, errorHandler);
 		int row = this.getRowCount();
 		this.fireTableRowsInserted(0, row - 1);
 	}

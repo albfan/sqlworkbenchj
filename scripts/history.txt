@@ -1,5 +1,49 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh:  Rows in the result set can now be copied ("cloned")
+Enh:  The text file import now reports the rows which had problems
+Fix:  Importing a text file did not work for data types other then VARCHAR
+Fix:  Updating the database from the DbExplorer is now done in the background
+      so that the GUI doesn't lock up.
+Fix:  When updating a table from within the DbExplorer, the setting
+      to preview the update statements was not used.
+      (The preview was never shown)
+
+
+Build 71, 05.04.2004
+--------------------
+Enh:  The SQL parser now accepts # as a single line comment character as well
+      (MySQL standard)
+Enh:  The EXPORT command can now export to HTML as well.
+Enh:  If an error occurs during sending result set updates to the database,
+      the user can now choose to abort or ignore the errors.
+Enh:  In the result sets more then one row can now be selected and deleted.
+Enh:  The popup menu for the table list (in the DbExplorer) now offers the
+      possibility to delete all table data.
+Enh:  Procedures and packages can now be recompmiled for Oracle
+Enh:  Files can now be dropped from the filesystem into the editor
+Fix:  If no development build is available the version check information does
+      not show anything at all
+Fix:  When closing tabs with files in it, subsequent tabs without names where
+      not reloaded correctly the next time.
+Fix:  The label for the alternate delimiter in the options dialog was not
+      displayed correctly
+Fix:  When using MS SQL Server with autocommit off, the update table was not
+      retrieved correctly and thus "Copy as INSERT" was not working
+Fix:  If a file was opened using Ctrl-O or saved using Ctrl-S the tab label
+      was not updated.
+Fix:  If the DataPumper (or import) was defined with update mode and only
+      key columns where selected, it would fail without reporting the cause
+      of the problem.
+Fix:  When opening multiple windows, the DatabaseExplorer would not work
+      properly if the Connection Profile was set to "One Connection per Tab"
+Fix:  Workspaces where one editor tab was completely empty were not loaded
+      properly.
+Fix:  The page setup dialog (from within the print preview) caused the
+      application to hang when run under Linux
+
+Build 70, 05.03.2004
+--------------------
 Enh:  The EXPORT command now supports the -append parameter to append text of
       SQL output to an already existing file
 Enh:  When printing, the page now contains a header identifying the source of
@@ -14,7 +58,7 @@ Enh:  Column/Table level constraints defined with the check() keyword are now
       Firebird, Postgres, SQL Server, Oracle, Adaptive Server Anywhere and
       HSQLDB >= 1.7.2 RC2
 Enh:  The DatabaseExplorer now shows Sequences for Oracle
-Enh:  The connection info can now be configured with the property 
+Enh:  The connection info can now be configured with the property
       workbench.gui.connectiondisplay
       The value for that property can contain the following placeholders:
       %username%, %url%, %profile%, %catalog%

@@ -30,6 +30,7 @@ public class WbExport extends SqlCommand
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument("type");
 		cmdLine.addArgument("file");
+		cmdLine.addArgument("title");
 		cmdLine.addArgument("table");
 		cmdLine.addArgument("delimiter");
 		cmdLine.addArgument("quotechar");
@@ -48,6 +49,8 @@ public class WbExport extends SqlCommand
 		cmdLine.addArgument("sqlinsert");
 		cmdLine.addArgument("sqlupdate");
 		cmdLine.addArgument("append");
+		cmdLine.addArgument("escapehtml");
+		cmdLine.addArgument("createfullhtml");
 	}
 
 	public String getVerb() { return VERB; }
@@ -172,6 +175,35 @@ public class WbExport extends SqlCommand
 			if (format != null) spooler.setDecimalSymbol(format);
 
 			spooler.setOutputTypeXml();
+			if (table != null) spooler.setTableName(table);
+		}
+		else if ("html".equalsIgnoreCase(type))
+		{
+			// change the contents of type in order to display it properly
+			typeDisplay = "HTML";
+			String format = cmdLine.getValue("dateformat");
+			if (format != null) spooler.setTextDateFormat(format);
+
+			format = cmdLine.getValue("timestampformat");
+			if (format != null) spooler.setTextTimestampFormat(format);
+
+			format = cmdLine.getValue("decimal");
+			if (format != null) spooler.setDecimalSymbol(format);
+
+			spooler.setHtmlTitle(cmdLine.getValue("title"));
+
+			String value = cmdLine.getValue("escapehtml");
+			if (value != null)
+			{
+				spooler.setEscapeHtml("true".equalsIgnoreCase(value));
+			}
+			value = cmdLine.getValue("createfullhtml");
+			if (value != null)
+			{
+				spooler.setCreateFullHtmlPage("true".equalsIgnoreCase(value));
+			}
+
+			spooler.setOutputTypeHtml();
 			if (table != null) spooler.setTableName(table);
 		}
 		else

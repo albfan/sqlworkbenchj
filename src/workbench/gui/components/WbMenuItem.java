@@ -6,6 +6,7 @@ package workbench.gui.components;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JMenuItem;
+import workbench.resource.ResourceMgr;
 
 /**
  *
@@ -78,4 +79,8 @@ public class WbMenuItem
 		}
 	}	
 
+	public void setBlankIcon()
+	{
+		this.setIcon(ResourceMgr.getImage("blank"));
+	}
 }

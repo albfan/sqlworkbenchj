@@ -11,13 +11,13 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
-import workbench.util.LineTokenizer;
 import workbench.util.StringUtil;
 
 /**
@@ -39,8 +39,9 @@ public class SqlCommand
 	protected boolean checkVerb(String aSql)
 		throws Exception
 	{
-		LineTokenizer tok = new LineTokenizer(aSql, " ");
-		String verb = tok.nextToken();
+		StringTokenizer tok = new StringTokenizer(aSql, " ");
+		String verb = null;
+		if (tok.hasMoreTokens()) verb = tok.nextToken();
 		String thisVerb = this.getVerb();
 		if (!thisVerb.equalsIgnoreCase(verb)) throw new Exception("Syntax error! " + thisVerb + " expected");
 		return true;

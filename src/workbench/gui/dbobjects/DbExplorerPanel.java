@@ -65,10 +65,12 @@ public class DbExplorerPanel
 	private ConnectionInfo connectionInfo;
 	private boolean restoreWindow = false;
 	private boolean retrievePending = false;
+	private int internalId = 0;
 	
-	public DbExplorerPanel(MainWindow aParent)
+	public DbExplorerPanel(MainWindow aParent, int index)
 	{
 		this.parentWindow = aParent;
+		this.internalId = index;
 		try
 		{
 			tables = new TableListPanel(aParent);
@@ -77,8 +79,14 @@ public class DbExplorerPanel
 			tabPane = new JTabbedPane(JTabbedPane.TOP);
 			tabPane.setUI(TabbedPaneUIFactory.getBorderLessUI());
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerTables"), tables);
+			tabPane.setToolTipTextAt(0, ResourceMgr.getDescription("TxtDbExplorerTables"));
+			
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerProcs"), procs);
+			tabPane.setToolTipTextAt(1, ResourceMgr.getDescription("TxtDbExplorerProcs"));
+			
 			tabPane.add(ResourceMgr.getString("TxtSearchTables"), this.searchPanel);
+			tabPane.setToolTipTextAt(2, ResourceMgr.getDescription("TxtSearchTables"));
+			
 			//tabPane.add(ResourceMgr.getString("TxtPersistenceGenerator"), new JPanel());
 			tabPane.setFocusable(false);
 			
@@ -125,9 +133,10 @@ public class DbExplorerPanel
 	{
 		return false;
 	}
+	
 	public String getId()
 	{
-		return "DbExp";
+		return "WbExp-" + Integer.toString(this.internalId);
 	}
 
 	private void initSearchPanel()

@@ -35,6 +35,7 @@ public class SqlUtil
 	public static String getSqlVerb(String aStatement)
 	{
 		StringTokenizer tok = new StringTokenizer(aStatement.trim());
+		if (!tok.hasMoreTokens()) return "";
 		return tok.nextToken(" \t");
 	}
 
@@ -71,22 +72,51 @@ public class SqlUtil
 		if (fromEnd == -1) fromEnd = aSql.indexOf(" ORDER ", fromPos);
 		if (fromEnd == -1) fromEnd = aSql.length();
 		String fromList = orgSql.substring(fromPos + FROM.length(), fromEnd);
-		StringTokenizer tok = new StringTokenizer(fromList, ",");
+		
+		boolean joinSyntax = (aSql.indexOf(" JOIN ", fromPos) > -1);
 		ArrayList result = new ArrayList();
-		while (tok.hasMoreTokens())
+		if (joinSyntax)
 		{
-			String table = tok.nextToken().trim();
-			pos = table.indexOf(' ');
-			if (pos != -1)
+			StringTokenizer tok = new StringTokenizer(fromList, " ");
+			// first token after the FROM clause is the first table
+			// we can add it right away
+			if (tok.hasMoreTokens())
 			{
-				table = table.substring(0, pos);
+				result.add(tok.nextToken());
 			}
-			result.add(table);
+			boolean nextIsTable = false;
+			while (tok.hasMoreTokens())
+			{
+				String s = tok.nextToken();
+				if (nextIsTable)
+				{
+					result.add(s);
+					nextIsTable = false;
+				}
+				else 
+				{
+					nextIsTable = ("JOIN".equalsIgnoreCase(s));
+				}
+			}
+		}
+		else
+		{
+			StringTokenizer tok = new StringTokenizer(fromList, ",");
+			while (tok.hasMoreTokens())
+			{
+				String table = tok.nextToken().trim();
+				pos = table.indexOf(' ');
+				if (pos != -1)
+				{
+					table = table.substring(0, pos);
+				}
+				result.add(table);
+			}
 		}
 
 		return result;
 	}
-
+	
 	public static String makeCleanSql(String aSql, boolean keepNewlines)
 	{
 		return makeCleanSql(aSql, keepNewlines, '\'');
@@ -407,4 +437,22 @@ public class SqlUtil
 			return "UNKNOWN";
 	}
 
+	public static void main(String args[])
+	{
+		try
+		{
+			String sql = "select bla from table1 left outer join table2 on (x=y) inner join table3 on (x=y2);";
+			List l = getTables(sql);
+			for (int i=0; i < l.size(); i++)
+			{
+				System.out.println("table=" + l.get(i));
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		System.out.println("*** Done.");
+	}
+	
 }

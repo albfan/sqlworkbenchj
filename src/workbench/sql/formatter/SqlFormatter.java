@@ -43,8 +43,8 @@ public class SqlFormatter
 	static
 	{
 		//LINE_BREAK_AFTER.add("UNION");
-		LINE_BREAK_AFTER.add("MINUS");
-		LINE_BREAK_AFTER.add("INTERSECT");
+		//LINE_BREAK_AFTER.add("MINUS");
+		//LINE_BREAK_AFTER.add("INTERSECT");
 		LINE_BREAK_AFTER.add("AS");
 		LINE_BREAK_AFTER.add("FOR");
 		LINE_BREAK_AFTER.add("JOIN");
@@ -76,6 +76,8 @@ public class SqlFormatter
 	{
 		FROM_TERMINAL.addAll(WHERE_TERMINAL);
 		FROM_TERMINAL.add("WHERE");
+		FROM_TERMINAL.add("MINUS");
+		FROM_TERMINAL.add("INTERSECT");
 	}
 
 
@@ -281,7 +283,7 @@ public class SqlFormatter
 	{
 		StringBuffer b = new StringBuffer("     ");
 		StringBuffer oldIndent = this.indent;
-		this.indent = null;
+		//this.indent = null;
 		SQLToken t = (SQLToken)this.lexer.getNextToken(true, false);
 		SQLToken lastToken = t;
 		while (t != null)
@@ -612,6 +614,7 @@ public class SqlFormatter
 	{
 		SQLToken t = (SQLToken)this.lexer.getNextToken(true, false);
 		SQLToken lastToken = t;
+		if (this.indent != null) this.appendText(this.indent);
 		while (t != null)
 		{
 			if (t.isComment())
@@ -1387,7 +1390,9 @@ public class SqlFormatter
 //           "      FROM userprops \n" +
 //           "      WHERE NAME= 'city' \n" +
 //           "      ) city \n";
-					String sql = "update bla set col1 = (select x from y)";
+//					String sql = "update bla set col1 = (select x from y)";
+			String sql = "select * from (SELECT x,y,z FROM tab1,tab2,tab3 minus SELECT x2 from tab2,tab2,tab4 WHERE x=1)";
+//			String sql = "SELECT  x , y , z   FROM   tab1 , tab2 , tab3  MINUS   SELECT   x2   FROM   tab2 , tab2 , tab4   WHERE   x = 1";
 			//String sql = "UPDATE bla set column1='test',col2=NULL, col4=222 where xyz=42 AND ab in (SELECT x from t\nWHERE x = 6) OR y = 5;commit;";
 //			String sql="SELECT city.id, \n" +
 //           "       city.value, \n" +

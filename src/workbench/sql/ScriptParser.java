@@ -313,14 +313,21 @@ public class ScriptParser
 
 				if (!commentOn)
 				{
+					// set the last character to a newline
+					// if pos == 0, we "fake" a a new line for
+					// the single line comment test further down
+					char last = '\r';
+					if (pos > 1)  last = this.originalScript.charAt(pos - 1);
+					
 					char next = this.originalScript.charAt(pos + 1);
+					
 					if (toTest == '/' && next == '*')
 					{
 						blockComment = true;
 						singleLineComment = false;
 						commentOn = true;
 					}
-					else if (toTest == '-' && next == '-')
+					else if ((last == '\n' || last == '\r') && (toTest == '#' || (toTest == '-' && next == '-')))
 					{
 						singleLineComment = true;
 						blockComment = false;

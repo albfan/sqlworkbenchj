@@ -47,31 +47,34 @@ import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarButton;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import javax.swing.SwingUtilities;
+import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.HashPrintRequestAttributeSet;
 
 
-public class PrintPreview 
-	extends JDialog 
+public class PrintPreview
+	extends JDialog
 	implements ActionListener, WindowListener
 {
 	protected int pageWidth;
 	protected int pageHeight;
 	private int scale = 100;
-	
+
 	protected TablePrinter printTarget;
-	
+
 	protected JComboBox cbZoom;
 	private JButton pageSetupButton;
 	private JButton printButton;
 	private JButton chooseFontButton;
 	private JButton closeButton;
-	
+
 	private JButton pageRight;
 	private JButton pageLeft;
-	
+
 	private JButton pageDown;
 	private JButton pageUp;
 	private boolean hasHorizontalPages;
-	
+
 	private JScrollPane scroll;
 	protected PreviewContainer preview;
 	private PagePreview pageDisplay;
@@ -80,7 +83,7 @@ public class PrintPreview
 	public PrintPreview(JFrame owner, TablePrinter target)
 	{
 		super(owner, ResourceMgr.getString("TxtPrintPreviewWindowTitle"), true);
-		
+
 		if (!WbManager.getSettings().restoreWindowSize(this))
 		{
 			setSize(500, 600);
@@ -94,25 +97,25 @@ public class PrintPreview
 
 		WbToolbar tb = new WbToolbar();
 		tb.addDefaultBorder();
-		
+
 		this.printButton = new WbToolbarButton(ResourceMgr.getString("LabelPrintButton"));
 		this.printButton.addActionListener(this);
 		tb.add(printButton);
 
 		tb.addSeparator();
-		
+
 		this.chooseFontButton = new WbToolbarButton(ResourceMgr.getString("LabelSetectPrintFont"));
 		this.chooseFontButton.addActionListener(this);
 		tb.add(this.chooseFontButton);
-		
+
 		tb.addSeparator();
-		
+
 		this.pageSetupButton = new WbToolbarButton(ResourceMgr.getString("LabelPageSetupButton"));
 		this.pageSetupButton.addActionListener(this);
 		tb.add(this.pageSetupButton);
 
 		tb.addSeparator();
-		
+
 		this.pageDown = new WbToolbarButton(ResourceMgr.getImage("Down"));
 		this.pageDown.addActionListener(this);
 		this.pageDown.setEnabled(false);
@@ -126,7 +129,7 @@ public class PrintPreview
 		if (this.printTarget.getPagesAcross() > 1)
 		{
 			this.hasHorizontalPages = true;
-			
+
 			this.pageLeft = new WbToolbarButton(ResourceMgr.getImage("Back"));
 			this.pageLeft.addActionListener(this);
 			this.pageLeft.setEnabled(false);
@@ -137,7 +140,7 @@ public class PrintPreview
 			this.pageRight.setEnabled(false);
 			tb.add(this.pageRight);
 		}
-		
+
 		tb.addSeparator();
 
 		String[] scales = { "10%", "25%", "50%", "100%", "150%"};
@@ -148,7 +151,7 @@ public class PrintPreview
 		this.cbZoom.addActionListener(this);
 		tb.add(this.cbZoom);
 		tb.addSeparator();
-		
+
 		this.closeButton = new WbToolbarButton(ResourceMgr.getString("LabelClose"));
 		this.closeButton.addActionListener(this);
 		tb.add(this.closeButton);
@@ -156,21 +159,21 @@ public class PrintPreview
 		getContentPane().add(tb, BorderLayout.NORTH);
 
 		this.addWindowListener(this);
-		
+
 		this.preview = new PreviewContainer();
 		this.pageDisplay = new PagePreview();
 		this.preview.add(this.pageDisplay);
 		showCurrentPage();
-		
+
 		this.scroll = new JScrollPane(this.preview);
 		adjustScrollbar();
-		
+
 		getContentPane().add(scroll, BorderLayout.CENTER);
-		
+
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setVisible(true);
 	}
-	
+
 	private void selectPrintFont()
 	{
 		Font f = WbFontChooser.chooseFont(this, this.printTarget.getFont());
@@ -199,7 +202,7 @@ public class PrintPreview
 		FontMetrics fm = this.getFontMetrics(f);
 		this.scroll.getVerticalScrollBar().setUnitIncrement((int)fm.getHeight());
 	}
-	
+
 	private void showCurrentPage()
 	{
 		WbSwingUtilities.showWaitCursorOnWindow(this);
@@ -223,7 +226,7 @@ public class PrintPreview
 				g.setStroke(new BasicStroke(0.2f));
 				g.drawRect((int)pageFormat.getImageableX() - 1, (int)pageFormat.getImageableY() - 1, (int)pageFormat.getImageableWidth() + 1, (int)pageFormat.getImageableHeight() + 1);
 				g.setStroke(s);
-				if (this.printTarget.print(g, pageFormat, this.currentPage) == Printable.PAGE_EXISTS)			
+				if (this.printTarget.print(g, pageFormat, this.currentPage) == Printable.PAGE_EXISTS)
 				{
 					this.pageDisplay.setImage(w,h,img);
 				}
@@ -245,10 +248,10 @@ public class PrintPreview
 			this.repaint();
 			WbSwingUtilities.showDefaultCursorOnWindow(this);
 		}
-		
+
 		this.pageUp.setEnabled(this.printTarget.getPreviousVerticalPage(this.currentPage) != -1);
 		this.pageDown.setEnabled(this.printTarget.getNextVerticalPage(this.currentPage) != -1);
-		
+
 		if (this.hasHorizontalPages)
 		{
 			this.pageLeft.setEnabled(this.printTarget.getPreviousHorizontalPage(this.currentPage) != -1);
@@ -277,14 +280,36 @@ public class PrintPreview
 			System.err.println("Printing error: "+ex.toString());
 		}
 	}
-	
-	private synchronized void showNativePageSetup()
+
+	private void showCrossPlatformPageSetup()
 	{
+		if (pageDialogShowing) return;
+		pageDialogShowing = true;
+
 		PrinterJob prnJob = PrinterJob.getPrinterJob();
 		PageFormat oldFormat = this.printTarget.getPageFormat();
-		
+		PrintRequestAttributeSet attr = PrintUtil.getPrintAttributes(oldFormat);
+		PageFormat newFormat = prnJob.pageDialog(attr);
+		pageDialogShowing = false;
+
+		if (newFormat == null) return;
+	}
+
+	private boolean pageDialogShowing = false;
+
+	private void showNativePageSetup()
+	{
+		if (pageDialogShowing) return;
+		pageDialogShowing = true;
+
+		PrinterJob prnJob = PrinterJob.getPrinterJob();
+		PageFormat oldFormat = this.printTarget.getPageFormat();
+
 		PageFormat newFormat = prnJob.pageDialog(oldFormat);
-		
+		pageDialogShowing = false;
+
+		if (newFormat == null) return;
+
 		if (!PrintUtil.pageFormatEquals(newFormat, oldFormat))
 		{
 			WbManager.getSettings().setPageFormat(newFormat);
@@ -293,21 +318,37 @@ public class PrintPreview
 			this.doLayout();
 		}
 	}
-	
+
 	public void doPageSetup()
 	{
-		Thread t = new Thread()
+		if (WbManager.getSettings().getShowNativePageDialog())
 		{
-			public void run()
+			// the native dialog is shown in it's own thread
+			// because otherwise the repainting of the preview window
+			// does not work property
+			Thread t = new Thread()
 			{
-				showNativePageSetup();
-			}
-		};
-		t.setName("PageSetup Thread");
-		t.setDaemon(true);
-		t.start();
+				public void run()
+				{
+					showNativePageSetup();
+				}
+			};
+			t.setName("PageSetup Thread");
+			t.setDaemon(true);
+			t.start();
+		}
+		else
+		{
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					showCrossPlatformPageSetup();
+				}
+			});
+		}
 	}
-	
+
 	public void changeZoom()
 	{
 		WbSwingUtilities.showWaitCursor(this);
@@ -347,7 +388,7 @@ public class PrintPreview
 			WbSwingUtilities.showDefaultCursor(this);
 		}
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.printButton)
@@ -417,36 +458,36 @@ public class PrintPreview
 		WbManager.getSettings().storeWindowSize(this);
 		WbManager.getSettings().storeWindowPosition(this);
 	}
-	
+
 	public void windowActivated(WindowEvent e)
 	{
 	}
-	
+
 	public void windowClosed(WindowEvent e)
 	{
 	}
-	
+
 	public void windowClosing(WindowEvent e)
 	{
 		this.saveSettings();
 	}
-	
+
 	public void windowDeactivated(WindowEvent e)
 	{
 	}
-	
+
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
-	
+
 	public void windowIconified(WindowEvent e)
 	{
 	}
-	
+
 	public void windowOpened(WindowEvent e)
 	{
 	}
-	
+
 	class PreviewContainer
 		extends JPanel
 	{
@@ -462,7 +503,7 @@ public class PrintPreview
 			Dimension dc = comp.getPreferredSize();
 			int w = dc.width;
 			int h = dc.height;
-			
+
 			Dimension dp = getParent().getSize();
 			int nCol = Math.max((dp.width-H_GAP)/(w+H_GAP), 1);
 			int nRow = n/nCol;
@@ -498,7 +539,7 @@ public class PrintPreview
 			Dimension dc = comp.getPreferredSize();
 			int w = dc.width;
 			int h = dc.height;
-			
+
 			Dimension dp = getParent().getSize();
 			int nCol = Math.max((dp.width-H_GAP)/(w+H_GAP), 1);
 			int nRow = n/nCol;
@@ -533,12 +574,12 @@ public class PrintPreview
 		public PagePreview()
 		{
 		}
-		
+
 		public PagePreview(int w, int h, Image source)
 		{
 			this.setImage(w,h,source);
 		}
-		
+
 		public void setImage(int w, int h, Image source)
 		{
 			m_w = w;
@@ -591,7 +632,7 @@ public class PrintPreview
 	{
 		int cols = 7;
 		int rows = 150;
-		
+
 		DefaultTableModel data = new DefaultTableModel(rows, cols);
 		for (int row = 0; row < rows; row ++)
 		{
@@ -623,5 +664,5 @@ public class PrintPreview
 		}
 		System.exit(0);
 	}
-	
+
 }

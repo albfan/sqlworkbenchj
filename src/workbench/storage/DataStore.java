@@ -35,10 +35,11 @@ import java.util.Locale;
 import java.util.Map;
 
 import workbench.WbManager;
+import workbench.interfaces.JobErrorHandler;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
-import workbench.util.LineTokenizer;
+import workbench.util.CsvLineParser;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
@@ -148,18 +149,18 @@ public class DataStore
 	}
 
 	/**
-	 *	Create a DataStore based on the given ResultSet. 
+	 *	Create a DataStore based on the given ResultSet.
 	 *	@param aResult the result set to use
 	 *  @param readData if true the data from the ResultSet should be read into memory, otherwise only MetaData information is read
-	 *  @param maxRows limit number of rows to maxRows if the JDBC driver does not already limit them 
+	 *  @param maxRows limit number of rows to maxRows if the JDBC driver does not already limit them
 	 */
 	public DataStore(ResultSet aResult, boolean readData, int maxRows) throws SQLException
 	{
 		this(aResult, readData, null, maxRows);
 	}
-	
+
 	/**
-	 *	Create a DataStore based on the given ResultSet. 
+	 *	Create a DataStore based on the given ResultSet.
 	 *	@param aResult the result set to use
 	 *  @param readData if true the data from the ResultSet should be read into memory, otherwise only MetaData information is read
 	 *  @param RowActionMonitor if not null, the loading process is displayed through this monitor
@@ -169,14 +170,14 @@ public class DataStore
 	{
 		this(aResult, readData, aMonitor, -1);
 	}
-	
-	
+
+
 	/**
-	 *	Create a DataStore based on the given ResultSet. 
+	 *	Create a DataStore based on the given ResultSet.
 	 *	@param aResult the result set to use
 	 *  @param readData if true the data from the ResultSet should be read into memory, otherwise only MetaData information is read
 	 *  @param RowActionMonitor if not null, the loading process is displayed through this monitor
-	 *  @param maxRows limit number of rows to maxRows if the JDBC driver does not already limit them 
+	 *  @param maxRows limit number of rows to maxRows if the JDBC driver does not already limit them
 	 */
 	public DataStore(ResultSet aResult, boolean readData, RowActionMonitor aMonitor, int maxRows) throws SQLException
 	{
@@ -205,12 +206,12 @@ public class DataStore
 		this.initMetaData(metaData);
 		this.reset();
 	}
-	
+
 	public void setSourceConnection(WbConnection aConn)
 	{
 		this.originalConnection = aConn;
 	}
-	
+
 	public void setColumnSizes(int[] sizes)
 	{
 		if (sizes == null) return;
@@ -229,6 +230,18 @@ public class DataStore
 
 	public int[] getColumnTypes() { return this.columnTypes; }
 
+	public int duplicateRow(int aRow)
+	{
+		if (aRow < 0 || aRow >= this.getRowCount()) return -1;
+		RowData oldRow = this.getRow(aRow);
+		RowData newRow = oldRow.createCopy();
+		int newIndex = aRow + 1; 
+		if (newIndex >= this.getRowCount()) newIndex = this.getRowCount();
+		this.data.add(newIndex, newRow);
+		this.modified = true;
+		return newIndex;
+	}
+	
 	public DataStore createCopy(boolean withData)
 	{
 		DataStore ds = new DataStore(this.columnNames, this.columnTypes, this.columnSizes);
@@ -369,7 +382,7 @@ public class DataStore
 	{
 		this.data.remove(aRow);
 	}
-	
+
 	/**
 	 *	Deletes the given row and saves it in the delete buffer
 	 *	in order to be able to generate a DELETE statement if
@@ -463,7 +476,7 @@ public class DataStore
 	{
 		return this.useUpdateTableFromSql(aSql, false);
 	}
-	
+
 	public boolean useUpdateTableFromSql(String aSql, boolean retrievePk)
 	{
 		this.updateTable = null;
@@ -575,7 +588,7 @@ public class DataStore
 	/**
 	 * Returns the current table to be updated
 	 * @return The current update table
-	 */	
+	 */
 	public String getUpdateTable()
 	{
 		return this.updateTable;
@@ -585,7 +598,7 @@ public class DataStore
 	 * Return the name of the given column
 	 * @param aColumn The index of the column in this DataStore. The first column index is 0
 	 * @return The name of the column
-	 */	
+	 */
 	public String getColumnName(int aColumn)
 		throws IndexOutOfBoundsException
 	{
@@ -609,7 +622,7 @@ public class DataStore
 	 * Returns the value of the given row/column as a String.
 	 * The value's toString() method is used to convert the value to a String value.
 	 * @return Null if the column is null, or the column's value as a String
-	 */	
+	 */
 	public String getValueAsString(int aRow, int aColumn)
 		throws IndexOutOfBoundsException
 	{
@@ -634,7 +647,7 @@ public class DataStore
 	 * @see #setDefaultDateFormat(String)
 	 * @see #setDefaultTimestampFormat(String)
 	 * @see #setDefaultNumberFormat(String)
-	 */	
+	 */
 	public String getValueAsFormattedString(int aRow, int aColumn)
 		throws IndexOutOfBoundsException
 	{
@@ -651,7 +664,7 @@ public class DataStore
 			{
 				result = this.defaultTimestampFormatter.format(value);
 			}
-			if (value instanceof java.util.Date && this.defaultDateFormatter != null)
+			else if (value instanceof java.util.Date && this.defaultDateFormatter != null)
 			{
 				result = this.defaultDateFormatter.format(value);
 			}
@@ -677,7 +690,7 @@ public class DataStore
 	 * @param aRow The row
 	 * @param aColumn The column to be returned
 	 * @param aDefault The default value that will be returned if the the column's value cannot be converted to an int
-	 */	
+	 */
 	public int getValueAsInt(int aRow, int aColumn, int aDefault)
 	{
 		RowData row = this.getRow(aRow);
@@ -707,7 +720,7 @@ public class DataStore
 	 * @param aRow The row
 	 * @param aColumn The column to be returned
 	 * @param aDefault The default value that will be returned if the the column's value cannot be converted to a long
-	 */	
+	 */
 	public long getValueAsLong(int aRow, int aColumn, long aDefault)
 	{
 		RowData row = this.getRow(aRow);
@@ -732,7 +745,7 @@ public class DataStore
 	 * @param aRow
 	 * @param aColumn
 	 * @param aValue The value to be set
-	 */	
+	 */
 	public void setValue(int aRow, int aColumn, Object aValue)
 		throws IndexOutOfBoundsException
 	{
@@ -757,7 +770,7 @@ public class DataStore
 	 * @param aRow
 	 * @param aColumn
 	 * @see #setValue(int, int, Object)
-	 */	
+	 */
 	public void setNull(int aRow, int aColumn)
 	{
 		NullValue nul = NullValue.getInstance(this.columnTypes[aColumn]);
@@ -768,7 +781,7 @@ public class DataStore
 	 * Returns the index of the column with the given name.
 	 * @param aName The column's name to search for
 	 * @return The column's index (first column starts at 0)
-	 */	
+	 */
 	public int getColumnIndex(String aName)
 		throws SQLException
 	{
@@ -779,7 +792,7 @@ public class DataStore
 	 * Returns true if the given row has been modified.
 	 * A new row is considered modified only if setValue() has been called at least once.
 	 * @param aRow The row to check
-	 */	
+	 */
 	public boolean isRowModified(int aRow)
 	{
 		RowData row = this.getRow(aRow);
@@ -790,7 +803,7 @@ public class DataStore
 	 * Restore the original values as retrieved from the database.
 	 * This will have no effect if {@link #isModified()} returns <code>false</code>
 	 * @see #setValue(int, int, Object)
-	 */	
+	 */
 	public void restoreOriginalValues()
 	{
 		RowData row;
@@ -1065,7 +1078,7 @@ public class DataStore
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError(this, "Error while retrieving ResultSetMetaData", e);
+			LogMgr.logError("DataStore.initData()", "Error while retrieving ResultSetMetaData", e);
 			throw e;
 		}
 
@@ -1096,7 +1109,7 @@ public class DataStore
 					}
 					catch (SQLException e)
 					{
-						LogMgr.logError("DataStore.initData", "Error when retrieving column " + this.getColumnName(i) + " for row " + rowCount, e);
+						LogMgr.logError("DataStore.initData()", "Error when retrieving column " + this.getColumnName(i) + " for row " + rowCount, e);
 						value = null;
 					}
 
@@ -1191,7 +1204,7 @@ public class DataStore
 
 	/**
 	 *	Return the closing root xml tag for the whole DataStore.
-	 * A valid XML document can be created with 
+	 * A valid XML document can be created with
 	 * {@link #getXmlStart()}
 	 * {@link #getMetaDataAsXml()}
 	 * Call {@link #getRowDataAsXml()} for each row
@@ -1447,7 +1460,7 @@ public class DataStore
 		return result;
 	}
 
-	/** 
+	/**
 	 * Return the complete data of this DataStore as an XML document.
 	 * This is equivalent to calling:<br>
 	 * {@link #getXmlStart()} <br>
@@ -1500,8 +1513,8 @@ public class DataStore
 	 * The display row index will be on greater then the internal one.
 	 * The XML will not be indented
 	 * @param aRow the internal row number for which the XML data should be returned (starting with 0)
-	 * 
-	 * @return a StringBuffer with a single &lt;row-data&gt; tag 
+	 *
+	 * @return a StringBuffer with a single &lt;row-data&gt; tag
 	 * @see #getRowDataAsXml(int, String)
 	 * @see #getRowDataAsXml(int, String, int)
 	 */
@@ -1514,9 +1527,9 @@ public class DataStore
 	 * Returns the data contained in the given row as an XML tag.
 	 * The display row index will be on greater then the internal one.
 	 * @param aRow the internal row number for which the XML data should be returned (starting with 0)
-	 * @param anIndent a String which is used to define the base indention for the XML 
-	 * 
-	 * @return a StringBuffer with a single &lt;row-data&gt; tag 
+	 * @param anIndent a String which is used to define the base indention for the XML
+	 *
+	 * @return a StringBuffer with a single &lt;row-data&gt; tag
 	 * @see #getRowDataAsXml(int, String, int)
 	 */
 	public StringBuffer getRowDataAsXml(int aRow, String anIndent)
@@ -1527,9 +1540,9 @@ public class DataStore
 	/**
 	 * Returns the data contained in the given row as an XML tag.
 	 * @param aRow the internal row number for which the XML data should be returned (starting with 0)
-	 * @param anIndent a String which is used to define the base indention for the XML 
+	 * @param anIndent a String which is used to define the base indention for the XML
 	 * @param displayRowIndex the actual row index to be written into the attribute row-num
-	 * @return a StringBuffer with a single &lt;row-data&gt; tag 
+	 * @return a StringBuffer with a single &lt;row-data&gt; tag
 	 */
 	public StringBuffer getRowDataAsXml(int aRow, String anIndent, int displayRowIndex)
 	{
@@ -1610,58 +1623,135 @@ public class DataStore
 		return html.toString();
 	}
 
+	public StringBuffer getHtmlStart()
+	{
+		return this.getHtmlStart(true, null);
+	}
+
+	public StringBuffer getHtmlStart(boolean createFullPage)
+	{
+		return this.getHtmlStart(createFullPage, null);
+	}
+
+	public StringBuffer getHtmlStart(boolean createFullPage, String title)
+	{
+		StringBuffer result = new StringBuffer(250);
+		if (createFullPage)
+		{
+			result.append("<html>\n");
+			if (title != null && title.length() > 0)
+			{
+				result.append("<head>\n<title>");
+				result.append(title);
+				result.append("</title>\n");
+			}
+			result.append("<style type=\"text/css\">\n");
+			result.append("<!--\n");
+			result.append("  table { border-spacing:0; border-collapse:collapse}\n");
+			result.append("  td { padding:2; border-style:solid;border-width:1px; vertical-align:top;}\n");
+			result.append("  .number-cell { text-align:right; white-space:nowrap; } \n");
+			result.append("  .text-cell { text-align:left; } \n");
+			result.append("  .date-cell { text-align:left; white-space:nowrap;} \n");
+			result.append("-->\n</style>\n");
+
+			result.append("</head>\n<body>\n");
+			/*
+			if (title != null && title.length() > 0)
+			{
+				result.append("<h3>");
+				result.append(title);
+				result.append("</h3>\n");
+			}*/
+		}
+		result.append("<table>\n");
+
+		// table header with column names
+		result.append("  <tr>\n      ");
+		for (int c=0; c < this.getColumnCount(); c ++)
+		{
+			result.append("<td><b>");
+			result.append(this.getColumnName(c));
+			result.append("</b></td>");
+		}
+		result.append("\n  </tr>\n");
+
+		return result;
+	}
+
+	public StringBuffer getHtmlEnd()
+	{
+		return this.getHtmlEnd(true);
+	}
+	public StringBuffer getHtmlEnd(boolean createFullPage)
+	{
+		StringBuffer html = new StringBuffer("</table>\n");
+		if (createFullPage) html.append("</body>\n</html>\n");
+		return html;
+	}
+
+	public StringBuffer getRowDataAsHtml(int row)
+	{
+		int count = this.getColumnCount();
+		StringBuffer result = new StringBuffer(count * 30);
+		result.append("  <tr>\n      ");
+		for (int c=0; c < count; c ++)
+		{
+			String value = this.getValueAsFormattedString(row, c);
+			int type = this.getColumnType(c);
+			if (SqlUtil.isDateType(type))
+			{
+				result.append("<td class=\"date-cell\">");
+			}
+			else if (SqlUtil.isNumberType(type) || SqlUtil.isDateType(type))
+			{
+				result.append("<td class=\"number-cell\">");
+			}
+			else
+			{
+				result.append("<td class=\"text-cell\">");
+			}
+
+			if (value == null)
+			{
+				result.append("&nbsp;");
+			}
+			else
+			{
+				if (this.escapeHtml)
+				{
+					value = StringUtil.escapeHTML(value);
+				}
+				result.append(value);
+			}
+			result.append("</td>");
+		}
+		result.append("\n  </tr>\n");
+		return result;
+	}
+
 	public void writeHtmlData(Writer html)
 		throws IOException
 	{
 		int count = this.getRowCount();
 		if (count == 0) return;
-		html.write("<style type=\"text/css\">\n");
-		html.write("<!--\n");
-		html.write("  table { border-spacing:0; border-left-style:solid; border-left-width:1px; border-bottom-style:solid; border-bottom-width:1px;}\n");
-		html.write("  td { padding:2; border-top-style:solid;border-top-width:1px;border-right-style:solid;border-right-width:1px;}\n");
-		html.write("  .number-cell { text-align:right; } \n");
-		html.write("  .text-cell { text-align:left; } \n");
-		html.write("-->\n</style>\n");
-		html.write("<table>\n");
+		html.write(this.getHtmlStart().toString());
 
-		// table header with column names
-		html.write("  <tr>\n      ");
-		for (int c=0; c < this.getColumnCount(); c ++)
-		{
-			html.write("<td><b>");
-			html.write(this.getColumnName(c));
-			html.write("</b></td>");
-		}
-		html.write("\n  </tr>\n");
 		for (int i=0; i < count; i++)
 		{
-			html.write("  <tr>\n      ");
-			for (int c=0; c < this.getColumnCount(); c ++)
-			{
-				String value = this.getValueAsString(i, c);
-				int type = this.getColumnType(c);
-				if (SqlUtil.isNumberType(type) || SqlUtil.isDateType(type))
-					html.write("<td class=\"number-cell\">");
-				else
-					html.write("<td class=\"text-cell\">");
-				if (value == null)
-				{
-					html.write("&nbsp;");
-				}
-				else
-				{
-					html.write(StringUtil.escapeHTML(value));
-				}
-				html.write("</td>");
-			}
-			html.write("\n  </tr>\n");
+			html.write(this.getRowDataAsHtml(i).toString());
 		}
-		html.write("</table>\n");
+		html.write(this.getHtmlEnd().toString());
 	}
 
+	private boolean escapeHtml = true;
+
+	public void setEscapeExportValues(boolean aFlag)
+	{
+		this.escapeHtml = aFlag;
+	}
 	/**
 	 *	Returns true if the current data can be converted to SQL INSERT statements.
-	 *	The data can be saved as SQL INSERTs if an update table is defined. 
+	 *	The data can be saved as SQL INSERTs if an update table is defined.
 	 *	If no update table is defined, then this method will call {@link #checkUpdateTable()}
 	 *  and try to determine the table from the used SQL statement.
 	 *
@@ -1676,7 +1766,7 @@ public class DataStore
 	}
 
 	// =========== SQL Insert generation ================
-	
+
 	/**
 	 * Returns the given row as an INSERT statement.
 	 * \n will be used as the line terminator
@@ -1692,7 +1782,7 @@ public class DataStore
 
 	/**
 	 * Returns the given row as an INSERT statement.
-	 * 
+	 *
 	 * @param aRow the row to be returned
 	 * @param aLineTerminator the line terminator to be used
 	 * @param aConn the connection object to be used to retrieve MetaData information
@@ -1710,14 +1800,14 @@ public class DataStore
 	 * If aCharFunc and aConcatString are not null, then all non-printable characters
 	 * in character data are replaced with a call to the passed function. <br>
 	 * Example:<br>
-	 * A character column contains a carriage return character (ASCII 13) and 
+	 * A character column contains a carriage return character (ASCII 13) and
 	 * aCharFunc is passed as "CHR" and aConcatString is passed as "||". The generated
 	 * SQL will look like this: <br>
 	 * <code>
-	 * INSERT INTO table (col1, character_column) 
+	 * INSERT INTO table (col1, character_column)
 	 * VALUES
 	 * (1, "Hello, "||chr(13)||"world");
-	 * </code> 
+	 * </code>
 	 * @param aRow the row to be returned
 	 * @param aLineTerminator the line terminator to be used
 	 * @param aConn the connection object to be used to retrieve MetaData information
@@ -1821,7 +1911,7 @@ public class DataStore
 		}
 		return script.toString();
 	}
-	
+
 	public void writeDataAsSqlUpdate(Writer out, String aLineTerminator)
 		throws IOException
 	{
@@ -1884,12 +1974,12 @@ public class DataStore
 	 * If aCharFunc and aConcatString are not null, then all non-printable characters
 	 * in character data are replaced with a call to the passed function. <br>
 	 * Example:<br>
-	 * A character column contains a carriage return character (ASCII 13) and 
+	 * A character column contains a carriage return character (ASCII 13) and
 	 * aCharFunc is passed as "CHR" and aConcatString is passed as "||". The generated
 	 * SQL will look like this: <br>
 	 * <code>
 	 * UPDATE table set character_column = "Hello, "||chr(13)||"world";
-	 * </code> 
+	 * </code>
 	 * @param aRow the row to be returned
 	 * @param aLineTerminator the line terminator to be used
 	 * @param aConn to the WbConnection to be used to retrieve the metadata
@@ -1914,6 +2004,34 @@ public class DataStore
 		return sql;
 	}
 
+	/**
+	 * Set all values in the given row to NULL
+	 */
+	public void setRowNull(int aRow)
+	{
+		for (int i=0; i < this.colCount; i++)
+		{
+			this.setNull(aRow, i);
+		}
+	}
+
+
+	private boolean cancelUpdate = false;
+	private boolean cancelImport = false;
+
+	public void cancelUpdate()
+	{
+		this.cancelUpdate = true;
+	}
+
+	/**
+	 * 	Cancel a running import
+	 */
+	public void cancelImport()
+	{
+		this.cancelImport = true;
+	}
+
 
 	/**
 	 *	Import a text file (tab separated) with a header row and no column mapping
@@ -1923,7 +2041,18 @@ public class DataStore
 	public void importData(String aFilename)
 		throws FileNotFoundException
 	{
-		this.importData(aFilename, true, "\t", "\"", Collections.EMPTY_MAP);
+		this.importData(aFilename, null);
+	}
+
+	/**
+	 *	Import a text file (tab separated) with a header row and no column mapping
+	 *	into this DataStore
+	 * @param aFilename - The text file to import
+	 */
+	public void importData(String aFilename, JobErrorHandler errorHandler)
+		throws FileNotFoundException
+	{
+		this.importData(aFilename, true, "\t", "\"", errorHandler);
 	}
 
 	/**
@@ -1936,36 +2065,13 @@ public class DataStore
 	public void importData(String aFilename, boolean hasHeader, String quoteChar)
 		throws FileNotFoundException
 	{
-		this.importData(aFilename, hasHeader, "\t", quoteChar, Collections.EMPTY_MAP);
-	}
-
-	/**
-	 * Set all values in the given row to NULL
-	 */
-	public void setRowNull(int aRow)
-	{
-		for (int i=0; i < this.colCount; i++)
-		{
-			this.setNull(aRow, i);
-		}
+		this.importData(aFilename, hasHeader, "\t", quoteChar, null);
 	}
 
 	public void importData(String aFilename, boolean hasHeader, String aColSeparator, String aQuoteChar)
 		throws FileNotFoundException
 	{
-		this.importData(aFilename, hasHeader, aColSeparator, aQuoteChar, Collections.EMPTY_MAP);
-	}
-
-	private boolean cancelUpdate = false;
-	private boolean cancelImport = false;
-
-	public void cancelUpdate()
-	{
-		this.cancelUpdate = true;
-	}
-	public void cancelImport()
-	{
-		this.cancelImport = true;
+		this.importData(aFilename, hasHeader, aColSeparator, aQuoteChar, null);
 	}
 
 	/**
@@ -1973,23 +2079,19 @@ public class DataStore
 	 * @param aFilename - The text file to import
 	 * @param hasHeader - wether the text file has a header row
 	 * @param aColSeparator - the separator for column data
-	 * @param aColumnMapping - a mapping between columns in the text file and the DataStore
 	 */
 	public void importData(String aFilename
 	                     , boolean hasHeader
 											 , String aColSeparator
 											 , String aQuoteChar
-											 , Map aColumnMapping)
+											 , JobErrorHandler errorHandler)
 		throws FileNotFoundException
 	{
 		File f = new File(aFilename);
 		long fileSize = f.length();
 		BufferedReader in = new BufferedReader(new FileReader(aFilename),1024*512);
 		String line;
-		List lineData;
 		Object colData;
-		boolean doMapping = (aColumnMapping != null && aColumnMapping.size() > 0);
-		int col;
 		int row;
 		this.cancelImport = false;
 
@@ -2007,6 +2109,7 @@ public class DataStore
 		{
 			line = null;
 		}
+
 		if (this.rowActionMonitor != null)
 		{
 			this.rowActionMonitor.setMonitorType(RowActionMonitor.MONITOR_INSERT);
@@ -2017,58 +2120,39 @@ public class DataStore
 		// we really have in the file, we take the length of the first line
 		// as the average, and calculate the expected number of lines from
 		// this length.
-		// Event if we don't get the number of lines correct, this method should be better
+		// Even if we don't get the number of lines correct, this method should be better
 		// then not initializing the array at all.
 		if (line != null && this.data.size() == 0)
 		{
 			int initialSize = (int)(fileSize / line.length());
 			this.data = new ArrayList(initialSize);
 		}
-		lineData = new ArrayList(this.colCount);
-		WbStringTokenizer tok = new WbStringTokenizer(aColSeparator.charAt(0), "", false);
+
+		CsvLineParser tok = new CsvLineParser(aColSeparator.charAt(0), '"');
 		int importRow = 0;
+		
 		while (line != null)
 		{
-			lineData.clear();
-			tok.setSourceString(line);
-			while (tok.hasMoreTokens())
-			{
-				lineData.add(tok.nextToken());
-			}
+			tok.setLine(line);
 
 			row = this.addRow();
 			importRow ++;
+			
 			this.updateProgressMonitor(importRow, -1);
 
 			this.setRowNull(row);
 
-			int count = lineData.size();
-			for (int i=0; i < count; i++)
+			for (int col=0; col < this.colCount; col++)
 			{
-				if (doMapping)
-				{
-					Integer key = new Integer(i);
-					Integer target = (Integer)aColumnMapping.get(key);
-					if (target != null)
-					{
-						col = target.intValue();
-					}
-					else
-					{
-						col = -1;
-					}
-				}
-				else
-				{
-					col = i;
-				}
 				if (col > -1)
 				{
-					Object value = null;
+					String value = null;
 					try
 					{
-						value = lineData.get(i);
-						if (value == null)
+						
+						if (tok.hasNext()) value = tok.getNext();
+						
+						if (value == null || value.length() == 0)
 						{
 							this.setNull(row, col);
 						}
@@ -2081,6 +2165,11 @@ public class DataStore
 					catch (Exception e)
 					{
 						LogMgr.logWarning("DataStore.importData()","Error reading line #" + row + ",col #" + col + ",colValue=" + value, e);
+						if (errorHandler != null)
+						{
+							int choice = errorHandler.getActionOnError(row, col, (value == null ? null : value.toString()), "");
+							if (choice == JobErrorHandler.JOB_ABORT) break;
+						}
 					}
 				}
 			}
@@ -2152,6 +2241,48 @@ public class DataStore
 		return stmt;
 	}
 
+	public synchronized int updateDb(WbConnection aConnection)
+		throws SQLException
+	{
+		return this.updateDb(aConnection, null);
+	}
+
+	private boolean ignoreAllUpdateErrors = false;
+
+	private int executeGuarded(WbConnection aConnection, DmlStatement dml, JobErrorHandler errorHandler, int row)
+		throws SQLException
+	{
+		int rowsUpdated = 0;
+		try
+		{
+			rowsUpdated = dml.execute(aConnection);
+		}
+		catch (SQLException e)
+		{
+			if (!this.ignoreAllUpdateErrors)
+			{
+				boolean abort = true;
+				int choice = JobErrorHandler.JOB_ABORT;
+				if (errorHandler != null)
+				{
+					choice = errorHandler.getActionOnError(row, -1, dml.getExecutableStatement(), e.getMessage());
+				}
+				if (choice == JobErrorHandler.JOB_CONTINUE)
+				{
+					abort = false;
+				}
+				else if (choice == JobErrorHandler.JOB_IGNORE_ALL)
+				{
+					abort = false;
+					this.ignoreAllUpdateErrors = true;
+				}
+				if (abort) throw e;
+			}
+			LogMgr.logError("DataStore.executeGuarded()", "Error executing statement " + dml.getExecutableStatement() + " for row = " + row, e);
+		}
+		return rowsUpdated;
+	}
+
 	/**
 	 * Save the changes to this DataStore to the database.
 	 * The changes are applied in the following order
@@ -2161,7 +2292,7 @@ public class DataStore
 	 * <li>Update statements</li>
 	 * </ul>
 	 */
-	public synchronized int updateDb(WbConnection aConnection)
+	public synchronized int updateDb(WbConnection aConnection, JobErrorHandler errorHandler)
 		throws SQLException
 	{
 		int rows = 0;
@@ -2173,6 +2304,8 @@ public class DataStore
 		{
 			this.rowActionMonitor.setMonitorType(RowActionMonitor.MONITOR_UPDATE);
 		}
+
+		this.ignoreAllUpdateErrors = false;
 
 		try
 		{
@@ -2186,7 +2319,7 @@ public class DataStore
 				if (!row.isDmlSent())
 				{
 					dml = this.createDeleteStatement(row);
-					rows += dml.execute(aConnection);
+					rows += this.executeGuarded(aConnection, dml, errorHandler, -1);
 					row.setDmlSent(true);
 				}
 				Thread.yield();
@@ -2202,7 +2335,7 @@ public class DataStore
 				if (!row.isDmlSent())
 				{
 					dml = this.createUpdateStatement(row, false, "\r\n");
-					rows += dml.execute(aConnection);
+					rows += this.executeGuarded(aConnection, dml, errorHandler, currentUpdateRow);
 					row.setDmlSent(true);
 				}
 				Thread.yield();
@@ -2218,7 +2351,7 @@ public class DataStore
 				if (!row.isDmlSent())
 				{
 					dml = this.createInsertStatement(row, false);
-					rows += dml.execute(aConnection);
+					rows += this.executeGuarded(aConnection, dml, errorHandler, currentInsertRow);
 					row.setDmlSent(true);
 				}
 				Thread.yield();
@@ -2543,7 +2676,15 @@ public class DataStore
 			int pkcol = ((Integer)this.pkColumns.get(j)).intValue();
 			String name = this.getColumnName(pkcol);
 			Object value = data.getValue(pkcol);
-			result.put(name, value);
+			if (value instanceof NullValue)
+			{
+				result.put(name, null);
+			}
+			else
+			{
+				result.put(name, value);
+			}
+
 		}
 		return result;
 	}
@@ -2869,12 +3010,11 @@ public class DataStore
 	public String getUpdateTableSchema(WbConnection aConnection)
 	{
 		if (this.updateTable == null) return null;
-		LineTokenizer tok = new LineTokenizer(this.updateTable, ".");
+		int pos = this.updateTable.indexOf(".");
 		String schema = null;
-
-		if (tok.countTokens() > 1)
+		if (pos > -1) 
 		{
-			schema = tok.nextToken();
+			schema = this.updateTable.substring(0, pos);
 		}
 
 		if (schema == null || schema.trim().length() == 0)

@@ -33,7 +33,7 @@ public class VersionCheckDialog extends javax.swing.JDialog
 	private boolean timedOut = false;
 	private boolean isDevVersion =  false;
 	private WbVersionReader versionReader;
-	
+
 	/** Creates new form VersionCheckDialog */
 	public VersionCheckDialog(java.awt.Frame parent, boolean modal)
 	{
@@ -58,27 +58,30 @@ public class VersionCheckDialog extends javax.swing.JDialog
 		readThread.setName("WbVersionCheck Thread");
 		readThread.setDaemon(true);
 		readThread.start();
-		
+
 		this.timeout = new Timer(60 * 1000, this);
 		this.timedOut = false;
 		this.timeout.start();
 	}
-	
+
 	private void readVersion()
 	{
 		try
 		{
 			LogMgr.logDebug("VersionCheckDialog.readVersion()", "Retrieving versions from the website...");
 			this.versionReader = new WbVersionReader();
+
+			this.stableVersion.setText(" " + ResourceMgr.getString("LabelVersionNotAvailable"));
+			this.devVersion.setText(" " + ResourceMgr.getString("LabelVersionNotAvailable"));
+
 			if (!this.timedOut)
 			{
 				this.stableVersion.setText(" " + ResourceMgr.getString("TxtBuild") + " " + this.versionReader.getStableBuildNumber() + " (" + this.versionReader.getStableBuildDate() + ")");
-				this.devVersion.setText(" " + this.versionReader.getDevBuildDate());
-			}
-			else
-			{
-				this.stableVersion.setText(" " + ResourceMgr.getString("LabelVersionNotAvailable"));
-				this.devVersion.setText(" " + ResourceMgr.getString("LabelVersionNotAvailable"));
+				String date = this.versionReader.getDevBuildDate();
+				if (date != null)
+				{
+					this.devVersion.setText(" " + this.versionReader.getDevBuildDate());
+				}
 			}
 			checkDisplay();
 		}
@@ -97,7 +100,7 @@ public class VersionCheckDialog extends javax.swing.JDialog
 			this.headingLabel.setText(ResourceMgr.getString("LabelVersionsAvailable"));
 		}
 	}
-	
+
 	private void checkDisplay()
 	{
 		if (ResourceMgr.isDevBuild())
@@ -105,12 +108,12 @@ public class VersionCheckDialog extends javax.swing.JDialog
 		else
 			checkStableVersion();
 	}
-	
+
 	private void checkDevVersion()
 	{
 		String builddate = this.versionReader.getDevBuildDate();
 		String stableDate = this.versionReader.getStableBuildDate();
-		
+
 		Date current = ResourceMgr.getBuildDate();
 		Date last = null;
 		Date lastStable = null;
@@ -125,9 +128,9 @@ public class VersionCheckDialog extends javax.swing.JDialog
 			last = new Date(0);
 			lastStable = new Date(0);
 		}
-		
+
 		String msg = ResourceMgr.getString("LabelVersionUpToDate");
-		
+
 		if (lastStable.getTime() > current.getTime())
 		{
 			this.stableVersion.setBackground(Color.YELLOW);
@@ -140,7 +143,7 @@ public class VersionCheckDialog extends javax.swing.JDialog
 		}
 		this.statusLabel.setText(msg);
 	}
-	
+
 	private void checkStableVersion()
 	{
 		int current = ResourceMgr.getBuildNumber();
@@ -163,7 +166,7 @@ public class VersionCheckDialog extends javax.swing.JDialog
 		}
 		this.statusLabel.setText(msg);
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -297,14 +300,14 @@ public class VersionCheckDialog extends javax.swing.JDialog
 
     setSize(new java.awt.Dimension(386, 212));
   }//GEN-END:initComponents
-	
+
 	/** Closes the dialog */
 	private void closeDialog(java.awt.event.WindowEvent evt)//GEN-FIRST:event_closeDialog
 	{
 		setVisible(false);
 		dispose();
 	}//GEN-LAST:event_closeDialog
-	
+
 	/**
 	 * @param args the command line arguments
 	 */
@@ -312,7 +315,7 @@ public class VersionCheckDialog extends javax.swing.JDialog
 	{
 		new VersionCheckDialog(new javax.swing.JFrame(), true).show();
 	}
-	
+
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
 		if (e.getSource() == this.closeButton)
@@ -328,8 +331,8 @@ public class VersionCheckDialog extends javax.swing.JDialog
 			this.stableVersion.setText(" " + ResourceMgr.getString("LabelVersionNotAvailable"));
 			this.devVersion.setText(" " + ResourceMgr.getString("LabelVersionNotAvailable"));
 		}
-	}	
-	
+	}
+
 	public void mouseClicked(java.awt.event.MouseEvent e)
 	{
 		if (e.getSource() == this.headingLabel &&
@@ -346,23 +349,23 @@ public class VersionCheckDialog extends javax.swing.JDialog
 			}
 		}
 	}
-	
+
 	public void mouseEntered(java.awt.event.MouseEvent e)
 	{
 	}
-	
+
 	public void mouseExited(java.awt.event.MouseEvent e)
 	{
 	}
-	
+
 	public void mousePressed(java.awt.event.MouseEvent e)
 	{
 	}
-	
+
 	public void mouseReleased(java.awt.event.MouseEvent e)
 	{
 	}
-	
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton closeButton;
   private javax.swing.JLabel devVersion;
@@ -375,5 +378,5 @@ public class VersionCheckDialog extends javax.swing.JDialog
   private javax.swing.JLabel yourVersion;
   private javax.swing.JLabel yourVersionLabel;
   // End of variables declaration//GEN-END:variables
-	
+
 }

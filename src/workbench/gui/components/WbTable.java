@@ -14,6 +14,7 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Frame;
+import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -560,61 +561,108 @@ public class WbTable
 	{
 		if (this.dwModel == null) return;
 		if (aFlag == this.dwModel.getShowStatusColumn()) return;
-		int column = this.getSelectedColumn();
-		int row = this.getSelectedRow();
-
-		int sortColumn = -1;
-		boolean asc = false;
-		if (this.dwModel != null)
+		
+		try
 		{
-			sortColumn = dwModel.getSortColumn();
-			asc = this.dwModel.isSortAscending();
-		}
+			int column = this.getSelectedColumn();
+			int row = this.getSelectedRow();
 
-		this.saveColumnSizes();
-
-		this.dwModel.setShowStatusColumn(aFlag);
-		if (aFlag)
-		{
-			TableColumn col = this.getColumnModel().getColumn(0);
-			col.setCellRenderer(new RowStatusRenderer());
-			col.setMaxWidth(20);
-			col.setMinWidth(20);
-			col.setPreferredWidth(20);
-		}
-		else
-		{
-			TableColumnModel model = this.getTableHeader().getColumnModel();
-			if (model.getColumnCount() > this.dwModel.getColumnCount())
+			int sortColumn = -1;
+			boolean asc = false;
+			if (this.dwModel != null)
 			{
-				TableColumn col = model.getColumn(0);
-				model.removeColumn(col);
+				sortColumn = dwModel.getSortColumn();
+				asc = this.dwModel.isSortAscending();
+			}
+
+			this.saveColumnSizes();
+
+			this.setSuspendRepaint(true);
+			
+			this.dwModel.setShowStatusColumn(aFlag);
+			if (aFlag)
+			{
+				TableColumn col = this.getColumnModel().getColumn(0);
+				col.setCellRenderer(new RowStatusRenderer());
+				col.setMaxWidth(20);
+				col.setMinWidth(20);
+				col.setPreferredWidth(20);
+			}
+			else
+			{
+				TableColumnModel model = this.getTableHeader().getColumnModel();
+				if (model.getColumnCount() > this.dwModel.getColumnCount())
+				{
+					TableColumn col = model.getColumn(0);
+					model.removeColumn(col);
+				}
+			}
+
+			this.initDefaultEditors();
+			this.restoreColumnSizes();
+			
+			this.setSuspendRepaint(false);
+			
+			if (sortColumn > -1 && this.dwModel != null)
+			{
+				if (aFlag)
+					sortColumn ++;
+				else
+					sortColumn --;
+				this.dwModel.sortByColumn(sortColumn, asc);
+			}
+			if (row >= 0)
+			{
+				this.getSelectionModel().setSelectionInterval(row, row);
+				int newColumn = column;
+				if (aFlag)
+					newColumn ++;
+				else
+					newColumn --;
+
+				if (newColumn >= 0) this.changeSelection(row, newColumn, true, true);
 			}
 		}
-
-		this.initDefaultEditors();
-		this.restoreColumnSizes();
-		if (sortColumn > -1 && this.dwModel != null)
+		finally
 		{
-			if (aFlag)
-				sortColumn ++;
-			else
-				sortColumn --;
-			this.dwModel.sortByColumn(sortColumn, asc);
-		}
-		if (row >= 0)
-		{
-			this.getSelectionModel().setSelectionInterval(row, row);
-			int newColumn = column;
-			if (aFlag)
-				newColumn ++;
-			else
-				newColumn --;
-
-			if (newColumn >= 0) this.changeSelection(row, newColumn, true, true);
+			this.setSuspendRepaint(false);
 		}
 	}
 
+	private boolean suspendRepaint = false;
+	
+	public synchronized void setSuspendRepaint(boolean aFlag)
+	{
+		boolean suspend = this.suspendRepaint;
+		this.suspendRepaint = aFlag;
+		
+		// if repainting was re-enabled, then queue
+		// a repaint event right away
+		if (suspend && !aFlag)
+		{
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					invalidate();
+					repaint();
+				}
+			});
+		}
+	}
+	
+	public void repaint()
+	{
+		if (this.suspendRepaint) return;
+		super.repaint();
+	}
+	
+	public void paintComponents(Graphics g)
+	{
+		if (this.suspendRepaint) return;
+		super.paintComponents(g);
+	}
+		
 
 	public int getSortedViewColumnIndex()
 	{
@@ -1566,21 +1614,39 @@ public class WbTable
 		return newRow;
 	}
 
+	public int duplicateRow()
+	{
+		DataStore ds = this.getDataStore();
+		if (ds == null) return -1;
+		if (this.getSelectedRowCount() != 1) return -1;
+		int row = this.getSelectedRow();
+		int newRow = ds.duplicateRow(row);
+		return newRow;
+	}
+	
 	public boolean deleteRow()
 	{
 		DataStoreTableModel ds = this.getDataStoreTableModel();
 		if (ds == null) return false;
 
-		int selectedRow = this.getSelectedRow();
-		if (selectedRow != -1)
+		int[] selectedRows = this.getSelectedRows();
+		int numRows = selectedRows.length;
+		if (numRows > 0)
 		{
-			ds.deleteRow(selectedRow);
-			if (selectedRow >= ds.getRowCount())
+			for (int i = numRows - 1; i >= 0; i--)
 			{
-				selectedRow --;
+				ds.deleteRow(selectedRows[i]);
 			}
-			this.getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
 		}
+//		if (selectedRow != -1)
+//		{
+//			ds.deleteRow(selectedRow);
+//			if (selectedRow >= ds.getRowCount())
+//			{
+//				selectedRow --;
+//			}
+//			this.getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
+//		}
 		return true;
 	}
 

@@ -15,7 +15,7 @@ import javax.swing.text.Segment;
  * SQL token marker.
  *
  * @author mike dillon
- * @version $Id: SQLTokenMarker.java,v 1.2 2002-12-07 21:23:47 thomas Exp $
+ * @version $Id: SQLTokenMarker.java,v 1.3 2004-04-07 22:51:56 thomas Exp $
  */
 public class SQLTokenMarker extends TokenMarker
 {
@@ -135,6 +135,17 @@ loop:
 					}
 				}
 				break;
+			case '#':
+				if (isMySql && token == Token.NULL)
+				{
+					if (length - i >= 1)
+					{
+						searchBack(line, i);
+						addToken(length - i, Token.COMMENT1);
+						lastOffset = length;
+						break loop;
+					}
+				}
 			case '!':
 				if(isTSQL && token == Token.NULL && length - i >= 2 &&
 				(line.array[i+1] == '=' || line.array[i+1] == '<' || line.array[i+1] == '>'))
@@ -173,6 +184,7 @@ loop:
 
 	// protected members
 	protected boolean isTSQL = false;
+	protected boolean isMySql = false;
 
 	// private members
 	private KeywordMap keywords;

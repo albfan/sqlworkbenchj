@@ -29,7 +29,7 @@ public class ExecuteSelAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.target.actionPerformed(e);
+		if (this.isEnabled()) this.target.actionPerformed(e);
 	}
 	
 }

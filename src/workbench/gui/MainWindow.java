@@ -829,7 +829,7 @@ public class MainWindow
 			{
 				this.currentConnection = null;
 				MainPanel p = this.getCurrentPanel();
-				id = "Wb-" + p.getId();
+				id = p.getId();
 			}
 			conn = mgr.getConnection(this.currentProfile, id);
 			connected = true;
@@ -1495,20 +1495,25 @@ public class MainWindow
 		throws Exception
 	{
 		if (this.currentConnection != null) return this.currentConnection;
-		String id = "Wb-" + aPanel.getId();
+		String id = aPanel.getId();
 		aPanel.showStatusMessage(ResourceMgr.getString("MsgConnectingTo") + " " + this.currentProfile.getName() + " ...");
 		ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
 		WbConnection conn = mgr.getConnection(this.currentProfile, id);
 		return conn;
 	}
 
-	public void addDbExplorerTab()
+	private void createDbExplorerPanel()
 	{
 		if (this.dbExplorerPanel == null)
 		{
-			this.dbExplorerPanel = new DbExplorerPanel(this);
+			int count = this.sqlTab.getTabCount() + 1;
+			this.dbExplorerPanel = new DbExplorerPanel(this, count);
 			this.dbExplorerPanel.restoreSettings();
 		}
+	}
+	public void addDbExplorerTab()
+	{
+		this.createDbExplorerPanel();
 		JMenuBar dbmenu = this.getMenuForPanel(this.dbExplorerPanel);
 
 		this.sqlTab.add(this.dbExplorerPanel);
@@ -1527,12 +1532,7 @@ public class MainWindow
 	 */
 	public void showDbExplorer()
 	{
-		if (this.dbExplorerPanel == null)
-		{
-			this.dbExplorerPanel = new DbExplorerPanel(this);
-			this.dbExplorerPanel.restoreSettings();
-		}
-
+		this.createDbExplorerPanel();
 		if (WbManager.getSettings().getShowDbExplorerInMainWindow())
 		{
 			Component c = this.sqlTab.getComponentAt(this.sqlTab.getTabCount() - 1);
@@ -1832,6 +1832,7 @@ public class MainWindow
 				{
 					SqlPanel sql = (SqlPanel)p;
 					sql.closeFile(true);
+					sql.clearSqlStatements();
 					sql.readFromWorkspace(w);
 					sql.setTabTitle(this.sqlTab, i);
 				}

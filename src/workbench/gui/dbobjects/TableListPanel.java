@@ -91,6 +91,7 @@ public class TableListPanel
 
 	private WbMenuItem dropTableItem;
 	private WbMenuItem scriptTablesItem;
+	private WbMenuItem deleteTableItem;
 
 	private MainWindow parentWindow;
 
@@ -117,6 +118,7 @@ public class TableListPanel
 
 	private static final String DROP_CMD = "drop-table";
 	private static final String SCRIPT_CMD = "create-scripts";
+	private static final String DELETE_TABLE_CMD = "delete-table-data";
 
 	private JMenu showDataMenu;
 
@@ -235,7 +237,6 @@ public class TableListPanel
 		this.listPanel.add(scroll, BorderLayout.CENTER);
 		this.listPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
-		//this.splitPane.set
 		this.splitPane.setLeftComponent(this.listPanel);
 		this.splitPane.setRightComponent(displayTab);
 		this.splitPane.setDividerSize(8);
@@ -267,11 +268,19 @@ public class TableListPanel
 		this.dropTableItem.setEnabled(false);
 		popup.add(this.dropTableItem);
 
+		this.deleteTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDeleteTableData"));
+		this.deleteTableItem.setActionCommand(DELETE_TABLE_CMD);
+		this.deleteTableItem.setBlankIcon();
+		this.deleteTableItem.addActionListener(this);
+		this.deleteTableItem.setEnabled(true);
+		popup.add(this.deleteTableItem);
+
 		this.scriptTablesItem = new WbMenuItem(ResourceMgr.getString("MnuTxtCreateScript"));
 		this.scriptTablesItem.setIcon(ResourceMgr.getImage("script"));
 		this.scriptTablesItem.setActionCommand(SCRIPT_CMD);
 		this.scriptTablesItem.addActionListener(this);
 		this.scriptTablesItem.setEnabled(true);
+		popup.addSeparator();
 		popup.add(this.scriptTablesItem);
 
 		this.showDataMenu = new WbMenu(ResourceMgr.getString("MnuTxtShowTableData"));
@@ -1034,6 +1043,10 @@ public class TableListPanel
 					ex.printStackTrace();
 				}
 			}
+			else if (command.equals(DELETE_TABLE_CMD))
+			{
+				this.deleteTables();
+			}
 			else if (command.equals(DROP_CMD))
 			{
 				this.dropTables();
@@ -1111,6 +1124,41 @@ public class TableListPanel
 	{
 		if (this.tableListClients == null) return;
 		this.tableListClients.remove(aClient);
+	}
+
+	private void deleteTables()
+	{
+		if (this.tableList.getSelectedRowCount() == 0) return;
+		int rows[] = this.tableList.getSelectedRows();
+		int count = rows.length;
+		if (count == 0) return;
+
+		ArrayList names = new ArrayList(count);
+
+		for (int i=0; i < count; i ++)
+		{
+			String type = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+			if (!"table".equalsIgnoreCase(type) && !"view".equalsIgnoreCase(type)) continue;
+
+			String name = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+			String schema = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+
+      if (schema!= null && schema.length() > 0)
+      {
+        name = SqlUtil.quoteObjectname(schema) + "." + SqlUtil.quoteObjectname(name);
+      }
+      else
+      {
+        name = SqlUtil.quoteObjectname(name);
+      }
+
+			names.add(name);
+		}
+		TableDeleterUI deleter = new TableDeleterUI();
+		deleter.setObjects(names);
+		deleter.setConnection(this.dbConnection);
+		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
+		deleter.showDialog(f);
 	}
 
 	private void dropTables()

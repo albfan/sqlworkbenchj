@@ -31,6 +31,7 @@ import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.CopyRowAction;
 import workbench.gui.actions.DeleteRowAction;
 import workbench.gui.actions.InsertRowAction;
 import workbench.gui.actions.StartEditAction;
@@ -53,6 +54,7 @@ import workbench.storage.DmlStatement;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.interfaces.JobErrorHandler;
 
 /**
  *	A Panel which displays the result of a SELECT statement.
@@ -60,7 +62,7 @@ import workbench.util.StringUtil;
 public class DwPanel
 	extends JPanel
 	implements TableModelListener, ListSelectionListener, ChangeListener,
-						RowActionMonitor, DbData, DbUpdater, Interruptable
+						RowActionMonitor, DbData, DbUpdater, Interruptable, JobErrorHandler
 {
 	private WbTable infoTable;
 	private DwStatusBar statusBar;
@@ -82,6 +84,7 @@ public class DwPanel
 
 	private UpdateDatabaseAction updateAction = null;
 	private InsertRowAction insertRow = null;
+	private CopyRowAction duplicateRow = null;
 	private DeleteRowAction deleteRow = null;
 	private StartEditAction startEdit = null;
 
@@ -130,26 +133,20 @@ public class DwPanel
 		this.insertRow = new InsertRowAction(this);
 		this.deleteRow = new DeleteRowAction(this);
 		this.startEdit = new StartEditAction(this);
+		this.duplicateRow = new CopyRowAction(this);
 
 		//infoTable.addPopupAction(this.startEdit, true);
 		infoTable.addPopupAction(this.updateAction, true);
 		infoTable.addPopupAction(this.insertRow, true);
 		infoTable.addPopupAction(this.deleteRow, false);
-		this.infoTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		this.infoTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.infoTable.setRowSelectionAllowed(true);
+		this.infoTable.getSelectionModel().addListSelectionListener(this);
 	}
 
 	public void setManageActions(boolean aFlag)
 	{
 		this.manageUpdateAction = aFlag;
-		if (aFlag)
-		{
-			infoTable.getSelectionModel().addListSelectionListener(this);
-		}
-		else
-		{
-			infoTable.getSelectionModel().removeListSelectionListener(this);
-		}
 	}
 
 	public void setDefaultStatusMessage(String aMessage)
@@ -272,13 +269,32 @@ public class DwPanel
 		this.updateAction.setClient(aDelegate);
 	}
 
+	private boolean saveChangesInBackground = false;
+	
+	public void setSaveChangesInBackground(boolean flag) 
+	{ 
+		this.saveChangesInBackground = flag; 
+	}
+	
 	public synchronized void saveChangesToDatabase()
 	{
 		if (this.dbConnection == null) return;
+		if (!this.shouldSaveChanges(this.dbConnection)) return;
+		
+		if (this.saveChangesInBackground) 
+		{
+			this.startBackgroundSave();
+			return;
+		}
+		doSave();
+	}
+
+	private void doSave()
+	{
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			this.saveChanges(dbConnection);
+			this.saveChanges(dbConnection, this);
 		}
 		catch (Exception e)
 		{
@@ -289,8 +305,22 @@ public class DwPanel
 		{
 			WbSwingUtilities.showDefaultCursor(this);
 		}
+		
 	}
-
+	private void startBackgroundSave()
+	{
+		Thread t = new Thread()
+		{
+			public void run()
+			{
+				doSave();
+			}
+		};
+		t.setName("DwPanel update thread");
+		t.setDaemon(true);
+		t.start();
+	}
+	
 	public boolean shouldSaveChanges(WbConnection aConnection)
 	{
 		if (!WbManager.getSettings().getDbDebugMode()) return true;
@@ -346,10 +376,13 @@ public class DwPanel
 		}
 		return doSave;
 	}
-	public synchronized int saveChanges(WbConnection aConnection)
+
+	public synchronized int saveChanges(WbConnection aConnection, JobErrorHandler errorHandler)
 		throws SQLException
 	{
 		int rows = 0;
+		JobErrorHandler activeErrorHandler = this;
+		if (errorHandler != null) activeErrorHandler = errorHandler;
 
 		this.infoTable.stopEditing();
 
@@ -360,7 +393,7 @@ public class DwPanel
       WbSwingUtilities.showWaitCursor(this);
 			ds.setProgressMonitor(this);
 			start = System.currentTimeMillis();
-			rows = ds.updateDb(aConnection);
+			rows = ds.updateDb(aConnection, errorHandler);
 			end = System.currentTimeMillis();
 			ds.setProgressMonitor(null);
 			long sqlTime = (end - start);
@@ -675,9 +708,20 @@ public class DwPanel
 		this.statusBar.setRowcount(startRow + 1, endRow + 1, count);
   }
 
+	public int duplicateRow()
+	{
+		if (this.readOnly) return -1;
+		if (!this.startEdit()) return -1;
+		int newRow = this.infoTable.duplicateRow();
+		if (newRow >= 0) this.infoTable.getSelectionModel().setSelectionInterval(newRow, newRow);
+		this.rowCountChanged();
+		return newRow;
+	}
+
 	public void deleteRow()
 	{
 		if (this.readOnly) return;
+		if (!this.startEdit()) return;
 		this.infoTable.deleteRow();
     this.rowCountChanged();
 	}
@@ -685,6 +729,7 @@ public class DwPanel
 	public long addRow()
 	{
 		if (this.readOnly) return -1;
+		if (!this.startEdit()) return -1;
 		long newRow = this.infoTable.addRow();
 		if (newRow > -1) this.rowCountChanged();
 		return newRow;
@@ -866,6 +911,35 @@ public class DwPanel
 		return this.resultEmptyMsgModel;
 	}
 
+	public int getActionOnError(int errorRow, int errorColumn, String data, String errorMessage)
+	{
+		String msg = ResourceMgr.getString("ErrorUpdateSqlError");
+		msg = msg.replaceAll("%statement%", (data == null ? "" : data.substring(0, 50) + "..."));
+		msg = msg.replaceAll("%message%", errorMessage);
+
+		String r = "";
+		if (errorRow > -1)
+		{
+			r = ResourceMgr.getString("TxtErrorRow").replaceAll("%row%", Integer.toString(errorRow));
+		}
+		msg = msg.replaceAll("%row%", r);
+
+		Window w = SwingUtilities.getWindowAncestor(this);
+		int choice = WbSwingUtilities.getYesNoIgnoreAll(w, msg);
+
+		int result = JobErrorHandler.JOB_ABORT;
+
+		if (choice == JOptionPane.YES_OPTION)
+		{
+			result = JobErrorHandler.JOB_CONTINUE;
+		}
+		else if (choice == WbSwingUtilities.IGNORE_ALL)
+		{
+			result = JobErrorHandler.JOB_IGNORE_ALL;
+		}
+		return result;
+	}
+
 	private TableModel getErrorTableModel()
 	{
 		return this.getErrorTableModel(null);
@@ -921,8 +995,10 @@ public class DwPanel
 		this.editingStarted = false;
 		this.infoTable.setShowStatusColumn(false);
 		this.updateAction.setEnabled(false);
-		this.insertRow.setEnabled(this.manageUpdateAction);
-		this.deleteRow.setEnabled(false);
+		int rows = this.infoTable.getSelectedRowCount();
+		this.insertRow.setEnabled(this.isUpdateable());
+		this.deleteRow.setEnabled(this.isUpdateable() && rows > 0);
+		this.duplicateRow.setEnabled(this.isUpdateable() && rows == 1);
 		this.startEdit.setSwitchedOn(false);
 		this.restoreOriginalValues();
 	}
@@ -984,13 +1060,20 @@ public class DwPanel
 			this.editingStarted = true;
 			this.startEdit.setSwitchedOn(true);
 		}
+		else
+		{
+			this.startEdit.setSwitchedOn(false);
+		}
+		int rows = this.infoTable.getSelectedRowCount();
 		if (this.insertRow != null) this.insertRow.setEnabled(update);
-		if (this.deleteRow != null) this.deleteRow.setEnabled(update);
+		if (this.deleteRow != null) this.deleteRow.setEnabled(update && rows > 0);
+		if (this.duplicateRow != null) this.duplicateRow.setEnabled(update && rows == 1);
 
 		return update;
 	}
 
 	public InsertRowAction getInsertRowAction() { return this.insertRow; }
+	public CopyRowAction getCopyRowAction() { return this.duplicateRow; }
 	public DeleteRowAction getDeleteRowAction() { return this.deleteRow; }
 	public UpdateDatabaseAction getUpdateDatabaseAction() { return this.updateAction; }
 	public StartEditAction getStartEditAction() { return this.startEdit; }
@@ -1030,14 +1113,16 @@ public class DwPanel
 
 	/**
 	 *	This is called when the selection in the table changes.
-	 *  The delete row action will be enabled when exactly one row
+	 *  The copy row action will be enabled when exactly one row
 	 *  is selected
 	 */
 	public void valueChanged(javax.swing.event.ListSelectionEvent e)
 	{
 		if (this.readOnly) return;
 		long rows = this.infoTable.getSelectedRowCount();
-		this.deleteRow.setEnabled( (rows == 1) );
+		boolean update = this.isUpdateable();
+		this.deleteRow.setEnabled( (rows > 0) && update);
+		this.duplicateRow.setEnabled(rows == 1 && update);
 	}
 
 	/**

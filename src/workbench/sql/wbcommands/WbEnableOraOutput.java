@@ -1,12 +1,12 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+import java.util.StringTokenizer;
 
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.util.LineTokenizer;
 
 /**
  *
@@ -27,9 +27,10 @@ public class WbEnableOraOutput extends SqlCommand
 	{
 		this.checkVerb(aSql);
 
-		LineTokenizer tok = new LineTokenizer(aSql.trim(), " ");
+		StringTokenizer tok = new StringTokenizer(aSql.trim(), " ");
 		long limit = -1;
-		String verb = tok.nextToken(); // skip the verb
+		
+		if (tok.hasMoreTokens()) tok.nextToken(); // skip the verb
 
 		// second token is the buffer size
 		if (tok.hasMoreTokens())

@@ -1,6 +1,11 @@
 package workbench.print;
 
 import java.awt.print.PageFormat;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttribute;
+import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.MediaPrintableArea;
+import javax.print.attribute.standard.OrientationRequested;
 
 /*
  * PrintUtil.java
@@ -20,8 +25,36 @@ public class PrintUtil
 	{
 	}
 
+	public static PrintRequestAttributeSet getPrintAttributes(PageFormat format)
+	{
+		PrintRequestAttributeSet attr = new HashPrintRequestAttributeSet();
+		PrintRequestAttribute att = null;
+		int value = format.getOrientation();
+		switch (value)
+		{
+			case PageFormat.LANDSCAPE:
+				att = OrientationRequested.LANDSCAPE;
+				break;
+			case PageFormat.PORTRAIT:
+				att = OrientationRequested.PORTRAIT;
+				break;
+			case PageFormat.REVERSE_LANDSCAPE:
+				att = OrientationRequested.REVERSE_LANDSCAPE;
+				break;
+		}
+		attr.add(att);
+		att = new MediaPrintableArea((float)format.getImageableX(), 
+		                             (float)format.getImageableY(), 
+																 (float)format.getImageableWidth(), 
+																 (float)format.getImageableHeight(), MediaPrintableArea.INCH);
+		attr.add(att);
+		
+		return attr;
+	}
+
 	public static boolean pageFormatEquals(PageFormat first, PageFormat second)
 	{
+		if (first != null || second != null) return false;
 		if (first.getOrientation() != second.getOrientation()) return false;
 		if (first.getHeight() != second.getHeight()) return false;
 		if (first.getWidth() != second.getWidth()) return false;
@@ -31,7 +64,7 @@ public class PrintUtil
 		if (first.getImageableHeight() != second.getImageableHeight()) return false;
 		return true;
 	}
-	
+
 	public static double millimeterToPoints(double mm)
 	{
 		double inch = millimeterToInch(mm);
@@ -53,15 +86,15 @@ public class PrintUtil
 	{
 		return (inch * 25.4);
 	}
-	
+
 	public static void printPageFormat(String aName, PageFormat aFormat)
 	{
 		double width = aFormat.getPaper().getWidth();
 		double height = aFormat.getPaper().getHeight();
-		
+
 		double leftmargin = aFormat.getImageableX();
 		double rightmargin = width - leftmargin - aFormat.getImageableWidth();
-		
+
 		double topmargin = (int)aFormat.getImageableY();
 		double bottommargin = height - topmargin - aFormat.getImageableHeight();
 

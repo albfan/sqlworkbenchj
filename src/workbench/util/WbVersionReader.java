@@ -33,17 +33,33 @@ public class WbVersionReader
 
 	private String currentDevBuildNumber;
 	private String currentDevBuildDate;
-	
+
 	private String currentStableBuildNumber;
 	private String currentStableBuildDate;
-	
+
 	public WbVersionReader()
 		throws Exception
 	{
 		long start, end;
 		start = System.currentTimeMillis();
-		this.readDevBuildInfo();
-		this.readStableBuildInfo();
+		try
+		{
+			this.readDevBuildInfo();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("WbVersionReader.<init>", "Error when retrieving dev build version");
+		}
+
+		try
+		{
+			this.readStableBuildInfo();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("WbVersionReader.<init>", "Error when retrieving release build version");
+		}
+
 		end = System.currentTimeMillis();
 		LogMgr.logDebug("WbVersionReader.<init>", "Retrieving version information took " + (end - start) + "ms");
 	}
@@ -62,7 +78,7 @@ public class WbVersionReader
 			Attributes attrs = mani.getMainAttributes();
 			String value = attrs.getValue("WbBuild-Number");
 			if (value != null) this.currentDevBuildNumber = value.trim();
-			
+
 			value = attrs.getValue("WbBuild-Date");
 			if (value != null) this.currentDevBuildDate = value.trim();
 
@@ -79,7 +95,7 @@ public class WbVersionReader
 			LogMgr.logDebug("WbVersionReader.readDevBuildInfo", "Retrieving development version information done.");
 		}
 	}
-	
+
 	private void readStableBuildInfo()
 		throws Exception
 	{
@@ -104,7 +120,7 @@ public class WbVersionReader
 					Attributes attrs = mani.getMainAttributes();
 					String value = attrs.getValue("WbBuild-Number");
 					if (value != null) this.currentStableBuildNumber = value.trim();
-					
+
 					value = attrs.getValue("WbBuild-Date");
 					if (value != null) this.currentStableBuildDate = value.trim();
 					break;
@@ -123,7 +139,7 @@ public class WbVersionReader
 		{
 			LogMgr.logDebug("WbVersionReader.readDevBuildInfo", "Retrieving release version information done.");
 		}
-		
+
 		if (historyLine != null)
 		{
 			int spacePos = historyLine.indexOf(' ');
@@ -140,7 +156,7 @@ public class WbVersionReader
 
 	public String getStableBuildNumber() { return this.currentStableBuildNumber; }
 	public String getStableBuildDate() { return this.currentStableBuildDate; }
-	
+
 	public static void main(String[] args)
 	{
 		try

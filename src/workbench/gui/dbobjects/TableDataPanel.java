@@ -91,7 +91,8 @@ public class TableDataPanel
 		this.dataDisplay.setShowErrorMessages(true);
 		this.dataDisplay.getTable().setMaxColWidth(WbManager.getSettings().getMaxColumnWidth());
 		this.dataDisplay.getTable().setMinColWidth(WbManager.getSettings().getMinColumnWidth());
-
+		this.dataDisplay.setSaveChangesInBackground(true);
+		
     JPanel topPanel = new JPanel();
 		topPanel.setMaximumSize(new Dimension(32768, 32768));
 		//topPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
@@ -154,6 +155,7 @@ public class TableDataPanel
 		toolbar.add(this.dataDisplay.getUpdateDatabaseAction());
 		toolbar.addSeparator();
 		toolbar.add(this.dataDisplay.getInsertRowAction());
+		toolbar.add(this.dataDisplay.getCopyRowAction());
 		toolbar.add(this.dataDisplay.getDeleteRowAction());
 
 		//this.dataTable = this.dataDisplay.getTable();

@@ -30,6 +30,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import javax.swing.event.ListSelectionListener;
 
 import workbench.WbManager;
 import workbench.db.DataSpooler;
@@ -74,6 +75,7 @@ import workbench.util.StringUtil;
 import workbench.util.WbWorkspace;
 import workbench.exception.ExceptionUtil;
 import workbench.sql.ScriptParser;
+import workbench.interfaces.JobErrorHandler;
 
 
 
@@ -86,9 +88,10 @@ import workbench.sql.ScriptParser;
  */
 public class SqlPanel
 	extends JPanel
-	implements Runnable, FontChangedListener, ActionListener, TextChangeListener,
+	implements Runnable, FontChangedListener, ActionListener, TextChangeListener, 
 				    PropertyChangeListener,
-						MainPanel, Spooler, TextFileContainer, DbUpdater, Interruptable, FormattableSql, Commitable
+						MainPanel, Spooler, TextFileContainer, DbUpdater, Interruptable, FormattableSql, Commitable,
+						JobErrorHandler, FilenameChangeListener
 {
 	private boolean runSelectedCommand;
 	private boolean runCurrentCommand;
@@ -206,6 +209,7 @@ public class SqlPanel
 		this.resultTab.setFocusTraversalPolicy(pol);
 
 		this.editor = EditorPanel.createSqlEditor();
+		this.editor.addFilenameChangeListener(this);
 		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
 		this.contentPanel.setOneTouchExpandable(true);
 		this.contentPanel.setContinuousLayout(true);
@@ -235,7 +239,7 @@ public class SqlPanel
 
 	public String getId()
 	{
-		return Integer.toString(this.internalId);
+		return "Wb-" + Integer.toString(this.internalId);
 	}
 
 	public void setId(int anId)
@@ -364,8 +368,7 @@ public class SqlPanel
 
 	public boolean hasFileLoaded()
 	{
-		String file = this.editor.getCurrentFileName();
-		return (file != null) && (file.length() > 0);
+		return this.editor.hasFileLoaded();
 	}
 
 	public void checkAndSaveFile()
@@ -393,20 +396,7 @@ public class SqlPanel
 	 */
 	public boolean canCloseFile()
 	{
-		if (!this.hasFileLoaded()) return true;
-		boolean result = true;
-		if (this.editor.isModified())
-		{
-			String filename = this.editor.getCurrentFileName().replaceAll("\\\\", "\\\\\\\\");
-			String msg = ResourceMgr.getString("MsgConfirmUnsavedEditorFile").replaceAll("%filename%", filename);
-			int choice = WbSwingUtilities.getYesNoCancel(this, msg);
-			if (choice == JOptionPane.YES_OPTION)
-			{
-				this.editor.saveCurrentFile();
-			}
-			result = (choice != JOptionPane.CANCEL_OPTION);
-		}
-		return result;
+		return this.editor.canCloseFile();
 	}
 
 	public boolean saveCurrentFile()
@@ -432,7 +422,6 @@ public class SqlPanel
 			String newFile = this.editor.getCurrentFileName();
 			if (newFile != null && !newFile.equals(oldFile))
 			{
-	      this.fireFilenameChanged(this.editor.getCurrentFileName());
 				return true;
 			}
 		}
@@ -460,6 +449,11 @@ public class SqlPanel
 		return false;
 	}
 
+	public void fileNameChanged(Object sender, String aNewName)
+	{
+		this.fireFilenameChanged(aNewName);
+	}
+	
 	public void fireFilenameChanged(String aNewName)
 	{
 		if (this.filenameChangeListeners == null) return;
@@ -527,9 +521,9 @@ public class SqlPanel
 
 		TextPopup pop = (TextPopup)this.editor.getRightClickPopup();
 
-		a = new FileOpenAction(this);
-		a.setCreateMenuSeparator(true);
-		this.actions.add(a);
+		FileOpenAction open = new FileOpenAction(this);
+		open.setCreateMenuSeparator(true);
+		this.actions.add(open);
 		this.actions.add(new FileSaveAction(this));
 		this.actions.add(new FileSaveAsAction(this));
 		this.fileDiscardAction = new FileDiscardAction(this);
@@ -566,6 +560,7 @@ public class SqlPanel
 		this.actions.add(this.data.getStartEditAction());
 		this.actions.add(this.data.getUpdateDatabaseAction());
 		this.actions.add(this.data.getInsertRowAction());
+		this.actions.add(this.data.getCopyRowAction());
 		this.actions.add(this.data.getDeleteRowAction());
 
 		this.createDeleteScript = new CreateDeleteScriptAction(this);
@@ -664,6 +659,7 @@ public class SqlPanel
 		this.toolbarActions.add(this.data.getUpdateDatabaseAction());
 		this.toolbarActions.add(this.data.getStartEditAction());
 		this.toolbarActions.add(this.data.getInsertRowAction());
+		this.toolbarActions.add(this.data.getCopyRowAction());
 		this.toolbarActions.add(this.data.getDeleteRowAction());
 
 		this.commitAction.setCreateToolbarSeparator(true);
@@ -815,7 +811,7 @@ public class SqlPanel
 		{
 			this.log.setText(ResourceMgr.getString("MsgUpdatingDatabase"));
 			this.log.append("\n");
-			int rows = this.data.saveChanges(this.dbConnection);
+			int rows = this.data.saveChanges(this.dbConnection, this);
 			this.log.append(this.data.getLastMessage());
 			success = true;
 		}
@@ -1028,6 +1024,7 @@ public class SqlPanel
 	public void readFromWorkspace(WbWorkspace w)
 		throws IOException
 	{
+		this.editor.setText("");
 		SqlHistory history = this.getSqlHistory();
 
 		try
@@ -1125,6 +1122,7 @@ public class SqlPanel
 	{
 		String fname = null;
 		String tooltip = null;
+		this.setId(index + 1);
 
 		fname = this.getCurrentFileName();
 		if (fname != null)
@@ -1538,6 +1536,64 @@ public class SqlPanel
 
 	private boolean importRunning = false;
 
+	public int getActionOnError(int errorRow, int errorColumn, String data, String errorMessage)
+	{
+		if (this.importRunning)
+		{
+			return this.getImportErrorAction(errorRow, errorColumn, data, errorMessage);
+		}
+		else if (this.updateRunning)
+		{
+			return this.getUpdateErrorAction(errorRow, errorColumn, data, errorMessage);
+		}
+		return JobErrorHandler.JOB_ABORT;
+	}
+
+	/**
+	 * 	We are implementing our own getUpdateErrorAction() because it's necessary to
+	 *  turn off the loading indicator before displaying a message box.
+	 * 	DwPanel's getUpdateErrorAction is called from here after turning off the loading indicator.
+	 */
+	public int getUpdateErrorAction(int errorRow, int errorColumn, String data, String errorMessage)
+	{
+		this.showBusyIcon(false);
+		int choice = this.data.getActionOnError(errorRow, errorColumn, data, errorMessage);
+		this.showBusyIcon(true);
+		return choice;
+	}
+
+	public int getImportErrorAction(int errorRow, int errorColumn, String data, String errorMessage)
+	{
+		String msg = null;
+		if (errorColumn > -1)
+		{
+			msg = ResourceMgr.getString("ErrorColumnImportError");
+			msg = msg.replaceAll("%row%", Integer.toString(errorRow));
+			msg = msg.replaceAll("%column%", Integer.toString(errorColumn));
+			msg = msg.replaceAll("%data%", data);
+		}
+		else
+		{
+			msg = ResourceMgr.getString("ErrorRowImportError");
+			msg = msg.replaceAll("%row%", Integer.toString(errorRow));
+			msg = msg.replaceAll("%data%", data == null ? "(null)" : data.substring(0,40) + " ...");
+		}
+
+		this.showBusyIcon(false);
+		int choice = WbSwingUtilities.getYesNoIgnoreAll(this, msg);
+		int result = JobErrorHandler.JOB_ABORT;
+		this.showBusyIcon(true);
+		if (choice == JOptionPane.YES_OPTION)
+		{
+			result = JobErrorHandler.JOB_CONTINUE;
+		}
+		else if (choice == WbSwingUtilities.IGNORE_ALL)
+		{
+			result = JobErrorHandler.JOB_IGNORE_ALL;
+		}
+		return result;
+	}
+
 	public synchronized void importFile()
 	{
 		if (!this.data.startEdit()) return;
@@ -1580,7 +1636,7 @@ public class SqlPanel
 						{
 							importRunning = true;
 							ds.setProgressMonitor(data);
-							model.importFile(fname, header, delimit, quote);
+							model.importFile(fname, header, delimit, quote, SqlPanel.this);
 							data.rowCountChanged();
 							importRunning = false;
 						}
@@ -1855,8 +1911,8 @@ public class SqlPanel
 		DataStore ds = table.getDataStore();
 		if (ds == null) return;
 
-		int row = table.getSelectedRow();
-		if (row < 0)
+		int[] rows = table.getSelectedRows();
+		if (rows.length == 0)
 		{
 			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgSelectRow"));
 			return;
@@ -1865,13 +1921,21 @@ public class SqlPanel
 		String updatetable = ds.getUpdateTable();
 		String schema = ds.getUpdateTableSchema();
 
-		Map pkvalues = ds.getPkValues(row);
+		int numRows = rows.length;
 		try
 		{
-			DeleteScriptGenerator gen = new DeleteScriptGenerator(this.dbConnection);
-			gen.setTable(null, schema, updatetable);
-			gen.setValues(pkvalues);
-			String script = gen.createScript();
+			StringBuffer script = new StringBuffer(numRows * 150);
+			for (int i=0; i < numRows; i++)
+			{
+				Map pkvalues = ds.getPkValues(rows[i]);
+				DeleteScriptGenerator gen = new DeleteScriptGenerator(this.dbConnection);
+				gen.setTable(null, schema, updatetable);
+				gen.setValues(pkvalues);
+				String rowScript = gen.createScript();
+				if (i > 0) script.append("\n\n");
+				script.append(rowScript);
+			}
+
 			MainWindow parent = (MainWindow)SwingUtilities.getWindowAncestor(this);
 			String title = ResourceMgr.getString("TxtDeleteScriptWindowTitle") + " " + schema + "." + ds.getRealUpdateTable();
 			final String id = this.getClass().getName() + ".ScriptDialog";
@@ -1887,7 +1951,7 @@ public class SqlPanel
 				}
 			});
 			EditorPanel editor = EditorPanel.createSqlEditor();
-			editor.setText(script);
+			editor.setText(script.toString());
 			editor.setCaretPosition(0);
 			//editor.addPopupMenuItem(new FileSaveAsAction(editor), true);
 
@@ -1924,16 +1988,20 @@ public class SqlPanel
 		this.setActionState(new Action[] {this.findDataAction, this.dataToClipboard, this.exportDataAction, this.optimizeAllCol}, hasResult);
 
 		boolean mayEdit = hasResult && this.data.hasUpdateableColumns();
-		this.setActionState(this.data.getStartEditAction(), mayEdit);
-		this.setActionState(this.createDeleteScript, mayEdit);
+		this.data.getStartEditAction().setEnabled(mayEdit);
+		this.createDeleteScript.setEnabled(mayEdit);
+		int rows = this.data.getTable().getSelectedRowCount();
+		
+		this.data.getCopyRowAction().setEnabled(mayEdit && (rows == 1));
+		this.data.getInsertRowAction().setEnabled(this.data.isUpdateable());
 
 		boolean findNext = hasResult && (this.data.getTable() != null && this.data.getTable().canSearchAgain());
-		this.setActionState(this.findDataAgainAction, findNext);
+		this.findDataAgainAction.setEnabled(findNext);
 
 		boolean canUpdate = this.data.isUpdateable();
-		this.setActionState(this.copyAsSqlInsert, canUpdate);
-		this.setActionState(this.copyAsSqlUpdate, canUpdate);
-		this.setActionState(this.importFileAction, canUpdate);
+		this.copyAsSqlInsert.setEnabled(canUpdate);
+		this.copyAsSqlUpdate.setEnabled(canUpdate);
+		this.importFileAction.setEnabled(canUpdate);
 	}
 
 	public void run()

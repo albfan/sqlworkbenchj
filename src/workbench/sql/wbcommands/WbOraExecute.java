@@ -2,6 +2,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.StringTokenizer;
 
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
@@ -9,7 +10,6 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
-import workbench.util.LineTokenizer;
 import workbench.util.SqlUtil;
 
 /**
@@ -35,8 +35,9 @@ public class WbOraExecute extends SqlCommand
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		String sql = SqlUtil.makeCleanSql(aSql, false, false, '\'');
-		LineTokenizer tok = new LineTokenizer(sql, " ");
-		String verb = tok.nextToken();
+		StringTokenizer tok = new StringTokenizer(sql, " ");
+		String verb = null;
+		if (tok.hasMoreTokens()) verb = tok.nextToken();
 		if (!this.sqlcommand.equalsIgnoreCase(verb)) throw new Exception("Wrong syntax. " + sqlcommand + " expected!");
 
 		String upper = sql.toUpperCase();

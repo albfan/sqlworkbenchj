@@ -28,7 +28,7 @@ public class WbTabbedPane
 		this.putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
 	}
 	
-	public void setSuspendRepaint(boolean aFlag)
+	public synchronized void setSuspendRepaint(boolean aFlag)
 	{
 		boolean suspend = this.suspendRepaint;
 		this.suspendRepaint = aFlag;

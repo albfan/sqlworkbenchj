@@ -10,6 +10,7 @@ import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -66,8 +67,10 @@ public class ProcedureListPanel
 	private String currentCatalog;
 	private boolean shouldRetrieve;
 	private WbMenuItem dropTableItem;
+	private WbMenuItem recompileItem;
 
-	private static final String DROP_CMD = "drop-table";
+	private static final String DROP_CMD = "drop-object";
+	private static final String COMPILE_CMD = "compile-procedure";
 	private EmptyBorder EMPTY = new EmptyBorder(1,1, 3, 1);
 
 	public ProcedureListPanel() throws Exception
@@ -140,6 +143,7 @@ public class ProcedureListPanel
 		this.dropTableItem.setActionCommand(DROP_CMD);
 		this.dropTableItem.addActionListener(this);
 		this.dropTableItem.setEnabled(false);
+		this.dropTableItem.setIcon(ResourceMgr.getImage("blank"));
 		popup.add(this.dropTableItem);
 	}
 
@@ -161,6 +165,21 @@ public class ProcedureListPanel
 		this.dbConnection = aConnection;
 		this.source.getSqlTokenMarker().initDatabaseKeywords(aConnection.getSqlConnection());
 		this.reset();
+		
+		if (this.dbConnection.getMetadata().isOracle())
+		{
+			this.recompileItem = new WbMenuItem(ResourceMgr.getString("MnuTxtRecompile"));
+			this.recompileItem.setActionCommand(COMPILE_CMD);
+			this.recompileItem.addActionListener(this);
+			this.recompileItem.setEnabled(false);
+			this.recompileItem.setIcon(ResourceMgr.getImage("blank"));
+			JPopupMenu popup = this.procList.getPopupMenu();
+			popup.add(this.recompileItem);
+		}
+		else
+		{
+			this.recompileItem = null;
+		}
 	}
 
 	public void setCatalogAndSchema(String aCatalog, String aSchema)
@@ -200,14 +219,10 @@ public class ProcedureListPanel
 					try
 					{
 						DbMetadata meta = dbConnection.getMetadata();
-						//procList.setVisible(false);
 						WbSwingUtilities.showWaitCursorOnWindow(current);
-						//LogMgr.logDebug("ProcedureListPanel.retrieve()", "Retrieving procedure list");
 						procList.setModel(meta.getListOfProcedures(currentCatalog, currentSchema), true);
-						//LogMgr.logDebug("ProcedureListPanel.retrieve()", "Procedure list retrieved");
 						procList.adjustColumns();
 						WbSwingUtilities.showDefaultCursorOnWindow(current);
-						//procList.setVisible(true);
 						shouldRetrieve = false;
 					}
 					catch (OutOfMemoryError mem)
@@ -225,7 +240,7 @@ public class ProcedureListPanel
 		t.start();
 	}
 
-	private void dropTables()
+	private void dropObjects()
 	{
 		if (this.procList.getSelectedRowCount() == 0) return;
 		int rows[] = this.procList.getSelectedRows();
@@ -234,44 +249,9 @@ public class ProcedureListPanel
 
 		ArrayList names = new ArrayList(count);
 		ArrayList types = new ArrayList(count);
-		for (int i=0; i < count; i ++)
-		{
-			String name = this.procList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_PROC_LIST_NAME);
-			if (name.indexOf(';') > 0)
-			{
-				name = name.substring(0, name.indexOf(';'));
-			}
-
-			String schema = this.procList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_PROC_LIST_SCHEMA);
-      if (schema != null && schema.length() > 0)
-      {
-  			name = SqlUtil.quoteObjectname(schema) + "." + SqlUtil.quoteObjectname(name);
-      }
-      else
-      {
-        name = SqlUtil.quoteObjectname(name);
-      }
-
-			String type = this.procList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_PROC_LIST_TYPE);
-			if (this.dbConnection.getMetadata().isOracle())
-			{
-				String catalog = this.procList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_PROC_LIST_CATALOG);
-				if (catalog != null && catalog.length() > 0)
-				{
-					type = "PACKAGE";
-				}
-      	else if ("RESULT".equalsIgnoreCase(type))
-      	{
-        	type = "FUNCTION";
-				}
-				else if ("NO RESULT".equalsIgnoreCase(type))
-				{
-					type = "PROCEDURE";
-				}
-			}
-			names.add(name);
-			types.add(type);
-		}
+		
+		this.readSelecteItems(names, types);
+		
 		ObjectDropperUI ui = new ObjectDropperUI();
 		ui.setObjects(names, types);
 		ui.setConnection(this.dbConnection);
@@ -320,6 +300,10 @@ public class ProcedureListPanel
 
 		if (row < 0) return;
 		this.dropTableItem.setEnabled(this.procList.getSelectedRowCount() > 0);
+		if (this.recompileItem != null)
+		{
+			this.recompileItem.setEnabled(this.procList.getSelectedRowCount() > 0);
+		}
 
 		final String proc = this.procList.getValueAsString(row, DbMetadata.COLUMN_IDX_PROC_LIST_NAME);
 		final String schema = this.procList.getValueAsString(row, DbMetadata.COLUMN_IDX_PROC_LIST_SCHEMA);
@@ -365,6 +349,86 @@ public class ProcedureListPanel
 		});
 	}
 
+	private void readSelecteItems(ArrayList names, ArrayList types)
+	{
+		if (this.procList.getSelectedRowCount() == 0) return;
+		int rows[] = this.procList.getSelectedRows();
+		int count = rows.length;
+		if (count == 0) return;
+
+		for (int i=0; i < count; i ++)
+		{
+			String name = this.procList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_PROC_LIST_NAME);
+			
+			// MS SQL Server appends a semicolon at the end of the name...
+			if (name.indexOf(';') > 0)
+			{
+				name = name.substring(0, name.indexOf(';'));
+			}
+
+			String schema = this.procList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_PROC_LIST_SCHEMA);
+      if (schema != null && schema.length() > 0)
+      {
+  			name = SqlUtil.quoteObjectname(schema) + "." + SqlUtil.quoteObjectname(name);
+      }
+      else
+      {
+        name = SqlUtil.quoteObjectname(name);
+      }
+
+			String type = this.procList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_PROC_LIST_TYPE);
+			if (this.dbConnection.getMetadata().isOracle())
+			{
+				// Oracle reports the type of the procedure in a rather strange way.
+				// the only way to tell if it's a package, is to look at the CATALOG column
+				// if that contains an entry, it's a packaged procedure
+				String catalog = this.procList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_PROC_LIST_CATALOG);
+				if (catalog != null && catalog.length() > 0)
+				{
+					type = "PACKAGE";
+					
+					// the procedure itself cannot neither be dropped
+					// nor recompiled. So we use the name of the package
+					// as the object name
+					name = catalog;
+				}
+      	else if ("RESULT".equalsIgnoreCase(type))
+      	{
+        	type = "FUNCTION";
+				}
+				else if ("NO RESULT".equalsIgnoreCase(type))
+				{
+					type = "PROCEDURE";
+				}
+			}
+			names.add(name);
+			types.add(type);
+		}
+	}
+	
+	private void compileObjects()
+	{
+		if (this.procList.getSelectedRowCount() == 0) return;
+		int rows[] = this.procList.getSelectedRows();
+		int count = rows.length;
+		if (count == 0) return;
+
+		ArrayList names = new ArrayList(count);
+		ArrayList types = new ArrayList(count);
+		
+		this.readSelecteItems(names, types);
+		
+		try
+		{
+			ObjectCompilerUI ui = new ObjectCompilerUI(names, types, this.dbConnection);
+			ui.show(SwingUtilities.getWindowAncestor(this));
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("ProcedureListPanel.compileObjects()", "Error initializing ObjectCompilerUI", e);
+		}
+		
+	}
 	public void reload()
 	{
 		this.reset();
@@ -376,7 +440,11 @@ public class ProcedureListPanel
 		String command = e.getActionCommand();
 		if (DROP_CMD.equals(command))
 		{
-			this.dropTables();
+			this.dropObjects();
+		}
+		else if (COMPILE_CMD.equals(command))
+		{
+			this.compileObjects();
 		}
 	}
 }

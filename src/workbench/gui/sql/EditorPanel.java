@@ -8,6 +8,13 @@ package workbench.gui.sql;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Window;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
@@ -17,10 +24,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
@@ -58,11 +68,11 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.ScriptParser;
 import workbench.sql.formatter.SqlFormatter;
-import workbench.util.LineTokenizer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.gui.actions.MatchBracketAction;
 import workbench.gui.editor.SyntaxDocument;
+import workbench.interfaces.FilenameChangeListener;
 
 
 /**
@@ -72,7 +82,7 @@ import workbench.gui.editor.SyntaxDocument;
  */
 public class EditorPanel
 	extends JEditTextArea
-	implements ClipboardSupport, FontChangedListener, PropertyChangeListener,
+	implements ClipboardSupport, FontChangedListener, PropertyChangeListener, DropTargetListener,
 						 TextContainer, TextFileContainer, Replaceable, Searchable, FormattableSql
 {
 	private static final Border DEFAULT_BORDER = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
@@ -91,6 +101,8 @@ public class EditorPanel
 	private FileOpenAction fileOpen;
 	private ColumnSelectionAction columnSelection;
 	private MatchBracketAction matchBracket;
+	
+	private List filenameChangeListeners;
 
   private static final SyntaxStyle[] SYNTAX_COLORS;
   static
@@ -169,8 +181,15 @@ public class EditorPanel
 		//this.setSelectionRectangular(true);
 		WbManager.getSettings().addFontChangedListener(this);
 		WbManager.getSettings().addChangeListener(this);
+		
+		new DropTarget(this, DnDConstants.ACTION_COPY, this);
 	}
 
+	public void setFileOpenAction(FileOpenAction anAction)
+	{
+		this.fileOpen = anAction;
+	}
+	
 	public void fontChanged(String aKey, Font aFont)
 	{
 		if (aKey.equals(Settings.EDITOR_FONT_KEY))
@@ -237,7 +256,7 @@ public class EditorPanel
 		{
 			formattedDelimit = "\n" + delimit + "\n\n";
 		}
-		else if (sql.endsWith("\n") ||sql.endsWith("\r"))
+		else if (sql.endsWith("\n") || sql.endsWith("\r"))
 		{
 			formattedDelimit = delimit + "\n";
 		}
@@ -248,12 +267,20 @@ public class EditorPanel
 
 		for (int i=0; i < count; i++)
 		{
-			SqlFormatter f = new SqlFormatter((String)commands.get(i), WbManager.getSettings().getMaxSubselectLength());
+			String command = (String)commands.get(i);
+			SqlFormatter f = new SqlFormatter(command, WbManager.getSettings().getMaxSubselectLength());
 			try
 			{
 				String formattedSql = f.format().trim();
 				newSql.append(formattedSql);
-				newSql.append(formattedDelimit);
+				if (command.trim().endsWith(delimit))
+				{
+					newSql.append(formattedDelimit);
+				}
+				else
+				{
+					newSql.append("\n");
+				}
 			}
 			catch (Exception e)
 			{
@@ -406,9 +433,40 @@ public class EditorPanel
     return true;
 	}
 
+	public void fireFilenameChanged(String aNewName)
+	{
+		if (this.filenameChangeListeners == null) return;
+		for (int i=0; i < this.filenameChangeListeners.size(); i++)
+		{
+			FilenameChangeListener l = (FilenameChangeListener)this.filenameChangeListeners.get(i);
+			l.fileNameChanged(this, aNewName);
+		}
+	}
+
+	public void addFilenameChangeListener(FilenameChangeListener aListener)
+	{
+		if (aListener == null) return;
+		if (this.filenameChangeListeners == null) this.filenameChangeListeners = new ArrayList();
+		this.filenameChangeListeners.add(aListener);
+	}
+
+	public void removeFilenameChangeListener(FilenameChangeListener aListener)
+	{
+		if (aListener == null) return;
+		if (this.filenameChangeListeners == null) return;
+		this.filenameChangeListeners.remove(aListener);
+	}
+	
 	public boolean openFile()
 	{
 		boolean result = false;
+		String oldFile = this.getCurrentFileName();
+		if (!this.canCloseFile())
+		{
+			this.requestFocusInWindow();
+			return false;
+		}
+		
 		String lastDir = WbManager.getSettings().getLastSqlDir();
 		JFileChooser fc = new JFileChooser(lastDir);
 		fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
@@ -422,6 +480,30 @@ public class EditorPanel
 		return result;
 	}
 
+	public boolean hasFileLoaded()
+	{
+		String file = this.getCurrentFileName();
+		return (file != null) && (file.length() > 0);
+	}
+	
+	public boolean canCloseFile()
+	{
+		if (!this.hasFileLoaded()) return true;
+		boolean result = true;
+		if (this.isModified())
+		{
+			String filename = this.getCurrentFileName().replaceAll("\\\\", "\\\\\\\\");
+			String msg = ResourceMgr.getString("MsgConfirmUnsavedEditorFile").replaceAll("%filename%", filename);
+			int choice = WbSwingUtilities.getYesNoCancel(this, msg);
+			if (choice == JOptionPane.YES_OPTION)
+			{
+				this.saveCurrentFile();
+			}
+			result = (choice != JOptionPane.CANCEL_OPTION);
+		}
+		return result;
+	}	
+	
 	public boolean readFile(File aFile)
 	{
 		if (aFile == null) return false;
@@ -452,6 +534,7 @@ public class EditorPanel
 			result = true;
 			this.clearUndoBuffer();
 			this.resetModified();
+			this.fireFilenameChanged(filename);
 		}
 		catch (IOException e)
 		{
@@ -517,6 +600,7 @@ public class EditorPanel
 			try
 			{
 				this.saveFile(fc.getSelectedFile());
+	      this.fireFilenameChanged(this.getCurrentFileName());
 				lastDir = fc.getCurrentDirectory().getAbsolutePath();
 				if (this.editorType == SQL_EDITOR)
 				{
@@ -546,6 +630,12 @@ public class EditorPanel
 		try
 		{
 			String filename = aFile.getAbsolutePath();
+			int pos = filename.indexOf('.');
+			if (pos < 0)
+			{
+				filename = filename + ".sql";
+				aFile = new File(filename);
+			}
 			PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(filename)));
 			int count = this.getLineCount();
 			String line;
@@ -728,4 +818,83 @@ public class EditorPanel
 		}
 	}
 
+	public void dragEnter(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
+	{
+		if (this.isEditable())
+		{
+			dropTargetDragEvent.acceptDrag (DnDConstants.ACTION_COPY);
+		}
+		else
+		{
+			dropTargetDragEvent.rejectDrag();
+		}
+	}
+	
+	public void dragExit(java.awt.dnd.DropTargetEvent dropTargetEvent)
+	{
+	}
+	
+	public void dragOver(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
+	{
+	}
+	
+	public void drop(java.awt.dnd.DropTargetDropEvent dropTargetDropEvent)
+	{
+		try
+		{
+			Transferable tr = dropTargetDropEvent.getTransferable();
+			if (tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
+			{
+				dropTargetDropEvent.acceptDrop(DnDConstants.ACTION_COPY);
+				java.util.List fileList = (java.util.List)tr.getTransferData(DataFlavor.javaFileListFlavor);
+				if (fileList != null && fileList.size() == 1)
+				{
+					File file = (File)fileList.get(0);
+					if (this.canCloseFile())
+					{
+						this.readFile(file);
+						dropTargetDropEvent.getDropTargetContext().dropComplete(true);
+					}
+					else
+					{
+						dropTargetDropEvent.getDropTargetContext().dropComplete(false);
+					}
+				}
+				else
+				{
+					dropTargetDropEvent.getDropTargetContext().dropComplete(false);
+					final Window w = SwingUtilities.getWindowAncestor(this);
+					SwingUtilities.invokeLater(new Runnable()
+					{
+						public void run()
+						{
+							w.toFront();
+							w.requestFocus();
+							WbSwingUtilities.showErrorMessage(w, ResourceMgr.getString("ErrorNoMultipleDrop"));
+						}
+					});
+				}
+			} 
+			else
+			{
+				dropTargetDropEvent.rejectDrop();
+			}
+		} 
+		catch (IOException io)
+		{
+			io.printStackTrace();
+			dropTargetDropEvent.rejectDrop();
+		} 
+		catch (UnsupportedFlavorException ufe)
+		{
+			ufe.printStackTrace();
+			dropTargetDropEvent.rejectDrop();
+		}
+	}
+	
+	
+	public void dropActionChanged(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
+	{
+	}
+	
 }

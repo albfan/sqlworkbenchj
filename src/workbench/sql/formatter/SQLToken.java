@@ -135,7 +135,7 @@ public class SQLToken extends Token
 	public SQLToken(int ID, String contents, int lineNumber, int charBegin, int charEnd, int state)
 	{
 		this.ID = ID;
-		this.contents = new String(contents);
+		this.contents = contents;
 		this.lineNumber = lineNumber;
 		this.charBegin = charBegin;
 		this.charEnd = charEnd;
