@@ -20,11 +20,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import javax.swing.*;
+import javax.swing.CellEditor;
 import javax.swing.border.LineBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
 import javax.swing.table.*;
+import javax.swing.table.TableCellEditor;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 
@@ -121,7 +123,7 @@ extends JTable
 
 		JTextField text = new JTextField();
 		text.setFont(dataFont);
-		this.defaultEditor = WbTextCellEditor.createInstance();
+		this.defaultEditor = WbTextCellEditor.createInstance(this);
 		this.defaultEditor.setFont(dataFont);
 		
 		numberEditorTextField = new JTextField();
@@ -719,6 +721,32 @@ extends JTable
 		}
 	}
 
+	public void openEditWindow()
+	{
+		if (!this.isEditing()) return;
+		
+		int col = this.getEditingColumn();
+		int row = this.getEditingRow();
+		String data = this.getValueAsString(row, col);
+		Frame owner = (Frame)SwingUtilities.getWindowAncestor(this);
+		String title = ResourceMgr.getString("TxtEditWindowTitle");
+		TableCellEditor editor = this.getCellEditor();
+		EditWindow w = new EditWindow(owner, title, data);
+		w.show();
+		if (editor != null) 
+		{
+			// we need to "cancel" the editor so that the data
+			// in the editor component will not be written into the 
+			// table model!
+			editor.cancelCellEditing();
+		}
+		if (!w.isCancelled())
+		{
+			this.setValueAt(w.getText(), row, col);
+		}
+		w.dispose();
+	}
+	
 	public void addTableModelListener(TableModelListener aListener)
 	{
 		this.changeListener = aListener;

@@ -65,6 +65,12 @@ public class ArgumentParser
 			}
 		}
 	}
+
+	public boolean getBoolean(String key)
+	{
+		String value = this.getValue(key);
+		return "true".equals(value);
+	}
 	
 	public String getValue(String key)
 	{
@@ -85,7 +91,7 @@ public class ArgumentParser
 		parser.addArgument("delimiter");
 		parser.addArgument("quotechar");
 		parser.addArgument("dateformat");
-		parser.addArgument("timestampformat");
+		parser.addArgument("cleancr");
 		parser.parse(test);
 		System.out.println("delimiter=>" + parser.getValue("delimiter") + "<");
 		System.out.println("file=" + parser.getValue("file"));

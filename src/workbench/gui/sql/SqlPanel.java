@@ -155,7 +155,7 @@ public class SqlPanel
 		pol.addComponent(data.getTable());
 		this.resultTab.setFocusTraversalPolicy(pol);
 
-		this.editor = new EditorPanel();
+		this.editor = EditorPanel.createSqlEditor();
 		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
 		this.contentPanel.setOneTouchExpandable(true);
 		this.contentPanel.setContinuousLayout(true);
@@ -1312,7 +1312,7 @@ public class SqlPanel
 					WbManager.getSettings().storeWindowSize(fd, id);
 				}
 			});
-			EditorPanel editor = new EditorPanel();
+			EditorPanel editor = EditorPanel.createSqlEditor();
 			editor.setText(script);
 			editor.setCaretPosition(0);
 			//editor.addPopupMenuItem(new FileSaveAsAction(editor), true);

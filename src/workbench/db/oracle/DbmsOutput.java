@@ -4,8 +4,6 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
-import workbench.WbManager;
-import workbench.log.LogMgr;
 
 
 public class DbmsOutput
@@ -73,19 +71,6 @@ public class DbmsOutput
 	 */
 	public void enable(long size) throws SQLException
 	{
-		if (size <= 0)
-		{
-			String prop = WbManager.getSettings().getProperty(this.getClass().getName(), "defaultbuffer", "32000");
-			try
-			{
-				size = Long.parseLong(prop);
-			}
-			catch (NumberFormatException nfe)
-			{
-				size = 32000;
-			}
-		}
-		LogMgr.logInfo("DbmsOutput.enable()", "Setting dbms_output buffer size to " + size);
 		this.disable();
 		enable_stmt.setLong( 1, size );
 		enable_stmt.executeUpdate();

@@ -135,7 +135,7 @@ public class TableListPanel
 		this.indexes.setAdjustToColumnLabel(false);
 		this.indexPanel = new WbScrollPane(this.indexes);
 
-		this.tableSource = new EditorPanel();
+		this.tableSource = EditorPanel.createSqlEditor();
 		this.tableSource.setEditable(false);
 		//this.tableSource.addPopupMenuItem(new FileSaveAsAction(this.tableSource), true);
 

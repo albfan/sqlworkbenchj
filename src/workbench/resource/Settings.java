@@ -69,7 +69,9 @@ public class Settings
 			File f = new File("");
 			configDir = f.getAbsolutePath();
 		}
-		
+	
+		if (WbManager.trace) System.out.println("Settings.<init> - using configDir: " + configDir);
+		LogMgr.logInfo("Settings.<init>", "Using configDir: " + configDir);
 		String sep = System.getProperty("file.separator");
 		if (!this.configDir.endsWith(sep))
 		{

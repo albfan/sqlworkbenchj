@@ -27,11 +27,18 @@ public class WbTextCellEditor
 {
 	
 	private JTextField textField;
+	private WbTable parentTable;
 	
 	public static final WbTextCellEditor createInstance()
 	{
+		return createInstance(null);
+	}
+	
+	public static final WbTextCellEditor createInstance(WbTable parent)
+	{
 		JTextField field = new JTextField();
 		WbTextCellEditor editor = new WbTextCellEditor(field);
+		editor.parentTable = parent;
 		return editor;
 	}
 	
@@ -75,14 +82,22 @@ public class WbTextCellEditor
 
 	private void openEditWindow()
 	{
-		Frame owner = (Frame)SwingUtilities.getWindowAncestor(this.textField);
-		String title = ResourceMgr.getString("TxtEditWindowTitle");
-		EditWindow w = new EditWindow(owner, title, this.textField.getText());
-		w.show();
-		if (!w.isCancelled())
+		if (this.parentTable == null)
 		{
-			this.textField.setText(w.getText());
+			Frame owner = (Frame)SwingUtilities.getWindowAncestor(this.textField);
+			String title = ResourceMgr.getString("TxtEditWindowTitle");
+
+			EditWindow w = new EditWindow(owner, title, this.textField.getText());
+			w.show();
+			if (!w.isCancelled())
+			{
+				this.textField.setText(w.getText());
+			}
+			w.dispose();
 		}
-		w.dispose();
+		else
+		{
+			this.parentTable.openEditWindow();
+		}
 	}
 }

@@ -579,7 +579,11 @@ public class DwPanel
   {
     this.statusBar.selectMaxRowsField();
   }
-  
+
 	public WbTable getTable() { return this.infoTable; }
-	
+
+	private void doRepaint()
+	{
+		this.paint(this.getGraphics());
+	}
 }

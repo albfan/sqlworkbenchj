@@ -80,7 +80,10 @@ public class MainWindow
 	private SaveWorkspaceAction saveWorkspace;
 	private SaveAsNewWorkspaceAction saveAsWorkspace;
 	private LoadWorkspaceAction loadWorkspace;
+	private AssignWorkspaceAction assignWorkspace;
 	
+	private boolean isProfileWorkspace = false;
+
 	/** Creates new MainWindow */
 	public MainWindow()
 	{
@@ -98,9 +101,10 @@ public class MainWindow
 
 		this.disconnectAction = new FileDisconnectAction(this);
 		this.disconnectAction.setEnabled(false);
-
+		this.assignWorkspace = new AssignWorkspaceAction(this);
 		this.closeWorkspace = new CloseWorkspaceAction(this);
 	  this.saveAsWorkspace = new SaveAsNewWorkspaceAction(this);
+		
 		this.loadWorkspace = new LoadWorkspaceAction(this);
 		this.saveWorkspace = new SaveWorkspaceAction(this);
 
@@ -200,6 +204,7 @@ public class MainWindow
 	private void checkWorkspaceActions()
 	{
 		this.saveWorkspace.setEnabled(this.currentWorkspaceFile != null);
+		this.assignWorkspace.setEnabled(this.currentWorkspaceFile != null && this.currentProfile != null);
 		WbManager.getSettings().setLastWorkspaceFile(this.currentWorkspaceFile);
 		if (WbManager.getSettings().getRestoreLastWorkspace())
 		{
@@ -254,6 +259,7 @@ public class MainWindow
 		menu.add(this.saveAsWorkspace);
 		menu.add(this.loadWorkspace);
 		menu.add(this.closeWorkspace);
+		menu.add(this.assignWorkspace);
 		
 		// now create the menus for the current tab
 		List actions = aPanel.getActions();
@@ -547,6 +553,10 @@ public class MainWindow
 			this.saveWorkspace(null);
 		}
 		*/
+		if (this.isProfileWorkspace && this.currentWorkspaceFile != null)
+		{
+			this.saveWorkspace(this.currentWorkspaceFile);
+		}
 		WbManager.getInstance().windowClosing(this);
 	}
 
@@ -578,6 +588,12 @@ public class MainWindow
 		if (current != null) current.showLogMessage(aMsg);
 	}
 
+	private boolean checkWorkspaceFile(String aFilename)
+	{
+		if (aFilename == null) return false;
+		return true;
+	}
+	
 	public boolean connectTo(ConnectionProfile aProfile)
 	{
 		boolean connected = false;
@@ -586,6 +602,7 @@ public class MainWindow
 			this.disconnect();
 			this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			this.showStatusMessage(ResourceMgr.getString("MsgConnecting"));
+			this.paint(this.getGraphics());
 			try
 			{
 				ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
@@ -610,23 +627,45 @@ public class MainWindow
 				this.getCurrentPanel().showResultPanel();
 				this.currentProfile = aProfile;
 				connected = true;
+				
+				String file = this.currentProfile.getWorkspaceFile();
+				String realFilename = WbManager.getInstance().replaceConfigDir(file);
+				if (realFilename != null)
+				{
+					File f = new File(realFilename);
+					if (!f.exists())
+					{
+						boolean open = WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgProfileWorkspaceNotFound"));
+						if (open)
+						{
+							file = WbManager.getInstance().getWorkspaceFilename(this, false, true);
+							this.currentProfile.setWorkspaceFile(file);
+						}
+					}
+					if (file != null)
+					{
+						this.loadWorkspace(file);
+						this.isProfileWorkspace = true;
+					}
+				}
 			}
 			catch (ClassNotFoundException cnf)
 			{
 				this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_DRIVER_NOT_FOUND));
+				LogMgr.logError("MainWindow.connectTo()", "Error when connecting", cnf);
 			}
 			catch (SQLException se)
 			{
 				this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_CONNECTION_ERROR) + "\r\n\n" + se.toString());
+				LogMgr.logError("MainWindow.connectTo()", "SQL Exception when connecting", se);
 			}
-			catch (Exception e)
+			catch (Throwable e)
 			{
 				this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_CONNECTION_ERROR) + "\r\n\n" + e.toString());
+				LogMgr.logError("MainWindow.connectTo()", "Error during connect", e);
 			}
-			this.showStatusMessage("");
 			this.dbExplorerAction.setEnabled(true);
 			this.disconnectAction.setEnabled(true);
-			this.updateWindowTitle();
 		}
 		catch (Exception e)
 		{
@@ -638,7 +677,12 @@ public class MainWindow
 			this.showLogMessage("Could not connect\n" + msg);
 			LogMgr.logError("MainWindow.connectTo()", "Could not connect", e);
 		}
-		this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		finally
+		{
+			this.showStatusMessage("");
+			this.updateWindowTitle();
+			this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		}
 		return connected;
 	}
 
@@ -945,20 +989,36 @@ public class MainWindow
 
 	public void loadWorkspace()
 	{
-		String filename = WbManager.getInstance().getWorkspaceFilename(this, false);
+		String filename = WbManager.getInstance().getWorkspaceFilename(this, false, true);
 		if (filename == null) return;
 		this.loadWorkspace(filename);
+		if (this.isProfileWorkspace)
+		{
+			boolean saveIt = WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgAttachWorkspaceToProfile"));
+			if (saveIt)
+			{
+				this.currentProfile.setWorkspaceFile(filename);
+			}
+			else
+			{
+				this.isProfileWorkspace = false;
+			}
+		}
 	}
 	
 	public void loadWorkspace(String filename)
 	{
 		if (filename == null) return;
+		String realFilename = WbManager.getInstance().replaceConfigDir(filename);
+		
+		File f = new File(realFilename);
+		if (!f.exists()) return;
 		
 		WbWorkspace w = null;
 		this.currentWorkspaceFile = null;
 		try
 		{
-			w = new WbWorkspace(filename, false);
+			w = new WbWorkspace(realFilename, false);
 			int entryCount = w.getEntryCount();
 			int tabCount = this.sqlTab.getTabCount();
 			if (this.dbExplorerTabVisible) tabCount --;
@@ -994,7 +1054,7 @@ public class MainWindow
 		{
 			try { w.close(); } catch (Throwable th) {}
 		}
-		this.currentWorkspaceFile = filename;
+		this.currentWorkspaceFile = realFilename;
 		this.updateWindowTitle();
 		this.checkWorkspaceActions();
 	}
@@ -1011,6 +1071,14 @@ public class MainWindow
 		return this.currentWorkspaceFile;
 	}
 	
+	public void assignWorkspace()
+	{
+		if (this.currentWorkspaceFile == null) return;
+		if (this.currentProfile == null) return;
+		String filename = WbManager.getInstance().putConfigDirKey(this.currentWorkspaceFile);
+		this.currentProfile.setWorkspaceFile(filename);
+	}
+	
 	public void saveWorkspace(String filename)
 	{
 		WbWorkspace w = null;
@@ -1021,9 +1089,11 @@ public class MainWindow
 			if (filename == null) return;
 		}
 		
+		String realFilename = WbManager.getInstance().replaceConfigDir(filename);
+		
 		try
 		{
-			w = new WbWorkspace(filename, true);
+			w = new WbWorkspace(realFilename, true);
 			int count = this.sqlTab.getComponentCount();
 			for (int i=0; i < count; i++)
 			{

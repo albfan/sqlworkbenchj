@@ -80,6 +80,7 @@ public class DbMetadata
   private boolean needsReconnect;
   private boolean caseSensitive;
   private boolean isOracle;
+	private boolean isPostgres;
 
 	/** Creates a new instance of DbMetadata */
 	public DbMetadata(WbConnection aConnection)
@@ -140,10 +141,16 @@ public class DbMetadata
 		{
 			this.isOracle = true;
 		}
+		else if (this.productName.toLowerCase().indexOf("postgres") > - 1)
+		{
+			this.isPostgres = true;
+		}
+		
 		this.needsReconnect = serversWhichNeedReconnect.contains(this.productName);
 		this.caseSensitive = caseSensitiveServers.contains(this.productName);
 	}
 
+	public boolean isPostgres() { return this.isPostgres; }
   public boolean isOracle() { return this.isOracle; }
 
 
@@ -627,6 +634,7 @@ public class DbMetadata
         this.oraOutput = null;
       }
     }
+		
     if (this.oraOutput != null)
     {
 			try
@@ -636,6 +644,7 @@ public class DbMetadata
 			catch (Throwable e)
 			{
 				e.printStackTrace();
+				LogMgr.logError("DbMetadata.enableOutput()", "Error when enabling DbmsOutput", e);
 			}
 		}
 	}
@@ -656,6 +665,7 @@ public class DbMetadata
 			catch (Throwable e)
 			{
 				e.printStackTrace();
+				LogMgr.logError("DbMetadata.disableOutput()", "Error when disabling DbmsOutput", e);
 			}
 		}
 	}
@@ -671,6 +681,7 @@ public class DbMetadata
 			}
 			catch (Throwable th)
 			{
+				LogMgr.logError("DbMetadata.getOutputMessages()", "Error when retrieving Output Messages", th);
 				result = "";
 			}
 		}
@@ -1171,7 +1182,8 @@ public class DbMetadata
 			ds.setValue(row, 8, new Integer(rs.getInt(9)));
 			ds.setValue(row, 9, new Integer(rs.getInt(10)));
 			ds.setValue(row, 10, rs.getString(11));
-			ds.setValue(row, 11, rs.getString(12));
+			String fk_name = this.fixFKName(rs.getString(12));
+			ds.setValue(row, 11, fk_name);
 			ds.setValue(row, 12, rs.getString(13));
 			ds.setValue(row, 13, new Integer(rs.getInt(14)));
 		}
@@ -1179,6 +1191,19 @@ public class DbMetadata
 		return ds;
 	}
 
+	private String fixFKName(String aName)
+	{
+		if (aName == null) return null;
+		if (!this.isPostgres) return aName;
+		if (aName.indexOf("\\000") > -1)
+		{
+			// the Postgres JDBC driver seems to have a bug here, 
+			// because it appends the whole FK information to the fk name!
+			// the actual FK name ends at the first \000 
+			return aName.substring(0, aName.indexOf("\\000"));
+		}
+		return aName;
+	}
 	public DataStore getForeignKeys(String aCatalog, String aSchema, String aTable)
 	{
 		return this.getKeyList(aCatalog, aSchema, aTable, true);
@@ -1245,7 +1270,7 @@ public class DbMetadata
 				String table = rs.getString(tableCol);
 				String fk_col = rs.getString(fkColCol);
 				String col = rs.getString(colCol);
-				String fk_name = rs.getString(fkNameCol);
+				String fk_name = this.fixFKName(rs.getString(fkNameCol));
 				String schema = rs.getString(schemaCol);
 				if (schema != null && !rs.wasNull() && schema.length() > 0 && !schema.equals(this.getUserName()))
 				{

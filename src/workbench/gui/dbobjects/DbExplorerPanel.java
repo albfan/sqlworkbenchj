@@ -41,8 +41,8 @@ import workbench.resource.ResourceMgr;
  *
  * @author  workbench@kellerer.org
  */
-public class DbExplorerPanel 
-	extends JPanel 
+public class DbExplorerPanel
+	extends JPanel
 	implements ActionListener, MainPanel, ChangeListener
 {
 	private MainWindow parentWindow;
@@ -70,11 +70,12 @@ public class DbExplorerPanel
 		{
 			tables = new TableListPanel(aParent);
 			procs = new ProcedureListPanel();
+			this.searchPanel = new TableSearchPanel(tables);
 			tabPane = new JTabbedPane(JTabbedPane.TOP);
 			tabPane.setUI(TabbedPaneUIFactory.getBorderLessUI());
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerTables"), tables);
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerProcs"), procs);
-			tabPane.add(ResourceMgr.getString("TxtSearchTables"), new JPanel());
+			tabPane.add(ResourceMgr.getString("TxtSearchTables"), this.searchPanel);
 			tabPane.add(ResourceMgr.getString("TxtPersistenceGenerator"), new JPanel());
 			tabPane.setFocusable(false);
 		}
@@ -90,7 +91,7 @@ public class DbExplorerPanel
 		this.selectorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 0));
 
 		this.schemaLabel = new JLabel();
-		
+
 		this.selectorPanel.add(schemaLabel);
 		this.schemaSelector = new JComboBox();
 		d = new Dimension(150, 20);
@@ -106,6 +107,7 @@ public class DbExplorerPanel
 
 		this.add(this.selectorPanel, BorderLayout.NORTH);
 		this.add(tabPane, BorderLayout.CENTER);
+		this.searchPanel.restoreSettings();
 
 		this.toolbar = new WbToolbar();
 		Border b = new CompoundBorder(new EmptyBorder(1,0,1,0), new EtchedBorder());
@@ -117,7 +119,7 @@ public class DbExplorerPanel
 		this.connectionInfo = new ConnectionInfo(this.toolbar.getBackground());
 		this.connectionInfo.setMinimumSize(d);
 		this.toolbar.add(this.connectionInfo);
-		
+
 		this.tabPane.addChangeListener(this);
 	}
 
@@ -133,7 +135,7 @@ public class DbExplorerPanel
 		int index = this.tabPane.getTabCount() - 2;
 		this.tabPane.setComponentAt(index, this.searchPanel);
 	}
-	
+
 	private void initGenerator()
 	{
 		this.generator = new PersistenceGeneratorPanel(this.tables);
@@ -145,7 +147,7 @@ public class DbExplorerPanel
 		int index = this.tabPane.getTabCount() - 1;
 		this.tabPane.setComponentAt(index, this.generator);
 	}
-	
+
 	public void setConnection(WbConnection aConnection)
 	{
 		this.setConnection(aConnection, null);
@@ -179,7 +181,7 @@ public class DbExplorerPanel
 		{
 			LogMgr.logError(this, "Could not retrieve list of schemas", e);
 		}
-		
+
 		this.schemaSelector.addActionListener(this);
 	}
 
@@ -217,30 +219,30 @@ public class DbExplorerPanel
 	{
 		return this.dbConnection;
 	}
-	
+
 	public void disconnect()
 	{
 		this.dbConnection = null;
 		this.tables.disconnect();
 		this.procs.disconnect();
-		
+
 		int count = this.tabPane.getTabCount();
 		this.tabPane.setSelectedIndex(0);
-		
-		if (this.searchPanel != null) 
+
+		if (this.searchPanel != null)
 		{
 			this.tabPane.setComponentAt(count - 2, new JPanel());
 			this.searchPanel.disconnect();
 			this.searchPanel = null;
 		}
-		
-		if (this.generator != null) 
+
+		if (this.generator != null)
 		{
 			this.tabPane.setComponentAt(count - 1, new JPanel());
 			this.generator.disconnect();
 			this.generator = null;
 		}
-		
+
 		this.closeWindow();
 	}
 
@@ -290,7 +292,7 @@ public class DbExplorerPanel
 			LogMgr.logError(this, "Could not set schema", ex);
 		}
 	}
-	
+
 	public void closeWindow()
 	{
 		if (this.window != null)
@@ -336,19 +338,19 @@ public class DbExplorerPanel
 	{
 	}
 	public void clearLog() {}
-	
+
 	public void showLogPanel() {}
 	public void showResultPanel() {}
 
 	public void addToToolbar(WbAction anAction, boolean aFlag)
 	{
 	}
-	
+
 	public void explorerWindowClosed()
 	{
 		this.window = null;
 	}
-	
+
 	public void mainWindowDeiconified()
 	{
 		//if (this.window != null && this.restoreWindow) this.window.show();
@@ -373,7 +375,7 @@ public class DbExplorerPanel
 			this.toolbar.repaint();
 		}
 	}
-	
+
 	public void stateChanged(ChangeEvent e)
 	{
 		if (e.getSource() == this.tabPane)
@@ -393,5 +395,5 @@ public class DbExplorerPanel
 			}
 		}
 	}
-	
+
 }

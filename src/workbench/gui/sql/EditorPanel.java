@@ -56,8 +56,9 @@ public class EditorPanel
 	private static final Border DEFAULT_BORDER = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
 	private AnsiSQLTokenMarker sqlTokenMarker;
 	private File currentFile;
-	private static final int JAVA_EDITOR = 1;
 	private static final int SQL_EDITOR = 0;
+	private static final int JAVA_EDITOR = 1;
+	private static final int TEXT_EDITOR = 2;
 	private int editorType;
 
   private static final SyntaxStyle[] SYNTAX_COLORS;
@@ -80,8 +81,10 @@ public class EditorPanel
   
 	public static EditorPanel createSqlEditor()
 	{
-		EditorPanel p = new EditorPanel();
+		AnsiSQLTokenMarker sql = new AnsiSQLTokenMarker();
+		EditorPanel p = new EditorPanel(sql);
 		p.editorType = SQL_EDITOR;
+		p.sqlTokenMarker = sql;
 		return p;
 	}
 	
@@ -92,7 +95,15 @@ public class EditorPanel
 		return p;
 	}
 	
-	public EditorPanel()
+	public static EditorPanel createTextEditor()
+	{
+		EditorPanel p = new EditorPanel(null);
+		p.editorType = JAVA_EDITOR;
+		return p;
+	}
+	
+	
+	private EditorPanel()
 	{
 		this(null);
 	}
@@ -109,7 +120,10 @@ public class EditorPanel
 		this.setTabSize(WbManager.getSettings().getEditorTabWidth());
 		this.setCaretBlinkEnabled(true);
 		this.addPopupMenuItem(new FileSaveAsAction(this), true);
-	
+
+		if (aMarker != null) this.setTokenMarker(aMarker);
+
+		/*
 		if (aMarker == null)
 		{
 			this.sqlTokenMarker = new AnsiSQLTokenMarker();
@@ -120,7 +134,7 @@ public class EditorPanel
 		{
 			this.setTokenMarker(aMarker);
 		}
-		
+		*/
 		this.setMaximumSize(null);
 		this.setPreferredSize(null);
 		WbManager.getSettings().addFontChangedListener(this);

@@ -44,7 +44,7 @@ public class TriggerDisplayPanel
 		WbScrollPane scroll = new WbScrollPane(this.triggers);
 		scroll.setBorder(new EtchedBorder());
 		
-		this.source = new EditorPanel();
+		this.source = EditorPanel.createSqlEditor();
 		this.source.setEditable(false);
 		this.source.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setBorder(WbSwingUtilities.BEVEL_BORDER);

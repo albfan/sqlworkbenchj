@@ -68,6 +68,8 @@ public class DataStore
 	
 	private ColumnComparator comparator;
 	
+	private String defaultExportDelimiter = "\t";
+	
 	public DataStore(String[] aColNames, int[] colTypes)
 	{
 		this(aColNames, colTypes, null);
@@ -208,6 +210,16 @@ public class DataStore
 	
   public int getRowCount() { return this.data.size(); }
 	public int getColumnCount() { return this.colCount; }
+
+	public void setExportDelimiter(String aDelimit)
+	{
+		this.defaultExportDelimiter = aDelimit;
+	}
+	
+	public String getExportDelimiter() 
+	{
+		return this.defaultExportDelimiter;
+	}
 	
 	/**
 	 *	Returns the total number of modified, new or deleted rows
@@ -627,8 +639,7 @@ public class DataStore
 	
 	public StringBuffer getHeaderString()
 	{
-		String delimit = WbManager.getSettings().getDefaultTextDelimiter();
-		return this.getHeaderString(delimit);
+		return this.getHeaderString(this.defaultExportDelimiter);
 	}
 	
 	public StringBuffer getHeaderString(String aFieldDelimiter)
@@ -888,9 +899,18 @@ public class DataStore
 	
 	public StringBuffer getRowDataAsSqlInsert(int aRow, String aLineTerminator, WbConnection aConn)
 	{
+		return this.getRowDataAsSqlInsert(aRow, aLineTerminator, aConn, null, null);
+	}
+	public StringBuffer getRowDataAsSqlInsert(int aRow, String aLineTerminator, WbConnection aConn, String aCharFunc, String aConcatString)
+	{
 		if (!this.canSaveAsSqlInsert()) return null;
 		RowData data = this.getRow(aRow);
 		DmlStatement stmt = this.createInsertStatement(data, true, aLineTerminator); 
+		if (aCharFunc != null)
+		{
+			stmt.setChrFunction(aCharFunc);
+			stmt.setConcatString(aConcatString);
+		}
 		StringBuffer sql = new StringBuffer(stmt.getExecutableStatement(aConn.getSqlConnection()));
 		sql.append(";");
 		return sql;
@@ -1490,6 +1510,12 @@ public class DataStore
 		return result;
 	}
 
+	public DmlStatement getInsertStatement(int aRow, String aLineTerminator)
+	{
+		RowData row = this.getRow(aRow);
+		DmlStatement result = this.createInsertStatement(row, true, aLineTerminator);
+		return result;
+	}
 	/**
 	 * Returns a List of {@link #DmlStatements } which 
 	 * would be executed in order to store the current content

@@ -11,14 +11,21 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.FieldPosition;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -43,7 +50,9 @@ public class DataSpooler
 {
 	public static final int EXPORT_SQL = 1;
 	public static final int EXPORT_TXT = 2;
-
+	public static final int EXPORT_ORALOADER = 3; // export in Oracle Loader format
+	public static final int EXPORT_BCP = 4; // export in MS SQL Server bcp format
+	
 	private WbConnection dbConn;
 	private String sql;
 	private String outputfile;
@@ -51,6 +60,18 @@ public class DataSpooler
 	private boolean exportHeaders;
 	private boolean includeCreateTable = false;
 	private String tableName;
+	private String delimiter = "\t";
+	private String quoteChar = null;
+	private String dateFormat = null;
+	private String dateTimeFormat = null;
+	private char decimalSymbol = '.';
+	private String chrFunc = null;
+	private String concatString = "||";
+	
+	/** If true, then cr/lf characters will be removed from
+	 *  character columns
+	 */
+	private boolean cleancr = false;
 	
 	private boolean showProgress = false;
 	private SpoolerProgressPanel progressPanel;
@@ -111,10 +132,20 @@ public class DataSpooler
 	{
 		this.dbConn = aConn;
 	}
+
+	public void exportDataAsText(WbConnection aConnection
+	                            ,String aSql
+															,String anOutputfile
+															, boolean includeHeaders)
+		throws IOException, SQLException
+	{
+		this.exportDataAsText(aConnection, aSql, anOutputfile, "\t", includeHeaders);
+	}
 	
 	public void exportDataAsText(WbConnection aConnection
 	                            ,String aSql
 															,String anOutputfile
+															,String aDelimiter
 															, boolean includeHeaders)
 		throws IOException, SQLException
 	{
@@ -123,6 +154,7 @@ public class DataSpooler
 		this.outputfile = anOutputfile;
 		this.exportHeaders = includeHeaders;
 		this.exportType = EXPORT_TXT;
+		this.delimiter = aDelimiter;
 		if (this.showProgress)
 		{
 			this.openProgressMonitor();
@@ -166,6 +198,18 @@ public class DataSpooler
 
 	public void setExportHeaders(boolean aFlag) { this.exportHeaders = aFlag; }
 	public boolean getExportHeaders() { return this.exportHeaders; }
+
+	public void setTextDelimiter(String aDelimiter) { this.delimiter = aDelimiter; }
+	public String getTextDelimiter() { return this.delimiter; }
+
+	public void setTextQuoteChar(String aQuote) { this.quoteChar = aQuote; }
+	public String getTextQuoteChar() { return this.quoteChar; }
+
+	public void setTextDateFormat(String aFormat) { this.dateFormat = aFormat; }
+	public String getTextDateFormat() { return this.dateFormat; }
+	
+	public void setTextTimestampFormat(String aFormat) { this.dateTimeFormat = aFormat; }
+	public String getTextTimestampFormat() { return this.dateTimeFormat; }
 	
 	public void setOutputTypeText() { this.exportType = EXPORT_TXT; }
 	public void setOutputTypeSqlInsert() { this.exportType = EXPORT_SQL; }
@@ -174,6 +218,33 @@ public class DataSpooler
 	
 	public void setOutputFilename(String aFilename) { this.outputfile = aFilename; }
 	public String getOutputFilename() { return this.outputfile; }
+	
+	public void setCleanCarriageReturns(boolean aFlag)
+	{
+		this.cleancr = aFlag;
+	}
+	
+	public void setConcatString(String aConcatString)
+	{
+		if (aConcatString == null) return;
+		this.concatString = aConcatString;
+	}
+	
+	public void setChrFunction(String aFunc)
+	{
+		this.chrFunc = aFunc;
+	}
+	
+	public void setDecimalSymbol(char aSymbol)
+	{
+		this.decimalSymbol = aSymbol;
+	}
+
+	public void setDecimalSymbol(String aSymbol)
+	{
+		if (aSymbol == null || aSymbol.length() == 0) return;
+		this.decimalSymbol = aSymbol.charAt(0);
+	}
 	
 	public void setSql(String aSql) { this.sql = aSql; }
 	public String getSql() { return this.sql; }
@@ -284,7 +355,6 @@ public class DataSpooler
 		int row = 0;
 
 		BufferedWriter pw = null;
-		String fieldDelimit = WbManager.getSettings().getDefaultTextDelimiter();
 		
 		int colCount = meta.getColumnCount();
 		int types[] = new int[colCount];
@@ -293,18 +363,50 @@ public class DataSpooler
 			types[i] = meta.getColumnType(i+1);
 		}
 			
-		String quoteChar = WbManager.getSettings().getQuoteChar();
-		boolean useQuotes = (quoteChar != null) && (quoteChar.trim().length() > 0);
+		boolean useQuotes = (this.quoteChar != null) && (this.quoteChar.trim().length() > 0);
 		
 		if (showProgress)
 		{
 			if (this.progressPanel == null) this.openProgressMonitor();
 		}
 
-		byte[] quoteBytes = quoteChar.getBytes();
-		byte[] lineEnd = StringUtil.LINE_TERMINATOR.getBytes();
-		byte[] fieldBytes = fieldDelimit.getBytes();
+		//byte[] quoteBytes = quoteChar.getBytes();
+		//byte[] lineEnd = StringUtil.LINE_TERMINATOR.getBytes();
+		//byte[] fieldBytes = delimiter.getBytes();
+	
+		SimpleDateFormat dateFormatter = null;
+		SimpleDateFormat dateTimeFormatter = null;
+		DecimalFormat numberFormatter = null;
 		
+		if (this.exportType == EXPORT_TXT)
+		{
+			if (this.dateFormat != null) 
+			{
+				try
+				{
+					dateFormatter = new SimpleDateFormat(this.dateFormat);
+				}
+				catch (IllegalArgumentException i)
+				{
+					dateFormatter = null;
+				}
+			}
+			if (this.dateTimeFormat != null)
+			{
+				try
+				{
+					dateTimeFormatter = new SimpleDateFormat(this.dateTimeFormat);
+				}
+				catch (Exception e)
+				{
+					dateTimeFormatter = null;
+				}
+			}
+			DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+			symbols.setDecimalSeparator(this.decimalSymbol);
+			numberFormatter = new DecimalFormat("#.#", symbols);
+			numberFormatter.setGroupingUsed(false);
+		}
 		try
 		{
 			Object value = null;
@@ -314,7 +416,7 @@ public class DataSpooler
 			
 			if (exportType == EXPORT_TXT && exportHeaders)
 			{
-				pw.write(ds.getHeaderString().toString());
+				pw.write(ds.getHeaderString(this.delimiter).toString());
 				pw.newLine();
 			}
 			else if (this.exportType == EXPORT_SQL && this.includeCreateTable)
@@ -339,6 +441,8 @@ public class DataSpooler
 				}
 			}
 			
+			FieldPosition position = new FieldPosition(0);
+			
 			while (rs.next())
 			{
 				currentRow ++;
@@ -350,7 +454,7 @@ public class DataSpooler
 				if (this.exportType == EXPORT_SQL)
 				{
 					row = ds.addRow(rs);
-					line = ds.getRowDataAsSqlInsert(row, StringUtil.LINE_TERMINATOR, this.dbConn);
+					line = ds.getRowDataAsSqlInsert(row, StringUtil.LINE_TERMINATOR, this.dbConn, this.chrFunc, this.concatString);
 					ds.discardRow(row);
 					if (line != null)
 					{
@@ -366,15 +470,57 @@ public class DataSpooler
 					{
 						value = rs.getObject(i+1);
 						quote = useQuotes && (types[i] == Types.VARCHAR || types[i] == Types.CHAR);
-						if (quote) pw.write(quoteChar);
 						
 						if (value != null && !rs.wasNull())
 						{
-							pw.write(value.toString());
+							if (currentRow == 1) System.out.println("value.class=" + value.getClass().getName());
+							if (dateFormatter != null && value instanceof Date)
+							{
+								pw.write(dateFormatter.format((Date)value));
+							}
+							else if (this.dateTimeFormat != null && value instanceof Timestamp)
+							{
+								pw.write(dateTimeFormatter.format((Timestamp)value));
+							}
+							/*
+							else if (numberFormatter != null && value instanceof Double)
+							{
+								pw.write(numberFormatter.format(((Double)value).doubleValue()));
+							}
+							else if (numberFormatter != null && value instanceof Float)
+							{
+								pw.write(numberFormatter.format(((Float)value).doubleValue()));
+							}
+							else if (numberFormatter != null && value instanceof BigDecimal)
+							{
+								pw.write(numberFormatter.format(((BigDecimal)value).doubleValue()));
+							}
+							*/
+							else if (value instanceof Number)
+							{
+								position.setBeginIndex(0);
+								position.setEndIndex(0);
+								pw.write(numberFormatter.format(value, new StringBuffer(25), position).toString());
+							}
+							else if (value instanceof String)
+							{
+								if (quote) pw.write(quoteChar);
+								if (this.cleancr)
+								{
+									pw.write(StringUtil.cleanNonPrintable((String)value));
+								}
+								else
+								{
+									pw.write((String)value);
+								}
+								if (quote) pw.write(quoteChar); 
+							}
+							else
+							{
+								pw.write(value.toString());
+							}
 						}
-						if (quote) pw.write(quoteChar); 
-						
-						if (i < colCount - 1) pw.write(fieldDelimit);
+						if (i < colCount - 1) pw.write(this.delimiter);
 					}
 					pw.newLine();
 				}
@@ -449,10 +595,20 @@ public class DataSpooler
 	{
 		this.includeCreateTable = includeCreateTable;
 	}
-	
+
 	private class SpoolerJob
 	{
 		private String outputFile;
 		private String sqlStatement;
+	}
+
+	public static void main(String[] args)
+	{
+		BigDecimal d = new BigDecimal(123.456);
+		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+		symbols.setDecimalSeparator('.');
+		DecimalFormat f = new DecimalFormat("#.#", symbols);
+		FieldPosition p = new FieldPosition(0);
+		System.out.println("d=" + f.format(d, new StringBuffer(), p));
 	}
 }

@@ -86,7 +86,7 @@ public class ProcedureListPanel
 		this.procColumns.setAdjustToColumnLabel(false);
 		JScrollPane scroll = new WbScrollPane(this.procColumns);
 
-		this.source = new EditorPanel();
+		this.source = EditorPanel.createSqlEditor();
 		this.source.setEditable(false);
 		//this.source.addPopupMenuItem(new FileSaveAsAction(this.source), true);
 		//this.source.setBorder(WbSwingUtilities.EMPTY_BORDER);

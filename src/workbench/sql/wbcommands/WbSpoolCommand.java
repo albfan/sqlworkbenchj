@@ -33,6 +33,14 @@ public class WbSpoolCommand
 		cmdLine.addArgument("type");
 		cmdLine.addArgument("file");
 		cmdLine.addArgument("table");
+		cmdLine.addArgument("delimiter");
+		cmdLine.addArgument("quotechar");
+		cmdLine.addArgument("dateformat");
+		cmdLine.addArgument("timestampformat");
+		cmdLine.addArgument("decimal");
+		cmdLine.addArgument("cleancr");
+		cmdLine.addArgument("charfunc");
+		cmdLine.addArgument("concat");
 	}
 
 	public String getVerb() { return VERB; }
@@ -47,7 +55,8 @@ public class WbSpoolCommand
 		String type = null;
 		String file = null;
 		String table = null;
-		
+		String delimiter = null;
+		String cleancr = null;
 		this.spooler = new DataSpooler();
 		try
 		{
@@ -63,6 +72,7 @@ public class WbSpoolCommand
 		type = cmdLine.getValue("type");
 		file = cmdLine.getValue("file");
 		table = cmdLine.getValue("table");
+		delimiter = cmdLine.getValue("delimiter");
 		if (type == null || file == null) 
 		{
 			result.addMessage(ResourceMgr.getString("ErrorSpoolWrongParameters"));
@@ -73,11 +83,30 @@ public class WbSpoolCommand
 		if ("text".equalsIgnoreCase(type))
 		{
 			spooler.setOutputTypeText();
+			if (delimiter != null) spooler.setTextDelimiter(delimiter);
+			String quote = cmdLine.getValue("quotechar");
+			System.out.println("quote=" + quote);
+			if (quote != null) spooler.setTextQuoteChar(quote);
+			
+			String format = cmdLine.getValue("dateformat");
+			if (format != null) spooler.setTextDateFormat(format);
+			
+			format = cmdLine.getValue("timestampformat");
+			if (format != null) spooler.setTextTimestampFormat(format);
+			
+			format = cmdLine.getValue("decimal");
+			if (format != null) spooler.setDecimalSymbol(format);
+			
+			spooler.setCleanCarriageReturns(cmdLine.getBoolean("cleancr"));
 		}
 		else if ("sql".equalsIgnoreCase(type))
 		{
 			spooler.setOutputTypeSqlInsert();
+			spooler.setChrFunction(cmdLine.getValue("charfunc"));
+			spooler.setConcatString(cmdLine.getValue("concat"));
 			if (table != null) spooler.setTableName(table);
+			
+			
 		}
 		else
 		{
@@ -91,6 +120,7 @@ public class WbSpoolCommand
 		String msg = ResourceMgr.getString("MsgSpoolInit");
 		msg = StringUtil.replace(msg, "%type%", type.toUpperCase());
 		msg = StringUtil.replace(msg, "%file%", file);
+		//msg = msg + " quote=" + spooler.getTextQuoteChar();
 		result.addMessage(msg);
 		return result;
 	}	

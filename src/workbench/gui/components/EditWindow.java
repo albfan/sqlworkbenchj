@@ -14,12 +14,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowListener;
 import javax.swing.*;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbButton;
+import workbench.gui.editor.JEditTextArea;
 import workbench.gui.sql.EditorPanel;
 import workbench.resource.ResourceMgr;
 
@@ -30,7 +32,7 @@ import workbench.resource.ResourceMgr;
  */
 public class EditWindow
 	extends JDialog
-	implements ActionListener
+	implements ActionListener, WindowListener
 {
 	
 	private EditorPanel editor;
@@ -42,7 +44,7 @@ public class EditWindow
 	{
 		super(owner, title, true);
 		this.getContentPane().setLayout(new BorderLayout());
-		this.editor = new EditorPanel();
+		this.editor = EditorPanel.createTextEditor();
 		this.getContentPane().add(editor, BorderLayout.CENTER);
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -74,7 +76,12 @@ public class EditWindow
 		this.getRootPane().setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
 		this.getRootPane().setActionMap(am);
 		
-		this.pack();
+		if (!WbManager.getSettings().restoreWindowSize(this))
+		{
+			this.setSize(500,400);
+		}
+
+		this.addWindowListener(this);
 		
 		// pack() needs to be called before center() !!!
 		WbSwingUtilities.center(this, owner);
@@ -102,11 +109,41 @@ public class EditWindow
 	{
 		return this.editor.getText();
 	}
+
 	public static void main(String[] args)
 	{
-		WbManager.getInstance();
-		EditWindow w = new EditWindow(null, "Test", "Hallo dies ist der Text!");
+		//WbManager.getInstance();
+		EditWindow w = new EditWindow(null, "Test", "Hallo dies ist \nder Text!");
 		w.show();
+	}
+	
+	public void windowActivated(java.awt.event.WindowEvent e)
+	{
+	}
+	
+	public void windowClosed(java.awt.event.WindowEvent e)
+	{
+		WbManager.getSettings().storeWindowSize(this);
+	}
+	
+	public void windowClosing(java.awt.event.WindowEvent e)
+	{
+	}
+	
+	public void windowDeactivated(java.awt.event.WindowEvent e)
+	{
+	}
+	
+	public void windowDeiconified(java.awt.event.WindowEvent e)
+	{
+	}
+	
+	public void windowIconified(java.awt.event.WindowEvent e)
+	{
+	}
+	
+	public void windowOpened(java.awt.event.WindowEvent e)
+	{
 	}
 	
 }

@@ -23,6 +23,9 @@ public class DmlStatement
 	private String sql;
 	private List values;
 	private boolean usePrepared = true;
+	
+	private String chrFunc = null;
+	private String concatString = "||";
 
 	/**
 	 *	Create a new DmlStatement with the given SQL template string
@@ -147,6 +150,17 @@ public class DmlStatement
 		}
 		return this.getExecutableStatement(dbproduct);	
 	}
+	
+	public void setConcatString(String aConcatString)
+	{
+		this.concatString = aConcatString;
+	}
+	
+	public void setChrFunction(String aFunc)
+	{
+		this.chrFunc = aFunc;
+	}
+	
 	/**
 	 *	Returns a "real" SQL Statement which can be executed
 	 *	directly. The statement contains the parameter values
@@ -171,6 +185,10 @@ public class DmlStatement
 				{
 					Object v = this.values.get(parmIndex);
 					String literal = SqlSyntaxFormatter.getDefaultLiteral(v, dateFormat);
+					if (this.chrFunc != null && v instanceof String)
+					{
+						literal = this.createInsertString(literal);
+					}
 					result.append(literal);
 					parmIndex ++;
 				}
@@ -187,6 +205,35 @@ public class DmlStatement
 		}
 	}
 
+	private String createInsertString(String aValue)
+	{
+		if (aValue == null) return null;
+		if (this.chrFunc == null) return aValue;
+		if (this.concatString == null) this.concatString = "||";
+		StringBuffer result = new StringBuffer(aValue.length() + 50);
+		int len = aValue.length();
+		for (int i=0; i < len; i++)
+		{
+			char c = aValue.charAt(i);
+			if (c < 32)
+			{
+				result.append('\'');
+				result.append(this.concatString);
+				result.append(this.chrFunc);
+				result.append('(');
+				result.append((int)c);
+				result.append(')');
+				result.append(this.concatString);
+				result.append('\'');
+			}
+			else
+			{
+				result.append(c);
+			}
+		}
+		return result.toString();
+	}
+	
 	private int countParameters(String aSql)
 	{
 		if (aSql == null) return -1;

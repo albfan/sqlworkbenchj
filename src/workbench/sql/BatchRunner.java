@@ -37,9 +37,15 @@ public class BatchRunner
 	public void setProfile(String aProfilename)
 		throws Exception
 	{
-		LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MgsBatchConnecting") + " [" + aProfilename + "]");
+		LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchConnecting") + " [" + aProfilename + "]");
 		ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
 		ConnectionProfile prof = mgr.getProfile(aProfilename);
+		if (prof == null) 
+		{
+			LogMgr.logError("BatchRunner", ResourceMgr.getString("ErrorConnectionError"),null);
+			throw new IllegalArgumentException("Could not find profile " + aProfilename);
+		}
+		
 		this.connection = mgr.getConnection(prof, "BatchRunner");
 		this.stmtRunner = new StatementRunner();
 		this.stmtRunner.setConnection(this.connection);
@@ -48,6 +54,7 @@ public class BatchRunner
 
 	public void setSuccessScript(String aFilename)
 	{
+		if (aFilename == null) return;
 		File f = new File(aFilename);
 		if (f.exists() && !f.isDirectory())
 			this.successScript = aFilename;
@@ -57,6 +64,7 @@ public class BatchRunner
 	
 	public void setErrorScript(String aFilename)
 	{
+		if (aFilename == null) return;
 		File f = new File(aFilename);
 		if (f.exists() && !f.isDirectory())
 			this.errorScript = aFilename;

@@ -37,6 +37,7 @@ public class StringUtil
 
 	public static final String LINE_TERMINATOR = System.getProperty("line.separator");
 	public static final String PATH_SEPARATOR = System.getProperty("path.separator");
+	public static final String FILE_SEPARATOR = System.getProperty("file.separator");
 	public static final StringBuffer EMPTY_STRINGBUFFER = new StringBuffer("");
 	public static final String EMPTY_STRING = "";
 
@@ -110,6 +111,25 @@ public class StringUtil
 		return result;
 	}
 
+	public static String cleanNonPrintable(String aValue)
+	{
+		if (aValue == null) return null;
+		int len = aValue.length();
+		StringBuffer result = new StringBuffer(len);
+		for (int i=0; i < len; i++)
+		{
+			char c = aValue.charAt(i);
+			if (c > 32)
+			{
+				result.append(c);
+			}
+			else
+			{
+				result.append(' ');
+			}
+		}
+		return result.toString();
+	}
 	public static int getIntValue(String aValue)
 	{
 		return getIntValue(aValue, 0);

@@ -37,6 +37,8 @@ public class ConnectionProfile
 	private boolean storePassword = true;
 	private boolean seperateConnection = false;
 
+	private String workspaceFile = null;
+	
 	private boolean ignoreDropErrors = true;
 	
 	static
@@ -365,6 +367,25 @@ public class ConnectionProfile
 	public void setIgnoreDropErrors(boolean ignoreDropErrors)
 	{
 		this.ignoreDropErrors = ignoreDropErrors;
+	}
+	
+	/** Getter for property workspaceFile.
+	 * @return Value of property workspaceFile.
+	 *
+	 */
+	public String getWorkspaceFile()
+	{
+		return this.workspaceFile;
+	}
+	
+	/** Setter for property workspaceFile.
+	 * @param workspaceFile New value of property workspaceFile.
+	 *
+	 */
+	public void setWorkspaceFile(String aWorkspaceFile)
+	{
+		this.workspaceFile = aWorkspaceFile;
+    this.changed = true;
 	}
 	
 }

@@ -107,6 +107,7 @@ public class DwStatusBar extends javax.swing.JPanel
 	public void clearRowcount()
 	{
 		this.tfRowCount.setText("");
+		this.doRepaint();
 	}
 
 	public void setStatusMessage(String aMsg)
@@ -119,6 +120,7 @@ public class DwStatusBar extends javax.swing.JPanel
 		{
 			this.tfStatus.setText(aMsg);
 		}
+		this.doRepaint();
 	}
 
 	public void clearStatusMessage()
@@ -136,4 +138,10 @@ public class DwStatusBar extends javax.swing.JPanel
 		this.tfMaxRows.selectAll();
     this.tfMaxRows.requestFocusInWindow();
   }
+	
+	private void doRepaint()
+	{
+		this.paint(this.getGraphics());
+	}
+	
 }

@@ -42,6 +42,7 @@ import workbench.util.WbNullCipher;
  */
 public class WbManager implements FontChangedListener
 {
+	private static final String CONFIG_DIR_KEY = "%ConfigDir%/";
 	private static WbManager wb;
 	private Settings settings;
 	private ConnectionMgr connMgr = new ConnectionMgr();
@@ -104,11 +105,15 @@ public class WbManager implements FontChangedListener
 
 	public String getWorkspaceFilename(Window parent, boolean toSave)
 	{
+		return this.getWorkspaceFilename(parent, toSave, false);
+	}
+
+	public String getWorkspaceFilename(Window parent, boolean toSave, boolean replaceConfigDir)
+	{
 		String lastDir = settings.getLastWorkspaceDir();
 		JFileChooser fc = new JFileChooser(lastDir);
 		FileFilter wksp = ExtensionFileFilter.getWorkspaceFileFilter();
 		fc.addChoosableFileFilter(wksp);
-		//fc.setFileFilter(wksp);
 		String filename = null;
 
 		int answer = JFileChooser.CANCEL_OPTION;
@@ -143,9 +148,35 @@ public class WbManager implements FontChangedListener
 			lastDir = fc.getCurrentDirectory().getAbsolutePath();
 			settings.setLastWorkspaceDir(lastDir);
 		}
+		if (replaceConfigDir)
+		{
+			filename = this.putConfigDirKey(filename);
+		}
 		return filename;
 	}
 
+	public String putConfigDirKey(String aPathname)
+	{
+		File f = new File(aPathname);
+		String fname = f.getName();
+		File dir = f.getParentFile();
+		File config = new File(this.settings.getConfigDir());
+		if (dir.equals(config))
+		{
+			return CONFIG_DIR_KEY + fname;
+		}
+		else
+		{
+			return aPathname;
+		}
+	}
+	
+	public String replaceConfigDir(String aPathname)
+	{
+		if (aPathname == null) return null;
+		return StringUtil.replace(aPathname, CONFIG_DIR_KEY, this.settings.getConfigDir());
+	}
+	
 	public String getExportFilename(boolean includeSqlType)
 	{
 		return this.getExportFilename(null, includeSqlType);
@@ -477,6 +508,7 @@ public class WbManager implements FontChangedListener
 			else
 			{
 				this.batchMode = true;
+				LogMgr.logInfo("WbManager", "Executing script " + scriptname);
 			}
 
 		}
