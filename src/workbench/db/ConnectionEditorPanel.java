@@ -4,7 +4,7 @@
  * Created on January 25, 2002, 11:27 PM
  */
 
-package workbench.gui;
+package workbench.db;
 
 import workbench.db.ConnectionMgr;
 import workbench.WbManager;
@@ -155,6 +155,10 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
   private javax.swing.JLabel jLabel1;
   // End of variables declaration//GEN-END:variables
 
+	public void setProfile(ConnectionProfile aProfile)
+	{
+	}
+	
 	public static void main(String args[])
 	{
 		JDialog f = new JDialog();

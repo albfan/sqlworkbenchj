@@ -22,7 +22,7 @@ import javax.crypto.spec.SecretKeySpec;
  *
  *	@author  thomas
  */
-public class ConnectionInfo
+public class ConnectionProfile
 {
 	private static final String CRYPT_PREFIX = "#e#";
 	private String name;
@@ -34,17 +34,16 @@ public class ConnectionInfo
 	private static final byte[] KEY_DATA = {-108,-50,-5,-75,-98,28,-116,107};
 	private static final SecretKeySpec KEY = new SecretKeySpec(KEY_DATA, "DES");
 	
-	public ConnectionInfo()
+	public ConnectionProfile()
 	{
 	}
 	
-	public ConnectionInfo(String driverClass, String url, String userName, String pwd)
+	public ConnectionProfile(String driverClass, String url, String userName, String pwd)
 	{
 		this.setUrl(url);
 		this.setDriverclass(driverClass);
 		this.setUsername(userName);
 		this.setPassword(pwd);
-	
 	}
 	
 	/** Getter for property url.
@@ -205,62 +204,6 @@ public class ConnectionInfo
 			e.printStackTrace();
 		}
 			
-	}
-	public static void writeObjects()
-	{
-		try
-		{
-			ConnectionInfo i = new ConnectionInfo();
-			FileOutputStream s = new FileOutputStream("d:\\temp\\connections.xml");
-			XMLEncoder e = new XMLEncoder(s);
-			i.setName("Test1");
-			i.setDriverclass("Class1");
-			i.setUrl("jdbc:driver1");
-			i.setEncryptedPassword(i.encryptPassword("secret"));
-			e.writeObject(i);
-			System.out.println("Object 1 written");
-			
-			i = new ConnectionInfo();
-			i.setName("Test Two");
-			i.setDriverclass("Class2");
-			i.setUrl("jdbc:driver2");
-			e.writeObject(i);
-			System.out.println("Object 2 written");
-			
-			e.close();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-	
-	public static void readObjects()
-	{
-		try
-		{
-			FileInputStream s = new FileInputStream("d:\\temp\\connections.xml");
-			XMLDecoder e = new XMLDecoder(s);
-			boolean end = false;
-			while (!end)
-			{
-				try
-				{
-					ConnectionInfo i = (ConnectionInfo)e.readObject();
-					System.out.println("i=" + i.getName());
-				}
-				catch (ArrayIndexOutOfBoundsException ex)
-				{
-					System.out.println("End!");
-					e.close();
-					end = true;
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
 	}
 	
 	public static void main(String args[])
