@@ -55,6 +55,9 @@ public class StatementRunner
 		sql = new WbSpoolCommand();
 		cmdDispatch.put(sql.getVerb(), sql);
 		
+		cmdDispatch.put(WbListCatalogs.LISTCAT.getVerb(), WbListCatalogs.LISTCAT);
+		cmdDispatch.put(WbListCatalogs.LISTDB.getVerb(), WbListCatalogs.LISTDB);
+		
 		cmdDispatch.put(SingleVerbCommand.COMMIT.getVerb(), SingleVerbCommand.COMMIT);
 		cmdDispatch.put(SingleVerbCommand.ROLLBACK.getVerb(), SingleVerbCommand.ROLLBACK);
 		
@@ -83,6 +86,17 @@ public class StatementRunner
 		throws SQLException, WbException
 	{
 		String cleanSql = SqlUtil.makeCleanSql(aSql, false);
+		if (cleanSql == null || cleanSql.length() == 0)
+		{
+			if (this.result == null)
+			{
+				this.result = new StatementRunnerResult("");
+			}
+			this.result.clear();
+			this.result.setSuccess();
+			return;
+		}
+		
 		String verb = SqlUtil.getSqlVerb(cleanSql).toUpperCase();
 		
 		// clean up the result from the last statement

@@ -33,7 +33,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.BatchRunner;
-import workbench.util.CmdLineParser;
+import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 import workbench.util.WbCipher;
 import workbench.util.WbNullCipher;
@@ -260,23 +260,26 @@ public class WbManager
 	{
 		this.getConnectionMgr().disconnectAll();
 		boolean first = true;
-		MainWindow w;
-		for (int i=0; i < mainWindows.size(); i ++)
+		if (!this.batchMode)
 		{
-			w = (MainWindow)this.mainWindows.get(i);
-			if (w == null) continue;
-      // If there are multiple Windows open, we only save the 
-      // settings for the currently active window
-			if (w.isFocused()) 
+			MainWindow w;
+			for (int i=0; i < mainWindows.size(); i ++)
 			{
-        if (!this.checkProfiles(w)) return;
-				w.saveSettings();
+				w = (MainWindow)this.mainWindows.get(i);
+				if (w == null) continue;
+				// If there are multiple Windows open, we only save the 
+				// settings for the currently active window
+				if (w.isFocused()) 
+				{
+					if (!this.checkProfiles(w)) return;
+					w.saveSettings();
+				}
+				this.mainWindows.remove(w);
+				w.setVisible(false);
+				w.dispose();
 			}
-      this.mainWindows.remove(w);
-			w.setVisible(false);
-			w.dispose();
+			this.settings.saveSettings();
 		}
-		this.settings.saveSettings();
 		LogMgr.shutdown();
 		System.exit(0);
 	}
@@ -327,7 +330,7 @@ public class WbManager
 		if (checkCmdLine)
 		{
 			// get profile name from commandline
-			String profilename = (String)cmdLine.getOptionValue(profileNameOption);
+			String profilename = cmdLine.getValue(ARG_PROFILE);
 			if (profilename != null && profilename.trim().length() > 0)
 			{
 				ConnectionProfile prof = connMgr.getProfile(profilename);
@@ -350,37 +353,37 @@ public class WbManager
 		}
 	}
 	
-	private CmdLineParser cmdLine;
-	private CmdLineParser.Option profileNameOption;
-	private CmdLineParser.Option configDirOption;
-	private CmdLineParser.Option scriptOption;
-	private CmdLineParser.Option logFileOption;
+	private ArgumentParser cmdLine;
+	private static final String ARG_PROFILE = "profile";
+	private static final String ARG_CONFIGDIR = "configdir";
+	private static final String ARG_SCRIPT = "script";
+	private static final String ARG_LOGFILE = "logfile";
 	
 	private void initCmdLine(String[] args)
 	{
 		if (trace) System.err.println("WbManager.initCmdLine()");
-		cmdLine = new CmdLineParser();
-		profileNameOption = cmdLine.addStringOption('p', "profile");
-		configDirOption = cmdLine.addStringOption('c', "configdir");
-		scriptOption = cmdLine.addStringOption('s', "script");
-		logFileOption = cmdLine.addStringOption('l', "logfile");
+		cmdLine = new ArgumentParser();
+		cmdLine.addArgument(ARG_PROFILE);
+		cmdLine.addArgument(ARG_CONFIGDIR);
+		cmdLine.addArgument(ARG_SCRIPT);
+		cmdLine.addArgument(ARG_LOGFILE);
 		
 		try
 		{
 			cmdLine.parse(args);
-			String value = (String)cmdLine.getOptionValue(configDirOption);
+			String value = cmdLine.getValue(ARG_CONFIGDIR);
 			if (value != null && value.length() > 0)
 			{
 				System.setProperty("workbench.configdir", value);
 			}
 			
-			value = (String)cmdLine.getOptionValue(logFileOption);
+			value = cmdLine.getValue(ARG_LOGFILE);
 			if (value != null && value.length() > 0)
 			{
 				System.setProperty("workbench.log.filename", value);
 			}
 			
-			String scriptname = this.getScriptFile();
+			String scriptname = cmdLine.getValue(ARG_SCRIPT);
 			if (scriptname == null || scriptname.length() == 0)
 			{
 				this.batchMode = false;
@@ -396,13 +399,7 @@ public class WbManager
 		}
 	}
 
-	public String getScriptFile()
-	{
-		String scriptname = (String)cmdLine.getOptionValue(scriptOption);
-		return scriptname;
-	}
-	
-	private void init()
+	public void init()
 	{
 		if (trace) System.err.println("WbManager.init()");
 		this.settings = new Settings();
@@ -424,15 +421,24 @@ public class WbManager
 		}
 		else
 		{
-			BatchRunner runner = new BatchRunner(this.getScriptFile());
-			String profilename = (String)cmdLine.getOptionValue(profileNameOption);
-			try
+			String scripts = cmdLine.getValue(ARG_SCRIPT);
+			String profilename = cmdLine.getValue(ARG_PROFILE);
+			if (scripts != null && profilename != null)
 			{
-				runner.setProfile(profilename);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("WbManager", "Could not initialize the batch runner", e);
+				BatchRunner runner = new BatchRunner(scripts);
+				try
+				{
+					runner.setProfile(StringUtil.trimQuotes(profilename));
+					runner.execute();
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("WbManager", "Could not initialize the batch runner", e);
+				}
+				finally
+				{
+					runner.done();
+				}
 			}
 		}
 	}

@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import workbench.log.LogMgr;
 
 /**
  *
@@ -22,7 +23,7 @@ public class ScriptReader
 	//private char[] delimit;
 	private int delimitLen;
 	
-	public ScriptReader(String aDelimiter) throws IOException
+	public ScriptReader(String aDelimiter)
 	{
 		this.delimiter = aDelimiter.trim().toUpperCase().toCharArray();
 		this.delimitLen = delimiter.length;
@@ -30,18 +31,36 @@ public class ScriptReader
 	
 	public void setScript(String aScript)
 	{
+		if (this.content != null)
+		{
+			try { this.content.close(); } catch (Throwable th) {}
+		}
 		this.content = new StringReader(aScript);
 	}
 	
-	public void setScriptFilename(String aFilename)
-		throws IOException, FileNotFoundException
+	public boolean setScriptFilename(String aFilename)
 	{
-		this.content = new BufferedReader(new FileReader(aFilename));
+		if (this.content != null)
+		{
+			try { this.content.close(); } catch (Throwable th) {}
+		}
+		try
+		{
+			this.content = new BufferedReader(new FileReader(aFilename));
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("ScriptReader.setScriptFilename()", "Error reading script " + aFilename, e);
+			this.content = null;
+			return false;
+		}
+		return true;
 	}
 	
 	public String getNextStatement()
 		throws IOException
 	{
+		if (this.content == null) return null;
 		boolean quoteOn = false;
 		
 		char[] currChar = new char[this.delimitLen];

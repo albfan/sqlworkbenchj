@@ -26,14 +26,25 @@ public class ArgumentParser
 		this.arguments.put(key.toLowerCase(), null);
 	}
 	
+	public void parse(String args[])
+	{
+		StringBuffer line = new StringBuffer(200);
+		for (int i=0; i<args.length; i++)
+		{
+			line.append(args[i]);
+			line.append(' ');
+		}
+		this.parse(line.toString());
+	}
+	
 	public void parse(String aCmdLine)
 	{
-		List words = StringUtil.split(aCmdLine, "/", false, "\"'", true);
+		List words = StringUtil.split(aCmdLine, "/", false, "\"", true);
+
 		int count = words.size();
 		for (int i=0; i < count; i++)
 		{
 			String word = (String)words.get(i);
-			System.out.println("word=" + word);
 			String arg = null;
 			String value = null;
 			int pos = word.indexOf('=');
@@ -62,15 +73,15 @@ public class ArgumentParser
 	
 	public static void main(String[] args)
 	{
-		String test = "spool /type=sql /file=\"d:\\temp\\test.sql\" /table=my_table;";
+		//String test = "spool /type=sql /file=\"d:/temp/test.sql\" /table=my_table;";
+		String test = "/profile=\"HSQLDB - Test Server\" /script=\"d:/temp/test.sql\"";
 		ArgumentParser parser = new ArgumentParser();
-		parser.addArgument("type");
-		parser.addArgument("file");
-		parser.addArgument("table");
+		parser.addArgument("script");
+		parser.addArgument("profile");
 		parser.parse(test);
-		System.out.println("type=" + parser.getValue("type"));
-		System.out.println("file=" + parser.getValue("file"));
-		System.out.println("table=" + parser.getValue("table"));
+		System.out.println("script=" + parser.getValue("script"));
+		System.out.println("profile=" + parser.getValue("profile"));
+		System.out.println("done.");
 	} 
 
 }

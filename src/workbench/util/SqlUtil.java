@@ -202,6 +202,7 @@ public class SqlUtil
 	{
 		aSql = aSql.trim();
 		int count = aSql.length();
+		if (count == 0) return aSql;
 		boolean inComment = false;
 		boolean inQuotes = false;
 		

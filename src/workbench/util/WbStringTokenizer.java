@@ -181,19 +181,19 @@ public class WbStringTokenizer
 		//System.out.println("---");
 		//test = "spool -t type \t-f \"file name.sql\" -b tablename./select * from test where name='test'./";
 		//test = "spool /type=text /file=\"file name.sql\" /table=tablename";
-		test = "/profile=\"HSQLDB - Test Server\" /script=test.sql";
-		//WbStringTokenizer tok = new WbStringTokenizer(";",false, "\"'", true);
-		WbStringTokenizer tok = new WbStringTokenizer("/",false, "\"'", true);
+		test = "/profile=\"HSQLDB - Test Server\" /script=\"d:/temp/test.sql\"";
+		WbStringTokenizer tok = new WbStringTokenizer(";",false, "\"'", true);
+		//WbStringTokenizer tok = new WbStringTokenizer("/",false, "\"'", true);
 		try
 		{
-			tok.setSourceString(test);
-			//tok.setSourceFile("d:/projects/java/jworkbench/sql/test.sql");
+			//tok.setSourceString(test);
+			tok.setSourceFile("d:/projects/java/jworkbench/sql/test.sql");
 			//tok.setSourceFile("d:/temp/test.sql");
 			String token = null;
 			while (tok.hasMoreTokens())
 			{
 				token = tok.nextToken();
-				if (token != null)	System.out.println("token=" + token.trim());
+				if (token != null)	System.out.println("token=[" + token.trim() + "]");
 			}
 		}
 		catch (Exception e)
