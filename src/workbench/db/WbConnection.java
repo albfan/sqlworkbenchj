@@ -10,9 +10,12 @@ import java.sql.DatabaseMetaData;
 import workbench.log.LogMgr;
 
 /**
+ *	Wrapper class for a java.sql.Connection which provides
+ *	an enhanced toString() method and is used instead of
+ *	java.sql.Connection throughout the JWorkbench
  *
  * @author  thomas
- * @version
+ * @version $Revision: 1.2 $  
  */
 public class WbConnection
 	implements java.sql.Connection
