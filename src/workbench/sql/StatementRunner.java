@@ -28,6 +28,9 @@ public class StatementRunner
 	private HashMap cmdDispatch;
 	
 	private SqlCommand currentCommand;
+	private SqlCommand currentConsumer;
+	
+	private int maxRows;
 	
 	public StatementRunner()
 	{
@@ -47,6 +50,9 @@ public class StatementRunner
 		cmdDispatch.put(sql.getVerb(), sql);
 		
 		sql = new SelectCommand();
+		cmdDispatch.put(sql.getVerb(), sql);
+		
+		sql = new WbSpoolCommand();
 		cmdDispatch.put(sql.getVerb(), sql);
 		
 		cmdDispatch.put(SingleVerbCommand.COMMIT.getVerb(), SingleVerbCommand.COMMIT);
@@ -73,11 +79,11 @@ public class StatementRunner
 		return this.result;
 	}
 	
-	public void runStatement(String aSql)
+	public void runStatement(String aSql, int maxRows)
 		throws SQLException, WbException
 	{
 		String cleanSql = SqlUtil.makeCleanSql(aSql, false);
-		String verb = SqlUtil.getSqlVerb(cleanSql);
+		String verb = SqlUtil.getSqlVerb(cleanSql).toUpperCase();
 		
 		// clean up the result from the last statement
 		if (this.result != null) this.result.clear();
@@ -89,8 +95,21 @@ public class StatementRunner
 		{
 			this.currentCommand = (SqlCommand)this.cmdDispatch.get("*");
 		}
-		
+		this.currentCommand.setMaxRows(maxRows);
 		this.result = this.currentCommand.execute(this.dbConnection, aSql);
+		
+		if (this.currentCommand.isResultSetConsumer())
+		{
+			this.currentConsumer = this.currentCommand;
+		}
+		else
+		{
+			if (this.currentConsumer != null)
+			{
+				this.currentConsumer.consumeResult(this.result);
+			}
+			this.currentConsumer = null;
+		}
 	}
 
 	public void cancel()
@@ -108,9 +127,13 @@ public class StatementRunner
 		}
 	}
 	
-	private StatementRunnerResult executeSql(String aSql)
+	public void done()
 	{
-		StatementRunnerResult result = new StatementRunnerResult();
-		return result;
+		if (this.result != null) this.result.clear();
+		if (this.currentCommand != null && this.currentCommand != this.currentConsumer) 
+		{
+			this.currentCommand.done();
+		}
 	}
+	
 }

@@ -58,13 +58,6 @@ public class DataSpooler
 	{
 	}
 
-	public void setShowProgress(boolean aFlag)
-	{
-		this.showProgress = aFlag;
-	}
-	
-	public boolean getShowProgress() { return this.showProgress; }
-	
 	/**
 	 *	Open the progress monitor window.
 	 */
@@ -137,7 +130,23 @@ public class DataSpooler
 		});
 	}
 	
+	public void setShowProgress(boolean aFlag) { this.showProgress = aFlag; }
+	public boolean getShowProgress() { return this.showProgress; }
 
+	public void setExportHeaders(boolean aFlag) { this.exportHeaders = aFlag; }
+	public boolean getExportHeaders() { return this.exportHeaders; }
+	
+	public void setOutputTypeText() { this.exportType = EXPORT_TXT; }
+	public void setOutputTypeSqlInsert() { this.exportType = EXPORT_SQL; }
+	public boolean isOutputTypeText() { return this.exportType == EXPORT_TXT; }
+	public boolean isOutputTypeSqlInsert() { return this.exportType == EXPORT_SQL; }
+	
+	public void setOutputFilename(String aFilename) { this.outputfile = aFilename; }
+	public String getOutputFilename() { return this.outputfile; }
+	
+	public void setSql(String aSql) { this.sql = aSql; }
+	public String getSql() { return this.sql; }
+	
 	private void startBackgroundThread()
 	{
 		Thread t = new Thread()
@@ -151,19 +160,32 @@ public class DataSpooler
 		t.start();
 	}
 	
+	public void startExport()
+		throws IOException, SQLException
+	{
+		Statement stmt = this.dbConn.createStatement();
+		ResultSet rs = null;
+		try
+		{
+			stmt.execute(this.sql);
+			rs = stmt.getResultSet();
+			this.startExport(rs);
+		}
+		finally
+		{
+			try { rs.close(); } catch (Throwable th) {}
+			try { stmt.close(); } catch (Throwable th) {}
+		}
+	}
+	
 	/**
 	 *	Export a table to an external file.
 	 *	The data will be "piped" through a DataStore in order to use 
 	 *	the SQL scripting built into that object.
 	 */
-	public void startExport()
+	public void startExport(ResultSet rs)
 		throws IOException, SQLException
 	{
-		Statement stmt = this.dbConn.createStatement();
-		
-		stmt.execute(this.sql);
-		ResultSet rs = stmt.getResultSet();
-		
 		int interval = 1;
 		int currentRow = 0;
 		
@@ -258,16 +280,16 @@ public class DataSpooler
 		catch (IOException e)
 		{
 			LogMgr.logError("DataSpooler", "Error writing data file", e);
+			throw e;
 		}
 		catch (SQLException e)
 		{
 			LogMgr.logError("DataSpooler", "SQL Error", e);
+			throw e;
 		}
 		finally 
 		{
 			try { if (pw != null) pw.close(); } catch (Throwable th) {}
-			try { rs.close(); } catch (Throwable th) {}
-			try { stmt.close(); } catch (Throwable th) {}
 			this.closeProgress();
 		}
 	}

@@ -45,7 +45,7 @@ public class DdlCommand extends SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql) 
 		throws SQLException, WbException
 	{
-		StatementRunnerResult result = new StatementRunnerResult();
+		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		try
 		{
 			Statement stmt = aConnection.createStatement();
@@ -65,6 +65,7 @@ public class DdlCommand extends SqlCommand
 				msg = this.verb + " " + ResourceMgr.getString("MsgKnownStatementOK");
 			}
 			result.addMessage(msg);
+			
 			StringBuffer warnings = new StringBuffer();
 			if (this.appendWarnings(aConnection, stmt, warnings))
 			{
@@ -78,10 +79,6 @@ public class DdlCommand extends SqlCommand
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
 			result.addMessage(ExceptionUtil.getDisplay(e));
 			result.setFailure();
-		}
-		finally
-		{
-			this.done();
 		}
 		
 		return result;

@@ -25,7 +25,7 @@ public class WbDescribeTable extends SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql) 
 		throws SQLException, WbException
 	{
-		StatementRunnerResult result = new StatementRunnerResult();
+		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		LineTokenizer tok = new LineTokenizer(aSql, " ");
 		String verb = tok.nextToken(); 
 		if (!VERB.equalsIgnoreCase(verb)) throw new WbException("Wrong syntax. " + VERB + " expected!");

@@ -29,10 +29,13 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.sql.StatementRunner;
+import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 import workbench.storage.DmlStatement;
 import workbench.util.LineTokenizer;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 
 /**
@@ -61,39 +64,8 @@ public class DwPanel extends JPanel
 	private static int nextId = 0;
 	private WbConnection lastConnection;
 	private boolean cancelled;
-	private static final ArrayList knownSqlVerbs;
-	private static final ArrayList noResultVerbs;
-	private static final ArrayList noUpdateCountVerbs;
-	static
-	{
-		knownSqlVerbs = new ArrayList();
-		knownSqlVerbs.add("SELECT");
-		knownSqlVerbs.add("UPDATE");
-		knownSqlVerbs.add("INSERT");
-		knownSqlVerbs.add("DELETE");
-		knownSqlVerbs.add("CREATE");
-		knownSqlVerbs.add("DROP");
-		knownSqlVerbs.add("ALTER");
-		knownSqlVerbs.add("GRANT");
-		knownSqlVerbs.add("COMMIT");
-		knownSqlVerbs.add("ROLLBACK");
-		
-		noResultVerbs = new ArrayList();
-		noResultVerbs.add("COMMIT");
-		noResultVerbs.add("ROLLBACK");
-		noResultVerbs.add("UPDATE");
-		noResultVerbs.add("INSERT");
-		noResultVerbs.add("DELETE");
-
-		noUpdateCountVerbs = new ArrayList();
-		noUpdateCountVerbs.add("COMMIT");
-		noUpdateCountVerbs.add("ROLLBACK");
-		noUpdateCountVerbs.add("DROP");
-		noUpdateCountVerbs.add("CREATE");
-		noUpdateCountVerbs.add("ALTER");
-		noUpdateCountVerbs.add("GRANT");
-	}
 	
+	private StatementRunner stmtRunner;
 	
 	public DwPanel()
 	{
@@ -118,6 +90,7 @@ public class DwPanel extends JPanel
 		pol.addComponent(statusBar.tfMaxRows);
 		this.setFocusTraversalPolicy(pol);
 		this.setDoubleBuffered(true);
+		this.stmtRunner = new StatementRunner();
 	}
 	
 	public void disconnect()
@@ -144,6 +117,7 @@ public class DwPanel extends JPanel
 		this.lastMessage = null;
 		this.dbConnection = aConn;
 		this.hasResultSet = false;
+		this.stmtRunner.setConnection(aConn);
 	}
 
 	public int saveChanges(WbConnection aConnection)
@@ -209,13 +183,6 @@ public class DwPanel extends JPanel
 		return this.sql;
 	}
 
-	public void setMaxRows(int aRowCount)
-	{
-		if (aRowCount <= 0) this.maxRows = 0;
-		else this.maxRows = aRowCount;
-	}
-	public int getMaxRows(){ return this.maxRows; }
-	
 	public void setUpdateTable(String aTable)
 	{
 		this.infoTable.getDataStore().setUpdateTable(aTable);
@@ -259,189 +226,58 @@ public class DwPanel extends JPanel
 			LogMgr.logInfo(this, "No connection given or connection closed!");
 			return;
 		}
+		
 		this.lastConnection = aConnection;
+		StatementRunnerResult result = null;
 		
 		try
 		{
 			long start, end, sqlTime = 0;
-			String cleanSql = null;
-			StringBuffer msg = new StringBuffer(500);
+			this.clearContent();
 			
-			this.lastMessage = "";
-			
-			if (aSql.endsWith(";"))
-				aSql = aSql.substring(0, aSql.length() - 1);
+			if (aSql.endsWith(";")) aSql = aSql.substring(0, aSql.length() - 1);
 				
-			boolean repeatLast = false;
-			repeatLast = aSql.equals(this.sql);
+			boolean repeatLast = aSql.equals(this.sql);
+			this.sql = aSql;
+		
+			start = System.currentTimeMillis();
+			this.stmtRunner.runStatement(aSql, this.statusBar.getMaxRows());
+			end = System.currentTimeMillis();
+			sqlTime = (end - start);
 			
-			// the cleanSql is necessary to strip the 
-			// statement from all comments so that the actual SQL verb 
-			// can be identified
-			cleanSql = SqlUtil.makeCleanSql(aSql, false);
-			this.sql = null;
-			
-			String verb = SqlUtil.getSqlVerb(cleanSql).toUpperCase();
-			Connection sqlcon = aConnection.getSqlConnection();
-			ResultSet rs = null;
-			List keepColumns = null;
+			result = this.stmtRunner.getResult();
 			DataStore newData = null;
 		
-			this.clearContent();
 			this.hasResultSet = false;
-			this.setMaxRows(this.statusBar.getMaxRows());
-			StringBuffer rows = null;
-			
-			if (verb.equalsIgnoreCase("DESC"))
-			{
-				LineTokenizer tok = new LineTokenizer(aSql, " ");
-				tok.nextToken();
-				String table = tok.nextToken();
-				String schema = null;
-				int pos = table.indexOf('.');
-				if (pos > -1)
-				{
-					schema = table.substring(0, pos);
-					table = table.substring(pos + 1);
-				}
-				this.hasResultSet = true;
-				newData = aConnection.getMetadata().getTableDefinition(null, schema, table);
-			}
-			else if (verb.equalsIgnoreCase("LIST"))
+		
+			if (result.hasData())
 			{
 				this.hasResultSet = true;
-				newData = aConnection.getMetadata().getTables();
-			}
-			else if (verb.equalsIgnoreCase("LISTPROCS"))
-			{
-				newData = aConnection.getMetadata().getProcedures(null, null);
-				this.hasResultSet = true;
-			}
-			else if (verb.equalsIgnoreCase("LISTDB"))
-			{
-				newData = aConnection.getMetadata().getCatalogInformation();
-				this.hasResultSet = true;
-			}
-			else if (verb.equalsIgnoreCase("ENABLEOUT"))
-			{
-				StringTokenizer tok = new StringTokenizer(aSql, " ");
-				long limit = -1;
-				tok.nextToken(); // skip the verb
-				if (tok.hasMoreTokens())
-				{
-					String value = tok.nextToken();
-					try
-					{
-						limit = Long.parseLong(value);
-					}
-					catch (NumberFormatException nfe)
-					{
-						limit = -1;
-					}
-				}
-				this.dbConnection.getMetadata().enableOutput(limit);
-				this.hasResultSet = false;
-				this.lastStatement = null;
-			}
-			else if (verb.equalsIgnoreCase("DISABLEOUT"))
-			{
-				this.dbConnection.getMetadata().disableOutput();
-				this.hasResultSet = false;
-				this.lastStatement = null;
-			}
-			else
-			{
-				boolean checkForResultSet = false;
 				
-				this.lastStatement = sqlcon.createStatement();
-
-				if (verb.equalsIgnoreCase("SELECT"))
+				if (result.hasDataStores())
 				{
-					this.lastStatement.setMaxRows(this.maxRows);
+					newData = result.getDataStores()[0];
 				}
 				else
 				{
-					this.lastStatement.setMaxRows(0);
-				}					
-				start = System.currentTimeMillis();
-				
-				boolean hasResult = this.lastStatement.execute(aSql);
-				int updateCount = -1;
-				
-				if (hasResult) 
-				{
-					rs = this.lastStatement.getResultSet();
-				}
-				else
-				{
-					updateCount = this.lastStatement.getUpdateCount();
-					if (updateCount > -1 && !this.noUpdateCountVerbs.contains(verb))
-					{
-						rows = new StringBuffer(100);
-						rows.append(updateCount + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
-						rows.append('\n');
-					}
+					// the resultset will be closed when stmtRunner.done() is called
+					// in the finally block
+					ResultSet rs = result.getResultSets()[0];
+					newData = new DataStore(rs, true);
+					newData.setOriginalStatement(aSql);
+					newData.setSourceConnection(this.dbConnection);
+					newData.checkUpdateTable();
 				}
 				
-				boolean moreResults = false; 
-				
-				if (!noResultVerbs.contains(verb))
-				{
-					if (rs == null)
-					{
-						moreResults = this.lastStatement.getMoreResults();
-					}
-
-					while (moreResults || (updateCount != -1))
-					{
-						if (moreResults)
-						{
-							rs  = this.lastStatement.getResultSet();
-						}
-
-						if (updateCount > -1 && !this.noUpdateCountVerbs.contains(verb))
-						{
-							if (rows == null) rows = new StringBuffer(100);
-							rows.append(updateCount + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
-							rows.append('\n');
-						}
-
-						moreResults = this.lastStatement.getMoreResults();
-						updateCount = this.lastStatement.getUpdateCount();
-					}			
-				}
-				
-				if (rs != null)
-				{
-					this.hasResultSet = true;
-					newData = new DataStore(rs, this.dbConnection);
-					rs.close();
-				}
-				else
-				{
-					this.hasResultSet = false;
-				}
-				end = System.currentTimeMillis();
-				sqlTime = (end - start);
-			}
-
-			
-			if (this.hasResultSet)
-			{
-				this.sql = aSql;
 				if (repeatLast)
 				{
 					this.infoTable.saveColumnSizes();
 				}
-				newData.setOriginalStatement(aSql);
-				newData.setSourceConnection(this.dbConnection);
-				newData.checkUpdateTable();
 				
 				this.infoTable.reset();
 				this.infoTable.setAutoCreateColumnsFromModel(true);
 				this.infoTable.setModel(new DataStoreTableModel(newData), true);
 
-				/*
 				if (repeatLast)
 				{
 					this.infoTable.restoreColumnSizes();
@@ -450,41 +286,28 @@ public class DwPanel extends JPanel
 				{
 					this.infoTable.adjustColumns();
 				}
-				*/
 				this.infoTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 				this.infoTable.setRowSelectionAllowed(true);
 				this.statusBar.setRowcount(this.infoTable.getRowCount());
 			}
-			else if (this.lastStatement != null)
+			else 
 			{
+				this.hasResultSet = false;
 				this.setMessageDisplayModel(this.getEmptyMsgTableModel());
-				SQLWarning warn = this.lastStatement.getWarnings();
-				boolean warnings = warn != null;
-				while (warn != null)
-				{
-					msg.append('\n');
-					msg.append(warn.getMessage());
-					warn = warn.getNextWarning();
-				}
-				if (warnings) msg.append("\n\n");
-				String outMsg = this.lastConnection.getOutputMessages();
-				if (outMsg.length() > 0)
-				{
-					msg.append(outMsg);
-					msg.append("\n\n");
-				}
 			}
-			msg.append(verb.toUpperCase());
-			msg.append(' ');
-			msg.append(ResourceMgr.getString("MsgKnownStatementOK"));
-			msg.append('\n');
-			
-			if (rows != null) msg.append(rows);
-			
-			this.lastMessage = msg.toString();
+			String[] messages = result.getMessages();
+			StringBuffer msg = null;
+			if (messages != null)
+			{
+				msg = new StringBuffer(messages.length * 80);
+				for (int i=0; i < messages.length; i++)
+				{
+					msg.append(messages[i]);
+					msg.append('\n');
+				}
+				this.lastMessage = msg.toString();
+			}
 			this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgExecTime") + " " + (((double)sqlTime) / 1000.0) + "s";
-			if (this.lastStatement != null) this.lastStatement.close();
-			this.lastStatement = null;
 		}
 		catch (SQLException sql)
 		{
@@ -502,6 +325,10 @@ public class DwPanel extends JPanel
 			String s = ExceptionUtil.getDisplay(e);
 			this.lastMessage = this.lastMessage + s;
 			throw new WbException(s);
+		}
+		finally
+		{
+			this.stmtRunner.done();
 		}
 		
 	}
@@ -643,7 +470,7 @@ public class DwPanel extends JPanel
 		this.infoTable.reset();
 		this.hasResultSet = false;
 		this.cancelled = false;
-		this.lastMessage = null;
+		this.lastMessage = StringUtil.EMPTY_STRING;
 		this.sql = null;
 		this.statusBar.clearRowcount();
 	}

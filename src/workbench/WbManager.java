@@ -22,6 +22,7 @@ import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 import workbench.db.ConnectionMgr;
+import workbench.db.ConnectionProfile;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
@@ -29,6 +30,8 @@ import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.CmdLineParser;
+import workbench.util.StringUtil;
 import workbench.util.WbCipher;
 import workbench.util.WbNullCipher;
 import workbench.util.WbPersistence;
@@ -48,7 +51,6 @@ public class WbManager
 	
 	private WbManager() 
 	{
-		long start,end;
 		this.setLookAndFeel();
 		this.initUI();
 		this.settings.addFontChangedListener(this);
@@ -297,14 +299,51 @@ public class WbManager
     }
 	}
 	
-	public void openNewWindow()
+	public void openNewWindow(boolean checkCmdLine)
 	{
 		MainWindow main = this.createWindow();
 		main.show();
 		main.restoreState();
-		main.selectConnection();
+		boolean connected = false;
+		
+		if (checkCmdLine)
+		{
+			// get profile name from commandline
+			String profilename = (String)cmdLine.getOptionValue(profileNameOption);
+			System.out.println("profile=" + profilename);
+			//profilename = StringUtil.trimQuotes(profilename);
+			if (profilename != null && profilename.trim().length() > 0)
+			{
+				ConnectionProfile prof = connMgr.getProfile(profilename);
+				if (prof != null)
+				{
+					connected = main.connectTo(prof);
+				}
+			}
+		}
+		
+		if (!connected)
+		{
+			main.selectConnection();
+		}
 	}
 	
+	private CmdLineParser cmdLine;
+	private CmdLineParser.Option profileNameOption;
+	private String[] cmdArguments;
+	
+	private void initCmdLine(String[] args)
+	{
+		cmdLine = new CmdLineParser();
+		profileNameOption = cmdLine.addStringOption('p', "profile");
+		try
+		{
+			cmdLine.parse(args);
+		}
+		catch (Exception e)
+		{
+		}
+	}
 	
 	public static void startup(String[] args)
 	{
@@ -314,8 +353,8 @@ public class WbManager
 			splash = new WbSplash(null, false);
 			splash.setVisible(true);
 		}
-
-		wb.openNewWindow();
+		wb.initCmdLine(args);
+		wb.openNewWindow(true);
 		if (splash != null)
 		{
 			splash.setVisible(false);

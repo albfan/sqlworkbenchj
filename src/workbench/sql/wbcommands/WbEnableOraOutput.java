@@ -45,7 +45,7 @@ public class WbEnableOraOutput extends SqlCommand
 			}
 		}
 		aConnection.getMetadata().enableOutput(limit);
-		StatementRunnerResult result = new StatementRunnerResult();
+		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		return result;
 	}	
 	

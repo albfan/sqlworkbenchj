@@ -1024,7 +1024,7 @@ public class SqlPanel
 				{
 					this.log.append("\n");
 					this.log.append(StringUtil.replace(msg, "%nr%", Integer.toString(i + 1)));
-					this.log.append("\n");
+					this.log.append("\n\n");
 					this.log.setCaretPosition(this.log.getText().length());
 				}
 				if (i == 0 && !this.data.hasResultSet())

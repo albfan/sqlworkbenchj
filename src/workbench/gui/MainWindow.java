@@ -681,8 +681,9 @@ public class MainWindow
 		return this.currentProfileName;
 	}
 
-	public void connectTo(ConnectionProfile aProfile)
+	public boolean connectTo(ConnectionProfile aProfile)
 	{
+		boolean connected = false;
 		try
 		{
 			this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -704,6 +705,7 @@ public class MainWindow
 				this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_CONNECTION_ERROR) + "\r\n\n" + se.toString());
 			}
 			this.showStatusMessage("");
+			connected = true;
 		}
 		catch (Exception e)
 		{
@@ -716,6 +718,7 @@ public class MainWindow
 			LogMgr.logError("MainWindow.connectTo()", "Could not connect", e);
 		}
 		this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		return connected;
 	}
 
 	public JMenu buildHelpMenu()

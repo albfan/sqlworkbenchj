@@ -39,6 +39,11 @@ public class SqlCommand
 		return true;
 	}
 	
+	protected void appendSuccessMessage(StatementRunnerResult result)
+	{
+		result.addMessage(this.getVerb() + " " + ResourceMgr.getString("MsgKnownStatementOK"));
+	}
+	
 	/**
 	 *	Append any warnings from the Statement to the given 
 	 *	StringBuffer. If the connection is a connection to Oracle
@@ -87,15 +92,18 @@ public class SqlCommand
 		{ 
 			this.currentStatement.close(); 
 		} 
-		catch (Throwable th) {}
+		catch (Throwable th) 
+		{
+		}
 	}
+	
 	/**
 	 *	Should be overridden by a specialised SqlCommand 
 	 */
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql) 	
 		throws SQLException, WbException
 	{
-		StatementRunnerResult result = new StatementRunnerResult();
+		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		ResultSet rs = null;
 		this.currentStatement = aConnection.createStatement();
 		
@@ -171,4 +179,7 @@ public class SqlCommand
 		return ""; 
 	}
 
+	public void setMaxRows(int maxRows) { }
+	public boolean isResultSetConsumer() { return false; }
+	public void consumeResult(StatementRunnerResult aResult) {}
 }

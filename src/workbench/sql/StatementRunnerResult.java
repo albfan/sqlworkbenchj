@@ -24,16 +24,19 @@ public class StatementRunnerResult
 	private ArrayList updateCounts;
 	private ArrayList messages;
 	private ArrayList datastores;
+	private String sourceCommand;
 
 	private boolean success = true;
 	
-	public StatementRunnerResult()
+	public StatementRunnerResult(String aCmd)
 	{
+		this.sourceCommand = aCmd;
 	}
 
 	public void setSuccess() { this.success = true; }
 	public void setFailure() { this.success = false; }
 	public boolean isSuccess() { return this.success; }
+	public String getSourceCommand() { return this.sourceCommand; }
 	
 	public int addDataStore(DataStore ds)
 	{
@@ -87,7 +90,7 @@ public class StatementRunnerResult
 	
 	public DataStore[] getDataStores()
 	{
-		if (this.datastores == null) return new DataStore[0];
+		if (this.datastores == null) return null;
 		int size = this.datastores.size();
 		DataStore[] ds = new DataStore[size];
 		for (int i=0; i< size; i++)
@@ -99,7 +102,7 @@ public class StatementRunnerResult
 	
 	public ResultSet[] getResultSets()
 	{
-		if (this.results == null) return new ResultSet[0];
+		if (this.results == null) return null;
 		
 		int size = this.results.size();
 		ResultSet[] rs = new ResultSet[size];
@@ -112,12 +115,12 @@ public class StatementRunnerResult
 	
 	public String[] getMessages()
 	{
-		if (this.messages == null) return new String[0];
+		if (this.messages == null) return null;
 		int size = this.messages.size();
 		String[] msgs = new String[size];
 		for (int i=0; i< size; i++)
 		{
-			msgs[i] = (String)this.updateCounts.get(i);
+			msgs[i] = (String)this.messages.get(i);
 		}
 		return msgs;
 	}
@@ -134,18 +137,8 @@ public class StatementRunnerResult
 		return counts;
 	}
 	
-	public void clear()
+	public void clearResultSets()
 	{
-		if (this.datastores != null)
-		{
-			for (int i=0; i < this.datastores.size(); i ++)
-			{
-				DataStore ds = (DataStore)this.datastores.get(i);
-				ds.reset();
-			}
-			this.datastores.clear();
-		}
-		
 		if (this.results != null)
 		{
 			for (int i=0; i < this.results.size(); i++)
@@ -164,6 +157,15 @@ public class StatementRunnerResult
 			}
 			this.results.clear();
 		}
+	}
+	
+	public void clear()
+	{
+		if (this.datastores != null)
+		{
+			this.datastores.clear();
+		}
+		this.clearResultSets();
 		if (this.messages != null) this.messages.clear();
 		if (this.updateCounts !=null) this.updateCounts.clear();
 	}

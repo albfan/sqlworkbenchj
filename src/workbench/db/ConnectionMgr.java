@@ -187,6 +187,20 @@ public class ConnectionMgr
 		this.drivers = aDriverList;
 	}
 
+	public ConnectionProfile getProfile(String aName)
+	{
+		this.getProfiles();
+		if (this.profiles == null) return null;
+		Iterator itr = this.profiles.values().iterator();
+		ConnectionProfile prof = null;
+		while (itr.hasNext())
+		{
+			prof = (ConnectionProfile)itr.next();
+			if (aName.equalsIgnoreCase(prof.getName())) return prof;
+		}
+		return prof;
+	}
+	
 	/**
 	 *	Returns a Map with the current profiles.
 	 *	The key to the map is the profile name, the value is the actual profile

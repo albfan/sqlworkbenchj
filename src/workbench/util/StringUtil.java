@@ -228,6 +228,21 @@ public class StringUtil
 		}
 	}
 	
+
+	public static final String trimQuotes(String input)
+	{
+		if (input == null) return null;
+		if (input.length() == 0) return EMPTY_STRING;
+		if (input.indexOf('"') < 0) return input;
+		int first=0;
+		int len = input.length();
+		String result = input.trim();
+		while (result.charAt(first) == '"' && first < len) first++;
+		int last = result.length() - 1;
+		while (result.charAt(last) == '"' && last > first) last--;
+		result = result.substring(first, last + 1);
+		return result;
+	}
 	
 	public static final String capitalize(String aString)
 	{
@@ -410,7 +425,9 @@ public class StringUtil
 
 	public static void main(String args[])
 	{
-		String test = "String sql = \"SELECT column \\n\" + \n\"  FROM test \\r\" + \n\"  WHERE x= 10\"; ";
-		System.out.println(cleanJavaString(test));
+		//String test = "String sql = \"SELECT column \\n\" + \n\"  FROM test \\r\" + \n\"  WHERE x= 10\"; ";
+		//System.out.println(cleanJavaString(test));
+		String test = "Profile name\"";
+		System.out.println(">" + trimQuotes(test) + "<");
 	}
 }

@@ -20,7 +20,7 @@ import javax.swing.text.Segment;
  * This class is used by <code>CTokenMarker</code> to map keywords to ids.
  *
  * @author Slava Pestov, Mike Dillon
- * @version $Id: KeywordMap.java,v 1.2 2002-08-19 20:57:43 thomas Exp $
+ * @version $Id: KeywordMap.java,v 1.3 2002-12-07 21:23:47 thomas Exp $
  */
 public class KeywordMap
 {
@@ -55,8 +55,7 @@ public class KeywordMap
 	 */
 	public byte lookup(Segment text, int offset, int length)
 	{
-		if(length == 0)
-			return Token.NULL;
+		if(length == 0)	return Token.NULL;
 		Keyword k = map[getSegmentMapKey(text, offset, length)];
 		while(k != null)
 		{
@@ -72,6 +71,13 @@ public class KeywordMap
 		return Token.NULL;
 	}
 
+	public boolean containsKey(String aKey)
+	{
+		if (aKey == null) return false;
+		Segment s = new Segment(aKey.toCharArray(), 0, aKey.length());
+		return (this.lookup(s, 0, aKey.length()) != Token.NULL);
+	}
+	
 	/**
 	 * Adds a key-value mapping.
 	 * @param keyword The key
@@ -107,9 +113,7 @@ public class KeywordMap
 
 	protected int getStringMapKey(String s)
 	{
-		return (Character.toUpperCase(s.charAt(0)) +
-				Character.toUpperCase(s.charAt(s.length()-1)))
-				% mapLength;
+		return (Character.toUpperCase(s.charAt(0)) + Character.toUpperCase(s.charAt(s.length()-1)))	% mapLength;
 	}
 
 	protected int getSegmentMapKey(Segment s, int off, int len)
@@ -117,6 +121,7 @@ public class KeywordMap
 		return (Character.toUpperCase(s.array[off]) + Character.toUpperCase(s.array[off + len - 1])) % mapLength;
 	}
 
+	
 	// private members
 	class Keyword
 	{

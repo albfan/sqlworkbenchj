@@ -35,16 +35,17 @@ public class UpdatingCommand extends SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql) 
 		throws SQLException, WbException
 	{
-		StatementRunnerResult result = new StatementRunnerResult();
+		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		try
 		{
 			this.currentStatement = aConnection.createStatement();
 			int updateCount = this.currentStatement.executeUpdate(aSql);
 			StringBuffer warnings = new StringBuffer();
-			this.appendWarnings(aConnection, this.currentStatement, warnings);
-			result.addMessage(ResourceMgr.getString("MsgStatementOK"));
+			boolean hasWarnings = this.appendWarnings(aConnection, this.currentStatement, warnings);
+			this.appendSuccessMessage(result);
 			result.addMessage(updateCount + " " + ResourceMgr.getString("MsgRowsAffected"));
-			if (warnings.toString().length() > 0) result.addMessage(warnings.toString());
+			if (hasWarnings) result.addMessage(warnings.toString());
+			
 			result.setSuccess();
 		}
 		catch (Exception e)

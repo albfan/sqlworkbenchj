@@ -37,20 +37,20 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 			{
 				keywords.add("SYNONYM", Token.KEYWORD1);
 			}
-			//keys = meta.getStringFunctions();
-			System.out.println("string functions = "+ keys);
+			keys = meta.getStringFunctions();
+			//System.out.println("string functions = "+ keys);
 			this.addKeywordList(keys, Token.KEYWORD3);
 
-			//keys = meta.getNumericFunctions();
-			System.out.println("numeric functions = "+ keys);
+			keys = meta.getNumericFunctions();
+			//System.out.println("numeric functions = "+ keys);
 			this.addKeywordList(keys, Token.KEYWORD3);
 
-			//keys = meta.getTimeDateFunctions();
-			System.out.println("timedate functions = "+ keys);
+			keys = meta.getTimeDateFunctions();
+			//System.out.println("timedate functions = "+ keys);
 			this.addKeywordList(keys, Token.KEYWORD3);
 
-			//keys = meta.getSystemFunctions();
-			System.out.println("system functions = " +keys);
+			keys = meta.getSystemFunctions();
+			//System.out.println("system functions = " +keys);
 			this.addKeywordList(keys, Token.KEYWORD3);
 
 		}
@@ -65,8 +65,11 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		while (tok.hasMoreTokens())
 		{
 			String keyword = tok.nextToken();
-			//System.out.println("adding key=" + keyword);
-			keywords.add(keyword.toUpperCase().trim(),anId);
+			if (!keywords.containsKey(keyword))
+			{
+				//System.out.println("adding key=" + keyword);
+				keywords.add(keyword.toUpperCase().trim(),anId);
+			}
 		}
 	}
 
@@ -176,6 +179,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("WITH",Token.KEYWORD1);
 		keywords.add("WORK",Token.KEYWORD1);
 
+		keywords.add("SPOOL",Token.KEYWORD2);
 		keywords.add("LIST",Token.KEYWORD2);
 		keywords.add("LISTPROCS",Token.KEYWORD2);
 		keywords.add("LISTDB",Token.KEYWORD2);

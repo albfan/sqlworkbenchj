@@ -24,7 +24,8 @@ public class SelectCommand extends SqlCommand
 {
 	
 	public static final String VERB = "SELECT";
-
+	private int maxRows = 0;
+	
 	public SelectCommand()
 	{
 	}
@@ -32,14 +33,20 @@ public class SelectCommand extends SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql) 
 		throws SQLException, WbException
 	{
-		StatementRunnerResult result = new StatementRunnerResult();
+		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		try
 		{
 			this.currentStatement = aConnection.createStatement();
+			this.currentStatement.setMaxRows(this.maxRows);
 			ResultSet rs = this.currentStatement.executeQuery(aSql);
 			result.addResultSet(rs);
 			StringBuffer warnings = new StringBuffer();
-			this.appendWarnings(aConnection, this.currentStatement, warnings);
+			
+			this.appendSuccessMessage(result);
+			if (this.appendWarnings(aConnection, this.currentStatement, warnings))
+			{
+				result.addMessage(warnings.toString());
+			}
 			result.setSuccess();
 		}
 		catch (Exception e)
@@ -49,17 +56,22 @@ public class SelectCommand extends SqlCommand
 			result.addMessage(ExceptionUtil.getDisplay(e));
 			result.setFailure();
 		}
-		finally
-		{
-			this.done();
-		}
-		
 		return result;
 	}
 	
 	public String getVerb()
 	{
 		return VERB;
+	}
+	
+	public boolean supportsMaxRows()
+	{
+		return true;
+	}
+	
+	public void setMaxRows(int max)
+	{
+		this.maxRows = max;
 	}
 	
 }

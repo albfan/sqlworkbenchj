@@ -56,7 +56,6 @@ public class Settings
 		
 	public Settings()
 	{
-		//System.out.println("Settings.<init>");
 		this.props = new Properties();
 		this.filename = System.getProperty("workbench.settings.file", null);
 		fillDefaults();
@@ -76,7 +75,6 @@ public class Settings
 				configDir = configDir + sep;
 			}
 		}
-		System.out.println("configDir = " + configDir);
 		if (filename == null) this.filename = this.configDir + "workbench.settings";
 		
 		try

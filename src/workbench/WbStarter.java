@@ -18,7 +18,6 @@ public class WbStarter
 	 */
 	public static void main(String[] args)
 	{
-		//System.out.println("WbStarter.main()");
 		String version = System.getProperty("java.version", null);
 		if (version == null)
 		{
@@ -30,8 +29,6 @@ public class WbStarter
 		{
 			int majorversion = Integer.parseInt(version.substring(0,1));
 			int minorversion = Integer.parseInt(version.substring(2,3));
-			System.out.println(majorversion);
-			System.out.println(minorversion);
 			is14 = (majorversion >= 1) && (minorversion >= 4);
 		}
 		catch (Exception e)

@@ -29,7 +29,7 @@ public class SingleVerbCommand extends SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql) 
 		throws SQLException, WbException
 	{
-		StatementRunnerResult result = new StatementRunnerResult();
+		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		try
 		{
 			this.currentStatement = aConnection.createStatement();

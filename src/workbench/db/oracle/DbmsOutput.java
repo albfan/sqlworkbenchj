@@ -1,9 +1,12 @@
 package workbench.db.oracle;
 
-import java.lang.NumberFormatException;
-import java.sql.*;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Types;
 import workbench.WbManager;
 import workbench.log.LogMgr;
+
 
 public class DbmsOutput
 {
@@ -103,7 +106,7 @@ public class DbmsOutput
 	}
 	
 	/*
-	 * show does most of the work.  It loops over
+	 * getResult() does most of the work.  It loops over
 	 * all of the dbms_output data, fetching it in this
 	 * case 32,000 bytes at a time (give or take 255 bytes).
 	 * It will print this output on stdout by default (just
@@ -115,8 +118,8 @@ public class DbmsOutput
 	{
 		int done = 0;
 		
-		show_stmt.registerOutParameter( 2, java.sql.Types.INTEGER );
-		show_stmt.registerOutParameter( 3, java.sql.Types.VARCHAR );
+		show_stmt.registerOutParameter( 2, Types.INTEGER );
+		show_stmt.registerOutParameter( 3, Types.VARCHAR );
 		StringBuffer result = new StringBuffer(1024);
 		for(;;)
 		{

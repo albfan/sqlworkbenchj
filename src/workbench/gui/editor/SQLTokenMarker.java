@@ -15,7 +15,7 @@ import javax.swing.text.Segment;
  * SQL token marker.
  *
  * @author mike dillon
- * @version $Id: SQLTokenMarker.java,v 1.1 2001-12-11 19:07:23 thomas Exp $
+ * @version $Id: SQLTokenMarker.java,v 1.2 2002-12-07 21:23:47 thomas Exp $
  */
 public class SQLTokenMarker extends TokenMarker
 {
@@ -85,11 +85,12 @@ loop:
 					lastOffset = i + 1;
 				}
 				break;
-			case ' ': case '\t':
+			case ' ': case '\t': case ';':
 				if (token == Token.NULL) {
 					searchBack(line, i, false);
 				}
 				break;
+		  /*
 			case ':':
 				if(token == Token.NULL)
 				{
@@ -97,6 +98,7 @@ loop:
 					lastOffset = i + 1;
 				}
 				break;
+			*/
 			case '/':
 				if(token == Token.NULL)
 				{
