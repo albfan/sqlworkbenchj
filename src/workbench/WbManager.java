@@ -17,6 +17,7 @@ import workbench.db.ConnectionMgr;
 import workbench.resource.Settings;
 import java.util.List;
 import workbench.db.ConnectionProfile;
+import workbench.util.WbCipher;
 
 /**
  *	The main application "controller" for the jWorkbench
@@ -29,10 +30,16 @@ public class WbManager
 	private Settings settings = new Settings();
 	private ConnectionMgr connMgr = new ConnectionMgr();
 	private HashMap windowList = new HashMap();
+	private WbCipher cipher = null;
 	
 	private WbManager() 
 	{
 		this.initFonts();
+		long start, end;
+		start = System.currentTimeMillis();
+		this.cipher = new WbCipher();
+		end = System.currentTimeMillis();
+		System.out.println("new WbCipher() " + (end - start));
 	}
 
 	public static WbManager getInstance()
@@ -48,6 +55,11 @@ public class WbManager
 	public ConnectionMgr getConnectionMgr()
 	{
 		return this.connMgr;
+	}
+	
+	public WbCipher getCipher()
+	{
+		return this.cipher;
 	}
 	
 	private void initFonts() 
@@ -86,7 +98,7 @@ public class WbManager
 		UIManager.put("Tree.font", stdFont);
 		UIManager.put("ViewPort.font", stdFont);
 		end = System.currentTimeMillis();
-		System.out.println("initFonts=" + (end - start));
+		//System.out.println("initFonts=" + (end - start));
 	}
 
 	public MainWindow createWindow()
@@ -108,7 +120,7 @@ public class WbManager
 			win.saveSettings();
 			win.dispose();
 		}
-		
+		this.connMgr.writeSettings();
 		this.settings.saveSettings();
 		System.exit(0);
 	}
@@ -122,6 +134,7 @@ public class WbManager
 		// the constructor
 		MainWindow main = wb.createWindow();
 		main.show();
+		main.selectConnection();
 		/*
 		Connection conn = null;
 		ConnectionProfile profile = wb.connMgr.selectConnection();

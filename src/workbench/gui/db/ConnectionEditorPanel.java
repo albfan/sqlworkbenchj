@@ -25,19 +25,19 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 {
 	private ConnectionProfile currentProfile;
 	private List drivers;
-	
+
 	public ConnectionEditorPanel()
 	{
 		this.initComponents();
 	}
-	
+
 	/** Creates new form ConnectionEditorPanel */
 	public ConnectionEditorPanel(List aDriverList)
 	{
 		this.drivers = aDriverList;
 		initComponents();
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -50,24 +50,28 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
     lblUsername = new javax.swing.JLabel();
     tfUserName = new javax.swing.JTextField();
     lblPwd = new javax.swing.JLabel();
-    tfPwd = new javax.swing.JTextField();
     jLabel1 = new javax.swing.JLabel();
     cbDrivers = new javax.swing.JComboBox();
     jLabel2 = new javax.swing.JLabel();
     tfURL = new javax.swing.JTextField();
-    jLabel3 = new javax.swing.JLabel();
+    tfPwd = new javax.swing.JPasswordField();
+    cbAutocommit = new javax.swing.JCheckBox();
+    dummy = new javax.swing.JPanel();
+    tfProfileName = new javax.swing.JTextField();
 
     setLayout(new java.awt.GridBagLayout());
 
-    lblUsername.setFont(new java.awt.Font("Dialog", 0, 12));
+    setMinimumSize(new java.awt.Dimension(200, 200));
+    lblUsername.setFont(null);
     lblUsername.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_USERNAME));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
     add(lblUsername, gridBagConstraints);
 
+    tfUserName.setFont(null);
     tfUserName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
     tfUserName.setToolTipText("");
     tfUserName.setMaximumSize(new java.awt.Dimension(2147483647, 20));
@@ -76,66 +80,55 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
     tfUserName.setPreferredSize(new java.awt.Dimension(100, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
     add(tfUserName, gridBagConstraints);
 
-    lblPwd.setFont(new java.awt.Font("Dialog", 0, 12));
+    lblPwd.setFont(null);
     lblPwd.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_PASSWORD));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
     add(lblPwd, gridBagConstraints);
 
-    tfPwd.setMaximumSize(new java.awt.Dimension(2147483647, 20));
-    tfPwd.setMinimumSize(new java.awt.Dimension(40, 20));
-    tfPwd.setNextFocusableComponent(cbDrivers);
-    tfPwd.setPreferredSize(new java.awt.Dimension(100, 20));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 6);
-    add(tfPwd, gridBagConstraints);
-
-    jLabel1.setFont(new java.awt.Font("Dialog", 0, 12));
+    jLabel1.setFont(null);
     jLabel1.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_DRIVER));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 5, 2, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
     add(jLabel1, gridBagConstraints);
 
     cbDrivers.setEditable(true);
-    cbDrivers.setFont(new java.awt.Font("Dialog", 0, 12));
+    cbDrivers.setFont(null);
     cbDrivers.setMaximumSize(new java.awt.Dimension(32767, 20));
     cbDrivers.setMinimumSize(new java.awt.Dimension(40, 20));
     cbDrivers.setNextFocusableComponent(tfURL);
     cbDrivers.setPreferredSize(new java.awt.Dimension(120, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(10, 4, 2, 6);
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
     add(cbDrivers, gridBagConstraints);
 
-    jLabel2.setFont(new java.awt.Font("Dialog", 0, 12));
+    jLabel2.setFont(null);
     jLabel2.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_URL));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
     add(jLabel2, gridBagConstraints);
 
+    tfURL.setFont(null);
     tfURL.setHorizontalAlignment(javax.swing.JTextField.LEFT);
     tfURL.setMaximumSize(new java.awt.Dimension(2147483647, 20));
     tfURL.setMinimumSize(new java.awt.Dimension(40, 20));
@@ -143,31 +136,65 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
     tfURL.setPreferredSize(new java.awt.Dimension(100, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
     add(tfURL, gridBagConstraints);
 
+    tfPwd.setFont(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
+    add(tfPwd, gridBagConstraints);
+
+    cbAutocommit.setFont(null);
+    cbAutocommit.setText("Autocommit");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
+    add(cbAutocommit, gridBagConstraints);
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridheight = java.awt.GridBagConstraints.REMAINDER;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
     gridBagConstraints.weighty = 1.0;
-    add(jLabel3, gridBagConstraints);
+    add(dummy, gridBagConstraints);
+
+    tfProfileName.setFont(null);
+    tfProfileName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    add(tfProfileName, gridBagConstraints);
 
   }//GEN-END:initComponents
-	
-	
+
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JComboBox cbDrivers;
   private javax.swing.JLabel lblUsername;
-  private javax.swing.JTextField tfPwd;
+  private javax.swing.JPasswordField tfPwd;
+  private javax.swing.JPanel dummy;
   private javax.swing.JLabel lblPwd;
+  private javax.swing.JCheckBox cbAutocommit;
   private javax.swing.JTextField tfURL;
-  private javax.swing.JLabel jLabel3;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JTextField tfUserName;
   private javax.swing.JLabel jLabel1;
+  private javax.swing.JTextField tfProfileName;
   // End of variables declaration//GEN-END:variables
 
 	public void setDrivers(List aDriverList)
@@ -178,16 +205,23 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 
 	public ConnectionProfile getProfile()
 	{
-		return this.currentProfile;
+		ConnectionProfile profile = new ConnectionProfile();
+		profile.setDriverclass(cbDrivers.getSelectedItem().toString());
+		profile.setPassword(tfPwd.getText());
+		profile.setUrl(tfURL.getText());
+		profile.setUsername(tfUserName.getText());
+		profile.setAutocommit(cbAutocommit.isSelected());
+		return profile;
 	}
 
 	public void setProfile(ConnectionProfile aProfile)
 	{
 		this.currentProfile = aProfile;
+		this.tfProfileName.setText(aProfile.getName());
 		this.tfUserName.setText(aProfile.getUsername());
 		this.tfURL.setText(aProfile.getUrl());
 		this.tfURL.setCaretPosition(0);
-		this.tfPwd.setText(aProfile.getPassword());
+		this.tfPwd.setText(aProfile.decryptPassword());
 		DbDriver driver;
 		int newIndex = -1;
 		int count = this.cbDrivers.getItemCount();
@@ -205,5 +239,5 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 			this.cbDrivers.setSelectedIndex(newIndex);
 		}
 	}
-	
+
 }

@@ -25,6 +25,10 @@ public class DbDriver
 	/** Holds value of property library. */
 	private String library;
 	
+	public DbDriver()
+	{
+	}
+	
 	/** Creates a new instance of DbDriver */
 	public DbDriver(String aName, String aClass, String aLibrary)
 	{
@@ -33,57 +37,15 @@ public class DbDriver
 		this.setLibrary(aLibrary);
 	}
 	
-	/** Getter for property name.
-	 * @return Value of property name.
-	 */
-	public String getName()
-	{
-		return this.name;
-	}
+	public String getName() { return this.name; }
+	public void setName(String name) { 	this.name = name; }
 	
-	/** Setter for property name.
-	 * @param name New value of property name.
-	 */
-	public void setName(String name)
-	{
-		this.name = name;
-	}
+	public String getDriverClass() {  return this.driverClass; }
+	public void setDriverClass(String driverClass) { this.driverClass = driverClass;	}
 	
-	/** Getter for property driverClass.
-	 * @return Value of property driverClass.
-	 */
-	public String getDriverClass()
-	{
-		return this.driverClass;
-	}
+	public String getLibrary() { return this.library; }
+	public void setLibrary(String library) { this.library = library; }
 	
-	/** Setter for property driverClass.
-	 * @param driverClass New value of property driverClass.
-	 */
-	public void setDriverClass(String driverClass)
-	{
-		this.driverClass = driverClass;
-	}
-	
-	/** Getter for property library.
-	 * @return Value of property library.
-	 */
-	public String getLibrary()
-	{
-		return this.library;
-	}
-	
-	/** Setter for property library.
-	 * @param library New value of property library.
-	 */
-	public void setLibrary(String library)
-	{
-		this.library = library;
-	}
-	
-	public String toString()
-	{
-		return this.getDriverClass();
-	}
+	public String toString() { return this.getDriverClass(); }
 	
 }

@@ -163,6 +163,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("CEILING",Token.KEYWORD3);
 		keywords.add("COS",Token.KEYWORD3);
 		keywords.add("COT",Token.KEYWORD3);
+		keywords.add("COUNT", Token.KEYWORD3);
 		keywords.add("CURRENT_TIME",Token.KEYWORD3);
 		keywords.add("CURRENT_DATE",Token.KEYWORD3);
 		keywords.add("CURRENT_TIMESTAMP",Token.KEYWORD3);

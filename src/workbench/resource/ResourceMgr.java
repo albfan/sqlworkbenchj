@@ -33,7 +33,12 @@ public class ResourceMgr
 	public static final String TXT_PRODUCT_NAME = "SQL Workbench/J";
 	public static final String TXT_ERROR_MSG_DATA = "ErrorMessageData";
 	public static final String TXT_ERROR_MSG_TITLE = "ErrorMessageTitle";
+	
+	// Messages from the ResultPanel
+	public static final String TXT_WARN_NO_RESULT = "WarningNoResultSet";
 	public static final String TXT_SQL_EXCUTE_OK = "StatementOK";
+	public static final String TXT_ROWS_AFFECTED = "RowsAffected";
+	public static final String TXT_EXECUTING_SQL = "ExecutingSql";
 	
 	public static final String TXT_COPY = "Copy";
 	public static final String TXT_CUT = "Cut";
@@ -43,6 +48,7 @@ public class ResourceMgr
 	
 	public static final String TXT_EXECUTE_SEL = "ExecuteSel";
 	public static final String TXT_EXECUTE_ALL = "ExecuteAll";
+	public static final String TXT_STOP_STMT = "StopStmt";
 	
 	public static final String TXT_DB_DRIVER = "Driver";
 	public static final String TXT_DB_USERNAME = "Username";
@@ -50,6 +56,7 @@ public class ResourceMgr
 	public static final String TXT_DB_PASSWORD = "Password";
 	
 	public static final String TXT_SELECT_PROFILE = "SelectProfile";
+	public static final String TXT_SAVE_PROFILE = "SaveProfile";
 	
 	public static final String IMG_COPY_16 = "Copy16";
 	public static final String IMG_COPY_24 = "Copy24";
@@ -61,6 +68,8 @@ public class ResourceMgr
 	public static final String IMG_EXEC_SEL_24 = "ExecuteSel24";
 	public static final String IMG_EXEC_ALL_16 = "ExecuteAll16";
 	public static final String IMG_EXEC_ALL_24 = "ExecuteAll24";
+	public static final String IMG_STOP_16 = "Stop16.gif";
+	public static final String IMG_STOP_24 = "Stop24.gif";
 	
 	public static final String MNU_TXT_FILE = "File";
 	public static final String MNU_TXT_SQL = "SQL";
@@ -69,7 +78,10 @@ public class ResourceMgr
 	
 	public static final String MNU_TXT_CONNECT = "Connect";
 	public static final String MNU_TXT_EXIT = "Exit";
-
+	
+	public static final String TXT_OK = "OK";
+	public static final String TXT_CANCEL = "Cancel";
+	
 	public static final String STAT_READY = "Ready";
 	
 	public static final String ERR_DRIVER_NOT_FOUND = "ErrDriverNotFound";
@@ -77,6 +89,7 @@ public class ResourceMgr
 	
 	private static ResourceBundle resources = ResourceBundle.getBundle("workbench/resource/wbstrings");
 	private static HashMap images = new HashMap();
+
 	
 	private ResourceMgr()
 	{

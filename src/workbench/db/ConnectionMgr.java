@@ -6,34 +6,25 @@
 
 package workbench.db;
 
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.lang.ClassNotFoundException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
-
-import org.xml.sax.InputSource;
 
 import workbench.exception.NoConnectionException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.WbManager;
+import workbench.util.WbPersistence;
 
 /**
  *
@@ -43,7 +34,7 @@ import workbench.WbManager;
 public class ConnectionMgr
 {
 	private HashMap activeConnections = new HashMap();
-	private List profiles;
+	private HashMap profiles;
 	private List drivers;
 
 	/** Creates new ConnectionMgr */
@@ -51,45 +42,19 @@ public class ConnectionMgr
 	{
 	}
 	
+
 	/**
-	 *	Return a connection for the given ID.
-	 *	A NoConnectException is thrown if no connection
-	 *	is found for that ID
-	 */
-	public Connection getConnection(String anId)
-		throws NoConnectionException
-	{
-		if (this.profiles == null) this.readProfiles();
-		return this.getConnection(anId, false);
-	}
-	
-	/**
-	 *	Return the connection identified by the given id.
-	 *	Typically the ID is the ID of the MainWindow requesting
-	 *	the connection.
-	 *	If no connection is found with that ID and the selectWindow
-	 *	parameter is set to true, the connection dialog
-	 *	is displayed.
-	 *	If still no connection is found a NoConnectionException is thrown
-	 *	If a connection is created then it will be stored together
-	 *	with the given ID.
-	 *
-	 *	@param ID the id for the connection
-	 *	@param showSelectWindow if true show the connection window
+	 *	Return a connection for the given windowId
+	 *	@param ID the windowId for window which is requesting the connection
 	 *	@throws NoConnectionException
 	 *	@see workbench.gui.MainWindow#getWindowId()
 	 *	@see #releaseConnection(String)
 	 *	@see #disconnectAll()
 	 */
-	public Connection getConnection(String anId, boolean showSelectWindow)
+	public Connection getConnection(String aWindowId)
 		throws NoConnectionException
 	{
-		Connection conn = (Connection)this.activeConnections.get(anId);
-		if (conn == null && showSelectWindow)
-		{
-			//conn = this.selectConnection();
-			if (conn != null) this.activeConnections.put(anId, conn);
-		}
+		Connection conn = (Connection)this.activeConnections.get(aWindowId);
 		if (conn == null)
 		{
 			throw new NoConnectionException(ResourceMgr.getString(ResourceMgr.ERROR_NO_CONNECTION_AVAIL));
@@ -97,15 +62,19 @@ public class ConnectionMgr
 		return conn;
 	}
 
-	public Connection getConnection(String anId, ConnectionProfile aProfile)
+	/**
+	 *	Return a new connection specified by the profile, for the
+	 *	given window id
+	 */
+	public Connection getConnection(String aWindowId, ConnectionProfile aProfile)
 		throws ClassNotFoundException, SQLException
 	{
-		Connection conn = (Connection)this.activeConnections.get(anId);
-		if (conn != null) return conn;
+		this.disconnect(aWindowId);
 		
 		Class.forName(aProfile.getDriverclass());
-		conn  = DriverManager.getConnection(aProfile.getUrl(), aProfile.getUsername(), aProfile.getPassword());
-		this.activeConnections.put(anId, aProfile);
+		Connection conn  = DriverManager.getConnection(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword());
+		conn.setAutoCommit(aProfile.getAutocommit());
+		this.activeConnections.put(aWindowId, conn);
 		
 		return conn;
 	}
@@ -118,40 +87,15 @@ public class ConnectionMgr
 	{
 		if (this.drivers == null)
 		{
-			this.drivers = new ArrayList();
-			int i=0;
-			String name = null;
-			String classname = null;
-			String lib = null;
-			Settings sett = WbManager.getSettings();
-			do
-			{
-				try
-				{
-					name = sett.getDriverName(i);
-					classname = sett.getDriverClass(i);
-					lib = sett.getDriverName(i);
-					this.drivers.add(new DbDriver(name, classname, lib));
-					i++;
-				}
-				catch (NoSuchElementException e)
-				{
-					name = null;
-				}
-			}
-			while (name != null);
+			this.readDrivers();
 		}
 		return Collections.unmodifiableList(this.drivers);
 	}
 
-	public List getProfiles()
+	public Map getProfiles()
 	{
 		if (this.profiles == null) this.readProfiles();
 		return this.profiles;
-	}
-	
-	private void saveDrivers()
-	{
 	}
 	
 	/**
@@ -169,11 +113,8 @@ public class ConnectionMgr
 			String db = con.getCatalog();
 			buff.append(data.getUserName());
 			buff.append('@');
-			if (db == null)
-			{
-				db = data.getURL();
-			}
-			buff.append(db);
+			String url = data.getURL().substring(5);
+			buff.append(url);
 			displayString = buff.toString();
 		}
 		catch (Exception e)
@@ -184,32 +125,6 @@ public class ConnectionMgr
 		return displayString;
 	}
 
-	public ConnectionProfile selectConnection()
-	{
-		ConnectionProfile result = null;
-		result = this.getProfile(WbManager.getSettings().getLastConnection());
-		return result;
-	}
-	
-	
-	/**
-	 *	Reads a connection profile from the applications settings.
-	 *	The connection is is identified by the given name and is
-	 *	assigned to the given id (=MainWindow)
-	 */
-	public ConnectionProfile getProfile(int anId)
-	{
-		if (this.profiles == null) this.readProfiles();
-		try
-		{
-			return (ConnectionProfile)this.profiles.get(anId);
-		}
-		catch (ArrayIndexOutOfBoundsException e)
-		{
-			return null;
-		}
-	}
-	
 	/**
 	 *	Disconnects all connections
 	 */
@@ -233,38 +148,81 @@ public class ConnectionMgr
 		{
 			Connection con = (Connection)this.activeConnections.get(anId);
 			if (con != null) con.close();
+			this.activeConnections.put(anId, null);
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError(this, ResourceMgr.getString(ResourceMgr.ERROR_DISCONNECT) + " " + anId, e);
 		}
 	}
+	
 	public String toString()
 	{
 		return this.getClass().getName();
 	}
 	
-	public void readProfiles()
+	public void writeSettings()
 	{
-		this.profiles = new ArrayList();
-		Settings set = WbManager.getSettings();
-		int count = set.getConnectionCount();
-		String driver;
-		String url;
-		String pwd;
-		String user;
-		String name;
-		for (int i=0; i < count; i++)
+		this.saveXmlProfiles();
+		this.saveDrivers();
+	}
+	
+	private void saveDrivers()
+	{
+		WbPersistence.writeObject(this.drivers, "WbDrivers.xml");
+	}
+	
+	private void readDrivers()
+	{
+		Object result = WbPersistence.readObject("WbDrivers.xml");
+		if (result instanceof Collection)
 		{
-			driver = set.getConnectionDriver(i);
-			url = set.getConnectionUrl(i);
-			user = set.getConnectionUsername(i);
-			pwd = set.getConnectionPassword(i);
-			name = set.getConnectionName(i);
-			ConnectionProfile info = new ConnectionProfile(driver, url, user, pwd);
-			info.setName(name);
-			this.profiles.add(i, info);
+			Iterator itr = ((Collection)result).iterator();
+			this.drivers = new ArrayList();
+			while (itr.hasNext())
+			{
+				DbDriver driv = (DbDriver)itr.next();
+				this.drivers.add(driv);
+			}
 		}
 	}
 	
+	public void readProfiles()
+	{
+		this.readXmlProfiles();
+	}
+
+	public void saveXmlProfiles()
+	{
+		if (this.profiles != null)
+		{
+			WbPersistence.writeObject(new ArrayList(this.profiles.values()), "WbProfiles.xml");
+		}
+	}
+	
+	public void readXmlProfiles()
+	{
+		Object result = WbPersistence.readObject("WbProfiles.xml");
+		if (result instanceof Collection)
+		{
+			Iterator itr = ((Collection)result).iterator();
+			this.profiles = new HashMap();
+			while (itr.hasNext())
+			{
+				ConnectionProfile prof = (ConnectionProfile)itr.next();
+				this.profiles.put(prof.getName(), prof);
+			}
+		}
+		else if (result instanceof Object[])
+		{
+			Object[] l = (Object[])result;
+			this.profiles = new HashMap(20);
+			for (int i=0; i < l.length; i++)
+			{
+				ConnectionProfile prof = (ConnectionProfile)l[i];
+				this.profiles.put(prof.getName(), prof);
+			}
+		}
+	}
+
 }

@@ -7,8 +7,13 @@
 package workbench.gui.db;
 
 import java.awt.BorderLayout;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import javax.swing.BorderFactory;
 import javax.swing.JDialog;
+import javax.swing.ListModel;
+import javax.swing.border.Border;
 import workbench.WbManager;
 import workbench.db.ConnectionProfile;
 
@@ -19,18 +24,43 @@ import workbench.db.ConnectionProfile;
 public class ProfileEditorPanel extends javax.swing.JPanel
 {
 	private ConnectionEditorPanel connectionEditor;
+	private Map profiles;
 	
 	/** Creates new form ProfileEditor */
 	public ProfileEditorPanel()
 	{
 		initComponents();
-		jList1.setSelectedIndex(0);
+		String last = WbManager.getSettings().getLastConnection();
+		try
+		{
+			ListModel m = jList1.getModel();
+			int count = m.getSize();
+			
+			for (int i=0; i < count; i++)
+			{
+				ConnectionProfile prof = (ConnectionProfile)m.getElementAt(i);
+				if (prof.getName().equals(last))
+				{
+					jList1.setSelectedIndex(i);
+					break;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			jList1.setSelectedIndex(0);
+		}
 		jList1.setNextFocusableComponent(connectionEditor);
 		this.connectionEditor.setNextFocusableComponent(jList1);
+		//jSplitPane1.setBorder(BorderFactory.createEmptyBorder());
+//		Border b = BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createLoweredBevelBorder());
+//		jList1.setBorder(b);
+//		this.connectionEditor.setBorder(BorderFactory.createEtchedBorder());
 	}
 	
 	private void initConnectionEditor()
 	{
+		long start, end;
 		this.connectionEditor = new ConnectionEditorPanel();
 		List drivers = WbManager.getInstance().getConnectionMgr().getDrivers();
 		this.connectionEditor.setDrivers(drivers);
@@ -38,10 +68,10 @@ public class ProfileEditorPanel extends javax.swing.JPanel
 	
 	private void fillProfiles()
 	{
-		List profiles = WbManager.getInstance().getConnectionMgr().getProfiles();
-		jList1.setListData(profiles.toArray());
-		//ConnectionProfile profile = (ConnectionProfile)profiles.get(0);
-		//this.connectionEditor.setProfile(profile);
+		this.profiles = WbManager.getInstance().getConnectionMgr().getProfiles();
+		Object[] l = this.profiles.values().toArray();
+		Arrays.sort(l, ConnectionProfile.getNameComparator());
+		jList1.setListData(l);
 	}
 	/** This method is called from within the constructor to
 	 * initialize the form.
@@ -57,9 +87,10 @@ public class ProfileEditorPanel extends javax.swing.JPanel
 
     setLayout(new java.awt.BorderLayout());
 
-    setPreferredSize(null);
+    jSplitPane1.setBorder(new javax.swing.border.EtchedBorder());
     jSplitPane1.setDividerLocation(100);
     jSplitPane1.setDividerSize(5);
+    jList1.setFont(null);
     this.fillProfiles();
     jList1.addListSelectionListener(new javax.swing.event.ListSelectionListener()
     {
@@ -86,8 +117,20 @@ public class ProfileEditorPanel extends javax.swing.JPanel
 	
 	public ConnectionProfile getSelectedProfile()
 	{
-		return this.connectionEditor.getProfile();
+		ConnectionProfile prof = this.connectionEditor.getProfile();
+		ConnectionProfile prof2 = (ConnectionProfile)jList1.getSelectedValue();
+		// two profiles are equal if their driver, url and username are equal
+		// in this case 
+		if (prof.equals(prof2)) 
+		{
+			return prof2;
+		}
+		else
+		{
+			return prof;
+		}
 	}
+	
 	
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JSplitPane jSplitPane1;

@@ -5,10 +5,12 @@
  */
 package workbench.resource;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.util.Properties;
 import java.awt.Font;
 import java.awt.Point;
+import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -45,7 +47,7 @@ public class Settings
 		
 		try
 		{
-			FileInputStream in = new FileInputStream(this.filename);
+			BufferedInputStream in = new BufferedInputStream(new FileInputStream(this.filename));
 			this.props.load(in);
 			in.close();
 		}
@@ -171,6 +173,7 @@ public class Settings
 	{
 		return "[Settings]";
 	}
+	
 	/**
 	 *	Returns the name of the driver with the given number
 	 *	@see #getDriverClass(int)
@@ -224,23 +227,61 @@ public class Settings
 		return StringUtil.getIntValue(value, 0);
 	}
 	
-	public void storeWindowPosition(JFrame target)
+	public void storeWindowPosition(Component target)
 	{
-		int x,y,w,h;
 		Point p = target.getLocation();
-		Dimension d = target.getSize();
 		String id = target.getClass().getName();
-		this.setWindowPosition(id, p.x, p.y, d.width, d.height);
+		this.setWindowPosition(id, p.x, p.y);
 	}
 	
-	public void setWindowPosition(String windowClass, int x, int y, int width, int height)
+	public void storeWindowSize(Component target)
 	{
-		this.props.setProperty("window." + windowClass + ".x", Integer.toString(x));
-		this.props.setProperty("window." + windowClass + ".y", Integer.toString(y));
-		this.props.setProperty("window." + windowClass + ".width", Integer.toString(width));
-		this.props.setProperty("window." + windowClass + ".height", Integer.toString(height));
+		Dimension d = target.getSize();
+		String id = target.getClass().getName();
+		this.setWindowSize(id, d.width, d.height);
+	}
+	
+	public void setWindowPosition(String windowClass, int x, int y)
+	{
+		this.props.setProperty(windowClass + ".x", Integer.toString(x));
+		this.props.setProperty(windowClass + ".y", Integer.toString(y));
 	}
 
+	public void setWindowSize(String windowClass, int width, int height)
+	{
+		this.props.setProperty(windowClass + ".width", Integer.toString(width));
+		this.props.setProperty(windowClass + ".height", Integer.toString(height));
+	}
+	
+	public boolean restoreWindowSize(Component target)
+	{
+		boolean result = false;
+		String id = target.getClass().getName();
+		int w = this.getWindowWidth(id);
+		int h = this.getWindowHeight(id);
+		if (w > 0 && h > 0) 
+		{
+			target.setSize(new Dimension(w, h));
+			result = true;
+		}
+		return result;
+	}
+
+	public boolean restoreWindowPosition(Component target)
+	{
+		boolean result = false;
+		String id = target.getClass().getName();
+		int x = this.getWindowPosX(id);
+		int y = this.getWindowPosY(id);
+		if (x > 0 && y > 0) 
+		{
+			target.setLocation(new Point(x, y));
+			result = true;
+		}
+		return result;
+	}
+	
+	
 	public void setSqlDividerLocation(int y)
 	{
 		this.props.setProperty("window.sql.divider", Integer.toString(y));
@@ -253,22 +294,22 @@ public class Settings
 	
 	public int getWindowPosX(String windowClass)
 	{
-		return StringUtil.getIntValue(this.props.getProperty("window." + windowClass + ".x", "0"));
+		return StringUtil.getIntValue(this.props.getProperty(windowClass + ".x", "0"));
 	}
 	
 	public int getWindowPosY(String windowClass)
 	{
-		return StringUtil.getIntValue(this.props.getProperty("window." + windowClass + ".y", "0"));
+		return StringUtil.getIntValue(this.props.getProperty(windowClass + ".y", "0"));
 	}
 	
 	public int getWindowWidth(String windowClass)
 	{
-		return StringUtil.getIntValue(this.props.getProperty("window." + windowClass + ".width", "0"));
+		return StringUtil.getIntValue(this.props.getProperty(windowClass + ".width", "0"));
 	}
 	
 	public int getWindowHeight(String windowClass)
 	{
-		return StringUtil.getIntValue(this.props.getProperty("window." + windowClass + ".height", "0"));
+		return StringUtil.getIntValue(this.props.getProperty(windowClass + ".height", "0"));
 	}
 	
 	public int getEditorTabWidth()
@@ -280,39 +321,16 @@ public class Settings
 	{
 		this.props.setProperty("editor.tabwidth", Integer.toString(aWidth));
 	}
-
-	public String getConnectionName(int anId)
-	{
-		return this.props.getProperty("connection" + anId + ".name", "");
-	}
-	public String getConnectionDriver(int anId)
-	{
-		return this.props.getProperty("connection" + anId + ".driverclass", "");
-	}
 	
-	public String getConnectionUrl(int anId)
+	public String getLastConnection()
 	{
-		return this.props.getProperty("connection" + anId + ".url", "");
-	}
-	
-	public String getConnectionUsername(int anId)
-	{
-		return this.props.getProperty("connection" + anId + ".username", "");
-	}
-	
-	public String getConnectionPassword(int anId)
-	{
-		return this.props.getProperty("connection" + anId + ".password", "");
-	}
-	
-	public int getConnectionCount()
-	{
-		return StringUtil.getIntValue(this.props.getProperty("connection.count"));
-	}
-	
-	public int getLastConnection()
-	{
-		return StringUtil.getIntValue(this.props.getProperty("connection.last"));
+		return this.props.getProperty("connection.last");
 	}		
+
+	public void setLastConnection(String aName)
+	{
+		if (aName == null) aName = "";
+		this.props.setProperty("connection.last", aName);
+	}
 	
 }

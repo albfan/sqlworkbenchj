@@ -6,14 +6,10 @@
 package workbench.db;
 
 import java.util.HashMap;
-import java.io.FileOutputStream;
-import java.beans.XMLEncoder;
-import java.beans.XMLDecoder;
-import java.io.FileInputStream;
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
+import java.util.Comparator;
+import java.util.StringTokenizer;
+import workbench.WbManager;
+import workbench.log.LogMgr;
 
 /**
  *	Supplies connection information as stored in
@@ -24,194 +20,173 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class ConnectionProfile
 {
-	private static final String CRYPT_PREFIX = "#e#";
+	private static final String CRYPT_PREFIX = "@*@";
 	private String name;
 	private String url;
 	private String driverclass;
 	private String driverlib;
 	private String username;
 	private String password;
-	private static final byte[] KEY_DATA = {-108,-50,-5,-75,-98,28,-116,107};
-	private static final SecretKeySpec KEY = new SecretKeySpec(KEY_DATA, "DES");
+	private boolean autocommit;
+	private String description;
+	private boolean isNew;
 	
 	public ConnectionProfile()
 	{
+		this.isNew = true;
 	}
 	
 	public ConnectionProfile(String driverClass, String url, String userName, String pwd)
 	{
+		this.isNew = true;
 		this.setUrl(url);
 		this.setDriverclass(driverClass);
 		this.setUsername(userName);
 		this.setPassword(pwd);
+		this.setName(url);
 	}
 	
-	/** Getter for property url.
-	 * @return Value of property url.
-	 */
-	public String getUrl()
+	public ConnectionProfile(String aName, String driverClass, String url, String userName, String pwd)
 	{
-		return this.url;
+		this.isNew = true;
+		this.setUrl(url);
+		this.setDriverclass(driverClass);
+		this.setUsername(userName);
+		this.setPassword(pwd);
+		this.setName(aName);
 	}
 	
-	/** Setter for property url.
-	 * @param url New value of property url.
+	/**
+	 *	Sets the current password. If the password
+	 *	is not already encrypted, it will be encrypted
+	 *
+	 *	@see #getPassword()
+	 *	@see workbench.util.WbCipher#encryptString(String)
 	 */
-	public void setUrl(String aUrl)
-	{
-		this.url = aUrl;
-	}
-	
-	/** Getter for property driverclass.
-	 * @return Value of property driverclass.
-	 */
-	public String getDriverclass()
-	{
-		return this.driverclass;
-	}
-	
-	/** Setter for property driverclass.
-	 * @param driverclass New value of property driverclass.
-	 */
-	public void setDriverclass(String aDriverclass)
-	{
-		this.driverclass = aDriverclass;
-	}
-	
-	/** Getter for property user.
-	 * @return Value of property user.
-	 */
-	public String getUsername()
-	{
-		return this.username;
-	}
-	
-	/** Setter for property user.
-	 * @param user New value of property user.
-	 */
-	public void setUsername(java.lang.String aUsername)
-	{
-		this.username = aUsername;
-	}
-	
 	public void setPassword(String aPwd)
 	{
-		this.password = this.encryptPassword(aPwd);
-	}
-	
-	public String getPassword()
-	{
-		return this.decryptPassword(this.password);
-	}
-	
-	/** Getter for property password.
-	 * @return Value of property password.
-	 */
-	public String getEncryptedPassword()
-	{
-		return password;
-	}
-	
-	/** Setter for property password.
-	 * @param password New value of property password.
-	 */
-	public void setEncryptedPassword(String aPassword)
-	{
-		this.password = aPassword;
-	}
-	
-	public String decryptPassword(String aPwd)
-	{
-		if (aPwd.startsWith(CRYPT_PREFIX))
+		if (!aPwd.startsWith(CRYPT_PREFIX))
 		{
-			return aPwd.substring(3);
+			this.password = CRYPT_PREFIX + this.encryptPassword(aPwd);
 		}
 		else
 		{
-			return aPwd;
-		}
-	}
-	
-	public String toString() { return this.name; }
-	
-	public String encryptPassword(String aPwd)
-	{
-		try
-		{
-			Cipher des = Cipher.getInstance("DES");
-			des.init(Cipher.ENCRYPT_MODE, KEY);
-			byte[] values = aPwd.getBytes();
-			byte[] ecnrypted = des.doFinal(values);
-			System.out.println("");
-			return CRYPT_PREFIX + aPwd;
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			return aPwd;
-		}
-	}
-	
-	/**
-	 *	Return the (logical) name
-	 *	of this Connection definition
-	 */
-	public String getName()
-	{
-		return this.name;
-	}
-	
-	/**
-	 *	Set the (logical) name of this connection definition
-	 */
-	public void setName(String aName)
-	{
-		this.name = aName;
-	}
-	
-	public static void createKey()
-	{
-		try
-		{
-			KeyGenerator keygen = KeyGenerator.getInstance("DES");
-			SecretKey desKey = keygen.generateKey();
-			
-			byte[] keyvalue = desKey.getEncoded();
-			System.out.print("byte[] myKey={");
-			for (int i=0; i < keyvalue.length; i++)
-			{
-				System.out.print(keyvalue[i]);
-				if (i < keyvalue.length - 1) System.out.print(",");
-			}
-			System.out.println("};");
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
+			this.password = aPwd;
 		}
 	}
 
-	public static void testCipher()
+	
+	/**
+	 *	Returns the encrypted version of the password.
+	 *	@see #decryptPassword(String)
+	 */
+	public String getPassword() { return this.password; }
+	
+
+	/**
+	 *	Returns the plain text version of the
+	 *	current password.
+	 *
+	 *	@see #decryptPassword(String)
+	 */
+	public String decryptPassword()
 	{
-		try
+		return this.decryptPassword(this.password);
+	}
+
+	/**
+	 *	Returns the plain text version of the given
+	 *	password. This is not put into the getPassword()
+	 *	method because the XMLEncode would write the
+	 *	password in plain text into the XML file.
+	 *	A method beginning with decrypt is not 
+	 *	regarded as a property and thus not written
+	 *	to the XML file.
+	 *
+	 *	@parm the encrypted password
+	 */
+	public String decryptPassword(String aPwd)
+	{
+		if (!aPwd.startsWith(CRYPT_PREFIX))
 		{
-			Cipher des = Cipher.getInstance("DES");
-			des.init(Cipher.ENCRYPT_MODE, KEY);
-			byte[] values = "secretepassword".getBytes();
-			byte[] encrypted = des.doFinal(values);
-			System.out.println("enc=" + encrypted);
+			return aPwd;
 		}
-		catch (Exception e)
+		else
 		{
-			e.printStackTrace();
+			return WbManager.getInstance().getCipher().decryptString(aPwd.substring(CRYPT_PREFIX.length()));
 		}
-			
+	}
+
+	private String encryptPassword(String aPwd)
+	{
+		return WbManager.getInstance().getCipher().encryptString(aPwd);
 	}
 	
-	public static void main(String args[])
+	/**
+	 *	Returns the name of the Profile
+	 */
+	public String toString() { return this.name; }
+
+	/** Two connection profiles are equal if:
+	 *  <ul>
+	 * 	<li>the url are equal</li>
+	 *  <li>the driver classes are equal</li>
+	 *	<li>the usernames are equal</li>
+	 *	<li>the (encrypted) passwords are equal</li>
+	 *  </ul> 
+	 */	
+	public boolean equals(Object other)
 	{
-		//writeObjects();
-		//readObjects();
-		createKey();
+		try 
+		{
+			ConnectionProfile prof = (ConnectionProfile)other;
+			return this.url.equals(prof.url) && 
+						 this.driverclass.equals(prof.driverclass) &&
+						 this.username.equals(prof.username) &&
+						 this.password.equals(prof.password);
+		}
+		catch (ClassCastException e)
+		{
+			return false;
+		}
 	}
+	
+	public String getUrl() { return this.url; }
+	public void setUrl(String aUrl) { this.url = aUrl; }
+	
+	public String getDriverclass() { return this.driverclass; }
+	public void setDriverclass(String aDriverclass) { this.driverclass = aDriverclass; }
+	
+	public String getUsername() { return this.username; }
+	public void setUsername(java.lang.String aUsername) { this.username = aUsername; }
+
+	public boolean getAutocommit() { return this.autocommit; }
+	public void setAutocommit(boolean autocommit) { this.autocommit = autocommit; }
+	
+	public String getName() { return this.name; }
+	public void setName(String aName) { this.name = aName;	}
+	
+	public String getDescription() { return this.description; }
+	public void setDescription(String description) { this.description = description; }
+
+	public static Comparator getNameComparator()
+	{
+		return new Comparator()
+		{
+			public int compare(Object o1, Object o2)
+			{
+				if (o1 == null && o2 == null) return 0;
+				if (o1 == null) return -1;
+				if (o2 == null) return 1;
+				if (o1 instanceof ConnectionProfile && o2 instanceof ConnectionProfile)
+				{
+					String name1 = ((ConnectionProfile)o1).name;
+					String name2 = ((ConnectionProfile)o2).name;
+					return name1.compareTo(name2);				
+				}
+				return 0;
+			}
+		};
+	}
+	
 }
