@@ -192,8 +192,8 @@ public class XmlDataFileParser
 	/**
 	 *	Returns the first column from the import columns
 	 *  that is not found in the import file
-	 *	@see setColumns(String)
-	 *  @see setColumns(List)
+	 *	@see #setColumns(String)
+	 *  @see #setColumns(List)
 	 */
 	public String getMissingColumn() { return this.missingColumn; }
 	

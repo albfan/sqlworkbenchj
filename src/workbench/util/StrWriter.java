@@ -15,7 +15,8 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- *
+ * A replacement for a StringWriter which is not synchronized for
+ * performance reasons
  * @author  info@sql-workbench.net
  */
 

@@ -11,7 +11,9 @@
  */
 package workbench.db.report;
 
+import java.util.List;
 import workbench.db.DbMetadata;
+import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.storage.DataStore;
@@ -32,38 +34,39 @@ public class IndexReporter
 	public static final String TAG_INDEX_PK = "primary-key";
 	public static final String TAG_INDEX_EXPR = "index-expression";
 
-	private DataStore indexList;
+	private IndexDefinition[] indexList;
 	private TagWriter tagWriter = new TagWriter();
 
 	public IndexReporter(TableIdentifier tbl, WbConnection conn)
 	{
-		this.indexList = conn.getMetadata().getTableIndexInformation(tbl.getCatalog(), tbl.getSchema(), tbl.getTable());
+		indexList  = conn.getMetadata().getIndexList(tbl);
 	}
 
+	public IndexReporter(IndexDefinition[] list)
+	{
+		indexList  = list;
+	}	
+	
+	public IndexReporter(IndexDefinition index)
+	{
+		indexList  = new IndexDefinition[] { index };
+	}	
+	
 	public void appendXml(StrBuffer result, StrBuffer indent)
 	{
-		int numIndex = this.indexList.getRowCount();
+		int numIndex = this.indexList.length;
 		if (numIndex == 0) return;
 		StrBuffer defIndent = new StrBuffer(indent);
-		defIndent.append("    ");
+		defIndent.append("  ");
 
 		for (int i=0; i < numIndex; i ++)
 		{
 			tagWriter.appendOpenTag(result, indent, TAG_INDEX);
 			result.append('\n');
-
-			String value = this.indexList.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
-			tagWriter.appendTag(result, defIndent, TAG_INDEX_NAME, value);
-
-			value = this.indexList.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_COL_DEF);
-			tagWriter.appendTag(result, defIndent, TAG_INDEX_EXPR, value);
-
-			value = this.indexList.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_UNIQUE_FLAG);
-			tagWriter.appendTag(result, defIndent, TAG_INDEX_UNIQUE, String.valueOf("YES".equals(value)));
-
-			value = this.indexList.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG);
-			tagWriter.appendTag(result, defIndent, TAG_INDEX_PK, String.valueOf("YES".equals(value)));
-
+			tagWriter.appendTag(result, defIndent, TAG_INDEX_NAME, indexList[i].getName());
+			tagWriter.appendTag(result, defIndent, TAG_INDEX_EXPR, indexList[i].getExpression());
+			tagWriter.appendTag(result, defIndent, TAG_INDEX_UNIQUE, indexList[i].isUnique());
+			tagWriter.appendTag(result, defIndent, TAG_INDEX_PK, indexList[i].isPrimaryKeyIndex());
 			tagWriter.appendCloseTag(result, indent, TAG_INDEX);
 		}
 		return;
@@ -74,8 +77,12 @@ public class IndexReporter
 		this.tagWriter.setNamespace(name);
 	}
 
+	public IndexDefinition[] getIndexList()
+	{
+		return this.indexList;
+	}
+	
 	public void done()
 	{
-		this.indexList.reset();
 	}
 }

@@ -123,7 +123,7 @@ public class ObjectDropper
 	}
 
 	/** Setter for property cascadeConstraints.
-	 * @param cascadeConstraints New value of property cascadeConstraints.
+	 * @param aFlag New value of property cascadeConstraints.
 	 *
 	 */
 	public void setCascadeConstraints(boolean aFlag)

@@ -33,8 +33,8 @@ import workbench.resource.Settings;
 import workbench.util.WbPersistence;
 
 /**
+ * A connection factory for the application.
  * @author  info@sql-workbench.net
- * @version  $Revision: 1.47 $
  */
 public class ConnectionMgr
 {

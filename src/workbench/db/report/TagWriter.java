@@ -14,7 +14,8 @@ package workbench.db.report;
 import workbench.util.StrBuffer;
 
 /**
- *
+ * Utility class to add XML tags to a StrBuffer.
+ * Handles namespaces for the tags as well.
  * @author  info@sql-workbench.net
  */
 public class TagWriter
@@ -30,11 +31,19 @@ public class TagWriter
 		this.xmlNamespace = ns;
 	}
 	
+	/**
+	 * Appends an integer value for a tag in one line. There will be a new line
+	 * after the closing tag.
+	 */
 	public void appendTag(StrBuffer target, StrBuffer indent, String tag, int value)
 	{
 		appendTag(target, indent, tag, String.valueOf(value));
 	}
 	
+	/**
+	 * Appends a boolean value for a tag in one line. There will be a new line
+	 * after the closing tag.
+	 */
 	public void appendTag(StrBuffer target, StrBuffer indent, String tag, boolean value)
 	{
 		if (value)
@@ -43,14 +52,32 @@ public class TagWriter
 			appendTag(target, indent, tag, "false");
 	}
 	
-	public  void appendTag(StrBuffer target, StrBuffer indent, String tag, String value)
+	/**
+	 * Appends the tag and the value in one line. There will be a new line
+	 * after the closing tag.
+	 */
+	public void appendTag(StrBuffer target, StrBuffer indent, String tag, String value)
 	{
 		appendOpenTag(target, indent, tag);
 		target.append(value);
 		appendCloseTag(target, null, tag);
 	}
+
+	/**
+	 * Appends the tag and the value in one line. There will be a new line
+	 * after the closing tag.
+	 */
+	public void appendEmptyTag(StrBuffer target, StrBuffer indent, String tag, String attribute, String attValue)
+	{
+		String[] attr = new String[1];
+		String[] values = new String[1];
+		attr[0] = attribute;
+		values[0] = attValue;
+		appendOpenTag(target, indent, tag, attr, values, false);
+		target.append("/>");
+	}
 	
-	public  void appendOpenTag(StrBuffer target, StrBuffer indent, String tag)
+	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag)
 	{
 		this.appendOpenTag(target, indent, tag, (String[])null, (String[])null);
 	}
@@ -63,7 +90,17 @@ public class TagWriter
 		values[0] = attValue;
 		this.appendOpenTag(target, indent, tag, attr, values);
 	}
+	
 	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, String[] attributes, String[] values)
+	{
+		appendOpenTag(target, indent, tag, attributes, values, true);
+	}
+	
+	/**
+	 * Appends a opening tag to the target buffer including attributes.
+	 * No new line will be written 
+	 */
+	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, String[] attributes, String[] values, boolean closeTag)
 	{
 		if (indent != null) target.append(indent);
 		target.append('<');
@@ -87,7 +124,7 @@ public class TagWriter
 				}
 			}
 		}
-		target.append('>');
+		if (closeTag) target.append('>');
 	}
 
 	public  void appendCloseTag(StrBuffer target, StrBuffer indent, String tag)

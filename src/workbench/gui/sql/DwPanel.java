@@ -282,11 +282,6 @@ public class DwPanel
 				case RowActionMonitor.MONITOR_PROCESS_TABLE:
 					this.updateMsg = ResourceMgr.getString("MsgProcessTable") + " ";
 					break;
-				/*
-				case RowActionMonitor.MONITOR_FILE_EXEC:
-					this.updateMsg = ResourceMgr.getString("MsgProcessSqlScript") + " ";
-					break;
-				*/
 				case RowActionMonitor.MONITOR_PLAIN:
 					this.updateMsg = null;
 					break;
@@ -300,7 +295,7 @@ public class DwPanel
 		}
 	}
 
-	private final String objectMsg = ResourceMgr.getString("MsgProcessObject") + " ";
+	private String objectMsg = ResourceMgr.getString("MsgProcessObject") + " ";
 
 	/**
 	 *	Callback method from the {@link workbench.interfaces.ScriptGenerationMonitor}
@@ -311,7 +306,7 @@ public class DwPanel
 	}
 
 	/**
-	 *	Callback method from the {@link workbench.interfaces.RowActionMonitor}
+	 *	Callback method from the {@link workbench.storage.RowActionMonitor}
 	 */
 	public void setCurrentObject(String name, long number, long total)
 	{
@@ -341,7 +336,7 @@ public class DwPanel
 	}
 
 	/**
-	 *	Callback method from the {@link workbench.interfaces.RowActionMonitor}
+	 *	Callback method from the {@link workbench.storage.RowActionMonitor}
 	 */
 	public void setCurrentRow(long currentRow, long totalRows)
 	{
@@ -400,7 +395,7 @@ public class DwPanel
 	 *  This delegate is passed to the UpdateDatabaseAction. The action will in turn
 	 *  call the delegate's saveChangesToDatabase() method instead of ours.
 	 *  @see workbench.interfaces.DbUpdater#saveChangesToDatabase()
-	 *  @see saveChangesToDatabase()
+	 *  @see #saveChangesToDatabase()
 	 */
 	public void setUpdateDelegate(DbUpdater aDelegate)
 	{

@@ -97,7 +97,7 @@ public class DmlStatement
 	 * If setUsePreparedStatement(false) is called before
 	 * calling execute(), the statement generated {@link #getExecutableStatement() }
 	 * will be executed directly. Otherwise a prepared statement will be used.
-	 * @param the Connection to be used
+	 * @param aConnection the Connection to be used
 	 * @return the number of rows affected
 	 */
 	public int execute(Connection aConnection)

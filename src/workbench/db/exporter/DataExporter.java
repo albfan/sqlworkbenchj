@@ -984,9 +984,9 @@ public class DataExporter
 
 	/**
 	 * Setter for property concatFunction.
-	 * @param concatFunction New value of property concatFunction.
+	 * @param func New value of property concatFunction.
 	 */
-	public void setConcatFunction(java.lang.String func)
+	public void setConcatFunction(String func)
 	{
 		this.concatFunction = func;
 		this.concatString = null;

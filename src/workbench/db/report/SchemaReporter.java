@@ -14,8 +14,9 @@ package workbench.db.report;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -166,7 +167,7 @@ public class SchemaReporter
 
 		try
 		{
-			bw = new BufferedWriter(new FileWriter(this.outputfile));
+			bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(this.outputfile), "UTF-8"));
 			this.writeXml(bw);
 		}
 		catch (IOException io)
@@ -259,25 +260,12 @@ public class SchemaReporter
 	private void writeReportInfo(Writer out)
 		throws IOException
 	{
-		Date now = new Date(System.currentTimeMillis());
 		StrBuffer info = new StrBuffer();
 		StrBuffer indent = new StrBuffer("  ");
 		info.append(this.dbConn.getDatabaseInfoAsXml(indent, this.xmlNamespace));
 		info.writeTo(out);
 	}
 
-	/**
-	 * Return the XML definition for the supplied table
-	 * @param tbl The table to get the definition for
-	 * @return The XML definition for the table
-	 * @throws java.sql.SQLException When retrieving of the table definition fails
-	 */
-	public String getXmlForTable(TableIdentifier tbl)
-		throws SQLException
-	{
-		ReportTable table = new ReportTable(tbl, this.dbConn, this.xmlNamespace);
-		return table.getXml();
-	}
 
 	/**
 	 * Define the namespace for the XML tags

@@ -282,7 +282,7 @@ public class SqlRowDataConverter
 
 	/**
 	 * Setter for property createTable.
-	 * @param createTable New value of property createTable.
+	 * @param flag New value of property createTable.
 	 */
 	public void setCreateTable(boolean flag)
 	{
@@ -300,7 +300,7 @@ public class SqlRowDataConverter
 
 	/**
 	 * Setter for property alternateUpdateTable.
-	 * @param alternateUpdateTable New value of property alternateUpdateTable.
+	 * @param table New value of property alternateUpdateTable.
 	 */
 	public void setAlternateUpdateTable(String table)
 	{

@@ -1557,7 +1557,8 @@ public class WbTable
 
 	/**
 	 *	Copy all rows from the table as tab-delimited into the clipboard
-	 *	@param includeHeaders if true, then a header line with the column names is copied as well
+	 *	@param includeheaders if true, then a header line with the column names is copied as well
+	 *  @param columns a {@link java.util.List} of Strings with the names of columns to be copied
 	 *
 	 *  @see #copyDataToClipboard(boolean, boolean)
 	 */

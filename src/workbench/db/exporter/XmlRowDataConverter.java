@@ -34,6 +34,18 @@ public class XmlRowDataConverter
 	public static final String LONG_COLUMN_TAG = "column-data";
 	public static final String SHORT_ROW_TAG = "rd";
 	public static final String SHORT_COLUMN_TAG = "cd";
+	public static final String COLUMN_DEF_TAG = ReportColumn.TAG_COLUMN_DEFINITION;
+	public static final String JAVA_CLASS_TAG = ReportColumn.TAG_COLUMN_JAVA_CLASS;
+	public static final String JAVA_TYPE_TAG = ReportColumn.TAG_COLUMN_JAVA_TYPE;
+	public static final String DBMS_TYPE_TAG = ReportColumn.TAG_COLUMN_DBMS_TYPE;
+	public static final String DATA_FORMAT_TAG = "data-format";
+	public static final String TABLE_NAME_TAG = ReportTable.TAG_TABLE_NAME;
+	public static final String TABLE_DEF_TAG = ReportTable.TAG_TABLE_DEF;
+	public static final String COLUMN_COUNT_TAG = "column-count";
+	public static final String COLUMN_NAME_TAG = ReportColumn.TAG_COLUMN_NAME;
+	public static final String ATTR_LONGVALUE = "longValue";
+	public static final String ATTR_NULL = "null";
+	
 	private boolean useCData = false;
 	private boolean verboseFormat = true;
 	private String lineEnding = "\n";
@@ -249,7 +261,7 @@ public class XmlRowDataConverter
 
 		result.append(indent);
 		result.append('<');
-		result.append(ReportTable.TAG_TABLE_DEF);
+		result.append(TABLE_DEF_TAG);
 		result.append('>');
 		result.append(this.lineEnding);
 
@@ -301,12 +313,12 @@ public class XmlRowDataConverter
 		boolean hasTable = false;
 		result.append(indent);
 		result.append("  <");
-		result.append(ReportTable.TAG_TABLE_NAME);
+		result.append(TABLE_NAME_TAG);
 		result.append('>');
 		TableIdentifier table = this.metaData.getUpdateTable();
 		if (table != null) result.append(table.getTableExpression());
 		result.append("</");
-		result.append(ReportTable.TAG_TABLE_NAME);
+		result.append(TABLE_NAME_TAG);
 		result.append(">");
 		result.append(this.lineEnding);
 
@@ -322,26 +334,26 @@ public class XmlRowDataConverter
 			if (!this.includeColumnInExport(i)) continue;
 			result.append(indent);
 			result.append("  <");
-			result.append(ReportColumn.TAG_COLUMN_DEFINITION);
+			result.append(COLUMN_DEF_TAG);
 			result.append(" index=\"");
 			result.append(i);
 			result.append("\">");
 			result.append(this.lineEnding);
 
 			result.append(indent);
-			appendTag(result, "    ", ReportColumn.TAG_COLUMN_NAME, this.metaData.getColumnName(i));
+			appendTag(result, "    ", COLUMN_NAME_TAG, this.metaData.getColumnName(i));
 
 			result.append(indent);
-			appendTag(result, "    ", ReportColumn.TAG_COLUMN_JAVA_CLASS, this.metaData.getColumnClassName(i));
+			appendTag(result, "    ", JAVA_CLASS_TAG, this.metaData.getColumnClassName(i));
 
 			result.append(indent);
 			appendTag(result, "    ", ReportColumn.TAG_COLUMN_JAVA_TYPE_NAME, SqlUtil.getTypeName(this.metaData.getColumnType(i)));
 
 			result.append(indent);
-			appendTag(result, "    ", ReportColumn.TAG_COLUMN_JAVA_TYPE, String.valueOf(this.metaData.getColumnType(i)));
+			appendTag(result, "    ", JAVA_TYPE_TAG, String.valueOf(this.metaData.getColumnType(i)));
 
 			result.append(indent);
-			appendTag(result, "    ", ReportColumn.TAG_COLUMN_DBMS_TYPE, this.metaData.getDbmsTypeName(i));
+			appendTag(result, "    ", DBMS_TYPE_TAG, this.metaData.getDbmsTypeName(i));
 
 			int type = this.metaData.getColumnType(i);
 			if (SqlUtil.isDateType(type) )
@@ -365,13 +377,13 @@ public class XmlRowDataConverter
 			}
 			result.append(indent);
 			result.append("  </");
-			result.append(ReportColumn.TAG_COLUMN_DEFINITION);
+			result.append(COLUMN_DEF_TAG);
 			result.append(">");
 			result.append(this.lineEnding);
 		}
 		result.append(indent);
 		result.append("</");
-		result.append(ReportTable.TAG_TABLE_DEF);
+		result.append(TABLE_DEF_TAG);
 		result.append(">");
 		result.append(this.lineEnding);
 

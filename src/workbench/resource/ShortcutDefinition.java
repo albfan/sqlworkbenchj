@@ -183,7 +183,7 @@ public class ShortcutDefinition
 	/**
 	 * Return the defined alternate key as a KeyStroke.
 	 * If no alternate key is define null is returned
-	 * @return
+	 * @return the alternate keystroke
 	 */
 	public StoreableKeyStroke getAlternateKey()
 	{
@@ -221,7 +221,7 @@ public class ShortcutDefinition
 	 * 	Returns the active KeyStroke.
 	 * 	This is either the current or the default, or null if the shortcut 
 	 *  has been removed completely. 
-	 * @return
+	 * @return the keystroke that is active
 	 */
 	public KeyStroke getActiveKeyStroke()
 	{

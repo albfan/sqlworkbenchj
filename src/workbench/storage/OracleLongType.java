@@ -15,7 +15,7 @@ package workbench.storage;
  * Class to Wrap Oracle's LONG datatype. This is merely used to
  * identify the LONG datatype when storing the content into the database
  * as it requires a special treatment.
- * @see DmlStatement.executePrepared(Connection)
+ * @see DmlStatement#executePrepared(Connection)
  * @author  info@sql-workbench.net
  */
 class OracleLongType

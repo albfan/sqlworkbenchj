@@ -206,9 +206,11 @@ public class SqlUtil
 	/**
 	 *	Replaces all white space characters with ' ' (But not inside
 	 *	string literals) and removes -- style and Java style comments
-	 *	@param String - The sql script to "clean out"
-	 *  @param boolean - if true, newline characters (\n) are kept
-	 *	@returns String
+	 *	@param aSql The sql script to "clean out"
+	 *  @param keepNewlines if true, newline characters (\n) are kept
+	 *  @param keepComments if true, comments (single line, block comments) are kept
+	 *  @param quote The quote character
+	 *	@return String
 	 */
 	public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments, char quote)
 	{

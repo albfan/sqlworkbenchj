@@ -15,6 +15,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
+ * Read the definition of synonyms from the database.
  * @author info@sql-workbench.net
  */
 public interface SynonymReader

@@ -11,14 +11,14 @@
  */
 package workbench.db.firebird;
 
-import workbench.db.*;
-
+import workbench.db.AbstractConstraintReader;
 
 /**
  * An implementation of {@link AbstractConstraintReader} for the Firebird database server
  * @author  info@sql-workbench.net
  */
-public class FirebirdConstraintReader extends AbstractConstraintReader
+public class FirebirdConstraintReader 
+	extends AbstractConstraintReader
 {
 	
 	private static final String COL_SQL="select f.rdb$field_name,rdb$trigger_source \n" + 

@@ -76,8 +76,8 @@ public class WbSwingUtilities
 	 *	If a second window is passed the first window is centered
 	 *	against that one
 	 *
-	 *	@param 	Window 	the window to be centered
-	 *	@param	Window	center against this window. If null -> center on screen
+	 *	@param 	aWinToCenter the window to be centered
+	 *	@param	aReference	center against this window. If null -> center on screen
 	 */
 	public static void center(Window aWinToCenter, Window aReference)
 	{

@@ -24,12 +24,8 @@ import javax.swing.ImageIcon;
 
 import workbench.log.LogMgr;
 
-
-
 /**
- *
  * @author  thomas.kellerer
- * @version
  */
 public class ResourceMgr
 {

@@ -17,6 +17,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ *	A node in the dependency tree for a cascading delete script.
+ *  Used in {@link #DeleteScriptGenerator}
+ */
 public class DependencyNode
 {
 	private TableIdentifier table;

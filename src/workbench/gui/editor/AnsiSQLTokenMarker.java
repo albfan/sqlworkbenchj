@@ -53,6 +53,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 				keywords.add("LPAD", Token.KEYWORD3);
 				keywords.add("RPAD", Token.KEYWORD3);
 				keywords.add("CONTINUE", Token.KEYWORD3);
+				keywords.add("MODIFY", Token.KEYWORD3);
 			}
 
 			keys = meta.getStringFunctions();
@@ -220,6 +221,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("WBSTARTBATCH",Token.KEYWORD2);
 		keywords.add("WBENDBATCH",Token.KEYWORD2);
 		keywords.add("WBFEEDBACK",Token.KEYWORD2);
+		keywords.add("WBDIFF",Token.KEYWORD2);
 	}
 
 	private static void addDataTypes()

@@ -30,7 +30,7 @@ import javax.swing.text.Utilities;
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.15 2004-12-03 19:01:02 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.16 2005-04-04 20:50:24 thomas Exp $
  */
 public class TextAreaPainter extends JComponent implements TabExpander
 {
@@ -139,7 +139,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	/**
 	 * Returns the syntax styles used to paint colorized text. Entry <i>n</i>
 	 * will be used to paint tokens with id = <i>n</i>.
-	 * @see org.gjt.sp.jedit.syntax.Token
+	 * @see Token
 	 */
 	public final SyntaxStyle[] getStyles()
 	{
@@ -150,7 +150,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	 * Sets the syntax styles used to paint colorized text. Entry <i>n</i>
 	 * will be used to paint tokens with id = <i>n</i>.
 	 * @param styles The syntax styles
-	 * @see org.gjt.sp.jedit.syntax.Token
+	 * @see Token
 	 */
 	public final void setStyles(SyntaxStyle[] styles)
 	{
@@ -437,7 +437,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 
 	/**
 	 * Repaints the text.
-	 * @param g The graphics context
+	 * @param gfx The graphics context
 	 */
 	public void paint(Graphics gfx)
 	{
@@ -518,7 +518,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 		catch(Exception e)
 		{
 			System.err.println("Error repainting line range {" + firstInvalid + "," + lastInvalid + "}:");
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 

@@ -33,7 +33,7 @@ import java.sql.DriverManager;
  *	The definition includes a (logical) name, a driver class
  *	and (optional) a library from which the driver is to
  *	be loaded.
- *	@author  thomas
+ *	@author  info@sql-workbench.net
  */
 public class DbDriver
 {

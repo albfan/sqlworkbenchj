@@ -62,13 +62,18 @@ public class ReportColumn
 
 	public void appendXml(StrBuffer result, StrBuffer indent)
 	{
+		appendXml(result, indent, true);
+	}
+	
+	public void appendXml(StrBuffer result, StrBuffer indent, boolean includePosition)
+	{
 		StrBuffer myindent = new StrBuffer(indent);
 
 		myindent.append("  ");
 		tagWriter.appendOpenTag(result, indent, TAG_COLUMN_DEFINITION);
 		result.append('\n');
 
-		tagWriter.appendTag(result, myindent, TAG_COLUMN_POSITION, this.column.getPosition());
+		if (includePosition) tagWriter.appendTag(result, myindent, TAG_COLUMN_POSITION, this.column.getPosition());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_NAME, this.column.getColumnName());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_DBMS_TYPE, this.column.getDbmsType());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_PK, this.column.isPkColumn());

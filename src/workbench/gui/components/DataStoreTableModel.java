@@ -76,8 +76,8 @@ public class DataStoreTableModel
 	/**
 	 *	Return the contents of the field at the given position
 	 *	in the result set.
-	 *	@parm row - The row to get. Counting starts at zero.
-	 *	@parm col - The column to get. Counting starts at zero.
+	 *	@param row - The row to get. Counting starts at zero.
+	 *	@param col - The column to get. Counting starts at zero.
 	 */
 	public Object getValueAt(int row, int col)
 	{

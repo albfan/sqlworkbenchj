@@ -198,12 +198,12 @@ public abstract class RowDataConverter
 	 * Return the column's value as a formatted String.
 	 * Especially for Date objects this is different then getValueAsString()
 	 * as a default formatter can be defined.
-	 * @param aRow The requested row
-	 * @param aColumn The column in aRow for which the value should be formatted
+	 * @param row The requested row
+	 * @param col The column in aRow for which the value should be formatted
 	 * @return The formatted value as a String
 	 * @see #setDefaultDateFormatter(SimpleDateFormat)
 	 * @see #setDefaultTimestampFormatter(SimpleDateFormat)
-	 * @see #setDefaultNumberFormatter(SimpleDateFormat)
+	 * @see #setDefaultNumberFormatter(DecimalFormat)
 	 * @see #setDefaultDateFormat(String)
 	 * @see #setDefaultTimestampFormat(String)
 	 * @see #setDefaultNumberFormat(String)

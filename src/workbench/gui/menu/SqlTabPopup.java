@@ -25,9 +25,7 @@ import workbench.gui.actions.FileReloadAction;
 import workbench.gui.actions.FileSaveAction;
 
 /**
- *
  * @author  info@sql-workbench.net
- * @version
  */
 public class SqlTabPopup extends JPopupMenu
 {

@@ -21,6 +21,11 @@ import workbench.resource.Settings;
 import workbench.util.WbCipher;
 import workbench.util.WbPersistence;
 
+/**
+ *	A class to store a connection definition including non-JDBC properties
+ *  specific to the application.
+ *	@author info@sql-workbench.net
+ */
 public class ConnectionProfile
 	implements PropertyChangeListener
 {
@@ -203,7 +208,7 @@ public class ConnectionProfile
 	 *	regarded as a property and thus not written
 	 *	to the XML file.
 	 *
-	 *	@parm the encrypted password
+	 *	@param aPwd the encrypted password
 	 */
 	public String decryptPassword(String aPwd)
 	{
@@ -472,7 +477,7 @@ public class ConnectionProfile
 
 	/**
 	 * Setter for property disableUpdateTableCheck.
-	 * @param disableUpdateTableCheck New value of property disableUpdateTableCheck.
+	 * @param flag New value of property disableUpdateTableCheck.
 	 */
 	public void setDisableUpdateTableCheck(boolean flag)
 	{

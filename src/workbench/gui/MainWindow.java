@@ -107,9 +107,7 @@ import workbench.gui.actions.FileSaveProfiles;
 
 
 /**
- *
  * @author  info@sql-workbench.net
- * @version
  */
 public class MainWindow
 	extends JFrame

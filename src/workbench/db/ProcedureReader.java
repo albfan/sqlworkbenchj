@@ -15,6 +15,8 @@ import workbench.storage.DataStore;
 import workbench.util.StrBuffer;
 
 /**
+ * Read the definition (source, parameters etc) of a stored procedures from 
+ * the database
  * @author info@sql-workbench.net
  */
 public interface ProcedureReader

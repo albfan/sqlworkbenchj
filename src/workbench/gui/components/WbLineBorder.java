@@ -37,10 +37,9 @@ public class WbLineBorder extends AbstractBorder
 	}
 
 	/**
-	 * Creates a divider border with the specified type and thickness
-	 * @param type (LEFT, RIGHT, TOP, BOTTOM)
-	 * @param thickness the thickness of the border
-	 * @param roundedCorners whether or not border corners should be round
+	 * Creates a divider border with the specified type and color
+	 * @param aType (LEFT, RIGHT, TOP, BOTTOM)
+	 * @param aColor the thickness of the border
 	 */
 	public WbLineBorder(int aType, Color aColor)
 	{

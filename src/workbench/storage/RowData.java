@@ -244,7 +244,7 @@ public class RowData
 	/**
 	 *	Returns true if the row is neither modified nor is a new row.
 	 *
-	 *	@returns true if the row has not been altered since retrieval
+	 *	@return true if the row has not been altered since retrieval
 	 */
 	public boolean isOriginal()
 	{

@@ -15,6 +15,7 @@ import java.util.List;
 import workbench.storage.DataStore;
 
 /**
+ * Read the definition of sequences from the database
  * @author info@sql-workbench.net
  */
 public interface SequenceReader

@@ -38,7 +38,6 @@ import workbench.util.WbProperties;
 
 
 /**
- *
  * @author  info@sql-workbench.net
  */
 public class VariablePool

@@ -21,7 +21,7 @@ import java.util.Map;
 import workbench.log.LogMgr;
 
 /**
- *
+* A class to read table level constraints from the database.
  * @author  info@sql-workbench.net
  */
 public abstract class AbstractConstraintReader

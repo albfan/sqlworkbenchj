@@ -42,9 +42,8 @@ public class DividerBorder extends AbstractBorder
 
 	/**
 	 * Creates a divider border with the specified type and thickness
-	 * @param type (LEFT, RIGHT, TOP, BOTTOM)
-	 * @param thickness the thickness of the border
-	 * @param roundedCorners whether or not border corners should be round
+	 * @param aType (LEFT, RIGHT, TOP, BOTTOM)
+	 * @param aThickness the thickness of the border
 	 */
 	public DividerBorder(int aType, int aThickness)
 	{

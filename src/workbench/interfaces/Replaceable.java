@@ -25,7 +25,7 @@ public interface Replaceable
 	
 	/**
 	 *	Find and highlight the first occurance of the String
-	 *	@returns true if an occurance was found
+	 *	@return true if an occurance was found
 	 */
 	int findFirst(String aValue, boolean ignoreCase, boolean wholeWord, boolean useRegex);
 
@@ -53,7 +53,7 @@ public interface Replaceable
 	/**
 	 *	Find and replace the next occurance.
 	 *  Only valid if findFirst() was called.
-	 *	@returns true if an occurance was found
+	 *	@return true if an occurance was found
 	 */
 	boolean replaceNext(String aReplacement);
 	

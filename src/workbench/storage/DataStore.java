@@ -190,7 +190,7 @@ public class DataStore
 	 *	Create a DataStore based on the given ResultSet.
 	 *	@param aResult the result set to use
 	 *  @param readData if true the data from the ResultSet should be read into memory, otherwise only MetaData information is read
-	 *  @param RowActionMonitor if not null, the loading process is displayed through this monitor
+	 *  @param aMonitor if not null, the loading process is displayed through this monitor
 	 */
 	public DataStore(ResultSet aResult, boolean readData, RowActionMonitor aMonitor)
 		throws SQLException
@@ -203,8 +203,9 @@ public class DataStore
 	 *	Create a DataStore based on the given ResultSet.
 	 *	@param aResult the result set to use
 	 *  @param readData if true the data from the ResultSet should be read into memory, otherwise only MetaData information is read
-	 *  @param RowActionMonitor if not null, the loading process is displayed through this monitor
+	 *  @param aMonitor if not null, the loading process is displayed through this monitor
 	 *  @param maxRows limit number of rows to maxRows if the JDBC driver does not already limit them
+	 *  @param conn the connection that was used to retrieve the result set
 	 */
 	public DataStore(ResultSet aResult, boolean readData, RowActionMonitor aMonitor, int maxRows, WbConnection conn)
 		throws SQLException
@@ -1629,7 +1630,7 @@ public class DataStore
 	}
 
 	/**
-	 * Returns a List of {@link #DmlStatements } which
+	 * Returns a List of {@link workbench.storage.DmlStatement}s which
 	 * would be executed in order to store the current content
 	 * of the DataStore.
 	 */
@@ -2286,7 +2287,7 @@ public class DataStore
 	}
 
 	/** Setter for property progressMonitor.
-	 * @param progressMonitor New value of property progressMonitor.
+	 * @param aMonitor New value of property progressMonitor.
 	 *
 	 */
 	public void setProgressMonitor(RowActionMonitor aMonitor)

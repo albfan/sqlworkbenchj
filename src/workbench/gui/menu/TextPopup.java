@@ -22,9 +22,7 @@ import workbench.gui.actions.WbAction;
 import workbench.interfaces.ClipboardSupport;
 
 /**
- *
  * @author  info@sql-workbench.net
- * @version
  */
 public class TextPopup extends JPopupMenu
 {

@@ -596,7 +596,7 @@ public class TextFileParser
 
 	/**
 	 * 	Read the column definitions from the database.
-	 * 	@parm cols a List of column names (String)
+	 * 	@param cols a List of column names (String)
 	 */
 	private void readColumnDefinitions(List cols)
 	{

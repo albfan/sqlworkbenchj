@@ -22,8 +22,8 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.storage.DataStore;
 import workbench.util.StrBuffer;
-import workbench.util.StrWriter;
 import java.util.Collections;
+import workbench.db.IndexDefinition;
 
 /**
  *
@@ -44,12 +44,38 @@ public class ReportTable
 	private String tableComment;
 	private TagWriter tagWriter = new TagWriter();
 	private String schemaNameToUse = null;
+	private String namespace = null;
 
-	/** Creates a new instance of ReportTable */
-	public ReportTable(TableIdentifier tbl, WbConnection conn, String namespace)
+	public ReportTable(TableIdentifier tbl)
+	{
+		this(tbl, (String)null);
+	}
+	
+	public ReportTable(TableIdentifier tbl, String nspace)
+	{
+		this.table = tbl;
+		this.namespace = nspace;
+		tagWriter.setNamespace(this.namespace);
+	}
+	
+	public ReportTable(TableIdentifier tbl, WbConnection conn)
+		throws SQLException
+	{
+		this(tbl, conn, null, true, true);
+	}
+	
+	public ReportTable(TableIdentifier tbl, WbConnection conn, String nspace)
+		throws SQLException
+	{
+		this(tbl, conn, nspace, true, true);
+	}
+	
+	public ReportTable(TableIdentifier tbl, WbConnection conn, String nspace, boolean includeIndex, boolean includeFk)
 		throws SQLException
 	{
 		this.table = tbl;
+		this.namespace = nspace;
+		
 		List cols = conn.getMetadata().getTableColumns(tbl);
 		Collections.sort(cols);
 
@@ -61,21 +87,29 @@ public class ReportTable
 			if (schema != null) this.table.setSchema(schema);
 		}
 
+		this.setColumns(cols);
+		this.tagWriter.setNamespace(namespace);
+		if (includeIndex)
+		{
+			this.index = new IndexReporter(tbl, conn);
+			this.index.setNamespace(namespace);
+		}
+		if (includeFk) this.readForeignKeys(conn);
+	}
+
+	public void setColumns(List cols)
+	{
+		if (cols == null) return;
 		int numCols = cols.size();
 		this.columns = new ReportColumn[numCols];
 		for (int i=0; i < numCols; i++)
 		{
 			ColumnIdentifier col = (ColumnIdentifier)cols.get(i);
 			this.columns[i] = new ReportColumn(col);
-			this.columns[i].setNamespace(namespace);
+			this.columns[i].setNamespace(this.namespace);
 		}
-
-		this.index = new IndexReporter(tbl, conn);
-		this.index.setNamespace(namespace);
-		this.tagWriter.setNamespace(namespace);
-		this.readForeignKeys(conn);
 	}
-
+	
 	private void readForeignKeys(WbConnection conn)
 	{
 		DataStore ds = conn.getMetadata().getForeignKeys(this.table.getCatalog(), this.table.getSchema(), this.table.getTable());
@@ -108,7 +142,7 @@ public class ReportTable
 		}
 	}
 
-	private ReportColumn findColumn(String col)
+	public ReportColumn findColumn(String col)
 	{
 		if (col == null) return null;
 
@@ -125,19 +159,22 @@ public class ReportTable
 		return result;
 	}
 
-	public String getXml()
+	public IndexDefinition[] getIndexList()
 	{
-		StrWriter out = new StrWriter();
-		try
-		{
-			this.writeXml(out);
-		}
-		catch (IOException e)
-		{
-		}
-		return out.toString();
+		if (this.index == null) return null;
+		return this.index.getIndexList();
 	}
-
+	
+	public ReportColumn[] getColumns()
+	{
+		return this.columns;
+	}
+	
+	public TableIdentifier getTable()
+	{
+		return this.table;
+	}
+	
 	public void setSchemaNameToUse(String name)
 	{
 		this.schemaNameToUse = name;
@@ -146,8 +183,18 @@ public class ReportTable
 	public void writeXml(Writer out)
 		throws IOException
 	{
-		StrBuffer line = new StrBuffer();
-		StrBuffer indent = new StrBuffer("  ");
+		StrBuffer line = this.getXml();
+		line.writeTo(out);
+	}
+
+	public StrBuffer getXml()
+	{
+		return getXml(new StrBuffer("  "));
+	}
+	
+	public StrBuffer getXml(StrBuffer indent)
+	{
+		StrBuffer line = new StrBuffer(500);
 		StrBuffer colindent = new StrBuffer(indent);
 		colindent.append(indent);
 
@@ -164,12 +211,12 @@ public class ReportTable
 		{
 			this.columns[i].appendXml(line, colindent);
 		}
-		this.index.appendXml(line, colindent);
+		if (this.index != null) this.index.appendXml(line, colindent);
 
 		tagWriter.appendCloseTag(line, indent, TAG_TABLE_DEF);
-		line.writeTo(out);
+		return line;
 	}
-
+	
 	public void setNamespace(String namespace)
 	{
 		this.tagWriter.setNamespace(namespace);

@@ -104,7 +104,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.30 2005-03-25 13:42:05 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.31 2005-04-04 20:50:24 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -1910,7 +1910,7 @@ public class JEditTextArea
 
 	/**
 	 * Sets if the selection should be rectangular.
-	 * @param overwrite True if the selection should be rectangular,
+	 * @param rectSelect True if the selection should be rectangular,
 	 * false otherwise.
 	 */
 	public final void setSelectionRectangular(boolean rectSelect)

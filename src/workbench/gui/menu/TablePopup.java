@@ -23,9 +23,7 @@ import workbench.gui.actions.WbAction;
 import workbench.interfaces.ClipboardSupport;
 
 /**
- *
  * @author  thomas
- * @version
  */
 public class TablePopup extends JPopupMenu
 {

@@ -319,7 +319,7 @@ public class TableSearcher
 	}
 
 	/** Setter for property criteria.
-	 * @param criteria New value of property criteria.
+	 * @param aText New value of property criteria.
 	 *
 	 */
 	public void setCriteria(java.lang.String aText)

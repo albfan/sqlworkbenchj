@@ -12,9 +12,7 @@
 package workbench.exception;
 
 /**
- *
  * @author  thomas
- * @version
  */
 public class NoConnectionException extends Exception
 {

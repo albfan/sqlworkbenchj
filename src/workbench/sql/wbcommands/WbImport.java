@@ -273,7 +273,19 @@ public class WbImport extends SqlCommand
 			String cols = cmdLine.getValue(ARG_IMPORTCOLUMNS);
 			if (cols != null)
 			{
-				xmlParser.setColumns(cols);
+				try
+				{
+					xmlParser.setColumns(cols);
+				}
+				catch (IllegalArgumentException e)
+				{
+					result.setFailure();
+					String col = xmlParser.getMissingColumn();
+					String msg = ResourceMgr.getString("ErrorImportColumnNotFound").replaceAll("%name%", col);
+					result.addMessage(msg);
+					LogMgr.logError("WbImport.execute()", msg, null);
+					return result;
+				}
 			}
 			imp.setProducer(xmlParser);
 		}
@@ -351,7 +363,7 @@ public class WbImport extends SqlCommand
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("WbImport.execute()", "Error when importing file (" + file +")", e);
+			LogMgr.logError("WbImport.execute()", "Error importing '" + file +"': " + e.getMessage(), null);
 			result.setFailure();
 			result.addMessage(ExceptionUtil.getDisplay(e));
 		}

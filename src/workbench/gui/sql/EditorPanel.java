@@ -87,9 +87,7 @@ import workbench.util.UnicodeReader;
 
 
 /**
- *
  * @author  info@sql-workbench.net
- * @version
  */
 public class EditorPanel
 	extends JEditTextArea

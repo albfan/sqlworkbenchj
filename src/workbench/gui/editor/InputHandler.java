@@ -31,8 +31,8 @@ import javax.swing.text.BadLocationException;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.15 2004-12-03 19:01:01 thomas Exp $
- * @see org.gjt.sp.jedit.textarea.DefaultInputHandler
+ * @version $Id: InputHandler.java,v 1.16 2005-04-04 20:50:23 thomas Exp $
+ * @see DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
 {
@@ -197,7 +197,7 @@ public abstract class InputHandler extends KeyAdapter
 	/**
 	 * Grabs the next key typed event and invokes the specified
 	 * action with the key as a the action command.
-	 * @param action The action
+	 * @param listener The Listener
 	 */
 	public void grabNextKeyStroke(ActionListener listener)
 	{

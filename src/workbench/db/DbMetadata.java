@@ -64,9 +64,12 @@ import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 import workbench.db.hsqldb.HsqlConstraintReader;
+import workbench.db.firebird.FirebirdConstraintReader;
 
 
 /**
+ * Retrieve meta data information from the database. 
+ * This class returns more information then the generic JDBC DatabaseMetadata.
  *  @author  info@sql-workbench.net
  */
 public class DbMetadata
@@ -1400,43 +1403,43 @@ public class DbMetadata
 	}
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link getTableDefinition(String, String, String) that holds
+	 *  by {@link #getTableDefinition(String, String, String)} that holds
 	 *  the column name
 	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_COL_NAME = 0;
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link getTableDefinition(String, String, String) that holds
+	 *  by {@link #getTableDefinition(String, String, String)} that holds
 	 *  the DBMS specific data type string
 	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE = 1;
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link getTableDefinition(String, String, String) that holds
+	 *  by {@link #getTableDefinition(String, String, String)} that holds
 	 *  the primary key flag
 	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_PK_FLAG = 2;
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link getTableDefinition(String, String, String) that holds
+	 *  by {@link #getTableDefinition(String, String, String)} that holds
 	 *  the nullable flag
 	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_NULLABLE = 3;
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link getTableDefinition(String, String, String) that holds
+	 *  by {@link #getTableDefinition(String, String, String)} that holds
 	 *  the default value for this column
 	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_DEFAULT = 4;
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link getTableDefinition(String, String, String) that holds
+	 *  by {@link #getTableDefinition(String, String, String)} that holds
 	 *  the remark for this column
 	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_REMARKS = 5;
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link getTableDefinition(String, String, String) that holds
+	 *  by {@link #getTableDefinition(String, String, String)} that holds
 	 *  the integer value of the java datatype from {@link java.sql.Types}
 	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE = 6;
@@ -1460,13 +1463,14 @@ public class DbMetadata
 	}
 
  /**
-  *
-  * @param aCatalog
-  * @param aSchema
-  * @param aTable
-  * @param aType
+  * Retrieve the column definition of the given table
+  * @param aCatalog the catalog of the table (may be null)
+  * @param aSchema  the schema of the table (may be null)
+  * @param aTable   the table name
+  * @param aType    the table type. One of the types retrurned {@link #getTableTypes()}
   * @throws SQLException
-  * @return
+  * @return a DataStore with the columns of the table
+	* 
   */
 	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, String aType)
 		throws SQLException
@@ -1731,7 +1735,6 @@ public class DbMetadata
 						}
 					}
 				}
-
 			}
 
 			if (this.isOracle && funcIndex != null)
@@ -1794,11 +1797,45 @@ public class DbMetadata
 			{
 				this.oracleMetaData.closeStatement();
 			}
-
 		}
 		return idxData;
 	}
 
+	public List getTableList()
+		throws SQLException
+	{
+		String user = this.getUserName();
+		DataStore ds = getTables(null, user, TABLE_TYPE_TABLE);
+		int count = ds.getRowCount();
+		List tables = new ArrayList(count);
+		for (int i=0; i < count; i++)
+		{
+			String name = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_NAME);
+			String schema = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_SCHEMA);
+			String catalog = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_CATALOG);
+			tables.add(new TableIdentifier(catalog, schema, name));
+		}
+		return tables;
+	}
+	
+	public IndexDefinition[] getIndexList(TableIdentifier tbl)
+	{
+		DataStore ds = this.getTableIndexInformation(tbl.getCatalog(), tbl.getSchema(), tbl.getTable());
+		int count = ds.getRowCount();
+		IndexDefinition[] result = new IndexDefinition[count];
+		for (int i=0; i < count; i ++)
+		{
+			String name = ds.getValueAsString(i, COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
+			String coldef = ds.getValueAsString(i, COLUMN_IDX_TABLE_INDEXLIST_COL_DEF);
+			boolean unique = "YES".equalsIgnoreCase(ds.getValueAsString(i, COLUMN_IDX_TABLE_INDEXLIST_UNIQUE_FLAG));
+			boolean pk = "YES".equalsIgnoreCase(ds.getValueAsString(i, COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG));
+			IndexDefinition def = new IndexDefinition(name, coldef);
+			def.setUnique(unique);
+			def.setPrimaryKeyIndex(pk);
+			result[i] = def;
+		}
+		return result;
+	}
 	/** 	Return the current catalog for this connection. If no catalog is defined
 	 * 	or the DBMS does not support catalogs, an empty string is returned.
 	 *
@@ -1974,12 +2011,13 @@ public class DbMetadata
 		return result;
 	}
 
-	/** 	Returns the SQL Source of the given trigger.
+	/** 
+	 * Retrieve the SQL Source of the given trigger.
 	 * @param aCatalog The catalog in which the trigger is defined. This should be null if the DBMS does not support catalogs
 	 * @param aSchema The schema in which the trigger is defined. This should be null if the DBMS does not support schemas
 	 * @param aTriggername
 	 * @throws SQLException
-	 * @return
+	 * @return the trigger source
 	 */
 	public String getTriggerSource(String aCatalog, String aSchema, String aTriggername)
 		throws SQLException

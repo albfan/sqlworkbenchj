@@ -76,6 +76,16 @@ public class StrBuffer
 			this.append(source);
 		}
 	}
+	
+	/**
+	 *	Remove count characters from the end of the buffer
+	 */ 
+	public StrBuffer removeFromEnd(int count)
+	{
+		if (count > this.numchar) this.numchar = 0;
+		this.numchar -= count;
+		return this;
+	}
 
 	/**
 	 * Make an empty string buffer with 'len' characters of storage.
@@ -174,6 +184,7 @@ public class StrBuffer
 	 */
 	public StrBuffer append(StrBuffer str)
 	{
+		if (str == null) return this;
 		int len = str.numchar;
 		if (len == 0) return this;
 		if (len == 1)
@@ -215,7 +226,7 @@ public class StrBuffer
 	/**
 	 * Appends the character to this string buffer.
 	 *
-	 * @param   str   a string.
+	 * @param   c the character to append
 	 * @return  this string buffer
 	 */
 	public StrBuffer append(char c)

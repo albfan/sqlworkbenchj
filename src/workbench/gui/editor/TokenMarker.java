@@ -22,9 +22,9 @@ import java.util.*;
  * cached.
  *
  * @author Slava Pestov
- * @version $Id: TokenMarker.java,v 1.5 2004-12-03 19:01:02 thomas Exp $
+ * @version $Id: TokenMarker.java,v 1.6 2005-04-04 20:50:24 thomas Exp $
  *
- * @see org.gjt.sp.jedit.syntax.Token
+ * @see Token
  */
 public abstract class TokenMarker
 {
@@ -38,8 +38,7 @@ public abstract class TokenMarker
 	{
 		if(lineIndex >= length)
 		{
-			throw new IllegalArgumentException("Tokenizing invalid line: "
-				+ lineIndex);
+			throw new IllegalArgumentException("Tokenizing invalid line: " + lineIndex);
 		}
 
 		lastToken = null;

@@ -27,9 +27,7 @@ import workbench.util.StringUtil;
 
 
 /**
- *
  * @author  info@sql-workbench.net
- * @version
  */
 public class LogMgr
 {
