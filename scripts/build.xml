@@ -55,13 +55,6 @@
     <echo message="Build number is ${build.number}"/>
   </target>
 
-  <target name="clean-all">
-    <delete dir="${build}" failonerror="false"/>
-    <delete file="${scriptsrc}/history.new" failonerror="false" />
-    <mkdir dir="${build}"/>
-    <mkdir dir="${distdir}"/>
-  </target>
-    
   <target name="clean">
     <delete dir="${build}/workbench" failonerror="false"/>
     <delete file="${scriptsrc}/history.new" failonerror="false" />
@@ -69,10 +62,6 @@
     <mkdir dir="${distdir}"/>
   </target>
 
-  <target name="clean-dev">
-    <delete dir="${classes}/workbench" failonerror="false"/>
-  </target>
-  
   <target name="prepare" depends="init">
     <copy todir="${build}">
       <fileset dir="${src}">
@@ -87,11 +76,6 @@
       <fileset dir="${src}">
         <include name="**/*.properties"/>
       </fileset>
-      <!--
-      <fileset dir="${scriptsrc}">
-        <include name="**/manifest.mf"/>
-      </fileset>
-      -->
       <filterset begintoken="@" endtoken="@">
         <filter token="BUILD_DATE" value="${build_date}"/>
         <filter token="BUILD_NUMBER" value="${build.number}"/>
@@ -106,36 +90,12 @@
     </copy>
   </target>
 
-  <!-- run the application (for development) -->
-  <target name="r" depends="cd">
-    <java fork="true" classname="workbench.WbManager" dir="${root}/conf">
-      <classpath>
-        <pathelement location="${src}"/>
-        <pathelement location="${classes}"/>
-      </classpath>    
-    </java>
-  </target>
-  
   <target name="compile" depends="prepare">
-    <javac debug="off" destdir="${build}" optimize="on" srcdir="${src}">
+    <javac debug="off" debuglevel="source,lines" destdir="${build}" optimize="on" srcdir="${src}" >
         <exclude name="workbench/test/**"/>
     </javac>
   </target>
 
-  <!-- shortcut for compile-dbg for development -->
-  <target name="cd" depends="compile-dev"/>
-  
-  <target name="compile-dev" depends="prepare">
-    <javac debug="on" destdir="${classes}" optimize="off" srcdir="${src}">
-        <exclude name="workbench/test/**"/>
-    </javac>
-  </target>
-  
-  <target name="compile-dbg" depends="prepare">
-    <javac debug="on" destdir="${build}" optimize="off" srcdir="${src}">
-        <exclude name="workbench/test/**"/>
-    </javac>
-  </target>
 
   <!-- Manual related tasks -->
   
@@ -179,16 +139,10 @@
     <delete file="${doc}/pdf/manual.fo"/>
   </target>
 
-  <!-- create the help stuff for the development environment 
-       (putting the generated html files into the classes directory
-  -->
-  <target name="build-dev-help" depends="init-dev-help,build-html"/>
-  
   <!-- Create the html help files for putting them into the 
        distribution jar 
   -->
-  <!-- target name="build-help" depends="init-help,build-html"/ -->
-  
+ 
   <target name="build-help" depends="prepare">
     <delete dir="${build}/help" failonerror="false"/>
     <mkdir dir="${build}/help"/>
@@ -245,9 +199,6 @@
     <copy overwrite="true" todir="${build}/help" file="${doc}/css/html-internal.css"/>
   </target>
   
-  <!-- Create the HTML files suitable for publishing on the website -->
-  <target name="publish" depends="init-publish,build-html"/>
-  
   <target name="init-help">
     <property name="html-stylesheet" value="html-internal.css"/>
     <property name="html-outdir" value="${build}/help"/>
@@ -256,16 +207,9 @@
     <property name="html-css-tables" value="0"/>
   </target>
 
-  <target name="init-dev-help">
-    <property name="html-stylesheet" value="html-internal.css"/>
-    <property name="html-outdir" value="${classes}/help"/>
-    <property name="html-resource-dir" value="../../src/workbench/resource/images"/>
-    <property name="index-file-name" value="index"/>
-    <property name="html-css-tables" value="0"/>
-    <delete dir="${html-outdir}" failonerror="false"/>
-    <mkdir dir="${html-outdir}"/>
-  </target>
-    
+  <!-- Create the HTML files suitable for publishing on the website -->
+  <target name="publish" depends="init-publish,build-html"/>
+  
   <target name="init-publish">
     <property name="html-stylesheet" value="html-publish.css"/>
     <property name="html-outdir" value="${distdir}/manual"/>
@@ -348,10 +292,12 @@
     <delete file="${html-outdir}/Manual.xml"/>
     <copy overwrite="true" todir="${html-outdir}" file="${doc}/css/${html-stylesheet}"/>
   </target>
+  
   <!-- End Manual related tasks -->
   
   <target name="make-jar" depends="prepare">
     <copy failonerror="false" overwrite="true" file="${scriptsrc}/history.new" tofile="${build}/help/history.txt" />
+    <copy failonerror="false" overwrite="true" file="${scriptsrc}/history.new" tofile="${distdir}/history.txt" />
     
     <jar compress="true" jarfile="${distdir}/${jarfile}">
       <manifest>
@@ -366,16 +312,11 @@
     
   </target>
 
-  <target name="cleanup">
-    <delete dir="${build}"/>
-  </target>
-  
-  <target name="publish-dev" depends="set-dev-build, copy-history, publish"/>
+  <target name="publish-dev" depends="set-dev-build, copy-history, publish, clean-history"/>
 
   <target  name="dev-release" depends="set-dev-build, clean, copy-history, prepare, compile, build-help, make-jar, clean-history"/>
   
-  <target name="make-dev-jar" depends="set-dev-build, clean, copy-history, prepare, compile, make-jar"/>
-  <target name="dji" depends="prepare,compile-dbg,make-jar"/>
+  <target name="make-dev-jar" depends="set-dev-build, clean, copy-history, prepare, compile, make-jar, clean-history"/>
   
   <target name="make-src-zip">
     <delete file="${srczip}"/>
@@ -383,6 +324,7 @@
     <zip zipfile="${srczip}">
       <zipfileset dir="${src}" prefix="src">
         <include name="**/*.*"/>
+        <include name="**/*.class"/>
         <exclude name="**/workbench.settings"/>
         <exclude name="**/CVS/*"/>
         <exclude name="**/.cvsignore"/>
@@ -412,8 +354,11 @@
       </zipfileset>
     </zip>
   </target>
-  
-  <target name="release" depends="clean-all, set-build-number, copy-history, build-help, compile, make-jar, pdf, publish, release-package, restart-history, clean-history"/>
+
+  <!-- build a full relase with documentation and source distribution -->  
+  <target name="release" 
+      depends="clean, set-build-number, copy-history, build-help, compile, make-jar, pdf, publish, release-package, restart-history, clean-history"
+  />
 
   <target name="copy-history">
     <copy file="${scriptsrc}/history.txt" overwrite="true" tofile="${scriptsrc}/history.new">

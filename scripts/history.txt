@@ -1,13 +1,61 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+
+Build 72, 13.05.2004
+--------------------
 Enh:  Rows in the result set can now be copied ("cloned")
 Enh:  The text file import now reports the rows which had problems
+Enh:  If no look and feel has been selected by the user (e.g. when starting
+      for the first time), SQL Workbench/J now uses the system look and feel
+Enh:  The Table Search Panel now has a "Select All" and "Select None" button
+      to ease the selection of tables.
+Enh:  In the Table Search Panel, the search can now also be invoked by
+      pressing ENTER in the text field for the criteria
+Enh:  The automatic check for the update table after the retrieve can now
+      be disabled per profile. This is useful for slow connections/databases
+      where the retrieval of the table meta data takes long.
+Enh:  Added default definitions for DB2 driver
+Enh:  When using the EXPORT command -createtable now also works for SQL
+      statements that contain a join. SQL Workbench/J tries to include a
+      CREATE TABLE which matches the result set structure as close as possible
+Enh:  SELECT ... FROM table INTO temp_table now works with Informix
+      and for PostgreSQL (slightly different syntax)
+Enh:  The database explorer now optionally uses the list of table types 
+      returned by the driver when selecting the type *
+      The Postgres JDBC driver returns only certain types (e.g. not the system 
+      tables) even when all table types are requested. This behaviour can 
+      be controlled through the property workbench.dbexplorer.usetypelist 
+      (true or false)
+Enh:  The SQL formatter does not add a space between a function and the 
+      following opening bracket. The function names which are included in this
+      check are retrieved from the JDBC driver. 
+      The space would break SQL statements for MySQL as it does not comply with 
+      the SQL standard.
+Enh:  Batch updates are now supported for the DataPumper, the COPY and IMPORT
+      commands (depending on the support by the JDBC driver of course)
+Enh:  SQL Workbench/J can now be configured to ignore certain SQL commands. 
+      This is useful for e.g. scripts that are written for SQL*Plus and contain
+      SQL*Plus specific statements (e.g. EXIT, WHENEVER)
 Fix:  Importing a text file did not work for data types other then VARCHAR
 Fix:  Updating the database from the DbExplorer is now done in the background
       so that the GUI doesn't lock up.
 Fix:  When updating a table from within the DbExplorer, the setting
       to preview the update statements was not used.
       (The preview was never shown)
+Fix:  A single quote character in a comment would break the parser to
+      recognize the individual statements
+Fix:  When using several windows, only the workspace for the active
+      window was saved when closing the application
+Fix:  The procedure display for SQL Server was not correct (it would always 
+      show "RESULT" as the type even if it really was a procedure) therefor the 
+      generated DROP statements weren't correct.
+Fix:  Using GO as the delimiter for SQL Server did not work any longer
+Fix:  When using "New Window" to open a new window with a different connection 
+      the connection from the first window was broken
+Fix:  When opening the driver manager dialog from the connection dialog, 
+      and closing the driver manager with OK, the selected driver class in 
+      the current profile was changed back to the first driver (Thanks Meikel!)
+Fix:  The SQL formatter was removing the semicolon at the end of a statement
 
 
 Build 71, 05.04.2004

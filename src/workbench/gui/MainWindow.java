@@ -827,8 +827,8 @@ public class MainWindow
 		{
 			ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
 
-			String id = "Wb-0";
-
+			String id = this.getWindowId();
+			
 			if (this.currentProfile.getUseSeperateConnectionPerTab())
 			{
 				this.currentConnection = null;
