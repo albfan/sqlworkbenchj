@@ -1,0 +1,221 @@
+package workbench.gui.editor;
+
+/*
+ * AnsiSQLTokenMarker.java
+ *
+ *	Copied from TSQLTokenMarker and modified for ANSI SQL
+ *
+ */
+
+import javax.swing.text.Segment;
+
+/**
+ * ANSI-SQL token marker.
+ *
+ */
+public class AnsiSQLTokenMarker extends SQLTokenMarker
+{
+	// public members
+	public AnsiSQLTokenMarker()
+	{
+		super(getKeywordMap(), true);
+	}
+	
+	public static KeywordMap getKeywordMap()
+	{
+		if (keywords == null)
+		{
+			keywords = new KeywordMap(true);
+			addKeywords();
+			addDataTypes();
+			addSystemFunctions();
+			addOperators();
+			addSystemStoredProcedures();
+			addSystemTables();
+		}
+		return keywords;
+	}
+	
+	private static void addKeywords()
+	{
+		keywords.add("ADD",Token.KEYWORD1);
+		keywords.add("ALTER",Token.KEYWORD1);
+		keywords.add("AS",Token.KEYWORD1);
+		keywords.add("ASC",Token.KEYWORD1);
+		keywords.add("BEGIN",Token.KEYWORD1);
+		keywords.add("BREAK",Token.KEYWORD1);
+		keywords.add("BY",Token.KEYWORD1);
+		keywords.add("CASCADE",Token.KEYWORD1);
+		keywords.add("CHECK",Token.KEYWORD1);
+		keywords.add("CHECKPOINT",Token.KEYWORD1);
+		keywords.add("CLOSE",Token.KEYWORD1);
+		keywords.add("CLUSTERED",Token.KEYWORD1);
+		keywords.add("COLUMN",Token.KEYWORD1);
+		keywords.add("COMMIT",Token.KEYWORD1);
+		keywords.add("CONSTRAINT",Token.KEYWORD1);
+		keywords.add("CREATE",Token.KEYWORD1);
+		keywords.add("CURRENT",Token.KEYWORD1);
+		keywords.add("CURRENT_DATE",Token.KEYWORD1);
+		keywords.add("CURRENT_TIME",Token.KEYWORD1);
+		keywords.add("CURSOR",Token.KEYWORD1);
+		keywords.add("DATABASE",Token.KEYWORD1);
+		keywords.add("DECLARE",Token.KEYWORD1);
+		keywords.add("DEFAULT",Token.KEYWORD1);
+		keywords.add("DELETE",Token.KEYWORD1);
+		keywords.add("DENY",Token.KEYWORD1);
+		keywords.add("DESC",Token.KEYWORD1);
+		keywords.add("DISTINCT",Token.KEYWORD1);
+		keywords.add("DROP",Token.KEYWORD1);
+		keywords.add("EXEC",Token.KEYWORD1);
+		keywords.add("EXECUTE",Token.KEYWORD1);
+		keywords.add("EXIT",Token.KEYWORD1);
+		keywords.add("FETCH",Token.KEYWORD1);
+		keywords.add("FOR",Token.KEYWORD1);
+		keywords.add("FOREIGN",Token.KEYWORD1);
+		keywords.add("FROM",Token.KEYWORD1);
+		keywords.add("GRANT",Token.KEYWORD1);
+		keywords.add("GROUP",Token.KEYWORD1);
+		keywords.add("HAVING",Token.KEYWORD1);
+		keywords.add("IF",Token.KEYWORD1);
+		keywords.add("INDEX",Token.KEYWORD1);
+		keywords.add("INNER",Token.KEYWORD1);
+		keywords.add("INSERT",Token.KEYWORD1);
+		keywords.add("INTO",Token.KEYWORD1);
+		keywords.add("IS",Token.KEYWORD1);
+		keywords.add("ISOLATION",Token.KEYWORD1);
+		keywords.add("KEY",Token.KEYWORD1);
+		keywords.add("LEVEL",Token.KEYWORD1);
+		keywords.add("MAX",Token.KEYWORD1);
+		keywords.add("MIN",Token.KEYWORD1);
+		keywords.add("MIRROREXIT",Token.KEYWORD1);
+		keywords.add("NATIONAL",Token.KEYWORD1);
+		keywords.add("NOCHECK",Token.KEYWORD1);
+		keywords.add("OF",Token.KEYWORD1);
+		keywords.add("ON",Token.KEYWORD1);
+		keywords.add("ORDER",Token.KEYWORD1);
+		keywords.add("PREPARE",Token.KEYWORD1);
+		keywords.add("PRIMARY",Token.KEYWORD1);
+		keywords.add("PRIVILEGES",Token.KEYWORD1);
+		keywords.add("PROCEDURE",Token.KEYWORD1);
+		keywords.add("REFERENCES",Token.KEYWORD1);
+		keywords.add("RESTORE",Token.KEYWORD1);
+		keywords.add("RESTRICT",Token.KEYWORD1);
+		keywords.add("REVOKE",Token.KEYWORD1);
+		keywords.add("ROLLBACK",Token.KEYWORD1);
+		keywords.add("SCHEMA",Token.KEYWORD1);
+		keywords.add("SELECT",Token.KEYWORD1);
+		keywords.add("SET",Token.KEYWORD1);
+		keywords.add("TABLE",Token.KEYWORD1);
+		keywords.add("TO",Token.KEYWORD1);
+		keywords.add("TRANSACTION",Token.KEYWORD1);
+		keywords.add("TRIGGER",Token.KEYWORD1);
+		keywords.add("TRUNCATE",Token.KEYWORD1);
+		keywords.add("UNION",Token.KEYWORD1);
+		keywords.add("UNIQUE",Token.KEYWORD1);
+		keywords.add("UPDATE",Token.KEYWORD1);
+		keywords.add("VALUES",Token.KEYWORD1);
+		keywords.add("VARYING",Token.KEYWORD1);
+		keywords.add("VIEW",Token.KEYWORD1);
+		keywords.add("WHERE",Token.KEYWORD1);
+		keywords.add("WITH",Token.KEYWORD1);
+		keywords.add("WORK",Token.KEYWORD1);
+	}
+	
+	private static void addDataTypes()
+	{
+		keywords.add("binary",Token.KEYWORD1);
+		keywords.add("bit",Token.KEYWORD1);
+		keywords.add("char",Token.KEYWORD1);
+		keywords.add("character",Token.KEYWORD1);
+		keywords.add("datetime",Token.KEYWORD1);
+		keywords.add("decimal",Token.KEYWORD1);
+		keywords.add("float",Token.KEYWORD1);
+		keywords.add("image",Token.KEYWORD1);
+		keywords.add("int",Token.KEYWORD1);
+		keywords.add("integer",Token.KEYWORD1);
+		keywords.add("money",Token.KEYWORD1);
+		keywords.add("name",Token.KEYWORD1);
+		keywords.add("numeric",Token.KEYWORD1);
+		keywords.add("nchar",Token.KEYWORD1);
+		keywords.add("nvarchar",Token.KEYWORD1);
+		keywords.add("ntext",Token.KEYWORD1);
+		keywords.add("real",Token.KEYWORD1);
+		keywords.add("smalldatetime",Token.KEYWORD1);
+		keywords.add("smallint",Token.KEYWORD1);
+		keywords.add("smallmoney",Token.KEYWORD1);
+		keywords.add("text",Token.KEYWORD1);
+		keywords.add("timestamp",Token.KEYWORD1);
+		keywords.add("tinyint",Token.KEYWORD1);
+		keywords.add("uniqueidentifier",Token.KEYWORD1);
+		keywords.add("varbinary",Token.KEYWORD1);
+		keywords.add("varchar",Token.KEYWORD1);
+	}
+	
+	private static void addSystemFunctions()
+	{
+		keywords.add("ABS",Token.KEYWORD2);
+		keywords.add("ACOS",Token.KEYWORD2);
+		keywords.add("ASIN",Token.KEYWORD2);
+		keywords.add("ATAN",Token.KEYWORD2);
+		keywords.add("ATN2",Token.KEYWORD2);
+		keywords.add("CASE",Token.KEYWORD2);
+		keywords.add("CAST",Token.KEYWORD2);
+		keywords.add("CEILING",Token.KEYWORD2);
+		keywords.add("COS",Token.KEYWORD2);
+		keywords.add("COT",Token.KEYWORD2);
+		keywords.add("CURRENT_TIME",Token.KEYWORD2);
+		keywords.add("CURRENT_DATE",Token.KEYWORD2);
+		keywords.add("CURRENT_TIMESTAMP",Token.KEYWORD2);
+		keywords.add("CURRENT_USER",Token.KEYWORD2);
+		keywords.add("DATALENGTH",Token.KEYWORD2);
+		keywords.add("DATEADD",Token.KEYWORD2);
+		keywords.add("DATEDIFF",Token.KEYWORD2);
+		keywords.add("DATENAME",Token.KEYWORD2);
+		keywords.add("DATEPART",Token.KEYWORD2);
+		keywords.add("DAY",Token.KEYWORD2);
+		keywords.add("EXP",Token.KEYWORD2);
+		keywords.add("FLOOR",Token.KEYWORD2);
+		keywords.add("LOG",Token.KEYWORD2);
+		keywords.add("MONTH",Token.KEYWORD2);
+		keywords.add("RIGHT",Token.KEYWORD2);
+		keywords.add("ROUND",Token.KEYWORD2);
+		keywords.add("SIN",Token.KEYWORD2);
+		keywords.add("SOUNDEX",Token.KEYWORD2);
+		keywords.add("SPACE",Token.KEYWORD2);
+		keywords.add("SQRT",Token.KEYWORD2);
+		keywords.add("SQUARE",Token.KEYWORD2);
+		keywords.add("TAN",Token.KEYWORD2);
+		keywords.add("UPPER",Token.KEYWORD2);
+		keywords.add("USER",Token.KEYWORD2);
+		keywords.add("YEAR",Token.KEYWORD2);
+	}
+	
+	private static void addOperators()
+	{
+		keywords.add("ALL",Token.KEYWORD1);
+		keywords.add("AND",Token.KEYWORD1);
+		keywords.add("ANY",Token.KEYWORD1);
+		keywords.add("BETWEEN",Token.KEYWORD1);
+		keywords.add("CROSS",Token.KEYWORD1);
+		keywords.add("EXISTS",Token.KEYWORD1);
+		keywords.add("IN",Token.KEYWORD1);
+		keywords.add("INTERSECT",Token.KEYWORD1);
+		keywords.add("JOIN",Token.KEYWORD1);
+		keywords.add("LIKE",Token.KEYWORD1);
+		keywords.add("NOT",Token.KEYWORD1);
+		keywords.add("NULL",Token.KEYWORD1);
+		keywords.add("OR",Token.KEYWORD1);
+		keywords.add("OUTER",Token.KEYWORD1);
+		keywords.add("SOME",Token.KEYWORD1);
+	}
+	
+	private static void addSystemStoredProcedures()
+	{
+	}
+	
+	private static void addSystemTables()
+	{
+	}
+	
+	private static KeywordMap keywords;
+}
