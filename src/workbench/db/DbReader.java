@@ -37,7 +37,8 @@ public class DbReader
 	 *	
 	 *	@see #load(Connection)
 	 */
-	public DbReader(String aStatement) throws SQLException
+	public DbReader(String aStatement) 
+		throws SQLException
 	{
 		this(aStatement, null);
 	}
@@ -49,11 +50,12 @@ public class DbReader
 	 *
 	 *	@see #load()
 	 */
-	public DbReader(String aStatement, Connection aConn) throws SQLException
+	public DbReader(String aStatement, WbConnection aConn) 
+		throws SQLException
 	{
 		this.data = new CachedRowSet();
 		this.sqlStatement = aStatement;
-		this.dbConnection = aConn;
+		this.dbConnection = aConn.getSqlConnection();
 		this.data.setCommand(this.sqlStatement);
 	}
 	
