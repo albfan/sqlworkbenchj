@@ -5,6 +5,8 @@
  */
 package workbench.util;
 
+import java.io.BufferedReader;
+import java.io.StringReader;
 
 /**
  *
@@ -12,6 +14,8 @@ package workbench.util;
  */
 public class StringUtil
 {
+	public static final String LINE_TERMINATOR = System.getProperty("line.separator");
+	
 	public static String replace(String aString, String aValue, String aReplacement)
 	{
 		int pos = aString.indexOf(aValue);
@@ -67,5 +71,37 @@ public class StringUtil
 		{
 		}
 		return result;
+	}
+	
+	public static String makeJavaString(String aString)
+	{
+		StringBuffer result = new StringBuffer("String sql=");
+		BufferedReader reader = new BufferedReader(new StringReader(aString));
+		try
+		{
+			String line = reader.readLine();
+			while (line != null)
+			{
+				result.append('"');
+				result.append(line);
+				result.append(" \"");
+				//result.append();
+				line = reader.readLine();
+				if (line != null) 
+				{
+					result.append(" + \r");
+				}
+			}
+			result.append(';');
+		}
+		catch (Exception e)
+		{
+			result.append("(Error)");
+		}
+		finally
+		{
+			try { reader.close(); } catch (Exception e) {}
+		}
+		return result.toString();
 	}
 }
