@@ -1,5 +1,10 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Fix:  Spooling of more then one table from within the DbExplorer did not work
+
+
+Build 67, 20.01.2004
+--------------------
 Enh:  Selected text can now be indented and un-indented using the tab key
       (or Shift-Tab)
 Enh:  Column selection mode can now also be activated by keyboard.

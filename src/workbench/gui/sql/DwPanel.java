@@ -671,6 +671,7 @@ public class DwPanel
 		return newRow;
 	}
 
+	public boolean confirmCancel() { return true; }
 	public void cancelExecution()
 	{
 		if (this.stmtRunner != null)

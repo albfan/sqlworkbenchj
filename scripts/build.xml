@@ -339,6 +339,7 @@
       <param name="css.decoration" expression="1"/>
     </xslt>
     <!-- delete file="${html-outdir}/docbookx.dtd"/ -->
+    <delete file="${html-outdir}/Manual.html"/>
     <delete>
 			<fileset dir="${html-outdir}">
 				<include name="*.xml"/>
@@ -373,7 +374,7 @@
   
   <target name="publish-dev" depends="set-dev-build, copy-history, publish"/>
 
-  <target  name="dev-release" depends="set-dev-build, clean, copy-history, prepare, compile-dbg, build-help, make-jar, clean-history"/>
+  <target  name="dev-release" depends="set-dev-build, clean, copy-history, prepare, compile, build-help, make-jar, clean-history"/>
   
   <target name="make-dev-jar" depends="set-dev-build, clean, copy-history, prepare, compile-dbg, make-jar"/>
   <target name="dji" depends="prepare,compile-dbg,make-jar"/>
@@ -440,7 +441,9 @@
     
     <copy file="${doc}/pdf/SQLWorkbench-Manual.pdf" overwrite="true" todir="${root}/release"/>
     <copy file="${distdir}/JWorkbench.exe" overwrite="true" todir="${root}/release"/>
-    
+    <copy todir="${root}/release">
+        <fileset dir="${html-outdir}"/>
+    </copy>
     <delete file="${packagezip}"/>
     <zip zipfile="${packagezip}">
       <zipfileset dir="${root}/release">

@@ -202,6 +202,21 @@ public class WbSwingUtilities
 		else return JOptionPane.NO_OPTION;
 	}
 
+	public static int getYesNo(Component aCaller, String aMessage, String[] options)
+	{
+		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, null, options);
+		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);
+		dialog.setResizable(true);
+		dialog.pack();
+		dialog.show();
+		dialog.dispose();
+		Object result = ignorePane.getValue();
+		if (result == null) return JOptionPane.YES_OPTION;
+		else if (result.equals(options[0])) return 0;
+		else if (result.equals(options[1])) return 1;
+		else return -1;
+	}
+	
 	public static final int DO_COMMIT = 0;
 	public static final int DO_ROLLBACK = 1;
 	

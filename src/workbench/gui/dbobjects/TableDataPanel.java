@@ -271,6 +271,7 @@ public class TableDataPanel
 		return sql.toString();
 	}
 
+	public boolean confirmCancel() { return true; }
 	public void cancelExecution()
 	{
 		Thread t = new Thread()

@@ -1342,6 +1342,14 @@ public class SqlPanel
 		return success;
 	}
 
+	public boolean confirmCancel()
+	{
+		return true;
+	}
+	
+	/**
+	 *	Implementation of the Interruptable Interface.
+	 */
 	public void cancelExecution()
 	{
 		if (!this.isBusy()) return;

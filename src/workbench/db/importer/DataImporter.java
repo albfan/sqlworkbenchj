@@ -150,6 +150,11 @@ public class DataImporter
 		return result;
 	}
 
+	public boolean confirmCancel()
+	{
+		return true;
+	}
+	
 	public void cancelExecution()
 	{
 		this.isRunning = false;

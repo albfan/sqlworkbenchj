@@ -13,4 +13,5 @@ package workbench.interfaces;
 public interface Interruptable
 {
 	void cancelExecution();
+	boolean confirmCancel();
 }

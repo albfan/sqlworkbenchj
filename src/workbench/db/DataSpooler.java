@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import workbench.WbManager;
 import workbench.db.importer.RowDataProducer;
@@ -86,7 +87,8 @@ public class DataSpooler
 	private ProgressPanel progressPanel;
 	private JFrame progressWindow;
 	private boolean keepRunning = true;
-
+	private boolean cancelJobs = false;
+	private int pendingJobs = 0;
 	private boolean jobsRunning = false;
 	private RowActionMonitor rowMonitor;
 
@@ -147,6 +149,20 @@ public class DataSpooler
 		this.dbConn = aConn;
 	}
 
+	public boolean confirmCancel()
+	{
+		if (!this.jobsRunning) return true;
+		String msg = ResourceMgr.getString("MsgCancelAllCurrent");
+		String current = ResourceMgr.getString("LabelCancelCurrentExport");
+		String all = ResourceMgr.getString("LabelCancelAllExports");
+		int answer = WbSwingUtilities.getYesNo(this.progressWindow, msg, new String[] { current, all });
+		if (answer == 1)
+		{
+			this.cancelJobs = true;
+		}
+		return true;
+	}
+	
 	public void cancelExecution() 
 	{ 
 		this.keepRunning = false; 
@@ -269,7 +285,9 @@ public class DataSpooler
 	{
 		if (this.jobQueue == null) return;
 		int count = this.jobQueue.size();
+		this.pendingJobs = count;
 		this.jobsRunning = true;
+		this.cancelJobs = false;
 		for (int i=0; i < count; i++)
 		{
 			SpoolerJob job = (SpoolerJob)this.jobQueue.get(i);
@@ -288,7 +306,10 @@ public class DataSpooler
 			{
 				LogMgr.logError("DataSpooler.runJobs()", "Error spooling data for [" + this.sql + "] to file: " + this.outputfile, th);
 			}
+			this.pendingJobs --;
+			if (this.cancelJobs) break;
 		}
+		this.pendingJobs = 0;
 		this.jobsRunning = false;
 		this.closeProgress();
 	}
@@ -617,6 +638,11 @@ public class DataSpooler
 			if (this.exportType == EXPORT_XML)
 			{
 				pw.write(ds.getXmlEnd().toString());
+			}
+			else if (this.exportType == EXPORT_SQL)
+			{
+				pw.write("COMMIT;");
+				pw.newLine();
 			}
 		}
 		catch (IOException e)

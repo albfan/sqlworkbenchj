@@ -721,7 +721,7 @@ public class TableListPanel
 		return (aType.indexOf("table") > -1 || 
 		        aType.indexOf("view") > -1 || 
 						aType.indexOf("synonym") > -1 ||
-						(this.selectedObjectType.indexOf("sequence") > -1 && this.dbConnection.getMetadata().isPostgres())
+						(aType.indexOf("sequence") > -1 && this.dbConnection.getMetadata().isPostgres())
 					);
 	}
 
@@ -1177,16 +1177,23 @@ public class TableListPanel
 		String lastDir = WbManager.getSettings().getLastExportDir();
 		JFileChooser fc = new JFileChooser(lastDir);
 		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		//fc.setApproveButtonText(ResourceMgr.getString("LabelSelectDirButton"));
 
 		fc.setDialogTitle(ResourceMgr.getString("LabelSelectDirTitle"));
 		ExportOptionsPanel options = new ExportOptionsPanel();
 		fc.setAccessory(options);
+		int commitEvery = WbManager.getSettings().getIntProperty("workbench.dataspooler", "commitevery", -1);
+		if (commitEvery > 0)
+		{
+			options.setCommitEvery(commitEvery);
+		}
 
 		int answer = fc.showDialog(SwingUtilities.getWindowAncestor(this), null);
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
 			File fdir = fc.getSelectedFile();
+			WbManager.getSettings().setLastExportDir(fdir.getAbsolutePath());
+			commitEvery = options.getCommitEvery();
+			WbManager.getSettings().setProperty("workbench.dataspooler.commitevery", Integer.toString(commitEvery));
 			DataSpooler spooler = new DataSpooler();
 			spooler.setConnection(this.dbConnection);
 			spooler.setShowProgress(true);
@@ -1195,6 +1202,7 @@ public class TableListPanel
 			{
 				spooler.setOutputTypeSqlInsert();
 				spooler.setIncludeCreateTable(options.getCreateTable());
+				spooler.setCommitEvery(commitEvery);
 				ext = ".sql";
 			}
 			else
@@ -1214,7 +1222,8 @@ public class TableListPanel
 				if (table == null) continue;
 
 				String ttype = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-				if (!this.isTableType(ttype)) continue;
+				if (ttype == null) continue;
+				if (!this.isTableType(ttype.toLowerCase())) continue;
 				String stmt = "SELECT * FROM " + SqlUtil.quoteObjectname(table);
 				String fname = table.replaceAll("[\t\\:\\\\/\\?\\*\\|<>]", "").toLowerCase();
 				File f = new File(fdir, fname + ext);
