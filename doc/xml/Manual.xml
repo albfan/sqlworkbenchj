@@ -1,0 +1,1417 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.0/docbookx.dtd">
+<?xml-stylesheet href="html.css" type="text/css"?>
+<article>
+  <artheader>
+    <title>SQL Workbench/J User Manual</title>
+  </artheader>
+
+  <section id="license">
+    <title>Software license</title>
+
+    <para>Copyright (c) 2002-2003, Thomas Kellerer</para>
+
+    <para>This software is released to the public domain.</para>
+
+    <para>Permission is hereby granted, free of charge, to any person
+    obtaining a copy of this software and associated documentation files (the
+    &#34;Software&#34;), to deal in the Software without restriction,
+    including without limitation the rights to use, copy, modify, merge,
+    publish, distribute, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:</para>
+
+    <para>The above copyright notice and this permission notice shall be
+    included in all copies or substantial portions of the Software.</para>
+
+    <para>In order to ensure that this software stays free, selling, licensing
+    or charging for the use of this software is prohibited. The right to
+    include this software in a commercial product (bundling) is still granted
+    as long as this software is not the major functionality delivered.</para>
+
+    <para>Disclaimer</para>
+
+    <para>THE SOFTWARE IS PROVIDED &#34;AS IS&#34;, WITHOUT WARRANTY OF ANY
+    KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN
+    NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+    OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+    USE OR OTHER DEALINGS IN THE SOFTWARE.</para>
+  </section>
+
+  <section id="install">
+    <title>Installing and starting SQL Workbench/J</title>
+
+    <para>To run SQLWorkbench/J JDK 1.4 (or above) is required. Apart from
+    that, no special installation procedure is required. Just copy the files
+    into a directory that is convenient. When upgrading to a newer version of
+    SQLWorkbench/J the old .jar file can simply be overwritten.</para>
+
+    <section id="version">
+      <title>Program version</title>
+
+      <para>This document describes build $BUILD_NUMBER$ of the SQL Workbench/J</para>
+    </section>
+
+    <section id="starting">
+      <title>Starting the program</title>
+
+      <para>Workbench.jar is a self executing JAR file. This means, that if
+      your JDK is installed properly, a double click (on the Windows platform)
+      on Workbench.jar will execute the application. To run the application
+      manually use the command:</para>
+
+      <programlisting>java -jar Workbench.jar</programlisting>
+
+      <para>If you want to create a shortcut on your desktop use the above
+      line. On Windows systems - if you don&#39;t use the native launcher - it
+      is recommended to use javaw instead of java, so that the console window
+      is not displayed.</para>
+
+      <section id="config-dir">
+        <title>Specifying the location of configuration files</title>
+
+        <para>By default SQL Workbench/J will put all its configuration files
+        into the current directory (note that this is not necessarily the
+        directory where the .jar file is located). If a different directory
+        should be used to store connection profiles and other settings, the
+        parameter configdir can be used to specify an alternate directory:</para>
+
+        <programlisting>java -jar Workbench.jar -configdir=c:\ConfigData</programlisting>
+
+        <para>The configuration files and the binaries (.exe, .jar) don&#39;t
+        have to be in the same directory.</para>
+      </section>
+
+      <section id="no-ddraw">
+        <title>Crashes/Bluescreen when running under Windows®</title>
+
+        <para>If you experience problems when running SQL Workbench/J (or
+        other Java/Swing based applications) on the Windows ® platform, this
+        might be due to problems with the graphics driver and/or the
+        DirectDraw installation. If upgrading the graphics driver or the
+        DirectDraw/DirectX version is not an option (or does not solve the
+        problem), try to run SQL Workbench with the direct draw featured
+        turned off:</para>
+
+        <programlisting>java -Dsun.java2d.noddraw=true -jar Workbench.jar</programlisting>
+
+        <para>When using the exe launcher, you have to use the following
+        syntax:</para>
+
+        <programlisting>jworkbench -J-Dsun.java2d.noddraw=true</programlisting>
+      </section>
+    </section>
+
+    <section id="using-launcher">
+      <title>Using the Windows launcher</title>
+
+      <para>On the windows platform the supplied JWorkbench.exe can be used to
+      start the program. The native launcher searches for an installed JDK
+      (querying the registry) and then starts the SQL Workbench. The file
+      workbench.jar has to be located in the same directory as the
+      JWorkbench.exe, otherwise it doesn&#39;t work.</para>
+
+      <para>By default the launcher increases the maximum JVM heap size to 128
+      MB (the default for JDK 1.4 is 96MB). If you need more heap memory, you
+      need to pass the appropriate JVM parameter to the launcher</para>
+
+      <section id="launcher-jdk-search">
+        <title>How the Windows launcher searches for a JDK</title>
+
+        <para>First the launcher checks for a system variable WORKBENCH_JDK.
+        If that is defined, the JDK specified by that directory is used. If
+        WORKBENCH_JDK is not found, JAVA_HOME is used. If JAVA_HOME is not
+        defined, the registry key HKLM\Software\JavaSoft\Java Runtime
+        Environment is queried. If that is not defined,
+        HKLM\Software\JavaSoft\Java Development Kit is queried.</para>
+
+        <para>In the registry a subkey for the version 1.4 is retrieved, and
+        the directory specified by that key, is used as the base JDK
+        directory.</para>
+      </section>
+
+      <section id="launcher-parameters">
+        <title>Parameters for the Windows launcher</title>
+
+        <para>To distinguish parameters for the launcher and parameters to the
+        JVM that will be started, JVM parameter need to be prefixed with -J.
+        If you want to pass the parameter -Xmx256m to the JVM, specify the
+        parameter -J-Xmx128m. To define a system property you would pass
+        -J-Dsun.java2d.noddraw=true.</para>
+
+        <para>The following parameters are recognized:</para>
+
+        <informaltable>
+          <tgroup cols="2">
+            <tbody>
+              <row>
+                <entry>-jdk</entry>
+
+                <entry>Specify the installation
+                directory of the JDK e.g.: -jdk=c:\jdk1.4.1</entry>
+              </row>
+
+              <row>
+                <entry>-J</entry>
+
+                <entry>Pass a parameter to the JVM e.g:
+                -J-Dmyprop.value=hello</entry>
+              </row>
+
+              <row>
+                <entry>-server</entry>
+
+                <entry>Select the server JVM (instead of the
+                default client JVM)</entry>
+              </row>
+
+              <row>
+                <entry>-debug</entry>
+
+                <entry>Write debug information to the file
+                workbench.dbg to identify problems when using the launcher</entry>
+              </row>
+
+              <row>
+                <entry>-help</entry>
+
+                <entry>Display a message with the list of
+                parameters</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+
+        <para>All other parameters are passed on to the Workbench main class.
+        See <xref linkend="commandline"/> for details.</para>
+
+        <para>The following call to the launcher</para>
+
+        <programlisting>JWorkbench -configdir=c:\MyConf -J-Dsun.java2d.noddraw=true</programlisting>
+
+        <para>is the same as directly starting Workbench.jar with these
+        parameters:</para>
+
+        <programlisting>java -Dsun.java2d.noddraw=true -jar Workbench.jar -configdir=c:\MyConf</programlisting>
+      </section>
+    </section>
+
+    <section id="commandline" xreflabel="command line parameters">
+      <title>Command line parameters</title>
+
+      <para>Command line parameters are not case sensitive. So
+      <emphasis>-Profile</emphasis> or <emphasis>-profile</emphasis> are
+      identical. The usage of the command line parameters is identical between
+      using the launcher or using the java command itself.</para>
+
+      <section>
+        <title>-configdir=&#60;a directory&#62;</title>
+
+        <para>Store all settings, the connection profile and the statement
+        history in the given directory.</para>
+
+        <programlisting>java -jar Workbench.jar -configdir=&#34;c:/Configurations/JWorkbench&#34; 
+jworkbench -configdir=&#34;c:/Configurations/JWorkbench&#34;</programlisting>
+      </section>
+
+      <section>
+        <title>-profile=&#60;profile name&#62;</title>
+
+        <para>Connect to the given profile. The name has to be exactly the
+        same as it appears in the profile dialog (case sensitiv!). If the name
+        contains spaces, it has to be enclosed in quotations marks:</para>
+
+        <para>Example:</para>
+
+        <programlisting>java -jar Workbench.jar -profile=&#34;Oracle - Test&#34;
+jworkbench -profile=&#34;Oracle - Test&#34;</programlisting>
+      </section>
+
+      <section>
+        <title>-script=&#60;filename&#62;</title>
+
+        <para>Run the given script. Multiple scripts can be specified by
+        separating them with a comma. The scripts will be executed in the
+        order in which they appear in the commandline</para>
+
+        <para>Example:</para>
+
+        <programlisting>java -jar Workbench.jar -script=&#34;c:/scripts/script1.sql&#34;,&#34;c:/scripst/script2.sql&#34;
+jworkbench -script=&#34;c:/scripts/script1.sql&#34;,&#34;c:/scripst/script2.sql&#34;</programlisting>
+
+        <para>When this parameter is specified no GUI will be displayed. The
+        script(s) will be executed and then the Workbench will terminate. Any
+        messages are written to the logfile which can either be specified with
+        the -logfile parameter or via an entry in workbench.settings.</para>
+
+        <para>When specifying the -script parameter, make sure you also
+        specify a connection profile!</para>
+      </section>
+
+      <section>
+        <title>-logfile=&#60;filename&#62;</title>
+
+        <para>Write messages to a file named &#60;filename&#62;. If this
+        parameter is not passed, the logfile name will be retrieved from
+        workbench.settings (currently there is no field in the option dialog
+        to enter the location of the log file)</para>
+      </section>
+
+      <section>
+        <title>-AbortOnError=[true|false]</title>
+
+        <para>Controls the behavior when running a script through the -script
+        parameter. If any error occurs, and AbortOnError is true, script
+        processing is completely stopped. The only script which will be
+        executed after that point is the script specified with the parameter
+        -CleanupError. If no error occurs the script specified with
+        -CleanupSuccess is executed.</para>
+
+        <para>If AbortOnError is false all statements in all scripts are
+        executed regardless of any errors. As no error information is
+        evaluated the script specified in -CleanupSuccess will be executed at
+        the end.</para>
+
+        <para>Instead of true/false you can also use yes/no</para>
+
+        <para>If this parameter is not supplied it defaults to true, meaning
+        that the script will be aborted when an error occurs.</para>
+      </section>
+
+      <section>
+        <title>-CleanupSuccess=&#60;filename&#62;</title>
+
+        <para>This script is executed as the last script if either no error
+        occurred or AbortOnError is set to false.</para>
+      </section>
+
+      <section>
+        <title>-CleanupErorr=&#60;filename&#62;</title>
+
+        <para>This script is executed as the last script if AbortOnError is
+        set to true and an error occurred during script execution.</para>
+      </section>
+
+      <section>
+        <title>Script execution without a profile</title>
+
+        <para>When specifying a script to execute, you don&#39;t need to have
+        a profile for the connection (in fact you don&#39;t need
+        WbProfiles.xml, WbDrivers.xml to run in this mode).</para>
+
+        <para>When specifying a script, SQL Workbench/J accepts the following
+        parameters to specify the full connection details</para>
+
+        <informaltable>
+          <tgroup cols="2">
+            <colspec colname="c1" colwidth="5.3cm" />
+
+            <colspec colname="c2" colwidth="11.7cm" />
+
+            <tbody>
+              <row>
+                <entry>-url</entry>
+
+                <entry>The -url parameter specifies the JDBC url
+                to connect to.</entry>
+              </row>
+
+              <row>
+                <entry>-username</entry>
+
+                <entry>Specify the username for the DBMS</entry>
+              </row>
+
+              <row>
+                <entry>-password</entry>
+
+                <entry>Specify the password for the user</entry>
+              </row>
+
+              <row>
+                <entry>-driver</entry>
+
+                <entry>Specify the full class name of the JDBC
+                driver</entry>
+              </row>
+
+              <row>
+                <entry>-driverjar</entry>
+
+                <entry>Specify the full pathname to the .jar file
+                containing the JDBC driver</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+
+        <para>Example (one line):</para>
+
+        <programlisting>java -jar Workbench.jar -url=jdbc:postgresql:/dbserver/mydb
+     -driver=org.postgresql.Driver -username=thomas -password=welcome  
+     -driverjar=C:/Programme/pgsql/pg73jdbc3.jar -script=test.sql</programlisting>
+
+        <para>This will start SQL Workbench/J, connect to the database server
+        as specified in the connection parameters and execute the script
+        test.sql</para>
+      </section>
+    </section>
+  </section>
+
+  <section id="configure-drivers">
+    <title>Configuring JDBC drivers</title>
+
+    <para>Before you can connect to a DBMS you have to configure the JDBC
+    driver to be used. The configuration of a JDBC driver requires two
+    properties</para>
+
+    <itemizedlist><listitem><para>the driver&#39;s class name</para></listitem>
+    <listitem><para>the library where to find the classes</para></listitem></itemizedlist>
+
+    <para>Here is an overview of common JDBC drivers, and how they have to
+    be configured. SQLWorkbench/J contains predefined JDBC drivers. The only
+    thing that needs to be changed is the exact location of the library
+    containing the driver class.</para>
+
+    <informaltable>
+      <tgroup cols="3">
+        <tbody> 
+          <row> 
+            <entry><para>DBMS</para> </entry> 
+            <entry> <para>Driver class</para></entry> 
+            <entry> <para>Library name</para> </entry> 
+          </row>      
+          <row> 
+            <entry> <para>Oracle</para> </entry> 
+            <entry> <para>oracle.jdbc.OracleDriver</para> </entry> 
+            <entry> <para>ojdbc4.jar (JDBC 2.x, for JDK 1.4) http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html</para></entry> 
+          </row> 
+          <row> 
+            <entry> <para>SQL Server driver from INET Software</para> </entry> 
+            <entry> <para>com.inet.tds.TdsDriver</para> </entry> 
+            <entry> <para>Library name depends on the driver www.inetsoftware.de</para> </entry> 
+          </row> 
+          <row> 
+            <entry> <para>MS SQL Server 2000</para> </entry> 
+            <entry> <para>com.microsoft.jdbc.sqlserver.SQLServerDriver</para></entry> 
+            <entry> <para>msbase.jar;mssqlserver.jar;msutil.jar http://www.microsoft.com/sql/default.asp</para></entry> 
+          </row> 
+          <row> 
+            <entry> <para>JTDS driver for MS SQL Server </para> </entry> 
+            <entry> <para>net.sourceforge.jtds.jdbc.Driver</para> </entry> 
+            <entry> <para>http://jtds.sourceforge.net</para></entry> 
+          </row> 
+          <row> 
+            <entry> <para>HSQLDB</para> </entry>
+            <entry> <para>org.hsqldb.jdbcDriver</para> </entry> 
+            <entry> <para>hsqldb.jar http://hsqldb.sourceforge.net</para> </entry> 
+          </row> 
+          <row> 
+            <entry> <para>ODBC Bridge</para></entry> 
+            <entry> <para>sun.jdbc.odbc.JdbcOdbcDriver</para> </entry> 
+            <entry> <para>Included in the JDK</para> </entry>
+          </row> 
+        </tbody> 
+      </tgroup>
+    </informaltable>
+
+    <para>The name of the library has to contain the full path, so that
+    SQLWorkbench/J can find it. If a driver requires more than one library,
+    select all necessary libraries in the file open dialog, or enter all the
+    filenames separated by a semicolon.</para>
+
+    <para>You can assign a sample URL to each driver, which will be put into
+    the URL property of the profile, when the driver class is selected.</para>
+
+    <para>You do not need to add the jar file containing the driver, to the
+    classpath when starting SQLWorkbench/J. This is handled by the
+    application automatically.</para>
+
+    <para>SQLWorkbench/J comes with some sample URLs pre-configured.
+    Some of these sample URLs use brackets to indicate a parameters that need 
+    to be replaced with the actual value for your connection:  (servername)</para> 
+    <para>In this case the entire sequence including the brackets need to be replaced with the actual servername.</para>
+
+    <section id="odbc">
+			<title>ODBC connections without a data source</title>
+			<para>On Microsoft Windows® you can use the ODBC bridge to connect to
+			ODBC datasources. For some drivers you don&#39;t need to create an ODBC
+			datasource in order to be able to use the ODBC driver. The following
+			URLs can be used to connect to data files directly</para>
+	
+			<informaltable> 
+				<tgroup cols="2"> 
+					<colspec colname="c1" colwidth="2.2cm"></colspec>
+					<colspec colname="c2" colwidth="14.8cm"></colspec> 
+					<tbody> 
+						<row> 
+							<entry> <para>Excel</para> </entry> 
+							<entry><para>jdbc:odbc:DRIVER={Microsoft Excel Driver (*.xls)};DBQ=&#60;filename&#62;</para> </entry> 
+							</row> 
+							<row> 
+								<entry> <para>Access</para> </entry> 
+								<entry> <para>jdbc:odbc:DRIVER={Microsoft Access Driver (*.mdb)};DBQ=&#60;filename&#62;</para> </entry> </row> 
+							<row> 
+								<entry> <para>dBase</para> </entry> 
+								<entry>  <para>jdbc:odbc:DRIVER={Microsoft dBase Driver (*.dbf)};DefaultDir=&#60;directory where the .dbf files are located&#62;</para></entry> 
+							</row> 
+					</tbody> 
+				</tgroup> 
+			</informaltable>
+		</section>
+		
+  </section>
+
+  <section id="profiles">
+    <title>Database profiles</title>
+
+    <section>
+      <title>JDBC settings</title>
+      <para>SQL Workbench/J uses the concept of database profiles to store
+      connection information. A database profile describes all the parameters
+      needed to connect to a database system such username, password, JDBC
+      driver to be used and other properties needed to connect to the backend
+      DBMS</para>
+      
+      <para>Some JDBC drivers accept additional properties. These properties
+      can be edited and defined when clicking the "Extended properties"
+      button on the connection dialog. An extended property consists of a
+      property name and its value. The possible property names can be looked
+      up in the documentation for your JDBC driver.</para>
+    </section>
+    
+    <section id="profile-workbench-settings">
+      <title>SQL Workbench specific settings</title>
+
+      <section id="profile-save-password">
+        <title>Save password</title>
+
+        <para>If this option is enabled (i.e. checked) the password for the
+        profile will also be stored in the profile file. If the global
+        option <link linked="options-encrypt-password">Encrypt Passwords</link> 
+				is selected, then the password will be stored encrypted, 
+				otherwise it will be stored in plain text!</para>
+      </section>
+
+      <section id="profile-separate-connection">
+        <title>One connection per tab</title>
+
+        <para>If this option is enabled, then each tab in the main window
+        will open a separate connection to the database server. This is
+        useful, if the JDBC driver is not multi-threaded and does not allow
+        to execute two statements concurrently on the same connection.</para>
+
+        <para>The connection for each tab will not be opened until the tab
+        is actually selected.</para>
+      </section>
+
+      <section id="profile-ignore-drop-error">
+        <title>Ignore DROP errors</title>
+
+        <para>If this option is enabled, any error reported by the database
+        server when issuing a statement that begins with DROP, will be
+        ignored. Only a warning will be printed into the message area. This
+        is useful when executing SQL scripts to build up a schema, where a
+        DROP TABLE is executed before each CREATE TABLE. If the table does
+        not exist the error which the DROP statement will report, is not
+        considered as an error and the script execution continues.</para>
+      </section>
+
+      <section id="profile-workspace">
+        <title>Workspace</title>
+
+        <para>For each connection a workspace file can be assigned. When you
+        create a new connection, and do not yet have a workspace file, leave
+        this field empty. Later when you have entered some statements you
+        wish to associate with this connection, use „Workspace-&#62;Save
+        Workspace as&#34; to create a workspace file. You will be prompted
+        if you want to assign that workspace to the active connection
+        profile.</para>
+      </section>
+    </section>
+  
+    <section id="connecting">
+      <title>Connecting to the database</title>
+      <para>After the program is started, the user is prompted to choose a
+      connection to a database.</para>
+
+      <para>The list on the left side displays all available profiles. The last used profile is highlighted.</para> 
+      <para>To create a new profile click on the [New Profile]</para>
+      <para>To delete an existing profile, select the profile in the list and
+      click on the delete profile button</para>
+    </section>
+  </section>
+  
+  <section id="using">
+    <title>Using SQL Workbench</title>
+
+    <section id="sql-statements">
+      <title>Entering and executing SQL statements</title>
+
+      <section id="edit">
+        <title>Editing and executing</title>
+
+        <para>SQL statements can be entered in the upper part of the window.
+        The tabbed editor allows you to keep more than one statement
+        accessible (without needing to use the history functions). Each tab
+        has its own result set and message panel. When you switch to a
+        different statement tab, the result list in the lower part of the
+        window will change to either the last result or the last message of
+        that statement.</para>
+
+        <para>You can run any statement that is valid for the current DBMS. If
+        the statement returns a result set, it will be displayed, otherwise
+        any messages from the server will be displayed in the messages tab. To
+        add or remove tab pages, right click on the tab header and choose
+        "Add tab" or "Close tab"). The number of tabs is stored in
+        the associated workspace. If you do not have a workspace assigned to
+        the current profile, the tab count will be stored in the default
+        workspace.</para>
+
+        <para>The statement is executed by either pressing F9, Ctrl-E or
+        clicking the &#34;Run&#34;. This will execute the currently selected
+        text. If no text is selected in the editor, the complete statement
+        will be executed. If you want to execute the whole statement even when
+        text is selected, use the command SQL/Execute All</para>
+
+        <para>To execute the statement in which the cursor is currently
+        located use Ctrl-Enter. The current statement is defined as the text
+        between the previous SQL delimiter and the next SQL delimiter. The
+        delimiter is not necessarily a semicolon. The delimiter can 
+        be configured in the <link linkend="options">system preferences</link>.
+        </para>
+
+        <para>The font that is used for the SQL editor can be defined in the
+        <link linkend="options">system preferences</link>.</para>
+      </section>
+
+      <section id="execute-ddl">
+        <title>Executing DDL Statements</title>
+
+        <para>SQLWorkbench will send every statement to the backend DBMS, so
+        executing DDL statements (CREATE TABLE, ...) is not a problem.</para>
+
+        <para>However when executing statements such as CREATE PROCEDURE which
+        in turn contain valid SQL statement, delimited with a ; the SQL
+        Workbench will send everything up to the first semicolon to the
+        backend. In case of a CREATE PROCEDURE statement this will obviously
+        result in an error as the statement is not complete.</para>
+
+        <para>The solution is to terminate the script with a character
+        sequence called "<xref linkend="options-alternate-delimiter"/>". 
+        The value of this sequence can be configured in the <link linkend="options">options dialog</link>. 
+        The default is ./ (a dot followed by a slash)</para>
+
+        <para>If a SQL statement is terminated with the alternate delimiter, 
+        that delimiter is used instead of a semicolon. This way the semicolons embedded in
+        the CREATE PROCEDURE script will be sent correctly to the backend
+        DBMS.</para>
+
+        <para>When you execute selected text from the editor, be sure to
+        select the alternate delimiter as well, otherwise it will not be
+        recognized.</para>
+      </section>
+
+      <section id="statement-history">
+        <title>Statement history</title>
+
+        <para>More than one statement can be entered in the editor. The
+        individual statements have to be seperated either by a semicolon or
+        with the keyword GO on a single line.</para>
+
+        <para>When executing a statement the contents of the editor is put
+        into an internal buffer together with the information about the
+        selected text and the cursor position. The previous statement can be
+        recalled by pressing Alt-Left or choosing SQL/Previous Statement
+        statement from the menu. Once the previous statement(s) have been
+        recalled the next statement can be shown using Alt-Right or choosing
+        SQL/Next Statement from the menu. This is similar to browsing through
+        the history of a web browser.</para>
+      </section>
+
+      <section id="using-workspaces">
+        <title>Using workspaces</title>
+
+        <para>The complete history for all editor tabs is saved and loaded
+        into one file, called a workspace. A connection profile can be
+        associated with a specific workspace, which gets loaded as soon as the
+        connection is established. All connections which are not assigned to a
+        workspace, share a common workspace called Default.wksp</para>
+
+        <para>To save a new workspace from the current SQL statement history,
+        select File/Save&#x00A0;Workspace&#x00A0;as.... The default file
+        extension for workspaces is wksp.</para>
+
+        <para>Once you have loaded a workspace, you can save it with
+        File/Save&#x00A0;Workspace. The current workspace is automatically
+        saved, when you exit the Workbench.</para>
+
+        <para>An existing workspace can be loaded with
+        File/Load&#x00A0;Workspace.</para>
+      </section>
+
+      <section id="macros">
+        <title>SQL Macros</title>
+
+        <para>SQL Workbench/J offers so called SQL macros, or abbreviations.
+        You can define macros for often used SQL statements. Once defined, you
+        only need to enter the defined macro name and the underlying SQL
+        statement will be executed.</para>
+
+        <section id="define-macro">
+          <title>Defining Macros</title>
+
+          <para>There are two ways to define a SQL macro. Once you have
+          selected the statement in the SQL editor, select
+          SQL/Add&#x00A0;SQL&#x00A0;macro from the main menu. A dialog box
+          will appear where you can enter the name for this macro. From then
+          own, you can executed the defined statement by simply entering the
+          given name.</para>
+
+          <para>You can edit, delete and add new macros through
+          File/Manage&#x00A0;SQL&#x00A0;macros.</para>
+        </section>
+
+        <section id="exec-macro">
+          <title>Executing macros</title>
+
+          <para>To execute a macro, you can either type the alias you have
+          defined, or select SQL/SQL&#x00A0;Macros. The first 10 macros will
+          be listed there directly. The other macros can be executed when
+          selecting SQL/SQL&#x00A0;Macros/Run&#x00A0;macro... This will
+          display a dialog with all defined macros. After selecting a macro,
+          it can be executed by clicking on the „Run&#34; button.</para>
+
+          <para>The alias for a macro which is executed through the menu, will
+          not be placed into the editor and will not overwrite the current
+          text in the editor.</para>
+        </section>
+      </section>
+    </section>
+
+    <section id="manage-scripts">
+      <title>Saving and loading SQL scripts</title>
+
+      <para>The text from the current editor can be saved to an external file,
+      by choosing "File/Save" or "File/Save as". The filename for the
+      current editor will be remembered. If you want to "detach" the tab
+      from the external file, you can use "File/Discard file" (Ctrl-F4)
+      or use the context menu on the tab itself. This will empty the text
+      editor as well. If you only want to detach the filename from the editor
+      but keep the text, then press Ctrl-Shift-F4 or hold down the Shift key
+      while selecting the Discard menu item.</para>
+    </section>
+
+    <section id="server-messages">
+      <title>Server messages</title>
+
+      <para>For MS SQL Server, any message written with the
+      <literal>PRINT</literal> command will be displayed in the messages tab.</para>
+
+      <para>For Oracle the dbms_output package is supported as well. Support for this
+      package can to be turned on manually with the <xref linkend="command-enableout"/> command 
+      or by default in the <link linkend="options-enable-out">system preferences</link>
+      </para>
+
+      <para>If your DBMS supports something similar please let me know, and I
+      will implement it provided I have access to the DBMS. Please send your
+      request to workbench@kellerer.org</para>
+    </section>
+
+    <section id="edit-data">
+      <title>Editing the data</title>
+
+      <para>Once the data has been retrieved from the database, it can be
+      edited directly in the table. The SQL Workbench assumes that enough
+      columns have been retrieved from the table so that at a unique
+      identifier is available to identify the rows to be updated.</para>
+
+      <para>If you have defined primary keys in your database schema, and they
+      are part of the result set, the primary key columns will be used for the
+      where statements for UPDATE and DELETE. If no primary key columns are
+      found, the JDBC driver is asked for a &#34;best row identifier&#34;. If
+      that doesn&#39;t return any information, the original values of all
+      columns in the result set will be used to restrict DELETE&#39;s and
+      UPDATE&#39;s</para>
+
+      <para>To enter the Edit mode, choose Data/Enable&#x00A0;Data&#x00A0;Edit
+      from the main menu. The toolbar icon will indicate the edit mode by
+      being pressed down (The &#34;pressed down&#34; look is dependent on the
+      Look &#38; Feel). Now the data in the result set can be edited. To
+      insert a new row choose &#34;Data/Insert&#34;?row. The new row will be
+      inserted prior the current row. To delete the current row, choose
+      &#34;Data/Delete?row&#34;.</para>
+
+      <para>The changes will not be saved to the database until you choose
+      Data/Save. If the update is successful (no database errors) they will be
+      committed automatically.</para>
+
+      <para>Once you issue a new SELECT statement the Edit mode will be
+      disabled. If you try to enable the edit mode for a result set where more
+      than one table is involved a dialog box will be shown, where you can
+      select the table to be updated.</para>
+    </section>
+
+    <section id="wb-commands">
+      <title>Special Commands</title>
+
+      <section id="command-list">
+        <title>LIST</title>
+
+        <para>This command lists all available tables (including views and
+        synonyms). This output is equivalent to the left part of the Database
+        Object Explorer&#39;s Table tab.</para>
+      </section>
+
+      <section id="command-listprocs">
+        <title>LISTPROCS</title>
+
+        <para>This command will list all stored procedures available to the
+        current user. The output of this command is equivalent to the Database
+        Explorer&#39;s Procedure tab.</para>
+      </section>
+
+      <section id="command-desc">
+        <title>DESCRIBE &#60;table_name&#62;</title>
+
+        <para>Describe shows the definition of the given table. It can be
+        abbreviated with DESC.</para>
+      </section>
+
+      <section id="command-listcat">
+        <title>LISTCAT/LISTDB</title>
+
+        <para>Lists the available catalogs or databases. The output of this
+        command depends on the underlying JDBC driver and DBMS. For MS SQL
+        Server this lists the available databases (which then could be changed
+        by USE &#60;dbname&#62;)</para>
+
+        <para>For Oracle this command returns nothing (as Oracle does not
+        implement the concept of catalogs)</para>
+      </section>
+
+      <section id="command-spool">
+        <title>SPOOL</title>
+
+        <para>Turns on spooling of data for the <emphasis role="strong">next</emphasis>
+        SQL statement (which has to produce a result set). The data is
+        directly written to disk without loading it into memory. This is
+        equivalent to the menu item SQL/Spool&#x00A0;Data. The spool command
+        gives you more control over the format of the created file, then the
+        menu.</para>
+
+        <para>The command supports the following parameters:</para>
+
+        <informaltable>
+          <tgroup cols="2">
+            <colspec colname="c1" colwidth="4.1cm" />
+
+            <colspec colname="c2" colwidth="12.9cm" />
+
+            <tbody>
+              <row>
+                <entry><para>-type=[text|sql|xml]</para></entry>
+
+                <entry><para>Defines the type of the output file
+                </para></entry>
+              </row>
+
+              <row>
+                <entry><para>-file=&#60;filename&#62;</para></entry>
+
+                <entry><para>Defines the output file </para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+
+        <section>
+          <title>Parameters for the type SQL</title>
+
+          <informaltable>
+            <tgroup cols="2">
+              <colspec colname="c1" colwidth="4.1cm" />
+
+              <colspec colname="c2" colwidth="12.9cm" />
+
+              <tbody>
+                <row>
+                  <entry><para>-table</para></entry>
+
+                  <entry><para>If the type is SQL the given
+                  tablename will be used to create the INSERT statements. This
+                  is useful when the data is retrieved from several different
+                  tables, and should be inserted into one target table (e.g.
+                  when migrating data from one DBMS to another)</para></entry>
+                </row>
+
+                <row>
+                  <entry><para>-charfunc</para></entry>
+
+                  <entry><para>If this parameter is given, any
+                  non-printable character in a text/character column will be
+                  replaced with a call to the given function with the ASCII
+                  value as the parameter. </para> <para>If -charfunc=chr is
+                  given (e.g. for an Oracle syntax), a CR (=13) inside a
+                  character column will be replaced with:</para> <para>INSERT
+                  INTO ... VALUES (&#39;First line&#39;||chr(13)||&#39;Second
+                  line&#39; ... )</para> <para>This setting will affect ASCII
+                  values 0 to 31</para></entry>
+                </row>
+
+                <row>
+                  <entry><para>-concat</para></entry>
+
+                  <entry><para>If charfunc is given and the DBMS
+                  does not support the standard ANSI character for
+                  concatenating strings (which is ||) then a different
+                  concatenation character can be defined with this parameter:</para>
+                  <para>-concat=+</para> <para>e.g. for MS Access </para></entry>
+                </row>
+
+                <row>
+                  <entry><para>-commitevery</para></entry>
+
+                  <entry><para>A numeric value which identifies
+                  the number of INSERT statements after which a COMMIT is put
+                  into the generated SQL script.</para> <para>-commitevery=100</para>
+                  <para>will create a COMMIT; after every 100 INSERT&#39;s</para></entry>
+                </row>
+
+                <row>
+                  <entry><para>-createtable==[true|false]</para></entry>
+
+                  <entry><para>If this parameter is set to true,
+                  the necessary CREATE TABLE command is put into the output
+                  file.</para></entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable>
+        </section>
+
+        <section id="spool-text-parameters">
+          <title>Parameters for the type TEXT</title>
+
+          <informaltable>
+            <tgroup cols="2">
+              <colspec colname="c1" colwidth="4.1cm" />
+
+              <colspec colname="c2" colwidth="12.9cm" />
+
+              <tbody>
+                <row>
+                  <entry><para>-delimiter</para></entry>
+
+                  <entry><para>The given string sequence will be
+                  placed between two columns. The default is a tab character.</para></entry>
+                </row>
+
+                <row>
+                  <entry><para>-dateformat</para></entry>
+
+                  <entry><para>The date format to be used when
+                  writing date columns into the output file. The syntax of the
+                  format definition, is the same as for the SimpleDateFormat
+                  class.</para></entry>
+                </row>
+
+                <row>
+                  <entry><para>-datetimeformat</para></entry>
+
+                  <entry><para>The format to be used when writing
+                  datetime (or timestamp) columns into the output file.
+                  </para></entry>
+                </row>
+
+                <row>
+                  <entry><para>-quotechar</para></entry>
+
+                  <entry><para>The character (or sequence of
+                  characters) to be used to enclose text data. The default is
+                  not to use a quote character</para></entry>
+                </row>
+
+                <row>
+                  <entry><para>-decimal</para></entry>
+
+                  <entry><para>The decimal symbol to be used for
+                  numbers. The default is a point.</para></entry>
+                </row>
+
+                <row>
+                  <entry><para>-cleancr=[true|false]</para></entry>
+
+                  <entry><para>Controls the writing of non
+                  printing characters inside character columns. If
+                  cleancr=true, any non printable character (&#60; 32) will be
+                  replaced with a space character.</para></entry>
+                </row>
+
+                <row>
+                  <entry><para>-header=[true|false]</para></entry>
+
+                  <entry><para>If this parameter is set to true,
+                  the header (i.e. The column names) are placed into the
+                  output file.</para></entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable>
+        </section>
+
+        <section id="spoole-xml-parameters">
+          <title>Parameters for the type XML</title>
+
+          <informaltable>
+            <tgroup cols="2">
+              <tbody>
+                <row>
+                  <entry><para>-table</para></entry>
+
+                  <entry><para>The given tablename will be put
+                  into the &#60;table&#62; tag as an attribute.</para></entry>
+                </row>
+
+                <row>
+                  <entry><para>-dateformat</para></entry>
+
+                  <entry><para>The date format to be used when
+                  writing date columns into the output file. The syntax of the
+                  format definition, is the same as for the SimpleDateFormat
+                  class.</para></entry>
+                </row>
+
+                <row>
+                  <entry><para>-datetimeformat</para></entry>
+
+                  <entry><para>The format to be used when writing
+                  datetime (or timestamp) columns into the output file.
+                  </para></entry>
+                </row>
+
+                <row>
+                  <entry><para>-decimal</para></entry>
+
+                  <entry><para>The decimal symbol to be used for
+                  numbers. The default is a point.</para></entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable>
+
+          <para>Examples:</para>
+
+          <programlisting>SPOOL -type=text -file=&#34;c:/data/data.txt&#34; -delimiter=&#34;|&#34; -decimal=&#34;,&#34;;
+SELECT * FROM data_table;</programlisting>
+
+          <para>Will create a text file with the data from data_table. Each
+          column will be separated with the character | Each fractional number
+          will be written with a comma as the decimal separator.</para>
+
+          <programlisting>SPOOL -type=sql -file=&#34;c:/data/newtable.sql&#34; -table=newtable;
+SELECT * FROM table1, table2 
+WHERE table1.column1 = table2.column1;</programlisting>
+
+          <para>Will create a SQL scripts which inserts the data from table1
+          and table2 into a table called newtable. If the parameter -table is
+          omitted, the creation of SQL is only possible, if the SELECT is
+          based on a single table (or view).</para>
+        </section>
+      </section>
+
+      <section id="command-enableout" xreflabel="ENABLEOUT">
+        <title>ENABLEOUT</title>
+
+        <para>This command enables the DBMS_OUTPUT package when connected to
+        an Oracle database. On other systems this command does nothing. After
+        the DBMS_OUTPUT package is enabled, any message written with
+        dbms_output.put_line() are displayed in the message pane after
+        executing a SQL statement. It is equivalent to calling the
+        dbms_output.enable() procedure.</para>
+
+        <para>The DBMS_OUTPUT package can be enabled automatically when a
+        connection is established. See <xref linkend="options-enable-out"/></para>
+      </section>
+
+      <section id="command-disableout">
+        <title>DISABLEOUT</title>
+
+        <para>This disables the DBMS_OUTPUT package for an Oracle database.
+        This is equivalent to calling dbms_output.disable() procedure.</para>
+      </section>
+    </section>
+
+    <section id="export">
+      <title>Export data</title>
+
+      <para>You can export the data of the result set into local files of the
+      following formats:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>HTMLText with HTML formatting</para>
+        </listitem>
+
+        <listitem>
+          <para>SQL SQL INSERT syntax</para>
+        </listitem>
+
+        <listitem>
+          <para>XMLXML format</para>
+        </listitem>
+
+        <listitem>
+          <para>Text Tab-separated columns with a newline at the end of each
+          row</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>To copy the data into the clipboard choose "Copy into
+      Clipboard" from the data menu. The export dialog uses default
+      settings for the creation of the files. If you want to have more control
+      over the generated output file, use the <link linkend="command-spool">SPOOL</link>
+      command.</para>
+    </section>
+
+    <section id="import">
+      <title>Import data</title>
+
+      <para>SQL Workbench/J can import text (Tab separated). The structure of
+      the file has to match the structure of the result set, otherwise an
+      error will occur. To import a text file select Data/Import</para>
+
+      <para>When selecting the file, you can change some parameters for the
+      import:</para>
+
+      <para>Header: if this is checked, the first line of the import file will
+      be ignored</para>
+
+      <para>Delimiter: the delimiter used to separate column values. Enter \t
+      for the tab character</para>
+
+      <para>Date Format: The format in which date fields are specified. The
+      format of this parameter is the same as the SimpleDateFormat class from
+      the JDK.</para>
+
+      <para>Number Format: The format in which numeric values are specified.
+      Most import if a comma or a point are used as the decimal separator. In
+      the above example a point is used. Enter #,# if a comma is used.</para>
+
+      <para>Quote char: The character used to quote values with special
+      characters. Make sure that each opening quote is followed by a
+      closing quote in your text file.</para>
+    </section>
+
+    <section id="change-display">
+      <title>Changing the display of the result set table</title>
+
+      <para>Each column width of the result set table can be changed. When you
+      press the right mouse button in the header area of the result set, the
+      following menu is displayed:</para>
+
+      <para>&#34;Optimal width&#34; determines the text width of the longest
+      entry of that column and adjusts the column width to completely display
+      the contents. Optimal width for all columns can also be executed by
+      pressing Ctrl-W</para>
+
+      <para>Each row can be resized vertically as well, to display multi line
+      contents.</para>
+    </section>
+  </section>
+
+  <section id="dbexplorer">
+    <title>Database Object Explorer</title>
+    
+    <para>The Database Object Explorer displays the available database objects
+    such as Tables, Views, Triggers and Stored Procedures.</para>
+
+    <para>At the top of the window, the current schema (for MS SQL Server this
+    would be a database, for Oracle this is the user) can be selected.</para>
+
+    <para>The first tab displays the structure of tables and views. The type
+    of object displayed can be chosen from the drop down right above the table
+    list. This list will be returned by the JDBC driver, so the available
+    „Table types&#34; can vary from DBMS to DBMS.</para>
+
+    <para>As soon as either the Schema/Database or the Type is selected, the
+    list will be refreshed.</para>
+
+    <para>The Database Explorer can either be displayed as a separate window,
+    or as a tab inside the main window. This behavior can be changed in the
+    system options. To close the Db Explorer Tab, right click on the tab
+    label, and choose Close&#x00A0;Tab. If the Explorer tab is left open when
+    exiting the SQLWorkbench/J, the explorer tab will be restored the next
+    time SQL Workbench/J is started. (the Explorer <emphasis role="strong">window</emphasis>
+    will <emphasis role="strong">not</emphasis> be restored)</para>
+
+    <section id="dbexplorer-tablelist">
+      <title>Table tab</title>
+
+      <section id="table-tab">
+        <title>Tables</title>
+
+        <para>When a table is selected, the right part of the window will
+        display it&#39;s column definition, the SQL statement to create the
+        table, any index defined on that table (only if the JDBC driver
+        returns that information), other tables that are referenced by the
+        currently selected table, any table that references the currently
+        selected table and any trigger that is defined on that table.</para>
+
+        <para>When an Oracle synonym is selected, the columns tab will display
+        the column definition of the underlying table or view. The source tab
+        will display the statement to re-create the synonym.</para>
+
+        <para>The References/Referenced by tabs, also display the complete
+        reference tree (any table referencing the tables referencing the
+        currently selected one, and so on).</para>
+
+        <para>The table list offers the following additional commands in the
+        context menu:</para>
+
+        <para>Spool data</para>
+
+        <para>This will execute a SPOOL command for the currently selected
+        table. Choosing this option is equivalent to do a SELECT * FROM table;
+        and then executing „SQL/Spool data&#34; from the SQL editor in the
+        main window (or issuing a SPOOL command before the SELECT). See the
+        description of the <link linkend="command-spool">SPOOL command</link>
+        for details.</para>
+
+        <para>Show table data</para>
+
+        <para>This will put a SELECT statement into the SQL editor to display
+        all data for the selected table. You can choose into which editor tab
+        the statement will be written. The currently selected editor tab is
+        displayed in bold</para>
+      </section>
+
+      <section id="data-tab">
+        <title>Data tab</title>
+
+        <para>The data tab will display the data from the currently selected
+        table. There are several options to configure the display of this tab.
+        The Autoload check box, controls the retrieval of the data. If this is
+        checked, then the data will be retrieved from the database as soon as
+        the table is selected in the table list (and the tab is visible).</para>
+
+        <para>You can define a maximum number of rows which should be
+        retrieved. If you enter 0 (zero) then all rows are retrieved. Limiting
+        the number of rows is useful if you have tables with a lot of rows,
+        where the entire table would not fit into memory.</para>
+
+        <para>In addition to the max rows setting, another limit can be
+        defined. If the total number of rows in the table exceeds this second
+        limit a warning is displayed, whether the data should be loaded.</para>
+
+        <para>This is useful when the max rows parameter is set to zero and
+        you accidently hit a table with a large number of rows.</para>
+
+        <para>If the automatic retrieval is activated, then the retrieve of
+        the data can be prevented by holding down the Shift key while
+        switching to the data tab.</para>
+
+        <para>The data in the tab can be edited just like the data in the main
+        window. To add or delete rows, you can either use the buttons on the
+        toolbar in the upper part of the data display, or the popup menu. To
+        edit a value in a field, simply double click that field, start typing
+        while the field has focus (yellow border) or hit F2 while the field
+        has focus.</para>
+      </section>
+    </section>
+
+    <section id="procedure-tab">
+      <title>Procedure tab</title>
+
+      <para>The procedure tab will list all stored procedures and functions
+      stored in the current schema. For procedures or functions returning a
+      result set, the definition of the columns will be displayed as well.</para>
+
+      <para>Functions in Oracle packages will be listed separately on the left
+      side, but the source code will contain all functions/procedures from
+      that package.</para>
+    </section>
+
+    <section id="search-tables">
+      <title>Search tables</title>
+
+      <para>This tab offers the ability to search for a value in all text
+      columns of all tables which are selected. The results will be displayed
+      on the right side of that tab. The result will always display the
+      complete row where the search value was found. Any column that contains
+      the entered value will be highlighted.</para>
+
+      <para>The value will be used to create a LIKE &#60;value&#62;
+      restriction for each text column on the selected tables. Therefore the
+      value should contain a wildcard, otherwise the exact expression will be
+      searched.</para>
+
+      <para>You can apply a function to each column as well. This is useful if
+      you want to to do a case insensitive search on Oracle (Oracles VARCHAR
+      comparison is case sensitiv). In the entry field for the column the
+      placeholder $col$ is replaced with the actual column name during the
+      search. To do a case insensitive search in Oracle, you would enter
+      lower($col$) in the column field and &#39;%test%&#39; in the value
+      field.</para>
+
+      <para>The expression in the column field is sent to the DBMS without
+      changes, except the replacement of $col$ with the current column name.
+      The above example would yield a lower(&#60;column_name&#62;) like
+      &#39;%test%&#39; for each text column for the selected tables.</para>
+
+      <para>The generated SQL statements are logged in the second tab labeled
+      SQL Statements</para>
+    </section>
+  </section>
+
+  <section id="options">
+    <title>Configuring SQL Workbench/J</title>
+
+    <section id="options-explorer-as-tab">
+      <title>DB Explorer as Tab</title>
+
+      <para>The Database Explorer can either be displayed as a separate
+      window, or inside the main window as a another tab. If this option is
+      selected, the Db Explorer will be displayed inside the main window. If
+      the option Retrieve DB Explorer is checked as well, the current database
+      scheme will be retrieved upon starting SQL Workbench/J!</para>
+    </section>
+
+    <section id="options-retrieve-explorer">
+      <title>Retrieve DB Explorer</title>
+
+      <para>If this option is enabled, the contents of the database schema is
+      retrieved when the DB Explorer is displayed. If this option is not
+      checked, either the &#34;Refresh&#34; button or selecting a schema or
+      table type will load the list.</para>
+    </section>
+
+    <section id="options-encrypt-password">
+      <title>Encrypt passwords</title>
+
+      <para>If this option is enabled, the password stored within a connection
+      profile will be encrypted. Whether the password should be stored at all
+      can be selected in the profile itself.</para>
+    </section>
+
+    <section id="options-confirm-update">
+      <title>Confirm result set updates</title>
+
+      <para>When this option is enabled, the statements which are sent to the
+      database when saving changes to result set table, are displayed before
+      execution. The update can be canceled at that point if the statements
+      are not correct. The generated statements can also be saved to a file
+      from that window.</para>
+
+      <para>The displayed statements can not be changed!</para>
+    </section>
+
+    <section id="options-enable-out" xreflabel="Enabling DBMS_OUTPUT">
+      <title>Enable DBMS_OUTPUT</title>
+
+      <para>If this option is enabled, the DBMS_OUTPUT package is
+      automatically enabled when connecting to an Oracle database. This option
+      has no effect on other DBMS. If it is disabled, the DBMS_OUTPUT package
+      can be enabled using the enableout command.</para>
+
+      <para>If this option is not checked, the DBMS_OUTPUT package can be
+      enabled with <xref linkend="command-enableout"/>.</para>
+    </section>
+
+    <section id="options-date-format">
+      <title>Date format</title>
+
+      <para>Define the date format for displaying date columns in the result
+      set.</para>
+    </section>
+
+    <section id="options-alternate-delimiter" xreflabel="alternate delimiter">
+      <title>Alternate Delimiter</title>
+
+      <para>When last characters of the text in the editor match the character
+      sequence in this input field, this character sequence is used to delimit
+      individual statements in the editor.</para>
+
+      <para>This is needed when creating stored procedures which themselves
+      have a semicolon in the source code. Normally the SQL Workbench/J would
+      stop parsing the command at the first semicolon and send that command to
+      the database (which will produce an error message as the statement is
+      not complete).</para>
+
+      <para>In the case of a CREATE PROCEDURE statement this should be
+      terminated with the character sequence entered in this input field. The
+      terminator can have more than one character e.g. ./
+      (a dot followed by a slash). 
+      It should not be a sequence which is used inside a SQL statement.</para>
+
+      <para>Using a slash as the terminator (as e.g. SQL*Plus does) might lead
+      to problems when stored procedures are created that do calculations such
+      as</para>
+
+      <para>SELECT sum(field)/count(*) FROM table;</para>
+
+      <para>This would lead to problems as the slash is recognized as the
+      statement terminator. Thus the SQL Workbench/J would send everything up
+      to sum(field) to the database and execute it.</para>
+    </section>
+
+    <section id="options-history-size">
+      <title>History size</title>
+
+      <para>The number of statements per tab which should be stored in the
+      statement history. Remember that always the full text of the editor
+      (together with the selection and cursor information) is stored in the
+      history. If you have large amounts of text in the editor and set this
+      number quite high, be aware of the memory consumption this might create.</para>
+    </section>
+
+    <section id="options-decimal-symbol">
+      <title>Decimal symbol</title>
+
+      <para>The character which is used as the decimal separator when
+      displaying numbers.</para>
+    </section>
+
+    <section id="options-decimal-digits">
+      <title>Decimal digits</title>
+
+      <para>Define the maximum number of digits which will be displayed for
+      numeric columns. This only affects the display of the number internally
+      they are still stored as the DBMS returned them. To see the internal
+      value, leave the mouse cursor over the cell. The tooltip which is
+      displayed will contain the number as it was returned by the JDBC driver.
+      When exporting data or copying it to the clipboard, the real value will
+      be used.</para>
+    </section>
+
+    <section id="options-column-width">
+      <title>Max column width</title>
+
+      <para>When the initial display size of a column is calculated, the
+      column width will not exceed this number. This is useful when displaying
+      large character columns.</para>
+    </section>
+
+    <section id="options-filed-delimiter">
+      <title>Field delimiter</title>
+
+      <para>The default delimiter used when exporting data to a text file.
+      This can be overridden in the file selection dialog when actually
+      exporting the data.</para>
+    </section>
+
+    <section id="options-quote-character">
+      <title>Quote character</title>
+
+      <para>This character will be used to quote column data when exporting to
+      a text file. When using a tab character (\t) as the field delimiter this
+      is not really necessary. When using a comma as the field delimiter,
+      quoting the data is necessary in case the data contains a a comma (or
+      whatever character is used to delimit the columns). This will be the
+      default for exporting data through the menu. If you use the <link
+      linkend="command-spool">SPOOL command</link>, you can
+      freely customize the output for each file you create.</para>
+    </section>
+  </section>
+</article>

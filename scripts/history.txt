@@ -1,0 +1,357 @@
+Dev        Fix: Sometimes a wrong "Statement cancelled" would be printed in the message area
+           Fix: After importing a text file, the "Save" button was not enabled
+           Enh: The verifying of the JDBC URL via acceptsUrl() can be disabled 
+                by an entry in workbench.settings
+                workbench.db.verifydriverurl=false
+           Fix: "Clean Java Code" now replaces single line comments // with --
+           Fix: Sometimes "Execute current" would fail with finding the "current" Statement
+                and the whole text would be executed
+           Enh: Text can now be searched in the SQL Editor
+           Enh: Tabs can now be added and closed with Ctrl-T and Ctrl-W (same 
+                shortcuts as Mozilla)
+           End: Changed data in the DbExplorer could not be saved.
+
+12.08.2003 Fix: When the default workspace has only one statement tab, and the DbExplorer 
+Build 57        was shown as a tab, the statement tab would disappear after loading the 
+                workspace (thanks for catching that Patrick!)
+           Enh: Added Ctrl-B shortcut to jump to the location of the matching bracket
+           Fix: The hyperlinks in the help window did not work
+           Enh: Added F1 as the shortcut for Help
+           Enh: When running SQL Workbench in batch mode, no profiles need to be defined
+                in advance. The full connection details can now be defined on the commandline
+           Fix: Table sorting is now done based on the system's default locale
+           Fix: The editor selection wasn't restored, if the selection started at the very
+                first character of the text
+           Enh: The result data can now be printed
+           Fix: Oracle: The display of compilation errors for CREATE PROCEDURE did not work
+                for some statements
+                
+19.07.2003 Enh: The help file is now included in Workbench.jar, thus the Help 
+Build 56        menu does not try to display the internet page any longer.
+                Displaying the "plain" HTML file is a workaround, until the full
+                JavaHelp is available
+                
+19.07.2003 Fix: The data for PUBLIC synonyms in Oracle would not be displayed
+Build 55   Fix: Support for DBMS_OUTPUT package was broken
+           Enh: DBMS_OUTPUT package can now be enabled automatically (Tools -> Options)
+           Fix: When adding more then 9 tabs to the main window, tabs >= 10 are no longer 
+                assigned a shortcut (to make sure the shortcuts stay unique)
+           Fix: When switching the connection profile while the DbExplorer was open, the DbExplorer would 
+                not work any longer when the DbExplorer window was re-opened
+           Fix: The "Ignore DROP errors" attribute for a connection was always (implicitly) stored as 
+                enabled. Unfortunately the fix means that this attribute needs to be re-enabled for
+                old profiles.
+           Enh: It's now possible to define "Macros". A simple alias for a lengthy SQL
+                statement. The macros are available under SQL/SQL Macros 
+           Enh: Support for driver specific JDBC properties (Extended Properties)
+           Enh: Changed the "Stop" icon in the toolbar (That's for you Felix!)
+
+05.07.2003 Fix: The "Spool data" menu item did not work, if SQL statement ended with a semicolon
+Build 54   Fix: When the rowcount for a table is retrieved in the DbExplorer, an hourglass
+                is now displayed next to the "Total:" label, to indicate that the SQL 
+                query is running.
+           Enh: The data tab in the DbExplorer is now using the same component as the SQL panel
+                in the main window, thus the max row setting moved to the lower right corner
+           Enh: The data in the data tab of the DbExplorer can now be changed and saved 
+                to the database.
+           Fix: The table rowcount and data was retrieved too often in the DbExplorer
+           Enh: When spooling data to XML format, the date and number format can now
+                specified with the spool command (same as with spool type=txt)
+           Enh: Importing a file into the current table, can now be cancelled
+           Enh: Updating the database can now be cancelled
+           Fix: If the connection URL for a driver is wrong, a more detailed error message
+                is now displayed
+           Fix: The "Separate connection for each tab" property was broken with the new 
+                Workspace features
+           Fix: When closing the workbench while a statement which cannot be cancelled
+                is running, the application can now be closed gracefully
+           Enh: The application identifies itself now in the connection properties for 
+                Oracle and SQL Server (session output from v$session or sp_who2 will 
+                show SQL Workbench/J as the application name)
+                
+17.06.2003 Fix: When loading workspaces where a script file was open, they were not restored
+Build 53        correctly
+           Fix: When closing a tab in a workspace, the following tabs would not keep their 
+                correct names if they had a non standard name
+           Fix: Fixed a bug when the alternate delimiter was set to / and the 
+                script contained C-Style comments with /* ... */
+           Fix: Leading spaces where strippped of the SQL Statements when loaded 
+                from a workspace
+           Fix: The table searcher now works with Oracle synonyms (the searcher replaces 
+                the synonym name with the real table name)
+           Enh: The table search now shows the SQL Statements executed in a separate
+                editor pane as a refernce
+                
+11.06.2003 Fix: Fixed a problem when loading workspaces. Newlines were added incorrectly
+Build 52   Fix: When cancelling the Connect Dialog and then closing the main window, 
+                the default workspace would get overwritten with an empty workspace file.
+           Enh: When searching table in the DbExplorer the expression used for the column's 
+                name, can now be defined
+
+03.06.2003 Enh: Improved Workspace handling: 
+Build 51        - A profile can now be connected to a workspace
+                - Moved all Workspace menu items to a new main menu called Workspace
+                - When using a Workspace, the tabs can be renamed
+                - Text selection and cursor position is now stored in the workspace as well
+           Enh: Data can now be exported to XML as well
+           Enh: Improved SQL History handling (selection and cursor position are stored
+                and maintained)
+           Fix: Worked around a bug in the PostgreSQL JDBC driver, where the columns for a 
+                for foreign key definition would appear twice
+                
+19.05.2003 Enh: The spool command now supports the following additional parameters for text export
+Build 50        -dateformat
+                -timestampformat
+                -delimiter
+                -quotechar
+                -cleancr
+                -decimal
+                
+                and the following additional parameters for SQL Export
+                -charfunc
+                -concat
+                
+                See the User's Manual for a detailed explanation on how the parameters work
+                
+           Fix: Fixed a bug in the SQL parser, when a quote character occurred inside quotes
+                (e.g. "'")
+                
+16.05.2003 Fix: -script parameter was broken
+Build 49
+
+14.05.2003 Fix: When saving changes to the database, JWorkbench would build all update 
+Build 48        statements in memory which causes trouble when importing large files 
+           Fix: When an operation generates an OutOfMemoryError, a message is displayed 
+                to the user.
+           Fix: Fixed connection problems if the JDBC driver does not support
+                getSchemaTerm(), getCatalogTerm() or getProductName()
+           Fix: When closing the main window with the close button in the window title bar
+                and profiles where changed, the application was exited even if Cancel 
+                was selected from the message box
+           Enh: When importing text files, the number format and the quote character can 
+                now be specified
+           Enh: When issuing the SHUTDOWN command for HSQLDB, the connection will be closed
+                as well (because the HSQLDB engine is no longer available)
+
+           Enh: The windows launcher now supports the following new command line parameters:
+                -jdk=<dir>
+                -debug
+                -? (-help -h)
+                
+           Enh: When switching to the data tab in the DbExplorer, the retrieval of the data
+                can be prevent if the shift button is hold down, when switching the tab. 
+                Even if "Automatic retrieve" is activated.
+                
+                The data display can also be configured to show a warning when retrieving more
+                then a specific number of rows (independently of the max rows setting)
+
+           Enh: Documented the DbExplorer's data tab (and its settings)
+           
+22.04.2003 Fix: When removing an editor tab the toolbars and menus would sometimes show
+                wrong menu item states.
+                
+           Fix: When a long table search was running the GUI would freeze when 
+                switching to the procedure panel in the DbExplorer
+                
+04.04.2003 Enh: Spool data in the DbExplorer can now handle multiple tables
+           Fix: Remove trailing spaces from JDBC URL, username and password
+
+01.04.2003 Fix: When copying data into the clipboard the global settings for the decimal
+                Symbol and the date format were not used.
+           Fix: Delete Script generation did not work correctly with PostgreSQL
+           Fix: Change the "escape" character for command line parameters to - (a / would
+                not work well on *nix systems), and adjusted the documentation in this 
+                area
+           Fix: The spool command didn't work anymore
+                
+29.03.2003 Enh: Ctrl-Enter now executes the current SQL statement at the cursor position
+           Enh: When editing text columns in the result set, a double click now opens
+                a dialog window where large amounts of text can be edited easier.
+           Enh: Added support for workspaces. A workspace contains all statements from all 
+                editor tabs (including their history). 
+           Fix: Added shortcuts for OK and Cancel buttons in Dialogs
+           Fix: Fixed a bug when displaying Oracle compile error messages from CREATE PROCEDURE
+           Fix: Fixed a bug when closing and re-adding a tab
+           
+21.03.2003 Enh: When running more then one statement (aka script execution) and one statement fails
+                the user is now prompted if he wants to continue, cancel the whole execution or
+                ignore all subsequent errors as well.
+           Enh: Display View, Trigger and procedure Source for PostgreSQL
+           Enh: View source now contains either a DROP VIEW or a CREATE OR REPLACE VIEW part
+           Enh: Added a Data tab to the DbExplorer
+           Enh: New connection profile setting to ignore errors for DROP statements
+           
+           Fix: Fixed some bugs with the PostgreSQL JDBC driver
+           
+25.02.2003 Enh: The date format for an import file can now be specified (separately to the default
+                date format)
+           Fix: Fixed a small bug with importing date fields. The importer tries more date formats now     
+           
+09.02.2003 Enh: It is now possible to use separate connection for each tab (for one profile)
+           Enh: A Windows native launcher is now available
+           
+03.02.2003 Fix: [Oracle] Fixed a display problem in a table definition for the NUMBER data type 
+01.02.2003 Fix: Fixed a problem with the usage of the alternate delimiter and 
+                DDL statements (e.g. CREATE PROCEDURE)
+                
+31.01.2003 Fix: [Oracle] Dropping procedures and functions in the DBExplorer did not work with Oracle
+
+30.01.2003 Fix: The last statement from the history would not be retrieved again
+                due to the new file format.
+                
+24.01.2003 Fix: Importing a file with two consecutive tabs would not work
+
+21.01.2003 Fix: When adding a new SQL tab, the Mnemonic would not be set correctly
+
+18.01.2003 Fix: Changed the format of the SQL Statement history files to plain text
+                for performance reasons. Starting the workbench with a large 
+                statement history would cause longer startup times due to the XML#
+                parsing. Existing XML files will be automatically converted and 
+                deleted.
+           Fix: Optimize column width shrinks columns with no values at all, as much 
+                as possible
+                
+17.01.2003 Fix: When the DbExplorer was displayed as a tab the workbench did not start
+           Enh: The DbExplorer TAB can now be closed.
+           Chg: Removed the Option "Default tab count" because this can be controlled
+                by closing and adding tabs in the main window directly
+                
+16.01.2003 Fix: Enhance handling of huge script files
+           Fix: Running multiple statements could not be cancelled.
+           Fix: When executing a single statement which ended with the
+                alternate delimiter, the delimiter would be passed to the database
+                (thus causing an error)
+
+15.01.2003 Enh: The command DESCRIBE is now also recognized as (not only DESC)
+           Fix: Running a stored procedure with exec did not work in Oracle
+           
+09.01.2003 Enh: Support old style shortcuts Ctrl-Shift, Ctrl-Insert and Shift-Delete
+                for copy & paste in the result table.
+           Enh: The tabs in the main window now display the shortcuts to activate them
+           
+07.01.2003 Fix: DESC now displays an error message if the table was not found
+
+19.12.2002 Enh: New Shortcut Ctrl-M to set the focus to the Max rows field in the status bar
+
+16.12.2002 Fix: The shortcut Ctrl-Y for "Copy data to clipboard" did not work
+
+14.12.2002 Enh: Compiler errors from Oracle are now displayed as well when 
+                creating triggers and procedures (equivalent to show errors in SQL*Plus)
+           Fix: The wrong column was sorted when the result table was in edit mode
+           Enh: First draft of a user manual
+           
+11.12.2002 Enh: A profile can now be selected on the command line with the /profile parameter
+           Fix: When pressing Alt-C during startup of the application two connection 
+                dialogs would be shown.
+           Fix: Displaying the preview when updating a large number of rows in the result 
+                set would take ages
+           Fix: Fixed a bug with the delete script generation, when the table contained
+                numeric columns
+           Fix: Fixed a bug with the display of decimal columns
+           
+04.12.2002 Enh: Oracle Synonyms are now displayed correctly in the DbExplorer
+
+03.12.2002 Fix: Fixed a bug with excessive CPU usage due to the animated icon during 
+                SQL execution.
+
+28.11.2002 Fix: Entering dates inside the result table did not work properly with Oracle
+           Enh: "Copy Code Snippet" now includes \n inside the SQL string so that logging
+                the string from inside a Java application is more readable
+           Chg: Reworked the layout of the connection dialog 
+           Enh: The "Manage JDBC drivers" is now available from the file menu as well
+
+21.11.2002 Enh: Added "Clean up Java Code" command to reverse the code produced by "Copy code snippet"
+           Enh: Added "Optimize all column width" with shortcut Ctrl-W
+           Fix: Oracle: display of packaged procedures still wasn't correct
+
+14.11.2002 Enh: Any SQL tab can now be closed
+           Fix: Oracle: When executing UPDATE, DELETE, INSERT statements on Oracle
+                        the statement would fail with an "Out of memory exception"
+                        This was caused by bug in Oracle's JDBC driver not conforming 
+                        to the JDBC spec
+           Fix: Oracle: The source for procedures defined in a package was not displayed.
+                        Due to the way oracle stores this procedures the whole 
+                        package source is now displayed
+
+12.11.2002 Enh: New option, not to store the password for a connection profile
+           Enh: Display the Java version in the about box.
+           Chg: Removed the version from the about box, because for the build date is more 
+                accurate
+           Fix: Fixed a small display problem with the table source for columns with 
+                defaults in Oracle
+           Enh: Add the option to disable the SQL preview when saving changes
+                to the result table
+                
+04.11.2002 Fix: Starting the workbench with an empty (nor non existing) WbProfiles.xml
+                was broken.
+
+31.10.2002 Fix: Fixed processing of stored procedures which return a result set 
+                in SQL Server 
+           Enh: Import text file into current result set
+           
+25.10.2002 Enh: The Db Explorer now displays all dependencies of a table in a tree
+           Enh: There is a new menu item to generate a delete script for the 
+                currently selected record in the result table, which will 
+                delete all depending objects as well.
+                
+21.10.2002 Enh: Added a "Drop" item to the context menus in the Db Explorer
+           
+           Fix: Fixed some bugs with checking if profiles were changed
+                Fixed some bugs when disconnecting and reconnecting
+           
+16.10.2002 Enh: The "Search tables" feature now displays the results in tables instead
+                of using a text area. Values which match the searched criteria are 
+                highlighted
+           Enh: When exiting the application, it now asks if modified profiles should be saved
+           Enh: Put the "File/Open" and "File/Discard" menu items in the popup 
+                for the SQL tabs.
+           Fix: When adding a new row while still editing a value, the current value 
+                would be copied into the first column of the new row
+           Enh: New option: DB Explorer can now automatically retrieve the table
+                list for the current schema/user when it is opened
+                
+11.10.2002 Fix: When cancelling the search in "Search tables" the Database Explorer
+                would not work any more (with MS SQL Server)
+           Enh: Added a "Load tables" button to the "Search Tables" panel
+                Added the option to display the SQL statement used to search the tables
+                
+10.10.2002 Fix: Database Explorer could not be set as a tab any more
+           Fix: Search tables did not work with tables where first column 
+                was not a character column
+           Fix: The list of tables on the "Search tables" panel in the
+                database explorer was not updated correctly when switching
+                to a different schema
+           Enh: Changed the user interface for "Search tables" to give the 
+                user more control on how the searching is done.
+                
+09.10.2002 Enh: Add "Create SQL list" to the edit commands.
+                the command will change each line of the selection into an element
+                of an SQL IN clause and add opening and closing parenthesis 
+                at the beginning and end of the selection.
+                
+08.10.2002 Enh: New tab "Search tables" in Database Explorer can be used to search
+                for string across all tables and columns
+           Fix: The maximized state of the window is now restored correctly
+           
+01.10.2002 Enh: Add menu shortcuts to expand the editor and result set panel
+
+24.09.2002 Fix: Fixed a bug with the display of null values in two consecutive
+                number columns
+                
+23.09.2002 Fix: "Show data in" adds the owner to the table name
+
+20.09.2002 Enh: Allow row height resizing
+           Enh: Add "Show data in" option in the DB Explorer's table list
+           Fix: MS SQL Server's identity columns weren't displayed correctly 
+                in the DB Explorer
+           Fix: DESC with a table with spaces in it did not work 
+                (e.g. desc "My Table")
+           
+16.09.2002 Fix: when using ODBC to connect to an Access Database table columns
+                would not be displayed in the Database Explorer
+           Fix: copy as SQL Insert was broken
+           
+12.09.2002 Enh: Allow multiple .jar files to be selected when defining libraries
+                for a JDBC driver.
+                
+01.09.2002 Initial release
