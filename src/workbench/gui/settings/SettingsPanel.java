@@ -67,6 +67,7 @@ public class SettingsPanel extends javax.swing.JPanel
 		maxDigitsField = new NumberField();
 		maxColSizeLabel = new javax.swing.JLabel();
 		maxColSizeField = new NumberField();
+		jPanel1 = new javax.swing.JPanel();
 		fontPanel = new javax.swing.JPanel();
 		wbFontChooser1 = new workbench.gui.components.WbFontChooser();
 		fontsComboBox = new javax.swing.JComboBox();
@@ -89,6 +90,8 @@ public class SettingsPanel extends javax.swing.JPanel
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 0;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.weightx = 1.0;
 		gridBagConstraints.insets = new java.awt.Insets(9, 7, 0, 11);
 		generalPanel.add(showDbExplorer, gridBagConstraints);
 		
@@ -98,17 +101,17 @@ public class SettingsPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 1;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
 		generalPanel.add(dateFormatLabel, gridBagConstraints);
 		
-		dateFormatTextField.setColumns(10);
 		dateFormatTextField.setFont(getFont());
 		dateFormatTextField.setText(WbManager.getSettings().getDefaultDateFormat());
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 1;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 11);
 		generalPanel.add(dateFormatTextField, gridBagConstraints);
 		
@@ -117,7 +120,6 @@ public class SettingsPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
 		generalPanel.add(dbExplorerLabel, gridBagConstraints);
@@ -127,16 +129,16 @@ public class SettingsPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 2;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
 		generalPanel.add(altDelimLabel, gridBagConstraints);
 		
-		altDelimitTextField.setColumns(10);
 		altDelimitTextField.setText(WbManager.getSettings().getAlternateDelimiter());
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 2;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 11);
 		generalPanel.add(altDelimitTextField, gridBagConstraints);
 		
@@ -145,16 +147,16 @@ public class SettingsPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 3;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
 		generalPanel.add(tabCountLabel, gridBagConstraints);
 		
-		tabCountField.setColumns(10);
 		tabCountField.setText(Integer.toString(WbManager.getSettings().getDefaultTabCount()));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 3;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 11);
 		generalPanel.add(tabCountField, gridBagConstraints);
 		
@@ -163,16 +165,16 @@ public class SettingsPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 4;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
 		generalPanel.add(historySizeLabel, gridBagConstraints);
 		
-		historySizeField.setColumns(10);
 		historySizeField.setText(Integer.toString(WbManager.getSettings().getMaxHistorySize()));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 4;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 11);
 		generalPanel.add(historySizeField, gridBagConstraints);
 		
@@ -181,16 +183,17 @@ public class SettingsPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 5;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
 		generalPanel.add(decimalLabel, gridBagConstraints);
 		
-		decimalField.setColumns(10);
 		decimalField.setText(WbManager.getSettings().getDecimalSymbol());
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 5;
-		gridBagConstraints.insets = new java.awt.Insets(0, 9, 0, 12);
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 11);
 		generalPanel.add(decimalField, gridBagConstraints);
 		
 		maxDigitsLabel.setText(ResourceMgr.getString("LabelMaxDigits"));
@@ -198,16 +201,17 @@ public class SettingsPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 6;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
 		generalPanel.add(maxDigitsLabel, gridBagConstraints);
 		
-		maxDigitsField.setColumns(10);
 		maxDigitsField.setText(Integer.toString(WbManager.getSettings().getMaxFractionDigits()));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 6;
-		gridBagConstraints.insets = new java.awt.Insets(0, 9, 0, 12);
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 11);
 		generalPanel.add(maxDigitsField, gridBagConstraints);
 		
 		maxColSizeLabel.setText(ResourceMgr.getString("LabelMaxColsize"));
@@ -215,17 +219,24 @@ public class SettingsPanel extends javax.swing.JPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 7;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 12, 8, 0);
 		generalPanel.add(maxColSizeLabel, gridBagConstraints);
 		
-		maxColSizeField.setColumns(10);
 		maxColSizeField.setText(Integer.toString(WbManager.getSettings().getMaxColumnWidth()));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 7;
-		gridBagConstraints.insets = new java.awt.Insets(0, 9, 8, 12);
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 7, 8, 11);
 		generalPanel.add(maxColSizeField, gridBagConstraints);
+		
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 8;
+		gridBagConstraints.weighty = 1.0;
+		generalPanel.add(jPanel1, gridBagConstraints);
 		
 		mainTab.addTab(ResourceMgr.getString("LabelSettingsGeneral"), generalPanel);
 		
@@ -236,10 +247,10 @@ public class SettingsPanel extends javax.swing.JPanel
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 1;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(7, 6, 7, 6);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
 		gridBagConstraints.weightx = 1.0;
 		gridBagConstraints.weighty = 1.0;
+		gridBagConstraints.insets = new java.awt.Insets(7, 6, 7, 6);
 		fontPanel.add(wbFontChooser1, gridBagConstraints);
 		
 		fontsComboBox.addItemListener(new java.awt.event.ItemListener()
@@ -362,13 +373,18 @@ public class SettingsPanel extends javax.swing.JPanel
 		this.dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.dialog.setTitle(ResourceMgr.getString("TxtSettingsDialogTitle"));
 		this.dialog.getContentPane().add(this);
-		this.dialog.pack();
+		if (!WbManager.getSettings().restoreWindowSize(this.dialog, this.getClass().getName()))
+		{
+			this.dialog.pack();
+		}
+	
 		WbSwingUtilities.center(this.dialog, aReference);
 		this.dialog.show();
 	}
 
 	private void closeWindow()
 	{
+		WbManager.getSettings().setWindowSize(this.getClass().getName(), this.getWidth(), this.getHeight());
 		this.dialog.dispose();
 	}
 	
@@ -376,6 +392,7 @@ public class SettingsPanel extends javax.swing.JPanel
 	private javax.swing.JLabel historySizeLabel;
 	private javax.swing.JPanel generalPanel;
 	private javax.swing.JCheckBox showDbExplorer;
+	private javax.swing.JPanel jPanel1;
 	private javax.swing.JPanel fontPanel;
 	private javax.swing.JPanel buttonPanel;
 	private workbench.gui.components.WbFontChooser wbFontChooser1;

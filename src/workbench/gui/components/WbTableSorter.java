@@ -23,7 +23,6 @@ public class WbTableSorter
 {
 	protected TableModel model;
 	RowIndex[]   indexes;
-	//Vector  sortingColumns = new Vector();
 	boolean ascending = true;
 	int     column = -1;
 	int     compares;

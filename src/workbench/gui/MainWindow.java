@@ -10,6 +10,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
+import java.awt.Font;
 import java.awt.event.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.gui.settings.SettingsPanel;
 import workbench.gui.sql.SqlPanel;
+import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -48,7 +50,8 @@ import workbench.resource.Settings;
  * @author  workbench@kellerer.org
  * @version
  */
-public class MainWindow extends JFrame implements ActionListener, WindowListener, ChangeListener
+public class MainWindow extends JFrame 
+	implements ActionListener, WindowListener, ChangeListener
 {
 	private String windowId;
 	private String currentProfileName;
@@ -556,6 +559,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			System.out.println("");
 		}
 	}
+	
 	/**
 	 *	Invoked when any of the main window menu commands are
 	 *

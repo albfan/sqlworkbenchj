@@ -173,7 +173,7 @@ public class WbFontChooser extends JPanel
 	
 	public void setSelectedFont(Font aFont)
 	{
-		String name = aFont.getFontName();
+		String name = aFont.getFamily();
 		String size = Integer.toString(aFont.getSize());
 		int style = aFont.getStyle();
 		this.updateing = true;

@@ -503,24 +503,28 @@ public class DataStore
 		{
 			return NullValue.getInstance(type);
 		}
+		System.out.println("converting " + aValue.getClass().getName());
 		switch (type)
 		{
 			case Types.BIGINT:
-				return new BigInteger(((String)aValue).trim());
+				return new BigInteger(aValue.toString());
 			case Types.INTEGER:
 			case Types.SMALLINT:
-				return Integer.valueOf(((String)aValue).trim());
+					return new Integer(aValue.toString());
 			case Types.NUMERIC:
 			case Types.DECIMAL:
-				return new BigDecimal((String)aValue);
+				return new BigDecimal(aValue.toString());
 			case Types.DOUBLE:
-				return new Double(((String)aValue).trim());
+				return new Double((String)aValue);
 			case Types.REAL:
 			case Types.FLOAT:
-				return new Float(((String)aValue).trim());
+				return new Float(aValue.toString());
 			case Types.CHAR:
 			case Types.VARCHAR:
-				return (String)aValue;
+				if (aValue instanceof String)
+					return aValue;
+				else
+					return aValue.toString();
 			case Types.DATE:
 				DateFormat df = new SimpleDateFormat();
 				return df.parse(((String)aValue).trim());

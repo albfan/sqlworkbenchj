@@ -12,7 +12,7 @@ import javax.swing.event.ListSelectionListener;
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
-import workbench.gui.components.ResultSetTableModel;
+import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
@@ -79,7 +79,7 @@ public class TriggerDisplayPanel
 		try
 		{
 			DataStore trg = this.metaData.getTableTriggers(aCatalog, aSchema, aTable);
-			ResultSetTableModel rs = new ResultSetTableModel(trg);
+			DataStoreTableModel rs = new DataStoreTableModel(trg);
 			triggers.setModel(rs, true);
 			triggers.adjustColumns();
 			this.triggerCatalog = aCatalog;

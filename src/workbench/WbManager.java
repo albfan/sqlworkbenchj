@@ -11,6 +11,7 @@ import javax.swing.UIManager;
 import workbench.db.ConnectionMgr;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
+import workbench.interfaces.FontChangedListener;
 import workbench.resource.Settings;
 import workbench.util.WbCipher;
 import workbench.util.WbPersistence;
@@ -21,6 +22,7 @@ import workbench.util.WbPersistence;
  * @version
  */
 public class WbManager
+	implements FontChangedListener
 {
 	private static WbManager wb = new WbManager();
 	private Settings settings = new Settings();
@@ -30,8 +32,10 @@ public class WbManager
 	
 	private WbManager() 
 	{
+		this.setLookAndFeel();
 		this.initFonts();
 		this.cipher = new WbCipher();
+		this.settings.addFontChangedListener(this);
 	}
 
 	public static WbManager getInstance()
@@ -53,11 +57,18 @@ public class WbManager
 	{
 		return this.cipher;
 	}
-	
-	private void initFonts() 
+
+	public void fontChanged(String aFontKey, Font newFont)
 	{
-		long end;
-		long start = System.currentTimeMillis();
+		if (aFontKey.equals(Settings.DATA_FONT_KEY))
+		{
+			UIManager.put("Table.font", newFont);
+			UIManager.put("TableHeader.font", newFont);
+		}
+	}
+
+	private void setLookAndFeel()
+	{
 		try
 		{
 			String className = this.settings.getLookAndFeelClass();
@@ -70,6 +81,10 @@ public class WbManager
 		{
 			System.out.println("Could not set look and feel");
 		}
+	}
+	
+	private void initFonts() 
+	{
 		Font stdFont = this.settings.getStandardFont();
 		UIManager.put("Button.font", stdFont);
 		UIManager.put("CheckBox.font", stdFont);
@@ -90,8 +105,6 @@ public class WbManager
 		UIManager.put("ProgressBar.font", stdFont);
 		UIManager.put("RadioButton.font", stdFont);
 		UIManager.put("TabbedPane.font", stdFont);
-		UIManager.put("Table.font", stdFont);
-		UIManager.put("TableHeader.font", stdFont);
 		UIManager.put("TextArea.font", stdFont);
 		UIManager.put("TextField.font", stdFont);
 		UIManager.put("TextPane.font", stdFont);
@@ -102,9 +115,11 @@ public class WbManager
 		UIManager.put("Tree.font", stdFont);
 		UIManager.put("ViewPort.font", stdFont);
 		UIManager.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
+		
+		Font dataFont = this.settings.getDataFont();
+		UIManager.put("Table.font", dataFont);
+		UIManager.put("TableHeader.font", dataFont);
 		//UIManager.put("Button.showMnemonics", Boolean.TRUE);
-		end = System.currentTimeMillis();
-		//System.out.println("initFonts=" + (end - start));
 	}
 
 	public MainWindow createWindow()

@@ -13,6 +13,7 @@ import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.editor.JEditTextArea;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import workbench.WbManager;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -28,6 +29,8 @@ import javax.swing.border.EtchedBorder;
 import workbench.gui.actions.WbAction;
 import workbench.gui.editor.SyntaxStyle;
 import workbench.gui.editor.Token;
+import workbench.interfaces.FontChangedListener;
+import workbench.resource.Settings;
 
 /**
  *
@@ -36,7 +39,7 @@ import workbench.gui.editor.Token;
  */
 public class EditorPanel 
 	extends JEditTextArea
-	implements ClipboardSupport, TextContainer
+	implements ClipboardSupport, TextContainer, FontChangedListener
 {
 	private TextPopup popup = new TextPopup(this);
 	private AnsiSQLTokenMarker tokenMarker;
@@ -83,8 +86,17 @@ public class EditorPanel
 		this.setRightClickPopup(popup);
 		this.setMaximumSize(null);
 		this.setPreferredSize(null);
+		WbManager.getSettings().addFontChangedListener(this);
 	}
 
+	public void fontChanged(String aKey, Font aFont)
+	{
+		if (aKey.equals(Settings.EDITOR_FONT_KEY))
+		{
+			this.setFont(aFont);
+		}
+	}
+	
 	public AnsiSQLTokenMarker getSqlTokenMarker()
 	{
 		return this.tokenMarker;

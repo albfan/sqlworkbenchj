@@ -6,6 +6,7 @@
 
 package workbench.interfaces;
 
+import java.awt.Font;
 import java.util.List;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -28,4 +29,5 @@ public interface MainPanel
 	void showLogMessage(String aMsg);
 	void setConnection(WbConnection aConnection);
 	void addToToolbar(WbAction anAction, boolean aFlag);
+	void setFont(Font aFont);
 }

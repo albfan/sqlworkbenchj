@@ -26,6 +26,7 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import workbench.interfaces.FontChangedListener;
 import workbench.util.StringUtil;
 
 /**
@@ -45,7 +46,8 @@ public class Settings
 	private Font msgLogFont;
 	private Font dataFont;
 	private String filename;
-
+	private ArrayList fontChangeListeners = new ArrayList();
+	
 	public Settings()
 	{
 		this.props = new Properties();
@@ -71,6 +73,16 @@ public class Settings
 		JOptionPane.showMessageDialog(null, "Not yet implemented. Please edit workbench.settings");
 	}
 
+	public void addFontChangedListener(FontChangedListener aListener)
+	{
+		this.fontChangeListeners.add(aListener);
+	}
+	
+	public void removeFontChangedListener(FontChangedListener aListener)
+	{
+		this.fontChangeListeners.remove(aListener);
+	}
+	
 	public void saveSettings()
 	{
 		try
@@ -215,7 +227,7 @@ public class Settings
 	public void setFont(String aFontName, Font aFont)
 	{
 		String baseKey = new StringBuffer("workbench.font.").append(aFontName).toString();
-		String name = aFont.getFontName();
+		String name = aFont.getFamily();
 		String size = Integer.toString(aFont.getSize());
 		int style = aFont.getStyle();
 		this.props.setProperty(baseKey + ".name", name);
@@ -238,6 +250,17 @@ public class Settings
 			this.standardFont = aFont;
 		else if (aFontName.equals(DATA_FONT_KEY))
 			this.dataFont = aFont;
+		
+		this.fireFontChangedEvent(aFontName, aFont);
+	}
+	
+	public void fireFontChangedEvent(String aKey, Font aFont)
+	{
+		for (int i=0; i < this.fontChangeListeners.size(); i++)
+		{
+			FontChangedListener listener = (FontChangedListener)this.fontChangeListeners.get(i);
+			if (listener != null)	listener.fontChanged(aKey, aFont);
+		}
 	}
 	
 	public String getLastExportDir()
@@ -284,8 +307,11 @@ public class Settings
 
 	public boolean restoreWindowSize(Component target)
 	{
+		return this.restoreWindowSize(target, target.getClass().getName());
+	}
+	public boolean restoreWindowSize(Component target, String id)
+	{
 		boolean result = false;
-		String id = target.getClass().getName();
 		int w = this.getWindowWidth(id);
 		int h = this.getWindowHeight(id);
 		if (w > 0 && h > 0)

@@ -39,7 +39,14 @@ public class SqlUtil
 
 		aScript = aScript.trim();
 		// Handle MS SQL GO's
-		aScript = StringUtil.replace(aScript, StringUtil.LINE_TERMINATOR + "GO" + StringUtil.LINE_TERMINATOR, StringUtil.LINE_TERMINATOR);
+		if (aScript.indexOf("\nGO\n") > -1)
+		{
+			aScript = StringUtil.replace(aScript, "\nGO\n", "\n");
+		}
+		else
+		{
+			aScript = StringUtil.replace(aScript, StringUtil.LINE_TERMINATOR + "GO" + StringUtil.LINE_TERMINATOR, StringUtil.LINE_TERMINATOR);
+		}
 		pos = aScript.indexOf(aDelimiter);
 		if (pos == -1 || pos == aScript.length() - 1)
 		{
@@ -154,7 +161,7 @@ public class SqlUtil
 	{
 		boolean inQotes = false;
 		boolean fromFound = false;
-		String orgSql = makeCleanSql(aSql);
+		String orgSql = makeCleanSql(aSql, false);
 		aSql = orgSql.toUpperCase();
 		
 		final String FROM = " FROM ";
@@ -196,21 +203,54 @@ public class SqlUtil
 		return result;
 	}
 
-	private static String makeCleanSql(String aSql)
+	public static String makeCleanSql(String aSql, boolean keepNewlines)
 	{
 		int count = aSql.length();
 		aSql = aSql.trim();
+		boolean inComment = false;
+		boolean inQuotes = false;
+		
 		StringBuffer newSql = new StringBuffer(count);
 		for (int i=0; i < count; i++)
 		{
 			char c = aSql.charAt(i);
-			if (c < 32 || (c > 126 && c < 145) || c == 255)
+			inQuotes = c == '\'';
+			
+			if (!inComment)
 			{
-				newSql.append(' ');
+				if ( c == '/' && i < count - 1 && aSql.charAt(i+1) == '*' & !inQuotes)
+				{
+					inComment = true;
+					i++;
+				}
+				else if (c == '-' && i < count - 1 && aSql.charAt(i+1) == '-' && !inQuotes)
+				{
+					// ignore rest of line for -- style comments
+					while (c != '\n' && i < count - 1) 
+					{
+						i++;
+						c = aSql.charAt(i);
+					}
+				}
+				else
+				{						
+					if ( (c != '\n' && keepNewlines) && (c < 32 || (c > 126 && c < 145) || c == 255))
+					{
+						newSql.append(' ');
+					}
+					else
+					{
+						newSql.append(c);
+					}
+				}
 			}
 			else
 			{
-				newSql.append(c);
+				if ( c == '*' && i < count - 1 && aSql.charAt(i+1) == '/')
+				{
+					inComment = false;
+					i++;
+				}
 			}
 		}
 		return newSql.toString();

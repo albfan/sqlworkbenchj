@@ -56,7 +56,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 	private void initComponents()//GEN-BEGIN:initComponents
 	{
 		java.awt.GridBagConstraints gridBagConstraints;
-
+		
 		buttonPanel = new javax.swing.JPanel();
 		closeButton = new javax.swing.JButton();
 		contentPanel = new javax.swing.JPanel();
@@ -67,7 +67,8 @@ public class WbAboutDialog extends javax.swing.JDialog
 		contactInformation = new javax.swing.JTextField();
 		labelCopyright = new javax.swing.JLabel();
 		jLabel1 = new javax.swing.JLabel();
-
+		jLabel2 = new javax.swing.JLabel();
+		
 		setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 		setTitle(ResourceMgr.getString("TxtAbout") + " " + ResourceMgr.TXT_PRODUCT_NAME);
 		setName("AboutDialog");
@@ -79,9 +80,9 @@ public class WbAboutDialog extends javax.swing.JDialog
 				closeDialog(evt);
 			}
 		});
-
+		
 		buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
-
+		
 		closeButton.setFont(null);
 		closeButton.setText(ResourceMgr.getString("LabelClose"));
 		closeButton.addActionListener(new java.awt.event.ActionListener()
@@ -91,13 +92,13 @@ public class WbAboutDialog extends javax.swing.JDialog
 				closeButtonActionPerformed(evt);
 			}
 		});
-
+		
 		buttonPanel.add(closeButton);
-
+		
 		getContentPane().add(buttonPanel, java.awt.BorderLayout.SOUTH);
-
+		
 		contentPanel.setLayout(new java.awt.GridBagLayout());
-
+		
 		logo.setFont(null);
 		logo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/workbench/resource/images/hitchguide.gif")));
 		logo.setBorder(new javax.swing.border.EtchedBorder());
@@ -111,7 +112,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.gridheight = 5;
 		gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 0);
 		contentPanel.add(logo, gridBagConstraints);
-
+		
 		labelTitel.setFont(new java.awt.Font("Dialog", 1, 14));
 		labelTitel.setText(ResourceMgr.TXT_PRODUCT_NAME);
 		gridBagConstraints = new java.awt.GridBagConstraints();
@@ -122,7 +123,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.weightx = 1.0;
 		gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 4);
 		contentPanel.add(labelTitel, gridBagConstraints);
-
+		
 		labelDesc.setFont(null);
 		labelDesc.setText(ResourceMgr.getString("TxtProductDescription"));
 		gridBagConstraints = new java.awt.GridBagConstraints();
@@ -132,17 +133,17 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
 		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
 		contentPanel.add(labelDesc, gridBagConstraints);
-
+		
 		labelVersion.setFont(null);
 		labelVersion.setText(ResourceMgr.getString("TxtVersion") + " (" + ResourceMgr.getString("TxtBuild") + ")");
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 2;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
 		contentPanel.add(labelVersion, gridBagConstraints);
-
+		
 		contactInformation.setEditable(false);
 		contactInformation.setText(ResourceMgr.getString("TxtContact"));
 		contactInformation.setBorder(null);
@@ -150,10 +151,10 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 4;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
 		contentPanel.add(contactInformation, gridBagConstraints);
-
+		
 		labelCopyright.setFont(null);
 		labelCopyright.setText(ResourceMgr.getString("TxtCopyright"));
 		gridBagConstraints = new java.awt.GridBagConstraints();
@@ -162,7 +163,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 4);
 		contentPanel.add(labelCopyright, gridBagConstraints);
-
+		
 		jLabel1.setFont(new java.awt.Font("Dialog", 0, 11));
 		jLabel1.setForeground((java.awt.Color) javax.swing.UIManager.getDefaults().get("Label.disabledForeground"));
 		jLabel1.setText("Built with NetBeans (www.netbeans.org)");
@@ -171,11 +172,22 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.gridy = 5;
 		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(4, 5, 5, 4);
+		gridBagConstraints.insets = new java.awt.Insets(4, 5, 0, 4);
 		contentPanel.add(jLabel1, gridBagConstraints);
-
+		
+		jLabel2.setFont(new java.awt.Font("Dialog", 0, 11));
+		jLabel2.setForeground((java.awt.Color) javax.swing.UIManager.getDefaults().get("Label.disabledForeground"));
+		jLabel2.setText("The editor is based on jEdit's 2.2.1 syntax highlighting package");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 6;
+		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 4);
+		contentPanel.add(jLabel2, gridBagConstraints);
+		
 		getContentPane().add(contentPanel, java.awt.BorderLayout.CENTER);
-
+		
 		pack();
 	}//GEN-END:initComponents
 
@@ -219,6 +231,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 	private javax.swing.JLabel labelDesc;
 	private javax.swing.JPanel contentPanel;
 	private javax.swing.JButton closeButton;
+	private javax.swing.JLabel jLabel2;
 	private javax.swing.JLabel jLabel1;
 	private javax.swing.JLabel labelVersion;
 	// End of variables declaration//GEN-END:variables

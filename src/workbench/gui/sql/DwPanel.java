@@ -1,19 +1,18 @@
 package workbench.gui.sql;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Window;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 import javax.swing.*;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -27,20 +26,14 @@ import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
-import workbench.gui.renderer.DateColumnRenderer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
 
-
-
 /**
  *	A Panel which displays the result of a SELECT statement.
- *	A DBReader is used to read the results from the
- *	database and a DBReaderTableModel is used for the TableModel
- *	of the resulting JTable
  */
 public class DwPanel extends JPanel
 {
@@ -65,7 +58,20 @@ public class DwPanel extends JPanel
 	
 	private static int nextId = 0;
 	private WbConnection lastConnection;
+	private static final ArrayList knownSqlVerbs;
 	
+	static
+	{
+		knownSqlVerbs = new ArrayList();
+		knownSqlVerbs.add("SELECT");
+		knownSqlVerbs.add("UPDATE");
+		knownSqlVerbs.add("INSERT");
+		knownSqlVerbs.add("DELETE");
+		knownSqlVerbs.add("CREATE");
+		knownSqlVerbs.add("DROP");
+		knownSqlVerbs.add("ALTER");
+		knownSqlVerbs.add("GRANT");
+	}
 	public DwPanel()
 	{
 		this.objectId = nextId++;
@@ -217,6 +223,8 @@ public class DwPanel extends JPanel
 		try
 		{
 			long start, end, sqlTime = 0;
+			String cleanSql = null;
+			
 			this.lastMessage = null;
 			this.realModel = null;
 			if (aSql.endsWith(";"))
@@ -225,9 +233,11 @@ public class DwPanel extends JPanel
 			}
 			boolean repeatLast = false;
 			repeatLast = aSql.equals(this.sql);
+			cleanSql = SqlUtil.makeCleanSql(aSql, false).trim();
+			
 			this.sql = null;
 			
-			String verb = SqlUtil.getSqlVerb(aSql);
+			String verb = SqlUtil.getSqlVerb(cleanSql).toUpperCase();
 			Connection sqlcon = aConnection.getSqlConnection();
 			ResultSet rs = null;
 			List keepColumns = null;
@@ -313,7 +323,8 @@ public class DwPanel extends JPanel
 				}
 				else
 				{
-					this.initColumns();
+					this.infoTable.setDefaultRenderersAndEditors();
+					this.infoTable.adjustColumns();
 				}
 				this.setVisible(true);
 				this.infoTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -322,8 +333,7 @@ public class DwPanel extends JPanel
 			}
 			else if (this.lastStatement != null)
 			{
-				this.hasResultSet = false;
-				StringBuffer msg = new StringBuffer();
+				StringBuffer msg = new StringBuffer(500);
 				this.setMessageDisplayModel(this.getEmptyTableModel());
 				SQLWarning warn = this.lastStatement.getWarnings();
 				boolean warnings = warn != null;
@@ -336,7 +346,15 @@ public class DwPanel extends JPanel
 				msg.append('\n');
 				if (!warnings)
 				{
-					msg.append(verb.toUpperCase() + " executed successfully.\n");
+					if (knownSqlVerbs.contains(verb))
+					{
+						msg.append(verb.toUpperCase() + ResourceMgr.getString("MsgKnownStatementOK"));
+					}
+					else
+					{
+						msg.append(ResourceMgr.getString(ResourceMgr.MSG_SQL_EXCUTE_OK));
+					}
+					msg.append('\n');
 				}
 				int count = 0;
 				count = this.lastStatement.getUpdateCount();
@@ -448,11 +466,6 @@ public class DwPanel extends JPanel
 
 	public boolean isModified() { return this.realModel.getDataStore().isModified(); }
 
-	private void initColumns()
-	{
-		this.infoTable.adjustColumns();
-	}
-	
 	private void initLayout()
 	{
 		this.setLayout(new BorderLayout());

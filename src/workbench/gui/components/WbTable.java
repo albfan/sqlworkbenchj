@@ -6,6 +6,7 @@
 package workbench.gui.components;
 
 import java.awt.*;
+import java.awt.Font;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
@@ -41,16 +42,18 @@ import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RowStatusRenderer;
 import workbench.gui.renderer.ToolTipRenderer;
 import workbench.interfaces.Exporter;
+import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.Searchable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.NullValue;
 
 
 
 public class WbTable extends JTable 
-	implements ActionListener, MouseListener, Exporter, Searchable
+	implements ActionListener, MouseListener, Exporter, Searchable, FontChangedListener
 {
 	private WbTableSorter sortModel;
 	private JPopupMenu popup;
@@ -87,6 +90,7 @@ public class WbTable extends JTable
 	
 	public WbTable()
 	{
+		super();
 		this.setMinimumSize(null);
 		this.setMaximumSize(null);
 		this.setPreferredSize(null);
@@ -140,6 +144,7 @@ public class WbTable extends JTable
 		this.findAgainAction.addToInputMap(im, am);
 		this.dataToClipboard.addToInputMap(im, am);
 		this.exportDataAction.addToInputMap(im, am);
+		WbManager.getSettings().addFontChangedListener(this);
 	}
 	
 	public SaveDataAsAction getExportAction()
@@ -278,6 +283,7 @@ public class WbTable extends JTable
 			col.setMinWidth(20);
 			col.setPreferredWidth(20);
 		}
+		this.setDefaultRenderersAndEditors();
 		this.restoreColumnSizes();
 		if (row >= 0) 
 		{
@@ -438,27 +444,21 @@ public class WbTable extends JTable
 		this.savedColumnSizes = null;
 	}
 	
-	public void adjustColumns()
+	public void setDefaultRenderersAndEditors()
 	{
 		if (this.getModel() == null) return;
-		Font f = this.getFont();
-		FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(f);
-		int charWidth = fm.stringWidth("n");
-		TableColumnModel colMod = this.getColumnModel();
-		String format = WbManager.getSettings().getDefaultDateFormat();
 		TableCellRenderer rend = this.getDefaultRenderer(Integer.class);
+		
+		String format = WbManager.getSettings().getDefaultDateFormat();
 		this.setDefaultRenderer(Date.class, new DateColumnRenderer(format));
 		int maxDigits = WbManager.getSettings().getMaxFractionDigits();
 		if (maxDigits == -1) maxDigits = 10;
 		this.setDefaultRenderer(Number.class, new NumberColumnRenderer(maxDigits));
 		this.setDefaultRenderer(Object.class, new ToolTipRenderer());
-		
+		TableColumnModel colMod = this.getColumnModel();
 		for (int i=0; i < colMod.getColumnCount(); i++)
 		{
 			TableColumn col = colMod.getColumn(i);
-			int addWidth = this.getAdditionalColumnSpace(0, i);
-			int addHeaderWidth = this.getAdditionalColumnSpace(-1, i);
-			
 			if (Number.class.isAssignableFrom(this.dwModel.getColumnClass(i)))
 			{
 				col.setCellEditor(this.defaultNumberEditor);
@@ -467,6 +467,23 @@ public class WbTable extends JTable
 			{
 				col.setCellEditor(this.defaultEditor);
 			}
+		}
+	}
+	
+	public void adjustColumns()
+	{
+		if (this.getModel() == null) return;
+		Font f = this.getFont();
+		FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(f);
+		int charWidth = fm.stringWidth("n");
+		TableColumnModel colMod = this.getColumnModel();
+		
+		for (int i=0; i < colMod.getColumnCount(); i++)
+		{
+			TableColumn col = colMod.getColumn(i);
+			int addWidth = this.getAdditionalColumnSpace(0, i);
+			int addHeaderWidth = this.getAdditionalColumnSpace(-1, i);
+
 			if (this.dwModel != null)
 			{
 				int lblWidth = 0;
@@ -540,6 +557,14 @@ public class WbTable extends JTable
 		return addWidth;
 	}
 	
+	public void tableChanged(TableModelEvent evt)
+	{
+		super.tableChanged(evt);
+		if (evt.getFirstRow() == TableModelEvent.HEADER_ROW)
+		{
+			//this.setDefaultRenderersAndEditors();
+		}
+	}
 	public void addTableModelListener(TableModelListener aListener)
 	{
 		this.changeListener = aListener;
@@ -832,20 +857,21 @@ public class WbTable extends JTable
 		}
 	}
 
+	/*
 	public TableCellEditor getCellEditor(int row, int column)
 	{
 		this.currentRow = row;
 		this.currentColumn = column;
 		return super.getCellEditor(row, column);
 	}
-	
+
 	public TableCellRenderer getCellRenderer(int row, int column)
 	{
-		this.currentRow = row;
-		this.currentColumn = column;
+		//this.currentRow = row;
+		//this.currentColumn = column;
 		return super.getCellRenderer(row, column);
 	}
-	
+	*/
 	/** Getter for property maxColWidth.
 	 * @return Value of property maxColWidth.
 	 *
@@ -880,6 +906,15 @@ public class WbTable extends JTable
 	public void setMinColWidth(int minColWidth)
 	{
 		this.minColWidth = minColWidth;
+	}
+	
+	public void fontChanged(String aFontId, Font newFont)
+	{
+		if (aFontId.equals(Settings.DATA_FONT_KEY))
+		{
+			this.setFont(newFont);
+			this.getTableHeader().setFont(newFont);
+		}
 	}
 	
 }

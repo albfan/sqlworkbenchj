@@ -28,7 +28,7 @@ import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.*;
-import workbench.gui.components.ResultSetTableModel;
+import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
@@ -236,7 +236,7 @@ public class TableListPanel
 				{
 					parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					String table = (String)tableTypes.getSelectedItem();
-					ResultSetTableModel rs = meta.getListOfTables(currentCatalog, currentSchema, table);
+					DataStoreTableModel rs = meta.getListOfTables(currentCatalog, currentSchema, table);
 					tableList.setModel(rs, true);
 					tableList.adjustColumns();
 					parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -338,10 +338,10 @@ public class TableListPanel
 		addTablePanels();
 		triggers.readTriggers(catalog, schema, table);
 
-		ResultSetTableModel model = new ResultSetTableModel(meta.getForeignKeys(catalog, schema, table));
+		DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(catalog, schema, table));
 		importedKeys.setModel(model, true);
 		importedKeys.adjustColumns();
-		model = new ResultSetTableModel(meta.getReferencedBy(catalog, schema, table));
+		model = new DataStoreTableModel(meta.getReferencedBy(catalog, schema, table));
 		exportedKeys.setModel(model, true);
 		exportedKeys.adjustColumns();
 

@@ -8,6 +8,7 @@ package workbench.gui.sql;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -30,9 +31,11 @@ import workbench.gui.actions.CopyAsSqlInsertAction;
 import workbench.gui.components.*;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.menu.TextPopup;
+import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
@@ -46,7 +49,8 @@ import workbench.util.WbPersistence;
  * @author  workbench@kellerer.org
  * @version 1.0
  */
-public class SqlPanel extends JPanel implements Runnable, TableModelListener, MainPanel
+public class SqlPanel extends JPanel 
+	implements Runnable, TableModelListener, MainPanel, FontChangedListener
 {
 	private boolean selected;
 	EditorPanel editor;
@@ -143,6 +147,7 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ma
 		this.data.getTable().setMinColWidth(WbManager.getSettings().getMinColumnWidth());
 		this.makeReadOnly();
 		this.checkResultSetActions();
+		WbManager.getSettings().addFontChangedListener(this);
 	}
 
 	public WbToolbar getToolbar()
@@ -477,7 +482,7 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ma
 				
 				// Check if the editing mode was started automatically
 				if (!this.startEditAction.isSwitchedOn())
-					this.startEditAction.setSwitchedOn(false);
+					this.startEditAction.setSwitchedOn(true);
 			}
 		}
 		else
@@ -876,5 +881,12 @@ public class SqlPanel extends JPanel implements Runnable, TableModelListener, Ma
 		}
 	}
 	
+	public void fontChanged(String aFontId, Font newFont)
+	{
+		if (aFontId.equals(Settings.MSGLOG_FONT_KEY))
+		{
+			this.log.setFont(newFont);
+		}
+	}	
 
 }

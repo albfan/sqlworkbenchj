@@ -29,7 +29,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  *
- * @author  thomas
+ * @author  workbench@kellerer.org
  */
 public class ConnectionEditorPanel extends javax.swing.JPanel
 {
