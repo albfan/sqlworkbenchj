@@ -12,6 +12,7 @@ import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
@@ -25,6 +26,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import workbench.WbManager;
+import workbench.db.DataSpooler;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.*;
@@ -35,6 +37,7 @@ import workbench.gui.menu.TextPopup;
 import workbench.interfaces.FilenameChangeListener;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.MainPanel;
+import workbench.interfaces.Spooler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -53,7 +56,7 @@ import workbench.util.WbPersistence;
  */
 public class SqlPanel 
 	extends JPanel 
-	implements Runnable, TableModelListener, FontChangedListener, MainPanel
+	implements Runnable, TableModelListener, FontChangedListener, MainPanel, Spooler
 {
 	private boolean selected;
 	EditorPanel editor;
@@ -87,6 +90,7 @@ public class SqlPanel
 	private DataToClipboardAction dataToClipboard;
 	private SaveDataAsAction exportDataAction;
 	private CopyAsSqlInsertAction copyAsSqlInsert;
+	private SpoolDataAction spoolData;
 	
 	private int internalId;
 	private String historyFilename;
@@ -288,6 +292,7 @@ public class SqlPanel
 		this.editor.addPopupMenuItem(this.executeSelected, true);
 		this.editor.addPopupMenuItem(this.executeAll, false);
 
+
 		TextPopup pop = (TextPopup)this.editor.getRightClickPopup();
 
 		this.actions.add(new FileOpenAction(this));
@@ -337,6 +342,8 @@ public class SqlPanel
 		
 		this.actions.add(this.executeAll);
 		this.actions.add(this.executeSelected);
+		this.spoolData = new SpoolDataAction(this);
+		this.actions.add(this.spoolData);
 		
 		this.stopAction = new StopAction(this);
 		this.stopAction.setEnabled(false);
@@ -808,10 +815,6 @@ public class SqlPanel
 		if (selected) 
 		{
 			sql = this.editor.getSelectedStatement();
-			if (sql == null) 
-			{
-				sql = this.editor.getStatement();
-			}
 		}
 		else
 		{
@@ -828,6 +831,12 @@ public class SqlPanel
 		this.checkResultSetActions();
 	}
 
+	public void spoolData()
+	{
+		String sql = this.editor.getSelectedStatement();
+		this.spoolData.execute(this.dbConnection, sql);
+	}
+	
 	private void displayResult(String aSqlScript)
 	{
 		try
@@ -1015,4 +1024,9 @@ public class SqlPanel
 		}
 	}	
 
+	public Window getParentWindow()
+	{
+		return SwingUtilities.getWindowAncestor(this);
+	}
+	
 }

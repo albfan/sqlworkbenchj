@@ -123,7 +123,11 @@ public class EditorPanel extends JEditTextArea implements ClipboardSupport, Font
 	 */
 	public String getSelectedStatement()
 	{
-		return this.getSelectedText();
+		String text = this.getSelectedText();
+		if (text == null || text.length() == 0)
+			return this.getText();
+		else
+			return text;
 	}
 	
 	public void clear()

@@ -11,6 +11,7 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
@@ -27,10 +28,12 @@ import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.gui.actions.ReloadAction;
+import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.components.*;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.Reloadable;
+import workbench.interfaces.Spooler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
@@ -43,7 +46,7 @@ import workbench.storage.DataStore;
  */
 public class TableListPanel
 	extends JPanel
-	implements ActionListener, ListSelectionListener, Reloadable
+	implements ActionListener, ListSelectionListener, Reloadable, Spooler
 {
 	private WbConnection dbConnection;
 	private JPanel listPanel;
@@ -65,6 +68,8 @@ public class TableListPanel
 	private JComboBox tableTypes = new JComboBox();
 	private String currentSchema;
 	private String currentCatalog;
+	private SpoolDataAction spoolData;
+	
 	private boolean shouldRetrieve;
 
 	public TableListPanel()
@@ -106,6 +111,9 @@ public class TableListPanel
 		this.tableList.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		this.tableList.setAdjustToColumnLabel(false);
 
+		this.spoolData = new SpoolDataAction(this);
+		this.tableList.addPopupAction(spoolData, true);
+		
 		JPanel topPanel = new JPanel();
 		this.findPanel = new FindPanel(this.tableList);
 		this.findPanel.addToToolbar(new ReloadAction(this), true, false);
@@ -401,5 +409,18 @@ public class TableListPanel
 		}
 	}
 
+	public void spoolData()
+	{
+		int row = this.tableList.getSelectedRow();
+		if (row < 0) return;
+		String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+		String sql = "SELECT * FROM " + table;
+		this.spoolData.execute(this.dbConnection, sql);
+	}
 
+	public Window getParentWindow()
+	{
+		return SwingUtilities.getWindowAncestor(this);
+	}
+	
 }

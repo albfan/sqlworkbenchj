@@ -8,6 +8,7 @@ package workbench;
 
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.Window;
 import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
@@ -64,18 +65,28 @@ public class WbManager
 		return this.cipher;
 	}
 
+	public String getExportFilename(boolean includeSqlType)
+	{
+		return this.getExportFilename(null, includeSqlType);
+	}
 	public String getExportFilename(Component caller, boolean includeSqlType)
 	{
 		String lastDir = settings.getLastExportDir();
 		JFileChooser fc = new JFileChooser(lastDir);
-		fc.addChoosableFileFilter(ExtensionFileFilter.getTextFileFilter());
 		if (includeSqlType)
 		{
 			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
 		}
+		fc.addChoosableFileFilter(ExtensionFileFilter.getTextFileFilter());
 		String filename = null;
 
-		int answer = fc.showSaveDialog(SwingUtilities.getWindowAncestor(caller));
+		Window parent;
+		if (caller == null)
+			parent = this.mainWindow;
+		else
+			parent = SwingUtilities.getWindowAncestor(caller);
+		
+		int answer = fc.showSaveDialog(parent);
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
 			File fl = fc.getSelectedFile();

@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import javax.swing.AbstractListModel;
 import javax.swing.ListModel;
+import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import workbench.db.ConnectionProfile;
 
@@ -18,28 +20,22 @@ import workbench.db.ConnectionProfile;
  *
  * @author  workbench@kellerer.org
  */
-class ProfileListModel implements ListModel
+class ProfileListModel 
+	extends AbstractListModel
 {
 
 	private ArrayList profiles;
+	
 	/** Creates a new instance of ProfileListModel */
 	public ProfileListModel(Map aProfileList)
 	{
 		this.profiles = new ArrayList();
+		
 		if (aProfileList != null)
 		{
 			this.profiles.addAll(aProfileList.values());
 			Collections.sort(this.profiles, ConnectionProfile.getNameComparator());
 		}
-	}
-
-	/** Adds a listener to the list that's notified each time a change
-	 * to the data model occurs.
-	 * @param l the <code>ListDataListener</code> to be added
-	 *
-	 */
-	public void addListDataListener(ListDataListener l)
-	{
 	}
 
 	/** Returns the value at the specified index.
@@ -61,24 +57,26 @@ class ProfileListModel implements ListModel
 	{
 		return this.profiles.size();
 	}
-
-	/** Removes a listener from the list that's notified each time a
-	 * change to the data model occurs.
-	 * @param l the <code>ListDataListener</code> to be removed
-	 *
-	 */
-	public void removeListDataListener(ListDataListener l)
+	
+	public void profileChanged(ConnectionProfile aProfile)
 	{
+		int index = this.profiles.indexOf(aProfile);
+		if (index >= 0)
+		{
+			this.fireContentsChanged(this, index, index);
+		}
 	}
 
 	public void addProfile(ConnectionProfile aProfile)
 	{
 		this.profiles.add(this.profiles.size(), aProfile);
+		this.fireIntervalAdded(this, this.profiles.size() - 1,  this.profiles.size() - 1);
 	}
 
 	public void deleteProfile(int index)
 	{
 		this.profiles.remove(index);
+		this.fireIntervalRemoved(this, index, index);
 	}
 
 	public void putProfile(int index, ConnectionProfile aProfile)
@@ -90,5 +88,7 @@ class ProfileListModel implements ListModel
 	{
 		return this.profiles;
 	}
+	
+	
 }
 

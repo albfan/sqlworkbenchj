@@ -6,40 +6,54 @@
 
 package workbench.gui.profiles;
 
+import java.awt.Component;
 import java.awt.Frame;
 import java.awt.event.ItemEvent;
-import workbench.db.ConnectionMgr;
-import workbench.db.ConnectionProfile;
-import workbench.WbManager;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import workbench.WbManager;
+import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.BooleanPropertyEditor;
+import workbench.gui.components.ComboStringPropertyEditor;
+import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
+import workbench.interfaces.SimplePropertyEditor;
 import workbench.resource.ResourceMgr;
 
 /**
  *
  * @author  workbench@kellerer.org
  */
-public class ConnectionEditorPanel extends javax.swing.JPanel
+public class ConnectionEditorPanel extends JPanel
 {
 	private ConnectionProfile currentProfile;
 	private List drivers;
+	private ProfileListModel sourceModel;
 	private boolean init;
-
+	private List editors;
+	
 	public ConnectionEditorPanel()
 	{
 		this.initComponents();
+		this.initEditorList();
+	}
+	
+	private void initEditorList()
+	{
+		this.editors = new ArrayList(10);
+		for (int i=0; i < this.getComponentCount(); i++)
+		{
+			Component c = this.getComponent(i);
+			if (c instanceof SimplePropertyEditor)
+			{
+				this.editors.add(c);
+			}
+		}
 	}
 
 	/** This method is called from within the constructor to
@@ -52,22 +66,21 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		java.awt.GridBagConstraints gridBagConstraints;
 		
 		lblUsername = new javax.swing.JLabel();
-		tfUserName = new javax.swing.JTextField();
+		tfUserName = new StringPropertyEditor();
 		lblPwd = new javax.swing.JLabel();
 		jLabel1 = new javax.swing.JLabel();
-		cbDrivers = new javax.swing.JComboBox();
+		cbDrivers = new ComboStringPropertyEditor();
 		jLabel2 = new javax.swing.JLabel();
-		tfURL = new javax.swing.JTextField();
+		tfURL = new StringPropertyEditor();
 		tfPwd = new javax.swing.JPasswordField();
-		cbAutocommit = new javax.swing.JCheckBox();
+		cbAutocommit = new BooleanPropertyEditor();
 		dummy = new javax.swing.JPanel();
-		tfProfileName = new javax.swing.JTextField();
+		tfProfileName = new StringPropertyEditor();
 		manageDriversButton = new javax.swing.JButton();
 		
 		setLayout(new java.awt.GridBagLayout());
 		
 		setMinimumSize(new java.awt.Dimension(200, 200));
-		lblUsername.setFont(null);
 		lblUsername.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_USERNAME));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
@@ -76,26 +89,13 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
 		add(lblUsername, gridBagConstraints);
 		
-		tfUserName.setFont(null);
 		tfUserName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
 		tfUserName.setToolTipText("");
 		tfUserName.setMaximumSize(new java.awt.Dimension(2147483647, 20));
 		tfUserName.setMinimumSize(new java.awt.Dimension(40, 20));
-		tfUserName.setNextFocusableComponent(tfPwd);
+		tfUserName.setName("username");
 		tfUserName.setPreferredSize(new java.awt.Dimension(100, 20));
 		tfUserName.addMouseListener(new TextComponentMouseListener());
-		tfUserName.addFocusListener(new java.awt.event.FocusAdapter()
-		{
-			public void focusGained(java.awt.event.FocusEvent evt)
-			{
-				fieldFocusGained(evt);
-			}
-			public void focusLost(java.awt.event.FocusEvent evt)
-			{
-				fieldFocusLost(evt);
-			}
-		});
-		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 3;
@@ -105,7 +105,6 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		add(tfUserName, gridBagConstraints);
 		
-		lblPwd.setFont(null);
 		lblPwd.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_PASSWORD));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
@@ -114,7 +113,6 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
 		add(lblPwd, gridBagConstraints);
 		
-		jLabel1.setFont(null);
 		jLabel1.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_DRIVER));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
@@ -124,19 +122,11 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		add(jLabel1, gridBagConstraints);
 		
 		cbDrivers.setEditable(true);
-		cbDrivers.setFont(null);
 		cbDrivers.setMaximumSize(new java.awt.Dimension(32767, 20));
 		cbDrivers.setMinimumSize(new java.awt.Dimension(40, 20));
-		cbDrivers.setNextFocusableComponent(tfURL);
+		cbDrivers.setName("driverclass");
 		cbDrivers.setPreferredSize(new java.awt.Dimension(120, 20));
-		cbDrivers.addFocusListener(new java.awt.event.FocusAdapter()
-		{
-			public void focusLost(java.awt.event.FocusEvent evt)
-			{
-				fieldFocusLost(evt);
-			}
-		});
-		
+		cbDrivers.setVerifyInputWhenFocusTarget(false);
 		cbDrivers.addItemListener(new java.awt.event.ItemListener()
 		{
 			public void itemStateChanged(java.awt.event.ItemEvent evt)
@@ -155,7 +145,6 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 4);
 		add(cbDrivers, gridBagConstraints);
 		
-		jLabel2.setFont(null);
 		jLabel2.setText(ResourceMgr.getString(ResourceMgr.TXT_DB_URL));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
@@ -164,21 +153,12 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.insets = new java.awt.Insets(0, 5, 2, 0);
 		add(jLabel2, gridBagConstraints);
 		
-		tfURL.setFont(null);
 		tfURL.setHorizontalAlignment(javax.swing.JTextField.LEFT);
 		tfURL.setMaximumSize(new java.awt.Dimension(2147483647, 20));
 		tfURL.setMinimumSize(new java.awt.Dimension(40, 20));
-		tfURL.setNextFocusableComponent(tfUserName);
+		tfURL.setName("url");
 		tfURL.setPreferredSize(new java.awt.Dimension(100, 20));
 		tfURL.addMouseListener(new TextComponentMouseListener());
-		tfURL.addFocusListener(new java.awt.event.FocusAdapter()
-		{
-			public void focusLost(java.awt.event.FocusEvent evt)
-			{
-				fieldFocusLost(evt);
-			}
-		});
-		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 2;
@@ -188,19 +168,7 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		add(tfURL, gridBagConstraints);
 		
-		tfPwd.setFont(null);
-		tfPwd.addFocusListener(new java.awt.event.FocusAdapter()
-		{
-			public void focusGained(java.awt.event.FocusEvent evt)
-			{
-				fieldFocusGained(evt);
-			}
-			public void focusLost(java.awt.event.FocusEvent evt)
-			{
-				fieldFocusLost(evt);
-			}
-		});
-		
+		tfPwd.setName("inputPassword");
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 4;
@@ -210,16 +178,8 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 6);
 		add(tfPwd, gridBagConstraints);
 		
-		cbAutocommit.setFont(null);
 		cbAutocommit.setText("Autocommit");
-		cbAutocommit.addItemListener(new java.awt.event.ItemListener()
-		{
-			public void itemStateChanged(java.awt.event.ItemEvent evt)
-			{
-				cbAutocommitItemStateChanged(evt);
-			}
-		});
-		
+		cbAutocommit.setName("autocommit");
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 5;
@@ -235,17 +195,9 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.weighty = 1.0;
 		add(dummy, gridBagConstraints);
 		
-		tfProfileName.setFont(null);
 		tfProfileName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+		tfProfileName.setName("name");
 		tfProfileName.addMouseListener(new TextComponentMouseListener());
-		tfProfileName.addFocusListener(new java.awt.event.FocusAdapter()
-		{
-			public void focusLost(java.awt.event.FocusEvent evt)
-			{
-				fieldFocusLost(evt);
-			}
-		});
-		
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 0;
@@ -256,7 +208,6 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
 		add(tfProfileName, gridBagConstraints);
 		
-		manageDriversButton.setFont(null);
 		manageDriversButton.setText(ResourceMgr.getString("LabelEditDrivers"));
 		manageDriversButton.setMaximumSize(new java.awt.Dimension(200, 20));
 		manageDriversButton.setMinimumSize(new java.awt.Dimension(70, 20));
@@ -278,27 +229,16 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		
 	}//GEN-END:initComponents
 
-	private void fieldFocusGained(java.awt.event.FocusEvent evt)//GEN-FIRST:event_fieldFocusGained
-	{//GEN-HEADEREND:event_fieldFocusGained
-		if (evt.getSource() instanceof JTextField)
-		{
-			JTextField field = (JTextField)evt.getSource();
-			field.selectAll();
-		}
-	}//GEN-LAST:event_fieldFocusGained
-
 	private void cbDriversItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_cbDriversItemStateChanged
 	{//GEN-HEADEREND:event_cbDriversItemStateChanged
+		if (this.init) return;
 		if (evt.getStateChange() == ItemEvent.SELECTED)
 		{
-			if (this.tfURL.getText() == null || this.tfURL.getText().trim().length() == 0)
+			String selected = (String)this.cbDrivers.getSelectedItem();
+			if (selected != null)
 			{
-				Object selected = this.cbDrivers.getSelectedItem();
-				if (selected instanceof DbDriver)
-				{
-					DbDriver newDriver = (DbDriver)selected;
-					this.tfURL.setText(newDriver.getSampleUrl());
-				}
+				DbDriver newDriver = WbManager.getInstance().getConnectionMgr().findDriver(selected);
+				if (newDriver != null) this.tfURL.setText(newDriver.getSampleUrl());
 			}
 		}
 	}//GEN-LAST:event_cbDriversItemStateChanged
@@ -311,20 +251,9 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		DriverEditorDialog d = new DriverEditorDialog(parent, true);
 		WbSwingUtilities.center(d,parent);
 		d.show();
-		List drivers = WbManager.getInstance().getConnectionMgr().getDrivers();
+		List drivers = WbManager.getInstance().getConnectionMgr().getDriverClasses();
 		this.setDrivers(drivers);
 	}//GEN-LAST:event_showDriverEditorDialog
-
-	private void cbAutocommitItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_cbAutocommitItemStateChanged
-	{//GEN-HEADEREND:event_cbAutocommitItemStateChanged
-		this.updateProfile();
-	}//GEN-LAST:event_cbAutocommitItemStateChanged
-
-	private void fieldFocusLost(java.awt.event.FocusEvent evt)//GEN-FIRST:event_fieldFocusLost
-	{//GEN-HEADEREND:event_fieldFocusLost
-		this.updateProfile();
-	}//GEN-LAST:event_fieldFocusLost
-
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JButton manageDriversButton;
@@ -343,20 +272,31 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 
 	public void setDrivers(List aDriverList)
 	{
-		this.drivers = aDriverList;
 		if (aDriverList != null)
 		{
 			this.cbDrivers.setModel(new DefaultComboBoxModel(aDriverList.toArray()));
-			//this.cbDrivers.setSelectedItem(null);
-			this.checkDriverDropDown();
 		}
 	}
 
+	public void setSourceList(ProfileListModel aSource)
+	{
+		this.sourceModel = aSource;
+	}
+	
 	public void updateProfile()
 	{
 		if (this.init) return;
 		if (this.currentProfile == null) return;
-
+		if (this.editors == null) return;
+		boolean changed = false;
+		
+		for (int i=0; i < this.editors.size(); i++)
+		{
+			SimplePropertyEditor editor = (SimplePropertyEditor)this.editors.get(i);
+			changed = changed || editor.isChanged();
+			editor.applyChanges();
+		}
+		/*
 		Object driver = cbDrivers.getSelectedItem();
 		if (driver != null)
 		{
@@ -367,13 +307,11 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		this.currentProfile.setUsername(tfUserName.getText());
 		this.currentProfile.setAutocommit(cbAutocommit.isSelected());
 		this.currentProfile.setName(tfProfileName.getText());
-
-		// dirty trick to update the list display
-		// if I update the parent, the divider size gets reset :-(
-		JSplitPane parent = (JSplitPane)this.getParent();
-		parent.repaint();
-		//JComponent list = (JComponent)parent.getLeftComponent();
-		//list.updateUI();
+		*/
+		if (changed)
+		{
+//			this.sourceModel.profileChanged(this.currentProfile);
+		}
 	}
 
 	public ConnectionProfile getProfile()
@@ -381,32 +319,53 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		this.updateProfile();
 		return this.currentProfile;
 	}
+	
+	private void initPropertyEditors()
+	{
+		if (this.editors == null) return;
+		if (this.currentProfile == null) return;
+		
+		for (int i=0; i < this.editors.size(); i++)
+		{
+			SimplePropertyEditor editor = (SimplePropertyEditor)this.editors.get(i);
+			Component c = (Component)editor;
+			String property = c.getName();
+			if (property != null)
+			{
+				editor.setSourceObject(this.currentProfile, property);
+			}
+		}
+	}
+	
 
 	public void setProfile(ConnectionProfile aProfile)
 	{
 		this.init = true;
 		this.currentProfile = aProfile;
-		this.tfProfileName.setText(aProfile.getName());
-		this.tfUserName.setText(aProfile.getUsername());
-		this.tfURL.setText(aProfile.getUrl());
-		this.tfURL.setCaretPosition(0);
+		//this.tfProfileName.setText(aProfile.getName());
+		//this.tfProfileName.setText(aProfile.getName());
+		//this.tfUserName.setText(aProfile.getUsername());
+		//this.tfURL.setText(aProfile.getUrl());
+		//this.tfURL.setCaretPosition(0);
 		this.tfPwd.setText(aProfile.decryptPassword());
-		this.cbAutocommit.setSelected(aProfile.getAutocommit());
-		this.checkDriverDropDown();
+		//this.cbAutocommit.setSelected(aProfile.getAutocommit());
+		//this.checkDriverDropDown();
+		this.initPropertyEditors();
 		this.init = false;
 	}
 
 	private void checkDriverDropDown()
 	{
 		if (this.currentProfile == null) return;
-		DbDriver driver;
 		int newIndex = -1;
 		int count = this.cbDrivers.getItemCount();
+		String currentClass = this.currentProfile.getDriverclass();
+		String drvClass;
+		
 		for (int i=0; i < count; i++)
 		{
-			driver = (DbDriver)this.cbDrivers.getItemAt(i);
-			String driverClass = driver.getDriverClass();
-			if (driverClass != null && driverClass.equals(this.currentProfile.getDriverclass()))
+			drvClass = (String)this.cbDrivers.getItemAt(i);
+			if (drvClass.equals(currentClass))
 			{
 				newIndex = i;
 				break;
@@ -418,17 +377,20 @@ public class ConnectionEditorPanel extends javax.swing.JPanel
 		}
 		else
 		{
+			this.init = true;
 			String cls = this.currentProfile.getDriverclass();
 			if (cls != null && cls.length() > 0)
 			{
-				DbDriver drv = new DbDriver();
+				DbDriver drv = new DbDriver(cls);
 				this.cbDrivers.addItem(drv);
-				this.cbDrivers.setSelectedIndex(this.cbDrivers.getItemCount() - 1);
+				this.cbDrivers.setSelectedItem(drv);
 			}
 			else
 			{
 				this.cbDrivers.setSelectedItem(null);
 			}
+			this.init = false;
 		}
 	}
+
 }

@@ -69,11 +69,12 @@ public class ProfileEditorPanel
 			this.jSplitPane1.setDividerLocation(pos);
 		}
 		this.addKeyListener(this);
+		this.connectionEditor.setSourceList(this.model);
 	}
 
 	private void fillDrivers()
 	{
-		List drivers = WbManager.getInstance().getConnectionMgr().getDrivers();
+		List drivers = WbManager.getInstance().getConnectionMgr().getDriverClasses();
 		this.connectionEditor.setDrivers(drivers);
 	}
 
@@ -171,11 +172,7 @@ public class ProfileEditorPanel
 
 	public ConnectionProfile getSelectedProfile()
 	{
-		this.repaint();
-		//this.connectionEditor.updateProfile();
 		return this.connectionEditor.getProfile();
-		//ConnectionProfile prof = (ConnectionProfile)jList1.getSelectedValue();
-		//return prof;
 	}
 
 
@@ -220,9 +217,8 @@ public class ProfileEditorPanel
 	public void deleteItem() throws WbException
 	{
 		int index = this.jList1.getSelectedIndex();
-		if (index > 0) this.jList1.setSelectedIndex(index - 1);
+		//if (index > 0) this.jList1.setSelectedIndex(index - 1);
 		this.model.deleteProfile(index);
-		this.jList1.updateUI();
 	}
 
 	/**
@@ -244,8 +240,6 @@ public class ProfileEditorPanel
 		cp.setName(ResourceMgr.getString("TxtEmptyProfileName"));
 		this.model.addProfile(cp);
 		this.selectProfile(cp.getName());
-		// if I call repaint() the list disappears :-(
-		this.jList1.updateUI();
 	}
 
 	public void saveItem() throws WbException

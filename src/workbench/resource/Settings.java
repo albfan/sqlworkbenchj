@@ -538,7 +538,47 @@ public class Settings
 	{
 		this.props.setProperty("workbench.sql.alternatedelimiter", aDelimit);
 	}
+	
+	public String getDefaultTextDelimiter()
+	{
+		return this.getDefaultTextDelimiter(false);
+	}
 
+	public String getQuoteChar()
+	{
+		return this.props.getProperty("workbench.export.text.quotechar", "");
+	}
+
+	public void setQuoteChar(String aQuoteChar)
+	{
+		this.props.setProperty("workbench.export.text.quotechar", aQuoteChar);
+	}
+	
+	public String getDefaultTextDelimiter(boolean readable)
+	{
+		String del = this.props.getProperty("workbench.export.text.fielddelimiter", "\\t");
+		if (readable)
+		{
+			if (del.equals("\t"))
+			{
+				del = "\\t";
+			}
+		}
+		else
+		{
+			if (del.equals("\\t")) del = "\t";
+		}
+		
+		return del;
+	}
+
+	public void setDefaultTextDelimiter(String aDelimit)
+	{
+		if (aDelimit.equals("\t")) aDelimit = "\\t";
+		
+		this.props.setProperty("workbench.export.text.fielddelimiter", aDelimit);
+	}
+	
 	public boolean getDbDebugMode()
 	{
 		return "true".equals(this.props.getProperty("workbench.db.debugger", "true"));

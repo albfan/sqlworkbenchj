@@ -224,6 +224,7 @@ public class WbTable
 		}
 		
 		this.initDefaultRenderers();
+		this.initDefaultEditors();
 		this.currentRow = -1;
 		this.currentColumn = -1;
 	}
