@@ -136,7 +136,7 @@ public class SqlUtil
 						{
 							value = value.substring(0, l - delimitLen);
 						}
-						result.add(value);
+						if (makeCleanSql(value, false).length() > 0) result.add(value);
 						if (isCurrent)
 						{
 							currentIndex = result.size() - 1;
@@ -154,8 +154,7 @@ public class SqlUtil
 			{
 				value = value.substring(0, value.length() - delimitLen);
 			}
-			if (makeCleanSql(value, false).length() > 0) 
-				result.add(value);
+			if (makeCleanSql(value, false).length() > 0) result.add(value);
 			
 			if ((lastPos <= currentCursorPos) && (pos >= currentCursorPos))
 			{
@@ -520,13 +519,16 @@ public class SqlUtil
 		{
 			System.out.println("table=" + tables.get(i));
 		}
-		*/
+		
 		String col = "test col";
 		Pattern p = Pattern.compile("[$ ]");		
 		Matcher m;
 		m = p.matcher(col);
 		System.out.println("find()=" + m.find());
 		System.out.println(quoteObjectname(col));
+		*/
+		String sql = "-- this is a test";
+		System.out.println(">" + makeCleanSql(sql, false));
 	}
 
 }

@@ -33,7 +33,25 @@ public class WbStringTokenizer
 		this(delimiter, false, "\"", false);
 		this.setSourceString(aSource);
 	}
+
+	public WbStringTokenizer(char aDelim, String quoteChars, boolean keepQuotes)
+	{
+		this.delimit = new String(new char[] { aDelim });
+		this.singleWordDelimiter = false;
+		this.quoteChars = quoteChars;
+		this.keepQuotes = keepQuotes;
+	}
 	
+	/**
+	 *	Create a new tokenizer.
+	 *	If aDelim contains more then one character, the parameter isSingleDelimter indicates
+	 *  whether the given delimiter string should be considered one delimiter or a sequence
+	 *  of possible delimiter characters.
+	 *
+	 *	Once the Tokenizer is created, the string to be tokenized can be set with 
+	 *	setSourceString()
+	 *
+	 */
 	public WbStringTokenizer(String aDelim, boolean isSingleDelimiter, String quoteChars, boolean keepQuotes)
 	{
 		this.delimit = aDelim;
@@ -73,6 +91,7 @@ public class WbStringTokenizer
 	
 	private void initTokenizer(Reader aReader)
 	{
+		this.lastToken = 0;
 		this.tokenizer = new StreamTokenizer(aReader);
 		this.tokenizer.resetSyntax();
 		this.tokenizer.wordChars(0,255);
@@ -102,7 +121,8 @@ public class WbStringTokenizer
 		int delimIndex = 0;
 		StringBuffer current = null;
 		boolean tokenFound = false;
-
+		String result = null;
+		
 		try
 		{
 			while (true)
@@ -180,13 +200,14 @@ public class WbStringTokenizer
 		//System.out.println("---");
 		//test = "spool -t type \t-f \"file name.sql\" -b tablename./select * from test where name='test'./";
 		//test = "spool /type=text /file=\"file name.sql\" /table=tablename";
-		test = "/profile=\"HSQLDB - Test Server\" /script=\"d:/temp/test.sql\"";
-		WbStringTokenizer tok = new WbStringTokenizer(";",false, "\"'", true);
+		test = "column2value\"\tcolumn3";
+		WbStringTokenizer tok = new WbStringTokenizer("\t",false, "", false);
+		System.out.println("test=" + test);
 		//WbStringTokenizer tok = new WbStringTokenizer("/",false, "\"'", true);
 		try
 		{
-			//tok.setSourceString(test);
-			tok.setSourceFile("d:/projects/java/jworkbench/sql/test.sql");
+			tok.setSourceString(test);
+			//tok.setSourceFile("d:/projects/java/jworkbench/sql/test.sql");
 			//tok.setSourceFile("d:/temp/test.sql");
 			String token = null;
 			while (tok.hasMoreTokens())

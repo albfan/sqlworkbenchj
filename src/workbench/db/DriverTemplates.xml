@@ -10,7 +10,7 @@
      <string>hsqldb.jar</string>
     </void>
     <void property="name">
-     <string>HSQLDB Local</string>
+     <string>HSQLDB</string>
     </void>
     <void property="sampleUrl">
      <string>jdbc:hsqldb:(path to dababase file)</string>
@@ -52,7 +52,7 @@
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
-     <string>org.gjt.mm.mysql.Driver</string>
+     <string>com.mysql.jdbc.Driver</string>
     </void>
     <void property="library">
      <string>mm.mysql-2.0.4-bin.jar</string>
@@ -97,53 +97,53 @@
     </void>
    </object>
   </void>
-  <void method="add"> 
-   <object class="workbench.db.DbDriver"> 
-    <void property="driverClass"> 
-     <string>de.sag.jdbc.adabasd.ADriver</string> 
-    </void> 
-    <void property="library"> 
-     <string>adabasd.jar</string> 
-    </void> 
-    <void property="name"> 
-     <string>Adabas</string> 
-    </void> 
-    <void property="sampleUrl"> 
-     <string>jdbc:adabasd://&lt;server&gt;/&lt;database&gt;</string> 
-    </void> 
-   </object> 
-  </void> 
-  <void method="add"> 
-   <object class="workbench.db.DbDriver"> 
-    <void property="driverClass"> 
-     <string>org.postgresql.Driver</string> 
-    </void> 
-    <void property="library"> 
-     <string>pg73jdbc3.jar</string> 
-    </void> 
-    <void property="name"> 
-     <string>PostgreSQL</string> 
-    </void> 
-    <void property="sampleUrl"> 
-     <string>jdbc:postgresql://host:port/database</string> 
-    </void> 
-   </object> 
-  </void> 
-  <void method="add"> 
-   <object class="workbench.db.DbDriver"> 
-    <void property="driverClass"> 
-     <string>sun.jdbc.odbc.JdbcOdbcDriver</string> 
-    </void> 
-    <void property="library"> 
-     <string></string> 
-    </void> 
-    <void property="name"> 
-     <string>Access</string> 
-    </void> 
-    <void property="sampleUrl"> 
-     <string>jdbc:odbc:DRIVER={Microsoft Access Driver (*.mdb)};DBQ=&lt;filename&gt;</string> 
-    </void> 
-   </object> 
-  </void> 
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>de.sag.jdbc.adabasd.ADriver</string>
+    </void>
+    <void property="library">
+     <string>adabasd.jar</string>
+    </void>
+    <void property="name">
+     <string>Adabas</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:adabasd://&lt;server&gt;/&lt;database&gt;</string>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>org.postgresql.Driver</string>
+    </void>
+    <void property="library">
+     <string>pg73jdbc3.jar</string>
+    </void>
+    <void property="name">
+     <string>PostgreSQL</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:postgresql://host:port/database</string>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>sun.jdbc.odbc.JdbcOdbcDriver</string>
+    </void>
+    <void property="library">
+     <string></string>
+    </void>
+    <void property="name">
+     <string>Access</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:odbc:DRIVER={Microsoft Access Driver (*.mdb)};DBQ=&lt;filename&gt;</string>
+    </void>
+   </object>
+  </void>
  </object>
 </java>

@@ -11,10 +11,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.List;
+import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
 import workbench.interfaces.TableSearchDisplay;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 
 /**
@@ -134,6 +136,10 @@ public class TableSearcher
 				}
 				if (this.display != null)this.display.addResultRow(aTable, rs);
 			}
+		}
+		catch (OutOfMemoryError mem)
+		{
+			WbManager.getInstance().showErrorMessage(null, ResourceMgr.getString("MsgOutOfMemoryError"));
 		}
 		catch (Exception e)
 		{

@@ -37,6 +37,7 @@ import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.TextContainer;
 import workbench.interfaces.TextFileContainer;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.LineTokenizer;
@@ -312,7 +313,11 @@ public class EditorPanel
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("EditorPanel.readFile()", "Error reading file " + aFile.getAbsolutePath(), e);
+		}
+		catch (OutOfMemoryError mem)
+		{
+			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
 		}
 		return result;
 	}

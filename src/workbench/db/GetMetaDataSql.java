@@ -492,15 +492,51 @@ public class GetMetaDataSql
 		listMsSqlTrigs.setObjectNameField("tab.name");
 		listMsSqlTrigs.setOrderBy("trigger_name");
 		
+		GetMetaDataSql hsql = new GetMetaDataSql();
+		hsql.setBaseSql("SELECT trigger_name, when_clause as trigger_type, triggering_event as trigger_event from system_triggers");
+		hsql.setObjectNameField("table_name");
+		hsql.setOrderBy("trigger_name");
+		
 		HashMap trgStatements = new HashMap();
 		trgStatements.put("Oracle", listOraTrigs);
 		trgStatements.put("Oracle8", listOraTrigs);
 		trgStatements.put("PostgreSQL", listPostgresTrigs);
 		trgStatements.put("Microsoft SQL Server", listMsSqlTrigs);
+		trgStatements.put("HSQL Database Engine", hsql);
 		
-		WbPersistence.writeObject(trgStatements, "ListTriggersStatements.xml");
+		WbPersistence.writeObject(trgStatements, "d:/temp/ListTriggersStatements.xml");
 	}
-	
+
+	public static void createViewStatements()
+	{
+		GetMetaDataSql hsql = new GetMetaDataSql();
+		hsql.setUseUpperCase(true);
+		hsql.setBaseSql("SELECT view_definition FROM SYSTEM_VIEWS");
+		hsql.setObjectNameField("TABLE_NAME");
+		hsql.setCatalogField(null);
+		hsql.setSchemaField(null);
+
+		GetMetaDataSql ora = new GetMetaDataSql();
+		ora.setUseUpperCase(true);
+		ora.setBaseSql("SELECT text FROM all_views");
+		ora.setObjectNameField("view_name");
+		ora.setCatalogField(null);
+		ora.setSchemaField("owner");
+
+		GetMetaDataSql mss = new GetMetaDataSql();
+		mss.setBaseSql("exec sp_helptext");
+		mss.setArgumentsNeedParanthesis(false);
+		mss.setSchemaArgumentPos(0);
+		mss.setCatalogArgumentPos(0);
+		mss.setObjectNameArgumentPos(1);
+		mss.setIsProcedureCall(true);
+		
+		HashMap viewStatements = new HashMap();
+		viewStatements.put("Oracle", ora);
+		viewStatements.put("Microsoft SQL Server", mss);
+		viewStatements.put("HSQLDB Database Engine", hsql);
+		WbPersistence.writeObject(viewStatements, "d:/temp/test.xml");
+	}
 	public static void createDefaultStatements()
 	{
 		System.out.println("Generating default statements...");
@@ -541,6 +577,7 @@ public class GetMetaDataSql
 	{
 		//createDefaultStatements();
 		createListTriggerStatements();
+		//createViewStatements();
 		System.out.println("Done.");
 	}
 	

@@ -24,7 +24,10 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		{
 			DatabaseMetaData meta = aConnection.getMetaData();
 
-			String keys = meta.getSQLKeywords();
+			String keys = null;
+			
+			keys = meta.getSQLKeywords();
+				
 			//System.out.println("sql keywords = "+ keys);
 			this.addKeywordList(keys, Token.KEYWORD1);
 			if (meta.getDatabaseProductName().toLowerCase().indexOf("oracle") > -1)
@@ -42,19 +45,15 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 			}
 
 			keys = meta.getStringFunctions();
-			//System.out.println("string functions = "+ keys);
 			this.addKeywordList(keys, Token.KEYWORD3);
 
 			keys = meta.getNumericFunctions();
-			//System.out.println("numeric functions = "+ keys);
 			this.addKeywordList(keys, Token.KEYWORD3);
 
 			keys = meta.getTimeDateFunctions();
-			//System.out.println("timedate functions = "+ keys);
 			this.addKeywordList(keys, Token.KEYWORD3);
 
 			keys = meta.getSystemFunctions();
-			//System.out.println("system functions = " +keys);
 			this.addKeywordList(keys, Token.KEYWORD3);
 
 		}
@@ -65,6 +64,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 	}
 	private void addKeywordList(String aList, byte anId)
 	{
+		if (aList == null) return;
 		StringTokenizer tok = new StringTokenizer(aList, ",");
 		while (tok.hasMoreTokens())
 		{

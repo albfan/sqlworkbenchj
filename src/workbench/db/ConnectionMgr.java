@@ -286,9 +286,9 @@ public class ConnectionMgr
 		{
 			WbConnection con = (WbConnection)this.activeConnections.get(anId);
 
-			if (con != null && !con.isClosed())
+			if (con != null)
 			{
-				LogMgr.logDebug("ConnectionMgr.disconnect()", "Disconnecting: " + con.getProfile().getName());
+				LogMgr.logDebug("ConnectionMgr.disconnect()", "Disconnecting: " + con.getProfile().getName() + " with ID=" + anId);
 				con.close();
 			}
 			this.activeConnections.put(anId, null);

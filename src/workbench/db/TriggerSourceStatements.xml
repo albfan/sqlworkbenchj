@@ -113,5 +113,16 @@ where trg.tgrelid = tbl.oid
     </void>
    </object>
   </void>
+  <void method="put"> 
+   <string>HSQL Database Engine</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>SELECT trigger_body FROM system_triggers</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>trigger_name</string> 
+    </void> 
+   </object> 
+  </void> 
  </object>
 </java>

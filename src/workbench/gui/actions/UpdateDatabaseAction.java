@@ -5,6 +5,7 @@
  */
 package workbench.gui.actions;
 
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
@@ -34,6 +35,13 @@ public class UpdateDatabaseAction extends WbAction
 
 	public void actionPerformed(ActionEvent e)
 	{
-		this.panel.saveChangesToDatabase();
+		Thread t = new Thread()
+		{
+			public void run()
+			{
+				panel.saveChangesToDatabase();
+			}
+		};
+		t.start();
 	}
 }

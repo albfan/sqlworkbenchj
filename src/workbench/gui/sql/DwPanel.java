@@ -25,6 +25,7 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
+import workbench.storage.RowActionMonitor;
 import workbench.storage.DmlStatement;
 import workbench.util.StringUtil;
 
@@ -33,7 +34,9 @@ import workbench.util.StringUtil;
 /**
  *	A Panel which displays the result of a SELECT statement.
  */
-public class DwPanel extends JPanel
+public class DwPanel 
+	extends JPanel
+	implements RowActionMonitor
 {
 	private WbTable infoTable;
 	private DwStatusBar statusBar;
@@ -96,6 +99,33 @@ public class DwPanel extends JPanel
 		}
 	}
 	
+	private String updateMsg;
+	private int monitorType;
+	
+	public void setMonitorType(int aType) 
+	{ 
+		this.monitorType = aType; 
+		if (this.monitorType == RowActionMonitor.MONITOR_INSERT)
+			this.updateMsg = ResourceMgr.getString("MsgImportingRow");
+		else
+			this.updateMsg = ResourceMgr.getString("MsgUpdatingRow");
+	}
+	
+	public void setCurrentRow(int currentRow, int totalRows)
+	{
+		StringBuffer msg = new StringBuffer(40);
+		msg.append(this.updateMsg);
+		msg.append(' ');
+		msg.append(currentRow);
+		if (totalRows > 0)
+		{
+			msg.append('/');
+			msg.append(totalRows);
+		}
+		this.statusBar.setStatusMessage(msg.toString());
+	}
+	
+	
 	/**
 	 *	Defines the connection for this DBPanel.
 	 *	@see setSqlStatement(String)
@@ -109,10 +139,11 @@ public class DwPanel extends JPanel
 		this.lastMessage = null;
 		this.dbConnection = aConn;
 		this.hasResultSet = false;
+		this.clearStatusMessage();
 		this.stmtRunner.setConnection(aConn);
 	}
 
-	public int saveChanges(WbConnection aConnection)
+	public synchronized int saveChanges(WbConnection aConnection)
 		throws WbException, SQLException
 	{
 		int rows = 0;
@@ -124,46 +155,75 @@ public class DwPanel extends JPanel
 			DataStore ds = this.infoTable.getDataStore();
 			if (WbManager.getSettings().getDbDebugMode())
 			{
-				Dimension max = new Dimension(800,600);
-				Dimension pref = new Dimension(400, 300);
-				EditorPanel preview = EditorPanel.createSqlEditor();
-				preview.setBorder(WbSwingUtilities.EMPTY_BORDER);
-				preview.setPreferredSize(pref);
-				preview.setMaximumSize(max);
-				JScrollPane scroll = new JScrollPane(preview);
-				scroll.setMaximumSize(max);
-				List stmts = ds.getUpdateStatements(aConnection);
-        StringBuffer text = new StringBuffer(stmts.size() * 80);
-				for (int i=0; i < stmts.size(); i++)
-				{
-					DmlStatement dml = (DmlStatement)stmts.get(i);
-          text.append(dml.getExecutableStatement(aConnection.getDatabaseProductName()));
-          text.append(";\n");
-				}
-        preview.setText(text.toString());
-        preview.setCaretPosition(0);
+				WbSwingUtilities.showWaitCursor(this);
 				Window win = SwingUtilities.getWindowAncestor(this);
-				int choice = JOptionPane.showConfirmDialog(win, scroll, "Please confirm updates", JOptionPane.OK_CANCEL_OPTION);
-				if (choice == JOptionPane.CANCEL_OPTION) return 0;
+				try
+				{
+					Dimension max = new Dimension(800,600);
+					Dimension pref = new Dimension(400, 300);
+					EditorPanel preview = EditorPanel.createSqlEditor();
+					preview.setBorder(WbSwingUtilities.EMPTY_BORDER);
+					preview.setPreferredSize(pref);
+					preview.setMaximumSize(max);
+					JScrollPane scroll = new JScrollPane(preview);
+					scroll.setMaximumSize(max);
+					List stmts = ds.getUpdateStatements(aConnection);
+					StringBuffer text = new StringBuffer(stmts.size() * 80);
+					for (int i=0; i < stmts.size(); i++)
+					{
+						DmlStatement dml = (DmlStatement)stmts.get(i);
+						text.append(dml.getExecutableStatement(aConnection.getDatabaseProductName()));
+						text.append(";\n");
+					}
+					preview.setText(text.toString());
+					preview.setCaretPosition(0);
+					WbSwingUtilities.showDefaultCursor(this);
+					int choice = JOptionPane.showConfirmDialog(win, scroll, ResourceMgr.getString("MsgConfirmUpdates"), JOptionPane.OK_CANCEL_OPTION);
+					if (choice == JOptionPane.CANCEL_OPTION) return 0;
+				}
+				catch (OutOfMemoryError mem)
+				{
+					String msg = ResourceMgr.getString("MsgOutOfMemorySQLPreview");
+					int choice = JOptionPane.showConfirmDialog(win, msg, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION);
+					if (choice == JOptionPane.NO_OPTION) return 0;
+				}
+				finally
+				{
+					WbSwingUtilities.showDefaultCursorOnWindow(this);
+				}
 			}
 			long start, end;
-      WbSwingUtilities.showWaitCursorOnWindow(this);
+      WbSwingUtilities.showWaitCursor(this);
+			ds.setProgressMonitor(this);
 			start = System.currentTimeMillis();
 			rows = ds.updateDb(aConnection);
 			end = System.currentTimeMillis();
+			ds.setProgressMonitor(null);
 			long sqlTime = (end - start);
-      WbSwingUtilities.showDefaultCursorOnWindow(this);
-			this.infoTable.repaint();
 			this.lastMessage = ResourceMgr.getString("MsgUpdateSuccessfull");
 			this.lastMessage = this.lastMessage + "\n" + rows + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED);
 			this.lastMessage = this.lastMessage + ResourceMgr.getString("MsgExecTime") + " " + (((double)sqlTime) / 1000.0) + "s";
 		}
 		catch (SQLException e)
 		{
-			e.printStackTrace();
 			this.lastMessage = ExceptionUtil.getDisplay(e);
 			throw e;
 		}
+		catch (OutOfMemoryError mem)
+		{
+			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
+		}
+		catch (Throwable th)
+		{
+			th.printStackTrace();
+		}
+		finally
+		{
+      WbSwingUtilities.showDefaultCursor(this);
+			this.clearStatusMessage();
+		}
+		this.repaint();
+		
 		return rows;
 	}
 	
@@ -313,6 +373,10 @@ public class DwPanel extends JPanel
 		}
 		catch (Throwable e)
 		{
+			if (e instanceof OutOfMemoryError)
+			{
+				WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
+			}
 			LogMgr.logError(this, "Error executing statement: \r\n" + this.sql, e);
 			this.setMessageDisplayModel(this.getErrorTableModel());
 			this.lastMessage = ResourceMgr.getString("MsgExecuteError") + "\r\n";

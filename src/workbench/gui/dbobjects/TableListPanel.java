@@ -4,20 +4,15 @@
 package workbench.gui.dbobjects;
 
 import java.awt.*;
-import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import javax.swing.*;
-import javax.swing.Box;
-import javax.swing.ButtonGroup;
-import javax.swing.JRadioButton;
-import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -29,7 +24,6 @@ import workbench.WbManager;
 import workbench.db.DataSpooler;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
-import workbench.exception.ExceptionUtil;
 import workbench.exception.WbException;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
@@ -38,7 +32,6 @@ import workbench.gui.actions.SpoolDataAction;
 
 
 import workbench.gui.components.*;
-import workbench.gui.components.DirectoryFileFilter;
 import workbench.gui.renderer.SqlTypeRenderer;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
@@ -50,7 +43,6 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 
 
 
@@ -61,7 +53,7 @@ import workbench.util.StringUtil;
  */
 public class TableListPanel
 	extends JPanel
-	implements ActionListener, ChangeListener, ListSelectionListener
+	implements ActionListener, ChangeListener, ListSelectionListener, MouseListener
 						, ShareableDisplay, Spooler, FilenameChangeListener
 {
 	private WbConnection dbConnection;
@@ -102,6 +94,7 @@ public class TableListPanel
 	private String selectedTableName;
 	private String selectedObjectType;
 
+	private boolean shiftDown = false;
 	private boolean shouldRetrieve;
 
 	private boolean shouldRetrieveTable;
@@ -248,6 +241,8 @@ public class TableListPanel
 		this.reset();
 		this.parentWindow.addFilenameChangeListener(this);
     this.parentWindow.addIndexChangeListener(this);
+		this.displayTab.addMouseListener(this);
+		this.tableList.addMouseListener(this);
 	}
 
 	private void extendPopupMenu()
@@ -320,20 +315,28 @@ public class TableListPanel
 
 	private void addTablePanels()
 	{
-		if (this.displayTab.getComponentCount() > 2) return;
-		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerData"), this.tableData);
+		if (this.displayTab.getComponentCount() > 3) return;
+		if (this.displayTab.getComponentCount() == 2) this.addDataPanel();
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerIndexes"), this.indexPanel);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerFkColumns"), this.importedPanel);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerReferencedColumns"), this.exportedPanel);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTriggers"), this.triggers);
 	}
 
-	private void removeTablePanels()
+	private void removeTablePanels(boolean includeDataPanel)
 	{
-		if (this.displayTab.getComponentCount() == 2) return;
+		int index = this.displayTab.getSelectedIndex();
+		
+		//if (this.displayTab.getTabCount() == 2) return;
+
 		this.displayTab.setSelectedIndex(0);
-		this.displayTab.remove(this.tableData);
-		this.tableData.reset();
+
+		int count = this.displayTab.getTabCount();
+		if (count < 3 && includeDataPanel) return;
+		if (count < 2 && !includeDataPanel) return;
+		
+		if (count == 3 && includeDataPanel) this.removeDataPanel();
+		
 		this.displayTab.remove(this.indexPanel);
 		this.indexes.reset();
 		this.displayTab.remove(this.importedPanel);
@@ -342,8 +345,23 @@ public class TableListPanel
 		this.exportedKeys.reset();
 		this.displayTab.remove(this.triggers);
 		this.triggers.reset();
+		if (index < this.displayTab.getTabCount())
+		{
+			this.displayTab.setSelectedIndex(index);
+		}
 	}
 
+	private void addDataPanel()
+	{
+		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerData"), this.tableData);
+	}
+	
+	private void removeDataPanel()
+	{
+		this.displayTab.remove(this.tableData);
+		this.tableData.reset();
+	}
+	
 	public void setInitialFocus()
 	{
 		this.findPanel.setFocusToEntryField();
@@ -488,11 +506,18 @@ public class TableListPanel
 						shouldRetrieve = false;
 					}
 				}
+				catch (OutOfMemoryError mem)
+				{
+					WbManager.getInstance().showErrorMessage(TableListPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
+				}
 				catch (Throwable e)
 				{
 					LogMgr.logError("TableListPanel.retrieve()", "Error retrieving table list", e);
 				}
-				busy = false;
+				finally
+				{
+					busy = false;
+				}
 			}
 		}).start();
 	}
@@ -564,11 +589,18 @@ public class TableListPanel
 			}
 			else
 			{
-				removeTablePanels();
+				if (this.selectedObjectType.indexOf("view") > -1)
+				{
+					if (this.displayTab.getTabCount() == 2) this.addDataPanel();
+					else this.removeTablePanels(false);
+				}
+				else
+				{
+					removeTablePanels(true);
+				}
 			}
 			this.showDataMenu.setEnabled(this.isTableType(selectedObjectType));
 			this.tableData.setTable(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
-			this.retrieveCurrentPanel();
 			this.startRetrieveCurrentPanel();
 		}
 	}
@@ -694,7 +726,7 @@ public class TableListPanel
 						if (this.shouldRetrieveTable) this.retrieveTableDefinition();
 						break;
 					case 2:
-						if (this.shouldRetrieveTableDataCount) this.tableData.showData();
+						if (this.shouldRetrieveTableDataCount) this.tableData.showData(!this.shiftDown);
 						break;
 					case 3:
 						if (this.shouldRetrieveIndexes) this.retrieveIndexes();
@@ -1056,4 +1088,25 @@ public class TableListPanel
 		this.updateShowDataMenu();
 	}
 
+	public void mouseClicked(MouseEvent e)
+	{
+		this.shiftDown = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
+	}
+	
+	public void mouseEntered(MouseEvent e)
+	{
+	}
+	
+	public void mouseExited(MouseEvent e)
+	{
+	}
+	
+	public void mousePressed(MouseEvent e)
+	{
+	}
+	
+	public void mouseReleased(MouseEvent e)
+	{
+	}
+	
 }

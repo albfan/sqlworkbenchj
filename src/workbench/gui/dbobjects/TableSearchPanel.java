@@ -176,8 +176,8 @@ public class TableSearchPanel
 		gridBagConstraints.gridy = 0;
 		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
 		gridBagConstraints.weightx = 1.0;
+		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
 		entryPanel.add(searchText, gridBagConstraints);
 		
 		jLabel1.setText(ResourceMgr.getString("LabelSearchTableCriteria"));
@@ -196,8 +196,8 @@ public class TableSearchPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 0;
-		gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 0);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 0);
 		entryPanel.add(reloadButton, gridBagConstraints);
 		
 		gridBagConstraints = new java.awt.GridBagConstraints();
@@ -215,8 +215,8 @@ public class TableSearchPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 0;
-		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
 		optionPanel.add(labelRowCount, gridBagConstraints);
 		
 		rowCount.setColumns(4);
@@ -226,9 +226,9 @@ public class TableSearchPanel
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 0;
-		gridBagConstraints.insets = new java.awt.Insets(2, 4, 2, 4);
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 		gridBagConstraints.weightx = 1.0;
+		gridBagConstraints.insets = new java.awt.Insets(2, 4, 2, 4);
 		optionPanel.add(rowCount, gridBagConstraints);
 		
 		gridBagConstraints = new java.awt.GridBagConstraints();
@@ -455,22 +455,22 @@ public class TableSearchPanel
 	}
 	
 	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.JTextField searchText;
-	private javax.swing.JLabel jLabel1;
-	private javax.swing.JSplitPane jSplitPane1;
+	private javax.swing.ButtonGroup buttonGroup1;
 	private javax.swing.JPanel entryPanel;
-	private javax.swing.JScrollPane resultScrollPane;
+	private javax.swing.JLabel jLabel1;
+	private javax.swing.JPanel jPanel1;
+	private javax.swing.JSplitPane jSplitPane1;
+	private javax.swing.JLabel labelRowCount;
 	private javax.swing.JPanel optionPanel;
 	private javax.swing.JButton reloadButton;
 	private javax.swing.JPanel resultPanel;
+	private javax.swing.JScrollPane resultScrollPane;
+	private javax.swing.JTextField rowCount;
+	private javax.swing.JTextField searchText;
 	private javax.swing.JButton startButton;
-	private javax.swing.ButtonGroup buttonGroup1;
-	private javax.swing.JPanel jPanel1;
 	private javax.swing.JLabel statusInfo;
 	private javax.swing.JScrollPane tableListScrollPane;
-	private javax.swing.JTextField rowCount;
 	private javax.swing.JTable tableNames;
-	private javax.swing.JLabel labelRowCount;
 	// End of variables declaration//GEN-END:variables
 	
 	class ParentWidthScrollPane

@@ -120,7 +120,7 @@ public class WbConnection
 		}
 		catch (Throwable th)
 		{
-			th.printStackTrace();
+			LogMgr.logWarning("WbConnection.clearWarnings()", "Error resetting warnings!", th);
 		}
 	}
 	public Connection getSqlConnection()
@@ -146,7 +146,7 @@ public class WbConnection
 		}
 		catch (Throwable th)
 		{
-			LogMgr.logError(this, "Rollback failed!", th);
+			LogMgr.logError("WbConnection.rollback()", "Rollback failed!", th);
 		}
 	}
 
@@ -176,21 +176,16 @@ public class WbConnection
 
 	public void close()
 	{
-		try
-		{
-			this.rollback();
-		}
-		catch (Throwable th)
-		{
-			// we will ignore this. What can we do :-)
-		}
+		this.rollback();
+		
 		try
 		{
 			this.sqlConnection.close();
+			this.sqlConnection = null;
 		}
 		catch (Throwable th)
 		{
-			// see above...
+			LogMgr.logDebug("WbConnection.close()", "Error when closing connection", th);
 		}
 	}
 
@@ -216,6 +211,18 @@ public class WbConnection
 		return this.metaData;
 	}
 
+	public String getUrl()
+	{
+		try
+		{
+			return this.sqlConnection.getMetaData().getURL();
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}
+	
 	public String getDisplayString()
 	{
 		return ConnectionMgr.getDisplayString(this);

@@ -340,6 +340,21 @@ public class Settings
 		this.props.setProperty("workbench.import.dateformat", aFormat);
 	}
 
+	public void setLastImportNumberFormat(String aFormat)
+	{
+		this.props.setProperty("workbench.import.numberformat", aFormat);
+	}
+
+	public String getLastImportNumberFormat()
+	{
+		String result = this.props.getProperty("workbench.import.numberformat", null);
+		if (result == null)
+		{
+			result = "#" + this.getDecimalSymbol() + "#"; 
+		}
+		return result;
+	}
+	
 	public String getLastImportDir()
 	{
 		return this.props.getProperty("workbench.import.lastdir", this.getLastExportDir());
@@ -350,6 +365,16 @@ public class Settings
 		this.props.setProperty("workbench.import.lastdir", aDir);
 	}
 
+	public String getLastImportQuoteChar()
+	{
+		return this.props.getProperty("workbench.import.quotechar", "\"");
+	}
+
+	public void setLastImportQuoteChar(String aChar)
+	{
+		this.props.setProperty("workbench.import.quotechar", aChar);
+	}
+	
 	public void setRestoreLastWorkspace(boolean aFlag)
 	{
 		this.props.setProperty("workbench.workspace.restorelast", Boolean.toString(aFlag));
@@ -980,5 +1005,19 @@ public class Settings
 		return installDir.getAbsolutePath();
 	}
 
+	public static void main(String args[])
+	{
+		try
+		{
+			DecimalFormat f = new DecimalFormat("#,#");
+			Number n = f.parse("1");
+			System.out.println(n.toString());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		System.out.println("done.");
+	}
 
 }

@@ -100,16 +100,42 @@ public class DbMetadata
 		this.triggerSourceSql = this.readStatementTemplates("TriggerSourceStatements.xml");
 		//this.dateLiteralFormatter = this.readStatementTemplates("DateLiteralFormats.xml");
 
-		this.schemaTerm = this.metaData.getSchemaTerm();
+		try
+		{
+			this.schemaTerm = this.metaData.getSchemaTerm();
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logWarning("DbMetadata.<init>", "Could not retrieve Schema term", e);
+			this.schemaTerm = "Schema";
+		}
 
+		try
+		{
+			this.catalogTerm = this.metaData.getCatalogTerm();
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logWarning("DbMetadata.<init>", "Could not retrieve Catalog term", e);
+			this.catalogTerm = "Catalog";
+		}
+		
 		if (this.schemaTerm == null || this.schemaTerm.length() == 0)
 			this.schemaTerm = "Schema";
 
-		this.catalogTerm = this.metaData.getCatalogTerm();
 		if (this.catalogTerm == null || this.catalogTerm.length() == 0)
 			this.catalogTerm = "Catalog";
 
-		this.productName = this.metaData.getDatabaseProductName();
+		try
+		{
+			this.productName = this.metaData.getDatabaseProductName();
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logWarning("DbMetadata.<init>", "Could not retrieve Database Product name", e);
+			this.productName = aConnection.getProfile().getDriverclass();
+		}
+		
 		if (this.productName.toLowerCase().indexOf("oracle") > -1)
 		{
 			this.isOracle = true;

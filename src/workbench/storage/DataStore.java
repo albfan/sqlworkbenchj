@@ -7,9 +7,12 @@
 package workbench.storage;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Connection;
@@ -20,6 +23,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +40,7 @@ import workbench.log.LogMgr;
 import workbench.util.LineTokenizer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbStringTokenizer;
 
 
 /**
@@ -48,6 +53,8 @@ public class DataStore
 	public static final Integer ROW_NEW = new Integer(RowData.NEW);
 	public static final Integer ROW_ORIGINAL = new Integer(RowData.NOT_MODIFIED);
 
+	private RowActionMonitor rowActionMonitor;
+	
 	private boolean modified;
 	private int colCount;
 	private int realColumns;
@@ -69,7 +76,9 @@ public class DataStore
 	
 	private WbConnection originalConnection;
 
-	private SimpleDateFormat defaultFormatter;
+	private SimpleDateFormat defaultDateFormatter;
+	private DecimalFormat defaultNumberFormatter;
+	
 	private ColumnComparator comparator;
 	
 	public DataStore(String[] aColNames, int[] colTypes)
@@ -212,6 +221,30 @@ public class DataStore
 	
   public int getRowCount() { return this.data.size(); }
 	public int getColumnCount() { return this.colCount; }
+	
+	/**
+	 *	Returns the total number of modified, new or deleted rows
+	 */
+	public int getModifiedCount()
+	{
+		if (!this.isModified()) return 0;
+		int count = this.getRowCount();
+		int modifiedCount = 0;
+		for (int i=0; i < count; i++)
+		{
+			if (this.isRowModified(i)) modifiedCount++;
+		}
+		if (this.deletedRows != null)
+		{
+			count = this.deletedRows.size();
+			for (int i=0; i < count; i++)
+			{
+				RowData data = (RowData)this.deletedRows.get(i);
+				if (!data.isNew()) modifiedCount++;
+			}
+		}
+		return modifiedCount;
+	}
 	
 	public int getColumnType(int aColumn)
 		throws IndexOutOfBoundsException
@@ -538,7 +571,7 @@ public class DataStore
 	public boolean isRowModified(int aRow)
 	{
 		RowData row = this.getRow(aRow);
-		return row.isNew();
+		return (row.isNew() && row.isModified() || row.isModified());
 	}
 
 	public void restoreOriginalValues()
@@ -909,7 +942,7 @@ public class DataStore
 	public void importData(String aFilename)
 		throws FileNotFoundException
 	{
-		this.importData(aFilename, true, "\t", Collections.EMPTY_MAP);
+		this.importData(aFilename, true, "\t", "\"", Collections.EMPTY_MAP);
 	}
 	
 	/** 
@@ -919,10 +952,10 @@ public class DataStore
 	 * @param aFilename - The text file to import
 	 * @param hasHeader - wether the text file has a header row
 	 */
-	public void importData(String aFilename, boolean hasHeader)
+	public void importData(String aFilename, boolean hasHeader, String quoteChar)
 		throws FileNotFoundException
 	{
-		this.importData(aFilename, hasHeader, "\t", Collections.EMPTY_MAP);
+		this.importData(aFilename, hasHeader, "\t", quoteChar, Collections.EMPTY_MAP);
 	}
 
 	/**
@@ -935,10 +968,11 @@ public class DataStore
 			this.setNull(aRow, i);
 		}
 	}
-	public void importData(String aFilename, boolean hasHeader, String aColSeparator)
+	
+	public void importData(String aFilename, boolean hasHeader, String aColSeparator, String aQuoteChar)
 		throws FileNotFoundException
 	{
-		this.importData(aFilename, hasHeader, aColSeparator, Collections.EMPTY_MAP);
+		this.importData(aFilename, hasHeader, aColSeparator, aQuoteChar, Collections.EMPTY_MAP);
 	}
 	
 	/** 	
@@ -951,6 +985,7 @@ public class DataStore
 	public void importData(String aFilename
 	                     , boolean hasHeader
 											 , String aColSeparator
+											 , String aQuoteChar
 											 , Map aColumnMapping)
 		throws FileNotFoundException
 	{
@@ -975,10 +1010,25 @@ public class DataStore
 		{
 			line = null;
 		}
+		if (this.rowActionMonitor != null)
+		{
+			this.rowActionMonitor.setMonitorType(RowActionMonitor.MONITOR_INSERT);
+		}
+		
+		WbStringTokenizer tok = new WbStringTokenizer(aColSeparator.charAt(0), "", false);
 		while (line != null)
 		{
-			data = StringUtil.stringToList(line, aColSeparator);
+			//data = StringUtil.stringToList(line, aColSeparator);
+			tok.setSourceString(line);
+			data = new ArrayList(this.colCount);
+			while (tok.hasMoreTokens())
+			{
+				data.add(tok.nextToken());
+			}
+
 			row = this.addRow();
+			this.updateProgressMonitor(row + 1, -1);
+			
 			this.setRowNull(row);
 			
 			int count = data.size();
@@ -1003,9 +1053,10 @@ public class DataStore
 				}
 				if (col > -1)
 				{
+					Object value = null;
 					try
 					{
-						Object value = data.get(i);
+						value = data.get(i);
 						if (value == null)
 						{
 							this.setNull(row, col);
@@ -1018,7 +1069,7 @@ public class DataStore
 					}
 					catch (Exception e)
 					{
-						LogMgr.logWarning("DataStore.importData()","Error reading line #" + row + ",contents=" + line, e);
+						LogMgr.logWarning("DataStore.importData()","Error reading line #" + row + ",col #" + col + ",colValue=" + value, e);
 					}
 				}
 				
@@ -1046,7 +1097,7 @@ public class DataStore
 	 * <li>Update statements</li>
 	 * </ul>
 	 */
-	public int updateDb(WbConnection aConnection)
+	public int _updateDb(WbConnection aConnection)
 		throws WbException, SQLException
 	{
 		int rows = 0;
@@ -1075,6 +1126,71 @@ public class DataStore
 		return rows;
 	}
 
+	private void updateProgressMonitor(int currentRow, int totalRows)
+	{
+		if (this.rowActionMonitor != null)
+		{
+			this.rowActionMonitor.setCurrentRow(currentRow, totalRows);
+		}
+	}
+	
+	public synchronized int updateDb(WbConnection aConnection)
+		throws WbException, SQLException, Exception
+	{
+		int rows = 0;
+		this.updatePkInformation(aConnection);
+		int totalRows = this.getModifiedCount();
+		int currentRow = 0;
+		if (this.rowActionMonitor != null)
+		{
+			this.rowActionMonitor.setMonitorType(RowActionMonitor.MONITOR_UPDATE);
+		}
+		
+		try
+		{
+			this.resetUpdateRowCounters();
+			DmlStatement dml = this.getNextDeleteStatement();
+			while (dml != null)
+			{
+				currentRow ++;
+				this.updateProgressMonitor(currentRow, totalRows);
+				rows += dml.execute(aConnection);
+				dml = this.getNextDeleteStatement();
+			}
+			
+			dml = this.getNextUpdateStatement();
+			while (dml != null)
+			{
+				currentRow ++;
+				this.updateProgressMonitor(currentRow, totalRows);
+				rows += dml.execute(aConnection);
+				dml = this.getNextUpdateStatement();
+			}
+		
+			dml = this.getNextInsertStatement();
+			while (dml != null)
+			{
+				currentRow ++;
+				this.updateProgressMonitor(currentRow, totalRows);
+				rows += dml.execute(aConnection);
+				dml = this.getNextInsertStatement();
+			}
+			
+			if (!aConnection.getAutoCommit() && rows > 0) aConnection.commit();
+			this.resetStatus();
+		}
+		catch (Exception e)
+		{
+			if (!aConnection.getAutoCommit())
+			{
+				aConnection.rollback();
+			}
+			throw e;
+		}
+		
+		return rows;
+	}
+
 	public void resetStatus()
 	{
 		this.deletedRows = null;
@@ -1084,6 +1200,7 @@ public class DataStore
 			RowData row = this.getRow(i);
 			row.resetStatus();
 		}
+		this.resetUpdateRowCounters();
 	}
 	
 	public int compareRowsByColumn(RowData row1, RowData row2, int column)
@@ -1154,8 +1271,35 @@ public class DataStore
 	
 	public String getDefaultDateFormat()
 	{
-		if (this.defaultFormatter == null) return null;
-		return this.defaultFormatter.toPattern();
+		if (this.defaultDateFormatter == null) return null;
+		return this.defaultDateFormatter.toPattern();
+	}
+
+	public String getDefaultNumberFormat()
+	{
+		if (this.defaultNumberFormatter == null) return null;
+		return this.defaultNumberFormatter.toPattern();
+	}
+	
+	public void setDefaultNumberFormat(String aFormat)
+	{
+		if (aFormat == null) return;
+		try
+		{
+			if (this.defaultNumberFormatter == null) 
+			{
+				this.defaultNumberFormatter = new DecimalFormat(aFormat);
+			}
+			else
+			{
+				this.defaultNumberFormatter.applyPattern(aFormat);
+			}
+		}
+		catch (Exception e)
+		{
+			this.defaultNumberFormatter = null;
+			LogMgr.logWarning("DataStore.setDefaultDateFormat()", "Could not create decimal formatter for format " + aFormat);
+		}
 	}
 	
 	public void setDefaultDateFormat(String aFormat)
@@ -1163,22 +1307,51 @@ public class DataStore
 		if (aFormat == null) return;
 		try
 		{
-			if (this.defaultFormatter == null) 
+			if (this.defaultDateFormatter == null) 
 			{
-				this.defaultFormatter = new SimpleDateFormat(aFormat);
+				this.defaultDateFormatter = new SimpleDateFormat(aFormat);
 			}
 			else
 			{
-				this.defaultFormatter.applyPattern(aFormat);
+				this.defaultDateFormatter.applyPattern(aFormat);
 			}
 		}
 		catch (Exception e)
 		{
-			this.defaultFormatter = null;
+			this.defaultDateFormatter = null;
 			LogMgr.logWarning("DataStore.setDefaultDateFormat()", "Could not create date formatter for format " + aFormat);
 		}
 	}
 	
+	private Number parseNumber(String aValue)
+		throws NumberFormatException
+	{
+		if (this.defaultNumberFormatter != null)
+		{
+			return this.parseNumber(aValue, this.defaultNumberFormatter);
+		}
+		else
+		{
+			return this.parseNumber(aValue, WbManager.getSettings().getDefaultDecimalFormatter());
+		}
+	}
+	
+	private Number parseNumber(String aValue, DecimalFormat formatter)
+		throws NumberFormatException
+	{
+		Number result = null;
+		try
+		{
+			result = formatter.parse(aValue);
+		}
+		catch (ParseException e)
+		{
+			LogMgr.logError("DataStore.parseNumber()", "Could not parse value " + aValue + " with format " + formatter.toPattern(), e);
+			result = null;
+			throw new NumberFormatException(aValue + " is not a valid number!");
+		}
+		return result;
+	}
 	
 	public Object convertCellValue(Object aValue, int aColumn)
 		throws Exception
@@ -1189,21 +1362,33 @@ public class DataStore
 			return NullValue.getInstance(type);
 		}
 		
+		Number result = null;
 		switch (type)
 		{
 			case Types.BIGINT:
-				return new BigInteger(aValue.toString());
+				result = this.parseNumber(aValue.toString());
+				if (result == null) return null;
+				return new Integer(result.intValue());
 			case Types.INTEGER:
 			case Types.SMALLINT:
-					return new Integer(aValue.toString());
+				result = this.parseNumber(aValue.toString());
+				if (result == null) return null;
+				return new Integer(result.intValue());
 			case Types.NUMERIC:
 			case Types.DECIMAL:
-				return new BigDecimal(aValue.toString());
+				//return new BigDecimal(aValue.toString());
+				result = this.parseNumber(aValue.toString());
+				if (result == null) return null;
+				return new BigDecimal(result.doubleValue());
 			case Types.DOUBLE:
-				return new Double((String)aValue);
+				result = this.parseNumber(aValue.toString());
+				if (result == null) return null;
+				return new Double(result.doubleValue());
 			case Types.REAL:
 			case Types.FLOAT:
-				return new Float(aValue.toString());
+				result = this.parseNumber(aValue.toString());
+				if (result == null) return null;
+				return new Float(result.doubleValue());
 			case Types.CHAR:
 			case Types.VARCHAR:
 				if (aValue instanceof String)
@@ -1217,7 +1402,10 @@ public class DataStore
 				*/
 				return this.parseDate((String)aValue, false);
 			case Types.TIMESTAMP:
-				return Timestamp.valueOf(((String)aValue).trim());
+				//return Timestamp.valueOf(((String)aValue).trim());
+				java.sql.Date d = this.parseDate((String)aValue, false);
+				Timestamp t = new Timestamp(d.getTime());
+				return t;
 			default:
 				return aValue;
 		}
@@ -1237,15 +1425,15 @@ public class DataStore
   private java.sql.Date parseDate(String aDate, boolean dateOnly)
   {
 		java.util.Date result = null;
-		if (this.defaultFormatter != null)
+		if (this.defaultDateFormatter != null)
 		{
 			try
 			{
-				result = defaultFormatter.parse(aDate);
+				result = defaultDateFormatter.parse(aDate);
 			}
 			catch (Exception e)
 			{
-				LogMgr.logWarning("DataStore.parseDate()", "Could not parse date " + aDate + " with default formatter " + this.defaultFormatter.toPattern());
+				LogMgr.logWarning("DataStore.parseDate()", "Could not parse date " + aDate + " with default formatter " + this.defaultDateFormatter.toPattern());
 				result = null;
 			}
 		}
@@ -1354,6 +1542,7 @@ public class DataStore
 	{
 		if (this.updateTable == null) throw new WbException("No update table defined!");
 		this.updatePkInformation(aConnection);
+		/*
 		ArrayList deletes  = new ArrayList();
 		ArrayList updates = new ArrayList();
 		ArrayList inserts = new ArrayList();
@@ -1362,6 +1551,7 @@ public class DataStore
     int count = this.getRowCount();
     int modifiedCount = 0;
     
+		
 		for (int i=0; i < count; i ++)
 		{
 			row = this.getRow(i);
@@ -1395,11 +1585,100 @@ public class DataStore
 				}
 			}
 		}
-		ArrayList stmt = new ArrayList(modifiedCount);
-		stmt.addAll(deletes);
-		stmt.addAll(updates);
-		stmt.addAll(inserts);
+		*/
+		ArrayList stmt = new ArrayList(this.getModifiedCount());
+		this.resetUpdateRowCounters();
+		DmlStatement dml = this.getNextDeleteStatement();
+		
+		while (dml != null)
+		{
+			stmt.add(dml);
+			dml = this.getNextDeleteStatement();
+		}
+
+		dml = this.getNextUpdateStatement();
+		while (dml != null)
+		{
+			stmt.add(dml);
+			dml = this.getNextUpdateStatement();
+		}
+
+		dml = this.getNextInsertStatement();
+		while (dml != null)
+		{
+			stmt.add(dml);
+			dml = this.getNextInsertStatement();
+		}
+		
+		//stmt.addAll(deletes);
+		//stmt.addAll(updates);
+		//stmt.addAll(inserts);
+		
 		return stmt;
+	}
+	private int currentUpdateRow = 0;
+	private int currentInsertRow = 0;
+	private int currentDeleteRow = 0;
+	
+	private void resetUpdateRowCounters()
+	{
+		currentUpdateRow = 0;
+		currentInsertRow = 0;
+		currentDeleteRow = 0;
+	}
+	
+	private DmlStatement getNextUpdateStatement()
+	{
+		if (this.currentUpdateRow >= this.getRowCount()) return null;
+		RowData row = null;
+		
+		int count = this.getRowCount();
+		
+		while (this.currentUpdateRow < count)
+		{
+			row = this.getRow(this.currentUpdateRow);
+			this.currentUpdateRow ++;
+			
+			if (row.isModified() && !row.isNew())
+				return this.createUpdateStatement(row);
+		}
+		return null;
+	}
+	
+	private DmlStatement getNextDeleteStatement()
+	{
+		if (this.deletedRows == null || this.deletedRows.size() == 0) return null;
+		int count = this.deletedRows.size();
+		
+		if (this.currentDeleteRow > count) return null;
+		
+		RowData row = null;
+		
+		while (this.currentDeleteRow < count)
+		{
+			row = (RowData)this.deletedRows.get(this.currentDeleteRow);
+			this.currentDeleteRow ++;
+			return this.createDeleteStatement(row);
+		}
+		return null;
+	}
+	
+	private DmlStatement getNextInsertStatement()
+	{
+		int count = this.getRowCount();
+		if (this.currentInsertRow >= count) return null;
+		
+		RowData row = null;
+		
+		while (this.currentInsertRow < count)
+		{
+			row = this.getRow(this.currentInsertRow);
+			this.currentInsertRow ++;
+			
+			if (row.isNew() && row.isModified())
+				return this.createInsertStatement(row, false);
+		}
+		return null;
 	}
 	
 	private DmlStatement createUpdateStatement(RowData aRow)
@@ -1409,10 +1688,11 @@ public class DataStore
 	
 	private DmlStatement createUpdateStatement(RowData aRow, boolean ignoreStatus, String lineEnd)
 	{
+		if (aRow == null) return null;
 		boolean first = true;
 		DmlStatement dml;
 		
-		if (!aRow.isModified()) return null;
+		if (!ignoreStatus && !aRow.isModified()) return null;
 		ArrayList values = new ArrayList();
 		StringBuffer sql = new StringBuffer("UPDATE ");
 		
@@ -1580,6 +1860,7 @@ public class DataStore
 	private DmlStatement createDeleteStatement(RowData aRow)
 	{
 		if (aRow == null) return null;
+		if (aRow.isNew()) return null;
 		
 		// don't create a statement for a row which was inserted and 
 		// then deleted
@@ -1745,6 +2026,24 @@ public class DataStore
 		if (aColumn < 0 || aColumn > this.colCount - 1) throw new IndexOutOfBoundsException("Column index " + aColumn + " out of range ([0," + this.colCount + "])");
 	}
 
+	/** Getter for property progressMonitor.
+	 * @return Value of property progressMonitor.
+	 *
+	 */
+	public RowActionMonitor getProgressMonitor()
+	{
+		return this.rowActionMonitor;
+	}
+	
+	/** Setter for property progressMonitor.
+	 * @param progressMonitor New value of property progressMonitor.
+	 *
+	 */
+	public void setProgressMonitor(RowActionMonitor aMonitor)
+	{
+		this.rowActionMonitor = aMonitor;
+	}
+	
 	class ColumnComparator implements Comparator
 	{
 		int column;

@@ -40,6 +40,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
+import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
@@ -543,6 +544,7 @@ public class SqlPanel
 	public void saveChangesToDatabase()
 	{
 		this.showStatusMessage(ResourceMgr.getString("MsgUpdatingDatabase"));
+		this.setActionState(this.updateAction, false);
 		try
 		{
 			this.log.setText(ResourceMgr.getString("MsgUpdatingDatabase"));
@@ -554,7 +556,15 @@ public class SqlPanel
 		{
 			this.showLogMessage(this.data.getLastMessage());
 		}
-		this.clearStatusMessage();
+		catch (OutOfMemoryError mem)
+		{
+			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
+		}
+		finally
+		{
+			this.clearStatusMessage();
+			this.checkResultSetActions();
+		}
 	}
 
 	/**
@@ -1061,6 +1071,22 @@ public class SqlPanel
 		this.clearStatusMessage();
 		this.setCancelState(false);
 		this.checkResultSetActions();
+		
+		if (sql != null && sql.trim().toLowerCase().startsWith("shutdown"))
+		{
+			String url = this.dbConnection.getUrl();
+			if (url != null)
+			{
+				if (url.startsWith("jdbc:hsqldb"))
+				{
+					MainWindow win = (MainWindow)SwingUtilities.getWindowAncestor(this);
+					win.disconnect();
+					String msg = ResourceMgr.getString("MsgShutdownHsqlDb");
+					this.showLogMessage(msg);
+					WbManager.getInstance().showErrorMessage(this, msg);
+				}
+			}
+		}
 	}
 
 	public void spoolData()
@@ -1070,15 +1096,16 @@ public class SqlPanel
 		spooler.executeStatement(this.getParentWindow(), this.dbConnection, sql);
 	}
 
-	public void importFile()
+	public synchronized void importFile()
 	{
 		if (!this.startEdit()) return;
 
+		this.setActionState(this.importFileAction, false);
 		WbTable table = this.data.getTable();
 		if (table == null) return;
-		DataStoreTableModel model = (DataStoreTableModel)table.getModel();
-		DataStore ds = table.getDataStore();
-		String currentFormat = ds.getDefaultDateFormat();
+		final DataStoreTableModel model = (DataStoreTableModel)table.getModel();
+		final DataStore ds = table.getDataStore();
+		final String currentFormat = ds.getDefaultDateFormat();
 		if (ds == null) return;
 		String lastDir = WbManager.getSettings().getLastImportDir();
 		JFileChooser fc = new JFileChooser(lastDir);
@@ -1096,15 +1123,39 @@ public class SqlPanel
 			try
 			{
 				ds.setDefaultDateFormat(optionPanel.getDateFormat());
-				model.importFile(filename, optionPanel.getContainsHeader(), optionPanel.getColumnDelimiter());
+				ds.setDefaultNumberFormat(optionPanel.getNumberFormat());
+				final boolean header = optionPanel.getContainsHeader();
+				final String delimit = optionPanel.getColumnDelimiter();
+				final String fname = filename;
+				new Thread()
+				{
+					public void run()
+					{
+						try
+						{
+							ds.setProgressMonitor(data);
+							model.importFile(fname, header, delimit);
+							data.dataChanged();
+						}
+						catch (Exception e)
+						{
+							LogMgr.logError("SqlPanel.importFile() - worker thread", "Error when importing " + fname, e);
+						}
+						finally
+						{
+							ds.setDefaultDateFormat(currentFormat);
+							ds.setProgressMonitor(null);
+							data.clearStatusMessage();
+						}
+					}
+				}.start();
 			}
 			catch (Exception e)
 			{
 				LogMgr.logError("SqlPanel.importFile()", "Error importing " + filename, e);
 			}
+			this.checkResultSetActions();
 		}
-    this.data.dataChanged();
-		ds.setDefaultDateFormat(currentFormat);
 	}
 
 	private void appendToLog(final String aString)

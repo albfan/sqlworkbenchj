@@ -257,8 +257,14 @@ public class DataStoreTableModel
 	public void importFile(String aFilename, boolean hasHeader, String colSep)
 		throws FileNotFoundException
 	{
+		this.importFile(aFilename, hasHeader, colSep, "\"");
+		
+	}
+	public void importFile(String aFilename, boolean hasHeader, String colSep, String quoteChar)
+		throws FileNotFoundException
+	{
 		if (this.dataCache == null) return;
-		this.dataCache.importData(aFilename, hasHeader, colSep);
+		this.dataCache.importData(aFilename, hasHeader, colSep, quoteChar);
 		int row = this.getRowCount();
 		this.fireTableRowsInserted(0, row - 1);
 	}

@@ -3,6 +3,10 @@
  */
 package workbench.gui.dbobjects;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Cursor;
@@ -11,12 +15,14 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyListener;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JCheckBox;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -45,18 +51,23 @@ import workbench.util.SqlUtil;
  */
 public class TableDataPanel
   extends JPanel
-	implements Reloadable
+	implements Reloadable, ActionListener
 {
 	private WbConnection dbConnection;
 	private WbTable dataTable;
 
 	private Object retrieveLock = new Object();
 
+	private JButton config;
 	private JTextField maxRowField;
 	private JLabel rowCountLabel;
 	private JLabel maxRowsLabel;
 	private JCheckBox autoRetrieve;
 
+	private long warningThreshold = -1;
+	
+	private boolean shiftDown = false;
+	
 	private String catalog;
 	private String schema;
 	private String tableName;
@@ -90,10 +101,15 @@ public class TableDataPanel
 
 		maxRowsLabel = new JLabel(ResourceMgr.getString("LabelTableDataMaxRows"));
 		topPanel.add(maxRowsLabel);
+		
 
 		this.maxRowField = new JTextField(10);
 		topPanel.add(this.maxRowField);
 
+		this.config = new JButton(ResourceMgr.getString("LabelConfigureWarningThreshold"));
+		this.config.addActionListener(this);
+		topPanel.add(this.config);
+		
 		this.dataTable = new WbTable();
 		this.add(topPanel, BorderLayout.NORTH);
 		JScrollPane scroll = new JScrollPane(this.dataTable);
@@ -133,15 +149,16 @@ public class TableDataPanel
 		this.dbConnection = aConnection;
 	}
 
-	public void showRowCount()
+	public long showRowCount()
 	{
-		if (this.dbConnection == null) return;
+		if (this.dbConnection == null) return -1;
 		String sql = this.buildSqlForTable(true);
-		if (sql == null) return;
+		if (sql == null) return -1;
 
+		long rowCount = 0;
 		Statement stmt = null;
 		ResultSet rs = null;
-		long rowCount = 0;
+
 		try
 		{
 			stmt = this.dbConnection.createStatement();
@@ -161,6 +178,7 @@ public class TableDataPanel
 			try { rs.close(); } catch (Throwable th) {}
 			try { stmt.close(); } catch (Throwable th) {}
 		}
+		return rowCount;
 	}
 
 	public void setTable(String aCatalog, String aSchema, String aTable)
@@ -221,7 +239,7 @@ public class TableDataPanel
 						}
 						catch (Exception e)
 						{
-							LogMgr.logError("TableDataPanel.retrieve()", "Error retrieving data for " + tableName, e);
+							e.printStackTrace();
 						}
 						finally
 						{
@@ -230,6 +248,10 @@ public class TableDataPanel
 							try { stmt.close(); } catch (Throwable th) {}
 						}
 					}
+				}
+				catch (OutOfMemoryError mem)
+				{
+					WbManager.getInstance().showErrorMessage(TableDataPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
 				}
 				catch (Throwable e)
 				{
@@ -244,6 +266,7 @@ public class TableDataPanel
 		WbManager.getSettings().setProperty(TableDataPanel.class.getName(), "maxrows", this.maxRowField.getText());
 		String auto = Boolean.toString(this.autoRetrieve.isSelected());
 		WbManager.getSettings().setProperty(TableDataPanel.class.getName(), "autoretrieve", auto);
+		WbManager.getSettings().setProperty(TableDataPanel.class.getName(), "warningthreshold", Long.toString(this.warningThreshold));
 	}
 
 	public void restoreSettings()
@@ -251,13 +274,35 @@ public class TableDataPanel
 		this.maxRowField.setText(WbManager.getSettings().getProperty(TableDataPanel.class.getName(), "maxrows", "0"));
 		boolean auto = "true".equals(WbManager.getSettings().getProperty(TableDataPanel.class.getName(), "autoretrieve", "false"));
 		this.autoRetrieve.setSelected(auto);
+		
+		try
+		{
+			String v = WbManager.getSettings().getProperty(TableDataPanel.class.getName(), "warningthreshold", "-1");
+			this.warningThreshold = Long.parseLong(v);
+		}
+		catch (Exception e)
+		{
+			this.warningThreshold = -1;
+		}
 	}
 
 	public void showData()
 	{
-		this.showRowCount();
-		if (this.autoRetrieve.isSelected())
+		this.showData(true);
+	}
+	
+	public void showData(boolean includeData)
+	{
+		long rows = this.showRowCount();
+		if (this.autoRetrieve.isSelected() && includeData)
 		{
+			if (this.warningThreshold > 0 && rows > this.warningThreshold)
+			{
+				String msg = ResourceMgr.getString("MsgDataDisplayWarningThreshold");
+				msg = msg.replaceAll("%rows%", Long.toString(rows));
+				int choice = JOptionPane.showConfirmDialog(this, msg, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION);
+				if (choice == JOptionPane.NO_OPTION) return;
+			}
 			this.reload();
 		}
 	}
@@ -272,5 +317,20 @@ public class TableDataPanel
 	{
 		return SwingUtilities.getWindowAncestor(this);
 	}
-
+	
+	public void actionPerformed(ActionEvent e)
+	{
+		if (e.getSource() == this.config)
+		{
+			ConfigureWarningThreshold p = new ConfigureWarningThreshold();
+			p.setThresholdValue(this.warningThreshold);
+			Window parent = SwingUtilities.getWindowAncestor(this);
+			int choice = JOptionPane.showConfirmDialog(parent, p, ResourceMgr.getString("LabelConfigureWarningThresholdTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+			if (choice == JOptionPane.OK_OPTION)
+			{
+				this.warningThreshold = p.getThresholdValue();
+			}
+		}
+	}
+	
 }

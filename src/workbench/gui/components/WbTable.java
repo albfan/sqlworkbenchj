@@ -232,12 +232,12 @@ extends JTable
 	}
 
 
-	public void setModel(TableModel aModel)
+	public synchronized void setModel(TableModel aModel)
 	{
 		this.setModel(aModel, false);
 	}
 
-	public void setModel(TableModel aModel, boolean sortIt)
+	public synchronized void setModel(TableModel aModel, boolean sortIt)
 	{
 		if (this.dwModel != null)
 		{

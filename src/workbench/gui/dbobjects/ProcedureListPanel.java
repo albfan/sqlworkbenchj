@@ -203,6 +203,10 @@ public class ProcedureListPanel
 						procList.setVisible(true);
 						shouldRetrieve = false;
 					}
+					catch (OutOfMemoryError mem)
+					{
+						WbManager.getInstance().showErrorMessage(ProcedureListPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
+					}
 					catch (Exception e)
 					{
 						LogMgr.logError("ProcedureListPanel.retrieve() thread", "Could not retrieve procedure list", e);

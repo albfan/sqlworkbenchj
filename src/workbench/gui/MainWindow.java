@@ -53,17 +53,18 @@ import workbench.util.WbWorkspace;
  * @author  workbench@kellerer.org
  * @version
  */
-public class MainWindow extends JFrame implements ActionListener, MouseListener, WindowListener, ChangeListener, FilenameChangeListener
+public class MainWindow 
+	extends JFrame 
+	implements ActionListener, MouseListener, WindowListener, ChangeListener, FilenameChangeListener
 {
 	private static int instanceCount;
 	private String windowId;
-	//private String currentProfileName;
+
 	private WbConnection currentConnection;
 	private ConnectionProfile currentProfile;
 
 	private DbExplorerPanel dbExplorerPanel;
 
-	//private JMenuBar currentMenu;
 	private FileDisconnectAction disconnectAction;
 	private ShowDbExplorerAction dbExplorerAction;
 
@@ -436,7 +437,7 @@ public class MainWindow extends JFrame implements ActionListener, MouseListener,
 
 		if (!s.restoreWindowSize(this))
 		{
-			this.setSize(500,500);
+			this.setSize(800,600);
 		}
 
 		if (!s.restoreWindowPosition(this))
@@ -599,14 +600,6 @@ public class MainWindow extends JFrame implements ActionListener, MouseListener,
 					this.currentProfile = aProfile;
 					MainPanel p = this.getCurrentPanel();
 					p.setConnection(this.getConnectionForTab());
-					/*
-					for (int i=0; i < this.sqlTab.getTabCount(); i++)
-					{
-						conn = this.getConnectionForTab();
-						MainPanel p = this.getSqlPanel(i);
-						p.setConnection(conn);
-					}
-					*/
 				}
 				else
 				{
@@ -616,6 +609,7 @@ public class MainWindow extends JFrame implements ActionListener, MouseListener,
 				this.getCurrentPanel().clearLog();
 				this.getCurrentPanel().showResultPanel();
 				this.currentProfile = aProfile;
+				connected = true;
 			}
 			catch (ClassNotFoundException cnf)
 			{
@@ -625,11 +619,14 @@ public class MainWindow extends JFrame implements ActionListener, MouseListener,
 			{
 				this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_CONNECTION_ERROR) + "\r\n\n" + se.toString());
 			}
+			catch (Exception e)
+			{
+				this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_CONNECTION_ERROR) + "\r\n\n" + e.toString());
+			}
 			this.showStatusMessage("");
 			this.dbExplorerAction.setEnabled(true);
 			this.disconnectAction.setEnabled(true);
 			this.updateWindowTitle();
-			connected = true;
 		}
 		catch (Exception e)
 		{
@@ -752,8 +749,10 @@ public class MainWindow extends JFrame implements ActionListener, MouseListener,
         if (prof != null)
         {
 					this.currentProfile = prof;
-          this.connectTo(prof);
-          WbManager.getSettings().setLastConnection(this.currentProfile.getName());
+          if (this.connectTo(prof))
+					{
+						WbManager.getSettings().setLastConnection(this.currentProfile.getName());
+					}
         }
       }
 			if (dialog != null) dialog.dispose();
@@ -990,6 +989,7 @@ public class MainWindow extends JFrame implements ActionListener, MouseListener,
 			{
 				ArrayList data = w.getHistoryData(i);
 				SqlPanel sql = (SqlPanel)this.getSqlPanel(i);
+				sql.closeFile(true);
 				sql.initStatementHistory(data);
 			}
 		}
@@ -1143,8 +1143,8 @@ public class MainWindow extends JFrame implements ActionListener, MouseListener,
 			this.dbExplorerTabVisible = false;
 		}
 
-		this.sqlTab.remove(index);
 		this.panelMenus.remove(index);
+		this.sqlTab.remove(index);
 
 		int count = this.sqlTab.getTabCount();
 		for (int i=index; i < count; i++)
@@ -1156,6 +1156,8 @@ public class MainWindow extends JFrame implements ActionListener, MouseListener,
 				this.sqlTab.setTitleAt(i, ResourceMgr.getString("LabelTabStatement") + " " + Integer.toString(i + 1));
 			}
 		}
+		int newTab = this.sqlTab.getSelectedIndex();
+		this.tabSelected(newTab);
 	}
 
 	public void listMenus()
