@@ -82,7 +82,7 @@ public class SqlHistoryEntry
 
 	public String toString()
 	{
-		return "{" + StringUtil.getMaxSubstring(this.text, 40, "...") + ", Cursor=" + this.cursorPos + ", Selection=[" + this.selectionStart + "," + this.selectionEnd + "]}";
+		return "{" + StringUtil.getMaxSubstring(this.text, 40) + ", Cursor=" + this.cursorPos + ", Selection=[" + this.selectionStart + "," + this.selectionEnd + "]}";
 	}
 
 

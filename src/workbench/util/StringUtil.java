@@ -95,7 +95,7 @@ public class StringUtil
 			target.append(aString);
 			return target;
 		}
-		
+
 
 		int lastpos = 0;
 		int len = aValue.length();
@@ -730,6 +730,11 @@ public class StringUtil
 		return result;
 	}
 
+	public static final String getMaxSubstring(String s, int maxLen)
+	{
+		return getMaxSubstring(s, maxLen, "...");
+	}
+	
 	public static final String getMaxSubstring(String s, int maxLen, String cont)
 	{
 		if (s == null) return null;
@@ -774,7 +779,7 @@ public class StringUtil
 		}
 		return -1;
 	}
-	
+
 	public static int findPattern(String regex, String data)
 	{
 		return findPattern(regex, data);

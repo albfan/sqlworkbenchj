@@ -138,6 +138,11 @@ public class ColumnIdentifier
 		this.isNullable = true;
 	}
 
+	/**
+	 *	Set the JDBC datatype.
+	 *
+	 *	@see java.sql.Types
+	 */
 	public void setDataType(int aType)
 	{
 		this.type = aType;
@@ -145,7 +150,8 @@ public class ColumnIdentifier
 
 	/**
 	 *	Returns the java.sql.Types data type as returned
-	 *  by the jdbc driver
+	 *  by the jdbc driver. If no type has been defined
+	 *  Types.OTHER will be returned
 	 */
 	public int getDataType()
 	{
@@ -158,18 +164,13 @@ public class ColumnIdentifier
 		return this.name;
 	}
 
-	public boolean equals(Object other)
+	public boolean equals(ColumnIdentifier other)
 	{
-		if (other instanceof ColumnIdentifier)
+		if (this.type == NO_TYPE || other.type == NO_TYPE)
 		{
-			ColumnIdentifier cd = (ColumnIdentifier)other;
-			if (this.type == NO_TYPE || cd.type == NO_TYPE)
-			{
-				return this.name.equalsIgnoreCase(cd.name);
-			}
-			return this.type == cd.type && this.name.equalsIgnoreCase(cd.name);
+			return this.name.equalsIgnoreCase(other.name);
 		}
-		return false;
+		return (this.type == other.type && this.name.equalsIgnoreCase(other.name));
 	}
 
 	/**
@@ -289,6 +290,6 @@ public class ColumnIdentifier
 			ColumnIdentifier c = (ColumnIdentifier)other;
 			return this.name.compareToIgnoreCase(c.name);
 		}
-		return 0;
+		return 1;
 	}
 }

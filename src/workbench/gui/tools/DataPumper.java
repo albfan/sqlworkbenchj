@@ -1613,11 +1613,11 @@ public class DataPumper
 		}
 	}
 
-	public void setCurrentObject(String object, int number, int total)
+	public void setCurrentObject(String object, long number, long total)
 	{
 	}
 
-	public void setCurrentRow(int currentRow, int totalRows)
+	public void setCurrentRow(long currentRow, long totalRows)
 	{
 		if (currentRow == 1) this.updateWindowTitle();
 		this.statusLabel.setText(this.copyMsg + " " + currentRow);

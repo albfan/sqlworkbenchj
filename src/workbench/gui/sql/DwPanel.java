@@ -248,6 +248,7 @@ public class DwPanel
 	}
 
 	private String updateMsg;
+	private String currentMonitorObject;
 	private int monitorType = -1;
 
 	private void clearRowMonitorSettings()
@@ -281,6 +282,11 @@ public class DwPanel
 				case RowActionMonitor.MONITOR_PROCESS_TABLE:
 					this.updateMsg = ResourceMgr.getString("MsgProcessTable") + " ";
 					break;
+				/*
+				case RowActionMonitor.MONITOR_FILE_EXEC:
+					this.updateMsg = ResourceMgr.getString("MsgProcessSqlScript") + " ";
+					break;
+				*/
 				case RowActionMonitor.MONITOR_PLAIN:
 					this.updateMsg = null;
 					break;
@@ -307,7 +313,7 @@ public class DwPanel
 	/**
 	 *	Callback method from the {@link workbench.interfaces.RowActionMonitor}
 	 */
-	public void setCurrentObject(String name, int number, int total)
+	public void setCurrentObject(String name, long number, long total)
 	{
 		if (this.monitorType == RowActionMonitor.MONITOR_PLAIN)
 		{
@@ -315,6 +321,7 @@ public class DwPanel
 		}
 		else
 		{
+			this.currentMonitorObject = name;
 			StringBuffer msg = new StringBuffer(40);
 			msg.append(objectMsg);
 			msg.append(name);
@@ -336,16 +343,26 @@ public class DwPanel
 	/**
 	 *	Callback method from the {@link workbench.interfaces.RowActionMonitor}
 	 */
-	public void setCurrentRow(int currentRow, int totalRows)
+	public void setCurrentRow(long currentRow, long totalRows)
 	{
 		StringBuffer msg = new StringBuffer(40);
-		msg.append(this.updateMsg);
+		if (this.updateMsg == null)
+		{
+			msg.append(objectMsg);
+			msg.append(this.currentMonitorObject);
+			msg.append(" (");
+		}
+		else
+		{
+			msg.append(this.updateMsg);
+		}
 		msg.append(currentRow);
 		if (totalRows > 0)
 		{
 			msg.append('/');
 			msg.append(totalRows);
 		}
+		if (this.updateMsg == null) msg.append(')');
 		statusBar.setStatusMessage(msg.toString());
 	}
 
@@ -635,7 +652,7 @@ public class DwPanel
 		if (this.infoTable.getDataStore() == null) return false;
 		return this.infoTable.getDataStore().hasPkColumns();
 	}
-	
+
 	public boolean isUpdateable()
 	{
 		if (this.infoTable.getDataStore() == null) return false;
@@ -657,7 +674,7 @@ public class DwPanel
 	{
 		this.statusBar.setQueryTimeout(value);
 	}
-	
+
 	public int getMaxRows()
 	{
 		return this.statusBar.getMaxRows();
@@ -777,7 +794,7 @@ public class DwPanel
 			StringBuffer b = new StringBuffer(100);
 			b.append(ResourceMgr.getString("MsgExecuteError"));
 			b.append('\n');
-			b.append(StringUtil.getMaxSubstring(this.sql, 100, "..."));
+			b.append(StringUtil.getMaxSubstring(this.sql, 100));
 			b.append('\n');
 			b.append(msg);
 

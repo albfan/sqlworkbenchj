@@ -706,12 +706,14 @@ public class SqlPanel
 		this.actions.add(this.executeSelected);
 		this.actions.add(this.executeCurrent);
 
-		this.spoolData = new SpoolDataAction(this);
+		this.spoolData = new SpoolDataAction(this, "MnuTxtSpoolSql");
 		this.spoolData.setCreateMenuSeparator(true);
+		this.spoolData.setEditor(this.editor);
 		this.actions.add(this.spoolData);
 
 		this.stopAction = new StopAction(this);
 		this.stopAction.setEnabled(false);
+		this.stopAction.setCreateMenuSeparator(false);
 		this.actions.add(this.stopAction);
 
 		this.commitAction = new CommitAction(this);
@@ -1583,13 +1585,11 @@ public class SqlPanel
 
 	public void commit()
 	{
-		if (this.isBusy()) return;
 		this.startExecution(SingleVerbCommand.COMMIT.getVerb(), 0, -1, false);
 	}
 
 	public void rollback()
 	{
-		if (this.isBusy()) return;
 		this.startExecution(SingleVerbCommand.ROLLBACK.getVerb(), 0, -1, false);
 	}
 
@@ -1603,16 +1603,14 @@ public class SqlPanel
 	{
 		if (this.isBusy()) return;
 
-		this.executionThread = new Thread(new Runnable()
+		this.executionThread = new WbThread(new Runnable()
 		{
 			public void run()
 			{
 				runStatement(sql, offset, commandAtIndex, highlight);
 			}
-		});
+		},"SQL Execution Thread " + this.getId());
 		this.executionThread.setPriority(Thread.MAX_PRIORITY);
-		this.executionThread.setDaemon(true);
-		this.executionThread.setName("SQL Execution Thread " + this.getId());
 		this.executionThread.start();
 	}
 
@@ -1625,8 +1623,7 @@ public class SqlPanel
 	private void runStatement(String sql, int selectionOffset, int commandAtIndex, boolean highlightOnError)
 	{
 		this.showStatusMessage(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
-		this.data.getStartEditAction().setSwitchedOn(false);
-
+		
 		this.storeStatementInHistory();
 
 		// the dbStart should be fired *after* updating the
@@ -1639,20 +1636,24 @@ public class SqlPanel
 		this.setCancelState(true);
 		this.makeReadOnly();
 		this.data.setBatchUpdate(true);
+		
+		try
+		{
+			this.displayResult(sql, selectionOffset, commandAtIndex, highlightOnError);
+		}
+		finally
+		{
+			this.data.setBatchUpdate(false);
+			this.setBusy(false);
 
-		this.displayResult(sql, selectionOffset, commandAtIndex, highlightOnError);
+			this.clearStatusMessage();
+			this.setCancelState(false);
+			this.checkResultSetActions();
 
-		this.data.setBatchUpdate(false);
-
-		this.setBusy(false);
-
-		this.clearStatusMessage();
-		this.setCancelState(false);
-		this.checkResultSetActions();
-
-		this.fireDbExecEnd();
-		this.selectEditorLater();
-		this.executionThread = null;
+			this.fireDbExecEnd();
+			this.selectEditorLater();
+			this.executionThread = null;
+		}
 	}
 
 	public void executeMacro(final String macroName, final boolean replaceText)
@@ -1673,10 +1674,81 @@ public class SqlPanel
 
 	public void spoolData()
 	{
-		String sql = SqlUtil.makeCleanSql(this.editor.getSelectedStatement(),false);
+		final String sql = SqlUtil.makeCleanSql(this.editor.getSelectedStatement(),false);
 
-		DataExporter spooler = new DataExporter();
-		spooler.executeStatement(this.getParentWindow(), this.dbConnection, sql);
+		this.cancelExecution = false;
+
+		final DataExporter exporter = new DataExporter();
+		exporter.setRowMonitor(this.data);
+		exporter.setSql(sql);
+		exporter.setConnection(this.dbConnection);
+		boolean selected = exporter.selectOutput(getParentWindow());
+		if (selected)
+		{
+			String msg = ResourceMgr.getString("MsgQueryExportInit");
+			msg = StringUtil.replace(msg, "%type%", exporter.getTypeDisplay());
+			msg = StringUtil.replace(msg, "%sql%", StringUtil.getMaxSubstring(sql, 100));
+			showLogMessage(msg);
+			appendToLog("\n");
+			
+			this.executionThread = new WbThread("ExportSQL")
+			{
+				public void run()
+				{
+					setBusy(true);
+					setCancelState(true);
+					try
+					{
+						StringBuffer messages = new StringBuffer();
+						String msg;
+						long rowCount = exporter.startExport();
+						if (exporter.isSuccess())
+						{
+							msg = ResourceMgr.getString("MsgSpoolOk").replaceAll("%rows%", Long.toString(rowCount));
+							messages.append("\n"); // force new line in output
+							messages.append(msg);
+							messages.append("\n"); // force new line in output
+						}
+						String[] spoolMsg = exporter.getErrors();
+						if (spoolMsg.length > 0)
+						{
+							for (int i=0; i < spoolMsg.length; i++)
+							{
+								messages.append(spoolMsg[i]);
+								messages.append('\n');
+							}
+							messages.append('\n');
+						}
+
+						String warn = ResourceMgr.getString("TxtWarning");
+						spoolMsg = exporter.getWarnings();
+						if (spoolMsg.length > 0)
+						{
+							for (int i=0; i < spoolMsg.length; i++)
+							{
+								messages.append(warn + ": " + spoolMsg[i]);
+								messages.append('\n');
+							}
+							messages.append('\n');
+						}
+						msg = ResourceMgr.getString("MsgSpoolTarget") + " " + exporter.getFullOutputFilename();
+						messages.append(msg);
+						messages.append('\n');
+						appendToLog(messages.toString());
+						showLogPanel();
+					}
+					catch (Exception e)
+					{
+						LogMgr.logError("SqlPanel.spoolData()", "Error exporting data", e);
+					}
+					setBusy(false);
+					clearStatusMessage();
+					setCancelState(false);
+					executionThread = null;
+				}
+			};
+			this.executionThread.start();
+		}
 	}
 
 	private boolean importRunning = false;
@@ -1877,6 +1949,8 @@ public class SqlPanel
 
 		ScriptParser scriptParser = new ScriptParser();
 		scriptParser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
+		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
+
 		int oldSelectionStart = -1;
 		int oldSelectionEnd = -1;
 
@@ -1905,10 +1979,15 @@ public class SqlPanel
 
 			if (commandAtIndex > -1)
 			{
-				int pos = this.editor.getCaretPosition();
 				count = 1;
-				startIndex = scriptParser.getCommandIndexAtCursorPos(pos);
+				startIndex = scriptParser.getCommandIndexAtCursorPos(commandAtIndex);
 				endIndex = startIndex + 1;
+				if (startIndex == -1)
+				{
+					this.appendToLog(ResourceMgr.getString("ErrorNoCurrentStatement"));
+					this.showLogPanel();
+					return;
+				}
 			}
 
 			StringBuffer msg1 = new StringBuffer(ResourceMgr.getString("TxtScriptStatementFinished1"));
@@ -1922,7 +2001,7 @@ public class SqlPanel
 			String currentMsg = null;
 
 			boolean onErrorAsk = !Settings.getInstance().getIgnoreErrors();
-			
+
 			if (count == 1) compressLog = false;
 
 			this.data.scriptStarting();
@@ -1950,8 +2029,7 @@ public class SqlPanel
 				lastSql = scriptParser.getCommand(i);
 				if (lastSql == null)
 				{
-					this.appendToLog(ResourceMgr.getString("ErrorNoCurrentStatement"));
-					break;
+					continue;
 				}
 
 				// in case of a batch execution we need to make sure that
@@ -2325,7 +2403,7 @@ public class SqlPanel
 		this.executeSelected.setEnabled(aFlag);
 		this.executeCurrent.setEnabled(aFlag);
 		this.importFileAction.setEnabled(aFlag);
-		this.spoolData.setEnabled(aFlag);
+		//this.spoolData.setEnabled(aFlag);
 	}
 
 	private synchronized void showCancelIcon()

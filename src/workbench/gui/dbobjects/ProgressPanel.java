@@ -81,11 +81,11 @@ public class ProgressPanel
 	{
 	}
 
-	public void setCurrentObject(String object, int number, int totalObjects)
+	public void setCurrentObject(String object, long number, long totalObjects)
 	{
 	}
 
-	public void setCurrentRow(int currentRow, int totalRows)
+	public void setCurrentRow(long currentRow, long totalRows)
 	{
 		if (currentRow > -1) this.rowInfo.setText(Long.toString(currentRow));
 	}

@@ -250,7 +250,7 @@ public class WbSchemaReport
 		}
 	}
 
-	public void setCurrentObject(String anObject, int number, int total)
+	public void setCurrentObject(String anObject, long number, long total)
 	{
 		if (anObject == null)
 		{
@@ -275,7 +275,7 @@ public class WbSchemaReport
 		}
 	}
 
-	public void setCurrentRow(int number, int total)
+	public void setCurrentRow(long number, long total)
 	{
 
 	}

@@ -11,7 +11,9 @@
  */
 package workbench.db.firebird;
 
+import java.sql.SQLException;
 import workbench.db.DbMetadata;
+import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
 import workbench.storage.DataStore;
 import workbench.util.StrBuffer;
@@ -26,6 +28,13 @@ public class FirebirdMetadata
 	public FirebirdMetadata(DbMetadata meta)
 	{
 		this.metaData = meta;
+	}
+
+	public DataStore getProcedures(String catalog, String schema)
+		throws SQLException
+	{
+		JdbcProcedureReader procReader = new JdbcProcedureReader(this.metaData);
+		return procReader.getProcedures(catalog, schema);
 	}
 	
 	public StrBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname)

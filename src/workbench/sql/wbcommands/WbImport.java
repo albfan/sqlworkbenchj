@@ -70,7 +70,7 @@ public class WbImport extends SqlCommand
 		cmdLine.addArgument("linefilter");
 		cmdLine.addArgument("showprogress");
 		cmdLine.addArgument("progressinterval");
-		
+
 		this.isUpdatingCommand = true;
 	}
 
@@ -121,7 +121,7 @@ public class WbImport extends SqlCommand
 			result.setFailure();
 			return result;
 		}
-		
+
 		String type = null;
 		String file = null;
 		String cleancr = null;
@@ -129,7 +129,7 @@ public class WbImport extends SqlCommand
 		type = cmdLine.getValue("type");
 		file = cmdLine.getValue("file");
 
-		
+
 		if (type == null || file == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrorImportFileMissing"));
@@ -141,9 +141,9 @@ public class WbImport extends SqlCommand
 
 		int commit = cmdLine.getIntValue("commitevery",-1);
 		imp.setCommitEvery(commit);
-		
+
 		imp.setContinueOnError(cmdLine.getBoolean("continueonerror", true));
-			
+
 		String table = cmdLine.getValue("table");
 
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
@@ -184,7 +184,7 @@ public class WbImport extends SqlCommand
 
 			String columns = cmdLine.getValue("filecolumns");
 			if (columns == null) columns = cmdLine.getValue("columns");
-			
+
 			if (columns != null)
 			{
 				List cols = StringUtil.stringToList(columns, ",", true);
@@ -207,8 +207,8 @@ public class WbImport extends SqlCommand
 				result.setFailure();
 				return result;
 			}
-			
-			// the import columns have to set after setting 
+
+			// the import columns have to set after setting
 			// the file columns!
 			columns = cmdLine.getValue("importcolumns");
 			if (columns != null)
@@ -216,15 +216,15 @@ public class WbImport extends SqlCommand
 				List cols = StringUtil.stringToList(columns, ",", true);
 				textParser.setImportColumns(cols);
 			}
-			
-			// The column filter has to bee applied after the 
+
+			// The column filter has to bee applied after the
 			// columns are defined!
 			String filter = cmdLine.getValue("columnfilter");
 			if (filter != null)
 			{
 				addColumnFilter(filter, textParser);
 			}
-			
+
 			filter = cmdLine.getValue("linefilter");
 			if (filter != null)
 			{
@@ -232,7 +232,7 @@ public class WbImport extends SqlCommand
 			}
 			imp.setProducer(textParser);
 		}
-		
+
 		else if ("xml".equalsIgnoreCase(type))
 		{
 			XmlDataFileParser xmlParser = new XmlDataFileParser(file);
@@ -240,10 +240,10 @@ public class WbImport extends SqlCommand
 
 			String encoding = cmdLine.getValue("encoding");
 			if (encoding != null) xmlParser.setEncoding(encoding);
-			
+
 			boolean verbose = cmdLine.getBoolean("verbosexml", true);
 			xmlParser.setUseVerboseFormat(verbose);
-				
+
 			imp.setProducer(xmlParser);
 		}
 		else
@@ -252,7 +252,7 @@ public class WbImport extends SqlCommand
 			result.setFailure();
 			return result;
 		}
-		
+
 		this.imp.setRowActionMonitor(this.rowMonitor);
 		String value = cmdLine.getValue("showprogress");
 		if (value == null)
@@ -268,12 +268,12 @@ public class WbImport extends SqlCommand
 		{
 			this.imp.setReportInterval(0);
 		}
-		else 
+		else
 		{
 			int interval = StringUtil.getIntValue(value, 0);
 			this.imp.setReportInterval(interval);
 		}
-		
+
 		String mode = cmdLine.getValue("mode");
 		if (mode != null)
 		{
@@ -297,7 +297,7 @@ public class WbImport extends SqlCommand
 
 		boolean delete = cmdLine.getBoolean("deletetarget");
 		imp.setDeleteTarget(delete);
-		
+
 		boolean useBatch = cmdLine.getBoolean("usebatch");
 		imp.setUseBatch(useBatch);
 		if (useBatch && cmdLine.isArgPresent("batchsize"))
@@ -312,7 +312,7 @@ public class WbImport extends SqlCommand
 				result.addMessage(ResourceMgr.getString("ErrorImportInvalidBatchSize"));
 			}
 		}
-		
+
 		try
 		{
 			imp.startImport();
@@ -353,7 +353,7 @@ public class WbImport extends SqlCommand
 			textParser.addColumnFilter(col, StringUtil.trimQuotes(regex));
 		}
 	}
-	
+
 	private void addWarnings(StatementRunnerResult result)
 	{
 		String[] err = imp.getWarnings();
@@ -365,7 +365,7 @@ public class WbImport extends SqlCommand
 
 	private int estimateReportInterval(String filename)
 	{
-		try 
+		try
 		{
 			long records = FileUtil.estimateRecords(filename, 10);
 			if (records < 100)
@@ -380,9 +380,9 @@ public class WbImport extends SqlCommand
 			{
 				return 1000;
 			}
-			else 
+			else
 			{
-				return 10000;
+				return 5000;
 			}
 		}
 		catch (Exception e)

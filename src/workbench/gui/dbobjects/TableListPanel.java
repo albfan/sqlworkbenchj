@@ -1420,7 +1420,7 @@ public class TableListPanel
 		if (this.selectedTableName == null || this.selectedTableName.length() == 0) return null;
 		String table = SqlUtil.quoteObjectname(this.selectedTableName);
 
-		if (this.tableDefinition.getRowCount() == 0)
+		if (this.shouldRetrieveTable || this.tableDefinition.getRowCount() == 0)
 		{
 			try
 			{
@@ -1873,7 +1873,7 @@ public class TableListPanel
 		String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 		String sql = "SELECT * FROM " + SqlUtil.quoteObjectname(table);
 		DataExporter spooler = new DataExporter();
-		spooler.executeStatement(this.parentWindow, this.dbConnection, sql);
+		spooler.executeStatement(SwingUtilities.getWindowAncestor(this), this.dbConnection, sql, true);
 	}
 
 	public void spoolTables()

@@ -268,10 +268,6 @@ public class XmlDataFileParser
 			this.buildColumnData();
 			if (!this.verboseFormat) this.currentColIndex ++;
 		}
-		else if (qName.equals("wb-export"))
-		{
-			this.receiver.importFinished();
-		}
 		else if (qName.equals("table-name"))
 		{
 			if (this.tableName == null)

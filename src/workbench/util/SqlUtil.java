@@ -11,6 +11,7 @@
  */
 package workbench.util;
 
+import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -18,6 +19,7 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
@@ -52,6 +54,7 @@ public class SqlUtil
 	public static String getSqlVerb(String aStatement)
 	{
 		if (aStatement == null) return "";
+		//String s = makeCleanSql(aStatement, false, false, '\'');
 		String s = aStatement.trim();
 		if (s.length() == 0) return "";
 		if (s.charAt(0) == '@') return "@";
@@ -556,4 +559,41 @@ public class SqlUtil
 			return "UNKNOWN";
 	}
 
+	public static boolean isValidType(int sqlType)
+	{
+		return !getTypeName(sqlType).equals("UNKNOWN");
+	}
+	
+	private static void validateStaticTypes()
+	{
+		try
+		{
+			Field fields[] = java.sql.Types.class.getDeclaredFields();
+			for (int i=0; i < fields.length; i++)
+			{
+				int type = fields[i].getInt(null);
+				if (!isValidType(type))
+				{
+					System.out.println("Type " + fields[i].getName() + " not included in getTypeName()!");
+				}
+			}
+		}
+		catch (Throwable th)
+		{
+			th.printStackTrace();
+		}
+	}
+	
+	public static void main(String args[])
+	{
+		try
+		{
+			validateStaticTypes();
+		}
+		catch (Throwable th)
+		{
+			th.printStackTrace();
+		}
+		System.out.println("Done.");
+	}
 }

@@ -257,7 +257,7 @@ public class SqlCommand
 			StringBuffer msg = new StringBuffer(150);
 			msg.append(ResourceMgr.getString("MsgExecuteError") + "\n");
 			int maxLen = 150;
-			msg.append(StringUtil.getMaxSubstring(aSql.trim(), maxLen, "..."));
+			msg.append(StringUtil.getMaxSubstring(aSql.trim(), maxLen));
 			msg.append("\n");
 			result.addMessage(msg.toString());
 			result.addMessage(ExceptionUtil.getDisplay(e));

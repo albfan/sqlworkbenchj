@@ -15,20 +15,32 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import workbench.db.DbMetadata;
+import workbench.db.JdbcProcedureReader;
+import workbench.db.ProcedureReader;
+import workbench.storage.DataStore;
+import workbench.util.StrBuffer;
 
 /**
  *
  * @author  info@sql-workbench.net
  */
 public class MsSqlMetaData
+	implements ProcedureReader
 {
 	private Connection dbConn = null;
+	private DbMetadata meta = null;
 	private PreparedStatement procStatement = null;
 
-	/** Creates a new instance of MsSqlMetaData */
-	public MsSqlMetaData(Connection con)
+	public MsSqlMetaData(DbMetadata db)
 	{
-		this.dbConn = con;
+		this.dbConn = db.getSqlConnection();
+		this.meta = db;
+	}
+	
+	public StrBuffer getProcedureHeader(String catalog, String schema, String procName)
+	{
+		return StrBuffer.EMPTY_BUFFER;
 	}
 
 	/**
@@ -37,7 +49,7 @@ public class MsSqlMetaData
 	 *  - strictly speaking - true, but as MS still distinguished between
 	 *  procedures and functions we need to return this correctly
 	 */
-	public ResultSet getProcedures(String catalog, String schema)
+	public DataStore getProcedures(String catalog, String schema)
 		throws SQLException
 	{
 		this.procStatement = this.dbConn.prepareStatement(MsSqlMetaData.GET_PROC_SQL);
@@ -50,7 +62,8 @@ public class MsSqlMetaData
 			this.procStatement.setString(1, schema);
 		}
 		ResultSet rs = this.procStatement.executeQuery();
-		return rs;
+		JdbcProcedureReader reader = new JdbcProcedureReader(this.meta);
+		return reader.buildProcedureListDataStore(rs);
 	}
 
 	public void closeStatement()

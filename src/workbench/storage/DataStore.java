@@ -98,6 +98,7 @@ public class DataStore
 	private boolean cancelRetrieve = false;
 	private boolean cancelUpdate = false;
 	private boolean cancelImport = false;
+	private static final int reportInterval;
 
 	static
 	{
@@ -124,6 +125,8 @@ public class DataStore
 		}
 
 		defaultCollator = Collator.getInstance(l);
+
+		reportInterval = Settings.getInstance().getIntProperty("workbench.gui.data.reportinterval", 10);
 	}
 
 	public DataStore(String[] aColNames, int[] colTypes)
@@ -236,7 +239,7 @@ public class DataStore
 	{
 		return this.originalConnection;
 	}
-	
+
 	public void setSourceConnection(WbConnection aConn)
 	{
 		this.originalConnection = aConn;
@@ -347,7 +350,7 @@ public class DataStore
 		throws IndexOutOfBoundsException
 	{
 		RowData row = this.data.get(aRow);
-		// new rows (not read from the database) 
+		// new rows (not read from the database)
 		// do not need to be put into the deleted buffer
 		if (row.isNew())
 		{
@@ -544,7 +547,7 @@ public class DataStore
 					ColumnIdentifier column = (ColumnIdentifier)columns.get(i);
 
 					int index = this.findColumn(column.getColumnName());
-					if (index > -1) 
+					if (index > -1)
 					{
 						this.resultInfo.setUpdateable(index, true);
 						this.resultInfo.setIsPkColumn(index, column.isPkColumn());
@@ -807,7 +810,7 @@ public class DataStore
 		DecimalFormat formatter = Settings.getInstance().getDefaultDecimalFormatter();
 		return row.getDataAsString(aDelimiter, formatter);
 	}
-	
+
 	public StringBuffer getRowDataAsString(int aRow, String aDelimiter, boolean[] columns)
 	{
 		RowData row = this.getRow(aRow);
@@ -824,7 +827,7 @@ public class DataStore
 	{
 		return getHeaderString(aFieldDelimiter, null);
 	}
-	
+
 	public StringBuffer getHeaderString(String aFieldDelimiter, List columns)
 	{
 		int cols = this.resultInfo.getColumnCount();
@@ -836,7 +839,7 @@ public class DataStore
 				if (!columns.contains(this.resultInfo.getColumn(i))) continue;
 			}
 			String colName = this.getColumnName(i);
-			
+
 			if (colName == null || colName.trim().length() == 0) colName = "Col" + i;
 			result.append(colName);
 			if (i < cols - 1) result.append(aFieldDelimiter);
@@ -847,8 +850,8 @@ public class DataStore
 	public String getDataString(String aLineTerminator, boolean includeHeaders)
 	{
 		return this.getDataString(Settings.getInstance().getDefaultTextDelimiter(), aLineTerminator, includeHeaders, null);
-	}	
-	
+	}
+
 	public String getDataString(String aLineTerminator, boolean includeHeaders, List columns)
 	{
 		return this.getDataString(Settings.getInstance().getDefaultTextDelimiter(), aLineTerminator, includeHeaders, columns);
@@ -858,7 +861,7 @@ public class DataStore
 	{
 		return this.getDataString(aFieldDelimiter, aLineTerminator, includeHeaders, null);
 	}
-	
+
 	public String getDataString(String aFieldDelimiter, String aLineTerminator, boolean includeHeaders, List columns)
 	{
 		int count = this.getRowCount();
@@ -908,7 +911,7 @@ public class DataStore
 		boolean[] includeColumns = new boolean[colCount];
 		for (int i=0; i < colCount; i++)
 		{
-			if (columns != null) 
+			if (columns != null)
 			{
 				includeColumns[i] = columns.contains(this.resultInfo.getColumn(i));
 			}
@@ -924,7 +927,7 @@ public class DataStore
 	{
 		writeDataString(out, aFieldDelimiter, aLineTerminator, includeHeaders, rows, null);
 	}
-	
+
 	/**
 	 *	Write the contents of the datastore into the writer but only the rows
 	 *  that have been passed in the rows[] parameter
@@ -989,9 +992,9 @@ public class DataStore
 		if (!this.isModified()) return false;
 		return (this.hasDeletedRows() || this.hasUpdatedRows());
 	}
-	
+
 	public boolean isModified() { return this.modified;  }
-	
+
 	public boolean isUpdateable()
 	{
 		if (this.allowUpdates) return true;
@@ -1049,7 +1052,8 @@ public class DataStore
 			while (!this.cancelRetrieve && aResultSet.next())
 			{
 				rowCount ++;
-				if (this.rowActionMonitor != null)
+
+				if (this.rowActionMonitor != null && rowCount % reportInterval == 0)
 				{
 					this.rowActionMonitor.setCurrentRow(rowCount, -1);
 				}
@@ -1116,7 +1120,7 @@ public class DataStore
 
 	/**
 	 *	Return the table that should be used for INSERTs
-	 *	Normally this is the update table. If no update table 
+	 *	Normally this is the update table. If no update table
 	 *	is defined, the table from the SQL statement will be used
 	 *	but no checking for key columns takes place (which might take long)
 	 */
@@ -1130,13 +1134,13 @@ public class DataStore
 		String table = (String)tables.get(0);
 		return table;
 	}
-	
+
 	public void writeXmlData(Writer pw)
 		throws IOException
 	{
 		this.writeXmlData(pw, false);
 	}
-	
+
 	public void writeXmlData(Writer pw, boolean useCdata)
 		throws IOException
 	{
@@ -1211,19 +1215,19 @@ public class DataStore
 	{
 		return this.getDataAsSqlInsert("\n", null, null, (int[])null, null, true);
 	}
-	
+
 	public String getDataAsSqlDeleteInsert(List columns)
 		throws Exception, SQLException
 	{
 		return this.getDataAsSqlInsert("\n", null, null, null, columns, true);
 	}
-	
+
 	public String getDataAsSqlDeleteInsert(int rows[], List columns)
 		throws Exception, SQLException
 	{
 		return this.getDataAsSqlInsert("\n", null, null, rows, columns, true);
 	}
-	
+
 	public String getDataAsSqlInsert()
 		throws Exception, SQLException
 	{
@@ -1241,18 +1245,18 @@ public class DataStore
 	{
 		return this.getDataAsSqlInsert("\n", null, null, rows, columns);
 	}
-	
+
 	public String getDataAsSqlInsert(String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns)
 		throws Exception, SQLException
 	{
 		return getDataAsSqlInsert(aLineTerminator, aCharFunc, aConcatString, rows, columns, false);
 	}
-	
+
 	public String getDataAsSqlInsert(String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns, boolean includeDelete)
 		throws Exception, SQLException
 	{
 		if (!this.canSaveAsSqlInsert()) return "";
-		
+
 		StringWriter script = new StringWriter(this.getRowCount() * 150);
 		try
 		{
@@ -1277,7 +1281,7 @@ public class DataStore
 	{
 		writeDataAsSqlInsert(out, aLineTerminator, aCharFunc, aConcatString, rows, columns, false);
 	}
-	
+
 	public void writeDataAsSqlInsert(Writer out, String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns, boolean includeDelete)
 		throws IOException
 	{
@@ -1311,12 +1315,12 @@ public class DataStore
 			converter.setCreateInsert();
 			converter.setAlternateUpdateTable(this.getInsertTable());
 		}
-		
+
 		for (int row = 0; row < count; row ++)
 		{
 			RowData data;
 			int rowIndex = -1;
-			if (rows == null) rowIndex = row; 
+			if (rows == null) rowIndex = row;
 			else rowIndex = rows[row];
 
 			data = this.getRow(rowIndex);
@@ -1324,7 +1328,7 @@ public class DataStore
 			sql.writeTo(out);
 		}
 	}
-	
+
 	// =========== SQL Update generation ================
 	public String getDataAsSqlUpdate()
 	{
@@ -2226,7 +2230,7 @@ public class DataStore
 	{
 		return this.resultInfo;
 	}
-	
+
 	public ColumnIdentifier[] getColumns()
 	{
 		return this.resultInfo.getColumns();

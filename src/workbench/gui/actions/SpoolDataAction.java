@@ -31,9 +31,13 @@ public class SpoolDataAction
 
 	public SpoolDataAction(Spooler aClient)
 	{
+		this(aClient, "MnuTxtSpoolData");
+	}
+	public SpoolDataAction(Spooler aClient, String msgKey)
+	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtSpoolData");
+		this.initMenuDefinition(msgKey);
 		this.setIcon(ResourceMgr.getImage("SpoolData"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setEnabled(false);
@@ -52,16 +56,7 @@ public class SpoolDataAction
 
 	public void selectionChanged(int newStart, int newEnd)
 	{
-		if(newEnd > newStart)
-		{
-			int startLine = this.editor.getSelectionStartLine();
-			int endLine = this.editor.getSelectionEndLine();
-			this.setEnabled(startLine < endLine);
-		}
-		else
-		{
-			this.setEnabled(false);
-		}
+		this.setEnabled(newEnd > newStart);
 	}
 
 }

@@ -104,7 +104,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.29 2005-02-02 20:57:10 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.30 2005-03-25 13:42:05 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -463,6 +463,7 @@ public class JEditTextArea
 
 	public boolean searchPatternMatchesSelectedText()
 	{
+		if (this.lastSearchPattern == null) return false;
 		Matcher m = this.lastSearchPattern.matcher(this.getSelectedText());
 		return m.matches();
 	}

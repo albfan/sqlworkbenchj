@@ -169,16 +169,12 @@ public class WbExport
 		String table = cmdLine.getValue("table");
 		type = type.toLowerCase();
 
-		String typeDisplay = null;
-
 		String encoding = cmdLine.getValue("encoding");
 		if (encoding != null) exporter.setEncoding(encoding);
 		exporter.setAppendToFile(cmdLine.getBoolean("append"));
 
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
-			// change the contents of type in order to display it properly
-			typeDisplay = "Text";
 			exporter.setOutputTypeText();
 			String delimiter = cmdLine.getValue("delimiter");
 			if (delimiter != null) exporter.setTextDelimiter(delimiter);
@@ -238,17 +234,14 @@ public class WbExport
 			if (type.equals("sql") || type.equals("sqlinsert"))
 			{
 				exporter.setOutputTypeSqlInsert();
-				typeDisplay = "SQL INSERT";
 			}
 			else if (type.equals("sqlupdate"))
 			{
 				exporter.setOutputTypeSqlUpdate();
-				typeDisplay = "SQL UPDATE";
 			}
 			else if (type.equals("sqldeleteinsert"))
 			{
 				exporter.setOutputTypeSqlDeleteInsert();
-				typeDisplay = "SQL DELETE/INSERT";
 			}
 			exporter.setIncludeCreateTable(cmdLine.getBoolean("createtable"));
 			exporter.setChrFunction(cmdLine.getValue("charfunc"));
@@ -268,8 +261,6 @@ public class WbExport
 		}
 		else if ("xml".equalsIgnoreCase(type))
 		{
-			// change the contents of type in order to display it properly
-			typeDisplay = "XML";
 			String format = cmdLine.getValue("dateformat");
 			if (format != null) exporter.setDateFormat(format);
 
@@ -309,7 +300,6 @@ public class WbExport
 		else if ("html".equalsIgnoreCase(type))
 		{
 			// change the contents of type in order to display it properly
-			typeDisplay = "HTML";
 			String format = cmdLine.getValue("dateformat");
 			if (format != null) exporter.setDateFormat(format);
 
@@ -372,30 +362,28 @@ public class WbExport
 
 		this.exporter.setConnection(aConnection);
 
-		//this.showProgress = cmdLine.getBoolean("showprogress", true);
 		String value = cmdLine.getValue("showprogress");
 		if (value == null || "true".equalsIgnoreCase(value))
 		{
-			this.showProgress = true;
-			this.progressInterval = 1;
+			this.progressInterval = DataExporter.DEFAULT_PROGRESS_INTERVAL;
 		}
 		else if ("false".equalsIgnoreCase(value))
 		{
-			this.showProgress = false;
+			this.progressInterval = 0;
 		}
-		else 
+		else
 		{
 			this.progressInterval = StringUtil.getIntValue(value, -1);
-			this.showProgress = (this.progressInterval > 0);
 		}
-		
+		this.showProgress = (this.progressInterval > 0);
+
 		if (!this.directExport)
 		{
 			this.exporter.setRowMonitor(this.rowMonitor);
 			this.exporter.setProgressInterval(this.progressInterval);
-			
+
 			String msg = ResourceMgr.getString("MsgSpoolInit");
-			msg = StringUtil.replace(msg, "%type%", typeDisplay);
+			msg = StringUtil.replace(msg, "%type%", exporter.getTypeDisplay());
 			msg = StringUtil.replace(msg, "%file%", file);
 			//msg = msg + " quote=" + exporter.getTextQuoteChar();
 			result.addMessage(msg);
@@ -436,7 +424,7 @@ public class WbExport
 				result.addMessage(ResourceMgr.getString("ErrorExportOutputDirRequired"));
 				return;
 			}
-			
+
 			outdir = new File(outputdir);
 			if (!outdir.isDirectory())
 			{
@@ -458,6 +446,7 @@ public class WbExport
 		}
 
 		exporter.setRowMonitor(this);
+		exporter.setProgressInterval(this.progressInterval);
 		
 		if (count > 1)
 		{
@@ -465,7 +454,7 @@ public class WbExport
 			{
 				String table = (String)this.tablesToExport.get(i);
 				if (table == null) continue;
-
+				table = table.trim();
 				String fname = StringUtil.makeFilename(table);
 				File f = new File(outdir, fname + defaultExtension);
 				exporter.addTableExportJob(f.getAbsolutePath(), table);
@@ -614,7 +603,7 @@ public class WbExport
 	{
 	}
 
-	public void setCurrentObject(String object, int number, int total)
+	public void setCurrentObject(String object, long number, long total)
 	{
 		this.currentTable = object;
 		if (!this.showProgress)
@@ -623,10 +612,9 @@ public class WbExport
 		}
 	}
 
-	public void setCurrentRow(int currentRow, int totalRows)
+	public void setCurrentRow(long currentRow, long totalRows)
 	{
-		if (this.showProgress && this.rowMonitor != null && this.currentTable != null
-			&& (this.progressInterval == 1 || currentRow % this.progressInterval == 0))
+		if (this.showProgress)
 		{
 			this.rowMonitor.setCurrentObject(this.currentTable, currentRow, -1);
 		}

@@ -37,6 +37,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.event.ChangeListener;
+import workbench.db.firebird.FirebirdMetadata;
 import workbench.db.hsqldb.HsqlSequenceReader;
 import workbench.db.ingres.IngresMetaData;
 import workbench.db.mckoi.McKoiMetadata;
@@ -47,8 +48,9 @@ import workbench.db.mysql.EnumReader;
 import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.OracleConstraintReader;
 import workbench.db.oracle.OracleMetaData;
-import workbench.db.postgres.PgSequenceReader;
+import workbench.db.postgres.PostgresSequenceReader;
 import workbench.db.postgres.PostgresConstraintReader;
+import workbench.db.postgres.PostgresMetadata;
 import workbench.exception.ExceptionUtil;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.log.LogMgr;
@@ -68,10 +70,6 @@ import workbench.util.WbPersistence;
 public class DbMetadata
 	implements PropertyChangeListener
 {
-	public static final String PROC_RESULT_UNKNOWN = "";
-	public static final String PROC_RESULT_YES = "RESULT";
-	public static final String PROC_RESULT_NO = "NO RESULT";
-
 	public static final String TABLE_NAME_PLACEHOLDER = "%tablename%";
 	public static final String INDEX_NAME_PLACEHOLDER = "%indexname%";
 	public static final String PK_NAME_PLACEHOLDER = "%pk_name%";
@@ -91,9 +89,8 @@ public class DbMetadata
 	private String productName;
 	private String dbId;
 
-	private DatabaseMetaData metaData;
-	//private List tableListColumns;
-	private WbConnection dbConnection;
+	DatabaseMetaData metaData;
+	WbConnection dbConnection;
 
 	// Specialized classes to retrieve metadata that is either not
 	// supported by JDBC or where the JDBC driver does not work properly
@@ -144,6 +141,7 @@ public class DbMetadata
 	private AbstractConstraintReader constraintReader = null;
 	private SynonymReader synonymReader = null;
 	private SequenceReader sequenceReader = null;
+	private ProcedureReader procedureReader = null;
 
 	private List keywords;
 	private String quoteCharacter;
@@ -214,20 +212,22 @@ public class DbMetadata
 		if (productLower.indexOf("oracle") > -1)
 		{
 			this.isOracle = true;
-			this.oracleMetaData = new OracleMetaData(this.dbConnection.getSqlConnection());
+			this.oracleMetaData = new OracleMetaData(this);
 			this.constraintReader = new OracleConstraintReader();
 			this.synonymReader = new workbench.db.oracle.OracleSynonymReader();
 
 			// check for changes to the "enable dbms output" property
 			Settings.getInstance().addPropertyChangeListener(this);
 			this.sequenceReader = this.oracleMetaData;
+			this.procedureReader = this.oracleMetaData;
 		}
 		else if (productLower.indexOf("postgres") > - 1)
 		{
 			this.isPostgres = true;
 			this.selectIntoPattern = Pattern.compile(SELECT_INTO_PG);
 			this.constraintReader = new PostgresConstraintReader();
-			this.sequenceReader = new PgSequenceReader(this.dbConnection.getSqlConnection());
+			this.sequenceReader = new PostgresSequenceReader(this.dbConnection.getSqlConnection());
+			this.procedureReader = new PostgresMetadata(this);
 		}
 		else if (productLower.indexOf("hsql") > -1)
 		{
@@ -239,12 +239,13 @@ public class DbMetadata
 		{
 			this.isFirebird = true;
 			this.constraintReader = new FirebirdConstraintReader();
+			this.procedureReader = new FirebirdMetadata(this);
 		}
 		else if (productLower.indexOf("sql server") > -1)
 		{
 			this.isSqlServer = true;
 			this.constraintReader = new SqlServerConstraintReader();
-			this.msSqlMetaData = new MsSqlMetaData(this.dbConnection.getSqlConnection());
+			this.msSqlMetaData = new MsSqlMetaData(this);
 		}
 		else if (productLower.indexOf("adaptive server") > -1)
 		{
@@ -290,6 +291,11 @@ public class DbMetadata
 			this.sequenceReader = this.mckoiMetaData;
 		}
 
+		if (this.procedureReader == null) 
+		{
+			this.procedureReader = new JdbcProcedureReader(this);
+		}
+		
 		try
 		{
 			this.quoteCharacter = this.metaData.getIdentifierQuoteString();
@@ -322,6 +328,11 @@ public class DbMetadata
 
 	}
 
+	public Connection getSqlConnection()
+	{
+		return this.dbConnection.getSqlConnection();
+	}
+	
 	/**
 	 *	Return the name of the DBMS as reported by the JDBC driver
 	 */
@@ -763,96 +774,6 @@ public class DbMetadata
 		}
 	}
 
-	private StrBuffer getFirebirdProcedureHeader(String aCatalog, String aSchema, String aProcname)
-	{
-		StrBuffer source = new StrBuffer();
-		try
-		{
-			DataStore ds = this.getProcedureColumnInformation(aCatalog, aSchema, aProcname);
-			source.append("CREATE PROCEDURE ");
-			source.append(aProcname);
-			String retType = null;
-			int count = ds.getRowCount();
-			int added = 0;
-			for (int i=0; i < count; i++)
-			{
-				String vartype = ds.getValueAsString(i,COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
-				String name = ds.getValueAsString(i,COLUMN_IDX_PROC_COLUMNS_COL_NAME);
-				String ret = ds.getValueAsString(i,COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
-				if ("OUT".equals(ret))
-				{
-					retType = "(" + name + " " + vartype + ")";
-				}
-				else
-				{
-					if (added > 0)
-					{
-						source.append(",");
-					}
-					else
-					{
-						source.append(" (");
-					}
-					source.append(name);
-					source.append(" ");
-					source.append(vartype);
-					added ++;
-				}
-			}
-			if (added > 0) source.append(")");
-			if (retType != null)
-			{
-				source.append("\nRETURNS ");
-				source.append(retType);
-			}
-			source.append("\nAS");
-		}
-		catch (Exception e)
-		{
-			source = new StrBuffer();
-		}
-		return source;
-	}
-
-	private StrBuffer getPostgresProcedureHeader(String aCatalog, String aSchema, String aProcname)
-	{
-		StrBuffer source = new StrBuffer();
-		try
-		{
-			DataStore ds = this.getProcedureColumnInformation(aCatalog, aSchema, aProcname);
-			source.append("CREATE OR REPLACE FUNCTION ");
-			source.append(aProcname);
-			source.append(" (");
-			String retType = null;
-			int count = ds.getRowCount();
-			int added = 0;
-			for (int i=0; i < count; i++)
-			{
-				String vartype = ds.getValueAsString(i,COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
-				String ret = ds.getValueAsString(i,COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
-				if ("RETURN".equals(ret))
-				{
-					retType = vartype;
-				}
-				else
-				{
-					if (added > 0) source.append(",");
-					source.append(vartype);
-					added ++;
-				}
-			}
-			source.append(")");
-			source.append("\nRETURNS ");
-			source.append(retType);
-			source.append("\nAS\n");
-		}
-		catch (Exception e)
-		{
-			source = StrBuffer.EMPTY_BUFFER;
-		}
-		return source;
-	}
-
 	public String getProcedureSource(String aCatalog, String aSchema, String aProcname)
 	{
 		if (aProcname == null) return null;
@@ -868,17 +789,9 @@ public class DbMetadata
 
 		// Postgres and Firebird do not store the CREATE PROCEDURE part
 		// of the source, so we have to recreate it "manually"
-		if (this.isPostgres)
+		if (this.procedureReader != null)
 		{
-			source.append(getPostgresProcedureHeader(aCatalog, aSchema, aProcname));
-		}
-		else if (this.isFirebird)
-		{
-			source.append(this.getFirebirdProcedureHeader(aCatalog, aSchema, aProcname));
-		}
-		else if (this.isOracle)
-		{
-			source.append("CREATE OR REPLACE ");
+			source.append(this.procedureReader.getProcedureHeader(aCatalog, aSchema, aProcname));
 		}
 
 		Statement stmt = null;
@@ -1266,18 +1179,12 @@ public class DbMetadata
 		}
 	}
 
-	public DataStoreTableModel getProcedureColumns(String aCatalog, String aSchema, String aProcname)
-		throws SQLException
-	{
-		return new DataStoreTableModel(this.getProcedureColumnInformation(aCatalog, aSchema, aProcname));
-	}
-
 	public final static int COLUMN_IDX_PROC_COLUMNS_COL_NAME = 0;
 	public final static int COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE = 1;
 	public final static int COLUMN_IDX_PROC_COLUMNS_DATA_TYPE = 2;
 	public final static int COLUMN_IDX_PROC_COLUMNS_REMARKS = 3;
 
-	public DataStore getProcedureColumnInformation(String aCatalog, String aSchema, String aProcname)
+	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
 		throws SQLException
 	{
 		final String cols[] = {"COLUMN_NAME", "COL_TYPE", "TYPE_NAME", "REMARKS"};
@@ -1344,7 +1251,7 @@ public class DbMetadata
 			case Types.DOUBLE:
 			case Types.NUMERIC:
 			case Types.FLOAT:
-				if (aTypeName.equalsIgnoreCase("money"))
+				if (aTypeName.equalsIgnoreCase("money")) // SQL Server
 				{
 					display = aTypeName;
 				}
@@ -1387,88 +1294,10 @@ public class DbMetadata
 		return display;
 	}
 
-	public DataStoreTableModel getListOfProcedures()
-		throws SQLException
-	{
-		return this.getListOfProcedures(null, null);
-	}
-
-	public DataStoreTableModel getListOfProcedures(String aCatalog, String aSchema)
-		throws SQLException
-	{
-		return new DataStoreTableModel(this.getProcedures(aCatalog, aSchema));
-	}
-
-	public static final int COLUMN_IDX_PROC_LIST_NAME = 0;
-	public static final int COLUMN_IDX_PROC_LIST_TYPE = 1;
-	public static final int COLUMN_IDX_PROC_LIST_CATALOG = 2;
-	public static final int COLUMN_IDX_PROC_LIST_SCHEMA = 3;
-	public static final int COLUMN_IDX_PROC_LIST_REMARKS = 4;
-
 	public DataStore getProcedures(String aCatalog, String aSchema)
 		throws SQLException
 	{
-		String[] cols = new String[] {"PROCEDURE_NAME", "TYPE", catalogTerm.toUpperCase(), schemaTerm.toUpperCase(), "REMARKS"};
-		final int types[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		final int sizes[] = {30,12,10,10,20};
-
-		DataStore ds = new DataStore(cols, types, sizes);
-
-		if ("*".equals(aSchema) || "%".equals(aSchema))
-		{
-			aSchema = null;
-		}
-
-		ResultSet rs = null;
-		try
-		{
-			if (this.msSqlMetaData != null)
-				rs = this.msSqlMetaData.getProcedures(aCatalog, aSchema);
-			else
-				rs = this.metaData.getProcedures(aCatalog, aSchema, "%");
-
-			String sType;
-
-			while (rs.next())
-			{
-				String cat = rs.getString("PROCEDURE_CAT");
-				String schema = rs.getString("PROCEDURE_SCHEM");
-				String name = rs.getString("PROCEDURE_NAME");
-				String remark = rs.getString("REMARKS");
-				short type = rs.getShort("PROCEDURE_TYPE");
-				if (rs.wasNull())
-				{
-					sType = "N/A";
-				}
-				else
-				{
-					if (type == DatabaseMetaData.procedureNoResult)
-						sType = PROC_RESULT_NO;
-					else if (type == DatabaseMetaData.procedureReturnsResult)
-						sType = PROC_RESULT_YES;
-					else
-						sType = PROC_RESULT_UNKNOWN;
-				}
-				int row = ds.addRow();
-
-
-				ds.setValue(row, COLUMN_IDX_PROC_LIST_CATALOG, cat);
-				ds.setValue(row, COLUMN_IDX_PROC_LIST_SCHEMA, schema);
-				ds.setValue(row, COLUMN_IDX_PROC_LIST_NAME, name);
-				ds.setValue(row, COLUMN_IDX_PROC_LIST_TYPE, sType);
-				ds.setValue(row, COLUMN_IDX_PROC_LIST_REMARKS, remark);
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DbMetadata.getProcedures()", "Error while retrieving procedures", e);
-		}
-		finally
-		{
-			SqlUtil.closeResult(rs);
-			if (this.msSqlMetaData != null) this.msSqlMetaData.closeStatement();
-		}
-		return ds;
+		return this.procedureReader.getProcedures(aCatalog, aSchema);
 	}
 
 	public void enableOutput()
@@ -1566,42 +1395,13 @@ public class DbMetadata
 		}
 	}
 
-	public DataStoreTableModel getListOfTables()
-		throws SQLException
-	{
-		return this.getListOfTables(null, null, null);
-	}
-
-	public DataStoreTableModel getListOfTables(String aCatalog, String aSchema, String aType)
-		throws SQLException
-	{
-		return new DataStoreTableModel(this.getTables(aCatalog, aSchema, aType));
-	}
-
-	public DataStoreTableModel getTableDefinitionModel(String aCatalog, String aSchema, String aTable)
-		throws SQLException
-	{
-		return new DataStoreTableModel(this.getTableDefinition(aCatalog, aSchema, aTable));
-	}
-	public DataStoreTableModel getTableDefinitionModel(String aTable)
-		throws SQLException
-	{
-		return new DataStoreTableModel(this.getTableDefinition(null, null, aTable));
-	}
-
-	public DataStore getTableDefinition(String aTable)
-		throws SQLException
-	{
-		return this.getTableDefinition(null, null, aTable);
-	}
-
 	/**
 	 *	Return a list of ColumnIdentifier's for the given table
 	 */
 	public List getTableColumns(TableIdentifier aTable)
 		throws SQLException
 	{
-		ColumnIdentifier[] cols = createColumnIdentifiers(aTable);
+		ColumnIdentifier[] cols = getColumnIdentifiers(aTable);
 		List result = new ArrayList(cols.length);
 		for (int i=0; i < cols.length; i++)
 		{
@@ -1610,7 +1410,7 @@ public class DbMetadata
 		return result;
 	}
 
-	private ColumnIdentifier[] createColumnIdentifiers(TableIdentifier table)
+	public ColumnIdentifier[] getColumnIdentifiers(TableIdentifier table)
 		throws SQLException
 	{
 		DataStore ds = this.getTableDefinition(table.getCatalog(), table.getSchema(), table.getTable());

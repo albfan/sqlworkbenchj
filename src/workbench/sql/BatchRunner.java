@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 import workbench.WbManager;
@@ -53,7 +54,8 @@ public class BatchRunner
 	private boolean cancelExecution = false;
 	private RowActionMonitor rowMonitor;
 	private boolean verboseLogging = true;
-	
+	private boolean checkEscapedQuotes = false;
+
 	public BatchRunner(String aFilelist)
 	{
 		this.files = StringUtil.stringToList(aFilelist, ",");
@@ -71,8 +73,9 @@ public class BatchRunner
 		{
 			this.stmtRunner.setVerboseLogging(flag);
 		}
+		this.showTiming = this.verboseLogging;
 	}
-	
+
 	public void setProfile(String aProfilename)
 	{
 		LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchConnecting") + " [" + aProfilename + "]");
@@ -90,7 +93,9 @@ public class BatchRunner
 	{
 		this.profile = aProfile;
 	}
-	
+
+	public void setDelimiter(String delim) { this.delimiter = delim; }
+
 	public void setConnection(WbConnection conn)
 	{
 		this.connection = conn;
@@ -98,7 +103,7 @@ public class BatchRunner
 		this.stmtRunner.setConnection(this.connection);
 		this.stmtRunner.setVerboseLogging(this.verboseLogging);
 	}
-	
+
 	public void connect()
 		throws Exception
 	{
@@ -190,27 +195,30 @@ public class BatchRunner
 	{
 		this.rowMonitor = mon;
 	}
-	
+
 	public void execute()
 		throws IOException
 	{
 		String file = null;
 		boolean error = false;
 		int count = this.files.size();
-		
+
 		if (this.rowMonitor  != null)
 		{
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
 		}
-		
+
 		for (int i=0; i < count; i++)
 		{
 			file = (String)this.files.get(i);
+
+			File fo = new File(file);
+
 			if (this.rowMonitor != null)
 			{
 				this.rowMonitor.setCurrentObject(file, i+1, count);
 			}
-			
+
 			try
 			{
 				String msg = ResourceMgr.getString("MsgBatchProcessingFile") + " " + file;
@@ -221,20 +229,16 @@ public class BatchRunner
 					this.resultDisplay.appendToLog(msg);
 					this.resultDisplay.appendToLog("\n\n");
 				}
-				
-				String script = this.readFile(file);
-				if (script != null)
+
+				error = this.executeScript(fo);
+				msg = ResourceMgr.getString("MsgBatchProcessingFileDone") + " " + file;
+				if (this.resultDisplay != null)
 				{
-					error = this.executeScript(script);
-					msg = ResourceMgr.getString("MsgBatchProcessingFileDone") + " " + file;
-					if (this.resultDisplay != null)
-					{
-						this.resultDisplay.appendToLog("\n");
-						this.resultDisplay.appendToLog(msg);
-						this.resultDisplay.appendToLog("\n\n");
-					}
-					LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchProcessingFileDone") + " " + file);
+					this.resultDisplay.appendToLog("\n");
+					this.resultDisplay.appendToLog(msg);
+					this.resultDisplay.appendToLog("\n\n");
 				}
+				LogMgr.logInfo("BatchRunner", msg);
 			}
 			catch (Exception e)
 			{
@@ -255,8 +259,7 @@ public class BatchRunner
 				if (this.errorScript != null)
 				{
 					LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchExecutingErrorScript") + " " + this.errorScript);
-					String errorScript = this.readFile(this.errorScript);
-					this.executeScript(errorScript);
+					this.executeScript(new File(this.errorScript));
 				}
 			}
 			catch (Exception e)
@@ -272,8 +275,7 @@ public class BatchRunner
 				if (this.successScript != null)
 				{
 					LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchExecutingSuccessScript") + " " + this.successScript);
-					String script = this.readFile(this.successScript);
-					this.executeScript(script);
+					this.executeScript(new File(this.successScript));
 				}
 			}
 			catch (Exception e)
@@ -291,29 +293,42 @@ public class BatchRunner
 			this.stmtRunner.cancel();
 		}
 	}
-	
-	private boolean executeScript(String aScript)
+
+	private boolean executeScript(File scriptFile)
+		throws IOException
 	{
 		boolean error = false;
 		StatementRunnerResult result = null;
-		ScriptParser parser = new ScriptParser();
+		ScriptParser parser = new ScriptParser(scriptFile);
 		parser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
-		parser.setScript(aScript);
-		List statements = parser.getCommands();
+		parser.setDelimiter(this.delimiter);
+		parser.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		String sql = null;
 		this.cancelExecution = false;
-		int count = statements.size();
+
 		int executedCount = 0;
 		long start, end;
 
-		start = System.currentTimeMillis();
-		
-		for (int i=0; i < count; i++)
+		int interval;
+		if (scriptFile.length() < 5000)
 		{
-			sql = (String)statements.get(i);
-			if (sql == null) continue;
-			sql = sql.trim();
-			if (sql.length() == 0) continue;
+			interval = 1;
+		}
+		if (scriptFile.length() < 100000)
+		{
+			interval = 10;
+		}
+		else
+		{
+			interval = 100;
+		}
+
+		start = System.currentTimeMillis();
+
+		Iterator itr = parser.getIterator();
+		while (itr.hasNext())
+		{
+			sql = itr.next().toString();
 
 			try
 			{
@@ -331,18 +346,23 @@ public class BatchRunner
 					}
 				}
 				executedCount ++;
-				
+
 				if (this.showTiming)
 				{
 					this.printMessage(ResourceMgr.getString("MsgSqlVerbTime") + " " + (((double)(verbend - verbstart)) / 1000.0) + "s");
 				}
-				
-				if (this.cancelExecution) 
+
+				if (this.rowMonitor != null && (executedCount % interval == 0))
+				{
+					this.rowMonitor.setCurrentRow(executedCount, -1);
+				}
+
+				if (this.cancelExecution)
 				{
 					this.printMessage(ResourceMgr.getString("MsgStatementCancelled"));
 					break;
 				}
-				
+
 				if (this.showResultSets && result.isSuccess() && result.hasDataStores())
 				{
 					System.out.println();
@@ -378,7 +398,7 @@ public class BatchRunner
 			msg = ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s";
 			this.printMessage(msg);
 		}
-		
+
 		return error;
 	}
 
@@ -393,6 +413,11 @@ public class BatchRunner
 		this.abortOnError = aFlag;
 	}
 
+	public void setCheckEscapedQuotes(boolean flag)
+	{
+		this.checkEscapedQuotes = flag;
+	}
+
 	public void setResultLogger(ResultLogger logger)
 	{
 		this.resultDisplay = logger;
@@ -401,7 +426,7 @@ public class BatchRunner
 			this.stmtRunner.setResultLogger(logger);
 		}
 	}
-	
+
 	private void printMessage(String msg)
 	{
 		if (this.resultDisplay == null)
@@ -419,7 +444,7 @@ public class BatchRunner
 	{
 		String scripts = cmdLine.getValue(WbManager.ARG_SCRIPT);
 		if (scripts == null || scripts.trim().length() == 0) return null;
-		
+
 		String profilename = cmdLine.getValue(WbManager.ARG_PROFILE);
 		String errorHandling = cmdLine.getValue(WbManager.ARG_ABORT);
 		boolean showResult = cmdLine.getBoolean(WbManager.ARG_DISPLAY_RESULT);
@@ -455,7 +480,7 @@ public class BatchRunner
 
 		String success = cmdLine.getValue(WbManager.ARG_SUCCESS_SCRIPT);
 		String error = cmdLine.getValue(WbManager.ARG_ERROR_SCRIPT);
-		
+
 		BatchRunner runner = new BatchRunner(scripts);
 		runner.showResultSets(showResult);
 		runner.setAbortOnError(abort);
@@ -463,7 +488,7 @@ public class BatchRunner
 		runner.setSuccessScript(success);
 		runner.setProfile(profile);
 		runner.showTiming = cmdLine.getBoolean(WbManager.ARG_SHOW_TIMING, true);
-		
+
 		return runner;
 	}
 }

@@ -18,7 +18,8 @@ import workbench.db.*;
  *
  * @author  info@sql-workbench.net
  */
-public class PostgresConstraintReader extends AbstractConstraintReader
+public class PostgresConstraintReader 
+	extends AbstractConstraintReader
 {
 	private static final String TABLE_SQL = 
 					 "select rel.rcsrc \n" + 

@@ -72,7 +72,7 @@ public class DataImporter
 	private boolean supportsBatch = false;
 	private boolean canCommitInBatch = true;
 	private int reportInterval = 1;
-	
+
 	private int colCount;
 	private ArrayList warnings = new ArrayList();
 	private ArrayList errors = new ArrayList();
@@ -291,7 +291,7 @@ public class DataImporter
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
 	}
-	
+
 	/**
 	 *	Start the import
 	 */
@@ -301,6 +301,11 @@ public class DataImporter
 		if (this.source == null) return;
 		this.isRunning = true;
 		this.canCommitInBatch = true;
+
+		if (this.useBatch && (this.isModeInsertUpdate() || this.isModeUpdateInsert()))
+		{
+			this.useBatch = false;
+		}
 		this.source.start();
 	}
 
@@ -392,18 +397,12 @@ public class DataImporter
 		if (row == null) return;
 		if (row.length != this.colCount) return;
 
-		// a bit paranoid :)
-		if (this.useBatch && (this.isModeInsertUpdate() || this.isModeUpdateInsert()))
-		{
-			this.useBatch = false;
-		}
-
 		currentImportRow++;
-		if (this.progressMonitor != null && this.reportInterval > 0 && currentImportRow % reportInterval == 0)
+		if (this.progressMonitor != null && this.reportInterval > 0 && (currentImportRow == 1 || currentImportRow % reportInterval == 0))
 		{
 			progressMonitor.setCurrentRow(currentImportRow, -1);
 		}
-		
+
 		int rows = 0;
 		try
 		{
@@ -517,7 +516,6 @@ public class DataImporter
 				}
 				else
 				{
-					//LogMgr.logDebug("DataImporter.processRow()", "Committing changes (commitEvery=" + this.commitEvery + ")");
 					this.dbConn.commit();
 				}
 			}
@@ -760,7 +758,7 @@ public class DataImporter
 		{
 			this.insertSql = text.toString();
 			this.insertStatement = this.dbConn.getSqlConnection().prepareStatement(this.insertSql);
-			LogMgr.logDebug("DataImporter.prepareInsertStatement()", "Using INSERT: " + this.insertSql);
+			LogMgr.logInfo("DataImporter.prepareInsertStatement()", "Using INSERT: " + this.insertSql);
 		}
 		catch (SQLException e)
 		{
@@ -826,7 +824,7 @@ public class DataImporter
 		}
 		if (!pkAdded)
 		{
-			LogMgr.logDebug("DataImporter.prepareUpdateStatement()", "No primary key columns defined! Update mode not available");
+			LogMgr.logError("DataImporter.prepareUpdateStatement()", "No primary key columns defined! Update mode not available", null);
 			this.errors.add(ResourceMgr.getString("ErrorImportNoKeyForUpdate"));
 			this.updateSql = null;
 			this.updateStatement = null;
@@ -834,7 +832,7 @@ public class DataImporter
 		}
 		if (colIndex == 0)
 		{
-			LogMgr.logDebug("DataImporter.prepareUpdateStatement()", "Only PK columns defined! Update mode is not available!");
+			LogMgr.logError("DataImporter.prepareUpdateStatement()", "Only PK columns defined! Update mode is not available!", null);
 			this.errors.add(ResourceMgr.getString("ErrorImportOnlyKeyColumnsForUpdate"));
 			this.updateSql = null;
 			this.updateStatement = null;
@@ -845,7 +843,7 @@ public class DataImporter
 		{
 			this.updateSql = sql.toString();
 			this.updateStatement = this.dbConn.getSqlConnection().prepareStatement(this.updateSql);
-			LogMgr.logDebug("DataImporter.prepareUpdateStatement()", "Using UPDATE: " + this.updateSql);
+			LogMgr.logInfo("DataImporter.prepareUpdateStatement()", "Using UPDATE: " + this.updateSql);
 		}
 		catch (SQLException e)
 		{
@@ -866,15 +864,14 @@ public class DataImporter
 	{
 		try
 		{
-			List cols = this.dbConn.getMetadata().getTableColumns(new TableIdentifier(this.targetTable));
-			int count = cols.size();
+			ColumnIdentifier cols[] = this.dbConn.getMetadata().getColumnIdentifiers(new TableIdentifier(this.targetTable));
+			int count = cols.length;
 			this.keyColumns = new ArrayList();
 			for (int i=0; i < count; i++)
 			{
-				ColumnIdentifier col = (ColumnIdentifier)cols.get(i);
-				if (col.isPkColumn())
+				if (cols[i].isPkColumn())
 				{
-					this.keyColumns.add(col);
+					this.keyColumns.add(cols[i]);
 				}
 			}
 		}
@@ -997,5 +994,5 @@ public class DataImporter
 			this.reportInterval = 0;
 		}
 	}
-	
+
 }

@@ -34,6 +34,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import workbench.db.DbMetadata;
+import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
@@ -248,7 +249,7 @@ public class ProcedureListPanel
 			{
 				DbMetadata meta = dbConnection.getMetadata();
 				WbSwingUtilities.showWaitCursorOnWindow(this);
-				DataStoreTableModel model = meta.getListOfProcedures(currentCatalog, currentSchema);
+				DataStoreTableModel model = new DataStoreTableModel(meta.getProcedures(currentCatalog, currentSchema));
 				int rows = model.getRowCount();
 				String info = rows + " " + ResourceMgr.getString("TxtTableListObjects");
 				this.infoLabel.setText(info);
@@ -336,9 +337,9 @@ public class ProcedureListPanel
 			this.recompileItem.setEnabled(this.procList.getSelectedRowCount() > 0);
 		}
 
-		final String proc = this.procList.getValueAsString(row, DbMetadata.COLUMN_IDX_PROC_LIST_NAME);
-		final String schema = this.procList.getValueAsString(row, DbMetadata.COLUMN_IDX_PROC_LIST_SCHEMA);
-		final String catalog = this.procList.getValueAsString(row, DbMetadata.COLUMN_IDX_PROC_LIST_CATALOG);
+		final String proc = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
+		final String schema = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
+		final String catalog = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
 
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -351,7 +352,8 @@ public class ProcedureListPanel
 					try
 					{
 						procColumns.setVisible(false);
-						procColumns.setModel(meta.getProcedureColumns(catalog, schema, proc), true);
+						DataStoreTableModel model = new DataStoreTableModel(meta.getProcedureColumns(catalog, schema, proc));
+						procColumns.setModel(model, true);
 						procColumns.adjustColumns();
 						procColumns.setVisible(true);
 					}
@@ -389,7 +391,7 @@ public class ProcedureListPanel
 
 		for (int i=0; i < count; i ++)
 		{
-			String name = this.procList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_PROC_LIST_NAME);
+			String name = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
 
 			// MS SQL Server appends a semicolon at the end of the name...
 			if (name.indexOf(';') > 0)
@@ -397,7 +399,7 @@ public class ProcedureListPanel
 				name = name.substring(0, name.indexOf(';'));
 			}
 
-			String schema = this.procList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_PROC_LIST_SCHEMA);
+			String schema = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
       if (schema != null && schema.length() > 0)
       {
   			name = SqlUtil.quoteObjectname(schema) + "." + SqlUtil.quoteObjectname(name);
@@ -407,13 +409,13 @@ public class ProcedureListPanel
         name = SqlUtil.quoteObjectname(name);
       }
 
-			String type = this.procList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_PROC_LIST_TYPE);
+			String type = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE);
 			if (this.dbConnection.getMetadata().isOracle())
 			{
 				// Oracle reports the type of the procedure in a rather strange way.
 				// the only way to tell if it's a package, is to look at the CATALOG column
 				// if that contains an entry, it's a packaged procedure
-				String catalog = this.procList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_PROC_LIST_CATALOG);
+				String catalog = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
 				if (catalog != null && catalog.length() > 0)
 				{
 					type = "PACKAGE";

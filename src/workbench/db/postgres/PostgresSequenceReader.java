@@ -26,12 +26,12 @@ import workbench.util.StrBuffer;
 /**
  * @author  info@sql-workbench.net
  */
-public class PgSequenceReader
+public class PostgresSequenceReader
 	implements SequenceReader
 {
 	private Connection dbConnection;
 	
-	public PgSequenceReader(Connection conn)
+	public PostgresSequenceReader(Connection conn)
 	{
 		this.dbConnection = conn;
 	}

@@ -568,12 +568,12 @@ public class TextFileParser
 				myCols.set(i, colname.toUpperCase());
 			}
 			DbMetadata meta = this.connection.getMetadata();
-			List colIds = meta.getTableColumns(new TableIdentifier(this.tableName));
-			int tableCols = colIds.size();
+			ColumnIdentifier[] colIds = meta.getColumnIdentifiers(new TableIdentifier(this.tableName));
+			int tableCols = colIds.length;
 
 			for (int i=0; i < tableCols; i++)
 			{
-				ColumnIdentifier id = (ColumnIdentifier)colIds.get(i);
+				ColumnIdentifier id = colIds[i];
 				String column = id.getColumnName().toUpperCase();
 				int index = myCols.indexOf(column);
 				if (index >= 0 && this.columns[index] != null)

@@ -35,8 +35,8 @@ public abstract class ExportWriter
 	protected RowActionMonitor rowMonitor;
 	private RowDataConverter converter;
 	private Writer output;
-	private int progressInterval = 1;
-	
+	private int progressInterval = 10;
+
 	public ExportWriter(DataExporter exp)
 	{
 		this.exporter = exp;
@@ -51,7 +51,7 @@ public abstract class ExportWriter
 		else
 			this.progressInterval = interval;
 	}
-	
+
 	public void setRowMonitor(RowActionMonitor monitor)
 	{
 		this.rowMonitor = monitor;
@@ -73,7 +73,7 @@ public abstract class ExportWriter
 		converter.setOriginalConnection(this.exporter.getConnection());
 		converter.setColumnsToExport(this.exporter.getColumnsToExport());
 	}
-	
+
 	public void writeExport(DataStore ds)
 		throws SQLException, IOException
 	{
@@ -98,8 +98,9 @@ public abstract class ExportWriter
 		for (int i=0; i < rowCount; i++)
 		{
 			if (this.cancel) break;
-			if (this.rowMonitor != null && this.progressInterval > 0 && 
-				  (this.progressInterval == 1 || this.rows % this.progressInterval == 0))
+
+			if (this.rowMonitor != null && this.progressInterval > 0 &&
+				  (this.rows == 1 || this.rows % this.progressInterval == 0))
 			{
 				this.rowMonitor.setCurrentRow((int)this.rows, -1);
 			}
@@ -134,8 +135,9 @@ public abstract class ExportWriter
 		while (rs.next())
 		{
 			if (this.cancel) break;
-			if (this.rowMonitor != null && this.progressInterval > 0 && 
-				  (this.progressInterval == 1 || this.rows % this.progressInterval == 0))
+
+			if (this.rowMonitor != null && this.progressInterval > 0 &&
+				  (this.rows == 1 || this.rows % this.progressInterval == 0))
 			{
 				this.rowMonitor.setCurrentRow((int)this.rows, -1);
 			}

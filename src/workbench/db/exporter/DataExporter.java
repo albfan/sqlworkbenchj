@@ -11,6 +11,7 @@
  */
 package workbench.db.exporter;
 
+import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -30,6 +31,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JDialog;
 
 import javax.swing.JFrame;
 
@@ -81,7 +83,7 @@ public class DataExporter
 	private boolean exportHeaders;
 	private boolean includeCreateTable = false;
 	private boolean headerOnly = false;
-	//private boolean useSqlUpdate = false;
+	
 	private int sqlType = SqlRowDataConverter.SQL_INSERT;
 	private boolean useCDATA = false;
 	private CharacterRange escapeRange = null;
@@ -116,10 +118,11 @@ public class DataExporter
 	private boolean verboseFormat = true;
 
 	private boolean showProgressWindow = false;
-	private int progressInterval = 1;
+	public static final int DEFAULT_PROGRESS_INTERVAL = 10;
+	private int progressInterval = DEFAULT_PROGRESS_INTERVAL;
 	
 	private ProgressPanel progressPanel;
-	private JFrame progressWindow;
+	private JDialog progressWindow;
 	private boolean keepRunning = true;
 	private boolean cancelJobs = false;
 	private int pendingJobs = 0;
@@ -138,23 +141,37 @@ public class DataExporter
 	{
 	}
 
+	private void openProgressMonitor(Window parent, boolean modal)
+	{
+		Frame f = null;
+		if (parent instanceof Frame)
+		{
+			f = (Frame)parent;
+		}
+		openProgressMonitor(parent, modal);
+	}
+	
+	private void createProgressPanel()
+	{
+		progressPanel = new ProgressPanel(this);
+		this.progressPanel.setFilename(this.outputfile);
+		this.progressPanel.setInfoText(ResourceMgr.getString("MsgSpoolStart"));
+	}
 	/**
 	 *	Open the progress monitor window.
 	 */
-	private void openProgressMonitor()
+	private void openProgressMonitor(Frame parent, boolean modal)
 	{
 		File f = new File(this.outputfile);
 		String fname = f.getName();
 
-		progressPanel = new ProgressPanel(this);
-		this.progressPanel.setFilename(this.outputfile);
-		this.progressPanel.setInfoText(ResourceMgr.getString("MsgSpoolStart"));
-
-		this.progressWindow = new JFrame();
+		if (this.progressPanel == null) createProgressPanel();
+		
+		this.progressWindow = new JDialog(parent, modal);
 		this.progressWindow.getContentPane().add(progressPanel);
 		this.progressWindow.pack();
 		this.progressWindow.setTitle(ResourceMgr.getString("MsgSpoolWindowTitle"));
-		this.progressWindow.setIconImage(ResourceMgr.getPicture("SpoolData16").getImage());
+		//this.progressWindow.setIconImage(ResourceMgr.getPicture("SpoolData16").getImage());
 		this.progressWindow.addWindowListener(new WindowAdapter()
 		{
 			public void windowClosing(WindowEvent e)
@@ -274,6 +291,30 @@ public class DataExporter
 	public void setCommitEvery(int aCount) { this.commitEvery = aCount; }
 	public int getCommitEvery() { return this.commitEvery; }
 
+	public String getTypeDisplay()
+	{
+		switch (this.exportType)
+		{
+			case EXPORT_HTML:
+				return "HTML";
+				
+			case EXPORT_SQL:
+				if (this.getSqlType() == SqlRowDataConverter.SQL_DELETE_INSERT)
+					return "SQL DELETE/INSERT";
+				else if (this.getSqlType() == SqlRowDataConverter.SQL_INSERT)
+					return "SQL INSERT";
+				else if (this.getSqlType() == SqlRowDataConverter.SQL_UPDATE)
+					return "SQL UPDATE";
+				
+			case EXPORT_TXT:
+				return "Text";
+				
+			case EXPORT_XML:
+				return "XML";
+		}
+		return "";
+	}
+	
 	/**
 	 * Control the progress display in the RowActionMonitor
 	 * This is used by the WBEXPORT command to turn off the row
@@ -719,7 +760,8 @@ public class DataExporter
 		}
 		
 		BufferedWriter pw = null;
-
+		final int buffSize = 64*1024;
+		
 		try
 		{
 			File f = new File(this.outputfile);
@@ -731,7 +773,7 @@ public class DataExporter
 				try
 				{
 					OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(f, this.append), this.encoding);
-					pw = new BufferedWriter(out);
+					pw = new BufferedWriter(out, buffSize);
 				}
 				catch (UnsupportedEncodingException e)
 				{
@@ -747,7 +789,7 @@ public class DataExporter
 			// without encoding (thus using the
 			if (pw == null)
 			{
-				pw = new BufferedWriter(new FileWriter(f,this.append), 16*1024);
+				pw = new BufferedWriter(new FileWriter(f,this.append), buffSize);
 			}
 			exporter.setOutput(pw);
 		}
@@ -776,7 +818,7 @@ public class DataExporter
 
 		if (this.showProgressWindow)
 		{
-			if (this.progressPanel == null) this.openProgressMonitor();
+			if (this.progressPanel == null) createProgressPanel();//this.openProgressMonitor(this.parentWindow, false);
 			exporter.setRowMonitor(this.progressPanel);
 		}
 		
@@ -795,17 +837,31 @@ public class DataExporter
 
 	public void executeStatement(WbConnection aConnection, String aSql)
 	{
-		this.executeStatement(null, aConnection, aSql);
+		this.executeStatement(null, aConnection, aSql, false);
 	}
 
-	public void executeStatement(Window aParent, WbConnection aConnection, String aSql)
+	public boolean selectOutput(Window parent)
+	{
+		ExportFileDialog dialog = new ExportFileDialog(parent);
+		dialog.setIncludeSqlInsert(true);
+		dialog.setIncludeSqlUpdate(true);
+
+		boolean result = dialog.selectOutput();
+		if (result)
+		{
+			dialog.setExporterOptions(this);
+		}
+		return result;
+	}
+	
+	public void executeStatement(Window aParent, WbConnection aConnection, String aSql, boolean modal)
 	{
 		this.setSql(aSql);
 		boolean includeSqlExport = this.sqlTable != null;
 		this.parentWindow = aParent;
 		ExportFileDialog dialog = new ExportFileDialog(aParent);
-		dialog.setIncludeSqlInsert(includeSqlExport);
-		dialog.setIncludeSqlUpdate(false);
+		dialog.setIncludeSqlInsert(true);
+		dialog.setIncludeSqlUpdate(true);
 
 		boolean result = dialog.selectOutput();
 		if (result)
@@ -815,12 +871,21 @@ public class DataExporter
 				this.setConnection(aConnection);
 				dialog.setExporterOptions(this);
 				this.setShowProgressWindow(true);
-				this.openProgressMonitor();
+				Frame parent = null;
+				if (aParent instanceof Frame)
+				{
+					parent = (Frame)aParent;
+				}
 				this.startBackgroundThread();
+				this.openProgressMonitor(parent, modal);
 			}
 			catch (Exception e)
 			{
 				LogMgr.logError("DataExporter.executeStatement()", "Could not export data", e);
+				if (aParent != null)
+				{
+					WbSwingUtilities.showErrorMessage(aParent, ExceptionUtil.getDisplay(e));
+				}
 			}
 		}
 	}

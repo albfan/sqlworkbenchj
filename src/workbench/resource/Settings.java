@@ -687,7 +687,7 @@ public class Settings
 	{
 		return StringUtil.stringToBool(this.props.getProperty("workbench.editor.autojumpnext", "false"));
 	}
-	
+
 	public void setAutoJumpNextStatement(boolean show)
 	{
 		this.props.setProperty("workbench.editor.autojumpnext", Boolean.toString(show));
@@ -697,12 +697,12 @@ public class Settings
 	{
 		return StringUtil.stringToBool(this.props.getProperty("workbench.sql.ignoreerror", "false"));
 	}
-	
+
 	public void setIgnoreErrors(boolean ignore)
 	{
 		this.props.setProperty("workbench.sql.ignoreerror", Boolean.toString(ignore));
 	}
-	
+
 	public boolean getCheckPreparedStatements()
 	{
 		return StringUtil.stringToBool(this.props.getProperty("workbench.sql.checkprepared", "false"));
@@ -711,7 +711,7 @@ public class Settings
 	{
 		this.props.setProperty("workbench.sql.checkprepared", Boolean.toString(show));
 	}
-	
+
 	public boolean getHighlightCurrentStatement()
 	{
 		return StringUtil.stringToBool(this.props.getProperty("workbench.editor.highlightcurrent", "false"));
@@ -725,12 +725,12 @@ public class Settings
 	{
 		return this.getBoolProperty("workbench.export.sql.includeowner", true);
 	}
-	
+
 	public void setIncludeOwnerInSqlExport(boolean flag)
 	{
 		this.props.setProperty("workbench.export.sql.includeowner", Boolean.toString(flag));
 	}
-	
+
 	public String getConnectionDisplayModel()
 	{
 		return this.props.getProperty("workbench.gui.connectiondisplay", "");
@@ -871,10 +871,19 @@ public class Settings
 		this.props.setProperty("workbench.editor.lastdir", aDir);
 	}
 
-
 	public String toString()
 	{
 		return "[Settings]";
+	}
+
+	public boolean getCheckEscapedQuotes()
+	{
+		return getBoolProperty("workbench.sql.checkescapedquotes", false);
+	}
+
+	public void setCheckEscapedQuotes(boolean flag)
+	{
+		this.props.setProperty("workbench.sql.checkescapedquotes", Boolean.toString(flag));
 	}
 
 	public boolean getAutoConnectDataPumper()
@@ -1089,11 +1098,24 @@ public class Settings
 
 	public int getMinColumnWidth()
 	{
-		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.mincolwidth", "50"));
+		return this.getIntProperty("workbench.sql.mincolwidth", 50);
 	}
+
 	public void setMinColumnWidth(int aWidth)
 	{
 		this.props.setProperty("workbench.sql.mincolwidth", Integer.toString(aWidth));
+	}
+
+	public int getInMemoryScriptSizeThreshold()
+	{
+		// Process scripts up to 1 MB in Memory
+		// this is used by the ScriptParser
+		return getIntProperty("workbench.sql.script.inmemory.maxsize", 1024 * 1024);
+	}
+
+	public void setInMemoryScriptSizeThreshold(int size)
+	{
+		this.props.setProperty("workbench.sql.script.inmemory.maxsize", Integer.toString(size));
 	}
 
 	public int getMaxSubselectLength()
@@ -1131,7 +1153,7 @@ public class Settings
 	{
 		return this.props.getProperty("workbench.gui.display.datetimeformat", "yyyy-MM-dd HH:mm:ss");
 	}
-	
+
 	public void setDefaultDateFormat(String aFormat)
 	{
 		this.defaultDateFormatter = null;
@@ -1323,8 +1345,9 @@ public class Settings
 
 	public boolean getDbDebugMode()
 	{
-		return "true".equals(this.props.getProperty("workbench.db.previewsql", "true"));
+		return this.getBoolProperty("workbench.db.previewsql", true);
 	}
+
 	public void setDbDebugMode(boolean aFlag)
 	{
 		this.props.setProperty("workbench.db.previewsql", Boolean.toString(aFlag));
