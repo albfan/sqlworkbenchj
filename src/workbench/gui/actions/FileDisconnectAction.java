@@ -20,7 +20,6 @@ public class FileDisconnectAction extends WbAction
 
 	public void actionPerformed(ActionEvent e)
 	{
-		window.closeWorkspace();
-		window.disconnect(true);
+		window.disconnect(true, true);
 	}
 }

@@ -469,6 +469,8 @@ public class MainWindow
 	private void checkConnectionForPanel(final MainPanel aPanel, boolean createConnection)
 	{
 		if (aPanel.isConnected()) return;
+		if (this.connectInProgress) return;
+		
 		try
 		{
 			if (this.currentProfile != null && this.currentProfile.getUseSeperateConnectionPerTab() && createConnection)
@@ -915,6 +917,10 @@ public class MainWindow
 
 	public void disconnect(boolean background)
 	{
+		this.disconnect(background, false);
+	}
+	public void disconnect(boolean background, final boolean closeWorkspace)
+	{
 		if (this.connectInProgress) return;
 		this.connectInProgress = true;
 
@@ -924,7 +930,9 @@ public class MainWindow
 			{
 				public void run()
 				{
+					if (closeWorkspace) saveWorkspace();
 					doDisconnect();
+					if (closeWorkspace) closeWorkspace();
 				}
 			};
 			t.setName("MainWindow - disconnect thread");
@@ -932,7 +940,9 @@ public class MainWindow
 		}
 		else
 		{
+			if (closeWorkspace) saveWorkspace();
 			this.doDisconnect();
+			if (closeWorkspace) closeWorkspace();
 		}
 	}
 

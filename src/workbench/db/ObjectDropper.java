@@ -65,15 +65,16 @@ public class ObjectDropper
 		int count = this.objectNames.size();
 		Statement stmt = this.connection.createStatement();
 		String cascade = null;
-		boolean doCascade = false;
 		
+		/*
+		boolean doCascade = false;
 		if (this.cascadeConstraints)
 		{
 			cascade = this.connection.getMetadata().getCascadeConstraintsVerb();
 		}
 		
 		doCascade = (cascade != null && cascade.length() > 0);
-		
+		*/
 		for (int i=0; i < count; i++)
 		{
 			String name = (String)this.objectNames.get(i);
@@ -85,10 +86,15 @@ public class ObjectDropper
 			sql.append(type);
 			sql.append(' ');
 			sql.append(name);
-			if (doCascade && "TABLE".equalsIgnoreCase(type))
+			//if (doCascade && "TABLE".equalsIgnoreCase(type))
+			if (this.cascadeConstraints)
 			{
-				sql.append(' ');
-				sql.append(cascade);
+				cascade = this.connection.getMetadata().getCascadeConstraintsVerb(type);
+				if (cascade != null)
+				{
+					sql.append(' ');
+					sql.append(cascade);
+				}
 			}
 			stmt.execute(sql.toString());
 		}

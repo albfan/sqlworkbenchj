@@ -95,6 +95,7 @@ public class DbMetadata
 	private boolean isSqlServer;
 
 	private List keywords;
+	private String quoteCharacter;
 	
 	/** Creates a new instance of DbMetadata */
 	public DbMetadata(WbConnection aConnection)
@@ -135,6 +136,9 @@ public class DbMetadata
 			this.catalogTerm = "Catalog";
 		}
 
+		// Some JDBC drivers do not return a value for getCatalogTerm() or getSchemaTerm()
+		// and don't throw an Exception. This is to ensure that getCatalogTerm() will
+		// always return something usable.
 		if (this.schemaTerm == null || this.schemaTerm.length() == 0)
 			this.schemaTerm = "Schema";
 
@@ -151,6 +155,7 @@ public class DbMetadata
 			this.productName = aConnection.getProfile().getDriverclass();
 		}
 
+		// For some functions we need to know which DBMS this is.
 		if (this.productName.toLowerCase().indexOf("oracle") > -1)
 		{
 			this.isOracle = true;
@@ -173,6 +178,16 @@ public class DbMetadata
 			this.isSqlServer = true;
 		}
 
+		try
+		{
+			this.quoteCharacter = this.metaData.getIdentifierQuoteString();
+		}
+		catch (Exception e)
+		{
+			this.quoteCharacter = null;
+		}
+		if (this.quoteCharacter == null || this.quoteCharacter.length() == 0) this.quoteCharacter = "\"";
+		
 		this.needsReconnect = serversWhichNeedReconnect.contains(this.productName);
 		this.caseSensitive = caseSensitiveServers.contains(this.productName);
 		this.useJdbcCommit = serverNeedsJdbcCommit.contains(this.productName);
@@ -217,18 +232,27 @@ public class DbMetadata
 		return result;
 	}
 
-	public String getCascadeConstraintsVerb()
+	/**
+	 *	Return the verb which does a DROP ... CASCADE for the given 
+	 *  object type. If the current DBMS does not support cascaded dropping
+	 *  of objects, then null will be returned.
+	 *
+	 *	@param aType the database object type to drop (TABLE, VIEW etc)
+	 *  @return a String which can be appended to a DROP type name command in order to drop dependent objects as well 
+	 *          or null if the current DBMS does not support this.
+	 */
+	public String getCascadeConstraintsVerb(String aType)
 	{
-		if (this.productName.toLowerCase().indexOf("oracle") >= 0)
+		if (!"TABLE".equalsIgnoreCase(aType)) return null;
+		
+		if (this.isOracle)
 		{
 			return "CASCADE CONSTRAINTS";
 		}
-		else
-		{
-			return "";
-		}
+		
+		return null;
 	}
-
+	
 	public String getUserName()
 	{
 		try
@@ -245,8 +269,6 @@ public class DbMetadata
 	{
 		return SqlSyntaxFormatter.getDateLiteralFormatter(this.productName);
 	}
-
-	//public List getTableListColumns() { return this.tableListColumns; }
 
 	public String getExtendedViewSource(String aCatalog, String aSchema, String aView, boolean includeDrop)
 		throws SQLException, WbException
@@ -277,6 +299,8 @@ public class DbMetadata
 			if (this.isHsql()) result.append(" IF EXISTS");
 			result.append(";\nCREATE VIEW " + aView);
 		}
+		
+		// currently HSQLDB does not support a column list in the view definition
 		if (!isHsql())
 		{
 			result.append("\n(\n");
@@ -301,7 +325,15 @@ public class DbMetadata
 		result.append("\n");
 		return result.toString();
 	}
-	
+
+	/**
+	 *	Return the source of a view definition as it is stored in the database.
+	 *	Usually (depending on how the meta data is stored in the database) the DBMS
+	 *	only stores the underlying SELECT statement, and that will be returned by this method.
+	 *	To create a complete SQL to re-create a view, use #getExtendedViewSource(String, String, String, DataStore, boolean)
+	 *
+	 *	@return the view source as stored in the database.
+	 */
 	public String getViewSource(String aCatalog, String aSchema, String aViewname)
 	{
 		if (aViewname == null) return null;
@@ -416,6 +448,16 @@ public class DbMetadata
 	}
 
 
+	/**
+	 *	Encloses the given object name in double quotes if necessary. 
+	 *	Quoting of names is necessary if the name is a reserved word in the 
+	 *	database. To check if the given name is a keyword, it is compared 
+	 *  to the words returned by getSQLKeywords().
+	 *
+	 *	If the given name is not a keyword, {@link workbench.util.SqlUtil#quoteObjectname(String)}
+	 *  will be called to check if the name contains special characters which require
+	 *	double quotes around the object name
+	 */
 	public String quoteObjectname(String aName)
 	{
 		if (aName == null) return null;
@@ -434,19 +476,26 @@ public class DbMetadata
 			{
 				isKeyword = this.keywords.contains(aName.trim().toUpperCase());
 			}
+			// The ODBC driver for Access returns false for storesLowerCaseIdentifiers() 
+			// AND storesUpperCaseIdentifiers()!
 			if (!isKeyword && this.productName.equalsIgnoreCase("ACCESS"))
 			{
 				isKeyword = this.keywords.contains(aName.trim().toUpperCase());
 			}
+			
+			// if the given name is a keyword, then we need to quote it!
 			if (isKeyword)
 			{
-				return "\"" + aName.trim() + "\"";
+				return this.quoteCharacter + aName.trim() + this.quoteCharacter;
 			}
 		}
 		catch (Exception e)
 		{
 			LogMgr.logWarning("DbMetadata.quoteObjectName()", "Error when retrieving DB information", e);
 		}
+		
+		// if it is not a keyword, we have to check for special characters such 
+		// as a space, $ etec
 		return SqlUtil.quoteObjectname(aName);
 	}
 	
@@ -690,7 +739,6 @@ public class DbMetadata
 	public DataStore getProcedures(String aCatalog, String aSchema)
 		throws SQLException
 	{
-		String catalog = this.dbConnection.getSqlConnection().getCatalog();
 		String[] cols = new String[] {"PROCEDURE_NAME", "TYPE", catalogTerm.toUpperCase(), schemaTerm.toUpperCase(), "REMARKS"};
 		final int types[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 		final int sizes[] = {30,12,10,10,20};
@@ -890,6 +938,19 @@ public class DbMetadata
 		return this.getTableDefinition(aCatalog, aSchema, aTable, aType, true);
 	}
 
+	/** Return a DataStore containing the definition of the given table.
+	 * @param aCatalog The catalog in which the table is defined. This should be null if the DBMS does not support catalogs
+	 * @param aSchema The schema in which the table is defined. This should be null if the DBMS does not support schemas
+	 * @param aTable The name of the table
+	 * @param aType The type of the table
+	 * @param adjustNames If true the object names will be quoted if necessary
+	 * @throws SQLException
+	 * @throws WbException
+	 * @return A DataStore with the table definition.
+	 * The individual columns should be accessed using the
+	 * COLUMN_IDX_TABLE_DEFINITION_xxx constants.
+	 *
+	 */	
 	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, String aType, boolean adjustNames)
 		throws SQLException, WbException
 	{
@@ -1129,12 +1190,24 @@ public class DbMetadata
 		return idxData;
 	}
 
+	/** 	Return the current catalog for this connection. If no catalog is defined
+	 * 	or the DBMS does not support catalogs, an empty string is returned.
+	 *
+	 * 	This method works around a bug in Microsoft's JDBC driver which does
+	 *  not return the correct database (=catalog) after the database has
+	 *  been changed with the USE <db> command from within the Workbench.
+	 * @return The name of the current catalog or an empty String if there is no current catalog
+	 */
 	public String getCurrentCatalog()
 	{
 		String catalog = null;
 		
 		if (this.isSqlServer)
 		{
+			// for some reason, getCatalog() does not return the correct
+			// information when using Microsoft's JDBC driver. 
+			// So we are using SQL Server's db_name() function to retrieve
+			// the current catalog
 			Statement stmt = null;
 			ResultSet rs = null;
 			try
@@ -1171,20 +1244,15 @@ public class DbMetadata
 		return catalog;
 	}
 	
+	/**
+	 *	Returns a list of all catalogs in the database. 
+	 *	Some DBMS's do not support catalogs, in this case the method
+	 *	will return an empty Datastore.
+	 */
 	public DataStore getCatalogInformation()
 	{
 
-		String catalogTerm;
-		try
-		{
-			catalogTerm = this.metaData.getCatalogTerm();
-		}
-		catch (Exception e)
-		{
-			catalogTerm = "CATALOG";
-		}
-
-		String[] cols = { catalogTerm };
+		String[] cols = { this.getCatalogTerm().toUpperCase() };
 		int[] types = { Types.VARCHAR };
 		int[] sizes = { 10 };
 
@@ -1209,10 +1277,25 @@ public class DbMetadata
 		return result;
 	}
 
+	/**
+	 *	The column index in the DataStore returned by getTableTriggers which identifies
+	 *  the name of the trigger.
+	 */
 	public static final int COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME = 0;
+	/**
+	 *	The column index in the DataStore returned by getTableTriggers which identifies
+	 *  the type (INSERT, UPDATE etc) of the trigger.
+	 */
 	public static final int COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TYPE = 1;
+	/**
+	 *	The column index in the DataStore returned by getTableTriggers which identifies
+	 *  the event (before, after) of the trigger.
+	 */
 	public static final int COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT = 2;
 
+	/**
+	 *	Return the list of defined triggers for the given table.
+	 */
 	public DataStore getTableTriggers(String aCatalog, String aSchema, String aTable)
 		throws SQLException
 	{
@@ -1263,6 +1346,13 @@ public class DbMetadata
 		return result;
 	}
 
+	/** 	Returns the SQL Source of the given trigger.
+	 * @param aCatalog The catalog in which the trigger is defined. This should be null if the DBMS does not support catalogs
+	 * @param aSchema The schema in which the trigger is defined. This should be null if the DBMS does not support schemas
+	 * @param aTriggername
+	 * @throws SQLException
+	 * @return
+	 */
 	public String getTriggerSource(String aCatalog, String aSchema, String aTriggername)
 		throws SQLException
 	{
@@ -1306,6 +1396,9 @@ public class DbMetadata
 		return new DataStoreTableModel(this.getCatalogInformation());
 	}
 
+	/** Returns a list of database catalogs as returned by DatabaseMetadata.getCatalogs()
+	 * @return ArrayList
+	 */
 	public List getCatalogs()
 	{
 		ArrayList result = new ArrayList();
@@ -1324,6 +1417,9 @@ public class DbMetadata
 		return result;
 	}
 
+	/** Returns the list of schemas as returned by DatabaseMetadata.getSchemas()
+	 * @return ArrayList
+	 */	
 	public List getSchemas()
 	{
 		ArrayList result = new ArrayList();
@@ -1401,12 +1497,6 @@ public class DbMetadata
 
 		DataStore ds = new DataStore(rs, false);
 
-		// ugly workaround for Oracle driver bug...
-		int[] types = ds.getColumnTypes();
-		types[8] = Types.INTEGER;
-		types[9] = Types.INTEGER;
-		types[13] = Types.INTEGER;
-
 		while (rs.next())
 		{
 			int row = ds.addRow();
@@ -1430,6 +1520,11 @@ public class DbMetadata
 		return ds;
 	}
 
+	/**
+	 *	Works around a bug in Postgres' JDBC driver. 
+	 *	For Postgres strips everything after \000 for any 
+	 *  other DBMS the given name is returned without change
+	 */
 	private String fixFKName(String aName)
 	{
 		if (aName == null) return null;
@@ -1538,12 +1633,18 @@ public class DbMetadata
 		}
 		catch (Exception e)
 		{
-			//LogMgr.logError(this, "Could not retrieve FK information", e);
 			ds.reset();
 		}
 		return ds;
 	}
 
+	/**
+	 *	Translates the numberic constants of DatabaseMetaData for trigger rules
+	 *	into text (e.g DatabaseMetaData.importedKeyNoAction --> NO ACTION)
+	 *
+	 *	@param aRule the numeric value for a rule as defined by DatabaseMetaData.importedKeyXXXX constants
+	 *	@return String
+	 */
 	public String getRuleTypeDisplay(int aRule)
 	{
 		switch (aRule)
@@ -1587,6 +1688,11 @@ public class DbMetadata
 		return name;
 	}
 
+	/**
+	 *	Return the source SQL for a PostgreSQL sequence definition.
+	 *
+	 *	@return The SQL to recreate the sequence if the current DBMS is Postgres. An empty String otherwise
+	 */
 	public String getSequenceSource(String aSequence)
 	{
 		if (!this.isPostgres) return "";
@@ -1648,6 +1754,11 @@ public class DbMetadata
 		return result;
 	}
 
+	/**
+	 *	Return the underlying table of an Oracle synonym.
+	 *
+	 *	@return the table to which the synonym points. If the DBMS is not Oracle an empty String
+	 */
 	public TableIdentifier getSynonymTable(String anOwner, String aSynonym)
 	{
 		if (!this.isOracle) return null;
@@ -1663,6 +1774,11 @@ public class DbMetadata
 		return id;
 	}
 	
+	/**
+	 *	Return the SQL statement to recreate the given synonym.
+	 *
+	 *	@return the SQL to create the synonym. If the DBMS is not Oracle an empty String
+	 */
 	public String getSynonymSource(String anOwner, String aSynonym)
 	{
 		if (!this.isOracle) return "";
@@ -1679,6 +1795,16 @@ public class DbMetadata
 	}
 
 
+	/** 	Return the SQL statement to re-create the given table. (in the dialect for the
+	 *  current DBMS)
+	 * @return the SQL statement to create the given table.
+	 * @param catalog The catalog in which the table is defined. This should be null if the DBMS does not support catalogs
+	 * @param schema The schema in which the table is defined. This should be null if the DBMS does not support schemas
+	 * @param table The name of the table
+	 * @param includeDrop If true, a DROP TABLE statement will be included in the generated SQL script.
+	 * @throws SQLException
+	 * @throws WbException
+	 */
 	public String getTableSource(String catalog, String schema, String table, boolean includeDrop)
 		throws SQLException, WbException
 	{
@@ -1690,6 +1816,11 @@ public class DbMetadata
 		return source;
 	}
 	
+	/** Return the SQL script to recreate the table defined in the DataStore
+	 * @param aTablename The name of the table as it should appear in the CREATE TABLE statement
+	 * @param aTableDef The DataStore containing a table definition obtained by #getTableDefinition(String, String, String, String)
+	 * @return
+	 */	
 	public String getTableSource(String aTablename, DataStore aTableDef)
 	{
 		return this.getTableSource(aTablename, aTableDef, null, null);
@@ -1723,6 +1854,8 @@ public class DbMetadata
 		StringBuffer pkCols = new StringBuffer(1000);
 		int maxColLength = 0;
 		int maxTypeLength = 0;
+		
+		// calculate the longest column name, so that the display can be formatted
 		for (int i=0; i < count; i++)
 		{
 			String colName = aTableDef.getValue(i, 0).toString();
@@ -1735,7 +1868,6 @@ public class DbMetadata
 		
 		for (int i=0; i < count; i++)
 		{
-			//{"COLUMN_NAME", "TYPE_NAME", "PK", "NULLABLE", "DEFAULT", "REMARKS"};
 			String colName = (String)aTableDef.getValue(i, COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
 			String type = aTableDef.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
 			String pk = (String)aTableDef.getValue(i, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG);
@@ -1786,6 +1918,14 @@ public class DbMetadata
 		return result.toString();
 	}
 
+	/**
+	 *	Return a SQL script to re-create the Foreign key definition for the given table.
+	 *	
+	 *	@param aTable the tablename for which the foreign keys should be created
+	 *  @param aFkDef a DataStore with the FK definition as returned by #getForeignKeys()
+	 *
+	 *	@return a SQL statement to add the foreign key definitions to the given table
+	 */
 	public StringBuffer getFkSource(String aTable, DataStore aFkDef)
 	{
 		if (aFkDef == null) return StringUtil.EMPTY_STRINGBUFFER;
@@ -1856,10 +1996,10 @@ public class DbMetadata
 			stmt = StringUtil.replace(stmt, TABLE_NAME_PLACEHOLDER, aTable);
 			stmt = StringUtil.replace(stmt, FK_NAME_PLACEHOLDER, name);
 			colList = (HashSet)fkCols.get(name);
-			entry = this.setToList(colList);
+			entry = this.convertSetToList(colList);
 			stmt = StringUtil.replace(stmt, COLUMNLIST_PLACEHOLDER, entry);
 			colList = (HashSet)fkTarget.get(name);
-			entry = this.setToList(colList);
+			entry = this.convertSetToList(colList);
 
 			StringTokenizer tok = new StringTokenizer(entry, ",");
 			StringBuffer colListBuffer = new StringBuffer(30);
@@ -1898,7 +2038,11 @@ public class DbMetadata
 		return fk;
 	}
 
-	private String setToList(HashSet aSet)
+	/**
+	 *	Convert a Set to a comma separated list.
+	 *	@return the entries of the Set delimited by comma
+	 */
+	private String convertSetToList(HashSet aSet)
 	{
 		StringBuffer result = new StringBuffer(aSet.size() * 10);
 		Iterator itr = aSet.iterator();
@@ -1954,7 +2098,8 @@ public class DbMetadata
 					columns.append(col);
 				}
 			}
-			// PK's have been created with the table source...
+			// The PK's have been created with the table source, so 
+			// we do not need to add the corresponding index here.
 			if ("NO".equalsIgnoreCase(is_pk))
 			{
 				idxCount ++;
@@ -1976,13 +2121,29 @@ public class DbMetadata
 		if (idxCount > 0) idx.append("\n");
 		return idx;
 	}
-
-	public static final int COLUMN_IDX_TABLE_GRANTS_OBJECT_NAME = 0;
-	public static final int COLUMN_IDX_TABLE_GRANTS_GRANTOR = 1;
-	public static final int COLUMN_IDX_TABLE_GRANTS_GRANTEE = 2;
-	public static final int COLUMN_IDX_TABLE_GRANTS_PRIV = 3;
-	public static final int COLUMN_IDX_TABLE_GRANTS_GRANTABLE = 4;
 	
+	
+	/**	The column index for the DataStore returned by getTableGrants() which contains the object's name */
+	public static final int COLUMN_IDX_TABLE_GRANTS_OBJECT_NAME = 0;
+	/**	The column index for the DataStore returned by getTableGrants() which contains the name of the user which granted the access (GRANTOR) */
+	public static final int COLUMN_IDX_TABLE_GRANTS_GRANTOR = 1;
+	/**	The column index for the DataStore returned by getTableGrants() which contains the name of the user to which the privilege was granted */
+	public static final int COLUMN_IDX_TABLE_GRANTS_GRANTEE = 2;
+	/**	The column index for the DataStore returned by getTableGrants() which contains the privilege's name (SELECT, UPDATE etc) */
+	public static final int COLUMN_IDX_TABLE_GRANTS_PRIV = 3;
+	/** The column index for th DataStore returned by getTableGrants() which contains the information if the GRANTEE may grant the privilege to other users */
+	public static final int COLUMN_IDX_TABLE_GRANTS_GRANTABLE = 4;
+
+	/**	
+	 *	Return a String to recreate the GRANTs given for the passed table.
+	 *
+	 *	Some JDBC drivers return all GRANT privileges separately even if the original
+	 *  GRANT was a GRANT ALL ON object TO user.
+	 *
+	 *	The COLUMN_IDX_TABLE_GRANTS_xxx constants should be used to access the DataStore's columns.
+	 *
+	 *	@return a DataStore which contains the grant information.	
+	 */
 	public DataStore getTableGrants(String aCatalog, String aSchema, String aTablename)
 	{
 		String[] columns = new String[] { "TABLENAME", "GRANTOR", "GRANTEE", "PRIVILEGE", "GRANTABLE" };
@@ -2014,6 +2175,12 @@ public class DbMetadata
 		return result;
 	}
 
+	/**
+	 *	Creates an SQL Statement which can be used to re-create the GRANTs on the 
+	 *  given table.
+	 *
+	 *	@return SQL script to GRANT access to the table.
+	 */
 	public String getTableGrantSource(String aCatalog, String aSchema, String aTablename)
 	{
 		DataStore ds = this.getTableGrants(aCatalog, aSchema, aTablename);
@@ -2077,6 +2244,14 @@ public class DbMetadata
 	{
 		caseSensitiveServers = aList;
 	}
+	
+	/**
+	 *	Return the errors reported in the all_errors table for Oracle. 
+	 *	This method can be used to obtain error information after a CREATE PROCEDURE 
+	 *	or CREATE TRIGGER statement has been executed. 
+	 *
+	 *	@return extended error information if the current DBMS is Oracle. An empty string otherwise.
+	 */
   public String getExtendedErrorInfo(String schema, String objectType, String objectName)
   {
     if (!this.isOracle) return "";
@@ -2153,15 +2328,6 @@ public class DbMetadata
 			template = (String)aMap.get(GENERAL_SQL);
 		}
 		return template;
-	}
-
-	public static void main(String args[])
-	{
-		HashMap m = new HashMap();
-		m.put("Oracle", "ALTER TABLE %tablename% \r\n " +
-		                " ADD CONSTRAINT %constraintname% (%columnlist%) \r\n" +
-										" REFERENCES %targettable% (%targetcolumnlist%)");
-		WbPersistence.writeObject(m, "FkStatements.xml");
 	}
 
 }

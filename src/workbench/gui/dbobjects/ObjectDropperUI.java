@@ -172,8 +172,8 @@ public class ObjectDropperUI
 		boolean canCascade = this.typesAreTables;
 		if (canCascade)
 		{
-			String verb = this.connection.getMetadata().getCascadeConstraintsVerb();
-			canCascade = (verb.length() > 0);
+			String verb = this.connection.getMetadata().getCascadeConstraintsVerb("TABLE");
+			canCascade = (verb != null);
 		}
 		if (!canCascade)
 		{
