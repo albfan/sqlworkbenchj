@@ -1,10 +1,11 @@
-package workbench.gui.sql;
+package workbench.gui.components;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -13,6 +14,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
@@ -23,26 +26,15 @@ import workbench.storage.DataStore;
 /**
  *	Table model for displaying the contents of a SQL statement
  */
-public class DwTableModel 
-	extends AbstractTableModel
+public class ResultSetTableModel extends AbstractTableModel
 {
-	//private ResultSet dbData;
 	private DataStore dataCache;
 	public static final String NOT_AVAILABLE = "(n/a)";
-	private WbConnection dbConnection;
-	private boolean isUpdateable = false;
 	
-	public DwTableModel(ResultSet aResultSet)
-		throws SQLException, WbException
-	{
-		this(aResultSet, null);
-	}
-	
-	public DwTableModel(ResultSet aResultSet, WbConnection aConnection) 
+	public ResultSetTableModel(ResultSet aResultSet) 
 		throws SQLException, WbException
 	{
 		this.dataCache = new DataStore(aResultSet);
-		this.dbConnection = aConnection;
 	}
 		
 	/**
@@ -56,7 +48,6 @@ public class DwTableModel
 		try
 		{
 			Object result;
-			//this.dataCache.absolute(row + 1);
 			result = this.dataCache.getValue(row, col);
 			return result;
 		}
@@ -98,9 +89,10 @@ public class DwTableModel
 	{
 		try
 		{
-			if (this.isUpdateable)
+			if (this.isUpdateable())
 			{
-				this.dataCache.setValue(row, column, aValue);
+				Object realValue = this.convertCellValue(aValue, row, column);
+				this.dataCache.setValue(row, column, realValue);
 				fireTableDataChanged();
 			}
 		}
@@ -111,6 +103,42 @@ public class DwTableModel
 		}
 	}
 	
+	/**
+	 *	Convert a String to the internal storage class for this cell.
+	 */
+	private Object convertCellValue(Object aValue, int aRow, int aColumn)
+		throws Exception
+	{
+		Object lastValue = this.getValueAt(aRow, aColumn);
+		int type = this.getColumnType(aColumn);
+		switch (type)
+		{
+			case Types.BIGINT:
+				return new BigInteger((String)aValue);
+			case Types.INTEGER:
+			case Types.SMALLINT:
+				return Integer.valueOf((String)aValue);
+			case Types.NUMERIC:
+			case Types.DECIMAL:
+				return new BigDecimal((String)aValue);
+			case Types.DOUBLE:
+				return new Double((String)aValue);
+			case Types.REAL:
+			case Types.FLOAT:
+				return new Float((String)aValue);
+			case Types.CHAR:
+			case Types.VARCHAR:
+				return (String)aValue;
+			case Types.DATE:
+				DateFormat df = new SimpleDateFormat();
+				return df.parse((String)aValue);
+			case Types.TIMESTAMP:
+				return java.sql.Timestamp.valueOf((String)aValue);
+			default:
+				return aValue;
+		}
+	}
+		
 	/**
 	 *	Return the number of columns in the model.
 	 */
@@ -148,18 +176,18 @@ public class DwTableModel
 	/**
 	 *	Return type of the column as a string.
 	 */
-	public String getColumnTypeName(int aColumn)
-	{
-		try
-		{
-			return this.dataCache.getColumnTypeName(aColumn);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			return NOT_AVAILABLE;
-		}
-	}
+//	public String getColumnTypeName(int aColumn)
+//	{
+//		try
+//		{
+//			return this.dataCache.getColumnTypeName(aColumn);
+//		}
+//		catch (Exception e)
+//		{
+//			e.printStackTrace();
+//			return NOT_AVAILABLE;
+//		}
+//	}
 	
 	/**
 	 *	Number of rows in the result set
@@ -175,14 +203,18 @@ public class DwTableModel
 		switch (type)
 		{
 			case Types.BIGINT:
-			case Types.DECIMAL:
-			case Types.DOUBLE:
-			case Types.FLOAT:
 			case Types.INTEGER:
-			case Types.NUMERIC:
-			case Types.REAL:
+				return BigInteger.class;
 			case Types.SMALLINT:
-				return Number.class;
+				return Integer.class;
+			case Types.NUMERIC:
+			case Types.DECIMAL:
+				return BigDecimal.class;
+			case Types.DOUBLE:
+				return Double.class;
+			case Types.REAL:
+			case Types.FLOAT:
+				return Float.class;
 			case Types.CHAR:
 			case Types.VARCHAR:
 				return String.class;
@@ -243,7 +275,7 @@ public class DwTableModel
 		return true;
 	}
 	
-	public void saveChangesToDatabase()
+	public void saveChangesToDatabase(WbConnection aConnection)
 		throws SQLException
 	{
 		//this.dataCache.acceptChanges(this.dbConnection.getSqlConnection());
