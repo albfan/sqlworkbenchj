@@ -35,6 +35,7 @@ import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.*;
 import workbench.interfaces.Interruptable;
+import workbench.interfaces.TextChangeListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -55,7 +56,7 @@ import workbench.util.WbWorkspace;
  */
 public class SqlPanel
 	extends JPanel
-	implements Runnable, FontChangedListener, ActionListener, TextSelectionListener, 
+	implements Runnable, FontChangedListener, ActionListener, TextSelectionListener, TextChangeListener, 
 						MainPanel, Spooler, TextFileContainer, DbUpdater, Interruptable
 {
 	private boolean runSelectedCommand;
@@ -70,6 +71,7 @@ public class SqlPanel
 	private JSplitPane contentPanel;
 	private boolean threadBusy;
 	private boolean suspended = true;
+	
 	private Thread background;
 	private int currentHistoryEntry = -1;
 	private int maxHistorySize = 10;
@@ -116,6 +118,7 @@ public class SqlPanel
 	private boolean cancelExecution;
 	private boolean updateRunning;
 
+	private boolean textModified = false;
 	private String tabName = null;
 	
 	private ImageIcon loadingIcon;
@@ -179,7 +182,8 @@ public class SqlPanel
 
 		Settings s = WbManager.getSettings();
 		s.addFontChangedListener(this);
-		
+
+		this.editor.addTextChangeListener(this);
 		this.data.setUpdateDelegate(this);
 	}
 
@@ -267,7 +271,7 @@ public class SqlPanel
 			this.toolbar.repaint();
 		}
 	}
-
+	
 	public boolean readFile(String aFilename)
 	{
 		if (aFilename == null) return false;
@@ -319,6 +323,7 @@ public class SqlPanel
 
 	public void checkAndSaveFile()
 	{
+		if (!this.hasFileLoaded()) return;
 		if (this.editor.isModified())
 		{
 			String filename = this.editor.getCurrentFileName().replaceAll("\\\\", "\\\\\\\\");
@@ -369,6 +374,7 @@ public class SqlPanel
 
 	public boolean closeFile(boolean emptyEditor)
 	{
+		this.checkAndSaveFile();
 		if (this.editor.closeFile(emptyEditor))
     {
 			this.fileDiscardAction.setEnabled(false);
@@ -834,7 +840,11 @@ public class SqlPanel
 		if (!fileLoaded)
 		{
 			this.showCurrentHistoryStatement();
-			this.fireFilenameChanged(this.tabName);
+		}
+		else
+		{
+			int cursorPos = w.getExternalFileCursorPos(this.internalId - 1);
+			if (cursorPos > -1) this.editor.setCaretPosition(cursorPos);
 		}
 		
 		Properties props = w.getSettings();
@@ -847,6 +857,12 @@ public class SqlPanel
 		this.saveHistory(w);
 		Properties props = w.getSettings();
 		this.saveSettings(props);
+		if (this.hasFileLoaded())
+		{
+			w.setExternalFileName(this.internalId - 1, this.getCurrentFileName());
+			w.setExternalFileCursorPos(this.internalId - 1, this.editor.getCaretPosition());
+		}
+		this.checkAndSaveFile();
 	}
 	
 	public void saveHistory(WbWorkspace w)
@@ -1619,14 +1635,29 @@ public class SqlPanel
 	}
 	
 	private ImageIcon fileIcon = null;
+	private ImageIcon fileModifiedIcon = null;
 	
 	private ImageIcon getFileIcon()
 	{
-		if (this.fileIcon == null)
+		ImageIcon icon = null;
+		if (this.textModified)
 		{
-			this.fileIcon = ResourceMgr.getPicture("file-icon");
+			if (this.fileModifiedIcon == null)
+			{
+				this.fileModifiedIcon = ResourceMgr.getPicture("file-modified-icon");
+			}
+			icon = this.fileModifiedIcon;
 		}
-		return this.fileIcon;
+		else
+		{
+			if (this.fileIcon == null)
+			{
+				this.fileIcon = ResourceMgr.getPicture("file-icon");
+			}
+			icon = this.fileIcon;
+		}
+		
+		return icon;
 	}
 	
 	private void removeTabIcon()
@@ -1638,6 +1669,7 @@ public class SqlPanel
 	{
 		this.showTabIcon(this.getFileIcon());
 	}
+	
 	private void showTabIcon(ImageIcon icon)
 	{
 		if (this.isBusy()) return;
@@ -1776,4 +1808,13 @@ public class SqlPanel
 		this.addMacro.setEnabled(selected);
 	}	
 
+	public void textStatusChanged(boolean modified)
+	{
+		this.textModified = modified;
+		if (this.hasFileLoaded())
+		{
+			this.showFileIcon();
+		}
+	}
+	
 }

@@ -176,12 +176,37 @@ public class WbWorkspace
 		return value;
 	}
 	
+	public int getExternalFileCursorPos(int tabIndex)
+	{
+		if (this.tabInfo == null) return -1;
+		String key = "tab" + tabIndex + ".file.cursorpos";
+		String value = (String)this.tabInfo.get(key);
+		if (value == null) return -1;
+		int result = -1;
+		try
+		{
+			result = Integer.parseInt(value);
+		}
+		catch (Exception e)
+		{
+			result = -1;
+		}
+		
+		return result;
+	}
+
 	public String getExternalFileName(int tabIndex)
 	{
 		if (this.tabInfo == null) return null;
 		String key = "tab" + tabIndex + ".filename";
 		String value = (String)this.tabInfo.get(key);
 		return value;
+	}
+	
+	public void setExternalFileCursorPos(int tabIndex, int cursor)
+	{
+		String key = "tab" + tabIndex + ".file.cursorpos";
+		this.tabInfo.setProperty(key, Integer.toString(cursor));
 	}
 	
 	public void setExternalFileName(int tabIndex, String filename)

@@ -542,14 +542,14 @@ public class MainWindow
     Settings sett = WbManager.getSettings();
 		sett.setDbExplorerVisible(this.dbExplorerTabVisible);
 
-		try
-		{
-			if (this.workspaceLoaded) this.saveWorkspace(this.currentWorkspaceFile);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("MainWindow.saveSettings()", "Could not save workspace!", e);
-		}
+//		try
+//		{
+//			if (this.currentWorkspaceFile != null) this.saveWorkspace(this.currentWorkspaceFile);
+//		}
+//		catch (Exception e)
+//		{
+//			LogMgr.logError("MainWindow.saveSettings()", "Could not save workspace!", e);
+//		}
 
 		int state = this.getExtendedState();
 		sett.setProperty(this.getClass().getName(), "state", state);
@@ -606,10 +606,10 @@ public class MainWindow
 
 	public void windowClosing(WindowEvent windowEvent)
 	{
-		if (this.isProfileWorkspace && this.currentWorkspaceFile != null)
-		{
-			this.saveWorkspace(this.currentWorkspaceFile);
-		}
+//		if (this.currentWorkspaceFile != null)
+//		{
+//			this.saveWorkspace(this.currentWorkspaceFile);
+//		}
 		WbManager.getInstance().windowClosing(this);
 	}
 
@@ -1438,6 +1438,15 @@ public class MainWindow
 		this.updateWindowTitle();
 	}
 
+	public void saveWorkspace()
+	{
+		if (this.currentWorkspaceFile != null)
+		{
+			this.saveWorkspace(this.currentWorkspaceFile);
+		}
+	}
+	
+	
 	public void saveWorkspace(String filename)
 	{
 		WbWorkspace w = null;
@@ -1468,12 +1477,7 @@ public class MainWindow
 					SqlPanel sql = (SqlPanel)this.sqlTab.getComponentAt(i);
 					sql.saveToWorkspace(w);
 
-					if (sql.hasFileLoaded())
-					{
-						sql.checkAndSaveFile();
-						w.setExternalFileName(i, sql.getCurrentFileName());
-					}
-					else
+					if (!sql.hasFileLoaded())
 					{
 						String title = this.getPlainTabTitle(i);
 						if (!title.startsWith(defaultLabel))

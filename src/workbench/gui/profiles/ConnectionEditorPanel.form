@@ -18,7 +18,6 @@
         <Property name="name" type="java.lang.String" value="name"/>
       </Properties>
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="tfProfileName.addMouseListener(new TextComponentMouseListener());"/>
         <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new StringPropertyEditor();"/>
       </AuxValues>
       <Constraints>
@@ -69,7 +68,6 @@
         </Property>
       </Properties>
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="tfURL.addMouseListener(new TextComponentMouseListener());"/>
         <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new StringPropertyEditor();"/>
       </AuxValues>
       <Constraints>
@@ -94,7 +92,6 @@
         </Property>
       </Properties>
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="tfUserName.addMouseListener(new TextComponentMouseListener());"/>
         <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new StringPropertyEditor();"/>
       </AuxValues>
       <Constraints>
@@ -296,7 +293,6 @@
         </Property>
       </Properties>
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="tfURL.addMouseListener(new TextComponentMouseListener());"/>
         <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new StringPropertyEditor();"/>
       </AuxValues>
       <Constraints>

@@ -10,8 +10,8 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import javax.swing.*;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.FindAction;
-import workbench.gui.actions.FindAgainAction;
+import workbench.gui.actions.FindDataAction;
+import workbench.gui.actions.FindDataAgainAction;
 import workbench.gui.actions.WbAction;
 import workbench.interfaces.Searchable;
 
@@ -27,8 +27,8 @@ public class FindPanel
 	private WbTable searchTable;
 	private JTextField findField;
 	public WbToolbar toolbar;
-	private FindAction findAction;
-	private FindAgainAction findAgainAction;
+	private FindDataAction findAction;
+	private FindDataAgainAction findAgainAction;
 
 	public FindPanel(WbTable aTable)
 	{
@@ -41,8 +41,8 @@ public class FindPanel
 		this.findField.addMouseListener(new TextComponentMouseListener());
 
 		this.toolbar = new WbToolbar();
-		this.findAction = new FindAction(this);
-		this.findAgainAction = new FindAgainAction(this);
+		this.findAction = new FindDataAction(this);
+		this.findAgainAction = new FindDataAgainAction(this);
 		this.toolbar.add(this.findAction);
 		this.toolbar.add(this.findAgainAction);
 		this.toolbar.setMargin(new Insets(0,0,0,0));

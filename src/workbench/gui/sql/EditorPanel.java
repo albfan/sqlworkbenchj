@@ -353,6 +353,7 @@ public class EditorPanel
 		{
 			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
 		}
+		this.setCaretPosition(0);
 		return result;
 	}
 	
@@ -576,6 +577,14 @@ public class EditorPanel
 		{
 			this.setSelectedText(aReplacement);
 			return true;
+		}
+		else
+		{
+			if (this.findNext() > -1)
+			{
+				this.setSelectedText(aReplacement);
+				return true;
+			}
 		}
 		return false;
 	}

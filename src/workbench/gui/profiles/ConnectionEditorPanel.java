@@ -126,7 +126,6 @@ public class ConnectionEditorPanel
 		setMinimumSize(new java.awt.Dimension(200, 200));
 		tfProfileName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
 		tfProfileName.setName("name");
-		tfProfileName.addMouseListener(new TextComponentMouseListener());
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 0;
@@ -166,7 +165,6 @@ public class ConnectionEditorPanel
 		tfURL.setMinimumSize(new java.awt.Dimension(40, 20));
 		tfURL.setName("url");
 		tfURL.setPreferredSize(new java.awt.Dimension(100, 20));
-		tfURL.addMouseListener(new TextComponentMouseListener());
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 2;
@@ -182,7 +180,6 @@ public class ConnectionEditorPanel
 		tfUserName.setMinimumSize(new java.awt.Dimension(40, 20));
 		tfUserName.setName("username");
 		tfUserName.setPreferredSize(new java.awt.Dimension(100, 20));
-		tfUserName.addMouseListener(new TextComponentMouseListener());
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 3;
@@ -316,7 +313,6 @@ public class ConnectionEditorPanel
 		tfWorkspaceFile.setMinimumSize(new java.awt.Dimension(40, 20));
 		tfWorkspaceFile.setName("workspaceFile");
 		tfWorkspaceFile.setPreferredSize(new java.awt.Dimension(100, 20));
-		tfURL.addMouseListener(new TextComponentMouseListener());
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 11;

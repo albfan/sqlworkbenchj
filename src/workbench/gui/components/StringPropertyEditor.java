@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import workbench.gui.components.TextComponentMouseListener;
 
 import workbench.interfaces.SimplePropertyEditor;
 
@@ -34,6 +35,7 @@ public class StringPropertyEditor
 	{
 		super();
 		this.addFocusListener(this);
+		this.addMouseListener(new TextComponentMouseListener());		
 	}
 	
 	public void setSourceObject(Object aSource, String aProperty)

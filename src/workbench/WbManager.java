@@ -355,13 +355,17 @@ public class WbManager implements FontChangedListener
 				if (w.isFocused())
 				{
 					if (!this.checkProfiles(w)) return;
-					//if (!this.checkMacros(w)) return;
 					w.saveSettings();
 				}
+				
 				aborted = w.abortAll();
 				if (!aborted)
 				{
 					if (!checkAbort(w)) return;
+					// workspace will only be save if we call disconnect()
+					// so we need to save the workspace here.
+					// I know it's not nice...
+					w.saveWorkspace(); 
 				}
 				else
 				{

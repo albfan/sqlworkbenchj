@@ -29,7 +29,7 @@ public class FindDataAgainAction extends WbAction
 		super();
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtFindDataAgain"));
-		//this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("FindAgain"));
+		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("FindAgain"));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtFindDataAgain"));
 		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F3, InputEvent.SHIFT_MASK));

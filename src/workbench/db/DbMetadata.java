@@ -217,6 +217,56 @@ public class DbMetadata
 
 	//public List getTableListColumns() { return this.tableListColumns; }
 
+	public String getExtendedViewSource(String aCatalog, String aSchema, String aView, boolean includeDrop)
+		throws SQLException, WbException
+	{
+		return this.getExtendedViewSource(aCatalog, aSchema, aView, null, includeDrop);
+	}
+	
+	public String getExtendedViewSource(String aCatalog, String aSchema, String aView, DataStore viewTableDefinition, boolean includeDrop)
+		throws SQLException, WbException
+	{
+		if (viewTableDefinition == null)
+		{
+			viewTableDefinition = this.getTableDefinition(aCatalog, aSchema, aView);
+		}
+		String source = this.getViewSource(aCatalog, aSchema, aView);
+		
+		if (source == null) return "";
+		if (source.length() == 0) return "";
+
+		StringBuffer result = new StringBuffer(source.length() + 100);
+
+		if (this.isOracle())
+		{
+			result.append("CREATE OR REPLACE VIEW " + aView);
+		}
+		else
+		{
+			if (includeDrop) result.append("DROP VIEW " + aView + ";\r\n");
+			result.append("CREATE VIEW " + aView);
+		}
+		result.append("\r\n(\r\n");
+		int rows = viewTableDefinition.getRowCount();
+		for (int i=0; i < rows; i++)
+		{
+			String colName = viewTableDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+			if (i == 0)
+			{
+				result.append("  ");
+			}
+			else
+			{
+				result.append(" ,");
+			}
+			result.append(colName);
+			result.append("\r\n");
+		}
+		result.append(") AS \r\n");
+		result.append(source);
+		return result.toString();
+	}
+	
 	public String getViewSource(String aCatalog, String aSchema, String aViewname)
 	{
 		if (aViewname == null) return null;
@@ -1413,6 +1463,12 @@ public class DbMetadata
 	{
 		if (!this.isPostgres) return "";
 		if (aSequence == null) return "";
+		
+		int pos = aSequence.indexOf('.');
+		if (pos > 0)
+		{
+			aSequence = aSequence.substring(pos);
+		}
 		Statement stmt = null;
 		ResultSet rs = null;
 		String result = "";
@@ -1495,6 +1551,17 @@ public class DbMetadata
 	}
 
 
+	public String getTableSource(String catalog, String schema, String table)
+		throws SQLException, WbException
+	{
+		DataStore tableDef = this.getTableDefinition(catalog, schema, table, true);
+		DataStore index = this.getTableIndexInformation(catalog, schema, table);
+		DataStore fkDef = this.getForeignKeys(catalog, schema, table);
+		
+		String source = this.getTableSource(table, tableDef, index, fkDef);
+		return source;
+	}
+	
 	public String getTableSource(String aTablename, DataStore aTableDef)
 	{
 		return this.getTableSource(aTablename, aTableDef, null, null);

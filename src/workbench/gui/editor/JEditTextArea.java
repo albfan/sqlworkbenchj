@@ -66,6 +66,7 @@ import javax.swing.undo.UndoableEdit;
 import workbench.gui.actions.WbAction;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.ClipboardSupport;
+import workbench.interfaces.TextChangeListener;
 import workbench.interfaces.TextSelectionListener;
 import workbench.interfaces.Undoable;
 import workbench.util.StringUtil;
@@ -98,7 +99,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.14 2003-08-30 15:57:09 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.15 2003-09-06 09:00:22 thomas Exp $
  */
 public class JEditTextArea 
 	extends JComponent
@@ -270,7 +271,8 @@ public class JEditTextArea
 		String search = null;
 	
 		Matcher m = this.lastSearchPattern.matcher(this.getText());
-		if (m.find(this.lastSearchPos + 1))
+		
+		if (m.find(this.getCaretPosition() + 1))
 		{
 			this.lastSearchPos = m.start();
 			int end = m.end();
@@ -1687,6 +1689,16 @@ public class JEditTextArea
 		listenerList.remove(TextSelectionListener.class, l);
 	}
 	
+	public final void addTextChangeListener(TextChangeListener l)
+	{
+		listenerList.add(TextChangeListener.class, l);
+	}
+	
+	public final void removeTextChangeListener(TextChangeListener l)
+	{
+		listenerList.remove(TextChangeListener.class, l);
+	}
+	
 	/**
 	 * Adds a caret change listener to this text area.
 	 * @param listener The listener
@@ -1869,6 +1881,18 @@ public class JEditTextArea
 	protected boolean rectSelect;
 	protected boolean modified;
 	
+	protected void fireTextStatusChanged(boolean isModified)
+	{
+		Object[] listeners = listenerList.getListenerList();
+		for(int i = listeners.length - 2; i >= 0; i--)
+		{
+			if(listeners[i] == TextChangeListener.class)
+			{
+				((TextChangeListener)listeners[i+1]).textStatusChanged(isModified);
+			}
+		}
+	}
+	
 	protected void fireSelectionEvent()
 	{
 		Object[] listeners = listenerList.getListenerList();
@@ -1921,15 +1945,13 @@ public class JEditTextArea
 
 	protected void documentChanged(DocumentEvent evt)
 	{
-		DocumentEvent.ElementChange ch = evt.getChange(
-			document.getDefaultRootElement());
+		DocumentEvent.ElementChange ch = evt.getChange(document.getDefaultRootElement());
 
 		int count;
 		if(ch == null)
 			count = 0;
 		else
-			count = ch.getChildrenAdded().length -
-				ch.getChildrenRemoved().length;
+			count = ch.getChildrenAdded().length - ch.getChildrenRemoved().length;
 
 		int line = getLineOfOffset(evt.getOffset());
 		if(count == 0)
@@ -1947,11 +1969,26 @@ public class JEditTextArea
 			painter.invalidateLineRange(line,firstLine + visibleLines);
 			updateScrollBars();
 		}
+		boolean wasModified = this.modified;
 		this.modified = true;
+		// only fire event if modified status is changed
+		if (!wasModified)
+		{
+			this.fireTextStatusChanged(true);
+		}
+		
 	}
 
 	public boolean isModified() { return this.modified; }
-	public void resetModified() { this.modified = false; }
+	public void resetModified() 
+	{ 
+		boolean wasModified = this.modified;
+		this.modified = false; 
+		if (wasModified)
+		{
+			this.fireTextStatusChanged(false);
+		}
+	}
 	
 	/** Invoked when the mouse wheel is rotated.
 	 * @see MouseWheelEvent
@@ -2297,8 +2334,7 @@ public class JEditTextArea
 
 			try
 			{
-				int bracket = TextUtilities.findMatchingBracket(
-					document,Math.max(0,dot - 1));
+				int bracket = TextUtilities.findMatchingBracket(document,Math.max(0,dot - 1));
 				if(bracket != -1)
 				{
 					int mark = getMarkPosition();

@@ -11,6 +11,7 @@ import java.awt.event.MouseListener;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -23,6 +24,7 @@ import javax.swing.table.TableModel;
 import workbench.WbManager;
 import workbench.db.DataSpooler;
 import workbench.db.DbMetadata;
+import workbench.db.ObjectScripter;
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
 import workbench.gui.MainWindow;
@@ -32,6 +34,7 @@ import workbench.gui.actions.SpoolDataAction;
 
 
 import workbench.gui.components.*;
+import workbench.gui.dbobjects.ObjectScripterUI;
 import workbench.gui.renderer.SqlTypeRenderer;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
@@ -85,8 +88,11 @@ public class TableListPanel
 	private String currentSchema;
 	private String currentCatalog;
 	private SpoolDataAction spoolData;
+	
+	
 	private WbMenuItem dropTableItem;
-
+	private WbMenuItem scriptTablesItem;
+	
 	private MainWindow parentWindow;
 
 	private String selectedCatalog;
@@ -111,6 +117,8 @@ public class TableListPanel
 	private boolean ignoreStateChanged = false;
 
 	private static final String DROP_CMD = "drop-table";
+	private static final String SCRIPT_CMD = "create-scripts";
+	
 	private JMenu showDataMenu;
 
 	// holds a reference to other WbTables which
@@ -253,10 +261,18 @@ public class TableListPanel
 		popup.addSeparator();
 		this.dropTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDropDbObject"));
 		this.dropTableItem.setActionCommand(DROP_CMD);
+		this.dropTableItem.setIcon(ResourceMgr.getImage("blank"));
 		this.dropTableItem.addActionListener(this);
 		this.dropTableItem.setEnabled(false);
 		popup.add(this.dropTableItem);
 
+		this.scriptTablesItem = new WbMenuItem(ResourceMgr.getString("MnuTxtCreateScript"));
+		this.scriptTablesItem.setIcon(ResourceMgr.getImage("script"));
+		this.scriptTablesItem.setActionCommand(SCRIPT_CMD);
+		this.scriptTablesItem.addActionListener(this);
+		this.scriptTablesItem.setEnabled(true);
+		popup.add(this.scriptTablesItem);
+		
 		this.showDataMenu = new WbMenu(ResourceMgr.getString("MnuTxtShowTableData"));
 		this.showDataMenu.setEnabled(false);
 		this.updateShowDataMenu();
@@ -667,43 +683,6 @@ public class TableListPanel
 					);
 	}
 
-	private String extendViewSource(String aSource, String aName, DataStore viewDefinition)
-	{
-		if (aSource == null) return "";
-		if (aSource.length() == 0) return "";
-
-		StringBuffer result = new StringBuffer(aSource.length() + 100);
-
-		if (this.dbConnection.getMetadata().isOracle())
-		{
-			result.append("CREATE OR REPLACE VIEW " + aName);
-		}
-		else
-		{
-			result.append("DROP VIEW " + aName + ";\r\n");
-			result.append("CREATE VIEW " + aName);
-		}
-		result.append("\r\n(\r\n");
-		int rows = viewDefinition.getRowCount();
-		for (int i=0; i < rows; i++)
-		{
-			String colName = viewDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-			if (i == 0)
-			{
-				result.append("  ");
-			}
-			else
-			{
-				result.append(" ,");
-			}
-			result.append(colName);
-			result.append("\r\n");
-		}
-		result.append(") AS \r\n");
-		result.append(aSource);
-		return result.toString();
-	}
-	
 	private synchronized void retrieveTableSource()
 		throws SQLException, WbException
 	{
@@ -720,8 +699,8 @@ public class TableListPanel
 			}
 			if (this.selectedObjectType.indexOf("view") > -1)
 			{
-				String viewSource = meta.getViewSource(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
-				tableSource.setText(this.extendViewSource(viewSource, this.selectedTableName, tableDefinition.getDataStore()));
+				String viewSource = meta.getExtendedViewSource(this.selectedCatalog, this.selectedSchema, this.selectedTableName, tableDefinition.getDataStore(), true);
+				tableSource.setText(viewSource);
 				tableSource.setCaretPosition(0);
 			}
 			else if ("synonym".equals(this.selectedObjectType))
@@ -806,7 +785,8 @@ public class TableListPanel
 		
 		if (this.tableList.getSelectedRowCount() <= 0) return;
 		int index = this.displayTab.getSelectedIndex();
-		if (index != 2) WbSwingUtilities.showWaitCursorOnWindow(this);
+		
+		WbSwingUtilities.showWaitCursorOnWindow(this);
 		this.busy = true;
 		try
 		{
@@ -988,9 +968,39 @@ public class TableListPanel
 			{
 				this.dropTables();
 			}
+			else if (command.equals(SCRIPT_CMD))
+			{
+				this.createScript();
+			}
 		}
 	}
 
+	private void createScript()
+	{
+		int[] rows = this.tableList.getSelectedRows();
+		int count = rows.length;
+		HashMap tables = new HashMap(count);
+		for (int i=0; i < count; i++)
+		{
+			int row = rows[i];
+			String owner = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+			String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+			String type = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+			
+			if (owner != null)
+			{
+				tables.put(owner + "." + table, type);
+			}
+			else
+			{
+				tables.put(table, type);
+			}
+		}
+		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
+		ObjectScripterUI ui = new ObjectScripterUI(s);
+		ui.show(SwingUtilities.getWindowAncestor(this));
+	}
+	
 	private boolean isClientVisible()
 	{
 		if (this.tableListClients == null) return false;

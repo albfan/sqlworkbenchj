@@ -26,6 +26,7 @@ public class SqlHistory
 	private ArrayList history;
 	private int currentEntry;
 	private int maxSize;
+	private boolean changed = false;
 
 	public SqlHistory(int maxSize)
 	{
@@ -59,6 +60,7 @@ public class SqlHistory
 			this.history.remove(0);
 		}
 		this.currentEntry = this.history.size() - 1;
+		this.changed = true;
 	}
 
 	public boolean hasNext()
@@ -75,6 +77,7 @@ public class SqlHistory
 	{
 		this.currentEntry = 0;
 		this.history.clear();
+		this.changed = false;
 	}
 
 	public void showCurrent(EditorPanel editor)
@@ -152,6 +155,7 @@ public class SqlHistory
 				writer.write(StringUtil.LINE_TERMINATOR);
 			}
 			writer.flush();
+			this.changed = false;
 		}
 		catch (IOException e)
 		{
@@ -159,6 +163,11 @@ public class SqlHistory
 		}
 	}
 
+	public boolean isChanged()
+	{
+		return this.changed;
+	}
+	
 	public void readFromStream(InputStream in)
 	{
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -206,6 +215,7 @@ public class SqlHistory
 				}
 				line = reader.readLine();
 			}
+			this.changed = false;
 		}
 		catch (IOException e)
 		{
