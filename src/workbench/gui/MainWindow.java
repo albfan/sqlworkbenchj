@@ -529,24 +529,29 @@ public class MainWindow
 				this.dbExplorerPanel = null;
 			}
 		}
-		//SwingUtilities.invokeLater(new Runnable()
-    //{
-    //  public void run()
-    //  {
-        disconnectAction.setEnabled(true);
-    //  }
-    //});
+		SwingUtilities.invokeLater(new Runnable()
+    {
+      public void run()
+      {
+				disconnectAction.setEnabled(true);
+      }
+    });
 	}
 
+	private boolean connecting = false;
+	
 	public void selectConnection()
 	{
-		WbSwingUtilities.showWaitCursor(this);
-		ProfileSelectionDialog dialog = new ProfileSelectionDialog(this, true);
-		WbSwingUtilities.center(dialog, this);
-		WbSwingUtilities.showDefaultCursor(this);
-		dialog.setVisible(true);
+		if (connecting) return;
 		try
 		{
+			// prevent a second 
+			this.connecting = true;
+			WbSwingUtilities.showWaitCursor(this);
+			ProfileSelectionDialog dialog = new ProfileSelectionDialog(this, true);
+			WbSwingUtilities.center(dialog, this);
+			WbSwingUtilities.showDefaultCursor(this);
+			dialog.setVisible(true);
       if (!dialog.isCancelled())
       {
         ConnectionProfile prof = dialog.getSelectedProfile();
@@ -562,6 +567,10 @@ public class MainWindow
 		catch (Throwable th)
 		{
 			LogMgr.logError("MainWindow.selectConnection()", "Error when disposing dialog", th);
+		}
+		finally
+		{
+			this.connecting = false;
 		}
 	}
 
