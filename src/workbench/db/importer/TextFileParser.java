@@ -9,20 +9,17 @@ package workbench.db.importer;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
-import workbench.storage.RowActionMonitor;
-import workbench.util.SqlUtil;
 import workbench.util.ValueConverter;
 import workbench.util.WbStringTokenizer;
 
@@ -95,6 +92,12 @@ public class TextFileParser
 		}
 	}
 
+	private boolean doCancel()
+	{
+		Thread.yield();
+		return this.cancelImport;
+	}
+	
 	public void cancel()
 	{
 		this.cancelImport = true;
@@ -131,11 +134,12 @@ public class TextFileParser
 	public void parse()
 		throws Exception
 	{
+		this.cancelImport = false;
 		File f = new File(this.filename);
 		long fileSize = f.length();
 		
 		InputStream inStream = new FileInputStream(f);
-		BufferedReader in = new BufferedReader(new InputStreamReader(inStream, this.encoding),1024*512);
+		BufferedReader in = new BufferedReader(new InputStreamReader(inStream, this.encoding),1024*256);
 
 		this.converter = new ValueConverter(this.dateFormat, this.timestampFormat);
 		this.converter.setDecimalCharacter(this.decimalChar);
@@ -145,7 +149,6 @@ public class TextFileParser
 		Object colData;
 		int col;
 		int row;
-		this.cancelImport = false;
 		
 		try
 		{
@@ -165,7 +168,7 @@ public class TextFileParser
 		{
 			throw new WbException("Cannot import file without a column definition");
 		}
-		
+
 		this.receiver.setTargetTable(this.tableName, this.columns, this.colTypes);
 		
 		lineData = new ArrayList(this.colCount);
@@ -176,7 +179,8 @@ public class TextFileParser
 		
 		while (line != null)
 		{
-			if (this.cancelImport) break;
+			if (this.doCancel()) break;
+			
 			this.clearRowData();
 			lineData.clear();
 			
@@ -205,12 +209,9 @@ public class TextFileParser
 				}
 			}
 
-			if (this.cancelImport) break;
+			if (this.doCancel()) break;
 			
 			this.receiver.processRow(rowData);
-			Thread.yield();
-			
-			if (this.cancelImport) break;
 			
 			try
 			{
@@ -220,9 +221,20 @@ public class TextFileParser
 			{
 				line = null;
 			}
+			
+			if (this.doCancel()) break;
 		}
 		
 		try { in.close(); } catch (IOException e) {}
+		
+		if (!this.cancelImport)
+		{
+			this.receiver.importFinished();
+		}
+		else
+		{
+			this.receiver.importCancelled();
+		}
 	}
 
 	private void clearRowData()

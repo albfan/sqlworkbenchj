@@ -1,11 +1,13 @@
 package workbench.gui.components;
 
-import com.sun.java.swing.plaf.motif.MotifTabbedPaneUI;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Insets;
+
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
+
+import com.sun.java.swing.plaf.motif.MotifTabbedPaneUI;
 
 public class BorderLessMotifTabbedPaneUI extends MotifTabbedPaneUI
 {

@@ -1,14 +1,20 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Window;
-import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import javax.swing.*;
+
+import javax.swing.DefaultCellEditor;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -16,6 +22,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+
 import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
@@ -23,13 +30,14 @@ import workbench.exception.WbException;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteRowAction;
 import workbench.gui.actions.InsertRowAction;
-import workbench.gui.actions.OptimizeAllColumnsAction;
-import workbench.gui.actions.PrintAction;
 import workbench.gui.actions.StartEditAction;
 import workbench.gui.actions.UpdateDatabaseAction;
-
-
-import workbench.gui.components.*;
+import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.OneLineTableModel;
+import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.WbScrollPane;
+import workbench.gui.components.WbTable;
+import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.DbData;
 import workbench.interfaces.DbUpdater;
 import workbench.interfaces.Interruptable;
@@ -42,8 +50,6 @@ import workbench.storage.DmlStatement;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
-
-
 
 /**
  *	A Panel which displays the result of a SELECT statement.
@@ -111,6 +117,7 @@ public class DwPanel
 		this.setFocusTraversalPolicy(pol);
 		this.setDoubleBuffered(true);
 		this.stmtRunner = new StatementRunner();
+		this.stmtRunner.setRowMonitor(this);
 		this.infoTable.addTableModelListener(this);	
 		
 		this.updateAction = new UpdateDatabaseAction(this);
@@ -122,7 +129,6 @@ public class DwPanel
 		infoTable.addPopupAction(this.updateAction, true);
 		infoTable.addPopupAction(this.insertRow, true);
 		infoTable.addPopupAction(this.deleteRow, false);
-		
 	}
 
 	public void setManageActions(boolean aFlag)
@@ -183,6 +189,9 @@ public class DwPanel
 					break;
 				case RowActionMonitor.MONITOR_LOAD:
 					this.updateMsg = ResourceMgr.getString("MsgLoadingRow") + " ";
+					break;
+				case RowActionMonitor.MONITOR_EXPORT:
+					this.updateMsg = ResourceMgr.getString("MsgWritingRow") + " ";
 					break;
 				default:
 					clearRowMonitorSettings();

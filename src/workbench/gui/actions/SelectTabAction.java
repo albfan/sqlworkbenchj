@@ -14,6 +14,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 
 import workbench.gui.dbobjects.DbExplorerPanel;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -39,7 +40,7 @@ public class SelectTabAction extends WbAction
 		Object tab = this.client.getComponentAt(this.index);
 		if (tab instanceof DbExplorerPanel)
 		{
-			this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_MASK));
+			this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_MASK));
 			this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtShowDbExplorer"));
 		}
 		else
@@ -47,39 +48,39 @@ public class SelectTabAction extends WbAction
 			switch (this.index)
 			{
 				case 0:
-					this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_1, InputEvent.CTRL_MASK));
+					this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, InputEvent.CTRL_MASK));
 					break;
 				case 1:
-					this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_2, InputEvent.CTRL_MASK));
+					this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, InputEvent.CTRL_MASK));
 					break;
 				case 2:
-					this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_3, InputEvent.CTRL_MASK));
+					this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3, InputEvent.CTRL_MASK));
 					break;
 				case 3:
-					this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_4, InputEvent.CTRL_MASK));
+					this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4, InputEvent.CTRL_MASK));
 					break;
 				case 4:
-					this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_5, InputEvent.CTRL_MASK));
+					this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_5, InputEvent.CTRL_MASK));
 					break;
 				case 5:
-					this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_6, InputEvent.CTRL_MASK));
+					this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_6, InputEvent.CTRL_MASK));
 					break;
 				case 6:
-					this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_7, InputEvent.CTRL_MASK));
+					this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_7, InputEvent.CTRL_MASK));
 					break;
 				case 7:
-					this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_8, InputEvent.CTRL_MASK));
+					this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_8, InputEvent.CTRL_MASK));
 					break;
 				case 8:
-					this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_9, InputEvent.CTRL_MASK));
+					this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_9, InputEvent.CTRL_MASK));
 					break;
 				default:
-					this.putValue(Action.ACCELERATOR_KEY, null);
+					this.setAccelerator(null);
 			}
 			this.setActionName("SelectTab" + (this.index+1));
 			this.putValue(Action.NAME, ResourceMgr.getString("LabelTabStatement") + " &" + Integer.toString(this.index+1));
 		}
-		this.putValue(Action.SMALL_ICON, null);
+		this.setIcon(null);
 	}
 	public int getIndex() { return this.index; }
 	
@@ -94,7 +95,7 @@ public class SelectTabAction extends WbAction
 		this.putValue(Action.NAME, aName + " &" + Integer.toString(this.index+1));
 	}
 	
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		if (client != null)
 		{
@@ -104,6 +105,7 @@ public class SelectTabAction extends WbAction
 			}
 			catch (Exception ex)
 			{
+				LogMgr.logError("SelectTabAction.executeAction()", "Error when selecting tab " + this.index, ex);
 			}
 		}
 	}

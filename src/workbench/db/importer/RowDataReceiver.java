@@ -15,6 +15,7 @@ import java.sql.SQLException;
 public interface RowDataReceiver
 {
 	void processRow(Object[] row) throws SQLException;
-	void setTargetTable(String tableName, String[] columns);
+	void setTargetTable(String tableName, String[] columns, int[] columnTypes);
 	void importFinished();
+	void importCancelled();
 }

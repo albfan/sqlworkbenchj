@@ -2,8 +2,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.Action;
-
 import workbench.interfaces.TextFileContainer;
 import workbench.resource.ResourceMgr;
 
@@ -18,12 +16,11 @@ public class FileSaveAsAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtFileSaveAs"));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtFileSaveAs"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_FILE);
+		this.initMenuDefinition("MnuTxtFileSaveAs");
+		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		this.client.saveFile();
 	}

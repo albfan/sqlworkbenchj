@@ -66,6 +66,7 @@ public class ResourceMgr
 
 	public static final String    MNU_TXT_WORKSPACE = "MnuTxtWorkspace";
 	public static final String    MNU_TXT_FILE = "MnuTxtFile";
+	public static final String    MNU_TXT_MACRO = "MnuTxtMacro";
 	public static final String    MNU_TXT_SQL = "MnuTxtSQL";
 	public static final String    MNU_TXT_EDIT = "MnuTxtEdit";
 	public static final String    MNU_TXT_DATA = "MnuTxtData";
@@ -114,7 +115,16 @@ public class ResourceMgr
 	 */
 	public static String getDescription(String aKey)
 	{
-		return getString("Desc_" + aKey);
+		try
+		{
+			String value = resources.getString("Desc_" + aKey);
+			return value;
+		}
+		catch (MissingResourceException e)
+		{
+			LogMgr.logDebug("ResourceMgr", "No description for key=" + aKey + " found in resource file!", e);
+			return "";
+		}
 	}
 
 	public static InputStream getDefaultSettings()

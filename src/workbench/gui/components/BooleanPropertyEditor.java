@@ -9,7 +9,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+
 import javax.swing.JCheckBox;
+
 import workbench.interfaces.SimplePropertyEditor;
 
 

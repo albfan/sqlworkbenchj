@@ -4,7 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.Action;
 import javax.swing.KeyStroke;
 
 import workbench.interfaces.Commitable;
@@ -21,11 +20,9 @@ public class RollbackAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtRollback"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("Rollback"));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtRollback"));
-		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_MASK));
+		this.initMenuDefinition("MnuTxtRollback", KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_MASK));
+		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+		this.setIcon(ResourceMgr.getImage("Rollback"));
 	}
 
 	public void executeAction(ActionEvent e)

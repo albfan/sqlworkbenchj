@@ -8,6 +8,8 @@ package workbench.gui.sql;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -25,7 +27,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
 
 import workbench.WbManager;
-import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.actions.FindAction;
 import workbench.gui.actions.FindAgainAction;
@@ -63,7 +64,7 @@ import workbench.util.SqlUtil;
  */
 public class EditorPanel 
 	extends JEditTextArea 
-	implements ClipboardSupport, FontChangedListener, 
+	implements ClipboardSupport, FontChangedListener, PropertyChangeListener, 
 						 TextContainer, TextFileContainer, Replaceable, Searchable, FormattableSql
 {
 	private static final Border DEFAULT_BORDER = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
@@ -148,21 +149,11 @@ public class EditorPanel
 
 		if (aMarker != null) this.setTokenMarker(aMarker);
 
-		/*
-		if (aMarker == null)
-		{
-			this.sqlTokenMarker = new AnsiSQLTokenMarker();
-			this.setTokenMarker(this.sqlTokenMarker);
-			this.editorType = SQL_EDITOR;
-		}
-		else
-		{
-			this.setTokenMarker(aMarker);
-		}
-		*/
 		this.setMaximumSize(null);
 		this.setPreferredSize(null);
+		this.setShowLineNumbers(WbManager.getSettings().getShowLineNumbers());
 		WbManager.getSettings().addFontChangedListener(this);
+		WbManager.getSettings().addChangeListener(this);
 	}
 
 	public void fontChanged(String aKey, Font aFont)
@@ -553,7 +544,8 @@ public class EditorPanel
 		String criteria = p.getCriteria();
 		boolean ignoreCase = p.getIgnoreCase();
 		boolean wholeWord = p.getWholeWordOnly();
-		int pos = this.findText(criteria, ignoreCase, wholeWord);
+		boolean useRegex = p.getUseRegex();
+		int pos = this.findText(criteria, ignoreCase, wholeWord, useRegex);
 		this.lastSearchCriteria = criteria;
 		this.findAgainAction.setEnabled(pos > -1);
 		return pos;
@@ -564,21 +556,21 @@ public class EditorPanel
 		return this.findNextText();
 	}
 
-	public int findFirst(String aValue, boolean ignoreCase, boolean wholeWord)
+	public int findFirst(String aValue, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 	{
-		int pos = this.findText(aValue, ignoreCase, wholeWord);
+		int pos = this.findText(aValue, ignoreCase, wholeWord, useRegex);
 		return pos;
 	}
 	
-	public int find(String aValue, boolean ignoreCase, boolean wholeWord)
+	public int find(String aValue, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 	{
-		if (this.isCurrentSearchCriteria(aValue, ignoreCase, wholeWord))
+		if (this.isCurrentSearchCriteria(aValue, ignoreCase, wholeWord, useRegex))
 		{
 			return this.findNext();
 		}
 		else
 		{
-			return this.findFirst(aValue, ignoreCase, wholeWord);
+			return this.findFirst(aValue, ignoreCase, wholeWord, useRegex);
 		}
 	}
 	private ReplacePanel replacePanel = null;
@@ -612,7 +604,7 @@ public class EditorPanel
 		int selEnd = this.getSelectionEnd();
 		return (selStart > -1 && selEnd > selStart);
 	}
-	public int replaceAll(String value, String replacement, boolean selectedText, boolean ignoreCase, boolean wholeWord)
+	public int replaceAll(String value, String replacement, boolean selectedText, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 	{
 		String old = null;
 		if (selectedText)
@@ -627,7 +619,7 @@ public class EditorPanel
 		int selStart = this.getSelectionStart();
 		int selEnd = this.getSelectionEnd();
 		int newLen = -1;
-		String regex = this.getSearchExpression(value, ignoreCase, wholeWord);
+		String regex = this.getSearchExpression(value, ignoreCase, wholeWord, useRegex);
 		String newText = old.replaceAll(regex, replacement);
 		if (selectedText)
 		{
@@ -668,6 +660,18 @@ public class EditorPanel
 			}
 		}
 		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+	 */
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (Settings.PROPERTY_SHOW_LINE_NUMBERS.equals(evt.getPropertyName()))
+		{
+			this.setShowLineNumbers(WbManager.getSettings().getShowLineNumbers());
+			this.repaint();
+		}
 	}
 	
 }

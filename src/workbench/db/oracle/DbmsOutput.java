@@ -26,10 +26,10 @@ public class DbmsOutput
 	private CallableStatement enable_stmt;
 	private CallableStatement disable_stmt;
 	private CallableStatement show_stmt;
-	
+
 	private boolean enabled;
 	private long lastSize;
-	
+
 /*
  * our constructor simply prepares the three
  * statements we plan on executing.
@@ -45,12 +45,12 @@ public class DbmsOutput
  * from getting yet another line but it will not chunk up a line.
  *
  */
-	public DbmsOutput( Connection conn ) 
+	public DbmsOutput( Connection conn )
 		throws SQLException
 	{
 		enable_stmt  = conn.prepareCall( "begin dbms_output.enable(:1); end;" );
 		disable_stmt = conn.prepareCall( "begin dbms_output.disable; end;" );
-		
+
 		show_stmt = conn.prepareCall(
 		"declare " +
 		"    l_line varchar2(255); " +
@@ -66,7 +66,7 @@ public class DbmsOutput
 		" :buffer := l_buffer; " +
 		"end;" );
 	}
-	
+
 	/*
 	 * enable simply sets your size and executes
 	 * the dbms_output.enable call
@@ -75,21 +75,21 @@ public class DbmsOutput
 	public void enable(long size) throws SQLException
 	{
 		if (this.enabled && size == this.lastSize) return;
-		
-		this.disable();
+
+		//this.disable();
 		enable_stmt.setLong( 1, size );
 		enable_stmt.executeUpdate();
 		this.enabled = true;
 		this.lastSize = size;
-		LogMgr.logInfo("DbmsOutput.enable()", "Support for DBMS_OUTPUT package enabled");
+		LogMgr.logDebug("DbmsOutput.enable()", "Support for DBMS_OUTPUT package enabled");
 	}
-	
+
 	public void enable()
 		throws SQLException
 	{
 		this.enable(-1);
 	}
-	
+
 	/*
 	 * disable only has to execute the dbms_output.disable call
 	 */
@@ -97,9 +97,9 @@ public class DbmsOutput
 	{
 		disable_stmt.executeUpdate();
 		this.enabled = false;
-		LogMgr.logInfo("DbmsOutput.disable()", "Support for DBMS_OUTPUT package disabled");
+		LogMgr.logDebug("DbmsOutput.disable()", "Support for DBMS_OUTPUT package disabled");
 	}
-	
+
 	/*
 	 * getResult() does most of the work.  It loops over
 	 * all of the dbms_output data, fetching it in this
@@ -108,11 +108,11 @@ public class DbmsOutput
 	 * reset what System.out is to change or redirect this
 	 * output).
 	 */
-	public String getResult() 
+	public String getResult()
 		throws SQLException
 	{
 		int done = 0;
-		
+
 		show_stmt.registerOutParameter( 2, Types.INTEGER );
 		show_stmt.registerOutParameter( 3, Types.VARCHAR );
 		StringBuffer result = new StringBuffer(1024);
@@ -126,7 +126,7 @@ public class DbmsOutput
 
 		return result.toString().trim();
 	}
-	
+
 /*
  * close closes the callable statements associated with
  * the DbmsOutput class. Call this if you allocate a DbmsOutput
@@ -134,17 +134,16 @@ public class DbmsOutput
  * just as you would with any callable statement, result set
  * and so on.
  */
-	public void close() 
+	public void close()
 	{
 		try { this.disable(); } catch (Throwable th) {}
 		try { enable_stmt.close(); } catch (Throwable th) {}
 		try { disable_stmt.close(); } catch (Throwable th) {}
 		try { show_stmt.close(); } catch (Throwable th) {}
 	}
-	
+
 	public void finalize()
 	{
 		this.close();
 	}
 }
-	

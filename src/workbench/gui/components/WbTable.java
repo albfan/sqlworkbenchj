@@ -5,15 +5,31 @@
  */
 package workbench.gui.components;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Frame;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.print.PageFormat;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -21,17 +37,47 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
-import javax.swing.*;
+
+import javax.swing.ActionMap;
+import javax.swing.CellEditor;
+import javax.swing.DefaultCellEditor;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.JToolTip;
+import javax.swing.JViewport;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.JPopupMenu.Separator;
 import javax.swing.border.LineBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 
-import javax.swing.table.*;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
-
-import workbench.gui.actions.*;
+import workbench.gui.actions.DataToClipboardAction;
+import workbench.gui.actions.FindDataAction;
+import workbench.gui.actions.FindDataAgainAction;
+import workbench.gui.actions.OptimizeAllColumnsAction;
+import workbench.gui.actions.OptimizeColumnWidthAction;
+import workbench.gui.actions.PrintAction;
+import workbench.gui.actions.PrintPreviewAction;
+import workbench.gui.actions.SaveDataAsAction;
+import workbench.gui.actions.SetColumnWidthAction;
+import workbench.gui.actions.SortAscendingAction;
+import workbench.gui.actions.SortDescendingAction;
+import workbench.gui.actions.WbAction;
 import workbench.gui.renderer.DateColumnRenderer;
 import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RowStatusRenderer;
@@ -49,7 +95,6 @@ import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.NullValue;
 import workbench.util.StringUtil;
-
 
 
 public class WbTable
@@ -104,6 +149,8 @@ public class WbTable
 	private TableModelListener changeListener;
 	private JScrollPane scrollPane;
 
+	private boolean showPopup = true;
+	
 	public WbTable()
 	{
 		super(EMPTY_MODEL);
@@ -118,7 +165,6 @@ public class WbTable
 		this.optimizeCol = new OptimizeColumnWidthAction(this);
 		this.optimizeAllCol = new OptimizeAllColumnsAction(this);
 		this.optimizeAllCol.setEnabled(true);
-		this.optimizeAllCol.enableShortCut();
 		this.setColWidth = new SetColumnWidthAction(this);
 
 		this.headerPopup = new JPopupMenu();
@@ -148,10 +194,9 @@ public class WbTable
 
 		this.defaultNumberEditor = new DefaultCellEditor(numberEditorTextField);
 
-		this.addMouseListener(this);
 		this.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		JTableHeader th = this.getTableHeader();
-		th.addMouseListener(this);
+		//JTableHeader th = this.getTableHeader();
+		//th.addMouseListener(this);
 
 		this.findAction = new FindDataAction(this);
 		this.findAction.setEnabled(false);
@@ -173,7 +218,8 @@ public class WbTable
 		this.popup.add(this.printDataAction.getMenuItem());
 		this.popup.add(this.printPreviewAction.getMenuItem());
 
-
+		this.addMouseListener(this);
+		
 		InputMap im = this.getInputMap(WHEN_FOCUSED);
 		ActionMap am = this.getActionMap();
 		this.findAction.addToInputMap(im, am);
@@ -184,6 +230,12 @@ public class WbTable
 		WbManager.getSettings().addFontChangedListener(this);
 	}
 
+
+	public void setShowPopupMenu(boolean aFlag)
+	{
+		this.showPopup = aFlag;
+	}
+	
 	public void setRowResizeAllowed(boolean aFlag)
 	{
 		if (aFlag && this.rowResizer == null)
@@ -287,7 +339,25 @@ public class WbTable
 				}
 			}
 		}
-	}	
+		this.checkMouseListener();
+	}
+	
+	private void checkMouseListener()
+	{
+		JTableHeader th = this.getTableHeader();
+		MouseListener[] list = th.getMouseListeners();
+		if (list == null)
+		{
+			th.addMouseListener(this);
+			return;
+		}
+		for (int i=0; i < list.length; i++)
+		{
+			if (list[i] == this) return;
+		}
+		th.addMouseListener(this);
+	}
+	
 	public void printPreview()
 	{
 		TablePrinter printer = this.getTablePrinter();
@@ -355,6 +425,7 @@ public class WbTable
 				LogMgr.logError("WbTable.setModel()", "Received a DataStoreTableModel without a DataStore", e);
 			}
 		}
+		
 		if (this.sortAscending != null) this.sortAscending.setEnabled(sortIt);
 		if (this.sortDescending != null) this.sortDescending.setEnabled(sortIt);
 
@@ -373,6 +444,7 @@ public class WbTable
 		}
 		if (this.printDataAction != null) this.printDataAction.setEnabled(this.getRowCount() > 0);
 		if (this.printPreviewAction != null) this.printPreviewAction.setEnabled(this.getRowCount() > 0);
+		
 	}
 
 	public DataStoreTableModel getDataStoreTableModel()
@@ -732,16 +804,26 @@ public class WbTable
 		}
 	}
 
-	public synchronized void optimizeAllColWidth()
+	public void optimizeAllColWidth()
+	{
+		this.optimizeAllColWidth(0);
+	}
+	
+	public void optimizeAllColWidth(int aMinWidth)
 	{
 		int count = this.getColumnCount();
 		for (int i=0; i < count; i++)
 		{
-			this.optimizeColWidth(i);
+			this.optimizeColWidth(i, aMinWidth);
 		}
 	}
 
-	public synchronized void optimizeColWidth(int aColumn)
+	public void optimizeColWidth(int aColumn)
+	{
+		this.optimizeColWidth(aColumn, 0);
+	}
+	
+	public void optimizeColWidth(int aColumn, int aMinWidth)
 	{
 		if (this.dwModel == null) return;
 		if (aColumn < 0 || aColumn > this.getColumnCount() - 1) return;
@@ -752,7 +834,7 @@ public class WbTable
 		TableColumn col = colMod.getColumn(aColumn);
 		int addWidth = this.getAdditionalColumnSpace(0, aColumn);
 		String s = null;//this.dwModel.getColumnName(aColumn);
-		int optWidth = 0;
+		int optWidth = aMinWidth;
 		int stringWidth = 0;
 		for (int row = 0; row < this.getRowCount(); row ++)
 		{
@@ -926,7 +1008,7 @@ public class WbTable
 				this.headerPopupY = e.getY();
 				this.headerPopup.show(this.getTableHeader(), e.getX(), e.getY());
 			}
-			else if (this.popup != null)
+			else if (this.showPopup && this.popup != null)
 			{
 				this.findAction.setEnabled(this.getRowCount() > 0);
 				this.findAgainAction.setEnabled(this.lastFoundRow > 0);
@@ -976,6 +1058,16 @@ public class WbTable
 	{
 	}
 
+	public void setColumnWidth(int column, int width)
+	{
+		TableColumn col = this.getColumnModel().getColumn(column);
+		if (width > 0 && col != null)
+		{
+			col.setWidth(width);
+			col.setPreferredWidth(width);
+		}
+	}
+	
 	public void actionPerformed(ActionEvent e)
 	{
 		TableColumnModel columnModel = this.getColumnModel();

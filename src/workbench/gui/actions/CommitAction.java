@@ -4,7 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.Action;
 import javax.swing.KeyStroke;
 
 import workbench.interfaces.Commitable;
@@ -22,10 +21,10 @@ public class CommitAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.setMenuTextByKey("MnuTxtCommit");
+		KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.ALT_MASK);
+		this.initMenuDefinition("MnuTxtCommit",key);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setIcon(ResourceMgr.getImage("Commit"));
-		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.ALT_MASK));
 	}
 
 	public void executeAction(ActionEvent e)

@@ -41,7 +41,7 @@ public class MultiLineToolTipUI extends BasicToolTipUI
 	
 	public Dimension getPreferredSize(JComponent c)
 	{
-		FontMetrics metrics = toolkit.getFontMetrics(c.getFont());
+		FontMetrics metrics = c.getFontMetrics(c.getFont());
 		String tipText = ((JToolTip)c).getTipText();
 		this.displayLines.clear();
 		if (tipText == null)

@@ -11,7 +11,6 @@ import java.awt.event.ActionListener;
 import javax.swing.Action;
 
 import workbench.gui.components.SortArrowIcon;
-import workbench.resource.ResourceMgr;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
@@ -25,11 +24,11 @@ public class SortDescendingAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtSortDescending"));
+		this.setMenuTextByKey("MnuTxtSortDescending");
 		this.putValue(Action.SMALL_ICON, SortArrowIcon.ARROW_UP);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		e.setSource(this);
 		this.client.actionPerformed(e);

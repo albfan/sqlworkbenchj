@@ -7,8 +7,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.Action;
-
 import workbench.interfaces.Exporter;
 import workbench.resource.ResourceMgr;
 
@@ -24,13 +22,12 @@ public class SaveDataAsAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtSaveDataAs"));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_SAVE_AS));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtSaveDataAs"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
+		this.initMenuDefinition("MnuTxtSaveDataAs");
+		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_SAVE_AS));
+		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		this.client.saveAs();
 	}

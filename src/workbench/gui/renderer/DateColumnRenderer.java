@@ -8,7 +8,6 @@ package workbench.gui.renderer;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 
 import javax.swing.SwingConstants;
 

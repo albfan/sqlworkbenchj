@@ -8,7 +8,6 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.Action;
 import javax.swing.KeyStroke;
 
 import workbench.gui.sql.EditorPanel;
@@ -29,14 +28,12 @@ public class MakeUpperCaseAction extends WbAction
 		super();
 		this.client = aClient;
 		this.client.addSelectionListener(this);
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtMakeUpperCase"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_EDIT);
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtMakeUpperCase"));
-		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_U,KeyEvent.CTRL_MASK));
+		this.initMenuDefinition("MnuTxtMakeUpperCase", KeyStroke.getKeyStroke(KeyEvent.VK_U,KeyEvent.CTRL_MASK));
+		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 		this.setEnabled(false);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		this.client.toUpperCase();
 	}

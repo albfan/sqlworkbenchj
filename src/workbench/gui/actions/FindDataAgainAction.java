@@ -9,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.Action;
 import javax.swing.KeyStroke;
 
 import workbench.interfaces.Searchable;
@@ -28,14 +27,12 @@ public class FindDataAgainAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtFindDataAgain"));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("FindAgain"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtFindDataAgain"));
-		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F3, InputEvent.SHIFT_MASK));
+		this.initMenuDefinition("MnuTxtFindDataAgain", KeyStroke.getKeyStroke(KeyEvent.VK_F3, InputEvent.SHIFT_MASK));
+		this.setIcon(ResourceMgr.getImage("FindAgain"));
+		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		this.client.findNext();
 	}

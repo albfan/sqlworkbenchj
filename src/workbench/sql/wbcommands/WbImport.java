@@ -1,9 +1,8 @@
 package workbench.sql.wbcommands;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
-import workbench.db.DataSpooler;
 import workbench.db.WbConnection;
 import workbench.db.importer.DataImporter;
 import workbench.exception.ExceptionUtil;
@@ -12,7 +11,6 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.sql.commands.SelectCommand;
 import workbench.util.ArgumentParser;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -41,7 +39,8 @@ public class WbImport extends SqlCommand
 		cmdLine.addArgument("decimal");
 		cmdLine.addArgument("commitevery");
 		cmdLine.addArgument("header");
-		cmdLine.addArgument("createtable");
+		cmdLine.addArgument("encoding");
+		cmdLine.addArgument("columns");
 	}
 
 	public String getVerb() { return VERB; }
@@ -50,7 +49,7 @@ public class WbImport extends SqlCommand
 		throws SQLException, WbException
 	{
 		imp = new DataImporter();
-		
+
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
 		int pos = aSql.indexOf(' ');
@@ -70,6 +69,21 @@ public class WbImport extends SqlCommand
 			return result;
 		}
 
+		if (cmdLine.hasUnknownArguments())
+		{
+			List params = cmdLine.getUnknownArguments();
+			StringBuffer msg = new StringBuffer(ResourceMgr.getString("ErrorUnknownParameter"));
+			for (int i=0; i < params.size(); i++)
+			{
+				msg.append((String)params.get(i));
+				if (i > 0) msg.append(',');
+			}
+			result.addMessage(msg.toString());
+			result.addMessage(ResourceMgr.getString("ErrorImportWrongParameters"));
+			result.setFailure();
+			return result;
+		}
+		
 		String type = null;
 		String file = null;
 		String cleancr = null;
@@ -88,42 +102,58 @@ public class WbImport extends SqlCommand
 		
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
-			result.addMessage(ResourceMgr.getString("ErrorImportTextNotImplemented"));
-			result.setFailure();
-			return result;
+			if (table == null)
+			{
+				result.addMessage(ResourceMgr.getString("ErrorTextImportRequiresTableName"));
+				result.setFailure();
+				return result;
+			}
 			
-//			imp.setImportTypeText();
-//			String delimiter = cmdLine.getValue("delimiter");
-//			if (delimiter != null) imp.setTextDelimiter(delimiter);
-//			
-//			String quote = cmdLine.getValue("quotechar");
-//			if (quote != null) imp.setTextQuoteChar(quote);
-//
-//			String format = cmdLine.getValue("dateformat");
-//			if (format != null) imp.setTextDateFormat(format);
-//
-//			format = cmdLine.getValue("timestampformat");
-//			if (format != null) imp.setTextTimestampFormat(format);
-//
-//			format = cmdLine.getValue("decimal");
-//			if (format != null) imp.setDecimalSymbol(format);
-//
-//			String header = cmdLine.getValue("header");
-//			imp.setTextContainsHeaders(StringUtil.stringToBool(header));
+			imp.setImportTypeText();
+			imp.setTableName(table);
+			
+			String delimiter = cmdLine.getValue("delimiter");
+			if (delimiter != null) imp.setTextDelimiter(delimiter);
+			
+			String quote = cmdLine.getValue("quotechar");
+			if (quote != null) imp.setTextQuoteChar(quote);
+
+			String format = cmdLine.getValue("dateformat");
+			if (format != null) imp.setTextDateFormat(format);
+
+			format = cmdLine.getValue("timestampformat");
+			if (format != null) imp.setTextTimestampFormat(format);
+
+			format = cmdLine.getValue("decimal");
+			if (format != null) imp.setDecimalSymbol(format);
+
+			String header = cmdLine.getValue("header");
+			imp.setTextContainsHeaders(StringUtil.stringToBool(header));
+
+			String encoding = cmdLine.getValue("encoding");
+			if (encoding != null) imp.setEncoding(encoding);
+			
+			String columns = cmdLine.getValue("columns");
+			if (columns != null)
+			{
+				List cols = StringUtil.stringToList(columns, ",");
+				imp.setTextFileColumns(cols);
+			}
+			if (!"true".equals(header) && columns == null)
+			{
+				result.addMessage(ResourceMgr.getString("ErrorHeaderOrColumnDefRequired"));
+				result.setFailure();
+				return result;
+			}
 		}
 		else if ("xml".equalsIgnoreCase(type))
 		{
-//			String format = cmdLine.getValue("dateformat");
-//			if (format != null) imp.setTextDateFormat(format);
-
-//			format = cmdLine.getValue("timestampformat");
-//			if (format != null) imp.setTextTimestampFormat(format);
-//
-//			format = cmdLine.getValue("decimal");
-//			if (format != null) imp.setDecimalSymbol(format);
-
 			imp.setImportTypeXml();
+
 			if (table != null) imp.setTableName(table);
+			
+			String encoding = cmdLine.getValue("encoding");
+			if (encoding != null) imp.setEncoding(encoding);
 			
 			int commit = StringUtil.getIntValue(cmdLine.getValue("commitevery"),-1);
 			imp.setCommitEvery(commit);
@@ -136,10 +166,15 @@ public class WbImport extends SqlCommand
 		}
 		file = StringUtil.trimQuotes(file);
 		this.imp.setInputFilename(file);
-		this.imp.setConnection(aConnection.getSqlConnection());
-		String msg = ResourceMgr.getString("MsgImportInit");
-		msg = StringUtil.replace(msg, "%type%", type.toUpperCase());
-		msg = StringUtil.replace(msg, "%file%", file);
+		this.imp.setConnection(aConnection);
+		this.imp.setRowActionMonitor(this.rowMonitor);
+		String msg = ResourceMgr.getString("MsgImportingFile");
+		msg += " " + file;
+		if (table != null)
+		{
+			msg += " " + ResourceMgr.getString("MsgImportTable");
+			msg += ": " + table.toUpperCase();
+		}
 		result.addMessage(msg);
 		
 		try
@@ -153,7 +188,7 @@ public class WbImport extends SqlCommand
 			result.setFailure();
 			result.addMessage(ExceptionUtil.getDisplay(e));
 		}
-		
+		this.addWarnings(result);
 		this.addErrors(result);
 		long rows = imp.getAffectedRow();
 		msg = rows + " " + ResourceMgr.getString("MsgImportNumRows");
@@ -162,12 +197,26 @@ public class WbImport extends SqlCommand
 		return result;
 	}
 
-	private void addErrors(StatementRunnerResult result)
+	private void addWarnings(StatementRunnerResult result)
 	{
-		String[] err = imp.getErrors();
+		String[] err = imp.getWarnings();
 		for (int i=0; i < err.length; i++)
 		{
 			result.addMessage(err[i]);
+		}
+	}
+	
+	private void addErrors(StatementRunnerResult result)
+	{
+		String[] warn = imp.getErrors();
+		for (int i=0; i < warn.length; i++)
+		{
+			result.addMessage(warn[i]);
+		}
+		if (warn.length > 0)
+		{
+			// force an empty line if we had warnings
+			result.addMessage("");
 		}
 	}
 	

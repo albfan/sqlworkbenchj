@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.Toolkit;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
@@ -81,7 +80,7 @@ public class WbToolTipUI extends BasicToolTipUI
 		super.paint(g, c);
 		
 		Font font = c.getFont();
-		FontMetrics metrics = Toolkit.getDefaultToolkit().getFontMetrics(font);
+		FontMetrics metrics = g.getFontMetrics(font);
 		String keyText = getAcceleratorString(tip);
 		String tipText = tip.getTipText();
 		if (tipText == null)
@@ -103,7 +102,8 @@ public class WbToolTipUI extends BasicToolTipUI
 		String key = getAcceleratorString((JToolTip)c);
 		if (! (key.equals("")))
 		{
-			FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(smallFont);
+			//FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(smallFont);
+			FontMetrics fm = c.getFontMetrics(smallFont);
 			d.width += fm.stringWidth(key) + padSpaceBetweenStrings;
 		}
 		return d;

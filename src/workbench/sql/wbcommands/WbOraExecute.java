@@ -11,6 +11,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 import workbench.util.LineTokenizer;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -34,18 +35,19 @@ public class WbOraExecute extends SqlCommand
 		throws SQLException, WbException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
-		LineTokenizer tok = new LineTokenizer(aSql.trim(), " ");
+		String sql = SqlUtil.makeCleanSql(aSql, false, false, '\'');
+		LineTokenizer tok = new LineTokenizer(sql, " ");
 		String verb = tok.nextToken(); 
 		if (!this.sqlcommand.equalsIgnoreCase(verb)) throw new WbException("Wrong syntax. " + sqlcommand + " expected!");
 		
-		String upper = aSql.toUpperCase();
+		String upper = sql.toUpperCase();
 		int startpos = upper.indexOf(this.sqlcommand.toUpperCase());
 		String realSql = "";
 		if (startpos > 0)
 		{
-			realSql = aSql.substring(0, startpos - 1);
+			realSql = sql.substring(0, startpos - 1);
 		}
-		realSql = realSql + "{call " + aSql.substring(startpos + this.sqlcommand.length() + 1) + "}";
+		realSql = realSql + "{call " + sql.substring(startpos + this.sqlcommand.length() + 1) + "}";
 		
 		result.addMessage(ResourceMgr.getString("MsgProcCallConverted") + " " + realSql);
 		

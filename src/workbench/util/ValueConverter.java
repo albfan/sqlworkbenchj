@@ -37,17 +37,16 @@ public class ValueConverter
 	
 	private String defaultDateFormat;
 	private String defaultTimestampFormat;
-	private String defaultNumberFormat;
+	private char decimalCharacter = '.';
 	
 	public ValueConverter()
 	{
 	}
 	
-	public ValueConverter(String aDateFormat, String aTimeStampFormat, String aNumberFormat)
+	public ValueConverter(String aDateFormat, String aTimeStampFormat)
 	{
 		this.setDefaultDateFormat(aDateFormat);
 		this.setDefaultTimestampFormat(aTimeStampFormat);
-		this.setDefaultNumberFormat(aNumberFormat);
 	}
 
 	public void setDefaultDateFormat(String aFormat)
@@ -60,9 +59,9 @@ public class ValueConverter
 		this.defaultTimestampFormat = aFormat;
 	}
 	
-	public void setDefaultNumberFormat(String aFormat)
+	public void setDecimalCharacter(char aChar)
 	{
-		this.defaultNumberFormat = aFormat;
+		this.decimalCharacter = aChar;
 	}
 	
 	public Object convertValue(Object aValue, int type)
@@ -83,7 +82,7 @@ public class ValueConverter
 			case Types.DOUBLE:
 			case Types.REAL:
 			case Types.FLOAT:
-				return new BigDecimal(aValue.toString());
+				return new BigDecimal(this.adjustDecimalString(aValue.toString()));
 			case Types.CHAR:
 			case Types.VARCHAR:
 				if (aValue instanceof String)
@@ -154,5 +153,42 @@ public class ValueConverter
 		}
 		return null;
   }
+	
+	//private static Pattern DECIMAL = Pattern.compile("^[-+]?\\d+\\.?\\d*e?\\d*$");
+	
+	private String adjustDecimalString(String input)
+	{
+		if (input == null)  return input;
+		String value = input.trim();
+		int len = value.length();
+		if (len == 0) return value;
+		StringBuffer result = new StringBuffer(len);
+		int pos = value.lastIndexOf(this.decimalCharacter);
+		for (int i=0; i < len; i++)
+		{
+			char c = value.charAt(i);
+			if (i == pos)
+			{
+				// replace the decimal char with a . as that is required by BigDecimal(String)
+				result.append('.');
+			}
+			// filter out everything but valid number characters
+			else if ("+-0123456789eE".indexOf(c) > -1)
+			{
+				result.append(c);
+			}
+		}
+		
+		return result.toString();
+	}
+	
+	public static void main(String[] args)
+	{
+		String input = "$1.234,5";
+		ValueConverter convert = new ValueConverter();
+		convert.setDecimalCharacter(',');
+		input = convert.adjustDecimalString(input);
+		System.out.println("input=" + input);
+	}
 	
 }

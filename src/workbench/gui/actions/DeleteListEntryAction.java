@@ -7,10 +7,7 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.Action;
-
 import workbench.exception.WbException;
-import workbench.gui.actions.WbAction;
 import workbench.interfaces.FileActions;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -26,12 +23,11 @@ public class DeleteListEntryAction extends WbAction
 	public DeleteListEntryAction(FileActions aClient)
 	{
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("LabelDeleteListEntry"));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("LabelDeleteListEntry"));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_DELETE));
+		this.setMenuTextByKey("LabelDeleteListEntry");
+		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_DELETE));
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		try
 		{

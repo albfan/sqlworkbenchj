@@ -10,8 +10,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -19,20 +17,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+
 import workbench.WbManager;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.BooleanPropertyEditor;
-import workbench.gui.components.ComboStringPropertyEditor;
 import workbench.gui.components.PasswordPropertyEditor;
 import workbench.gui.components.StringPropertyEditor;
-import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.help.HtmlViewer;
@@ -551,7 +549,7 @@ public class ConnectionEditorPanel
 		this.initPropertyEditors();
 		String drvClass = aProfile.getDriverclass();
 		String name = aProfile.getDriverName();
-		DbDriver drv = WbManager.getInstance().getConnectionMgr().findDriver(drvClass, name);
+		DbDriver drv = WbManager.getInstance().getConnectionMgr().findDriverByName(drvClass, name);
 		cbDrivers.setSelectedItem(drv);
 		this.init = false;
 	}

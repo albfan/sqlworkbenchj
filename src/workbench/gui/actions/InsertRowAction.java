@@ -6,7 +6,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import javax.swing.Action;
+
 import workbench.interfaces.DbData;
 import workbench.resource.ResourceMgr;
 
@@ -22,13 +22,12 @@ public class InsertRowAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtInsertRow"));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("RowInsertAfter"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtInsertRow"));
+		this.initMenuDefinition("MnuTxtInsertRow");
+		this.setIcon(ResourceMgr.getImage("RowInsertAfter"));
+		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		this.client.addRow();
 	}

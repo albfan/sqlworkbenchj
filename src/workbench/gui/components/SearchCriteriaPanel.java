@@ -10,14 +10,14 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
+
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
+
 import workbench.WbManager;
-import workbench.gui.components.TextComponentMouseListener;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -30,9 +30,11 @@ public class SearchCriteriaPanel
 	private static final String PROP_CLASS = "workbench.sql.search";
 	private static final String PROP_KEY_CASE = "ignoreCase";
 	private static final String PROP_KEY_WHOLE_WORD = "wholeWord";
+	private static final String PROP_KEY_REGEX = "useRegEx";
 	private static final String PROP_KEY_CRIT = "lastValue";
 	private JCheckBox ignoreCase;
 	private JCheckBox wholeWord;
+	private JCheckBox useRegEx;
 	
 	private JTextField criteria;
 	private JLabel label;
@@ -45,11 +47,17 @@ public class SearchCriteriaPanel
 	public SearchCriteriaPanel(String initialValue)
 	{
 		this.ignoreCase = new JCheckBox(ResourceMgr.getString("LabelSearchIgnoreCase"));
+		this.ignoreCase.setToolTipText(ResourceMgr.getDescription("LabelSearchIgnoreCase"));
 		this.ignoreCase.setSelected("true".equals(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_CASE, "true")));
 		
-		this.wholeWord = new JCheckBox(ResourceMgr.getString("LabelSearchWholeWord"));
+		this.wholeWord = new JCheckBox(ResourceMgr.getString("LabelSearchWordsOnly"));
+		this.wholeWord.setToolTipText(ResourceMgr.getDescription("LabelSearchWordsOnly"));
 		this.wholeWord.setSelected("true".equals(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_WHOLE_WORD, "false")));
-	
+
+		this.useRegEx = new JCheckBox(ResourceMgr.getString("LabelSearchRegEx"));
+		this.useRegEx.setToolTipText(ResourceMgr.getDescription("LabelSearchRegEx"));
+		this.useRegEx.setSelected("true".equals(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_REGEX, "false")));
+		
 		this.label = new JLabel(ResourceMgr.getString("LabelSearchCriteria"));
 		this.criteria = new JTextField();
 		this.criteria.setColumns(40);
@@ -69,9 +77,10 @@ public class SearchCriteriaPanel
 		p.add(this.criteria, BorderLayout.CENTER);
 		this.add(p,BorderLayout.CENTER);
 		p = new JPanel();
-		p.setLayout(new GridLayout(2,1));
+		p.setLayout(new GridLayout(3,1));
 		p.add(this.ignoreCase);
 		p.add(this.wholeWord);
+		p.add(this.useRegEx);
 		
 		this.add(p, BorderLayout.SOUTH);
 	}
@@ -91,6 +100,11 @@ public class SearchCriteriaPanel
 		return this.ignoreCase.isSelected();
 	}
 
+	public boolean getUseRegex()
+	{
+		return this.useRegEx.isSelected();
+	}
+	
 	public void setSearchCriteria(String aValue)
 	{
 		this.criteria.setText(aValue);
@@ -113,6 +127,7 @@ public class SearchCriteriaPanel
 		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_CASE, Boolean.toString(this.getIgnoreCase()));
 		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_CRIT, this.getCriteria());
 		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_WHOLE_WORD, Boolean.toString(this.getWholeWordOnly()));
+		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_REGEX, Boolean.toString(this.getUseRegex()));
 		if (choice == JOptionPane.CANCEL_OPTION) return false;
 		return true;
 	}

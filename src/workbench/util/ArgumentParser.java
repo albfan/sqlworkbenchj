@@ -3,7 +3,10 @@
  */
 package workbench.util;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +18,7 @@ public class ArgumentParser
 {
 
 	private Map arguments = new HashMap();
+	private ArrayList unknownParameters = new ArrayList();
 	
 	public ArgumentParser()
 	{
@@ -28,6 +32,7 @@ public class ArgumentParser
 	
 	public void parse(String args[])
 	{
+		this.reset();
 		StringBuffer line = new StringBuffer(200);
 		for (int i=0; i<args.length; i++)
 		{
@@ -39,7 +44,8 @@ public class ArgumentParser
 	
 	public void parse(String aCmdLine)
 	{
-		List words = StringUtil.split(aCmdLine, "-", false, "\"'", true);
+		this.reset();
+		List words = StringUtil.split(aCmdLine, "-", false, "\"'", false);
 
 		int count = words.size();
 		for (int i=0; i < count; i++)
@@ -63,9 +69,32 @@ public class ArgumentParser
 			{
 				arguments.put(arg, value);
 			}
+			else
+			{
+				this.unknownParameters.add(arg);
+			}
 		}
 	}
 
+	public boolean hasUnknownArguments()
+	{
+		return this.unknownParameters.size() > 0;
+	}
+	
+	public List getUnknownArguments()
+	{
+		return Collections.unmodifiableList(this.unknownParameters);
+	}
+	public void reset()
+	{
+		Iterator keys = this.arguments.keySet().iterator();
+		while (keys.hasNext())
+		{
+			String key = (String)keys.next();
+			this.arguments.put(key, null);
+		}
+		this.unknownParameters.clear();
+	}
 	public boolean getBoolean(String key)
 	{
 		String value = this.getValue(key);

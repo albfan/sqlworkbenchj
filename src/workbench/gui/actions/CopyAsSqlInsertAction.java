@@ -9,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.Action;
 import javax.swing.KeyStroke;
 
 import workbench.gui.components.WbTable;
@@ -27,14 +26,11 @@ public class CopyAsSqlInsertAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtCopyAsSqlInsert"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
-		String desc = ResourceMgr.getDescription("MnuTxtCopyAsSqlInsert");
-		this.putValue(Action.SHORT_DESCRIPTION, desc);
-		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK));
+		this.initMenuDefinition("MnuTxtCopyAsSqlInsert",KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK));
+		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		client.copyAsSqlInsert();
 	}

@@ -36,7 +36,7 @@ public class StringUtil
 	public static final Pattern PATTERN_CRLF = Pattern.compile("(\r\n|\n\r|\r|\n)");
 
 	public static final Pattern PATTERN_EMPTY_LINE = Pattern.compile("$(\r\n|\n\r|\r|\n)");
-	
+
 	public static final String LINE_TERMINATOR = System.getProperty("line.separator");
 	public static final String PATH_SEPARATOR = System.getProperty("path.separator");
 	public static final String FILE_SEPARATOR = System.getProperty("file.separator");
@@ -47,21 +47,21 @@ public class StringUtil
 	{
 		return replaceToBuffer(null, aString, aValue, aReplacement);
 	}
-	
+
 	public static final StringBuffer replaceToBuffer(StringBuffer target, String aString, String aValue, String aReplacement)
 	{
 		if (target == null)
 		{
 			target = new StringBuffer((int)(aString.length() * 1.1));
 		}
-		
-		if (aReplacement == null) 
+
+		if (aReplacement == null)
 		{
 			target.append(aString);
 		}
 
 		int pos = aString.indexOf(aValue);
-		if (pos == -1) 
+		if (pos == -1)
 		{
 			target.append(aString);
 			return target;
@@ -83,7 +83,7 @@ public class StringUtil
 		}
 		return target;
 	}
-	
+
 	public static final String replace(String aString, String aValue, String aReplacement)
 	{
 		if (aReplacement == null) return aString;
@@ -92,7 +92,7 @@ public class StringUtil
 		if (pos == -1) return aString;
 
 		StringBuffer temp = replaceToBuffer(aString, aValue, aReplacement);
-		
+
 		return temp.toString();
 	}
 
@@ -132,11 +132,11 @@ public class StringUtil
 		}
 		return result.toString();
 	}
-	
+
 	public static double getDoubleValue(String aValue, double aDefault)
 	{
 		if (aValue == null) return aDefault;
-		
+
 		double result = aDefault;
 		try
 		{
@@ -147,7 +147,7 @@ public class StringUtil
 		}
 		return result;
 	}
-	
+
 	public static int getIntValue(String aValue)
 	{
 		return getIntValue(aValue, 0);
@@ -156,7 +156,7 @@ public class StringUtil
 	public static int getIntValue(String aValue, int aDefault)
 	{
 		if (aValue == null) return aDefault;
-		
+
 		int result = aDefault;
 		try
 		{
@@ -184,6 +184,7 @@ public class StringUtil
 	{
 		return makeJavaString(aString, true);
 	}
+
 	public static final String makeJavaString(String aString, boolean includeNewLines)
 	{
 		StringBuffer result = new StringBuffer("String sql=");
@@ -198,7 +199,7 @@ public class StringUtil
 				else result.append("           ");
 				result.append('"');
 				result.append(line);
-				if (includeNewLines) 
+				if (includeNewLines)
 				{
 					result.append(" \\n\"");
 				}
@@ -237,7 +238,7 @@ public class StringUtil
 		{
 			String l = (String)lines.get(i);
 			if ( l == null) continue;
-			if (l.trim().startsWith("//")) 
+			if (l.trim().startsWith("//"))
 			{
 				l = l.replaceFirst("//", "--");
 			}
@@ -338,7 +339,7 @@ public class StringUtil
 		//System.out.println("toTrim=" + input);
 		if (input == null) return null;
 		if (input.length() == 0) return EMPTY_STRING;
-		
+
 		String result = input.trim();
 		int first = 0;
 		int len = result.length();
@@ -346,7 +347,7 @@ public class StringUtil
 
 		char firstChar = result.charAt(0);
 		char lastChar = result.charAt(len - 1);
-		
+
 		if ( (firstChar == '"' && lastChar == '"') ||
 		     (firstChar == '\'' && lastChar == '\''))
 		{
@@ -407,13 +408,13 @@ public class StringUtil
 	public static final String escapeXML(String s)
 	{
 		StringBuffer result = null;
-		
+
 		for(int i = 0, max = s.length(), delta = 0; i < max; i++)
 		{
 			char c = s.charAt(i);
 			String replacement = null;
-			
-			switch (c) 
+
+			switch (c)
 			{
 				case '&': replacement = "&amp;"; break;
 				case '<': replacement = "&lt;"; break;
@@ -422,7 +423,7 @@ public class StringUtil
 				case '"': replacement = "&quot;"; break;
 				case '\'': replacement = "&apos;"; break;
 			}
-			
+
 			if (replacement != null)
 			{
 				if (result == null)
@@ -438,9 +439,9 @@ public class StringUtil
 			return s;
 		}
 		return result.toString();
-		
+
 	}
-	
+
 	public static final String escapeHTML(String s)
 	{
 		if (s == null) return null;
@@ -616,7 +617,7 @@ public class StringUtil
 		Reader in = new InputStreamReader(aStream);
 		return readStringList(in);
 	}
-	
+
 	public static ArrayList readStringList(Reader aReader)
 		throws IOException
 	{
@@ -659,14 +660,14 @@ public class StringUtil
 		Writer out = new FileWriter(aFilename);
 		writeStringList(aList, out, true);
 	}
-	
+
 	public static void writeStringList(List aList, OutputStream out)
 		throws IOException
 	{
 		Writer w = new OutputStreamWriter(out);
 		writeStringList(aList, w, false);
-	}	
-	
+	}
+
 	public static void writeStringList(List aList, Writer aWriter, boolean closeStream)
 		throws IOException
 	{

@@ -19,7 +19,6 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import javax.swing.ActionMap;
-import javax.swing.ComponentInputMap;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -31,7 +30,6 @@ import workbench.WbManager;
 import workbench.db.ConnectionProfile;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 

@@ -8,8 +8,10 @@ package workbench.gui.renderer;
 
 import java.awt.Color;
 import java.awt.Component;
+
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbTable;
 import workbench.util.SqlUtil;

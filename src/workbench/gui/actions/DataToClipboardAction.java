@@ -31,15 +31,14 @@ public class DataToClipboardAction extends WbAction
 		super();
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtDataToClipboard"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
+		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		String desc = ResourceMgr.getDescription("MnuTxtDataToClipboard");
 		String shift = KeyEvent.getKeyModifiersText(KeyEvent.SHIFT_MASK);
 		desc = StringUtil.replace(desc, "%shift%", shift);
-		this.putValue(Action.SHORT_DESCRIPTION, desc);
-		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
+		this.initMenuDefinition(ResourceMgr.getString("MnuTxtDataToClipboard"), desc, KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
 		client.copyDataToClipboard(!shiftPressed); 

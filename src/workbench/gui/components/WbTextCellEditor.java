@@ -10,11 +10,12 @@ import java.awt.Font;
 import java.awt.Frame;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+
 import javax.swing.DefaultCellEditor;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.EditWindow;
 import workbench.resource.ResourceMgr;
 
 /**

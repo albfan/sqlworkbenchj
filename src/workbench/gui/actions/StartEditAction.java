@@ -12,13 +12,13 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 
 import workbench.gui.components.WbToolbarButton;
-import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.DbData;
 import workbench.resource.ResourceMgr;
 
@@ -26,7 +26,8 @@ import workbench.resource.ResourceMgr;
  *	Action to copy the contents of a entry field into the clipboard
  *	@author  workbench@kellerer.org
  */
-public class StartEditAction extends WbAction
+public class StartEditAction 
+	extends WbAction
 {
 	private DbData client;
 	private Border enabledBorder = new CompoundBorder(new BevelBorder(BevelBorder.LOWERED), new EmptyBorder(2,2,2,2));
@@ -40,14 +41,13 @@ public class StartEditAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtStartEdit"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtStartEdit"));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("editor"));
+		this.initMenuDefinition("MnuTxtStartEdit");
+		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+		this.setIcon(ResourceMgr.getImage("editor"));
 		this.setEnabled(false);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		this.setSwitchedOn(!this.switchedOn);
 		if (this.switchedOn)
@@ -98,7 +98,15 @@ public class StartEditAction extends WbAction
 			}
 			this.toggleMenu.setText(text);
 			this.toggleMenu.setIconTextGap(0);
-			this.toggleMenu.setIcon(ResourceMgr.getImage("blank"));
+			String lnf = UIManager.getLookAndFeel().getClass().getName();
+			if (lnf.startsWith("com.jgoodies"))
+			{	
+				this.toggleMenu.setIcon(null);
+			}
+			else
+			{	
+				this.toggleMenu.setIcon(ResourceMgr.getImage("blank"));
+			}
 		}
 		aMenu.add(this.toggleMenu);
 	}

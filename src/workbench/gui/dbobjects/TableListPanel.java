@@ -315,7 +315,6 @@ public class TableListPanel
 			if (i >= currentCount)
 			{
 				item = new WbMenuItem();
-				((WbMenuItem)item).removeExtraSpacing();
 				item.setActionCommand("panel-" + i);
 				item.addActionListener(this);
 				this.showDataMenu.add(item);
@@ -625,16 +624,18 @@ public class TableListPanel
 
 	public void restoreSettings()
 	{
+		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+		int maxWidth = (int)(d.getWidth() - 50);
 		int loc = WbManager.getSettings().getIntProperty(this.getClass().getName(), "divider");
-		if (loc == 0) loc = 200;
+		if (loc == 0 || loc > maxWidth) loc = 200;
 		this.splitPane.setDividerLocation(loc);
 
 		loc = WbManager.getSettings().getIntProperty(this.getClass().getName(), "exportedtreedivider");
-		if (loc == 0) loc = 200;
+		if (loc == 0 || loc > maxWidth) loc = 200;
 		this.exportedPanel.setDividerLocation(loc);
 
 		loc = WbManager.getSettings().getIntProperty(this.getClass().getName(), "importedtreedivider");
-		if (loc == 0) loc = 200;
+		if (loc == 0 || loc > maxWidth) loc = 200;
 		this.importedPanel.setDividerLocation(loc);
 
 		String s = WbManager.getSettings().getProperty(this.getClass().getName(), "lastsearch", "");

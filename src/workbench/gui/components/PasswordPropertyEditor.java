@@ -6,9 +6,11 @@ package workbench.gui.components;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.lang.reflect.Method;
+
 import javax.swing.JPasswordField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+
 import workbench.interfaces.SimplePropertyEditor;
 
 

@@ -10,10 +10,12 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.WindowListener;
+
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
+
 import workbench.WbManager;
 import workbench.db.ObjectScripter;
 import workbench.gui.WbSwingUtilities;

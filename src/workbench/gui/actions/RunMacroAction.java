@@ -1,59 +1,59 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.Action;
-import javax.swing.KeyStroke;
 
-import workbench.gui.WbSwingUtilities;
+import workbench.gui.MainWindow;
 import workbench.gui.sql.SqlPanel;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.sql.MacroManager;
+import workbench.util.StringUtil;
 
 /**
  *	@author  workbench@kellerer.org
  */
 public class RunMacroAction extends WbAction
 {
-	private SqlPanel client;
+	private MainWindow client;
 	private String macroName;
 
-	public RunMacroAction(SqlPanel aClient)
+	public RunMacroAction(MainWindow aClient, String aName, int index)
 	{
 		super();
-		this.client = aClient;
-		this.macroName = null;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtManageMacros"));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtManageMacros"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
-		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.CTRL_MASK));
-		this.putValue(Action.SMALL_ICON, null);
-	}
-	
-	public RunMacroAction(SqlPanel aClient, String aName)
-	{
-		super();
-		this.client = aClient;
 		this.macroName = aName;
-		this.putValue(Action.NAME, aName);
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtRunMacro") + " " + aName);
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
-		this.putValue(Action.SMALL_ICON, null);
+		this.client = aClient;
+		String menuTitle = aName;
+		
+		if (index < 10)
+		{
+			menuTitle = "&" + Integer.toString(index) + " - " + aName;
+		}
+		this.putValue(Action.NAME, menuTitle);
+		this.setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
+		String desc = ResourceMgr.getDescription("MnuTxtRunMacro");
+		String shift = KeyEvent.getKeyModifiersText(KeyEvent.SHIFT_MASK);
+		desc = StringUtil.replace(desc, "%shift%", shift);
+		desc = StringUtil.replace(desc, "%macro%", this.macroName);
+		
+		this.putValue(Action.SHORT_DESCRIPTION, desc);
+		this.setIcon(null);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
-		if (this.client != null)
+		if (this.client != null && this.macroName != null)
 		{
-			if (this.macroName == null)
-			{
-				MacroManager.getInstance().selectAndRun(this.client);
+			boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
+			SqlPanel sql = this.client.getCurrentSqlPanel();
+			if (sql != null)
+			{	
+				sql.executeMacro(macroName, shiftPressed);
 			}
 			else
 			{
-				client.executeMacro(macroName);
+				LogMgr.logWarning("RunMacroAction.actionPerformed()", "Don't have a curretn SqlPanel!");
 			}
 		}
 	}

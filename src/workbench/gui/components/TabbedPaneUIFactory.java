@@ -7,6 +7,7 @@
 package workbench.gui.components;
 
 import java.awt.Insets;
+
 import javax.swing.JTabbedPane;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;

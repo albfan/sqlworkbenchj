@@ -22,7 +22,7 @@ public interface Replaceable
 	 *	Find and highlight the first occurance of the String
 	 *	@returns true if an occurance was found
 	 */
-	int findFirst(String aValue, boolean ignoreCase, boolean wholeWord);
+	int findFirst(String aValue, boolean ignoreCase, boolean wholeWord, boolean useRegex);
 
 	/**
 	 *	Find and highlight the next occurance of the expression
@@ -37,7 +37,7 @@ public interface Replaceable
 	 *	If the parameters passed to this method differ from the 
 	 *	last call to findFirst() an implicit findFirst() is issued
 	 */
-	int find(String aValue, boolean ignoreCase, boolean wholeWord);
+	int find(String aValue, boolean ignoreCase, boolean wholeWord, boolean useRegex);
 	
 	/**
 	 *	Replace the currently highlighted (=found) text with the given value
@@ -57,7 +57,7 @@ public interface Replaceable
 	 *	with replacement.
 	 *	@return the number of occurances replaced
 	 */
-	int replaceAll(String value, String replacement, boolean selectedText, boolean ignoreCase, boolean wholeWord);
+	int replaceAll(String value, String replacement, boolean selectedText, boolean ignoreCase, boolean wholeWord, boolean useRegex);
 	
 	boolean isTextSelected();
 }

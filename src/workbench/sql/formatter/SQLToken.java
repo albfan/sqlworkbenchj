@@ -177,9 +177,13 @@ public class SQLToken extends Token
 		{
 			return contents.toUpperCase();
 		}
+		else if (this.isIdentifier())
+		{
+			return contents.toLowerCase();
+		}
 		else
 		{
-			return contents;
+			return this.contents;
 		}
 	}
 

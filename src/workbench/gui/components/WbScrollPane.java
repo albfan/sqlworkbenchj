@@ -66,7 +66,6 @@ public class WbScrollPane extends JScrollPane
 	
 	public void updateCorner()
 	{
-		System.out.println("update corner...");
 		JViewport header = this.getColumnHeader();
 		Dimension visiblesize = header.getExtentSize();
 		Dimension realsize = header.getViewSize();

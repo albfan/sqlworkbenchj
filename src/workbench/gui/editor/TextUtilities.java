@@ -9,12 +9,13 @@ package workbench.gui.editor;
  * remains intact in all source distributions of this package.
  */
 
-import javax.swing.text.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 
 /**
  * Class with several utility functions used by the text area component.
  * @author Slava Pestov
- * @version $Id: TextUtilities.java,v 1.1 2001-12-11 19:07:23 thomas Exp $
+ * @version $Id: TextUtilities.java,v 1.2 2003-12-16 21:58:37 thomas Exp $
  */
 public class TextUtilities
 {

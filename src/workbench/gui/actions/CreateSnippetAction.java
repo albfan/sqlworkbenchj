@@ -7,10 +7,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.Action;
 import javax.swing.KeyStroke;
-import workbench.WbManager;
 
+import workbench.WbManager;
 import workbench.interfaces.TextContainer;
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
@@ -27,13 +26,11 @@ public class CreateSnippetAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtCreateSnippet"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtCreateSnippet"));
-		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.ALT_MASK));
+		this.initMenuDefinition("MnuTxtCreateSnippet", KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.ALT_MASK));
+		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		String sql = this.client.getSelectedText();
 		if (sql == null || sql.length() == 0)

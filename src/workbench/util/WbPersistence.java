@@ -1,6 +1,7 @@
 package workbench.util;
 
 import java.beans.BeanInfo;
+import java.beans.ExceptionListener;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -11,27 +12,62 @@ import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
+
 import workbench.log.LogMgr;
 
 public class WbPersistence
 {
+	private static final ErrorListener listener = new ErrorListener();
 	
 	/** Creates a new instance of Persistence */
 	private WbPersistence()
 	{
 	}
-	
-	public static void makeTransient( Class clazz, String property )
+
+	/**
+	 * Makes a property of the given class transient, so that it won't be written
+	 * into the XML file when saved using WbPersistence 
+	 * @param clazz
+	 * @param property
+	 */
+	public static void makeTransient(Class clazz, String property)
 	{
 		try
 		{
 			BeanInfo info = Introspector.getBeanInfo( clazz );
 			PropertyDescriptor propertyDescriptors[] = info.getPropertyDescriptors();
-			
-			for ( int i = 0; i < propertyDescriptors.length; i++ )
+			for (int i = 0; i < propertyDescriptors.length; i++)
 			{
 				PropertyDescriptor pd = propertyDescriptors[i];
 				if ( pd.getName().equals(property) )
+				{
+					pd.setValue( "transient", Boolean.TRUE );
+				}
+			}
+		} 
+		catch ( IntrospectionException e )
+		{ 
+		}
+	}
+	
+	public static void makeTransient(Class clazz, String[] properties)
+	{
+		try
+		{
+			BeanInfo info = Introspector.getBeanInfo( clazz );
+			PropertyDescriptor propertyDescriptors[] = info.getPropertyDescriptors();
+			int count = properties.length;
+			Set props = new HashSet(count);
+			for (int i=0; i < count; i++) props.add(properties[i]);
+			
+			for (int i = 0; i < propertyDescriptors.length; i++)
+			{
+				PropertyDescriptor pd = propertyDescriptors[i];
+				String name = pd.getName();
+				
+				if (props.contains(name))
 				{
 					pd.setValue( "transient", Boolean.TRUE );
 				}
@@ -47,52 +83,61 @@ public class WbPersistence
 		try
 		{
 			InputStream in = new BufferedInputStream(new FileInputStream(aFilename));
-			return readObject(in);
+			return readObject(in, aFilename);
 		}
 		catch (Exception e)
 		{
-			//e.printStackTrace();
+			LogMgr.logWarning("WbPersistence.readObject()", "File " + aFilename + " not found!");
 			return null;
 		}
 	}
 	
-	public static Object readObject(InputStream in)
+	public static Object readObject(InputStream in, String filename)
+		throws Exception
 	{
-		long start,end;
-		try
-		{
-			start = System.currentTimeMillis();
-			// TODO register an ExceptionListener in order to catch
-			// the error messages
-			XMLDecoder e = new XMLDecoder(in);
-			Object result = e.readObject();
-			e.close();
-			end = System.currentTimeMillis();
-			return result;
-		}
-		catch (Throwable e)
-		{
-			return null;
-		}
+		listener.setFilename(filename);
+		XMLDecoder e = new XMLDecoder(in, null, listener);
+		Object result = e.readObject();
+		e.close();
+		return result;
 	}
 	
 	public static void writeObject(Object aValue, String aFilename)
 	{
 		if (aValue == null) return;
-		long start,end;
 		
 		try
 		{
-			start = System.currentTimeMillis();
-			XMLEncoder e = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(aFilename)));
+			BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(aFilename));
+			listener.setFilename(aFilename);
+			XMLEncoder e = new XMLEncoder(out);
 			e.writeObject(aValue);
 			e.close();
-			end = System.currentTimeMillis();
 		}
 		catch (Throwable e)
 		{
 			LogMgr.logError("WbPersistence.writeObject()", "Error writing " + aFilename, e);
 		}
 	}
+
+}
+
+class ErrorListener 
+	implements ExceptionListener
+{
+	private String currentFilename;
 	
+	public ErrorListener()
+	{
+	}
+
+	public void setFilename(String file)
+	{
+		this.currentFilename = file;
+	}
+	
+	public void exceptionThrown(Exception e)
+	{
+		LogMgr.logError("WbPersistence", "Error reading file " + currentFilename, e);
+	}
 }

@@ -11,15 +11,14 @@ import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
+
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
+
 import workbench.WbManager;
-import workbench.gui.components.TextComponentMouseListener;
 import workbench.interfaces.Replaceable;
 import workbench.resource.ResourceMgr;
 

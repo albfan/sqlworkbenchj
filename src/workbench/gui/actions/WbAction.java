@@ -1,13 +1,12 @@
 package workbench.gui.actions;
 
-import java.awt.EventQueue;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
+import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JMenu;
@@ -15,9 +14,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 
+import workbench.WbManager;
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbToolbarButton;
 import workbench.resource.ResourceMgr;
+import workbench.resource.ShortcutManager;
 
 /**
  *	@author  workbench@kellerer.org
@@ -30,6 +31,7 @@ public class WbAction
 	public static final String MENU_SEPARATOR = "MenuSepBefore";
 	public static final String TBAR_SEPARATOR = "TbarSepBefore";
 	public static final String ALTERNATE_ACCELERATOR = "AlternateAccelerator";
+	public static final String DEFAULT_ACCELERATOR = "DefaultAccelerator";
 	public static final String MNEMONIC_INDEX = "MnemonicIndex";
 	
 	private String actionName;
@@ -42,6 +44,7 @@ public class WbAction
 		this();
 		this.delegate = l;
 	}
+	
 	public WbAction()
 	{
 		String c = this.getClass().getName();
@@ -49,7 +52,6 @@ public class WbAction
     this.putValue(ACTION_COMMAND_KEY, this.actionName);
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("blank"));
 	}
-
 
 	public void setTooltip(String aText)
 	{
@@ -66,9 +68,112 @@ public class WbAction
 		this.actionName = aName;
 	}
 
+	public String getMenuLabel()
+	{
+		return (String)this.getValue(Action.NAME);
+	}
+	
+	/**
+	 * Initialize the menu definition for this action. The passed key will 
+	 * be used to initialize the menu label and tooltip.
+	 * This method will register the action with the ShortcutManager even though
+	 * no shortcut is defined.
+	 * @param aKey         Translation key for ResourceMgr
+	 * @see #setMenuTextByKey(String) 
+	 * @see workbench.resource.ShortcutManager#registerAction(WbAction)
+	 */
+	public void initMenuDefinition(String aKey)
+	{
+		this.initMenuDefinition(aKey, null);
+	}
+
+	/**
+	 * Initialize the menu definition for this action. The passed key will 
+	 * be used to initialize the menu label and tooltip.
+	 * This method will register the action with the ShortcutManager.
+	 * @param aKey         Translation key for ResourceMgr
+	 * @param defaultKey   Default shortcut key, may be null
+	 * @see #setMenuTextByKey(String)
+	 * @see workbench.resource.ShortcutManager#registerAction(WbAction)
+	 */
+	public void initMenuDefinition(String aKey, KeyStroke defaultKey)
+	{
+		this.setMenuTextByKey(aKey);
+		this.setDefaultAccelerator(defaultKey);
+		ShortcutManager mgr = WbManager.getShortcutManager(); 
+		mgr.registerAction(this);
+		KeyStroke key = mgr.getCustomizedKeyStroke(this);
+		if (key != null)
+		{
+			this.setAccelerator(key);
+		}
+	}
+
+	/**
+	 * Initialize the menu definition for this action. The menu text and tooltip
+	 * will be used directly without retrieving it from the ResourceMgr.  
+	 * This method will register the action with the ShortcutManager.
+	 * @param aMenuText    The text to be displayed in the menu item
+	 * @param aTooltip     The tooltip for the menu item
+	 * @param defaultKey   Default shortcut key, may be null
+	 * @see workbench.resource.ShortcutManager#registerAction(WbAction)
+	 */
+	public void initMenuDefinition(String aMenuText, String aTooltip, KeyStroke defaultKey)
+	{
+		this.putValue(Action.NAME, aMenuText);
+		this.setTooltip(aTooltip);
+		
+		this.setDefaultAccelerator(defaultKey);
+		ShortcutManager mgr = WbManager.getShortcutManager(); 
+		mgr.registerAction(this);
+		KeyStroke custom = mgr.getCustomizedKeyStroke(this);
+		if (custom != null)
+		{
+			this.setAccelerator(custom);
+		}
+	}
+	
+	/**
+	 * Define the displayed menu text and tooltip. The passed key
+	 * will be used to retrieve the real text from the ResourceManager.
+	 * This will not register the Action with the ShortcutManager. 
+	 * @param aKey  The key for the ResourceManager
+	 * @see workbench.resource.ResourceMgr#getString(String)
+	 * @see workbench.resource.ResourceMgr#getDescription(String)
+	 */
+	public void setMenuTextByKey(String aKey)
+	{
+		this.putValue(Action.NAME, ResourceMgr.getString(aKey));
+		this.setTooltip(ResourceMgr.getDescription(aKey));
+	}
+	
 	public KeyStroke getAlternateAccelerator()
 	{
 		return (KeyStroke)this.getValue(ALTERNATE_ACCELERATOR);
+	}
+	
+	public void setAccelerator(KeyStroke key)
+	{
+		KeyStroke old = this.getAccelerator();
+		this.putValue(Action.ACCELERATOR_KEY, key);
+
+		boolean isNew = false;
+		if (old != null && key != null) 
+		{	
+			isNew = !key.equals(old);
+		}
+		else
+		{
+			isNew = (old != null || key != null);
+		}
+  
+		if (isNew && this.menuItem != null)
+		{
+			// to force a re-initialization of the menu item
+			// we need to first clear the action and then re-assign it
+			this.menuItem.setAction(null);
+			this.menuItem.setAction(this);
+		}
 	}
 	
 	public KeyStroke getAccelerator()
@@ -80,6 +185,7 @@ public class WbAction
   {
     return this.getToolbarButton(false);
   }
+	
 	public JButton getToolbarButton(boolean createNew )
 	{
     JButton result;
@@ -96,14 +202,6 @@ public class WbAction
       result = this.toolbarButton;
     }
     
-		/*
-		KeyStroke stroke = this.getAccelerator();
-		int mod = stroke.getModifiers();
-		String delimit = UIManager.getString( "MenuItem.acceleratorDelimiter" );
-		String keyTip = KeyEvent.getKeyModifiersText(mod) +
-								delimit +
-								KeyEvent.getKeyText(stroke.getKeyCode());
-		*/
 		return result;
 	}
 
@@ -136,6 +234,11 @@ public class WbAction
 		return this.menuItem;
 	}
 
+	public void setMenuItemName(String aKey)
+	{
+		this.putValue(WbAction.MAIN_MENU_ITEM, aKey);
+	}
+	
 	public void setCreateToolbarSeparator(boolean aFlag)
 	{
 		if (aFlag)
@@ -186,6 +289,7 @@ public class WbAction
 			im.remove(alternate);
 		}
 	}
+	
 	public void putValue(String key, Object newValue)
 	{
 		if (Action.NAME.equals(key) && (newValue instanceof String) && (newValue != null))
@@ -207,13 +311,56 @@ public class WbAction
 		{
 			super.putValue(key, newValue);
 		}
+		
+		/*
+		// if the accelerator is beeing set, check if we already
+		// have a default key. If not, then set the current accelerator
+		// as the default key. This way, the first shortcut defined
+		// for this action, will define the default shortcut.
+		if (Action.ACCELERATOR_KEY.equals(key))
+		{
+			if (this.getDefaultAccelerator() == null)
+			{
+				super.putValue(DEFAULT_ACCELERATOR, this.getAccelerator());
+			}
+		}
+		
+		String label = this.getMenuLabel();
+		KeyStroke def = this.getDefaultAccelerator();
+
+		// if label and default accelerator are defined
+		// ask the ShortcutManager if a customized shortcut is available
+		// if it is, we'll overwrite the current accelerator 
+		// with the value from the ShortcutManager
+		if (label != null && def != null)
+		{
+			ShortcutManager mgr = WbManager.getShortcutManager(); 
+			mgr.registerAction(this);
+			KeyStroke custom = mgr.getCustomizedKeyStroke(this);
+			if (custom != null)
+			{
+				// call the ancestor directly, otherwise we'll run into an infitinite loop!
+				super.putValue(Action.ACCELERATOR_KEY, custom);
+			}
+		}
+		*/
 	}
 
-	public void setAcceleratorKey(KeyStroke key)
+	
+	public void setDefaultAccelerator(KeyStroke key)
 	{
-		this.putValue(Action.ACCELERATOR_KEY, key);
+		this.putValue(DEFAULT_ACCELERATOR, key);
 	}
 	
+	public KeyStroke getDefaultAccelerator()
+	{
+		return (KeyStroke)this.getValue(DEFAULT_ACCELERATOR);
+	}
+	
+	public void setIcon(ImageIcon icon)
+	{
+		this.putValue(Action.SMALL_ICON, icon);
+	}
 	public void removeIcon()
 	{
 		this.putValue(Action.SMALL_ICON, null);
@@ -221,13 +368,7 @@ public class WbAction
 	
 	public void actionPerformed(final ActionEvent e)
 	{
-//		EventQueue.invokeLater(new Runnable()
-//		{
-//			public void run()
-//			{
-				executeAction(e);
-//			}
-//		});
+		executeAction(e);
 	}
 	
 	public void executeAction(ActionEvent e)

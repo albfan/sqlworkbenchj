@@ -10,13 +10,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.Action;
 import javax.swing.KeyStroke;
 
-import workbench.resource.ResourceMgr;
-
 /**
- *	Action to copy the contents of a entry field into the clipboard
  *	@author  workbench@kellerer.org
  */
 public class OptimizeAllColumnsAction extends WbAction
@@ -27,15 +23,15 @@ public class OptimizeAllColumnsAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtOptimizeAllCol"));
+		this.initMenuDefinition("MnuTxtOptimizeAllCol",KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK));
 	}
 
-	public void enableShortCut()
+	public void disableShortcut()
 	{
-		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK));
+		this.setAccelerator(null);
 	}
 	
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		e.setSource(this);
 		this.client.actionPerformed(e);

@@ -7,8 +7,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.Action;
-
 import workbench.interfaces.Spooler;
 import workbench.resource.ResourceMgr;
 
@@ -24,13 +22,12 @@ public class SpoolDataAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtSpoolData"));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtSpoolData"));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("SpoolData"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
+		this.initMenuDefinition("MnuTxtSpoolData");
+		this.setIcon(ResourceMgr.getImage("SpoolData"));
+		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		this.client.spoolData();
 	}

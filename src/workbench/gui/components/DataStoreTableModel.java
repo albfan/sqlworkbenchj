@@ -36,6 +36,7 @@ public class DataStoreTableModel
 	// used for sorting the model
 	private boolean sortAscending = true;
 	private int sortColumn = -1;
+	private boolean allowEditing = true;
 	
 	public DataStoreTableModel(DataStore aDataStore) throws IllegalArgumentException
 	{
@@ -320,9 +321,14 @@ public class DataStoreTableModel
 		if (this.showStatusColumn)
 			return (column != 0);
 		else
-			return true;
+			return this.allowEditing;
 	}
 
+	public void setAllowEditing(boolean aFlag)
+	{
+		this.allowEditing = aFlag;
+	}
+	
 	/**    Return true if the data is sorted in ascending order.
 	 *
 	 * @return True if sorted in ascending order
@@ -404,6 +410,7 @@ public class DataStoreTableModel
 			}
 		};
 		t.setName("DataStoreTableModel sort thread");
+		t.setDaemon(true);
 		t.start();
 	}
 

@@ -1,17 +1,12 @@
 package workbench.sql.wbcommands;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import workbench.WbManager;
 
+import workbench.WbManager;
 import workbench.db.WbConnection;
-import workbench.exception.ExceptionUtil;
 import workbench.exception.WbException;
-import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.DataStore;
-import workbench.util.LineTokenizer;
 
 /**
  *

@@ -2,6 +2,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import workbench.db.DataSpooler;
 import workbench.db.WbConnection;
@@ -10,7 +11,6 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.sql.commands.SelectCommand;
 import workbench.util.ArgumentParser;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -71,11 +71,25 @@ public class WbExport extends SqlCommand
 			result.setFailure();
 			return result;
 		}
+		
+		if (cmdLine.hasUnknownArguments())
+		{
+			List params = cmdLine.getUnknownArguments();
+			StringBuffer msg = new StringBuffer(ResourceMgr.getString("ErrorUnknownParameter"));
+			for (int i=0; i < params.size(); i++)
+			{
+				msg.append((String)params.get(i));
+				if (i > 0) msg.append(',');
+			}
+			result.addMessage(msg.toString());
+			result.addMessage(ResourceMgr.getString("ErrorSpoolWrongParameters"));
+			result.setFailure();
+			return result;
+		}
 
 		String type = null;
 		String file = null;
 		
-		String cleancr = null;
 		this.spooler = new DataSpooler();
 		
 		type = cmdLine.getValue("type");
@@ -92,7 +106,8 @@ public class WbExport extends SqlCommand
 		
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
-			
+			// change the contents of type in order to display it properly
+			type = "Text";
 			spooler.setOutputTypeText();
 			String delimiter = cmdLine.getValue("delimiter");
 			if (delimiter != null) spooler.setTextDelimiter(delimiter);
@@ -115,6 +130,8 @@ public class WbExport extends SqlCommand
 		}
 		else if ("sql".equalsIgnoreCase(type))
 		{
+			// change the contents of type in order to display it properly
+			type = "SQL";
 			spooler.setOutputTypeSqlInsert();
 			String create = cmdLine.getValue("createtable");
 			spooler.setIncludeCreateTable(StringUtil.stringToBool(create));
@@ -126,11 +143,12 @@ public class WbExport extends SqlCommand
 		}
 		else if ("xml".equalsIgnoreCase(type))
 		{
+			// change the contents of type in order to display it properly
+			type = "XML";
 			String format = cmdLine.getValue("dateformat");
 			if (format != null) spooler.setTextDateFormat(format);
 
 			String encoding = cmdLine.getValue("encoding");
-			System.out.println("encoding=" + encoding);
 			if (encoding != null) spooler.setXmlEncoding(encoding);
 			
 			format = cmdLine.getValue("timestampformat");
@@ -152,7 +170,7 @@ public class WbExport extends SqlCommand
 		this.spooler.setOutputFilename(file);
 		this.spooler.setConnection(aConnection);
 		String msg = ResourceMgr.getString("MsgSpoolInit");
-		msg = StringUtil.replace(msg, "%type%", type.toUpperCase());
+		msg = StringUtil.replace(msg, "%type%", type);
 		msg = StringUtil.replace(msg, "%file%", file);
 		//msg = msg + " quote=" + spooler.getTextQuoteChar();
 		result.addMessage(msg);

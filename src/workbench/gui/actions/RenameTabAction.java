@@ -2,8 +2,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.Action;
-
 import workbench.gui.MainWindow;
 import workbench.resource.ResourceMgr;
 
@@ -18,13 +16,12 @@ public class RenameTabAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtRenameTab"));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtRenameTab"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_VIEW);
-		this.putValue(Action.SMALL_ICON, null);
+		this.initMenuDefinition("MnuTxtRenameTab");
+		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
+		this.setIcon(null);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		this.client.renameTab();
 	}

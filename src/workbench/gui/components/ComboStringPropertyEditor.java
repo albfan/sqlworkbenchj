@@ -8,8 +8,10 @@ import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.Method;
+
 import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
+
 import workbench.interfaces.SimplePropertyEditor;
 
 

@@ -5,8 +5,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
-import javax.swing.JPanel;
 
+import javax.swing.JPanel;
 import javax.swing.border.AbstractBorder;
 
 public class DividerBorder extends AbstractBorder
@@ -17,6 +17,7 @@ public class DividerBorder extends AbstractBorder
 	public static final int BOTTOM = 3;
 	public static final int MIDDLE = 4;
 	public static final int LEFT_RIGHT = 5;
+	public static final int HORIZONTAL_MIDDLE = 6;
 	
 	protected int type;
 	protected int thickness;
@@ -82,6 +83,12 @@ public class DividerBorder extends AbstractBorder
 				g.drawLine(x + w2, y, x + w2, y + height);
 				g.setColor(light);
 				g.drawLine(x + w2 + 1, y, x + w2 + 1, y + height);
+				break;
+			case HORIZONTAL_MIDDLE:
+				int h2 = (int)height / 2;
+				g.drawLine(0, y + h2, width, y + h2);
+				g.setColor(light);
+				g.drawLine(0, y + h2 + 1, width, y + h2 + 1);
 				break;
 				
 		}

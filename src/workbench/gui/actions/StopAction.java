@@ -7,9 +7,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.Action;
-
-import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.Interruptable;
 import workbench.resource.ResourceMgr;
 
@@ -25,10 +22,9 @@ public class StopAction extends WbAction
 	{
 		super();
 		this.panel = aPanel;
-		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_STOP_STMT));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription(ResourceMgr.TXT_STOP_STMT));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("Stop"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
+		this.initMenuDefinition(ResourceMgr.TXT_STOP_STMT);
+		this.setIcon(ResourceMgr.getImage("Stop"));
+		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.putValue(WbAction.ADD_TO_TOOLBAR, "true");
 		this.setCreateMenuSeparator(true);
 	}

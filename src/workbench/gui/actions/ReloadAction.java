@@ -7,8 +7,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.Action;
-
 import workbench.interfaces.Reloadable;
 import workbench.resource.ResourceMgr;
 
@@ -23,13 +21,12 @@ public class ReloadAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("TxtReload"));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("Refresh"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("TxtReload"));
+		this.setMenuTextByKey("TxtReload");
+		this.setIcon(ResourceMgr.getImage("Refresh"));
+		//this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		this.client.reload();
 	}

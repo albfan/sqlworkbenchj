@@ -9,12 +9,19 @@ package workbench.gui.editor;
  * remains intact in all source distributions of this package.
  */
 
-import javax.swing.text.*;
-import javax.swing.JPopupMenu;
-import java.awt.event.*;
 import java.awt.Component;
-import java.util.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.util.Enumeration;
+import java.util.EventObject;
+import java.util.Hashtable;
+
+import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 
 /**
  * An input handler converts the user's key strokes into concrete actions.
@@ -25,7 +32,7 @@ import javax.swing.KeyStroke;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.9 2003-11-15 15:26:57 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.10 2003-12-16 21:58:36 thomas Exp $
  * @see org.gjt.sp.jedit.textarea.DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
@@ -268,8 +275,7 @@ public abstract class InputHandler extends KeyAdapter
 	 * @param source The event source
 	 * @param actionCommand The action command
 	 */
-	public void executeAction(ActionListener listener, Object source,
-		String actionCommand)
+	public void executeAction(ActionListener listener, Object source, String actionCommand)
 	{
 		// create event
 		ActionEvent evt = new ActionEvent(source,

@@ -1,18 +1,15 @@
 package workbench.gui.editor;
 
 import java.util.ArrayList;
-import java.util.regex.Pattern;
-/*
- * SyntaxDocument.java - Document that can be tokenized
- * Copyright (C) 1999 Slava Pestov
- *
- * You may use and modify this package for any purpose. Redistribution is
- * permitted, in both source and binary form, provided that this notice
- * remains intact in all source distributions of this package.
- */
 
-import javax.swing.event.*;
-import javax.swing.text.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Element;
+import javax.swing.text.PlainDocument;
+import javax.swing.text.Segment;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
@@ -23,7 +20,7 @@ import javax.swing.undo.UndoableEdit;
  * system.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxDocument.java,v 1.6 2003-08-30 15:57:09 thomas Exp $
+ * @version $Id: SyntaxDocument.java,v 1.7 2003-12-16 21:58:36 thomas Exp $
  */
 public class SyntaxDocument
 	extends PlainDocument

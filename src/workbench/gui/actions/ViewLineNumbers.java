@@ -29,7 +29,7 @@ public class ViewLineNumbers extends WbAction
 	public ViewLineNumbers()
 	{
 		super();
-		this.setMenuTextByKey("MnuTxtShowLineNumbers");
+		this.initMenuDefinition("MnuTxtShowLineNumbers");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 		this.setIcon(null);
 		this.switchedOn = WbManager.getSettings().getShowLineNumbers();

@@ -1,7 +1,5 @@
 package workbench.util;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,6 +7,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import workbench.WbManager;
 
 public class SqlUtil
@@ -492,10 +491,12 @@ public class SqlUtil
 	{
 		return getDecimalClass(aSqlType, aSize, aPrecision);
 	}
+	
 	private static String getFloatClass(int aSqlType, int aSize, int aPrecision)
 	{
 		return getDecimalClass(aSqlType, aSize, aPrecision);
 	}
+	
 	private static String getNumericClass(int aSqlType, int aSize, int aPrecision)
 	{
 		return getDecimalClass(aSqlType, aSize, aPrecision);

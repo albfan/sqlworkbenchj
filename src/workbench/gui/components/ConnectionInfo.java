@@ -7,9 +7,11 @@
 package workbench.gui.components;
 
 import java.awt.Color;
+
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeListener;
+
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 

@@ -26,7 +26,8 @@ import workbench.sql.wbcommands.WbListCatalogs;
 import workbench.sql.wbcommands.WbListProcedures;
 import workbench.sql.wbcommands.WbListTables;
 import workbench.sql.wbcommands.WbOraExecute;
-import workbench.sql.wbcommands.WbSpoolCommand;
+import workbench.sql.wbcommands.WbExport;
+import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 
 /**
@@ -45,13 +46,14 @@ public class StatementRunner
 	
 	private int maxRows;
 	private boolean isCancelled;
+
+	private RowActionMonitor rowMonitor;
 	
 	public StatementRunner()
 	{
-		cmdDispatch = new HashMap(10);
+		cmdDispatch = new HashMap();
 		cmdDispatch.put("*", new SqlCommand());
 
-		
 		SqlCommand sql = new WbListTables();
 		cmdDispatch.put(sql.getVerb(), sql);
 		
@@ -74,10 +76,11 @@ public class StatementRunner
 		sql = new SelectCommand();
 		cmdDispatch.put(sql.getVerb(), sql);
 		
-		sql = new WbSpoolCommand();
+		sql = new WbExport();
 		cmdDispatch.put(sql.getVerb(), sql);
 		cmdDispatch.put("EXP", sql);
 		cmdDispatch.put("EXPORT", sql);
+		cmdDispatch.put("SPOOL", sql);
 		
 		sql = new WbImport();
 		cmdDispatch.put(sql.getVerb(), sql);
@@ -113,6 +116,11 @@ public class StatementRunner
 	public StatementRunnerResult getResult()
 	{
 		return this.result;
+	}
+	
+	public void setRowMonitor(RowActionMonitor monitor)
+	{
+		this.rowMonitor = monitor;
 	}
 	
 	public void runStatement(String aSql, int maxRows)
@@ -153,6 +161,8 @@ public class StatementRunner
 		{
 			this.currentCommand = (SqlCommand)this.cmdDispatch.get("*");
 		}
+		
+		this.currentCommand.setRowMonitor(this.rowMonitor);
 		this.currentCommand.setMaxRows(maxRows);
 		this.result = this.currentCommand.execute(this.dbConnection, aSql);
 		

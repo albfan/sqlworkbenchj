@@ -1,13 +1,16 @@
 package workbench.gui.components;
 
 
-import javax.swing.*;
-import javax.swing.text.*;
-
 import java.awt.Toolkit;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
+
+import javax.swing.JTextField;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.PlainDocument;
 
 public class NumberField extends JTextField
 {

@@ -10,12 +10,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 import workbench.WbManager;
 import workbench.util.StringUtil;
@@ -74,17 +68,19 @@ public class LogMgr
 		else
 		{
 			logErrors();
+			logError("LogMgr.setLevel()", "Requested level " +  aType + " not found! Setting level " + ERROR, null);
 		}
 	}
 
-	private static int loglevel = 4;
+  // default INFO
+	private static int loglevel = 3;
 
 
 	public static boolean isDebug()
 	{
 		return (loglevel == 3);
 	}
-	
+
 	public static void shutdown()
 	{
 		if (logOut != null)
@@ -93,7 +89,7 @@ public class LogMgr
 		}
 	}
 
-	public static void setOutputFile(String aFilename)
+	public static void setOutputFile(String aFilename, int maxFilesize)
 	{
 	  if (WbManager.trace) System.out.println("LogMgr.setOutputFile() - " + aFilename);
 		if (aFilename == null || aFilename.length() == 0) return;
@@ -107,14 +103,15 @@ public class LogMgr
 			}
       if (WbManager.trace) System.out.println("LogMgr.checkOutput() - Opening logfile " + aFilename);
 			File f = new File(aFilename);
-			if (f.exists())
+			
+			if (f.exists() && f.length() > maxFilesize)
 			{
 				File last = new File(aFilename + ".last");
 				if (last.exists()) last.delete();
 				f.renameTo(last);
 			}
-			logOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(aFilename)));
-      logInfo("LogMgr", "Log started");
+			logOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(aFilename,true)));
+			logInfo("LogMgr", "========= Log started =========");
 		}
 		catch (Throwable th)
 		{
@@ -161,24 +158,27 @@ public class LogMgr
 	private static void logMessage(String aType, Object aCaller, String aMsg, Throwable th)
 	{
 		int level = LEVELS.indexOf(aType);
+		//System.out.println("requested level=" + level + ", current level=" + loglevel + ",msg=" + aMsg);
+		
 		if (level > loglevel) return;
 
 		String s = formatMessage(aType, aCaller, aMsg, th);
-		if (logOut != null) 
+		if (logOut != null)
 		{
 			logOut.print(s);
 			logOut.flush();
 		}
 		System.out.print(s);
 	}
-	
+
 	private static String formatMessage(String aType, Object aCaller, String aMsg, Throwable th)
 	{
 		StringBuffer buff;
 		if (th == null) buff = new StringBuffer(200);
 		else buff = new StringBuffer(500);
-		
+
 		buff.append(aType);
+		for (int i=aType.length(); i < 5; i++) buff.append(" ");
 		buff.append(" ");
 		buff.append(getTimeString());
 		buff.append(" - ");
@@ -213,12 +213,12 @@ public class LogMgr
 			else if (exceptionType == EXC_TYPE_COMPLETE)
 			{
 				String msg = th.getMessage();
-				if (msg != null) 
+				if (msg != null)
 				{
 					buff.append(msg);
 					buff.append(StringUtil.LINE_TERMINATOR);
 				}
-				
+
 				buff.append(getStackTrace(th));
 				buff.append(StringUtil.LINE_TERMINATOR);
 			}
@@ -236,7 +236,7 @@ public class LogMgr
 			th.printStackTrace(pw);
 			pw.close();
 			return sw.toString();
-		} 
+		}
 		catch (Exception ex)
 		{
 		}

@@ -9,6 +9,8 @@ package workbench.storage;
 import java.io.BufferedInputStream;
 import java.util.Date;
 import java.util.HashMap;
+
+import workbench.log.LogMgr;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 
@@ -38,7 +40,17 @@ public class SqlSyntaxFormatter
 		HashMap result = null;
 
 		BufferedInputStream in = new BufferedInputStream(SqlSyntaxFormatter.class.getResourceAsStream(aFilename));
-		Object value = WbPersistence.readObject(in);
+		Object value;
+		try
+		{
+			// filename is for logging purposes only
+			value = WbPersistence.readObject(in, aFilename);
+		}
+		catch (Exception e)
+		{
+			value = null;
+			LogMgr.logError("SqlSyntaxFormatter.readStatementTemplates()", "Error reading template file " + aFilename,e);
+		}
 		if (value != null && value instanceof HashMap)
 		{
 			result = (HashMap)value;

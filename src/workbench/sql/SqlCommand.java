@@ -17,6 +17,7 @@ import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.storage.RowActionMonitor;
 import workbench.util.LineTokenizer;
 import workbench.util.StringUtil;
 
@@ -29,6 +30,7 @@ public class SqlCommand
 	protected Statement currentStatement;
 	protected WbConnection currentConnection;
 	protected boolean isCancelled = false;
+	protected RowActionMonitor rowMonitor;
 	
 	/**
 	 *	Checks if the verb of the given SQL script 
@@ -44,59 +46,77 @@ public class SqlCommand
 		return true;
 	}
 	
+	public void setRowMonitor(RowActionMonitor monitor)
+	{
+		this.rowMonitor = monitor;
+	}
+	
 	protected void appendSuccessMessage(StatementRunnerResult result)
 	{
 		result.addMessage(this.getVerb() + " " + ResourceMgr.getString("MsgKnownStatementOK"));
 	}
 	
 	/**
-	 *	Append any warnings from the Statement to the given 
+	 *	Append any warnings from the given Statement and Connection to the given 
 	 *	StringBuffer. If the connection is a connection to Oracle
 	 *	then any messages written with dbms_output are appended as well
+	 *  This behaviour is then similar to MS SQL Server where any messages
+	 *  displayed using the PRINT function are returned in the Warnings as well.
 	 */
 	protected boolean appendWarnings(WbConnection aConn, Statement aStmt, StringBuffer msg)
 	{
 		try
 		{
+			// some DBMS return warnings on the connection rather then on the 
+			// statement. We need to check them here as well. Then some of
+			// the DBMS return the same warnings on the Statement AND the 
+			// Connection object. 
+			// For this we keep a list of warnings which have been added
+			// from the statement. They will not be added when the Warnings from
+			// the connection are retrieved
 			ArrayList added = new ArrayList();
+			
 			String s = null;
 			SQLWarning warn = aStmt.getWarnings();
-			boolean warnings = warn != null;
+			boolean hasWarnings = warn != null;
 			while (warn != null)
 			{
 				s = warn.getMessage();
 				if (s != null && s.length() > 0)
 				{
-					msg.append('\n');
 					msg.append(s);
+					if (!s.endsWith("\n")) msg.append('\n');
 				}
 				warn = warn.getNextWarning();
 				added.add(s);
 			}
-			if (warnings) msg.append('\n');
-			String outMsg = aConn.getOutputMessages();
-			if (outMsg.length() > 0)
+			if (hasWarnings) msg.append('\n');
+			s = aConn.getOutputMessages();
+			if (s.length() > 0)
 			{
-				msg.append(outMsg);
-				if (!outMsg.endsWith("\n")) msg.append("\n");
-				warnings = true;
+				msg.append(s);
+				if (!s.endsWith("\n")) msg.append("\n");
+				hasWarnings = true;
 			}
+			
 			warn = aConn.getSqlConnection().getWarnings();
-			warnings = warnings || (warn != null);
+			hasWarnings = hasWarnings || (warn != null);
 			while (warn != null)
 			{
 				s = warn.getMessage();
 				if (!added.contains(s))
 				{
-					msg.append('\n');
 					msg.append(s);
+					if (!s.endsWith("\n")) msg.append('\n');
 				}
 				warn = warn.getNextWarning();
 			}
 			
+			// make sure the warnings are cleared from both objects!
 			aStmt.clearWarnings();
 			aConn.clearWarnings();
-			return warnings;
+			
+			return hasWarnings;
 		}
 		catch (Exception e)
 		{
@@ -175,7 +195,10 @@ public class SqlCommand
 			{
 				updateCount = this.currentStatement.getUpdateCount();
 				//result.addUpdateCount(updateCount);
-				result.addMessage(updateCount + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
+				if (updateCount > -1)
+				{	
+					result.addMessage(updateCount + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
+				}
 			}
 
 			boolean moreResults = false; 

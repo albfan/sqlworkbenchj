@@ -8,7 +8,6 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.Action;
 import javax.swing.KeyStroke;
 
 import workbench.gui.sql.SqlPanel;
@@ -26,13 +25,11 @@ public class SelectResultAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtSelectResult"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_EDIT);
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtSelectResult"));
-		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F6,0));
+		this.initMenuDefinition("MnuTxtSelectResult", KeyStroke.getKeyStroke(KeyEvent.VK_F6,0));
+		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		this.client.selectResult();
 	}

@@ -8,10 +8,12 @@ package workbench.gui.renderer;
 
 import java.awt.Component;
 import java.awt.Dimension;
+
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
+
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 

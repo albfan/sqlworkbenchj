@@ -7,23 +7,20 @@
 package workbench.gui.components;
 
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
-import java.lang.Runnable;
+
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
+
 import workbench.WbManager;
-import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
-import workbench.gui.components.WbButton;
-import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.Replaceable;
 import workbench.resource.ResourceMgr;
 
@@ -39,6 +36,7 @@ public class ReplacePanel
 	private static final String PROP_KEY_CASE = "ignoreCase";
 	private static final String PROP_KEY_WHOLE_WORD = "wholeWord";
 	private static final String PROP_KEY_SELECTED = "selectedText";
+	private static final String PROP_KEY_USE_REGEX = "useRegEx";
 	
 	private Replaceable client;
 	private int lastPos = -1;
@@ -96,6 +94,7 @@ public class ReplacePanel
     replaceAllButton = new WbButton();
     closeButton = new WbButton();
     selectedTextCheckBox = new javax.swing.JCheckBox();
+    useRegexCheckBox = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -110,9 +109,9 @@ public class ReplacePanel
     criteriaTextField.setColumns(30);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 5);
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 5);
     add(criteriaTextField, gridBagConstraints);
 
     replaceValueTextField.setColumns(30);
@@ -158,7 +157,7 @@ public class ReplacePanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.weighty = 1.0;
     add(spacerPanel, gridBagConstraints);
 
@@ -176,8 +175,8 @@ public class ReplacePanel
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
     add(replaceNextButton, gridBagConstraints);
 
     replaceAllButton.setText(ResourceMgr.getString("LabelReplaceAll"));
@@ -186,16 +185,16 @@ public class ReplacePanel
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
     add(replaceAllButton, gridBagConstraints);
 
     closeButton.setText(ResourceMgr.getString("LabelClose"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(25, 0, 5, 5);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
     gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHEAST;
     add(closeButton, gridBagConstraints);
 
@@ -203,12 +202,23 @@ public class ReplacePanel
     selectedTextCheckBox.setToolTipText(ResourceMgr.getDescription("LabelSelectedTextOnly"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    add(selectedTextCheckBox, gridBagConstraints);
+
+    useRegexCheckBox.setText(ResourceMgr.getString("LabelSearchRegEx"));
+    useRegexCheckBox.setToolTipText(ResourceMgr.getDescription("LabelSearchRegEx"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    add(selectedTextCheckBox, gridBagConstraints);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    add(useRegexCheckBox, gridBagConstraints);
 
   }//GEN-END:initComponents
 	
@@ -307,7 +317,7 @@ public class ReplacePanel
 	private void find()
 	{
 		String toFind = this.criteriaTextField.getText();
-		this.lastPos = this.client.findFirst(toFind, this.ignoreCaseCheckBox.isSelected(), this.wordsOnlyCheckBox.isSelected());
+		this.lastPos = this.client.findFirst(toFind, this.ignoreCaseCheckBox.isSelected(), this.wordsOnlyCheckBox.isSelected(), this.useRegexCheckBox.isSelected());
 	}
 	
 	private void replaceNext()
@@ -325,7 +335,8 @@ public class ReplacePanel
 		                       this.replaceValueTextField.getText(), 
 													 selected, 
 		                       this.ignoreCaseCheckBox.isSelected(), 
-													 this.wordsOnlyCheckBox.isSelected());
+													 this.wordsOnlyCheckBox.isSelected(),
+													 this.useRegexCheckBox.isSelected());
 	}
 	
 	private void closeWindow()
@@ -345,6 +356,8 @@ public class ReplacePanel
 		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_CASE, Boolean.toString(this.ignoreCaseCheckBox.isSelected()));
 		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_WHOLE_WORD, Boolean.toString(this.wordsOnlyCheckBox.isSelected()));
 		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_SELECTED, Boolean.toString(this.selectedTextCheckBox.isSelected()));
+		WbManager.getSettings().setProperty(PROP_CLASS, PROP_KEY_USE_REGEX, Boolean.toString(this.useRegexCheckBox.isSelected()));
+		
 		WbManager.getSettings().storeWindowPosition(this.dialog, PROP_CLASS + ".window");
 	}
 	
@@ -353,6 +366,7 @@ public class ReplacePanel
 		this.ignoreCaseCheckBox.setSelected("true".equals(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_CASE, "true")));
 		this.wordsOnlyCheckBox.setSelected("true".equals(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_WHOLE_WORD, "false")));
 		this.selectedTextCheckBox.setSelected("true".equals(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_SELECTED, "false")));
+		this.useRegexCheckBox.setSelected("true".equals(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_USE_REGEX, "true")));
 		//this.criteriaTextField.setText(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_SEARCH, ""));
 		//this.replaceValueTextField.setText(WbManager.getSettings().getProperty(PROP_CLASS, PROP_KEY_REPLACE, ""));
 	}
@@ -398,6 +412,7 @@ public class ReplacePanel
   private javax.swing.JTextField replaceValueTextField;
   private javax.swing.JCheckBox selectedTextCheckBox;
   private javax.swing.JPanel spacerPanel;
+  private javax.swing.JCheckBox useRegexCheckBox;
   private javax.swing.JCheckBox wordsOnlyCheckBox;
   // End of variables declaration//GEN-END:variables
 

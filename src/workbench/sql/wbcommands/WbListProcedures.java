@@ -1,6 +1,7 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+
 import workbench.db.WbConnection;
 import workbench.exception.WbException;
 import workbench.sql.SqlCommand;

@@ -26,10 +26,11 @@ public class SqlHistoryEntry
 	{
 		this.text = this.trimEmptyLines(sql);
 		int len = this.text.length();
-		if (pos >= len) 
+		if (pos > len) 
 			this.cursorPos = len - 1;
 		else
 			this.cursorPos = pos;
+		
 		this.selectionStart = selStart;
 		
 		if (selStart < 0)
@@ -38,7 +39,7 @@ public class SqlHistoryEntry
 			this.selectionStart = selStart;
 			
 		if (selEnd > len)
-			this.selectionEnd = len;
+			this.selectionEnd = len - 1;
 		else
 			this.selectionEnd = selEnd;
 	}
@@ -98,7 +99,7 @@ public class SqlHistoryEntry
 		}
 	}
 	
-	private static String trimEmptyLines(String input)
+	private String trimEmptyLines(String input)
 	{
 		if (input == null) return null;
 		int len = input.length() - 1;

@@ -20,6 +20,7 @@ import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.exception.WbException;
+import workbench.gui.actions.CopyProfileAction;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.actions.SaveListFileAction;
@@ -56,6 +57,7 @@ public class ProfileEditorPanel
 		this.selectProfile(last);
 		this.toolbar = new WbToolbar();
 		this.toolbar.add(new NewListEntryAction(this));
+		this.toolbar.add(new CopyProfileAction(this));
 		this.toolbar.add(new SaveListFileAction(this));
 		this.toolbar.addSeparator();
 		this.toolbar.add(new DeleteListEntryAction(this));
@@ -245,15 +247,19 @@ public class ProfileEditorPanel
 		if (createCopy)
 		{
   		ConnectionProfile current = (ConnectionProfile)this.jList1.getSelectedValue();
-			cp = current.createCopy();
+  		if (current != null)
+  		{	
+  			cp = current.createCopy();
+  			cp.setName(ResourceMgr.getString("TxtCopyOfProfile") + " " + current.getName());
+  		}
 		}
     
 		if (cp == null)
 		{
 			cp = new ConnectionProfile();
+			cp.setName(ResourceMgr.getString("TxtEmptyProfileName"));
 		}
     cp.setNew();
-		cp.setName(ResourceMgr.getString("TxtEmptyProfileName"));
 		this.model.addProfile(cp);
 		this.selectProfile(cp.getName());
 	}

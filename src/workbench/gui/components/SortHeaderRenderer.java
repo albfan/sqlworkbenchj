@@ -1,6 +1,7 @@
 package workbench.gui.components;
 
 import java.awt.Component;
+
 import javax.swing.Icon;
 import javax.swing.JTable;
 import javax.swing.UIManager;

@@ -9,8 +9,9 @@ package workbench.gui.editor;
  * remains intact in all source distributions of this package.
  */
 
-import javax.swing.JPopupMenu;
 import java.awt.Color;
+
+import javax.swing.JPopupMenu;
 
 /**
  * Encapsulates default settings for a text area. This can be passed

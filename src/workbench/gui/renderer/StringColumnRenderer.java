@@ -6,14 +6,6 @@
 
 package workbench.gui.renderer;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.HashMap;
-
-import javax.swing.SwingConstants;
-
-import workbench.WbManager;
-import workbench.util.StringUtil;
 
 /**
  * This is basically a ToolTipRenderer, but for performance

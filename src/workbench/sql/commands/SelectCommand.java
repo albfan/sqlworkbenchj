@@ -9,10 +9,10 @@ package workbench.sql.commands;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.exception.WbException;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -40,6 +40,11 @@ public class SelectCommand extends SqlCommand
 			this.currentConnection = aConnection;
 			this.currentStatement = aConnection.createStatement();
 			this.currentStatement.setMaxRows(this.maxRows);
+			int fetchSize = WbManager.getSettings().getDefaultFetchSize();
+			if (fetchSize > 0 && fetchSize < this.maxRows)
+			{
+				this.currentStatement.setFetchSize(fetchSize);
+			}
 			this.isCancelled = false;
 			ResultSet rs = this.currentStatement.executeQuery(aSql);
 			if (rs != null)
@@ -70,6 +75,12 @@ public class SelectCommand extends SqlCommand
 			result.clear();
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
 			result.addMessage(ExceptionUtil.getDisplay(e));
+			
+			StringBuffer warnings = new StringBuffer();
+			if (this.appendWarnings(aConnection, this.currentStatement, warnings))
+			{
+				result.addMessage(warnings.toString());
+			}
 			result.setFailure();
 		}
 		return result;

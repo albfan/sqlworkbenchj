@@ -7,35 +7,35 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import workbench.exception.WbException;
 import workbench.interfaces.FileActions;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
  *	@author  workbench@kellerer.org
  */
-public class SaveListFileAction extends WbAction
+public class CopyProfileAction 
+	extends WbAction
 {
 	private FileActions client;
 
-	public SaveListFileAction(FileActions aClient)
+	public CopyProfileAction(FileActions aClient)
 	{
 		this.client = aClient;
-		this.setMenuTextByKey("LabelSaveProfiles");
-		this.setIcon(	ResourceMgr.getImage(ResourceMgr.IMG_SAVE));
+		this.setIcon(ResourceMgr.getImage("CopyProfile"));
+		this.initMenuDefinition("LabelCopyProfile");
 	}
 
 	public void executeAction(ActionEvent e)
 	{
 		try
 		{
-			this.client.saveItem();
+			this.client.newItem(true);
 		}
-		catch (WbException ex)
+		catch (Exception ex)
 		{
-			LogMgr.logError(this, "Error saving profiles", ex);
+			LogMgr.logError("NewListEntryAction.executeAction()", "Error copying profile", ex);
 		}
+		
 	}
 }

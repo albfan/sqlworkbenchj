@@ -7,8 +7,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.Action;
-
 import workbench.interfaces.ClipboardSupport;
 import workbench.resource.ResourceMgr;
 
@@ -25,13 +23,11 @@ public class ClearAction
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_CLEAR));
-    this.putValue(ACTION_COMMAND_KEY, "ClearAction");
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription(ResourceMgr.TXT_CLEAR));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_EDIT);
+		this.setMenuTextByKey(ResourceMgr.TXT_CLEAR);
+		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		this.client.clear();
 	}

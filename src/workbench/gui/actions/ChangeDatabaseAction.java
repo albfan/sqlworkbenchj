@@ -15,7 +15,6 @@ import javax.swing.KeyStroke;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
  *	@author  workbench@kellerer.org
  */
 public class ChangeDatabaseAction extends WbAction
@@ -29,7 +28,7 @@ public class ChangeDatabaseAction extends WbAction
 		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_H, InputEvent.CTRL_MASK));
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 	}
 }

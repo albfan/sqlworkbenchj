@@ -2,10 +2,7 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.Action;
-
 import workbench.gui.MainWindow;
-import workbench.resource.ResourceMgr;
 
 public class FileDisconnectAction extends WbAction
 {
@@ -15,10 +12,10 @@ public class FileDisconnectAction extends WbAction
 	{
 		super();
 		this.window = aWindow;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtDisconnect"));
+		this.initMenuDefinition("MnuTxtDisconnect");
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		window.disconnect(true, true);
 	}

@@ -7,24 +7,19 @@
 package workbench.gui.macros;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.FlowLayout;
 import java.beans.PropertyChangeListener;
-import java.lang.Runnable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import javax.swing.AbstractListModel;
 import javax.swing.JLabel;
 import javax.swing.JList;
-
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTextField;
 import javax.swing.JToolBar;
-import javax.swing.ListModel;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
@@ -32,7 +27,6 @@ import javax.swing.event.ListSelectionListener;
 
 import workbench.WbManager;
 import workbench.exception.WbException;
-import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.FormatSqlAction;
@@ -129,21 +123,10 @@ public class MacroManagerGui
 		policy.setDefaultComponent(macroList);
 		this.setFocusTraversalPolicy(policy);
 		this.setFocusCycleRoot(true);
-		
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				if (model.getSize() > 0)
-				{
-					macroList.setSelectedIndex(0);
-				}
-				macroList.requestFocusInWindow();
-			}
-		});
-		
 	}
 
+	public JList getMacroList() { return this.macroList; }
+	
 	public String getSelectedMacroName()
 	{
 		int index = this.macroList.getSelectedIndex();
@@ -202,6 +185,16 @@ public class MacroManagerGui
 		this.macroList.updateUI();
 	}
 
+	private void selectListLater()
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				macroList.requestFocusInWindow();
+			}
+		});
+	}
 	
 	public void saveItem() throws WbException
 	{
@@ -217,6 +210,8 @@ public class MacroManagerGui
 	{
 		int location = this.jSplitPane1.getDividerLocation();
 		WbManager.getSettings().setProperty(this.getClass().getName(), "divider", location);
+		String macro = this.getSelectedMacroName();
+		WbManager.getSettings().setProperty(this.getClass().getName(), "lastmacro", macro);
 	}
 	
 	public void restoreSettings()
@@ -227,6 +222,34 @@ public class MacroManagerGui
 			location = 140;
 		}
 		this.jSplitPane1.setDividerLocation(location);
+		String macro = WbManager.getSettings().getProperty(this.getClass().getName(), "lastmacro", null);
+		this.selectMacro(macro);
+		this.selectListLater();
+	}
+
+	private void selectMacro(String macro)
+	{
+		if (this.model == null || this.macroList == null) return;
+		int count = this.model.getSize();
+		boolean selected = false;
+		int index = 0;
+		if (macro == null) 
+		{
+			this.macroList.setSelectedIndex(0);
+			return;
+		}
+		
+		for (int i=0; i < count; i ++)
+		{
+			MacroEntry entry = (MacroEntry)this.model.getElementAt(i);
+			if (macro.equalsIgnoreCase(entry.getName()))
+			{
+				macroList.setSelectedIndex(i);
+				return;
+			}
+		}
+		// if we get here, the macro was not found
+		this.macroList.setSelectedIndex(0);
 	}
 	
 	public void addSelectionListener(ListSelectionListener aListener)

@@ -10,16 +10,25 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import javax.swing.*;
+
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ListSelectionListener;
+
 import workbench.WbManager;
 import workbench.exception.WbException;
 import workbench.gui.WbSwingUtilities;
@@ -31,10 +40,11 @@ import workbench.resource.ResourceMgr;
 
 public class MacroManagerDialog 
 	extends JDialog 
-	implements ActionListener, ListSelectionListener
+	implements ActionListener, ListSelectionListener, MouseListener
 {
 	private JPanel dummyPanel;
 	private JPanel buttonPanel;
+	private JList macroList;
 	private JButton okButton;
 	private JButton runButton;
 	private MacroManagerGui macroPanel;
@@ -49,7 +59,6 @@ public class MacroManagerDialog
 		super(parent, true);
 		this.client = aTarget;
 		this.initComponents();
-		this.initKeys();
 		this.initWindow(parent);
 		boolean connected = this.client.isConnected();
 		this.runButton.setEnabled(connected);
@@ -57,6 +66,7 @@ public class MacroManagerDialog
 		
 		this.replaceEditorText.setVisible(connected);
 		this.replaceEditorText.setEnabled(connected);
+		this.initKeys();
 	}
 
 	private void initWindow(Frame parent)
@@ -67,13 +77,20 @@ public class MacroManagerDialog
 		}
 		WbSwingUtilities.center(this, parent);
 		macroPanel.restoreSettings();
-		boolean replace = "true".equals(WbManager.getInstance().getSettings().getProperty("workbench.gui.macros", "replaceOnRun", "false"));
+		boolean replace = "true".equals(WbManager.getSettings().getProperty("workbench.gui.macros", "replaceOnRun", "false"));
 		this.replaceEditorText.setSelected(replace);
 	}
 	
 	private void initKeys()
 	{
-		this.getRootPane().setDefaultButton(this.okButton);
+		if (this.runButton.isEnabled()) 
+		{
+			this.getRootPane().setDefaultButton(this.runButton);
+		}
+		else
+		{
+			this.getRootPane().setDefaultButton(this.okButton);
+		}
 		InputMap im = this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 		ActionMap am = this.getRootPane().getActionMap();
 		escAction = new EscAction(this);
@@ -140,6 +157,8 @@ public class MacroManagerDialog
 		dummyPanel.setPreferredSize(new Dimension(2, 2));
 		getContentPane().add(dummyPanel, BorderLayout.NORTH);
 
+		this.macroList = macroPanel.getMacroList();
+		this.macroList.addMouseListener(this);
 	}
 
 	public void actionPerformed(ActionEvent e)
@@ -176,7 +195,13 @@ public class MacroManagerDialog
 			e.printStackTrace();
 		}
 	}
+	
 	private void runButtonActionPerformed(ActionEvent evt)
+	{
+		this.runSelectedMacro();
+	}
+
+	private void runSelectedMacro()
 	{
 		try
 		{
@@ -194,7 +219,7 @@ public class MacroManagerDialog
 			e.printStackTrace();
 		}
 	}
-
+	
   public boolean isCancelled() { return this.cancelled; }
   
 	/** Closes the dialog */
@@ -207,7 +232,7 @@ public class MacroManagerDialog
 	{
 		WbManager.getSettings().storeWindowSize(this);
 		macroPanel.saveSettings();
-		WbManager.getInstance().getSettings().setProperty("workbench.gui.macros", "replaceOnRun", Boolean.toString(this.replaceEditorText.isSelected()));
+		WbManager.getSettings().setProperty("workbench.gui.macros", "replaceOnRun", Boolean.toString(this.replaceEditorText.isSelected()));
 		setVisible(false);
 	}
 	
@@ -217,6 +242,33 @@ public class MacroManagerDialog
 		boolean selected = (e.getFirstIndex() > -1);
 		this.okButton.setEnabled(selected);
 		this.runButton.setEnabled(selected);
+	}
+	
+	public void mouseClicked(java.awt.event.MouseEvent e)
+	{
+		if (e.getSource() == this.macroList)
+		{
+			if (e.getClickCount() == 2 && this.runButton.isEnabled())
+			{
+				this.runSelectedMacro();
+			}
+		}
+	}
+	
+	public void mouseEntered(java.awt.event.MouseEvent e)
+	{
+	}
+	
+	public void mouseExited(java.awt.event.MouseEvent e)
+	{
+	}
+	
+	public void mousePressed(java.awt.event.MouseEvent e)
+	{
+	}
+	
+	public void mouseReleased(java.awt.event.MouseEvent e)
+	{
 	}
 	
 }

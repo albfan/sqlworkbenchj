@@ -7,8 +7,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.Action;
-
 import workbench.WbManager;
 import workbench.resource.ResourceMgr;
 
@@ -21,10 +19,10 @@ public class FileExitAction extends WbAction
 	public FileExitAction()
 	{
 		super();
-		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.MNU_TXT_EXIT));
+		this.initMenuDefinition(ResourceMgr.MNU_TXT_EXIT);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		WbManager.getInstance().exitWorkbench();
 	}

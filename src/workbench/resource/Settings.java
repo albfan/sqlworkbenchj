@@ -12,9 +12,11 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
-import java.awt.print.PrinterJob;
 import java.beans.PropertyChangeListener;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.CodeSource;
@@ -23,17 +25,15 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 import java.util.StringTokenizer;
+
 import javax.swing.JOptionPane;
-import javax.swing.text.DateFormatter;
+
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
-import workbench.print.PrintUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
 
@@ -61,6 +61,8 @@ public class Settings
 	private String filename;
 	private ArrayList fontChangeListeners = new ArrayList();
 	private String configDir;
+
+	private ShortcutManager keyManager;
 
 	public Settings()
 	{
@@ -111,7 +113,8 @@ public class Settings
 			{
 				logfile = this.props.getProperty("workbench.log.filename", "Workbench.log");
 			}
-			LogMgr.setOutputFile(logfile);
+			int maxSize = this.getMaxLogfileSize();
+			LogMgr.setOutputFile(logfile, maxSize);
     }
     catch (Throwable e)
     {
@@ -135,11 +138,21 @@ public class Settings
 		System.setProperty("org.kellerer.sort.language", this.getSortLanguage());
 		System.setProperty("org.kellerer.sort.country", this.getSortCountry());
 
+		if (WbManager.trace) System.out.println("Initializing ShortcutManager");
+		this.keyManager = new ShortcutManager(this.getShortcutFilename());
+
 		if (WbManager.trace) System.out.println("Settings.<init> - done");
 	}
 
+	public ShortcutManager getShortcutManager() { return this.keyManager; }
+
 	public String getConfigDir() { return this.configDir; }
 	public void setConfigDir(String aDir) { this.configDir = aDir; }
+
+	private String getShortcutFilename()
+	{
+		return this.configDir + "WbShortcuts.xml";
+	}
 
 	public String getProfileFileName()
 	{
@@ -150,6 +163,7 @@ public class Settings
 	{
 		return this.configDir + "WbDrivers.xml";
 	}
+
 	public void showOptionsDialog()
 	{
 		JOptionPane.showMessageDialog(null, "Not yet implemented. Please edit workbench.settings");
@@ -177,6 +191,7 @@ public class Settings
 
 	public void saveSettings()
 	{
+		this.keyManager.saveSettings();
 		this.removeObsolete();
 		try
 		{
@@ -201,6 +216,19 @@ public class Settings
 			}
 			this.props.remove("workbench.workspace.lastfile");
 			this.props.remove("workbench.workspace.restorelast");
+			this.props.remove("workbench.persistence.cleanupunderscores");
+			this.props.remove("workbench.persistence.lastdir.table");
+			this.props.remove("workbench.persistence.lastdir.value");
+			this.props.remove("workbench.persistence.lastdir");
+			this.props.remove("workbench.sql.defaulttabcount");
+
+			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.divider");
+			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.package");
+			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.package.table");
+			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.package.value");
+			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.pattern.table");
+			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.pattern.value");
+			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.tables");
 		}
 		catch (Throwable e)
 		{
@@ -477,9 +505,25 @@ public class Settings
 		}
 	}
 
+	public int getMaxLogfileSize()
+	{
+		return this.getIntProperty("workbench.log", "maxfilesize", 30000);
+	}
+
+	public static final String PROPERTY_SHOW_LINE_NUMBERS = "workbench.editor.showlinenumber";
+
+	public boolean getShowLineNumbers()
+	{
+		return StringUtil.stringToBool(this.props.getProperty(PROPERTY_SHOW_LINE_NUMBERS, "true"));
+	}
+	public void setShowLineNumbers(boolean show)
+	{
+		this.props.setProperty(PROPERTY_SHOW_LINE_NUMBERS, Boolean.toString(show));
+	}
+
 	public boolean getEnableDbmsOutput()
 	{
-		return StringUtil.stringToBool(this.props.getProperty("workbench.sql.enable_dbms_output", "false"));
+		return StringUtil.stringToBool(this.props.getProperty(PROPERTY_SHOW_LINE_NUMBERS, "false"));
 	}
 
 	public void setEnableDbmsOutput(boolean aFlag)
@@ -575,7 +619,7 @@ public class Settings
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.persistence.cleanupunderscores", "false"));
 	}
-	
+
 	public void setCleanupUnderscores(boolean useEncryption)
 	{
 		this.props.setProperty("workbench.persistence.cleanupunderscores", Boolean.toString(useEncryption));
@@ -585,12 +629,12 @@ public class Settings
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.javacode.includenewline", "true"));
 	}
-	
+
 	public void setIncludeNewLineInCodeSnippet(boolean useEncryption)
 	{
 		this.props.setProperty("workbench.javacode.includenewline", Boolean.toString(useEncryption));
 	}
-	
+
 	public String getLastSqlDir()
 	{
 		return this.props.getProperty("workbench.sql.lastscriptdir","");
@@ -664,14 +708,14 @@ public class Settings
 	{
 		return this.restoreWindowSize(target, target.getClass().getName());
 	}
-	
+
 	public boolean restoreWindowSize(Component target, String id)
 	{
 		boolean result = false;
 		int w = this.getWindowWidth(id);
 		int h = this.getWindowHeight(id);
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-		
+
 		if (w > 0 && h > 0 && w <= screen.getWidth() && h <= screen.getHeight())
 		{
 			target.setSize(new Dimension(w, h));
@@ -691,7 +735,7 @@ public class Settings
 		int x = this.getWindowPosX(id);
 		int y = this.getWindowPosY(id);
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-		
+
 		if (x > 0 && y > 0 && x <= screen.getWidth() - 20 && y <= screen.getHeight() - 20)
 		{
 			target.setLocation(new Point(x, y));
@@ -709,26 +753,6 @@ public class Settings
 	public String getEditorFile(int anEditorId)
 	{
 		return this.props.getProperty("workbench.editor.lastfile" + anEditorId, null);
-	}
-
-	public void setLastSqlDividerLocation(int aDividerId, int y)
-	{
-		this.props.setProperty("workbench.gui.sql.lastdivider" + aDividerId, Integer.toString(y));
-	}
-
-	public int getLastSqlDividerLocation(int aDividerId)
-	{
-		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.sql.lastdivider" + aDividerId, "-1"));
-	}
-
-	public void setSqlDividerLocation(int aDividerId, int y)
-	{
-		this.props.setProperty("workbench.gui.sql.divider" + aDividerId, Integer.toString(y));
-	}
-
-	public int getSqlDividerLocation(int aDividerId)
-	{
-		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.sql.divider" + aDividerId, "-1"));
 	}
 
 	public int getWindowPosX(String windowClass)
@@ -771,6 +795,17 @@ public class Settings
 		if (aName == null) aName = "";
 		this.props.setProperty("connection.last", aName);
 	}
+
+	public int getDefaultFetchSize()
+	{
+		return StringUtil.getIntValue(this.props.getProperty("workbench.db.fetchsize", "-1"));
+	}
+
+	public void setDefaultFetchSize(int aSize)
+	{
+		this.props.setProperty("workbench.db.fetchsize", Integer.toString(aSize));
+	}
+
 
 	public String getLastLibraryDir()
 	{
@@ -834,7 +869,7 @@ public class Settings
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.formatter.subselect.maxlength"), 60);
 	}
-	
+
 	public int getMaxColumnWidth()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.maxcolwidth", "500"));
@@ -1033,6 +1068,16 @@ public class Settings
 		this.props.setProperty("workbench.db.debugger", Boolean.toString(aFlag));
 	}
 
+  public boolean getShowBuildInConnectionId()
+  {
+		return "true".equals(this.props.getProperty("workbench.db.connection-id.showbuild", "false"));
+	}
+
+	public boolean getDebugMetadataSql()
+	{
+		return "true".equals(this.getProperty("workbench.dbmetadata", "debugmetasql", "false"));
+	}
+
 	public int getProfileDividerLocation()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.profiles.divider", "-1"));
@@ -1110,7 +1155,6 @@ public class Settings
 		this.props.setProperty("workbench.dbexplorer.retrieveonopen", Boolean.toString(aFlag));
 	}
 
-
 	public boolean getAutoSaveWorkspace()
 	{
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.workspace.autosave", "false"));
@@ -1119,6 +1163,11 @@ public class Settings
 	public void setAutoSaveWorkspace(boolean aFlag)
 	{
 		this.props.setProperty("workbench.workspace.autosave", Boolean.toString(aFlag));
+	}
+
+	public boolean getCreateWorkspaceBackup()
+	{
+		return "true".equalsIgnoreCase(this.props.getProperty("workbench.workspace.createbackup", "false"));
 	}
 
 	public boolean getUseAnimatedIcon()
@@ -1165,7 +1214,7 @@ public class Settings
 		String list = this.props.getProperty("workbench.db.ddlneedscommit", null);
     return StringUtil.stringToList(list, ",");
 	}
-	
+
 	public List getServersWhichNeedJdbcCommit()
 	{
 		String list = this.props.getProperty("workbench.db.usejdbccommit", null);

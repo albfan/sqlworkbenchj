@@ -99,7 +99,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.17 2003-11-15 15:26:57 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.18 2003-12-16 21:58:36 thomas Exp $
  */
 public class JEditTextArea 
 	extends JComponent
@@ -182,6 +182,14 @@ public class JEditTextArea
 		focusedComponent = this;
 	}
 
+	public void setShowLineNumbers(boolean aFlag)
+	{
+		this.painter.setShowLineNumbers(aFlag);
+	}
+	public boolean getShowLineNumbers()
+	{
+		return this.painter.getShowLineNumbers();
+	}
 	private void changeCase(boolean toLower)
 	{
 		String sel = this.getSelectedText();
@@ -208,20 +216,60 @@ public class JEditTextArea
 	
 	private Pattern lastSearchPattern;
 	private String lastSearchExpression;
-	private int lastSearchPos = 0;
+	private int lastSearchPos = -1;
+	private boolean lastSearchOptionWholeWords;
+
+	private static final String REGEX_SPECIAL_CHARS = "\\[](){}.*+?$^|";
+	
+	private String quoteRegexMeta(String str)
+	{
+		if (str.length() == 0)
+		{
+			return "";
+		}
+		int len = str.length();
+		StringBuffer buf = new StringBuffer(len + 5);
+		for (int i = 0; i < len; i++)
+		{
+			char c = str.charAt(i);
+			if (REGEX_SPECIAL_CHARS.indexOf(c) != -1)
+			{
+				buf.append('\\');
+			}
+			buf.append(c);
+		}
+		return buf.toString();
+	}
 	
 	public int findText(String anExpression, boolean ignoreCase)
 	{
-		return this.findText(anExpression, ignoreCase, false);
+		return this.findText(anExpression, ignoreCase, false, true);
 	}
 	
-	protected String getSearchExpression(String anExpression, boolean ignoreCase, boolean wholeWord)
+	protected String getSearchExpression(String anExpression, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 	{
 		String regex = anExpression;
+		String quoted = this.quoteRegexMeta(anExpression);
+
+		if (!useRegex)
+		{
+			regex = "(" + quoted + ")";
+		}
 		
 		if (wholeWord)
 		{
-			regex = "\\b" + anExpression;
+			char c = anExpression.charAt(0);
+			// word boundary dos not work if the expression starts with 
+			// a special Regex character. So in that case, we'll just ignore it
+			if (REGEX_SPECIAL_CHARS.indexOf(c) == -1)
+			{
+				regex = "\\b" + regex;
+			}
+			c = anExpression.charAt(anExpression.length() - 1);
+			if (REGEX_SPECIAL_CHARS.indexOf(c) == -1)
+			{
+				regex = regex + "\\b";
+			}
 		}
 		
 		if (ignoreCase)
@@ -232,17 +280,17 @@ public class JEditTextArea
 		return regex;
 	}
 	
-	public boolean isCurrentSearchCriteria(String aValue, boolean ignoreCase, boolean wholeWord)
+	public boolean isCurrentSearchCriteria(String aValue, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 	{
 		if (this.lastSearchExpression == null) return false;
 		if (aValue == null) return false;
-		String regex = this.getSearchExpression(aValue, ignoreCase, wholeWord);
+		String regex = this.getSearchExpression(aValue, ignoreCase, wholeWord, useRegex);
 		return regex.equals(this.lastSearchExpression);
 	}
 
-	public int findText(String anExpression, boolean ignoreCase, boolean wholeWord)
+	public int findText(String anExpression, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 	{
-		String regex = this.getSearchExpression(anExpression, ignoreCase, wholeWord);
+		String regex = this.getSearchExpression(anExpression, ignoreCase, wholeWord, useRegex);
 		
 		int start = -1;
 		int end = -1;
@@ -280,7 +328,7 @@ public class JEditTextArea
 		}
 		else
 		{
-			this.lastSearchPos = 0;
+			this.lastSearchPos = -1;
 			Toolkit.getDefaultToolkit().beep();
 		}
 		return this.lastSearchPos;
@@ -369,6 +417,12 @@ public class JEditTextArea
 		return (!caretBlinks || blink) && caretVisible;
 	}
 
+	public boolean isTextSelected()
+	{
+		int start = this.getSelectionStart();
+		int end = this.getSelectionEnd();
+		return (start < end);
+	}
 	/**
 	 * Sets if the caret should be visible.
 	 * @param caretVisible True if the caret should be visible, false
@@ -504,11 +558,10 @@ public class JEditTextArea
 	 */
 	public void setHorizontalOffset(int horizontalOffset)
 	{
-		if(horizontalOffset == this.horizontalOffset)
-			return;
+		if(horizontalOffset == this.horizontalOffset) return;
 		this.horizontalOffset = horizontalOffset;
-		if(horizontalOffset != horizontal.getValue())
-			updateScrollBars();
+		//System.out.println("hori=" + this.horizontalOffset);
+		if(horizontalOffset != horizontal.getValue())	updateScrollBars();
 		painter.repaint();
 	}
 
@@ -807,8 +860,7 @@ public class JEditTextArea
 					char c = segmentArray[segmentOffset + offset + i];
 					int charWidth;
 					if(c == '\t')
-						charWidth = (int)painter.nextTabStop(width,offset + i)
-							- width;
+						charWidth = (int)painter.nextTabStop(width,offset + i) - width;
 					else
 						charWidth = fm.charWidth(c);
 
@@ -929,8 +981,7 @@ public class JEditTextArea
 	 */
 	public int getLineStartOffset(int line)
 	{
-		Element lineElement = document.getDefaultRootElement()
-			.getElement(line);
+		Element lineElement = document.getDefaultRootElement().getElement(line);
 		if(lineElement == null)
 			return -1;
 		else
@@ -945,8 +996,7 @@ public class JEditTextArea
 	 */
 	public int getLineEndOffset(int line)
 	{
-		Element lineElement = document.getDefaultRootElement()
-			.getElement(line);
+		Element lineElement = document.getDefaultRootElement().getElement(line);
 		if(lineElement == null)
 			return -1;
 		else
@@ -1013,6 +1063,7 @@ public class JEditTextArea
 	
 	public void appendLine(String aLine)
 	{
+		int count = Integer.toString(this.getLineCount()).length();
 		try
 		{
 			document.beginCompoundEdit();
@@ -1025,6 +1076,12 @@ public class JEditTextArea
 		finally
 		{
 			document.endCompoundEdit();
+		}
+		int newCount = Integer.toString(this.getLineCount()).length(); 
+		System.out.println("count=" + count + ", newcount" + newCount);
+		if (newCount > count)
+		{
+			this.repaint();
 		}
 	}
 	/**
@@ -1335,11 +1392,9 @@ public class JEditTextArea
 
 			if(painter.isBracketHighlightEnabled())
 			{
-				if(bracketLine != -1)
-					painter.invalidateLine(bracketLine);
+				if(bracketLine != -1)	painter.invalidateLine(bracketLine);
 				updateBracketHighlight(end);
-				if(bracketLine != -1)
-					painter.invalidateLine(bracketLine);
+				if(bracketLine != -1) painter.invalidateLine(bracketLine);
 			}
 
 			painter.invalidateLineRange(selectionStartLine,selectionEndLine);
@@ -1438,11 +1493,13 @@ public class JEditTextArea
 			throw new InternalError("Text component read only");
 		}
 
+//		int oldcount = Integer.toString(this.getLineCount()).length();
+		
 		document.beginCompoundEdit();
 
 		try
 		{
-			if(rectSelect)
+			if (rectSelect)
 			{
 				Element map = document.getDefaultRootElement();
 
@@ -1523,7 +1580,13 @@ public class JEditTextArea
 		}
 		updateScrollBars();
 		setCaretPosition(selectionEnd);
-
+//		int newcount = Integer.toString(this.getLineCount()).length();
+//		if (oldcount != newcount)
+//		{
+//			this.invalidate();
+//			this.repaint();
+//			//this.update(this.getGraphics());
+//		}
 	}
 
 	public void setAutoIndent(boolean aFlag)  { this.autoIndent = aFlag; }
@@ -1687,6 +1750,7 @@ public class JEditTextArea
 	{
 		listenerList.add(TextSelectionListener.class, l);
 	}
+	
 	public final void removeSelectionListener(TextSelectionListener l)
 	{
 		listenerList.remove(TextSelectionListener.class, l);
@@ -1816,6 +1880,7 @@ public class JEditTextArea
 		if(inputHandler == null)
 			return;
 		
+		int oldcount = Integer.toString(this.getLineCount()).length();
 		switch(evt.getID())
 		{
 			case KeyEvent.KEY_TYPED:
@@ -1832,7 +1897,22 @@ public class JEditTextArea
 		{
 			super.processKeyEvent(evt);
 		}
-		//this.updateScrollBars();
+		int newcount = Integer.toString(this.getLineCount()).length();
+		boolean changed = false;
+		
+		if(this.getFirstLine() < 0)
+		{
+			updateScrollBars();
+			changed = true;
+		}
+		
+		changed = changed || (oldcount != newcount);
+	
+		if (changed)
+		{	
+			this.invalidate();
+			this.repaint();
+		}
 	}
 
 	// protected members
@@ -2249,11 +2329,13 @@ public class JEditTextArea
 	{
 		public void mouseDragged(MouseEvent evt)
 		{
-			if(popup != null && popup.isVisible())
-				return;
+			if(popup != null && popup.isVisible()) return;
 
 			setSelectionRectangular((evt.getModifiers()	& InputEvent.CTRL_MASK) != 0);
-			select(getMarkPosition(),xyToOffset(evt.getX(),evt.getY()));
+			
+			int x = evt.getX() - painter.getGutterWidth();
+			int y = evt.getY();
+			select(getMarkPosition(),xyToOffset(x,y));
 		}
 
 		public void mouseMoved(MouseEvent evt) {}
@@ -2284,42 +2366,42 @@ public class JEditTextArea
 			setCaretVisible(true);
 			focusedComponent = JEditTextArea.this;
 
-			if((evt.getModifiers() & InputEvent.BUTTON3_MASK) != 0
-				&& popup != null)
+			int x = evt.getX() - painter.getGutterWidth();
+			
+			if((evt.getModifiers() & InputEvent.BUTTON3_MASK) != 0 && popup != null)
 			{
-				popup.show(painter,evt.getX(),evt.getY());
+				popup.show(painter,x,evt.getY());
 				return;
 			}
 
 			int line = yToLine(evt.getY());
-			int offset = xToOffset(line,evt.getX());
+			int offset = xToOffset(line,x);
 			int dot = getLineStartOffset(line) + offset;
 
 			switch(evt.getClickCount())
 			{
-			case 1:
-				doSingleClick(evt,line,offset,dot);
-				break;
-			case 2:
-				// It uses the bracket matching stuff, so
-				// it can throw a BLE
-				try
-				{
-					doDoubleClick(evt,line,offset,dot);
-				}
-				catch(BadLocationException bl)
-				{
-					bl.printStackTrace();
-				}
-				break;
-			case 3:
-				doTripleClick(evt,line,offset,dot);
-				break;
+				case 1:
+					doSingleClick(evt,line,offset,dot);
+					break;
+				case 2:
+					// It uses the bracket matching stuff, so
+					// it can throw a BLE
+					try
+					{
+						doDoubleClick(evt,line,offset,dot);
+					}
+					catch(BadLocationException bl)
+					{
+						bl.printStackTrace();
+					}
+					break;
+				case 3:
+					doTripleClick(evt,line,offset,dot);
+					break;
 			}
 		}
 
-		private void doSingleClick(MouseEvent evt, int line, 
-			int offset, int dot)
+		private void doSingleClick(MouseEvent evt, int line,int offset, int dot)
 		{
 			if((evt.getModifiers() & InputEvent.SHIFT_MASK) != 0)
 			{
@@ -2330,12 +2412,11 @@ public class JEditTextArea
 				setCaretPosition(dot);
 		}
 
-		private void doDoubleClick(MouseEvent evt, int line,
-			int offset, int dot) throws BadLocationException
+		private void doDoubleClick(MouseEvent evt, int line, int offset, int dot) 
+			throws BadLocationException
 		{
 			// Ignore empty lines
-			if(getLineLength(line) == 0)
-				return;
+			if(getLineLength(line) == 0) return;
 
 			try
 			{
@@ -2406,8 +2487,7 @@ public class JEditTextArea
 			*/
 		}
 
-		private void doTripleClick(MouseEvent evt, int line,
-			int offset, int dot)
+		private void doTripleClick(MouseEvent evt, int line,int offset, int dot)
 		{
 			select(getLineStartOffset(line),getLineEndOffset(line)-1);
 		}

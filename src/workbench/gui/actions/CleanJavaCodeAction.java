@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.Action;
 import javax.swing.KeyStroke;
 
 import workbench.interfaces.TextContainer;
@@ -20,13 +19,11 @@ public class CleanJavaCodeAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtCleanJavaCode"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtCleanJavaCode"));
-		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.ALT_MASK));
+		this.initMenuDefinition("MnuTxtCleanJavaCode", KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.ALT_MASK));
+		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		boolean selected = true;
 		String code = this.client.getSelectedText();

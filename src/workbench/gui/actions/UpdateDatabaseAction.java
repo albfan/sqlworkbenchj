@@ -7,9 +7,7 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.Action;
 import workbench.interfaces.DbUpdater;
-
 import workbench.resource.ResourceMgr;
 
 /**
@@ -24,15 +22,14 @@ public class UpdateDatabaseAction extends WbAction
 	{
 		super();
 		this.panel = aPanel;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtUpdateDatabase"));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtUpdateDatabase"));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_SAVE));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
+		this.initMenuDefinition("MnuTxtUpdateDatabase");
+		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_SAVE));
+		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(true);
 		this.setEnabled(false);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		panel.saveChangesToDatabase();
 	}

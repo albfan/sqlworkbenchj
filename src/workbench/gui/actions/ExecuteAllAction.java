@@ -10,7 +10,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.Action;
 import javax.swing.KeyStroke;
 
 import workbench.resource.ResourceMgr;
@@ -27,14 +26,12 @@ public class ExecuteAllAction extends WbAction
 	{
 		super();
 		this.client = aListener;
-		this.putValue(Action.NAME, ResourceMgr.getString(ResourceMgr.TXT_EXECUTE_ALL));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription(ResourceMgr.TXT_EXECUTE_ALL));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage(ResourceMgr.IMG_EXEC_ALL));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
-		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+		this.initMenuDefinition(ResourceMgr.TXT_EXECUTE_ALL, KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_EXEC_ALL));
+		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		this.client.actionPerformed(e);
 	}

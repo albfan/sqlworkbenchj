@@ -3,6 +3,7 @@ package workbench.gui.components;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Insets;
+
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.plaf.metal.MetalTabbedPaneUI;

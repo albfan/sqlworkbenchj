@@ -10,13 +10,13 @@ import java.awt.BorderLayout;
 import java.sql.Types;
 import java.util.Enumeration;
 import java.util.Properties;
+
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.border.EtchedBorder;
+
 import workbench.exception.WbException;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
-import workbench.gui.actions.SaveListFileAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;

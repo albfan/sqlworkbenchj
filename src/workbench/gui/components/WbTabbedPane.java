@@ -7,6 +7,7 @@
 package workbench.gui.components;
 
 import java.awt.Graphics;
+
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
@@ -23,6 +24,8 @@ public class WbTabbedPane
 	/** Creates a new instance of WbTabbedPane */
 	public WbTabbedPane()
 	{
+		super();
+		this.putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
 	}
 	
 	public void setSuspendRepaint(boolean aFlag)

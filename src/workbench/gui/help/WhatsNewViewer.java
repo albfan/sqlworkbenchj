@@ -8,20 +8,17 @@ package workbench.gui.help;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.FileInputStream;
 import java.net.URL;
-import java.util.Enumeration;
-import javax.swing.*;
+
 import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 

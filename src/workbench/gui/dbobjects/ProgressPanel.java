@@ -8,7 +8,6 @@ package workbench.gui.dbobjects;
 
 import java.io.File;
 
-import workbench.db.DataSpooler;
 import workbench.gui.components.WbButton;
 import workbench.interfaces.Interruptable;
 import workbench.resource.ResourceMgr;

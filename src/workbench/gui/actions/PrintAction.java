@@ -2,11 +2,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.Action;
-
-import workbench.gui.MainWindow;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.macros.MacroManagerDialog;
 import workbench.interfaces.PrintableComponent;
 import workbench.resource.ResourceMgr;
 
@@ -21,13 +16,12 @@ public class PrintAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtPrint"));
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtPrint"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_FILE);
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("Print"));
+		this.initMenuDefinition("MnuTxtPrint");
+		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
+		this.setIcon(ResourceMgr.getImage("Print"));
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		this.client.print();
 	}

@@ -15,21 +15,33 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.text.Collator;
 import java.text.DecimalFormat;
-import java.text.ParseException;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
-//import workbench.exception.WbException;
 import workbench.log.LogMgr;
 import workbench.util.LineTokenizer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.ValueConverter;
 import workbench.util.WbStringTokenizer;
 
 
@@ -79,6 +91,8 @@ public class DataStore
 	private String defaultExportDelimiter = "\t";
 	private boolean allowUpdates = false;
 
+	private ValueConverter converter = new ValueConverter();
+	
 	private static final Collator defaultCollator;
 	static 
 	{
@@ -986,8 +1000,13 @@ public class DataStore
 
 	public StringBuffer getXmlStart()
 	{
+		return this.getXmlStart("UTF-8");
+	}
+	
+	public StringBuffer getXmlStart(String encoding)
+	{
 		StringBuffer xml = new StringBuffer(1000 + colCount * 50);
-		xml.append("<?xml version=\"1.0\"?>");
+		xml.append("<?xml version=\"1.0\" encoding=\"" + encoding + "\"?>");
 		xml.append(StringUtil.LINE_TERMINATOR);
 		xml.append("<wb-export>");
 		xml.append(StringUtil.LINE_TERMINATOR);
@@ -1974,42 +1993,14 @@ public class DataStore
 		try
 		{
 			this.defaultNumberFormatter = new DecimalFormat(aFormat);
+			DecimalFormatSymbols symb = this.defaultNumberFormatter.getDecimalFormatSymbols();
+			this.converter.setDecimalCharacter(symb.getDecimalSeparator());
 		}
 		catch (Exception e)
 		{
 			this.defaultNumberFormatter = null;
 			LogMgr.logWarning("DataStore.setDefaultDateFormat()", "Could not create decimal formatter for format " + aFormat);
 		}
-	}
-	
-	private Number parseNumber(String aValue)
-		throws NumberFormatException
-	{
-		if (this.defaultNumberFormatter != null)
-		{
-			return this.parseNumber(aValue, this.defaultNumberFormatter);
-		}
-		else
-		{
-			return this.parseNumber(aValue, WbManager.getSettings().getDefaultDecimalFormatter());
-		}
-	}
-	
-	private Number parseNumber(String aValue, DecimalFormat formatter)
-		throws NumberFormatException
-	{
-		Number result = null;
-		try
-		{
-			result = formatter.parse(aValue);
-		}
-		catch (ParseException e)
-		{
-			LogMgr.logError("DataStore.parseNumber()", "Could not parse value " + aValue + " with format " + formatter.toPattern(), e);
-			result = null;
-			throw new NumberFormatException(aValue + " is not a valid number!");
-		}
-		return result;
 	}
 	
 	public Object convertCellValue(Object aValue, int aColumn)
@@ -2020,111 +2011,48 @@ public class DataStore
 		{
 			return NullValue.getInstance(type);
 		}
-		
-		Number result = null;
+
 		switch (type)
 		{
-			case Types.BIGINT:
-//				result = this.parseNumber(aValue.toString());
-//				if (result == null) return null;
-				return new BigInteger(aValue.toString());
-			case Types.INTEGER:
-			case Types.SMALLINT:
-			case Types.TINYINT:
-//				result = this.parseNumber(aValue.toString());
-//				if (result == null) return null;
-				return new Integer(aValue.toString());
-			case Types.NUMERIC:
-			case Types.DECIMAL:
-			case Types.DOUBLE:
-			case Types.REAL:
-			case Types.FLOAT:
-				return new BigDecimal(aValue.toString());
-				//result = this.parseNumber(aValue.toString());
-				//if (result == null) return null;
-				//return new BigDecimal(result.doubleValue());
-				//result = this.parseNumber(aValue.toString());
-				//if (result == null) return null;
-				//return new Double(result.doubleValue());
-//				return new Double(aValue.toString());
-//				result = this.parseNumber(aValue.toString());
-//				if (result == null) return null;
-//				return new Float(result.doubleValue());
-			case Types.CHAR:
-			case Types.VARCHAR:
-				if (aValue instanceof String)
-					return aValue;
-				else
-					return aValue.toString();
 			case Types.DATE:
-				/*
-				DateFormat df = new SimpleDateFormat();
-				return df.parse(((String)aValue).trim());
-				*/
-				return this.parseDate((String)aValue, false);
+				return this.parseDate((String)aValue);
 			case Types.TIMESTAMP:
-				//return Timestamp.valueOf(((String)aValue).trim());
-				java.sql.Date d = this.parseDate((String)aValue, false);
+				java.sql.Date d = this.parseDate((String)aValue);
 				Timestamp t = new Timestamp(d.getTime());
 				return t;
 			default:
-				return aValue;
+				return converter.convertValue(aValue, type);
 		}
 	}
 
-	private static final String[] dateFormats = new String[] {
-														"yyyy-MM-dd HH:mm:ss",
-														"dd.MM.yyyy HH:mm:ss",
-														"MM/dd/yy HH:mm:ss",
-														"MM/dd/yyyy HH:mm:ss",
-														"yyyy-MM-dd", 
-														"dd.MM.yyyy",
-														"MM/dd/yy",
-														"MM/dd/yyyy"
-													};
-	
-  private java.sql.Date parseDate(String aDate, boolean dateOnly)
+  private java.sql.Date parseDate(String aDate)
   {
-		java.util.Date result = null;
+		java.sql.Date result = null;
 		if (this.defaultDateFormatter != null)
 		{
 			try
 			{
-				result = defaultDateFormatter.parse(aDate);
+				java.util.Date d = defaultDateFormatter.parse(aDate);
+				result = new java.sql.Date(d.getTime());
 			}
 			catch (Exception e)
 			{
 				LogMgr.logWarning("DataStore.parseDate()", "Could not parse date " + aDate + " with default formatter " + this.defaultDateFormatter.toPattern());
 				result = null;
 			}
+			
 		}
+		
 		if (result == null)
 		{
-			SimpleDateFormat formatter = new SimpleDateFormat();
-			for (int i=0; i < dateFormats.length; i++)
-			{
-				try
-				{
-					formatter.applyPattern(dateFormats[i]);
-					result = formatter.parse(aDate);
-					LogMgr.logInfo("DataStore.parseDate()", "Parsing of " + aDate + " successful with format " + dateFormats[i]);
-					break;
-				}
-				catch (Exception e)
-				{
-					result = null;
-				}
-			}
+			result = converter.parseDate(aDate);
 		}
-		if (result != null)
-		{
-			return new java.sql.Date(result.getTime());
-		}
-		else
+		
+		if (result == null)
 		{
 			LogMgr.logWarning("DataStore.parseDate()", "Could not parse date " + aDate);
-			return null;
 		}
+		return result;
   }
 	/**
 	 * Return the status object for the give row.

@@ -7,8 +7,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.Action;
-
 import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.TextSelectionListener;
 import workbench.resource.ResourceMgr;
@@ -26,13 +24,12 @@ public class MakeInListAction extends WbAction implements TextSelectionListener
 		super();
 		this.client = aClient;
 		this.client.addSelectionListener(this);
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtMakeCharInList"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_SQL);
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtMakeCharInList"));
+		this.initMenuDefinition("MnuTxtMakeCharInList");
+		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setEnabled(false);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		this.client.makeInListForChar();
 	}

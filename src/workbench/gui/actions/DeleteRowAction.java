@@ -6,7 +6,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import javax.swing.Action;
+
 import workbench.interfaces.DbData;
 import workbench.resource.ResourceMgr;
 
@@ -22,13 +22,12 @@ public class DeleteRowAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtDeleteRow"));
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("Delete"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_DATA);
-		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtDeleteRow"));
+		this.initMenuDefinition("MnuTxtDeleteRow");
+		this.setIcon(ResourceMgr.getImage("Delete"));
+		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 	}
 
-	public void actionPerformed(ActionEvent e)
+	public void executeAction(ActionEvent e)
 	{
 		this.client.deleteRow();
 	}
