@@ -11,6 +11,8 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.event.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -26,6 +28,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.gui.actions.FileConnectAction;
 import workbench.gui.actions.FileExitAction;
+import workbench.gui.actions.RemoveTabAction;
 import workbench.gui.actions.SelectTabAction;
 import workbench.gui.actions.ShowDbExplorerAction;
 import workbench.gui.actions.WbAction;
@@ -34,6 +37,7 @@ import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.dbobjects.DbExplorerPanel;
 import workbench.gui.dbobjects.DbExplorerWindow;
+import workbench.gui.menu.SqlTabPopup;
 import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.gui.settings.SettingsPanel;
 import workbench.gui.sql.SqlPanel;
@@ -51,7 +55,8 @@ import workbench.resource.Settings;
  */
 public class MainWindow 
 	extends JFrame 
-	implements ActionListener, WindowListener, ChangeListener, FilenameChangeListener
+	implements ActionListener, WindowListener, ChangeListener, FilenameChangeListener, 
+						MouseListener
 {
 	private String windowId;
 	private String currentProfileName;
@@ -67,7 +72,6 @@ public class MainWindow
 	private JTabbedPane sqlTab = new JTabbedPane();
 	private WbToolbar currentToolbar;
 	private ArrayList panelMenus = new ArrayList(5);
-	private int tabCount = 0;
 
 	/** Creates new MainWindow */
 	public MainWindow()
@@ -77,7 +81,7 @@ public class MainWindow
 		this.addWindowListener(this);
 		this.sqlTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
-		this.tabCount = WbManager.getSettings().getDefaultTabCount();
+		int tabCount = WbManager.getSettings().getDefaultTabCount();
 		if (tabCount <= 0) tabCount = 1;
 
 		for (int i=0; i < tabCount; i++)
@@ -111,6 +115,7 @@ public class MainWindow
 		// now that we have setup the SplitPane we can add the
 		// change listener
 		this.sqlTab.addChangeListener(this);
+		this.sqlTab.addMouseListener(this);
 	}
 
 	private void initMenu()
@@ -118,7 +123,8 @@ public class MainWindow
 		this.dbExplorerAction = new ShowDbExplorerAction(this);
 		this.dbExplorerAction.setEnabled(false);
 
-		for (int tab=0; tab < this.tabCount; tab ++)
+		int tabCount = this.sqlTab.getTabCount();
+		for (int tab=0; tab < tabCount; tab ++)
 		{
 			MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(tab);
 			JMenuBar menuBar = this.getMenuForPanel(sql);
@@ -211,7 +217,8 @@ public class MainWindow
 		menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_VIEW);
 		menu.setVisible(true);
 
-		for (int i=0; i < this.tabCount; i ++)
+		int tabCount = this.sqlTab.getTabCount();
+		for (int i=0; i < tabCount; i ++)
 		{
 			action = new SelectTabAction(this.sqlTab, i);
 			menu.add(action.getMenuItem());
@@ -275,7 +282,8 @@ public class MainWindow
 	{
 		int index = this.sqlTab.getSelectedIndex();
 		WbManager.getSettings().setLastSqlTab(index);
-		for (int i=0; i < this.tabCount; i++)
+		int tabCount = this.sqlTab.getTabCount();
+		for (int i=0; i < tabCount; i++)
 		{
 			MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
 			sql.saveSettings();
@@ -368,7 +376,7 @@ public class MainWindow
 
 	public void setConnection(WbConnection con)
 	{
-		for (int i=0; i < this.tabCount; i++)
+		for (int i=0; i < this.sqlTab.getTabCount(); i++)
 		{
 			MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
 			sql.setConnection(con);
@@ -427,12 +435,43 @@ public class MainWindow
 		return null;
 	}
 
-	public void addToViewMenu(WbAction anAction)
+	public void addToViewMenu(SelectTabAction anAction)
 	{
 		for (int i=0; i < this.panelMenus.size(); i++)
 		{
 			JMenu view = this.getViewMenu(i);
-			view.add(anAction.getMenuItem());
+			
+			// insert at the correct position
+			int count = view.getItemCount();
+			int inserted = -1; 
+			for (int k=0; k < count; k++)
+			{
+				SelectTabAction a = (SelectTabAction)view.getItem(k).getAction();
+				if (a.getIndex() >= anAction.getIndex())
+				{
+					view.insert(anAction.getMenuItem(), k);
+					inserted = k;
+					break;
+				}
+			}
+			
+			if (inserted == -1)
+			{
+				// no index found which is greate or equal than the new one
+				// so add it to the end
+				view.add(anAction.getMenuItem());
+			}
+			else
+			{
+				// renumber the shortcuts for the remaining actions
+				int newIndex = anAction.getIndex() + 1;
+				for (int k=inserted + 1; k < count; k++)
+				{
+					SelectTabAction a = (SelectTabAction)view.getItem(k).getAction();
+					a.setNewIndex(newIndex);
+					newIndex ++;
+				}					
+			}
 		}
 	}
 
@@ -445,16 +484,8 @@ public class MainWindow
 		JMenuBar dbmenu = this.getMenuForPanel(this.dbExplorerPanel);
 
 		this.sqlTab.addTab(ResourceMgr.getString("LabelDbExplorer"), this.dbExplorerPanel);
-		this.tabCount = this.sqlTab.getTabCount();
 
-		WbAction action = new SelectTabAction(this.sqlTab, this.tabCount - 1, ResourceMgr.getString("MnuTxtShowDbExplorer"));
-
-		// Add a second keystroke for the Db Explorer panel
-		KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_MASK);
-		InputMap im = this.sqlTab.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-		ActionMap am = this.sqlTab.getActionMap();
-		im.put(key, action.getActionName());
-		am.put(action.getActionName(), action);
+		SelectTabAction action = new SelectTabAction(this.sqlTab, this.sqlTab.getTabCount() - 1);
 
 		this.panelMenus.add(dbmenu);
 		this.addToViewMenu(action);
@@ -469,12 +500,12 @@ public class MainWindow
 		}
 		if (WbManager.getSettings().getShowDbExplorerInMainWindow())
 		{
-			Component c = this.sqlTab.getComponentAt(this.tabCount - 1);
+			Component c = this.sqlTab.getComponentAt(this.sqlTab.getTabCount() - 1);
 			if (!(c instanceof DbExplorerPanel))
 			{
 				this.addDbExplorerTab();
 			}
-			this.sqlTab.setSelectedIndex(this.tabCount - 1);
+			this.sqlTab.setSelectedIndex(this.sqlTab.getTabCount() - 1);
 		}
 		else
 		{
@@ -580,7 +611,49 @@ public class MainWindow
 		}
 	}
 
+	/**
+	 *	Adds a new SQL tab to the main window. This will be inserted
+	 *	before the DbExplorer (if that is displayed as a tab)
+	 */
+	public void addTab()
+	{
+		int index = this.sqlTab.getTabCount();
+		
+		if (this.getSqlPanel(index - 1) instanceof DbExplorerPanel)
+		{
+			index --;
+		}
+		SqlPanel sql = new SqlPanel(index + 1);
+		sql.setConnection(this.currentConnection, true);
+		this.sqlTab.add(sql, index);
+		this.sqlTab.setTitleAt(index, ResourceMgr.getString("LabelTabStatement") + " " + Integer.toString(index+1));
 
+		SelectTabAction a = new SelectTabAction(this.sqlTab, index);
+		this.addToViewMenu(a);
+		JMenuBar menuBar = this.getMenuForPanel(sql);
+		this.panelMenus.add(index, menuBar);
+		this.sqlTab.setSelectedIndex(index);
+		//WbManager.getSettings().setDefaultTabCount(index + 1);
+	}
+	
+	/**
+	 *	Removes the last SQL Tab. The DbExplorer will not be removed!
+	 */
+	public void removeTab()
+	{
+		if (this.getCurrentPanel() instanceof DbExplorerPanel) return;
+		int lastIndex = this.getLastSqlIndex();
+		this.sqlTab.remove(lastIndex);
+		this.panelMenus.remove(lastIndex);
+	}
+
+	private int getLastSqlIndex()
+	{
+		int lastIndex = this.sqlTab.getTabCount() - 1;
+		if (this.getSqlPanel(lastIndex) instanceof DbExplorerPanel) lastIndex --;
+		return lastIndex;
+	}
+	
 	public void listMenus()
 	{
 		for (int i=0; i < this.panelMenus.size(); i ++)
@@ -627,7 +700,7 @@ public class MainWindow
 							//SwingUtilities.updateComponentTreeUI(this.dbExplorerPanel);
 						}
 					}
-					for (int i=0; i < this.tabCount; i ++)
+					for (int i=0; i < this.sqlTab.getTabCount(); i ++)
 					{
 						JMenuBar menu = (JMenuBar)this.panelMenus.get(i);
 						SwingUtilities.updateComponentTreeUI(menu);
@@ -640,13 +713,12 @@ public class MainWindow
 			}
 			else if ("optionsDialog".equals(command))
 			{
-				//JOptionPane.showMessageDialog(this, "Options are not yet implemented\r\n Please edit the file 'workbench.settings'");
 				SettingsPanel panel = new SettingsPanel();
 				panel.showSettingsDialog(this);
 			}
 			else if ("helpContents".equals(command))
 			{
-				JOptionPane.showMessageDialog(this, "Sorry! Help is not yet available");
+				JOptionPane.showMessageDialog(this, "Sorry! Help is not yet available\nFor command details check the tooltip for each menu item");
 			}
 			else if ("helpAbout".equals(command))
 			{
@@ -658,4 +730,51 @@ public class MainWindow
 		}
 	}
 
+	/** Invoked when the mouse button has been clicked (pressed
+	 * and released) on a component.
+	 *
+	 */
+	public void mouseClicked(MouseEvent e)
+	{
+		if (e.getSource() == this.sqlTab && e.getButton() == MouseEvent.BUTTON3)
+		{
+			MainPanel p = this.getCurrentPanel();
+			if (! (p instanceof DbExplorerPanel))
+			{
+				SqlTabPopup pop = new SqlTabPopup(this);
+				RemoveTabAction a = pop.getRemoveAction();
+				a.setEnabled(this.sqlTab.getSelectedIndex() == this.getLastSqlIndex());
+				pop.show(this.sqlTab,e.getX(),e.getY());
+			}
+		}
+	}
+	
+	/** Invoked when the mouse enters a component.
+	 *
+	 */
+	public void mouseEntered(MouseEvent e)
+	{
+	}
+	
+	/** Invoked when the mouse exits a component.
+	 *
+	 */
+	public void mouseExited(MouseEvent e)
+	{
+	}
+	
+	/** Invoked when a mouse button has been pressed on a component.
+	 *
+	 */
+	public void mousePressed(MouseEvent e)
+	{
+	}
+	
+	/** Invoked when a mouse button has been released on a component.
+	 *
+	 */
+	public void mouseReleased(MouseEvent e)
+	{
+	}
+	
 }

@@ -202,6 +202,18 @@ public class EditorPanel extends JEditTextArea implements ClipboardSupport, Font
 		return result;
 	}
 	
+	public boolean saveCurrentFile()
+	{
+		if (this.currentFile != null)
+		{
+			return this.saveFile(this.currentFile);
+		}
+		else
+		{
+			return this.saveFile();
+		}
+	}
+	
 	public boolean saveFile()
 	{
 		boolean result = false;

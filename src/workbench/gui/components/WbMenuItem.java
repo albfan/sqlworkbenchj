@@ -82,6 +82,7 @@ public class WbMenuItem
 	
 	public void setText(String aText)
 	{
+		if (aText == null) return;
 		int pos = aText.indexOf('&');
 		if (pos > -1)
 		{

@@ -75,7 +75,6 @@ public class SqlPanel extends JPanel
 
 	private List filenameChangeListeners;
 	
-	private FileOpenAction fileOpenAction;
 	private NextStatementAction nextStmtAction;
 	private PrevStatementAction prevStmtAction;
 	private StopAction stopAction;
@@ -213,6 +212,18 @@ public class SqlPanel extends JPanel
 			}
 		}
 	}
+	public void saveCurrentFile()
+	{
+		String oldFile = this.editor.getCurrentFileName();
+		if (this.editor.saveCurrentFile())
+		{
+			String newFile = this.editor.getCurrentFileName();
+			if (newFile != null && !newFile.equals(oldFile))
+			{
+				this.fireFilenameChanged();
+			}
+		}
+	}		
 	public void saveFile()
 	{
 		String oldFile = this.editor.getCurrentFileName();
@@ -272,9 +283,9 @@ public class SqlPanel extends JPanel
 
 		TextPopup pop = (TextPopup)this.editor.getRightClickPopup();
 
-		this.fileOpenAction = new FileOpenAction(this);
-		this.actions.add(this.fileOpenAction);
+		this.actions.add(new FileOpenAction(this));
 		this.actions.add(new FileSaveAction(this));
+		this.actions.add(new FileSaveAsAction(this));
 		this.actions.add(new FileCloseAction(this));
 		
 		this.actions.add(pop.getCutAction());
@@ -564,14 +575,22 @@ public class SqlPanel extends JPanel
 		this.background.start();
 	}
 
+	
 	private void initStatementHistory()
+	{
+		this.initStatementHistory(false);
+	}
+	
+	private void initStatementHistory(boolean readFromFile)
 	{
 		if (this.statementHistory != null) return;
 		
 		this.maxHistorySize = WbManager.getSettings().getMaxHistorySize();
 		try
 		{	
-			Object data = WbPersistence.readObject(this.historyFilename);
+			Object data = null;
+			if (readFromFile)
+				data = WbPersistence.readObject(this.historyFilename);
 			if (data != null && data instanceof ArrayList)
 			{
 				this.statementHistory = (ArrayList)data;
@@ -659,6 +678,10 @@ public class SqlPanel extends JPanel
 	
 	public void setConnection(WbConnection aConnection)
 	{
+		this.setConnection(aConnection, true);
+	}
+	public void setConnection(WbConnection aConnection, boolean readStatementHistory)
+	{
 		this.dbConnection = aConnection;
 		try
 		{
@@ -667,7 +690,7 @@ public class SqlPanel extends JPanel
 		catch (Exception e)
 		{
 		}
-		this.initStatementHistory();
+		this.initStatementHistory(readStatementHistory);
 		this.executeAll.setEnabled(true);
 		this.executeSelected.setEnabled(true);
 		this.updateAction.setEnabled(false);
