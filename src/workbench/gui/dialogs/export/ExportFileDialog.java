@@ -27,8 +27,8 @@ import workbench.gui.components.ExtensionFileFilter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.ResultInfo;
-import workbench.interfaces.TextOptions;
-import workbench.interfaces.XmlOptions;
+import workbench.gui.dialogs.export.TextOptions;
+import workbench.gui.dialogs.export.XmlOptions;
 
 
 /**

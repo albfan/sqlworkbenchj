@@ -29,12 +29,12 @@ import workbench.util.SqlUtil;
 /**
  * @author  info@sql-workbench.net
  */
-public class IngresMetaData
+public class IngresMetadata
 	implements SynonymReader, SequenceReader
 {
 	private Connection dbConn;
 	
-	public IngresMetaData(Connection conn)
+	public IngresMetadata(Connection conn)
 	{
 		this.dbConn = conn;
 	}

@@ -31,6 +31,13 @@ public class PostgresMetadata
 		this.metaData = meta;
 	}
 	
+	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
+		throws SQLException
+	{
+		JdbcProcedureReader reader = new JdbcProcedureReader(this.metaData);
+		return reader.getProcedureColumns(aCatalog, aSchema, aProcname);
+	}
+	
 	public DataStore getProcedures(String catalog, String schema)
 		throws SQLException
 	{
@@ -52,8 +59,8 @@ public class PostgresMetadata
 			int added = 0;
 			for (int i=0; i < count; i++)
 			{
-				String vartype = ds.getValueAsString(i,DbMetadata.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
-				String ret = ds.getValueAsString(i,DbMetadata.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+				String vartype = ds.getValueAsString(i,ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
+				String ret = ds.getValueAsString(i,ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
 				if ("RETURN".equals(ret))
 				{
 					retType = vartype;

@@ -16,7 +16,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.CharacterRange;
 import workbench.util.StringUtil;
-import workbench.interfaces.TextOptions;
+import workbench.gui.dialogs.export.TextOptions;
 
 /**
  *

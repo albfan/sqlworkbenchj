@@ -51,6 +51,8 @@ public class VariablePool
 	private int suffixLen = 0;
 	private Pattern validNamePattern = Pattern.compile("[\\w]*");;
 	private Pattern promptPattern;
+	private Pattern promptAlwaysPattern;
+	private Pattern conditionalPattern;
 	private Pattern variablePattern;
 	
 	public static VariablePool getInstance()
@@ -67,6 +69,11 @@ public class VariablePool
 		
 		String expr = StringUtil.quoteRegexMeta(prefix) + "[\\?\\&][\\w]*" + StringUtil.quoteRegexMeta(suffix);
 		this.promptPattern = Pattern.compile(expr);
+		expr = StringUtil.quoteRegexMeta(prefix) + "[\\?][\\w]*" + StringUtil.quoteRegexMeta(suffix);
+		this.promptAlwaysPattern = Pattern.compile(expr);
+
+		expr = StringUtil.quoteRegexMeta(prefix) + "[\\&][\\w]*" + StringUtil.quoteRegexMeta(suffix);
+		this.conditionalPattern = Pattern.compile(expr);
 		
 		expr = StringUtil.quoteRegexMeta(prefix) + "[\\?\\&]?[\\w]*" + StringUtil.quoteRegexMeta(suffix);
 		this.variablePattern = Pattern.compile(expr);
@@ -123,6 +130,14 @@ public class VariablePool
 	public Set getVariablesNeedingPrompt(String sql)
 	{
 		return this.getPromptVariables(sql, false);
+	}
+	
+	public boolean hasPrompt(String sql)
+	{
+		if (sql == null) return false;
+		Matcher m = this.promptPattern.matcher(sql);
+		if (m == null) return false;
+		return m.find();
 	}
 	
 	private Set getPromptVariables(String sql, boolean includeConditional)

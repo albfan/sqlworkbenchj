@@ -101,4 +101,57 @@ public class JdbcProcedureReader
 		return ds;
 	}
 	
+	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
+		throws SQLException
+	{
+		final String cols[] = {"COLUMN_NAME", "TYPE", "TYPE_NAME", "REMARKS"};
+		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+		final int sizes[] =   {20, 10, 18, 30};
+		DataStore ds = new DataStore(cols, types, sizes);
+
+		ResultSet rs = null;
+		try
+		{
+			rs = this.dbMeta.metaData.getProcedureColumns(aCatalog, aSchema, dbMeta.adjustObjectname(aProcname), "%");
+			while (rs.next())
+			{
+				int row = ds.addRow();
+				String colName = rs.getString("COLUMN_NAME");
+				ds.setValue(row, 0, colName);
+				int colType = rs.getInt("COLUMN_TYPE");
+				String stype;
+
+				if (colType == DatabaseMetaData.procedureColumnIn)
+					stype = "IN";
+				else if (colType == DatabaseMetaData.procedureColumnInOut)
+					stype = "INOUT";
+				else if (colType == DatabaseMetaData.procedureColumnOut)
+					stype = "OUT";
+				else if (colType == DatabaseMetaData.procedureColumnResult)
+					stype = "RESULTSET";
+				else if (colType == DatabaseMetaData.procedureColumnReturn)
+					stype = "RETURN";
+				else
+					stype = "";
+				ds.setValue(row, 1, stype);
+
+				int sqlType = rs.getInt("DATA_TYPE");
+				String typeName = rs.getString("TYPE_NAME");
+				int digits = rs.getInt("PRECISION");
+				int size = rs.getInt("LENGTH");
+				String rem = rs.getString("REMARKS");
+
+				String display = dbMeta.getSqlTypeDisplay(typeName, sqlType, size, digits);
+				ds.setValue(row, 2, display);
+				ds.setValue(row, 3, rem);
+			}
+		}
+		finally
+		{
+			SqlUtil.closeResult(rs);
+		}
+
+		return ds;
+	}
+
 }

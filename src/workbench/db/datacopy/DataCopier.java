@@ -41,6 +41,8 @@ public class DataCopier
 	private WbConnection sourceConnection;
 	private WbConnection targetConnection;
 
+	private RowDataProducer sourceData;
+	
 	private TableIdentifier sourceTable;
 	private TableIdentifier targetTable;
 
@@ -73,6 +75,18 @@ public class DataCopier
 		this.copyFromTable(source, target, aSourceTable, aTargetTable, (Map)null, null, false, false);
 	}
 
+	public void copyFromFile(RowDataProducer source, WbConnection target, TableIdentifier targetTable)
+	{
+		this.sourceConnection = null;
+		this.targetConnection = target;
+		this.importer.setConnection(target);
+		this.targetTable = targetTable;
+		this.useQuery = false;
+		this.targetColumnsForQuery = null;
+		this.sourceData = source;
+		this.importer.setProducer(source);
+	}
+	
 	/**
 	 *	Define the source table, the target table and the column mapping
 	 *	for the copy process.
@@ -170,11 +184,16 @@ public class DataCopier
 		this.abortOnError = flag;
 	}
 
-	public void setKeyColumns(String aColList)
+	public void setKeyColumns(List keys)
 	{
-		this.importer.setKeyColumns(aColList);
+		this.importer.setKeyColumns(keys);
 	}
 
+	public void setKeyColumns(String keys)
+	{
+		this.importer.setKeyColumns(keys);
+	}
+	
 	/**
 	 *	Forwards the setMode() call to the DataImporter.
 	 *	@see workbench.db.importer.DataImporter#setMode(String)
@@ -184,6 +203,11 @@ public class DataCopier
 		return this.importer.setMode(mode);
 	}
 
+	public void setReportInterval(int value)
+	{
+		this.importer.setReportInterval(value);
+	}
+	
 	/**
 	 *	Initialize the DataCopier to create a copy of the source table by creating
 	 *	a new table in the target database.
@@ -443,7 +467,16 @@ public class DataCopier
 		{
 			public void run()
 			{
-				try { start(); } catch (Throwable th) {}
+				try 
+				{ 
+					// can't use start() because
+					// this would refer to the start() method
+					// of the thread, and not the from the DataCopier
+					DataCopier.this.start(); 
+				} 
+				catch (Throwable th) 
+				{ 
+				}
 			}
 		};
 		t.start();
@@ -489,22 +522,30 @@ public class DataCopier
 		try
 		{
 			step = "retrieve";
-			this.retrieveStatement = this.sourceConnection.createStatement();
-			rs = this.retrieveStatement.executeQuery(this.retrieveSql);
-			int colCount = rs.getMetaData().getColumnCount();
-			Object[] rowData = new Object[colCount];
-			step = "copy";
-			while (this.keepRunning && rs.next())
+			if (this.sourceData == null)
 			{
-				for (int i=0; i < colCount; i++)
+				this.retrieveStatement = this.sourceConnection.createStatement();
+				rs = this.retrieveStatement.executeQuery(this.retrieveSql);
+				int colCount = rs.getMetaData().getColumnCount();
+				Object[] rowData = new Object[colCount];
+				step = "copy";
+				while (this.keepRunning && rs.next())
 				{
-					if (!keepRunning) break;
-					rowData[i] = rs.getObject(i + 1);
+					for (int i=0; i < colCount; i++)
+					{
+						if (!keepRunning) break;
+						rowData[i] = rs.getObject(i + 1);
+					}
+					if (this.keepRunning) this.importer.processRow(rowData);
 				}
-				if (this.keepRunning) this.importer.processRow(rowData);
 			}
-			step = "cleanup";
+			else
+			{
+				step = "copy";
+				this.sourceData.start();
+			}
 
+			step = "cleanup";
 			this.importer.importFinished();
 			String msg = this.getRowsInsertedMessage();
 			if (msg != null) this.addMessage(msg);
@@ -572,6 +613,10 @@ public class DataCopier
 	public void cancel()
 	{
 		this.keepRunning = false;
+		if (this.sourceData != null) 
+		{
+			this.sourceData.cancel();
+		}
 		this.importer.importCancelled();
 	}
 
@@ -742,12 +787,13 @@ public class DataCopier
 		{
 			sourceCols = cols;
 		}
+		
 		List targetCols = this.targetConnection.getMetadata().getTableColumns(this.targetTable);
 
 		int count = targetCols.size();
 		this.columnMap = new HashMap(count);
 		LogMgr.logInfo("DataCopier.readColumnDefinition()", "Copying matching columns from " + this.sourceTable + " to " + this.targetTable);
-
+		StringBuffer usedColumns = new StringBuffer(100);
 		for (int i=0; i < count; i++)
 		{
 			ColumnIdentifier column = (ColumnIdentifier)targetCols.get(i);
@@ -758,7 +804,14 @@ public class DataCopier
 			{
 				LogMgr.logInfo("DataCopier.readColumnDefinition()", "Including column: " + column);
 				this.columnMap.put(column, column);
+				if (i > 0) usedColumns.append(',');
+				usedColumns.append(column.getColumnName());
 			}
+		}
+		if (requestedCols == null)
+		{
+			String msg = ResourceMgr.getString("MsgCopyColumnsUsed") + ": " + usedColumns.toString();
+			this.addMessage(msg);
 		}
 	}
 

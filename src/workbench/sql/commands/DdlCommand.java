@@ -121,11 +121,12 @@ public class DdlCommand extends SqlCommand
 			msg.append("\n");
 
 			result.addMessage(msg.toString());
-			result.addMessage(ExceptionUtil.getDisplay(e));
+			String ex = ExceptionUtil.getDisplay(e);
+			result.addMessage(ex);
 
       this.addExtendErrorInfo(aConnection, aSql, result);
 			result.setFailure();
-			LogMgr.logDebug("DdlCommand.execute()", "Error executing statement", e);
+			LogMgr.logDebug("DdlCommand.execute()", "Error executing statement " + ex,null);
 		}
 		finally
 		{

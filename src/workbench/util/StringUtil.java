@@ -242,15 +242,23 @@ public class StringUtil
 
 	public static final List stringToList(String aString, String aDelimiter)
 	{
-		return stringToList(aString, aDelimiter, false);
+		return stringToList(aString, aDelimiter, false, false);
+	}
+	
+	public static final List stringToList(String aString, String aDelimiter, boolean removeEmpty)
+	{
+		return stringToList(aString, aDelimiter, removeEmpty, false);
 	}
 	/**
-	 *	Parses the given String and creates a List containing the elements
+	 * 	Parses the given String and creates a List containing the elements
 	 *  of the string that are separated by <tt>aDelimiter</aa>
-	 *  @param String the separated input to parse
-	 *  @param String the delimiter to user
+	 * @param aString the separated input to parse
+	 * @param aDelimiter the delimiter to user
+	 * @param removeEmpty flag to remove empty entries
+	 * @param trimEntries flag to trim entries
+	 * @return A List of Strings
 	 */
-	public static final List stringToList(String aString, String aDelimiter, boolean removeEmpty)
+	public static final List stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries)
 	{
     if (aString == null || aString.length() == 0) return Collections.EMPTY_LIST;
 		WbStringTokenizer tok = new WbStringTokenizer(aString, aDelimiter);
@@ -260,11 +268,21 @@ public class StringUtil
 			String element = tok.nextToken();
 			if (element == null) continue;
 			if (removeEmpty && element.trim().length() == 0) continue;
-			result.add(element);
+			if (trimEntries)
+				result.add(element.trim());
+			else
+				result.add(element);
 		}
 		return result;
 	}
 
+	/**
+	 * Create a String from the given list, where the elements are delimited
+	 * with the supplied delimiter
+	 * @return The elements of the list as a String
+	 * @param aList The list to process
+	 * @param aDelimiter The delimiter to use
+	 */
 	public static final String listToString(List aList, char aDelimiter)
 	{
 		if (aList == null || aList.size() == 0) return "";

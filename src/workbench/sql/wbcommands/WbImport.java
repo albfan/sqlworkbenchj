@@ -37,39 +37,63 @@ public class WbImport extends SqlCommand
 {
 	public static final String VERB = "WBIMPORT";
 	private DataImporter imp;
+	public static final String ARG_TYPE = "type";
+	public static final String ARG_FILE = "file";
+	public static final String ARG_TARGETTABLE = "table";
+	public static final String ARG_DELIM = "delimiter";
+	public static final String ARG_QUOTE = "quotechar";
+	public static final String ARG_DATE_FORMAT = "dateformat";
+	public static final String ARG_TIMESTAMP_FORMAT = "timestampformat";
+	public static final String ARG_DECCHAR = "decimal";
+	public static final String ARG_COMMIT = "commitevery";
+	public static final String ARG_CONTAINSHEADER = "header";
+	public static final String ARG_ENCODING = "encoding";
+	public static final String ARG_FILECOLUMNS = "filecolumns";
+	public static final String ARG_MODE = "mode";
+	public static final String ARG_KEYCOLUMNS = "keycolumns";
+	public static final String ARG_USEBATCH = "usebatch";
+	public static final String ARG_BATCHSIZE = "batchsize";
+	public static final String ARG_DELETE_TARGET = "deletetarget";
+	public static final String ARG_EMPTY_STRING_IS_NULL = "emptystringnull";
+	public static final String ARG_CONTINUE = "continueonerror";
+	public static final String ARG_DECODE = "decode";
+	public static final String ARG_VERBOSEXML = "verbosexml";
+	public static final String ARG_IMPORTCOLUMNS = "importcolumns";
+	public static final String ARG_COL_FILTER = "columnfilter";
+	public static final String ARG_LINE_FILTER = "linefilter";
+	public static final String ARG_PROGRESS = "showprogress";
 
 	private ArgumentParser cmdLine;
 
 	public WbImport()
 	{
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument("type");
-		cmdLine.addArgument("file");
-		cmdLine.addArgument("table");
-		cmdLine.addArgument("delimiter");
-		cmdLine.addArgument("quotechar");
-		cmdLine.addArgument("dateformat");
-		cmdLine.addArgument("timestampformat");
-		cmdLine.addArgument("decimal");
-		cmdLine.addArgument("commitevery");
-		cmdLine.addArgument("header");
-		cmdLine.addArgument("encoding");
+		cmdLine.addArgument(ARG_TYPE);
+		cmdLine.addArgument(ARG_FILE);
+		cmdLine.addArgument(ARG_TARGETTABLE);
+		cmdLine.addArgument(ARG_DELIM);
+		cmdLine.addArgument(ARG_QUOTE);
+		cmdLine.addArgument(ARG_DATE_FORMAT);
+		cmdLine.addArgument(ARG_TIMESTAMP_FORMAT);
+		cmdLine.addArgument(ARG_DECCHAR);
+		cmdLine.addArgument(ARG_COMMIT);
+		cmdLine.addArgument(ARG_CONTAINSHEADER);
+		cmdLine.addArgument(ARG_ENCODING);
 		cmdLine.addArgument("columns");
-		cmdLine.addArgument("filecolumns");
-		cmdLine.addArgument("mode");
-		cmdLine.addArgument("keycolumns");
-		cmdLine.addArgument("usebatch");
-		cmdLine.addArgument("batchsize");
-		cmdLine.addArgument("deletetarget");
-		cmdLine.addArgument("emptystringnull");
-		cmdLine.addArgument("continueonerror");
-		cmdLine.addArgument("decode");
-		cmdLine.addArgument("verbosexml");
-		cmdLine.addArgument("importcolumns");
-		cmdLine.addArgument("columnfilter");
-		cmdLine.addArgument("linefilter");
-		cmdLine.addArgument("showprogress");
-		cmdLine.addArgument("progressinterval");
+		cmdLine.addArgument(ARG_FILECOLUMNS);
+		cmdLine.addArgument(ARG_MODE);
+		cmdLine.addArgument(ARG_KEYCOLUMNS);
+		cmdLine.addArgument(ARG_USEBATCH);
+		cmdLine.addArgument(ARG_BATCHSIZE);
+		cmdLine.addArgument(ARG_DELETE_TARGET);
+		cmdLine.addArgument(ARG_EMPTY_STRING_IS_NULL);
+		cmdLine.addArgument(ARG_CONTINUE);
+		cmdLine.addArgument(ARG_DECODE);
+		cmdLine.addArgument(ARG_VERBOSEXML);
+		cmdLine.addArgument(ARG_IMPORTCOLUMNS);
+		cmdLine.addArgument(ARG_COL_FILTER);
+		cmdLine.addArgument(ARG_LINE_FILTER);
+		cmdLine.addArgument(ARG_PROGRESS);
 
 		this.isUpdatingCommand = true;
 	}
@@ -126,8 +150,8 @@ public class WbImport extends SqlCommand
 		String file = null;
 		String cleancr = null;
 
-		type = cmdLine.getValue("type");
-		file = cmdLine.getValue("file");
+		type = cmdLine.getValue(ARG_TYPE);
+		file = cmdLine.getValue(ARG_FILE);
 
 
 		if (type == null || file == null)
@@ -139,12 +163,12 @@ public class WbImport extends SqlCommand
 		}
 		file = StringUtil.trimQuotes(file);
 
-		int commit = cmdLine.getIntValue("commitevery",-1);
+		int commit = cmdLine.getIntValue(ARG_COMMIT,-1);
 		imp.setCommitEvery(commit);
 
-		imp.setContinueOnError(cmdLine.getBoolean("continueonerror", true));
+		imp.setContinueOnError(cmdLine.getBoolean(ARG_CONTINUE, true));
 
-		String table = cmdLine.getValue("table");
+		String table = cmdLine.getValue(ARG_TARGETTABLE);
 
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
@@ -159,30 +183,32 @@ public class WbImport extends SqlCommand
 			textParser.setTableName(table);
 			textParser.setConnection(aConnection);
 
-			String delimiter = cmdLine.getValue("delimiter");
+			String delimiter = cmdLine.getValue(ARG_DELIM);
 			if (delimiter != null) textParser.setDelimiter(delimiter);
 
-			String quote = cmdLine.getValue("quotechar");
+			String quote = cmdLine.getValue(ARG_QUOTE);
 			if (quote != null) textParser.setQuoteChar(quote);
 
-			String format = cmdLine.getValue("dateformat");
+			String format = cmdLine.getValue(ARG_DATE_FORMAT);
 			if (format != null) textParser.setDateFormat(format);
 
-			format = cmdLine.getValue("timestampformat");
+			format = cmdLine.getValue(ARG_TIMESTAMP_FORMAT);
 			if (format != null) textParser.setTimeStampFormat(format);
 
-			format = cmdLine.getValue("decimal");
+			format = cmdLine.getValue(ARG_DECODE);
 			if (format != null) textParser.setDecimalChar(format);
 
-			boolean header = cmdLine.getBoolean("header");
+			boolean header = cmdLine.getBoolean(ARG_CONTAINSHEADER);
 			textParser.setContainsHeader(header);
 
-			textParser.setDecodeUnicode(cmdLine.getBoolean("decode"));
+			textParser.setDecodeUnicode(cmdLine.getBoolean(ARG_DECODE));
 
-			String encoding = cmdLine.getValue("encoding");
+			String encoding = cmdLine.getValue(ARG_ENCODING);
 			if (encoding != null) textParser.setEncoding(encoding);
 
-			String columns = cmdLine.getValue("filecolumns");
+			// filecolumns is the new parameter
+			// -columns is deprecated
+			String columns = cmdLine.getValue(ARG_FILECOLUMNS);
 			if (columns == null) columns = cmdLine.getValue("columns");
 
 			if (columns != null)
@@ -198,7 +224,7 @@ public class WbImport extends SqlCommand
 					result.setFailure();
 					return result;
 				}
-				textParser.setEmptyStringIsNull(cmdLine.getBoolean("emptystringnull", true));
+				textParser.setEmptyStringIsNull(cmdLine.getBoolean(ARG_EMPTY_STRING_IS_NULL, true));
 			}
 
 			if (!header && columns == null)
@@ -210,7 +236,7 @@ public class WbImport extends SqlCommand
 
 			// the import columns have to set after setting
 			// the file columns!
-			columns = cmdLine.getValue("importcolumns");
+			columns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
 			if (columns != null)
 			{
 				List cols = StringUtil.stringToList(columns, ",", true);
@@ -219,13 +245,13 @@ public class WbImport extends SqlCommand
 
 			// The column filter has to bee applied after the
 			// columns are defined!
-			String filter = cmdLine.getValue("columnfilter");
+			String filter = cmdLine.getValue(ARG_COL_FILTER);
 			if (filter != null)
 			{
 				addColumnFilter(filter, textParser);
 			}
 
-			filter = cmdLine.getValue("linefilter");
+			filter = cmdLine.getValue(ARG_LINE_FILTER);
 			if (filter != null)
 			{
 				textParser.setLineFilter(StringUtil.trimQuotes(filter));
@@ -238,12 +264,17 @@ public class WbImport extends SqlCommand
 			XmlDataFileParser xmlParser = new XmlDataFileParser(file);
 			if (table != null) xmlParser.setTableName(table);
 
-			String encoding = cmdLine.getValue("encoding");
+			String encoding = cmdLine.getValue(ARG_ENCODING);
 			if (encoding != null) xmlParser.setEncoding(encoding);
 
-			boolean verbose = cmdLine.getBoolean("verbosexml", true);
+			boolean verbose = cmdLine.getBoolean(ARG_VERBOSEXML, true);
 			xmlParser.setUseVerboseFormat(verbose);
-
+			
+			String cols = cmdLine.getValue(ARG_IMPORTCOLUMNS);
+			if (cols != null)
+			{
+				xmlParser.setColumns(cols);
+			}
 			imp.setProducer(xmlParser);
 		}
 		else
@@ -254,10 +285,10 @@ public class WbImport extends SqlCommand
 		}
 
 		this.imp.setRowActionMonitor(this.rowMonitor);
-		String value = cmdLine.getValue("showprogress");
+		String value = cmdLine.getValue(ARG_PROGRESS);
 		if (value == null)
 		{
-			int interval = this.estimateReportInterval(file);
+			int interval = DataImporter.estimateReportIntervalFromFileSize(file);
 			imp.setReportInterval(interval);
 		}
 		else if ("true".equalsIgnoreCase(value))
@@ -274,7 +305,7 @@ public class WbImport extends SqlCommand
 			this.imp.setReportInterval(interval);
 		}
 
-		String mode = cmdLine.getValue("mode");
+		String mode = cmdLine.getValue(ARG_MODE);
 		if (mode != null)
 		{
 			if (!imp.setMode(mode))
@@ -283,7 +314,7 @@ public class WbImport extends SqlCommand
 			}
 		}
 
-		String keyColumns = cmdLine.getValue("keycolumns");
+		String keyColumns = cmdLine.getValue(ARG_KEYCOLUMNS);
 		imp.setKeyColumns(keyColumns);
 
 		String msg = ResourceMgr.getString("MsgImportingFile");
@@ -295,14 +326,14 @@ public class WbImport extends SqlCommand
 		}
 		result.addMessage(msg);
 
-		boolean delete = cmdLine.getBoolean("deletetarget");
+		boolean delete = cmdLine.getBoolean(ARG_DELETE_TARGET);
 		imp.setDeleteTarget(delete);
 
-		boolean useBatch = cmdLine.getBoolean("usebatch");
+		boolean useBatch = cmdLine.getBoolean(ARG_USEBATCH);
 		imp.setUseBatch(useBatch);
-		if (useBatch && cmdLine.isArgPresent("batchsize"))
+		if (useBatch && cmdLine.isArgPresent(ARG_BATCHSIZE))
 		{
-			int queueSize = cmdLine.getIntValue("batchsize",-1);
+			int queueSize = cmdLine.getIntValue(ARG_BATCHSIZE,-1);
 			if (queueSize > 0)
 			{
 				imp.setBatchSize(queueSize);

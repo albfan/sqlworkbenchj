@@ -28,6 +28,7 @@ import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
+import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import java.io.StringReader;
@@ -42,10 +43,10 @@ import workbench.util.WbThread;
 public class DataImporter
 	implements Interruptable, RowDataReceiver
 {
-	private static final int MODE_INSERT = 0;
-	private static final int MODE_UPDATE = 1;
-	private static final int MODE_INSERT_UPDATE = 2;
-	private static final int MODE_UPDATE_INSERT = 3;
+	public static final int MODE_INSERT = 0;
+	public static final int MODE_UPDATE = 1;
+	public static final int MODE_INSERT_UPDATE = 2;
+	public static final int MODE_UPDATE_INSERT = 3;
 
 	private WbConnection dbConn;
 	private String insertSql;
@@ -78,7 +79,7 @@ public class DataImporter
 	private ArrayList errors = new ArrayList();
 	//private int[] columnTypes = null;
 
-	// this array will map the columns for updateing the target table
+	// this array will map the columns for updating the target table
 	// the index into this array will be the index
 	// from the row data array supplied by the producer.
 	// (which should be the same order as the columns in targetColumns)
@@ -197,6 +198,47 @@ public class DataImporter
 	public boolean isModeInsertUpdate() { return (this.mode == MODE_INSERT_UPDATE); }
 	public boolean isModeUpdateInsert() { return (this.mode == MODE_UPDATE_INSERT); }
 
+	public static int estimateReportIntervalFromFileSize(String filename)
+	{
+		try
+		{
+			long records = FileUtil.estimateRecords(filename, 10);
+			if (records < 100)
+			{
+				return 1;
+			}
+			else if (records < 1000)
+			{
+				return 10;
+			}
+			else if (records < 100000)
+			{
+				return 100;
+			}
+			else
+			{
+				return 1000;
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DataImporter.estimateReportIntervalFromFileSize()", "Error when checking input file", e);
+			return 0;
+		}
+	}
+	
+	public void setMode(int mode)
+	{
+		if (mode == MODE_INSERT)
+			this.setModeInsert();
+		else if (mode == MODE_UPDATE)
+			this.setModeUpdate();
+		else if (mode == MODE_INSERT_UPDATE)
+			this.setModeInsertUpdate();
+		else if (mode == MODE_UPDATE_INSERT)
+			this.setModeUpdateInsert();
+	}
+	
 	/**
 	 *	Define the mode by supplying keywords.
 	 *	The following combinations are valid:
@@ -208,6 +250,7 @@ public class DataImporter
 	 *	<li>insert,update</li>
 	 *	<li>update,insert</li>
 	 *  </ul>
+	 *	The mode string is not case sensitive (INSERT is the same as insert)
 	 *	@return true if the passed string is valid, false otherwise
 	 */
 	public boolean setMode(String mode)
@@ -672,38 +715,46 @@ public class DataImporter
 	public void setTargetTable(String tableName, ColumnIdentifier[] columns)
 		throws SQLException
 	{
-		this.targetTable = this.dbConn.getMetadata().adjustObjectname(tableName);
-		this.targetColumns = columns;
+		try
+		{
+			this.targetTable = this.dbConn.getMetadata().adjustObjectname(tableName);
+			this.targetColumns = columns;
 
-		this.colCount = this.targetColumns.length;
-		if (this.dbConn != null)
-		{
-			this.checkTable();
-		}
-		if (this.mode != MODE_UPDATE)
-		{
-			this.prepareInsertStatement();
-		}
-		if (this.mode != MODE_INSERT)
-		{
-			this.prepareUpdateStatement();
-		}
-		this.checkColumnsForBatch();
-		if (this.deleteTarget)
-		{
-			try
+			this.colCount = this.targetColumns.length;
+			if (this.dbConn != null)
 			{
-				this.deleteTarget();
+				this.checkTable();
 			}
-			catch (Exception e)
+			if (this.mode != MODE_UPDATE)
 			{
-				LogMgr.logError("DataImporter.setTargetTable()", "Could not delete contents of table " + this.targetTable, e);
+				this.prepareInsertStatement();
+			}
+			if (this.mode != MODE_INSERT)
+			{
+				this.prepareUpdateStatement();
+			}
+			this.checkColumnsForBatch();
+			if (this.deleteTarget)
+			{
+				try
+				{
+					this.deleteTarget();
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("DataImporter.setTargetTable()", "Could not delete contents of table " + this.targetTable, e);
+				}
+			}
+			if (this.reportInterval == 0 && this.progressMonitor != null)
+			{
+				this.progressMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+				this.progressMonitor.setCurrentObject(ResourceMgr.getString("MsgImportingTableData") + " " + this.targetTable + " (" + this.getModeString() + ")",-1,-1);
 			}
 		}
-		if (this.reportInterval == 0 && this.progressMonitor != null)
+		catch (RuntimeException th)
 		{
-			this.progressMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
-			this.progressMonitor.setCurrentObject(ResourceMgr.getString("MsgImportingTableData") + " " + this.targetTable + " (" + this.getModeString() + ")",-1,-1);
+			th.printStackTrace();
+			throw th;
 		}
 	}
 

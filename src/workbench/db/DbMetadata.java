@@ -39,15 +39,16 @@ import java.util.regex.Pattern;
 import javax.swing.event.ChangeListener;
 import workbench.db.firebird.FirebirdMetadata;
 import workbench.db.hsqldb.HsqlSequenceReader;
-import workbench.db.ingres.IngresMetaData;
+import workbench.db.ingres.IngresMetadata;
 import workbench.db.mckoi.McKoiMetadata;
 
-import workbench.db.mssql.MsSqlMetaData;
+import workbench.db.mssql.SqlServerMetadata;
 import workbench.db.mssql.SqlServerConstraintReader;
 import workbench.db.mysql.EnumReader;
 import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.OracleConstraintReader;
-import workbench.db.oracle.OracleMetaData;
+import workbench.db.oracle.OracleMetadata;
+import workbench.db.oracle.OracleSynonymReader;
 import workbench.db.postgres.PostgresSequenceReader;
 import workbench.db.postgres.PostgresConstraintReader;
 import workbench.db.postgres.PostgresMetadata;
@@ -62,6 +63,7 @@ import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
+import workbench.db.hsqldb.HsqlConstraintReader;
 
 
 /**
@@ -94,9 +96,9 @@ public class DbMetadata
 
 	// Specialized classes to retrieve metadata that is either not
 	// supported by JDBC or where the JDBC driver does not work properly
-	private OracleMetaData oracleMetaData;
-	private MsSqlMetaData msSqlMetaData;
-	private IngresMetaData ingresMetaData;
+	private OracleMetadata oracleMetaData;
+	private SqlServerMetadata msSqlMetaData;
+	private IngresMetadata ingresMetaData;
 	private McKoiMetadata mckoiMetaData;
 
 	private static List caseSensitiveServers = Collections.EMPTY_LIST;
@@ -104,8 +106,8 @@ public class DbMetadata
 	private static List serverNeedsJdbcCommit = Collections.EMPTY_LIST;
 	private static List serversWithInlineConstraints = Collections.EMPTY_LIST;
 
-	// These Hashmaps contains templates
-	// for object creation
+	// These Hashmaps contains SQL templates
+	// for metadata retrieval and object creation
 	private static HashMap procSourceSql;
 	private static HashMap viewSourceSql;
 	private static HashMap triggerSourceSql;
@@ -144,16 +146,14 @@ public class DbMetadata
 	private ProcedureReader procedureReader = null;
 
 	private List keywords;
+	private Set dbFunctions;
 	private String quoteCharacter;
 	private String dbVersion;
 
-	//private static final String SELECT_INTO_PG = "(?i)SELECT.*INTO\\s*TABLE\\s*\\p{Print}*\\s*FROM.*";
-	// the TABLE word is not mandatory...
 	private static final String SELECT_INTO_PG = "(?i)(?s)SELECT.*INTO\\p{Print}*\\s*FROM.*";
 	private static final String SELECT_INTO_INFORMIX = "(?i)(?s)SELECT.*FROM.*INTO\\s*\\p{Print}*";
 	private Pattern selectIntoPattern = null;
 
-	/** Creates a new instance of DbMetadata */
 	public DbMetadata(WbConnection aConnection)
 		throws SQLException
 	{
@@ -212,10 +212,11 @@ public class DbMetadata
 		if (productLower.indexOf("oracle") > -1)
 		{
 			this.isOracle = true;
-			this.oracleMetaData = new OracleMetaData(this);
+			this.oracleMetaData = new OracleMetadata(this);
 			this.constraintReader = new OracleConstraintReader();
-			this.synonymReader = new workbench.db.oracle.OracleSynonymReader();
+			this.synonymReader = new OracleSynonymReader();
 
+			// register with the Settings to be able to 
 			// check for changes to the "enable dbms output" property
 			Settings.getInstance().addPropertyChangeListener(this);
 			this.sequenceReader = this.oracleMetaData;
@@ -245,7 +246,8 @@ public class DbMetadata
 		{
 			this.isSqlServer = true;
 			this.constraintReader = new SqlServerConstraintReader();
-			this.msSqlMetaData = new MsSqlMetaData(this);
+			this.msSqlMetaData = new SqlServerMetadata(this);
+			this.procedureReader = this.msSqlMetaData;
 		}
 		else if (productLower.indexOf("adaptive server") > -1)
 		{
@@ -274,7 +276,7 @@ public class DbMetadata
 		else if (productLower.indexOf("ingres") > -1)
 		{
 			this.isIngres = true;
-			this.ingresMetaData = new IngresMetaData(this.dbConnection.getSqlConnection());
+			this.ingresMetaData = new IngresMetadata(this.dbConnection.getSqlConnection());
 			this.synonymReader = this.ingresMetaData;
 			this.sequenceReader = this.ingresMetaData;
 		}
@@ -291,6 +293,8 @@ public class DbMetadata
 			this.sequenceReader = this.mckoiMetaData;
 		}
 
+		// if the DBMS does not need a specific ProcedureReader
+		// we use the default implementation 
 		if (this.procedureReader == null) 
 		{
 			this.procedureReader = new JdbcProcedureReader(this);
@@ -358,7 +362,7 @@ public class DbMetadata
 	 *	Returns a comma separated list of SQL verbs that should
 	 *  be ignored during execution for this DBMS.
 	 *	This can be configured in workbench.properties:
-	 *	workbench.db.ignore.<dbms-name>=
+	 *	workbench.db.ignore.<dbmsId>=
 	 */
 	public String getVerbsToIgnore()
 	{
@@ -378,20 +382,19 @@ public class DbMetadata
 
 	private static void readTemplates()
 	{
-		procSourceSql = readStatementTemplates("ProcSourceStatements.xml");
-		viewSourceSql = readStatementTemplates("ViewSourceStatements.xml");
-		fkStatements = readStatementTemplates("CreateFkStatements.xml");
-		pkStatements = readStatementTemplates("CreatePkStatements.xml");
-		idxStatements = readStatementTemplates("CreateIndexStatements.xml");
-		triggerList = readStatementTemplates("ListTriggersStatements.xml");
-		triggerSourceSql = readStatementTemplates("TriggerSourceStatements.xml");
-		columnCommentStatements = readStatementTemplates("ColumnCommentStatements.xml");
-		tableCommentStatements = readStatementTemplates("TableCommentStatements.xml");
 		synchronized (GENERAL_SQL)
 		{
+			procSourceSql = readStatementTemplates("ProcSourceStatements.xml");
+			viewSourceSql = readStatementTemplates("ViewSourceStatements.xml");
+			fkStatements = readStatementTemplates("CreateFkStatements.xml");
+			pkStatements = readStatementTemplates("CreatePkStatements.xml");
+			idxStatements = readStatementTemplates("CreateIndexStatements.xml");
+			triggerList = readStatementTemplates("ListTriggersStatements.xml");
+			triggerSourceSql = readStatementTemplates("TriggerSourceStatements.xml");
+			columnCommentStatements = readStatementTemplates("ColumnCommentStatements.xml");
+			tableCommentStatements = readStatementTemplates("TableCommentStatements.xml");
 			templatesRead = true;
 		}
-
 	}
 
 	/**
@@ -481,7 +484,7 @@ public class DbMetadata
 			types = Settings.getInstance().getProperty("workbench.ignoretypes.other", null);
 		}
 
-		return StringUtil.stringToList(types, ",");
+		return StringUtil.stringToList(types, ",", true, true);
 	}
 
 	private static HashMap readStatementTemplates(String aFilename)
@@ -568,8 +571,6 @@ public class DbMetadata
 
 		return null;
 	}
-
-	private Set dbFunctions;
 
 	public Set getDbFunctions()
 	{
@@ -783,12 +784,12 @@ public class DbMetadata
 		// the end of the procedure name
 		int i = aProcname.indexOf(';');
 		if (i > -1)
+		{
 			aProcname = aProcname.substring(0, i);
+		}
 
 		StrBuffer source = new StrBuffer();
 
-		// Postgres and Firebird do not store the CREATE PROCEDURE part
-		// of the source, so we have to recreate it "manually"
 		if (this.procedureReader != null)
 		{
 			source.append(this.procedureReader.getProcedureHeader(aCatalog, aSchema, aProcname));
@@ -832,8 +833,8 @@ public class DbMetadata
 		{
       if (this.isOracle && linecount == 0)
       {
-        // this might be a procedure from a package. Then wie need
-        // to retrieve the whole package. This will be stored in the catalog
+        // this might be a procedure from a package. Then we need
+        // to retrieve the whole package. 
         sql.setSchema(aSchema);
         sql.setObjectName(aCatalog);
         sql.setCatalog(null);
@@ -1167,6 +1168,7 @@ public class DbMetadata
 		}
 		return exists;
 	}
+	
 	public boolean storesUpperCaseIdentifiers()
 	{
 		try
@@ -1179,62 +1181,11 @@ public class DbMetadata
 		}
 	}
 
-	public final static int COLUMN_IDX_PROC_COLUMNS_COL_NAME = 0;
-	public final static int COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE = 1;
-	public final static int COLUMN_IDX_PROC_COLUMNS_DATA_TYPE = 2;
-	public final static int COLUMN_IDX_PROC_COLUMNS_REMARKS = 3;
 
 	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
 		throws SQLException
 	{
-		final String cols[] = {"COLUMN_NAME", "COL_TYPE", "TYPE_NAME", "REMARKS"};
-		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		final int sizes[] =   {20, 10, 18, 30};
-		DataStore ds = new DataStore(cols, types, sizes);
-
-		ResultSet rs = null;
-		try
-		{
-			rs = this.metaData.getProcedureColumns(aCatalog, aSchema, this.adjustObjectname(aProcname), "%");
-			while (rs.next())
-			{
-				int row = ds.addRow();
-				String colName = rs.getString("COLUMN_NAME");
-				ds.setValue(row, 0, colName);
-				int colType = rs.getInt("COLUMN_TYPE");
-				String stype;
-
-				if (colType == DatabaseMetaData.procedureColumnIn)
-					stype = "IN";
-				else if (colType == DatabaseMetaData.procedureColumnInOut)
-					stype = "INOUT";
-				else if (colType == DatabaseMetaData.procedureColumnOut)
-					stype = "OUT";
-				else if (colType == DatabaseMetaData.procedureColumnResult)
-					stype = "RESULTSET";
-				else if (colType == DatabaseMetaData.procedureColumnReturn)
-					stype = "RETURN";
-				else
-					stype = "";
-				ds.setValue(row, 1, stype);
-
-				int sqlType = rs.getInt("DATA_TYPE");
-				String typeName = rs.getString("TYPE_NAME");
-				int digits = rs.getInt("PRECISION");
-				int size = rs.getInt("LENGTH");
-				String rem = rs.getString("REMARKS");
-
-				String display = getSqlTypeDisplay(typeName, sqlType, size, digits);
-				ds.setValue(row, 2, display);
-				ds.setValue(row, 3, rem);
-			}
-		}
-		finally
-		{
-			SqlUtil.closeResult(rs);
-		}
-
-		return ds;
+		return this.procedureReader.getProcedureColumns(aCatalog, aSchema, aProcname);
 	}
 
 	public static String getSqlTypeDisplay(String aTypeName, int sqlType, int size, int digits)
@@ -1376,6 +1327,8 @@ public class DbMetadata
 	public void close()
 	{
 		Settings.getInstance().removePropertyChangeLister(this);
+		if (this.dbFunctions != null) this.dbFunctions.clear();
+		if (this.keywords != null) this.keywords.clear();
 		if (this.oraOutput != null) this.oraOutput.close();
 		if (this.oracleMetaData != null) this.oracleMetaData.done();
 		if (this.msSqlMetaData != null) this.msSqlMetaData.done();
@@ -2578,21 +2531,6 @@ public class DbMetadata
 
 		String source = this.getTableSource(catalog, schema, table, tableDef, index, fkDef, includeDrop);
 		return source;
-	}
-
-	/** Return the SQL script to recreate the table defined in the DataStore
-	 * @param aTablename The name of the table as it should appear in the CREATE TABLE statement
-	 * @param aTableDef The DataStore containing a table definition obtained by #getTableDefinition(String, String, String, String)
-	 * @return
-	 */
-	public String getTableSource(String aTablename, DataStore aTableDef)
-	{
-		return this.getTableSource(aTablename, aTableDef, null, null);
-	}
-
-	public String getTableSource(String aTablename, DataStore aTableDef, DataStore aIndexDef, DataStore aFkDef)
-	{
-		return this.getTableSource(null, null, aTablename, aTableDef, aIndexDef, aFkDef, false);
 	}
 
 	public String getTableSource(String aCatalog, String aSchema, String aTablename, DataStore aTableDef, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop)

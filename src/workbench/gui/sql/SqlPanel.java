@@ -1602,6 +1602,7 @@ public class SqlPanel
 	private void startExecution(final String sql, final int offset, final int commandAtIndex, final boolean highlight)
 	{
 		if (this.isBusy()) return;
+		if (!this.isConnected()) return;
 
 		this.executionThread = new WbThread(new Runnable()
 		{
@@ -1610,7 +1611,7 @@ public class SqlPanel
 				runStatement(sql, offset, commandAtIndex, highlight);
 			}
 		},"SQL Execution Thread " + this.getId());
-		this.executionThread.setPriority(Thread.MAX_PRIORITY);
+		//this.executionThread.setPriority(Thread.MAX_PRIORITY);
 		this.executionThread.start();
 	}
 
@@ -2038,17 +2039,14 @@ public class SqlPanel
 				if (cancelExecution) break;
 
 				boolean goOn = true;
-				if (parametersPresent)
+				VariablePrompter prompter = new VariablePrompter(lastSql);
+				if (prompter.needsInput())
 				{
-					VariablePrompter prompter = new VariablePrompter(lastSql);
-					if (prompter.needsInput())
-					{
-						// the animated gif needs to be turned off when a
-						// dialog is displayed, otherwise Swing uses too much CPU
-						this.showBusyIcon(false);
-						goOn = prompter.getPromptValues();
-						this.showBusyIcon(true);
-					}
+					// the animated gif needs to be turned off when a
+					// dialog is displayed, otherwise Swing uses too much CPU
+					this.showBusyIcon(false);
+					goOn = prompter.getPromptValues();
+					this.showBusyIcon(true);
 				}
 
 				if (goOn && checkPreparedStatement)
@@ -2403,7 +2401,9 @@ public class SqlPanel
 		this.executeSelected.setEnabled(aFlag);
 		this.executeCurrent.setEnabled(aFlag);
 		this.importFileAction.setEnabled(aFlag);
-		//this.spoolData.setEnabled(aFlag);
+		this.commitAction.setEnabled(aFlag);
+		this.rollbackAction.setEnabled(aFlag);
+		this.spoolData.setEnabled(aFlag);
 	}
 
 	private synchronized void showCancelIcon()

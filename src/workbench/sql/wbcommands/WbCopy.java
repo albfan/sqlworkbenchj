@@ -18,7 +18,7 @@ import java.util.Map;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
-import workbench.db.DataCopier;
+import workbench.db.datacopy.DataCopier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;

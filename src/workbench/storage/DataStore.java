@@ -832,6 +832,7 @@ public class DataStore
 	{
 		int cols = this.resultInfo.getColumnCount();
 		StringBuffer result = new StringBuffer(cols * 30);
+		int numCols = 0;
 		for (int i=0; i < cols; i++)
 		{
 			if (columns != null)
@@ -839,10 +840,11 @@ public class DataStore
 				if (!columns.contains(this.resultInfo.getColumn(i))) continue;
 			}
 			String colName = this.getColumnName(i);
+			if (numCols > 0) result.append(aFieldDelimiter);
 
 			if (colName == null || colName.trim().length() == 0) colName = "Col" + i;
 			result.append(colName);
-			if (i < cols - 1) result.append(aFieldDelimiter);
+			numCols ++;
 		}
 		return result;
 	}

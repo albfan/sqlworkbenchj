@@ -387,12 +387,12 @@ public class WbAction
 	
 	public void actionPerformed(final ActionEvent e)
 	{
-		executeAction(e);
+		if (this.isEnabled()) executeAction(e);
 	}
 	
 	public void executeAction(ActionEvent e)
 	{
-		if (this.delegate != null)
+		if (this.isEnabled() && this.delegate != null)
 		{
 			e.setSource(this);
 			this.delegate.actionPerformed(e);

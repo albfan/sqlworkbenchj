@@ -296,8 +296,8 @@ public class RowData
 	{
 		int count = this.colData.length;
 		StringBuffer result = new StringBuffer(count * 20);
-		int start = 0;
-
+		//int start = 0;
+		int numCols = 0;
 		if (columns != null && count != columns.length) columns = null;
 
 		for (int c=0; c < count; c++)
@@ -307,6 +307,8 @@ public class RowData
 				if (!columns[c]) continue;
 			}
 			Object value = this.getValue(c);
+			if (numCols > 0) result.append(aDelimiter);
+
 			if (value != null)
 			{
 				if ((value instanceof Double ||
@@ -333,7 +335,7 @@ public class RowData
 					result.append(v);
 				}
 			}
-			if (c < count - 1) result.append(aDelimiter);
+			numCols ++;
 		}
 		return result;
 	}

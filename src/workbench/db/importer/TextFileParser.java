@@ -27,6 +27,7 @@ import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
+import workbench.interfaces.ImportFileParser;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.CsvLineParser;
@@ -43,7 +44,7 @@ import java.util.regex.Matcher;
  * @author  info@sql-workbench.net
  */
 public class TextFileParser
-	implements RowDataProducer
+	implements RowDataProducer, ImportFileParser
 {
 	private String filename;
 	private String tableName;
@@ -106,6 +107,11 @@ public class TextFileParser
 		this.importColCount = this.colCount;
 	}
 
+	public String getSourceFilename()
+	{
+		return this.filename;
+	}
+	
 	public void setLineFilter(String regex)
 	{
 		try
@@ -227,7 +233,6 @@ public class TextFileParser
 	 * 	Define the columns in the input file.
 	 */
 	public void setColumns(List columnList)
-		throws Exception
 	{
 		if (columnList == null || columnList.size()  == 0) return;
 		this.readColumnDefinitions(columnList);
@@ -291,8 +296,14 @@ public class TextFileParser
 
 	public void setQuoteChar(String aChar)
 	{
-		if (aChar == null) return;
-		this.quoteChar = aChar;
+		if (aChar != null && aChar.trim().length() > 0)
+		{
+			this.quoteChar = aChar;
+		}
+		else
+		{
+			this.quoteChar = null;
+		}
 	}
 
 	public void setDecimalChar(String aChar)
@@ -534,15 +545,61 @@ public class TextFileParser
 			this.pendingImportColumns = null;
 		}
 	}
+	
+	/**
+	 *	Return a list of ColumnIdentifier objects determined
+	 *	by the input file. The identifiers will only have a name
+	 *  not data type assigned. 
+	 *  If the input file does not contain a header row, the columns
+	 *  will be named Column1, Column2, ...
+	 */
+	public List getColumnsFromFile()
+	{
+		BufferedReader in = null;
+		List cols = new ArrayList();
+		try
+		{
+			File f = new File(this.filename);
+			InputStream inStream = new FileInputStream(f);
+			in = new BufferedReader(new InputStreamReader(inStream, this.encoding));
+			String firstLine = in.readLine();
+			WbStringTokenizer tok = new WbStringTokenizer(delimiter.charAt(0), this.quoteChar, false);
+			tok.setSourceString(firstLine);
+			int i = 1;
+			while (tok.hasMoreTokens())
+			{
+				String column = tok.nextToken();
+				String name = null;
+				if (this.withHeader)
+				{
+					name = column.toUpperCase();
+				}
+				else
+				{
+					name = "Column" + i;
+				}
+				ColumnIdentifier c = new ColumnIdentifier(name);
+				cols.add(c);
+				i++;
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("TextFileParser.getColumnsFromFile()", "Error when reading columns", e);
+		}
+		finally
+		{
+			try { in.close(); } catch (Throwable th) {}
+		}
+		return cols;
+	}
 
 	/**
 	 * 	Read the column definitions from the database.
 	 * 	@parm cols a List of column names (String)
 	 */
 	private void readColumnDefinitions(List cols)
-		throws Exception
 	{
-
 		try
 		{
 			ArrayList myCols = new ArrayList(cols);
@@ -555,7 +612,7 @@ public class TextFileParser
 			for (int i=0; i < this.colCount; i++)
 			{
 				String colname = ((String)myCols.get(i)).trim();
-				if ("$wb_skip$".equalsIgnoreCase(colname))
+				if (colname.toLowerCase().startsWith(RowDataProducer.SKIP_INDICATOR))
 				{
 					this.columns[i] = null;
 					skipPresent = true;

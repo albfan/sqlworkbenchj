@@ -13,7 +13,7 @@ package workbench.gui.dialogs.export;
 
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.interfaces.XmlOptions;
+import workbench.gui.dialogs.export.XmlOptions;
 
 /**
  *
@@ -34,12 +34,24 @@ public class XmlOptionsPanel
 	{
 		Settings s = Settings.getInstance();
 		s.setBoolProperty("workbench.export.xml.usecdata", this.getUseCDATA());
+		s.setBoolProperty("workbench.export.xml.verbosexml", this.getUseVerboseXml());
 	}
 	
 	public void restoreSettings()
 	{
 		Settings s = Settings.getInstance();
 		this.setUseCDATA(s.getBoolProperty("workbench.export.xml.usecdata"));
+		this.setUseVerboseXml(s.getBoolProperty("workbench.export.xml.verbosexml", true));
+	}
+	
+	public boolean getUseVerboseXml()
+	{
+		return this.verboseXmlCheckBox.isSelected();
+	}
+	
+	public void setUseVerboseXml(boolean flag)
+	{
+		this.verboseXmlCheckBox.setSelected(flag);
 	}
 	
 	public boolean getUseCDATA()
@@ -63,6 +75,7 @@ public class XmlOptionsPanel
     java.awt.GridBagConstraints gridBagConstraints;
 
     useCdata = new javax.swing.JCheckBox();
+    verboseXmlCheckBox = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -70,10 +83,20 @@ public class XmlOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    add(useCdata, gridBagConstraints);
+
+    verboseXmlCheckBox.setText(ResourceMgr.getString("LabelExportVerboseXml"));
+    verboseXmlCheckBox.setToolTipText(ResourceMgr.getDescription("LabelExportVerboseXml"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    add(useCdata, gridBagConstraints);
+    add(verboseXmlCheckBox, gridBagConstraints);
 
   }
   // </editor-fold>//GEN-END:initComponents
@@ -81,6 +104,7 @@ public class XmlOptionsPanel
 	
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JCheckBox useCdata;
+  private javax.swing.JCheckBox verboseXmlCheckBox;
   // End of variables declaration//GEN-END:variables
 	
 }

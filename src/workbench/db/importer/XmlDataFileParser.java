@@ -20,8 +20,12 @@ import java.math.BigInteger;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -34,7 +38,9 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.exporter.XmlRowDataConverter;
+import workbench.interfaces.ImportFileParser;
 import workbench.log.LogMgr;
+import workbench.util.WbStringTokenizer;
 
 /**
  *
@@ -42,18 +48,18 @@ import workbench.log.LogMgr;
  */
 public class XmlDataFileParser
 	extends DefaultHandler
-	implements RowDataProducer
+	implements RowDataProducer, ImportFileParser
 {
 	private String inputFile;
-	private String tableName = null;
-
+	private String tableName;
+	
 	private int currentRowNumber = 1;
 	private int colCount;
+	private int realColCount;
 
+	private List columnsToImport;
 	private ColumnIdentifier[] columns;
-	private String[] colClasses;
 	private String[] colFormats;
-	//private int[] colTypes;
 	private String encoding = "UTF-8";
 
 	private Object[] currentRow;
@@ -80,11 +86,14 @@ public class XmlDataFileParser
 	}
 
 	private int currentColIndex = 0;
+	private int realColIndex = 0;
+	private boolean ignoreCurrentColumn = false;
 	private long columnLongValue = 0;
 	private boolean hasLongValue = false;
 	private boolean isNull = false;
 	private StringBuffer chars;
 	private boolean keepRunning;
+	private boolean readTableStructure;
 	private String rowTag = XmlRowDataConverter.LONG_ROW_TAG;
 	private String columnTag = XmlRowDataConverter.LONG_COLUMN_TAG;
 	
@@ -95,15 +104,92 @@ public class XmlDataFileParser
 		this.inputFile = inputFile;
 	}
 
+	public void setColumns(String columnList)
+	{
+		if (columnList != null && columnList.trim().length() > 0)
+		{
+			WbStringTokenizer tok = new WbStringTokenizer(columnList, ",");
+			this.columnsToImport = new ArrayList(15);
+			while (tok.hasMoreTokens())
+			{
+				String col = tok.nextToken();
+				if (col == null) continue;
+				col = col.trim();
+				if (col.length() == 0) continue;
+				ColumnIdentifier ci = new ColumnIdentifier(col);
+				this.columnsToImport.add(ci);
+			}
+		}
+		else
+		{
+			this.columnsToImport = null;
+		}
+	}
+	
+	/**	 Define the columns to be imported
+	 */
+	public void setColumns(List columns)
+	{
+		if (columns != null && columns.size() > 0)
+		{
+			this.columnsToImport = new ArrayList();
+			Iterator itr = columns.iterator();
+			while (itr.hasNext())
+			{
+				Object o = itr.next();
+				if (o == null) continue;
+				if (o instanceof ColumnIdentifier)
+				{
+					ColumnIdentifier id = (ColumnIdentifier)o;
+					if (!id.getColumnName().equals(RowDataProducer.SKIP_INDICATOR))
+					{
+						this.columnsToImport.add(id);
+					}
+				}
+				else 
+				{
+					String colname = o.toString();
+					if (!colname.equals(RowDataProducer.SKIP_INDICATOR))
+					{
+						ColumnIdentifier id = new ColumnIdentifier(colname);
+						this.columnsToImport.add(id);
+					}
+				}
+			}
+		}
+		else
+		{
+			this.columnsToImport = null;
+		}
+	}
+	
 	public void setTableName(String aName)
 	{
 		this.tableName = aName;
 	}
 
+	public List getColumnsFromFile()
+	{
+		this.parseTableStructure();
+		if (this.columns == null) return Collections.EMPTY_LIST;
+		ArrayList result = new ArrayList(this.columns.length);
+		for (int i=0; i < this.columns.length; i++)
+		{
+			result.add(this.columns[i]);
+		}
+		return result;
+	}
+	
+	public String getSourceFilename()
+	{
+		return this.inputFile;
+	}
+	
 	public void setAbortOnError(boolean flag)
 	{
 		this.abortOnError = flag;
 	}
+	
 	public void start()
 		throws Exception
 	{
@@ -112,7 +198,6 @@ public class XmlDataFileParser
 		InputStream in = null;
 		try
 		{
-			// Parse the input
 			SAXParser saxParser = factory.newSAXParser();
 			in = new FileInputStream(this.inputFile);
 			InputSource source = new InputSource(new BufferedReader(new InputStreamReader(in, this.encoding)));
@@ -136,6 +221,38 @@ public class XmlDataFileParser
 		}
 	}
 
+	private void parseTableStructure()
+	{
+		SAXParserFactory factory = SAXParserFactory.newInstance();
+		factory.setValidating(false);
+		InputStream in = null;
+		try
+		{
+			// Parse the input
+			SAXParser saxParser = factory.newSAXParser();
+			in = new FileInputStream(this.inputFile);
+			InputSource source = new InputSource(new BufferedReader(new InputStreamReader(in, this.encoding)));
+			this.readTableStructure = true;
+			this.keepRunning = true;
+			saxParser.parse(source, this);
+		}
+		catch (ParsingEndedException e)
+		{
+			// ignore this, this is thrown, when only the 
+			// table definition is read
+		}
+		catch (Throwable e)
+		{
+			LogMgr.logError("XmlDataFileParser.parseTableStructure()", "Error reading table structure", e);
+			this.columns = null;
+			this.tableName = null;
+		}
+		finally
+		{
+			this.readTableStructure = false;
+		}
+	}
+	
 	public void cancel()
 	{
 		this.keepRunning = false;
@@ -143,15 +260,12 @@ public class XmlDataFileParser
 
 	private void clearRowData()
 	{
-		if (this.currentRow == null)
-		{
-			this.currentRow = new Object[this.colCount];
-		}
-		for (int i=0; i < this.colCount; i++)
+		for (int i=0; i < this.realColCount; i++)
 		{
 			this.currentRow[i] = null;
 		}
 		this.currentColIndex = 0;
+		this.realColIndex = 0;
 	}
 
 	public void setEncoding(String enc)
@@ -191,20 +305,8 @@ public class XmlDataFileParser
 
 		if (qName.equals(this.rowTag))
 		{
+			// row definition ended, start a new row
 			this.clearRowData();
-		}
-		else if (qName.equals("column-def"))
-		{
-			try
-			{
-				String attrValue = attrs.getValue("index");
-				this.currentColIndex = Integer.parseInt(attrValue);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("XmlDataFileParser.endElement()", "Could not read columnn index definition", e);
-				throw new SAXException("Could not read columnn index");
-			}
 		}
 		else if (qName.equals(this.columnTag))
 		{
@@ -222,20 +324,6 @@ public class XmlDataFileParser
 					hasLongValue = false;
 				}
 			}
-			if (this.verboseFormat)
-			{
-				try
-				{
-					attrValue = attrs.getValue("index");
-					this.currentColIndex = Integer.parseInt(attrValue);
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError("XmlDataFileParser.endElement()", "Could not read columnn index!", e);
-					throw new SAXException("Could not read columnn index");
-				}
-			}
-
 			attrValue = attrs.getValue("null");
 			this.isNull = "true".equals(attrValue);
 		}
@@ -266,7 +354,11 @@ public class XmlDataFileParser
 		else if (qName.equals(this.columnTag))
 		{
 			this.buildColumnData();
-			if (!this.verboseFormat) this.currentColIndex ++;
+			this.currentColIndex ++;
+		}
+		else if (qName.equals("column-def"))
+		{
+			this.currentColIndex ++;
 		}
 		else if (qName.equals("table-name"))
 		{
@@ -279,6 +371,10 @@ public class XmlDataFileParser
 		{
 			try
 			{
+				if (this.readTableStructure)
+				{
+					throw new ParsingEndedException();
+				}
 				this.sendTableDefinition();
 			}
 			catch (SQLException sql)
@@ -287,17 +383,26 @@ public class XmlDataFileParser
 				throw new SAXException("Could not initialize target table");
 			}
 		}
+		// The following tags are for meta-data
 		else if (qName.equals("column-count"))
 		{
 			try
 			{
 				this.colCount = Integer.parseInt(this.chars.toString());
 				this.columns = new ColumnIdentifier[this.colCount];
-				this.colClasses = new String[this.colCount];
 				this.colFormats = new String[this.colCount];
+				if (this.columnsToImport == null)
+				{
+					this.realColCount = this.colCount;
+				}
+				else
+				{
+					this.realColCount = this.columnsToImport.size();
+				}
 			}
 			catch (Exception e)
 			{
+				LogMgr.logError("XmlDataFileParser.endElement()", "Error when setting column count", e);
 				throw new SAXException("Invalid column-count (" + this.chars + ")");
 			}
 		}
@@ -305,7 +410,8 @@ public class XmlDataFileParser
 		{
 			try
 			{
-				this.columns[this.currentColIndex] = new ColumnIdentifier(this.chars.toString());
+				ColumnIdentifier col = new ColumnIdentifier(this.chars.toString());
+				this.columns[this.currentColIndex] = col;
 			}
 			catch (Exception e)
 			{
@@ -341,7 +447,7 @@ public class XmlDataFileParser
 		{
 			try
 			{
-				this.colClasses[this.currentColIndex] = this.chars.toString();
+				this.columns[this.currentColIndex].setColumnClass(this.chars.toString());
 			}
 			catch (Exception e)
 			{
@@ -349,10 +455,7 @@ public class XmlDataFileParser
 				throw new SAXException("Could not read columnn name");
 			}
 		}
-
-		// Stop collecting characters...
 		this.chars = null;
-
 	}
 
 	public void characters(char buf[], int offset, int len)
@@ -411,7 +514,8 @@ public class XmlDataFileParser
 	 */
 	private void buildColumnData()
 	{
-		this.currentRow[this.currentColIndex] = null;
+		if (this.columnsToImport != null && !this.columnsToImport.contains(this.columns[this.currentColIndex])) return;
+		this.currentRow[this.realColIndex] = null;
 
 		// the isNull flag will be set by the startElement method
 		// as that is an attribute of the tag
@@ -421,19 +525,19 @@ public class XmlDataFileParser
 		}
 
 		String value = this.chars.toString();
-		int type = this.columns[this.currentColIndex].getDataType();
+		int type = this.columns[this.realColIndex].getDataType();
 		switch (type)
 		{
 			case Types.CHAR:
 			case Types.VARCHAR:
 			case Types.LONGVARCHAR:
-				this.currentRow[this.currentColIndex] = value;
+				this.currentRow[this.realColIndex] = value;
 				break;
 
 			case Types.TIME:
 				if (hasLongValue)
 				{
-					this.currentRow[this.currentColIndex] = new java.sql.Time(this.columnLongValue);
+					this.currentRow[this.realColIndex] = new java.sql.Time(this.columnLongValue);
 				}
 				break;
 
@@ -442,13 +546,13 @@ public class XmlDataFileParser
 				{
 					if (value.trim().length() > 0)
 					{
-						this.currentRow[this.currentColIndex] = new BigInteger(value);
+						this.currentRow[this.realColIndex] = new BigInteger(value);
 					}
 				}
 				catch (Exception e)
 				{
 					LogMgr.logError("XmlDataFileParser.buildColumnData()", "Could not create BigInt value!", e);
-					this.currentRow[this.currentColIndex] = null;
+					this.currentRow[this.realColIndex] = null;
 				}
 				break;
 
@@ -459,13 +563,13 @@ public class XmlDataFileParser
 				{
 					if (value.trim().length() > 0)
 					{
-						this.currentRow[this.currentColIndex] = new Integer(value);
+						this.currentRow[this.realColIndex] = new Integer(value);
 					}
 				}
 				catch (Exception e)
 				{
 					LogMgr.logError("XmlDataFileParser.buildColumnData()", "Could not create BigInt value!", e);
-					this.currentRow[this.currentColIndex] = null;
+					this.currentRow[this.realColIndex] = null;
 				}
 				break;
 
@@ -487,7 +591,7 @@ public class XmlDataFileParser
 					catch (Exception e)
 					{
 						LogMgr.logError("XmlDataFileParser.buildColumnData()", "Could not convert data value " + value + " using format " + this.colFormats[this.currentColIndex], e);
-						this.currentRow[this.currentColIndex] = null;
+						this.currentRow[this.realColIndex] = null;
 						d = null;
 					}
 				}
@@ -496,11 +600,11 @@ public class XmlDataFileParser
 				{
 					if (type == Types.TIMESTAMP)
 					{
-						this.currentRow[this.currentColIndex] = new java.sql.Timestamp(d.getTime());
+						this.currentRow[this.realColIndex] = new java.sql.Timestamp(d.getTime());
 					}
 					else
 					{
-						this.currentRow[this.currentColIndex] = d;
+						this.currentRow[this.realColIndex] = d;
 					}
 				}
 				break;
@@ -510,11 +614,11 @@ public class XmlDataFileParser
 			case Types.DOUBLE:
 			case Types.NUMERIC:
 			case Types.REAL:
-				Object result = this.createNumericType(this.colClasses[this.currentColIndex], value);
-				this.currentRow[this.currentColIndex] = result;
+				Object result = this.createNumericType(this.columns[this.currentColIndex].getColumnClass(), value);
+				this.currentRow[this.realColIndex] = result;
 				break;
 		}
-
+		this.realColIndex ++;
 	}
 
 	private Object createNumericType(String aClass, String aValue)
@@ -543,7 +647,25 @@ public class XmlDataFileParser
 	private void sendTableDefinition()
 		throws SQLException
 	{
-		this.receiver.setTargetTable(this.tableName, this.columns);
+		if (this.columnsToImport == null)
+		{
+			this.receiver.setTargetTable(this.tableName, this.columns);
+		}
+		else
+		{
+			ColumnIdentifier[] cols = new ColumnIdentifier[this.realColCount];
+			int index = 0;
+			for (int i=0; i < this.colCount; i++)
+			{
+				if (this.columnsToImport.contains(this.columns[i]))
+				{
+					cols[index] = this.columns[i];
+					index ++;
+				}
+			}
+			this.receiver.setTargetTable(this.tableName, cols);
+		}
+		this.currentRow = new Object[this.realColCount];
 	}
 
 	private void sendRowData()

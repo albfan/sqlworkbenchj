@@ -42,7 +42,7 @@ public class SqlCommand
 	protected ResultLogger resultLogger;
 	protected StatementRunner runner;
 	protected int queryTimeout = 0;
-	
+
 	/**
 	 *	Checks if the verb of the given SQL script
 	 *	is the same as registered for this SQL command.
@@ -252,16 +252,17 @@ public class SqlCommand
 		}
 		catch (Exception e)
 		{
-			LogMgr.logDebug("SqlCommand.execute()", "Error executing sql statement", e);
 			result.clear();
 			StringBuffer msg = new StringBuffer(150);
 			msg.append(ResourceMgr.getString("MsgExecuteError") + "\n");
-			int maxLen = 150;
-			msg.append(StringUtil.getMaxSubstring(aSql.trim(), maxLen));
+			String s = StringUtil.getMaxSubstring(aSql.trim(), 150);
+			msg.append(s);
 			msg.append("\n");
 			result.addMessage(msg.toString());
-			result.addMessage(ExceptionUtil.getDisplay(e));
+			String er = ExceptionUtil.getDisplay(e);
+			result.addMessage(er);
 			result.setFailure();
+			LogMgr.logDebug("SqlCommand.execute()", "Error executing sql statement " + s + "\nError:" + er, null);
 		}
 		finally
 		{
@@ -304,11 +305,11 @@ public class SqlCommand
 		return this.isUpdatingCommand;
 	}
 
-	public void setQueryTimeout(int timeout) 
+	public void setQueryTimeout(int timeout)
 	{
 		this.queryTimeout = timeout;
 	}
-	
+
 	public void setMaxRows(int maxRows) { }
 	public boolean isResultSetConsumer() { return false; }
 	public void consumeResult(StatementRunnerResult aResult) {}

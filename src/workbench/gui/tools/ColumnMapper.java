@@ -13,6 +13,7 @@ package workbench.gui.tools;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.DefaultCellEditor;
@@ -27,6 +28,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.importer.RowDataProducer;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbScrollPane;
 import workbench.log.LogMgr;
@@ -112,7 +114,7 @@ public class ColumnMapper
 		return t;
 	}
 
-	public void defineColumns(List source, List target)
+	public void defineColumns(List source, List target, boolean syncDataTypes)
 	{
 		if (source == null || target == null) throw new IllegalArgumentException("Both column lists have to be specified");
 		this.sourceColumns = source;
@@ -129,6 +131,13 @@ public class ColumnMapper
 			row.setTarget(targetCol);
 
 			ColumnIdentifier sourceCol = this.findSourceColumnByName(targetCol.getColumnName());
+			if (syncDataTypes && sourceCol != null)
+			{
+				sourceCol.setDataType(targetCol.getDataType());
+				sourceCol.setColumnTypeName(targetCol.getColumnTypeName());
+				sourceCol.setDbmsType(targetCol.getDbmsType());
+				sourceCol.setDecimalDigits(targetCol.getDecimalDigits());
+			}
 			row.setSource(sourceCol);
 			this.mapping[i] = row;
 		}
@@ -170,6 +179,7 @@ public class ColumnMapper
 		}
 		return null;
 	}
+	
 
 	public void setAllowSourceEditing(boolean aFlag)
 	{
@@ -200,6 +210,28 @@ public class ColumnMapper
 		return result;
 	}
 
+	public List getMappingForImport()
+	{
+		int count = this.mapping.length;
+		ArrayList result = new ArrayList(count);
+		for (int i=0; i < count; i++)
+		{
+			ColumnMapRow row = this.mapping[i];
+			String s = null;
+
+			if (row.getSource() == null)
+			{
+				result.add(RowDataProducer.SKIP_INDICATOR);
+			}
+			else
+			{
+				s = row.getSource().getColumnName();
+				result.add(s);
+			}
+		}
+		return result;
+	}
+	
 	public MappingDefinition getMapping()
 	{
 		int count = this.mapping.length;

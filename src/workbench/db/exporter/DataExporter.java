@@ -922,6 +922,7 @@ public class DataExporter
 	{
 		this.setOutputTypeXml();
 		this.setUseCDATA(xmlOptions.getUseCDATA());
+		this.setUseVerboseFormat(xmlOptions.getUseVerboseXml());
 	}
 
 	public void setHtmlOptions(HtmlOptions html)

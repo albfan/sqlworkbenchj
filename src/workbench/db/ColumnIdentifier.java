@@ -164,13 +164,18 @@ public class ColumnIdentifier
 		return this.name;
 	}
 
-	public boolean equals(ColumnIdentifier other)
+	public boolean equals(Object o)
 	{
-		if (this.type == NO_TYPE || other.type == NO_TYPE)
+		if (o instanceof ColumnIdentifier)
 		{
-			return this.name.equalsIgnoreCase(other.name);
+			ColumnIdentifier other = (ColumnIdentifier)o;
+			if (this.type == NO_TYPE || other.type == NO_TYPE)
+			{
+				return this.name.equalsIgnoreCase(other.name);
+			}
+			return (this.type == other.type && this.name.equalsIgnoreCase(other.name));
 		}
-		return (this.type == other.type && this.name.equalsIgnoreCase(other.name));
+		return false;
 	}
 
 	/**

@@ -209,6 +209,8 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("ENABLEOUT",Token.KEYWORD2);
 		keywords.add("DISABLEOUT",Token.KEYWORD2);
 		keywords.add("WBIMPORT",Token.KEYWORD2);
+		keywords.add("WBFEEDBACK",Token.KEYWORD2);
+		keywords.add("WBINCLUDE",Token.KEYWORD2);
 		keywords.add("WBCOPY",Token.KEYWORD2);
 		keywords.add("WBVARDEF",Token.KEYWORD2);
 		keywords.add("WBVARDEFINE",Token.KEYWORD2);

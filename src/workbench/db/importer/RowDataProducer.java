@@ -18,6 +18,8 @@ package workbench.db.importer;
  */
 public interface RowDataProducer
 {
+	public static final String SKIP_INDICATOR = "$wb_skip$";
+	
 	void setReceiver(RowDataReceiver receiver);
 	void start() throws Exception;
 	void cancel();

@@ -19,4 +19,6 @@ public interface XmlOptions
 {
 	boolean getUseCDATA();
 	void setUseCDATA(boolean flag);
+	boolean getUseVerboseXml();
+	void setUseVerboseXml(boolean flag);
 }
