@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import workbench.db.ColumnIdentifier;
 
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
@@ -28,6 +29,7 @@ import workbench.util.WbStringTokenizer;
  * @author  workbench@kellerer.org
  */
 public class TextFileParser
+	implements RowDataProducer
 {
 	private String filename;
 	private String tableName;
@@ -36,8 +38,7 @@ public class TextFileParser
 	private String quoteChar = "\"";
 	
 	private int colCount = -1;
-	private String[] columns;
-	private int[] colTypes;
+	private ColumnIdentifier[] columns;
 	private Object[] rowData;
 	
 	private boolean withHeader = true;
@@ -131,7 +132,7 @@ public class TextFileParser
 		}
 	}
 	
-	public void parse()
+	public void start()
 		throws Exception
 	{
 		this.cancelImport = false;
@@ -169,7 +170,7 @@ public class TextFileParser
 			throw new WbException("Cannot import file without a column definition");
 		}
 
-		this.receiver.setTargetTable(this.tableName, this.columns, this.colTypes);
+		this.receiver.setTargetTable(this.tableName, this.columns);
 		
 		lineData = new ArrayList(this.colCount);
 		Object value = null;
@@ -199,7 +200,7 @@ public class TextFileParser
 					value = lineData.get(i);
 					if (value != null)
 					{
-						rowData[i] = converter.convertValue(value, this.colTypes[i]);
+						rowData[i] = converter.convertValue(value, this.columns[i].getDataType());
 					}
 				}
 				catch (Exception e)
@@ -265,12 +266,11 @@ public class TextFileParser
 		try
 		{
 			this.colCount = cols.size();
-			this.columns = new String[this.colCount];
-			this.colTypes = new int[this.colCount];
+			this.columns = new ColumnIdentifier[this.colCount];
 
 			for (int i=0; i < this.colCount; i++)
 			{
-				this.columns[i] = (String)cols.get(i);
+				this.columns[i] = new ColumnIdentifier((String)cols.get(i));
 			}
 			DbMetadata meta = this.connection.getMetadata();
 			DataStore ds = meta.getTableDefinition(this.tableName);
@@ -282,7 +282,7 @@ public class TextFileParser
 				int index = cols.indexOf(column);
 				if (index >= 0)
 				{
-					this.colTypes[i] = ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE, -1);
+					this.columns[i].setDataType(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE, ColumnIdentifier.NO_TYPE));
 				}
 			}
 		}

@@ -52,6 +52,7 @@ import workbench.gui.actions.AddMacroAction;
 import workbench.gui.actions.AddTabAction;
 import workbench.gui.actions.AssignWorkspaceAction;
 import workbench.gui.actions.CloseWorkspaceAction;
+import workbench.gui.actions.DataPumperAction;
 import workbench.gui.actions.FileConnectAction;
 import workbench.gui.actions.FileDisconnectAction;
 import workbench.gui.actions.FileExitAction;
@@ -65,6 +66,7 @@ import workbench.gui.actions.SaveAsNewWorkspaceAction;
 import workbench.gui.actions.SaveWorkspaceAction;
 import workbench.gui.actions.SelectTabAction;
 import workbench.gui.actions.ShowDbExplorerAction;
+import workbench.gui.actions.VersionCheckAction;
 import workbench.gui.actions.ViewLineNumbers;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.TabbedPaneUIFactory;
@@ -72,6 +74,7 @@ import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbToolbar;
+
 import workbench.gui.dbobjects.DbExplorerPanel;
 import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.help.WhatsNewViewer;
@@ -80,6 +83,7 @@ import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.gui.settings.SettingsPanel;
 import workbench.gui.settings.ShortcutEditor;
 import workbench.gui.sql.SqlPanel;
+import workbench.gui.tools.DataPumper;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.FilenameChangeListener;
 import workbench.interfaces.MacroChangeListener;
@@ -763,6 +767,10 @@ public class MainWindow
 
 	public void connectTo(final ConnectionProfile aProfile)
 	{
+		this.connectTo(aProfile, false);
+	}
+	public void connectTo(final ConnectionProfile aProfile, final boolean showDialogOnError)
+	{
 		if (this.connectInProgress) return;
 
 		if (this.currentWorkspaceFile != null)
@@ -793,7 +801,7 @@ public class MainWindow
 						}
 					});
 					Thread.yield();
-					doConnect();
+					doConnect(showDialogOnError);
 				}
 			};
 			t.setName("MainWindow connection thread");
@@ -805,7 +813,7 @@ public class MainWindow
 		}
 	}
 
-	private void doConnect()
+	private void doConnect(final boolean showSelectDialogOnError)
 	{
 		boolean connected = false;
 		WbConnection conn = null;
@@ -869,6 +877,10 @@ public class MainWindow
 					public void run()
 					{
 						connectFailed(msg);
+						if (showSelectDialogOnError)
+						{
+							selectConnection();
+						}
 					}
 				});
 			}
@@ -1283,7 +1295,7 @@ public class MainWindow
 				});
 			}
 		};
-		t.setName("Select connection thread");
+		t.setName("Select Connection thread");
 		t.start();
 	}
 
@@ -1482,7 +1494,7 @@ public class MainWindow
 	{
 		if (this.currentConnection != null) return this.currentConnection;
 		String id = "Wb-" + aPanel.getId();
-		aPanel.showStatusMessage(ResourceMgr.getString("MsgConnecting") + " " + this.currentProfile.getName() + " ...");
+		aPanel.showStatusMessage(ResourceMgr.getString("MsgConnectingTo") + " " + this.currentProfile.getName() + " ...");
 		ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
 		WbConnection conn = mgr.getConnection(this.currentProfile, id);
 		return conn;
@@ -1598,6 +1610,7 @@ public class MainWindow
 		}
 	}
 
+	public ConnectionProfile getCurrentProfile() { return this.currentProfile; }
 	public String getCurrentProfileName()
 	{
 		if (this.currentProfile == null) return null;
@@ -1632,6 +1645,10 @@ public class MainWindow
 		result.setName(ResourceMgr.MNU_TXT_TOOLS);
 
 		result.add(this.dbExplorerAction);
+
+		DataPumperAction pumper = new DataPumperAction(this);
+		result.add(pumper);
+
 		result.addSeparator();
 
 		JMenuItem options = new WbMenuItem(ResourceMgr.getString(ResourceMgr.MNU_TXT_OPTIONS));
@@ -1645,6 +1662,10 @@ public class MainWindow
 		shortcuts.putClientProperty("command", "keyboardDialog");
 		shortcuts.addActionListener(this);
 		result.add(shortcuts);
+
+		VersionCheckAction version = new VersionCheckAction();
+		result.add(version);
+		result.addSeparator();
 
 		JMenu lnf = new WbMenu(ResourceMgr.getString("MnuTxtLookAndFeel"));
 		lnf.setName("lnf");

@@ -56,6 +56,7 @@ public class ObjectScripterUI
 	private void startScripting()
 	{
 		this.worker = new Thread(this);
+		this.worker.setName("ObjectScripter Thread");
 		this.worker.start();
 	}
 	

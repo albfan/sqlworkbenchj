@@ -193,6 +193,9 @@ public class DwPanel
 				case RowActionMonitor.MONITOR_EXPORT:
 					this.updateMsg = ResourceMgr.getString("MsgWritingRow") + " ";
 					break;
+				case RowActionMonitor.MONITOR_COPY:
+					this.updateMsg = ResourceMgr.getString("MsgCopyingRow") + " ";
+					break;
 				default:
 					clearRowMonitorSettings();
 			}
@@ -640,7 +643,7 @@ public class DwPanel
   public void rowCountChanged()
   {
 		int startRow = this.infoTable.getFirstVisibleRow();
-		int endRow = this.infoTable.getLastVisibleRow();
+		int endRow = this.infoTable.getLastVisibleRow(startRow);
 		int count = this.infoTable.getRowCount();
 		
 		// start row and end row are 0 based
@@ -1008,6 +1011,10 @@ public class DwPanel
 	public void stateChanged(javax.swing.event.ChangeEvent e)
 	{
 		this.rowCountChanged();
+	}
+	
+	public void jobFinished()
+	{
 	}
 	
 }

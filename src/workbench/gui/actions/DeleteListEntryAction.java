@@ -22,8 +22,13 @@ public class DeleteListEntryAction extends WbAction
 
 	public DeleteListEntryAction(FileActions aClient)
 	{
+		this(aClient, "LabelDeleteListEntry");
+	}
+	
+	public DeleteListEntryAction(FileActions aClient, String aKey)
+	{
 		this.client = aClient;
-		this.setMenuTextByKey("LabelDeleteListEntry");
+		this.setMenuTextByKey(aKey);
 		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_DELETE));
 	}
 

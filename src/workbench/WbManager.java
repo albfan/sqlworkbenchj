@@ -20,6 +20,7 @@ import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.help.HtmlViewer;
+import workbench.gui.tools.DataPumper;
 import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -46,6 +47,7 @@ public class WbManager
 	private Settings settings;
 	private ConnectionMgr connMgr = new ConnectionMgr();
 	private ArrayList mainWindows = new ArrayList();
+	private ArrayList toolWindows = new ArrayList();
 	private WbCipher desCipher = null;
 	private boolean batchMode = false;
 	public static boolean trace = "true".equalsIgnoreCase(System.getProperty("workbench.startuptrace", "false"));
@@ -130,6 +132,37 @@ public class WbManager
 		return this.getWorkspaceFilename(parent, toSave, false);
 	}
 
+	public void registerToolWindow(Window aWindow)
+	{
+		this.toolWindows.add(aWindow);
+	}
+	
+	public void unregisterToolWindow(Window aWindow)
+	{
+		if (aWindow == null) return;
+		int index = this.toolWindows.indexOf(aWindow);
+		if (index > -1)
+		{
+			this.toolWindows.remove(index);
+		}
+		if (this.toolWindows.size() == 0 && this.mainWindows.size() == 0)
+		{
+			this.exitWorkbench();
+		}
+			
+	}
+	private void closeToolWindows()
+	{
+		int count = this.toolWindows.size();
+		for (int i=0; i < count; i ++)
+		{
+			Window w = (Window)this.toolWindows.get(i);
+			w.setVisible(false);
+			w.dispose();
+		}
+		this.toolWindows.clear();
+	}
+	
 	public String getWorkspaceFilename(Window parent, boolean toSave, boolean replaceConfigDir)
 	{
 		String lastDir = settings.getLastWorkspaceDir();
@@ -383,6 +416,11 @@ public class WbManager
 		if (!this.checkProfiles(w)) return false;
 		return true;
 	}
+
+	public boolean isBatchMode()
+	{
+	  return this.batchMode;
+	}
 	
 	public void exitWorkbench()
 	{
@@ -390,6 +428,13 @@ public class WbManager
 		if (!this.batchMode)
 		{
 			MainWindow w = this.getCurrentWindow();
+			if (w == null)
+			{
+				getConnectionMgr().disconnectAll();
+				this.doShutdown();
+				return;
+			}
+			
 			boolean canExit = this.saveSettings();
 			if (!canExit) return;
 			
@@ -400,9 +445,8 @@ public class WbManager
 			
 			// If it takes too long the user can still abort the JVM ...
 			this.createCloseMessageWindow(w);
-			this.closeMessage.show();
+			if (this.closeMessage != null) this.closeMessage.show();
 
-			this.settings.saveSettings();
 			MacroManager.getInstance().saveMacros();
 			Thread t = new Thread()
 			{
@@ -426,6 +470,7 @@ public class WbManager
 
 	private void createCloseMessageWindow(MainWindow parent)
 	{
+		if (parent == null) return;
 		this.closeMessage = new JDialog(parent, false);
 		JPanel p = new JPanel();
 		p.setBorder(WbSwingUtilities.BEVEL_BORDER_RAISED);
@@ -479,6 +524,7 @@ public class WbManager
 			this.closeMessage.setVisible(false);
 			this.closeMessage.dispose();
 		}
+		
 		try
 		{
 			if (SwingUtilities.isEventDispatchThread())
@@ -518,10 +564,12 @@ public class WbManager
 				w.dispose();
 			}
 		}
+		this.closeToolWindows();
 	}
 	
 	private void doShutdown()
 	{
+		this.settings.saveSettings();
 		LogMgr.logInfo("WbManager.doShutdown()", "Stopping " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
 		LogMgr.shutdown();
 		Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
@@ -620,7 +668,6 @@ public class WbManager
 		main.restoreState();
 		boolean connected = false;
 
-		/*
 		if (checkCmdLine)
 		{
 			// get profile name from commandline
@@ -634,12 +681,16 @@ public class WbManager
 					// try to connect to the profile passed on the
 					// command line. If this fails the connection
 					// dialog will be show to the user
-					connected = main.connectTo(prof);
+					main.connectTo(prof, true);
+					
+					// the main window will take of displaying the connection dialog
+					// if the connection to the requested profile fails.
+					connected = true; 
 				}
 			}
 		}
-		*/
-		// no connection, display the connection dialog
+		
+		// no connection? then display the connection dialog
 		if (!connected)
 		{
 			EventQueue.invokeLater(new Runnable()
@@ -666,6 +717,7 @@ public class WbManager
 	private static final String ARG_CONN_JAR = "driverjar";
 	private static final String ARG_CONN_USER = "username";
 	private static final String ARG_CONN_PWD = "password";
+	private static final String ARG_SHOW_PUMPER = "datapumper";
 	
 	private void initCmdLine(String[] args)
 	{
@@ -684,7 +736,7 @@ public class WbManager
 		cmdLine.addArgument(ARG_CONN_JAR);
 		cmdLine.addArgument(ARG_CONN_USER);
 		cmdLine.addArgument(ARG_CONN_PWD);
-
+		cmdLine.addArgument(ARG_SHOW_PUMPER);
 		try
 		{
 			cmdLine.parse(args);
@@ -710,9 +762,7 @@ public class WbManager
 			{
 				this.batchMode = true;
 				this.connMgr.setReadTemplates(false);
-				LogMgr.logInfo("WbManager", "Executing script " + scriptname);
 			}
-
 		}
 		catch (Exception e)
 		{
@@ -732,6 +782,11 @@ public class WbManager
 		LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
 		LogMgr.logInfo("WbManager.init()", "Using Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") );
 		LogMgr.logDebug("WbManager.init()", "Use -Dworkbench.startuptrace=true to display trace messages during startup");
+		if (this.cmdLine.hasUnknownArguments())
+		{
+			LogMgr.logWarning("WbManager.init()", "Ignoring unknown argument(s) " + StringUtil.listToString(this.cmdLine.getUnknownArguments(), ','));
+		}
+		
 		if (!this.batchMode)
 		{
 			WbSplash splash = null;
@@ -743,7 +798,16 @@ public class WbManager
 			}
 			if (trace) System.out.println("WbManager.init() - initializing UI defaults");
 			this.initUI();
-			this.openNewWindow(true);
+			boolean pumper = "true".equals(cmdLine.getValue(ARG_SHOW_PUMPER));
+			if (pumper)
+			{
+				DataPumper p = new DataPumper(null, null);
+				p.showWindow(null);
+			}
+			else
+			{
+				this.openNewWindow(true);
+			}
 			if (splash != null)
 			{
 				if (trace) System.out.println("WbManager.init() - closing splash window");
@@ -810,6 +874,7 @@ public class WbManager
 					runner.done();
 				}
 			}
+			this.exitWorkbench();
 		}
 		if (trace) System.out.println("WbManager.init() - done.");
 	}

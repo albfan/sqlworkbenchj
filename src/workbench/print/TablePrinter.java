@@ -107,6 +107,8 @@ public class TablePrinter
 				}
 			}
 		};
+		pt.setDaemon(true);
+		pt.setName("Print Thread");
 		pt.start();
 	}
 

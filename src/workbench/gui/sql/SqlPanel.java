@@ -943,6 +943,9 @@ public class SqlPanel
 			this.tabName = null;
 		}
 		
+		int maxRows = w.getMaxRows(this.internalId - 1);
+		this.data.setMaxRows(maxRows);
+		
 		boolean fileLoaded = false;
 		if (filename != null)
 		{
@@ -986,6 +989,7 @@ public class SqlPanel
 		this.saveHistory(w);
 		Properties props = w.getSettings();
 		this.saveSettings(props);
+		w.setMaxRows(this.internalId - 1, this.data.getMaxRows());
 		if (this.hasFileLoaded())
 		{
 			w.setExternalFileName(this.internalId - 1, this.getCurrentFileName());
@@ -1121,11 +1125,6 @@ public class SqlPanel
 		{
 			AnsiSQLTokenMarker token = this.editor.getSqlTokenMarker();
 			token.initDatabaseKeywords(aConnection.getSqlConnection());
-			
-			if (WbManager.getSettings().getEnableDbmsOutput())
-			{
-				aConnection.getMetadata().enableOutput();
-			}
 		}
 
 		this.checkResultSetActions();
@@ -1294,7 +1293,7 @@ public class SqlPanel
 						}
 					}
 				};
-				t.setName("SqlPanel Statement cancel thread");
+				t.setName("SQL Cancel Thread");
 				t.setDaemon(true);
 				t.setPriority(Thread.MAX_PRIORITY);
 				t.start();
@@ -1368,25 +1367,33 @@ public class SqlPanel
 		this.setCancelState(false);
 		this.checkResultSetActions();
 
-		/*
-		if (sql.trim().toLowerCase().startsWith("shutdown"))
+		this.fireDbExecEnd();
+		this.selectEditorLater();
+		
+		
+		if (sql.trim().toLowerCase().startsWith("shutdown") && WbManager.getSettings().getProcessHsqlShutdown())
 		{
 			String url = this.dbConnection.getUrl();
 			if (url != null)
 			{
 				if (url.startsWith("jdbc:hsqldb"))
 				{
-					MainWindow win = (MainWindow)SwingUtilities.getWindowAncestor(this);
-					win.disconnect();
+					final MainWindow win = (MainWindow)SwingUtilities.getWindowAncestor(this);
 					String msg = ResourceMgr.getString("MsgShutdownHsqlDb");
 					this.showLogMessage(msg);
 					WbManager.getInstance().showErrorMessage(this.getParentWindow(), msg);
+					SwingUtilities.invokeLater(new Runnable()
+					{
+						public void run()
+						{
+							win.disconnect(true, true);
+						}
+					});
+					
 				}
 			}
 		}
-		*/
-		this.fireDbExecEnd();
-		this.selectEditorLater();
+		
 	}
 
 	public void executeMacro(final String macroName, final boolean replaceText)
@@ -1483,6 +1490,7 @@ public class SqlPanel
 					}
 				};
 				Thread.yield();
+				importThread.setName("Data Import Thread");
 				importThread.setDaemon(true);
 				importThread.start();
 			}

@@ -179,6 +179,28 @@ public class StringUtil
 		}
 		return result;
 	}
+	
+	public static final String listToString(List aList, char aDelimiter)
+	{
+		if (aList == null || aList.size() == 0) return "";
+		int count = aList.size();
+		int numElements = 0;
+		StringBuffer result = new StringBuffer(count * 50);
+		for (int i=0; i < count; i++)
+		{
+			Object o = aList.get(i);
+			if (o == null) continue;
+			if (numElements > 0) 
+			{
+				result.append(aDelimiter);
+				result.append(' ');
+			}
+			result.append(o.toString());
+			numElements ++;
+		}
+		return result.toString();
+	}
+	
 
 	public static final String makeJavaString(String aString)
 	{

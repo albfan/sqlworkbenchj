@@ -7,6 +7,8 @@
 package workbench.db.importer;
 
 import java.sql.SQLException;
+import workbench.db.ColumnIdentifier;
+import workbench.db.WbConnection;
 
 /**
  *
@@ -15,7 +17,7 @@ import java.sql.SQLException;
 public interface RowDataReceiver
 {
 	void processRow(Object[] row) throws SQLException;
-	void setTargetTable(String tableName, String[] columns, int[] columnTypes);
+	void setTargetTable(String tableName, ColumnIdentifier[] columns)	throws SQLException;
 	void importFinished();
 	void importCancelled();
 }

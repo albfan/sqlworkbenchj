@@ -53,8 +53,12 @@ public class ProfileSelectionDialog
 	/** Creates new form ProfileSelectionDialog */
 	public ProfileSelectionDialog(Frame parent, boolean modal)
 	{
+		this(parent, modal, null);
+	}
+	public ProfileSelectionDialog(Frame parent, boolean modal, String lastProfileKey)
+	{
 		super(parent, modal);
-		initComponents();
+		initComponents(lastProfileKey);
 		
 		JRootPane root = this.getRootPane();
 		root.setDefaultButton(okButton);		
@@ -94,9 +98,9 @@ public class ProfileSelectionDialog
 		}
 	}
 
-  private void initComponents()
+  private void initComponents(String lastProfileKey)
   {
-		profiles = new ProfileEditorPanel();
+		profiles = new ProfileEditorPanel(lastProfileKey);
     buttonPanel = new JPanel();
     okButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_OK));
     cancelButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));

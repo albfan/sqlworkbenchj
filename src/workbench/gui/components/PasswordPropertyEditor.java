@@ -75,6 +75,7 @@ public class PasswordPropertyEditor
 		try
 		{
 			this.setter.invoke(this.source, args);
+			this.changed = false;
 		}
 		catch (Exception e)
 		{

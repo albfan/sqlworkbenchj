@@ -197,6 +197,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		// Workbench specific keywords
 		keywords.add("SPOOL",Token.KEYWORD2);
 		keywords.add("EXPORT",Token.KEYWORD2);
+		keywords.add("EXP",Token.KEYWORD2);
 		keywords.add("LIST",Token.KEYWORD2);
 		keywords.add("LISTPROCS",Token.KEYWORD2);
 		keywords.add("LISTDB",Token.KEYWORD2);
@@ -204,6 +205,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("DISABLEOUT",Token.KEYWORD2);
 		keywords.add("IMP",Token.KEYWORD2);
 		keywords.add("IMPORT",Token.KEYWORD2);
+		keywords.add("COPY",Token.KEYWORD2);
 	}
 
 	private static void addDataTypes()

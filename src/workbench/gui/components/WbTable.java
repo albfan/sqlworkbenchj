@@ -54,6 +54,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.JPopupMenu.Separator;
+import javax.swing.JScrollBar;
 import javax.swing.border.LineBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -836,7 +837,8 @@ public class WbTable
 		String s = null;//this.dwModel.getColumnName(aColumn);
 		int optWidth = aMinWidth;
 		int stringWidth = 0;
-		for (int row = 0; row < this.getRowCount(); row ++)
+		int rowCount = this.getRowCount();
+		for (int row = 0; row < rowCount; row ++)
 		{
 			s = this.getValueAsString(row, aColumn);
 			if (s == null || s.length() == 0)
@@ -969,21 +971,52 @@ public class WbTable
 	
 	public int getLastVisibleRow()
 	{
-		if (this.getRowCount() == 0) return -1;
-		int first = this.getFirstVisibleRow();
+		return this.getLastVisibleRow(this.getFirstVisibleRow());
+	}
+	
+	public int getLastVisibleRow(int first)
+	{
+		int count = this.getRowCount();
+		if (count == 0) return -1;
+		
+		JScrollBar bar = this.scrollPane.getVerticalScrollBar();
+		if (bar != null && bar.getValue() == bar.getMaximum()) return count;
 		
 		JViewport view = this.scrollPane.getViewport();
 		Point p = view.getViewPosition();
 		Dimension d = view.getExtentSize();
-		p.move(0, (int)d.getHeight());
-		
-		int row = this.rowAtPoint(p);
+		int height = (int)d.getHeight();
+		int rowHeight = 0;
+		int spacing = this.getRowMargin();
+		int lastRow = 0;
+		if (this.rowResizer == null)
+		{
+			// if the row height cannot be resized, we can 
+			// calculate the number of visible rows
+			rowHeight = this.getRowHeight();
+			int numRows = (int) ((height / rowHeight) - 0.5);
+			lastRow = numRows;
+		}
+		else
+		{
+			for (int r = first; r < count; r ++)
+			{
+				int h = this.getRowHeight(r) + spacing;
+				if (rowHeight + h > height) break;
+				rowHeight += h;
+			}
+
+			//p.move(0, (int)d.getHeight());
+			p.move(0, rowHeight);
+
+			lastRow = this.rowAtPoint(p);
+		}
 		
 		// if rowAtPoint() returns a negative number, then all 
 		// rows fit into the current viewport
-		if (row < 0) row = this.getRowCount() - 1;
+		if (lastRow < 0) lastRow = this.getRowCount() - 1;
 		
-		return first + row;
+		return first + lastRow;
 	}
 	
 	/** Scroll the given row into view.
@@ -1083,15 +1116,19 @@ public class WbTable
 		}
 		else if (e.getSource() == this.optimizeCol)
 		{
-			new Thread()
+			Thread t = new Thread()
 			{
 				public void run()	{ optimizeColWidth(column); }
-			}.start();
+			};
+			t.setName("OptimizeCol Thread");
+			t.start();
 
 		}
 		else if (e.getSource() == this.optimizeAllCol)
 		{
-			new Thread() { 	public void run()	{ optimizeAllColWidth(); } }.start();
+			Thread t = new Thread() { 	public void run()	{ optimizeAllColWidth(); } };
+			t.setName("OptimizeAllCols Thread");
+			t.start();
 		}
 		else if (e.getSource() == this.setColWidth)
 		{
@@ -1300,19 +1337,31 @@ public class WbTable
 				final String name = filename;
 				if (ExtensionFileFilter.hasSqlExtension(filename))
 				{
-					new Thread() { public void run() { saveAsSqlInsert(name); } }.start();
+					Thread t = new Thread() { public void run() { saveAsSqlInsert(name); } };
+					t.setDaemon(true);
+					t.setName("SaveAsSql Thread");
+					t.start();
 				}
 				else if (ExtensionFileFilter.hasTxtExtension(filename))
 				{
-					new Thread() { public void run() { saveAsAscii(name); }}.start();
+					Thread t = new Thread() { public void run() { saveAsAscii(name); }};
+					t.setDaemon(true);
+					t.setName("SaveAsAscii Thread");
+					t.start();
 				}
 				else if (ExtensionFileFilter.hasHtmlExtension(filename))
 				{
-					new Thread() { public void run() { saveAsHtml(name); }}.start();
+					Thread t = new Thread() { public void run() { saveAsHtml(name); }};
+					t.setName("saveAsHtml Thread");
+					t.setDaemon(true);
+					t.start();
 				}
 				else if (ExtensionFileFilter.hasXmlExtension(filename))
 				{
-					new Thread() { public void run() { saveAsXml(name); }}.start();
+					Thread t = new Thread() { public void run() { saveAsXml(name); }};
+					t.setDaemon(true);
+					t.setName("SaveAsXml Thread");
+					t.start();
 				}
 			}
 		}

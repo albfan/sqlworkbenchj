@@ -47,20 +47,20 @@ public class ProfileEditorPanel
 	private boolean ctrlPressed = false;
 
 	/** Creates new form ProfileEditor */
-	public ProfileEditorPanel()
+	public ProfileEditorPanel(String lastProfileKey)
 	{
 		initComponents();
 		this.connectionEditor = new ConnectionEditorPanel();
 		this.jSplitPane1.setRightComponent(this.connectionEditor);
 		this.fillDrivers();
-		String last = WbManager.getSettings().getLastConnection();
+		String last = WbManager.getSettings().getLastConnection(lastProfileKey);
 		this.selectProfile(last);
 		this.toolbar = new WbToolbar();
-		this.toolbar.add(new NewListEntryAction(this));
+		this.toolbar.add(new NewListEntryAction(this, "LabelNewProfile"));
 		this.toolbar.add(new CopyProfileAction(this));
 		this.toolbar.add(new SaveListFileAction(this));
 		this.toolbar.addSeparator();
-		this.toolbar.add(new DeleteListEntryAction(this));
+		this.toolbar.add(new DeleteListEntryAction(this, "LabelDeleteProfile"));
 		this.listPanel.add(this.toolbar, BorderLayout.NORTH);
 		int pos = WbManager.getSettings().getProfileDividerLocation();
 		if (pos > -1)
@@ -267,7 +267,7 @@ public class ProfileEditorPanel
 	public void saveItem() throws WbException
 	{
 		ConnectionMgr conn = WbManager.getInstance().getConnectionMgr();
-		//this.connectionEditor.updateProfile();
+		this.connectionEditor.updateProfile();
 		conn.saveProfiles();
 	}
 

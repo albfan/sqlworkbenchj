@@ -5,6 +5,8 @@ import java.util.List;
 
 import workbench.db.WbConnection;
 import workbench.db.importer.DataImporter;
+import workbench.db.importer.TextFileParser;
+import workbench.db.importer.XmlDataFileParser;
 import workbench.exception.ExceptionUtil;
 import workbench.exception.WbException;
 import workbench.log.LogMgr;
@@ -98,6 +100,9 @@ public class WbImport extends SqlCommand
 			return result;
 		}
 
+		int commit = StringUtil.getIntValue(cmdLine.getValue("commitevery"),-1);
+		imp.setCommitEvery(commit);
+		
 		String table = cmdLine.getValue("table");
 		
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
@@ -109,35 +114,46 @@ public class WbImport extends SqlCommand
 				return result;
 			}
 			
-			imp.setImportTypeText();
-			imp.setTableName(table);
+			TextFileParser textParser = new TextFileParser(file);
+			textParser.setTableName(table);
+			textParser.setConnection(aConnection);
 			
 			String delimiter = cmdLine.getValue("delimiter");
-			if (delimiter != null) imp.setTextDelimiter(delimiter);
+			if (delimiter != null) textParser.setDelimiter(delimiter);
 			
 			String quote = cmdLine.getValue("quotechar");
-			if (quote != null) imp.setTextQuoteChar(quote);
+			if (quote != null) textParser.setQuoteChar(quote);
 
 			String format = cmdLine.getValue("dateformat");
-			if (format != null) imp.setTextDateFormat(format);
+			if (format != null) textParser.setDateFormat(format);
 
 			format = cmdLine.getValue("timestampformat");
-			if (format != null) imp.setTextTimestampFormat(format);
+			if (format != null) textParser.setTimeStampFormat(format);
 
 			format = cmdLine.getValue("decimal");
-			if (format != null) imp.setDecimalSymbol(format);
+			if (format != null) textParser.setDecimalChar(format);
 
 			String header = cmdLine.getValue("header");
-			imp.setTextContainsHeaders(StringUtil.stringToBool(header));
+			textParser.setContainsHeader(StringUtil.stringToBool(header));
 
 			String encoding = cmdLine.getValue("encoding");
-			if (encoding != null) imp.setEncoding(encoding);
+			if (encoding != null) textParser.setEncoding(encoding);
 			
 			String columns = cmdLine.getValue("columns");
 			if (columns != null)
 			{
 				List cols = StringUtil.stringToList(columns, ",");
-				imp.setTextFileColumns(cols);
+				try
+				{
+					textParser.setColumns(cols);
+				}
+				catch (Exception e)
+				{
+					result.addMessage(ResourceMgr.getString("ErrorWrongColumnList"));
+					result.setFailure();
+					return result;
+				}
+					
 			}
 			if (!"true".equals(header) && columns == null)
 			{
@@ -145,18 +161,16 @@ public class WbImport extends SqlCommand
 				result.setFailure();
 				return result;
 			}
+			imp.setProducer(textParser);
 		}
 		else if ("xml".equalsIgnoreCase(type))
 		{
-			imp.setImportTypeXml();
-
-			if (table != null) imp.setTableName(table);
+			XmlDataFileParser xmlParser = new XmlDataFileParser(file);
+			if (table != null) xmlParser.setTableName(table);
 			
 			String encoding = cmdLine.getValue("encoding");
-			if (encoding != null) imp.setEncoding(encoding);
-			
-			int commit = StringUtil.getIntValue(cmdLine.getValue("commitevery"),-1);
-			imp.setCommitEvery(commit);
+			if (encoding != null) xmlParser.setEncoding(encoding);
+			imp.setProducer(xmlParser);
 		}
 		else
 		{
@@ -165,7 +179,6 @@ public class WbImport extends SqlCommand
 			return result;
 		}
 		file = StringUtil.trimQuotes(file);
-		this.imp.setInputFilename(file);
 		this.imp.setConnection(aConnection);
 		this.imp.setRowActionMonitor(this.rowMonitor);
 		String msg = ResourceMgr.getString("MsgImportingFile");

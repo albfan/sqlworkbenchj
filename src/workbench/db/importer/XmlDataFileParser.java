@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.math.BigInteger;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
+import workbench.db.ColumnIdentifier;
 
 import workbench.log.LogMgr;
 
@@ -34,16 +36,18 @@ import workbench.log.LogMgr;
  */
 public class XmlDataFileParser
 	extends DefaultHandler
+	implements RowDataProducer
 {
 	private String inputFile;
 	private String tableName = null;
 
 	private int currentRowNumber = 1;
 	private int colCount;
-	private String[] colNames;
+	//private String[] colNames;
+	private ColumnIdentifier[] columns;
 	private String[] colClasses;
 	private String[] colFormats;
-	private int[] colTypes;
+	//private int[] colTypes;
 	private String encoding = "UTF-8";
 	
 	private Object[] currentRow;
@@ -84,7 +88,7 @@ public class XmlDataFileParser
 		this.tableName = aName;
 	}
 	
-	public void parse()
+	public void start()
 		throws Exception
 	{
 		SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -137,7 +141,7 @@ public class XmlDataFileParser
 		this.encoding = enc;
 	}
 	
-	public void setRowDataReceiver(RowDataReceiver aReceiver)
+	public void setReceiver(RowDataReceiver aReceiver)
 	{
 		this.receiver = aReceiver;
 	}
@@ -243,29 +247,39 @@ public class XmlDataFileParser
 		}
 		else if (qName.equals("table-def"))
 		{
-			this.sendTableDefinition();
+			try
+			{ 
+				this.sendTableDefinition();
+			}
+			catch (SQLException sql)
+			{
+				LogMgr.logError("XmlDataFileParser.endElement()", "Error when setting target table", sql);
+				throw new SAXException("Could not initialize target table");
+			}
 		}
 		else if (qName.equals("column-data"))
 		{
 			this.buildColumnData();
 		}
-		else if (qName.equals("java-sql-type"))
+		else if (qName.equals("column-count"))
 		{
 			try
 			{
-				this.colTypes[this.currentColIndex] = Integer.parseInt(this.chars.toString());
+				this.colCount = Integer.parseInt(this.chars.toString());
+				this.columns = new ColumnIdentifier[this.colCount];
+				this.colClasses = new String[this.colCount];
+				this.colFormats = new String[this.colCount];
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("XmlDataFileParser.endElement()", "Could not read columnn type!", e);
-				throw new SAXException("Could not read columnn type");
+				throw new SAXException("Invalid column-count (" + this.chars + ")");
 			}
 		}
 		else if (qName.equals("column-name"))
 		{
 			try
 			{
-				this.colNames[this.currentColIndex] = this.chars.toString();
+				this.columns[this.currentColIndex] = new ColumnIdentifier(this.chars.toString());
 			}
 			catch (Exception e)
 			{
@@ -273,19 +287,17 @@ public class XmlDataFileParser
 				throw new SAXException("Could not read columnn name");
 			}
 		}
-		else if (qName.equals("column-count"))
+		else if (qName.equals("java-sql-type"))
 		{
 			try
 			{
-				this.colCount = Integer.parseInt(this.chars.toString());
-				this.colTypes = new int[this.colCount];
-				this.colClasses = new String[this.colCount];
-				this.colNames = new String[this.colCount];
-				this.colFormats = new String[this.colCount];
+				//this.colTypes[this.currentColIndex] = Integer.parseInt(this.chars.toString());
+				this.columns[this.currentColIndex].setDataType(Integer.parseInt(this.chars.toString()));
 			}
 			catch (Exception e)
 			{
-				throw new SAXException("Invalid column-count (" + this.chars + ")");
+				LogMgr.logError("XmlDataFileParser.endElement()", "Could not read columnn type!", e);
+				throw new SAXException("Could not read columnn type");
 			}
 		}
 		else if (qName.equals("java-class"))
@@ -373,7 +385,7 @@ public class XmlDataFileParser
 
 		String value = this.chars.toString();
 		
-		switch (this.colTypes[this.currentColIndex])
+		switch (this.columns[this.currentColIndex].getDataType())
 		{
 			case Types.CHAR:
 			case Types.VARCHAR:
@@ -477,8 +489,9 @@ public class XmlDataFileParser
 	}
 
 	private void sendTableDefinition()
+		throws SQLException
 	{
-		this.receiver.setTargetTable(this.tableName, this.colNames, this.colTypes);
+		this.receiver.setTargetTable(this.tableName, this.columns);
 	}
 	
 	private void sendRowData()

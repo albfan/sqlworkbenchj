@@ -81,7 +81,7 @@ public class DbmsOutput
 		enable_stmt.executeUpdate();
 		this.enabled = true;
 		this.lastSize = size;
-		LogMgr.logDebug("DbmsOutput.enable()", "Support for DBMS_OUTPUT package enabled");
+		//LogMgr.logDebug("DbmsOutput.enable()", "Support for DBMS_OUTPUT package enabled (buffer size=" + size + ")");
 	}
 
 	public void enable()
@@ -97,7 +97,7 @@ public class DbmsOutput
 	{
 		disable_stmt.executeUpdate();
 		this.enabled = false;
-		LogMgr.logDebug("DbmsOutput.disable()", "Support for DBMS_OUTPUT package disabled");
+		//LogMgr.logDebug("DbmsOutput.disable()", "Support for DBMS_OUTPUT package disabled");
 	}
 
 	/*

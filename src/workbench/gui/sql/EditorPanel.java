@@ -27,6 +27,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
 
 import workbench.WbManager;
+import workbench.gui.actions.FileOpenAction;
 import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.actions.FindAction;
 import workbench.gui.actions.FindAgainAction;
@@ -55,6 +56,7 @@ import workbench.resource.Settings;
 import workbench.sql.formatter.SqlFormatter;
 import workbench.util.LineTokenizer;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 
 /**
@@ -80,6 +82,7 @@ public class EditorPanel
 	private FindAgainAction findAgainAction;
 	private ReplaceAction replaceAction;
 	private FormatSqlAction formatSql;
+	private FileOpenAction fileOpen;
 	
   private static final SyntaxStyle[] SYNTAX_COLORS;
   static
@@ -139,6 +142,8 @@ public class EditorPanel
 		this.setTabSize(WbManager.getSettings().getEditorTabWidth());
 		this.setCaretBlinkEnabled(true);
 		this.addPopupMenuItem(new FileSaveAsAction(this), true);
+		this.fileOpen = new FileOpenAction(this);
+		this.addPopupMenuItem(this.fileOpen, false);
 
 		this.findAction = new FindAction(this);
 		this.findAction.setEnabled(true);
@@ -174,7 +179,7 @@ public class EditorPanel
 		this.addPopupMenuItem(this.findAgainAction, false);
 		this.addPopupMenuItem(this.replaceAction, false);
 	}
-
+	
 	public FormatSqlAction getFormatSqlAction()
 	{
 		return this.formatSql;
@@ -190,6 +195,7 @@ public class EditorPanel
 	{
 		super.setEditable(editable);
 		this.replaceAction.setEnabled(editable);
+		this.fileOpen.setEnabled(false);
 	}
 	
 	public void reformatSql()
@@ -208,7 +214,11 @@ public class EditorPanel
 		}
 		else if (sql.endsWith("\n") ||sql.endsWith("\r"))
 		{
-			formattedDelimit = "\n";
+			formattedDelimit = delimit + "\n";
+		}
+		else
+		{
+			formattedDelimit = delimit;
 		}
 		
 		for (int i=0; i < count; i++)
@@ -259,6 +269,17 @@ public class EditorPanel
 	 */
 	public void makeInListForChar()
 	{
+		this.makeInList(true);
+	}
+	
+	
+	public void makeInListForNonChar()
+	{
+		this.makeInList(false);
+	}
+
+	private void makeInList(boolean quoteElements)
+	{
 		int startline = this.getSelectionStartLine();
 		int endline = this.getSelectionEndLine();
 		StringBuffer newText = new StringBuffer((endline - startline + 1) * 80);
@@ -266,9 +287,9 @@ public class EditorPanel
 		{
 			String line = this.getLineText(i);
 			StringBuffer newline = new StringBuffer(line.length() + 10);
-			if (line != null && line.length() > 0) 
+			if (line != null && line.length() > 0)
 			{
-				if (i > startline) 
+				if (i > startline)
 				{
 					if (i < endline) newText.append(',');
 					newText.append('\n');
@@ -278,9 +299,9 @@ public class EditorPanel
 				{
 					newline.append("(");
 				}
-				newline.append('\'');
+				if (quoteElements) newline.append('\'');
 				newline.append(line);
-				newline.append('\'');
+				if (quoteElements) newline.append('\'');
 			}
 			if (i == endline)
 			{
@@ -291,43 +312,6 @@ public class EditorPanel
 		this.setSelectedText(newText.toString());
 	}
 	
-	
-	public void makeInListForNonChar()
-	{
-		String selectedText = this.getSelectedText();
-		if (selectedText == null || selectedText.length() == 0) return;
-		LineTokenizer tok = new LineTokenizer(selectedText, " \n");
-		int tokens = tok.countTokens();
-		StringBuffer newText = new StringBuffer(selectedText.length() + tokens * 4);
-		boolean afterFirst = false;
-		while (tok.hasMoreTokens())
-		{
-			String line = tok.nextToken();
-			StringBuffer newline = new StringBuffer(line.length() + 10);
-			if (afterFirst) 
-			{
-				newline.append(' ');
-			}
-			else
-			{
-				newline.append("(");
-				afterFirst = true;
-			}
-			newline.append(line);
-			if (tok.hasMoreTokens()) 
-			{
-				newline.append(',');
-			}
-			else
-			{
-				newline.append(')');
-			}
-			newText.append(newline);
-			if (newText.length() > 40) newText.append('\n');
-		}
-		this.setSelectedText(newText.toString());
-	}
-
 	public void addPopupMenuItem(WbAction anAction, boolean withSeparator)
 	{
 		if (withSeparator)

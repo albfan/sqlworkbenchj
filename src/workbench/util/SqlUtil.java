@@ -518,6 +518,13 @@ public class SqlUtil
 		}
 	}
 	
+	public static final boolean isIntegerType(int aSqlType)
+	{
+		return (aSqlType == Types.BIGINT ||
+						aSqlType == Types.INTEGER ||
+						aSqlType == Types.SMALLINT ||
+						aSqlType == Types.TINYINT);
+	}
 	public static final boolean isNumberType(int aSqlType)
 	{
 		return (aSqlType == Types.BIGINT ||
@@ -600,53 +607,6 @@ public class SqlUtil
 			return "VARCHAR";
 		else 
 			return "UNKNOWN";
-	}
-
-	public static void main(String args[])
-	{
-		//String script = "select 'testing'';''', test.spalte1 from test;\r\n                ;\r\nupdate test set blba='xx';";
-		/*
-		String script = "select 'testing'';''', test.spalte1 from test;";
-		List commands = getCommands(script, ";");
-		for (int i=0; i < commands.size(); i++)
-		{
-			System.out.println(commands.get(i).toString());
-			System.out.println("-----");
-		}
-		String sql = "select bp.productid, from visa_bidproduct bp ,visa_config c ,visa_bid b where c.bidid = bp.bidid and   c.configid = bp.configid and  bp.bidid = b.bidid and b.bidref = 'VGB0042304-02'";
-		List tables = getTables(sql);
-		for (int i=0; i < tables.size(); i++)
-		{
-			System.out.println("table=" + tables.get(i));
-		}
-		
-		String col = "test col";
-		Pattern p = Pattern.compile("[$ ]");		
-		Matcher m;
-		m = p.matcher(col);
-		System.out.println("find()=" + m.find());
-		System.out.println(quoteObjectname(col));
-		String sql = "-- this is a test";
-		System.out.println(">" + makeCleanSql(sql, false));
-		*/
-		try
-		{
-			Pattern p = Pattern.compile("(?mi)^\\s*go\\s*$");
-			//Pattern p = Pattern.compile("(?i)^\\s*go");
-			String sql = "SELECT *, 'GO' from test\n  GO";
-			Matcher m = p.matcher(sql);
-			if (m.find())
-			{
-				System.out.println("sql=" + m.replaceAll(";\n"));
-			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-		}
 	}
 
 }

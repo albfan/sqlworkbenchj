@@ -35,6 +35,7 @@ import workbench.gui.components.WbButton;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.help.HtmlViewer;
 import workbench.interfaces.SimplePropertyEditor;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -549,7 +550,10 @@ public class ConnectionEditorPanel
 		this.initPropertyEditors();
 		String drvClass = aProfile.getDriverclass();
 		String name = aProfile.getDriverName();
+		long start = System.currentTimeMillis();
 		DbDriver drv = WbManager.getInstance().getConnectionMgr().findDriverByName(drvClass, name);
+		long end = System.currentTimeMillis();
+		//LogMgr.logDebug("ConnectionEditorPanel.setProfile()", "FindDriver took " + (end - start) + " ms");
 		cbDrivers.setSelectedItem(drv);
 		this.init = false;
 	}

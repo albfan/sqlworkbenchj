@@ -44,6 +44,14 @@ public class ConnectionMgr
 	{
 	}
 
+	public WbConnection getConnection(String aProfileName, String anId)
+		throws ClassNotFoundException, SQLException, Exception
+	{
+		ConnectionProfile prof = this.getProfile(aProfileName);
+		if (prof == null) return null;
+		
+		return this.getConnection(prof, anId);
+	}
 	/**
 	 *	Return a new connection specified by the profile
 	 */
@@ -57,6 +65,20 @@ public class ConnectionMgr
 		Connection sql = this.connect(aProfile, anId);
 		conn.setSqlConnection(sql);
 		conn.setProfile(aProfile);
+		
+		try
+		{
+			if (WbManager.getSettings().getEnableDbmsOutput())
+			{
+				int size = WbManager.getSettings().getDbmsOutputDefaultBuffer();
+				conn.getMetadata().enableOutput(size);
+			}
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logWarning("ConnectionMgr.getConnection()", "Could not enable DBMS_OUTPUT package");
+		}
+		
 		this.activeConnections.put(anId, conn);
 
 		return conn;
@@ -70,8 +92,12 @@ public class ConnectionMgr
 		// established directly from the driver.
 		String drvClass = aProfile.getDriverclass();
 		String drvName = aProfile.getDriverName();
+		long start, end;
+		start = System.currentTimeMillis();
 		DbDriver drv = this.findDriverByName(drvClass, drvName);
-		if (drv == null)
+		end = System.currentTimeMillis();
+		//LogMgr.logDebug("ConnectionMgr.connect()", "FindDriver took " + (end - start) + " ms");
+		if (drv == null) 
 		{
 			throw new NoConnectionException("Driver class not registered");
 		}
@@ -94,6 +120,7 @@ public class ConnectionMgr
 					LogMgr.logInfo("ConnectionMgr.connect()", "(" + th.getMessage() + ")");
 				}
 			}
+
 			return sql;
 		}
 		catch (Exception e)
@@ -133,6 +160,7 @@ public class ConnectionMgr
 		DbDriver db = null;
 
 		if (aName == null || aName.length() == 0) return this.findDriver(drvClassName);
+		if (this.drivers == null) this.readDrivers();
 
 		LogMgr.logDebug("ConnectionMgr.findDriverByName()", "Searching for DriverClass=" + drvClassName + ",DriverName=" + aName);
 
@@ -158,12 +186,9 @@ public class ConnectionMgr
 
 	public DbDriver findRegisteredDriver(String drvClassName)
 	{
-		if (this.drivers == null)
-		{
-			this.readDrivers();
-		}
+		if (this.drivers == null)	this.readDrivers();
+		
     DbDriver db = null;
-
 
 		for (int i=0; i < this.drivers.size(); i ++)
 		{
@@ -245,7 +270,6 @@ public class ConnectionMgr
 
 	public ConnectionProfile getProfile(String aName)
 	{
-		//LogMgr.logDebug("LogMgr.getConnection()", "Searching for " + aName);
 		this.getProfiles();
 		if (this.profiles == null) return null;
 		Iterator itr = this.profiles.values().iterator();
@@ -253,7 +277,6 @@ public class ConnectionMgr
 		while (itr.hasNext())
 		{
 			prof = (ConnectionProfile)itr.next();
-			//LogMgr.logDebug("LogMgr.getConnection()", "Current profile= " + prof.getName());
 			if (aName.equalsIgnoreCase(prof.getName())) return prof;
 		}
 		return null;
@@ -313,7 +336,6 @@ public class ConnectionMgr
 	 */
 	public void disconnectAll()
 	{
-		//try { Thread.sleep(10000); } catch (Throwable th) {}
 		Iterator itr = this.activeConnections.keySet().iterator();
 		while (itr.hasNext())
 		{
@@ -368,10 +390,6 @@ public class ConnectionMgr
 			LogMgr.logWarning("ConnectionMgr.disconnectLocalHsql()", "Error when executing SHUTDOWN", e);
 		}
 
-	}
-	public String toString()
-	{
-		return this.getClass().getName();
 	}
 
 	public void writeSettings()

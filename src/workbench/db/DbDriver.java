@@ -81,10 +81,13 @@ public class DbDriver
 	}
 
 	public String getDriverClass() {  return this.driverClass; }
+	
 	public void setDriverClass(String driverClass)
 	{
 		this.driverClass = driverClass;
 		this.identifier = null;
+		this.driverClassInstance = null;
+		this.classLoader = null;
 	}
 
 	public String getIdentifier()
@@ -100,8 +103,14 @@ public class DbDriver
 		}
 		return this.identifier;
 	}
+	
 	public String getLibrary() { return this.library; }
-	public void setLibrary(String library) { this.library = library; }
+	public void setLibrary(String library) 
+	{ 
+		this.library = library; 
+		this.driverClassInstance = null;
+		this.classLoader = null;
+	}
 
 	public String toString()
 	{

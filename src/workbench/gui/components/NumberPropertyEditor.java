@@ -74,6 +74,7 @@ public class NumberPropertyEditor
 		try
 		{
 			this.setter.invoke(this.source, args);
+			this.changed = true;
 		}
 		catch (Exception e)
 		{

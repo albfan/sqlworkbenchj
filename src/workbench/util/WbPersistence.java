@@ -87,7 +87,7 @@ public class WbPersistence
 		}
 		catch (Exception e)
 		{
-			LogMgr.logWarning("WbPersistence.readObject()", "File " + aFilename + " not found!");
+			LogMgr.logDebug("WbPersistence.readObject()", "File " + aFilename + " not found!");
 			return null;
 		}
 	}
@@ -95,10 +95,14 @@ public class WbPersistence
 	public static Object readObject(InputStream in, String filename)
 		throws Exception
 	{
+		long start, end;
+		start = System.currentTimeMillis();
 		listener.setFilename(filename);
 		XMLDecoder e = new XMLDecoder(in, null, listener);
 		Object result = e.readObject();
 		e.close();
+		end = System.currentTimeMillis();
+		//LogMgr.logDebug("WbPersistence.readObject()", "Reading " + filename + " took " + (end - start) + "ms"); 
 		return result;
 	}
 	

@@ -18,6 +18,7 @@ import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.text.AttributeSet;
@@ -125,6 +126,11 @@ public class HtmlViewer
 		display.setEditorKit(kit);
 		display.setDocument(htmlDoc);
 	}
+
+	public void showDataPumperHelp()
+	{
+		this.showHtmlFile("data-pumper.html");
+	}
 	
 	public void showProfileHelp()
 	{
@@ -156,11 +162,16 @@ public class HtmlViewer
 				display.setContentType("text/html");
 				display.setText("<h2>Help file not found!</h2>"); 
 			}
-			if (!this.isVisible())
+			this.setVisible(true);
+			this.requestFocus();
+			SwingUtilities.invokeLater(new Runnable()
 			{
-				this.setVisible(true);
-				this.requestFocus();
-			}
+				public void run()
+				{
+					repaint();
+					getRootPane().updateUI();
+				}
+			});
 		}
 		catch (Exception e)
 		{

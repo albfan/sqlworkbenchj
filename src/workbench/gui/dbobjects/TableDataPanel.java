@@ -288,6 +288,7 @@ public class TableDataPanel
 				}
 			}
 		};
+		t.setName("TableDataPanel cancel thread");
 		t.setDaemon(true);
 		t.start();
 	}
@@ -319,7 +320,7 @@ public class TableDataPanel
 				}
 				catch (Throwable e)
 				{
-					LogMgr.logError("TableListPanel.retrieve()", "Error retrieving table data", e);
+					LogMgr.logError("TableDataPanel.retrieve()", "Error retrieving table data", e);
 				}
 				finally
 				{
@@ -329,6 +330,7 @@ public class TableDataPanel
 				}
 			}
 		};
+		t.setName("TableDataPanel retrieve thread");
 		t.setDaemon(true);
 		t.start();
 	}

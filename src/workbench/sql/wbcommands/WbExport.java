@@ -23,7 +23,6 @@ public class WbExport extends SqlCommand
 {
 	public static final String VERB = "EXPORT";
 	public DataSpooler spooler;
-	private int instance;
 
 	private ArgumentParser cmdLine;
 
@@ -46,6 +45,7 @@ public class WbExport extends SqlCommand
 		cmdLine.addArgument("createtable");
 		cmdLine.addArgument("nodata");
 		cmdLine.addArgument("encoding");
+		cmdLine.addArgument("showprogress");
 	}
 
 	public String getVerb() { return VERB; }
@@ -169,6 +169,10 @@ public class WbExport extends SqlCommand
 		file = StringUtil.trimQuotes(file);
 		this.spooler.setOutputFilename(file);
 		this.spooler.setConnection(aConnection);
+		
+		String progress = cmdLine.getValue("showprogress");
+		this.spooler.setShowProgress("true".equalsIgnoreCase(progress));
+		
 		String msg = ResourceMgr.getString("MsgSpoolInit");
 		msg = StringUtil.replace(msg, "%type%", type);
 		msg = StringUtil.replace(msg, "%file%", file);

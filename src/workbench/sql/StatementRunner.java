@@ -17,6 +17,7 @@ import workbench.sql.commands.DdlCommand;
 import workbench.sql.commands.SelectCommand;
 import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.commands.UpdatingCommand;
+import workbench.sql.wbcommands.WbCopy;
 import workbench.sql.wbcommands.WbDescribeTable;
 import workbench.sql.wbcommands.WbDisableOraOutput;
 import workbench.sql.wbcommands.WbEnableOraOutput;
@@ -85,6 +86,9 @@ public class StatementRunner
 		sql = new WbImport();
 		cmdDispatch.put(sql.getVerb(), sql);
 		cmdDispatch.put("IMP", sql);
+		
+		sql = new WbCopy();
+		cmdDispatch.put(sql.getVerb(), sql);
 		
 		cmdDispatch.put(WbListCatalogs.LISTCAT.getVerb(), WbListCatalogs.LISTCAT);
 		cmdDispatch.put(WbListCatalogs.LISTDB.getVerb(), WbListCatalogs.LISTDB);

@@ -30,6 +30,8 @@ import java.util.List;
 import javax.swing.JFrame;
 
 import workbench.WbManager;
+import workbench.db.importer.RowDataProducer;
+import workbench.db.importer.RowDataReceiver;
 import workbench.exception.WbException;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
@@ -53,8 +55,6 @@ public class DataSpooler
 	public static final int EXPORT_SQL = 1;
 	public static final int EXPORT_TXT = 2;
 	public static final int EXPORT_XML = 3;
-	public static final int EXPORT_ORALOADER = 4; // export in Oracle Loader format
-	public static final int EXPORT_BCP = 5; // export in MS SQL Server bcp format
 	
 	private WbConnection dbConn;
 	private String sql;
@@ -81,7 +81,7 @@ public class DataSpooler
 	 *  character columns
 	 */
 	private boolean cleancr = false;
-	
+
 	private boolean showProgress = false;
 	private ProgressPanel progressPanel;
 	private JFrame progressWindow;
@@ -172,7 +172,13 @@ public class DataSpooler
 	public void setCommitEvery(int aCount) { this.commitEvery = aCount; }
 	public int getCommitEvery() { return this.commitEvery; }
 	
-	public void setShowProgress(boolean aFlag) { this.showProgress = aFlag; }
+	public void setShowProgress(boolean aFlag) 
+	{
+	  if (!WbManager.getInstance().isBatchMode())
+	  {
+	    this.showProgress = aFlag; 
+	  }
+	}
 	public boolean getShowProgress() { return this.showProgress; }
 
 	public void setExportHeaders(boolean aFlag) { this.exportHeaders = aFlag; }
@@ -194,9 +200,6 @@ public class DataSpooler
 	public void setOutputTypeText() { this.exportType = EXPORT_TXT; }
 	public void setOutputTypeSqlInsert() { this.exportType = EXPORT_SQL; }
 	
-	public void setXmlTags(String tableTag, String rowTag, String columnTag)
-	{
-	}
 	public boolean isOutputTypeText() { return this.exportType == EXPORT_TXT; }
 	public boolean isOutputTypeSqlInsert() { return this.exportType == EXPORT_SQL; }
 	public boolean isOutputTypeSqlXml() { return this.exportType == EXPORT_XML; }
@@ -720,4 +723,5 @@ public class DataSpooler
 		FieldPosition p = new FieldPosition(0);
 		System.out.println("d=" + f.format(d, new StringBuffer(), p));
 	}
+	
 }

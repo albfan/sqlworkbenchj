@@ -165,7 +165,7 @@ public class WbWorkspace
 		String key = "tab" + index + ".title";
 		this.tabInfo.setProperty(key, name);
 	}
-	
+
 	public String getTabTitle(int index)
 	{
 		if (this.tabInfo == null) return null;
@@ -192,7 +192,31 @@ public class WbWorkspace
 		
 		return result;
 	}
+	
+	public void setMaxRows(int index, int numRows)
+	{
+		String key = "tab" + index + ".maxrows";
+		this.tabInfo.setProperty(key, Integer.toString(numRows));
+	}
 
+	public int getMaxRows(int tabIndex)
+	{
+		if (this.tabInfo == null) return 0;
+		String key = "tab" + tabIndex + ".maxrows";
+		String value = (String)this.tabInfo.get(key);
+		if (value == null) return 0;
+		int result = 0;
+		try
+		{
+			result = Integer.parseInt(value);
+		}
+		catch (Exception e)
+		{
+			result = 0;
+		}
+		return result;
+	}
+	
 	public String getExternalFileName(int tabIndex)
 	{
 		if (this.tabInfo == null) return null;

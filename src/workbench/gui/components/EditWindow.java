@@ -42,10 +42,16 @@ public class EditWindow
 	private JButton okButton = new WbButton(ResourceMgr.getString("LabelOK"));
 	private JButton cancelButton = new WbButton(ResourceMgr.getString("LabelCancel"));
 	private boolean isCancelled = true;
+	private String settingsId = null;
 	
 	public EditWindow(Frame owner, String title, String text)
 	{
+		this(owner, title, text, null);
+	}
+	public EditWindow(Frame owner, String title, String text, String settingsId)
+	{
 		super(owner, title, true);
+		this.settingsId = settingsId;
 		this.getContentPane().setLayout(new BorderLayout());
 		this.editor = EditorPanel.createTextEditor();
 		this.editor.showFindOnPopupMenu();
@@ -83,7 +89,7 @@ public class EditWindow
 		this.getRootPane().setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
 		this.getRootPane().setActionMap(am);
 		
-		if (!WbManager.getSettings().restoreWindowSize(this))
+		if (!WbManager.getSettings().restoreWindowSize(this, settingsId))
 		{
 			this.setSize(500,400);
 		}
@@ -117,20 +123,13 @@ public class EditWindow
 		return this.editor.getText();
 	}
 
-	public static void main(String[] args)
-	{
-		//WbManager.getInstance();
-		EditWindow w = new EditWindow(null, "Test", "Hallo dies ist \nder Text!");
-		w.show();
-	}
-	
 	public void windowActivated(java.awt.event.WindowEvent e)
 	{
 	}
 	
 	public void windowClosed(java.awt.event.WindowEvent e)
 	{
-		WbManager.getSettings().storeWindowSize(this);
+		WbManager.getSettings().storeWindowSize(this, this.settingsId);
 	}
 	
 	public void windowClosing(java.awt.event.WindowEvent e)

@@ -51,7 +51,7 @@ public class TableSearcher
 				doSearch();
 			}
 		};
-		t.setName("TableSearcher thread");
+		t.setName("TableSearcher Thread");
 		t.setDaemon(true);
 		return t;
 	}
@@ -195,7 +195,7 @@ public class TableSearcher
 		for (int i=0; i < cols; i++)
 		{
 			String column = (String)def.getValue(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-			Integer type = (Integer)def.getValue(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_TYPE_ID);
+			Integer type = (Integer)def.getValue(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
 			int sqlType = type.intValue();
 			boolean isChar = (sqlType == Types.VARCHAR || sqlType == Types.CHAR);
 			if (isChar)

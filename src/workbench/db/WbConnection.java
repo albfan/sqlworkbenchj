@@ -214,10 +214,13 @@ public class WbConnection
 		}
 	}
 
+	public void disconnect()
+	{
+		WbManager.getInstance().getConnectionMgr().disconnect(this.id);
+	}
+	
 	public void close()
 	{
-		//this.rollback();
-		
 		try
 		{
 			this.metaData.close();

@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -38,11 +39,13 @@ import workbench.gui.components.DividerBorder;
 import workbench.gui.components.EditWindow;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbSplitPane;
+import workbench.gui.help.HtmlViewer;
 import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.gui.sql.EditorPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.sql.wbcommands.WbCopy;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -81,6 +84,7 @@ public class DataPumper
 		this.startButton.addActionListener(this);
 		this.cancelButton.addActionListener(this);
 		this.showLogButton.addActionListener(this);
+		this.helpButton.addActionListener(this);
 		this.columnMapper = new ColumnMapper();
 		this.mapperPanel.setLayout(new BorderLayout());
 		this.mapperPanel.add(this.columnMapper, BorderLayout.CENTER);
@@ -111,6 +115,7 @@ public class DataPumper
 		s.setProperty("workbench.datapumper", "continue", Boolean.toString(this.continueOnErrorCbx.isSelected()));
 		s.setProperty("workbench.datapumper", "commitevery", this.commitEvery.getText());
 		s.setProperty("workbench.datapumper", "usequery", Boolean.toString(this.useQueryCbx.isSelected()));
+		s.setProperty("workbench.datapumper", "droptable", Boolean.toString(this.dropTargetCbx.isSelected()));
 		String where = this.sqlEditor.getText();
 		if (where != null && where.length() > 0)
 		{
@@ -121,6 +126,7 @@ public class DataPumper
 			s.setProperty("workbench.datapumper", "where", "");
 		}
 		s.storeWindowSize(this.window, "workbench.datapumper.window");
+		s.storeWindowPosition(this.window, "workbench.datapumper.window");
 	}
 	
 	public void restoreSettings()
@@ -128,12 +134,15 @@ public class DataPumper
 		Settings s = WbManager.getSettings();
 		boolean delete = "true".equals(s.getProperty("workbench.datapumper.target", "deletetable", "false"));
 		boolean cont = "true".equals(s.getProperty("workbench.datapumper", "continue", "false"));
+		boolean drop = "true".equals(s.getProperty("workbench.datapumper", "droptable", "false"));
 		this.deleteTargetCbx.setSelected(delete);
 		this.continueOnErrorCbx.setSelected(cont);
+		this.dropTargetCbx.setSelected(drop);
 		if (!s.restoreWindowSize(this.window, "workbench.datapumper.window"))
 		{
 			this.window.setSize(640,480);
 		}
+
 		int commit = s.getIntProperty("workbench.datapumper", "commitevery", 0);
 		if (commit > 0)
 		{
@@ -156,29 +165,10 @@ public class DataPumper
 		// initialize the depending controls for the usage of a SQL query
 		this.checkType();
 	}
-	
-	private void updateDisplay()
+
+	private void updateTargetDisplay()
 	{
-		String label = ResourceMgr.getString("LabelDPSourceProfile");
-		String addTitle = null;
-		if (this.source != null)
-		{
-			if (this.sourceConnection == null)
-			{
-				label = label + ": (" + this.source.getName() + ")";
-			}
-			else
-			{
-				label = label + ": " + this.source.getName();
-			}
-			this.sourceProfileLabel.setText(label); 
-		}
-		else
-		{
-			this.sourceProfileLabel.setText(label + ": " + ResourceMgr.getString("LabelPleaseSelect"));
-		}
-		
-		label = ResourceMgr.getString("LabelDPTargetProfile");
+		String label = ResourceMgr.getString("LabelDPTargetProfile");
 		if (this.target != null)
 		{
 			this.targetProfileLabel.setText(label + ": " + this.target.getName());
@@ -189,10 +179,31 @@ public class DataPumper
 		}
 		this.updateWindowTitle();
 	}
+	
+	private void updateSourceDisplay()
+	{
+		String label = ResourceMgr.getString("LabelDPSourceProfile");
+		if (this.source != null)
+		{
+			this.sourceProfileLabel.setText(label + ": " + this.source.getName());
+		}
+		else
+		{
+			this.sourceProfileLabel.setText(label + ": " + ResourceMgr.getString("LabelPleaseSelect"));
+		}
+		this.updateWindowTitle();
+	}
+	
+	private void updateDisplay()
+	{
+		this.updateSourceDisplay();
+		this.updateTargetDisplay();
+		this.updateWindowTitle();
+	}
 
 	private void updateWindowTitle()
 	{
-		if (this.targetConnection != null && this.sourceConnection != null && this.window != null)
+		if (this.target != null && this.source != null && this.window != null)
 		{
 			String title = ResourceMgr.getString("TxtWindowTitleDataPumper");
 			title = title + " [" + this.source.getName() + " -> " + this.target.getName() + "]";
@@ -214,7 +225,8 @@ public class DataPumper
 	{
 		if (this.source == null) return;
 		
-		String label = ResourceMgr.getString("MsgConnecting") + " " + this.source.getName() + " ...";
+		String label = ResourceMgr.getString("MsgConnectingTo") + " " + this.source.getName() + " ...";
+		this.sourceProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
 		this.sourceProfileLabel.setText(label);
 		Thread t = new Thread()
 		{
@@ -231,11 +243,8 @@ public class DataPumper
 	private void doConnectSource()
 	{
 		this.disconnectSource();
-		
 		try
 		{
-		  
-			this.sourceProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
 			this.sourceConnection = WbManager.getInstance().getConnectionMgr().getConnection(this.source, "Dp-Source");
 		}
 		catch (Exception e)
@@ -248,17 +257,8 @@ public class DataPumper
 		finally
 		{
 			this.sourceProfileLabel.setIcon(null);
+			this.updateSourceDisplay();
 		}
-		
-		
-		// Make sure the display update happens on the AWT Thread
-		SwingUtilities.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				updateDisplay();
-			}
-		});
 		
 		if (this.sourceConnection != null)
 		{
@@ -283,6 +283,7 @@ public class DataPumper
 		
 		String label = ResourceMgr.getString("MsgConnectingTo") + " " + this.target.getName() + " ...";
 		this.targetProfileLabel.setText(label);
+		this.targetProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
 		Thread t = new Thread()
 		{
 			public void run()
@@ -301,7 +302,6 @@ public class DataPumper
 		
 		try
 		{
-			this.targetProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
 			this.targetConnection = WbManager.getInstance().getConnectionMgr().getConnection(this.target, "Dp-Target");
 		}
 		catch (Exception e)
@@ -314,18 +314,9 @@ public class DataPumper
 		finally
 		{
 			this.targetProfileLabel.setIcon(null);
+			this.updateTargetDisplay();
 		}
 		
-		// Make sure the display update happens on the AWT Thread
-		SwingUtilities.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				updateDisplay();
-				targetTable.setConnection(targetConnection);
-			}
-		});
-
 		if (this.targetConnection != null)
 		{
 			this.targetTable.setChangeListener(this, "target-table");
@@ -380,6 +371,8 @@ public class DataPumper
     checkQueryButton = new javax.swing.JButton();
     useQueryCbx = new javax.swing.JCheckBox();
     showWbCommand = new javax.swing.JButton();
+    dropTargetCbx = new javax.swing.JCheckBox();
+    helpButton = new javax.swing.JButton();
     statusLabel = new javax.swing.JLabel();
 
     setLayout(new java.awt.GridBagLayout());
@@ -576,7 +569,7 @@ public class DataPumper
     gridBagConstraints.gridx = 4;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.gridheight = 3;
+    gridBagConstraints.gridheight = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
     gridBagConstraints.weightx = 1.0;
@@ -598,7 +591,7 @@ public class DataPumper
     commitEvery.setText("\n");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.gridheight = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -610,7 +603,7 @@ public class DataPumper
     commitLabel.setToolTipText(ResourceMgr.getDescription("LabelDPCommitEvery"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.gridheight = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -623,8 +616,8 @@ public class DataPumper
     gridBagConstraints.gridx = 7;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 4);
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 4);
     buttonPanel.add(cancelButton, gridBagConstraints);
 
     checkQueryButton.setText(ResourceMgr.getString("LabelDPCheckQuery"));
@@ -637,7 +630,7 @@ public class DataPumper
     checkQueryButton.setEnabled(false);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 4;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.2;
@@ -650,7 +643,7 @@ public class DataPumper
     useQueryCbx.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 5;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 0.8;
@@ -661,10 +654,30 @@ public class DataPumper
     showWbCommand.setToolTipText(ResourceMgr.getDescription("LabelShowWbCopyCommand"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 7;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(2, 0, 4, 4);
     buttonPanel.add(showWbCommand, gridBagConstraints);
+
+    dropTargetCbx.setText(ResourceMgr.getString("LabelDPDropTable"));
+    dropTargetCbx.setToolTipText(ResourceMgr.getDescription("LabelDPDropTable"));
+    dropTargetCbx.setEnabled(false);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    buttonPanel.add(dropTargetCbx, gridBagConstraints);
+
+    helpButton.setText(ResourceMgr.getString("LabelHelp"));
+    helpButton.setToolTipText("");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 7;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 4, 4);
+    buttonPanel.add(helpButton, gridBagConstraints);
 
     jSplitPane1.setBottomComponent(buttonPanel);
 
@@ -703,6 +716,8 @@ public class DataPumper
   private javax.swing.JLabel commitLabel;
   private javax.swing.JCheckBox continueOnErrorCbx;
   private javax.swing.JCheckBox deleteTargetCbx;
+  private javax.swing.JCheckBox dropTargetCbx;
+  private javax.swing.JButton helpButton;
   private javax.swing.JSplitPane jSplitPane1;
   private javax.swing.JPanel mapperPanel;
   private javax.swing.JButton selectSourceButton;
@@ -730,15 +745,10 @@ public class DataPumper
 	{
 		this.window  = new JFrame(ResourceMgr.getString("TxtWindowTitleDataPumper"))
 		{
-			// for some reason the windowClosed(WindowEvent) method
-			// is not called when dispose() is called, and thus the settings
-			// are not saved when the WbManager closes the tool window
-			// when shutting down the workbench. This is why we catch the dispose()
-			// method directly
-			public void dispose()
+			public void hide()
 			{
-				windowClosed();
-				super.dispose();
+				saveSettings();
+				super.hide();
 			}
 		};
 		
@@ -749,7 +759,17 @@ public class DataPumper
 		this.window.addWindowListener(this);
 		WbManager.getInstance().registerToolWindow(this.window);
 		
-		WbSwingUtilities.center(this.window, aParent);
+		if (aParent == null)
+		{
+			if (!WbManager.getSettings().restoreWindowPosition(this.window, "workbench.datapumper.window"))
+			{
+				WbSwingUtilities.center(this.window, null);
+			}
+		}
+		else
+		{
+			WbSwingUtilities.center(this.window, aParent);
+		}
 		this.window .show();
 		SwingUtilities.invokeLater(new Runnable()
 		{
@@ -766,14 +786,23 @@ public class DataPumper
 		
 		try
 		{
+			String label = ResourceMgr.getString("MsgDisconnecting");
+			this.targetProfileLabel.setText(label);
+			this.targetProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
+			
 			this.targetTable.removeChangeListener();
 			this.targetConnection.disconnect();
-			this.targetConnection = null;
 			this.targetTable.setConnection(null);
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("DataPumper.disconnectTarget()", "Error disconnecting target connection", e);
+		}
+		finally
+		{
+			this.targetConnection = null;
+			this.updateTargetDisplay();
+			this.targetProfileLabel.setIcon(null);
 		}
 	}
 	
@@ -782,49 +811,34 @@ public class DataPumper
 		if (this.sourceConnection == null) return;
 		try
 		{
+			String label = ResourceMgr.getString("MsgDisconnecting");
+			this.sourceProfileLabel.setText(label);
+			this.sourceProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
+			
 			this.sourceTable.removeChangeListener();
 			this.sourceConnection.disconnect();
-			this.sourceConnection = null;
 			this.sourceTable.setConnection(null);
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("DataPumper.disconnectSource()", "Error disconnecting source connection", e);
 		}
-	}
-	
-	public void windowClosed()
-	{
-		WbManager.getInstance().unregisterToolWindow(this.window);
-		this.saveSettings();
-		
-		this.source = null;
-		this.target = null;
-		this.columnMapper = null;
-		
-		Thread t = new Thread()
+		finally
 		{
-			public void run()
-			{
-				disconnectSource();
-				disconnectTarget();
-			}
-		};
-		t.setName("DataPumper disconnect thread");
-		t.setDaemon(true);
-		t.start();
+			this.sourceConnection = null;
+			this.updateSourceDisplay();
+			this.sourceProfileLabel.setIcon(null);
+		}
 	}
 	
 	private void selectTargetConnection()
 	{
-		this.disconnectTarget();
 		this.target = this.selectConnection("workbench.datapumper.target.lastprofile");
 		this.connectTarget();
 	}
 	
 	private void selectSourceConnection()
 	{
-		this.disconnectSource();
 		this.source = this.selectConnection("workbench.datapumper.source.lastprofile");
 		this.connectSource();
 	}
@@ -844,10 +858,10 @@ public class DataPumper
 			if (!cancelled)
 			{
 				prof = dialog.getSelectedProfile();
+				WbManager.getSettings().setProperty(lastProfileKey, prof.getName());
 			}
 			dialog.setVisible(false);
 			dialog.dispose();
-			
 		}
 		catch (Throwable th)
 		{
@@ -857,11 +871,21 @@ public class DataPumper
 		return prof;
 	}
 	
+	private void showHelp()
+	{
+		HtmlViewer viewer = new HtmlViewer(this.window, "data-pumper.html");
+		viewer.showDataPumperHelp();
+		//WbManager.getInstance().getHelpViewer().showDataPumperHelp();
+	}
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
 		if (e.getSource() == this.closeButton)
 		{
 			this.closeWindow();
+		}
+		else if (e.getSource() == this.helpButton)
+		{
+			this.showHelp();
 		}
 		else if (e.getSource() == this.cancelButton)
 		{
@@ -905,12 +929,16 @@ public class DataPumper
 		}
 	}
 
+	/**
+	 *	Check the controls depending on the state of the useQuery CheckBox
+	 */
 	private void checkType()
 	{
 		boolean useQuery = this.useQueryCbx.isSelected();
 		this.sourceTable.setEnabled(!useQuery);
 		this.checkQueryButton.setEnabled(useQuery);
-		
+	
+		this.targetTable.allowNewTable(!useQuery);
 		if (useQuery)
 		{
 			this.sqlEditorLabel.setText(ResourceMgr.getString("LabelDPQueryText"));
@@ -942,14 +970,13 @@ public class DataPumper
 		}
 		return false;
 	}
-	
+
 	public void windowActivated(java.awt.event.WindowEvent e)
 	{
 	}
 	
 	public void windowClosed(java.awt.event.WindowEvent e)
 	{
-		this.windowClosed();
 	}
 	
 	public void windowClosing(java.awt.event.WindowEvent e)
@@ -959,13 +986,42 @@ public class DataPumper
 
 	public void closeWindow()
 	{
+		this.done();
 		if (this.window != null)
 		{
-			this.window.setVisible(false);
 			this.window.removeWindowListener(this);
 			this.window.dispose();
 		}
 	}
+	
+	public void done()
+	{
+		this.saveSettings();
+
+		this.source = null;
+		this.target = null;
+		this.columnMapper.resetData();
+		this.columnMapper = null;
+
+		Thread t = new Thread()
+		{
+			public void run()
+			{
+				disconnectSource();
+				disconnectTarget();
+				disconnectDone();
+			}
+		};
+		t.setName("DataPumper disconnect thread");
+		t.setDaemon(true);
+		t.start();
+	}
+	
+	private void disconnectDone()
+	{
+		WbManager.getInstance().unregisterToolWindow(this.window);
+	}
+	
 	
 	public void windowDeactivated(java.awt.event.WindowEvent e)
 	{
@@ -993,6 +1049,19 @@ public class DataPumper
 	public void propertyChange(java.beans.PropertyChangeEvent evt)
 	{
 		TableIdentifier target = this.targetTable.getSelectedTable();
+		
+		if (target != null && target.isNewTable())
+		{
+			
+			String name = target.getTable();
+			if (name == null) 
+			{
+				name = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("TxtEnterNewTableName"), "");
+				target.setTable(name);
+				this.targetTable.repaint();
+			}
+		}
+		
 		if (this.hasSource() && target != null)
 		{
 			SwingUtilities.invokeLater(new Runnable()
@@ -1008,6 +1077,7 @@ public class DataPumper
 			this.startButton.setEnabled(false);
 			this.showWbCommand.setEnabled(false);			
 			this.columnMapper.resetData();
+			this.dropTargetCbx.setEnabled(false);
 		}
 	}
 
@@ -1074,14 +1144,14 @@ public class DataPumper
 		if (!this.hasSource()) return;
 		
 		StringBuffer result = new StringBuffer(150);
-		result.append("COPY -sourceprofile=");
+		result.append("COPY -" + WbCopy.PARAM_SOURCEPROFILE + "=");
 		String s = this.source.getName();
 		if (s.indexOf(' ') >-1) result.append('"');
 		result.append(s);
 		if (s.indexOf(' ') >-1) result.append('"');
 		
 		s = this.target.getName();
-		result.append("\n     -targetprofile=");
+		result.append("\n     -" + WbCopy.PARAM_TARGETPROFILE + "=");
 		if (s.indexOf(' ') >-1) result.append('"');
 		result.append(s);
 		if (s.indexOf(' ') >-1) result.append('"');
@@ -1089,9 +1159,20 @@ public class DataPumper
 		TableIdentifier id = this.targetTable.getSelectedTable();
 		if (target == null) return;
 		
-		s = id.getTableExpression();
-		result.append("\n     -targettable=");
+		if (id.isNewTable())
+			s = id.getTable();
+		else
+			s = id.getTableExpression();
+		result.append("\n     -" + WbCopy.PARAM_TARGETTABLE + "=");
 		result.append(s);
+		if (id.isNewTable())
+		{
+			result.append("\n     -" + WbCopy.PARAM_CREATETARGET + "=true");
+			if (this.dropTargetCbx.isSelected())
+			{
+				result.append("\n     -" + WbCopy.PARAM_DROPTARGET + "=true");
+			}
+		}
 		
 		ColumnMapper.MappingDefinition colMapping = this.columnMapper.getMapping();
 		if (colMapping == null) return;
@@ -1100,11 +1181,11 @@ public class DataPumper
 		if (this.useQueryCbx.isSelected())
 		{
 			String sql = SqlUtil.makeCleanSql(this.sqlEditor.getText(), false);
-			result.append("\n     -sourcequery=\"");
+			result.append("\n     -" + WbCopy.PARAM_SOURCEQUERY + "=\"");
 			result.append(sql);
 			result.append('"');
 			
-			result.append("\n     -targetcolumns=\"");
+			result.append("\n     -"+ WbCopy.PARAM_COLUMNS + "=\"");
 			for (int i=0; i < count; i++)
 			{
 				if (i > 0) result.append(", ");
@@ -1117,7 +1198,7 @@ public class DataPumper
 			id = this.sourceTable.getSelectedTable();
 			if (id == null) return;
 			s = id.getTableExpression();
-			result.append("\n     -sourcetable=");
+			result.append("\n     -" + WbCopy.PARAM_SOURCETABLE + "=");
 			if (s.indexOf(' ') > -1) result.append('"');
 			result.append(s);
 			if (s.indexOf(' ') > -1) result.append('"');
@@ -1125,12 +1206,12 @@ public class DataPumper
 			s = sqlEditor.getText();
 			if (s != null && s.length() > 0)
 			{
-				result.append("\n     -sourcewhere=\"");
+				result.append("\n     -" + WbCopy.PARAM_SOURCEWHERE + "=\"");
 				result.append(SqlUtil.makeCleanSql(s, false));
 				result.append('"');
 			}
 			
-			result.append("\n     -columnmapping=\"");
+			result.append("\n     -" + WbCopy.PARAM_COLUMNS + "=\"");
 			for (int i=0; i < count; i++)
 			{
 				if (i > 0) result.append(", ");
@@ -1141,16 +1222,16 @@ public class DataPumper
 			result.append('"');
 		}
 		
-		result.append("\n     -deletetarget=");
+		result.append("\n     -" + WbCopy.PARAM_DELETETARGET + "=");
 		result.append(Boolean.toString(this.deleteTargetCbx.isSelected()));
 		
-		result.append("\n     -continue=");
+		result.append("\n     -" + WbCopy.PARAM_CONTINUE + "=");
 		result.append(Boolean.toString(this.continueOnErrorCbx.isSelected()));
 		
 		int commit = StringUtil.getIntValue(this.commitEvery.getText(), -1);
 		if (commit > 0)
 		{
-			result.append("\n     -commitevery=");
+			result.append("\n     -" + WbCopy.PARAM_COMMITEVERY + "=");
 			result.append(commit);
 		}
 		result.append(";");
@@ -1176,11 +1257,12 @@ public class DataPumper
 			this.showWbCommand.setEnabled(false);
 			return;
 		}
-		
+
+		boolean useQuery = this.useQueryCbx.isSelected();
 		try
 		{
 			List sourceCols = null;
-			if (this.useQueryCbx.isSelected())
+			if (useQuery)
 			{
 				sourceCols = this.getResultSetColumns();
 			}
@@ -1190,17 +1272,20 @@ public class DataPumper
 				sourceCols = this.sourceConnection.getMetadata().getTableColumns(source);
 			}
 			
-			List targetCols = this.targetConnection.getMetadata().getTableColumns(target);
-			
-			this.columnMapper.defineColumns(sourceCols, targetCols);
-			if (this.useQueryCbx.isSelected())
+			boolean newTable = target.isNewTable();
+			this.columnMapper.setAllowTargetEditing(newTable);
+			this.dropTargetCbx.setEnabled(newTable);
+			if (newTable)
 			{
-				this.columnMapper.setAllowSourceEditing(false);
+				this.columnMapper.defineColumns(sourceCols, sourceCols);
 			}
 			else
 			{
-				this.columnMapper.setAllowSourceEditing(true);
+				List targetCols = this.targetConnection.getMetadata().getTableColumns(target);
+				this.columnMapper.defineColumns(sourceCols, targetCols);
 			}
+			
+			this.columnMapper.setAllowSourceEditing(!useQuery && !newTable);
 			this.startButton.setEnabled(true);
 			this.showWbCommand.setEnabled(true);
 		}
@@ -1255,12 +1340,29 @@ public class DataPumper
 			this.copier.setCommitEvery(commit);
 			if (this.useQueryCbx.isSelected())
 			{
-				this.copier.setDefinition(this.sourceConnection, this.targetConnection, this.sqlEditor.getText(), ttable, colMapping.targetColumns);
+				this.copier.copyFromQuery(this.sourceConnection, this.targetConnection, this.sqlEditor.getText(), ttable, colMapping.targetColumns);
 			}
 			else
 			{
-				if (!ignoreSelect) this.copier.setSourceTableWhere(this.sqlEditor.getText());
-				this.copier.setDefinition(this.sourceConnection, this.targetConnection, stable, ttable, colMapping.sourceColumns, colMapping.targetColumns);
+				String where = null;
+				if (!ignoreSelect) where = this.sqlEditor.getText();
+				if (ttable.isNewTable())
+				{
+					boolean dropTable = this.dropTargetCbx.isSelected();
+					Map mapping = new HashMap();
+					int count = colMapping.sourceColumns.length;
+					for (int i=0; i < count; i++)
+					{
+						mapping.put(colMapping.sourceColumns[i].getColumnName(), colMapping.targetColumns[i].getColumnName());
+					}
+					
+					this.copier.copyFromTable(this.sourceConnection, this.targetConnection, stable, ttable, mapping, where, true, dropTable);
+				}
+				else
+				{
+					this.copier.setSourceTableWhere(where);
+					this.copier.copyFromTable(this.sourceConnection, this.targetConnection, stable, ttable, colMapping.sourceColumns, colMapping.targetColumns);
+				}
 			}			
 			this.copier.setRowActionMonitor(this);
 			this.copier.startBackgroundCopy();
@@ -1268,11 +1370,17 @@ public class DataPumper
 			this.showLogButton.setEnabled(false);
 			this.startButton.setEnabled(false);
 			this.cancelButton.setEnabled(true);
+			
 			this.updateWindowTitle();
 		}
 		catch (Exception e)
 		{
+			this.copyRunning = false;
+			this.showLogButton.setEnabled(true);
+			this.startButton.setEnabled(true);
+			this.cancelButton.setEnabled(false);
 			LogMgr.logError("DataPumper.startCopy()", "Could not execute copy process", e);
+			this.statusLabel.setText(ResourceMgr.getString("MsgCopyFinishedWithErrors"));
 		}
 	}
 	

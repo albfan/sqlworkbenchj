@@ -3,7 +3,9 @@
  */
 package workbench.sql;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import workbench.WbManager;
@@ -12,6 +14,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
 
@@ -78,12 +81,40 @@ public class BatchRunner
 			this.errorScript = null;
 	}
 	
+	private String readFile(String aFilename)
+	{
+		BufferedReader in = null;
+		StringBuffer content = null;
+		try
+		{
+			File f = new File(aFilename);
+			content = new StringBuffer((int)f.length());
+			in = new BufferedReader(new FileReader(f));
+			String line = in.readLine();
+			while (line != null)
+			{
+				content.append(line);
+				content.append('\n');
+				line = in.readLine();
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("BatchRunner.readFile()", "Error reading file " + aFilename, e);
+			content = new StringBuffer();
+		}
+		finally
+		{
+			try { in.close(); } catch (Throwable th) {}
+		}
+		return content.toString();
+	}
 	public void execute()
 		throws IOException
 	{
 		String file = null;
 		boolean error = false;
-		WbStringTokenizer reader = new WbStringTokenizer(";",false, "\"'", true);
+		//WbStringTokenizer reader = new WbStringTokenizer(";",false, "\"'", true);
 		
 		for (int i=0; i < this.files.size(); i++)
 		{
@@ -91,8 +122,10 @@ public class BatchRunner
 			try
 			{
 				LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchProcessingFile") + " " + file);
-				reader.setSourceFile(file);
-				error = this.executeScript(reader);
+				//reader.setSourceFile(file);
+				//error = this.executeScript(reader);
+				String script = this.readFile(file);
+				this.executeScript(script);
 				LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchProcessingFileDone") + " " + file);
 			}
 			catch (Exception e)
@@ -113,8 +146,9 @@ public class BatchRunner
 				if (this.errorScript != null)
 				{
 					LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchExecutingErrorScript") + this.errorScript);
-					reader.setSourceFile(this.errorScript);
-					this.executeScript(reader);
+					//reader.setSourceFile(this.errorScript);
+					String errorScript = this.readFile(this.errorScript);
+					this.executeScript(errorScript);
 				}
 			}
 			catch (Exception e)
@@ -129,8 +163,9 @@ public class BatchRunner
 				if (this.successScript != null)
 				{
 					LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchExecutingSuccessScript") + this.successScript);
-					reader.setSourceFile(this.successScript);
-					this.executeScript(reader);
+					//reader.setSourceFile(this.successScript);
+					String script = this.readFile(this.successScript);
+					this.executeScript(script);
 				}
 			}
 			catch (Exception e)
@@ -141,15 +176,18 @@ public class BatchRunner
 	}
 
 	
-	private boolean executeScript(WbStringTokenizer reader)
+	//private boolean executeScript(WbStringTokenizer reader)
+	private boolean executeScript(String aScript)
 	{
 		boolean error = false;
 		StatementRunnerResult result = null;
-		
+		List statements = SqlUtil.getCommands(aScript);
 		String sql = null;
-		while (reader.hasMoreTokens())
+		int count = statements.size();
+		//while (reader.hasMoreTokens())
+		for (int i=0; i < count; i++)
 		{
-			sql = reader.nextToken();
+			sql = (String)statements.get(i);//reader.nextToken();
 			if (sql == null) continue;
 			sql = sql.trim();
 			if (sql.length() == 0) continue;

@@ -72,7 +72,12 @@ public class WbProperties
 			Object v = this.get(key);
 			if (v != null)
 			{
-				value = StringUtil.replace(v.toString(), "\\", "\\\\");
+				value = v.toString();
+				value = StringUtil.replace(value, "\\", "\\\\");
+				if (value.indexOf('\n') > -1)
+				{
+					value = value.replaceAll("\n", "\\\\n");
+				}
 				if (value.length() > 0)
 				{
 					bw.write(key + "=" + value);

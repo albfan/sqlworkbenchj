@@ -28,7 +28,7 @@ import javax.swing.text.Utilities;
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.9 2003-12-16 21:58:37 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.10 2004-01-07 20:13:50 thomas Exp $
  */
 public class TextAreaPainter extends JComponent implements TabExpander
 {
@@ -484,7 +484,12 @@ public class TextAreaPainter extends JComponent implements TabExpander
 			}
 		}
 
-		gfx.clipRect(this.gutterWidth, clipRect.y, clipRect.width - this.gutterWidth, clipRect.height);
+		int clipX = clipRect.x; 
+		if (clipRect.x < this.gutterWidth)
+		{
+			clipX = this.gutterWidth;
+		}
+		gfx.clipRect(clipX, clipRect.y, clipRect.width, clipRect.height);
 		gfx.translate(this.gutterWidth,0);
 		
 		try

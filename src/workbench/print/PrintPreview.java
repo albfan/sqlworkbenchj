@@ -272,6 +272,8 @@ public class PrintPreview
 				showNativePageSetup();
 			}
 		};
+		t.setName("PageSetup Thread");
+		t.setDaemon(true);
 		t.start();
 	}
 	

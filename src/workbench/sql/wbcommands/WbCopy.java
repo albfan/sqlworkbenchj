@@ -25,29 +25,41 @@ import workbench.util.StringUtil;
  * version of the DataPumper.
  * @author  workbench@kellerer.org
  */
-public class WbCopy 
+public class WbCopy
 	extends SqlCommand
 {
 	public static final String VERB = "COPY";
-
+	public static final String PARAM_SOURCETABLE = "sourcetable";
+	public static final String PARAM_SOURCEQUERY = "sourcequery";
+	public static final String PARAM_TARGETTABLE = "targettable";
+	public static final String PARAM_SOURCEPROFILE = "sourceprofile";
+	public static final String PARAM_TARGETPROFILE = "targetprofile";
+	public static final String PARAM_COLUMNS = "columns";
+	public static final String PARAM_SOURCEWHERE = "sourcewhere";
+	public static final String PARAM_COMMITEVERY = "commitevery";
+	public static final String PARAM_CONTINUE = "continue";
+	public static final String PARAM_DELETETARGET = "deletetarget";
+	public static final String PARAM_DROPTARGET = "droptarget";
+	public static final String PARAM_CREATETARGET = "createtarget";
+	
 	private ArgumentParser cmdLine;
 	private DataCopier copier;
 
 	public WbCopy()
 	{
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument("sourcetable");
-		cmdLine.addArgument("sourcequery");
-		cmdLine.addArgument("targettable");
-		cmdLine.addArgument("sourceprofile");
-		cmdLine.addArgument("targetprofile");
-		cmdLine.addArgument("columnmapping");
-		cmdLine.addArgument("columns");
-		cmdLine.addArgument("sourcewhere");
-		cmdLine.addArgument("columns");
-		cmdLine.addArgument("commitevery");
-		cmdLine.addArgument("continue");
-		cmdLine.addArgument("deletetarget");
+		cmdLine.addArgument(PARAM_SOURCETABLE);
+		cmdLine.addArgument(PARAM_SOURCEQUERY);
+		cmdLine.addArgument(PARAM_TARGETTABLE);
+		cmdLine.addArgument(PARAM_SOURCEPROFILE);
+		cmdLine.addArgument(PARAM_TARGETPROFILE);
+		cmdLine.addArgument(PARAM_COLUMNS);
+		cmdLine.addArgument(PARAM_SOURCEWHERE);
+		cmdLine.addArgument(PARAM_COMMITEVERY);
+		cmdLine.addArgument(PARAM_CONTINUE);
+		cmdLine.addArgument(PARAM_DELETETARGET);
+		cmdLine.addArgument(PARAM_DROPTARGET);
+		cmdLine.addArgument(PARAM_CREATETARGET);
 	}
 
 	public String getVerb() { return VERB; }
@@ -58,11 +70,11 @@ public class WbCopy
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
 		int pos = aSql.indexOf(' ');
-		if (pos > -1) 
+		if (pos > -1)
 			aSql = aSql.substring(pos);
-		else 
+		else
 			aSql = "";
-		
+
 		try
 		{
 			cmdLine.parse(aSql);
@@ -84,15 +96,16 @@ public class WbCopy
 				if (i > 0) msg.append(',');
 			}
 			result.addMessage(msg.toString());
+			result.addMessage("");
 			result.addMessage(ResourceMgr.getString("ErrorCopyWrongParameters"));
 			result.setFailure();
 			return result;
 		}
-		
-		
-		String sourceProfile = cmdLine.getValue("sourceprofile");
-		String targetProfile = cmdLine.getValue("targetprofile");
-		
+
+
+		String sourceProfile = cmdLine.getValue(PARAM_SOURCEPROFILE);
+		String targetProfile = cmdLine.getValue(PARAM_TARGETPROFILE);
+
 		if (targetProfile == null && targetProfile == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrorCopyWrongParameters"));
@@ -100,10 +113,10 @@ public class WbCopy
 			return result;
 		}
 
-		int commit = StringUtil.getIntValue(cmdLine.getValue("commitevery"),-1);
-		
-		String sourcetable = cmdLine.getValue("sourcetable");
-		String sourcequery = cmdLine.getValue("sourcequery");
+		int commit = StringUtil.getIntValue(cmdLine.getValue(PARAM_COMMITEVERY),-1);
+
+		String sourcetable = cmdLine.getValue(PARAM_SOURCETABLE);
+		String sourcequery = cmdLine.getValue(PARAM_SOURCEQUERY);
 		if (sourcetable == null && sourcequery == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrorCopyNoSourceSpecified"));
@@ -112,8 +125,8 @@ public class WbCopy
 			result.setFailure();
 			return result;
 		}
-		
-		String targettable = cmdLine.getValue("targettable");
+
+		String targettable = cmdLine.getValue(PARAM_TARGETTABLE);
 		if (targettable == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrorCopyWrongParameters"));
@@ -126,7 +139,7 @@ public class WbCopy
 		if (targetProfile == null)
 		{
 			targetCon = aConnection;
-		}	
+		}
 		else
 		{
 			try
@@ -155,46 +168,68 @@ public class WbCopy
 			{
 				result.addMessage(ResourceMgr.getString("ErrorCopyCouldNotConnectSource"));
 				result.setFailure();
+				// disconnect the target connection only if it was created by this command
+				if (targetCon.getId().startsWith("Wb-Copy"))
+				{
+					try { targetCon.disconnect(); } catch (Throwable th) {}
+				}
 				return result;
 			}
 		}
-		boolean delete = "true".equalsIgnoreCase(cmdLine.getValue("deletetarget"));
-		boolean cont = "true".equalsIgnoreCase(cmdLine.getValue("continue"));
+		boolean delete = "true".equalsIgnoreCase(cmdLine.getValue(PARAM_DELETETARGET));
+		boolean cont = "true".equalsIgnoreCase(cmdLine.getValue(PARAM_CONTINUE));
+		boolean createTable = "true".equals(cmdLine.getValue(PARAM_CREATETARGET));
+		boolean dropTable = "true".equals(cmdLine.getValue(PARAM_DROPTARGET));
 
 		this.copier = new DataCopier();
 		copier.setRowActionMonitor(this.rowMonitor);
-		copier.setDeleteTarget(delete);
 		copier.setContinueOnError(cont);
 		copier.setCommitEvery(commit);
 
+		// no need to delete the data in the target table if it's beeing dropped anyway...
+		copier.setDeleteTarget(delete && !dropTable);
+
 		TableIdentifier targetId = new TableIdentifier(targettable);
-		
-		if (sourcetable != null)
+
+		try
 		{
-			TableIdentifier srcTable = new TableIdentifier(sourcetable);
-			String where = cmdLine.getValue("sourcewhere");
-			boolean createTable = "true".equals(cmdLine.getValue("createtable"));
-			if (createTable)
+			if (sourcetable != null)
 			{
-				ColumnIdentifier[] cols = this.parseColumns();
-				copier.setDefinitionForNewTable(sourceCon, targetCon, srcTable, cols, where);
+				TableIdentifier srcTable = new TableIdentifier(sourcetable);
+				String where = cmdLine.getValue(PARAM_SOURCEWHERE);
+				String columns = cmdLine.getValue(PARAM_COLUMNS);
+				boolean containsMapping = (columns.indexOf('/') > -1);
+				if (containsMapping)
+				{
+					Map mapping = this.parseMapping();
+					copier.copyFromTable(sourceCon, targetCon, srcTable, targetId, mapping, where, createTable, dropTable);
+				}
+				else
+				{
+					ColumnIdentifier[] cols = this.parseColumns();
+					copier.copyToNewTable(sourceCon, targetCon, srcTable, targetId, cols, where);
+				}
+
 			}
 			else
 			{
-				Map mapping = this.parseMapping();
-				copier.setDefinition(sourceCon, targetCon, srcTable, targetId, mapping, where);
+				ColumnIdentifier[] cols = this.parseColumns();
+				copier.copyFromQuery(sourceCon, targetCon, sourcequery, targetId, cols);
 			}
-		}
-		else 
-		{
-			ColumnIdentifier[] cols = this.parseColumns();
-			copier.setDefinition(sourceCon, targetCon, sourcequery, targetId, cols);
-		}
-		
-		try
-		{
+
 			copier.start();
 			result.setSuccess();
+			String s = copier.getMessages();
+			if (s != null) result.addMessage(s);
+			this.addWarnings(result);
+			this.addErrors(result);
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("WbCopy.execute()", "SQL Error when copying data", e);
+			result.addMessage(ResourceMgr.getString("ErrorOnCopy"));
+			result.addMessage(ExceptionUtil.getDisplay(e));
+			result.setFailure();
 		}
 		catch (Exception e)
 		{
@@ -202,44 +237,41 @@ public class WbCopy
 			result.setFailure();
 			result.addMessage(ExceptionUtil.getDisplay(e));
 		}
-		
-		try
+		finally
 		{
-			if (sourceCon.getId().startsWith("Wb-Copy"))
+			try
 			{
-				sourceCon.disconnect();
+				if (sourceCon.getId().startsWith("Wb-Copy"))
+				{
+					sourceCon.disconnect();
+				}
 			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("WbCopy.execute()", "Errro when disconnecting source connection",e);
-			result.addMessage(ExceptionUtil.getDisplay(e));
+			catch (Exception e)
+			{
+				LogMgr.logError("WbCopy.execute()", "Errro when disconnecting source connection",e);
+				result.addMessage(ExceptionUtil.getDisplay(e));
+			}
+
+			try
+			{
+				if (targetCon.getId().startsWith("Wb-Copy"))
+				{
+					targetCon.disconnect();
+				}
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("WbCopy.execute()", "Errro when disconnecting target connection",e);
+				result.addMessage(ExceptionUtil.getDisplay(e));
+			}
 		}
 
-		try
-		{
-			if (targetCon.getId().startsWith("Wb-Copy"))
-			{
-				targetCon.disconnect();
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("WbCopy.execute()", "Errro when disconnecting target connection",e);
-			result.addMessage(ExceptionUtil.getDisplay(e));
-		}
-		this.addWarnings(result);
-		this.addErrors(result);
-		long rows = copier.getAffectedRow();
-		String msg = rows + " " + ResourceMgr.getString("MsgCopyNumRows");
-		result.addMessage(msg);
-		
 		return result;
 	}
 
 	private ColumnIdentifier[] parseColumns()
 	{
-		String cols = cmdLine.getValue("columns");
+		String cols = cmdLine.getValue(PARAM_COLUMNS);
 		List l = StringUtil.stringToList(cols, ",");
 		int count = l.size();
 		ColumnIdentifier[] result = new ColumnIdentifier[count];
@@ -250,10 +282,10 @@ public class WbCopy
 		}
 		return result;
 	}
-	
+
 	private Map parseMapping()
 	{
-		String cols = cmdLine.getValue("columnmapping");
+		String cols = cmdLine.getValue(PARAM_COLUMNS);
 		List l = StringUtil.stringToList(cols, ",");
 		int count = l.size();
 		HashMap mapping = new HashMap(count);
@@ -263,14 +295,12 @@ public class WbCopy
 			int pos = s.indexOf("/");
 			String scol = s.substring(0, pos).trim();
 			String tcol = s.substring(pos + 1).trim();
-			//ColumnIdentifier sid = new ColumnIdentifier(scol);
-			//ColumnIdentifier tid = new ColumnIdentifier(tcol);
 			mapping.put(scol, tcol);
 		}
 		return mapping;
 	}
-	
-	
+
+
 	private void addWarnings(StatementRunnerResult result)
 	{
 		String[] err = copier.getWarnings();
@@ -279,7 +309,7 @@ public class WbCopy
 			result.addMessage(err[i]);
 		}
 	}
-	
+
 	private void addErrors(StatementRunnerResult result)
 	{
 		String[] warn = copier.getErrors();
@@ -293,7 +323,7 @@ public class WbCopy
 			result.addMessage("");
 		}
 	}
-	
+
 	public void done()
 	{
 		super.done();

@@ -753,6 +753,7 @@ public class SqlFormatter
 			if (t.isSeparator() && verb.equals(")"))
 			{
 				bracketCount --;
+				this.appendText(")");
 			}
 			else if (t.isComment())
 			{
@@ -776,7 +777,6 @@ public class SqlFormatter
 					if (t == null) return null;
 					continue;
 				}
-
 				if (!lastToken.isSeparator()) this.appendText(' ');
 				this.appendText(t.getContents());
 			}
@@ -1350,11 +1350,11 @@ public class SqlFormatter
 //           "and bug_status not in ('CLOSED','RESOLVED') \n" +
 //           "and reporter = 47 \n";
 //				String sql = "SELECT * from v_$test";
-			String sql = "SELECT 1 FROM my_TABLE WHERE (bv_user_profile.number_login=0 OR bv_user_profile.number_login = 'tEEt')";
+//			String sql = "SELECT 1 FROM my_TABLE WHERE (bv_user_profile.number_login=0 OR bv_user_profile.number_login = 'tEEt')";
 
-//			String sql = "SELECT \n t1.col1, nvl(to_upper(bla,1),1), 'xxx'||col4, col3 " +
-//			" \nfrom test_table t1, table2 t2\nWHERE t2.col=1 " +
-//			" and col2 = 'f';\n";
+			String sql = "SELECT \n t1.col1, nvl(to_upper(bla,1),1), 'xxx'||col4, col3 " +
+			" \nfrom test_table t1, table2 t2\nWHERE t2.col=1 " +
+			" AND  (substr(partner_cbn.cust_base_no, 1, 2) = opg_country.opg_cbn  OR  col_header.country IN ('GER','EUR','ITA') AND substr(partner_cbn.cust_base_no, 1, 4) IN ('N883','N882') )  ";
 //			String sql = "select * \nfrom (select * from person) AS t \nwhere nr2 = 2;";
 //			String sql = "insert into test values ('x', 2);commit;";
 //			String sql = "SELECT * from test, table22";

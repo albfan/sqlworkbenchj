@@ -7,6 +7,7 @@ package workbench.resource;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 
 import java.util.HashMap;
 import java.util.MissingResourceException;
@@ -88,10 +89,65 @@ public class ResourceMgr
 	private static ResourceBundle resources = ResourceBundle.getBundle("workbench/resource/wbstrings");
 	private static HashMap        images = new HashMap();
 
+	private static String BUILD_INFO;
+	
 	private ResourceMgr()
 	{
 	}
 
+	public static String getBuildInfo()
+	{
+		if (BUILD_INFO == null)
+		{
+			BUILD_INFO = getString("TxtBuild") + " " + getString("TxtBuildNumber") + " (" + getString("TxtBuildDate") + ")";
+		}
+		return BUILD_INFO;
+	}
+	public static java.util.Date getBuildDate()
+	{
+		String builddate = getString("TxtBuildDate");
+		// running from the dev environment --> build date is now!
+		if ("@BUILD_DATE@".equals(builddate)) return new java.util.Date();
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		java.util.Date result = null;
+		try
+		{
+			result = format.parse(builddate);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("ResourceMgr.getBuildDate()", "Error when parsing build date!", e);
+			result = new java.util.Date();
+		}
+		return result;
+	}
+	
+	public static boolean isDevBuild()
+	{
+		String nr = getString("TxtBuildNumber");
+		char c = nr.charAt(0);
+		return (c == '[' || c == '@');
+	}
+	
+	public static int getBuildNumber()
+	{
+		String nr = getString("TxtBuildNumber");
+		if ("@BUILD_NUMBER@".equals(nr)) return Integer.MAX_VALUE;
+		if (nr.startsWith("[")) return -1;
+		
+		int result = -1;
+		
+		try
+		{
+			result = Integer.parseInt(nr);
+		}
+		catch (Exception e)
+		{
+			result = -1;
+		}
+		return result;
+	}
+	
 	public static String getString(String aKey)
 	{
 		try

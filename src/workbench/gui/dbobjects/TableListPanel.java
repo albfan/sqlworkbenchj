@@ -561,7 +561,7 @@ public class TableListPanel
 		}
 		
 		final Container parent = this.getParent();
-		new Thread()
+		Thread t = new Thread()
 		{
 			public void run()
 			{
@@ -601,7 +601,10 @@ public class TableListPanel
 					setBusy(false);
 				}
 			}
-		}.start();
+		};
+		t.setDaemon(true);
+		t.setName("TableListPanel retrieve() thread");
+		t.start();
 	}
 
 	public void setVisible(boolean aFlag)
@@ -786,7 +789,7 @@ public class TableListPanel
 			tableDefinition.setModel(model, true);
 			tableDefinition.adjustColumns();
 			TableColumnModel colmod = tableDefinition.getColumnModel();
-			TableColumn col = colmod.getColumn(DbMetadata.COLUMN_IDX_TABLE_DEFINITION_TYPE_ID);
+			TableColumn col = colmod.getColumn(DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
 			col.setCellRenderer(new SqlTypeRenderer());
 
 			// remove the last two columns...
@@ -808,13 +811,16 @@ public class TableListPanel
 	private void startRetrieveCurrentPanel()
 	{
 		final Component caller = this;
-		new Thread()
+		Thread t = new Thread()
 		{
 			public void run()
 			{
 				retrieveCurrentPanel();
 			}
-		}.start();
+		};
+		t.setDaemon(true);
+		t.setName("TableListPanel RetrievePanel Thread");
+		t.start();
 	}
 
 	private void retrieveCurrentPanel()

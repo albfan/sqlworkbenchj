@@ -54,7 +54,7 @@ public class DbExplorerPanel
 	private ProcedureListPanel procs;
 	//private PersistenceGeneratorPanel generator;
 	private JComboBox schemaSelector;
-	private JComboBox catalogSelector;
+	//private JComboBox catalogSelector;
 	private JLabel schemaLabel;
 	private JPanel selectorPanel;
 	private JLabel catalogLabel;
@@ -295,13 +295,8 @@ public class DbExplorerPanel
 		try
 		{
 			String schema = (String)schemaSelector.getSelectedItem();
-			String cat = null;
-			if (catalogSelector != null)
-			{
-				cat = (String)catalogSelector.getSelectedItem();
-			}
-			tables.setCatalogAndSchema(cat, schema, retrieve);
-			procs.setCatalogAndSchema(cat, schema, retrieve);
+			tables.setCatalogAndSchema(null, schema, retrieve);
+			procs.setCatalogAndSchema(null, schema, retrieve);
 		}
 		catch (Exception ex)
 		{

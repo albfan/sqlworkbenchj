@@ -127,7 +127,7 @@
               <Connection code="WbManager.getSettings().getStandardFont()" type="code"/>
             </Property>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;TxtBuild&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getBuildInfo()" type="code"/>
             </Property>
           </Properties>
           <Constraints>

@@ -531,6 +531,15 @@ public class Settings
 		this.props.setProperty("workbench.sql.enable_dbms_output", Boolean.toString(aFlag));
 	}
 
+	public int getDbmsOutputDefaultBuffer()
+	{
+		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.dbms_output.defaultbuffer", "-1"));
+	}
+	public void setDbmsOutputDefaultBuffer(int aSize)
+	{
+		this.props.setProperty("workbench.sql.dbms_output.defaultbuffer", Integer.toString(aSize));
+	}
+	
 	public String getLastImportDateFormat()
 	{
 		return this.props.getProperty("workbench.import.dateformat", this.getDefaultDateFormat());
@@ -687,6 +696,7 @@ public class Settings
 	}
 	public void storeWindowSize(Component target, String id)
 	{
+		if (target == null) return;
 		Dimension d = target.getSize();
 		if (id == null) id = target.getClass().getName();
 		this.setWindowSize(id, d.width, d.height);
@@ -784,10 +794,16 @@ public class Settings
 	{
 		this.props.setProperty("workbench.editor.tabwidth", Integer.toString(aWidth));
 	}
+	
+	public String getLastConnection(String key)
+	{
+		if (key == null) return this.props.getProperty("connection.last");
+		return this.props.getProperty(key);
+	}
 
 	public String getLastConnection()
 	{
-		return this.props.getProperty("connection.last");
+		return this.getLastConnection("connection.last");
 	}
 
 	public void setLastConnection(String aName)
@@ -1068,6 +1084,11 @@ public class Settings
 		this.props.setProperty("workbench.db.debugger", Boolean.toString(aFlag));
 	}
 
+	public boolean getProcessHsqlShutdown()
+	{
+		return "true".equals(this.props.getProperty("workbench.db.hsqldb.closeOnShutdown", "false"));
+	}
+	
   public boolean getShowBuildInConnectionId()
   {
 		return "true".equals(this.props.getProperty("workbench.db.connection-id.showbuild", "false"));
@@ -1088,6 +1109,11 @@ public class Settings
 		this.props.setProperty("workbench.gui.profiles.divider", Integer.toString(aValue));
 	}
 
+	public void setProperty(String aProperty, String aValue)
+	{
+		this.props.setProperty(aProperty, aValue);
+	}
+	
 	public void setProperty(String aClass, String aProperty, String aValue)
 	{
 		this.props.setProperty(aClass + "." + aProperty.toLowerCase(), aValue);

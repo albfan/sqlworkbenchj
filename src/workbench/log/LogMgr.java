@@ -178,7 +178,7 @@ public class LogMgr
 		else buff = new StringBuffer(500);
 
 		buff.append(aType);
-		for (int i=aType.length(); i < 5; i++) buff.append(" ");
+		if (aType.length() == 4) buff.append(" ");
 		buff.append(" ");
 		buff.append(getTimeString());
 		buff.append(" - ");
@@ -215,6 +215,7 @@ public class LogMgr
 				String msg = th.getMessage();
 				if (msg != null)
 				{
+					buff.append(": ");
 					buff.append(msg);
 					buff.append(StringUtil.LINE_TERMINATOR);
 				}

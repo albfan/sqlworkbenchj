@@ -244,7 +244,7 @@ public class DeleteScriptGenerator
 			String col = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
 			if (aColname.equals(col))
 			{
-				String t = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_TYPE_ID);
+				String t = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
 				int type = 0;
 				try { type = Integer.parseInt(t); } catch (Exception e) {}
 				return type;
