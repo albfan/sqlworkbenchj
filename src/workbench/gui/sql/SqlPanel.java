@@ -12,11 +12,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -24,13 +25,13 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+
 import workbench.WbManager;
 import workbench.db.DataSpooler;
 import workbench.db.DeleteScriptGenerator;
 import workbench.db.WbConnection;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
-
 import workbench.gui.actions.*;
 import workbench.gui.components.*;
 import workbench.gui.editor.AnsiSQLTokenMarker;
@@ -40,7 +41,6 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
-import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
@@ -64,13 +64,14 @@ public class SqlPanel
 
 	EditorPanel editor;
 	private DwPanel data;
+	private SqlHistory sqlHistory;
+	
 	private JTextArea log;
 	private JTabbedPane resultTab;
 	private JSplitPane contentPanel;
 	private boolean threadBusy;
 	private boolean suspended = true;
 	private Thread background;
-	private ArrayList statementHistory;
 	private int currentHistoryEntry = -1;
 	private int maxHistorySize = 10;
 
@@ -172,6 +173,7 @@ public class SqlPanel
 		this.data.getTable().setMinColWidth(WbManager.getSettings().getMinColumnWidth());
 		this.makeReadOnly();
 		this.checkResultSetActions();
+		this.initStatementHistory();
 
 		Settings s = WbManager.getSettings();
 		s.addFontChangedListener(this);
@@ -186,19 +188,54 @@ public class SqlPanel
 	public void initDefaults()
 	{
 		int loc = this.getHeight() / 2;
+		if (loc <= 5) loc = 200;
 		this.contentPanel.setDividerLocation(loc);
-		this.initStatementHistory(null);
 	}
+
+	public void saveSettings()
+	{
+//		Settings s = WbManager.getSettings();
+//		int location = this.contentPanel.getDividerLocation();
+//		int last = this.contentPanel.getLastDividerLocation();
+//		s.setSqlDividerLocation(this.internalId, location);
+//		s.setLastSqlDividerLocation(this.internalId, last);
+//		String fname = this.editor.getCurrentFileName();
+//		s.setEditorFile(this.internalId, fname);
+//		//if (!s.getRestoreLastWorkspace()) this.saveSqlStatementHistory();
+	}
+
+	public void saveSettings(Properties props)
+	{
+		int location = this.contentPanel.getDividerLocation();
+		int last = this.contentPanel.getLastDividerLocation();
+		props.setProperty("tab" + (this.internalId - 1) + ".divider.location", Integer.toString(location));
+		props.setProperty("tab" + (this.internalId - 1) + ".divider.lastlocation", Integer.toString(last));
+	}
+
 
 	public void restoreSettings()
 	{
-		int loc = WbManager.getSettings().getSqlDividerLocation(this.internalId);
-		if (loc <= 0) loc = 200;
-		this.contentPanel.setDividerLocation(loc);
-		loc = WbManager.getSettings().getLastSqlDividerLocation(this.internalId);
-		if (loc > 0) this.contentPanel.setLastDividerLocation(loc);
-		this.readStatementHistory();
-		this.restoreLastEditorFile();
+//		int loc = WbManager.getSettings().getSqlDividerLocation(this.internalId);
+//		if (loc <= 0) loc = 200;
+//		this.contentPanel.setDividerLocation(loc);
+//		loc = WbManager.getSettings().getLastSqlDividerLocation(this.internalId);
+//		if (loc > 0) this.contentPanel.setLastDividerLocation(loc);
+	}
+
+	public void restoreSettings(Properties props)
+	{
+		try
+		{
+			int loc = Integer.parseInt(props.getProperty("tab" + (this.internalId - 1) + ".divider.location", "0"));
+			if (loc <= 0) loc = 200;
+			this.contentPanel.setDividerLocation(loc);
+			loc = Integer.parseInt(props.getProperty("tab" + (this.internalId - 1) + ".divider.lastlocation", "0"));
+			if (loc > 0) this.contentPanel.setLastDividerLocation(loc);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("SqlPanel.restoreSettings()", "Error when restore settings", e);
+		}
 	}
 
 	public WbToolbar getToolbar()
@@ -244,6 +281,21 @@ public class SqlPanel
 			this.toolbar.updateUI();
 			this.toolbar.repaint();
 		}
+	}
+
+	public boolean readFile(String aFilename)
+	{
+		boolean result = false;
+		File f = new File(aFilename);
+		if (!f.exists()) return false;
+
+		if (this.editor.readFile(f))
+		{
+			this.fireFilenameChanged();
+			this.selectEditor();
+			result = true;
+		}
+		return result;
 	}
 
 	public boolean openFile()
@@ -295,6 +347,13 @@ public class SqlPanel
 			}
 		}
 		return false;
+	}
+
+	public void clearSqlStatements()
+	{
+		if (this.sqlHistory != null) this.sqlHistory.clear();
+		this.editor.setText("");
+		this.checkStatementActions();
 	}
 
 	public boolean closeFile(boolean emptyEditor)
@@ -368,7 +427,8 @@ public class SqlPanel
 
 		this.editor.addPopupMenuItem(this.executeSelected, true);
 		this.editor.addPopupMenuItem(this.executeAll, false);
-
+		this.editor.addPopupMenuItem(this.executeCurrent, false);
+		
 		TextPopup pop = (TextPopup)this.editor.getRightClickPopup();
 
 		a = new FileOpenAction(this);
@@ -491,9 +551,9 @@ public class SqlPanel
 		action = new CleanJavaCodeAction(this.editor);
 		this.actions.add(action);
 
-		action = new SaveSqlHistoryAction(this);
-		action.setCreateMenuSeparator(true);
-		this.actions.add(action);
+//		action = new SaveSqlHistoryAction(this);
+//		action.setCreateMenuSeparator(true);
+//		this.actions.add(action);
 
 		this.toolbarActions.add(this.findAction);
 		this.toolbarActions.add(this.findAgainAction);
@@ -710,66 +770,40 @@ public class SqlPanel
 		this.background.start();
 	}
 
-	private void readStatementHistory()
+//	public void readStatementHistory()
+//	{
+//		try
+//		{
+//			ArrayList history = null;
+//			File f = new File(this.historyFilename + ".xml");
+//			if (f.exists())
+//			{
+//				Object data = WbPersistence.readObject(this.historyFilename + ".xml");
+//				if (data instanceof ArrayList)
+//				{
+//					history = (ArrayList)data;
+//				}
+//			}
+//			else
+//			{
+//				f = new File(this.historyFilename + ".txt");
+//				if (f.exists())
+//				{
+//					history = StringUtil.readStringList(this.historyFilename + ".txt");
+//				}
+//			}
+//			this.initStatementHistory(history);
+//		}
+//		catch (Exception e)
+//		{
+//			LogMgr.logWarning(this, "Error reading the statement history (" + e.getMessage() + ")");
+//			this.initStatementHistory(null);
+//		}
+//	}
+
+	public void initStatementHistory()
 	{
-		if (this.statementHistory != null) return;
-
-		boolean readFromFile = true;
-
-		if (WbManager.getSettings().getRestoreLastWorkspace())
-		{
-			String filename = WbManager.getSettings().getLastWorkspaceFile();
-			if (filename != null)
-			{
-				File f = new File(filename);
-				if (f.exists())
-				{
-					readFromFile = false;
-				}
-			}
-			else
-			{
-				readFromFile = true;
-			}
-		}
-
-		if (!readFromFile)
-		{
-			this.initStatementHistory(null);
-			return;
-		}
-
-		try
-		{
-			ArrayList history = null;
-			File f = new File(this.historyFilename + ".xml");
-			if (f.exists())
-			{
-				Object data = WbPersistence.readObject(this.historyFilename + ".xml");
-				if (data instanceof ArrayList)
-				{
-					history = (ArrayList)data;
-				}
-			}
-			else
-			{
-				f = new File(this.historyFilename + ".txt");
-				if (f.exists())
-				{
-					history = StringUtil.readStringList(this.historyFilename + ".txt");
-				}
-			}
-			this.initStatementHistory(history);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning(this, "Error reading the statement history (" + e.getMessage() + ")");
-			this.initStatementHistory(null);
-		}
-	}
-
-	public void initStatementHistory(ArrayList data)
-	{
+		/*
 		if (data != null)
 		{
 			this.statementHistory = data;
@@ -781,124 +815,85 @@ public class SqlPanel
 				this.editor.setCaretPosition(0);
 				this.editor.clearUndoBuffer();
 			}
-			if (WbManager.getSettings().getRestoreLastWorkspace())
-			{
-				this.removeHistoryFile();
-			}
 		}
-		else
+		else if (this.statementHistory == null)
 		{
 			this.statementHistory = new ArrayList(this.maxHistorySize);
 			this.currentHistoryEntry = -1;
 		}
+		*/
+		this.sqlHistory = new SqlHistory(this.maxHistorySize);
 		this.checkStatementActions();
-	}
-
-	private void checkHistorySize()
-	{
-		if (this.statementHistory == null) return;
-		while (this.statementHistory.size() >= this.maxHistorySize)
-		{
-			this.statementHistory.remove(0);
-		}
 	}
 
 	private void checkStatementActions()
 	{
-		int count;
-		if (this.statementHistory == null)
-		{
-			count = 0;
-		}
-		else
-		{
-			count = this.statementHistory.size();
-		}
-		if (count == 0)
+		if (this.sqlHistory == null)
 		{
 			this.nextStmtAction.setEnabled(false);
 			this.prevStmtAction.setEnabled(false);
 		}
 		else
 		{
-			this.nextStmtAction.setEnabled(this.currentHistoryEntry < (count - 1));
-			this.prevStmtAction.setEnabled(this.currentHistoryEntry > 0);
+			this.nextStmtAction.setEnabled(this.sqlHistory.hasNext());
+			this.prevStmtAction.setEnabled(this.sqlHistory.hasPrevious());
 		}
 	}
 
-	public void showNextStatement()
+	public synchronized void showNextStatement()
 	{
-		this.showStatementFromHistory(this.currentHistoryEntry + 1);
-	}
-
-	public void showPrevStatement()
-	{
-		this.showStatementFromHistory(this.currentHistoryEntry - 1);
-	}
-
-	private synchronized void showStatementFromHistory(int anIndex)
-	{
-		if (anIndex < 0) return;
-		if (anIndex >= this.statementHistory.size()) return;
-		this.currentHistoryEntry = anIndex;
-		String stmt = this.statementHistory.get(this.currentHistoryEntry).toString();
-		this.editor.setText(stmt);
-		this.editor.setCaretPosition(0);
+		this.sqlHistory.showNext(this.editor);
 		this.checkStatementActions();
 	}
 
-	public void removeHistoryFile()
+	public synchronized void showPrevStatement()
 	{
-		File f = new File(this.historyFilename + ".txt");
-		if (f.exists())
-		{
-			f.delete();
-		}
+		this.sqlHistory.showPrevious(editor);
+		this.checkStatementActions();
 	}
+	
+	public void showCurrentHistoryStatement()
+	{
+		this.sqlHistory.showCurrent(editor);
+		this.checkStatementActions();
+	}
+	
+	public SqlHistory getSqlHistory()
+	{
+		return this.sqlHistory;
+	}
+	
 
-	public void saveSettings()
-	{
-		Settings s = WbManager.getSettings();
-		int location = this.contentPanel.getDividerLocation();
-		int last = this.contentPanel.getLastDividerLocation();
-		s.setSqlDividerLocation(this.internalId, location);
-		s.setLastSqlDividerLocation(this.internalId, last);
-		String fname = this.editor.getCurrentFileName();
-		s.setEditorFile(this.internalId, fname);
-		if (!s.getRestoreLastWorkspace()) this.saveSqlStatementHistory();
-	}
+//	private synchronized void showStatementFromHistory(int anIndex)
+//	{
+//		if (anIndex < 0) return;
+//		if (anIndex >= this.statementHistory.size()) return;
+//		this.currentHistoryEntry = anIndex;
+//		String stmt = this.statementHistory.get(this.currentHistoryEntry).toString();
+//		this.editor.setText(stmt);
+//		this.editor.setCaretPosition(0);
+//		this.checkStatementActions();
+//	}
 
-	public void saveSqlStatementHistory()
-	{
-		this.storeInHistory(this.editor.getText());
-		try
-		{
-			if (this.statementHistory.size() > 0)
-			{
-				StringUtil.writeStringList(this.statementHistory, this.historyFilename + ".txt");
-			}
-			File f = new File(this.historyFilename + ".xml");
-			if (f.exists())
-			{
-				f.delete();
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning(this, "Error storing statement history", e);
-		}
-	}
+//	public void removeHistoryFile()
+//	{
+//		File f = new File(this.historyFilename + ".txt");
+//		if (f.exists())
+//		{
+//			f.delete();
+//		}
+//	}
 
 	public String getHistoryFilename()
 	{
 		return this.historyFilename + ".txt";
 	}
 
-	public ArrayList getStatementHistory()
-	{
-		this.storeInHistory(this.editor.getText());
-		return this.statementHistory;
-	}
+//	public ArrayList getStatementHistory()
+//	{
+//		this.storeStatementInHistory(this.editor.getText());
+//		return this.sqlHistory;
+//	}
 
 	private void restoreLastEditorFile()
 	{
@@ -913,9 +908,14 @@ public class SqlPanel
 		}
 	}
 
+	public String getCurrentFileName()
+	{
+		return this.editor.getCurrentFileName();
+	}
+	
 	public void setStatementText(String aStatement)
 	{
-		this.storeInHistory(this.editor.getText());
+		this.storeStatementInHistory();
 		if (this.editor.getCurrentFile() != null) this.editor.saveCurrentFile();
 		this.editor.closeFile(true);
 		this.editor.setText(aStatement);
@@ -969,22 +969,9 @@ public class SqlPanel
 		notify();
 	}
 
-	public synchronized void storeInHistory(String aStatement)
+	public synchronized void storeStatementInHistory()
 	{
-		if (this.statementHistory == null) return;
-		if (aStatement == null) return;
-
-		// if this statement is already in the history
-		// delete the old one, and put it at first position
-		int index = this.statementHistory.indexOf(aStatement);
-		if (index >= 0)
-		{
-			this.statementHistory.remove(index);
-		}
-
-		this.checkHistorySize();
-		this.statementHistory.add(aStatement);
-		this.currentHistoryEntry = this.statementHistory.size() - 1;
+		this.sqlHistory.addContent(editor);
 	}
 
 	public void cancelExecution()
@@ -1055,7 +1042,8 @@ public class SqlPanel
 			sql = this.editor.getStatement();
 		}
 
-		this.storeInHistory(sql);
+		this.storeStatementInHistory();
+		this.checkStatementActions();
 
 		if (runCurrentCommand)
 		{
@@ -1071,7 +1059,7 @@ public class SqlPanel
 		this.clearStatusMessage();
 		this.setCancelState(false);
 		this.checkResultSetActions();
-		
+
 		if (sql != null && sql.trim().toLowerCase().startsWith("shutdown"))
 		{
 			String url = this.dbConnection.getUrl();
@@ -1200,7 +1188,7 @@ public class SqlPanel
 			boolean onErrorAsk = true;
 
 			this.data.scriptStarting();
-			
+
 			for (int i=0; i < count; i++)
 			{
 				StringBuffer logmsg = new StringBuffer(200);
@@ -1519,4 +1507,5 @@ public class SqlPanel
 		}
 	}
 
+	
 }

@@ -25,8 +25,10 @@ public class LoadWorkspaceAction extends WbAction
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtLoadWorkspace"));
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtLoadWorkspace"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_FILE);
+		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_WORKSPACE);
 		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+		this.putValue(Action.SMALL_ICON, null);
+		
 	}
 
 	public void actionPerformed(ActionEvent e)

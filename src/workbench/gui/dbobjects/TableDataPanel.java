@@ -3,36 +3,17 @@
  */
 package workbench.gui.dbobjects;
 
+import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Window;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyListener;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.List;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JCheckBox;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
+
+import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import workbench.WbManager;
 
 import workbench.db.WbConnection;
-import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.DataStoreTableModel;
@@ -42,6 +23,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+
 
 
 /**
@@ -291,7 +273,11 @@ public class TableDataPanel
 		long rows = this.showRowCount();
 		if (this.autoRetrieve.isSelected() && includeData)
 		{
-			if (this.warningThreshold > 0 && rows > this.warningThreshold && this.warningThreshold < this.getMaxRows())
+			int max = this.getMaxRows();
+			if ( this.warningThreshold > 0 && 
+			     rows > this.warningThreshold &&
+			     (max > this.warningThreshold || max == 0) 
+				 )
 			{
 				String msg = ResourceMgr.getString("MsgDataDisplayWarningThreshold");
 				msg = msg.replaceAll("%rows%", Long.toString(rows));
@@ -305,6 +291,7 @@ public class TableDataPanel
 	public void reload()
 	{
 		this.reset();
+		this.showRowCount();
 		this.retrieve();
 	}
 

@@ -72,6 +72,11 @@ public class LogMgr
 	private static int loglevel = 4;
 
 
+	public static boolean isDebug()
+	{
+		return (loglevel == 3);
+	}
+	
 	public static void shutdown()
 	{
 		if (outputOpened && outputfile != null)

@@ -125,6 +125,8 @@ public class DbExplorerPanel
 
 	private void initSearchPanel()
 	{
+		if (this.searchPanel != null) return;
+
 		this.searchPanel = new TableSearchPanel(tables);
 
 		if (this.dbConnection != null)

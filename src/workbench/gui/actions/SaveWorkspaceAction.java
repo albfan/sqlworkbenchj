@@ -27,6 +27,7 @@ public class SaveWorkspaceAction extends WbAction
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtSaveWorkspace"));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_FILE);
 		this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+		this.putValue(Action.SMALL_ICON, null);
 	}
 
 	public void actionPerformed(ActionEvent e)

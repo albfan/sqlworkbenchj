@@ -15,9 +15,12 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+import workbench.gui.sql.SqlHistory;
+import workbench.log.LogMgr;
 import workbench.util.StringUtil;
 
 /**
@@ -33,6 +36,7 @@ public class WbWorkspace
 	private ArrayList entries;
 	
 	private boolean isReadOnly;
+	private WbProperties tabInfo = new WbProperties();
 	
 	public WbWorkspace(String archiveName, boolean createNew)
 		throws IOException
@@ -56,12 +60,21 @@ public class WbWorkspace
 			while (e.hasMoreElements())
 			{
 				ZipEntry entry = (ZipEntry)e.nextElement();
-				this.entries.add(entry);
+				String filename = entry.getName().toLowerCase();
+				
+				if (filename.endsWith("txt"))
+				{
+					this.entries.add(entry);
+				}
+				else if (filename.endsWith("properties"))
+				{
+					this.readTabInfo(entry);
+				}
 			}
 		}
 	}
 
-	public void addHistoryEntry(String aFilename, ArrayList data)
+	public void addHistoryEntry(String aFilename, SqlHistory history)
 		throws IOException
 	{
 		if (this.isReadOnly) throw new IllegalStateException("Workspace is opened for reading. addHistoryEntry() may not be called");
@@ -70,7 +83,7 @@ public class WbWorkspace
 		String filename = f.getName();
 		ZipEntry entry = new ZipEntry(filename);
 		this.zout.putNextEntry(entry);
-		StringUtil.writeStringList(data, this.zout);
+		history.writeToStream(zout);
 		zout.closeEntry();
 	}
 
@@ -81,16 +94,20 @@ public class WbWorkspace
 		return this.entries.size();
 	}
 	
-	public ArrayList getHistoryData(int anIndex)
+	public void readHistoryData(int anIndex, SqlHistory history)
 		throws IOException
 	{
 		if (!this.isReadOnly) throw new IllegalStateException("Workspace is opened for writing. Entry count is not available");
 		if (anIndex > this.entries.size()) throw new IndexOutOfBoundsException("Index " + anIndex + " is great then " + (this.entries.size() - 1));
 		ZipEntry e = (ZipEntry)this.entries.get(anIndex);
 		InputStream in = this.archive.getInputStream(e);
-		ArrayList data = StringUtil.readStringList(in);
-		
-		return data;
+		history.readFromStream(in);
+		return;
+	}
+	
+	public Properties getSettings()
+	{
+		return this.tabInfo;
 	}
 	
 	public void close()
@@ -98,29 +115,79 @@ public class WbWorkspace
 	{
 		if (this.zout != null)
 		{
+			if (this.tabInfo != null && this.tabInfo.size() > 0)
+			{
+				try
+				{
+					ZipEntry entry = new ZipEntry("tabinfo.properties");
+					this.zout.putNextEntry(entry);
+					this.tabInfo.save(this.zout);
+					zout.closeEntry();
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("WbWorkspace.close()", "Could not write tab info!", e);
+				}
+			}
 			this.zout.close();
 		}
+		else if (this.archive != null)
+		{
+			this.archive.close();
+		}
 	}
-	
-	public static void main(String[] args)
+
+	private void readTabInfo(ZipEntry entry)
 	{
 		try
 		{
-			ArrayList data = new ArrayList(10);
-			for (int i=0; i < 10; i++)
-				data.add("statement" + i);
-
-			WbWorkspace w = new WbWorkspace("test.wksp", true);
-			w.addHistoryEntry("file1.txt", data);
-			w.addHistoryEntry("file2.txt", data);
-			w.addHistoryEntry("file3.txt", data);
-			w.close();
-			System.out.println("done.");
+			InputStream in = this.archive.getInputStream(entry);
+			this.tabInfo = new WbProperties();
+			this.tabInfo.load(in);
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("WbWorkspace", "Could not read tab info!", e);
+			this.tabInfo = new WbProperties();
 		}
+	}
+	
+	public void setSelectedTab(int anIndex)
+	{
+		this.tabInfo.setProperty("tab.selected", Integer.toString(anIndex));
+	}
+	
+	public int getSelectedTab()
+	{
+		return StringUtil.getIntValue(this.tabInfo.getProperty("tab.selected", "0"));
+	}
+	
+	public void setTabTitle(int index, String name)
+	{
+		String key = "tab" + index + ".title";
+		this.tabInfo.setProperty(key, name);
+	}
+	
+	public String getTabTitle(int index)
+	{
+		if (this.tabInfo == null) return null;
+		String key = "tab" + index + ".title";
+		String value = (String)this.tabInfo.get(key);
+		return value;
+	}
+	
+	public String getExternalFileName(int tabIndex)
+	{
+		if (this.tabInfo == null) return null;
+		String key = "tab" + tabIndex + ".filename";
+		String value = (String)this.tabInfo.get(key);
+		return value;
+	}
+	
+	public void setExternalFileName(int tabIndex, String filename)
+	{
+		String key = "tab" + tabIndex + ".filename";
+		this.tabInfo.setProperty(key, filename);
 	}
 	
 }

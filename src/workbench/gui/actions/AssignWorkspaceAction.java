@@ -25,7 +25,8 @@ public class AssignWorkspaceAction extends WbAction
 		this.client = aClient;
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtAssignWorkspace"));
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtAssignWorkspace"));
-		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_FILE);
+		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_WORKSPACE);
+		this.putValue(Action.SMALL_ICON, null);
 	}
 
 	public void actionPerformed(ActionEvent e)

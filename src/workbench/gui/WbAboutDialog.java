@@ -13,6 +13,7 @@ import javax.swing.ActionMap;
 import javax.swing.ComponentInputMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
+import workbench.WbManager;
 
 import workbench.gui.actions.EscAction;
 import workbench.resource.ResourceMgr;
@@ -38,8 +39,6 @@ public class WbAboutDialog extends javax.swing.JDialog
 		escAction = new EscAction(this);
 		im.put(escAction.getAccelerator(), escAction.getActionName());
 		am.put(escAction.getActionName(), escAction);
-		
-		//this.contactInformation.addMouseListener(new TextComponentMouseListener());
 	}
 
 	/** This method is called from within the constructor to
@@ -67,8 +66,8 @@ public class WbAboutDialog extends javax.swing.JDialog
 		
 		setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 		setTitle(ResourceMgr.getString("TxtAbout") + " " + ResourceMgr.TXT_PRODUCT_NAME);
+		setFont(new java.awt.Font("Academy Engraved LET", 0, 10));
 		setName("AboutDialog");
-		setResizable(false);
 		addWindowListener(new java.awt.event.WindowAdapter()
 		{
 			public void windowClosing(java.awt.event.WindowEvent evt)
@@ -129,7 +128,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 4);
 		contentPanel.add(labelTitel, gridBagConstraints);
 		
-		labelDesc.setFont(null);
+		labelDesc.setFont(WbManager.getSettings().getStandardFont());
 		labelDesc.setText(ResourceMgr.getString("TxtProductDescription"));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
@@ -139,7 +138,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
 		contentPanel.add(labelDesc, gridBagConstraints);
 		
-		labelVersion.setFont(null);
+		labelVersion.setFont(WbManager.getSettings().getStandardFont());
 		labelVersion.setText(ResourceMgr.getString("TxtBuild"));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
@@ -149,6 +148,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
 		contentPanel.add(labelVersion, gridBagConstraints);
 		
+		labelCopyright.setFont(WbManager.getSettings().getStandardFont());
 		labelCopyright.setText(ResourceMgr.getString("TxtCopyright"));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
@@ -186,6 +186,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 4);
 		contentPanel.add(jLabel2, gridBagConstraints);
 		
+		jdkVersion.setFont(WbManager.getSettings().getStandardFont());
 		jdkVersion.setText(ResourceMgr.getString("TxtJavaVersion") + " " + System.getProperty("java.version"));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
@@ -195,6 +196,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
 		contentPanel.add(jdkVersion, gridBagConstraints);
 		
+		homepageLabel.setFont(WbManager.getSettings().getStandardFont());
 		homepageLabel.setText("<html><u>www.kellerer.org/workbench</u></html>");
 		homepageLabel.addMouseListener(new java.awt.event.MouseAdapter()
 		{
@@ -212,6 +214,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 		gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
 		contentPanel.add(homepageLabel, gridBagConstraints);
 		
+		mailToLabel.setFont(WbManager.getSettings().getStandardFont());
 		mailToLabel.setText("workbench@kellerer.org");
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;

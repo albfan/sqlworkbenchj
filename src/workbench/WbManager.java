@@ -6,20 +6,10 @@
 
 package workbench;
 
-import java.awt.Component;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.Toolkit;
-import java.awt.Window;
+import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Locale;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.LookAndFeel;
-import javax.swing.SwingUtilities;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -35,6 +25,7 @@ import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 import workbench.util.WbCipher;
 import workbench.util.WbNullCipher;
+
 
 /**
  * The main application "controller" for the jWorkbench
@@ -148,7 +139,7 @@ public class WbManager implements FontChangedListener
 			lastDir = fc.getCurrentDirectory().getAbsolutePath();
 			settings.setLastWorkspaceDir(lastDir);
 		}
-		if (replaceConfigDir)
+		if (replaceConfigDir && filename != null)
 		{
 			filename = this.putConfigDirKey(filename);
 		}
@@ -193,6 +184,8 @@ public class WbManager implements FontChangedListener
 		{
 			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
 		}
+		fc.addChoosableFileFilter(ExtensionFileFilter.getXmlFileFilter());
+		
 		fc.setFileFilter(text);
 		String filename = null;
 
@@ -204,26 +197,16 @@ public class WbManager implements FontChangedListener
 		{
 			File fl = fc.getSelectedFile();
 			FileFilter ff = fc.getFileFilter();
-			if (ff == ExtensionFileFilter.getSqlFileFilter())
+			if (ff instanceof ExtensionFileFilter)
 			{
+				ExtensionFileFilter eff = (ExtensionFileFilter)ff;
 				filename = fl.getAbsolutePath();
 
 				String ext = ExtensionFileFilter.getExtension(fl);
 				if (ext.length() == 0)
 				{
 					if (!filename.endsWith(".")) filename = filename + ".";
-					filename = filename + "sql";
-				}
-			}
-			else if (ff == ExtensionFileFilter.getHtmlFileFilter())
-			{
-				filename = fl.getAbsolutePath();
-
-				String ext = ExtensionFileFilter.getExtension(fl);
-				if (ext.length() == 0)
-				{
-					if (!filename.endsWith(".")) filename = filename + ".";
-					filename = filename + "html";
+					filename = filename + eff.getDefaultExtension();
 				}
 			}
 			else

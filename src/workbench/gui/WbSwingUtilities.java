@@ -158,10 +158,15 @@ public class WbSwingUtilities
 	
 	public static String getUserInput(Component caller, String aTitle, String initialValue)
 	{
-		Window parent = SwingUtilities.getWindowAncestor(caller);
+		Component parent = SwingUtilities.getWindowAncestor(caller);
+		
 		final JTextField input = new JTextField();
 		input.setColumns(40);
 		input.setText(initialValue);
+		if (initialValue != null)
+		{
+			input.selectAll();
+		}
 		input.addMouseListener(new TextComponentMouseListener());
 		EventQueue.invokeLater(new Runnable() {
 			public void run()

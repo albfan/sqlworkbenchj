@@ -518,7 +518,7 @@ public class StringUtil
 		return result;
 	}
 
-	private static final String LIST_DELIMITER = "----------- WbStatement -----------";
+	public static final String LIST_DELIMITER = "----------- WbStatement -----------";
 
 	public static ArrayList readStringList(String aFilename)
 		throws IOException

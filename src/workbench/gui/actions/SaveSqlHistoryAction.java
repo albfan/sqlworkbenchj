@@ -27,6 +27,6 @@ public class SaveSqlHistoryAction extends WbAction
 
 	public void actionPerformed(ActionEvent e)
 	{
-		this.client.saveSqlStatementHistory();
+		//this.client.saveSqlStatementHistory();
 	}
 }

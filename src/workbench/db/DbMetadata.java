@@ -7,6 +7,7 @@
 package workbench.db;
 
 import java.io.BufferedInputStream;
+import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -16,6 +17,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -1206,12 +1208,14 @@ public class DbMetadata
 	}
 	public DataStore getForeignKeys(String aCatalog, String aSchema, String aTable)
 	{
-		return this.getKeyList(aCatalog, aSchema, aTable, true);
+		DataStore ds = this.getKeyList(aCatalog, aSchema, aTable, true);
+		return ds;
 	}
 
 	public DataStore getReferencedBy(String aCatalog, String aSchema, String aTable)
 	{
-		return this.getKeyList(aCatalog, aSchema, aTable, false);
+		DataStore ds = this.getKeyList(aCatalog, aSchema, aTable, false);
+		return ds;
 	}
 
 	private DataStore getKeyList(String aCatalog, String aSchema, String aTable, boolean getOwnFk)
@@ -1280,6 +1284,11 @@ public class DbMetadata
 				{
 					schema = "";
 				}
+				String catalog = rs.getString(1);
+				System.out.println("pktable_cat=" + catalog);
+				catalog = rs.getString(5);
+				System.out.println("fktable_cat=" + catalog);
+				
 				int updateAction = rs.getInt(updateActionCol);
 				String updActionDesc = this.getRuleTypeDisplay(updateAction);
 				int deleteAction = rs.getInt(deleteActionCol);
@@ -1443,20 +1452,21 @@ public class DbMetadata
 		// collects all columns from the base table mapped to the
 		// defining foreign key constraing.
 		// The fk name is the key.
-		// to the hashtable. The entry will be a comma
-		// separated list of columns
+		// to the hashtable. The entry will be a HashSet containing the column names
+		// this ensures that each column will only be used once per fk definition
+		// (the postgres driver returns some columns twice!)
 		HashMap fkCols = new HashMap();
 
 		// this hashmap contains the columns of the referenced table
 		HashMap fkTarget = new HashMap();
 
-		// this will contain the
 		HashMap fks = new HashMap();
 
 		String name;
 		String col;
 		String fkCol;
-		String entry;
+		HashSet colList;
+		//String entry;
 
 		for (int i=0; i < count; i++)
 		{
@@ -1464,27 +1474,23 @@ public class DbMetadata
 			name = aFkDef.getValue(i, COLUMN_IDX_FK_DEF_FK_NAME).toString();
 			col = aFkDef.getValue(i, COLUMN_IDX_FK_DEF_COLUMN_NAME).toString();
 			fkCol = aFkDef.getValue(i, COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME).toString();
-			entry = (String)fkCols.get(name);
-			if (entry == null)
+			colList = (HashSet)fkCols.get(name);
+			if (colList == null)
 			{
-				fkCols.put(name, col);
+				colList = new HashSet();
+				fkCols.put(name, colList);
 			}
-			else
+			colList.add(col);
+			
+			colList = (HashSet)fkTarget.get(name);
+			if (colList == null)
 			{
-				entry = entry + "," + col;
-				fkCols.put(name, entry);
+				colList = new HashSet();
+				fkTarget.put(name, colList);
 			}
-			entry = (String)fkTarget.get(name);
-			if (entry == null)
-			{
-				fkTarget.put(name, fkCol);
-			}
-			else
-			{
-				entry = entry + "," + fkCol;
-				fkTarget.put(name, entry);
-			}
+			colList.add(fkCol);
 		}
+		
 		// now put the real statements together
 		Iterator names = fkCols.keySet().iterator();
 		while (names.hasNext())
@@ -1497,13 +1503,17 @@ public class DbMetadata
 				// first time we hit this FK definition in this loop
 				stmt = template;
 			}
+			String entry = null;
 			stmt = StringUtil.replace(stmt, TABLE_NAME_PLACEHOLDER, aTable);
 			stmt = StringUtil.replace(stmt, FK_NAME_PLACEHOLDER, name);
-			entry = (String)fkCols.get(name);
+			colList = (HashSet)fkCols.get(name);
+			entry = this.setToList(colList);
 			stmt = StringUtil.replace(stmt, COLUMNLIST_PLACEHOLDER, entry);
-			entry = (String)fkTarget.get(name);
+			colList = (HashSet)fkTarget.get(name);
+			entry = this.setToList(colList);
+			
 			StringTokenizer tok = new StringTokenizer(entry, ",");
-			StringBuffer colList = new StringBuffer(30);
+			StringBuffer colListBuffer = new StringBuffer(30);
 			String targetTable = null;
 			boolean first = true;
 			while (tok.hasMoreTokens())
@@ -1516,16 +1526,16 @@ public class DbMetadata
 				}
 				if (!first)
 				{
-					colList.append(',');
+					colListBuffer.append(',');
 				}
 				else
 				{
 					first = false;
 				}
-				colList.append(col.substring(pos + 1));
+				colListBuffer.append(col.substring(pos + 1));
 			}
 			stmt = StringUtil.replace(stmt, FK_TARGET_TABLE_PLACEHOLDER, targetTable);
-			stmt = StringUtil.replace(stmt, FK_TARGET_COLUMNS_PLACEHOLDER, colList.toString());
+			stmt = StringUtil.replace(stmt, FK_TARGET_COLUMNS_PLACEHOLDER, colListBuffer.toString());
 			fks.put(name, stmt);
 		}
 		StringBuffer fk = new StringBuffer(500);
@@ -1539,6 +1549,25 @@ public class DbMetadata
 		return fk;
 	}
 
+	private String setToList(HashSet aSet)
+	{
+		StringBuffer result = new StringBuffer(aSet.size() * 10);
+		Iterator itr = aSet.iterator();
+		boolean first = true;
+		while (itr.hasNext())
+		{
+			if (first)
+			{
+				first = false;
+			}
+			else
+			{
+				result.append(", ");
+			}
+			result.append((String)itr.next());
+		}
+		return result.toString();
+	}
 	public StringBuffer getIndexSource(String aTable, DataStore aIndexDef)
 	{
 		if (aIndexDef == null) return StringUtil.EMPTY_STRINGBUFFER;

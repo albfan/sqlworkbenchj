@@ -23,6 +23,7 @@ public class ExtensionFileFilter
 	private static FileFilter sqlFileFilter;
 	private static FileFilter jarFileFilter;
 	private static FileFilter htmlFileFilter;
+	private static FileFilter xmlFileFilter;
 
 	private static FileFilter wkspFileFilter;
 	
@@ -31,6 +32,7 @@ public class ExtensionFileFilter
 	public static final String SQL_EXT = "sql";
 	public static final String TXT_EXT = "txt";
 	public static final String WORKSPACE_EXT = "wksp";
+	public static final String XML_EXT = "xml";
 	
 	private boolean ignoreCase = true;
 
@@ -46,6 +48,11 @@ public class ExtensionFileFilter
 		this.ignoreCase = ignoreCase;
 	}
 
+	public String getDefaultExtension()
+	{
+		return (String)this.extensions.get(0);
+	}
+	
 	public static String getExtension(File f)
 	{
 		return getExtension(f.getName());
@@ -78,6 +85,12 @@ public class ExtensionFileFilter
 	{
 		String ext = getExtension(aFilename);
 		return "html".equalsIgnoreCase(ext);
+	}
+	
+	public static boolean hasXmlExtension(String aFilename)
+	{
+		String ext = getExtension(aFilename);
+		return XML_EXT.equalsIgnoreCase(ext);
 	}
 	
 	public boolean accept(File f)
@@ -124,7 +137,7 @@ public class ExtensionFileFilter
 		if (sqlFileFilter == null)
 		{
 			ArrayList ext = new ArrayList();
-			ext.add("sql");
+			ext.add(SQL_EXT);
 			String desc = ResourceMgr.getString("TxtFileFilterSql");
 			sqlFileFilter = new ExtensionFileFilter(desc, ext, true);
 		}
@@ -136,11 +149,23 @@ public class ExtensionFileFilter
 		if (textFileFilter == null)
 		{
 			ArrayList ext = new ArrayList();
-			ext.add("txt");
+			ext.add(TXT_EXT);
 			String desc = ResourceMgr.getString("TxtFileFilterText");
 			textFileFilter = new ExtensionFileFilter(desc, ext, true);
 		}
 		return textFileFilter;
+	}
+
+	public static FileFilter getXmlFileFilter()
+	{
+		if (xmlFileFilter == null)
+		{
+			ArrayList ext = new ArrayList();
+			ext.add(XML_EXT);
+			String desc = ResourceMgr.getString("TxtFileFilterXml");
+			xmlFileFilter = new ExtensionFileFilter(desc, ext, true);
+		}
+		return xmlFileFilter;
 	}
 	
 	public static FileFilter getJavaFileFilter()

@@ -834,6 +834,80 @@ public class DataStore
 		return true;
 	}
 	
+	public String getDataAsXml()
+	{
+		return this.getDataAsXml("table", "row", "column");
+	}
+	
+	public String getDataAsXml(String tableTag, String rowTag, String colTag)
+	{
+		int count = this.getRowCount();
+		if (count == 0) return "";
+		StringBuffer xml = new StringBuffer(count * 1000);
+
+		String updateTable = this.getUpdateTable();
+		String indent = null;
+		boolean hasTable = false;
+		if (updateTable != null && updateTable.length() > 0)
+		{
+			xml.append("<table name=\"");
+			xml.append(updateTable);
+			xml.append("\">");
+			xml.append(StringUtil.LINE_TERMINATOR);
+			indent = "  ";
+			hasTable = true;
+		}
+		
+		for (int row=0; row < count; row++)
+		{
+			xml.append(this.getRowDataAsXml(row, rowTag, colTag, indent));
+		}
+		
+		if (hasTable)
+		{
+			xml.append("</table>");
+			xml.append(StringUtil.LINE_TERMINATOR);
+		}
+		return xml.toString();
+	}
+
+	public StringBuffer getRowDataAsXml(int aRow)
+	{
+		return this.getRowDataAsXml(aRow, "table", "row", "column");
+	}
+	public StringBuffer getRowDataAsXml(int aRow, String aRowTag, String aColTag, String anIndent)
+	{
+		boolean indent = (anIndent != null && anIndent.length() > 0);
+		int colCount = this.getColumnCount();
+		StringBuffer xml = new StringBuffer(colCount * 100);
+		if (indent) xml.append(anIndent);
+		xml.append("<");
+		xml.append(aRowTag);
+		xml.append(">");
+		xml.append(StringUtil.LINE_TERMINATOR);
+		for (int c=0; c < colCount; c ++)
+		{
+			String value = this.getValueAsString(aRow, c);
+			if (indent) xml.append(anIndent);
+			xml.append("  <");
+			xml.append(aColTag);
+			xml.append(" name=\"");
+			xml.append(this.getColumnName(c));
+			xml.append("\" null=\"" + (value == null) + "\">");
+			if (value != null) xml.append(value);
+			xml.append("</");
+			xml.append(aColTag);
+			xml.append(">");
+			xml.append(StringUtil.LINE_TERMINATOR);
+		}
+		if (indent) xml.append(anIndent);
+		xml.append("</");
+		xml.append(aRowTag);
+		xml.append(">");
+		xml.append(StringUtil.LINE_TERMINATOR);
+		return xml;
+	}
+	
 	public String getDataAsHtmlTable()
 	{
 		int count = this.getRowCount();

@@ -50,8 +50,9 @@ public class DataSpooler
 {
 	public static final int EXPORT_SQL = 1;
 	public static final int EXPORT_TXT = 2;
-	public static final int EXPORT_ORALOADER = 3; // export in Oracle Loader format
-	public static final int EXPORT_BCP = 4; // export in MS SQL Server bcp format
+	public static final int EXPORT_XML = 3;
+	public static final int EXPORT_ORALOADER = 4; // export in Oracle Loader format
+	public static final int EXPORT_BCP = 5; // export in MS SQL Server bcp format
 	
 	private WbConnection dbConn;
 	private String sql;
@@ -210,11 +211,13 @@ public class DataSpooler
 	
 	public void setTextTimestampFormat(String aFormat) { this.dateTimeFormat = aFormat; }
 	public String getTextTimestampFormat() { return this.dateTimeFormat; }
-	
+
+	public void setOutputTypeXml() { this.exportType = EXPORT_XML; }
 	public void setOutputTypeText() { this.exportType = EXPORT_TXT; }
 	public void setOutputTypeSqlInsert() { this.exportType = EXPORT_SQL; }
 	public boolean isOutputTypeText() { return this.exportType == EXPORT_TXT; }
 	public boolean isOutputTypeSqlInsert() { return this.exportType == EXPORT_SQL; }
+	public boolean isOutputTypeSqlXml() { return this.exportType == EXPORT_XML; }
 	
 	public void setOutputFilename(String aFilename) { this.outputfile = aFilename; }
 	public String getOutputFilename() { return this.outputfile; }
@@ -351,6 +354,10 @@ public class DataSpooler
 				ds.useUpdateTable(this.tableName);
 			}
 		}
+		else if (this.exportType == EXPORT_XML)
+		{
+			if (this.tableName != null) ds.useUpdateTable(this.tableName);
+		}
 		
 		int row = 0;
 
@@ -455,6 +462,18 @@ public class DataSpooler
 				{
 					row = ds.addRow(rs);
 					line = ds.getRowDataAsSqlInsert(row, StringUtil.LINE_TERMINATOR, this.dbConn, this.chrFunc, this.concatString);
+					ds.discardRow(row);
+					if (line != null)
+					{
+						pw.write(line.toString());
+						pw.newLine();
+						pw.newLine();
+					}
+				}
+				else if (this.exportType == EXPORT_XML)
+				{
+					row = ds.addRow(rs);
+					line = ds.getRowDataAsXml(row);
 					ds.discardRow(row);
 					if (line != null)
 					{

@@ -105,8 +105,11 @@ public class WbSpoolCommand
 			spooler.setChrFunction(cmdLine.getValue("charfunc"));
 			spooler.setConcatString(cmdLine.getValue("concat"));
 			if (table != null) spooler.setTableName(table);
-			
-			
+		}
+		else if ("xml".equalsIgnoreCase(type))
+		{
+			spooler.setOutputTypeXml();
+			if (table != null) spooler.setTableName(table);
 		}
 		else
 		{

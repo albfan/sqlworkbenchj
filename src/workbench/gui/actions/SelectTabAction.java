@@ -89,6 +89,11 @@ public class SelectTabAction extends WbAction
 		this.initName();
 	}
 	
+	public void setName(String aName)
+	{
+		this.putValue(Action.NAME, aName + " &" + Integer.toString(this.index+1));
+	}
+	
 	public void actionPerformed(ActionEvent e)
 	{
 		if (client != null)

@@ -26,6 +26,7 @@ public class SaveAsNewWorkspaceAction extends WbAction
 		this.putValue(Action.NAME, ResourceMgr.getString("MnuTxtSaveAsNewWorkspace"));
 		this.putValue(Action.SHORT_DESCRIPTION, ResourceMgr.getDescription("MnuTxtSaveAsNewWorkspace"));
 		this.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_FILE);
+		this.putValue(Action.SMALL_ICON, null);
 	}
 
 	public void actionPerformed(ActionEvent e)

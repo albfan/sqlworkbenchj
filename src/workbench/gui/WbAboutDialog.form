@@ -6,8 +6,10 @@
     <Property name="title" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
       <Connection code="ResourceMgr.getString(&quot;TxtAbout&quot;) + &quot; &quot; + ResourceMgr.TXT_PRODUCT_NAME" type="code"/>
     </Property>
+    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+      <Font name="Academy Engraved LET" size="10" style="0"/>
+    </Property>
     <Property name="name" type="java.lang.String" value="AboutDialog"/>
-    <Property name="resizable" type="boolean" value="false"/>
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
@@ -107,7 +109,7 @@
         <Component class="javax.swing.JLabel" name="labelDesc">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="null" type="code"/>
+              <Connection code="WbManager.getSettings().getStandardFont()" type="code"/>
             </Property>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="ResourceMgr.getString(&quot;TxtProductDescription&quot;)" type="code"/>
@@ -122,7 +124,7 @@
         <Component class="javax.swing.JLabel" name="labelVersion">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="null" type="code"/>
+              <Connection code="WbManager.getSettings().getStandardFont()" type="code"/>
             </Property>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="ResourceMgr.getString(&quot;TxtBuild&quot;)" type="code"/>
@@ -136,6 +138,9 @@
         </Component>
         <Component class="javax.swing.JLabel" name="labelCopyright">
           <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="WbManager.getSettings().getStandardFont()" type="code"/>
+            </Property>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="ResourceMgr.getString(&quot;TxtCopyright&quot;)" type="code"/>
             </Property>
@@ -177,6 +182,9 @@
         </Component>
         <Component class="javax.swing.JLabel" name="jdkVersion">
           <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="WbManager.getSettings().getStandardFont()" type="code"/>
+            </Property>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="ResourceMgr.getString(&quot;TxtJavaVersion&quot;) + &quot; &quot; + System.getProperty(&quot;java.version&quot;)" type="code"/>
             </Property>
@@ -189,6 +197,9 @@
         </Component>
         <Component class="javax.swing.JLabel" name="homepageLabel">
           <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="WbManager.getSettings().getStandardFont()" type="code"/>
+            </Property>
             <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;u&gt;www.kellerer.org/workbench&lt;/u&gt;&lt;/html&gt;"/>
           </Properties>
           <Events>
@@ -202,6 +213,9 @@
         </Component>
         <Component class="javax.swing.JLabel" name="mailToLabel">
           <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="WbManager.getSettings().getStandardFont()" type="code"/>
+            </Property>
             <Property name="text" type="java.lang.String" value="workbench@kellerer.org"/>
           </Properties>
           <Constraints>

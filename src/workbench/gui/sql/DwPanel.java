@@ -283,6 +283,8 @@ public class DwPanel
 		try
 		{
 			long start, end, sqlTime = 0;
+			long execTime = 0;
+			
 			this.clearContent();
 			
 			boolean repeatLast = aSql.equals(this.sql);
@@ -316,6 +318,8 @@ public class DwPanel
 					newData.setSourceConnection(this.dbConnection);
 					newData.checkUpdateTable();
 				}
+				end = System.currentTimeMillis();
+				execTime = (end - start);
 				
 				if (repeatLast)
 				{
@@ -361,7 +365,11 @@ public class DwPanel
 				}
 				this.lastMessage = msg.toString();
 			}
-			this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgExecTime") + " " + (((double)sqlTime) / 1000.0) + "s";
+			if (LogMgr.isDebug())
+			{
+				this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgSqlVerbTime") + " " + (((double)sqlTime) / 1000.0) + "s";
+			}
+			this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s";
 		}
 		catch (SQLException sqle)
 		{

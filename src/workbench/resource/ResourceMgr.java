@@ -64,6 +64,7 @@ public class ResourceMgr
 	public static final String		IMG_DOWN = "Down";
 	public static final String		IMG_FIND = "Find";
 
+	public static final String    MNU_TXT_WORKSPACE = "MnuTxtWorkspace";
 	public static final String    MNU_TXT_FILE = "MnuTxtFile";
 	public static final String    MNU_TXT_SQL = "MnuTxtSQL";
 	public static final String    MNU_TXT_EDIT = "MnuTxtEdit";

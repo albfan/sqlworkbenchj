@@ -1003,6 +1003,31 @@ extends JTable
 		WbSwingUtilities.showDefaultCursor(this.getParent());
 	}
 
+	public void saveAsXml(String aFilename)
+	{
+		if (this.dwModel == null) return;
+
+		PrintWriter out = null;
+
+		WbSwingUtilities.showWaitCursor(this.getParent());
+		try
+		{
+			out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(aFilename)));
+			DataStore ds = this.getDataStore();
+			String contents = ds.getDataAsXml();
+			out.print(contents);
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError(this, "Could not save data", th);
+		}
+		finally
+		{
+			try { out.close(); } catch (Throwable th) {}
+		}
+		WbSwingUtilities.showDefaultCursor(this.getParent());
+	}
+	
 	public void saveAsAscii(String aFilename)
 	{
 		if (this.dwModel == null) return;
@@ -1036,29 +1061,23 @@ extends JTable
 			String filename = WbManager.getInstance().getExportFilename(this, sql);
 			if (filename != null)
 			{
-				String ext = ExtensionFileFilter.getExtension(new File(filename));
-
+				//String ext = ExtensionFileFilter.getExtension(new File(filename));
 				final String name = filename;
 				if (ExtensionFileFilter.hasSqlExtension(filename))
 				{
-					new Thread(new Runnable()
-					{
-						public void run() { saveAsSqlInsert(name); }
-					}).start();
+					new Thread() { public void run() { saveAsSqlInsert(name); } }.start();
 				}
 				else if (ExtensionFileFilter.hasTxtExtension(filename))
 				{
-					new Thread(new Runnable()
-					{
-						public void run() { saveAsAscii(name); }
-					}).start();
+					new Thread() { public void run() { saveAsAscii(name); }}.start();
 				}
 				else if (ExtensionFileFilter.hasHtmlExtension(filename))
 				{
-					new Thread(new Runnable()
-					{
-						public void run() { saveAsHtml(name); }
-					}).start();
+					new Thread() { public void run() { saveAsHtml(name); }}.start();
+				}
+				else if (ExtensionFileFilter.hasXmlExtension(filename))
+				{
+					new Thread() { public void run() { saveAsXml(name); }}.start();
 				}
 			}
 		}

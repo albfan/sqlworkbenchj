@@ -29,6 +29,7 @@ import workbench.db.DbMetadata;
 import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
 import workbench.util.StringUtil;
+import workbench.util.WbProperties;
 
 
 /**
@@ -42,7 +43,7 @@ public class Settings
 	public static final String MSGLOG_FONT_KEY = "msglog";
 	public static final String DATA_FONT_KEY = "data";
 
-	private Properties props;
+	private WbProperties props;
 	private Font standardFont;
 	private Font editorFont;
 	private Font msgLogFont;
@@ -54,7 +55,7 @@ public class Settings
 	public Settings()
 	{
 		if (WbManager.trace) System.out.println("Settings.<init> - start");
-		this.props = new Properties();
+		this.props = new WbProperties();
 		this.filename = System.getProperty("workbench.settings.file", null);
 		fillDefaults();
 
@@ -71,7 +72,6 @@ public class Settings
 		}
 	
 		if (WbManager.trace) System.out.println("Settings.<init> - using configDir: " + configDir);
-		LogMgr.logInfo("Settings.<init>", "Using configDir: " + configDir);
 		String sep = System.getProperty("file.separator");
 		if (!this.configDir.endsWith(sep))
 		{
@@ -108,6 +108,8 @@ public class Settings
       System.err.println("Error initializing Log system!");
       e.printStackTrace(System.err);
     }
+
+		LogMgr.logInfo("Settings.<init>", "Using configDir: " + configDir);
 
 		if (WbManager.trace) System.out.println("Setting server lists for MetaData");
 		DbMetadata.setServersWhichNeedReconnect(this.getCancelWithReconnectServers());
@@ -150,34 +152,10 @@ public class Settings
 
 	public void saveSettings()
 	{
+		this.removeObsolete();
 		try
 		{
-			Object[] keys = this.props.keySet().toArray();
-			Arrays.sort(keys);
-			BufferedWriter bw = new BufferedWriter(new FileWriter(this.filename));
-			String value = null;
-			String lastKey = null;
-			String key = null;
-			for (int i=0; i < keys.length; i++)
-			{
-				key = (String)keys[i];
-
-				if (lastKey != null)
-				{
-					String k1, k2;
-					k1 = getFirstTwoSections(lastKey);
-					k2 = getFirstTwoSections(key);
-					if (!k1.equals(k2))
-					{
-						bw.newLine();
-					}
-				}
-				value = StringUtil.replace(this.props.get(key).toString(), "\\", "\\\\");
-				bw.write(key + "=" + value);
-				bw.newLine();
-				lastKey = key;
-			}
-			bw.close();
+			this.props.saveToFile(this.filename);
 		}
 		catch (IOException e)
 		{
@@ -185,29 +163,26 @@ public class Settings
 		}
 	}
 
-	private String getFirstTwoSections(String aString)
+	private void removeObsolete()
 	{
-		int pos1 = aString.indexOf(".");
-		String result;
-		if (pos1 > -1)
+		try
 		{
-			int pos2 = aString.indexOf(".", pos1 + 1);
-			if (pos2 > -1)
+			// remove settings which are no longer needed
+			this.props.remove("workbench.sql.lasttab");
+			for (int i=0; i < 10; i++)
 			{
-				result = aString.substring(0, pos2);
+				this.props.remove("workbench.gui.sql.lastdivider" + i);
+				this.props.remove("workbench.gui.sql.divider" + i);
 			}
-			else
-			{
-				result = aString.substring(0, pos1);
-			}
-			return result;
+			this.props.remove("workbench.workspace.lastfile");
+			this.props.remove("workbench.workspace.restorelast");
 		}
-		else
+		catch (Throwable e)
 		{
-			return aString;
+			LogMgr.logWarning("Settings.removeObsolete()", "Error when removing obsolete properties", e);
 		}
 	}
-
+	
 	private void fillDefaults()
 	{
 		if (WbManager.trace) System.out.println("Setting.fillDefaults() - start");
@@ -375,30 +350,6 @@ public class Settings
 	public void setLastImportQuoteChar(String aChar)
 	{
 		this.props.setProperty("workbench.import.quotechar", aChar);
-	}
-	
-	public void setRestoreLastWorkspace(boolean aFlag)
-	{
-		this.props.setProperty("workbench.workspace.restorelast", Boolean.toString(aFlag));
-	}
-	
-	public boolean getRestoreLastWorkspace()
-	{
-		return "true".equals(this.props.getProperty("workbench.workspace.restorelast", "false"));
-	}
-	
-	public String getLastWorkspaceFile()
-	{
-		String file = this.props.getProperty("workbench.workspace.lastfile", null);
-		if (file == null) return null;
-		if (file.trim().length() == 0) return null;
-		return file;
-	}
-
-	public void setLastWorkspaceFile(String aFilename)
-	{
-		if (aFilename == null) aFilename = "";
-		this.props.setProperty("workbench.workspace.lastfile", aFilename);
 	}
 	
 	public String getLastWorkspaceDir()
@@ -606,16 +557,6 @@ public class Settings
 	public void setEditorTabWidth(int aWidth)
 	{
 		this.props.setProperty("workbench.editor.tabwidth", Integer.toString(aWidth));
-	}
-
-	public int getLastSqlTab()
-	{
-		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.lasttab", "0"));
-	}
-
-	public void setLastSqlTab(int anIndex)
-	{
-		this.props.setProperty("workbench.sql.lasttab", Integer.toString(anIndex));
 	}
 
 	public String getLastConnection()

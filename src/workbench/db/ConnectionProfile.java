@@ -327,6 +327,9 @@ public class ConnectionProfile
 		result.setPassword(this.getPassword());
 		result.setUrl(this.url);
 		result.setUsername(this.username);
+		result.setWorkspaceFile(this.workspaceFile);
+		result.setIgnoreDropErrors(this.ignoreDropErrors);
+		result.setUseSeperateConnectionPerTab(this.seperateConnection);
 		result.changed = false;
 		return result;
 	}
