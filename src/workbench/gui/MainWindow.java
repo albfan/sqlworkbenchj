@@ -29,15 +29,16 @@ import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
-import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FileConnectAction;
 import workbench.gui.actions.FileExitAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.profiles.ProfileSelectionDialog;
+import workbench.gui.sql.SqlPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
 
 
 /**
@@ -166,6 +167,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			}
 			toolbar.addSeparator();
 			menuBar.add(this.buildToolsMenu());
+			menuBar.add(this.buildHelpMenu());
 			this.panelMenus.add(menuBar);
 			this.panelToolbars.add(toolbar);
 		}
@@ -322,6 +324,21 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 		this.getRootPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	}
 
+	public JMenu buildHelpMenu()
+	{
+		JMenu result = new JMenu(ResourceMgr.getString("MnuTxtHelp"));
+		JMenuItem item = new JMenuItem(ResourceMgr.getString("MnuTxtHelpContents"));
+		item.putClientProperty("command", "helpContents");
+		item.addActionListener(this);
+		result.add(item);
+		
+		item = new JMenuItem(ResourceMgr.getString("MnuTxtAbout"));
+		item.putClientProperty("command", "helpAbout");
+		item.addActionListener(this);
+		result.add(item);
+		return result;
+	}
+	
 	public JMenu buildToolsMenu()
 	{
 		JMenu result = new JMenu(ResourceMgr.getString("MnuTxtTools"));
@@ -391,6 +408,16 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			else if ("optionsDialog".equals(command))
 			{
 				JOptionPane.showMessageDialog(this, "Not yet implemented. Please edit workbench.settings");
+			}
+			else if ("helpContents".equals(command))
+			{
+				JOptionPane.showMessageDialog(this, "Sorry! Help is not yet available");
+			}
+			else if ("helpAbout".equals(command))
+			{
+				WbAboutDialog about = new WbAboutDialog(this, true);
+				WbSwingUtilities.center(about, this);
+				about.show();
 			}
 		}
 	}

@@ -37,7 +37,7 @@ public class DriverEditorDialog extends javax.swing.JDialog
 		cancelButton = new javax.swing.JButton();
 		dummyPanel = new javax.swing.JPanel();
 
-		setTitle(ResourceMgr.getString("DriverEditorWindowTitle"));
+		setTitle(ResourceMgr.getString("TxtDriverEditorWindowTitle"));
 		setModal(true);
 		setName("DriverEditorDialog");
 		addWindowListener(new java.awt.event.WindowAdapter()
