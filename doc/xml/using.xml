@@ -60,6 +60,10 @@ COMMIT;</programlisting>
 				 <para>As long as at least one statement is running the title of the main window
 				 will be prefixed with the &raquo; sign. Even if the main window is minimized
 				 you can still see if a statement is running by looking at the window title.</para>
+         
+         <para>You can use variables in your SQL statements that are replaced when 
+         the statement is executed. Details on how to use variables can be found in
+         the chapter <xref linkend="using-variables"/>.</para>
 			</section>
 
       <section id="execute-dml">
@@ -377,16 +381,33 @@ Done.</programlisting>
       that doesn&#39;t return any information, the original values of all
       columns in the result set will be used to restrict <literal>DELETE</literal>&#39;s and
       <literal>UPDATE</literal>&#39;s</para>
+      
+      <para>After a <literal>SELECT</literal> statement has finished, &wb-productname; analyzes
+      the SQL statement and tries to find out which tables are part of the result.
+      If only one table was used in the <literal>FROM</literal> list, the primary key
+      definition for that table is automatically retrieved from the server. On slow
+      network connections this can take up so several seconds. If you don't need the automatic
+      retrieval, you can turn it off in the <xref linkend="profile-ignore-disable-auto-edit">
+      connection profile</xref>.
+      </para>
+      <para>
+      The adavantage of the automatic check is, that you do not need to enter the
+      edit mode manually. As soon as you start editing the data, &wb-productname; will
+      automatically start the edit mode (if a single update table could be found)
+      </para>
 
       <para>To enter the Edit mode, choose
       <menuchoice><guimenu>Data</guimenu><guimenuitem>Enable Data Edit</guimenuitem></menuchoice>
       from the main menu. The toolbar icon will indicate the edit mode by
       being pressed down (The pressed down look is dependent on the
-      Look &#38; Feel). Now the data in the result set can be edited. To
-      insert a new row choose
+      Look &#38; Feel).</para>
+      <para>Now the data in the result set can be edited. To insert a new row choose
       <menuchoice><guimenu>Data</guimenu><guimenuitem>Insert row</guimenuitem></menuchoice>. The new row will be
       inserted prior the current row. To delete the current row, choose
-      <menuchoice><guimenu>Data</guimenu><guimenuitem>Delete row</guimenuitem></menuchoice>.</para>
+      <menuchoice><guimenu>Data</guimenu><guimenuitem>Delete row</guimenuitem></menuchoice>.
+      To create a copy of the currently selected row choose
+      <menuchoice><guimenu>Data</guimenu><guimenuitem>Copy row</guimenuitem></menuchoice>
+      </para>
 
       <para>The changes will not be saved to the database until you choose
       <menuchoice><guimenu>Data</guimenu><guimenuitem>Save</guimenuitem></menuchoice>.
@@ -399,7 +420,7 @@ Done.</programlisting>
 			regardless of the autocommit setting of the connection profile.</para></note>
 
       <para>Once you issue a new <literal>SELECT</literal> statement the edit mode will be
-      disabled. If you try to enable the edit mode for a result set where more
+      turned off again. If you try to enable the edit mode for a result set where more
       than one table is involved, you will be prompted for the table that should
       be updated.</para>
     </section>

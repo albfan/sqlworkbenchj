@@ -29,21 +29,21 @@ public class ValueConverter
 														"dd.MM.yyyy HH:mm:ss",
 														"MM/dd/yy HH:mm:ss",
 														"MM/dd/yyyy HH:mm:ss",
-														"yyyy-MM-dd", 
+														"yyyy-MM-dd",
 														"dd.MM.yyyy",
 														"MM/dd/yy",
 														"MM/dd/yyyy"
 													};
-	
+
 	private String defaultDateFormat;
 	private String defaultTimestampFormat;
 	private char decimalCharacter = '.';
 	private SimpleDateFormat formatter = new SimpleDateFormat();
-	
+
 	public ValueConverter()
 	{
 	}
-	
+
 	public ValueConverter(String aDateFormat, String aTimeStampFormat)
 	{
 		this.setDefaultDateFormat(aDateFormat);
@@ -54,35 +54,38 @@ public class ValueConverter
 	{
 		this.defaultDateFormat = aFormat;
 	}
-	
+
 	public void setDefaultTimestampFormat(String aFormat)
 	{
 		this.defaultTimestampFormat = aFormat;
 	}
-	
+
 	public void setDecimalCharacter(char aChar)
 	{
 		this.decimalCharacter = aChar;
 	}
-	
+
 	public Object convertValue(Object aValue, int type)
 		throws Exception
 	{
 		if (aValue == null) return null;
-		
+
 		switch (type)
 		{
 			case Types.BIGINT:
+				if (aValue.toString().length() == 0) return null;
 				return new BigInteger(aValue.toString());
 			case Types.INTEGER:
 			case Types.SMALLINT:
 			case Types.TINYINT:
+				if (aValue.toString().length() == 0) return null;
 				return new Integer(aValue.toString());
 			case Types.NUMERIC:
 			case Types.DECIMAL:
 			case Types.DOUBLE:
 			case Types.REAL:
 			case Types.FLOAT:
+				if (aValue.toString().length() == 0) return null;
 				return new BigDecimal(this.adjustDecimalString(aValue.toString()));
 			case Types.CHAR:
 			case Types.VARCHAR:
@@ -91,8 +94,10 @@ public class ValueConverter
 				else
 					return aValue.toString();
 			case Types.DATE:
+				if (aValue.toString().length() == 0) return null;
 				return this.parseDate((String)aValue);
 			case Types.TIMESTAMP:
+				if (aValue.toString().length() == 0) return null;
 				java.sql.Date d = this.parseDate((String)aValue);
 				Timestamp t = new Timestamp(d.getTime());
 				return t;
@@ -105,12 +110,12 @@ public class ValueConverter
 	{
 		return this.defaultDateFormat;
 	}
-	
+
 	public String getTimestampPattern()
 	{
 		return this.defaultTimestampFormat;
 	}
-	
+
   public java.sql.Date parseDate(String aDate)
   {
 		java.util.Date result = null;
@@ -126,7 +131,7 @@ public class ValueConverter
 				result = null;
 			}
 		}
-		
+
 		if (result == null && this.defaultTimestampFormat != null)
 		{
 			this.formatter.applyPattern(this.defaultTimestampFormat);
@@ -156,16 +161,16 @@ public class ValueConverter
 				}
 			}
 		}
-		
+
 		if (result != null)
 		{
 			return new java.sql.Date(result.getTime());
 		}
 		return null;
   }
-	
+
 	//private static Pattern DECIMAL = Pattern.compile("^[-+]?\\d+\\.?\\d*e?\\d*$");
-	
+
 	private String adjustDecimalString(String input)
 	{
 		if (input == null)  return input;
@@ -188,10 +193,10 @@ public class ValueConverter
 				result.append(c);
 			}
 		}
-		
+
 		return result.toString();
 	}
-	
+
 	public static void main(String[] args)
 	{
 		String input = "$1.234,5";
@@ -200,5 +205,5 @@ public class ValueConverter
 		input = convert.adjustDecimalString(input);
 		System.out.println("input=" + input);
 	}
-	
+
 }

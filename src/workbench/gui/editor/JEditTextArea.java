@@ -83,6 +83,7 @@ import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.TextChangeListener;
 import workbench.interfaces.TextSelectionListener;
 import workbench.interfaces.Undoable;
+import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -113,7 +114,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.22 2004-04-07 22:51:56 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.23 2004-08-22 14:38:40 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -266,8 +267,8 @@ public class JEditTextArea
 		int realEndline = this.getSelectionEndLine();
 		int endline = realEndline;
 		int tabSize = this.getTabSize();
-		StringBuffer buff = new StringBuffer(tabSize);
-		for (int i=0; i < tabSize; i++) buff.append(' ');
+		StrBuffer buff = new StrBuffer(tabSize);
+		for (int i=0; i < tabSize; i++) buff.append(" ");
 		String spacer = buff.toString();
 
 		int pos = this.getSelectionEnd(endline) - this.getLineStartOffset(endline);
@@ -320,28 +321,6 @@ public class JEditTextArea
 	private int lastSearchPos = -1;
 	private boolean lastSearchOptionWholeWords;
 
-	private static final String REGEX_SPECIAL_CHARS = "\\[](){}.*+?$^|";
-
-	private String quoteRegexMeta(String str)
-	{
-		if (str.length() == 0)
-		{
-			return "";
-		}
-		int len = str.length();
-		StringBuffer buf = new StringBuffer(len + 5);
-		for (int i = 0; i < len; i++)
-		{
-			char c = str.charAt(i);
-			if (REGEX_SPECIAL_CHARS.indexOf(c) != -1)
-			{
-				buf.append('\\');
-			}
-			buf.append(c);
-		}
-		return buf.toString();
-	}
-
 	public int findText(String anExpression, boolean ignoreCase)
 	{
 		return this.findText(anExpression, ignoreCase, false, true);
@@ -350,7 +329,7 @@ public class JEditTextArea
 	protected String getSearchExpression(String anExpression, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 	{
 		String regex = anExpression;
-		String quoted = this.quoteRegexMeta(anExpression);
+		String quoted = StringUtil.quoteRegexMeta(anExpression);
 
 		if (!useRegex)
 		{
@@ -362,12 +341,12 @@ public class JEditTextArea
 			char c = anExpression.charAt(0);
 			// word boundary dos not work if the expression starts with
 			// a special Regex character. So in that case, we'll just ignore it
-			if (REGEX_SPECIAL_CHARS.indexOf(c) == -1)
+			if (StringUtil.REGEX_SPECIAL_CHARS.indexOf(c) == -1)
 			{
 				regex = "\\b" + regex;
 			}
 			c = anExpression.charAt(anExpression.length() - 1);
-			if (REGEX_SPECIAL_CHARS.indexOf(c) == -1)
+			if (StringUtil.REGEX_SPECIAL_CHARS.indexOf(c) == -1)
 			{
 				regex = regex + "\\b";
 			}
@@ -1967,7 +1946,7 @@ public class JEditTextArea
 			String selection = getSelectedText();
 
 			int repeatCount = inputHandler.getRepeatCount();
-			StringBuffer buf = new StringBuffer();
+			StrBuffer buf = new StrBuffer();
 			for(int i = 0; i < repeatCount; i++)
 				buf.append(selection);
 

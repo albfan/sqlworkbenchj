@@ -135,17 +135,4 @@ public class ReplaceCriteriaPanel extends JPanel
 	{
 	}
 
-	public static void main(String[] args)
-	{
-		try
-		{
-			WbManager.getInstance().initSettings();
-			ReplaceCriteriaPanel p = new ReplaceCriteriaPanel(null);
-			p.showReplaceDialog(p);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
 }

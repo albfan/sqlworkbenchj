@@ -195,9 +195,15 @@ public class ProcedureListPanel
 		this.currentSchema = aSchema;
 		this.currentCatalog = aCatalog;
 		if (this.isVisible() && retrieve)
+		{
 			this.retrieve();
+			this.procList.requestFocusInWindow();
+		}
 		else
+		{
 			this.shouldRetrieve = true;
+		}
+
 	}
 
 	public void retrieveIfNeeded()

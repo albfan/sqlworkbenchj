@@ -158,5 +158,46 @@ and  sysobjects.type = &apos;TR&apos;</string>
     </void> 
    </object> 
   </void> 
+  <void method="put"> 
+   <string>Cloudscape</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>
+SELECT 'CREATE TRIGGER ' || trg.triggername || '\n  '
+       || case when trg.type ='A' then 'AFTER'
+          else 'BEFORE' end
+       || ' '
+       || case when trg.event = 'D' then 'DELETE' 
+            else case when trg.event = 'I' then 'INSERT'
+                 else case when trg.event = 'U' THEN 'UPDATE' end
+            end
+          end
+       || case when trg.referencedcolumns is not null then ' OF ' || trg.referencedcolumns else '' end 
+       || ' ON ' || t.tablename || '\n' 
+       || case when trg.referencingnew = 'true' then '  REFERENCING NEW AS ' || trg.newreferencingname 
+          else case when trg.referencingold = 'true' then '  REFERENCING OLD AS ' || trg.oldreferencingname end
+          end
+       || '\n'
+       || case when trg.type = 'S' then '  FOR EACH STATEMENT '
+               else '  FOR EACH ROW' end
+       || ' MODE DB2SQL\n\n'
+       || trg.triggerdefinition
+from sys.systriggers trg, sys.systables t, sys.sysschemas s
+where trg.tableid = t.tableid
+and   t.schemaid = s.schemaid
+     </string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>trg.triggername</string> 
+    </void> 
+    <void property="useUpperCase"> 
+     <boolean>true</boolean> 
+    </void> 
+    <void property="schemaField"> 
+     <string>s.schemaname</string> 
+    </void> 
+   </object> 
+  </void> 
+  
  </object>
 </java>

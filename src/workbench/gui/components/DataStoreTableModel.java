@@ -33,7 +33,8 @@ public class DataStoreTableModel
 	private boolean showStatusColumn = false;
 	private int statusOffset = 0;
 	public static final String NOT_AVAILABLE = "(n/a)";
-
+	private int lockColumn = -1;
+	
 	// used for sorting the model
 	private boolean sortAscending = true;
 	private int sortColumn = -1;
@@ -50,7 +51,7 @@ public class DataStoreTableModel
 		return this.dataCache;
 	}
 
-	public synchronized void setDataStore(DataStore newData)
+	public void setDataStore(DataStore newData)
 	{
 		this.dispose();
 		this.dataCache = newData;
@@ -115,17 +116,20 @@ public class DataStoreTableModel
 	 *	The status column will display an indicator if the row has
 	 *  been modified or was inserted
 	 */
-	public synchronized void setShowStatusColumn(boolean aFlag)
+	public void setShowStatusColumn(boolean aFlag)
 	{
 		if (aFlag == this.showStatusColumn) return;
-		this.showStatusColumn = aFlag;
-		if (this.showStatusColumn)
+		synchronized (this)
 		{
-			this.statusOffset = 1;
-		}
-		else
-		{
-			this.statusOffset = 0;
+			this.showStatusColumn = aFlag;
+			if (this.showStatusColumn)
+			{
+				this.statusOffset = 1;
+			}
+			else
+			{
+				this.statusOffset = 0;
+			}
 		}
 		this.fireTableStructureChanged();
 	}
@@ -327,11 +331,29 @@ public class DataStoreTableModel
 	public boolean isCellEditable(int row, int column)
 	{
 		if (this.showStatusColumn)
+		{
 			return (column != 0);
+		}
+		else if (this.lockColumn > -1)
+		{
+			return (column != lockColumn && this.allowEditing);
+		}
 		else
+		{
 			return this.allowEditing;
+		}
 	}
 
+	public void clearLockedColumn()
+	{
+		this.lockColumn = -1;
+	}
+	
+	public void setLockedColumn(int column)
+	{
+		this.lockColumn = column;
+	}
+	
 	public void setAllowEditing(boolean aFlag)
 	{
 		this.allowEditing = aFlag;

@@ -11,6 +11,7 @@
 		to copy data between two systems. With the DataPumper no intermediate
 		files are necessary. Especially with large tables this can be an advantage.
 		</para>
+		
 		<para>
   	To open the DataPumper, select <menuchoice><guimenu>Tools</guimenu><guimenuitem>DataPumper</guimenuitem></menuchoice>
   	</para>
@@ -28,6 +29,10 @@
 		<para><note>The DataPumper can also be started as a stand-alone application - without the
 		main window - by specifying -datapumper=true in the command line when starting &wb-productname;.
 		</note></para>
+		<para>When opening the DatPumper from the main window, the main window's current connection
+		will be used as the initial source connection. You can disable the automatic connection upon
+		startup with the property <literal>workbench.datapumper.autoconnect</literal> in the <filename>workbench.settings</filename> file. 
+		</para>
 	</section>
 
 	<section id="data-pumper-connecting">
@@ -48,11 +53,10 @@
 		connect to the database. Connecting to the target database works similar. Simply
 		click on the ellipsis next to the target profile box.</para>
 
-		<!--
 		<para>The dropdown for the target table includes an entry labelled "(Create new table)". For details
 		on how to create a new table during the copy process please refer to the
 		<link linkend="data-pumper-advanced-tasks">advanced tasks</link> section.</para>
-		-->
+
 		<para>After source and target connection are established you can specify the tables and
 		define the column mapping between the tables.</para>
 	</section>
@@ -125,25 +129,39 @@
 			row 50, row 100, row 150 and after the last row.</para>
 		</section>
 		
+		<section id="data-pumper-batchupdate">
+			<title>Batch execution</title>
+			<para>If the JDBC driver supports batch updates, you can enable the use of batch updates with 
+			this checkbox. The checkbox will be disabled, if the JDBC driver does not support batch updates,
+			or if a combined update mode (insert,update, update,insert) is selected.
+			
+			</para>
+			<para>Batch execution is only available if either INSERT or UPDATE mode is selected.</para>
+		</section>
+		
 		<section id="data-pumper-update-mode">
       <title>Update mode</title>
       <para>Just like the <link linkend="command-import">IMPORT</link> and
       <link linkend="command-copy">COPY</link> commands, the data pumper can
       optionally update the data in the target table. Select the approriate
-      update strategy from the <literal>Mode</literal> drop down. The <literal>UPDATE</literal>
-      command will use the key columns defined in the column mapper to generate the <literal>UPDATE</literal>
-      command. If you do not specify key columns, &wb-productname; will try to retrieve the
-      primary key definition from the target table during the copy process.
+      update strategy from the <literal>Mode</literal> drop down. The DataPumper
+      will use the key columns defined in the column mapper to generate the <literal>UPDATE</literal>
+      command. When using update you have to select at least one key column.
+			</para>
+      <para>You cannot use the update mode, if you select <emphasis role="strong">only</emphasis> key columns,
+      The values from the source are used to build up the <literal>WHERE</literal> clause for the 
+      <literal>UPDATE</literal> statement. If ony key columns are defined, then there would be nothing to 
+      update.
       </para>
-        <para>
-          For maximum performance, choose the update strategy that will result in a succssful
-          first statement more often. As a rule of thumb:
-       		<itemizedlist>
-  			    <listitem><para>Use <literal>-mode=insert,upadte</literal>, if you expect more rows to be inserted then updated.</para></listitem>
-  			    <listitem><para>Use <literal>-mode=update,insert</literal>, if you expect more rows to be updated then inserted.</para></listitem>
-  		    </itemizedlist>
-        </para>
-      </section>
+      <para>
+        For maximum performance, choose the update strategy that will result in a succssful
+        first statement more often. As a rule of thumb:
+     		<itemizedlist>
+			    <listitem><para>Use <literal>-mode=insert,upadte</literal>, if you expect more rows to be inserted then updated.</para></listitem>
+			    <listitem><para>Use <literal>-mode=update,insert</literal>, if you expect more rows to be updated then inserted.</para></listitem>
+		    </itemizedlist>
+      </para>
+    </section>
 
 	</section>
 
@@ -159,7 +177,6 @@
 			selected, the field cannot be edited.</para>
 		</section>
 
-		<!--
 		<section id="create-target-table">
 			<title>Creating the target table</title>
 			<para>You can create the target table "on the fly" by selecting
@@ -187,7 +204,7 @@
 			<para>
 			If you want the datapumper to use a different native data type (and not the first
 			match returned by the driver), you can specify a list of types that should completely
-			be ignored during the mapping process. This can be specified in <filename>workbench.properties</filename>.
+			be ignored during the mapping process. This can be specified in <filename>workbench.settings</filename>.
 			The following keys are recognized:
 			</para>
 			<informaltable>
@@ -244,7 +261,7 @@
 				use the value <literal>no-ignore-list</literal>.
 			</para>
 		</section>
-		-->
+
 		<section id="source-query">
 			<title>Using a query as the source</title>
 
@@ -258,10 +275,10 @@
 			columns from different tables with the same name, make sure you use a column alias
 			to rename the columns.
 			</para>
-			<!--
+
 			<para>Creating the target table "on the fly" is not available when using a SQL
 			query as the source of the data</para>
-			-->
+
 		</section>
 
 	</section>

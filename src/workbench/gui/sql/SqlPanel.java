@@ -6,17 +6,9 @@
 
 package workbench.gui.sql;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.Toolkit;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -24,60 +16,34 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
-import javax.swing.event.ListSelectionListener;
-
 import workbench.WbManager;
 import workbench.db.DataSpooler;
 import workbench.db.DeleteScriptGenerator;
 import workbench.db.WbConnection;
-import workbench.gui.MainWindow;
+import workbench.exception.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.*;
-import workbench.gui.components.ConnectionInfo;
-import workbench.gui.components.DataStoreTableModel;
-import workbench.gui.components.ExtensionFileFilter;
-import workbench.gui.components.ImportFileOptionsPanel;
-import workbench.gui.components.TabbedPaneUIFactory;
-import workbench.gui.components.TextComponentMouseListener;
-import workbench.gui.components.WbScrollPane;
-import workbench.gui.components.WbSplitPane;
-import workbench.gui.components.WbTable;
-import workbench.gui.components.WbToolbar;
-import workbench.gui.components.WbToolbarSeparator;
-import workbench.gui.components.WbTraversalPolicy;
-import workbench.gui.editor.AnsiSQLTokenMarker;
+
+import workbench.gui.components.*;
 import workbench.gui.menu.TextPopup;
-import workbench.interfaces.Commitable;
-import workbench.interfaces.DbExecutionListener;
-import workbench.interfaces.DbUpdater;
-import workbench.interfaces.FilenameChangeListener;
-import workbench.interfaces.FontChangedListener;
-import workbench.interfaces.FormattableSql;
-import workbench.interfaces.Interruptable;
-import workbench.interfaces.MainPanel;
-import workbench.interfaces.Spooler;
-import workbench.interfaces.TextChangeListener;
-import workbench.interfaces.TextFileContainer;
+import workbench.interfaces.*;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.MacroManager;
+import workbench.sql.ScriptParser;
 import workbench.sql.commands.SingleVerbCommand;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbWorkspace;
-import workbench.exception.ExceptionUtil;
-import workbench.sql.ScriptParser;
-import workbench.interfaces.JobErrorHandler;
-
 
 
 /**
@@ -89,14 +55,11 @@ import workbench.interfaces.JobErrorHandler;
  */
 public class SqlPanel
 	extends JPanel
-	implements Runnable, FontChangedListener, ActionListener, TextChangeListener,
+	implements FontChangedListener, ActionListener, TextChangeListener,
 				    PropertyChangeListener,
 						MainPanel, Spooler, TextFileContainer, DbUpdater, Interruptable, FormattableSql, Commitable,
 						JobErrorHandler, FilenameChangeListener
 {
-	private boolean runSelectedCommand;
-	private boolean runCurrentCommand;
-
 	EditorPanel editor;
 	private DwPanel data;
 	private SqlHistory sqlHistory;
@@ -105,9 +68,8 @@ public class SqlPanel
 	private JTabbedPane resultTab;
 	private JSplitPane contentPanel;
 	private boolean threadBusy;
-	private boolean suspended = true;
-
-	private Thread background;
+	private boolean cancelExecution = false;
+	
 	private int currentHistoryEntry = -1;
 	private int maxHistorySize = 10;
 
@@ -157,18 +119,19 @@ public class SqlPanel
 
 	private WbConnection dbConnection;
 	private boolean updating;
-	private boolean cancelExecution;
+	
 	private boolean updateRunning;
 	private boolean textModified = false;
 	private String tabName = null;
-	private String macroToExecute = null;
+	
 	private ImageIcon loadingIcon;
 	private Icon dummyIcon;
-	//private boolean dummyIconFetched = false;
+	
 	private int lastDividerLocation = -1;
 
 	private ArrayList execListener = null;
-
+	private Thread executionThread = null;
+	
 	/** Creates new SqlPanel */
 	public SqlPanel(int anId)
 	{
@@ -183,16 +146,18 @@ public class SqlPanel
 
 		this.data = new DwPanel(statusBar);
 		this.data.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		this.data.setDoubleBuffered(true);
+		
 		this.log = new JTextArea();
 		this.log.setDoubleBuffered(true);
 		this.log.setBorder(new EmptyBorder(0,2,0,0));
-		this.log.setFont(WbManager.getSettings().getMsgLogFont());
+		this.log.setFont(Settings.getInstance().getMsgLogFont());
 		this.log.setEditable(false);
 		this.log.setLineWrap(true);
 		this.log.setWrapStyleWord(true);
 		this.log.addMouseListener(new TextComponentMouseListener());
 
-		this.maxHistorySize = WbManager.getSettings().getMaxHistorySize();
+		this.maxHistorySize = Settings.getInstance().getMaxHistorySize();
 
 		this.resultTab = new JTabbedPane();
 		this.resultTab.setTabPlacement(JTabbedPane.TOP);
@@ -223,20 +188,20 @@ public class SqlPanel
 		this.initToolbar();
 		this.setupActionMap();
 
-		this.data.getTable().setMaxColWidth(WbManager.getSettings().getMaxColumnWidth());
-		this.data.getTable().setMinColWidth(WbManager.getSettings().getMinColumnWidth());
+		this.data.getTable().setMaxColWidth(Settings.getInstance().getMaxColumnWidth());
+		this.data.getTable().setMinColWidth(Settings.getInstance().getMinColumnWidth());
 		this.makeReadOnly();
 		this.checkResultSetActions();
 		this.initStatementHistory();
 
-		Settings s = WbManager.getSettings();
+		Settings s = Settings.getInstance();
 		s.addFontChangedListener(this);
 
 		this.editor.addTextChangeListener(this);
 		this.data.setUpdateDelegate(this);
 		this.data.addPropertyChangeListener("updateTable", this);
 
-		WbManager.getSettings().addChangeListener(this);
+		Settings.getInstance().addChangeListener(this);
 	}
 
 	public String getId()
@@ -247,7 +212,7 @@ public class SqlPanel
 	public void setId(int anId)
 	{
 		this.internalId = anId;
-		this.historyFilename = WbManager.getSettings().getConfigDir() + "WbStatements" + Integer.toString(this.internalId);
+		this.historyFilename = Settings.getInstance().getConfigDir() + "WbStatements" + Integer.toString(this.internalId);
 	}
 
 	public void initDefaults()
@@ -284,6 +249,11 @@ public class SqlPanel
 	public WbToolbar getToolbar()
 	{
 		return this.toolbar;
+	}
+
+	public DwPanel getData()
+	{
+		return this.data;
 	}
 
 	private void initToolbar()
@@ -512,14 +482,9 @@ public class SqlPanel
 	private void initActions()
 	{
 		WbAction a;
-		ExecuteSql e = new ExecuteSql();
-		this.executeAll = new ExecuteAllAction(e);
-
-		ExecuteSelectedSql se = new ExecuteSelectedSql();
-		this.executeSelected = new ExecuteSelAction(se);
-
-		ExecuteCurrentSql c = new ExecuteCurrentSql();
-		this.executeCurrent = new ExecuteCurrentAction(c);
+		this.executeAll = new ExecuteAllAction(this);
+		this.executeSelected = new ExecuteSelAction(this);
+		this.executeCurrent = new ExecuteCurrentAction(this);
 
 		MakeLowerCaseAction makeLower = new MakeLowerCaseAction(this.editor);
 		MakeUpperCaseAction makeUpper = new MakeUpperCaseAction(this.editor);
@@ -600,7 +565,7 @@ public class SqlPanel
 		this.actions.add(new ExpandResultAction(this));
 		this.actions.add(new UndoExpandAction(this));
 
-		this.optimizeAllCol = new OptimizeAllColumnsAction(this);
+		this.optimizeAllCol = new OptimizeAllColumnsAction(this.data.getTable());
 		this.optimizeAllCol.setCreateMenuSeparator(true);
 		this.optimizeAllCol.setEnabled(false);
 		this.optimizeAllCol.putValue(Action.SMALL_ICON, null);
@@ -664,7 +629,6 @@ public class SqlPanel
 
 		this.executeAll.setEnabled(false);
 		this.executeSelected.setEnabled(false);
-		this.initBackgroundThread();
 
 		this.toolbarActions.add(this.executeSelected);
 		this.toolbarActions.add(this.stopAction);
@@ -824,7 +788,7 @@ public class SqlPanel
 		String errorMessage = null;
 		boolean success = false;
 		boolean wasUpdate = this.updateRunning;
-		
+
 		try
 		{
 			this.log.setText(ResourceMgr.getString("MsgUpdatingDatabase"));
@@ -965,20 +929,6 @@ public class SqlPanel
 	public void clearStatusMessage()
 	{
 		this.data.clearStatusMessage();
-	}
-
-	/**
-	 *	Create and initialize the SQL Thread which carries
-	 *	out the actual SQL execution.
-	 *	The Thread's runnable method is this.run();
-	 */
-	private void initBackgroundThread()
-	{
-		this.suspendThread();
-		this.background = new Thread(this);
-		this.background.setDaemon(true);
-		this.background.setName("SQL execution thread - " + this.internalId);
-		this.background.start();
 	}
 
 	public void initStatementHistory()
@@ -1265,17 +1215,6 @@ public class SqlPanel
 	public boolean isRequestFocusEnabled() { return true; }
 	//public boolean isFocusTraversable() { return true; }
 
-	public void suspendThread()
-	{
-		this.suspended = true;
-	}
-
-	public synchronized void resumeThread()
-	{
-		this.suspended = false;
-		notify();
-	}
-
 	public synchronized void storeStatementInHistory()
 	{
 		this.sqlHistory.addContent(editor);
@@ -1303,7 +1242,7 @@ public class SqlPanel
 						if (commit == WbSwingUtilities.DO_COMMIT)
 						{
 							this.dbConnection.commit();
-							ds.resetStatusForSentRow();
+							ds.resetStatusForSentRows();
 						}
 						else
 						{
@@ -1324,7 +1263,7 @@ public class SqlPanel
 			}
 			else
 			{
-				ds.resetStatusForSentRow();
+				ds.resetStatusForSentRows();
 			}
 		}
 		this.setCancelState(false);
@@ -1333,10 +1272,12 @@ public class SqlPanel
 	public void forceAbort()
 	{
 		if (!this.isBusy()) return;
+		if (this.executionThread == null) return;
 		try
 		{
-			this.background.interrupt();
-			this.background = null;
+			this.cancelExecution = true;
+			this.executionThread.interrupt();
+			this.executionThread = null;
 		}
 		catch (Exception e)
 		{
@@ -1350,13 +1291,15 @@ public class SqlPanel
 	public boolean abortExecution()
 	{
 		if (!this.isBusy()) return true;
+		if (this.executionThread == null) return true;
+		
 		boolean success = false;
-		int wait = WbManager.getSettings().getIntProperty(this.getClass().getName(), "abortwait", 1);
+		int wait = Settings.getInstance().getIntProperty(this.getClass().getName(), "abortwait", 1);
 		try
 		{
 			LogMgr.logDebug("SqlPanel.abortExecution()", "Interrupting SQL Thread...");
-			this.background.interrupt();
-			this.background.join(wait * 1000);
+			this.executionThread.interrupt();
+			this.executionThread.join(wait * 1000);
 			if (this.isBusy())
 			{
 				LogMgr.logDebug("SqlPanel.abortExecution()", "SQL Thread still running after " + wait +"s!");
@@ -1412,8 +1355,8 @@ public class SqlPanel
 						try
 						{
 							showCancelIcon();
+							cancelExecution = true;
 							data.cancelExecution();
-							suspendThread();
 						}
 						finally
 						{
@@ -1454,18 +1397,65 @@ public class SqlPanel
 		}
 	}
 
-	public String getCurrentStatement()
+	public void runCurrentStatement()
 	{
-		return this.editor.getSelectedStatement();
+		String sql = this.editor.getText();
+		int caret = this.editor.getCaretPosition();
+		startExecution(sql, 0, caret, true);
+	}
+	
+	public void runSelectedStatement()
+	{
+		String sql = this.editor.getSelectedStatement();
+		int offset = 0;
+		if (this.editor.isTextSelected())
+		{
+			offset = this.editor.getSelectionStart();
+		}
+		this.startExecution(sql, offset, -1, true);
+	}
+	
+	public void commit()
+	{
+		if (this.isBusy()) return;
+		this.startExecution(SingleVerbCommand.COMMIT.getVerb(), 0, -1, false);
 	}
 
+	public void rollback()
+	{
+		if (this.isBusy()) return;
+		this.startExecution(SingleVerbCommand.ROLLBACK.getVerb(), 0, -1, false);
+	}
+	
+	public void runAll()
+	{
+		String sql = this.editor.getText();
+		this.startExecution(sql, 0, -1, true);
+	}
+	
+	private void startExecution(final String sql, final int offset, final int commandAtIndex, final boolean highlight)
+	{
+		if (this.isBusy()) return;
+		
+		this.executionThread = new Thread(new Runnable()
+		{
+			public void run()
+			{
+				runStatement(sql, offset, commandAtIndex, highlight);
+			}
+		});
+		this.executionThread.setDaemon(true);
+		this.executionThread.setName("SQL Execution Thread " + this.getId());
+		this.executionThread.start();
+	}
+	
 	/*
 	 * 	Execute the given SQL string. This is invoked from the the run() and other
 	 *  methods in order to execute the SQL command. It takes care of updating the
 	 *  actions and the menu.
 	 *  The actual execution and display of the result is handled by displayResult()
 	 */
-	private void runStatement(String sql)
+	private void runStatement(String sql, int selectionOffset, int commandAtIndex, boolean highlightOnError)
 	{
 		this.showStatusMessage(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
 		this.data.getStartEditAction().setSwitchedOn(false);
@@ -1477,12 +1467,13 @@ public class SqlPanel
 		// receives the execStart event
 		this.fireDbExecStart();
 
+		this.cancelExecution = false;
 		this.setBusy(true);
 		this.setCancelState(true);
 		this.makeReadOnly();
 		this.data.setBatchUpdate(true);
 
-		this.displayResult(sql);
+		this.displayResult(sql, selectionOffset, commandAtIndex, highlightOnError);
 
 		this.data.setBatchUpdate(false);
 
@@ -1494,32 +1485,7 @@ public class SqlPanel
 
 		this.fireDbExecEnd();
 		this.selectEditorLater();
-
-		/*
-		if (sql.trim().toLowerCase().startsWith("shutdown") && WbManager.getSettings().getProcessHsqlShutdown())
-		{
-			String url = this.dbConnection.getUrl();
-			if (url != null)
-			{
-				if (url.startsWith("jdbc:hsqldb"))
-				{
-					final MainWindow win = (MainWindow)SwingUtilities.getWindowAncestor(this);
-					String msg = ResourceMgr.getString("MsgShutdownHsqlDb");
-					this.showLogMessage(msg);
-					WbManager.getInstance().showErrorMessage(this.getParentWindow(), msg);
-					SwingUtilities.invokeLater(new Runnable()
-					{
-						public void run()
-						{
-							win.disconnect(true, true);
-						}
-					});
-
-				}
-			}
-		}
-		*/
-
+		this.executionThread = null;
 	}
 
 	public void executeMacro(final String macroName, final boolean replaceText)
@@ -1529,22 +1495,13 @@ public class SqlPanel
 		final String sql = MacroManager.getInstance().getMacroText(macroName);
 		if (sql == null || sql.trim().length() == 0) return;
 
-		this.runSelectedCommand = false;
-		this.runCurrentCommand = false;
-
 		if (replaceText)
 		{
-			this.macroToExecute = null;
 			this.storeStatementInHistory();
 			this.editor.setText(sql);
 			this.storeStatementInHistory();
-			resumeThread();
 		}
-		else
-		{
-			this.macroToExecute = sql;
-			resumeThread();
-		}
+		this.startExecution(sql, 0, -1, replaceText);
 	}
 
 	public void spoolData()
@@ -1625,7 +1582,7 @@ public class SqlPanel
 		final DataStore ds = table.getDataStore();
 		final String currentFormat = ds.getDefaultDateFormat();
 		if (ds == null) return;
-		String lastDir = WbManager.getSettings().getLastImportDir();
+		String lastDir = Settings.getInstance().getLastImportDir();
 		JFileChooser fc = new JFileChooser(lastDir);
 		ImportFileOptionsPanel optionPanel = new ImportFileOptionsPanel();
 		optionPanel.restoreSettings();
@@ -1637,7 +1594,7 @@ public class SqlPanel
 			this.setActionState(this.importFileAction, false);
 			String filename = fc.getSelectedFile().getAbsolutePath();
 			lastDir = fc.getCurrentDirectory().getAbsolutePath();
-			WbManager.getSettings().setLastImportDir(lastDir);
+			Settings.getInstance().setLastImportDir(lastDir);
 			optionPanel.saveSettings();
 			try
 			{
@@ -1691,70 +1648,30 @@ public class SqlPanel
 
 	private void appendToLog(final String aString)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				log.append(aString);
-				log.setCaretPosition(log.getDocument().getLength());
-			}
-		});
+		log.append(aString);
+		log.setCaretPosition(log.getDocument().getLength());
 	}
 
-	private void displayResult(String aSql)
+	private void displayResult(String script, int selectionOffset, int commandAtIndex, boolean highlightOnError)
 	{
-		boolean compressLog = WbManager.getSettings().getConsolidateLogMsg();
-
+		if (script == null) return;
+		
+		boolean compressLog = Settings.getInstance().getConsolidateLogMsg();
+		boolean jumpToNext = (commandAtIndex > -1 && Settings.getInstance().getAutoJumpNextStatement());
+		
 		ScriptParser scriptParser = new ScriptParser();
-		scriptParser.setAlternateDelimiter(WbManager.getSettings().getAlternateDelimiter());
-
-		String script = null;
-		boolean editorCommand = true;
-		boolean highlightError = true;
-		int startOffset = 0;
-
-		if (this.macroToExecute != null)
-		{
-			script = this.macroToExecute;
-			this.macroToExecute = null;
-		}
-		else if (aSql == null)
-		{
-			// the flags to run the current command, the selected text, or everything
-			// are set in the nested classes ExecuteSql, ExcecuteCurrentSql, ExecuteSelectedSql
-			if (this.runSelectedCommand)
-			{
-				script = this.editor.getSelectedStatement();
-
-				// getSelectionStart() returns the current caret position
-				// if no text is selected!
-				if (this.editor.isTextSelected())
-				{
-					startOffset = this.editor.getSelectionStart();
-				}
-			}
-			else
-			{
-				script = this.editor.getStatement();
-			}
-		}
-		else
-		{
-			script = aSql;
-			editorCommand = false;
-			highlightError = false;
-		}
+		scriptParser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
 
 		try
 		{
-			this.log.setText(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
+			this.log.setText("");
 
 			String cleanSql = SqlUtil.makeCleanSql(script, false);
 			String macro = MacroManager.getInstance().getMacroText(cleanSql);
 			if (macro != null)
 			{
+				appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ": " + cleanSql + "\n");
 				script = macro;
-				editorCommand = false;
 			}
 
 			scriptParser.setScript(script);
@@ -1765,7 +1682,7 @@ public class SqlPanel
 			int endIndex = sqls.size();
 			int count = sqls.size();
 
-			if (this.runCurrentCommand)
+			if (commandAtIndex > -1)
 			{
 				int pos = this.editor.getCaretPosition();
 				count = 1;
@@ -1776,7 +1693,6 @@ public class SqlPanel
 			String msg = ResourceMgr.getString("TxtScriptStatementFinished");
 			msg = StringUtil.replace(msg, "%total%", Integer.toString(count));
 			String currentMsg = null;
-			this.log.setText("");
 
 			boolean onErrorAsk = true;
 			if (count == 1) compressLog = false;
@@ -1788,22 +1704,41 @@ public class SqlPanel
 
 			for (int i=startIndex; i < endIndex; i++)
 			{
-				StringBuffer logmsg = new StringBuffer(200);
+				StrBuffer logmsg = new StrBuffer();
 				String sql = scriptParser.getCommand(i);
-				StringBuffer header = new StringBuffer(80);
+				
+				// in case of a batch execution we need to make sure that
+				// this thread can actually be interrupted!
+				Thread.yield();
+				if (cancelExecution) break;
+				
+				VariablePrompter prompter = new VariablePrompter(sql);
+				boolean goOn = true;
+				if (prompter.needsInput())
+				{
+					this.showBusyIcon(false);
+					goOn = prompter.getPromptValues();
+				}
+
+				if (!goOn)
+				{
+					String cancelMsg = ResourceMgr.getString("MsgSqlCancelledDuringPrompt");
+					cancelMsg = cancelMsg.replaceAll("%nr%", Integer.toString(i+1));
+					this.appendToLog(cancelMsg);
+					this.showLogPanel();
+					continue;
+				}
+				this.showBusyIcon(true);
+				
+				StrBuffer header = new StrBuffer(80);
 				header.append(ResourceMgr.getString("TxtPrintHeaderResultFrom"));
 				header.append(sql);
+				
 				this.data.setPrintHeader(header.toString());
 				this.data.runStatement(sql);
-
-				if (!compressLog /*|| !this.data.wasSuccessful()*/)
+				
+				if (!compressLog)
 				{
-					/*
-					if (!this.data.wasSuccessful())
-					{
-						logmsg.append(ResourceMgr.getString("MsgExecuteError") + "\n");
-					}
-					*/
 					logmsg.append(this.data.getLastMessage());
 					if (count > 1)
 					{
@@ -1820,11 +1755,7 @@ public class SqlPanel
 				{
 					this.showLogPanel();
 				}
-				// in case of a batch execution we need to make sure that
-				// this thread can actually be interrupted!
-				Thread.yield();
-				if (suspended) break;
-
+				
 				if (!this.data.wasSuccessful())
 				{
 					commandWithError = i;
@@ -1836,7 +1767,7 @@ public class SqlPanel
 					// dialog is displayed, otherwise Swing uses too much CPU
 					this.showBusyIcon(false);
 
-					this.highlightError(scriptParser, commandWithError, startOffset);
+					this.highlightError(scriptParser, commandWithError, selectionOffset);
 
 					// force a refresh in order to display the selection
 					this.repaint();
@@ -1859,11 +1790,11 @@ public class SqlPanel
 				}
 			} // end for loop
 
-			if (commandWithError > -1 && highlightError)
+			if (commandWithError > -1 && highlightOnError)
 			{
 				final ScriptParser p = scriptParser;
 				final int command = commandWithError;
-				final int offset = startOffset;
+				final int offset = selectionOffset;
 
 				SwingUtilities.invokeLater(new Runnable()
 				{
@@ -1904,7 +1835,7 @@ public class SqlPanel
 				this.appendToLog(s);
 			}
 
-			if (commandWithError == -1 && this.runCurrentCommand && WbManager.getSettings().getAutoJumpNextStatement())
+			if (commandWithError == -1 && jumpToNext)
 			{
 				int nextCommand = startIndex + 1;
 				int startPos = scriptParser.getStartPosForCommand(nextCommand);
@@ -1943,65 +1874,15 @@ public class SqlPanel
 	{
 		WbTable table = this.data.getTable();
 		if (table == null) return;
-
-		DataStore ds = table.getDataStore();
-		if (ds == null) return;
-
-		int[] rows = table.getSelectedRows();
-		if (rows.length == 0)
-		{
-			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgSelectRow"));
-			return;
-		}
-
-		String updatetable = ds.getUpdateTable();
-		String schema = ds.getUpdateTableSchema();
-
-		int numRows = rows.length;
 		try
 		{
-			StringBuffer script = new StringBuffer(numRows * 150);
-			for (int i=0; i < numRows; i++)
-			{
-				Map pkvalues = ds.getPkValues(rows[i]);
-				DeleteScriptGenerator gen = new DeleteScriptGenerator(this.dbConnection);
-				gen.setTable(null, schema, updatetable);
-				gen.setValues(pkvalues);
-				String rowScript = gen.createScript();
-				if (i > 0) script.append("\n\n");
-				script.append(rowScript);
-			}
-
-			MainWindow parent = (MainWindow)SwingUtilities.getWindowAncestor(this);
-			String title = ResourceMgr.getString("TxtDeleteScriptWindowTitle") + " " + schema + "." + ds.getRealUpdateTable();
-			final String id = this.getClass().getName() + ".ScriptDialog";
-			JFrame f = new JFrame(title);
-			f.setIconImage(ResourceMgr.getPicture("workbench16").getImage());
-			final JFrame fd = f;
-			f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-			f.addWindowListener(new WindowAdapter()
-			{
-				public void windowClosing(WindowEvent e)
-				{
-					WbManager.getSettings().storeWindowSize(fd, id);
-				}
-			});
-			EditorPanel editor = EditorPanel.createSqlEditor();
-			editor.setText(script.toString());
-			editor.setCaretPosition(0);
-			//editor.addPopupMenuItem(new FileSaveAsAction(editor), true);
-
-			f.getContentPane().add(editor);
-			if (!WbManager.getSettings().restoreWindowSize(f, id))
-			{
-				f.setSize(400,400);
-			}
-			WbSwingUtilities.center(f, parent);
-			f.show();
+			DeleteScriptGenerator gen = new DeleteScriptGenerator(this.dbConnection);
+			gen.setSource(table);
+			gen.startGenerate();
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("SqlPanel.generateDeleteScript", "Error generating delete script", e);
+			LogMgr.logError("SqlPanel.generateDeleteScript()", "Error initializing DeleteScriptGenerator", e);
 		}
 	}
 
@@ -2025,8 +1906,8 @@ public class SqlPanel
 
 		boolean mayEdit = hasResult && this.data.hasUpdateableColumns();
 		this.data.getStartEditAction().setEnabled(mayEdit);
-		this.createDeleteScript.setEnabled(mayEdit);
 		int rows = this.data.getTable().getSelectedRowCount();
+		this.createDeleteScript.setEnabled(mayEdit && rows == 1);
 
 		this.data.getCopyRowAction().setEnabled(mayEdit && (rows == 1));
 		this.data.getInsertRowAction().setEnabled(this.data.isUpdateable());
@@ -2035,45 +1916,16 @@ public class SqlPanel
 		this.findDataAgainAction.setEnabled(findNext);
 
 		boolean canUpdate = this.data.isUpdateable();
-		//boolean hasPK = this.data.hasPrimaryKey();
 		this.copyAsSqlInsert.setEnabled(canUpdate);
 		this.copyAsSqlUpdate.setEnabled(canUpdate);
 		this.importFileAction.setEnabled(canUpdate);
 	}
 
-	public void run()
-	{
-		while (true)
-		{
-			try
-			{
-				if (suspended)
-				{
-					synchronized(this)
-					{
-						while(suspended)
-							wait();
-					}
-				}
-			}
-			catch(InterruptedException e)
-			{
-				LogMgr.logDebug("SqlPanel.run()", "Thread " + this.internalId + " has been interrupted");
-				return;
-			}
-
-			this.runStatement(null);
-
-			suspendThread();
-		}
-	}
-
-
 	private ImageIcon getLoadingIndicator()
 	{
 		if (this.loadingIcon == null)
 		{
-			if (WbManager.getSettings().getUseAnimatedIcon())
+			if (Settings.getInstance().getUseAnimatedIcon())
 			{
 				this.loadingIcon = ResourceMgr.getPicture("loading");
 			}
@@ -2091,7 +1943,7 @@ public class SqlPanel
 	{
 		if (this.cancelIcon == null)
 		{
-			if (WbManager.getSettings().getUseAnimatedIcon())
+			if (Settings.getInstance().getUseAnimatedIcon())
 			{
 				this.cancelIcon = ResourceMgr.getPicture("cancelling");
 			}
@@ -2223,13 +2075,6 @@ public class SqlPanel
 		if (busy == this.threadBusy) return;
 		this.threadBusy = busy;
 		this.setExecuteActionStates(!busy);
-//		SwingUtilities.invokeLater(new Runnable()
-//			{
-//				public void run()
-//				{
-//					showBusyIcon(busy);
-//				}
-//			});
 		this.showBusyIcon(busy);
 	}
 
@@ -2302,13 +2147,13 @@ public class SqlPanel
 
 	public void dispose()
 	{
-		WbManager.getSettings().removeChangeLister(this);
+		Settings.getInstance().removeChangeLister(this);
 		this.data.clearContent();
 		this.data = null;
 		this.editor.dispose();
 		this.editor = null;
 		this.abortExecution();
-		this.background = null;
+		this.executionThread = null;
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)
@@ -2330,74 +2175,6 @@ public class SqlPanel
 		{
 			this.checkResultSetActions();
 		}
-	}
-
-	public void commit()
-	{
-		if (this.isBusy()) return;
-		this.runStatement(SingleVerbCommand.COMMIT.getVerb());
-	}
-
-	public void rollback()
-	{
-		if (this.isBusy()) return;
-		this.runStatement(SingleVerbCommand.ROLLBACK.getVerb());
-	}
-
-	class ExecuteCurrentSql implements ActionListener
-	{
-		public void actionPerformed(ActionEvent actionEvent)
-		{
-			if (!isBusy())
-			{
-				runSelectedCommand = false;
-				runCurrentCommand = true;
-				resumeThread();
-			}
-			else
-			{
-				Toolkit.getDefaultToolkit().beep();
-				LogMgr.logWarning("ExecuteCurrentSql", "actionPerformed called while thread is busy!");
-			}
-		}
-	}
-
-	class ExecuteSql implements ActionListener
-	{
-		public void actionPerformed(ActionEvent actionEvent)
-		{
-			if (!isBusy())
-			{
-				runSelectedCommand = false;
-				runCurrentCommand = false;
-				resumeThread();
-			}
-			else
-			{
-				Toolkit.getDefaultToolkit().beep();
-				LogMgr.logWarning("ExecuteSql", "actionPerformed called while thread is busy!");
-			}
-		}
-
-	}
-
-	class ExecuteSelectedSql implements ActionListener
-	{
-		public void actionPerformed(ActionEvent actionEvent)
-		{
-			if (!isBusy())
-			{
-				runSelectedCommand = true;
-				runCurrentCommand = false;
-				resumeThread();
-			}
-			else
-			{
-				Toolkit.getDefaultToolkit().beep();
-				LogMgr.logWarning("ExecuteSelectedSql", "actionPerformed called while thread is busy!");
-			}
-		}
-
 	}
 
 }

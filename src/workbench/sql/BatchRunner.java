@@ -14,6 +14,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
@@ -31,12 +32,18 @@ public class BatchRunner
 	private String successScript;
 	private String errorScript;
 	private String delimiter = ";";
-
+	private boolean showResultSets = false;
+	
 	public BatchRunner(String aFilelist)
 	{
 		this.files = StringUtil.stringToList(aFilelist, ",");
 	}
 
+	public void showResultSets(boolean flag)
+	{
+		this.showResultSets = flag;
+	}
+	
 	public void setProfile(String aProfilename)
 		throws Exception
 	{
@@ -195,7 +202,7 @@ public class BatchRunner
 		int count = statements.size();
 		for (int i=0; i < count; i++)
 		{
-			sql = (String)statements.get(i);//reader.nextToken();
+			sql = (String)statements.get(i);
 			if (sql == null) continue;
 			sql = sql.trim();
 			if (sql.length() == 0) continue;
@@ -211,8 +218,20 @@ public class BatchRunner
 					for (int m=0; m < msg.length; m++)
 					{
 						if (msg[m] != null && msg[m].length() > 0)
-							LogMgr.logInfo("BatchRunner", msg[m]);
+							System.out.println(msg[m]);
 					}
+				}
+				if (this.showResultSets && result.isSuccess() && result.hasDataStores())
+				{
+					System.out.println();
+					System.out.println(sql);
+					System.out.println("---------------- " + ResourceMgr.getString("MsgResultLogStart") + " ----------------------------");
+					DataStore[] data = result.getDataStores();
+					for (int nr=0; nr < data.length; nr++)
+					{
+						System.out.println(data[nr].getDataString(StringUtil.LINE_TERMINATOR, true));
+					}
+					System.out.println("---------------- " + ResourceMgr.getString("MsgResultLogEnd") + " ----------------------------");
 				}
 				if (!result.isSuccess())
 				{

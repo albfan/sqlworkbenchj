@@ -27,7 +27,7 @@
       <format pattern="yyyy-MM-dd HH:mm" property="build_date"/>
     </tstamp>
     <tstamp>
-    <format pattern="dd.MM.yyyy" property="formatted_build_date"/>
+      <format pattern="dd.MM.yyyy" property="formatted_build_date"/>
     </tstamp>
   </target>
 
@@ -326,12 +326,12 @@
     <zip zipfile="${srczip}">
       <zipfileset dir="${src}" prefix="src">
         <include name="**/*.*"/>
-        <include name="**/*.class"/>
+        <exclude name="**/*.class"/>
+        <exclude name="**/*.java~"/>
         <exclude name="**/workbench.settings"/>
         <exclude name="**/CVS/*"/>
         <exclude name="**/.cvsignore"/>
         <exclude name="**/.nb*"/>
-        <exclude name="**/*.dfPackage"/>
         <exclude name="**/tags"/>
         <exclude name="help/*.*"/>
         <exclude name="**/Test/*"/>

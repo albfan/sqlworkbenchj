@@ -30,7 +30,7 @@ public class SingleVerbCommand extends SqlCommand
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		try
 		{
-			if (aConnection.useJdbcConnect())
+			if (aConnection.useJdbcCommit())
 			{
 				if ("COMMIT".equals(this.verb))
 				{

@@ -13,6 +13,8 @@ import java.sql.Statement;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import workbench.db.AbstractConstraintReader;
+import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
 
 /**

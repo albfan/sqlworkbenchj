@@ -46,17 +46,15 @@
     </section>
 
     <section id="command-spool">
-      <title>EXPORT (EXP, SPOOL)</title>
+      <title>EXPORT (EXP)</title>
 
-      <para>Exports the result of the <emphasis role="strong">next</emphasis>
+      <para>Exports the result of the <emphasis role="bold">next</emphasis>
       SQL statement (which has to produce a result set) to a file without
       loading the data into memory. This is
       equivalent to the menu item
       <menuchoice><guimenu>SQL</guimenu><guimenuitem>Spool Data</guimenuitem></menuchoice>.
       The export command gives you more control over the format of the created file, then the
       menu.</para>
-      <note><para>EXP and SPOOL are synonyms for the EXPORT command. All three
-      commands are identical.</para></note>
 
       <para>The command supports the following parameters:</para>
 
@@ -73,9 +71,13 @@
 
           <tbody valign="top">
             <row>
-              <entry><para>-type=[text|sql|xml]</para></entry>
+              <entry><para>-type=[text|sqlinsert|sqlupdate|xml|html]</para></entry>
 
-              <entry><para>Defines the type of the output file
+              <entry><para>Defines the type of the output file. <literal>sqlinsert</literal>
+              will create the necessary <literal>INSERT</literal> statements to put
+              the data into a table. Specifying sql is the same as specifying sqlinsert.
+              <literal>sqlupdate</literal> will generate UPDATE statements that update
+              all non-key columns of the table.
               </para></entry>
             </row>
 
@@ -89,7 +91,7 @@
       </informaltable>
 
       <section id="spool-sql-parameters">
-        <title>Parameters for the type SQL</title>
+        <title>Additional parameters for type SQL</title>
 
         <informaltable frame="all">
           <tgroup cols="2" align="left">
@@ -133,11 +135,13 @@
               <row>
                 <entry><para>-concat</para></entry>
 
-                <entry><para>If charfunc is given and the DBMS
-                does not support the standard ANSI character for
-                concatenating strings (which is ||) then a different
-                concatenation character can be defined with this parameter:</para>
-                <para>-concat=+</para> <para>e.g. for MS Access </para></entry>
+                <entry><para>If the parameter <literal>-charfunc</literal> is used
+                &wb-productname; will concatenate the individual pieces using 
+                the ANSI SQL operator for string concatenation. In case 
+                your DBMS does not support the ANSI standard (e.g. MS ACCESS) 
+                you can specify the operator to be used:</para>
+                <para><literal>-concat=+</literal></para><para> defines the plus sign
+                as the concatenation operator.</para></entry>
               </row>
 
               <row>
@@ -239,7 +243,7 @@
       </section>
 
       <section id="spool-xml-parameters">
-        <title>Parameters for the type XML</title>
+        <title>Parameters for type XML</title>
 
         <informaltable frame="all">
           <tgroup cols="2" align="left">
@@ -254,14 +258,12 @@
             <tbody valign="top">
               <row>
                 <entry><para>-table</para></entry>
-
                 <entry><para>The given tablename will be put
                 into the &#60;table&#62; tag as an attribute.</para></entry>
               </row>
 
               <row>
                 <entry><para>-dateformat</para></entry>
-
                 <entry><para>The date format to be used when
                 writing date columns into the output file. The syntax of the
                 format definition, is the same as for the SimpleDateFormat
@@ -270,7 +272,6 @@
 
               <row>
                 <entry><para>-datetimeformat</para></entry>
-
                 <entry><para>The format to be used when writing
                 datetime (or timestamp) columns into the output file.
                 </para></entry>
@@ -278,10 +279,25 @@
 
               <row>
                 <entry><para>-decimal</para></entry>
-
                 <entry><para>The decimal symbol to be used for
-                numbers. The default is a point.</para></entry>
+                numbers. The default is a dot.</para></entry>
               </row>
+              
+              <row>
+                <entry><para>-stylesheet</para></entry>
+                <entry><para>The name of the XSLT stylesheet that should be used
+                to transform the &wb-productname; specific XML file into a 
+                different format. If -stylesheet is specified, -xsltoutput has
+                to be specified as well.</para></entry>
+              </row>
+              <row>
+                <entry><para>-xsltoutput</para></entry>
+                <entry><para>The resulting output file (specified 
+                with the -file parameter), can be transformed using XSLT after
+                the export has finished. This parameter then defines 
+                the name of the outputfile of the transformation.</para></entry>
+              </row>
+              
             </tbody>
           </tgroup>
         </informaltable>
@@ -342,8 +358,8 @@ WHERE table1.column1 = table2.column1;</programlisting>
             <row>
               <entry><para>-commitevery</para></entry>
               <entry><para>Issue a commit every (number) rows. If this parameter
-              is not passed (or a value of zero or lower), then &wb-productname; will commit everything when
-              all rows have been imported. </para></entry>
+              is not passed (or a value of zero or lower), then &wb-productname; will commit
+              everything when all rows have been imported. </para></entry>
             </row>
             <row>
               <entry><para>-mode</para></entry>
@@ -369,6 +385,20 @@ WHERE table1.column1 = table2.column1;</programlisting>
               <entry><para>-encoding</para></entry>
               <entry><para>Define the encoding for the input file. For XML files
               the default encoding is UTF-8, for text files it's 8859_1</para></entry>
+            </row>
+            <row>
+              <entry><para>-deletetarget</para></entry>
+              <entry><para>If this parameter is set to true, data from the target table will
+              be deleted before the import is started.
+              </para></entry>
+            </row>
+            <row>
+              <entry><para>-usebatch</para></entry>
+              <entry><para>Enable or disable the use of the JDBC batch update features. If the
+              JDBC driver supports this, the INSERT (or UPDATE) performance can be increased. 
+              This parameter will be ignored if the driver does not support batch updates or if 
+              the mode is not UPDATE or INSERT.
+              </para></entry>
             </row>
           </tbody>
         </tgroup>
@@ -451,15 +481,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
         <para>The XML import has no additional parameters, as all the necessary
         information is stored in the XML file itself. Therefore
         the XML import only works on files generated by the <link linkend="command-spool">EXPORT</link>
-        (or SPOOL) command.</para>
-        <!--
-        <note><para>The architecture of the &wb-productname; makes it possible to
-        plug other XML parsers into the system to allow the import of other
-        XML formats. This is not yet enabled. If you have the need to use your
-        own XML parser, please contact the author for details.</para></note>
-        <para>For more information on how to export and import data with &wb-productname;
-        please see <xref linkend="xml-export-import"/>.</para>
-        -->
+        command.</para>
       </section>
       
       <section id="import-update-mode">
@@ -492,7 +514,12 @@ WHERE table1.column1 = table2.column1;</programlisting>
         <para>The keycolumns defined with the <literal>-keycolumns</literal> parameter don't
         have to match the real primary key, but they should identify one row uniquely.
         </para>
-        
+       <para>You cannot use the update mode, if you select <emphasis role="bold">only</emphasis> key columns.
+       The values from the source are used to build up the <literal>WHERE</literal> clause for the 
+       <literal>UPDATE</literal> statement. If ony key columns are defined, then there would be nothing to 
+       update.
+        </para>
+ 
         <para>
           For maximum performance, choose the update strategy that will result in a succssful
           first statement more often. As a rule of thumb:
@@ -504,17 +531,53 @@ WHERE table1.column1 = table2.column1;</programlisting>
       </section>
 
     </section>
+    
+    <section id="command-xslt">
+      <title>XSLT</title>
+
+      <para>Transform an XML file via a XSLT stylesheet. This can be used to format 
+      XML input files into the correct format for &wb-productname; or to transform
+      the output files that are generated.</para>
+      <para>Parameters for the XSLT command:</para>
+        <informaltable frame="all">
+          <tgroup cols="2"  align="left">
+            <colspec colname="c1" colwidth="4cm" />
+            <colspec colname="c2" />
+            <thead>
+              <row>
+                <entry>Parameter</entry>
+                <entry>Description</entry>
+              </row>
+            </thead>
+
+            <tbody valign="top">
+              <row>
+                <entry><para>-inputfile</para></entry>
+                <entry><para>The name of the XML source file.</para></entry>
+              </row>
+              <row>
+                <entry><para>-xsltoutput</para></entry>
+                <entry><para>The name of the generated output file.</para></entry>
+              </row>
+              <row>
+                <entry><para>-stylesheet</para></entry>
+                <entry><para>The name of the XSLT stylesheet to be used.</para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+    </section>
 
     <section id="command-copy">
-      <title>COPY</title>
-      <para>The <literal>COPY</literal> is essentially the command line version of the
-      the <link linkend="data-pumper">DataPumper</link>. For a more detailed discussion
-      on copying data directly from one DBMS to another, please refer to that section.
+      <title>WBCOPY</title>
+      <para>The <literal>WBCOPY</literal> is essentially the command line version of the
+      the <link linkend="data-pumper">DataPumper</link>. For a more detailed explanation
+      of the copy process, please refer to that section.
       </para>
 
       <section id="copy-general-parameters">
 
-        <title>General parameters for the <literal>COPY</literal> command.</title>
+        <title>General parameters for the <literal>WBCOPY</literal> command.</title>
         <informaltable frame="all">
           <tgroup cols="2"  align="left">
             <colspec colname="c1" colwidth="4cm" />
@@ -724,4 +787,39 @@ WHERE table1.column1 = table2.column1;</programlisting>
       <para>This disables the <literal>DBMS_OUTPUT</literal> package for an Oracle database.
       This is equivalent to calling dbms_output.disable() procedure.</para>
     </section>
-  </section>
+    
+    <section id="command-vardef">
+      <title>WBVARDEF</title>
+
+      <para>This defines an internal variable which is used for variable substitution during
+      SQL execution. Details can be found in the chapter <xref linkend="using-variables"/>.
+      </para>
+      <para>The syntax for defining a variable is: <literal>WBVARDEF variable=value</literal></para>
+      <para>The variable definition can also be read from a file. The file should list 
+      each variable definition on one line (this is the format of a normal Java properties 
+      file). Lines beginning with a <literal>#</literal> sign are ignored.
+      The syntax is <literal>WBVARDEF -file=&lt;filename&gt;</literal>
+      </para>
+      <para>You can also specify a file when starting &wb-productname; with the 
+      parameter <literal>-vardef=&lt;filename&gt;</literal>.
+      For details see see <link linkend="vardef-commandline">Reading variables from a file</link>.
+      </para>
+    </section>
+    
+    <section id="command-vardelete">
+      <title>WBVARDELETE</title>
+
+      <para>This removes an internal variable from the variable list.
+       Details can be found in the chapter <xref linkend="using-variables"/>.
+      </para>
+    </section>
+
+    <section id="command-varlist">
+      <title>WBLISTVAR</title>
+
+      <para>This list all defined variables from the variable list.
+       Details can be found in the chapter <xref linkend="using-variables"/>.
+      </para>
+    </section>
+    
+</section>

@@ -87,8 +87,8 @@ public class ObjectDropper
 			sql.append(type);
 			sql.append(' ');
 			sql.append(name);
-			//if (doCascade && "TABLE".equalsIgnoreCase(type))
-			if (this.cascadeConstraints)
+			
+			if (this.cascadeConstraints && "TABLE".equalsIgnoreCase(type))
 			{
 				cascade = this.connection.getMetadata().getCascadeConstraintsVerb(type);
 				if (cascade != null)

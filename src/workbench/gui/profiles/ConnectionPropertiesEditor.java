@@ -41,8 +41,9 @@ public class ConnectionPropertiesEditor
 	{
 		String[] cols = new String[] { ResourceMgr.getString("TxtConnDataPropName"), ResourceMgr.getString("TxtConnDataPropValue") };
 		int[] types = new int[] { Types.VARCHAR, Types.VARCHAR };
+		int[] sizes = new int[] { 15, 5 };
 
-		this.propData = new DataStore(cols, types);
+		this.propData = new DataStore(cols, types, sizes);
 		this.propData.setAllowUpdates(true);
 		if (source != null)
 		{
@@ -59,7 +60,7 @@ public class ConnectionPropertiesEditor
 		this.propTable = new WbTable();
 
 		this.propTable.setModel(new DataStoreTableModel(this.propData));
-
+		this.propTable.optimizeAllColWidth(100, true);
 
 		this.setLayout(new BorderLayout());
 		JScrollPane scroll = new JScrollPane(this.propTable);
@@ -78,6 +79,7 @@ public class ConnectionPropertiesEditor
 	public Properties getProperties()
 	{
 		Properties props = new Properties();
+		this.propTable.stopEditing();
 		int count = this.propData.getRowCount();
 		for (int row=0; row < count; row++)
 		{
@@ -98,6 +100,7 @@ public class ConnectionPropertiesEditor
 		throws Exception
 	{
 		this.propTable.addRow();
+		this.propTable.getSelectionModel().clearSelection();
 	}
 
 	public void saveItem()

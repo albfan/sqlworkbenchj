@@ -26,6 +26,7 @@ import workbench.storage.DataStore;
 import workbench.util.CsvLineParser;
 import workbench.util.ValueConverter;
 import workbench.util.WbStringTokenizer;
+import java.io.EOFException;
 
 /**
  *
@@ -55,7 +56,7 @@ public class TextFileParser
 
 	private ValueConverter converter;
 	private StringBuffer messages = new StringBuffer(100);
-	
+
 	/** Creates a new instance of TextFileParser */
 	public TextFileParser(String aFile)
 	{
@@ -92,7 +93,7 @@ public class TextFileParser
 	{
 		return this.messages.toString();
 	}
-	
+
 	public void setDelimiter(String delimit)
 	{
 		this.delimiter = delimit;
@@ -161,15 +162,20 @@ public class TextFileParser
 		try
 		{
 			line = in.readLine();
-			if (this.withHeader && this.columns == null)
+			if (this.withHeader)
 			{
-				this.readColumns(line);
+				if (this.columns == null) this.readColumns(line);
+				line = in.readLine();
 			}
-			line = in.readLine();
+		}
+		catch (EOFException eof)
+		{
+			line = null;
 		}
 		catch (IOException e)
 		{
-			line = null;
+			LogMgr.logWarning("TextFileParser.start()", "Error reading input file " + f.getAbsolutePath(), e);
+			throw e;
 		}
 
 		if (this.colCount <= 0)
@@ -209,8 +215,8 @@ public class TextFileParser
 					rowData[i] = null;
 					String msg = ResourceMgr.getString("ErrorTextfileImport");
 					msg = msg.replaceAll("%row%", Integer.toString(importRow + 1));
-					//msg = msg.replaceAll("%col%", this.columns[i].getName());
-					msg = msg.replaceAll("%value%", (value == null ? "" : value.toString()));
+					msg = msg.replaceAll("%col%", this.columns[i].getColumnName());
+					msg = msg.replaceAll("%value%", (value == null ? "(NULL)" : value.toString()));
 					msg = msg.replaceAll("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
 					this.messages.append(msg);
 					this.messages.append("\n");
@@ -247,7 +253,7 @@ public class TextFileParser
 
 	private void clearRowData()
 	{
-		// this is nearly as fast as using System.arrayCopy() 
+		// this is nearly as fast as using System.arrayCopy()
 		// with a blank array...
 		for (int i=0; i < this.colCount; i++)
 		{
@@ -301,6 +307,7 @@ public class TextFileParser
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("TextFileParser.readColumnDefinition()", "Error when reading column definition", e);
 			this.colCount = -1;
 			this.columns = null;
 		}

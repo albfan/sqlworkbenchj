@@ -224,10 +224,22 @@
         <title>Settings not available through the GUI</title>
 
         <para>This section describes the additional options for &wb-productname; which
-        are not available in the options dialog.</para>
+        are not (yet) available in the options dialog.</para>
 
         <para>The name of the setting refers to the entry in the file <literal>workbench.settings</literal>
-        which is located in the <link linkend="config-dir">configuration directory</link>.
+        which is located in the <link linkend="config-dir">configuration directory</link>. Not all 
+        listed properties will be present in <literal>workbench.settings</literal>. If a property
+        does not yet exist in the file, simply add it to the file. The position does not matter, 
+        as the file will be sorted the next time it is written back.
+        </para>
+        <para>Some parameters define a list of identifiers for a DBMS. The identifier that needs to 
+        be put there can be obtained by hovering the mouse over the connection URL information in 
+        the main window, or from the log file. After a successful connect to a database, there will be
+        an entry in the log file similar to this:
+        </para>
+        <programlisting>INFO  15.08.2004 10:24:42 Connected to: [HSQL Database Engine]</programlisting>
+        <para>The text between (but not including) the square brackets, is the ID that needs to 
+        be used for the various <literal>workbench.db.</literal> parameters.
         </para>
 
         <informaltable frame="all">
@@ -283,6 +295,33 @@
                 <entry><para>INFO</para></entry>
               </row>
               <row>
+                <entry><para>workbench.log.format</para></entry>
+                <entry><para>Define the format of the log messages. The following placeholders
+                are supported:
+                   <itemizedlist spacing="compact">
+                      <listitem><para>{type}</para></listitem>
+                      <listitem><para>{timestamp}</para></listitem>
+                      <listitem><para>{message}</para></listitem>
+                      <listitem><para>{error}</para></listitem>
+                      <listitem><para>{source}</para></listitem>
+                      <listitem><para>{stacktrace}</para></listitem>
+                   </itemizedlist>
+                   The order of the placeholders defines the order in the log file, except
+                   for the stacktrace which will always be printed after the message.
+                   If the log level is set to debug, the stacktrace will always be displayed
+                   even if it is not included in the format string.
+                   </para>
+                </entry>
+                <entry><para>{type} {timestamp} {message} {error}</para></entry>
+              </row>
+              <row>
+                <entry><para id="options-log-console">workbench.log.console</para></entry>
+                <entry><para>Defines whether &wb-productname; logs messages additionally to the standard
+                error output</para>
+                </entry>
+                <entry><para>false</para></entry>
+              </row>
+              <row>
                 <entry><para>workbench.workspace.autosave</para></entry>
                 <entry><para>If this is enabled, the current workspace will
                 be saved automatically, when a SQL statement is executed. This
@@ -310,32 +349,6 @@
                 <entry><para>false</para></entry>
               </row>
               <row>
-                <entry><para>workbench.db.fetchsize</para></entry>
-                <entry><para>This setting controls the default fetch size 
-								for data retrieval. If this parameter is set to a value &gt;0 
-								it will be passed to the 
-								<ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/Statement.html#setFetchSize(int)">setFetchSize()</ulink> 
-								method of the <literal>Statement</literal> object.</para>
-                </entry>
-                <entry><para>-1</para></entry>
-              </row>
-              <row>
-                <entry><para>workbench.db.inlineconstraints</para></entry>
-                <entry><para>This setting controls the generation of the <literal>CREATE TABLE</literal>
-								source in the <link linkend="dbexplorer">DbExplorer</link>. This is a comma separated
-								list of DBMS systems that only support defining primary and foreign keys inside
-								the <literal>CREATE TABLE</literal> statement.</para>
-								<para>The values that should be entered to identify the DBMS can be obtained
-								either from the log file - the "product name" will be logged with <literal>Connect to [product name]</literal>
-								Everything between (but no including) the square brackets is the identifier for the DBMS as 
-								reported by the JDBC driver.</para>
-								<para>This product name is also shown in the tooltip for the connection information in the toolbar
-								of the main window. </para>
-								<para>Example for multiple DBMS entries: <literal>FirstSQL/J,Oracle</literal></para>
-                </entry>
-                <entry><para>FirstSQL/J</para></entry>
-              </row>
-              <row>
                 <entry><para id="formatter-subselect-threshold">workbench.sql.formatter.subselect.maxlength</para></entry>
                 <entry><para>When the SQL formatter hits a sub-SELECT while
                 parsing it will not reformat any statement which is shorter
@@ -355,6 +368,82 @@
                 </entry>
                 <entry><para>true</para></entry>
               </row>
+              <row>
+                <entry><para id="manual-setting-datapumper-autoconnect">workbench.datapumper.autoconnect</para></entry>
+                <entry><para>When opening the <link linkend="data-pumper">DataPumper</link> it will 
+                connect to the current profile as the source connection. If you do not want the DataPumper to
+                connect automatically set this property to <literal>false</literal>
+								</para>
+                </entry>
+                <entry><para>true</para></entry>
+              </row>
+              <row>
+                <entry><para>workbench.db.fetchsize</para></entry>
+                <entry><para>This setting controls the default fetch size 
+								for data retrieval. If this parameter is set to a value &gt;0 
+								it will be passed to the 
+								<ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/Statement.html#setFetchSize(int)">setFetchSize()</ulink> 
+								method of the <literal>Statement</literal> object.
+                For some combinations of JDBC driver and DBMS, setting this parameter to a 
+                rather large number can improve retrieval performance because it saves network traffic.
+                Setting this parameter will affect <emphasis role="bold">all</emphasis> connections. If you want
+                to set this for an individual connection, please refer to the manual of your JDBC driver, 
+                as some JDBC drivers support this also through 
+                <link linkend="profile-extended-properties">properties</link> for the connection.
+                </para>
+                </entry>
+                <entry><para>-1 (meaning the fetch size will not be set)</para></entry>
+              </row>
+              <row>
+                <entry><para>workbench.db.ddlneedscommit</para></entry>
+                <entry><para>A list of DBMS that require a COMMIT after issuing DDL statements (such 
+                as <literal>CREATE TABLE</literal></para>
+                </entry>
+                <entry><para>PostgreSQL,Firebird</para></entry>
+              </row>
+              <row>
+                <entry><para>workbench.db.usejdbccommit</para></entry>
+                <entry><para>Some DBMS return an error when <literal>COMMIT</literal> or <literal>ROLLBACK</literal> is send as 
+                a regular command through the JDBC interface. If the DBMS is listed here, 
+                the JDBC functions <literal>commit()</literal> or <literal>rollback()</literal> will 
+                be used instead.</para>
+                </entry>
+                <entry><para>Firebird,Cloudscape</para></entry>
+              </row>
+              <row>
+                <entry><para>workbench.db.inlineconstraints</para></entry>
+                <entry><para>This setting controls the generation of the <literal>CREATE TABLE</literal>
+								source in the <link linkend="dbexplorer">DbExplorer</link>. This is a comma separated
+								list of DBMS systems that only support defining primary and foreign keys inside
+								the <literal>CREATE TABLE</literal> statement.</para>
+                </entry>
+                <entry><para>FirstSQL/J</para></entry>
+              </row>
+              <row>
+                <entry><para>workbench.db.casesensitive</para></entry>
+                <entry><para>This is (currently) only used in the table search panel of the DbExplorer.
+                The highlighting of matching values considers this setting.</para>
+                </entry>
+                <entry><para>Oracle</para></entry>
+              </row>
+              <row>
+                <entry><para>workbench.db.ignore.[dbid]</para></entry>
+                <entry><para>For a DBMS identifier you can define a list of commands
+                that are simply ignored by &wb-productname;. This is useful e.g. for Oracle, 
+                when you want to run scripts that are intended for SQL*Plus. If those scripts
+                contain special SQL*Plus commands (that are not understood by the Oracle server
+                as SQL*Plus executes these commands directly) they would fail in &wb-productname;.
+                If those commands are simply ignored and not send to the server, the scripts
+                can run without modification.</para>
+                <para>The dbid is the lower case DBMS identifier (see above) with all 
+                special characters like <literal>\/,.$[]()</literal> and spaces removed.
+                The actual ID that is used to retrieve this list is reported as an 
+                informational message in the log file (<literal>Using DBID=</literal>)</para>
+                </entry>
+                <entry><para>workbench.db.ignore.oracle =prompt, exit, whenever</para></entry>
+              </row>
+              
+
             </tbody>
           </tgroup>
         </informaltable>

@@ -151,7 +151,7 @@ public class ObjectDropperUI
 	{
 		this.objectNames = objects;
 		this.objectTypes = types;
-		this.typesAreTables = true;
+		this.typesAreTables = false;
 		int numNames = this.objectNames.size();
 		int numTypes = this.objectTypes.size();
 
@@ -160,10 +160,9 @@ public class ObjectDropperUI
 		{
 			if (i >= numTypes) continue;
 
-			if (!"table".equalsIgnoreCase( (String)this.objectTypes.get(i)) )
+			if ("table".equalsIgnoreCase( (String)this.objectTypes.get(i)) )
 			{
-				this.typesAreTables = false;
-				//break;
+				this.typesAreTables = true;
 			}
 			display[i] = this.objectTypes.get(i) + " " + this.objectNames.get(i);
 		}

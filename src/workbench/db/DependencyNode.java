@@ -29,7 +29,12 @@ public class DependencyNode
 		this.table = new TableIdentifier(adjustCatalogSchemaName(aCatalog), adjustCatalogSchemaName(aSchema), aTable);
 		this.parenttable = null;
 	}
-
+	public DependencyNode(TableIdentifier aTable)
+	{
+		this.table = aTable;
+		this.parenttable = null;
+	}
+	
 	public void addColumnDefinition(String aColumn, String aParentColumn)
 	{
 		Object parent = this.columns.get(aColumn);
@@ -74,6 +79,11 @@ public class DependencyNode
 	public String getSchema() { return this.table.getSchema(); }
 	public String getCatalog() { return this.table.getCatalog(); }
 
+	public TableIdentifier getTableId()
+	{
+		return this.table;
+	}
+	
 	public Map getColumns() 
 	{ 
 		if (this.columns == null)

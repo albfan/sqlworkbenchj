@@ -20,31 +20,35 @@ import workbench.WbManager;
 import workbench.db.ObjectScripter;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.EditorPanel;
+import workbench.interfaces.ScriptGenerationMonitor;
+import workbench.interfaces.Scripter;
 import workbench.resource.ResourceMgr;
+import workbench.gui.actions.CreateSnippetAction;
 
 /**
  *
  * @author  workbench@kellerer.org
  */
-public class ObjectScripterUI 
+public class ObjectScripterUI
 	extends JPanel
-	implements Runnable, WindowListener, ObjectScripter.ScriptGenerationMonitor
+	implements Runnable, WindowListener, ScriptGenerationMonitor
 {
 	public static final int TPYE_CREATE = 1;
 	public static final int TYPE_INSERT = 2;
-	
-	private ObjectScripter scripter;
+	public static final int TYPE_GENERATE = 3;
+
+	private Scripter scripter;
 	private Thread worker;
 	private JLabel statusMessage;
 	private EditorPanel editor;
 	private JFrame window;
-	
-	public ObjectScripterUI(ObjectScripter scripter)
+
+	public ObjectScripterUI(Scripter scripter)
 	{
 		super();
 		this.scripter = scripter;
 		this.scripter.setProgressMonitor(this);
-		
+
 		this.statusMessage = new JLabel("");
 		this.statusMessage.setBorder(new EtchedBorder());
 		this.statusMessage.setMaximumSize(new Dimension(32768, 22));
@@ -53,6 +57,8 @@ public class ObjectScripterUI
 		this.setLayout(new BorderLayout());
 		this.add(this.statusMessage, BorderLayout.SOUTH);
 		this.editor = EditorPanel.createSqlEditor();
+		CreateSnippetAction create = new CreateSnippetAction(this.editor);
+		this.editor.addPopupMenuItem(create, true);
 		this.add(this.editor, BorderLayout.CENTER);
 	}
 
@@ -62,20 +68,20 @@ public class ObjectScripterUI
 		this.worker.setName("ObjectScripter Thread");
 		this.worker.start();
 	}
-	
+
 	public void run()
 	{
 		String script = this.scripter.getScript();
 		this.editor.setText(script);
 		this.editor.setCaretPosition(0);
 		this.statusMessage.setText("");
-	}	
-	
-	public void currentTable(String aTableName)
+	}
+
+	public void currentObject(String aTableName)
 	{
 		this.statusMessage.setText(aTableName);
 		this.statusMessage.repaint();
-	}	
+	}
 
 	public void show(Window aParent)
 	{
@@ -89,7 +95,7 @@ public class ObjectScripterUI
 			{
 				this.window.setSize(500,400);
 			}
-			
+
 			if (!WbManager.getSettings().restoreWindowPosition(this.window, ObjectScripterUI.class.getName()))
 			{
 				WbSwingUtilities.center(this.window, aParent);
@@ -99,15 +105,15 @@ public class ObjectScripterUI
 		this.window.show();
 		this.startScripting();
 	}
-	
+
 	public void windowActivated(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowClosed(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowClosing(java.awt.event.WindowEvent e)
 	{
 		if (this.worker != null)
@@ -121,21 +127,21 @@ public class ObjectScripterUI
 		this.window.hide();
 		this.window.dispose();
 	}
-	
+
 	public void windowDeactivated(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowDeiconified(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowIconified(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowOpened(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 }

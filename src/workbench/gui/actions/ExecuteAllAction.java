@@ -11,6 +11,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
+import workbench.gui.sql.SqlPanel;
 
 import workbench.resource.ResourceMgr;
 
@@ -20,12 +21,12 @@ import workbench.resource.ResourceMgr;
  */
 public class ExecuteAllAction extends WbAction
 {
-	private ActionListener client;
+	private SqlPanel client;
 
-	public ExecuteAllAction(ActionListener aListener)
+	public ExecuteAllAction(SqlPanel aPanel)
 	{
 		super();
-		this.client = aListener;
+		this.client = aPanel;
 		this.initMenuDefinition(ResourceMgr.TXT_EXECUTE_ALL, KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
 		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_EXEC_ALL));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
@@ -33,6 +34,6 @@ public class ExecuteAllAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.actionPerformed(e);
+		this.client.runAll();
 	}
 }

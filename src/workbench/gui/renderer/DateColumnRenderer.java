@@ -56,24 +56,4 @@ public class DateColumnRenderer
 		}
   }
 	
-	public static void main(String[] args)
-	{
-		SimpleDateFormat form = new SimpleDateFormat("yyyy-MM-dd");
-		int loops = 50000000;
-		long start,end;
-		Date d = new Date();
-		start = System.currentTimeMillis();
-		for (int i=0; i < loops; i++)
-		{
-			String s= form.format(d);
-		}
-		end = System.currentTimeMillis();
-		long duration = (end - start);
-		long secs = duration / 1000;
-		System.out.println("dauer " + (end - start));
-		System.out.println("ms/call = " + duration / loops);
-		System.out.println("secs=" + secs	);
-		System.out.println("calls/s " + loops/secs);
-		
-	}
 }

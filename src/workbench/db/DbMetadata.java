@@ -8,25 +8,17 @@ package workbench.db;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.sql.*;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import workbench.WbManager;
+import workbench.db.mssql.MsSqlMetaData;
+import workbench.db.mssql.SqlServerConstraintReader;
 import workbench.db.mysql.EnumReader;
-
 import workbench.db.oracle.DbmsOutput;
+import workbench.db.oracle.OracleConstraintReader;
 import workbench.db.oracle.OracleMetaData;
 import workbench.db.oracle.SynonymReader;
 import workbench.exception.ExceptionUtil;
@@ -38,10 +30,7 @@ import workbench.storage.SqlSyntaxFormatter;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
-import java.sql.ResultSetMetaData;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import workbench.db.mssql.MsSqlMetaData;
+
 
 /**
  *  @author  workbench@kellerer.org
@@ -66,7 +55,9 @@ public class DbMetadata
 
 	private String schemaTerm;
 	private String catalogTerm;
-	String productName;
+	private String productName;
+	private String dbId;
+
 	private DatabaseMetaData metaData;
 	//private List tableListColumns;
 	private WbConnection dbConnection;
@@ -106,7 +97,8 @@ public class DbMetadata
 	private boolean isMySql = false;
 	private boolean isASA = false; // Adaptive Server Anywhere
 	private boolean isInformix = false;
-
+	private boolean isCloudscape = false;
+	
 	private boolean createInlineConstraints = false;
 
 	private AbstractConstraintReader constraintReader = null;
@@ -170,6 +162,7 @@ public class DbMetadata
 		try
 		{
 			this.productName = this.metaData.getDatabaseProductName();
+			this.dbId = null;
 		}
 		catch (SQLException e)
 		{
@@ -222,6 +215,11 @@ public class DbMetadata
 			this.isInformix = true;
 			this.selectIntoPattern = Pattern.compile(SELECT_INTO_INFORMIX);
 		}
+		else if (productLower.indexOf("cloudscape") > -1)
+		{
+			this.isCloudscape = true;
+			this.constraintReader = new CloudscapeConstraintReader();
+		}
 
 		try
 		{
@@ -250,6 +248,27 @@ public class DbMetadata
 	}
 
 	/**
+	 *	Return the name of the DBMS as reported by the JDBC driver
+	 */
+	public String getProductName()
+	{
+		return this.productName;
+	}
+
+	/**
+	 * 	Return a clean version of the productname.
+	 *  @see #getProductName()
+	 */
+	private String getDbId()
+	{
+		if (this.dbId == null)
+		{
+			this.dbId = this.productName.replaceAll("[ \\(\\)\\[\\]\\/$,.]", "_").toLowerCase();
+			LogMgr.logInfo("DbMetadata", "Using DBID=" + this.dbId);
+		}
+		return this.dbId;
+	}
+	/**
 	 *	Returns a comma separated list of SQL verbs that should
 	 *  be ignored during execution for this DBMS.
 	 *	This can be configured in workbench.properties:
@@ -257,9 +276,7 @@ public class DbMetadata
 	 */
 	public String getVerbsToIgnore()
 	{
-		String dbms = this.productName.replaceAll(" ", "_");
-
-		String list = WbManager.getSettings().getProperty("workbench.db.ignore." + dbms, "");
+		String list = WbManager.getSettings().getProperty("workbench.db.ignore." + this.getDbId(), "");
 		return list;
 	}
 
@@ -312,6 +329,7 @@ public class DbMetadata
 	public boolean isHsql() { return this.isHsql; }
 	public boolean isFirebird() { return this.isFirebird; }
 	public boolean isSqlServer() { return this.isSqlServer; }
+	public boolean isCloudscape() { return this.isCloudscape; }
 
 	/**
 	 *	Return a list of datatype as returned from DatabaseMetaData.getTypeInfo()
@@ -1377,12 +1395,46 @@ public class DbMetadata
 		return result;
 	}
 
+	/** The column index for a {@link workbench.storage.DataStore} returned
+	 *  by {@link getTableDefinition(String, String, String) that holds
+	 *  the column name
+	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_COL_NAME = 0;
+
+	/** The column index for a {@link workbench.storage.DataStore} returned
+	 *  by {@link getTableDefinition(String, String, String) that holds
+	 *  the DBMS specific data type string
+	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE = 1;
+
+	/** The column index for a {@link workbench.storage.DataStore} returned
+	 *  by {@link getTableDefinition(String, String, String) that holds
+	 *  the primary key flag
+	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_PK_FLAG = 2;
+
+	/** The column index for a {@link workbench.storage.DataStore} returned
+	 *  by {@link getTableDefinition(String, String, String) that holds
+	 *  the nullable flag
+	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_NULLABLE = 3;
+
+	/** The column index for a {@link workbench.storage.DataStore} returned
+	 *  by {@link getTableDefinition(String, String, String) that holds
+	 *  the default value for this column
+	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_DEFAULT = 4;
+
+	/** The column index for a {@link workbench.storage.DataStore} returned
+	 *  by {@link getTableDefinition(String, String, String) that holds
+	 *  the remark for this column
+	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_REMARKS = 5;
+
+	/** The column index for a {@link workbench.storage.DataStore} returned
+	 *  by {@link getTableDefinition(String, String, String) that holds
+	 *  the integer value of the java datatype from {@link java.sql.Types}
+	 */
 	public final static int COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE = 6;
 	public final static int COLUMN_IDX_TABLE_DEFINITION_SCALE = 7;
 	public final static int COLUMN_IDX_TABLE_DEFINITION_SIZE = 7;
@@ -1401,12 +1453,28 @@ public class DbMetadata
 		return this.getTableDefinition(aCatalog, aSchema, aTable, "TABLE", true);
 	}
 
+ /**
+  *
+  * @param aCatalog
+  * @param aSchema
+  * @param aTable
+  * @param aType
+  * @throws SQLException
+  * @return
+  */
 	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, String aType)
 		throws SQLException
 	{
 		return this.getTableDefinition(aCatalog, aSchema, aTable, aType, true);
 	}
 
+	/**
+  * Returns the definition of the given
+  * table in a {@link workbench.storage.DataStore }
+  * @return definiton of the datastore
+  * @param aTable The identifier of the table
+  * @throws SQLException If the table was not found or an error occurred
+  */
 	public DataStore getTableDefinition(TableIdentifier aTable)
 		throws SQLException
 	{
@@ -1702,7 +1770,7 @@ public class DbMetadata
 				Iterator defs = funcIndex.entrySet().iterator();
 				while (defs.hasNext())
 				{
-					Map.Entry entry = (Map.Entry)defs.next();
+					Entry entry = (Entry)defs.next();
 					String index = (String)entry.getKey();
 					ArrayList old = (ArrayList)idxInfo.get(index);
 					ArrayList newList = (ArrayList)entry.getValue();
@@ -1714,7 +1782,7 @@ public class DbMetadata
 			Iterator itr = idxInfo.entrySet().iterator();
 			while (itr.hasNext())
 			{
-				Map.Entry entry = (Map.Entry)itr.next();
+				Entry entry = (Entry)itr.next();
 				ArrayList colist = (ArrayList)entry.getValue();
 				String index = (String)entry.getKey();
 				int row = idxData.addRow();
@@ -1973,7 +2041,15 @@ public class DbMetadata
 		rs.close();
 		stmt.close();
 
-		return result.toString();
+		if (this.isCloudscape)
+		{
+			String r = result.toString().replaceAll("\\\\n", "\n");
+			return r;
+		}
+		else
+		{
+			return result.toString();
+		}
 	}
 
 	public DataStoreTableModel getListOfCatalogs()
@@ -2433,7 +2509,7 @@ public class DbMetadata
 		sql.append("INSERT INTO ");
 		sql.append(table);
 		sql.append("\n(\n");
-		
+
 		boolean quote = false;
 		for (int i=0; i < colCount; i++)
 		{
@@ -2444,13 +2520,13 @@ public class DbMetadata
 			sql.append(column);
 		}
 		sql.append("\n)\nVALUES\n(\n");
-		
+
 		for (int i=0; i < colCount; i++)
 		{
 			String dummyvalue = "";
 			String type = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
 			String name = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-			if (type != null || type.length() > 0) 
+			if (type != null || type.length() > 0)
 			{
 				type = type.toLowerCase();
 				dummyvalue = name + "_" + type;
@@ -2459,7 +2535,7 @@ public class DbMetadata
 					dummyvalue = "'" + dummyvalue + "'";
 				}
 			}
-			
+
 			if (i > 0 && i < colCount) sql.append(",\n");
 			sql.append("   ");
 			sql.append(dummyvalue);
@@ -2467,7 +2543,7 @@ public class DbMetadata
 		sql.append("\n);\n");
 		return sql.toString();
 	}
-	
+
 	/** 	Return the SQL statement to re-create the given table. (in the dialect for the
 	 *  current DBMS)
 	 * @return the SQL statement to create the given table.
@@ -2992,7 +3068,7 @@ public class DbMetadata
 		Iterator itr = entries.iterator();
 		while (itr.hasNext())
 		{
-			Map.Entry entry = (Map.Entry)itr.next();
+			Entry entry = (Entry)itr.next();
 			String grantee = (String)entry.getKey();
 			StringBuffer privs = (StringBuffer)entry.getValue();
 			result.append("GRANT ");

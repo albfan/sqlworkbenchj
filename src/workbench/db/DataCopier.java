@@ -193,6 +193,7 @@ public class DataCopier
 
 		if (target.getMetadata().tableExists(newTableName))
 		{
+			LogMgr.logInfo("DataCopier.copyToNewTable()", "New table " + newTableName.getTableExpression() + " does already exist!");
 			List requestedCols = null;
 			if (sourceColumns != null)
 			{
@@ -283,10 +284,10 @@ public class DataCopier
 		{
 			TableCreator creator = new TableCreator(this.targetConnection, this.targetTable, realCols);
 			creator.createTable();
-			
+
 			// no need to delete rows from a newly created table
 			this.setDeleteTarget(false);
-			
+
 			String msg = creator.getMessages();
 			if (msg != null)
 			{
@@ -321,7 +322,7 @@ public class DataCopier
 		this.retrieveSql = aSourceQuery;
 		this.useQuery = true;
 		this.targetColumnsForQuery = queryColumns;
-		
+
 		if (aTargetTable.isNewTable())
 		{
 			if (!target.getMetadata().tableExists(aTargetTable))
@@ -461,16 +462,20 @@ public class DataCopier
 		return this.importer.getWarnings();
 	}
 
-	public void start() throws Exception
+	public void start()
+		throws Exception
 	{
 		ResultSet rs = null;
-		//this.isRunning = true;
+
+		String step = null;
 		try
 		{
+			step = "retrieve";
 			this.retrieveStatement = this.sourceConnection.createStatement();
 			rs = this.retrieveStatement.executeQuery(this.retrieveSql);
 			int colCount = rs.getMetaData().getColumnCount();
 			Object[] rowData = new Object[colCount];
+			step = "copy";
 			while (this.keepRunning && rs.next())
 			{
 				for (int i=0; i < colCount; i++)
@@ -480,6 +485,8 @@ public class DataCopier
 				}
 				if (this.keepRunning) this.importer.processRow(rowData);
 			}
+			step = "cleanup";
+
 			this.importer.importFinished();
 			String msg = this.getRowsInsertedMessage();
 			if (msg != null) this.addMessage(msg);
@@ -491,7 +498,22 @@ public class DataCopier
 		catch (Exception e)
 		{
 			LogMgr.logError("DataCopier.start()", "Error when copying data", e);
+			String msg = null;
+			if ("retrieve".equals(step))
+			{
+				msg = ResourceMgr.getString("ErrorCopyRetrieving");
+			}
+			else if ("copy".equals(step))
+			{
+				msg = ResourceMgr.getString("ErrorCopyInsert");
+			}
+			else if ("cleanup".equals(step))
+			{
+				msg = ResourceMgr.getString("ErrorCopyCleanup");
+			}
+			this.addError(msg + ": " + ExceptionUtil.getDisplay(e, false));
 			this.importer.importCancelled();
+			throw e;
 		}
 		finally
 		{
@@ -739,24 +761,31 @@ public class DataCopier
 		StringBuffer log = new StringBuffer(250);
 
 		String[] msg = this.getImportWarnings();
-		int count = msg.length;
-		for (int i=0; i < count; i++)
+		int count = 0;
+		if (msg != null)
 		{
-			log.append(msg[i]);
-			log.append("\n");
+			count = msg.length;
+			for (int i=0; i < count; i++)
+			{
+				if (msg[i] != null) log.append(msg[i]);
+				log.append("\n");
+			}
 		}
 		msg = this.getImportErrors();
-		count = msg.length;
-		if (count > 0) log.append("\n");
-		for (int i=0; i < count; i++)
+		if (msg != null)
 		{
-			log.append(msg[i]);
-			log.append("\n");
+			count = msg.length;
+			if (count > 0) log.append("\n");
+			for (int i=0; i < count; i++)
+			{
+				if (msg[i] != null) log.append(msg[i]);
+				log.append("\n");
+			}
 		}
 
 		String errmsg = this.getErrorMessage();
 		if (errmsg != null) log.append(errmsg);
-		
+
 		return log.toString();
 	}
 }

@@ -14,32 +14,13 @@ import java.util.List;
 import workbench.db.DbMetadata;
 
 import workbench.db.WbConnection;
+import workbench.gui.sql.VariablePrompter;
 import workbench.log.LogMgr;
-import workbench.sql.MacroManager;
-import workbench.sql.commands.DdlCommand;
-import workbench.sql.commands.SelectCommand;
-import workbench.sql.commands.SetCommand;
-import workbench.sql.commands.SingleVerbCommand;
-import workbench.sql.commands.UpdatingCommand;
-import workbench.sql.commands.UseCommand;
-import workbench.sql.wbcommands.WbCopy;
-import workbench.sql.wbcommands.WbDescribeTable;
-import workbench.sql.wbcommands.WbDisableOraOutput;
-import workbench.sql.wbcommands.WbEnableOraOutput;
-import workbench.sql.wbcommands.WbHelp;
-import workbench.sql.wbcommands.WbImport;
-import workbench.sql.wbcommands.WbListCatalogs;
-import workbench.sql.wbcommands.WbListProcedures;
-import workbench.sql.wbcommands.WbListTables;
-import workbench.sql.wbcommands.WbOraExecute;
-import workbench.sql.wbcommands.WbExport;
+import workbench.sql.commands.*;
+import workbench.sql.wbcommands.*;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
-import workbench.sql.commands.IgnoredCommand;
-import workbench.sql.wbcommands.WbDefineVar;
-import workbench.sql.wbcommands.WbListVars;
 import workbench.util.StringUtil;
-import workbench.sql.wbcommands.WbXslt;
 
 /**
  *
@@ -92,7 +73,10 @@ public class StatementRunner
 		sql = new WbXslt();
 		cmdDispatch.put(sql.getVerb(), sql);
 
-		sql = new WbDefineVar();
+		cmdDispatch.put(WbDefineVar.DEFINE_LONG.getVerb(), WbDefineVar.DEFINE_LONG);
+		cmdDispatch.put( WbDefineVar.DEFINE_SHORT.getVerb(), WbDefineVar.DEFINE_SHORT);
+		
+		sql = new WbRemoveVar();
 		cmdDispatch.put(sql.getVerb(), sql);
 
 		sql = new WbListVars();
@@ -216,9 +200,7 @@ public class StatementRunner
 			return;
 		}
 
-		String verb = this.getRealVerb(cleanSql);
-
-		this.currentCommand = (SqlCommand)this.cmdDispatch.get(verb);
+		this.currentCommand = this.getCommandToUse(cleanSql);
 
 		// if no mapping is found use the default implementation
 		if (this.currentCommand == null)
@@ -234,7 +216,7 @@ public class StatementRunner
 		this.currentCommand.setConsumerWaiting(this.currentConsumer != null);
 		this.currentCommand.setRowMonitor(this.rowMonitor);
 		this.currentCommand.setMaxRows(maxRows);
-		String realSql = parameterPool.replaceParameter(aSql);
+		String realSql = parameterPool.replaceAllParameters(aSql);
 		this.result = this.currentCommand.execute(this.dbConnection, realSql);
 
 		if (this.currentCommand.isResultSetConsumer())
@@ -256,22 +238,27 @@ public class StatementRunner
 	/**
 	 *	Check for a SELECT ... INTO syntax for Informix which actually
 	 *  creates a table. In that case we will simply pretend it's a
-	 *  CREATE statement
+	 *  CREATE statement.
+	 *	In all other casese, the approriate SqlCommand from commanDispatch will be used
 	 */
-	private String getRealVerb(String cleanSql)
+	private SqlCommand getCommandToUse(String cleanSql)
 	{
 		String verb = SqlUtil.getSqlVerb(cleanSql).toUpperCase();
 		DbMetadata meta = this.dbConnection.getMetadata();
-		if (!meta.supportsSelectIntoNewTable()) return verb;
+		if (!meta.supportsSelectIntoNewTable()) 
+		{
+			return (SqlCommand)this.cmdDispatch.get(verb);
+		}
 
 		if (meta.isSelectIntoNewTable(cleanSql))
 		{
 			LogMgr.logDebug("StatementRunner.getRealVerb()", "Found 'SELECT ... INTO new_table'");
-			return "*";
+			// use the generic SqlCommand implementation for this.
+			return (SqlCommand)this.cmdDispatch.get("*");
 		}
 		else
 		{
-			return verb;
+			return (SqlCommand)this.cmdDispatch.get(verb);
 		}
 	}
 
@@ -296,7 +283,7 @@ public class StatementRunner
 		}
 		catch (Throwable th)
 		{
-			LogMgr.logDebug("StatementRunner.cancel()", "Error when cancelling statement", th);
+			LogMgr.logWarning("StatementRunner.cancel()", "Error when cancelling statement", th);
 		}
 	}
 

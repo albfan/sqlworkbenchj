@@ -532,7 +532,7 @@ public class ConnectionEditorPanel
 		if (this.currentProfile == null) return;
 		Properties p = this.currentProfile.getConnectionProperties();
 		ConnectionPropertiesEditor editor = new ConnectionPropertiesEditor(p);
-		Dimension d = new Dimension(200,200);
+		Dimension d = new Dimension(300,250);
 		editor.setMinimumSize(d);
 		editor.setPreferredSize(d);
 

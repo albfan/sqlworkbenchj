@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -28,6 +29,7 @@ import workbench.resource.Settings;
 import workbench.resource.ShortcutManager;
 import workbench.sql.BatchRunner;
 import workbench.sql.MacroManager;
+import workbench.sql.SqlParameterPool;
 import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 import workbench.util.WbCipher;
@@ -96,11 +98,6 @@ public class WbManager
 	public static WbManager getInstance()
 	{
 		return wb;
-	}
-
-	public static Settings getSettings()
-	{
-		return wb.settings;
 	}
 
 	public static ShortcutManager getShortcutManager()
@@ -764,12 +761,16 @@ public class WbManager
 	private static final String ARG_ABORT = "abortonerror";
 	private static final String ARG_SUCCESS_SCRIPT = "cleanupsuccess";
 	private static final String ARG_ERROR_SCRIPT = "cleanuperror";
+	private static final String ARG_VARDEF = "vardef";
 
 	private static final String ARG_CONN_URL = "url";
 	private static final String ARG_CONN_DRIVER = "driver";
 	private static final String ARG_CONN_JAR = "driverjar";
 	private static final String ARG_CONN_USER = "username";
 	private static final String ARG_CONN_PWD = "password";
+	private static final String ARG_IGNORE_DROP = "ignoredroperrors";
+	private static final String ARG_DISPLAY_RESULT = "displayresult";
+
 	private static final String ARG_SHOW_PUMPER = "datapumper";
 
 	private void initCmdLine(String[] args)
@@ -783,6 +784,7 @@ public class WbManager
 		cmdLine.addArgument(ARG_ABORT);
 		cmdLine.addArgument(ARG_SUCCESS_SCRIPT);
 		cmdLine.addArgument(ARG_ERROR_SCRIPT);
+		cmdLine.addArgument(ARG_VARDEF);
 
 		cmdLine.addArgument(ARG_CONN_URL);
 		cmdLine.addArgument(ARG_CONN_DRIVER);
@@ -790,6 +792,9 @@ public class WbManager
 		cmdLine.addArgument(ARG_CONN_USER);
 		cmdLine.addArgument(ARG_CONN_PWD);
 		cmdLine.addArgument(ARG_SHOW_PUMPER);
+		cmdLine.addArgument(ARG_IGNORE_DROP);
+		cmdLine.addArgument(ARG_DISPLAY_RESULT);
+
 		try
 		{
 			cmdLine.parse(args);
@@ -816,6 +821,19 @@ public class WbManager
 				this.batchMode = true;
 				this.connMgr.setReadTemplates(false);
 			}
+			
+			value = cmdLine.getValue(ARG_VARDEF);
+			if (value != null && value.length() > 0)
+			{
+				try
+				{
+					SqlParameterPool.getInstance().readFromFile(value);
+				}
+				catch (IOException e)
+				{
+					LogMgr.logError("WbManager.initCmdLine()", "Error reading variable definition from file " + value, e);
+				}
+			}
 		}
 		catch (Exception e)
 		{
@@ -823,16 +841,16 @@ public class WbManager
 		if (trace) System.out.println("WbManager.initCmdLine() - done");
 	}
 
-	public void initSettings()
+	public static Settings getSettings()
 	{
-		this.settings = new Settings();
+		return wb.settings;
 	}
-
+	
 	public void init()
 	{
 		if (trace) System.out.println("WbManager.init() - start");
-		this.initSettings();
-		LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
+		this.settings = Settings.getInstance();
+		LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
 		LogMgr.logInfo("WbManager.init()", "Using Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") );
 		LogMgr.logDebug("WbManager.init()", "Use -Dworkbench.startuptrace=true to display trace messages during startup");
     if (this.cmdLine == null) this.initCmdLine(null);
@@ -874,6 +892,7 @@ public class WbManager
 			String scripts = cmdLine.getValue(ARG_SCRIPT);
 			String profilename = cmdLine.getValue(ARG_PROFILE);
 			String errorHandling = cmdLine.getValue(ARG_ABORT);
+			boolean showResult = StringUtil.stringToBool(cmdLine.getValue(ARG_DISPLAY_RESULT));
 			boolean abort = true;
 			if (errorHandling != null)
 			{
@@ -899,6 +918,8 @@ public class WbManager
 			{
 				profile = this.connMgr.getProfile(StringUtil.trimQuotes(profilename));
 			}
+			boolean ignoreDrop = "true".equalsIgnoreCase(cmdLine.getValue(ARG_IGNORE_DROP));
+			profile.setIgnoreDropErrors(ignoreDrop);
 
 			String success = cmdLine.getValue(ARG_SUCCESS_SCRIPT);
 			String error = cmdLine.getValue(ARG_ERROR_SCRIPT);
@@ -913,6 +934,7 @@ public class WbManager
 				BatchRunner runner = new BatchRunner(scripts);
 				try
 				{
+					runner.showResultSets(showResult);
 					runner.setAbortOnError(abort);
 					runner.setErrorScript(error);
 					runner.setSuccessScript(success);
@@ -972,6 +994,9 @@ public class WbManager
 	public static void main(String args[])
 	{
 		if (trace) System.out.println("WbManager.main() - start");
+		// the command line needs to be initialized before everything
+		// else, in order to set some of the system poperties correctly
+		// e.g. the configdir.
 		wb.initCmdLine(args);
 		wb.init();
 		if (trace) System.out.println("WbManager.main() - done");

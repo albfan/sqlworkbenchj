@@ -336,6 +336,7 @@ public class DbExplorerPanel
 	private void fireSchemaChanged(final boolean retrieve)
 	{
 		final String schema = (String)schemaSelector.getSelectedItem();
+
 		Thread t = new Thread()
 		{
 			public void run()

@@ -90,11 +90,9 @@ public class DbDateFormatter
 		format.setFormat("yyyy-MM-dd HH:mm:ss");
 		format.setFunctionCall(null);
 
-
 		m.put("Microsoft SQL Server", format);
 		WbPersistence.writeObject(m, "../src/workbench/storage/DateLiteralFormats.xml");
 
 		m.put(SqlSyntaxFormatter.GENERAL_SQL, format);
-
 	}
 }

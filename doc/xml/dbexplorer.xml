@@ -35,6 +35,14 @@
         returns that information), other tables that are referenced by the
         currently selected table, any table that references the currently
         selected table and any trigger that is defined on that table.</para>
+        
+        <para>The column list will also display any comments defined for the column.
+        Oracle's JDBC driver does not return those comments by default. To enable the 
+        display of column comments (remarks) you have to supply an <link linkend="profile-extended-properties">extended property</link>
+        in your connection profile. The property's name should be <literal>remarksReporting</literal>
+        and the value should be set to <literal>true</literal>.
+        </para>
+
 
         <para>When an Oracle synonym is selected, the columns tab will display
         the column definition of the underlying table or view. The source tab
@@ -56,6 +64,35 @@
         See the description of the <link linkend="command-spool">SPOOL command</link>
         for details.</para>
 
+        <para><emphasis>Create Empty INSERT</emphasis></para>
+
+        <para>This creates an empty <literal>INSERT</literal>statement for the 
+        currently selected table.
+        </para>
+        
+        <para><emphasis>Drop</emphasis></para>
+
+        <para>Drops the selected objects. If at least one object is a table, and 
+        the currently used DBMS supports cascaded dropping of constraints, you 
+        can enable cascaded delete of constraints. If this option is enabled
+        &wb-productname; would generate e.g. for Oracle a <literal>DROP TABLE
+        mytable CASCADE CONSTRAINTS</literal>. This is necessary if you want to
+        drop several tables at the same time that have foreign key constraints
+        defined.
+        </para>
+
+        <para><emphasis>Create SQL Script</emphasis></para>
+
+        <para>This will create one SQL script to recreate all selected objects.
+        The SQL statements for the objects will be created in the following order:
+        </para>
+        <simplelist columns="1">
+            <member>SEQUENCES</member>
+            <member>TABLEs</member>
+            <member>VIEWs</member>
+            <member>SYNONYMS</member>
+        </simplelist>
+               
         <para><emphasis>Show table data</emphasis></para>
 
         <para>This will put a SELECT statement into the SQL editor to display
@@ -152,13 +189,13 @@
       <para>The generated SQL statements are logged in the second tab, labelled
       <literal>SQL Statements</literal>.</para>
 
-			<para>In the resulting tables, &wb-productname; tries to highlight those columns
-			which match the criteria. This might not always work, if you apply a function to the
-			column itself such as <literal>to_upper()</literal> &wb-productname; does not know
-			that this will result in a case-insesitive search on the database. &wb-productname; tries to
-			guess if the given function/value combination might result in a case insensitive search (especially
-			on a DBMS which does a case sensitive search by default) but this might not work
-			in all the cases and for all DBMS</para>
+      <para>In the resulting tables, &wb-productname; tries to highlight those columns
+      which match the criteria. This might not always work, if you apply a function to the
+      column itself such as <literal>to_upper()</literal> &wb-productname; does not know
+      that this will result in a case-insesitive search on the database. &wb-productname; tries to
+      guess if the given function/value combination might result in a case insensitive search (especially
+      on a DBMS which does a case sensitive search by default) but this might not work
+      in all the cases and for all DBMS</para>
 
     </section>
   </section>

@@ -96,6 +96,34 @@ public class StringUtil
 
 		return temp.toString();
 	}
+	
+	public static final StringBuffer replaceBuffer(StringBuffer haystack, String needle, String replacement)
+	{
+		
+		int pos = haystack.indexOf(needle);
+		if (pos == -1)
+		{
+			return haystack;
+		}
+
+		StringBuffer result = new StringBuffer(haystack.length() + 50);
+
+		int lastpos = 0;
+		int len = needle.length();
+		while (pos != -1)
+		{
+			result.append(haystack.substring(lastpos, pos));
+			result.append(replacement);
+			lastpos = pos + len;
+			pos = haystack.indexOf(needle, lastpos);
+		}
+		if (lastpos < haystack.length())
+		{
+			result.append(haystack.substring(lastpos));
+		}
+		return result;
+	}
+	
 
 	public static final String getStartingWhiteSpace(final String aLine)
 	{
@@ -743,6 +771,29 @@ public class StringUtil
 		}
 	}
 
+	public static final String REGEX_SPECIAL_CHARS = "\\[](){}.*+?$^|";
+
+	public static String quoteRegexMeta(String str)
+	{
+		if (str == null) return null;
+		if (str.length() == 0)
+		{
+			return "";
+		}
+		int len = str.length();
+		StringBuffer buf = new StringBuffer(len + 5);
+		for (int i = 0; i < len; i++)
+		{
+			char c = str.charAt(i);
+			if (REGEX_SPECIAL_CHARS.indexOf(c) != -1)
+			{
+				buf.append('\\');
+			}
+			buf.append(c);
+		}
+		return buf.toString();
+	}
+	
 	public static void main(String args[])
 	{
 		try

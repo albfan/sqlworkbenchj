@@ -105,7 +105,7 @@ public class DdlCommand extends SqlCommand
 			result.addMessage(ExceptionUtil.getDisplay(e));
       this.addExtendErrorInfo(aConnection, aSql, result);
 			result.setFailure();
-			LogMgr.logDebug("SelectCommand.execute()", "Error executing statement", e);
+			LogMgr.logDebug("DdlCommand.execute()", "Error executing statement", e);
 		}
 		finally
 		{

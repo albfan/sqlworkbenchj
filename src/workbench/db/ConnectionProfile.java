@@ -318,6 +318,7 @@ public class ConnectionProfile
 		result.setAutocommit(this.autocommit);
 		result.setDescription(this.description);
 		result.setDriverclass(this.driverclass);
+		result.setDriverName(this.driverName);
 		result.setName(this.name);
 		result.setPassword(this.getPassword());
 		result.setUrl(this.url);
@@ -440,7 +441,7 @@ public class ConnectionProfile
 	{
 		return disableUpdateTableCheck;
 	}
-	
+
 	/**
 	 * Setter for property disableUpdateTableCheck.
 	 * @param disableUpdateTableCheck New value of property disableUpdateTableCheck.
@@ -450,5 +451,5 @@ public class ConnectionProfile
 		if (aFlag != this.disableUpdateTableCheck) this.changed = true;
 		this.disableUpdateTableCheck = aFlag;
 	}
-	
+
 }

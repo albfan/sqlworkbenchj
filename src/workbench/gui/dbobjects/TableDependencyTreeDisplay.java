@@ -26,6 +26,7 @@ import workbench.WbManager;
 
 import workbench.db.DependencyNode;
 import workbench.db.TableDependency;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbScrollPane;
@@ -58,7 +59,7 @@ public class TableDependencyTreeDisplay
 		this.connection = aConn;
 	}
 	
-	public void readTree(String aCatalog, String aSchema, String aTable, boolean exportedKeys)
+	public void readTree(TableIdentifier aTable, boolean exportedKeys)
 	{
 		this.renderer = new DependencyTreeCellRenderer();
 		this.showExported = exportedKeys;
@@ -67,7 +68,7 @@ public class TableDependencyTreeDisplay
 			WbSwingUtilities.showWaitCursor(this);
       TableDependency dep = new TableDependency();
       dep.setConnection(this.connection);
-      dep.setTableName(aCatalog, aSchema, aTable);
+      dep.setTable(aTable);
       dep.readDependencyTree(exportedKeys);
       DependencyNode root = dep.getRootNode();
       this.readTreeNodes(root);
@@ -211,38 +212,6 @@ public class TableDependencyTreeDisplay
 		}
 		this.nodesToExpand.clear();
 		this.nodesToExpand = null;
-	}
-	
-	public static void main(String args[])
-	{
-		Connection con = null;
-		try
-		{
-			//Class.forName("com.inet.tds.TdsDriver");
-			Class.forName("oracle.jdbc.OracleDriver");
-			//con = DriverManager.getConnection("jdbc:inetdae:demsqlvisa02:1433?database=visa_cpl_test", "visa", "savivisa");
-			//con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:oradb", "auto", "auto");
-			con = DriverManager.getConnection("jdbc:oracle:thin:@infintema:1526:tbg", "migration", "tbg");
-			//con = DriverManager.getConnection("jdbc:oracle:thin:@ztxcpndbitg01.cce.cpqcorp.net:1521:D146", "R_CRZ", "dorfman20");
-			WbConnection wb = new WbConnection(con);
-			
-			JFrame f = new JFrame("Test");
-      TableDependencyTreeDisplay display = new TableDependencyTreeDisplay();
-			display.setConnection(wb);
-			display.readTree(null,"MIGRATION", "PERSON", true);
-			//display.readTree(null, "EXPRESSO", "product", false);
-			f.getContentPane().add(display);
-			f.pack();
-			f.show();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			try { con.close(); } catch (Throwable th) {}
-		}
 	}
 	
 }

@@ -9,21 +9,20 @@ package workbench.db;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
+import workbench.interfaces.ScriptGenerationMonitor;
+import workbench.interfaces.Scripter;
+import workbench.util.StrBuffer;
 
 /**
  *
  * @author  workbench@kellerer.org
  */
 public class ObjectScripter
+	implements Scripter
 {
-	public interface ScriptGenerationMonitor
-	{
-		void currentTable(String aTableName);
-	}
-
 	private Map objectList;
 	private DbMetadata meta;
-	private StringBuffer script;
+	private StrBuffer script;
 	private ScriptGenerationMonitor progressMonitor;
 
 	public ObjectScripter(Map objectList, WbConnection aConnection)
@@ -41,7 +40,7 @@ public class ObjectScripter
 	{
 		if (this.script == null)
 		{
-			this.script = new StringBuffer(this.objectList.size() * 500);
+			this.script = new StrBuffer(this.objectList.size() * 500);
 			this.appendObjectType("sequence");
 			this.appendObjectType("table");
 			this.appendObjectType("view");
@@ -64,7 +63,7 @@ public class ObjectScripter
 			{
 				if (this.progressMonitor != null)
 				{
-					this.progressMonitor.currentTable(object);
+					this.progressMonitor.currentObject(object);
 				}
 				try
 				{

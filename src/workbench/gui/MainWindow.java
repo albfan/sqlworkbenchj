@@ -91,6 +91,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.MacroManager;
+import workbench.util.StrBuffer;
 import workbench.util.WbWorkspace;
 
 
@@ -855,14 +856,24 @@ public class MainWindow
 		catch (SQLException se)
 		{
 			this.currentProfile = null;
-			this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_CONNECTION_ERROR) + "\r\n\n" + se.toString());
-			LogMgr.logError("MainWindow.connectTo()", "SQL Exception when connecting", se);
 			error = se.getMessage();
+			
+			StrBuffer logmsg = new StrBuffer(200);
+			logmsg.append(se.getMessage());
+			SQLException next = se.getNextException();
+			while (next != null)
+			{
+				logmsg.append("\n");
+				logmsg.append(next.getMessage());
+				next = next.getNextException();
+			}
+			this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_CONNECTION_ERROR) + "\n\n" + logmsg.toString());
+			LogMgr.logError("MainWindow.connectTo()", "SQL Exception when connecting", se);
 		}
 		catch (Throwable e)
 		{
 			this.currentProfile = null;
-			this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_CONNECTION_ERROR) + "\r\n\n" + e.toString());
+			this.showLogMessage(ResourceMgr.getString(ResourceMgr.ERR_CONNECTION_ERROR) + "\n\n" + e.toString());
 			LogMgr.logError("MainWindow.connectTo()", "Error during connect", e);
 			error = ExceptionUtil.getDisplay(e);
 		}

@@ -23,7 +23,7 @@ public abstract class AbstractConstraintReader
 {
 	private PreparedStatement columnConstraintStatement;
 	private PreparedStatement tableConstraintStatement;
-	
+
 	public AbstractConstraintReader()
 	{
 	}
@@ -57,7 +57,7 @@ public abstract class AbstractConstraintReader
 		if (sql == null) return Collections.EMPTY_MAP;
 
 		HashMap result = new HashMap();
-		
+
 		ResultSet rs = null;
 		try
 		{
@@ -104,7 +104,7 @@ public abstract class AbstractConstraintReader
 		StringBuffer result = new StringBuffer(100);
 		String prefix = this.getPrefixTableConstraintKeyword();
 		String suffix = this.getSuffixTableConstraintKeyword();
-		
+
 		ResultSet rs = null;
 		try
 		{
@@ -152,7 +152,7 @@ public abstract class AbstractConstraintReader
 		}
 		return result.toString();
 	}
-	
+
 	public void done()
 	{
 		if (this.tableConstraintStatement != null)
@@ -164,5 +164,5 @@ public abstract class AbstractConstraintReader
 			try { this.columnConstraintStatement.close(); } catch (Throwable th) {}
 		}
 	}
-	
+
 }

@@ -120,10 +120,9 @@ public class WbSwingUtilities
 
 	public static void showWaitCursorOnWindow(Component caller)
 	{
-		Window parent = SwingUtilities.getWindowAncestor(caller);
-		//showWaitCursor(caller);
-		if (parent != null) showWaitCursor(parent);
+		showCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR), caller, true);
 	}
+
 	public static void showDefaultCursorOnWindow(Component caller)
 	{
 		showDefaultCursor(caller, true);
@@ -131,6 +130,8 @@ public class WbSwingUtilities
 
 	public static void showWaitCursor(final Component caller)
 	{
+		caller.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		/*
 		if (SwingUtilities.isEventDispatchThread())
 		{
 			caller.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -145,14 +146,33 @@ public class WbSwingUtilities
 				}
 			});
 		}
+		*/
 	}
 
 	public static void showDefaultCursor(final Component caller)
 	{
 		showDefaultCursor(caller, false);
 	}
+
 	public static void showDefaultCursor(final Component caller, final boolean includeParents)
 	{
+		showCursor(null, caller, includeParents);
+	}
+
+	private static void showCursor(Cursor cursor, final Component caller, final boolean includeParents)
+	{
+		caller.setCursor(cursor);
+		if (includeParents)
+		{
+			Container c = caller.getParent();
+			while (c != null)
+			{
+				c.setCursor(cursor);
+				c = c.getParent();
+			}
+		}
+
+		/*
 		if (SwingUtilities.isEventDispatchThread())
 		{
 			caller.setCursor(null);
@@ -185,6 +205,7 @@ public class WbSwingUtilities
 				}
 			});
 		}
+		*/
 	}
 
 	public static void showErrorMessage(Component aCaller, String aMessage)

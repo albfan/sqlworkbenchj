@@ -1,5 +1,5 @@
 /*
- * FirebirdColumnConstraintReader.java
+ * ASAColumnConstraintReader.java
  *
  * Created on February 14, 2004, 1:35 PM
  */
@@ -36,4 +36,5 @@ public class ASAConstraintReader extends AbstractConstraintReader
 	
 	public String getColumnConstraintSql() { return null; }
 	public String getTableConstraintSql() { return TABLE_SQL; }
+	public int getIndexForTableNameParameter() { return 1; }
 }

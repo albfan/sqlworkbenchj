@@ -298,6 +298,19 @@ public class DbDriver
 		return c;
 	}
 
+	/**
+	 *	This is a "simplified version of the connect() method
+	 *  for issuing a "shutdown command" to Cloudscape
+	 */
+	void commandConnect(String url)
+		throws SQLException, ClassNotFoundException, Exception
+	{
+		this.loadDriverClass();
+		Properties props = new Properties();
+		LogMgr.logDebug("DbDriver.commandConnect()", "Sending command URL=" + url + " to database");
+		this.driverClassInstance.connect(url, props);
+	}
+	
 	public boolean equals(Object other)
 	{
 		if (other == null) return false;

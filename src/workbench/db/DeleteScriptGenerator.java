@@ -15,6 +15,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import workbench.WbManager;
+import workbench.gui.components.WbTable;
+import workbench.gui.dbobjects.ObjectScripterUI;
+import workbench.interfaces.ScriptGenerationMonitor;
+import workbench.interfaces.Scripter;
+import workbench.resource.ResourceMgr;
+import workbench.sql.formatter.SqlFormatter;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.log.LogMgr;
@@ -25,16 +32,17 @@ import workbench.log.LogMgr;
  * @author  workbench@kellerer.org
  */
 public class DeleteScriptGenerator
+	implements Scripter
 {
 	private WbConnection connection;
-	private String tablename;
-	private String schemaname;
-	private String catalogname;
 	private Map columnValues;
 	private TableDependency dependency;
 	private DbMetadata meta;
 	private DataStore tableDefinition;
-
+	private TableIdentifier rootTable = null;
+	private WbTable sourceTable = null;
+	private ScriptGenerationMonitor monitor;
+	
 	public DeleteScriptGenerator(WbConnection aConnection)
 		throws SQLException
 	{
@@ -44,33 +52,34 @@ public class DeleteScriptGenerator
 		this.dependency.setConnection(this.connection);
 	}
 
+	public void setSource(WbTable aTable)
+	{
+		this.sourceTable = aTable;
+	}
+	
 	public void setTable(String aCatalog, String aSchema, String aTable)
 		throws SQLException
 	{
 		if (aTable == null || aTable.trim().length() == 0) throw new IllegalArgumentException("The table name may not be empty");
-		this.tablename = this.meta.adjustObjectname(aTable);
-		if (this.tablename.indexOf('.') > 0)
-		{
-			this.tablename = this.tablename.substring(this.tablename.lastIndexOf('.') + 1);
-		}
+		aTable = this.meta.adjustObjectname(aTable);
+		aCatalog = this.meta.adjustObjectname(aCatalog);
 
-		this.catalogname = this.meta.adjustObjectname(aCatalog);
-		this.schemaname = this.meta.adjustObjectname(aSchema);
-
-		if (this.schemaname == null)
+		if (aSchema == null)
 		{
 			try
 			{
-				this.schemaname = this.meta.getSchemaForTable(this.tablename);
+				aSchema = this.meta.getSchemaForTable(aTable);
 			}
 			catch (Exception e)
 			{
-				this.schemaname = null;
+				aSchema = null;
 			}
 		}
-
-		this.dependency.setTableName(this.catalogname, this.schemaname, this.tablename);
-		this.tableDefinition = this.meta.getTableDefinition(this.catalogname, this.schemaname, this.tablename);
+		aSchema = this.meta.adjustObjectname(aSchema);
+		this.rootTable = new TableIdentifier(aCatalog, aSchema, aTable);
+		
+		this.dependency.setTable(this.rootTable);
+		this.tableDefinition = this.meta.getTableDefinition(this.rootTable);
 	}
 
 	public void setValues(Map colValues)
@@ -92,7 +101,7 @@ public class DeleteScriptGenerator
 			p = node.getParent();
 			while (p != null)
 			{
-				if (!isMasterTable(p) && !parents.contains(p))
+				if (!isMasterTable(p) && !parents.contains(p) && !leafs.contains(p))
 				{
 					parents.add(p);
 				}
@@ -104,26 +113,33 @@ public class DeleteScriptGenerator
 		{
 			p = (DependencyNode)parents.get(i);
 			this.addDeleteStatement(sql, p);
-			sql.append("\n\n");
+			sql.append("\n");
 		}
 		DependencyNode root = this.dependency.getRootNode();
 		sql.append("DELETE FROM ");
-		sql.append(this.createTableExpression(root.getCatalog(), root.getSchema(), root.getTable()));
+		sql.append(root.getTableId().getTableExpression());
 		sql.append("\n WHERE ");
 		this.addRootTableWhere(sql);
 		sql.append(';');
-		return sql.toString();
+		try
+		{
+			int max = WbManager.getSettings().getMaxSubselectLength();
+			SqlFormatter format = new SqlFormatter(sql.toString(), max);
+			return format.format().trim();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return sql.toString();
+		}
 	}
 
 	private void addDeleteStatement(StringBuffer sql, DependencyNode node)
 	{
 		if (node == null) return;
-		String catalog = node.getCatalog();
-		String schema = node.getSchema();
-		String table = node.getTable();
 
 		sql.append("DELETE FROM ");
-		sql.append(this.createTableExpression(catalog, schema, table));
+		sql.append(node.getTableId().getTableExpression());
 		sql.append("\n WHERE ");
 
 		this.addParentWhere(sql, node);
@@ -140,9 +156,6 @@ public class DeleteScriptGenerator
 		{
 			DependencyNode parent = node.getParent();
 			sql.append(" (");
-			String parentTable = parent.getTable();
-			String parentSchema = parent.getSchema();
-			String parentCatalog = parent.getCatalog();
 
 			Map columns = node.getColumns();
 			Iterator itr = columns.entrySet().iterator();
@@ -153,18 +166,18 @@ public class DeleteScriptGenerator
 				String column = (String)entry.getKey();
 				column = this.meta.adjustObjectname(column);
 				String parentColumn = (String)entry.getValue();
-				if (nodeColumn != null && !nodeColumn.equals(column)) continue;
+				//if (nodeColumn != null && !nodeColumn.equals(column)) continue;
 				if (count > 0) sql.append("\n          AND ");
-				if (parent != null && !isMasterTable(parent))
+				if (!this.rootTable.equals(parent.getTableId()))
 				{
 					sql.append("(");
 					sql.append(column);
 					sql.append(" IN ( SELECT ");
 					sql.append(parentColumn);
 					sql.append(" FROM ");
-					sql.append(this.createTableExpression(parentCatalog, parentSchema, parentTable));
+					sql.append(parent.getTableId().getTableExpression());
 					sql.append("\n WHERE ");
-					this.addParentWhere(sql, parent, column);
+					this.addParentWhere(sql, parent, parentColumn);
 					sql.append(")) ");
 					count ++;
 				}
@@ -184,13 +197,8 @@ public class DeleteScriptGenerator
 
 	private boolean isMasterTable(DependencyNode node)
 	{
-		String table = node.getTable();
-		String schema = node.getSchema();
-		String catalog = node.getCatalog();
-
-		if (schema == null) schema = "";
-		if (table == null) table = "";
-		return (schema.equals(this.schemaname) && table.equals(this.tablename));
+		TableIdentifier table = node.getTableId();
+		return (this.rootTable.equals(table));
 	}
 
 	private void addRootTableWhere(StringBuffer sql)
@@ -252,18 +260,6 @@ public class DeleteScriptGenerator
 		}
 	}
 
-	private StringBuffer createTableExpression(String aCatalog, String aSchema, String aTable)
-	{
-		StringBuffer buff = new StringBuffer(100);
-		if (aSchema != null && aSchema.length() > 0)
-		{
-			buff.append(SqlUtil.quoteObjectname(this.meta.adjustObjectname(aSchema)));
-			buff.append('.');
-		}
-		buff.append(SqlUtil.quoteObjectname(this.meta.adjustObjectname(aTable)));
-		return buff;
-	}
-
 	private int getColumnType(DataStore tableDef, String aColname)
 	{
 		for (int i=0; i < tableDef.getRowCount(); i ++)
@@ -280,4 +276,59 @@ public class DeleteScriptGenerator
 		return -1;
 	}
 
+	public void startGenerate()
+	{
+		ObjectScripterUI ui = new ObjectScripterUI(this);
+		ui.show(WbManager.getInstance().getCurrentWindow());
+	}
+
+	public void setProgressMonitor(ScriptGenerationMonitor aMonitor)
+	{
+		this.monitor = aMonitor;
+	}
+	
+	public String getScript()
+	{
+		if (this.sourceTable == null) return "";
+
+		DataStore ds = this.sourceTable.getDataStore();
+		if (ds == null) return "";
+
+		int[] rows = this.sourceTable.getSelectedRows();
+		if (rows.length == 0)
+		{
+			return "";
+		}
+
+		ds.checkUpdateTable();
+		String updatetable = ds.getUpdateTable();
+		String schema = ds.getUpdateTableSchema();
+
+		int numRows = rows.length;
+		StringBuffer script = new StringBuffer(numRows * 150);
+		int max = WbManager.getSettings().getMaxSubselectLength();
+		StringBuffer sep = new StringBuffer(max + 2);
+		sep.append('\n');
+		for (int i=0; i < max; i++) sep.append('=');
+		sep.append('\n');
+		
+		try
+		{
+			for (int i=0; i < numRows; i++)
+			{
+				Map pkvalues = ds.getPkValues(rows[i]);
+				this.setTable(null, schema, updatetable);
+				this.setValues(pkvalues);
+				this.monitor.currentObject(ResourceMgr.getString("MsgGeneratingScriptForRow") + " " + i);
+				String rowScript = this.createScript();
+				if (i > 0) script.append(sep);
+				script.append(rowScript);
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("SqlPanel.generateDeleteScript", "Error generating delete script", e);
+		}
+		return script.toString();
+	}
 }

@@ -123,9 +123,9 @@ public class WbConnection
 	}
 
 	/**
-	 *	This will clear the warnings from the connection object. 
+	 *	This will clear the warnings from the connection object.
 	 *	Some drivers will not replace existing warnings until clearWarnings()
-	 *	is called, thus SQL Workbench would show the same error message over and 
+	 *	is called, thus SQL Workbench would show the same error message over and
 	 *  over again.
 	 *  This method also works around a bug in the Oracle JDBC driver, because
 	 *	that does not properly clear the warnings list.
@@ -168,7 +168,7 @@ public class WbConnection
 			LogMgr.logWarning("WbConnection.clearWarnings()", "Error resetting warnings!", th);
 		}
 	}
-	
+
 	public Connection getSqlConnection()
 	{
 		return this.sqlConnection;
@@ -224,7 +224,7 @@ public class WbConnection
 	 *	Disconnect this connection. This is delegated to the Connection Manager
 	 *	because for certain DBMS some cleanup works needs to be done.
 	 *  And the ConnectionMgr is the only one who knows if there are more connections
-	 *  around, which might influence what needs to be cleaned up 
+	 *  around, which might influence what needs to be cleaned up
 	 *  (Currently this is only HSQLDB, but who knows...)
 	 */
 	public void disconnect()
@@ -247,7 +247,7 @@ public class WbConnection
 		}
 		catch (Throwable th)
 		{
-			LogMgr.logDebug("WbConnection.close()", "Error when closing connection", th);
+			LogMgr.logWarning("WbConnection.close()", "Error when closing connection", th);
 		}
 	}
 
@@ -263,7 +263,7 @@ public class WbConnection
 		return this.sqlConnection.createStatement();
 	}
 
-	public boolean useJdbcConnect()
+	public boolean useJdbcCommit()
 	{
 		return this.metaData.getUseJdbcCommit();
 	}
@@ -297,7 +297,7 @@ public class WbConnection
 
 	public String getDatabaseProductName()
 	{
-		return this.metaData.productName;
+		return this.metaData.getProductName();
 	}
 
 	public String getOutputMessages()
@@ -315,7 +315,7 @@ public class WbConnection
 	}
 
 	/**
-	 *	Returns information about the DBMS and the JDBC driver 
+	 *	Returns information about the DBMS and the JDBC driver
 	 *	in the XML format used for the XML export
 	 */
 	public StringBuffer getDatabaseInfoAsXml(String anIndent)
@@ -371,7 +371,7 @@ public class WbConnection
 	}
 
 
-	/**	
+	/**
 	 *	Some DBMS need to commit DDL (CREATE, DROP, ...) statements.
 	 *	If the current connection needs a commit for a DDL, this will return true.
 	 *	The metadata class reads the names of those DBMS from the Settings object!

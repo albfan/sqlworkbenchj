@@ -12,8 +12,10 @@ import javax.swing.JOptionPane;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
+import javax.swing.table.TableCellEditor;
 import workbench.WbManager;
 
 import workbench.gui.actions.DeleteListEntryAction;
@@ -21,6 +23,7 @@ import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTable;
+import workbench.gui.components.WbTextCellEditor;
 import workbench.gui.components.WbToolbar;
 import workbench.interfaces.FileActions;
 import workbench.interfaces.ValidatingComponent;
@@ -51,9 +54,12 @@ public class VariablesEditor
 
 		this.variablesTable = new WbTable();
 		this.variablesTable.setRowSelectionAllowed(false);
+		this.variablesTable.setColumnSelectionAllowed(false);
 		this.varData = data;
-		this.variablesTable.setModel(new DataStoreTableModel(data));
-		this.variablesTable.optimizeAllColWidth(100, true);
+		DataStoreTableModel model = new DataStoreTableModel(data);
+		model.setLockedColumn(0);
+		this.variablesTable.setModel(model);
+		this.variablesTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
 		JLabel l = new JLabel(ResourceMgr.getString("TxtVariableInputText"));
 		Border b = BorderFactory.createEmptyBorder(5, 2, 5, 2);
@@ -116,7 +122,15 @@ public class VariablesEditor
 
 	public void componentDisplayed()
 	{
-		this.variablesTable.editCellAt(0, 0);
+		this.variablesTable.setColumnSelectionInterval(1,1);
+		this.variablesTable.editCellAt(0, 1);
+		TableCellEditor editor = this.variablesTable.getCellEditor();
+		if (editor instanceof WbTextCellEditor)
+		{
+			WbTextCellEditor wbedit = (WbTextCellEditor)editor;
+			wbedit.selectAll();
+			wbedit.requestFocus();
+		}
 		
 	}
 	

@@ -115,7 +115,7 @@ public class SqlFormatter
 	private StringBuffer indent = null;
 	private int realLength = 0;
 	private int maxSubselectLength = 60;
-	private Set dbFunctions;
+	private Set dbFunctions = Collections.EMPTY_SET;
 	
 	public SqlFormatter(String aScript, int maxLength)
 	{
@@ -1419,11 +1419,16 @@ public class SqlFormatter
 //			String sql = "create index tk_test_idx on tk_test (col1, col2)";
 //			String sql = "/* testing \n testing line 2 \n*/\nCREATE TABLE test (nr integer);";
 //			String sql = "create index TK_TEST on bla ( upper(eins), FUENF, sechs)" ;
-			String sql = "select count(*) from test where ucase(surname) like 'BLA%' and x >= 500 and y=10";
-			SqlFormatter f = new SqlFormatter(sql,60);
-			Set s = new HashSet();
-			s.add("UCASE");
-			f.setDBFunctions(s);
+//			String sql = "select count(*) from test where ucase(surname) like 'BLA%' and x >= 500 and y=10";
+
+			
+			String sql = "SELECT * FROM ( SELECT DISTINCT v.uuid AS value_uuid attr1, attr4  FROM (SELECT * FROM meas meas) M, value v, (SELECT * FROM CHAR) c \n" + 
+             "       WHERE M.uuid = v.meas_uuid \n" + 
+             "       AND   c.uuid = v.char_uuid \n" + 
+             "       AND   M.uuid = ?) sel JOIN (SELECT DISTINCT M.uuid AS meas_uuid FROM (SELECT * FROM meas) M, value v, char c  \n" + 
+             "       WHERE M.uuid = v.meas_uuid AND   c.uuid = v.char_uuid ) sub_sel ON (sel.meas_uuid = sub_sel.meas_uuid), (SELECT uuid, root_uuid, parent_uuid FROM meas) mtree \n" + 
+             " WHERE sel.meas_root_uuid = mtree.root_uuid ";
+			SqlFormatter f = new SqlFormatter(sql,40);
 			System.out.println(sql);
 			System.out.println("----------");
 			System.out.println(f.format());

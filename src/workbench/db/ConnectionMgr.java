@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import workbench.WbManager;
+import workbench.exception.ExceptionUtil;
 import workbench.exception.NoConnectionException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -27,7 +28,7 @@ import workbench.util.WbPersistence;
 
 /**
  * @author  workbench@kellerer.org
- * @version  $Revision: 1.39 $
+ * @version  $Revision: 1.40 $
  */
 public class ConnectionMgr
 {
@@ -401,12 +402,28 @@ public class ConnectionMgr
 	 */
 	private void disconnect(WbConnection conn)
 	{
+		if (conn == null) return;
+		
 		try
 		{
-			if (conn != null && this.canDisconnectHsql(conn))
+			if (conn.getMetadata().isCloudscape())
+			{
+				ConnectionProfile prof = conn.getProfile();
+				boolean shutdown = this.canShutdownCloudscape(conn);
+				conn.close();
+				if (shutdown) 
+				{
+					this.shutdownCloudscape(prof);
+				}
+			}
+			else if (conn.getMetadata().isHsql() && this.canShutdownHsql(conn))
+			{
+				this.shutdownHsql(conn);
+				conn.close();
+			}
+			else 
 			{
 				LogMgr.logInfo("ConnectionMgr.disconnect()", "Disconnecting: [" + conn.getProfile().getName() + "], ID=" + conn.getId());
-				this.disconnectLocalHsql(conn);
 				conn.close();
 			}
 		}
@@ -421,7 +438,7 @@ public class ConnectionMgr
 	 *  (=in process) engine should be closed down with SHUTDOWN when
 	 *  disconnecting. It shouldn't hurt for pre-1.7.2 either :-)
 	 */
-	private void disconnectLocalHsql(WbConnection con)
+	private void shutdownHsql(WbConnection con)
 	{
 		if (con == null) return;
 		String url = con.getUrl();
@@ -451,7 +468,7 @@ public class ConnectionMgr
 	 *	they seem to "share" something in the driver and closing one
 	 *	will close the others as well.
 	 */
-	private boolean canDisconnectHsql(WbConnection aConn)
+	private boolean canShutdownHsql(WbConnection aConn)
 	{
 		if (!aConn.getMetadata().isHsql()) return true;
 
@@ -470,13 +487,69 @@ public class ConnectionMgr
 			if (c.getId().equals(id)) continue;
 
 			String u = c.getUrl();
-			// we found one connection with the same URL --> do not connect this one!
+			// we found one connection with the same URL --> do not shutdown this one!
 			if (u.equals(url)) return false;
 		}
 
 		return true;
 	}
 
+	/**
+	 *	Shut down the connection to an internal Cloudscape database
+	 */
+	private void shutdownCloudscape(ConnectionProfile prof)
+	{
+		String drvClass = prof.getDriverclass();
+		String drvName = prof.getDriverName();
+		
+		try
+		{
+			DbDriver drv = this.findDriverByName(drvClass, drvName);
+			LogMgr.logInfo("ConnectionMgr.shutdownCloudscape()", "Local Cloudscape connection detected. Shutting down engine...");
+			drv.commandConnect("jdbc:cloudscape:;shutdown=true");
+		}
+		catch (SQLException e)
+		{
+			// this exception is expected. Cloudscape reports success through 
+			// the exception message!!!!!
+			LogMgr.logInfo("ConnectionMgr.shutdownCloudscape()", ExceptionUtil.getDisplay(e));
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError("ConnectionMgr.shutdownCloudscape()", "Error when shutting down Cloudscape", th);
+		}
+	}
+
+	private boolean canShutdownCloudscape(WbConnection aConn)
+	{
+		if (!aConn.getMetadata().isCloudscape()) return true;
+
+		String url = aConn.getUrl();
+		
+		// check for cloudscape connection
+		if (!url.startsWith("jdbc:cloudscape:")) return true;
+		
+		// do not shutdown server connections!
+		if (url.startsWith("jdbc:cloudscape:net:")) return false;
+
+		String id = aConn.getId();
+
+		Iterator itr = this.activeConnections.values().iterator();
+		while (itr.hasNext())
+		{
+			WbConnection c = (WbConnection)itr.next();
+			if (c == null) continue;
+
+			if (c.getId().equals(id)) continue;
+
+			String u = c.getUrl();
+			// we found one connection with the same URL --> do not shutdown this one!
+			if (u.equals(url)) return false;
+		}
+
+		return true;
+	}
+	
 	public void writeSettings()
 	{
 		this.saveProfiles();

@@ -29,6 +29,7 @@ import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.xml.transform.TransformerException;
 
 import workbench.WbManager;
 import workbench.db.importer.RowDataProducer;
@@ -43,6 +44,7 @@ import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.XsltTransformer;
 
 
 /**
@@ -62,6 +64,8 @@ public class DataSpooler
 	private String htmlTitle = null;
 	private String outputfile;
 	private String fullOutputFileName;
+	private String xsltFile = null;
+	private String transformOutputFile = null;
 	private int exportType;
 	private boolean exportHeaders;
 	private boolean includeCreateTable = false;
@@ -198,6 +202,16 @@ public class DataSpooler
 	  }
 	}
 	public boolean getShowProgress() { return this.showProgress; }
+
+	public void setXsltTransformation(String xsltFileName)
+	{
+		this.xsltFile = xsltFileName;
+	}
+
+	public void setXsltTransformationOutput(String aFilename)
+	{
+		this.transformOutputFile = aFilename;
+	}
 
 	public void setExportHeaders(boolean aFlag) { this.exportHeaders = aFlag; }
 	public boolean getExportHeaders() { return this.exportHeaders; }
@@ -706,6 +720,19 @@ public class DataSpooler
 			try { if (pw != null) pw.close(); } catch (Throwable th) {}
 			if (!jobsRunning) this.closeProgress();
 		}
+
+		if (this.exportType == EXPORT_XML && this.xsltFile != null && this.transformOutputFile != null)
+		{
+			try
+			{
+				XsltTransformer.transformFile(this.outputfile, this.transformOutputFile, this.xsltFile);
+			}
+			catch (TransformerException e)
+			{
+				LogMgr.logError("DataSpooler.startExport()", "Error when transforming " + this.outputfile + " using " + this.xsltFile, e);
+			}
+		}
+
 		return currentRow;
 	}
 

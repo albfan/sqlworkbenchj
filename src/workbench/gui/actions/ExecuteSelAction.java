@@ -1,11 +1,11 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
+import workbench.gui.sql.SqlPanel;
 
 import workbench.resource.ResourceMgr;
 
@@ -14,12 +14,12 @@ import workbench.resource.ResourceMgr;
  */
 public class ExecuteSelAction extends WbAction
 {
-	private ActionListener target;
+	private SqlPanel target;
 	
-	public ExecuteSelAction(ActionListener aListener)
+	public ExecuteSelAction(SqlPanel aPanel)
 	{
 		super();
-		this.target = aListener;
+		this.target = aPanel;
 		this.initMenuDefinition(ResourceMgr.TXT_EXECUTE_SEL, KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
 		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_EXEC_SEL));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
@@ -29,7 +29,7 @@ public class ExecuteSelAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		if (this.isEnabled()) this.target.actionPerformed(e);
+		if (this.isEnabled()) this.target.runSelectedStatement();
 	}
 	
 }

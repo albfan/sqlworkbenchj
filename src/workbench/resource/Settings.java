@@ -66,7 +66,18 @@ public class Settings
 
 	private ShortcutManager keyManager;
 
-	public Settings()
+	private static Settings settings;
+	
+	public static final Settings getInstance()
+	{
+		if (settings == null) 
+		{
+			settings = new Settings();
+		}
+		return settings;
+	}
+	
+	private Settings()
 	{
 		if (WbManager.trace) System.out.println("Settings.<init> - start");
 		this.props = new WbProperties();
@@ -108,6 +119,15 @@ public class Settings
 
 	  if (WbManager.trace) System.out.println("Settings.<init> - Done reading settings");
 
+		boolean logSysErr = StringUtil.stringToBool(this.props.getProperty("workbench.log.console", "false"));
+		LogMgr.logToSystemError(logSysErr);
+		
+		String format = this.props.getProperty("workbench.log.format", "{type} {timestamp} {message} {error}");
+		LogMgr.setMessageFormat(format);
+		
+		String level = this.props.getProperty("workbench.log.level", "info");
+		LogMgr.setLevel(level);
+		
     try
     {
 			String logfile = System.getProperty("workbench.log.filename", null);
@@ -135,9 +155,7 @@ public class Settings
 
 		if (WbManager.trace) System.out.println("Done setting server lists for MetaData");
 
-		String level = this.props.getProperty("workbench.log.level", "INFO");
-		LogMgr.setLevel(level);
-
+		
 		this.renameOldProps();
 
 		// init settings for datastore sort feature
@@ -581,6 +599,28 @@ public class Settings
 	public void setAutoSelectTableEditor(boolean aFlag)
 	{
 		this.props.setProperty("workbench.table.edit.autoselect", Boolean.toString(aFlag));
+	}
+	
+	public void setSqlParameterPrefix(String prefix)
+	{
+		this.props.setProperty("workbench.sql.parameter.prefix", prefix);
+	}
+	
+	public String getSqlParameterPrefix()
+	{
+		String value = this.props.getProperty("workbench.sql.parameter.prefix", "$[");
+		if (value == null || value.length() == 0) value = "$[";
+		return value;
+	}
+
+	public void setSqlParameterSuffix(String suffix)
+	{
+		this.props.setProperty("workbench.sql.parameter.suffix", suffix);
+	}
+	
+	public String getSqlParameterSuffix()
+	{
+		return this.props.getProperty("workbench.sql.parameter.suffix", "]");
 	}
 
 	public int getMaxLogfileSize()
@@ -1315,9 +1355,9 @@ public class Settings
 		return "true".equalsIgnoreCase(this.props.getProperty("workbench.gui.dynamiclayout", "true"));
 	}
 
-	public void setUseDynamicLayout(boolean useEncryption)
+	public void setUseDynamicLayout(boolean flag)
 	{
-		this.props.setProperty("workbench.gui.dynamiclayout", Boolean.toString(useEncryption));
+		this.props.setProperty("workbench.gui.dynamiclayout", Boolean.toString(flag));
 	}
 
 	public boolean getVerifyDriverUrl()
@@ -1341,30 +1381,30 @@ public class Settings
 
 	public List getServersWhereDDLNeedsCommit()
 	{
-		String list = this.props.getProperty("workbench.db.ddlneedscommit", "PostgreSQL,Firebird");
+		String list = this.props.getProperty("workbench.db.ddlneedscommit", "");
     return StringUtil.stringToList(list, ",");
 	}
 
 	public List getServersWithInlineConstraints()
 	{
-		String list = this.props.getProperty("workbench.db.inlineconstraints", "FirstSQL/J");
+		String list = this.props.getProperty("workbench.db.inlineconstraints", "");
     return StringUtil.stringToList(list, ",");
 	}
 	public List getServersWhichNeedJdbcCommit()
 	{
-		String list = this.props.getProperty("workbench.db.usejdbccommit", "Firebird");
+		String list = this.props.getProperty("workbench.db.usejdbccommit", "");
     return StringUtil.stringToList(list, ",");
 	}
 
   public List getCaseSensitivServers()
   {
-		String list = this.props.getProperty("workbench.db.casesensitive", "Oracle");
+		String list = this.props.getProperty("workbench.db.casesensitive", "");
     return StringUtil.stringToList(list, ",");
   }
 
 	public List getCancelWithReconnectServers()
 	{
-		String list = this.props.getProperty("workbench.db.cancelwithreconnect", "Microsoft SQL Server");
+		String list = this.props.getProperty("workbench.db.cancelwithreconnect", "");
     return StringUtil.stringToList(list, ",");
 	}
 
@@ -1397,20 +1437,4 @@ public class Settings
 
 		return installDir.getAbsolutePath();
 	}
-
-	public static void main(String args[])
-	{
-		try
-		{
-			DecimalFormat f = new DecimalFormat("#,#");
-			Number n = f.parse("1");
-			System.out.println(n.toString());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		System.out.println("done.");
-	}
-
 }

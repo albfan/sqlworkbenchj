@@ -71,6 +71,15 @@ public class WbTextCellEditor
 		this.textField.setFont(aFont);
 	}
 
+	public void requestFocus()
+	{
+		this.textField.requestFocusInWindow();
+	}
+	public void selectAll()
+	{
+  	this.textField.selectAll();
+	}
+	
 	public Component getTableCellEditorComponent(JTable table, Object value,
 							boolean isSelected,int row, int column)
 	{

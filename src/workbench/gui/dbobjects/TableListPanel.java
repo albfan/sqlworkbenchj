@@ -47,6 +47,7 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.db.TableIdentifier;
 import workbench.gui.sql.ExecuteSqlDialog;
+import workbench.util.StrBuffer;
 
 
 
@@ -576,11 +577,25 @@ public class TableListPanel
 		if (this.isVisible() || this.isClientVisible())
 		{
 			this.retrieve();
+			this.setFocusToTableList();
+
 		}
 		else
 		{
 			this.shouldRetrieve = true;
 		}
+	}
+
+	private void setFocusToTableList()
+	{
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				listPanel.requestFocus();
+				tableList.requestFocus();
+			}
+		});
 	}
 
 	public void retrieve()
@@ -777,7 +792,8 @@ public class TableListPanel
 		if (dataVisible)
 		{
 			this.tableData.setReadOnly(!maybeUpdateable(this.selectedObjectType));
-			this.tableData.setTable(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+			TableIdentifier id = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+			this.tableData.setTable(id);
 		}
 		else
 		{
@@ -923,7 +939,9 @@ public class TableListPanel
 				case 2:
 					if (this.shouldRetrieveTableDataCount)
 					{
+						WbSwingUtilities.showWaitCursor(this.tableData);
 						this.tableData.showData(!this.shiftDown);
+						WbSwingUtilities.showDefaultCursor(this.tableData);
 						this.shouldRetrieveTableDataCount = false;
 					}
 					break;
@@ -1041,7 +1059,8 @@ public class TableListPanel
 		{
 			synchronized (retrieveLock)
 			{
-				importedTableTree.readTree(this.selectedCatalog, this.selectedSchema, this.selectedTableName, false);
+				TableIdentifier id = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+				importedTableTree.readTree(id, false);
 				this.shouldRetrieveImportedTree = false;
 			}
 		}
@@ -1063,7 +1082,8 @@ public class TableListPanel
 		{
 			synchronized (retrieveLock)
 			{
-				exportedTableTree.readTree(this.selectedCatalog, this.selectedSchema, this.selectedTableName, true);
+				TableIdentifier id = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+				exportedTableTree.readTree(id, true);
 				this.shouldRetrieveExportedTree = false;
 			}
 		}
@@ -1103,7 +1123,7 @@ public class TableListPanel
 		int colCount = this.tableDefinition.getRowCount();
 		if (colCount == 0) return null;
 
-		StringBuffer sql = new StringBuffer(colCount * 80);
+		StrBuffer sql = new StrBuffer(colCount * 80);
 
 		sql.append("SELECT ");
 		boolean quote = false;
@@ -1133,7 +1153,12 @@ public class TableListPanel
 	{
 		if (e.getSource() == this.tableTypes)
 		{
-			try { this.retrieve(); } catch (Exception ex) {}
+			try
+			{
+				this.retrieve();
+				this.setFocusToTableList();
+			}
+			catch (Exception ex) {}
 		}
 		else
 		{
@@ -1517,7 +1542,14 @@ public class TableListPanel
 		if (this.ignoreStateChanged) return;
     if (e.getSource() == this.displayTab)
     {
-      this.startRetrieveCurrentPanel();
+	    SwingUtilities.invokeLater(new Runnable()
+	    {
+				public void run()
+				{
+					startRetrieveCurrentPanel();
+				}
+
+			});
     }
     else
     {

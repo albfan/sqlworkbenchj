@@ -15,6 +15,7 @@ import java.util.List;
 import workbench.WbManager;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
+import workbench.util.StrBuffer;
 
 /**
  *
@@ -61,10 +62,10 @@ public class ScriptParser
 		throws IOException
 	{
 		BufferedReader in = null;
-		StringBuffer content = null;
+		StrBuffer content = null;
 		try
 		{
-			content = new StringBuffer((int)f.length());
+			content = new StrBuffer((int)f.length());
 			in = new BufferedReader(new FileReader(f));
 			String line = in.readLine();
 			while (line != null)
@@ -77,7 +78,7 @@ public class ScriptParser
 		catch (Exception e)
 		{
 			LogMgr.logError("ScriptParser.readFile()", "Error reading file " + f.getAbsolutePath(), e);
-			content = new StringBuffer();
+			content = new StrBuffer();
 		}
 		finally
 		{

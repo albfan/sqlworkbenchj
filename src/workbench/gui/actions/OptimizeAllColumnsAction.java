@@ -11,15 +11,18 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
+import workbench.gui.components.WbTable;
+import javax.swing.InputMap;
+import javax.swing.ActionMap;
 
 /**
  *	@author  workbench@kellerer.org
  */
 public class OptimizeAllColumnsAction extends WbAction
 {
-	private ActionListener client;
+	private WbTable client;
 
-	public OptimizeAllColumnsAction(ActionListener aClient)
+	public OptimizeAllColumnsAction(WbTable aClient)
 	{
 		super();
 		this.client = aClient;
@@ -30,10 +33,17 @@ public class OptimizeAllColumnsAction extends WbAction
 	{
 		this.setAccelerator(null);
 	}
-	
+
 	public void executeAction(ActionEvent e)
 	{
-		e.setSource(this);
-		this.client.actionPerformed(e);
+		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
+		this.client.optimizeAllColWidth(shiftPressed);
 	}
+
+	public void addToInputMap(InputMap im, ActionMap am)
+	{
+		super.addToInputMap(im, am);
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK), this.getActionName());
+	}
+
 }

@@ -6,27 +6,15 @@ import java.awt.Window;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import javax.swing.BorderFactory;
-
-import javax.swing.DefaultCellEditor;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
+
+import javax.swing.event.*;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-
 import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
@@ -36,28 +24,29 @@ import workbench.gui.actions.DeleteRowAction;
 import workbench.gui.actions.InsertRowAction;
 import workbench.gui.actions.StartEditAction;
 import workbench.gui.actions.UpdateDatabaseAction;
-import workbench.gui.components.DataStoreTableModel;
-import workbench.gui.components.OneLineTableModel;
-import workbench.gui.components.TextComponentMouseListener;
-import workbench.gui.components.WbScrollPane;
-import workbench.gui.components.WbTable;
-import workbench.gui.components.WbTraversalPolicy;
+
+import workbench.gui.components.*;
 import workbench.interfaces.DbData;
 import workbench.interfaces.DbUpdater;
 import workbench.interfaces.Interruptable;
+import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 import workbench.storage.DmlStatement;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
+import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
-import workbench.interfaces.JobErrorHandler;
+
 
 /**
  *	A Panel which displays the result of a SELECT statement.
+ *
+ *	@author workbench@kellerer.org
  */
 public class DwPanel
 	extends JPanel
@@ -98,7 +87,7 @@ public class DwPanel
 	private boolean scriptRunning = false;
 
 	private StatementRunner stmtRunner;
-
+	
 	public DwPanel()
 	{
 		this(null);
@@ -217,12 +206,12 @@ public class DwPanel
 	public void setCurrentRow(int currentRow, int totalRows)
 	{
 		if (this.monitorType < 0) return;
-		StringBuffer msg = new StringBuffer(40);
+		StringBuffer msg = new StringBuffer(80);
 		msg.append(this.updateMsg);
 		msg.append(currentRow);
 		if (totalRows > 0)
 		{
-			msg.append('/');
+			msg.append("/");
 			msg.append(totalRows);
 		}
 		this.statusBar.setStatusMessage(msg.toString());
@@ -318,16 +307,20 @@ public class DwPanel
 
 	public boolean shouldSaveChanges(WbConnection aConnection)
 	{
-		if (!WbManager.getSettings().getDbDebugMode()) return true;
+		if (!Settings.getInstance().getDbDebugMode()) return true;
 
 		this.infoTable.stopEditing();
 		DataStore ds = this.infoTable.getDataStore();
 
+		
 		boolean doSave = true;
 
 		Window win = SwingUtilities.getWindowAncestor(this);
 		try
 		{
+			List stmts = ds.getUpdateStatements(aConnection);
+			if (stmts.isEmpty()) return true;
+			
 			Dimension max = new Dimension(800,600);
 			Dimension pref = new Dimension(400, 300);
 			EditorPanel preview = EditorPanel.createSqlEditor();
@@ -338,8 +331,7 @@ public class DwPanel
 			preview.setMaximumSize(max);
 			JScrollPane scroll = new JScrollPane(preview);
 			scroll.setMaximumSize(max);
-			List stmts = ds.getUpdateStatements(aConnection);
-			StringBuffer text = new StringBuffer(stmts.size() * 80);
+			StrBuffer text = new StrBuffer(stmts.size() * 80);
 			for (int i=0; i < stmts.size(); i++)
 			{
 				DmlStatement dml = (DmlStatement)stmts.get(i);
@@ -496,152 +488,23 @@ public class DwPanel
 	{
 		if (aSql == null)
 		{
-			LogMgr.logError(this, "No sql statement given!", null);
+			Exception e = new Exception("runStatement requires a SQL statement!");
+			LogMgr.logError(this, "No sql statement given!", e);
 			return;
 		}
 
 		this.success = false;
-		StatementRunnerResult result = null;
 
 		try
 		{
-			long end, sqlTime = 0;
-			long execTime = 0;
-			long checkUpdateTime = 0;
-
 			this.clearContent();
 
-			boolean repeatLast = aSql.equals(this.sql);
 			this.sql = aSql;
 
-			final long start = System.currentTimeMillis();
-
+			long sqlExecStart = System.currentTimeMillis();
+				
 			this.stmtRunner.runStatement(aSql, this.statusBar.getMaxRows());
-			end = System.currentTimeMillis();
-			sqlTime = (end - start);
-
-			result = this.stmtRunner.getResult();
-			this.hasResultSet = false;
-			DataStore newData = null;
-			this.success = result.isSuccess();
-
-			if (this.success && result.hasData())
-			{
-				this.hasResultSet = true;
-
-				if (result.hasDataStores())
-				{
-					newData = result.getDataStores()[0];
-				}
-				else
-				{
-					// the resultset will be closed when stmtRunner.done() is called
-					// in scriptFinished()
-					ResultSet rs = result.getResultSets()[0];
-
-					// passing the maxrows to the datastore is a workaround for JDBC drivers
-					// which do not support the setMaxRows() method.
-					// The datastore will make sure that no more rows are read then really requested
-					if (this.showLoadProgress)
-					{
-						newData = new DataStore(rs, true, this, this.getMaxRows());
-					}
-					else
-					{
-						newData = new DataStore(rs, true, this.getMaxRows());
-					}
-				}
-				this.stmtRunner.statementDone();
-
-				newData.setOriginalStatement(aSql);
-				newData.setSourceConnection(this.dbConnection);
-				newData.setProgressMonitor(null);
-				this.clearStatusMessage();
-
-				end = System.currentTimeMillis();
-
-				if (repeatLast)
-				{
-					this.infoTable.saveColumnSizes();
-				}
-
-				this.infoTable.reset();
-				this.infoTable.setAutoCreateColumnsFromModel(true);
-				this.infoTable.setModel(new DataStoreTableModel(newData), true);
-
-				if (repeatLast)
-				{
-					this.infoTable.restoreColumnSizes();
-				}
-				else
-				{
-					this.infoTable.adjustColumns();
-				}
-
-				if (!this.dbConnection.getProfile().getDisableUpdateTableCheck())
-				{
-					this.setStatusMessage(ResourceMgr.getString("MsgCheckingUpdateTable"));
-					long updStart, updEnd;
-					updStart = System.currentTimeMillis();
-					this.checkUpdateTable();
-					updEnd = System.currentTimeMillis();
-					checkUpdateTime = (updEnd - updStart);
-				}
-				this.clearStatusMessage();
-
-				if (this.manageUpdateAction)
-				{
-					boolean update = this.isUpdateable();
-					this.insertRow.setEnabled(true);
-				}
-        this.rowCountChanged();
-			}
-			else if (result.isSuccess())
-			{
-				end = System.currentTimeMillis();
-				this.hasResultSet = false;
-				this.setMessageDisplayModel(this.getEmptyMsgTableModel());
-			}
-			else
-			{
-				end = System.currentTimeMillis();
-				this.hasResultSet = false;
-				if (!this.showErrorMessages)
-				{
-					this.setMessageDisplayModel(this.getErrorTableModel());
-				}
-			}
-			execTime = (end - start);
-			this.rowsAffectedByScript += result.getTotalUpdateCount();
-
-			String[] messages = result.getMessages();
-			StringBuffer msg = null;
-			if (messages != null)
-			{
-				msg = new StringBuffer(messages.length * 80);
-				for (int i=0; i < messages.length; i++)
-				{
-					msg.append(messages[i]);
-					msg.append(" \n");
-				}
-				this.lastMessage = msg.toString();
-			}
-
-			if (!result.isSuccess() && this.showErrorMessages)
-			{
-				this.setMessageDisplayModel(this.getErrorTableModel(this.lastMessage));
-			}
-
-			if (LogMgr.isDebug())
-			{
-				this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgSqlVerbTime") + " " + (((double)sqlTime) / 1000.0) + "s";
-			}
-			this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s";
-
-			if (checkUpdateTime > 0 && LogMgr.isDebug())
-			{
-				this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgCheckUpdateTableTime") + " " + (((double)checkUpdateTime) / 1000.0) + "s";
-			}
+			this.processResult(sqlExecStart);
 		}
 		catch (SQLException sqle)
 		{
@@ -673,12 +536,133 @@ public class DwPanel
 			this.lastMessage = this.lastMessage + s;
 			throw new Exception(s);
 		}
-		finally
-		{
-			result = null;
-		}
   }
 
+	private void processResult(long startTime)
+		throws SQLException
+	{
+		long sqlTime = (startTime - System.currentTimeMillis());
+		long end = 0, checkUpdateTime = 0;
+		
+		DataStore newData = null;
+		
+		StatementRunnerResult result = this.stmtRunner.getResult();
+		
+		this.hasResultSet = false;
+		this.success = result.isSuccess();
+		try
+		{
+			if (this.success && result.hasData())
+			{
+				this.hasResultSet = true;
+
+				if (result.hasDataStores())
+				{
+					newData = result.getDataStores()[0];
+				}
+				else
+				{
+					// the resultset will be closed when stmtRunner.done() is called
+					// in scriptFinished()
+					ResultSet rs = result.getResultSets()[0];
+
+					// passing the maxrows to the datastore is a workaround for JDBC drivers
+					// which do not support the setMaxRows() method.
+					// The datastore will make sure that no more rows are read then really requested
+					if (this.showLoadProgress)
+					{
+						newData = new DataStore(rs, true, this, this.getMaxRows());
+					}
+					else
+					{
+						newData = new DataStore(rs, true, this.getMaxRows());
+					}
+				}
+
+				newData.setOriginalStatement(result.getSourceCommand());
+				newData.setSourceConnection(this.dbConnection);
+				newData.setProgressMonitor(null);
+				this.clearStatusMessage();
+
+				end = System.currentTimeMillis();
+
+				this.infoTable.reset();
+				this.infoTable.setAutoCreateColumnsFromModel(true);
+				this.infoTable.setModel(new DataStoreTableModel(newData), true);
+				this.infoTable.adjustColumns();
+
+				if (!this.dbConnection.getProfile().getDisableUpdateTableCheck())
+				{
+					this.setStatusMessage(ResourceMgr.getString("MsgCheckingUpdateTable"));
+					long updStart, updEnd;
+					updStart = System.currentTimeMillis();
+					this.checkUpdateTable();
+					updEnd = System.currentTimeMillis();
+					checkUpdateTime = (updEnd - updStart);
+				}
+				this.clearStatusMessage();
+
+				if (this.manageUpdateAction)
+				{
+					boolean update = this.isUpdateable();
+					this.insertRow.setEnabled(true);
+				}
+				this.rowCountChanged();
+			}
+			else if (result != null && result.isSuccess())
+			{
+				end = System.currentTimeMillis();
+				this.hasResultSet = false;
+				this.setMessageDisplayModel(this.getEmptyMsgTableModel());
+			}
+			else
+			{
+				end = System.currentTimeMillis();
+				this.hasResultSet = false;
+				if (!this.showErrorMessages)
+				{
+					this.setMessageDisplayModel(this.getErrorTableModel());
+				}
+			}
+			long execTime = (end - startTime);
+			this.rowsAffectedByScript += result.getTotalUpdateCount();
+
+			String[] messages = result.getMessages();
+			StrBuffer msg = null;
+			if (messages != null)
+			{
+				msg = new StrBuffer(messages.length * 80);
+				for (int i=0; i < messages.length; i++)
+				{
+					msg.append(messages[i]);
+					msg.append(" \n");
+				}
+				this.lastMessage = msg.toString();
+			}
+
+			if (!result.isSuccess() && this.showErrorMessages)
+			{
+				this.setMessageDisplayModel(this.getErrorTableModel(this.lastMessage));
+			}
+
+			if (LogMgr.isDebugEnabled())
+			{
+				this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgSqlVerbTime") + " " + (((double)sqlTime) / 1000.0) + "s";
+			}
+			this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s";
+
+			if (checkUpdateTime > 0 && LogMgr.isDebugEnabled())
+			{
+				this.lastMessage = this.lastMessage + "\n" + ResourceMgr.getString("MsgCheckUpdateTableTime") + " " + (((double)checkUpdateTime) / 1000.0) + "s";
+			}
+		}
+		finally
+		{
+			result.clear();
+			this.stmtRunner.statementDone();
+		}
+	}
+	
 	/**
 	 *	Callback method to tell this component that a script is running.
 	 *  It resets the total number of rows which have been affected by the script to zero
@@ -698,7 +682,7 @@ public class DwPanel
 	{
 		this.scriptRunning = false;
 		this.stmtRunner.done();
-    WbSwingUtilities.showDefaultCursor(this);
+    //WbSwingUtilities.showDefaultCursor(this);
 	}
 
 	public boolean wasSuccessful()
@@ -1056,6 +1040,7 @@ public class DwPanel
 		if (this.readOnly) return false;
 		this.editingStarted = false;
 
+    int[] selectedRows = this.infoTable.getSelectedRows();
 		// if the result is not yet updateable (automagically)
 		// then try to find the table. If the table cannot be
 		// determined, then ask the user
@@ -1099,6 +1084,20 @@ public class DwPanel
 		else
 		{
 			this.startEdit.setSwitchedOn(false);
+		}
+
+    int numSelectedRows = selectedRows.length;
+		if (selectedRows.length > 0)
+		{
+			ListSelectionModel model = this.infoTable.getSelectionModel();
+			model.setValueIsAdjusting(true);
+			// make sure nothing is selecte, then restore the old selection
+			model.clearSelection();
+			for (int i = 0; i < numSelectedRows; i++)
+			{
+				model.addSelectionInterval(selectedRows[i], selectedRows[i]);
+			}
+			model.setValueIsAdjusting(false);
 		}
 		int rows = this.infoTable.getSelectedRowCount();
 		if (this.insertRow != null) this.insertRow.setEnabled(update);
@@ -1152,7 +1151,7 @@ public class DwPanel
 	 *  The copy row action will be enabled when exactly one row
 	 *  is selected
 	 */
-	public void valueChanged(javax.swing.event.ListSelectionEvent e)
+	public void valueChanged(ListSelectionEvent e)
 	{
 		if (this.readOnly) return;
 		long rows = this.infoTable.getSelectedRowCount();
@@ -1165,7 +1164,7 @@ public class DwPanel
 	 *	Called from the viewport, when the display has been scrolled
 	 *  We need to update the row display then.
 	 */
-	public void stateChanged(javax.swing.event.ChangeEvent e)
+	public void stateChanged(ChangeEvent e)
 	{
 		this.rowCountChanged();
 	}

@@ -798,7 +798,7 @@ public class DataImporter
 			this.closeStatements();
 			if (!this.dbConn.getAutoCommit())
 			{
-				LogMgr.logDebug("DataImporter.importFinished()", "Committing changes");
+				LogMgr.logDebug("DataImporter.importFinished()", this.getAffectedRows() + " row(s) imported. Committing changes");
 				this.dbConn.commit();
 			}
 		}

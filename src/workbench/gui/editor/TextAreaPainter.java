@@ -23,12 +23,14 @@ import javax.swing.text.PlainDocument;
 import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 
 /**
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.11 2004-01-20 18:11:47 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.12 2004-08-22 14:38:40 thomas Exp $
  */
 public class TextAreaPainter extends JComponent implements TabExpander
 {
@@ -46,7 +48,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	protected Color bracketHighlightColor;
 	protected Color eolMarkerColor;
 	protected Color errorColor;
-	
+
 	protected boolean blockCaret;
 	protected boolean lineHighlight;
 	protected boolean bracketHighlight;
@@ -54,7 +56,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	protected boolean eolMarkers;
 	protected int cols;
 	protected int rows;
-	
+
 	protected int tabSize;
 	protected FontMetrics fm;
 
@@ -62,7 +64,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 
 	protected boolean showLineNumbers = false;
 	protected int gutterWidth = 0;
-	
+
 	protected static final int GUTTER_MARGIN = 2;
 	protected static final Color GUTTER_BACKGROUND = new Color(238,240,238);
 	protected static final Color GUTTER_COLOR = Color.DARK_GRAY;
@@ -107,24 +109,24 @@ public class TextAreaPainter extends JComponent implements TabExpander
 
 	/**
 	 * Switches display of line numbers in the left gutter area.
-	 * 
+	 *
 	 * @param aFlag
 	 */
 	public final void setShowLineNumbers(boolean aFlag)
 	{
 		this.showLineNumbers = aFlag;
-		
-		// set gutter width to zero. If line numbers are enabled, 
+
+		// set gutter width to zero. If line numbers are enabled,
 		// the gutter width will be re-calculated in the paint method!
-		if (!showLineNumbers) 
+		if (!showLineNumbers)
 		{
 			this.gutterWidth = 0;
 		}
 		this.invalidate();
 	}
-	
+
 	public final boolean getShowLineNumbers() { return this.showLineNumbers; }
-	
+
 	/**
 	 * Returns if this component can be traversed by pressing the
 	 * Tab key. This returns false.
@@ -441,8 +443,12 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	{
 		tabSize = fm.charWidth(' ') * ((Integer)textArea.getDocument().getProperty(PlainDocument.tabSizeAttribute)).intValue();
 
+		Graphics2D gf2d = (Graphics2D)gfx;
+		gf2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+		gf2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+
 		int lastLine = 0;
-		if (this.showLineNumbers) 
+		if (this.showLineNumbers)
 		{
 			lastLine = textArea.getLineCount();
 			String s = Integer.toString(lastLine);
@@ -452,9 +458,8 @@ public class TextAreaPainter extends JComponent implements TabExpander
 		{
 			this.gutterWidth = 0;
 		}
-		
-		Rectangle clipRect = gfx.getClipBounds();
 
+		Rectangle clipRect = gfx.getClipBounds();
 		gfx.setColor(this.getBackground());
 		gfx.fillRect(clipRect.x,clipRect.y,clipRect.width,clipRect.height);
 
@@ -467,12 +472,12 @@ public class TextAreaPainter extends JComponent implements TabExpander
 		// of the font height, we subtract 1 from it, otherwise one
 		// too many lines will always be painted.
 		int lastInvalid = firstLine + (clipRect.y + clipRect.height - 1) / height;
-		
+
 		if (this.showLineNumbers && clipRect.x < this.getGutterWidth())
 		{
 			gfx.setColor(GUTTER_BACKGROUND);
 			gfx.fillRect(clipRect.x,clipRect.y,this.getGutterWidth() - clipRect.x,clipRect.height);
-		
+
 			try
 			{
 				for(int line = firstLine; line < lastLine; line++)
@@ -486,19 +491,19 @@ public class TextAreaPainter extends JComponent implements TabExpander
 			}
 		}
 
-		int clipX = clipRect.x; 
+		int clipX = clipRect.x;
 		if (clipRect.x < this.gutterWidth)
 		{
 			clipX = this.gutterWidth;
 		}
 		gfx.clipRect(clipX, clipRect.y, clipRect.width, clipRect.height);
 		gfx.translate(this.gutterWidth,0);
-		
+
 		try
 		{
 			TokenMarker tokenMarker = textArea.getDocument().getTokenMarker();
 			int x = textArea.getHorizontalOffset();
-			
+
 			for(int line = firstInvalid; line <= lastInvalid; line++)
 			{
 				paintLine(gfx,tokenMarker,line,x);
@@ -521,14 +526,14 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	{
 		Font defaultFont = getFont();
 		Color defaultColor = getForeground();
-		
+
 		gfx.setFont(defaultFont);
 		gfx.setColor(GUTTER_COLOR);
 
 		int y = textArea.lineToY(line) + fm.getHeight();
 		String s = Integer.toString(line + 1);
 		int w = fm.stringWidth(s);
-		
+
 		gfx.drawString(s, this.gutterWidth - w - GUTTER_MARGIN,y);
 	}
 	/**
@@ -540,7 +545,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 		repaint(0,textArea.lineToY(line) + fm.getMaxDescent() + fm.getLeading(),getWidth(),fm.getHeight());
 	}
 
-	public int getGutterWidth() 
+	public int getGutterWidth()
 	{
 		return this.gutterWidth + GUTTER_MARGIN;
 	}
@@ -585,7 +590,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 		tabSize = fm.charWidth(' ') * ((Integer)textArea.getDocument().getProperty(PlainDocument.tabSizeAttribute)).intValue();
 		if (tabSize == 0) tabSize = TextAreaDefaults.getDefaults().tabSize;
 	}
-	
+
 	protected void paintLine(Graphics gfx, TokenMarker tokenMarker,	int line, int x)
 	{
 		Font defaultFont = getFont();
@@ -743,7 +748,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	{
 		int position = textArea.getBracketPosition();
 		if(position == -1) return;
-		
+
 		y += fm.getLeading() + fm.getMaxDescent();
 		int x = textArea._offsetToX(line,position);
 		gfx.setColor(bracketHighlightColor);
@@ -762,7 +767,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 			int caretWidth = ((blockCaret || textArea.isOverwriteEnabled()) ? fm.charWidth('w') : 2);
 			y += fm.getLeading() + fm.getMaxDescent();
 			int height = fm.getHeight();
-			
+
 			gfx.setColor(caretColor);
 
 			if(textArea.isOverwriteEnabled())

@@ -6,74 +6,45 @@
 
 package workbench.gui.sql;
 
-import java.awt.Component;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import workbench.resource.Settings;
-import workbench.util.StringUtil;
+import workbench.sql.SqlParameterPool;
+import workbench.storage.DataStore;
 
 /**
  *
- * @author  thomas
+ * @author  workbench@kellerer.org
  */
 public class VariablePrompter
 {
-	private Component parent;
-	private Pattern regex = null;
-	private String prefix; 
-	private String suffix;
-	public VariablePrompter()
+	private Set toPrompt = null;
+	private	SqlParameterPool pool = SqlParameterPool.getInstance();
+	private String sql;
+
+	public VariablePrompter(String input)
 	{
-		this.prefix = Settings.getInstance().getSqlParameterPrefix();
-		this.suffix = Settings.getInstance().getSqlParameterSuffix();
-		if (this.suffix == null) this.suffix = StringUtil.EMPTY_STRING;
-		String expr = StringUtil.quoteRegexMeta(prefix) + "\\?[\\w]*" + StringUtil.quoteRegexMeta(suffix);
-		System.out.println(expr);
-		regex = Pattern.compile(expr);
+		this.sql = input;
 	}
 	
-	public VariablePrompter(Component aParent)
+	public boolean needsInput()
 	{
-		this();
-		this.parent = aParent;
-	}
-	
-	public boolean hasPrompts(String sql)
-	{
-		Matcher m = regex.matcher(sql);
-		return m.find();
-	}
-	
-	public String checkPrompts(String sql)
-	{
-		if (!this.hasPrompts(sql)) return sql;
-		Matcher m = regex.matcher(sql);
-		Set variables = new TreeSet();
-		while (m.find())
+		if (this.toPrompt == null)
 		{
-			int start = m.start() + this.prefix.length() + 1;
-			int end = m.end() - this.suffix.length();
-			String var = sql.substring(start, end);
-			System.out.println("Found varible prompt: " + var);
-			variables.add(var);
+			this.toPrompt = this.pool.getVariablesNeedingPrompt(this.sql);
 		}
-		return sql;
+		return (this.toPrompt.size() > 0);
 	}
 	
-	public static void main(String args[])
+	public boolean getPromptValues()
 	{
-		try
+		if (this.toPrompt == null)
 		{
-			VariablePrompter p = new VariablePrompter();
-			p.checkPrompts("select * from a where x = $[?myvar] and y = $[?secondvar]");
+			this.toPrompt = this.pool.getVariablesNeedingPrompt(this.sql);
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		System.out.println("*** Done.");
+		if (this.toPrompt.size() == 0) return true;
+		
+		DataStore vars = this.pool.getVariablesDataStore(this.toPrompt);
+		
+		return VariablesEditor.showVariablesDialog(vars);
 	}
 	
 }

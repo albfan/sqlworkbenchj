@@ -109,7 +109,14 @@ public class TableIdentifier
 	{
 		if (!this.isNewTable && (aTable == null || aTable.trim().length() == 0)) 
 			throw new IllegalArgumentException("Table name may not be null");
-		this.tablename = aTable;
+		if (aTable.indexOf('.') > 0)
+		{
+			this.tablename = aTable.substring(aTable.lastIndexOf('.') + 1);
+		}
+		else
+		{
+			this.tablename = aTable;
+		}
 		this.expression = null;
 	}
 	

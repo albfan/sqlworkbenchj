@@ -22,9 +22,7 @@ import workbench.storage.DataStore;
 public class TableDependency
 {
 	private WbConnection connection;
-	private String tablename;
-	private String catalog;
-	private String schema;
+	private TableIdentifier theTable;
 	private DependencyNode tableRoot;
 	private DbMetadata wbMetadata;
 	private ArrayList leafs;
@@ -40,23 +38,28 @@ public class TableDependency
 		this.wbMetadata = this.connection.getMetadata();
 	}
 
-	public void setTableName(String aCatalog, String aSchema, String aTable)
+	private void setTableName(String aCatalog, String aSchema, String aTable)
 	{
-		this.tablename = this.wbMetadata.adjustObjectname(aTable);
-		this.catalog = this.wbMetadata.adjustObjectname(aCatalog);
-		this.schema = this.wbMetadata.adjustObjectname(aSchema);
+		aTable = this.wbMetadata.adjustObjectname(aTable);
+		aCatalog = this.wbMetadata.adjustObjectname(aCatalog);
+		aSchema = this.wbMetadata.adjustObjectname(aSchema);
+		this.theTable = new TableIdentifier(aCatalog, aSchema, aTable);
 	}
 
+	public void setTable(TableIdentifier aTable)
+	{
+		this.theTable = aTable;
+	}
 	public void readDependencyTree()
 	{
 		this.readDependencyTree(true);
 	}
 	public void readDependencyTree(boolean exportedKeys)
 	{
-		if (this.tablename == null) return;
+		if (this.theTable == null) return;
 		if (this.connection == null) return;
 		this.leafs = new ArrayList();
-		this.tableRoot = new DependencyNode(this.catalog, this.schema, this.tablename);
+		this.tableRoot = new DependencyNode(this.theTable);
 		this.readTree(this.tableRoot, exportedKeys);
 	}
 

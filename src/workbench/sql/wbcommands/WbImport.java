@@ -120,7 +120,7 @@ public class WbImport extends SqlCommand
 			TextFileParser textParser = new TextFileParser(file);
 			textParser.setTableName(table);
 			textParser.setConnection(aConnection);
-			
+
 			String delimiter = cmdLine.getValue("delimiter");
 			if (delimiter != null) textParser.setDelimiter(delimiter);
 
@@ -204,7 +204,7 @@ public class WbImport extends SqlCommand
 			msg += ": " + table.toUpperCase();
 		}
 		result.addMessage(msg);
-		
+
 		boolean useBatch = cmdLine.getBoolean("usebatch");
 		boolean delete = cmdLine.getBoolean("deletetarget");
 		imp.setUseBatch(useBatch);

@@ -26,7 +26,7 @@ public class WbListVars extends SqlCommand
 	{
 	}
 
-	public String getVerb() { return "LISTVAR"; }
+	public String getVerb() { return "WBVARLIST"; }
 
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException

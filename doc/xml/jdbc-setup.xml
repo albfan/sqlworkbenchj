@@ -22,7 +22,7 @@
       the necessary drivers are already part of the Java runtime.</para>
 
       <!--<para>When you specify a library, you do not need to add it to the
-      classpath of the JVM (e.g. using a startup script for &wb-productname;). 
+      classpath of the JVM (e.g. using a startup script for &wb-productname;).
       This is handled by the application automatically.</para>-->
       </note>
 
@@ -33,7 +33,7 @@
       Some of these sample URLs use brackets to indicate a parameters that need
       to be replaced with the actual value for your connection: (servername)</para>
       <para>In this case the entire sequence including the brackets need to be replaced with the actual servername.</para>
-      
+
     </section>
 
     <section id="jdbc-drivers">
@@ -93,6 +93,16 @@
               <simplelist columns="1">
                 <member>firebirdsql-full.jar</member>
                 <member><ulink url="http://firebird.sourceforge.net"/></member>
+              </simplelist>
+            </entry>
+          </row>
+          <row>
+            <entry> <para>Cloudscape</para> </entry>
+            <entry> <para>com.ihost.cs.jdbc.CloudscapeDriver</para> </entry>
+            <entry>
+              <simplelist columns="1">
+                <member>cs.jar</member>
+                <member><ulink url="http://www.ibm.com/software/data/cloudscape"/></member>
               </simplelist>
             </entry>
           </row>

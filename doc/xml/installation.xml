@@ -1,10 +1,12 @@
 <section id="install">
   <title>Installing and starting &wb-productname;</title>
 
-  <para>To run &wb-productname; JDK 1.4 (or above) is required. Apart from
-  that, no special installation procedure is required. Just copy the files
-  into a directory that is convenient. When upgrading to a newer version of
-  &wb-productname; the old .jar file can simply be overwritten.</para>
+  <para>To run &wb-productname; a <ulink url="http://java.sun.com/j2se/">Java runtime environment</ulink> 
+  version 1.4 (or above) is required. You can either use a JRE ("Runtime") or a JDK ("Development Kit") to
+  run &wb-productname; Apart from that, no special installation procedure is needed. 
+  Just copy the files into a directory that is convenient. When upgrading 
+  to a newer version of &wb-productname; simply overwrite the old <literal>workbench.jar</literal>> file.
+  </para>
 
   <section id="starting">
     <title>Starting the program</title>
@@ -116,8 +118,8 @@
     <para>This will then be translated by the launcher into the approriate
     system property (but it's easier to remember)</para>
 
-    <para>If you run &wb-productname; through PC-Duo or a similar program
-    that enables remote access to a Windows&reg; workstations (VNC, NetMeeting, etc),
+    <para>If you run &wb-productname; through a program that enables remote 
+    access to a Windows&reg; workstations (PC-Duo, VNC, NetMeeting, etc),
     you may need to disable the use of DirectDraw for Java as well.</para>
 
     <para>Simply add the above parameter to the Windows shortcut definition</para>
@@ -278,23 +280,29 @@
 jworkbench -configdir=&#34;c:/Configurations/JWorkbench&#34;</programlisting>
     </section>
 
-    <section>
-      <title>-profile=&#60;profile name&#62;</title>
+    <section id="vardef-commandline">
+      <title>-vardef=&#60;variable definition file&#62;</title>
 
-      <para>Connect to the given profile. The name has to be exactly the
-      same as it appears in the profile dialog (case sensitiv!). If the name
-      contains spaces, it has to be enclosed in quotations marks.</para>
+      <para>With this command line parameter a definition file for internal variables can 
+      be defined. This file has to be a standard Java "properties" file. Each variable 
+      is listed on a single line in the format <literal>variable=value</literal>.
+      Lines starting with a <literal>#</literal> character are ignored (comments)
+      </para>
+      <programlisting>#Define the ID that we need later
+var_id=42
+person_name=Dent
+another_variable=24</programlisting>
 
-      <para>Example:</para>
-
-      <programlisting>java -jar Workbench.jar -profile=&#34;Oracle - Test&#34;
-jworkbench -profile='Oracle - Test'</programlisting>
-
-      <para>&wb-productname; understands more command line parameters, which can be used
-      to execute SQL scripts from batch files. Please refer to <link linkend="using-scripting">
-      Using &wb-productname; in batch files</link>
-      for more detailed information.</para>
     </section>
 
+    <section id="commandline-scripting">
+      <title>Parameters for batch execution</title>
+
+      <para>When using &wb-productname; inside batch files, additional command line parameters 
+      are supported to define the database connection and other things. 
+      Details about using batch execution can be found in the chapter <xref linkend="using-scripting"/>
+      </para>
+    </section>
+    
   </section>
 </section>

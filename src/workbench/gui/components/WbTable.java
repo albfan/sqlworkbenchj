@@ -110,6 +110,8 @@ import workbench.storage.NullValue;
 import workbench.util.StringUtil;
 import workbench.gui.actions.CopyAsSqlInsertAction;
 import workbench.gui.actions.CopyAsSqlUpdateAction;
+import java.awt.RenderingHints;
+import java.awt.Graphics2D;
 
 
 public class WbTable
@@ -714,7 +716,28 @@ public class WbTable
 	public void paintComponents(Graphics g)
 	{
 		if (this.suspendRepaint) return;
+		Graphics2D gf2d = (Graphics2D)g;
+		gf2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+		gf2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
 		super.paintComponents(g);
+	}
+
+	public void paintComponent(Graphics g)
+	{
+		if (this.suspendRepaint) return;
+		Graphics2D gf2d = (Graphics2D)g;
+		gf2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+		gf2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+		super.paintComponent(g);
+	}
+
+	public void paint(Graphics g)
+	{
+		if (this.suspendRepaint) return;
+		Graphics2D gf2d = (Graphics2D)g;
+		gf2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+		gf2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+		super.paint(g);
 	}
 
 
@@ -964,24 +987,44 @@ public class WbTable
 
 	public void optimizeAllColWidth()
 	{
-		this.optimizeAllColWidth(0);
+		this.optimizeAllColWidth(0, false);
+	}
+
+	public void optimizeAllColWidth(boolean respectColName)
+	{
+		this.optimizeAllColWidth(0, respectColName);
 	}
 
 	public void optimizeAllColWidth(int aMinWidth)
 	{
+		this.optimizeAllColWidth(aMinWidth, false);
+	}
+
+	public void optimizeAllColWidth(int aMinWidth, boolean respectColName)
+	{
 		int count = this.getColumnCount();
 		for (int i=0; i < count; i++)
 		{
-			this.optimizeColWidth(i, aMinWidth);
+			this.optimizeColWidth(i, aMinWidth, respectColName);
 		}
 	}
 
 	public void optimizeColWidth(int aColumn)
 	{
-		this.optimizeColWidth(aColumn, 0);
+		this.optimizeColWidth(aColumn, 0, false);
+	}
+
+	public void optimizeColWidth(int aColumn, boolean respectColName)
+	{
+		this.optimizeColWidth(aColumn, 0, respectColName);
 	}
 
 	public void optimizeColWidth(int aColumn, int aMinWidth)
+	{
+		this.optimizeColWidth(aColumn, aMinWidth, false);
+	}
+
+	public void optimizeColWidth(int aColumn, int aMinWidth, boolean respectColumnName)
 	{
 		if (this.dwModel == null) return;
 		if (aColumn < 0 || aColumn > this.getColumnCount() - 1) return;
@@ -991,10 +1034,18 @@ public class WbTable
 		TableColumnModel colMod = this.getColumnModel();
 		TableColumn col = colMod.getColumn(aColumn);
 		int addWidth = this.getAdditionalColumnSpace(0, aColumn);
-		String s = null;//this.dwModel.getColumnName(aColumn);
-		int optWidth = aMinWidth;
+		String s = null;
 		int stringWidth = 0;
+		int optWidth = aMinWidth;
+
+		if (respectColumnName)
+		{
+			s = this.dwModel.getColumnName(aColumn);
+			stringWidth = fm.stringWidth(s);
+			optWidth = Math.max(optWidth, stringWidth + addWidth);
+		}
 		int rowCount = this.getRowCount();
+
 		for (int row = 0; row < rowCount; row ++)
 		{
 			s = this.getValueAsString(row, aColumn);
@@ -1302,9 +1353,10 @@ public class WbTable
 		}
 		else if (e.getSource() == this.optimizeCol)
 		{
+			final boolean respectColName = this.optimizeCol.includeColumnLabels();
 			Thread t = new Thread()
 			{
-				public void run()	{ optimizeColWidth(column); }
+				public void run()	{ optimizeColWidth(column, respectColName); }
 			};
 			t.setName("OptimizeCol Thread");
 			t.start();
@@ -1721,15 +1773,6 @@ public class WbTable
 				ds.deleteRow(selectedRows[i]);
 			}
 		}
-//		if (selectedRow != -1)
-//		{
-//			ds.deleteRow(selectedRow);
-//			if (selectedRow >= ds.getRowCount())
-//			{
-//				selectedRow --;
-//			}
-//			this.getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
-//		}
 		return true;
 	}
 

@@ -634,6 +634,12 @@ public class DataStore
 		return this.columnSizes[aColumn];
 	}
 
+	protected Object getOriginalValue(int aRow, int aColumn)
+	{
+		RowData row = this.getRow(aRow);
+		return row.getOriginalValue(aColumn);
+	}
+		
 	public Object getValue(int aRow, int aColumn)
 		throws IndexOutOfBoundsException
 	{
@@ -2479,7 +2485,7 @@ public class DataStore
 		}
 	}
 
-	public void resetStatusForSentRow()
+	public void resetStatusForSentRows()
 	{
 		int rows = this.getRowCount();
 		for (int i=0; i < rows; i++)

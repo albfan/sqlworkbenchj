@@ -14,8 +14,7 @@ import javax.swing.SwingConstants;
 import workbench.WbManager;
 
 /**
- *
- * @author  thomas.kellerer@mgm-edv.de
+ * @author  workbench@kellerer.org
  */
 public class NumberColumnRenderer
 	extends ToolTipRenderer
@@ -77,29 +76,5 @@ public class NumberColumnRenderer
 			displayValue = aValue.toString(); 
 			tooltip = null;
 		}
-	}
-
-  public static void main(String[] args)
-  {
-    double value = 0.81;
-		DecimalFormatSymbols symb = new DecimalFormatSymbols();
-		symb.setDecimalSeparator('.');
-		DecimalFormat f = new DecimalFormat("0.00", symb);
-		f.setMaximumFractionDigits(4);
-		
-		int loops = 5000000;
-		long start,end;
-		start = System.currentTimeMillis();
-		for (int i=0; i < loops; i++)
-		{
-			String s= f.format(value);
-		}
-		end = System.currentTimeMillis();
-		long duration = (end - start);
-		long secs = duration / 1000;
-		System.out.println("dauer " + (end - start));
-		System.out.println("secs=" + secs	);
-		System.out.println("calls/s " + loops/secs);
-
 	}
 }

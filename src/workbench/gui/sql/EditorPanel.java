@@ -71,6 +71,7 @@ import workbench.resource.Settings;
 import workbench.sql.ScriptParser;
 import workbench.sql.formatter.SqlFormatter;
 import workbench.util.SqlUtil;
+import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.gui.actions.MatchBracketAction;
 import workbench.gui.editor.SyntaxDocument;
@@ -554,7 +555,7 @@ public class EditorPanel
 			this.setText(""); // clear memory!
 			String filename = aFile.getAbsolutePath();
 			BufferedReader reader = new BufferedReader(new FileReader(filename));
-			StringBuffer content = new StringBuffer((int)aFile.length() + 500);
+			StrBuffer content = new StrBuffer((int)aFile.length() + 500);
 			this.setText("");
 			String line = reader.readLine();
 			while (line != null)
@@ -569,6 +570,7 @@ public class EditorPanel
 			result = true;
 			this.clearUndoBuffer();
 			this.resetModified();
+			content = null;
 			this.fireFilenameChanged(filename);
 		}
 		catch (IOException e)

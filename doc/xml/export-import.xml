@@ -98,18 +98,21 @@
       with an XML file is the recommended way of importing data.</para></note>
     </section>
 
-	  <section id="xml-export-import" xreflabel="XML Export and Import">
-	      <title>XML Export and Import</title>
-			 <para>You can use &wb-productname;'s XML files to copy data from
+    <section id="xml-export-import" xreflabel="XML Export and Import">
+      <title>XML Export and Import</title>
+      
+       <para>You can use &wb-productname;'s XML files to copy data from
        one system to another.</para>
-       <para>You need to create the XML file first, using the EXPORT (or SPOOL) command
+       <para>You need to create the XML file first, using the EXPORT command
        from within the workbench, beeing connected to the source system. Suppose your data
        is stored in the table <literal>PERSON</literal> on your source system
        and you want to only select the columns <literal>lastname, firstname, birthday</literal>
        to be transferred to your target system.
        </para>
+       
        <para>To create the XML file the following command should be used:</para>
-          <programlisting>EXPORT -type=xml -file=&quot;c:/data/person.xml&quot; -table=contact;
+       
+       <programlisting>EXPORT -type=xml -file=&quot;c:/data/person.xml&quot; -table=contact;
 SELECT lastname, firstname, birthday FROM person;</programlisting>
        <para>As the data should be imported into the table <literal>CONTACT</literal>
        the <literal>-table=contact</literal> parameter is passed to the <literal>EXPORT</literal>
@@ -124,5 +127,12 @@ SELECT lastname, firstname, birthday FROM person;</programlisting>
        If you have a file with a lot of rows, you might want to set the parameter <literal>-commitevery=n</literal>.
        Some DBMS work faster if you commit more frequently instead of commit a huge number of inserts at the end.
        </para>
-		</section>
+       
+       <para>If you have XML files in a different format then the one expected by &wb-productname;
+       you can transform the file via XSLT into the correct format. More details on how 
+       to transform XML files to and from &wb-productname; can be found in the 
+       description of the <link linkend="command-xslt">XSLT command</link> and the 
+       <link id="command-export">EXPORT command</link>
+       </para>
+    </section>
   </section>

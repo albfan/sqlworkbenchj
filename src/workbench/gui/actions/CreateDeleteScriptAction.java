@@ -1,6 +1,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
@@ -8,7 +9,9 @@ import workbench.resource.ResourceMgr;
 /**
  *	@author  workbench@kellerer.org
  */
-public class CreateDeleteScriptAction extends WbAction
+public class CreateDeleteScriptAction 
+	extends WbAction
+	implements ListSelectionListener
 {
 	private SqlPanel client;
 
@@ -18,10 +21,22 @@ public class CreateDeleteScriptAction extends WbAction
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtCreateDeleteScript", null);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+		
+		this.client.getData().getTable().getSelectionModel().addListSelectionListener(this);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
 		this.client.generateDeleteScript();
 	}
+
+	public void valueChanged(javax.swing.event.ListSelectionEvent e)
+	{
+		if (e.getValueIsAdjusting()) return;
+		boolean mayUpdate = this.client.getData().hasUpdateableColumns();
+		int rows = this.client.getData().getTable().getSelectedRowCount();
+		this.setEnabled(mayUpdate && rows > 0);
+	}
+		
+
 }

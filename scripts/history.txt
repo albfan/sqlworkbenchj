@@ -1,11 +1,62 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
-Fix:  When trying to delete multiple rows before switching to edit mode, only 
-      the first row was deleted (because switching to edit mode resets the 
+Enh:  The logging has been improved. Logging to the console can 
+      now be disabled (workbench.log.console=false). If enabled
+      it will now log to System.err (instead of System.out).
+      The format of the log message can now be defined through
+      workbench.log.format 
+      Valid placeholders are: 
+      {type}        DEBUG, INFO etc
+      {timestamp}    
+      {message}     The actual log message
+      {error}       The error message from the exception (if present)
+      {source}      Where the error occurred
+      {stacktrace}  The exception stacktrace if any (will always be displayed
+                    after the log message regardless of the position in the 
+                    format string
+      If the level is set to debug, the stacktrace will always be displayed
+Enh:  The batch runner now displays the messages returned from the individual 
+      commands to System.out and doesn't use the logging facility any more. 
+      Combined with workbench.log.console=false the output of a batch run
+      is now very similar to the messages printed in the GUI.
+      Additionally result sets (if available) can now be printed to the console
+      using the commandline switch -displayresult=true
+Enh:  Views and triggers are now displayed for Cloudscape in the 
+      Database Explorer
+Enh:  Added the commandline switch -ignoredroperrors for batch mode.
+      This sets the "Ignore errors from DROP commands" property for the
+      connection (same effect as connecting with a profile where this
+      behaviour is enabled)
+Enh:  Variable subsitution is now supported. Variables can be defined
+      interactively (using WBVARDEF) from a file or as the result
+      of a SQL query. 
+      A variable can be referenced so that Workbench prompts never, only once
+      or always for a value. 
+      For details see the online help.
+Enh:  The EXPORT command now supports transforming the resulting XML file
+      through XSLT. Two new parameters (-stylesheet and -trans) have been
+      added to support this. The transformation will be executed after
+      the XML file has been created.
+      The transformation can also be executed "standalon" by using
+      the new command XSLT
+Enh:  When pressing Shift while selecting one of the "Optimize Column Width"
+      menu items, the column label will be taken into account for the
+      optimal size. Ctrl-Shift-W will optimize all columns with respecting
+      to the column's name. This shortcut cannot be remapped currently.
+Fix:  When importing a text file empty values for numeric fields gave an error.
+      They are now treated as NULL.
+Fix:  When trying to delete multiple rows before switching to edit mode, only
+      the first row was deleted (because switching to edit mode resets the
       row selection)
-Fix:  Generate Delete Script wasn't working if 
+Fix:  Generate Delete Script wasn't working if
       "Disable automatic update table check" was turned on for the profile
-
+      Fixed some minor problems during delete script generation.
+Fix:  After changing the object type in the DbExplorer the focus is not set
+      to the table list
+Fix:  A profile where the driverclass was registered more then once
+      (using different names) was not copied correctly.
+Fix:  When importing a text file with -header=false and -columns=... the first
+      line of the file was not imported.
 
 Build 73, 02.08.2004
 --------------------

@@ -6,6 +6,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
+import workbench.gui.sql.SqlPanel;
 
 import workbench.resource.ResourceMgr;
 
@@ -14,12 +15,12 @@ import workbench.resource.ResourceMgr;
  */
 public class ExecuteCurrentAction extends WbAction
 {
-	private ActionListener target;
+	private SqlPanel target;
 	
-	public ExecuteCurrentAction(ActionListener aListener)
+	public ExecuteCurrentAction(SqlPanel aPanel)
 	{
 		super();
-		this.target = aListener;
+		this.target = aPanel;
 		this.initMenuDefinition("MnuTxtExecuteCurrent", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.putValue(WbAction.ADD_TO_TOOLBAR, "false");
@@ -27,7 +28,7 @@ public class ExecuteCurrentAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.target.actionPerformed(e);
+		this.target.runCurrentStatement();
 	}
 	
 }

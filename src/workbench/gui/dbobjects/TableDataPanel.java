@@ -45,6 +45,7 @@ import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.SqlUtil;
+import java.awt.Cursor;
 
 
 
@@ -65,18 +66,14 @@ public class TableDataPanel
 	private ReloadAction reloadAction;
 
 	private JButton config;
-	//private JTextField maxRowField;
 	private JLabel rowCountLabel;
-	//private JLabel maxRowsLabel;
 	private JCheckBox autoRetrieve;
 
 	private long warningThreshold = -1;
 
 	private boolean shiftDown = false;
 
-	private String catalog;
-	private String schema;
-	private String tableName;
+	private TableIdentifier table;
 	private ImageIcon loadingIcon;
 	private Image loadingImage;
 
@@ -241,12 +238,12 @@ public class TableDataPanel
 		catch (SQLException e)
 		{
 			this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount") + " " + ResourceMgr.getString("TxtError"));
-			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.tableName + ": " + ExceptionUtil.getDisplay(e), null);
+			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.table.getTableExpression() + ": " + ExceptionUtil.getDisplay(e), null);
 		}
 		catch (Exception e)
 		{
 			this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount") + " " + ResourceMgr.getString("TxtError"));
-			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.tableName, e);
+			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.table.getTableExpression(), e);
 			/*
 			final Component caller = this;
 			final String msg = ResourceMgr.getString("ErrorRetrievingRowCount") + "\n" + e.getMessage();
@@ -272,20 +269,17 @@ public class TableDataPanel
 		return rowCount;
 	}
 
-	public void setTable(String aCatalog, String aSchema, String aTable)
+	public void setTable(TableIdentifier aTable)
 	{
 		this.reset();
-		this.schema = aSchema;
-		this.catalog = aCatalog;
-    this.tableName = aTable;
+		this.table = aTable;
 	}
 
 	private String buildSqlForTable(boolean forRowCount)
 	{
 		//if (this.currentTable == null) return null;
 
-		if (this.tableName == null || this.tableName.length() == 0) return null;
-		String table = this.dbConnection.getMetadata().quoteObjectname(this.tableName);
+		if (this.table == null) return null;
 
 		StringBuffer sql = new StringBuffer(100);
 		if (forRowCount)
@@ -293,18 +287,8 @@ public class TableDataPanel
 		else
 			sql.append("SELECT * FROM ");
 
-		if (this.schema != null && this.schema.trim().length() > 0)
-		{
-			if (!this.dbConnection.getMetadata().isOracle() || (this.dbConnection.getMetadata().isOracle() && !"PUBLIC".equalsIgnoreCase(this.schema)))
-			{
-				sql.append(this.dbConnection.getMetadata().quoteObjectname(this.schema));
-				sql.append(".");
-			}
-		}
-		sql.append(table);
+		sql.append(this.table.getTableExpression());
 
-		//sql.append(this.currentTable.getTableExpression());
-		//LogMgr.logDebug("TableDataPanel.buildSql()", "Using query=" + sql);
 		return sql.toString();
 	}
 
@@ -332,7 +316,7 @@ public class TableDataPanel
 	}
 
 
-	public synchronized void retrieve()
+	public void retrieve()
 	{
     final String sql = this.buildSqlForTable(false);
     if (sql == null) return;
@@ -347,17 +331,17 @@ public class TableDataPanel
 			{
 				try
 				{
-					WbSwingUtilities.showWaitCursor(dataDisplay);
+					//WbSwingUtilities.showWaitCursor(dataDisplay);
+					//dataDisplay.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					synchronized (retrieveLock)
 					{
 						dataDisplay.setShowErrorMessages(true);
 						dataDisplay.scriptStarting();
 						dataDisplay.setMaxRows(maxRows);
 						dataDisplay.runStatement(sql);
-						String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + tableName;
+						String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
 						dataDisplay.setPrintHeader(header);
 						dataDisplay.setStatusMessage("");
-            WbSwingUtilities.showDefaultCursor(dataDisplay);
 					}
 				}
 				catch (OutOfMemoryError mem)
@@ -376,9 +360,10 @@ public class TableDataPanel
 				}
 				finally
 				{
-					WbSwingUtilities.showDefaultCursorOnWindow(dataDisplay);
 					WbSwingUtilities.showDefaultCursor(dataDisplay);
-					dataDisplay.getTable().setCursor(null);
+					//dataDisplay.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+					//WbSwingUtilities.showDefaultCursor(dataDisplay);
+					//dataDisplay.getTable().setCursor(null);
 					dataDisplay.scriptFinished();
 					cancelRetrieve.setEnabled(false);
 					reloadAction.setEnabled(true);

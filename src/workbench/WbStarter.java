@@ -55,7 +55,7 @@ public class WbStarter
 		try
 		{
 			// Create an instance using reflection, so that this class can be
-			// loaded even with JDK < 1.4 (because now reference to WbManager is
+			// loaded even with JDK < 1.4 (because no reference to WbManager is
 			// in the class)
 			Class manager = Class.forName("workbench.WbManager");
 			Class[] parms = {String[].class};

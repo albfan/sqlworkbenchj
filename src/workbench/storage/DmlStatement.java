@@ -15,6 +15,7 @@ import java.util.List;
 
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
+import workbench.util.StrBuffer;
 
 /**
  *
@@ -181,7 +182,7 @@ public class DmlStatement
 		{
 			DbDateFormatter dateFormat = SqlSyntaxFormatter.getDateLiteralFormatter(dbproduct);
 			
-			StringBuffer result = new StringBuffer(this.sql.length() + this.values.size() * 10);
+			StrBuffer result = new StrBuffer(this.sql.length() + this.values.size() * 10);
 			boolean inQuotes = false;
 			int parmIndex = 0;
 			for (int i = 0; i < this.sql.length(); ++i)
@@ -218,7 +219,7 @@ public class DmlStatement
 		if (aValue == null) return null;
 		if (this.chrFunc == null) return aValue;
 		if (this.concatString == null) this.concatString = "||";
-		StringBuffer result = new StringBuffer(aValue.length() + 50);
+		StrBuffer result = new StrBuffer();
 		int len = aValue.length();
 		for (int i=0; i < len; i++)
 		{
@@ -229,7 +230,7 @@ public class DmlStatement
 				result.append(this.concatString);
 				result.append(this.chrFunc);
 				result.append('(');
-				result.append((int)c);
+				result.append(Integer.toString((int)c));
 				result.append(')');
 				result.append(this.concatString);
 				result.append('\'');
@@ -269,24 +270,8 @@ public class DmlStatement
 	{
 		try
 		{
-			//Class.forName("oracle.jdbc.OracleDriver");
-			//Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:oradb", "test", "test");
-			try
-			{
-				String sql = "insert into test (id, data) values (?,?)";
-				ArrayList values = new ArrayList();
-				values.add(new Integer(4));
-				values.add(new OracleLongType("Test"));
-				DmlStatement dml = new DmlStatement(sql, values);
-				//int rows = dml.execute(con);
-				System.out.println(dml.getExecutableStatement());
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-			//con.commit();
-			//con.close();
+			char c = '\t';
+			System.out.println(Integer.toString((int)c));
 		}
 		catch (Exception e)
 		{

@@ -4,6 +4,23 @@
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
+     <string>com.ihost.cs.jdbc.CloudscapeDriver</string>
+    </void>
+    <void property="library">
+     <string>cs.jar</string>
+    </void>
+    <void property="name">
+     <string>Cloudscape 10 Embedded</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:cloudscape:&lt;/path/to/database&gt;</string>
+    </void>
+   </object>
+  </void>
+ 
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
      <string>COM.FirstSQL.Dbcp.DbcpDriver</string>
     </void>
     <void property="library">
@@ -49,22 +66,24 @@
     </void>
    </object>
   </void>
+  
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
-     <string>com.inet.tds.TdsDriver</string>
+     <string>net.sourceforge.jtds.jdbc.Driver</string>
     </void>
     <void property="library">
-     <string>Una2000.jar</string>
+     <string>jtds.jar</string>
     </void>
     <void property="name">
-     <string>iNet MS SQL Driver</string>
+     <string>jTDS MS SQL Driver</string>
     </void>
     <void property="sampleUrl">
-     <string>jdbc:inetdae:servername:1433?database=name_of_database</string>
+     <string>jdbc:jtds:sqlserver://&lt;server&gt;[:&lt;port&gt;][/&lt;database&gt;]</string>
     </void>
    </object>
   </void>
+  
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -113,6 +132,7 @@
     </void>
    </object>
   </void>
+  
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -129,6 +149,7 @@
     </void>
    </object>
   </void>
+  
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -161,6 +182,7 @@
     </void>
    </object>
   </void>
+  
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -177,6 +199,7 @@
     </void>
    </object>
   </void>
+  
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -193,6 +216,7 @@
     </void>
    </object>
   </void>
+  
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -209,6 +233,7 @@
     </void>
    </object>
   </void>
+  
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">

@@ -135,8 +135,6 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("DEFAULT",Token.KEYWORD1);
 		keywords.add("DELETE",Token.KEYWORD1);
 		keywords.add("DENY",Token.KEYWORD1);
-		keywords.add("DESC",Token.KEYWORD2);
-		keywords.add("DESCRIBE",Token.KEYWORD2);
 		keywords.add("DISTINCT",Token.KEYWORD1);
 		keywords.add("DROP",Token.KEYWORD1);
 		keywords.add("EXEC",Token.KEYWORD1);
@@ -200,6 +198,9 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("WORK",Token.KEYWORD1);
 
 		// Workbench specific keywords
+		keywords.add("DESC",Token.KEYWORD2);
+		keywords.add("DESCRIBE",Token.KEYWORD2);
+		keywords.add("XSLT",Token.KEYWORD2);
 		keywords.add("SPOOL",Token.KEYWORD2);
 		keywords.add("EXPORT",Token.KEYWORD2);
 		keywords.add("EXP",Token.KEYWORD2);
@@ -211,6 +212,11 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("IMP",Token.KEYWORD2);
 		keywords.add("IMPORT",Token.KEYWORD2);
 		keywords.add("COPY",Token.KEYWORD2);
+		keywords.add("WBCOPY",Token.KEYWORD2);
+		keywords.add("WBVARDEF",Token.KEYWORD2);
+		keywords.add("WBVARDEFINE",Token.KEYWORD2);
+		keywords.add("WBVARLIST",Token.KEYWORD2);
+		keywords.add("WBVARDELETE",Token.KEYWORD2);
 	}
 
 	private static void addDataTypes()
