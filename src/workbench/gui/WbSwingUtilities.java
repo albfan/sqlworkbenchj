@@ -5,6 +5,7 @@ import java.awt.Point;
 import javax.swing.RootPaneContainer;
 import java.awt.Window;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Toolkit;
 
 import java.awt.event.FocusAdapter;
@@ -15,9 +16,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import workbench.gui.components.TextComponentMouseListener;
 
 public class WbSwingUtilities
 {
@@ -107,4 +111,23 @@ public class WbSwingUtilities
 		caller.getTopLevelAncestor().setCursor(null);
 	}
 	
+	
+	public static String getUserInput(Component caller, String aTitle, String initialValue)
+	{
+		Window parent = SwingUtilities.getWindowAncestor(caller);
+		final JTextField input = new JTextField();
+		input.setColumns(40);
+		input.setText(initialValue);
+		input.addMouseListener(new TextComponentMouseListener());
+		EventQueue.invokeLater(new Runnable() {
+			public void run()
+			{
+				input.grabFocus();
+			}
+		});
+		int choice = JOptionPane.showConfirmDialog(parent, input, aTitle, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+		if (choice == JOptionPane.CANCEL_OPTION) return null;
+		String value = input.getText();
+		return value;
+	}
 }

@@ -291,7 +291,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 			SqlPanel sql = (SqlPanel)this.sqlPanels.get(i);
 			sql.setConnection(con);
 		}
-		this.setTitle(ResourceMgr.TXT_PRODUCT_NAME + " [" + ConnectionMgr.getDisplayString(con) + "]");
+		//this.setTitle(ResourceMgr.TXT_PRODUCT_NAME + " [" + ConnectionMgr.getDisplayString(con) + "]");
 	}
 
 	public void selectConnection()
@@ -325,6 +325,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
 				ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
 				WbConnection conn = mgr.getConnection(aProfile);
 				this.setConnection(conn);
+				this.setTitle(ResourceMgr.TXT_PRODUCT_NAME + " [" + aProfile.getName() + "]");
 			}
 			catch (ClassNotFoundException cnf)
 			{

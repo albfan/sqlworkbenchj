@@ -114,7 +114,8 @@ public class WbTable extends javax.swing.JTable
 		int colCount = this.sortModel.getColumnCount();
 		int count = this.sortModel.getRowCount();
 		StringBuffer result = new StringBuffer(count * 250);
-		for (int i=0; i < colCount; i++)
+		// Start loop at 1 --> ignore status column
+		for (int i=1; i < colCount; i++)
 		{
 			result.append(this.sortModel.getColumnName(i));
 			if (i < colCount - 1) result.append('\t');
