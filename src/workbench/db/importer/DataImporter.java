@@ -77,7 +77,6 @@ public class DataImporter
 	private int colCount;
 	private ArrayList warnings = new ArrayList();
 	private ArrayList errors = new ArrayList();
-	//private int[] columnTypes = null;
 
 	// this array will map the columns for updating the target table
 	// the index into this array will be the index
@@ -435,7 +434,8 @@ public class DataImporter
 	 *	Callback function for RowDataProducer. The order in the data array
 	 * 	has to be the same as initially passed in the setTargetTable() method.
 	 */
-	public void processRow(Object[] row) throws SQLException
+	public void processRow(Object[] row) 
+		throws SQLException
 	{
 		if (row == null) return;
 		if (row.length != this.colCount) return;
@@ -499,7 +499,7 @@ public class DataImporter
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("DataImporter.processRow()", "Error importing row " + this.totalRows, e);
+			LogMgr.logError("DataImporter.processRow()", "Error importing row " + this.totalRows + ": " + e.getMessage(), null);
 			this.errors.add(ResourceMgr.getString("ErrorImportingRow") + " " + currentImportRow);
 			this.errors.add(ResourceMgr.getString("ErrorImportErrorMsg") + " " + e.getMessage());
 			this.errors.add(ResourceMgr.getString("ErrorImportValues") + " " + this.getValueDisplay(row));
@@ -528,6 +528,8 @@ public class DataImporter
 			{
 				if (this.useBatch)
 				{
+					// Oracle seems to have a problem with adding another SQL statement
+					// to the batch of a prepared Statement (works fine with PostgreSQL)
 					if (this.canCommitInBatch)
 					{
 						PreparedStatement stmt = null;
@@ -540,10 +542,6 @@ public class DataImporter
 							stmt = this.updateStatement;
 						}
 
-						// Oracle seems to have a problem with adding a SQL statement
-						// to the batch of a prepared Statement (works fine with PostgreSQL)
-						// as I don't know how other DBMS behave, adding the COMMIT will
-						// be disabled as soon as a problem occurs here
 						try
 						{
 							if (stmt != null) stmt.addBatch("COMMIT");
@@ -766,6 +764,7 @@ public class DataImporter
 		if (this.isModeUpdateInsert()) return "update/insert";
 		return "";
 	}
+	
 	private void checkTable()
 		throws SQLException
 	{
