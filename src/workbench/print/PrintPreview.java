@@ -49,8 +49,18 @@ public class PrintPreview
 	private JButton pageSetupButton;
 	private JButton printButton;
 	private JButton closeButton;
+	
+	private JButton pageRight;
+	private JButton pageLeft;
+	
+	private JButton pageDown;
+	private JButton pageUp;
+	private boolean hasHorizontalPages;
+	
 	private JScrollPane scroll;
 	protected PreviewContainer preview;
+	private PagePreview pageDisplay;
+	private int currentPage = 0;
 	
 	public PrintPreview(JFrame owner, TablePrinter target)
 	{
@@ -77,10 +87,35 @@ public class PrintPreview
 		this.pageSetupButton = new WbToolbarButton(ResourceMgr.getString("LabelPageSetupButton"));
 		this.pageSetupButton.addActionListener(this);
 		tb.add(this.pageSetupButton);
+
+		tb.addSeparator();
 		
-		this.closeButton = new WbToolbarButton(ResourceMgr.getString("LabelClose"));
-		this.closeButton.addActionListener(this);
-		tb.add(this.closeButton);
+		this.pageDown = new WbToolbarButton(ResourceMgr.getImage("Down"));
+		this.pageDown.addActionListener(this);
+		this.pageDown.setEnabled(false);
+		tb.add(this.pageDown);
+
+		this.pageUp = new WbToolbarButton(ResourceMgr.getImage("Up"));
+		this.pageUp.addActionListener(this);
+		this.pageUp.setEnabled(false);
+		tb.add(this.pageUp);
+
+		if (this.printTarget.getPagesAcross() > 1)
+		{
+			this.hasHorizontalPages = true;
+			
+			this.pageLeft = new WbToolbarButton(ResourceMgr.getImage("Back"));
+			this.pageLeft.addActionListener(this);
+			this.pageLeft.setEnabled(false);
+			tb.add(this.pageLeft);
+
+			this.pageRight = new WbToolbarButton(ResourceMgr.getImage("Forward"));
+			this.pageRight.addActionListener(this);
+			this.pageRight.setEnabled(false);
+			tb.add(this.pageRight);
+		}
+		
+		tb.addSeparator();
 
 		String[] scales = { "10%", "25%", "50%", "100%", "150%"};
 		this.cbZoom = new JComboBox(scales);
@@ -88,21 +123,28 @@ public class PrintPreview
 		this.cbZoom.setEditable(true);
 		this.cbZoom.setSelectedItem("100%");
 		this.cbZoom.addActionListener(this);
-		
-		tb.addSeparator();
 		tb.add(this.cbZoom);
+		tb.addSeparator();
+		
+		this.closeButton = new WbToolbarButton(ResourceMgr.getString("LabelClose"));
+		this.closeButton.addActionListener(this);
+		tb.add(this.closeButton);
+
 		getContentPane().add(tb, BorderLayout.NORTH);
 
 		this.addWindowListener(this);
 		
 		this.preview = new PreviewContainer();
+		this.pageDisplay = new PagePreview();
+		this.preview.add(this.pageDisplay);
+		showCurrentPage();
+		
 		this.scroll = new JScrollPane(this.preview);
 		adjustScrollbar();
 		
 		getContentPane().add(scroll, BorderLayout.CENTER);
 		
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		updateDisplay();
 		setVisible(true);
 	}
 	
@@ -114,28 +156,19 @@ public class PrintPreview
 		this.scroll.getVerticalScrollBar().setUnitIncrement((int)fm.getHeight());
 	}
 	
-	private void updateDisplay()
+	private void showCurrentPage()
 	{
-		PageFormat pageFormat = this.printTarget.getPageFormat();
-		if (pageFormat.getHeight()==0 || pageFormat.getWidth()==0)
-		{
-			System.err.println("Unable to determine default page size");
-			return;
-		}
-		WbSwingUtilities.showWaitCursor(this);
-		this.pageWidth = (int)(pageFormat.getWidth());
-		this.pageHeight = (int)(pageFormat.getHeight());
-		
-		int w = (int)(this.pageWidth * this.scale/100);
-		int h = (int)(this.pageHeight* this.scale/100);
-
-		this.preview.removeAll();
-		this.doLayout();
-		
-		int pageIndex = 0;
+		WbSwingUtilities.showWaitCursorOnWindow(this);
 		try
 		{
-			while (true)
+			PageFormat pageFormat = this.printTarget.getPageFormat();
+			this.pageWidth = (int)(pageFormat.getWidth());
+			this.pageHeight = (int)(pageFormat.getHeight());
+
+			int w = (int)(this.pageWidth * this.scale/100);
+			int h = (int)(this.pageHeight* this.scale/100);
+
+			try
 			{
 				BufferedImage img = new BufferedImage(pageWidth, pageHeight, BufferedImage.TYPE_INT_RGB);
 				Graphics2D g = img.createGraphics();
@@ -146,24 +179,37 @@ public class PrintPreview
 				g.setStroke(new BasicStroke(0.2f));
 				g.drawRect((int)pageFormat.getImageableX() - 1, (int)pageFormat.getImageableY() - 1, (int)pageFormat.getImageableWidth() + 1, (int)pageFormat.getImageableHeight() + 1);
 				g.setStroke(s);
-				if (this.printTarget.print(g, pageFormat, pageIndex) != Printable.PAGE_EXISTS)			
-					break;
-
-				PagePreview pp = new PagePreview(w, h, img);
-				this.preview.add(pp);
-				pageIndex++;
+				if (this.printTarget.print(g, pageFormat, this.currentPage) == Printable.PAGE_EXISTS)			
+				{
+					this.pageDisplay.setImage(w,h,img);
+				}
+			}
+			catch (PrinterException e)
+			{
+				LogMgr.logError("PrintPreview.updateDisplay()", "Error when creating preview", e);
+				WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgPrintPreviewError") + "\n" + e.getMessage());
 			}
 		}
-		catch (PrinterException e)
+		catch (OutOfMemoryError e)
 		{
-			e.printStackTrace();
-			System.err.println("Printing error: "+e.toString());
+			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
+			this.pageDisplay.setImage(0,0,null);
 		}
-		this.validate();
-		this.getContentPane().validate();
-		this.getContentPane().repaint();
-		this.repaint();
-		WbSwingUtilities.showDefaultCursor(this);
+		finally
+		{
+			this.validate();
+			this.repaint();
+			WbSwingUtilities.showDefaultCursorOnWindow(this);
+		}
+		
+		this.pageUp.setEnabled(this.printTarget.getPreviousVerticalPage(this.currentPage) != -1);
+		this.pageDown.setEnabled(this.printTarget.getNextVerticalPage(this.currentPage) != -1);
+		
+		if (this.hasHorizontalPages)
+		{
+			this.pageLeft.setEnabled(this.printTarget.getPreviousHorizontalPage(this.currentPage) != -1);
+			this.pageRight.setEnabled(this.printTarget.getNextHorizontalPage(this.currentPage) != -1);
+		}
 	}
 
 	public void doPrint()
@@ -199,43 +245,8 @@ public class PrintPreview
 		{
 			WbManager.getSettings().setPageFormat(newFormat);
 			this.printTarget.setPageFormat(newFormat);
-			updateDisplay();
-		}
-	}
-	
-	private synchronized void showPageSetup()
-	{
-		PrinterJob prnJob = PrinterJob.getPrinterJob();
-		PrintRequestAttributeSet attr = new HashPrintRequestAttributeSet();
-		PageFormat pageFormat = this.printTarget.getPageFormat();
-		
-		float x = (float)PrintUtil.pointsToMillimeter(pageFormat.getImageableX());
-		float y = (float)PrintUtil.pointsToMillimeter(pageFormat.getImageableY());
-		float w = (float)PrintUtil.pointsToMillimeter(pageFormat.getImageableWidth());
-		float h = (float)PrintUtil.pointsToMillimeter(pageFormat.getImageableHeight());
-		attr.add(MediaSizeName.ISO_A4);
-		MediaPrintableArea area = new MediaPrintableArea(x,y,w,h,MediaPrintableArea.MM);
-		attr.add(area);
-
-		PageFormat newFormat = prnJob.pageDialog(attr);
-		if (newFormat != null)
-		{
-			area = (MediaPrintableArea)attr.get(MediaPrintableArea.class);
-			
-			Attribute[] content = attr.toArray();
-			System.out.println("width=" + area.getWidth(MediaPrintableArea.MM));
-			MediaSizeName media = null;
-			for (int i=0; i < content.length; i++)
-			{
-				System.out.println("entry=" + i + ",class=" + content[i].getClass().getName());
-				if (content[i] instanceof MediaSizeName)
-				{
-					media = (MediaSizeName)content[i];
-					System.out.println("media=" + WbMediaSizeName.getName(media));
-				}
-			}
-			this.printTarget.setPageFormat(newFormat);
-			this.updateDisplay();
+			showCurrentPage();
+			this.doLayout();
 		}
 	}
 	
@@ -311,6 +322,36 @@ public class PrintPreview
 				}
 			};
 			runner.start();
+		}
+		else if (e.getSource() == this.pageRight)
+		{
+			int newIndex = this.printTarget.getNextHorizontalPage(this.currentPage);
+			if (newIndex != -1)	this.currentPage = newIndex;
+			this.showCurrentPage();
+		}
+		else if (e.getSource() == this.pageLeft)
+		{
+			int newIndex = this.printTarget.getPreviousHorizontalPage(this.currentPage);
+			if (newIndex != -1)	this.currentPage = newIndex;
+			this.showCurrentPage();
+		}
+		else if (e.getSource() == this.pageUp)
+		{
+			int newIndex = this.printTarget.getPreviousVerticalPage(this.currentPage);
+			if (newIndex != -1)
+			{
+				this.currentPage = newIndex;
+				this.showCurrentPage();
+			}
+		}
+		else if (e.getSource() == this.pageDown)
+		{
+			int newIndex = this.printTarget.getNextVerticalPage(this.currentPage);
+			if (newIndex != -1)
+			{
+				this.currentPage = newIndex;
+				this.showCurrentPage();
+			}
 		}
 		else if (e.getSource() == this.closeButton)
 		{
@@ -437,7 +478,16 @@ public class PrintPreview
 		protected Image m_source;
 		protected Image m_img;
 
+		public PagePreview()
+		{
+		}
+		
 		public PagePreview(int w, int h, Image source)
+		{
+			this.setImage(w,h,source);
+		}
+		
+		public void setImage(int w, int h, Image source)
 		{
 			m_w = w;
 			m_h = h;
@@ -474,70 +524,21 @@ public class PrintPreview
 
 		public void paint(Graphics g)
 		{
-			g.setColor(getBackground());
-			g.fillRect(0, 0, getWidth(), getHeight());
-			//g.setColor(Color.LIGHT_GRAY);
-			g.drawImage(m_img, 0, 0, this);
-			paintBorder(g);
+			if (this.m_img != null)
+			{
+				g.setColor(getBackground());
+				g.fillRect(0, 0, getWidth(), getHeight());
+				//g.setColor(Color.LIGHT_GRAY);
+				g.drawImage(m_img, 0, 0, this);
+				paintBorder(g);
+			}
 		}
 	}
 
-	public static void _main(String[] args)
-	{
-		try
-		{
-			PrinterJob prnJob = PrinterJob.getPrinterJob();
-			PrintRequestAttributeSet attr = new HashPrintRequestAttributeSet();
-			WbManager.getInstance().initSettings();
-			PageFormat pageFormat = WbManager.getInstance().getSettings().getPageFormat();
-			/*
-			PageFormat pageFormat = new PageFormat();
-			Paper p = new Paper();
-			
-			MediaSize size = MediaSize.getMediaSizeForName(MediaSizeName.ISO_A4);
-			
-			float a4width_points = (float)PrintUtil.millimeterToPoints(size.getX(Size2DSyntax.MM));
-			float a4height_points = (float)PrintUtil.millimeterToPoints(size.getY(Size2DSyntax.MM));
-			p.setSize(a4width_points, a4height_points);
-			
-			double x = PrintUtil.millimeterToPoints(20);
-			double y = PrintUtil.millimeterToPoints(20);
-			double w = a4width_points - (x * 2);
-			double h = a4height_points - (y * 2);
-			
-			p.setImageableArea(x,y, w,h);
-			
-			
-			//MediaPrintableArea area = new MediaPrintableArea(x,y,w,h,MediaPrintableArea.MM);
-			//attr.add(area);
-			//attr.add(MediaSizeName.ISO_A4);
-			pageFormat.setPaper(p);
-			*/
-			
-			MediaSize size = MediaSize.getMediaSizeForName(MediaSizeName.ISO_A4);
-			
-			float a4width_points = (float)PrintUtil.millimeterToPoints(size.getX(Size2DSyntax.MM));
-			float a4height_points = (float)PrintUtil.millimeterToPoints(size.getY(Size2DSyntax.MM));
-			System.out.println("a4size = [" + a4width_points + "," + a4height_points + "]");
-			
-			PrintUtil.printPageFormat("test", pageFormat);
-			
-			PageFormat newFormat = prnJob.pageDialog(pageFormat);
-			PrintUtil.printPageFormat("changed", newFormat);
-			WbManager.getSettings().setPageFormat(newFormat);
-			WbManager.getSettings().saveSettings();
-			System.exit(0);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-	
 	public static void main(String[] args)
 	{
-		int cols = 5;
-		int rows = 100;
+		int cols = 7;
+		int rows = 150;
 		
 		DefaultTableModel data = new DefaultTableModel(rows, cols);
 		for (int row = 0; row < rows; row ++)
@@ -556,6 +557,7 @@ public class PrintPreview
 
 		try
 		{
+			WbManager.getInstance().initSettings();
 			PrinterJob pj=PrinterJob.getPrinterJob();
 			PageFormat page = pj.defaultPage();
 			TablePrinter printer = new TablePrinter(tbl, page, new Font("Courier New", Font.PLAIN, 12));

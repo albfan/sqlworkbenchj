@@ -13,6 +13,7 @@ import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.db.DbDriver;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
@@ -498,6 +499,12 @@ public class WbManager implements FontChangedListener
 	private static final String ARG_SUCCESS_SCRIPT = "cleanupsuccess";
 	private static final String ARG_ERROR_SCRIPT = "cleanuperror";
 
+	private static final String ARG_CONN_URL = "url";
+	private static final String ARG_CONN_DRIVER = "driver";
+	private static final String ARG_CONN_JAR = "driverjar";
+	private static final String ARG_CONN_USER = "username";
+	private static final String ARG_CONN_PWD = "password";
+	
 	private void initCmdLine(String[] args)
 	{
 		if (trace) System.out.println("WbManager.initCmdLine() - start");
@@ -506,6 +513,15 @@ public class WbManager implements FontChangedListener
 		cmdLine.addArgument(ARG_CONFIGDIR);
 		cmdLine.addArgument(ARG_SCRIPT);
 		cmdLine.addArgument(ARG_LOGFILE);
+		cmdLine.addArgument(ARG_ABORT);
+		cmdLine.addArgument(ARG_SUCCESS_SCRIPT);
+		cmdLine.addArgument(ARG_ERROR_SCRIPT);
+		
+		cmdLine.addArgument(ARG_CONN_URL);
+		cmdLine.addArgument(ARG_CONN_DRIVER);
+		cmdLine.addArgument(ARG_CONN_JAR);
+		cmdLine.addArgument(ARG_CONN_USER);
+		cmdLine.addArgument(ARG_CONN_PWD);
 
 		try
 		{
@@ -526,10 +542,12 @@ public class WbManager implements FontChangedListener
 			if (scriptname == null || scriptname.length() == 0)
 			{
 				this.batchMode = false;
+				this.connMgr.setReadTemplates(true);
 			}
 			else
 			{
 				this.batchMode = true;
+				this.connMgr.setReadTemplates(false);
 				LogMgr.logInfo("WbManager", "Executing script " + scriptname);
 			}
 
@@ -544,6 +562,7 @@ public class WbManager implements FontChangedListener
 	{
 		this.settings = new Settings();
 	}
+	
 	public void init()
 	{
 		if (trace) System.out.println("WbManager.init() - start");
@@ -578,9 +597,29 @@ public class WbManager implements FontChangedListener
 				abort = StringUtil.stringToBool(errorHandling);
 			}
 
+			ConnectionProfile profile = null;
+			if (profilename == null)
+			{
+				String url = StringUtil.trimQuotes(cmdLine.getValue(ARG_CONN_URL));
+				String driver = StringUtil.trimQuotes(cmdLine.getValue(ARG_CONN_DRIVER));
+				String user = StringUtil.trimQuotes(cmdLine.getValue(ARG_CONN_USER));
+				String pwd = StringUtil.trimQuotes(cmdLine.getValue(ARG_CONN_PWD));
+				String jar = StringUtil.trimQuotes(cmdLine.getValue(ARG_CONN_JAR));
+				DbDriver drv = this.connMgr.findRegisteredDriver(driver);
+				if (drv == null)
+				{
+					this.connMgr.registerDriver(driver, jar);
+				}
+				profile = new ConnectionProfile(driver, url, user, pwd);
+			}
+			else
+			{
+				profile = this.connMgr.getProfile(StringUtil.trimQuotes(profilename));
+			}
+			
 			String success = cmdLine.getValue(ARG_SUCCESS_SCRIPT);
 			String error = cmdLine.getValue(ARG_ERROR_SCRIPT);
-			if (scripts != null && profilename != null)
+			if (scripts != null && profile != null)
 			{
 				if (trace) System.out.println("WbManager.init() - initializing BatchRunner");
 				BatchRunner runner = new BatchRunner(scripts);
@@ -593,13 +632,13 @@ public class WbManager implements FontChangedListener
 					// connection manager. It will throw an exception
 					// if the connection fails.
 					if (trace) System.out.println("WbManager.init() - connecting BatchRunner");
-					runner.setProfile(StringUtil.trimQuotes(profilename));
+					runner.setProfile(profile);
 					if (trace) System.out.println("WbManager.init() - starting BatchRunner");
 					runner.execute();
 				}
 				catch (Exception e)
 				{
-					LogMgr.logError("WbManager", "Could not initialize the batch runner", e);
+					LogMgr.logError("WbManager", "Could not initialize the batch runner\n", e);
 				}
 				finally
 				{

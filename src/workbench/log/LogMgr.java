@@ -4,12 +4,21 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import workbench.WbManager;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -34,10 +43,8 @@ public class LogMgr
 		LEVELS.add(DEBUG);
 	}
 
-	private static PrintStream logOut = System.err;
-	private static String outputfile;
-	private static boolean outputOpened;
-
+	private static PrintStream logOut = null;
+	private static final Date theDate = new Date();
 	private static final int EXC_TYPE_MSG = 1;
 	private static final int EXC_TYPE_BRIEF = 2;
 	private static final int EXC_TYPE_COMPLETE = 3;
@@ -80,7 +87,7 @@ public class LogMgr
 	
 	public static void shutdown()
 	{
-		if (outputOpened && outputfile != null)
+		if (logOut != null)
 		{
 			logOut.close();
 		}
@@ -90,70 +97,31 @@ public class LogMgr
 	{
 	  if (WbManager.trace) System.out.println("LogMgr.setOutputFile() - " + aFilename);
 		if (aFilename == null || aFilename.length() == 0) return;
-		if ("System.out".equalsIgnoreCase(aFilename))
-		{
-			if (logOut != null && logOut != System.out && logOut != System.err)
-			{
-				System.out.println("closing output stream " + logOut);
-				logOut.close();
-			}
-			outputOpened = true;
-			outputfile = null;
-			logOut = System.out;
-			return;
-		}
-		if ("System.err".equalsIgnoreCase(aFilename))
-		{
-			if (logOut != null && logOut != System.out && logOut != System.err)
-			{
-				System.out.println("closing output stream " + logOut);
-				logOut.close();
-			}
-			outputOpened = true;
-			outputfile = null;
-			logOut = System.err;
-			return;
-		}
-		outputfile = aFilename;
-		outputOpened = false;
-		checkOutput();
-	  if (WbManager.trace) System.out.println("LogMgr.setOutputFile() - done");
-	}
-
-	private static void checkOutput()
-	{
-		if (outputOpened) return;
-    if (outputfile == null)
-    {
-      logOut = System.err;
-      outputOpened = true;
-      return;
-    }
+		if (aFilename.startsWith("System")) return;
 		try
 		{
-			if (logOut != null && logOut != System.out && logOut != System.err)
+			if (logOut != null)
 			{
-				System.out.println("closing output stream " + logOut);
 				logOut.close();
+				logOut = null;
 			}
-      if (WbManager.trace) System.out.println("LogMgr.checkOutput() - Opening logfile " + outputfile);
-			File f = new File(outputfile);
+      if (WbManager.trace) System.out.println("LogMgr.checkOutput() - Opening logfile " + aFilename);
+			File f = new File(aFilename);
 			if (f.exists())
 			{
-				File last = new File(outputfile + ".last");
+				File last = new File(aFilename + ".last");
 				if (last.exists()) last.delete();
 				f.renameTo(last);
 			}
-			logOut = new DuplicatingPrintStream(new BufferedOutputStream(new FileOutputStream(outputfile)), System.out);
-      outputOpened = true;
+			logOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(aFilename)));
       logInfo("LogMgr", "Log started");
 		}
 		catch (Throwable th)
 		{
-			logOut = System.err;
-      outputOpened = true;
-			logError("LogMgr.checkOutput()", "Error when opening logfile=" + outputfile, th);
+			logOut = null;
+			logError("LogMgr.checkOutput()", "Error when opening logfile=" + aFilename, th);
 		}
+	  if (WbManager.trace) System.out.println("LogMgr.setOutputFile() - done");
 	}
 
 	public static void logDebug(Object aCaller, String aMsg)
@@ -195,55 +163,85 @@ public class LogMgr
 		int level = LEVELS.indexOf(aType);
 		if (level > loglevel) return;
 
-		checkOutput();
-		logOut.print(aType);
-		logOut.print(" ");
-		logOut.print(getTimeString());
-		logOut.print(" - ");
+		String s = formatMessage(aType, aCaller, aMsg, th);
+		if (logOut != null) logOut.print(s);
+		System.out.print(s);
+	}
+	
+	private static String formatMessage(String aType, Object aCaller, String aMsg, Throwable th)
+	{
+		StringBuffer buff;
+		if (th == null) buff = new StringBuffer(200);
+		else buff = new StringBuffer(500);
+		
+		buff.append(aType);
+		buff.append(" ");
+		buff.append(getTimeString());
+		buff.append(" - ");
 		if (aCaller instanceof String)
-			logOut.print((String)aCaller);
+			buff.append((String)aCaller);
 		else
-			logOut.print(aCaller.getClass().getName());
-		logOut.print(" - ");
-		logOut.print(aMsg);
+			buff.append(aCaller.getClass().getName());
+		buff.append(" - ");
+		buff.append(aMsg);
 		if (th == null)
 		{
-			logOut.println();
+			buff.append(StringUtil.LINE_TERMINATOR);
 		}
 		else
 		{
 			if (exceptionType == EXC_TYPE_MSG)
 			{
-				logOut.print(" (");
-				logOut.print(th.getMessage());
-				logOut.println(")");
+				buff.append(" (");
+				buff.append(th.getMessage());
+				buff.append(')');
+				buff.append(StringUtil.LINE_TERMINATOR);
 			}
 			else if (exceptionType == EXC_TYPE_BRIEF)
 			{
-				logOut.println();
-				logOut.print("     ");
-				logOut.print(th.getClass());
-				logOut.print(": ");
-				logOut.println(th.getMessage());
+				buff.append(StringUtil.LINE_TERMINATOR);
+				buff.append("     ");
+				buff.append(th.getClass());
+				buff.append(": ");
+				buff.append(th.getMessage());
+				buff.append(StringUtil.LINE_TERMINATOR);
 			}
 			else if (exceptionType == EXC_TYPE_COMPLETE)
 			{
 				String msg = th.getMessage();
-				if (msg != null) logOut.println(msg);
-				logOut.println();
-				logStackTrace(th);
+				if (msg != null) 
+				{
+					buff.append(msg);
+					buff.append(StringUtil.LINE_TERMINATOR);
+				}
+				
+				buff.append(getStackTrace(th));
+				buff.append(StringUtil.LINE_TERMINATOR);
 			}
 		}
-		logOut.flush();
+		return buff.toString();
 	}
 
-	public static void logStackTrace(Throwable th)
+	public static String getStackTrace(Throwable th)
 	{
-		if (th != null) th.printStackTrace(logOut);
+		if (th == null) return "";
+		try
+		{
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			th.printStackTrace(pw);
+			pw.close();
+			return sw.toString();
+		} 
+		catch (Exception ex)
+		{
+		}
+		return "";
 	}
 
 	private static String getTimeString()
 	{
-		return formatter.format(new Date());
+		theDate.setTime(System.currentTimeMillis());
+		return formatter.format(theDate);
 	}
 }

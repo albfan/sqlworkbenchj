@@ -125,6 +125,10 @@ public class Settings
 
 		String level = this.props.getProperty("workbench.log.level", "INFO");
 		LogMgr.setLevel(level);
+		
+		// init settings for datastore
+		System.setProperty("org.kellerer.sort.language", this.getSortLanguage());
+		System.setProperty("org.kellerer.sort.country", this.getSortCountry());
 
 		if (WbManager.trace) System.out.println("Settings.<init> - done");
 	}
@@ -939,6 +943,17 @@ public class Settings
 
 		return del;
 	}
+	
+	public String getSortLanguage()
+	{
+		return this.props.getProperty("sort.language", System.getProperty("user.language"));
+	}
+	
+	public String getSortCountry()
+	{
+		return this.props.getProperty("sort.country", System.getProperty("user.country"));
+	}
+	
 	public void setLastImportDelimiter(String aDelimit)
 	{
 		if (aDelimit.equals("\t")) aDelimit = "\\t";

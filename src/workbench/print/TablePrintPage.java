@@ -76,7 +76,7 @@ public class TablePrintPage
 		}
 		else
 		{
-			return "(" + this.pageNumDown + "-" + this.pageNumAcross + ")";
+			return this.pageNumDown + "-" + this.pageNumAcross;
 		}
 	}
 	public void setColumnHeaders(String[] headers)
