@@ -4,7 +4,7 @@
  * Created on November 25, 2001, 3:10 PM
  */
 
-package workbench.gui.sql;
+package workbench.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
