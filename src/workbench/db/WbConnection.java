@@ -77,7 +77,7 @@ public class WbConnection
 	{
 		try
 		{
-			WbManager.getInstance().getConnectionMgr().reconnect(this);
+			ConnectionMgr.getInstance().reconnect(this);
 		}
 		catch (Exception e)
 		{
@@ -239,7 +239,7 @@ public class WbConnection
 	 */
 	public void disconnect()
 	{
-		WbManager.getInstance().getConnectionMgr().disconnect(this.id);
+		ConnectionMgr.getInstance().disconnect(this.id);
 	}
 
 	/**

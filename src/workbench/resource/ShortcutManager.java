@@ -17,6 +17,7 @@ import javax.swing.KeyStroke;
 
 import workbench.gui.actions.WbAction;
 import workbench.util.WbPersistence;
+import workbench.gui.actions.ActionRegistration;
 
 /**
  * @author workbench@kellerer.org

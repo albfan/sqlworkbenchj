@@ -97,36 +97,60 @@ public class ResultInfo
 				col.setColumnTypeName(SqlUtil.getTypeName(col.getDataType()));
 			}
 
+			int scale = 0;
+			// Some JDBC drivers (e.g. Oracle) do not like 
+			// getPrecision or getScale() on all column types
+			// so we'll simply ignore any exceptions thrown by
+			// those methods
 			try
 			{
-				int scale = metaData.getScale(i + 1);
-				int prec = metaData.getPrecision(i + 1);
-				String dbmsType = DbMetadata.getSqlTypeDisplay(typename, col.getDataType(), prec, scale);
-				col.setDbmsType(dbmsType);
-				col.setDecimalDigits(scale);
-				if (type == Types.VARCHAR)
+				scale = metaData.getScale(i + 1);
+			}
+			catch (Throwable th)
+			{
+				scale = 0;
+			}
+			int prec = 0;
+			try
+			{
+				prec = metaData.getPrecision(i + 1);
+			}
+			catch (Throwable th)
+			{
+				prec = 0;
+			}
+
+			int size = 0;
+			try
+			{
+				size = metaData.getColumnDisplaySize(i + 1);
+			}
+			catch (Exception e)
+			{
+				size = prec;
+			}
+
+			String dbmsType = DbMetadata.getSqlTypeDisplay(typename, col.getDataType(), prec, scale);; 
+			col.setDecimalDigits(scale);
+			if (type == Types.VARCHAR)
+			{
+				if (sourceConnection != null && sourceConnection.getMetadata().reportsRealSizeAsDisplaySize())
 				{
-					if (sourceConnection != null && sourceConnection.getMetadata().reportsRealSizeAsDisplaySize())
-					{
-						// HSQL reports the VARCHAR size in displaySize()
-						int size = metaData.getColumnDisplaySize(i + 1);
-						col.setColumnSize(size);
-					}
-					else
-					{
-						// all others seem to report the VARCHAR size in precision
-						col.setColumnSize(prec);
-					}
+					// HSQL reports the VARCHAR size in displaySize()
+					dbmsType = DbMetadata.getSqlTypeDisplay(typename, col.getDataType(), size, 0);
+					col.setColumnSize(size);
 				}
 				else
 				{
+					// all others seem to report the VARCHAR size in precision
 					col.setColumnSize(prec);
 				}
 			}
-			catch (SQLException e)
+			else
 			{
-				col.setDbmsType(typename);
+				col.setColumnSize(size);
 			}
+			col.setDbmsType(dbmsType);
 			
 			try
 			{
@@ -250,7 +274,11 @@ public class ResultInfo
 		}
 	}	
 	
-	public int getColumnType(int i) { return this.columns[i].getDataType(); }
+	public int getColumnType(int i) 
+	{ 
+		if (i >= this.columns.length) return Types.OTHER;
+		return this.columns[i].getDataType(); 
+	}
 	public String getColumnClassName(int i) 
 	{ 
 		String className = this.columns[i].getColumnClass();
@@ -264,6 +292,7 @@ public class ResultInfo
 	
 	public Class getColumnClass(int aColumn)
 	{
+		if (aColumn > this.colCount) return null;
 		int type = this.getColumnType(aColumn);
 		switch (type)
 		{

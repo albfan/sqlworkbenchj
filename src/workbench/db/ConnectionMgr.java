@@ -19,16 +19,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import workbench.WbManager;
 import workbench.exception.ExceptionUtil;
 import workbench.exception.NoConnectionException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.WbPersistence;
+import workbench.resource.Settings;
 
 /**
  * @author  workbench@kellerer.org
- * @version  $Revision: 1.41 $
+ * @version  $Revision: 1.42 $
  */
 public class ConnectionMgr
 {
@@ -40,10 +40,17 @@ public class ConnectionMgr
 	private boolean profilesChanged;
 	private boolean readTemplates = true;
 	private boolean templatesImported;
+	private static final ConnectionMgr mgrInstance = new ConnectionMgr();
 
 	/** Creates new ConnectionMgr */
-	public ConnectionMgr()
+	private ConnectionMgr()
 	{
+
+	}
+
+	public static ConnectionMgr getInstance()
+	{
+		return mgrInstance;
 	}
 
 	public WbConnection getConnection(String aProfileName, String anId)
@@ -84,9 +91,9 @@ public class ConnectionMgr
 
 		try
 		{
-			if (WbManager.getSettings().getEnableDbmsOutput())
+			if (Settings.getInstance().getEnableDbmsOutput())
 			{
-				int size = WbManager.getSettings().getDbmsOutputDefaultBuffer();
+				int size = Settings.getInstance().getDbmsOutputDefaultBuffer();
 				conn.getMetadata().enableOutput(size);
 			}
 		}
@@ -315,7 +322,7 @@ public class ConnectionMgr
 	public static String getDisplayString(WbConnection con)
 	{
 		String displayString = null;
-		String model = WbManager.getSettings().getConnectionDisplayModel();
+		String model = Settings.getInstance().getConnectionDisplayModel();
 		if (model != null && model.length() > 0) return getDisplayStringFromModel(con);
 
 		try
@@ -352,7 +359,7 @@ public class ConnectionMgr
 
 	private static String getDisplayStringFromModel(WbConnection con)
 	{
-		String displayString = WbManager.getSettings().getConnectionDisplayModel();
+		String displayString = Settings.getInstance().getConnectionDisplayModel();
 		try
 		{
 			DatabaseMetaData data = con.getSqlConnection().getMetaData();
@@ -558,14 +565,14 @@ public class ConnectionMgr
 
 	public void saveDrivers()
 	{
-		WbPersistence.writeObject(this.drivers, WbManager.getSettings().getDriverConfigFileName());
+		WbPersistence.writeObject(this.drivers, Settings.getInstance().getDriverConfigFileName());
 	}
 
 	private void readDrivers()
 	{
 		try
 		{
-			Object result = WbPersistence.readObject(WbManager.getSettings().getDriverConfigFileName());
+			Object result = WbPersistence.readObject(Settings.getInstance().getDriverConfigFileName());
 			if (result == null)
 			{
 				this.drivers = new ArrayList();
@@ -632,7 +639,7 @@ public class ConnectionMgr
 		Object result = null;
 		try
 		{
-			result = WbPersistence.readObject(WbManager.getSettings().getProfileFileName());
+			result = WbPersistence.readObject(Settings.getInstance().getProfileFileName());
 		}
 		catch (FileNotFoundException fne)
 		{
@@ -694,7 +701,7 @@ public class ConnectionMgr
 	{
 		if (this.profiles != null)
 		{
-			WbPersistence.writeObject(new ArrayList(this.profiles.values()), WbManager.getSettings().getProfileFileName());
+			WbPersistence.writeObject(new ArrayList(this.profiles.values()), Settings.getInstance().getProfileFileName());
 			this.resetProfiles();
 		}
 	}

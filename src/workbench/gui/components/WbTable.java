@@ -107,6 +107,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.NullValue;
+import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
 import workbench.gui.actions.CopyAsSqlInsertAction;
 import workbench.gui.actions.CopyAsSqlUpdateAction;
@@ -1231,8 +1232,8 @@ public class WbTable
 
 	public void tableChanged(TableModelEvent evt)
 	{
-		if (this.suspendRepaint) return;
 		super.tableChanged(evt);
+		if (this.suspendRepaint) return;
 		if (evt.getFirstRow() == TableModelEvent.HEADER_ROW)
 		{
 			this.initDefaultEditors();
@@ -1586,12 +1587,12 @@ public class WbTable
 	{
 		copyAsSqlUpdate(false);
 	}
-	
+
 	public void copyAsSqlUpdate(boolean selectedOnly)
 	{
 		// we need decent PK columns in order to create update statements
-		if (!this.checkPkColumns()) return;
-		
+		if (!this.checkPkColumns(false)) return;
+
 		this.copyAsSql(true, selectedOnly);
 	}
 
@@ -1599,7 +1600,7 @@ public class WbTable
 	{
 		copyAsSqlInsert(false);
 	}
-	
+
 	public void copyAsSqlInsert(boolean selectedOnly)
 	{
 		this.copyAsSql(false, selectedOnly);
@@ -1615,7 +1616,7 @@ public class WbTable
 		ColumnIdentifier[] originalCols = ds.getColumns();
 		KeyColumnSelectorPanel panel = new KeyColumnSelectorPanel(originalCols, ds.getUpdateTable());
 		int choice = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(this), panel, ResourceMgr.getString("MsgSelectKeyColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION);
-		
+
 		// KeyColumnSelectorPanel works on a copy of the ColumnIdentifiers so
 		// we need to copy the PK flag back to the original ones..
 		if (choice == JOptionPane.OK_OPTION)
@@ -1625,7 +1626,7 @@ public class WbTable
 		}
 		return false;
 	}
-	
+
 	public boolean detectDefinedPkColumns()
 	{
 		DataStore ds = this.getDataStore();
@@ -1650,16 +1651,42 @@ public class WbTable
 	 *	@see #detectDefinedPkColumns()
 	 *	@see #selectKeyColumns()
 	 */
-	public boolean checkPkColumns()
+	public boolean checkPkColumns(boolean promptWhenNeeded)
 	{
 		DataStore ds = this.getDataStore();
 		if (ds == null) return false;
+
 		if (ds.hasPkColumns()) return true;
 		detectDefinedPkColumns();
-		
-		return this.selectKeyColumns();
+		if (ds.hasPkColumns()) return true;
+
+		boolean needPrompt = true;
+		if (promptWhenNeeded)
+		{
+			if (ds.isModified())
+			{
+				boolean updated = ds.hasUpdatedRows();
+				boolean deleted = ds.hasDeletedRows();
+				needPrompt = (updated || deleted);
+			}
+			else
+			{
+				needPrompt = false;
+			}
+		}
+		boolean result = true;
+		if (needPrompt)
+		{
+			result = this.selectKeyColumns();
+		}
+		else
+		{
+			result = ds.hasPkColumns();
+		}
+
+		return result;
 	}
-	
+
 	/**
 	 * 	Copy the data of this table into the clipboard using SQL statements
 	 *
@@ -1820,41 +1847,42 @@ public class WbTable
 		{
 			DataStore ds = this.dwModel.getDataStore();
 			boolean sql = (ds != null && ds.canSaveAsSqlInsert());
-			String filename = WbManager.getInstance().getExportFilename(this, sql);
+			FileDialogUtil dialog = new FileDialogUtil();
+			String filename = dialog.getExportFilename(this, sql);
 			if (filename != null)
 			{
 				//String ext = ExtensionFileFilter.getExtension(new File(filename));
 				final String name = filename;
-				int type = WbManager.getInstance().getLastSelectedFileType();
+				int type = dialog.getLastSelectedFileType();
 
 				Thread t = null;
 				switch (type)
 				{
-					case WbManager.FILE_TYPE_SQL:
+					case FileDialogUtil.FILE_TYPE_SQL:
 						t = new Thread() { public void run() { saveAsSqlInsert(name); } };
 						t.setDaemon(true);
 						t.setName("SaveAsSql Thread");
 						t.start();
 						break;
-					case WbManager.FILE_TYPE_SQL_UPDATE:
+					case FileDialogUtil.FILE_TYPE_SQL_UPDATE:
 						t = new Thread() { public void run() { saveAsSqlUpdate(name); } };
 						t.setDaemon(true);
 						t.setName("SaveAsSql Thread");
 						t.start();
 						break;
-					case WbManager.FILE_TYPE_TXT:
+					case FileDialogUtil.FILE_TYPE_TXT:
 						t = new Thread() { public void run() { saveAsAscii(name); }};
 						t.setDaemon(true);
 						t.setName("SaveAsAscii Thread");
 						t.start();
 						break;
-					case WbManager.FILE_TYPE_HTML:
+					case FileDialogUtil.FILE_TYPE_HTML:
 						t = new Thread() { public void run() { saveAsHtml(name); }};
 						t.setName("saveAsHtml Thread");
 						t.setDaemon(true);
 						t.start();
 						break;
-					case WbManager.FILE_TYPE_XML:
+					case FileDialogUtil.FILE_TYPE_XML:
 						t = new Thread() { public void run() { saveAsXml(name); }};
 						t.setDaemon(true);
 						t.setName("SaveAsXml Thread");

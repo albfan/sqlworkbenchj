@@ -38,6 +38,7 @@ import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.WbThread;
 
 
 /**
@@ -338,7 +339,7 @@ public class DbExplorerPanel
 	{
 		final String schema = (String)schemaSelector.getSelectedItem();
 
-		Thread t = new Thread()
+		Thread t = new WbThread("Schema Change")
 		{
 			public void run()
 			{
@@ -353,8 +354,6 @@ public class DbExplorerPanel
 				}
 			}
 		};
-		t.setDaemon(true);
-		t.setName("DbExplorerPanel schema change thread");
 		t.start();
 	}
 

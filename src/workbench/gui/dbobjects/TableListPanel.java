@@ -44,6 +44,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
+import workbench.util.FileDialogUtil;
 import workbench.util.SqlUtil;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.DataExporter;
@@ -51,6 +52,7 @@ import workbench.gui.sql.ExecuteSqlDialog;
 import workbench.util.StrBuffer;
 import workbench.gui.actions.ToggleTableSourceAction;
 import workbench.util.StringUtil;
+import workbench.util.WbThread;
 
 
 
@@ -178,7 +180,7 @@ public class TableListPanel
 		this.importedPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT);
 		this.importedPanel.setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.importedPanel.setDividerLocation(100);
-		this.importedPanel.setDividerSize(4);
+		this.importedPanel.setDividerSize(6);
 		this.importedPanel.setTopComponent(scroll);
 		this.importedTableTree = new TableDependencyTreeDisplay();
 		this.importedPanel.setBottomComponent(this.importedTableTree);
@@ -189,7 +191,7 @@ public class TableListPanel
 		this.exportedPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT);
 		this.exportedPanel.setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.exportedPanel.setDividerLocation(100);
-		this.exportedPanel.setDividerSize(4);
+		this.exportedPanel.setDividerSize(5);
 		this.exportedPanel.setTopComponent(scroll);
 		this.exportedTableTree = new TableDependencyTreeDisplay();
 		this.exportedPanel.setBottomComponent(this.exportedTableTree);
@@ -331,7 +333,7 @@ public class TableListPanel
 		item.addActionListener(this);
 		item.setEnabled(true);
 		popup.add(item);
-		
+
 		this.showDataMenu = new WbMenu(ResourceMgr.getString("MnuTxtShowTableData"));
 		this.showDataMenu.setEnabled(false);
 		this.updateShowDataMenu();
@@ -658,7 +660,7 @@ public class TableListPanel
 		{
 			if (dbConnection == null || dbConnection.isClosed())
 			{
-				WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("ErrorConnectionGone"));
+				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrorConnectionGone"));
 				return;
 			}
 		}
@@ -708,7 +710,7 @@ public class TableListPanel
 		}
 		catch (OutOfMemoryError mem)
 		{
-			WbManager.getInstance().showErrorMessage(TableListPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
+			WbSwingUtilities.showErrorMessage(TableListPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
 		}
 		catch (Throwable e)
 		{
@@ -726,15 +728,13 @@ public class TableListPanel
 	 */
 	public void startRetrieve()
 	{
-		Thread t = new Thread()
+		Thread t = new WbThread("TableListPanel retrieve() thread")
 		{
 			public void run()
 			{
 				retrieve();
 			}
 		};
-		t.setDaemon(true);
-		t.setName("TableListPanel retrieve() thread");
 		t.start();
 	}
 
@@ -949,7 +949,7 @@ public class TableListPanel
 
 				col = colmod.getColumn(colmod.getColumnCount() - 1);
 				colmod.removeColumn(col);
-				
+
 				col = colmod.getColumn(colmod.getColumnCount() - 1);
 				colmod.removeColumn(col);
 
@@ -988,7 +988,7 @@ public class TableListPanel
 			{
 			}
 		}
-		panelRetrieveThread = new Thread()
+		panelRetrieveThread = new WbThread("TableListPanel RetrievePanel")
 		{
 			public void run()
 			{
@@ -1002,8 +1002,6 @@ public class TableListPanel
 				}
 			}
 		};
-		panelRetrieveThread.setDaemon(true);
-		panelRetrieveThread.setName("TableListPanel RetrievePanel");
 		panelRetrieveThread.start();
 	}
 
@@ -1539,7 +1537,7 @@ public class TableListPanel
 		int[] rows = this.tableList.getSelectedRows();
 		int count = rows.length;
 		if (count == 0) return null;
-		
+
 		TableIdentifier[] result = new TableIdentifier[count];
 		for (int i=0; i < count; i++)
 		{
@@ -1550,21 +1548,22 @@ public class TableListPanel
 		}
 		return result;
 	}
-	
-	
+
+
 	public void saveReport()
 	{
 		TableIdentifier[] tables = getSelectedTables();
 		if (tables == null) return;
 		
-		String filename = WbManager.getInstance().getXmlReportFilename(this);
+		FileDialogUtil dialog = new FileDialogUtil();
+		String filename = dialog.getXmlReportFilename(this);
 		if (filename == null) return;
-		
+
 		final SchemaReporter reporter = new SchemaReporter(this.dbConnection);
 		reporter.setShowProgress(true);
 		reporter.setTableList(tables);
 		reporter.setOutputFilename(filename);
-		Thread t = new Thread()
+		Thread t = new WbThread("Schema Report")
 		{
 			public void run()
 			{
@@ -1578,11 +1577,9 @@ public class TableListPanel
 				}
 			}
 		};
-		t.setName("Schema Report");
-		t.setDaemon(true);
 		t.start();
 	}
-	
+
 	public void spoolData()
 	{
 		int rowCount = this.tableList.getSelectedRowCount();

@@ -114,7 +114,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.24 2004-09-12 15:54:58 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.25 2004-09-17 22:45:57 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -1440,6 +1440,16 @@ public class JEditTextArea
 
 	public void selectError(int start, int end)
 	{
+		this.selectCommand(start, end, true);
+	}
+	
+	public void selectStatement(int start, int end)
+	{
+		this.selectCommand(start, end, false);
+	}
+	
+	private void selectCommand(int start, int end, boolean useErrorColor)
+	{
 		if (start >= end) return;
 
 		int len = (end - start);
@@ -1466,7 +1476,7 @@ public class JEditTextArea
 			c = text.charAt(maxIndex - pos);
 		}
 		int newEnd = end - pos;
-		this.select(newStart, newEnd, true);
+		this.select(newStart, newEnd, useErrorColor);
 	}
 	public void select(int start, int end)
 	{

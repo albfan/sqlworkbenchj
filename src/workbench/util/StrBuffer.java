@@ -1,6 +1,7 @@
 package workbench.util;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.Writer;
 
 /**
@@ -16,7 +17,7 @@ public class StrBuffer
 	implements CharSequence
 {
 	public static final StrBuffer EMPTY_BUFFER = new StrBuffer();
-	private static final int DEFAULT_LEN = 80; 
+	private static final int DEFAULT_LEN = 80;
 	/**
 	 * The number of characters in the buffer.
 	 */
@@ -64,7 +65,7 @@ public class StrBuffer
 			this.append(source);
 		}
 	}
-	
+
 	/**
 	 * Make an empty string buffer with 'len' characters of storage.
 	 *
@@ -90,12 +91,19 @@ public class StrBuffer
 	 */
 	private void moreStorage(int minStorage)
 	{
-		int newStorage = (this.charData.length * 2) + 5;
-		if (newStorage < minStorage)
-			newStorage = minStorage;
-		char newBuf[] = new char[newStorage];
-		System.arraycopy(this.charData, 0, newBuf, 0, this.numchar);
-		this.charData = newBuf;
+		int newStorage = (int)((double)this.charData.length * 1.2) + 5;
+
+		if (newStorage < minStorage) newStorage = minStorage;
+		if (this.charData == null)
+		{
+			this.charData = new char[newStorage];
+		}
+		if (this.charData != null)
+		{
+			char newBuf[] = new char[newStorage];
+			System.arraycopy(this.charData, 0, newBuf, 0, this.numchar);
+			this.charData = newBuf;
+		}
 	}
 
 	/**
@@ -133,7 +141,7 @@ public class StrBuffer
 	{
 		return this.append(Long.toString(i));
 	}
-	
+
 	public StrBuffer append(int i)
 	{
 		return this.append(Integer.toString(i));
@@ -208,6 +216,34 @@ public class StrBuffer
 		return this;
 	}
 
+	public StrBuffer insert(int index, char c)
+	{
+		int newlen = this.numchar + 1;
+		if (newlen > this.charData.length)
+		{
+			char newBuf[] = new char[newlen + 10];
+			System.arraycopy(this.charData, 0, newBuf, 0, index);
+			System.arraycopy(this.charData, index, newBuf, index + 1, (numchar - index));
+			this.charData = newBuf;
+		}
+		this.charData[index] = c;
+		this.numchar = newlen;
+		return this;
+	}
+
+	public StrBuffer remove(int index)
+	{
+		int num = this.numchar - index - 1;
+
+		if (num > 0)
+		{
+			System.arraycopy(charData, index+1, charData, index, num);
+		}
+		this.numchar --;
+		this.charData[numchar] = 0;
+		return this;
+	}
+
 	public StrBuffer append(StringBuffer b)
 	{
 		int len = b.length();
@@ -227,30 +263,43 @@ public class StrBuffer
 	{
 		return new String(this.charData, 0, this.numchar);
 	}
-	
+
 	public char charAt(int index)
 	{
 		if (index >= this.numchar) throw new IndexOutOfBoundsException(index + " >= " + this.numchar);
 		return this.charData[index];
 	}
-	
+
 	public CharSequence subSequence(int start, int end)
 	{
 		if (start < 0) throw new IndexOutOfBoundsException("start must be >= 0");
 		if (end < 0) throw new IndexOutOfBoundsException("end must be >=0");
 		if (end > this.numchar) throw new IndexOutOfBoundsException(end + " >= " + this.numchar);
 		if (start > end ) throw new IndexOutOfBoundsException(start + " > "  + end);
-		
+
 		int len = (end - start);
 		StrBuffer result = new StrBuffer(len);
 		result.numchar = len;
 		System.arraycopy(this.charData, start, result.charData, 0, len);
 		return result;
 	}
-	
+
 	public void writeTo(Writer out)
 		throws IOException
 	{
 		out.write(this.charData, 0, this.numchar);
+	}
+
+	public void writeTo(PrintStream out)
+	{
+		for (int i=0; i < this.numchar; i++)
+		{
+			out.print(this.charData[i]);
+		}
+	}
+	public void release()
+	{
+		this.numchar = 0;
+		this.charData = null;
 	}
 }

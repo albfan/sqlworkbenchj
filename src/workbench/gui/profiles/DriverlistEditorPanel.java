@@ -53,7 +53,7 @@ public class DriverlistEditorPanel
 
 	private void fillDriverList()
 	{
-		this.model = new DriverListModel(WbManager.getInstance().getConnectionMgr().getDrivers());
+		this.model = new DriverListModel(ConnectionMgr.getInstance().getDrivers());
 		this.driverList.setModel(this.model);
 		if (this.model.getSize() > 0)
 		{
@@ -187,7 +187,7 @@ public class DriverlistEditorPanel
 
 	public void saveItem() throws Exception
 	{
-		ConnectionMgr conn = WbManager.getInstance().getConnectionMgr();
+		ConnectionMgr conn = ConnectionMgr.getInstance();
 		this.driverEditor.updateDriver();
 		conn.setDrivers(this.model.getValues());
 		conn.saveDrivers();

@@ -20,7 +20,13 @@ import javax.swing.border.EmptyBorder;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.resource.ResourceMgr;
 import java.awt.Container;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import javax.swing.JFrame;
 import javax.swing.JPasswordField;
+import javax.swing.UIManager;
+import javax.swing.border.LineBorder;
 
 
 public class WbSwingUtilities
@@ -132,22 +138,6 @@ public class WbSwingUtilities
 	public static void showWaitCursor(final Component caller)
 	{
 		caller.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		/*
-		if (SwingUtilities.isEventDispatchThread())
-		{
-			caller.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		}
-		else
-		{
-			SwingUtilities.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					caller.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				}
-			});
-		}
-		*/
 	}
 
 	public static void showDefaultCursor(final Component caller)
@@ -165,12 +155,16 @@ public class WbSwingUtilities
 		caller.setCursor(cursor);
 		if (includeParents)
 		{
-			Container c = caller.getParent();
+			//Container c = caller.getParent();
+			Window w = SwingUtilities.getWindowAncestor(caller);
+			w.setCursor(cursor);
+			/*
 			while (c != null)
 			{
 				c.setCursor(cursor);
 				c = c.getParent();
 			}
+			*/
 		}
 
 		/*
@@ -272,7 +266,20 @@ public class WbSwingUtilities
 	{
 		String[] options = new String[] { ResourceMgr.getString("LabelCommit"), ResourceMgr.getString("LabelRollback")};
 		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, null, options);
+		int w = 0;
+		try
+		{
+			Font f = ignorePane.getFont();
+			FontMetrics fm = ignorePane.getFontMetrics(f);
+			w = fm.stringWidth(aMessage);
+		}
+		catch (Throwable th)
+		{
+			th.printStackTrace();
+			w = 300;
+		}
 		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);
+		dialog.setSize(w + 130, dialog.getHeight());
 		dialog.setResizable(true);
 		dialog.show();
 		dialog.dispose();
@@ -316,5 +323,21 @@ public class WbSwingUtilities
 		return value;
 	}
 
+	public static void main(String args[])
+	{
+		try
+		{
+			JFrame f = new JFrame("Hello");
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			getCommitRollbackQuestion(f,ResourceMgr.getString("MsgCommitPartialUpdate"));
+			System.exit(1);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		System.out.println("*** Done.");
+	}
+	
 
 }

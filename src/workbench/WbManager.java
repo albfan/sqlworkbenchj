@@ -13,13 +13,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.help.HtmlViewer;
 import workbench.gui.tools.DataPumper;
 import workbench.interfaces.FontChangedListener;
@@ -44,10 +42,8 @@ public class WbManager
 	implements FontChangedListener, Runnable
 
 {
-	private static final String CONFIG_DIR_KEY = "%ConfigDir%/";
 	private static WbManager wb;
 	private Settings settings;
-	private ConnectionMgr connMgr = new ConnectionMgr();
 	private ArrayList mainWindows = new ArrayList();
 	private ArrayList toolWindows = new ArrayList();
 	private WbCipher desCipher = null;
@@ -57,15 +53,9 @@ public class WbManager
 
 	private Thread shutdownHook = new Thread(this);
 
-	static
-	{
-		wb = new WbManager();
-		wb.connMgr = new ConnectionMgr();
-		Runtime.getRuntime().addShutdownHook(wb.shutdownHook);
-	}
-
 	private WbManager()
 	{
+		Runtime.getRuntime().addShutdownHook(this.shutdownHook);
 	}
 
 	/**
@@ -100,16 +90,6 @@ public class WbManager
 		return wb;
 	}
 
-	public static ShortcutManager getShortcutManager()
-	{
-		return wb.settings.getShortcutManager();
-	}
-
-	public ConnectionMgr getConnectionMgr()
-	{
-		return this.connMgr;
-	}
-
 	public MainWindow getCurrentWindow()
 	{
 		if (this.mainWindows == null) return null;
@@ -124,11 +104,7 @@ public class WbManager
 		}
 		return null;
 	}
-	public String getWorkspaceFilename(Window parent, boolean toSave)
-	{
-		return this.getWorkspaceFilename(parent, toSave, false);
-	}
-
+	
 	public void registerToolWindow(Window aWindow)
 	{
 		this.toolWindows.add(aWindow);
@@ -158,191 +134,6 @@ public class WbManager
 			w.dispose();
 		}
 		this.toolWindows.clear();
-	}
-
-	public String getWorkspaceFilename(Window parent, boolean toSave, boolean replaceConfigDir)
-	{
-		String lastDir = settings.getLastWorkspaceDir();
-		JFileChooser fc = new JFileChooser(lastDir);
-		FileFilter wksp = ExtensionFileFilter.getWorkspaceFileFilter();
-		fc.addChoosableFileFilter(wksp);
-		String filename = null;
-
-		int answer = JFileChooser.CANCEL_OPTION;
-		if (toSave)
-		{
-			answer = fc.showSaveDialog(parent);
-		}
-		else
-		{
-			answer = fc.showOpenDialog(parent);
-		}
-		if (answer == JFileChooser.APPROVE_OPTION)
-		{
-			File fl = fc.getSelectedFile();
-			FileFilter ff = fc.getFileFilter();
-			if (ff == wksp)
-			{
-				filename = fl.getAbsolutePath();
-
-				String ext = ExtensionFileFilter.getExtension(fl);
-				if (ext.length() == 0)
-				{
-					if (!filename.endsWith(".")) filename = filename + ".";
-					filename = filename + ExtensionFileFilter.WORKSPACE_EXT;
-				}
-			}
-			else
-			{
-				filename = fl.getAbsolutePath();
-			}
-
-			lastDir = fc.getCurrentDirectory().getAbsolutePath();
-			settings.setLastWorkspaceDir(lastDir);
-		}
-		if (replaceConfigDir && filename != null)
-		{
-			filename = this.putConfigDirKey(filename);
-		}
-		return filename;
-	}
-
-	public String putConfigDirKey(String aPathname)
-	{
-		File f = new File(aPathname);
-		String fname = f.getName();
-		File dir = f.getParentFile();
-		File config = new File(this.settings.getConfigDir());
-		if (dir.equals(config))
-		{
-			return CONFIG_DIR_KEY + fname;
-		}
-		else
-		{
-			return aPathname;
-		}
-	}
-
-	public String replaceConfigDir(String aPathname)
-	{
-		if (aPathname == null) return null;
-		return StringUtil.replace(aPathname, CONFIG_DIR_KEY, this.settings.getConfigDir());
-	}
-
-	public String getExportFilename(boolean includeSqlType)
-	{
-		return this.getExportFilename(null, includeSqlType);
-	}
-
-	public static final int FILE_TYPE_UNKNOWN = -1;
-	public static final int FILE_TYPE_TXT = 0;
-	public static final int FILE_TYPE_SQL = 1;
-	public static final int FILE_TYPE_XML = 2;
-	public static final int FILE_TYPE_HTML = 3;
-	public static final int FILE_TYPE_SQL_UPDATE = 4;
-
-	private int lastFileType = FILE_TYPE_UNKNOWN;
-
-	public int getLastSelectedFileType()
-	{
-		return this.lastFileType;
-	}
-
-	public String getExportFilename(Component caller, boolean includeSqlType)
-	{
-		FileFilter text = ExtensionFileFilter.getTextFileFilter();
-		FileFilter[] filters;
-		int index = 0;
-		if (includeSqlType)
-		{
-			filters = new FileFilter[5];
-		}
-		else
-		{
-			filters = new FileFilter[3];
-		}
-		
-		filters[index++] = text;
-		filters[index++] = ExtensionFileFilter.getHtmlFileFilter();
-		if (includeSqlType)
-		{
-			filters[index++] = ExtensionFileFilter.getSqlFileFilter();
-			filters[index++] = ExtensionFileFilter.getSqlUpdateFileFilter();
-		}
-		filters[index++] = ExtensionFileFilter.getXmlFileFilter();
-		String lastDir = settings.getLastExportDir();
-		return getFilename(caller, filters, 0, "workbench.export.lastdir");
-	}
-	
-	public String getXmlReportFilename(Component caller)
-	{
-		FileFilter[] filter = new FileFilter[1];
-		filter[0] = ExtensionFileFilter.getXmlFileFilter();
-		return getFilename(caller, filter, 0, "workbench.xmlreport.lastdir");
-	}
-	
-	private String getFilename(Component caller, FileFilter[] filters, int defaultFilter, String dirProperty)
-	{
-		this.lastFileType = FILE_TYPE_UNKNOWN;
-		String lastDir = settings.getProperty(dirProperty, null);
-		JFileChooser fc = new JFileChooser(lastDir);
-		for (int i=0; i < filters.length; i++)
-		{
-			fc.addChoosableFileFilter(filters[i]);
-		}
-		fc.setFileFilter(filters[defaultFilter]);
-		String filename = null;
-
-		Window parent;
-		parent = SwingUtilities.getWindowAncestor(caller);
-
-		int answer = fc.showSaveDialog(parent);
-		if (answer == JFileChooser.APPROVE_OPTION)
-		{
-			File fl = fc.getSelectedFile();
-			FileFilter ff = fc.getFileFilter();
-			if (ff instanceof ExtensionFileFilter)
-			{
-				ExtensionFileFilter eff = (ExtensionFileFilter)ff;
-				filename = fl.getAbsolutePath();
-
-				String ext = ExtensionFileFilter.getExtension(fl);
-				if (ext.length() == 0)
-				{
-					if (!filename.endsWith(".")) filename = filename + ".";
-					filename = filename + eff.getDefaultExtension();
-				}
-				if (ff == ExtensionFileFilter.getSqlFileFilter())
-				{
-					this.lastFileType = FILE_TYPE_SQL;
-				}
-				else if (ff == ExtensionFileFilter.getSqlUpdateFileFilter())
-				{
-					this.lastFileType = FILE_TYPE_SQL_UPDATE;
-				}
-				else if (ff == ExtensionFileFilter.getXmlFileFilter())
-				{
-					this.lastFileType = FILE_TYPE_XML;
-				}
-				else if (ff == ExtensionFileFilter.getTextFileFilter())
-				{
-					this.lastFileType = FILE_TYPE_TXT;
-				}
-				else if (ff == ExtensionFileFilter.getHtmlFileFilter())
-				{
-					this.lastFileType = FILE_TYPE_HTML;
-				}
-			}
-			else
-			{
-				filename = fl.getAbsolutePath();
-			}
-
-			lastDir = fc.getCurrentDirectory().getAbsolutePath();
-			settings.setProperty(dirProperty, lastDir);
-		}
-
-		return filename;
 	}
 
 	public void fontChanged(String aFontKey, Font newFont)
@@ -465,11 +256,6 @@ public class WbManager
 		return win;
 	}
 
-	public void showErrorMessage(Component aCaller, String aMsg)
-	{
-		WbSwingUtilities.showErrorMessage(aCaller, aMsg);
-	}
-
 	private JDialog closeMessage;
 
 	private boolean saveSettings()
@@ -506,7 +292,7 @@ public class WbManager
 			MainWindow w = this.getCurrentWindow();
 			if (w == null)
 			{
-				getConnectionMgr().disconnectAll();
+				ConnectionMgr.getInstance().disconnectAll();
 				this.doShutdown();
 				return;
 			}
@@ -529,7 +315,7 @@ public class WbManager
 				public void run()
 				{
 					disconnectWindows();
-					getConnectionMgr().disconnectAll();
+					ConnectionMgr.getInstance().disconnectAll();
 					disconnected();
 				}
 			};
@@ -539,7 +325,7 @@ public class WbManager
 		}
 		else
 		{
-			getConnectionMgr().disconnectAll();
+			ConnectionMgr.getInstance().disconnectAll();
 			doShutdown();
 		}
 	}
@@ -683,12 +469,12 @@ public class WbManager
 	}
   private boolean checkProfiles(MainWindow win)
   {
-    if (getConnectionMgr().profilesChanged())
+    if (ConnectionMgr.getInstance().profilesChanged())
     {
       int answer = JOptionPane.showConfirmDialog(win, ResourceMgr.getString("MsgConfirmUnsavedProfiles"), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_CANCEL_OPTION);
       if (answer == JOptionPane.OK_OPTION)
       {
-        this.getConnectionMgr().saveProfiles();
+        ConnectionMgr.getInstance().saveProfiles();
         return true;
       }
       else if (answer == JOptionPane.NO_OPTION)
@@ -753,7 +539,7 @@ public class WbManager
 			String profilename = cmdLine.getValue(ARG_PROFILE);
 			if (profilename != null && profilename.trim().length() > 0)
 			{
-				ConnectionProfile prof = connMgr.getProfile(profilename);
+				ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(profilename);
 				if (prof != null)
 				{
 					LogMgr.logDebug("WbManager.openNewWindow()", "Connecting to " + prof.getName());
@@ -843,12 +629,12 @@ public class WbManager
 			if (scriptname == null || scriptname.length() == 0)
 			{
 				this.batchMode = false;
-				this.connMgr.setReadTemplates(true);
+				ConnectionMgr.getInstance().setReadTemplates(true);
 			}
 			else
 			{
 				this.batchMode = true;
-				this.connMgr.setReadTemplates(false);
+				ConnectionMgr.getInstance().setReadTemplates(false);
 			}
 
 			value = cmdLine.getValue(ARG_VARDEF);
@@ -936,16 +722,16 @@ public class WbManager
 				String user = StringUtil.trimQuotes(cmdLine.getValue(ARG_CONN_USER));
 				String pwd = StringUtil.trimQuotes(cmdLine.getValue(ARG_CONN_PWD));
 				String jar = StringUtil.trimQuotes(cmdLine.getValue(ARG_CONN_JAR));
-				DbDriver drv = this.connMgr.findRegisteredDriver(driver);
+				DbDriver drv = ConnectionMgr.getInstance().findRegisteredDriver(driver);
 				if (drv == null)
 				{
-					this.connMgr.registerDriver(driver, jar);
+					ConnectionMgr.getInstance().registerDriver(driver, jar);
 				}
 				profile = new ConnectionProfile(driver, url, user, pwd);
 			}
 			else
 			{
-				profile = this.connMgr.getProfile(StringUtil.trimQuotes(profilename));
+				profile = ConnectionMgr.getInstance().getProfile(StringUtil.trimQuotes(profilename));
 			}
 			boolean ignoreDrop = "true".equalsIgnoreCase(cmdLine.getValue(ARG_IGNORE_DROP));
 			profile.setIgnoreDropErrors(ignoreDrop);
@@ -1022,6 +808,7 @@ public class WbManager
 
 	public static void main(String args[])
 	{
+		wb = new WbManager();
 		if (trace) System.out.println("WbManager.main() - start");
 		// the command line needs to be initialized before everything
 		// else, in order to set some of the system poperties correctly

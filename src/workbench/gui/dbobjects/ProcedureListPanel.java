@@ -43,6 +43,7 @@ import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.SqlUtil;
+import workbench.util.WbThread;
 
 
 /**
@@ -115,13 +116,14 @@ public class ProcedureListPanel
 		this.listPanel.add(findPanel, BorderLayout.NORTH);
 
 		this.splitPane = new WbSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		this.splitPane.setOneTouchExpandable(true);
+		this.splitPane.setDividerSize(6);
 		scroll = new WbScrollPane(this.procList);
 
 		this.listPanel.add(scroll, BorderLayout.CENTER);
 
 		this.splitPane.setLeftComponent(this.listPanel);
 		this.splitPane.setRightComponent(displayTab);
-		this.splitPane.setDividerSize(8);
 		this.splitPane.setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setLayout(new BorderLayout());
 		this.add(splitPane, BorderLayout.CENTER);
@@ -213,15 +215,13 @@ public class ProcedureListPanel
 
 	public void startRetrieve()
 	{
-		Thread t = new Thread()
+		Thread t = new WbThread("ProcedureListPanel retrieve thread")
 		{
 			public void run()
 			{
 				retrieve();
 			}
 		};
-		t.setDaemon(true);
-		t.setName("ProcedureListPanel retrieve thread");
 		t.start();
 	}
 
@@ -239,7 +239,7 @@ public class ProcedureListPanel
 			}
 			catch (OutOfMemoryError mem)
 			{
-				WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
+				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
 			}
 			catch (Throwable e)
 			{

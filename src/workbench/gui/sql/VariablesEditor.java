@@ -17,6 +17,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.table.TableCellEditor;
 import workbench.WbManager;
+import workbench.gui.WbSwingUtilities;
 
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
@@ -146,7 +147,7 @@ public class VariablesEditor
 				String msg = ResourceMgr.getString("ErrorIllegalVariableName");
 				msg = msg.replaceAll("%varname%", varName);
 				msg = msg + "\n" + ResourceMgr.getString("ErrorVarDefWrongName");
-				WbManager.getInstance().showErrorMessage(this, msg);
+				WbSwingUtilities.showErrorMessage(this, msg);
 				return false;
 			}
 		}

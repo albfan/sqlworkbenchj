@@ -91,6 +91,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.MacroManager;
+import workbench.util.FileDialogUtil;
 import workbench.util.StrBuffer;
 import workbench.util.WbWorkspace;
 
@@ -856,7 +857,7 @@ public class MainWindow
 
 		try
 		{
-			ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
+			ConnectionMgr mgr = ConnectionMgr.getInstance();
 
 			String id = this.getWindowId();
 
@@ -984,7 +985,7 @@ public class MainWindow
 		this.clearConnectInProgress();
 		this.closeConnectingInfo();
 		String msg = ResourceMgr.getString("ErrorConnectFailed").replaceAll("%msg%", error.trim());
-		WbManager.getInstance().showErrorMessage(this, msg);
+		WbSwingUtilities.showErrorMessage(this, msg);
 	}
 
 	private static final int CREATE_WORKSPACE = 0;
@@ -1014,7 +1015,8 @@ public class MainWindow
 		try
 		{
 			String file = aProfile.getWorkspaceFile();
-			realFilename = WbManager.getInstance().replaceConfigDir(file);
+			FileDialogUtil util = new FileDialogUtil();
+			realFilename = util.replaceConfigDir(file);
 			if (realFilename != null && realFilename.length() > 0)
 			{
 				File f = new File(realFilename);
@@ -1023,7 +1025,7 @@ public class MainWindow
 					int action = this.checkNonExistingWorkspace();
 					if (action == LOAD_OTHER_WORKSPACE)
 					{
-						file = WbManager.getInstance().getWorkspaceFilename(this, false, true);
+						file = util.getWorkspaceFilename(this, false, true);
 						aProfile.setWorkspaceFile(file);
 					}
 					else if (action == IGNORE_MISSING_WORKSPACE)
@@ -1099,7 +1101,7 @@ public class MainWindow
 	{
 		try
 		{
-			ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
+			ConnectionMgr mgr = ConnectionMgr.getInstance();
 			WbConnection conn = null;
 			for (int i=0; i < this.sqlTab.getTabCount(); i++)
 			{
@@ -1544,7 +1546,7 @@ public class MainWindow
 		if (this.currentConnection != null) return this.currentConnection;
 		String id = this.getConnectionIdForPanel(aPanel);;
 		aPanel.showStatusMessage(ResourceMgr.getString("MsgConnectingTo") + " " + this.currentProfile.getName() + " ...");
-		ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
+		ConnectionMgr mgr = ConnectionMgr.getInstance();
 		WbConnection conn = null;
 		try
 		{
@@ -1796,7 +1798,8 @@ public class MainWindow
 
 	public void loadWorkspace()
 	{
-		String filename = WbManager.getInstance().getWorkspaceFilename(this, false, true);
+		FileDialogUtil dialog = new FileDialogUtil();
+		String filename = dialog.getWorkspaceFilename(this, false, true);
 		if (filename == null) return;
 		this.loadWorkspace(filename);
 		this.isProfileWorkspace = this.checkMakeProfileWorkspace();
@@ -1853,7 +1856,8 @@ public class MainWindow
 	public boolean loadWorkspace(String filename)
 	{
 		if (filename == null) return false;
-		String realFilename = WbManager.getInstance().replaceConfigDir(filename);
+		FileDialogUtil util = new FileDialogUtil();
+		String realFilename = util.replaceConfigDir(filename);
 
 		File f = new File(realFilename);
 	 	if (!f.exists())
@@ -1987,8 +1991,9 @@ public class MainWindow
 	{
 		if (this.currentWorkspaceFile == null) return;
 		if (this.currentProfile == null) return;
-		String filename = WbManager.getInstance().putConfigDirKey(this.currentWorkspaceFile);
-		ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
+		FileDialogUtil util = new FileDialogUtil();
+		String filename = util.putConfigDirKey(this.currentWorkspaceFile);
+		ConnectionMgr mgr = ConnectionMgr.getInstance();
 		this.currentProfile.setWorkspaceFile(filename);
 		this.isProfileWorkspace = true;
 		this.updateWindowTitle();
@@ -2032,14 +2037,16 @@ public class MainWindow
 	{
 		WbWorkspace w = null;
 		boolean interactive = false;
+		FileDialogUtil util = new FileDialogUtil();
+		
 		if (filename == null)
 		{
 			interactive = true;
-			filename = WbManager.getInstance().getWorkspaceFilename(this, true);
+			filename = util.getWorkspaceFilename(this, true);
 			if (filename == null) return;
 		}
 
-		String realFilename = WbManager.getInstance().replaceConfigDir(filename);
+		String realFilename = util.replaceConfigDir(filename);
 
 		File f = new File(realFilename);
 		if (WbManager.getSettings().getCreateWorkspaceBackup())
@@ -2289,7 +2296,7 @@ public class MainWindow
 					{
 						public void run()
 						{
-							WbManager.getInstance().getConnectionMgr().disconnect(id);
+							ConnectionMgr.getInstance().disconnect(id);
 						}
 					};
 					t.setName("Disconnect thread for " + id);

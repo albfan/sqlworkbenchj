@@ -125,7 +125,7 @@ public class ObjectDropperUI
 		catch (Exception ex)
 		{
 			String msg = ex.getMessage();
-			WbManager.getInstance().showErrorMessage(this.dialog, msg);
+			WbSwingUtilities.showErrorMessage(this.dialog, msg);
 		}
 		finally
 		{

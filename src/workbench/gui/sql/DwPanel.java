@@ -80,7 +80,7 @@ public class DwPanel
 	private DeleteRowAction deleteRow = null;
 	private StartEditAction startEdit = null;
 	private SelectKeyColumnsAction selectKeys = null;
-	
+
 	private boolean editingStarted = false;
 	private boolean batchUpdate = false;
 	private boolean manageUpdateAction = false;
@@ -128,9 +128,9 @@ public class DwPanel
 		this.deleteRow = new DeleteRowAction(this);
 		this.startEdit = new StartEditAction(this);
 		this.duplicateRow = new CopyRowAction(this);
-		
+
 		this.selectKeys = new SelectKeyColumnsAction(this);
-		
+
 		//infoTable.addPopupAction(this.startEdit, true);
 		infoTable.addPopupAction(this.updateAction, true);
 		infoTable.addPopupAction(this.insertRow, true);
@@ -171,7 +171,7 @@ public class DwPanel
 				{
 					public void run()
 					{
-						infoTable.selectKeyColumns();	
+						infoTable.selectKeyColumns();
 					}
 				});
 			}
@@ -249,15 +249,32 @@ public class DwPanel
 	}
 
 	private String objectMsg = ResourceMgr.getString("MsgProcessObject");
-	
+
 	public void setCurrentObject(String name)
+	{
+		statusBar.setStatusMessage(name);
+	}
+
+	public void setCurrentObject(String name, int number, int total)
 	{
 		StringBuffer msg = new StringBuffer(objectMsg);
 		msg.append(" ");
 		msg.append(name);
+		if (number > 0)
+		{
+			msg.append(" (");
+			msg.append(number);
+			if (total > 0)
+			{
+				msg.append("/");
+				msg.append(total);
+			}
+			msg.append(")");
+		}
+
 		statusBar.setStatusMessage(msg.toString());
 	}
-	
+
 	/**
 	 *	Callback method from the {@link workbench.interfaces.RowActionMonitor}
 	 */
@@ -327,9 +344,9 @@ public class DwPanel
 	public synchronized void saveChangesToDatabase()
 	{
 		if (this.dbConnection == null) return;
-		if (!this.infoTable.checkPkColumns()) return;
+		if (!this.infoTable.checkPkColumns(true)) return;
 		if (!this.shouldSaveChanges(this.dbConnection)) return;
-		
+
 		if (this.saveChangesInBackground)
 		{
 			this.startBackgroundSave();
@@ -347,21 +364,19 @@ public class DwPanel
 		catch (Exception e)
 		{
 			String msg = ResourceMgr.getString("ErrorUpdatingDb");
-			WbManager.getInstance().showErrorMessage(this, msg + "\n" + e.getMessage());
+			WbSwingUtilities.showErrorMessage(this, msg + "\n" + e.getMessage());
 		}
 	}
 
 	private void startBackgroundSave()
 	{
-		Thread t = new Thread()
+		Thread t = new WbThread("DwPanel update")
 		{
 			public void run()
 			{
 				doSave();
 			}
 		};
-		t.setName("DwPanel update thread");
-		t.setDaemon(true);
 		t.start();
 	}
 
@@ -414,6 +429,10 @@ public class DwPanel
 			String msg = ResourceMgr.getString("MsgOutOfMemorySQLPreview");
 			int choice = JOptionPane.showConfirmDialog(win, msg, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION);
 			if (choice == JOptionPane.NO_OPTION) doSave = false;
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError("DwPanel.shouldSaveChanges()", "Error when previewing SQL", th);
 		}
 		return doSave;
 	}
@@ -500,6 +519,7 @@ public class DwPanel
 	public boolean checkUpdateTable()
 	{
 		if (this.readOnly) return false;
+		this.setStatusMessage(ResourceMgr.getString("MsgCheckingUpdateTable"));
 		DataStore ds = this.infoTable.getDataStore();
 		if (ds == null) return false;
 		if (this.dbConnection == null) return false;
@@ -510,6 +530,8 @@ public class DwPanel
 			this.fireUpdateTableChanged();
 		}
 		this.selectKeys.setEnabled(result);
+
+		this.clearStatusMessage();
 		return result;
 	}
 
@@ -618,7 +640,6 @@ public class DwPanel
 
 				if (!this.dbConnection.getProfile().getDisableUpdateTableCheck())
 				{
-					this.setStatusMessage(ResourceMgr.getString("MsgCheckingUpdateTable"));
 					long updStart, updEnd;
 					updStart = System.currentTimeMillis();
 					this.checkUpdateTable();
@@ -691,7 +712,7 @@ public class DwPanel
 			{
 				//this.setMessageDisplayModel(this.getEmptyMsgTableModel());
 				this.setMessageDisplayModel(this.getErrorTableModel(sqle.getMessage()));
-				WbManager.getInstance().showErrorMessage(SwingUtilities.getWindowAncestor(this), this.lastMessage);
+				WbSwingUtilities.showErrorMessage(SwingUtilities.getWindowAncestor(this), this.lastMessage);
 			}
 			else
 			{
@@ -703,7 +724,7 @@ public class DwPanel
 		{
 			if (e instanceof OutOfMemoryError)
 			{
-				WbManager.getInstance().showErrorMessage(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("MsgOutOfMemoryError"));
+				WbSwingUtilities.showErrorMessage(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("MsgOutOfMemoryError"));
 			}
 			LogMgr.logError(this, "Error executing statement: \r\n" + this.sql, e);
 			this.setMessageDisplayModel(this.getErrorTableModel(e.getMessage()));
@@ -1091,6 +1112,7 @@ public class DwPanel
 	public boolean startEdit()
 	{
 		if (this.readOnly) return false;
+
 		this.editingStarted = false;
 
     int[] selectedRows = this.infoTable.getSelectedRows();
@@ -1099,6 +1121,7 @@ public class DwPanel
 		// determined, then ask the user
 		if (!this.isUpdateable())
 		{
+
 			if (!this.checkUpdateTable())
 			{
 				String sql = this.getCurrentSql();
@@ -1144,7 +1167,7 @@ public class DwPanel
 		{
 			ListSelectionModel model = this.infoTable.getSelectionModel();
 			model.setValueIsAdjusting(true);
-			// make sure nothing is selecte, then restore the old selection
+			// make sure nothing is selected, then restore the old selection
 			model.clearSelection();
 			for (int i = 0; i < numSelectedRows; i++)
 			{

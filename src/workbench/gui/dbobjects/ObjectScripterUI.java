@@ -24,6 +24,7 @@ import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
 import workbench.resource.ResourceMgr;
 import workbench.gui.actions.CreateSnippetAction;
+import workbench.util.WbThread;
 
 /**
  *
@@ -64,8 +65,7 @@ public class ObjectScripterUI
 
 	private void startScripting()
 	{
-		this.worker = new Thread(this);
-		this.worker.setName("ObjectScripter Thread");
+		this.worker = new WbThread(this,"ObjectScripter Thread");
 		this.worker.start();
 	}
 

@@ -71,7 +71,7 @@ class ProfileListModel
 
 	public void addProfile(ConnectionProfile aProfile)
 	{
-		ConnectionMgr conn = WbManager.getInstance().getConnectionMgr();
+		ConnectionMgr conn = ConnectionMgr.getInstance();
 		conn.addProfile(aProfile);
 		this.profiles.add(this.profiles.size(), aProfile);
 		this.fireIntervalAdded(this, this.profiles.size() - 1,  this.profiles.size() - 1);
@@ -80,7 +80,7 @@ class ProfileListModel
 
 	public void deleteProfile(int index)
 	{
-		ConnectionMgr conn = WbManager.getInstance().getConnectionMgr();
+		ConnectionMgr conn = ConnectionMgr.getInstance();
 		ConnectionProfile profile = (ConnectionProfile)this.profiles.get(index);
 		conn.removeProfile(profile);
 		this.profiles.remove(index);

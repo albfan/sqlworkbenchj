@@ -21,12 +21,14 @@ import javax.swing.border.EmptyBorder;
 import workbench.gui.components.WbToolbarButton;
 import workbench.interfaces.DbData;
 import workbench.resource.ResourceMgr;
+import javax.swing.SwingUtilities;
+import workbench.util.WbThread;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
  *	@author  workbench@kellerer.org
  */
-public class StartEditAction 
+public class StartEditAction
 	extends WbAction
 {
 	private DbData client;
@@ -50,10 +52,23 @@ public class StartEditAction
 	public void executeAction(ActionEvent e)
 	{
 		this.setSwitchedOn(!this.switchedOn);
+		Thread t = new WbThread("StartEdit")
+		{
+			public void run()
+			{
+				if (switchedOn)
+					client.startEdit();
+				else
+					client.endEdit();
+			}
+		};
+		t.start();
+		/*
 		if (this.switchedOn)
 			this.client.startEdit();
 		else
 			this.client.endEdit();
+		*/
 	}
 
 	public boolean isSwitchedOn() { return this.switchedOn; }
@@ -100,11 +115,11 @@ public class StartEditAction
 			this.toggleMenu.setIconTextGap(0);
 			String lnf = UIManager.getLookAndFeel().getClass().getName();
 			if (lnf.startsWith("com.jgoodies"))
-			{	
+			{
 				this.toggleMenu.setIcon(null);
 			}
 			else
-			{	
+			{
 				this.toggleMenu.setIcon(ResourceMgr.getImage("blank"));
 			}
 		}

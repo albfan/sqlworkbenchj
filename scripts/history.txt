@@ -1,5 +1,7 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh:  When executing several statements, the currently executed statement can 
+      now be highlighted
 Enh:  An XML report of the database tables can now be generated using 
       the WBREPORT command or from within the table list of the database
       explorer.
@@ -23,11 +25,12 @@ Enh:  Several WBEXPORT enhancements:
       The -concat switch and the -concatfunc switch are mutually exclusive.
 
       The command now supports transforming the resulting XML file
-      through XSLT. Two new parameters (-stylesheet and -trans) have been
+      using XSLT. Two new parameters (-stylesheet and -xsltoutput) have been
       added to support this. The transformation will be executed after
       the XML file has been created.
       The transformation can also be executed "standalone" by using
-      the new command XSLT
+      the new command XSLT (this could e.g. be used to transform the result
+      of the WBREPORT command into a different format)
 
 Enh:  Cancelling a SELECT statement now works also for JDBC drivers that 
       do not support the cancel() operation.
@@ -86,6 +89,7 @@ Enh:  When pressing Shift while selecting one of the "Optimize Column Width"
       menu items, the column label will be taken into account for the
       optimal size. Ctrl-Shift-W will optimize all columns with respecting
       to the column's name. This shortcut cannot be remapped currently.
+Fix:  Fixed a memory leak in the retrieval of foreign keys
 Fix:  If a workspace could not be loaded (due to an error), the user is asked 
       if he wants to create a new workspace with that name.
 Fix:  When an error occurred during an import into the current result set

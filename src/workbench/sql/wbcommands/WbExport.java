@@ -21,18 +21,19 @@ import workbench.util.StringUtil;
  *
  * @author  workbench@kellerer.org
  */
-public class WbExport 
+public class WbExport
 	extends SqlCommand
 	implements RowActionMonitor
 {
 	public static final String VERB = "WBEXPORT";
-	public DataExporter exporter;
-	private int maxRows = 0;
 	private ArgumentParser cmdLine;
+	private DataExporter exporter;
+	private int maxRows = 0;
 	private boolean directExport = false;
 	private List tablesToExport = null;
 	private String currentTable;
-	
+	private String defaultExtension;
+
 	public WbExport()
 	{
 		cmdLine = new ArgumentParser();
@@ -111,17 +112,22 @@ public class WbExport
 		String file = null;
 
 		this.exporter = new DataExporter();
-		
+
 		type = cmdLine.getValue("type");
 		file = cmdLine.getValue("file");
 		String outputdir = cmdLine.getValue("outputdir");
 		String tables = cmdLine.getValue("sourcetable");
-		
-		if (
-				(type == null) || 
-				(file == null && outputdir == null) 
-			 )
+
+		if (type == null)
 		{
+			result.addMessage(ResourceMgr.getString("ErrorExportTypeRequired"));
+			result.setFailure();
+			return result;
+		}
+		if (file == null && outputdir == null)
+		{
+			result.addMessage(ResourceMgr.getString("ErrorExportFileRequired"));
+			result.addMessage("");
 			result.addMessage(ResourceMgr.getString("ErrorSpoolWrongParameters"));
 			result.setFailure();
 			return result;
@@ -157,6 +163,7 @@ public class WbExport
 			exporter.setCleanupCarriageReturns(cmdLine.getBoolean("cleancr"));
 
 			exporter.setAppendToFile(cmdLine.getBoolean("append"));
+			this.defaultExtension = ".txt";
 		}
 		else if (type.startsWith("sql"))
 		{
@@ -184,6 +191,7 @@ public class WbExport
 				List cols = StringUtil.stringToList(c, ",");
 				exporter.setKeyColumnsToUse(cols);
 			}
+			this.defaultExtension = ".sql";
 		}
 		else if ("xml".equalsIgnoreCase(type))
 		{
@@ -223,6 +231,7 @@ public class WbExport
 			}
 
 			if (table != null) exporter.setTableName(table);
+			this.defaultExtension = ".xml";
 		}
 		else if ("html".equalsIgnoreCase(type))
 		{
@@ -252,6 +261,7 @@ public class WbExport
 
 			exporter.setOutputTypeHtml();
 			if (table != null) exporter.setTableName(table);
+			this.defaultExtension = ".html";
 		}
 		else
 		{
@@ -259,16 +269,16 @@ public class WbExport
 			result.setFailure();
 			return result;
 		}
-		
+
 		file = StringUtil.trimQuotes(file);
 		this.exporter.setOutputFilename(file);
-		
+
 		if (tables != null)
 		{
 			this.tablesToExport = StringUtil.stringToList(tables, ",");
 			this.directExport = (this.tablesToExport.size() > 0);
 		}
-		
+
 		this.exporter.setConnection(aConnection);
 
 		String progress = cmdLine.getValue("showprogress");
@@ -303,13 +313,13 @@ public class WbExport
 		}
 
 		result.setSuccess();
-		
+
 		int count = this.tablesToExport.size();
-		
+
 		File outdir = null;
 		String outfile = exporter.getOutputFilename();
 		String msg = null;
-		
+
 		if (count > 1)
 		{
 			outdir = new File(outputdir);
@@ -333,22 +343,20 @@ public class WbExport
 				return;
 			}
 		}
-			
+
 		exporter.setRowMonitor(this);
-		if (count > 1 || outfile == null)
+		if (count > 1)
 		{
 			for (int i = 0; i < count; i ++)
 			{
 				String table = (String)this.tablesToExport.get(i);
 				if (table == null) continue;
 
-				String stmt = "SELECT * FROM " + SqlUtil.quoteObjectname(table);
 				String fname = StringUtil.makeFilename(table);
-				File f = new File(outdir, fname + ".xml");
-				this.currentTable = table;
-				exporter.addJob(f.getAbsolutePath(), stmt);
+				File f = new File(outdir, fname + defaultExtension);
+				exporter.addTableExportJob(f.getAbsolutePath(), table);
 			}
-			exporter.runJobs();	
+			exporter.runJobs();
 			msg = ResourceMgr.getString("MsgExportNumTables");
 			msg = msg.replaceAll("%numtables%", Integer.toString(count));
 			msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
@@ -357,6 +365,13 @@ public class WbExport
 		else
 		{
 			String table = (String)this.tablesToExport.get(0);
+			if (outfile == null)
+			{
+				File nf = new File(outputdir, table + defaultExtension);
+				outfile = nf.getAbsolutePath();
+				exporter.setOutputFilename(outfile);
+			}
+			this.currentTable = table;
 			String stmt = "SELECT * FROM " + SqlUtil.quoteObjectname(table);
 			exporter.setSql(stmt);
 			long rows = 0;
@@ -376,9 +391,9 @@ public class WbExport
 				msg = StringUtil.replace(msg, "%tablename%", table);
 				msg = StringUtil.replace(msg, "%rows%", Long.toString(rows));
 				result.addMessage(msg);
-			}			
+			}
 		}
-		
+
 		if (exporter.hasWarning())
 		{
 			result.addMessages(exporter.getWarnings());
@@ -389,7 +404,7 @@ public class WbExport
 		}
 		result.addMessage("");
 	}
-	
+
 	public boolean isResultSetConsumer()
 	{
 		return !this.directExport;
@@ -399,7 +414,7 @@ public class WbExport
 	{
 		this.maxRows = rows;
 	}
-	
+
 	public void consumeResult(StatementRunnerResult aResult)
 	{
 		try
@@ -464,7 +479,12 @@ public class WbExport
 	public void done()
 	{
 		super.done();
-		this.exporter = null;
+		exporter = null;
+		maxRows = 0;
+		directExport = false;
+		tablesToExport = null;
+		currentTable = null;
+		defaultExtension = null;
 	}
 
 	public void cancel()
@@ -476,26 +496,26 @@ public class WbExport
 			this.exporter.cancelExecution();
 		}
 	}
-	
+
 	public void jobFinished()
 	{
 	}
-	
-	public void setCurrentObject(String object)
+
+	public void setCurrentObject(String object, int number, int total)
 	{
 		this.currentTable = object;
 	}
-		
+
 	public void setCurrentRow(int currentRow, int totalRows)
 	{
 		if (this.rowMonitor != null && this.currentTable != null)
 		{
-			this.rowMonitor.setCurrentObject(this.currentTable + " " + currentRow);
+			this.rowMonitor.setCurrentObject(this.currentTable, currentRow, -1);
 		}
 	}
-	
+
 	public void setMonitorType(int aType)
 	{
 	}
-	
+
 }

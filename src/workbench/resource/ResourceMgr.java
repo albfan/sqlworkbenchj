@@ -77,6 +77,8 @@ public class ResourceMgr
 	public static final String MNU_TXT_SQL = "MnuTxtSQL";
 	public static final String MNU_TXT_EDIT = "MnuTxtEdit";
 	public static final String MNU_TXT_DATA = "MnuTxtData";
+	public static final String MNU_TXT_COPY_SELECTED = "MnuTxtCopySelected";
+		
 	public static final String MNU_TXT_CONNECT = "MnuTxtConnect";
 	public static final String MNU_TXT_EXIT = "MnuTxtExit";
 	public static final String MNU_TXT_VIEW = "MnuTxtView";
@@ -203,6 +205,11 @@ public class ResourceMgr
 		return retrieveImage(aKey + "24");
 	}
 
+	public static ImageIcon getBlankImage()
+	{
+		return retrieveImage("blank16");
+	}
+	
 	public static ImageIcon getImage(String aKey)
 	{
 		return retrieveImage(aKey + "16");

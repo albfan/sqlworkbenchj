@@ -13,7 +13,7 @@ package workbench.util;
 public class WbThread
 	extends Thread
 {
-	
+
 	/** Creates a new instance of WbThread */
 	public WbThread(String name)
 	{
@@ -21,5 +21,12 @@ public class WbThread
 		this.setName(name);
 		this.setDaemon(true);
 	}
-	
+
+	public WbThread(Runnable run, String name)
+	{
+		super(run);
+		this.setName(name);
+		this.setDaemon(true);
+	}
+
 }

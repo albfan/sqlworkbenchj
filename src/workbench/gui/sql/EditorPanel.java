@@ -546,7 +546,7 @@ public class EditorPanel
 		if (!aFile.exists()) return false;
 		if (aFile.length() >= Integer.MAX_VALUE)
 		{
-			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgFileTooBig"));
+			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgFileTooBig"));
 			return false;
 		}
 		boolean result = false;
@@ -580,7 +580,7 @@ public class EditorPanel
 		catch (OutOfMemoryError mem)
 		{
 			mem.printStackTrace();
-			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
+			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
 		}
 		this.setCaretPosition(0);
 		return result;

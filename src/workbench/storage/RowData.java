@@ -18,7 +18,7 @@ import workbench.util.StrBuffer;
  *	A class to hold the data for a single row retrieved from the database.
  *	It will also save the originally retrieved information in case the
  *  data is changed.
- *	A row can be in three different status: 
+ *	A row can be in three different status:
  *	NEW          - the row has not been retrieved from the database
  *  MODIFIED     - the row has been retrieved but has been changed since then
  *  NOT_MODIFIED - The row has not been changed since it has been retrieved
@@ -30,7 +30,7 @@ public class RowData
 	public static final int NEW = 2;
 
 	private int status = NOT_MODIFIED;
-	
+
 	/**
 	 *	This flag will be used by the {@link DataStore}
 	 *	to store the information for which rows the SQL statements
@@ -91,7 +91,7 @@ public class RowData
 		}
 		this.resetStatus();
 	}
-	
+
 	/**
 	 *	Create a deep copy of this object.
 	 *	The status of the new row will be NOT_MODIFIED
@@ -104,6 +104,12 @@ public class RowData
 			result.colData[i] = this.colData[i];
 		}
 		return result;
+	}
+	
+	public int getColumnCount()
+	{
+		if (this.colData == null) return 0;
+		return this.colData.length;
 	}
 
 	/**
@@ -202,6 +208,24 @@ public class RowData
 		this.originalData = null;
 	}
 
+	public void reset()
+	{
+		if (this.colData == null) return;
+		int count = this.colData.length;
+		for (int i=0; i < count; i++)
+		{
+			this.colData[i] = null;
+		}
+		this.colData = null;
+		if (this.originalData != null)
+		{
+			for (int i=0; i < count; i++)
+			{
+				this.originalData[i] = null;
+			}
+			this.originalData = null;
+		}
+	}
 	/**
 	 *	Sets the status of this row to new.
 	 */
@@ -256,13 +280,13 @@ public class RowData
 	}
 
 	public boolean isDmlSent() { return this.dmlSent; }
-	
+
 	public StringBuffer getDataAsString(String aDelimiter, DecimalFormat formatter)
 	{
 		int count = this.colData.length;
 		StringBuffer result = new StringBuffer(count * 20);
 		int start = 0;
-		
+
 		for (int c=0; c < count; c++)
 		{
 			Object value = this.getValue(c);
@@ -295,5 +319,5 @@ public class RowData
 			if (c < count - 1) result.append(aDelimiter);
 		}
 		return result;
-	}	
+	}
 }

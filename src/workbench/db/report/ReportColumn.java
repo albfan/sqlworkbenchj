@@ -24,7 +24,7 @@ public class ReportColumn
 	public static final String TAG_COLUMN_JAVA_TYPE_NAME = "java-sql-type-name";
 	public static final String TAG_COLUMN_JAVA_TYPE = "java-sql-type";
 	public static final String TAG_COLUMN_JAVA_CLASS = "java-class";
-	
+
 	public static final String TAG_COLUMN_SIZE = "dbms-data-size";
 	public static final String TAG_COLUMN_DIGITS = "dbms-data-digits";
 	public static final String TAG_COLUMN_POSITION = "dbms-position";
@@ -32,11 +32,11 @@ public class ReportColumn
 	public static final String TAG_COLUMN_NULLABLE = "nullable";
 	public static final String TAG_COLUMN_PK = "primary-key";
 	public static final String TAG_COLUMN_COMMENT = "comment";
-	
+
 	private ColumnReference fk;
 	private ColumnIdentifier column;
 	private TagWriter tagWriter = new TagWriter();
-	
+
 	/** Creates a new instance of ReportColumn */
 	public ReportColumn(ColumnIdentifier col)
 	{
@@ -47,7 +47,7 @@ public class ReportColumn
 	{
 		return this.column;
 	}
-	
+
 	public void setForeignKeyReference(ColumnReference ref)
 	{
 		this.fk = ref;
@@ -56,15 +56,15 @@ public class ReportColumn
 			this.fk.setNamespace(this.tagWriter.getNamespace());
 		}
 	}
-	public StrBuffer getXml(StrBuffer indent)
+
+	public void appendXml(StrBuffer result, StrBuffer indent)
 	{
-		StrBuffer result = new StrBuffer(100);
 		StrBuffer myindent = new StrBuffer(indent);
-		
+
 		myindent.append("  ");
 		tagWriter.appendOpenTag(result, indent, TAG_COLUMN_DEFINITION);
 		result.append('\n');
-		
+
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_POSITION, this.column.getPosition());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_NAME, this.column.getColumnName());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_DBMS_TYPE, this.column.getDbmsType());
@@ -75,7 +75,7 @@ public class ReportColumn
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_DIGITS, this.column.getDecimalDigits());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_JAVA_TYPE, this.column.getDataType());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_JAVA_TYPE_NAME, SqlUtil.getTypeName(this.column.getDataType()));
-	
+
 		tagWriter.appendOpenTag(result, myindent, TAG_COLUMN_COMMENT);
 		String comment = this.column.getComment();
 		if (comment != null && comment.trim().length() > 0)
@@ -85,15 +85,15 @@ public class ReportColumn
 			result.append("]]>");
 		}
 		tagWriter.appendCloseTag(result, null, TAG_COLUMN_COMMENT);
-		
+
 		if (this.fk != null)
 		{
 			result.append(fk.getXml(myindent));
 		}
 		tagWriter.appendCloseTag(result, indent, TAG_COLUMN_DEFINITION);
-		return result;
+		return;
 	}
-	
+
 	public void setNamespace(String namespace)
 	{
 		this.tagWriter.setNamespace(namespace);
@@ -102,5 +102,5 @@ public class ReportColumn
 			this.fk.setNamespace(namespace);
 		}
 	}
-	
+
 }

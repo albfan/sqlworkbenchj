@@ -13,6 +13,7 @@ import java.sql.Types;
 import java.util.List;
 import workbench.WbManager;
 import workbench.db.WbConnection;
+import workbench.gui.WbSwingUtilities;
 import workbench.interfaces.TableSearchDisplay;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -144,7 +145,7 @@ public class TableSearcher
 		}
 		catch (OutOfMemoryError mem)
 		{
-			WbManager.getInstance().showErrorMessage(null, ResourceMgr.getString("MsgOutOfMemoryError"));
+			WbSwingUtilities.showErrorMessage(null, ResourceMgr.getString("MsgOutOfMemoryError"));
 		}
 		catch (Exception e)
 		{

@@ -48,7 +48,7 @@ public class BatchRunner
 		throws Exception
 	{
 		LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchConnecting") + " [" + aProfilename + "]");
-		ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
+		ConnectionMgr mgr = ConnectionMgr.getInstance();
 		ConnectionProfile prof = mgr.getProfile(aProfilename);
 		if (prof == null)
 		{
@@ -67,7 +67,7 @@ public class BatchRunner
 			return;
 		}
 
-		ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
+		ConnectionMgr mgr = ConnectionMgr.getInstance();
 		this.connection = mgr.getConnection(aProfile, "BatchRunner");
 		this.stmtRunner = new StatementRunner();
 		this.stmtRunner.setConnection(this.connection);
@@ -127,7 +127,6 @@ public class BatchRunner
 	{
 		String file = null;
 		boolean error = false;
-		//WbStringTokenizer reader = new WbStringTokenizer(";",false, "\"'", true);
 
 		for (int i=0; i < this.files.size(); i++)
 		{
@@ -135,8 +134,6 @@ public class BatchRunner
 			try
 			{
 				LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchProcessingFile") + " " + file);
-				//reader.setSourceFile(file);
-				//error = this.executeScript(reader);
 				String script = this.readFile(file);
 				error = this.executeScript(script);
 				LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchProcessingFileDone") + " " + file);
@@ -159,7 +156,6 @@ public class BatchRunner
 				if (this.errorScript != null)
 				{
 					LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchExecutingErrorScript") + " " + this.errorScript);
-					//reader.setSourceFile(this.errorScript);
 					String errorScript = this.readFile(this.errorScript);
 					this.executeScript(errorScript);
 				}
@@ -176,7 +172,6 @@ public class BatchRunner
 				if (this.successScript != null)
 				{
 					LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchExecutingSuccessScript") + " " + this.successScript);
-					//reader.setSourceFile(this.successScript);
 					String script = this.readFile(this.successScript);
 					this.executeScript(script);
 				}
@@ -188,8 +183,6 @@ public class BatchRunner
 		}
 	}
 
-
-	//private boolean executeScript(WbStringTokenizer reader)
 	private boolean executeScript(String aScript)
 	{
 		boolean error = false;
@@ -218,7 +211,9 @@ public class BatchRunner
 					for (int m=0; m < msg.length; m++)
 					{
 						if (msg[m] != null && msg[m].length() > 0)
+						{
 							System.out.println(msg[m]);
+						}
 					}
 				}
 				if (this.showResultSets && result.isSuccess() && result.hasDataStores())
@@ -251,7 +246,7 @@ public class BatchRunner
 
 	public void done()
 	{
-		ConnectionMgr mgr = WbManager.getInstance().getConnectionMgr();
+		ConnectionMgr mgr = ConnectionMgr.getInstance();
 		mgr.disconnectAll();
 	}
 

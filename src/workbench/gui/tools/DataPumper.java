@@ -31,6 +31,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
+import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DataCopier;
 import workbench.db.TableIdentifier;
@@ -288,14 +289,14 @@ public class DataPumper
 
 		try
 		{
-			this.sourceConnection = WbManager.getInstance().getConnectionMgr().getConnection(this.source, "Dp-Source");
+			this.sourceConnection = ConnectionMgr.getInstance().getConnection(this.source, "Dp-Source");
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("DataPumper.doConnectSource()", "Error when connecting to profile: " + this.source.getName(), e);
 			String msg = ResourceMgr.getString("ErrorConnectionError") + "\n" + e.getMessage();
 			this.source = null;
-			WbManager.getInstance().showErrorMessage(this, msg);
+			WbSwingUtilities.showErrorMessage(this, msg);
 		}
 		finally
 		{
@@ -347,14 +348,14 @@ public class DataPumper
 
 		try
 		{
-			this.targetConnection = WbManager.getInstance().getConnectionMgr().getConnection(this.target, "Dp-Target");
+			this.targetConnection = ConnectionMgr.getInstance().getConnection(this.target, "Dp-Target");
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("DataPumper.doConnectSource()", "Error when connecting to profile: " + this.target.getName(), e);
 			String msg = ResourceMgr.getString("ErrorConnectionError") + "\n" + e.getMessage();
 			this.target = null;
-			WbManager.getInstance().showErrorMessage(this, msg);
+			WbSwingUtilities.showErrorMessage(this, msg);
 		}
 		finally
 		{
@@ -1297,7 +1298,7 @@ public class DataPumper
 		catch (SQLException e)
 		{
 			LogMgr.logError("DataPumper", "Error when retrieving ResultSet definition for source SQL", e);
-			WbManager.getInstance().showErrorMessage(this, e.getMessage());
+			WbSwingUtilities.showErrorMessage(this, e.getMessage());
 		}
 		return result;
 	}
@@ -1533,7 +1534,7 @@ public class DataPumper
 			stable = this.sourceTable.getSelectedTable();
 			if (this.isSelectQuery())
 			{
-				WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgDPIgnoreSelect"));
+				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgDPIgnoreSelect"));
 				ignoreSelect = true;
 			}
 		}
@@ -1546,12 +1547,12 @@ public class DataPumper
 		List keys = this.getKeyColumns();
 		if (mode.indexOf("update") > -1 && keys.size() == 0)
 		{
-			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("ErrorDPNoKeyColumns"));
+			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrorDPNoKeyColumns"));
 			return;
 		}
 		if (keys.size() == colMapping.targetColumns.length && mode.indexOf("update") > -1)
 		{
-			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("ErrorDPUpdateOnlyKeyColumns"));
+			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrorDPUpdateOnlyKeyColumns"));
 			return;
 		}
 
@@ -1614,10 +1615,10 @@ public class DataPumper
 		}
 	}
 
-	public void setCurrentObject(String object)
+	public void setCurrentObject(String object, int number, int total)
 	{
 	}
-	
+
 	public void setCurrentRow(int currentRow, int totalRows)
 	{
 		if (currentRow == 1) this.updateWindowTitle();

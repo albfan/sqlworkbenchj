@@ -37,6 +37,7 @@ import workbench.gui.components.DividerBorder;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.resource.ShortcutDefinition;
 import workbench.resource.ShortcutManager;
 import workbench.resource.StoreableKeyStroke;
@@ -186,7 +187,7 @@ public class ShortcutEditor
 	
 	private void createModel()
 	{
-		ShortcutDefinition[] keys = WbManager.getShortcutManager().getDefinitions();
+		ShortcutDefinition[] keys = Settings.getInstance().getShortcutManager().getDefinitions();
 		
 		String[] cols = new String[] { ResourceMgr.getString("LabelKeyDefCommandCol"), 
                                    ResourceMgr.getString("LabelKeyDefKeyCol"),
@@ -198,7 +199,7 @@ public class ShortcutEditor
 		for (int i=0; i < keys.length; i++)
 		{
 			int row = this.definitions.addRow();
-			this.definitions.setValue(row, 0, WbManager.getShortcutManager().getActionNameForClass(keys[i].getActionClass()));
+			this.definitions.setValue(row, 0, Settings.getInstance().getShortcutManager().getActionNameForClass(keys[i].getActionClass()));
 			this.definitions.setValue(row, 1, new ShortcutDisplay(keys[i], ShortcutDisplay.TYPE_PRIMARY_KEY));
 			this.definitions.setValue(row, 2, new ShortcutDisplay(keys[i], ShortcutDisplay.TYPE_DEFAULT_KEY));
 		}
@@ -247,7 +248,7 @@ public class ShortcutEditor
 
 	private void saveShortcuts()
 	{
-		ShortcutManager mgr = WbManager.getShortcutManager();
+		ShortcutManager mgr = Settings.getInstance().getShortcutManager();
 		int count = this.definitions.getRowCount();
 		boolean update = false;
 		for (int row = 0; row < count; row++)

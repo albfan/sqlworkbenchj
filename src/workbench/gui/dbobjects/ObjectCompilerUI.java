@@ -25,13 +25,14 @@ import workbench.db.oracle.OracleObjectCompiler;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.EditorPanel;
 import workbench.resource.ResourceMgr;
+import workbench.util.WbThread;
 
 /**
  *
  * @author  workbench@kellerer.org
  */
-public class ObjectCompilerUI 
-	extends JPanel 
+public class ObjectCompilerUI
+	extends JPanel
 	implements Runnable, WindowListener
 {
 	private Thread worker;
@@ -40,7 +41,7 @@ public class ObjectCompilerUI
 	private List types;
 	private List names;
 	private OracleObjectCompiler compiler;
-	
+
 	public ObjectCompilerUI(List names, List types, WbConnection conn)
 		throws SQLException
 	{
@@ -55,18 +56,17 @@ public class ObjectCompilerUI
 
 	private void startCompile()
 	{
-		this.worker = new Thread(this);
-		this.worker.setName("ObjectCompiler Thread");
+		this.worker = new WbThread(this, "ObjectCompiler Thread");
 		this.worker.start();
 	}
-	
+
 	public void run()
 	{
 		String msg = ResourceMgr.getString("TxtCompilingObject");
 		this.log.setText("");
 		int count = this.names.size();
-		
-		
+
+
 		for (int i=0; i < count; i++)
 		{
 			String name = (String)this.names.get(i);
@@ -84,8 +84,8 @@ public class ObjectCompilerUI
 			}
 		}
 		this.log.setCaretPosition(0);
-	}	
-	
+	}
+
 	public void show(Window aParent)
 	{
 		if (this.window == null)
@@ -98,7 +98,7 @@ public class ObjectCompilerUI
 			{
 				this.window.setSize(500,400);
 			}
-			
+
 			if (!WbManager.getSettings().restoreWindowPosition(this.window, ObjectCompilerUI.class.getName()))
 			{
 				WbSwingUtilities.center(this.window, aParent);
@@ -108,15 +108,15 @@ public class ObjectCompilerUI
 		this.window.show();
 		this.startCompile();
 	}
-	
+
 	public void windowActivated(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowClosed(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowClosing(java.awt.event.WindowEvent e)
 	{
 		if (this.worker != null)
@@ -131,21 +131,21 @@ public class ObjectCompilerUI
 		this.window.hide();
 		this.window.dispose();
 	}
-	
+
 	public void windowDeactivated(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowDeiconified(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowIconified(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowOpened(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 }

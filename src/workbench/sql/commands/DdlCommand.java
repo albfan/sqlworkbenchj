@@ -129,16 +129,12 @@ public class DdlCommand extends SqlCommand
 		TYPES.add("VIEW");
   }
 
-  private boolean addExtendErrorInfo(WbConnection aConnection, String sql, StatementRunnerResult result)
-  {
-    String cleanSql = SqlUtil.makeCleanSql(sql, false).toUpperCase();
-    String sqlverb = SqlUtil.getSqlVerb(cleanSql);
-    if (!"CREATE".equals(sqlverb)) return false;
-    String type = null;
-
+	private String getObjectType(String cleanSql)
+	{
     StringTokenizer tok = new StringTokenizer(cleanSql, " ");
     String word = null;
     String name = null;
+    String type = null;
     boolean nextTokenIsName = false;
     while (tok.hasMoreTokens())
     {
@@ -154,10 +150,45 @@ public class DdlCommand extends SqlCommand
         nextTokenIsName = true;
       }
     }
+    return type;
+	}
+
+	private String getObjectName(String cleanSql)
+	{
+    StringTokenizer tok = new StringTokenizer(cleanSql, " ");
+    String word = null;
+    String name = null;
+    String type = null;
+    boolean nextTokenIsName = false;
+    while (tok.hasMoreTokens())
+    {
+      word = tok.nextToken();
+      if (nextTokenIsName)
+      {
+        name = word;
+        break;
+      }
+      if (TYPES.contains(word))
+      {
+        type = word;
+        nextTokenIsName = true;
+      }
+    }
+    return type;
+	}
+
+  private boolean addExtendErrorInfo(WbConnection aConnection, String sql, StatementRunnerResult result)
+  {
+    String cleanSql = SqlUtil.makeCleanSql(sql, false).toUpperCase();
+    String sqlverb = SqlUtil.getSqlVerb(cleanSql);
+    if (!"CREATE".equals(sqlverb)) return false;
+    String type = getObjectType(cleanSql);
+    String name = getObjectName(cleanSql);
+
 		if (type == null || name == null) return false;
 
 		// remove anything behind the ( to get the real object name
-		tok = new StringTokenizer(name, "(");
+		StringTokenizer tok = new StringTokenizer(name, "(");
 		if (tok.hasMoreTokens())
 		{
 			name = tok.nextToken();

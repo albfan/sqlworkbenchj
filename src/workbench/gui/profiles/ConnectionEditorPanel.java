@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import workbench.WbManager;
+import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
 import workbench.gui.WbSwingUtilities;
@@ -37,6 +38,7 @@ import workbench.gui.help.HtmlViewer;
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.util.FileDialogUtil;
 
 /**
  *
@@ -487,7 +489,7 @@ public class ConnectionEditorPanel
 		d.show();
     if (!d.isCancelled())
     {
-  		List drivers = WbManager.getInstance().getConnectionMgr().getDrivers();
+  		List drivers = ConnectionMgr.getInstance().getDrivers();
     	this.setDrivers(drivers);
     }
     d.dispose();
@@ -563,7 +565,8 @@ public class ConnectionEditorPanel
 	}
 	public void selectWorkspace()
 	{
-		String filename = WbManager.getInstance().getWorkspaceFilename(SwingUtilities.getWindowAncestor(this), false, true);
+		FileDialogUtil util = new FileDialogUtil();
+		String filename = util.getWorkspaceFilename(SwingUtilities.getWindowAncestor(this), false, true);
 		if (filename == null) return;
 		this.tfWorkspaceFile.setText(filename);
 	}
@@ -629,7 +632,7 @@ public class ConnectionEditorPanel
 		{
 			String name = aProfile.getDriverName();
 			long start = System.currentTimeMillis();
-			drv = WbManager.getInstance().getConnectionMgr().findDriverByName(drvClass, name);
+			drv = ConnectionMgr.getInstance().findDriverByName(drvClass, name);
 			long end = System.currentTimeMillis();
 		}
 

@@ -22,6 +22,7 @@ import workbench.gui.components.NoSelectionModel;
 import workbench.gui.components.WbButton;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.util.WbThread;
 
 /**
  *
@@ -35,7 +36,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 	private boolean cancelled;
 	private WbConnection connection;
 	private Thread deleteThread;
-	
+
 	public TableDeleterUI()
 	{
 		initComponents();
@@ -167,7 +168,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 		{
 			this.enableCommitSettings();
 		}
-			
+
 	}//GEN-LAST:event_useTruncateCheckBoxItemStateChanged
 
 	private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_cancelButtonActionPerformed
@@ -201,7 +202,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 		this.connection = aConn;
 		if (this.connection != null)
 		{
-			
+
 			this.useTruncateCheckBox.setEnabled(this.connection.getMetadata().supportsTruncate());
 			boolean autoCommit = this.connection.getAutoCommit();
 			if (autoCommit)
@@ -213,7 +214,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 				this.enableCommitSettings();
 			}
 		}
-		
+
 	}
 
 	private void disableCommitSettings()
@@ -223,7 +224,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 		this.commitAtEnd.setSelected(false);
 		this.commitEach.setSelected(false);
 	}
-	
+
 	private void enableCommitSettings()
 	{
 		this.commitAtEnd.setEnabled(true);
@@ -231,21 +232,19 @@ public class TableDeleterUI extends javax.swing.JPanel
 		this.commitAtEnd.setSelected(false);
 		this.commitEach.setSelected(true);
 	}
-	
+
 	private void startDelete()
 	{
-		this.deleteThread = new Thread()
+		this.deleteThread = new WbThread("TableDeleteThread")
 		{
 			public void run()
 			{
 				doDelete();
 			}
 		};
-		this.deleteThread.setName("TableDeleteThread");
-		this.deleteThread.setDaemon(true);
 		this.deleteThread.start();
 	}
-	
+
 	private void doDelete()
 	{
 		this.cancelled = false;
@@ -255,7 +254,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 		boolean useTruncate = this.useTruncateCheckBox.isSelected();
 		if (useTruncate) commitEach = false;
 		boolean hasError = false;
-		
+
 		int count = this.objectNames.size();
 		String table = null;
 		for (int i=0; i < count; i++)
@@ -278,7 +277,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 					question = question.replaceAll("%error%", error);
 
 					int choice = WbSwingUtilities.getYesNoIgnoreAll(this.dialog,  question);
-					if (choice == JOptionPane.NO_OPTION) 
+					if (choice == JOptionPane.NO_OPTION)
 					{
 						// the hasError flag will cause a rollback at the end.
 						hasError = true;
@@ -286,16 +285,16 @@ public class TableDeleterUI extends javax.swing.JPanel
 					}
 					if (choice == WbSwingUtilities.IGNORE_ALL)
 					{
-						// if we ignore all errors we should do a commit at the 
-						// end in order to ensure that the delete's which were 
+						// if we ignore all errors we should do a commit at the
+						// end in order to ensure that the delete's which were
 						// successful are committed.
-						hasError = false; 
+						hasError = false;
 						ignoreAll = true;
 					}
 				}
 			}
 		}
-		
+
 		boolean commit = true;
 		try
 		{
@@ -316,14 +315,14 @@ public class TableDeleterUI extends javax.swing.JPanel
 		{
 			LogMgr.logError("TableDeleterUI.doDelete()", "Error on commit/rollback", e);
 			String msg = null;
-			
+
 			if (commit) ResourceMgr.getString("ErrorCommitDeleteTableData");
 			else msg = ResourceMgr.getString("ErrorRollbackTableData");
 			msg = msg.replaceAll("%error%", e.getMessage());
-			
-			WbManager.getInstance().showErrorMessage(this.dialog, msg);
+
+			WbSwingUtilities.showErrorMessage(this.dialog, msg);
 		}
-		
+
 		this.statusLabel.setText("");
 		if (!hasError)
 		{
@@ -333,7 +332,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 		}
 		this.cancelled = false;
 	}
-	
+
 	private void deleteTable(final String tableName, final boolean useTruncate, final boolean doCommit)
 		throws SQLException
 	{

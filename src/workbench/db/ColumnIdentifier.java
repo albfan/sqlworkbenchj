@@ -26,16 +26,16 @@ public class ColumnIdentifier
 	private String defaultValue = null;
 	private String columnClass = null;
 	private String columnTypeName = null;
-	
+
 	private int position;
-	
+
 	private int size; // for VARCHAR's etc
 	private int digits; // for DECIMAL types
-	
+
 	public ColumnIdentifier()
 	{
 	}
-	
+
 	/**
 	 *	Create a ColummIdentifier where the type is ignored.
 	 */
@@ -52,14 +52,14 @@ public class ColumnIdentifier
 		this(aName, aType, false);
 	}
 
-	
+
 	/**
 	 *	Create a ColumnIdentifier for a primary key column with a given data type (from java.sql.Types)
 	 */
 	public ColumnIdentifier(String aName, int aType, boolean isPkColumn)
 	{
 		if (aName == null) throw new IllegalArgumentException("Column name may not be null!");
-		this.name = aName.trim().toLowerCase();
+		this.name = aName.trim();//.toLowerCase();
 		this.type = aType;
 		this.isPk = isPkColumn;
 	}
@@ -69,24 +69,24 @@ public class ColumnIdentifier
 	 */
 	public void setColumnSize(int aSize) { this.size = aSize; }
 	public int getColumnSize() { return this.size; }
-	
+
 	/**
 	 *	Define the decimal digits for this column (e.g. for DECIMAL columns)
 	 */
 	public void setDecimalDigits(int numDigits) { this.digits = numDigits; }
 	public int getDecimalDigits() { return this.digits; }
-	
+
 	public void setIsPkColumn(boolean flag) { this.isPk = flag; }
 	public boolean isPkColumn() { return this.isPk; }
 
 	public void setIsNullable(boolean flag) { this.isNullable = flag; }
 	public boolean isNullable() { return this.isNullable; }
-	
+
 	public void setDbmsType(String type) { this.dbmsType = type; }
 	public String getDbmsType() { return this.dbmsType; }
-	
+
 	/**
-	 *	Define this column to be an expression. 
+	 *	Define this column to be an expression.
 	 *	The major difference to setColumnName() is, that the name will internally
 	 *  not be stored in lowercase
 	 *  (But can be used in a SELECT anyway)
@@ -98,7 +98,7 @@ public class ColumnIdentifier
 		this.isPk = false;
 		this.type = NO_TYPE;
 	}
-	
+
 	public ColumnIdentifier createCopy()
 	{
 		ColumnIdentifier result = new ColumnIdentifier();
@@ -118,12 +118,12 @@ public class ColumnIdentifier
 		result.position = this.position;
 		return result;
 	}
-	
+
 	public String getColumnName()
 	{
 		return this.name;
 	}
-	
+
 	public void setColumnName(String aName)
 	{
 		this.name = aName;
@@ -131,23 +131,23 @@ public class ColumnIdentifier
 		this.isPk = false;
 		this.isNullable = true;
 	}
-	
+
 	public void setDataType(int aType)
 	{
 		this.type = aType;
 	}
-	
+
 	public int getDataType()
 	{
 		if (type == NO_TYPE) return Types.OTHER;
 		return this.type;
 	}
-	
+
 	public String toString()
-	{ 
-		return this.name; 
+	{
+		return this.name;
 	}
-	
+
 	public boolean equals(Object other)
 	{
 		if (other instanceof ColumnIdentifier)
@@ -155,13 +155,13 @@ public class ColumnIdentifier
 			ColumnIdentifier cd = (ColumnIdentifier)other;
 			if (this.type == NO_TYPE || cd.type == NO_TYPE)
 			{
-				return this.name.equals(cd.name);
+				return this.name.equalsIgnoreCase(cd.name);
 			}
-			return this.type == cd.type && this.name.equals(cd.name);
+			return this.type == cd.type && this.name.equalsIgnoreCase(cd.name);
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Getter for property comment.
 	 * @return Value of property comment.
@@ -170,7 +170,7 @@ public class ColumnIdentifier
 	{
 		return comment;
 	}
-	
+
 	/**
 	 * Setter for property comment.
 	 * @param comment New value of property comment.
@@ -179,7 +179,7 @@ public class ColumnIdentifier
 	{
 		this.comment = comment;
 	}
-	
+
 	/**
 	 * Getter for property defaultValue.
 	 * @return Value of property defaultValue.
@@ -188,7 +188,7 @@ public class ColumnIdentifier
 	{
 		return defaultValue;
 	}
-	
+
 	/**
 	 * Setter for property defaultValue.
 	 * @param defaultValue New value of property defaultValue.
@@ -197,7 +197,7 @@ public class ColumnIdentifier
 	{
 		this.defaultValue = defaultValue;
 	}
-	
+
 	/**
 	 * Getter for property position.
 	 * @return Value of property position.
@@ -206,7 +206,7 @@ public class ColumnIdentifier
 	{
 		return position;
 	}
-	
+
 	/**
 	 * Setter for property position.
 	 * @param position New value of property position.
@@ -215,7 +215,7 @@ public class ColumnIdentifier
 	{
 		this.position = position;
 	}
-	
+
 	/**
 	 * Getter for property columnClass.
 	 * @return Value of property columnClass.
@@ -224,7 +224,7 @@ public class ColumnIdentifier
 	{
 		return columnClass;
 	}
-	
+
 	/**
 	 * Setter for property columnClass.
 	 * @param columnClass New value of property columnClass.
@@ -233,7 +233,7 @@ public class ColumnIdentifier
 	{
 		this.columnClass = columnClass;
 	}
-	
+
 	/**
 	 * Getter for property columnTypeName.
 	 * @return Value of property columnTypeName.
@@ -242,7 +242,7 @@ public class ColumnIdentifier
 	{
 		return columnTypeName;
 	}
-	
+
 	/**
 	 * Setter for property columnTypeName.
 	 * @param columnTypeName New value of property columnTypeName.
@@ -251,7 +251,7 @@ public class ColumnIdentifier
 	{
 		this.columnTypeName = columnTypeName;
 	}
-	
+
 	/**
 	 * Getter for property isUpdateable.
 	 * @return Value of property isUpdateable.
@@ -260,7 +260,7 @@ public class ColumnIdentifier
 	{
 		return isUpdateable;
 	}
-	
+
 	/**
 	 * Setter for property isUpdateable.
 	 * @param isUpdateable New value of property isUpdateable.
@@ -269,5 +269,5 @@ public class ColumnIdentifier
 	{
 		this.isUpdateable = isUpdateable;
 	}
-	
+
 }

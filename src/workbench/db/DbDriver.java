@@ -94,10 +94,17 @@ public class DbDriver
 		if (this.identifier == null)
 		{
 			StringBuffer b = new StringBuffer(100);
-			b.append(this.driverClass);
-			b.append(" (");
-			b.append(this.name);
-			b.append(")");
+			if (this.name != null)
+			{
+				b.append(this.name);
+				b.append(" (");
+				b.append(this.driverClass);
+				b.append(")");
+			}
+			else
+			{
+				b.append(this.driverClass);
+			}
 			this.identifier = b.toString();
 		}
 		return this.identifier;
@@ -169,6 +176,7 @@ public class DbDriver
 		copy.driverClass = this.driverClass;
 		copy.library = this.library;
 		copy.sampleUrl = this.sampleUrl;
+		copy.name = this.name;
 		return copy;
 	}
 
@@ -310,7 +318,7 @@ public class DbDriver
 		LogMgr.logDebug("DbDriver.commandConnect()", "Sending command URL=" + url + " to database");
 		this.driverClassInstance.connect(url, props);
 	}
-	
+
 	public boolean equals(Object other)
 	{
 		if (other == null) return false;

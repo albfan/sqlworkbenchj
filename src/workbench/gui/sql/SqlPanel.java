@@ -43,6 +43,7 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
+import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
 
 
@@ -632,6 +633,9 @@ public class SqlPanel
 		this.actions.add(this.lastStmtAction);
 
 		this.actions.add(new AutoJumpNextStatement());
+		WbAction hi = new HighlightCurrentStatement();
+		hi.setCreateMenuSeparator(false);
+		this.actions.add(hi);
 
 		this.executeAll.setEnabled(false);
 		this.executeSelected.setEnabled(false);
@@ -770,14 +774,16 @@ public class SqlPanel
 	public void saveChangesToDatabase()
 	{
 		// Make sure we have real PK columns.
-		if (!this.data.getTable().checkPkColumns()) return;
-		
+		boolean needPk = this.data.getTable().getDataStore().needPkForUpdate();
+		boolean hasPk = this.data.getTable().checkPkColumns(true);
+		if (needPk && !hasPk) return;
+
 		// check if we really want to save the data
 		// it fhe "DbDebugger" is not enabled this will
 		// always return true, otherwise it depends on the user's
 		// selection after the SQL preview has been displayed
 		if (!this.data.shouldSaveChanges(this.dbConnection)) return;
-		
+
 		this.setBusy(true);
 
 		this.updateRunning = true;
@@ -850,7 +856,7 @@ public class SqlPanel
 			{
 				public void run()
 				{
-					WbManager.getInstance().showErrorMessage(getParentWindow(), msg);
+					WbSwingUtilities.showErrorMessage(getParentWindow(), msg);
 				}
 			});
 		}
@@ -1620,7 +1626,7 @@ public class SqlPanel
 				final String fname = filename;
 				this.setBusy(true);
 				this.setCancelState(true);
-				Thread importThread = new Thread()
+				Thread importThread = new WbThread("DataImport")
 				{
 					public void run()
 					{
@@ -1648,8 +1654,6 @@ public class SqlPanel
 					}
 				};
 				Thread.yield();
-				importThread.setName("Data Import");
-				importThread.setDaemon(true);
 				importThread.start();
 			}
 			catch (Exception e)
@@ -1672,10 +1676,14 @@ public class SqlPanel
 
 		boolean compressLog = Settings.getInstance().getConsolidateLogMsg();
 		boolean jumpToNext = (commandAtIndex > -1 && Settings.getInstance().getAutoJumpNextStatement());
-
+		boolean highlightCurrent = false;
+		boolean restoreSelection = false;
+		
 		ScriptParser scriptParser = new ScriptParser();
 		scriptParser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
-
+		int oldSelectionStart = -1;
+		int oldSelectionEnd = -1;
+		
 		try
 		{
 			this.log.setText("");
@@ -1714,6 +1722,15 @@ public class SqlPanel
 			this.data.scriptStarting();
 			this.showResultPanel();
 
+			highlightCurrent = (count > 1 && Settings.getInstance().getHighlightCurrentStatement());
+			
+			if (highlightCurrent)
+			{
+				oldSelectionStart = this.editor.getSelectionStart();
+				oldSelectionEnd = this.editor.getSelectionEnd();
+				restoreSelection = true;
+			}
+			
 			long startTime = System.currentTimeMillis();
 
 			for (int i=startIndex; i < endIndex; i++)
@@ -1749,6 +1766,10 @@ public class SqlPanel
 				header.append(sql);
 
 				this.data.setPrintHeader(header.toString());
+				if (highlightCurrent)
+				{
+					highlightStatement(scriptParser, i, selectionOffset);
+				}
 				this.data.runStatement(sql);
 
 				if (!compressLog)
@@ -1806,6 +1827,7 @@ public class SqlPanel
 
 			if (commandWithError > -1 && highlightOnError)
 			{
+				restoreSelection = false;
 				final ScriptParser p = scriptParser;
 				final int command = commandWithError;
 				final int offset = selectionOffset;
@@ -1848,7 +1870,18 @@ public class SqlPanel
 				this.appendToLog("\n");
 				this.appendToLog(s);
 			}
-
+			if (restoreSelection && oldSelectionStart > -1 && oldSelectionEnd > -1)
+			{
+				final int selstart = oldSelectionStart;
+				final int selend = oldSelectionEnd;
+				SwingUtilities.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						editor.select(selstart, selend);
+					}
+				});
+			}
 			if (commandWithError == -1 && jumpToNext)
 			{
 				int nextCommand = startIndex + 1;
@@ -1875,6 +1908,15 @@ public class SqlPanel
 		}
 	}
 
+	private void highlightStatement(ScriptParser scriptParser, int command, int startOffset)
+	{
+		if (this.editor == null) return;
+		int startPos = scriptParser.getStartPosForCommand(command) + startOffset;
+		int endPos = scriptParser.getEndPosForCommand(command) + startOffset;
+		int line = this.editor.getLineOfOffset(startPos);
+		this.editor.scrollTo(line, 0);
+		this.editor.selectStatement(startPos, endPos);
+	}
 	private void highlightError(ScriptParser scriptParser, int commandWithError, int startOffset)
 	{
 		if (this.editor == null) return;

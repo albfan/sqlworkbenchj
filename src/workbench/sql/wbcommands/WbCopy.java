@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
+import workbench.db.ConnectionMgr;
 import workbench.db.DataCopier;
 import workbench.db.TableIdentifier;
 
@@ -171,7 +172,7 @@ public class WbCopy
 		{
 			try
 			{
-				targetCon = WbManager.getInstance().getConnectionMgr().getConnection(targetProfile, "Wb-Copy-Target");
+				targetCon = ConnectionMgr.getInstance().getConnection(targetProfile, "Wb-Copy-Target");
 			}
 			catch (Exception e)
 			{
@@ -189,7 +190,7 @@ public class WbCopy
 		{
 			try
 			{
-				sourceCon = WbManager.getInstance().getConnectionMgr().getConnection(sourceProfile, "Wb-Copy-Source");
+				sourceCon = ConnectionMgr.getInstance().getConnection(sourceProfile, "Wb-Copy-Source");
 			}
 			catch (Exception e)
 			{

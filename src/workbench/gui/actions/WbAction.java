@@ -20,6 +20,7 @@ import workbench.WbManager;
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbToolbarButton;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.resource.ShortcutManager;
 
 /**
@@ -109,7 +110,7 @@ public class WbAction
 	{
 		this.setMenuTextByKey(aKey);
 		this.setDefaultAccelerator(defaultKey);
-		ShortcutManager mgr = WbManager.getShortcutManager(); 
+		ShortcutManager mgr = Settings.getInstance().getShortcutManager(); 
 		mgr.registerAction(this);
 		KeyStroke key = mgr.getCustomizedKeyStroke(this);
 		if (key != null)
@@ -133,7 +134,7 @@ public class WbAction
 		this.setTooltip(aTooltip);
 		
 		this.setDefaultAccelerator(defaultKey);
-		ShortcutManager mgr = WbManager.getShortcutManager(); 
+		ShortcutManager mgr = Settings.getInstance().getShortcutManager(); 
 		mgr.registerAction(this);
 		KeyStroke custom = mgr.getCustomizedKeyStroke(this);
 		if (custom != null)

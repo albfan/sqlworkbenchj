@@ -236,7 +236,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("int",Token.KEYWORD1);
 		keywords.add("integer",Token.KEYWORD1);
 		keywords.add("money",Token.KEYWORD1);
-		keywords.add("name",Token.KEYWORD1);
+		//keywords.add("name",Token.KEYWORD1);
 		keywords.add("number",Token.KEYWORD1);
 		keywords.add("numeric",Token.KEYWORD1);
 		keywords.add("nchar",Token.KEYWORD1);
@@ -252,7 +252,11 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("uniqueidentifier",Token.KEYWORD1);
 		keywords.add("varbinary",Token.KEYWORD1);
 		keywords.add("varchar",Token.KEYWORD1);
+		keywords.add("nvarchar",Token.KEYWORD1);
 		keywords.add("varchar2",Token.KEYWORD1);
+		keywords.add("nvarchar2",Token.KEYWORD1);
+		keywords.add("clob",Token.KEYWORD1);
+		keywords.add("nclob",Token.KEYWORD1);
 	}
 
 	private static void addSystemFunctions()

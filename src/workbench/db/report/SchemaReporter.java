@@ -28,27 +28,33 @@ import workbench.storage.DataStore;
 import workbench.util.StrBuffer;
 import workbench.util.StrWriter;
 import workbench.util.StringUtil;
+import java.util.ArrayList;
+import java.util.List;
+import workbench.storage.RowActionMonitor;
+
 
 /**
  * Generate an report from a selection of database tables
  * @author  workbench@kellerer.org
- * 
+ *
  */
 public class SchemaReporter
 	implements Interruptable
 {
 	private WbConnection dbConn;
-	private TableIdentifier[] tables;
+	private ArrayList tables;
 	private String xmlNamespace;
 	private String[] types = DbMetadata.TABLE_TYPE_TABLE;
+	private List schemas;
+
 	private TagWriter tagWriter = new TagWriter();
-	private ScriptGenerationMonitor monitor;
+	private RowActionMonitor monitor;
 	private String outputfile;
 	private boolean cancel = false;
 	private ProgressPanel progressPanel;
 	private JFrame progressWindow;
 	private boolean showProgress = false;
-	
+
 	/**
 	 * Creates a new SchemaReporter for the supplied connection
 	 * @param conn The connection that the schema report should use
@@ -58,19 +64,24 @@ public class SchemaReporter
 		this.dbConn = conn;
 	}
 
-	public void setProgressMonitor(ScriptGenerationMonitor mon)
+	public void setProgressMonitor(RowActionMonitor mon)
 	{
 		this.monitor = mon;
 	}
-	
+
 	/**
 	 *	Define the list of tables to run the report on
 	 */
 	public void setTableList(TableIdentifier[] tableList)
 	{
-		this.tables = tableList;
+		this.tables = new ArrayList();
+		for (int i=0; i < tableList.length; i++)
+		{
+			this.tables.add(tableList[i]);
+		}
 	}
-	
+
+
 	/**
 	 *	Define the table types to be retrieved if no tables
 	 *  are specified.
@@ -80,11 +91,16 @@ public class SchemaReporter
 		this.types = selectedTypes;
 	}
 
+	public void setSchemas(List list)
+	{
+		this.schemas = list;
+	}
+
 	public void setOutputFilename(String filename)
 	{
 		this.outputfile = filename;
 	}
-	
+
 	/**
 	 * Return the XML for the (selected) tables
 	 * @return The XML for all tables
@@ -103,23 +119,23 @@ public class SchemaReporter
 		}
 		return out.toString();
 	}
-	
+
 	public void setShowProgress(boolean flag)
 	{
 		this.showProgress = flag;
 	}
-	
+
 	public void writeXml()
 		throws IOException
 	{
-		
+
 		if (this.showProgress)
 		{
 			this.openProgressMonitor();
 		}
-		
+
 		BufferedWriter bw = null;
-			
+
 		try
 		{
 			bw = new BufferedWriter(new FileWriter(this.outputfile));
@@ -137,21 +153,21 @@ public class SchemaReporter
 		}
 	}
 	/**
-	 *	Write the XML into the supplied output 
+	 *	Write the XML into the supplied output
 	 */
 	public void writeXml(Writer out)
 		throws IOException
 	{
 		this.cancel = false;
 
-		if (this.tables == null) this.retrieveTables();
+		if (this.tables == null || this.tables.size() == 0) this.retrieveTables();
 		if (this.cancel) return;
 		if (this.tables == null) return;
-		
-		int count = this.tables.length;
+
+		int count = this.tables.size();
 		out.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		out.write("<");
-		if (this.xmlNamespace != null) 
+		if (this.xmlNamespace != null)
 		{
 			out.write(this.xmlNamespace);
 			out.write(':');
@@ -159,32 +175,37 @@ public class SchemaReporter
 		out.write("schema-report>\n\n");
 		writeReportInfo(out);
 		out.write("\n");
+
+		TableIdentifier table  = null;
 		for (int i=0; i < count; i++)
 		{
 			try
 			{
-				if (this.cancel) return;
-				
-				String tableName = tables[i].getTableExpression();
+				if (this.cancel) break;
+
+				table = (TableIdentifier)this.tables.get(i);
+				String tableName = table.getTableExpression();
 				if (this.monitor != null)
 				{
-					this.monitor.setCurrentObject(tableName);
+					this.monitor.setCurrentObject(tableName, i+1, count);
 				}
 				if (this.progressPanel != null)
 				{
 					this.progressPanel.setInfoText(tableName);
 				}
-				ReportTable table = new ReportTable(tables[i], this.dbConn, this.xmlNamespace);
-				table.writeXml(out);
+				ReportTable rtable = new ReportTable(table, this.dbConn, this.xmlNamespace);
+				rtable.writeXml(out);
+				rtable.done();
+				out.flush();
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("SchemaReporter.writeXml()", "Error writing table: " + tables[i], e);
+				LogMgr.logError("SchemaReporter.writeXml()", "Error writing table: " + table, e);
 			}
 		}
 		out.write("\n");
 		out.write("</");
-		if (this.xmlNamespace != null) 
+		if (this.xmlNamespace != null)
 		{
 			out.write(this.xmlNamespace);
 			out.write(':');
@@ -192,7 +213,7 @@ public class SchemaReporter
 		out.write("schema-report>");
 		out.flush();
 	}
-	
+
 	/**
 	 *	Writes basic information about the report
 	 */
@@ -205,7 +226,7 @@ public class SchemaReporter
 		info.append(this.dbConn.getDatabaseInfoAsXml(indent, this.xmlNamespace));
 		info.writeTo(out);
 	}
-	
+
 	/**
 	 * Return the XML definition for the supplied table
 	 * @param tbl The table to get the definition for
@@ -218,24 +239,24 @@ public class SchemaReporter
 		ReportTable table = new ReportTable(tbl, this.dbConn, this.xmlNamespace);
 		return table.getXml();
 	}
-	
+
 	/**
 	 * Define the namespace for the XML tags
 	 * @param name The namespace to be used for the XML tags
 	 */
-	public void setNamespace(String name) 
-	{ 
-		this.xmlNamespace = name; 
+	public void setNamespace(String name)
+	{
+		this.xmlNamespace = name;
 		this.tagWriter.setNamespace(name);
 	}
-	
+
 	/**
 	 * Get the currently defined namespace
 	 * @return The namespace that is used
 	 */
-	public String getNamespace() 
-	{ 
-		return this.xmlNamespace; 
+	public String getNamespace()
+	{
+		return this.xmlNamespace;
 	}
 
 	/**
@@ -251,7 +272,7 @@ public class SchemaReporter
 	{
 		return true;
 	}
-	
+
 	private void closeProgress()
 	{
 		if (this.progressWindow != null)
@@ -285,35 +306,56 @@ public class SchemaReporter
 		WbSwingUtilities.center(this.progressWindow, null);
 		this.progressWindow.show();
 	}
-	
-	/**
-	 *	Retrieve all tables for the current user.
-	 *	The "type" of table can be defined by #setTableTypes(String)
-	 */
+
 	private void retrieveTables()
 	{
 		if (this.monitor != null)
 		{
-			this.monitor.setCurrentObject(ResourceMgr.getString("MsgSchemaReporterRetrievingTables"));
+			this.monitor.setCurrentObject(ResourceMgr.getString("MsgSchemaReporterRetrievingTables"), -1, -1);
 		}
+		if (this.schemas == null || this.schemas.size() == 0)
+		{
+			this.retrieveTables(null);
+		}
+		else
+		{
+			int count = this.schemas.size();
+			for (int i=0; i < count; i++)
+			{
+				this.retrieveTables((String)schemas.get(i));
+			}
+		}
+		if (this.monitor != null)
+		{
+			this.monitor.setCurrentObject(null, -1, -1);
+		}
+	}
+
+	/**
+	 *	Retrieve all tables for the current user.
+	 *	The "type" of table can be defined by #setTableTypes(String)
+	 */
+	private void retrieveTables(String targetSchema)
+	{
 		try
 		{
+			if (this.tables == null) this.tables = new ArrayList();
+
 			if (this.cancel) return;
-			DataStore ds = this.dbConn.getMetadata().getTables(this.types);
+			DataStore ds = this.dbConn.getMetadata().getTables(targetSchema, this.types);
 			int count = ds.getRowCount();
-			this.tables = new TableIdentifier[count];
 
 			for (int i=0; i < count; i++)
 			{
 				if (this.cancel) return;
-				
+
 				String type = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
 				if (type.indexOf("TABLE") > -1)
 				{
 					String table = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 					String catalog = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
 					String schema = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-					this.tables[i] = new TableIdentifier(catalog, schema, table);
+					this.tables.add(new TableIdentifier(catalog, schema, table));
 				}
 			}
 		}

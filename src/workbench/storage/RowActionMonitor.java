@@ -21,7 +21,7 @@ public interface RowActionMonitor
 	final int MONITOR_PROCESS = 6;
 
 	void setMonitorType(int aType);
-	void setCurrentObject(String object);
+	void setCurrentObject(String object, int number, int totalObjects);
 	void setCurrentRow(int currentRow, int totalRows);
 	void jobFinished();
 }

@@ -440,7 +440,7 @@ public class TableSearchPanel
 	{
 		if (!searcher.setColumnFunction(this.columnFunction.getText()))
 		{
-			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgErrorColFunction"));
+			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgErrorColFunction"));
 			return;
 		}
 

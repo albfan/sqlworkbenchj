@@ -91,7 +91,7 @@ public class TableIdentifier
 	{
 		if (!this.isNewTable && (aTable == null || aTable.trim().length() == 0))
 			throw new IllegalArgumentException("Table name may not be null");
-		
+
 		int pos = aTable.indexOf('.');
 		if (pos > -1)
 		{
@@ -185,4 +185,5 @@ public class TableIdentifier
 		}
 		return false;
 	}
+
 }

@@ -73,9 +73,9 @@ public class DataStore
 	private boolean pkColumnsRead = false;
 	private int realColumns;
 
-	private ArrayList data;
-	
-	protected ArrayList deletedRows;
+	private RowDataList data;
+	protected RowDataList deletedRows;
+
 	private String sql;
 
 	private ResultInfo resultInfo;
@@ -137,7 +137,7 @@ public class DataStore
 	 */
 	public DataStore(String[] colNames, int[] colTypes, int[] colSizes)
 	{
-		this.data = new ArrayList();
+		this.data = createData();
 		this.setColumnSizes(colSizes);
 		this.resultInfo = new ResultInfo(colNames, colTypes, colSizes);
 	}
@@ -156,9 +156,9 @@ public class DataStore
 	public DataStore(ResultInfo metaData)
 	{
 		this.resultInfo = metaData;
-		this.data = new ArrayList(150);
+		this.data = createData();
 	}
-	
+
 	public DataStore(ResultSet aResult)
 		throws SQLException
 	{
@@ -216,7 +216,7 @@ public class DataStore
 		{
 			ResultSetMetaData metaData = aResult.getMetaData();
 			this.initMetaData(metaData);
-			this.data = new ArrayList(100);
+			this.data = createData();
 		}
 	}
 
@@ -248,7 +248,14 @@ public class DataStore
 		this.allowUpdates = aFlag;
 	}
 
-	//public int[] getColumnTypes() { return this.resultInfo.columnTypes; }
+	private RowDataList createData(int size)
+	{
+		return new RowDataList(size);
+	}
+	private RowDataList createData()
+	{
+		return new RowDataList();
+	}
 
 	public int duplicateRow(int aRow)
 	{
@@ -303,7 +310,7 @@ public class DataStore
 			count = this.deletedRows.size();
 			for (int i=0; i < count; i++)
 			{
-				RowData data = (RowData)this.deletedRows.get(i);
+				RowData data = this.deletedRows.get(i);
 				if (!data.isNew()) modifiedCount++;
 			}
 		}
@@ -318,25 +325,12 @@ public class DataStore
 
 	public String getColumnClassName(int aColumn)
 	{
-		return this.resultInfo.getColumnClassName(aColumn); 
+		return this.resultInfo.getColumnClassName(aColumn);
 	}
 
 	public Class getColumnClass(int aColumn)
 	{
 		return this.resultInfo.getColumnClass(aColumn);
-	}
-
-	/**
-	 *	Removes the row from the DataStore without putting
-	 *	it into the delete buffer. So no DELETE statement
-	 *	will be generated for that row, when updating the
-	 *	DataStore.
-	 *	The internal modification state will not be modified.
-	 */
-	public void discardRow(int aRow)
-		throws IndexOutOfBoundsException
-	{
-		this.data.remove(aRow);
 	}
 
 	/**
@@ -347,8 +341,8 @@ public class DataStore
 	public void deleteRow(int aRow)
 		throws IndexOutOfBoundsException
 	{
-		Object row = this.data.get(aRow);
-		if (this.deletedRows == null) this.deletedRows = new ArrayList();
+		RowData row = this.data.get(aRow);
+		if (this.deletedRows == null) this.deletedRows = createData();
 		this.deletedRows.add(row);
 		this.data.remove(aRow);
 		this.modified = true;
@@ -396,7 +390,7 @@ public class DataStore
 		this.modified = true;
 		return this.getRowCount() - 1;
 	}
-	
+
 	public int addRow(RowData row)
 	{
 		this.data.add(row);
@@ -758,7 +752,7 @@ public class DataStore
 		{
 			for (int i=0; i < this.deletedRows.size(); i++)
 			{
-				row = (RowData)this.deletedRows.get(i);
+				row = this.deletedRows.get(i);
 				this.data.add(row);
 			}
 			this.deletedRows.clear();
@@ -871,14 +865,12 @@ public class DataStore
 
 	public void reset()
 	{
-		this.reset(150);
-	}
-
-	public void reset(int initialCapacity)
-	{
-		this.data.clear();
-		this.data.ensureCapacity(initialCapacity);
-		this.deletedRows = null;
+		this.data.reset();
+		if (this.deletedRows != null)
+		{
+			this.deletedRows.reset();
+			this.deletedRows = null;
+		}
 		this.modified = false;
 	}
 
@@ -887,6 +879,34 @@ public class DataStore
 		return this.resultInfo.hasUpdateableColumns();
 	}
 
+	/**
+	 *	Returns true if at least one row has been updated.
+	 */
+	public boolean hasUpdatedRows()
+	{
+		if (!this.isModified()) return false;
+		int count = this.getRowCount();
+		for (int i=0; i < count; i++)
+		{
+			RowData row = this.getRow(i);
+			if (row.isModified() && !row.isNew()) return true;
+		}
+		return false;
+	}
+
+	/**
+	 *	Returns true if at least one row has been deleted
+	 */
+	public boolean hasDeletedRows()
+	{
+		return (this.deletedRows != null && this.deletedRows.size() > 0);
+	}
+
+	public boolean needPkForUpdate()
+	{
+		if (!this.isModified()) return false;
+		return (this.hasDeletedRows() || this.hasUpdatedRows());
+	}
 	public boolean isModified() { return this.modified;  }
 	public boolean isUpdateable()
 	{
@@ -902,7 +922,7 @@ public class DataStore
 	private RowData getRow(int aRow)
 		throws IndexOutOfBoundsException
 	{
-		return (RowData)this.data.get(aRow);
+		return this.data.get(aRow);
 	}
 
 	private void initMetaData(ResultSetMetaData metaData)
@@ -941,7 +961,7 @@ public class DataStore
 		{
 			int rowCount = 0;
 			int cols = this.resultInfo.getColumnCount();
-			this.data = new ArrayList(500);
+			this.data = createData(500);
 			while (!this.cancelRetrieve && aResultSet.next())
 			{
 				rowCount ++;
@@ -953,7 +973,7 @@ public class DataStore
 				RowData row = new RowData(cols);
 				row.read(aResultSet, this.resultInfo);
 				this.data.add(row);
-				
+
 				if (this.cancelRetrieve) break;
 				if (maxRows > 0 && rowCount > maxRows) break;
 			}
@@ -998,17 +1018,17 @@ public class DataStore
 		this.setUpdateTable(table, aConn);
 		return true;
 	}
-	
+
 	public void writeXmlData(Writer pw)
 		throws IOException
 	{
 		int count = this.getRowCount();
 		if (count == 0) return;
-		
+
 		XmlRowDataConverter converter = new XmlRowDataConverter(this.resultInfo);
 		this.writeConverterData(converter, pw);
 	}
-	
+
 	public void writeHtmlData(Writer html)
 		throws IOException
 	{
@@ -1020,7 +1040,7 @@ public class DataStore
 		converter.setPageTitle(sql);
 		this.writeConverterData(converter, html);
 	}
-	
+
 	private void writeConverterData(RowDataConverter converter, Writer pw)
 		throws IOException
 	{
@@ -1169,10 +1189,10 @@ public class DataStore
 	{
 		if (!this.canSaveAsSqlInsert()) return;
 		int count;
-		
+
 		if (rows == null) count = this.getRowCount();
 		else count = rows.length;
-		
+
 		StatementFactory factory = new StatementFactory(this.resultInfo);
 
 		for (int row = 0; row < count; row ++)
@@ -1265,9 +1285,9 @@ public class DataStore
 		int count = 0;
 		if (rows != null) count = rows.length;
 		else count = this.getRowCount();
-		
+
 		StatementFactory factory = new StatementFactory(this.resultInfo);
-		
+
 		for (int row = 0; row < count; row ++)
 		{
 			RowData data;
@@ -1456,7 +1476,7 @@ public class DataStore
 		if (line != null && this.data.size() == 0)
 		{
 			int initialSize = (int)(fileSize / line.length());
-			this.data = new ArrayList(initialSize);
+			this.data = createData(initialSize);
 		}
 
 		CsvLineParser tok = new CsvLineParser(aColSeparator.charAt(0), '"');
@@ -1556,7 +1576,7 @@ public class DataStore
 		RowData row = null;
 
 		StatementFactory factory = new StatementFactory(this.resultInfo);
-		
+
 		row = this.getNextDeletedRow();
 		while (row != null)
 		{
@@ -1655,7 +1675,7 @@ public class DataStore
 		this.ignoreAllUpdateErrors = false;
 
 		StatementFactory factory = new StatementFactory(this.resultInfo);
-		
+
 		try
 		{
 			this.resetUpdateRowCounters();
@@ -1737,7 +1757,7 @@ public class DataStore
 			rows = this.deletedRows.size();
 			for (int i=0; i < rows; i++)
 			{
-				RowData row = (RowData)this.deletedRows.get(i);
+				RowData row = this.deletedRows.get(i);
 			row.setDmlSent(false);
 			}
 		}
@@ -1756,11 +1776,11 @@ public class DataStore
 		}
 		if (this.deletedRows != null)
 		{
-			ArrayList newDeleted = new ArrayList(this.deletedRows.size());
+			RowDataList newDeleted = createData(this.deletedRows.size());
 			rows = this.deletedRows.size();
 			for (int i=0; i < rows; i++)
 			{
-				RowData row = (RowData)this.deletedRows.get(i);
+				RowData row = this.deletedRows.get(i);
 				if (!row.isDmlSent())
 				{
 					newDeleted.add(row);
@@ -1851,7 +1871,8 @@ public class DataStore
 				this.comparator = new ColumnComparator();
 			}
 			this.comparator.setMode(aColumn, ascending);
-			Collections.sort(this.data, this.comparator);
+			//Collections.sort(this.data, this.comparator);
+			this.data.sort(this.comparator);
 		}
 	}
 
@@ -2078,7 +2099,7 @@ public class DataStore
 
 		while (this.currentDeleteRow < count)
 		{
-			row = (RowData)this.deletedRows.get(this.currentDeleteRow);
+			row = this.deletedRows.get(this.currentDeleteRow);
 			this.currentDeleteRow ++;
 			return row;
 		}
@@ -2137,17 +2158,17 @@ public class DataStore
 	{
 		this.resultInfo.setPKColumns(pkColumns);
 	}
-	
+
 	public ColumnIdentifier[] getColumns()
 	{
 		return this.resultInfo.getColumns();
 	}
-	
+
 	public boolean hasPkColumns()
 	{
 		return this.resultInfo.hasPkColumns() && this.resultInfo.hasRealPkColumns();
 	}
-	
+
 	private void updatePkInformation(WbConnection aConnection)
 		throws SQLException
 	{
@@ -2175,7 +2196,7 @@ public class DataStore
 		}
 		this.resultInfo.readPkDefinition(this.originalConnection, false);
 	}
-	
+
 	private boolean isPkColumn(int col)
 	{
 		return this.resultInfo.isPkColumn(col);

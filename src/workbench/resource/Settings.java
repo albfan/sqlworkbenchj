@@ -38,6 +38,7 @@ import workbench.util.StringUtil;
 import workbench.util.WbProperties;
 import java.awt.Color;
 import workbench.exception.ExceptionUtil;
+import workbench.gui.actions.ActionRegistration;
 
 
 /**
@@ -67,16 +68,16 @@ public class Settings
 	private ShortcutManager keyManager;
 
 	private static Settings settings;
-	
+
 	public static final Settings getInstance()
 	{
-		if (settings == null) 
+		if (settings == null)
 		{
 			settings = new Settings();
 		}
 		return settings;
 	}
-	
+
 	private Settings()
 	{
 		if (WbManager.trace) System.out.println("Settings.<init> - start");
@@ -108,6 +109,7 @@ public class Settings
 	  if (WbManager.trace) System.out.println("Settings.<init> - Reading settings");
 		try
 		{
+
 			BufferedInputStream in = new BufferedInputStream(new FileInputStream(this.filename));
 			this.props.load(in);
 			in.close();
@@ -117,17 +119,17 @@ public class Settings
 			fillDefaults();
 		}
 
-	  if (WbManager.trace) System.out.println("Settings.<init> - Done reading settings");
+	  if (WbManager.trace) System.out.println("Settings.<init> - Done reading settings. Initializing LogMgr");
 
 		boolean logSysErr = StringUtil.stringToBool(this.props.getProperty("workbench.log.console", "false"));
 		LogMgr.logToSystemError(logSysErr);
-		
+
 		String format = this.props.getProperty("workbench.log.format", "{type} {timestamp} {message} {error}");
 		LogMgr.setMessageFormat(format);
-		
+
 		String level = this.props.getProperty("workbench.log.level", "info");
 		LogMgr.setLevel(level);
-		
+
     try
     {
 			String logfile = System.getProperty("workbench.log.filename", null);
@@ -147,7 +149,7 @@ public class Settings
 		LogMgr.logInfo("Settings.<init>", "Using configDir: " + configDir);
 
 		if (WbManager.trace) System.out.println("Setting server lists for MetaData");
-		DbMetadata.setServersWhichNeedReconnect(this.getCancelWithReconnectServers());
+		//DbMetadata.setServersWhichNeedReconnect(this.getCancelWithReconnectServers());
 		DbMetadata.setCaseSensitiveServers(this.getCaseSensitivServers());
 		DbMetadata.setServersWhereDDLNeedsCommit(this.getServersWhereDDLNeedsCommit());
 		DbMetadata.setServersWhichNeedJdbcCommit(this.getServersWhichNeedJdbcCommit());
@@ -155,7 +157,6 @@ public class Settings
 
 		if (WbManager.trace) System.out.println("Done setting server lists for MetaData");
 
-		
 		this.renameOldProps();
 
 		// init settings for datastore sort feature
@@ -180,6 +181,9 @@ public class Settings
 		if (this.keyManager == null)
 		{
 			this.keyManager = new ShortcutManager(this.getShortcutFilename());
+			// make sure actions that are not created upon startup are
+			// registered with us!
+			ActionRegistration.registerActions();
 		}
 		return this.keyManager;
 	}
@@ -247,6 +251,16 @@ public class Settings
 		this.renameProperty("sort.country", "workbench.sort.country");
 		this.renameProperty("connection.last", "workbench.connection.last");
 		this.renameProperty("drivers.lastlibdir", "workbench.drivers.lastlibdir");
+		this.renameProperty("workbench.db.debugger", "workbench.db.previewsql");
+
+		// check if the reconnect setting has been modified
+		String reconnect = this.props.getProperty("workbench.db.cancelwithreconnect", "");
+
+		// Still the old default -> Change to classname of driver
+		if (reconnect.equalsIgnoreCase("Microsoft SQL Server"))
+		{
+			this.props.setProperty("workbench.db.cancelwithreconnect", "com.microsoft.jdbc.sqlserver.SQLServerDriver");
+		}
 	}
 
 	private void renameProperty(String oldKey, String newKey)
@@ -285,6 +299,8 @@ public class Settings
 			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.pattern.value");
 			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.tables");
 
+			this.props.remove("workbench.db.one_connection_per_tab");
+
 		}
 		catch (Throwable e)
 		{
@@ -295,6 +311,7 @@ public class Settings
 	private void fillDefaults()
 	{
 		if (WbManager.trace) System.out.println("Setting.fillDefaults() - start");
+
 		try
 		{
 			this.props.load(ResourceMgr.getDefaultSettings());
@@ -600,12 +617,12 @@ public class Settings
 	{
 		this.props.setProperty("workbench.table.edit.autoselect", Boolean.toString(aFlag));
 	}
-	
+
 	public void setSqlParameterPrefix(String prefix)
 	{
 		this.props.setProperty("workbench.sql.parameter.prefix", prefix);
 	}
-	
+
 	public String getSqlParameterPrefix()
 	{
 		String value = this.props.getProperty("workbench.sql.parameter.prefix", "$[");
@@ -617,7 +634,7 @@ public class Settings
 	{
 		this.props.setProperty("workbench.sql.parameter.suffix", suffix);
 	}
-	
+
 	public String getSqlParameterSuffix()
 	{
 		return this.props.getProperty("workbench.sql.parameter.suffix", "]");
@@ -649,6 +666,7 @@ public class Settings
 	{
 		this.props.setProperty(PROPERTY_SHOW_LINE_NUMBERS, Boolean.toString(show));
 	}
+	
 	public boolean getAutoJumpNextStatement()
 	{
 		return StringUtil.stringToBool(this.props.getProperty("workbench.editor.autojumpnext", "false"));
@@ -658,6 +676,15 @@ public class Settings
 		this.props.setProperty("workbench.editor.autojumpnext", Boolean.toString(show));
 	}
 
+	public boolean getHighlightCurrentStatement()
+	{
+		return StringUtil.stringToBool(this.props.getProperty("workbench.editor.highlightcurrent", "false"));
+	}
+	public void setHighlightCurrentStatement(boolean show)
+	{
+		this.props.setProperty("workbench.editor.highlightcurrent", Boolean.toString(show));
+	}
+	
 	public String getConnectionDisplayModel()
 	{
 		return this.props.getProperty("workbench.gui.connectiondisplay", "");
@@ -1201,11 +1228,11 @@ public class Settings
 
 	public boolean getDbDebugMode()
 	{
-		return "true".equals(this.props.getProperty("workbench.db.debugger", "true"));
+		return "true".equals(this.props.getProperty("workbench.db.previewsql", "true"));
 	}
 	public void setDbDebugMode(boolean aFlag)
 	{
-		this.props.setProperty("workbench.db.debugger", Boolean.toString(aFlag));
+		this.props.setProperty("workbench.db.previewsql", Boolean.toString(aFlag));
 	}
 
 	public boolean getProcessHsqlShutdown()
@@ -1278,6 +1305,11 @@ public class Settings
 	public boolean getDbExplorerClearDataOnClose()
 	{
 		return "true".equals(this.props.getProperty("workbench.dbexplorer.cleardata", "true"));
+	}
+
+	public boolean disconnectDbExplorerOnClose()
+	{
+		return "true".equals(this.props.getProperty("workbench.dbexplorer.disconnect", "false"));
 	}
 
 	public boolean getDbExplorerVisible()
@@ -1402,7 +1434,7 @@ public class Settings
     return StringUtil.stringToList(list, ",");
   }
 
-	public List getCancelWithReconnectServers()
+	public List getCancelWithReconnectDrivers()
 	{
 		String list = this.props.getProperty("workbench.db.cancelwithreconnect", "");
     return StringUtil.stringToList(list, ",");

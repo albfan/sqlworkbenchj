@@ -88,7 +88,7 @@ public class DbMetadata
 	private static HashMap columnCommentStatements;
 	private static HashMap tableCommentStatements;
 	private static boolean templatesRead = false;
-	
+
 	//private HashMap dateLiteralFormatter;
 	private DbmsOutput oraOutput;
 
@@ -104,7 +104,7 @@ public class DbMetadata
 	private boolean isASA = false; // Adaptive Server Anywhere
 	private boolean isInformix = false;
 	private boolean isCloudscape = false;
-	
+
 	private boolean createInlineConstraints = false;
 
 	private AbstractConstraintReader constraintReader = null;
@@ -129,7 +129,7 @@ public class DbMetadata
 		{
 			readTemplates();
 		}
-		
+
 		try
 		{
 			this.schemaTerm = this.metaData.getSchemaTerm();
@@ -301,7 +301,7 @@ public class DbMetadata
 		tableCommentStatements = readStatementTemplates("TableCommentStatements.xml");
 		templatesRead = true;
 	}
-	
+
 	/**
 	 *	Returns true if the current DBMS supports a SELECT syntax
 	 *	which creates a new table (e.g. SELECT .. INTO new_table FROM old_table)
@@ -958,17 +958,18 @@ public class DbMetadata
 	public DataStore getTables()
 		throws SQLException
 	{
-		return this.getTables(null, null, (String[])null);
+		String user = this.getUserName();
+		return this.getTables(null, user, (String[])null);
 	}
 
 	public static final String[] TABLE_TYPE_TABLE = new String[] {"TABLE"};
-	
-	public DataStore getTables(String[] type)
+
+	public DataStore getTables(String schema, String[] type)
 		throws SQLException
 	{
-		return this.getTables(null, null, type);
+		return this.getTables(null, schema, type);
 	}
-	
+
 	public final static int COLUMN_IDX_TABLE_LIST_NAME = 0;
 	public final static int COLUMN_IDX_TABLE_LIST_TYPE = 1;
 	public final static int COLUMN_IDX_TABLE_LIST_CATALOG = 2;
@@ -1000,6 +1001,8 @@ public class DbMetadata
 		int sizes[] = {30,12,10,10,20};
 
 		DataStore result = new DataStore(cols, coltypes, sizes);
+		aSchema = adjustObjectname(aSchema);
+		aCatalog = adjustObjectname(aCatalog);
 
 		ResultSet tableRs = this.metaData.getTables(aCatalog, aSchema, null, types);
 		while (tableRs.next())
@@ -1408,14 +1411,14 @@ public class DbMetadata
 		}
 		return result;
 	}
-	
+
 	private ColumnIdentifier[] createColumnIdentifiers(TableIdentifier table)
 		throws SQLException
 	{
 		DataStore ds = this.getTableDefinition(table.getCatalog(), table.getSchema(), table.getTable());
 		return createColumnIdentifiers(ds);
 	}
-	
+
 	private ColumnIdentifier[] createColumnIdentifiers(DataStore ds)
 	{
 		int count = ds.getRowCount();
@@ -1492,7 +1495,7 @@ public class DbMetadata
 	public final static int COLUMN_IDX_TABLE_DEFINITION_DIGITS = 8;
 
 	public final static int COLUMN_IDX_TABLE_DEFINITION_POSITION = 9;
-	
+
 	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, boolean adjustNames)
 		throws SQLException
 	{
@@ -1917,9 +1920,10 @@ public class DbMetadata
 		int[] sizes = { 10 };
 
 		DataStore result = new DataStore(cols, types, sizes);
+		ResultSet rs = null;
 		try
 		{
-			ResultSet rs = this.metaData.getCatalogs();
+			rs = this.metaData.getCatalogs();
 			while (rs.next())
 			{
 				String cat = rs.getString(1);
@@ -1929,10 +1933,13 @@ public class DbMetadata
 					result.setValue(row, 0, cat);
 				}
 			}
-			rs.close();
 		}
 		catch (Exception e)
 		{
+		}
+		finally
+		{
+			try { rs.close(); } catch (Throwable th) {}
 		}
 		return result;
 	}
@@ -1988,21 +1995,28 @@ public class DbMetadata
 			LogMgr.logInfo("DbMetadata.getTableTriggers()", "Using query=\n" + query);
 		}
 		ResultSet rs = stmt.executeQuery(query);
-		while (rs.next())
+		try
 		{
-			int row = result.addRow();
-			String value = rs.getString(1);
-			if (!rs.wasNull() && value != null) value = value.trim();
-			result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME, value);
+			while (rs.next())
+			{
+				int row = result.addRow();
+				String value = rs.getString(1);
+				if (!rs.wasNull() && value != null) value = value.trim();
+				result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME, value);
 
-			value = rs.getString(2);
-			result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TYPE, value);
+				value = rs.getString(2);
+				result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TYPE, value);
 
-			value = rs.getString(3);
-			result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT, value);
+				value = rs.getString(3);
+				result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT, value);
+			}
 		}
-		rs.close();
-		stmt.close();
+		finally
+		{
+			try { rs.close(); } catch (Throwable th) {}
+			try { stmt.close(); } catch (Throwable th) {}
+		}
+
 
 		return result;
 	}
@@ -2117,9 +2131,10 @@ public class DbMetadata
 	public List getTableTypes()
 	{
 		ArrayList result = new ArrayList();
+		ResultSet rs = null;
 		try
 		{
-			ResultSet rs = this.metaData.getTableTypes();
+			rs = this.metaData.getTableTypes();
 			while (rs.next())
 			{
 				String type = rs.getString(1);
@@ -2131,7 +2146,6 @@ public class DbMetadata
 				type = type.trim();
 				if (!result.contains(type)) result.add(type);
 			}
-			rs.close();
 			if (this.isOracle)
 			{
 				result.add("SEQUENCE");
@@ -2139,6 +2153,10 @@ public class DbMetadata
 		}
 		catch (Exception e)
 		{
+		}
+		finally
+		{
+			try { rs.close(); }	 catch (Throwable e) {}
 		}
 		return result;
 	}
@@ -2243,6 +2261,8 @@ public class DbMetadata
 		int types[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 		int sizes[] = {25, 10, 30, 12, 12};
 		DataStore ds = new DataStore(cols, types, sizes);
+		ResultSet rs = null;
+
 		try
 		{
 			if ("*".equals(aCatalog)) aCatalog = null;
@@ -2259,7 +2279,6 @@ public class DbMetadata
 			int updateActionCol;
 			int schemaCol;
 
-			ResultSet rs;
 			if (getOwnFk)
 			{
 				rs = this.metaData.getImportedKeys(aCatalog, aSchema, aTable);
@@ -2304,6 +2323,10 @@ public class DbMetadata
 		catch (Exception e)
 		{
 			ds.reset();
+		}
+		finally
+		{
+			try { rs.close(); } catch (Exception e) {}
 		}
 		return ds;
 	}
@@ -2583,17 +2606,17 @@ public class DbMetadata
 		ColumnIdentifier[] cols = createColumnIdentifiers(aTableDef);
 		return getTableSource(aCatalog, aSchema, aTablename, cols, aIndexDef, aFkDef, includeDrop);
 	}
-	
+
 	public String getTableSource(TableIdentifier table, ColumnIdentifier[] columns, String tableNameToUse)
 	{
 		return getTableSource(table.getCatalog(), table.getSchema(), table.getTable(), columns, null, null, false, tableNameToUse);
 	}
-	
+
 	public String getTableSource(String aCatalog, String aSchema, String aTablename, ColumnIdentifier[] columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop)
 	{
 		return getTableSource(aCatalog, aSchema, aTablename, columns, aIndexDef, aFkDef, includeDrop, null);
 	}
-	
+
 	public String getTableSource(String aCatalog, String aSchema, String aTablename, ColumnIdentifier[] columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse)
 	{
 		if (columns == null || columns.length == 0) return "";
@@ -2730,32 +2753,32 @@ public class DbMetadata
 		}
 		result.append(this.getIndexSource(aTablename, aIndexDef).toString());
 		if (!this.createInlineConstraints) result.append(this.getFkSource(aTablename, aFkDef));
-		
+
 		String comments = this.getTableCommentSql(aCatalog, aSchema, aTablename);
-		if (comments != null && comments.length() > 0)  
+		if (comments != null && comments.length() > 0)
 		{
 			result.append('\n');
 			result.append(comments);
 			result.append('\n');
 		}
-		
+
 		comments = this.getTableColumnCommentsSql(aCatalog, aSchema, aTablename, columns);
-		if (comments != null && comments.length() > 0)  
+		if (comments != null && comments.length() > 0)
 		{
 			result.append('\n');
 			result.append(comments);
 			result.append('\n');
 		}
-		
+
 		StrBuffer grants = this.getTableGrantSource(null, null, aTablename);
 		if (grants.length() > 0)
 		{
 			result.append(grants);
 		}
-		
+
 		return result.toString();
 	}
-	
+
 	public String getTableColumnCommentsSql(String aCatalog, String aSchema, String aTablename, ColumnIdentifier[] columns)
 	{
 		String columnStatement = (String)this.columnCommentStatements.get(this.productName);
@@ -2775,7 +2798,7 @@ public class DbMetadata
 		}
 		return result.toString();
 	}
-	
+
 	public String getTableCommentSql(String aCatalog, String aSchema, String aTablename)
 	{
 		String commentStatement = (String)this.tableCommentStatements.get(this.productName);
@@ -2790,7 +2813,7 @@ public class DbMetadata
 		}
 		return result;
 	}
-	
+
 	public String getTableComment(TableIdentifier table)
 	{
 		return this.getTableComment(table.getCatalog(), table.getSchema(), table.getTable());
@@ -2816,10 +2839,10 @@ public class DbMetadata
 		{
 			try { rs.close(); } catch (Throwable th) {}
 		}
-		
+
 		return result;
 	}
-		
+
 	/**
 	 *	Return a SQL script to re-create the Foreign key definition for the given table.
 	 *
@@ -3190,7 +3213,7 @@ public class DbMetadata
 	{
 		ddlNeedsCommitServers = aList;
 	}
-	
+
 	public static void setServersWhichNeedJdbcCommit(List aList)
 	{
 		serverNeedsJdbcCommit = aList;

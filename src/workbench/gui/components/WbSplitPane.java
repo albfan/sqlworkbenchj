@@ -28,25 +28,25 @@ public class WbSplitPane
 		super();
 		this.initDefaults();
 	}
-	
+
 	public WbSplitPane(int orientation)
 	{
 		super(orientation);
 		this.initDefaults();
 	}
-	
-	public WbSplitPane(int newOrientation, boolean newContinuousLayout) 	
+
+	public WbSplitPane(int newOrientation, boolean newContinuousLayout)
 	{
 		super(newOrientation, newContinuousLayout);
 		this.initDefaults();
 	}
-	
+
 	public WbSplitPane(int newOrientation, boolean newContinuousLayout, Component newLeftComponent, Component newRightComponent)
 	{
 		super(newOrientation, newContinuousLayout, newLeftComponent, newRightComponent);
 		this.initDefaults();
 	}
-	
+
 	public WbSplitPane(int newOrientation, Component newLeftComponent, Component newRightComponent)
 	{
 		super(newOrientation, newLeftComponent, newRightComponent);
@@ -59,10 +59,10 @@ public class WbSplitPane
 		//super.updateUI();
 		super.setUI(new WbSplitPaneUI());
 		revalidate();
-		
+
 		this.setDividerSize(divider);
 	}
-	
+
 	public void setUI(ComponentUI newUI)
 	{
 		int divider = this.getDividerSize();
@@ -85,12 +85,12 @@ public class WbSplitPane
 		//this.setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setContinuousLayout(true);
 	}
-	
+
 	public Border getDividerBorder()
 	{
 		Border result = null;
 		try
-		{		
+		{
 			int divider = this.getDividerSize();
 			BasicSplitPaneUI ui = (BasicSplitPaneUI)this.getUI();
 			BasicSplitPaneDivider div = ui.getDivider();
@@ -101,11 +101,11 @@ public class WbSplitPane
 			result = null;
 		}
 		return result;
-	}	
+	}
 	public void setDividerBorder(Border newBorder)
 	{
 		try
-		{		
+		{
 			int divider = this.getDividerSize();
 			BasicSplitPaneUI ui = (BasicSplitPaneUI)this.getUI();
 			BasicSplitPaneDivider div = ui.getDivider();
@@ -117,4 +117,3 @@ public class WbSplitPane
 		}
 	}
 }
-

@@ -1,11 +1,6 @@
 package workbench.log;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,6 +13,7 @@ import workbench.WbManager;
 import workbench.exception.ExceptionUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
+
 
 /**
  *
@@ -246,28 +242,34 @@ public class LogMgr
 		if (levelError > loglevel) return;
 		
 		logMessage(ERROR, aCaller, aMsg, se);
-		SQLException next = se.getNextException();
-		while (next != null)
+		if (se != null)
 		{
-			logMessage(ERROR, "Chained exception", ExceptionUtil.getDisplay(next), null);
-			next = next.getNextException();
+			SQLException next = se.getNextException();
+			while (next != null)
+			{
+				logMessage(ERROR, "Chained exception", ExceptionUtil.getDisplay(next), null);
+				next = next.getNextException();
+			}
 		}
 	}
 
 	private synchronized static void logMessage(String aType, Object aCaller, String aMsg, Throwable th)
 	{
-		String s = formatMessage(aType, aCaller, aMsg, th);
+		StrBuffer s = formatMessage(aType, aCaller, aMsg, th);
 		if (logOut != null)
 		{
-			logOut.print(s);
+			s.writeTo(logOut);
 			logOut.flush();
 		}
-		if (logSystemErr) System.err.print(s);
+		if (logSystemErr) 
+		{
+			s.writeTo(System.err);
+		}
 	}
 
-	private static String formatMessage(String aType, Object aCaller, String aMsg, Throwable th)
+	private static StrBuffer formatMessage(String aType, Object aCaller, String aMsg, Throwable th)
 	{
-		StrBuffer buff = StrBuffer.reuse();
+		StrBuffer buff = new StrBuffer(100);
 
 		for (int i=0; i < NUM_ELEMENTS; i++) MSG_ELEMENTS[i] = null;
 		
@@ -297,9 +299,11 @@ public class LogMgr
 			MSG_ELEMENTS[messageIndex] = aMsg;
 		}
 		
+		boolean hasException = false;
 		if (exceptionMsgIndex > -1 && th != null)
 		{
 			MSG_ELEMENTS[exceptionMsgIndex] = ExceptionUtil.getDisplay(th);
+			hasException = true;
 		}
 		
 		boolean first = true;
@@ -313,7 +317,7 @@ public class LogMgr
 				else first = false;
 				buff.append(MSG_ELEMENTS[i]);
 				if (i == sourceIndex) buff.append(" -");
-				if (i == messageIndex && exceptionMsgIndex > -1) buff.append(":");
+				if (i == messageIndex && hasException) buff.append(":");
 			}
 		}
 		buff.append(StringUtil.LINE_TERMINATOR);
@@ -325,12 +329,12 @@ public class LogMgr
 			buff.append(StringUtil.LINE_TERMINATOR);
 		}
 		
-		return buff.toString();
+		return buff;
 	}
 
 	public static String getStackTrace(Throwable th)
 	{
-		if (th == null) return "";
+		if (th == null) return StringUtil.EMPTY_STRING;
 		try
 		{
 			StringWriter sw = new StringWriter(2000);
@@ -343,7 +347,7 @@ public class LogMgr
 		catch (Exception ex)
 		{
 		}
-		return "";
+		return StringUtil.EMPTY_STRING;
 	}
 
 	private static String getTimeString()

@@ -22,26 +22,33 @@ public class SynonymReader
 		StringBuffer sql = new StringBuffer(200);
 		sql.append("SELECT synonym_name, table_owner, table_name FROM all_synonyms ");
 		sql.append(" WHERE synonym_name = ? AND owner = ?");
-		
+
 		PreparedStatement stmt = con.prepareStatement(sql.toString());
 		stmt.setString(1, aSynonym);
 		stmt.setString(2, anOwner);
-		
+
 		ResultSet rs = stmt.executeQuery();
 		String table = null;
 		String owner = null;
 		TableIdentifier result = null;
-		if (rs.next())
+		try
 		{
-			owner = rs.getString(2);
-			table = rs.getString(3);
-			result = new TableIdentifier(null, owner, table);
+			if (rs.next())
+			{
+				owner = rs.getString(2);
+				table = rs.getString(3);
+				result = new TableIdentifier(null, owner, table);
+			}
 		}
-		rs.close();
-		stmt.close();
+		finally
+		{
+			try { rs.close(); } catch (Exception e) {}
+			try { stmt.close(); } catch (Exception e) {}
+		}
+
 		return result;
 	}
-	
+
 	public static String getSynonymSource(Connection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
@@ -54,7 +61,6 @@ public class SynonymReader
 		result.append(";\n");
 		return result.toString();
 	}
-	
-}
 
+}
 

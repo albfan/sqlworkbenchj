@@ -89,7 +89,7 @@ public class ProfileEditorPanel
 
 	private void fillDrivers()
 	{
-		List drivers = WbManager.getInstance().getConnectionMgr().getDrivers();
+		List drivers = ConnectionMgr.getInstance().getDrivers();
 		this.connectionEditor.setDrivers(drivers);
 	}
 
@@ -99,7 +99,7 @@ public class ProfileEditorPanel
 	}
 	private void fillProfiles()
 	{
-		this.model = new ProfileListModel(WbManager.getInstance().getConnectionMgr().getProfiles());
+		this.model = new ProfileListModel(ConnectionMgr.getInstance().getProfiles());
 		this.jList1.setModel(this.model);
 	}
 	/** This method is called from within the constructor to
@@ -265,7 +265,7 @@ public class ProfileEditorPanel
 
 	public void saveItem() throws Exception
 	{
-		ConnectionMgr conn = WbManager.getInstance().getConnectionMgr();
+		ConnectionMgr conn = ConnectionMgr.getInstance();
 		this.connectionEditor.updateProfile();
 		conn.saveProfiles();
 	}

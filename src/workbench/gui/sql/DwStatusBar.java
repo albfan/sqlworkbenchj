@@ -36,7 +36,7 @@ import workbench.util.StringUtil;
 public class DwStatusBar extends JPanel
 {
 	private JTextField tfRowCount;
-	
+
 	private JTextField tfStatus;
 	JTextField tfMaxRows;
 	private String readyMsg;
@@ -57,7 +57,7 @@ public class DwStatusBar extends JPanel
 		this.tfMaxRows.setToolTipText(ResourceMgr.getDescription("TxtMaxRows"));
 		this.tfMaxRows.setHorizontalAlignment(SwingConstants.RIGHT);
 		this.tfMaxRows.addMouseListener(new TextComponentMouseListener());
-		
+
 		Border b = BorderFactory.createCompoundBorder(new LineBorder(Color.LIGHT_GRAY, 1), new EmptyBorder(1,1,1,1));
 		this.tfMaxRows.setBorder(b);
 		JPanel p = new JPanel();
@@ -69,7 +69,7 @@ public class DwStatusBar extends JPanel
 		p.setMaximumSize(new Dimension(300, FIELD_HEIGHT));
 
 		this.setLayout(new BorderLayout());
-		
+
 		this.setMaximumSize(new Dimension(32768, BAR_HEIGHT));
 		this.setMinimumSize(new Dimension(80, BAR_HEIGHT));
 		this.setPreferredSize(null);
@@ -118,12 +118,12 @@ public class DwStatusBar extends JPanel
 			this.readyMsg = aMsg;
 		}
 	}
-	
+
 	public void setRowcount(int start, int end, int count)
 	{
 		StringBuffer s = new StringBuffer(20);
 		if (count > 0)
-		{			
+		{
 			// for some reason the dynamic layout does not leave enough
 			// space to the left of the text, so we'll add some space here
 			s.append(" ");
@@ -138,7 +138,7 @@ public class DwStatusBar extends JPanel
 		this.updateUI();
 		this.doRepaint();
 	}
-	
+
 	public void setMaxRows(int max)
 	{
 		this.tfMaxRows.setText(Integer.toString(max));
@@ -160,8 +160,8 @@ public class DwStatusBar extends JPanel
 		else
 		{
 			this.tfStatus.setText(aMsg);
+			this.doRepaint();
 		}
-		this.doRepaint();
 	}
 
 	public void clearStatusMessage()
@@ -175,16 +175,16 @@ public class DwStatusBar extends JPanel
 		if (this.tfMaxRows == null) return 0;
 		return StringUtil.getIntValue(this.tfMaxRows.getText(), 0);
 	}
-  
+
   public void selectMaxRowsField()
   {
 		this.tfMaxRows.selectAll();
     this.tfMaxRows.requestFocusInWindow();
   }
-	
+
 	private void doRepaint()
 	{
 		this.repaint();
 	}
-	
+
 }

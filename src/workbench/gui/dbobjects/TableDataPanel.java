@@ -47,6 +47,7 @@ import workbench.resource.ResourceMgr;
 import workbench.util.SqlUtil;
 import java.awt.Cursor;
 import workbench.util.StrBuffer;
+import workbench.util.WbThread;
 
 
 
@@ -295,7 +296,7 @@ public class TableDataPanel
 	 */
 	public void cancelExecution()
 	{
-		Thread t = new Thread()
+		Thread t = new WbThread("Cancel thread")
 		{
 			public void run()
 			{
@@ -310,8 +311,6 @@ public class TableDataPanel
 				}
 			}
 		};
-		t.setName("TableDataPanel cancel thread");
-		t.setDaemon(true);
 		t.start();
 	}
 
@@ -344,7 +343,7 @@ public class TableDataPanel
 		this.reloadAction.setEnabled(false);
 		try
 		{
-			//WbSwingUtilities.showWaitCursor(dataDisplay);
+			WbSwingUtilities.showWaitCursorOnWindow(dataDisplay);
 			//dataDisplay.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			dataDisplay.setShowErrorMessages(true);
 			dataDisplay.scriptStarting();
@@ -360,7 +359,7 @@ public class TableDataPanel
 			{
 				public void run()
 				{
-					WbManager.getInstance().showErrorMessage(TableDataPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
+					WbSwingUtilities.showErrorMessage(TableDataPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
 				}
 			});
 		}
@@ -370,7 +369,7 @@ public class TableDataPanel
 		}
 		finally
 		{
-			WbSwingUtilities.showDefaultCursor(dataDisplay);
+			WbSwingUtilities.showDefaultCursorOnWindow(dataDisplay);
 			//dataDisplay.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 			//WbSwingUtilities.showDefaultCursor(dataDisplay);
 			//dataDisplay.getTable().setCursor(null);
@@ -383,15 +382,13 @@ public class TableDataPanel
 
 	public void retrieve()
 	{
-		Thread t = new Thread()
+		Thread t = new WbThread("TableDataPanel retrieve thread")
 		{
 			public void run()
 			{
 				doRetrieve();
 			}
 		};
-		t.setName("TableDataPanel - retrieve thread");
-		t.setDaemon(true);
 		t.start();
 	}
 

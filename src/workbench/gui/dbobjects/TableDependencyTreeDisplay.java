@@ -75,7 +75,7 @@ public class TableDependencyTreeDisplay
     }
 		catch (OutOfMemoryError mem)
 		{
-			WbManager.getInstance().showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
+			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
 		}
     catch (Exception e)
     {

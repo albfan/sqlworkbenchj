@@ -12,12 +12,14 @@ import javax.swing.table.AbstractTableModel;
 
 import workbench.WbManager;
 import workbench.exception.ExceptionUtil;
+import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.interfaces.JobErrorHandler;
 import workbench.util.StrBuffer;
+import workbench.util.WbThread;
 
 
 
@@ -35,11 +37,12 @@ public class DataStoreTableModel
 	private int statusOffset = 0;
 	public static final String NOT_AVAILABLE = "(n/a)";
 	private int lockColumn = -1;
-	
+
 	// used for sorting the model
 	private boolean sortAscending = true;
 	private int sortColumn = -1;
 	private boolean allowEditing = true;
+	private final Object model_change_lock = new Object();
 
 	public DataStoreTableModel(DataStore aDataStore) throws IllegalArgumentException
 	{
@@ -114,15 +117,18 @@ public class DataStoreTableModel
 	public void setShowStatusColumn(boolean aFlag)
 	{
 		if (aFlag == this.showStatusColumn) return;
-		if (aFlag)
+		synchronized(model_change_lock)
 		{
-			this.statusOffset = 1;
+			if (aFlag)
+			{
+				this.statusOffset = 1;
+			}
+			else
+			{
+				this.statusOffset = 0;
+			}
+			this.showStatusColumn = aFlag;
 		}
-		else
-		{
-			this.statusOffset = 0;
-		}
-		this.showStatusColumn = aFlag;
 		this.fireTableStructureChanged();
 	}
 
@@ -157,7 +163,7 @@ public class DataStoreTableModel
 					Toolkit.getDefaultToolkit().beep();
 					String msg = ResourceMgr.getString("MsgConvertError");
 					msg = msg + "\r\n" + ce.getLocalizedMessage();
-					WbManager.getInstance().showErrorMessage(parentTable, msg);
+					WbSwingUtilities.showErrorMessage(parentTable, msg);
 					return;
 				}
 			}
@@ -335,12 +341,12 @@ public class DataStoreTableModel
 	{
 		this.lockColumn = -1;
 	}
-	
+
 	public void setLockedColumn(int column)
 	{
 		this.lockColumn = column;
 	}
-	
+
 	public void setAllowEditing(boolean aFlag)
 	{
 		this.allowEditing = aFlag;
@@ -409,7 +415,7 @@ public class DataStoreTableModel
 		if (sortingInProgress) return;
 
 		final DataStoreTableModel model = this;
-		Thread t = new Thread()
+		Thread t = new WbThread("Data Sort")
 		{
 			public void run()
 			{
@@ -426,8 +432,6 @@ public class DataStoreTableModel
 				sortingInProgress = false;
 			}
 		};
-		t.setName("DataStoreTableModel sort thread");
-		t.setDaemon(true);
 		t.start();
 	}
 

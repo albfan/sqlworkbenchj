@@ -27,16 +27,15 @@ import workbench.util.StringUtil;
  *
  * @author  workbench@kellerer.org
  */
-public class WbSchemaReport 
+public class WbSchemaReport
 	extends SqlCommand
-	implements ScriptGenerationMonitor
+	implements RowActionMonitor
 {
 	public static final String VERB = "WBREPORT";
 	private SchemaReporter reporter;
-	private ScriptGenerationMonitor scriptMonitor;
 	private ArgumentParser cmdLine;
 	private int currentTable = 0;
-	
+
 	public WbSchemaReport()
 	{
 		cmdLine = new ArgumentParser();
@@ -99,26 +98,29 @@ public class WbSchemaReport
 		}
 
 		file = StringUtil.trimQuotes(file);
-		
+
 		String namespace = cmdLine.getValue("namespace");
 		this.reporter = new SchemaReporter(aConnection);
 		this.reporter.setNamespace(namespace);
+
 		TableIdentifier[] tables = this.parseTables();
 		if (tables != null)
 		{
 			this.reporter.setTableList(tables);
 		}
-		
+		else
+		{
+			String arg = cmdLine.getValue("schemas");
+			List schemas = StringUtil.stringToList(arg, ",");
+			this.reporter.setSchemas(schemas);
+		}
+
 		if (this.rowMonitor != null)
 		{
-			if (this.rowMonitor instanceof ScriptGenerationMonitor)
-			{
-				this.scriptMonitor = (ScriptGenerationMonitor)this.rowMonitor;
-			}
 			this.reporter.setProgressMonitor(this);
-			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS_TABLE);
+			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
 		}
-		
+
 		if (aConnection.getMetadata().isOracle())
 		{
 			// check if remarksReporting is turned on for Oracle, if not
@@ -138,12 +140,14 @@ public class WbSchemaReport
 		}
 		this.currentTable = 0;
 		this.reporter.setOutputFilename(file);
-		
+
 		try
 		{
 			this.reporter.writeXml();
 			String msg = ResourceMgr.getString("MsgSchemaReportTablesWritten");
 			msg = msg.replaceAll("%numtables%", Integer.toString(this.currentTable));
+			File f = new File(file);
+			msg = StringUtil.replace(msg, "%filename%", f.getAbsolutePath());
 			result.addMessage(msg);
 			result.setSuccess();
 		}
@@ -152,7 +156,7 @@ public class WbSchemaReport
 			result.setFailure();
 			result.addMessage(e.getMessage());
 		}
-		
+
 		return result;
 	}
 
@@ -163,7 +167,7 @@ public class WbSchemaReport
 		List l = StringUtil.stringToList(tables, ",");
 		int count = l.size();
 		TableIdentifier[] result = new TableIdentifier[count];
-		
+
 		for (int i=0; i < count; i++)
 		{
 			String table = (String)l.get(i);
@@ -174,7 +178,7 @@ public class WbSchemaReport
 		}
 		return result;
 	}
-	
+
 	public void cancel()
 		throws SQLException
 	{
@@ -183,18 +187,44 @@ public class WbSchemaReport
 			this.reporter.cancelExecution();
 		}
 	}
-	
-	public void setCurrentObject(String anObject)
+
+	public void setCurrentObject(String anObject, int number, int total)
 	{
-		this.currentTable ++;
-		if (this.scriptMonitor != null)
+		if (anObject == null)
 		{
-			this.scriptMonitor.setCurrentObject(anObject);
+			this.currentTable = 0;
+			return;
 		}
-		else if (this.rowMonitor != null)
+		else
 		{
-			this.rowMonitor.setCurrentRow(currentTable, -1);
+			this.currentTable ++;
+			if (this.rowMonitor != null)
+			{
+				if (number > 0)
+				{
+					this.rowMonitor.setCurrentObject(anObject, number, total);
+				}
+				else if (rowMonitor instanceof ScriptGenerationMonitor)
+				{
+					((ScriptGenerationMonitor)this.rowMonitor).setCurrentObject(anObject);
+				}
+
+			}
 		}
 	}
-	
+
+	public void setCurrentRow(int number, int total)
+	{
+
+	}
+
+	public void setMonitorType(int type)
+	{
+
+	}
+
+	public void jobFinished()
+	{
+
+	}
 }
