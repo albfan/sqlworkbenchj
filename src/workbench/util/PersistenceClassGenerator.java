@@ -138,7 +138,7 @@ public class PersistenceClassGenerator
 			{
 				String column = def.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
 				String pk = def.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_PK_FLAG);
-				int type = def.getValueAsInt(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_TYPE_ID, 0);
+				int type = def.getValueAsInt(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, 0);
 				int size = def.getValueAsInt(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_SCALE, 0);
 				int digits = def.getValueAsInt(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_PRECISION, 0);
 				
