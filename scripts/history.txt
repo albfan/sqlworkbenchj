@@ -1,5 +1,95 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh:  (77.1) Prepared Statements (i.e. ? in a SELECT) are now supported
+      This support relies on certain JDBC features which are
+      not available e.g. in Oracle's or PostgreSQL's JDBC drivers.
+      Currently this has been tested with Firebird and HSQLDB.
+Enh:  (77.3) The source for stored procedure and views can now be
+      displayed for Informix (thanks Meikel)
+Enh:  (77.10) Errors during script execution can now be ignored by default
+      (SQL -> Ignore errors)
+Enh:  (77.12) When importing text files, columns can now be excluded
+      from the import by specifying $wb_skip$ as the columnname
+      in the -filecolumns parameter or by supplying a list of
+      columns to be imported using the -importcolumns switch
+Enh:  (77.12) When importing text file, filters based on regular expressions
+      can now be applied either on column level or input line level
+      (using the -columnfilter or -linefilter switch)
+Enh:  (77.12) The WbImport command can now switch off the progress display
+      of the current row which speeds up the process when importing from
+      within the GUI (batch import does not suffer from the performance
+      impact of the progress report). To disable the progress use
+      -showprogress=false
+      Alternatively the interval for the reporting can be selected as
+      well -showprogress=100 will only update the display every 100 rows.
+      Additionally the performance of the status display has been improved.
+      Loading large result sets (which report the progress as well) and
+      importing using -showprogress=true (the default) should run quicker now
+Enh:  (77.14) The WBINCLUDE (and batch execution) command will not load script
+      files into memory that exceed a certain size. They will be processed
+      statement by statement which is a bit slower then loading them into
+      memory. The threshold can be defined in workbench.settings with the
+      property: workbench.sql.script.inmemory.maxsize
+      The value is defined in bytes. Any file exceeding this size will be
+      processed by not loading it into memory. The default threshold
+      is 1MB (which means that any file that is smaller then 1MB will be
+      processed in memory)
+Enh:  (77.17) WBIMPORT now supports -importcolumns for XML files to
+      select only certain columns from the input file
+Enh:  (77.17) The DataPumper can now use a text or XML file as the source
+Enh:  (77.18) A new command - WBDIFF - to generate an XML presentation of the 
+      difference between to schemas. The XML shows all modifications that
+      need to be done to get the target schema to the same state
+      as the reference (=source) schema. XSLTs to transform this XML
+      into SQL scripts will follow
+Enh:  (77.19) WBIMPORT now accepts -sourcedir for XML files to import 
+      all .xml files in that directory. When mixing XML files with long 
+      and short tags this works only if the files are created with 
+      this build, as the information about the tags used is available
+      in the meta data of the XML file.
+Enh:  (77.19) WBEXPORT now accepts -sourcetable=* to export all tables
+Enh:  (77.22) Two new settings to control the formatting of generated
+      SQL statements: 
+      workbench.sql.generate.insert.doformat
+	  workbench.sql.generate.update.doformat
+	  If set to false generated SQL statements (INSERT, UPDATE) will always 
+	  be put into a single line.
+
+Fix:  (77.1) When a table was created using lowercase in Oracle, the
+      DB Explorer would not work correctly for displaying data and
+      dropping the table
+Fix:  (77.2) Schemas with underscores where not treated correctly when
+      creating UPDATE statements for the result set
+Fix:  (77.4) SELECT statements that were immediately followed by a whitespace
+      other then a regular space were not detected correctly when
+      exporting data.
+Fix:  (77.4) "Show table data" in the DbExplorer did not always use the
+      correct table definition.
+Fix:  (77.5) When a file was saved with an encoding other then the default
+      encoding, the encoding was not properly restored when the workspace
+      was loaded again.
+Fix:  (77.6) Tried to make the workspace loading more robust to avoid
+      corrupted workspaces.
+Fix:  (77.10) SELECT .. INTO did no longer work with Informix and Postgres
+Fix:  (77.11) Sometimes connection errors where not displayed correctly
+      (the application would display the "Connecting to the database..."
+      message indefinitely)
+Fix:  (77.11) Fixed a problem when no workspace file was defined for
+      a connection profile that was introduced with 77.6
+Fix:  (77.12) Fixed a uppercase/lowercase problem when using WBIMPORT
+Fix:  (77.12) When the -file switched is not supplied when using WBIMPORT
+      a clear error message is now given.
+Fix:  (77.15) Fixed a problem with the parsing of SQL statements with comments
+Fix:  When importing text files with quote characters, empty fields ("") where
+      not processed correctly (the import would fail with an error)
+Fix:  (77.16) When exporting data from the select SQL statement, this now blocks
+      the current panel (just like executing the statement would do) to avoid
+      conflicts with non-threaded JDBC drivers
+Fix:  (77.17) Ctrl-Enter was still working even if the application was 
+      disconnected. 
+Fix:  (77.20) Worked around a bug in the Oracle driver which would not 
+      return the correct objects for Timestamp (Oracle 9) columns
+Fix:  (77.22) Entering timestamp values did not work.
 
 Build 77, 12.02.2005
 --------------------
@@ -113,7 +203,7 @@ Enh:  WBEXPORT now supports the -quotealways=true flag. In this case
 Enh:  The schema report written with WBREPORT is now always sorted
       by table name and the columns are sorted as well to allow better
       comparison between two different reports.
-Enh:  For driver's supporting batch updates, batch execution can now
+Enh:  For drivers supporting batch updates, batch execution can now
       be enabled with WBSTARTBATCH. The queued statements are sent
       to the server when WBENDBATCH is executed.
 Enh:  When loading and saving editor files, the encoding to be used

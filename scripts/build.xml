@@ -71,6 +71,14 @@
     
   </target>
 
+  <target name="get-dev-build" depends="init">
+    <loadproperties srcFile="release.property"/>
+    <loadproperties srcFile="devbuild.number"/>
+    
+    <property name="build.number" value="${release.build.number}.${dev-build.number}"/>
+    <echo message="Build number is ${build.number}"/>
+  </target>
+
   <target name="clean">
     <delete dir="${build}/workbench" failonerror="false"/>
     <delete dir="${build}/language" failonerror="false"/>
@@ -333,7 +341,7 @@
 
   </target>
 
-  <target name="publish-dev" depends="set-dev-build, copy-history, publish, clean-history">
+  <target name="publish-dev" depends="get-dev-build, copy-history, publish, clean-history">
   </target>
 
   <target name="make-src-zip">
@@ -394,7 +402,7 @@
     </ant>
   </target>
 
-  <target name="make-dev-jar" depends="set-dev-build, clean, copy-history, prepare, compile, make-jar, clean-history">
+  <target name="make-dev-jar" depends="get-dev-build, clean, copy-history, prepare, compile, make-jar, clean-history">
   </target>
 
   <!-- build a development release -->
