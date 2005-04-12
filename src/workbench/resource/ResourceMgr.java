@@ -147,6 +147,10 @@ public class ResourceMgr
 
 		try
 		{
+			if (nr.indexOf('.') > -1)
+			{
+				nr = nr.substring(0,nr.indexOf('.'));
+			}
 			result = Integer.parseInt(nr);
 		}
 		catch (Exception e)
