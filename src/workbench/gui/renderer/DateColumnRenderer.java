@@ -55,7 +55,8 @@ public class DateColumnRenderer
 		}
 		catch (Throwable cc)
 		{
-			this.displayValue = StringUtil.EMPTY_STRING;
+			//this.displayValue = StringUtil.EMPTY_STRING;
+			this.displayValue = value.toString();
 			this.tooltip = null;
 		}
   }

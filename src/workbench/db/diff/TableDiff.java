@@ -35,6 +35,9 @@ public class TableDiff
 	public static final String TAG_MODIFY_TABLE = "modify-table";
 	public static final String TAG_ADD_COLUMN = "add-column";
 	public static final String TAG_REMOVE_COLUMN = "remove-column";
+	public static final String TAG_ADD_PK = "add-primary-key";
+	public static final String TAG_MODIFY_PK = "modify-primary-key";
+	public static final String TAG_REMOVE_PK = "remove-primary-key";
 	
 	private ReportTable referenceTable;
 	private ReportTable targetTable;
@@ -103,12 +106,16 @@ public class TableDiff
 		}
 		boolean rename = !ref.getTable().equalsIgnoreCase(target.getTable());
 		
-		if (colDiff.length() == 0 && !rename && 
-			  colsToBeAdded.size() == 0 && colsToBeRemoved.size() == 0) 
+		List refPk = this.referenceTable.getPrimaryKeyColumns();
+		List tPk = this.targetTable.getPrimaryKeyColumns();
+		
+		if (colDiff.length() == 0 && !rename && colsToBeAdded.size() == 0 
+			  && colsToBeRemoved.size() == 0 && refPk.equals(tPk)) 
 		{
 			return result;
 		}
 		
+
 		writer.appendOpenTag(result, this.indent, TAG_MODIFY_TABLE, "name", target.getTable());
 		result.append('\n');
 		if (rename)
@@ -122,6 +129,42 @@ public class TableDiff
 		}
 		appendAddColumns(result, colsToBeAdded);
 		appendRemoveColumns(result, colsToBeRemoved);
+		
+		String pkTagToUse = null;
+		String attr[] = new String[] { "name" };
+		String value[] = new String[1];
+		List pkcols = null;
+
+		if (refPk.size() == 0 && tPk.size() > 0)
+		{
+			value[0] = this.targetTable.getPrimaryKeyName();
+			pkTagToUse = TAG_REMOVE_PK;
+			pkcols = this.targetTable.getPrimaryKeyColumns();
+		}
+		else if (refPk.size() > 0 && tPk.size() == 0)
+		{
+			value[0] = this.referenceTable.getPrimaryKeyName();
+			pkTagToUse = TAG_ADD_PK;
+			pkcols = this.referenceTable.getPrimaryKeyColumns();
+		}
+		else if (!refPk.equals(tPk))
+		{
+			value[0] = this.targetTable.getPrimaryKeyName();
+			pkTagToUse = TAG_MODIFY_PK;
+			pkcols = this.referenceTable.getPrimaryKeyColumns();
+		}
+		
+		writer.appendOpenTag(result, myindent, pkTagToUse, attr, value);
+		result.append('\n');
+		myindent.append("  ");
+		Iterator itr = pkcols.iterator();
+		while (itr.hasNext())
+		{
+			writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_NAME, (String)itr.next());
+		}
+		myindent.removeFromEnd(2);
+		writer.appendCloseTag(result, myindent, pkTagToUse);
+			
 		result.append(colDiff);
 		appendIndexDiff(result);
 		writer.appendCloseTag(result, this.indent, TAG_MODIFY_TABLE);

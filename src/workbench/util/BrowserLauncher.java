@@ -528,8 +528,8 @@ public class BrowserLauncher {
 					throw new IOException("IllegalAccessException while calling openURL: " + iae.getMessage());
 				}
 				break;
-		    case WINDOWS_NT:
-		    case WINDOWS_9x:
+			case WINDOWS_NT:
+			case WINDOWS_9x:
 		    	// Add quotes around the URL to allow ampersands and other special
 		    	// characters to work.
 				Process process = Runtime.getRuntime().exec(new String[] { (String) browser,

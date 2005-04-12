@@ -14,6 +14,7 @@ package workbench.db.report;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import workbench.db.ColumnIdentifier;
@@ -97,6 +98,47 @@ public class ReportTable
 		if (includeFk) this.readForeignKeys(conn);
 	}
 
+	/**
+	 *	Return the list of column names (String) 
+	 *  that make up the primary key of this table
+	 *  If the table has no primary key, an empty list
+	 *  is returned.
+	 */
+	public List getPrimaryKeyColumns()
+	{
+		List result = new ArrayList();
+		int count = this.columns.length;
+		for (int i=0; i < count; i++)
+		{
+			if (this.columns[i].getColumn().isPkColumn())
+			{
+				result.add(this.columns[i].getColumn().getColumnName().toUpperCase());
+			}
+		}
+		Collections.sort(result);
+		return result;
+	}
+	
+	/**
+	 *	Return the name of the primary 
+	 */
+	public String getPrimaryKeyName()
+	{
+		if (this.index == null) return null;
+		List pk = this.getPrimaryKeyColumns();
+		if (pk.size() == 0) return null;
+		IndexDefinition[] idx = this.index.getIndexList();
+		int count = idx.length;
+		for (int i=0; i < count; i++)
+		{
+			if (idx[i].isPrimaryKeyIndex())
+			{
+				return idx[i].getName();
+			}
+		}
+		return null;
+	}
+	
 	public void setColumns(List cols)
 	{
 		if (cols == null) return;

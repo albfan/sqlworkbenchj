@@ -752,6 +752,7 @@ public class SqlPanel
 		this.executeSelected.setEnabled(false);
 
 		this.toolbarActions.add(this.executeSelected);
+		this.toolbarActions.add(this.executeCurrent);
 		this.toolbarActions.add(this.stopAction);
 		this.toolbarActions.add(this.firstStmtAction);
 		this.toolbarActions.add(this.prevStmtAction);
@@ -2344,13 +2345,7 @@ public class SqlPanel
 		this.data.getTable().checkKeyActions();
 
 		boolean canUpdate = this.data.hasKeyColumns();
-		//this.copyAsSqlUpdate.setEnabled(canUpdate);
-		this.importFileAction.setEnabled(canUpdate);
-
-		//DataStore ds = this.data.getTable().getDataStore();
-		//boolean canInsert = (ds == null ? false : ds.canSaveAsSqlInsert());
-		//this.copyAsSqlInsert.setEnabled(canInsert);
-		//this.copyAsSqlDeleteInsert.setEnabled(canUpdate && canInsert);
+		this.importFileAction.setEnabled(mayEdit);
 	}
 
 	private ImageIcon getLoadingIndicator()

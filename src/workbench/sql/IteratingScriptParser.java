@@ -228,6 +228,7 @@ public class IteratingScriptParser
 						blockComment = true;
 						singleLineComment = false;
 						commentOn = true;
+						//pos ++; // ignore the next character
 					}
 					else if (startOfLine && (firstChar == '#' || (firstChar == '-' && next == '-')))
 					{
@@ -267,7 +268,7 @@ public class IteratingScriptParser
 				}
 			}
 
-			if (!quoteOn && !commentOn)
+ 			if (!quoteOn && !commentOn)
 			{
 				if (this.delimiterLength > 1 && pos + this.delimiterLength < scriptLength)
 				{
@@ -335,7 +336,7 @@ public class IteratingScriptParser
 		} // end loop for next statement
 
 		ScriptCommandDefinition c = null;
-		if (lastPos < pos)
+		if (lastPos < pos && !commentOn && !quoteOn)
 		{
 			String value = this.script.substring(lastPos, scriptLength).trim();
 			int endpos = scriptLength;
@@ -412,7 +413,7 @@ public class IteratingScriptParser
 					i++;
 					c = sql.charAt(i);
 				}
-				while (Character.isWhitespace(sql.charAt(i+1)))
+				while (i < len && Character.isWhitespace(sql.charAt(i+1)))
 				{
 					i++;
 				}
@@ -422,7 +423,11 @@ public class IteratingScriptParser
 			if (inComment && c == '*' && sql.charAt(i+1) == '/')
 			{
 				inComment = false;
-				i++;
+				i += 2;
+				while (i < len - 1 && Character.isWhitespace(sql.charAt(i)))
+				{
+					i++;
+				}
 			}
 			
 			if (!inComment)
@@ -447,9 +452,10 @@ public class IteratingScriptParser
 	
 	public static void main(String args[])
 	{
+		String sql = null;
 		try
 		{
-//			String sql = "@include.sql \n" +
+//			sql = "@include.sql \n" +
 //				     "delete from person; \n" +
 //             "commit\n; \n" +
 //             "set transaction read only \n" +
@@ -463,6 +469,10 @@ public class IteratingScriptParser
 //             "group by firstname, lastname\n;\n" +
 //						 "UPDATE table \n SET column=value;\n" +
 //						 "commit;";
+					sql = "select * from all_tables; \n" + 
+								"select * from user_tab_privs where grantee='MYUSER'; \n" + 
+								"select * from dba_tab_privs;-- where grantee='MYUSER';";			
+//					sql = "select * from dba_tab_privs;-- where grantee='MYUSER';";
 //String sql = "select year(request_date) as year, month(request_date) as month, filename, count(*) \n" + 
 //             "from wb_downloads \n" + 
 //             "where filename like 'Workbench-Build%' \n" + 
@@ -503,28 +513,29 @@ public class IteratingScriptParser
 //									 " \n" + 
 //									 "truncate table bv_cow_uprof \n" + 
 //									 ";";
-String sql = "-- create the database \n" +
-	"-- another comment\n" +
-	"wbfeedback off;\n" +
-	"create table TempDiasMain ( \n" + 
-			 "   MediaObjKey    integer not null,    -- media object key (number) \n" + 
-			 "   AuthorAge      varchar(12),         -- Year + Day/100 or \"o.D.\" or errors \n" + 
-			 "   AuthorAgeInfo  varchar(10),         -- \"J\", \"M\", \"M-O\", \"He\", \"Fe\", \"So\", ... \n" + 
-			 "   PageFormat     varchar(5),          -- \"A4\", \"A5\", \"A6\", ... \n" + 
-			 "   CommentFlag    varchar(5),          -- \"K\" if there is a comment \n" + 
-			 "   RelMediaObjKey integer,             -- link to related media object \n" + 
-			 "   DateCreated    varchar(16),         -- dd-mm-yyyy (contains errors) \n" + 
-			 "      -- If day/month is unknown: --yyyy, if day is unknown: -mm-yyyy \n" + 
-			 "      -- Bemerkung von Dieter: Sollte später nicht mehr vorkommen. \n" + 
-			 "      --    Datierungen müssen immer vollständig sein. \n" + 
-			 "   Title          varchar(500), \n" + 
-			 "   Comment1       varchar(2000),       -- \"content\" comment \n" + 
-			 "   Comment2       varchar(2000),       -- not content-related comment \n" + 
-			 "   AuthorKey      integer,             -- may be 0 or Null \n" + 
-			 "   MediaFileType  varchar(5));         -- \"JPG\", \"WAV\", \"MOV\", ... \n" +
-	     "wbfeedback on;\n" + 
-			 "commit;\n";
-			
+//String sql = "-- create the database \n" +
+//	"-- another comment\n" +
+//	"wbfeedback off;\n" +
+//	"create table TempDiasMain ( \n" + 
+//			 "   MediaObjKey    integer not null,    -- media object key (number) \n" + 
+//			 "   AuthorAge      varchar(12),         -- Year + Day/100 or \"o.D.\" or errors \n" + 
+//			 "   AuthorAgeInfo  varchar(10),         -- \"J\", \"M\", \"M-O\", \"He\", \"Fe\", \"So\", ... \n" + 
+//			 "   PageFormat     varchar(5),          -- \"A4\", \"A5\", \"A6\", ... \n" + 
+//			 "   CommentFlag    varchar(5),          -- \"K\" if there is a comment \n" + 
+//			 "   RelMediaObjKey integer,             -- link to related media object \n" + 
+//			 "   DateCreated    varchar(16),         -- dd-mm-yyyy (contains errors) \n" + 
+//			 "      -- If day/month is unknown: --yyyy, if day is unknown: -mm-yyyy \n" + 
+//			 "      -- Bemerkung von Dieter: Sollte später nicht mehr vorkommen. \n" + 
+//			 "      --    Datierungen müssen immer vollständig sein. \n" + 
+//			 "   Title          varchar(500), \n" + 
+//			 "   Comment1       varchar(2000),       -- \"content\" comment \n" + 
+//			 "   Comment2       varchar(2000),       -- not content-related comment \n" + 
+//			 "   AuthorKey      integer,             -- may be 0 or Null \n" + 
+//			 "   MediaFileType  varchar(5));         -- \"JPG\", \"WAV\", \"MOV\", ... \n" +
+//	     "wbfeedback on;\n" + 
+//			 "commit;\n";
+
+//			String sql = "/* \n testing\n*/\nWBEXPORT -file=bla -type=text\n;\nSELECT bla from bla;\n";
 			//String sql = "drop index idx_pa_date\n;\n\ncreate index idx_pa_date on partner_pro_pa (start_date, end_date)\n;\n\ncreate or replace view v_active_pa \nas\nSELECT PARTNER_PRO_ID,\n       PURCHASE_AGREE_NO,\n       START_DATE,\n       END_DATE,\n       STATUS\nFROM PARTNER_PRO_PA\nWHERE end_date >= sysdate\nAND   start_date < sysdate\n;\n\n\nselect distinct PURCHASE_AGREE_NO, cac_cd\nfrom PARTNER_PA_CAC\norder by 1\n;\n\nSELECT count(*)\nFROM rpl_user.partner_pro_pa;\n;\n\nselect * from v_active_pa\n;\n";
 //			String sql = "SELECT count(*)\nFROM rpl_user.partner_pro_pa\n;\n;\nselect * from v_active_pa\n;\n";
 			//File f = new File("d:/projects/jworkbench/testdata/statements.sql");

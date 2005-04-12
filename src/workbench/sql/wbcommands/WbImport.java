@@ -12,7 +12,6 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import java.util.Iterator;
 import java.util.List;
 
 import workbench.db.WbConnection;
@@ -62,6 +61,8 @@ public class WbImport extends SqlCommand
 	public static final String ARG_COL_FILTER = "columnfilter";
 	public static final String ARG_LINE_FILTER = "linefilter";
 	public static final String ARG_PROGRESS = "showprogress";
+	public static final String ARG_DIRECTORY = "sourcedir";
+	public static final String ARG_TARGET_SCHEMA = "schema";
 
 	private ArgumentParser cmdLine;
 
@@ -94,6 +95,8 @@ public class WbImport extends SqlCommand
 		cmdLine.addArgument(ARG_COL_FILTER);
 		cmdLine.addArgument(ARG_LINE_FILTER);
 		cmdLine.addArgument(ARG_PROGRESS);
+		cmdLine.addArgument(ARG_DIRECTORY);
+		cmdLine.addArgument(ARG_TARGET_SCHEMA);
 
 		this.isUpdatingCommand = true;
 	}
@@ -146,21 +149,29 @@ public class WbImport extends SqlCommand
 			return result;
 		}
 
-		String type = null;
-		String file = null;
+		String type = cmdLine.getValue(ARG_TYPE);
+		String file = cmdLine.getValue(ARG_FILE);
 		String cleancr = null;
+		String dir = cmdLine.getValue(ARG_DIRECTORY);
 
-		type = cmdLine.getValue(ARG_TYPE);
-		file = cmdLine.getValue(ARG_FILE);
-
-
-		if (type == null || file == null)
+		if (type == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorImportFileMissing"));
+			result.addMessage(ResourceMgr.getString("ErrorImportTypeMissing"));
 			result.addMessage(ResourceMgr.getString("ErrorImportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
+
+		if ( (file == null && !"xml".equalsIgnoreCase(type)) ||
+			   ("xml".equalsIgnoreCase(type) && dir == null && file == null))
+		{
+			result.addMessage(ResourceMgr.getString("ErrorImportFileMissing"));
+			result.addMessage("");
+			result.addMessage(ResourceMgr.getString("ErrorImportWrongParameters"));
+			result.setFailure();
+			return result;
+		}
+
 		file = StringUtil.trimQuotes(file);
 
 		int commit = cmdLine.getIntValue(ARG_COMMIT,-1);
@@ -208,12 +219,12 @@ public class WbImport extends SqlCommand
 
 			// filecolumns is the new parameter
 			// -columns is deprecated
-			String columns = cmdLine.getValue(ARG_FILECOLUMNS);
-			if (columns == null) columns = cmdLine.getValue("columns");
+			String filecolumns = cmdLine.getValue(ARG_FILECOLUMNS);
+			if (filecolumns == null) filecolumns = cmdLine.getValue("columns");
 
-			if (columns != null)
+			if (filecolumns != null)
 			{
-				List cols = StringUtil.stringToList(columns, ",", true);
+				List cols = StringUtil.stringToList(filecolumns, ",", true);
 				try
 				{
 					textParser.setColumns(cols);
@@ -227,19 +238,26 @@ public class WbImport extends SqlCommand
 				textParser.setEmptyStringIsNull(cmdLine.getBoolean(ARG_EMPTY_STRING_IS_NULL, true));
 			}
 
-			if (!header && columns == null)
+			if (!header && filecolumns == null)
 			{
 				result.addMessage(ResourceMgr.getString("ErrorHeaderOrColumnDefRequired"));
 				result.setFailure();
 				return result;
 			}
 
-			// the import columns have to set after setting
-			// the file columns!
-			columns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
-			if (columns != null)
+			// the import columns have to be set after setting the file columns!
+			// if no file columns were specified then we won't accept this...
+			String importcolumns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
+			if (importcolumns != null && filecolumns == null)
 			{
-				List cols = StringUtil.stringToList(columns, ",", true);
+				result.addMessage(ResourceMgr.getString("ErrorImportNoFileColumns"));
+				result.setFailure();
+				return result;
+			}
+
+			if (importcolumns != null)
+			{
+				List cols = StringUtil.stringToList(importcolumns, ",", true);
 				textParser.setImportColumns(cols);
 			}
 
@@ -261,32 +279,41 @@ public class WbImport extends SqlCommand
 
 		else if ("xml".equalsIgnoreCase(type))
 		{
-			XmlDataFileParser xmlParser = new XmlDataFileParser(file);
-			if (table != null) xmlParser.setTableName(table);
+			XmlDataFileParser xmlParser = new XmlDataFileParser();
+
+			if (dir != null)
+			{
+				xmlParser.setSourceDirectory(dir);
+			}
+			else
+			{
+				xmlParser.setSourceFile(file);
+				if (table != null) xmlParser.setTableName(table);
+				String cols = cmdLine.getValue(ARG_IMPORTCOLUMNS);
+				if (cols != null)
+				{
+					try
+					{
+						xmlParser.setColumns(cols);
+					}
+					catch (IllegalArgumentException e)
+					{
+						result.setFailure();
+						String col = xmlParser.getMissingColumn();
+						String msg = ResourceMgr.getString("ErrorImportColumnNotFound").replaceAll("%name%", col);
+						result.addMessage(msg);
+						LogMgr.logError("WbImport.execute()", msg, null);
+						return result;
+					}
+				}
+			}
 
 			String encoding = cmdLine.getValue(ARG_ENCODING);
 			if (encoding != null) xmlParser.setEncoding(encoding);
 
 			boolean verbose = cmdLine.getBoolean(ARG_VERBOSEXML, true);
 			xmlParser.setUseVerboseFormat(verbose);
-			
-			String cols = cmdLine.getValue(ARG_IMPORTCOLUMNS);
-			if (cols != null)
-			{
-				try
-				{
-					xmlParser.setColumns(cols);
-				}
-				catch (IllegalArgumentException e)
-				{
-					result.setFailure();
-					String col = xmlParser.getMissingColumn();
-					String msg = ResourceMgr.getString("ErrorImportColumnNotFound").replaceAll("%name%", col);
-					result.addMessage(msg);
-					LogMgr.logError("WbImport.execute()", msg, null);
-					return result;
-				}
-			}
+
 			imp.setProducer(xmlParser);
 		}
 		else
@@ -298,7 +325,7 @@ public class WbImport extends SqlCommand
 
 		this.imp.setRowActionMonitor(this.rowMonitor);
 		String value = cmdLine.getValue(ARG_PROGRESS);
-		if (value == null)
+		if (value == null && file != null)
 		{
 			int interval = DataImporter.estimateReportIntervalFromFileSize(file);
 			imp.setReportInterval(interval);
@@ -311,10 +338,14 @@ public class WbImport extends SqlCommand
 		{
 			this.imp.setReportInterval(0);
 		}
-		else
+		else if (value != null)
 		{
 			int interval = StringUtil.getIntValue(value, 0);
 			this.imp.setReportInterval(interval);
+		}
+		else
+		{
+			this.imp.setReportInterval(10);
 		}
 
 		String mode = cmdLine.getValue(ARG_MODE);
@@ -326,17 +357,11 @@ public class WbImport extends SqlCommand
 			}
 		}
 
+		String schema = cmdLine.getValue(ARG_TARGET_SCHEMA);
+		if (schema != null) imp.setTargetSchema(schema);
+
 		String keyColumns = cmdLine.getValue(ARG_KEYCOLUMNS);
 		imp.setKeyColumns(keyColumns);
-
-		String msg = ResourceMgr.getString("MsgImportingFile");
-		msg += " " + file;
-		if (table != null)
-		{
-			msg += " " + ResourceMgr.getString("MsgImportTable");
-			msg += ": " + table.toUpperCase();
-		}
-		result.addMessage(msg);
 
 		boolean delete = cmdLine.getBoolean(ARG_DELETE_TARGET);
 		imp.setDeleteTarget(delete);
@@ -361,23 +386,25 @@ public class WbImport extends SqlCommand
 			imp.startImport();
 			result.setSuccess();
 		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("WbImport.execute()", "Error importing '" + file +"': " + e.getMessage(), null);
+			result.setFailure();
+		}
 		catch (Exception e)
 		{
 			LogMgr.logError("WbImport.execute()", "Error importing '" + file +"': " + e.getMessage(), null);
 			result.setFailure();
 			result.addMessage(ExceptionUtil.getDisplay(e));
 		}
-		this.addWarnings(result);
-		this.addErrors(result);
+
 		if (result.isSuccess())
 		{
-			long rows = imp.getInsertedRows();
-			msg = rows + " " + ResourceMgr.getString("MsgCopyNumRowsInserted");
-			result.addMessage(msg);
-			rows = imp.getUpdatedRows();
-			msg = rows + " " + ResourceMgr.getString("MsgCopyNumRowsUpdated");
-			result.addMessage(msg);
+			result.addMessage(imp.getMessages());
 		}
+		this.addWarnings(result);
+		this.addErrors(result);
+
 		return result;
 	}
 

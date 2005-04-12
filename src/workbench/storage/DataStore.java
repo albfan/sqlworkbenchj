@@ -19,16 +19,12 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.Clob;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
 import java.text.Collator;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -83,9 +79,9 @@ public class DataStore
 
 	private WbConnection originalConnection;
 
-	private SimpleDateFormat defaultDateFormatter;
+//	private SimpleDateFormat defaultDateFormatter;
 	private DecimalFormat defaultNumberFormatter;
-	private SimpleDateFormat defaultTimestampFormatter;
+//	private SimpleDateFormat defaultTimestampFormatter;
 
 	private ColumnComparator comparator;
 
@@ -708,6 +704,18 @@ public class DataStore
 	}
 
 	/**
+	 *	Set a value received from a user input. This 
+	 *  will convert the given value to an object of the
+	 *  correct class
+	 */
+	public void setInputValue(int row, int col, Object value)
+		throws Exception
+	{
+		Object realValue = this.convertCellValue(value, col);
+		this.setValue(row, col, realValue);
+	}
+	
+	/**
 	 * Set the value for the given column. This will change the internal state of the DataStore to modified.
 	 * @param aRow
 	 * @param aColumn
@@ -1172,9 +1180,9 @@ public class DataStore
 	{
 		int count = this.getRowCount();
 		if (count == 0) return;
-		converter.setDefaultTimestampFormatter(this.defaultTimestampFormatter);
+		converter.setDefaultTimestampFormat(this.converter.getTimestampPattern());
 		converter.setDefaultNumberFormatter(this.defaultNumberFormatter);
-		converter.setDefaultDateFormatter(this.defaultDateFormatter);
+		converter.setDefaultDateFormat(this.converter.getDatePattern());
 		converter.getStart().writeTo(pw);
 		for (int row=0; row < count; row++)
 		{
@@ -1646,6 +1654,7 @@ public class DataStore
 		RowData row = null;
 
 		StatementFactory factory = new StatementFactory(this.resultInfo);
+		factory.setIncludeTableOwner(aConnection.getMetadata().needSchemaInDML(resultInfo.getUpdateTable()));
 
 		row = this.getNextDeletedRow();
 		while (row != null)
@@ -1745,7 +1754,8 @@ public class DataStore
 		this.ignoreAllUpdateErrors = false;
 
 		StatementFactory factory = new StatementFactory(this.resultInfo);
-
+		factory.setIncludeTableOwner(aConnection.getMetadata().needSchemaInDML(resultInfo.getUpdateTable()));
+		
 		try
 		{
 			this.resetUpdateRowCounters();
@@ -1948,43 +1958,25 @@ public class DataStore
 
 	public String getDefaultDateFormat()
 	{
-		if (this.defaultDateFormatter == null) return null;
-		return this.defaultDateFormatter.toPattern();
+		return this.converter.getDatePattern();
 	}
 
-	public void setDefaultTimestampFormatter(SimpleDateFormat aFormatter)
+	public void setDefaultTimestampFormat(String aFormat)
 	{
-		this.defaultTimestampFormatter = aFormatter;
+		if (aFormat == null) return;
+		this.converter.setDefaultTimestampFormat(aFormat);
 	}
-
-	public void setDefaultDateFormatter(SimpleDateFormat aFormatter)
-	{
-		this.defaultDateFormatter = aFormatter;
-	}
-
+	
 	public void setDefaultDateFormat(String aFormat)
 	{
 		if (aFormat == null) return;
-		try
-		{
-			this.defaultDateFormatter = new SimpleDateFormat(aFormat);
-		}
-		catch (Exception e)
-		{
-			this.defaultDateFormatter = null;
-			LogMgr.logWarning("DataStore.setDefaultDateFormat()", "Could not create date formatter for format " + aFormat);
-		}
+		this.converter.setDefaultDateFormat(aFormat);
 	}
 
 	public String getDefaultNumberFormat()
 	{
 		if (this.defaultNumberFormatter == null) return null;
-		return this.defaultNumberFormatter.toPattern();
-	}
-
-	public void setDefaultNumberFormatter(DecimalFormat aFormatter)
-	{
-		this.defaultNumberFormatter = aFormatter;
+		return defaultNumberFormatter.toPattern();
 	}
 
 	public void setDefaultNumberFormat(String aFormat)
@@ -2012,48 +2004,9 @@ public class DataStore
 			return NullValue.getInstance(type);
 		}
 
-		switch (type)
-		{
-			case Types.DATE:
-				return this.parseDate((String)aValue);
-			case Types.TIMESTAMP:
-				java.sql.Date d = this.parseDate((String)aValue);
-				Timestamp t = new Timestamp(d.getTime());
-				return t;
-			default:
-				return converter.convertValue(aValue, type);
-		}
+		return converter.convertValue(aValue, type);
 	}
-
-  private java.sql.Date parseDate(String aDate)
-  {
-		java.sql.Date result = null;
-		if (this.defaultDateFormatter != null)
-		{
-			try
-			{
-				java.util.Date d = defaultDateFormatter.parse(aDate);
-				result = new java.sql.Date(d.getTime());
-			}
-			catch (Exception e)
-			{
-				LogMgr.logWarning("DataStore.parseDate()", "Could not parse date " + aDate + " with default formatter " + this.defaultDateFormatter.toPattern());
-				result = null;
-			}
-
-		}
-
-		if (result == null)
-		{
-			result = converter.parseDate(aDate);
-		}
-
-		if (result == null)
-		{
-			LogMgr.logWarning("DataStore.parseDate()", "Could not parse date " + aDate + " with formatter " + converter.getDatePattern());
-		}
-		return result;
-  }
+	
 	/**
 	 * Return the status object for the give row.
 	 * The status is one of

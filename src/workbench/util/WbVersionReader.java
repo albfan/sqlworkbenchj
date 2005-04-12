@@ -158,6 +158,7 @@ public class WbVersionReader
 			}
 		}
 	}
+	
 	public String getDevBuildNumber() { return this.currentDevBuildNumber; }
 	public String getDevBuildDate() { return this.currentDevBuildDate; }
 

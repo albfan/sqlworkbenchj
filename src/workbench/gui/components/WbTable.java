@@ -37,25 +37,14 @@ import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.print.PageFormat;
-import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-
-import javax.swing.AbstractListModel;
 import javax.swing.ActionMap;
 import javax.swing.CellEditor;
 import javax.swing.InputMap;
@@ -72,7 +61,6 @@ import javax.swing.JTextField;
 import javax.swing.JToolTip;
 import javax.swing.JViewport;
 import javax.swing.ListCellRenderer;
-import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -84,7 +72,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -131,8 +118,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.NullValue;
-import workbench.util.FileDialogUtil;
-import workbench.util.StringUtil;
+
 
 
 public class WbTable

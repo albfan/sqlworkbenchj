@@ -16,9 +16,11 @@ import java.util.Comparator;
 
 public class RowDataList
 {
-	public static final RowDataList EMPTY_BUFFER = new RowDataList();
+	public static final RowDataList EMPTY_BUFFER = new RowDataList(0);
 	private static final int DEFAULT_SIZE = 150;
 
+	// growth factor when increasing the array
+	private float grow = 1.25f;
 	private int size;
 	private RowData data[];
 
@@ -35,7 +37,7 @@ public class RowDataList
 
 	private void grow(int minStorage)
 	{
-		int newStorage = (int)(this.data.length * 1.5) + 1;
+		int newStorage = (int)(this.data.length * grow) + 1;
 
 		if (newStorage < minStorage) newStorage = minStorage;
 
@@ -112,9 +114,9 @@ public class RowDataList
 		int newlen = this.size + 1;
 		if (newlen > this.data.length)
 		{
-			// we are not using moreStorage here to optimize
+			// we are not using ensureCapacity here to optimize
 			// the calls to System.arraycopy
-			RowData newBuf[] = new RowData[newlen + 10];
+			RowData newBuf[] = new RowData[(int)(newlen * grow)];
 			System.arraycopy(this.data, 0, newBuf, 0, index);
 			System.arraycopy(this.data, index, newBuf, index + 1, (size - index));
 			this.data = newBuf;

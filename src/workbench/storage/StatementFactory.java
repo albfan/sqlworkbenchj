@@ -65,8 +65,12 @@ public class StatementFactory
 		if (aRow == null) return null;
 		boolean first = true;
 		int cols = this.resultInfo.getColumnCount();
+
+		boolean doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.update.doformat",true);
+		int columnThresholdForNewline = Settings.getInstance().getIntProperty("workbench.sql.generate.update.newlinethreshold",5);
 		
-		boolean newLineAfterColumn = (cols > 5);
+		//boolean newLineAfterColumn = (cols > 5);
+		boolean newLineAfterColumn = doFormatting && (cols > columnThresholdForNewline);
 
 		DmlStatement dml;
 
@@ -75,7 +79,8 @@ public class StatementFactory
 		StringBuffer sql = new StringBuffer("UPDATE ");
 
 		sql.append(getTableNameToUse());
-		sql.append("\n   SET ");
+		if (doFormatting) sql.append("\n  ");
+		sql.append(" SET ");
 		first = true;
 		for (int col=0; col < cols; col ++)
 		{
@@ -116,7 +121,8 @@ public class StatementFactory
 				}
 			}
 		}
-		sql.append("\n WHERE ");
+		if (doFormatting) sql.append("\n ");
+		sql.append(" WHERE ");
 		first = true;
 		int count = this.resultInfo.getColumnCount();
 		for (int j=0; j < count; j++)
@@ -161,7 +167,7 @@ public class StatementFactory
 
 	public DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus, String lineEnd)
 	{
-		return this.createInsertStatement(aRow, ignoreStatus, lineEnd);
+		return this.createInsertStatement(aRow, ignoreStatus, lineEnd, null);
 	}
 	
 	/**
@@ -184,8 +190,9 @@ public class StatementFactory
 
 		int cols = this.resultInfo.getColumnCount();
 		
+		boolean doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.doformat",true);
 		int columnThresholdForNewline = Settings.getInstance().getIntProperty("workbench.sql.generate.insert.newlinethreshold",5);
-		boolean newLineAfterColumn = (cols > columnThresholdForNewline);
+		boolean newLineAfterColumn = doFormatting && (cols > columnThresholdForNewline);
 		
 		int colsPerLine = Settings.getInstance().getIntProperty("workbench.sql.generate.insert.colsperline",1);
 		
@@ -195,7 +202,9 @@ public class StatementFactory
 		StringBuffer valuePart = new StringBuffer(250);
 
 		sql.append(getTableNameToUse());
-		sql.append(lineEnd);
+		if (doFormatting) sql.append(lineEnd);
+		else sql.append(' ');
+		
 		sql.append('(');
 		if (newLineAfterColumn)
 		{
@@ -208,7 +217,6 @@ public class StatementFactory
 				sql.append("  ");
 				valuePart.append("  ");
 			}
-			
 		}
 
 		first = true;
@@ -270,12 +278,20 @@ public class StatementFactory
 		}
 
 		sql.append(')');
-		sql.append(lineEnd);
-		sql.append("VALUES");
-		sql.append(lineEnd);
+		if (doFormatting) 
+		{
+			sql.append(lineEnd);
+			sql.append("VALUES");
+			sql.append(lineEnd);
+		}
+		else
+		{
+			sql.append(" VALUES ");
+		}
 		sql.append('(');
 		sql.append(valuePart);
 		sql.append(')');
+		
 		try
 		{
 			dml = new DmlStatement(sql.toString(), values);

@@ -162,8 +162,7 @@ public class DataStoreTableModel
 			{
 				try
 				{
-					Object realValue = this.dataCache.convertCellValue(aValue, column - this.statusOffset);
-					this.dataCache.setValue(row, column - this.statusOffset, realValue);
+					this.dataCache.setInputValue(row, column - this.statusOffset, aValue);
 				}
 				catch (Exception ce)
 				{

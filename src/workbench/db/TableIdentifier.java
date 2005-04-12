@@ -25,6 +25,7 @@ public class TableIdentifier
 	private String catalog;
 	private String expression;
 	private boolean isNewTable = false;
+	private String pkName;
 
 	public TableIdentifier(String aName)
 	{
@@ -119,6 +120,14 @@ public class TableIdentifier
 		if (!this.isNewTable && (aTable == null || aTable.trim().length() == 0))
 			throw new IllegalArgumentException("Table name may not be null");
 
+		if (aTable == null)
+		{
+			this.tablename = null;
+			this.schema = null;
+			this.expression = null;
+			return;
+		}
+		
 		int pos = aTable.indexOf('.');
 		if (pos > -1)
 		{
@@ -213,4 +222,13 @@ public class TableIdentifier
 		return false;
 	}
 
+	public String getPrimaryKeyName()
+	{
+		return this.pkName;
+	}
+	
+	public void setPrimaryKeyName(String name)
+	{
+		this.pkName = name;
+	}
 }

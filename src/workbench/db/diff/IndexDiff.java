@@ -87,6 +87,7 @@ public class IndexDiff
 				}
 			}
 		}
+		
 		if (indexToAdd.size() > 0)
 		{
 			Iterator itr = indexToAdd.iterator();

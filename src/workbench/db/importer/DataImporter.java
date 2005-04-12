@@ -15,12 +15,11 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.SwingUtilities;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
@@ -29,10 +28,11 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
 import workbench.util.FileUtil;
-import workbench.util.SqlUtil;
+import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import java.io.StringReader;
 import java.io.Reader;
+import workbench.interfaces.ImportFileParser;
 import workbench.util.WbThread;
 
 
@@ -73,11 +73,14 @@ public class DataImporter
 	private boolean supportsBatch = false;
 	private boolean canCommitInBatch = true;
 	private int reportInterval = 1;
-
+	private StrBuffer messages;
+	private String targetSchema;
+	
 	private int colCount;
 	private ArrayList warnings = new ArrayList();
 	private ArrayList errors = new ArrayList();
-
+	private int numTables;
+	
 	// this array will map the columns for updating the target table
 	// the index into this array will be the index
 	// from the row data array supplied by the producer.
@@ -93,9 +96,11 @@ public class DataImporter
 	private RowActionMonitor progressMonitor;
 	private boolean isRunning = false;
 	private int batchSize = -1;
+	private ImportFileParser parser;
 
 	public DataImporter()
 	{
+		this.messages = new StrBuffer(1000);
 	}
 
 	public void setConnection(WbConnection aConn)
@@ -119,6 +124,10 @@ public class DataImporter
 		this.source = producer;
 		this.source.setReceiver(this);
 		this.source.setAbortOnError(!this.continueOnError);
+		if (producer instanceof ImportFileParser)
+		{
+			this.parser = (ImportFileParser)producer;
+		}
 	}
 
 	public void setCommitEvery(int aCount) { this.commitEvery = aCount; }
@@ -206,11 +215,11 @@ public class DataImporter
 			{
 				return 1;
 			}
-			else if (records < 1000)
+			else if (records < 10000)
 			{
 				return 10;
 			}
-			else if (records < 100000)
+			else if (records < 250000)
 			{
 				return 100;
 			}
@@ -225,7 +234,7 @@ public class DataImporter
 			return 0;
 		}
 	}
-	
+
 	public void setMode(int mode)
 	{
 		if (mode == MODE_INSERT)
@@ -237,7 +246,7 @@ public class DataImporter
 		else if (mode == MODE_UPDATE_INSERT)
 			this.setModeUpdateInsert();
 	}
-	
+
 	/**
 	 *	Define the mode by supplying keywords.
 	 *	The following combinations are valid:
@@ -341,7 +350,9 @@ public class DataImporter
 		throws IOException, SQLException, Exception
 	{
 		if (this.source == null) return;
+		this.messages = new StrBuffer(2000);
 		this.isRunning = true;
+		this.numTables = 0;
 		this.canCommitInBatch = true;
 
 		if (this.useBatch && (this.isModeInsertUpdate() || this.isModeUpdateInsert()))
@@ -362,7 +373,7 @@ public class DataImporter
 		Statement stmt = this.dbConn.createStatement();
 		LogMgr.logDebug("DataImporter.deleteTarget()", "Executing: [" + deleteSql + "] to delete target table...");
 		int rows = stmt.executeUpdate(deleteSql);
-		this.warnings.add(rows + " " + ResourceMgr.getString("MsgImporterRowsDeleted") + " " + this.targetTable);
+		this.messages.append(rows + " " + ResourceMgr.getString("MsgImporterRowsDeleted") + " " + this.targetTable + "\n");
 	}
 
 	public boolean isRunning() { return this.isRunning; }
@@ -434,7 +445,7 @@ public class DataImporter
 	 *	Callback function for RowDataProducer. The order in the data array
 	 * 	has to be the same as initially passed in the setTargetTable() method.
 	 */
-	public void processRow(Object[] row) 
+	public void processRow(Object[] row)
 		throws SQLException
 	{
 		if (row == null) return;
@@ -443,7 +454,7 @@ public class DataImporter
 		currentImportRow++;
 		if (this.progressMonitor != null && this.reportInterval > 0 && (currentImportRow == 1 || currentImportRow % reportInterval == 0))
 		{
-			progressMonitor.setCurrentRow(currentImportRow, -1);
+			progressMonitor.setCurrentObject(this.targetTable, currentImportRow, -1);
 		}
 
 		int rows = 0;
@@ -713,16 +724,54 @@ public class DataImporter
 	public void setTargetTable(String tableName, ColumnIdentifier[] columns)
 		throws SQLException
 	{
+		// be prepared to import more then one table...
+		if (this.isRunning && this.targetTable != null)
+		{
+			try
+			{
+				this.finishTable();
+				this.totalRows = 0;
+				this.currentImportRow = 0;
+				this.updatedRows = 0;
+				this.insertedRows = 0;
+			}
+			catch (SQLException e)
+			{
+				this.totalRows = -1;
+				this.currentImportRow = -1;
+				this.updatedRows = -1;
+				this.insertedRows = -1;
+				if (!this.continueOnError) throw e;
+			}
+		}
+		if (this.parser != null)
+		{
+			this.messages.append(ResourceMgr.getString("MsgImportingFile"));
+			this.messages.append(' ');
+			this.messages.append(this.parser.getSourceFilename());
+			this.messages.append('\n');
+		}
+		
 		try
 		{
 			this.targetTable = this.dbConn.getMetadata().adjustObjectname(tableName);
 			this.targetColumns = columns;
-
 			this.colCount = this.targetColumns.length;
-			if (this.dbConn != null)
+			
+			try
 			{
 				this.checkTable();
 			}
+			catch (SQLException e)
+			{
+				String msg = ResourceMgr.getString("ErrorImportTableNotFound").replaceAll("%table%", this.targetTable);
+				msg = StringUtil.replace(msg, "%filename%", this.parser.getSourceFilename());
+				this.messages.append(msg);
+				this.messages.append("\n\n");
+				this.targetTable = null;
+				throw e;
+			}
+			
 			if (this.mode != MODE_UPDATE)
 			{
 				this.prepareInsertStatement();
@@ -743,6 +792,9 @@ public class DataImporter
 					LogMgr.logError("DataImporter.setTargetTable()", "Could not delete contents of table " + this.targetTable, e);
 				}
 			}
+			this.currentImportRow = 0;
+			this.totalRows = 0;
+			
 			if (this.reportInterval == 0 && this.progressMonitor != null)
 			{
 				this.progressMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
@@ -751,7 +803,7 @@ public class DataImporter
 		}
 		catch (RuntimeException th)
 		{
-			th.printStackTrace();
+			LogMgr.logError("DataImporter.setTargetTable()", "Error when setting target table", th);
 			throw th;
 		}
 	}
@@ -764,16 +816,21 @@ public class DataImporter
 		if (this.isModeUpdateInsert()) return "update/insert";
 		return "";
 	}
-	
+
 	private void checkTable()
 		throws SQLException
 	{
 		if (this.dbConn == null) return;
 		if (this.targetTable == null) return;
 
+		DbMetadata meta = this.dbConn.getMetadata();
 		TableIdentifier tbl = new TableIdentifier(this.targetTable);
-		boolean exists = this.dbConn.getMetadata().tableExists(tbl);
-		if (!exists) throw new SQLException("Table " + this.targetTable + " not found!");
+		if (tbl.getSchema() == null) tbl.setSchema(this.targetSchema == null ? meta.getCurrentSchema() : this.targetSchema);
+		boolean exists = meta.tableExists(tbl);
+		if (!exists) 
+		{
+			throw new SQLException("Table " + this.targetTable + " not found!");
+		}
 	}
 
 	/**
@@ -812,7 +869,7 @@ public class DataImporter
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("DataImporter.prepareInsertStatement()", "Error when preparing INSERT statement", e);
+			LogMgr.logError("DataImporter.prepareInsertStatement()", "Error when preparing INSERT statement: " + this.insertSql, e);
 			this.errors.add(ResourceMgr.getString("ErrorImportInitTargetFailed"));
 			this.errors.add(ExceptionUtil.getDisplay(e));
 			this.insertStatement = null;
@@ -968,10 +1025,8 @@ public class DataImporter
 		}
 	}
 
-	/**
-	 *	Callback from the RowDataProducer
-	 */
-	public void importFinished()
+	private void finishTable()
+		throws SQLException
 	{
 		try
 		{
@@ -982,12 +1037,47 @@ public class DataImporter
 			this.closeStatements();
 			if (!this.dbConn.getAutoCommit())
 			{
-				LogMgr.logDebug("DataImporter.importFinished()", this.getAffectedRows() + " row(s) imported. Committing changes");
+				LogMgr.logDebug("DataImporter.finishTable()", this.getAffectedRows() + " row(s) imported. Committing changes");
 				this.dbConn.commit();
 			}
+			if (this.insertedRows > -1)
+			{
+				this.messages.append(this.insertedRows + " " + ResourceMgr.getString("MsgCopyNumRowsInserted"));
+				this.messages.append('\n');
+			}
+			if (this.updatedRows > -1)
+			{
+				this.messages.append(this.updatedRows + " " + ResourceMgr.getString("MsgCopyNumRowsUpdated"));
+				this.messages.append("\n\n");
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("DataImporter.finishTable()", "Error commiting changes", e);
+			this.errors.add(ExceptionUtil.getDisplay(e));
+			throw e;
+		}
+	}
+	public String getMessages()
+	{
+		return this.messages.toString();
+	}
+	/**
+	 *	Callback from the RowDataProducer
+	 */
+	public void importFinished()
+	{
+		try
+		{
+			this.finishTable();
+		}
+		catch (SQLException sql)
+		{
+			// already logged in finishTable()
 		}
 		catch (Exception e)
 		{
+			// log all others...
 			LogMgr.logError("DataImporter.importFinished()", "Error commiting changes", e);
 			this.errors.add(ExceptionUtil.getDisplay(e));
 		}
@@ -1043,6 +1133,16 @@ public class DataImporter
 		{
 			this.reportInterval = 0;
 		}
+	}
+
+	public String getTargetSchema()
+	{
+		return targetSchema;
+	}
+
+	public void setTargetSchema(String targetSchema)
+	{
+		this.targetSchema = targetSchema;
 	}
 
 }

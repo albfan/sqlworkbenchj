@@ -335,6 +335,11 @@ public class DbMetadata
 
 	}
 
+	public DatabaseMetaData getJdbcMetadata()
+	{
+		return this.metaData;
+	}
+	
 	public Connection getSqlConnection()
 	{
 		return this.dbConnection.getSqlConnection();
@@ -444,6 +449,17 @@ public class DbMetadata
 	public boolean isCloudscape() { return this.isCloudscape; }
 	public boolean isApacheDerby() { return this.isApacheDerby; }
 
+	public boolean needSchemaInDML(TableIdentifier table)
+	{
+		if (this.isOracle)
+		{
+			String tblSchema = table.getSchema();
+			if (tblSchema == null) return false;
+			return !this.getUserName().equalsIgnoreCase(tblSchema);
+		}
+		return true;
+	}
+	
   public boolean isOracle8()
 	{
 		if (!this.isOracle) return false;
@@ -961,6 +977,13 @@ public class DbMetadata
 		return aTable.trim();
 	}
 
+	public String getCurrentSchema()
+	{
+		if (this.isOracle) return this.getUserName();
+		
+		return null;
+	}
+	
 	public String getSchemaForTable(String aTablename)
 		throws SQLException
 	{
@@ -1804,16 +1827,31 @@ public class DbMetadata
 	public List getTableList()
 		throws SQLException
 	{
-		String user = this.getUserName();
-		DataStore ds = getTables(null, user, TABLE_TYPE_TABLE);
+		String schema = null;
+		if (this.metaData.supportsSchemasInTableDefinitions())
+		{
+			schema = this.getUserName();
+		}
+		return getTableList(null);
+	}
+	
+	public List getTableList(String schema)
+		throws SQLException
+	{
+		if (schema != null)
+		{
+			schema = this.adjustObjectname(schema);
+			if (schema.length() == 0) schema = null;
+		}
+		DataStore ds = getTables(null, schema, TABLE_TYPE_TABLE);
 		int count = ds.getRowCount();
 		List tables = new ArrayList(count);
 		for (int i=0; i < count; i++)
 		{
-			String name = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_NAME);
-			String schema = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_SCHEMA);
-			String catalog = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_CATALOG);
-			tables.add(new TableIdentifier(catalog, schema, name));
+			String t = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_NAME);
+			String s = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_SCHEMA);
+			String c = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_CATALOG);
+			tables.add(new TableIdentifier(c, s, t));
 		}
 		return tables;
 	}

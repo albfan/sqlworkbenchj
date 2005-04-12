@@ -61,13 +61,24 @@ public class RowData
 	public void read(ResultSet rs, ResultInfo info)
 	{
 		int colCount = this.colData.length;
+		Object value = null;
 		for (int i=0; i < colCount; i++)
 		{
-			Object value = null;
 			int type = info.getColumnType(i);
 			try
 			{
-				value = rs.getObject(i + 1);
+				if (type == java.sql.Types.TIMESTAMP)
+				{
+					value = rs.getTimestamp(i+1);
+				}
+				else if (type == java.sql.Types.DATE)
+				{
+					value = rs.getDate(i+1);
+				}
+				else
+				{
+					value = rs.getObject(i + 1);
+				}
 				if (type == Types.CLOB)
 				{
 					try

@@ -56,6 +56,8 @@ public class SchemaDiff
 	private boolean diffForeignKeys = false;
 	private RowActionMonitor monitor;
 	private boolean cancel = false;
+	private String referenceSchema;
+	private String targetSchema;
 	
 	public SchemaDiff()
 	{
@@ -230,6 +232,80 @@ public class SchemaDiff
 			}
 			this.referenceTables[i] = new ReportTable(t, this.sourceDb, this.namespace, diffIndex, diffForeignKeys);
 			TableIdentifier tid = new TableIdentifier(t.getTable());
+			if (meta.tableExists(tid))
+			{
+				this.targetTables[i] = new ReportTable(tid, this.targetDb, this.namespace, diffIndex, diffForeignKeys);
+			}
+			refTableNames.add(t.getTable());
+		}
+
+		if (cancel) return;
+		
+		this.tablesToDelete = new ArrayList();
+		List target= meta.getTableList();
+		count = target.size();
+		for (int i=0; i < count; i++)
+		{
+			TableIdentifier t = (TableIdentifier)target.get(i);
+			if (!refTableNames.contains(t.getTable()))
+			{
+				this.tablesToDelete.add(t);
+			}
+		}
+	}
+
+	/**
+	 *	Setup this SchemaDiff object to compare all tables that the user
+	 *  can access in the reference connection with all matching (=same name)
+	 *  tables in the target connection.
+	 *  This will retrieve all user tables from the reference (=source)
+	 *  connection and will match them to the tables in the target connection.
+	 *  
+	 *  When using compareAll() drop statements will be created for tables 
+	 *  present in the target connection but not existing in the reference
+	 *  connection.
+	 *
+	 * @see #setTables(List, List)
+	 * @see #setTables(List)
+	 */
+	public void setSchemas(String refSchema, String targetSchema)
+		throws SQLException
+	{
+		if (this.monitor != null)
+		{
+			this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+			this.monitor.setCurrentObject(ResourceMgr.getString("MsgDiffRetrieveDbInfo"), -1, -1);
+		}
+		this.referenceSchema = refSchema;
+		this.targetSchema = targetSchema;
+		
+		List refTables = this.sourceDb.getMetadata().getTableList(refSchema);
+		int count = refTables.size();
+		List refTableNames = new ArrayList(count);
+		
+		this.referenceTables = new ReportTable[count];
+		this.targetTables = new ReportTable[count];
+		DbMetadata meta = this.targetDb.getMetadata();
+		
+		this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+		String msg = ResourceMgr.getString("MsgLoadTableInfo") + " ";
+		
+		for (int i=0; i < count; i++)
+		{
+			if (this.cancel) 
+			{
+				this.targetTables = null;
+				this.referenceTables = null;
+				break;
+			}
+			
+			TableIdentifier t = (TableIdentifier)refTables.get(i);
+			if (this.monitor != null)
+			{
+				this.monitor.setCurrentObject(msg + t.getTable(), -1, -1);
+			}
+			this.referenceTables[i] = new ReportTable(t, this.sourceDb, this.namespace, diffIndex, diffForeignKeys);
+			TableIdentifier tid = new TableIdentifier(targetSchema, t.getTable());
 			if (meta.tableExists(tid))
 			{
 				this.targetTables[i] = new ReportTable(tid, this.targetDb, this.namespace, diffIndex, diffForeignKeys);
@@ -453,8 +529,13 @@ public class SchemaDiff
 		tw.appendOpenTag(info, indent, TAG_COMPARE_INFO);
 		info.append('\n');
 		tw.appendTag(info, indent2, TAG_INDEX_INFO, this.diffIndex);
-		tw.appendTag(info, indent2, TAG_FK_INFO, this.diffForeignKeys);
+		//tw.appendTag(info, indent2, TAG_FK_INFO, this.diffForeignKeys);
 
+		if (this.referenceSchema != null && this.targetSchema != null)
+		{
+			tw.appendTag(info, indent2, "reference-schema", this.referenceSchema);
+			tw.appendTag(info, indent2, "target-schema", this.targetSchema);
+		}
 		int count = this.referenceTables.length;
 		String attr[] = new String[] { "referenceTable", "compareTo" };
 		String tbls[] = new String[2];

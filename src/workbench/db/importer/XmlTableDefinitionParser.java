@@ -28,6 +28,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.exporter.XmlRowDataConverter;
 import workbench.log.LogMgr;
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 /**
  * A parser to read the table definition from a Workbench XML file.
@@ -36,32 +37,31 @@ import workbench.util.StrBuffer;
 public class XmlTableDefinitionParser
 	extends DefaultHandler
 {
-	private List columnList;
+	private int currentColIndex;
+	private ColumnIdentifier[] columnList;
 	private String tableName;
-	private ColumnIdentifier currentColumn;
+	//private ColumnIdentifier currentColumn;
 	private String filename;
 	private String encoding = "UTF-8";
 	private StringBuffer chars;
+	private String tagFormat;
 	
 	public XmlTableDefinitionParser(String fname, String enc)
 		throws FileNotFoundException
 	{
 		this.filename = fname;
 		if (enc != null) this.encoding = enc;
-		this.columnList = new ArrayList();
 		this.parseTableStructure();
 	}
 	
 	public ColumnIdentifier[] getColumns()
 	{
-		int count = this.columnList.size();
-		ColumnIdentifier[] cols = new ColumnIdentifier[count];
-		for (int i=0; i < count; i++)
-		{
-			ColumnIdentifier c = (ColumnIdentifier)this.columnList.get(i);
-			cols[i] = c;
-		}
-		return cols;
+		return this.columnList;
+	}
+	
+	public String getTagFormat()
+	{
+		return this.tagFormat;
 	}
 	
 	public String getTableName()
@@ -107,16 +107,36 @@ public class XmlTableDefinitionParser
 		this.chars = new StringBuffer();
 		if (qName.equals(XmlRowDataConverter.COLUMN_DEF_TAG))
 		{
-			this.currentColumn = new ColumnIdentifier();
+			//this.currentColumn = new ColumnIdentifier();
+			this.columnList[this.currentColIndex] = new ColumnIdentifier();
 		}
 	}
 	
 	public void endElement(String namespaceURI, String sName, String qName)
 		throws SAXException
 	{
-		if (qName.equals(XmlRowDataConverter.COLUMN_DEF_TAG))
+		if (qName.equals(XmlRowDataConverter.TAG_TAG_FORMAT))
 		{
-			this.columnList.add(this.currentColumn);
+			this.tagFormat = this.chars.toString();
+		}
+		else if (qName.equals(XmlRowDataConverter.COLUMN_COUNT_TAG))
+		{
+			try
+			{
+				int count = StringUtil.getIntValue(this.chars.toString(), -1);
+				this.columnList = new ColumnIdentifier[count];
+				this.currentColIndex = 0;
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("XmlTableDefinitionParser.endElement", "Incorrec value for " + XmlRowDataConverter.COLUMN_COUNT_TAG + ": " + this.chars, e);
+				throw new SAXException("Invalid column count");
+			}
+		}
+		else if (qName.equals(XmlRowDataConverter.COLUMN_DEF_TAG))
+		{
+			//this.columnList[currentColIndex] = this.currentColumn;
+			currentColIndex ++;
 		}
 		else if (qName.equals(XmlRowDataConverter.TABLE_NAME_TAG))
 		{
@@ -124,14 +144,14 @@ public class XmlTableDefinitionParser
 		}
 		else if (qName.equals(XmlRowDataConverter.COLUMN_NAME_TAG))
 		{
-			this.currentColumn.setColumnName(this.chars.toString()); 
+			this.columnList[this.currentColIndex].setColumnName(this.chars.toString()); 
 		}
 		else if (qName.equals(XmlRowDataConverter.JAVA_TYPE_TAG))
 		{
 			try
 			{
 				int type = Integer.parseInt(this.chars.toString());
-				this.currentColumn.setDataType(type);
+				this.columnList[currentColIndex].setDataType(type);
 			}
 			catch (Exception e)
 			{
@@ -143,7 +163,7 @@ public class XmlTableDefinitionParser
 		{
 			try
 			{
-				this.currentColumn.setDbmsType(this.chars.toString());
+				this.columnList[currentColIndex].setDbmsType(this.chars.toString());
 			}
 			catch (Exception e)
 			{
@@ -155,7 +175,7 @@ public class XmlTableDefinitionParser
 		{
 			try
 			{
-				this.currentColumn.setColumnClass(this.chars.toString());
+				this.columnList[currentColIndex].setColumnClass(this.chars.toString());
 			}
 			catch (Exception e)
 			{

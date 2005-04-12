@@ -16,6 +16,7 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
+import workbench.resource.Settings;
 
 /**
  * Utility class to parse String into approriate Java classes according
@@ -40,6 +41,13 @@ public class ValueConverter
 														"MM/dd/yyyy",
 														"dd-MMM-yyyy"
 													};
+													
+	private static final String[] timestampFormats = new String[] {
+														"yyyy-MM-dd HH:mm:ss",
+														"dd.MM.yyyy HH:mm:ss",
+														"MM/dd/yy HH:mm:ss",
+														"MM/dd/yyyy HH:mm:ss",
+													};
 
 	private String defaultDateFormat;
 	private String defaultTimestampFormat;
@@ -48,6 +56,9 @@ public class ValueConverter
 
 	public ValueConverter()
 	{
+		Settings sett = Settings.getInstance();
+		this.defaultDateFormat = sett.getDefaultDateFormat();
+		this.defaultTimestampFormat = sett.getDefaultDateTimeFormat();
 	}
 
 	public ValueConverter(String aDateFormat, String aTimeStampFormat)
@@ -80,12 +91,12 @@ public class ValueConverter
 		{
 			case Types.BIGINT:
 				if (aValue.toString().length() == 0) return null;
-				return new BigInteger(aValue.toString());
+				return new BigInteger(aValue.toString().trim());
 			case Types.INTEGER:
 			case Types.SMALLINT:
 			case Types.TINYINT:
 				if (aValue.toString().length() == 0) return null;
-				return new Integer(aValue.toString());
+				return new Integer(aValue.toString().trim());
 			case Types.NUMERIC:
 			case Types.DECIMAL:
 			case Types.DOUBLE:
@@ -104,10 +115,7 @@ public class ValueConverter
 				return this.parseDate((String)aValue);
 			case Types.TIMESTAMP:
 				if (aValue.toString().length() == 0) return null;
-				java.sql.Date d = this.parseDate((String)aValue);
-				if (d == null) throw new Exception("Could not parse date " + aValue);
-				Timestamp t = new Timestamp(d.getTime());
-				return t;
+				return this.parseTimestamp((String)aValue);
 			default:
 				return aValue;
 		}
@@ -123,9 +131,52 @@ public class ValueConverter
 		return this.defaultTimestampFormat;
 	}
 
+  public java.sql.Timestamp parseTimestamp(String aDate)
+  {
+		java.util.Date result = null;
+		
+		if (this.defaultTimestampFormat != null)
+		{
+			this.formatter.applyPattern(this.defaultTimestampFormat);
+			try
+			{
+				result = this.formatter.parse(aDate);
+			}
+			catch (Exception e)
+			{
+				result = null;
+			}
+		}
+		
+		if (result == null)
+		{
+			for (int i=0; i < dateFormats.length; i++)
+			{
+				try
+				{
+					this.formatter.applyPattern(timestampFormats[i]);
+					result = this.formatter.parse(aDate);
+					break;
+				}
+				catch (Exception e)
+				{
+					result = null;
+				}
+			}
+		}
+		
+		if (result != null)
+		{
+			return new java.sql.Timestamp(result.getTime());
+		}
+		return null;
+		
+	}
+	
   public java.sql.Date parseDate(String aDate)
   {
 		java.util.Date result = null;
+		
 		if (this.defaultDateFormat != null)
 		{
 			this.formatter.applyPattern(this.defaultDateFormat);

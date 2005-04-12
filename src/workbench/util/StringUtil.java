@@ -74,7 +74,7 @@ public class StringUtil
 
 	public static final String makeFilename(String input)
 	{
-		return input.replaceAll("[\t\\:\\\\/\\?\\*\\|<>]", "").toLowerCase();
+		return input.replaceAll("[\t\\:\\\\/\\?\\*\\|<>\"'\\{\\}$%§\\[\\]\\^|\\&]", "").toLowerCase();
 	}
 
 	public static final StringBuffer replaceToBuffer(StringBuffer target, String aString, String aValue, String aReplacement)
@@ -247,7 +247,7 @@ public class StringUtil
 		if (one != null && other == null) return false;
 		return one.equals(other);
 	}
-	
+
 	public static final boolean equalStringIgnoreCase(String one, String other)
 	{
 		if (one == null && other == null) return true;
@@ -255,12 +255,12 @@ public class StringUtil
 		if (one != null && other == null) return false;
 		return one.equalsIgnoreCase(other);
 	}
-	
+
 	public static final List stringToList(String aString, String aDelimiter)
 	{
 		return stringToList(aString, aDelimiter, false, false);
 	}
-	
+
 	public static final List stringToList(String aString, String aDelimiter, boolean removeEmpty)
 	{
 		return stringToList(aString, aDelimiter, removeEmpty, false);
@@ -768,7 +768,7 @@ public class StringUtil
 	{
 		return getMaxSubstring(s, maxLen, "...");
 	}
-	
+
 	public static final String getMaxSubstring(String s, int maxLen, String cont)
 	{
 		if (s == null) return null;

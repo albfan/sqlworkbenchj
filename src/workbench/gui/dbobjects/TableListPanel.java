@@ -1871,9 +1871,10 @@ public class TableListPanel
 		int row = this.tableList.getSelectedRow();
 		if (row < 0) return;
 		String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-		String sql = "SELECT * FROM " + SqlUtil.quoteObjectname(table);
+		String schema = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+		TableIdentifier id = new TableIdentifier(schema, table);
 		DataExporter spooler = new DataExporter();
-		spooler.executeStatement(SwingUtilities.getWindowAncestor(this), this.dbConnection, sql, true);
+		spooler.exportTable(SwingUtilities.getWindowAncestor(this), this.dbConnection, id);
 	}
 
 	public void spoolTables()
@@ -1925,7 +1926,9 @@ public class TableListPanel
 				String ttype = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
 				if (ttype == null) continue;
 				if (!this.isTableType(ttype.toLowerCase())) continue;
-				String stmt = "SELECT * FROM " + SqlUtil.quoteObjectname(table);
+				String schema = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+				TableIdentifier id = new TableIdentifier(schema, table);
+				String stmt = "SELECT * FROM " + id.getTableExpression(this.dbConnection);
 				String fname = StringUtil.makeFilename(table);
 				File f = new File(fdir, fname + ext);
 				exporter.addJob(f.getAbsolutePath(), stmt);

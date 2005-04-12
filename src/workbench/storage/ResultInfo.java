@@ -62,6 +62,13 @@ public class ResultInfo
 		}
 	}
 
+	public ResultInfo(TableIdentifier table, WbConnection conn)
+		throws SQLException
+	{
+		this.columns = conn.getMetadata().getColumnIdentifiers(table);
+		this.colCount = this.columns.length;
+	}
+	
 	/** Creates a new instance of ResultMetaData */
 	public ResultInfo(ResultSetMetaData metaData, WbConnection sourceConnection) 
 		throws SQLException

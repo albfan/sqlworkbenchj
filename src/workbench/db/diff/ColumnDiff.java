@@ -93,7 +93,7 @@ public class ColumnDiff
 		myindent.append("  ");
 		
 		boolean typeDifferent = !sId.getDbmsType().equalsIgnoreCase(tId.getDbmsType());
-		boolean pkDifferent = (sId.isPkColumn() != tId.isPkColumn());
+//		boolean pkDifferent = (sId.isPkColumn() != tId.isPkColumn());
 		boolean nullableDifferent = (sId.isNullable() != tId.isNullable());
 		String sdef = sId.getDefaultValue();
 		String tdef = tId.getDefaultValue();
@@ -105,7 +105,7 @@ public class ColumnDiff
 		
 		if (writer == null) this.writer = new TagWriter();
 		
-		if (typeDifferent || pkDifferent || nullableDifferent || defaultDifferent || commentDifferent)
+		if (typeDifferent || nullableDifferent || defaultDifferent || commentDifferent)
 		{
 			writer.appendOpenTag(result, this.indent, TAG_MODIFY_COLUMN, "name", tId.getColumnName());
 			result.append('\n');
@@ -113,10 +113,10 @@ public class ColumnDiff
 			{
 				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_DBMS_TYPE, sId.getDbmsType());
 			}
-			if (pkDifferent)
-			{
-				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_PK, sId.isPkColumn());
-			}
+//			if (pkDifferent)
+//			{
+//				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_PK, sId.isPkColumn());
+//			}
 			if (nullableDifferent)
 			{
 				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_NULLABLE, sId.isNullable());

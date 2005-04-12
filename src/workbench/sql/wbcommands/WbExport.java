@@ -28,6 +28,8 @@ import workbench.util.ArgumentParser;
 import workbench.util.CharacterRange;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.db.TableIdentifier;
+import workbench.exception.ExceptionUtil;
 
 /**
  *
@@ -146,6 +148,8 @@ public class WbExport
 		type = cmdLine.getValue("type");
 		file = cmdLine.getValue("file");
 		String tables = cmdLine.getValue("sourcetable");
+		boolean allTables = "*".equals(tables);
+
 		String outputdir = cmdLine.getValue("outputdir");
 
 		if (type == null)
@@ -411,6 +415,38 @@ public class WbExport
 		result.setSuccess();
 
 		int count = this.tablesToExport.size();
+		if (count == 1)
+		{
+			String t = (String)this.tablesToExport.get(0);
+			if (t.endsWith("*"))
+			{
+				String schema = null;
+				if (t.length() > 1)
+				{
+					schema = t.substring(0, t.indexOf('.'));
+				}
+				List l = null;
+				try
+				{
+					l = this.currentConnection.getMetadata().getTableList(schema);
+				}
+				catch (SQLException e)
+				{
+					LogMgr.logError("WbExport.runTableExports()", "Could not retrieve table list", e);
+					result.addMessage(ExceptionUtil.getDisplay(e));
+					result.setFailure();
+					return;
+				}
+				this.tablesToExport.clear();
+				int c = l.size();
+				for (int i=0; i < c; i++)
+				{
+					TableIdentifier id = (TableIdentifier)l.get(i);
+					this.tablesToExport.add(id.getTableExpression(this.currentConnection));
+				}
+				count = this.tablesToExport.size();
+			}
+		}
 
 		File outdir = null;
 		String outfile = exporter.getOutputFilename();
@@ -447,7 +483,7 @@ public class WbExport
 
 		exporter.setRowMonitor(this);
 		exporter.setProgressInterval(this.progressInterval);
-		
+
 		if (count > 1)
 		{
 			for (int i = 0; i < count; i ++)
@@ -506,7 +542,6 @@ public class WbExport
 		{
 			result.addMessages(exporter.getErrors());
 		}
-		result.addMessage("");
 	}
 
 	public boolean isResultSetConsumer()

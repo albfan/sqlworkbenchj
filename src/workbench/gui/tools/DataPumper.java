@@ -54,7 +54,6 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.wbcommands.WbCopy;
-import workbench.sql.wbcommands.WbImport;
 import workbench.storage.RowActionMonitor;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -1309,6 +1308,7 @@ public class DataPumper
 			if (target != null && target.isNewTable())
 			{
 				this.targetTable.resetNewTableItem();
+				target = null;
 			}
 			if (target == null)
 			{
@@ -1417,6 +1417,14 @@ public class DataPumper
 	private void showImportCommand()
 	{
 		if (this.fileImporter == null || this.target == null) return;
+		try
+		{
+			this.initImporter();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 		String sql = this.fileImporter.getWbCommand();
 		EditWindow w = new EditWindow(this.window, ResourceMgr.getString("MsgWindowTitleDPScript"), sql, "workbench.datapumper.scriptwindow", true);
 		w.show();
@@ -1632,6 +1640,15 @@ public class DataPumper
 		this.statusLabel.setText(ResourceMgr.getString("MsgCopyCancelled"));
 	}
 
+	private void initImporter()
+		throws Exception
+	{
+		this.fileImporter.setConnection(this.targetConnection);
+		List cols = columnMapper.getMappingForImport();
+		this.fileImporter.setTargetTable(this.targetTable.getSelectedTable());
+		this.fileImporter.setImportColumns(cols);
+	}
+	
 	private void startCopy()
 	{
 		if (this.targetConnection == null || (this.sourceConnection == null && this.fileImporter == null)) return;
@@ -1649,10 +1666,7 @@ public class DataPumper
 
 			if (this.fileImporter != null)
 			{
-				List cols = columnMapper.getMappingForImport();
-				this.fileImporter.setTargetTable(this.targetTable.getSelectedTable());
-				this.fileImporter.setConnection(this.targetConnection);
-				this.fileImporter.setImportColumns(cols);
+				this.initImporter();
 				this.copier.copyFromFile(this.fileImporter.getProducer(), this.targetConnection, this.targetTable.getSelectedTable());
 				int interval = DataImporter.estimateReportIntervalFromFileSize(this.fileImporter.getSourceFilename());
 				this.copier.setReportInterval(interval);

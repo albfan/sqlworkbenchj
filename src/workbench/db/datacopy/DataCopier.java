@@ -546,7 +546,7 @@ public class DataCopier
 			}
 
 			step = "cleanup";
-			this.importer.importFinished();
+			if (this.sourceData == null) this.importer.importFinished();
 			String msg = this.getRowsInsertedMessage();
 			if (msg != null) this.addMessage(msg);
 			msg = this.getRowsUpdatedMessage();

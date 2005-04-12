@@ -20,7 +20,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
@@ -35,7 +34,6 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
 import workbench.util.WbStringTokenizer;
-import java.util.HashMap;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -648,7 +646,40 @@ public class TextFileParser
 			this.colCount = -1;
 			this.columns = null;
 		}
-
+	}
+	
+	/**
+	 *	Returns the column list as a comma separated string
+	 *  that can be used for the WbImport command
+	 */
+	public String getColumns()
+	{
+		StringBuffer result = new StringBuffer(this.colCount * 10);
+		
+		if (this.columnMap == null || this.importColCount == this.colCount) 
+		{
+			for (int i=0; i < this.colCount; i++)
+			{
+				if (i > 0) result.append(',');
+				result.append(this.columns[i].getColumnName());
+			}
+		}
+		else
+		{
+			for (int i=0; i < this.colCount; i++)
+			{
+				if (i > 0) result.append(',');
+				if (this.columnMap[i] != -1)
+				{
+					result.append(this.columns[i].getColumnName());
+				}
+				else
+				{
+					result.append(RowDataProducer.SKIP_INDICATOR);
+				}
+			}
+		}
+		return result.toString();
 	}
 
 	/**

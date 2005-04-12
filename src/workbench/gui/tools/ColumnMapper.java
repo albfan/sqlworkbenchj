@@ -225,7 +225,7 @@ public class ColumnMapper
 			}
 			else
 			{
-				s = row.getSource().getColumnName();
+				s = row.getTarget().getColumnName();
 				result.add(s);
 			}
 		}

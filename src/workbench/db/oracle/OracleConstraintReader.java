@@ -26,10 +26,8 @@ import workbench.log.LogMgr;
 public class OracleConstraintReader
 	extends AbstractConstraintReader
 {
-	private PreparedStatement statement;
-
 	private static final String TABLE_SQL =
-	         "SELECT search_condition \n" +
+	         "SELECT constraint_name, search_condition \n" +
            "FROM all_constraints cons   \n" +
            "WHERE constraint_type = 'C' \n" +
            " and owner = ? \n" +
@@ -51,7 +49,7 @@ public class OracleConstraintReader
 	{
 		return 2;
 	}
-	public String getPrefixTableConstraintKeyword() { return "check ("; }
+	public String getPrefixTableConstraintKeyword() { return "CHECK ("; }
 	public String getSuffixTableConstraintKeyword() { return ")"; }
 
 	public String getColumnConstraintSql() { return null; }
@@ -63,20 +61,19 @@ public class OracleConstraintReader
 		if (sql == null) return null;
 		StringBuffer result = new StringBuffer(100);
 		ResultSet rs = null;
+		PreparedStatement stmt = null;
 		try
 		{
-			if (this.statement == null)
-			{
-				this.statement = dbConnection.prepareStatement(sql);
-			}
-			this.statement.setString(1, aTable.getSchema());
-			this.statement.setString(2, aTable.getTable());
+			stmt = dbConnection.prepareStatement(sql);
+			stmt.setString(1, aTable.getSchema());
+			stmt.setString(2, aTable.getTable());
 
-			rs = this.statement.executeQuery();
+			rs = stmt.executeQuery();
 			int count = 0;
 			while (rs.next())
 			{
-				String constraint = rs.getString(1);
+				String name = rs.getString(1);
+				String constraint = rs.getString(2);
 				if (constraint != null)
 				{
           if (constraint.trim().endsWith("NOT NULL")) continue;
@@ -86,7 +83,13 @@ public class OracleConstraintReader
 						result.append(indent);
 						result.append(',');
 					}
-					result.append("check (");
+					if (!name.startsWith("SYS_"))
+					{
+						result.append("CONSTRAINT ");
+						result.append(name);
+						result.append(' ');
+					}
+					result.append("CHECK (");
 					result.append(constraint);
 					result.append(")");
 					count++;
@@ -100,16 +103,12 @@ public class OracleConstraintReader
 		finally
 		{
 			try { rs.close(); } catch (Throwable th) {}
-			//try { stmt.close(); } catch (Throwable th) {}
+			try { stmt.close(); } catch (Throwable th) {}
 		}
 		return result.toString();
 	}
 
 	public void done()
 	{
-		if (this.statement != null)
-		{
-			try { this.statement.close(); } catch (Throwable th) {}
-		}
 	}
 }

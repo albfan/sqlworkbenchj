@@ -12,6 +12,7 @@
 package workbench.db.exporter;
 
 import java.sql.Types;
+import workbench.db.DbMetadata;
 
 import workbench.db.TableIdentifier;
 import workbench.db.report.ReportColumn;
@@ -45,6 +46,9 @@ public class XmlRowDataConverter
 	public static final String COLUMN_NAME_TAG = ReportColumn.TAG_COLUMN_NAME;
 	public static final String ATTR_LONGVALUE = "longValue";
 	public static final String ATTR_NULL = "null";
+	public static final String KEY_FORMAT_LONG = "long";
+	public static final String KEY_FORMAT_SHORT = "short";
+	public static final String TAG_TAG_FORMAT = "wb-tag-format";
 	
 	private boolean useCData = false;
 	private boolean verboseFormat = true;
@@ -254,6 +258,10 @@ public class XmlRowDataConverter
 		}
 
 		result.append(this.lineEnding);
+		result.append(indent2);
+		result.append('<');result.append(TAG_TAG_FORMAT);result.append('>');
+		result.append(this.verboseFormat ? KEY_FORMAT_LONG : KEY_FORMAT_SHORT);
+		result.append("</");result.append(TAG_TAG_FORMAT);result.append('>');
 		result.append(indent);
 		result.append("</meta-data>");
 		result.append(this.lineEnding);
@@ -310,13 +318,15 @@ public class XmlRowDataConverter
 		result.append(this.lineEnding);
 		result.append(this.lineEnding);
 
-		boolean hasTable = false;
 		result.append(indent);
 		result.append("  <");
 		result.append(TABLE_NAME_TAG);
 		result.append('>');
 		TableIdentifier table = this.metaData.getUpdateTable();
-		if (table != null) result.append(table.getTableExpression());
+		if (table != null) 
+		{
+			result.append(table.getTable());
+		}
 		result.append("</");
 		result.append(TABLE_NAME_TAG);
 		result.append(">");

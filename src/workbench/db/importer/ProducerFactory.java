@@ -10,8 +10,6 @@
  *
  */
 package workbench.db.importer;
-
-import java.util.Collections;
 import java.util.List;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -48,8 +46,11 @@ public class ProducerFactory
 	
 	public void setConnection(WbConnection conn)
 	{
+		if (this.connection != conn)
+		{
+			this.producer = null;
+		}
 		this.connection = conn;
-		this.producer = null;
 	}
 	
 	public void setGeneralOptions(ImportOptions options)
@@ -195,6 +196,58 @@ public class ProducerFactory
 		this.fileParser = parser;
 	}
 	
+	/**
+	 * Appends text import options to the passed sql command
+	 */
+	private void appendTextOptions(StringBuffer command, StringBuffer indent)
+	{
+		if (this.textOptions == null) return;
+		appendArgument(command, WbImport.ARG_CONTAINSHEADER, textOptions.getContainsHeader(), indent);
+		appendArgument(command, WbImport.ARG_DECODE, textOptions.getDecode(), indent);
+		String delim = textOptions.getTextDelimiter();
+		if ("\t".equals(delim)) delim = "\\t";
+		appendArgument(command, WbImport.ARG_DELIM, delim, indent);
+		appendArgument(command, WbImport.ARG_QUOTE, textOptions.getTextQuoteChar(), indent);
+		appendArgument(command, WbImport.ARG_DECCHAR, textOptions.getDecimalChar(), indent);
+		appendArgument(command, WbImport.ARG_FILECOLUMNS, this.fileParser.getColumns(), indent);
+	}
+	
+	/**
+	 * Appends xml import options to the passed sql command
+	 */
+	private void appendXmlOptions(StringBuffer command, StringBuffer indent)
+	{
+		if (this.xmlOptions == null) return;
+		appendArgument(command, WbImport.ARG_VERBOSEXML, xmlOptions.getUseVerboseXml(), indent);
+	}
+
+	private void appendArgument(StringBuffer result, String arg, boolean value, StringBuffer indent)
+	{
+		appendArgument(result, arg, Boolean.toString(value), indent);
+	}
+	
+	private void appendArgument(StringBuffer result, String arg, String value, StringBuffer indent)
+	{
+		if (value != null)
+		{
+			result.append(indent);
+			result.append('-');
+			result.append(arg);
+			result.append('=');
+			if (value.indexOf("-") > -1) result.append('"');
+			else if ("\"".equals(value)) result.append('\'');
+			else if ("\'".equals(value)) result.append('\"');
+			result.append(value);
+			if (value.indexOf("-") > -1) result.append('"');
+			else if ("\"".equals(value)) result.append('\'');
+			else if ("\'".equals(value)) result.append('\"');
+		}
+	}
+	
+	/**
+	 *	Generates a WB SQL command from the current import
+	 *  settings
+	 */
 	public String getWbCommand()
 	{
 		StringBuffer result = new StringBuffer(150);
@@ -202,7 +255,6 @@ public class ProducerFactory
 		indent.append('\n');
 		for (int i=0; i < WbImport.VERB.length(); i++) indent.append(' ');
 		indent.append(' ');
-		
 		result.append(WbImport.VERB + " -" + WbImport.ARG_FILE + "=");
 		if (inputFile.indexOf('-') > -1) result.append('"');
 		result.append(StringUtil.replace(inputFile, "\\", "/"));
@@ -219,6 +271,15 @@ public class ProducerFactory
 		{
 			result.append("text");
 		}
+		
+		appendArgument(result, WbImport.ARG_TARGETTABLE, this.table.getTable(), indent);
+		appendArgument(result, WbImport.ARG_ENCODING, this.generalOptions.getEncoding(), indent);
+		appendArgument(result, WbImport.ARG_MODE, this.generalOptions.getMode(), indent);
+		
+		if (this.isXmlImport())
+			this.appendXmlOptions(result, indent);
+		else
+			appendTextOptions(result, indent);
 		
 		return result.toString();
 	}

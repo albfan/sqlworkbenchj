@@ -36,6 +36,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 
 import workbench.WbManager;
+import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
@@ -835,11 +836,6 @@ public class DataExporter
 		}
 	}
 
-	public void executeStatement(WbConnection aConnection, String aSql)
-	{
-		this.executeStatement(null, aConnection, aSql, false);
-	}
-
 	public boolean selectOutput(Window parent)
 	{
 		ExportFileDialog dialog = new ExportFileDialog(parent);
@@ -854,12 +850,21 @@ public class DataExporter
 		return result;
 	}
 	
-	public void executeStatement(Window aParent, WbConnection aConnection, String aSql, boolean modal)
+	//public void executeStatement(Window aParent, WbConnection aConnection, String aSql, boolean modal)
+	public void exportTable(Window aParent, WbConnection aConnection, TableIdentifier table)
 	{
-		this.setSql(aSql);
-		boolean includeSqlExport = this.sqlTable != null;
 		this.parentWindow = aParent;
-		ExportFileDialog dialog = new ExportFileDialog(aParent);
+		ResultInfo info = null;
+		try
+		{
+			info = new ResultInfo(table, aConnection);
+		}
+		catch (SQLException e)
+		{
+			info = null;
+		}
+		ExportFileDialog dialog = new ExportFileDialog(aParent, info);
+		
 		dialog.setIncludeSqlInsert(true);
 		dialog.setIncludeSqlUpdate(true);
 
@@ -868,6 +873,18 @@ public class DataExporter
 		{
 			try
 			{
+				List cols = dialog.getColumnsToExport();
+				StringBuffer sql = new StringBuffer(250);
+				sql.append("SELECT ");
+				for (int i=0; i < cols.size(); i++)
+				{
+					if (i > 0) sql.append(", ");
+					ColumnIdentifier col = (ColumnIdentifier)cols.get(i);
+					sql.append(col.getColumnName());
+				}
+				sql.append(" FROM ");
+				sql.append(table.getTableExpression(aConnection));
+				this.setSql(sql.toString());
 				this.setConnection(aConnection);
 				dialog.setExporterOptions(this);
 				this.setShowProgressWindow(true);
@@ -877,7 +894,7 @@ public class DataExporter
 					parent = (Frame)aParent;
 				}
 				this.startBackgroundThread();
-				this.openProgressMonitor(parent, modal);
+				this.openProgressMonitor(parent, true);
 			}
 			catch (Exception e)
 			{

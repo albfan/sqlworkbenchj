@@ -15,7 +15,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.sql.Types;
-import java.util.Properties;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -28,13 +27,10 @@ import javax.swing.table.TableCellEditor;
 
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.DeleteListEntryAction;
-import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTextCellEditor;
-import workbench.interfaces.FileActions;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;

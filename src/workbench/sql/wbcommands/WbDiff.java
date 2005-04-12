@@ -12,6 +12,7 @@
 package workbench.sql.wbcommands;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -39,9 +40,13 @@ public class WbDiff
 	public static final String PARAM_TARGETPROFILE = "targetprofile";
 	public static final String PARAM_FILENAME = "file";
 	public static final String PARAM_ENCODING = "encoding";
+	public static final String PARAM_NAMESPACE = "namespace";
 	
-	public static final String PARAM_SOURCETABLES = "sourcetables";
+	public static final String PARAM_SOURCETABLES = "referencetables";
 	public static final String PARAM_TARGETTABLES = "targettables";
+
+	public static final String PARAM_SOURCESCHEMA = "referenceschema";
+	public static final String PARAM_TARGETSCHEMA = "targetschema";
 	
 	private ArgumentParser cmdLine;
 	private SchemaDiff diff;
@@ -55,6 +60,9 @@ public class WbDiff
 		cmdLine.addArgument(PARAM_ENCODING);
 		cmdLine.addArgument(PARAM_SOURCETABLES);
 		cmdLine.addArgument(PARAM_TARGETTABLES);
+		cmdLine.addArgument(PARAM_SOURCESCHEMA);
+		cmdLine.addArgument(PARAM_TARGETSCHEMA);
+		cmdLine.addArgument(PARAM_NAMESPACE);
 	}
 
 	public String getVerb() { return VERB; }
@@ -158,9 +166,33 @@ public class WbDiff
 		
 		String refTables = cmdLine.getValue(PARAM_SOURCETABLES);
 		String tarTables = cmdLine.getValue(PARAM_TARGETTABLES);
+		
 		if (refTables == null)
 		{
-			diff.compareAll();
+			String refSchema = cmdLine.getValue(PARAM_SOURCESCHEMA);
+			String targetSchema = cmdLine.getValue(PARAM_TARGETSCHEMA);
+			if (refSchema == null || targetSchema == null)
+			{
+				if (sourceCon == targetCon)
+				{
+					result.addMessage(ResourceMgr.getString("ErrorDiffSameConnectionNoTableSelection"));
+					result.setFailure();
+					if (targetCon.getId().startsWith("Wb-Diff"))
+					{
+						try { targetCon.disconnect(); } catch (Throwable th) {}
+					}
+					if (sourceCon.getId().startsWith("Wb-Diff"))
+					{
+						try { sourceCon.disconnect(); } catch (Throwable th) {}
+					}
+					return result;
+				}
+				diff.compareAll();
+			}
+			else
+			{
+				diff.setSchemas(refSchema, targetSchema);
+			}
 		}
 		else if (tarTables == null)
 		{
@@ -221,6 +253,12 @@ public class WbDiff
 			if (outputToConsole)
 			{
 				result.addMessage(out.toString());
+			}
+			else
+			{
+				File f = new File(filename);
+				String msg = ResourceMgr.getString("MsgDiffFileWritten") + " " + f.getAbsolutePath();
+				result.addMessage(msg);
 			}
 		}
 		return result;

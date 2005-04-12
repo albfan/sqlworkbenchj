@@ -18,6 +18,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.DmlStatement;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
@@ -48,7 +49,8 @@ public class SqlRowDataConverter
 	private String lineTerminator = "\n";
 	private String doubleLineTerminator = "\n\n";
 	private boolean includeOwner = true;
-	
+	private boolean doFormatting = true; 
+
 	public SqlRowDataConverter(ResultInfo info)
 	{
 		super(info);
@@ -127,7 +129,10 @@ public class SqlRowDataConverter
 		dml.setConcatFunction(this.concatFunction);
 		result.append(dml.getExecutableStatement());
 		result.append(';');
-		result.append(doubleLineTerminator);
+		if (doFormatting)
+			result.append(doubleLineTerminator);
+		else
+			result.append(lineTerminator);
 
 		if (this.commitEvery > 0 && ((rowIndex + 1) % commitEvery) == 0)
 		{
@@ -167,6 +172,7 @@ public class SqlRowDataConverter
 	public void setCreateInsert()
 	{
 		this.sqlType = SQL_INSERT;
+		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.doformat",true);
 	}
 	
 	public void setCreateUpdate()
@@ -175,6 +181,7 @@ public class SqlRowDataConverter
 		// when creating update statements, we need to make sure
 		// that we have key columns
 		this.checkKeyColumns();
+		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.update.doformat",true);
 	}
 
 	public void setCreateInsertDelete()
@@ -185,6 +192,7 @@ public class SqlRowDataConverter
 			LogMgr.logWarning("SqlRowDataConverter.setCreateInsertDelete()", "No key columns found, reverting back to INSERT generation");
 			this.sqlType = SQL_INSERT;
 		}
+		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.doformat",true);
 	}
 	
 	private boolean checkKeyColumns()

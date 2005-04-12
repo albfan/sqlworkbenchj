@@ -56,10 +56,6 @@ public class TableSelectorPanel
 		this.schemaLabel.setText(ResourceMgr.getString("LabelSchema"));
 		this.tableLabel.setText(ResourceMgr.getString("LabelTable"));
 		this.tableSelector.setMaximumRowCount(15);
-		//this.popupMenu = new JPopupMenu();
-		//this.editNewTableNameItem = new WbMenuItem(ResourceMgr.getString("MnuTxtEditNewTableName"));
-		//this.editNewTableNameItem.addActionListener(this);
-		//this.popupMenu.add(this.editNewTableNameItem);
 		this.editNewTableNameButton.setVisible(false);
 	}
 
@@ -88,6 +84,7 @@ public class TableSelectorPanel
 	public void allowNewTable(boolean flag)
 	{
 		this.allowNewTable = flag;
+		this.editNewTableNameButton.removeActionListener(this);
 		int count = this.tableSelector.getItemCount();
 		if (count > 0)
 		{
@@ -120,10 +117,6 @@ public class TableSelectorPanel
 		if (flag)
 		{
 			this.editNewTableNameButton.addActionListener(this);
-		}
-		else
-		{
-			this.editNewTableNameButton.removeActionListener(this);
 		}
 	}
 
@@ -369,8 +362,8 @@ public class TableSelectorPanel
 				if (name != null)
 				{
 					id.setTable(name);
+					this.tableSelector.repaint();
 				}
-				this.tableSelector.repaint();
 			}
 		}
 	}

@@ -12,6 +12,7 @@
 package workbench.db.importer;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -20,7 +21,6 @@ import java.lang.reflect.Constructor;
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,6 +39,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.exporter.XmlRowDataConverter;
+import workbench.exception.ExceptionUtil;
 import workbench.interfaces.ImportFileParser;
 import workbench.log.LogMgr;
 import workbench.util.StrBuffer;
@@ -53,6 +54,7 @@ public class XmlDataFileParser
 	extends DefaultHandler
 	implements RowDataProducer, ImportFileParser
 {
+	private String sourceDirectory;
 	private String inputFile;
 	private String tableName;
 	private String tableNameFromFile;
@@ -94,12 +96,33 @@ public class XmlDataFileParser
 	private String columnTag = XmlRowDataConverter.LONG_COLUMN_TAG;
 	
 	private HashMap constructors = new HashMap();
-
+	private SAXParser saxParser;
+	
+	public XmlDataFileParser()
+	{
+		SAXParserFactory factory = SAXParserFactory.newInstance();
+		factory.setValidating(false);
+		try
+		{
+			saxParser = factory.newSAXParser();
+		}
+		catch (Exception e)
+		{
+			// should not happen!
+			LogMgr.logError("XmlDataFileParser.<init>", "Error creating XML parser", e);
+		}
+	}
 	public XmlDataFileParser(String inputFile)
 	{
+		this();
 		this.inputFile = inputFile;
 	}
 
+	public String getColumns()
+	{
+		return StringUtil.listToString(this.columnsToImport, ',');
+	}
+	
 	public void setColumns(String columnList)
 	{
 		if (columnList != null && columnList.trim().length() > 0)
@@ -233,15 +256,46 @@ public class XmlDataFileParser
 	private void readTableDefinition()
 		throws FileNotFoundException
 	{
-		XmlTableDefinitionParser tableDef = new XmlTableDefinitionParser(this.inputFile, this.encoding);
+		XmlTableDefinitionParser tableDef = new XmlTableDefinitionParser(inputFile, this.encoding);
 		this.columns = tableDef.getColumns();
 		this.colCount = this.columns.length;
 		this.tableNameFromFile = tableDef.getTableName();
+		String format = tableDef.getTagFormat();
+		if (format != null)
+		{
+			if (XmlRowDataConverter.KEY_FORMAT_LONG.equals(format))
+			{
+				this.setUseVerboseFormat(true);
+			}
+			else if (XmlRowDataConverter.KEY_FORMAT_SHORT.equals(format))
+			{
+				this.setUseVerboseFormat(false);
+			}
+		}
 	}
-	
+
 	public String getSourceFilename()
 	{
 		return this.inputFile;
+	}
+	
+	public void setSourceFile(String file)
+	{
+		this.sourceDirectory = null;
+		this.inputFile = file;
+	}
+	
+	public void setSourceDirectory(String dir)
+	{
+		File f = new File(dir);
+		if (!f.isDirectory()) throw new IllegalArgumentException(dir + " is not a directory");
+		this.sourceDirectory = dir;
+		this.inputFile = null;
+	}
+	
+	public String getSourceDirectory()
+	{
+		return this.sourceDirectory;
 	}
 	
 	public void setAbortOnError(boolean flag)
@@ -249,7 +303,7 @@ public class XmlDataFileParser
 		this.abortOnError = flag;
 	}
 	
-	public void start()
+	private void processOneFile()
 		throws Exception
 	{
 		if (this.columns == null) this.readTableDefinition();
@@ -262,32 +316,94 @@ public class XmlDataFileParser
 			this.realColCount = this.columnsToImport.size();
 		}
 		this.sendTableDefinition();
-		SAXParserFactory factory = SAXParserFactory.newInstance();
-		factory.setValidating(false);
 		InputStream in = null;
 		try
 		{
-			SAXParser saxParser = factory.newSAXParser();
 			in = new FileInputStream(this.inputFile);
 			InputSource source = new InputSource(new BufferedReader(new InputStreamReader(in, this.encoding), 512*1024));
 			this.keepRunning = true;
 			saxParser.parse(source, this);
-			this.receiver.importFinished();
 		}
 		catch (ParsingInterruptedException e)
 		{
 			this.receiver.importCancelled();
 			throw e;
 		}
-		catch (Exception e)
-		{
-			LogMgr.logError("XmlDataFileParser.start()", "Error during parsing", e);
-			this.receiver.importCancelled();
-			throw e;
-		}
 		finally
 		{
 			try { in.close(); } catch (Throwable th) {}
+		}
+	}
+
+	private void reset()
+	{
+		tableName = null;
+		tableNameFromFile = null;
+		ignoreCurrentRow = false;
+		currentColIndex = 0;
+		realColIndex = 0;
+		ignoreCurrentColumn = false;
+		columnLongValue = 0;
+		hasLongValue = false;
+		isNull = false;
+		chars = null;
+		columns = null;
+		columnsToImport = null;
+	}
+	
+	private void processDirectory()
+		throws Exception
+	{
+		File dir = new File(this.sourceDirectory);
+		File[] files = dir.listFiles();
+		int count = files.length;
+		boolean verbose = this.verboseFormat;
+		for (int i=0; i < count; i++)
+		{
+			if (files[i].getName().endsWith(".xml"))
+			{
+				try
+				{
+					this.inputFile = files[i].getAbsolutePath();
+					this.reset();
+
+					// readTableDefinition() might reset the verbose 
+					// flag if a new XML structure is used
+					// this ensures, that the flag specified by the 
+					// user will be used for files that do not have the 
+					// flag in the meta-data tag
+					this.verboseFormat = verbose;
+					this.processOneFile();
+				}
+				catch (SQLException e)
+				{
+					LogMgr.logWarning("XmlDataFileParser.processDirectory()", "Error importing " + this.inputFile + ": " + ExceptionUtil.getDisplay(e), null);
+					if (this.abortOnError) return;
+				}
+			}
+		}
+	}
+	
+	public void start()
+		throws Exception
+	{
+		try
+		{
+			if (this.sourceDirectory == null)
+			{
+				processOneFile();
+			}
+			else 
+			{
+				processDirectory();
+			}
+			this.receiver.importFinished();
+		}
+		catch (Exception e)
+		{
+			//LogMgr.logError("XmlDataFileParser.start()", "Error during parsing", e);
+			this.receiver.importCancelled();
+			throw e;
 		}
 	}
 
@@ -458,10 +574,12 @@ public class XmlDataFileParser
 		if (this.columnsToImport != null && !this.columnsToImport.contains(this.columns[this.currentColIndex])) return;
 		this.currentRow[this.realColIndex] = null;
 
+		
 		// the isNull flag will be set by the startElement method
 		// as that is an attribute of the tag
 		if (this.isNull)
 		{
+			this.realColIndex ++;
 			return;
 		}
 
@@ -565,25 +683,33 @@ public class XmlDataFileParser
 	private void sendTableDefinition()
 		throws SQLException
 	{
-		if (this.columnsToImport == null)
+		try
 		{
-			this.receiver.setTargetTable(this.tableName, this.columns);
-		}
-		else
-		{
-			ColumnIdentifier[] cols = new ColumnIdentifier[this.realColCount];
-			int index = 0;
-			for (int i=0; i < this.colCount; i++)
+			if (this.columnsToImport == null)
 			{
-				if (this.columnsToImport.contains(this.columns[i]))
-				{
-					cols[index] = this.columns[i];
-					index ++;
-				}
+				this.receiver.setTargetTable(this.tableName == null ? this.tableNameFromFile : this.tableName, this.columns);
 			}
-			this.receiver.setTargetTable(this.tableName == null ? this.tableNameFromFile : this.tableName, cols);
+			else
+			{
+				ColumnIdentifier[] cols = new ColumnIdentifier[this.realColCount];
+				int index = 0;
+				for (int i=0; i < this.colCount; i++)
+				{
+					if (this.columnsToImport.contains(this.columns[i]))
+					{
+						cols[index] = this.columns[i];
+						index ++;
+					}
+				}
+				this.receiver.setTargetTable(this.tableName == null ? this.tableNameFromFile : this.tableName, cols);
+			}
+			this.currentRow = new Object[this.realColCount];
 		}
-		this.currentRow = new Object[this.realColCount];
+		catch (SQLException e)
+		{
+			this.currentRow = null;
+			throw e;
+		}
 	}
 
 	private void sendRowData()

@@ -378,7 +378,18 @@ public class SqlFormatter
 			{
 				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
 				this.appendText("(");
-				this.processFunctionCall(t);
+				// an equal sign immediately followed by an opening 
+				// bracket cannot be a function call (the function name 
+				// is missing) so it has to be a sub-select
+				if ("=".equals(lastToken.getContents()))
+				{
+					t = this.processSubSelect(false);
+					this.appendText(t.getContents());
+				}
+				else
+				{
+					this.processFunctionCall(t);
+				}
 			}
 			else if (t.isSeparator() && text.equals(","))
 			{
@@ -398,11 +409,6 @@ public class SqlFormatter
 			lastToken = t;
 			t = (SQLToken)this.lexer.getNextToken(true, false);
 		}
-		return null;
-	}
-
-	private SQLToken processUpdate()
-	{
 		return null;
 	}
 
@@ -449,8 +455,8 @@ public class SqlFormatter
 					else
 					{
 						this.appendText(s);
-						this.appendNewline();
-						for (int i=0; i < lastIndent; i++) this.indent(' ');
+						//this.appendNewline();
+						//for (int i=0; i < lastIndent; i++) this.indent(' ');
 					}
 
 					return t;
@@ -631,7 +637,7 @@ public class SqlFormatter
 	{
 		SQLToken t = (SQLToken)this.lexer.getNextToken(true, false);
 		SQLToken lastToken = t;
-		if (this.indent != null) this.appendText(this.indent);
+		//if (this.indent != null) this.appendText(this.indent);
 		while (t != null)
 		{
 			if (t.isComment())
@@ -647,6 +653,7 @@ public class SqlFormatter
 				if (LINE_BREAK_BEFORE.contains(word))
 				{
 					if (!isStartOfLine()) this.appendNewline();
+					if ("SET".equals(word)) this.indent("   ");
 					this.appendText(word);
 				}
 				else
@@ -672,16 +679,9 @@ public class SqlFormatter
 					continue;
 				}
 
-//				if (word.equals("UPDATE"))
-//				{
-//					t = this.processUpdate();
-//					if (t == null) return;
-//					continue;
-//				}
-
 				if (word.equals("SET"))
 				{
-					t = this.processList(t,"SET".length() + 1, SET_TERMINAL);
+					t = this.processList(t,"SET".length() + 4, SET_TERMINAL);
 					if (t == null) return;
 					continue;
 				}
@@ -815,8 +815,6 @@ public class SqlFormatter
 				{
 					this.appendText(" (");
 					t = this.processSubSelect(false);
-					// closing bracket for the subselect has been consumed by processSubSelect
-					bracketCount --;
 					if (t == null) return null;
 					continue;
 				}
@@ -1293,9 +1291,10 @@ public class SqlFormatter
 
 	public static void main(String[] args)
 	{
+		String sql = null;
 		try
 		{
-//			String sql="Select count(*) \n" +
+//			sql="Select count(*) \n" +
 //           "FROM \n" +
 //           "bv_user, \n" +
 //           "bv_user_profile, \n" +
@@ -1359,9 +1358,9 @@ public class SqlFormatter
 //           "     AND    bv_cow_uprof.mind_location_id = bvc.mind_location_id \n" +
 //           "     ) \n";
 
-//					String sql = "SELECT      count(*)     FROM      COL_editorial     WHERE COL_EDITORIAL.oid NOT IN (select BV_CONTENT_REF.oid FROM BV_CONTENT_REF) and deleted='0'";
+//					sql =  "SELECT      count(*)     FROM      COL_editorial     WHERE COL_EDITORIAL.oid NOT IN (select BV_CONTENT_REF.oid FROM BV_CONTENT_REF) and deleted='0'";
 
-//					String sql="SELECT substr(to_char(s.pct, '99.00'), 2) || '%'  load, \n" +
+//					sql="SELECT substr(to_char(s.pct, '99.00'), 2) || '%'  load, \n" +
 //           "       p.sql_text, \n" +
 //           "       p.piece, \n" +
 //           "       s.executions executes, \n" +
@@ -1382,7 +1381,7 @@ public class SqlFormatter
 //           "AND   p.address = s.address \n" +
 //           "ORDER BY s.address, p.piece \n";
 
-//			String sql="SELECT username, value || ' bytes' \"Current UGA memory\", stat.* \n" +
+//			sql="SELECT username, value || ' bytes' \"Current UGA memory\", stat.* \n" +
 //           "   FROM v$session sess, v$sesstat stat, v$statname name \n" +
 //           "WHERE sess.sid = stat.sid \n" +
 //           "   AND stat.statistic# = name.statistic# \n" +
@@ -1393,50 +1392,46 @@ public class SqlFormatter
 //           "where rep_platform in ('CONSULTANCY', 'ENHANCEMENT') \n" +
 //           "and bug_status not in ('CLOSED','RESOLVED') \n" +
 //           "and reporter = 47 \n";
-//				String sql = "SELECT * from v_$test";
-//			String sql = "SELECT 1 FROM my_TABLE WHERE (bv_user_profile.number_login=0 OR bv_user_profile.number_login = 'tEEt')";
+//				sql =  "SELECT * from v_$test";
+//			sql =  "SELECT 1 FROM my_TABLE WHERE (bv_user_profile.number_login=0 OR bv_user_profile.number_login = 'tEEt')";
 
-//			String sql = "SELECT \n t1.col1, nvl(to_upper(bla,1),1), 'xxx'||col4, col3 " +
+//			sql =  "SELECT \n t1.col1, nvl(to_upper(bla,1),1), 'xxx'||col4, col3 " +
 //			" \nfrom test_table t1, table2 t2\nWHERE t2.col=1 " +
 //			" AND  (substr(partner_cbn.cust_base_no, 1, 2) = opg_country.opg_cbn  OR  col_header.country IN ('GER','EUR','ITA') AND substr(partner_cbn.cust_base_no, 1, 4) IN ('N883','N882') )  ";
-//			String sql = "select * \nfrom (select * from person) AS t \nwhere nr2 = 2;";
-//			String sql = "insert into test values ('x', 2);commit;";
-//			String sql = "SELECT * from test, table22";
-//			String sql = "select * \nfrom (select * from person) AS t \nwhere t.nr2 = 2;";
-//			String sql = "select /* testing */1\n--, bla\n from dual\n -- table\nwhere x = 6\n--and y = 6\n and x in (1,2, /* comment */3)";
-//			String sql="SELECT * \n" +
-//           "FROM (SELECT id, \n" +
-//           "             VALUE \n" +
-//           "      FROM userprops \n" +
-//           "      WHERE NAME= 'city' \n" +
-//           "      ) city \n";
-//					String sql = "update bla set col1 = (select x from y)";
-//			String sql = "select * from (SELECT x,y,z FROM tab1,tab2,tab3 minus SELECT x2 from tab2,tab2,tab4 WHERE x=1)";
-//			String sql = "SELECT  x , y , z   FROM   tab1 , tab2 , tab3  MINUS   SELECT   x2   FROM   tab2 , tab2 , tab4   WHERE   x = 1";
-			//String sql = "UPDATE bla set column1='test',col2=NULL, col4=222 where xyz=42 AND ab in (SELECT x from t\nWHERE x = 6) OR y = 5;commit;";
-//			String sql="SELECT city.id, \n" +
+//			sql = "select * \nfrom (select * from person) AS t \nwhere nr2 = 2;";
+//			sql = "insert into test values ('x', 2);commit;";
+//			sql = "SELECT * from test, table22 where avg(x) = 5";
+//			sql = "select * \nfrom (select * from person) AS t \nwhere t.nr2 = 2;";
+//			sql = "select /* testing */1\n--, bla\n from dual\n -- table\nwhere x = 6\n--and y = 6\n and x in (1,2, /* comment */3)";
+//			sql = "SELECT * from (SELECT id, value FROM userprops WHERE NAME= 'city') city";
+//			sql = "update bla set col1 = (select column1, column2, column3 from table1, table2, table3 where col1 = col2 and col3 = col4 and col5 = col6)";
+//			sql = "select column1, column2, column3 from table1, table2, table3 where col1 = col2 and col3 = col4 and col5 = col6";
+//			sql = "select * from (SELECT x,y,z FROM tab1,tab2,tab3 minus SELECT x2 from tab2,tab2,tab4 WHERE x=1)";
+//			sql = "SELECT  x , y , z   FROM   tab1 , tab2 , tab3  MINUS   SELECT   x2   FROM   tab2 , tab2 , tab4   WHERE   x = 1";
+			sql = "UPDATE bla set column1='test',col2=NULL, col4=222 where xyz=42 AND ab in (SELECT x from t\nWHERE x = 6 and col3 = col5 and col6 = col7 and col8 = col9) OR y = 5;commit;";
+//			sql="SELECT city.id, \n" +
 //           "       city.value, \n" +
 //           "       state.value \n" +
 //           "FROM (SELECT id, value FROM userprops WHERE NAME= 'city') city LEFT OUTER JOIN \n" +
 //           " (SELECT id, value FROM userprops WHERE NAME= 'state') state ON city.id = state.id  \n" +
 //           " -- the city\n";
-//			String sql = "create table tk_test (nr integer, name varchar(100), price number(23,4))";
-//			String sql = "create view tk_test (nr, nachname,vorname) as select nr, nachname, vorname from person";
-//			String sql = "create view tk_test as select nr, nachname, vorname from person";
-//			String sql = "create index tk_test_idx on tk_test (col1, col2)";
-//			String sql = "/* testing \n testing line 2 \n*/\nCREATE TABLE test (nr integer);";
-//			String sql = "create index TK_TEST on bla ( upper(eins), FUENF, sechs)" ;
-//			String sql = "select count(*) from test where ucase(surname) like 'BLA%' and x >= 500 and y=10";
+//			sql =  "create table tk_test (nr integer, name varchar(100), price number(23,4))";
+//			sql =  "create view tk_test (nr, nachname,vorname) as select nr, nachname, vorname from person";
+//			sql =  "create view tk_test as select nr, nachname, vorname from person";
+//			sql =  "create index tk_test_idx on tk_test (col1, col2)";
+//			sql =  "/* testing \n testing line 2 \n*/\nCREATE TABLE test (nr integer);";
+//			sql =  "create index TK_TEST on bla ( upper(eins), FUENF, sechs)" ;
+//			sql =  "select count(*) from test where ucase(surname) like 'BLA%' and x >= 500 and y=10";
 
 			
-//			String sql = "SELECT * FROM ( SELECT DISTINCT v.uuid AS value_uuid attr1, attr4  FROM (SELECT * FROM meas meas) M, value v, (SELECT * FROM CHAR) c \n" + 
+//			sql =  "SELECT * FROM ( SELECT DISTINCT v.uuid AS value_uuid attr1, attr4  FROM (SELECT * FROM meas meas) M, value v, (SELECT * FROM CHAR) c \n" + 
 //             "       WHERE M.uuid = v.meas_uuid \n" + 
 //             "       AND   c.uuid = v.char_uuid \n" + 
 //             "       AND   M.uuid = ?) sel JOIN (SELECT DISTINCT M.uuid AS meas_uuid FROM (SELECT * FROM meas) M, value v, char c  \n" + 
 //             "       WHERE M.uuid = v.meas_uuid AND   c.uuid = v.char_uuid ) sub_sel ON (sel.meas_uuid = sub_sel.meas_uuid), (SELECT uuid, root_uuid, parent_uuid FROM meas) mtree \n" + 
 //             " WHERE sel.meas_root_uuid = mtree.root_uuid ";
-//			String sql = "SELECT * from bla where x=1 and test.u= x.u and t.f = b.c and (a = 5 or b in (1,2,3)) and (c=5)";
-			String sql = "SELECT * from bla where (x = 1 or y in (1,2,3)) and y=5";
+//			sql =  "SELECT * from bla where x=1 and test.u= x.u and t.f = b.c and (a = 5 or b in (1,2,3)) and (c=5)";
+//			sql =  "SELECT * from bla where (x = 1 or y in (1,2,3)) and y=5";
 			SqlFormatter f = new SqlFormatter(sql,40);
 			System.out.println(sql);
 			System.out.println("----------");
