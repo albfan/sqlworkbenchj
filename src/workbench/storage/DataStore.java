@@ -52,6 +52,11 @@ import workbench.util.ValueConverter;
 
 
 /**
+ * A class to cache the result of a database query.
+ * If the underlying SELECT used only one table, then the
+ * DataStore can be updated and the changes can be saved back
+ * to the database. For inserting new records key columns are not
+ * required, otherwise the base table needs to have a key defined.
  * @author  info@sql-workbench.net
  */
 public class DataStore
@@ -78,15 +83,11 @@ public class DataStore
 	private String updateTable;
 
 	private WbConnection originalConnection;
-
-//	private SimpleDateFormat defaultDateFormatter;
 	private DecimalFormat defaultNumberFormatter;
-//	private SimpleDateFormat defaultTimestampFormatter;
-
 	private ColumnComparator comparator;
 
-	private String defaultExportDelimiter = "\t";
 	private boolean allowUpdates = false;
+	private boolean escapeHtml = true;
 
 	private ValueConverter converter = new ValueConverter();
 
@@ -287,16 +288,6 @@ public class DataStore
 
   public int getRowCount() { return this.data.size(); }
 	public int getColumnCount() { return this.resultInfo.getColumnCount(); }
-
-	public void setExportDelimiter(String aDelimit)
-	{
-		this.defaultExportDelimiter = aDelimit;
-	}
-
-	public String getExportDelimiter()
-	{
-		return this.defaultExportDelimiter;
-	}
 
 	/**
 	 *	Returns the total number of modified, new or deleted rows
@@ -827,11 +818,6 @@ public class DataStore
 		return row.getDataAsString(aDelimiter, formatter, columns);
 	}
 
-	public StringBuffer getHeaderString()
-	{
-		return this.getHeaderString(this.defaultExportDelimiter);
-	}
-
 	public StringBuffer getHeaderString(String aFieldDelimiter)
 	{
 		return getHeaderString(aFieldDelimiter, null);
@@ -933,6 +919,7 @@ public class DataStore
 		}
 		return includeColumns;
 	}
+	
 	public void writeDataString(Writer out, String aFieldDelimiter, String aLineTerminator, boolean includeHeaders, int[] rows)
 		throws IOException
 	{
@@ -959,6 +946,9 @@ public class DataStore
 		}
 	}
 
+	/**
+	 *	Remove all data from the DataStore
+	 */
 	public void reset()
 	{
 		this.data.reset();
@@ -998,6 +988,11 @@ public class DataStore
 		return (this.deletedRows != null && this.deletedRows.size() > 0);
 	}
 
+	/**
+	 * Returns true if key columns are needed to save the changes
+	 * to the database. If only inserted rows are present, then no 
+	 * key is needed. For updated or deleted rows a key is needed
+	 */
 	public boolean needPkForUpdate()
 	{
 		if (!this.isModified()) return false;
@@ -1035,6 +1030,13 @@ public class DataStore
 		this.initData(aResultSet, -1);
 	}
 
+	/**
+	 * Read the column definitions from the result set's meta data 
+	 * and store the data from the ResultSet in this DataStore (up to maxRows)
+	 *
+	 * @param aResultSet the ResultSet to read
+	 * @param maxRows max. number of rows to read. Zero or lower to read all rows
+	 */
 	public void initData(ResultSet aResultSet, int maxRows)
 		throws SQLException
 	{
@@ -1101,6 +1103,10 @@ public class DataStore
 		}
 	}
 
+	/**	
+	 * Define the (SELECT) statement that was used to produce this 
+	 * DataStore's result set. This is used to find the update table later
+	 */
 	public void setOriginalStatement(String aSql)
 	{
 		this.sql = aSql;
@@ -1146,12 +1152,26 @@ public class DataStore
 		return table;
 	}
 
+	/**
+	 * Write the contents of this DataStore as XML into the  
+	 * supplied Writer
+	 * @param pw Thw writer to which the XML is written.
+	 * @see #writeXmlData(Writer, boolean)
+	 */
 	public void writeXmlData(Writer pw)
 		throws IOException
 	{
 		this.writeXmlData(pw, false);
 	}
 
+	/**
+	 * Write the contents of this DataStore as XML into the  
+	 * supplied Writer
+	 *
+	 * @param pw The writer to which the XML is written.
+	 * @param useCdata if true all character data is put into a CDATA sectioni
+	 * @see workbench.db.exporter.XmlRowDataConverter
+	 */
 	public void writeXmlData(Writer pw, boolean useCdata)
 		throws IOException
 	{
@@ -1163,7 +1183,14 @@ public class DataStore
 		this.writeConverterData(converter, pw);
 	}
 
-	public void writeHtmlData(Writer html)
+	/**
+	 * Write the contents of this DataStore as HTML into the  
+	 * supplied Writer
+	 *
+	 * @param pw The writer to which the HTML is written.
+	 * @see workbench.db.exporter.HmltRowDataConverter
+	 */
+	public void writeHtmlData(Writer pw)
 		throws IOException
 	{
 		HtmlRowDataConverter converter = new HtmlRowDataConverter(this.resultInfo);
@@ -1172,9 +1199,13 @@ public class DataStore
 		String sql = SqlUtil.makeCleanSql(this.sql, false, false, '\'');
 		if (sql.length() > 60) sql = sql.substring(0, 60);
 		converter.setPageTitle(sql);
-		this.writeConverterData(converter, html);
+		this.writeConverterData(converter, pw);
 	}
 
+	/**
+	 * Writes all rows using the supplied {@link workbench.db.exporter.RowDataConverter}
+	 * to the supplied Writer.
+	 */
 	private void writeConverterData(RowDataConverter converter, Writer pw)
 		throws IOException
 	{
@@ -1193,8 +1224,6 @@ public class DataStore
 		converter.getEnd(count).writeTo(pw);
 	}
 
-	private boolean escapeHtml = true;
-
 	public void setEscapeExportValues(boolean aFlag)
 	{
 		this.escapeHtml = aFlag;
@@ -1212,6 +1241,10 @@ public class DataStore
 		return (this.getInsertTable() != null);
 	}
 
+	/**
+	 * Checks if the underlying SQL statement references only one table.
+	 * @return true if only one table is found in the SELECT statement
+	 */
 	public boolean sqlHasUpdateTable()
 	{
 		if (this.updateTable != null) return true;
@@ -1221,36 +1254,12 @@ public class DataStore
 		return true;
 	}
 
-	public String getDataAsSqlDeleteInsert()
-		throws Exception, SQLException
-	{
-		return this.getDataAsSqlInsert("\n", null, null, (int[])null, null, true);
-	}
-
-	public String getDataAsSqlDeleteInsert(List columns)
-		throws Exception, SQLException
-	{
-		return this.getDataAsSqlInsert("\n", null, null, null, columns, true);
-	}
-
 	public String getDataAsSqlDeleteInsert(int rows[], List columns)
 		throws Exception, SQLException
 	{
 		return this.getDataAsSqlInsert("\n", null, null, rows, columns, true);
 	}
-
-	public String getDataAsSqlInsert()
-		throws Exception, SQLException
-	{
-		return this.getDataAsSqlInsert("\n", null, null, null, null);
-	}
-
-	public String getDataAsSqlInsert(int[] rows)
-		throws Exception, SQLException
-	{
-		return this.getDataAsSqlInsert("\n", null, null, rows, null);
-	}
-
+	
 	public String getDataAsSqlInsert(int[] rows, List columns)
 		throws Exception, SQLException
 	{
@@ -1281,18 +1290,6 @@ public class DataStore
 		return script.toString();
 	}
 
-	public void writeDataAsSqlInsert(Writer out, String aLineTerminator)
-		throws IOException
-	{
-		this.writeDataAsSqlInsert(out, aLineTerminator, null, null, null, null);
-	}
-
-	public void writeDataAsSqlInsert(Writer out, String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns)
-		throws IOException
-	{
-		writeDataAsSqlInsert(out, aLineTerminator, aCharFunc, aConcatString, rows, columns, false);
-	}
-
 	public void writeDataAsSqlInsert(Writer out, String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns, boolean includeDelete)
 		throws IOException
 	{
@@ -1306,7 +1303,6 @@ public class DataStore
 		{
 			includeDelete = false;
 		}
-		//StatementFactory factory = new StatementFactory(this.resultInfo);
 		SqlRowDataConverter converter = new SqlRowDataConverter(this.resultInfo);
 		converter.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
 		converter.setOriginalConnection(this.originalConnection);
@@ -1341,19 +1337,9 @@ public class DataStore
 	}
 
 	// =========== SQL Update generation ================
-	public String getDataAsSqlUpdate()
-	{
-		return this.getDataAsSqlUpdate("\n", null, null, null, null);
-	}
-
 	public String getDataAsSqlUpdate(int[] rows, List columns)
 	{
 		return this.getDataAsSqlUpdate("\n", null, null, rows, columns);
-	}
-
-	public String getDataAsSqlUpdate(String aLineTerminator)
-	{
-		return this.getDataAsSqlUpdate(aLineTerminator, null, null, null, null);
 	}
 
 	public String getDataAsSqlUpdate(String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns)
@@ -1372,17 +1358,17 @@ public class DataStore
 		return script.toString();
 	}
 
-	public void writeDataAsSqlUpdate(Writer out, String aLineTerminator)
-		throws IOException
-	{
-		this.writeDataAsSqlUpdate(out, aLineTerminator, null, null);
-	}
+//	public void writeDataAsSqlUpdate(Writer out, String aLineTerminator)
+//		throws IOException
+//	{
+//		this.writeDataAsSqlUpdate(out, aLineTerminator, null, null);
+//	}
 
-	public void writeDataAsSqlUpdate(Writer out, String aLineTerminator, String aCharFunc, String aConcatString)
-		throws IOException
-	{
-		writeDataAsSqlUpdate(out, aLineTerminator, aCharFunc, aConcatString, null, null);
-	}
+//	public void writeDataAsSqlUpdate(Writer out, String aLineTerminator, String aCharFunc, String aConcatString)
+//		throws IOException
+//	{
+//		writeDataAsSqlUpdate(out, aLineTerminator, aCharFunc, aConcatString, null, null);
+//	}
 
 	public void writeDataAsSqlUpdate(Writer out, String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns)
 		throws IOException
@@ -1459,48 +1445,6 @@ public class DataStore
 	public void cancelRetrieve()
 	{
 		this.cancelRetrieve = true;
-	}
-
-
-	/**
-	 *	Import a text file (tab separated) with a header row and no column mapping
-	 *	into this DataStore
-	 * @param aFilename - The text file to import
-	 */
-	public void importData(String aFilename)
-		throws FileNotFoundException
-	{
-		this.importData(aFilename, null);
-	}
-
-	/**
-	 *	Import a text file (tab separated) with a header row and no column mapping
-	 *	into this DataStore
-	 * @param aFilename - The text file to import
-	 */
-	public void importData(String aFilename, JobErrorHandler errorHandler)
-		throws FileNotFoundException
-	{
-		this.importData(aFilename, true, "\t", "\"", errorHandler);
-	}
-
-	/**
-	 * Import a text file (tab separated) with no column mapping
-	 * into this DataStore.
-	 *
-	 * @param aFilename - The text file to import
-	 * @param hasHeader - wether the text file has a header row
-	 */
-	public void importData(String aFilename, boolean hasHeader, String quoteChar)
-		throws FileNotFoundException
-	{
-		this.importData(aFilename, hasHeader, "\t", quoteChar, null);
-	}
-
-	public void importData(String aFilename, boolean hasHeader, String aColSeparator, String aQuoteChar)
-		throws FileNotFoundException
-	{
-		this.importData(aFilename, hasHeader, aColSeparator, aQuoteChar, null);
 	}
 
 	/**
@@ -1824,6 +1768,10 @@ public class DataStore
 		return rows;
 	}
 
+	/**
+	 * Clears the flag for all modified rows that the update
+	 * has already been sent to the database
+	 */
 	public void resetDmlSentStatus()
 	{
 		int rows = this.getRowCount();
@@ -1843,6 +1791,10 @@ public class DataStore
 		}
 	}
 
+	/**
+	 * Clears the modified status for those rows where
+	 * the update has been sent to the database
+	 */
 	public void resetStatusForSentRows()
 	{
 		int rows = this.getRowCount();
@@ -1871,6 +1823,10 @@ public class DataStore
 		}
 	}
 
+	/**
+	 * Reset all rows to not modified. After this a call 
+	 * to #isModified() will return false.
+	 */
 	public void resetStatus()
 	{
 		this.deletedRows = null;
@@ -1995,6 +1951,15 @@ public class DataStore
 		}
 	}
 
+	/**
+	 * Convert the value to the approriate class instance 
+	 * for the given column
+	 *
+	 * @param aValue the value as entered by the user
+	 * @param aColumn the column for which this value should be converted
+	 * @returns an Object of the needed class for the column
+	 * @see ValueConverter#convertValue(Object, int)
+	 */
 	public Object convertCellValue(Object aValue, int aColumn)
 		throws Exception
 	{
@@ -2008,15 +1973,17 @@ public class DataStore
 	}
 	
 	/**
-	 * Return the status object for the give row.
+	 * Return the status object for the given row.
 	 * The status is one of
 	 * <ul>
-	 * <li>DataStore.ROW_ORIGINAL</li>
-	 * <li>DataStore.ROW_MODIFIED</li>
-	 * <li>DataStore.ROW_NEW</li>
-	 * <ul>
-	 * The status object is used by the renderer in the result
-	 * table to display the approriate icon.
+	 * <li>{@link #ROW_ORIGINAL}</li>
+	 * <li>{@link #ROW_MODIFIED}</li>
+	 * <li>{@link #ROW_NEW}</li>
+	 * </ul>
+	 * The status object is used by the {@link workbench.gui.renderer.RowStatusRenderer} 
+	 * in the result table to display the approriate icon.
+	 * @param aRow the row for which the status should be returned
+	 * @return an Integer identifying the status
 	 */
 	public Integer getRowStatus(int aRow)
 		throws IndexOutOfBoundsException

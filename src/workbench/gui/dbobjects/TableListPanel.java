@@ -1801,7 +1801,7 @@ public class TableListPanel
 
 		final SchemaReporter reporter = new SchemaReporter(this.dbConnection);
 		final Component caller = this;
-		reporter.setShowProgress(true);
+		reporter.setShowProgress(true, (JFrame)SwingUtilities.getWindowAncestor(this));
 		reporter.setTableList(tables);
 
 		/*

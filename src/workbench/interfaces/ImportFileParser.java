@@ -10,6 +10,7 @@
  */
 package workbench.interfaces;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -28,7 +29,8 @@ public interface ImportFileParser
 	 */
 	List getColumnsFromFile();
 	void setTableName(String table);
-	void setColumns(List columns);
+	void setColumns(List columns)
+		throws SQLException;
 	
 	/**
 	 *	Returns the column list as a comma separated string

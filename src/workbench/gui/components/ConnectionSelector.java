@@ -125,13 +125,18 @@ public class ConnectionSelector
 
 	public void closeConnectingInfo()
 	{
+		WbSwingUtilities.showDefaultCursor(this.parent);
+		WbSwingUtilities.showDefaultCursor(this.connectingInfo);
 		if (this.connectingInfo != null)
 		{
-			WbSwingUtilities.showDefaultCursor(this.parent);
-			WbSwingUtilities.showDefaultCursor(this.connectingInfo);
-			this.connectLabel = null;
-			this.connectingInfo.setVisible(false);
-			this.connectingInfo.dispose();
+			try
+			{
+				this.connectingInfo.setVisible(false);
+				this.connectingInfo.dispose();
+			}
+			catch (Throwable th)
+			{
+			}
 			this.connectingInfo = null;
 			this.parent.repaint();
 		}

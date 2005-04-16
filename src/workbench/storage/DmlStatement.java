@@ -235,12 +235,14 @@ public class DmlStatement
 	{
 		if (aValue == null) return null;
 		if (this.chrFunc == null) return aValue;
-		boolean useFunc = (this.concatFunction != null);
+		boolean useConcatFunc = (this.concatFunction != null);
 		
-		if (!useFunc && this.concatString == null) this.concatString = "||";
+		if (!useConcatFunc && this.concatString == null) this.concatString = "||";
 		StrBuffer result = new StrBuffer();
 		boolean funcAppended = false;
 		boolean quotePending = false;
+		
+		char last = 0;
 		
 		int len = aValue.length();
 		for (int i=0; i < len; i++)
@@ -248,7 +250,7 @@ public class DmlStatement
 			char c = aValue.charAt(i);
 			if (c < 32)
 			{
-				if (useFunc)
+				if (useConcatFunc)
 				{
 					if (!funcAppended)
 					{
@@ -258,11 +260,11 @@ public class DmlStatement
 						result = temp;
 						funcAppended = true;
 					}
-					if (quotePending)
+					if (quotePending && last >= 32)
 					{
 						result.append(",\'");
 					}
-					result.append('\'');
+					if (last >= 32) result.append('\'');
 					result.append(',');
 					result.append(this.chrFunc);
 					result.append('(');
@@ -272,8 +274,11 @@ public class DmlStatement
 				}
 				else
 				{
-					result.append('\'');
-					result.append(this.concatString);
+					if (last >= 32) 
+					{
+						result.append('\'');
+						result.append(this.concatString);
+					}
 					result.append(this.chrFunc);
 					result.append('(');
 					result.append(Integer.toString((int)c));
@@ -286,12 +291,13 @@ public class DmlStatement
 			{
 				if (quotePending)
 				{
-					if (useFunc) result.append(',');
+					if (useConcatFunc) result.append(',');
 					result.append('\'');
 				}
 				result.append(c);
 				quotePending = false;
 			}
+			last = c;
 		}
 		if (funcAppended)
 		{

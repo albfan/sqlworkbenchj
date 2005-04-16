@@ -107,6 +107,12 @@ import workbench.gui.actions.FileSaveProfiles;
 
 
 /**
+ * The main window for the Workbench.
+ * It will display several {@link workbench.gui.sql.SqlPanel}s in 
+ * a tabbed pane. Depending on the user's settings a 
+ * {@link workbench.gui.dbobjects.DbExplorerPanel} might also be displayed 
+ * inside the JTabbedPane
+ *
  * @author  info@sql-workbench.net
  */
 public class MainWindow
@@ -217,8 +223,19 @@ public class MainWindow
 		new DropTarget(this.sqlTab, DnDConstants.ACTION_COPY, this);
 	}
 
+	/**
+	 * Return the internal ID of this window. This ID will be used
+	 * to generate the ID for each connection done from within this 
+	 * window.
+	 */
 	public String getWindowId() { return this.windowId; }
 
+	/**
+	 * The listener will be notified when the name of a tab changes.
+	 * This is used in the {@link workbench.gui.dbobjects.TableListPanel}
+	 * to display the available panels in the context menu
+	 * @see workbench.gui.dbobjects.TableListPanel#fileNameChanged(Object, String)
+	 */
 	public void addFilenameChangeListener(FilenameChangeListener aListener)
 	{
 		for (int i=0; i < this.sqlTab.getTabCount(); i++)
@@ -245,6 +262,12 @@ public class MainWindow
 		}
 	}
 
+	/**
+	 * The listener will be notified when the current tab changes.
+	 * This is used in the {@link workbench.gui.dbobjects.TableListPanel}
+	 * to highlight the current tab the context menu
+	 * @see workbench.gui.dbobjects.TableListPanel#stateChanged(ChangeEvent)
+	 */
   public void addIndexChangeListener(ChangeListener aListener)
   {
     this.sqlTab.addChangeListener(aListener);
@@ -880,7 +903,6 @@ public class MainWindow
 
 		loadWorkspaceForProfile(aProfile);
 		showStatusMessage(ResourceMgr.getString("MsgConnecting"));
-
 	}
 
 	private String getConnectionIdForPanel(MainPanel p)

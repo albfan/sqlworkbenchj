@@ -1036,17 +1036,6 @@ public class Settings
 		this.props.setProperty("workbench.connection.last", aName);
 	}
 
-	public int getDefaultFetchSize()
-	{
-		return StringUtil.getIntValue(this.props.getProperty("workbench.db.fetchsize", "-1"));
-	}
-
-	public void setDefaultFetchSize(int aSize)
-	{
-		this.props.setProperty("workbench.db.fetchsize", Integer.toString(aSize));
-	}
-
-
 	public String getLastLibraryDir()
 	{
 		return this.props.getProperty("workbench.drivers.lastlibdir", "");
@@ -1123,6 +1112,16 @@ public class Settings
 		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.formatter.subselect.maxlength"), 60);
 	}
 
+	public boolean getRightClickMovesCursor()
+	{
+		return this.getBoolProperty("workbench.editor.rightclickmovescursor", false);
+	}
+	
+	public void setRightClickMovesCursor(boolean flag)
+	{
+		this.props.setProperty("workbench.editor.rightclickmovescursor", Boolean.toString(flag));
+	}
+	
 	public int getMaxColumnWidth()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.maxcolwidth", "500"));
