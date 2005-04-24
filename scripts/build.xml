@@ -49,32 +49,32 @@
   <target name="set-build-number" depends="init">
     <buildnumber file="build.number"/>
     <echo message="Build number is ${build.number}"/>
-    
+
     <!-- Reset the sub-build number for dev-builds -->
     <propertyfile file="devbuild.number">
         <entry key="dev-build.number" type="int" operation="=" value="0"/>
     </propertyfile>
-    
+
   </target>
 
   <target name="set-dev-build" depends="init">
     <propertyfile file="devbuild.number">
         <entry key="dev-build.number" type="int" operation="+" value="1"/>
     </propertyfile>
-    
+
     <!-- <echo message="sub ${dev-build.number}"/> -->
     <loadproperties srcFile="release.property"/>
     <loadproperties srcFile="devbuild.number"/>
-    
+
     <property name="build.number" value="${release.build.number}.${dev-build.number}"/>
     <echo message="Build number is ${build.number}"/>
-    
+
   </target>
 
   <target name="get-dev-build" depends="init">
     <loadproperties srcFile="release.property"/>
     <loadproperties srcFile="devbuild.number"/>
-    
+
     <property name="build.number" value="${release.build.number}.${dev-build.number}"/>
     <echo message="Build number is ${build.number}"/>
   </target>
@@ -117,7 +117,7 @@
   </target>
 
   <target name="compile" depends="prepare">
-    <javac debug="on" debuglevel="source,lines" destdir="${build}" optimize="on" srcdir="${src}" >
+    <javac debug="off" debuglevel="source,lines" destdir="${build}" optimize="on" srcdir="${src}" >
         <exclude name="workbench/test/**"/>
     </javac>
   </target>
@@ -398,7 +398,7 @@
       <entry key="release.build.number" value="${build.number}"/>
       <entry key="release.build.date" value="${today}"/>
     </propertyfile>
-    <ant dir="..\website" target="noDev">
+    <ant dir="..\website" inheritall="false" target="noDev">
     </ant>
   </target>
 
@@ -416,7 +416,7 @@
         <entry key="dev.build.number" value="${build.number}"/>
     </propertyfile>
 
-    <ant dir="..\website" target="withDev">
+    <ant dir="..\website" inheritall="false" target="withDev">
     </ant>
   </target>
 
@@ -456,7 +456,7 @@
       </fileset>
     </delete>
 
-    <zip zipfile="${root}/release/workbench.zip">
+    <zip zipfile="${root}/release/Workbench-Build${build.number}.zip">
       <zipfileset dir="${distdir}">
         <include name="Workbench.jar"/>
         <include name="history.txt"/>

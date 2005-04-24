@@ -1,5 +1,8 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+
+Build 78, 24.04.2005
+--------------------
 Enh:  (77.1) Prepared Statements (i.e. ? in a SELECT) are now supported
       This support relies on certain JDBC features which are
       not available e.g. in Oracle's or PostgreSQL's JDBC drivers.
@@ -54,6 +57,12 @@ Enh:  (77.22) Two new settings to control the formatting of generated
 	  workbench.sql.generate.update.doformat
 	  If set to false generated SQL statements (INSERT, UPDATE) will always 
 	  be put into a single line.
+Enh:  (77.27) The default behaviour when creating text files with WBEXPORT
+      for writing a header line, can now be defined using the property
+      workbench.export.text.default.header
+      (The existing setting workbench.export.text.includeheader stores
+      the last selection when the export file was created using the GUI
+      rather then WBEXPORT)
 
 Fix:  (77.1) When a table was created using lowercase in Oracle, the
       DB Explorer would not work correctly for displaying data and
@@ -90,6 +99,14 @@ Fix:  (77.17) Ctrl-Enter was still working even if the application was
 Fix:  (77.20) Worked around a bug in the Oracle driver which would not 
       return the correct objects for Timestamp (Oracle 9) columns
 Fix:  (77.22) Entering timestamp values did not work.
+Fix:  (77.23) [Oracle] In the DbExplorer the name for table level check 
+      constraints was not included in the SQL source
+Fix:  (77.24) When using -charfunc for WBEXPORT the generated SQL Statements
+      were not correct if a non-printable character was immediately followed
+      by another non-printable character.
+Fix:  (77.25) The source for Oracle packages are now displayed correctly
+Fix:  (77.28) Date columns where not exported (Clipboard, WBEXPORT) correctly 
+      with Oracle (the export would not use to_date())
 
 Build 77, 12.02.2005
 --------------------
