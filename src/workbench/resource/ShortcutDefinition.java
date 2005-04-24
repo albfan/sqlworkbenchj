@@ -269,19 +269,4 @@ public class ShortcutDefinition
 		
 		return result.toString();
 	}
-	
-	public static void main(String[] args)
-	{
-		ShortcutDefinition def = new ShortcutDefinition();
-		def.setActionClass(workbench.gui.actions.AddTabAction.class.getName());
-		def.assignDefaultKey(KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_MASK));
-		def.assignKey(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK));
-		System.out.println("def before=" + def);
-		WbPersistence.writeObject(def, "d:/temp/Shortcut.xml");
-		
-		//def = (ShortcutDefinition)WbPersistence.readObject("d:/temp/Shortcut.xml");
-		//def.assignDefaultKey(KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_MASK));
-		//System.out.println("def after=" + def);
-	}
-
 }

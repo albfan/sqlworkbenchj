@@ -782,7 +782,7 @@ public class WbTable
 
 				if (newColumn >= 0)
 				{
-					SwingUtilities.invokeLater(new Runnable()
+					EventQueue.invokeLater(new Runnable()
 					{
 						public void run()
 						{
@@ -809,7 +809,7 @@ public class WbTable
 		// a repaint event right away
 		if (suspend && !aFlag)
 		{
-			SwingUtilities.invokeLater(new Runnable()
+			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
@@ -1374,7 +1374,7 @@ public class WbTable
 					if (row != selectedRow)
 					{
 						final ListSelectionModel model = this.getSelectionModel();
-						SwingUtilities.invokeLater(new Runnable()
+						EventQueue.invokeLater(new Runnable()
 						{
 							public void run()
 							{
@@ -1389,7 +1389,7 @@ public class WbTable
 				final int x = e.getX();
 				final int y = e.getY();
 
-				SwingUtilities.invokeLater(new Runnable()
+				EventQueue.invokeLater(new Runnable()
 				{
 					public void run()
 					{

@@ -43,5 +43,4 @@ public interface ProcedureReader
 		throws SQLException;
 	DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
 		throws SQLException;
-	
 }

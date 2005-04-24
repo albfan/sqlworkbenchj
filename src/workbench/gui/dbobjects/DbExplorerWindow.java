@@ -11,11 +11,11 @@
  */
 package workbench.gui.dbobjects;
 
+import java.awt.EventQueue;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import workbench.WbManager;
@@ -84,7 +84,7 @@ public class DbExplorerWindow
 	}
 	public void selectConnection()
 	{
-		SwingUtilities.invokeLater(new Runnable()
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{

@@ -96,8 +96,6 @@ import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.exception.ExceptionUtil;
-import workbench.gui.components.ReportTypePanel;
-import workbench.db.report.Workbench2Designer;
 import java.awt.Component;
 
 
@@ -719,7 +717,7 @@ public class TableListPanel
 
 	private void setFocusToTableList()
 	{
-		SwingUtilities.invokeLater(new Runnable()
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
@@ -784,7 +782,7 @@ public class TableListPanel
 			DataStoreTableModel rs = new DataStoreTableModel(ds);
 			tableList.setModel(rs, true);
 			tableList.adjustColumns();
-			SwingUtilities.invokeLater(new Runnable()
+			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
@@ -970,19 +968,20 @@ public class TableListPanel
 	}
 
 	private void retrieveTableSource()
-		throws SQLException
 	{
 		tableSource.setText(ResourceMgr.getString("TxtRetrievingSourceCode"));
 
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			final String sql;
+			String sql = "";
 
 			DbMetadata meta = this.dbConnection.getMetadata();
 			if (this.shouldRetrieveTable || tableDefinition.getRowCount() == 0)
 			{
 				this.retrieveTableDefinition();
+				this.shouldRetrieveIndexes = true;
+				this.shouldRetrieveImportedTree = true;
 			}
 			if (this.selectedObjectType.indexOf("view") > -1)
 			{
@@ -991,39 +990,50 @@ public class TableListPanel
 			else if ("synonym".equals(this.selectedObjectType))
 			{
 				sql = meta.getSynonymSource(this.selectedSchema, this.selectedTableName);
+				if (sql.length() == 0)
+				{
+					sql = ResourceMgr.getString("MsgSynonymSourceNotImplemented") + " " + this.dbConnection.getMetadata().getProductName();
+				}
 			}
 			else if ("sequence".equals(this.selectedObjectType))
 			{
 				sql = meta.getSequenceSource(this.selectedCatalog, this.selectedSchema,this.selectedTableName);
+				if (sql.length() == 0)
+				{
+					sql = ResourceMgr.getString("MsgSequenceSourceNotImplemented") + " " + this.dbConnection.getMetadata().getProductName();
+				}
 			}
 			else if (this.selectedObjectType.indexOf("table") > -1)
 			{
 				// the table information has to be retrieved before
 				// the table source, because otherwise the DataStores
 				// passed to getTableSource() would be empty
-				this.retrieveIndexes();
-				this.retrieveImportedTables();
+				if (this.shouldRetrieveIndexes) this.retrieveIndexes();
+				if (this.shouldRetrieveImportedTree) this.retrieveImportedTables();
 				sql = meta.getTableSource(this.selectedCatalog, this.selectedSchema, this.selectedTableName, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore(), true);
 			}
-			else
+			final String s = sql;
+			EventQueue.invokeLater(new Runnable()
 			{
-				sql = "";
-			}
-			SwingUtilities.invokeLater(new Runnable()
-			{
-
 				public void run()
 				{
-					tableSource.setText(sql);
+					tableSource.setText(s);
 					tableSource.setCaretPosition(0);
 				}
 			});
 			shouldRetrieveTableSource = false;
 		}
-		catch (SQLException e)
+		catch (Exception e)
 		{
-			tableSource.setText(ExceptionUtil.getDisplay(e));
-			throw e;
+			LogMgr.logError("TableListPanel.retrieveTableSource()", "Error retrieving table source", e);
+			final String msg = ExceptionUtil.getDisplay(e);
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					tableSource.setText(msg);
+				}
+			});
 		}
 		finally
 		{
@@ -1223,7 +1233,6 @@ public class TableListPanel
 						this.tableData.showData(!this.shiftDown);
 						this.shouldRetrieveTableDataCount = false;
 					}
-					this.tableData.setCursor(null);
 					break;
 				case 3:
 					if (this.shouldRetrieveIndexes) this.retrieveIndexes();
@@ -1484,7 +1493,7 @@ public class TableListPanel
 					final int panelIndex = Integer.parseInt(command.substring(6));
 					// Allow the selection change to finish so that
 					// we have the correct table name in the instance variables
-					SwingUtilities.invokeLater(new Runnable()
+					EventQueue.invokeLater(new Runnable()
 					{
 						public void run()
 						{
@@ -1554,7 +1563,7 @@ public class TableListPanel
 		ui.showDialog(f);
 		if (!ui.dialogWasCancelled())
 		{
-			SwingUtilities.invokeLater(new Runnable()
+			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
@@ -1760,7 +1769,7 @@ public class TableListPanel
 		ui.showDialog(f);
 		if (!ui.dialogWasCancelled())
 		{
-			SwingUtilities.invokeLater(new Runnable()
+			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
@@ -1844,7 +1853,7 @@ public class TableListPanel
 				{
 					LogMgr.logError("TableListPanel.saveReport()", "Error writing schema report", e);
 					final String msg = ExceptionUtil.getDisplay(e);
-					SwingUtilities.invokeLater(new Runnable()
+					EventQueue.invokeLater(new Runnable()
 					{
 						public void run()
 						{
@@ -1873,8 +1882,9 @@ public class TableListPanel
 		String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 		String schema = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
 		TableIdentifier id = new TableIdentifier(schema, table);
-		DataExporter spooler = new DataExporter();
-		spooler.exportTable(SwingUtilities.getWindowAncestor(this), this.dbConnection, id);
+		DataExporter exporter = new DataExporter();
+		exporter.setProgressInterval(10);
+		exporter.exportTable(SwingUtilities.getWindowAncestor(this), this.dbConnection, id);
 	}
 
 	public void spoolTables()
@@ -1933,7 +1943,8 @@ public class TableListPanel
 				File f = new File(fdir, fname + ext);
 				exporter.addJob(f.getAbsolutePath(), stmt);
 			}
-			exporter.startExportJobs();
+			exporter.setProgressInterval(10);
+			exporter.startExportJobs((Frame)SwingUtilities.getWindowAncestor(this));
 		}
 	}
 
@@ -1950,7 +1961,7 @@ public class TableListPanel
 		if (this.ignoreStateChanged) return;
     if (e.getSource() == this.displayTab)
     {
-	    SwingUtilities.invokeLater(new Runnable()
+	    EventQueue.invokeLater(new Runnable()
 	    {
 				public void run()
 				{

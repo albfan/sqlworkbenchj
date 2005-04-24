@@ -19,7 +19,7 @@ import java.text.SimpleDateFormat;
 import workbench.resource.Settings;
 
 /**
- * Utility class to parse String into approriate Java classes according
+ * Utility class to parse Strings into approriate Java classes according
  * to a type from java.sql.Types.
  *
  * @author  info@sql-workbench.net
@@ -82,6 +82,11 @@ public class ValueConverter
 		this.decimalCharacter = aChar;
 	}
 
+	/**
+	 * Convert the given input value to a class instance
+	 * according to the given type (from java.sql.Types)
+	 * @see workbench.storage.DataStore#convertCellValue(Object, int)
+	 */
 	public Object convertValue(Object aValue, int type)
 		throws Exception
 	{
@@ -253,15 +258,6 @@ public class ValueConverter
 		}
 
 		return result.toString();
-	}
-
-	public static void main(String[] args)
-	{
-		String input = "$1.234,5";
-		ValueConverter convert = new ValueConverter();
-		convert.setDecimalCharacter(',');
-		input = convert.adjustDecimalString(input);
-		System.out.println("input=" + input);
 	}
 
 }

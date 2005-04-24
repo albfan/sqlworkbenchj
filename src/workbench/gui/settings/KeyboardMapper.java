@@ -44,29 +44,6 @@ public class KeyboardMapper
 		this.add(display);
 	}
 	
-	public static void main(String args[])
-	{
-		try
-		{
-			JFrame w = new JFrame("Testing");
-			w.getContentPane().setLayout(new BorderLayout());
-			w.getContentPane().add(new KeyboardMapper(), BorderLayout.CENTER);
-			w.addWindowListener(new WindowAdapter()
-			{
-				public void windowClosing(WindowEvent evt)
-				{
-					System.exit(0);
-				}
-			});
-			w.pack();
-			w.show();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-
 	public void grabFocus()
 	{
 		this.display.grabFocus();

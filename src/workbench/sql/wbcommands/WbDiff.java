@@ -48,6 +48,9 @@ public class WbDiff
 	public static final String PARAM_SOURCESCHEMA = "referenceschema";
 	public static final String PARAM_TARGETSCHEMA = "targetschema";
 	
+	public static final String PARAM_INCLUDE_INDEX = "includeindex";
+	public static final String PARAM_INCLUDE_FK = "includeforeignkeys";
+	
 	private ArgumentParser cmdLine;
 	private SchemaDiff diff;
 	
@@ -63,6 +66,8 @@ public class WbDiff
 		cmdLine.addArgument(PARAM_SOURCESCHEMA);
 		cmdLine.addArgument(PARAM_TARGETSCHEMA);
 		cmdLine.addArgument(PARAM_NAMESPACE);
+		cmdLine.addArgument(PARAM_INCLUDE_FK);
+		cmdLine.addArgument(PARAM_INCLUDE_INDEX);
 	}
 
 	public String getVerb() { return VERB; }
@@ -163,6 +168,10 @@ public class WbDiff
 		
 		this.diff = new SchemaDiff(sourceCon, targetCon);
 		diff.setMonitor(this.rowMonitor);
+
+		// this needs to be set before the tables are defined!
+		diff.setIncludeForeignKeys(cmdLine.getBoolean(PARAM_INCLUDE_FK, true));
+		diff.setIncludeIndex(cmdLine.getBoolean(PARAM_INCLUDE_INDEX, true));
 		
 		String refTables = cmdLine.getValue(PARAM_SOURCETABLES);
 		String tarTables = cmdLine.getValue(PARAM_TARGETTABLES);
@@ -211,7 +220,6 @@ public class WbDiff
 			}
 			diff.setTables(rl, tl);
 		}
-		
 		Writer out = null;
 		boolean outputToConsole = false;
 		try
@@ -232,7 +240,7 @@ public class WbDiff
 				{
 					diff.setEncoding(encoding);
 				}
-				out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), encoding));
+				out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), encoding), 256*1024);
 			}
 			if (!diff.isCancelled()) diff.writeXml(out);
 		}

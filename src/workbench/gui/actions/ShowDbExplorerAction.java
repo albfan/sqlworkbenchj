@@ -11,12 +11,12 @@
  */
 package workbench.gui.actions;
 
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
 
 import workbench.gui.MainWindow;
 import workbench.resource.ResourceMgr;
@@ -39,7 +39,7 @@ public class ShowDbExplorerAction
 
 	public void executeAction(ActionEvent e)
 	{
-		SwingUtilities.invokeLater(new Runnable()
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{

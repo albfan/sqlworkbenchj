@@ -124,6 +124,7 @@ public class StatementRunner
 
 		sql = new WbXslt();
 		cmdDispatch.put(sql.getVerb(), sql);
+		cmdDispatch.put("XSLT", sql);
 
 		cmdDispatch.put(WbDefineVar.DEFINE_LONG.getVerb(), WbDefineVar.DEFINE_LONG);
 		cmdDispatch.put( WbDefineVar.DEFINE_SHORT.getVerb(), WbDefineVar.DEFINE_SHORT);
@@ -136,12 +137,9 @@ public class StatementRunner
 
 		sql = new WbExport();
 		cmdDispatch.put(sql.getVerb(), sql);
-		cmdDispatch.put("EXPORT", sql);
-		cmdDispatch.put("SPOOL", sql);
 
 		sql = new WbImport();
 		cmdDispatch.put(sql.getVerb(), sql);
-		cmdDispatch.put("IMPORT", sql);
 
 		sql = new WbCopy();
 		cmdDispatch.put(sql.getVerb(), sql);
@@ -234,6 +232,7 @@ public class StatementRunner
 			this.dbSpecificCommands.add(WbInclude.INCLUDE_FB.getVerb());
 		}
 
+		/*
 		if (!meta.isPostgres())
 		{
 			// for non-PostgreSQL connections we can use the
@@ -245,6 +244,7 @@ public class StatementRunner
 			this.cmdDispatch.put("COPY", copy);
 			this.dbSpecificCommands.add("COPY");
 		}
+		*/
 
 		String verbs = meta.getVerbsToIgnore();
 		List l = StringUtil.stringToList(verbs, ",");

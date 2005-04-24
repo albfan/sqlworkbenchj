@@ -14,9 +14,11 @@ package workbench.db;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import workbench.exception.ExceptionUtil;
 
 import workbench.log.LogMgr;
 
@@ -26,9 +28,6 @@ import workbench.log.LogMgr;
  */
 public abstract class AbstractConstraintReader
 {
-	private PreparedStatement columnConstraintStatement;
-	private PreparedStatement tableConstraintStatement;
-
 	public AbstractConstraintReader()
 	{
 	}
@@ -38,6 +37,9 @@ public abstract class AbstractConstraintReader
 	public String getPrefixTableConstraintKeyword() { return ""; }
 	public String getSuffixTableConstraintKeyword() { return ""; }
 
+	public boolean isColumnConstraintNameIncluded() { return false; }
+	public boolean isTableConstraintNameIncluded() { return false; }
+	
 	public int getIndexForSchemaParameter()
 	{
 		return -1;
@@ -64,22 +66,20 @@ public abstract class AbstractConstraintReader
 		HashMap result = new HashMap();
 
 		ResultSet rs = null;
+		PreparedStatement stmt = null;
 		try
 		{
-			if (this.columnConstraintStatement == null)
-			{
-				this.columnConstraintStatement = dbConnection.prepareStatement(sql);
-			}
+			stmt = dbConnection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 			int index = this.getIndexForSchemaParameter();
-			if (index > 0) this.columnConstraintStatement.setString(index, aTable.getSchema());
+			if (index > 0) stmt.setString(index, aTable.getSchema());
 
 			index = this.getIndexForCatalogParameter();
-			if (index > 0) this.columnConstraintStatement.setString(index, aTable.getCatalog());
+			if (index > 0) stmt.setString(index, aTable.getCatalog());
 
 			index = this.getIndexForTableNameParameter();
-			if (index > 0) this.columnConstraintStatement.setString(index, aTable.getTable());
+			if (index > 0) stmt.setString(index, aTable.getTable());
 
-			rs = this.columnConstraintStatement.executeQuery();
+			rs = stmt.executeQuery();
 			while (rs.next())
 			{
 				String column = rs.getString(1);
@@ -103,30 +103,30 @@ public abstract class AbstractConstraintReader
 	}
 
 	public String getTableConstraints(Connection dbConnection, TableIdentifier aTable, String indent)
+		throws SQLException
 	{
 		String sql = this.getTableConstraintSql();
 		if (sql == null) return null;
 		StringBuffer result = new StringBuffer(100);
 		String prefix = this.getPrefixTableConstraintKeyword();
 		String suffix = this.getSuffixTableConstraintKeyword();
-
+		PreparedStatement stmt = null;
+		
 		ResultSet rs = null;
 		try
 		{
-			if (this.tableConstraintStatement == null)
-			{
-				this.tableConstraintStatement = dbConnection.prepareStatement(sql);
-			}
+			stmt = dbConnection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			
 			int index = this.getIndexForSchemaParameter();
-			if (index > 0) this.tableConstraintStatement.setString(index, aTable.getSchema());
+			if (index > 0) stmt.setString(index, aTable.getSchema());
 
 			index = this.getIndexForCatalogParameter();
-			if (index > 0) this.tableConstraintStatement.setString(index, aTable.getCatalog());
+			if (index > 0) stmt.setString(index, aTable.getCatalog());
 
 			index = this.getIndexForTableNameParameter();
-			if (index > 0) this.tableConstraintStatement.setString(index, aTable.getTable());
+			if (index > 0) stmt.setString(index, aTable.getTable());
 
-			rs = this.tableConstraintStatement.executeQuery();
+			rs = stmt.executeQuery();
 			int count = 0;
 			while (rs.next())
 			{
@@ -146,28 +146,17 @@ public abstract class AbstractConstraintReader
 				}
 			}
 		}
-		catch (Exception e)
+		catch (SQLException e)
 		{
-			LogMgr.logError("AbstractConstraintReader", "Error when reading column constraints", e);
+			LogMgr.logError("AbstractConstraintReader", "Error when reading column constraints " + ExceptionUtil.getDisplay(e), null);
+			throw e;
 		}
 		finally
 		{
 			try { rs.close(); } catch (Throwable th) {}
-			//try { stmt.close(); } catch (Throwable th) {}
+			try { stmt.close(); } catch (Throwable th) {}
 		}
 		return result.toString();
-	}
-
-	public void done()
-	{
-		if (this.tableConstraintStatement != null)
-		{
-			try { this.tableConstraintStatement.close(); } catch (Throwable th) {}
-		}
-		if (this.columnConstraintStatement != null)
-		{
-			try { this.columnConstraintStatement.close(); } catch (Throwable th) {}
-		}
 	}
 
 }

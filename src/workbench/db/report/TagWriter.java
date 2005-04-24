@@ -37,7 +37,7 @@ public class TagWriter
 	 */
 	public void appendTag(StrBuffer target, StrBuffer indent, String tag, int value)
 	{
-		appendTag(target, indent, tag, String.valueOf(value));
+		appendTag(target, indent, tag, String.valueOf(value), false);
 	}
 	
 	/**
@@ -47,9 +47,9 @@ public class TagWriter
 	public void appendTag(StrBuffer target, StrBuffer indent, String tag, boolean value)
 	{
 		if (value)
-			appendTag(target, indent, tag, "true");
+			appendTag(target, indent, tag, "true", false);
 		else
-			appendTag(target, indent, tag, "false");
+			appendTag(target, indent, tag, "false", false);
 	}
 	
 	/**
@@ -58,8 +58,21 @@ public class TagWriter
 	 */
 	public void appendTag(StrBuffer target, StrBuffer indent, String tag, String value)
 	{
+		appendTag(target, indent, tag, value, false);
+	}
+	
+	/**
+	 * Appends the tag and the value in one line. There will be a new line
+	 * after the closing tag. If checkCData is true, then the value 
+	 * is checked for characters which require a <![CDATA[ "quoting"
+	 */
+	public void appendTag(StrBuffer target, StrBuffer indent, String tag, String value, boolean checkCData)
+	{
 		appendOpenTag(target, indent, tag);
+		boolean useCData = checkCData && needsCData(value);
+		if (useCData) target.append("<![CDATA[");
 		target.append(value);
+		if (useCData) target.append("]]>");
 		appendCloseTag(target, null, tag);
 	}
 
@@ -157,6 +170,17 @@ public class TagWriter
 	{
 		this.xmlNamespace = namespace;
 	}
+
+	private static final char[] SPECIAL_CHARS = new char[] {'<', '>', '&', '\'', '\n', '\r' };
 	
+	private boolean needsCData(String value)
+	{
+		if (value == null) return false;
+		for (int i=0; i < SPECIAL_CHARS.length; i++)
+		{
+			if (value.indexOf(SPECIAL_CHARS[i]) > -1) return true;
+		}
+		return false;
+	}
 	
 }

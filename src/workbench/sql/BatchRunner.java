@@ -13,8 +13,13 @@ package workbench.sql;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -31,10 +36,13 @@ import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
+import workbench.util.EncodingUtil;
 import workbench.util.StringUtil;
 
 /**
- *
+ * A class to run several statements from a script file. This is used 
+ * when running SQL Workbench in batch mode and for the {@link workbench.sql.wbcommands.WbInclude}
+ * command.
  * @author  info@sql-workbench.net
  */
 public class BatchRunner
@@ -55,7 +63,8 @@ public class BatchRunner
 	private RowActionMonitor rowMonitor;
 	private boolean verboseLogging = true;
 	private boolean checkEscapedQuotes = false;
-
+	private String encoding = null;
+	
 	public BatchRunner(String aFilelist)
 	{
 		this.files = StringUtil.stringToList(aFilelist, ",");
@@ -168,8 +177,9 @@ public class BatchRunner
 				this.printMessage(msg + "\n");
 				return null;
 			}
+			InputStream inStream = new FileInputStream(f);
 			content = new StringBuffer((int)f.length());
-			in = new BufferedReader(new FileReader(f));
+			in = new BufferedReader(new InputStreamReader(inStream, this.encoding),1024*256);
 			String line = in.readLine();
 			while (line != null)
 			{
@@ -225,19 +235,18 @@ public class BatchRunner
 				LogMgr.logInfo("BatchRunner", msg);
 				if (this.resultDisplay != null)
 				{
-					this.resultDisplay.appendToLog("\n");
 					this.resultDisplay.appendToLog(msg);
-					this.resultDisplay.appendToLog("\n\n");
+					this.resultDisplay.appendToLog("\n");
 				}
-
 				error = this.executeScript(fo);
-				msg = ResourceMgr.getString("MsgBatchProcessingFileDone") + " " + file;
+				/*
 				if (this.resultDisplay != null)
 				{
-					this.resultDisplay.appendToLog("\n");
+					msg = ResourceMgr.getString("MsgBatchProcessingFileDone") + " " + file;
 					this.resultDisplay.appendToLog(msg);
-					this.resultDisplay.appendToLog("\n\n");
+					this.resultDisplay.appendToLog("\n");
 				}
+				*/
 				LogMgr.logInfo("BatchRunner", msg);
 			}
 			catch (Exception e)
@@ -299,7 +308,7 @@ public class BatchRunner
 	{
 		boolean error = false;
 		StatementRunnerResult result = null;
-		ScriptParser parser = new ScriptParser(scriptFile);
+		ScriptParser parser = new ScriptParser(scriptFile, this.encoding);
 		parser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
 		parser.setDelimiter(this.delimiter);
 		parser.setCheckEscapedQuotes(this.checkEscapedQuotes);
@@ -389,7 +398,7 @@ public class BatchRunner
 			if (error && abortOnError) break;
 		}
 		end = System.currentTimeMillis();
-		String msg = "\n" + executedCount + " " + ResourceMgr.getString("MsgTotalStatementsExecuted");
+		String msg = executedCount + " " + ResourceMgr.getString("MsgTotalStatementsExecuted");
 		this.printMessage(msg);
 
 		if (this.showTiming)
@@ -408,6 +417,19 @@ public class BatchRunner
 		mgr.disconnectAll();
 	}
 
+	public void setEncoding(String enc)
+		throws UnsupportedEncodingException
+	{
+		if (!EncodingUtil.isEncodingSupported(enc))
+			throw new UnsupportedEncodingException(enc + " encoding not supported!");
+		this.encoding = EncodingUtil.cleanupEncoding(enc);
+	}
+	
+	public void setShowTiming(boolean flag)
+	{
+		this.showTiming = flag;
+	}
+	
 	public void setAbortOnError(boolean aFlag)
 	{
 		this.abortOnError = aFlag;

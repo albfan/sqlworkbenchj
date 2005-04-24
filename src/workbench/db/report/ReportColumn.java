@@ -51,6 +51,10 @@ public class ReportColumn
 		return this.column;
 	}
 
+	public ColumnReference getForeignKey()
+	{
+		return this.fk;
+	}
 	public void setForeignKeyReference(ColumnReference ref)
 	{
 		this.fk = ref;
@@ -83,16 +87,7 @@ public class ReportColumn
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_DIGITS, this.column.getDecimalDigits());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_JAVA_TYPE, this.column.getDataType());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_JAVA_TYPE_NAME, SqlUtil.getTypeName(this.column.getDataType()));
-
-		tagWriter.appendOpenTag(result, myindent, TAG_COLUMN_COMMENT);
-		String comment = this.column.getComment();
-		if (comment != null && comment.trim().length() > 0)
-		{
-			result.append("<![CDATA[");
-			result.append(comment);
-			result.append("]]>");
-		}
-		tagWriter.appendCloseTag(result, null, TAG_COLUMN_COMMENT);
+		tagWriter.appendTag(result, myindent, TAG_COLUMN_COMMENT, this.column.getComment(), true);
 
 		if (this.fk != null)
 		{

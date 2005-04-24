@@ -12,6 +12,7 @@
 package workbench.gui.help;
 
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.Window;
@@ -23,7 +24,6 @@ import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.text.AttributeSet;
@@ -169,7 +169,7 @@ public class HtmlViewer
 			}
 			this.setVisible(true);
 			this.requestFocus();
-			SwingUtilities.invokeLater(new Runnable()
+			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{

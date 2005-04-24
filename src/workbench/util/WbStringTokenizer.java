@@ -243,22 +243,4 @@ public class WbStringTokenizer
 		return current.toString();
 	}
 	
-	public static void main(String[] args)
-	{
-		String test = "select something;\n\nselect another thing;";
-		try
-		{
-			WbStringTokenizer tok = new WbStringTokenizer(test, ";", false, "\"'", false);
-			while (tok.hasMoreTokens()) 
-			{
-				System.out.println(tok.nextToken());
-				System.out.println("----------------------------");
-			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		System.out.println("done.");
-	}
 }

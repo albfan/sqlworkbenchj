@@ -673,16 +673,23 @@ public class DbMetadata
 	public String getExtendedViewSource(String aCatalog, String aSchema, String aView, DataStore viewTableDefinition, boolean includeDrop)
 		throws SQLException
 	{
+		GetMetaDataSql sql = (GetMetaDataSql)viewSourceSql.get(this.productName);
+		if (sql == null)
+		{
+			SourceStatementsHelp help = new SourceStatementsHelp();
+			return help.explainMissingViewSourceSql(this.getProductName());
+		}
+		
 		if (viewTableDefinition == null)
 		{
 			viewTableDefinition = this.getTableDefinition(aCatalog, aSchema, aView);
 		}
 		String source = this.getViewSource(aCatalog, aSchema, aView);
 
+		if (source == null || source.length() == 0) return StringUtil.EMPTY_STRING;
+		
 		// ThinkSQL returns the full CREATE VIEW statement
 		if (source.toLowerCase().startsWith("create")) return source;
-
-		if (source == null || source.length() == 0) return "";
 
 		StrBuffer result = new StrBuffer(source.length() + 100);
 
@@ -749,7 +756,7 @@ public class DbMetadata
 			sql.setSchema(aSchema);
 			sql.setObjectName(aViewname);
 			sql.setCatalog(aCatalog);
-			stmt = this.dbConnection.getSqlConnection().createStatement();
+			stmt = this.dbConnection.createStatement();
 			String query = sql.getSql();
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
@@ -773,6 +780,7 @@ public class DbMetadata
 		{
 			LogMgr.logWarning("DbMetadata.getViewSource()", "Could not retrieve view definition for " + aViewname, e);
 			source = new StrBuffer(ExceptionUtil.getDisplay(e));
+			if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
 		}
 		finally
 		{
@@ -799,6 +807,13 @@ public class DbMetadata
 		if (aProcname == null) return null;
 		if (aProcname.length() == 0) return null;
 
+		GetMetaDataSql sql = (GetMetaDataSql)procSourceSql.get(this.productName);
+		if (sql == null)
+		{
+			SourceStatementsHelp help = new SourceStatementsHelp();
+			return help.explainMissingProcSourceSql(this.getProductName());
+		}
+		
 		// this is for MS SQL Server, which appends a ;1 to
 		// the end of the procedure name
 		int i = aProcname.indexOf(';');
@@ -817,16 +832,14 @@ public class DbMetadata
 		Statement stmt = null;
 		ResultSet rs = null;
     int linecount = 0;
-		GetMetaDataSql sql = null;
 
 		try
 		{
-			sql = (GetMetaDataSql)procSourceSql.get(this.productName);
 			aProcname = this.adjustObjectname(aProcname);
 			sql.setSchema(aSchema);
 			sql.setObjectName(aProcname);
 			sql.setCatalog(aCatalog);
-			stmt = this.dbConnection.getSqlConnection().createStatement();
+			stmt = this.dbConnection.createStatementForQuery();
 			rs = stmt.executeQuery(sql.getSql());
 			while (rs.next())
 			{
@@ -838,32 +851,25 @@ public class DbMetadata
         }
 			}
 		}
-		catch (Exception e)
+		catch (SQLException e)
 		{
 			LogMgr.logError("DbMetadata.getProcedureSource()", "Error retrieving procedure source", e);
 			source = new StrBuffer(ExceptionUtil.getDisplay(e));
+			if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
 
+		boolean isPackage = false;
+		
 		try
 		{
       if (this.isOracle && linecount == 0)
       {
-        // this might be a procedure from a package. Then we need
-        // to retrieve the whole package. 
-        sql.setSchema(aSchema);
-        sql.setObjectName(aCatalog);
-        sql.setCatalog(null);
-        stmt = this.dbConnection.getSqlConnection().createStatement();
-        rs = stmt.executeQuery(sql.getSql());
-        while (rs.next())
-        {
-          String line = rs.getString(1);
-          if (line != null) source.append(line);
-        }
+				source = this.oracleMetaData.getPackageSource(aSchema, aCatalog);
+				isPackage = (source != null && source.length() > 0);
       }
 		}
 		catch (Exception e)
@@ -876,7 +882,7 @@ public class DbMetadata
 			SqlUtil.closeAll(rs, stmt);
 		}
 
-		if (!source.endsWith(';'))
+		if (!isPackage && !source.endsWith(';'))
 		{
 			source.append(";");
 		}
@@ -1358,7 +1364,6 @@ public class DbMetadata
 		if (this.oraOutput != null) this.oraOutput.close();
 		if (this.oracleMetaData != null) this.oracleMetaData.done();
 		if (this.msSqlMetaData != null) this.msSqlMetaData.done();
-		if (this.constraintReader != null) this.constraintReader.done();
 		if (this.mckoiMetaData != null) this.mckoiMetaData.done();
 	}
 
@@ -2019,7 +2024,7 @@ public class DbMetadata
 		sql.setSchema(aSchema);
 		sql.setCatalog(aCatalog);
 		sql.setObjectName(aTable);
-		Statement stmt = this.dbConnection.getSqlConnection().createStatement();
+		Statement stmt = this.dbConnection.createStatementForQuery();
 		String query = sql.getSql();
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
@@ -2075,14 +2080,24 @@ public class DbMetadata
 		sql.setSchema(aSchema);
 		sql.setCatalog(aCatalog);
 		sql.setObjectName(aTriggername);
-		Statement stmt = this.dbConnection.getSqlConnection().createStatement();
+		Statement stmt = this.dbConnection.createStatementForQuery();
 		String query = sql.getSql();
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo("DbMetadata.getTriggerSource()", "Using query=\n" + query);
 		}
 
-		ResultSet rs = stmt.executeQuery(query);
+		ResultSet rs = null;
+		try
+		{
+			rs = stmt.executeQuery(query);
+		}
+		catch (SQLException e)
+		{
+			if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
+			throw e;
+		}
+		
 		int colCount = rs.getMetaData().getColumnCount();
 		try
 		{
@@ -2652,7 +2667,15 @@ public class DbMetadata
 		Map columnConstraints = Collections.EMPTY_MAP;
 		if (this.constraintReader != null)
 		{
-			columnConstraints = this.constraintReader.getColumnConstraints(this.dbConnection.getSqlConnection(), table);
+			try
+			{
+				columnConstraints = this.constraintReader.getColumnConstraints(this.dbConnection.getSqlConnection(), table);
+			}
+			catch (Exception e)
+			{
+				if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
+			}
+			
 		}
 
 		result.append("CREATE TABLE ");
@@ -2733,7 +2756,16 @@ public class DbMetadata
 
 		if (this.constraintReader != null)
 		{
-			String cons = this.constraintReader.getTableConstraints(dbConnection.getSqlConnection(), table, "   ");
+			
+			String cons = null;
+			try
+			{
+				cons = this.constraintReader.getTableConstraints(dbConnection.getSqlConnection(), table, "   ");
+			}
+			catch (SQLException e)
+			{
+				if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
+			}
 			if (cons != null && cons.length() > 0)
 			{
 				result.append("   ,");
@@ -3280,7 +3312,7 @@ public class DbMetadata
     StrBuffer result = new StrBuffer(250);
     try
     {
-      stmt = this.dbConnection.getSqlConnection().createStatement();
+      stmt = this.dbConnection.createStatementForQuery();
       rs = stmt.executeQuery(sql.toString());
 			int count = 0;
       while (rs.next())

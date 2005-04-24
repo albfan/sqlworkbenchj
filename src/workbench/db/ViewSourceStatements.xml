@@ -37,6 +37,21 @@
   </void> 
   
   <void method="put"> 
+   <string>DB2/NT</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>SELECT text from syscat.views</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>viewname</string> 
+    </void> 
+    <void property="schemaField"> 
+     <string>viewschema</string> 
+    </void> 
+   </object> 
+  </void> 
+  
+  <void method="put"> 
    <string>Cloudscape</string> 
    <object class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 

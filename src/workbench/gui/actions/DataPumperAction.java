@@ -11,9 +11,8 @@
  */
 package workbench.gui.actions;
 
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
-
-import javax.swing.SwingUtilities;
 
 import workbench.db.ConnectionProfile;
 import workbench.gui.MainWindow;
@@ -30,7 +29,7 @@ import workbench.resource.Settings;
 public class DataPumperAction extends WbAction
 {
 	private MainWindow parent;
-
+	
 	public DataPumperAction(MainWindow parent)
 	{
 		super();
@@ -39,14 +38,14 @@ public class DataPumperAction extends WbAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_TOOLS);
 		this.setIcon(ResourceMgr.getImage("DataPumper"));
 	}
-
+	
 	public void executeAction(ActionEvent e)
 	{
 		if (parent == null)
 		{
 			return;
 		}
-		SwingUtilities.invokeLater(new Runnable()
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
@@ -62,5 +61,5 @@ public class DataPumperAction extends WbAction
 			}
 		});
 	}
-
+	
 }

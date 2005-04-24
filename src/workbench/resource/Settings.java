@@ -1244,7 +1244,9 @@ public class Settings
 
 	public String getDefaultDataEncoding()
 	{
-		return this.props.getProperty("workbench.file.data.encoding", "UTF-8");
+		String def = System.getProperty("file.encoding");
+		if ("Cp1252".equals(def)) def = "ISO-8859-15";
+		return this.props.getProperty("workbench.file.data.encoding", def);
 	}
 
 	public void setDefaultDataEncoding(String enc)
@@ -1254,7 +1256,9 @@ public class Settings
 
 	public String getDefaultFileEncoding()
 	{
-		return this.props.getProperty("workbench.file.encoding", "UTF-8");
+		String def = System.getProperty("file.encoding");
+		if ("Cp1252".equals(def)) def = "ISO-8859-15";
+		return this.props.getProperty("workbench.file.encoding", def);
 	}
 
 	public void setDefaultFileEncoding(String enc)
@@ -1364,7 +1368,7 @@ public class Settings
 
 	public boolean getDebugMetadataSql()
 	{
-		return "true".equals(this.getProperty("workbench.dbmetadata", "debugmetasql", "false"));
+		return "true".equals(this.props.getProperty("workbench.dbmetadata.debugmetasql", "false"));
 	}
 
 	public int getProfileDividerLocation()

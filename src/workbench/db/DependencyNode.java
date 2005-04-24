@@ -19,7 +19,7 @@ import java.util.Map;
 
 /**
  *	A node in the dependency tree for a cascading delete script.
- *  Used in {@link #DeleteScriptGenerator}
+ *  Used in {@link workbench.db.DeleteScriptGenerator}
  */
 public class DependencyNode
 {

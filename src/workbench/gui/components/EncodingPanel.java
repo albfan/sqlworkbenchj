@@ -14,8 +14,6 @@ package workbench.gui.components;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.Iterator;
-import java.util.Map;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -24,6 +22,7 @@ import workbench.interfaces.EncodingSelector;
 
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.EncodingUtil;
 
 /**
  *
@@ -34,33 +33,15 @@ public class EncodingPanel
 		implements EncodingSelector
 {
 	protected JComboBox encodings = new JComboBox();
-	private static String[] charsets;
 
 	public EncodingPanel()
 	{
 		this(null);
 	}
 
-	public static String[] getEncodings()
-	{
-		if (charsets == null)
-		{
-			Map sets = java.nio.charset.Charset.availableCharsets();
-			Iterator names = sets.keySet().iterator();
-			charsets = new String[sets.size()];
-			int i=0;
-			while (names.hasNext())
-			{
-				charsets[i] = (String)names.next();
-				i++;
-			}
-		}
-		return charsets;
-	}
-
 	public EncodingPanel(String encoding)
 	{
-		getEncodings();
+		String[] charsets = EncodingUtil.getEncodings();
 		int count = charsets.length;
 		for (int i=0; i < count; i++)
 		{

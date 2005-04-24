@@ -49,7 +49,7 @@ public class XmlRowDataConverter
 	public static final String KEY_FORMAT_LONG = "long";
 	public static final String KEY_FORMAT_SHORT = "short";
 	public static final String TAG_TAG_FORMAT = "wb-tag-format";
-	
+
 	private boolean useCData = false;
 	private boolean verboseFormat = true;
 	private String lineEnding = "\n";
@@ -59,10 +59,16 @@ public class XmlRowDataConverter
 	private String startColTag = "  <" + coltag + " index=\"";
 	private String closeColTag = "</" + coltag + ">";
 	private String closeRowTag = "</" + rowtag + ">";
-		
+	private String tableToUse = null;
+
 	public XmlRowDataConverter(ResultInfo info)
 	{
 		super(info);
+	}
+
+	public void setTableNameToUse(String name)
+	{
+		this.tableToUse = name;
 	}
 
 	public void setUseVerboseFormat(boolean flag)
@@ -79,7 +85,7 @@ public class XmlRowDataConverter
 			coltag = SHORT_COLUMN_TAG;
 			rowtag = SHORT_ROW_TAG;
 			startColTag = "<" + coltag;
-		} 
+		}
 		closeColTag = "</" + coltag + ">";
 		closeRowTag = "</" + rowtag + ">";
 	}
@@ -144,7 +150,7 @@ public class XmlRowDataConverter
 		StrBuffer indent = new StrBuffer("    ");
 		int colCount = this.metaData.getColumnCount();
 		StrBuffer xml = new StrBuffer(colCount * 100);
-		
+
 		if (this.verboseFormat)
 		{
 			tagWriter.appendOpenTag(xml, indent, rowtag, numAttrib, Long.toString(rowIndex + 1));
@@ -153,7 +159,7 @@ public class XmlRowDataConverter
 		{
 			tagWriter.appendOpenTag(xml, null, rowtag);
 		}
-		
+
 		if (verboseFormat) xml.append(this.lineEnding);
 		for (int c=0; c < colCount; c ++)
 		{
@@ -322,10 +328,17 @@ public class XmlRowDataConverter
 		result.append("  <");
 		result.append(TABLE_NAME_TAG);
 		result.append('>');
-		TableIdentifier table = this.metaData.getUpdateTable();
-		if (table != null) 
+		if (this.tableToUse != null)
 		{
-			result.append(table.getTable());
+			result.append(tableToUse);
+		}
+		else
+		{
+			TableIdentifier table = this.metaData.getUpdateTable();
+			if (table != null)
+			{
+				result.append(table.getTable());
+			}
 		}
 		result.append("</");
 		result.append(TABLE_NAME_TAG);

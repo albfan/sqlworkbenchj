@@ -154,17 +154,20 @@ public class TableDiff
 			pkcols = this.referenceTable.getPrimaryKeyColumns();
 		}
 		
-		writer.appendOpenTag(result, myindent, pkTagToUse, attr, value);
-		result.append('\n');
-		myindent.append("  ");
-		Iterator itr = pkcols.iterator();
-		while (itr.hasNext())
+		if (pkcols != null)
 		{
-			writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_NAME, (String)itr.next());
+			writer.appendOpenTag(result, myindent, pkTagToUse, attr, value);
+			result.append('\n');
+			myindent.append("  ");
+			Iterator itr = pkcols.iterator();
+			while (itr.hasNext())
+			{
+				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_NAME, (String)itr.next());
+			}
+			myindent.removeFromEnd(2);
+			writer.appendCloseTag(result, myindent, pkTagToUse);
 		}
-		myindent.removeFromEnd(2);
-		writer.appendCloseTag(result, myindent, pkTagToUse);
-			
+		
 		result.append(colDiff);
 		appendIndexDiff(result);
 		writer.appendCloseTag(result, this.indent, TAG_MODIFY_TABLE);
@@ -249,74 +252,4 @@ public class TableDiff
 		this.indent = ind;
 	}
 	
-	public static void main(String args[])
-	{
-		try
-		{
-			TagWriter w = new TagWriter("wb");
-			TableIdentifier t = new TableIdentifier("PERSON");
-			List cols = new ArrayList();
-			ColumnIdentifier col = new ColumnIdentifier("LASTNAME");
-			col.setDbmsType("VARCHAR2(20)");
-			col.setIsPkColumn(true);
-			col.setIsNullable(false);
-			col.setComment("Nachname der Person");
-			cols.add(col);
-			
-			col = new ColumnIdentifier("FIRSTNAME");
-			col.setDbmsType("VARCHAR2(20)");
-			col.setDefaultValue("Hans");
-			cols.add(col);
-			
-			col = new ColumnIdentifier("CITY");
-			col.setDbmsType("VARCHAR2(20)");
-			col.setIsPkColumn(false);
-			col.setIsNullable(true);
-			cols.add(col);
-//
-//			col = new ColumnIdentifier("ZIP");
-//			col.setDbmsType("VARCHAR2(20)");
-//			col.setIsPkColumn(false);
-//			col.setIsNullable(true);
-//			cols.add(col);
-			
-			ReportTable ref = new ReportTable(t);
-			ref.setColumns(cols);
-
-			TableIdentifier s = new TableIdentifier("PERSON2");
-			cols = new ArrayList();
-			col = new ColumnIdentifier("LASTNAME");
-			col.setDbmsType("VARCHAR2(15)");
-			col.setIsPkColumn(false);
-			col.setIsNullable(true);
-			cols.add(col);
-			
-			col = new ColumnIdentifier("FIRSTNAME");
-			col.setDbmsType("VARCHAR2(20)");
-			col.setIsNullable(false);
-			cols.add(col);
-
-//			col = new ColumnIdentifier("CITY");
-//			col.setDbmsType("VARCHAR2(20)");
-//			col.setIsNullable(false);
-//			cols.add(col);
-//			
-//			col = new ColumnIdentifier("ZIP");
-//			col.setDbmsType("VARCHAR2(20)");
-//			col.setIsNullable(false);
-//			cols.add(col);
-			
-			ReportTable target = new ReportTable(s);
-			target.setColumns(cols);
-			TableDiff d = new TableDiff(ref, target);
-			d.setIndent("  ");
-			//d.setTagWriter(w);
-			System.out.println(d.getMigrateTargetXml());
-		}
-		catch (Throwable th)
-		{
-			th.printStackTrace();
-		}
-		System.out.println("Done.");
-	}
 }

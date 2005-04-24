@@ -41,7 +41,6 @@ public class ConnectionProfile
 	private boolean rollbackBeforeDisconnect;
 	private String description;
 	private int id;
-  private String identifier;
 	private static int nextId = 1;
 	private boolean changed;
 	private boolean isNew;
@@ -51,7 +50,8 @@ public class ConnectionProfile
 	private String workspaceFile;
 	private boolean ignoreDropErrors;
 	private boolean confirmUpdates;
-
+	private Integer defaultFetchSize;
+	
 	static
 	{
 		WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
@@ -60,7 +60,6 @@ public class ConnectionProfile
 	public ConnectionProfile()
 	{
 		this.id = getNextId();
-    this.identifier = String.valueOf(this.id);
     this.isNew = true;
     this.changed = true;
 		Settings.getInstance().addPropertyChangeListener(this);
@@ -84,7 +83,7 @@ public class ConnectionProfile
 
   public String getIdentifier()
   {
-    return this.identifier;
+    return Integer.toString(this.id);
   }
 
 	public ConnectionProfile(String aName, String driverClass, String url, String userName, String pwd)
@@ -98,6 +97,10 @@ public class ConnectionProfile
 		this.changed = false;
 	}
 
+	/**
+	 * Return true if the application should use a separate connection
+	 * per tab or if all SQL tabs should share the same connection
+	 */
 	public boolean getUseSeperateConnectionPerTab()
 	{
 		return this.seperateConnection;
@@ -175,6 +178,10 @@ public class ConnectionProfile
 			return null;
 	}
 
+	/**
+	 * Returns the user's password in plain readable text.
+	 * (This value is send to the DB server)
+	 */
 	public String getInputPassword()
 	{
 		if (this.storePassword)
@@ -192,7 +199,7 @@ public class ConnectionProfile
 	 *	Returns the plain text version of the
 	 *	current password.
 	 *
-	 *	@see #decryptPassword(String)
+	 *	@see #encryptPassword(String)
 	 */
 	public String decryptPassword()
 	{
@@ -504,6 +511,39 @@ public class ConnectionProfile
 			// calling setPassword will encrypt/decrypt the password
 			// according to the current setting
 			this.setPassword(old);
+		}
+	}
+
+	public int getFetchSize()
+	{
+		if (this.defaultFetchSize == null) return -1;
+		else return this.defaultFetchSize.intValue();
+	}
+	
+	public Integer getDefaultFetchSize()
+	{
+		return defaultFetchSize;
+	}
+
+	public void setDefaultFetchSize(Integer fetchSize)
+	{
+		if (fetchSize != null && this.defaultFetchSize == null)
+		{
+			this.defaultFetchSize = fetchSize;
+			this.changed = true;
+			return;
+		}
+		if (fetchSize == null && this.defaultFetchSize != null)
+		{
+			this.defaultFetchSize = fetchSize;
+			this.changed = true;
+			return;
+		}
+		
+		if (fetchSize.intValue() != this.defaultFetchSize.intValue())
+		{
+			this.defaultFetchSize = fetchSize;
+			this.changed = true;
 		}
 	}
 

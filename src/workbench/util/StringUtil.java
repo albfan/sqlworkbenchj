@@ -585,6 +585,7 @@ public class StringUtil
 				case '&': replacement = "&amp;"; break;
 				case '<': replacement = "&lt;"; break;
 				case '\r': replacement = "&#13;"; break;
+				case '\n': replacement = "&#10;"; break;
 				case '>': replacement = "&gt;"; break;
 				case '"': replacement = "&quot;"; break;
 				case '\'': replacement = "&apos;"; break;

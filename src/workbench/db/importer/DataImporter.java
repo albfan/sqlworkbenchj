@@ -37,6 +37,8 @@ import workbench.util.WbThread;
 
 
 /**
+ * Import data that is provided from {@link RowDataProducer} into 
+ * a tabel in the database.
  *
  * @author  info@sql-workbench.net
  */
@@ -80,6 +82,7 @@ public class DataImporter
 	private ArrayList warnings = new ArrayList();
 	private ArrayList errors = new ArrayList();
 	private int numTables;
+	private boolean useTruncate = false;
 	
 	// this array will map the columns for updating the target table
 	// the index into this array will be the index
@@ -350,7 +353,6 @@ public class DataImporter
 		throws IOException, SQLException, Exception
 	{
 		if (this.source == null) return;
-		this.messages = new StrBuffer(2000);
 		this.isRunning = true;
 		this.numTables = 0;
 		this.canCommitInBatch = true;
@@ -369,13 +371,34 @@ public class DataImporter
 		throws SQLException
 	{
 		if (this.targetTable == null) return;
-		String deleteSql = "DELETE FROM " + this.targetTable;
+		String deleteSql = null;
+		if (this.useTruncate) 
+		{
+			deleteSql = "TRUNCATE TABLE " + this.targetTable;
+		}
+		else
+		{
+			deleteSql = "DELETE FROM " + this.targetTable;
+		}
 		Statement stmt = this.dbConn.createStatement();
 		LogMgr.logDebug("DataImporter.deleteTarget()", "Executing: [" + deleteSql + "] to delete target table...");
 		int rows = stmt.executeUpdate(deleteSql);
-		this.messages.append(rows + " " + ResourceMgr.getString("MsgImporterRowsDeleted") + " " + this.targetTable + "\n");
+		if (this.useTruncate)
+		{
+			String msg = ResourceMgr.getString("MsgImportTableTruncated").replaceAll("%table%", this.targetTable);
+			this.messages.append(msg);
+			this.messages.append('\n');
+		}
+		else
+		{
+			this.messages.append(rows + " " + ResourceMgr.getString("MsgImporterRowsDeleted") + " " + this.targetTable + "\n");
+		}
 	}
 
+	public void setUseTruncate(boolean flag)
+	{
+		this.useTruncate = flag;
+	}
 	public boolean isRunning() { return this.isRunning; }
 	public boolean isSuccess() { return this.errors.size() == 0; }
 	public boolean hasWarning() { return this.warnings.size() > 0; }
@@ -383,6 +406,7 @@ public class DataImporter
 
 	public long getInsertedRows() { return this.insertedRows; }
 	public long getUpdatedRows() { return this.updatedRows; }
+	
 	/**
 	 *	Return the error messages which where collected during the import.
 	 */
@@ -766,8 +790,7 @@ public class DataImporter
 			{
 				String msg = ResourceMgr.getString("ErrorImportTableNotFound").replaceAll("%table%", this.targetTable);
 				msg = StringUtil.replace(msg, "%filename%", this.parser.getSourceFilename());
-				this.messages.append(msg);
-				this.messages.append("\n\n");
+				this.errors.add(msg + "\n");
 				this.targetTable = null;
 				throw e;
 			}
@@ -1048,7 +1071,7 @@ public class DataImporter
 			if (this.updatedRows > -1)
 			{
 				this.messages.append(this.updatedRows + " " + ResourceMgr.getString("MsgCopyNumRowsUpdated"));
-				this.messages.append("\n\n");
+				this.messages.append("\n");
 			}
 		}
 		catch (SQLException e)

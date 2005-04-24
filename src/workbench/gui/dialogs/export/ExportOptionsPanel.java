@@ -73,7 +73,7 @@ public class ExportOptionsPanel
 		this.allowColumnSelection = (columns != null);
 		this.dataStoreColumns = columns;
 		this.generalOptions = new GeneralExportOptionsPanel();
-		generalOptions.allowSelectColumns(this.allowColumnSelection );
+		generalOptions.allowSelectColumns(this.allowColumnSelection);
 		if (this.allowColumnSelection )
 		{
 			this.columnSelectEventSource = generalOptions.addColumnSelectListener(this);
@@ -260,6 +260,7 @@ public class ExportOptionsPanel
 				type = DataExporter.EXPORT_XML;
 			else 
 				type = DataExporter.EXPORT_HTML;
+			this.currentType = type;
 			firePropertyChange("exportType", -1, type);
 		}
 		else if (event.getSource() == this.columnSelectEventSource)

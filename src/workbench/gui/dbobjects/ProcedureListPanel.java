@@ -291,7 +291,7 @@ public class ProcedureListPanel
 		ui.showDialog(f);
 		if (!ui.dialogWasCancelled())
 		{
-			SwingUtilities.invokeLater(new Runnable()
+			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{

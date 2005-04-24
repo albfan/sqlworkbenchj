@@ -158,58 +158,30 @@ public class WbSwingUtilities
 		showCursor(null, caller, includeParents);
 	}
 
-	private static void showCursor(Cursor cursor, final Component caller, final boolean includeParents)
+	private static void showCursor(final Cursor cursor, final Component caller, final boolean includeParents)
 	{
 		if (caller == null) return;
-		caller.setCursor(cursor);
-		if (includeParents)
+		Runnable r = new Runnable()
 		{
-			//Container c = caller.getParent();
-			Window w = SwingUtilities.getWindowAncestor(caller);
-			w.setCursor(cursor);
-			/*
-			while (c != null)
+			public void run()
 			{
-				c.setCursor(cursor);
-				c = c.getParent();
-			}
-			*/
-		}
-
-		/*
-		if (SwingUtilities.isEventDispatchThread())
-		{
-			caller.setCursor(null);
-			if (includeParents)
-			{
-				Container c = caller.getParent();
-				while (c != null)
+				caller.setCursor(cursor);
+				if (includeParents)
 				{
-					c.setCursor(null);
-					c = c.getParent();
+					final Window w = SwingUtilities.getWindowAncestor(caller);
+					if (w != null) w.setCursor(cursor);
 				}
 			}
+		};
+		
+		if (EventQueue.isDispatchThread())
+		{
+			r.run();
 		}
 		else
 		{
-			SwingUtilities.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					caller.setCursor(null);
-					if (includeParents)
-					{
-						Container c = caller.getParent();
-						while (c != null)
-						{
-							c.setCursor(null);
-							c = c.getParent();
-						}
-					}
-				}
-			});
+			try { EventQueue.invokeAndWait(r); } catch (Throwable ignore) {} 
 		}
-		*/
 	}
 
 	public static void showErrorMessage(Component aCaller, String aMessage)
@@ -354,22 +326,5 @@ public class WbSwingUtilities
 		String value = input.getText();
 		return value;
 	}
-
-	public static void main(String args[])
-	{
-		try
-		{
-			JFrame f = new JFrame("Hello");
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			getCommitRollbackQuestion(f,ResourceMgr.getString("MsgCommitPartialUpdate"));
-			System.exit(1);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		System.out.println("*** Done.");
-	}
-
 
 }

@@ -98,21 +98,5 @@ public class CsvLineParser
 		if (this.returnEmptyStrings && next == null) next = StringUtil.EMPTY_STRING;
 		return next;
 	}
-	
-	public static void main(String args[])
-	{
-		try
-		{
-			CsvLineParser p = new CsvLineParser('\t', '"');
-			p.setLine("field1\t\"test\"\tfield3");
-			while (p.hasNext())
-				System.out.println(p.getNext());
-		}
-		catch (Throwable th)
-		{
-			th.printStackTrace();
-		}
-		System.out.println("Done.");
-	}
-	
+
 }

@@ -11,10 +11,11 @@
  */
 package workbench.gui.components;
 
+import java.awt.EventQueue;
 import java.awt.Graphics;
 
 import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
+
 
 /**
  *
@@ -44,7 +45,7 @@ public class WbTabbedPane
 		// this is executed on the AWT thread.
 		if (suspend && !aFlag)
 		{
-			SwingUtilities.invokeLater(new Runnable()
+			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{

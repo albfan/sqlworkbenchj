@@ -81,23 +81,4 @@ public class DbDateFormatter
 		return dateStr;
 	}
 
-	public static void main(String args[])
-	{
-		HashMap m = new HashMap();
-		DbDateFormatter format = new DbDateFormatter();
-		format.setFormat("yyyy-MM-dd HH:mm:ss");
-		format.setFunctionCall("to_date(%formatted_date_literal%, 'yyyy-MM-dd hh24:mi:ss')");
-
-		m.put("Oracle", format);
-		m.put("Oracle8", format);
-
-		format = new DbDateFormatter();
-		format.setFormat("yyyy-MM-dd HH:mm:ss");
-		format.setFunctionCall(null);
-
-		m.put("Microsoft SQL Server", format);
-		WbPersistence.writeObject(m, "../src/workbench/storage/DateLiteralFormats.xml");
-
-		m.put(SqlSyntaxFormatter.GENERAL_SQL, format);
-	}
 }

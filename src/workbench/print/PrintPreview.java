@@ -17,6 +17,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -41,7 +42,6 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 import javax.swing.border.MatteBorder;
 
 import workbench.gui.WbSwingUtilities;
@@ -51,6 +51,7 @@ import workbench.gui.components.WbToolbarButton;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.WbThread;
 
 
 public class PrintPreview
@@ -326,21 +327,19 @@ public class PrintPreview
 		{
 			// the native dialog is shown in it's own thread
 			// because otherwise the repainting of the preview window
-			// does not work property
-			Thread t = new Thread()
+			// does not work properly
+			WbThread t = new WbThread("PageSetup Thread")
 			{
 				public void run()
 				{
 					showNativePageSetup();
 				}
 			};
-			t.setName("PageSetup Thread");
-			t.setDaemon(true);
 			t.start();
 		}
 		else
 		{
-			SwingUtilities.invokeLater(new Runnable()
+			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{

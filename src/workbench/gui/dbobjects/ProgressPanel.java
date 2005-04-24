@@ -13,7 +13,9 @@ package workbench.gui.dbobjects;
 
 import java.awt.Dimension;
 import java.awt.FontMetrics;
+import java.awt.Window;
 import java.io.File;
+import javax.swing.SwingUtilities;
 
 import workbench.gui.components.WbButton;
 import workbench.interfaces.Interruptable;
@@ -59,22 +61,32 @@ public class ProgressPanel
 		String fullName = f.getAbsolutePath();
 		this.fileNameField.setToolTipText(fullName);
 		this.fileNameField.setText(fullName);
+		FontMetrics fm = this.getFontMetrics(this.fileNameField.getFont());
+		int w = fm.stringWidth(aFilename) + 10;
+		int h = fm.getHeight() + 2;
+		Dimension d = new Dimension(w, h < 22 ? 22 : h);
+		fileNameField.setPreferredSize(d);
+		fileNameField.setMinimumSize(d);
+		this.invalidate();
 	}
 
 	public void setRowSize(int cols)
 	{
 		FontMetrics fm = this.getFontMetrics(this.getFont());
 		int w = fm.charWidth(' ');
-		Dimension d = new Dimension(w * cols, 22);
+		int h = fm.getHeight() + 2;
+		Dimension d = new Dimension(w * cols, h < 22 ? 22 : h);
 		this.rowInfo.setPreferredSize(d);
 		this.rowInfo.setMinimumSize(d);
-		this.doLayout();
-		this.updateUI();
+		this.invalidate();
 	}
+	
 
 	public void setInfoSize(int cols)
 	{
 		this.progressInfoText.setColumns(cols);
+		this.doLayout();
+		this.updateUI();
 	}
 
 	public void jobFinished()
@@ -106,7 +118,7 @@ public class ProgressPanel
     fileNameField = new javax.swing.JTextField();
     infoPanel = new javax.swing.JPanel();
     progressInfoText = new javax.swing.JTextField();
-    rowInfo = new javax.swing.JTextField();
+    rowInfo = new javax.swing.JLabel();
     cancelButton = new WbButton();
 
     setLayout(new java.awt.GridBagLayout());
@@ -131,13 +143,10 @@ public class ProgressPanel
     progressInfoText.setDisabledTextColor(java.awt.Color.black);
     infoPanel.add(progressInfoText, java.awt.BorderLayout.CENTER);
 
-    rowInfo.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-    rowInfo.setBorder(null);
-    rowInfo.setDoubleBuffered(true);
-    rowInfo.setMaximumSize(new java.awt.Dimension(2147483647, 18));
-    rowInfo.setMinimumSize(new java.awt.Dimension(40, 18));
-    rowInfo.setOpaque(false);
-    rowInfo.setPreferredSize(new java.awt.Dimension(40, 18));
+    rowInfo.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+    rowInfo.setMaximumSize(new java.awt.Dimension(32768, 18));
+    rowInfo.setMinimumSize(new java.awt.Dimension(30, 18));
+    rowInfo.setPreferredSize(new java.awt.Dimension(50, 18));
     infoPanel.add(rowInfo, java.awt.BorderLayout.EAST);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -181,7 +190,7 @@ public class ProgressPanel
   private javax.swing.JTextField fileNameField;
   private javax.swing.JPanel infoPanel;
   private javax.swing.JTextField progressInfoText;
-  private javax.swing.JTextField rowInfo;
+  private javax.swing.JLabel rowInfo;
   // End of variables declaration//GEN-END:variables
 
 }

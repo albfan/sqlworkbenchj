@@ -19,7 +19,7 @@ import java.util.StringTokenizer;
  * An instance of this class represents a pattern of the SQL operator LIKE.
  *
  * @author  <a href="mailto:ey@inweb.de?subject=Like Operator">Christian Ey</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class Like {
 
@@ -32,14 +32,6 @@ public class Like {
 
     /** Pattern string in form of a sequence of tokens */
     private Like.Token[] a;
-
-		public static void main( String[] args) throws Exception
-		{
-
-			Like pattern = new Like("'%request%'", false);
-			boolean wowThisMatches = pattern.like(" ");
-			System.out.println( "matches: " + wowThisMatches);
-		}
 
     /**
      * Creates a new instance of a Like Pattern.

@@ -24,6 +24,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import workbench.interfaces.CharacterSequence;
+import workbench.log.LogMgr;
 
 /**
  * An implementatio of CharacterSequence that does not read the 
@@ -48,15 +49,10 @@ public class FileMappedSequence
 	private FileInputStream input;
 	private FileChannel channel;
 	
-	public FileMappedSequence(File f)
-		throws IOException
-	{
-		this(f, "ISO-8859-1");
-	}
-	
 	public FileMappedSequence(File f, String characterSet)
 		throws IOException
 	{
+		if (characterSet == null) throw new NullPointerException("Empty encoding not allowed");
 		this.fileSize = f.length();
 		this.input = new FileInputStream(f);
 		this.channel = input.getChannel();
@@ -88,14 +84,13 @@ public class FileMappedSequence
 			{
 				chunkSize = (int)(this.fileSize - chunkStart);
 			}
-			//System.out.println("start window at " + chunkStart + ", size=" + chunkSize);
 			MappedByteBuffer bb = this.channel.map(FileChannel.MapMode.READ_ONLY, chunkStart, chunkSize);
 			CharBuffer cb = decoder.decode(bb);
-			this.chunk = cb.toString(); //new String(buffer, 0, size);
+			this.chunk = cb.toString(); 
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("FileMappedSequence.ensureWindow", "Error reading chunk", e);
 		}
 	}
 	
@@ -126,20 +121,5 @@ public class FileMappedSequence
 		int endInChunk = end - chunkStart;
 		result.append(this.chunk.substring(startInChunk, endInChunk));
 		return result.toString();
-	}
-
-	public static void main (String args[])
-	{
-		try
-		{
-			File f = new File("c:/temp/MDE_EMEA_PartnerHierarchy_Created_2005-03-11_cut.txt");
-			FileMappedSequence seq = new FileMappedSequence(f);
-			String c = seq.substring(9000, 9100);
-			System.out.println("c=" + c);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
 	}
 }

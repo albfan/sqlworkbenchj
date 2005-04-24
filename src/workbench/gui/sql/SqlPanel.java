@@ -47,7 +47,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
-import javax.swing.event.ChangeListener;
 
 import workbench.db.DeleteScriptGenerator;
 import workbench.db.WbConnection;
@@ -143,7 +142,6 @@ import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.sql.preparedstatement.StatementParameters;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
@@ -237,6 +235,7 @@ public class SqlPanel
 
 	private ArrayList execListener = null;
 	private Thread executionThread = null;
+	private DataExporter exporter;
 
 	/** Creates new SqlPanel */
 	public SqlPanel(int anId)
@@ -753,6 +752,8 @@ public class SqlPanel
 
 		this.toolbarActions.add(this.executeSelected);
 		this.toolbarActions.add(this.executeCurrent);
+		//this.toolbarActions.add(this.executeAll);
+		this.stopAction.setCreateToolbarSeparator(true);
 		this.toolbarActions.add(this.stopAction);
 		this.toolbarActions.add(this.firstStmtAction);
 		this.toolbarActions.add(this.prevStmtAction);
@@ -996,7 +997,7 @@ public class SqlPanel
 		{
 			final String msg = errorMessage;
 			// Make sure the error dialog is displayed on the AWT
-			SwingUtilities.invokeLater(new Runnable()
+			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
@@ -1515,6 +1516,10 @@ public class SqlPanel
 			{
 				this.cancelUpdate();
 			}
+			else if (this.exporter != null)
+			{
+				this.exporter.cancelExecution();
+			}
 			else
 			{
 				Thread t = new Thread()
@@ -1680,10 +1685,11 @@ public class SqlPanel
 
 		this.cancelExecution = false;
 
-		final DataExporter exporter = new DataExporter();
+		this.exporter = new DataExporter();
 		exporter.setRowMonitor(this.data);
 		exporter.setSql(sql);
 		exporter.setConnection(this.dbConnection);
+
 		boolean selected = exporter.selectOutput(getParentWindow());
 		if (selected)
 		{
@@ -1691,7 +1697,6 @@ public class SqlPanel
 			msg = StringUtil.replace(msg, "%type%", exporter.getTypeDisplay());
 			msg = StringUtil.replace(msg, "%sql%", StringUtil.getMaxSubstring(sql, 100));
 			showLogMessage(msg);
-			appendToLog("\n");
 			
 			this.executionThread = new WbThread("ExportSQL")
 			{
@@ -1699,42 +1704,49 @@ public class SqlPanel
 				{
 					setBusy(true);
 					setCancelState(true);
+					fireDbExecStart();
 					try
 					{
+						boolean newLineAppended = false;
 						StringBuffer messages = new StringBuffer();
 						String msg;
+						long start = System.currentTimeMillis();
 						long rowCount = exporter.startExport();
-						if (exporter.isSuccess())
-						{
-							msg = ResourceMgr.getString("MsgSpoolOk").replaceAll("%rows%", Long.toString(rowCount));
-							messages.append("\n"); // force new line in output
-							messages.append(msg);
-							messages.append("\n"); // force new line in output
-						}
+						long execTime = (System.currentTimeMillis() - start);
 						String[] spoolMsg = exporter.getErrors();
 						if (spoolMsg.length > 0)
 						{
+							messages.append('\n');
+							newLineAppended = true;
 							for (int i=0; i < spoolMsg.length; i++)
 							{
 								messages.append(spoolMsg[i]);
 								messages.append('\n');
 							}
-							messages.append('\n');
 						}
 
 						String warn = ResourceMgr.getString("TxtWarning");
 						spoolMsg = exporter.getWarnings();
 						if (spoolMsg.length > 0)
 						{
+							if (!newLineAppended) messages.append('\n');
 							for (int i=0; i < spoolMsg.length; i++)
 							{
-								messages.append(warn + ": " + spoolMsg[i]);
+								messages.append(spoolMsg[i]);
 								messages.append('\n');
 							}
-							messages.append('\n');
 						}
-						msg = ResourceMgr.getString("MsgSpoolTarget") + " " + exporter.getFullOutputFilename();
-						messages.append(msg);
+						if (exporter.isSuccess())
+						{
+							msg = ResourceMgr.getString("MsgSpoolOk").replaceAll("%rows%", Long.toString(rowCount));
+							messages.append("\n"); 
+							messages.append(msg);
+							messages.append("\n"); 
+							msg = ResourceMgr.getString("MsgSpoolTarget") + " " + exporter.getFullOutputFilename();
+							messages.append(msg);
+							messages.append("\n\n");
+						}
+						messages.append(ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s");
 						messages.append('\n');
 						appendToLog(messages.toString());
 						showLogPanel();
@@ -1743,10 +1755,15 @@ public class SqlPanel
 					{
 						LogMgr.logError("SqlPanel.spoolData()", "Error exporting data", e);
 					}
-					setBusy(false);
-					clearStatusMessage();
-					setCancelState(false);
-					executionThread = null;
+					finally
+					{
+						fireDbExecEnd();
+						setBusy(false);
+						clearStatusMessage();
+						setCancelState(false);
+						executionThread = null;
+						exporter = null;
+					}
 				}
 			};
 			this.executionThread.start();
@@ -1837,57 +1854,52 @@ public class SqlPanel
 			lastDir = fc.getCurrentDirectory().getAbsolutePath();
 			Settings.getInstance().setLastImportDir(lastDir);
 			optionPanel.saveSettings();
-			try
+			
+			ds.setDefaultDateFormat(optionPanel.getDateFormat());
+			ds.setDefaultNumberFormat(optionPanel.getNumberFormat());
+			final boolean header = optionPanel.getContainsHeader();
+			final String delimit = optionPanel.getColumnDelimiter();
+			final String quote = optionPanel.getQuoteChar();
+			final String fname = filename;
+			this.setBusy(true);
+			this.setCancelState(true);
+			Thread importThread = new WbThread("DataImport")
 			{
-				ds.setDefaultDateFormat(optionPanel.getDateFormat());
-				ds.setDefaultNumberFormat(optionPanel.getNumberFormat());
-				final boolean header = optionPanel.getContainsHeader();
-				final String delimit = optionPanel.getColumnDelimiter();
-				final String quote = optionPanel.getQuoteChar();
-				final String fname = filename;
-				this.setBusy(true);
-				this.setCancelState(true);
-				Thread importThread = new WbThread("DataImport")
+				public void run()
 				{
-					public void run()
+					try
 					{
-						try
-						{
-							importRunning = true;
-							ds.setProgressMonitor(data);
-							model.importFile(fname, header, delimit, quote, SqlPanel.this);
-							data.rowCountChanged();
-							importRunning = false;
-						}
-						catch (Exception e)
-						{
-							LogMgr.logError("SqlPanel.importFile() - worker thread", "Error when importing " + fname, e);
-						}
-						finally
-						{
-							setBusy(false);
-							ds.setDefaultDateFormat(currentFormat);
-							ds.setProgressMonitor(null);
-							data.clearStatusMessage();
-							setCancelState(false);
-							checkResultSetActions();
-						}
+						fireDbExecStart();
+						importRunning = true;
+						ds.setProgressMonitor(data);
+						model.importFile(fname, header, delimit, quote, SqlPanel.this);
+						data.rowCountChanged();
 					}
-				};
-				Thread.yield();
-				importThread.start();
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("SqlPanel.importFile()", "Error importing " + filename, e);
-			}
-		}
+					catch (Exception e)
+					{
+						LogMgr.logError("SqlPanel.importFile() - worker thread", "Error when importing " + fname, e);
+					}
+					finally
+					{
+						importRunning = false;
+						setBusy(false);
+						fireDbExecEnd();
+						ds.setDefaultDateFormat(currentFormat);
+						ds.setProgressMonitor(null);
+						data.clearStatusMessage();
+						setCancelState(false);
+						checkResultSetActions();
+					}
+				}
+			};
+			importThread.start();
+		}			
 		this.selectEditor();
 	}
 
 	public void appendToLog(final String aString)
 	{
-		SwingUtilities.invokeLater(new Runnable()
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
@@ -2023,8 +2035,6 @@ public class SqlPanel
 			int executedCount = 0;
 			String lastSql = null;
 
-			this.data.setAutoClearStatus(false);
-
 			for (int i=startIndex; i < endIndex; i++)
 			{
 				StringBuffer logmsg = new StringBuffer();
@@ -2092,7 +2102,7 @@ public class SqlPanel
 				compressLog = !this.data.getVerboseLogging() && (count > 1);
 				logWasCompressed = logWasCompressed || compressLog;
 
-				StringBuffer b = new StringBuffer(76);
+				StringBuffer b = new StringBuffer(80);
 				b.append(msg1);
 				b.append(i + 1);
 				b.append(msg2);
@@ -2175,7 +2185,7 @@ public class SqlPanel
 				final int command = commandWithError;
 				final int offset = selectionOffset;
 
-				SwingUtilities.invokeLater(new Runnable()
+				EventQueue.invokeLater(new Runnable()
 				{
 					public void run()
 					{
@@ -2215,7 +2225,7 @@ public class SqlPanel
 
 			if (count > 1)
 			{
-				this.appendToLog("\n" + ResourceMgr.getString("TxtScriptFinished")+ "\n");
+				this.appendToLog(ResourceMgr.getString("TxtScriptFinished")+ "\n");
 				long execTime = (end - startTime);
 				String s = ResourceMgr.getString("MsgScriptExecTime") + " " + (((double)execTime) / 1000.0) + "s";
 				this.appendToLog(s + "\n");
@@ -2225,7 +2235,7 @@ public class SqlPanel
 			{
 				final int selstart = oldSelectionStart;
 				final int selend = oldSelectionEnd;
-				SwingUtilities.invokeLater(new Runnable()
+				EventQueue.invokeLater(new Runnable()
 				{
 					public void run()
 					{
@@ -2314,7 +2324,7 @@ public class SqlPanel
   public void selectMaxRowsField()
   {
 		this.showResultPanel();
-		SwingUtilities.invokeLater(new Runnable()
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
@@ -2489,7 +2499,7 @@ public class SqlPanel
 				{
 					LogMgr.logWarning("SqlPanel.setBusy()", "Error when setting busy icon!", th);
 				}
-				SwingUtilities.invokeLater(new Runnable()
+				EventQueue.invokeLater(new Runnable()
 				{
 					public void run()
 					{

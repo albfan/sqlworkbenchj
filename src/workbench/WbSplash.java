@@ -86,14 +86,7 @@ public class WbSplash extends javax.swing.JDialog
 		setVisible(false);
 		dispose();
 	}//GEN-LAST:event_closeDialog
-	
-	/**
-	 * @param args the command line arguments
-	 */
-	public static void main(String args[])
-	{
-		new WbSplash(new javax.swing.JFrame(), true).show();
-	}
+
 	
 	
 	// Variables declaration - do not modify//GEN-BEGIN:variables

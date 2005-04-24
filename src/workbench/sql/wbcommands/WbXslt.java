@@ -29,6 +29,7 @@ public class WbXslt
 	extends SqlCommand
 {
 	private ArgumentParser cmdLine;
+	public static final String VERB = "WBXSLT";
 	public static final String ARG_STYLESHEET = "stylesheet";
 	public static final String ARG_OUTPUT = "xsltoutput";
 	public static final String ARG_INPUT = "inputfile";
@@ -43,7 +44,7 @@ public class WbXslt
 
 	public String getVerb()
 	{
-		return "XSLT";
+		return VERB;
 	}
 
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)

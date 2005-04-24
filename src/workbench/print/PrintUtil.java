@@ -114,16 +114,4 @@ public class PrintUtil
 		System.out.println(aName + ": imageable size=[" + aFormat.getImageableWidth() + "," + aFormat.getImageableHeight() + "]");
 		System.out.println(aName + ": margins (l,r,t,b)=" + leftmargin + "," + rightmargin + "," + topmargin + "," + bottommargin);
 	}
-
-	public static void main(String[] args)
-	{
-		/*
-		System.out.println("72 point = " + pointsToMillimeter(72) + "mm");
-		System.out.println("1 inch = " + inchToMillimeter(1) + "mm");
-		System.out.println("1 mm = " + millimeterToInch(1) + "inch");
-		System.out.println("25 mm = " + millimeterToPoints(25.4) + "points");
-		System.out.println("20 mm = " + millimeterToPoints(20) + "points");
-		*/
-		System.out.println(pointsToMillimeter(612.0));
-	}
 }

@@ -47,6 +47,7 @@ public class WbInclude
 		cmdLine.addArgument("checkescapedquotes");
 		cmdLine.addArgument("delimiter");
 		cmdLine.addArgument("verbose");
+		cmdLine.addArgument("encoding");
 	}
 
 	public String getVerb() { return verb; }
@@ -89,7 +90,7 @@ public class WbInclude
 		{
 			result.setFailure();
 			String msg = ResourceMgr.getString("ErrorIncludeFileNotFound");
-			msg.replaceAll("%filename%", file);
+			msg = msg.replaceAll("%filename%", file);
 			result.addMessage(msg);
 			return result;
 		}
@@ -97,7 +98,8 @@ public class WbInclude
 		boolean continueOnError = cmdLine.getBoolean("continueonerror", true);
 		boolean checkEscape = cmdLine.getBoolean("checkescapedquotes", Settings.getInstance().getCheckEscapedQuotes());
 		boolean verbose = cmdLine.getBoolean("verbose", false);
-
+		String encoding = cmdLine.getValue("encoding");
+		
 		String delim = cmdLine.getValue("delimiter");
 		try
 		{
@@ -109,6 +111,8 @@ public class WbInclude
 			batchRunner.setRowMonitor(this.rowMonitor);
 			batchRunner.setAbortOnError(!continueOnError);
 			batchRunner.setCheckEscapedQuotes(checkEscape);
+			batchRunner.setShowTiming(false);
+			batchRunner.setEncoding(encoding);
 			batchRunner.execute();
 			result.setSuccess();
 		}

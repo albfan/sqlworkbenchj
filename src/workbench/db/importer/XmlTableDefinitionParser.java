@@ -10,14 +10,9 @@
  *
  */
 package workbench.db.importer;
-
-import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Reader;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.Attributes;
@@ -27,7 +22,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import workbench.db.ColumnIdentifier;
 import workbench.db.exporter.XmlRowDataConverter;
 import workbench.log.LogMgr;
-import workbench.util.StrBuffer;
+import workbench.util.EncodingUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -74,17 +69,18 @@ public class XmlTableDefinitionParser
 	{
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		factory.setValidating(false);
-		InputStream in = null;
+		Reader in = null;
 		try
 		{
 			SAXParser saxParser = factory.newSAXParser();
-			in = new FileInputStream(this.filename);
-			InputSource source = new InputSource(new BufferedReader(new InputStreamReader(in, this.encoding)));
+			File f = new File(this.filename);
+			in = EncodingUtil.createReader(f, this.encoding);
+			InputSource source = new InputSource(in);
 			saxParser.parse(source, this);
 		}
 		catch (ParsingEndedException e)
 		{
-			// ignore this...
+			// expected exception to stop parsing
 		}
 		catch (FileNotFoundException e)
 		{
@@ -98,6 +94,7 @@ public class XmlTableDefinitionParser
 		}
 		finally
 		{
+			try { in.close(); } catch (Throwable th) {}
 		}
 	}
 	
@@ -107,7 +104,6 @@ public class XmlTableDefinitionParser
 		this.chars = new StringBuffer();
 		if (qName.equals(XmlRowDataConverter.COLUMN_DEF_TAG))
 		{
-			//this.currentColumn = new ColumnIdentifier();
 			this.columnList[this.currentColIndex] = new ColumnIdentifier();
 		}
 	}
@@ -135,7 +131,6 @@ public class XmlTableDefinitionParser
 		}
 		else if (qName.equals(XmlRowDataConverter.COLUMN_DEF_TAG))
 		{
-			//this.columnList[currentColIndex] = this.currentColumn;
 			currentColIndex ++;
 		}
 		else if (qName.equals(XmlRowDataConverter.TABLE_NAME_TAG))
@@ -198,19 +193,4 @@ public class XmlTableDefinitionParser
 		}
 	}		
 
-	public static void main(String args[])
-	{
-		try
-		{
-			XmlTableDefinitionParser parser = new XmlTableDefinitionParser("d:/projects/jworkbench/testdata/mind-50.xml", "UTF-8");
-			ColumnIdentifier[] cols = parser.getColumns();
-			System.out.println("table=" + parser.getTableName());
-			for (int i=0; i<cols.length; i++) System.out.println(cols[i]);
-		}
-		catch (Throwable th)
-		{
-			th.printStackTrace();
-		}
-		System.out.println("Done.");
-	}
 }

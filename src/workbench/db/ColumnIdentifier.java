@@ -12,6 +12,7 @@
 package workbench.db;
 
 import java.sql.Types;
+import workbench.util.SqlUtil;
 
 /**
  * An object containing the definition for a table column.
@@ -182,7 +183,7 @@ public class ColumnIdentifier
 	 * Getter for property comment.
 	 * @return Value of property comment.
 	 */
-	public java.lang.String getComment()
+	public String getComment()
 	{
 		return comment;
 	}
@@ -191,7 +192,7 @@ public class ColumnIdentifier
 	 * Setter for property comment.
 	 * @param comment New value of property comment.
 	 */
-	public void setComment(java.lang.String comment)
+	public void setComment(String comment)
 	{
 		this.comment = comment;
 	}
@@ -200,7 +201,7 @@ public class ColumnIdentifier
 	 * Getter for property defaultValue.
 	 * @return Value of property defaultValue.
 	 */
-	public java.lang.String getDefaultValue()
+	public String getDefaultValue()
 	{
 		return defaultValue;
 	}
@@ -209,7 +210,7 @@ public class ColumnIdentifier
 	 * Setter for property defaultValue.
 	 * @param defaultValue New value of property defaultValue.
 	 */
-	public void setDefaultValue(java.lang.String defaultValue)
+	public void setDefaultValue(String defaultValue)
 	{
 		this.defaultValue = defaultValue;
 	}
@@ -236,7 +237,7 @@ public class ColumnIdentifier
 	 * Getter for property columnClass.
 	 * @return Value of property columnClass.
 	 */
-	public java.lang.String getColumnClass()
+	public String getColumnClass()
 	{
 		return columnClass;
 	}
@@ -245,7 +246,7 @@ public class ColumnIdentifier
 	 * Setter for property columnClass.
 	 * @param columnClass New value of property columnClass.
 	 */
-	public void setColumnClass(java.lang.String columnClass)
+	public void setColumnClass(String columnClass)
 	{
 		this.columnClass = columnClass;
 	}
@@ -254,16 +255,20 @@ public class ColumnIdentifier
 	 * Getter for property columnTypeName.
 	 * @return Value of property columnTypeName.
 	 */
-	public java.lang.String getColumnTypeName()
+	public String getColumnTypeName()
 	{
-		return columnTypeName;
+		if (this.columnTypeName == null)
+		{
+			return SqlUtil.getTypeName(this.type);
+		}
+		return this.columnTypeName;
 	}
 
 	/**
 	 * Setter for property columnTypeName.
 	 * @param columnTypeName New value of property columnTypeName.
 	 */
-	public void setColumnTypeName(java.lang.String columnTypeName)
+	public void setColumnTypeName(String columnTypeName)
 	{
 		this.columnTypeName = columnTypeName;
 	}

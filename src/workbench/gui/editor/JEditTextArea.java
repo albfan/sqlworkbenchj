@@ -47,7 +47,6 @@ import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollBar;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
@@ -104,13 +103,13 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.31 2005-04-04 20:50:24 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.32 2005-04-24 11:29:04 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
 	implements MouseWheelListener, Undoable, ClipboardSupport
 {
-
+	private boolean rightClickMovesCursor = false;
 	private Pattern lastSearchPattern;
 	private String lastSearchExpression;
 	private int lastSearchPos = -1;
@@ -2436,7 +2435,7 @@ public class JEditTextArea
 			// If this is not done, mousePressed events accumilate
 			// and the result is that scrolling doesn't stop after
 			// the mouse is released
-			SwingUtilities.invokeLater(new Runnable() {
+			EventQueue.invokeLater(new Runnable() {
 				public void run()
 				{
 					if(evt.getAdjustable() == vertical)
@@ -2562,16 +2561,20 @@ public class JEditTextArea
 			focusedComponent = JEditTextArea.this;
 
 			int x = evt.getX() - painter.getGutterWidth();
-
-			if((evt.getModifiers() & InputEvent.BUTTON3_MASK) != 0 && popup != null)
-			{
-				popup.show(painter,x,evt.getY());
-				return;
-			}
-
 			int line = yToLine(evt.getY());
 			int offset = xToOffset(line,x);
 			int dot = getLineStartOffset(line) + offset;
+
+
+			if((evt.getModifiers() & InputEvent.BUTTON3_MASK) != 0 && popup != null)
+			{
+				if (rightClickMovesCursor && !isTextSelected())
+				{
+					setCaretPosition(dot);
+				}
+				popup.show(painter,x,evt.getY());
+				return;
+			}
 
 			switch(evt.getClickCount())
 			{
@@ -2604,7 +2607,9 @@ public class JEditTextArea
 				select(getMarkPosition(),dot);
 			}
 			else
+			{
 				setCaretPosition(dot);
+			}
 		}
 
 		private void doDoubleClick(MouseEvent evt, int line, int offset, int dot)
@@ -2744,5 +2749,15 @@ public class JEditTextArea
 		caretTimer = new Timer(500,new CaretBlinker());
 		caretTimer.setInitialDelay(500);
 		caretTimer.start();
+	}
+
+	public boolean isRightClickMovesCursor()
+	{
+		return rightClickMovesCursor;
+	}
+
+	public void setRightClickMovesCursor(boolean rightClickMovesCursor)
+	{
+		this.rightClickMovesCursor = rightClickMovesCursor;
 	}
 }

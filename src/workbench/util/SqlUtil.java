@@ -588,14 +588,7 @@ public class SqlUtil
 	
 	public static void main(String args[])
 	{
-		try
-		{
-			validateStaticTypes();
-		}
-		catch (Throwable th)
-		{
-			th.printStackTrace();
-		}
+		validateStaticTypes();
 		System.out.println("Done.");
 	}
 }

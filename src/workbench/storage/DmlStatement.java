@@ -329,16 +329,4 @@ public class DmlStatement
 		return sql;
 	}
 
-	public static void main(String args[])
-	{
-		try
-		{
-			char c = '\t';
-			System.out.println(Integer.toString((int)c));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
 }

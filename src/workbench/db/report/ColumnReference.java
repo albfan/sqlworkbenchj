@@ -52,16 +52,45 @@ public class ColumnReference
 		myindent.append("  ");
 		tagWriter.appendOpenTag(result, indent, TAG_REFERENCE);
 		result.append('\n');
-		
-		tagWriter.appendTag(result, myindent, ReportTable.TAG_TABLE_NAME, this.foreignTable);
-		tagWriter.appendTag(result, myindent, ReportColumn.TAG_COLUMN_NAME, this.foreignColumn);
-		tagWriter.appendTag(result, myindent, TAG_CONSTRAINT_NAME, this.fkName);
-		tagWriter.appendTag(result, myindent, TAG_DELETE_RULE, this.deleteRule);
-		tagWriter.appendTag(result, myindent, TAG_UPDATE_RULE, this.updateRule);
+
+		result.append(getInnerXml(myindent));
 		
 		tagWriter.appendCloseTag(result, indent, TAG_REFERENCE);
 		
 		return result;
 	}
+
+	public StrBuffer getInnerXml(StrBuffer indent)
+	{
+		StrBuffer result = new StrBuffer(250);
+		tagWriter.appendTag(result, indent, ReportTable.TAG_TABLE_NAME, this.foreignTable);
+		tagWriter.appendTag(result, indent, ReportColumn.TAG_COLUMN_NAME, this.foreignColumn);
+		tagWriter.appendTag(result, indent, TAG_CONSTRAINT_NAME, this.fkName);
+		tagWriter.appendTag(result, indent, TAG_DELETE_RULE, this.deleteRule);
+		tagWriter.appendTag(result, indent, TAG_UPDATE_RULE, this.updateRule);
+		return result;
+	}
 	
+	public boolean equals(Object o)
+	{
+		if (o == null) return false;
+		if (o instanceof ColumnReference) return equals((ColumnReference)o);
+		return false;
+	}
+	
+	public boolean equals(ColumnReference ref)
+	{
+		try
+		{
+			return (this.foreignColumn.equals(ref.foreignColumn) &&
+			        this.foreignTable.equals(ref.foreignTable) &&
+							this.updateRule.equals(ref.updateRule) &&
+							this.deleteRule.equals(ref.deleteRule)
+			        );
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+	}
 }

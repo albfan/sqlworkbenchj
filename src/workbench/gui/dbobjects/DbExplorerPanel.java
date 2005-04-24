@@ -12,6 +12,7 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
@@ -191,7 +192,6 @@ public class DbExplorerPanel
 		String currentSchema = null;
 		try
 		{
-			//LogMgr.logDebug("DbExplorerPanel.readSchemas()", "Reading schemas...");
 			this.schemaSelector.removeActionListener(this);
 
 			StringBuffer s = new StringBuffer(this.dbConnection.getMetadata().getSchemaTerm());
@@ -204,8 +204,11 @@ public class DbExplorerPanel
 			for (int i=0; i < schemas.size(); i++)
 			{
 				String schema = (String)schemas.get(i);
-				this.schemaSelector.addItem(schema);
-				if (user.equalsIgnoreCase(schema)) currentSchema = schema;
+				if (schema != null) 
+				{
+					this.schemaSelector.addItem(schema.trim());
+					if (user.equalsIgnoreCase(schema)) currentSchema = schema;
+				}
 			}
 			schemaSelector.setSelectedItem(currentSchema);
 			tables.setCatalogAndSchema(null, currentSchema, false);
@@ -215,7 +218,6 @@ public class DbExplorerPanel
 		{
 			LogMgr.logError(this, "Could not retrieve list of schemas", e);
 		}
-
 		this.schemaSelector.addActionListener(this);
 	}
 
@@ -244,43 +246,52 @@ public class DbExplorerPanel
 			this.reset();
 			return;
 		}
-		this.dbConnection = aConnection;
-		this.tables.setConnection(aConnection);
-		this.procs.setConnection(aConnection);
-		if (this.searchPanel != null) this.searchPanel.setConnection(aConnection);
-		//if (this.generator != null) this.generator.setConnection(aConnection);
-		this.schemaLabel.setText(aConnection.getMetadata().getSchemaTerm());
-		this.schemaSelector.doLayout();
-		this.readSchemas();
-
-		if (this.window != null && aProfilename != null)
+		
+		WbSwingUtilities.showWaitCursorOnWindow(this);
+		try
 		{
-			this.window.setProfileName(aProfilename);
-		}
-		this.connectionInfo.setConnection(aConnection);
+			this.dbConnection = aConnection;
+			this.tables.setConnection(aConnection);
+			this.procs.setConnection(aConnection);
+			if (this.searchPanel != null) this.searchPanel.setConnection(aConnection);
+			//if (this.generator != null) this.generator.setConnection(aConnection);
+			this.schemaLabel.setText(aConnection.getMetadata().getSchemaTerm());
+			this.schemaSelector.doLayout();
+			this.readSchemas();
 
-		if (Settings.getInstance().getRetrieveDbExplorer())
-		{
-			if (this.isVisible())
+			if (this.window != null && aProfilename != null)
 			{
-				// if we are visible start the retrieve immediately
-				this.retrievePending = false;
-				EventQueue.invokeLater(new Runnable()
+				this.window.setProfileName(aProfilename);
+			}
+			this.connectionInfo.setConnection(aConnection);
+
+			if (Settings.getInstance().getRetrieveDbExplorer())
+			{
+				if (this.isVisible())
 				{
-					public void run()
+					// if we are visible start the retrieve immediately
+					this.retrievePending = false;
+					EventQueue.invokeLater(new Runnable()
 					{
-						fireSchemaChanged();
-					}
-				});
+						public void run()
+						{
+							fireSchemaChanged();
+						}
+					});
+				}
+				else
+				{
+					// if we are not visible just store the information
+					// that we need to retrieve the table list.
+					// this will be evaluated by the (overwritten) setVisible() method
+					// There is no need in retrieving the information if we are not visible
+					this.retrievePending = true;
+				}
 			}
-			else
-			{
-				// if we are not visible just store the information
-				// that we need to retrieve the table list.
-				// this will be evaluated by the (overwritten) setVisible() method
-				// There is no need in retrieving the information if we are not visible
-				this.retrievePending = true;
-			}
+		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursorOnWindow(this);
 		}
 	}
 
@@ -367,19 +378,25 @@ public class DbExplorerPanel
 	private void fireSchemaChanged(final boolean retrieve)
 	{
 		final String schema = (String)schemaSelector.getSelectedItem();
-
+		final Component c = this;
+		
 		Thread t = new WbThread("Schema Change")
 		{
 			public void run()
 			{
 				try
 				{
+					WbSwingUtilities.showWaitCursorOnWindow(c);
 					tables.setCatalogAndSchema(null, schema, retrieve);
 					procs.setCatalogAndSchema(null, schema, retrieve);
 				}
 				catch (Exception ex)
 				{
 					LogMgr.logError(this, "Could not set schema", ex);
+				}
+				finally
+				{
+					WbSwingUtilities.showDefaultCursorOnWindow(c);
 				}
 			}
 		};
@@ -450,19 +467,23 @@ public class DbExplorerPanel
 	{
 		this.window = null;
 		if (Settings.getInstance().getDbExplorerClearDataOnClose() && this.tables != null) this.tables.clearTableData();
-		if (this.dbConnection != null &&
-		    Settings.getInstance().disconnectDbExplorerOnClose() &&
-		    this.dbConnection.getProfile().getUseSeperateConnectionPerTab())
+		if (this.dbConnection != null && this.dbConnection.getProfile().getUseSeperateConnectionPerTab())
 		{
 			try
 			{
-				this.dbConnection.disconnect();
+				if (Settings.getInstance().disconnectDbExplorerOnClose())
+				{
+					this.dbConnection.disconnect();
+				}
+				else 
+				{
+					try { this.dbConnection.rollback(); } catch (Throwable th) {}
+				}
 			}
 			catch (Throwable th)
 			{
 				LogMgr.logWarning("DbExplorerPanel.dispose()", "Error when closing connection", th);
 			}
-
 		}
 	}
 

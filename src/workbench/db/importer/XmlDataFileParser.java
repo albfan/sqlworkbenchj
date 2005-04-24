@@ -124,6 +124,7 @@ public class XmlDataFileParser
 	}
 	
 	public void setColumns(String columnList)
+		throws SQLException
 	{
 		if (columnList != null && columnList.trim().length() > 0)
 		{
@@ -149,6 +150,7 @@ public class XmlDataFileParser
 	/**	 Define the columns to be imported
 	 */
 	public void setColumns(List cols)
+		throws SQLException
 	{
 		if (cols != null && cols.size() > 0)
 		{
@@ -185,6 +187,7 @@ public class XmlDataFileParser
 	}
 
 	private void checkImportColumns()
+		throws SQLException
 	{
 		if (this.columnsToImport == null) 
 		{
@@ -206,7 +209,7 @@ public class XmlDataFileParser
 			if (!this.containsColumn(c)) 
 			{
 				this.missingColumn = c.getColumnName();
-				throw new IllegalArgumentException("Import column " + c.getColumnName() + " not present in input file!");
+				throw new SQLException("Import column " + c.getColumnName() + " not present in input file!");
 			}
 		}
 		this.realColCount = this.columnsToImport.size();
@@ -326,6 +329,7 @@ public class XmlDataFileParser
 		}
 		catch (ParsingInterruptedException e)
 		{
+
 			this.receiver.importCancelled();
 			throw e;
 		}

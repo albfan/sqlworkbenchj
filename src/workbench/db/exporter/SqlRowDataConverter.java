@@ -127,7 +127,14 @@ public class SqlRowDataConverter
 		dml.setChrFunction(this.chrFunction);
 		dml.setConcatString(this.concatString);
 		dml.setConcatFunction(this.concatFunction);
-		result.append(dml.getExecutableStatement());
+		String db = null;
+		if (this.originalConnection != null)
+		{
+			db = this.originalConnection.getDatabaseProductName();
+		}
+		// passing the db name is important, so that e.g. 
+		// date literals can be formatted correctly
+		result.append(dml.getExecutableStatement(db));
 		result.append(';');
 		if (doFormatting)
 			result.append(doubleLineTerminator);

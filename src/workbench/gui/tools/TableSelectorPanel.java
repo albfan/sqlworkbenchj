@@ -12,6 +12,7 @@
 package workbench.gui.tools;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -20,7 +21,6 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
@@ -329,7 +329,7 @@ public class TableSelectorPanel
 			{
 				this.editNewTableNameButton.setEnabled(false);
 			}
-			SwingUtilities.invokeLater(new Runnable()
+			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{

@@ -75,6 +75,7 @@ import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import java.awt.Cursor;
+import java.awt.EventQueue;
 
 /**
  *	A Panel which displays the result of a SELECT statement and
@@ -204,7 +205,7 @@ public class DwPanel
 				{
 					WbSwingUtilities.showDefaultCursorOnWindow(panel);
 				}
-				SwingUtilities.invokeLater(new Runnable()
+				EventQueue.invokeLater(new Runnable()
 				{
 					public void run()
 					{
@@ -685,13 +686,6 @@ public class DwPanel
 		return rowsAffectedByScript;
 	}
 
-	private boolean autoClearStatus = true;
-
-	public void setAutoClearStatus(boolean flag)
-	{
-		this.autoClearStatus = flag;
-	}
-
 	public void setResultLogger(ResultLogger logger)
 	{
 		this.stmtRunner.setResultLogger(logger);
@@ -767,6 +761,7 @@ public class DwPanel
 			}
 			long execTime = (end - sqlExecStart);
 			this.lastTimingMessage = ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s";
+			/*
 			if (LogMgr.isDebugEnabled())
 			{
 				this.lastTimingMessage += "\n" + ResourceMgr.getString("MsgSqlVerbTime") + " " + (((double)sqlTime) / 1000.0) + "s";
@@ -775,6 +770,7 @@ public class DwPanel
 					this.lastTimingMessage += "\n" + ResourceMgr.getString("MsgCheckUpdateTableTime") + " " + (((double)checkUpdateTime) / 1000.0) + "s";
 				}
 			}
+			*/
 			this.rowsAffectedByScript += result.getTotalUpdateCount();
 			this.lastResultMessages = result.getMessages();
 		}
@@ -827,7 +823,6 @@ public class DwPanel
 		{
 			if (result != null) result.clear();
 			this.stmtRunner.statementDone();
-			if (this.autoClearStatus) this.clearStatusMessage();
 		}
 
   }
@@ -1014,7 +1009,7 @@ public class DwPanel
 			for (int i=0; i < lastResultMessages.length; i++)
 			{
 				msg.append(lastResultMessages[i]);
-				msg.append(" \n");
+				msg.append("\n");
 			}
 			this.lastMessage = msg.toString();
 			this.lastResultMessages = null;
@@ -1093,7 +1088,7 @@ public class DwPanel
 		{
 			try
 			{
-				SwingUtilities.invokeLater(new Runnable()
+				EventQueue.invokeLater(new Runnable()
 				{
 					public void run()
 					{
@@ -1122,7 +1117,7 @@ public class DwPanel
 		}
 		else
 		{
-			SwingUtilities.invokeLater(new Runnable()
+			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{

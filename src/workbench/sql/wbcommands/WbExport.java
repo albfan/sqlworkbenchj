@@ -21,11 +21,13 @@ import workbench.db.exporter.DataExporter;
 import workbench.gui.components.EncodingPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 import workbench.util.CharacterRange;
+import workbench.util.EncodingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.db.TableIdentifier;
@@ -117,7 +119,7 @@ public class WbExport
 		{
 			result.addMessage(ResourceMgr.getString("MsgAvailableEncodings"));
 			result.addMessage("");
-			String[] encodings = EncodingPanel.getEncodings();
+			String[] encodings = EncodingUtil.getEncodings();
 			for (int i=0; i < encodings.length; i++)
 			{
 				result.addMessage(encodings[i]);
@@ -195,7 +197,8 @@ public class WbExport
 			format = cmdLine.getValue("decimal");
 			if (format != null) exporter.setDecimalSymbol(format);
 
-			exporter.setExportHeaders(cmdLine.getBoolean("header"));
+			boolean headerDefault = Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false);
+			exporter.setExportHeaders(cmdLine.getBoolean("header", headerDefault));
 			exporter.setCleanupCarriageReturns(cmdLine.getBoolean("cleancr"));
 			String escape = cmdLine.getValue("escapetext");
 			if (escape != null)
@@ -279,7 +282,8 @@ public class WbExport
 			String xsl = cmdLine.getValue(WbXslt.ARG_STYLESHEET);
 			String output = cmdLine.getValue(WbXslt.ARG_OUTPUT);
 
-			boolean verbose = cmdLine.getBoolean("verbosexml", true);
+			boolean verboseDefault = Settings.getInstance().getBoolProperty("workbench.export.xml.default.verbose", true);
+			boolean verbose = cmdLine.getBoolean("verbosexml", verboseDefault);
 			exporter.setUseVerboseFormat(verbose);
 
 			if (xsl != null && output != null)

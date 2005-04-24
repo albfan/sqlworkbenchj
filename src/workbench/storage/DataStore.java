@@ -1188,7 +1188,7 @@ public class DataStore
 	 * supplied Writer
 	 *
 	 * @param pw The writer to which the HTML is written.
-	 * @see workbench.db.exporter.HmltRowDataConverter
+	 * @see workbench.db.exporter.HtmlRowDataConverter
 	 */
 	public void writeHtmlData(Writer pw)
 		throws IOException
@@ -1957,7 +1957,7 @@ public class DataStore
 	 *
 	 * @param aValue the value as entered by the user
 	 * @param aColumn the column for which this value should be converted
-	 * @returns an Object of the needed class for the column
+	 * @return an Object of the needed class for the column
 	 * @see ValueConverter#convertValue(Object, int)
 	 */
 	public Object convertCellValue(Object aValue, int aColumn)

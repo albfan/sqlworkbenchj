@@ -53,7 +53,7 @@ public class SchemaDiff
 	private String namespace;
 	private String encoding = "UTF-8";
 	private boolean diffIndex = true;
-	private boolean diffForeignKeys = false;
+	private boolean diffForeignKeys = true;
 	private RowActionMonitor monitor;
 	private boolean cancel = false;
 	private String referenceSchema;
@@ -82,6 +82,11 @@ public class SchemaDiff
 		this.namespace = space;
 	}
 	
+	/**
+	 * Control whether foreing keys should be compared as well.
+	 * The default is to compare foreign keys.
+	 */
+	public void setIncludeForeignKeys(boolean flag) { this.diffForeignKeys = flag; }
 
 	/**
 	 *	Control whether index definitions should be compared as well.
@@ -529,7 +534,7 @@ public class SchemaDiff
 		tw.appendOpenTag(info, indent, TAG_COMPARE_INFO);
 		info.append('\n');
 		tw.appendTag(info, indent2, TAG_INDEX_INFO, this.diffIndex);
-		//tw.appendTag(info, indent2, TAG_FK_INFO, this.diffForeignKeys);
+		tw.appendTag(info, indent2, TAG_FK_INFO, this.diffForeignKeys);
 
 		if (this.referenceSchema != null && this.targetSchema != null)
 		{
@@ -593,43 +598,6 @@ public class SchemaDiff
 		}
 		out.write(tag);
 		out.write(">\n");
-	}
-	
-	public static void main(String args[])
-	{
-		Connection source = null;
-		Connection target = null;
-		try
-		{
-			Class.forName("org.firebirdsql.jdbc.FBDriver");
-			source = DriverManager.getConnection("jdbc:firebirdsql:localhost/3051:thk", "thomas", "welcome");
-			WbConnection sc = new WbConnection(source);
-			target = DriverManager.getConnection("jdbc:firebirdsql:localhost/3051:thk2", "thomas", "welcome");
-			WbConnection tc = new WbConnection(target);
-			List refTables = new ArrayList();
-			List targetTables = new ArrayList();
-			TableIdentifier t1 = new TableIdentifier("MIND");
-			refTables.add(t1);
-			TableIdentifier t2 = new TableIdentifier("MIND2");
-			targetTables.add(t2);
-//			ReportTable r1 = new ReportTable(t1, sc, null, false, false);
-//			ReportTable r2 = new ReportTable(t2, sc, null, false, false);
-//			TableDiff d = new TableDiff(r1, r2);
-			SchemaDiff d = new SchemaDiff(sc, tc);
-//			d.setTables(refTables);
-			d.compareAll();
-			System.out.println(d.getMigrateTargetXml());
-		}
-		catch (Throwable th)
-		{
-			th.printStackTrace();
-		}
-		finally
-		{
-			try { source.close(); } catch (Throwable th) {}
-			try { target.close(); } catch (Throwable th) {}
-		}
-		System.out.println("Done.");
 	}
 
 }

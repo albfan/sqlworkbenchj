@@ -16,11 +16,13 @@ import java.util.List;
 
 import workbench.db.WbConnection;
 import workbench.db.importer.DataImporter;
+import workbench.db.importer.ParsingInterruptedException;
 import workbench.db.importer.TextFileParser;
 import workbench.db.importer.XmlDataFileParser;
 import workbench.exception.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
@@ -63,7 +65,7 @@ public class WbImport extends SqlCommand
 	public static final String ARG_PROGRESS = "showprogress";
 	public static final String ARG_DIRECTORY = "sourcedir";
 	public static final String ARG_TARGET_SCHEMA = "schema";
-
+	public static final String ARG_USE_TRUNCATE = "usetruncate";
 	private ArgumentParser cmdLine;
 
 	public WbImport()
@@ -97,6 +99,7 @@ public class WbImport extends SqlCommand
 		cmdLine.addArgument(ARG_PROGRESS);
 		cmdLine.addArgument(ARG_DIRECTORY);
 		cmdLine.addArgument(ARG_TARGET_SCHEMA);
+		cmdLine.addArgument(ARG_USE_TRUNCATE);
 
 		this.isUpdatingCommand = true;
 	}
@@ -177,7 +180,8 @@ public class WbImport extends SqlCommand
 		int commit = cmdLine.getIntValue(ARG_COMMIT,-1);
 		imp.setCommitEvery(commit);
 
-		imp.setContinueOnError(cmdLine.getBoolean(ARG_CONTINUE, true));
+		boolean continueDefault = Settings.getInstance().getBoolProperty("workbench.export.default.continue", true);
+		imp.setContinueOnError(cmdLine.getBoolean(ARG_CONTINUE, continueDefault));
 
 		String table = cmdLine.getValue(ARG_TARGETTABLE);
 
@@ -193,7 +197,7 @@ public class WbImport extends SqlCommand
 			TextFileParser textParser = new TextFileParser(file);
 			textParser.setTableName(table);
 			textParser.setConnection(aConnection);
-
+			textParser.setAbortOnError(!cmdLine.getBoolean(ARG_CONTINUE, true));
 			String delimiter = cmdLine.getValue(ARG_DELIM);
 			if (delimiter != null) textParser.setDelimiter(delimiter);
 
@@ -232,6 +236,7 @@ public class WbImport extends SqlCommand
 				catch (Exception e)
 				{
 					result.addMessage(ResourceMgr.getString("ErrorWrongColumnList"));
+					result.addMessage(ExceptionUtil.getDisplay(e));
 					result.setFailure();
 					return result;
 				}
@@ -248,7 +253,7 @@ public class WbImport extends SqlCommand
 			// the import columns have to be set after setting the file columns!
 			// if no file columns were specified then we won't accept this...
 			String importcolumns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
-			if (importcolumns != null && filecolumns == null)
+			if (!header && importcolumns != null && filecolumns == null)
 			{
 				result.addMessage(ResourceMgr.getString("ErrorImportNoFileColumns"));
 				result.setFailure();
@@ -365,7 +370,11 @@ public class WbImport extends SqlCommand
 
 		boolean delete = cmdLine.getBoolean(ARG_DELETE_TARGET);
 		imp.setDeleteTarget(delete);
-
+		if (delete)
+		{
+			boolean truncate = cmdLine.getBoolean(ARG_USE_TRUNCATE, false);
+			imp.setUseTruncate(truncate);
+		}
 		boolean useBatch = cmdLine.getBoolean(ARG_USEBATCH);
 		imp.setUseBatch(useBatch);
 		if (useBatch && cmdLine.isArgPresent(ARG_BATCHSIZE))
@@ -388,19 +397,23 @@ public class WbImport extends SqlCommand
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("WbImport.execute()", "Error importing '" + file +"': " + e.getMessage(), null);
+			LogMgr.logError("WbImport.execute()", "Error importing '" + file +"': " + e.getMessage(), e);
 			result.setFailure();
 		}
+		catch (ParsingInterruptedException e)
+		{
+			// Logging already done by DataImporter
+			result.setFailure();
+		}		
 		catch (Exception e)
 		{
-			LogMgr.logError("WbImport.execute()", "Error importing '" + file +"': " + e.getMessage(), null);
+			LogMgr.logError("WbImport.execute()", "Error importing '" + file +"': " + e.getMessage(), e);
 			result.setFailure();
 			result.addMessage(ExceptionUtil.getDisplay(e));
 		}
-
 		if (result.isSuccess())
 		{
-			result.addMessage(imp.getMessages());
+			result.addMessage(imp.getMessages().trim());
 		}
 		this.addWarnings(result);
 		this.addErrors(result);
@@ -467,11 +480,6 @@ public class WbImport extends SqlCommand
 		for (int i=0; i < warn.length; i++)
 		{
 			result.addMessage(warn[i]);
-		}
-		if (warn.length > 0)
-		{
-			// force an empty line if we had warnings
-			result.addMessage("");
 		}
 	}
 

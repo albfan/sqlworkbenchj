@@ -848,7 +848,7 @@ public class MainWindow
 		}
 		final SqlPanel p = this.getCurrentSqlPanel();
 		final JMenu m = m1;
-		SwingUtilities.invokeLater(new Runnable()
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
@@ -1224,7 +1224,7 @@ public class MainWindow
 					((SqlPanel)sql).abortExecution();
 				}
 				conn = sql.getConnection();
-				SwingUtilities.invokeLater(new Runnable()
+				EventQueue.invokeLater(new Runnable()
 				{
 					public void run()
 					{
@@ -1238,7 +1238,7 @@ public class MainWindow
 		finally
 		{
 			this.disconnected();
-			SwingUtilities.invokeLater(new Runnable()
+			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
@@ -1394,7 +1394,7 @@ public class MainWindow
 
 	public void selectConnection()
 	{
-		SwingUtilities.invokeLater(new Runnable()
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
@@ -1680,7 +1680,7 @@ public class MainWindow
 			String msg = ResourceMgr.getString("ErrorExplorerConnectFailed").replaceAll("%msg%", error.trim());
 			WbSwingUtilities.showErrorMessage(this.dbExplorerPanel, msg);
 			LogMgr.logError("MainWindow.showDbExplorer()", "Error getting new connection for DbExplorer tab. Using connection from current panel", e);
-			SwingUtilities.invokeLater(new Runnable()
+			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
@@ -2360,7 +2360,7 @@ public class MainWindow
 			else if ("keyboardDialog".equals(command))
 			{
 				final ShortcutEditor editor = new ShortcutEditor(this);
-				SwingUtilities.invokeLater(new Runnable()
+				EventQueue.invokeLater(new Runnable()
 					{
 						public void run()
 						{

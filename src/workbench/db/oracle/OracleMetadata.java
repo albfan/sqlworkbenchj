@@ -275,7 +275,7 @@ public class OracleMetadata
 							 "  and i.owner = c.index_owner ");
 		sql.append("ORDER BY non_unique, type, index_name, ordinal_position ");
 		if (this.statement != null) this.closeStatement();
-		this.statement = this.connection.createStatement();
+		this.statement = this.connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 		ResultSet rs = this.statement.executeQuery(sql.toString());
 		return rs;
 	}
@@ -326,7 +326,7 @@ public class OracleMetadata
 		Statement stmt = null;
 		try
 		{
-			stmt = this.connection.createStatement();
+			stmt = this.connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 			rs = stmt.executeQuery(sql.toString());
 			while (rs.next())
 			{
@@ -433,6 +433,76 @@ public class OracleMetadata
 		throws SQLException
 	{
 		return this.procReader.getProcedures(catalog, schema);
+	}
+	
+	
+	public StrBuffer getPackageSource(String owner, String packageName)
+	{
+		final String sql = "SELECT text \n" + 
+												 "FROM all_source \n" + 
+												 "WHERE name = ? \n" + 
+												 "AND   owner = ? \n" + 
+												 "AND   type = ? \n" + 
+												 "ORDER BY line";
+		
+		StrBuffer result = new StrBuffer(1000);
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+			int lineCount = 0;
+			stmt = this.connection.prepareStatement(sql);
+			stmt.setString(1, packageName);
+			stmt.setString(2, owner);
+			stmt.setString(3, "PACKAGE");
+			rs = stmt.executeQuery();
+			while (rs.next())
+			{
+				String line = rs.getString(1);
+				if (line != null)
+				{
+					lineCount ++;
+					if (lineCount == 1)
+					{
+						result.append("CREATE OR REPLACE ");
+					}
+					result.append(line);
+				}
+			}
+			if (!(result.endsWith('\n') || result.endsWith('\r'))) result.append('\n');
+			result.append("/\n\n");
+			lineCount = 0;
+			
+			stmt.clearParameters();
+			stmt.setString(1, packageName);
+			stmt.setString(2, owner);
+			stmt.setString(3, "PACKAGE BODY");
+			rs = stmt.executeQuery();
+			while (rs.next())
+			{
+				String line = rs.getString(1);
+				if (line != null)
+				{
+					lineCount ++;
+					if (lineCount == 1)
+					{
+						result.append("CREATE OR REPLACE ");
+					}
+					result.append(line);
+				}
+			}
+			if (!(result.endsWith('\n') || result.endsWith('\r'))) result.append('\n');
+			result.append("/\n");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		return result;
 	}
 	
 	public void done()

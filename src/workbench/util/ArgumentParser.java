@@ -154,19 +154,5 @@ public class ArgumentParser
 	{
 		return StringUtil.getIntValue(this.getValue(key),def);
 	}
-
-	public static void main(String[] args)
-	{
-		//String test = "spool /type=sql /file=\"d:/temp/test.sql\" /table=my_table;";
-		//String test = "/profile=\"HSQLDB - Test Server\" /script=\"d:/temp/test.sql\"";
-		//String test = "-quotechar='\"' -file=\"d:/temp/export test.txt\" -delimiter=\" \" -dateformat=dd.MMM.yyyy";
-		String test = "-arg1=one -vardef=one-two";
-		ArgumentParser parser = new ArgumentParser();
-		parser.addArgument("arg1");
-		parser.addArgument("vardef");
-		parser.parse(test);
-		System.out.println("arg1=" + parser.getValue("arg1"));
-		System.out.println("vardef=" + parser.getValue("vardef"));
-	}
-
+	
 }

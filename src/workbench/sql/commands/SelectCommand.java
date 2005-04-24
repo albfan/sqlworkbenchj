@@ -62,7 +62,7 @@ public class SelectCommand extends SqlCommand
 			}
 			else
 			{
-				this.currentStatement = aConnection.createStatement();
+				this.currentStatement = aConnection.createStatementForQuery();
 			}
 			try { this.currentStatement.setQueryTimeout(this.queryTimeout); } catch (Throwable th) {}
 			
@@ -74,27 +74,6 @@ public class SelectCommand extends SqlCommand
 			{
 				LogMgr.logWarning("SelectCommand.execute()", "The JDBC driver does not support the setMaxRows() function! (" +e.getMessage() + ")");
 			}
-			int fetchSize = 0;
-			try
-			{
-				fetchSize = Settings.getInstance().getDefaultFetchSize();
-			}
-			catch (Exception e)
-			{
-				fetchSize = 0;
-			}
-			if (fetchSize > 0)
-			{
-				try
-				{
-					this.currentStatement.setFetchSize(fetchSize);
-				}
-				catch (Throwable th)
-				{
-					LogMgr.logWarning("SelectCommand.execute()", "The JDBC driver does not support the setFetchSize() function! (" +th.getMessage() + ")");
-				}
-			}
-
 			
 			ResultSet rs = null;
 			if (isPrepared)
@@ -125,7 +104,7 @@ public class SelectCommand extends SqlCommand
 				{
 					try
 					{
-						// An exception in the constructor should leead to a real error
+						// An exception in the constructor should lead to a real error
 						this.data = new DataStore(rs, false, this.rowMonitor, maxRows, this.currentConnection);
 						try
 						{

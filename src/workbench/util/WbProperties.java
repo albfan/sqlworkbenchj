@@ -231,20 +231,4 @@ public class WbProperties
 		}
 	}
 	
-	public static void main(String args[])
-	{
-		try
-		{
-			WbProperties p = new WbProperties();
-			p.loadTextFile("d:/Projects/jworkbench/dist/vars.def");
-			//System.out.println(p.getProperty("dir"));
-			p.list(System.out);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		System.out.println("*** Done.");
-	}
-	
 }

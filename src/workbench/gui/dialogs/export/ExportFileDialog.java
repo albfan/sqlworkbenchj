@@ -49,6 +49,7 @@ public class ExportFileDialog
 	private boolean includeSqlInsert = true;
 	private boolean includeSqlDeleteInsert = true;
 	private String lastDirConfigKey = "workbench.export.lastdir";
+	
 	private Component parentComponent;
 	
 	public ExportFileDialog(Component caller)
@@ -184,10 +185,9 @@ public class ExportFileDialog
 			setupFileFilters(chooser);
 			chooser.addPropertyChangeListener("fileFilterChanged", this);
 			chooser.setFileFilter(ExtensionFileFilter.getTextFileFilter());
-			this.exportOptions.addPropertyChangeListener("exportType", this);
 		}
+		this.exportOptions.addPropertyChangeListener("exportType", this);
 		this.restoreSettings();
-		this.exportOptions.setTypeText();
 		this.exportOptions.setIncludeSqlUpdate(includeSqlUpdate);
 		this.exportOptions.setIncludeSqlDeleteInsert(includeSqlDeleteInsert);
 			

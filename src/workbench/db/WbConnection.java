@@ -17,6 +17,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import workbench.db.report.TagWriter;
+import workbench.exception.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.sql.preparedstatement.PreparedStatementPool;
@@ -316,6 +318,28 @@ public class WbConnection
 		return this.sqlConnection.isClosed();
 	}
 
+	/**
+	 * Create a statement that produces ResultSets that
+	 * are read only and forward only (for performance)
+	 * If the profile defined a default fetch size, this 
+	 * will be set as well.
+	 */
+	public Statement createStatementForQuery()
+		throws SQLException
+	{
+		Statement stmt = this.sqlConnection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		try
+		{
+			int fetchSize = this.getProfile().getFetchSize();
+			if (fetchSize > -1) stmt.setFetchSize(fetchSize);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("WbConnection.createStatementForQuery()", "Error when setting the fetchSize: " + ExceptionUtil.getDisplay(e));
+		}
+		return stmt;
+	}
+	
 	public Statement createStatement()
 		throws SQLException
 	{

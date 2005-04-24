@@ -245,36 +245,4 @@ public class ResourceMgr
 		return result;
 	}
 
-	public static void main(String args[])
-	{
-		InputStream in = null;
-		try
-		{
-			in = ClassLoader.getSystemResourceAsStream("META-INF/test.txt");
-			BufferedReader b = new BufferedReader(new InputStreamReader(in));
-			String line = b.readLine();
-			while (line != null)
-			{
-				System.out.println("Line: " + line);
-				line = b.readLine();
-			}
-			/*
-			Manifest mf = new Manifest(in);
-			Attributes attr = mf.getMainAttributes();
-			Iterator itr = attr.keySet().iterator();
-			while (itr.hasNext()) System.out.println("key=" + itr.next());
-			String build = attr.getValue("WbBuild-Date");
-			System.out.println("Build-date" + build);
-			 **/
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			try { in.close(); } catch (Exception ignore) {}
-		}
-	}
-
 }

@@ -12,6 +12,7 @@
 package workbench.gui.sql;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Window;
 import java.awt.datatransfer.DataFlavor;
@@ -198,7 +199,7 @@ public class EditorPanel
 		//this.setSelectionRectangular(true);
 		Settings.getInstance().addFontChangedListener(this);
 		Settings.getInstance().addPropertyChangeListener(this);
-
+		this.setRightClickMovesCursor(Settings.getInstance().getRightClickMovesCursor());
 		new DropTarget(this, DnDConstants.ACTION_COPY, this);
 	}
 
@@ -1042,7 +1043,7 @@ public class EditorPanel
 				{
 					dropTargetDropEvent.getDropTargetContext().dropComplete(false);
 					final Window w = SwingUtilities.getWindowAncestor(this);
-					SwingUtilities.invokeLater(new Runnable()
+					EventQueue.invokeLater(new Runnable()
 					{
 						public void run()
 						{

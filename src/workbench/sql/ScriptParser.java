@@ -10,25 +10,25 @@
  *
  */
 package workbench.sql;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.util.EncodingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
-import workbench.util.StringUtil;
+
 
 /**
+ * A class to parse a SQL script and return the individual commands
+ * in the script. The actual parsing is done by using an instance
+ * of {@link IteratingScriptParser}
  *
  * @author  info@sql-workbench.net
  */
@@ -61,28 +61,41 @@ public class ScriptParser
 	public ScriptParser(File f)
 		throws IOException
 	{
+		this(f, null);
+	}
+	/**
+	 *	Initialize a ScriptParser from a file.
+	 *	The delimiter will be evaluated dynamically
+	 */
+	public ScriptParser(File f, String encoding)
+		throws IOException
+	{
+		if (encoding == null)
+		{
+			encoding = Settings.getInstance().getDefaultFileEncoding();
+		}
+		
 		if (!f.exists()) throw new FileNotFoundException(f.getName() + " not found");
 
 		if (f.length() < Settings.getInstance().getInMemoryScriptSizeThreshold())
 		{
-			this.readScriptFromFile(f);
+			this.readScriptFromFile(f, encoding);
 			this.findDelimiterToUse();
 		}
 		else
 		{
-			this.iteratingParser = new IteratingScriptParser(f);
+			this.iteratingParser = new IteratingScriptParser(f, encoding);
 			this.iteratingParser.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		}
 	}
 
-	public void readScriptFromFile(String filename)
+	public void readScriptFromFile(File f)
 		throws IOException
 	{
-		File f = new File(filename);
-		this.readScriptFromFile(f);
+		this.readScriptFromFile(f, null);
 	}
-
-	public void readScriptFromFile(File f)
+	
+	public void readScriptFromFile(File f, String encoding)
 		throws IOException
 	{
 		BufferedReader in = null;
@@ -90,7 +103,7 @@ public class ScriptParser
 		try
 		{
 			content = new StrBuffer((int)f.length());
-			in = new BufferedReader(new FileReader(f));
+			in = EncodingUtil.createReader(f, encoding,256*1024);
 			String line = in.readLine();
 			while (line != null)
 			{
@@ -138,6 +151,9 @@ public class ScriptParser
 		this.iteratingParser = null;
 	}
 
+	/**
+	 * Define the delimiter to be used in case it's not a semicolon
+	 */
 	public void setDelimiter(String delim)
 	{
 		this.delimiter = delim;
@@ -204,7 +220,7 @@ public class ScriptParser
 	}
 
 	/**
-	 *	Get the starting offset in the original script for the command indicated by index
+	 * Get the starting offset in the original script for the command indicated by index
 	 */
 	public int getEndPosForCommand(int index)
 	{
@@ -214,6 +230,9 @@ public class ScriptParser
 		return b.getEndPositionInScript();
 	}
 
+	/**
+	 * Find the position in the original script for the next start of line
+	 */
 	public int findNextLineStart(int pos)
 	{
 		if (this.originalScript == null) return -1;
@@ -229,6 +248,9 @@ public class ScriptParser
 		return pos;
 	}
 
+	/**
+	 * Return the command at the given index position.
+	 */
 	public String getCommand(int index)
 	{
 		if (this.commands == null) this.parseCommands();
@@ -240,7 +262,7 @@ public class ScriptParser
 	/**
 	 *	Return the list of commands in the current script.
 	 *	The list contains elements of <code>String</code>.
-	 *	The commands will be returned without the used delimiter
+	 *	The commands will be returned without the delimiter
 	 */
 	public List getCommands()
 	{
@@ -253,6 +275,11 @@ public class ScriptParser
 		return result;
 	}
 
+	/**
+	 * Return an Iterator which allows to iterate over 
+	 * the commands from the script. The Iterator
+	 * will return objects of type {@link ScriptCommandDefinition}
+	 */
 	public Iterator getIterator()
 	{
 		this.currentIteratorIndex = 0;
@@ -263,6 +290,15 @@ public class ScriptParser
 		return this;
 	}
 
+	/**
+	 * Check for quote characters that are escaped using a 
+	 * backslash. If turned on (flag == true) the following
+	 * SQL statement would be valid (different to the SQL standard):
+	 * <pre>INSERT INTO myTable (column1) VALUES ('Arthurs\'s house');</pre>
+	 * but the following Script would generate an error: 
+	 * <pre>INSERT INTO myTable (file_path) VALUES ('c:\');</pre>
+	 * because the last quote would not bee seen as a closing quote
+	 */
 	public void setCheckEscapedQuotes(boolean flag)
 	{
 		this.checkEscapedQuotes = flag;
@@ -282,14 +318,8 @@ public class ScriptParser
 		return this.delimiter;
 	}
 
-	public String getScript()
-	{
-		return this.originalScript;
-	}
-
 	/**
 	 *	Parse the given SQL Script into a List of single SQL statements.
-	 *	Returns the index of the statement indicated by the currentCursorPos
 	 */
 	private void parseCommands()
 	{
@@ -310,6 +340,9 @@ public class ScriptParser
 		}
 	}
 
+	/**
+	 *	Check if more commands are present. 
+	 */
 	public boolean hasNext()
 	{
 		if (this.iteratingParser != null)
@@ -322,6 +355,10 @@ public class ScriptParser
 		}
 	}
 
+	/**
+	 * Return the next {@link ScriptCommandDefinition} from the script. 
+	 * @see IteratingScriptParser#getNextCommand()
+	 */
 	public Object next()
 	{
 		Object result = null;
@@ -337,37 +374,12 @@ public class ScriptParser
 		return result;
 	}
 
+	/**
+	 * Not implemented, as removing commands is not possible.
+	 * A call to this method simply does nothing.
+	 */
 	public void remove()
 	{
 	}
 
-	public static void main(String args[])
-	{
-		try
-		{
-			String sql = "drop index idx_pa_date\n;\n\ncreate index idx_pa_date on partner_pro_pa (start_date, end_date);\n;\n\ncreate or replace view v_active_pa \nas\nSELECT PARTNER_PRO_ID,\n       PURCHASE_AGREE_NO,\n       START_DATE,\n       END_DATE,\n       STATUS\nFROM PARTNER_PRO_PA\nWHERE end_date >= sysdate\nAND   start_date < sysdate\n;\n\n\nselect distinct PURCHASE_AGREE_NO, cac_cd\nfrom PARTNER_PA_CAC\norder by 1\n;\n\nSELECT count(*)\nFROM rpl_user.partner_pro_pa;\n;\n\nselect * from v_active_pa\n;\n";
-			
-		  ScriptParser p = new ScriptParser();
-			
-			//p.readScriptFromFile("d:/projects/jworkbench/testdata/statements.sql");
-			//p.readScriptFromFile("d:/projects/jworkbench/testdata/BuildDb_test1.sql");
-			p.setScript(sql);
-			p.setCheckEscapedQuotes(false);
-			long start, end;
-			start = System.currentTimeMillis();
-			List l = p.getCommands();
-			end = System.currentTimeMillis();
-			System.out.println("time=" + (end - start));
-			for (int i=0; i < l.size(); i++)
-			{
-				System.out.println(l.get(i) + "\n--------------------------");
-			}
-		}
-		catch (Throwable e)
-		{
-			e.printStackTrace();
-		}
-
-		System.out.println("*** Done.");
-	}
 }

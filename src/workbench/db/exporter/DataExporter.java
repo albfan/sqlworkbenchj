@@ -51,6 +51,7 @@ import workbench.gui.dialogs.export.XmlOptions;
 import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
@@ -81,10 +82,10 @@ public class DataExporter
 	private String xsltFile = null;
 	private String transformOutputFile = null;
 	private int exportType;
-	private boolean exportHeaders;
+	private boolean exportHeaders = Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false);
 	private boolean includeCreateTable = false;
 	private boolean headerOnly = false;
-	
+
 	private int sqlType = SqlRowDataConverter.SQL_INSERT;
 	private boolean useCDATA = false;
 	private CharacterRange escapeRange = null;
@@ -121,7 +122,7 @@ public class DataExporter
 	private boolean showProgressWindow = false;
 	public static final int DEFAULT_PROGRESS_INTERVAL = 10;
 	private int progressInterval = DEFAULT_PROGRESS_INTERVAL;
-	
+
 	private ProgressPanel progressPanel;
 	private JDialog progressWindow;
 	private boolean keepRunning = true;
@@ -137,7 +138,7 @@ public class DataExporter
 	private ArrayList jobQueue;
 	private ExportWriter exportWriter;
 	private Window parentWindow;
-	
+
 	public DataExporter()
 	{
 	}
@@ -151,7 +152,7 @@ public class DataExporter
 		}
 		openProgressMonitor(parent, modal);
 	}
-	
+
 	private void createProgressPanel()
 	{
 		progressPanel = new ProgressPanel(this);
@@ -167,7 +168,7 @@ public class DataExporter
 		String fname = f.getName();
 
 		if (this.progressPanel == null) createProgressPanel();
-		
+
 		this.progressWindow = new JDialog(parent, modal);
 		this.progressWindow.getContentPane().add(progressPanel);
 		this.progressWindow.pack();
@@ -237,9 +238,11 @@ public class DataExporter
 	public void cancelExecution()
 	{
 		this.keepRunning = false;
+		this.cancelJobs = true;
 		if (this.exportWriter != null)
 		{
 			this.exportWriter.cancel();
+			this.warnings.add(ResourceMgr.getString("MsgExportCancelled"));
 		}
 	}
 
@@ -274,12 +277,12 @@ public class DataExporter
 	{
 		return this.columnsToExport;
 	}
-	
+
 	public void setExportAllColumns()
 	{
 		this.columnsToExport = null;
 	}
-	
+
 	public void setUseCDATA(boolean flag) { this.useCDATA = flag; }
 	public boolean getUseCDATA() { return this.useCDATA; }
 
@@ -298,7 +301,7 @@ public class DataExporter
 		{
 			case EXPORT_HTML:
 				return "HTML";
-				
+
 			case EXPORT_SQL:
 				if (this.getSqlType() == SqlRowDataConverter.SQL_DELETE_INSERT)
 					return "SQL DELETE/INSERT";
@@ -306,32 +309,32 @@ public class DataExporter
 					return "SQL INSERT";
 				else if (this.getSqlType() == SqlRowDataConverter.SQL_UPDATE)
 					return "SQL UPDATE";
-				
+
 			case EXPORT_TXT:
 				return "Text";
-				
+
 			case EXPORT_XML:
 				return "XML";
 		}
 		return "";
 	}
-	
+
 	/**
 	 * Control the progress display in the RowActionMonitor
 	 * This is used by the WBEXPORT command to turn off the row
-	 * progress display. Turning off the display will speed up 
+	 * progress display. Turning off the display will speed up
 	 * the export because the GUI does not need to be updated
 	 */
-	public void setProgressInterval(int interval) 
-	{ 
+	public void setProgressInterval(int interval)
+	{
 		if (interval <= 0)
 			this.progressInterval = 0;
-		else 
+		else
 			this.progressInterval = interval;
 	}
 	public int getProgressInterval() { return this.progressInterval; }
-	
-	
+
+
 	/** Control the display of a progress window. This is used
 	 *  from within the DbExplorer
 	 */
@@ -442,7 +445,7 @@ public class DataExporter
 		this.exportType = EXPORT_SQL;
 		this.sqlType = SqlRowDataConverter.SQL_UPDATE;
 	}
-	
+
 	public void setOutputTypeSqlDeleteInsert()
 	{
 		this.exportType = EXPORT_SQL;
@@ -456,7 +459,7 @@ public class DataExporter
 		else
 			return -1;
 	}
-		
+
 	public void setOutputFilename(String aFilename) { this.outputfile = aFilename; }
 
 	public String getOutputFilename() { return this.outputfile; }
@@ -525,8 +528,23 @@ public class DataExporter
 		t.start();
 	}
 
-	public void startExportJobs()
+	public void startExportJobs(final Frame parent)
 	{
+		if (this.showProgressWindow)
+		{
+			// the progress window is a modal dialog
+			// so we need to open that in a new thread
+			// otherwise this thread would be blocked
+			WbThread p = new WbThread("Progress Thread")
+			{
+				public void run()
+				{
+					createProgressPanel();
+					openProgressMonitor(parent, true);
+				}
+			};
+			p.start();
+		}
 		Thread t = new WbThread("Export Jobs")
 		{
 			public void run()
@@ -554,6 +572,7 @@ public class DataExporter
 			{
 				this.progressPanel.setFilename(this.outputfile);
 				this.progressPanel.setRowInfo(0);
+				this.progressWindow.pack();
 			}
 			if (this.rowMonitor != null && job.tableName != null)
 			{
@@ -585,19 +604,16 @@ public class DataExporter
 		}
 	}
 
+	/**
+	 * Start the export. This will execute the defined query
+	 * and then write the result into the outputfile
+	 */
 	public long startExport()
 		throws IOException, SQLException
 	{
-		Statement stmt = this.dbConn.createStatement();
+		Statement stmt = this.dbConn.createStatementForQuery();
 		ResultSet rs = null;
 		long rows = 0;
-		try
-		{
-			stmt.setFetchSize(1500);
-		}
-		catch (Exception e)
-		{
-		}
 
 		try
 		{
@@ -660,14 +676,6 @@ public class DataExporter
 	{
 		if (this.errors == null) this.errors = new ArrayList();
 		this.errors.add(msg);
-	}
-
-	private String getDefaultEncoding()
-	{
-		String enc = System.getProperty("file.encoding");
-		// We prefer a standard encoding instead of the windows encoding
-		if ("Cp1252".equals(enc)) return "ISO-8859-15";
-		return enc;
 	}
 
 	public long startExport(ResultSet rs)
@@ -737,7 +745,7 @@ public class DataExporter
 			info.setUpdateTable(new TableIdentifier(this.sqlTable));
 		}
 
-		if (this.encoding == null) this.encoding = getDefaultEncoding();
+		if (this.encoding == null) this.encoding = Settings.getInstance().getDefaultDataEncoding();
 		ExportWriter exporter = null;
 
 		switch (this.exportType)
@@ -759,10 +767,10 @@ public class DataExporter
 		{
 			exporter.setTableToUse(this.tableName);
 		}
-		
+
 		BufferedWriter pw = null;
 		final int buffSize = 64*1024;
-		
+
 		try
 		{
 			File f = new File(this.outputfile);
@@ -787,7 +795,7 @@ public class DataExporter
 			}
 
 			// if opening the file with an encoding failed, open the file
-			// without encoding (thus using the
+			// without encoding (thus using the default system encoding)
 			if (pw == null)
 			{
 				pw = new BufferedWriter(new FileWriter(f,this.append), buffSize);
@@ -803,7 +811,7 @@ public class DataExporter
 		finally
 		{
 		}
-		
+
 		if (this.progressInterval > 0)
 		{
 			exporter.setRowMonitor(this.rowMonitor);
@@ -819,10 +827,10 @@ public class DataExporter
 
 		if (this.showProgressWindow)
 		{
-			if (this.progressPanel == null) createProgressPanel();//this.openProgressMonitor(this.parentWindow, false);
+			if (this.progressPanel == null) createProgressPanel();
 			exporter.setRowMonitor(this.progressPanel);
 		}
-		
+
 		return exporter;
 	}
 
@@ -849,7 +857,7 @@ public class DataExporter
 		}
 		return result;
 	}
-	
+
 	//public void executeStatement(Window aParent, WbConnection aConnection, String aSql, boolean modal)
 	public void exportTable(Window aParent, WbConnection aConnection, TableIdentifier table)
 	{
@@ -864,7 +872,7 @@ public class DataExporter
 			info = null;
 		}
 		ExportFileDialog dialog = new ExportFileDialog(aParent, info);
-		
+
 		dialog.setIncludeSqlInsert(true);
 		dialog.setIncludeSqlUpdate(true);
 
@@ -873,14 +881,26 @@ public class DataExporter
 		{
 			try
 			{
-				List cols = dialog.getColumnsToExport();
 				StringBuffer sql = new StringBuffer(250);
 				sql.append("SELECT ");
-				for (int i=0; i < cols.size(); i++)
+				List cols = dialog.getColumnsToExport();
+				if (cols != null)
 				{
-					if (i > 0) sql.append(", ");
-					ColumnIdentifier col = (ColumnIdentifier)cols.get(i);
-					sql.append(col.getColumnName());
+					for (int i=0; i < cols.size(); i++)
+					{
+						if (i > 0) sql.append(", ");
+						ColumnIdentifier col = (ColumnIdentifier)cols.get(i);
+						sql.append(col.getColumnName());
+					}
+				}
+				else
+				{
+					int count = info.getColumnCount();
+					for (int i=0; i < count; i++)
+					{
+						if (i > 0) sql.append(", ");
+						sql.append(info.getColumnName(i));
+					}
 				}
 				sql.append(" FROM ");
 				sql.append(table.getTableExpression(aConnection));
@@ -1014,6 +1034,7 @@ public class DataExporter
 		private String outputFile;
 		private String sqlStatement;
 		private String tableName;
+		private int exportType;
 	}
 
 	public boolean getQuoteAlways()

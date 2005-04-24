@@ -13,6 +13,7 @@ package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -27,7 +28,6 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 
 import workbench.gui.actions.EscAction;
@@ -68,7 +68,7 @@ public class DriverEditorDialog extends JDialog
 		// when invoked from the connection dialog, it seems that under
 		// Linux the dialog is not visible (because it's behind the connection
 		// dialog), so we're trying to make this window visible
-		SwingUtilities.invokeLater(new Runnable()
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
@@ -163,12 +163,5 @@ public class DriverEditorDialog extends JDialog
 		Settings.getInstance().storeWindowSize(this);
 		driverListPanel.saveSettings();
 		setVisible(false);
-	}
-	/**
-	 * @param args the command line arguments
-	 */
-	public static void main(String args[])
-	{
-		new DriverEditorDialog(new JFrame(), true).show();
 	}
 }

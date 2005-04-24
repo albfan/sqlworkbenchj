@@ -104,11 +104,4 @@ public class ExceptionUtil
 	}
 
 
-	public static void main(String args[])
-	{
-		Exception e = new NullPointerException("Testing");
-		System.out.println("e=" + getDisplay(e, true));
-		System.out.println("*****");
-	}
-
 }

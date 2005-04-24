@@ -134,7 +134,7 @@ public class TableSearcher
 			if (sql == null) return;
 			if (this.display != null) this.display.setCurrentTable(aTable, sql);
 
-			this.query = this.connection.getSqlConnection().createStatement();
+			this.query = this.connection.createStatementForQuery();
 			this.query.setMaxRows(this.maxRows);
 			//LogMgr.logInfo("TableSearcher", "Using SQL:\n" + sql);
 			rs = this.query.executeQuery(sql);

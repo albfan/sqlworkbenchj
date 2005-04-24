@@ -18,6 +18,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,7 @@ import workbench.util.ValueConverter;
 import workbench.util.WbStringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import workbench.util.EncodingUtil;
 
 /**
  *
@@ -231,6 +233,7 @@ public class TextFileParser
 	 * 	Define the columns in the input file.
 	 */
 	public void setColumns(List columnList)
+		throws SQLException
 	{
 		if (columnList == null || columnList.size()  == 0) return;
 		this.readColumnDefinitions(columnList);
@@ -319,9 +322,8 @@ public class TextFileParser
 		File f = new File(this.filename);
 		long fileSize = f.length();
 
-		InputStream inStream = new FileInputStream(f);
-		BufferedReader in = new BufferedReader(new InputStreamReader(inStream, this.encoding),1024*256);
-
+		BufferedReader in = EncodingUtil.createReader(f, this.encoding);
+		
 		this.converter = new ValueConverter(this.dateFormat, this.timestampFormat);
 		this.converter.setDecimalCharacter(this.decimalChar);
 
@@ -597,6 +599,7 @@ public class TextFileParser
 	 * 	@param cols a List of column names (String)
 	 */
 	private void readColumnDefinitions(List cols)
+		throws SQLException
 	{
 		try
 		{
@@ -623,9 +626,18 @@ public class TextFileParser
 				myCols.set(i, colname.toUpperCase());
 			}
 			DbMetadata meta = this.connection.getMetadata();
-			ColumnIdentifier[] colIds = meta.getColumnIdentifiers(new TableIdentifier(this.tableName));
+			TableIdentifier targetTable = new TableIdentifier(this.tableName);
+			if (targetTable.getSchema() == null)
+			{
+				targetTable.setSchema(meta.getCurrentSchema());
+			}
+			ColumnIdentifier[] colIds = meta.getColumnIdentifiers(targetTable);
 			int tableCols = colIds.length;
-
+			
+			// the number of columns in the table and in the file could be different
+			// so the array needs to be sized to the bigger value
+			boolean[] present = new boolean[tableCols > colCount ? tableCols : colCount];
+			
 			for (int i=0; i < tableCols; i++)
 			{
 				ColumnIdentifier id = colIds[i];
@@ -634,11 +646,45 @@ public class TextFileParser
 				if (index >= 0 && this.columns[index] != null)
 				{
 					this.columns[index].setDataType(id.getDataType());
+					// set the marker that this column exists in the table
+					// thus we can check if all columns were found afterwards
+					present[i] = true;
 				}
 			}
+			
+			// Check if all columns from the input file do exist in the table. 
+			// If a column does not exist, simply pretend it should be ignored
+			for (int i=0; i < this.colCount; i++)
+			{
+				if (!present[i] && this.columns[i] != null)
+				{
+					String name = this.columns[i].getColumnName();
+					if (this.abortOnError) 
+					{
+						String msg = ResourceMgr.getString("ErrorImportColumnNotFound");
+						msg = StringUtil.replace(msg, "%column%", name);					
+						msg = StringUtil.replace(msg, "%table%", this.tableName);
+						throw new SQLException(msg);
+					}
+					
+					String msg = ResourceMgr.getString("ErrorImportColumnIgnored");
+					msg = StringUtil.replace(msg, "%column%", name);					
+					msg = StringUtil.replace(msg, "%table%", this.tableName);
+					this.messages.append(msg + "\n");
+					
+					realCols.remove(name);
+					this.columns[i] = null;
+					skipPresent = true;
+				}
+			}
+			
 			// reset mapping
 			this.importAllColumns();
 			if (skipPresent) this.setImportColumns(realCols);
+		}
+		catch (SQLException e)
+		{
+			throw e;
 		}
 		catch (Exception e)
 		{

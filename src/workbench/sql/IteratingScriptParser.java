@@ -27,6 +27,9 @@ import workbench.util.StringUtil;
 
 
 /**
+ * A class to parse a script with SQL commands. Access to the commands
+ * is given through an Iterator. The parser will not read the script into
+ * memory if a certain file size is exceeded.
  *
  * @author  info@sql-workbench.net
  */
@@ -54,13 +57,27 @@ public class IteratingScriptParser
 	}
 
 	/**
-	 *	Initialize a ScriptParser from a file.
-	 *	The delimiter will be evaluated dynamically
+	 * Initialize a ScriptParser from a file. The default 
+	 * encoding {@link workbench.util.EncodingUtil#getDefaultEncoding()} 
+	 * will be used. 
+	 * The delimiter will be evaluated dynamically
+	 * @see #setFile(File)
 	 */
 	public IteratingScriptParser(File f)
 		throws IOException
 	{
-		this.setFile(f);
+		this.setFile(f, null);
+	}
+	
+	/**
+	 * Initialize a ScriptParser from a file with a given encoding.
+	 * The delimiter will be evaluated dynamically
+	 * @see #setFile(File, String)
+	 */
+	public IteratingScriptParser(File f, String encoding)
+		throws IOException
+	{
+		this.setFile(f, encoding);
 	}
 	
 
@@ -75,11 +92,27 @@ public class IteratingScriptParser
 		this.setScript(aScript);
 	}
 
+	/**
+	 * Define the source file for the script using the default encoding.
+	 * @see #setFile(File, String)
+	 * @see workbench.util.EncodingUtil#getDefaultEncoding()
+	 */
 	public void setFile(File f)
 		throws IOException
 	{
+		this.setFile(f, null);
+	}
+	
+	/**
+	 * Define the source file to be used and the encoding of the file
+	 * The delimiter will be evaluated dynamically
+	 * @see #setFile(File, String)
+	 */
+	public void setFile(File f, String enc)
+		throws IOException
+	{
 		this.cleanup();
-		this.script = new FileMappedSequence(f);
+		this.script = new FileMappedSequence(f, enc);
 		this.scriptLength = (int)f.length();
 		this.checkEscapedQuotes = false;
 		this.reset();
@@ -89,13 +122,9 @@ public class IteratingScriptParser
 	{
 		if (this.script != null) this.script.done();
 	}
+	
 	/**
-	 *	Define the script to be parsed and the delimiter to be used.
-	 *	If delim == null, it will be evaluated dynamically.
-	 *	First the it will check if the script ends with the alternate delimiter
-	 *	if this is not the case, the script will be checked if it ends with GO
-	 *	If so, GO will be used (MS SQL Server script style)
-	 *	If none of the above is true, ; (semicolon) will be used
+	 *	Define the script to be parsed
 	 */
 	public void setScript(String aScript)
 	{
@@ -166,6 +195,7 @@ public class IteratingScriptParser
          { Pattern.compile("(?m)^\\s*@.*$"),
 					 Pattern.compile("(?mi)^\\s*SET\\s*\\w*\\s*((ON)|(OFF))\\s*;?\\s*$"),
 					 Pattern.compile("(?mi)^\\s*ECHO\\s*((ON)|(OFF))\\s*;?\\s*$"),
+					 Pattern.compile("(?mi)^\\s*WHENEVER\\s*ERROR\\s*$"),
 					 Pattern.compile("(?mi)^\\s*SET\\s*TRANSACTION\\s*READ\\s*((WRITE)|(ONLY))\\s*;?\\s*$")
 	       };
 
@@ -365,9 +395,6 @@ public class IteratingScriptParser
 		int offset = this.getRealStartOffset(value);
 		if (offset > 0) value = value.substring(offset);
 
-		//String clean = SqlUtil.makeCleanSql(value, false);
-		//if (clean.equalsIgnoreCase(this.delimiter)) return null;
-		
 		ScriptCommandDefinition c = new ScriptCommandDefinition(value, startPos, endPos);
 		
 		return c;
@@ -448,112 +475,6 @@ public class IteratingScriptParser
 	public void done()
 	{
 		this.script.done();
-	}
-	
-	public static void main(String args[])
-	{
-		String sql = null;
-		try
-		{
-//			sql = "@include.sql \n" +
-//				     "delete from person; \n" +
-//             "commit\n; \n" +
-//             "set transaction read only \n" +
-//						 "-- include file \n" +
-//             "@c:/temp/test_insert.sql \n" +
-//						 "set feedback off \n" +
-//             " \n" +
-//             "wbexport -type=text -file=\"d:/temp/test-1.txt\" -delimiter=, -header=true; \n" +
-//             "select firstname, lastname, 'test-1' \n" +
-//             "from person \n" +
-//             "group by firstname, lastname\n;\n" +
-//						 "UPDATE table \n SET column=value;\n" +
-//						 "commit;";
-					sql = "select * from all_tables; \n" + 
-								"select * from user_tab_privs where grantee='MYUSER'; \n" + 
-								"select * from dba_tab_privs;-- where grantee='MYUSER';";			
-//					sql = "select * from dba_tab_privs;-- where grantee='MYUSER';";
-//String sql = "select year(request_date) as year, month(request_date) as month, filename, count(*) \n" + 
-//             "from wb_downloads \n" + 
-//             "where filename like 'Workbench-Build%' \n" + 
-//             "group by year(request_date), month(request_date), filename \n" + 
-//             "order by 1 asc, 2 asc \n" + 
-//             "; \n" + 
-//             " \n" + 
-//             "-- Dev build downloads \n" + 
-//             "select year(request_date) year, month(request_date) month, count(*) downloads \n" + 
-//             "from wb_downloads \n" + 
-//             "where filename = 'Workbench.jar' \n" + 
-//             "and http_status = '200' \n" + 
-//             "and size > 550000 \n" + 
-//             "--and year(request_date) = 2004 \n" + 
-//             "and type <> 'WbUpdateCheck' \n" + 
-//             "group by year(request_date), month(request_date) \n" + 
-//             "order by 1 asc, 2 asc \n" + 
-//             "; \n" + 
-//             " \n" + 
-//             "-- Source downloads \n" + 
-//             "select year(request_date) year, month(request_date) month, count(*) downloads \n" + 
-//             "from wb_downloads \n" + 
-//             "where filename like 'WorkbenchSrc%' \n" + 
-//             "and http_status = '200' \n" + 
-//             "and size > 500000 \n" + 
-//             "and type <> 'WbUpdateCheck' \n" + 
-//             "group by year(request_date), month(request_date) \n" + 
-//             "order by 1 asc, 2 asc, 3 asc \n" + 
-//             ";";
-//		 String sql = 
-//			            "; \n" +
-//				           "wbfeedback off; \n" + 
-//									 "@c:/temp/2005-03-15_bv_cow_uprof.sql; \n" + 
-//									 " \n" + 
-//									 "select count(*)  \n" + 
-//									 "from bv_cow_uprof \n" + 
-//									 "; \n" + 
-//									 " \n" + 
-//									 "truncate table bv_cow_uprof \n" + 
-//									 ";";
-//String sql = "-- create the database \n" +
-//	"-- another comment\n" +
-//	"wbfeedback off;\n" +
-//	"create table TempDiasMain ( \n" + 
-//			 "   MediaObjKey    integer not null,    -- media object key (number) \n" + 
-//			 "   AuthorAge      varchar(12),         -- Year + Day/100 or \"o.D.\" or errors \n" + 
-//			 "   AuthorAgeInfo  varchar(10),         -- \"J\", \"M\", \"M-O\", \"He\", \"Fe\", \"So\", ... \n" + 
-//			 "   PageFormat     varchar(5),          -- \"A4\", \"A5\", \"A6\", ... \n" + 
-//			 "   CommentFlag    varchar(5),          -- \"K\" if there is a comment \n" + 
-//			 "   RelMediaObjKey integer,             -- link to related media object \n" + 
-//			 "   DateCreated    varchar(16),         -- dd-mm-yyyy (contains errors) \n" + 
-//			 "      -- If day/month is unknown: --yyyy, if day is unknown: -mm-yyyy \n" + 
-//			 "      -- Bemerkung von Dieter: Sollte später nicht mehr vorkommen. \n" + 
-//			 "      --    Datierungen müssen immer vollständig sein. \n" + 
-//			 "   Title          varchar(500), \n" + 
-//			 "   Comment1       varchar(2000),       -- \"content\" comment \n" + 
-//			 "   Comment2       varchar(2000),       -- not content-related comment \n" + 
-//			 "   AuthorKey      integer,             -- may be 0 or Null \n" + 
-//			 "   MediaFileType  varchar(5));         -- \"JPG\", \"WAV\", \"MOV\", ... \n" +
-//	     "wbfeedback on;\n" + 
-//			 "commit;\n";
-
-//			String sql = "/* \n testing\n*/\nWBEXPORT -file=bla -type=text\n;\nSELECT bla from bla;\n";
-			//String sql = "drop index idx_pa_date\n;\n\ncreate index idx_pa_date on partner_pro_pa (start_date, end_date)\n;\n\ncreate or replace view v_active_pa \nas\nSELECT PARTNER_PRO_ID,\n       PURCHASE_AGREE_NO,\n       START_DATE,\n       END_DATE,\n       STATUS\nFROM PARTNER_PRO_PA\nWHERE end_date >= sysdate\nAND   start_date < sysdate\n;\n\n\nselect distinct PURCHASE_AGREE_NO, cac_cd\nfrom PARTNER_PA_CAC\norder by 1\n;\n\nSELECT count(*)\nFROM rpl_user.partner_pro_pa;\n;\n\nselect * from v_active_pa\n;\n";
-//			String sql = "SELECT count(*)\nFROM rpl_user.partner_pro_pa\n;\n;\nselect * from v_active_pa\n;\n";
-			//File f = new File("d:/projects/jworkbench/testdata/statements.sql");
-		  IteratingScriptParser p = new IteratingScriptParser(sql);
-			ScriptCommandDefinition c  = p.getNextCommand();
-			while (c != null)
-			{
-				System.out.println(c + "\n************************************************");
-				c  = p.getNextCommand();
-			}
-			p.done();
-		}
-		catch (Throwable e)
-		{
-			e.printStackTrace();
-		}
-
-		System.out.println("*** Done.");
 	}
 
 }

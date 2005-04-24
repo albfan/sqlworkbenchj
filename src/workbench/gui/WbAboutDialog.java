@@ -278,17 +278,6 @@ public class WbAboutDialog extends javax.swing.JDialog
 		dispose();
 	}//GEN-LAST:event_closeDialog
 
-	/**
-	 * @param args the command line arguments
-	 */
-	public static void main(String args[])
-	{
-		new WbAboutDialog(new javax.swing.JFrame(), true).show();
-	}
-
-	/** Invoked when an action occurs.
-	 *
-	 */
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getActionCommand().equals(escAction.getActionName()))

@@ -23,8 +23,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import javax.swing.ImageIcon;
+import javax.swing.JDialog;
 
 import javax.swing.JFrame;
+import javax.swing.JWindow;
 
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
@@ -38,6 +41,7 @@ import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 import workbench.util.StrBuffer;
 import workbench.util.StrWriter;
+import workbench.util.WbThread;
 
 
 /**
@@ -59,10 +63,11 @@ public class SchemaReporter
 	private String outputfile;
 	private boolean cancel = false;
 	private ProgressPanel progressPanel;
-	private JFrame progressWindow;
+	private JDialog progressWindow;
 	private boolean showProgress = false;
 	private boolean outputDbDesigner = false;
 	private String schemaNameToUse = null;
+	private JFrame parentWindow;
 
 	/**
 	 * Creates a new SchemaReporter for the supplied connection
@@ -149,9 +154,10 @@ public class SchemaReporter
 		return out.toString();
 	}
 
-	public void setShowProgress(boolean flag)
+	public void setShowProgress(boolean flag, JFrame parent)
 	{
 		this.showProgress = flag;
+		this.parentWindow = parent;
 	}
 
 	public void writeXml()
@@ -243,7 +249,7 @@ public class SchemaReporter
 				LogMgr.logError("SchemaReporter.writeXml()", "Error writing table: " + table, e);
 			}
 		}
-		out.write("\n");
+		//out.write("\n");
 		out.write("</");
 		if (this.xmlNamespace != null)
 		{
@@ -308,6 +314,7 @@ public class SchemaReporter
 			this.progressWindow.dispose();
 		}
 	}
+	
 	private void openProgressMonitor()
 	{
 		progressPanel = new ProgressPanel(this);
@@ -316,12 +323,14 @@ public class SchemaReporter
 		this.progressPanel.setFilename(this.outputfile);
 		this.progressPanel.setInfoText(ResourceMgr.getString("MsgProcessTable"));
 
-		this.progressWindow = new JFrame();
+		this.progressWindow = new JDialog(this.parentWindow, true);
 		this.progressWindow.getContentPane().add(progressPanel);
 		this.progressWindow.pack();
 		this.progressWindow.setSize(300,120);
+		WbSwingUtilities.center(progressWindow, parentWindow);
 		this.progressWindow.setTitle(ResourceMgr.getString("MsgReportWindowTitle"));
-		this.progressWindow.setIconImage(ResourceMgr.getPicture("xml16").getImage());
+		//ImageIcon i = ResourceMgr.getPicture("xml16");
+		//if (i != null) this.progressWindow.setIconImage(i.getImage());
 		this.progressWindow.addWindowListener(new WindowAdapter()
 		{
 			public void windowClosing(WindowEvent e)
@@ -331,7 +340,14 @@ public class SchemaReporter
 		});
 
 		WbSwingUtilities.center(this.progressWindow, null);
-		this.progressWindow.show();
+		WbThread t = new WbThread("Reporter Progress")
+		{
+			public void run()
+			{
+				progressWindow.show();
+			}
+		};
+		t.start();
 	}
 
 	private void retrieveTables()

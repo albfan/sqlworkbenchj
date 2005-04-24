@@ -40,7 +40,7 @@
     </void> 
    </object> 
   </void> 
-  
+
   <void method="put"> 
    <string>Oracle8</string> 
    <object class="workbench.db.GetMetaDataSql"> 

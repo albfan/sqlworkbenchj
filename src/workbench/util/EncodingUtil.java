@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -31,20 +32,41 @@ public class EncodingUtil
 {
 	private static String[] charsets;
 	
+	/**
+	 *	Create a BufferedReader for the given file and encoding
+	 */
 	public static BufferedReader createReader(File f, String encoding)
 		throws IOException, UnsupportedEncodingException
 	{
 		return createReader(f, encoding, 512*1024);
 	}
 	
+	/**
+	 *	Create a BufferedReader for the given file and encoding
+	 */
 	public static BufferedReader createReader(File f, String encoding, int buffSize)
 		throws IOException, UnsupportedEncodingException
 	{
 		InputStream inStream = new FileInputStream(f);
-		BufferedReader in = new BufferedReader(new InputStreamReader(inStream, encoding),buffSize);
+		BufferedReader in = new BufferedReader(new InputStreamReader(inStream, cleanupEncoding(encoding)),buffSize);
 		return in;
 	}
 	
+	/**
+	 * Allow some common other names for encodings (e.g. UTF for UTF-8) 
+	 */
+	public static String cleanupEncoding(String input)
+	{
+		if (input == null) return null;
+		if ("utf".equalsIgnoreCase(input)) return "UTF-8";
+		if ("utf8".equalsIgnoreCase(input)) return "UTF-8";
+		if (input.startsWith("8859")) return "ISO-" + input;
+		return input;
+	}
+	
+	/**
+	 * Return all available encodings.
+	 */
 	public static String[] getEncodings()
 	{
 		if (charsets == null)
@@ -62,14 +84,24 @@ public class EncodingUtil
 		return charsets;
 	}
 
+	/**
+	 * Test if the given encoding is supported. Before this is 
+	 * tested, cleanupEncoding() is called to allow for some
+	 * common "abbreviations"
+	 * @see cleanupEncoding(String)
+	 */
 	public static boolean isEncodingSupported(String encoding)
 	{
-		String[] available = getEncodings();
-		for (int i=0; i < available.length; i++)
+		String enc = cleanupEncoding(encoding);
+		try
 		{
-			if (available[i].equals(encoding)) return true;
+			Charset charset = Charset.forName(enc);
+			return true;
 		}
-		return false;
+		catch (Exception e)
+		{
+			return false;
+		}
 	}
 	
 }

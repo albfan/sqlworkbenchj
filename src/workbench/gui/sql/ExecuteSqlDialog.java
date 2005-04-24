@@ -23,7 +23,6 @@ import java.sql.Statement;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 
 import workbench.db.WbConnection;
@@ -83,7 +82,7 @@ public class ExecuteSqlDialog
 		this.addWindowListener(this);
 
 		WbSwingUtilities.center(this, owner);
-		SwingUtilities.invokeLater(new Runnable()
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{

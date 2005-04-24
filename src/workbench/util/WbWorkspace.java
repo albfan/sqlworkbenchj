@@ -314,20 +314,4 @@ public class WbWorkspace
 		String key = "tab" + tabIndex + ".encoding";
 		this.tabInfo.setProperty(key, encoding);
 	}
-
-	public static void main(String args[])
-	{
-		try
-		{
-			String filename = "WbStatements99.txt";
-			int pos = filename.indexOf('.');
-			System.out.println(filename.substring(12,pos));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		System.out.println("done.");
-		System.exit(0);
-	}
 }

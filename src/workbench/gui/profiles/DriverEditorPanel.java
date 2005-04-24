@@ -281,17 +281,5 @@ public class DriverEditorPanel extends javax.swing.JPanel
 	private javax.swing.JTextField tfSampleUrl;
 	// End of variables declaration//GEN-END:variables
 
-	public static void main(String args[])
-	{
-		JDialog d = new JDialog((Frame)null, "Driver", true);
-		DriverEditorPanel editor = new DriverEditorPanel();
-		d.getContentPane().add(editor);
-		DbDriver test = new DbDriver();
-		test.setLibrary("this is a very long string path to a library");
-		editor.setDriver(test);
-		d.pack();
-		d.show();
-		//Settings.getInstance().saveSettings();
-	}
 
 }

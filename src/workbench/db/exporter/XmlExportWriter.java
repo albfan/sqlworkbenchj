@@ -33,6 +33,7 @@ public class XmlExportWriter
 		converter.setUseCDATA(this.exporter.getUseCDATA());
 		converter.setLineEnding(exporter.getLineEnding());
 		converter.setUseVerboseFormat(exporter.getUseVerboseFormat());
+		converter.setTableNameToUse(exporter.getTableName());
 		return converter;
 	}
 

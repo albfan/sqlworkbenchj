@@ -58,41 +58,5 @@ public class VariablePrompter
 		
 		return VariablesEditor.showVariablesDialog(vars);
 	}
-	
-	public static void main(String[] args)
-	{
-		try
-		{
-			String sql = "SELECT * \n" + 
-                                 "FROM configurations \n" + 
-                                 "where ( key not in (select key from configurations where username = 'tkellerer') \n" + 
-                                 "        and key like '%$[?keystart]%' \n" + 
-                                 "        and username = '_global_') \n" + 
-                                 "or username = 'tkellerer' \n" + 
-                                 "and KEY like '%$[&keystart]%' \n" + 
-                                 "ORDER BY key";		
-			sql += sql;
-			sql += sql;
-			sql += sql;
-			sql += sql;
-			sql += sql;
-				VariablePrompter p = new VariablePrompter(sql);
-				System.out.println(p.hasPrompt());
-				
-			long start, end;
-			start = System.currentTimeMillis();
-			for (int i=0; i < 50000; i ++)
-			{
-				VariablePrompter p2 = new VariablePrompter(sql);
-				p2.hasPrompt();
-			}
-			end = System.currentTimeMillis();
-			System.out.println("time=" + (end -start));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		System.out.println("Done.");
-	}
+
 }

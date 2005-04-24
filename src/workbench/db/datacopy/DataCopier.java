@@ -524,7 +524,7 @@ public class DataCopier
 			step = "retrieve";
 			if (this.sourceData == null)
 			{
-				this.retrieveStatement = this.sourceConnection.createStatement();
+				this.retrieveStatement = this.sourceConnection.createStatementForQuery();
 				rs = this.retrieveStatement.executeQuery(this.retrieveSql);
 				int colCount = rs.getMetaData().getColumnCount();
 				Object[] rowData = new Object[colCount];

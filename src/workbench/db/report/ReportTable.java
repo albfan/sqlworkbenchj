@@ -246,7 +246,7 @@ public class ReportTable
 		tagWriter.appendTag(line, colindent, TAG_TABLE_CATALOG, this.table.getCatalog());
 		tagWriter.appendTag(line, colindent, TAG_TABLE_SCHEMA, (this.schemaNameToUse == null ? this.table.getSchema() : this.schemaNameToUse));
 		tagWriter.appendTag(line, colindent, TAG_TABLE_NAME, this.table.getTable());
-		tagWriter.appendTag(line, colindent, TAG_TABLE_COMMENT, this.tableComment);
+		tagWriter.appendTag(line, colindent, TAG_TABLE_COMMENT, this.tableComment, true);
 
 		int cols = this.columns.length;
 		for (int i=0; i < cols; i++)
@@ -256,6 +256,7 @@ public class ReportTable
 		if (this.index != null) this.index.appendXml(line, colindent);
 
 		tagWriter.appendCloseTag(line, indent, TAG_TABLE_DEF);
+		line.append('\n');
 		return line;
 	}
 	
