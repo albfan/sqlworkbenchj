@@ -420,9 +420,16 @@ public class BatchRunner
 	public void setEncoding(String enc)
 		throws UnsupportedEncodingException
 	{
-		if (!EncodingUtil.isEncodingSupported(enc))
-			throw new UnsupportedEncodingException(enc + " encoding not supported!");
-		this.encoding = EncodingUtil.cleanupEncoding(enc);
+		if (enc == null)
+		{
+			this.encoding = null;
+		}
+		else
+		{
+			if (!EncodingUtil.isEncodingSupported(enc))
+				throw new UnsupportedEncodingException(enc + " encoding not supported!");
+			this.encoding = EncodingUtil.cleanupEncoding(enc);
+		}
 	}
 	
 	public void setShowTiming(boolean flag)

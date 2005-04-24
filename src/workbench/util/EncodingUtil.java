@@ -14,6 +14,7 @@ package workbench.util;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -47,8 +48,16 @@ public class EncodingUtil
 	public static BufferedReader createReader(File f, String encoding, int buffSize)
 		throws IOException, UnsupportedEncodingException
 	{
-		InputStream inStream = new FileInputStream(f);
-		BufferedReader in = new BufferedReader(new InputStreamReader(inStream, cleanupEncoding(encoding)),buffSize);
+		BufferedReader in = null;
+		if (encoding != null)
+		{
+			InputStream inStream = new FileInputStream(f);
+			in = new BufferedReader(new InputStreamReader(inStream, cleanupEncoding(encoding)),buffSize);
+		}
+		else
+		{
+			in = new BufferedReader(new FileReader(f), buffSize);
+		}
 		return in;
 	}
 	
@@ -63,7 +72,13 @@ public class EncodingUtil
 		if (input.startsWith("8859")) return "ISO-" + input;
 		return input;
 	}
-	
+
+	public String getDefaultEncoding()
+	{
+		String enc = System.getProperty("file.encoding");
+		if ("Cp1252".equalsIgnoreCase(enc)) return "ISO-8859-1";
+		return enc;
+	}
 	/**
 	 * Return all available encodings.
 	 */

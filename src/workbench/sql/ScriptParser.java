@@ -70,11 +70,6 @@ public class ScriptParser
 	public ScriptParser(File f, String encoding)
 		throws IOException
 	{
-		if (encoding == null)
-		{
-			encoding = Settings.getInstance().getDefaultFileEncoding();
-		}
-		
 		if (!f.exists()) throw new FileNotFoundException(f.getName() + " not found");
 
 		if (f.length() < Settings.getInstance().getInMemoryScriptSizeThreshold())
@@ -103,7 +98,7 @@ public class ScriptParser
 		try
 		{
 			content = new StrBuffer((int)f.length());
-			in = EncodingUtil.createReader(f, encoding,256*1024);
+			in = EncodingUtil.createReader(f, encoding, 256*1024);
 			String line = in.readLine();
 			while (line != null)
 			{
