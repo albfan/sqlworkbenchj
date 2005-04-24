@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<project name="MakeDoc" default="noDev" basedir=".">
+
+	<target name="init">
+    <tstamp>
+      <format pattern="yyyy-MM-dd" property="currentDate"/>
+    </tstamp>
+	</target>
+	
+	<property file="..\scripts\release.property"/>
+	
+	<target name="clean" depends="init">
+    <delete>
+      <fileset dir=".">
+        <include name="*.html"/>
+      </fileset>
+    </delete>
+	</target>
+	
+	<target name="noDev" depends="-noDev, makeHTML"/>
+	<target name="withDev" depends="-withDev, makeHTML"/>
+
+	<target name="-noDev">
+	  <property name="dev.build" value="0"/>
+	</target>
+	
+	<target name="-withDev">
+	  <property name="dev.build" value="1"/>
+	</target>
+
+  <target name="makeHTML" depends="init,clean">
+    <xslt in="workbench.xml" out="index.html" style="workbench.xslt" force="true">
+      <param name="buildNumber" expression="${release.build.number}"/>
+      <param name="devBuildDate" expression="${dev.build.date}"/>
+      <param name="devBuildNumber" expression="${dev.build.number}"/>
+      <param name="buildDate" expression="${release.build.date}"/>
+      <param name="includeDev" expression="${dev.build}"/>
+      <param name="currentDate" expression="${currentDate}"/>
+    </xslt>
+  </target>
+
+</project>
