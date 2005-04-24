@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE xslt [
+    <!ENTITY nbsp "&#160;">
+]>
+
+<xsl:stylesheet
+     version="1.0" 
+     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+>
+
+<xsl:output 
+  encoding="iso-8859-15" 
+  method="text" 
+  indent="no" 
+  standalone="yes"	
+  omit-xml-declaration="yes"
+  doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
+/>
+
+<xsl:strip-space elements="*"/>
+
+<xsl:template match="/">
+	<xsl:for-each select="/schema-diff/modify-table">
+    <xsl:variable name="table" select="@name"/>
+    <xsl:apply-templates select="add-column">
+      <xsl:with-param name="table" select="$table"/>
+    </xsl:apply-templates>
+    
+    <xsl:apply-templates select="remove-column">
+      <xsl:with-param name="table" select="$table"/>
+    </xsl:apply-templates>
+    
+    <xsl:apply-templates select="modify-column">
+      <xsl:with-param name="table" select="$table"/>
+    </xsl:apply-templates>
+
+    <xsl:apply-templates select="remove-primary-key">
+      <xsl:with-param name="table" select="$table"/>
+    </xsl:apply-templates>
+    
+    <xsl:apply-templates select="add-primary-key">
+      <xsl:with-param name="table" select="$table"/>
+    </xsl:apply-templates>
+
+    <xsl:apply-templates select="add-index">
+      <xsl:with-param name="table" select="$table"/>
+    </xsl:apply-templates>
+
+  </xsl:for-each>
+
+</xsl:template>
+
+<xsl:template match="rename">
+<!-- Ignore table rename -->
+</xsl:template>
+
+<xsl:template match="add-index">
+</xsl:template>
+
+<xsl:template match="drop-index">
+</xsl:template>
+
+<!-- Process the modify-column part -->
+<xsl:template match="modify-column">
+<xsl:param name="table"/> 
+<xsl:variable name="column" select="@name"/>
+<xsl:if test="string-length(dbms-data-type) &gt; 0">
+ALTER TABLE <xsl:value-of select="$table"/> MODIFY <xsl:value-of select="$column"/>&nbsp;<xsl:value-of select="dbms-data-type"/>;
+</xsl:if>
+<xsl:if test="nullable = 'true'">
+ALTER TABLE <xsl:value-of select="$table"/> MODIFY <xsl:value-of select="$column"/> NULL;
+</xsl:if>
+<xsl:if test="nullable = 'false'">
+ALTER TABLE <xsl:value-of select="$table"/> MODIFY <xsl:value-of select="$column"/> NOT NULL;
+</xsl:if>
+<xsl:if test="string-length(default-value) &gt; 0">
+ALTER TABLE <xsl:value-of select="$table"/> MODIFY <xsl:value-of select="$column"/> DEFAULT <xsl:value-of select="default-value"/>;  
+</xsl:if>
+<xsl:if test="string-length(comment) &gt; 0">
+COMMENT ON COLUMN <xsl:value-of select="$table"/>.<xsl:value-of select="$column"/> IS '<xsl:value-of select="comment"/>';  
+</xsl:if>
+</xsl:template>
+
+<!-- Add primary keys -->
+<xsl:template match="add-primary-key">
+<xsl:param name="table"/> 
+ALTER TABLE <xsl:value-of select="$table"/> ADD CONSTRAINT <xsl:value-of select="@name"/>&nbsp;PRIMARY KEY(<xsl:value-of select="column-name"/>);
+</xsl:template>
+
+<!-- Remove primary keys -->
+<xsl:template match="remove-primary-key">
+<xsl:param name="table"/> 
+ALTER TABLE <xsl:value-of select="$table"/> DROP PRIMARY KEY;
+</xsl:template>
+
+</xsl:stylesheet>

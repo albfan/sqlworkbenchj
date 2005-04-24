@@ -3,6 +3,9 @@ Build @BUILD_NUMBER@, @BUILD_DATE@
 
 Build 78, 24.04.2005
 --------------------
+
+Build 78, 24.04.2005
+--------------------
 Enh:  (77.1) Prepared Statements (i.e. ? in a SELECT) are now supported
       This support relies on certain JDBC features which are
       not available e.g. in Oracle's or PostgreSQL's JDBC drivers.

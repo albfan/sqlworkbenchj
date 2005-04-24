@@ -27,7 +27,7 @@
 		<p style="margin-top:10px">It has been tested with the following database systems:</p>
 		<ul>
 			<li><a target="_blank" href="http://hsqldb.sourceforge.net/">HSQLDB</a></li>
-			<li><a target="_blank" href="http://www.firebirdsql.org">FireBird</a> <a target="_blank" href="http://www.firebirdsql.org/index.php?op=devel&amp;sub=jdbc">(Download JDBC driver)</a></li>
+			<li><a target="_blank" href="http://www.firebirdsql.org">Firebird SQL</a> <a target="_blank" href="http://www.firebirdsql.org/index.php?op=devel&amp;sub=jdbc">(Download JDBC driver)</a></li>
 			<li><a target="_blank" href="http://www.postgresql.org/">PostgreSQL</a> <a target="_blank" href="http://jdbc.postgresql.org/download.html">(Download JDBC driver)</a></li>
 			<li><a target="_blank" href="http://www.mckoi.com/database/">Mckoi SQL Database</a></li>
 			<li><a target="_blank" href="http://www.ibm.com/software/data/cloudscape/">IBM Cloudscape</a></li>
@@ -52,7 +52,9 @@
 		<title>SQL Workbench/J</title>
 		<subtitle>Features</subtitle>
 		<content>
-		<p>The main focus of SQL Workbench/J's features is running SQL commands.</p>
+		<p>The main focus of SQL Workbench/J's features is running SQL commands to give
+		experienced developers a tool to quickly work with a DBMS. The focus is not
+		on providing a graphical query or database administratioin tool.</p>
 		<ul>
 			<li>Display result data from SQL queries (<image-link title="Main window" name="MainWindow.png">Screenshot</image-link>)</li>
 			<li>Edit, insert and delete data directly in the result table (<image-link title="Editing data in result set" name="EditData.jpg">Screenshot</image-link>)</li>
@@ -101,6 +103,33 @@
 		</content>
 	</page>
 
+  <!-- ======================== XSLT Files ========================== -->
+  <page name="xslt_stuff" title="XSLT">
+    <title>Sample XSL transformations</title>
+    <content>
+			<p>These are some XSLT files to transform outputs of SQL Workbench/J
+			into other formats. These scripts are meant to be a starting point
+			that can be enhanced to meet your own needs. They are far from
+			beeing production-quality scripts.</p>
+			<p>If you have developed an XSLT file to support the various
+			XML outputs of SQL Workbench/J and would like to share it, please send
+			it to <mail-to/></p>
+			<h2 style="text-align:left;padding-top:5px">WbDiff transformations</h2>
+			<p>The following files will transform the output of the <a href="http://www.sql-workbench.net/manual/wb-commands.html#command-diff">WBDIFF</a>
+			command into SQL scripts</p>
+			<ul>
+			  <li><a href="wbdiff2pg.xslt">Transform to a PostgreSQL script</a></li>
+			  <li><a href="wbdiff2oracle.xslt">Transform to an Oracle script</a></li>
+	 		</ul>
+			<h2 style="text-align:left;padding-top:5px">WbExport transformations</h2>
+			<p>The following files will transform the output of the <a href="http://www.sql-workbench.net/manual/wb-commands.html#command-export">WBEXPORT</a>
+			command into SQL scripts</p>
+			<ul>
+			  <li><a href="wbexport2text.xslt">Transform into a text file</a></li>
+	 		</ul>
+    </content>
+  </page>
+  
   <!-- ======================== Downloads ========================== -->
   <page name="downloads" title="Downloads">
         <title>SQL Workbench/J</title>

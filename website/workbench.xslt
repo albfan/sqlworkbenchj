@@ -202,7 +202,9 @@
 </xsl:template>
 
 <xsl:template match="zip-link">
-<a href="workbench.zip">ZIP File</a>
+<!-- <a href="workbench.zip">ZIP File</a>-->
+<a href="Workbench-Build{$buildNumber}.zip">ZIP File</a>
+
 </xsl:template>
 
 <xsl:template match="tar-link">
