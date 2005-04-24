@@ -87,6 +87,19 @@
       <para>The displayed statements can not be changed!</para>
     </section>
 
+    <section id="options-consolidate-log">
+      <title>Consolidate script log</title>
+
+      <para>Usually &wb-productname; reports the success and timings
+        for each statement that is beeing executed in the message tab
+        of the current SQL panel. For large scripts this can slow down
+        script execution dramatically. If this option is enabled, only 
+        a summary of the execution is printed once the script has finished. 
+        You can turn off the log during script execution by using 
+        the <link linkend="command-wbfeedback">WBFEEDBACK</link> command.
+      </para>
+    </section>
+
     <section id="options-enable-out" xreflabel="Enabling DBMS_OUTPUT">
       <title>Enable DBMS_OUTPUT</title>
 
@@ -101,10 +114,12 @@
 
     <section id="option-animated-icon" xreflabel="Enable animated icons">
       <title>Enable animated icons</title>
-      <para>Enable or disable the use of an animated icons in the SQL editor to indicate a running
-      SQL statement. It has been reported, that the animated icon does impact
-      performance on certain combinations of JDK/OS Version/Graphics driver. If you
-      experience a high CPU usage during the execution of SQL statements, try
+      <para>Enable or disable the use of an animated icons in the SQL editor to 
+      indicate a running SQL statement. It has been reported, that the animated 
+      icon does have a severe (negativ) impact on the performance on some computers
+      (depending on JDK/OS/Graphics driver).
+      If you experience a high CPU usage during the execution of SQL statements, or 
+      if you find your SQL statements are running very slow, try
       to turn off the usage of the animated icons.</para>
     </section>
 
@@ -380,23 +395,6 @@
                 <entry><para>true</para></entry>
               </row>
               <row>
-                <entry><para>workbench.db.fetchsize</para></entry>
-                <entry><para>This setting controls the default fetch size 
-								for data retrieval. If this parameter is set to a value &gt;0 
-								it will be passed to the 
-								<ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/Statement.html#setFetchSize(int)">setFetchSize()</ulink> 
-								method of the <literal>Statement</literal> object.
-                For some combinations of JDBC driver and DBMS, setting this parameter to a 
-                rather large number can improve retrieval performance because it saves network traffic.
-                Setting this parameter will affect <emphasis role="bold">all</emphasis> connections. If you want
-                to set this for an individual connection, please refer to the manual of your JDBC driver, 
-                as some JDBC drivers support this also through 
-                <link linkend="profile-extended-properties">properties</link> for the connection.
-                </para>
-                </entry>
-                <entry><para>-1 (meaning the fetch size will not be set)</para></entry>
-              </row>
-              <row>
                 <entry><para>workbench.db.ddlneedscommit</para></entry>
                 <entry><para>A list of DBMS that require a COMMIT after issuing DDL statements (such 
                 as <literal>CREATE TABLE</literal></para>
@@ -449,7 +447,36 @@
                 <entry><para>A list of JDBC driver classes, that require a reconnect after cancelling 
                 a statement. </para>
                 </entry>
-                <entry><para>PostgreSQL,Firebird</para></entry>
+                <entry><para>com.microsoft.jdbc.sqlserver.SQLServerDriver</para></entry>
+              </row>
+              <row>
+                <entry><para>workbench.db.casesensitive</para></entry>
+                <entry><para>This is (currently) only used in the table search panel of the DbExplorer.
+                The highlighting of matching values considers this setting.</para>
+                </entry>
+                <entry><para>Oracle</para></entry>
+              </row>
+              
+              <row>
+                <entry><para>workbench.sql.script.inmemory.maxsize</para></entry>
+                <entry><para>Control the size up to which files that are executed in batch
+                mode or via the <link linkend="command-wbinclude">WBINCLUDE</link> command
+                are read into memory. Files exceeding this size are not read into memory
+                but processed statement by statement. When a file is not read into memory
+                the automatic detection of the alternate delimiter does not work
+                any longer. The size is given in bytes.</para>
+                </entry>
+                <entry><para>1048576</para></entry>
+              </row>
+              <row>
+                <entry><para>workbench.editor.rightclickmovescursor</para></entry>
+                <entry>
+                  <para>Normally a right click in the SQL editor does not 
+                        change the location of the cursor (caret). If this parameter is set to 
+                        true, then a right click will also change the caret's location.
+                   </para>
+                </entry>
+                <entry><para>false</para></entry>
               </row>
               
             </tbody>

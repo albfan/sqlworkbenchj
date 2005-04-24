@@ -40,6 +40,11 @@
       Lines starting with a <literal>#</literal> character are ignored (comments). Assuming the file
       /temp/myvars.def had the following content:
       </para>
+      <para>You can also use (Java) PreparedStatements in the SQL editor.In this case
+      the parameters are denoted by quotation marks. For details on how to use
+      prepared statements refer to <link linkend="editor-prepared-statement">support for prepared statements</link> 
+      </para>
+      
       <programlisting>#Define the ID that we need later
 var_id=42
 person_name=Dent

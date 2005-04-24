@@ -86,6 +86,26 @@
             require a commit for DDL statements (<literal>CREATE TABLE, ...</literal>)
             as well. Please refer to the documentation of your DBMS.</para></entry>
           </row>
+          <row>
+            <entry><para>Fetch size</para></entry>
+            <entry><para>This setting controls the default fetch size 
+            for data retrieval. This parameter will directly be passed to the
+            <ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/Statement.html#setFetchSize(int)">setFetchSize()</ulink> 
+            method of the <literal>Statement</literal> object.
+            For some combinations of JDBC driver and DBMS, setting this parameter to a 
+            rather large number can improve retrieval performance because it saves network traffic.
+            </para>
+            <para>
+            The JDBC driver for <ulink url="http://www.postgresql.org/">PostgreSQL</ulink> controls the <ulink url="http://jdbc.postgresql.org/documentation/80/query.html#query-with-cursor">caching</ulink>
+            of ResultSets through this parameter. As the results are cached by &wb-productname; 
+            anyway, it is suggested to set this parameter to a value greater then zero to disable
+            the caching in the driver. Especially when exporting large results using 
+            <link linkend="command-export">WBEXPORT</link> or <link linkend="command-copy">WBCOPY</link>
+            it is recommended to turn off the caching in the driver.
+            </para>
+            </entry>
+          </row>
+          
         </tbody>
       </tgroup>
 

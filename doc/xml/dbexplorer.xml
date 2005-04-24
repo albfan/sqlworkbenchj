@@ -43,7 +43,8 @@
         currently selected table, any table that references the currently
         selected table and any trigger that is defined on that table.</para>
         
-        <para>The column list will also display any comments defined for the column.
+        <para>The column list will also display any comments defined for the column
+        (if the JDBC driver returns the information).
         Oracle's JDBC driver does not return those comments by default. To enable the 
         display of column comments (remarks) you have to supply an <link linkend="profile-extended-properties">extended property</link>
         in your connection profile. The property's name should be <literal>remarksReporting</literal>
@@ -54,21 +55,21 @@
         the column definition of the underlying table or view. The source tab
         will display the statement to re-create the synonym.</para>
 
-        <para>The References/Referenced by tabs, also display the complete
+        <para>The References/Referenced by tabs display the complete
         reference tree (any table referencing the tables referencing the
         currently selected one, and so on).</para>
 
         <para>The table list offers the following additional commands in the
         context menu:</para>
 
-        <simplesect>
-          <title>Spool data</title>
+        <simplesect id="dbexplorer-spool">
+          <title>Export data</title>
           <blockquote>
-          <para>This will execute a <literal>SPOOL</literal> command for the currently selected
-          table. Choosing this option is equivalent to do a <literal>SELECT * FROM table;</literal>
+          <para>This will execute a <literal>WBEXPORT</literal> command for the currently selected
+          table(s). Choosing this option is equivalent to do a <literal>SELECT * FROM table;</literal>
           and then executing <menuchoice><guimenu>SQL</guimenu><guimenuitem>Spool data</guimenuitem></menuchoice>
-          from the SQL editor in the main window (or issuing a SPOOL command before the SELECT).
-          See the description of the <link linkend="command-export">SPOOL command</link>
+          from the SQL editor in the main window (or issuing a WBEXPORT command before the SELECT).
+          See the description of the <link linkend="command-export">WBEXPORT command</link>
           for details.</para>
           </blockquote>
         </simplesect>
@@ -78,7 +79,17 @@
           
           <blockquote>
           <para>This creates an empty <literal>INSERT</literal>statement for the 
-          currently selected table.
+          currently selected table(s).
+          </para>
+          </blockquote>
+        </simplesect>
+
+        <simplesect>
+          <title>Create default SELECT</title>
+          
+          <blockquote>
+          <para>This creates a <literal>SELECT</literal> for the 
+          selected table(s) that includes all columns for the table. 
           </para>
           </blockquote>
         </simplesect>
@@ -97,6 +108,20 @@
           </para>
           </blockquote>
         </simplesect>
+
+        <simplesect>
+          <title>Delete data</title>
+
+          <blockquote>
+          <para>Deletes all rows from the selected table(s) by sending an 
+          <literal>DELETE FROM table_name;</literal> to the server for each
+          selected table. If the DBMS supports <literal>TRUNCATE</literal>
+          then this can be done with <literal>TRUNCATE</literal> as well. Using
+          <literal>TRUNCATE</literal> is usually faster as no transation 
+          state is maintained. 
+          </para>
+          </blockquote>
+        </simplesect>
         
         <simplesect>
           <title>Create SQL Script</title>
@@ -104,8 +129,9 @@
           <blockquote>
           <para>With this command a script for multiple objects can be created. Select
           all the tables, views or other objects in the table list, that you want
-          to create a script for, then right click and select "Create SQL Script".
-          This will generate one script for all selected items in the list.</para>
+          to create a script for. Then right click and select "Create SQL Script".
+          This will generate one script for all selected items in the list.
+          </para>
           <para>When this command is selected, a new window will be shown. The window
           contains a statusbar which indicates the object that is currently processed. The
           complete script will be shown as soon as all objects have been processed. 

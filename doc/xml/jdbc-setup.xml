@@ -16,14 +16,24 @@
       <para>The name of the library has to contain the full path to the driver&apos;s jar file, so that
       &wb-productname; can find it. If a driver requires more than one library,
       select all necessary libraries in the file open dialog, or enter all the
-      filenames separated by a semicolon.</para>
+      filenames separated by a semicolon. This is also true for drivers that require
+			a license file that is contained in a jar file. In this case you have to
+			include the license jar in the list of files. Basically this list defines
+			the classpath for the classloader that is used to load and instantiate the driver.
+			If the driver accesses files through its classpath definition that are not
+			contained in a jar library, you have to include that directory as part
+			of the library definition (e.g: "c:\etc\TheDriver\jdbcDriver.jar;c:\etc\TheDriver").
+			The file selection dialog will not let you select a directory, so you have
+			to add it manually to the library definition.
+			</para>
+			
+      <para>&wb-productname; is <emphasis role="bold">not</emphasis> using
+			the system CLASSPATH definition (e.g. environment variable) to load the
+			driver classes.
+			</para>
 
       <note><para>When using the JDBC-ODBC bridge you do not need to specify a library as
       the necessary drivers are already part of the Java runtime.</para>
-
-      <!--<para>When you specify a library, you do not need to add it to the
-      classpath of the JVM (e.g. using a startup script for &wb-productname;).
-      This is handled by the application automatically.</para>-->
       </note>
 
       <para>You can assign a sample URL to each driver, which will be put into
@@ -92,7 +102,7 @@
             <entry>
               <simplelist columns="1">
                 <member>firebirdsql-full.jar</member>
-                <member><ulink url="http://firebird.sourceforge.net"/></member>
+                <member><ulink url="http://www.firebirdsql.org/"/></member>
               </simplelist>
             </entry>
           </row>
@@ -127,15 +137,6 @@
             </entry>
           </row>
           <row>
-            <entry> <para>SQL Server 2000</para> </entry>
-            <entry> <para>com.microsoft.jdbc.sqlserver.SQLServerDriver</para></entry>
-            <entry> <simplelist columns="1">
-                    <member>msbase.jar;mssqlserver.jar;msutil.jar</member>
-                    <member><ulink url="http://www.microsoft.com/sql/default.asp"/></member>
-                    </simplelist>
-            </entry>
-          </row>
-          <row>
             <entry> <para>SQL Server </para> </entry>
             <entry> <para>net.sourceforge.jtds.jdbc.Driver</para> </entry>
             <entry>
@@ -149,7 +150,7 @@
             <entry> <para>com.mysql.jdbc.Driver</para> </entry>
             <entry>
               <simplelist columns="1">
-                <member>mysql-jdbc.jar</member>
+                <member>mysql-connector-java-3.1.7-bin.jar (exact name depends on version)</member>
                 <member><ulink url="http://www.mysql.com"/></member>
               </simplelist>
             </entry>

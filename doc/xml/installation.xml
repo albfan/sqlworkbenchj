@@ -131,8 +131,8 @@
     <para>If you experience a high CPU usage when running a SQL statement,
     this might be caused by a combination of the graphics driver, the JDK and
     the Windows&reg; version you are using. This is usually caused by the animated
-    icon which indicates a running statement (the yellow smiley). This animation can be turned off
-    with a setting in the <filename>workbench.settings</filename> configuration file.
+    icon which indicates a running statement (the yellow smiley). This animation can 
+    be turned off in <menuchoice><guimenu>Tools</guimenu><guimenuitem>Options</guimenuitem></menuchoice>
     See <xref linkend="option-animated-icon"/> for details. A different
     icon (not animated) will be used if that option is disabled.
     </para>

@@ -215,6 +215,28 @@ END;
 
       </section>
     </section>
+    
+    <section id="sql-performance">
+      <title>Performance tuning when executing SQL</title>
+      <para>There are some configuration settings that affect the performance
+        of your SQL statements. On slow computers it is recommended to turn off
+        the usage of the <link linkend="option-animated-icon">animated icon</link> 
+        as the indicator when a statement is running. When running large imports, 
+        turning off the animated icon can have a huge impact on the performance.
+      </para>
+      <para>When running large scripts, the feedback which statement is executed
+        can also slow down the execution. It is recommended to either turn off
+        the feedback using <link linkend="command-wbfeedback">WBFEEDBACK OFF</link> or by 
+        <link linkend="options-consolidate-log">consolidating the script log</link>
+      </para>
+      <para>When running <link linkend="command-import">imports</link> or 
+        <link linkend="command-export">exports</link> it is recommended to turn
+        off the progress display in the statusbar that shows the current row
+        that is imported/exported because this will slow down the process as 
+        well. In both cases you can use <literal>-showprogress</literal>
+        to turn off the display. 
+      </para>
+    </section>
 
       <section id="macros">
         <title>SQL Macros</title>
@@ -362,7 +384,7 @@ Done.</programlisting>
         <title>Other database systems</title>
       <para>If your DBMS supports something similar please let me know, and I
       will try to implement it - provided I have access to the DBMS. Please send your
-      request to <ulink url="mailto:workbench@kellerer.org">workbench@kellerer.org</ulink></para>
+      request to <ulink url="mailto:info@sql-workbench.net">info@sql-workbench.net</ulink></para>
       </section>
     </section>
 
