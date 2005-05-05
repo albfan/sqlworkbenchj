@@ -507,7 +507,6 @@ public class XmlDataFileParser
 				}
 			}
 			this.ignoreCurrentRow = false;
-			this.clearRowData();
 			this.currentRowNumber ++;
 		}
 		else if (qName.equals(this.columnTag))

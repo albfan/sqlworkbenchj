@@ -339,7 +339,7 @@ public class DwPanel
 	/**
 	 *	Callback method from the {@link workbench.storage.RowActionMonitor}
 	 */
-	public void setCurrentRow(long currentRow, long totalRows)
+	public void setCurrentRow(final long currentRow, final long totalRows)
 	{
 		StringBuffer msg = new StringBuffer(40);
 		if (this.updateMsg == null)

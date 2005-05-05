@@ -46,10 +46,11 @@ public class SqlSyntaxFormatter
 
 		BufferedInputStream in = new BufferedInputStream(SqlSyntaxFormatter.class.getResourceAsStream(aFilename));
 		Object value;
+		// filename is for logging purposes only
 		try
 		{
-			// filename is for logging purposes only
-			value = WbPersistence.readObject(in, aFilename);
+			WbPersistence reader = new WbPersistence(aFilename);
+			value = reader.readObject(in);
 		}
 		catch (Exception e)
 		{
@@ -64,7 +65,8 @@ public class SqlSyntaxFormatter
 		// try to read additional definitions from local file
 		try
 		{
-			value = WbPersistence.readObject(aFilename);
+			WbPersistence reader = new WbPersistence(aFilename);
+			value = reader.readObject();
 		}
 		catch (Exception e)
 		{

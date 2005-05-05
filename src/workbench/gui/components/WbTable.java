@@ -37,6 +37,8 @@ import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.print.PageFormat;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -124,7 +126,8 @@ import workbench.storage.NullValue;
 public class WbTable
 	extends JTable
 	implements ActionListener, FocusListener, MouseListener,
-	           Exporter, FontChangedListener, Searchable, PrintableComponent, ListSelectionListener
+	           Exporter, FontChangedListener, Searchable, PrintableComponent, ListSelectionListener, 
+	           PropertyChangeListener
 {
 	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.YELLOW);
 	private JPopupMenu popup;
@@ -279,6 +282,7 @@ public class WbTable
 		this.exportDataAction.addToInputMap(im, am);
 		this.optimizeAllCol.addToInputMap(im, am);
 		Settings.getInstance().addFontChangedListener(this);
+		Settings.getInstance().addPropertyChangeListener(this);
 	}
 
 
@@ -993,6 +997,42 @@ public class WbTable
 	}
 	public boolean getUseDefaultStringRenderer() { return this.useDefaultStringRenderer; }
 
+	private void initDateRenderers()
+	{
+		Settings sett = Settings.getInstance();
+		
+		String format = sett.getDefaultDateFormat();
+		if (defaultDateRenderer == null)
+		{
+			defaultDateRenderer = new DateColumnRenderer(format);
+			this.setDefaultRenderer(java.sql.Date.class, defaultDateRenderer);
+		}
+		else
+		{
+			defaultDateRenderer.setFormat(format);
+		}
+		
+		format = sett.getDefaultDateTimeFormat();
+		if (defaultTimestampRenderer == null)
+		{
+			defaultTimestampRenderer = new DateColumnRenderer(format);
+			this.setDefaultRenderer(java.sql.Timestamp.class, defaultTimestampRenderer);
+		}
+		else
+		{
+			this.defaultTimestampRenderer.setFormat(format);
+		}
+	}
+	
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (Settings.DATE_FORMAT_KEY.equals(evt.getPropertyName()) ||
+			  Settings.DATE_TIME_FORMAT_KEY.equals(evt.getPropertyName()))
+		{
+			initDateRenderers();
+		}
+	}
+	
 	public void initDefaultRenderers()
 	{
 		// need to let JTable do some initialization stuff

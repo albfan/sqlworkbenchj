@@ -22,13 +22,11 @@ public class ClobColumnRenderer extends ToolTipRenderer
 	public ClobColumnRenderer()
 	{
 		super();
+		this.tooltip = null;
 	}
 
 	public void prepareDisplay(Object aValue)
 	{
-		// this method will not be called with a null value, so we do not need
-		// to check it here!
-
 		try
 		{
 			Clob clob = (Clob)aValue;
@@ -39,16 +37,6 @@ public class ClobColumnRenderer extends ToolTipRenderer
 		{
 			displayValue = aValue.toString();
 		}
-		
-		if (this.displayValue.length() > 0) 
-		{
-			this.tooltip = this.displayValue;
-		}
-		else
-		{
-			this.tooltip = null;
-		}
-
 	}
 
 }

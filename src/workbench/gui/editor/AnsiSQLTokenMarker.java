@@ -202,7 +202,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		// Workbench specific keywords
 		keywords.add("DESC",Token.KEYWORD2);
 		keywords.add("DESCRIBE",Token.KEYWORD2);
-		keywords.add("XSLT",Token.KEYWORD2);
+		keywords.add("WBXSLT",Token.KEYWORD2);
 		keywords.add("WBEXPORT",Token.KEYWORD2);
 		keywords.add("LIST",Token.KEYWORD2);
 		keywords.add("LISTPROCS",Token.KEYWORD2);

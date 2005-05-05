@@ -68,8 +68,6 @@ public class NumberColumnRenderer
 	
 	public void prepareDisplay(Object aValue)
 	{
-		// this method will not be called with a null value, so we do not need
-		// to check it here!
 		try
 		{
 			Number n = (Number) aValue;

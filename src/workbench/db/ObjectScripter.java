@@ -14,6 +14,7 @@ package workbench.db;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
+import workbench.exception.ExceptionUtil;
 
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
@@ -26,6 +27,13 @@ import workbench.util.StrBuffer;
 public class ObjectScripter
 	implements Scripter
 {
+	public static final String TYPE_SEQUENCE = "sequence";
+	public static final String TYPE_TABLE = "table";
+	public static final String TYPE_VIEW = "view";
+	public static final String TYPE_SYNONYM = "synonym";
+	public static final String TYPE_INSERT = "insert";
+	public static final String TYPE_SELECT = "select";
+
 	private Map objectList;
 	private DbMetadata meta;
 	private StrBuffer script;
@@ -47,12 +55,12 @@ public class ObjectScripter
 		if (this.script == null)
 		{
 			this.script = new StrBuffer(this.objectList.size() * 500);
-			this.appendObjectType("sequence");
-			this.appendObjectType("table");
-			this.appendObjectType("view");
-			this.appendObjectType("synonym");
-			this.appendObjectType("insert");
-			this.appendObjectType("select");
+			this.appendObjectType(TYPE_SEQUENCE);
+			this.appendObjectType(TYPE_TABLE);
+			this.appendObjectType(TYPE_VIEW);
+			this.appendObjectType(TYPE_SYNONYM);
+			this.appendObjectType(TYPE_INSERT);
+			this.appendObjectType(TYPE_SELECT);
 		}
 		return this.script.toString();
 	}
@@ -65,96 +73,56 @@ public class ObjectScripter
 			Map.Entry entry = (Map.Entry)itr.next();
 			String object = (String)entry.getKey();
 			String type = (String)entry.getValue();
+			TableIdentifier tbl = new TableIdentifier(object);
 			String source = null;
-			if (type.equalsIgnoreCase(typeFilter))
+			
+			if (!type.equals(typeFilter)) continue;
+			
+			if (this.progressMonitor != null)
 			{
-				if (this.progressMonitor != null)
+				this.progressMonitor.setCurrentObject(object);
+			}
+			try
+			{
+				if (TYPE_TABLE.equals(type))
 				{
-					this.progressMonitor.setCurrentObject(object);
+					source = meta.getTableSource(null, tbl.getSchema(), tbl.getTable(), true);
 				}
-				try
+				else if (TYPE_VIEW.equals(type))
 				{
-					if ("table".equalsIgnoreCase(type))
-					{
-						source = this.getTableScript(object);
-					}
-					else if ("view".equalsIgnoreCase(type))
-					{
-						source = this.getViewSource(object);
-					}
-					else if ("synonym".equalsIgnoreCase(type))
-					{
-						source = this.getSynonymSource(object);
-					}
-					else if ("sequence".equalsIgnoreCase(type))
-					{
-						source = this.meta.getSequenceSource(object);
-					}
-					else if ("insert".equalsIgnoreCase(type))
-					{
-						source = this.meta.getEmptyInsert(null, null, object);
-					}
-					else if ("select".equalsIgnoreCase(type))
-					{
-						source = this.meta.getDefaultSelect(null, null, object);
-					}
+					source = meta.getExtendedViewSource(null, tbl.getSchema(), tbl.getTable(), false);
 				}
-				catch (Exception e)
+				else if (TYPE_SYNONYM.equals(type))
 				{
-					this.script.append("\nError creating DDL for " + object);
+					source = meta.getSynonymSource(tbl.getSchema(), tbl.getTable());
 				}
-				if (source != null && source.length() > 0)
+				else if (TYPE_SEQUENCE.equals(type))
 				{
-					if (!type.equalsIgnoreCase("insert")) this.script.append("-- BEGIN " + type + " " + object + "\n");
-					this.script.append(source);
-					if (!type.equalsIgnoreCase("insert")) this.script.append("-- END " + type + " " + object + "\n");
-					this.script.append("\n");
+					source = this.meta.getSequenceSource(object);
+				}
+				else if (TYPE_INSERT.equals(type))
+				{
+					source = this.meta.getEmptyInsert(null, null, object);
+				}
+				else if (TYPE_SELECT.equals(type))
+				{
+					source = this.meta.getDefaultSelect(null, null, object);
 				}
 			}
-		}
-	}
+			catch (Exception e)
+			{
+				this.script.append("\nError creating script for " + object + " " + ExceptionUtil.getDisplay(e));
+			}
 
-	private String getSynonymSource(String tableName)
-		throws SQLException
-	{
-		String table = tableName;
-		String owner = null;
-		int pos = tableName.indexOf('.');
-		if (pos > 0)
-		{
-			owner = tableName.substring(0, pos);
-			table = tableName.substring(pos + 1);
+			if (source != null && source.length() > 0)
+			{
+				boolean useSeparator = !type.equalsIgnoreCase("insert") && !type.equalsIgnoreCase("select");
+				if (useSeparator) this.script.append("-- BEGIN " + type + " " + object + "\n");
+				this.script.append(source);
+				if (useSeparator) this.script.append("-- END " + type + " " + object + "\n");
+				this.script.append("\n");
+			}
 		}
-		return this.meta.getSynonymSource(owner, table);
-	}
-
-	private String getTableScript(String tableName)
-		throws SQLException
-	{
-		String table = tableName;
-		String owner = null;
-		int pos = tableName.indexOf('.');
-		if (pos > 0)
-		{
-			owner = tableName.substring(0, pos);
-			table = tableName.substring(pos + 1);
-		}
-		String source = this.meta.getTableSource(null, owner, table, true);
-		return source;
-	}
-
-	private String getViewSource(String viewName)
-		throws SQLException
-	{
-		String view = viewName;
-		String owner = null;
-		int pos = viewName.indexOf('.');
-		if (pos > 0)
-		{
-			owner = viewName.substring(0, pos);
-			view = viewName.substring(pos + 1);
-		}
-		return this.meta.getExtendedViewSource(null, owner, view, false);
 	}
 
 }

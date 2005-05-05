@@ -38,6 +38,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.event.ChangeListener;
 import workbench.db.firebird.FirebirdMetadata;
+import workbench.db.firstsql.FirstSqlMetadata;
 import workbench.db.hsqldb.HsqlSequenceReader;
 import workbench.db.ingres.IngresMetadata;
 import workbench.db.mckoi.McKoiMetadata;
@@ -129,6 +130,7 @@ public class DbMetadata
 	private boolean ddlNeedsCommit;
   private boolean isOracle = false;
 	private boolean isPostgres = false;
+	private boolean isFirstSql = false;
 	private boolean isHsql = false;
 	private boolean isFirebird = false;
 	private boolean isSqlServer = false;
@@ -143,7 +145,7 @@ public class DbMetadata
 	private boolean createInlineConstraints = false;
 	private boolean useNullKeyword = true;
 
-	private AbstractConstraintReader constraintReader = null;
+	private ConstraintReader constraintReader = null;
 	private SynonymReader synonymReader = null;
 	private SequenceReader sequenceReader = null;
 	private ProcedureReader procedureReader = null;
@@ -294,6 +296,11 @@ public class DbMetadata
 			this.productName = this.productName.substring(0, pos).trim();
 			this.mckoiMetaData = new McKoiMetadata(this.dbConnection.getSqlConnection());
 			this.sequenceReader = this.mckoiMetaData;
+		}
+		else if (productLower.indexOf("firstsql") > -1)
+		{
+			this.constraintReader = new FirstSqlMetadata();
+			this.isFirstSql = true;
 		}
 
 		// if the DBMS does not need a specific ProcedureReader
@@ -515,7 +522,8 @@ public class DbMetadata
 		try
 		{
 			// filename is for logging purposes only
-			value = WbPersistence.readObject(in, aFilename);
+			WbPersistence reader = new WbPersistence(aFilename);
+			value = reader.readObject(in);
 		}
 		catch (Exception e)
 		{
@@ -536,7 +544,8 @@ public class DbMetadata
 			// try to read additional definitions from local file
 			try
 			{
-				value = WbPersistence.readObject(aFilename);
+				WbPersistence reader = new WbPersistence(aFilename);
+				value = reader.readObject();
 			}
 			catch (Exception e)
 			{
@@ -2070,9 +2079,9 @@ public class DbMetadata
 		if ("*".equals(aCatalog)) aCatalog = null;
 		if ("*".equals(aSchema)) aSchema = null;
 
-		aCatalog = this.adjustObjectname(aCatalog);
-		aSchema = this.adjustObjectname(aSchema);
-		aTriggername = this.adjustObjectname(aTriggername);
+		//aCatalog = this.adjustObjectname(aCatalog);
+		//aSchema = this.adjustObjectname(aSchema);
+		//aTriggername = this.adjustObjectname(aTriggername);
 
 		GetMetaDataSql sql = (GetMetaDataSql)triggerSourceSql.get(this.productName);
 		if (sql == null) return "";
@@ -2114,7 +2123,7 @@ public class DbMetadata
 			SqlUtil.closeAll(rs, stmt);
 		}
 
-		if (this.isCloudscape)
+		if (this.isCloudscape || this.isFirstSql)
 		{
 			String r = result.toString().replaceAll("\\\\n", "\n");
 			return r;
@@ -2598,7 +2607,8 @@ public class DbMetadata
 			sql.append(column);
 		}
 		sql.append("\nFROM ");
-		sql.append(table);
+		TableIdentifier tbl = new TableIdentifier(table);
+		sql.append(tbl.getTable());
 		sql.append(";\n");
 
 		return sql.toString();
@@ -2656,7 +2666,7 @@ public class DbMetadata
 			{
 				result.append(" CASCADE CONSTRAINTS");
 			}
-			else if (this.isPostgres)
+			else if (this.isPostgres || this.isFirstSql)
 			{
 				result.append(" CASCADE");
 			}
@@ -2705,7 +2715,7 @@ public class DbMetadata
 
 			result.append("   ");
 			result.append(colName);
-			if (columns[i].isPkColumn())
+			if (columns[i].isPkColumn() && (this.isFirstSql && !type.equals("sequence")))
 			{
 				if (pkCols.length() > 0) pkCols.append(',');
 				pkCols.append(colName.trim());
@@ -2722,7 +2732,12 @@ public class DbMetadata
 				result.append(def.trim());
 			}
 
-			if (columns[i].isNullable() )
+			if (this.isFirstSql && "sequence".equals(type))
+			{
+				// with FirstSQL a column of type "sequence" is always the primary key
+				result.append(" PRIMARY KEY");
+			}
+			else if (columns[i].isNullable() )
 			{
 				if (this.isIngres)
 				{

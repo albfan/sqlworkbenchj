@@ -52,8 +52,10 @@ public class ValueConverter
 	private String defaultDateFormat;
 	private String defaultTimestampFormat;
 	private char decimalCharacter = '.';
+	private SimpleDateFormat dateFormatter = new SimpleDateFormat();
+	private SimpleDateFormat timestampFormatter = new SimpleDateFormat();
 	private SimpleDateFormat formatter = new SimpleDateFormat();
-
+	
 	public ValueConverter()
 	{
 		Settings sett = Settings.getInstance();
@@ -70,11 +72,13 @@ public class ValueConverter
 	public void setDefaultDateFormat(String aFormat)
 	{
 		this.defaultDateFormat = aFormat;
+		if (aFormat != null) this.dateFormatter.applyPattern(aFormat);
 	}
 
 	public void setDefaultTimestampFormat(String aFormat)
 	{
 		this.defaultTimestampFormat = aFormat;
+		if (aFormat != null) this.timestampFormatter.applyPattern(aFormat);
 	}
 
 	public void setDecimalCharacter(char aChar)
@@ -142,10 +146,9 @@ public class ValueConverter
 		
 		if (this.defaultTimestampFormat != null)
 		{
-			this.formatter.applyPattern(this.defaultTimestampFormat);
 			try
 			{
-				result = this.formatter.parse(aDate);
+				result = this.timestampFormatter.parse(aDate);
 			}
 			catch (Exception e)
 			{
@@ -184,10 +187,9 @@ public class ValueConverter
 		
 		if (this.defaultDateFormat != null)
 		{
-			this.formatter.applyPattern(this.defaultDateFormat);
 			try
 			{
-				result = this.formatter.parse(aDate);
+				result = this.dateFormatter.parse(aDate);
 			}
 			catch (Exception e)
 			{
@@ -197,10 +199,9 @@ public class ValueConverter
 
 		if (result == null && this.defaultTimestampFormat != null)
 		{
-			this.formatter.applyPattern(this.defaultTimestampFormat);
 			try
 			{
-				result = this.formatter.parse(aDate);
+				result = this.timestampFormatter.parse(aDate);
 			}
 			catch (Exception e)
 			{

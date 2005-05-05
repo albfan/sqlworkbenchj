@@ -53,6 +53,8 @@ public class Settings
 {
 	public static final String ANIMATED_ICONS_KEY = "workbench.gui.animatedicon";
 	public static final String ENCRYPT_PWD_KEY = "workbench.profiles.encryptpassword";
+	public static final String DATE_FORMAT_KEY = "workbench.gui.display.dateformat";
+	public static final String DATE_TIME_FORMAT_KEY = "workbench.gui.display.datetimeformat";
 
 	public static final String EDITOR_FONT_KEY = "editor";
 	public static final String STANDARD_FONT_KEY = "standard";
@@ -217,12 +219,12 @@ public class Settings
 		return new File(this.configDir, "WbShortcuts.xml").getAbsolutePath();
 	}
 
-	public String getProfileFileName()
+	public String getProfileFilename()
 	{
 		return new File(this.configDir, "WbProfiles.xml").getAbsolutePath();
 	}
 
-	public String getDriverConfigFileName()
+	public String getDriverConfigFilename()
 	{
 		return new File(this.configDir, "WbDrivers.xml").getAbsolutePath();
 	}
@@ -1145,30 +1147,31 @@ public class Settings
 
 	public String getDefaultDateFormat()
 	{
-		return this.props.getProperty("workbench.gui.display.dateformat", "yyyy-MM-dd");
+		return this.props.getProperty(DATE_FORMAT_KEY, "yyyy-MM-dd");
 	}
 
 	public String getDefaultDateTimeFormat()
 	{
-		return this.props.getProperty("workbench.gui.display.datetimeformat", "yyyy-MM-dd HH:mm:ss");
+		return this.props.getProperty(DATE_TIME_FORMAT_KEY, "yyyy-MM-dd HH:mm:ss");
 	}
 
 	public void setDefaultDateFormat(String aFormat)
 	{
 		this.defaultDateFormatter = null;
-		this.props.setProperty("workbench.gui.display.dateformat", aFormat);
+		this.props.setProperty(DATE_FORMAT_KEY, aFormat);
 	}
 
 	public void setDefaultDateTimeFormat(String aFormat)
 	{
 		this.defaultDateFormatter = null;
-		this.props.setProperty("workbench.gui.display.datetimeformat", aFormat);
+		this.props.setProperty(DATE_TIME_FORMAT_KEY, aFormat);
 	}
 
 	public int getMaxFractionDigits()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.display.maxfractiondigits", "2"));
 	}
+	
 	public void setMaxFractionDigits(int aValue)
 	{
 		this.props.setProperty("workbench.gui.display.maxfractiondigits", Integer.toString(aValue));
@@ -1189,13 +1192,14 @@ public class Settings
 		if (this.defaultFormatter == null)
 		{
 			this.defaultFormatter = new DecimalFormat("0.#");
+			String sep = this.getDecimalSymbol();
+			int maxDigits = this.getMaxFractionDigits();
+			this.decSymbols.setDecimalSeparator(sep.charAt(0));
+			this.defaultFormatter.setDecimalFormatSymbols(this.decSymbols);
+			this.defaultFormatter.setMaximumFractionDigits(maxDigits);
 		}
-		String sep = this.getDecimalSymbol();
-		int maxDigits = this.getMaxFractionDigits();
-		this.decSymbols.setDecimalSeparator(sep.charAt(0));
-		this.defaultFormatter.setDecimalFormatSymbols(this.decSymbols);
-		this.defaultFormatter.setMaximumFractionDigits(maxDigits);
 	}
+	
 	public String getDecimalSymbol()
 	{
 		return this.props.getProperty("workbench.gui.display.decimal.separator", ".");
@@ -1257,7 +1261,6 @@ public class Settings
 	public String getDefaultFileEncoding()
 	{
 		String def = System.getProperty("file.encoding");
-		if ("Cp1252".equals(def)) def = "ISO-8859-15";
 		return this.props.getProperty("workbench.file.encoding", def);
 	}
 

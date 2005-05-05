@@ -47,7 +47,8 @@ public class ShortcutManager
 		this.filename = aFilename;
 		try
 		{
-			this.keyMap = (HashMap)WbPersistence.readObject(this.filename);
+			WbPersistence reader = new WbPersistence(this.filename);
+			this.keyMap = (HashMap)reader.readObject();
 		}
 		catch (Exception e)
 		{
@@ -202,7 +203,8 @@ public class ShortcutManager
 		// if no mapping at all is defined, then don't save it
 		if (toSave.size() > 0)
 		{
-			WbPersistence.writeObject(toSave, this.filename);
+			WbPersistence writer = new WbPersistence(this.filename);
+			writer.writeObject(toSave);
 		}
 		else
 		{

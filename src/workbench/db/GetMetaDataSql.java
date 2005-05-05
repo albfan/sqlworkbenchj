@@ -465,7 +465,8 @@ public class GetMetaDataSql
 		
 		trgSrcStatements.put("Adaptive Server Anywhere", asaSource);
 		trgSrcStatements.put("Oracle", oraTrigSrc);
-		WbPersistence.writeObject(trgSrcStatements, "d:/temp/TriggerSourceStatements.xml");
+		WbPersistence writer = new WbPersistence("d:/temp/TriggerSourceStatements.xml");
+		writer.writeObject(trgSrcStatements);
 	}
 	
 	public static void createListTriggerStatements()
@@ -535,8 +536,8 @@ public class GetMetaDataSql
 		trgStatements.put("Microsoft SQL Server", listMsSqlTrigs);
 		trgStatements.put("HSQL Database Engine", hsql);
 		trgStatements.put("Adaptive Server Anywhere", asa);
-		
-		WbPersistence.writeObject(trgStatements, "d:/temp/ListTriggersStatements.xml");
+		WbPersistence writer = new WbPersistence("d:/temp/ListTriggersStatements.xml");
+		writer.writeObject(trgStatements);
 	}
 
 	public static void createViewStatements()
@@ -576,7 +577,8 @@ public class GetMetaDataSql
 		viewStatements.put("Microsoft SQL Server", mss);
 		viewStatements.put("HSQLDB Database Engine", hsql);
 		viewStatements.put("Adaptive Server Anywhere", asa);
-		WbPersistence.writeObject(viewStatements, "d:/temp/ViewSourceStatements.xml");
+		WbPersistence writer = new WbPersistence("d:/temp/ViewSourceStatements.xml");
+		writer.writeObject(viewStatements);
 	}
 	public static void createDefaultStatements()
 	{
@@ -600,7 +602,8 @@ public class GetMetaDataSql
 		HashMap procStatements = new HashMap();
 		procStatements.put("Oracle", oracleProc);
 		procStatements.put("Microsoft SQL Server", mssProc);
-		WbPersistence.writeObject(procStatements, "ProcSourceStatements.xml");
+		WbPersistence writer = new WbPersistence("d:/temp/ProcSourceStatements.xml");
+		writer.writeObject(procStatements);
 	}
 
 	public static void main(String args[])

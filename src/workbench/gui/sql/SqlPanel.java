@@ -99,6 +99,7 @@ import workbench.gui.actions.SelectMaxRowsAction;
 import workbench.gui.actions.SelectResultAction;
 import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.actions.StopAction;
+import workbench.gui.actions.ToggleAutoCommitAction;
 import workbench.gui.actions.UndoAction;
 import workbench.gui.actions.UndoExpandAction;
 import workbench.gui.actions.WbAction;
@@ -200,6 +201,7 @@ public class SqlPanel
 	private CheckPreparedStatementsAction checkPreparedAction;
 
 	private WbMenu copySelectedMenu;
+	private ToggleAutoCommitAction toggleAutoCommit;
 	private CommitAction commitAction;
 	private RollbackAction rollbackAction;
 
@@ -722,7 +724,9 @@ public class SqlPanel
 		this.rollbackAction = new RollbackAction(this);
 		this.rollbackAction.setEnabled(false);
 		this.actions.add(this.rollbackAction);
-
+		this.toggleAutoCommit = new ToggleAutoCommitAction();
+		this.actions.add(this.toggleAutoCommit);
+		
 		this.firstStmtAction = new FirstStatementAction(this);
 		this.firstStmtAction.setEnabled(false);
 		this.actions.add(this.firstStmtAction);
@@ -1340,6 +1344,8 @@ public class SqlPanel
 		}
 
 		this.dbConnection = aConnection;
+		this.toggleAutoCommit.setConnection(this.dbConnection);
+		
 		try
 		{
 			this.data.setConnection(aConnection);
@@ -1364,26 +1370,37 @@ public class SqlPanel
 
 		this.checkResultSetActions();
 		this.checkAutocommit();
-
-		//this.doLayout();
 	}
 
+	/**
+	 * Check the autoCommit property of the current connection
+	 * and enable/disable the rollback and commit actions
+	 * accordingly
+	 */
 	private void checkAutocommit()
 	{
-		if (this.dbConnection != null)
+		SwingUtilities.invokeLater(new Runnable()
 		{
-			this.commitAction.setEnabled(!this.dbConnection.getAutoCommit());
-			this.rollbackAction.setEnabled(!this.dbConnection.getAutoCommit());
-		}
-		else
-		{
-			this.commitAction.setEnabled(false);
-			this.rollbackAction.setEnabled(false);
-		}
+			public void run()
+			{
+				if (dbConnection != null)
+				{
+					// if autocommit is enabled, then rollback and commit will 
+					// be disabled
+					boolean flag = dbConnection.getAutoCommit();
+					commitAction.setEnabled(!flag);
+					rollbackAction.setEnabled(!flag);
+				}
+				else
+				{
+					commitAction.setEnabled(false);
+					rollbackAction.setEnabled(false);
+				}
+			}
+		});
 	}
 
 	public boolean isRequestFocusEnabled() { return true; }
-	//public boolean isFocusTraversable() { return true; }
 
 	public synchronized void storeStatementInHistory()
 	{
@@ -2406,8 +2423,15 @@ public class SqlPanel
 		this.executeSelected.setEnabled(aFlag);
 		this.executeCurrent.setEnabled(aFlag);
 		this.importFileAction.setEnabled(aFlag);
-		this.commitAction.setEnabled(aFlag);
-		this.rollbackAction.setEnabled(aFlag);
+		if (aFlag)
+		{
+			this.checkAutocommit();
+		}
+		else
+		{
+			this.commitAction.setEnabled(aFlag);
+			this.rollbackAction.setEnabled(aFlag);
+		}
 		this.spoolData.setEnabled(aFlag);
 	}
 

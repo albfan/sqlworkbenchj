@@ -14,7 +14,10 @@ package workbench.util;
 import workbench.interfaces.CharacterSequence;
 
 /**
+ * An implementation of the CharacterSequence interface
+ * based on a String as the source.
  *
+ * @see FileMappedSequence
  * @author info@sql-workbench.net
  */
 public class StringSequence
@@ -22,7 +25,9 @@ public class StringSequence
 {
 	private String source;
 	
-	/** Creates a new instance of StringSequence */
+	/**
+	 * Create a StringSequence based on the given String
+	 */
 	public StringSequence(String s)
 	{
 		this.source = s;

@@ -240,6 +240,18 @@ public class WbConnection
 		}
 	}
 
+	public void toggleAutoCommit()
+	{
+		boolean flag = this.getAutoCommit();
+		try
+		{
+			this.setAutoCommit(!flag);
+		}
+		catch (Exception e)
+		{
+			// ignore it
+		}
+	}
 	public void setAutoCommit(boolean flag)
 		throws SQLException
 	{

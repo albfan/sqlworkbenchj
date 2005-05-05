@@ -87,6 +87,7 @@
     </void> 
    </object> 
   </void> 
+  
   <void method="put"> 
    <string>PostgreSQL</string> 
    <object class="workbench.db.GetMetaDataSql"> 
@@ -226,7 +227,6 @@ catalog_definition_schema.sysschema
     </void> 
    </object> 
   </void> 
-
-    
+  
  </object> 
 </java> 

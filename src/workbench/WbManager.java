@@ -247,9 +247,6 @@ public class WbManager
 		def.put("Table.font", dataFont);
 		def.put("TableHeader.font", dataFont);
 
-		LookAndFeel lnf = UIManager.getLookAndFeel();
-		String lnfClass = lnf.getClass().getName();
-
 		// Polish up the standard look & feel settings
 		Color c = this.settings.getColor("workbench.table.gridcolor");
 		if (c == null)
@@ -260,7 +257,6 @@ public class WbManager
 
 		// use our own classes for some GUI elements
 		def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
-		//def.put("SplitPaneUI", "com.sun.java.swing.plaf.windows.WindowsSplitPaneUI");
 		def.put("SplitPaneUI", "workbench.gui.components.WbSplitPaneUI");
 
 		if (settings.getShowMnemonics())
@@ -634,7 +630,7 @@ public class WbManager
 	public static final String ARG_SUCCESS_SCRIPT = "cleanupsuccess";
 	public static final String ARG_ERROR_SCRIPT = "cleanuperror";
 	public static final String ARG_SHOW_TIMING = "showtiming";
-	
+
 	// Other parameters
 	public static final String ARG_PROFILE = "profile";
 	private static final String ARG_CONFIGDIR = "configdir";
@@ -780,7 +776,8 @@ public class WbManager
 				finally
 				{
 					// disconnects everything
-					runner.done();
+					ConnectionMgr mgr = ConnectionMgr.getInstance();
+					mgr.disconnectAll();
 				}
 				if (!runner.isSuccess()) exitCode = 1;
 			}

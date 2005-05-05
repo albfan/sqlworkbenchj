@@ -201,12 +201,9 @@ public class ToolTipRenderer
 	
 	public void prepareDisplay(Object aValue)
 	{
-		// this method will not be called with a null value, so we do not need
-		// to check it here!
 		displayValue = aValue.toString();
-		// this is the tooltip
-		tooltip = null;
 		if (displayValue.length() > 0) tooltip = displayValue;
+		else tooltip = null;
 	}
 
 	public String getDisplayValue() { return displayValue; }

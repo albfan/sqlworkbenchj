@@ -188,7 +188,7 @@ public class TableListPanel
 	// e.g. the table search panel
 	private List tableListClients;
 
-	private JDialog cancelInfoWindow;
+	private JDialog infoWindow;
 	private JLabel infoLabel;
 	private JLabel tableInfoLabel;
 
@@ -582,17 +582,18 @@ public class TableListPanel
 
 	public void reset()
 	{
-		if (this.isBusy()) return;
-		this.tableList.reset();
+		if (this.isBusy()) 
+		{
+			this.invalidateData();
+			return;
+		}
+		this.clearTableData();
 		this.resetDetails();
 	}
 
 	public void clearTableData()
 	{
-		if (!this.tableData.isRetrieving())
-		{
-			this.tableData.reset();
-		}
+		this.tableData.reset();
 		this.shouldRetrieveTableDataCount = true;
 	}
 
@@ -872,6 +873,11 @@ public class TableListPanel
 			this.updateDisplay();
 		}
 	}
+	
+	/**
+	 * Invoked when the selection in the table list 
+	 * has changed
+	 */
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
@@ -1097,12 +1103,22 @@ public class TableListPanel
 		this.showPopupMessagePanel(ResourceMgr.getString("MsgTryCancelling"));
 	}
 
+	private void showWaitMessage()
+	{
+		this.showPopupMessagePanel(ResourceMgr.getString("MsgWaitRetrieveEnded"));
+	}
+	
+	private void showRetrieveMessage()
+	{
+		this.showPopupMessagePanel(ResourceMgr.getString("MsgRetrieving"));
+	}
+	
 	private void showPopupMessagePanel(String aMsg)
 	{
-		if (this.cancelInfoWindow != null)
+		if (this.infoWindow != null)
 		{
 			this.infoLabel.setText(aMsg);
-			this.cancelInfoWindow.repaint();
+			this.infoWindow.invalidate();
 			Thread.yield();
 			return;
 		}
@@ -1113,37 +1129,42 @@ public class TableListPanel
 		this.infoLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		p.add(this.infoLabel, BorderLayout.CENTER);
 		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
-		this.cancelInfoWindow = new JDialog(f, false);
-		this.cancelInfoWindow.getContentPane().setLayout(new BorderLayout());
-		this.cancelInfoWindow.getContentPane().add(p, BorderLayout.CENTER);
-		this.cancelInfoWindow.setUndecorated(true);
-		this.cancelInfoWindow.setSize(250,50);
-		WbSwingUtilities.center(this.cancelInfoWindow, f);
-		this.cancelInfoWindow.show();
-		WbSwingUtilities.showWaitCursor(this);
-		WbSwingUtilities.showWaitCursor(this.cancelInfoWindow);
-		//f.setEnabled(false);
+		this.infoWindow = new JDialog(f, true);
+		this.infoWindow.getContentPane().setLayout(new BorderLayout());
+		this.infoWindow.getContentPane().add(p, BorderLayout.CENTER);
+		this.infoWindow.setUndecorated(true);
+		this.infoWindow.setSize(260,50);
+		WbSwingUtilities.center(this.infoWindow, f);
+		//WbSwingUtilities.showWaitCursor(this);
+		//WbSwingUtilities.showWaitCursor(this.infoWindow);
+		WbThread t = new WbThread("Info display")
+		{
+			public void run()
+			{
+				infoWindow.show();
+			}
+		};
+		t.start();
+		//this.infoWindow.show();
 		Thread.yield();
 	}
 
-	private void closeCancelInfo()
+	private void closeInfoWindow()
 	{
-		if (this.cancelInfoWindow != null)
+		if (this.infoWindow != null)
 		{
 			this.infoLabel = null;
-			this.cancelInfoWindow.getOwner().setEnabled(true);
-			this.cancelInfoWindow.setVisible(false);
-			this.cancelInfoWindow.dispose();
-			this.cancelInfoWindow = null;
+			this.infoWindow.getOwner().setEnabled(true);
+			this.infoWindow.setVisible(false);
+			this.infoWindow.dispose();
+			this.infoWindow = null;
 		}
 	}
 
 	private Thread panelRetrieveThread;
-	//private Object syncLock = new Object();
 
 	private void startCancelThread()
 	{
-		showCancelMessage();
 		Thread t = new WbThread("TableListPanel Cancel")
 		{
 			public void run()
@@ -1152,25 +1173,26 @@ public class TableListPanel
 				{
 					if (tableData.isRetrieving())
 					{
+						showCancelMessage();
 						tableData.cancelRetrieve();
 					}
+					else
+					{
+						showWaitMessage();
+					}
+					
 					if (panelRetrieveThread != null)
 					{
-						panelRetrieveThread.interrupt();
-						panelRetrieveThread.join(60000);
+						panelRetrieveThread.join();
 						panelRetrieveThread = null;
 					}
 				}
 				catch (InterruptedException e)
 				{
 				}
-				finally
-				{
-					closeCancelInfo();
-				}
 				setBusy(false);
 				invalidateData();
-				startRetrieveThread();
+				startRetrieveThread(true);
 			}
 		};
 		t.start();
@@ -1178,14 +1200,17 @@ public class TableListPanel
 
 	private void startRetrieveCurrentPanel()
 	{
-		if (panelRetrieveThread != null && panelRetrieveThread.isAlive())
+		if (isBusy()) 
 		{
 			startCancelThread();
 		}
-		startRetrieveThread();
+		else
+		{
+			startRetrieveThread(false);
+		}
 	}
-
-	private void startRetrieveThread()
+	
+	private void startRetrieveThread(final boolean withMessage)
 	{
 		panelRetrieveThread = new WbThread("TableListPanel RetrievePanel")
 		{
@@ -1193,7 +1218,7 @@ public class TableListPanel
 			{
 				try
 				{
-					retrieveCurrentPanel();
+					retrieveCurrentPanel(withMessage);
 				}
 				finally
 				{
@@ -1204,7 +1229,7 @@ public class TableListPanel
 		panelRetrieveThread.start();
 	}
 
-	private void retrieveCurrentPanel()
+	private void retrieveCurrentPanel(final boolean withMessage)
 	{
 		if (this.isBusy())
 		{
@@ -1215,6 +1240,8 @@ public class TableListPanel
 		if (this.tableList.getSelectedRowCount() <= 0) return;
 		int index = this.displayTab.getSelectedIndex();
 
+		if (withMessage) showRetrieveMessage();
+		
 		this.setBusy(true);
 
 		try
@@ -1255,19 +1282,29 @@ public class TableListPanel
 		}
 		finally
 		{
-			this.setBusy(false);
+			this.repaint();
+			closeInfoWindow();
 			WbSwingUtilities.showDefaultCursor(this);
+			this.setBusy(false);
 		}
 	}
 
-	private synchronized boolean isBusy()
+	private Object busyLock = new Object();
+	
+	private boolean isBusy()
 	{
-		return this.busy;
+		synchronized (busyLock)
+		{
+			return this.busy;
+		}
 	}
 
 	private synchronized void setBusy(boolean aFlag)
 	{
-		this.busy = aFlag;
+		synchronized (busyLock)
+		{
+			this.busy = aFlag;
+		}
 	}
 
 	private void retrieveTriggers()
@@ -1580,32 +1617,6 @@ public class TableListPanel
 		}
 	}
 
-	private void createScript()
-	{
-		int[] rows = this.tableList.getSelectedRows();
-		int count = rows.length;
-		HashMap tables = new HashMap(count);
-		for (int i=0; i < count; i++)
-		{
-			int row = rows[i];
-			String owner = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-			String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-			String type = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-
-			if (owner != null)
-			{
-				tables.put(owner + "." + table, type);
-			}
-			else
-			{
-				tables.put(table, type);
-			}
-		}
-		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
-		ObjectScripterUI ui = new ObjectScripterUI(s);
-		ui.show(SwingUtilities.getWindowAncestor(this));
-	}
-
 	private boolean isClientVisible()
 	{
 		if (this.tableListClients == null) return false;
@@ -1675,6 +1686,32 @@ public class TableListPanel
 		deleter.showDialog(f);
 	}
 
+	private void createScript()
+	{
+		int[] rows = this.tableList.getSelectedRows();
+		int count = rows.length;
+		HashMap tables = new HashMap(count);
+		for (int i=0; i < count; i++)
+		{
+			int row = rows[i];
+			String owner = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+			String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+			String type = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+
+			if (owner != null)
+			{
+				tables.put(owner + "." + table, type.toUpperCase());
+			}
+			else
+			{
+				tables.put(table, type.toUpperCase());
+			}
+		}
+		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
+		ObjectScripterUI ui = new ObjectScripterUI(s);
+		ui.show(SwingUtilities.getWindowAncestor(this));
+	}
+
 	private void createDummyInserts()
 	{
 		int[] rows = this.tableList.getSelectedRows();
@@ -1684,7 +1721,15 @@ public class TableListPanel
 		{
 			int row = rows[i];
 			String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-			tables.put(table, "INSERT");
+			String schema = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+			if (schema != null)
+			{
+				tables.put(schema + "." + table, ObjectScripter.TYPE_INSERT);
+			}
+			else
+			{
+				tables.put(table, ObjectScripter.TYPE_INSERT);
+			}
 		}
 		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
 		ObjectScripterUI ui = new ObjectScripterUI(s);
@@ -1700,7 +1745,15 @@ public class TableListPanel
 		{
 			int row = rows[i];
 			String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-			tables.put(table, "SELECT");
+			String schema = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+			if (schema != null)
+			{
+				tables.put(schema + "." + table, ObjectScripter.TYPE_SELECT);
+			}
+			else
+			{
+				tables.put(table, ObjectScripter.TYPE_SELECT);
+			}
 		}
 		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
 		ObjectScripterUI ui = new ObjectScripterUI(s);

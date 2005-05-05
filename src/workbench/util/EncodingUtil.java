@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.Map;
+import workbench.resource.Settings;
 
 /**
  * Utility class to handle encoding related stuff
@@ -37,22 +38,31 @@ public class EncodingUtil
 	 *	Create a BufferedReader for the given file and encoding
 	 */
 	public static BufferedReader createReader(File f, String encoding)
-		throws IOException, UnsupportedEncodingException
+		throws IOException, Exception
 	{
 		return createReader(f, encoding, 512*1024);
 	}
 	
 	/**
-	 *	Create a BufferedReader for the given file and encoding
+	 * Create a BufferedReader for the given file and encoding.
+	 * If no encoding is given, then a regular FileReader without 
+	 * a specific encoding is used.
 	 */
 	public static BufferedReader createReader(File f, String encoding, int buffSize)
-		throws IOException, UnsupportedEncodingException
+		throws IOException, Exception
 	{
 		BufferedReader in = null;
 		if (encoding != null)
 		{
-			InputStream inStream = new FileInputStream(f);
-			in = new BufferedReader(new InputStreamReader(inStream, cleanupEncoding(encoding)),buffSize);
+			try
+			{
+				InputStream inStream = new FileInputStream(f);
+				in = new BufferedReader(new InputStreamReader(inStream, cleanupEncoding(encoding)),buffSize);
+			}
+			catch (UnsupportedEncodingException e)
+			{
+				throw new Exception("Encoding " + encoding + " not supported");
+			}
 		}
 		else
 		{
@@ -69,14 +79,15 @@ public class EncodingUtil
 		if (input == null) return null;
 		if ("utf".equalsIgnoreCase(input)) return "UTF-8";
 		if ("utf8".equalsIgnoreCase(input)) return "UTF-8";
-		if (input.startsWith("8859")) return "ISO-" + input;
 		return input;
 	}
 
-	public String getDefaultEncoding()
+	/**
+	 * Returns the system's default encoding. 
+	 */
+	public static String getDefaultEncoding()
 	{
-		String enc = System.getProperty("file.encoding");
-		if ("Cp1252".equalsIgnoreCase(enc)) return "ISO-8859-1";
+		String enc = Settings.getInstance().getDefaultFileEncoding();
 		return enc;
 	}
 	/**

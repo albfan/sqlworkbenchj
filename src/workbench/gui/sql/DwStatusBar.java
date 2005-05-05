@@ -43,7 +43,6 @@ public class DwStatusBar extends JPanel
 {
 	private JTextField tfRowCount;
 
-	//private JLabel tfStatus;
 	private WbTextLabel tfStatus;
 	
 	JTextField tfMaxRows;
@@ -163,12 +162,15 @@ public class DwStatusBar extends JPanel
 			s.append(count);
 		}
 		this.tfRowCount.setText(s.toString());
+		this.doLayout();
+		this.repaint();
 	}
 	
 	public void clearRowcount()
 	{
 		this.tfRowCount.setText("");
-		this.doRepaint();
+		this.doLayout();
+		this.repaint();
 	}
 
 	public void setStatusMessage(String aMsg)
@@ -179,7 +181,6 @@ public class DwStatusBar extends JPanel
 	public void clearStatusMessage()
 	{
 		this.tfStatus.setText(this.readyMsg);
-		this.doRepaint();
 	}
 
 	public void setQueryTimeout(int timeout)
@@ -199,7 +200,6 @@ public class DwStatusBar extends JPanel
 	public void setMaxRows(int max)
 	{
 		this.tfMaxRows.setText(Integer.toString(max));
-		this.doRepaint();
 	}
 
 	public int getMaxRows()
@@ -213,10 +213,5 @@ public class DwStatusBar extends JPanel
 		this.tfMaxRows.selectAll();
     this.tfMaxRows.requestFocusInWindow();
   }
-
-	private void doRepaint()
-	{
-		this.repaint();
-	}
 
 }

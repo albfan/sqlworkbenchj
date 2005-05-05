@@ -442,8 +442,14 @@ public class WbExport
 					return;
 				}
 				this.tablesToExport.clear();
-				int c = l.size();
-				for (int i=0; i < c; i++)
+				if (l.size() == 0)
+				{
+					result.addMessage(ResourceMgr.getString("ErrorExportNoTablesFound") + " " + t);
+					result.setFailure();
+					directExport = false;
+					return;
+				}
+				for (int i=0; i < l.size(); i++)
 				{
 					TableIdentifier id = (TableIdentifier)l.get(i);
 					this.tablesToExport.add(id.getTableExpression(this.currentConnection));

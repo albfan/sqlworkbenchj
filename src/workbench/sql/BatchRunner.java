@@ -337,7 +337,9 @@ public class BatchRunner
 		Iterator itr = parser.getIterator();
 		while (itr.hasNext())
 		{
-			sql = itr.next().toString();
+			Object command = itr.next();
+			if (command == null) continue;
+			sql = command.toString();
 
 			try
 			{
@@ -409,12 +411,6 @@ public class BatchRunner
 		}
 
 		return error;
-	}
-
-	public void done()
-	{
-		ConnectionMgr mgr = ConnectionMgr.getInstance();
-		mgr.disconnectAll();
 	}
 
 	public void setEncoding(String enc)

@@ -25,6 +25,7 @@ public class CsvLineParser
 	private char delimiter;
 	private char quoteChar = 0;
 	private boolean returnEmptyStrings = false;
+	private boolean trimValues = false;
 	
 	public CsvLineParser(char delimit)
 	{
@@ -96,7 +97,18 @@ public class CsvLineParser
 		
 		this.current ++; // skip the delimiter
 		if (this.returnEmptyStrings && next == null) next = StringUtil.EMPTY_STRING;
-		return next;
+		if (trimValues) return next.trim();
+		else return next;
+	}
+
+	public boolean isTrimValues()
+	{
+		return trimValues;
+	}
+
+	public void setTrimValues(boolean trimValues)
+	{
+		this.trimValues = trimValues;
 	}
 
 }

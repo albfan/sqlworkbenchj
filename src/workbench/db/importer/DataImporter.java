@@ -642,8 +642,8 @@ public class DataImporter
 			{
 				this.insertStatement.setNull(i + 1, this.targetColumns[i].getDataType());
 			}
-			else if ("LONG".equals(this.targetColumns[i].getDbmsType()) ||
-				        this.targetColumns[i].getDataType() == java.sql.Types.LONGVARCHAR)
+			else if (this.targetColumns[i].getDataType() == java.sql.Types.LONGVARCHAR ||
+				       "LONG".equals(this.targetColumns[i].getDbmsType()))
 			{
 				String value = row[i].toString();
 				int size = value.length();
@@ -687,8 +687,6 @@ public class DataImporter
 	private int updateRow(Object[] row)
 		throws SQLException
 	{
-		//this.updateStatement.clearParameters();
-
 		int count = row.length;
 		for (int i=0; i < count; i++)
 		{
@@ -697,8 +695,8 @@ public class DataImporter
 			{
 				this.updateStatement.setNull(realIndex, this.targetColumns[i].getDataType());
 			}
-			else if ("LONG".equals(this.targetColumns[i].getDbmsType()) ||
-				      this.targetColumns[i].getDataType() == java.sql.Types.LONGVARCHAR)
+			else if (this.targetColumns[i].getDataType() == java.sql.Types.LONGVARCHAR ||
+						   "LONG".equals(this.targetColumns[i].getDbmsType()))
 			{
 				String value = row[i].toString();
 				Reader in = new StringReader(value);
@@ -1167,5 +1165,6 @@ public class DataImporter
 	{
 		this.targetSchema = targetSchema;
 	}
+
 
 }

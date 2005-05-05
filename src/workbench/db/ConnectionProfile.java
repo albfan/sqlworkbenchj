@@ -39,22 +39,26 @@ public class ConnectionProfile
 	private boolean autocommit;
 	private boolean disableUpdateTableCheck;
 	private boolean rollbackBeforeDisconnect;
-	private String description;
 	private int id;
 	private static int nextId = 1;
 	private boolean changed;
 	private boolean isNew;
 	private boolean storePassword = true;
-	private boolean seperateConnection;
+	private boolean separateConnection;
 	private Properties connectionProperties;
 	private String workspaceFile;
 	private boolean ignoreDropErrors;
 	private boolean confirmUpdates;
 	private Integer defaultFetchSize;
+	private boolean globalProfile = false;
 	
 	static
 	{
 		WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
+		WbPersistence.makeTransient(ConnectionProfile.class, "globalProfile");
+		
+		// trying to correct the misspelled seperate...
+		WbPersistence.makeTransient(ConnectionProfile.class, "useSeperateConnectionPerTab");
 	}
 
 	public ConnectionProfile()
@@ -101,16 +105,23 @@ public class ConnectionProfile
 	 * Return true if the application should use a separate connection
 	 * per tab or if all SQL tabs should share the same connection
 	 */
-	public boolean getUseSeperateConnectionPerTab()
+	public boolean getUseSeparateConnectionPerTab()
 	{
-		return this.seperateConnection;
+		return this.separateConnection;
 	}
-
-	public void setUseSeperateConnectionPerTab(boolean aFlag)
+	
+	public void setUseSeparateConnectionPerTab(boolean aFlag)
 	{
-		if (this.seperateConnection != aFlag) this.changed = true;
-		this.seperateConnection = aFlag;
+		if (this.separateConnection != aFlag) this.changed = true;
+		this.separateConnection = aFlag;
 	}
+	
+	public void setGlobalProfile(boolean flag) {this.globalProfile = flag; }
+	public boolean isGlobalProfile() { return this.globalProfile; }
+	
+	// Old, incorrectly spelled separate connections flag...
+	public void setUseSeperateConnectionPerTab(boolean aFlag) { this.setUseSeparateConnectionPerTab(aFlag); }
+	public boolean getUseSeperateConnectionPerTab() { return this.getUseSeparateConnectionPerTab(); 	}
 
 	public boolean getRollbackBeforeDisconnect()
 	{
@@ -339,14 +350,6 @@ public class ConnectionProfile
 		this.changed = true;
 	}
 
-	public String getDescription() { return this.description; }
-
-	public void setDescription(String description)
-	{
-		this.changed = true;
-		this.description = description;
-	}
-
 	public boolean getStorePassword() { return this.storePassword; }
 	public void setStorePassword(boolean aFlag) { this.storePassword = aFlag; }
 
@@ -354,7 +357,6 @@ public class ConnectionProfile
 	{
 		ConnectionProfile result = new ConnectionProfile();
 		result.setAutocommit(this.autocommit);
-		result.setDescription(this.description);
 		result.setDriverclass(this.driverclass);
 		result.setDriverName(this.driverName);
 		result.setName(this.name);
@@ -363,7 +365,7 @@ public class ConnectionProfile
 		result.setUsername(this.username);
 		result.setWorkspaceFile(this.workspaceFile);
 		result.setIgnoreDropErrors(this.ignoreDropErrors);
-		result.setUseSeperateConnectionPerTab(this.seperateConnection);
+		result.setUseSeperateConnectionPerTab(this.separateConnection);
 		result.setRollbackBeforeDisconnect(this.rollbackBeforeDisconnect);
 		result.setConfirmUpdates(this.confirmUpdates);
 		if (this.connectionProperties != null)
@@ -529,20 +531,34 @@ public class ConnectionProfile
 	{
 		if (fetchSize != null && this.defaultFetchSize == null)
 		{
-			this.defaultFetchSize = fetchSize;
+			if (fetchSize.intValue() < 0)
+			{
+				this.defaultFetchSize = null;
+			}
+			else
+			{
+				this.defaultFetchSize = fetchSize;
+			}
 			this.changed = true;
 			return;
 		}
 		if (fetchSize == null && this.defaultFetchSize != null)
 		{
-			this.defaultFetchSize = fetchSize;
+			this.defaultFetchSize = null;
 			this.changed = true;
 			return;
 		}
 		
 		if (fetchSize.intValue() != this.defaultFetchSize.intValue())
 		{
-			this.defaultFetchSize = fetchSize;
+			if (fetchSize.intValue() < 0)
+			{
+				this.defaultFetchSize = null;
+			}
+			else
+			{
+				this.defaultFetchSize = fetchSize;
+			}
 			this.changed = true;
 		}
 	}

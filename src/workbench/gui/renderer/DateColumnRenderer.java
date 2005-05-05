@@ -14,6 +14,7 @@ package workbench.gui.renderer;
 import java.text.SimpleDateFormat;
 
 import javax.swing.SwingConstants;
+import workbench.log.LogMgr;
 
 import workbench.util.StringUtil;
 
@@ -26,27 +27,30 @@ public class DateColumnRenderer
 {
 	private SimpleDateFormat dateFormatter;
 
-	public static final String DEFAULT_FORMAT = "yyyy-MM-dd";
+	public static final String DEFAULT_FORMAT = "yyyy-MM-dd mm:HH:ss";
 	
-	public DateColumnRenderer()
-	{
-		this(DEFAULT_FORMAT);
-	}
-
 	public DateColumnRenderer(String aDateFormat)
 	{
-		if (aDateFormat == null)
-		{
-			aDateFormat = DEFAULT_FORMAT;
-		}
-		this.dateFormatter = new SimpleDateFormat(aDateFormat);
+		this.dateFormatter = new SimpleDateFormat(DEFAULT_FORMAT);
+		this.setFormat(aDateFormat);
     this.setHorizontalAlignment(SwingConstants.RIGHT);
+	}
+	
+	public void setFormat(String aDateFormat)
+	{
+		try
+		{
+			this.dateFormatter.applyPattern(aDateFormat);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("DateColumnRenderer.setFormat()", "Error when setting date format [" + aDateFormat + "] default format [" + DEFAULT_FORMAT + "] will be used instead", e);
+			this.dateFormatter.applyPattern(DEFAULT_FORMAT);
+		}
 	}
 
 	public void prepareDisplay(Object value)
 	{
-		// this method will not be called with a null value, so we do not need
-		// to check it here!
 		try
 		{
 			java.util.Date d = (java.util.Date)value;
@@ -55,7 +59,6 @@ public class DateColumnRenderer
 		}
 		catch (Throwable cc)
 		{
-			//this.displayValue = StringUtil.EMPTY_STRING;
 			this.displayValue = value.toString();
 			this.tooltip = null;
 		}

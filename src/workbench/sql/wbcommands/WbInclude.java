@@ -126,8 +126,7 @@ public class WbInclude
 
 	public void done()
 	{
-		// do not call batchRunner.done();
-		// because that will disconnect the connection!
+		// nothing to do
 	}
 
 	public void cancel()

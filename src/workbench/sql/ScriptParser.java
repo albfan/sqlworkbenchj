@@ -72,6 +72,7 @@ public class ScriptParser
 	{
 		if (!f.exists()) throw new FileNotFoundException(f.getName() + " not found");
 
+		
 		if (f.length() < Settings.getInstance().getInMemoryScriptSizeThreshold())
 		{
 			this.readScriptFromFile(f, encoding);
@@ -130,7 +131,7 @@ public class ScriptParser
 
 	/**
 	 *	Define the script to be parsed.
-	 *	If delim == null, it will be evaluated dynamically.
+	 *	The delimiter to be used will be checked automatically
 	 *	First the it will check if the script ends with the alternate delimiter
 	 *	if this is not the case, the script will be checked if it ends with GO
 	 *	If so, GO will be used (MS SQL Server script style)
@@ -152,6 +153,7 @@ public class ScriptParser
 	public void setDelimiter(String delim)
 	{
 		this.delimiter = delim;
+		if (this.iteratingParser != null) this.iteratingParser.setDelimiter(delim);
 	}
 
 	/**

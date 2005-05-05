@@ -53,6 +53,7 @@ and   t.schemaid = s.schemaid
     </void>
    </object>
   </void>
+  
   <void method="put"> 
    <string>Adaptive Server Anywhere</string> 
    <object class="workbench.db.GetMetaDataSql"> 
@@ -67,6 +68,28 @@ and   t.schemaid = s.schemaid
     </void> 
    </object> 
   </void> 
+  
+  <void method="put"> 
+   <string>FirstSQL/J</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>select class_name||'.'||class_method as trigger_name, 
+             mode as trigger_type, 
+             command as event 
+    from definition_schema.systriggers</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>table_name</string> 
+    </void> 
+    <void property="schemaField">
+     <string>table_schema</string>
+    </void>
+    <void property="orderBy"> 
+     <string>ORDER BY 1</string> 
+    </void> 
+   </object> 
+  </void> 
+
   <void method="put">
    <string>Oracle8</string>
    <object class="workbench.db.GetMetaDataSql">

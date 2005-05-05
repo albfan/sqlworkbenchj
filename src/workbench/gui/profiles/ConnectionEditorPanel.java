@@ -73,7 +73,7 @@ public class ConnectionEditorPanel
 		policy.addComponent(tfFetchSize);
 		policy.addComponent(cbAutocommit);
 		policy.addComponent(cbStorePassword);
-		policy.addComponent(cbSeperateConnections);
+		policy.addComponent(cbSeparateConnections);
 		policy.addComponent(cbIgnoreDropErrors);
 		policy.addComponent(disableTableCheck);
 		policy.addComponent(rollbackBeforeDisconnect);
@@ -125,7 +125,7 @@ public class ConnectionEditorPanel
     lblUrl = new javax.swing.JLabel();
     jSeparator2 = new javax.swing.JSeparator();
     cbStorePassword = new BooleanPropertyEditor();
-    cbSeperateConnections = new BooleanPropertyEditor();
+    cbSeparateConnections = new BooleanPropertyEditor();
     cbIgnoreDropErrors = new BooleanPropertyEditor();
     jSeparator1 = new javax.swing.JSeparator();
     workspaceFileLabel = new javax.swing.JLabel();
@@ -287,15 +287,15 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 2, 0, 0);
     add(cbStorePassword, gridBagConstraints);
 
-    cbSeperateConnections.setText(ResourceMgr.getString("LabelSeperateConnections"));
-    cbSeperateConnections.setToolTipText(ResourceMgr.getDescription("LabelSeperateConnections"));
-    cbSeperateConnections.setName("useSeperateConnectionPerTab");
+    cbSeparateConnections.setText(ResourceMgr.getString("LabelSeperateConnections"));
+    cbSeparateConnections.setToolTipText(ResourceMgr.getDescription("LabelSeperateConnections"));
+    cbSeparateConnections.setName("useSeparateConnectionPerTab");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 10;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
-    add(cbSeperateConnections, gridBagConstraints);
+    add(cbSeparateConnections, gridBagConstraints);
 
     cbIgnoreDropErrors.setSelected(true);
     cbIgnoreDropErrors.setText(ResourceMgr.getString("LabelIgnoreDropErrors"));
@@ -542,7 +542,7 @@ public class ConnectionEditorPanel
   private javax.swing.JCheckBox cbAutocommit;
   private javax.swing.JComboBox cbDrivers;
   private javax.swing.JCheckBox cbIgnoreDropErrors;
-  private javax.swing.JCheckBox cbSeperateConnections;
+  private javax.swing.JCheckBox cbSeparateConnections;
   private javax.swing.JCheckBox cbStorePassword;
   private javax.swing.JCheckBox confirmUpdates;
   private javax.swing.JCheckBox disableTableCheck;

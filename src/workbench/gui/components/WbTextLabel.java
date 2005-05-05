@@ -10,14 +10,13 @@
  *
  */
 package workbench.gui.components;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import javax.swing.JComponent;
 import javax.swing.UIManager;
-
-
 
 /**
  *  Displays a Label left aligned with no further overhead in painting

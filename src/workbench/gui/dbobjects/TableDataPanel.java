@@ -86,7 +86,7 @@ public class TableDataPanel
 	private TableIdentifier table;
 	private ImageIcon loadingIcon;
 	private Image loadingImage;
-
+	private Object retrieveLock = new Object();
 	private StopAction cancelRetrieve;
 
 	public TableDataPanel() throws Exception
@@ -123,7 +123,6 @@ public class TableDataPanel
 
     JPanel topPanel = new JPanel();
 		topPanel.setMaximumSize(new Dimension(32768, 32768));
-		//topPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
 		BoxLayout box = new BoxLayout(topPanel, BoxLayout.X_AXIS);
 		topPanel.setLayout(box);
 
@@ -141,10 +140,6 @@ public class TableDataPanel
 		toolbar.add(this.cancelRetrieve);
 		toolbar.addSeparator();
 
-		//JButton b = a.getToolbarButton();
-		//b.setBorder(new EtchedBorder());
-		//b.setToolTipText(ResourceMgr.getDescription("TxtLoadTableData"));
-		//topPanel.add(b);
 
 		topPanel.add(Box.createHorizontalStrut(15));
 
@@ -172,12 +167,6 @@ public class TableDataPanel
 		this.config.setBorder(border);
 		topPanel.add(this.config);
 
-		//maxRowsLabel = new JLabel(ResourceMgr.getString("LabelTableDataMaxRows"));
-		//topPanel.add(maxRowsLabel);
-
-		//this.maxRowField = new JTextField(4);
-		//topPanel.add(this.maxRowField);
-
 		this.add(topPanel, BorderLayout.NORTH);
 
 		toolbar.add(this.dataDisplay.getUpdateDatabaseAction());
@@ -186,8 +175,6 @@ public class TableDataPanel
 		toolbar.add(this.dataDisplay.getCopyRowAction());
 		toolbar.add(this.dataDisplay.getDeleteRowAction());
 
-		//this.dataTable = this.dataDisplay.getTable();
-		//JScrollPane scroll = new JScrollPane(this.dataTable);
 		this.add(dataDisplay, BorderLayout.CENTER);
 	}
 
@@ -292,8 +279,6 @@ public class TableDataPanel
 
 	private String buildSqlForTable(boolean forRowCount)
 	{
-		//if (this.currentTable == null) return null;
-
 		if (this.table == null) return null;
 
 		StringBuffer sql = new StringBuffer(100);
@@ -349,17 +334,50 @@ public class TableDataPanel
 
 	private synchronized void retrieveStart()
 	{
-		this.retrieveRunning = true;
+		synchronized (this.retrieveLock)
+		{
+			this.retrieveRunning = true;
+		}
 	}
 
-	private synchronized void retrieveEnd()
+	private void retrieveEnd()
 	{
-		this.retrieveRunning = false;
+		synchronized (this.retrieveLock)
+		{
+			this.retrieveRunning = false;
+		}
+	}
+
+	private void dbUpdateStart()
+	{
+		this.reloadAction.setEnabled(false);
+		synchronized (this.retrieveLock)
+		{
+			this.updateRunning = true;
+		}
+	}
+
+	private void dbUpdateEnd()
+	{
+		try
+		{
+			this.reloadAction.setEnabled(true);
+		}
+		finally
+		{
+			synchronized (this.retrieveLock)
+			{
+				this.updateRunning = false;
+			}
+		}
 	}
 
 	public boolean isRetrieving()
 	{
-		return this.retrieveRunning || this.updateRunning;
+		synchronized (this.retrieveLock)
+		{
+			return this.retrieveRunning || this.updateRunning;
+		}
 	}
 
 	private void doRetrieve()
@@ -379,7 +397,6 @@ public class TableDataPanel
 			dataDisplay.setAutomaticUpdateTableCheck(false);
 			dataDisplay.scriptStarting();
 			dataDisplay.setMaxRows(this.getMaxRows());
-			WbSwingUtilities.showWaitCursor(this);
 			dataDisplay.runStatement(sql);
 			dataDisplay.setUpdateTable(this.table.getTableExpression(this.dbConnection));
 			String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
@@ -402,19 +419,11 @@ public class TableDataPanel
 		}
 		finally
 		{
-			WbSwingUtilities.showDefaultCursor(this);
 			dataDisplay.scriptFinished();
 			cancelRetrieve.setEnabled(false);
 			reloadAction.setEnabled(true);
 			this.retrieveEnd();
-			final JComponent th = this;
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					WbSwingUtilities.showDefaultCursor(th);
-				}
-			});
+			WbSwingUtilities.showDefaultCursor(this);
 		}
 	}
 
@@ -539,29 +548,6 @@ public class TableDataPanel
 		}
 	}
 
-	private void dbUpdateStart()
-	{
-		this.reloadAction.setEnabled(false);
-		synchronized (this)
-		{
-			this.updateRunning = true;
-		}
-	}
-
-	private void dbUpdateEnd()
-	{
-		try
-		{
-			this.reloadAction.setEnabled(true);
-		}
-		finally
-		{
-			synchronized (this)
-			{
-				this.updateRunning = false;
-			}
-		}
-	}
 
 
 }

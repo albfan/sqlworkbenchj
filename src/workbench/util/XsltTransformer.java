@@ -56,6 +56,8 @@ public class XsltTransformer
 		Source xmlSource = new StreamSource(inXml);
 		StreamResult res = new StreamResult(out);
 		transformer.transform(xmlSource, res);
+		try { inXml.close(); } catch (Throwable ignore) {} 
+		try { out.close(); } catch (Throwable ignore) {} 
 	}
 
 	public static void transformFile(String inputFileName, String outputFilename, String xsltFile)
@@ -63,9 +65,11 @@ public class XsltTransformer
 	{
 		File f = new File(xsltFile);
 		XsltTransformer trans = new XsltTransformer(f);
-		InputStream in = new BufferedInputStream(new FileInputStream(inputFileName));
-		OutputStream out = new BufferedOutputStream(new FileOutputStream(outputFilename));
+		InputStream in = new BufferedInputStream(new FileInputStream(inputFileName),32*1024);
+		OutputStream out = new BufferedOutputStream(new FileOutputStream(outputFilename), 32*1024);
 		trans.transform(in, out);
+		try { in.close(); } catch (Throwable ignore) {} 
+		try { out.close(); } catch (Throwable ignore) {} 
 	}
 
 	public static void main(String args[])

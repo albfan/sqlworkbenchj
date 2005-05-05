@@ -29,7 +29,7 @@ public class TabbedPaneUIFactory
 	private static Insets leftInsets = new Insets(1,3,1,1);
 	private static Insets rightInsets = new Insets(1,1,1,3);
 	private static Insets defaultInsets = new Insets(1,1,1,1);
-	
+
 	static Insets getBorderLessInsets(int tabPlacement)
 	{
 		switch (tabPlacement)
@@ -46,7 +46,7 @@ public class TabbedPaneUIFactory
 				return defaultInsets;
 		}
 	}
-	
+
 	public static TabbedPaneUI getBorderLessUI()
 	{
 		LookAndFeel lnf = UIManager.getLookAndFeel();
@@ -55,7 +55,8 @@ public class TabbedPaneUIFactory
 		{
 			return getClassInstance("workbench.gui.components.BorderLessMetalTabbedPaneUI");
 		}
-		else if (lnfClass.equals("com.sun.java.swing.plaf.windows.WindowsLookAndFeel"))
+		else if (lnfClass.equals("com.sun.java.swing.plaf.windows.WindowsLookAndFeel") ||
+		         lnfClass.equals("com.sun.java.swing.plaf.windows.WindowsClassicLookAndFeel"))
 		{
 			return getClassInstance("workbench.gui.components.BorderLessWindowsTabbedPaneUI");
 		}
@@ -80,7 +81,7 @@ public class TabbedPaneUIFactory
 			return uiInstance;
 		}
 	}
-	
+
 	private static TabbedPaneUI getClassInstance(String className)
 	{
 		TabbedPaneUI ui = null;

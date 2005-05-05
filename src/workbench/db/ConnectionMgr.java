@@ -586,14 +586,16 @@ public class ConnectionMgr
 
 	public void saveDrivers()
 	{
-		WbPersistence.writeObject(this.drivers, Settings.getInstance().getDriverConfigFileName());
+		WbPersistence writer = new WbPersistence(Settings.getInstance().getDriverConfigFilename());
+		writer.writeObject(this.drivers);
 	}
 
 	private void readDrivers()
 	{
 		try
 		{
-			Object result = WbPersistence.readObject(Settings.getInstance().getDriverConfigFileName());
+			WbPersistence reader = new WbPersistence(Settings.getInstance().getDriverConfigFilename());
+			Object result = reader.readObject();
 			if (result == null)
 			{
 				this.drivers = new ArrayList();
@@ -632,8 +634,10 @@ public class ConnectionMgr
 		try
 		{
 			in = this.getClass().getResourceAsStream("DriverTemplates.xml");
+			
 			// the additional filename is for logging purposes only
-			ArrayList templates = (ArrayList)WbPersistence.readObject(in, "DriverTemplates.xml");
+			WbPersistence reader = new WbPersistence("DriverTemplates.xml");
+			ArrayList templates = (ArrayList)reader.readObject(in);
 
 			for (int i=0; i < templates.size(); i++)
 			{
@@ -660,7 +664,8 @@ public class ConnectionMgr
 		Object result = null;
 		try
 		{
-			result = WbPersistence.readObject(Settings.getInstance().getProfileFileName());
+			WbPersistence reader = new WbPersistence(Settings.getInstance().getProfileFilename());
+			result = reader.readObject();
 		}
 		catch (FileNotFoundException fne)
 		{
@@ -722,7 +727,8 @@ public class ConnectionMgr
 	{
 		if (this.profiles != null)
 		{
-			WbPersistence.writeObject(new ArrayList(this.profiles.values()), Settings.getInstance().getProfileFileName());
+			WbPersistence writer = new WbPersistence(Settings.getInstance().getProfileFilename());
+			writer.writeObject(new ArrayList(this.profiles.values()));
 			this.resetProfiles();
 		}
 	}

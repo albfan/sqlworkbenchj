@@ -48,7 +48,7 @@ public class TextFileParser
 {
 	private String filename;
 	private String tableName;
-	private String encoding = "8859_1";
+	private String encoding = "ISO-8859-1";
 	private String delimiter = "\t";
 	private String quoteChar = null;
 	private boolean decodeUnicode = false;
@@ -62,7 +62,8 @@ public class TextFileParser
 	private boolean withHeader = true;
 	private boolean cancelImport = false;
 	private boolean emptyStringIsNull = false;
-
+	private boolean trimValues = false;
+	
 	private RowDataReceiver receiver;
 	private String dateFormat;
 	private String timestampFormat;
@@ -364,6 +365,7 @@ public class TextFileParser
 
 		CsvLineParser tok = new CsvLineParser(delimiter.charAt(0), (quoteChar == null ? 0 : quoteChar.charAt(0)));
 		tok.setReturnEmptyStrings(true);
+		tok.setTrimValues(this.trimValues);
 
 		try
 		{
@@ -373,7 +375,7 @@ public class TextFileParser
 
 			while (line != null)
 			{
-				if (this.doCancel()) break;
+				if (this.cancelImport) break;
 
 				// silently ignore empty lines...
 				if (line.trim().length() == 0)
@@ -468,7 +470,7 @@ public class TextFileParser
 					}
 				}
 
-				if (this.doCancel()) break;
+				if (this.cancelImport) break;
 
 				try
 				{
@@ -489,7 +491,7 @@ public class TextFileParser
 					line = null;
 				}
 
-				if (this.doCancel()) break;
+				if (this.cancelImport) break;
 			}
 
 			if (!this.cancelImport)
@@ -754,6 +756,16 @@ public class TextFileParser
 	public boolean getDecodeUnicode()
 	{
 		return this.decodeUnicode;
+	}
+
+	public boolean isTrimValues()
+	{
+		return trimValues;
+	}
+
+	public void setTrimValues(boolean trimValues)
+	{
+		this.trimValues = trimValues;
 	}
 
 }

@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import workbench.sql.wbcommands.CommandTester;
 import workbench.util.StringUtil;
 
 /**
@@ -473,6 +474,44 @@ public class SqlFormatter
 		return null;
 	}
 
+	private SQLToken processWbCommand(int indent)
+		throws Exception
+	{
+		StringBuffer b = new StringBuffer(indent);
+
+		for (int i=0; i < indent; i++) b.append(' ');
+
+		SQLToken t = (SQLToken)this.lexer.getNextToken(true,false);
+		boolean first = true;
+		boolean isParm = false;
+		while (t != null)
+		{
+			String text = t.getContents();
+			if (isParm) text = text.toLowerCase();
+			if (text.equals("-"))
+			{
+				if (!first) 
+				{
+					this.appendNewline();
+					this.indent(b);
+				}
+				else 
+				{
+					this.appendText(' ');
+				}
+				isParm = true;
+			}
+			else
+			{
+				isParm = false;
+			}
+			this.appendText(text);
+			t = (SQLToken)this.lexer.getNextToken(true,false);
+			first = false;
+		}
+		return null;
+	}
+	
 	private SQLToken processBracketList(int indentCount)
 		throws Exception
 	{
@@ -637,6 +676,7 @@ public class SqlFormatter
 	{
 		SQLToken t = (SQLToken)this.lexer.getNextToken(true, false);
 		SQLToken lastToken = t;
+		CommandTester wbTester = new CommandTester();
 		//if (this.indent != null) this.appendText(this.indent);
 		while (t != null)
 		{
@@ -732,6 +772,11 @@ public class SqlFormatter
 					}
 					if (t == null) return;
 					continue;
+				}
+				
+				if (wbTester.isWbCommand(word))
+				{
+					t = this.processWbCommand(word.length() + 1);
 				}
 			}
 			else
@@ -1408,7 +1453,7 @@ public class SqlFormatter
 //			sql = "select column1, column2, column3 from table1, table2, table3 where col1 = col2 and col3 = col4 and col5 = col6";
 //			sql = "select * from (SELECT x,y,z FROM tab1,tab2,tab3 minus SELECT x2 from tab2,tab2,tab4 WHERE x=1)";
 //			sql = "SELECT  x , y , z   FROM   tab1 , tab2 , tab3  MINUS   SELECT   x2   FROM   tab2 , tab2 , tab4   WHERE   x = 1";
-			sql = "UPDATE bla set column1='test',col2=NULL, col4=222 where xyz=42 AND ab in (SELECT x from t\nWHERE x = 6 and col3 = col5 and col6 = col7 and col8 = col9) OR y = 5;commit;";
+//			sql = "UPDATE bla set column1='test',col2=NULL, col4=222 where xyz=42 AND ab in (SELECT x from t\nWHERE x = 6 and col3 = col5 and col6 = col7 and col8 = col9) OR y = 5;commit;";
 //			sql="SELECT city.id, \n" +
 //           "       city.value, \n" +
 //           "       state.value \n" +
@@ -1432,6 +1477,7 @@ public class SqlFormatter
 //             " WHERE sel.meas_root_uuid = mtree.root_uuid ";
 //			sql =  "SELECT * from bla where x=1 and test.u= x.u and t.f = b.c and (a = 5 or b in (1,2,3)) and (c=5)";
 //			sql =  "SELECT * from bla where (x = 1 or y in (1,2,3)) and y=5";
+			sql = "wbexport -type=text -file=c:/temp/test.txt";
 			SqlFormatter f = new SqlFormatter(sql,40);
 			System.out.println(sql);
 			System.out.println("----------");

@@ -66,6 +66,8 @@ public class WbImport extends SqlCommand
 	public static final String ARG_DIRECTORY = "sourcedir";
 	public static final String ARG_TARGET_SCHEMA = "schema";
 	public static final String ARG_USE_TRUNCATE = "usetruncate";
+	public static final String ARG_TRIM_VALUES = "trimvalues";
+	
 	private ArgumentParser cmdLine;
 
 	public WbImport()
@@ -100,6 +102,7 @@ public class WbImport extends SqlCommand
 		cmdLine.addArgument(ARG_DIRECTORY);
 		cmdLine.addArgument(ARG_TARGET_SCHEMA);
 		cmdLine.addArgument(ARG_USE_TRUNCATE);
+		cmdLine.addArgument(ARG_TRIM_VALUES);
 
 		this.isUpdatingCommand = true;
 	}
@@ -215,7 +218,7 @@ public class WbImport extends SqlCommand
 
 			boolean header = cmdLine.getBoolean(ARG_CONTAINSHEADER);
 			textParser.setContainsHeader(header);
-
+			textParser.setTrimValues(cmdLine.getBoolean(ARG_TRIM_VALUES, false));
 			textParser.setDecodeUnicode(cmdLine.getBoolean(ARG_DECODE));
 
 			String encoding = cmdLine.getValue(ARG_ENCODING);
@@ -389,7 +392,6 @@ public class WbImport extends SqlCommand
 				result.addMessage(ResourceMgr.getString("ErrorImportInvalidBatchSize"));
 			}
 		}
-
 		try
 		{
 			imp.startImport();

@@ -199,7 +199,8 @@ public class MetaDataSqlManager
 		try
 		{
 			// filename is for logging purposes only
-			value = WbPersistence.readObject(in, aFilename);
+			WbPersistence reader = new WbPersistence(aFilename);
+			value = reader.readObject(in);
 		}
 		catch (Exception e)
 		{
@@ -225,7 +226,8 @@ public class MetaDataSqlManager
 			// try to read additional definitions from local file
 			try
 			{
-				value = WbPersistence.readObject(aFilename);
+				WbPersistence reader = new WbPersistence(aFilename);
+				value = reader.readObject();
 			}
 			catch (Exception e)
 			{

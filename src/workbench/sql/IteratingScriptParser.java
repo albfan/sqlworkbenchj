@@ -20,6 +20,7 @@ import java.io.Reader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.interfaces.CharacterSequence;
+import workbench.util.EncodingUtil;
 import workbench.util.FileMappedSequence;
 import workbench.util.SqlUtil;
 import workbench.util.StringSequence;
@@ -28,8 +29,15 @@ import workbench.util.StringUtil;
 
 /**
  * A class to parse a script with SQL commands. Access to the commands
- * is given through an Iterator. The parser will not read the script into
- * memory if a certain file size is exceeded.
+ * is given through an Iterator. If a file is set as the source for
+ * this parser, then the file will not be read into memory. A 
+ * {@link workbench.util.FileMappedSequence} will be used to process
+ * the file. If the script is defined through a String, then 
+ * a {@link workbench.util.StringSequence} is used to process the Script
+ *
+ * @see workbench.interfaces.CharacterSequence
+ * @see workbench.util.FileMappedSequence
+ * @see workbench.util.StringSequences
  *
  * @author  info@sql-workbench.net
  */
@@ -57,21 +65,7 @@ public class IteratingScriptParser
 	}
 
 	/**
-	 * Initialize a ScriptParser from a file. The default 
-	 * encoding {@link workbench.util.EncodingUtil#getDefaultEncoding()} 
-	 * will be used. 
-	 * The delimiter will be evaluated dynamically
-	 * @see #setFile(File)
-	 */
-	public IteratingScriptParser(File f)
-		throws IOException
-	{
-		this.setFile(f, null);
-	}
-	
-	/**
 	 * Initialize a ScriptParser from a file with a given encoding.
-	 * The delimiter will be evaluated dynamically
 	 * @see #setFile(File, String)
 	 */
 	public IteratingScriptParser(File f, String encoding)
@@ -80,9 +74,8 @@ public class IteratingScriptParser
 		this.setFile(f, encoding);
 	}
 	
-
 	/**
-	 *	Create a ScriptParser for the given Script.
+	 *	Create a ScriptParser for the given String.
 	 *	The delimiter to be used will be evaluated dynamically
 	 */
 	public IteratingScriptParser(String aScript)
@@ -100,18 +93,21 @@ public class IteratingScriptParser
 	public void setFile(File f)
 		throws IOException
 	{
-		this.setFile(f, null);
+		this.setFile(f, EncodingUtil.getDefaultEncoding());
 	}
 	
 	/**
-	 * Define the source file to be used and the encoding of the file
-	 * The delimiter will be evaluated dynamically
+	 * Define the source file to be used and the encoding of the file.
+	 * If the encoding is null, the default encoding will be used.
 	 * @see #setFile(File, String)
+	 * @see workbench.util.EncodingUtil#getDefaultEncoding()
 	 */
 	public void setFile(File f, String enc)
 		throws IOException
 	{
 		this.cleanup();
+		// Make sure we have an encoding (otherwise FileMappedSequence will not work!
+		if (enc == null) enc = EncodingUtil.getDefaultEncoding();
 		this.script = new FileMappedSequence(f, enc);
 		this.scriptLength = (int)f.length();
 		this.checkEscapedQuotes = false;
@@ -307,7 +303,7 @@ public class IteratingScriptParser
 
 				if ((currChar.equals(this.delimiter) || (pos == scriptLength)))
 				{
-					if (lastPos >= pos) 
+					if (lastPos >= pos && pos < scriptLength - 1) 
 					{
 						lastPos ++;
 						continue;
@@ -327,6 +323,8 @@ public class IteratingScriptParser
 					if (firstChar == '\r' || firstChar == '\n' )
 					{
 						String line = this.script.substring(lastNewLineStart, pos).trim();
+						String clean = SqlUtil.makeCleanSql(line, false, false, '\'');
+						
 						boolean slcFound = false;
 						
 						int commandStart = lastNewLineStart;
@@ -335,19 +333,21 @@ public class IteratingScriptParser
 						
 						lastNewLineStart = pos;
 						startOfLine = true;
-						
-						for (int pi=0; pi < SLC_PATTERNS.length; pi++)
+
+						if (clean.length() > 0 )
 						{
-							String clean = SqlUtil.makeCleanSql(line, false, false, '\'');
-							Matcher m = SLC_PATTERNS[pi].matcher(clean);
-							
-							if (m.matches())
+							for (int pi=0; pi < SLC_PATTERNS.length; pi++)
 							{
-								slcFound = true;
-								break;
+								Matcher m = SLC_PATTERNS[pi].matcher(clean);
+
+								if (m.matches())
+								{
+									slcFound = true;
+									break;
+								}
 							}
 						}
-
+						
 						if (slcFound)
 						{
 							lastPos = pos;
@@ -366,15 +366,15 @@ public class IteratingScriptParser
 		} // end loop for next statement
 
 		ScriptCommandDefinition c = null;
-		if (lastPos < pos && !commentOn && !quoteOn)
+		if (lastPos < pos && !blockComment && !quoteOn)
 		{
-			String value = this.script.substring(lastPos, scriptLength).trim();
+			String value = this.script.substring(lastCommandEnd, scriptLength).trim();
 			int endpos = scriptLength;
 			if (value.endsWith(this.delimiter))
 			{
 				endpos = endpos - this.delimiterLength;
 			}
-			c = createCommand(lastPos, endpos);
+			c = createCommand(lastCommandEnd, endpos);
 		}
 		this.lastPos = scriptLength;
 		return c;
@@ -440,7 +440,7 @@ public class IteratingScriptParser
 					i++;
 					c = sql.charAt(i);
 				}
-				while (i < len && Character.isWhitespace(sql.charAt(i+1)))
+				while (i < len -1  && Character.isWhitespace(sql.charAt(i+1)))
 				{
 					i++;
 				}

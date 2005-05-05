@@ -18,6 +18,7 @@
     </void>
    </object>
   </void>
+  
   <void method="put">
    <string>Oracle8</string>
    <object class="workbench.db.GetMetaDataSql">
@@ -35,6 +36,7 @@
     </void>
    </object>
   </void>
+  
   <void method="put">
    <string>-PostgreSQL</string>
    <object class="workbench.db.GetMetaDataSql">
@@ -65,6 +67,7 @@ where trg.tgrelid = tbl.oid
     </void>
    </object>
   </void>
+  
   <void method="put">
    <string>PostgreSQL</string>
    <object class="workbench.db.GetMetaDataSql">
@@ -99,6 +102,7 @@ where trg.tgrelid = tbl.oid
     </void>
    </object>
   </void>
+  
   <void method="put">
    <string>Microsoft SQL Server</string>
    <object class="workbench.db.GetMetaDataSql">
@@ -113,6 +117,7 @@ where trg.tgrelid = tbl.oid
     </void>
    </object>
   </void>
+  
   <void method="put"> 
    <string>HSQL Database Engine</string> 
    <object class="workbench.db.GetMetaDataSql"> 
@@ -124,6 +129,21 @@ where trg.tgrelid = tbl.oid
     </void> 
    </object> 
   </void> 
+
+  <void method="put"> 
+   <string>FirstSQL/J</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>SELECT 'CREATE TRIGGER ON '||table_name||'\n'||mode||' '||command||'\nWITH '||class_name||'.'||class_method||';\n\n'
+    from definition_schema.systriggers
+  </string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>class_name||'.'||class_method</string> 
+    </void> 
+   </object> 
+  </void> 
+    
   <void method="put"> 
    <string>Adaptive Server Anywhere</string> 
    <object class="workbench.db.GetMetaDataSql"> 
@@ -141,6 +161,7 @@ and  sysobjects.type = &apos;TR&apos;</string>
     </void> 
    </object> 
   </void> 
+  
   <void method="put"> 
    <string>Firebird</string> 
    <object class="workbench.db.GetMetaDataSql"> 

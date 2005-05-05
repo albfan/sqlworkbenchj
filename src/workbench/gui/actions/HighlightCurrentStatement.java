@@ -25,10 +25,9 @@ import workbench.resource.Settings;
  *	Action to copy the contents of a entry field into the clipboard
  *	@author  info@sql-workbench.net
  */
-public class HighlightCurrentStatement extends WbAction
+public class HighlightCurrentStatement 
+	extends WbAction
 {
-	private Border originalBorder;
-
 	private boolean switchedOn = false;
 	private JCheckBoxMenuItem toggleMenu;
 

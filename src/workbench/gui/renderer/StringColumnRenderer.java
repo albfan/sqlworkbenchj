@@ -30,9 +30,6 @@ public class StringColumnRenderer extends ToolTipRenderer
 
 	public void prepareDisplay(Object aValue)
 	{
-		// this method will not be called with a null value, so we do not need
-		// to check it here!
-		
 		try
 		{
 			this.displayValue = (String)aValue;

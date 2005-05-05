@@ -10,16 +10,11 @@
  *
  */
 package workbench.util;
-
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.io.Reader;
+import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
@@ -28,19 +23,28 @@ import workbench.log.LogMgr;
 
 /**
  * An implementatio of CharacterSequence that does not read the 
- * entire file into memory. Only a part of the file is read into 
- * memory.
+ * entire file but only a part of it into memory
  * @author info@sql-workbench.net
  */
 public class FileMappedSequence
 	implements CharacterSequence
 {
-	private int chunkSize = 32768;
+	// the current size of the chunk read from the file
+	// this will be adjusted dynamically according to the
+	// calls to substring
+	private int chunkSize = 128 * 1024;
+	
+	// The current chunk that has been read from the file
+	// its length will be equal to chunkSize 
 	private String chunk;
+	
+	// The decoder used to convert the bytes from the file
+	// into a String object
 	private CharsetDecoder decoder;
 	
 	// Stores the starting position of the current chunk in the file
 	private int chunkStart;
+	
 	// Stores the end position of the current chunk in the file
 	private int chunkEnd;
 	
@@ -48,26 +52,22 @@ public class FileMappedSequence
 	
 	private FileInputStream input;
 	private FileChannel channel;
+	private ByteBuffer readBuffer;
 	
 	public FileMappedSequence(File f, String characterSet)
 		throws IOException
 	{
-		if (characterSet == null) throw new NullPointerException("Empty encoding not allowed");
 		this.fileSize = f.length();
 		this.input = new FileInputStream(f);
 		this.channel = input.getChannel();
 		this.chunkStart = 0;
 		this.chunkEnd = 0;
 		this.chunk = "";
+		readBuffer = ByteBuffer.allocateDirect(chunkSize);
 		Charset charset = Charset.forName(characterSet);
 		this.decoder = charset.newDecoder();
 	}
 
-	public boolean available()
-	{
-		return (this.chunkEnd < fileSize);
-	}
-	
 	private void ensureWindow(int start, int end)
 	{
 		if (this.chunkStart <= start && this.chunkEnd > end) return;
@@ -84,8 +84,27 @@ public class FileMappedSequence
 			{
 				chunkSize = (int)(this.fileSize - chunkStart);
 			}
-			MappedByteBuffer bb = this.channel.map(FileChannel.MapMode.READ_ONLY, chunkStart, chunkSize);
-			CharBuffer cb = decoder.decode(bb);
+			
+			// prepare for requests larger then the chunkSize
+			if (chunkSize > readBuffer.capacity())
+			{
+				readBuffer = ByteBuffer.allocateDirect(chunkSize);
+			}
+			readBuffer.clear();
+			readBuffer.limit(chunkSize);
+			int read = this.channel.read(readBuffer, chunkStart);
+			
+			// Rewind is necessary because the decoder starts at the 
+			// current position
+			readBuffer.rewind();
+			
+			// Setting the limit to the number of bytes read
+			// is also necessary because the decoder uses that
+			// information to find out how many bytes it needs
+			// to decode from the buffer
+			readBuffer.limit(read);
+			
+			CharBuffer cb = decoder.decode(readBuffer);
 			this.chunk = cb.toString(); 
 		}
 		catch (Exception e)
@@ -102,7 +121,7 @@ public class FileMappedSequence
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("FileMappedSequence.done()", "Error closing input stream", e);
 		}
 	}
 
@@ -116,10 +135,8 @@ public class FileMappedSequence
 	public String substring(int start, int end)
 	{
 		this.ensureWindow(start, end);
-		StringBuffer result = new StringBuffer(end - start);
 		int startInChunk = start - chunkStart; 
 		int endInChunk = end - chunkStart;
-		result.append(this.chunk.substring(startInChunk, endInChunk));
-		return result.toString();
+		return this.chunk.substring(startInChunk, endInChunk);
 	}
 }

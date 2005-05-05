@@ -135,7 +135,8 @@ public class MacroManager
 	{
 		if (this.macros != null && this.modified)
 		{
-			WbPersistence.writeObject(this.macros, this.getMacroFile().getAbsolutePath());
+			WbPersistence writer = new WbPersistence(this.getMacroFile().getAbsolutePath());
+			writer.writeObject(this.macros);
 			this.modified = false;
 			this.errorDuringLoad = false;
 		}
@@ -157,7 +158,8 @@ public class MacroManager
 	{
 		try
 		{
-			Object o = WbPersistence.readObject(this.getMacroFile().getAbsolutePath());
+			WbPersistence reader = new WbPersistence(this.getMacroFile().getAbsolutePath());
+			Object o = reader.readObject();
 			if (o instanceof HashMap)
 			{
 				this.macros = (HashMap)o;
