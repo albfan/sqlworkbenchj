@@ -16,10 +16,9 @@ package workbench.db;
  * Constraint reader for Cloudscape database
  * @author  info@sql-workbench.net
  */
-public class CloudscapeConstraintReader extends AbstractConstraintReader
+public class CloudscapeConstraintReader 
+	extends AbstractConstraintReader
 {
-	
-	
 	private static final String TABLE_SQL = "select 'check '|| c.checkdefinition \n" + 
              "from sys.syschecks c, sys.systables t, sys.sysconstraints cons, sys.sysschemas s \n" + 
              "where t.tableid = cons.tableid \n" + 

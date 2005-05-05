@@ -27,6 +27,7 @@ import workbench.log.LogMgr;
  * @author  info@sql-workbench.net
  */
 public abstract class AbstractConstraintReader
+	implements ConstraintReader
 {
 	public AbstractConstraintReader()
 	{
@@ -102,6 +103,10 @@ public abstract class AbstractConstraintReader
 		return result;
 	}
 
+	/**
+	 * Returns the SQL Statement that should be appended to a CREATE table
+	 * in order to create the constraints defined on the table
+	 */
 	public String getTableConstraints(Connection dbConnection, TableIdentifier aTable, String indent)
 		throws SQLException
 	{
