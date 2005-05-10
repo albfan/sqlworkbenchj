@@ -22,19 +22,17 @@ import workbench.gui.MainWindow;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to paste the contents of the clipboard into the entry field
  *	@author  info@sql-workbench.net
  */
-public class ShowDbExplorerAction
+public class NewDbExplorerWindowAction
 	extends WbAction
 {
 	private MainWindow mainWin;
-	public ShowDbExplorerAction(MainWindow aWindow)
+	public NewDbExplorerWindowAction(MainWindow aWindow)
 	{
 		super();
 		mainWin = aWindow;
-		this.initMenuDefinition("MnuTxtShowDbExplorer",KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_MASK));
-		this.setIcon(ResourceMgr.getImage("Database"));
+		this.initMenuDefinition("MnuTxtNewExplorerWindow");
 	}
 
 	public void executeAction(ActionEvent e)
@@ -45,7 +43,7 @@ public class ShowDbExplorerAction
 		{
 			public void run()
 			{
-				mainWin.showDbExplorer();
+				mainWin.newDbExplorerWindow();
 			}
 		});
 	}

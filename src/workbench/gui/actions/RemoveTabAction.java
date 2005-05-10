@@ -11,6 +11,7 @@
  */
 package workbench.gui.actions;
 
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -38,6 +39,12 @@ public class RemoveTabAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.removeTab();
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				client.removeTab();
+			}
+		});
 	}
 }

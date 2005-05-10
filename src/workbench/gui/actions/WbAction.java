@@ -62,7 +62,8 @@ public class WbAction
 	{
 		this();
 		this.delegate = l;
-		this.actionName = "wb-" + aName;
+		this.actionName = aName;
+    this.putValue(ACTION_COMMAND_KEY, this.actionName);
 	}
 	
 	public WbAction()
@@ -83,6 +84,11 @@ public class WbAction
 		this.putValue(Action.ACCELERATOR_KEY, null);
 	}
 
+	public String getActionCommand()
+	{
+		return (String)getValue(ACTION_COMMAND_KEY);
+	}
+	
 	protected void setActionName(String aName)
 	{
 		this.actionName = aName;

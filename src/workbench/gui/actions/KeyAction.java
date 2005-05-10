@@ -14,27 +14,30 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import javax.swing.Action;
 
 import javax.swing.KeyStroke;
+import workbench.gui.WbSwingUtilities;
 
 /**
  *	Action to clear the contents of a entry field
  *	@author  info@sql-workbench.net
  */
-public class EscAction extends WbAction
+public class KeyAction extends WbAction
 {
-	private ActionListener client;
-
-	public EscAction(ActionListener aClient)
+	public KeyAction(ActionListener aClient, KeyStroke stroke)
 	{
-		super();
-		this.client = aClient;
-		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0));
+		super(aClient, getKeyName(stroke));
+		this.setAccelerator(stroke);
 	}
-
-	public void actionPerformed(ActionEvent e)
+	
+	private static final String getKeyName(KeyStroke stroke)
 	{
-		e.setSource(this);
-		this.client.actionPerformed(e);
+		String keyName;
+		if (stroke.getModifiers() == 0)
+			keyName = WbSwingUtilities.getKeyName(stroke.getKeyCode());
+		else
+			keyName = KeyEvent.getKeyModifiersText(stroke.getModifiers()) + "-" +WbSwingUtilities.getKeyName(stroke.getKeyCode());
+		return keyName;
 	}
 }

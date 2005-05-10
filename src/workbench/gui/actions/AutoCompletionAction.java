@@ -1,5 +1,5 @@
 /*
- * MatchBracketAction.java
+ * AutoCompletionAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -13,31 +13,26 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-
 import javax.swing.KeyStroke;
-
-import workbench.gui.sql.EditorPanel;
-import workbench.resource.ResourceMgr;
+import workbench.gui.completion.CompletionHandler;
 
 /**
- *	@author  info@sql-workbench.net
+ * @author  info@sql-workbench.net
  */
-public class MatchBracketAction extends WbAction
+public class AutoCompletionAction
+	extends WbAction
 {
-	private EditorPanel client;
-
-	public MatchBracketAction(EditorPanel aClient)
+	private CompletionHandler handler;
+	
+	public AutoCompletionAction(CompletionHandler h)
 	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtMatchBracket", KeyStroke.getKeyStroke(KeyEvent.VK_B,KeyEvent.CTRL_MASK));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+		this.handler = h;
+		this.initMenuDefinition("MnuTxtAutoComplete", KeyStroke.getKeyStroke(KeyEvent.VK_G,KeyEvent.CTRL_MASK));
 		this.setEnabled(true);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.matchBracket();
+		this.handler.showCompletionPopup();
 	}
-
 }
