@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.gui.dbobjects;
@@ -58,7 +58,7 @@ import workbench.gui.components.DataStoreTableModel;
 
 /**
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  *
  */
 public class ProcedureListPanel
@@ -184,6 +184,12 @@ public class ProcedureListPanel
 		this.source.getSqlTokenMarker().initDatabaseKeywords(aConnection.getSqlConnection());
 		this.reset();
 
+		if (this.recompileItem != null)
+		{
+			this.recompileItem.removeActionListener(this);
+		}
+		
+		JPopupMenu popup = this.procList.getPopupMenu();
 		if (this.dbConnection.getMetadata().isOracle())
 		{
 			this.recompileItem = new WbMenuItem(ResourceMgr.getString("MnuTxtRecompile"));
@@ -191,11 +197,14 @@ public class ProcedureListPanel
 			this.recompileItem.addActionListener(this);
 			this.recompileItem.setEnabled(false);
 			this.recompileItem.setIcon(ResourceMgr.getImage("blank"));
-			JPopupMenu popup = this.procList.getPopupMenu();
 			popup.add(this.recompileItem);
 		}
 		else
 		{
+			if (this.recompileItem != null)
+			{
+				popup.remove(this.recompileItem);
+			}
 			this.recompileItem = null;
 		}
 	}
@@ -471,8 +480,8 @@ public class ProcedureListPanel
 		{
 			LogMgr.logError("ProcedureListPanel.compileObjects()", "Error initializing ObjectCompilerUI", e);
 		}
-
 	}
+	
 	public void reload()
 	{
 		this.reset();

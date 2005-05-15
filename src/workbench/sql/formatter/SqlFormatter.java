@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.sql.formatter;
@@ -27,8 +27,7 @@ import workbench.util.StringUtil;
  */
 public class SqlFormatter
 {
-	private static final Set LINE_BREAK_BEFORE = new HashSet();
-	static
+	private final Set LINE_BREAK_BEFORE = new HashSet();
 	{
 		LINE_BREAK_BEFORE.add("SELECT");
 		LINE_BREAK_BEFORE.add("SET");
@@ -46,8 +45,7 @@ public class SqlFormatter
 		LINE_BREAK_BEFORE.add("FOR");
 	}
 
-	private static final Set LINE_BREAK_AFTER = new HashSet();
-	static
+	private final Set LINE_BREAK_AFTER = new HashSet();
 	{
 		//LINE_BREAK_AFTER.add("UNION");
 		//LINE_BREAK_AFTER.add("MINUS");
@@ -57,16 +55,14 @@ public class SqlFormatter
 		LINE_BREAK_AFTER.add("JOIN");
 	}
 
-	private static final Set SUBSELECT_START = new HashSet();
-	static
+	private final Set SUBSELECT_START = new HashSet();
 	{
 		SUBSELECT_START.add("IN");
 		SUBSELECT_START.add("EXISTS");
 	}
 
 	// keywords terminating a WHERE clause
-	private static final Set WHERE_TERMINAL = new HashSet();
-	static
+	private final Set WHERE_TERMINAL = new HashSet();
 	{
 		WHERE_TERMINAL.add("ORDER");
 		WHERE_TERMINAL.add("GROUP");
@@ -78,8 +74,7 @@ public class SqlFormatter
 	}
 
 	// keywords terminating the FROM part
-	private static final Set FROM_TERMINAL = new HashSet();
-	static
+	private final Set FROM_TERMINAL = new HashSet();
 	{
 		FROM_TERMINAL.addAll(WHERE_TERMINAL);
 		FROM_TERMINAL.add("WHERE");
@@ -89,8 +84,7 @@ public class SqlFormatter
 
 
 	// keywords terminating an GROUP BY clause
-	private static final Set BY_TERMINAL = new HashSet();
-	static
+	private final Set BY_TERMINAL = new HashSet();
 	{
 		BY_TERMINAL.addAll(WHERE_TERMINAL);
 		BY_TERMINAL.add("SELECT");
@@ -102,14 +96,12 @@ public class SqlFormatter
 		BY_TERMINAL.add(";");
 	}
 
-	private static final Set SELECT_TERMINAL = new HashSet(1);
-	static
+	private final Set SELECT_TERMINAL = new HashSet(1);
 	{
 		SELECT_TERMINAL.add("FROM");
 	}
 
-	private static final Set SET_TERMINAL = new HashSet();
-	static
+	private final Set SET_TERMINAL = new HashSet();
 	{
 		SET_TERMINAL.add("FROM");
 		SET_TERMINAL.add("WHERE");
@@ -150,7 +142,7 @@ public class SqlFormatter
 			this.dbFunctions = Collections.EMPTY_SET;
 	}
 	
-	public String format()
+	public String getFormattedSql()
 		throws Exception
 	{
 		this.formatSql();
@@ -361,15 +353,28 @@ public class SqlFormatter
 		StringBuffer b = new StringBuffer(indentCount);
 		for (int i=0; i < indentCount; i++) b.append(' ');
 
+		boolean isSelect = last.getContents().equals("SELECT");
 		SQLToken t = (SQLToken)this.lexer.getNextToken(true, false);
 		SQLToken lastToken = last;
-
+		
 		while (t != null)
 		{
 			String text = t.getContents();
 			if (t.isComment())
 			{
 				this.appendComment(text);
+			}
+			else if (isSelect && "DECODE".equalsIgnoreCase(text))
+			{
+				this.appendText(' ');
+				this.appendText(text);
+				t = processDecode(indentCount);
+			}
+			else if (isSelect && "CASE".equals(text))
+			{
+				this.appendText(' ');
+				this.appendText(text);
+				t = processCase(indentCount);
 			}
 			else if (t.isReservedWord() && terminalKeys.contains(text.toUpperCase()))
 			{
@@ -447,7 +452,7 @@ public class SqlFormatter
 				if (bracketCount == 0)
 				{
 					SqlFormatter f = new SqlFormatter(subSql.toString(), lastIndent, this.maxSubselectLength);
-					String s = f.format();
+					String s = f.getFormattedSql();
 					if (f.getRealLength() < this.maxSubselectLength)
 					{
 						s = s.replaceAll(" *\n *", " ");
@@ -473,7 +478,100 @@ public class SqlFormatter
 		}
 		return null;
 	}
+	
+	private SQLToken processDecode(int indent)
+		throws Exception
+	{
+		StringBuffer current = new StringBuffer(indent);
 
+		for (int i=0; i < indent; i++) current.append(' ');
+		
+		StringBuffer b = new StringBuffer(indent + 2);
+		for (int i=0; i < indent; i++) b.append(' ');
+		b.append("      ");
+		
+		SQLToken t = (SQLToken)this.lexer.getNextToken(true,true);
+		String text = null;
+		int commaCount = 0;
+		boolean inQuotes = false;
+		while (t != null)
+		{
+			text = t.getContents();
+			if ("'".equals(text))
+			{
+				inQuotes = !inQuotes;
+			}
+			if (",".equals(text) && !inQuotes) commaCount ++;
+			
+			if (",".equals(text) && !inQuotes)
+			{
+				this.appendText(text);
+				if (commaCount % 2 == 1)
+				{
+					this.appendNewline();
+					this.indent(b);
+				}
+			}
+			else if (")".equalsIgnoreCase(text) && !inQuotes)
+			{
+				this.appendNewline();
+				this.indent(current);
+				this.appendText(text);
+				t = (SQLToken)this.lexer.getNextToken(true, true);
+				return t;
+			}
+			else if (text.indexOf("\n") == -1 &&  text.indexOf("\r") == -1)
+			{
+				this.appendText(text);
+			}
+			t = (SQLToken)this.lexer.getNextToken(true,true);
+		}
+		return null;
+	}
+
+	private SQLToken processCase(int indent)
+		throws Exception
+	{
+		StringBuffer current = new StringBuffer(indent);
+
+		for (int i=0; i < indent; i++) current.append(' ');
+		
+		StringBuffer b = new StringBuffer(indent + 2);
+		for (int i=0; i < indent; i++) b.append(' ');
+		b.append("  ");
+		
+		SQLToken t = (SQLToken)this.lexer.getNextToken(true,true);
+		String text = null;
+		while (t != null)
+		{
+			text = t.getContents();
+			if ("WHEN".equalsIgnoreCase(text) || "ELSE".equalsIgnoreCase(text))
+			{
+				this.appendNewline();
+				this.indent(b);
+				this.appendText(text);
+			}
+			else if ("THEN".equalsIgnoreCase(text))
+			{
+				this.appendText(text);
+			}
+			else if ("END".equalsIgnoreCase(text))
+			{
+				this.appendNewline();
+				this.indent(current);
+				this.appendText(text);
+				t = (SQLToken)this.lexer.getNextToken(true, true);
+				return t;
+			}
+			else if (text.indexOf("\n") == -1 &&  text.indexOf("\r") == -1)
+			{
+				this.appendText(text);
+			}
+			t = (SQLToken)this.lexer.getNextToken(true,true);
+		}
+		return null;
+	}
+	
 	private SQLToken processWbCommand(int indent)
 		throws Exception
 	{
@@ -1477,11 +1575,15 @@ public class SqlFormatter
 //             " WHERE sel.meas_root_uuid = mtree.root_uuid ";
 //			sql =  "SELECT * from bla where x=1 and test.u= x.u and t.f = b.c and (a = 5 or b in (1,2,3)) and (c=5)";
 //			sql =  "SELECT * from bla where (x = 1 or y in (1,2,3)) and y=5";
-			sql = "wbexport -type=text -file=c:/temp/test.txt";
+			//sql = "wbexport -type=text -file=c:/temp/test.txt";
+			
+			//sql = "select case when nr is null then 'Null' \n when nr > 100 then 'bla'\nelse nr end as nr_value from tk_test";			
+			sql = "select decode(nr, null, 'null', 'xxxx', 'y,yy') as nr_value, col1, col2 from tk_test";			
+			
 			SqlFormatter f = new SqlFormatter(sql,40);
 			System.out.println(sql);
 			System.out.println("----------");
-			System.out.println(f.format());
+			System.out.println(f.getFormattedSql());
 //			System.out.println("----------------------------------");
 //			"insert into test (col1, col2) values ('x', to_date(2,'XXXX'));commit;" 	 ;
 //			f = new SqlFormatter(sql);

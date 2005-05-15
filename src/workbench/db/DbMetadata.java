@@ -6,17 +6,14 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.db;
 
 import java.beans.PropertyChangeListener;
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.Reader;
-import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -36,7 +33,6 @@ import java.util.StringTokenizer;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.swing.event.ChangeListener;
 import workbench.db.firebird.FirebirdMetadata;
 import workbench.db.firstsql.FirstSqlMetadata;
 import workbench.db.hsqldb.HsqlSequenceReader;
@@ -69,9 +65,9 @@ import workbench.db.firebird.FirebirdConstraintReader;
 
 
 /**
- * Retrieve meta data information from the database. 
+ * Retrieve meta data information from the database.
  * This class returns more information then the generic JDBC DatabaseMetadata.
- *  @author  info@sql-workbench.net
+ *  @author  support@sql-workbench.net
  */
 public class DbMetadata
 	implements PropertyChangeListener
@@ -221,7 +217,7 @@ public class DbMetadata
 			this.constraintReader = new OracleConstraintReader();
 			this.synonymReader = new OracleSynonymReader();
 
-			// register with the Settings to be able to 
+			// register with the Settings to be able to
 			// check for changes to the "enable dbms output" property
 			Settings.getInstance().addPropertyChangeListener(this);
 			this.sequenceReader = this.oracleMetaData;
@@ -304,12 +300,12 @@ public class DbMetadata
 		}
 
 		// if the DBMS does not need a specific ProcedureReader
-		// we use the default implementation 
-		if (this.procedureReader == null) 
+		// we use the default implementation
+		if (this.procedureReader == null)
 		{
 			this.procedureReader = new JdbcProcedureReader(this);
 		}
-		
+
 		try
 		{
 			this.quoteCharacter = this.metaData.getIdentifierQuoteString();
@@ -346,12 +342,12 @@ public class DbMetadata
 	{
 		return this.metaData;
 	}
-	
+
 	public Connection getSqlConnection()
 	{
 		return this.dbConnection.getSqlConnection();
 	}
-	
+
 	/**
 	 *	Return the name of the DBMS as reported by the JDBC driver
 	 */
@@ -456,17 +452,37 @@ public class DbMetadata
 	public boolean isCloudscape() { return this.isCloudscape; }
 	public boolean isApacheDerby() { return this.isApacheDerby; }
 
+	private List omitSchemaInDML;
+
+	public boolean useSchemaInDML()
+	{
+		if (omitSchemaInDML == null)
+		{
+			String ids = Settings.getInstance().getProperty("workbench.sql.omitdmlschema", null);
+			if (ids != null)
+			{
+				omitSchemaInDML = StringUtil.stringToList(ids, ",");
+			}
+			else
+			{
+				 omitSchemaInDML = Collections.EMPTY_LIST;
+			}
+		}
+		return !omitSchemaInDML.contains(this.getDbId());
+	}
+	
 	public boolean needSchemaInDML(TableIdentifier table)
 	{
-		if (this.isOracle)
+		boolean useSchema = useSchemaInDML();
+		if (this.isOracle && useSchema)
 		{
 			String tblSchema = table.getSchema();
 			if (tblSchema == null) return false;
 			return !this.getUserName().equalsIgnoreCase(tblSchema);
 		}
-		return true;
+		return useSchema;
 	}
-	
+
   public boolean isOracle8()
 	{
 		if (!this.isOracle) return false;
@@ -688,7 +704,7 @@ public class DbMetadata
 			SourceStatementsHelp help = new SourceStatementsHelp();
 			return help.explainMissingViewSourceSql(this.getProductName());
 		}
-		
+
 		if (viewTableDefinition == null)
 		{
 			viewTableDefinition = this.getTableDefinition(aCatalog, aSchema, aView);
@@ -696,7 +712,7 @@ public class DbMetadata
 		String source = this.getViewSource(aCatalog, aSchema, aView);
 
 		if (source == null || source.length() == 0) return StringUtil.EMPTY_STRING;
-		
+
 		// ThinkSQL returns the full CREATE VIEW statement
 		if (source.toLowerCase().startsWith("create")) return source;
 
@@ -761,7 +777,7 @@ public class DbMetadata
 		{
 			GetMetaDataSql sql = (GetMetaDataSql)viewSourceSql.get(this.productName);
 			if (sql == null) return StringUtil.EMPTY_STRING;
-			aViewname = this.adjustObjectname(aViewname);
+			aViewname = this.adjustObjectnameCase(aViewname);
 			sql.setSchema(aSchema);
 			sql.setObjectName(aViewname);
 			sql.setCatalog(aCatalog);
@@ -798,12 +814,27 @@ public class DbMetadata
 		return source.toString();
 	}
 
+	
 	private void readKeywords()
 	{
 		try
 		{
 			String keys = this.metaData.getSQLKeywords();
 			this.keywords = StringUtil.stringToList(keys, ",");
+			
+			keys = Settings.getInstance().getProperty("workbench.db.keywordlist." + this.getDbId(), null);
+			if (keys != null)
+			{
+				List l = StringUtil.stringToList(keys.toUpperCase(), ",");
+				if (this.keywords == Collections.EMPTY_LIST)
+				{
+					this.keywords = l;
+				}
+				else
+				{
+					this.keywords.addAll(l);
+				}
+			}
 		}
 		catch (Exception e)
 		{
@@ -822,7 +853,7 @@ public class DbMetadata
 			SourceStatementsHelp help = new SourceStatementsHelp();
 			return help.explainMissingProcSourceSql(this.getProductName());
 		}
-		
+
 		// this is for MS SQL Server, which appends a ;1 to
 		// the end of the procedure name
 		int i = aProcname.indexOf(';');
@@ -844,7 +875,7 @@ public class DbMetadata
 
 		try
 		{
-			aProcname = this.adjustObjectname(aProcname);
+			aProcname = this.adjustObjectnameCase(aProcname);
 			sql.setSchema(aSchema);
 			sql.setObjectName(aProcname);
 			sql.setCatalog(aCatalog);
@@ -872,7 +903,7 @@ public class DbMetadata
 		}
 
 		boolean isPackage = false;
-		
+
 		try
 		{
       if (this.isOracle && linecount == 0)
@@ -924,17 +955,26 @@ public class DbMetadata
 			{
 				isKeyword = this.keywords.contains(aName.trim().toLowerCase());
 			}
-			if (!isKeyword && this.storesUpperCaseIdentifiers())
+			else if (this.storesUpperCaseIdentifiers())
 			{
 				isKeyword = this.keywords.contains(aName.trim().toUpperCase());
 			}
-			// The ODBC driver for Access returns false for storesLowerCaseIdentifiers()
-			// AND storesUpperCaseIdentifiers()!
-			if (!isKeyword && this.productName.equalsIgnoreCase("ACCESS"))
+			else
 			{
-				isKeyword = this.keywords.contains(aName.trim().toUpperCase());
+				// The ODBC driver for Access returns false for storesLowerCaseIdentifiers()
+				// AND storesUpperCaseIdentifiers()!
+				if (this.productName.equalsIgnoreCase("ACCESS"))
+				{
+					isKeyword = this.keywords.contains(aName.trim().toUpperCase());
+				}
+				else
+				{
+					// if both methods return false, then we'll check 
+					// the keyword as it is
+					isKeyword = this.keywords.contains(aName.trim());
+				}
 			}
-
+			
 			// Oracle and HSQL require identifiers starting with a number to be quoted
 			if (this.isHsql || this.isOracle)
 			{
@@ -949,7 +989,7 @@ public class DbMetadata
 			{
 				needQuote = true;
 			}
-			
+
 			if (this.storesUpperCaseIdentifiers() && !aName.toUpperCase().equals(aName))
 			{
 				needQuote = true;
@@ -971,7 +1011,7 @@ public class DbMetadata
 		return SqlUtil.quoteObjectname(aName);
 	}
 
-	public String adjustObjectname(String aTable)
+	public String adjustObjectnameCase(String aTable)
 	{
 		if (aTable == null) return null;
 		aTable = StringUtil.trimQuotes(aTable);
@@ -995,17 +1035,17 @@ public class DbMetadata
 	public String getCurrentSchema()
 	{
 		if (this.isOracle) return this.getUserName();
-		
+
 		return null;
 	}
-	
+
 	public String getSchemaForTable(String aTablename)
 		throws SQLException
 	{
-		aTablename = this.adjustObjectname(aTablename);
+		aTablename = this.adjustObjectnameCase(aTablename);
 
 		// First we try the current user as the schema name...
-		String schema = this.adjustObjectname(this.getUserName());
+		String schema = this.adjustObjectnameCase(this.getUserName());
 		ResultSet rs = this.metaData.getTables(null, schema, aTablename, null);
 		String table = null;
 		try
@@ -1058,7 +1098,12 @@ public class DbMetadata
 		return this.getTables(null, user, (String[])null);
 	}
 
-	public static final String[] TABLE_TYPE_TABLE = new String[] {"TABLE"};
+	public static final String TABLE_TYPE_VIEW = "VIEW";
+	public static final String TABLE_TYPE_TABLE = "TABLE";
+
+	public static final String[] TABLE_TYPES_VIEW = new String[] {TABLE_TYPE_VIEW};
+	public static final String[] TABLE_TYPES_TABLE = new String[] {TABLE_TYPE_TABLE};
+	public static final String[] TABLE_TYPES_SELECTABLE = new String[] {TABLE_TYPE_TABLE, TABLE_TYPE_VIEW, "SYNONYM"};
 
 	public DataStore getTables(String schema, String[] type)
 		throws SQLException
@@ -1104,9 +1149,10 @@ public class DbMetadata
 		int sizes[] = {30,12,10,10,20};
 
 		DataStore result = new DataStore(cols, coltypes, sizes);
-		aSchema = adjustObjectname(aSchema);
-		aCatalog = adjustObjectname(aCatalog);
+		aSchema = adjustObjectnameCase(aSchema);
+		aCatalog = adjustObjectnameCase(aCatalog);
 		boolean sequencesReturned = false;
+		boolean checkOracleInternalSynonyms = (isOracle && typeIncluded("SYNONYM", types));
 
 		ResultSet tableRs = null;
 		try
@@ -1118,10 +1164,13 @@ public class DbMetadata
 				String schem = tableRs.getString(2);
 				String name = tableRs.getString(3);
 				if (name == null) continue;
+
 				// filter out "internal" synonyms for Oracle
-				if (this.isOracle && name.startsWith("/")) continue;
+				if (checkOracleInternalSynonyms && name.indexOf("/") > -1) continue;
+
 				String ttype = tableRs.getString(4);
 				String rem = tableRs.getString(5);
+				String typeUpper = ttype.toUpperCase();
 				int row = result.addRow();
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, name);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_TYPE, ttype);
@@ -1136,6 +1185,39 @@ public class DbMetadata
 			SqlUtil.closeResult(tableRs);
 		}
 
+		// Public synonyms will not be returned when a schema (=user)
+		// has been specified, but they are accessible and need to be retrieved
+		/*
+		if (this.isOracle && !"PUBLIC".equalsIgnoreCase(aSchema) && typeIncluded("SYNONYM", types) )
+		{
+			try
+			{
+				tableRs = this.metaData.getTables(aCatalog, "PUBLIC", tables, new String[] {"SYNONYM"} );
+				while (tableRs.next())
+				{
+					String cat = tableRs.getString(1);
+					String schem = tableRs.getString(2);
+					String name = tableRs.getString(3);
+					if (name == null) continue;
+					// filter out "internal" synonyms for Oracle
+					if (this.isOracle && name.indexOf("/") > -1) continue;
+					String ttype = tableRs.getString(4);
+					String rem = tableRs.getString(5);
+					String typeUpper = ttype.toUpperCase();
+					int row = result.addRow();
+					result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, name);
+					result.setValue(row, COLUMN_IDX_TABLE_LIST_TYPE, ttype);
+					result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, cat);
+					result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, null);
+					result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, rem);
+				}
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+		*/
 		if (this.sequenceReader != null && typeIncluded("SEQUENCE", types) &&
 				"true".equals(Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".retrieve_sequences", "true"))
 				&& !sequencesReturned)
@@ -1153,6 +1235,7 @@ public class DbMetadata
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, aSchema);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, null);
 			}
+			//this.dbConnection.getObjectCache().setTables(tableList);
 		}
 
 		if (this.isIngres && typeIncluded("SYNONYM", types) && "true".equals(Settings.getInstance().getProperty("workbench.db.ingres.retrieve_synonyms", "true")))
@@ -1185,7 +1268,7 @@ public class DbMetadata
 		}
 		return false;
 	}
-	
+
 	public boolean tableExists(TableIdentifier aTable)
 	{
 		if (aTable == null) return false;
@@ -1193,9 +1276,9 @@ public class DbMetadata
 		ResultSet rs = null;
 		try
 		{
-			String c = this.adjustObjectname(aTable.getCatalog());
-			String s = this.adjustObjectname(aTable.getSchema());
-			String t = this.adjustObjectname(aTable.getTable());
+			String c = this.adjustObjectnameCase(aTable.getCatalog());
+			String s = this.adjustObjectnameCase(aTable.getSchema());
+			String t = this.adjustObjectnameCase(aTable.getTable());
 			rs = this.metaData.getTables(c, s, t, new String[] { "TABLE" });
 			exists = rs.next();
 		}
@@ -1209,7 +1292,7 @@ public class DbMetadata
 		}
 		return exists;
 	}
-	
+
 	public boolean storesUpperCaseIdentifiers()
 	{
 		try
@@ -1406,7 +1489,9 @@ public class DbMetadata
 	public ColumnIdentifier[] getColumnIdentifiers(TableIdentifier table)
 		throws SQLException
 	{
-		DataStore ds = this.getTableDefinition(table.getCatalog(), table.getSchema(), table.getTable());
+		String type = table.getType();
+		if (type == null) type = "TABLE";
+		DataStore ds = this.getTableDefinition(table.getCatalog(), table.getSchema(), table.getTable(), type, false);
 		return createColumnIdentifiers(ds);
 	}
 
@@ -1507,7 +1592,7 @@ public class DbMetadata
   * @param aType    the table type. One of the types retrurned {@link #getTableTypes()}
   * @throws SQLException
   * @return a DataStore with the columns of the table
-	* 
+	*
   */
 	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, String aType)
 		throws SQLException
@@ -1566,9 +1651,9 @@ public class DbMetadata
 
 		if (adjustNames)
 		{
-			aCatalog = this.adjustObjectname(aCatalog);
-			aSchema = this.adjustObjectname(aSchema);
-			aTable = this.adjustObjectname(aTable);
+			aCatalog = this.adjustObjectnameCase(aCatalog);
+			aSchema = this.adjustObjectnameCase(aSchema);
+			aTable = this.adjustObjectnameCase(aTable);
 		}
 
 		if (this.sequenceReader != null && "SEQUENCE".equalsIgnoreCase(aType))
@@ -1706,7 +1791,7 @@ public class DbMetadata
 			ResultSet keysRs = null;
 			try
 			{
-				keysRs = this.metaData.getPrimaryKeys(aCatalog, aSchema, this.adjustObjectname(aTable));
+				keysRs = this.metaData.getPrimaryKeys(aCatalog, aSchema, this.adjustObjectnameCase(aTable));
 				while (keysRs.next())
 				{
 					pkName = keysRs.getString("PK_NAME");
@@ -1730,12 +1815,12 @@ public class DbMetadata
 
 			if (this.isOracle)
 			{
-				idxRs = this.oracleMetaData.getIndexInfo(aCatalog, aSchema, this.adjustObjectname(aTable), false, true);
+				idxRs = this.oracleMetaData.getIndexInfo(aCatalog, aSchema, this.adjustObjectnameCase(aTable), false, true);
 				funcIndex = new HashMap();
 			}
 			else
 			{
-				idxRs = this.metaData.getIndexInfo(aCatalog, aSchema, this.adjustObjectname(aTable), false, true);
+				idxRs = this.metaData.getIndexInfo(aCatalog, aSchema, this.adjustObjectnameCase(aTable), false, true);
 			}
 
 			while (idxRs.next())
@@ -1776,7 +1861,7 @@ public class DbMetadata
 
 			if (this.isOracle && funcIndex != null)
 			{
-				this.oracleMetaData.readFunctionIndexDefinition(aSchema, this.adjustObjectname(aTable), funcIndex);
+				this.oracleMetaData.readFunctionIndexDefinition(aSchema, this.adjustObjectnameCase(aTable), funcIndex);
 				Iterator defs = funcIndex.entrySet().iterator();
 				while (defs.hasNext())
 				{
@@ -1841,35 +1926,71 @@ public class DbMetadata
 	public List getTableList()
 		throws SQLException
 	{
-		String schema = null;
-		if (this.metaData.supportsSchemasInTableDefinitions())
-		{
-			schema = this.getUserName();
-		}
-		return getTableList(null);
+		String schema = this.getCurrentSchema();
+		return getTableList(schema, false);
+	}
+
+	public List getTableList(boolean includeViews)
+		throws SQLException
+	{
+		String schema = this.getCurrentSchema();
+		return getTableList(schema, includeViews);
+	}
+
+	public List getTableList(String schema)
+		throws SQLException
+	{
+		return getTableList(schema, TABLE_TYPES_TABLE);
+	}
+
+	public List getViewList(String schema)
+		throws SQLException
+	{
+		String[] types = new String[] { "VIEW" };
+		return getTableList(schema, types);
 	}
 	
-	public List getTableList(String schema)
+	public List getTableList(String schema, boolean includeViews)
+		throws SQLException
+	{
+		if (includeViews)
+			return getTableList(schema, TABLE_TYPES_SELECTABLE);
+		else 
+			return getTableList(schema, TABLE_TYPES_TABLE);
+	}
+	/**
+	 *	Return a list of tables for the given schema
+	 * if the schema is null, all tables will be returned
+	 */
+	public List getTableList(String schema, String[] types)
 		throws SQLException
 	{
 		if (schema != null)
 		{
-			schema = this.adjustObjectname(schema);
+			schema = this.adjustObjectnameCase(schema);
 			if (schema.length() == 0) schema = null;
 		}
-		DataStore ds = getTables(null, schema, TABLE_TYPE_TABLE);
+
+		DataStore ds = getTables(null, schema, types);
 		int count = ds.getRowCount();
 		List tables = new ArrayList(count);
+		String user = getUserName();
 		for (int i=0; i < count; i++)
 		{
 			String t = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_NAME);
 			String s = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_SCHEMA);
 			String c = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_CATALOG);
-			tables.add(new TableIdentifier(c, s, t));
+			if (this.isPostgres && "public".equals(s))
+			{
+				s = null;
+			}
+			TableIdentifier tbl = new TableIdentifier(c, s, t);
+			tbl.setType(ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_TYPE));
+			tables.add(tbl);
 		}
 		return tables;
 	}
-	
+
 	public IndexDefinition[] getIndexList(TableIdentifier tbl)
 	{
 		DataStore ds = this.getTableIndexInformation(tbl.getCatalog(), tbl.getSchema(), tbl.getTable());
@@ -2020,9 +2141,9 @@ public class DbMetadata
 		if ("*".equals(aCatalog)) aCatalog = null;
 		if ("*".equals(aSchema)) aSchema = null;
 
-		aCatalog = this.adjustObjectname(aCatalog);
-		aSchema = this.adjustObjectname(aSchema);
-		aTable = this.adjustObjectname(aTable);
+		aCatalog = this.adjustObjectnameCase(aCatalog);
+		aSchema = this.adjustObjectnameCase(aSchema);
+		aTable = this.adjustObjectnameCase(aTable);
 
 		GetMetaDataSql sql = (GetMetaDataSql)triggerList.get(this.productName);
 		if (sql == null)
@@ -2063,7 +2184,7 @@ public class DbMetadata
 		return result;
 	}
 
-	/** 
+	/**
 	 * Retrieve the SQL Source of the given trigger.
 	 * @param aCatalog The catalog in which the trigger is defined. This should be null if the DBMS does not support catalogs
 	 * @param aSchema The schema in which the trigger is defined. This should be null if the DBMS does not support schemas
@@ -2106,7 +2227,7 @@ public class DbMetadata
 			if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
 			throw e;
 		}
-		
+
 		int colCount = rs.getMetaData().getColumnCount();
 		try
 		{
@@ -2260,9 +2381,9 @@ public class DbMetadata
 	private DataStore getRawKeyList(String aCatalog, String aSchema, String aTable, boolean exported)
 		throws SQLException
 	{
-		aCatalog = this.adjustObjectname(aCatalog);
-		aSchema = this.adjustObjectname(aSchema);
-		aTable = this.adjustObjectname(aTable);
+		aCatalog = this.adjustObjectnameCase(aCatalog);
+		aSchema = this.adjustObjectnameCase(aSchema);
+		aTable = this.adjustObjectnameCase(aTable);
 		ResultSet rs;
 		if (exported)
 			rs = this.metaData.getExportedKeys(aCatalog, aSchema, aTable);
@@ -2348,9 +2469,9 @@ public class DbMetadata
 			if ("*".equals(aCatalog)) aCatalog = null;
 			if ("*".equals(aSchema)) aSchema = null;
 
-			aCatalog = this.adjustObjectname(aCatalog);
-			aSchema = this.adjustObjectname(aSchema);
-			aTable = this.adjustObjectname(aTable);
+			aCatalog = this.adjustObjectnameCase(aCatalog);
+			aSchema = this.adjustObjectnameCase(aSchema);
+			aTable = this.adjustObjectnameCase(aTable);
 			int tableCol;
 			int fkNameCol;
 			int colCol;
@@ -2496,6 +2617,10 @@ public class DbMetadata
 		try
 		{
 			id = this.synonymReader.getSynonymTable(this.dbConnection.getSqlConnection(), anOwner, aSynonym);
+			if (id == null && this.isOracle)
+			{
+				id = this.synonymReader.getSynonymTable(this.dbConnection.getSqlConnection(), "PUBLIC", aSynonym);
+			}
 		}
 		catch (Exception e)
 		{
@@ -2598,12 +2723,12 @@ public class DbMetadata
 		{
 			String column = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
 			//column = SqlUtil.quoteObjectname(column);
-			if (i > 0) 
+			if (i > 0)
 			{
 				sql.append(",\n");
 				sql.append("       ");
 			}
-			
+
 			sql.append(column);
 		}
 		sql.append("\nFROM ");
@@ -2685,7 +2810,7 @@ public class DbMetadata
 			{
 				if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
 			}
-			
+
 		}
 
 		result.append("CREATE TABLE ");
@@ -2771,7 +2896,7 @@ public class DbMetadata
 
 		if (this.constraintReader != null)
 		{
-			
+
 			String cons = null;
 			try
 			{
@@ -3309,17 +3434,17 @@ public class DbMetadata
     }
 
     sql.append("owner='");
-    sql.append(this.adjustObjectname(schema));
+    sql.append(this.adjustObjectnameCase(schema));
     sql.append('\'');
 
     sql.append(" AND ");
     sql.append(" type='");
-    sql.append(this.adjustObjectname(objectType));
+    sql.append(this.adjustObjectnameCase(objectType));
     sql.append('\'');
 
     sql.append(" AND ");
     sql.append(" name='");
-    sql.append(this.adjustObjectname(objectName));
+    sql.append(this.adjustObjectnameCase(objectName));
     sql.append('\'');
 
     Statement stmt = null;

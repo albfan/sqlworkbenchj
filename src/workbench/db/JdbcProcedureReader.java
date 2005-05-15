@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.db;
@@ -21,7 +21,7 @@ import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 
 /**
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class JdbcProcedureReader
 	implements ProcedureReader
@@ -112,7 +112,7 @@ public class JdbcProcedureReader
 		ResultSet rs = null;
 		try
 		{
-			rs = this.dbMeta.metaData.getProcedureColumns(aCatalog, aSchema, dbMeta.adjustObjectname(aProcname), "%");
+			rs = this.dbMeta.metaData.getProcedureColumns(aCatalog, aSchema, dbMeta.adjustObjectnameCase(aProcname), "%");
 			while (rs.next())
 			{
 				int row = ds.addRow();

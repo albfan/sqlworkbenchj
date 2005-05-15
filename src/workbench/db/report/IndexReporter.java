@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.db.report;
@@ -23,7 +23,7 @@ import workbench.util.StrBuffer;
  * Class to retrieve all index definitions for a table and
  * generate an XML string from that.
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class IndexReporter
 {

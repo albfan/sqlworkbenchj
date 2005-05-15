@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.storage;
@@ -41,6 +41,7 @@ import workbench.db.exporter.HtmlRowDataConverter;
 import workbench.db.exporter.RowDataConverter;
 import workbench.db.exporter.SqlRowDataConverter;
 import workbench.db.exporter.XmlRowDataConverter;
+import workbench.gui.WbSwingUtilities;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -57,7 +58,7 @@ import workbench.util.ValueConverter;
  * DataStore can be updated and the changes can be saved back
  * to the database. For inserting new records key columns are not
  * required, otherwise the base table needs to have a key defined.
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class DataStore
 {
@@ -84,47 +85,16 @@ public class DataStore
 
 	private WbConnection originalConnection;
 	private DecimalFormat defaultNumberFormatter;
-	private ColumnComparator comparator;
-
+	
 	private boolean allowUpdates = false;
 	private boolean escapeHtml = true;
 
 	private ValueConverter converter = new ValueConverter();
 
-	private static final Collator defaultCollator;
 	private boolean cancelRetrieve = false;
 	private boolean cancelUpdate = false;
 	private boolean cancelImport = false;
-	private static final int reportInterval;
-
-	static
-	{
-		Locale l = null;
-		String lang = null;
-		String country = null;
-		try
-		{
-			lang = System.getProperty("org.kellerer.sort.language", System.getProperty("user.language", "en"));
-			country = System.getProperty("org.kellerer.sort.country", System.getProperty("user.country", null));
-		}
-		catch (Exception e)
-		{
-			l = Locale.ENGLISH;
-		}
-
-		if (lang != null && country != null)
-		{
-			l = new Locale(lang, country);
-		}
-		else if (lang != null && country == null)
-		{
-			l = new Locale(lang);
-		}
-
-		defaultCollator = Collator.getInstance(l);
-
-		reportInterval = Settings.getInstance().getIntProperty("workbench.gui.data.reportinterval", 10);
-	}
+	private int reportInterval = Settings.getInstance().getIntProperty("workbench.gui.data.reportinterval", 10);
 
 	public DataStore(String[] aColNames, int[] colTypes)
 	{
@@ -528,7 +498,7 @@ public class DataStore
 					return;
 				}
 
-				this.updateTable = meta.adjustObjectname(aTablename);
+				this.updateTable = meta.adjustObjectnameCase(aTablename);
 
 				for (int i=0; i < columns.size(); i++)
 				{
@@ -780,7 +750,6 @@ public class DataStore
 				row = this.deletedRows.get(i);
 				this.data.add(row);
 			}
-			this.deletedRows.clear();
 			this.deletedRows = null;
 		}
 		for (int i=0; i < this.data.size(); i++)
@@ -1818,7 +1787,7 @@ public class DataStore
 					newDeleted.add(row);
 				}
 			}
-			this.deletedRows.clear();
+			this.deletedRows.reset();
 			this.deletedRows = newDeleted;
 		}
 	}
@@ -1839,76 +1808,12 @@ public class DataStore
 		this.resetUpdateRowCounters();
 	}
 
-
-	public int compareRowsByColumn(RowData row1, RowData row2, int column)
+	public void sortByColumn(int col, boolean ascending)
 	{
-		Object o1 = row1.getValue(column);
-		Object o2 = row2.getValue(column);
-
-		if ( (o1 == null && o2 == null) ||
-		     (o1 instanceof NullValue && o2 instanceof NullValue) )
+		synchronized (this.data)
 		{
-			return 0;
-		}
-		else if (o1 == null || o1 instanceof NullValue)
-		{
-			return 1;
-		}
-		else if (o2 == null || o2 instanceof NullValue)
-		{
-			return -1;
-		}
-
-		if (o1 instanceof String && o2 instanceof String)
-		{
-			return defaultCollator.compare(o1, o2);
-		}
-
-		try
-		{
-			int result = ((Comparable)o1).compareTo(o2);
-			return result;
-		}
-		catch (Throwable e)
-		{
-		}
-
-		// Fallback sorting...
-		// if the values didn't implement Comparable
-		// the use normale String comparison
-		String v1 = o1.toString();
-		String v2 = o2.toString();
-		return v1.compareTo(v2);
-	}
-
-	/**    Compare two rows.  All sorting columns will be sorted.
-	 *
-	 * @param row1 Row 1
-	 * @param row2 Row 2
-	 * @return 1, 0, or -1
-	 */
-	public int compare(RowData row1, RowData row2, int column, boolean ascending)
-	{
-		int result = compareRowsByColumn(row1, row2, column);
-		if (result == 0) return 0;
-
-		//if (result == -2 || result == 2)
-		//	return result;
-		//else
-		return ascending ? result : -result;
-	}
-
-	public void sortByColumn(int aColumn, boolean ascending)
-	{
-		synchronized (this)
-		{
-			if (this.comparator == null)
-			{
-				this.comparator = new ColumnComparator();
-			}
-			this.comparator.setMode(aColumn, ascending);
-			//Collections.sort(this.data, this.comparator);
-			this.data.sort(this.comparator);
+			RowDataListSorter sorter = new RowDataListSorter(col, ascending);
+			sorter.sort(this.data);
 		}
 	}
 
@@ -2214,37 +2119,5 @@ public class DataStore
 	{
 		this.rowActionMonitor = aMonitor;
 	}
-
-	class ColumnComparator implements Comparator
-	{
-		int column;
-		boolean ascending;
-
-		public ColumnComparator()
-		{
-		}
-
-		public void setMode(int aCol, boolean aFlag)
-		{
-			this.column = aCol;
-			this.ascending = aFlag;
-		}
-
-		public int compare(Object o1, Object o2)
-		{
-			try
-			{
-				RowData row1 = (RowData)o1;
-				RowData row2 = (RowData)o2;
-				return DataStore.this.compare(row1, row2, this.column, this.ascending);
-			}
-			catch (ClassCastException e)
-			{
-				// cannot happen
-			}
-			return 0;
-		}
-	}
-
 
 }

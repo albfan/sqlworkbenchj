@@ -47,7 +47,7 @@ public class DbObjectCache
 	/**
 	 * Add this list of tables to the current cache. 
 	 */
-	void setTables(List tables)
+	private void setTables(List tables)
 	{
 		if (!enabled) return;
 		if (this.objects == null)
@@ -66,20 +66,26 @@ public class DbObjectCache
 	
 	public Set getTables()
 	{
-		return getTables(null);
+		return getTables(null, null);
+	}
+	
+	public Set getTables(String schema)
+	{
+		return getTables(schema, null);
 	}
 	
 	/**
 	 * Get the tables (and views) the are currently in the cache
 	 */
-	public Set getTables(String schema)
+	public Set getTables(String schema, String type)
 	{
 		if (!enabled) return Collections.EMPTY_SET;
+
 		if (this.objects == null || (schema != null && !schemasInCache.contains(schema.toUpperCase()))) 
 		{
 			try
 			{
-				List tables = this.dbConnection.getMetadata().getTableList(schema, true);
+				List tables = this.dbConnection.getMetadata().getTableList(schema, DbMetadata.TABLE_TYPES_SELECTABLE);
 				this.setTables(tables);
 				if (schema != null)
 				{
@@ -91,7 +97,31 @@ public class DbObjectCache
 				LogMgr.logError("DbObjectCache.getTables()", "Could not retrieve table list", e);
 			}
 		}
-		return filterTablesBySchema(schema);
+		if (type != null)
+			return filterTablesByType(schema, type);
+		else
+			return filterTablesBySchema(schema);
+	}
+
+	private Set filterTablesByType(String schema, String type)
+	{
+		this.getTables(schema);
+		Iterator itr = this.objects.keySet().iterator();
+		SortedSet result = new TreeSet();
+		while (itr.hasNext())
+		{
+			TableIdentifier tbl = (TableIdentifier)itr.next();
+			String ttype = tbl.getType();
+			String tSchema = tbl.getSchema();
+			if ( type.equalsIgnoreCase(ttype) &&
+				   ((schema == null || schema.equalsIgnoreCase(tSchema) || tSchema == null || "public".equalsIgnoreCase(tSchema))
+					 ))
+			{
+				TableIdentifier copy = tbl.createCopy();
+				result.add(copy);
+			}
+		}
+		return result;
 	}
 	
 	private Set filterTablesBySchema(String schema)
@@ -131,9 +161,9 @@ public class DbObjectCache
 		TableIdentifier tblToUse = null;
 		TableIdentifier t2 = null;
 		
-		// if we didn't find one with the schema in the table, try
+		// if we didn't find an entry with the schema in the table, try
 		// to find a table with that name but without the schema
-		// this is to support oracle public synonyms
+		// this is to support oracle public synonyms/objects
 		if (tbl.getSchema() != null && cols == null || cols == Collections.EMPTY_LIST)
 		{
 			if (!this.objects.containsKey(tbl))
@@ -146,6 +176,10 @@ public class DbObjectCache
 		
 		if (cols == null || cols == Collections.EMPTY_LIST)
 		{
+			// use the stored key because that might already
+			// carry the type attribute
+			// TabelIdentifier.equals() doesn't compare the type
+			// only the expression
 			if (objects.containsKey(tbl))
 			{
 				tblToUse = findKey(tbl);
@@ -175,6 +209,12 @@ public class DbObjectCache
 		return Collections.unmodifiableList(cols);
 	}
 	
+	/**
+	 * Return the stored key according to the passed
+	 * TableIdentifier. The stored key might carry additional
+	 * properties that the passed key does not have (even 
+	 * though they are equal)
+	 */
 	private TableIdentifier findKey(TableIdentifier key)
 	{
 		if (key == null) return null;
@@ -186,6 +226,7 @@ public class DbObjectCache
 		}
 		return null;
 	}
+	
 	/**
 	 * Disposes any db objects held in the cache
 	 */
@@ -208,6 +249,11 @@ public class DbObjectCache
 		}
 	}
 	
+	
+	/**
+	 * Utility function for debugging for printing out the conents
+	 * of the cache
+	 */
 	private void dumpTables()
 	{
 		Iterator keys = this.objects.keySet().iterator();

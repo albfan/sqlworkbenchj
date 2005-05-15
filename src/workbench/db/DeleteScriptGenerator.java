@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.db;
@@ -33,7 +33,7 @@ import workbench.util.SqlUtil;
 /**
  *	Generates a SQL script to delete a record from the given table and
  *	any dependent tables.
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class DeleteScriptGenerator
 	implements Scripter
@@ -66,8 +66,8 @@ public class DeleteScriptGenerator
 		throws SQLException
 	{
 		if (aTable == null || aTable.trim().length() == 0) throw new IllegalArgumentException("The table name may not be empty");
-		aTable = this.meta.adjustObjectname(aTable);
-		aCatalog = this.meta.adjustObjectname(aCatalog);
+		aTable = this.meta.adjustObjectnameCase(aTable);
+		aCatalog = this.meta.adjustObjectnameCase(aCatalog);
 
 		if (aSchema == null)
 		{
@@ -80,7 +80,7 @@ public class DeleteScriptGenerator
 				aSchema = null;
 			}
 		}
-		aSchema = this.meta.adjustObjectname(aSchema);
+		aSchema = this.meta.adjustObjectnameCase(aSchema);
 		this.rootTable = new TableIdentifier(aCatalog, aSchema, aTable);
 
 		this.dependency.setTable(this.rootTable);
@@ -136,7 +136,7 @@ public class DeleteScriptGenerator
 		{
 			int max = Settings.getInstance().getMaxSubselectLength();
 			SqlFormatter format = new SqlFormatter(sql.toString(), max);
-			return format.format().trim();
+			return format.getFormattedSql().trim();
 		}
 		catch (Exception e)
 		{
@@ -175,7 +175,7 @@ public class DeleteScriptGenerator
 			{
 				Map.Entry entry = (Map.Entry)itr.next();
 				String column = (String)entry.getKey();
-				column = this.meta.adjustObjectname(column);
+				column = this.meta.adjustObjectnameCase(column);
 				String parentColumn = (String)entry.getValue();
 				//if (nodeColumn != null && !nodeColumn.equals(column)) continue;
 				if (count > 0) sql.append("\n          AND ");
@@ -220,7 +220,7 @@ public class DeleteScriptGenerator
 		{
 			Map.Entry entry = (Map.Entry)itr.next();
 			String column = (String)entry.getKey();
-			column = this.meta.adjustObjectname(column);
+			column = this.meta.adjustObjectnameCase(column);
 			Object data = entry.getValue();
 			int type = this.getColumnType(tableDefinition, column);
 			if (!first)
@@ -252,7 +252,7 @@ public class DeleteScriptGenerator
 	private void addRootTableWhere(StringBuffer sql, String parentColumn, String childColumn)
 	{
 		Object data = this.columnValues.get(parentColumn);
-		parentColumn = this.meta.adjustObjectname(parentColumn);
+		parentColumn = this.meta.adjustObjectnameCase(parentColumn);
 
 		int type = this.getColumnType(tableDefinition, parentColumn);
 		sql.append(SqlUtil.quoteObjectname(childColumn));

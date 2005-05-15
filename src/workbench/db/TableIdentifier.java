@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.db;
@@ -16,9 +16,10 @@ import workbench.util.SqlUtil;
 
 /**
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class TableIdentifier
+	implements Comparable
 {
 	private String tablename;
 	private String schema;
@@ -26,7 +27,8 @@ public class TableIdentifier
 	private String expression;
 	private boolean isNewTable = false;
 	private String pkName;
-
+	private String type;
+	
 	public TableIdentifier(String aName)
 	{
 		this.expression = null;
@@ -60,6 +62,18 @@ public class TableIdentifier
 		this.setSchema(aSchema);
 	}
 
+	public TableIdentifier createCopy()
+	{
+		TableIdentifier copy = new TableIdentifier();
+		copy.isNewTable = this.isNewTable;
+		copy.pkName = this.pkName;
+		copy.schema = this.schema;
+		copy.tablename = this.tablename;
+		copy.catalog = this.catalog;
+		copy.expression = null;
+		return copy;
+	}
+	
 	public String getTableExpression()
 	{
 		if (this.expression == null) this.initExpression();
@@ -113,6 +127,24 @@ public class TableIdentifier
 		return result.toString();
 	}
 
+	public void adjustCase(WbConnection conn)
+	{
+		DbMetadata meta = conn.getMetadata();
+		if (meta.storesUpperCaseIdentifiers())
+		{
+			if (this.tablename != null) this.tablename = this.tablename.toUpperCase();
+			if (this.schema != null) this.schema = this.schema.toUpperCase();
+			if (this.catalog != null) this.catalog = this.catalog.toUpperCase();
+		}
+		else if (meta.storesLowerCaseIdentifiers())
+		{
+			if (this.tablename != null) this.tablename = this.tablename.toLowerCase();
+			if (this.schema != null) this.schema = this.schema.toLowerCase();
+			if (this.catalog != null) this.catalog = this.catalog.toLowerCase();
+		}
+		this.expression = null;
+	}
+	
 	public String getTable() { return this.tablename; }
 
 	public void setTable(String aTable)
@@ -199,6 +231,16 @@ public class TableIdentifier
 		this.isNewTable = flag;
 	}
 
+	public int compareTo(Object other)
+	{
+		if (other instanceof TableIdentifier)
+		{
+			TableIdentifier t = (TableIdentifier)other;
+			return this.getTableExpression().compareTo(t.getTableExpression());
+		}
+		return -1;
+	}
+	
 	public boolean equals(Object other)
 	{
 		if (other instanceof TableIdentifier)
@@ -230,5 +272,15 @@ public class TableIdentifier
 	public void setPrimaryKeyName(String name)
 	{
 		this.pkName = name;
+	}
+
+	public String getType()
+	{
+		return type;
+	}
+
+	public void setType(String type)
+	{
+		this.type = type;
 	}
 }

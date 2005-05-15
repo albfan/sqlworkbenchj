@@ -17,4 +17,6 @@ public interface StatusBar
 {
 	void setStatusMessage(String message);
 	void clearStatusMessage();
+	void repaint();
+	String getText();
 }

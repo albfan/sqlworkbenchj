@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.sql.wbcommands;
@@ -33,7 +33,7 @@ import workbench.util.StringUtil;
 
 /**
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class WbSchemaReport
 	extends SqlCommand
@@ -235,7 +235,7 @@ public class WbSchemaReport
 			String table = (String)l.get(i);
 			if (table == null) continue;
 			if (table.trim().length() == 0) continue;
-			table = this.currentConnection.getMetadata().adjustObjectname(table);
+			table = this.currentConnection.getMetadata().adjustObjectnameCase(table);
 			result[i] = new TableIdentifier(table);
 		}
 		return result;

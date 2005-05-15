@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.gui;
@@ -68,6 +68,8 @@ import workbench.gui.actions.FileNewWindowAction;
 import workbench.gui.actions.LoadWorkspaceAction;
 import workbench.gui.actions.ManageDriversAction;
 import workbench.gui.actions.ManageMacroAction;
+import workbench.gui.actions.NewDbExplorerPanelAction;
+import workbench.gui.actions.NewDbExplorerWindowAction;
 import workbench.gui.actions.RemoveTabAction;
 import workbench.gui.actions.RunMacroAction;
 import workbench.gui.actions.SaveAsNewWorkspaceAction;
@@ -95,6 +97,7 @@ import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.FilenameChangeListener;
 import workbench.interfaces.MacroChangeListener;
 import workbench.interfaces.MainPanel;
+import workbench.interfaces.ToolWindow;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -113,7 +116,7 @@ import workbench.gui.actions.FileSaveProfiles;
  * {@link workbench.gui.dbobjects.DbExplorerPanel} might also be displayed 
  * inside the JTabbedPane
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class MainWindow
 	extends JFrame
@@ -128,17 +131,19 @@ public class MainWindow
 	private ConnectionProfile currentProfile;
 	private ConnectionSelector connectionSelector;
 
-	private DbExplorerPanel dbExplorerPanel;
+	//private DbExplorerPanel dbExplorerPanel;
+	//private boolean dbExplorerTabVisible = false;
 
 	private FileDisconnectAction disconnectAction;
 	private ShowDbExplorerAction dbExplorerAction;
+	private NewDbExplorerPanelAction newDbExplorerPanel;
+	private NewDbExplorerWindowAction newDbExplorerWindow;
 
 	private WbTabbedPane sqlTab = new WbTabbedPane();
 	private WbToolbar currentToolbar;
 	private ArrayList panelMenus = new ArrayList(5);
 	private int nextConnectionId = 0;
 
-	private boolean dbExplorerTabVisible = false;
 	private String currentWorkspaceFile = null;
 
 	private CloseWorkspaceAction closeWorkspaceAction;
@@ -159,6 +164,7 @@ public class MainWindow
 
 	private AddMacroAction createMacro;
 	private ManageMacroAction manageMacros;
+	private List explorerWindows = new ArrayList();
 
 	private int runningJobs = 0;
 
@@ -192,12 +198,6 @@ public class MainWindow
 
 		this.addTab(false, false);
 
-		Settings s = Settings.getInstance();
-		if (s.getShowDbExplorerInMainWindow() &&
-				s.getDbExplorerVisible())
-		{
-			this.addDbExplorerTab();
-		}
 		// this necessary to initialize the size of the panel!
 		// so that sql.initDefaults() will actually be able to
 		// to set the divider at 50%
@@ -207,9 +207,6 @@ public class MainWindow
 
 		this.sqlTab.setSelectedIndex(0);
 		this.updateGuiForTab(0);
-
-		SqlPanel sql = (SqlPanel)this.getSqlPanel(0);
-		sql.initDefaults();
 
 		this.updateWindowTitle();
 		this.checkWorkspaceActions();
@@ -287,13 +284,19 @@ public class MainWindow
 
 	private void initMenu()
 	{
-		this.dbExplorerAction = new ShowDbExplorerAction(this);
-		this.dbExplorerAction.setEnabled(false);
-
 		this.createMacro = new AddMacroAction();
 		this.createMacro.setEnabled(false);
 		this.manageMacros = new ManageMacroAction(this);
 
+		this.dbExplorerAction = new ShowDbExplorerAction(this);
+		this.dbExplorerAction.setEnabled(false);
+
+		this.newDbExplorerPanel = new NewDbExplorerPanelAction(this);
+		this.newDbExplorerPanel.setEnabled(false);
+
+		this.newDbExplorerWindow = new NewDbExplorerWindowAction(this);
+		this.newDbExplorerWindow.setEnabled(false);
+		
 		int tabCount = this.sqlTab.getTabCount();
 		for (int tab=0; tab < tabCount; tab ++)
 		{
@@ -540,16 +543,22 @@ public class MainWindow
 	public String[] getPanelLabels()
 	{
 		int tabCount = this.sqlTab.getTabCount();
-		if (this.dbExplorerTabVisible)
-		{
-			tabCount --;
-		}
 
-		String[] result = new String[tabCount];
-
+		int realCount = 0;
+		ArrayList titles = new ArrayList(tabCount);
 		for (int i=0; i < tabCount; i++)
 		{
-			result[i] = this.sqlTab.getTitleAt(i);
+			Component c = this.sqlTab.getComponentAt(i);
+			if (c instanceof SqlPanel)
+			{
+				titles.add(this.sqlTab.getTitleAt(i));
+			}
+		}
+		
+		String[] result = new String[titles.size()];
+		for (int i=0; i < titles.size(); i++)
+		{
+			result[i] = (String)titles.get(i);
 		}
 		return result;
 	}
@@ -761,7 +770,7 @@ public class MainWindow
     // if the DbExplorer should be displayed as a tab
     // it will be restored the next time if is't visible when
     // closing the window
-		sett.setDbExplorerVisible(this.dbExplorerTabVisible);
+		//sett.setDbExplorerVisible(this.dbExplorerTabVisible);
 
 		int state = this.getExtendedState();
 		sett.setProperty(this.getClass().getName(), "state", state);
@@ -771,14 +780,15 @@ public class MainWindow
 			sett.storeWindowPosition(this);
 			sett.storeWindowSize(this);
 		}
-		if (dbExplorerPanel != null)
-		{
-			this.dbExplorerPanel.saveSettings();
-      if (this.dbExplorerPanel.getWindow() != null)
-      {
-        this.dbExplorerPanel.getWindow().saveSettings();
-      }
-		}
+		
+//		if (dbExplorerPanel != null)
+//		{
+//			this.dbExplorerPanel.saveSettings();
+//      if (this.dbExplorerPanel.getWindow() != null)
+//      {
+//        this.dbExplorerPanel.getWindow().saveSettings();
+//      }
+//		}
 	}
 
 	public void fileNameChanged(Object sender, String newFilename)
@@ -810,10 +820,10 @@ public class MainWindow
 
 	public void windowDeiconified(WindowEvent windowEvent)
 	{
-		if (this.dbExplorerPanel != null)
-		{
-			this.dbExplorerPanel.mainWindowDeiconified();
-		}
+//		if (this.dbExplorerPanel != null)
+//		{
+//			this.dbExplorerPanel.mainWindowDeiconified();
+//		}
 	}
 
 	public void windowClosing(WindowEvent windowEvent)
@@ -859,10 +869,10 @@ public class MainWindow
 
 	public void windowIconified(WindowEvent windowEvent)
 	{
-		if (this.dbExplorerPanel != null)
-		{
-			this.dbExplorerPanel.mainWindowIconified();
-		}
+//		if (this.dbExplorerPanel != null)
+//		{
+//			this.dbExplorerPanel.mainWindowIconified();
+//		}
 	}
 
 	/**
@@ -949,7 +959,11 @@ public class MainWindow
 		}
 		this.setMacroMenuEnabled(true);
 		this.updateWindowTitle();
+		
 		this.dbExplorerAction.setEnabled(true);
+		this.newDbExplorerPanel.setEnabled(true);
+		this.newDbExplorerWindow.setEnabled(true);
+		
 		this.disconnectAction.setEnabled(true);
 		selectCurrentEditorLater();
 		this.getCurrentPanel().clearLog();
@@ -968,6 +982,8 @@ public class MainWindow
 		this.setMacroMenuEnabled(false);
 		this.updateWindowTitle();
 		this.dbExplorerAction.setEnabled(false);
+		this.newDbExplorerPanel.setEnabled(false);
+		this.newDbExplorerWindow.setEnabled(false);
 		this.disconnectAction.setEnabled(false);
 		try
 		{
@@ -1200,22 +1216,7 @@ public class MainWindow
 		{
 			ConnectionMgr mgr = ConnectionMgr.getInstance();
 			WbConnection conn = null;
-
-			if (this.dbExplorerPanel != null)
-			{
-				// the Explorer panel will not be included in the following loop
-				// if it was opened in a separate window.
-				// Closing the dbExplorer should be done before closing the
-				// SQL Tabs
-				conn = this.dbExplorerPanel.getConnection();
-				if (conn != null) mgr.disconnect(conn.getId());
-
-				// disconnect will close the window as well!
-				this.dbExplorerPanel.disconnect();
-				this.dbExplorerPanel.dispose();
-				this.dbExplorerPanel = null;
-			}
-
+			
 			for (int i=0; i < this.sqlTab.getTabCount(); i++)
 			{
 				final MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
@@ -1234,6 +1235,7 @@ public class MainWindow
 				if (conn != null) mgr.disconnect(conn.getId());
 				sql.disconnect();
 			}
+			this.closeExplorerWindows(true);
 		}
 		finally
 		{
@@ -1256,7 +1258,9 @@ public class MainWindow
 		this.setMacroMenuEnabled(false);
 		this.updateWindowTitle();
 		this.disconnectAction.setEnabled(false);
-		if (this.dbExplorerAction != null) this.dbExplorerAction.setEnabled(false);
+		this.dbExplorerAction.setEnabled(false);
+		this.newDbExplorerPanel.setEnabled(false);
+		this.newDbExplorerWindow.setEnabled(false);
 		this.clearConnectInProgress();
 		this.showStatusMessage("");
 	}
@@ -1377,19 +1381,19 @@ public class MainWindow
 		this.currentConnection = con;
 		if (this.currentProfile == null) this.currentProfile = con.getProfile();
 
-		if (this.dbExplorerPanel != null && !explorerIncluded)
-		{
-			try
-			{
-				this.dbExplorerPanel.setConnection(con, this.currentProfile.getName());
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError(this, "Could not set connection for DbExplorerWindow", e);
-				this.dbExplorerPanel.disconnect();
-				this.dbExplorerPanel = null;
-			}
-		}
+//		if (this.dbExplorerPanel != null && !explorerIncluded)
+//		{
+//			try
+//			{
+//				this.dbExplorerPanel.setConnection(con, this.currentProfile.getName());
+//			}
+//			catch (Exception e)
+//			{
+//				LogMgr.logError(this, "Could not set connection for DbExplorerWindow", e);
+//				this.dbExplorerPanel.disconnect();
+//				this.dbExplorerPanel = null;
+//			}
+//		}
 	}
 
 	public void selectConnection()
@@ -1585,112 +1589,108 @@ public class MainWindow
 		return conn;
 	}
 
-	private void createDbExplorerPanel()
+	public void addDbExplorerTab(DbExplorerPanel explorer)
 	{
-		if (this.dbExplorerPanel == null)
-		{
-			int count = this.sqlTab.getTabCount() + 1;
-			this.dbExplorerPanel = new DbExplorerPanel(this, count);
-			this.dbExplorerPanel.restoreSettings();
-		}
-	}
-	public void addDbExplorerTab()
-	{
-		this.createDbExplorerPanel();
-		JMenuBar dbmenu = this.createMenuForPanel(this.dbExplorerPanel);
+		JMenuBar dbmenu = this.createMenuForPanel(explorer);
 
-		this.sqlTab.add(this.dbExplorerPanel);
-		this.dbExplorerPanel.setTabTitle(this.sqlTab, this.sqlTab.getTabCount() - 1);
+		this.sqlTab.add(explorer);
+		explorer.setTabTitle(this.sqlTab, this.sqlTab.getTabCount() - 1);
 
 		SelectTabAction action = new SelectTabAction(this.sqlTab, this.sqlTab.getTabCount() - 1);
 
 		this.panelMenus.add(dbmenu);
 		this.addToViewMenu(action);
-		this.dbExplorerTabVisible = true;
 	}
 
 	/**
-	 *	Displays the DbExplorer. Either in a separate tab,
-	 *  or as a new window.
+	 * Displays the DbExplorer. Either in a separate tab,
+	 * or as a new window. If an explorer is already open, 
+	 * that instance will be re-used
 	 */
 	public void showDbExplorer()
 	{
-		this.createDbExplorerPanel();
-		if (Settings.getInstance().getShowDbExplorerInMainWindow())
+		boolean useTab = Settings.getInstance().getShowDbExplorerInMainWindow();
+		if (useTab)
 		{
-			Component c = this.sqlTab.getComponentAt(this.sqlTab.getTabCount() - 1);
-			if (!(c instanceof DbExplorerPanel))
+			int count = this.sqlTab.getTabCount();
+			for (int i=count - 1; i > 0; i--)
 			{
-				this.addDbExplorerTab();
-				// we cannot activate the tab yet, as that will trigger
-				// the connection process, and we want to control
-				// that here, so that a separate thread can be used
-				this.dbExplorerTabVisible = true;
+				Component c = this.sqlTab.getComponentAt(i);
+				if (c instanceof DbExplorerPanel) 
+				{
+					this.selectTab(i);
+					return;
+				}
 			}
-			this.sqlTab.setSelectedIndex(this.sqlTab.getTabCount() - 1);
+		}
+		else 
+		{
+			if (this.explorerWindows.size() > 0)
+			{
+				DbExplorerPanel p = (DbExplorerPanel)this.explorerWindows.get(0);
+				p.activateWindow();
+				return;
+			}
+		}
+		// no explorer window or tab found --> create a new one
+		if (useTab)
+		{
+			this.newDbExplorerPanel();
 		}
 		else
 		{
-			this.dbExplorerPanel.openWindow(this.currentProfile.getName());
-			this.dbExplorerTabVisible = false;
-
-			// connecting can be pretty time consuming on a slow system
-			// so move it into its own thread...
-			if (!this.dbExplorerPanel.isConnected())
-			{
-				Thread t = new Thread()
-				{
-					public void run()
-					{
-						setConnectionForDbExplorer();
-					}
-				};
-				t.setDaemon(true);
-				t.setName("DbExplorer connection thread");
-				t.start();
-			}
+			this.newDbExplorerWindow();
 		}
 	}
-
-	/**
-	 *	Set the connection for the current DbExplorer. This is started
-	 *  as a separate thread from showDbExplorer() in order not to block
-	 *  the AWT thread.
-	 */
-	private void setConnectionForDbExplorer()
+	
+	public void closeExplorerWindows(boolean doDisconnect)
 	{
-		try
+		for (int i=0; i < this.explorerWindows.size(); i++)
 		{
-			WbConnection conn = this.getConnectionForTab(this.dbExplorerPanel);
-
-			dbExplorerPanel.setConnection(conn);
-			if (dbExplorerTabVisible)
+			DbExplorerPanel p = (DbExplorerPanel)this.explorerWindows.get(i);
+			
+			if (doDisconnect) 
 			{
-				sqlTab.setSelectedIndex(sqlTab.getTabCount() - 1);
-				if (Settings.getInstance().getRetrieveDbExplorer())
+				WbConnection conn = p.getConnection();
+				if (conn != this.currentConnection)
 				{
-					dbExplorerPanel.startRetrieve();
+					ConnectionMgr.getInstance().disconnect(conn.getId());
 				}
 			}
-			dbExplorerPanel.updateUI();
-		}
-		catch (Exception e)
-		{
-			String error = ExceptionUtil.getDisplay(e);
-			String msg = ResourceMgr.getString("ErrorExplorerConnectFailed").replaceAll("%msg%", error.trim());
-			WbSwingUtilities.showErrorMessage(this.dbExplorerPanel, msg);
-			LogMgr.logError("MainWindow.showDbExplorer()", "Error getting new connection for DbExplorer tab. Using connection from current panel", e);
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					dbExplorerPanel.setConnection(getCurrentPanel().getConnection());
-					dbExplorerPanel.updateUI();
-				}
-			});
+			p.disconnect();
+			p.closeWindow();
 		}
 	}
-
+	public void newDbExplorerWindow()
+	{
+		DbExplorerPanel explorer = new DbExplorerPanel(this);
+		explorer.restoreSettings();
+		explorer.openWindow(this.currentProfile.getName());
+		if (this.currentProfile.getUseSeparateConnectionPerTab() || this.currentConnection == null)
+		{
+			explorer.connect(this.currentProfile);
+		}
+		else
+		{
+			explorer.setConnection(this.currentConnection);
+		}
+		this.explorerWindows.add(explorer);
+	}
+	
+	public void explorerWindowClosed(DbExplorerPanel p)
+	{
+		this.explorerWindows.remove(p);
+	}
+	
+	public void newDbExplorerPanel()
+	{
+		DbExplorerPanel explorer = new DbExplorerPanel(this);
+		explorer.restoreSettings();
+		this.addDbExplorerTab(explorer);
+		// Switching to the new tab will initiate the connection if necessary
+		this.sqlTab.setSelectedIndex(this.sqlTab.getTabCount() - 1);
+	}
+	
 	public ConnectionProfile getCurrentProfile() { return this.currentProfile; }
 	public String getCurrentProfileName()
 	{
@@ -1725,13 +1725,22 @@ public class MainWindow
 		return result;
 	}
 
+	/**
+	 * Create the tools menu for a panel menu. This will be called
+	 * for each panel that gets added to the main window.
+	 * Actions that are singletons (like the db explorer stuff
+	 * should not be created here)
+	 */
 	public JMenu buildToolsMenu()
 	{
 		JMenu result = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_TOOLS));
 		result.setName(ResourceMgr.MNU_TXT_TOOLS);
 
 		result.add(this.dbExplorerAction);
-
+		result.add(this.newDbExplorerPanel);
+		result.add(this.newDbExplorerWindow);
+		result.addSeparator();
+		
 		DataPumperAction pumper = new DataPumperAction(this);
 		result.add(pumper);
 
@@ -1852,7 +1861,6 @@ public class MainWindow
 		try
 		{
 			int tabCount = this.sqlTab.getTabCount();
-			if (this.dbExplorerTabVisible) tabCount --;
 
 			if (newCount > tabCount)
 			{
@@ -1865,7 +1873,7 @@ public class MainWindow
 			{
 				for (int i=0; i < (tabCount - newCount); i++)
 				{
-					this.removeLastTab();
+					this.removeLastTab(newCount == 1);
 				}
 			}
 		}
@@ -2118,10 +2126,11 @@ public class MainWindow
 	{
 		int index = this.sqlTab.getTabCount();
 
-		if (index > 0 && this.getSqlPanel(index - 1) instanceof DbExplorerPanel)
+		while (index > 0 && this.getSqlPanel(index - 1) instanceof DbExplorerPanel)
 		{
 			index --;
 		}
+		
 		SqlPanel sql = new SqlPanel(index + 1);
 		sql.addDbExecutionListener(this);
 		sql.addFilenameChangeListener(this);
@@ -2158,34 +2167,34 @@ public class MainWindow
 	}
 
 	/**
-	 *	Sets the tible of a tab and appends the index number to
+	 *	Sets the title of a tab and appends the index number to
 	 *  the title, so that a shortcut Ctrl-n can be defined
 	 */
 	private void setTabTitle(int anIndex, String aName)
 	{
 		MainPanel p = this.getSqlPanel(anIndex);
-		if (p instanceof SqlPanel)
-		{
-			SqlPanel sql = (SqlPanel)p;
-			sql.setTabName(aName);
-			sql.setTabTitle(this.sqlTab, anIndex);
-		}
+		p.setTabName(aName);
+		p.setTabTitle(this.sqlTab, anIndex);
 		this.updateViewMenu(anIndex, aName);
 	}
 
-	public void removeLastTab()
+	public void removeLastTab(boolean includeExplorer)
 	{
 		int index = this.sqlTab.getTabCount() - 1;
-		MainPanel p = this.getSqlPanel(index);
-		if (p instanceof DbExplorerPanel)
-			index --;
+		MainPanel p;
+		if (!includeExplorer)
+		{
+			while ((p = this.getSqlPanel(index)) instanceof DbExplorerPanel)
+			{
+				index --;
+			}
+		}
 		this.removeTab(index);
 	}
 
 	public boolean canCloseTab()
 	{
 		int numTabs = this.sqlTab.getTabCount();
-		if (this.dbExplorerTabVisible) numTabs --;
 		return numTabs > 1;
 	}
 
@@ -2240,34 +2249,26 @@ public class MainWindow
 		try
 		{
 			this.tabRemovalInProgress = true;
-
-			if (this.currentProfile != null && this.currentProfile.getUseSeperateConnectionPerTab())
-			{
-				WbConnection conn = panel.getConnection();
-				if (conn != null)
-				{
-					final String id = conn.getId();
-					Thread t = new WbThread("Disconnect thread for " + id)
-					{
-						public void run()
-						{
-							ConnectionMgr.getInstance().disconnect(id);
-						}
-					};
-					t.start();
-				}
-			}
-
-			if (panel instanceof DbExplorerPanel)
-			{
-				((DbExplorerPanel)panel).saveSettings();
-				this.dbExplorerTabVisible = false;
-				this.dbExplorerPanel = null;
-			}
-
+			WbConnection conn = panel.getConnection();
+			
+			panel.saveSettings();
 			panel.disconnect();
 			panel.dispose();
-
+			
+			if (this.currentProfile != null && this.currentProfile.getUseSeperateConnectionPerTab()
+			   && conn != null)
+			{
+				final String id = conn.getId();
+				Thread t = new WbThread("Panel " + panel.getId() + " disconnect thread")
+				{
+					public void run()
+					{
+						ConnectionMgr.getInstance().disconnect(id);
+					}
+				};
+				t.start();
+			}				
+			
 			this.panelMenus.remove(index);
 			this.sqlTab.remove(index);
 			this.removeFromViewMenu(index);
@@ -2314,17 +2315,7 @@ public class MainWindow
 				String className = (String)item.getClientProperty("class");
 				try
 				{
-					Settings.getInstance().setLookAndFeelClass(className);
-					UIManager.setLookAndFeel(className);
-					SwingUtilities.updateComponentTreeUI(this);
-					if (this.dbExplorerPanel != null)
-					{
-						DbExplorerWindow win = this.dbExplorerPanel.getWindow();
-						if (win != null)
-						{
-							SwingUtilities.updateComponentTreeUI(win);
-						}
-					}
+					WbManager.getInstance().changeLookAndFeel(className);
 					for (int i=0; i < this.sqlTab.getTabCount(); i ++)
 					{
 						JMenuBar menu = (JMenuBar)this.panelMenus.get(i);

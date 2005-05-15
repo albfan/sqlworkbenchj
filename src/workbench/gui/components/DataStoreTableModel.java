@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.gui.components;
@@ -29,11 +29,9 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.WbThread;
 
-
-
 /**
  * TableModel for displaying the contents of a {@link workbench.storage.DataStore }
- * @author info@sql-workbench.net
+ * @author support@sql-workbench.net
  *
  */
 public class DataStoreTableModel
@@ -265,6 +263,7 @@ public class DataStoreTableModel
 		this.fireTableRowsInserted(row, row);
 		return row;
 	}
+	
 	public void deleteRow(int aRow)
 	{
 		this.dataCache.deleteRow(aRow);
@@ -339,11 +338,24 @@ public class DataStoreTableModel
 		}
 	}
 
+	
+	/**
+	 * Clear the locked column. After a call to clearLockedColumn()
+	 * all columns (except the status column) are editable 
+	 * when the table is in edit mode.
+	 * @see setLockedColumn(int)
+	 */
 	public void clearLockedColumn()
 	{
 		this.lockColumn = -1;
 	}
 
+	/**
+	 * Define a column that may not be edited even if the 
+	 * table is in "Edit mode"
+	 * @param the column to be set as non-editable
+	 * @see clearLockedColumn()
+	 */
 	public void setLockedColumn(int column)
 	{
 		this.lockColumn = column;
@@ -354,8 +366,8 @@ public class DataStoreTableModel
 		this.allowEditing = aFlag;
 	}
 
-	/**    Return true if the data is sorted in ascending order.
-	 *
+	/** 
+	 * Return true if the data is sorted in ascending order.
 	 * @return True if sorted in ascending order
 	 */
 	public boolean isSortAscending()
@@ -363,12 +375,19 @@ public class DataStoreTableModel
 		return sortAscending;
 	}
 
+	/**
+	 * Return the current sort column
+	 * @return the index of the current sort column or -1 if not sorted
+	 */
 	public int getSortColumn()
 	{
-		if (this.sortColumn == -1) return -1;
 		return this.sortColumn;
 	}
 
+	/**
+	 * Sort the data by the given column. If the data is already
+	 * sorted by this column, then the sort order will be reversed
+	 */
 	public void sortByColumn(int column)
 	{
 		boolean ascending = true;
@@ -376,6 +395,9 @@ public class DataStoreTableModel
 		sortByColumn(column, ascending);
 	}
 
+	/**
+	 * Sort the data by the given column in the defined order
+	 */
 	public void sortByColumn(int aColumn, boolean ascending)
 	{
 		this.sortAscending = ascending;
@@ -417,25 +439,28 @@ public class DataStoreTableModel
 		if (sortingInProgress) return;
 
 		final DataStoreTableModel model = this;
+		WbSwingUtilities.showWaitCursor(table);
+		WbSwingUtilities.showWaitCursor(table.getTableHeader());
 		Thread t = new WbThread("Data Sort")
 		{
 			public void run()
 			{
 				sortingInProgress = true;
-				table.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				//table.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				model.sortByColumn(aColumn, ascending);
-				//table.getTableHeader().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-				table.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-				table.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-				// repaint the header so that the icon is displayed...
-				table.getTableHeader().repaint();
-				sortingInProgress = false;
+				try
+				{
+					table.sortingStarted();
+					model.sortByColumn(aColumn, ascending);
+				}
+				finally
+				{
+					table.sortingFinished();
+					WbSwingUtilities.showDefaultCursor(table);
+					WbSwingUtilities.showDefaultCursor(table.getTableHeader());
+					sortingInProgress = false;
+				}
 			}
 		};
 		t.start();
 	}
-
 
 }

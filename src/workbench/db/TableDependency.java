@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.db;
@@ -23,7 +23,7 @@ import workbench.storage.DataStore;
 
 /**
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class TableDependency
 {
@@ -46,9 +46,9 @@ public class TableDependency
 
 	private void setTableName(String aCatalog, String aSchema, String aTable)
 	{
-		aTable = this.wbMetadata.adjustObjectname(aTable);
-		aCatalog = this.wbMetadata.adjustObjectname(aCatalog);
-		aSchema = this.wbMetadata.adjustObjectname(aSchema);
+		aTable = this.wbMetadata.adjustObjectnameCase(aTable);
+		aCatalog = this.wbMetadata.adjustObjectnameCase(aCatalog);
+		aSchema = this.wbMetadata.adjustObjectnameCase(aSchema);
 		this.theTable = new TableIdentifier(aCatalog, aSchema, aTable);
 	}
 

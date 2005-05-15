@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.db;
@@ -24,7 +24,7 @@ import workbench.util.WbPersistence;
 /**
  *	A class to store a connection definition including non-JDBC properties
  *  specific to the application.
- *	@author info@sql-workbench.net
+ *	@author support@sql-workbench.net
  */
 public class ConnectionProfile
 	implements PropertyChangeListener
@@ -119,8 +119,16 @@ public class ConnectionProfile
 	public void setGlobalProfile(boolean flag) {this.globalProfile = flag; }
 	public boolean isGlobalProfile() { return this.globalProfile; }
 	
-	// Old, incorrectly spelled separate connections flag...
+	/**
+	 * 
+	 * @deprecate Replaced by {@link #setUseSeparateConnectionPerTab(boolean)}
+	 */
 	public void setUseSeperateConnectionPerTab(boolean aFlag) { this.setUseSeparateConnectionPerTab(aFlag); }
+	
+	/**
+	 * 
+	 * @deprecated replaced by {@link #getUseSeparateConnectionPerTab()}
+	 */
 	public boolean getUseSeperateConnectionPerTab() { return this.getUseSeparateConnectionPerTab(); 	}
 
 	public boolean getRollbackBeforeDisconnect()

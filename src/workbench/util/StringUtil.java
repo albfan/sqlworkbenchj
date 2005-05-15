@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.util;
@@ -27,7 +27,7 @@ import workbench.log.LogMgr;
 
 /**
  *
- *	@author  info@sql-workbench.net
+ *	@author  support@sql-workbench.net
  */
 public class StringUtil
 {
@@ -804,11 +804,31 @@ public class StringUtil
 		return buf.toString();
 	}
 
-	public static int findFirstWhiteSpace(String data)
+	public static int findPreviousWhitespace(String data, int pos)
 	{
 		if (data == null) return -1;
 		int count = data.length();
-		for (int i=0; i < count; i++)
+		if (pos > count || pos <= 1) return -1;
+		int index = pos;
+		for (int i=pos; i > 0; i--)
+		{
+			if (Character.isWhitespace(data.charAt(i))) return i;
+		}
+		return -1;
+	}
+	
+	public static int findFirstWhiteSpace(String data)
+	{
+		return findFirstWhiteSpace(data, 0);
+	}
+	
+	public static int findFirstWhiteSpace(String data, int start)
+	{
+		if (start < 0) return -1;
+		if (data == null) return -1;
+		int count = data.length();
+		if (start >= count) return -1;
+		for (int i=start; i < count; i++)
 		{
 			if (Character.isWhitespace(data.charAt(i))) return i;
 		}
@@ -823,6 +843,12 @@ public class StringUtil
 	public static int findPattern(String regex, String data, int startAt)
 	{
 		Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+		return findPattern(p, data, startAt);
+	}
+	
+	public static int findPattern(Pattern p, String data, int startAt)
+	{
+		if (startAt < 0) return -1;
 		Matcher m = p.matcher(data);
 		int result = -1;
 		if (m.find(startAt)) result = m.start();

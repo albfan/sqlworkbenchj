@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.resource;
@@ -47,7 +47,7 @@ import workbench.util.WbProperties;
 
 /**
  *
- *	@author  info@sql-workbench.net
+ *	@author  support@sql-workbench.net
  */
 public class Settings
 {
@@ -1118,12 +1118,12 @@ public class Settings
 	{
 		return this.getBoolProperty("workbench.editor.rightclickmovescursor", false);
 	}
-	
+
 	public void setRightClickMovesCursor(boolean flag)
 	{
 		this.props.setProperty("workbench.editor.rightclickmovescursor", Boolean.toString(flag));
 	}
-	
+
 	public int getMaxColumnWidth()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.maxcolwidth", "500"));
@@ -1171,7 +1171,7 @@ public class Settings
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.display.maxfractiondigits", "2"));
 	}
-	
+
 	public void setMaxFractionDigits(int aValue)
 	{
 		this.props.setProperty("workbench.gui.display.maxfractiondigits", Integer.toString(aValue));
@@ -1199,7 +1199,7 @@ public class Settings
 			this.defaultFormatter.setMaximumFractionDigits(maxDigits);
 		}
 	}
-	
+
 	public String getDecimalSymbol()
 	{
 		return this.props.getProperty("workbench.gui.display.decimal.separator", ".");
@@ -1320,6 +1320,11 @@ public class Settings
 	public void setConsolidateLogMsg(boolean aFlag)
 	{
 		this.props.setProperty("workbench.gui.log.consolidate", Boolean.toString(aFlag));
+	}
+
+	public boolean getUseCollator()
+	{
+		return this.getBoolProperty("workbench.sort.usecollator", false);
 	}
 
 	public String getSortLanguage()
@@ -1449,24 +1454,24 @@ public class Settings
 		return StringUtil.getIntValue(value);
 	}
 
-	public void setDbExplorerVisible(boolean aFlag)
+	public String getAutoCompletionPasteCase()
 	{
-		this.props.setProperty("workbench.dbexplorer.visible", Boolean.toString(aFlag));
+		return getProperty("workbench.editor.autocompletion.paste.case", null);
+	}
+
+	public boolean getUseAutoCompletion()
+	{
+		return getBoolProperty("workbench.editor.autocompletion.enabled", true);
 	}
 
 	public boolean getDbExplorerClearDataOnClose()
 	{
-		return "true".equals(this.props.getProperty("workbench.dbexplorer.cleardata", "true"));
+		return getBoolProperty("workbench.dbexplorer.cleardata", true);
 	}
 
 	public boolean disconnectDbExplorerOnClose()
 	{
-		return "true".equals(this.props.getProperty("workbench.dbexplorer.disconnect", "false"));
-	}
-
-	public boolean getDbExplorerVisible()
-	{
-		return "true".equals(this.props.getProperty("workbench.dbexplorer.visible", "false"));
+		return getBoolProperty("workbench.dbexplorer.disconnect", false);
 	}
 
 	public boolean getUseTableTypeList()

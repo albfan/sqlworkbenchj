@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.sql.preparedstatement;
@@ -19,7 +19,7 @@ import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 
 /**
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  *	A class to store the parameters for a PreparedStatement
  */
 public class StatementParameters

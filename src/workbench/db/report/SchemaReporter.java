@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.db.report;
@@ -46,7 +46,7 @@ import workbench.util.WbThread;
 
 /**
  * Generate an report from a selection of database tables
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  *
  */
 public class SchemaReporter
@@ -55,7 +55,7 @@ public class SchemaReporter
 	private WbConnection dbConn;
 	private ArrayList tables;
 	private String xmlNamespace;
-	private String[] types = DbMetadata.TABLE_TYPE_TABLE;
+	private String[] types = DbMetadata.TABLE_TYPES_TABLE;
 	private List schemas;
 
 	private TagWriter tagWriter = new TagWriter();

@@ -6,47 +6,52 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.util;
 
+import workbench.db.TableIdentifier;
+
 /**
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class TableAlias
 {
-	private final String table;
+	private final TableIdentifier table;
 	private final String alias;
 	private String display;
 	
 	public TableAlias(String value)
 	{
+		String tablename = null;
 		int apos = value.indexOf(' ');
 		if (apos > -1)
 		{
-			this.table = value.substring(0, apos);
+			tablename = value.substring(0, apos);
 			this.alias = value.substring(apos + 1);
 		}
 		else
 		{
-			this.table = value;
+			tablename = value;
 			this.alias = null;
 		}
+		this.table = new TableIdentifier(tablename);
+		
 	}
 	
 	public final String getAlias() { return this.alias; }
-	public final String getTable() { return this.table; }
+	public final TableIdentifier getTable() { return this.table; }
 	public final String getNameToUse() 
 	{
-		if (alias == null) return table;
+		if (alias == null) return table.getTable();
 		return alias;
 	}
 	public String toString() 
 	{
 		if (display == null)
 		{
-			if (alias == null) display = table;
+			if (alias == null) display = table.getTable();
 			else display = alias + " (" + table + ")";
 		}
 		return display;
@@ -54,9 +59,14 @@ public class TableAlias
 		
 	public boolean isTableOrAlias(String name)
 	{
+		TableIdentifier tbl = new TableIdentifier(name);
 		if (this.alias == null)
-			return table.equalsIgnoreCase(name);
+		{
+			return table.getTable().equalsIgnoreCase(tbl.getTable());
+		}
 		else
-			return (name.equalsIgnoreCase(table) || name.equalsIgnoreCase(alias));
+		{
+			return (table.getTable().equalsIgnoreCase(tbl.getTable()) || name.equalsIgnoreCase(alias));
+		}
 	}
 }

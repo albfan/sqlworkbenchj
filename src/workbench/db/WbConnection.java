@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.db;
@@ -34,7 +34,7 @@ import workbench.util.StringUtil;
 
 /**
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class WbConnection
 {
@@ -54,7 +54,8 @@ public class WbConnection
 	private boolean cancelNeedsReconnect = false;
 	
 	private List listeners;
-
+	private DbObjectCache objectCache;
+	
 	/** Creates a new instance of WbConnection */
 	public WbConnection(String anId)
 	{
@@ -89,6 +90,15 @@ public class WbConnection
 			this.pool = new PreparedStatementPool(this);
 		}
 		return this.pool;
+	}
+	
+	public DbObjectCache getObjectCache()
+	{
+		if (this.objectCache == null)
+		{
+			this.objectCache = new DbObjectCache(this);
+		}
+		return this.objectCache;
 	}
 	
 	public String getCurrentUser()

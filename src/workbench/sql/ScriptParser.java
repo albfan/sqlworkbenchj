@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.sql;
@@ -30,7 +30,7 @@ import workbench.util.StrBuffer;
  * in the script. The actual parsing is done by using an instance
  * of {@link IteratingScriptParser}
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class ScriptParser
 	implements Iterator
@@ -44,7 +44,8 @@ public class ScriptParser
 	private int currentIteratorIndex = 0;
 	private boolean checkEscapedQuotes = true;
 	private IteratingScriptParser iteratingParser = null;
-
+	private boolean emptyLineIsSeparator = false;
+	
 	/** Create a ScriptParser
 	 *
 	 *	The actual script needs to be specified with setScript()
@@ -63,6 +64,7 @@ public class ScriptParser
 	{
 		this(f, null);
 	}
+	
 	/**
 	 *	Initialize a ScriptParser from a file.
 	 *	The delimiter will be evaluated dynamically
@@ -70,8 +72,22 @@ public class ScriptParser
 	public ScriptParser(File f, String encoding)
 		throws IOException
 	{
-		if (!f.exists()) throw new FileNotFoundException(f.getName() + " not found");
+		setFile(f, encoding);
+	}
 
+	public void setFile(File f)
+		throws IOException
+	{
+		setFile(f, null);
+	}
+	/**
+	 * Define the source file for this ScriptParser.
+	 * Depending on the size the file might be read into memory or not
+	 */
+	public void setFile(File f, String encoding)
+		throws IOException
+	{
+		if (!f.exists()) throw new FileNotFoundException(f.getName() + " not found");
 		
 		if (f.length() < Settings.getInstance().getInMemoryScriptSizeThreshold())
 		{
@@ -82,9 +98,10 @@ public class ScriptParser
 		{
 			this.iteratingParser = new IteratingScriptParser(f, encoding);
 			this.iteratingParser.setCheckEscapedQuotes(this.checkEscapedQuotes);
+			this.iteratingParser.allowEmptyLineAsSeparator(this.emptyLineIsSeparator);
 		}
 	}
-
+	
 	public void readScriptFromFile(File f)
 		throws IOException
 	{
@@ -129,6 +146,15 @@ public class ScriptParser
 		this.setScript(aScript);
 	}
 
+	public void allowEmptyLineAsSeparator(boolean flag)
+	{
+		this.emptyLineIsSeparator = flag;
+		if (this.iteratingParser != null)
+		{
+			this.iteratingParser.allowEmptyLineAsSeparator(this.emptyLineIsSeparator);
+		}
+	}
+	
 	/**
 	 *	Define the script to be parsed.
 	 *	The delimiter to be used will be checked automatically
@@ -183,6 +209,20 @@ public class ScriptParser
 		this.delimiterLength = this.delimiter.length();
 	}
 
+	/**
+	 * Return the index from the overall script mapped to the 
+	 * index inside the specified command. For a single command
+	 * script scriptCursorLocation will be the same as 
+	 * the location inside the dedicated command.
+	 * @param commandIndex the index for the command to check
+	 * @param cursorPos the index in the overall script
+	 * @return the relative index inside the command
+	 */
+	public int getIndexInCommand(int commandIndex, int cursorPos)
+	{
+		int start = this.getStartPosForCommand(commandIndex);
+		return (cursorPos - start);
+	}
 	/**
 	 *	Return the command index for the command which is located at
 	 *	the given index of the current script.
@@ -322,6 +362,7 @@ public class ScriptParser
 	{
 		this.commands = new ArrayList();
 		IteratingScriptParser p = new IteratingScriptParser();
+		p.allowEmptyLineAsSeparator(this.emptyLineIsSeparator);
 		p.setScript(this.originalScript);
 		p.setDelimiter(this.delimiter);
 		p.setCheckEscapedQuotes(this.checkEscapedQuotes);

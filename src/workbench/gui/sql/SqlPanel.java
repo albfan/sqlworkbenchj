@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.gui.sql;
@@ -53,9 +53,11 @@ import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.exception.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.AutoCompletionAction;
 import workbench.gui.actions.AutoJumpNextStatement;
 import workbench.gui.actions.CheckPreparedStatementsAction;
 import workbench.gui.actions.CleanJavaCodeAction;
+import workbench.gui.actions.ClearCompletionCacheAction;
 import workbench.gui.actions.CommitAction;
 import workbench.gui.actions.CopyAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopyAsSqlInsertAction;
@@ -103,6 +105,7 @@ import workbench.gui.actions.ToggleAutoCommitAction;
 import workbench.gui.actions.UndoAction;
 import workbench.gui.actions.UndoExpandAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.completion.CompletionHandler;
 import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.ExtensionFileFilter;
@@ -152,7 +155,7 @@ import workbench.util.WbWorkspace;
  *	A panel with an SQL editor (EditorPanel), a log panel and
  *	a panel for displaying SQL results (DwPanel)
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  * @version 1.0
  */
 public class SqlPanel
@@ -199,7 +202,9 @@ public class SqlPanel
 	private PrintAction printDataAction;
 	private PrintPreviewAction printPreviewAction;
 	private CheckPreparedStatementsAction checkPreparedAction;
-
+	private ClearCompletionCacheAction clearCompletionCache;
+	private AutoCompletionAction autoCompletion;
+	
 	private WbMenu copySelectedMenu;
 	private ToggleAutoCommitAction toggleAutoCommit;
 	private CommitAction commitAction;
@@ -330,6 +335,11 @@ public class SqlPanel
 		this.contentPanel.setDividerLocation(loc);
 	}
 
+	public void saveSettings()
+	{
+		// no global settings to store
+	}
+	
 	public void saveSettings(Properties props)
 	{
 		int location = this.contentPanel.getDividerLocation();
@@ -664,7 +674,7 @@ public class SqlPanel
 		this.actions.add(sea);
 		SelectResultAction r = new SelectResultAction(this);
 		this.actions.add(r);
-    this.actions.add(new SelectMaxRowsAction(this));
+        this.actions.add(new SelectMaxRowsAction(this));
 
 		a = new ExpandEditorAction(this);
 		a.setCreateMenuSeparator(true);
@@ -756,7 +766,7 @@ public class SqlPanel
 
 		this.toolbarActions.add(this.executeSelected);
 		this.toolbarActions.add(this.executeCurrent);
-		//this.toolbarActions.add(this.executeAll);
+		
 		this.stopAction.setCreateToolbarSeparator(true);
 		this.toolbarActions.add(this.stopAction);
 		this.toolbarActions.add(this.firstStmtAction);
@@ -782,6 +792,15 @@ public class SqlPanel
 		this.findDataAgainAction = this.data.getTable().getFindAgainAction();
 		this.findDataAgainAction.setEnabled(false);
 
+		if (Settings.getInstance().getUseAutoCompletion())
+		{
+			this.autoCompletion = new AutoCompletionAction(this.editor, this.data.getStatusBar());
+			this.autoCompletion.setCreateMenuSeparator(true);
+			this.actions.add(this.autoCompletion);
+			this.clearCompletionCache = new ClearCompletionCacheAction();
+			this.actions.add(this.clearCompletionCache);
+		}
+		
 		this.formatSql = this.editor.getFormatSqlAction();
 		this.formatSql.setCreateMenuSeparator(true);
 		this.actions.add(this.formatSql);
@@ -1346,6 +1365,9 @@ public class SqlPanel
 		this.dbConnection = aConnection;
 		this.toggleAutoCommit.setConnection(this.dbConnection);
 		
+		if (this.clearCompletionCache != null) this.clearCompletionCache.setConnection(this.dbConnection);
+		if (this.autoCompletion != null) this.autoCompletion.setConnection(this.dbConnection);
+		
 		try
 		{
 			this.data.setConnection(aConnection);
@@ -1359,7 +1381,7 @@ public class SqlPanel
 
 		if (aConnection != null)
 		{
-			if (this.editor != null) this.editor.initDatabaseKeywords(aConnection);
+			if (this.editor != null) this.editor.setDatabaseConnection(aConnection);
 			if (this.data != null) this.data.setAutomaticUpdateTableCheck(!aConnection.getProfile().getDisableUpdateTableCheck());
 		}
 

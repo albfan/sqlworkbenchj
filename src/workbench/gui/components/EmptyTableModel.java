@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.gui.components;
@@ -15,10 +15,12 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
 
-public class EmptyTableModel implements TableModel
+public class EmptyTableModel 
+	implements TableModel
 {
+	public static final TableModel EMPTY_MODEL = new EmptyTableModel();
 	
-	public EmptyTableModel() 
+	private EmptyTableModel()
 	{
 	}
 	

@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.gui.sql;
@@ -62,6 +62,7 @@ import workbench.interfaces.Interruptable;
 import workbench.interfaces.JobErrorHandler;
 import workbench.interfaces.ResultLogger;
 import workbench.interfaces.ScriptGenerationMonitor;
+import workbench.interfaces.StatusBar;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -81,7 +82,7 @@ import java.awt.EventQueue;
  *	A Panel which displays the result of a SELECT statement and
  *  can save changes to the database
  *
- *	@author info@sql-workbench.net
+ *	@author support@sql-workbench.net
  */
 public class DwPanel
 	extends JPanel
@@ -154,7 +155,7 @@ public class DwPanel
 		WbTraversalPolicy pol = new WbTraversalPolicy();
 		pol.setDefaultComponent(infoTable);
 		pol.addComponent(infoTable);
-		pol.addComponent(this.statusBar.tfMaxRows);
+		//pol.addComponent(this.statusBar.tfMaxRows);
 		this.setFocusTraversalPolicy(pol);
 		this.setDoubleBuffered(true);
 		this.stmtRunner = new StatementRunner();
@@ -183,6 +184,11 @@ public class DwPanel
 		return this.selectKeys;
 	}
 
+	public StatusBar getStatusBar()
+	{
+		return this.statusBar;
+	}
+	
 	public void checkAndSelectKeyColumns()
 	{
 		final DwPanel panel = this;

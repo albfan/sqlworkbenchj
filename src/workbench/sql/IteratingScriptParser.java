@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.sql;
@@ -39,7 +39,7 @@ import workbench.util.StringUtil;
  * @see workbench.util.FileMappedSequence
  * @see workbench.util.StringSequences
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class IteratingScriptParser
 {
@@ -57,7 +57,8 @@ public class IteratingScriptParser
 	private int lastNewLineStart = 0;
 	private char lastQuote = 0;
 	private boolean checkEscapedQuotes = true;
-
+	private boolean emptyLineIsSeparator = false;
+	
 	/** Create an InteratingScriptParser
 	 */
 	public IteratingScriptParser()
@@ -114,6 +115,11 @@ public class IteratingScriptParser
 		this.reset();
 	}
 
+	public void allowEmptyLineAsSeparator(boolean flag)
+	{
+		this.emptyLineIsSeparator = flag;
+	}
+	
 	private void cleanup()
 	{
 		if (this.script != null) this.script.done();
@@ -325,6 +331,19 @@ public class IteratingScriptParser
 						String line = this.script.substring(lastNewLineStart, pos).trim();
 						String clean = SqlUtil.makeCleanSql(line, false, false, '\'');
 						
+						if (clean.length() == 0 && this.emptyLineIsSeparator)
+						{
+							int start = lastCommandEnd;
+							ScriptCommandDefinition c = this.createCommand(start, pos);
+							if (c != null) 
+							{
+								startOfLine = true;
+								this.lastNewLineStart = pos + 1;
+								this.lastPos = pos + this.delimiterLength;
+								this.lastCommandEnd = lastPos;
+								return c;
+							}
+						}
 						boolean slcFound = false;
 						
 						int commandStart = lastNewLineStart;
@@ -389,8 +408,17 @@ public class IteratingScriptParser
 			endPos = scriptLength;
 		}
 		
+		// remove whitespaces at the start
+		char ch = this.script.charAt(startPos);
+		while (startPos < endPos && Character.isWhitespace(ch))
+		{
+			startPos ++;
+			if (startPos < endPos) ch = this.script.charAt(startPos);
+		}
+
 		value = this.script.substring(startPos, endPos).trim();
 		if (value.length() == 0) return null;
+		int len = value.length();
 		
 		int offset = this.getRealStartOffset(value);
 		if (offset > 0) value = value.substring(offset);

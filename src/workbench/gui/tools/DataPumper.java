@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.gui.tools;
@@ -50,6 +50,7 @@ import workbench.gui.dialogs.dataimport.ImportFileDialog;
 import workbench.gui.help.HtmlViewer;
 import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.gui.sql.EditorPanel;
+import workbench.interfaces.ToolWindow;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -61,11 +62,12 @@ import workbench.util.WbThread;
 
 /**
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class DataPumper
 	extends JPanel
-	implements ActionListener, WindowListener, PropertyChangeListener, RowActionMonitor
+	implements ActionListener, WindowListener, PropertyChangeListener, RowActionMonitor,
+	           ToolWindow
 {
 	private ConnectionProfile source;
 	private String sourceFile;
@@ -957,7 +959,7 @@ public class DataPumper
 		this.window.getContentPane().add(this);
 		this.restoreSettings();
 		this.window.addWindowListener(this);
-		WbManager.getInstance().registerToolWindow(this.window);
+		WbManager.getInstance().registerToolWindow(this);
 
 		if (aParent == null)
 		{
@@ -1248,6 +1250,20 @@ public class DataPumper
 		}
 	}
 
+	public void activateWindow()
+	{
+		if (this.window != null)
+		{
+			this.window.setVisible(true);
+			this.window.toFront();
+		}
+	}
+	public void disconnect()
+	{
+		this.disconnectSource();
+		this.disconnectTarget();
+	}
+	
 	public void done()
 	{
 		this.saveSettings();
@@ -1261,17 +1277,16 @@ public class DataPumper
 		{
 			public void run()
 			{
-				disconnectSource();
-				disconnectTarget();
-				disconnectDone();
+				disconnect();
+				unregister();
 			}
 		};
 		t.start();
 	}
 
-	private void disconnectDone()
+	private void unregister()
 	{
-		WbManager.getInstance().unregisterToolWindow(this.window);
+		WbManager.getInstance().unregisterToolWindow(this);
 	}
 
 

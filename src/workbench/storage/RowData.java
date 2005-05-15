@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.storage;
@@ -231,23 +231,13 @@ public class RowData
 		this.originalData = null;
 	}
 
+	/**
+	 * Resets data and status
+	 */
 	public void reset()
 	{
-		if (this.colData == null) return;
-		int count = this.colData.length;
-		for (int i=0; i < count; i++)
-		{
-			this.colData[i] = null;
-		}
 		this.colData = null;
-		if (this.originalData != null)
-		{
-			for (int i=0; i < count; i++)
-			{
-				this.originalData[i] = null;
-			}
-			this.originalData = null;
-		}
+		this.resetStatus();
 	}
 	/**
 	 *	Sets the status of this row to new.

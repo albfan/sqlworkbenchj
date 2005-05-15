@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.storage;
@@ -25,7 +25,7 @@ import workbench.util.StrBuffer;
 
 /**
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class DmlStatement
 {
@@ -58,16 +58,6 @@ public class DmlStatement
 	{
 		if (aStatement == null) throw new NullPointerException();
 
-		/*
-		String verb = SqlUtil.getSqlVerb(aStatement);
-		if (! ("insert".equalsIgnoreCase(verb) ||
-		       "update".equalsIgnoreCase(verb) ||
-					 "delete".equalsIgnoreCase(verb)))
-		{
-			throw new IllegalArgumentException("Only UPDATE, DELETE, INSERT allowed");
-		}
-		*/
-		
 		int count = this.countParameters(aStatement);
 		if (count > 0 && aValueList != null && count != aValueList.size())
 		{

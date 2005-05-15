@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.gui.sql;
@@ -34,7 +34,7 @@ import workbench.resource.Settings;
 
 /**
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class ExecuteSqlDialog
 	extends JDialog
@@ -64,7 +64,7 @@ public class ExecuteSqlDialog
 		sqlEditor.showFormatSql();
 		mainPanel.setLayout(new BorderLayout());
 		mainPanel.add(sqlEditor, BorderLayout.CENTER);
-		sqlEditor.initDatabaseKeywords(this.dbConn);
+		sqlEditor.setDatabaseConnection(this.dbConn);
 		sqlEditor.setText(sql);
 
 		this.statusMessage = new JLabel("");

@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.gui.settings;
@@ -25,7 +25,7 @@ import javax.swing.KeyStroke;
 
 /**
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class KeyboardMapper
 	extends JPanel
@@ -66,7 +66,7 @@ public class KeyboardMapper
 		
 		// keyReleased is also called when the Ctrl or Shift keys are release
 		// in that case the keycode is 0 --> ignore it
-		if (code > 32)
+		if (code >= 32)
 		{
 			String key = "";
 			if (modifier > 0) key = KeyEvent.getKeyModifiersText(modifier) + "-";
@@ -83,14 +83,6 @@ public class KeyboardMapper
 	
 	public void keyTyped(KeyEvent e)
 	{
-		//int modifier = e.getModifiers();
-		//int code = e.getKeyCode();
-		//char c = e.getKeyChar();
-		//System.out.println("c=" + (int)c);
-		//System.out.println("code = " + code);
-		//String key = KeyEvent.getKeyModifiersText(modifier) + "-" + c;
-		//System.out.println("Typed " + e.toString());
-		//this.display.setText(e.toString());
 	}
 	
 }

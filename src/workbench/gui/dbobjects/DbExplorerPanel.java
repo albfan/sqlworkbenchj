@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.gui.dbobjects;
@@ -33,8 +33,11 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import workbench.db.ConnectionMgr;
+import workbench.db.ConnectionProfile;
 
 import workbench.db.WbConnection;
+import workbench.exception.ExceptionUtil;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
@@ -51,7 +54,7 @@ import workbench.util.WbThread;
 
 /**
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class DbExplorerPanel
 	extends JPanel
@@ -77,15 +80,20 @@ public class DbExplorerPanel
 	private int internalId = 0;
 	private ConnectionSelector connectionSelector;
 	private JButton selectConnectionButton;
-
-	public DbExplorerPanel(int index)
+	private String tabTitle;
+	private static int instanceCount = 0;
+	private MainWindow mainWindow;
+	
+	public DbExplorerPanel()
 	{
-		this(null, index);
+		this(null);
 	}
 
-	public DbExplorerPanel(MainWindow aParent, int index)
+	public DbExplorerPanel(MainWindow aParent)
 	{
-		this.internalId = index;
+		instanceCount ++;
+		this.internalId = instanceCount;
+		this.mainWindow = aParent;
 		try
 		{
 			tables = new TableListPanel(aParent);
@@ -234,6 +242,51 @@ public class DbExplorerPanel
 		}
 	}
 
+	private void doConnect(ConnectionProfile profile)
+	{
+		String id = this.getId();
+		ConnectionMgr mgr = ConnectionMgr.getInstance();
+		WbConnection conn = null;
+		try
+		{
+			WbSwingUtilities.showWaitCursor(this);
+			conn = mgr.getConnection(profile, id);
+			this.setConnection(conn);
+			if (Settings.getInstance().getRetrieveDbExplorer())
+			{
+				this.startRetrieve();
+			}
+		}
+		catch (Exception e)
+		{
+			String error = ExceptionUtil.getDisplay(e);
+			String msg = ResourceMgr.getString("ErrorExplorerConnectFailed").replaceAll("%msg%", error.trim());
+			WbSwingUtilities.showErrorMessage(this, msg);
+			LogMgr.logError("MainWindow.showDbExplorer()", "Error getting new connection for DbExplorer tab. Using connection from current panel", e);
+		}
+		finally
+		{
+			WbSwingUtilities.showDefaultCursor(this);
+		}
+	}
+	
+	public void connect(final ConnectionProfile profile)
+	{
+		// connecting can be pretty time consuming on a slow system
+		// so move it into its own thread...
+		if (!this.isConnected())
+		{
+			Thread t = new WbThread("DbExplorer connection")
+			{
+				public void run()
+				{
+					doConnect(profile);
+				}
+			};
+			t.start();
+		}
+	}
+	
 	public void setConnection(WbConnection aConnection)
 	{
 		this.setConnection(aConnection, null);
@@ -339,7 +392,6 @@ public class DbExplorerPanel
 	public void disconnect()
 	{
 		this.reset();
-		this.closeWindow();
 	}
 
 	public void saveSettings()
@@ -403,9 +455,15 @@ public class DbExplorerPanel
 		t.start();
 	}
 
+	public void setTabName(String name)
+	{
+		this.tabTitle = name;
+	}
+	
 	public void setTabTitle(JTabbedPane tab, int index)
 	{
-		tab.setTitleAt(index, ResourceMgr.getString("LabelDbExplorer"));
+		if (this.tabTitle == null) tab.setTitleAt(index, ResourceMgr.getString("LabelDbExplorer"));
+		else tab.setTitleAt(index, tabTitle);
 	}
 
 	public void closeWindow()
@@ -463,6 +521,15 @@ public class DbExplorerPanel
 	{
 	}
 
+	public void activateWindow()
+	{
+		if (this.window != null)
+		{
+			this.window.setVisible(true);
+			this.window.toFront();
+		}
+	}
+	
 	public void explorerWindowClosed()
 	{
 		this.window = null;
@@ -471,20 +538,15 @@ public class DbExplorerPanel
 		{
 			try
 			{
-				if (Settings.getInstance().disconnectDbExplorerOnClose())
-				{
-					this.dbConnection.disconnect();
-				}
-				else 
-				{
-					try { this.dbConnection.rollback(); } catch (Throwable th) {}
-				}
+				try { this.dbConnection.rollback(); } catch (Throwable th) {}
+				this.dbConnection.disconnect();
 			}
 			catch (Throwable th)
 			{
 				LogMgr.logWarning("DbExplorerPanel.dispose()", "Error when closing connection", th);
 			}
 		}
+		this.mainWindow.explorerWindowClosed(this);
 	}
 
 	public void mainWindowDeiconified()

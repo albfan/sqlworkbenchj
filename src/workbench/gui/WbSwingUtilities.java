@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.gui;
@@ -21,14 +21,15 @@ import java.awt.FontMetrics;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
@@ -180,7 +181,8 @@ public class WbSwingUtilities
 		}
 		else
 		{
-			try { EventQueue.invokeAndWait(r); } catch (Throwable ignore) {} 
+			//try { EventQueue.invokeAndWait(r); } catch (Throwable ignore) {} 
+			EventQueue.invokeLater(r);
 		}
 	}
 
@@ -327,4 +329,103 @@ public class WbSwingUtilities
 		return value;
 	}
 
+	public static String getKeyName(int keyCode)
+	{
+		if (keyCode >= KeyEvent.VK_0 && keyCode <= KeyEvent.VK_9 || keyCode >= KeyEvent.VK_A && keyCode <= KeyEvent.VK_Z) 
+		{
+			return String.valueOf((char)keyCode);
+		}
+		
+		// Check for other ASCII keyCodes.
+		int index = ",./;=[\\]".indexOf(keyCode);
+		if (index >= 0)
+		{
+			return String.valueOf((char)keyCode);
+		}
+		
+		switch(keyCode)
+		{
+			case KeyEvent.VK_ENTER: return "VK_ENTER";
+			case KeyEvent.VK_BACK_SPACE: return "VK_BACK_SPACE";
+			case KeyEvent.VK_TAB: return "VK_TAB";
+			case KeyEvent.VK_CANCEL: return "VK_CANCEL";
+			case KeyEvent.VK_CLEAR: return "VK_CLEAR";
+			case KeyEvent.VK_SHIFT: return "VK_SHIFT";
+			case KeyEvent.VK_CONTROL: return "VK_CONTROL";
+			case KeyEvent.VK_ALT: return "VK_ALT";
+			case KeyEvent.VK_PAUSE: return "VK_PAUSE";
+			case KeyEvent.VK_CAPS_LOCK: return "VK_CAPS_LOCK";
+			case KeyEvent.VK_ESCAPE: return "VK_ESCAPE";
+			case KeyEvent.VK_SPACE: return "VK_SPACE";
+			case KeyEvent.VK_PAGE_UP: return "VK_PAGE_UP";
+			case KeyEvent.VK_PAGE_DOWN: return "VK_PAGE_UP";
+			case KeyEvent.VK_END: return "VK_END";
+			case KeyEvent.VK_HOME: return "VK_HOME";
+			
+			case KeyEvent.VK_LEFT: 
+			case KeyEvent.VK_KP_LEFT:
+				return "VK_LEFT";
+				
+			case KeyEvent.VK_UP: 
+			case KeyEvent.VK_KP_UP:
+				return "VK_UP";
+				
+			case KeyEvent.VK_RIGHT: 
+			case KeyEvent.VK_KP_RIGHT: 
+				return "VK_RIGHT";
+			
+			case KeyEvent.VK_DOWN: 
+			case KeyEvent.VK_KP_DOWN:
+				return "VK_DOWN";
+			case KeyEvent.VK_F1: return "F1";
+			case KeyEvent.VK_F2: return "F2";
+			case KeyEvent.VK_F3: return "F3";
+			case KeyEvent.VK_F4: return "F4";
+			case KeyEvent.VK_F5: return "F5";
+			case KeyEvent.VK_F6: return "F6";
+			case KeyEvent.VK_F7: return "F7";
+			case KeyEvent.VK_F8: return "F8";
+			case KeyEvent.VK_F9: return "F9";
+			case KeyEvent.VK_F10: return "F10";
+			case KeyEvent.VK_F11: return "F11";
+			case KeyEvent.VK_F12: return "F12";
+			case KeyEvent.VK_F13: return "F13";
+			case KeyEvent.VK_F14: return "F14";
+			case KeyEvent.VK_F15: return "F15";
+			case KeyEvent.VK_F16: return "F16";
+			case KeyEvent.VK_F17: return "F17";
+			case KeyEvent.VK_F18: return "F18";
+			case KeyEvent.VK_F19: return "F19";
+			case KeyEvent.VK_F20: return "F20";
+			case KeyEvent.VK_F21: return "F21";
+			case KeyEvent.VK_F22: return "F22";
+			case KeyEvent.VK_F23: return "F23";
+			case KeyEvent.VK_F24: return "F24";
+		}
+		if (keyCode >= KeyEvent.VK_NUMPAD0 && keyCode <= KeyEvent.VK_NUMPAD9)
+		{
+			String numpad = "NumPad";
+			char c = (char)(keyCode - KeyEvent.VK_NUMPAD0 + '0');
+			return numpad + "-" + c;
+		}
+		return "KeyCode: 0x" + Integer.toString(keyCode, 16);
+	}
+	
+	public static void requestFocus(final Window win, final Component comp)
+	{
+		win.addWindowListener(new WindowAdapter()
+		{
+			public void windowActivated(WindowEvent evt)
+			{
+				SwingUtilities.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						comp.requestFocus();
+					}
+				});
+				win.removeWindowListener(this);
+			}
+		});
+	} 
 }

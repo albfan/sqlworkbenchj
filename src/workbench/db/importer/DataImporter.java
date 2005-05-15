@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.db.importer;
@@ -40,7 +40,7 @@ import workbench.util.WbThread;
  * Import data that is provided from {@link RowDataProducer} into 
  * a tabel in the database.
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class DataImporter
 	implements Interruptable, RowDataReceiver
@@ -776,7 +776,7 @@ public class DataImporter
 		
 		try
 		{
-			this.targetTable = this.dbConn.getMetadata().adjustObjectname(tableName);
+			this.targetTable = this.dbConn.getMetadata().adjustObjectnameCase(tableName);
 			this.targetColumns = columns;
 			this.colCount = this.targetColumns.length;
 			

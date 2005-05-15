@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.util;
@@ -101,17 +101,24 @@ public class SqlUtil
 		}
 		return result;
 	}
+	
 
+	public static List getTables(String aSql)
+	{
+		return getTables(aSql, false);
+	}
+	
+	public static final Pattern FROM_PATTERN = Pattern.compile("\\sFROM\\s", Pattern.CASE_INSENSITIVE);
+	public static final Pattern WHERE_PATTERN = Pattern.compile("\\sWHERE\\s|\\sWHERE$", Pattern.CASE_INSENSITIVE);
 	/**
 	 * Return the list of tables which are in the FROM list of the given SQL statement.
 	 */
-	public static List getTables(String aSql)
+	public static List getTables(String aSql, boolean includeAlias)
 	{
 		boolean inQotes = false;
 		boolean fromFound = false;
-
-		Pattern fromPattern = Pattern.compile("\\sFROM\\s", Pattern.CASE_INSENSITIVE);
-		Matcher m = fromPattern.matcher(aSql);
+		
+		Matcher m = FROM_PATTERN.matcher(aSql);
 		if (!m.find()) return Collections.EMPTY_LIST;
 
 		int fromPos = m.start();
@@ -124,7 +131,7 @@ public class SqlUtil
 			while (!fromFound)
 			{
 				pos = skipQuotes(aSql, quotePos + 1);
-				//fromPos = aSql.indexOf(FROM, pos);
+				
 				if (m.find(pos))
 				{
 					fromPos = m.start();
@@ -141,11 +148,13 @@ public class SqlUtil
 		if (fromPos == -1) return Collections.EMPTY_LIST;
 		int fromEnd = m.end();
 
-		int nextVerb = StringUtil.findPattern("\\sWHERE\\s", aSql, fromPos);
+		int nextVerb = StringUtil.findPattern(WHERE_PATTERN, aSql, fromPos);
 
 		if (nextVerb == -1) nextVerb = StringUtil.findPattern("\\sGROUP\\s", aSql, fromPos);
 		if (nextVerb == -1) nextVerb = StringUtil.findPattern("\\sORDER\\s", aSql, fromPos);
 		if (nextVerb == -1) nextVerb = aSql.length();
+		if (nextVerb < fromEnd) return Collections.EMPTY_LIST;
+		
 		String fromList = aSql.substring(fromEnd, nextVerb);
 
 		boolean joinSyntax = (StringUtil.findPattern("\\sJOIN\\s", aSql, fromPos) > -1);
@@ -180,10 +189,13 @@ public class SqlUtil
 			while (tok.hasMoreTokens())
 			{
 				String table = tok.nextToken().trim();
-				pos = table.indexOf(' ');
-				if (pos != -1)
+				if (!includeAlias)
 				{
-					table = table.substring(0, pos);
+					pos = table.indexOf(' ');
+					if (pos != -1)
+					{
+						table = table.substring(0, pos);
+					}
 				}
 				result.add(table);
 			}

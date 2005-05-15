@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.gui.dbobjects;
@@ -24,16 +24,17 @@ import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ConnectionSelector;
 import workbench.interfaces.Connectable;
+import workbench.interfaces.ToolWindow;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class DbExplorerWindow
 	extends JFrame
-	implements WindowListener, Connectable
+	implements WindowListener, Connectable, ToolWindow
 {
 	private DbExplorerPanel panel;
 	private boolean connected;
@@ -82,6 +83,7 @@ public class DbExplorerWindow
 			this.panel.showConnectButton(this.connectionSelector);
 		}
 	}
+	
 	public void selectConnection()
 	{
 		EventQueue.invokeLater(new Runnable()
@@ -92,6 +94,26 @@ public class DbExplorerWindow
 				connectionSelector.selectConnection();
 			}
 		});
+	}
+	
+	public void activateWindow()
+	{
+		this.setVisible(true);
+		this.toFront();
+	}
+	
+	public void closeWindow()
+	{
+    this.saveSettings();
+		this.disconnect();
+		this.panel.explorerWindowClosed();
+		this.hide();
+		this.dispose();
+	}
+	
+	public void disconnect()
+	{
+		this.panel.disconnect();
 	}
 	
   public void saveSettings()
@@ -158,7 +180,7 @@ public class DbExplorerWindow
 
 	public static DbExplorerWindow showWindow()
 	{
-		DbExplorerPanel panel = new DbExplorerPanel(instanceCount + 1);
+		DbExplorerPanel panel = new DbExplorerPanel();
 		panel.restoreSettings();
 		DbExplorerWindow window = new DbExplorerWindow(panel);
 		window.setStandalone(true);

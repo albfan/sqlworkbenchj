@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.storage;
@@ -16,7 +16,7 @@ package workbench.storage;
  * identify the LONG datatype when storing the content into the database
  * as it requires a special treatment.
  * @see DmlStatement#executePrepared(Connection)
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 class OracleLongType
 {

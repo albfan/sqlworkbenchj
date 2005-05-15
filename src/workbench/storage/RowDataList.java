@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.storage;
@@ -53,41 +53,36 @@ public class RowDataList
 	{
 		this.grow(size);
 	}
-	/**
-	 * 	Free all objects stored in the internal array.
-	 * 	This does not shrink the array itself.
-	 */
-	public void clear()
-	{
-		for (int i=0; i < size; i++)
-		{
-			data[i] = null;
-		}
-		this.size = 0;
-	}
 
+	/**
+	 * Free all objects stored in the internal array. 
+	 * The size 
+	 */
 	public void reset()
 	{
-		for (int i=0; i < size; i++)
-		{
-			if (data[i] != null) data[i].reset();
-			data[i] = null;
-		}
 		this.size = 0;
 		this.data = new RowData[DEFAULT_SIZE];
 	}
 
+	/**
+	 * Return the number of rows in this list
+	 */
 	public int size()
 	{
 		return this.size;
 	}
 
-
+	/**
+	 * Return the row at the given index
+	 */
 	public RowData get(int index)
 	{
 		return this.data[index];
 	}
 
+	/**
+	 * Remove the row at the specified index
+	 */
 	public void remove(int index)
 	{
 		int count = size - index - 1;
@@ -100,6 +95,10 @@ public class RowDataList
 		this.data[size] = null;
 	}
 
+	/**
+	 * Add a row to this list.
+	 * @return the new size of this list 
+	 */
 	public int add(RowData row)
 	{
 		int newlen = this.size + 1;
@@ -109,6 +108,9 @@ public class RowDataList
 		return this.size;
 	}
 
+	/**
+	 * Add a row at a specific index in this list
+	 */
 	public int add(int index, RowData row)
 	{
 		int newlen = this.size + 1;
@@ -134,4 +136,5 @@ public class RowDataList
 	{
 		Arrays.sort(this.data, 0, this.size, comp);
 	}
+	
 }

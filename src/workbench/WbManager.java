@@ -6,13 +6,14 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -43,6 +44,7 @@ import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.help.HtmlViewer;
 import workbench.gui.tools.DataPumper;
 import workbench.interfaces.FontChangedListener;
+import workbench.interfaces.ToolWindow;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -58,7 +60,7 @@ import workbench.util.WbThread;
 
 /**
  * The main application "controller" for the jWorkbench
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class WbManager
 	implements FontChangedListener, Runnable
@@ -106,7 +108,6 @@ public class WbManager
 		return desCipher;
 	}
 
-
 	public static WbManager getInstance()
 	{
 		return wb;
@@ -127,12 +128,47 @@ public class WbManager
 		return null;
 	}
 
-	public void registerToolWindow(Window aWindow)
+	public void changeLookAndFeel(String className)
+	{
+		try
+		{
+			Settings.getInstance().setLookAndFeelClass(className);
+			UIManager.setLookAndFeel(className);
+			for (int i=0; i < this.mainWindows.size(); i++)
+			{
+				MainWindow w = (MainWindow)this.mainWindows.get(i);
+				SwingUtilities.updateComponentTreeUI(w);
+			}
+			for (int i=0; i < this.toolWindows.size(); i++)
+			{
+				Component c = (Component)this.toolWindows.get(i);
+				SwingUtilities.updateComponentTreeUI(c);
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("WbManager.changeLookAndFeel()", "Error setting new look and feel to " + className, e);
+		}
+	}
+	
+	public ToolWindow findToolWindow(Class clz)
+	{
+		int count = this.toolWindows.size();
+		if (count == 0) return null;
+		for (int i=0; i < count; i ++)
+		{
+			ToolWindow w = (ToolWindow)this.toolWindows.get(i);
+			if (clz.isInstance(w)) return w;
+		}
+		return null;
+	}
+	
+	public void registerToolWindow(ToolWindow aWindow)
 	{
 		this.toolWindows.add(aWindow);
 	}
 
-	public void unregisterToolWindow(Window aWindow)
+	public void unregisterToolWindow(ToolWindow aWindow)
 	{
 		if (aWindow == null) return;
 		int index = this.toolWindows.indexOf(aWindow);
@@ -158,9 +194,8 @@ public class WbManager
 		int count = this.toolWindows.size();
 		for (int i=0; i < count; i ++)
 		{
-			Window w = (Window)this.toolWindows.get(i);
-			w.setVisible(false);
-			w.dispose();
+			ToolWindow w = (ToolWindow)this.toolWindows.get(i);
+			w.closeWindow();
 		}
 		this.toolWindows.clear();
 	}
@@ -411,7 +446,6 @@ public class WbManager
 			w = (MainWindow)this.mainWindows.get(i);
 			if (w == null) continue;
 			aborted = w.abortAll();
-			//w.doDisconnect();
 			w.disconnect(false, true);
 		}
 	}

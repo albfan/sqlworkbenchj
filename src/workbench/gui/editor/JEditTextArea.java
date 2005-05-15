@@ -19,6 +19,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Insets;
 import java.awt.LayoutManager;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
@@ -33,6 +34,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
@@ -103,7 +105,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.32 2005-04-24 11:29:04 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.33 2005-05-15 11:41:05 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -119,7 +121,8 @@ public class JEditTextArea
 	private static final Color TEMP_COLOR = Color.GREEN.brighter();
 	private boolean currentSelectionIsTemporary;
 	protected String commentChar;
-
+	
+	private KeyListener keyEventInterceptor;
 	/**
 	 * Adding components with this name to the text area will place
 	 * them left of the horizontal scroll bar. In jEdit, the status
@@ -197,6 +200,20 @@ public class JEditTextArea
 		focusedComponent = this;
 	}
 
+	public Point getCursorLocation()
+	{
+		int line = getCaretLine();
+		int pos = getCaretPosition() - getLineStartOffset(line);
+		FontMetrics fm = painter.getFontMetrics();
+		int y = (line - firstLine + 1) * fm.getHeight();
+		if (y <= 0) y = 0;
+		y += 4;
+		int x = offsetToX(line, pos);
+		if (x < 0) x = 0;
+		x += this.getPainter().getGutterWidth();
+		return new Point(x,y);
+	}
+	
 	public void setShowLineNumbers(boolean aFlag)
 	{
 		this.painter.setShowLineNumbers(aFlag);
@@ -843,7 +860,7 @@ public class JEditTextArea
 		/* Use painter's cached info for speed */
 		FontMetrics fm = painter.getFontMetrics();
 
-		getLineText(line,lineSegment);
+		getLineText(line, lineSegment);
 
 		int segmentOffset = lineSegment.offset;
 		int x = horizontalOffset;
@@ -852,22 +869,21 @@ public class JEditTextArea
 		if(tokenMarker == null)
 		{
 			lineSegment.count = offset;
-			return x + Utilities.getTabbedTextWidth(lineSegment,
-				fm,x,painter,0);
+			return x + Utilities.getTabbedTextWidth(lineSegment,fm,x,painter,0);
 		}
-		/* If syntax coloring is enabled, we have to do this because
-		 * tokens can vary in width */
 		else
 		{
+			// If syntax coloring is enabled, we have to do this because
+			// tokens can vary in width
 			Token tokens;
-			if(painter.currentLineIndex == line
-				&& painter.currentLineTokens != null)
+			if (painter.currentLineIndex == line	&& painter.currentLineTokens != null)
+			{
 				tokens = painter.currentLineTokens;
+			}
 			else
 			{
 				painter.currentLineIndex = line;
-				tokens = painter.currentLineTokens
-					= tokenMarker.markTokens(lineSegment,line);
+				tokens = painter.currentLineTokens = tokenMarker.markTokens(lineSegment,line);
 			}
 
 			Toolkit toolkit = painter.getToolkit();
@@ -889,17 +905,15 @@ public class JEditTextArea
 
 				int length = tokens.length;
 
-				if(offset + segmentOffset < lineSegment.offset + length)
+				if (offset + segmentOffset < lineSegment.offset + length)
 				{
 					lineSegment.count = offset - (lineSegment.offset - segmentOffset);
-					return x + Utilities.getTabbedTextWidth(
-						lineSegment,fm,x,painter,0);
+					return x + Utilities.getTabbedTextWidth(lineSegment,fm,x,painter,0);
 				}
 				else
 				{
 					lineSegment.count = length;
-					x += Utilities.getTabbedTextWidth(
-						lineSegment,fm,x,painter,0);
+					x += Utilities.getTabbedTextWidth(lineSegment,fm,x,painter,0);
 					lineSegment.offset += length;
 				}
 				tokens = tokens.next;
@@ -941,13 +955,11 @@ public class JEditTextArea
 
 				if(painter.isBlockCaretEnabled())
 				{
-					if(x - charWidth <= width)
-						return i;
+					if(x - charWidth <= width) return i;
 				}
 				else
 				{
-					if(x - charWidth / 2 <= width)
-						return i;
+					if(x - charWidth / 2 <= width) return i;
 				}
 
 				width += charWidth;
@@ -958,14 +970,12 @@ public class JEditTextArea
 		else
 		{
 			Token tokens;
-			if(painter.currentLineIndex == line && painter
-				.currentLineTokens != null)
+			if(painter.currentLineIndex == line && painter.currentLineTokens != null)
 				tokens = painter.currentLineTokens;
 			else
 			{
 				painter.currentLineIndex = line;
-				tokens = painter.currentLineTokens
-					= tokenMarker.markTokens(lineSegment,line);
+				tokens = painter.currentLineTokens = tokenMarker.markTokens(lineSegment,line);
 			}
 
 			int offset = 0;
@@ -990,20 +1000,19 @@ public class JEditTextArea
 				{
 					char c = segmentArray[segmentOffset + offset + i];
 					int charWidth;
-					if(c == '\t')
+					
+					if (c == '\t')
 						charWidth = (int)painter.nextTabStop(width,offset + i) - width;
 					else
 						charWidth = fm.charWidth(c);
 
 					if(painter.isBlockCaretEnabled())
 					{
-						if(x - charWidth <= width)
-							return offset + i;
+						if (x - charWidth <= width) return offset + i;
 					}
 					else
 					{
-						if(x - charWidth / 2 <= width)
-							return offset + i;
+						if (x - charWidth / 2 <= width) return offset + i;
 					}
 
 					width += charWidth;
@@ -1683,8 +1692,6 @@ public class JEditTextArea
 	{
 		if(!editable) return;
 
-//		int oldcount = Integer.toString(this.getLineCount()).length();
-
 		document.beginCompoundEdit();
 
 		try
@@ -1762,23 +1769,37 @@ public class JEditTextArea
 			bl.printStackTrace();
 			throw new InternalError("Cannot replace selection");
 		}
-		// No matter what happends... stops us from leaving document
-		// in a bad state
 		finally
 		{
 			document.endCompoundEdit();
 		}
 		updateScrollBars();
 		setCaretPosition(selectionEnd);
-//		int newcount = Integer.toString(this.getLineCount()).length();
-//		if (oldcount != newcount)
-//		{
-			this.invalidate();
-			this.repaint();
-//			//this.update(this.getGraphics());
-//		}
+		this.invalidate();
+		this.repaint();
 	}
 
+	public void insertText(String text)
+	{
+		insertText(getCaretPosition(), text);
+	}
+	public void insertText(int position, String text)
+	{
+		document.beginCompoundEdit();
+		try
+		{
+			document.insertString(position, text, null);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			document.endCompoundEdit();
+		}
+		
+	}
 	public void setAutoIndent(boolean aFlag)  { this.autoIndent = aFlag; }
 	public boolean getAutoIndent() 	{ return this.autoIndent; }
 
@@ -2031,14 +2052,6 @@ public class JEditTextArea
 				// The MacOS MRJ doesn't convert \r to \n,
 				// so do it here
 				String selection = ((String)clipboard.getContents(this).getTransferData(DataFlavor.stringFlavor)).replaceAll("\r\n","\n");
-
-//				int repeatCount = inputHandler.getRepeatCount();
-//				StringBuffer buf = new StringBuffer(selection.length() * repeatCount);
-//				for(int i = 0; i < repeatCount; i++)
-//				{
-//					buf.append(selection);
-//				}
-//				selection = buf.toString();
 				setSelectedText(selection);
 			}
 			catch(Exception e)
@@ -2060,6 +2073,32 @@ public class JEditTextArea
 			focusedComponent = null;
 	}
 
+	public void setKeyEventInterceptor(KeyListener c)
+	{
+		this.keyEventInterceptor = c;
+	}
+	
+	public void removeKeyEventInterceptor()
+	{
+		this.keyEventInterceptor = null;
+	}
+	
+	private void forwardKeyEvent(KeyEvent evt)
+	{
+		switch(evt.getID())
+		{
+			case KeyEvent.KEY_TYPED:
+				keyEventInterceptor.keyTyped(evt);
+				break;
+			case KeyEvent.KEY_PRESSED:
+				keyEventInterceptor.keyPressed(evt);
+				break;
+			case KeyEvent.KEY_RELEASED:
+				keyEventInterceptor.keyReleased(evt);
+			break;
+		}
+	}
+	
 	/**
 	 * Forwards key events directly to the input handler.
 	 * This is slightly faster than using a KeyListener
@@ -2069,7 +2108,12 @@ public class JEditTextArea
 	{
 		if(inputHandler == null)
 			return;
-
+		if (keyEventInterceptor != null)
+		{
+			forwardKeyEvent(evt);
+			return;
+		}
+		
 		int oldcount = Integer.toString(this.getLineCount()).length();
 		switch(evt.getID())
 		{

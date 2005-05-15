@@ -14,9 +14,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.Enumeration;
 import java.util.EventObject;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
@@ -31,7 +31,7 @@ import javax.swing.text.BadLocationException;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.16 2005-04-04 20:50:23 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.17 2005-05-15 11:41:05 thomas Exp $
  * @see DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
@@ -87,11 +87,11 @@ public abstract class InputHandler extends KeyAdapter
 	// Default action
 	public static final ActionListener INSERT_CHAR = new insert_char();
 
-	private static Hashtable actions;
+	private static HashMap actions;
 
 	static
 	{
-		actions = new Hashtable();
+		actions = new HashMap();
 		actions.put("backspace",BACKSPACE);
 		actions.put("backspace-word",BACKSPACE_WORD);
 		actions.put("delete",DELETE);
@@ -146,10 +146,10 @@ public abstract class InputHandler extends KeyAdapter
 	 */
 	public static String getActionName(ActionListener listener)
 	{
-		Enumeration enum = getActions();
-		while(enum.hasMoreElements())
+		Iterator itr = getActions();
+		while(itr.hasNext())
 		{
-			String name = (String)enum.nextElement();
+			String name = (String)itr.next();
 			ActionListener _listener = getAction(name);
 			if(_listener == listener)
 				return name;
@@ -160,9 +160,9 @@ public abstract class InputHandler extends KeyAdapter
 	/**
 	 * Returns an enumeration of all available actions.
 	 */
-	public static Enumeration getActions()
+	public static Iterator getActions()
 	{
-		return actions.keys();
+		return actions.keySet().iterator();
 	}
 
 	/**
@@ -277,9 +277,7 @@ public abstract class InputHandler extends KeyAdapter
 	public void executeAction(ActionListener listener, Object source, String actionCommand)
 	{
 		// create event
-		ActionEvent evt = new ActionEvent(source,
-			ActionEvent.ACTION_PERFORMED,
-			actionCommand);
+		ActionEvent evt = new ActionEvent(source,ActionEvent.ACTION_PERFORMED,actionCommand);
 
 		// don't do anything if the action is a wrapper
 		// (like EditAction.Wrapper)
@@ -295,11 +293,15 @@ public abstract class InputHandler extends KeyAdapter
 
 		// execute the action
 		if(listener instanceof InputHandler.NonRepeatable)
+		{
 			listener.actionPerformed(evt);
+		}
 		else
 		{
 			for(int i = 0; i < Math.max(1,repeatCount); i++)
+			{
 				listener.actionPerformed(evt);
+			}
 		}
 
 		// do recording. Notice that we do no recording whatsoever
@@ -311,8 +313,9 @@ public abstract class InputHandler extends KeyAdapter
 				if(!(listener instanceof InputHandler.NonRecordable))
 				{
 					if(_repeatCount != 1)
+					{
 						recorder.actionPerformed(REPEAT,String.valueOf(_repeatCount));
-
+					}
 					recorder.actionPerformed(listener,actionCommand);
 				}
 			}
@@ -347,8 +350,7 @@ public abstract class InputHandler extends KeyAdapter
 					else if(c == null)
 						break;
 					if(c instanceof JPopupMenu)
-						c = ((JPopupMenu)c)
-							.getInvoker();
+						c = ((JPopupMenu)c).getInvoker();
 					else
 						c = c.getParent();
 				}
@@ -529,8 +531,7 @@ public abstract class InputHandler extends KeyAdapter
 			int lineStart = textArea.getLineStartOffset(line);
 			int caret = start - lineStart;
 
-			String lineText = textArea.getLineText(textArea
-				.getCaretLine());
+			String lineText = textArea.getLineText(textArea.getCaretLine());
 
 			if(caret == 0)
 			{
@@ -549,9 +550,7 @@ public abstract class InputHandler extends KeyAdapter
 
 			try
 			{
-				textArea.getDocument().remove(
-						caret + lineStart,
-						start - (caret + lineStart));
+				textArea.getDocument().remove(caret + lineStart,start - (caret + lineStart));
 			}
 			catch(BadLocationException bl)
 			{
@@ -572,8 +571,7 @@ public abstract class InputHandler extends KeyAdapter
 				return;
 			}
 
-			if(textArea.getSelectionStart()
-			   != textArea.getSelectionEnd())
+			if(textArea.getSelectionStart() != textArea.getSelectionEnd())
 			{
 				textArea.setSelectedText("");
 			}
@@ -840,8 +838,7 @@ public abstract class InputHandler extends KeyAdapter
 			}
 
 			if(select)
-				textArea.select(textArea.getMarkPosition(),
-					caret + 1);
+				textArea.select(textArea.getMarkPosition(),caret + 1);
 			else
 				textArea.setCaretPosition(caret + 1);
 		}
@@ -876,12 +873,13 @@ public abstract class InputHandler extends KeyAdapter
 					caret - textArea.getLineStartOffset(line));
 			}
 
-			caret = textArea.getLineStartOffset(line + 1)
-				+ textArea.xToOffset(line + 1,magic);
+			caret = textArea.getLineStartOffset(line + 1) + textArea.xToOffset(line + 1,magic);
+			
 			if(select)
 				textArea.select(textArea.getMarkPosition(),caret);
 			else
 				textArea.setCaretPosition(caret);
+			
 			textArea.setMagicCaretPosition(magic);
 		}
 	}
@@ -910,9 +908,8 @@ public abstract class InputHandler extends KeyAdapter
 
 			textArea.setFirstLine(firstLine);
 
-			int caret = textArea.getLineStartOffset(
-				Math.min(textArea.getLineCount() - 1,
-				line + visibleLines));
+			int caret = textArea.getLineStartOffset(Math.min(textArea.getLineCount() - 1,line + visibleLines));
+			
 			if(select)
 				textArea.select(textArea.getMarkPosition(),caret);
 			else
@@ -955,8 +952,7 @@ public abstract class InputHandler extends KeyAdapter
 			}
 
 			if(select)
-				textArea.select(textArea.getMarkPosition(),
-					lineStart + caret);
+				textArea.select(textArea.getMarkPosition(),lineStart + caret);
 			else
 				textArea.setCaretPosition(lineStart + caret);
 		}
@@ -967,8 +963,7 @@ public abstract class InputHandler extends KeyAdapter
 		public void actionPerformed(ActionEvent evt)
 		{
 			JEditTextArea textArea = getTextArea(evt);
-			textArea.setOverwriteEnabled(
-				!textArea.isOverwriteEnabled());
+			textArea.setOverwriteEnabled(!textArea.isOverwriteEnabled());
 		}
 	}
 
@@ -1029,12 +1024,13 @@ public abstract class InputHandler extends KeyAdapter
 					caret - textArea.getLineStartOffset(line));
 			}
 
-			caret = textArea.getLineStartOffset(line - 1)
-				+ textArea.xToOffset(line - 1,magic);
+			caret = textArea.getLineStartOffset(line - 1) + textArea.xToOffset(line - 1,magic);
+			
 			if(select)
 				textArea.select(textArea.getMarkPosition(),caret);
 			else
 				textArea.setCaretPosition(caret);
+			
 			textArea.setMagicCaretPosition(magic);
 		}
 	}
@@ -1055,13 +1051,12 @@ public abstract class InputHandler extends KeyAdapter
 			int visibleLines = textArea.getVisibleLines();
 			int line = textArea.getCaretLine();
 
-			if(firstLine < visibleLines)
-				firstLine = visibleLines;
+			if(firstLine < visibleLines) firstLine = visibleLines;
 
 			textArea.setFirstLine(firstLine - visibleLines);
 
-			int caret = textArea.getLineStartOffset(
-				Math.max(0,line - visibleLines));
+			int caret = textArea.getLineStartOffset(Math.max(0,line - visibleLines));
+			
 			if(select)
 				textArea.select(textArea.getMarkPosition(),caret);
 			else
@@ -1086,8 +1081,7 @@ public abstract class InputHandler extends KeyAdapter
 			int lineStart = textArea.getLineStartOffset(line);
 			caret -= lineStart;
 
-			String lineText = textArea.getLineText(textArea
-				.getCaretLine());
+			String lineText = textArea.getLineText(textArea.getCaretLine());
 
 			if(caret == 0)
 			{
@@ -1105,8 +1099,7 @@ public abstract class InputHandler extends KeyAdapter
 			}
 
 			if(select)
-				textArea.select(textArea.getMarkPosition(),
-					lineStart + caret);
+				textArea.select(textArea.getMarkPosition(),lineStart + caret);
 			else
 				textArea.setCaretPosition(lineStart + caret);
 		}
@@ -1148,8 +1141,7 @@ public abstract class InputHandler extends KeyAdapter
 			if(textArea.isEditable())
 			{
 				StringBuffer buf = new StringBuffer();
-				for(int i = 0; i < repeatCount; i++)
-					buf.append(str);
+				for(int i = 0; i < repeatCount; i++) buf.append(str);
 				textArea.overwriteSetSelectedText(buf.toString());
 			}
 			else

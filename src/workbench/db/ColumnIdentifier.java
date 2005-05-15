@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.db;
@@ -16,7 +16,7 @@ import workbench.util.SqlUtil;
 
 /**
  * An object containing the definition for a table column.
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class ColumnIdentifier
 	implements Comparable

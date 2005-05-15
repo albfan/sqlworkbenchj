@@ -6,13 +6,14 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.interfaces;
 
 import java.awt.Font;
 import java.util.List;
+import java.util.Properties;
 import javax.swing.JTabbedPane;
 
 import workbench.db.WbConnection;
@@ -21,7 +22,7 @@ import workbench.gui.components.WbToolbar;
 
 /**
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public interface MainPanel
 {
@@ -38,8 +39,10 @@ public interface MainPanel
 	void setFont(Font aFont);
 	void disconnect();
 	void setTabTitle(JTabbedPane tab, int index);
+	void setTabName(String name);
 	String getId();
 	boolean isConnected();
 	boolean isBusy();
 	void dispose();
+	void saveSettings();
 }

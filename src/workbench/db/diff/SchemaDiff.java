@@ -6,7 +6,7 @@
  * Copyright 2002-2004, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.db.diff;
@@ -32,7 +32,7 @@ import workbench.util.StrWriter;
 /**
  * Compare to Schemas for differences in the definition of the tables
  * 
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class SchemaDiff
 {

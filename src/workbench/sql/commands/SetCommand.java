@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.sql.commands;
@@ -32,7 +32,7 @@ import workbench.sql.StatementRunnerResult;
  * through a SQL command. All parameters except serveroutput and autocommit
  * are passed on to the server.
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class SetCommand extends SqlCommand
 {

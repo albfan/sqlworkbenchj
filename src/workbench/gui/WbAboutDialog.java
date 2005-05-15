@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.gui;
@@ -26,7 +26,7 @@ import workbench.util.BrowserLauncher;
 
 /**
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class WbAboutDialog extends javax.swing.JDialog
 	implements ActionListener
@@ -209,7 +209,7 @@ public class WbAboutDialog extends javax.swing.JDialog
     gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 4);
     contentPanel.add(homepageLabel, gridBagConstraints);
 
-    mailToLabel.setText("info@sql-workbench.net");
+    mailToLabel.setText("support@sql-workbench.net");
     mailToLabel.addMouseListener(new java.awt.event.MouseAdapter()
     {
       public void mouseClicked(java.awt.event.MouseEvent evt)
@@ -236,7 +236,7 @@ public class WbAboutDialog extends javax.swing.JDialog
 	{//GEN-HEADEREND:event_mailToLabelMouseClicked
 		try
 		{
-			if (evt.getClickCount() == 1) BrowserLauncher.openURL("mailto:info@sql-workbench.net");
+			if (evt.getClickCount() == 1) BrowserLauncher.openURL("mailto:support@sql-workbench.net");
 		}
 		catch (Exception e)
 		{

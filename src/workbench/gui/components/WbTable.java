@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.gui.components;
@@ -120,13 +120,15 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.NullValue;
+import workbench.util.WbThread;
 
 
 
 public class WbTable
 	extends JTable
 	implements ActionListener, FocusListener, MouseListener,
-	           Exporter, FontChangedListener, Searchable, PrintableComponent, ListSelectionListener, 
+	           Exporter, FontChangedListener, Searchable, 
+						 PrintableComponent, ListSelectionListener, 
 	           PropertyChangeListener
 {
 	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.YELLOW);
@@ -160,7 +162,6 @@ public class WbTable
 	private CopySelectedAsSqlInsertAction copySelectedAsInsertAction;
 	private CopySelectedAsSqlDeleteInsertAction copySelectedAsDeleteInsertAction;
 	private CopySelectedAsSqlUpdateAction copySelectedAsUpdateAction;
-	private ArrayList copySelectedMenus = new ArrayList();
 
 	private PrintAction printDataAction;
 	private PrintPreviewAction printPreviewAction;
@@ -171,7 +172,6 @@ public class WbTable
 	private HashMap savedColumnSizes;
 	private int maxColWidth = 32768;
 	private int minColWidth = 10;
-	private static final TableModel EMPTY_MODEL = new EmptyTableModel();
 	private SortHeaderRenderer sortRenderer = new SortHeaderRenderer();
 
 	private ToolTipRenderer defaultTooltipRenderer = new ToolTipRenderer();
@@ -183,7 +183,6 @@ public class WbTable
 	private ClobColumnRenderer defaultClobRenderer = new ClobColumnRenderer();
 
 	private RowHeightResizer rowResizer;
-	//private List changeListener;
 	private TableModelListener changeListener;
 	private JScrollPane scrollPane;
 
@@ -195,7 +194,7 @@ public class WbTable
 
 	public WbTable()
 	{
-		super(EMPTY_MODEL);
+		super(EmptyTableModel.EMPTY_MODEL);
 		this.setMinimumSize(null);
 		this.setMaximumSize(null);
 		this.setPreferredSize(null);
@@ -237,8 +236,6 @@ public class WbTable
 		this.defaultNumberEditor = new WbTextCellEditor(this, numberEditorTextField, autoSelect);
 
 		this.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		//JTableHeader th = this.getTableHeader();
-		//th.addMouseListener(this);
 
 		this.findAction = new FindDataAction(this);
 		this.findAction.setEnabled(false);
@@ -365,8 +362,6 @@ public class WbTable
 		copyMenu.add(copySelectedAsUpdateAction);
 		copyMenu.add(copySelectedAsInsertAction);
 		copyMenu.add(copySelectedAsDeleteInsertAction);
-		this.copySelectedMenus.add(copyMenu);
-
 		return copyMenu;
 	}
 
@@ -415,8 +410,8 @@ public class WbTable
 
 	public void reset()
 	{
-		if (this.getModel() == EMPTY_MODEL) return;
-		this.setModel(EMPTY_MODEL, false);
+		if (this.getModel() == EmptyTableModel.EMPTY_MODEL) return;
+		this.setModel(EmptyTableModel.EMPTY_MODEL, false);
 	}
 
 	public JPopupMenu getPopupMenu()
@@ -611,18 +606,6 @@ public class WbTable
 				header.setDefaultRenderer(this.sortRenderer);
 				header.addMouseListener(this);
 			}
-			DataStore ds = this.dwModel.getDataStore();
-			if (ds != null)
-			{
-				// The underlying DataStore needs to know the date format in order
-				// to convert input strings to dates
-				ds.setDefaultDateFormat(Settings.getInstance().getDefaultDateFormat());
-			}
-			else
-			{
-				Exception e = new NullPointerException();
-				LogMgr.logError("WbTable.setModel()", "Received a DataStoreTableModel without a DataStore", e);
-			}
 		}
 
 		if (this.sortAscending != null) this.sortAscending.setEnabled(sortIt);
@@ -635,10 +618,6 @@ public class WbTable
 
 		this.initDefaultRenderers();
 		this.initDefaultEditors();
-		if (aModel == EMPTY_MODEL)
-		{
-			this.createDefaultColumnsFromModel();
-		}
 		if (this.printDataAction != null) this.printDataAction.setEnabled(this.getRowCount() > 0);
 		if (this.printPreviewAction != null) this.printPreviewAction.setEnabled(this.getRowCount() > 0);
 	}
@@ -872,14 +851,15 @@ public class WbTable
 		return this.dwModel.isSortAscending();
 	}
 
-	public synchronized void sortingStarted()
+	public void sortingStarted()
 	{
 		this.setIgnoreRepaint(true);
 	}
 
-	public synchronized void sortingFinished()
+	public void sortingFinished()
 	{
 		this.setIgnoreRepaint(false);
+		this.getTableHeader().repaint();
 	}
 
 	public String getDataString(String aLineTerminator)
@@ -1449,7 +1429,6 @@ public class WbTable
 
 			if (realColumn >= 0)
 			{
-				//sorter.startSorting(tableView, realColumn, sortAscending);
 				this.dwModel.sortInBackground(this, realColumn);
 			}
 		}
@@ -1509,13 +1488,11 @@ public class WbTable
 		else if (e.getSource() == this.optimizeCol)
 		{
 			final boolean respectColName = this.optimizeCol.includeColumnLabels();
-			Thread t = new Thread()
+			Thread t = new WbThread("OptimizeCol Thread")
 			{
 				public void run()	{ optimizeColWidth(column, respectColName); }
 			};
-			t.setName("OptimizeCol Thread");
 			t.start();
-
 		}
 		else if (e.getSource() == this.optimizeAllCol)
 		{

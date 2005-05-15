@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.sql;
@@ -43,7 +43,7 @@ import workbench.util.StringUtil;
  * A class to run several statements from a script file. This is used 
  * when running SQL Workbench in batch mode and for the {@link workbench.sql.wbcommands.WbInclude}
  * command.
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class BatchRunner
 {

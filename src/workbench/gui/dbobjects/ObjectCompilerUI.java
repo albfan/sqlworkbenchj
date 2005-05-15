@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.gui.dbobjects;
@@ -30,7 +30,7 @@ import workbench.util.WbThread;
 
 /**
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class ObjectCompilerUI
 	extends JPanel
@@ -80,6 +80,7 @@ public class ObjectCompilerUI
 			}
 			else
 			{
+				this.log.appendLine("");
 				this.log.appendLine(ResourceMgr.getString("TxtError"));
 				this.log.appendLine(this.compiler.getLastError());
 			}

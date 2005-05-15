@@ -12,7 +12,7 @@ package workbench.gui.editor;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.StringTokenizer;
 
 import javax.swing.KeyStroke;
@@ -21,7 +21,7 @@ import javax.swing.KeyStroke;
  * The default input handler. It maps sequences of keystrokes into actions
  * and inserts key typed events into the text area.
  * @author Slava Pestov
- * @version $Id: DefaultInputHandler.java,v 1.15 2004-12-03 19:01:01 thomas Exp $
+ * @version $Id: DefaultInputHandler.java,v 1.16 2005-05-15 11:41:05 thomas Exp $
  */
 public class DefaultInputHandler extends InputHandler
 {
@@ -30,7 +30,7 @@ public class DefaultInputHandler extends InputHandler
 	 */
 	public DefaultInputHandler()
 	{
-		bindings = currentBindings = new Hashtable();
+		bindings = currentBindings = new HashMap();
 	}
 
 	/**
@@ -95,7 +95,7 @@ public class DefaultInputHandler extends InputHandler
 	 */
 	public void addKeyBinding(String keyBinding, ActionListener action)
 	{
-	  Hashtable current = bindings;
+	  HashMap current = bindings;
 
 		StringTokenizer st = new StringTokenizer(keyBinding);
 		while(st.hasMoreTokens())
@@ -107,13 +107,15 @@ public class DefaultInputHandler extends InputHandler
 			if(st.hasMoreTokens())
 			{
 				Object o = current.get(keyStroke);
-				if(o instanceof Hashtable)
-					current = (Hashtable)o;
+				if(o instanceof HashMap)
+				{
+					current = (HashMap)o;
+				}
 				else
 				{
-					o = new Hashtable();
+					o = new HashMap();
 					current.put(keyStroke,o);
-					current = (Hashtable)o;
+					current = (HashMap)o;
 				}
 			}
 			else
@@ -234,9 +236,9 @@ public class DefaultInputHandler extends InputHandler
 				evt.consume();
 				return;
 			}
-			else if(o instanceof Hashtable)
+			else if(o instanceof HashMap)
 			{
-				currentBindings = (Hashtable)o;
+				currentBindings = (HashMap)o;
 				evt.consume();
 				return;
 			}
@@ -257,9 +259,9 @@ public class DefaultInputHandler extends InputHandler
 				KeyStroke keyStroke = KeyStroke.getKeyStroke(Character.toUpperCase(c));
 				Object o = currentBindings.get(keyStroke);
 
-				if(o instanceof Hashtable)
+				if(o instanceof HashMap)
 				{
-					currentBindings = (Hashtable)o;
+					currentBindings = (HashMap)o;
 					return;
 				}
 				else if(o instanceof ActionListener)
@@ -362,8 +364,8 @@ public class DefaultInputHandler extends InputHandler
 	}
 
 	// private members
-	private Hashtable bindings;
-	private Hashtable currentBindings;
+	private HashMap bindings;
+	private HashMap currentBindings;
 
 	private DefaultInputHandler(DefaultInputHandler copy)
 	{

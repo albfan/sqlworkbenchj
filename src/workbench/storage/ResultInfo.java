@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.storage;
@@ -30,7 +30,7 @@ import workbench.util.SqlUtil;
 
 /**
  * A class to cache the meta information of a ResultSet
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class ResultInfo
 {
@@ -355,8 +355,8 @@ public class ResultInfo
 
 		Connection sqlConn = aConnection.getSqlConnection();
 		DatabaseMetaData meta = sqlConn.getMetaData();
-		String table = aConnection.getMetadata().adjustObjectname(this.updateTable.getTable());
-		String schema = aConnection.getMetadata().adjustObjectname(this.updateTable.getSchema());
+		String table = aConnection.getMetadata().adjustObjectnameCase(this.updateTable.getTable());
+		String schema = aConnection.getMetadata().adjustObjectnameCase(this.updateTable.getSchema());
 
 		ResultSet rs = meta.getPrimaryKeys(null, schema, table);
 		boolean found = this.readPkColumns(rs);

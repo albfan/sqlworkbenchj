@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.gui.sql;
@@ -49,6 +49,7 @@ import javax.swing.filechooser.FileFilter;
 import workbench.db.WbConnection;
 import workbench.exception.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.AutoCompletionAction;
 import workbench.gui.actions.ColumnSelectionAction;
 import workbench.gui.actions.CommentAction;
 import workbench.gui.actions.FileOpenAction;
@@ -64,6 +65,7 @@ import workbench.gui.components.EncodingPanel;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.ReplacePanel;
 import workbench.gui.components.SearchCriteriaPanel;
+import workbench.gui.completion.CompletionHandler;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.editor.JEditTextArea;
 import workbench.gui.editor.SyntaxDocument;
@@ -88,7 +90,7 @@ import workbench.util.UnicodeReader;
 
 
 /**
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
 public class EditorPanel
 	extends JEditTextArea
@@ -195,7 +197,7 @@ public class EditorPanel
 		this.unCommentAction = new UnCommentAction(this);
 		this.addKeyBinding(this.commentAction);
 		this.addKeyBinding(this.unCommentAction);
-		
+
 		//this.setSelectionRectangular(true);
 		Settings.getInstance().addFontChangedListener(this);
 		Settings.getInstance().addPropertyChangeListener(this);
@@ -209,8 +211,9 @@ public class EditorPanel
 	}
 
 	private Set dbFunctions = null;
-
-	public void initDatabaseKeywords(WbConnection aConnection)
+	private CompletionHandler completionHandler;
+	
+	public void setDatabaseConnection(WbConnection aConnection)
 	{
 		if (aConnection == null) return;
 		AnsiSQLTokenMarker token = this.getSqlTokenMarker();
@@ -286,7 +289,7 @@ public class EditorPanel
 
 		int count = commands.size();
 		if (count < 1) return;
-		
+
 		StringBuffer newSql = new StringBuffer(sql.length() + 100);
 		String formattedDelimit = StringUtil.EMPTY_STRING;
 
@@ -304,7 +307,7 @@ public class EditorPanel
 				formattedDelimit = delimit;
 			}
 		}
-		
+
 		for (int i=0; i < count; i++)
 		{
 			String command = (String)commands.get(i);
@@ -312,7 +315,7 @@ public class EditorPanel
 			f.setDBFunctions(this.dbFunctions);
 			try
 			{
-				String formattedSql = f.format().trim();
+				String formattedSql = f.getFormattedSql().trim();
 				newSql.append(formattedSql);
 				if (!command.trim().endsWith(delimit))
 				{
@@ -564,7 +567,7 @@ public class EditorPanel
 			String msg = ResourceMgr.getString("MsgConfirmUnsavedEditorFile");
 			msg = StringUtil.replace(msg, "%filename%", this.getCurrentFileName());
 			result = WbSwingUtilities.getYesNoCancel(this, msg);
-			if (result == JOptionPane.YES_OPTION) 
+			if (result == JOptionPane.YES_OPTION)
 			{
 				this.saveCurrentFile();
 			}
@@ -627,7 +630,7 @@ public class EditorPanel
 						r = null;
 					}
 				}
-				
+
 				if (r == null)
 				{
 					r = new InputStreamReader(in, encoding);
@@ -645,7 +648,7 @@ public class EditorPanel
 			}
 
 			BufferedReader reader = new BufferedReader(r);
-			
+
 			// Reading the text into a StringBuffer before
 			// putting it into the editor is faster then
 			// then calling this.appendLine() for each line
@@ -845,8 +848,8 @@ public class EditorPanel
 	}
 
 	public CommentAction getCommentAction() { return this.commentAction; }
-	public UnCommentAction getUnCommentAction() { return this.unCommentAction; }	
-	
+	public UnCommentAction getUnCommentAction() { return this.unCommentAction; }
+
 	public FindAction getFindAction() { return this.findAction; }
 	public FindAgainAction getFindAgainAction() { return this.findAgainAction; }
 

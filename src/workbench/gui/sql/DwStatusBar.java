@@ -6,7 +6,7 @@
  * Copyright 2002-2005, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
- * To contact the author please send an email to: info@sql-workbench.net
+ * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.gui.sql;
@@ -30,6 +30,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTextLabel;
+import workbench.interfaces.StatusBar;
 import workbench.resource.ResourceMgr;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -37,15 +38,17 @@ import workbench.util.StringUtil;
 
 /**
  *
- * @author  info@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
-public class DwStatusBar extends JPanel
+public class DwStatusBar 
+	extends JPanel
+	implements StatusBar
 {
 	private JTextField tfRowCount;
 
 	private WbTextLabel tfStatus;
 	
-	JTextField tfMaxRows;
+	private JTextField tfMaxRows;
 	private String readyMsg;
 	private JTextField tfTimeout;
 	private JLabel timeoutLabel;
@@ -173,6 +176,8 @@ public class DwStatusBar extends JPanel
 		this.repaint();
 	}
 
+	public String getText() { return this.tfStatus.getText(); }
+	
 	public void setStatusMessage(String aMsg)
 	{
 		this.tfStatus.setText(aMsg);
