@@ -5,43 +5,43 @@
       <title>Configuring keyboard shortcuts</title>
 
       <para>You can configure the keyboard shortcut to execute a specific action (=menu item)
-			in the dialog which is displayed when you select <menuchoice><guimenu>Tools</guimenu><guimenu>Configure shortcuts...</guimenu></menuchoice>.
-			The dialog lists the available actions together with their configured shortcut and their default shortcut.
-			</para>
+      in the dialog which is displayed when you select <menuchoice><guimenu>Tools</guimenu><guimenu>Configure shortcuts...</guimenu></menuchoice>.
+      The dialog lists the available actions together with their configured shortcut and their default shortcut.
+      </para>
 
-			<section id="configure-shortcuts-assign">
-				<title>Assign a shortcut to an action</title>
-				<para>
-				To assign a (new) keyboard combination for a specific action, select (highlight) the action in the list
-				and click on the <guibutton>Assign</guibutton> button. A small window will pop up, where you can
-				press the key combination which you would like to assign to that action.
-				Note that only F-Keys (F1, F2, ...) can be used without a modifier (Shift, Control, Alt). All other
-				keys need be pressed together with one of the modifier keys.
-				</para>
-				<para>After you have entered the desired keyboard shortcut, press the <guibutton>OK</guibutton> button.
-				If the shortcut is already assigned to a different action, you will be prompted, if you want to
-				override that definition. If you select to overwrite the shortcut for the other action, that
-				action will then have <emphasis role="bold">no</emphasis> shortcut assigned
-				</para>
-			</section>
+      <section id="configure-shortcuts-assign">
+        <title>Assign a shortcut to an action</title>
+        <para>
+        To assign a (new) keyboard combination for a specific action, select (highlight) the action in the list
+        and click on the <guibutton>Assign</guibutton> button. A small window will pop up, where you can
+        press the key combination which you would like to assign to that action.
+        Note that only F-Keys (F1, F2, ...) can be used without a modifier (Shift, Control, Alt). All other
+        keys need be pressed together with one of the modifier keys.
+        </para>
+        <para>After you have entered the desired keyboard shortcut, press the <guibutton>OK</guibutton> button.
+        If the shortcut is already assigned to a different action, you will be prompted, if you want to
+        override that definition. If you select to overwrite the shortcut for the other action, that
+        action will then have <emphasis role="bold">no</emphasis> shortcut assigned
+        </para>
+      </section>
 
-			<section id="configure-shortcuts-clear">
-				<title>Removing a shortcut from an action</title>
-				<para>
-					To remove a shortcut completely from an action, select (highlight) that action, and
-					click on the <guibutton>Clear</guibutton> button. Once the shortcut has been cleared,
-					the action is no longer accessible through a shortcut (only through the menu).
-				</para>
-			</section>
+      <section id="configure-shortcuts-clear">
+        <title>Removing a shortcut from an action</title>
+        <para>
+          To remove a shortcut completely from an action, select (highlight) that action, and
+          click on the <guibutton>Clear</guibutton> button. Once the shortcut has been cleared,
+          the action is no longer accessible through a shortcut (only through the menu).
+        </para>
+      </section>
 
-			<section id="configure-shortcuts-reset">
-				<title>Reset to defaults</title>
-				<para>
-					If you want to reset the shortcut for a single action to its default, select (highlight) the
-					action in the list, and click on the <guibutton>Reset</guibutton> button.
-					To reset all shortcuts click on the <guibutton>Reset all</guibutton> button.
-				</para>
-			</section>
+      <section id="configure-shortcuts-reset">
+        <title>Reset to defaults</title>
+        <para>
+          If you want to reset the shortcut for a single action to its default, select (highlight) the
+          action in the list, and click on the <guibutton>Reset</guibutton> button.
+          To reset all shortcuts click on the <guibutton>Reset all</guibutton> button.
+        </para>
+      </section>
 
     </section>
 
@@ -93,9 +93,9 @@
       <para>Usually &wb-productname; reports the success and timings
         for each statement that is beeing executed in the message tab
         of the current SQL panel. For large scripts this can slow down
-        script execution dramatically. If this option is enabled, only 
-        a summary of the execution is printed once the script has finished. 
-        You can turn off the log during script execution by using 
+        script execution dramatically. If this option is enabled, only
+        a summary of the execution is printed once the script has finished.
+        You can turn off the log during script execution by using
         the <link linkend="command-wbfeedback">WBFEEDBACK</link> command.
       </para>
     </section>
@@ -114,11 +114,11 @@
 
     <section id="option-animated-icon" xreflabel="Enable animated icons">
       <title>Enable animated icons</title>
-      <para>Enable or disable the use of an animated icons in the SQL editor to 
-      indicate a running SQL statement. It has been reported, that the animated 
+      <para>Enable or disable the use of an animated icons in the SQL editor to
+      indicate a running SQL statement. It has been reported, that the animated
       icon does have a severe (negativ) impact on the performance on some computers
       (depending on JDK/OS/Graphics driver).
-      If you experience a high CPU usage during the execution of SQL statements, or 
+      If you experience a high CPU usage during the execution of SQL statements, or
       if you find your SQL statements are running very slow, try
       to turn off the usage of the animated icons.</para>
     </section>
@@ -158,8 +158,8 @@
       <para>This would lead to problems as the slash is recognized as the
       statement terminator. Thus the &wb-productname; would send everything up
       to sum(field) to the database and execute it. The same is true when
-			using the column mapping parameters for the <link linkend="command-copy"><literal>WBCOPY</literal></link>
-			command.</para>
+      using the column mapping parameters for the <link linkend="command-copy"><literal>WBCOPY</literal></link>
+      command.</para>
     </section>
 
     <section id="options-history-size">
@@ -244,20 +244,30 @@
         are not (yet) available in the options dialog.</para>
 
         <para>The name of the setting refers to the entry in the file <literal>workbench.settings</literal>
-        which is located in the <link linkend="config-dir">configuration directory</link>. Not all 
+        which is located in the <link linkend="config-dir">configuration directory</link>. Not all
         listed properties will be present in <literal>workbench.settings</literal>. If a property
-        does not yet exist in the file, simply add it to the file. The position does not matter, 
+        does not yet exist in the file, simply add it to the file. The position does not matter,
         as the file will be sorted the next time it is written back.
         </para>
-        <para>Some parameters define a list of identifiers for a DBMS. The identifier that needs to 
-        be put there can be obtained by hovering the mouse over the connection URL information in 
-        the main window, or from the log file. After a successful connect to a database, there will be
-        an entry in the log file similar to this:
-        </para>
-        <programlisting>INFO  15.08.2004 10:24:42 Connected to: [HSQL Database Engine]</programlisting>
-        <para>The text between (but not including) the square brackets, is the ID that needs to 
-        be used for the various <literal>workbench.db.</literal> parameters.
-        </para>
+        <section id="dbms-identifier">
+					<title>Database Identifier</title>
+					<para>Some parameters define a list of "Database Identifiers".
+					The identifier that needs to be put there can be obtained by hovering the mouse over the connection
+					URL information in the main window, or from the log file.
+					After a successful connect to a database, there will be an entry in the log file similar to this:
+        	</para>
+        	<programlisting>INFO  15.08.2004 10:24:42 Connected to: [HSQL Database Engine]</programlisting>
+        	<para>The text between (but not including) the square brackets, is the ID that needs to
+        	be used for the various <literal>workbench.db.</literal> parameters.
+        	</para>
+				</section>
+        <section id="dbid">
+					<title>DBID</title>
+					<para>For some settings, where the ID is part of the property's key, a "clean" version of
+        	the Database Identifer, called the DBID is used. This DBID is also reported in the log
+        	file:</para>
+        	<programlisting>INFO  15.08.2004 10:24:42 DbMetadata - Using DBID=hsql_database_engine</programlisting>
+				</section>
 
         <informaltable frame="all">
           <tgroup cols="3">
@@ -349,19 +359,19 @@
               <row>
                 <entry><para>workbench.workspace.createbackup</para></entry>
                 <entry><para>If this is enabled, a backup file will be created
-								before saving the workspace. This is done by renaming the current
-								file (overwriting any existing backup) and then saving the workspace.</para>
+                before saving the workspace. This is done by renaming the current
+                file (overwriting any existing backup) and then saving the workspace.</para>
                 </entry>
                 <entry><para>false</para></entry>
               </row>
-							
+
               <row>
                 <entry><para>workbench.dbmetadata.logsql</para></entry>
                 <entry><para>If this is enabled, the SQL queries used to
                 retrieve DBMS specific meta data (such as view/procedure/trigger source,
-								defined triggers/views) will be logged with level INFO.
-								This can be used to debug customized SQL statements
-								for DBMS's which are not (yet) preconfigured.</para>
+                defined triggers/views) will be logged with level INFO.
+                This can be used to debug customized SQL statements
+                for DBMS's which are not (yet) preconfigured.</para>
                 </entry>
                 <entry><para>false</para></entry>
               </row>
@@ -372,79 +382,91 @@
                 then the length specified through this property. I.e. any sub SELECT
                 shorter then this value will be formatted as one single String without
                 line breaks or indention. See <xref linkend="editor-reformat-sql"/> for
-								details on how the SQL formatting works.</para>
+                details on how the SQL formatting works.</para>
                 </entry>
                 <entry><para>60</para></entry>
               </row>
               <row>
                 <entry><para id="manual-setting-snippet-no-newline">workbench.javacode.includenewline</para></entry>
                 <entry><para>When creating a <link linkend="editor-copy-java-code-snippet">Java code snippet</link>,
-								the newlines inside the editor are preserved by putting a <literal>\n</literal>
-								character into the String declaration. Setting this property to false, will
-								tell &wb-productname; not put any <literal>\n</literal> characters into the Java string.</para>
+                the newlines inside the editor are preserved by putting a <literal>\n</literal>
+                character into the String declaration. Setting this property to false, will
+                tell &wb-productname; not put any <literal>\n</literal> characters into the Java string.</para>
                 </entry>
                 <entry><para>true</para></entry>
               </row>
               <row>
                 <entry><para id="manual-setting-datapumper-autoconnect">workbench.datapumper.autoconnect</para></entry>
-                <entry><para>When opening the <link linkend="data-pumper">DataPumper</link> it will 
+                <entry><para>When opening the <link linkend="data-pumper">DataPumper</link> it will
                 connect to the current profile as the source connection. If you do not want the DataPumper to
                 connect automatically set this property to <literal>false</literal>
-								</para>
+                </para>
                 </entry>
                 <entry><para>true</para></entry>
               </row>
               <row>
                 <entry><para>workbench.db.ddlneedscommit</para></entry>
-                <entry><para>A list of DBMS that require a COMMIT after issuing DDL statements (such 
+                <entry><para>A list of <link linkend="dbms-identifier">DBMS Identifiers</link> that require a COMMIT after issuing DDL statements (such
                 as <literal>CREATE TABLE</literal></para>
                 </entry>
                 <entry><para>PostgreSQL,Firebird</para></entry>
               </row>
               <row>
                 <entry><para>workbench.db.usejdbccommit</para></entry>
-                <entry><para>Some DBMS return an error when <literal>COMMIT</literal> or <literal>ROLLBACK</literal> is send as 
-                a regular command through the JDBC interface. If the DBMS is listed here, 
-                the JDBC functions <literal>commit()</literal> or <literal>rollback()</literal> will 
-                be used instead.</para>
+                <entry><para>Some DBMS return an error when <literal>COMMIT</literal> or <literal>ROLLBACK</literal> is send as
+                a regular command through the JDBC interface. If the DBMS is listed here,
+                the JDBC functions <literal>commit()</literal> or <literal>rollback()</literal> will
+                be used instead.
+								This is a comma separated list of <link linkend="dbms-identifier">Database Identifiers</link>
+								</para>
                 </entry>
                 <entry><para>Firebird,Cloudscape</para></entry>
               </row>
               <row>
                 <entry><para>workbench.db.inlineconstraints</para></entry>
                 <entry><para>This setting controls the generation of the <literal>CREATE TABLE</literal>
-								source in the <link linkend="dbexplorer">DbExplorer</link>. This is a comma separated
-								list of DBMS systems that only support defining primary and foreign keys inside
-								the <literal>CREATE TABLE</literal> statement.</para>
+                source in the <link linkend="dbexplorer">DbExplorer</link>. This is a comma separated
+                list of <link linkend="dbms-identifier">Database Identifiers</link> that only support defining
+								primary and foreign keys inside the <literal>CREATE TABLE</literal> statement.</para>
                 </entry>
                 <entry><para>FirstSQL/J</para></entry>
               </row>
               <row>
                 <entry><para>workbench.db.casesensitive</para></entry>
                 <entry><para>This is (currently) only used in the table search panel of the DbExplorer.
-                The highlighting of matching values considers this setting.</para>
+                The highlighting of matching values considers this setting.
+								This is a comma separated list of <link linkend="dbms-identifier">Database Identifiers</link>
+								</para>
                 </entry>
                 <entry><para>Oracle</para></entry>
               </row>
               <row>
-                <entry><para>workbench.db.ignore.[dbid]</para></entry>
+                <entry><para>workbench.db.ignore.[dbid]=</para></entry>
                 <entry><para>For a DBMS identifier you can define a list of commands
-                that are simply ignored by &wb-productname;. This is useful e.g. for Oracle, 
+                that are simply ignored by &wb-productname;. This is useful e.g. for Oracle,
                 when you want to run scripts that are intended for SQL*Plus. If those scripts
                 contain special SQL*Plus commands (that are not understood by the Oracle server
                 as SQL*Plus executes these commands directly) they would fail in &wb-productname;.
                 If those commands are simply ignored and not send to the server, the scripts
                 can run without modification.</para>
-                <para>The dbid is the lower case DBMS identifier (see above) with all 
+                <para>The <link linkend="dbid">DBID</link> is the lower case DBMS identifier (see above) with all
                 special characters like <literal>\/,.$[]()</literal> and spaces removed.
-                The actual ID that is used to retrieve this list is reported as an 
+                The actual ID that is used to retrieve this list is reported as an
                 informational message in the log file (<literal>Using DBID=</literal>)</para>
                 </entry>
                 <entry><para>workbench.db.ignore.oracle =prompt, exit, whenever</para></entry>
               </row>
               <row>
+                <entry><para>workbench.db.keywordlist.[dbid]=</para></entry>
+                <entry><para>For a <link linkend="dbid">DBID</link> you can define a list of additional
+                SQL keywords. This can be used if the JDBC driver does not implement getSQLKeywords() correctly.
+								</para>
+                </entry>
+                <entry><para>No default</para></entry>
+              </row>
+              <row>
                 <entry><para>workbench.db.cancelneedsreconnect</para></entry>
-                <entry><para>A list of JDBC driver classes, that require a reconnect after cancelling 
+                <entry><para>A list of JDBC driver classes, that require a reconnect after cancelling
                 a statement. </para>
                 </entry>
                 <entry><para>com.microsoft.jdbc.sqlserver.SQLServerDriver</para></entry>
@@ -456,29 +478,44 @@
                 </entry>
                 <entry><para>Oracle</para></entry>
               </row>
-              
+
               <row>
                 <entry><para>workbench.sql.script.inmemory.maxsize</para></entry>
                 <entry><para>Control the size up to which files that are executed in batch
                 mode or via the <link linkend="command-wbinclude">WBINCLUDE</link> command
                 are read into memory. Files exceeding this size are not read into memory
                 but processed statement by statement. When a file is not read into memory
-                the automatic detection of the alternate delimiter does not work
-                any longer. The size is given in bytes.</para>
+                the automatic detection of the <link linkend="options-alternate-delimiter">alternate delimiter</link>
+								does not work any longer. The size is given in bytes.</para>
                 </entry>
                 <entry><para>1048576</para></entry>
               </row>
+              
+              <row>
+                <entry><para>workbench.sql.ignoreschema.[dbid1]=schema1,...</para></entry>
+                <entry><para>
+								Define a list of schemas that should be ignored for the <link linkend="dbid">DB ID</link>
+								When &wb-productname; creates DML statements and the current table is reported
+								to be belong to any of the schemas listed in this property, the schema will not
+								be used to qualify the table. To ignore all schemas use a *, e.g.
+								<literal>workbench.sql.ignoreschema.rdb=*</literal>. In this case, table names
+								will never be prefixed with the schema name reported by the JDBC driver.
+								The entries in there are case sensitiv.
+                </para></entry>
+                <entry><para>For Oracle: PUBLIC, For PostgreSQL: public, For rdb: *</para></entry>
+              </row>
+
               <row>
                 <entry><para>workbench.editor.rightclickmovescursor</para></entry>
                 <entry>
-                  <para>Normally a right click in the SQL editor does not 
-                        change the location of the cursor (caret). If this parameter is set to 
+                  <para>Normally a right click in the SQL editor does not
+                        change the location of the cursor (caret). If this parameter is set to
                         true, then a right click will also change the caret's location.
                    </para>
                 </entry>
                 <entry><para>false</para></entry>
               </row>
-              
+
             </tbody>
           </tgroup>
         </informaltable>

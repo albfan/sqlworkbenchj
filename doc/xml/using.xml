@@ -80,9 +80,9 @@ COMMIT;</programlisting>
         window will change to either the last result or the last message of
         that statement.</para>
 
-        <para>For JDBC drivers which do not support multi-threaded execution, you
-        can configure your <link linkend="profiles">Connection Profile</link> such
-        that &wb-productname; will open a new connection for each tab</para>
+        <para>For JDBC drivers which do not support multi-threaded execution (e.g. Oracle's
+				JDBC driver), you can configure your <link linkend="profiles">Connection Profile</link>
+				so that &wb-productname; will open a new connection for each tab.</para>
 
         <para>If you enter more than one statement in the editor and want to execute all statements
         as a batch script, you need to delimit each statement. The SQL standard for terminating a SQL
@@ -107,6 +107,22 @@ SQL*Plus can be used.</para>
 /
 COMMIT
 /</programlisting>
+				<para>The detection of the MS SQL "<literal>GO</literal>" syntax only works if the script
+				that is to be executed is terminated with a <literal>GO</literal> on a single line. The
+				following script will fail on every database that does not know the GO keyword (to my
+				knowledge MS SQL Server is the only one supporting this):</para>
+<programlisting>UPDATE person SET numheads = 2 WHERE name='Beeblebrox'
+GO
+COMMIT</programlisting>
+				<para>As the complete script does <emphasis role="bold">not</emphasis> end with the
+				<literal>GO</literal> keyword, it is not recognized by &wb-productname;. In this case
+				the whole script will be send to the server because no (known) delimiter is used
+				at all.</para>
+
+				<note><para>This automatic detection of the delimiter does not work when using
+				the <link linkend="command-wbinclude">WbInclude</link> command with large files
+				that are not processed in memory.</para></note>
+				
         <para>You can run any statement that is valid for the current DBMS. If
         the statement returns a result set, it will be displayed, otherwise
         any messages from the server will be displayed in the messages tab. To
@@ -116,6 +132,7 @@ COMMIT
         the associated workspace. If you do not have a workspace assigned to
         the current profile, the tab count will be stored in the default
         workspace.</para>
+
 
         <para>The statement is executed by either pressing <keycap>F9</keycap>, <keycap>Ctrl-E</keycap> or
         clicking the <guibutton>Execute Selected</guibutton> button
@@ -384,7 +401,7 @@ Done.</programlisting>
         <title>Other database systems</title>
       <para>If your DBMS supports something similar please let me know, and I
       will try to implement it - provided I have access to the DBMS. Please send your
-      request to <ulink url="mailto:info@sql-workbench.net">info@sql-workbench.net</ulink></para>
+      request to <ulink url="mailto:support@sql-workbench.net">support@sql-workbench.net</ulink></para>
       </section>
     </section>
 

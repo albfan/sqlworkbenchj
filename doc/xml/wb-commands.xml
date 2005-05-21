@@ -1,51 +1,6 @@
 <section id="wb-commands">
   <title>Special &wb-productname; commands</title>
 
-  <section id="command-list">
-    <title>LIST</title>
-    
-    <para>This command lists all available tables (including views and
-      synonyms). This output is equivalent to the left part of the Database
-      Object Explorer&#39;s Table tab.
-    </para>
-  </section>
-
-  <section id="command-listprocs">
-    <title>LISTPROCS</title>
-    
-    <para>This command will list all stored procedures available to the
-    current user. The output of this command is equivalent to the Database
-    Explorer&apos;s Procedure tab.</para>
-  </section>
-
-  <section id="command-desc">
-    <title>DESCRIBE (DESC)</title>
-    
-    <para>Describe shows the definition of the given table. It can be
-    abbreviated with DESC. The command expects the table name as a parameter.</para>
-    <programlisting>DESC person;</programlisting>
-    <para>If you want to show the structure of a table from a different user, you need
-    to prefix the table name with the desired user</para>
-    <programlisting>DESCRIBE otheruser.person;</programlisting>
-  </section>
-
-  <section id="command-listcat">
-    <title>LISTCAT (LISTDB)</title>
-    
-    <para>Lists the available catalogs or databases. The output of this
-    command depends on the underlying JDBC driver and DBMS. For MS SQL
-    Server this lists the available databases (which then could be changed
-    by USE &#60;dbname&#62;)</para>
-    
-    <para>For Oracle this command returns nothing (as Oracle does not
-    implement the concept of catalogs)</para>
-    <para>This command calls the JDBC driver&apos;s getCatalogs() method and will
-    return its result. If on your database system this command does not display
-    a list, it is most likely that your DBMS does not support catalogs (e.g. Oracle)
-    or the driver does not implement this feature.
-    </para>
-  </section>
-
   <section id="command-export">
     <title>WBEXPORT</title>
 
@@ -530,7 +485,8 @@ WHERE table1.column1 = table2.column1;</programlisting>
           contain whitespace) will be silently ignored. The text import does not support records
           spanning multiple lines in the input file. If the input file is created using
           WBEXPORT then it is recommended to use the <literal>-escape</literal> switch
-          to escape non-printable characters which could break text import.</para>
+          to escape non-printable characters which could break text import.
+	  </para>
 
     <para>The WBIMPORT command has the following syntax</para>
     <informaltable frame="all">
@@ -550,9 +506,24 @@ WHERE table1.column1 = table2.column1;</programlisting>
           </row>
           <row>
             <entry><para>-file</para></entry>
-            <entry><para>Defines the full name of the input file. For XML imports
+            <entry><para>Defines the full name of the input file. Alternatively
             you can also specify a directory (using <literal>-sourcedir</literal>
             from which all xml files are imported</para></entry>
+          </row>
+          <row>
+            <entry><para>-sourcedir</para></entry>
+            <entry><para>Defines a directory which contains import files. All
+            files from that directory will be imported. If this switch is used
+            with text files, then it is assumed that each filename (without the extension)
+            defines the target table.
+						</para></entry>
+          </row>
+          <row>
+            <entry><para>-extension</para></entry>
+            <entry><para>When using the <literal>-sourcedir</literal> switch, the
+            extension for the files can be defined. All files ending with the supplied
+            value will be processed. (e.g. <literal>-extension=csv</literal>
+						</para></entry>
           </row>
           <row>
             <entry><para>-commitevery</para></entry>
@@ -592,7 +563,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
           <row>
             <entry><para>-table</para></entry>
             <entry><para>Defines the table into which the data should be imported</para>
-            <para>This parameter is ignored if XML files are imported using the <literal>-sourcedir</literal>
+            <para>This parameter is ignored files are imported using the <literal>-sourcedir</literal>
             parameter
             </para></entry>
           </row>
@@ -668,7 +639,10 @@ WHERE table1.column1 = table2.column1;</programlisting>
               the name $wb_skip$. You can also specify the $wb_skip$ flag for
               columns which are present but that you want to exclude from the 
               import.
-              </para></entry>
+              </para>
+              <para>This parameter is ignored when the <literal>-sourcedir</literal>
+              parameter is used.</para>
+							</entry>
             </row>
             <row>
               <entry><para>-importcolumns</para></entry>
@@ -683,8 +657,10 @@ WHERE table1.column1 = table2.column1;</programlisting>
               is mainly a matter of taste. Listing all columns and excluding
               some using <literal>-importcolumns</literal> might be more readable
               because the structure of the file is still "visible" in the 
-              <literal>-filecolumns</literal> switch.
-              </para></entry>
+              <literal>-filecolumns</literal> switch.</para>
+              <para>This parameter is ignored when the <literal>-sourcedir</literal>
+              parameter is used.</para>
+							</entry>
             </row>
             <row>
               <entry><para>-delimiter</para></entry>
@@ -724,15 +700,18 @@ WHERE table1.column1 = table2.column1;</programlisting>
               the data from the first line of the file. If the column names
               to be imported are defined using the <literal>-columns</literal> switch,
               this parameter has to be set to true nevertheless, otherwise the first column
-              would be treated as a regular data column.
-              </para></entry>
+              would be treated as a regular data column.</para>
+              <para>This parameter is always set to true when the <literal>-sourcedir</literal>
+              parameter is used.</para>
+							</entry>
             </row>
             <row>
               <entry><para>-decode=[true|false]</para></entry>
               <entry><para>This controls the decoding of escaped characters. If the 
               export file was e.g. written with <link linkend="text-escape-switch">escaping enabled</link> 
               then you need to set <literal>-decode=true</literal> in order to interpret string sequences
-              like \t, \n or escaped Unicode characters properly.
+              like \t, \n or escaped Unicode characters properly. This is not enabled by default
+              because applying the necessary checks has an impact on the performance.
               </para></entry>
             </row>
             <row>
@@ -746,7 +725,9 @@ WHERE table1.column1 = table2.column1;</programlisting>
               in order for the input row to be processed. The expressions to be applied to
               the input value are regular expressions.
               </para>
-              </entry>
+              <para>This parameter is ignored when the <literal>-sourcedir</literal>
+              parameter is used.</para>
+							</entry>
             </row>
             <row>
               <entry><para>-linefilter</para></entry>
@@ -919,42 +900,6 @@ WHERE table1.column1 = table2.column1;</programlisting>
 
   </section>
     
-  <section id="command-xslt">
-    <title>XSLT</title>
-
-    <para>Transform an XML file via a XSLT stylesheet. This can be used to format 
-    XML input files into the correct format for &wb-productname; or to transform
-    the output files that are generated.</para>
-    <para>Parameters for the XSLT command:</para>
-      <informaltable frame="all">
-        <tgroup cols="2"  align="left">
-          <colspec colname="c1" colwidth="4cm" />
-          <colspec colname="c2" />
-          <thead>
-            <row>
-              <entry>Parameter</entry>
-              <entry>Description</entry>
-            </row>
-          </thead>
-
-          <tbody valign="top">
-            <row>
-              <entry><para>-inputfile</para></entry>
-              <entry><para>The name of the XML source file.</para></entry>
-            </row>
-            <row>
-              <entry><para>-xsltoutput</para></entry>
-              <entry><para>The name of the generated output file.</para></entry>
-            </row>
-            <row>
-              <entry><para>-stylesheet</para></entry>
-              <entry><para>The name of the XSLT stylesheet to be used.</para></entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </informaltable>
-  </section>
-
     <section id="command-copy">
       <title>WBCOPY</title>
       <para>The <literal>WBCOPY</literal> is essentially the command line version of the
@@ -1172,15 +1117,20 @@ WHERE table1.column1 = table2.column1;</programlisting>
       to generate an HTML documentation of the database (e.g. using the <link linkend="command-xslt">XSLT</link>
       command). This report can also be generated from within the <link linkend="dbexplorer">Database Object Explorer</link>
       </para>
-      <!-- <para>
-        The resulting XML file could e.g. be transformed in a HTML documentation of your database schema.
-                A sample stylesheet to do so can be downloaded from <ulink url="http://www.sql-workbench.net"/>.
+      <para>
+        The resulting XML file can  be transformed into a HTML documentation of your database schema.
+        Sample stylesheets can be downloaded from	<ulink url="http://www.sql-workbench.net/xstl.html"/>.
+        If you have XSLT stylsheets that you would like to share, please send them to
+        <email>support@sql-workbench.net</email>.
       </para> 
-      -->
+      
       <para>Using this command you can reverse engineer an existing database. The XML file
       can then be used to generate a HTML documentation of the database or to be transformed
       into a format that is supported by your design tool.</para>
-      
+			<para>To see table and column comments with an Oracle database, you need to
+			<link linkend="oracle-enable-remarks">enable remarks reporting</link> for the JDBC
+			driver in order to see the comments.</para>
+
       <para>The command supports the following parameters:</para>
 
       <informaltable frame="all">
@@ -1235,17 +1185,19 @@ WHERE table1.column1 = table2.column1;</programlisting>
         </tgroup>
      </informaltable>
    </section>
+   
    <section id="command-diff">
     <title>WBDIFF</title>
     <para>The <literal>WBDIFF</literal> analyzes two schemas (or a list of tables) 
     and outputs the differences between those schemas as an XML file. The XML file
     describes the changes that need to be applied to the target schema to have 
     the same structure as the reference schema, e.g. modify column definitions, 
-    remove or add tables, remove or add indexes. Currently it does not include 
-    foreign key references.
+    remove or add tables, remove or add indexes. 
     </para>
     <para>The output is intended to be transformed using XSLT (e.g. with the 
-    <link linkend="command-xslt">XSLT Command</link>)
+    <link linkend="command-xslt">XSLT Command</link>).
+		Sample XSLT transformations
+    can be found on the <ulink url="http://www.sql-workbench.net/xslt.html">&wb-productname; homepage</ulink>
     </para>
       <para>The command supports the following parameters:</para>
 
@@ -1337,46 +1289,82 @@ WHERE table1.column1 = table2.column1;</programlisting>
                 default is UTF-8
                 </para></entry>
             </row>
+            <row>
+	              <entry><para>-includeprimarykeys=[true|false]</para></entry>
+                <entry><para>Select whether primary key constraint definitions should be compared as well.
+								The default is to compare primary keys.
+                </para></entry>
+            </row>
+            <row>
+                <entry><para>-includeforeignkeys=[true|false]</para></entry>
+                <entry><para>Select whether foreign key constraint definitions should be compared as well.
+								The default is to compare foreign keys.
+                </para></entry>
+            </row>
+            <row>
+                <entry><para>-includeconstraints=[true|false]</para></entry>
+                <entry><para>Select whether table and column (check) constraints
+								should be compared as well. &wb-productname; compares the constraint
+								definition (SQL) as stored in the database. When comparing schemas from
+								different DBMS systems this will not return the desired results.</para>
+								<para>The default is to not compare table constraints.</para>
+								</entry>
+            </row>
+            <row>
+                <entry><para>-includecomments=[true|false]</para></entry>
+                <entry><para>Select whether table and column comments should be compared as well.
+								The default is to not compare comments. When using an Oracle database, you need
+								to <link linkend="oracle-enable-remarks">enable remarks reporting</link> for the JDBC
+								driver in order to use this feature.
+                </para></entry>
+            </row>
+            <row>
+                <entry><para>-includeindex=[true|false]</para></entry>
+                <entry><para>Select whether indexes should be compared as well.  The default
+                is to not compare index definitions.
+                </para></entry>
+            </row>
           </tbody>
         </tgroup>
      </informaltable>
     
    </section>
 
-    <section id="command-enableout" xreflabel="ENABLEOUT">
-      <title>ENABLEOUT</title>
+  <section id="command-xslt">
+    <title>WBXSLT</title>
 
-      <para>This command enables the <literal>DBMS_OUTPUT</literal> package when connected to
-      an Oracle database. On other systems this command does nothing. After
-      the <literal>DBMS_OUTPUT</literal> package is enabled, any message written with
-      dbms_output.put_line() are displayed in the message pane after
-      executing a SQL statement. It is equivalent to calling the
-      dbms_output.enable() procedure.</para>
+    <para>Transforms an XML file via a XSLT stylesheet. This can be used to format
+    XML input files into the correct format for &wb-productname; or to transform
+    the output files that are generated by the various &wb-productname; commands.</para>
+    <para>Parameters for the XSLT command:</para>
+      <informaltable frame="all">
+        <tgroup cols="2"  align="left">
+          <colspec colname="c1" colwidth="4cm" />
+          <colspec colname="c2" />
+          <thead>
+            <row>
+              <entry>Parameter</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
 
-      <para>The <literal>DBMS_OUTPUT</literal> package can be enabled automatically when a
-      connection is established. See <xref linkend="options-enable-out"/></para>
-    </section>
-
-    <section id="command-disableout">
-      <title>DISABLEOUT</title>
-
-      <para>This disables the <literal>DBMS_OUTPUT</literal> package for an Oracle database.
-      This is equivalent to calling dbms_output.disable() procedure.</para>
-    </section>
-    
-    <section id="command-wbfeedback">
-      <title>WBFEEDBACK</title>
-
-      <para>Normally &wb-productname; prints the results for each statement
-      into the message panel. As this feedback can slow down the execution
-      of large scripts, you can disable the feedback using the <literal>WBFEEDBAK</literal>
-      command. When <literal>WBFEEDBACK OFF</literal> is executed, only a summary of the
-      number of executed statements will be displayed, once the script execution has
-            finished. This is the same behaviour as selecting "Consolidate script log" in the
-            options window. The only difference is, that the setting through <literal>WBFEEDBACK</literal>
-            is temporary and does not affect the global setting.
-      </para>
-    </section>
+          <tbody valign="top">
+            <row>
+              <entry><para>-inputfile</para></entry>
+              <entry><para>The name of the XML source file.</para></entry>
+            </row>
+            <row>
+              <entry><para>-xsltoutput</para></entry>
+              <entry><para>The name of the generated output file.</para></entry>
+            </row>
+            <row>
+              <entry><para>-stylesheet</para></entry>
+              <entry><para>The name of the XSLT stylesheet to be used.</para></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+  </section>
 
     <section id="command-vardef">
       <title>WBVARDEF</title>
@@ -1469,5 +1457,86 @@ WHERE table1.column1 = table2.column1;</programlisting>
       <para>Execute <literal>my_script.sql</literal> but abort on the first error</para>
       <programlisting>wbinclude -file="my_script.sql" -continueOnError=false;</programlisting>
     </section>
+
+    <section id="command-enableout" xreflabel="ENABLEOUT">
+      <title>ENABLEOUT</title>
+
+      <para>This command enables the <literal>DBMS_OUTPUT</literal> package when connected to
+      an Oracle database. On other systems this command does nothing. After
+      the <literal>DBMS_OUTPUT</literal> package is enabled, any message written with
+      dbms_output.put_line() are displayed in the message pane after
+      executing a SQL statement. It is equivalent to calling the
+      dbms_output.enable() procedure.</para>
+
+      <para>The <literal>DBMS_OUTPUT</literal> package can be enabled automatically when a
+      connection is established. See <xref linkend="options-enable-out"/></para>
+    </section>
+
+    <section id="command-disableout">
+      <title>DISABLEOUT</title>
+
+      <para>This disables the <literal>DBMS_OUTPUT</literal> package for an Oracle database.
+      This is equivalent to calling dbms_output.disable() procedure.</para>
+    </section>
+
+    <section id="command-wbfeedback">
+      <title>WBFEEDBACK</title>
+
+      <para>Normally &wb-productname; prints the results for each statement
+      into the message panel. As this feedback can slow down the execution
+      of large scripts, you can disable the feedback using the <literal>WBFEEDBACK</literal>
+      command. When <literal>WBFEEDBACK OFF</literal> is executed, only a summary of the
+      number of executed statements will be displayed, once the script execution has
+            finished. This is the same behaviour as selecting "Consolidate script log" in the
+            options window. The only difference is, that the setting through <literal>WBFEEDBACK</literal>
+            is temporary and does not affect the global setting.
+      </para>
+    </section>
+    
+  <section id="command-list">
+    <title>LIST</title>
+
+    <para>This command lists all available tables (including views and
+      synonyms). This output is equivalent to the left part of the Database
+      Object Explorer&#39;s Table tab.
+    </para>
+  </section>
+
+  <section id="command-listprocs">
+    <title>LISTPROCS</title>
+
+    <para>This command will list all stored procedures available to the
+    current user. The output of this command is equivalent to the Database
+    Explorer&apos;s Procedure tab.</para>
+  </section>
+
+  <section id="command-desc">
+    <title>DESCRIBE (DESC)</title>
+
+    <para>Describe shows the definition of the given table. It can be
+    abbreviated with DESC. The command expects the table name as a parameter.</para>
+    <programlisting>DESC person;</programlisting>
+    <para>If you want to show the structure of a table from a different user, you need
+    to prefix the table name with the desired user</para>
+    <programlisting>DESCRIBE otheruser.person;</programlisting>
+  </section>
+
+  <section id="command-listcat">
+    <title>LISTCAT (LISTDB)</title>
+
+    <para>Lists the available catalogs or databases. The output of this
+    command depends on the underlying JDBC driver and DBMS. For MS SQL
+    Server this lists the available databases (which then could be changed
+    by USE &#60;dbname&#62;)</para>
+
+    <para>For Oracle this command returns nothing (as Oracle does not
+    implement the concept of catalogs)</para>
+    <para>This command calls the JDBC driver&apos;s getCatalogs() method and will
+    return its result. If on your database system this command does not display
+    a list, it is most likely that your DBMS does not support catalogs (e.g. Oracle)
+    or the driver does not implement this feature.
+    </para>
+  </section>
+
 
 </section>

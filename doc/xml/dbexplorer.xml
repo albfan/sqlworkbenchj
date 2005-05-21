@@ -1,259 +1,272 @@
-  <section id="dbexplorer" xreflabel="Database Object Explorer">
-    <title>Database Object Explorer</title>
+<section id="dbexplorer" xreflabel="Database Object Explorer">
+  <title>Database Object Explorer</title>
 
-    <para>The Database Object Explorer displays the available database objects
-    such as Tables, Views, Triggers and Stored Procedures.</para>
-    
-    <para>There are three ways to start the DbExplorer
-      <simplelist columns="1">
-          <member>Using <menuchoice><guimenu>Tools</guimenu><guimenuitem>Database Explorer</guimenuitem></menuchoice></member>
-          <member>Passing the paramter <literal>-dbexplorer</literal> to the main program (jworkbench or JWorkbench.exe)</member>
-          <member>When using Windows with the <literal>DbExplorer.exe</literal> executable or in Linux/Unix using shell script <literal>jworkbench</literal></member>
-      </simplelist>
-    </para>
-    <para>At the top of the window, the current schema (for MS SQL Server this
-    would be the current database, for Oracle this is the user) can be selected.</para>
+  <para>The Database Object Explorer displays the available database objects
+  such as Tables, Views, Triggers and Stored Procedures.</para>
+  
+  <para>There are three ways to start the DbExplorer
+    <simplelist columns="1">
+        <member>Using <menuchoice><guimenu>Tools</guimenu><guimenuitem>Database Explorer</guimenuitem></menuchoice></member>
+        <member>Passing the paramter <literal>-dbexplorer</literal> to the main program (jworkbench or JWorkbench.exe)</member>
+        <member>When using Windows with the <literal>DbExplorer.exe</literal> executable or in Linux/Unix using shell script <literal>jworkbench</literal></member>
+    </simplelist>
+  </para>
+  <para>At the top of the window, the current schema (for MS SQL Server this
+  would be the current database, for Oracle this is the user) can be selected.</para>
 
-    <para>The first tab displays the structure of tables and views. The type
-    of object displayed can be chosen from the drop down right above the table
-    list. This list will be returned by the JDBC driver, so the available
-    "Table types" can vary from DBMS to DBMS.</para>
+  <para>The first tab displays the structure of tables and views. The type
+  of object displayed can be chosen from the drop down right above the table
+  list. This list will be returned by the JDBC driver, so the available
+  "Table types" can vary from DBMS to DBMS. You can specify a default 
+  type to be selected in the <link linkend="options-deftabletype">System options</link>.
+  There you can also choose to automatically retrieve the objects in that list when 
+  the DbExplorer is opened.
+  </para>
 
-    <para>As soon as either the Schema/Database or the Type is selected, the
-    list will be refreshed.</para>
+  <para>The Database Explorer can either be displayed as a separate window,
+  or as a tab inside the main window.	This behavior can be changed in the
+  <link linkend="options-explorer-as-tab">system options</link>
+  </para>
 
-    <para>The Database Explorer can either be displayed as a separate window,
-    or as a tab inside the main window. This behavior can be changed in the
-    system options. To close the DbExplorer Tab, right click on the tab
-    label, and choose <guimenuitem>Close Tab</guimenuitem>. If the Explorer tab is left
-    open when exiting the &wb-productname;, the explorer tab will be restored the next
-    time &wb-productname; is started. (the Explorer <emphasis role="strong">window</emphasis>
-    will <emphasis role="strong">not</emphasis> be restored)</para>
+  <section id="dbexplorer-objectlist">
+    <title>Objects tab</title>
 
-    <section id="dbexplorer-tablelist">
-      <title>Table tab</title>
+      <para>The object list displays tables, views, sequences and synonyms (basically anyhting
+      apart from procedures or functions). The context menu of the list offers several
+      additional functions:</para>
 
-      <section id="table-tab">
-        <title>Tables</title>
-
-        <para>When a table is selected, the right part of the window will
-        display it&apos;s column definition, the SQL statement to create the
-        table, any index defined on that table (only if the JDBC driver
-        returns that information), other tables that are referenced by the
-        currently selected table, any table that references the currently
-        selected table and any trigger that is defined on that table.</para>
-        
-        <para>The column list will also display any comments defined for the column
-        (if the JDBC driver returns the information).
-        Oracle's JDBC driver does not return those comments by default. To enable the 
-        display of column comments (remarks) you have to supply an <link linkend="profile-extended-properties">extended property</link>
-        in your connection profile. The property's name should be <literal>remarksReporting</literal>
-        and the value should be set to <literal>true</literal>.
-        </para>
-
-        <para>When an Oracle synonym is selected, the columns tab will display
-        the column definition of the underlying table or view. The source tab
-        will display the statement to re-create the synonym.</para>
-
-        <para>The References/Referenced by tabs display the complete
-        reference tree (any table referencing the tables referencing the
-        currently selected one, and so on).</para>
-
-        <para>The table list offers the following additional commands in the
-        context menu:</para>
-
-        <simplesect id="dbexplorer-spool">
-          <title>Export data</title>
-          <blockquote>
-          <para>This will execute a <literal>WBEXPORT</literal> command for the currently selected
-          table(s). Choosing this option is equivalent to do a <literal>SELECT * FROM table;</literal>
-          and then executing <menuchoice><guimenu>SQL</guimenu><guimenuitem>Spool data</guimenuitem></menuchoice>
-          from the SQL editor in the main window (or issuing a WBEXPORT command before the SELECT).
-          See the description of the <link linkend="command-export">WBEXPORT command</link>
-          for details.</para>
-          </blockquote>
-        </simplesect>
-
-        <simplesect>
-          <title>Create Empty INSERT</title>
-          
-          <blockquote>
-          <para>This creates an empty <literal>INSERT</literal>statement for the 
-          currently selected table(s).
-          </para>
-          </blockquote>
-        </simplesect>
-
-        <simplesect>
-          <title>Create default SELECT</title>
-          
-          <blockquote>
-          <para>This creates a <literal>SELECT</literal> for the 
-          selected table(s) that includes all columns for the table. 
-          </para>
-          </blockquote>
-        </simplesect>
-        
-        <simplesect>
-          <title>Drop</title>
-
-          <blockquote>
-          <para>Drops the selected objects. If at least one object is a table, and 
-          the currently used DBMS supports cascaded dropping of constraints, you 
-          can enable cascaded delete of constraints. If this option is enabled
-          &wb-productname; would generate e.g. for Oracle a <literal>DROP TABLE
-          mytable CASCADE CONSTRAINTS</literal>. This is necessary if you want to
-          drop several tables at the same time that have foreign key constraints
-          defined.
-          </para>
-          </blockquote>
-        </simplesect>
-
-        <simplesect>
-          <title>Delete data</title>
-
-          <blockquote>
-          <para>Deletes all rows from the selected table(s) by sending an 
-          <literal>DELETE FROM table_name;</literal> to the server for each
-          selected table. If the DBMS supports <literal>TRUNCATE</literal>
-          then this can be done with <literal>TRUNCATE</literal> as well. Using
-          <literal>TRUNCATE</literal> is usually faster as no transation 
-          state is maintained. 
-          </para>
-          </blockquote>
-        </simplesect>
-        
-        <simplesect>
-          <title>Create SQL Script</title>
-
-          <blockquote>
-          <para>With this command a script for multiple objects can be created. Select
-          all the tables, views or other objects in the table list, that you want
-          to create a script for. Then right click and select "Create SQL Script".
-          This will generate one script for all selected items in the list.
-          </para>
-          <para>When this command is selected, a new window will be shown. The window
-          contains a statusbar which indicates the object that is currently processed. The
-          complete script will be shown as soon as all objects have been processed. 
-          The objects will be processed in this order:</para>
-          <simplelist columns="1">
-              <member>SEQUENCES</member>
-              <member>TABLEs</member>
-              <member>VIEWs</member>
-              <member>SYNONYMS</member>
-          </simplelist>
-          </blockquote>
-        </simplesect>
-        
-        <simplesect id="dbexplorer-schema-report">
-          <title>Create Report</title>
-
-          <blockquote>
-          <para>This will create an XML report of the selected tables. You will be
-          prompted to specify the location of the generated XML file. This report can
-          also be generated using the <link linkend="command-schema-report">WBREPORT</link>
-          command.
-          </para>
-          </blockquote>
-       </simplesect>
-       
-       <simplesect>
-        <title>Show table data</title>
-
+      <simplesect id="dbexplorer-spool">
+        <title>Export data</title>
         <blockquote>
-        <para>This will put a SELECT statement into the SQL editor to display
-        all data for the selected table. You can choose into which editor tab
-        the statement will be written. The currently selected editor tab is
-        displayed in bold</para>
+        <para>This will execute a <link linkend="command-export"><literal>WBEXPORT</literal></link> command for the currently selected
+        table(s). Choosing this option is equivalent to do a <literal>SELECT * FROM table;</literal>
+        and then executing <menuchoice><guimenu>SQL</guimenu><guimenuitem>Export query result</guimenuitem></menuchoice>
+        from the SQL editor in the main window.
+        See the description of the <link linkend="command-export">WBEXPORT command</link>
+        for details.</para>
         </blockquote>
       </simplesect>
 
-      </section>
+       <simplesect>
+        <title>Show table data</title>
 
-      <section id="data-tab">
-        <title>Data tab</title>
+        <blockquote><para>
+        This will put a SELECT statement into the SQL editor to display
+        all data for the selected table. You can choose into which editor tab
+        the statement will be written. The currently selected editor tab is
+        displayed in bold. You can also put the generated SQL statement into
+        a new editor tab, by selecting the item <guimenuitem>New tab</guimenuitem>
+        </para></blockquote>
+      </simplesect>
 
-        <para>The data tab will display the data from the currently selected
-        table. There are several options to configure the display of this tab.
-        The <literal>Autoload</literal> check box, controls the retrieval of the data. If this is
-        checked, then the data will be retrieved from the database as soon as
-        the table is selected in the table list (and the tab is visible).</para>
+      <simplesect>
+        <title>Create empty INSERT</title>
+        
+        <blockquote>
+        <para>This creates an empty <literal>INSERT</literal>statement for the 
+        currently selected table(s). This is intended for programmers that want
+        to use the statement inside their code.
+        </para>
+        </blockquote>
+      </simplesect>
 
-        <para>You can define a maximum number of rows which should be
-        retrieved. If you enter 0 (zero) then all rows are retrieved. Limiting
-        the number of rows is useful if you have tables with a lot of rows,
-        where the entire table would not fit into memory.</para>
+      <simplesect>
+        <title>Create default SELECT</title>
+        
+        <blockquote>
+        <para>This creates a <literal>SELECT</literal> for the 
+        selected table(s) that includes all columns for the table. If you want to
+        generate a SELECT statement to actually retreive data from within the
+        editor, please use the <literal>Show table data</literal> option.
+        </para>
+        </blockquote>
+      </simplesect>
 
-        <para>In addition to the max rows setting, another limit can be
-        defined. If the total number of rows in the table exceeds this second
-        limit, a warning is displayed, whether the data should be loaded.</para>
+      <simplesect>
+        <title>Create DDL Script</title>
 
-        <para>This is useful when the max rows parameter is set to zero and
-        you accidently display a table with a large number of rows.</para>
+        <blockquote>
+        <para>With this command a script for multiple objects can be created. Select
+        all the tables, views or other objects in the table list, that you want
+        to create a script for. Then right click and select "Create DDL Script".
+        This will generate one script for all selected items in the list.
+        </para>
+        <para>When this command is selected, a new window will be shown. The window
+        contains a statusbar which indicates the object that is currently processed. The
+        complete script will be shown as soon as all objects have been processed.
+        The objects will be processed in this order:</para>
+        <simplelist columns="1">
+            <member>SEQUENCES</member>
+            <member>TABLEs</member>
+            <member>VIEWs</member>
+            <member>SYNONYMS</member>
+        </simplelist>
+        </blockquote>
+      </simplesect>
 
-        <para>If the automatic retrieval is activated, then the retrieve of
-        the data can be prevented by holding down the Shift key while
-        switching to the data tab.</para>
+      <simplesect id="dbexplorer-schema-report">
+        <title>Create schema report</title>
 
-        <para>The data in the tab can be edited just like the data in the main
-        window. To add or delete rows, you can either use the buttons on the
-        toolbar in the upper part of the data display, or the popup menu. To
-        edit a value in a field, simply double click that field, start typing
-        while the field has focus (yellow border) or hit F2 while the field
-        has focus.</para>
+        <blockquote>
+        <para>This will create an XML report of the selected tables. You will be
+        prompted to specify the location of the generated XML file. This report can
+        also be generated using the <link linkend="command-schema-report">WBREPORT</link>
+        command.
+        </para>
+        </blockquote>
+     </simplesect>
 
-      </section>
-    </section>
+      <simplesect>
+        <title>Drop</title>
 
-    <section id="procedure-tab">
-      <title>Procedure tab</title>
+        <blockquote>
+        <para>Drops the selected objects. If at least one object is a table, and
+        the currently used DBMS supports cascaded dropping of constraints, you
+        can enable cascaded delete of constraints. If this option is enabled
+        &wb-productname; would generate e.g. for Oracle a <literal>DROP TABLE
+        mytable CASCADE CONSTRAINTS</literal>. This is necessary if you want to
+        drop several tables at the same time that have foreign key constraints
+        defined.
+        </para>
+        </blockquote>
+      </simplesect>
 
-      <para>The procedure tab will list all stored procedures and functions
-      stored in the current schema. For procedures or functions returning a
-      result set, the definition of the columns will be displayed as well.</para>
+      <simplesect>
+        <title>Delete data</title>
 
-      <para>Functions in Oracle packages will be listed separately on the left
-      side, but the source code will contain all functions/procedures from
-      that package.</para>
-    </section>
+        <blockquote>
+        <para>Deletes all rows from the selected table(s) by sending an
+        <literal>DELETE FROM table_name;</literal> to the server for each
+        selected table. If the DBMS supports <literal>TRUNCATE</literal>
+        then this can be done with <literal>TRUNCATE</literal> as well. Using
+        <literal>TRUNCATE</literal> is usually faster as no transation
+        state is maintained.
+        </para>
+        </blockquote>
+      </simplesect>
+     
+   </section>
 
-    <section id="search-tables">
-      <title>Search tables</title>
+  <section id="table-details">
+    <title>Table details</title>
+    
+    <para>When a table is selected, the right part of the window will
+    display it&apos;s column definition, the SQL statement to create the
+    table, any index defined on that table (only if the JDBC driver
+    returns that information), other tables that are referenced by the
+    currently selected table, any table that references the currently
+    selected table and any trigger that is defined on that table.</para>
 
-      <para>This tab offers the ability to search for a value in all text
-      columns of all tables which are selected. The results will be displayed
-      on the right side of that tab. The result will always display the
-      complete row where the search value was found. Any column that contains
-      the entered value will be highlighted.</para>
+    <para>The column list will also display any comments defined for the column
+    (if the JDBC driver returns the information).
+    Oracle's JDBC driver does not return those comments by default. To enable the
+    display of column comments (remarks) you have to supply an <link linkend="profile-extended-properties">extended property</link>
+    in your connection profile. The property's name should be <literal>remarksReporting</literal>
+    and the value should be set to <literal>true</literal>.
+    </para>
 
-      <para>The value will be used to create a <literal>LIKE &apos;value&apos;</literal>
-      restriction for each text column on the selected tables. Therefore the
-      value should contain a wildcard, otherwise the exact expression will be
-      searched.</para>
+    <para>When an Oracle synonym is selected, the columns tab will display
+    the column definition of the underlying table or view. The source tab
+    will display the statement to re-create the synonym.</para>
 
-      <para>You can apply a function to each column as well. This is useful if
-      you want to to do a case insensitive search on Oracle (Oracles VARCHAR
-      comparison is case sensitive). In the entry field for the column the
-      placeholder $col$ is replaced with the actual column name during the
-      search. To do a case insensitive search in Oracle, you would enter
-      lower($col$) in the column field and &apos;%test%&apos; in the value
-      field.</para>
+    <para>The data tab will display the data from the currently selected
+    table. There are several options to configure the display of this tab.
+    The <literal>Autoload</literal> check box, controls the retrieval of the data. If this is
+    checked, then the data will be retrieved from the database as soon as
+    the table is selected in the table list (and the tab is visible).</para>
 
-      <para>The expression in the column field is sent to the DBMS without
-      changes, except the replacement of $col$ with the current column name.
-      The above example would yield a <literal>lower(&lt;column_name&gt;) like
-      &apos;%test%&apos;</literal> for each text column for the selected tables.</para>
+    <para>You can define a maximum number of rows which should be
+    retrieved. If you enter 0 (zero) then all rows are retrieved. Limiting
+    the number of rows is useful if you have tables with a lot of rows,
+    where the entire table would not fit into memory.</para>
 
-      <para>The generated SQL statements are logged in the second tab, labelled
-      <literal>SQL Statements</literal>.</para>
+    <para>In addition to the max rows setting, a second limit can be
+    defined. If the total number of rows in the table exceeds this second
+    limit, a warning is displayed, whether the data should be loaded.</para>
 
-      <para>In the resulting tables, &wb-productname; tries to highlight those columns
-      which match the criteria. This might not always work, if you apply a function to the
-      column itself such as <literal>to_upper()</literal> &wb-productname; does not know
-      that this will result in a case-insesitive search on the database. &wb-productname; tries to
-      guess if the given function/value combination might result in a case insensitive search (especially
-      on a DBMS which does a case sensitive search by default) but this might not work
-      in all the cases and for all DBMS</para>
+    <para>This is useful when the max rows parameter is set to zero and
+    you accidently display a table with a large number of rows.</para>
 
-    </section>
+    <para>If the automatic retrieval is activated, then the retrieve of
+    the data can be prevented by holding down the Shift key while
+    switching to the data tab.</para>
+
+    <para>The data in the tab can be edited just like the data in the main
+    window. To add or delete rows, you can either use the buttons on the
+    toolbar in the upper part of the data display, or the popup menu. To
+    edit a value in a field, simply double click that field, start typing
+    while the field has focus (yellow border) or hit F2 while the field
+    has focus.</para>
+
+    <para>The References/Referenced by tabs display the complete
+    reference tree (any table referencing the tables referencing the
+    currently selected one, and so on).</para>
   </section>
+  
+  <section id="view-details">
+    <title>View details</title>
+    <para>When a database <literal>VIEW</literal> is selected in the object list
+    the right will display the columns for the view, the source and the data
+    returned by a select from that view.</para>
+    <para>The data details tab works the same way as the data tab
+    for a table. If the view is updateable (depends on the view definition
+    and the underlying DBMS) then the data can also be changed within 
+    the data tab</para>
+    <para>The source code is retrieved by customized SQL queries (this 
+    is not supported by the JDBC driver). If the source code of views is not 
+    displayed for your DBMS, please contact <email>support@sql-workbench.net</email>.
+    </para>
+  </section>
+  
+  <section id="procedure-tab">
+    <title>Procedure tab</title>
+
+    <para>The procedure tab will list all stored procedures and functions
+    stored in the current schema. For procedures or functions returning a
+    result set, the definition of the columns will be displayed as well.</para>
+
+    <para>Functions in Oracle packages will be listed separately on the left
+    side, but the source code will contain all functions/procedures from
+    that package.</para>
+  </section>
+
+  <section id="search-tables">
+    <title>Search tables</title>
+
+    <para>This tab offers the ability to search for a value in all text
+    columns of all tables which are selected. The results will be displayed
+    on the right side of that tab. The result will always display the
+    complete row where the search value was found. Any column that contains
+    the entered value will be highlighted.</para>
+
+    <para>The value will be used to create a <literal>LIKE &apos;value&apos;</literal>
+    restriction for each text column on the selected tables. Therefore the
+    value should contain a wildcard, otherwise the exact expression will be
+    searched.</para>
+
+    <para>You can apply a function to each column as well. This is useful if
+    you want to to do a case insensitive search on Oracle (Oracles VARCHAR
+    comparison is case sensitive). In the entry field for the column the
+    placeholder $col$ is replaced with the actual column name during the
+    search. To do a case insensitive search in Oracle, you would enter
+    lower($col$) in the column field and &apos;%test%&apos; in the value
+    field.</para>
+
+    <para>The expression in the column field is sent to the DBMS without
+    changes, except the replacement of $col$ with the current column name.
+    The above example would yield a <literal>lower(&lt;column_name&gt;) like
+    &apos;%test%&apos;</literal> for each text column for the selected tables.</para>
+
+    <para>The generated SQL statements are logged in the second tab, labelled
+    <literal>SQL Statements</literal>.</para>
+
+    <para>In the resulting tables, &wb-productname; tries to highlight those columns
+    which match the criteria. This might not always work, if you apply a function to the
+    column itself such as <literal>to_upper()</literal> &wb-productname; does not know
+    that this will result in a case-insesitive search on the database. &wb-productname; tries to
+    guess if the given function/value combination might result in a case insensitive search (especially
+    on a DBMS which does a case sensitive search by default) but this might not work
+    in all the cases and for all DBMS</para>
+
+  </section>
+</section>

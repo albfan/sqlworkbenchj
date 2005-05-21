@@ -101,7 +101,8 @@
             anyway, it is suggested to set this parameter to a value greater then zero to disable
             the caching in the driver. Especially when exporting large results using 
             <link linkend="command-export">WBEXPORT</link> or <link linkend="command-copy">WBCOPY</link>
-            it is recommended to turn off the caching in the driver.
+            it is recommended to turn off the caching in the driver (e.g. by setting the value
+						for this property to 1).
             </para>
             </entry>
           </row>
@@ -274,8 +275,9 @@
     Add a new property in the following window with the name <literal>remarksReporting</literal>
     and the value <literal>true</literal>. Now close the dialog by clicking on the OK button.
 		</para>
-		<para>Turning on this features slows down the retrieval of table information.
-		</para>
+		<para>Turning on this features slows down the retrieval of table information e.g. in the Database Explorer.</para>
+		<para>When you have comments defined in your Oracle database and use the <link linkend="command-schema-report">WbReport</link>
+		command, then you have to enable the remrks reporting, otherwise the comments will not show up in the report</para>
   </section>
 
   <section id="odbc">
