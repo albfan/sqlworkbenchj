@@ -74,13 +74,13 @@ public class DataImporter
 	private boolean useBatch = false;
 	private boolean supportsBatch = false;
 	private boolean canCommitInBatch = true;
+	private boolean hasErrors = false;
+	private boolean hasWarnings = false;
 	private int reportInterval = 1;
 	private StrBuffer messages;
 	private String targetSchema;
 	
 	private int colCount;
-	private ArrayList warnings = new ArrayList();
-	private ArrayList errors = new ArrayList();
 	private int numTables;
 	private boolean useTruncate = false;
 	
@@ -161,7 +161,7 @@ public class DataImporter
 		if (flag && !this.supportsBatch)
 		{
 			LogMgr.logWarning("DataImporter.setUseBatch()", "JDBC driver does not support batch updates. Ignoring request to use batch updates");
-			this.warnings.add(ResourceMgr.getString("MsgJDBCDriverNoBatch"));
+			this.messages.append(ResourceMgr.getString("MsgJDBCDriverNoBatch") + "\n");
 		}
 
 		if (this.dbConn != null)
@@ -400,53 +400,12 @@ public class DataImporter
 		this.useTruncate = flag;
 	}
 	public boolean isRunning() { return this.isRunning; }
-	public boolean isSuccess() { return this.errors.size() == 0; }
-	public boolean hasWarning() { return this.warnings.size() > 0; }
+	public boolean isSuccess() { return !hasErrors; }
+	public boolean hasWarnings() { return this.hasWarnings; }
 	public long getAffectedRows() { return this.totalRows; }
 
 	public long getInsertedRows() { return this.insertedRows; }
 	public long getUpdatedRows() { return this.updatedRows; }
-	
-	/**
-	 *	Return the error messages which where collected during the import.
-	 */
-	public String[] getErrors()
-	{
-		int count = this.errors.size();
-		String[] result = new String[count];
-		for (int i=0; i < count; i++)
-		{
-			result[i] = (String)this.errors.get(i);
-		}
-		return result;
-	}
-
-	/**
-	 *	Return the warning messages which where collected during the import.
-	 */
-	public String[] getWarnings()
-	{
-		int count = this.warnings.size();
-		String msg = this.source.getMessages();
-
-		String[] result = null;
-		if (msg != null && msg.length() == 0)
-		{
-			result = new String[count];
-		}
-		else
-		{
-			result = new String[count + 1];
-			result[count] = msg;
-		}
-
-		for (int i=0; i < count; i++)
-		{
-			result[i] = (String)this.warnings.get(i);
-		}
-
-		return result;
-	}
 
 	/**
 	 *	This method is called if cancelExecution() is called
@@ -461,7 +420,7 @@ public class DataImporter
 	{
 		this.isRunning = false;
 		this.source.cancel();
-		this.warnings.add(ResourceMgr.getString("MsgImportCancelled"));
+		this.messages.append(ResourceMgr.getString("MsgImportCancelled") + "\n");
 		if (this.progressMonitor != null) this.progressMonitor.jobFinished();
 	}
 
@@ -534,11 +493,12 @@ public class DataImporter
 		}
 		catch (SQLException e)
 		{
+			this.hasErrors = true;
 			LogMgr.logError("DataImporter.processRow()", "Error importing row " + this.totalRows + ": " + e.getMessage(), null);
-			this.errors.add(ResourceMgr.getString("ErrorImportingRow") + " " + currentImportRow);
-			this.errors.add(ResourceMgr.getString("ErrorImportErrorMsg") + " " + e.getMessage());
-			this.errors.add(ResourceMgr.getString("ErrorImportValues") + " " + this.getValueDisplay(row));
-			this.errors.add("");
+			this.messages.append(ResourceMgr.getString("ErrorImportingRow") + " " + currentImportRow + "\n");
+			this.messages.append(ResourceMgr.getString("ErrorImportErrorMsg") + " " + e.getMessage() + "\n");
+			this.messages.append(ResourceMgr.getString("ErrorImportValues") + " " + this.getValueDisplay(row) + "\n");
+			this.messages.append("\n");
 			if (!this.continueOnError) throw e;
 		}
 
@@ -550,9 +510,10 @@ public class DataImporter
 			}
 			catch (SQLException e)
 			{
+				this.hasErrors = true;
 				LogMgr.logError("DataImporter.processRow()", "Error executing batch after " + this.totalRows + " rows", e);
-				this.errors.add(ResourceMgr.getString("ErrorImportExecuteBatchQueue"));
-				this.errors.add("");
+				this.messages.append(ResourceMgr.getString("ErrorImportExecuteBatchQueue") + "\n");
+				this.messages.append("\n");
 				if (!this.continueOnError) throw e;
 			}
 		}
@@ -584,8 +545,8 @@ public class DataImporter
 						catch (Exception e)
 						{
 							LogMgr.logWarning("DataImporter.processRow()", "Error when adding COMMIT to batch. This does not seem to be supported by the server: " + ExceptionUtil.getDisplay(e));
-							String msg = ResourceMgr.getString("ErrorCommitInBatch").replaceAll("%error%", e.getMessage());
-							this.warnings.add(msg);
+							String msg = ResourceMgr.getString("ErrorCommitInBatch").replaceAll("%error%", e.getMessage()) + "\n";
+							this.messages.append(msg);
 							this.canCommitInBatch = false;
 						}
 					}
@@ -598,7 +559,8 @@ public class DataImporter
 			catch (SQLException e)
 			{
 				String error = ExceptionUtil.getDisplay(e);
-				this.errors.add(error);
+				this.messages.append(error + "\n");
+				this.hasErrors = true;
 				if (!continueOnError) throw e;
 			}
 		}
@@ -735,7 +697,7 @@ public class DataImporter
 			{
 				this.supportsBatch = false;
 				this.useBatch = false;
-				this.warnings.add(ResourceMgr.getString("ErrorNoOracle8BatchWithLong"));
+				this.messages.append(ResourceMgr.getString("ErrorNoOracle8BatchWithLong") + "\n");
 			}
 		}
 	}
@@ -788,7 +750,7 @@ public class DataImporter
 			{
 				String msg = ResourceMgr.getString("ErrorImportTableNotFound").replaceAll("%table%", this.targetTable);
 				msg = StringUtil.replace(msg, "%filename%", this.parser.getSourceFilename());
-				this.errors.add(msg + "\n");
+				this.messages.append(msg + "\n");
 				this.targetTable = null;
 				throw e;
 			}
@@ -891,8 +853,8 @@ public class DataImporter
 		catch (SQLException e)
 		{
 			LogMgr.logError("DataImporter.prepareInsertStatement()", "Error when preparing INSERT statement: " + this.insertSql, e);
-			this.errors.add(ResourceMgr.getString("ErrorImportInitTargetFailed"));
-			this.errors.add(ExceptionUtil.getDisplay(e));
+			this.messages.append(ResourceMgr.getString("ErrorImportInitTargetFailed"));
+			this.messages.append(ExceptionUtil.getDisplay(e));
 			this.insertStatement = null;
 			throw e;
 		}
@@ -910,7 +872,7 @@ public class DataImporter
 			this.retrieveKeyColumns();
 			if (this.keyColumns == null)
 			{
-				this.errors.add(ResourceMgr.getString("ErrorImportNoKeyForUpdate"));
+				this.messages.append(ResourceMgr.getString("ErrorImportNoKeyForUpdate"));
 				throw new SQLException("No key columns defined for update mode");
 			}
 		}
@@ -953,7 +915,7 @@ public class DataImporter
 		if (!pkAdded)
 		{
 			LogMgr.logError("DataImporter.prepareUpdateStatement()", "No primary key columns defined! Update mode not available", null);
-			this.errors.add(ResourceMgr.getString("ErrorImportNoKeyForUpdate"));
+			this.messages.append(ResourceMgr.getString("ErrorImportNoKeyForUpdate"));
 			this.updateSql = null;
 			this.updateStatement = null;
 			throw new SQLException("No key columns defined for update mode");
@@ -961,7 +923,7 @@ public class DataImporter
 		if (colIndex == 0)
 		{
 			LogMgr.logError("DataImporter.prepareUpdateStatement()", "Only PK columns defined! Update mode is not available!", null);
-			this.errors.add(ResourceMgr.getString("ErrorImportOnlyKeyColumnsForUpdate"));
+			this.messages.append(ResourceMgr.getString("ErrorImportOnlyKeyColumnsForUpdate"));
 			this.updateSql = null;
 			this.updateStatement = null;
 			throw new SQLException("Only key columns defined for update mode");
@@ -976,8 +938,8 @@ public class DataImporter
 		catch (SQLException e)
 		{
 			LogMgr.logError("DataImporter.prepareUpdateStatement()", "Error when preparing UPDATE statement", e);
-			this.errors.add(ResourceMgr.getString("ErrorImportInitTargetFailed"));
-			this.errors.add(ExceptionUtil.getDisplay(e));
+			this.messages.append(ResourceMgr.getString("ErrorImportInitTargetFailed"));
+			this.messages.append(ExceptionUtil.getDisplay(e));
 			this.updateStatement = null;
 			throw e;
 		}
@@ -1061,6 +1023,7 @@ public class DataImporter
 				LogMgr.logDebug("DataImporter.finishTable()", this.getAffectedRows() + " row(s) imported. Committing changes");
 				this.dbConn.commit();
 			}
+			this.messages.append(this.source.getMessages());
 			if (this.insertedRows > -1)
 			{
 				this.messages.append(this.insertedRows + " " + ResourceMgr.getString("MsgCopyNumRowsInserted"));
@@ -1071,14 +1034,20 @@ public class DataImporter
 				this.messages.append(this.updatedRows + " " + ResourceMgr.getString("MsgCopyNumRowsUpdated"));
 				this.messages.append("\n");
 			}
+			this.messages.append('\n');
 		}
 		catch (SQLException e)
 		{
+			if (!this.dbConn.getAutoCommit())
+			{
+				try { this.dbConn.rollback(); } catch (Throwable ignore) {} 
+			}
 			LogMgr.logError("DataImporter.finishTable()", "Error commiting changes", e);
-			this.errors.add(ExceptionUtil.getDisplay(e));
+			this.messages.append(ExceptionUtil.getDisplay(e) + "\n");
 			throw e;
 		}
 	}
+	
 	public String getMessages()
 	{
 		return this.messages.toString();
@@ -1100,7 +1069,7 @@ public class DataImporter
 		{
 			// log all others...
 			LogMgr.logError("DataImporter.importFinished()", "Error commiting changes", e);
-			this.errors.add(ExceptionUtil.getDisplay(e));
+			this.messages.append(ExceptionUtil.getDisplay(e));
 		}
 		finally
 		{
@@ -1109,6 +1078,27 @@ public class DataImporter
 		}
 	}
 
+	public void tableImportError()
+	{
+		try
+		{
+			this.closeStatements();
+			if (!this.dbConn.getAutoCommit())
+			{
+				LogMgr.logDebug("DataImporter.importCancelled()", "Rollback changes");
+				this.dbConn.rollback();
+				this.updatedRows = 0;
+				this.insertedRows = 0;
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DataImporter.importCancelled()", "Error on rollback", e);
+			this.messages.append(ExceptionUtil.getDisplay(e));
+		}
+		this.messages.append(this.source.getMessages());
+	}
+	
 	public void importCancelled()
 	{
 		try
@@ -1118,18 +1108,21 @@ public class DataImporter
 			{
 				LogMgr.logDebug("DataImporter.importCancelled()", "Rollback changes");
 				this.dbConn.rollback();
+				this.updatedRows = 0;
+				this.insertedRows = 0;
 			}
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("DataImporter.importCancelled()", "Error on rollback", e);
-			this.errors.add(ExceptionUtil.getDisplay(e));
+			this.messages.append(ExceptionUtil.getDisplay(e));
 		}
 		finally
 		{
 			this.isRunning = false;
 			if (this.progressMonitor != null) this.progressMonitor.jobFinished();
 		}
+		this.messages.append(this.source.getMessages());
 	}
 
 	private void closeStatements()

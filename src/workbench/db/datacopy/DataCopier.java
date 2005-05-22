@@ -107,8 +107,8 @@ public class DataCopier
 		
 		if (!this.sourceConnection.getMetadata().tableExists(aSourceTable))
 		{
-			this.addError(ResourceMgr.getString("ErrorCopySourceTableNotFound").replaceAll("%name%", aTargetTable.getTable()));
-			throw new SQLException("Table " + aTargetTable.getTable() + " not found in target connection");
+			this.addError(ResourceMgr.getString("ErrorCopySourceTableNotFound").replaceAll("%name%", aTargetTable.getTableName()));
+			throw new SQLException("Table " + aTargetTable.getTableName() + " not found in target connection");
 		}
 		
 		this.setSourceTableWhere(additionalWhere);
@@ -117,7 +117,7 @@ public class DataCopier
 		if (exists && dropTable && createTable)
 		{
 			this.targetConnection.getMetadata().dropTable(aTargetTable);
-			this.addMessage(ResourceMgr.getString("MsgCopyTableDropped").replaceAll("%name%", aTargetTable.getTable()));
+			this.addMessage(ResourceMgr.getString("MsgCopyTableDropped").replaceAll("%name%", aTargetTable.getTableName()));
 			exists = false;
 		}
 
@@ -161,20 +161,20 @@ public class DataCopier
 				{
 					this.addMessage(msg);
 				}
-				this.addMessage(ResourceMgr.getString("MsgCopyTableCreated").replaceAll("%name%", aTargetTable.getTable()));
+				this.addMessage(ResourceMgr.getString("MsgCopyTableCreated").replaceAll("%name%", aTargetTable.getTableName()));
 			}
 			catch (SQLException e)
 			{
 				LogMgr.logError("DataCopier.copyFromTable()", "Error when creating target table", e);
-				this.addError(ResourceMgr.getString("MsgCopyErrorCreatTable").replaceAll("%name%", aTargetTable.getTable()));
+				this.addError(ResourceMgr.getString("MsgCopyErrorCreatTable").replaceAll("%name%", aTargetTable.getTableName()));
 				this.addError(ExceptionUtil.getDisplay(e));
 				throw e;
 			}
 		}
 		else
 		{
-			this.addError(ResourceMgr.getString("ErrorCopyTargetTableNotFound").replaceAll("%name%", aTargetTable.getTable()));
-			throw new SQLException("Table " + aTargetTable.getTable() + " not found in target connection");
+			this.addError(ResourceMgr.getString("ErrorCopyTargetTableNotFound").replaceAll("%name%", aTargetTable.getTableName()));
+			throw new SQLException("Table " + aTargetTable.getTableName() + " not found in target connection");
 		}
 		this.initImporterForTable();
 	}
@@ -337,12 +337,12 @@ public class DataCopier
 			{
 				this.addMessage(msg);
 			}
-			this.addMessage(ResourceMgr.getString("MsgCopyTableCreated").replaceAll("%name%", this.targetTable.getTable()));
+			this.addMessage(ResourceMgr.getString("MsgCopyTableCreated").replaceAll("%name%", this.targetTable.getTableName()));
 		}
 		catch (SQLException e)
 		{
 			LogMgr.logError("DataCopier.copyFromTable()", "Error when creating target table", e);
-			this.addError(ResourceMgr.getString("MsgCopyErrorCreatTable").replaceAll("%name%", targetTable.getTable()));
+			this.addError(ResourceMgr.getString("MsgCopyErrorCreatTable").replaceAll("%name%", targetTable.getTableName()));
 			this.addError(ExceptionUtil.getDisplay(e));
 			throw e;
 		}
@@ -495,25 +495,10 @@ public class DataCopier
 		return this.importer.isSuccess();
 	}
 
-	public boolean hasWarnings()
-	{
-		return this.importer.hasWarning();
-	}
-
 	public String getErrorMessage()
 	{
 		if (this.errors == null) return null;
 		return this.errors.toString();
-	}
-
-	public String[] getImportErrors()
-	{
-		return this.importer.getErrors();
-	}
-
-	public String[] getImportWarnings()
-	{
-		return this.importer.getWarnings();
 	}
 
 	public void start()
@@ -833,6 +818,11 @@ public class DataCopier
 		this.messages.append(msg);
 	}
 
+	public boolean hasWarnings()
+	{
+		return this.importer.hasWarnings();
+	}
+	
 	public String getMessages()
 	{
 		if (this.messages == null) return null;
@@ -843,31 +833,9 @@ public class DataCopier
 	{
 		StringBuffer log = new StringBuffer(250);
 
-		String[] msg = this.getImportWarnings();
-		int count = 0;
-		if (msg != null)
-		{
-			count = msg.length;
-			for (int i=0; i < count; i++)
-			{
-				if (msg[i] != null) log.append(msg[i]);
-				log.append("\n");
-			}
-		}
-		msg = this.getImportErrors();
-		if (msg != null)
-		{
-			count = msg.length;
-			if (count > 0) log.append("\n");
-			for (int i=0; i < count; i++)
-			{
-				if (msg[i] != null) log.append(msg[i]);
-				log.append("\n");
-			}
-		}
-
-		String errmsg = this.getErrorMessage();
-		if (errmsg != null) log.append(errmsg);
+		if (this.messages != null) log.append(this.messages);
+		log.append(this.importer.getMessages());
+		if (this.errors != null) log.append(this.errors);
 
 		return log.toString();
 	}

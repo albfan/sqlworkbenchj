@@ -48,9 +48,14 @@ public class WbDiff
 	public static final String PARAM_SOURCESCHEMA = "referenceschema";
 	public static final String PARAM_TARGETSCHEMA = "targetschema";
 	
+	public static final String PARAM_EXCLUDE_TABLES = "excludetables";
+	
 	public static final String PARAM_INCLUDE_INDEX = "includeindex";
 	public static final String PARAM_INCLUDE_FK = "includeforeignkeys";
-	
+	public static final String PARAM_INCLUDE_PK = "includeprimarykeys";
+	public static final String PARAM_INCLUDE_CONSTRAINTS = "includeconstraints";
+	public static final String PARAM_INCLUDE_COMMENTS = "includecomments";
+		
 	private ArgumentParser cmdLine;
 	private SchemaDiff diff;
 	
@@ -67,7 +72,11 @@ public class WbDiff
 		cmdLine.addArgument(PARAM_TARGETSCHEMA);
 		cmdLine.addArgument(PARAM_NAMESPACE);
 		cmdLine.addArgument(PARAM_INCLUDE_FK);
+		cmdLine.addArgument(PARAM_INCLUDE_PK);
 		cmdLine.addArgument(PARAM_INCLUDE_INDEX);
+		cmdLine.addArgument(PARAM_EXCLUDE_TABLES);
+		cmdLine.addArgument(PARAM_INCLUDE_CONSTRAINTS);
+		cmdLine.addArgument(PARAM_INCLUDE_COMMENTS);
 	}
 
 	public String getVerb() { return VERB; }
@@ -75,7 +84,7 @@ public class WbDiff
 	public StatementRunnerResult execute(WbConnection aConnection, String sql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult(sql);
+		StatementRunnerResult result = new StatementRunnerResult();
 
 		if (sql.equalsIgnoreCase(VERB))
 		{
@@ -171,7 +180,10 @@ public class WbDiff
 
 		// this needs to be set before the tables are defined!
 		diff.setIncludeForeignKeys(cmdLine.getBoolean(PARAM_INCLUDE_FK, true));
-		diff.setIncludeIndex(cmdLine.getBoolean(PARAM_INCLUDE_INDEX, true));
+		diff.setIncludeIndex(cmdLine.getBoolean(PARAM_INCLUDE_INDEX, false));
+		diff.setIncludePrimaryKeys(cmdLine.getBoolean(PARAM_INCLUDE_PK, true));
+		diff.setIncludeTableConstraints(cmdLine.getBoolean(PARAM_INCLUDE_CONSTRAINTS, false));
+		diff.setIncludeComments(cmdLine.getBoolean(PARAM_INCLUDE_COMMENTS, false));
 		
 		String refTables = cmdLine.getValue(PARAM_SOURCETABLES);
 		String tarTables = cmdLine.getValue(PARAM_TARGETTABLES);
@@ -180,6 +192,8 @@ public class WbDiff
 		{
 			String refSchema = cmdLine.getValue(PARAM_SOURCESCHEMA);
 			String targetSchema = cmdLine.getValue(PARAM_TARGETSCHEMA);
+			String excludeTables = cmdLine.getValue(PARAM_EXCLUDE_TABLES);
+			
 			if (refSchema == null || targetSchema == null)
 			{
 				if (sourceCon == targetCon)
@@ -196,10 +210,20 @@ public class WbDiff
 					}
 					return result;
 				}
+				if (excludeTables != null)
+				{
+					List l = StringUtil.stringToList(excludeTables, ",", true);
+					diff.setExcludeTables(l);
+				}
 				diff.compareAll();
 			}
 			else
 			{
+				if (excludeTables != null)
+				{
+					List l = StringUtil.stringToList(excludeTables, ",", true);
+					diff.setExcludeTables(l);
+				}
 				diff.setSchemas(refSchema, targetSchema);
 			}
 		}

@@ -91,9 +91,9 @@ public class SchemaReporter
 		this.tables = new ArrayList();
 		for (int i=0; i < tableList.length; i++)
 		{
-			if (tableList[i].getTable().indexOf('%') > -1)
+			if (tableList[i].getTableName().indexOf('%') > -1)
 			{
-				List tlist = retrieveWildcardTables(tableList[i].getTable());
+				List tlist = retrieveWildcardTables(tableList[i].getTableName());
 				if (tlist != null)
 				{
 					this.tables.addAll(tlist);
@@ -238,7 +238,7 @@ public class SchemaReporter
 				{
 					this.progressPanel.setInfoText(tableName);
 				}
-				ReportTable rtable = new ReportTable(table, this.dbConn, this.xmlNamespace);
+				ReportTable rtable = new ReportTable(table, this.dbConn, this.xmlNamespace, true, true, true, true);
 				rtable.setSchemaNameToUse(this.schemaNameToUse);
 				rtable.writeXml(out);
 				rtable.done();

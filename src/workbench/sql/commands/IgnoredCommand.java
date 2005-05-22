@@ -39,7 +39,7 @@ public class IgnoredCommand extends SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		StatementRunnerResult result = new StatementRunnerResult();
 		String msg = ResourceMgr.getString("MsgCommandIgnored").replaceAll("%verb%", this.verb);
 		result.addMessage(msg);
 		result.setSuccess();

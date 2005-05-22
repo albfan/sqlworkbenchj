@@ -77,19 +77,19 @@ public class DependencyNode
 	{ 
 		if (this.fkName == null)
 		{
-			return this.table.getTable();
+			return this.table.getTableName();
 		}
 		else
 		{
-			return this.table.getTable() + " (" + this.fkName + ")"; 
+			return this.table.getTableName() + " (" + this.fkName + ")"; 
 		}
 	}
   public String getFkName() { return this.fkName; }
-	public String getParentTable() { return this.parenttable.getTable(); }
+	public String getParentTable() { return this.parenttable.getTableName(); }
 	public String getParentCatalog() { return this.parenttable.getCatalog(); }
 	public String getParentSchema() { return this.parenttable.getSchema(); }
 	
-	public String getTable() { return this.table.getTable(); }
+	public String getTable() { return this.table.getTableName(); }
 	public String getSchema() { return this.table.getSchema(); }
 	public String getCatalog() { return this.table.getCatalog(); }
 

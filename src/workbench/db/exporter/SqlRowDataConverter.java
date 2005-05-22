@@ -38,7 +38,7 @@ public class SqlRowDataConverter
 	
 	private int sqlType = SQL_INSERT;
 	private boolean createTable = false;
-	private String alternateUpdateTable;
+	private TableIdentifier alternateUpdateTable;
 	private int commitEvery;
 	private String concatString;
 	private String chrFunction;
@@ -155,7 +155,7 @@ public class SqlRowDataConverter
 		TableIdentifier updatetable = this.metaData.getUpdateTable();
 		ColumnIdentifier[] cols = this.metaData.getColumns();
 		DbMetadata db = this.originalConnection.getMetadata();
-		String source = db.getTableSource(updatetable, cols, alternateUpdateTable);
+		String source = db.getTableSource(updatetable, cols, alternateUpdateTable.getTableName());
 		StrBuffer createSql = new StrBuffer(source);
 		createSql.append(doubleLineTerminator);
 		return createSql;
@@ -305,21 +305,12 @@ public class SqlRowDataConverter
 	}
 
 	/**
-	 * Getter for property alternateUpdateTable.
-	 * @return Value of property alternateUpdateTable.
-	 */
-	public String getAlternateUpdateTable()
-	{
-		return alternateUpdateTable;
-	}
-
-	/**
 	 * Setter for property alternateUpdateTable.
 	 * @param table New value of property alternateUpdateTable.
 	 */
-	public void setAlternateUpdateTable(String table)
+	public void setAlternateUpdateTable(TableIdentifier table)
 	{
-		if (table != null && table.trim().length() > 0) 
+		if (table != null) 
 		{
 			this.alternateUpdateTable = table;
 			this.needsUpdateTable = false;

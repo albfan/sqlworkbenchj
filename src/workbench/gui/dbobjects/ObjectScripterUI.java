@@ -13,6 +13,7 @@ package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Window;
 import java.awt.event.WindowListener;
 
@@ -36,17 +37,18 @@ import workbench.util.WbThread;
  */
 public class ObjectScripterUI
 	extends JPanel
-	implements Runnable, WindowListener, ScriptGenerationMonitor
+	implements WindowListener, ScriptGenerationMonitor
 {
 	public static final int TPYE_CREATE = 1;
 	public static final int TYPE_INSERT = 2;
 	public static final int TYPE_GENERATE = 3;
 
 	private Scripter scripter;
-	private Thread worker;
 	private JLabel statusMessage;
 	private EditorPanel editor;
 	private JFrame window;
+	private boolean isRunning;
+	private Object runMonitor = new Object();
 
 	public ObjectScripterUI(Scripter scripter)
 	{
@@ -67,18 +69,45 @@ public class ObjectScripterUI
 		this.add(this.editor, BorderLayout.CENTER);
 	}
 
+	private void setRunning(boolean flag) 
+	{ 
+		synchronized (runMonitor) { this.isRunning = flag; }
+	}
+	
+	private boolean isRunning() 
+	{ 
+		synchronized (runMonitor) { return this.isRunning; }
+	}
+	
+	
 	private void startScripting()
 	{
-		this.worker = new WbThread(this,"ObjectScripter Thread");
-		this.worker.start();
-	}
-
-	public void run()
-	{
-		String script = this.scripter.getScript();
-		this.editor.setText(script);
-		this.editor.setCaretPosition(0);
-		this.statusMessage.setText("");
+		if (this.isRunning()) return;
+		WbThread t = new WbThread("ObjectScripter Thread")
+		{
+			public void run()
+			{
+				try
+				{
+					setRunning(true);
+					scripter.generateScript();
+					if (!scripter.isCancelled())
+					{
+						editor.setText(scripter.getScript());
+						editor.setCaretPosition(0);
+					}
+				}
+				finally
+				{
+					setRunning(false);
+					EventQueue.invokeLater(new Runnable()
+					{
+						public void run() { statusMessage.setText(""); }
+					});
+				}
+			}
+		};
+		t.start();
 	}
 
 	public void setCurrentObject(String aTableName)
@@ -118,18 +147,52 @@ public class ObjectScripterUI
 	{
 	}
 
-	public void windowClosing(java.awt.event.WindowEvent e)
+	private void cancel()
 	{
-		if (this.worker != null)
+		WbThread t = new WbThread("Scripter Cancel")
 		{
-			this.worker.interrupt();
-			this.scripter = null;
-			this.worker = null;
-		}
+			public void run()
+			{
+				try
+				{
+					WbSwingUtilities.showWaitCursor(window);
+					statusMessage.setText(ResourceMgr.getString("MsgCancelling"));
+					Thread.yield();
+					scripter.cancel();
+				}
+				catch (Throwable ex)
+				{
+					ex.printStackTrace();
+				}
+				finally
+				{
+					WbSwingUtilities.showDefaultCursor(window);
+				}
+				scripter = null;
+				setRunning(false);
+				closeWindow();
+			}
+		};
+		t.start();
+	}
+	
+	private void closeWindow()
+	{
+		if (isRunning()) return;
 		Settings.getInstance().storeWindowPosition(this.window, ObjectScripterUI.class.getName());
 		Settings.getInstance().storeWindowSize(this.window, ObjectScripterUI.class.getName());
 		this.window.hide();
 		this.window.dispose();
+	}
+	
+	public void windowClosing(java.awt.event.WindowEvent e)
+	{
+		if (this.isRunning())
+		{
+			cancel();
+			return;
+		}
+		closeWindow();
 	}
 
 	public void windowDeactivated(java.awt.event.WindowEvent e)

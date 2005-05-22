@@ -131,6 +131,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("CURRENT",Token.KEYWORD1);
 		keywords.add("CURRENT_DATE",Token.KEYWORD1);
 		keywords.add("CURRENT_TIME",Token.KEYWORD1);
+		keywords.add("CURRENT_TIMESTAMP",Token.KEYWORD1);
 		keywords.add("CURSOR",Token.KEYWORD1);
 		keywords.add("DATABASE",Token.KEYWORD1);
 		keywords.add("DECLARE",Token.KEYWORD1);
@@ -202,13 +203,12 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		// Workbench specific keywords
 		keywords.add("DESC",Token.KEYWORD2);
 		keywords.add("DESCRIBE",Token.KEYWORD2);
-		keywords.add("WBXSLT",Token.KEYWORD2);
-		keywords.add("WBEXPORT",Token.KEYWORD2);
 		keywords.add("LIST",Token.KEYWORD2);
 		keywords.add("LISTPROCS",Token.KEYWORD2);
 		keywords.add("LISTDB",Token.KEYWORD2);
 		keywords.add("ENABLEOUT",Token.KEYWORD2);
 		keywords.add("DISABLEOUT",Token.KEYWORD2);
+		keywords.add("WBEXPORT",Token.KEYWORD2);
 		keywords.add("WBIMPORT",Token.KEYWORD2);
 		keywords.add("WBFEEDBACK",Token.KEYWORD2);
 		keywords.add("WBINCLUDE",Token.KEYWORD2);
@@ -217,11 +217,12 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("WBVARDEFINE",Token.KEYWORD2);
 		keywords.add("WBVARLIST",Token.KEYWORD2);
 		keywords.add("WBVARDELETE",Token.KEYWORD2);
-		keywords.add("WBREPORT",Token.KEYWORD2);
 		keywords.add("WBSTARTBATCH",Token.KEYWORD2);
 		keywords.add("WBENDBATCH",Token.KEYWORD2);
 		keywords.add("WBFEEDBACK",Token.KEYWORD2);
+		keywords.add("WBREPORT",Token.KEYWORD2);
 		keywords.add("WBDIFF",Token.KEYWORD2);
+		keywords.add("WBXSLT",Token.KEYWORD2);
 	}
 
 	private static void addDataTypes()

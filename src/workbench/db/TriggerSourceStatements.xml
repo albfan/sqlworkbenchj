@@ -122,7 +122,7 @@ where trg.tgrelid = tbl.oid
    <string>HSQL Database Engine</string> 
    <object class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
-     <string>SELECT description FROM system_triggers</string> 
+     <string>SELECT description FROM information_schema.system_triggers</string> 
     </void> 
     <void property="objectNameField"> 
      <string>trigger_name</string> 

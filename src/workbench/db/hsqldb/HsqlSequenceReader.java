@@ -15,6 +15,7 @@ import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.db.SequenceReader;
@@ -29,10 +30,41 @@ public class HsqlSequenceReader
 	implements SequenceReader
 {
 	private Connection dbConn;
+	private final String sql;
 	
 	public HsqlSequenceReader(Connection conn)
 	{
 		this.dbConn = conn;
+		String version = null;
+		try
+		{
+			version = conn.getMetaData().getDatabaseProductVersion();
+		}
+		catch (SQLException e)
+		{
+			version = "1.7.0";
+		}
+		
+		if (version.startsWith("1.8"))
+		{
+			sql = "SELECT sequence_name, \n" + 
+             "       dtd_identifier, \n" + 
+             "       maximum_value, \n" + 
+             "       minimum_value, \n" + 
+             "       increment, \n" + 
+             "       start_with " + 
+             " FROM information_schema.system_sequences WHERE sequence_name = ?";		
+		}
+		else
+		{
+			sql = "SELECT sequence_name, \n" + 
+             "       dtd_identifier, \n" + 
+             "       maximum_value, \n" + 
+             "       minimum_value, \n" + 
+             "       increment, \n" + 
+             "       start_with " + 
+             " FROM system_sequences WHERE sequence_name = ?";		
+		}
 	}
 
 	public DataStore getSequenceDefinition(String owner, String sequence)
@@ -40,13 +72,6 @@ public class HsqlSequenceReader
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		DataStore result = null;
-		final String sql = "SELECT sequence_name, \n" + 
-             "       dtd_identifier, \n" + 
-             "       maximum_value, \n" + 
-             "       minimum_value, \n" + 
-             "       increment, \n" + 
-             "       start_with " + 
-             " FROM system_sequences WHERE sequence_name = ?";		
 		try
 		{
 			stmt = this.dbConn.prepareStatement(sql);

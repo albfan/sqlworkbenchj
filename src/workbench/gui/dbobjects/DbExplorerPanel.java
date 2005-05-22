@@ -91,7 +91,10 @@ public class DbExplorerPanel
 
 	public DbExplorerPanel(MainWindow aParent)
 	{
-		instanceCount ++;
+		synchronized (DbExplorerPanel.class)
+		{
+			instanceCount++;
+		}
 		this.internalId = instanceCount;
 		this.mainWindow = aParent;
 		try
@@ -250,7 +253,7 @@ public class DbExplorerPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			conn = mgr.getConnection(profile, id);
+			conn = mgr.getConnection(profile, id, true);
 			this.setConnection(conn);
 			if (Settings.getInstance().getRetrieveDbExplorer())
 			{
@@ -380,18 +383,23 @@ public class DbExplorerPanel
 
 	private void reset()
 	{
-		this.dbConnection = null;
-		this.tables.disconnect();
-		this.procs.disconnect();
-		this.searchPanel.disconnect();
-
-		int count = this.tabPane.getTabCount();
+		if (this.dbConnection != null)
+		{
+			try { this.dbConnection.rollback(); } catch (Throwable th) {}
+		}
+		this.tables.reset();
+		this.procs.reset();
+		this.searchPanel.reset();
 		this.tabPane.setSelectedIndex(0);
 	}
 
 	public void disconnect()
 	{
 		this.reset();
+		this.tables.disconnect();
+		this.procs.disconnect();
+		this.searchPanel.disconnect();
+		this.dbConnection = null;
 	}
 
 	public void saveSettings()
@@ -533,19 +541,17 @@ public class DbExplorerPanel
 	public void explorerWindowClosed()
 	{
 		this.window = null;
-		if (Settings.getInstance().getDbExplorerClearDataOnClose() && this.tables != null) this.tables.clearTableData();
-		if (this.dbConnection != null && this.dbConnection.getProfile().getUseSeperateConnectionPerTab())
+		
+		if (this.dbConnection != null)
 		{
-			try
+			if (this.dbConnection.getProfile().getUseSeperateConnectionPerTab())
 			{
-				try { this.dbConnection.rollback(); } catch (Throwable th) {}
-				this.dbConnection.disconnect();
-			}
-			catch (Throwable th)
-			{
-				LogMgr.logWarning("DbExplorerPanel.dispose()", "Error when closing connection", th);
+				try { this.dbConnection.disconnect(); } catch (Throwable th) {}
 			}
 		}
+		this.dispose();
+		this.disconnect();
+		
 		this.mainWindow.explorerWindowClosed(this);
 	}
 
@@ -585,7 +591,11 @@ public class DbExplorerPanel
 
 	public void dispose()
 	{
-		this.tables.reset();
+		this.reset();
+		synchronized (DbExplorerPanel.class)
+		{
+			instanceCount--;
+		}
 	}
 
 }

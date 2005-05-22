@@ -41,24 +41,28 @@ public abstract class BaseAnalyzer
 	protected static final int CONTEXT_FROM_LIST = 3;
 	
 	protected static final int CONTEXT_TABLE_OR_COLUMN_LIST = 4;
+	private final SelectAllMarker allColumnsMarker = new SelectAllMarker();
 	private String typeFilter;
 	protected WbConnection dbConnection;
 	protected final String sql;
-	protected final int pos;
+	protected final int cursorPos;
 	protected int context;
 	protected TableIdentifier tableForColumnList;
 	protected String schemaForTableList;
 
 	protected List elements;
 	protected String title;
+	protected boolean overwriteCurrentWord;
 	
 	public BaseAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{
 		this.dbConnection = conn;
 		this.sql = statement;
-		this.pos = cursorPos;
+		this.cursorPos = cursorPos;
 	}
 
+	public boolean getOverwriteCurrentWord() { return this.overwriteCurrentWord; }
+	
 	public void retrieveObjects()
 	{
 		// reset current state
@@ -136,8 +140,11 @@ public abstract class BaseAnalyzer
 		List cols = this.dbConnection.getObjectCache().getColumns(tableForColumnList);
 		if (cols != null && cols.size() > 0)
 		{
-			this.title = tableForColumnList.getTable() + ".*";
-			this.elements = cols;
+			this.title = tableForColumnList.getTableName() + ".*";
+			
+			this.elements = new ArrayList(cols.size() + 1);
+			this.elements.add(allColumnsMarker);
+			this.elements.addAll(cols);
 		}
 		return cols;
 	}
@@ -146,57 +153,27 @@ public abstract class BaseAnalyzer
 	{
 		this.typeFilter = filter;
 	}
-	
-	protected String getWordLeftOfCursor(String sql, int pos)
-	{
-		String word = null;
-		int len = sql.length();
-		int start = pos - 1;
-		int end = pos;
-		if (pos > len) 
-		{
-			start = len - 1;
-			end = len;
-		}
 
-		// find the first non-whitespace character left of the cursor
-		char c = 0;
-		int p = pos;
-		while ( p > 1 && Character.isWhitespace(sql.charAt(p)))
-		{
-			p--;
-		}
-
-		if (p > 1)
-		{
-			int startOfQualifier = StringUtil.findPreviousWhitespace(sql, p);
-			if (startOfQualifier > 0)
-			{
-				word = sql.substring(startOfQualifier, p).trim();
-			}
-		}
-		return word;
-	}
-	
-	protected String getQualifierLeftOfCursor(String sql, int pos)
+	protected String getQualifierLeftOfCursor(String statement, int pos)
 	{
 		String qualifier = null;
-		int len = sql.length();
+		int len = statement.length();
 		int start = pos - 1;
 		if (pos > len) 
 		{
 			start = len - 1;
 		}
 			
-		char c = sql.charAt(start);
-		if (c == '.')
+		char c = statement.charAt(start);
+		if (Character.isWhitespace(c)) return null;
+		
+		// get the word left of the cursor that is "terminated" by a whitespace
+		String word = StringUtil.getWordLeftOfCursor(statement, pos, null);
+		int dotPos= word.indexOf('.');
+		
+		if (dotPos > -1)
 		{
-			// find qualifier
-			int startOfQualifier = StringUtil.findPreviousWhitespace(sql, start);
-			if (startOfQualifier > 0)
-			{
-				qualifier = sql.substring(startOfQualifier, start).trim();
-			}
+			qualifier = word.substring(0, dotPos);
 		}
 		return qualifier;
 	}

@@ -12,12 +12,15 @@
 package workbench.db.importer;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.Reader;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 import workbench.db.ColumnIdentifier;
 import workbench.db.exporter.XmlRowDataConverter;
@@ -42,7 +45,7 @@ public class XmlTableDefinitionParser
 	private String tagFormat;
 	
 	public XmlTableDefinitionParser(String fname, String enc)
-		throws FileNotFoundException
+		throws IOException, SAXException
 	{
 		this.filename = fname;
 		if (enc != null) this.encoding = enc;
@@ -65,7 +68,7 @@ public class XmlTableDefinitionParser
 	}
 
 	private void parseTableStructure()
-		throws FileNotFoundException
+		throws IOException, SAXException
 	{
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		factory.setValidating(false);
@@ -78,19 +81,24 @@ public class XmlTableDefinitionParser
 			InputSource source = new InputSource(in);
 			saxParser.parse(source, this);
 		}
+		catch (ParserConfigurationException ce)
+		{
+			// should not happen
+		}
 		catch (ParsingEndedException e)
 		{
 			// expected exception to stop parsing
 		}
-		catch (FileNotFoundException e)
+		catch (IOException e)
 		{
 			throw e;
 		}
-		catch (Throwable e)
+		catch (SAXException e)
 		{
 			LogMgr.logError("XmlDataTableParser.parseTableStructure()", "Error reading table structure", e);
 			this.columnList = null;
 			this.tableName = null;
+			throw e;
 		}
 		finally
 		{

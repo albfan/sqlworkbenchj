@@ -272,7 +272,7 @@ public class ProducerFactory
 			result.append("text");
 		}
 		
-		appendArgument(result, WbImport.ARG_TARGETTABLE, this.table.getTable(), indent);
+		appendArgument(result, WbImport.ARG_TARGETTABLE, this.table.getTableName(), indent);
 		appendArgument(result, WbImport.ARG_ENCODING, this.generalOptions.getEncoding(), indent);
 		appendArgument(result, WbImport.ARG_MODE, this.generalOptions.getMode(), indent);
 		

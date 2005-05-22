@@ -76,7 +76,7 @@ public class SetCommand extends SqlCommand
 
 			if (execSql)
 			{
-				result = new StatementRunnerResult(aSql);
+				result = new StatementRunnerResult();
 				this.currentStatement = aConnection.createStatement();
 				this.currentStatement.execute(aSql);
 				StringBuffer warnings = new StringBuffer();

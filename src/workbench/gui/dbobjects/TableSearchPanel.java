@@ -425,11 +425,11 @@ public class TableSearchPanel
 
 	public void disconnect()
 	{
-		this.resetResult();
+		this.reset();
 		this.tableListSource.removeTableListDisplayClient(this.tableNames);
 	}
 
-	private void resetResult()
+	public void reset()
 	{
     // resultPanel.removeAll() does not work
     // the old tables just stay in there
@@ -450,7 +450,7 @@ public class TableSearchPanel
 		}
 
 		if (this.tableNames.getSelectedRowCount() == 0) return;
-		this.resetResult();
+		this.reset();
 
 		int[] selectedTables = this.tableNames.getSelectedRows();
 		ArrayList searchTables = new ArrayList(this.tableNames.getSelectedRowCount());
@@ -469,7 +469,7 @@ public class TableSearchPanel
 				if (id != null)
 				{
 					schema = id.getSchema();
-					tablename = id.getTable();
+					tablename = id.getTableName();
 				}
 			}
 

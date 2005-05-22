@@ -457,7 +457,7 @@ public class DwPanel
 
 	public boolean shouldSaveChanges(WbConnection aConnection)
 	{
-		if (!Settings.getInstance().getDbDebugMode() && !this.dbConnection.getProfile().isConfirmUpdates()) return true;
+		if (!Settings.getInstance().getPreviewDml() && !this.dbConnection.getProfile().isConfirmUpdates()) return true;
 
 		this.infoTable.stopEditing();
 		DataStore ds = this.infoTable.getDataStore();

@@ -25,8 +25,10 @@ import workbench.gui.editor.JEditTextArea;
 import workbench.interfaces.StatusBar;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.ScriptParser;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
@@ -44,6 +46,7 @@ public class CompletionHandler
 	private int currentCursorLocation;
 	private CompletionPopup window;
 	private StatusBar statusBar;
+	private String currentWord;
 	
 	public CompletionHandler(JEditTextArea ed)
 	{
@@ -74,10 +77,11 @@ public class CompletionHandler
 		statusBar.setStatusMessage(ResourceMgr.getString("MsgCompletionRetrievingObjects"));
 		if (this.updateSelectionList())
 		{
-			this.window.showPopup();
+			this.window.showPopup(currentWord);
 		}
 		statusBar.clearStatusMessage();
 	}
+	
 	public void showCompletionPopup()
 	{
 		if (this.window == null)
@@ -102,19 +106,24 @@ public class CompletionHandler
 		boolean result = false;
 		String script = this.editor.getText();
 		ScriptParser parser = new ScriptParser(script);
-		parser.allowEmptyLineAsSeparator(true);
+		parser.allowEmptyLineAsSeparator(Settings.getInstance().getAutoCompletionEmptyLineIsSeparator());
 		
 		int cursorPos = this.editor.getCaretPosition();
 
 		int index = parser.getCommandIndexAtCursorPos(cursorPos);
 		int commandCursorPos = parser.getIndexInCommand(index, cursorPos);
 		String sql = parser.getCommand(index);
+		this.currentWord = editor.getWordAtCursor(".");//StringUtil.getWordLeftOfCursor(sql, commandCursorPos);
 		
 		try
 		{
 			StatementContext ctx = new StatementContext(this.dbConnection, sql, commandCursorPos);
 			if (ctx.isStatementSupported())
 			{
+				if (ctx.getOverwriteCurrentWord() && currentWord != null)
+				{
+					editor.selectWordAtCursor(".");
+				}
 				this.elements = ctx.getData();
 				this.header.setText(ctx.getTitle());
 

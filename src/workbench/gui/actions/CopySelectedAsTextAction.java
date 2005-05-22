@@ -13,8 +13,8 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import workbench.gui.components.WbTable;
 
-import workbench.interfaces.Exporter;
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
 
@@ -24,9 +24,9 @@ import workbench.util.StringUtil;
  */
 public class CopySelectedAsTextAction extends WbAction
 {
-	private Exporter client;
+	private WbTable client;
 
-	public CopySelectedAsTextAction(Exporter aClient)
+	public CopySelectedAsTextAction(WbTable aClient)
 	{
 		super();
 		this.client = aClient;

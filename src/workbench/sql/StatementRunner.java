@@ -215,7 +215,6 @@ public class StatementRunner
 			EchoCommand echo = new EchoCommand();
 			this.cmdDispatch.put(echo.getVerb(), echo);
 
-			//this.dbSpecificCommands.add(set.getVerb());
 			this.dbSpecificCommands.add(WbOraExecute.EXEC.getVerb());
 			this.dbSpecificCommands.add(WbOraExecute.EXECUTE.getVerb());
 			this.dbSpecificCommands.add(echo.getVerb());
@@ -228,25 +227,13 @@ public class StatementRunner
 		}
 		else if (meta.isFirebird())
 		{
+			this.cmdDispatch.put(DdlCommand.RECREATE.getVerb(), DdlCommand.RECREATE);
 			this.cmdDispatch.put(WbInclude.INCLUDE_FB.getVerb(), WbInclude.INCLUDE_FB);
 			this.dbSpecificCommands.add(WbInclude.INCLUDE_FB.getVerb());
+			this.dbSpecificCommands.add(DdlCommand.RECREATE.getVerb());
 		}
 
-		/*
-		if (!meta.isPostgres())
-		{
-			// for non-PostgreSQL connections we can use the
-			// COPY command. For PGSQL we cannot use the verb COPY, as
-			// PGSQL has it's own COPY command. Oracle's COPY command
-			// is a SQL*Plus command and cannot be used through JDBC,
-			// so we do not need to take care of that
-			SqlCommand copy = (SqlCommand)this.cmdDispatch.get(WbCopy.VERB);
-			this.cmdDispatch.put("COPY", copy);
-			this.dbSpecificCommands.add("COPY");
-		}
-		*/
-
-		String verbs = meta.getVerbsToIgnore();
+		String verbs = Settings.getInstance().getProperty("workbench.db.ignore." + meta.getDbId(), "");
 		List l = StringUtil.stringToList(verbs, ",");
 		for (int i=0; i < l.size(); i++)
 		{
@@ -294,7 +281,7 @@ public class StatementRunner
 		// Silently ignore empty statements
 		if (aSql == null || aSql.trim().length() == 0)
 		{
-			this.result = new StatementRunnerResult("");
+			this.result = new StatementRunnerResult();
 			this.result.clear();
 			this.result.setSuccess();
 			return;
@@ -327,7 +314,7 @@ public class StatementRunner
 			boolean doExecute = this.controller.confirmExecution(realSql);
 			if (!doExecute)
 			{
-				this.result = new StatementRunnerResult(realSql);
+				this.result = new StatementRunnerResult();
 				String msg = ResourceMgr.getString("MsgStatementCancelled");
 				this.result.addMessage(msg);
 				this.result.setWarning(true);

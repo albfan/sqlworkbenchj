@@ -33,7 +33,7 @@ public class WbHelp extends SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult("HELP");
+		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
 		WbManager.getInstance().getCurrentWindow().showHelp();
 		return result;

@@ -11,15 +11,14 @@
  */
 package workbench.interfaces;
 
+import java.awt.Window;
+
 /**
  *
  * @author  support@sql-workbench.net
  */
 public interface Exporter
 {
-	void saveAs();
-	void copyDataToClipboard();
-	void copyDataToClipboard(boolean includeHeaders);
-	void copyDataToClipboard(boolean includeHeaders, boolean selectedOnly);
-	void copyDataToClipboard(boolean includeHeaders, boolean selectedOnly, boolean showSelectColumns);
+	void exportData();
+	Window getParentWindow();
 }

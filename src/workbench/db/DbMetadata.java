@@ -100,6 +100,11 @@ public class DbMetadata
 	private SqlServerMetadata msSqlMetaData;
 	private IngresMetadata ingresMetaData;
 	private McKoiMetadata mckoiMetaData;
+	
+	private ConstraintReader constraintReader = null;
+	private SynonymReader synonymReader = null;
+	private SequenceReader sequenceReader = null;
+	private ProcedureReader procedureReader = null;
 
 	private static List caseSensitiveServers = Collections.EMPTY_LIST;
 	private static List ddlNeedsCommitServers = Collections.EMPTY_LIST;
@@ -140,11 +145,6 @@ public class DbMetadata
 
 	private boolean createInlineConstraints = false;
 	private boolean useNullKeyword = true;
-
-	private ConstraintReader constraintReader = null;
-	private SynonymReader synonymReader = null;
-	private SequenceReader sequenceReader = null;
-	private ProcedureReader procedureReader = null;
 
 	private List keywords;
 	private Set dbFunctions;
@@ -336,6 +336,19 @@ public class DbMetadata
 			this.useNullKeyword = !ids.contains(this.getDbId());
 		}
 
+		String regex = Settings.getInstance().getProperty("workbench.sql.selectnewtablepattern." + this.getDbId(), null);
+		if (regex != null)
+		{
+			try
+			{
+				this.selectIntoPattern = Pattern.compile(regex);
+			}
+			catch (Exception e)
+			{
+				this.selectIntoPattern = null;
+				LogMgr.logError("DbMetadata.<init>", "Invalid pattern to identify a SELECT INTO a new table: " + regex, e);
+			}
+		}
 	}
 
 	public DatabaseMetaData getJdbcMetadata()
@@ -360,7 +373,7 @@ public class DbMetadata
 	 * 	Return a clean version of the productname.
 	 *  @see #getProductName()
 	 */
-	private String getDbId()
+	public String getDbId()
 	{
 		if (this.dbId == null)
 		{
@@ -368,17 +381,6 @@ public class DbMetadata
 			LogMgr.logInfo("DbMetadata", "Using DBID=" + this.dbId);
 		}
 		return this.dbId;
-	}
-	/**
-	 *	Returns a comma separated list of SQL verbs that should
-	 *  be ignored during execution for this DBMS.
-	 *	This can be configured in workbench.properties:
-	 *	workbench.db.ignore.<dbmsId>=
-	 */
-	public String getVerbsToIgnore()
-	{
-		String list = Settings.getInstance().getProperty("workbench.db.ignore." + this.getDbId(), "");
-		return list;
 	}
 
 	public String getDbVersion() { return this.dbVersion; }
@@ -414,7 +416,7 @@ public class DbMetadata
 	 */
 	public boolean supportsSelectIntoNewTable()
 	{
-		return this.isInformix || this.isPostgres;
+		return this.selectIntoPattern != null;
 	}
 
 	/**
@@ -426,7 +428,6 @@ public class DbMetadata
 	public boolean isSelectIntoNewTable(String sql)
 	{
 		if (sql == null || sql.length() == 0) return false;
-		if (!this.supportsSelectIntoNewTable()) return false;
 		if (this.selectIntoPattern == null) return false;
 		Matcher m = this.selectIntoPattern.matcher(sql);
 		return m.find();
@@ -451,83 +452,61 @@ public class DbMetadata
 	public boolean isSqlServer() { return this.isSqlServer; }
 	public boolean isCloudscape() { return this.isCloudscape; }
 	public boolean isApacheDerby() { return this.isApacheDerby; }
+	public boolean isFirstSql() { return this.isFirstSql; }
 
-	private List omitSchemaInDML;
-
-	public boolean useSchemaInDML()
+	private List schemasToIgnore;
+	
+	public boolean ignoreSchema(String schema)
 	{
-		if (omitSchemaInDML == null)
+		if (schema == null) return true;
+		if (schemasToIgnore == null)
 		{
-			String ids = Settings.getInstance().getProperty("workbench.sql.omitdmlschema", null);
+			String ids = Settings.getInstance().getProperty("workbench.sql.ignoreschema." + this.getDbId(), null);
 			if (ids != null)
 			{
-				omitSchemaInDML = StringUtil.stringToList(ids, ",");
+				schemasToIgnore = StringUtil.stringToList(ids, ",");
 			}
 			else
 			{
-				 omitSchemaInDML = Collections.EMPTY_LIST;
+				 schemasToIgnore = Collections.EMPTY_LIST;
 			}
 		}
-		return !omitSchemaInDML.contains(this.getDbId());
+		return schemasToIgnore.contains("*") || schemasToIgnore.contains(schema);
 	}
 	
+	/**
+	 * Check if the given {@link TableIdentifier} requires
+	 * the usage of the schema for a DML (select, insert, update, delete)
+	 * statement. By default this is not required for an Oracle
+	 * connetion where the schema is the current user.
+	 * For all other DBMS, the usage can be disabled by setting
+	 * a property in the configuration file
+	 */
 	public boolean needSchemaInDML(TableIdentifier table)
 	{
-		boolean useSchema = useSchemaInDML();
-		if (this.isOracle && useSchema)
+		String tblSchema = table.getSchema();
+		if (ignoreSchema(tblSchema)) return false;
+		
+		if (this.isOracle)
 		{
-			String tblSchema = table.getSchema();
+			// In oracle we don't need the schema if the it is the current user
 			if (tblSchema == null) return false;
 			return !this.getUserName().equalsIgnoreCase(tblSchema);
 		}
-		return useSchema;
+		return true;
 	}
 
+	/**
+	 * Return true if connected to an Oracle8 database. Returns fals
+	 * for every other DBMS (include Oracle9 and later)
+	 */
   public boolean isOracle8()
 	{
 		if (!this.isOracle) return false;
 		if (this.oracleMetaData == null) return false;
 		return this.oracleMetaData.isOracle8();
 	}
-	/**
-	 *	Return a list of datatype as returned from DatabaseMetaData.getTypeInfo()
-	 *	which we cannot handle. This is used by the TableCreator when searching
-	 *	for a matching data type.
-	 */
-	public List getIgnoredDataTypes()
-	{
-		String types = null;
-		if (this.isMySql)
-		{
-			types = Settings.getInstance().getProperty("workbench.ignoretypes.mysql", null);
-		}
-		else if (this.isFirebird)
-		{
-			types = Settings.getInstance().getProperty("workbench.ignoretypes.firebird", null);
-		}
-		else if (this.isOracle)
-		{
-			types = Settings.getInstance().getProperty("workbench.ignoretypes.oracle", null);
-		}
-		else if (this.isPostgres)
-		{
-			types = Settings.getInstance().getProperty("workbench.ignoretypes.postgres", null);
-		}
-		else if (this.isHsql)
-		{
-			types = Settings.getInstance().getProperty("workbench.ignoretypes.hsqldb", null);
-		}
-		else if (this.isSqlServer)
-		{
-			types = Settings.getInstance().getProperty("workbench.ignoretypes.sqlserver", null);
-		}
-		else
-		{
-			types = Settings.getInstance().getProperty("workbench.ignoretypes.other", null);
-		}
 
-		return StringUtil.stringToList(types, ",", true, true);
-	}
 
 	private static HashMap readStatementTemplates(String aFilename)
 	{
@@ -606,14 +585,9 @@ public class DbMetadata
 	 */
 	public String getCascadeConstraintsVerb(String aType)
 	{
-		if (!"TABLE".equalsIgnoreCase(aType)) return null;
-
-		if (this.isOracle)
-		{
-			return "CASCADE CONSTRAINTS";
-		}
-
-		return null;
+		if (aType == null) return null;
+		String verb = Settings.getInstance().getProperty("workbench.db.drop." + aType.toLowerCase() + ".cascade." + this.getDbId(), null);
+		return verb;
 	}
 
 	public Set getDbFunctions()
@@ -654,21 +628,45 @@ public class DbMetadata
 		}
 	}
 
+	/**
+	 * Drop given table. If this is successful and the 
+	 * DBMS requires a COMMIT for DDL statements then 
+	 * the DROP will be commited (or rolled back in case
+	 * of an error
+	 */
 	public void dropTable(TableIdentifier aTable)
 		throws SQLException
 	{
-		StrBuffer sql = new StrBuffer();
-		sql.append("DROP TABLE ");
-		sql.append(aTable.getTableExpression());
-		if (this.isOracle)
+		Statement stmt = null;
+		try
 		{
-			sql.append(" CASCADE CONSTRAINTS");
+			StringBuffer sql = new StringBuffer();
+			sql.append("DROP TABLE ");
+			sql.append(aTable.getTableExpression());
+			String cascade = this.getCascadeConstraintsVerb("TABLE");
+			if (cascade != null)
+			{
+				sql.append(' ');
+				sql.append(cascade);
+			}
+			stmt = this.dbConnection.createStatement();
+			stmt.executeUpdate(sql.toString());
+			if (this.ddlNeedsCommit && !this.dbConnection.getAutoCommit())
+			{
+				this.dbConnection.commit();
+			}
 		}
-		Statement stmt = this.dbConnection.createStatement();
-		stmt.executeUpdate(sql.toString());
-		if (this.ddlNeedsCommit && !this.dbConnection.getAutoCommit())
+		catch (SQLException e)
 		{
-			this.dbConnection.commit();
+			if (this.ddlNeedsCommit && !this.dbConnection.getAutoCommit())
+			{
+				try { this.dbConnection.rollback(); } catch (Throwable th) {}
+			}
+			throw e;
+		}
+		finally
+		{
+			try { stmt.close(); } catch (Throwable th) {}
 		}
 	}
 
@@ -695,6 +693,9 @@ public class DbMetadata
 		return this.getExtendedViewSource(aCatalog, aSchema, aView, null, includeDrop);
 	}
 
+	/**
+	 * Returns a complete SQL statement to (re)create the given view.
+	 */
 	public String getExtendedViewSource(String aCatalog, String aSchema, String aView, DataStore viewTableDefinition, boolean includeDrop)
 		throws SQLException
 	{
@@ -717,22 +718,9 @@ public class DbMetadata
 		if (source.toLowerCase().startsWith("create")) return source;
 
 		StrBuffer result = new StrBuffer(source.length() + 100);
-
-		if (this.isOracle())
-		{
-			result.append("CREATE OR REPLACE VIEW " + aView);
-		}
-		else if (this.isFirebird)
-		{
-			result.append("RECREATE VIEW " + aView);
-		}
-		else
-		{
-			if (includeDrop) result.append("DROP VIEW " + aView);
-			if (this.isHsql()) result.append(" IF EXISTS");
-			result.append(";\nCREATE VIEW " + aView);
-		}
-
+		
+		result.append(generateCreateObject(includeDrop, "VIEW", aView));
+		
 		// currently (as of version 1.7.2) HSQLDB does not support a column list in the view definition
 		if (!isHsql())
 		{
@@ -761,7 +749,7 @@ public class DbMetadata
 	 *	Return the source of a view definition as it is stored in the database.
 	 *	Usually (depending on how the meta data is stored in the database) the DBMS
 	 *	only stores the underlying SELECT statement, and that will be returned by this method.
-	 *	To create a complete SQL to re-create a view, use #getExtendedViewSource(String, String, String, DataStore, boolean)
+	 *	To create a complete SQL to re-create a view, use {@linke getExtendedViewSource(String, String, String, DataStore, boolean)}
 	 *
 	 *	@return the view source as stored in the database.
 	 */
@@ -782,7 +770,7 @@ public class DbMetadata
 			sql.setObjectName(aViewname);
 			sql.setCatalog(aCatalog);
 			stmt = this.dbConnection.createStatement();
-			String query = sql.getSql();
+			String query = this.adjustHsqlQuery(sql.getSql());
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
 				LogMgr.logInfo("DbMetadata.getViewSource()", "Using query=\n" + query);
@@ -814,6 +802,65 @@ public class DbMetadata
 		return source.toString();
 	}
 
+	private StrBuffer generateCreateObject(boolean includeDrop, String type, String name)
+	{
+		StrBuffer result = new StrBuffer();
+		boolean replaced = false;
+		
+		String prefix = "workbench.db.";
+		String suffix = "." + type.toLowerCase() + ".sql." + this.getDbId();
+		
+		String replace = Settings.getInstance().getProperty(prefix + "replace" + suffix, null);
+		if (replace != null)
+		{
+			replace = replace.replaceAll("%name%", name);
+			result.append(replace);
+			replaced = true;
+		}
+		
+		if (includeDrop && !replaced)
+		{
+			String drop = Settings.getInstance().getProperty(prefix + "drop" + suffix, null);
+			if (drop == null)
+			{
+				result.append("DROP ");
+				result.append(type.toUpperCase());
+				result.append(" ");
+				result.append(name);
+				String cascade = this.getCascadeConstraintsVerb(type);
+				if (cascade != null)
+				{
+					result.append(" ");
+					result.append(cascade);
+				}
+				result.append("\n");
+			}
+			else
+			{
+				drop = drop.replaceAll("%name%", name);
+				result.append(drop);
+			}
+			result.append("\n");
+		}
+		
+		if (!replaced)
+		{
+			String create = Settings.getInstance().getProperty(prefix + "create" + suffix, null);
+			if (create == null)
+			{
+				result.append("CREATE ");
+				result.append(type.toUpperCase());
+				result.append(" ");
+				result.append(name);
+			}
+			else
+			{
+				create = create.replaceAll("%name%", name);
+				result.append(create);
+			}
+		}
+		return result;
+	}
 	
 	private void readKeywords()
 	{
@@ -1039,11 +1086,13 @@ public class DbMetadata
 		return null;
 	}
 
-	public String getSchemaForTable(String aTablename)
+	public String findSchemaForTable(String aTablename)
 		throws SQLException
 	{
+		if (this.ignoreSchema("*")) return null;
+		
 		aTablename = this.adjustObjectnameCase(aTablename);
-
+		
 		// First we try the current user as the schema name...
 		String schema = this.adjustObjectnameCase(this.getUserName());
 		ResultSet rs = this.metaData.getTables(null, schema, aTablename, null);
@@ -1088,14 +1137,8 @@ public class DbMetadata
 				SqlUtil.closeResult(rs);
 			}
 		}
+		if (this.ignoreSchema(schema)) return null;
 		return schema;
-	}
-
-	public DataStore getTables()
-		throws SQLException
-	{
-		String user = this.getUserName();
-		return this.getTables(null, user, (String[])null);
 	}
 
 	public static final String TABLE_TYPE_VIEW = "VIEW";
@@ -1105,31 +1148,24 @@ public class DbMetadata
 	public static final String[] TABLE_TYPES_TABLE = new String[] {TABLE_TYPE_TABLE};
 	public static final String[] TABLE_TYPES_SELECTABLE = new String[] {TABLE_TYPE_TABLE, TABLE_TYPE_VIEW, "SYNONYM"};
 
-	public DataStore getTables(String schema, String[] type)
-		throws SQLException
-	{
-		return this.getTables(null, schema, null, type);
-	}
 
 	public final static int COLUMN_IDX_TABLE_LIST_NAME = 0;
 	public final static int COLUMN_IDX_TABLE_LIST_TYPE = 1;
 	public final static int COLUMN_IDX_TABLE_LIST_CATALOG = 2;
 	public final static int COLUMN_IDX_TABLE_LIST_SCHEMA = 3;
 	public final static int COLUMN_IDX_TABLE_LIST_REMARKS = 4;
-
-	public DataStore getTables(String aCatalog, String aSchema, String aType)
+	
+	public DataStore getTables()
 		throws SQLException
 	{
-		String[] types;
-		if (aType == null || "*".equals(aType) || "%".equals(aType))
-		{
-			types = null;
-		}
-		else
-		{
-			types = new String[] { aType.trim() };
-		}
-		return this.getTables(aCatalog, aSchema, null, types);
+		String user = this.getCurrentSchema();
+		return this.getTables(null, user, (String[])null);
+	}
+	
+	public DataStore getTables(String schema, String[] types)
+		throws SQLException
+	{
+		return this.getTables(null, schema, null, types);
 	}
 
 	public DataStore getTables(String aCatalog, String aSchema, String[] types)
@@ -1185,39 +1221,6 @@ public class DbMetadata
 			SqlUtil.closeResult(tableRs);
 		}
 
-		// Public synonyms will not be returned when a schema (=user)
-		// has been specified, but they are accessible and need to be retrieved
-		/*
-		if (this.isOracle && !"PUBLIC".equalsIgnoreCase(aSchema) && typeIncluded("SYNONYM", types) )
-		{
-			try
-			{
-				tableRs = this.metaData.getTables(aCatalog, "PUBLIC", tables, new String[] {"SYNONYM"} );
-				while (tableRs.next())
-				{
-					String cat = tableRs.getString(1);
-					String schem = tableRs.getString(2);
-					String name = tableRs.getString(3);
-					if (name == null) continue;
-					// filter out "internal" synonyms for Oracle
-					if (this.isOracle && name.indexOf("/") > -1) continue;
-					String ttype = tableRs.getString(4);
-					String rem = tableRs.getString(5);
-					String typeUpper = ttype.toUpperCase();
-					int row = result.addRow();
-					result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, name);
-					result.setValue(row, COLUMN_IDX_TABLE_LIST_TYPE, ttype);
-					result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, cat);
-					result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, null);
-					result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, rem);
-				}
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-		}
-		*/
 		if (this.sequenceReader != null && typeIncluded("SEQUENCE", types) &&
 				"true".equals(Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".retrieve_sequences", "true"))
 				&& !sequencesReturned)
@@ -1235,7 +1238,6 @@ public class DbMetadata
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, aSchema);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, null);
 			}
-			//this.dbConnection.getObjectCache().setTables(tableList);
 		}
 
 		if (this.isIngres && typeIncluded("SYNONYM", types) && "true".equals(Settings.getInstance().getProperty("workbench.db.ingres.retrieve_synonyms", "true")))
@@ -1278,7 +1280,7 @@ public class DbMetadata
 		{
 			String c = this.adjustObjectnameCase(aTable.getCatalog());
 			String s = this.adjustObjectnameCase(aTable.getSchema());
-			String t = this.adjustObjectnameCase(aTable.getTable());
+			String t = this.adjustObjectnameCase(aTable.getTableName());
 			rs = this.metaData.getTables(c, s, t, new String[] { "TABLE" });
 			exists = rs.next();
 		}
@@ -1491,7 +1493,7 @@ public class DbMetadata
 	{
 		String type = table.getType();
 		if (type == null) type = "TABLE";
-		DataStore ds = this.getTableDefinition(table.getCatalog(), table.getSchema(), table.getTable(), type, false);
+		DataStore ds = this.getTableDefinition(table.getCatalog(), table.getSchema(), table.getTableName(), type, false);
 		return createColumnIdentifiers(ds);
 	}
 
@@ -1611,7 +1613,7 @@ public class DbMetadata
 		throws SQLException
 	{
 		if (aTable == null) return null;
-		return this.getTableDefinition(aTable.getCatalog(), aTable.getSchema(), aTable.getTable(), "TABLE", false);
+		return this.getTableDefinition(aTable.getCatalog(), aTable.getSchema(), aTable.getTableName(), "TABLE", false);
 	}
 
 	private DataStore createTableDefinitionDataStore()
@@ -1668,7 +1670,7 @@ public class DbMetadata
 			if (id != null)
 			{
 				aSchema = id.getSchema();
-				aTable = id.getTable();
+				aTable = id.getTableName();
 				aCatalog = null;
 			}
 		}
@@ -1927,14 +1929,7 @@ public class DbMetadata
 		throws SQLException
 	{
 		String schema = this.getCurrentSchema();
-		return getTableList(schema, false);
-	}
-
-	public List getTableList(boolean includeViews)
-		throws SQLException
-	{
-		String schema = this.getCurrentSchema();
-		return getTableList(schema, includeViews);
+		return getTableList(schema, TABLE_TYPES_TABLE);
 	}
 
 	public List getTableList(String schema)
@@ -1943,21 +1938,6 @@ public class DbMetadata
 		return getTableList(schema, TABLE_TYPES_TABLE);
 	}
 
-	public List getViewList(String schema)
-		throws SQLException
-	{
-		String[] types = new String[] { "VIEW" };
-		return getTableList(schema, types);
-	}
-	
-	public List getTableList(String schema, boolean includeViews)
-		throws SQLException
-	{
-		if (includeViews)
-			return getTableList(schema, TABLE_TYPES_SELECTABLE);
-		else 
-			return getTableList(schema, TABLE_TYPES_TABLE);
-	}
 	/**
 	 *	Return a list of tables for the given schema
 	 * if the schema is null, all tables will be returned
@@ -1993,7 +1973,7 @@ public class DbMetadata
 
 	public IndexDefinition[] getIndexList(TableIdentifier tbl)
 	{
-		DataStore ds = this.getTableIndexInformation(tbl.getCatalog(), tbl.getSchema(), tbl.getTable());
+		DataStore ds = this.getTableIndexInformation(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
 		int count = ds.getRowCount();
 		IndexDefinition[] result = new IndexDefinition[count];
 		for (int i=0; i < count; i ++)
@@ -2064,15 +2044,11 @@ public class DbMetadata
 
 	public boolean supportsTruncate()
 	{
-		if (this.isMySql)
-		{
-			return !this.dbVersion.startsWith("3");
-		}
-		else
-		{
-			return this.isOracle || this.isPostgres || this.isASA;
-		}
+		String s = Settings.getInstance().getProperty("workbench.db.truncatesupported", "");
+		List l = StringUtil.stringToList(s, ",");
+		return l.contains(this.getDbId());
 	}
+	
 	/**
 	 *	Returns a list of all catalogs in the database.
 	 *	Some DBMS's do not support catalogs, in this case the method
@@ -2105,7 +2081,7 @@ public class DbMetadata
 		}
 		finally
 		{
-			try { rs.close(); } catch (Throwable th) {}
+			SqlUtil.closeResult(rs);
 		}
 		return result;
 	}
@@ -2155,7 +2131,8 @@ public class DbMetadata
 		sql.setCatalog(aCatalog);
 		sql.setObjectName(aTable);
 		Statement stmt = this.dbConnection.createStatementForQuery();
-		String query = sql.getSql();
+		String query = this.adjustHsqlQuery(sql.getSql());
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo("DbMetadata.getTableTriggers()", "Using query=\n" + query);
@@ -2200,10 +2177,6 @@ public class DbMetadata
 		if ("*".equals(aCatalog)) aCatalog = null;
 		if ("*".equals(aSchema)) aSchema = null;
 
-		//aCatalog = this.adjustObjectname(aCatalog);
-		//aSchema = this.adjustObjectname(aSchema);
-		//aTriggername = this.adjustObjectname(aTriggername);
-
 		GetMetaDataSql sql = (GetMetaDataSql)triggerSourceSql.get(this.productName);
 		if (sql == null) return "";
 
@@ -2211,7 +2184,8 @@ public class DbMetadata
 		sql.setCatalog(aCatalog);
 		sql.setObjectName(aTriggername);
 		Statement stmt = this.dbConnection.createStatementForQuery();
-		String query = sql.getSql();
+		String query = this.adjustHsqlQuery(sql.getSql());
+		
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo("DbMetadata.getTriggerSource()", "Using query=\n" + query);
@@ -2225,6 +2199,7 @@ public class DbMetadata
 		catch (SQLException e)
 		{
 			if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
+			SqlUtil.closeStatement(stmt);
 			throw e;
 		}
 
@@ -2261,7 +2236,7 @@ public class DbMetadata
 	}
 
 	/** Returns a list of database catalogs as returned by DatabaseMetadata.getCatalogs()
-	 * @return ArrayList
+	 * @return ArrayList with String objects
 	 */
 	public List getCatalogs()
 	{
@@ -2733,7 +2708,7 @@ public class DbMetadata
 		}
 		sql.append("\nFROM ");
 		TableIdentifier tbl = new TableIdentifier(table);
-		sql.append(tbl.getTable());
+		sql.append(tbl.getTableName());
 		sql.append(";\n");
 
 		return sql.toString();
@@ -2767,7 +2742,7 @@ public class DbMetadata
 
 	public String getTableSource(TableIdentifier table, ColumnIdentifier[] columns, String tableNameToUse)
 	{
-		return getTableSource(table.getCatalog(), table.getSchema(), table.getTable(), columns, null, null, false, tableNameToUse);
+		return getTableSource(table.getCatalog(), table.getSchema(), table.getTableName(), columns, null, null, false, tableNameToUse);
 	}
 
 	public String getTableSource(String aCatalog, String aSchema, String aTablename, ColumnIdentifier[] columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop)
@@ -2780,41 +2755,13 @@ public class DbMetadata
 		if (columns == null || columns.length == 0) return "";
 
 		StrBuffer result = new StrBuffer();
-		if (includeDrop)
-		{
-			result.append("DROP TABLE " + (tableNameToUse == null ? aTablename : tableNameToUse));
-			if (this.isHsql)
-			{
-				result.append(" IF EXISTS");
-			}
-			else if (this.isOracle)
-			{
-				result.append(" CASCADE CONSTRAINTS");
-			}
-			else if (this.isPostgres || this.isFirstSql)
-			{
-				result.append(" CASCADE");
-			}
-			result.append(";\n");
-		}
-
+		
 		TableIdentifier table = new TableIdentifier(aCatalog, aSchema, aTablename);
-		Map columnConstraints = Collections.EMPTY_MAP;
-		if (this.constraintReader != null)
-		{
-			try
-			{
-				columnConstraints = this.constraintReader.getColumnConstraints(this.dbConnection.getSqlConnection(), table);
-			}
-			catch (Exception e)
-			{
-				if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
-			}
-
-		}
-
-		result.append("CREATE TABLE ");
-		result.append((tableNameToUse == null ? aTablename : tableNameToUse));
+		Map columnConstraints = this.getColumnConstraints(table);
+		
+		result.append(generateCreateObject(includeDrop, "TABLE", (tableNameToUse == null ? aTablename : tableNameToUse)));
+		//result.append("CREATE TABLE ");
+		//result.append((tableNameToUse == null ? aTablename : tableNameToUse));
 		result.append("\n(\n");
 		int count = columns.length;
 		StrBuffer pkCols = new StrBuffer(1000);
@@ -2834,13 +2781,13 @@ public class DbMetadata
 
 		for (int i=0; i < count; i++)
 		{
-			String colName = columns[i].getColumnName();//(String)aTableDef.getValue(i, COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-			String type = columns[i].getDbmsType();//aTableDef.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
-			String def = columns[i].getDefaultValue(); //aTableDef.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_DEFAULT);
+			String colName = columns[i].getColumnName();
+			String type = columns[i].getDbmsType();
+			String def = columns[i].getDefaultValue(); 
 
 			result.append("   ");
 			result.append(colName);
-			if (columns[i].isPkColumn() && (this.isFirstSql && !type.equals("sequence")))
+			if (columns[i].isPkColumn() && (!this.isFirstSql || this.isFirstSql && !type.equals("sequence")))
 			{
 				if (pkCols.length() > 0) pkCols.append(',');
 				pkCols.append(colName.trim());
@@ -2894,24 +2841,12 @@ public class DbMetadata
 			result.append('\n');
 		}
 
-		if (this.constraintReader != null)
+		String cons = this.getTableConstraints(table, "   ");
+		if (cons != null && cons.length() > 0)
 		{
-
-			String cons = null;
-			try
-			{
-				cons = this.constraintReader.getTableConstraints(dbConnection.getSqlConnection(), table, "   ");
-			}
-			catch (SQLException e)
-			{
-				if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
-			}
-			if (cons != null && cons.length() > 0)
-			{
-				result.append("   ,");
-				result.append(cons);
-				result.append('\n');
-			}
+			result.append("   ,");
+			result.append(cons);
+			result.append('\n');
 		}
 
 		if (this.createInlineConstraints && pkCols.length() > 0)
@@ -2967,6 +2902,45 @@ public class DbMetadata
 		return result.toString();
 	}
 
+	public Map getColumnConstraints(TableIdentifier table)
+	{
+		Map columnConstraints = Collections.EMPTY_MAP;
+		if (this.constraintReader != null)
+		{
+			try
+			{
+				columnConstraints = this.constraintReader.getColumnConstraints(this.dbConnection.getSqlConnection(), table);
+			}
+			catch (Exception e)
+			{
+				if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
+				columnConstraints = Collections.EMPTY_MAP;
+			}
+		}
+		return columnConstraints;
+	}
+	
+	public String getTableConstraints(TableIdentifier tbl)
+	{
+		return getTableConstraints(tbl, "");
+	}
+	
+	public String getTableConstraints(TableIdentifier tbl, String indent)
+	{
+		if (this.constraintReader == null) return null;
+		String cons = null;
+		try
+		{
+			cons = this.constraintReader.getTableConstraints(dbConnection.getSqlConnection(), tbl, indent);
+		}
+		catch (SQLException e)
+		{
+			if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
+			cons = null;
+		}
+		return cons;
+	}
+	
 	public String getTableColumnCommentsSql(String aCatalog, String aSchema, String aTablename, ColumnIdentifier[] columns)
 	{
 		String columnStatement = (String)columnCommentStatements.get(this.productName);
@@ -3004,8 +2978,9 @@ public class DbMetadata
 
 	public String getTableComment(TableIdentifier table)
 	{
-		return this.getTableComment(table.getCatalog(), table.getSchema(), table.getTable());
+		return this.getTableComment(table.getCatalog(), table.getSchema(), table.getTableName());
 	}
+	
 	public String getTableComment(String aCatalog, String aSchema, String aTablename)
 	{
 		ResultSet rs = null;
@@ -3025,7 +3000,7 @@ public class DbMetadata
 		}
 		finally
 		{
-			try { rs.close(); } catch (Throwable th) {}
+			SqlUtil.closeResult(rs);
 		}
 
 		return result;
@@ -3171,7 +3146,7 @@ public class DbMetadata
 	 *	Convert a Set to a comma separated list.
 	 *	@return the entries of the Set delimited by comma
 	 */
-	private String convertSetToList(HashSet aSet)
+	private String convertSetToList(Set aSet)
 	{
 		StrBuffer result = new StrBuffer(aSet.size() * 10);
 		Iterator itr = aSet.iterator();
@@ -3475,12 +3450,27 @@ public class DbMetadata
     }
     finally
     {
-      try { rs.close(); } catch (Exception e) {}
-      try { stmt.close(); } catch (Exception e) {}
+			SqlUtil.closeAll(rs, stmt);
     }
     return result.toString();
   }
 
+	/**
+	 * With v1.8 of HSQLDB the tables that list table and view 
+	 * information, are stored in the INFORMATION_SCHEMA schema.
+	 * Although the table names are the same, prior to 1.8 you 
+	 * cannot use the schema, so it needs to be removed
+	 */
+	private String adjustHsqlQuery(String query)
+	{
+		if (!this.isHsql) return query;
+		if (this.dbVersion.startsWith("1.8")) return query;
+	
+		Pattern p = Pattern.compile("\\sINFORMATION_SCHEMA\\.", Pattern.CASE_INSENSITIVE);
+		Matcher m = p.matcher(query);
+		return m.replaceAll(" ");
+	}
+	
 	private String getSqlTemplate(HashMap aMap)
 	{
 		String template = (String)aMap.get(this.productName);

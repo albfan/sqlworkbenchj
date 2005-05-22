@@ -38,7 +38,7 @@ public class WbDescribeTable extends SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		StatementRunnerResult result = new StatementRunnerResult();
 		StringTokenizer tok = new StringTokenizer(aSql.trim(), " ");
 		String verb = tok.nextToken();
 		if (!VERB.equalsIgnoreCase(verb) &&

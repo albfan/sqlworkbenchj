@@ -14,7 +14,7 @@ package workbench.db.importer;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
@@ -42,6 +42,7 @@ import workbench.db.exporter.XmlRowDataConverter;
 import workbench.exception.ExceptionUtil;
 import workbench.interfaces.ImportFileParser;
 import workbench.log.LogMgr;
+import workbench.util.EncodingUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
@@ -73,6 +74,9 @@ public class XmlDataFileParser
 	private boolean abortOnError = false;
 	private boolean verboseFormat = false;
 	private String missingColumn;
+	private StrBuffer messages;
+	private String extensionToUse;
+	
 	
 	/** Define the tags for which the characters surrounded by the
 	 *  tag should be collected
@@ -244,7 +248,11 @@ public class XmlDataFileParser
 		{
 			if (this.columns == null) this.readTableDefinition();
 		}
-		catch (FileNotFoundException e)
+		catch (IOException e)
+		{
+			return Collections.EMPTY_LIST;
+		}
+		catch (SAXException e)
 		{
 			return Collections.EMPTY_LIST;
 		}
@@ -257,10 +265,11 @@ public class XmlDataFileParser
 	}
 
 	private void readTableDefinition()
-		throws FileNotFoundException
+		throws IOException, SAXException
 	{
 		XmlTableDefinitionParser tableDef = new XmlTableDefinitionParser(inputFile, this.encoding);
 		this.columns = tableDef.getColumns();
+		//if (columns == null) throw new IllegalArgumentException("No valid table definition found");
 		this.colCount = this.columns.length;
 		this.tableNameFromFile = tableDef.getTableName();
 		String format = tableDef.getTagFormat();
@@ -286,6 +295,11 @@ public class XmlDataFileParser
 	{
 		this.sourceDirectory = null;
 		this.inputFile = file;
+	}
+	
+	public void setSourceExtension(String ext)
+	{
+		this.extensionToUse = ext;
 	}
 	
 	public void setSourceDirectory(String dir)
@@ -318,19 +332,31 @@ public class XmlDataFileParser
 		{
 			this.realColCount = this.columnsToImport.size();
 		}
+		this.messages = new StrBuffer();
 		this.sendTableDefinition();
 		InputStream in = null;
 		try
 		{
 			in = new FileInputStream(this.inputFile);
-			InputSource source = new InputSource(new BufferedReader(new InputStreamReader(in, this.encoding), 512*1024));
+			InputSource source = new InputSource(new BufferedReader(new InputStreamReader(in, EncodingUtil.cleanupEncoding(this.encoding)), 512*1024));
 			this.keepRunning = true;
 			saxParser.parse(source, this);
 		}
 		catch (ParsingInterruptedException e)
 		{
-
 			this.receiver.importCancelled();
+			throw e;
+		}
+		catch (Exception e)
+		{
+		  String msg = "Error during parsing of data row: " + (this.currentRowNumber) + 
+				  ", column: " + this.currentColIndex + 
+				  ", current data: " + (this.chars == null ? "<n/a>" : "[" + this.chars.toString() + "]" ) + 
+				  ", message: " + ExceptionUtil.getDisplay(e);
+			LogMgr.logWarning("XmlDataFileParser.processOneFile()", msg);
+			this.messages.append(msg);
+			this.messages.append('\n');
+			this.receiver.tableImportError();
 			throw e;
 		}
 		finally
@@ -341,6 +367,7 @@ public class XmlDataFileParser
 
 	private void reset()
 	{
+		messages = new StrBuffer();
 		tableName = null;
 		tableNameFromFile = null;
 		ignoreCurrentRow = false;
@@ -353,6 +380,7 @@ public class XmlDataFileParser
 		chars = null;
 		columns = null;
 		columnsToImport = null;
+		keepRunning = true;
 	}
 	
 	private void processDirectory()
@@ -362,9 +390,12 @@ public class XmlDataFileParser
 		File[] files = dir.listFiles();
 		int count = files.length;
 		boolean verbose = this.verboseFormat;
+		if (this.extensionToUse == null) this.extensionToUse = ".xml";
+		
 		for (int i=0; i < count; i++)
 		{
-			if (files[i].getName().endsWith(".xml"))
+			if (!this.keepRunning) break;
+			if (files[i].getName().endsWith(this.extensionToUse))
 			{
 				try
 				{
@@ -379,10 +410,14 @@ public class XmlDataFileParser
 					this.verboseFormat = verbose;
 					this.processOneFile();
 				}
-				catch (SQLException e)
+				catch (ParsingInterruptedException e)
 				{
-					LogMgr.logWarning("XmlDataFileParser.processDirectory()", "Error importing " + this.inputFile + ": " + ExceptionUtil.getDisplay(e), null);
-					if (this.abortOnError) return;
+					// canel the import
+					break;
+				}
+				catch (Exception e)
+				{
+					if (this.abortOnError) throw e;
 				}
 			}
 		}
@@ -393,6 +428,7 @@ public class XmlDataFileParser
 	{
 		try
 		{
+			this.keepRunning = true;
 			if (this.sourceDirectory == null)
 			{
 				processOneFile();
@@ -546,25 +582,24 @@ public class XmlDataFileParser
 	public void error(SAXParseException e)
 		throws SAXParseException
 	{
-		LogMgr.logError("XmlDataFileParser.error()", "Error in line = " + e.getLineNumber() + ",data-row=" + this.currentRowNumber + "\n", e);
+		String msg = "XML Parse error in line=" + e.getLineNumber() + ",data-row=" + (this.currentRowNumber);
+		LogMgr.logError("XmlDataFileParser.error()", msg, e);
 		this.ignoreCurrentRow = true;
-		if (!this.keepRunning) throw e;
 	}
 
 	public void fatalError(SAXParseException e)
 		throws SAXParseException
 	{
-		LogMgr.logError("XmlDataFileParser.fatalError()", "Fatal error in line = " + e.getLineNumber() + ",data-row=" + this.currentRowNumber + "\n", e);
+		String msg = "Fatal XML parse error in line=" + e.getLineNumber() + ",data-row=" + (this.currentRowNumber) + "\nRest of file will be ignored!";
+		LogMgr.logError("XmlDataFileParser.fatalError()", msg, e);
 		this.ignoreCurrentRow = true;
-		if (!this.keepRunning) throw e;
 	}
 
 	// dump warnings too
 	public void warning(SAXParseException err)
 		throws SAXParseException
 	{
-		System.out.println("** Warning: line " + err.getLineNumber() + ", uri " + err.getSystemId());
-		System.out.println("   " + err.getMessage());
+		this.messages.append(ExceptionUtil.getDisplay(err));
 		if (!this.keepRunning) throw err;
 	}
 
@@ -735,7 +770,8 @@ public class XmlDataFileParser
 
 	public String getMessages()
 	{
-		return "";
+		if (this.messages == null) return "";
+		return this.messages.toString();
 	}
 
 	public boolean getUseVerboseFormat()

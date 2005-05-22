@@ -42,7 +42,6 @@ import java.beans.PropertyChangeListener;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -54,6 +53,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollBar;
@@ -109,7 +109,6 @@ import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RowStatusRenderer;
 import workbench.gui.renderer.StringColumnRenderer;
 import workbench.gui.renderer.ToolTipRenderer;
-import workbench.interfaces.Exporter;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.PrintableComponent;
 import workbench.interfaces.Searchable;
@@ -127,7 +126,7 @@ import workbench.util.WbThread;
 public class WbTable
 	extends JTable
 	implements ActionListener, FocusListener, MouseListener,
-	           Exporter, FontChangedListener, Searchable, 
+	           FontChangedListener, Searchable, 
 						 PrintableComponent, ListSelectionListener, 
 	           PropertyChangeListener
 {
@@ -193,6 +192,11 @@ public class WbTable
 	private boolean selectOnRightButtonClick = false;
 
 	public WbTable()
+	{
+		this(true);
+	}
+	
+	public WbTable(boolean printEnabled)
 	{
 		super(EmptyTableModel.EMPTY_MODEL);
 		this.setMinimumSize(null);
@@ -263,12 +267,15 @@ public class WbTable
 		this.addPopupAction(this.findAction, true);
 		this.addPopupAction(this.findAgainAction, false);
 
-		this.printDataAction = new PrintAction(this);
-		this.printPreviewAction = new PrintPreviewAction(this);
-		this.popup.addSeparator();
-		this.popup.add(this.printDataAction.getMenuItem());
-		this.popup.add(this.printPreviewAction.getMenuItem());
-
+		if (printEnabled)
+		{
+			this.printDataAction = new PrintAction(this);
+			this.printPreviewAction = new PrintPreviewAction(this);
+			this.popup.addSeparator();
+			this.popup.add(this.printDataAction.getMenuItem());
+			this.popup.add(this.printPreviewAction.getMenuItem());
+		}
+		
 		this.addMouseListener(this);
 
 		InputMap im = this.getInputMap(WHEN_FOCUSED);
@@ -281,7 +288,6 @@ public class WbTable
 		Settings.getInstance().addFontChangedListener(this);
 		Settings.getInstance().addPropertyChangeListener(this);
 	}
-
 
 	public void setShowPopupMenu(boolean aFlag)
 	{
@@ -428,11 +434,15 @@ public class WbTable
 		}
 		this.popup.add(submenu);
 	}
-
+	
 	public void addPopupAction(WbAction anAction, boolean withSep)
 	{
-		if (this.popup == null) this.popup = new JPopupMenu();
+		this.addPopupMenu(anAction.getMenuItem(), withSep);
+	}
 
+	public void addPopupMenu(JMenuItem item, boolean withSep)
+	{
+		if (this.popup == null) this.popup = new JPopupMenu();
 
 		if (this.printDataAction != null)
 		{
@@ -442,15 +452,14 @@ public class WbTable
 			{
 				this.popup.add(new Separator(), this.popup.getComponentCount() - 3);
 			}
-			this.popup.add(anAction.getMenuItem(), this.popup.getComponentCount() - 3);
+			this.popup.add(item, this.popup.getComponentCount() - 3);
 		}
 		else
 		{
 			if (withSep) this.popup.addSeparator();
-			this.popup.add(anAction.getMenuItem());
+			this.popup.add(item);
 		}
 	}
-
 	public void valueChanged(ListSelectionEvent e)
 	{
 		super.valueChanged(e);

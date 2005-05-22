@@ -12,8 +12,8 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import workbench.gui.components.WbTable;
 
-import workbench.interfaces.Exporter;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -22,9 +22,9 @@ import workbench.resource.ResourceMgr;
  */
 public class SaveDataAsAction extends WbAction
 {
-	private Exporter client;
+	private WbTable client;
 
-	public SaveDataAsAction(Exporter aClient)
+	public SaveDataAsAction(WbTable aClient)
 	{
 		super();
 		this.client = aClient;

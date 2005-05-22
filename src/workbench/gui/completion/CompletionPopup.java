@@ -33,6 +33,7 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import workbench.db.ColumnIdentifier;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.editor.JEditTextArea;
 import workbench.log.LogMgr;
@@ -87,6 +88,11 @@ public class CompletionPopup
 	
 	public void showPopup()
 	{
+		this.showPopup(null);
+	}
+	
+	public void showPopup(String valueToSelect)
+	{
 		if (window != null) closePopup(false);
 		try
 		{
@@ -103,8 +109,16 @@ public class CompletionPopup
 			int count = data.getSize();
 			elementList.setVisibleRowCount(count < 12 ? count + 1 : 12);
 			
+			int index = 0;
 			String s = editor.getSelectedText();
-			int index = findEntry(s);
+			if (s != null)
+			{
+				index = findEntry(s);
+			}
+			else if (valueToSelect != null)
+			{
+				index = findEntry(valueToSelect);
+			}
 			if (index == -1) index = 0;
 			
 			elementList.setSelectedIndex(index);
@@ -161,18 +175,40 @@ public class CompletionPopup
 			if (pasteEntry)
 			{
 				Object o = this.elementList.getSelectedValue();
+				String value = null;
 				if (o != null)
 				{
-					String value = null;
 					if (o instanceof TableAlias)
 					{
-						value = ((TableAlias)o).getNameToUse();
+						value = getPasteValue(((TableAlias)o).getNameToUse());
 					}
-					else
+					else if (o instanceof SelectAllMarker)
 					{
-						value = o.toString();
+						ListModel data = this.elementList.getModel();
+						int count = data.getSize();
+						StringBuffer cols = new StringBuffer(count * 10);
+						int col = 0;
+						for (int i=0; i < count; i++)
+						{
+							
+							Object c = this.data.getElementAt(i);
+							if (c instanceof ColumnIdentifier) 
+							{
+								if (col > 0) cols.append(", ");
+								cols.append(getPasteValue(c.toString()));
+								col ++;
+							}
+						}
+						value = cols.toString();
 					}
-					editor.setSelectedText(getPasteValue(value));
+					else if (o != null)
+					{
+						value = getPasteValue(o.toString());
+					}
+				}
+				if (value != null)
+				{
+					editor.setSelectedText(value);
 				}
 			}
 		}

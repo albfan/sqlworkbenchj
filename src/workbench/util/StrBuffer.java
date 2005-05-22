@@ -137,6 +137,7 @@ public class StrBuffer
 	{
 		if (str == null) return this;
 		int oldlen = str.length();
+		if (oldlen == 0) return this;
 		if (oldlen == 1)
 		{
 			return this.append(str.charAt(0));

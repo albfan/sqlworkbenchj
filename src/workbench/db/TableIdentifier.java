@@ -25,7 +25,7 @@ public class TableIdentifier
 	private String schema;
 	private String catalog;
 	private String expression;
-	private boolean isNewTable = false;
+	private boolean isNewTable;
 	private String pkName;
 	private String type;
 	
@@ -34,6 +34,14 @@ public class TableIdentifier
 		this.expression = null;
 		this.isNewTable = false;
 		this.setTable(aName);
+	}
+	
+	public TableIdentifier(String aName, WbConnection conn)
+	{
+		this.expression = null;
+		this.isNewTable = false;
+		this.setTable(aName);
+		this.adjustCase(conn);
 	}
 
 	/**
@@ -117,7 +125,7 @@ public class TableIdentifier
 		else
 		{
 			DbMetadata meta = conn.getMetadata();
-			if (this.schema != null)
+			if (this.schema != null && meta.needSchemaInDML(this))
 			{
 				result.append(meta.quoteObjectname(this.schema));
 				result.append('.');
@@ -129,6 +137,7 @@ public class TableIdentifier
 
 	public void adjustCase(WbConnection conn)
 	{
+		if (conn == null) return;
 		DbMetadata meta = conn.getMetadata();
 		if (meta.storesUpperCaseIdentifiers())
 		{
@@ -145,7 +154,7 @@ public class TableIdentifier
 		this.expression = null;
 	}
 	
-	public String getTable() { return this.tablename; }
+	public String getTableName() { return this.tablename; }
 
 	public void setTable(String aTable)
 	{
@@ -178,7 +187,7 @@ public class TableIdentifier
 	{
 		if (this.isNewTable) return;
 
-		if (aSchema != null && aSchema.trim().length() == 0)
+		if (aSchema == null || aSchema.trim().length() == 0)
 		{
 			this.schema = null;
 		}
@@ -194,7 +203,7 @@ public class TableIdentifier
 	{
 		if (this.isNewTable) return;
 
-		if (aCatalog != null && aCatalog.trim().length() == 0)
+		if (aCatalog == null || aCatalog.trim().length() == 0)
 		{
 			this.catalog = null;
 		}

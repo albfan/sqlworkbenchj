@@ -36,7 +36,7 @@ public class DdlAnalyzer
 	{
 
 		String verb = SqlUtil.getSqlVerb(this.sql);
-		String q = this.getQualifierLeftOfCursor(sql, pos);
+		String q = this.getQualifierLeftOfCursor(sql, cursorPos);
 		if (q != null)
 		{
 			this.schemaForTableList = q;
@@ -55,7 +55,7 @@ public class DdlAnalyzer
 		int tablePos = StringUtil.findPattern(TABLE_PATTERN, sql, 0);
 		// for DROP etc, we'll need to be after the table keyword
 		// otherwise it could be a DROP PROCEDURE as well.
-		if (tablePos > -1 && pos > tablePos + 5)
+		if (tablePos > -1 && cursorPos > tablePos + 5)
 		{
 			context = CONTEXT_TABLE_LIST;
 			setTableTypeFilter(DbMetadata.TABLE_TYPE_TABLE);
@@ -63,7 +63,7 @@ public class DdlAnalyzer
 		else 
 		{
 			int viewPos = StringUtil.findPattern(VIEW_PATTERN, sql, 0);
-			if (viewPos > -1 && pos > tablePos + 4)
+			if (viewPos > -1 && cursorPos > tablePos + 4)
 			{
 				context = CONTEXT_TABLE_LIST;
 				setTableTypeFilter(DbMetadata.TABLE_TYPE_VIEW);

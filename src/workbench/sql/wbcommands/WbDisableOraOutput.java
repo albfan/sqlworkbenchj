@@ -35,7 +35,7 @@ public class WbDisableOraOutput extends SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		StatementRunnerResult result = new StatementRunnerResult();
 		aConnection.getMetadata().disableOutput();
 		result.addMessage(ResourceMgr.getString("MsgDbmsOutputDisabled"));
 		return result;

@@ -44,6 +44,7 @@ public class SchemaDiff
 	public static final String TAG_TABLE_PAIR = "table-info";
 	public static final String TAG_INDEX_INFO = "include-index";
 	public static final String TAG_FK_INFO = "include-foreign-key";
+	public static final String TAG_PK_INFO = "include-primary-key";
 	
 	private WbConnection sourceDb;
 	private WbConnection targetDb;
@@ -54,10 +55,14 @@ public class SchemaDiff
 	private String encoding = "UTF-8";
 	private boolean diffIndex = true;
 	private boolean diffForeignKeys = true;
+	private boolean diffPrimaryKeys = true;
+	private boolean diffConstraints;
 	private RowActionMonitor monitor;
 	private boolean cancel = false;
 	private String referenceSchema;
 	private String targetSchema;
+	private List tablesToIgnore;
+	private boolean diffComments;
 	
 	public SchemaDiff()
 	{
@@ -83,7 +88,7 @@ public class SchemaDiff
 	}
 	
 	/**
-	 * Control whether foreing keys should be compared as well.
+	 * Control whether foreign keys should be compared as well.
 	 * The default is to compare foreign keys.
 	 */
 	public void setIncludeForeignKeys(boolean flag) { this.diffForeignKeys = flag; }
@@ -93,6 +98,20 @@ public class SchemaDiff
 	 *  The default is to compare index definitions
 	 */
 	public void setIncludeIndex(boolean flag) { this.diffIndex = flag; }
+	
+	/**
+	 * Control whether primary keys should be compared as well.
+	 * The default is to compare primary keys.
+	 */
+	public void setIncludePrimaryKeys(boolean flag) { this.diffPrimaryKeys = flag; }
+
+	/**
+	 * Control whether table constraints should be compared as well.
+	 * The default is to not compare primary keys.
+	 */
+	public void setIncludeTableConstraints(boolean flag) { this.diffConstraints = flag; }
+	
+	public void setIncludeComments(boolean flag) { this.diffComments = flag; }
 	
 	/**
 	 *	Set the {@link workbench.storage.RowActionMonitor} for reporting progress
@@ -126,7 +145,7 @@ public class SchemaDiff
 	 * compared to target at index 0...)
 	 * No name matching will take place. Thus it's possible to compare
 	 * tables that might have different names but are supposed to be identical
-	 * otherwise
+	 * otherwise. The entries in the list are expected to be Strings or {@link workbench.db.TableIdentifier}
 	 *
 	 * @see #setTables(List)
 	 * @see #compareAll()
@@ -179,14 +198,37 @@ public class SchemaDiff
 			{
 				tar = new TableIdentifier(o.toString());
 			}
-			this.referenceTables[i] = new ReportTable(ref, this.sourceDb, this.namespace, diffIndex, diffForeignKeys);
+			this.referenceTables[i] = createReportTableInstance(ref, this.sourceDb);
 			if (tar != null)
 			{
-				this.targetTables[i] = new ReportTable(tar, this.targetDb, this.namespace, diffIndex, diffForeignKeys);
+				this.targetTables[i] = createReportTableInstance(tar, this.targetDb);
 			}
 		}
 	}
 
+	private ReportTable createReportTableInstance(TableIdentifier tbl, WbConnection con)
+		throws SQLException
+	{
+		tbl.adjustCase(con);
+		return new ReportTable(tbl, con, this.namespace, diffIndex, diffForeignKeys, diffPrimaryKeys, diffConstraints);
+	}
+	
+	public void setExcludeTables(List tables)
+	{
+		if (tables == null || tables.size() == 0)
+		{
+			this.tablesToIgnore = null;
+			return;
+		}
+		int count = tables.size();
+		this.tablesToIgnore = new ArrayList(count);
+		for (int i=0; i < count; i++)
+		{
+			String s = (String)tables.get(i);
+			this.tablesToIgnore.add(this.sourceDb.getMetadata().adjustObjectnameCase(s));
+		}
+	}
+	
 	/**
 	 *	Setup this SchemaDiff object to compare all tables that the user
 	 *  can access in the reference connection with all matching (=same name)
@@ -231,17 +273,19 @@ public class SchemaDiff
 			}
 			
 			TableIdentifier t = (TableIdentifier)refTables.get(i);
+			if (this.tablesToIgnore != null && this.tablesToIgnore.contains(t.getTableName())) continue;
+			
 			if (this.monitor != null)
 			{
-				this.monitor.setCurrentObject(msg + t.getTable(), -1, -1);
+				this.monitor.setCurrentObject(msg + t.getTableName(), -1, -1);
 			}
-			this.referenceTables[i] = new ReportTable(t, this.sourceDb, this.namespace, diffIndex, diffForeignKeys);
-			TableIdentifier tid = new TableIdentifier(t.getTable());
+			this.referenceTables[i] = createReportTableInstance(t, this.sourceDb);
+			TableIdentifier tid = new TableIdentifier(t.getTableName());
 			if (meta.tableExists(tid))
 			{
-				this.targetTables[i] = new ReportTable(tid, this.targetDb, this.namespace, diffIndex, diffForeignKeys);
+				this.targetTables[i] = createReportTableInstance(tid, this.targetDb);
 			}
-			refTableNames.add(t.getTable());
+			refTableNames.add(t.getTableName());
 		}
 
 		if (cancel) return;
@@ -252,7 +296,7 @@ public class SchemaDiff
 		for (int i=0; i < count; i++)
 		{
 			TableIdentifier t = (TableIdentifier)target.get(i);
-			if (!refTableNames.contains(t.getTable()))
+			if (!refTableNames.contains(t.getTableName()))
 			{
 				this.tablesToDelete.add(t);
 			}
@@ -305,17 +349,20 @@ public class SchemaDiff
 			}
 			
 			TableIdentifier t = (TableIdentifier)refTables.get(i);
+			if (this.tablesToIgnore != null && this.tablesToIgnore.contains(t.getTableName())) continue;
+			
 			if (this.monitor != null)
 			{
-				this.monitor.setCurrentObject(msg + t.getTable(), -1, -1);
+				this.monitor.setCurrentObject(msg + t.getTableName(), -1, -1);
 			}
-			this.referenceTables[i] = new ReportTable(t, this.sourceDb, this.namespace, diffIndex, diffForeignKeys);
-			TableIdentifier tid = new TableIdentifier(targetSchema, t.getTable());
+			this.referenceTables[i] = createReportTableInstance(t, this.sourceDb);
+			TableIdentifier tid = new TableIdentifier(targetSchema, t.getTableName());
+			tid.adjustCase(targetDb);
 			if (meta.tableExists(tid))
 			{
-				this.targetTables[i] = new ReportTable(tid, this.targetDb, this.namespace, diffIndex, diffForeignKeys);
+				this.targetTables[i] = createReportTableInstance(tid, this.targetDb);
 			}
-			refTableNames.add(t.getTable());
+			refTableNames.add(t.getTableName());
 		}
 
 		if (cancel) return;
@@ -326,7 +373,8 @@ public class SchemaDiff
 		for (int i=0; i < count; i++)
 		{
 			TableIdentifier t = (TableIdentifier)target.get(i);
-			if (!refTableNames.contains(t.getTable()))
+			if (tablesToIgnore != null && tablesToIgnore.contains(t.getTableName())) continue;
+			if (!refTableNames.contains(t.getTableName()))
 			{
 				this.tablesToDelete.add(t);
 			}
@@ -371,15 +419,15 @@ public class SchemaDiff
 		
 			if (this.monitor != null)
 			{
-				this.monitor.setCurrentObject(msg + ref.getTable(), -1, -1);
+				this.monitor.setCurrentObject(msg + ref.getTableName(), -1, -1);
 			}
 			
-			this.referenceTables[i] = new ReportTable(ref, this.sourceDb, this.namespace, diffIndex, diffForeignKeys);
+			this.referenceTables[i] = createReportTableInstance(ref, this.sourceDb);
 
-			TableIdentifier tid = new TableIdentifier(ref.getTable());
+			TableIdentifier tid = new TableIdentifier(ref.getTableName());
 			if (meta.tableExists(tid))
 			{
-				this.targetTables[i] = new ReportTable(tid, this.targetDb, this.namespace, diffIndex, diffForeignKeys);
+				this.targetTables[i] = createReportTableInstance(tid, this.targetDb);
 			}
 		}
 	}
@@ -460,6 +508,8 @@ public class SchemaDiff
 				break;
 			}
 			
+			if (this.referenceTables[i] == null) continue;
+			
 			if (this.monitor != null)
 			{
 				this.monitor.setCurrentObject(this.referenceTables[i].getTable().getTableExpression(), i+1, count);
@@ -467,7 +517,8 @@ public class SchemaDiff
 			
 			if (this.targetTables[i] == null)
 			{
-				writeTag(out, indent, TAG_ADD_TABLE, true);
+				out.write("\n");
+				writeTag(out, indent, TAG_ADD_TABLE, true, "name", referenceTables[i].getTable().getTableName());
 				StrBuffer s = referenceTables[i].getXml(tblIndent);
 				s.writeTo(out);
 				writeTag(out, indent, TAG_ADD_TABLE, false);
@@ -475,6 +526,7 @@ public class SchemaDiff
 			else
 			{
 				TableDiff d = new TableDiff(this.referenceTables[i], this.targetTables[i]);
+				d.setCompareComments(this.diffComments);
 				d.setIndent(indent);
 				d.setTagWriter(tw);
 				StrBuffer s = d.getMigrateTargetXml();
@@ -504,7 +556,7 @@ public class SchemaDiff
 		while (itr.hasNext())
 		{
 			TableIdentifier t = (TableIdentifier)itr.next();
-			writeTagValue(out, myindent, ReportTable.TAG_TABLE_NAME, t.getTable());
+			writeTagValue(out, myindent, ReportTable.TAG_TABLE_NAME, t.getTableName());
 		}
 		writeTag(out, indent, TAG_DROP_TABLE, false);
 	}
@@ -535,7 +587,9 @@ public class SchemaDiff
 		info.append('\n');
 		tw.appendTag(info, indent2, TAG_INDEX_INFO, this.diffIndex);
 		tw.appendTag(info, indent2, TAG_FK_INFO, this.diffForeignKeys);
-
+		tw.appendTag(info, indent2, TAG_PK_INFO, this.diffPrimaryKeys);
+		info.append('\n');
+		
 		if (this.referenceSchema != null && this.targetSchema != null)
 		{
 			tw.appendTag(info, indent2, "reference-schema", this.referenceSchema);
@@ -546,8 +600,11 @@ public class SchemaDiff
 		String tbls[] = new String[2];
 		for (int i=0; i < count; i++)
 		{
-			tbls[0] = this.referenceTables[i].getTable().getTable();
-			tbls[1] = this.targetTables[i] == null ? "" : this.targetTables[i].getTable().getTable();
+			// check for ignored tables
+			if (this.referenceTables[i] == null) continue;
+			
+			tbls[0] = this.referenceTables[i].getTable().getTableName();
+			tbls[1] = this.targetTables[i] == null ? "" : this.targetTables[i].getTable().getTableName();
 			tw.appendOpenTag(info, indent2, TAG_TABLE_PAIR, attr, tbls, false);
 			info.append("/>\n");
 		}
@@ -557,6 +614,11 @@ public class SchemaDiff
 	}
 	
 	private void writeTag(Writer out, StrBuffer indent, String tag, boolean isOpeningTag)
+		throws IOException
+	{
+		writeTag(out, indent, tag, isOpeningTag, null, null);
+	}
+	private void writeTag(Writer out, StrBuffer indent, String tag, boolean isOpeningTag, String attr, String attrValue)
 		throws IOException
 	{
 		if (indent != null) indent.writeTo(out);;
@@ -574,6 +636,14 @@ public class SchemaDiff
 			out.write(":");
 		}
 		out.write(tag);
+		if (isOpeningTag && attr != null)
+		{
+			out.write(' ');
+			out.write(attr);
+			out.write("=\"");
+			out.write(attrValue);
+			out.write('"');
+		}
 		out.write(">\n");
 	}
 	

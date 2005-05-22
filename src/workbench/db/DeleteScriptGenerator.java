@@ -47,7 +47,8 @@ public class DeleteScriptGenerator
 	private WbTable sourceTable = null;
 	private ScriptGenerationMonitor monitor;
 	private List visitedTables = new ArrayList();
-
+	private String script;
+	
 	public DeleteScriptGenerator(WbConnection aConnection)
 		throws SQLException
 	{
@@ -73,7 +74,7 @@ public class DeleteScriptGenerator
 		{
 			try
 			{
-				aSchema = this.meta.getSchemaForTable(aTable);
+				aSchema = this.meta.findSchemaForTable(aTable);
 			}
 			catch (Exception e)
 			{
@@ -92,7 +93,17 @@ public class DeleteScriptGenerator
 		this.columnValues = colValues;
 	}
 
-	public String createScript()
+	public boolean isCancelled()
+	{
+		// not implemented yet
+		return false;
+	}
+	public void cancel()
+	{
+		// not implemented yet
+	}
+	
+	private String createScriptForCurrentObject()
 	{
 		ArrayList parents = new ArrayList();
 		this.dependency.readDependencyTree(true);
@@ -300,15 +311,22 @@ public class DeleteScriptGenerator
 
 	public String getScript()
 	{
-		if (this.sourceTable == null) return "";
+		if (this.script == null) this.generateScript();
+		return this.script;
+	}
+	
+	public void generateScript()
+	{
+		this.script = "";
+		if (this.sourceTable == null) return;
 
 		DataStore ds = this.sourceTable.getDataStore();
-		if (ds == null) return "";
+		if (ds == null) return;
 
 		int[] rows = this.sourceTable.getSelectedRows();
 		if (rows.length == 0)
 		{
-			return "";
+			return;
 		}
 
 		ds.checkUpdateTable();
@@ -316,7 +334,7 @@ public class DeleteScriptGenerator
 		String schema = ds.getUpdateTableSchema();
 
 		int numRows = rows.length;
-		StringBuffer script = new StringBuffer(numRows * 150);
+		StringBuffer result = new StringBuffer(numRows * 150);
 		int max = Settings.getInstance().getMaxSubselectLength();
 		StringBuffer sep = new StringBuffer(max + 2);
 		sep.append('\n');
@@ -331,15 +349,16 @@ public class DeleteScriptGenerator
 				this.setTable(null, schema, updatetable);
 				this.setValues(pkvalues);
 				this.monitor.setCurrentObject(ResourceMgr.getString("MsgGeneratingScriptForRow") + " " + i);
-				String rowScript = this.createScript();
-				if (i > 0) script.append(sep);
-				script.append(rowScript);
+				
+				String rowScript = this.createScriptForCurrentObject();
+				if (i > 0) result.append(sep);
+				result.append(rowScript);
 			}
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("SqlPanel.generateDeleteScript", "Error generating delete script", e);
 		}
-		return script.toString();
+		this.script = result.toString();
 	}
 }

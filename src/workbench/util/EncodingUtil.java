@@ -38,7 +38,7 @@ public class EncodingUtil
 	 *	Create a BufferedReader for the given file and encoding
 	 */
 	public static BufferedReader createReader(File f, String encoding)
-		throws IOException, Exception
+		throws IOException, UnsupportedEncodingException
 	{
 		return createReader(f, encoding, 512*1024);
 	}
@@ -49,7 +49,7 @@ public class EncodingUtil
 	 * a specific encoding is used.
 	 */
 	public static BufferedReader createReader(File f, String encoding, int buffSize)
-		throws IOException, Exception
+		throws IOException
 	{
 		BufferedReader in = null;
 		if (encoding != null)
@@ -61,7 +61,7 @@ public class EncodingUtil
 			}
 			catch (UnsupportedEncodingException e)
 			{
-				throw new Exception("Encoding " + encoding + " not supported");
+				throw e;
 			}
 		}
 		else

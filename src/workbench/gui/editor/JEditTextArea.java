@@ -105,7 +105,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.33 2005-05-15 11:41:05 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.34 2005-05-22 14:43:34 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -1116,6 +1116,13 @@ public class JEditTextArea
 		return document.getDefaultRootElement().getElementIndex(offset);
 	}
 
+	public int getCaretPositionInLine(int line)
+	{
+		int pos = getCaretPosition();
+		int start = getLineStartOffset(line);
+		return (pos - start);
+	}
+	
 	/**
 	 * Returns the start offset of the specified line.
 	 * @param line The line
@@ -1288,7 +1295,35 @@ public class JEditTextArea
 			segment.offset = segment.count = 0;
 		}
 	}
+	
+	/**
+	 * Returns the word that is left of the cursor.
+	 * If the character left of the cursor is a whitespace
+	 * this method returns null.
+	 * @param additional word boundary characters (whitespace is always a word boundary)
+	 */
+	public String getWordAtCursor(String wordBoundaries)
+	{
+		int currentLine = getCaretLine();
+		String line = this.getLineText(currentLine);
+		int pos = this.getCaretPositionInLine(currentLine);
+		return StringUtil.getWordLeftOfCursor(line, pos, wordBoundaries);
+	}
 
+	public void selectWordAtCursor(String wordBoundaries)
+	{
+		int currentLine = getCaretLine();
+		String line = this.getLineText(currentLine);
+		int pos = this.getCaretPositionInLine(currentLine);
+		if (pos == 0) return;
+		if (Character.isWhitespace(line.charAt(pos - 1))) return;
+		int start = -1;
+		start = StringUtil.findWordBoundary(line, pos - 1, wordBoundaries);
+		if (start > -1) 
+		{
+			this.select(start + 1, pos);
+		}
+	}
 	/**
 	 * Returns the text on the specified line.
 	 * @param lineIndex The line

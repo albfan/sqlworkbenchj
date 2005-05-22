@@ -184,7 +184,7 @@ public class ScriptParser
 
 	/**
 	 *	Try to find out which delimiter should be used for the current script.
-	 *	First the it will check if the script ends with the alternate delimiter
+	 *	First it will check if the script ends with the alternate delimiter
 	 *	if this is not the case, the script will be checked if it ends with GO
 	 *	If so, GO will be used (MS SQL Server script style)
 	 *	If none of the above is true, ; (semicolon) will be used
@@ -253,7 +253,8 @@ public class ScriptParser
 		if (this.commands == null) this.parseCommands();
 		if (index < 0 || index >= this.commands.size()) return -1;
 		ScriptCommandDefinition b = (ScriptCommandDefinition)this.commands.get(index);
-		return b.getStartPositionInScript();
+		int start = b.getStartPositionInScript();
+		return start;
 	}
 
 	/**

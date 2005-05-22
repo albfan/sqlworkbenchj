@@ -389,40 +389,63 @@ public class EditorPanel
 		int endline = this.getSelectionEndLine();
 		int count = (endline - startline + 1);
 		StringBuffer newText = new StringBuffer(count * 80);
+		
+		try
+		{
+			// make sure at least one character from the last line is selected
+			// if the selection does not extend into the line, then
+			// the line is ignored
+			int selectionLength = this.getSelectionEnd(endline) - this.getLineStartOffset(endline);
+			if (selectionLength <= 0) endline--;
+		}
+		catch (Exception e)
+		{
+			// ignore it
+		}
+		
+		int maxElementsPerLine = 5;
+		if (quoteElements)
+		{
+			maxElementsPerLine = Settings.getInstance().getIntProperty("workbench.editor.format.list.maxelements.quoted", 2);
+		}
+		else
+		{
+			maxElementsPerLine = Settings.getInstance().getIntProperty("workbench.editor.format.list.maxelements.nonquoted", 10);
+		}
+		int elements = 0;
+		
 		for (int i=startline; i <= endline; i++)
 		{
 			String line = this.getLineText(i);
+			if (line == null || line.length() == 0) continue;
 
-			// make sure at least one character from the line is selected
-			// if the selection does not extend into the line, then
-			// the line is ignored. This can happen with the last line
-			int pos = this.getSelectionEnd(i) - this.getLineStartOffset(i);
-
-			StringBuffer newline = new StringBuffer(line.length() + 10);
-			if (pos > 0 && line != null && line.length() > 0)
+			if (i == startline)
 			{
-				if (i > startline)
-				{
-					newText.append(',');
-					if ( (quoteElements && count > 5) || (!quoteElements && count > 15)) newText.append('\n');
-					newline.append(' ');
-				}
-				else
-				{
-					newline.append("(");
-				}
-				if (quoteElements) newline.append('\'');
-				newline.append(line);
-				if (quoteElements) newline.append('\'');
+				newText.append('(');
 			}
+			else
+			{
+				newText.append(' ');
+			}
+			if (quoteElements) newText.append('\'');
+			newText.append(line);
+			if (quoteElements) newText.append('\'');
+			elements ++;
 			if (i == endline)
 			{
-				newline.append(')');
+				newText.append(')');
 			}
-			newText.append(newline);
+			else
+			{
+				newText.append(',');
+				if ((elements & maxElementsPerLine) == maxElementsPerLine) 
+				{
+					newText.append('\n');
+					elements = 0;
+				}
+			}
 		}
-		int pos = this.getSelectionEnd(endline) - this.getLineStartOffset(endline);
-		if (pos == 0) newText.append("\n");
+		newText.append('\n');
 		this.setSelectedText(newText.toString());
 	}
 

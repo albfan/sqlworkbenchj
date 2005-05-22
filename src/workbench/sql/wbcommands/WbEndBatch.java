@@ -34,7 +34,7 @@ public class WbEndBatch
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException, Exception
 	{
-		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
 		result.addMessage(ResourceMgr.getString("MsgJdbcBatchProcessingEnded"));
 		return result;

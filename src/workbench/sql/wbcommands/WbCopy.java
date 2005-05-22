@@ -84,7 +84,8 @@ public class WbCopy
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		StatementRunnerResult result = new StatementRunnerResult();
+		
 		/* when using makeCleanSql, a SQL query as the source will
 		 * be modified (i.e. comments will be stripped, which is not good
 		 * if the query contains Oracle hints. We actually only need to make
@@ -378,30 +379,6 @@ public class WbCopy
 			mapping.put(scol, tcol);
 		}
 		return mapping;
-	}
-
-
-	private void addWarningsFromImporter(StatementRunnerResult result)
-	{
-		String[] err = copier.getImportWarnings();
-		for (int i=0; i < err.length; i++)
-		{
-			result.addMessage(err[i]);
-		}
-	}
-
-	private void addErrorsFromImporter(StatementRunnerResult result)
-	{
-		String[] warn = copier.getImportErrors();
-		for (int i=0; i < warn.length; i++)
-		{
-			result.addMessage(warn[i]);
-		}
-		if (warn.length > 0)
-		{
-			// force an empty line if we had warnings
-			result.addMessage("");
-		}
 	}
 
 	public void done()

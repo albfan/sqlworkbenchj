@@ -108,8 +108,12 @@ public class SqlUtil
 		return getTables(aSql, false);
 	}
 	
-	public static final Pattern FROM_PATTERN = Pattern.compile("\\sFROM\\s", Pattern.CASE_INSENSITIVE);
+	public static final Pattern FROM_PATTERN = Pattern.compile("\\sFROM\\s|\\sFROM$", Pattern.CASE_INSENSITIVE);
 	public static final Pattern WHERE_PATTERN = Pattern.compile("\\sWHERE\\s|\\sWHERE$", Pattern.CASE_INSENSITIVE);
+	private static final Pattern GROUP_PATTERN = Pattern.compile("\\sGROUP\\s", Pattern.CASE_INSENSITIVE);
+	private static final Pattern ORDER_PATTERN = Pattern.compile("\\sORDER\\s", Pattern.CASE_INSENSITIVE);
+	private static final Pattern JOIN_PATTERN = Pattern.compile("\\sJOIN\\s", Pattern.CASE_INSENSITIVE);
+		
 	/**
 	 * Return the list of tables which are in the FROM list of the given SQL statement.
 	 */
@@ -117,7 +121,10 @@ public class SqlUtil
 	{
 		boolean inQotes = false;
 		boolean fromFound = false;
-		
+
+		int fromPos = getFromPosition(aSql);
+		int pos = -1;
+		/*
 		Matcher m = FROM_PATTERN.matcher(aSql);
 		if (!m.find()) return Collections.EMPTY_LIST;
 
@@ -145,19 +152,19 @@ public class SqlUtil
 				fromFound = (quotePos == -1 || (quotePos > fromPos));
 			}
 		}
+		*/
 		if (fromPos == -1) return Collections.EMPTY_LIST;
-		int fromEnd = m.end();
+		int fromEnd = fromPos + 5;
 
 		int nextVerb = StringUtil.findPattern(WHERE_PATTERN, aSql, fromPos);
 
-		if (nextVerb == -1) nextVerb = StringUtil.findPattern("\\sGROUP\\s", aSql, fromPos);
-		if (nextVerb == -1) nextVerb = StringUtil.findPattern("\\sORDER\\s", aSql, fromPos);
+		if (nextVerb == -1) nextVerb = StringUtil.findPattern(GROUP_PATTERN, aSql, fromPos);
+		if (nextVerb == -1) nextVerb = StringUtil.findPattern(ORDER_PATTERN, aSql, fromPos);
 		if (nextVerb == -1) nextVerb = aSql.length();
 		if (nextVerb < fromEnd) return Collections.EMPTY_LIST;
 		
 		String fromList = aSql.substring(fromEnd, nextVerb);
-
-		boolean joinSyntax = (StringUtil.findPattern("\\sJOIN\\s", aSql, fromPos) > -1);
+		boolean joinSyntax = (StringUtil.findPattern(JOIN_PATTERN, aSql, fromPos) > -1);
 		ArrayList result = new ArrayList();
 		if (joinSyntax)
 		{
@@ -186,9 +193,11 @@ public class SqlUtil
 		else
 		{
 			StringTokenizer tok = new StringTokenizer(fromList, ",");
+			pos = -1;
 			while (tok.hasMoreTokens())
 			{
 				String table = tok.nextToken().trim();
+				if (table.length() == 0) continue;
 				if (!includeAlias)
 				{
 					pos = table.indexOf(' ');
@@ -204,6 +213,50 @@ public class SqlUtil
 		return result;
 	}
 
+	private static final Pattern IGNORED_TEXT = Pattern.compile("'.*'|\\(.*\\)");
+	
+	public static int getFromPosition(String sql)
+	{
+		Matcher m = IGNORED_TEXT.matcher(sql);
+		Matcher fm = FROM_PATTERN.matcher(sql);
+		int fromPos = -1; 
+		if (fm.find())
+		{
+			fromPos = fm.start();
+		}
+		int end = 0;
+		int firstIgnoredText = -1;
+		if (m.find())
+		{
+			firstIgnoredText = m.start();
+		}
+		if (firstIgnoredText > -1 && fromPos > -1 && firstIgnoredText < fromPos)
+		{
+			while (m.find())
+			{
+				end = m.end();
+			}
+		}
+		m = FROM_PATTERN.matcher(sql);
+		if (m.find(end)) 
+		{
+			fromPos = m.start();
+			int len = sql.length();
+			while (fromPos < len)
+			{
+				if (Character.isWhitespace(sql.charAt(fromPos))) 
+				{
+					fromPos ++;
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+		return fromPos;
+	}
+	
 	public static String makeCleanSql(String aSql, boolean keepNewlines)
 	{
 		return makeCleanSql(aSql, keepNewlines, '\'');
@@ -300,6 +353,24 @@ public class SqlUtil
 		return s;
 	}
 
+	private static int findClosingBracket(String value, int startPos)
+	{
+		int len = value.length();
+		boolean inQuotes = false;
+		for (int pos=startPos; pos < len; pos++)
+		{
+			char c = value.charAt(pos);
+			if (c == '\'') 
+			{
+				inQuotes = !inQuotes;
+			}
+			if (!inQuotes)
+			{
+				if (c == ')') return pos;
+			}
+		}
+		return -1;
+	}
 	private static final int skipQuotes(String aString, int aStartpos)
 	{
 		char c = aString.charAt(aStartpos);
@@ -503,8 +574,8 @@ public class SqlUtil
 	 */
 	public static void closeAll(ResultSet rs, Statement stmt)
 	{
-		closeResult(rs);
-		closeStatement(stmt);
+		try { rs.close(); } catch (Throwable th) {}
+		try { stmt.close(); } catch (Throwable th) {}
 	}
 
 	public static final String getTypeName(int aSqlType)

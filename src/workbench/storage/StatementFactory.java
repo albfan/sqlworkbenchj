@@ -28,10 +28,11 @@ import workbench.util.SqlUtil;
 public class StatementFactory
 {
 	private ResultInfo resultInfo;
-	private String tableToUse;
+	//private String tableToUse;
+	private TableIdentifier tableToUse;
 	private boolean includeTableOwner = true;
 	private String currentUser;
-	
+	private WbConnection dbConnection;
 	public StatementFactory(ResultInfo metaData)
 	{
 		this.resultInfo = metaData;
@@ -367,39 +368,29 @@ public class StatementFactory
 		TableIdentifier updateTable = this.resultInfo.getUpdateTable();
 		if (this.tableToUse != null || updateTable == null )
 		{
-			name = SqlUtil.quoteObjectname(this.tableToUse);
+			if (!includeTableOwner) 
+			{
+				name = tableToUse.getTableName();
+			}
+			else
+			{
+				name = tableToUse.getTableExpression(this.dbConnection);
+			}
 		}
 		else
 		{
-			name = (includeTableOwner ? updateTable.getTableExpression() : updateTable.getTable());
+			name = (includeTableOwner ? updateTable.getTableExpression(this.dbConnection) : updateTable.getTableName());
 		}
 		return name;
-	}
-
-	/**
-	 * Getter for property tableToUse.
-	 * @return Value of property tableToUse.
-	 */
-	public String getTableToUse()
-	{
-		return tableToUse;
 	}
 
 	/**
 	 * Setter for property tableToUse.
 	 * @param tableToUse New value of property tableToUse.
 	 */
-	public void setTableToUse(String tableToUse)
+	public void setTableToUse(TableIdentifier tableToUse)
 	{
-		if (!this.includeTableOwner)
-		{
-			TableIdentifier id = new TableIdentifier(tableToUse);
-			this.tableToUse = id.getTable();
-		}
-		else
-		{
-			this.tableToUse = tableToUse;
-		}
+		this.tableToUse = tableToUse;
 	}
 
 	public void setIncludeTableOwner(boolean flag) { this.includeTableOwner = flag; }
@@ -407,6 +398,7 @@ public class StatementFactory
 	
 	public void setCurrentConnection(WbConnection conn)
 	{
+		this.dbConnection = conn;
 		this.currentUser = conn.getCurrentUser();
 	}
 }

@@ -87,6 +87,7 @@ import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.dbobjects.DbExplorerPanel;
 import workbench.gui.dbobjects.DbExplorerWindow;
+import workbench.gui.help.HtmlViewer;
 import workbench.gui.help.WhatsNewViewer;
 import workbench.gui.menu.SqlTabPopup;
 import workbench.gui.settings.SettingsPanel;
@@ -151,7 +152,6 @@ public class MainWindow
 	private SaveAsNewWorkspaceAction saveAsWorkspaceAction;
 	private LoadWorkspaceAction loadWorkspaceAction;
 	private AssignWorkspaceAction assignWorkspaceAction;
-	//private ClearWorkspaceAction clearWorkspace;
 
 	private boolean isProfileWorkspace = false;
 	private boolean workspaceLoaded = false;
@@ -167,7 +167,7 @@ public class MainWindow
 	private List explorerWindows = new ArrayList();
 
 	private int runningJobs = 0;
-
+	
 	public MainWindow()
 	{
 		super(ResourceMgr.TXT_PRODUCT_NAME);
@@ -2095,9 +2095,9 @@ public class MainWindow
 		}
 	}
 
-	public void addTab()
+	public MainPanel addTab()
 	{
-		this.addTab(true);
+		return this.addTab(true);
 	}
 
 	/**
@@ -2107,9 +2107,9 @@ public class MainWindow
 	 *  @param selectNew if true the new tab is automatically selected
 	 *
 	 */
-	public void addTab(boolean selectNew)
+	public MainPanel addTab(boolean selectNew)
 	{
-		this.addTab(selectNew, true);
+		return this.addTab(selectNew, true);
 	}
 
 
@@ -2122,7 +2122,7 @@ public class MainWindow
 	 *  this is important if a Profile is used where each panel gets its own
 	 *  connection
 	 */
-	public void addTab(boolean selectNew, boolean checkConnection)
+	public MainPanel addTab(boolean selectNew, boolean checkConnection)
 	{
 		int index = this.sqlTab.getTabCount();
 
@@ -2151,6 +2151,7 @@ public class MainWindow
 		if (selectNew) sqlTab.setSelectedIndex(index);
 
 		this.setMacroMenuEnabled(sql.isConnected());
+		return sql;
 	}
 
 	/**
@@ -2370,7 +2371,16 @@ public class MainWindow
 
 	public void showHelp()
 	{
-		WbManager.getInstance().getHelpViewer().showIndex();
+		try
+		{
+			HtmlViewer helpWindow = new HtmlViewer(this);
+			helpWindow.showIndex();
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError("MainWindow.showHelp()", "Error when displaying HTML help", ex);
+			JOptionPane.showMessageDialog(this, "The documentation is currently available at www.kellerer.org/workbench");
+		}
 	}
 
 	public void mouseClicked(MouseEvent e)

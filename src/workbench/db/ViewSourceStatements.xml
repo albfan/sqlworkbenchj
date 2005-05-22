@@ -125,7 +125,7 @@ catalog_definition_schema.sysschema
    <string>HSQL Database Engine</string> 
    <object class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
-     <string>SELECT view_definition FROM SYSTEM_VIEWS</string> 
+     <string>SELECT view_definition FROM INFORMATION_SCHEMA.SYSTEM_VIEWS</string> 
     </void> 
     <void property="objectNameField"> 
      <string>TABLE_NAME</string> 

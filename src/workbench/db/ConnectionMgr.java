@@ -67,20 +67,38 @@ public class ConnectionMgr
 
 		return this.getConnection(prof, anId);
 	}
-	/**
-	 *	Return a new connection specified by the profile
-	 */
+	
 	public WbConnection getConnection(ConnectionProfile aProfile, String anId)
 		throws ClassNotFoundException, SQLException, Exception
 	{
+		return getConnection(aProfile, anId, false);
+	}
+	
+	/**
+	 *	Return a new connection specified by the profile
+	 */
+	public WbConnection getConnection(ConnectionProfile aProfile, String anId, boolean reUse)
+		throws ClassNotFoundException, SQLException, Exception
+	{
+		
+		if (reUse)
+		{
+			WbConnection old = (WbConnection)this.activeConnections.get(anId);
+			
+			if (old != null) 
+			{
+				LogMgr.logInfo("ConnectionMgr.getConnection()", "Re-using connection ID=" + anId);
+				return old;
+			}
+		}
+		
 		this.disconnect(anId);
-
 		WbConnection conn = new WbConnection(anId);
 		LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + aProfile.getName() + "] with ID=" + anId + " for driver=" + aProfile.getDriverclass());
 		Connection sql = this.connect(aProfile, anId);
 		conn.setSqlConnection(sql);
 		conn.setProfile(aProfile);
-
+		
 		String version = null;
 		try
 		{
@@ -323,8 +341,8 @@ public class ConnectionMgr
 	public static String getDisplayString(WbConnection con)
 	{
 		String displayString = null;
-		String model = Settings.getInstance().getConnectionDisplayModel();
-		if (model != null && model.length() > 0) return getDisplayStringFromModel(con);
+//		String model = Settings.getInstance().getConnectionDisplayModel();
+//		if (model != null && model.length() > 0) return getDisplayStringFromModel(con);
 
 		try
 		{
@@ -358,29 +376,29 @@ public class ConnectionMgr
 		return displayString;
 	}
 
-	private static String getDisplayStringFromModel(WbConnection con)
-	{
-		String displayString = Settings.getInstance().getConnectionDisplayModel();
-		try
-		{
-			DatabaseMetaData data = con.getSqlConnection().getMetaData();
-			displayString = displayString.replaceAll("%username%", data.getUserName());
-
-			String catalog = con.getMetadata().getCurrentCatalog();
-			displayString = displayString.replaceAll("%catalog%", catalog == null ? "" : catalog);
-
-			displayString = displayString.replaceAll("%url%", data.getURL());
-			String prof = con.getProfile().getName();
-			displayString = displayString.replaceAll("%profile%", prof == null ? "" : prof);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("ConnectionMgr.getDisplayStringFromModel()", "Could not retrieve connection information", e);
-			displayString = "n/a";
-		}
-		return displayString;
-
-	}
+//	private static String getDisplayStringFromModel(WbConnection con)
+//	{
+//		String displayString = Settings.getInstance().getConnectionDisplayModel();
+//		try
+//		{
+//			DatabaseMetaData data = con.getSqlConnection().getMetaData();
+//			displayString = displayString.replaceAll("%username%", data.getUserName());
+//
+//			String catalog = con.getMetadata().getCurrentCatalog();
+//			displayString = displayString.replaceAll("%catalog%", catalog == null ? "" : catalog);
+//
+//			displayString = displayString.replaceAll("%url%", data.getURL());
+//			String prof = con.getProfile().getName();
+//			displayString = displayString.replaceAll("%profile%", prof == null ? "" : prof);
+//		}
+//		catch (Exception e)
+//		{
+//			LogMgr.logError("ConnectionMgr.getDisplayStringFromModel()", "Could not retrieve connection information", e);
+//			displayString = "n/a";
+//		}
+//		return displayString;
+//	}
+	
 	/**
 	 *	Disconnects all connections
 	 */

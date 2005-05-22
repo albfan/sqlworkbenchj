@@ -282,7 +282,7 @@ public class IteratingScriptParser
 							lastNewLineStart = pos;
 							
 							// don't include the comment in the next command
-							lastPos = pos + 1;
+							lastPos = pos;
 							continue;
 						}
 					}
@@ -421,7 +421,11 @@ public class IteratingScriptParser
 		int len = value.length();
 		
 		int offset = this.getRealStartOffset(value);
-		if (offset > 0) value = value.substring(offset);
+		if (offset > 0)
+		{
+			startPos += offset;
+			value = value.substring(offset);
+		}
 
 		ScriptCommandDefinition c = new ScriptCommandDefinition(value, startPos, endPos);
 		
@@ -460,8 +464,9 @@ public class IteratingScriptParser
 			
 			if (c == '-' && sql.charAt(i+1) == '-')
 			{
-				i+= 2;
-				c = sql.charAt(i);
+				i += 2;
+				
+				if (i < len) c = sql.charAt(i);
 				// ignore rest of line for -- style comments
 				while (c != '\n' && c != '\r' && i < len - 1)
 				{

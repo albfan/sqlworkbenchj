@@ -18,8 +18,8 @@ import java.awt.event.KeyEvent;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.KeyStroke;
+import workbench.gui.components.WbTable;
 
-import workbench.interfaces.Exporter;
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
 
@@ -29,9 +29,9 @@ import workbench.util.StringUtil;
  */
 public class DataToClipboardAction extends WbAction
 {
-	private Exporter client;
+	private WbTable client;
 
-	public DataToClipboardAction(Exporter aClient)
+	public DataToClipboardAction(WbTable aClient)
 	{
 		super();
 		this.client = aClient;

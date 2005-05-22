@@ -42,11 +42,11 @@ public class HtmlViewer
 	extends JDialog 
 	implements HyperlinkListener 
 {
-	JEditorPane display;
+	private JEditorPane display;
 	
 	public HtmlViewer(JFrame owner)
 	{
-		this(owner, "index.html");
+		this(owner, "workbench-manual.html");
 	}
 	
 	public HtmlViewer(JFrame owner, String aStartFile)
@@ -98,7 +98,6 @@ public class HtmlViewer
 				saveSettings();
 				hide();
 				dispose();
-				//System.exit(1);
 			}
 		});
 	}
@@ -144,7 +143,7 @@ public class HtmlViewer
 	
 	public void showIndex()
 	{
-		this.showHtmlFile("index.html");
+		this.showHtmlFile("workbench-manual.html");
 	}
 	
 	private void showHtmlFile(String aFile)

@@ -38,10 +38,13 @@ public class ObjectScripter
 	private DbMetadata meta;
 	private StrBuffer script;
 	private ScriptGenerationMonitor progressMonitor;
-
+	private WbConnection dbConnection;
+	private boolean cancel;
+	
 	public ObjectScripter(Map objectList, WbConnection aConnection)
 	{
 		this.objectList = objectList;
+		this.dbConnection = aConnection;
 		this.meta = aConnection.getMetadata();
 	}
 
@@ -52,31 +55,44 @@ public class ObjectScripter
 
 	public String getScript()
 	{
-		if (this.script == null)
-		{
-			this.script = new StrBuffer(this.objectList.size() * 500);
-			this.appendObjectType(TYPE_SEQUENCE);
-			this.appendObjectType(TYPE_TABLE);
-			this.appendObjectType(TYPE_VIEW);
-			this.appendObjectType(TYPE_SYNONYM);
-			this.appendObjectType(TYPE_INSERT);
-			this.appendObjectType(TYPE_SELECT);
-		}
+		if (this.script == null) this.generateScript();
 		return this.script.toString();
 	}
+	
+	public boolean isCancelled()
+	{
+		return this.cancel;
+	}
+	
+	public void generateScript()
+	{
+		this.cancel = false;
+		this.script = new StrBuffer(this.objectList.size() * 500);
+		if (!cancel) this.appendObjectType(TYPE_SEQUENCE);
+		if (!cancel) this.appendObjectType(TYPE_TABLE);
+		if (!cancel) this.appendObjectType(TYPE_VIEW);
+		if (!cancel) this.appendObjectType(TYPE_SYNONYM);
+		if (!cancel) this.appendObjectType(TYPE_INSERT);
+		if (!cancel) this.appendObjectType(TYPE_SELECT);
+	}
 
+	public void cancel()
+	{
+		this.cancel = true;
+	}
+	
 	private void appendObjectType(String typeFilter)
 	{
 		Iterator itr = this.objectList.entrySet().iterator();
 		while (itr.hasNext())
 		{
+			if (cancel) break;
 			Map.Entry entry = (Map.Entry)itr.next();
 			String object = (String)entry.getKey();
 			String type = (String)entry.getValue();
-			TableIdentifier tbl = new TableIdentifier(object);
 			String source = null;
 			
-			if (!type.equals(typeFilter)) continue;
+			if (!type.equalsIgnoreCase(typeFilter)) continue;
 			
 			if (this.progressMonitor != null)
 			{
@@ -84,27 +100,29 @@ public class ObjectScripter
 			}
 			try
 			{
-				if (TYPE_TABLE.equals(type))
+				TableIdentifier tbl = new TableIdentifier(object);
+				tbl.adjustCase(this.dbConnection);
+				if (TYPE_TABLE.equalsIgnoreCase(type))
 				{
-					source = meta.getTableSource(null, tbl.getSchema(), tbl.getTable(), true);
+					source = meta.getTableSource(null, tbl.getSchema(), tbl.getTableName(), true);
 				}
-				else if (TYPE_VIEW.equals(type))
+				else if (TYPE_VIEW.equalsIgnoreCase(type))
 				{
-					source = meta.getExtendedViewSource(null, tbl.getSchema(), tbl.getTable(), false);
+					source = meta.getExtendedViewSource(null, tbl.getSchema(), tbl.getTableName(), false);
 				}
-				else if (TYPE_SYNONYM.equals(type))
+				else if (TYPE_SYNONYM.equalsIgnoreCase(type))
 				{
-					source = meta.getSynonymSource(tbl.getSchema(), tbl.getTable());
+					source = meta.getSynonymSource(tbl.getSchema(), tbl.getTableName());
 				}
-				else if (TYPE_SEQUENCE.equals(type))
+				else if (TYPE_SEQUENCE.equalsIgnoreCase(type))
 				{
 					source = this.meta.getSequenceSource(object);
 				}
-				else if (TYPE_INSERT.equals(type))
+				else if (TYPE_INSERT.equalsIgnoreCase(type))
 				{
 					source = this.meta.getEmptyInsert(null, null, object);
 				}
-				else if (TYPE_SELECT.equals(type))
+				else if (TYPE_SELECT.equalsIgnoreCase(type))
 				{
 					source = this.meta.getDefaultSelect(null, null, object);
 				}

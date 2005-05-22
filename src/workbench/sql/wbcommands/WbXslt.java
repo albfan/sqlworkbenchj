@@ -50,7 +50,7 @@ public class WbXslt
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult("XSLT");
+		StatementRunnerResult result = new StatementRunnerResult();
 		if (!aSql.trim().toUpperCase().startsWith(this.getVerb()))
 		{
 			result.addMessage("Wrong command! " + this.getVerb() + " expected.");

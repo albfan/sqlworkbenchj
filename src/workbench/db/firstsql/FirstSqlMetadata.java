@@ -54,7 +54,7 @@ public class FirstSqlMetadata
 		{
 			pstmt = dbConnection.prepareStatement(SQL);
 			pstmt.setString(1, aTable.getSchema());
-			pstmt.setString(2, aTable.getTable());
+			pstmt.setString(2, aTable.getTableName());
 			rs = pstmt.executeQuery();
 			int count = 0;
 			while (rs.next())

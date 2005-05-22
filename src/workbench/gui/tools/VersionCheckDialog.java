@@ -315,14 +315,6 @@ public class VersionCheckDialog extends javax.swing.JDialog
 		dispose();
 	}//GEN-LAST:event_closeDialog
 
-	/**
-	 * @param args the command line arguments
-	 */
-	public static void main(String args[])
-	{
-		new VersionCheckDialog(new javax.swing.JFrame(), true).show();
-	}
-
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
 		if (e.getSource() == this.closeButton)

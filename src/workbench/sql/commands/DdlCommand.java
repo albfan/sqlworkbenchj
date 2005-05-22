@@ -40,6 +40,9 @@ public class DdlCommand extends SqlCommand
 	public static final SqlCommand CHECKPOINT = new DdlCommand("CHECKPOINT");
 	public static final SqlCommand SHUTDOWN = new DdlCommand("SHUTDOWN");
 
+	// Firebird RECREATE VIEW command
+	public static final SqlCommand RECREATE = new DdlCommand("RECREATE");
+	
 	public static final List DDL_COMMANDS = new ArrayList();
 
 	static
@@ -64,7 +67,7 @@ public class DdlCommand extends SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		StatementRunnerResult result = new StatementRunnerResult();
 		try
 		{
 			this.currentStatement = aConnection.createStatement();
@@ -91,7 +94,7 @@ public class DdlCommand extends SqlCommand
 				{
 					msg = ResourceMgr.getString("MsgDropSuccess");
 				}
-				else if ("CREATE".equals(verb))
+				else if ("CREATE".equals(verb) || "RECREATE".equals(verb))
 				{
 					msg = ResourceMgr.getString("MsgCreateSuccess");
 				}

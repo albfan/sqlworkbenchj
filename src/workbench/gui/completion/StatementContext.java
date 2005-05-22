@@ -13,6 +13,8 @@ package workbench.gui.completion;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
 
@@ -27,21 +29,25 @@ public class StatementContext
 	public StatementContext(WbConnection conn, String sql, int pos)
 	{
 		String verb = SqlUtil.getSqlVerb(sql);
-		if ("SELECT".equalsIgnoreCase(verb))
+		
+		if (!inSubSelect(conn, sql, pos))
 		{
-			analyzer = new SelectAnalyzer(conn, sql, pos);
-		}
-		else if ("UPDATE".equalsIgnoreCase(verb))
-		{
-			analyzer = new UpdateAnalyzer(conn, sql, pos);
-		}
-		else if ("DELETE".equalsIgnoreCase(verb))
-		{
-			analyzer = new DeleteAnalyzer(conn, sql, pos);
-		}
-		else if ("DROP".equalsIgnoreCase(verb) || "TRUNCATE".equalsIgnoreCase(verb))
-		{
-			analyzer = new DdlAnalyzer(conn, sql, pos);
+			if ("SELECT".equalsIgnoreCase(verb))
+			{
+				analyzer = new SelectAnalyzer(conn, sql, pos);
+			}
+			else if ("UPDATE".equalsIgnoreCase(verb))
+			{
+				analyzer = new UpdateAnalyzer(conn, sql, pos);
+			}
+			else if ("DELETE".equalsIgnoreCase(verb))
+			{
+				analyzer = new DeleteAnalyzer(conn, sql, pos);
+			}
+			else if ("DROP".equalsIgnoreCase(verb) || "TRUNCATE".equalsIgnoreCase(verb))
+			{
+				analyzer = new DdlAnalyzer(conn, sql, pos);
+			}
 		}
 		
 		if (analyzer != null)
@@ -49,6 +55,53 @@ public class StatementContext
 			analyzer.retrieveObjects();
 		}
 	}
+	
+	public boolean getOverwriteCurrentWord()
+	{
+		if (analyzer == null) return false;
+		return analyzer.getOverwriteCurrentWord();
+	}
+	
+	private final Pattern SUBSELECT_PATTERN = Pattern.compile("\\(\\s*SELECT.*FROM.*\\)", Pattern.CASE_INSENSITIVE);
+	private final Pattern OPEN_BRACKET = Pattern.compile("^\\s*\\(\\s*");
+	private final Pattern CLOSE_BRACKET = Pattern.compile("\\s*\\)\\s*$");
+	
+	private boolean inSubSelect(WbConnection conn, String sql, int pos)
+	{
+		Matcher m = SUBSELECT_PATTERN.matcher(sql);
+		int start = 0;
+		int end = -1;
+		while (m.find())
+		{
+			start = m.start();
+			end = m.end();
+			if (pos > start && pos < end)
+			{
+				int newpos = pos - start;
+				
+				// cleanup the brackets, and adjust the position
+				// to reflect the removed brackets at the beginning
+				String subselect = sql.substring(start, end);
+				Matcher o = OPEN_BRACKET.matcher(subselect);
+				
+				// the find() is necessary in order to get the correct
+				// value from end()
+				if (o.find())
+				{
+					int oend = o.end(); // is actually the number of characters that we'll remove
+					newpos -= oend;
+					subselect = o.replaceAll("");
+				}
+				
+				Matcher c = CLOSE_BRACKET.matcher(subselect);
+				subselect = c.replaceAll("");
+				analyzer = new SelectAnalyzer(conn, subselect, newpos);
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	
 	public boolean isStatementSupported()
 	{

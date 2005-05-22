@@ -55,7 +55,7 @@ public class PostgresConstraintReader
 		try
 		{
 			stmt = dbConnection.prepareStatement(sql);
-			stmt.setString(1, aTable.getTable());
+			stmt.setString(1, aTable.getTableName());
 			rs = stmt.executeQuery();
 			int count = 0;
 			while (rs.next())

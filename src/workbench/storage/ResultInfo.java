@@ -355,7 +355,7 @@ public class ResultInfo
 
 		Connection sqlConn = aConnection.getSqlConnection();
 		DatabaseMetaData meta = sqlConn.getMetaData();
-		String table = aConnection.getMetadata().adjustObjectnameCase(this.updateTable.getTable());
+		String table = aConnection.getMetadata().adjustObjectnameCase(this.updateTable.getTableName());
 		String schema = aConnection.getMetadata().adjustObjectnameCase(this.updateTable.getSchema());
 
 		ResultSet rs = meta.getPrimaryKeys(null, schema, table);

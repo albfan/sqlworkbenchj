@@ -57,7 +57,7 @@ public class WbEnableOraOutput extends SqlCommand
 			}
 		}
 		aConnection.getMetadata().enableOutput(limit);
-		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		StatementRunnerResult result = new StatementRunnerResult();
 		result.addMessage(ResourceMgr.getString("MsgDbmsOutputEnabled"));
 		return result;
 	}

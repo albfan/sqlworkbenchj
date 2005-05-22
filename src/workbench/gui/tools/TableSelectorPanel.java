@@ -288,7 +288,7 @@ public class TableSelectorPanel
 			Object item = this.tableSelector.getItemAt(i);
 			if (item instanceof TableIdentifier)
 			{
-				table = ((TableIdentifier)item).getTable();
+				table = ((TableIdentifier)item).getTableName();
 			}
 			else
 			{
@@ -357,7 +357,7 @@ public class TableSelectorPanel
 			if (item instanceof TableIdentifier)
 			{
 				TableIdentifier id = (TableIdentifier)item;
-				String name = id.getTable();
+				String name = id.getTableName();
 				name = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("TxtEnterNewTableName"), name);
 				if (name != null)
 				{

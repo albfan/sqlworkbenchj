@@ -23,6 +23,7 @@ import workbench.db.report.ReportColumn;
 import workbench.db.report.ReportTable;
 import workbench.db.report.TagWriter;
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 /**
  * Compares and evaluates the difference between a reference table
@@ -38,11 +39,14 @@ public class TableDiff
 	public static final String TAG_ADD_PK = "add-primary-key";
 	public static final String TAG_MODIFY_PK = "modify-primary-key";
 	public static final String TAG_REMOVE_PK = "remove-primary-key";
+	public static final String TAG_TABLE_CONS = "table-constraint";
 	
 	private ReportTable referenceTable;
 	private ReportTable targetTable;
 	private StrBuffer indent;
 	private TagWriter writer;
+	private boolean compareComments = true;
+	private boolean compareFK = true;
 	
 	public TableDiff(ReportTable reference, ReportTable target)
 	{
@@ -58,6 +62,9 @@ public class TableDiff
 		StrBuffer result = this.getMigrateTargetXml();
 		result.writeTo(out);
 	}
+	
+	public void setCompareComments(boolean flag) { this.compareComments = flag; }
+	public void setCompareForeignKeys(boolean flag) { this.compareFK = flag; }
 	
 	/**
 	 * Return the XML that describes how the target table needs to 
@@ -85,13 +92,15 @@ public class TableDiff
 			else
 			{
 				ColumnDiff d = new ColumnDiff(refCols[i], tcol);
+				d.setCompareComments(this.compareComments);
+				d.setCompareForeignKeys(this.compareFK);
 				d.setTagWriter(this.writer);
 				d.setIndent(myindent);
 				StrBuffer diff = d.getMigrateTargetXml();
 				if (diff.length() > 0)
 				{
 					colDiff.append(diff);
-					colDiff.append('\n');
+					//colDiff.append('\n');
 				}
 			}
 		}
@@ -104,26 +113,36 @@ public class TableDiff
 				colsToBeRemoved.add(tcols[i]);
 			}
 		}
-		boolean rename = !ref.getTable().equalsIgnoreCase(target.getTable());
+
+		boolean commentsEqual = true;
+		if (this.compareComments)
+		{
+			commentsEqual = StringUtil.equalString(this.referenceTable.getTableComment(), this.targetTable.getTableComment());
+		}
+		
+		boolean rename = !ref.getTableName().equalsIgnoreCase(target.getTableName());
+		String rc = this.referenceTable.getTableConstraints();
+		String tc = this.targetTable.getTableConstraints();
+		
+		boolean constraintsEqual = StringUtil.equalString(rc, tc);
 		
 		List refPk = this.referenceTable.getPrimaryKeyColumns();
 		List tPk = this.targetTable.getPrimaryKeyColumns();
 		
 		if (colDiff.length() == 0 && !rename && colsToBeAdded.size() == 0 
-			  && colsToBeRemoved.size() == 0 && refPk.equals(tPk)) 
+			  && colsToBeRemoved.size() == 0 && refPk.equals(tPk) && constraintsEqual) 
 		{
 			return result;
 		}
-		
 
-		writer.appendOpenTag(result, this.indent, TAG_MODIFY_TABLE, "name", target.getTable());
+		writer.appendOpenTag(result, this.indent, TAG_MODIFY_TABLE, "name", target.getTableName());
 		result.append('\n');
 		if (rename)
 		{
 			writer.appendOpenTag(result, myindent, TAG_RENAME_TABLE);
 			result.append('\n');
 			myindent.append("  ");
-			writer.appendTag(result, myindent, ReportTable.TAG_TABLE_NAME, this.referenceTable.getTable().getTable());
+			writer.appendTag(result, myindent, ReportTable.TAG_TABLE_NAME, this.referenceTable.getTable().getTableName());
 			myindent.removeFromEnd(2);
 			writer.appendCloseTag(result, myindent, TAG_RENAME_TABLE);
 		}
@@ -169,6 +188,7 @@ public class TableDiff
 		}
 		
 		result.append(colDiff);
+		if (!constraintsEqual) writer.appendTag(result, myindent, TAG_TABLE_CONS, this.referenceTable.getTableConstraints(), true);
 		appendIndexDiff(result);
 		writer.appendCloseTag(result, this.indent, TAG_MODIFY_TABLE);
 		return result;

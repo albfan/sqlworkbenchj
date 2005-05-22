@@ -366,15 +366,17 @@ public class SqlFormatter
 			}
 			else if (isSelect && "DECODE".equalsIgnoreCase(text))
 			{
-				this.appendText(' ');
+				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
 				this.appendText(text);
 				t = processDecode(indentCount);
+				continue;
 			}
 			else if (isSelect && "CASE".equals(text))
 			{
-				this.appendText(' ');
+				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
 				this.appendText(text);
 				t = processCase(indentCount);
+				continue;
 			}
 			else if (t.isReservedWord() && terminalKeys.contains(text.toUpperCase()))
 			{
@@ -517,7 +519,7 @@ public class SqlFormatter
 				this.appendNewline();
 				this.indent(current);
 				this.appendText(text);
-				t = (SQLToken)this.lexer.getNextToken(true, true);
+				t = (SQLToken)this.lexer.getNextToken(true, false);
 				return t;
 			}
 			else if (text.indexOf("\n") == -1 &&  text.indexOf("\r") == -1)
@@ -560,7 +562,8 @@ public class SqlFormatter
 				this.appendNewline();
 				this.indent(current);
 				this.appendText(text);
-				t = (SQLToken)this.lexer.getNextToken(true, true);
+				//this.appendNewline();
+				t = (SQLToken)this.lexer.getNextToken(true, false);
 				return t;
 			}
 			else if (text.indexOf("\n") == -1 &&  text.indexOf("\r") == -1)
@@ -570,6 +573,13 @@ public class SqlFormatter
 			t = (SQLToken)this.lexer.getNextToken(true,true);
 		}
 		return null;
+	}
+	
+	private String fixWbCommandCase(String verb)
+	{
+		if (!verb.toLowerCase().startsWith("wb")) return verb;
+		String s = "Wb" + Character.toUpperCase(verb.charAt(2)) + verb.substring(3).toLowerCase();
+		return s;
 	}
 	
 	private SQLToken processWbCommand(int indent)
@@ -788,6 +798,7 @@ public class SqlFormatter
 				if (lastToken.isComment()) this.appendNewline();
 
 				String word = t.getContents().toUpperCase();
+				
 				if (LINE_BREAK_BEFORE.contains(word))
 				{
 					if (!isStartOfLine()) this.appendNewline();
@@ -797,7 +808,14 @@ public class SqlFormatter
 				else
 				{
 					if (!lastToken.isSeparator() && lastToken != t && !isStartOfLine()) this.appendText(' ');
-					this.appendText(word);
+					if (wbTester.isWbCommand(word))
+					{
+						this.appendText(fixWbCommandCase(word));
+					}
+					else
+					{
+						this.appendText(word);
+					}
 				}
 
 				if (LINE_BREAK_AFTER.contains(word))
@@ -871,11 +889,11 @@ public class SqlFormatter
 					if (t == null) return;
 					continue;
 				}
-				
 				if (wbTester.isWbCommand(word))
 				{
 					t = this.processWbCommand(word.length() + 1);
 				}
+				
 			}
 			else
 			{
@@ -1430,172 +1448,6 @@ public class SqlFormatter
 		throws Exception
 	{
 		return (SQLToken)this.lexer.getNextToken(false, false);
-	}
-
-	public static void main(String[] args)
-	{
-		String sql = null;
-		try
-		{
-//			sql="Select count(*) \n" +
-//           "FROM \n" +
-//           "bv_user, \n" +
-//           "bv_user_profile, \n" +
-//           "bv_cow_uprof \n" +
-//           "WHERE    bv_user.user_id = bv_user_profile.user_id \n" +
-//           "AND    bv_user_profile.user_id = bv_cow_uprof.user_id \n" +
-//           "AND    bv_cow_uprof.user_role = 1 \n" +
-//           "AND    bv_cow_uprof.hp_internal_user = 'F' \n" +
-//           "AND    bv_user.user_state = 0 \n" +
-//           "AND    (bv_cow_uprof.tier <> 1 or bv_cow_uprof.tier is null) \n" +
-//           "AND    ( \n" +
-//           "        ( \n" +
-//           "         (bv_user_profile.number_login = 0 \n" +
-//           "        OR \n" +
-//           "         bv_user_profile.number_login IS NULL) \n" +
-//           "         AND \n" +
-//           "         (bv_user.modif_time < add_months(sysdate, -3) \n" +
-//           "         OR \n" +
-//           "          bv_user.modif_time IS NULL) \n" +
-//           "        ) \n" +
-//           "    OR \n" +
-//           "        (bv_user_profile.number_login > 0 \n" +
-//           "         AND \n" +
-//           "         (bv_user_profile.last_login_date is NULL \n" +
-//           "         OR \n" +
-//           "         bv_user_profile.last_login_date < add_months(sysdate, -6) \n" +
-//           "         ) \n" +
-//           "        ) \n" +
-//           "    ) \n" +
-//           "AND NOT EXISTS \n" +
-//           "      (SELECT 1 \n" +
-//           "       FROM cow_coop_funds_claims claim \n" +
-//           "       WHERE claim.mind_location_id = bv_cow_uprof.mind_location_id \n" +
-//           "      ) \n" +
-//           "AND NOT EXISTS \n" +
-//           "      (SELECT 1 \n" +
-//           "       FROM cow_coop_funds_fs fs \n" +
-//           "       WHERE fs.cust_mind_location_id = bv_cow_uprof.mind_location_id \n" +
-//           "         OR \n" +
-//           "         fs.user_id = bv_cow_uprof.user_id \n" +
-//           "      ) \n" +
-//           "AND NOT EXISTS \n" +
-//           "      (SELECT 1 \n" +
-//           "       FROM cow_coop_funds_pa pa \n" +
-//           "       WHERE pa.mind_location_id = bv_cow_uprof.mind_location_id \n" +
-//           "      ) \n" +
-//           "AND NOT EXISTS \n" +
-//           "      (SELECT 1 \n" +
-//           "       FROM sellto_confirmation sto \n" +
-//           "       WHERE sto.mind_company_id = bv_cow_uprof.mind_company_id \n" +
-//           "      ) \n" +
-//           "AND NOT EXISTS \n" +
-//           "      (SELECT 1 \n" +
-//           "       FROM sellout_confirmation sout \n" +
-//           "       WHERE sout.mind_company_id = bv_cow_uprof.mind_company_id \n" +
-//           "      ) \n" +
-//           "AND    NOT EXISTS \n" +
-//           "    (SELECT 1 \n" +
-//           "     FROM     bv_cow_uprof bvc \n" +
-//           "     WHERE    bv_cow_uprof.user_id <> bvc.user_id \n" +
-//           "     AND    bv_cow_uprof.mind_location_id = bvc.mind_location_id \n" +
-//           "     ) \n";
-
-//					sql =  "SELECT      count(*)     FROM      COL_editorial     WHERE COL_EDITORIAL.oid NOT IN (select BV_CONTENT_REF.oid FROM BV_CONTENT_REF) and deleted='0'";
-
-//					sql="SELECT substr(to_char(s.pct, '99.00'), 2) || '%'  load, \n" +
-//           "       p.sql_text, \n" +
-//           "       p.piece, \n" +
-//           "       s.executions executes, \n" +
-//           "       s.ranking \n" +
-//           "FROM \n" +
-//           "    (  \n" +
-//           "      SELECT address, disk_reads, executions, pct, rank() over (ORDER BY disk_reads DESC)  ranking \n" +
-//           "      FROM \n" +
-//           "      ( \n" +
-//           "        SELECT address, disk_reads, executions, 100 * ratio_to_report(disk_reads) over ()  pct \n" +
-//           "        FROM sys.v_$sql  \n" +
-//           "        WHERE command_type != 47 \n" +
-//           "      )  \n" +
-//           "      WHERE disk_reads > 50 * executions \n" +
-//           "  )  s, \n" +
-//           "  sys.v_$sqltext  p \n" +
-//           "WHERE s.ranking <= 5  \n" +
-//           "AND   p.address = s.address \n" +
-//           "ORDER BY s.address, p.piece \n";
-
-//			sql="SELECT username, value || ' bytes' \"Current UGA memory\", stat.* \n" +
-//           "   FROM v$session sess, v$sesstat stat, v$statname name \n" +
-//           "WHERE sess.sid = stat.sid \n" +
-//           "   AND stat.statistic# = name.statistic# \n" +
-//           "   AND name.name = 'session uga memory' \n" +
-//           "   and username = 'BVUSER' \n";
-//				String sql="select bug_id, short_desc  \n" +
-//           "from bugs \n" +
-//           "where rep_platform in ('CONSULTANCY', 'ENHANCEMENT') \n" +
-//           "and bug_status not in ('CLOSED','RESOLVED') \n" +
-//           "and reporter = 47 \n";
-//				sql =  "SELECT * from v_$test";
-//			sql =  "SELECT 1 FROM my_TABLE WHERE (bv_user_profile.number_login=0 OR bv_user_profile.number_login = 'tEEt')";
-
-//			sql =  "SELECT \n t1.col1, nvl(to_upper(bla,1),1), 'xxx'||col4, col3 " +
-//			" \nfrom test_table t1, table2 t2\nWHERE t2.col=1 " +
-//			" AND  (substr(partner_cbn.cust_base_no, 1, 2) = opg_country.opg_cbn  OR  col_header.country IN ('GER','EUR','ITA') AND substr(partner_cbn.cust_base_no, 1, 4) IN ('N883','N882') )  ";
-//			sql = "select * \nfrom (select * from person) AS t \nwhere nr2 = 2;";
-//			sql = "insert into test values ('x', 2);commit;";
-//			sql = "SELECT * from test, table22 where avg(x) = 5";
-//			sql = "select * \nfrom (select * from person) AS t \nwhere t.nr2 = 2;";
-//			sql = "select /* testing */1\n--, bla\n from dual\n -- table\nwhere x = 6\n--and y = 6\n and x in (1,2, /* comment */3)";
-//			sql = "SELECT * from (SELECT id, value FROM userprops WHERE NAME= 'city') city";
-//			sql = "update bla set col1 = (select column1, column2, column3 from table1, table2, table3 where col1 = col2 and col3 = col4 and col5 = col6)";
-//			sql = "select column1, column2, column3 from table1, table2, table3 where col1 = col2 and col3 = col4 and col5 = col6";
-//			sql = "select * from (SELECT x,y,z FROM tab1,tab2,tab3 minus SELECT x2 from tab2,tab2,tab4 WHERE x=1)";
-//			sql = "SELECT  x , y , z   FROM   tab1 , tab2 , tab3  MINUS   SELECT   x2   FROM   tab2 , tab2 , tab4   WHERE   x = 1";
-//			sql = "UPDATE bla set column1='test',col2=NULL, col4=222 where xyz=42 AND ab in (SELECT x from t\nWHERE x = 6 and col3 = col5 and col6 = col7 and col8 = col9) OR y = 5;commit;";
-//			sql="SELECT city.id, \n" +
-//           "       city.value, \n" +
-//           "       state.value \n" +
-//           "FROM (SELECT id, value FROM userprops WHERE NAME= 'city') city LEFT OUTER JOIN \n" +
-//           " (SELECT id, value FROM userprops WHERE NAME= 'state') state ON city.id = state.id  \n" +
-//           " -- the city\n";
-//			sql =  "create table tk_test (nr integer, name varchar(100), price number(23,4))";
-//			sql =  "create view tk_test (nr, nachname,vorname) as select nr, nachname, vorname from person";
-//			sql =  "create view tk_test as select nr, nachname, vorname from person";
-//			sql =  "create index tk_test_idx on tk_test (col1, col2)";
-//			sql =  "/* testing \n testing line 2 \n*/\nCREATE TABLE test (nr integer);";
-//			sql =  "create index TK_TEST on bla ( upper(eins), FUENF, sechs)" ;
-//			sql =  "select count(*) from test where ucase(surname) like 'BLA%' and x >= 500 and y=10";
-
-			
-//			sql =  "SELECT * FROM ( SELECT DISTINCT v.uuid AS value_uuid attr1, attr4  FROM (SELECT * FROM meas meas) M, value v, (SELECT * FROM CHAR) c \n" + 
-//             "       WHERE M.uuid = v.meas_uuid \n" + 
-//             "       AND   c.uuid = v.char_uuid \n" + 
-//             "       AND   M.uuid = ?) sel JOIN (SELECT DISTINCT M.uuid AS meas_uuid FROM (SELECT * FROM meas) M, value v, char c  \n" + 
-//             "       WHERE M.uuid = v.meas_uuid AND   c.uuid = v.char_uuid ) sub_sel ON (sel.meas_uuid = sub_sel.meas_uuid), (SELECT uuid, root_uuid, parent_uuid FROM meas) mtree \n" + 
-//             " WHERE sel.meas_root_uuid = mtree.root_uuid ";
-//			sql =  "SELECT * from bla where x=1 and test.u= x.u and t.f = b.c and (a = 5 or b in (1,2,3)) and (c=5)";
-//			sql =  "SELECT * from bla where (x = 1 or y in (1,2,3)) and y=5";
-			//sql = "wbexport -type=text -file=c:/temp/test.txt";
-			
-			//sql = "select case when nr is null then 'Null' \n when nr > 100 then 'bla'\nelse nr end as nr_value from tk_test";			
-			sql = "select decode(nr, null, 'null', 'xxxx', 'y,yy') as nr_value, col1, col2 from tk_test";			
-			
-			SqlFormatter f = new SqlFormatter(sql,40);
-			System.out.println(sql);
-			System.out.println("----------");
-			System.out.println(f.getFormattedSql());
-//			System.out.println("----------------------------------");
-//			"insert into test (col1, col2) values ('x', to_date(2,'XXXX'));commit;" 	 ;
-//			f = new SqlFormatter(sql);
-//			System.out.println(f.format());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-		}
 	}
 
 }

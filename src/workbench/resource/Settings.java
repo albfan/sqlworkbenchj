@@ -90,6 +90,9 @@ public class Settings
 		if (WbManager.trace) System.out.println("Settings.<init> - start");
 		this.props = new WbProperties();
 		this.filename = System.getProperty("workbench.settings.file", null);
+		
+		// first read the built-in defaults
+		// this ensures that new defaults will be applied automatically.
 		fillDefaults();
 
 		this.configDir = this.props.getProperty("workbench.configdir", null);
@@ -301,6 +304,8 @@ public class Settings
 				this.props.remove("workbench.gui.sql.lastdivider" + i);
 				this.props.remove("workbench.gui.sql.divider" + i);
 			}
+			this.props.remove("workbench.dbexplorer.disconnect");
+			this.props.remove("workbench.db.rollbackdisconnect");
 			this.props.remove("workbench.workspace.lastfile");
 			this.props.remove("workbench.workspace.restorelast");
 			this.props.remove("workbench.persistence.cleanupunderscores");
@@ -340,7 +345,7 @@ public class Settings
 		}
 		if (WbManager.trace) System.out.println("Setting.fillDefaults() - done");
 	}
-
+	
 	public Font getStandardFont()
 	{
 		if (this.standardFont == null)
@@ -490,7 +495,7 @@ public class Settings
 
 	public boolean getShowNativePageDialog()
 	{
-		return "true".equals(this.props.getProperty("workbench.print.nativepagedialog", "true"));
+		return getBoolProperty("workbench.print.nativepagedialog", true);
 	}
 
 	private int getPrintOrientation()
@@ -629,28 +634,14 @@ public class Settings
 
 	public boolean getAutoSelectTableEditor()
 	{
-		return "true".equals(this.props.getProperty("workbench.table.edit.autoselect", "true"));
+		return getBoolProperty("workbench.table.edit.autoselect", true);
 	}
-	public void setAutoSelectTableEditor(boolean aFlag)
-	{
-		this.props.setProperty("workbench.table.edit.autoselect", Boolean.toString(aFlag));
-	}
-
-	public void setSqlParameterPrefix(String prefix)
-	{
-		this.props.setProperty("workbench.sql.parameter.prefix", prefix);
-	}
-
+	
 	public String getSqlParameterPrefix()
 	{
 		String value = this.props.getProperty("workbench.sql.parameter.prefix", "$[");
 		if (value == null || value.length() == 0) value = "$[";
 		return value;
-	}
-
-	public void setSqlParameterSuffix(String suffix)
-	{
-		this.props.setProperty("workbench.sql.parameter.suffix", suffix);
 	}
 
 	public String getSqlParameterSuffix()
@@ -669,17 +660,13 @@ public class Settings
 		return value;
 	}
 
-	public void setCodeSnippetPrefix(String prefix)
-	{
-		this.props.setProperty("workbench.editor.codeprefix", prefix);
-	}
-
 	public static final String PROPERTY_SHOW_LINE_NUMBERS = "workbench.editor.showlinenumber";
 
 	public boolean getShowLineNumbers()
 	{
 		return StringUtil.stringToBool(this.props.getProperty(PROPERTY_SHOW_LINE_NUMBERS, "true"));
 	}
+	
 	public void setShowLineNumbers(boolean show)
 	{
 		this.props.setProperty(PROPERTY_SHOW_LINE_NUMBERS, Boolean.toString(show));
@@ -718,6 +705,7 @@ public class Settings
 	{
 		return StringUtil.stringToBool(this.props.getProperty("workbench.editor.highlightcurrent", "false"));
 	}
+	
 	public void setHighlightCurrentStatement(boolean show)
 	{
 		this.props.setProperty("workbench.editor.highlightcurrent", Boolean.toString(show));
@@ -726,16 +714,6 @@ public class Settings
 	public boolean getIncludeOwnerInSqlExport()
 	{
 		return this.getBoolProperty("workbench.export.sql.includeowner", true);
-	}
-
-	public void setIncludeOwnerInSqlExport(boolean flag)
-	{
-		this.props.setProperty("workbench.export.sql.includeowner", Boolean.toString(flag));
-	}
-
-	public String getConnectionDisplayModel()
-	{
-		return this.props.getProperty("workbench.gui.connectiondisplay", "");
 	}
 
 	public boolean getEnableDbmsOutput()
@@ -835,7 +813,7 @@ public class Settings
 
 	public boolean getIncludeNewLineInCodeSnippet()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty("workbench.javacode.includenewline", "true"));
+		return getBoolProperty("workbench.javacode.includenewline", true);
 	}
 
 	public void setIncludeNewLineInCodeSnippet(boolean useEncryption)
@@ -890,7 +868,7 @@ public class Settings
 
 	public boolean getAutoConnectDataPumper()
 	{
-		return "true".equals(this.props.getProperty("workbench.datapumper.autoconnect", "true"));
+		return getBoolProperty("workbench.datapumper.autoconnect", true);
 	}
 
 	public void setAutoConnectDataPumper(boolean flag)
@@ -902,6 +880,7 @@ public class Settings
 	{
 		this.storeWindowPosition(target, target.getClass().getName());
 	}
+	
 	public void storeWindowPosition(Component target, String id)
 	{
 		Point p = target.getLocation();
@@ -1057,17 +1036,6 @@ public class Settings
 		this.props.setProperty("workbench.sql.historysize", Integer.toString(aValue));
 	}
 
-  /*
-	public int getDefaultTabCount()
-	{
-		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.defaulttabcount", "4"));
-	}
-
-	public void setDefaultTabCount(int aCount)
-	{
-		this.props.setProperty("workbench.sql.defaulttabcount", Integer.toString(aCount));
-	}
-	*/
 	public void setLookAndFeelClass(String aClassname)
 	{
 		this.props.setProperty("workbench.gui.lookandfeelclass", aClassname);
@@ -1078,28 +1046,15 @@ public class Settings
 		return this.props.getProperty("workbench.gui.lookandfeelclass", "");
 	}
 
-	public int getPreferredColumnWidth()
-	{
-		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.preferredcolwidth", "80"));
-	}
-	public void setPreferredColumnWidth(int aWidth)
-	{
-		this.props.setProperty("workbench.sql.preferredcolwidth", Integer.toString(aWidth));
-	}
 
 	public int getMinColumnWidth()
 	{
 		return this.getIntProperty("workbench.sql.mincolwidth", 50);
 	}
 
-	public void setMinColumnWidth(int aWidth)
-	{
-		this.props.setProperty("workbench.sql.mincolwidth", Integer.toString(aWidth));
-	}
-
 	public int getInMemoryScriptSizeThreshold()
 	{
-		// Process scripts up to 1 MB in Memory
+		// Process scripts up to 1 MB in memory
 		// this is used by the ScriptParser
 		return getIntProperty("workbench.sql.script.inmemory.maxsize", 1024 * 1024);
 	}
@@ -1117,11 +1072,6 @@ public class Settings
 	public boolean getRightClickMovesCursor()
 	{
 		return this.getBoolProperty("workbench.editor.rightclickmovescursor", false);
-	}
-
-	public void setRightClickMovesCursor(boolean flag)
-	{
-		this.props.setProperty("workbench.editor.rightclickmovescursor", Boolean.toString(flag));
 	}
 
 	public int getMaxColumnWidth()
@@ -1169,7 +1119,7 @@ public class Settings
 
 	public int getMaxFractionDigits()
 	{
-		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.display.maxfractiondigits", "2"));
+		return getIntProperty("workbench.gui.display.maxfractiondigits", 2);
 	}
 
 	public void setMaxFractionDigits(int aValue)
@@ -1314,7 +1264,7 @@ public class Settings
 
 	public boolean getConsolidateLogMsg()
 	{
-		return "true".equals(this.props.getProperty("workbench.gui.log.consolidate", "false"));
+		return getBoolProperty("workbench.gui.log.consolidate", false);
 	}
 
 	public void setConsolidateLogMsg(boolean aFlag)
@@ -1346,7 +1296,7 @@ public class Settings
 
 	public boolean getLastImportWithHeaders()
 	{
-		return "true".equals(this.props.getProperty("workbench.import.text.containsheader", "true"));
+		return getBoolProperty("workbench.import.text.containsheader", true);
 	}
 
 	public void setLastImportWithHeaders(boolean aFlag)
@@ -1354,34 +1304,34 @@ public class Settings
 		this.props.setProperty("workbench.import.text.containsheader", Boolean.toString(aFlag));
 	}
 
-	public boolean getDbDebugMode()
+	public boolean getPreviewDml()
 	{
-		return this.getBoolProperty("workbench.db.previewsql", true);
+		return getBoolProperty("workbench.db.previewsql", true);
 	}
 
-	public void setDbDebugMode(boolean aFlag)
+	public void setPreviewDml(boolean aFlag)
 	{
 		this.props.setProperty("workbench.db.previewsql", Boolean.toString(aFlag));
 	}
 
 	public boolean getProcessHsqlShutdown()
 	{
-		return "true".equals(this.props.getProperty("workbench.db.hsqldb.closeOnShutdown", "false"));
+		return getBoolProperty("workbench.db.hsqldb.closeOnShutdown", false);
 	}
 
   public boolean getShowBuildInConnectionId()
   {
-		return "true".equals(this.props.getProperty("workbench.db.connection-id.showbuild", "false"));
+		return getBoolProperty("workbench.db.connection-id.showbuild", false);
 	}
 
 	public boolean getDebugMetadataSql()
 	{
-		return "true".equals(this.props.getProperty("workbench.dbmetadata.debugmetasql", "false"));
+		return getBoolProperty("workbench.dbmetadata.debugmetasql", false);
 	}
 
 	public int getProfileDividerLocation()
 	{
-		return StringUtil.getIntValue(this.props.getProperty("workbench.gui.profiles.divider", "-1"));
+		return getIntProperty("workbench.gui.profiles.divider", -1);
 	}
 
 	public void setProfileDividerLocation(int aValue)
@@ -1391,14 +1341,14 @@ public class Settings
 
 	public boolean getBoolProperty(String property)
 	{
-		return "true".equals(this.getProperty(property, ""));
+		return getBoolProperty(property, false);
 	}
 
 	public boolean getBoolProperty(String property, boolean defaultValue)
 	{
 		String value = this.getProperty(property, null);
 		if (value == null) return defaultValue;
-		return "true".equals(value);
+		return StringUtil.stringToBool(value);
 	}
 
 	public void setBoolProperty(String property, boolean value)
@@ -1444,19 +1394,24 @@ public class Settings
 
 	public int getIntProperty(String aProperty, int defaultValue)
 	{
-		String value = this.getProperty(aProperty, Integer.toString(defaultValue));
-		return StringUtil.getIntValue(value);
+		String value = this.getProperty(aProperty, null);
+		return StringUtil.getIntValue(value, defaultValue);
 	}
 
 	public int getIntProperty(String aClass, String aProperty)
 	{
-		String value = this.getProperty(aClass, aProperty, "0");
-		return StringUtil.getIntValue(value);
+		String value = this.getProperty(aClass, aProperty, null);
+		return StringUtil.getIntValue(value, 0);
 	}
 
 	public String getAutoCompletionPasteCase()
 	{
 		return getProperty("workbench.editor.autocompletion.paste.case", null);
+	}
+	
+	public boolean getAutoCompletionEmptyLineIsSeparator()
+	{
+		return getBoolProperty("workbench.editor.autocompletion.sql.emptylineseparator", false);
 	}
 
 	public boolean getUseAutoCompletion()
@@ -1464,19 +1419,9 @@ public class Settings
 		return getBoolProperty("workbench.editor.autocompletion.enabled", true);
 	}
 
-	public boolean getDbExplorerClearDataOnClose()
-	{
-		return getBoolProperty("workbench.dbexplorer.cleardata", true);
-	}
-
-	public boolean disconnectDbExplorerOnClose()
-	{
-		return getBoolProperty("workbench.dbexplorer.disconnect", false);
-	}
-
 	public boolean getUseTableTypeList()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty("workbench.dbexplorer.usetypelist", "true"));
+		return getBoolProperty("workbench.dbexplorer.usetypelist", true);
 	}
 
 	public void setUseTableTypeList(boolean flag)
@@ -1491,12 +1436,12 @@ public class Settings
 
 	public boolean getShowDbExplorerInMainWindow()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty("workbench.dbexplorer.mainwindow", "false"));
+		return this.getBoolProperty("workbench.dbexplorer.mainwindow", false);
 	}
 
 	public boolean getUseEncryption()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty(ENCRYPT_PWD_KEY, "false"));
+		return getBoolProperty(ENCRYPT_PWD_KEY, false);
 	}
 
 	public void setUseEncryption(boolean useEncryption)
@@ -1506,7 +1451,7 @@ public class Settings
 
 	public boolean getRetrieveDbExplorer()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty("workbench.dbexplorer.retrieveonopen", "true"));
+		return getBoolProperty("workbench.dbexplorer.retrieveonopen", true);
 	}
 
 	public void setRetrieveDbExplorer(boolean aFlag)
@@ -1516,7 +1461,7 @@ public class Settings
 
 	public boolean getAutoSaveWorkspace()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty("workbench.workspace.autosave", "false"));
+		return getBoolProperty("workbench.workspace.autosave", false);
 	}
 
 	public void setAutoSaveWorkspace(boolean aFlag)
@@ -1526,12 +1471,12 @@ public class Settings
 
 	public boolean getCreateWorkspaceBackup()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty("workbench.workspace.createbackup", "false"));
+		return getBoolProperty("workbench.workspace.createbackup", false);
 	}
 
 	public boolean getUseAnimatedIcon()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty(ANIMATED_ICONS_KEY, "false"));
+		return getBoolProperty(ANIMATED_ICONS_KEY, false);
 	}
 
 	public void setUseAnimatedIcon(boolean flag)
@@ -1541,7 +1486,7 @@ public class Settings
 
 	public boolean getUseDynamicLayout()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty("workbench.gui.dynamiclayout", "true"));
+		return getBoolProperty("workbench.gui.dynamiclayout", true);
 	}
 
 	public void setUseDynamicLayout(boolean flag)
@@ -1551,21 +1496,22 @@ public class Settings
 
 	public boolean getVerifyDriverUrl()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty("workbench.db.verifydriverurl", "false"));
+		return getBoolProperty("workbench.db.verifydriverurl", false);
 	}
+	
 	public boolean getShowMnemonics()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty("workbench.gui.showmnemonics", "true"));
+		return getBoolProperty("workbench.gui.showmnemonics", true);
 	}
 
 	public boolean getShowSplash()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty("workbench.gui.showsplash", "false"));
+		return getBoolProperty("workbench.gui.showsplash", false);
 	}
 
 	public boolean getRetrievePKList()
 	{
-		return "true".equalsIgnoreCase(this.props.getProperty("workbench.db.retrievepklist", "true"));
+		return getBoolProperty("workbench.db.retrievepklist", true);
 	}
 
 	public List getServersWhereDDLNeedsCommit()
@@ -1602,33 +1548,4 @@ public class Settings
 		return StringUtil.stringToList(list, ",");
 	}
 
-	public String getInstallDir()
-	{
-		CodeSource source = Settings.class.getProtectionDomain().getCodeSource();
-
-		if (source == null) return null;
-
-		File installDir;
-
-		try
-		{
-			URI sourceURI = new URI(source.getLocation().toString());
-			installDir = new File(sourceURI);
-		}
-		catch (URISyntaxException e)
-		{
-			return null;
-		}
-		catch (IllegalArgumentException e)
-		{
-			return null;
-		}
-
-		if (!installDir.isDirectory())
-		{
-			installDir = installDir.getParentFile();
-		}
-
-		return installDir.getAbsolutePath();
-	}
 }

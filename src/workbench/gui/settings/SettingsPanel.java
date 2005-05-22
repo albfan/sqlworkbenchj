@@ -407,7 +407,7 @@ public class SettingsPanel
     generalPanel.add(previewDmlLabel, gridBagConstraints);
 
     previewDml.setFont(null);
-    previewDml.setSelected(Settings.getInstance().getDbDebugMode());
+    previewDml.setSelected(Settings.getInstance().getPreviewDml());
     previewDml.setText("");
     previewDml.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     previewDml.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -792,8 +792,8 @@ public class SettingsPanel
 		set.setDefaultDateTimeFormat(this.timestampFormatTextField.getText());
 		set.setDecimalSymbol(this.decimalField.getText());
 		set.setUseEncryption(this.useEncryption.isSelected());
-		set.setRetrieveDbExplorer(this.retrieveDbExplorer.isSelected());
-		set.setDbDebugMode(this.previewDml.isSelected());
+		set.setRetrieveDbExplorer(retrieveDbExplorer.isSelected());
+		set.setPreviewDml(this.previewDml.isSelected());
 		set.setUseAnimatedIcon(this.enableAnimatedIcon.isSelected());
 
 		set.setMaxHistorySize(((NumberField)this.historySizeField).getValue());

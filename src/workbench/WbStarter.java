@@ -12,7 +12,6 @@
 package workbench;
 
 import java.awt.Toolkit;
-import java.lang.reflect.Method;
 
 import javax.swing.JOptionPane;
 
@@ -33,8 +32,9 @@ public class WbStarter
 		{
 			version = System.getProperty("java.runtime.version");
 		}
+		
 		boolean is14 = false;
-		//System.out.println("Workbench: Using Java version=" + version);
+		
 		try
 		{
 			int majorversion = Integer.parseInt(version.substring(0,1));
@@ -43,7 +43,7 @@ public class WbStarter
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 			is14 = false;
 		}
 
@@ -64,21 +64,15 @@ public class WbStarter
 			System.err.println(error);
 			System.exit(1);
 		}
+		
 		try
 		{
-			// Create an instance using reflection, so that this class can be
-			// loaded even with JDK < 1.4 (because no reference to WbManager is
-			// in the class)
-			Class manager = Class.forName("workbench.WbManager");
-			Class[] parms = {String[].class};
-			Method main = manager.getDeclaredMethod("main", parms);
-			Object[] para = new Object[] { args };
-			main.invoke(null, para);
+			WbManager.main(args);
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
-			e.printStackTrace();
-			System.exit(1);
+			e.printStackTrace(System.err);
+			System.exit(2);
 		}
 	}
 

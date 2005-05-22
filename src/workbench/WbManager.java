@@ -72,7 +72,6 @@ public class WbManager
 	private WbCipher desCipher = null;
 	private boolean batchMode = false;
 	public static boolean trace = "true".equalsIgnoreCase(System.getProperty("workbench.startuptrace", "false"));
-	private HtmlViewer helpWindow;
 	private boolean shutdownInProgress = false;
 
 	private Thread shutdownHook = new Thread(this);
@@ -819,37 +818,6 @@ public class WbManager
 			this.doShutdown(exitCode);
 		}
 		if (trace) System.out.println("WbManager.init() - done.");
-	}
-
-	private void showHelp(String aFile)
-	{
-		try
-		{
-			if (this.helpWindow == null)
-			{
-				this.helpWindow = new HtmlViewer(this.getCurrentWindow(), aFile);
-			}
-			else
-			{
-				this.helpWindow.showIndex();
-			}
-			if (aFile != null)
-			{
-				this.helpWindow.show();
-				this.helpWindow.requestFocus();
-			}
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logError("MainWindow", "Error when displaying HTML help", ex);
-			JOptionPane.showMessageDialog(this.getCurrentWindow(), "The documentation is currently available at www.kellerer.org/workbench");
-		}
-	}
-
-	public HtmlViewer getHelpViewer()
-	{
-		if (this.helpWindow == null) this.showHelp(null);
-		return this.helpWindow;
 	}
 
 	public static void main(String args[])

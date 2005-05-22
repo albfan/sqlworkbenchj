@@ -44,14 +44,14 @@ public class TableAlias
 	public final TableIdentifier getTable() { return this.table; }
 	public final String getNameToUse() 
 	{
-		if (alias == null) return table.getTable();
+		if (alias == null) return table.getTableName();
 		return alias;
 	}
 	public String toString() 
 	{
 		if (display == null)
 		{
-			if (alias == null) display = table.getTable();
+			if (alias == null) display = table.getTableName();
 			else display = alias + " (" + table + ")";
 		}
 		return display;
@@ -62,11 +62,11 @@ public class TableAlias
 		TableIdentifier tbl = new TableIdentifier(name);
 		if (this.alias == null)
 		{
-			return table.getTable().equalsIgnoreCase(tbl.getTable());
+			return table.getTableName().equalsIgnoreCase(tbl.getTableName());
 		}
 		else
 		{
-			return (table.getTable().equalsIgnoreCase(tbl.getTable()) || name.equalsIgnoreCase(alias));
+			return (table.getTableName().equalsIgnoreCase(tbl.getTableName()) || name.equalsIgnoreCase(alias));
 		}
 	}
 }

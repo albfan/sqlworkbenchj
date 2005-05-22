@@ -33,8 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JDialog;
 
-import javax.swing.JFrame;
-
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
@@ -56,7 +54,7 @@ import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.util.CharacterRange;
-import workbench.util.FileDialogUtil;
+import workbench.util.EncodingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -89,7 +87,7 @@ public class DataExporter
 	private int sqlType = SqlRowDataConverter.SQL_INSERT;
 	private boolean useCDATA = false;
 	private CharacterRange escapeRange = null;
-	private String lineEnding = StringUtil.LINE_TERMINATOR;
+	private String lineEnding = "\n";//StringUtil.LINE_TERMINATOR;
 	private String tableName;
 	private String sqlTable;
 	private String encoding;
@@ -630,6 +628,12 @@ public class DataExporter
 				if (!jobsRunning) this.closeProgress();
 				WbSwingUtilities.showErrorMessage(this.parentWindow, ResourceMgr.getString("MsgExecuteError") + ": " + e.getMessage());
 			}
+			if (!this.dbConn.getAutoCommit())
+			{
+				// Postgres needs a rollback, but this doesn't (or shouldn't!) 
+				// hurt with other DBMS either
+				try { this.dbConn.rollback(); } catch (Throwable th) {}
+			}
 		}
 		finally
 		{
@@ -781,7 +785,7 @@ public class DataExporter
 			{
 				try
 				{
-					OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(f, this.append), this.encoding);
+					OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(f, this.append), EncodingUtil.cleanupEncoding(this.encoding));
 					pw = new BufferedWriter(out, buffSize);
 				}
 				catch (UnsupportedEncodingException e)

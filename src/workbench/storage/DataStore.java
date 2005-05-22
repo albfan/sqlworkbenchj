@@ -491,14 +491,14 @@ public class DataStore
 				DbMetadata meta = aConn.getMetadata();
 				if (meta == null) return;
 
-
-				List columns = meta.getTableColumns(new TableIdentifier(aTablename));
+				TableIdentifier tbl = new TableIdentifier(aTablename, aConn);
+				List columns = meta.getTableColumns(tbl);
 				if (columns == null || columns.size() == 0)
 				{
 					return;
 				}
 
-				this.updateTable = meta.adjustObjectnameCase(aTablename);
+				this.updateTable = tbl.getTableExpression(aConn);
 
 				for (int i=0; i < columns.size(); i++)
 				{
@@ -1289,8 +1289,9 @@ public class DataStore
 		else
 		{
 			converter.setCreateInsert();
-			converter.setAlternateUpdateTable(this.getInsertTable());
 		}
+		TableIdentifier tbl = new TableIdentifier(this.getInsertTable());
+		converter.setAlternateUpdateTable(tbl);
 
 		for (int row = 0; row < count; row ++)
 		{
@@ -1327,18 +1328,6 @@ public class DataStore
 		return script.toString();
 	}
 
-//	public void writeDataAsSqlUpdate(Writer out, String aLineTerminator)
-//		throws IOException
-//	{
-//		this.writeDataAsSqlUpdate(out, aLineTerminator, null, null);
-//	}
-
-//	public void writeDataAsSqlUpdate(Writer out, String aLineTerminator, String aCharFunc, String aConcatString)
-//		throws IOException
-//	{
-//		writeDataAsSqlUpdate(out, aLineTerminator, aCharFunc, aConcatString, null, null);
-//	}
-
 	public void writeDataAsSqlUpdate(Writer out, String aLineTerminator, String aCharFunc, String aConcatString, int[] rows, List columns)
 		throws IOException
 	{
@@ -1366,7 +1355,7 @@ public class DataStore
 
 		StatementFactory factory = new StatementFactory(this.resultInfo);
 		factory.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
-
+		factory.setCurrentConnection(this.originalConnection);
 		for (int row = 0; row < count; row ++)
 		{
 			RowData data;
@@ -2039,7 +2028,7 @@ public class DataStore
 		{
 			try
 			{
-				schema = aConnection.getMetadata().getSchemaForTable(this.updateTable);
+				schema = aConnection.getMetadata().findSchemaForTable(this.updateTable);
 			}
 			catch (Exception e)
 			{

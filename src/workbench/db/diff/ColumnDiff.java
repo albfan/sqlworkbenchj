@@ -42,8 +42,9 @@ public class ColumnDiff
 	private String namespace;
 	private StrBuffer indent;
 	private TagWriter writer;
-	private boolean checkFk = true;
-
+	private boolean compareFK = true;
+	private boolean compareComments = true;
+	
 	/**
 	 *	Create a ColumnDiff object for the reference and target columns
 	 */
@@ -55,7 +56,9 @@ public class ColumnDiff
 		this.targetColumn = target;
 	}
 
-	public void setCompareForeignKeys(boolean flag) { this.checkFk = flag; }
+	public void setCompareForeignKeys(boolean flag) { this.compareFK = flag; }
+	public void setCompareComments(boolean flag) { this.compareComments = flag; }
+	
 	/**
 	 *	Set the {@link workbench.db.report.TagWriter} to 
 	 *  be used for writing the XML tags
@@ -107,22 +110,29 @@ public class ColumnDiff
 		ColumnReference refFk = this.referenceColumn.getForeignKey();
 		ColumnReference targetFk = this.targetColumn.getForeignKey();
 		boolean fkDifferent = false;
-		if (refFk == null && targetFk == null)
+		if (this.compareFK)
 		{
-			fkDifferent = false;
-		}
-		else if ((refFk == null && targetFk != null) || (refFk != null && targetFk == null))
-		{
-			fkDifferent = true;
-		}
-		else 
-		{
-			fkDifferent = fkDifferent = !(refFk.equals(targetFk));
+			if (refFk == null && targetFk == null)
+			{
+				fkDifferent = false;
+			}
+			else if ((refFk == null && targetFk != null) || (refFk != null && targetFk == null))
+			{
+				fkDifferent = true;
+			}
+			else 
+			{
+				fkDifferent = fkDifferent = !(refFk.equals(targetFk));
+			}
 		}
 		
 		String scomm = sId.getComment();
 		String tcomm = tId.getComment();
-		boolean commentDifferent = !StringUtil.equalString(scomm, tcomm);
+		boolean commentDifferent = false;
+		if (this.compareComments)
+		{
+			commentDifferent = !StringUtil.equalString(scomm, tcomm);
+		}
 		
 		if (writer == null) this.writer = new TagWriter();
 		

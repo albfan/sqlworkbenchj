@@ -132,7 +132,7 @@ import workbench.interfaces.Interruptable;
 import workbench.interfaces.JobErrorHandler;
 import workbench.interfaces.MainPanel;
 import workbench.interfaces.ResultLogger;
-import workbench.interfaces.Spooler;
+import workbench.interfaces.Exporter;
 import workbench.interfaces.TextChangeListener;
 import workbench.interfaces.TextFileContainer;
 import workbench.log.LogMgr;
@@ -162,7 +162,7 @@ public class SqlPanel
 	extends JPanel
 	implements FontChangedListener, ActionListener, TextChangeListener,
 				    PropertyChangeListener,
-						MainPanel, Spooler, TextFileContainer, DbUpdater, Interruptable, FormattableSql, Commitable,
+						MainPanel, Exporter, TextFileContainer, DbUpdater, Interruptable, FormattableSql, Commitable,
 						JobErrorHandler, FilenameChangeListener, ExecutionController, ResultLogger
 {
 	EditorPanel editor;
@@ -845,13 +845,6 @@ public class SqlPanel
 		editor.getActionMap().setParent(am);
 	}
 
-	public void addToActionMap(WbAction anAction)
-	{
-		InputMap im = this.getInputMap(WHEN_IN_FOCUSED_WINDOW);
-		ActionMap am = this.getActionMap();
-		anAction.addToInputMap(im, am);
-	}
-
 	public void selectEditorLater()
 	{
 		EventQueue.invokeLater(new Runnable()
@@ -919,16 +912,16 @@ public class SqlPanel
 
 	public void restoreFocus()
 	{
-		if (this.editorFocusPending)
+		if (this.editorFocusPending && editor != null)
 		{
 			editor.requestFocusInWindow();
-			this.editorFocusPending = false;
 		}
 		else if (this.currentFocus != null)
 		{
-			editor.requestFocusInWindow();
+			currentFocus.requestFocusInWindow();
 		}
 		this.currentFocus = null;
+		this.editorFocusPending = false;
 	}
 
 	public void selectResult()
@@ -959,15 +952,13 @@ public class SqlPanel
 		this.setCancelState(true);
 		this.disableExecuteActions();
 
-		Thread t = new Thread()
+		Thread t = new WbThread("Workbench DB Update Thread")
 		{
 			public void run()
 			{
 				updateDb();
 			}
 		};
-		t.setName("Workbench DB Update Thread");
-		t.setDaemon(true);
 		t.start();
 	}
 
@@ -1718,7 +1709,7 @@ public class SqlPanel
 		this.startExecution(sql, 0, -1, replaceText);
 	}
 
-	public void spoolData()
+	public void exportData()
 	{
 		final String sql = SqlUtil.makeCleanSql(this.editor.getSelectedStatement(),false);
 

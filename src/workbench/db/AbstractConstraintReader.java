@@ -78,7 +78,7 @@ public abstract class AbstractConstraintReader
 			if (index > 0) stmt.setString(index, aTable.getCatalog());
 
 			index = this.getIndexForTableNameParameter();
-			if (index > 0) stmt.setString(index, aTable.getTable());
+			if (index > 0) stmt.setString(index, aTable.getTableName());
 
 			rs = stmt.executeQuery();
 			while (rs.next())
@@ -129,7 +129,7 @@ public abstract class AbstractConstraintReader
 			if (index > 0) stmt.setString(index, aTable.getCatalog());
 
 			index = this.getIndexForTableNameParameter();
-			if (index > 0) stmt.setString(index, aTable.getTable());
+			if (index > 0) stmt.setString(index, aTable.getTableName());
 
 			rs = stmt.executeQuery();
 			int count = 0;

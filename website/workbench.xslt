@@ -55,9 +55,7 @@
             </xsl:if>
 
         </xsl:if>
-
   </xsl:for-each>
-
 </xsl:variable>
 
 <!-- entry point template to select the whole site document -->
@@ -255,12 +253,7 @@
 </xsl:template>
 
 <xsl:template match="mail-to">
-<a>
-    <xsl:attribute name="href">
-        <xsl:text disable-output-escaping="yes">mailto:<![CDATA[&#105;&#110;&#102;&#111;&#64;&#115;&#113;&#108;&#45;&#119;&#111;&#114;&#107;&#98;&#101;&#110;&#99;&#104;&#46;&#110;&#101;&#116;]]></xsl:text>
-    </xsl:attribute>
-    <xsl:text disable-output-escaping="yes"><![CDATA[&#105;&#110;&#102;&#111;&#64;&#115;&#113;&#108;&#45;&#119;&#111;&#114;&#107;&#98;&#101;&#110;&#99;&#104;&#46;&#110;&#101;&#116;]]></xsl:text>
-</a>
+<xsl:text disable-output-escaping="yes"><![CDATA[<a href=mailto:&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#115;&#113;&#108;&#45;&#119;&#111;&#114;&#107;&#98;&#101;&#110;&#99;&#104;&#46;&#110;&#101;&#116;>&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#115;&#113;&#108;&#45;&#119;&#111;&#114;&#107;&#98;&#101;&#110;&#99;&#104;&#46;&#110;&#101;&#116;</a>]]></xsl:text>
 </xsl:template>
     
 <!-- <xsl:template match="content"><xsl:value-of select="."/></xsl:template> -->

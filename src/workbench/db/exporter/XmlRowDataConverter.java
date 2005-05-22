@@ -337,7 +337,7 @@ public class XmlRowDataConverter
 			TableIdentifier table = this.metaData.getUpdateTable();
 			if (table != null)
 			{
-				result.append(table.getTable());
+				result.append(table.getTableName());
 			}
 		}
 		result.append("</");

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -34,6 +35,8 @@ public class SelectAnalyzer
 {
 	private final Pattern FROM_PATTERN = Pattern.compile("\\sFROM\\s|\\sFROM$", Pattern.CASE_INSENSITIVE);
 	private final Pattern WHERE_PATTERN = Pattern.compile("\\sWHERE\\s|\\sWHERE$", Pattern.CASE_INSENSITIVE);
+	private final Pattern BRACKET_TEXT = Pattern.compile("\\(.*\\)");
+	private final Pattern QUOTED_TEXT = Pattern.compile("'.*'");
 	
 	public SelectAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{	
@@ -42,16 +45,14 @@ public class SelectAnalyzer
 	
 	protected void checkContext()
 	{
-
-		int len = sql.length();
 		this.context = NO_CONTEXT;
 
-		int fromPos = StringUtil.findPattern(FROM_PATTERN, sql, 0);
+		int fromPos = SqlUtil.getFromPosition(this.sql); 
+		
 		int wherePos = -1;
 		if (fromPos > 0)
 		{
 			wherePos = StringUtil.findPattern(WHERE_PATTERN, sql, fromPos);
-			//if (wherePos == -1) wherePos = sql.length() + 1;
 		}
 
 		// find the tables from the FROM clause
@@ -66,11 +67,13 @@ public class SelectAnalyzer
 			tables = Collections.EMPTY_LIST;
 		}
 
+		String rest = sql.substring(fromPos);
+		
 		if ( fromPos < 0 ||
-			   (wherePos < 0 && pos > fromPos) ||
-			   (wherePos > -1 && pos > fromPos && pos <= wherePos))
+			   (wherePos < 0 && cursorPos > fromPos) ||
+			   (wherePos > -1 && cursorPos > fromPos && cursorPos <= wherePos))
 		{
-			String q = this.getQualifierLeftOfCursor(sql, pos);
+			String q = getQualifierLeftOfCursor(sql, cursorPos);
 			
 			// If no FROM is present but there is a word with a dot
 			// at the cursor position we will first try to use that 
@@ -107,6 +110,13 @@ public class SelectAnalyzer
 			// current cursor position is after the WHERE
 			// statement or before the FROM statement, so
 			// we'll try to find a proper column list
+			
+			String word = StringUtil.getWordLeftOfCursor(sql, cursorPos, null);
+			int dotPos = word.indexOf('.');
+			if (dotPos != -1 && dotPos < word.length() - 1)
+				this.overwriteCurrentWord = true;
+			else
+				this.overwriteCurrentWord = false;
 
 			int count = tables.size();
 			if (count == 1)
@@ -116,7 +126,7 @@ public class SelectAnalyzer
 			}
 			else
 			{
-				String q = getQualifierLeftOfCursor(sql, pos);
+				String q = getQualifierLeftOfCursor(sql, cursorPos);
 				String tableToUse = null;
 				this.tableForColumnList = null;
 				

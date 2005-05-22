@@ -46,10 +46,10 @@ public class DeleteAnalyzer
 
 		int wherePos = StringUtil.findPattern(WHERE_PATTERN, sql, 0);
 		
-		if ( wherePos == -1 || wherePos > -1 && pos < wherePos)
+		if ( wherePos == -1 || wherePos > -1 && cursorPos < wherePos)
 		{
 			context = CONTEXT_TABLE_LIST;
-			String q = this.getQualifierLeftOfCursor(sql, pos);
+			String q = this.getQualifierLeftOfCursor(sql, cursorPos);
 			if (q != null)
 			{
 				this.schemaForTableList = q;

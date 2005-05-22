@@ -13,7 +13,7 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import workbench.interfaces.Spooler;
+import workbench.interfaces.Exporter;
 import workbench.resource.ResourceMgr;
 import workbench.interfaces.TextSelectionListener;
 import workbench.gui.sql.EditorPanel;
@@ -26,14 +26,14 @@ public class SpoolDataAction
 	extends WbAction
 	implements TextSelectionListener
 {
-	private Spooler client;
+	private Exporter client;
 	private EditorPanel editor;
 
-	public SpoolDataAction(Spooler aClient)
+	public SpoolDataAction(Exporter aClient)
 	{
 		this(aClient, "MnuTxtSpoolData");
 	}
-	public SpoolDataAction(Spooler aClient, String msgKey)
+	public SpoolDataAction(Exporter aClient, String msgKey)
 	{
 		super();
 		this.client = aClient;
@@ -45,7 +45,7 @@ public class SpoolDataAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.spoolData();
+		this.client.exportData();
 	}
 
 	public void setEditor(EditorPanel ed)

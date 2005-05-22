@@ -37,6 +37,7 @@ public class ReportTable
 	public static final String TAG_TABLE_CATALOG = "table-catalog";
 	public static final String TAG_TABLE_SCHEMA = "table-schema";
 	public static final String TAG_TABLE_COMMENT = "table-comment";
+	public static final String TAG_TABLE_CONSTRAINT = "table-constraint";
 
 	private List referencedTables;
 	private TableIdentifier table;
@@ -46,7 +47,9 @@ public class ReportTable
 	private TagWriter tagWriter = new TagWriter();
 	private String schemaNameToUse = null;
 	private String namespace = null;
-
+	private boolean includePrimaryKey = true;
+	private String tableConstraints;
+	
 	public ReportTable(TableIdentifier tbl)
 	{
 		this(tbl, (String)null);
@@ -62,20 +65,27 @@ public class ReportTable
 	public ReportTable(TableIdentifier tbl, WbConnection conn)
 		throws SQLException
 	{
-		this(tbl, conn, null, true, true);
+		this(tbl, conn, null, true, true, true, true);
 	}
 	
 	public ReportTable(TableIdentifier tbl, WbConnection conn, String nspace)
 		throws SQLException
 	{
-		this(tbl, conn, nspace, true, true);
+		this(tbl, conn, nspace, true, true, true, true);
 	}
 	
-	public ReportTable(TableIdentifier tbl, WbConnection conn, String nspace, boolean includeIndex, boolean includeFk)
+	public ReportTable(TableIdentifier tbl, WbConnection conn, String nspace, boolean includeIndex, boolean includeFk, boolean includePk)
+		throws SQLException
+	{
+		this(tbl, conn, nspace, includeIndex, includeFk, includePk, true);
+	}
+	
+	public ReportTable(TableIdentifier tbl, WbConnection conn, String nspace, boolean includeIndex, boolean includeFk, boolean includePk, boolean includeConstraints)
 		throws SQLException
 	{
 		this.table = tbl;
 		this.namespace = nspace;
+		this.includePrimaryKey = includePk; 
 		
 		List cols = conn.getMetadata().getTableColumns(tbl);
 		Collections.sort(cols);
@@ -84,7 +94,7 @@ public class ReportTable
 		String schema = this.table.getSchema();
 		if (schema == null || schema.length() == 0)
 		{
-			schema = conn.getMetadata().getSchemaForTable(this.table.getTable());
+			schema = conn.getMetadata().findSchemaForTable(this.table.getTableName());
 			if (schema != null) this.table.setSchema(schema);
 		}
 
@@ -96,6 +106,10 @@ public class ReportTable
 			this.index.setNamespace(namespace);
 		}
 		if (includeFk) this.readForeignKeys(conn);
+		if (includeConstraints)
+		{
+			this.tableConstraints = conn.getMetadata().getTableConstraints(tbl, "");
+		}
 	}
 
 	/**
@@ -106,6 +120,7 @@ public class ReportTable
 	 */
 	public List getPrimaryKeyColumns()
 	{
+		if (!includePrimaryKey) return Collections.EMPTY_LIST;
 		List result = new ArrayList();
 		int count = this.columns.length;
 		for (int i=0; i < count; i++)
@@ -124,6 +139,7 @@ public class ReportTable
 	 */
 	public String getPrimaryKeyName()
 	{
+		if (!includePrimaryKey) return null;
 		if (this.index == null) return null;
 		List pk = this.getPrimaryKeyColumns();
 		if (pk.size() == 0) return null;
@@ -154,7 +170,7 @@ public class ReportTable
 	
 	private void readForeignKeys(WbConnection conn)
 	{
-		DataStore ds = conn.getMetadata().getForeignKeys(this.table.getCatalog(), this.table.getSchema(), this.table.getTable());
+		DataStore ds = conn.getMetadata().getForeignKeys(this.table.getCatalog(), this.table.getSchema(), this.table.getTableName());
 		int keys = ds.getRowCount();
 		if (keys == 0) return;
 
@@ -234,6 +250,9 @@ public class ReportTable
 		return getXml(new StrBuffer("  "));
 	}
 	
+	public String getTableComment() { return this.tableComment; }
+	public String getTableConstraints() { return this.tableConstraints; }
+		
 	public StrBuffer getXml(StrBuffer indent)
 	{
 		StrBuffer line = new StrBuffer(500);
@@ -245,18 +264,19 @@ public class ReportTable
 
 		tagWriter.appendTag(line, colindent, TAG_TABLE_CATALOG, this.table.getCatalog());
 		tagWriter.appendTag(line, colindent, TAG_TABLE_SCHEMA, (this.schemaNameToUse == null ? this.table.getSchema() : this.schemaNameToUse));
-		tagWriter.appendTag(line, colindent, TAG_TABLE_NAME, this.table.getTable());
+		tagWriter.appendTag(line, colindent, TAG_TABLE_NAME, this.table.getTableName());
 		tagWriter.appendTag(line, colindent, TAG_TABLE_COMMENT, this.tableComment, true);
-
 		int cols = this.columns.length;
 		for (int i=0; i < cols; i++)
 		{
 			this.columns[i].appendXml(line, colindent);
 		}
 		if (this.index != null) this.index.appendXml(line, colindent);
-
+		if (this.tableConstraints != null && this.tableConstraints.length() > 0)
+		{
+			tagWriter.appendTag(line, colindent, TAG_TABLE_CONSTRAINT, this.tableConstraints, true);
+		}
 		tagWriter.appendCloseTag(line, indent, TAG_TABLE_DEF);
-		line.append('\n');
 		return line;
 	}
 	

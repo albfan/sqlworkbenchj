@@ -23,8 +23,8 @@ public class MacroEntry
 	}
 	
 	public String toString() { return this.name; }
-	public String getName() { return this.name; }
-	public void setName(String aName) { this.name = aName; }
-	public String getText() { return this.text; }
-	public void setText(String aText) { this.text = aText; }
+	public final String getName() { return this.name; }
+	public final void setName(String aName) { this.name = aName; }
+	public final String getText() { return this.text; }
+	public final void setText(String aText) { this.text = aText; }
 }

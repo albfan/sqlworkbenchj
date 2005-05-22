@@ -259,11 +259,12 @@ public class DbDriver
 			{
 				propName = "v$session.program";
 				if (id != null) props.put("v$session.terminal", id);
-				/*
+				
+				// it seems that the Oracle 10 driver does not 
+				// add this to the properties automatically
+				// (as the drivers for 8 and 9 did)
 				user = System.getProperty("user.name");
-				System.out.println("user = " + user);
 				props.put("v$session.osuser", user);
-				*/
 			}
 			else if (url.startsWith("jdbc:inetdae"))
 			{
@@ -281,20 +282,6 @@ public class DbDriver
 			if (propName != null && !props.containsKey(propName))
 			{
 				String appName = ResourceMgr.TXT_PRODUCT_NAME;
-
-				if (Settings.getInstance().getShowBuildInConnectionId())
-				{
-					String build = ResourceMgr.getString("TxtBuildNumber");
-					if (build.startsWith("["))
-					{
-						appName = appName + " " +build;
-					}
-					else
-					{
-						appName = appName + " (B" + build + ")";
-					}
-				}
-
 				props.put(propName, appName);
 			}
 

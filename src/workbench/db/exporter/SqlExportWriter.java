@@ -11,6 +11,7 @@
  */
 package workbench.db.exporter;
 
+import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.ResultInfo;
@@ -51,7 +52,11 @@ public class SqlExportWriter
 			converter.setCreateInsert();
 		}
 		converter.setSql(exporter.getSql());
-		converter.setAlternateUpdateTable(exporter.getTableName());
+		String table = exporter.getTableName();
+		if (table != null)
+		{
+			converter.setAlternateUpdateTable(new TableIdentifier(table));
+		}
 		converter.setCreateTable(exporter.isIncludeCreateTable());
 		return converter;
 	}

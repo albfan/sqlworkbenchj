@@ -36,7 +36,7 @@ public class WbListTables extends SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		StatementRunnerResult result = new StatementRunnerResult();
 		DataStore ds = aConnection.getMetadata().getTables();
 		result.addDataStore(ds);
 		return result;

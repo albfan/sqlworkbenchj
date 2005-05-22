@@ -67,6 +67,7 @@ public class StringUtil
 	{
 		return new java.util.Date(System.currentTimeMillis());
 	}
+	
 	public static final StringBuffer replaceToBuffer(String aString, String aValue, String aReplacement)
 	{
 		return replaceToBuffer(null, aString, aValue, aReplacement);
@@ -816,6 +817,21 @@ public class StringUtil
 		}
 		return -1;
 	}
+
+	public static int findWordBoundary(String data, int pos, String wordBoundaries)
+	{
+		if (wordBoundaries == null) return findPreviousWhitespace(data, pos);
+		if (data == null) return -1;
+		int count = data.length();
+		if (pos > count || pos <= 1) return -1;
+		int index = pos;
+		for (int i=pos; i > 0; i--)
+		{
+			char c = data.charAt(i);
+			if (wordBoundaries.indexOf(c) > -1 || Character.isWhitespace(c)) return i;
+		}
+		return -1;
+	}
 	
 	public static int findFirstWhiteSpace(String data)
 	{
@@ -835,6 +851,28 @@ public class StringUtil
 		return -1;
 	}
 
+	public static final String getWordLeftOfCursor(String text, int pos, String wordBoundaries)
+	{
+		int len = text.length();
+		int end = pos;
+		if (pos >= len) 
+		{
+			end = len - 1;
+		}
+		if (end == 0) return null;
+		
+		if (Character.isWhitespace(text.charAt(end-1))) return null;
+		
+		String word = null;
+		int startOfWord = findWordBoundary(text, end-1, wordBoundaries);
+		if (startOfWord > 0)
+		{
+			word = text.substring(startOfWord+1, end);
+		}
+
+		return word;
+	}	
+	
 	public static int findPattern(String regex, String data)
 	{
 		return findPattern(regex, data);
@@ -918,6 +956,7 @@ public class StringUtil
 	 * with a preceding slash.
 	 * This has been "borrowed" from the Properties class, because the code
 	 * there is not usable from the outside.
+	 * Backslash, CR, LF, Tab and FormFeed (\f) will always be replaced.
 	 */
 	public static String escapeUnicode(String value, String specialSaveChars, CharacterRange range)
 	{

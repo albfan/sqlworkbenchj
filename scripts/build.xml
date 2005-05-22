@@ -191,7 +191,7 @@
              location="${doc}/dtd/docbookx.dtd"/>
       </xmlcatalog>
 
-      <param name="root.filename" expression="index"/>
+      <param name="root.filename" expression="workbench-manual"/>
       <param name="html.stylesheet" expression="html-internal.css"/>
       <!--
       <param name="admon.graphics.path" expression="../workbench/resource/images/"/>
@@ -336,6 +336,7 @@
         <attribute name="WbBuild-Date" value="${build_date}"/>
       </manifest>
       <fileset dir="${build}">
+        <exclude name="**/package.html"/>
       </fileset>
     </jar>
 
@@ -394,6 +395,10 @@
     <tstamp>
       <format pattern="yyyy-MM-dd" property="today"/>
     </tstamp>
+
+    <!-- reset the release property file -->
+    <delete file="release.property"/>
+
     <propertyfile file="release.property">
       <entry key="release.build.number" value="${build.number}"/>
       <entry key="release.build.date" value="${today}"/>
@@ -471,8 +476,8 @@
         <include name="datapumper"/>
         <include name="dbexplorer"/>
       </zipfileset>
-      <zipfileset dir="${html-outdir}" prefix="manual">
-        <include name="**/*.*"/>
+      <zipfileset dir="${scriptsrc}" prefix="xslt">
+        <include name="**/*.xslt"/>
       </zipfileset>
     </zip>
 
@@ -526,6 +531,9 @@
       </tarfileset>
       <tarfileset dir="${html-outdir}" prefix="manual">
         <include name="**/*.*"/>
+      </tarfileset>
+      <tarfileset dir="${scriptsrc}" prefix="xslt">
+        <include name="**/*.xslt"/>
       </tarfileset>
     </tar>
 

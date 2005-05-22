@@ -16,6 +16,8 @@ import java.sql.Statement;
 import java.util.List;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -36,7 +38,7 @@ public class TableCreator
 		this.tablename = newTable;
 		this.columnDefinition = columns;
 
-		List ignored = target.getMetadata().getIgnoredDataTypes();
+		List ignored = getIgnoredDataTypes();
 		this.mapper = new TypeMapper(this.connection, ignored);
 	}
 
@@ -45,7 +47,7 @@ public class TableCreator
 	{
 		StringBuffer sql = new StringBuffer(100);
 		sql.append("CREATE TABLE ");
-		String name = this.tablename.isNewTable() ? this.tablename.getTable() : this.tablename.getTableExpression();
+		String name = this.tablename.isNewTable() ? this.tablename.getTableName() : this.tablename.getTableExpression();
 		sql.append(name);
 		sql.append(" (");
 		int count = this.columnDefinition.length;
@@ -119,5 +121,47 @@ public class TableCreator
 		}
 
 		this.messages.append(aMsg);
+	}
+	
+	/**
+	 *	Return a list of datatype as returned from DatabaseMetaData.getTypeInfo()
+	 *	which we cannot handle. This is used by the {@linke TableCreator} when searching
+	 *	for a matching data type.
+	 */
+	private List getIgnoredDataTypes()
+	{
+		String types = null;
+		DbMetadata meta = this.connection.getMetadata();
+		
+		if (meta.isMySql())
+		{
+			types = Settings.getInstance().getProperty("workbench.ignoretypes.mysql", null);
+		}
+		else if (meta.isFirebird())
+		{
+			types = Settings.getInstance().getProperty("workbench.ignoretypes.firebird", null);
+		}
+		else if (meta.isOracle())
+		{
+			types = Settings.getInstance().getProperty("workbench.ignoretypes.oracle", null);
+		}
+		else if (meta.isPostgres())
+		{
+			types = Settings.getInstance().getProperty("workbench.ignoretypes.postgres", null);
+		}
+		else if (meta.isHsql())
+		{
+			types = Settings.getInstance().getProperty("workbench.ignoretypes.hsqldb", null);
+		}
+		else if (meta.isSqlServer())
+		{
+			types = Settings.getInstance().getProperty("workbench.ignoretypes.sqlserver", null);
+		}
+		else
+		{
+			types = Settings.getInstance().getProperty("workbench.ignoretypes." + meta.getDbId(), null);
+		}
+
+		return StringUtil.stringToList(types, ",", true, true);
 	}
 }

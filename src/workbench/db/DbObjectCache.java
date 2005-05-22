@@ -26,17 +26,18 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 /**
+ * A cache for DbObjects to support Auto-completion in the editor
  * @author  support@sql-workbench.net
  */
 public class DbObjectCache
 	implements PropertyChangeListener
 {
 	private WbConnection dbConnection;
-	private boolean enabled = Settings.getInstance().getUseAutoCompletion();
 	private Set schemasInCache = new HashSet();
+	private final String NULL_SCHEMA = "wb-null-schema-marker";
 	
 	// This will map a TableIdentifier to a list of ColumnIdentifier's
-	private SortedMap objects;
+	private SortedMap objects = new TreeMap();
 	
 	DbObjectCache(WbConnection conn)
 	{
@@ -49,7 +50,6 @@ public class DbObjectCache
 	 */
 	private void setTables(List tables)
 	{
-		if (!enabled) return;
 		if (this.objects == null)
 		{
 			this.objects = new TreeMap();
@@ -79,18 +79,13 @@ public class DbObjectCache
 	 */
 	public Set getTables(String schema, String type)
 	{
-		if (!enabled) return Collections.EMPTY_SET;
-
-		if (this.objects == null || (schema != null && !schemasInCache.contains(schema.toUpperCase()))) 
+		if (this.objects.size() == 0 || (!schemasInCache.contains(schema == null ? NULL_SCHEMA : schema.toUpperCase()))) 
 		{
 			try
 			{
 				List tables = this.dbConnection.getMetadata().getTableList(schema, DbMetadata.TABLE_TYPES_SELECTABLE);
 				this.setTables(tables);
-				if (schema != null)
-				{
-					this.schemasInCache.add(schema.toUpperCase());
-				}
+				this.schemasInCache.add(schema == null ? NULL_SCHEMA : schema.toUpperCase());
 			}
 			catch (Exception e)
 			{
@@ -114,8 +109,8 @@ public class DbObjectCache
 			String ttype = tbl.getType();
 			String tSchema = tbl.getSchema();
 			if ( type.equalsIgnoreCase(ttype) &&
-				   ((schema == null || schema.equalsIgnoreCase(tSchema) || tSchema == null || "public".equalsIgnoreCase(tSchema))
-					 ))
+				   ((schema == null || schema.equalsIgnoreCase(tSchema) || tSchema == null || "public".equalsIgnoreCase(tSchema)))
+				 )
 			{
 				TableIdentifier copy = tbl.createCopy();
 				result.add(copy);
@@ -149,9 +144,9 @@ public class DbObjectCache
 	 */
 	public List getColumns(TableIdentifier tbl)
 	{
-		if (!enabled) return Collections.EMPTY_LIST;
 		String schema = tbl.getSchema();
-		if (this.objects == null || (schema != null && schemasInCache.contains(schema.toUpperCase())))
+		
+		if (this.objects.size() == 0 || !schemasInCache.contains(schema == null ? NULL_SCHEMA : schema.toUpperCase()))
 		{
 			this.getTables(schema);
 		}
@@ -163,7 +158,7 @@ public class DbObjectCache
 		
 		// if we didn't find an entry with the schema in the table, try
 		// to find a table with that name but without the schema
-		// this is to support oracle public synonyms/objects
+		// (this is to support oracle public synonyms/objects)
 		if (tbl.getSchema() != null && cols == null || cols == Collections.EMPTY_LIST)
 		{
 			if (!this.objects.containsKey(tbl))
@@ -176,10 +171,11 @@ public class DbObjectCache
 		
 		if (cols == null || cols == Collections.EMPTY_LIST)
 		{
-			// use the stored key because that might already
-			// carry the type attribute
-			// TabelIdentifier.equals() doesn't compare the type
-			// only the expression
+			// use the stored key because that might carry the correct type attribute
+			// TabelIdentifier.equals() doesn't compare the type, only the expression
+			// so we'll get a containsKey() == true even if the type is different
+			// (which is necessary because the TableIdentifier passed to this 
+			// method will never contain a type!)
 			if (objects.containsKey(tbl))
 			{
 				tblToUse = findKey(tbl);

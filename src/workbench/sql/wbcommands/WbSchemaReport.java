@@ -64,7 +64,7 @@ public class WbSchemaReport
 		throws SQLException
 	{
 		boolean dbDesigner = false;
-		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		StatementRunnerResult result = new StatementRunnerResult();
 		this.currentConnection = aConnection;
 		aSql = SqlUtil.makeCleanSql(aSql, false, '"');
 		int pos = aSql.indexOf(' ');

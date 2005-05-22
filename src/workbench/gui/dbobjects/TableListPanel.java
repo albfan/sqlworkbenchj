@@ -85,7 +85,7 @@ import workbench.gui.sql.ExecuteSqlDialog;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.FilenameChangeListener;
 import workbench.interfaces.ShareableDisplay;
-import workbench.interfaces.Spooler;
+import workbench.interfaces.Exporter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -99,16 +99,13 @@ import workbench.exception.ExceptionUtil;
 import java.awt.Component;
 
 
-
 /**
- *
  * @author  support@sql-workbench.net
- *
  */
 public class TableListPanel
 	extends JPanel
 	implements ActionListener, ChangeListener, ListSelectionListener, MouseListener,
-						 ShareableDisplay, Spooler, FilenameChangeListener
+						 ShareableDisplay, Exporter, FilenameChangeListener
 {
 	private WbConnection dbConnection;
 	private JPanel listPanel;
@@ -171,7 +168,7 @@ public class TableListPanel
 	private static final String DELETE_TABLE_CMD = "delete-table-data";
 	private static final String COMPILE_CMD = "compile-procedure";
 
-	private JMenu showDataMenu;
+	private WbMenu showDataMenu;
 	private String[] availableTableTypes;
 	private WbAction dropIndexAction;
 	private WbAction createIndexAction;
@@ -244,7 +241,7 @@ public class TableListPanel
 		this.triggers = new TriggerDisplayPanel();
 
 		this.listPanel = new JPanel();
-		this.tableList = new WbTable();
+		this.tableList = new WbTable(false);
 		this.tableList.setSelectOnRightButtonClick(true);
 		this.tableList.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		this.tableList.setCellSelectionEnabled(false);
@@ -265,10 +262,8 @@ public class TableListPanel
 		this.createDefaultSelect.setEnabled(true);
 		this.createDefaultSelect.initMenuDefinition("MnuTxtCreateDefaultSelect");
 
-		this.tableList.addPopupAction(this.createDummyInsertAction, false);
-		this.tableList.addPopupAction(this.createDefaultSelect, false);
-
 		this.extendPopupMenu();
+		
 		this.findPanel = new FindPanel(this.tableList);
 
 		ReloadAction a = new ReloadAction(this);
@@ -362,45 +357,55 @@ public class TableListPanel
 
 	private void extendPopupMenu()
 	{
-		JPopupMenu popup = this.tableList.getPopupMenu();
-		popup.addSeparator();
-		this.dropTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDropDbObject"));
-		this.dropTableItem.setActionCommand(DROP_CMD);
-		this.dropTableItem.setIcon(ResourceMgr.getImage("blank"));
-		this.dropTableItem.addActionListener(this);
-		this.dropTableItem.setEnabled(false);
-		popup.add(this.dropTableItem);
-
-		this.deleteTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDeleteTableData"));
-		this.deleteTableItem.setActionCommand(DELETE_TABLE_CMD);
-		this.deleteTableItem.setBlankIcon();
-		this.deleteTableItem.addActionListener(this);
-		this.deleteTableItem.setEnabled(true);
-		popup.add(this.deleteTableItem);
+		if (this.parentWindow != null)
+		{
+			this.showDataMenu = new WbMenu(ResourceMgr.getString("MnuTxtShowTableData"));
+			this.showDataMenu.setEnabled(false);
+			this.updateShowDataMenu();
+			this.showDataMenu.setIcon(ResourceMgr.getImage("blank"));
+			this.tableList.addPopupMenu(this.showDataMenu, false);
+		}
+		
+		this.tableList.addPopupAction(this.createDummyInsertAction, true);
+		this.tableList.addPopupAction(this.createDefaultSelect, false);
 
 		this.scriptTablesItem = new WbMenuItem(ResourceMgr.getString("MnuTxtCreateScript"));
 		this.scriptTablesItem.setIcon(ResourceMgr.getImage("script"));
 		this.scriptTablesItem.setActionCommand(SCRIPT_CMD);
 		this.scriptTablesItem.addActionListener(this);
 		this.scriptTablesItem.setEnabled(true);
+		this.scriptTablesItem.setToolTipText(ResourceMgr.getDescription("MnuTxtCreateScript"));
+		this.tableList.addPopupMenu(this.scriptTablesItem, false);
+		
+		JPopupMenu popup = this.tableList.getPopupMenu();
 		popup.addSeparator();
-		popup.add(this.scriptTablesItem);
-
+		
 		WbMenuItem item = new WbMenuItem(ResourceMgr.getString("MnuTxtSchemaReport"));
-		item.setIcon(ResourceMgr.getImage("blank"));
+		item.setToolTipText(ResourceMgr.getDescription("MnuTxtSchemaReport"));
+		item.setBlankIcon();
 		item.setActionCommand(SCHEMA_REPORT_CMD);
 		item.addActionListener(this);
 		item.setEnabled(true);
 		popup.add(item);
+		
+		popup.addSeparator();
+		
+		this.dropTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDropDbObject"));
+		this.dropTableItem.setToolTipText(ResourceMgr.getDescription("MnuTxtDropDbObject"));
+		this.dropTableItem.setActionCommand(DROP_CMD);
+		this.dropTableItem.setBlankIcon();
+		this.dropTableItem.addActionListener(this);
+		this.dropTableItem.setEnabled(false);
+		popup.add(this.dropTableItem);
 
-		if (this.parentWindow != null)
-		{
-			this.showDataMenu = new WbMenu(ResourceMgr.getString("MnuTxtShowTableData"));
-			this.showDataMenu.setEnabled(false);
-			this.updateShowDataMenu();
-			popup.addSeparator();
-			popup.add(this.showDataMenu);
-		}
+		this.deleteTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDeleteTableData"));
+		this.deleteTableItem.setToolTipText(ResourceMgr.getDescription("MnuTxtDeleteTableData"));
+		this.deleteTableItem.setActionCommand(DELETE_TABLE_CMD);
+		this.deleteTableItem.setBlankIcon();
+		this.deleteTableItem.addActionListener(this);
+		this.deleteTableItem.setEnabled(true);
+		popup.add(this.deleteTableItem);
+		
 	}
 
 	private Font boldFont = null;
@@ -435,43 +440,44 @@ public class TableListPanel
 		if (panels == null) return;
 
 		int current = this.parentWindow.getCurrentPanelIndex();
-		int newCount = panels.length;
-		if (current > newCount - 1) return;
-
+		int newCount = panels.length  + 1;
 		int currentCount = this.showDataMenu.getItemCount();
 
+		// re-create the menu
+		if (newCount != currentCount && currentCount > 0)
+		{
+			int count = this.showDataMenu.getItemCount();
+			for (int i=0; i < count; i++)
+			{
+				JMenuItem item = this.showDataMenu.getItem(0);
+				item.removeActionListener(this);
+			}
+			this.showDataMenu.removeAll();
+		}
+		
 		if (this.boldFont == null) this.initFonts();
 		JMenuItem item = null;
 
 		for (int i=0; i < newCount; i++)
 		{
-			if (i >= currentCount)
+			if (i == newCount - 1)
 			{
-				item = new WbMenuItem();
+				item = new WbMenuItem(ResourceMgr.getString("LabelShowDataInNewTab"));
+				item.setActionCommand("panel--1");
+				showDataMenu.addSeparator();
+			}
+			else
+			{
+				item = new WbMenuItem(panels[i]);
 				item.setActionCommand("panel-" + i);
-				item.addActionListener(this);
-				this.showDataMenu.add(item);
+				if (i == current)
+				{
+					item.setFont(this.boldFont);
+				}
 			}
-			else
-			{
-				item = this.showDataMenu.getItem(i);
-			}
-
-			item.setText(panels[i]);
-			if (i == current)
-			{
-				item.setFont(this.boldFont);
-			}
-			else
-			{
-				item.setFont(this.standardFont);
-			}
-		}
-		int i = newCount;
-		while (i < this.showDataMenu.getItemCount())
-		{
-			this.showDataMenu.remove(i);
-			i++;
+			item.setToolTipText(ResourceMgr.getDescription("LabelShowDataInNewTab"));
+			item.addActionListener(this);
+			this.showDataMenu.add(item);
 		}
 	}
 
@@ -681,10 +687,11 @@ public class TableListPanel
 		if (this.dbConnection.getMetadata().isOracle())
 		{
 			this.recompileItem = new WbMenuItem(ResourceMgr.getString("MnuTxtRecompile"));
+			this.recompileItem.setToolTipText(ResourceMgr.getDescription("MnuTxtRecompile"));
 			this.recompileItem.setActionCommand(COMPILE_CMD);
 			this.recompileItem.addActionListener(this);
 			this.recompileItem.setEnabled(false);
-			//this.recompileItem.setIcon(ResourceMgr.getImage("blank"));
+			this.recompileItem.setBlankIcon();
 			JPopupMenu popup = this.tableList.getPopupMenu();
 			popup.add(this.recompileItem);
 		}
@@ -928,6 +935,10 @@ public class TableListPanel
 		if (e.getSource() == this.tableList.getSelectionModel() && !this.suspendTableSelection)
 		{
 			checkCompileMenu();
+			if (this.showDataMenu != null)
+			{
+				this.showDataMenu.setEnabled(this.tableList.getSelectedRowCount() == 1);
+			}
 			this.updateDisplay();
 		}
 		else if (e.getSource() == this.indexes.getSelectionModel())
@@ -1492,13 +1503,23 @@ public class TableListPanel
 
 	private void showTableData(int panelIndex)
 	{
-		final SqlPanel panel = (SqlPanel)this.parentWindow.getSqlPanel(panelIndex);
+		final SqlPanel panel;
+		
+		if (panelIndex == -1)
+		{
+			panel = (SqlPanel)this.parentWindow.addTab();
+		}
+		else
+		{
+		 panel = (SqlPanel)this.parentWindow.getSqlPanel(panelIndex);
+		}
+		
 		String sql = this.buildSqlForTable();
 		if (sql != null)
 		{
 			panel.setStatementText(sql);
 			this.parentWindow.show();
-			this.parentWindow.selectTab(panelIndex);
+			if (panelIndex > -1) this.parentWindow.selectTab(panelIndex);
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
@@ -1512,7 +1533,7 @@ public class TableListPanel
 	private String buildSqlForTable()
 	{
 		if (this.selectedTableName == null || this.selectedTableName.length() == 0) return null;
-		String table = SqlUtil.quoteObjectname(this.selectedTableName);
+		TableIdentifier tbl = new TableIdentifier(this.selectedSchema, this.selectedTableName);
 
 		if (this.shouldRetrieveTable || this.tableDefinition.getRowCount() == 0)
 		{
@@ -1533,6 +1554,7 @@ public class TableListPanel
 
 		sql.append("SELECT ");
 		boolean quote = false;
+		DbMetadata meta = this.dbConnection.getMetadata();
 		for (int i=0; i < colCount; i++)
 		{
 			String column = this.tableDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
@@ -1542,14 +1564,7 @@ public class TableListPanel
 			sql.append(column);
 		}
 		sql.append("\nFROM ");
-		if (this.selectedSchema != null && this.selectedSchema.trim().length() > 0)
-		{
-			sql.append(this.selectedSchema);
-			sql.append(".");
-		}
-
-		sql.append(table);
-
+		sql.append(tbl.getTableExpression(this.dbConnection));
 		return sql.toString();
 	}
 	
@@ -1785,16 +1800,10 @@ public class TableListPanel
 			int row = rows[i];
 			String owner = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
 			String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+			TableIdentifier tbl = new TableIdentifier(owner, table);
+			
 			String type = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-
-			if (owner != null)
-			{
-				tables.put(owner + "." + table, type.toUpperCase());
-			}
-			else
-			{
-				tables.put(table, type.toUpperCase());
-			}
+			tables.put(tbl.getTableExpression(this.dbConnection), type.toLowerCase());
 		}
 		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
 		ObjectScripterUI ui = new ObjectScripterUI(s);
@@ -2008,7 +2017,7 @@ public class TableListPanel
 		t.start();
 	}
 
-	public void spoolData()
+	public void exportData()
 	{
 		int rowCount = this.tableList.getSelectedRowCount();
 		if (rowCount <= 0) return;

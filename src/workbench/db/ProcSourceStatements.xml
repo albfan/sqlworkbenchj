@@ -61,6 +61,7 @@
     </void> 
    </object> 
   </void> 
+  
   <void method="put"> 
    <string>Microsoft SQL Server</string> 
    <object class="workbench.db.GetMetaDataSql"> 

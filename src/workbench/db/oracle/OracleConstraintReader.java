@@ -66,7 +66,7 @@ public class OracleConstraintReader
 		{
 			stmt = dbConnection.prepareStatement(sql);
 			stmt.setString(1, aTable.getSchema());
-			stmt.setString(2, aTable.getTable());
+			stmt.setString(2, aTable.getTableName());
 
 			rs = stmt.executeQuery();
 			int count = 0;
@@ -76,6 +76,7 @@ public class OracleConstraintReader
 				String constraint = rs.getString(2);
 				if (constraint != null)
 				{
+					// NOT NULL constraints do not need to be taken into account
           if (constraint.trim().endsWith("NOT NULL")) continue;
 					if (count > 0)
 					{

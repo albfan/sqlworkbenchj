@@ -1327,23 +1327,23 @@ public class DataPumper
 			}
 			if (target == null)
 			{
-				this.targetTable.findAndSelectTable(source.getTable());
+				this.targetTable.findAndSelectTable(source.getTableName());
 			}
 		}
 		else if (evt.getSource() == this.targetTable && target != null && source == null)
 		{
-			this.sourceTable.findAndSelectTable(target.getTable());
+			this.sourceTable.findAndSelectTable(target.getTableName());
 		}
 
 		if (target != null && target.isNewTable())
 		{
-			String name = target.getTable();
+			String name = target.getTableName();
 			if (name == null)
 			{
 				String def = null;
 				if (source != null)
 				{
-					def = source.getTable();
+					def = source.getTableName();
 				}
 				name = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("TxtEnterNewTableName"), def);
 				if (name != null)
@@ -1473,7 +1473,7 @@ public class DataPumper
 		if (target == null) return;
 
 		if (id.isNewTable())
-			s = id.getTable();
+			s = id.getTableName();
 		else
 			s = id.getTableExpression();
 		result.append("\n     -" + WbCopy.PARAM_TARGETTABLE + "=");

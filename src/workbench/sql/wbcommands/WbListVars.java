@@ -33,7 +33,7 @@ public class WbListVars extends SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult(getVerb());
+		StatementRunnerResult result = new StatementRunnerResult();
 		result.addDataStore(VariablePool.getInstance().getVariablesDataStore());
 		result.setSuccess();
 		return result;

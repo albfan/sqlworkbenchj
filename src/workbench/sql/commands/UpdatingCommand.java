@@ -42,7 +42,7 @@ public class UpdatingCommand extends SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		StatementRunnerResult result = new StatementRunnerResult();
 		try
 		{
 			boolean isPrepared = false;

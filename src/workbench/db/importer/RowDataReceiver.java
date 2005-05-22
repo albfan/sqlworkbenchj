@@ -25,4 +25,5 @@ public interface RowDataReceiver
 	void setTargetTable(String tableName, ColumnIdentifier[] columns)	throws SQLException;
 	void importFinished();
 	void importCancelled();
+	void tableImportError();
 }

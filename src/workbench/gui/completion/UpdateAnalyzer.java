@@ -43,10 +43,10 @@ public class UpdateAnalyzer
 	{
 		int setPos = StringUtil.findPattern(SET_PATTERN, sql, 0);
 
-		if ( setPos == -1 || setPos > -1 && pos < setPos )
+		if ( setPos == -1 || setPos > -1 && cursorPos < setPos )
 		{
 			context = CONTEXT_TABLE_LIST;
-			String q = this.getQualifierLeftOfCursor(sql, pos);
+			String q = this.getQualifierLeftOfCursor(sql, cursorPos);
 			if (q != null)
 			{
 				this.schemaForTableList = q;
