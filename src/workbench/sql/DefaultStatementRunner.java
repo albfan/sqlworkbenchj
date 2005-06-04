@@ -1,5 +1,5 @@
 /*
- * StatementRunner.java
+ * DefaultStatementRunner.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -21,6 +21,7 @@ import java.util.List;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.interfaces.ResultLogger;
+import workbench.interfaces.StatementRunner;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -62,8 +63,8 @@ import workbench.sql.wbcommands.WbFeedback;
  *
  * @author  support@sql-workbench.net
  */
-public class StatementRunner
-	implements PropertyChangeListener
+public class DefaultStatementRunner
+	implements PropertyChangeListener, StatementRunner
 {
 	private WbConnection dbConnection;
 	private StatementRunnerResult result;
@@ -86,7 +87,7 @@ public class StatementRunner
 	private boolean verboseLogging;
 	private boolean supportsSelectInto = false;
 	
-	public StatementRunner()
+	public DefaultStatementRunner()
 	{
 		this.verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
 		Settings.getInstance().addPropertyChangeListener(this);
