@@ -106,6 +106,29 @@ public class WbProperties
 		bw.flush();
 	}
 
+	public int getIntProperty(String property, int defaultValue)
+	{
+		String value = this.getProperty(property, null);
+		if (value == null) return defaultValue;
+		return StringUtil.getIntValue(value, defaultValue);
+	}
+	
+	public boolean getBoolProperty(String property, boolean defaultValue)
+	{
+		String value = this.getProperty(property, null);
+		if (value == null) return defaultValue;
+		return StringUtil.stringToBool(value);
+	}
+	
+	public void setProperty(String property, int value)
+	{
+		this.setProperty(property, Integer.toString(value));
+	}
+	
+	public void setProperty(String property, boolean value)
+	{
+		this.setProperty(property, Boolean.toString(value));
+	}
 	
 	private String getFirstTwoSections(String aString)
 	{

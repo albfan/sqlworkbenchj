@@ -14,7 +14,7 @@ package workbench.db;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
@@ -120,11 +120,11 @@ public class ObjectScripter
 				}
 				else if (TYPE_INSERT.equalsIgnoreCase(type))
 				{
-					source = this.meta.getEmptyInsert(null, null, object);
+					source = this.meta.getEmptyInsert(tbl);
 				}
 				else if (TYPE_SELECT.equalsIgnoreCase(type))
 				{
-					source = this.meta.getDefaultSelect(null, null, object);
+					source = this.meta.getDefaultSelect(tbl);
 				}
 			}
 			catch (Exception e)

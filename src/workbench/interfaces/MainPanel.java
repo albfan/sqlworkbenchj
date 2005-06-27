@@ -45,4 +45,5 @@ public interface MainPanel
 	boolean isBusy();
 	void dispose();
 	void saveSettings();
+	void panelSelected();
 }

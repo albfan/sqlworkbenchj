@@ -55,11 +55,23 @@ public class StatementContext
 			analyzer.retrieveObjects();
 		}
 	}
+
+	public boolean appendDotToSelection()
+	{
+		if (analyzer == null) return false;
+		return analyzer.appendDotToSelection();
+	}
 	
 	public boolean getOverwriteCurrentWord()
 	{
 		if (analyzer == null) return false;
 		return analyzer.getOverwriteCurrentWord();
+	}
+	
+	public String getColumnPrefix()
+	{
+		if (analyzer == null) return null;
+		return analyzer.getColumnPrefix();
 	}
 	
 	private final Pattern SUBSELECT_PATTERN = Pattern.compile("\\(\\s*SELECT.*FROM.*\\)", Pattern.CASE_INSENSITIVE);
@@ -69,6 +81,7 @@ public class StatementContext
 	private boolean inSubSelect(WbConnection conn, String sql, int pos)
 	{
 		Matcher m = SUBSELECT_PATTERN.matcher(sql);
+		if (m == null) return false;
 		int start = 0;
 		int end = -1;
 		while (m.find())

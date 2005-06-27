@@ -30,6 +30,8 @@ public class ColumnReference
 	private String updateRule;
 	private String deleteRule;
 	private TagWriter tagWriter = new TagWriter();
+	private int updateRuleValue;
+	private int deleteRuleValue;
 	
 	public ColumnReference()
 	{
@@ -39,6 +41,8 @@ public class ColumnReference
 	{
 		this.tagWriter.setNamespace(namespace);
 	}
+	public void setUpdateRuleValue(int value) { this.updateRuleValue = value; }
+	public void setDeleteRuleValue(int value) { this.deleteRuleValue = value; }
 	public void setConstraintName(String name) { this.fkName = name; }
 	public void setForeignColumn(String col) { this.foreignColumn = col; }
 	public void setForeignTable(String tbl) { this.foreignTable = tbl; }
@@ -66,8 +70,8 @@ public class ColumnReference
 		tagWriter.appendTag(result, indent, ReportTable.TAG_TABLE_NAME, this.foreignTable);
 		tagWriter.appendTag(result, indent, ReportColumn.TAG_COLUMN_NAME, this.foreignColumn);
 		tagWriter.appendTag(result, indent, TAG_CONSTRAINT_NAME, this.fkName);
-		tagWriter.appendTag(result, indent, TAG_DELETE_RULE, this.deleteRule);
-		tagWriter.appendTag(result, indent, TAG_UPDATE_RULE, this.updateRule);
+		tagWriter.appendTag(result, indent, TAG_DELETE_RULE, this.deleteRule, "jdbcValue", Integer.toString(this.deleteRuleValue));
+		tagWriter.appendTag(result, indent, TAG_UPDATE_RULE, this.updateRule, "jdbcValue", Integer.toString(this.updateRuleValue));
 		return result;
 	}
 	

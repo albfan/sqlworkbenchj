@@ -14,14 +14,16 @@ package workbench.sql.wbcommands;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import workbench.db.ColumnIdentifier;
 
 import workbench.db.WbConnection;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.ParsingInterruptedException;
 import workbench.db.importer.TextFileParser;
 import workbench.db.importer.XmlDataFileParser;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -293,6 +295,7 @@ public class WbImport extends SqlCommand
 						return result;
 					}
 				}
+				
 				if (!header && filecolumns == null)
 				{
 					result.addMessage(ResourceMgr.getString("ErrorHeaderOrColumnDefRequired"));
@@ -310,6 +313,24 @@ public class WbImport extends SqlCommand
 					return result;
 				}
 
+				if (header && filecolumns == null)
+				{
+					List l = textParser.getColumnsFromFile();
+					List cols = new ArrayList(l.size());
+					for (int i=0; i<l.size(); i++)
+					{
+						ColumnIdentifier c = (ColumnIdentifier)l.get(i);
+						cols.add(c.getColumnName());
+					}
+					textParser.setColumns(cols);
+					if (textParser.getColumnCount() == 0)
+					{
+						result.setFailure();
+						result.addMessage(ResourceMgr.getString("ErrorColumnsNotFound"));
+						return result;
+					}
+				}
+				
 				if (importcolumns != null)
 				{
 					List cols = StringUtil.stringToList(importcolumns, ",", true);
@@ -338,7 +359,6 @@ public class WbImport extends SqlCommand
 			}
 			imp.setProducer(textParser);
 		}
-
 		else if ("xml".equalsIgnoreCase(type))
 		{
 			XmlDataFileParser xmlParser = new XmlDataFileParser();

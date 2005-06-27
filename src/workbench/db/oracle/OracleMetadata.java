@@ -22,10 +22,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import workbench.db.DbMetadata;
+import workbench.db.ErrorInformationReader;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
+import workbench.db.SchemaInformationReader;
 import workbench.db.SequenceReader;
-import workbench.exception.ExceptionUtil;
+import workbench.db.WbConnection;
+import workbench.util.ExceptionUtil;
 
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
@@ -37,7 +40,7 @@ import workbench.util.StrBuffer;
  * @author  support@sql-workbench.net
  */
 public class OracleMetadata
-	implements SequenceReader, ProcedureReader
+	implements SequenceReader, ProcedureReader, ErrorInformationReader, SchemaInformationReader
 {
 	private Connection connection;
 	private Statement statement;
@@ -504,6 +507,97 @@ public class OracleMetadata
 		}
 		return result;
 	}
+
+	private String CURRENT_SCHEMA_SQL = "select schemaname from v$session where audsid = userenv('sessionid')";
+
+	public String getCurrentSchema(WbConnection con)
+	{
+		String schema = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+			stmt = con.getSqlConnection().prepareStatement(CURRENT_SCHEMA_SQL);
+			rs = stmt.executeQuery();
+			if (rs.next())
+			{
+				schema = rs.getString(1);
+			}
+		}
+		catch (Exception e)
+		{
+			schema = con.getCurrentUser();
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		return schema;
+	}
+	
+	private String ERROR_QUERY = "SELECT line, position, text " + 
+															"  FROM all_errors  " +
+															" WHERE owner = ?  " +
+															"   AND type = ? " +
+															"   AND name = ? ";
+				
+	/**
+	 *	Return the errors reported in the all_errors table for Oracle.
+	 *	This method can be used to obtain error information after a CREATE PROCEDURE
+	 *	or CREATE TRIGGER statement has been executed.
+	 *
+	 *	@return extended error information if the current DBMS is Oracle. An empty string otherwise.
+	 */
+  public String getErrorInfo(String schema, String objectName, String objectType)
+  {
+		if (objectType == null || objectName == null) return "";
+
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+
+    StrBuffer result = new StrBuffer(250);
+    try
+    {
+			if (objectName.indexOf('.') > -1)
+			{
+				schema = objectName.substring(0, objectName.indexOf('.'));
+			}
+			else if (schema == null)
+			{
+				schema = this.connection.getMetaData().getUserName();
+			}
+      stmt = this.connection.prepareStatement(ERROR_QUERY);
+			stmt.setString(1, schema.toUpperCase());
+			stmt.setString(2, objectType.toUpperCase());
+			stmt.setString(3, objectName.toUpperCase());
+			
+      rs = stmt.executeQuery();
+			int count = 0;
+      while (rs.next())
+      {
+				if (count > 0) result.append("\r\n");
+        int line = rs.getInt(1);
+        int pos = rs.getInt(2);
+        String msg = rs.getString(3);
+        result.append("Error at line ");
+        result.append(line);
+        result.append(", position ");
+        result.append(pos);
+        result.append(": ");
+        result.append(msg);
+        count ++;
+      }
+    }
+    catch (SQLException e)
+    {
+			LogMgr.logError("OracleMetadata.getExtendedErrorInfo()", "Error retrieving error information",e);
+    }
+    finally
+    {
+			SqlUtil.closeAll(rs, stmt);
+    }
+    return result.toString();
+  }	
 	
 	public void done()
 	{

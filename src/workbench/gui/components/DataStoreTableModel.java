@@ -194,6 +194,7 @@ public class DataStoreTableModel
 	public int getColumnWidth(int aColumn)
 	{
 		if (this.showStatusColumn && aColumn == 0) return 5;
+		if (this.dataCache == null) return 0;
 		try
 		{
 			return this.dataCache.getColumnDisplaySize(aColumn - this.statusOffset);

@@ -105,7 +105,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.34 2005-05-22 14:43:34 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.35 2005-06-27 20:03:33 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -704,7 +704,6 @@ public class JEditTextArea
 	{
 		if(horizontalOffset == this.horizontalOffset) return;
 		this.horizontalOffset = horizontalOffset;
-		//System.out.println("hori=" + this.horizontalOffset);
 		if(horizontalOffset != horizontal.getValue())	updateScrollBars();
 		painter.repaint();
 	}
@@ -1121,6 +1120,7 @@ public class JEditTextArea
 		int pos = getCaretPosition();
 		int start = getLineStartOffset(line);
 		return (pos - start);
+		
 	}
 	
 	/**
@@ -1314,14 +1314,16 @@ public class JEditTextArea
 	{
 		int currentLine = getCaretLine();
 		String line = this.getLineText(currentLine);
-		int pos = this.getCaretPositionInLine(currentLine);
-		if (pos == 0) return;
+		int caret = this.getCaretPosition();
+		int lineStart = this.getLineStartOffset(currentLine);
+		int pos = (caret - lineStart);
+		//this.getCaretPositionInLine(currentLine);
+		if (pos <= 0) return;
 		if (Character.isWhitespace(line.charAt(pos - 1))) return;
-		int start = -1;
-		start = StringUtil.findWordBoundary(line, pos - 1, wordBoundaries);
+		int start = StringUtil.findWordBoundary(line, pos - 1, wordBoundaries);
 		if (start > -1) 
 		{
-			this.select(start + 1, pos);
+			this.select(lineStart + start + 1, caret);
 		}
 	}
 	/**

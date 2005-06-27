@@ -43,7 +43,7 @@ public class NewDbExplorerPanelAction
 		{
 			public void run()
 			{
-				mainWin.newDbExplorerPanel();
+				mainWin.newDbExplorerPanel(true);
 			}
 		});
 	}

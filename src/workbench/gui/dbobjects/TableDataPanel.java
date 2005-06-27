@@ -40,7 +40,7 @@ import javax.swing.border.EtchedBorder;
 
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.StopAction;
@@ -398,7 +398,7 @@ public class TableDataPanel
 			dataDisplay.scriptStarting();
 			dataDisplay.setMaxRows(this.getMaxRows());
 			dataDisplay.runStatement(sql);
-			dataDisplay.setUpdateTable(this.table.getTableExpression(this.dbConnection));
+			dataDisplay.setUpdateTable(this.table);
 			String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
 			dataDisplay.setPrintHeader(header);
 			dataDisplay.setStatusMessage("");

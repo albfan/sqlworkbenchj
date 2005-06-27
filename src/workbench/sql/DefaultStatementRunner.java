@@ -392,9 +392,13 @@ public class DefaultStatementRunner
 	{
 		try
 		{
-			if (this.currentCommand != null)
+			this.isCancelled = true;
+			if (this.currentConsumer != null)
 			{
-				this.isCancelled = true;
+				this.currentConsumer.cancel();
+			}
+			else if (this.currentCommand != null)
+			{
 				this.currentCommand.cancel();
 			}
 		}

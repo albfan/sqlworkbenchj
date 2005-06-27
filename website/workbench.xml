@@ -71,7 +71,7 @@
 				The functionality of the DataPumper is also available as a SQL command for batch processing</li>
 			<li>Support for <tt>PreparedStatement</tt> if the JDBC driver implements the necessary meta data calls (Oracle does not)</li>
 			<li>It can be used in batch mode. SQL scripts (including special <a target="_blank" href="http://www.sql-workbench.net/manual/wb-commands.html">Workbench commands</a>) by running scripts from the command line (e.g. for exporting/importing data)</li>
-			<!-- <li>Auto completion for tables and columns in SQL statements</li> -->
+			<li>Popup window for table and columns in SQL statements (<image-link title="Column completion" name="completion.png">Screenshot</image-link>)</li>
 			<li>SQLWorkbench/J is <b>free</b> <a href="manual/information.html">License agreement</a></li>
 
 		</ul>

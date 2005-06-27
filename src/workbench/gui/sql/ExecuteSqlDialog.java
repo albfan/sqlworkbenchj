@@ -26,7 +26,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 
 import workbench.db.WbConnection;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbButton;
 import workbench.resource.ResourceMgr;

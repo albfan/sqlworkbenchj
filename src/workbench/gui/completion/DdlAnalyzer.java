@@ -34,7 +34,6 @@ public class DdlAnalyzer
 	
 	protected void checkContext()
 	{
-
 		String verb = SqlUtil.getSqlVerb(this.sql);
 		String q = this.getQualifierLeftOfCursor(sql, cursorPos);
 		if (q != null)
@@ -58,7 +57,7 @@ public class DdlAnalyzer
 		if (tablePos > -1 && cursorPos > tablePos + 5)
 		{
 			context = CONTEXT_TABLE_LIST;
-			setTableTypeFilter(DbMetadata.TABLE_TYPE_TABLE);
+			setTableTypeFilter(this.dbConnection.getMetadata().getTableTypeName());
 		}
 		else 
 		{

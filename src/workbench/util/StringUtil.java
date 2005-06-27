@@ -73,6 +73,21 @@ public class StringUtil
 		return replaceToBuffer(null, aString, aValue, aReplacement);
 	}
 
+	/**
+	 * Capitalize a single word.
+	 * (write the first character in uppercase, the rest in lower case)
+	 * This does not loop through the entire string to capitalize every word.
+	 */
+	public static final String capitalize(String word)
+	{
+		if (word == null) return null;
+		if (word.length() == 0) return word;
+		StringBuffer s = new StringBuffer(word.toLowerCase());
+		char c = s.charAt(0);
+		s.setCharAt(0, Character.toUpperCase(c));
+		return s.toString();
+	}
+	
 	public static final String makeFilename(String input)
 	{
 		return input.replaceAll("[\t\\:\\\\/\\?\\*\\|<>\"'\\{\\}$%§\\[\\]\\^|\\&]", "").toLowerCase();
@@ -524,14 +539,6 @@ public class StringUtil
 		return result;
 	}
 
-	public static final String capitalize(String aString)
-	{
-		StringBuffer result = new StringBuffer(aString);
-		char ch = aString.charAt(0);
-		result.setCharAt(0, Character.toUpperCase(ch));
-		return result.toString();
-	}
-
 	public static String getStackTrace(Throwable th)
 	{
 		StringWriter writer = new StringWriter(500);
@@ -853,13 +860,14 @@ public class StringUtil
 
 	public static final String getWordLeftOfCursor(String text, int pos, String wordBoundaries)
 	{
+		if (pos < 0) return null;
 		int len = text.length();
 		int end = pos;
 		if (pos >= len) 
 		{
 			end = len - 1;
 		}
-		if (end == 0) return null;
+		if (end < 1) return null;
 		
 		if (Character.isWhitespace(text.charAt(end-1))) return null;
 		
@@ -867,7 +875,7 @@ public class StringUtil
 		int startOfWord = findWordBoundary(text, end-1, wordBoundaries);
 		if (startOfWord > 0)
 		{
-			word = text.substring(startOfWord+1, end);
+			word = text.substring(startOfWord+1, Math.min(pos,len));
 		}
 
 		return word;

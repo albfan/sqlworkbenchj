@@ -23,7 +23,7 @@ import javax.swing.SwingConstants;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.interfaces.Connectable;

@@ -21,7 +21,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.datacopy.DataCopier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
@@ -230,7 +230,7 @@ public class WbCopy
 		copier.setCommitEvery(commit);
 		copier.setUseBatch(useBatch);
 		copier.setDeleteTarget(delete);
-
+		
 		TableIdentifier targetId = new TableIdentifier(targettable);
 		targetId.setNewTable(createTable);
 
@@ -244,21 +244,26 @@ public class WbCopy
 				boolean hasColumns = columns != null;
 				boolean containsMapping = hasColumns && (columns.indexOf('/') > -1);
 
-				if (!hasColumns || containsMapping)
+				if ((containsMapping || !hasColumns) && !createTable)
 				{
 					Map mapping = this.parseMapping();
-					copier.copyFromTable(sourceCon, targetCon, srcTable, targetId, mapping, where, false, false);
+					copier.copyFromTable(sourceCon, targetCon, srcTable, targetId, mapping, where, createTable, dropTable);
+				}
+				else if (createTable)
+				{
+					ColumnIdentifier[] cols = this.parseColumns();
+					copier.copyToNewTable(sourceCon, targetCon, srcTable, targetId, cols, where, dropTable);
 				}
 				else
 				{
-					ColumnIdentifier[] cols = this.parseColumns();
-					copier.copyToNewTable(sourceCon, targetCon, srcTable, targetId, cols, where);
+					result.addMessage(ResourceMgr.getString("ErrorCopyWrongParameters"));
+					result.setFailure();
+					return result;
 				}
 			}
 			else
 			{
 				ColumnIdentifier[] cols = this.parseColumns(sourcequery, sourceCon);
-				//if (createTable) targetId.
 				copier.copyFromQuery(sourceCon, targetCon, sourcequery, targetId, cols);
 			}
 
@@ -351,6 +356,7 @@ public class WbCopy
 	private ColumnIdentifier[] parseColumns()
 	{
 		String cols = cmdLine.getValue(PARAM_COLUMNS);
+		if (cols == null) return null;
 		List l = StringUtil.stringToList(cols, ",");
 		int count = l.size();
 		ColumnIdentifier[] result = new ColumnIdentifier[count];
@@ -365,7 +371,7 @@ public class WbCopy
 	private Map parseMapping()
 	{
 		String cols = cmdLine.getValue(PARAM_COLUMNS);
-		if (cols == null) return null;
+		if (cols == null || cols.length() == 0) return null;
 
 		List l = StringUtil.stringToList(cols, ",");
 		int count = l.size();

@@ -524,18 +524,23 @@ public class ConnectionEditorPanel
 
 	private void showDriverEditorDialog(java.awt.event.ActionEvent evt)//GEN-FIRST:event_showDriverEditorDialog
 	{//GEN-HEADEREND:event_showDriverEditorDialog
-		// not really nice, but works until the driver editor can be
-		// called from a different location...
-		Frame parent = (Frame)(SwingUtilities.getWindowAncestor(this)).getParent();
-		DriverEditorDialog d = new DriverEditorDialog(parent, true);
-		WbSwingUtilities.center(d,parent);
-		d.show();
-    if (!d.isCancelled())
-    {
-  		List drivers = ConnectionMgr.getInstance().getDrivers();
-    	this.setDrivers(drivers);
-    }
-    d.dispose();
+		final Frame parent = (Frame)(SwingUtilities.getWindowAncestor(this)).getParent();
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				DriverEditorDialog d = new DriverEditorDialog(parent, true);
+				WbSwingUtilities.center(d,parent);
+				d.show();
+				if (!d.isCancelled())
+				{
+					List drivers = ConnectionMgr.getInstance().getDrivers();
+					setDrivers(drivers);
+				}
+				d.dispose();
+			}
+		});
+
 	}//GEN-LAST:event_showDriverEditorDialog
 
   // Variables declaration - do not modify//GEN-BEGIN:variables

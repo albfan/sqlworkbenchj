@@ -53,6 +53,7 @@ import workbench.sql.MacroManager;
 import workbench.sql.VariablePool;
 import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
+import workbench.gui.dialogs.WbSplash;
 import workbench.util.WbCipher;
 import workbench.util.WbNullCipher;
 import workbench.util.WbThread;
@@ -66,7 +67,6 @@ public class WbManager
 	implements FontChangedListener, Runnable
 {
 	private static WbManager wb;
-	private Settings settings;
 	private ArrayList mainWindows = new ArrayList();
 	private ArrayList toolWindows = new ArrayList();
 	private WbCipher desCipher = null;
@@ -213,7 +213,7 @@ public class WbManager
 		if (trace) System.out.println("WbManager.setLookAndFeel() - start");
 		try
 		{
-			String className = this.settings.getLookAndFeelClass();
+			String className = Settings.getInstance().getLookAndFeelClass();
 			if (className != null && className.trim().length() > 0)
 			{
 				UIManager.setLookAndFeel(className);
@@ -231,7 +231,7 @@ public class WbManager
 
 		try
 		{
-			Toolkit.getDefaultToolkit().setDynamicLayout(settings.getUseDynamicLayout());
+			Toolkit.getDefaultToolkit().setDynamicLayout(Settings.getInstance().getUseDynamicLayout());
 		}
 		catch (Exception e)
 		{
@@ -244,8 +244,10 @@ public class WbManager
 		if (trace) System.out.println("WbManager.initUI() - start");
 		this.setLookAndFeel();
 
+		Settings settings = Settings.getInstance();
 		UIDefaults def = UIManager.getDefaults();
-		Font stdFont = this.settings.getStandardFont();
+		
+		Font stdFont = settings.getStandardFont();
 
 		def.put("Button.font", stdFont);
 		def.put("CheckBox.font", stdFont);
@@ -276,13 +278,13 @@ public class WbManager
 		def.put("Tree.font", stdFont);
 		def.put("ViewPort.font", stdFont);
 
-		Font dataFont = this.settings.getDataFont();
+		Font dataFont = settings.getDataFont();
 
 		def.put("Table.font", dataFont);
 		def.put("TableHeader.font", dataFont);
 
 		// Polish up the standard look & feel settings
-		Color c = this.settings.getColor("workbench.table.gridcolor");
+		Color c = settings.getColor("workbench.table.gridcolor");
 		if (c == null)
 		{
 			c = Color.LIGHT_GRAY;
@@ -302,7 +304,7 @@ public class WbManager
 			def.put("Button.showMnemonics", Boolean.FALSE);
 		}
 
-		this.settings.addFontChangedListener(this);
+		settings.addFontChangedListener(this);
 		if (trace) System.out.println("WbManager.initUI() - done");
 	}
 
@@ -513,7 +515,7 @@ public class WbManager
 		Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
 		this.shutdownInProgress = true;
 		this.closeAllWindows();
-		if (!this.isBatchMode()) settings.saveSettings();
+		if (!this.isBatchMode()) Settings.getInstance().saveSettings();
 		LogMgr.logInfo("WbManager.doShutdown()", "Stopping " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
 		LogMgr.shutdown();
 		System.exit(errorCode);
@@ -634,8 +636,9 @@ public class WbManager
 			}
 		}
 
+		boolean autoSelect = Settings.getInstance().getBoolProperty("workbench.gui.autoconnect", true);
 		// no connection? then display the connection dialog
-		if (!connected)
+		if (!connected && autoSelect)
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -746,25 +749,36 @@ public class WbManager
 	public void init()
 	{
 		if (trace) System.out.println("WbManager.init() - start");
-		this.settings = Settings.getInstance();
+		
 		LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
 		LogMgr.logInfo("WbManager.init()", "Using Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") );
 		LogMgr.logDebug("WbManager.init()", "Use -Dworkbench.startuptrace=true to display trace messages during startup");
+		
     if (this.cmdLine == null) this.initCmdLine(null);
-		if (this.cmdLine.hasUnknownArguments())
-		{
-			LogMgr.logWarning("WbManager.init()", "Ignoring unknown argument(s) " + StringUtil.listToString(this.cmdLine.getUnknownArguments(), ','));
-		}
 
-		if (!this.batchMode)
+		// batchMode flag is set by initCmdLine()
+		if (this.batchMode)
 		{
-			WbSplash splash = null;
-			if (wb.settings.getShowSplash())
-			{
-				if (trace) System.out.println("WbManager.init() - opening splash window");
-				splash = new WbSplash(null, false);
-				splash.setVisible(true);
-			}
+			runBatch();
+		}
+		else
+		{
+			runGui();
+		}
+		if (trace) System.out.println("WbManager.init() - done.");
+	}
+	
+	private void runGui()
+	{
+		WbSplash splash = null;
+		if (Settings.getInstance().getShowSplash())
+		{
+			if (trace) System.out.println("WbManager.init() - opening splash window");
+			splash = new WbSplash();
+			splash.show();
+		}
+		try
+		{
 			if (trace) System.out.println("WbManager.init() - initializing UI defaults");
 			this.initUI();
 			boolean pumper = cmdLine.isArgPresent(ARG_SHOW_PUMPER);
@@ -782,6 +796,9 @@ public class WbManager
 			{
 				this.openNewWindow(true);
 			}
+		}
+		finally
+		{
 			if (splash != null)
 			{
 				if (trace) System.out.println("WbManager.init() - closing splash window");
@@ -789,35 +806,34 @@ public class WbManager
 				splash.dispose();
 			}
 		}
-		else
+	}
+	
+	private void runBatch()
+	{
+		int exitCode = 0;
+		BatchRunner runner = BatchRunner.initFromCommandLine(cmdLine);
+
+		if (runner != null)
 		{
-			int exitCode = 0;
-			BatchRunner runner = BatchRunner.initFromCommandLine(cmdLine);
-
-			if (runner != null)
+			try
 			{
-				try
-				{
-					runner.connect();
-					runner.execute();
-				}
-				catch (Exception e)
-				{
-					exitCode = 1;
-					LogMgr.logError("WbManager", "Could not initialize the batch runner\n", e);
-				}
-				finally
-				{
-					// disconnects everything
-					ConnectionMgr mgr = ConnectionMgr.getInstance();
-					mgr.disconnectAll();
-				}
-				if (!runner.isSuccess()) exitCode = 1;
+				runner.connect();
+				runner.execute();
 			}
-
-			this.doShutdown(exitCode);
+			catch (Exception e)
+			{
+				exitCode = 1;
+				LogMgr.logError("WbManager", "Could not initialize the batch runner\n", e);
+			}
+			finally
+			{
+				// disconnects everything
+				ConnectionMgr mgr = ConnectionMgr.getInstance();
+				mgr.disconnectAll();
+			}
+			if (!runner.isSuccess()) exitCode = 1;
 		}
-		if (trace) System.out.println("WbManager.init() - done.");
+		this.doShutdown(exitCode);
 	}
 
 	public static void main(String args[])

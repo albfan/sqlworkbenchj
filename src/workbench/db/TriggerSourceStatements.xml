@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <java version="1.4.0_01" class="java.beans.XMLDecoder">
  <object class="java.util.HashMap">
+ 
   <void method="put">
    <string>Oracle</string>
    <object class="workbench.db.GetMetaDataSql">
@@ -53,6 +54,7 @@ where trg.tgrelid = tbl.oid
     </void>
    </object>
   </void>
+  
   <void method="put">
    <string>Microsoft SQL Server</string>
    <object class="workbench.db.GetMetaDataSql">
@@ -85,15 +87,18 @@ where trg.tgrelid = tbl.oid
          when 28 then &apos;INSERT OR UPDATE OR DELETE&apos; 
          when 24 then &apos;UPDATE OR DELETE&apos; 
          when 12 then &apos;INSERT OR DELETE&apos; 
-       end || '\r\non ' || tbl.relname 
+       end || '\non ' || tbl.relname 
        || ' for each row execute procedure '
        ||src.proname 
-       || '();\r\n\r\n--- Source for '
+       || '();\n\n--- Source for '
        || src.proname
-       || ' ---\r\n'
+       || ' ---\n'
+       || 'CREATE OR REPLACE FUNCTION '||src.proname||'() RETURNS TRIGGER AS\n$$\n'
        || src.prosrc 
-from pg_trigger trg, pg_class tbl, pg_proc src
+       || '$$\nlanguage '''||l.lanname||''''
+from pg_trigger trg, pg_class tbl, pg_proc src, pg_language l
 where trg.tgrelid = tbl.oid 
+ AND l.oid = src.prolang
  AND trg.tgfoid = src.oid
 </string> 
     </void>

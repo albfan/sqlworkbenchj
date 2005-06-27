@@ -12,7 +12,9 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Window;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,9 +41,10 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+import workbench.db.TableIdentifier;
 
 import workbench.db.WbConnection;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CopyRowAction;
 import workbench.gui.actions.DeleteRowAction;
@@ -63,10 +66,10 @@ import workbench.interfaces.JobErrorHandler;
 import workbench.interfaces.ResultLogger;
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.StatusBar;
+import workbench.interfaces.StatementRunner;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 import workbench.storage.DmlStatement;
@@ -75,8 +78,6 @@ import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
-import java.awt.Cursor;
-import java.awt.EventQueue;
 
 /**
  *	A Panel which displays the result of a SELECT statement and
@@ -87,103 +88,101 @@ import java.awt.EventQueue;
 public class DwPanel
 	extends JPanel
 	implements TableModelListener, ListSelectionListener, ChangeListener,
-						RowActionMonitor, DbData, DbUpdater, Interruptable, JobErrorHandler,
-						ScriptGenerationMonitor
+	RowActionMonitor, DbData, DbUpdater, Interruptable, JobErrorHandler,
+	ScriptGenerationMonitor
 {
-	private WbTable infoTable;
+	private WbTable dataTable;
 	private DwStatusBar statusBar;
-
+	
 	private String sql;
 	private String lastMessage;
 	private WbConnection dbConnection;
 	private OneLineTableModel errorModel;
 	private OneLineTableModel errorMessageModel;
 	private TableModel resultEmptyMsgModel;
-	private boolean hasResultSet = false;
-
+	private boolean hasResultSet;
+	
 	private WbScrollPane scrollPane;
 	private DefaultCellEditor defaultEditor;
 	private DefaultCellEditor defaultNumberEditor;
 	private int maxRows = 0;
-
-	private boolean success = false;
-	private boolean hasWarning = false;
-	private boolean showLoadProgress = false;
-
-	private UpdateDatabaseAction updateAction = null;
-	private InsertRowAction insertRow = null;
-	private CopyRowAction duplicateRow = null;
-	private DeleteRowAction deleteRow = null;
-	private StartEditAction startEdit = null;
-	private SelectKeyColumnsAction selectKeys = null;
-
-	private boolean editingStarted = false;
-	private boolean batchUpdate = false;
-	private boolean manageUpdateAction = false;
-	private boolean showErrorMessages = false;
-	private boolean readOnly = false;
+	
+	private boolean success;
+	private boolean hasWarning;
+	private boolean showLoadProgress;
+	
+	private UpdateDatabaseAction updateAction;
+	private InsertRowAction insertRow;
+	private CopyRowAction duplicateRow;
+	private DeleteRowAction deleteRow;
+	private StartEditAction startEdit;
+	private SelectKeyColumnsAction selectKeys;
+	
+	private boolean editingStarted;
+	private boolean batchUpdate;
+	private boolean manageUpdateAction;
+	private boolean showErrorMessages;
+	private boolean readOnly;
 	private boolean automaticUpdateTableCheck = true;
-
+	
 	private long rowsAffectedByScript = -1;
-	private boolean scriptRunning = false;
-	private boolean cancel = false;
-	private String[] lastResultMessages = null;
-	private String lastTimingMessage = null;
-
+	private boolean scriptRunning;
+	private boolean cancel;
+	private String[] lastResultMessages;
+	private String lastTimingMessage;
+	
 	private StatementRunner stmtRunner;
-
+	
 	public DwPanel()
 	{
 		this(null);
 	}
-
+	
 	public DwPanel(DwStatusBar aStatusBar)
 	{
 		JTextField stringField = new JTextField();
 		stringField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		stringField.addMouseListener(new TextComponentMouseListener());
 		this.defaultEditor = new DefaultCellEditor(stringField);
-
+		
 		JTextField numberField = new JTextField();
 		numberField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		numberField.setHorizontalAlignment(SwingConstants.RIGHT);
 		numberField.addMouseListener(new TextComponentMouseListener());
-
+		
 		this.defaultNumberEditor = new DefaultCellEditor(numberField);
 		this.initLayout(aStatusBar);
-
+		
 		WbTraversalPolicy pol = new WbTraversalPolicy();
-		pol.setDefaultComponent(infoTable);
-		pol.addComponent(infoTable);
+		pol.setDefaultComponent(dataTable);
+		pol.addComponent(dataTable);
 		//pol.addComponent(this.statusBar.tfMaxRows);
 		this.setFocusTraversalPolicy(pol);
 		this.setDoubleBuffered(true);
-		this.stmtRunner = new StatementRunner();
-		this.stmtRunner.setRowMonitor(this);
-		this.infoTable.addTableModelListener(this);
-
+		this.dataTable.addTableModelListener(this);
+		
 		this.updateAction = new UpdateDatabaseAction(this);
 		this.insertRow = new InsertRowAction(this);
 		this.deleteRow = new DeleteRowAction(this);
 		this.startEdit = new StartEditAction(this);
 		this.duplicateRow = new CopyRowAction(this);
-
+		
 		this.selectKeys = new SelectKeyColumnsAction(this);
-
-		//infoTable.addPopupAction(this.startEdit, true);
-		infoTable.addPopupAction(this.updateAction, true);
-		infoTable.addPopupAction(this.insertRow, true);
-		infoTable.addPopupAction(this.deleteRow, false);
-		this.infoTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		this.infoTable.setRowSelectionAllowed(true);
-		this.infoTable.getSelectionModel().addListSelectionListener(this);
+		
+		//dataTable.addPopupAction(this.startEdit, true);
+		dataTable.addPopupAction(this.updateAction, true);
+		dataTable.addPopupAction(this.insertRow, true);
+		dataTable.addPopupAction(this.deleteRow, false);
+		this.dataTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		this.dataTable.setRowSelectionAllowed(true);
+		this.dataTable.getSelectionModel().addListSelectionListener(this);
 	}
-
+	
 	public SelectKeyColumnsAction getSelectKeysAction()
 	{
 		return this.selectKeys;
 	}
-
+	
 	public StatusBar getStatusBar()
 	{
 		return this.statusBar;
@@ -200,7 +199,7 @@ public class DwPanel
 				{
 					setStatusMessage(ResourceMgr.getString("MsgRetrievingKeyColumns"));
 					WbSwingUtilities.showWaitCursorOnWindow(panel);
-					infoTable.detectDefinedPkColumns();
+					dataTable.detectDefinedPkColumns();
 					setStatusMessage("");
 				}
 				catch (Exception e)
@@ -215,7 +214,7 @@ public class DwPanel
 				{
 					public void run()
 					{
-						infoTable.selectKeyColumns();
+						dataTable.selectKeyColumns();
 					}
 				});
 			}
@@ -226,12 +225,12 @@ public class DwPanel
 	{
 		this.manageUpdateAction = aFlag;
 	}
-
+	
 	public void setDefaultStatusMessage(String aMessage)
 	{
 		this.statusBar.setReadyMsg(aMessage);
 	}
-
+	
 	public void disconnect()
 	{
 		try
@@ -242,28 +241,28 @@ public class DwPanel
 		{
 		}
 	}
-
+	
 	public void setCursor(Cursor newCursor)
 	{
 		super.setCursor(newCursor);
-		this.infoTable.setCursor(newCursor);
+		this.dataTable.setCursor(newCursor);
 	}
-
+	
 	public void setShowLoadProcess(boolean aFlag)
 	{
 		this.showLoadProgress = aFlag;
 	}
-
+	
 	private String updateMsg;
 	private String currentMonitorObject;
 	private int monitorType = -1;
-
+	
 	private void clearRowMonitorSettings()
 	{
 		this.updateMsg = null;
 		this.monitorType = -1;
 	}
-
+	
 	public void setMonitorType(int aType)
 	{
 		this.monitorType = aType;
@@ -301,9 +300,9 @@ public class DwPanel
 			clearRowMonitorSettings();
 		}
 	}
-
+	
 	private String objectMsg = ResourceMgr.getString("MsgProcessObject") + " ";
-
+	
 	/**
 	 *	Callback method from the {@link workbench.interfaces.ScriptGenerationMonitor}
 	 */
@@ -311,7 +310,7 @@ public class DwPanel
 	{
 		statusBar.setStatusMessage(name);
 	}
-
+	
 	/**
 	 *	Callback method from the {@link workbench.storage.RowActionMonitor}
 	 */
@@ -341,7 +340,7 @@ public class DwPanel
 			statusBar.setStatusMessage(msg.toString());
 		}
 	}
-
+	
 	/**
 	 *	Callback method from the {@link workbench.storage.RowActionMonitor}
 	 */
@@ -367,12 +366,12 @@ public class DwPanel
 		if (this.updateMsg == null) msg.append(')');
 		statusBar.setStatusMessage(msg.toString());
 	}
-
+	
 	public void setPrintHeader(String header)
 	{
-		this.infoTable.setPrintHeader(header);
+		this.dataTable.setPrintHeader(header);
 	}
-
+	
 	/**
 	 *	Enables or disables the display of error messages.
 	 */
@@ -380,12 +379,12 @@ public class DwPanel
 	{
 		this.showErrorMessages = aFlag;
 	}
-
+	
 	/**
 	 *	Defines the connection for this DwPanel.
 	 */
 	public void setConnection(WbConnection aConn)
-		throws SQLException
+	throws SQLException
 	{
 		this.clearContent();
 		this.sql = null;
@@ -394,9 +393,25 @@ public class DwPanel
 		this.dbConnection = aConn;
 		this.hasResultSet = false;
 		this.clearStatusMessage();
-		this.stmtRunner.setConnection(aConn);
+		if (this.stmtRunner == null && aConn != null)
+		{
+			try
+			{
+				// Use reflection to create instance to avoid class loading upon startup
+				this.stmtRunner = (StatementRunner)Class.forName("workbench.sql.DefaultStatementRunner").newInstance();
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			this.stmtRunner.setRowMonitor(this);
+		}
+		if (this.stmtRunner != null)
+		{
+			this.stmtRunner.setConnection(aConn);
+		}
 	}
-
+	
 	/**
 	 *	Sets a delegate which performs the DbUpdates.
 	 *  This delegate is passed to the UpdateDatabaseAction. The action will in turn
@@ -408,20 +423,20 @@ public class DwPanel
 	{
 		this.updateAction.setClient(aDelegate);
 	}
-
+	
 	private boolean saveChangesInBackground = false;
-
+	
 	public void setSaveChangesInBackground(boolean flag)
 	{
 		this.saveChangesInBackground = flag;
 	}
-
+	
 	public synchronized void saveChangesToDatabase()
 	{
 		if (this.dbConnection == null) return;
-		if (!this.infoTable.checkPkColumns(true)) return;
+		if (!this.dataTable.checkPkColumns(true)) return;
 		if (!this.shouldSaveChanges(this.dbConnection)) return;
-
+		
 		if (this.saveChangesInBackground)
 		{
 			this.startBackgroundSave();
@@ -429,7 +444,7 @@ public class DwPanel
 		}
 		doSave();
 	}
-
+	
 	private void doSave()
 	{
 		try
@@ -442,7 +457,7 @@ public class DwPanel
 			WbSwingUtilities.showErrorMessage(this, msg + "\n" + e.getMessage());
 		}
 	}
-
+	
 	private void startBackgroundSave()
 	{
 		Thread t = new WbThread("DwPanel update")
@@ -454,22 +469,22 @@ public class DwPanel
 		};
 		t.start();
 	}
-
+	
 	public boolean shouldSaveChanges(WbConnection aConnection)
 	{
 		if (!Settings.getInstance().getPreviewDml() && !this.dbConnection.getProfile().isConfirmUpdates()) return true;
-
-		this.infoTable.stopEditing();
-		DataStore ds = this.infoTable.getDataStore();
-
+		
+		this.dataTable.stopEditing();
+		DataStore ds = this.dataTable.getDataStore();
+		
 		boolean doSave = true;
-
+		
 		Window win = SwingUtilities.getWindowAncestor(this);
 		try
 		{
 			List stmts = ds.getUpdateStatements(aConnection);
 			if (stmts.isEmpty()) return true;
-
+			
 			Dimension max = new Dimension(800,600);
 			Dimension pref = new Dimension(400, 300);
 			EditorPanel preview = EditorPanel.createSqlEditor();
@@ -511,23 +526,23 @@ public class DwPanel
 		}
 		return doSave;
 	}
-
+	
 	public synchronized int saveChanges(WbConnection aConnection, JobErrorHandler errorHandler)
-		throws SQLException
+	throws SQLException
 	{
 		int rows = 0;
 		JobErrorHandler activeErrorHandler = this;
 		if (errorHandler != null) activeErrorHandler = errorHandler;
-
-		this.infoTable.stopEditing();
+		
+		this.dataTable.stopEditing();
 		if (this.manageUpdateAction)
 		{
 			this.disableUpdateActions();
 		}
-
+		
 		try
 		{
-			DataStore ds = this.infoTable.getDataStore();
+			DataStore ds = this.dataTable.getDataStore();
 			long start, end;
 			ds.setProgressMonitor(this);
 			start = System.currentTimeMillis();
@@ -549,42 +564,47 @@ public class DwPanel
 		{
 			this.clearStatusMessage();
 			if (this.manageUpdateAction) this.enableUpdateActions();
-    }
+		}
 		this.repaint();
-
+		
 		return rows;
 	}
-
+	
 	protected void enableUpdateActions()
 	{
 		boolean update = this.isUpdateable();
-		boolean rows = this.infoTable.getSelectedRowCount() > 0;
+		boolean rows = this.dataTable.getSelectedRowCount() > 0;
 		this.insertRow.setEnabled(update);
 		this.duplicateRow.setEnabled(update && rows);
 		this.deleteRow.setEnabled(rows);
 	}
-
+	
 	protected void disableUpdateActions()
 	{
 		this.insertRow.setEnabled(false);
 		this.duplicateRow.setEnabled(false);
 		this.deleteRow.setEnabled(false);
 	}
-
+	
 	public String getCurrentSql()
 	{
 		return this.sql;
 	}
-
+	
 	public void setUpdateTable(String aTable)
+	{
+		setUpdateTable(new TableIdentifier(aTable));
+	}
+	
+	public void setUpdateTable(TableIdentifier table)
 	{
 		this.setStatusMessage(ResourceMgr.getString("MsgRetrieveUpdateTableInfo"));
 		try
 		{
-			DataStore ds = this.infoTable.getDataStore();
+			DataStore ds = this.dataTable.getDataStore();
 			if (ds != null)
 			{
-				ds.setUpdateTable(aTable);
+				ds.setUpdateTable(table);
 			}
 			this.fireUpdateTableChanged();
 		}
@@ -593,11 +613,11 @@ public class DwPanel
 			this.clearStatusMessage();
 		}
 	}
-
+	
 	private void fireUpdateTableChanged()
 	{
 		String table = null;
-
+		
 		if (this.getTable() != null)
 		{
 			DataStore ds = this.getTable().getDataStore();
@@ -605,7 +625,7 @@ public class DwPanel
 		}
 		if (table != null) firePropertyChange("updateTable", null, table);
 	}
-
+	
 	public void setReadOnly(boolean aFlag)
 	{
 		this.readOnly = aFlag;
@@ -622,8 +642,9 @@ public class DwPanel
 			this.insertRow.setEnabled(true);
 		}
 	}
-	public boolean isReadOnly() { return this.readOnly; }
-
+	public boolean isReadOnly()
+	{ return this.readOnly; }
+	
 	public boolean checkUpdateTable()
 	{
 		if (this.readOnly) return false;
@@ -631,7 +652,7 @@ public class DwPanel
 		boolean result = false;
 		try
 		{
-			DataStore ds = this.infoTable.getDataStore();
+			DataStore ds = this.dataTable.getDataStore();
 			if (ds == null) return false;
 			if (this.dbConnection == null) return false;
 			if (this.sql == null) return false;
@@ -648,57 +669,57 @@ public class DwPanel
 		}
 		return result;
 	}
-
+	
 	public boolean hasKeyColumns()
 	{
-		if (this.infoTable.getDataStore() == null) return false;
-		return this.infoTable.getDataStore().hasPkColumns();
+		if (this.dataTable.getDataStore() == null) return false;
+		return this.dataTable.getDataStore().hasPkColumns();
 	}
-
+	
 	public boolean isUpdateable()
 	{
-		if (this.infoTable.getDataStore() == null) return false;
-		return this.infoTable.getDataStore().isUpdateable();
+		if (this.dataTable.getDataStore() == null) return false;
+		return this.dataTable.getDataStore().isUpdateable();
 	}
-
+	
 	public boolean hasUpdateableColumns()
 	{
-		if (this.infoTable.getDataStore() == null) return false;
-		return this.infoTable.getDataStore().hasUpdateableColumns();
+		if (this.dataTable.getDataStore() == null) return false;
+		return this.dataTable.getDataStore().hasUpdateableColumns();
 	}
-
+	
 	public int getQueryTimeout()
 	{
 		return this.statusBar.getQueryTimeout();
 	}
-
+	
 	public void setQueryTimeout(int value)
 	{
 		this.statusBar.setQueryTimeout(value);
 	}
-
+	
 	public int getMaxRows()
 	{
 		return this.statusBar.getMaxRows();
 	}
-
+	
 	public void setMaxRows(int aMax)
 	{
 		this.statusBar.setMaxRows(aMax);
 	}
-
+	
 	public long getRowsAffectedByScript()
 	{
 		return rowsAffectedByScript;
 	}
-
+	
 	public void setResultLogger(ResultLogger logger)
 	{
-		this.stmtRunner.setResultLogger(logger);
+		if (this.stmtRunner != null) this.stmtRunner.setResultLogger(logger);
 	}
-
+	
 	public void runStatement(String sql)
-		throws SQLException, Exception
+	throws SQLException, Exception
 	{
 		runStatement(sql, null);
 	}
@@ -709,37 +730,37 @@ public class DwPanel
 	 *  connection profile
 	 */
 	public void runStatement(String aSql, ExecutionController controller)
-		throws SQLException, Exception
+	throws SQLException, Exception
 	{
 		this.success = false;
 		this.cancel = false;
 		this.hasWarning = false;
-
+		
 		StatementRunnerResult result = null;
 		this.lastMessage = null;
 		this.lastTimingMessage = null;
-
+		
 		try
 		{
 			this.clearContent();
-
+			
 			this.sql = aSql;
-
+			
 			long sqlExecStart = System.currentTimeMillis();
 			this.stmtRunner.setExecutionController(controller);
 			int max = this.statusBar.getMaxRows();
 			int timeout = this.statusBar.getQueryTimeout();
 			this.stmtRunner.runStatement(aSql, max, timeout);
-
+			
 			long sqlTime = (System.currentTimeMillis() - sqlExecStart);
 			long end = 0, checkUpdateTime = 0;
-
+			
 			result = this.stmtRunner.getResult();
-
+			
 			this.hasResultSet = false;
 			this.success = result.isSuccess();
 			this.hasWarning = result.hasWarning();
-
+			
 			if (this.success)
 			{
 				this.hasResultSet = result.hasData();
@@ -776,7 +797,7 @@ public class DwPanel
 					this.lastTimingMessage += "\n" + ResourceMgr.getString("MsgCheckUpdateTableTime") + " " + (((double)checkUpdateTime) / 1000.0) + "s";
 				}
 			}
-			*/
+			 */
 			this.rowsAffectedByScript += result.getTotalUpdateCount();
 			this.lastResultMessages = result.getMessages();
 		}
@@ -784,9 +805,9 @@ public class DwPanel
 		{
 			this.lastMessage = null;
 			this.lastTimingMessage = null;
-
+			
 			String msg = ExceptionUtil.getDisplay(sqle);
-
+			
 			LogMgr.logWarning("DwPanel.runStatement()", "SQL error when executing statement: \n" + this.sql + "\n" + msg);
 			StringBuffer b = new StringBuffer(100);
 			b.append(ResourceMgr.getString("MsgExecuteError"));
@@ -794,9 +815,9 @@ public class DwPanel
 			b.append(StringUtil.getMaxSubstring(this.sql, 100));
 			b.append('\n');
 			b.append(msg);
-
+			
 			this.lastMessage = b.toString();
-
+			
 			if (this.showErrorMessages)
 			{
 				//this.setMessageDisplayModel(this.getEmptyMsgTableModel());
@@ -813,7 +834,7 @@ public class DwPanel
 		{
 			this.lastMessage = null;
 			this.lastTimingMessage = null;
-
+			
 			if (e instanceof OutOfMemoryError)
 			{
 				WbSwingUtilities.showErrorMessage(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("MsgOutOfMemoryError"));
@@ -830,17 +851,17 @@ public class DwPanel
 			if (result != null) result.clear();
 			this.stmtRunner.statementDone();
 		}
-
-  }
-
+		
+	}
+	
 	private long showData(StatementRunnerResult result)
-		throws SQLException
+	throws SQLException
 	{
 		this.hasResultSet = true;
 		long checkUpdateTime = -1;
-
+		
 		DataStore newData = null;
-
+		
 		if (result.hasDataStores())
 		{
 			newData = result.getDataStores()[0];
@@ -850,7 +871,7 @@ public class DwPanel
 			// the resultset will be closed when stmtRunner.done() is called
 			// in scriptFinished()
 			ResultSet rs = result.getResultSets()[0];
-
+			
 			// passing the maxrows to the datastore is a workaround for JDBC drivers
 			// which do not support the setMaxRows() method.
 			// The datastore will make sure that no more rows are read then really requested
@@ -863,17 +884,17 @@ public class DwPanel
 				newData = new DataStore(rs, true, null, this.getMaxRows(), this.dbConnection);
 			}
 		}
-
+		
 		newData.setOriginalStatement(result.getSourceCommand());
 		newData.setSourceConnection(this.dbConnection);
 		newData.setProgressMonitor(null);
 		this.clearStatusMessage();
-
-		this.infoTable.reset();
-		this.infoTable.setAutoCreateColumnsFromModel(true);
-		this.infoTable.setModel(new DataStoreTableModel(newData), true);
-		this.infoTable.adjustColumns();
-
+		
+		this.dataTable.reset();
+		this.dataTable.setAutoCreateColumnsFromModel(true);
+		this.dataTable.setModel(new DataStoreTableModel(newData), true);
+		this.dataTable.adjustColumns();
+		
 		if (automaticUpdateTableCheck)
 		{
 			long updStart, updEnd;
@@ -883,7 +904,7 @@ public class DwPanel
 			checkUpdateTime = (updEnd - updStart);
 		}
 		this.clearStatusMessage();
-
+		
 		if (this.manageUpdateAction)
 		{
 			boolean update = this.isUpdateable();
@@ -892,14 +913,14 @@ public class DwPanel
 		this.rowCountChanged();
 		return checkUpdateTime;
 	}
-
+	
 	private boolean oldVerboseLogging = true;
-
+	
 	public boolean getVerboseLogging()
 	{
 		return this.stmtRunner.getVerboseLogging();
 	}
-
+	
 	/**
 	 *	Callback method to tell this component that a script is running.
 	 *  It resets the total number of rows which have been affected by the script to zero
@@ -910,79 +931,80 @@ public class DwPanel
 		this.scriptRunning = true;
 		this.oldVerboseLogging = this.stmtRunner.getVerboseLogging();
 	}
-
+	
 	/**
-	 *	Callback method to tell this component that the script execution has finished.
-	 *  This method will cleanup the StatementRunner
-	 *  @see workbench.sql.StatementRunner#done()
+	 * 	Callback method to tell this component that the script execution has finished.
+	 *  This method will cleanup the DefaultStatementRunner
+	 *  @see workbench.sql.DefaultStatementRunner#done()
 	 */
 	public void scriptFinished()
 	{
 		this.scriptRunning = false;
 		this.stmtRunner.done();
 		this.stmtRunner.setVerboseLogging(this.oldVerboseLogging);
-    //WbSwingUtilities.showDefaultCursor(this);
+		//WbSwingUtilities.showDefaultCursor(this);
 	}
-
+	
 	public boolean wasSuccessful()
 	{
 		return this.success;
 	}
-
+	
 	public boolean hasWarning()
 	{
 		return this.hasWarning;
 	}
-
+	
 	/**
 	 *  This method will update the row info display on the statusbar.
 	 */
-  public void rowCountChanged()
-  {
+	public void rowCountChanged()
+	{
 		int startRow = 0;
 		int endRow = 0;
 		int count = 0;
-
-		TableModel model = this.infoTable.getModel();
-	  if (model != resultEmptyMsgModel && model != this.errorModel)
-	  {
-			startRow = this.infoTable.getFirstVisibleRow();
-			endRow = this.infoTable.getLastVisibleRow(startRow);
-			count = this.infoTable.getRowCount();
+		
+		TableModel model = this.dataTable.getModel();
+		if (model != resultEmptyMsgModel && model != this.errorModel)
+		{
+			startRow = this.dataTable.getFirstVisibleRow();
+			endRow = this.dataTable.getLastVisibleRow(startRow);
+			count = this.dataTable.getRowCount();
 		}
-
+		
 		// start row and end row are 0 based
 		this.statusBar.setRowcount(startRow + 1, endRow + 1, count);
-  }
-
+	}
+	
 	public int duplicateRow()
 	{
 		if (this.readOnly) return -1;
 		if (!this.startEdit()) return -1;
-		int newRow = this.infoTable.duplicateRow();
-		if (newRow >= 0) this.infoTable.getSelectionModel().setSelectionInterval(newRow, newRow);
+		int newRow = this.dataTable.duplicateRow();
+		if (newRow >= 0) this.dataTable.getSelectionModel().setSelectionInterval(newRow, newRow);
 		this.rowCountChanged();
 		return newRow;
 	}
-
+	
 	public void deleteRow()
 	{
 		if (this.readOnly) return;
 		if (!this.startEdit()) return;
-		this.infoTable.deleteRow();
-    this.rowCountChanged();
+		this.dataTable.deleteRow();
+		this.rowCountChanged();
 	}
-
+	
 	public long addRow()
 	{
 		if (this.readOnly) return -1;
 		if (!this.startEdit()) return -1;
-		long newRow = this.infoTable.addRow();
+		long newRow = this.dataTable.addRow();
 		if (newRow > -1) this.rowCountChanged();
 		return newRow;
 	}
-
-	public boolean confirmCancel() { return true; }
+	
+	public boolean confirmCancel()
+	{ return true; }
 	public void cancelExecution()
 	{
 		this.cancel = true;
@@ -992,21 +1014,21 @@ public class DwPanel
 		}
 		this.cancel = false;
 	}
-
+	
 	/**
 	 *	Replaces the current values with the values initially retrieved from the
 	 *  database.
 	 *	@see workbench.storage.DataStore#restoreOriginalValues()
 	 */
-
+	
 	public void restoreOriginalValues()
 	{
-		DataStore ds = this.infoTable.getDataStore();
+		DataStore ds = this.dataTable.getDataStore();
 		if (ds == null) return;
 		ds.restoreOriginalValues();
 		this.repaint();
 	}
-
+	
 	public String getLastMessage()
 	{
 		if (this.lastResultMessages != null)
@@ -1020,7 +1042,7 @@ public class DwPanel
 			this.lastMessage = msg.toString();
 			this.lastResultMessages = null;
 		}
-
+		
 		if (this.lastTimingMessage != null)
 		{
 			if (this.lastMessage == null || this.lastMessage.length() == 0)
@@ -1030,29 +1052,30 @@ public class DwPanel
 			this.lastTimingMessage = null;
 		}
 		if (this.lastMessage == null) this.lastMessage = "";
-
+		
 		return this.lastMessage;
 	}
-
-	public boolean hasResultSet() { return this.hasResultSet; }
-
+	
+	public boolean hasResultSet()
+	{ return this.hasResultSet; }
+	
 	/**
 	 *	Returns true if the DataStore of the Table has been modified.
 	 *	@see workbench.storage.DataStore#isModified()
 	 */
 	public boolean isModified()
 	{
-		DataStore ds = this.infoTable.getDataStore();
+		DataStore ds = this.dataTable.getDataStore();
 		if (ds == null) return false;
 		else return ds.isModified();
 	}
-
+	
 	private void initLayout(DwStatusBar status)
 	{
 		this.setLayout(new BorderLayout());
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		this.infoTable = new WbTable();
-		this.infoTable.setRowResizeAllowed(true);
+		this.dataTable = new WbTable();
+		this.dataTable.setRowResizeAllowed(true);
 		if (status != null)
 		{
 			this.statusBar = status; //new DwStatusBar();
@@ -1064,19 +1087,19 @@ public class DwPanel
 			this.statusBar.setBorder(b);
 			this.add(this.statusBar, BorderLayout.SOUTH);
 		}
-
+		
 		this.statusBar.setFocusable(false);
 		this.setFocusable(false);
-		this.scrollPane = new WbScrollPane(this.infoTable);
+		this.scrollPane = new WbScrollPane(this.dataTable);
 		this.scrollPane.getViewport().addChangeListener(this);
-
+		
 		this.add(this.scrollPane, BorderLayout.CENTER);
-		//this.infoTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		this.infoTable.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		this.infoTable.setDoubleBuffered(true);
-		this.infoTable.setAdjustToColumnLabel(true);
+		//this.dataTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		this.dataTable.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		this.dataTable.setDoubleBuffered(true);
+		this.dataTable.setAdjustToColumnLabel(true);
 	}
-
+	
 	/**
 	 *	Show a message in the status panel.
 	 *	This method might be called from within a background thread, so we
@@ -1108,7 +1131,7 @@ public class DwPanel
 			}
 		}
 	}
-
+	
 	/**
 	 *	Clears the display on the status bar.
 	 *  It is ensured that the call to the status bar methods is always called
@@ -1132,17 +1155,17 @@ public class DwPanel
 			});
 		}
 	}
-
+	
 	private void setMessageDisplayModel(TableModel aModel)
 	{
-		if (this.infoTable.getModel() == aModel) return;
-		this.infoTable.setModel(aModel);
-		TableColumnModel colMod = this.infoTable.getColumnModel();
+		if (this.dataTable.getModel() == aModel) return;
+		this.dataTable.setModel(aModel);
+		TableColumnModel colMod = this.dataTable.getColumnModel();
 		TableColumn col = colMod.getColumn(0);
 		col.setPreferredWidth(this.getWidth() - 10);
 		this.statusBar.setRowcount(0,0,0);
 	}
-
+	
 	/**
 	 *	Clears everything.
 	 *	<ul>
@@ -1157,14 +1180,14 @@ public class DwPanel
 	public void clearContent()
 	{
 		this.endEdit();
-		this.infoTable.reset();
+		this.dataTable.reset();
 		this.hasResultSet = false;
 		this.lastMessage = null;
 		this.sql = null;
 		this.statusBar.clearRowcount();
 		this.selectKeys.setEnabled(false);
 	}
-
+	
 	/**
 	 *	Returns a table model which displays a message that the last
 	 *  statement did not produce a result set.
@@ -1179,7 +1202,7 @@ public class DwPanel
 		}
 		return this.resultEmptyMsgModel;
 	}
-
+	
 	public int getActionOnError(int errorRow, String errorColumn, String data, String errorMessage)
 	{
 		String msg = ResourceMgr.getString("ErrorUpdateSqlError");
@@ -1193,10 +1216,10 @@ public class DwPanel
 				else
 					d = data;
 			}
-
+			
 			msg = msg.replaceAll("%statement%", d);
 			msg = msg.replaceAll("%message%", errorMessage);
-
+			
 			String r = "";
 			if (errorRow > -1)
 			{
@@ -1209,12 +1232,12 @@ public class DwPanel
 			LogMgr.logError("DwPanel.getActionOnError()", "Error while building error message", e);
 			msg = "An error occurred during update: \n" + errorMessage;
 		}
-
+		
 		Window w = SwingUtilities.getWindowAncestor(this);
 		int choice = WbSwingUtilities.getYesNoIgnoreAll(w, msg);
-
+		
 		int result = JobErrorHandler.JOB_ABORT;
-
+		
 		if (choice == JOptionPane.YES_OPTION)
 		{
 			result = JobErrorHandler.JOB_CONTINUE;
@@ -1225,7 +1248,7 @@ public class DwPanel
 		}
 		return result;
 	}
-
+	
 	private TableModel getErrorTableModel()
 	{
 		if (this.errorModel == null)
@@ -1236,7 +1259,7 @@ public class DwPanel
 		}
 		return this.errorModel;
 	}
-
+	
 	/**
 	 *	Returns a TableModel which displays an error text.
 	 *	This is used to show a hint in the table panel that an error
@@ -1256,19 +1279,20 @@ public class DwPanel
 		}
 		return this.errorMessageModel;
 	}
-
+	
 	/**
 	 *	Set the focus to the max rows field.
 	 *	@see DwStatusBar#selectMaxRowsField()
 	 */
-  public void selectMaxRowsField()
-  {
-    this.statusBar.selectMaxRowsField();
-  }
-
-	public WbTable getTable() { return this.infoTable; }
-
-
+	public void selectMaxRowsField()
+	{
+		this.statusBar.selectMaxRowsField();
+	}
+	
+	public WbTable getTable()
+	{ return this.dataTable; }
+	
+	
 	/**
 	 *	Stops the editing mode of the displayed WbTable:
 	 *	<ul>
@@ -1281,16 +1305,16 @@ public class DwPanel
 	{
 		if (!this.editingStarted) return;
 		this.editingStarted = false;
-		this.infoTable.setShowStatusColumn(false);
+		this.dataTable.setShowStatusColumn(false);
 		this.updateAction.setEnabled(false);
-		int rows = this.infoTable.getSelectedRowCount();
+		int rows = this.dataTable.getSelectedRowCount();
 		this.insertRow.setEnabled(this.isUpdateable());
 		this.deleteRow.setEnabled(this.isUpdateable() && rows > 0);
 		this.duplicateRow.setEnabled(this.isUpdateable() && rows == 1);
 		this.startEdit.setSwitchedOn(false);
 		this.restoreOriginalValues();
 	}
-
+	
 	/**
 	 *	Starts the "edit" mode of the table. It will not start the edit
 	 *  mode, if the table is "read only" meaning if no update table (=database
@@ -1306,30 +1330,30 @@ public class DwPanel
 	public boolean startEdit()
 	{
 		if (this.readOnly) return false;
-
+		
 		this.editingStarted = false;
-
-    int[] selectedRows = this.infoTable.getSelectedRows();
+		
+		int[] selectedRows = this.dataTable.getSelectedRows();
 		// if the result is not yet updateable (automagically)
 		// then try to find the table. If the table cannot be
 		// determined, then ask the user
 		if (!this.isUpdateable())
 		{
-
+			
 			if (!this.checkUpdateTable())
 			{
 				String sql = this.getCurrentSql();
 				List tables = SqlUtil.getTables(sql);
 				String table = null;
-
+				
 				if (tables.size() > 1)
 				{
 					table = (String)JOptionPane.showInputDialog(SwingUtilities.getWindowAncestor(this),
-							null, ResourceMgr.getString("MsgEnterUpdateTable"),
-							JOptionPane.QUESTION_MESSAGE,
-							null,tables.toArray(),null);
+						null, ResourceMgr.getString("MsgEnterUpdateTable"),
+						JOptionPane.QUESTION_MESSAGE,
+						null,tables.toArray(),null);
 				}
-
+				
 				if (table != null)
 				{
 					this.setUpdateTable(table);
@@ -1339,15 +1363,15 @@ public class DwPanel
 		boolean update = this.isUpdateable();
 		if (update)
 		{
-			this.infoTable.setShowStatusColumn(true);
+			this.dataTable.setShowStatusColumn(true);
 			if (this.updateAction != null)
 			{
-				if (this.infoTable.getDataStore().isModified())
+				if (this.dataTable.getDataStore().isModified())
 				{
 					this.updateAction.setEnabled(true);
 				}
 			}
-
+			
 			this.editingStarted = true;
 			this.startEdit.setSwitchedOn(true);
 		}
@@ -1355,11 +1379,11 @@ public class DwPanel
 		{
 			this.startEdit.setSwitchedOn(false);
 		}
-
-    int numSelectedRows = selectedRows.length;
+		
+		int numSelectedRows = selectedRows.length;
 		if (selectedRows.length > 0)
 		{
-			ListSelectionModel model = this.infoTable.getSelectionModel();
+			ListSelectionModel model = this.dataTable.getSelectionModel();
 			model.setValueIsAdjusting(true);
 			// make sure nothing is selected, then restore the old selection
 			model.clearSelection();
@@ -1369,20 +1393,25 @@ public class DwPanel
 			}
 			model.setValueIsAdjusting(false);
 		}
-		int rows = this.infoTable.getSelectedRowCount();
+		int rows = this.dataTable.getSelectedRowCount();
 		if (this.insertRow != null) this.insertRow.setEnabled(update);
 		if (this.deleteRow != null) this.deleteRow.setEnabled(update && rows > 0);
 		if (this.duplicateRow != null) this.duplicateRow.setEnabled(update && rows == 1);
-
+		
 		return update;
 	}
-
-	public InsertRowAction getInsertRowAction() { return this.insertRow; }
-	public CopyRowAction getCopyRowAction() { return this.duplicateRow; }
-	public DeleteRowAction getDeleteRowAction() { return this.deleteRow; }
-	public UpdateDatabaseAction getUpdateDatabaseAction() { return this.updateAction; }
-	public StartEditAction getStartEditAction() { return this.startEdit; }
-
+	
+	public InsertRowAction getInsertRowAction()
+	{ return this.insertRow; }
+	public CopyRowAction getCopyRowAction()
+	{ return this.duplicateRow; }
+	public DeleteRowAction getDeleteRowAction()
+	{ return this.deleteRow; }
+	public UpdateDatabaseAction getUpdateDatabaseAction()
+	{ return this.updateAction; }
+	public StartEditAction getStartEditAction()
+	{ return this.startEdit; }
+	
 	/**
 	 *	Turns on the batchUpdate mode.
 	 *  In this mode, the automatic switch to edit mode is disabled. This
@@ -1393,7 +1422,7 @@ public class DwPanel
 	{
 		this.batchUpdate = aFlag;
 	}
-
+	
 	/**
 	 *	If the user changes something in the database (which is possible, as
 	 *  the table defaults to beeing editable) the edit mode (with status column
@@ -1403,10 +1432,10 @@ public class DwPanel
 	{
 		if (this.batchUpdate) return;
 		if (this.readOnly) return;
-
+		
 		if (e.getFirstRow() != TableModelEvent.ALL_COLUMNS &&
-		    e.getFirstRow() != TableModelEvent.HEADER_ROW &&
-				this.isModified() )
+			e.getFirstRow() != TableModelEvent.HEADER_ROW &&
+			this.isModified() )
 		{
 			if (!this.editingStarted)
 			{
@@ -1415,7 +1444,7 @@ public class DwPanel
 			if (this.updateAction != null) this.updateAction.setEnabled(true);
 		}
 	}
-
+	
 	/**
 	 *	This is called when the selection in the table changes.
 	 *  The copy row action will be enabled when exactly one row
@@ -1424,12 +1453,12 @@ public class DwPanel
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (this.readOnly) return;
-		long rows = this.infoTable.getSelectedRowCount();
+		long rows = this.dataTable.getSelectedRowCount();
 		boolean update = this.isUpdateable();
 		this.deleteRow.setEnabled( (rows > 0) && update);
 		this.duplicateRow.setEnabled(rows == 1 && update);
 	}
-
+	
 	/**
 	 *	Called from the viewport, when the display has been scrolled
 	 *  We need to update the row display then.
@@ -1438,14 +1467,14 @@ public class DwPanel
 	{
 		this.rowCountChanged();
 	}
-
+	
 	public void jobFinished()
 	{
 	}
-
+	
 	public void setAutomaticUpdateTableCheck(boolean flag)
 	{
 		this.automaticUpdateTableCheck = flag;
 	}
-
+	
 }

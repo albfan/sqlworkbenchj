@@ -46,14 +46,22 @@ public class HtmlViewer
 	
 	public HtmlViewer(JFrame owner)
 	{
-		this(owner, "workbench-manual.html");
+		this(owner, null);
 	}
 	
 	public HtmlViewer(JFrame owner, String aStartFile)
 	{
 		super(owner, ResourceMgr.getString("TxtHelpWindowTitle"), false);
+		if (aStartFile == null)
+		{
+			this.initHtml("workbench-manual.html");
+		}
 		this.initHtml(aStartFile);
 		this.restoreSettings(owner);
+		if (aStartFile == null)
+		{
+			showIndex();
+		}
 	}
 
 	public HtmlViewer(JDialog owner)

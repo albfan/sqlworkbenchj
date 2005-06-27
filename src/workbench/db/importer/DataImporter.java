@@ -22,7 +22,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -1052,6 +1052,7 @@ public class DataImporter
 	{
 		return this.messages.toString();
 	}
+	
 	/**
 	 *	Callback from the RowDataProducer
 	 */

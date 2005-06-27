@@ -106,6 +106,16 @@ public class WbWorkspace
 		}
 	}
 
+	public void setDbExplorerVisibleCount(int count)
+	{
+		this.tabInfo.setProperty("dbexplorer.visible", count);
+	}
+	
+	public int getDbExplorerVisibleCount()
+	{
+		return this.tabInfo.getIntProperty("dbexplorer.visible", 0);
+	}
+	
 	public void addHistoryEntry(String aFilename, SqlHistory history)
 		throws IOException
 	{

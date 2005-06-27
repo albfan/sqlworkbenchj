@@ -95,7 +95,7 @@ import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import java.awt.Component;
 
 
@@ -241,7 +241,7 @@ public class TableListPanel
 		this.triggers = new TriggerDisplayPanel();
 
 		this.listPanel = new JPanel();
-		this.tableList = new WbTable(false);
+		this.tableList = new WbTable();
 		this.tableList.setSelectOnRightButtonClick(true);
 		this.tableList.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		this.tableList.setCellSelectionEnabled(false);
@@ -368,7 +368,7 @@ public class TableListPanel
 		
 		this.tableList.addPopupAction(this.createDummyInsertAction, true);
 		this.tableList.addPopupAction(this.createDefaultSelect, false);
-
+		
 		this.scriptTablesItem = new WbMenuItem(ResourceMgr.getString("MnuTxtCreateScript"));
 		this.scriptTablesItem.setIcon(ResourceMgr.getImage("script"));
 		this.scriptTablesItem.setActionCommand(SCRIPT_CMD);
@@ -377,18 +377,13 @@ public class TableListPanel
 		this.scriptTablesItem.setToolTipText(ResourceMgr.getDescription("MnuTxtCreateScript"));
 		this.tableList.addPopupMenu(this.scriptTablesItem, false);
 		
-		JPopupMenu popup = this.tableList.getPopupMenu();
-		popup.addSeparator();
-		
 		WbMenuItem item = new WbMenuItem(ResourceMgr.getString("MnuTxtSchemaReport"));
 		item.setToolTipText(ResourceMgr.getDescription("MnuTxtSchemaReport"));
 		item.setBlankIcon();
 		item.setActionCommand(SCHEMA_REPORT_CMD);
 		item.addActionListener(this);
 		item.setEnabled(true);
-		popup.add(item);
-		
-		popup.addSeparator();
+		tableList.addPopupMenu(item, false);
 		
 		this.dropTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDropDbObject"));
 		this.dropTableItem.setToolTipText(ResourceMgr.getDescription("MnuTxtDropDbObject"));
@@ -396,7 +391,7 @@ public class TableListPanel
 		this.dropTableItem.setBlankIcon();
 		this.dropTableItem.addActionListener(this);
 		this.dropTableItem.setEnabled(false);
-		popup.add(this.dropTableItem);
+		tableList.addPopupMenu(this.dropTableItem, true);
 
 		this.deleteTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDeleteTableData"));
 		this.deleteTableItem.setToolTipText(ResourceMgr.getDescription("MnuTxtDeleteTableData"));
@@ -404,7 +399,7 @@ public class TableListPanel
 		this.deleteTableItem.setBlankIcon();
 		this.deleteTableItem.addActionListener(this);
 		this.deleteTableItem.setEnabled(true);
-		popup.add(this.deleteTableItem);
+		tableList.addPopupMenu(this.deleteTableItem, false);
 		
 	}
 
@@ -1001,6 +996,7 @@ public class TableListPanel
 		this.tableData.reset();
 		this.tableData.setReadOnly(!maybeUpdateable(this.selectedObjectType));
 		TableIdentifier id = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+		id.setNeverAdjustCase(true);
 		this.tableData.setTable(id);
 
 		this.setShowDataMenuStatus(this.isTableType(selectedObjectType));
@@ -1436,7 +1432,7 @@ public class TableListPanel
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			DbMetadata meta = this.dbConnection.getMetadata();
-			DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(this.selectedCatalog, this.selectedSchema, this.selectedTableName));
+			DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(this.selectedCatalog, this.selectedSchema, this.selectedTableName, false));
 			importedKeys.setModel(model, true);
 			importedKeys.adjustColumns();
 			this.shouldRetrieveImportedKeys = false;
@@ -1661,23 +1657,53 @@ public class TableListPanel
 			}
 			else if (command.equals(SCRIPT_CMD))
 			{
-				this.createScript();
+				EventQueue.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						createScript();
+					}
+				});
 			}
 			else if (e.getSource() == this.dropIndexAction)
 			{
-				this.dropIndexes();
+				EventQueue.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						dropIndexes();
+					}
+				});
 			}
 			else if (e.getSource() == this.createIndexAction)
 			{
-				this.createIndex();
+				EventQueue.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						createIndex();
+					}
+				});
 			}
 			else if (e.getSource() == this.createDummyInsertAction)
 			{
-				this.createDummyInserts();
+				EventQueue.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						createDummyInserts();
+					}
+				});
 			}
 			else if (e.getSource() == this.createDefaultSelect)
 			{
-				this.createDefaultSelects();
+				EventQueue.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						createDefaultSelects();
+					}
+				});
 			}
 		}
 	}

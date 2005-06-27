@@ -103,11 +103,8 @@ import workbench.gui.actions.SortAscendingAction;
 import workbench.gui.actions.SortDescendingAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.dialogs.export.DataStoreExporter;
-import workbench.gui.renderer.ClobColumnRenderer;
-import workbench.gui.renderer.DateColumnRenderer;
-import workbench.gui.renderer.NumberColumnRenderer;
+import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RowStatusRenderer;
-import workbench.gui.renderer.StringColumnRenderer;
 import workbench.gui.renderer.ToolTipRenderer;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.PrintableComponent;
@@ -165,21 +162,14 @@ public class WbTable
 	private PrintAction printDataAction;
 	private PrintPreviewAction printPreviewAction;
 
+	private TableCellRenderer sortHeaderRenderer;
+	
 	private boolean adjustToColumnLabel = false;
 	private int headerPopupY = -1;
 	private int headerPopupX = -1;
 	private HashMap savedColumnSizes;
 	private int maxColWidth = 32768;
 	private int minColWidth = 10;
-	private SortHeaderRenderer sortRenderer = new SortHeaderRenderer();
-
-	private ToolTipRenderer defaultTooltipRenderer = new ToolTipRenderer();
-	private DateColumnRenderer defaultDateRenderer;
-	private DateColumnRenderer defaultTimestampRenderer;
-	private NumberColumnRenderer defaultNumberRenderer;
-	private NumberColumnRenderer defaultIntegerRenderer = new NumberColumnRenderer(0);
-	private StringColumnRenderer defaultStringRenderer = new StringColumnRenderer();
-	private ClobColumnRenderer defaultClobRenderer = new ClobColumnRenderer();
 
 	private RowHeightResizer rowResizer;
 	private TableModelListener changeListener;
@@ -612,23 +602,30 @@ public class WbTable
 			this.dwModel = (DataStoreTableModel)aModel;
 			if (sortIt && header != null)
 			{
-				header.setDefaultRenderer(this.sortRenderer);
+				if (this.sortHeaderRenderer == null)
+				{
+					this.sortHeaderRenderer = RendererFactory.getSortHeaderRenderer();
+				}
+				header.setDefaultRenderer(this.sortHeaderRenderer);
 				header.addMouseListener(this);
 			}
 		}
 
-		if (this.sortAscending != null) this.sortAscending.setEnabled(sortIt);
-		if (this.sortDescending != null) this.sortDescending.setEnabled(sortIt);
-
-		if (this.changeListener != null && this.dwModel != null)
+		if (aModel != EmptyTableModel.EMPTY_MODEL) 
 		{
-			this.dwModel.addTableModelListener(this.changeListener);
-		}
+			if (this.sortAscending != null) this.sortAscending.setEnabled(sortIt);
+			if (this.sortDescending != null) this.sortDescending.setEnabled(sortIt);
 
-		this.initDefaultRenderers();
-		this.initDefaultEditors();
-		if (this.printDataAction != null) this.printDataAction.setEnabled(this.getRowCount() > 0);
-		if (this.printPreviewAction != null) this.printPreviewAction.setEnabled(this.getRowCount() > 0);
+			if (this.changeListener != null && this.dwModel != null)
+			{
+				this.dwModel.addTableModelListener(this.changeListener);
+			}
+
+			this.initDefaultRenderers();
+			this.initDefaultEditors();
+			if (this.printDataAction != null) this.printDataAction.setEnabled(this.getRowCount() > 0);
+			if (this.printPreviewAction != null) this.printPreviewAction.setEnabled(this.getRowCount() > 0);
+		}
 	}
 
 	public DataStoreTableModel getDataStoreTableModel()
@@ -671,31 +668,6 @@ public class WbTable
 	{
 		if (this.dwModel == null) return false;
 		return this.dwModel.getShowStatusColumn();
-	}
-
-	public void setCursor(Cursor newCursor)
-	{
-		super.setCursor(newCursor);
-		if (this.defaultClobRenderer != null)
-		{
-			this.defaultClobRenderer.setCursor(newCursor);
-		}
-		if (this.defaultDateRenderer != null)
-		{
-			this.defaultDateRenderer.setCursor(newCursor);
-		}
-		if (this.defaultStringRenderer != null)
-		{
-			this.defaultStringRenderer.setCursor(newCursor);
-		}
-		if (this.defaultIntegerRenderer != null)
-		{
-			this.defaultIntegerRenderer.setCursor(newCursor);
-		}
-		if (this.defaultNumberRenderer != null)
-		{
-			this.defaultNumberRenderer.setCursor(newCursor);
-		}
 	}
 
 	public void setAdjustToColumnLabel(boolean aFlag)
@@ -991,26 +963,10 @@ public class WbTable
 		Settings sett = Settings.getInstance();
 		
 		String format = sett.getDefaultDateFormat();
-		if (defaultDateRenderer == null)
-		{
-			defaultDateRenderer = new DateColumnRenderer(format);
-			this.setDefaultRenderer(java.sql.Date.class, defaultDateRenderer);
-		}
-		else
-		{
-			defaultDateRenderer.setFormat(format);
-		}
+		this.setDefaultRenderer(java.sql.Date.class, RendererFactory.getDateRenderer(format));
 		
 		format = sett.getDefaultDateTimeFormat();
-		if (defaultTimestampRenderer == null)
-		{
-			defaultTimestampRenderer = new DateColumnRenderer(format);
-			this.setDefaultRenderer(java.sql.Timestamp.class, defaultTimestampRenderer);
-		}
-		else
-		{
-			this.defaultTimestampRenderer.setFormat(format);
-		}
+		this.setDefaultRenderer(java.sql.Timestamp.class, RendererFactory.getDateRenderer(format));
 	}
 	
 	public void propertyChange(PropertyChangeEvent evt)
@@ -1028,48 +984,30 @@ public class WbTable
 		// otherwise setDefaultRenderer() bombs out with a NullPointerException
 		if (this.defaultRenderersByColumnClass == null) createDefaultRenderers();
 
+		initDateRenderers();
+		
 		Settings sett = Settings.getInstance();
-		if (this.defaultDateRenderer == null)
-		{
-			String format = sett.getDefaultDateFormat();
-			defaultDateRenderer = new DateColumnRenderer(format);
-		}
-		if (this.defaultTimestampRenderer == null)
-		{
-			String format = sett.getDefaultDateTimeFormat();
-			defaultTimestampRenderer = new DateColumnRenderer(format);
-		}
-		
-		this.setDefaultRenderer(java.sql.Timestamp.class, defaultTimestampRenderer);
-		this.setDefaultRenderer(java.sql.Date.class, defaultDateRenderer);
-		
 		int maxDigits = sett.getMaxFractionDigits();
 		char sep = sett.getDecimalSymbol().charAt(0);
 
-		if (this.defaultNumberRenderer == null)
-		{
-			this.defaultNumberRenderer = new NumberColumnRenderer(maxDigits, sep);
-		}
-		else
-		{
-			defaultNumberRenderer.setMaxDigits(maxDigits);
-			defaultNumberRenderer.setDecimalSymbol(sep);
-		}
-		this.setDefaultRenderer(java.sql.Clob.class, defaultClobRenderer);
-		this.setDefaultRenderer(Number.class, defaultNumberRenderer);
-		this.setDefaultRenderer(Double.class, defaultNumberRenderer);
-		this.setDefaultRenderer(Float.class, defaultNumberRenderer);
-		this.setDefaultRenderer(BigDecimal.class, defaultNumberRenderer);
+		TableCellRenderer numberRenderer = RendererFactory.getNumberRenderer(maxDigits, sep);
+		
+		this.setDefaultRenderer(java.sql.Clob.class, RendererFactory.getClobRenderer());
+		this.setDefaultRenderer(Number.class, numberRenderer);
+		this.setDefaultRenderer(Double.class, numberRenderer);
+		this.setDefaultRenderer(Float.class, numberRenderer);
+		this.setDefaultRenderer(BigDecimal.class, numberRenderer);
 
-		this.setDefaultRenderer(BigInteger.class, defaultIntegerRenderer);
-		this.setDefaultRenderer(Integer.class, defaultIntegerRenderer);
+		TableCellRenderer intRenderer = RendererFactory.getIntegerRenderer();
+		this.setDefaultRenderer(BigInteger.class, intRenderer);
+		this.setDefaultRenderer(Integer.class, intRenderer);
+		
 		if (this.useDefaultStringRenderer)
 		{
-			this.setDefaultRenderer(String.class, defaultStringRenderer);
+			this.setDefaultRenderer(String.class, RendererFactory.getStringRenderer());
 		}
 
-		ToolTipRenderer rend = new ToolTipRenderer();
-		this.setDefaultRenderer(Object.class, rend);
+		this.setDefaultRenderer(Object.class, RendererFactory.getTooltipRenderer());
 	}
 
 	public void initDefaultEditors()

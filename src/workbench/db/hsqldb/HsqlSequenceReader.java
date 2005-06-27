@@ -31,6 +31,7 @@ public class HsqlSequenceReader
 {
 	private Connection dbConn;
 	private final String sql;
+	private boolean is18;
 	
 	public HsqlSequenceReader(Connection conn)
 	{
@@ -47,6 +48,7 @@ public class HsqlSequenceReader
 		
 		if (version.startsWith("1.8"))
 		{
+			this.is18 = true;
 			sql = "SELECT sequence_name, \n" + 
              "       dtd_identifier, \n" + 
              "       maximum_value, \n" + 
@@ -78,7 +80,6 @@ public class HsqlSequenceReader
 			stmt.setString(1, sequence.trim());
 			rs = stmt.executeQuery();
 			result = new DataStore(rs, true);
-			//result.setColumnSizes(sizes)
 		}
 		catch (Throwable e)
 		{
@@ -99,7 +100,9 @@ public class HsqlSequenceReader
 		ArrayList result = new ArrayList(100);
 
 		StringBuffer sql = new StringBuffer(200);
-		sql.append("SELECT sequence_name FROM system_sequences ");
+		sql.append("SELECT sequence_name FROM ");
+		if (is18) sql.append("information_schema.");
+		sql.append("system_sequences");
 
 		try
 		{

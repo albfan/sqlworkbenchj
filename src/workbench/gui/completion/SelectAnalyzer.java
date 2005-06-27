@@ -46,7 +46,10 @@ public class SelectAnalyzer
 	protected void checkContext()
 	{
 		this.context = NO_CONTEXT;
-
+		setAppendDot(false);
+		setColumnPrefix(null);
+		setOverwriteCurrentWord(false);
+		
 		int fromPos = SqlUtil.getFromPosition(this.sql); 
 		
 		int wherePos = -1;
@@ -102,7 +105,6 @@ public class SelectAnalyzer
 			{
 				this.schemaForTableList = this.dbConnection.getMetadata().getCurrentSchema();
 			}
-			
 		}
 		else
 		{
@@ -111,13 +113,14 @@ public class SelectAnalyzer
 			// statement or before the FROM statement, so
 			// we'll try to find a proper column list
 			
+			
 			String word = StringUtil.getWordLeftOfCursor(sql, cursorPos, null);
-			int dotPos = word.indexOf('.');
-			if (dotPos != -1 && dotPos < word.length() - 1)
-				this.overwriteCurrentWord = true;
-			else
-				this.overwriteCurrentWord = false;
-
+			if (word != null)
+			{
+				//int dotPos = word.indexOf('.');
+				//if (dotPos != -1 && dotPos < word.length() - 1)
+				setOverwriteCurrentWord(true);
+			}
 			int count = tables.size();
 			if (count == 1)
 			{
@@ -133,6 +136,7 @@ public class SelectAnalyzer
 				// check if the current qualifier is either one of the
 				// tables in the table list or one of the aliases used
 				// in the table list.
+				TableAlias currentAlias = null;
 				if (q != null)
 				{
 					for (int i=0; i < count; i++)
@@ -143,6 +147,7 @@ public class SelectAnalyzer
 						if (tbl.isTableOrAlias(q))
 						{
 							tableForColumnList = tbl.getTable();
+							currentAlias = tbl;
 							break;
 						}
 					}
@@ -157,7 +162,12 @@ public class SelectAnalyzer
 						String entry = (String)tables.get(i);
 						TableAlias tbl = new TableAlias(entry);
 						this.elements.add(tbl);
+						setAppendDot(true);
 					}
+				}
+				else if (currentAlias != null)
+				{
+					setColumnPrefix(currentAlias.getNameToUse());
 				}
 			}
 		}

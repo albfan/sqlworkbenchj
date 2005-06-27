@@ -64,10 +64,10 @@ public class TypeMapper
 		else if (SqlUtil.isNumberType(type) && !SqlUtil.isIntegerType(type))
 		{
 			//if (size == 0) return null;
-			if (size > info.max_scale)
-			{
-				size = info.max_scale;
-			}
+//			if (size > info.max_scale)
+//			{
+//				size = info.max_scale;
+//			}
 			if (SqlUtil.isDecimalType(type, size, digits))
 			{
 				result.append('(');
@@ -107,9 +107,9 @@ public class TypeMapper
 				TypeInfo info = new TypeInfo();
 				info.name = name;
 				info.type = type;
-				info.precision = rs.getInt(3);
-				info.min_scale = rs.getInt(14);
-				info.max_scale = rs.getInt(15);
+				info.precision = rs.getLong(3);
+				info.min_scale = rs.getLong(14);
+				info.max_scale = rs.getLong(15);
 				Integer key = new Integer(type);
 				if (this.typeInfo.containsKey(key))
 				{
@@ -138,7 +138,7 @@ class TypeInfo
 {
 	String name;
 	int type;
-	int precision;
-	int min_scale;
-	int max_scale;
+	long precision;
+	long min_scale;
+	long max_scale;
 }

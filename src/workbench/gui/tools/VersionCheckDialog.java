@@ -52,7 +52,7 @@ public class VersionCheckDialog extends javax.swing.JDialog
 		this.headingLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 	}
 
-	public void startRetrieveVersions()
+	private void startRetrieveVersions()
 	{
 		this.readThread = new WbThread("WbVersionCheck Thread")
 		{
@@ -68,6 +68,12 @@ public class VersionCheckDialog extends javax.swing.JDialog
 		this.timeout.start();
 	}
 
+	public void show()
+	{
+		startRetrieveVersions();
+		super.show();
+	}
+	
 	private void readVersion()
 	{
 		try

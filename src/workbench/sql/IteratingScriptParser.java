@@ -262,7 +262,7 @@ public class IteratingScriptParser
 						commentOn = true;
 						//pos ++; // ignore the next character
 					}
-					else if (startOfLine && (firstChar == '#' || (firstChar == '-' && next == '-')))
+					else if ((startOfLine && firstChar == '#') || (firstChar == '-' && next == '-'))
 					{
 						singleLineComment = true;
 						blockComment = false;

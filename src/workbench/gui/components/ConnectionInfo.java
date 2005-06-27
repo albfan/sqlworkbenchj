@@ -23,6 +23,7 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import workbench.db.DbMetadata;
 
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
@@ -90,13 +91,13 @@ public class ConnectionInfo
 			this.display.setText(ResourceMgr.getString("TxtNotConnected"));
 			this.display.setToolTipText(null);
 		}
-		//this.setCaretPosition(0);
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (evt.getSource() == this.sourceConnection 
-			  && WbConnection.PROP_CATALOG.equals(evt.getPropertyName()))
+			  && (WbConnection.PROP_CATALOG.equals(evt.getPropertyName()) ||
+			      WbConnection.PROP_SCHEMA.equals(evt.getPropertyName())))
 		{
 			this.updateDisplay();
 		}

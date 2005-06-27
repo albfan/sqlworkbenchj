@@ -25,7 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import workbench.db.report.TagWriter;
-import workbench.exception.ExceptionUtil;
+import workbench.resource.ResourceMgr;
+import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.sql.preparedstatement.PreparedStatementPool;
@@ -39,6 +40,7 @@ import workbench.util.StringUtil;
 public class WbConnection
 {
 	public static final String PROP_CATALOG = "catalog";
+	public static final String PROP_SCHEMA = "schema";
 	public static final String PROP_AUTOCOMMIT = "autocommit";
 	public static final String PROP_CONNECTION_STATE = "state";
 	public static final String CONNECTION_CLOSED = "closed";
@@ -395,9 +397,51 @@ public class WbConnection
 		}
 	}
 
+	/**
+	 *	Return a readable display of a connection
+	 */
 	public String getDisplayString()
 	{
-		return ConnectionMgr.getDisplayString(this);
+		String displayString = null;
+		try
+		{
+			DbMetadata meta = getMetadata();
+			StringBuffer buff = new StringBuffer(100);
+			String user = meta.getUserName();
+			buff.append(ResourceMgr.getString("TxtUser"));
+			buff.append('=');
+			buff.append(user);
+
+			String catalog = meta.getCurrentCatalog();
+			if (catalog != null && catalog.length() > 0)
+			{
+				String catName = meta.getCatalogTerm();
+				buff.append(", ");
+				buff.append(catName == null ? "Catalog" : StringUtil.capitalize(catName));
+				buff.append('=');
+				buff.append(catalog);
+			}
+
+			String schema = meta.getSchemaToUse();
+			if (schema != null && !schema.equals(user))
+			{
+				String schemaName = meta.getSchemaTerm();
+				buff.append(", ");
+				buff.append(schemaName == null ? "Schema" : StringUtil.capitalize(schemaName));
+				buff.append('=');
+				buff.append(schema);
+			}
+			
+			buff.append(", URL=");
+			buff.append(getSqlConnection().getMetaData().getURL());
+			displayString = buff.toString();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("ConnectionMgr.getDisplayString()", "Could not retrieve connection information", e);
+			displayString = "n/a";
+		}
+		return displayString;
 	}
 
 	public String getDatabaseProductName()
@@ -505,4 +549,9 @@ public class WbConnection
 		this.fireConnectionStateChanged(PROP_CATALOG, oldCatalog, newCatalog);
 	}
 
+	public void schemaChanged(String oldSchema, String newSchema)
+	{
+		this.fireConnectionStateChanged(PROP_SCHEMA, oldSchema, newSchema);
+	}
+	
 }

@@ -52,7 +52,9 @@ public abstract class BaseAnalyzer
 
 	protected List elements;
 	protected String title;
-	protected boolean overwriteCurrentWord;
+	private boolean overwriteCurrentWord;
+	private boolean appendDot; 
+	private String columnPrefix;
 	
 	public BaseAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{
@@ -61,7 +63,40 @@ public abstract class BaseAnalyzer
 		this.cursorPos = cursorPos;
 	}
 
-	public boolean getOverwriteCurrentWord() { return this.overwriteCurrentWord; }
+	public String getSelectionPrefix()
+	{
+		return this.columnPrefix;
+	}
+	
+	protected void setColumnPrefix(String prefix)
+	{
+		this.columnPrefix = prefix;
+	}
+	
+	public String getColumnPrefix() 
+	{
+		return this.columnPrefix;
+	}
+	
+	protected void setOverwriteCurrentWord(boolean flag)
+	{
+		this.overwriteCurrentWord = flag;
+	}
+	
+	protected void setAppendDot(boolean flag)
+	{
+		this.appendDot = flag;
+	}
+	
+	public boolean appendDotToSelection()
+	{
+		return this.appendDot;
+	}
+	
+	public boolean getOverwriteCurrentWord() 
+	{ 
+		return this.overwriteCurrentWord; 
+	}
 	
 	public void retrieveObjects()
 	{
@@ -169,6 +204,7 @@ public abstract class BaseAnalyzer
 		
 		// get the word left of the cursor that is "terminated" by a whitespace
 		String word = StringUtil.getWordLeftOfCursor(statement, pos, null);
+		if (word == null) return null;
 		int dotPos= word.indexOf('.');
 		
 		if (dotPos > -1)

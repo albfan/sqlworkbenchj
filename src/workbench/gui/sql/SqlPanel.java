@@ -51,7 +51,7 @@ import javax.swing.border.EtchedBorder;
 import workbench.db.DeleteScriptGenerator;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.AutoCompletionAction;
 import workbench.gui.actions.AutoJumpNextStatement;
@@ -156,7 +156,6 @@ import workbench.util.WbWorkspace;
  *	a panel for displaying SQL results (DwPanel)
  *
  * @author  support@sql-workbench.net
- * @version 1.0
  */
 public class SqlPanel
 	extends JPanel
@@ -259,7 +258,6 @@ public class SqlPanel
 		this.data = new DwPanel(statusBar);
 		this.data.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.data.setDoubleBuffered(true);
-		this.data.setResultLogger(this);
 
 		this.log = new JTextArea();
 		this.log.setDoubleBuffered(true);
@@ -1026,15 +1024,20 @@ public class SqlPanel
 	 *	selected in the main window) we set the focus to
 	 *	the editor component.
 	 */
-	public void setVisible(boolean aFlag)
-	{
-		super.setVisible(aFlag);
-		if (aFlag)
-		{
-			selectEditorLater();
-		}
-	}
+//	public void setVisible(boolean aFlag)
+//	{
+//		super.setVisible(aFlag);
+//		if (aFlag)
+//		{
+//			selectEditorLater();
+//		}
+//	}
 
+	public void panelSelected()
+	{
+		selectEditorLater();
+	}
+	
 	public List getToolbarActions()
 	{
 		return this.toolbarActions;
@@ -1362,6 +1365,7 @@ public class SqlPanel
 		try
 		{
 			this.data.setConnection(aConnection);
+			this.data.setResultLogger(this);
 		}
 		catch (Exception e)
 		{
@@ -1647,7 +1651,6 @@ public class SqlPanel
 				runStatement(sql, offset, commandAtIndex, highlight);
 			}
 		},"SQL Execution Thread " + this.getId());
-		//this.executionThread.setPriority(Thread.MAX_PRIORITY);
 		this.executionThread.start();
 	}
 
@@ -2014,10 +2017,17 @@ public class SqlPanel
 
 			int commandWithError = -1;
 			int startIndex = 0;
-			int endIndex = sqls.size();
 			int count = sqls.size();
+			int endIndex = count;
 			int failuresIgnored = 0;
 
+			if (count == 0)
+			{
+				this.appendToLog(ResourceMgr.getString("ErrorNoCommand"));
+				this.showLogPanel();
+				return;
+			}
+			
 			compressLog = !this.data.getVerboseLogging() && (count > 1);
 			logWasCompressed = logWasCompressed || compressLog;
 
@@ -2337,18 +2347,24 @@ public class SqlPanel
 
 	public void generateDeleteScript()
 	{
-		WbTable table = this.data.getTable();
+		final WbTable table = this.data.getTable();
 		if (table == null) return;
-		try
+		EventQueue.invokeLater(new Runnable()
 		{
-			DeleteScriptGenerator gen = new DeleteScriptGenerator(this.dbConnection);
-			gen.setSource(table);
-			gen.startGenerate();
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("SqlPanel.generateDeleteScript()", "Error initializing DeleteScriptGenerator", e);
-		}
+			public void run()
+			{
+				try
+				{
+					DeleteScriptGenerator gen = new DeleteScriptGenerator(dbConnection);
+					gen.setSource(table);
+					gen.startGenerate();
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("SqlPanel.generateDeleteScript()", "Error initializing DeleteScriptGenerator", e);
+				}
+			}
+		});
 	}
 
   public void selectMaxRowsField()

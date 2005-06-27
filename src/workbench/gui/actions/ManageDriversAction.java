@@ -10,7 +10,7 @@
  *
  */
 package workbench.gui.actions;
-
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 
 import workbench.gui.MainWindow;
@@ -35,8 +35,15 @@ public class ManageDriversAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		DriverEditorDialog d = new DriverEditorDialog(client, true);
-		WbSwingUtilities.center(d, client);
-		d.show();
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				DriverEditorDialog d = new DriverEditorDialog(client, true);
+				WbSwingUtilities.center(d, client);
+				d.show();
+			}
+		});
 	}
+	
 }

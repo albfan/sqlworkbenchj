@@ -83,7 +83,7 @@ public class DbObjectCache
 		{
 			try
 			{
-				List tables = this.dbConnection.getMetadata().getTableList(schema, DbMetadata.TABLE_TYPES_SELECTABLE);
+				List tables = this.dbConnection.getMetadata().getSelectableObjectsList(schema);
 				this.setTables(tables);
 				this.schemasInCache.add(schema == null ? NULL_SCHEMA : schema.toUpperCase());
 			}

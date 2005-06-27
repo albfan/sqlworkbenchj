@@ -15,7 +15,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
-import workbench.exception.NoConnectionException;
 import workbench.log.LogMgr;
 
 /**
@@ -46,12 +45,12 @@ public class ObjectDropper
 	}
 
 	public void execute()
-		throws NoConnectionException, SQLException
+		throws SQLException
 	{
 		Statement stmt = null;
 		try
 		{
-			if (this.connection == null) throw new NoConnectionException("Please specify a connection!");
+			if (this.connection == null) throw new NullPointerException("No connection!");
 			if (this.objectNames == null || this.objectNames.size() == 0) return;
 			int count = this.objectNames.size();
 			stmt = this.connection.createStatement();

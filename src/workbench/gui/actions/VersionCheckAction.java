@@ -10,7 +10,7 @@
  *
  */
 package workbench.gui.actions;
-
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JFrame;
@@ -36,10 +36,15 @@ public class VersionCheckAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		JFrame parent = WbManager.getInstance().getCurrentWindow();
-		VersionCheckDialog dialog = new VersionCheckDialog(parent, true);
-		WbSwingUtilities.center(dialog, parent);
-		dialog.startRetrieveVersions();
-		dialog.show();
+		final JFrame parent = WbManager.getInstance().getCurrentWindow();
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				VersionCheckDialog dialog = new VersionCheckDialog(parent, true);
+				WbSwingUtilities.center(dialog, parent);
+				dialog.show();
+			}
+		});
 	}
 }

@@ -21,7 +21,7 @@ import java.util.List;
 import workbench.db.SequenceReader;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;

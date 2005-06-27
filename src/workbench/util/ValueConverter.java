@@ -100,7 +100,7 @@ public class ValueConverter
 		{
 			case Types.BIGINT:
 				if (aValue.toString().length() == 0) return null;
-				return new BigInteger(aValue.toString().trim());
+				return new Long(aValue.toString().trim());
 			case Types.INTEGER:
 			case Types.SMALLINT:
 			case Types.TINYINT:

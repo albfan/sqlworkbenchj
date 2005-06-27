@@ -74,7 +74,7 @@ public class ReportColumn
 		StrBuffer myindent = new StrBuffer(indent);
 
 		myindent.append("  ");
-		tagWriter.appendOpenTag(result, indent, TAG_COLUMN_DEFINITION);
+		tagWriter.appendOpenTag(result, indent, TAG_COLUMN_DEFINITION, "name", this.column.getColumnName());
 		result.append('\n');
 
 		if (includePosition) tagWriter.appendTag(result, myindent, TAG_COLUMN_POSITION, this.column.getPosition());

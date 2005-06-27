@@ -21,7 +21,7 @@ import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;

@@ -18,7 +18,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 
 import workbench.log.LogMgr;
 

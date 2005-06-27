@@ -25,11 +25,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import workbench.exception.ExceptionUtil;
-import workbench.exception.NoConnectionException;
+import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 
 /**
@@ -51,7 +51,6 @@ public class ConnectionMgr
 	/** Creates new ConnectionMgr */
 	private ConnectionMgr()
 	{
-
 	}
 
 	public static ConnectionMgr getInstance()
@@ -132,7 +131,7 @@ public class ConnectionMgr
 	}
 
 	Connection connect(ConnectionProfile aProfile, String anId)
-		throws ClassNotFoundException, SQLException, Exception
+		throws ClassNotFoundException, Exception
 	{
 		// The DriverManager refuses to use a driver which was not loaded
 		// from the system classloader, so the connection has to be
@@ -146,7 +145,7 @@ public class ConnectionMgr
 		//LogMgr.logDebug("ConnectionMgr.connect()", "FindDriver took " + (end - start) + " ms");
 		if (drv == null)
 		{
-			throw new NoConnectionException("Driver class not registered");
+			throw new SQLException("Driver class not registered");
 		}
 
 		try
@@ -335,70 +334,6 @@ public class ConnectionMgr
 		return this.profiles;
 	}
 
-	/**
-	 *	Return a readable display of a connection
-	 */
-	public static String getDisplayString(WbConnection con)
-	{
-		String displayString = null;
-//		String model = Settings.getInstance().getConnectionDisplayModel();
-//		if (model != null && model.length() > 0) return getDisplayStringFromModel(con);
-
-		try
-		{
-			DatabaseMetaData data = con.getSqlConnection().getMetaData();
-			StringBuffer buff = new StringBuffer(100);
-			buff.append(ResourceMgr.getString("TxtUser"));
-			buff.append('=');
-			buff.append(data.getUserName());
-
-			String catName = data.getCatalogTerm();
-			String catalog = con.getMetadata().getCurrentCatalog();
-			if (catName == null) catName = "Catalog";
-			if (catName != null && catName.length() > 0 &&
-			    catalog != null && catalog.length() > 0)
-			{
-				buff.append(", ");
-				buff.append(catName);
-				buff.append('=');
-				buff.append(catalog);
-			}
-
-			buff.append(", URL=");
-			buff.append(data.getURL());
-			displayString = buff.toString();
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("ConnectionMgr.getDisplayString()", "Could not retrieve connection information", e);
-			displayString = "n/a";
-		}
-		return displayString;
-	}
-
-//	private static String getDisplayStringFromModel(WbConnection con)
-//	{
-//		String displayString = Settings.getInstance().getConnectionDisplayModel();
-//		try
-//		{
-//			DatabaseMetaData data = con.getSqlConnection().getMetaData();
-//			displayString = displayString.replaceAll("%username%", data.getUserName());
-//
-//			String catalog = con.getMetadata().getCurrentCatalog();
-//			displayString = displayString.replaceAll("%catalog%", catalog == null ? "" : catalog);
-//
-//			displayString = displayString.replaceAll("%url%", data.getURL());
-//			String prof = con.getProfile().getName();
-//			displayString = displayString.replaceAll("%profile%", prof == null ? "" : prof);
-//		}
-//		catch (Exception e)
-//		{
-//			LogMgr.logError("ConnectionMgr.getDisplayStringFromModel()", "Could not retrieve connection information", e);
-//			displayString = "n/a";
-//		}
-//		return displayString;
-//	}
-	
 	/**
 	 *	Disconnects all connections
 	 */

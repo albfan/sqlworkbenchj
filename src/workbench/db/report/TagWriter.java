@@ -61,6 +61,13 @@ public class TagWriter
 		appendTag(target, indent, tag, value, false);
 	}
 	
+	public void appendTag(StrBuffer target, StrBuffer indent, String tag, String value, String attr, String attValue)
+	{
+		appendOpenTag(target, indent, tag, attr, attValue);
+		target.append(value);
+		appendCloseTag(target, null, tag);
+	}
+	
 	/**
 	 * Appends the tag and the value in one line. There will be a new line
 	 * after the closing tag. If checkCData is true, then the value 

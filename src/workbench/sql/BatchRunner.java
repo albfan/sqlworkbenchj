@@ -28,7 +28,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
 import workbench.db.WbConnection;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.interfaces.ResultLogger;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -48,7 +48,7 @@ import workbench.util.StringUtil;
 public class BatchRunner
 {
 	private List files;
-	private StatementRunner stmtRunner;
+	private DefaultStatementRunner stmtRunner;
 	private WbConnection connection;
 	private boolean abortOnError = false;
 	private String successScript;
@@ -108,7 +108,7 @@ public class BatchRunner
 	public void setConnection(WbConnection conn)
 	{
 		this.connection = conn;
-		this.stmtRunner = new StatementRunner();
+		this.stmtRunner = new DefaultStatementRunner();
 		this.stmtRunner.setConnection(this.connection);
 		this.stmtRunner.setVerboseLogging(this.verboseLogging);
 	}

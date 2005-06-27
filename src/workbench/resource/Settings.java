@@ -24,9 +24,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.CodeSource;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -36,8 +33,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import workbench.WbManager;
-import workbench.db.DbMetadata;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.gui.actions.ActionRegistration;
 import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
@@ -174,15 +170,6 @@ public class Settings
 
 		LogMgr.logInfo("Settings.<init>", "Using configdir: " + configDir);
 
-		if (WbManager.trace) System.out.println("Setting server lists for MetaData");
-		//DbMetadata.setServersWhichNeedReconnect(this.getCancelWithReconnectServers());
-		DbMetadata.setCaseSensitiveServers(this.getCaseSensitivServers());
-		DbMetadata.setServersWhereDDLNeedsCommit(this.getServersWhereDDLNeedsCommit());
-		DbMetadata.setServersWhichNeedJdbcCommit(this.getServersWhichNeedJdbcCommit());
-		DbMetadata.setServersWithInlineConstraints(this.getServersWithInlineConstraints());
-
-		if (WbManager.trace) System.out.println("Done setting server lists for MetaData");
-
 		this.renameOldProps();
 
 		// init settings for datastore sort feature
@@ -306,6 +293,7 @@ public class Settings
 			}
 			this.props.remove("workbench.dbexplorer.disconnect");
 			this.props.remove("workbench.db.rollbackdisconnect");
+			this.props.remove("workbench.db.fetchsize");
 			this.props.remove("workbench.workspace.lastfile");
 			this.props.remove("workbench.workspace.restorelast");
 			this.props.remove("workbench.persistence.cleanupunderscores");
@@ -1341,19 +1329,17 @@ public class Settings
 
 	public boolean getBoolProperty(String property)
 	{
-		return getBoolProperty(property, false);
+		return this.props.getBoolProperty(property, false);
 	}
 
 	public boolean getBoolProperty(String property, boolean defaultValue)
 	{
-		String value = this.getProperty(property, null);
-		if (value == null) return defaultValue;
-		return StringUtil.stringToBool(value);
+		return this.props.getBoolProperty(property, defaultValue);
 	}
 
 	public void setBoolProperty(String property, boolean value)
 	{
-		this.setProperty(property, Boolean.toString(value));
+		this.props.setProperty(property, value);
 	}
 
 	public void setProperty(String aProperty, String aValue)
@@ -1434,6 +1420,11 @@ public class Settings
 		this.props.setProperty("workbench.dbexplorer.mainwindow", Boolean.toString(showWindow));
 	}
 
+	public boolean getRestoreExplorerTabs()
+	{
+		return getShowDbExplorerInMainWindow() || getBoolProperty("workbench.dbexplorer.restoretabs", false);
+	}
+	
 	public boolean getShowDbExplorerInMainWindow()
 	{
 		return this.getBoolProperty("workbench.dbexplorer.mainwindow", false);

@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import workbench.db.SequenceReader;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
@@ -45,11 +45,6 @@ public class McKoiMetadata
 	{
 		String s = new String(content, 2, content.length - 6);
 		return s;
-	}
-	
-	public void done()
-	{
-		this.connection = null;
 	}
 	
 	public workbench.storage.DataStore getSequenceDefinition(String owner, String sequence)

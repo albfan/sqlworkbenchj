@@ -119,23 +119,36 @@ public class DefaultCompletionHandler
 		int index = parser.getCommandIndexAtCursorPos(cursorPos);
 		int commandCursorPos = parser.getIndexInCommand(index, cursorPos);
 		String sql = parser.getCommand(index);
+		if (sql == null) 
+		{
+			showNoObjectsFoundMessage();
+			return false;
+		}
 		this.currentWord = editor.getWordAtCursor(".");//StringUtil.getWordLeftOfCursor(sql, commandCursorPos);
 		
 		try
 		{
 			StatementContext ctx = new StatementContext(this.dbConnection, sql, commandCursorPos);
+			
 			if (ctx.isStatementSupported())
 			{
-				if (ctx.getOverwriteCurrentWord() && currentWord != null)
-				{
-					editor.selectWordAtCursor(".");
-				}
+				boolean selectWord = (ctx.getOverwriteCurrentWord() && currentWord != null);
+				window.selectCurrentWordInEditor(selectWord);
 				this.elements = ctx.getData();
 				this.header.setText(ctx.getTitle());
-
+				this.window.setAppendDot(ctx.appendDotToSelection());
+				this.window.setColumnPrefix(ctx.getColumnPrefix());
+				
 				result = (this.elements != null && this.elements.size() > 0);
-				if (result)	fireDataChanged();
-				else showNoObjectsFoundMessage();
+				if (result)	
+				{
+					statusBar.clearStatusMessage();
+					fireDataChanged();
+				}
+				else 
+				{
+					showNoObjectsFoundMessage();
+				}
 			}
 			else
 			{
@@ -185,6 +198,7 @@ public class DefaultCompletionHandler
 		};
 		t.start();
 	}
+	
 	private void fireDataChanged()
 	{
 		if (this.listeners == null) return;

@@ -14,7 +14,7 @@ package workbench.sql.commands;
 import java.sql.SQLException;
 
 import workbench.db.WbConnection;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
@@ -51,22 +51,24 @@ public class SetCommand extends SqlCommand
 		{
 			String[] words = aSql.split("\\s");
 			boolean execSql = true;
-
+			String command = null;
+			
 			if (words.length > 1)
 			{
-				if (words[1].equalsIgnoreCase("autocommit"))
+				command = words[1];
+				if (command.equalsIgnoreCase("autocommit"))
 				{
 					result = this.setAutocommit(aConnection, words);
 					execSql = false;
 				}
 				else if (aConnection.getMetadata().isOracle())
 				{
-					if (words[1].equalsIgnoreCase("serveroutput"))
+					if (command.equalsIgnoreCase("serveroutput"))
 					{
 						result = this.setServeroutput(aConnection, words);
 						execSql = false;
 					}
-					else if (words[1].equalsIgnoreCase("feedback"))
+					else if (command.equalsIgnoreCase("feedback"))
 					{
 						result = this.setFeedback(aConnection, words);
 						execSql = false;
@@ -85,6 +87,12 @@ public class SetCommand extends SqlCommand
 					result.setWarning(true);
 					result.addMessage(warnings.toString());
 				}
+			}
+			
+			if ("SCHEMA".equalsIgnoreCase(command))
+			{
+				aConnection.schemaChanged(null, null);
+				result.addMessage(ResourceMgr.getString("MsgSchemaChanged"));
 			}
 		}
 		catch (Throwable e)

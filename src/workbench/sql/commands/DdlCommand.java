@@ -15,9 +15,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import workbench.db.WbConnection;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
@@ -57,11 +59,16 @@ public class DdlCommand extends SqlCommand
 	}
 
 	private String verb;
+	private Pattern createFunc;
 
 	private DdlCommand(String aVerb)
 	{
 		this.verb = aVerb;
 		this.isUpdatingCommand = true;
+		if ("CREATE".equals(verb))
+		{
+			createFunc = Pattern.compile("CREATE.*FUNCTION.*AS\\s*\\$", Pattern.CASE_INSENSITIVE);
+		}
 	}
 
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
@@ -72,6 +79,11 @@ public class DdlCommand extends SqlCommand
 		{
 			this.currentStatement = aConnection.createStatement();
 
+			if (aConnection.getMetadata().isPostgres() && "CREATE".equals(verb))
+			{
+				aSql = fixPgDollarQuote(aSql);
+			}
+			
 			String msg = null;
 
 			if ("DROP".equals(verb) && aConnection.getIgnoreDropErrors())
@@ -90,7 +102,36 @@ public class DdlCommand extends SqlCommand
 			else
 			{
 				this.currentStatement.execute(aSql);
-				if ("DROP".equals(verb))
+				boolean schemaChanged = false;
+				
+				if ("ALTER".equals(verb) && aConnection.getMetadata().isOracle())
+				{
+					// check for schema change in oracle
+					String[] args = aSql.split("\\s");
+					if (args.length > 3 && args[1].equalsIgnoreCase("SESSION") && args[2].equalsIgnoreCase("SET"))
+					{
+						String[] newValue = args[3].split("="); 
+						if (newValue.length == 2)
+						{
+							String property = newValue[0];
+							String schema = newValue[1];
+							if (property != null)
+							{
+								if (property.trim().equalsIgnoreCase("CURRENT_SCHEMA"))
+								{
+									aConnection.schemaChanged(null, schema);
+									schemaChanged = true;
+								}
+							}
+						}
+					}
+				}
+					
+				if (schemaChanged)
+				{
+					msg = ResourceMgr.getString("MsgSchemaChanged");
+				}
+				else if ("DROP".equals(verb))
 				{
 					msg = ResourceMgr.getString("MsgDropSuccess");
 				}
@@ -159,12 +200,18 @@ public class DdlCommand extends SqlCommand
     String word = null;
     String name = null;
     String type = null;
+		String lastType = null;
     boolean nextTokenIsName = false;
     while (tok.hasMoreTokens())
     {
       word = tok.nextToken();
       if (nextTokenIsName)
       {
+				if ("PACKAGE".equals(type) && "BODY".equals(word))
+				{
+					type = "PACKAGE BODY";
+					continue;
+				}
         name = word;
         break;
       }
@@ -189,6 +236,11 @@ public class DdlCommand extends SqlCommand
       word = tok.nextToken();
       if (nextTokenIsName)
       {
+				if ("PACKAGE".equals(type) && "BODY".equals(word))
+				{
+					// ignore the BODY keyword --> the next word is the real name
+					continue;
+				}
         name = word;
         break;
       }
@@ -198,7 +250,7 @@ public class DdlCommand extends SqlCommand
         nextTokenIsName = true;
       }
     }
-    return type;
+    return name;
 	}
 
   private boolean addExtendErrorInfo(WbConnection aConnection, String sql, StatementRunnerResult result)
@@ -218,7 +270,7 @@ public class DdlCommand extends SqlCommand
 			name = tok.nextToken();
 		}
 
-    String msg = aConnection.getMetadata().getExtendedErrorInfo(null, type, name);
+    String msg = aConnection.getMetadata().getExtendedErrorInfo(null, name, type);
 		if (msg != null && msg.length() > 0)
 		{
 			result.addMessage(msg);
@@ -231,9 +283,68 @@ public class DdlCommand extends SqlCommand
 
   }
 
+	
+	/**
+	 * PG's documentation shows CREATE FUNCTION samples that use
+	 * a "dollar quoting" to avoid the nested single quotes
+	 * e.g. http://www.postgresql.org/docs/8.0/static/plpgsql-structure.html
+	 * but the JDBC driver does not (yet) understand this as well (this 
+	 * seems to be only implemented in the psql command line tool
+	 * So we'll replace the "dollar quotes" with regular single quotes
+	 * Every single quote inside the function body will be replaced with 
+	 * two single quotes in properly "escape" them
+	 */
+	private String fixPgDollarQuote(String sql)
+	{
+		Matcher m = createFunc.matcher(sql);
+		if (!m.find()) return sql;
+		
+		int start = sql.indexOf('$');
+		int end = sql.indexOf('$', start + 1);
+		String quote = sql.substring(start, end + 1);
+		
+		int startQuote = sql.indexOf(quote);
+		int endQuote = sql.lastIndexOf(quote);
+		String body = sql.substring(startQuote + quote.length(), endQuote);
+		body = body.replaceAll("'", "''");
+		
+		StringBuffer newSql = new StringBuffer(sql.length() + 10);
+		newSql.append(sql.substring(0, startQuote));
+		newSql.append('\'');
+		newSql.append(body);
+		newSql.append('\'');
+		newSql.append(sql.substring(endQuote + quote.length()));
+		return newSql.toString();
+	}
+	
 	public String getVerb()
 	{
 		return verb;
 	}
 
+	public static void main(String[] args)
+	{
+		try
+		{
+			String sql = "CREATE OR REPLACE PACKAGE BODY questionnaire_service_pkg \n" + 
+									 "IS \n" + 
+									 " \n" + 
+									 " \n" + 
+									 "/* !!!!!!!!!!!!!!!!!!!!!! ONLY FOR DEVELOPMENT REASONS !!!!!!!!!!!!!!!! */ \n" + 
+									 "PROCEDURE DELETE_QUESTIONNAIRE_RESULT (quest_id IN NUMBER, partnerId IN VARCHAR2) \n" + 
+									 "IS \n" + 
+									 " \n" + 
+									 "BEGIN";		
+			
+			String cleanSql = SqlUtil.makeCleanSql(sql, false);
+			DdlCommand ddl = new DdlCommand("CREATE");
+			System.out.println("name = " + ddl.getObjectName(cleanSql));
+			//System.out.println("type = " + ddl.getObjectType(cleanSql));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		System.out.println("Done.");
+	}
 }

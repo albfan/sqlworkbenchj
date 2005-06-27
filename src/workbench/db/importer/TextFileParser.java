@@ -28,7 +28,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.interfaces.ImportFileParser;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -450,7 +450,15 @@ public class TextFileParser
 		}
 
 		ColumnIdentifier[] cols = this.getColumnsToImport();
-		this.receiver.setTargetTable(this.tableName, cols);
+		try
+		{
+			this.receiver.setTargetTable(this.tableName, cols);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("TextFileParser.processOneFile()", "Error setting target table", e);
+			throw e;
+		}
 
 		String value = null;
 		this.rowData = new Object[this.importColCount];
@@ -686,6 +694,7 @@ public class TextFileParser
 	private void readColumnDefinitions(List cols)
 		throws SQLException
 	{
+		if (this.messages == null) messages = new StrBuffer();
 		try
 		{
 			ArrayList myCols = new ArrayList(cols);
@@ -775,7 +784,20 @@ public class TextFileParser
 			
 			// reset mapping
 			this.importAllColumns();
-			if (skipPresent) this.setImportColumns(realCols);
+			
+			if (realCols.size() == 0)
+			{
+				// no columns found for the table!
+				this.colCount = 0;
+				this.columns = null;
+			}
+			else if (skipPresent) 
+			{
+				// only if we found at least one column to ignore, we
+				// need to set the real column list
+				this.setImportColumns(realCols);
+			}
+			
 		}
 		catch (SQLException e)
 		{
@@ -787,6 +809,11 @@ public class TextFileParser
 			this.colCount = -1;
 			this.columns = null;
 		}
+	}
+	
+	public int getColumnCount()
+	{
+		return this.colCount;
 	}
 	
 	/**

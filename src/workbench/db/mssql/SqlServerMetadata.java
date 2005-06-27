@@ -19,6 +19,7 @@ import workbench.db.DbMetadata;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
 import workbench.storage.DataStore;
+import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 
 /**
@@ -30,7 +31,6 @@ public class SqlServerMetadata
 {
 	private Connection dbConn = null;
 	private DbMetadata meta = null;
-	private PreparedStatement procStatement = null;
 
 	public SqlServerMetadata(DbMetadata db)
 	{
@@ -59,38 +59,28 @@ public class SqlServerMetadata
 	public DataStore getProcedures(String catalog, String schema)
 		throws SQLException
 	{
-		this.procStatement = this.dbConn.prepareStatement(SqlServerMetadata.GET_PROC_SQL);
-		if (schema == null)
+		PreparedStatement stmt = this.dbConn.prepareStatement(SqlServerMetadata.GET_PROC_SQL);
+		DataStore ds = null;
+		try 
 		{
-			this.procStatement.setString(1, "%");
-		}
-		else
-		{
-			this.procStatement.setString(1, schema);
-		}
-		ResultSet rs = this.procStatement.executeQuery();
-		JdbcProcedureReader reader = new JdbcProcedureReader(this.meta);
-		return reader.buildProcedureListDataStore(rs);
-	}
-
-	public void closeStatement()
-	{
-		if (this.procStatement != null)
-		{
-			try
+			if (schema == null)
 			{
-				this.procStatement.close();
+				stmt.setString(1, "%");
 			}
-			catch (Throwable e)
+			else
 			{
+				stmt.setString(1, schema);
 			}
+			ResultSet rs = stmt.executeQuery();
+			JdbcProcedureReader reader = new JdbcProcedureReader(this.meta);
+			// buildProcedureListDataStore will close the result set
+			ds = reader.buildProcedureListDataStore(rs);
 		}
-		this.procStatement = null;
-	}
-
-	public void done()
-	{
-		this.closeStatement();
+		finally
+		{
+			SqlUtil.closeStatement(stmt);
+		}
+		return ds;
 	}
 
 	private static final String GET_PROC_SQL =

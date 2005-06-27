@@ -242,7 +242,7 @@
      -profile=Firebird
      -AbortOnError=false
      -CleanupSuccess=commit.sql
-     -CleanupSuccess=rollback.sql</programlisting>
+     -CleanupErorr=rollback.sql</programlisting>
       <para>Note that you need to quote each file individually and not the value for the
       <literal>-script</literal> parameter</para>
 

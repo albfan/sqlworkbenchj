@@ -18,7 +18,6 @@ import java.util.List;
 
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
-import workbench.gui.components.EncodingPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -31,7 +30,7 @@ import workbench.util.EncodingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.db.TableIdentifier;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 
 /**
  *
@@ -637,11 +636,11 @@ public class WbExport
 	public void cancel()
 		throws SQLException
 	{
-		super.cancel();
 		if (this.exporter != null)
 		{
 			this.exporter.cancelExecution();
 		}
+		super.cancel();
 	}
 
 	public void jobFinished()

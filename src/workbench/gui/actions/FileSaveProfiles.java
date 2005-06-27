@@ -15,7 +15,7 @@ import java.awt.event.ActionEvent;
 
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;

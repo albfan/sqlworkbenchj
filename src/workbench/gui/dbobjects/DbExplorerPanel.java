@@ -37,7 +37,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 
 import workbench.db.WbConnection;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
@@ -292,11 +292,6 @@ public class DbExplorerPanel
 	
 	public void setConnection(WbConnection aConnection)
 	{
-		this.setConnection(aConnection, null);
-	}
-
-	public void setConnection(WbConnection aConnection, String aProfilename)
-	{
 		if (aConnection == null)
 		{
 			this.reset();
@@ -315,10 +310,14 @@ public class DbExplorerPanel
 			this.schemaSelector.doLayout();
 			this.readSchemas();
 
-			if (this.window != null && aProfilename != null)
+			if (this.window != null)
 			{
-				this.window.setProfileName(aProfilename);
+				String name = null;
+				ConnectionProfile prof = aConnection.getProfile();
+				if (prof != null) name = prof.getName();
+				if (name != null) this.window.setProfileName(name);
 			}
+			
 			this.connectionInfo.setConnection(aConnection);
 
 			if (Settings.getInstance().getRetrieveDbExplorer())
@@ -371,6 +370,11 @@ public class DbExplorerPanel
 		}
 	}
 
+	public void panelSelected()
+	{
+		// nothing to do
+	}
+	
 	public void startRetrieve()
 	{
 		this.fireSchemaChanged();

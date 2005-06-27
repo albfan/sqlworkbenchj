@@ -55,7 +55,7 @@ public class SchemaReporter
 	private WbConnection dbConn;
 	private ArrayList tables;
 	private String xmlNamespace;
-	private String[] types = DbMetadata.TABLE_TYPES_TABLE;
+	private String[] types;
 	private List schemas;
 
 	private TagWriter tagWriter = new TagWriter();
@@ -76,6 +76,7 @@ public class SchemaReporter
 	public SchemaReporter(WbConnection conn)
 	{
 		this.dbConn = conn;
+		types = conn.getMetadata().getTypeListTable();
 	}
 
 	public void setProgressMonitor(RowActionMonitor mon)

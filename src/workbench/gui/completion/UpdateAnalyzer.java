@@ -32,8 +32,8 @@ import workbench.util.TableAlias;
 public class UpdateAnalyzer
 	extends BaseAnalyzer
 {
-
 	private	final Pattern SET_PATTERN = Pattern.compile("\\sSET\\s|\\sSET$", Pattern.CASE_INSENSITIVE);
+	
 	public UpdateAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{	
 		super(conn, statement, cursorPos);

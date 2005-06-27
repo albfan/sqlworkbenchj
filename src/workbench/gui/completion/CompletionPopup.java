@@ -39,6 +39,7 @@ import workbench.gui.editor.JEditTextArea;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.TableAlias;
+import workbench.util.WbThread;
 
 
 /**
@@ -56,6 +57,9 @@ public class CompletionPopup
 	private ListModel data;
 	private JComponent headerComponent;
 	private String pasteCase;
+	private boolean appendDot;
+	private boolean selectCurrentWordInEditor;
+	private String columnPrefix;
 	
 	public CompletionPopup(JEditTextArea ed, JComponent header, ListModel listData)
 	{
@@ -77,18 +81,13 @@ public class CompletionPopup
 			public boolean isManagingFocus() { return false; }
 			public boolean getFocusTraversalKeysEnabled() {	return false;	}
 		};
+		
 		content.setLayout(new BorderLayout());
 		scroll = new JScrollPane(this.elementList);
 		scroll.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
 		elementList.setVisibleRowCount(10);
 		content.add(scroll);
 		elementList.addKeyListener(this);
-	}
-
-	
-	public void showPopup()
-	{
-		this.showPopup(null);
 	}
 	
 	public void showPopup(String valueToSelect)
@@ -106,6 +105,17 @@ public class CompletionPopup
 			Point p = editor.getCursorLocation();
 			SwingUtilities.convertPointToScreen(p, editor);
 
+			if (selectCurrentWordInEditor)
+			{
+				Thread t = new WbThread("select")
+				{
+					public void run()
+					{
+						editor.selectWordAtCursor(".");
+					}
+				};
+				t.start();
+			}
 			int count = data.getSize();
 			elementList.setVisibleRowCount(count < 12 ? count + 1 : 12);
 			
@@ -152,15 +162,21 @@ public class CompletionPopup
 	private String getPasteValue(String value)
 	{
 		if (value == null) return value;
+		String result;
 		if ("lower".equalsIgnoreCase(pasteCase))
 		{
-			return value.toLowerCase();
+			result = value.toLowerCase();
 		}
 		else if ("upper".equalsIgnoreCase(pasteCase))
 		{
-			return value.toUpperCase();
+			result = value.toUpperCase();
 		}
-		return value;
+		else 
+		{
+			result = value;
+		}
+		if (this.appendDot) result += ".";
+		return result;
 	}
 	
 	private void closePopup(boolean pasteEntry)
@@ -195,6 +211,11 @@ public class CompletionPopup
 							if (c instanceof ColumnIdentifier) 
 							{
 								if (col > 0) cols.append(", ");
+								if (columnPrefix != null)
+								{
+									cols.append(columnPrefix);
+									cols.append(".");
+								}
 								cols.append(getPasteValue(c.toString()));
 								col ++;
 							}
@@ -214,6 +235,21 @@ public class CompletionPopup
 		}
 	}
 
+	public void setColumnPrefix(String prefix)
+	{
+		this.columnPrefix = prefix;
+	}
+
+	public void selectCurrentWordInEditor(boolean flag)
+	{
+		this.selectCurrentWordInEditor = flag;
+	}
+	
+	public void setAppendDot(boolean flag)
+	{
+		this.appendDot = flag;
+	}
+	
 	protected int findEntry(String s)
 	{
 		if (s == null) return -1;

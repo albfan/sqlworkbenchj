@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -47,9 +48,10 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
 
 import workbench.db.WbConnection;
-import workbench.exception.ExceptionUtil;
+import workbench.interfaces.EncodingSelector;
+import workbench.util.EncodingUtil;
+import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.AutoCompletionAction;
 import workbench.gui.actions.ColumnSelectionAction;
 import workbench.gui.actions.CommentAction;
 import workbench.gui.actions.FileOpenAction;
@@ -61,7 +63,6 @@ import workbench.gui.actions.MatchBracketAction;
 import workbench.gui.actions.ReplaceAction;
 import workbench.gui.actions.UnCommentAction;
 import workbench.gui.actions.WbAction;
-import workbench.gui.components.EncodingPanel;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.ReplacePanel;
 import workbench.gui.components.SearchCriteriaPanel;
@@ -536,13 +537,14 @@ public class EditorPanel
 
 		String lastDir = Settings.getInstance().getLastSqlDir();
 		JFileChooser fc = new JFileChooser(lastDir);
-		EncodingPanel p = new EncodingPanel();
+		JComponent p = EncodingUtil.createEncodingPanel();
+		EncodingSelector selector = (EncodingSelector)p;
 		fc.setAccessory(p);
 		fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
 		int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(this));
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
-			String encoding = p.getEncoding();
+			String encoding = selector.getEncoding();
 			result = this.readFile(fc.getSelectedFile(), encoding);
 			lastDir = fc.getCurrentDirectory().getAbsolutePath();
 			Settings.getInstance().setLastSqlDir(lastDir);
@@ -758,7 +760,8 @@ public class EditorPanel
 		JFileChooser fc = new JFileChooser(lastDir);
 		fc.setSelectedFile(this.currentFile);
 		fc.addChoosableFileFilter(ff);
-		EncodingPanel p = new EncodingPanel(this.fileEncoding);
+		JComponent p = EncodingUtil.createEncodingPanel(this.fileEncoding);
+		EncodingSelector selector = (EncodingSelector)p;
 		fc.setAccessory(p);
 
 		int answer = fc.showSaveDialog(SwingUtilities.getWindowAncestor(this));
@@ -766,7 +769,7 @@ public class EditorPanel
 		{
 			try
 			{
-				String encoding = p.getEncoding();
+				String encoding = selector.getEncoding();
 				this.saveFile(fc.getSelectedFile(), encoding);
 	      this.fireFilenameChanged(this.getCurrentFileName());
 				lastDir = fc.getCurrentDirectory().getAbsolutePath();

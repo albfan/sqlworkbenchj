@@ -27,7 +27,16 @@ import java.util.Collections;
 import workbench.db.IndexDefinition;
 
 /**
+ * A class to hold information about a database table that 
+ * will eventually be stored in an XML report. 
+ * It uses a {@link workbench.db.TableIdentifier} to store the 
+ * table's name, and {@link workbench.db.ColumnIdentifier} to 
+ * store the table's columns.
+ * When initialized with a connection, it tries to find the primary 
+ * and foreign key constraints as well.
  *
+ * Primary feature of this class is that it can create an XML 
+ * representation of itself.
  * @author  support@sql-workbench.net
  */
 public class ReportTable
@@ -79,7 +88,18 @@ public class ReportTable
 	{
 		this(tbl, conn, nspace, includeIndex, includeFk, includePk, true);
 	}
-	
+
+	/**
+	 * Initialize this ReportTable.
+	 * This will read the following information for the table: 
+	 * <ul>
+	 *	<li>columns for the table using {@link workbench.db.DbMetadata.getTableColumns(workbench.db.TableIdentifier)}</li>
+	 *  <li>the comments for the table using {@link workbench.db.DbMetadata.getTableComment(workbench.db.TableIdentifier)}</li>
+	 *  <li>The defined indexes for the table if includeIndex == true using an {@link IndexReporter}</li>
+	 *  <li>The defined foreign keys if includeFK == true</li>
+	 *  <li>Table constraints if includeConstraints == true {@link workbench.db.DbMetadata.getTableConstraints(workbench.db.TableIdentifier)}</li>
+	 *</ul>
+	 */
 	public ReportTable(TableIdentifier tbl, WbConnection conn, String nspace, boolean includeIndex, boolean includeFk, boolean includePk, boolean includeConstraints)
 		throws SQLException
 	{
@@ -155,6 +175,9 @@ public class ReportTable
 		return null;
 	}
 	
+	/**
+	 * Define the columns that belong to this table
+	 */
 	public void setColumns(List cols)
 	{
 		if (cols == null) return;
@@ -170,7 +193,7 @@ public class ReportTable
 	
 	private void readForeignKeys(WbConnection conn)
 	{
-		DataStore ds = conn.getMetadata().getForeignKeys(this.table.getCatalog(), this.table.getSchema(), this.table.getTableName());
+		DataStore ds = conn.getMetadata().getForeignKeys(this.table.getCatalog(), this.table.getSchema(), this.table.getTableName(), true);
 		int keys = ds.getRowCount();
 		if (keys == 0) return;
 
@@ -184,6 +207,8 @@ public class ReportTable
 				ref.setConstraintName(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_FK_NAME));
 				ref.setDeleteRule(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_DELETE_RULE));
 				ref.setUpdateRule(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_UPDATE_RULE));
+				ref.setDeleteRuleValue(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE, -1));
+				ref.setUpdateRuleValue(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE, -1));
 				String colExpr = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
 				String table = null;
 				String column = null;
@@ -200,6 +225,9 @@ public class ReportTable
 		}
 	}
 
+	/**
+	 * Find a column witht the given name.
+	 */
 	public ReportColumn findColumn(String col)
 	{
 		if (col == null) return null;
@@ -253,13 +281,18 @@ public class ReportTable
 	public String getTableComment() { return this.tableComment; }
 	public String getTableConstraints() { return this.tableConstraints; }
 		
+	/**
+	 * Return an XML representation of this table information.
+	 * The columns will be listed alphabetically not in the order
+	 * they were retrieved from the database.
+	 */
 	public StrBuffer getXml(StrBuffer indent)
 	{
 		StrBuffer line = new StrBuffer(500);
 		StrBuffer colindent = new StrBuffer(indent);
 		colindent.append(indent);
 
-		tagWriter.appendOpenTag(line, indent, TAG_TABLE_DEF);
+		tagWriter.appendOpenTag(line, indent, TAG_TABLE_DEF, "name", this.table.getTableName());
 		line.append('\n');
 
 		tagWriter.appendTag(line, colindent, TAG_TABLE_CATALOG, this.table.getCatalog());
@@ -279,7 +312,10 @@ public class ReportTable
 		tagWriter.appendCloseTag(line, indent, TAG_TABLE_DEF);
 		return line;
 	}
-	
+
+	/**
+	 * The namespace to be used for the XML representation
+	 */
 	public void setNamespace(String namespace)
 	{
 		this.tagWriter.setNamespace(namespace);
@@ -290,6 +326,5 @@ public class ReportTable
 		this.columns = null;
 		this.index.done();
 	}
-	
 	
 }

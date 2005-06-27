@@ -28,8 +28,8 @@ public class TableCreator
 	private WbConnection connection;
 	private ColumnIdentifier[] columnDefinition;
 	private TableIdentifier tablename;
-	private StringBuffer messages;
 	private TypeMapper mapper;
+	private boolean useDbmsDataType = false;
 
 	public TableCreator(WbConnection target, TableIdentifier newTable, ColumnIdentifier[] columns)
 		throws SQLException
@@ -42,12 +42,15 @@ public class TableCreator
 		this.mapper = new TypeMapper(this.connection, ignored);
 	}
 
+	public void useDbmsDataType(boolean flag) { this.useDbmsDataType = flag; }
+	
 	public void createTable()
 		throws SQLException
 	{
 		StringBuffer sql = new StringBuffer(100);
 		sql.append("CREATE TABLE ");
-		String name = this.tablename.isNewTable() ? this.tablename.getTableName() : this.tablename.getTableExpression();
+		//String name = this.tablename.isNewTable() ? this.tablename.getTableName() : this.tablename.getTableExpression();
+		String name = this.tablename.getTableExpression(this.connection);
 		sql.append(name);
 		sql.append(" (");
 		int count = this.columnDefinition.length;
@@ -55,8 +58,10 @@ public class TableCreator
 		for (int i=0; i < count; i++)
 		{
 			ColumnIdentifier col = this.columnDefinition[i];
+			
 			String def = this.getColumnDefintionString(col);
 			if (def == null) continue;
+			
 			if (numCols > 0) sql.append(", ");
 			sql.append(def);
 			numCols++;
@@ -97,32 +102,20 @@ public class TableCreator
 		result.append(col.getColumnName());
 		result.append(' ');
 
-		String typeName = this.mapper.getTypeName(type, size, digits);
+		String typeName = null;
+		if (this.useDbmsDataType)
+		{
+			typeName = col.getDbmsType();
+		}
+		else
+		{
+			typeName = this.mapper.getTypeName(type, size, digits);
+		}
 		result.append(typeName);
 
 		return result.toString();
 	}
 
-	public String getMessages()
-	{
-		if (this.messages == null) return null;
-		return this.messages.toString();
-	}
-
-	private void addMessage(String aMsg)
-	{
-		if (this.messages == null)
-		{
-			this.messages = new StringBuffer(100);
-		}
-		else
-		{
-			this.messages.append("\n");
-		}
-
-		this.messages.append(aMsg);
-	}
-	
 	/**
 	 *	Return a list of datatype as returned from DatabaseMetaData.getTypeInfo()
 	 *	which we cannot handle. This is used by the {@linke TableCreator} when searching

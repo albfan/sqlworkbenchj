@@ -223,6 +223,7 @@ public class ScriptParser
 		int start = this.getStartPosForCommand(commandIndex);
 		return (cursorPos - start);
 	}
+	
 	/**
 	 *	Return the command index for the command which is located at
 	 *	the given index of the current script.
@@ -233,11 +234,13 @@ public class ScriptParser
 		if (cursorPos < 0) return -1;
 		int count = this.commands.size();
 		if (count == 1) return 0;
+		if (count == 0) return -1;
 		for (int i=0; i < count - 1; i++)
 		{
 			ScriptCommandDefinition b = (ScriptCommandDefinition)this.commands.get(i);
 			ScriptCommandDefinition next = (ScriptCommandDefinition)this.commands.get(i + 1);
 			if (b.getStartPositionInScript() <= cursorPos && b.getEndPositionInScript() >= cursorPos) return i;
+			if (cursorPos > b.getEndPositionInScript() && cursorPos < next.getEndPositionInScript()) return i + 1;
 			if (b.getEndPositionInScript() > cursorPos && next.getStartPositionInScript() <= cursorPos) return i+1;
 		}
 		ScriptCommandDefinition b = (ScriptCommandDefinition)this.commands.get(count - 1);

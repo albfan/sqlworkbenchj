@@ -136,7 +136,7 @@
             </td>
         </tr>
     </table>
-    <table border="0" cellpadding="0" cellspacing="0" margin="0">
+    <table style="margin:0px" border="0" cellpadding="0" cellspacing="0">
         <tr>
             <td style="vertical-align:top">
                 <table class="tocTable" border="0" cellpadding="0" cellspacing="0" margin="0">
@@ -151,7 +151,7 @@
                     <img src="{$imageName}"/>
                 </td>
             </xsl:if>
-            <xsl:if test="not(imageName)">
+            <xsl:if test="not($imageName)">
                   <td class="content">
                     <xsl:apply-templates select="content"/>
                 </td>

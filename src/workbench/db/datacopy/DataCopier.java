@@ -23,7 +23,7 @@ import java.util.Map;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.RowDataReceiver;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
@@ -117,7 +117,7 @@ public class DataCopier
 		if (exists && dropTable && createTable)
 		{
 			this.targetConnection.getMetadata().dropTable(aTargetTable);
-			this.addMessage(ResourceMgr.getString("MsgCopyTableDropped").replaceAll("%name%", aTargetTable.getTableName()));
+			this.addMessage(ResourceMgr.getString("MsgCopyTableDropped").replaceAll("%name%", aTargetTable.getTableExpression(this.targetConnection)));
 			exists = false;
 		}
 
@@ -155,13 +155,9 @@ public class DataCopier
 			try
 			{
 				TableCreator creator = new TableCreator(this.targetConnection, this.targetTable, cols);
+				creator.useDbmsDataType(this.sourceConnection.getDatabaseProductName().equals(this.targetConnection.getDatabaseProductName()));
 				creator.createTable();
-				String msg = creator.getMessages();
-				if (msg != null)
-				{
-					this.addMessage(msg);
-				}
-				this.addMessage(ResourceMgr.getString("MsgCopyTableCreated").replaceAll("%name%", aTargetTable.getTableName()));
+				this.addMessage(ResourceMgr.getString("MsgCopyTableCreated").replaceAll("%name%", aTargetTable.getTableExpression(this.targetConnection)) + "\n");
 			}
 			catch (SQLException e)
 			{
@@ -209,21 +205,11 @@ public class DataCopier
 	}
 	
 	/**
-	 *	Initialize the DataCopier to create a copy of the source table by creating
-	 *	a new table in the target database.
-	 */
-	public void copyToNewTable(WbConnection source, WbConnection target, TableIdentifier aSourceTable, TableIdentifier newTableName, String additionalWhere)
-		throws SQLException
-	{
-		this.copyToNewTable(source, target, aSourceTable, newTableName, null, additionalWhere);
-	}
-
-	/**
 	 *	Set the definition to copy a table from source to target.
 	 *	The table will be created in the target connection. If the table
 	 *	already exists, an Exception will be thrown.
 	 */
-	public void copyToNewTable(WbConnection source, WbConnection target, TableIdentifier aSourceTable, TableIdentifier newTableName, ColumnIdentifier[] sourceColumns, String additionalWhere)
+	public void copyToNewTable(WbConnection source, WbConnection target, TableIdentifier aSourceTable, TableIdentifier newTableName, ColumnIdentifier[] sourceColumns, String additionalWhere, boolean drop)
 		throws SQLException
 	{
 		this.sourceConnection = source;
@@ -233,9 +219,11 @@ public class DataCopier
 		this.targetTable = newTableName;
 		this.useQuery = false;
 		this.targetColumnsForQuery = null;
+		
 		this.setSourceTableWhere(additionalWhere);
-
-		if (target.getMetadata().tableExists(newTableName))
+		boolean tableExists = target.getMetadata().tableExists(newTableName);
+		
+		if (tableExists && !drop)
 		{
 			LogMgr.logInfo("DataCopier.copyToNewTable()", "New table " + newTableName.getTableExpression() + " does already exist!");
 			List requestedCols = null;
@@ -252,9 +240,13 @@ public class DataCopier
 		}
 		else
 		{
+			if (tableExists && drop)
+			{
+				this.targetConnection.getMetadata().dropTable(newTableName);
+				this.addMessage(ResourceMgr.getString("MsgCopyTableDropped").replaceAll("%name%", newTableName.getTableExpression(this.targetConnection)));
+			}
 			this.initNewTable(sourceColumns);
 		}
-
 		this.initImporterForTable();
 	}
 
@@ -285,11 +277,11 @@ public class DataCopier
 		}
 
 		// the names of the target columns are copied into
-		// a List, in order to preserver the column order
+		// a List, in order to preserve the column order
 		// which is either defined by the user (through the sourceColumns list)
 		// or by the order of the existing table.
 		List targetCols = null;
-		if (sourceColumns == null)
+		if (sourceColumns == null || sourceColumns.length == 0)
 		{
 			int count = sourceCols.size();
 			targetCols = new ArrayList(count);
@@ -327,22 +319,18 @@ public class DataCopier
 		try
 		{
 			TableCreator creator = new TableCreator(this.targetConnection, this.targetTable, realCols);
+			creator.useDbmsDataType(this.sourceConnection.getDatabaseProductName().equals(this.targetConnection.getDatabaseProductName()));
 			creator.createTable();
 
 			// no need to delete rows from a newly created table
 			this.setDeleteTarget(false);
 
-			String msg = creator.getMessages();
-			if (msg != null)
-			{
-				this.addMessage(msg);
-			}
-			this.addMessage(ResourceMgr.getString("MsgCopyTableCreated").replaceAll("%name%", this.targetTable.getTableName()));
+			this.addMessage(ResourceMgr.getString("MsgCopyTableCreated").replaceAll("%name%", this.targetTable.getTableExpression(this.targetConnection)) + "\n");
 		}
 		catch (SQLException e)
 		{
 			LogMgr.logError("DataCopier.copyFromTable()", "Error when creating target table", e);
-			this.addError(ResourceMgr.getString("MsgCopyErrorCreatTable").replaceAll("%name%", targetTable.getTableName()));
+			this.addError(ResourceMgr.getString("MsgCopyErrorCreatTable").replaceAll("%name%", targetTable.getTableExpression(this.targetConnection)));
 			this.addError(ExceptionUtil.getDisplay(e));
 			throw e;
 		}
@@ -646,7 +634,7 @@ public class DataCopier
 			col ++;
 		}
 		sql.append(" \nFROM ");
-		sql.append(this.sourceTable.getTableExpression());
+		sql.append(this.sourceTable.getTableExpression(this.sourceConnection));
 
 		if (this.addWhere != null)
 		{
@@ -664,7 +652,7 @@ public class DataCopier
 		LogMgr.logDebug("DataCopier.initImporter()", "Using retrieve statement\n" + this.retrieveSql);
 		try
 		{
-			this.importer.setTargetTable(this.targetTable.getTableExpression(), cols);
+			this.importer.setTargetTable(this.targetTable.getTableExpression(this.targetConnection), cols);
 		}
 		catch (SQLException e)
 		{
@@ -833,7 +821,9 @@ public class DataCopier
 	{
 		StringBuffer log = new StringBuffer(250);
 
-		if (this.messages != null) log.append(this.messages);
+		// No need to append our messages, as the importer will
+		// store any message from its source (that's us)
+		// when committing a table...
 		log.append(this.importer.getMessages());
 		if (this.errors != null) log.append(this.errors);
 

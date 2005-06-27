@@ -39,7 +39,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.exporter.XmlRowDataConverter;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.interfaces.ImportFileParser;
 import workbench.log.LogMgr;
 import workbench.util.EncodingUtil;

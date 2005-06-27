@@ -31,12 +31,11 @@ public class AutoCompletionAction
 {
 	private CompletionHandler handler;
 	private JEditTextArea editor;
-
+	private StatusBar status;
 	public AutoCompletionAction(JEditTextArea editor, StatusBar status)
 	{
-		this.handler = new CompletionHandler(editor);
 		this.editor = editor;
-		this.handler.setStatusBar(status);
+		this.status = status;
 		this.initMenuDefinition("MnuTxtAutoComplete", KeyStroke.getKeyStroke(KeyEvent.VK_Q,KeyEvent.CTRL_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setEnabled(false);
@@ -44,7 +43,25 @@ public class AutoCompletionAction
 
 	public void setConnection(WbConnection conn)
 	{
-		if (this.handler != null) this.handler.setConnection(conn);
+		if (conn != null && this.handler == null)
+		{
+			try
+			{
+				// Use reflection to create the instance so 
+				// that the classes are not loaded during startup
+				this.handler = (CompletionHandler)Class.forName("workbench.gui.completion.DefaultCompletionHandler").newInstance();
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+		if (conn != null)
+		{
+			this.handler.setStatusBar(status);
+			this.handler.setEditor(editor);
+			this.handler.setConnection(conn);
+		}
 		this.setEnabled(conn != null);
 	}
 

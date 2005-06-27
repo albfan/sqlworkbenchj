@@ -78,6 +78,7 @@ public class DataStore
 	private RowDataList data;
 	protected RowDataList deletedRows;
 
+	// The SQL statement (SELECT) that produced this DataStore
 	private String sql;
 
 	private ResultInfo resultInfo;
@@ -243,17 +244,6 @@ public class DataStore
 		this.data.add(newIndex, newRow);
 		this.modified = true;
 		return newIndex;
-	}
-
-	public List getColumnValues(int aColumn)
-	{
-		int rowCount = this.getRowCount();
-		ArrayList result = new ArrayList(rowCount);
-		for (int i=0; i < rowCount; i++)
-		{
-			result.add(this.getValue(i, aColumn));
-		}
-		return result;
 	}
 
   public int getRowCount() { return this.data.size(); }
@@ -473,11 +463,21 @@ public class DataStore
 	 */
 	public void setUpdateTable(String aTablename, WbConnection aConn)
 	{
-		if (aTablename == null)
+		setUpdateTable(new TableIdentifier(aTablename), aConn);
+	}
+	
+	public void setUpdateTable(TableIdentifier tbl)
+	{
+		setUpdateTable(tbl, this.originalConnection);
+	}
+	
+	public void setUpdateTable(TableIdentifier tbl, WbConnection aConn)
+	{
+		if (tbl == null)
 		{
 			this.updateTable = null;
 		}
-		else if (!aTablename.equalsIgnoreCase(this.updateTable) && aConn != null)
+		else if (!tbl.getTableExpression().equalsIgnoreCase(this.updateTable) && aConn != null)
 		{
 			this.updateTable = null;
 			// check the columns which are in that table
@@ -491,24 +491,24 @@ public class DataStore
 				DbMetadata meta = aConn.getMetadata();
 				if (meta == null) return;
 
-				TableIdentifier tbl = new TableIdentifier(aTablename, aConn);
-				List columns = meta.getTableColumns(tbl);
-				if (columns == null || columns.size() == 0)
-				{
-					return;
-				}
-
 				this.updateTable = tbl.getTableExpression(aConn);
-
-				for (int i=0; i < columns.size(); i++)
+				
+				//TableIdentifier tbl = new TableIdentifier(aTablename, aConn);
+				ColumnIdentifier[] columns = meta.getColumnIdentifiers(tbl);
+				if (columns == null || columns.length == 0)
 				{
-					ColumnIdentifier column = (ColumnIdentifier)columns.get(i);
-
-					int index = this.findColumn(column.getColumnName());
-					if (index > -1)
+					LogMgr.logWarning("Datastore.setUpdateTable()", "No columns found for table " + tbl.getTableExpression() + "! Assuming columns from result set belong to update table", null);
+				}
+				else
+				{
+					for (int i=0; i < columns.length; i++)
 					{
-						this.resultInfo.setUpdateable(index, true);
-						this.resultInfo.setIsPkColumn(index, column.isPkColumn());
+						int index = this.findColumn(columns[i].getColumnName());
+						if (index > -1)
+						{
+							this.resultInfo.setUpdateable(index, true);
+							this.resultInfo.setIsPkColumn(index, columns[i].isPkColumn());
+						}
 					}
 				}
 			}
@@ -787,11 +787,23 @@ public class DataStore
 		return row.getDataAsString(aDelimiter, formatter, columns);
 	}
 
+	/**
+	 * Return a StringBuffer with the names of the columns of this DataStore
+	 * @param aFieldDelimiter the delimiter to be used
+	 * @return a string containing the names of all columns
+	 */
 	public StringBuffer getHeaderString(String aFieldDelimiter)
 	{
 		return getHeaderString(aFieldDelimiter, null);
 	}
 
+	/**
+	 * Return a StringBuffer with the names of the columns present in the 
+	 * given List.
+	 * @param aFieldDelimiter the delimiter to be used
+	 * @param columns the columns to include. If null, all columns are included
+	 * @return a string containing the names of the selected columns
+	 */
 	public StringBuffer getHeaderString(String aFieldDelimiter, List columns)
 	{
 		int cols = this.resultInfo.getColumnCount();
@@ -1121,55 +1133,55 @@ public class DataStore
 		return table;
 	}
 
-	/**
-	 * Write the contents of this DataStore as XML into the  
-	 * supplied Writer
-	 * @param pw Thw writer to which the XML is written.
-	 * @see #writeXmlData(Writer, boolean)
-	 */
-	public void writeXmlData(Writer pw)
-		throws IOException
-	{
-		this.writeXmlData(pw, false);
-	}
-
-	/**
-	 * Write the contents of this DataStore as XML into the  
-	 * supplied Writer
-	 *
-	 * @param pw The writer to which the XML is written.
-	 * @param useCdata if true all character data is put into a CDATA sectioni
-	 * @see workbench.db.exporter.XmlRowDataConverter
-	 */
-	public void writeXmlData(Writer pw, boolean useCdata)
-		throws IOException
-	{
-		int count = this.getRowCount();
-		if (count == 0) return;
-
-		XmlRowDataConverter converter = new XmlRowDataConverter(this.resultInfo);
-		converter.setUseCDATA(useCdata);
-		this.writeConverterData(converter, pw);
-	}
-
-	/**
-	 * Write the contents of this DataStore as HTML into the  
-	 * supplied Writer
-	 *
-	 * @param pw The writer to which the HTML is written.
-	 * @see workbench.db.exporter.HtmlRowDataConverter
-	 */
-	public void writeHtmlData(Writer pw)
-		throws IOException
-	{
-		HtmlRowDataConverter converter = new HtmlRowDataConverter(this.resultInfo);
-		converter.setEscapeHtml(this.escapeHtml);
-		converter.setCreateFullPage(true);
-		String sql = SqlUtil.makeCleanSql(this.sql, false, false, '\'');
-		if (sql.length() > 60) sql = sql.substring(0, 60);
-		converter.setPageTitle(sql);
-		this.writeConverterData(converter, pw);
-	}
+//	/**
+//	 * Write the contents of this DataStore as XML into the  
+//	 * supplied Writer
+//	 * @param pw Thw writer to which the XML is written.
+//	 * @see #writeXmlData(Writer, boolean)
+//	 */
+//	public void writeXmlData(Writer pw)
+//		throws IOException
+//	{
+//		this.writeXmlData(pw, false);
+//	}
+//
+//	/**
+//	 * Write the contents of this DataStore as XML into the  
+//	 * supplied Writer
+//	 *
+//	 * @param pw The writer to which the XML is written.
+//	 * @param useCdata if true all character data is put into a CDATA sectioni
+//	 * @see workbench.db.exporter.XmlRowDataConverter
+//	 */
+//	public void writeXmlData(Writer pw, boolean useCdata)
+//		throws IOException
+//	{
+//		int count = this.getRowCount();
+//		if (count == 0) return;
+//
+//		XmlRowDataConverter converter = new XmlRowDataConverter(this.resultInfo);
+//		converter.setUseCDATA(useCdata);
+//		this.writeConverterData(converter, pw);
+//	}
+//
+//	/**
+//	 * Write the contents of this DataStore as HTML into the  
+//	 * supplied Writer
+//	 *
+//	 * @param pw The writer to which the HTML is written.
+//	 * @see workbench.db.exporter.HtmlRowDataConverter
+//	 */
+//	public void writeHtmlData(Writer pw)
+//		throws IOException
+//	{
+//		HtmlRowDataConverter converter = new HtmlRowDataConverter(this.resultInfo);
+//		converter.setEscapeHtml(this.escapeHtml);
+//		converter.setCreateFullPage(true);
+//		String sql = SqlUtil.makeCleanSql(this.sql, false, false, '\'');
+//		if (sql.length() > 60) sql = sql.substring(0, 60);
+//		converter.setPageTitle(sql);
+//		this.writeConverterData(converter, pw);
+//	}
 
 	/**
 	 * Writes all rows using the supplied {@link workbench.db.exporter.RowDataConverter}

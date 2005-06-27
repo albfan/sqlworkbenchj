@@ -30,6 +30,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,7 +56,7 @@ import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
-import workbench.exception.ExceptionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.gui.actions.AddMacroAction;
 import workbench.gui.actions.AddTabAction;
 import workbench.gui.actions.AssignWorkspaceAction;
@@ -108,6 +109,7 @@ import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
 import workbench.gui.actions.FileSaveProfiles;
+import workbench.gui.dialogs.WbAboutDialog;
 
 
 /**
@@ -711,6 +713,7 @@ public class MainWindow
 			this.currentToolbar = current.getToolbar();
 			content.add(this.currentToolbar, BorderLayout.NORTH);
 		}
+		current.panelSelected();
 		this.setMacroMenuEnabled(current.isConnected());
 		this.doLayout();
 	}
@@ -1108,6 +1111,18 @@ public class MainWindow
 			index = w.getSelectedTab();
 			result = true;
 
+			int explorerCount = w.getDbExplorerVisibleCount();
+			if (explorerCount > 0 && Settings.getInstance().getRestoreExplorerTabs())
+			{
+				int explorerIndex = this.findExplorerTab();
+				if (explorerIndex == -1)
+				{
+					for (int i=0; i < explorerCount; i++)
+					{
+						this.newDbExplorerPanel(false);
+					}
+				}
+			}
 			if (index < this.sqlTab.getTabCount())
 			{
 				this.sqlTab.setSelectedIndex(index);
@@ -1364,36 +1379,16 @@ public class MainWindow
 		this.connectionSelector.showConnectingInfo();
 	}
 
-	/**
-	 * used internally to store the current connection
-	 * if one connection for all tabs is used
-	 */
 	private void setConnection(WbConnection con)
 	{
-		boolean explorerIncluded = false;
 		int count = this.sqlTab.getTabCount();
 		for (int i=0; i < count; i++)
 		{
 			MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
 			sql.setConnection(con);
-			explorerIncluded = (sql instanceof DbExplorerPanel);
 		}
 		this.currentConnection = con;
 		if (this.currentProfile == null) this.currentProfile = con.getProfile();
-
-//		if (this.dbExplorerPanel != null && !explorerIncluded)
-//		{
-//			try
-//			{
-//				this.dbExplorerPanel.setConnection(con, this.currentProfile.getName());
-//			}
-//			catch (Exception e)
-//			{
-//				LogMgr.logError(this, "Could not set connection for DbExplorerWindow", e);
-//				this.dbExplorerPanel.disconnect();
-//				this.dbExplorerPanel = null;
-//			}
-//		}
 	}
 
 	public void selectConnection()
@@ -1612,15 +1607,14 @@ public class MainWindow
 		boolean useTab = Settings.getInstance().getShowDbExplorerInMainWindow();
 		if (useTab)
 		{
-			int count = this.sqlTab.getTabCount();
-			for (int i=count - 1; i > 0; i--)
+			int index = this.findExplorerTab();
+			if (index > -1)
 			{
-				Component c = this.sqlTab.getComponentAt(i);
-				if (c instanceof DbExplorerPanel) 
-				{
-					this.selectTab(i);
-					return;
-				}
+				this.selectTab(index);
+			}
+			else
+			{
+				this.newDbExplorerPanel(true);
 			}
 		}
 		else 
@@ -1629,18 +1623,27 @@ public class MainWindow
 			{
 				DbExplorerPanel p = (DbExplorerPanel)this.explorerWindows.get(0);
 				p.activateWindow();
-				return;
+			}
+			else
+			{
+				this.newDbExplorerWindow();
+			}
+			
+		}
+	}
+	
+	private int findExplorerTab()
+	{
+		int count = this.sqlTab.getTabCount();
+		for (int i=count - 1; i > 0; i--)
+		{
+			Component c = this.sqlTab.getComponentAt(i);
+			if (c instanceof DbExplorerPanel) 
+			{
+				return i;
 			}
 		}
-		// no explorer window or tab found --> create a new one
-		if (useTab)
-		{
-			this.newDbExplorerPanel();
-		}
-		else
-		{
-			this.newDbExplorerWindow();
-		}
+		return -1;
 	}
 	
 	public void closeExplorerWindows(boolean doDisconnect)
@@ -1682,13 +1685,16 @@ public class MainWindow
 		this.explorerWindows.remove(p);
 	}
 	
-	public void newDbExplorerPanel()
+	public void newDbExplorerPanel(boolean select)
 	{
 		DbExplorerPanel explorer = new DbExplorerPanel(this);
 		explorer.restoreSettings();
 		this.addDbExplorerTab(explorer);
-		// Switching to the new tab will initiate the connection if necessary
-		this.sqlTab.setSelectedIndex(this.sqlTab.getTabCount() - 1);
+		if (select)
+		{
+			// Switching to the new tab will initiate the connection if necessary
+			this.sqlTab.setSelectedIndex(this.sqlTab.getTabCount() - 1);
+		}
 	}
 	
 	public ConnectionProfile getCurrentProfile() { return this.currentProfile; }
@@ -2033,18 +2039,18 @@ public class MainWindow
 					}
 				}
 			}
-
+			int explorerCount = 0;
 			String defaultLabel = ResourceMgr.getString("LabelTabStatement");
 			w = new WbWorkspace(realFilename, true);
 			int selected = this.sqlTab.getSelectedIndex();
 			for (int i=0; i < count; i++)
 			{
+				if (i == selected)
+				{
+					w.setSelectedTab(i);
+				}
 				if (this.sqlTab.getComponentAt(i) instanceof SqlPanel)
 				{
-					if (i == selected)
-					{
-						w.setSelectedTab(i);
-					}
 					SqlPanel sql = (SqlPanel)this.sqlTab.getComponentAt(i);
 					sql.saveToWorkspace(w);
 
@@ -2057,7 +2063,13 @@ public class MainWindow
 						}
 					}
 				}
+				else
+				{
+					// not a SqlPanel --> DbExplorer panel
+					explorerCount++;
+				}
 			}
+			w.setDbExplorerVisibleCount(explorerCount);
 		}
 		catch (Exception e)
 		{
@@ -2353,18 +2365,25 @@ public class MainWindow
 			{
 				final ShortcutEditor editor = new ShortcutEditor(this);
 				EventQueue.invokeLater(new Runnable()
+				{
+					public void run()
 					{
-						public void run()
-						{
-							editor.showWindow();
-						}
-					});
+						editor.showWindow();
+					}
+				});
 			}
 			else if ("helpAbout".equals(command))
 			{
-				WbAboutDialog about = new WbAboutDialog(this, true);
-				WbSwingUtilities.center(about, this);
-				about.show();
+				final JFrame parent = this;
+				EventQueue.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						WbAboutDialog about = new WbAboutDialog(parent, true);
+						WbSwingUtilities.center(about, parent);
+						about.show();
+					}
+				});
 			}
 		}
 	}
@@ -2373,8 +2392,11 @@ public class MainWindow
 	{
 		try
 		{
-			HtmlViewer helpWindow = new HtmlViewer(this);
-			helpWindow.showIndex();
+			Class cls = Class.forName("workbench.gui.help.HtmlViewer");
+			Class[] types = new Class[] { JFrame.class };
+			Constructor cons = cls.getConstructor(types);
+			Object[] args = new Object[] { this };
+			cons.newInstance(args);
 		}
 		catch (Exception ex)
 		{

@@ -62,6 +62,14 @@
                     characters (e.g. newlines) in the actual data will not
                     be replaced (as it is possible with the <link linkend="text-escape-switch">
                     WBEXPORT</link> command).</para>
+                    <para>When you hold down the <keycap>Shift</keycap> key when you 
+                    select the menu item, the column headers will not be copied
+                    to the clipboard.
+                    When you hold down the <keycap>Ctrl</keycap> key when selecting
+                    the menu item, you can choose which columns should be copied
+                    to the clipboard. Pressing <keycap>Shift</keycap> and 
+                    <keycap>Ctrl</keycap> together is also supported.
+                    </para>
                 </listitem>
                 <listitem><para>SQL (INSERT, UPDATE, or DELETE &amp; INSERT)</para>
                     <para>The end-of-line sequence will be a newline (Unix style). 

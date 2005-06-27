@@ -13,6 +13,7 @@ package workbench.db;
 
 import workbench.resource.ResourceMgr;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -28,6 +29,7 @@ public class TableIdentifier
 	private boolean isNewTable;
 	private String pkName;
 	private String type;
+	private boolean neverAdjustCase;
 	
 	public TableIdentifier(String aName)
 	{
@@ -70,6 +72,10 @@ public class TableIdentifier
 		this.setSchema(aSchema);
 	}
 
+	public void setNeverAdjustCase(boolean flag)
+	{
+		this.neverAdjustCase = flag;
+	}
 	public TableIdentifier createCopy()
 	{
 		TableIdentifier copy = new TableIdentifier();
@@ -79,6 +85,7 @@ public class TableIdentifier
 		copy.tablename = this.tablename;
 		copy.catalog = this.catalog;
 		copy.expression = null;
+		copy.neverAdjustCase = this.neverAdjustCase;
 		return copy;
 	}
 	
@@ -137,20 +144,13 @@ public class TableIdentifier
 
 	public void adjustCase(WbConnection conn)
 	{
+		if (this.neverAdjustCase) return;
 		if (conn == null) return;
 		DbMetadata meta = conn.getMetadata();
-		if (meta.storesUpperCaseIdentifiers())
-		{
-			if (this.tablename != null) this.tablename = this.tablename.toUpperCase();
-			if (this.schema != null) this.schema = this.schema.toUpperCase();
-			if (this.catalog != null) this.catalog = this.catalog.toUpperCase();
-		}
-		else if (meta.storesLowerCaseIdentifiers())
-		{
-			if (this.tablename != null) this.tablename = this.tablename.toLowerCase();
-			if (this.schema != null) this.schema = this.schema.toLowerCase();
-			if (this.catalog != null) this.catalog = this.catalog.toLowerCase();
-		}
+		
+		if (this.tablename != null) this.tablename = meta.adjustObjectnameCase(this.tablename);
+		if (this.schema != null) this.schema = meta.adjustSchemaNameCase(this.schema);
+		if (this.catalog != null) this.catalog = meta.adjustObjectnameCase(this.catalog);
 		this.expression = null;
 	}
 	
@@ -177,7 +177,7 @@ public class TableIdentifier
 		}
 		else
 		{
-			this.tablename = aTable.trim();
+			this.tablename = StringUtil.trimQuotes(aTable).trim();
 		}
 		this.expression = null;
 	}
@@ -193,7 +193,7 @@ public class TableIdentifier
 		}
 		else
 		{
-			this.schema = aSchema;
+			this.schema = StringUtil.trimQuotes(aSchema).trim();
 		}
 		this.expression = null;
 	}
@@ -209,7 +209,7 @@ public class TableIdentifier
 		}
 		else
 		{
-			this.catalog = aCatalog;
+			this.catalog = StringUtil.trimQuotes(aCatalog).trim();
 		}
 		this.expression = null;
 	}
