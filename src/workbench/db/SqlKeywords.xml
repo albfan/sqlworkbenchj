@@ -1,0 +1,698 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.4.2_08" class="java.beans.XMLDecoder"> 
+ <object class="java.util.ArrayList"> 
+  <void method="add"> 
+   <string>ABSOLUTE</string> 
+  </void> 
+  <void method="add"> 
+   <string>ACTION</string> 
+  </void> 
+  <void method="add"> 
+   <string>ADD</string> 
+  </void> 
+  <void method="add"> 
+   <string>ALL</string> 
+  </void> 
+  <void method="add"> 
+   <string>ALLOCATE</string> 
+  </void> 
+  <void method="add"> 
+   <string>ALTER</string> 
+  </void> 
+  <void method="add"> 
+   <string>AND</string> 
+  </void> 
+  <void method="add"> 
+   <string>ANY</string> 
+  </void> 
+  <void method="add"> 
+   <string>ARE</string> 
+  </void> 
+  <void method="add"> 
+   <string>AS</string> 
+  </void> 
+  <void method="add"> 
+   <string>ASC</string> 
+  </void> 
+  <void method="add"> 
+   <string>ASSERTION</string> 
+  </void> 
+  <void method="add"> 
+   <string>AT</string> 
+  </void> 
+  <void method="add"> 
+   <string>AUTHORIZATION</string> 
+  </void> 
+  <void method="add"> 
+   <string>AVG</string> 
+  </void> 
+  <void method="add"> 
+   <string>BEGIN</string> 
+  </void> 
+  <void method="add"> 
+   <string>BETWEEN</string> 
+  </void> 
+  <void method="add"> 
+   <string>BIT</string> 
+  </void> 
+  <void method="add"> 
+   <string>BIT_LENGTH</string> 
+  </void> 
+  <void method="add"> 
+   <string>BOTH</string> 
+  </void> 
+  <void method="add"> 
+   <string>BY</string> 
+  </void> 
+  <void method="add"> 
+   <string>CASCADE</string> 
+  </void> 
+  <void method="add"> 
+   <string>CASCADED</string> 
+  </void> 
+  <void method="add"> 
+   <string>CASE</string> 
+  </void> 
+  <void method="add"> 
+   <string>CAST</string> 
+  </void> 
+  <void method="add"> 
+   <string>CATALOG</string> 
+  </void> 
+  <void method="add"> 
+   <string>CHAR</string> 
+  </void> 
+  <void method="add"> 
+   <string>CHARACTER</string> 
+  </void> 
+  <void method="add"> 
+   <string>CHAR_</string> 
+  </void> 
+  <void method="add"> 
+   <string>LENGTH</string> 
+  </void> 
+  <void method="add"> 
+   <string>CHARACTER_LENGTH</string> 
+  </void> 
+  <void method="add"> 
+   <string>CHECK</string> 
+  </void> 
+  <void method="add"> 
+   <string>CLOSE</string> 
+  </void> 
+  <void method="add"> 
+   <string>COALESCE</string> 
+  </void> 
+  <void method="add"> 
+   <string>COLLATE</string> 
+  </void> 
+  <void method="add"> 
+   <string>COLLATION</string> 
+  </void> 
+  <void method="add"> 
+   <string>COLUMN</string> 
+  </void> 
+  <void method="add"> 
+   <string>COMMIT</string> 
+  </void> 
+  <void method="add"> 
+   <string>CONNECT</string> 
+  </void> 
+  <void method="add"> 
+   <string>CONNECTION</string> 
+  </void> 
+  <void method="add"> 
+   <string>CONSTRAINT</string> 
+  </void> 
+  <void method="add"> 
+   <string>CONSTRAINTS</string> 
+  </void> 
+  <void method="add"> 
+   <string>CONTINUE</string> 
+  </void> 
+  <void method="add"> 
+   <string>CONVERT</string> 
+  </void> 
+  <void method="add"> 
+   <string>CORRESPONDING</string> 
+  </void> 
+  <void method="add"> 
+   <string>COUNT</string> 
+  </void> 
+  <void method="add"> 
+   <string>CREATE</string> 
+  </void> 
+  <void method="add"> 
+   <string>CROSS</string> 
+  </void> 
+  <void method="add"> 
+   <string>CURRENT</string> 
+  </void> 
+  <void method="add"> 
+   <string>CURRENT_DATE</string> 
+  </void> 
+  <void method="add"> 
+   <string>CURRENT_TIME</string> 
+  </void> 
+  <void method="add"> 
+   <string>CURRENT_TIMESTAMP</string> 
+  </void> 
+  <void method="add"> 
+   <string>CURRENT_</string> 
+  </void> 
+  <void method="add"> 
+   <string>USER</string> 
+  </void> 
+  <void method="add"> 
+   <string>CURSOR</string> 
+  </void> 
+  <void method="add"> 
+   <string>DATE</string> 
+  </void> 
+  <void method="add"> 
+   <string>DAY</string> 
+  </void> 
+  <void method="add"> 
+   <string>DEALLOCATE</string> 
+  </void> 
+  <void method="add"> 
+   <string>DEC</string> 
+  </void> 
+  <void method="add"> 
+   <string>DECIMAL</string> 
+  </void> 
+  <void method="add"> 
+   <string>DECLARE</string> 
+  </void> 
+  <void method="add"> 
+   <string>DEFAULT</string> 
+  </void> 
+  <void method="add"> 
+   <string>DEFERRABLE</string> 
+  </void> 
+  <void method="add"> 
+   <string>DEFERRED</string> 
+  </void> 
+  <void method="add"> 
+   <string>DELETE</string> 
+  </void> 
+  <void method="add"> 
+   <string>DESC</string> 
+  </void> 
+  <void method="add"> 
+   <string>DESCRIBE</string> 
+  </void> 
+  <void method="add"> 
+   <string>DESCRIPTOR</string> 
+  </void> 
+  <void method="add"> 
+   <string>DIAGNOSTICS</string> 
+  </void> 
+  <void method="add"> 
+   <string>DISCONNECT</string> 
+  </void> 
+  <void method="add"> 
+   <string>DISTINCT</string> 
+  </void> 
+  <void method="add"> 
+   <string>DOMAIN</string> 
+  </void> 
+  <void method="add"> 
+   <string>DOUBLE</string> 
+  </void> 
+  <void method="add"> 
+   <string>DROP</string> 
+  </void> 
+  <void method="add"> 
+   <string>ELSE</string> 
+  </void> 
+  <void method="add"> 
+   <string>END</string> 
+  </void> 
+  <void method="add"> 
+   <string>END-EXEC</string> 
+  </void> 
+  <void method="add"> 
+   <string>ESCAPE</string> 
+  </void> 
+  <void method="add"> 
+   <string>EXCEPT</string> 
+  </void> 
+  <void method="add"> 
+   <string>EXCEPTION</string> 
+  </void> 
+  <void method="add"> 
+   <string>EXEC</string> 
+  </void> 
+  <void method="add"> 
+   <string>EXECUTE</string> 
+  </void> 
+  <void method="add"> 
+   <string>EXISTS</string> 
+  </void> 
+  <void method="add"> 
+   <string>EXTERNAL</string> 
+  </void> 
+  <void method="add"> 
+   <string>EXTRACT</string> 
+  </void> 
+  <void method="add"> 
+   <string>FALSE</string> 
+  </void> 
+  <void method="add"> 
+   <string>FETCH</string> 
+  </void> 
+  <void method="add"> 
+   <string>FIRST</string> 
+  </void> 
+  <void method="add"> 
+   <string>FLOAT</string> 
+  </void> 
+  <void method="add"> 
+   <string>FOR</string> 
+  </void> 
+  <void method="add"> 
+   <string>FOREIGN</string> 
+  </void> 
+  <void method="add"> 
+   <string>FOUND</string> 
+  </void> 
+  <void method="add"> 
+   <string>FROM</string> 
+  </void> 
+  <void method="add"> 
+   <string>FULL</string> 
+  </void> 
+  <void method="add"> 
+   <string>GET</string> 
+  </void> 
+  <void method="add"> 
+   <string>GLOBAL</string> 
+  </void> 
+  <void method="add"> 
+   <string>GO</string> 
+  </void> 
+  <void method="add"> 
+   <string>GOTO</string> 
+  </void> 
+  <void method="add"> 
+   <string>GRANT</string> 
+  </void> 
+  <void method="add"> 
+   <string>GROUP</string> 
+  </void> 
+  <void method="add"> 
+   <string>HAVING</string> 
+  </void> 
+  <void method="add"> 
+   <string>HOUR</string> 
+  </void> 
+  <void method="add"> 
+   <string>IDENTITY</string> 
+  </void> 
+  <void method="add"> 
+   <string>IMMEDIATE</string> 
+  </void> 
+  <void method="add"> 
+   <string>IN</string> 
+  </void> 
+  <void method="add"> 
+   <string>INDICATOR</string> 
+  </void> 
+  <void method="add"> 
+   <string>INITIALLY</string> 
+  </void> 
+  <void method="add"> 
+   <string>INNER</string> 
+  </void> 
+  <void method="add"> 
+   <string>INPUT</string> 
+  </void> 
+  <void method="add"> 
+   <string>INSENSITIVE</string> 
+  </void> 
+  <void method="add"> 
+   <string>INSERT</string> 
+  </void> 
+  <void method="add"> 
+   <string>INT</string> 
+  </void> 
+  <void method="add"> 
+   <string>INTEGER</string> 
+  </void> 
+  <void method="add"> 
+   <string>INTERSECT</string> 
+  </void> 
+  <void method="add"> 
+   <string>INTERVAL</string> 
+  </void> 
+  <void method="add"> 
+   <string>INTO</string> 
+  </void> 
+  <void method="add"> 
+   <string>IS</string> 
+  </void> 
+  <void method="add"> 
+   <string>ISOLATION</string> 
+  </void> 
+  <void method="add"> 
+   <string>JOIN</string> 
+  </void> 
+  <void method="add"> 
+   <string>KEY</string> 
+  </void> 
+  <void method="add"> 
+   <string>LANGUAGE</string> 
+  </void> 
+  <void method="add"> 
+   <string>LAST</string> 
+  </void> 
+  <void method="add"> 
+   <string>LEADING</string> 
+  </void> 
+  <void method="add"> 
+   <string>LEFT</string> 
+  </void> 
+  <void method="add"> 
+   <string>LEVEL</string> 
+  </void> 
+  <void method="add"> 
+   <string>LIKE</string> 
+  </void> 
+  <void method="add"> 
+   <string>LOCAL</string> 
+  </void> 
+  <void method="add"> 
+   <string>LOWER</string> 
+  </void> 
+  <void method="add"> 
+   <string>MATCH</string> 
+  </void> 
+  <void method="add"> 
+   <string>MAX</string> 
+  </void> 
+  <void method="add"> 
+   <string>MIN</string> 
+  </void> 
+  <void method="add"> 
+   <string>MINUTE</string> 
+  </void> 
+  <void method="add"> 
+   <string>MODULE</string> 
+  </void> 
+  <void method="add"> 
+   <string>MONTH</string> 
+  </void> 
+  <void method="add"> 
+   <string>NAMES</string> 
+  </void> 
+  <void method="add"> 
+   <string>NATIONAL</string> 
+  </void> 
+  <void method="add"> 
+   <string>NATURAL</string> 
+  </void> 
+  <void method="add"> 
+   <string>NCHAR</string> 
+  </void> 
+  <void method="add"> 
+   <string>NEXT</string> 
+  </void> 
+  <void method="add"> 
+   <string>NO</string> 
+  </void> 
+  <void method="add"> 
+   <string>NOT</string> 
+  </void> 
+  <void method="add"> 
+   <string>NULL</string> 
+  </void> 
+  <void method="add"> 
+   <string>NULLIF</string> 
+  </void> 
+  <void method="add"> 
+   <string>NUMERIC</string> 
+  </void> 
+  <void method="add"> 
+   <string>OCTET_LENGTH</string> 
+  </void> 
+  <void method="add"> 
+   <string>OF</string> 
+  </void> 
+  <void method="add"> 
+   <string>ON</string> 
+  </void> 
+  <void method="add"> 
+   <string>ONLY</string> 
+  </void> 
+  <void method="add"> 
+   <string>OPEN</string> 
+  </void> 
+  <void method="add"> 
+   <string>OPTION</string> 
+  </void> 
+  <void method="add"> 
+   <string>OR</string> 
+  </void> 
+  <void method="add"> 
+   <string>ORDER</string> 
+  </void> 
+  <void method="add"> 
+   <string>OUTER</string> 
+  </void> 
+  <void method="add"> 
+   <string>OUTPUT</string> 
+  </void> 
+  <void method="add"> 
+   <string>OVERLAPS</string> 
+  </void> 
+  <void method="add"> 
+   <string>PAD</string> 
+  </void> 
+  <void method="add"> 
+   <string>PARTIAL</string> 
+  </void> 
+  <void method="add"> 
+   <string>POSITION</string> 
+  </void> 
+  <void method="add"> 
+   <string>PRECISION</string> 
+  </void> 
+  <void method="add"> 
+   <string>PREPARE</string> 
+  </void> 
+  <void method="add"> 
+   <string>PRESERVE</string> 
+  </void> 
+  <void method="add"> 
+   <string>PRIMARY</string> 
+  </void> 
+  <void method="add"> 
+   <string>PRIOR</string> 
+  </void> 
+  <void method="add"> 
+   <string>PRIVILEGES</string> 
+  </void> 
+  <void method="add"> 
+   <string>PROCEDURE</string> 
+  </void> 
+  <void method="add"> 
+   <string>PUBLIC</string> 
+  </void> 
+  <void method="add"> 
+   <string>READ</string> 
+  </void> 
+  <void method="add"> 
+   <string>REAL</string> 
+  </void> 
+  <void method="add"> 
+   <string>REFERENCES</string> 
+  </void> 
+  <void method="add"> 
+   <string>RELATIVE</string> 
+  </void> 
+  <void method="add"> 
+   <string>RESTRICT</string> 
+  </void> 
+  <void method="add"> 
+   <string>REVOKE</string> 
+  </void> 
+  <void method="add"> 
+   <string>RIGHT</string> 
+  </void> 
+  <void method="add"> 
+   <string>ROLLBACK</string> 
+  </void> 
+  <void method="add"> 
+   <string>ROWS</string> 
+  </void> 
+  <void method="add"> 
+   <string>SCHEMA</string> 
+  </void> 
+  <void method="add"> 
+   <string>SCROLL</string> 
+  </void> 
+  <void method="add"> 
+   <string>SECOND</string> 
+  </void> 
+  <void method="add"> 
+   <string>SECTION</string> 
+  </void> 
+  <void method="add"> 
+   <string>SELECT</string> 
+  </void> 
+  <void method="add"> 
+   <string>SESSION</string> 
+  </void> 
+  <void method="add"> 
+   <string>SESSION_</string> 
+  </void> 
+  <void method="add"> 
+   <string>USER</string> 
+  </void> 
+  <void method="add"> 
+   <string>SET</string> 
+  </void> 
+  <void method="add"> 
+   <string>SIZE</string> 
+  </void> 
+  <void method="add"> 
+   <string>SMALLINT</string> 
+  </void> 
+  <void method="add"> 
+   <string>SOME</string> 
+  </void> 
+  <void method="add"> 
+   <string>SPACE</string> 
+  </void> 
+  <void method="add"> 
+   <string>SQL</string> 
+  </void> 
+  <void method="add"> 
+   <string>SQLCODE</string> 
+  </void> 
+  <void method="add"> 
+   <string>SQLERROR</string> 
+  </void> 
+  <void method="add"> 
+   <string>SQLSTATE</string> 
+  </void> 
+  <void method="add"> 
+   <string>SUBSTRING</string> 
+  </void> 
+  <void method="add"> 
+   <string>SUM</string> 
+  </void> 
+  <void method="add"> 
+   <string>SYSTEM_USER</string> 
+  </void> 
+  <void method="add"> 
+   <string>TABLE</string> 
+  </void> 
+  <void method="add"> 
+   <string>TEMPORARY</string> 
+  </void> 
+  <void method="add"> 
+   <string>THEN</string> 
+  </void> 
+  <void method="add"> 
+   <string>TIME</string> 
+  </void> 
+  <void method="add"> 
+   <string>TIMESTAMP</string> 
+  </void> 
+  <void method="add"> 
+   <string>TIMEZONE_</string> 
+  </void> 
+  <void method="add"> 
+   <string>HOUR</string> 
+  </void> 
+  <void method="add"> 
+   <string>TIMEZONE_MINUTE</string> 
+  </void> 
+  <void method="add"> 
+   <string>TO</string> 
+  </void> 
+  <void method="add"> 
+   <string>TRAILING</string> 
+  </void> 
+  <void method="add"> 
+   <string>TRANSACTION</string> 
+  </void> 
+  <void method="add"> 
+   <string>TRANSLATE</string> 
+  </void> 
+  <void method="add"> 
+   <string>TRANSLATION</string> 
+  </void> 
+  <void method="add"> 
+   <string>TRIM</string> 
+  </void> 
+  <void method="add"> 
+   <string>TRUE</string> 
+  </void> 
+  <void method="add"> 
+   <string>UNION</string> 
+  </void> 
+  <void method="add"> 
+   <string>UNIQUE</string> 
+  </void> 
+  <void method="add"> 
+   <string>UNKNOWN</string> 
+  </void> 
+  <void method="add"> 
+   <string>UPDATE</string> 
+  </void> 
+  <void method="add"> 
+   <string>UPPER</string> 
+  </void> 
+  <void method="add"> 
+   <string>USAGE</string> 
+  </void> 
+  <void method="add"> 
+   <string>USER</string> 
+  </void> 
+  <void method="add"> 
+   <string>USING</string> 
+  </void> 
+  <void method="add"> 
+   <string>VALUE</string> 
+  </void> 
+  <void method="add"> 
+   <string>VALUES</string> 
+  </void> 
+  <void method="add"> 
+   <string>VARCHAR</string> 
+  </void> 
+  <void method="add"> 
+   <string>VARYING</string> 
+  </void> 
+  <void method="add"> 
+   <string>VIEW</string> 
+  </void> 
+  <void method="add"> 
+   <string>WHEN</string> 
+  </void> 
+  <void method="add"> 
+   <string>WHENEVER</string> 
+  </void> 
+  <void method="add"> 
+   <string>WHERE</string> 
+  </void> 
+  <void method="add"> 
+   <string>WITH</string> 
+  </void> 
+  <void method="add"> 
+   <string>WORK</string> 
+  </void> 
+  <void method="add"> 
+   <string>WRITE</string> 
+  </void> 
+  <void method="add"> 
+   <string>YEAR</string> 
+  </void> 
+  <void method="add"> 
+   <string>ZONE</string> 
+  </void> 
+ </object> 
+</java> 
