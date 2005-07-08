@@ -16,6 +16,7 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 /**
@@ -115,6 +116,7 @@ public class ValueConverter
 				return new BigDecimal(this.adjustDecimalString(aValue.toString()));
 			case Types.CHAR:
 			case Types.VARCHAR:
+			case Types.LONGVARCHAR:
 				if (aValue instanceof String)
 					return aValue;
 				else
@@ -125,6 +127,27 @@ public class ValueConverter
 			case Types.TIMESTAMP:
 				if (aValue.toString().length() == 0) return null;
 				return this.parseTimestamp((String)aValue);
+			case Types.BIT:
+			case Types.BOOLEAN:
+				try
+				{
+					if (aValue instanceof String)
+					{
+						return new Boolean(StringUtil.stringToBool((String)aValue));
+					}
+					else if (aValue instanceof Number)
+					{
+						return new Boolean(((Number)aValue).intValue() == 1);
+					}
+					else
+					{
+						return aValue;
+					}
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("ValueConverter.convertValue()", "Could not convert [" + aValue + "] to Boolean",e);
+				}
 			default:
 				return aValue;
 		}

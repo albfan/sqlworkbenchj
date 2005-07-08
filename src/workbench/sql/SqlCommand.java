@@ -25,6 +25,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -203,7 +204,15 @@ public class SqlCommand
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException, Exception
 	{
+		String clean = SqlUtil.makeCleanSql(aSql,false,false,'\'');
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		if (clean.length() == 0) 
+		{
+			result.addMessage(ResourceMgr.getString("MsgWarningEmptySqlIgnored"));
+			result.setWarning(true);
+			result.setSuccess();
+			return result;
+		}
 		ResultSet rs = null;
 		this.currentStatement = aConnection.createStatement();
 		this.currentConnection = aConnection;
@@ -222,11 +231,6 @@ public class SqlCommand
 				result.addMessage(warnings.toString());
 			}
 			int updateCount = -1;
-
-			// fallback hack for JDBC drivers which do not reset the value
-			// returned by getUpdateCount() after it is called
-			int maxLoops = 25;
-			int loopcounter = 0;
 
 			DataStore ds = null;
 

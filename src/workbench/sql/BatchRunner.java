@@ -67,7 +67,7 @@ public class BatchRunner
 	
 	public BatchRunner(String aFilelist)
 	{
-		this.files = StringUtil.stringToList(aFilelist, ",");
+		this.files = StringUtil.stringToList(aFilelist, ",", true);
 	}
 
 	public void showResultSets(boolean flag)
@@ -160,45 +160,6 @@ public class BatchRunner
 			this.errorScript = aFilename;
 		else
 			this.errorScript = null;
-	}
-
-	private String readFile(String aFilename)
-	{
-		BufferedReader in = null;
-		StringBuffer content = null;
-		try
-		{
-			File f = new File(aFilename);
-			if (!f.exists() )
-			{
-				String msg = ResourceMgr.getString("MsgBatchScriptFileNotFound");
-				msg = StringUtil.replace(msg, "%file%", aFilename);
-				LogMgr.logWarning("BatchRunner.readFile()", "Scriptfile not found: "+ aFilename);
-				this.printMessage(msg + "\n");
-				return null;
-			}
-			InputStream inStream = new FileInputStream(f);
-			content = new StringBuffer((int)f.length());
-			in = new BufferedReader(new InputStreamReader(inStream, this.encoding),1024*256);
-			String line = in.readLine();
-			while (line != null)
-			{
-				content.append(line);
-				content.append('\n');
-				line = in.readLine();
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("BatchRunner.readFile()", "Error reading file " + aFilename, e);
-			System.err.println(ResourceMgr.getString("MsgBatchScriptFileReadError") + " " + aFilename);
-			content = new StringBuffer();
-		}
-		finally
-		{
-			try { in.close(); } catch (Throwable th) {}
-		}
-		return content.toString();
 	}
 
 	public void setRowMonitor(RowActionMonitor mon)
@@ -308,10 +269,11 @@ public class BatchRunner
 	{
 		boolean error = false;
 		StatementRunnerResult result = null;
-		ScriptParser parser = new ScriptParser(scriptFile, this.encoding);
+		ScriptParser parser = new ScriptParser();
 		parser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
 		parser.setDelimiter(this.delimiter);
 		parser.setCheckEscapedQuotes(this.checkEscapedQuotes);
+		parser.setFile(scriptFile, this.encoding);
 		String sql = null;
 		this.cancelExecution = false;
 
@@ -402,6 +364,7 @@ public class BatchRunner
 		end = System.currentTimeMillis();
 		String msg = executedCount + " " + ResourceMgr.getString("MsgTotalStatementsExecuted");
 		this.printMessage(msg);
+		parser.done();
 
 		if (this.showTiming)
 		{

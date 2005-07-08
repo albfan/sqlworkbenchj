@@ -680,6 +680,11 @@ public class Settings
 		this.props.setProperty("workbench.sql.ignoreerror", Boolean.toString(ignore));
 	}
 
+	public boolean useOracleCharSemanticsFix()
+	{
+		return getBoolProperty("workbench.db.oracle.fixcharsemantics", true);
+	}
+	
 	public boolean getCheckPreparedStatements()
 	{
 		return StringUtil.stringToBool(this.props.getProperty("workbench.sql.checkprepared", "false"));
@@ -1113,7 +1118,7 @@ public class Settings
 	public void setMaxFractionDigits(int aValue)
 	{
 		this.props.setProperty("workbench.gui.display.maxfractiondigits", Integer.toString(aValue));
-		this.initFormatter();
+		this.defaultFormatter = null;
 	}
 
 	private DecimalFormat defaultFormatter = null;
@@ -1146,18 +1151,18 @@ public class Settings
 	public void setDecimalSymbol(String aSep)
 	{
 		this.props.setProperty("workbench.gui.display.decimal.separator", aSep);
-		this.initFormatter();
+		this.defaultFormatter = null;
 	}
 
-	public String getDecimalGroupingSeparator()
-	{
-		return this.props.getProperty("workbench.gui.display.decimal.groupseparator", ",");
-	}
-
-	public void getDecimalGroupingSeparator(String aSep)
-	{
-		this.props.setProperty("workbench.gui.display.decimal.groupseparator", aSep);
-	}
+//	public String getDecimalGroupingSeparator()
+//	{
+//		return this.props.getProperty("workbench.gui.display.decimal.groupseparator", ",");
+//	}
+//
+//	public void getDecimalGroupingSeparator(String aSep)
+//	{
+//		this.props.setProperty("workbench.gui.display.decimal.groupseparator", aSep);
+//	}
 
 	public String getAlternateDelimiter()
 	{
@@ -1191,10 +1196,10 @@ public class Settings
 		return this.props.getProperty("workbench.file.data.encoding", def);
 	}
 
-	public void setDefaultDataEncoding(String enc)
-	{
-		this.props.setProperty("workbench.file.data.encoding", enc);
-	}
+//	public void setDefaultDataEncoding(String enc)
+//	{
+//		this.props.setProperty("workbench.file.data.encoding", enc);
+//	}
 
 	public String getDefaultFileEncoding()
 	{
@@ -1302,15 +1307,15 @@ public class Settings
 		this.props.setProperty("workbench.db.previewsql", Boolean.toString(aFlag));
 	}
 
-	public boolean getProcessHsqlShutdown()
-	{
-		return getBoolProperty("workbench.db.hsqldb.closeOnShutdown", false);
-	}
+//	public boolean getProcessHsqlShutdown()
+//	{
+//		return getBoolProperty("workbench.db.hsqldb.closeOnShutdown", false);
+//	}
 
-  public boolean getShowBuildInConnectionId()
-  {
-		return getBoolProperty("workbench.db.connection-id.showbuild", false);
-	}
+//  public boolean getShowBuildInConnectionId()
+//  {
+//		return getBoolProperty("workbench.db.connection-id.showbuild", false);
+//	}
 
 	public boolean getDebugMetadataSql()
 	{
@@ -1400,11 +1405,6 @@ public class Settings
 		return getBoolProperty("workbench.editor.autocompletion.sql.emptylineseparator", false);
 	}
 
-	public boolean getUseAutoCompletion()
-	{
-		return getBoolProperty("workbench.editor.autocompletion.enabled", true);
-	}
-
 	public boolean getUseTableTypeList()
 	{
 		return getBoolProperty("workbench.dbexplorer.usetypelist", true);
@@ -1420,10 +1420,10 @@ public class Settings
 		this.props.setProperty("workbench.dbexplorer.mainwindow", Boolean.toString(showWindow));
 	}
 
-	public boolean getRestoreExplorerTabs()
-	{
-		return getShowDbExplorerInMainWindow() || getBoolProperty("workbench.dbexplorer.restoretabs", false);
-	}
+//	public boolean getRestoreExplorerTabs()
+//	{
+//		return getBoolProperty("workbench.dbexplorer.restoretabs", false);
+//	}
 	
 	public boolean getShowDbExplorerInMainWindow()
 	{

@@ -76,7 +76,8 @@ public class DataStore
 	private int realColumns;
 
 	private RowDataList data;
-	protected RowDataList deletedRows;
+	private RowDataList deletedRows;
+	private RowDataList filteredRows;
 
 	// The SQL statement (SELECT) that produced this DataStore
 	private String sql;
@@ -290,6 +291,37 @@ public class DataStore
 	}
 
 	/**
+	 * Removes this row from the "active" data, but keeps it unchanged
+	 * Filtered rows can be restored to be active by calling {@see #clearFilter()}
+	 * The status of the row is not changed. Rows that are filtered will not 
+	 * be updated when sending the changes back to the database
+	 * @param row the row to be filtered
+	 */
+	public void filterRow(int row)
+	{
+		RowData rowData = this.data.get(row);
+		this.data.remove(row);
+		if (this.filteredRows == null) this.filteredRows = createData();
+		this.filteredRows.add(rowData);
+	}
+	
+	/**
+	 * Restores all rows that were filtered.
+	 */
+	public void clearFilter()
+	{
+		if (this.filteredRows == null) return;
+		int count = this.filteredRows.size();
+		for (int i=0; i < count; i++)
+		{
+			RowData row = this.filteredRows.get(i);
+			this.data.add(row);
+		}
+		this.filteredRows.reset();
+		this.filteredRows = null;
+	}
+	
+	/**
 	 *	Deletes the given row and saves it in the delete buffer
 	 *	in order to be able to generate a DELETE statement if
 	 *	this DataStore needs updating
@@ -463,7 +495,8 @@ public class DataStore
 	 */
 	public void setUpdateTable(String aTablename, WbConnection aConn)
 	{
-		setUpdateTable(new TableIdentifier(aTablename), aConn);
+		TableIdentifier tbl = new TableIdentifier(aTablename);
+		setUpdateTable(tbl, aConn);
 	}
 	
 	public void setUpdateTable(TableIdentifier tbl)
@@ -477,7 +510,7 @@ public class DataStore
 		{
 			this.updateTable = null;
 		}
-		else if (!tbl.getTableExpression().equalsIgnoreCase(this.updateTable) && aConn != null)
+		else if (!tbl.getTableExpression(aConn).equalsIgnoreCase(this.updateTable) && aConn != null)
 		{
 			this.updateTable = null;
 			// check the columns which are in that table
@@ -493,7 +526,6 @@ public class DataStore
 
 				this.updateTable = tbl.getTableExpression(aConn);
 				
-				//TableIdentifier tbl = new TableIdentifier(aTablename, aConn);
 				ColumnIdentifier[] columns = meta.getColumnIdentifiers(tbl);
 				if (columns == null || columns.length == 0)
 				{

@@ -749,7 +749,11 @@ public class DataImporter
 			catch (SQLException e)
 			{
 				String msg = ResourceMgr.getString("ErrorImportTableNotFound").replaceAll("%table%", this.targetTable);
-				msg = StringUtil.replace(msg, "%filename%", this.parser.getSourceFilename());
+				if (parser != null)
+				{
+					String s = ResourceMgr.getString("ErrorImportFileNotProcessed");
+					msg = msg + " " + StringUtil.replace(msg, "%filename%", this.parser.getSourceFilename());
+				}
 				this.messages.append(msg + "\n");
 				this.targetTable = null;
 				throw e;

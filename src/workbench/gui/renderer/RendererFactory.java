@@ -16,6 +16,12 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
 /**
+ * A factory for TableCellRenderers. Classes are created using
+ * Class.forName() to avoid unnecessary class loading during startup.
+ * This is used from within WbTable
+ *
+ * @see workbench.gui.components.WbTable#initDefaultRenderers()
+ *
  * @author support@sql-workbench.net
  */
 public class RendererFactory

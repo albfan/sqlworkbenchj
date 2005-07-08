@@ -284,13 +284,14 @@ public class WbManager
 		def.put("TableHeader.font", dataFont);
 
 		// Polish up the standard look & feel settings
+		
 		Color c = settings.getColor("workbench.table.gridcolor");
 		if (c == null)
 		{
-			c = Color.LIGHT_GRAY;
+			c = new Color(215,215,215);
 		}
 		def.put("Table.gridColor", c);
-
+		
 		// use our own classes for some GUI elements
 		def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
 		def.put("SplitPaneUI", "workbench.gui.components.WbSplitPaneUI");

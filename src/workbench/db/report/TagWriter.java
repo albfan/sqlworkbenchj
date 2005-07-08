@@ -12,6 +12,7 @@
 package workbench.db.report;
 
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 /**
  * Utility class to add XML tags to a StrBuffer.
@@ -59,6 +60,11 @@ public class TagWriter
 	public void appendTag(StrBuffer target, StrBuffer indent, String tag, String value)
 	{
 		appendTag(target, indent, tag, value, false);
+	}
+	
+	public void appendTagConditionally(StrBuffer target, StrBuffer indent, String tag, String value)
+	{
+		if (!StringUtil.isEmptyString(value)) appendTag(target, indent, tag, value, false);
 	}
 	
 	public void appendTag(StrBuffer target, StrBuffer indent, String tag, String value, String attr, String attValue)

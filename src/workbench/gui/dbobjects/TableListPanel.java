@@ -1805,8 +1805,9 @@ public class TableListPanel
 
 			String name = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 			String schema = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-			TableIdentifier tbl = new TableIdentifier(schema, name);
-			names.add(tbl.getTableExpression(this.dbConnection));
+			String catalog = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
+			TableIdentifier tbl = new TableIdentifier(catalog, schema, name);
+			names.add(tbl);//.getTableExpression(this.dbConnection));
 		}
 		TableDeleterUI deleter = new TableDeleterUI();
 		deleter.addDeleteListener(this.tableData);

@@ -963,7 +963,6 @@ public class DwPanel
 		int startRow = 0;
 		int endRow = 0;
 		int count = 0;
-		
 		TableModel model = this.dataTable.getModel();
 		if (model != resultEmptyMsgModel && model != this.errorModel)
 		{
@@ -971,9 +970,7 @@ public class DwPanel
 			endRow = this.dataTable.getLastVisibleRow(startRow);
 			count = this.dataTable.getRowCount();
 		}
-		
-		// start row and end row are 0 based
-		this.statusBar.setRowcount(startRow + 1, endRow + 1, count);
+		statusBar.setRowcount(startRow + 1, endRow + 1, count);
 	}
 	
 	public int duplicateRow()

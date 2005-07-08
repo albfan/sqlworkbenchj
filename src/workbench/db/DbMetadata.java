@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Map.Entry;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.db.firebird.FirebirdMetadata;
@@ -143,7 +144,7 @@ public class DbMetadata
 	private boolean createInlineConstraints;
 	private boolean useNullKeyword = true;
 
-	private List keywords;
+	private Set keywords;
 	private Set dbFunctions;
 	private String quoteCharacter;
 	private String dbVersion;
@@ -228,7 +229,7 @@ public class DbMetadata
 		if (productLower.indexOf("oracle") > -1)
 		{
 			this.isOracle = true;
-			this.oracleMetaData = new OracleMetadata(this);
+			this.oracleMetaData = new OracleMetadata(this.dbConnection);
 			this.constraintReader = new OracleConstraintReader();
 			this.synonymReader = new OracleSynonymReader();
 
@@ -919,31 +920,48 @@ public class DbMetadata
 	 */
 	private void readKeywords()
 	{
+		this.keywords = new TreeSet();
 		try
 		{
 			String keys = this.metaData.getSQLKeywords();
-			this.keywords = StringUtil.stringToList(keys, ",");
+			List keyList = StringUtil.stringToList(keys, ",");
+			this.keywords.addAll(keyList);
 			
 			keys = Settings.getInstance().getProperty("workbench.db.keywordlist." + this.getDbId(), null);
 			if (keys != null)
 			{
 				List l = StringUtil.stringToList(keys.toUpperCase(), ",");
-				if (this.keywords == Collections.EMPTY_LIST)
-				{
-					this.keywords = l;
-				}
-				else
-				{
-					this.keywords.addAll(l);
-				}
+				this.keywords.addAll(l);
 			}
 		}
 		catch (Exception e)
 		{
-			this.keywords = Collections.EMPTY_LIST;
+			LogMgr.logError("DbMetadata.readKeywords", "Error reading SQL keywords", e);
+		}
+		
+		try
+		{
+			BufferedInputStream in = new BufferedInputStream(DbMetadata.class.getResourceAsStream("SqlKeywords.xml"));
+			WbPersistence reader = new WbPersistence("SqlKeywords.xml");
+			List values = (ArrayList)reader.readObject(in);
+			this.keywords.addAll(values);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DbMetadata.readKeywords", "Error reading SQL keywords", e);
 		}
 	}
-
+	
+	public boolean isKeyword(String verb)
+	{
+		if (verb == null) return false;
+		if (this.keywords == null)
+		{
+			this.readKeywords();
+		}
+		return this.keywords.contains(verb.toUpperCase());
+	}
+	
 	public String getProcedureSource(String aCatalog, String aSchema, String aProcname)
 	{
 		if (aProcname == null) return null;
@@ -1045,6 +1063,10 @@ public class DbMetadata
 	public String quoteObjectname(String aName)
 	{
 		if (aName == null) return null;
+		if (aName.length() == 0) return aName;
+		// already quoted?
+		if (aName.startsWith("\"")) return aName;
+		
 		if (this.neverQuoteObjects) return StringUtil.trimQuotes(aName);
 		
 		if (this.keywords == null)
@@ -1055,6 +1077,7 @@ public class DbMetadata
 		{
 			boolean needQuote = false;
 			boolean isKeyword = false;
+			
 			if (this.storesLowerCaseIdentifiers())
 			{
 				isKeyword = this.keywords.contains(aName.trim().toLowerCase());
@@ -1089,17 +1112,16 @@ public class DbMetadata
 				}
 			}
 
-			if (this.storesLowerCaseIdentifiers() && !aName.toLowerCase().equals(aName))
-			{
-				needQuote = true;
-			}
+//			if (this.storesLowerCaseIdentifiers() && !aName.toLowerCase().equals(aName))
+//			{
+//				needQuote = true;
+//			}
+//
+//			if (this.storesUpperCaseIdentifiers() && !aName.toUpperCase().equals(aName))
+//			{
+//				needQuote = true;
+//			}
 
-			if (this.storesUpperCaseIdentifiers() && !aName.toUpperCase().equals(aName))
-			{
-				needQuote = true;
-			}
-
-			// if the given name is a keyword, then we need to quote it!
 			if (isKeyword || needQuote)
 			{
 				return this.quoteCharacter + aName.trim() + this.quoteCharacter;
@@ -1158,25 +1180,28 @@ public class DbMetadata
 	 * the table definition. Usually the getColumns()
 	 * method is case sensitiv.
 	 */
-	public String adjustObjectnameCase(String aTable)
+	public String adjustObjectnameCase(String name)
 	{
-		if (aTable == null) return null;
-		aTable = StringUtil.trimQuotes(aTable);
+		if (name == null) return null;
+		// if we have quotes, keep them...
+		if (name.indexOf("\"") > -1) return name.trim();
+		
+		name = StringUtil.trimQuotes(name);
 		try
 		{
 			if (this.storesUpperCaseIdentifiers())
 			{
-				return aTable.toUpperCase();
+				return name.toUpperCase();
 			}
 			else if (this.storesLowerCaseIdentifiers())
 			{
-				return aTable.toLowerCase();
+				return name.toLowerCase();
 			}
 		}
 		catch (Exception e)
 		{
 		}
-		return aTable.trim();
+		return name.trim();
 	}
 
 	/**
@@ -1419,9 +1444,9 @@ public class DbMetadata
 		ResultSet rs = null;
 		try
 		{
-			String c = this.adjustObjectnameCase(aTable.getCatalog());
-			String s = this.adjustObjectnameCase(aTable.getSchema());
-			String t = this.adjustObjectnameCase(aTable.getTableName());
+			String c = StringUtil.trimQuotes(this.adjustObjectnameCase(aTable.getCatalog()));
+			String s = StringUtil.trimQuotes(this.adjustObjectnameCase(aTable.getSchema()));
+			String t = StringUtil.trimQuotes(this.adjustObjectnameCase(aTable.getTableName()));
 			rs = this.metaData.getTables(c, s, t, TABLE_TYPES_TABLE);
 			exists = rs.next();
 		}
@@ -1800,7 +1825,6 @@ public class DbMetadata
   * @param aType    the table type. One of the types retrurned {@link #getTableTypes()}
   * @throws SQLException
   * @return a DataStore with the columns of the table
-	*
   */
 	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, String aType)
 		throws SQLException
@@ -1857,13 +1881,17 @@ public class DbMetadata
 			aTable = aTable.substring(pos + 1);
 		}
 
+		aCatalog = StringUtil.trimQuotes(aCatalog);
+		aSchema = StringUtil.trimQuotes(aSchema);
+		aTable = StringUtil.trimQuotes(aTable);
+		
 		if (adjustNames)
 		{
 			aCatalog = this.adjustObjectnameCase(aCatalog);
 			aSchema = this.adjustObjectnameCase(aSchema);
 			aTable = this.adjustObjectnameCase(aTable);
 		}
-
+		
 		if (this.sequenceReader != null && "SEQUENCE".equalsIgnoreCase(aType))
 		{
 			DataStore seqDs = this.sequenceReader.getSequenceDefinition(aSchema, aTable);
@@ -1906,6 +1934,9 @@ public class DbMetadata
 
 		try
 		{
+			// Oracle's JDBC driver does not return varchar lengths
+			// correctly if the NLS_LENGTH_SEMANTICS is set to CHARACTER (and not byte)
+			// so we'll need to use our own statement
 			if (this.oracleMetaData != null)
 			{
 				rs = this.oracleMetaData.getColumns(aCatalog, aSchema, aTable, "%");
@@ -1914,7 +1945,9 @@ public class DbMetadata
 			{
 				rs = this.metaData.getColumns(aCatalog, aSchema, aTable, "%");
 			}
-
+			
+			//rs = this.metaData.getColumns(aCatalog, aSchema, aTable, "%");
+			
 			while (rs.next())
 			{
 				int row = ds.addRow();
@@ -2171,7 +2204,7 @@ public class DbMetadata
 			String t = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_NAME);
 			String s = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_SCHEMA);
 			String c = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_CATALOG);
-			if (this.isPostgres && "public".equals(s))
+			if (this.ignoreSchema(s))
 			{
 				s = null;
 			}
@@ -2679,6 +2712,7 @@ public class DbMetadata
 			aSchema = this.adjustObjectnameCase(aSchema);
 			aTable = this.adjustObjectnameCase(aTable);
 			int tableCol;
+			int catalogCol;
 			int fkNameCol;
 			int colCol;
 			int fkColCol;
@@ -2714,7 +2748,11 @@ public class DbMetadata
 				String fk_col = rs.getString(fkColCol);
 				String col = rs.getString(colCol);
 				String fk_name = this.fixFKName(rs.getString(fkNameCol));
-
+				String schema = rs.getString(schemaCol);
+				if (schema != null && !schema.equals(this.getCurrentSchema()))
+				{
+					table = schema + "." + table;
+				}
 				int updateAction = rs.getInt(updateActionCol);
 				String updActionDesc = this.getRuleTypeDisplay(updateAction);
 				int deleteAction = rs.getInt(deleteActionCol);

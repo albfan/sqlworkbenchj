@@ -210,15 +210,15 @@ public class ReportTable
 				ref.setDeleteRuleValue(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE, -1));
 				ref.setUpdateRuleValue(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE, -1));
 				String colExpr = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
-				String table = null;
+				String reftable = null;
 				String column = null;
-				int pos = colExpr.indexOf(".");
+				int pos = colExpr.lastIndexOf(".");
 				if (pos  > -1)
 				{
-					table = colExpr.substring(0, pos);
+					reftable = colExpr.substring(0, pos);
 					column = colExpr.substring(pos + 1);
 				}
-				ref.setForeignTable(table);
+				ref.setForeignTable(new ReportTable(new TableIdentifier(reftable)));
 				ref.setForeignColumn(column);
 				rcol.setForeignKeyReference(ref);
 			}
@@ -280,7 +280,14 @@ public class ReportTable
 	
 	public String getTableComment() { return this.tableComment; }
 	public String getTableConstraints() { return this.tableConstraints; }
-		
+	
+	public void appendTableNameXml(StrBuffer toAppend, StrBuffer indent)
+	{
+		tagWriter.appendTag(toAppend, indent, TAG_TABLE_CATALOG, this.table.getCatalog());
+		tagWriter.appendTag(toAppend, indent, TAG_TABLE_SCHEMA, (this.schemaNameToUse == null ? this.table.getSchema() : this.schemaNameToUse));
+		tagWriter.appendTag(toAppend, indent, TAG_TABLE_NAME, this.table.getTableName());
+	}
+
 	/**
 	 * Return an XML representation of this table information.
 	 * The columns will be listed alphabetically not in the order
@@ -294,10 +301,7 @@ public class ReportTable
 
 		tagWriter.appendOpenTag(line, indent, TAG_TABLE_DEF, "name", this.table.getTableName());
 		line.append('\n');
-
-		tagWriter.appendTag(line, colindent, TAG_TABLE_CATALOG, this.table.getCatalog());
-		tagWriter.appendTag(line, colindent, TAG_TABLE_SCHEMA, (this.schemaNameToUse == null ? this.table.getSchema() : this.schemaNameToUse));
-		tagWriter.appendTag(line, colindent, TAG_TABLE_NAME, this.table.getTableName());
+		appendTableNameXml(line, colindent);
 		tagWriter.appendTag(line, colindent, TAG_TABLE_COMMENT, this.tableComment, true);
 		int cols = this.columns.length;
 		for (int i=0; i < cols; i++)

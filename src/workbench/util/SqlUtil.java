@@ -206,7 +206,7 @@ public class SqlUtil
 						table = table.substring(0, pos);
 					}
 				}
-				result.add(table);
+				result.add(makeCleanSql(table, false));
 			}
 		}
 

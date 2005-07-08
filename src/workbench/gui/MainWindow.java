@@ -619,7 +619,7 @@ public class MainWindow
 
 		try
 		{
-			if (this.currentProfile != null && this.currentProfile.getUseSeperateConnectionPerTab() && createConnection)
+			if (this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab() && createConnection)
 			{
 				Thread t = new Thread(new Runnable()
 				{
@@ -927,7 +927,7 @@ public class MainWindow
 	{
 		String id;
 
-		if (aProfile.getUseSeperateConnectionPerTab())
+		if (aProfile.getUseSeparateConnectionPerTab())
 		{
 			MainPanel p = this.getCurrentPanel();
 			id = this.getConnectionIdForPanel(p);
@@ -952,7 +952,7 @@ public class MainWindow
 	{
 		this.showStatusMessage("");
 		this.currentProfile = conn.getProfile();
-		if (this.currentProfile.getUseSeperateConnectionPerTab())
+		if (this.currentProfile.getUseSeparateConnectionPerTab())
 		{
 			this.getCurrentPanel().setConnection(conn);
 		}
@@ -1112,17 +1112,7 @@ public class MainWindow
 			result = true;
 
 			int explorerCount = w.getDbExplorerVisibleCount();
-			if (explorerCount > 0 && Settings.getInstance().getRestoreExplorerTabs())
-			{
-				int explorerIndex = this.findExplorerTab();
-				if (explorerIndex == -1)
-				{
-					for (int i=0; i < explorerCount; i++)
-					{
-						this.newDbExplorerPanel(false);
-					}
-				}
-			}
+			this.adjustDbExplorerCount(explorerCount);
 			if (index < this.sqlTab.getTabCount())
 			{
 				this.sqlTab.setSelectedIndex(index);
@@ -1311,6 +1301,7 @@ public class MainWindow
 			public void run() { selectCurrentEditor(); }
 		});
 	}
+	
 	public void selectCurrentEditor()
 	{
 		MainPanel p = this.getCurrentPanel();
@@ -1664,6 +1655,7 @@ public class MainWindow
 			p.closeWindow();
 		}
 	}
+	
 	public void newDbExplorerWindow()
 	{
 		DbExplorerPanel explorer = new DbExplorerPanel(this);
@@ -1830,22 +1822,6 @@ public class MainWindow
 		}
 	}
 
-	public void loadWorkspace()
-	{
-		FileDialogUtil dialog = new FileDialogUtil();
-		String filename = dialog.getWorkspaceFilename(this, false, true);
-		if (filename == null) return;
-		if (this.loadWorkspace(filename))
-		{
-			this.isProfileWorkspace = this.checkMakeProfileWorkspace();
-		}
-		else
-		{
-			this.isProfileWorkspace = false;
-		}
-		//this.updateWindowTitle();
-	}
-
 	private boolean checkMakeProfileWorkspace()
 	{
 		boolean assigned = false;
@@ -1858,6 +1834,37 @@ public class MainWindow
 		return assigned;
 	}
 
+	private int getNumberOfExplorerPanels()
+	{
+		int count = 0;
+		int num = this.sqlTab.getTabCount();
+		for (int i=0; i < num; i++)
+		{
+			Component c = this.sqlTab.getComponentAt(i);
+			if (c instanceof DbExplorerPanel) count++;
+		}
+		return count;
+	}
+	
+	private void adjustDbExplorerCount(int newCount)
+	{
+		int count = this.getNumberOfExplorerPanels();
+		if (count == newCount) return;
+		if (newCount > count)
+		{
+			for (int i=0; i < (newCount - count); i++)
+			{
+				newDbExplorerPanel(false);
+			}
+		}
+		else if (newCount < count)
+		{
+			for (int i=0; i < (count - newCount); i++)
+			{
+				this.removeLastTab(true);
+			}
+		}
+	}
 	/**
 	 *	Creates or removes SQL tabs until newCount tabs are displayed
 	 */
@@ -1866,7 +1873,7 @@ public class MainWindow
 		this.sqlTab.setSuspendRepaint(true);
 		try
 		{
-			int tabCount = this.sqlTab.getTabCount();
+			int tabCount = this.sqlTab.getTabCount() - getNumberOfExplorerPanels();
 
 			if (newCount > tabCount)
 			{
@@ -1910,9 +1917,41 @@ public class MainWindow
 		}
 	}
 
+	/**
+	 *	Returns true if at least one of the SQL panels is currently
+	 *  executing a SQL statement.
+	 *  This method calls isBusy() for each tab.
+	 */
+	public boolean isBusy()
+	{
+		int count = this.sqlTab.getTabCount();
+		for (int i=0; i < count; i++)
+		{
+			MainPanel p = this.getSqlPanel(i);
+			if (p.isBusy()) return true;
+		}
+		return false;
+	}
+
 	public String getCurrentWorkspaceFile()
 	{
 		return this.currentWorkspaceFile;
+	}
+
+	public void loadWorkspace()
+	{
+		FileDialogUtil dialog = new FileDialogUtil();
+		String filename = dialog.getWorkspaceFilename(this, false, true);
+		if (filename == null) return;
+		if (this.loadWorkspace(filename))
+		{
+			this.isProfileWorkspace = this.checkMakeProfileWorkspace();
+		}
+		else
+		{
+			this.isProfileWorkspace = false;
+		}
+		//this.updateWindowTitle();
 	}
 
 	/**
@@ -1953,22 +1992,6 @@ public class MainWindow
 		this.currentProfile.setWorkspaceFile(filename);
 		this.isProfileWorkspace = true;
 		this.updateWindowTitle();
-	}
-
-	/**
-	 *	Returns true if at least one of the SQL panels is currently
-	 *  executing a SQL statement.
-	 *  This method calls isBusy() for each tab.
-	 */
-	public boolean isBusy()
-	{
-		int count = this.sqlTab.getTabCount();
-		for (int i=0; i < count; i++)
-		{
-			MainPanel p = this.getSqlPanel(i);
-			if (p.isBusy()) return true;
-		}
-		return false;
 	}
 
 	public boolean saveWorkspace()
@@ -2268,7 +2291,7 @@ public class MainWindow
 			panel.disconnect();
 			panel.dispose();
 			
-			if (this.currentProfile != null && this.currentProfile.getUseSeperateConnectionPerTab()
+			if (this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab()
 			   && conn != null)
 			{
 				final String id = conn.getId();
@@ -2350,12 +2373,24 @@ public class MainWindow
 			}
 			else if ("whatsNew".equals(command))
 			{
-				new WhatsNewViewer(this).show();
+				EventQueue.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						new WhatsNewViewer(MainWindow.this).show();
+					}
+				});
 			}
 			else if ("optionsDialog".equals(command))
 			{
-				SettingsPanel panel = new SettingsPanel();
-				panel.showSettingsDialog(this);
+				EventQueue.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						SettingsPanel panel = new SettingsPanel();
+						panel.showSettingsDialog(MainWindow.this);
+					}
+				});
 			}
 			else if ("helpContents".equals(command))
 			{
@@ -2363,24 +2398,23 @@ public class MainWindow
 			}
 			else if ("keyboardDialog".equals(command))
 			{
-				final ShortcutEditor editor = new ShortcutEditor(this);
 				EventQueue.invokeLater(new Runnable()
 				{
 					public void run()
 					{
+						ShortcutEditor editor = new ShortcutEditor(MainWindow.this);
 						editor.showWindow();
 					}
 				});
 			}
 			else if ("helpAbout".equals(command))
 			{
-				final JFrame parent = this;
 				EventQueue.invokeLater(new Runnable()
 				{
 					public void run()
 					{
-						WbAboutDialog about = new WbAboutDialog(parent, true);
-						WbSwingUtilities.center(about, parent);
+						WbAboutDialog about = new WbAboutDialog(MainWindow.this, true);
+						WbSwingUtilities.center(about, MainWindow.this);
 						about.show();
 					}
 				});
@@ -2392,6 +2426,8 @@ public class MainWindow
 	{
 		try
 		{
+			// Use reflection to load the HtmlViewer in order to 
+			// avoid unnecessary class loading during startup
 			Class cls = Class.forName("workbench.gui.help.HtmlViewer");
 			Class[] types = new Class[] { JFrame.class };
 			Constructor cons = cls.getConstructor(types);

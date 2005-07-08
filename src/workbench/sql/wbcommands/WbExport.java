@@ -612,11 +612,7 @@ public class WbExport
 		{
 			aResult.setFailure();
 			aResult.addMessage(ResourceMgr.getString("MsgSpoolError"));
-			String msg = e.getMessage();
-			if (msg == null)
-			{
-				msg = StringUtil.getStackTrace(e);
-			}
+			String msg = ExceptionUtil.getDisplay(e, true);
 			aResult.addMessage(msg);
 			LogMgr.logError("WbExportCommand.consumeResult()", "Error spooling data", e);
 		}

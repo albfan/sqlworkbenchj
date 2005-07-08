@@ -578,8 +578,6 @@ public class WbTable
 		{
 			this.dwModel.removeTableModelListener(this.changeListener);
 			this.dwModel.removeTableModelListener(this);
-			this.dwModel.dispose();
-			this.dwModel = null;
 		}
 
 		JTableHeader header = this.getTableHeader();
@@ -597,8 +595,15 @@ public class WbTable
 			LogMgr.logError("WbTable.setModel()", "Error setting table model", th);
 		}
 
+		if (this.dwModel != null)
+		{
+			this.dwModel.dispose();
+			this.dwModel = null;
+		}
+		
 		if (aModel instanceof DataStoreTableModel)
 		{
+			
 			this.dwModel = (DataStoreTableModel)aModel;
 			if (sortIt && header != null)
 			{
@@ -843,18 +848,6 @@ public class WbTable
 		this.getTableHeader().repaint();
 	}
 
-	public String getDataString(String aLineTerminator)
-	{
-		return this.getDataString(aLineTerminator, true, null);
-	}
-
-	public String getDataString(String aLineTerminator, boolean includeHeaders, List columns)
-	{
-		if (this.dwModel == null) return "";
-		DataStore ds = this.dwModel.getDataStore();
-		return ds.getDataString(aLineTerminator, includeHeaders, columns);
-	}
-
 	public boolean canSearchAgain()
 	{
 		return this.lastFoundRow >= 0;
@@ -941,15 +934,15 @@ public class WbTable
 		this.savedColumnSizes = null;
 	}
 
-	public TableCellRenderer getCellRenderer(int row, int column)
-	{
-		TableCellRenderer renderer = super.getCellRenderer(row, column);
-		if (renderer == null)
-		{
-			renderer = ToolTipRenderer.DEFAULT_TEXT_RENDERER;
-		}
-		return renderer;
-	}
+//	public TableCellRenderer getCellRenderer(int row, int column)
+//	{
+//		TableCellRenderer renderer = super.getCellRenderer(row, column);
+//		if (renderer == null)
+//		{
+//			renderer = ToolTipRenderer.DEFAULT_TEXT_RENDERER;
+//		}
+//		return renderer;
+//	}
 
 	private boolean useDefaultStringRenderer = true;
 	public void setUseDefaultStringRenderer(boolean aFlag)
@@ -978,6 +971,10 @@ public class WbTable
 		}
 	}
 	
+	/**
+	 * Initialize the default renderers for this table
+	 * @see workbench.gui.renderer.RendererFactory
+	 */
 	public void initDefaultRenderers()
 	{
 		// need to let JTable do some initialization stuff
@@ -1495,16 +1492,6 @@ public class WbTable
 		return this.searchNext();
 	}
 
-	public void copyDataToClipboard()
-	{
-		this.copyDataToClipboard(true);
-	}
-
-	public void copyDataToClipboard(final boolean includeheaders)
-	{
-		copyDataToClipboard(includeheaders, null);
-	}
-
 	/**
 	 *	Copy all rows from the table as tab-delimited into the clipboard
 	 *	@param includeheaders if true, then a header line with the column names is copied as well
@@ -1520,7 +1507,8 @@ public class WbTable
 		{
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 			WbSwingUtilities.showWaitCursorOnWindow(this);
-			String data = getDataString("\n", includeheaders, columns);
+			DataStore ds = this.getDataStore();
+			String data = ds.getDataString("\n", includeheaders, columns);
 			StringSelection sel = new StringSelection(data);
 			clp.setContents(sel, sel);
 		}
@@ -1529,11 +1517,6 @@ public class WbTable
 			LogMgr.logError(this, "Could not copy text data to clipboard", e);
 		}
 		WbSwingUtilities.showDefaultCursorOnWindow(this);
-	}
-
-	public void copyDataToClipboard(final boolean includeHeaders, final boolean selectedOnly)
-	{
-		copyDataToClipboard(includeHeaders, selectedOnly, false);
 	}
 
 	/**
@@ -1577,11 +1560,6 @@ public class WbTable
 	}
 
 
-	public void copyAsSqlUpdate()
-	{
-		copyAsSqlUpdate(false, false);
-	}
-
 	public void copyAsSqlUpdate(boolean selectedOnly, boolean showSelectColumns)
 	{
 		DataStore ds = this.getDataStore();
@@ -1600,19 +1578,9 @@ public class WbTable
 		}
 	}
 
-	public void copyAsSqlInsert()
-	{
-		copyAsSqlInsert(false, false);
-	}
-
 	public void copyAsSqlInsert(boolean selectedOnly, boolean showSelectColumns)
 	{
 		this.copyAsSql(false, selectedOnly, showSelectColumns, false);
-	}
-
-	public void copyAsSqlDeleteInsert()
-	{
-		copyAsSqlDeleteInsert(false, false);
 	}
 
 	public void copyAsSqlDeleteInsert(boolean selectedOnly, boolean showSelectColumns)
@@ -1788,19 +1756,9 @@ public class WbTable
 		exporter.saveAs();
 	}
 
-	public int getMaxColWidth()
-	{
-		return maxColWidth;
-	}
-
 	public void setMaxColWidth(int maxColWidth)
 	{
 		this.maxColWidth = maxColWidth;
-	}
-
-	public int getMinColWidth()
-	{
-		return minColWidth;
 	}
 
 	public void setMinColWidth(int minColWidth)
@@ -1817,11 +1775,6 @@ public class WbTable
 			//this.defaultEditor.setFont(newFont);
 			this.numberEditorTextField.setFont(newFont);
 		}
-	}
-
-	public String toString()
-	{
-		return getClass().getName() + '@' + Integer.toHexString(hashCode());
 	}
 
 	public void focusGained(FocusEvent e)

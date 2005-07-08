@@ -26,7 +26,7 @@ public class ColumnReference
 	
 	private String fkName;
 	private String foreignColumn;
-	private String foreignTable;
+	private ReportTable foreignTable;
 	private String updateRule;
 	private String deleteRule;
 	private TagWriter tagWriter = new TagWriter();
@@ -45,7 +45,7 @@ public class ColumnReference
 	public void setDeleteRuleValue(int value) { this.deleteRuleValue = value; }
 	public void setConstraintName(String name) { this.fkName = name; }
 	public void setForeignColumn(String col) { this.foreignColumn = col; }
-	public void setForeignTable(String tbl) { this.foreignTable = tbl; }
+	public void setForeignTable(ReportTable tbl) { this.foreignTable = tbl; }
 	public void setUpdateRule(String rule) { this.updateRule = rule; }
 	public void setDeleteRule(String rule) { this.deleteRule = rule; }
 	
@@ -67,7 +67,8 @@ public class ColumnReference
 	public StrBuffer getInnerXml(StrBuffer indent)
 	{
 		StrBuffer result = new StrBuffer(250);
-		tagWriter.appendTag(result, indent, ReportTable.TAG_TABLE_NAME, this.foreignTable);
+		this.foreignTable.appendTableNameXml(result, indent);
+		//tagWriter.appendTag(result, indent, ReportTable.TAG_TABLE_NAME, this.foreignTable);
 		tagWriter.appendTag(result, indent, ReportColumn.TAG_COLUMN_NAME, this.foreignColumn);
 		tagWriter.appendTag(result, indent, TAG_CONSTRAINT_NAME, this.fkName);
 		tagWriter.appendTag(result, indent, TAG_DELETE_RULE, this.deleteRule, "jdbcValue", Integer.toString(this.deleteRuleValue));

@@ -330,6 +330,14 @@ public class ScriptParser
 		}
 		return this;
 	}
+	
+	public void done()
+	{
+		if (this.iteratingParser != null)
+		{
+			this.iteratingParser.done();
+		}
+	}
 
 	/**
 	 * Check for quote characters that are escaped using a 

@@ -19,6 +19,8 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -41,6 +43,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import workbench.log.LogMgr;
 
 public class Workbench2Designer
 {
@@ -73,6 +76,7 @@ public class Workbench2Designer
 		ret.put("VARCHAR",new SQLDataType("VARCHAR",0,"","VARCHAR",new String[]{"length"}));
 		ret.put("BOOL",new SQLDataType("BOOL",0,"NUMBER(1)","BOOL"));
 		ret.put("LONG",new SQLDataType("LONG",0,"LONG","CLOB"));
+		ret.put("OTHER",new SQLDataType("OTHER",0,"OBJECT","OTHER"));
 		return ret;
 	}
 	private static Workbench2Designer.IDCounter idCounter=new Workbench2Designer.IDCounter();
@@ -267,7 +271,7 @@ public class Workbench2Designer
 	{
 		// An array of names for DOM node-types
 		// (Array indexes = nodeType() values.)
-		String[] typeName =
+		final String[] typeName =
 		{
 			"none",
 			"Element",
@@ -454,24 +458,36 @@ public class Workbench2Designer
 	public Element dbdCreateRelations()
 		throws DOMException,Workbench2Designer.MalformedSourceException
 	{
-		Set relKeys = Workbench2Designer.relations.keySet();
-		Iterator it = relKeys.iterator();
+		Iterator it = Workbench2Designer.relations.entrySet().iterator();
 		Element relationsElm = destination.createElement("RELATIONS");
-
 		while(it.hasNext())
 		{
 			try
 			{
-				Relation relation = (Relation) Workbench2Designer.relations.get(it.next());
+				Map.Entry entry = (Map.Entry)it.next();
+				Relation relation = (Relation) entry.getValue();
 				Table src = (Table) Workbench2Designer.tables.get(relation.getSrcTable());
-
+				if (relation == null) continue;
+				
 				// ignore missing tables
-				//if (src == null) continue;
+				if (src == null) 
+				{
+					LogMgr.logWarning("Workbench2DbDesigner.dbdCreateRelations()", "Source table " + relation.getSrcTable() + "for relation " + relation.getRelName() + " not found in WB table list!");
+					//System.out.println("Source table " + relation.getSrcTable() + " for relation " + relation.getRelName() + " not found in WB table list!");
+					it.remove();
+					continue;
+				}
 
 				String source = Workbench2Designer.dbdIDReference.getTableDBDID(src.getName());
 				Table dest = (Table) Workbench2Designer.tables.get(relation.getDestTable());
 
-				//if (dest == null) continue;
+				if (dest == null) 
+				{
+					LogMgr.logWarning("Workbench2DbDesigner.dbdCreateRelations()", "Destination table " + relation.getDestTable() + "for relation " + relation.getRelName() + " not found in WB table list!");
+					//System.out.println("Source table " + relation.getSrcTable() + " for relation " + relation.getRelName() + " not found in WB table list!");
+					it.remove();
+					continue;
+				}
 
 				String destination = Workbench2Designer.dbdIDReference.getTableDBDID(dest.getName());
 				String kind;
@@ -953,7 +969,6 @@ public class Workbench2Designer
 			}
 			if (name.equals("dbms-data-type"))
 			{
-
 				SQLDataTypeStatement dataTypeStatement = new SQLDataTypeStatement(text);
 				newCol.setDataTypeStatement(dataTypeStatement);
 				continue;
@@ -1038,7 +1053,6 @@ public class Workbench2Designer
 				newRel.setOnDelete(text);
 			}
 		}
-
 	}
 
 	private static class GUIPositioner
@@ -1250,7 +1264,13 @@ public class Workbench2Designer
 			{
 				this.datatype=(SQLDataType)Workbench2Designer.globalSQLDataTypes.get(this.name);
 			}
+			
+			if (this.datatype == null)
+			{
+				this.datatype = (SQLDataType)Workbench2Designer.globalSQLDataTypes.get("OTHER");
+			}
 		}
+		
 		public SQLDataType getSQLDataType()
 		{
 			return this.datatype;

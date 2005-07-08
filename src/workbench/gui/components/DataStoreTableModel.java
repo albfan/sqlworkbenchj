@@ -278,12 +278,6 @@ public class DataStoreTableModel
 		return row;
 	}
 
-	public void importFile(String aFilename, boolean hasHeader, String colSep, String quoteChar)
-		throws FileNotFoundException
-	{
-		this.importFile(aFilename, hasHeader, colSep, quoteChar, null);
-	}
-
 	public void importFile(String aFilename, boolean hasHeader, String colSep, String quoteChar, JobErrorHandler errorHandler)
 		throws FileNotFoundException
 	{

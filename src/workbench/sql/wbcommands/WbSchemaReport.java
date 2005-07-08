@@ -28,6 +28,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
+import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -200,13 +201,13 @@ public class WbSchemaReport
 
 		if (dbDesigner && result.isSuccess())
 		{
+			File f = new File(wbFile);
 			try
 			{
 				if (this.rowMonitor != null)
 				{
 					this.setCurrentObject(ResourceMgr.getString("MsgConvertReport2Designer"), -1, -1);
 				}
-				File f = new File(wbFile);
 				Workbench2Designer converter = new Workbench2Designer(f);
 				converter.transformWorkbench2Designer();
 				File output = new File(file);
@@ -215,7 +216,10 @@ public class WbSchemaReport
 			catch (Exception e)
 			{
 				result.setFailure();
-				result.addMessage(e.getMessage());
+				String msg = ResourceMgr.getString("ErrorGeneratingDbDesigner");
+				msg = StringUtil.replace(msg, "%wbfile%", f.getAbsolutePath());
+				msg = StringUtil.replace(msg, "%error%", ExceptionUtil.getDisplay(e));
+				result.addMessage(msg);
 			}
 
 		}

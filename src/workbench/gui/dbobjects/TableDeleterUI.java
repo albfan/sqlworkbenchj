@@ -264,17 +264,16 @@ public class TableDeleterUI extends javax.swing.JPanel
 		boolean hasError = false;
 		List tables = new ArrayList();
 		int count = this.objectNames.size();
-		String table = null;
+		TableIdentifier table = null;
 		for (int i=0; i < count; i++)
 		{
 			if (this.cancelled) break;
-			table = (String)this.objectNames.get(i);
+			table = (TableIdentifier)this.objectNames.get(i);
 			this.statusLabel.setText(ResourceMgr.getString("TxtDeletingTable") + " " + table + " ...");
 			try
 			{
 				this.deleteTable(table, useTruncate, commitEach);
-				TableIdentifier tid = new TableIdentifier(table);
-				tables.add(tid);
+				tables.add(table);
 			}
 			catch (Exception ex)
 			{
@@ -283,7 +282,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 				if (!ignoreAll)
 				{
 					String question = ResourceMgr.getString("ErrorDeleteTableData");
-					question = question.replaceAll("%table%", table);
+					question = question.replaceAll("%table%", table.toString());
 					question = question.replaceAll("%error%", error);
 
 					int choice = WbSwingUtilities.getYesNoIgnoreAll(this.dialog,  question);
@@ -343,12 +342,13 @@ public class TableDeleterUI extends javax.swing.JPanel
 		this.cancelled = false;
 	}
 
-	private void deleteTable(final String tableName, final boolean useTruncate, final boolean doCommit)
+	private void deleteTable(final TableIdentifier table, final boolean useTruncate, final boolean doCommit)
 		throws SQLException
 	{
 		try
 		{
 			String deleteSql = null;
+			String tableName = table.getTableExpression(this.connection);
 			if (useTruncate)
 			{
 				deleteSql = "TRUNCATE TABLE " + tableName;
@@ -358,7 +358,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 				deleteSql = "DELETE FROM " + tableName;
 			}
 			Statement stmt = this.connection.createStatement();
-			LogMgr.logDebug("DataImporter.deleteTarget()", "Executing: [" + deleteSql + "] to delete target table...");
+			LogMgr.logDebug("TableDeleterUI.deleteTable()", "Executing: [" + deleteSql + "] to delete target table...");
 			int rows = stmt.executeUpdate(deleteSql);
 			if (doCommit && !this.connection.getAutoCommit())
 			{
@@ -371,10 +371,12 @@ public class TableDeleterUI extends javax.swing.JPanel
 			throw e;
 		}
 	}
+	
 	public boolean dialogWasCancelled()
 	{
 		return this.cancelled;
 	}
+	
 	public void setObjects(List objects)
 	{
 		this.objectNames = objects;
@@ -383,7 +385,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 		String[] display = new String[numNames];
 		for (int i=0; i < numNames; i ++)
 		{
-			display[i] = (String)this.objectNames.get(i);
+			display[i] = this.objectNames.toString();
 		}
 		this.objectList.setListData(display);
 	}

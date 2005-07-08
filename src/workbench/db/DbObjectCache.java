@@ -165,6 +165,7 @@ public class DbObjectCache
 			{
 				t2 = tbl.createCopy();
 				t2.setSchema(null);
+				t2.setType(null);
 				cols = (List)this.objects.get(t2);
 			}
 		}

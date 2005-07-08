@@ -33,8 +33,6 @@ public class StringUtil
 {
 	public static final Pattern PATTERN_CRLF = Pattern.compile("(\r\n|\n\r|\r|\n)");
 
-	public static final Pattern PATTERN_EMPTY_LINE = Pattern.compile("$(\r\n|\n\r|\r|\n)");
-
 	public static final String LINE_TERMINATOR = System.getProperty("line.separator");
 	public static final String PATH_SEPARATOR = System.getProperty("path.separator");
 	public static final String FILE_SEPARATOR = System.getProperty("file.separator");
@@ -156,34 +154,13 @@ public class StringUtil
 		return temp.toString();
 	}
 
-	public static final StringBuffer replaceBuffer(StringBuffer haystack, String needle, String replacement)
+	public static final boolean isEmptyString(String value)
 	{
-
-		int pos = haystack.indexOf(needle);
-		if (pos == -1)
-		{
-			return haystack;
-		}
-
-		StringBuffer result = new StringBuffer(haystack.length() + 50);
-
-		int lastpos = 0;
-		int len = needle.length();
-		while (pos != -1)
-		{
-			result.append(haystack.substring(lastpos, pos));
-			result.append(replacement);
-			lastpos = pos + len;
-			pos = haystack.indexOf(needle, lastpos);
-		}
-		if (lastpos < haystack.length())
-		{
-			result.append(haystack.substring(lastpos));
-		}
-		return result;
+		if (value == null) return true;
+		if (value.length() == 0) return true;
+		return false;
 	}
-
-
+	
 	public static final String getStartingWhiteSpace(final String aLine)
 	{
 		if (aLine == null) return null;
@@ -281,6 +258,7 @@ public class StringUtil
 	{
 		return stringToList(aString, aDelimiter, removeEmpty, false);
 	}
+	
 	/**
 	 * 	Parses the given String and creates a List containing the elements
 	 *  of the string that are separated by <tt>aDelimiter</aa>
@@ -336,16 +314,6 @@ public class StringUtil
 		return result.toString();
 	}
 
-
-	public static final String makeJavaString(String aString)
-	{
-		return makeJavaString(aString, true);
-	}
-
-	public static final String makeJavaString(String sql, boolean includeNewLine)
-	{
-		return makeJavaString(sql, "String sql = ", true);
-	}
 
 	public static final String makeJavaString(String sql, String prefix, boolean includeNewLines)
 	{
@@ -508,13 +476,6 @@ public class StringUtil
 		}
 	}
 
-	public static final String trimEmptyLines(String input)
-	{
-		if (input == null) return null;
-		Matcher m = PATTERN_EMPTY_LINE.matcher(input);
-		return m.replaceAll("");
-	}
-
 	public static final String trimQuotes(String input)
 	{
 		//System.out.println("toTrim=" + input);
@@ -539,13 +500,6 @@ public class StringUtil
 		return result;
 	}
 
-	public static String getStackTrace(Throwable th)
-	{
-		StringWriter writer = new StringWriter(500);
-		PrintWriter pw = new PrintWriter(writer);
-		th.printStackTrace(pw);
-		return writer.getBuffer().toString();
-	}
 	public static final String cleanupUnderscores(String aString, boolean capitalize)
 	{
 		if (aString == null) return null;
@@ -754,7 +708,7 @@ public class StringUtil
 	public static boolean stringToBool(String aString)
 	{
 		if (aString == null) return false;
-		return ("true".equalsIgnoreCase(aString) || "y".equalsIgnoreCase(aString) || "yes".equalsIgnoreCase(aString) || "1".equals(aString));
+		return ("true".equalsIgnoreCase(aString) || "1".equals(aString) || "y".equalsIgnoreCase(aString) || "yes".equalsIgnoreCase(aString) );
 	}
 
 	public static List split(String aString, String delim, boolean singleDelimiter, String quoteChars, boolean keepQuotes)

@@ -39,10 +39,12 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.exporter.XmlRowDataConverter;
+import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
 import workbench.interfaces.ImportFileParser;
 import workbench.log.LogMgr;
 import workbench.util.EncodingUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
@@ -606,6 +608,10 @@ public class XmlDataFileParser
 	/**
 	 *	Creates the approriate column data object and puts it
 	 *	into rowData[currentColIndex]
+	 *  {@link workbench.util.ValueConverter} is not used because
+	 *  for most of the datatypes we have some special processing here
+	 *  Date and time can be initialized through the long value in the XML file
+	 *  Numeric types contain the actual class to be used {@link #createNumericType(String, String)}
 	 */
 	private void buildColumnData()
 	{
@@ -632,23 +638,17 @@ public class XmlDataFileParser
 				break;
 
 			case Types.TIME:
-				if (hasLongValue)
-				{
-					this.currentRow[this.realColIndex] = new java.sql.Time(this.columnLongValue);
-				}
+				this.currentRow[this.realColIndex] = new java.sql.Time(this.columnLongValue);
 				break;
 
 			case Types.BIGINT:
 				try
 				{
-					if (value.trim().length() > 0)
-					{
-						this.currentRow[this.realColIndex] = new BigInteger(value);
-					}
+					this.currentRow[this.realColIndex] = new Long(value);
 				}
 				catch (Exception e)
 				{
-					LogMgr.logError("XmlDataFileParser.buildColumnData()", "Could not create BigInt value!", e);
+					LogMgr.logError("XmlDataFileParser.buildColumnData()", "Could not create Long value from [" + value + "] for column " + realColIndex, e);
 					this.currentRow[this.realColIndex] = null;
 				}
 				break;
@@ -658,14 +658,11 @@ public class XmlDataFileParser
 			case Types.TINYINT:
 				try
 				{
-					if (value.trim().length() > 0)
-					{
-						this.currentRow[this.realColIndex] = new Integer(value);
-					}
+					this.currentRow[this.realColIndex] = new Integer(value);
 				}
 				catch (Exception e)
 				{
-					LogMgr.logError("XmlDataFileParser.buildColumnData()", "Could not create BigInt value!", e);
+					LogMgr.logError("XmlDataFileParser.buildColumnData()", "Could not create Integer value from [" + value + "] for column " + realColIndex, e);
 					this.currentRow[this.realColIndex] = null;
 				}
 				break;
@@ -690,6 +687,19 @@ public class XmlDataFileParser
 			case Types.REAL:
 				Object result = this.createNumericType(this.columns[this.currentColIndex].getColumnClass(), value);
 				this.currentRow[this.realColIndex] = result;
+				break;
+				
+			case Types.BIT:
+			case Types.BOOLEAN:
+				this.currentRow[this.realColIndex]  = new Boolean(StringUtil.stringToBool(value));
+				break;
+			default:
+				// type not taken into account. Simply use the String 
+				// value, hoping that the JDBC driver can cope with that :)
+				this.currentRow[this.realColIndex] = value;
+				String msg = ResourceMgr.getString("ErrorConvertError").replaceAll("%type%", SqlUtil.getTypeName(type));
+				this.messages.append(msg);
+				LogMgr.logWarning("XmlDataFileParser.buildColumnData()", msg, null);
 				break;
 		}
 		this.realColIndex ++;

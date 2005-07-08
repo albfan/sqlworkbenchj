@@ -790,14 +790,11 @@ public class SqlPanel
 		this.findDataAgainAction = this.data.getTable().getFindAgainAction();
 		this.findDataAgainAction.setEnabled(false);
 
-		if (Settings.getInstance().getUseAutoCompletion())
-		{
-			this.autoCompletion = new AutoCompletionAction(this.editor, this.data.getStatusBar());
-			this.autoCompletion.setCreateMenuSeparator(true);
-			this.actions.add(this.autoCompletion);
-			this.clearCompletionCache = new ClearCompletionCacheAction();
-			this.actions.add(this.clearCompletionCache);
-		}
+		this.autoCompletion = new AutoCompletionAction(this.editor, this.data.getStatusBar());
+		this.autoCompletion.setCreateMenuSeparator(true);
+		this.actions.add(this.autoCompletion);
+		this.clearCompletionCache = new ClearCompletionCacheAction();
+		this.actions.add(this.clearCompletionCache);
 		
 		this.formatSql = this.editor.getFormatSqlAction();
 		this.formatSql.setCreateMenuSeparator(true);

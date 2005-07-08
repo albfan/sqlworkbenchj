@@ -95,8 +95,8 @@ public class ConnectionMgr
 		WbConnection conn = new WbConnection(anId);
 		LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + aProfile.getName() + "] with ID=" + anId + " for driver=" + aProfile.getDriverclass());
 		Connection sql = this.connect(aProfile, anId);
-		conn.setSqlConnection(sql);
 		conn.setProfile(aProfile);
+		conn.setSqlConnection(sql);
 		
 		String version = null;
 		try

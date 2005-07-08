@@ -536,15 +536,9 @@ public class TableDataPanel
 	{
 		if (tables == null) return;
 		if (this.table == null) return;
-		int count = tables.size();
-		for (int i=0; i < count; i++)
+		if (tables.contains(this.table))
 		{
-			TableIdentifier tid = (TableIdentifier)tables.get(i);
-			if (this.table.equals(tid))
-			{
-				this.reset();
-				break;
-			}
+			this.reset();
 		}
 	}
 

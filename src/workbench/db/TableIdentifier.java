@@ -30,6 +30,7 @@ public class TableIdentifier
 	private String pkName;
 	private String type;
 	private boolean neverAdjustCase;
+//	private boolean external;
 	
 	public TableIdentifier(String aName)
 	{
@@ -76,6 +77,10 @@ public class TableIdentifier
 	{
 		this.neverAdjustCase = flag;
 	}
+	
+//	public void setExternalTable(boolean flag) { this.external = true; }
+//	public boolean isExternal() { return this.external; }
+	
 	public TableIdentifier createCopy()
 	{
 		TableIdentifier copy = new TableIdentifier();
@@ -86,6 +91,7 @@ public class TableIdentifier
 		copy.catalog = this.catalog;
 		copy.expression = null;
 		copy.neverAdjustCase = this.neverAdjustCase;
+		//copy.external = this.external;
 		return copy;
 	}
 	
@@ -132,6 +138,7 @@ public class TableIdentifier
 		else
 		{
 			DbMetadata meta = conn.getMetadata();
+			this.adjustCase(conn);
 			if (this.schema != null && meta.needSchemaInDML(this))
 			{
 				result.append(meta.quoteObjectname(this.schema));
@@ -177,7 +184,8 @@ public class TableIdentifier
 		}
 		else
 		{
-			this.tablename = StringUtil.trimQuotes(aTable).trim();
+			//this.tablename = StringUtil.trimQuotes(aTable).trim();
+			this.tablename = aTable.trim();
 		}
 		this.expression = null;
 	}
@@ -273,6 +281,36 @@ public class TableIdentifier
 		return false;
 	}
 
+	/**
+	 * Compare this TableIdentifier to another. The schema and catalog fields
+	 * are only compared if bothe identifiers have them
+	 */
+	public boolean compareNames(TableIdentifier other)
+	{
+		boolean result = false;
+		if (this.isNewTable && other.isNewTable)
+		{
+			result = true;
+		}
+		else if (this.isNewTable || other.isNewTable)
+		{
+			result = false;
+		}
+		else
+		{
+			result = this.getTableName().equals(other.getTableName());
+			if (result && this.schema != null && other.schema != null)
+			{
+				result = this.schema.equals(other.schema);
+			}
+			if (result && this.catalog != null && other.catalog != null)
+			{
+				result = this.catalog.equals(other.catalog);
+			}
+		}
+		return result;
+	}
+
 	public String getPrimaryKeyName()
 	{
 		return this.pkName;
@@ -292,4 +330,5 @@ public class TableIdentifier
 	{
 		this.type = type;
 	}
+
 }

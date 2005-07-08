@@ -34,8 +34,8 @@ public class OracleSynonymReader
 		throws SQLException
 	{
 		StringBuffer sql = new StringBuffer(200);
-		sql.append("SELECT synonym_name, table_owner, table_name FROM all_synonyms ");
-		sql.append(" WHERE synonym_name = ? AND owner = ?");
+		sql.append("SELECT synonym_name, table_owner, table_name, db_link FROM all_synonyms ");
+		sql.append(" WHERE synonym_name = ? AND owner = ? ");
 
 		PreparedStatement stmt = con.prepareStatement(sql.toString());
 		stmt.setString(1, aSynonym);
@@ -44,6 +44,7 @@ public class OracleSynonymReader
 		ResultSet rs = stmt.executeQuery();
 		String table = null;
 		String owner = null;
+		String dblink = null;
 		TableIdentifier result = null;
 		try
 		{
@@ -51,7 +52,9 @@ public class OracleSynonymReader
 			{
 				owner = rs.getString(2);
 				table = rs.getString(3);
+				dblink = rs.getString(4);
 				result = new TableIdentifier(null, owner, table);
+				//result.setExternalTable(dblink != null);
 			}
 		}
 		finally
