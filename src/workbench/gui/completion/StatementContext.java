@@ -48,6 +48,10 @@ public class StatementContext
 			{
 				analyzer = new DdlAnalyzer(conn, sql, pos);
 			}
+			else if ("INSERT".equalsIgnoreCase(verb))
+			{
+				analyzer = new InsertAnalyzer(conn, sql, pos);
+			}
 		}
 		
 		if (analyzer != null)

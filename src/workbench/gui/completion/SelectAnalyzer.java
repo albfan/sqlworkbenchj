@@ -46,10 +46,19 @@ public class SelectAnalyzer
 	protected void checkContext()
 	{
 		this.context = NO_CONTEXT;
+		String currentWord = StringUtil.getWordLeftOfCursor(sql, cursorPos, null);
+		if (currentWord != null)
+		{
+			boolean keyWord = this.dbConnection.getMetadata().isKeyword(currentWord);
+			setOverwriteCurrentWord(!keyWord);
+		}
+		else
+		{
+			setOverwriteCurrentWord(false);
+		}
+		
 		setAppendDot(false);
 		setColumnPrefix(null);
-		setOverwriteCurrentWord(false);
-		
 		int fromPos = SqlUtil.getFromPosition(this.sql); 
 		
 		int wherePos = -1;
@@ -77,7 +86,11 @@ public class SelectAnalyzer
 			   (wherePos > -1 && cursorPos > fromPos && cursorPos <= wherePos))
 		{
 			String q = getQualifierLeftOfCursor(sql, cursorPos);
-			
+			if (q != null)
+			{
+				setOverwriteCurrentWord(!this.dbConnection.getMetadata().isKeyword(q));
+			}
+
 			// If no FROM is present but there is a word with a dot
 			// at the cursor position we will first try to use that 
 			// as a table name (because usually you type the table name
@@ -113,14 +126,6 @@ public class SelectAnalyzer
 			// statement or before the FROM statement, so
 			// we'll try to find a proper column list
 			
-			
-			String word = StringUtil.getWordLeftOfCursor(sql, cursorPos, null);
-			if (word != null)
-			{
-				//int dotPos = word.indexOf('.');
-				//if (dotPos != -1 && dotPos < word.length() - 1)
-				setOverwriteCurrentWord(true);
-			}
 			int count = tables.size();
 			if (count == 1)
 			{

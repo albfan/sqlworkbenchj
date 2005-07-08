@@ -33,15 +33,26 @@ public class UpdateAnalyzer
 	extends BaseAnalyzer
 {
 	private	final Pattern SET_PATTERN = Pattern.compile("\\sSET\\s|\\sSET$", Pattern.CASE_INSENSITIVE);
-	
+
 	public UpdateAnalyzer(WbConnection conn, String statement, int cursorPos)
-	{	
+	{
 		super(conn, statement, cursorPos);
 	}
-	
+
 	protected void checkContext()
 	{
 		int setPos = StringUtil.findPattern(SET_PATTERN, sql, 0);
+
+		String currentWord = StringUtil.getWordLeftOfCursor(sql, cursorPos, null);
+		if (currentWord != null)
+		{
+			boolean keyWord = this.dbConnection.getMetadata().isKeyword(currentWord);
+			setOverwriteCurrentWord(!keyWord);
+		}
+		else
+		{
+			setOverwriteCurrentWord(false);
+		}
 
 		if ( setPos == -1 || setPos > -1 && cursorPos < setPos )
 		{
@@ -61,11 +72,11 @@ public class UpdateAnalyzer
 			// current cursor position is after the WHERE
 			// so we'll need a column list
 			int start = StringUtil.findFirstWhiteSpace(sql);
-			
+
 			int end = -1;
 			if (start > -1) end = StringUtil.findFirstWhiteSpace(sql, start + 1);
 			if (end == -1 && start > -1) end = this.sql.length() - 1;
-			
+
 			if (end > -1 && start > -1)
 			{
 				context = CONTEXT_COLUMN_LIST;
