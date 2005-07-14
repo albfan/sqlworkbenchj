@@ -12,8 +12,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-
-import workbench.interfaces.PrintableComponent;
+import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -21,9 +20,9 @@ import workbench.resource.ResourceMgr;
  */
 public class PrintAction extends WbAction
 {
-	private PrintableComponent client;
+	private WbTable client;
 
-	public PrintAction(PrintableComponent aClient)
+	public PrintAction(WbTable aClient)
 	{
 		super();
 		this.client = aClient;
@@ -34,6 +33,6 @@ public class PrintAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.print();
+		this.client.printTable();
 	}
 }

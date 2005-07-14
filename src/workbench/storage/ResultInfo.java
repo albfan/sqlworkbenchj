@@ -293,6 +293,7 @@ public class ResultInfo
 		if (i >= this.columns.length) return Types.OTHER;
 		return this.columns[i].getDataType(); 
 	}
+	
 	public String getColumnClassName(int i) 
 	{ 
 		String className = this.columns[i].getColumnClass();
@@ -312,7 +313,7 @@ public class ResultInfo
 		{
 			case Types.BIGINT:
 			case Types.INTEGER:
-				return BigInteger.class;
+				return Long.class;
 			case Types.SMALLINT:
 				return Integer.class;
 			case Types.NUMERIC:

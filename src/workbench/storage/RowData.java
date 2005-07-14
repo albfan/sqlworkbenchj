@@ -298,6 +298,7 @@ public class RowData
 	{
 		return this.getDataAsString(aDelimiter, formatter, null);
 	}
+	
 	public StringBuffer getDataAsString(String aDelimiter, DecimalFormat formatter, boolean[] columns)
 	{
 		int count = this.colData.length;

@@ -97,16 +97,20 @@ public class SqlCommand
 			String s = null;
 			SQLWarning warn = aStmt.getWarnings();
 			boolean hasWarnings = warn != null;
+			int count = 0;
 			while (warn != null)
 			{
+				count ++;
 				s = warn.getMessage();
 				if (s != null && s.length() > 0)
 				{
 					msg.append(s);
 					if (!s.endsWith("\n")) msg.append('\n');
 				}
-				warn = warn.getNextWarning();
 				added.add(s);
+				if (count > 25) break; // prevent endless loop
+				warn = warn.getNextWarning();
+				
 			}
 
 			// if the statement has been cancelled Oracle
@@ -126,6 +130,7 @@ public class SqlCommand
 			}
 			warn = aConn.getSqlConnection().getWarnings();
 			hasWarnings = hasWarnings || (warn != null);
+			count = 0;
 			while (warn != null)
 			{
 				s = warn.getMessage();
@@ -134,6 +139,7 @@ public class SqlCommand
 					msg.append(s);
 					if (!s.endsWith("\n")) msg.append('\n');
 				}
+				if (count > 25) break; // prevent endless loop
 				warn = warn.getNextWarning();
 			}
 

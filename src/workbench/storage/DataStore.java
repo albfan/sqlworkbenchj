@@ -45,6 +45,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.storage.filter.FilterExpression;
 import workbench.util.CsvLineParser;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
@@ -290,6 +291,42 @@ public class DataStore
 		return this.resultInfo.getColumnClass(aColumn);
 	}
 
+	public DecimalFormat getDefaultNumberFormatter()
+	{
+		return defaultNumberFormatter;
+	}
+
+	/**
+	 * Applies a filter based on the given {@link workbench.storage.filter.FilterExpression}
+	 * to this datastore. Each row that does not satisfy the {@link workbench.storage.filter.FilterExpression#evaluate(Object, Object)}
+	 * criteria is removed from the active date by {@link #filterRow(int)}
+	 * @param filterExpression the expression identifying the rows to be kept
+	 * @see workbench.storage.filter.FilterExpression
+	 * @see filterRow(int)
+	 * @see clearFilter()
+	 */
+	public void applyFilter(FilterExpression filterExpression)
+	{
+		int cols = getColumnCount();
+		Map valueMap = new HashMap(cols);
+		for (int r=0; r < getRowCount(); r++)
+		{
+			RowData row = getRow(r);
+			
+			// Build the value map required for the FilterExpression
+			for (int c=0; c < cols; c++)
+			{
+				String col = getColumnName(c);
+				Object value = row.getValue(c);
+				valueMap.put(col, value);
+			}
+			if (!filterExpression.evaluate(valueMap))
+			{
+				this.filterRow(r);
+			}
+		}
+	}
+	
 	/**
 	 * Removes this row from the "active" data, but keeps it unchanged
 	 * Filtered rows can be restored to be active by calling {@see #clearFilter()}

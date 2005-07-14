@@ -407,7 +407,7 @@ public class OracleMetadata
 		
 		final String comment_join = "   AND t.owner = c.owner (+)  AND t.table_name = c.table_name (+)  AND t.column_name = c.column_name (+)  \n";
 		final String order = "ORDER BY table_schem, table_name, ordinal_position";
-		final String sql_comment = sql1 +  "       c.comments AS remarks, \n" + sql2 + where + ", all_col_comments c  \n" + comment_join + order;
+		final String sql_comment = sql1 +  "       c.comments AS remarks, \n" + sql2 + ", all_col_comments c  \n" + where  + comment_join + order;
 		final String sql_no_comment = sql1 +  "       null AS remarks, \n" + sql2 + where + order;
 		String sql;
 		

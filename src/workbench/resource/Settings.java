@@ -156,7 +156,7 @@ public class Settings
 			logfile = System.getProperty("workbench.log.filename", null);
 			if (logfile == null)
 			{
-				logfile = this.props.getProperty("workbench.log.filename", "workbench.log");
+				logfile = this.props.getProperty("workbench.log.filename", "%configdir%/workbench.log");
 			}
 			int maxSize = this.getMaxLogfileSize();
 			logfile = StringUtil.replace(logfile, "%configdir%", configDir);

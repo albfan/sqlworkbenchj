@@ -107,7 +107,6 @@ import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RowStatusRenderer;
 import workbench.gui.renderer.ToolTipRenderer;
 import workbench.interfaces.FontChangedListener;
-import workbench.interfaces.PrintableComponent;
 import workbench.interfaces.Searchable;
 import workbench.log.LogMgr;
 import workbench.print.PrintPreview;
@@ -123,9 +122,7 @@ import workbench.util.WbThread;
 public class WbTable
 	extends JTable
 	implements ActionListener, FocusListener, MouseListener,
-	           FontChangedListener, Searchable, 
-						 PrintableComponent, ListSelectionListener, 
-	           PropertyChangeListener
+	           FontChangedListener, Searchable, ListSelectionListener, PropertyChangeListener
 {
 	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.YELLOW);
 	private JPopupMenu popup;
@@ -549,7 +546,7 @@ public class WbTable
 		return this.defaultPrintHeader;
 	}
 
-	public void print()
+	public void printTable()
 	{
 		this.getTablePrinter().startPrint();
 	}
