@@ -38,7 +38,6 @@ import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
-import workbench.gui.components.FindPanel;
 import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbScrollPane;
@@ -54,6 +53,8 @@ import workbench.util.SqlUtil;
 import workbench.util.WbThread;
 import javax.swing.JLabel;
 import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.QuickFilterPanel;
+import workbench.interfaces.CriteriaPanel;
 
 
 /**
@@ -67,7 +68,7 @@ public class ProcedureListPanel
 {
 	private WbConnection dbConnection;
 	private JPanel listPanel;
-	private FindPanel findPanel;
+	private CriteriaPanel findPanel;
 	private WbTable procList;
 	private WbTable procColumns;
 	private EditorPanel source;
@@ -119,12 +120,14 @@ public class ProcedureListPanel
 		this.procList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.procList.setAdjustToColumnLabel(false);
 
-		this.findPanel = new FindPanel(this.procList);
+		//this.findPanel = new FindPanel(this.procList);
+		this.findPanel = new QuickFilterPanel(this.procList, "PROCEDURE_NAME", "procedurelist");
+		
 		ReloadAction a = new ReloadAction(this);
 		this.findPanel.addToToolbar(a, true, false);
 		a.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshProcedureList"));
 		this.listPanel.setLayout(new BorderLayout());
-		this.listPanel.add(findPanel, BorderLayout.NORTH);
+		this.listPanel.add((JPanel)findPanel, BorderLayout.NORTH);
 
 		this.splitPane = new WbSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		this.splitPane.setOneTouchExpandable(true);
@@ -145,7 +148,8 @@ public class ProcedureListPanel
 		this.add(splitPane, BorderLayout.CENTER);
 
 		WbTraversalPolicy pol = new WbTraversalPolicy();
-		pol.setDefaultComponent(findPanel);
+		pol.setDefaultComponent((JPanel)findPanel);
+		pol.addComponent((JPanel)findPanel);
 		pol.addComponent(this.procList);
 		pol.addComponent(this.procColumns);
 		this.setFocusTraversalPolicy(pol);
@@ -320,7 +324,7 @@ public class ProcedureListPanel
 	public void saveSettings()
 	{
 		Settings.getInstance().setProperty(this.getClass().getName(), "divider", this.splitPane.getDividerLocation());
-		Settings.getInstance().setProperty(this.getClass().getName(), "lastsearch", this.findPanel.getSearchString());
+		Settings.getInstance().setProperty(this.getClass().getName(), "lastsearch", this.findPanel.getText());
 	}
 
 	public void restoreSettings()
@@ -330,7 +334,7 @@ public class ProcedureListPanel
 		this.splitPane.setDividerLocation(loc);
 
 		String s = Settings.getInstance().getProperty(this.getClass().getName(), "lastsearch", "");
-		this.findPanel.setSearchString(s);
+		this.findPanel.setText(s);
 	}
 
 	public void valueChanged(ListSelectionEvent e)

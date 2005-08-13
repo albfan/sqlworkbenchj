@@ -19,6 +19,7 @@ import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -38,7 +39,6 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -70,7 +70,9 @@ import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.actions.ToggleTableSourceAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.DividerBorder;
 import workbench.gui.components.FindPanel;
+import workbench.gui.components.QuickFilterPanel;
 import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbMenuItem;
@@ -97,6 +99,8 @@ import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.util.ExceptionUtil;
 import java.awt.Component;
+import workbench.db.ColumnIdentifier;
+import workbench.interfaces.CriteriaPanel;
 
 
 /**
@@ -109,7 +113,7 @@ public class TableListPanel
 {
 	private WbConnection dbConnection;
 	private JPanel listPanel;
-	private FindPanel findPanel;
+	private CriteriaPanel findPanel;
 	private WbTable tableList;
 	private WbTable tableDefinition;
 	private WbTable indexes;
@@ -130,6 +134,9 @@ public class TableListPanel
 	private JTabbedPane displayTab;
 	private WbSplitPane splitPane;
 
+	private QuickFilterPanel columnFilter;
+	private FindPanel columnSearcher;
+	
 	private JComboBox tableTypes = new JComboBox();
 	private String currentSchema;
 	private String currentCatalog;
@@ -174,7 +181,7 @@ public class TableListPanel
 	private WbAction createIndexAction;
 	private WbAction createDummyInsertAction;
 	private WbAction createDefaultSelect;
-	
+
 	private WbMenuItem recompileItem;
 
 	private ToggleTableSourceAction toggleTableSource;
@@ -198,11 +205,41 @@ public class TableListPanel
 		this.displayTab.setUI(TabbedPaneUIFactory.getBorderLessUI());
 		this.displayTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
+			
 		this.tableDefinition = new WbTable();
 		this.tableDefinition.setAdjustToColumnLabel(false);
 		this.tableDefinition.setSelectOnRightButtonClick(true);
+		
+		JPanel bar = new JPanel(new GridBagLayout());
+		columnSearcher = new FindPanel(this.tableDefinition, 20);
+		
+		String[] cols = new String[] {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "JAVA_TYPE"};
+		columnFilter  = new QuickFilterPanel(this.tableDefinition, cols, true, "columnlist");
+		
+		GridBagConstraints cc = new GridBagConstraints();
+		cc.anchor = GridBagConstraints.WEST;
+		cc.gridx = 0;
+		cc.weightx = 0.6;
+		cc.ipadx = 0;
+		cc.ipady = 0;
+		cc.insets = new Insets(0, 0, 0, 5);
+		cc.fill = GridBagConstraints.HORIZONTAL;
+		bar.add(columnFilter, cc);
+
+		cc.gridx ++;
+		cc.anchor = GridBagConstraints.WEST;
+		cc.fill = GridBagConstraints.NONE;
+		cc.weightx = 0.4;
+		cc.insets = new Insets(0, 0, 0, 0);
+		columnSearcher.setBorder(new DividerBorder(DividerBorder.LEFT));
+		//bar.setBorder(BorderFactory.createEtchedBorder());
+		bar.add(columnSearcher, cc);
+		
 		WbScrollPane scroll = new WbScrollPane(this.tableDefinition);
-		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), scroll);
+		JPanel defPanel = new JPanel(new BorderLayout());
+		defPanel.add(bar, BorderLayout.NORTH);
+		defPanel.add(scroll, BorderLayout.CENTER);
+		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), defPanel);
 
 		this.indexes = new WbTable();
 		this.indexes.setAdjustToColumnLabel(false);
@@ -263,8 +300,10 @@ public class TableListPanel
 		this.createDefaultSelect.initMenuDefinition("MnuTxtCreateDefaultSelect");
 
 		this.extendPopupMenu();
-		
-		this.findPanel = new FindPanel(this.tableList);
+
+		//this.findPanel = new FindPanel(this.tableList);
+		String[] s = new String[] { "NAME", "TYPE", "CATALOG", "SCHEMA"}; 
+		this.findPanel = new QuickFilterPanel(this.tableList, s, false, "tablelist");
 
 		ReloadAction a = new ReloadAction(this);
 		a.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshTableList"));
@@ -296,7 +335,7 @@ public class TableListPanel
 		constr.gridwidth = GridBagConstraints.REMAINDER;
 		constr.fill = GridBagConstraints.HORIZONTAL;
 		constr.weightx = 1.0;
-		topPanel.add(this.findPanel, constr);
+		topPanel.add((JPanel)this.findPanel, constr);
 
 		this.listPanel.setLayout(new BorderLayout());
 		this.listPanel.add(topPanel, BorderLayout.NORTH);
@@ -324,8 +363,8 @@ public class TableListPanel
 		this.add(splitPane, BorderLayout.CENTER);
 
 		WbTraversalPolicy pol = new WbTraversalPolicy();
-		pol.setDefaultComponent(findPanel);
-		pol.addComponent(findPanel);
+		pol.setDefaultComponent((JPanel)findPanel);
+		pol.addComponent((JPanel)findPanel);
 		pol.addComponent(tableList);
 		pol.addComponent(tableDefinition);
 		this.setFocusTraversalPolicy(pol);
@@ -365,10 +404,10 @@ public class TableListPanel
 			this.showDataMenu.setIcon(ResourceMgr.getImage("blank"));
 			this.tableList.addPopupMenu(this.showDataMenu, false);
 		}
-		
+
 		this.tableList.addPopupAction(this.createDummyInsertAction, true);
 		this.tableList.addPopupAction(this.createDefaultSelect, false);
-		
+
 		this.scriptTablesItem = new WbMenuItem(ResourceMgr.getString("MnuTxtCreateScript"));
 		this.scriptTablesItem.setIcon(ResourceMgr.getImage("script"));
 		this.scriptTablesItem.setActionCommand(SCRIPT_CMD);
@@ -376,7 +415,7 @@ public class TableListPanel
 		this.scriptTablesItem.setEnabled(true);
 		this.scriptTablesItem.setToolTipText(ResourceMgr.getDescription("MnuTxtCreateScript"));
 		this.tableList.addPopupMenu(this.scriptTablesItem, false);
-		
+
 		WbMenuItem item = new WbMenuItem(ResourceMgr.getString("MnuTxtSchemaReport"));
 		item.setToolTipText(ResourceMgr.getDescription("MnuTxtSchemaReport"));
 		item.setBlankIcon();
@@ -384,7 +423,7 @@ public class TableListPanel
 		item.addActionListener(this);
 		item.setEnabled(true);
 		tableList.addPopupMenu(item, false);
-		
+
 		this.dropTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDropDbObject"));
 		this.dropTableItem.setToolTipText(ResourceMgr.getDescription("MnuTxtDropDbObject"));
 		this.dropTableItem.setActionCommand(DROP_CMD);
@@ -400,7 +439,7 @@ public class TableListPanel
 		this.deleteTableItem.addActionListener(this);
 		this.deleteTableItem.setEnabled(true);
 		tableList.addPopupMenu(this.deleteTableItem, false);
-		
+
 	}
 
 	private Font boldFont = null;
@@ -449,7 +488,7 @@ public class TableListPanel
 			}
 			this.showDataMenu.removeAll();
 		}
-		
+
 		if (this.boldFont == null) this.initFonts();
 		JMenuItem item = null;
 
@@ -560,7 +599,7 @@ public class TableListPanel
 
 	public void setInitialFocus()
 	{
-		this.findPanel.setFocusToEntryField();
+		findPanel.setFocusToEntryField();
 	}
 
 	public void disconnect()
@@ -575,7 +614,7 @@ public class TableListPanel
 
 	public void reset()
 	{
-		if (this.isBusy()) 
+		if (this.isBusy())
 		{
 			this.invalidateData();
 			return;
@@ -678,7 +717,7 @@ public class TableListPanel
 		{
 			this.recompileItem.removeActionListener(this);
 		}
-		
+
 		if (this.dbConnection.getMetadata().isOracle())
 		{
 			this.recompileItem = new WbMenuItem(ResourceMgr.getString("MnuTxtRecompile"));
@@ -698,9 +737,9 @@ public class TableListPanel
 				popup.remove(this.recompileItem);
 			}
 			this.recompileItem = null;
-		}		
+		}
 	}
-	
+
 	public boolean isReallyVisible()
 	{
 		if (!this.isVisible()) return false;
@@ -781,30 +820,18 @@ public class TableListPanel
 			// reset will do nothing if the panel is busy
 			setBusy(true);
 
-			// Some JDBC drivers (e.g. PostgreSQL) return a selection
-			// of table types to the user when passing null to getTables()
-			// But we really might want to see all tables!
-			// So if the app settings tells us to do, we'll use the list
-			// of types provided by the driver instead of using null as the type
 			String[] types = null;
 			String type = (String)tableTypes.getSelectedItem();
-			if ("*".equals(type))
+			if (!"*".equals(type))
 			{
-				if (Settings.getInstance().getUseTableTypeList())
-				{
-					types = availableTableTypes;
-				}
-			}
-			else
-			{
-				types = new String[1];
-				types[0] = type;
+				types = new String[] { type };
 			}
 			DataStore ds = dbConnection.getMetadata().getTables(currentCatalog, currentSchema, types);
 			String info = ds.getRowCount() + " " + ResourceMgr.getString("TxtTableListObjects");
 			this.tableInfoLabel.setText(info);
-			DataStoreTableModel rs = new DataStoreTableModel(ds);
-			tableList.setModel(rs, true);
+			DataStoreTableModel model = new DataStoreTableModel(ds);
+			tableList.setModel(model, true);
+			model.sortByColumn(0);
 			tableList.adjustColumns();
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -856,11 +883,14 @@ public class TableListPanel
 	{
 		this.triggers.saveSettings();
 		this.tableData.saveSettings();
+		this.findPanel.saveSettings();
+		this.columnSearcher.saveSettings();
+		this.columnFilter.saveSettings();
 		Settings s = Settings.getInstance();
 		s.setProperty(this.getClass().getName(), "divider", this.splitPane.getDividerLocation());
 		s.setProperty(this.getClass().getName(), "exportedtreedivider", this.exportedPanel.getDividerLocation());
 		s.setProperty(this.getClass().getName(), "importedtreedivider", this.exportedPanel.getDividerLocation());
-		s.setProperty(this.getClass().getName(), "lastsearch", this.findPanel.getSearchString());
+		s.setProperty(this.getClass().getName(), "lastsearch", this.findPanel.getText());
 	}
 
 	public void restoreSettings()
@@ -880,9 +910,12 @@ public class TableListPanel
 		this.importedPanel.setDividerLocation(loc);
 
 		String s = Settings.getInstance().getProperty(this.getClass().getName(), "lastsearch", "");
-		this.findPanel.setSearchString(s);
+		this.findPanel.setText(s);
 		this.triggers.restoreSettings();
 		this.tableData.restoreSettings();
+		this.findPanel.restoreSettings();
+		this.columnSearcher.restoreSettings();
+		this.columnFilter.restoreSettings();
 	}
 
 	private boolean suspendTableSelection = false;
@@ -896,13 +929,13 @@ public class TableListPanel
 			this.updateDisplay();
 		}
 	}
-	
+
 	private void checkCompileMenu()
 	{
 		if (this.recompileItem == null) return;
 		int[] rows = this.tableList.getSelectedRows();
 		int count = rows.length;
-		if (count == 0) 
+		if (count == 0)
 		{
 			this.recompileItem.setEnabled(false);
 			return;
@@ -921,7 +954,7 @@ public class TableListPanel
 		this.recompileItem.setEnabled(enabled);
 	}
 	/**
-	 * Invoked when the selection in the table list 
+	 * Invoked when the selection in the table list
 	 * has changed
 	 */
 	public void valueChanged(ListSelectionEvent e)
@@ -1159,12 +1192,12 @@ public class TableListPanel
 	{
 		this.showPopupMessagePanel(ResourceMgr.getString("MsgWaitRetrieveEnded"));
 	}
-	
+
 	private void showRetrieveMessage()
 	{
 		this.showPopupMessagePanel(ResourceMgr.getString("MsgRetrieving"));
 	}
-	
+
 	private void showPopupMessagePanel(String aMsg)
 	{
 		if (this.infoWindow != null)
@@ -1232,7 +1265,7 @@ public class TableListPanel
 					{
 						showWaitMessage();
 					}
-					
+
 					if (panelRetrieveThread != null)
 					{
 						panelRetrieveThread.join();
@@ -1252,7 +1285,7 @@ public class TableListPanel
 
 	private void startRetrieveCurrentPanel()
 	{
-		if (isBusy()) 
+		if (isBusy())
 		{
 			startCancelThread();
 		}
@@ -1261,7 +1294,7 @@ public class TableListPanel
 			startRetrieveThread(false);
 		}
 	}
-	
+
 	private void startRetrieveThread(final boolean withMessage)
 	{
 		panelRetrieveThread = new WbThread("TableListPanel RetrievePanel")
@@ -1293,7 +1326,7 @@ public class TableListPanel
 		int index = this.displayTab.getSelectedIndex();
 
 		if (withMessage) showRetrieveMessage();
-		
+
 		this.setBusy(true);
 
 		try
@@ -1345,7 +1378,7 @@ public class TableListPanel
 	}
 
 	private Object busyLock = new Object();
-	
+
 	private boolean isBusy()
 	{
 		synchronized (busyLock)
@@ -1500,7 +1533,7 @@ public class TableListPanel
 	private void showTableData(int panelIndex)
 	{
 		final SqlPanel panel;
-		
+
 		if (panelIndex == -1)
 		{
 			panel = (SqlPanel)this.parentWindow.addTab();
@@ -1509,7 +1542,7 @@ public class TableListPanel
 		{
 		 panel = (SqlPanel)this.parentWindow.getSqlPanel(panelIndex);
 		}
-		
+
 		String sql = this.buildSqlForTable();
 		if (sql != null)
 		{
@@ -1525,7 +1558,7 @@ public class TableListPanel
 			});
 		}
 	}
-	
+
 	private String buildSqlForTable()
 	{
 		if (this.selectedTableName == null || this.selectedTableName.length() == 0) return null;
@@ -1539,12 +1572,20 @@ public class TableListPanel
 			}
 			catch (Exception e)
 			{
+				LogMgr.logError("TableListPanel.buidlSqlForTable()", "Error retrieving table definition", e);
+				String msg = ExceptionUtil.getDisplay(e);
+				WbSwingUtilities.showErrorMessage(this, msg);
 				return null;
 			}
 		}
 
 		int colCount = this.tableDefinition.getRowCount();
-		if (colCount == 0) return null;
+		if (colCount == 0) 
+		{
+			String msg = ResourceMgr.getString("ErrorNoColumnsRetrieved").replaceAll("%table%", this.selectedTableName);
+			WbSwingUtilities.showErrorMessage(this, msg);
+			return null;
+		}
 
 		StrBuffer sql = new StrBuffer(colCount * 80);
 
@@ -1563,7 +1604,7 @@ public class TableListPanel
 		sql.append(tbl.getTableExpression(this.dbConnection));
 		return sql.toString();
 	}
-	
+
 	private void compileObjects()
 	{
 		if (this.tableList.getSelectedRowCount() == 0) return;
@@ -1573,16 +1614,16 @@ public class TableListPanel
 
 		ArrayList names = new ArrayList(count);
 		ArrayList types = new ArrayList(count);
-		
+
 		for (int i=0; i < count; i++)
 		{
 			int row = rows[i];
 			String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 			String schema = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
 			String type = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-			
+
 			if (!"VIEW".equalsIgnoreCase(type)) continue;
-			
+
 			TableIdentifier tbl = new TableIdentifier(schema,table);
 			names.add(tbl.getTableExpression());
 			types.add(type);
@@ -1597,9 +1638,9 @@ public class TableListPanel
 		{
 			LogMgr.logError("ProcedureListPanel.compileObjects()", "Error initializing ObjectCompilerUI", e);
 		}
-		
+
 	}
-	
+
 	/**
 	 *	Invoked when the type dropdown changes or the "Show data" item is selected
 	 */
@@ -1828,7 +1869,7 @@ public class TableListPanel
 			String owner = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
 			String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 			TableIdentifier tbl = new TableIdentifier(owner, table);
-			
+
 			String type = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
 			tables.put(tbl.getTableExpression(this.dbConnection), type.toLowerCase());
 		}

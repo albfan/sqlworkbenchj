@@ -40,6 +40,7 @@ import javax.swing.border.EtchedBorder;
 
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.gui.actions.SelectKeyColumnsAction;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
@@ -72,10 +73,12 @@ public class TableDataPanel
 	private DwPanel dataDisplay;
 
 	private ReloadAction reloadAction;
-
+	private SelectKeyColumnsAction defineKeys;
+	
 	private JButton config;
 	private JLabel rowCountLabel;
 	private JCheckBox autoRetrieve;
+	private JPanel toolbar;
 
 	private long warningThreshold = -1;
 
@@ -128,7 +131,7 @@ public class TableDataPanel
 
 		this.reloadAction = new ReloadAction(this);
 		this.reloadAction.setTooltip(ResourceMgr.getDescription("TxtLoadTableData"));
-
+		
 		WbToolbar toolbar = new WbToolbar();
 		toolbar.addDefaultBorder();
 		topPanel.add(toolbar);
@@ -139,7 +142,6 @@ public class TableDataPanel
 		this.cancelRetrieve.setEnabled(false);
 		toolbar.add(this.cancelRetrieve);
 		toolbar.addSeparator();
-
 
 		topPanel.add(Box.createHorizontalStrut(15));
 
@@ -170,10 +172,14 @@ public class TableDataPanel
 		this.add(topPanel, BorderLayout.NORTH);
 
 		toolbar.add(this.dataDisplay.getUpdateDatabaseAction());
+		toolbar.add(this.dataDisplay.getSelectKeysAction());
 		toolbar.addSeparator();
 		toolbar.add(this.dataDisplay.getInsertRowAction());
 		toolbar.add(this.dataDisplay.getCopyRowAction());
 		toolbar.add(this.dataDisplay.getDeleteRowAction());
+		toolbar.addSeparator();
+		toolbar.add(this.dataDisplay.getTable().getFilterAction());
+		toolbar.add(this.dataDisplay.getTable().getResetFilterAction());
 
 		this.add(dataDisplay, BorderLayout.CENTER);
 	}
@@ -399,6 +405,7 @@ public class TableDataPanel
 			dataDisplay.setMaxRows(this.getMaxRows());
 			dataDisplay.runStatement(sql);
 			dataDisplay.setUpdateTable(this.table);
+			dataDisplay.getSelectKeysAction().setEnabled(true);
 			String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
 			dataDisplay.setPrintHeader(header);
 			dataDisplay.setStatusMessage("");
@@ -517,7 +524,7 @@ public class TableDataPanel
 	{
 		if (e.getSource() == this.config)
 		{
-			ConfigureWarningThreshold p = new ConfigureWarningThreshold();
+			TableDataSettings p = new TableDataSettings();
 			p.setThresholdValue(this.warningThreshold);
 			Window parent = SwingUtilities.getWindowAncestor(this);
 			int choice = JOptionPane.showConfirmDialog(parent, p, ResourceMgr.getString("LabelConfigureWarningThresholdTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
