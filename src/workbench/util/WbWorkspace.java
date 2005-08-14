@@ -106,10 +106,20 @@ public class WbWorkspace
 		}
 	}
 
-	public void setDbExplorerVisibleCount(int count)
+	/**
+	 * Increase the counter for visible DbExplorer panels
+	 */
+	public void dDbExplorerVisible()
 	{
+		int count = this.tabInfo.getIntProperty("dbexplorer.visible", 0);
+		count ++;
 		this.tabInfo.setProperty("dbexplorer.visible", count);
 	}
+	
+//	public void setDbExplorerVisibleCount(int count)
+//	{
+//		this.tabInfo.setProperty("dbexplorer.visible", count);
+//	}
 	
 	public int getDbExplorerVisibleCount()
 	{

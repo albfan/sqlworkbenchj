@@ -274,22 +274,23 @@
   </void>
   
   <void method="add">
-   <object class="workbench.db.DbDriver">
-    <void property="driverClass">
-     <string>com.ibm.as400.access.AS400JDBCDriver</string>
-    </void>
-    <void property="library">
-     <string>jt400Native.jar</string>
-    </void>
-    <void property="name">
-     <string>IBM DB2 (AS400 native)</string>
-    </void>
-    <void property="sampleUrl">
-     <string>jdbc:as400://server_name/database_name</string>
-    </void>
-   </object>
-  </void>
-
+    <object class="workbench.db.DbDriver">
+     <void property="driverClass">
+      <string>com.ibm.as400.access.AS400JDBCDriver</string>
+     </void>
+     <void property="library">
+      <string>jt400.jar</string>
+     </void>
+     <void property="name">
+      <string>IBM DB2 UDB for AS/400 (iSeries)</string>
+     </void>
+     <void property="sampleUrl">
+      <string>jdbc:as400://server_name/database_name</string>
+     </void>
+    </object>
+   </void> 
+   
+  
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">

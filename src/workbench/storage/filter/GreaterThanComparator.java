@@ -47,4 +47,8 @@ public class GreaterThanComparator
 		return Comparable.class.isAssignableFrom(valueClass);
 	}
 
+	public boolean equals(Object other)
+	{
+		return (other instanceof GreaterThanComparator);
+	}
 }

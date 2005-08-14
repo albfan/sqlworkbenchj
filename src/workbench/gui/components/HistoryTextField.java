@@ -17,6 +17,7 @@ import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import workbench.interfaces.ClipboardSupport;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
 

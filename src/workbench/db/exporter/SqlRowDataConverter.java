@@ -155,7 +155,7 @@ public class SqlRowDataConverter
 		TableIdentifier updatetable = this.metaData.getUpdateTable();
 		ColumnIdentifier[] cols = this.metaData.getColumns();
 		DbMetadata db = this.originalConnection.getMetadata();
-		String source = db.getTableSource(updatetable, cols, alternateUpdateTable.getTableName());
+		String source = db.getTableSource(updatetable, cols, (alternateUpdateTable == null ? updatetable.getTableName() : alternateUpdateTable.getTableName()));
 		StrBuffer createSql = new StrBuffer(source);
 		createSql.append(doubleLineTerminator);
 		return createSql;

@@ -33,7 +33,9 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FindDataAction;
 import workbench.gui.actions.FindDataAgainAction;
 import workbench.gui.actions.WbAction;
+import workbench.interfaces.CriteriaPanel;
 import workbench.interfaces.Searchable;
+import workbench.interfaces.TextContainer;
 
 /**
  * A small panel with a find and find next button, and a criteria field 
@@ -42,7 +44,7 @@ import workbench.interfaces.Searchable;
  */
 public class FindPanel 
 	extends JPanel 
-	implements Searchable
+	implements Searchable, CriteriaPanel
 {
 	private WbTable searchTable;
 	private JTextField findField;
@@ -50,14 +52,14 @@ public class FindPanel
 	private FindDataAction findAction;
 	private FindDataAgainAction findAgainAction;
 
-	public FindPanel(WbTable aTable)
+	public FindPanel(WbTable aTable, int textFieldColumns)
 	{
 		GridBagConstraints gridBagConstraints;
 		this.searchTable = aTable;
 		this.setLayout(new GridBagLayout());
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
-		this.findField = new JTextField();
+		this.findField = new JTextField(textFieldColumns);
 		this.findField.addMouseListener(new TextComponentMouseListener());
 
 		this.toolbar = new WbToolbar();
@@ -71,11 +73,11 @@ public class FindPanel
 		//toolbar.setBorder(b);
 		toolbar.setBorderPainted(true);
 
-		Dimension d = new Dimension(32768, 20);
-		this.setMaximumSize(d);
-		this.findField.setMaximumSize(d);
-		this.findField.setPreferredSize(new Dimension(50,20));
-		this.toolbar.setMaximumSize(d);
+//		Dimension d = new Dimension(32768, 20);
+//		this.setMaximumSize(d);
+//		this.findField.setMaximumSize(d);
+//		this.findField.setPreferredSize(new Dimension(50,20));
+//		this.toolbar.setMaximumSize(d);
 
 		gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.anchor = GridBagConstraints.WEST;
@@ -134,16 +136,6 @@ public class FindPanel
 		return row;
 	}
 
-	public void setSearchString(String aText)
-	{
-		this.findField.setText(aText);
-	}
-	
-	public String getSearchString()
-	{
-		return this.findField.getText();
-	}
-
 	public void addToToolbar(WbAction anAction)
 	{
 		this.addToToolbar(anAction, false, true);
@@ -163,4 +155,21 @@ public class FindPanel
 			if (withSep) this.toolbar.add(button);
 		}
 	}
+
+	public String getText()
+	{
+		return findField.getText();
+	}
+	public void setText(String aText)
+	{
+		findField.setText(aText);
+	}
+	
+	public void saveSettings()
+	{
+	}
+	
+	public void restoreSettings()
+	{
+	}	
 }

@@ -26,6 +26,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -265,6 +266,24 @@ public class WbSwingUtilities
 		else return -1;
 	}
 
+	public static boolean getOKCancel(String title, Component aCaller, Component message)
+	{
+		JOptionPane pane = new JOptionPane(message, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+		JDialog dialog = pane.createDialog(aCaller, title);
+		dialog.setResizable(true);
+		dialog.pack();
+		dialog.show();
+		dialog.dispose();
+		Object value = pane.getValue();
+		if (value == null) return false;
+		if (value instanceof Number)
+		{
+			int choice = ((Number)value).intValue();
+			return choice == 0;
+		}
+		return false;
+	}
+	
 	public static final int DO_COMMIT = 0;
 	public static final int DO_ROLLBACK = 1;
 
@@ -300,6 +319,7 @@ public class WbSwingUtilities
 	{
 		return getUserInput(caller, aTitle, initialValue, false);
 	}
+	
 	public static String getUserInput(Component caller, String aTitle, String initialValue, boolean hideInput)
 	{
 		Component parent = SwingUtilities.getWindowAncestor(caller);
@@ -428,4 +448,5 @@ public class WbSwingUtilities
 			}
 		});
 	} 
+	
 }

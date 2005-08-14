@@ -105,7 +105,6 @@ import workbench.gui.actions.ToggleAutoCommitAction;
 import workbench.gui.actions.UndoAction;
 import workbench.gui.actions.UndoExpandAction;
 import workbench.gui.actions.WbAction;
-import workbench.gui.completion.CompletionHandler;
 import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.ExtensionFileFilter;
@@ -672,7 +671,7 @@ public class SqlPanel
 		this.actions.add(sea);
 		SelectResultAction r = new SelectResultAction(this);
 		this.actions.add(r);
-        this.actions.add(new SelectMaxRowsAction(this));
+		this.actions.add(new SelectMaxRowsAction(this));
 
 		a = new ExpandEditorAction(this);
 		a.setCreateMenuSeparator(true);
@@ -778,6 +777,11 @@ public class SqlPanel
 		this.toolbarActions.add(this.data.getCopyRowAction());
 		this.toolbarActions.add(this.data.getDeleteRowAction());
 
+		a = this.data.getTable().getFilterAction();
+		a.setCreateToolbarSeparator(true);
+		this.toolbarActions.add(a);
+		this.toolbarActions.add(this.data.getTable().getResetFilterAction());
+		
 		this.commitAction.setCreateToolbarSeparator(true);
 		this.toolbarActions.add(this.commitAction);
 		this.toolbarActions.add(this.rollbackAction);
@@ -785,9 +789,11 @@ public class SqlPanel
 		this.toolbarActions.add(ignore);
 
 		this.findDataAction = this.data.getTable().getFindAction();
+		this.findDataAction.setMenuTextByKey("MnuTxtFindData");
 		this.findDataAction.setEnabled(false);
 		this.findDataAction.setCreateMenuSeparator(true);
 		this.findDataAgainAction = this.data.getTable().getFindAgainAction();
+		this.findDataAgainAction.setMenuTextByKey("MnuTxtFindDataAgain");
 		this.findDataAgainAction.setEnabled(false);
 
 		this.autoCompletion = new AutoCompletionAction(this.editor, this.data.getStatusBar());
@@ -1251,6 +1257,10 @@ public class SqlPanel
 			w.setExternalFileCursorPos(this.internalId - 1, this.editor.getCaretPosition());
 			w.setExternalFileEncoding(this.internalId - 1, this.editor.getCurrentFileEncoding());
 		}
+		if (this.tabName != null)
+		{
+			w.setTabTitle(this.internalId - 1, this.tabName);
+		}
 	}
 
 	public void saveHistory(WbWorkspace w)
@@ -1271,8 +1281,34 @@ public class SqlPanel
 		return this.historyFilename + ".txt";
 	}
 
-	private final String DEFAULT_TAB_NAME = ResourceMgr.getString("LabelTabStatement");
-
+	public String getTabTitle()
+	{
+		String defaultLabel = ResourceMgr.getDefaultTabLabel();
+		
+		String fname = this.getCurrentFileName();
+		if (fname != null)
+		{
+			File f = new File(fname);
+			String tabName = getTabName();
+			if (tabName == null || tabName.startsWith(defaultLabel))
+			{
+				fname = f.getName();
+			}
+			else
+			{
+				fname = "[" + tabName + "]";
+			}
+			this.showTabIcon(getFileIcon());
+		}
+		else
+		{
+			fname = this.getTabName();
+			this.removeTabIcon();
+		}
+		if (fname == null) fname = defaultLabel;
+		return fname;
+	}
+	
 	public void setTabTitle(JTabbedPane tab, int index)
 	{
 		String fname = null;
@@ -1283,19 +1319,26 @@ public class SqlPanel
 		if (fname != null)
 		{
 			File f = new File(fname);
-			fname = f.getName();
 			tooltip = f.getAbsolutePath();
+			this.showTabIcon(getFileIcon());
 		}
 		else
 		{
-			fname = this.getTabName();
+			this.removeTabIcon();
 		}
-		if (fname == null) fname = DEFAULT_TAB_NAME;
-		tab.setTitleAt(index, fname+ " " + Integer.toString(index+1));
+		
+		String tabTitle = getTabTitle();
+		String title = tabTitle + " " + Integer.toString(index+1);
+		tab.setTitleAt(index, title);
 		if (index < 9)
 		{
 			char c = Integer.toString(index+1).charAt(0);
+			int pos = tabTitle.length() + 1;
 			tab.setMnemonicAt(index, c);
+			// The Mnemonic index has to be set explicitely otherwise
+			// the display would be wrong if the tab title contains
+			// the mnemonic character
+			tab.setDisplayedMnemonicIndexAt(index, pos);
 		}
 		tab.setToolTipTextAt(index, tooltip);
 	}
@@ -1307,7 +1350,10 @@ public class SqlPanel
 
 	public void setTabName(String aName)
 	{
-		this.tabName = aName;
+		if (StringUtil.isEmptyString(aName))
+			this.tabName = null;
+		else
+			this.tabName = aName;
 		this.fireFilenameChanged(aName);
 	}
 
@@ -2574,7 +2620,7 @@ public class SqlPanel
 
 	public void fontChanged(String aFontId, Font newFont)
 	{
-		if (aFontId.equals(Settings.MSGLOG_FONT_KEY))
+		if (aFontId.equals(Settings.PROPERTY_MSGLOG_FONT))
 		{
 			this.log.setFont(newFont);
 		}

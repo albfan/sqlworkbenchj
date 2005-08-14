@@ -277,6 +277,7 @@ public class WbConnection
 
 	public boolean getAutoCommit()
 	{
+		if (this.sqlConnection == null) return false;
 		try
 		{
 			return this.sqlConnection.getAutoCommit();
@@ -521,13 +522,19 @@ public class WbConnection
 	public void addChangeListener(PropertyChangeListener l)
 	{
 		if (this.listeners == null) this.listeners = new ArrayList();
-		this.listeners.add(l);
+		synchronized (this.listeners)
+		{
+			this.listeners.add(l);
+		}
 	}
 
 	public void removeChangeListener(PropertyChangeListener l)
 	{
 		if (this.listeners == null) return;
-		this.listeners.remove(l);
+		synchronized (this.listeners)
+		{
+			this.listeners.remove(l);
+		}
 	}
 
 	private void fireConnectionStateChanged(String property, String oldValue, String newValue)

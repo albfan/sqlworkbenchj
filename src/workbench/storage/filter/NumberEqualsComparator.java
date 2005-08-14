@@ -47,4 +47,9 @@ public class NumberEqualsComparator
 		return (Number.class.isAssignableFrom(valueClass));
 	}
 
+	public boolean equals(Object other)
+	{
+		return (other instanceof NumberEqualsComparator);
+	}
+	
 }

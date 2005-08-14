@@ -29,7 +29,10 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.StringTokenizer;
 
 import workbench.WbManager;
@@ -37,6 +40,7 @@ import workbench.util.ExceptionUtil;
 import workbench.gui.actions.ActionRegistration;
 import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
+import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
 
@@ -52,12 +56,15 @@ public class Settings
 	public static final String DATE_FORMAT_KEY = "workbench.gui.display.dateformat";
 	public static final String DATE_TIME_FORMAT_KEY = "workbench.gui.display.datetimeformat";
 
-	public static final String EDITOR_FONT_KEY = "editor";
-	public static final String STANDARD_FONT_KEY = "standard";
-	public static final String MSGLOG_FONT_KEY = "msglog";
-	public static final String DATA_FONT_KEY = "data";
-	public static final String PRINTER_FONT_KEY = "printer";
+	public static final String PROPERTY_EDITOR_FONT = "editor";
+	public static final String PROPERTY_STANDARD_FONT = "standard";
+	public static final String PROPERTY_MSGLOG_FONT = "msglog";
+	public static final String PROPERTY_DATA_FONT = "data";
+	public static final String PROPERTY_PRINTER_FONT = "printer";
 
+	public static final String PROPERTY_PROFILE_STORAGE = "workbench.settings.profilestorage";
+	public static final String PROPERTY_EDITOR_TAB_WIDTH = "workbench.editor.tabwidth";
+	
 	private WbProperties props;
 	private Font printerFont;
 	private Font standardFont;
@@ -123,7 +130,6 @@ public class Settings
 	  if (WbManager.trace) System.out.println("Settings.<init> - Reading settings");
 	  try
 		{
-
 			BufferedInputStream in = new BufferedInputStream(new FileInputStream(this.filename));
 			this.props.load(in);
 			in.close();
@@ -209,9 +215,37 @@ public class Settings
 		return new File(this.configDir, "WbShortcuts.xml").getAbsolutePath();
 	}
 
-	public String getProfileFilename()
+	public void setProfileStorage(String file)
 	{
-		return new File(this.configDir, "WbProfiles.xml").getAbsolutePath();
+		if (StringUtil.isEmptyString(file))
+		{
+			this.props.remove(PROPERTY_PROFILE_STORAGE);
+		}
+		else
+		{
+			this.props.setProperty(PROPERTY_PROFILE_STORAGE, file);
+		}
+	}
+	
+	public String getProfileStorage()
+	{
+		String profiles = this.props.getProperty(PROPERTY_PROFILE_STORAGE);
+		if (profiles == null)
+		{
+			return new File(this.configDir, "WbProfiles.xml").getAbsolutePath();
+		}
+		FileDialogUtil util = new FileDialogUtil();
+		String realFilename = util.replaceConfigDir(profiles);
+		
+		// Check if filename contains a directory
+		File f = new File(realFilename);
+		if (f.getParent() == null)
+		{
+			// no directory in filename use config directory 
+			f = new File(this.configDir, realFilename);
+		}
+		LogMgr.logInfo("Settings.getProfileFilename()", "Using profiles from " + f.getAbsolutePath());
+		return f.getAbsolutePath();
 	}
 
 	public String getDriverConfigFilename()
@@ -338,7 +372,7 @@ public class Settings
 	{
 		if (this.standardFont == null)
 		{
-			this.standardFont = this.getFont(STANDARD_FONT_KEY);
+			this.standardFont = this.getFont(PROPERTY_STANDARD_FONT);
 		}
 		return this.standardFont;
 	}
@@ -347,7 +381,7 @@ public class Settings
 	{
 		if (this.editorFont == null)
 		{
-			this.editorFont = this.getFont(EDITOR_FONT_KEY);
+			this.editorFont = this.getFont(PROPERTY_EDITOR_FONT);
 		}
 		return editorFont;
 	}
@@ -356,7 +390,7 @@ public class Settings
 	{
 		if (this.msgLogFont == null)
 		{
-			this.msgLogFont = this.getFont(MSGLOG_FONT_KEY);
+			this.msgLogFont = this.getFont(PROPERTY_MSGLOG_FONT);
 		}
 		return this.msgLogFont;
 	}
@@ -365,7 +399,7 @@ public class Settings
 	{
 		if (this.dataFont == null)
 		{
-			this.dataFont = this.getFont(DATA_FONT_KEY);
+			this.dataFont = this.getFont(PROPERTY_DATA_FONT);
 		}
 		return this.dataFont;
 	}
@@ -374,7 +408,7 @@ public class Settings
 	{
 		if (this.printerFont == null)
 		{
-			this.printerFont = this.getFont(PRINTER_FONT_KEY);
+			this.printerFont = this.getFont(PROPERTY_PRINTER_FONT);
 			if (this.printerFont == null)
 			{
 				this.printerFont = this.getDataFont();
@@ -574,7 +608,7 @@ public class Settings
 
 	public void setPrintFont(Font aFont)
 	{
-		this.setFont(PRINTER_FONT_KEY, aFont);
+		this.setFont(PROPERTY_PRINTER_FONT, aFont);
 	}
 
 	public void setFont(String aFontName, Font aFont)
@@ -597,15 +631,15 @@ public class Settings
 		}
 		if (value == null) value = "PLAIN";
 		this.props.setProperty(baseKey + ".style", value);
-		if (aFontName.equals(EDITOR_FONT_KEY))
+		if (aFontName.equals(PROPERTY_EDITOR_FONT))
 			this.editorFont = aFont;
-		else if (aFontName.equals(MSGLOG_FONT_KEY))
+		else if (aFontName.equals(PROPERTY_MSGLOG_FONT))
 			this.msgLogFont = aFont;
-		else if (aFontName.equals(STANDARD_FONT_KEY))
+		else if (aFontName.equals(PROPERTY_STANDARD_FONT))
 			this.standardFont = aFont;
-		else if (aFontName.equals(DATA_FONT_KEY))
+		else if (aFontName.equals(PROPERTY_DATA_FONT))
 			this.dataFont = aFont;
-		else if (aFontName.equals(PRINTER_FONT_KEY))
+		else if (aFontName.equals(PROPERTY_PRINTER_FONT))
 			this.printerFont = aFont;
 
 		this.fireFontChangedEvent(aFontName, aFont);
@@ -844,6 +878,16 @@ public class Settings
 		this.props.setProperty("workbench.editor.lastdir", aDir);
 	}
 
+	public String getLastFilterDir() 
+	{
+		return this.props.getProperty("workbench.filter.lastdir","");
+	}
+	
+	public void setLastFilterDir(String dir) 
+	{
+		this.props.setProperty("workbench.filter.lastdir",dir);
+	}
+	
 	public String toString()
 	{
 		return "[Settings]";
@@ -974,8 +1018,6 @@ public class Settings
 	{
 		return StringUtil.getIntValue(this.props.getProperty(windowClass + ".height", "0"));
 	}
-
-	public static final String PROPERTY_EDITOR_TAB_WIDTH = "workbench.editor.tabwidth";
 
 	public int getEditorTabWidth()
 	{
@@ -1405,26 +1447,11 @@ public class Settings
 		return getBoolProperty("workbench.editor.autocompletion.sql.emptylineseparator", false);
 	}
 
-	public boolean getUseTableTypeList()
-	{
-		return getBoolProperty("workbench.dbexplorer.usetypelist", true);
-	}
-
-	public void setUseTableTypeList(boolean flag)
-	{
-		this.props.setProperty("workbench.dbexplorer.usetypelist", Boolean.toString(flag));
-	}
-
 	public void setShowDbExplorerInMainWindow(boolean showWindow)
 	{
 		this.props.setProperty("workbench.dbexplorer.mainwindow", Boolean.toString(showWindow));
 	}
 
-//	public boolean getRestoreExplorerTabs()
-//	{
-//		return getBoolProperty("workbench.dbexplorer.restoretabs", false);
-//	}
-	
 	public boolean getShowDbExplorerInMainWindow()
 	{
 		return this.getBoolProperty("workbench.dbexplorer.mainwindow", false);

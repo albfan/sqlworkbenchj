@@ -346,4 +346,20 @@ public class RowData
 		}
 		return result;
 	}
+	
+	public String toString()
+	{
+		int count = this.colData.length;
+		StringBuffer result = new StringBuffer(count * 20);
+
+		result.append('{');
+		for (int c=0; c < count; c++)
+		{
+			result.append('[');
+			result.append(this.getValue(c));
+			result.append(']');
+		}
+		result.append('}');
+		return result.toString();
+	}
 }

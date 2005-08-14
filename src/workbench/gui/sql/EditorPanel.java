@@ -232,7 +232,7 @@ public class EditorPanel
 
 	public void fontChanged(String aKey, Font aFont)
 	{
-		if (aKey.equals(Settings.EDITOR_FONT_KEY))
+		if (aKey.equals(Settings.PROPERTY_EDITOR_FONT))
 		{
 			this.setFont(aFont);
 		}

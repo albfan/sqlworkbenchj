@@ -326,7 +326,7 @@ public class WbImport extends SqlCommand
 					if (textParser.getColumnCount() == 0)
 					{
 						result.setFailure();
-						result.addMessage(ResourceMgr.getString("ErrorColumnsNotFound"));
+						result.addMessage(ResourceMgr.getString("ErrorImportFileColumnsNotFound"));
 						return result;
 					}
 				}

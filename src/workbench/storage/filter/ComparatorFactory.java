@@ -23,89 +23,28 @@ import java.util.regex.Pattern;
  */
 public class ComparatorFactory
 {
-	ColumnComparator greaterOrEqual;
-	ColumnComparator lessOrEqual;
-	ColumnComparator greaterThan;
-	ColumnComparator lessThan;
-	ColumnComparator equalString;
-	ColumnComparator equalNumber;
-	ColumnComparator regex;
-	ColumnComparator startsWith;
-	ColumnComparator contains;
+	private ColumnComparator[] comparatorList;
 	
 	public ComparatorFactory()
 	{
-	}
-	
-	public ColumnComparator getStringEqualsComparator()
-	{
-		if (this.equalString == null) equalString = new StringEqualsComparator();
-		return equalString;
-	}
-
-	public ColumnComparator getNumberEqualsComparator()
-	{
-		if (this.equalNumber == null) equalNumber = new NumberEqualsComparator();
-		return equalNumber;
-	}
-	
-	public ColumnComparator getContainsComparator()
-	{
-		if (this.contains == null) contains = new ContainsComparator();
-		return contains;
-	}
-	
-	public ColumnComparator getStartsWithComparator()
-	{
-		if (this.startsWith == null) startsWith = new StartsWithComparator();
-		return startsWith;
-	}
-	
-	public ColumnComparator getLessThanComparator()
-	{
-		if (this.lessThan == null) lessThan = new LessThanComparator();
-		return lessThan;
-	}
-	
-	public ColumnComparator getGreaterThanComparator()
-	{
-		if (this.greaterThan == null) greaterThan = new GreaterThanComparator();
-		return greaterThan;
-	}
-	
-	public ColumnComparator getGreaterOrEqualComparator()
-	{
-		if (this.greaterOrEqual == null) greaterOrEqual = new GreaterOrEqualComparator();
-		return greaterOrEqual;
-	}
-	
-	public ColumnComparator getLessOrEqualComparator()
-	{
-		if (this.lessOrEqual == null) lessOrEqual = new LessOrEqualComparator();
-		return lessOrEqual;
-	}
-	
-	public ColumnComparator getRegExComparator()
-	{
-		if (regex == null) regex = new RegExComparator();
-		return regex;
+		comparatorList = new ColumnComparator[]
+		{
+			new StringEqualsComparator(), 
+			new NumberEqualsComparator(),
+			new LessThanComparator(),
+			new LessOrEqualComparator(),
+			new GreaterThanComparator(),
+			new GreaterOrEqualComparator(),
+			new StartsWithComparator(),
+			new ContainsComparator(),
+			new ContainsNotComparator(),
+			new RegExComparator()
+		};
 	}
 	
 	public ColumnComparator[] getAvailableComparators()
 	{
-		ColumnComparator[] result = new ColumnComparator[]
-		{
-			getStringEqualsComparator(), 
-			getNumberEqualsComparator(),
-			getLessThanComparator(),
-			getLessOrEqualComparator(),
-			getGreaterThanComparator(),
-			getGreaterOrEqualComparator(),
-			getStartsWithComparator(),
-			getContainsComparator(),
-			getRegExComparator()
-		};
-		return result;
+		return comparatorList;
 	}
 	
 }

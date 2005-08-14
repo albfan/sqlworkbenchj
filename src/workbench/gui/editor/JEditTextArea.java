@@ -105,7 +105,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.36 2005-07-08 15:59:10 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.37 2005-08-14 16:37:19 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -498,6 +498,11 @@ public class JEditTextArea
 		}
 	}
 
+	public void removeKeyBinding(KeyStroke key)
+	{
+		this.getInputHandler().removeKeyBinding(key);
+	}
+	
 	/**
 	 * Returns if this component can be traversed by pressing
 	 * the Tab key. This returns false.

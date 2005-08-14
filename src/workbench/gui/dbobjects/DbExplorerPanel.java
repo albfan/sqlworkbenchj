@@ -18,6 +18,7 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -50,6 +51,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.WbThread;
+import workbench.util.WbWorkspace;
 
 
 /**
@@ -472,9 +474,14 @@ public class DbExplorerPanel
 		this.tabTitle = name;
 	}
 	
+	public String getTabTitle()
+	{
+		return ResourceMgr.getString("LabelDbExplorer");
+	}
+	
 	public void setTabTitle(JTabbedPane tab, int index)
 	{
-		if (this.tabTitle == null) tab.setTitleAt(index, ResourceMgr.getString("LabelDbExplorer"));
+		if (this.tabTitle == null) tab.setTitleAt(index, getTabTitle());
 		else tab.setTitleAt(index, tabTitle);
 	}
 
@@ -600,6 +607,13 @@ public class DbExplorerPanel
 		{
 			instanceCount--;
 		}
+	}
+
+	public void saveToWorkspace(WbWorkspace w) 
+		throws IOException
+	{
+		// this will increase the visible count for DbExplorer Panels in the workspace
+		w.dDbExplorerVisible();
 	}
 
 }

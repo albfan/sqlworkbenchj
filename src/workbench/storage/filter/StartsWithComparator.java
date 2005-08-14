@@ -52,4 +52,9 @@ public class StartsWithComparator
 		return (CharSequence.class.isAssignableFrom(valueClass));
 	}
 	
+	public boolean equals(Object other)
+	{
+		return (other instanceof StartsWithComparator);
+	}
+	
 }

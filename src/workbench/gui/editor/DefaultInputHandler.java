@@ -21,7 +21,7 @@ import javax.swing.KeyStroke;
  * The default input handler. It maps sequences of keystrokes into actions
  * and inserts key typed events into the text area.
  * @author Slava Pestov
- * @version $Id: DefaultInputHandler.java,v 1.16 2005-05-15 11:41:05 thomas Exp $
+ * @version $Id: DefaultInputHandler.java,v 1.17 2005-08-14 16:37:19 thomas Exp $
  */
 public class DefaultInputHandler extends InputHandler
 {
@@ -135,9 +135,9 @@ public class DefaultInputHandler extends InputHandler
 	 * implemented.
 	 * @param keyBinding The key binding
 	 */
-	public void removeKeyBinding(String keyBinding)
+	public void removeKeyBinding(KeyStroke key)
 	{
-		throw new InternalError("Not yet implemented");
+		bindings.remove(key);
 	}
 
 	/**
@@ -172,7 +172,7 @@ public class DefaultInputHandler extends InputHandler
 			keyCode == KeyEvent.VK_ALT ||
 			keyCode == KeyEvent.VK_META)
 			return;
-
+		
 		if((modifiers & ~KeyEvent.SHIFT_MASK) != 0
 			|| evt.isActionKey()
 			|| keyCode == KeyEvent.VK_BACK_SPACE
@@ -208,6 +208,7 @@ public class DefaultInputHandler extends InputHandler
 
 		  KeyStroke keyStroke = KeyStroke.getKeyStroke(keyCode,modifiers);
 			Object o = currentBindings.get(keyStroke);
+			
 			if(o == null)
 			{
 				// Don't beep if the user presses some
@@ -252,6 +253,23 @@ public class DefaultInputHandler extends InputHandler
 	{
 		int modifiers = evt.getModifiers();
 		char c = evt.getKeyChar();
+		
+		if (c == ' ' && modifiers != 0)
+		{
+			// check if the Space key with a modifier is bound to an action
+			if (  ((modifiers & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK) ||
+				    ((modifiers & KeyEvent.SHIFT_MASK) == KeyEvent.SHIFT_MASK))
+			{
+				KeyStroke key = KeyStroke.getKeyStroke(c, modifiers);
+				Object o = currentBindings.get(key);
+				if (o != null)
+				{
+					evt.consume();
+					return;
+				}
+			}
+		}
+		
 		if(c != KeyEvent.CHAR_UNDEFINED && (modifiers & KeyEvent.ALT_MASK) == 0)
 		{
 			if(c >= 0x20 && c != 0x7f)

@@ -18,6 +18,7 @@ import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -58,7 +59,7 @@ import workbench.util.WbThread;
 import workbench.interfaces.JobErrorHandler;
 import java.awt.Cursor;
 import java.awt.EventQueue;
-import javax.swing.JComponent;
+
 
 /**
  *
@@ -67,7 +68,7 @@ import javax.swing.JComponent;
  */
 public class TableDataPanel
   extends JPanel
-	implements Reloadable, ActionListener, Interruptable, TableDeleteListener
+	implements Reloadable, ActionListener, Interruptable, TableDeleteListener, MouseListener
 {
 	private WbConnection dbConnection;
 	private DwPanel dataDisplay;
@@ -85,7 +86,7 @@ public class TableDataPanel
 	private boolean shiftDown = false;
 	private boolean retrieveRunning = false;
 	private boolean updateRunning = false;
-
+	private boolean autoloadRowCount = true;
 	private TableIdentifier table;
 	private ImageIcon loadingIcon;
 	private Image loadingImage;
@@ -145,8 +146,8 @@ public class TableDataPanel
 
 		topPanel.add(Box.createHorizontalStrut(15));
 
-		autoRetrieve = new JCheckBox(ResourceMgr.getString("LabelAutoRetrieveTableData"));
-		autoRetrieve.setToolTipText(ResourceMgr.getDescription("LabelAutoRetrieveTableData"));
+		autoRetrieve = new JCheckBox(ResourceMgr.getString("LabelAutoLoadTableData"));
+		autoRetrieve.setToolTipText(ResourceMgr.getDescription("LabelAutoLoadTableData"));
 		autoRetrieve.setHorizontalTextPosition(SwingConstants.LEFT);
 		topPanel.add(autoRetrieve);
 
@@ -158,6 +159,7 @@ public class TableDataPanel
 		Font bold = std.deriveFont(Font.BOLD);
 		rowCountLabel.setFont(bold);
 		rowCountLabel.setHorizontalTextPosition(SwingConstants.LEFT);
+		rowCountLabel.addMouseListener(this);
 		topPanel.add(rowCountLabel);
 
 		topPanel.add(Box.createHorizontalStrut(10));
@@ -254,7 +256,6 @@ public class TableDataPanel
 				rowCount = rs.getLong(1);
 			}
 			this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount") + " " + rowCount);
-
 		}
 		catch (SQLException e)
 		{
@@ -456,17 +457,19 @@ public class TableDataPanel
 
 	public void saveSettings()
 	{
-		Settings.getInstance().setProperty(TableDataPanel.class.getName(), "maxrows", this.getMaxRows());
-		String auto = Boolean.toString(this.autoRetrieve.isSelected());
-		Settings.getInstance().setProperty(TableDataPanel.class.getName(), "autoretrieve", auto);
-		Settings.getInstance().setProperty(TableDataPanel.class.getName(), "warningthreshold", Long.toString(this.warningThreshold));
+		String prefix = TableDataPanel.class.getName();
+		Settings.getInstance().setProperty(prefix, "maxrows", this.getMaxRows());
+		Settings.getInstance().setBoolProperty(prefix + ".autoretrieve", this.autoRetrieve.isSelected());
+		Settings.getInstance().setProperty(prefix, "warningthreshold", Long.toString(this.warningThreshold));
+		Settings.getInstance().setBoolProperty(prefix + ".autoloadrowcount", this.autoloadRowCount);
 	}
 
 	public void restoreSettings()
 	{
-		int max = Settings.getInstance().getIntProperty(TableDataPanel.class.getName(), "maxrows", 500);
+		String propPrefix = TableDataPanel.class.getName();
+		int max = Settings.getInstance().getIntProperty(propPrefix + ".maxrows", 500);
 		this.dataDisplay.setMaxRows(max);
-		boolean auto = "true".equals(Settings.getInstance().getProperty(TableDataPanel.class.getName(), "autoretrieve", "false"));
+		boolean auto = Settings.getInstance().getBoolProperty(propPrefix + ".autoretrieve", false);
 		this.autoRetrieve.setSelected(auto);
 
 		try
@@ -478,6 +481,7 @@ public class TableDataPanel
 		{
 			this.warningThreshold = -1;
 		}
+		this.autoloadRowCount = Settings.getInstance().getBoolProperty(propPrefix + ".autoloadrowcount", true);
 	}
 
 	public void showData()
@@ -490,7 +494,8 @@ public class TableDataPanel
 		if (this.isRetrieving()) return;
 
 		this.reset();
-		long rows = this.showRowCount();
+		long rows = -1;
+		if (this.autoloadRowCount) rows = this.showRowCount();
 		if (this.autoRetrieve.isSelected() && includeData)
 		{
 			int max = this.getMaxRows();
@@ -526,11 +531,15 @@ public class TableDataPanel
 		{
 			TableDataSettings p = new TableDataSettings();
 			p.setThresholdValue(this.warningThreshold);
+			p.setAutoloadData(this.autoRetrieve.isSelected());
+			p.setAutoloadRowCount(this.autoloadRowCount);
 			Window parent = SwingUtilities.getWindowAncestor(this);
 			int choice = JOptionPane.showConfirmDialog(parent, p, ResourceMgr.getString("LabelConfigureWarningThresholdTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 			if (choice == JOptionPane.OK_OPTION)
 			{
 				this.warningThreshold = p.getThresholdValue();
+				this.autoRetrieve.setSelected(p.getAutoloadData());
+				this.autoloadRowCount = p.getAutoloadRowCount();
 			}
 		}
 	}
@@ -547,6 +556,40 @@ public class TableDataPanel
 		{
 			this.reset();
 		}
+	}
+
+	public void mouseClicked(java.awt.event.MouseEvent e)
+	{
+		if (e.getSource() == this.rowCountLabel && e.getClickCount() == 2)
+		{
+			WbThread t = new WbThread("RowCount Thread")
+			{
+				public void run()
+				{
+					synchronized (retrieveLock)
+					{
+						showRowCount();
+					}
+				}
+			};
+			t.start();
+		}
+	}
+
+	public void mouseEntered(java.awt.event.MouseEvent e)
+	{
+	}
+
+	public void mouseExited(java.awt.event.MouseEvent e)
+	{
+	}
+
+	public void mousePressed(java.awt.event.MouseEvent e)
+	{
+	}
+
+	public void mouseReleased(java.awt.event.MouseEvent e)
+	{
 	}
 
 

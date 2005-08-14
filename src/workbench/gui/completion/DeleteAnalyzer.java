@@ -33,6 +33,7 @@ public class DeleteAnalyzer
 	extends BaseAnalyzer
 {
 	private final Pattern WHERE_PATTERN = Pattern.compile("\\sWHERE\\s|\\sWHERE$", Pattern.CASE_INSENSITIVE);
+	private final Pattern FROM_PATTERN = Pattern.compile("FROM", Pattern.CASE_INSENSITIVE);
 	
 	public DeleteAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{	
@@ -63,17 +64,20 @@ public class DeleteAnalyzer
 		{
 			// current cursor position is after the WHERE
 			// so we'll need a column list
-			int start = StringUtil.findFirstWhiteSpace(sql);
-			
-			int end = -1;
-			if (start > -1) end = StringUtil.findFirstWhiteSpace(sql, start + 1);
-			if (end == -1 && start > -1) end = this.sql.length() - 1;
-			
-			if (end > -1 && start > -1)
+			int fromPos = StringUtil.findPattern(FROM_PATTERN, sql, 0);
+			if (fromPos > -1)
 			{
-				context = CONTEXT_COLUMN_LIST;
-				String table = sql.substring(start, end).trim();
-				tableForColumnList = new TableIdentifier(table);
+				int start = fromPos + "FROM".length() + 1;
+				int end = -1;
+				if (fromPos > -1) end = StringUtil.findFirstWhiteSpace(sql, start);
+				if (end == -1) end = this.sql.length() - 1;
+
+				if (end > -1 && start > -1)
+				{
+					context = CONTEXT_COLUMN_LIST;
+					String table = sql.substring(start, end).trim();
+					tableForColumnList = new TableIdentifier(table);
+				}
 			}
 		}
 	}

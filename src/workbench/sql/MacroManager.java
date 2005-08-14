@@ -136,7 +136,7 @@ public class MacroManager
 		if (this.macros != null && this.modified)
 		{
 			WbPersistence writer = new WbPersistence(this.getMacroFile().getAbsolutePath());
-			writer.writeObject(this.macros);
+			try { writer.writeObject(this.macros); } catch (Throwable th) {}
 			this.modified = false;
 			this.errorDuringLoad = false;
 		}

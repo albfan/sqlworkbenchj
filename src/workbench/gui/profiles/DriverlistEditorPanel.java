@@ -127,7 +127,7 @@ public class DriverlistEditorPanel
 		return drv;
 	}
 
-	private void selectDriver(String aDriverName)
+	public void selectDriver(String aDriverName)
 	{
 		if (aDriverName == null) return;
 

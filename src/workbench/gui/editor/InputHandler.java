@@ -31,7 +31,7 @@ import javax.swing.text.BadLocationException;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.17 2005-05-15 11:41:05 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.18 2005-08-14 16:37:19 thomas Exp $
  * @see DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
@@ -187,7 +187,7 @@ public abstract class InputHandler extends KeyAdapter
 	 * Removes a key binding from this input handler.
 	 * @param keyBinding The key binding
 	 */
-	public abstract void removeKeyBinding(String keyBinding);
+	public abstract void removeKeyBinding(KeyStroke key);
 
 	/**
 	 * Removes all key bindings from this input handler.

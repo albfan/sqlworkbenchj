@@ -11,9 +11,9 @@
  */
 package workbench.storage.filter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import workbench.util.StringUtil;
 
 /**
  * @author support@sql-workbench.net
@@ -29,7 +29,7 @@ public abstract class ComplexExpression
 
 	public void addExpression(FilterExpression expr)
 	{
-		if (expr != null) filter.add(expr);
+		filter.add(expr);
 	}
 	
 	public void addColumnExpression(String colname, ColumnComparator comp, Object refValue)
@@ -39,9 +39,6 @@ public abstract class ComplexExpression
 	
 	public void addColumnExpression(String colname, ColumnComparator comp, Object refValue, boolean ignoreCase)
 	{
-		if (StringUtil.isEmptyString(colname)) return;
-		if (comp == null) return;
-		if (refValue == null) return;
 		ColumnExpression def = new ColumnExpression(colname, comp, refValue);
 		if (comp.supportsIgnoreCase()) def.setIgnoreCase(ignoreCase);
 		addExpression(def);
@@ -51,12 +48,12 @@ public abstract class ComplexExpression
 	{
 		filter.remove(expr);
 	}
-	
-	/** Although getFilter() and setFilter() are not 
-	 * really used, they are needed as Bean patterns
-	 * in order to be able to store and load this FilterExpression
+
+	/**
+	 * Get the list of FilterExpression s that define this ComplexExpression
 	 */
 	public List getExpressions() { return filter; }
+	
 	public void setExpressions(List l) { this.filter = l;}
 	
 	public boolean equals(Object other)

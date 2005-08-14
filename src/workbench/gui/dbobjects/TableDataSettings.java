@@ -42,15 +42,17 @@ public class TableDataSettings
     java.awt.GridBagConstraints gridBagConstraints;
 
     checkBoxEnableWarning = new javax.swing.JCheckBox();
-    jLabel1 = new javax.swing.JLabel();
+    autoloadRowCount = new javax.swing.JCheckBox();
+    autoloadData = new javax.swing.JCheckBox();
+    thresholdLabel = new javax.swing.JLabel();
     textFieldThresholdValue = new javax.swing.JTextField();
     jPanel1 = new javax.swing.JPanel();
-    jCheckBox1 = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
     checkBoxEnableWarning.setText(ResourceMgr.getString("LabelEnableDataThresholdWarning"));
     checkBoxEnableWarning.setToolTipText(ResourceMgr.getDescription("LabelEnableDataThresholdWarning"));
+    checkBoxEnableWarning.setMargin(new java.awt.Insets(0, 0, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -59,18 +61,41 @@ public class TableDataSettings
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     add(checkBoxEnableWarning, gridBagConstraints);
 
-    jLabel1.setText(ResourceMgr.getString("LabelThresholdLevel"));
-    jLabel1.setToolTipText(ResourceMgr.getDescription("LabelThresholdLevel"));
+    autoloadRowCount.setText(ResourceMgr.getString("LabelAutoLoadRowCount"));
+    autoloadRowCount.setToolTipText(ResourceMgr.getDescription("LabelAutoLoadRowCount"));
+    autoloadRowCount.setMargin(new java.awt.Insets(0, 0, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
+    add(autoloadRowCount, gridBagConstraints);
+
+    autoloadData.setText(ResourceMgr.getString("LabelAutoLoadTableData"));
+    autoloadData.setToolTipText(ResourceMgr.getDescription("LabelAutoLoadTableData"));
+    autoloadData.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    add(autoloadData, gridBagConstraints);
+
+    thresholdLabel.setText(ResourceMgr.getString("LabelThresholdLevel"));
+    thresholdLabel.setToolTipText(ResourceMgr.getDescription("LabelThresholdLevel"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-    add(jLabel1, gridBagConstraints);
+    add(thresholdLabel, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
@@ -79,21 +104,10 @@ public class TableDataSettings
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
-
-    jCheckBox1.setText("jCheckBox1");
-    jCheckBox1.setBorder(new javax.swing.border.EmptyBorder(new java.awt.Insets(0, 0, 0, 0)));
-    jCheckBox1.setMargin(new java.awt.Insets(0, 0, 0, 0));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    add(jCheckBox1, gridBagConstraints);
 
   }
   // </editor-fold>//GEN-END:initComponents
@@ -119,11 +133,17 @@ public class TableDataSettings
 		}
 	}
 	
+	public void setAutoloadRowCount(boolean flag) { this.autoloadRowCount.setSelected(flag); }
+	public boolean getAutoloadRowCount() { return this.autoloadRowCount.isSelected(); }
+	
+	public void setAutoloadData(boolean flag) { this.autoloadData.setSelected(flag); }
+	public boolean getAutoloadData() { return this.autoloadData.isSelected(); }
+	
 	public void setThresholdValue(long aValue)
 	{
 		this.checkBoxEnableWarning.setSelected(aValue > 0);
 		this.textFieldThresholdValue.setEnabled(aValue > 0);
-		this.jLabel1.setEnabled(aValue > 0);
+		this.thresholdLabel.setEnabled(aValue > 0);
 		if (aValue <= 0)
 		{
 			this.textFieldThresholdValue.setText("");
@@ -139,16 +159,17 @@ public class TableDataSettings
 		if (e.getSource() == this.checkBoxEnableWarning)
 		{
 			this.textFieldThresholdValue.setEnabled(this.checkBoxEnableWarning.isSelected());
-			this.jLabel1.setEnabled(this.checkBoxEnableWarning.isSelected());
+			this.thresholdLabel.setEnabled(this.checkBoxEnableWarning.isSelected());
 		}
 	}
 	
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JCheckBox autoloadData;
+  private javax.swing.JCheckBox autoloadRowCount;
   private javax.swing.JCheckBox checkBoxEnableWarning;
-  private javax.swing.JCheckBox jCheckBox1;
-  private javax.swing.JLabel jLabel1;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JTextField textFieldThresholdValue;
+  private javax.swing.JLabel thresholdLabel;
   // End of variables declaration//GEN-END:variables
 	
 }

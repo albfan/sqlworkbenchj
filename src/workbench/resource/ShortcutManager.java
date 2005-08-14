@@ -204,7 +204,7 @@ public class ShortcutManager
 		if (toSave.size() > 0)
 		{
 			WbPersistence writer = new WbPersistence(this.filename);
-			writer.writeObject(toSave);
+			try { writer.writeObject(toSave); } catch (Throwable th) {}
 		}
 		else
 		{

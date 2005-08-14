@@ -525,11 +525,22 @@ public class ConnectionEditorPanel
 	private void showDriverEditorDialog(java.awt.event.ActionEvent evt)//GEN-FIRST:event_showDriverEditorDialog
 	{//GEN-HEADEREND:event_showDriverEditorDialog
 		final Frame parent = (Frame)(SwingUtilities.getWindowAncestor(this)).getParent();
+		DbDriver drv = (DbDriver)cbDrivers.getSelectedItem();
+		final String drvName;
+		if (drv != null)
+		{
+			drvName = drv.getName();
+		}
+		else
+		{
+			drvName = null;
+		}
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
 				DriverEditorDialog d = new DriverEditorDialog(parent, true);
+				d.setDriverName(drvName);
 				WbSwingUtilities.center(d,parent);
 				d.show();
 				if (!d.isCancelled())
@@ -682,9 +693,7 @@ public class ConnectionEditorPanel
 		if (drvClass != null)
 		{
 			String name = aProfile.getDriverName();
-			long start = System.currentTimeMillis();
 			drv = ConnectionMgr.getInstance().findDriverByName(drvClass, name);
-			long end = System.currentTimeMillis();
 		}
 
 		try

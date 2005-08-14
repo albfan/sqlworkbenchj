@@ -165,15 +165,21 @@ public class DwStatusBar
 			s.append(count);
 		}
 		this.tfRowCount.setText(s.toString());
-		this.validate();
+		this.doRepaint();
 	}
 	
 	public void clearRowcount()
 	{
 		this.tfRowCount.setText("");
-		this.validate();
+		this.doRepaint();
 	}
 
+	private void doRepaint()
+	{
+		this.invalidate();
+		this.validate();
+	}
+	
 	public String getText() { return this.tfStatus.getText(); }
 	
 	public void setStatusMessage(String aMsg)

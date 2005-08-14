@@ -201,7 +201,7 @@ public class WbManager
 
 	public void fontChanged(String aFontKey, Font newFont)
 	{
-		if (aFontKey.equals(Settings.DATA_FONT_KEY))
+		if (aFontKey.equals(Settings.PROPERTY_DATA_FONT))
 		{
 			UIManager.put("Table.font", newFont);
 			UIManager.put("TableHeader.font", newFont);
@@ -329,7 +329,7 @@ public class WbManager
 		// for the first visible window
 		if (w != null)
 		{
-			w.saveSettings();
+			w.saveWindowSize();
 			settingsSaved = true;
 		}
 
@@ -343,14 +343,14 @@ public class WbManager
 			if (w == null) continue;
 			if (i == 0 && !settingsSaved)
 			{
-				w.saveSettings();
+				w.saveWindowSize();
 				settingsSaved = true;
 			}
 			if (w.isBusy())
 			{
 				if (!this.checkAbort(w)) return false;
 			}
-			result = w.saveWorkspace();
+			result = w.saveWorkspace(true);
 			if (!result) return false;
 		}
 		return true;
@@ -670,6 +670,8 @@ public class WbManager
 
 	// Other parameters
 	public static final String ARG_PROFILE = "profile";
+	private static final String ARG_PROFILE_STORAGE = "profilestorage";
+	
 	private static final String ARG_CONFIGDIR = "configdir";
 	private static final String ARG_LOGFILE = "logfile";
 	private static final String ARG_VARDEF = "vardef";
@@ -682,6 +684,7 @@ public class WbManager
 		if (trace) System.out.println("WbManager.initCmdLine() - start");
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(ARG_PROFILE);
+		cmdLine.addArgument(ARG_PROFILE_STORAGE);
 		cmdLine.addArgument(ARG_CONFIGDIR);
 		cmdLine.addArgument(ARG_SCRIPT);
 		cmdLine.addArgument(ARG_LOGFILE);
@@ -705,19 +708,19 @@ public class WbManager
 		{
 			cmdLine.parse(args);
 			String value = cmdLine.getValue(ARG_CONFIGDIR);
-			if (value != null && value.length() > 0)
+			if (!StringUtil.isEmptyString(value))
 			{
 				System.setProperty("workbench.configdir", value);
 			}
-
+			
 			value = cmdLine.getValue(ARG_LOGFILE);
-			if (value != null && value.length() > 0)
+			if (!StringUtil.isEmptyString(value))
 			{
 				System.setProperty("workbench.log.filename", value);
 			}
 
 			String scriptname = cmdLine.getValue(ARG_SCRIPT);
-			if (scriptname == null || scriptname.length() == 0)
+			if (StringUtil.isEmptyString(scriptname))
 			{
 				this.batchMode = false;
 				ConnectionMgr.getInstance().setReadTemplates(true);
@@ -729,7 +732,7 @@ public class WbManager
 			}
 
 			value = cmdLine.getValue(ARG_VARDEF);
-			if (value != null && value.length() > 0)
+			if (!StringUtil.isEmptyString(value))
 			{
 				try
 				{
@@ -740,6 +743,11 @@ public class WbManager
 					LogMgr.logError("WbManager.initCmdLine()", "Error reading variable definition from file " + value, e);
 				}
 			}
+			
+			// Setting the profile storage should be done after initializing the configuration
+			// stuff correctly!
+			value = cmdLine.getValue(ARG_PROFILE_STORAGE);
+			Settings.getInstance().setProfileStorage(value);
 		}
 		catch (Exception e)
 		{

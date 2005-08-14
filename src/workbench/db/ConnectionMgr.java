@@ -11,7 +11,9 @@
  */
 package workbench.db;
 
+import java.beans.PropertyChangeListener;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -37,6 +39,7 @@ import workbench.util.WbPersistence;
  * @author  support@sql-workbench.net
  */
 public class ConnectionMgr
+	implements PropertyChangeListener
 {
 	//private WbConnection currentConnection;
 	private HashMap activeConnections = new HashMap();
@@ -51,6 +54,7 @@ public class ConnectionMgr
 	/** Creates new ConnectionMgr */
 	private ConnectionMgr()
 	{
+		Settings.getInstance().addPropertyChangeListener(this);
 	}
 
 	public static ConnectionMgr getInstance()
@@ -540,7 +544,14 @@ public class ConnectionMgr
 	public void saveDrivers()
 	{
 		WbPersistence writer = new WbPersistence(Settings.getInstance().getDriverConfigFilename());
-		writer.writeObject(this.drivers);
+		try
+		{
+			writer.writeObject(this.drivers);
+		} 
+		catch (IOException e)
+		{
+			LogMgr.logError("ConnectionMgr.saveDrivers()", "Could not save drivers", e);
+		}
 	}
 
 	private void readDrivers()
@@ -617,7 +628,7 @@ public class ConnectionMgr
 		Object result = null;
 		try
 		{
-			WbPersistence reader = new WbPersistence(Settings.getInstance().getProfileFilename());
+			WbPersistence reader = new WbPersistence(Settings.getInstance().getProfileStorage());
 			result = reader.readObject();
 		}
 		catch (FileNotFoundException fne)
@@ -680,8 +691,15 @@ public class ConnectionMgr
 	{
 		if (this.profiles != null)
 		{
-			WbPersistence writer = new WbPersistence(Settings.getInstance().getProfileFilename());
-			writer.writeObject(new ArrayList(this.profiles.values()));
+			WbPersistence writer = new WbPersistence(Settings.getInstance().getProfileStorage());
+			try
+			{
+				writer.writeObject(new ArrayList(this.profiles.values()));
+			}
+			catch (IOException e)
+			{
+				LogMgr.logError("ConnectionMgr.saveProfiles()", "Error saving profiles", e);
+			}
 			this.resetProfiles();
 		}
 	}
@@ -752,6 +770,14 @@ public class ConnectionMgr
 		{
 			ConnectionProfile prof = (ConnectionProfile)itr.next();
 			this.profiles.put(prof.getIdentifier(), prof);
+		}
+	}
+
+	public void propertyChange(java.beans.PropertyChangeEvent evt)
+	{
+		if (evt.getPropertyName().equals(Settings.PROPERTY_PROFILE_STORAGE))
+		{
+			this.profiles = null;
 		}
 	}
 

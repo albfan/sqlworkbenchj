@@ -12,6 +12,7 @@
 package workbench.interfaces;
 
 import java.awt.Font;
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 import javax.swing.JTabbedPane;
@@ -19,6 +20,7 @@ import javax.swing.JTabbedPane;
 import workbench.db.WbConnection;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbToolbar;
+import workbench.util.WbWorkspace;
 
 /**
  *
@@ -38,6 +40,7 @@ public interface MainPanel
 	void addToToolbar(WbAction anAction, boolean aFlag);
 	void setFont(Font aFont);
 	void disconnect();
+	String getTabTitle();
 	void setTabTitle(JTabbedPane tab, int index);
 	void setTabName(String name);
 	String getId();
@@ -46,4 +49,5 @@ public interface MainPanel
 	void dispose();
 	void saveSettings();
 	void panelSelected();
+	void saveToWorkspace(WbWorkspace w) throws IOException;
 }

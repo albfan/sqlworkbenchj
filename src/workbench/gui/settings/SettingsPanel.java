@@ -49,11 +49,11 @@ public class SettingsPanel
 	public SettingsPanel()
 	{
 		initComponents();
-		this.fontsComboBox.addItem(new FontListEntry(Settings.DATA_FONT_KEY));
-		this.fontsComboBox.addItem(new FontListEntry(Settings.EDITOR_FONT_KEY));
-		this.fontsComboBox.addItem(new FontListEntry(Settings.STANDARD_FONT_KEY));
-		this.fontsComboBox.addItem(new FontListEntry(Settings.MSGLOG_FONT_KEY));
-		this.fontsComboBox.addItem(new FontListEntry(Settings.PRINTER_FONT_KEY));
+		this.fontsComboBox.addItem(new FontListEntry(Settings.PROPERTY_DATA_FONT));
+		this.fontsComboBox.addItem(new FontListEntry(Settings.PROPERTY_EDITOR_FONT));
+		this.fontsComboBox.addItem(new FontListEntry(Settings.PROPERTY_STANDARD_FONT));
+		this.fontsComboBox.addItem(new FontListEntry(Settings.PROPERTY_MSGLOG_FONT));
+		this.fontsComboBox.addItem(new FontListEntry(Settings.PROPERTY_PRINTER_FONT));
 		this.fontsComboBox.setSelectedIndex(0);
 		this.enableDbmsOutput.addActionListener(this);
 	}

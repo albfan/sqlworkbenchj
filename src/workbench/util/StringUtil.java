@@ -306,7 +306,6 @@ public class StringUtil
 			if (numElements > 0)
 			{
 				result.append(aDelimiter);
-				result.append(' ');
 			}
 			result.append(o.toString());
 			numElements ++;

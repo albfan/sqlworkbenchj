@@ -160,6 +160,11 @@ public class ResourceMgr
 		return result;
 	}
 
+	public static String getDefaultTabLabel()
+	{
+		return getString("LabelTabStatement");
+	}
+	
 	public static String getString(String aKey)
 	{
 		try

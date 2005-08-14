@@ -20,7 +20,8 @@ import javax.swing.Icon;
  *
  * @author  support@sql-workbench.net
  */
-public class WbToolbarButton extends javax.swing.JButton
+public class WbToolbarButton 
+	extends javax.swing.JButton
 {
 
 	public static final Insets MARGIN = new Insets(1,1,1,1);

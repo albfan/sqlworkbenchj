@@ -48,4 +48,9 @@ public class LessOrEqualComparator
 		return Comparable.class.isAssignableFrom(valueClass);
 	}
 
+	public boolean equals(Object other)
+	{
+		return (other instanceof LessOrEqualComparator);
+	}
+	
 }

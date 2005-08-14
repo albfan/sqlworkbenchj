@@ -23,6 +23,7 @@ import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.MainPanel;
 import workbench.gui.actions.FileReloadAction;
 import workbench.gui.actions.FileSaveAction;
+import workbench.gui.actions.MoveSqlTab;
 
 /**
  * @author  support@sql-workbench.net
@@ -33,6 +34,8 @@ public class SqlTabPopup extends JPopupMenu
 	private AddTabAction add;
 	private RemoveTabAction remove;
 	private RenameTabAction rename;
+	private MoveSqlTab moveLeft;
+	private MoveSqlTab moveRight;
 
 	/** Creates new LogPanelPopup */
 	public SqlTabPopup(MainWindow aClient)
@@ -52,10 +55,18 @@ public class SqlTabPopup extends JPopupMenu
 			this.add(rename.getMenuItem());
 		}
 
-
 		if (panel instanceof SqlPanel)
 		{
 			SqlPanel spanel = (SqlPanel)panel;
+			int currentIndex = aClient.getCurrentPanelIndex();
+			moveLeft = new MoveSqlTab(aClient, true);
+			moveLeft.setEnabled(currentIndex > 0);
+			this.add(moveLeft.getMenuItem());
+			int lastIndex = aClient.getLastSqlPanelIndex();
+			moveRight = new MoveSqlTab(aClient, false);
+			moveRight.setEnabled(currentIndex < lastIndex);
+			this.add(moveRight);
+			
 			this.addSeparator();
 
 			FileSaveAction save = new FileSaveAction(spanel);
@@ -74,7 +85,6 @@ public class SqlTabPopup extends JPopupMenu
 			discard.removeIcon();
 			this.add(discard.getMenuItem());
 			this.remove.setEnabled(aClient.canCloseTab());
-
 		}
 	}
 

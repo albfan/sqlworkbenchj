@@ -547,20 +547,27 @@ public class MainWindow
 		int tabCount = this.sqlTab.getTabCount();
 
 		int realCount = 0;
-		ArrayList titles = new ArrayList(tabCount);
 		for (int i=0; i < tabCount; i++)
 		{
-			Component c = this.sqlTab.getComponentAt(i);
-			if (c instanceof SqlPanel)
+			MainPanel p = this.getSqlPanel(i);
+			if (p instanceof SqlPanel)
 			{
-				titles.add(this.sqlTab.getTitleAt(i));
+				realCount ++;
 			}
 		}
 		
-		String[] result = new String[titles.size()];
-		for (int i=0; i < titles.size(); i++)
+		String[] result = new String[realCount];
+		for (int i=0; i < realCount; i++)
 		{
-			result[i] = (String)titles.get(i);
+			MainPanel p = this.getSqlPanel(i);
+			if (i < 9) 
+			{
+				result[i] = p.getTabTitle() + " &" + Integer.toString(i+1);
+			}
+			else
+			{
+				result[i] = p.getTabTitle() + " " + Integer.toString(i+1);
+			}
 		}
 		return result;
 	}
@@ -765,16 +772,9 @@ public class MainWindow
 		}
 	}
 
-	public void saveSettings()
+	public void saveWindowSize()
 	{
     Settings sett = Settings.getInstance();
-
-    // this stores the state of the dbExplorer tab
-    // if the DbExplorer should be displayed as a tab
-    // it will be restored the next time if is't visible when
-    // closing the window
-		//sett.setDbExplorerVisible(this.dbExplorerTabVisible);
-
 		int state = this.getExtendedState();
 		sett.setProperty(this.getClass().getName(), "state", state);
 
@@ -783,15 +783,6 @@ public class MainWindow
 			sett.storeWindowPosition(this);
 			sett.storeWindowSize(this);
 		}
-		
-//		if (dbExplorerPanel != null)
-//		{
-//			this.dbExplorerPanel.saveSettings();
-//      if (this.dbExplorerPanel.getWindow() != null)
-//      {
-//        this.dbExplorerPanel.getWindow().saveSettings();
-//      }
-//		}
 	}
 
 	public void fileNameChanged(Object sender, String newFilename)
@@ -872,10 +863,6 @@ public class MainWindow
 
 	public void windowIconified(WindowEvent windowEvent)
 	{
-//		if (this.dbExplorerPanel != null)
-//		{
-//			this.dbExplorerPanel.mainWindowIconified();
-//		}
 	}
 
 	/**
@@ -1105,6 +1092,7 @@ public class MainWindow
 					sql.clearSqlStatements();
 					sql.readFromWorkspace(w);
 					sql.setTabTitle(this.sqlTab, i);
+					updateViewMenu(i, getPlainTabTitle(i));
 				}
 			}
 			this.currentWorkspaceFile = realFilename;
@@ -1393,21 +1381,21 @@ public class MainWindow
 		});
 	}
 
-	public JMenu getMacroMenu(int anIndex)
+	public JMenu getMacroMenu(int panelIndex)
 	{
-		JMenu menu = this.getMenu(ResourceMgr.MNU_TXT_MACRO, anIndex);
+		JMenu menu = this.getMenu(ResourceMgr.MNU_TXT_MACRO, panelIndex);
 		return menu;
 	}
 
-	public JMenu getViewMenu(int anIndex)
+	public JMenu getViewMenu(int panelIndex)
 	{
-		return this.getMenu(ResourceMgr.MNU_TXT_VIEW, anIndex);
+		return this.getMenu(ResourceMgr.MNU_TXT_VIEW, panelIndex);
 	}
 
-	public JMenu getMenu(String aName, int anIndex)
+	public JMenu getMenu(String aName, int panelIndex)
 	{
-		if (anIndex < 0 || anIndex >= this.panelMenus.size()) return null;
-		JMenuBar menubar = (JMenuBar)this.panelMenus.get(anIndex);
+		if (panelIndex < 0 || panelIndex >= this.panelMenus.size()) return null;
+		JMenuBar menubar = (JMenuBar)this.panelMenus.get(panelIndex);
 		int count = menubar.getMenuCount();
 		for (int k=0; k < count; k++)
 		{
@@ -1453,6 +1441,7 @@ public class MainWindow
 	private void updateViewMenu(int sqlTabIndex, String aName)
 	{
 		int panelCount = this.panelMenus.size();
+		if (aName == null) aName = ResourceMgr.getDefaultTabLabel();
 		for (int i=0; i < panelCount; i++)
 		{
 			JMenu view = this.getViewMenu(i);
@@ -1476,6 +1465,8 @@ public class MainWindow
 					}
 				}
 			}
+			view.updateUI();
+			view.invalidate();
 		}
 	}
 
@@ -1598,7 +1589,7 @@ public class MainWindow
 		boolean useTab = Settings.getInstance().getShowDbExplorerInMainWindow();
 		if (useTab)
 		{
-			int index = this.findExplorerTab();
+			int index = this.findFirstExplorerTab();
 			if (index > -1)
 			{
 				this.selectTab(index);
@@ -1623,7 +1614,19 @@ public class MainWindow
 		}
 	}
 	
-	private int findExplorerTab()
+	/** 
+	 * Returns the index of the las SQL Panel
+	 */
+	public int getLastSqlPanelIndex()
+	{
+		int explorer = findFirstExplorerTab();
+		if (explorer == -1)
+			return this.sqlTab.getTabCount() - 1;
+		else
+			return explorer -1;
+	}
+	
+	private int findFirstExplorerTab()
 	{
 		int count = this.sqlTab.getTabCount();
 		for (int i=count - 1; i > 0; i--)
@@ -2062,37 +2065,14 @@ public class MainWindow
 					}
 				}
 			}
-			int explorerCount = 0;
-			String defaultLabel = ResourceMgr.getString("LabelTabStatement");
 			w = new WbWorkspace(realFilename, true);
 			int selected = this.sqlTab.getSelectedIndex();
+			w.setSelectedTab(selected);
 			for (int i=0; i < count; i++)
 			{
-				if (i == selected)
-				{
-					w.setSelectedTab(i);
-				}
-				if (this.sqlTab.getComponentAt(i) instanceof SqlPanel)
-				{
-					SqlPanel sql = (SqlPanel)this.sqlTab.getComponentAt(i);
-					sql.saveToWorkspace(w);
-
-					if (!sql.hasFileLoaded())
-					{
-						String title = this.getPlainTabTitle(i);
-						if (!title.startsWith(defaultLabel))
-						{
-							w.setTabTitle(i, title);
-						}
-					}
-				}
-				else
-				{
-					// not a SqlPanel --> DbExplorer panel
-					explorerCount++;
-				}
+				MainPanel p = getSqlPanel(i);
+				p.saveToWorkspace(w);
 			}
-			w.setDbExplorerVisibleCount(explorerCount);
 		}
 		catch (Exception e)
 		{
@@ -2211,7 +2191,7 @@ public class MainWindow
 		MainPanel p = this.getSqlPanel(anIndex);
 		p.setTabName(aName);
 		p.setTabTitle(this.sqlTab, anIndex);
-		this.updateViewMenu(anIndex, aName);
+		this.updateViewMenu(anIndex, p.getTabTitle());
 	}
 
 	public void removeLastTab(boolean includeExplorer)
@@ -2238,15 +2218,16 @@ public class MainWindow
 	{
 		boolean canRename = (this.currentWorkspaceFile != null);
 		MainPanel p = this.getCurrentPanel();
-		if (p instanceof SqlPanel)
-		{
-			SqlPanel sql = (SqlPanel)p;
-			canRename = canRename && (!sql.hasFileLoaded());
-		}
-		else
-		{
-			canRename = false;
-		}
+//		if (p instanceof SqlPanel)
+//		{
+//			SqlPanel sql = (SqlPanel)p;
+//			canRename = canRename && (!sql.hasFileLoaded());
+//		}
+//		else
+//		{
+//			canRename = false;
+//		}
+		canRename = canRename && (p instanceof SqlPanel);
 		return canRename;
 	}
 
@@ -2271,6 +2252,83 @@ public class MainWindow
 		this.removeTab(index);
 	}
 
+	private void renumberTabs()
+	{
+		int count = this.sqlTab.getTabCount();
+		for (int i=0; i < count; i++)
+		{
+			MainPanel p = this.getSqlPanel(i);
+			if (p instanceof SqlPanel)
+			{
+				p.setTabTitle(sqlTab, i);
+			}
+		}
+		for (int panel=0; panel < count; panel++)
+		{
+			rebuildViewMenu(panel);
+		}
+	}
+
+	/**
+	 * Rebuild the part of the view menu that handles the 
+	 * selecting of tabs
+	 */
+	private void rebuildViewMenu(int panel)
+	{
+		JMenu menu = this.getViewMenu(panel);
+		JMenuItem item = menu.getItem(0);
+		while (item != null && (item.getAction() instanceof SelectTabAction))
+		{
+			menu.remove(0);
+			item = menu.getItem(0);
+		}
+		int count = this.sqlTab.getTabCount();
+		for (int i=0; i < count; i++)
+		{
+			MainPanel p = this.getSqlPanel(i);
+			SelectTabAction a = new SelectTabAction(sqlTab, i);
+			a.setName(getPlainTabTitle(i));
+			menu.insert(a, i);
+		}
+	}
+	
+	/**
+	 * Moves the current sql tab to the left (i.e. index := index - 1)
+	 * If index == 0 nothing happens
+	 */
+	public void moveTabLeft()
+	{
+		int index = this.getCurrentPanelIndex();
+		if (index <= 0) return;
+		SqlPanel p = (SqlPanel) this.getSqlPanel(index);
+		this.sqlTab.remove(index);
+		index --;
+		this.sqlTab.add(p, index);
+		this.sqlTab.setSelectedIndex(index);
+		renumberTabs();
+	}
+
+	/**
+	 * Moves the current sql tab to the right (i.e. index := index + 1)
+	 * If index denotes the last SQL Tab, nothing happens
+	 */
+	public void moveTabRight()
+	{
+		int index = this.getCurrentPanelIndex();
+		int lastIndex = this.getLastSqlPanelIndex();
+		if (index >= lastIndex) return;
+		SqlPanel p = (SqlPanel) this.getSqlPanel(index);
+		this.sqlTab.remove(index);
+		removeFromViewMenu(index);
+		index ++;
+		this.sqlTab.add(p, index);
+		this.sqlTab.setSelectedIndex(index);
+		SelectTabAction a = new SelectTabAction(this.sqlTab, index);
+		a.setName(getPlainTabTitle(index));
+		addToViewMenu(a);
+		renumberTabs();
+	}
+		
 	/**
 	 *	Removes the current SQL Tab. The DbExplorer will not be removed!
 	 */

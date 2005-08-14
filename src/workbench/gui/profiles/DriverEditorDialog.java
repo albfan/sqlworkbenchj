@@ -136,6 +136,17 @@ public class DriverEditorDialog extends JDialog
 		this.closeDialog();
 	}
 
+	/**
+	 *	Sets the driver name to be pre-selected in the list
+	 */
+	public void setDriverName(String name)
+	{
+		if (this.driverListPanel != null && name != null)
+		{
+			this.driverListPanel.selectDriver(name);
+		}
+	}
+	
 	private void okButtonActionPerformed(ActionEvent evt)
 	{
 		try

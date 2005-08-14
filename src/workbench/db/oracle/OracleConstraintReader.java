@@ -99,7 +99,7 @@ public class OracleConstraintReader
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("AbstractConstraintReader", "Error when reading column constraints", e);
+			LogMgr.logError("OracleConstraintReader", "Error when reading column constraints", e);
 		}
 		finally
 		{

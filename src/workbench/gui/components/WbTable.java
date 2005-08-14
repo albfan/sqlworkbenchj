@@ -42,6 +42,7 @@ import java.beans.PropertyChangeListener;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -91,6 +92,8 @@ import workbench.gui.actions.CopySelectedAsSqlInsertAction;
 import workbench.gui.actions.CopySelectedAsSqlUpdateAction;
 import workbench.gui.actions.CopySelectedAsTextAction;
 import workbench.gui.actions.DataToClipboardAction;
+import workbench.gui.actions.FilterDataAction;
+import workbench.gui.actions.ResetFilterAction;
 import workbench.gui.actions.FindDataAction;
 import workbench.gui.actions.FindDataAgainAction;
 import workbench.gui.actions.OptimizeAllColumnsAction;
@@ -105,7 +108,6 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.dialogs.export.DataStoreExporter;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RowStatusRenderer;
-import workbench.gui.renderer.ToolTipRenderer;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.Searchable;
 import workbench.log.LogMgr;
@@ -115,6 +117,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.NullValue;
+import workbench.storage.filter.FilterExpression;
 import workbench.util.WbThread;
 
 
@@ -155,7 +158,9 @@ public class WbTable
 	private CopySelectedAsSqlInsertAction copySelectedAsInsertAction;
 	private CopySelectedAsSqlDeleteInsertAction copySelectedAsDeleteInsertAction;
 	private CopySelectedAsSqlUpdateAction copySelectedAsUpdateAction;
-
+	private FilterDataAction filterAction;
+	private ResetFilterAction resetFilterAction;
+	
 	private PrintAction printDataAction;
 	private PrintPreviewAction printPreviewAction;
 
@@ -169,7 +174,8 @@ public class WbTable
 	private int minColWidth = 10;
 
 	private RowHeightResizer rowResizer;
-	private TableModelListener changeListener;
+	//private TableModelListener changeListener;
+	private ArrayList changeListener = new ArrayList();
 	private JScrollPane scrollPane;
 
 	private String defaultPrintHeader = null;
@@ -240,7 +246,9 @@ public class WbTable
 		this.copyUpdateAction = new CopyAsSqlUpdateAction(this);
 		this.exportDataAction = new SaveDataAsAction(this);
 
-
+		this.filterAction = new FilterDataAction(this);
+		this.resetFilterAction = new ResetFilterAction(this);
+		
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.addPopupAction(this.exportDataAction, false);
 		this.addPopupAction(this.dataToClipboard, true);
@@ -304,6 +312,9 @@ public class WbTable
 		return tip;
 	}
 
+	public FilterDataAction getFilterAction() { return this.filterAction; }
+	public ResetFilterAction getResetFilterAction() { return this.resetFilterAction; }
+	
 	public CopySelectedAsTextAction getCopySelectedAsTextAction()
 	{
 		return this.copySelectedAsTextAction;
@@ -564,6 +575,33 @@ public class WbTable
 		return printer;
 	}
 
+	/**
+	 *	Removes all registered listeners from the table model
+	 */
+	private void removeListeners()
+	{
+		if (this.dwModel == null) return;
+		int count = this.changeListener.size();
+		for (int i=0; i < count; i++)
+		{
+			TableModelListener l = (TableModelListener)changeListener.get(i);
+			this.dwModel.removeTableModelListener(l);
+		}
+	}
+	
+	private void addListeners()
+	{
+		if (this.dwModel == null) return;
+		int count = this.changeListener.size();
+		TableModelEvent evt = new TableModelEvent(this.dwModel);
+		for (int i=0; i < count; i++)
+		{
+			TableModelListener l = (TableModelListener)changeListener.get(i);
+			l.tableChanged(evt);
+			this.dwModel.addTableModelListener(l);
+		}
+	}
+	
 	public void setModel(TableModel aModel)
 	{
 		this.setModel(aModel, false);
@@ -571,11 +609,7 @@ public class WbTable
 
 	public void setModel(TableModel aModel, boolean sortIt)
 	{
-		if (this.dwModel != null)
-		{
-			this.dwModel.removeTableModelListener(this.changeListener);
-			this.dwModel.removeTableModelListener(this);
-		}
+		removeListeners();
 
 		JTableHeader header = this.getTableHeader();
 		if (header != null)
@@ -618,18 +652,47 @@ public class WbTable
 			if (this.sortAscending != null) this.sortAscending.setEnabled(sortIt);
 			if (this.sortDescending != null) this.sortDescending.setEnabled(sortIt);
 
-			if (this.changeListener != null && this.dwModel != null)
-			{
-				this.dwModel.addTableModelListener(this.changeListener);
-			}
-
 			this.initDefaultRenderers();
 			this.initDefaultEditors();
-			if (this.printDataAction != null) this.printDataAction.setEnabled(this.getRowCount() > 0);
-			if (this.printPreviewAction != null) this.printPreviewAction.setEnabled(this.getRowCount() > 0);
 		}
+		addListeners();
+//		checkActions();
 	}
 
+//	private void checkActions()
+//	{
+//		int rows = this.getRowCount();
+//		if (this.printDataAction != null) this.printDataAction.setEnabled(rows > 0);
+//		if (this.printPreviewAction != null) this.printPreviewAction.setEnabled(rows > 0);
+//		if (this.filterAction != null)
+//		{
+//			this.filterAction.setEnabled(lastFilter != null || rows > 0); 
+//		}
+//		if (resetFilterAction != null) resetFilterAction.setEnabled(lastFilter != null);
+//	}
+	
+	private FilterExpression lastFilter;
+	private FilterExpression currentFilter;
+	
+	public void resetFilter()
+	{
+		if (this.dwModel == null) return;
+		this.dwModel.resetFilter();
+		this.resetFilterAction.setEnabled(false);
+		this.currentFilter = null;
+	}
+	
+	public FilterExpression getLastFilter() { return lastFilter; }
+	public boolean isFiltered() { return (currentFilter != null); }
+	
+	public void applyFilter(FilterExpression filter)
+	{
+		if (this.dwModel == null) return;
+		this.lastFilter = filter;
+		this.currentFilter = filter;
+		this.dwModel.applyFilter(filter);
+	}
+	
 	public DataStoreTableModel getDataStoreTableModel()
 	{
 		return this.dwModel;
@@ -931,16 +994,6 @@ public class WbTable
 		this.savedColumnSizes = null;
 	}
 
-//	public TableCellRenderer getCellRenderer(int row, int column)
-//	{
-//		TableCellRenderer renderer = super.getCellRenderer(row, column);
-//		if (renderer == null)
-//		{
-//			renderer = ToolTipRenderer.DEFAULT_TEXT_RENDERER;
-//		}
-//		return renderer;
-//	}
-
 	private boolean useDefaultStringRenderer = true;
 	public void setUseDefaultStringRenderer(boolean aFlag)
 	{
@@ -1200,6 +1253,7 @@ public class WbTable
 		{
 			this.initDefaultEditors();
 		}
+//		checkActions();
 	}
 
 	public void openEditWindow()
@@ -1235,13 +1289,15 @@ public class WbTable
 
 	public void addTableModelListener(TableModelListener aListener)
 	{
-		this.changeListener = aListener;
-		if (this.dwModel != null) this.dwModel.addTableModelListener(aListener);
+		if (this.changeListener.add(aListener));
+		{
+			if (this.dwModel != null) this.dwModel.addTableModelListener(aListener);
+		}
 	}
 
 	public void removeTableModelListener(TableModelListener aListener)
 	{
-		this.changeListener = null;
+		this.changeListener.remove(aListener);
 		if (this.dwModel != null) this.dwModel.removeTableModelListener(aListener);
 	}
 
@@ -1765,7 +1821,7 @@ public class WbTable
 
 	public void fontChanged(String aFontId, Font newFont)
 	{
-		if (aFontId.equals(Settings.DATA_FONT_KEY))
+		if (aFontId.equals(Settings.PROPERTY_DATA_FONT))
 		{
 			this.setFont(newFont);
 			this.getTableHeader().setFont(newFont);

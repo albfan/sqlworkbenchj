@@ -518,7 +518,7 @@ public class SqlFormatter
 			{
 				this.appendNewline();
 				this.indent(current);
-				this.appendText(text);
+				this.appendText(") ");
 				t = (SQLToken)this.lexer.getNextToken(true, false);
 				return t;
 			}

@@ -26,6 +26,7 @@ import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.storage.filter.FilterExpression;
 import workbench.util.SqlUtil;
 import workbench.util.WbThread;
 
@@ -390,6 +391,42 @@ public class DataStoreTableModel
 		sortByColumn(column, ascending);
 	}
 
+	public void resetFilter()
+	{
+		dataCache.clearFilter();
+		if (!sort()) 
+		{
+			fireTableDataChanged();
+		}
+	}
+	
+	public void applyFilter(FilterExpression filter)
+	{
+		dataCache.applyFilter(filter);
+		// sort() will already fire a tableDataChanged() 
+		// if a sort column was defined
+		if (!sort()) 	
+		{
+			this.fireTableDataChanged();
+		}
+	}
+	
+	private synchronized void setSortInProgress(final boolean flag)
+	{
+		this.sortingInProgress = flag;
+	}
+	
+	/**
+	 *	Re-apply the last sort order defined.
+	 *  If no sort order was defined this method does nothing
+	 */
+	public boolean sort()
+	{
+		if (this.sortColumn == -1) return false;
+		this.sortByColumn(this.sortColumn, this.sortAscending);
+		return true;
+	}
+
 	/**
 	 * Sort the data by the given column in the defined order
 	 */
@@ -399,11 +436,16 @@ public class DataStoreTableModel
 		this.sortColumn = aColumn;
 		try
 		{
+			setSortInProgress(true);
 			this.dataCache.sortByColumn(aColumn - statusOffset, ascending);
 		}
 		catch (Throwable th)
 		{
 			LogMgr.logError("DataStoreTableModel.sortByColumn()", "Error when sorting data", th);
+		}
+		finally
+		{
+			setSortInProgress(false);
 		}
 		fireTableChanged(new TableModelEvent(this));
 	}
@@ -440,7 +482,7 @@ public class DataStoreTableModel
 		{
 			public void run()
 			{
-				sortingInProgress = true;
+				setSortInProgress(true);
 				try
 				{
 					table.sortingStarted();
@@ -451,7 +493,7 @@ public class DataStoreTableModel
 					table.sortingFinished();
 					WbSwingUtilities.showDefaultCursor(table);
 					WbSwingUtilities.showDefaultCursor(table.getTableHeader());
-					sortingInProgress = false;
+					setSortInProgress(false);
 				}
 			}
 		};

@@ -10,9 +10,9 @@
  *
  */
 package workbench.gui.components;
-
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import javax.swing.JMenuItem;
 
 import javax.swing.text.JTextComponent;
 
@@ -23,14 +23,20 @@ import workbench.interfaces.ClipboardSupport;
  *
  * @author  Thomas Kellerer
  */
-public class TextComponentMouseListener implements MouseListener
+public class TextComponentMouseListener 
+	implements MouseListener
 {
+	private JMenuItem additionalItem;
 	
 	/** Creates a new instance of WbMouseListener */
 	public TextComponentMouseListener()
 	{
 	}
-	
+
+	public void addMenuItem(JMenuItem item)
+	{
+		this.additionalItem = item;
+	}
 	/** Invoked when the mouse button has been clicked (pressed
 	 * and released) on a component.
 	 *
@@ -41,17 +47,29 @@ public class TextComponentMouseListener implements MouseListener
 		{
 			if (e.getSource() instanceof JTextComponent)
 			{
-				JTextComponent text = (JTextComponent)e.getSource();
-				final ClipboardWrapper wrapp = new ClipboardWrapper(text);
-				TextPopup pop = new TextPopup(wrapp);
-				boolean edit = text.isEditable();
-				boolean selected = text.getSelectionEnd() > text.getSelectionStart();
-				pop.getCutAction().setEnabled(edit);
-				pop.getClearAction().setEnabled(edit);
-				pop.getPasteAction().setEnabled(edit);
-				pop.getCopyAction().setEnabled(selected);
-				//Component parent = text.getParent();
-				pop.show(text,e.getX(),e.getY());
+				try
+				{
+					JTextComponent text = (JTextComponent)e.getSource();
+					final ClipboardWrapper wrapp = new ClipboardWrapper(text);
+					TextPopup pop = new TextPopup(wrapp);
+					if (this.additionalItem != null)
+					{
+						pop.addSeparator();
+						pop.add(this.additionalItem);
+					}
+					boolean edit = text.isEditable();
+					boolean selected = text.getSelectionEnd() > text.getSelectionStart();
+					pop.getCutAction().setEnabled(edit);
+					pop.getClearAction().setEnabled(edit);
+					pop.getPasteAction().setEnabled(edit);
+					pop.getCopyAction().setEnabled(selected);
+					//Component parent = text.getParent();
+					pop.show(text,e.getX(),e.getY());
+				}
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+				}
 			}
 		}
 	}

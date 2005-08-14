@@ -400,7 +400,7 @@ public class DbMetadata
 	public String[] getTypeListView() { return TABLE_TYPES_VIEW; }
 	public String[] getTypeListTable() { return TABLE_TYPES_TABLE; }
 	public String[] getTypeListSelectable() { return TABLE_TYPES_SELECTABLE; }
-
+	
 	public DatabaseMetaData getJdbcMetadata()
 	{
 		return this.metaData;
@@ -534,14 +534,21 @@ public class DbMetadata
 	 */
 	public boolean needSchemaInDML(TableIdentifier table)
 	{
-		String tblSchema = table.getSchema();
-		if (ignoreSchema(tblSchema)) return false;
-		
-		if (this.isOracle)
+		try
 		{
-			// In oracle we don't need the schema if the it is the current user
-			if (tblSchema == null) return false;
-			return !this.getUserName().equalsIgnoreCase(tblSchema);
+			String tblSchema = table.getSchema();
+			if (ignoreSchema(tblSchema)) return false;
+
+			if (this.isOracle)
+			{
+				// In oracle we don't need the schema if the it is the current user
+				if (tblSchema == null) return false;
+				return !this.getUserName().equalsIgnoreCase(tblSchema);
+			}
+		}
+		catch (Throwable th)
+		{
+			return false;
 		}
 		return true;
 	}
@@ -1846,12 +1853,12 @@ public class DbMetadata
 		return this.getTableDefinition(aTable.getCatalog(), aTable.getSchema(), aTable.getTableName(), tableTypeName, false);
 	}
 
+	public static final String[] TABLE_DEFINITION_COLS = {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "java.sql.Types", "SCALE/SIZE", "PRECISION", "POSITION"};
 	private DataStore createTableDefinitionDataStore()
 	{
-		final String cols[] = {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "java.sql.Types", "SCALE/SIZE", "PRECISION", "POSITION"};
-		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.INTEGER};
-		final int sizes[] =   {20, 18, 5, 8, 10, 25, 18, 2, 2, 2};
-		DataStore ds = new DataStore(cols, types, sizes);
+		final int[] types = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.INTEGER};
+		final int[] sizes = {20, 18, 5, 8, 10, 25, 18, 2, 2, 2};
+		DataStore ds = new DataStore(TABLE_DEFINITION_COLS, types, sizes);
 		return ds;
 	}
 	/** Return a DataStore containing the definition of the given table.
@@ -1919,7 +1926,7 @@ public class DbMetadata
 				keys.add(keysRs.getString("COLUMN_NAME").toLowerCase());
 			}
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			LogMgr.logError("DbMetaData.getTableDefinition()", "Error retrieving key columns", e);
 		}
@@ -3179,6 +3186,7 @@ public class DbMetadata
 			template = StringUtil.replace(template, COLUMNLIST_PLACEHOLDER, pkCols.toString());
 			String name = this.getPkIndexName(aIndexDef);
 			if (name == null) name = "pk_" + aTablename.toLowerCase();
+			if (isKeyword(name)) name = "\"" + name + "\"";
 			template = StringUtil.replace(template, PK_NAME_PLACEHOLDER, name);
 			result.append(template);
 			result.append(";\n\n");

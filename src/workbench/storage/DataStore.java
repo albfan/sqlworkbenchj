@@ -307,39 +307,31 @@ public class DataStore
 	 */
 	public void applyFilter(FilterExpression filterExpression)
 	{
+		this.clearFilter();
 		int cols = getColumnCount();
 		Map valueMap = new HashMap(cols);
-		for (int r=0; r < getRowCount(); r++)
+		this.filteredRows = createData();
+		int count = this.getRowCount();
+		for (int i= (count - 1); i >= 0; i--)
 		{
-			RowData row = getRow(r);
+			RowData rowData = this.getRow(i);
 			
 			// Build the value map required for the FilterExpression
 			for (int c=0; c < cols; c++)
 			{
 				String col = getColumnName(c);
-				Object value = row.getValue(c);
+				Object value = rowData.getValue(c);
 				valueMap.put(col, value);
 			}
+			
 			if (!filterExpression.evaluate(valueMap))
 			{
-				this.filterRow(r);
+				this.data.remove(i);
+				this.filteredRows.add(rowData);
 			}
 		}
-	}
-	
-	/**
-	 * Removes this row from the "active" data, but keeps it unchanged
-	 * Filtered rows can be restored to be active by calling {@see #clearFilter()}
-	 * The status of the row is not changed. Rows that are filtered will not 
-	 * be updated when sending the changes back to the database
-	 * @param row the row to be filtered
-	 */
-	public void filterRow(int row)
-	{
-		RowData rowData = this.data.get(row);
-		this.data.remove(row);
-		if (this.filteredRows == null) this.filteredRows = createData();
-		this.filteredRows.add(rowData);
+		
+		if (this.filteredRows.size() == 0) this.filteredRows = null;
 	}
 	
 	/**
@@ -1049,6 +1041,7 @@ public class DataStore
 		return (this.hasDeletedRows() || this.hasUpdatedRows());
 	}
 
+	public boolean isFiltered() { return this.filteredRows != null; }
 	public boolean isModified() { return this.modified;  }
 
 	public boolean isUpdateable()

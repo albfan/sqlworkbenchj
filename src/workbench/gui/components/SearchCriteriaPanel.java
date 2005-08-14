@@ -129,12 +129,12 @@ public class SearchCriteriaPanel
 		});
 		String title = ResourceMgr.getString("TxtWindowTitleSearchText");
 		int choice = JOptionPane.showConfirmDialog(caller, this, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+		System.out.println("choice=" + choice);
 		Settings.getInstance().setProperty(PROP_CLASS, PROP_KEY_CASE, Boolean.toString(this.getIgnoreCase()));
 		Settings.getInstance().setProperty(PROP_CLASS, PROP_KEY_CRIT, this.getCriteria());
 		Settings.getInstance().setProperty(PROP_CLASS, PROP_KEY_WHOLE_WORD, Boolean.toString(this.getWholeWordOnly()));
 		Settings.getInstance().setProperty(PROP_CLASS, PROP_KEY_REGEX, Boolean.toString(this.getUseRegex()));
-		if (choice == JOptionPane.CANCEL_OPTION) return false;
-		return true;
+		return (choice == JOptionPane.OK_OPTION);
 	}
 	
 }

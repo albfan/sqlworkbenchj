@@ -7,7 +7,6 @@
    <string>ALTER TABLE %tablename%
   ADD CONSTRAINT %constraintname% FOREIGN KEY (%columnlist%)
   REFERENCES %targettable% (%targetcolumnlist%)
-  ON UPDATE %fk_update_rule%
   ON DELETE %fk_delete_rule%</string>
   </void>
   

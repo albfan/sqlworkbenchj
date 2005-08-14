@@ -22,6 +22,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
@@ -81,20 +82,28 @@ public class WbPersistence
 	}
 
 	public void writeObject(Object aValue)
+		throws IOException
 	{
 		if (aValue == null) return;
 
+		BufferedOutputStream out = null;
 		try
 		{
-			BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(filename), 32*1024);
+			out = new BufferedOutputStream(new FileOutputStream(filename), 32*1024);
 			XMLEncoder e = new XMLEncoder(out);
 			e.writeObject(aValue);
 			e.close();
 		}
-		catch (Throwable e)
+//		catch (Throwable e)
+//		{
+//			LogMgr.logError("WbPersistence.writeObject()", "Error writing " + filename, e);
+//			return false;
+//		}
+		finally
 		{
-			LogMgr.logError("WbPersistence.writeObject()", "Error writing " + filename, e);
+			try { out.close(); } catch (Throwable th) {}
 		}
+//		return true;
 	}
 
 	public void exceptionThrown(Exception e)

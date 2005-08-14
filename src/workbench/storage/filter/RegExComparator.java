@@ -68,4 +68,9 @@ public class RegExComparator
 		return m.matches();
 	}
 
+	public boolean equals(Object other)
+	{
+		return (other instanceof RegExComparator);
+	}
+	
 }
