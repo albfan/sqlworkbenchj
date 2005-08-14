@@ -1,5 +1,5 @@
 /*
- * PrintPreviewAction.java
+ * FindAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -18,30 +18,34 @@ import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
 
 /**
+ *	Reset the filter defined on a WbTable
  *	@author  support@sql-workbench.net
  */
-public class PrintPreviewAction 		
+public class ResetFilterAction 
 	extends WbAction
 	implements TableModelListener
 {
 	private WbTable client;
 
-	public PrintPreviewAction(WbTable aClient)
+	public ResetFilterAction(WbTable aClient)
 	{
 		super();
 		this.client = aClient;
+		this.initMenuDefinition("MnuTxtResetFilter");
 		this.client.addTableModelListener(this);
-		this.initMenuDefinition("MnuTxtPrintPreview");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
+		this.setIcon(ResourceMgr.getImage("resetFilter"));
+		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+		this.setCreateToolbarSeparator(false);
+		this.setEnabled(false);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.printPreview();
+		this.client.resetFilter();
 	}
-	
+
 	public void tableChanged(TableModelEvent tableModelEvent)
 	{
-		this.setEnabled(this.client.getRowCount() > 0);
+		this.setEnabled(this.client.getLastFilter() != null);
 	}
 }

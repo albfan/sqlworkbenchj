@@ -12,13 +12,17 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
 
 /**
  *	@author  support@sql-workbench.net
  */
-public class PrintAction extends WbAction
+public class PrintAction 
+		extends WbAction
+		implements TableModelListener
 {
 	private WbTable client;
 
@@ -26,6 +30,7 @@ public class PrintAction extends WbAction
 	{
 		super();
 		this.client = aClient;
+		this.client.addTableModelListener(this);
 		this.initMenuDefinition("MnuTxtPrint");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
 		this.setIcon(ResourceMgr.getImage("Print"));
@@ -35,4 +40,10 @@ public class PrintAction extends WbAction
 	{
 		this.client.printTable();
 	}
+	
+	public void tableChanged(TableModelEvent tableModelEvent)
+	{
+		this.setEnabled(this.client.getRowCount() > 0);
+	}
+	
 }

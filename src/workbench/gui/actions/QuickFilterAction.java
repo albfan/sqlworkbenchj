@@ -1,5 +1,5 @@
 /*
- * PrintPreviewAction.java
+ * FindAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -15,33 +15,32 @@ import java.awt.event.ActionEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import workbench.gui.components.WbTable;
+import workbench.gui.filter.DefineFilterExpressionPanel;
+import workbench.interfaces.QuickFilter;
 import workbench.resource.ResourceMgr;
 
 /**
+ *	Filter data from a WbTable 
  *	@author  support@sql-workbench.net
  */
-public class PrintPreviewAction 		
-	extends WbAction
-	implements TableModelListener
+public class QuickFilterAction 
+		extends WbAction
 {
-	private WbTable client;
-
-	public PrintPreviewAction(WbTable aClient)
+	private QuickFilter client;
+	
+	public QuickFilterAction(QuickFilter filterGui)
 	{
 		super();
-		this.client = aClient;
-		this.client.addTableModelListener(this);
-		this.initMenuDefinition("MnuTxtPrintPreview");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
+		this.client = filterGui;
+		this.initMenuDefinition("MnuTxtQuickFilter");
+		this.setIcon(ResourceMgr.getImage("filter"));
+		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+		this.setCreateToolbarSeparator(false);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.printPreview();
+		client.applyQuickFilter();
 	}
-	
-	public void tableChanged(TableModelEvent tableModelEvent)
-	{
-		this.setEnabled(this.client.getRowCount() > 0);
-	}
+
 }

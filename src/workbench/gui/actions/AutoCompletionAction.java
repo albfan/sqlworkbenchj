@@ -39,6 +39,10 @@ public class AutoCompletionAction
 		this.initMenuDefinition("MnuTxtAutoComplete", KeyStroke.getKeyStroke(KeyEvent.VK_Q,KeyEvent.CTRL_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setEnabled(false);
+		
+		// we have to register this keybinding with the editor
+		// otherwise Ctrl-Space will not work properly
+		editor.addKeyBinding(this);
 	}
 
 	public void setConnection(WbConnection conn)
@@ -64,7 +68,15 @@ public class AutoCompletionAction
 		}
 		this.setEnabled(conn != null);
 	}
-
+	
+	public void setAccelerator(KeyStroke key)
+	{
+		KeyStroke old = this.getAccelerator();
+		editor.removeKeyBinding(old);
+		super.setAccelerator(key);
+		editor.addKeyBinding(this);
+	}
+	
 	public void executeAction(ActionEvent e)
 	{
 		Component focus = FocusManager.getCurrentManager().getFocusOwner();

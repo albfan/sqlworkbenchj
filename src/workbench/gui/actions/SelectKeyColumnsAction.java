@@ -30,7 +30,7 @@ public class SelectKeyColumnsAction extends WbAction
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtSelectKeyColumns");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.setIcon(ResourceMgr.getBlankImage());
+		this.setIcon(ResourceMgr.getImage("key"));
 		this.setEnabled(false);
 	}
 

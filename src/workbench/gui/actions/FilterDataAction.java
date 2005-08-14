@@ -1,5 +1,5 @@
 /*
- * PrintPreviewAction.java
+ * FindAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -15,33 +15,38 @@ import java.awt.event.ActionEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import workbench.gui.components.WbTable;
+import workbench.gui.filter.DefineFilterExpressionPanel;
 import workbench.resource.ResourceMgr;
 
 /**
+ *	Filter data from a WbTable 
  *	@author  support@sql-workbench.net
  */
-public class PrintPreviewAction 		
-	extends WbAction
-	implements TableModelListener
+public class FilterDataAction 
+		extends WbAction
+		implements TableModelListener
 {
 	private WbTable client;
 
-	public PrintPreviewAction(WbTable aClient)
+	public FilterDataAction(WbTable aClient)
 	{
 		super();
 		this.client = aClient;
 		this.client.addTableModelListener(this);
-		this.initMenuDefinition("MnuTxtPrintPreview");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
+		this.initMenuDefinition("MnuTxtFilter");
+		this.setIcon(ResourceMgr.getImage("filter"));
+		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+		this.setCreateToolbarSeparator(false);
+		this.setEnabled(false);		
 	}
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.printPreview();
+		DefineFilterExpressionPanel.showDialog(this.client);
 	}
-	
+
 	public void tableChanged(TableModelEvent tableModelEvent)
 	{
-		this.setEnabled(this.client.getRowCount() > 0);
+		this.setEnabled(this.client.getLastFilter() != null || this.client.getRowCount() > 0);
 	}
 }
