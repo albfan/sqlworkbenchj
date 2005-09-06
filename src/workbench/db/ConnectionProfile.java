@@ -81,7 +81,7 @@ public class ConnectionProfile
 		this.setDriverclass(driverClass);
 		this.setUsername(userName);
 		this.setPassword(pwd);
-		this.setName(url);
+		this.setName("");
 		this.changed = false;
 	}
 
@@ -373,9 +373,11 @@ public class ConnectionProfile
 		result.setUsername(this.username);
 		result.setWorkspaceFile(this.workspaceFile);
 		result.setIgnoreDropErrors(this.ignoreDropErrors);
-		result.setUseSeperateConnectionPerTab(this.separateConnection);
+		result.setUseSeparateConnectionPerTab(this.separateConnection);
 		result.setRollbackBeforeDisconnect(this.rollbackBeforeDisconnect);
+		result.setDisableUpdateTableCheck(this.disableUpdateTableCheck);
 		result.setConfirmUpdates(this.confirmUpdates);
+		result.setStorePassword(this.storePassword);
 		if (this.connectionProperties != null)
 		{
 			Enumeration keys = this.connectionProperties.propertyNames();
@@ -515,7 +517,7 @@ public class ConnectionProfile
 
 	public void propertyChange(java.beans.PropertyChangeEvent evt)
 	{
-		if (Settings.ENCRYPT_PWD_KEY.equals(evt.getPropertyName()))
+		if (Settings.PROPERTY_ENCRYPT_PWD.equals(evt.getPropertyName()))
 		{
 			String old = this.password;
 			// calling setPassword will encrypt/decrypt the password

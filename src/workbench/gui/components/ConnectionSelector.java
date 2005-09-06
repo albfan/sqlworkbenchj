@@ -46,7 +46,7 @@ public class ConnectionSelector
 	private JLabel connectLabel;
 	private String fullError;
 	private String propertyKey;
-	
+
 	/** Creates a new instance of ConnectionSelector */
 	public ConnectionSelector(Frame parent, Connectable conn)
 	{
@@ -58,20 +58,23 @@ public class ConnectionSelector
 	{
 		this.propertyKey = key;
 	}
-	
-	public boolean connectInProgress()
+
+	public boolean isConnectInProgress()
 	{
-		return this.connectInProgress;
+		synchronized (this)
+		{
+			return this.connectInProgress;
+		}
 	}
-	
+
 	public void selectConnection()
 	{
 		this.selectConnection(this.propertyKey);
 	}
-	
+
 	public void selectConnection(String profileKey)
 	{
-		if (this.connectInProgress) return;
+		if (this.isConnectInProgress()) return;
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this.parent);
@@ -99,8 +102,8 @@ public class ConnectionSelector
 		{
 			LogMgr.logError("ConnectionSelector.selectConnection()", "Error during connect", th);
 		}
-	}	
-	
+	}
+
 	public void connectTo(final ConnectionProfile aProfile)
 	{
 		this.connectTo(aProfile, false);
@@ -108,11 +111,10 @@ public class ConnectionSelector
 
 	public void connectTo(final ConnectionProfile aProfile, final boolean showDialogOnError)
 	{
-		if (this.connectInProgress) return;
-
+		if (this.isConnectInProgress()) return;
 		this.showConnectingInfo();
 
-		Thread t = new WbThread("MainWindow connection thread")
+		Thread t = new WbThread("Connection thread")
 		{
 			public void run()
 			{
@@ -141,7 +143,7 @@ public class ConnectionSelector
 			this.parent.repaint();
 		}
 	}
-	
+
 	public void showDisconnectInfo()
 	{
 		this.showPopupMessagePanel(ResourceMgr.getString("MsgDisconnecting"));
@@ -173,18 +175,19 @@ public class ConnectionSelector
 		this.connectingInfo.setUndecorated(true);
 		this.connectingInfo.setSize(200,50);
 		WbSwingUtilities.center(this.connectingInfo, this.parent);
-		this.connectingInfo.show();
+		this.connectingInfo.setVisible(true);
 		WbSwingUtilities.showWaitCursor(this.parent);
 		WbSwingUtilities.showWaitCursor(this.connectingInfo);
 		Thread.yield();
 	}
-	
+
 	private void doConnect(final ConnectionProfile aProfile, final boolean showSelectDialogOnError)
 	{
 		boolean connected = false;
 		WbConnection conn = null;
 		String error = null;
-
+		this.setConnectIsInProgress();
+		
 		this.client.connectBegin(aProfile);
 		String id = this.client.getConnectionId(aProfile);
 		try
@@ -217,8 +220,8 @@ public class ConnectionSelector
 				next = next.getNextException();
 			}
 			this.fullError = logmsg.toString();
-			
-			LogMgr.logError("MainWindow.connectTo()", "SQL Exception when connecting", se);
+
+			LogMgr.logError("ConnectionSelector.doConnect()", "SQL Exception when connecting", se);
 		}
 		catch (Throwable e)
 		{
@@ -229,23 +232,42 @@ public class ConnectionSelector
 			WbSwingUtilities.showDefaultCursor(this.parent);
 		}
 
-		if (connected)
+		try
 		{
-			client.connected(conn);
-		}
-		else
-		{
-			client.connectFailed(error);
-			if (showSelectDialogOnError)
+			if (connected)
 			{
-				selectConnection();
+				client.connected(conn);
+			}
+			else
+			{
+				client.connectFailed(error);
+				if (showSelectDialogOnError)
+				{
+					selectConnection();
+				}
 			}
 		}
-		this.closeConnectingInfo();
-		client.connectEnded();
+		catch (Throwable th)
+		{
+			LogMgr.logError("ConnectionSelector.doConnect()", "Error ending connection process", th);
+		}
+		finally
+		{
+			this.closeConnectingInfo();
+			client.connectEnded();
+			this.clearConnectIsInProgress();
+		}
+	}
+
+	private void setConnectIsInProgress()
+	{
+		synchronized (this)
+		{
+			this.connectInProgress = true;
+		}
 	}
 	
-	private void clearConnectInProgress()
+	private void clearConnectIsInProgress()
 	{
 		synchronized (this)
 		{

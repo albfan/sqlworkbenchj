@@ -66,13 +66,12 @@ public class TriggerDisplayPanel
 
 	public void saveSettings()
 	{
-		Settings.getInstance().setProperty(this.getClass().getName(), "divider", this.splitPane.getDividerLocation());
+		Settings.getInstance().setProperty(this.getClass().getName() + ".divider", this.splitPane.getDividerLocation());
 	}
 	
 	public void restoreSettings()
 	{
-		int loc = Settings.getInstance().getIntProperty(this.getClass().getName(), "divider");
-		if (loc == 0) loc = 200;
+		int loc = Settings.getInstance().getIntProperty(this.getClass().getName() + ".divider", 200);
 		this.splitPane.setDividerLocation(loc);
 	}
 	

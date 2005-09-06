@@ -43,6 +43,7 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.EventObject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -71,6 +72,7 @@ import javax.swing.UIManager;
 import javax.swing.JPopupMenu.Separator;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -108,6 +110,7 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.dialogs.export.DataStoreExporter;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RowStatusRenderer;
+import workbench.gui.renderer.ToolTipRenderer;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.Searchable;
 import workbench.log.LogMgr;
@@ -117,6 +120,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.NullValue;
+import workbench.storage.ResultInfo;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.WbThread;
 
@@ -160,12 +164,12 @@ public class WbTable
 	private CopySelectedAsSqlUpdateAction copySelectedAsUpdateAction;
 	private FilterDataAction filterAction;
 	private ResetFilterAction resetFilterAction;
-	
+
 	private PrintAction printDataAction;
 	private PrintPreviewAction printPreviewAction;
 
 	private TableCellRenderer sortHeaderRenderer;
-	
+
 	private boolean adjustToColumnLabel = false;
 	private int headerPopupY = -1;
 	private int headerPopupX = -1;
@@ -183,12 +187,14 @@ public class WbTable
 	private JList rowHeader = null;
 	private boolean showPopup = true;
 	private boolean selectOnRightButtonClick = false;
-
+	private boolean highlightRequiredFields = false;
+	private Color requiredColor;
+	
 	public WbTable()
 	{
 		this(true);
 	}
-	
+
 	public WbTable(boolean printEnabled)
 	{
 		super(EmptyTableModel.EMPTY_MODEL);
@@ -219,18 +225,14 @@ public class WbTable
 		Font dataFont = this.getFont();
 		if (dataFont == null) dataFont = (Font)UIManager.get("Table.font");
 
-		boolean autoSelect = Settings.getInstance().getAutoSelectTableEditor();
-
-		JTextField text = new JTextField();
-		text.setFont(dataFont);
-		this.defaultEditor = WbTextCellEditor.createInstance(this, autoSelect);
+		this.defaultEditor = WbTextCellEditor.createInstance(this);
 		this.defaultEditor.setFont(dataFont);
 
 		// Create a separate editor for numbers that is right alligned
 		numberEditorTextField = new JTextField();
 		numberEditorTextField.setFont(dataFont);
 		numberEditorTextField.setHorizontalAlignment(SwingConstants.RIGHT);
-		this.defaultNumberEditor = new WbTextCellEditor(this, numberEditorTextField, autoSelect);
+		this.defaultNumberEditor = new WbTextCellEditor(this, numberEditorTextField);
 
 		this.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
@@ -248,7 +250,7 @@ public class WbTable
 
 		this.filterAction = new FilterDataAction(this);
 		this.resetFilterAction = new ResetFilterAction(this);
-		
+
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.addPopupAction(this.exportDataAction, false);
 		this.addPopupAction(this.dataToClipboard, true);
@@ -270,7 +272,7 @@ public class WbTable
 			this.popup.add(this.printDataAction.getMenuItem());
 			this.popup.add(this.printPreviewAction.getMenuItem());
 		}
-		
+
 		this.addMouseListener(this);
 
 		InputMap im = this.getInputMap(WHEN_FOCUSED);
@@ -314,7 +316,7 @@ public class WbTable
 
 	public FilterDataAction getFilterAction() { return this.filterAction; }
 	public ResetFilterAction getResetFilterAction() { return this.resetFilterAction; }
-	
+
 	public CopySelectedAsTextAction getCopySelectedAsTextAction()
 	{
 		return this.copySelectedAsTextAction;
@@ -351,7 +353,7 @@ public class WbTable
 		{
 			copySelectedAsInsertAction = new CopySelectedAsSqlInsertAction(this);
 		}
-		
+
 		if (copySelectedAsDeleteInsertAction == null)
 		{
 			copySelectedAsDeleteInsertAction = new CopySelectedAsSqlDeleteInsertAction(this);
@@ -373,12 +375,12 @@ public class WbTable
 	{
 		 return this.copyInsertAction;
 	}
-	
+
 	public CopyAsSqlDeleteInsertAction getCopyAsDeleteInsertAction()
 	{
 		 return this.copyDeleteInsertAction;
 	}
-	
+
 	public CopyAsSqlUpdateAction getCopyAsUpdateAction()
 	{
 		return this.copyUpdateAction;
@@ -406,11 +408,6 @@ public class WbTable
 
 	public void setSelectOnRightButtonClick(boolean flag) { this.selectOnRightButtonClick = flag; }
 	public boolean getSelectOnRightButtonClick() { return this.selectOnRightButtonClick; }
-	public void setAutoSelectOnEdit(boolean aFlag)
-	{
-		if (this.defaultEditor != null) this.defaultEditor.setAutoSelect(aFlag);
-		if (this.defaultNumberEditor != null) this.defaultNumberEditor.setAutoSelect(aFlag);
-	}
 
 	public void reset()
 	{
@@ -432,7 +429,7 @@ public class WbTable
 		}
 		this.popup.add(submenu);
 	}
-	
+
 	public void addPopupAction(WbAction anAction, boolean withSep)
 	{
 		this.addPopupMenu(anAction.getMenuItem(), withSep);
@@ -466,7 +463,7 @@ public class WbTable
 		boolean selected = this.getSelectedRowCount() > 0;
 		boolean update = false;
 		boolean insert = false;
-		
+
 		if (selected)
 		{
 			DataStore ds = this.getDataStore();
@@ -483,17 +480,17 @@ public class WbTable
 		{
 			this.copySelectedAsInsertAction.setEnabled(selected && insert);
 		}
-		
+
 		if (this.copySelectedAsUpdateAction != null)
 		{
 			this.copySelectedAsUpdateAction.setEnabled(selected & update);
 		}
-		
+
 		if (this.copySelectedAsDeleteInsertAction != null)
 		{
 			this.copySelectedAsDeleteInsertAction.setEnabled(selected & update && insert);
 		}
-		
+
 	}
 
 	protected void configureEnclosingScrollPane()
@@ -575,6 +572,108 @@ public class WbTable
 		return printer;
 	}
 
+	public Component prepareEditor(TableCellEditor editor, int row, int column)
+	{
+		Component comp = super.prepareEditor(editor, row, column);
+		ResultInfo info = this.getDataStore().getResultInfo();
+		int realColumn  = column;
+		if (this.dwModel.getShowStatusColumn())
+		{
+			realColumn = column - 1;
+		}
+		boolean nullable = info.isNullable(realColumn);
+		if (editor == this.defaultEditor || editor == this.defaultNumberEditor)
+		{
+			WbTextCellEditor wbEditor = (WbTextCellEditor)editor;
+			if (nullable)
+			{
+				wbEditor.setBackground(wbEditor.getDefaultBackground());
+			}
+			else
+			{
+				wbEditor.setBackground(requiredColor);
+			}
+		}
+		return comp;
+	}
+
+	public boolean editCellAt(int row, int column, EventObject e)
+	{
+		boolean result = super.editCellAt(row, column, e);
+		if (result && this.highlightRequiredFields)
+		{
+			initRendererHighlight(row);
+		}
+		return result;
+	}
+
+	private void initRendererHighlight(int row)
+	{
+		ResultInfo info = this.getDataStore().getResultInfo();
+		int offset = 0;
+		int tableCols = this.getColumnCount();
+		if (this.dwModel.getShowStatusColumn()) offset = 1;
+		boolean[] highlightCols = new boolean[tableCols];
+		for (int i=0; i < info.getColumnCount(); i++)
+		{
+			boolean nullable = info.isNullable(i);
+			highlightCols[i+offset] = !nullable;
+		}
+
+		for (int i=0; i < tableCols; i++)
+		{
+			TableCellRenderer rend = getCellRenderer(row, i);
+			if (rend instanceof ToolTipRenderer)
+			{
+				ToolTipRenderer wbRenderer = (ToolTipRenderer)rend;
+				wbRenderer.setHighlightBackground(requiredColor);
+				wbRenderer.setEditingRow(row);
+				wbRenderer.setHighlightColumns(highlightCols);
+			}
+		}
+		this.repaint();
+	}
+
+	public void editingCanceled(ChangeEvent e)
+	{
+		int row = this.getEditingRow();
+		super.editingCanceled(e);
+		resetHighlightRenderers(row);
+	}
+
+	public void editingStopped(ChangeEvent e)
+	{
+		int row = this.getEditingRow();
+		super.editingStopped(e);
+		resetHighlightRenderers(row);
+	}
+
+	public void removeEditor()
+	{
+		int row = this.getEditingRow();
+		super.removeEditor();
+		resetHighlightRenderers(row);
+	}
+	
+	private void resetHighlightRenderers(int row)
+	{
+		if (!this.highlightRequiredFields) return;
+		int colcount = this.getColumnCount();
+		for (int i=0; i < colcount; i++)
+		{
+			TableCellRenderer renderer = getCellRenderer(row, i);
+			if (renderer instanceof ToolTipRenderer)
+			{
+				ToolTipRenderer wbRenderer = (ToolTipRenderer)renderer;
+				wbRenderer.setHighlightBackground(null);
+				wbRenderer.setEditingRow(-1);
+				wbRenderer.setHighlightColumns(null);
+			}
+		}
+		this.repaint();
+		if (row > -1) this.getSelectionModel().setSelectionInterval(row, row);
+	}
+
 	/**
 	 *	Removes all registered listeners from the table model
 	 */
@@ -588,7 +687,7 @@ public class WbTable
 			this.dwModel.removeTableModelListener(l);
 		}
 	}
-	
+
 	private void addListeners()
 	{
 		if (this.dwModel == null) return;
@@ -601,7 +700,7 @@ public class WbTable
 			this.dwModel.addTableModelListener(l);
 		}
 	}
-	
+
 	public void setModel(TableModel aModel)
 	{
 		this.setModel(aModel, false);
@@ -632,9 +731,11 @@ public class WbTable
 			this.dwModel = null;
 		}
 		
+		resetFilter();
+
 		if (aModel instanceof DataStoreTableModel)
 		{
-			
+
 			this.dwModel = (DataStoreTableModel)aModel;
 			if (sortIt && header != null)
 			{
@@ -647,7 +748,7 @@ public class WbTable
 			}
 		}
 
-		if (aModel != EmptyTableModel.EMPTY_MODEL) 
+		if (aModel != EmptyTableModel.EMPTY_MODEL)
 		{
 			if (this.sortAscending != null) this.sortAscending.setEnabled(sortIt);
 			if (this.sortDescending != null) this.sortDescending.setEnabled(sortIt);
@@ -656,35 +757,21 @@ public class WbTable
 			this.initDefaultEditors();
 		}
 		addListeners();
-//		checkActions();
 	}
 
-//	private void checkActions()
-//	{
-//		int rows = this.getRowCount();
-//		if (this.printDataAction != null) this.printDataAction.setEnabled(rows > 0);
-//		if (this.printPreviewAction != null) this.printPreviewAction.setEnabled(rows > 0);
-//		if (this.filterAction != null)
-//		{
-//			this.filterAction.setEnabled(lastFilter != null || rows > 0); 
-//		}
-//		if (resetFilterAction != null) resetFilterAction.setEnabled(lastFilter != null);
-//	}
-	
 	private FilterExpression lastFilter;
 	private FilterExpression currentFilter;
-	
+
 	public void resetFilter()
 	{
+		this.currentFilter = null;
 		if (this.dwModel == null) return;
 		this.dwModel.resetFilter();
-		this.resetFilterAction.setEnabled(false);
-		this.currentFilter = null;
 	}
-	
+
 	public FilterExpression getLastFilter() { return lastFilter; }
 	public boolean isFiltered() { return (currentFilter != null); }
-	
+
 	public void applyFilter(FilterExpression filter)
 	{
 		if (this.dwModel == null) return;
@@ -692,7 +779,7 @@ public class WbTable
 		this.currentFilter = filter;
 		this.dwModel.applyFilter(filter);
 	}
-	
+
 	public DataStoreTableModel getDataStoreTableModel()
 	{
 		return this.dwModel;
@@ -1004,23 +1091,23 @@ public class WbTable
 	private void initDateRenderers()
 	{
 		Settings sett = Settings.getInstance();
-		
+
 		String format = sett.getDefaultDateFormat();
 		this.setDefaultRenderer(java.sql.Date.class, RendererFactory.getDateRenderer(format));
-		
+
 		format = sett.getDefaultDateTimeFormat();
 		this.setDefaultRenderer(java.sql.Timestamp.class, RendererFactory.getDateRenderer(format));
 	}
-	
+
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (Settings.DATE_FORMAT_KEY.equals(evt.getPropertyName()) ||
-			  Settings.DATE_TIME_FORMAT_KEY.equals(evt.getPropertyName()))
+		if (Settings.PROPERTY_DATE_FORMAT.equals(evt.getPropertyName()) ||
+			  Settings.PROPERTY_DATETIME_FORMAT.equals(evt.getPropertyName()))
 		{
 			initDateRenderers();
 		}
 	}
-	
+
 	/**
 	 * Initialize the default renderers for this table
 	 * @see workbench.gui.renderer.RendererFactory
@@ -1032,13 +1119,13 @@ public class WbTable
 		if (this.defaultRenderersByColumnClass == null) createDefaultRenderers();
 
 		initDateRenderers();
-		
+
 		Settings sett = Settings.getInstance();
 		int maxDigits = sett.getMaxFractionDigits();
 		char sep = sett.getDecimalSymbol().charAt(0);
 
 		TableCellRenderer numberRenderer = RendererFactory.getNumberRenderer(maxDigits, sep);
-		
+
 		this.setDefaultRenderer(java.sql.Clob.class, RendererFactory.getClobRenderer());
 		this.setDefaultRenderer(Number.class, numberRenderer);
 		this.setDefaultRenderer(Double.class, numberRenderer);
@@ -1048,7 +1135,7 @@ public class WbTable
 		TableCellRenderer intRenderer = RendererFactory.getIntegerRenderer();
 		this.setDefaultRenderer(BigInteger.class, intRenderer);
 		this.setDefaultRenderer(Integer.class, intRenderer);
-		
+
 		if (this.useDefaultStringRenderer)
 		{
 			this.setDefaultRenderer(String.class, RendererFactory.getStringRenderer());
@@ -1640,7 +1727,7 @@ public class WbTable
 	{
 		this.copyAsSql(false, selectedOnly, showSelectColumns, true);
 	}
-	
+
 	/**
 	 *	A general purpose method to select specific columns from the result set
 	 *  this is e.g. used for copying data to the clipboard
@@ -1714,18 +1801,18 @@ public class WbTable
 		{
 			this.copyInsertAction.setEnabled(insert);
 		}
-		
+
 		if (this.copyUpdateAction != null)
 		{
 			this.copyUpdateAction.setEnabled(update);
 		}
-		
+
 		if (this.copyDeleteInsertAction != null)
 		{
 			this.copyDeleteInsertAction.setEnabled(update && insert);
 		}
 	}
-	
+
 	/**
 	 *	Check for any defined PK columns.
 	 *	If no key columns can be found, the user
@@ -1910,6 +1997,24 @@ public class WbTable
 			}
 		}
 		return true;
+	}
+
+	public boolean isHighlightRequiredFields()
+	{
+		return highlightRequiredFields;
+	}
+
+	public void setHighlightRequiredFields(boolean flag)
+	{
+		this.highlightRequiredFields = flag;
+		if (flag && this.requiredColor == null)
+		{
+			requiredColor = Settings.getInstance().getRequiredFieldColor();
+		}
+		else if (!flag)
+		{
+			requiredColor = null;
+		}
 	}
 
 }

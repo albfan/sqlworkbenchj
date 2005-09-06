@@ -136,7 +136,8 @@ public class DataExporter
 	private ArrayList jobQueue;
 	private ExportWriter exportWriter;
 	private Window parentWindow;
-
+	private int tablesExported;
+	
 	public DataExporter()
 	{
 	}
@@ -181,19 +182,19 @@ public class DataExporter
 		});
 
 		WbSwingUtilities.center(this.progressWindow, null);
-		this.progressWindow.show();
+		this.progressWindow.setVisible(true);
 	}
 
-	public void addTableExportJob(String anOutputfile, String table)
+	public void addTableExportJob(String anOutputfile, TableIdentifier table)
 	{
 		if (this.jobQueue == null)
 		{
 			this.jobQueue = new ArrayList();
 		}
 		JobEntry job = new DataExporter.JobEntry();
-		job.tableName = table;
+		job.tableName = table.getTableExpression(this.dbConn);
 		job.outputFile = anOutputfile;
-		job.sqlStatement = "SELECT * FROM " + SqlUtil.quoteObjectname(table);
+		job.sqlStatement = "SELECT * FROM " + job.tableName;
 		this.jobQueue.add(job);
 	}
 
@@ -513,7 +514,8 @@ public class DataExporter
 	}
 
 	public String getSql() { return this.sql; }
-
+	public int getNumberExportedTables() { return this.tablesExported; }
+	
 	private void startBackgroundThread()
 	{
 		Thread t = new WbThread("Export")
@@ -561,6 +563,7 @@ public class DataExporter
 		this.pendingJobs = count;
 		this.jobsRunning = true;
 		this.cancelJobs = false;
+		this.tablesExported = 0;
 		for (int i=0; i < count; i++)
 		{
 			JobEntry job = (JobEntry)this.jobQueue.get(i);
@@ -574,12 +577,20 @@ public class DataExporter
 			}
 			if (this.rowMonitor != null && job.tableName != null)
 			{
-				this.rowMonitor.setCurrentObject(job.tableName, i + 1, count);
+				StringBuffer msg = new StringBuffer(80);
+				msg.append(job.tableName);
+				msg.append(" [");
+				msg.append(i+1);
+				msg.append('/');
+				msg.append(count);
+				msg.append("] ");
+				this.rowMonitor.setCurrentObject(msg.toString(), i+1, count);
 			}
 
 			try
 			{
 				this.startExport();
+				this.tablesExported ++;
 			}
 			catch (Throwable th)
 			{
@@ -621,8 +632,9 @@ public class DataExporter
 		}
 		catch (Exception e)
 		{
+			this.addError(ResourceMgr.getString("MsgExecuteError") + this.sql);
 			this.addError(ExceptionUtil.getDisplay(e));
-			LogMgr.logError("DataExporter.startExport()", "Could not execute SQL statement: " + e.getMessage(), e);
+			LogMgr.logError("DataExporter.startExport()", "Could not execute SQL statement: " + this.sql + ", Error: " + e.getMessage(), e);
 			if (this.showProgressWindow)
 			{
 				if (!jobsRunning) this.closeProgress();
@@ -791,7 +803,7 @@ public class DataExporter
 				catch (UnsupportedEncodingException e)
 				{
 					pw = null;
-					String msg = ResourceMgr.getString("ErrorExportWronEncoding");
+					String msg = ResourceMgr.getString("ErrorExportWrongEncoding");
 					msg = StringUtil.replace(msg, "%encoding%", this.encoding);
 					this.encoding = null;
 					this.addWarning(msg);
@@ -842,7 +854,7 @@ public class DataExporter
 	{
 		if (this.progressWindow != null)
 		{
-			this.progressWindow.hide();
+			this.progressWindow.setVisible(false);
 			this.progressWindow.dispose();
 			this.progressPanel = null;
 		}

@@ -11,6 +11,7 @@
  */
 package workbench.gui.actions;
 
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -37,6 +38,13 @@ public class SelectMaxRowsAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.selectMaxRowsField();
+		this.client.showResultPanel();
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				client.getData().selectMaxRowsField();
+			}
+		});
 	}
 }

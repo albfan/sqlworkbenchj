@@ -24,6 +24,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -163,7 +165,9 @@ public class SqlPanel
 						MainPanel, Exporter, TextFileContainer, DbUpdater, Interruptable, FormattableSql, Commitable,
 						JobErrorHandler, FilenameChangeListener, ExecutionController, ResultLogger
 {
-	EditorPanel editor;
+	private static int instanceCount = 0;
+	
+	private EditorPanel editor;
 	private DwPanel data;
 	private SqlHistory sqlHistory;
 
@@ -172,9 +176,6 @@ public class SqlPanel
 	private JSplitPane contentPanel;
 	private boolean threadBusy;
 	private boolean cancelExecution = false;
-
-	private int currentHistoryEntry = -1;
-	private int maxHistorySize = 10;
 
 	private List actions = new ArrayList();
 	private List toolbarActions = new ArrayList();
@@ -216,7 +217,6 @@ public class SqlPanel
 	private RedoAction redo;
 
 	private int internalId;
-	private String historyFilename;
 
 	private FileDiscardAction fileDiscardAction;
 	private FileReloadAction fileReloadAction;
@@ -232,9 +232,6 @@ public class SqlPanel
 	private boolean updateRunning;
 	private boolean textModified = false;
 	private String tabName = null;
-
-	private ImageIcon loadingIcon;
-	private Icon dummyIcon;
 
 	private int lastDividerLocation = -1;
 
@@ -253,7 +250,7 @@ public class SqlPanel
 		DwStatusBar statusBar = new DwStatusBar(true);
 		Border b = BorderFactory.createCompoundBorder(new EmptyBorder(2, 1, 0, 1), new EtchedBorder());
 		statusBar.setBorder(b);
-
+		instanceCount ++;
 		this.data = new DwPanel(statusBar);
 		this.data.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.data.setDoubleBuffered(true);
@@ -266,8 +263,6 @@ public class SqlPanel
 		this.log.setLineWrap(true);
 		this.log.setWrapStyleWord(true);
 		this.log.addMouseListener(new TextComponentMouseListener());
-
-		this.maxHistorySize = Settings.getInstance().getMaxHistorySize();
 
 		this.resultTab = new JTabbedPane();
 		this.resultTab.setTabPlacement(JTabbedPane.TOP);
@@ -322,7 +317,6 @@ public class SqlPanel
 	public void setId(int anId)
 	{
 		this.internalId = anId;
-		this.historyFilename = "WbStatements" + Integer.toString(this.internalId);
 	}
 
 	public void initDefaults()
@@ -337,30 +331,6 @@ public class SqlPanel
 		// no global settings to store
 	}
 	
-	public void saveSettings(Properties props)
-	{
-		int location = this.contentPanel.getDividerLocation();
-		int last = this.contentPanel.getLastDividerLocation();
-		props.setProperty("tab" + (this.internalId - 1) + ".divider.location", Integer.toString(location));
-		props.setProperty("tab" + (this.internalId - 1) + ".divider.lastlocation", Integer.toString(last));
-	}
-
-	public void restoreSettings(Properties props)
-	{
-		try
-		{
-			int loc = Integer.parseInt(props.getProperty("tab" + (this.internalId - 1) + ".divider.location", "0"));
-			if (loc <= 0) loc = 200;
-			this.contentPanel.setDividerLocation(loc);
-			loc = Integer.parseInt(props.getProperty("tab" + (this.internalId - 1) + ".divider.lastlocation", "0"));
-			if (loc > 0) this.contentPanel.setLastDividerLocation(loc);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning("SqlPanel.restoreSettings()", "Error when restore settings", e);
-		}
-	}
-
 	public WbToolbar getToolbar()
 	{
 		return this.toolbar;
@@ -398,15 +368,15 @@ public class SqlPanel
 		if (withSeperator) this.toolbar.add(new WbToolbarSeparator(), this.toolbar.getComponentCount() - 1);
 	}
 
-	public void updateUI()
-	{
-		super.updateUI();
-		if (this.toolbar != null)
-		{
-			this.toolbar.updateUI();
-			this.toolbar.repaint();
-		}
-	}
+//	public void updateUI()
+//	{
+//		super.updateUI();
+//		if (this.toolbar != null)
+//		{
+//			this.toolbar.updateUI();
+//			this.toolbar.repaint();
+//		}
+//	}
 
 	public boolean readFile(String aFilename, String encoding)
 	{
@@ -426,7 +396,7 @@ public class SqlPanel
 		}
 		else
 		{
-			this.removeTabIcon();
+			this.removeIconFromTab();
 		}
 		return result;
 	}
@@ -538,7 +508,7 @@ public class SqlPanel
 			this.fileDiscardAction.setEnabled(false);
 			this.fileReloadAction.setEnabled(false);
       this.fireFilenameChanged(this.tabName);
-			this.removeTabIcon();
+			this.removeIconFromTab();
 			this.selectEditorLater();
 			return true;
     }
@@ -777,9 +747,10 @@ public class SqlPanel
 		this.toolbarActions.add(this.data.getCopyRowAction());
 		this.toolbarActions.add(this.data.getDeleteRowAction());
 
-		a = this.data.getTable().getFilterAction();
-		a.setCreateToolbarSeparator(true);
-		this.toolbarActions.add(a);
+		WbAction filterAction = this.data.getTable().getFilterAction();
+		filterAction.setCreateToolbarSeparator(true);
+		filterAction.setCreateMenuSeparator(true);
+		this.toolbarActions.add(filterAction);
 		this.toolbarActions.add(this.data.getTable().getResetFilterAction());
 		
 		this.commitAction.setCreateToolbarSeparator(true);
@@ -819,6 +790,9 @@ public class SqlPanel
 		this.findDataAction.setCreateMenuSeparator(true);
 		this.actions.add(this.findDataAction);
 		this.actions.add(this.findDataAgainAction);
+		this.actions.add(filterAction);
+		this.actions.add(this.data.getTable().getResetFilterAction());
+		
 		this.printDataAction.setCreateMenuSeparator(true);
 		this.actions.add(this.printDataAction);
 		this.actions.add(this.printPreviewAction);
@@ -1022,43 +996,14 @@ public class SqlPanel
 		}
 	}
 
-	/**
-	 *	When the SqlPanel becomse visible (i.e. the tab is
-	 *	selected in the main window) we set the focus to
-	 *	the editor component.
-	 */
-//	public void setVisible(boolean aFlag)
-//	{
-//		super.setVisible(aFlag);
-//		if (aFlag)
-//		{
-//			selectEditorLater();
-//		}
-//	}
-
 	public void panelSelected()
 	{
 		selectEditorLater();
 	}
 	
-	public List getToolbarActions()
-	{
-		return this.toolbarActions;
-	}
-
 	public List getActions()
 	{
 		return this.actions;
-	}
-
-	public long addRow()
-	{
-		return this.data.addRow();
-	}
-
-	public void deleteRow()
-	{
-		this.data.deleteRow();
 	}
 
 	public void makeReadOnly()
@@ -1120,7 +1065,9 @@ public class SqlPanel
 
 	public void initStatementHistory()
 	{
-		this.sqlHistory = new SqlHistory(this.maxHistorySize);
+		int size = Settings.getInstance().getMaxHistorySize();
+
+		this.sqlHistory = new SqlHistory(size);
 		this.checkStatementActions();
 	}
 
@@ -1177,15 +1124,14 @@ public class SqlPanel
 		this.selectEditor();
 	}
 
-	public void readFromWorkspace(WbWorkspace w)
+	public void readFromWorkspace(WbWorkspace w, int index)
 		throws IOException
 	{
 		this.editor.setText("");
-		SqlHistory history = this.getSqlHistory();
 
 		try
 		{
-			w.readHistoryData(this.internalId - 1, history);
+			w.readHistoryData(index, this.sqlHistory);
 		}
 		catch (Exception e)
 		{
@@ -1193,22 +1139,22 @@ public class SqlPanel
 			this.clearSqlStatements();
 		}
 
-		String filename = w.getExternalFileName(this.internalId - 1);
-		this.tabName = w.getTabTitle(this.internalId - 1);
+		String filename = w.getExternalFileName(index);
+		this.tabName = w.getTabTitle(index);
 		if (this.tabName != null && this.tabName.length() == 0)
 		{
 			this.tabName = null;
 		}
 
-		int v = w.getMaxRows(this.internalId - 1);
+		int v = w.getMaxRows(index);
 		this.data.setMaxRows(v);
-		v = w.getQueryTimeout(this.internalId - 1);
+		v = w.getQueryTimeout(index);
 		this.data.setQueryTimeout(v);
 
 		boolean fileLoaded = false;
 		if (filename != null)
 		{
-			String encoding = w.getExternalFileEncoding(this.internalId - 1);
+			String encoding = w.getExternalFileEncoding(index);
 			fileLoaded = this.readFile(filename, encoding);
 		}
 
@@ -1225,12 +1171,23 @@ public class SqlPanel
 		}
 		else
 		{
-			int cursorPos = w.getExternalFileCursorPos(this.internalId - 1);
+			int cursorPos = w.getExternalFileCursorPos(index);
 			if (cursorPos > -1 && cursorPos < this.editor.getText().length()) this.editor.setCaretPosition(cursorPos);
 		}
 
 		Properties props = w.getSettings();
-		this.restoreSettings(props);
+		try
+		{
+			int loc = Integer.parseInt(props.getProperty("tab" + (index) + ".divider.location", "0"));
+			if (loc <= 0) loc = 200;
+			this.contentPanel.setDividerLocation(loc);
+			loc = Integer.parseInt(props.getProperty("tab" + (index) + ".divider.lastlocation", "0"));
+			if (loc > 0) this.contentPanel.setLastDividerLocation(loc);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("SqlPanel.restoreSettings()", "Error when restore settings", e);
+		}
 	}
 
 	/** Do any work which should be done during the process of saving the
@@ -1243,23 +1200,28 @@ public class SqlPanel
 		return this.checkAndSaveFile();
 	}
 
-	public void saveToWorkspace(WbWorkspace w)
+	public void saveToWorkspace(WbWorkspace w, int index)
 		throws IOException
 	{
 		this.saveHistory(w);
 		Properties props = w.getSettings();
-		this.saveSettings(props);
-		w.setMaxRows(this.internalId - 1, this.data.getMaxRows());
-		w.setQueryTimeout(this.internalId - 1, this.data.getQueryTimeout());
+		
+		int location = this.contentPanel.getDividerLocation();
+		int last = this.contentPanel.getLastDividerLocation();
+		props.setProperty("tab" + (index) + ".divider.location", Integer.toString(location));
+		props.setProperty("tab" + (index) + ".divider.lastlocation", Integer.toString(last));
+		
+		w.setMaxRows(index, this.data.getMaxRows());
+		w.setQueryTimeout(index, this.data.getQueryTimeout());
 		if (this.hasFileLoaded())
 		{
-			w.setExternalFileName(this.internalId - 1, this.getCurrentFileName());
-			w.setExternalFileCursorPos(this.internalId - 1, this.editor.getCaretPosition());
-			w.setExternalFileEncoding(this.internalId - 1, this.editor.getCurrentFileEncoding());
+			w.setExternalFileName(index, this.getCurrentFileName());
+			w.setExternalFileCursorPos(index, this.editor.getCaretPosition());
+			w.setExternalFileEncoding(index, this.editor.getCurrentFileEncoding());
 		}
 		if (this.tabName != null)
 		{
-			w.setTabTitle(this.internalId - 1, this.tabName);
+			w.setTabTitle(index, this.tabName);
 		}
 	}
 
@@ -1267,18 +1229,7 @@ public class SqlPanel
 		throws IOException
 	{
 		this.storeStatementInHistory();
-		w.addHistoryEntry(this.getHistoryFilename(), this.sqlHistory);
-	}
-
-	public SqlHistory getSqlHistory()
-	{
-		return this.sqlHistory;
-	}
-
-
-	public String getHistoryFilename()
-	{
-		return this.historyFilename + ".txt";
+		w.addHistoryEntry("WbStatements" + this.internalId + ".txt", this.sqlHistory);
 	}
 
 	public String getTabTitle()
@@ -1298,12 +1249,12 @@ public class SqlPanel
 			{
 				fname = "[" + tabName + "]";
 			}
-			this.showTabIcon(getFileIcon());
+			//this.showIconForTab(getFileIcon());
 		}
 		else
 		{
 			fname = this.getTabName();
-			this.removeTabIcon();
+			//this.removeIconFromTab();
 		}
 		if (fname == null) fname = defaultLabel;
 		return fname;
@@ -1320,11 +1271,11 @@ public class SqlPanel
 		{
 			File f = new File(fname);
 			tooltip = f.getAbsolutePath();
-			this.showTabIcon(getFileIcon());
+			this.showIconForTab(getFileIcon());
 		}
 		else
 		{
-			this.removeTabIcon();
+			this.removeIconFromTab();
 		}
 		
 		String tabTitle = getTabTitle();
@@ -1343,6 +1294,11 @@ public class SqlPanel
 		tab.setToolTipTextAt(index, tooltip);
 	}
 
+	public String getName()
+	{
+		return this.getTabTitle();
+	}
+	
 	public String getTabName()
 	{
 		return this.tabName;
@@ -1359,6 +1315,7 @@ public class SqlPanel
 
 	public String getCurrentFileName()
 	{
+		if (this.editor == null) return null;
 		return this.editor.getCurrentFileName();
 	}
 
@@ -1370,19 +1327,22 @@ public class SqlPanel
 		this.editor.setText(aStatement);
 	}
 
-	public void disconnect()
+	public synchronized void disconnect()
 	{
-		this.setConnection(null);
+		if (this.dbConnection != null) 
+		{
+			this.setConnection(null);
+		}
 		this.makeReadOnly();
 		this.log.setText("");
 	}
 
-	public WbConnection getConnection()
+	public synchronized WbConnection getConnection()
 	{
 		return this.dbConnection;
 	}
 
-	public boolean isConnected()
+	public synchronized boolean isConnected()
 	{
 		// I'm only checking if the connection is defined, because
 		// MainWindow will make sure a valid connection is set
@@ -1392,7 +1352,7 @@ public class SqlPanel
 		return (this.dbConnection != null);
 	}
 
-	public void setConnection(WbConnection aConnection)
+	public synchronized void setConnection(WbConnection aConnection)
 	{
 		if (this.dbConnection != null)
 		{
@@ -1532,6 +1492,7 @@ public class SqlPanel
 		}
 		finally
 		{
+			this.setBusy(false);
 		}
 	}
 
@@ -1541,7 +1502,7 @@ public class SqlPanel
 		if (this.executionThread == null) return true;
 
 		boolean success = false;
-		int wait = Settings.getInstance().getIntProperty(this.getClass().getName(), "abortwait", 1);
+		int wait = Settings.getInstance().getIntProperty(this.getClass().getName() + ".abortwait", 1);
 		try
 		{
 			LogMgr.logDebug("SqlPanel.abortExecution()", "Interrupting SQL Thread...");
@@ -2410,19 +2371,6 @@ public class SqlPanel
 		});
 	}
 
-  public void selectMaxRowsField()
-  {
-		this.showResultPanel();
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				data.selectMaxRowsField();
-			}
-		});
-
-  }
-
 	private void checkResultSetActions()
 	{
 		if (this.data == null) return;
@@ -2447,48 +2395,9 @@ public class SqlPanel
 		this.importFileAction.setEnabled(mayEdit);
 	}
 
-	private ImageIcon getLoadingIndicator()
-	{
-		if (this.loadingIcon == null)
-		{
-			if (Settings.getInstance().getUseAnimatedIcon())
-			{
-				this.loadingIcon = ResourceMgr.getPicture("loading");
-			}
-			else
-			{
-				this.loadingIcon = ResourceMgr.getPicture("loading-static");
-			}
-		}
-		return this.loadingIcon;
-	}
-
-	private ImageIcon cancelIcon = null;
-
-	private ImageIcon getCancelIndicator()
-	{
-		if (this.cancelIcon == null)
-		{
-			if (Settings.getInstance().getUseAnimatedIcon())
-			{
-				this.cancelIcon = ResourceMgr.getPicture("cancelling");
-			}
-			else
-			{
-				this.cancelIcon = ResourceMgr.getPicture("cancelling-static");
-			}
-		}
-		return this.cancelIcon;
-	}
-
-	private void enableExecuteActions()
-	{
-		this.setExecuteActionStates(true);
-	}
-	private void disableExecuteActions()
-	{
-		this.setExecuteActionStates(false);
-	}
+	private void enableExecuteActions() { this.setExecuteActionStates(true); }
+	private void disableExecuteActions() { this.setExecuteActionStates(false); }
+	
 	private void setExecuteActionStates(boolean aFlag)
 	{
 		this.executeAll.setEnabled(aFlag);
@@ -2507,15 +2416,50 @@ public class SqlPanel
 		this.spoolData.setEnabled(aFlag);
 	}
 
-	private synchronized void showCancelIcon()
+	private ImageIcon fileIcon = null;
+	private ImageIcon fileModifiedIcon = null;
+	private ImageIcon cancelIcon = null;
+	private ImageIcon loadingIcon;
+
+	private void showCancelIcon()
 	{
-		this.showTabIcon(this.getCancelIndicator());
+		this.showIconForTab(this.getCancelIndicator());
 		if (this.loadingIcon != null) this.loadingIcon.getImage().flush();
 	}
 
-	private ImageIcon fileIcon = null;
-	private ImageIcon fileModifiedIcon = null;
+	private ImageIcon getLoadingIndicator()
+	{
+		if (this.loadingIcon == null)
+		{
+			if (Settings.getInstance().getUseAnimatedIcon())
+			{
+				this.loadingIcon = ResourceMgr.getPicture("loading");
+			}
+			else
+			{
+				this.loadingIcon = ResourceMgr.getPicture("loading-static");
+			}
+		}
+		return this.loadingIcon;
+	}
 
+	
+	private ImageIcon getCancelIndicator()
+	{
+		if (this.cancelIcon == null)
+		{
+			if (Settings.getInstance().getUseAnimatedIcon())
+			{
+				this.cancelIcon = ResourceMgr.getPicture("cancelling");
+			}
+			else
+			{
+				this.cancelIcon = ResourceMgr.getPicture("cancelling-static");
+			}
+		}
+		return this.cancelIcon;
+	}
+	
 	private ImageIcon getFileIcon()
 	{
 		ImageIcon icon = null;
@@ -2539,26 +2483,31 @@ public class SqlPanel
 		return icon;
 	}
 
-	private void removeTabIcon()
+	private void removeIconFromTab()
 	{
 		if (this.isBusy()) return;
-		this.showTabIcon(null);
+		this.showIconForTab(null);
 	}
 
 	private void showFileIcon()
 	{
 		if (this.isBusy()) return;
-		this.showTabIcon(this.getFileIcon());
+		this.showIconForTab(this.getFileIcon());
 	}
 
-	private void showTabIcon(ImageIcon icon)
+	private void showIconForTab(ImageIcon icon)
 	{
 		Container parent = this.getParent();
 		if (parent instanceof JTabbedPane)
 		{
 			JTabbedPane tab = (JTabbedPane)parent;
 			int index = tab.indexOfComponent(this);
-			tab.setIconAt(index, icon);
+			Icon oldIcon = tab.getIconAt(index);
+			if (icon == null && oldIcon == null) return;
+			if (icon != oldIcon)
+			{
+				tab.setIconAt(index, icon);
+			}
 		}
 	}
 
@@ -2686,15 +2635,24 @@ public class SqlPanel
 		Settings.getInstance().removePropertyChangeLister(this);
 		this.data.clearContent();
 		this.data = null;
+		this.sqlHistory.clear();
 		this.editor.dispose();
 		this.editor = null;
+		this.actions.clear();
+		this.toolbarActions.clear();
+		this.filenameChangeListeners.clear();
+		this.execListener.clear();
+		this.toolbar.removeAll();
+		this.toolbar = null;
 		this.abortExecution();
 		this.executionThread = null;
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (evt.getPropertyName().equals(Settings.ANIMATED_ICONS_KEY))
+		String prop = evt.getPropertyName();
+		if (prop == null) return;
+		if (prop.equals(Settings.PROPERTY_ANIMATED_ICONS))
 		{
 			if (this.cancelIcon != null)
 			{
@@ -2707,11 +2665,11 @@ public class SqlPanel
 				this.loadingIcon = null;
 			}
 		}
-		else if (evt.getSource() == this.dbConnection && WbConnection.PROP_AUTOCOMMIT.equals(evt.getPropertyName()))
+		else if (evt.getSource() == this.dbConnection && WbConnection.PROP_AUTOCOMMIT.equals(prop))
 		{
 			this.checkAutocommit();
 		}
-		else if (evt.getSource() == this.data && evt.getPropertyName().equals("updateTable"))
+		else if (evt.getSource() == this.data && prop.equals("updateTable"))
 		{
 			this.checkResultSetActions();
 		}

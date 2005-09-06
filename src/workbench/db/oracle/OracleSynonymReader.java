@@ -39,7 +39,7 @@ public class OracleSynonymReader
 
 		PreparedStatement stmt = con.prepareStatement(sql.toString());
 		stmt.setString(1, aSynonym);
-		stmt.setString(2, anOwner);
+		stmt.setString(2, anOwner == null ? "PUBLIC" : anOwner);
 
 		ResultSet rs = stmt.executeQuery();
 		String table = null;

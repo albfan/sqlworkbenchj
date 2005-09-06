@@ -35,8 +35,8 @@ public class TextOptionsPanel
 	public void saveSettings()
 	{
 		Settings s = Settings.getInstance();
-		s.setBoolProperty("workbench.import.text.containsheader", this.getContainsHeader());
-		s.setBoolProperty("workbench.import.text.decode", this.getDecode());
+		s.setProperty("workbench.import.text.containsheader", this.getContainsHeader());
+		s.setProperty("workbench.import.text.decode", this.getDecode());
 		s.setDefaultTextDelimiter(this.getTextDelimiter());
 		s.setQuoteChar(this.getTextQuoteChar());
 		s.setProperty("workbench.import.text.decimalchar", this.getDecimalChar());

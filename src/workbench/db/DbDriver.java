@@ -156,6 +156,10 @@ public class DbDriver
 				this.classLoader = new URLClassLoader(url);
 			}
 
+			// New Firebird 2.0 driver needs this, it does not seem to harm
+			// for other drivers
+			Thread.currentThread().setContextClassLoader(classLoader);
+			
 			Class drvClass = this.classLoader.loadClass(this.driverClass);
 			this.driverClassInstance = (Driver)drvClass.newInstance();
 			if (Settings.getInstance().getBoolProperty("workbench.db.registerdriver", false))

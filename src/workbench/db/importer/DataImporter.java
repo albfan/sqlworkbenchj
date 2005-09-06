@@ -83,6 +83,8 @@ public class DataImporter
 	private int colCount;
 	private int numTables;
 	private boolean useTruncate = false;
+	private int totalTables = -1;
+	private int currentTable = -1;
 	
 	// this array will map the columns for updating the target table
 	// the index into this array will be the index
@@ -100,7 +102,10 @@ public class DataImporter
 	private boolean isRunning = false;
 	private int batchSize = -1;
 	private ImportFileParser parser;
-
+	
+	// Additional WHERE clause for UPDATE statements
+	private String whereClauseForUpdate;
+	
 	public DataImporter()
 	{
 		this.messages = new StrBuffer(1000);
@@ -142,6 +147,18 @@ public class DataImporter
 	public boolean getDeleteTarget() { return deleteTarget; }
 	public void setBatchSize(int size) { this.batchSize = size; }
 
+	public void setWhereClauseForUpdate(String clause) 
+	{ 
+		if (StringUtil.isEmptyString(clause))
+		{
+			this.whereClauseForUpdate = null; 
+		}
+		else
+		{
+			this.whereClauseForUpdate = clause; 
+		}
+	}
+	
 	/**
 	 *	Controls deletion of the target table.
 	 */
@@ -424,6 +441,16 @@ public class DataImporter
 		if (this.progressMonitor != null) this.progressMonitor.jobFinished();
 	}
 
+	public void setTableCount(int total)
+	{
+		this.totalTables = total;
+	}
+	
+	public void setCurrentTable(int current)
+	{
+		this.currentTable = current;
+	}
+	
 	/**
 	 *	Callback function for RowDataProducer. The order in the data array
 	 * 	has to be the same as initially passed in the setTargetTable() method.
@@ -437,7 +464,21 @@ public class DataImporter
 		currentImportRow++;
 		if (this.progressMonitor != null && this.reportInterval > 0 && (currentImportRow == 1 || currentImportRow % reportInterval == 0))
 		{
-			progressMonitor.setCurrentObject(this.targetTable, currentImportRow, -1);
+			if (this.totalTables > 0)
+			{
+				StringBuffer msg = new StringBuffer(this.targetTable.length() + 20);
+				msg.append(targetTable);
+				msg.append(" [");
+				msg.append(this.currentTable);
+				msg.append('/');
+				msg.append(this.totalTables);
+				msg.append(']');
+				progressMonitor.setCurrentObject(msg.toString(), currentImportRow, -1);
+			}
+			else
+			{
+				progressMonitor.setCurrentObject(this.targetTable, currentImportRow, -1);
+			}
 		}
 
 		int rows = 0;
@@ -852,7 +893,7 @@ public class DataImporter
 		{
 			this.insertSql = text.toString();
 			this.insertStatement = this.dbConn.getSqlConnection().prepareStatement(this.insertSql);
-			LogMgr.logInfo("DataImporter.prepareInsertStatement()", "Using INSERT: " + this.insertSql);
+			LogMgr.logInfo("DataImporter.prepareInsertStatement()", "Statement for insert: " + this.insertSql);
 		}
 		catch (SQLException e)
 		{
@@ -933,11 +974,29 @@ public class DataImporter
 			throw new SQLException("Only key columns defined for update mode");
 		}
 		sql.append(where);
+		if (!StringUtil.isEmptyString(this.whereClauseForUpdate))
+		{
+			boolean addBracket = false;
+			if (!this.whereClauseForUpdate.trim().toUpperCase().startsWith("AND") && 
+				  !this.whereClauseForUpdate.trim().toUpperCase().startsWith("OR")
+				)
+			{
+				sql.append(" AND (");
+				addBracket = true;
+			}
+			else
+			{
+				sql.append(' ');
+			}
+			sql.append(this.whereClauseForUpdate.trim());
+			if (addBracket) sql.append(")");
+		}
+		
 		try
 		{
 			this.updateSql = sql.toString();
 			this.updateStatement = this.dbConn.getSqlConnection().prepareStatement(this.updateSql);
-			LogMgr.logInfo("DataImporter.prepareUpdateStatement()", "Using UPDATE: " + this.updateSql);
+			LogMgr.logInfo("DataImporter.prepareUpdateStatement()", "Statement for update: " + this.updateSql);
 		}
 		catch (SQLException e)
 		{

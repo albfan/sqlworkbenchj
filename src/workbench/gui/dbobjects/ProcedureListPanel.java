@@ -121,7 +121,8 @@ public class ProcedureListPanel
 		this.procList.setAdjustToColumnLabel(false);
 
 		//this.findPanel = new FindPanel(this.procList);
-		this.findPanel = new QuickFilterPanel(this.procList, "PROCEDURE_NAME", "procedurelist");
+		String[] cols = new String[] {"PROCEDURE_NAME", "TYPE", "CATALOG", "SCHEMA", "REMARKS"};
+		this.findPanel = new QuickFilterPanel(this.procList, cols, false, "procedurelist");
 		
 		ReloadAction a = new ReloadAction(this);
 		this.findPanel.addToToolbar(a, true, false);
@@ -323,17 +324,16 @@ public class ProcedureListPanel
 
 	public void saveSettings()
 	{
-		Settings.getInstance().setProperty(this.getClass().getName(), "divider", this.splitPane.getDividerLocation());
-		Settings.getInstance().setProperty(this.getClass().getName(), "lastsearch", this.findPanel.getText());
+		Settings.getInstance().setProperty(this.getClass().getName() + ".divider", this.splitPane.getDividerLocation());
+		Settings.getInstance().setProperty(this.getClass().getName() + ".lastsearch", this.findPanel.getText());
 	}
 
 	public void restoreSettings()
 	{
-		int loc = Settings.getInstance().getIntProperty(this.getClass().getName(), "divider");
-		if (loc == 0) loc = 200;
+		int loc = Settings.getInstance().getIntProperty(this.getClass().getName() + ".divider", 200);
 		this.splitPane.setDividerLocation(loc);
 
-		String s = Settings.getInstance().getProperty(this.getClass().getName(), "lastsearch", "");
+		String s = Settings.getInstance().getProperty(this.getClass().getName() + ".lastsearch", "");
 		this.findPanel.setText(s);
 	}
 

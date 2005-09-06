@@ -81,7 +81,7 @@ public class MacroManagerDialog
 		}
 		WbSwingUtilities.center(this, parent);
 		macroPanel.restoreSettings();
-		boolean replace = "true".equals(Settings.getInstance().getProperty("workbench.gui.macros", "replaceOnRun", "false"));
+		boolean replace = Settings.getInstance().getBoolProperty("workbench.gui.macros.replaceOnRun", false);
 		this.replaceEditorText.setSelected(replace);
 	}
 
@@ -239,7 +239,7 @@ public class MacroManagerDialog
 	{
 		Settings.getInstance().storeWindowSize(this);
 		macroPanel.saveSettings();
-		Settings.getInstance().setProperty("workbench.gui.macros", "replaceOnRun", Boolean.toString(this.replaceEditorText.isSelected()));
+		Settings.getInstance().setProperty("workbench.gui.macros.replaceOnRun", this.replaceEditorText.isSelected());
 		setVisible(false);
 	}
 

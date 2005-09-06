@@ -16,11 +16,13 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Window;
+import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.CellEditor;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -44,6 +46,8 @@ import javax.swing.table.TableModel;
 import workbench.db.TableIdentifier;
 
 import workbench.db.WbConnection;
+import workbench.gui.components.WbCellEditor;
+import workbench.gui.components.WbTextCellEditor;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CopyRowAction;
@@ -176,6 +180,7 @@ public class DwPanel
 		this.dataTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.dataTable.setRowSelectionAllowed(true);
 		this.dataTable.getSelectionModel().addListSelectionListener(this);
+		this.dataTable.setHighlightRequiredFields(Settings.getInstance().getHighlightRequiredFields());
 	}
 	
 	public SelectKeyColumnsAction getSelectKeysAction()
@@ -739,7 +744,7 @@ public class DwPanel
 		StatementRunnerResult result = null;
 		this.lastMessage = null;
 		this.lastTimingMessage = null;
-		
+		this.statusBar.clearExecutionTime();
 		try
 		{
 			this.clearContent();
@@ -800,6 +805,7 @@ public class DwPanel
 			 */
 			this.rowsAffectedByScript += result.getTotalUpdateCount();
 			this.lastResultMessages = result.getMessages();
+			this.statusBar.setExecutionTime(execTime);
 		}
 		catch (SQLException sqle)
 		{
@@ -977,8 +983,25 @@ public class DwPanel
 	{
 		if (this.readOnly) return -1;
 		if (!this.startEdit()) return -1;
-		int newRow = this.dataTable.duplicateRow();
-		if (newRow >= 0) this.dataTable.getSelectionModel().setSelectionInterval(newRow, newRow);
+		final int newRow = this.dataTable.duplicateRow();
+		if (newRow >= 0) 
+		{
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					dataTable.getSelectionModel().setSelectionInterval(newRow, newRow);
+					dataTable.setEditingRow(newRow);
+					dataTable.setEditingColumn(1);
+					dataTable.editCellAt(newRow,1);
+					CellEditor edit = dataTable.getCellEditor(newRow, 1);
+					if (edit instanceof WbTextCellEditor)
+					{
+						((WbTextCellEditor)edit).requestFocus();
+					}
+				}
+			});
+		}
 		this.rowCountChanged();
 		return newRow;
 	}

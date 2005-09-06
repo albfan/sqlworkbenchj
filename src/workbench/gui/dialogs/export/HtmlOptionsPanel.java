@@ -32,8 +32,8 @@ public class HtmlOptionsPanel
 	public void saveSettings()
 	{
 		Settings s = Settings.getInstance();
-		s.setBoolProperty("workbench.export.html.createfullpage", this.getCreateFullPage());
-		s.setBoolProperty("workbench.export.html.escape", this.getEscapeHtml());
+		s.setProperty("workbench.export.html.createfullpage", this.getCreateFullPage());
+		s.setProperty("workbench.export.html.escape", this.getEscapeHtml());
 		s.setProperty("workbench.export.html.pagetitle", this.getPageTitle());
 	}
 	

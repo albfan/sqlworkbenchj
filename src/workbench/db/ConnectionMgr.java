@@ -107,7 +107,7 @@ public class ConnectionMgr
 		{
 			int minor = sql.getMetaData().getDriverMinorVersion();
 			int major = sql.getMetaData().getDriverMajorVersion();
-			version = minor + "." + major;
+			version = major + "." + minor;
 		}
 		catch (Throwable th)
 		{
@@ -246,7 +246,7 @@ public class ConnectionMgr
 	{
     DbDriver db = this.findRegisteredDriver(drvClassName);
 
-		LogMgr.logDebug("ConnectionMgr.findDriverByName()", "Searching for DriverClass=" + drvClassName);
+		//LogMgr.logDebug("ConnectionMgr.findDriverByName()", "Searching for DriverClass=" + drvClassName);
 
 		if (db == null)
 		{
@@ -268,12 +268,13 @@ public class ConnectionMgr
 		return db;
 	}
 
-	public void registerDriver(String drvClassName, String jarFile)
+	public DbDriver registerDriver(String drvClassName, String jarFile)
 	{
 		if (this.drivers == null) this.readDrivers();
 
 		DbDriver drv = new DbDriver("JdbcDriver", drvClassName, jarFile);
 		this.drivers.add(drv);
+		return drv;
 	}
 
 	/**

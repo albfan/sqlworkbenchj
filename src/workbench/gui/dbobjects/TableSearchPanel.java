@@ -509,22 +509,21 @@ public class TableSearchPanel
 	{
 		Settings s = Settings.getInstance();
 		String cl = this.getClass().getName();
-		s.setProperty(cl, "divider", this.jSplitPane1.getDividerLocation());
-		s.setProperty(cl, "criteria", this.searchText.getText());
-		s.setProperty(cl, "maxrows", this.rowCount.getText());
-		s.setProperty(cl, "column-function", this.columnFunction.getText());
+		s.setProperty(cl + ".divider", this.jSplitPane1.getDividerLocation());
+		s.setProperty(cl + ".criteria", this.searchText.getText());
+		s.setProperty(cl + ".maxrows", this.rowCount.getText());
+		s.setProperty(cl + ".column-function", this.columnFunction.getText());
 	}
 
 	public void restoreSettings()
 	{
 		Settings s = Settings.getInstance();
 		String cl = this.getClass().getName();
-		int loc = s.getIntProperty(cl, "divider");
-		if (loc == 0) loc = 200;
+		int loc = s.getIntProperty(cl + ".divider",200);
 		this.jSplitPane1.setDividerLocation(loc);
-		this.searchText.setText(s.getProperty(cl, "criteria", ""));
-		this.rowCount.setText(s.getProperty(cl, "maxrows", "0"));
-		this.columnFunction.setText(s.getProperty(cl, "column-function", "$col$"));
+		this.searchText.setText(s.getProperty(cl + ".criteria", ""));
+		this.rowCount.setText(s.getProperty(cl + ".maxrows", "0"));
+		this.columnFunction.setText(s.getProperty(cl + ".column-function", "$col$"));
 	}
 
 	public void searchEnded()

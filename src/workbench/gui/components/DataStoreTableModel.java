@@ -391,15 +391,25 @@ public class DataStoreTableModel
 		sortByColumn(column, ascending);
 	}
 
+	/**
+	 * Clears the filter that is currently defined on the underlying 
+	 * DataStore. A tableDataChanged Event will be fired after this
+	 */
 	public void resetFilter()
 	{
 		dataCache.clearFilter();
+		// sort() will already fire a tableDataChanged() 
+		// if a sort column was defined
 		if (!sort()) 
 		{
 			fireTableDataChanged();
 		}
 	}
 	
+	/**
+	 * Applys the given filter to the underlying 
+	 * DataStore. A tableDataChanged Event will be fired after this
+	 */
 	public void applyFilter(FilterExpression filter)
 	{
 		dataCache.applyFilter(filter);

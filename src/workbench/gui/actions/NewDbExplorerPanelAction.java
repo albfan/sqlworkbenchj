@@ -28,11 +28,16 @@ public class NewDbExplorerPanelAction
 	extends WbAction
 {
 	private MainWindow mainWin;
+
 	public NewDbExplorerPanelAction(MainWindow aWindow)
+	{
+		this(aWindow, "MnuTxtNewExplorerPanel");
+	}
+	public NewDbExplorerPanelAction(MainWindow aWindow, String key)
 	{
 		super();
 		mainWin = aWindow;
-		this.initMenuDefinition("MnuTxtNewExplorerPanel");
+		this.initMenuDefinition(key);
 	}
 
 	public void executeAction(ActionEvent e)

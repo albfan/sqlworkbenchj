@@ -151,27 +151,27 @@ public class DataPumper
 		Settings s = Settings.getInstance();
 		if (this.source != null)
 		{
-			s.setProperty("workbench.datapumper.source", "lastprofile", this.source.getName());
+			s.setProperty("workbench.datapumper.source.lastprofile", this.source.getName());
 		}
 		if (this.target != null)
 		{
-			s.setProperty("workbench.datapumper.target", "lastprofile", this.target.getName());
+			s.setProperty("workbench.datapumper.target.lastprofile", this.target.getName());
 		}
-		s.setProperty("workbench.datapumper", "divider", jSplitPane1.getDividerLocation());
-		s.setProperty("workbench.datapumper.target", "deletetable", Boolean.toString(this.deleteTargetCbx.isSelected()));
-		s.setProperty("workbench.datapumper", "continue", Boolean.toString(this.continueOnErrorCbx.isSelected()));
-		s.setProperty("workbench.datapumper", "commitevery", this.commitEvery.getText());
-		s.setProperty("workbench.datapumper", "usequery", Boolean.toString(this.useQueryCbx.isSelected()));
-		s.setProperty("workbench.datapumper", "droptable", Boolean.toString(this.dropTargetCbx.isSelected()));
-    s.setProperty("workbench.datapumper", "updatemode", (String)this.modeComboBox.getSelectedItem());
+		s.setProperty("workbench.datapumper.divider", jSplitPane1.getDividerLocation());
+		s.setProperty("workbench.datapumper.target.deletetable", Boolean.toString(this.deleteTargetCbx.isSelected()));
+		s.setProperty("workbench.datapumper.continue", Boolean.toString(this.continueOnErrorCbx.isSelected()));
+		s.setProperty("workbench.datapumper.commitevery", this.commitEvery.getText());
+		s.setProperty("workbench.datapumper.usequery", Boolean.toString(this.useQueryCbx.isSelected()));
+		s.setProperty("workbench.datapumper.droptable", Boolean.toString(this.dropTargetCbx.isSelected()));
+    s.setProperty("workbench.datapumper.updatemode", (String)this.modeComboBox.getSelectedItem());
 		String where = this.sqlEditor.getText();
 		if (where != null && where.length() > 0)
 		{
-			s.setProperty("workbench.datapumper", "where", where);
+			s.setProperty("workbench.datapumper.where", where);
 		}
 		else
 		{
-			s.setProperty("workbench.datapumper", "where", "");
+			s.setProperty("workbench.datapumper.where", "");
 		}
 		s.storeWindowSize(this.window, "workbench.datapumper.window");
 		s.storeWindowPosition(this.window, "workbench.datapumper.window");
@@ -180,9 +180,9 @@ public class DataPumper
 	public void restoreSettings()
 	{
 		Settings s = Settings.getInstance();
-		boolean delete = "true".equals(s.getProperty("workbench.datapumper.target", "deletetable", "false"));
-		boolean cont = "true".equals(s.getProperty("workbench.datapumper", "continue", "false"));
-		boolean drop = "true".equals(s.getProperty("workbench.datapumper", "droptable", "false"));
+		boolean delete = s.getBoolProperty("workbench.datapumper.target.deletetable", false);
+		boolean cont = s.getBoolProperty("workbench.datapumper.continue", false);
+		boolean drop = s.getBoolProperty("workbench.datapumper.droptable", false);
 		this.deleteTargetCbx.setSelected(delete);
 		this.continueOnErrorCbx.setSelected(cont);
 		this.dropTargetCbx.setSelected(drop);
@@ -191,27 +191,27 @@ public class DataPumper
 			this.window.setSize(800,600);
 		}
 
-		int commit = s.getIntProperty("workbench.datapumper", "commitevery", 0);
+		int commit = s.getIntProperty("workbench.datapumper.commitevery", 0);
 		if (commit > 0)
 		{
 			this.commitEvery.setText(Integer.toString(commit));
 		}
-		String where = s.getProperty("workbench.datapumper", "where", "");
+		String where = s.getProperty("workbench.datapumper.where", null);
 		if (where != null && where.length() > 0)
 		{
 			this.sqlEditor.setText(where);
 		}
-		int loc = s.getIntProperty("workbench.datapumper", "divider", -1);
+		int loc = s.getIntProperty("workbench.datapumper.divider", -1);
 		if (loc == -1)
 		{
 			loc = (int)this.jSplitPane1.getHeight() / 2;
 			if (loc < 10) loc = 100;
 		}
 		this.jSplitPane1.setDividerLocation(loc);
-		boolean useQuery = "true".equals(s.getProperty("workbench.datapumper", "usequery", "false"));
+		boolean useQuery = s.getBoolProperty("workbench.datapumper.usequery", false);
 		this.useQueryCbx.setSelected(useQuery);
 
-    String mode = s.getProperty("workbench.datapumper", "updatemode", "insert");
+    String mode = s.getProperty("workbench.datapumper.updatemode", "insert");
     this.modeComboBox.setSelectedItem(mode);
 
 		// initialize the depending controls for the usage of a SQL query
@@ -947,9 +947,9 @@ public class DataPumper
 		this.mainWindow = aParent;
 		this.window  = new JFrame(ResourceMgr.getString("TxtWindowTitleDataPumper"))
 		{
-			public void hide()
+			public void setVisible(boolean visible)
 			{
-				saveSettings();
+				if (!visible) saveSettings();
 				super.hide();
 			}
 		};

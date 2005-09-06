@@ -448,16 +448,16 @@ public class BatchRunner
 			// No connection profile given, create a temporary profile
 			// to be used for the batch runner.
 			String url = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_URL));
-			String driver = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_DRIVER));
+			String driverclass = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_DRIVER));
 			String user = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_USER));
 			String pwd = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_PWD));
 			String jar = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_JAR));
-			DbDriver drv = ConnectionMgr.getInstance().findRegisteredDriver(driver);
+			DbDriver drv = ConnectionMgr.getInstance().findRegisteredDriver(driverclass);
 			if (drv == null)
 			{
-				ConnectionMgr.getInstance().registerDriver(driver, jar);
+				drv = ConnectionMgr.getInstance().registerDriver(driverclass, jar);
 			}
-			profile = new ConnectionProfile(driver, url, user, pwd);
+			profile = new ConnectionProfile("BatchRunnerProfile", driverclass, url, user, pwd);
 		}
 		else
 		{

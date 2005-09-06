@@ -22,7 +22,7 @@ import java.util.*;
  * cached.
  *
  * @author Slava Pestov
- * @version $Id: TokenMarker.java,v 1.6 2005-04-04 20:50:24 thomas Exp $
+ * @version $Id: TokenMarker.java,v 1.7 2005-09-06 17:44:33 thomas Exp $
  *
  * @see Token
  */
@@ -51,8 +51,7 @@ public abstract class TokenMarker
 			prev = lineInfo[lineIndex - 1];
 
 		byte oldToken = info.token;
-		byte token = markTokensImpl(prev == null ?
-			Token.NULL : prev.token,line,lineIndex);
+		byte token = markTokensImpl(prev == null ? Token.NULL : prev.token,line,lineIndex);
 
 		info.token = token;
 
@@ -121,8 +120,7 @@ public abstract class TokenMarker
 	 * starting at 0
 	 * @return The initial token type for the next line
 	 */
-	protected abstract byte markTokensImpl(byte token, Segment line,
-		int lineIndex);
+	protected abstract byte markTokensImpl(byte token, Segment line,int lineIndex);
 
 	/**
 	 * Returns if the token marker supports tokens that span multiple
@@ -138,6 +136,14 @@ public abstract class TokenMarker
 		return true;
 	}
 
+	public void dispose()
+	{
+		for (int i=0; i < lineInfo.length; i++)
+		{
+			if (lineInfo[i] != null) lineInfo[i].obj = null;
+		}
+		this.lineInfo = null;
+	}
 	/**
 	 * Informs the token marker that lines have been inserted into
 	 * the document. This inserts a gap in the <code>lineInfo</code>
@@ -147,13 +153,11 @@ public abstract class TokenMarker
 	 */
 	public void insertLines(int index, int lines)
 	{
-		if(lines <= 0)
-			return;
+		if(lines <= 0) return;
 		length += lines;
 		ensureCapacity(length);
 		int len = index + lines;
-		System.arraycopy(lineInfo,index,lineInfo,len,
-			lineInfo.length - len);
+		System.arraycopy(lineInfo,index,lineInfo,len,lineInfo.length - len);
 
 		for(int i = index + lines - 1; i >= index; i--)
 		{
@@ -170,12 +174,10 @@ public abstract class TokenMarker
 	 */
 	public void deleteLines(int index, int lines)
 	{
-		if (lines <= 0)
-			return;
+		if (lines <= 0) return;
 		int len = index + lines;
 		length -= lines;
-		System.arraycopy(lineInfo,len,lineInfo,
-			index,lineInfo.length - len);
+		System.arraycopy(lineInfo,len,lineInfo,index,lineInfo.length - len);
 	}
 
 	/**

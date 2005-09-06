@@ -46,6 +46,6 @@ public class ResetFilterAction
 
 	public void tableChanged(TableModelEvent tableModelEvent)
 	{
-		this.setEnabled(this.client.getLastFilter() != null);
+		this.setEnabled(this.client.isFiltered());
 	}
 }

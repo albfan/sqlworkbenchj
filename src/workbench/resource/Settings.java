@@ -36,6 +36,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import workbench.WbManager;
+import workbench.interfaces.PropertyStorage;
 import workbench.util.ExceptionUtil;
 import workbench.gui.actions.ActionRegistration;
 import workbench.interfaces.FontChangedListener;
@@ -50,11 +51,12 @@ import workbench.util.WbProperties;
  *	@author  support@sql-workbench.net
  */
 public class Settings
+	implements PropertyStorage
 {
-	public static final String ANIMATED_ICONS_KEY = "workbench.gui.animatedicon";
-	public static final String ENCRYPT_PWD_KEY = "workbench.profiles.encryptpassword";
-	public static final String DATE_FORMAT_KEY = "workbench.gui.display.dateformat";
-	public static final String DATE_TIME_FORMAT_KEY = "workbench.gui.display.datetimeformat";
+	public static final String PROPERTY_ANIMATED_ICONS = "workbench.gui.animatedicon";
+	public static final String PROPERTY_ENCRYPT_PWD = "workbench.profiles.encryptpassword";
+	public static final String PROPERTY_DATE_FORMAT = "workbench.gui.display.dateformat";
+	public static final String PROPERTY_DATETIME_FORMAT = "workbench.gui.display.datetimeformat";
 
 	public static final String PROPERTY_EDITOR_FONT = "editor";
 	public static final String PROPERTY_STANDARD_FONT = "standard";
@@ -225,6 +227,11 @@ public class Settings
 		{
 			this.props.setProperty(PROPERTY_PROFILE_STORAGE, file);
 		}
+	}
+	
+	public String getDefaultObjectType()
+	{
+		return getProperty("workbench.dbexplorer.defTableType", null);
 	}
 	
 	public String getProfileStorage()
@@ -465,12 +472,27 @@ public class Settings
 		return result;
 	}
 
+	public Color getRequiredFieldColor()
+	{
+		return getColor("workbench.gui.edit.requiredfield.color", new Color(255,100,100));
+	}
+	
+	public boolean getHighlightRequiredFields()
+	{
+		return getBoolProperty("workbench.gui.edit.requiredfield.dohighlight", true);
+	}
+	
 	public Color getColor(String aColorKey)
 	{
+		return getColor(aColorKey, null);
+	}
+	
+	public Color getColor(String aColorKey, Color defaultColor)
+	{
 		String value = this.getProperty(aColorKey, null);
-		if (value == null) return null;
+		if (value == null) return defaultColor;
 		String[] colors = value.split(",");
-		if (colors.length != 3) return null;
+		if (colors.length != 3) return defaultColor;
 		try
 		{
 			int r = StringUtil.getIntValue(colors[0]);
@@ -480,7 +502,7 @@ public class Settings
 		}
 		catch (Exception e)
 		{
-			return null;
+			return defaultColor;
 		}
 
 	}
@@ -654,9 +676,16 @@ public class Settings
 		}
 	}
 
-	public boolean getAutoSelectTableEditor()
+	public static final int SHOW_NO_FILENAME = 0;
+	public static final int SHOW_FILENAME = 1;
+	public static final int SHOW_FULL_PATH = 2;
+	
+	public int getShowFilenameInWindowTitle()
 	{
-		return getBoolProperty("workbench.table.edit.autoselect", true);
+		String type = this.getProperty("workbench.gui.display.showfilename", "none");
+		if ("name".equalsIgnoreCase(type)) return SHOW_FILENAME;
+		if ("path".equalsIgnoreCase(type)) return SHOW_FULL_PATH;
+		return SHOW_NO_FILENAME;
 	}
 	
 	public String getSqlParameterPrefix()
@@ -673,7 +702,7 @@ public class Settings
 
 	public int getMaxLogfileSize()
 	{
-		return this.getIntProperty("workbench.log", "maxfilesize", 30000);
+		return this.getIntProperty("workbench.log.maxfilesize", 30000);
 	}
 
 	public String getCodeSnippetPrefix()
@@ -805,7 +834,7 @@ public class Settings
 
 	public void setLastImportDecode(boolean flag)
 	{
-		this.setBoolProperty("workbench.import.decode", flag);
+		this.setProperty("workbench.import.decode", flag);
 	}
 
 	public String getLastImportQuoteChar()
@@ -1132,24 +1161,24 @@ public class Settings
 
 	public String getDefaultDateFormat()
 	{
-		return this.props.getProperty(DATE_FORMAT_KEY, "yyyy-MM-dd");
+		return this.props.getProperty(PROPERTY_DATE_FORMAT, "yyyy-MM-dd");
 	}
 
 	public String getDefaultDateTimeFormat()
 	{
-		return this.props.getProperty(DATE_TIME_FORMAT_KEY, "yyyy-MM-dd HH:mm:ss");
+		return this.props.getProperty(PROPERTY_DATETIME_FORMAT, "yyyy-MM-dd HH:mm:ss");
 	}
 
 	public void setDefaultDateFormat(String aFormat)
 	{
 		this.defaultDateFormatter = null;
-		this.props.setProperty(DATE_FORMAT_KEY, aFormat);
+		this.props.setProperty(PROPERTY_DATE_FORMAT, aFormat);
 	}
 
 	public void setDefaultDateTimeFormat(String aFormat)
 	{
 		this.defaultDateFormatter = null;
-		this.props.setProperty(DATE_TIME_FORMAT_KEY, aFormat);
+		this.props.setProperty(PROPERTY_DATETIME_FORMAT, aFormat);
 	}
 
 	public int getMaxFractionDigits()
@@ -1195,16 +1224,6 @@ public class Settings
 		this.props.setProperty("workbench.gui.display.decimal.separator", aSep);
 		this.defaultFormatter = null;
 	}
-
-//	public String getDecimalGroupingSeparator()
-//	{
-//		return this.props.getProperty("workbench.gui.display.decimal.groupseparator", ",");
-//	}
-//
-//	public void getDecimalGroupingSeparator(String aSep)
-//	{
-//		this.props.setProperty("workbench.gui.display.decimal.groupseparator", aSep);
-//	}
 
 	public String getAlternateDelimiter()
 	{
@@ -1349,16 +1368,6 @@ public class Settings
 		this.props.setProperty("workbench.db.previewsql", Boolean.toString(aFlag));
 	}
 
-//	public boolean getProcessHsqlShutdown()
-//	{
-//		return getBoolProperty("workbench.db.hsqldb.closeOnShutdown", false);
-//	}
-
-//  public boolean getShowBuildInConnectionId()
-//  {
-//		return getBoolProperty("workbench.db.connection-id.showbuild", false);
-//	}
-
 	public boolean getDebugMetadataSql()
 	{
 		return getBoolProperty("workbench.dbmetadata.debugmetasql", false);
@@ -1384,14 +1393,14 @@ public class Settings
 		return this.props.getBoolProperty(property, defaultValue);
 	}
 
-	public void setBoolProperty(String property, boolean value)
+	public void setProperty(String property, boolean value)
 	{
 		this.props.setProperty(property, value);
 	}
 
-	public void setProperty(String aProperty, String aValue)
+	public Object setProperty(String aProperty, String aValue)
 	{
-		this.props.setProperty(aProperty, aValue);
+		return this.props.setProperty(aProperty, aValue);
 	}
 
 	public void setProperty(String aProperty, int aValue)
@@ -1399,42 +1408,15 @@ public class Settings
 		this.props.setProperty(aProperty, Integer.toString(aValue));
 	}
 
-	public void setProperty(String aClass, String aProperty, String aValue)
-	{
-		this.props.setProperty(aClass + "." + aProperty.toLowerCase(), aValue);
-	}
-
-	public void setProperty(String aClass, String aProperty, int aValue)
-	{
-		this.props.setProperty(aClass + "." + aProperty.toLowerCase(), Integer.toString(aValue));
-	}
-
-	public String getProperty(String aClass, String aProperty, String aDefault)
-	{
-		return this.props.getProperty(aClass + "." + aProperty.toLowerCase(), aDefault);
-	}
-
 	public String getProperty(String aProperty, String aDefault)
 	{
-		return this.props.getProperty(aProperty.toLowerCase(), aDefault);
-	}
-
-	public int getIntProperty(String aClass, String aProperty, int aDefault)
-	{
-		String value = this.getProperty(aClass, aProperty, Integer.toString(aDefault));
-		return StringUtil.getIntValue(value);
+		return this.props.getProperty(aProperty, aDefault);
 	}
 
 	public int getIntProperty(String aProperty, int defaultValue)
 	{
 		String value = this.getProperty(aProperty, null);
 		return StringUtil.getIntValue(value, defaultValue);
-	}
-
-	public int getIntProperty(String aClass, String aProperty)
-	{
-		String value = this.getProperty(aClass, aProperty, null);
-		return StringUtil.getIntValue(value, 0);
 	}
 
 	public String getAutoCompletionPasteCase()
@@ -1459,12 +1441,12 @@ public class Settings
 
 	public boolean getUseEncryption()
 	{
-		return getBoolProperty(ENCRYPT_PWD_KEY, false);
+		return getBoolProperty(PROPERTY_ENCRYPT_PWD, false);
 	}
 
 	public void setUseEncryption(boolean useEncryption)
 	{
-		this.props.setProperty(ENCRYPT_PWD_KEY, Boolean.toString(useEncryption));
+		this.props.setProperty(PROPERTY_ENCRYPT_PWD, Boolean.toString(useEncryption));
 	}
 
 	public boolean getRetrieveDbExplorer()
@@ -1494,12 +1476,12 @@ public class Settings
 
 	public boolean getUseAnimatedIcon()
 	{
-		return getBoolProperty(ANIMATED_ICONS_KEY, false);
+		return getBoolProperty(PROPERTY_ANIMATED_ICONS, false);
 	}
 
 	public void setUseAnimatedIcon(boolean flag)
 	{
-		this.props.setProperty(ANIMATED_ICONS_KEY, Boolean.toString(flag));
+		this.props.setProperty(PROPERTY_ANIMATED_ICONS, Boolean.toString(flag));
 	}
 
 	public boolean getUseDynamicLayout()

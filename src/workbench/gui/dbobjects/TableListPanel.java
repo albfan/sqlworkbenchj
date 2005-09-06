@@ -31,6 +31,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 
 import javax.swing.ActionMap;
 import javax.swing.ComponentInputMap;
@@ -101,6 +102,8 @@ import workbench.util.ExceptionUtil;
 import java.awt.Component;
 import workbench.db.ColumnIdentifier;
 import workbench.interfaces.CriteriaPanel;
+import workbench.util.WbWorkspace;
+import workbench.util.WbProperties;
 
 
 /**
@@ -136,7 +139,7 @@ public class TableListPanel
 
 	private QuickFilterPanel columnFilter;
 	private FindPanel columnSearcher;
-	
+
 	private JComboBox tableTypes = new JComboBox();
 	private String currentSchema;
 	private String currentCatalog;
@@ -194,6 +197,7 @@ public class TableListPanel
 	private JDialog infoWindow;
 	private JLabel infoLabel;
 	private JLabel tableInfoLabel;
+	private String tableTypeToSelect;
 
 	public TableListPanel(MainWindow aParent)
 		throws Exception
@@ -205,17 +209,17 @@ public class TableListPanel
 		this.displayTab.setUI(TabbedPaneUIFactory.getBorderLessUI());
 		this.displayTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
-			
+
 		this.tableDefinition = new WbTable();
 		this.tableDefinition.setAdjustToColumnLabel(false);
 		this.tableDefinition.setSelectOnRightButtonClick(true);
-		
+
 		JPanel bar = new JPanel(new GridBagLayout());
 		columnSearcher = new FindPanel(this.tableDefinition, 20);
-		
+
 		String[] cols = new String[] {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "JAVA_TYPE"};
 		columnFilter  = new QuickFilterPanel(this.tableDefinition, cols, true, "columnlist");
-		
+
 		GridBagConstraints cc = new GridBagConstraints();
 		cc.anchor = GridBagConstraints.WEST;
 		cc.gridx = 0;
@@ -234,7 +238,7 @@ public class TableListPanel
 		columnSearcher.setBorder(new DividerBorder(DividerBorder.LEFT));
 		//bar.setBorder(BorderFactory.createEtchedBorder());
 		bar.add(columnSearcher, cc);
-		
+
 		WbScrollPane scroll = new WbScrollPane(this.tableDefinition);
 		JPanel defPanel = new JPanel(new BorderLayout());
 		defPanel.add(bar, BorderLayout.NORTH);
@@ -301,8 +305,7 @@ public class TableListPanel
 
 		this.extendPopupMenu();
 
-		//this.findPanel = new FindPanel(this.tableList);
-		String[] s = new String[] { "NAME", "TYPE", "CATALOG", "SCHEMA"}; 
+		String[] s = new String[] { "NAME", "TYPE", "CATALOG", "SCHEMA", "REMARKS"};
 		this.findPanel = new QuickFilterPanel(this.tableList, s, false, "tablelist");
 
 		ReloadAction a = new ReloadAction(this);
@@ -311,8 +314,6 @@ public class TableListPanel
 
 		JPanel selectPanel = new JPanel();
 		selectPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-		//selectPanel.setBorder(new LineBorder(Color.RED));
-		//selectPanel.setMinimumSize(new Dimension(100, 18));
 
 		this.tableTypes.setMaximumSize(new Dimension(32768, 18));
 		this.tableTypes.setMinimumSize(new Dimension(80, 18));
@@ -547,7 +548,7 @@ public class TableListPanel
 			if (count < 3 && includeDataPanel) return;
 			//if (count < 2 && !includeDataPanel) return;
 
-			if (count == 3 && includeDataPanel) this.removeDataPanel();
+			if (count >= 3 && includeDataPanel) this.removeDataPanel();
 
 			this.displayTab.remove(this.indexPanel);
 			this.indexes.reset();
@@ -671,7 +672,17 @@ public class TableListPanel
 		this.reset();
 		try
 		{
-			String preferredType = Settings.getInstance().getProperty("workbench.dbexplorer", "defTableType", null);
+
+			String preferredType = null;
+			if (this.tableTypeToSelect != null)
+			{
+				preferredType = tableTypeToSelect;
+				tableTypeToSelect = null;
+			}
+			else
+			{
+				preferredType = Settings.getInstance().getProperty("workbench.dbexplorer.defTableType", null);
+			}
 			if (preferredType != null && preferredType.length() == 0) preferredType = null;
 			List types = this.dbConnection.getMetadata().getTableTypes();
 			this.availableTableTypes = new String[types.size()];
@@ -879,6 +890,67 @@ public class TableListPanel
 			this.retrieve();
 	}
 
+	private String getWorkspacePrefix(int index)
+	{
+		return "dbexplorer" + index + ".tablelist.";
+	}
+
+	public void saveToWorkspace(WbWorkspace w, int index)
+	{
+		tableData.saveToWorkspace(w, index);
+		try
+		{
+			Properties props = w.getSettings();
+			String prefix = getWorkspacePrefix(index);
+			String type = (String)tableTypes.getSelectedItem();
+			if (type != null) props.setProperty(prefix + "objecttype", type);
+			props.setProperty(prefix + "divider", Integer.toString(this.splitPane.getDividerLocation()));
+			props.setProperty(prefix + "exportedtreedivider", Integer.toString(this.exportedPanel.getDividerLocation()));
+			props.setProperty(prefix + "importedtreedivider", Integer.toString(this.exportedPanel.getDividerLocation()));
+			String text = this.findPanel.getText();
+			if (text != null) props.setProperty(prefix + "lastsearch", text);
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logError("TableListPanel.saveToWorkspace()", "Error during workspace saving", th);
+		}
+	}
+
+	public void readFromWorkspace(WbWorkspace w, int index)
+	{
+		restoreSettings();
+		tableData.readFromWorkspace(w, index);
+		WbProperties props = w.getSettings();
+		String prefix = getWorkspacePrefix(index);
+
+		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+		int maxWidth = (int)(d.getWidth() - 50);
+
+		this.tableTypeToSelect = props.getProperty(prefix + "objecttype", Settings.getInstance().getDefaultObjectType());
+		int loc = props.getIntProperty(prefix + "divider",-1);
+		if (loc != -1)
+		{
+			if (loc == 0 || loc > maxWidth) loc = 200;
+			this.splitPane.setDividerLocation(loc);
+		}
+
+		loc = props.getIntProperty(prefix + "exportedtreedivider",-1);
+		if (loc != -1)
+		{
+			if (loc == 0 || loc > maxWidth) loc = 200;
+			this.exportedPanel.setDividerLocation(loc);
+		}
+
+		loc = props.getIntProperty(prefix + "importedtreedivider",-1);
+		if (loc != -1)
+		{
+			if (loc == 0 || loc > maxWidth) loc = 200;
+			this.importedPanel.setDividerLocation(loc);
+		}
+		String s = props.getProperty(prefix  + "lastsearch", "");
+		this.findPanel.setText(s);
+	}
+
 	public void saveSettings()
 	{
 		this.triggers.saveSettings();
@@ -887,30 +959,33 @@ public class TableListPanel
 		this.columnSearcher.saveSettings();
 		this.columnFilter.saveSettings();
 		Settings s = Settings.getInstance();
-		s.setProperty(this.getClass().getName(), "divider", this.splitPane.getDividerLocation());
-		s.setProperty(this.getClass().getName(), "exportedtreedivider", this.exportedPanel.getDividerLocation());
-		s.setProperty(this.getClass().getName(), "importedtreedivider", this.exportedPanel.getDividerLocation());
-		s.setProperty(this.getClass().getName(), "lastsearch", this.findPanel.getText());
+		s.setProperty(this.getClass().getName() + ".divider", this.splitPane.getDividerLocation());
+		s.setProperty(this.getClass().getName() + ".exportedtreedivider", this.exportedPanel.getDividerLocation());
+		s.setProperty(this.getClass().getName() + ".importedtreedivider", this.exportedPanel.getDividerLocation());
+		s.setProperty(this.getClass().getName() + ".lastsearch", this.findPanel.getText());
 	}
 
 	public void restoreSettings()
 	{
+		String prefix = this.getClass().getName();
+		Settings s = Settings.getInstance();
+
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
 		int maxWidth = (int)(d.getWidth() - 50);
-		int loc = Settings.getInstance().getIntProperty(this.getClass().getName(), "divider");
-		if (loc == 0 || loc > maxWidth) loc = 200;
-		this.splitPane.setDividerLocation(loc);
+		int loc = s.getIntProperty(prefix + ".divider",200);
+		if (loc > maxWidth) loc = 200;
+		splitPane.setDividerLocation(loc);
 
-		loc = Settings.getInstance().getIntProperty(this.getClass().getName(), "exportedtreedivider");
+		loc = s.getIntProperty(prefix + ".exportedtreedivider",0);
 		if (loc == 0 || loc > maxWidth) loc = 200;
-		this.exportedPanel.setDividerLocation(loc);
+		exportedPanel.setDividerLocation(loc);
 
-		loc = Settings.getInstance().getIntProperty(this.getClass().getName(), "importedtreedivider");
+		loc = s.getIntProperty(prefix + ".importedtreedivider",0);
 		if (loc == 0 || loc > maxWidth) loc = 200;
-		this.importedPanel.setDividerLocation(loc);
+		importedPanel.setDividerLocation(loc);
 
-		String s = Settings.getInstance().getProperty(this.getClass().getName(), "lastsearch", "");
-		this.findPanel.setText(s);
+		String search = s.getProperty(prefix  + ".lastsearch", "");
+		this.findPanel.setText(search);
 		this.triggers.restoreSettings();
 		this.tableData.restoreSettings();
 		this.findPanel.restoreSettings();
@@ -1048,14 +1123,9 @@ public class TableListPanel
 		return (aType.indexOf("table") > -1 || aType.indexOf("view") > -1);
 	}
 
-	private boolean isTableType(String aType)
+	private boolean isTableType(String type)
 	{
-		if (aType == null) return false;
-		return (aType.indexOf("table") > -1 ||
-		        aType.indexOf("view") > -1 ||
-						aType.indexOf("synonym") > -1 ||
-						(aType.indexOf("sequence") > -1 && this.dbConnection.getMetadata().isPostgres())
-					);
+		return this.dbConnection.getMetadata().objectTypeCanContainData(type);
 	}
 
 	private void retrieveTableSource()
@@ -1083,15 +1153,15 @@ public class TableListPanel
 				sql = meta.getSynonymSource(this.selectedSchema, this.selectedTableName);
 				if (sql.length() == 0)
 				{
-					sql = ResourceMgr.getString("MsgSynonymSourceNotImplemented") + " " + this.dbConnection.getMetadata().getProductName();
+					sql = ResourceMgr.getString("MsgSynonymSourceNotImplemented") + " " + meta.getProductName();
 				}
 			}
 			else if ("sequence".equals(this.selectedObjectType))
 			{
-				sql = meta.getSequenceSource(this.selectedCatalog, this.selectedSchema,this.selectedTableName);
+				sql = meta.getSequenceSource(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
 				if (sql.length() == 0)
 				{
-					sql = ResourceMgr.getString("MsgSequenceSourceNotImplemented") + " " + this.dbConnection.getMetadata().getProductName();
+					sql = ResourceMgr.getString("MsgSequenceSourceNotImplemented") + " " + meta.getProductName();
 				}
 			}
 			else if (this.selectedObjectType.indexOf("table") > -1)
@@ -1530,13 +1600,13 @@ public class TableListPanel
 		this.retrieve();
 	}
 
-	private void showTableData(int panelIndex)
+	private void showTableData(final int panelIndex)
 	{
 		final SqlPanel panel;
 
 		if (panelIndex == -1)
 		{
-			panel = (SqlPanel)this.parentWindow.addTab();
+			panel = (SqlPanel)this.parentWindow.addTab(true, true);
 		}
 		else
 		{
@@ -1547,12 +1617,13 @@ public class TableListPanel
 		if (sql != null)
 		{
 			panel.setStatementText(sql);
-			this.parentWindow.show();
-			if (panelIndex > -1) this.parentWindow.selectTab(panelIndex);
+
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
+					parentWindow.requestFocus();
+					if (panelIndex > -1) parentWindow.selectTab(panelIndex);
 					panel.selectEditor();
 				}
 			});
@@ -1580,7 +1651,7 @@ public class TableListPanel
 		}
 
 		int colCount = this.tableDefinition.getRowCount();
-		if (colCount == 0) 
+		if (colCount == 0)
 		{
 			String msg = ResourceMgr.getString("ErrorNoColumnsRetrieved").replaceAll("%table%", this.selectedTableName);
 			WbSwingUtilities.showErrorMessage(this, msg);

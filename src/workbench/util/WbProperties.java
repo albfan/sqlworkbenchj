@@ -23,6 +23,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
+import workbench.interfaces.PropertyStorage;
 
 /**
  *
@@ -30,6 +31,7 @@ import java.util.Properties;
  */
 public class WbProperties
 	extends Properties
+	implements PropertyStorage
 {
 	private int distinctSections = 2;
 

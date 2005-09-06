@@ -29,6 +29,7 @@ import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.ComparatorFactory;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.ValueConverter;
+import java.awt.EventQueue;
 
 /**
  * @author support@sql-workbench.net
@@ -47,13 +48,13 @@ public class ColumnExpressionPanel
 	private JTextField valueField;
 	private ValueConverter converter = new ValueConverter();
 	private Class lastColumnClass;
-	
-	public ColumnExpressionPanel(ResultInfo info)
+
+	public ColumnExpressionPanel(ResultInfo info, ColumnExpression filter)
 	{
 		columnInfo = info;
 		comparatorDropDown = new JComboBox();
 		activeItems = new ListComboBoxModel();
-		
+
 		ColumnComparator[] comps = factory.getAvailableComparators();
 		comparatorItems = new ArrayList(comps.length);
 		for (int i=0; i < comps.length; i++)
@@ -64,11 +65,11 @@ public class ColumnExpressionPanel
 		// pre-fill dropdown to calculate space
 		buildColumnComparatorDropDown(String.class);
 		comparatorDropDown.setModel(activeItems);
-		
+
 		Dimension d = comparatorDropDown.getPreferredSize();
 		comparatorDropDown.setPreferredSize(d);
 		comparatorDropDown.setMinimumSize(d);
-		
+
 		columnSelector = new JComboBox();
 		int count = info.getColumnCount();
 		ArrayList l = new ArrayList(count);
@@ -76,20 +77,20 @@ public class ColumnExpressionPanel
 		{
 			l.add(info.getColumnName(i));
 		}
-		
+
 		ListComboBoxModel model = new ListComboBoxModel(l);
 		columnSelector.setModel(model);
 		d = columnSelector.getPreferredSize();
 		//columnSelector.setPreferredSize(d);
 		//columnSelector.setMinimumSize(d);
-		
+
 		this.setLayout(new GridBagLayout());
 		ignoreCase = new JCheckBox(ResourceMgr.getString("LabelFilterIgnoreCase"));
 		ignoreCase.setSelected(false);
 		ignoreCase.setEnabled(false);
 		valueField = new JTextField(10);
 		valueField.setMinimumSize(new Dimension(15,24));
-		
+
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
@@ -98,23 +99,39 @@ public class ColumnExpressionPanel
 		c.weightx = 0;
 		c.insets = new Insets(1,0,0,0);
 		this.add(columnSelector, c);
-		
+
 		c.gridx ++;
 		this.add(comparatorDropDown, c);
-		
+
 		c.gridx ++;
 		this.add(ignoreCase, c);
-		
+
 		c.gridx ++;
 		c.weightx = 1.0;
 		c.anchor = GridBagConstraints.WEST;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		this.add(valueField,c);
-		
+
 		columnSelector.addActionListener(this);
 		comparatorDropDown.addActionListener(this);
+		
+		if (filter == null)
+		{
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					columnSelector.setSelectedIndex(0);
+					valueField.requestFocusInWindow();
+				}
+			});
+		}
+		else
+		{
+			setExpression(filter);
+		}
 	}
-	
+
 
 	public void actionPerformed(ActionEvent evt)
 	{
@@ -129,10 +146,7 @@ public class ColumnExpressionPanel
 			ComparatorListItem item = (ComparatorListItem)comparatorDropDown.getSelectedItem();
 			if (item != null)
 			{
-				if (!item.getComparator().supportsIgnoreCase())
-				{
-					ignoreCase.setSelected(false);
-				}
+				ignoreCase.setSelected(item.getComparator().supportsIgnoreCase());
 				ignoreCase.setEnabled(item.getComparator().supportsIgnoreCase());
 			}
 			else
@@ -146,7 +160,8 @@ public class ColumnExpressionPanel
 	public void setExpression(ColumnExpression expr)
 	{
 		String col = expr.getColumnName();
-		if (this.columnInfo.findColumn(col) > -1)
+		int index = this.columnInfo.findColumn(col);
+		if (index > -1)
 		{
 			this.columnSelector.setSelectedItem(col);
 			ComparatorListItem item = new ComparatorListItem(expr.getComparator());
@@ -159,17 +174,17 @@ public class ColumnExpressionPanel
 			}
 		}
 	}
-	
+
 	public void setFocusToColumn()
 	{
 		this.columnSelector.requestFocus();
 	}
-	
-	public String getColumnName() 
+
+	public String getColumnName()
 	{
 		return (String)columnSelector.getSelectedItem();
 	}
-	
+
 	public FilterExpression getExpression()
 	{
 		String col = this.getColumnName();
@@ -178,7 +193,7 @@ public class ColumnExpressionPanel
 		if (comp == null) return null;
 		Object value = this.getFilterValue();
 		if (value == null) return null;
-		
+
 		ColumnExpression exp = new ColumnExpression(col, comp, value);
 		if (this.ignoreCase.isEnabled())
 		{
@@ -186,7 +201,7 @@ public class ColumnExpressionPanel
 		}
 		return exp;
 	}
-	
+
 	public ColumnComparator getComparator()
 	{
 		ComparatorListItem item = (ComparatorListItem)this.comparatorDropDown.getSelectedItem();
@@ -196,10 +211,10 @@ public class ColumnExpressionPanel
 		}
 		return null;
 	}
-	
+
 	public Object getFilterValue()
 	{
-		String value = valueField.getText(); 
+		String value = valueField.getText();
 		String col = getColumnName();
 		int colIndex = this.columnInfo.findColumn(col);
 		if (colIndex > -1)
@@ -217,7 +232,7 @@ public class ColumnExpressionPanel
 		}
 		return value;
 	}
-	
+
 	private void buildColumnComparatorDropDown(ColumnIdentifier col)
 	{
 		Class columnClass = null;
@@ -230,11 +245,11 @@ public class ColumnExpressionPanel
 		{
 			e.printStackTrace();
 		}
-	}	
-	
+	}
+
 	private void buildColumnComparatorDropDown(Class columnClass)
 	{
-		if (lastColumnClass != null && columnClass.equals(lastColumnClass)) 
+		if (lastColumnClass != null && columnClass.equals(lastColumnClass))
 		{
 			if (comparatorDropDown.getSelectedItem() == null)
 			{
@@ -243,6 +258,7 @@ public class ColumnExpressionPanel
 			return;
 		}
 		int count = comparatorItems.size();
+		int added = 0;
 		ArrayList l = new ArrayList(count);
 		for (int i=0; i < count; i++)
 		{
@@ -250,18 +266,19 @@ public class ColumnExpressionPanel
 			if (item.getComparator().supportsType(columnClass))
 			{
 				l.add(item);
+				added++;
 			}
 		}
 		this.activeItems.setData(l);
-		comparatorDropDown.setSelectedItem(null);
-		//comparatorDropDown.setSelectedIndex(0);
-		comparatorDropDown.updateUI();
-		
+		comparatorDropDown.setModel(this.activeItems);
+		if (added > 0) comparatorDropDown.setSelectedIndex(0);
+    comparatorDropDown.validate();
+    comparatorDropDown.repaint();
 	}
 }
 
 /**
- * A wrapper class to display the operator for a comparator 
+ * A wrapper class to display the operator for a comparator
  */
 class ComparatorListItem
 {
@@ -270,7 +287,7 @@ class ComparatorListItem
 	{
 		comparator = comp;
 	}
-	
+
 	public String toString() { return comparator.getOperator(); }
 	public ColumnComparator getComparator() { return comparator; }
 	public boolean equals(Object other)

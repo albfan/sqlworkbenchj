@@ -45,7 +45,7 @@ public class SqlOptionsPanel
 	{
 		Settings s = Settings.getInstance();
 		s.setProperty("workbench.export.sql.commitevery", this.getCommitEvery());
-		s.setBoolProperty("workbench.export.sql.createtable", this.getCreateTable());
+		s.setProperty("workbench.export.sql.createtable", this.getCreateTable());
 	}
 	
 	public void restoreSettings()

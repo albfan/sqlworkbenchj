@@ -17,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * A factory to generate a BaseAnalyzer based on a given SQL statement
@@ -51,6 +52,20 @@ public class StatementContext
 			else if ("INSERT".equalsIgnoreCase(verb))
 			{
 				analyzer = new InsertAnalyzer(conn, sql, pos);
+			}
+			else if ("CREATE".equalsIgnoreCase(verb))
+			{
+				int viewPos = StringUtil.findPattern(DdlAnalyzer.VIEW_PATTERN, sql, 0);
+				if (viewPos > 0)
+				{
+					Pattern selectPattern = Pattern.compile("\\sSELECT\\s|\\sSELECT$", Pattern.CASE_INSENSITIVE);
+					int selectPos = StringUtil.findPattern(selectPattern, sql, viewPos + 1);
+					if (selectPos > 0)
+					{
+						String select = sql.substring(selectPos);
+						analyzer = new SelectAnalyzer(conn, select, pos - selectPos);
+					}
+				}
 			}
 		}
 		

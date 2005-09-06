@@ -22,6 +22,8 @@ import workbench.db.ColumnIdentifier;
 public interface RowDataReceiver
 {
 	void processRow(Object[] row) throws SQLException;
+	void setTableCount(int total);
+	void setCurrentTable(int current);
 	void setTargetTable(String tableName, ColumnIdentifier[] columns)	throws SQLException;
 	void importFinished();
 	void importCancelled();

@@ -328,7 +328,7 @@ public class SchemaDiff
 		this.referenceSchema = refSchema;
 		this.targetSchema = targetSchema;
 		
-		List refTables = this.sourceDb.getMetadata().getTableList(refSchema);
+		List refTables = this.sourceDb.getMetadata().getTableList(null, refSchema);
 		int count = refTables.size();
 		List refTableNames = new ArrayList(count);
 		

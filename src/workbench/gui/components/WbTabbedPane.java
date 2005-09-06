@@ -78,5 +78,4 @@ public class WbTabbedPane
 		if (this.suspendRepaint) return;
 		super.paintComponents(g);
 	}
-
 }

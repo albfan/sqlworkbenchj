@@ -462,18 +462,18 @@ public class Workbench2Designer
 		Element relationsElm = destination.createElement("RELATIONS");
 		while(it.hasNext())
 		{
+			Map.Entry entry = (Map.Entry)it.next();
+			Relation relation = (Relation) entry.getValue();
+			if (relation == null) continue;
+			
 			try
 			{
-				Map.Entry entry = (Map.Entry)it.next();
-				Relation relation = (Relation) entry.getValue();
 				Table src = (Table) Workbench2Designer.tables.get(relation.getSrcTable());
-				if (relation == null) continue;
 				
 				// ignore missing tables
 				if (src == null) 
 				{
 					LogMgr.logWarning("Workbench2DbDesigner.dbdCreateRelations()", "Source table " + relation.getSrcTable() + "for relation " + relation.getRelName() + " not found in WB table list!");
-					//System.out.println("Source table " + relation.getSrcTable() + " for relation " + relation.getRelName() + " not found in WB table list!");
 					it.remove();
 					continue;
 				}
@@ -484,12 +484,17 @@ public class Workbench2Designer
 				if (dest == null) 
 				{
 					LogMgr.logWarning("Workbench2DbDesigner.dbdCreateRelations()", "Destination table " + relation.getDestTable() + "for relation " + relation.getRelName() + " not found in WB table list!");
-					//System.out.println("Source table " + relation.getSrcTable() + " for relation " + relation.getRelName() + " not found in WB table list!");
 					it.remove();
 					continue;
 				}
 
 				String destination = Workbench2Designer.dbdIDReference.getTableDBDID(dest.getName());
+				if (destination == null)
+				{
+					LogMgr.logWarning("Workbench2DbDesigner.dbdCreateRelations()", "Destination string for relation " + relation.getRelName() + " not found in WB table list!");
+					it.remove();
+					continue;
+				}
 				String kind;
 
 				String[] cols=relation.getConstraintStatement().split("\\\\n");
@@ -545,7 +550,8 @@ public class Workbench2Designer
 			}
 			catch(java.lang.NullPointerException ne)
 			{
-				throw(new Workbench2Designer.MalformedSourceException("Invalid relation - destination/source missing or not existing",ne));
+				//throw(new Workbench2Designer.MalformedSourceException("Invalid relation - destination/source missing or not existing",ne));
+				LogMgr.logError("Workbench2Designer.dbdCreateRelations", "Error when adding relation for " + relation, ne);
 			}
 		}//while
 		return relationsElm;

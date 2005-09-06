@@ -18,7 +18,7 @@ import javax.swing.undo.UndoableEdit;
  * system.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxDocument.java,v 1.11 2004-12-03 19:01:02 thomas Exp $
+ * @version $Id: SyntaxDocument.java,v 1.12 2005-09-06 17:44:33 thomas Exp $
  */
 public class SyntaxDocument
 	extends PlainDocument
@@ -79,6 +79,8 @@ public class SyntaxDocument
 	public void dispose()
 	{
 		this.clearUndoBuffer();
+		tokenMarker.dispose();
+		try { this.remove(0, this.getLength()); } catch (Throwable th) {}
 	}
 	
 	public void clearUndoBuffer()

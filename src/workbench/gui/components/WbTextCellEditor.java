@@ -11,7 +11,9 @@
  */
 package workbench.gui.components;
 
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.event.MouseEvent;
@@ -34,52 +36,49 @@ public class WbTextCellEditor
 	extends DefaultCellEditor
 	implements MouseListener
 {
-
 	private JTextField textField;
 	private WbTable parentTable;
-	private boolean autoSelect = false;
-
-	/*
+	private Color defaultBackground;
+	
 	public static final WbTextCellEditor createInstance()
 	{
-		return createInstance(null, false);
-	}
-	*/
-	public static final WbTextCellEditor createInstance(boolean doAutoSelect)
-	{
-		return createInstance(null, doAutoSelect);
+		return createInstance(null);
 	}
 
-	public static final WbTextCellEditor createInstance(WbTable parent, boolean doAutoSelect)
+	public static final WbTextCellEditor createInstance(WbTable parent)
 	{
 		JTextField field = new JTextField();
-		WbTextCellEditor editor = new WbTextCellEditor(parent, field, doAutoSelect);
+		WbTextCellEditor editor = new WbTextCellEditor(parent, field);
 		return editor;
 	}
 
-	public WbTextCellEditor(WbTable parent, final JTextField aTextField, boolean doAutoSelect)
+	public WbTextCellEditor(WbTable parent, JTextField field)
 	{
-		super(aTextField);
+		super(field);
+		defaultBackground = field.getBackground();
 		this.parentTable = parent;
-		this.textField = aTextField;
-		this.autoSelect = doAutoSelect;
+		this.textField = field;
 		this.textField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.textField.addMouseListener(this);
 		this.textField.addMouseListener(new TextComponentMouseListener());
+		super.addCellEditorListener(parent);
 	}
-
-	public void setAutoSelect(boolean aFlag) {  this.autoSelect = aFlag; }
-	public boolean getAutoSelect() { return this.autoSelect; }
 
 	public void setFont(Font aFont)
 	{
 		this.textField.setFont(aFont);
 	}
 
+	public Color getDefaultBackground()
+	{
+		return defaultBackground;
+	}
+	
 	public void requestFocus()
 	{
 		this.textField.requestFocusInWindow();
 	}
+	
 	public void selectAll()
 	{
   	this.textField.selectAll();
@@ -89,10 +88,15 @@ public class WbTextCellEditor
 							boolean isSelected,int row, int column)
 	{
   	Component result = super.getTableCellEditorComponent(table, value, isSelected, row, column);
-  	this.textField.selectAll();
+		textField.selectAll();
 		return result;
   }
 
+	public void setBackground(Color c)
+	{
+		this.textField.setBackground(c);
+	}
+	
 	public boolean shouldSelectCell(EventObject anEvent)
 	{
 		boolean shouldSelect = super.shouldSelectCell(anEvent);
@@ -127,6 +131,22 @@ public class WbTextCellEditor
 	{
 	}
 
+	public void cancelCellEditing()
+	{
+		super.cancelCellEditing();
+		fireEditingCanceled();
+	}
+	
+	public boolean stopCellEditing()
+	{
+		boolean result = super.stopCellEditing();
+		if (result) 
+		{
+			fireEditingStopped();
+		}
+		return result;
+	}
+	
 	private void openEditWindow()
 	{
 		if (this.parentTable == null)

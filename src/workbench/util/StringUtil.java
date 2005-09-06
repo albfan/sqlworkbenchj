@@ -98,11 +98,6 @@ public class StringUtil
 			target = new StringBuffer((int)(aString.length() * 1.1));
 		}
 
-		if (aReplacement == null)
-		{
-			target.append(aString);
-		}
-
 		int pos = aString.indexOf(aValue);
 		if (pos == -1)
 		{
@@ -116,7 +111,7 @@ public class StringUtil
 		while (pos != -1)
 		{
 			target.append(aString.substring(lastpos, pos));
-			target.append(aReplacement);
+			if (aReplacement != null) target.append(aReplacement);
 			lastpos = pos + len;
 			pos = aString.indexOf(aValue, lastpos);
 		}
@@ -550,6 +545,7 @@ public class StringUtil
 				case '>': replacement = "&gt;"; break;
 				case '"': replacement = "&quot;"; break;
 				case '\'': replacement = "&apos;"; break;
+				case (char)0: replacement = ""; break;
 			}
 
 			if (replacement != null)

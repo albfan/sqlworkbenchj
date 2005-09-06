@@ -32,7 +32,7 @@ public class XmlOptionsPanel
 	public void saveSettings()
 	{
 		Settings s = Settings.getInstance();
-		s.setBoolProperty("workbench.export.xml.verbosexml", this.getUseVerboseXml());
+		s.setProperty("workbench.export.xml.verbosexml", this.getUseVerboseXml());
 	}
 	
 	public void restoreSettings()

@@ -69,7 +69,7 @@ public class ParameterEditor
 		this.parameterTable.setModel(this.model);
 		this.parameterTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		TableColumn col = this.parameterTable.getColumnModel().getColumn(2);
-		col.setCellEditor(WbTextCellEditor.createInstance(true));
+		col.setCellEditor(WbTextCellEditor.createInstance());
 
 		JLabel l = new JLabel(ResourceMgr.getString("TxtPSParameterInputText"));
 		Border b = BorderFactory.createEmptyBorder(5, 2, 5, 2);

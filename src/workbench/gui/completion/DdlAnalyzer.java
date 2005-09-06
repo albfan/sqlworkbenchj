@@ -24,8 +24,8 @@ import workbench.util.StringUtil;
 public class DdlAnalyzer
 	extends BaseAnalyzer
 {
-	private final Pattern TABLE_PATTERN = Pattern.compile("\\sTABLE\\s|\\sTABLE$", Pattern.CASE_INSENSITIVE);
-	private final Pattern VIEW_PATTERN = Pattern.compile("\\sVIEW\\s|\\sVIEW$", Pattern.CASE_INSENSITIVE);
+	final Pattern TABLE_PATTERN = Pattern.compile("\\sTABLE\\s|\\sTABLE$", Pattern.CASE_INSENSITIVE);
+	final static Pattern VIEW_PATTERN = Pattern.compile("\\sVIEW\\s|\\sVIEW$", Pattern.CASE_INSENSITIVE);
 
 	public DdlAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{	

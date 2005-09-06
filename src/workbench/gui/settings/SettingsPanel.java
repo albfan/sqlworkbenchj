@@ -44,7 +44,7 @@ public class SettingsPanel
 
 	private Frame parent;
 	private String escActionCommand;
-	
+
 	/** Creates new form SettingsPanel */
 	public SettingsPanel()
 	{
@@ -497,7 +497,7 @@ public class SettingsPanel
     generalPanel.add(editorTabSizeLabel, gridBagConstraints);
 
     defTableTypeField.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-    defTableTypeField.setText(Settings.getInstance().getProperty("workbench.dbexplorer", "defTableType", null));
+    defTableTypeField.setText(Settings.getInstance().getProperty("workbench.dbexplorer.defTableType", null));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 18;
@@ -607,7 +607,7 @@ public class SettingsPanel
     generalPanel.add(defTableTypeLabel1, gridBagConstraints);
 
     tabSize.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-    tabSize.setText(Settings.getInstance().getProperty("workbench.editor", "tabwidth", "2"));
+    tabSize.setText(Settings.getInstance().getProperty("workbench.editor.tabwidth", "2"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 19;
@@ -802,7 +802,7 @@ public class SettingsPanel
 		set.setDefaultTextDelimiter(this.textDelimiterField.getText());
 		set.setQuoteChar(this.quoteCharField.getText().trim());
 		set.setEnableDbmsOutput(this.enableDbmsOutput.isSelected());
-		set.setProperty("workbench.dbexplorer", "defTableType", this.defTableTypeField.getText());
+		set.setProperty("workbench.dbexplorer.defTableType", this.defTableTypeField.getText());
 		set.setConsolidateLogMsg(this.consolidateLog.isSelected());
     set.setEnableDbmsOutput(this.enableDbmsOutput.isSelected());
     set.setDbmsOutputDefaultBuffer(StringUtil.getIntValue(this.defaultBufferSize.getText(), -1));
@@ -842,8 +842,8 @@ public class SettingsPanel
 		EscAction esc = new EscAction(this);
 		escActionCommand = esc.getActionName();
 		im.put(esc.getAccelerator(), esc.getActionName());
-		am.put(esc.getActionName(), esc);		
-		
+		am.put(esc.getActionName(), esc);
+
 		WbSwingUtilities.center(this.dialog, aReference);
 		this.dialog.show();
 	}

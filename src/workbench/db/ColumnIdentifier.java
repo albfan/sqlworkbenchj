@@ -179,6 +179,11 @@ public class ColumnIdentifier
 		return false;
 	}
 
+	public int hashCode()
+	{
+		return this.name.hashCode();
+	}
+	
 	/**
 	 * Getter for property comment.
 	 * @return Value of property comment.

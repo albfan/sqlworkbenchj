@@ -21,6 +21,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.ParsingInterruptedException;
+import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.TextFileParser;
 import workbench.db.importer.XmlDataFileParser;
 import workbench.util.ExceptionUtil;
@@ -72,6 +73,7 @@ public class WbImport extends SqlCommand
 	public static final String ARG_USE_TRUNCATE = "usetruncate";
 	public static final String ARG_TRIM_VALUES = "trimvalues";
 	public static final String ARG_FILE_EXT = "extension";
+	public static final String ARG_UPDATE_WHERE = "updatewhere";
 	
 	
 	private ArgumentParser cmdLine;
@@ -80,6 +82,7 @@ public class WbImport extends SqlCommand
 	{
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(ARG_TYPE);
+		cmdLine.addArgument(ARG_UPDATE_WHERE);
 		cmdLine.addArgument(ARG_FILE);
 		cmdLine.addArgument(ARG_TARGETTABLE);
 		cmdLine.addArgument(ARG_DELIM);
@@ -191,7 +194,7 @@ public class WbImport extends SqlCommand
 
 		boolean continueDefault = Settings.getInstance().getBoolProperty("workbench.export.default.continue", true);
 		imp.setContinueOnError(cmdLine.getBoolean(ARG_CONTINUE, continueDefault));
-
+		
 		String table = cmdLine.getValue(ARG_TARGETTABLE);
 
 		if (file != null)
@@ -280,12 +283,25 @@ public class WbImport extends SqlCommand
 				String filecolumns = cmdLine.getValue(ARG_FILECOLUMNS);
 				if (filecolumns == null) filecolumns = cmdLine.getValue("columns");
 
+				String importcolumns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
+				if (importcolumns != null)
+				{
+					List cols = StringUtil.stringToList(importcolumns, ",", true);
+					textParser.setImportColumns(cols);
+				}
+				
 				if (filecolumns != null)
 				{
 					List cols = StringUtil.stringToList(filecolumns, ",", true);
 					try
 					{
-						textParser.setColumns(cols);
+						List colIds = new ArrayList(cols.size());
+						for (int i=0; i < cols.size(); i++)
+						{
+							ColumnIdentifier col = new ColumnIdentifier((String)cols.get(i));
+							colIds.add(col);
+						}
+						textParser.setColumns(colIds);
 					}
 					catch (Exception e)
 					{
@@ -303,9 +319,6 @@ public class WbImport extends SqlCommand
 					return result;
 				}
 				
-				// the import columns have to be set after setting the file columns!
-				// if no file columns were specified then we won't accept this...
-				String importcolumns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
 				if (!header && importcolumns != null && filecolumns == null)
 				{
 					result.addMessage(ResourceMgr.getString("ErrorImportNoFileColumns"));
@@ -315,26 +328,18 @@ public class WbImport extends SqlCommand
 
 				if (header && filecolumns == null)
 				{
-					List l = textParser.getColumnsFromFile();
-					List cols = new ArrayList(l.size());
-					for (int i=0; i<l.size(); i++)
+					// read column definition from heaer line
+					try
 					{
-						ColumnIdentifier c = (ColumnIdentifier)l.get(i);
-						cols.add(c.getColumnName());
+						textParser.setupFileColumns();
 					}
-					textParser.setColumns(cols);
-					if (textParser.getColumnCount() == 0)
+					catch (SQLException e)
 					{
 						result.setFailure();
-						result.addMessage(ResourceMgr.getString("ErrorImportFileColumnsNotFound"));
+						result.addMessage(textParser.getMessages());
+						LogMgr.logError("WbImport.execute()", ExceptionUtil.getDisplay(e),null);
 						return result;
 					}
-				}
-				
-				if (importcolumns != null)
-				{
-					List cols = StringUtil.stringToList(importcolumns, ",", true);
-					textParser.setImportColumns(cols);
 				}
 				
 				// The column filter has to bee applied after the
@@ -362,7 +367,6 @@ public class WbImport extends SqlCommand
 		else if ("xml".equalsIgnoreCase(type))
 		{
 			XmlDataFileParser xmlParser = new XmlDataFileParser();
-
 			if (dir != null)
 			{
 				String ext = cmdLine.getValue(ARG_FILE_EXT);
@@ -441,6 +445,9 @@ public class WbImport extends SqlCommand
 			}
 		}
 
+		String where = cmdLine.getValue(ARG_UPDATE_WHERE);
+		imp.setWhereClauseForUpdate(where);
+		
 		String schema = cmdLine.getValue(ARG_TARGET_SCHEMA);
 		if (schema != null) imp.setTargetSchema(schema);
 
@@ -507,35 +514,6 @@ public class WbImport extends SqlCommand
 			String col = (String)l.get(0);
 			String regex = (String)l.get(1);
 			textParser.addColumnFilter(col, StringUtil.trimQuotes(regex));
-		}
-	}
-
-	private int estimateReportInterval(String filename)
-	{
-		try
-		{
-			long records = FileUtil.estimateRecords(filename, 10);
-			if (records < 100)
-			{
-				return 1;
-			}
-			else if (records < 1000)
-			{
-				return 10;
-			}
-			else if (records < 100000)
-			{
-				return 1000;
-			}
-			else
-			{
-				return 5000;
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("WbImport.estimateReportInterval()", "Error when checking input file", e);
-			return 0;
 		}
 	}
 	

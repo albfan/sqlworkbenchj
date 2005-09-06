@@ -182,6 +182,11 @@ public class ResultInfo
 	{
 		return this.columns;
 	}
+
+	public boolean isNullable(int col)
+	{
+		return this.columns[col].isNullable();
+	}
 	
 	public void resetPkColumns()
 	{
@@ -219,6 +224,10 @@ public class ResultInfo
 		return this.columns[col].isUpdateable();
 	}
 	
+	public void setIsNullable(int col, boolean flag) 
+	{
+		this.columns[col].setIsNullable(flag);
+	}
 	public void setUpdateable(int col, boolean flag)
 	{
 		this.columns[col].setUpdateable(flag);

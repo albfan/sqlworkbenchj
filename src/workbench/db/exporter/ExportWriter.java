@@ -36,7 +36,7 @@ public abstract class ExportWriter
 	private RowDataConverter converter;
 	private Writer output;
 	private int progressInterval = 10;
-
+	
 	public ExportWriter(DataExporter exp)
 	{
 		this.exporter = exp;

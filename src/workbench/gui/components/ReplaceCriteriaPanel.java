@@ -34,8 +34,7 @@ import workbench.resource.Settings;
 public class ReplaceCriteriaPanel extends JPanel
 	implements ActionListener
 {
-	private static final String PROP_CLASS = "workbench.sql.replace";
-	private static final String PROP_KEY_CASE = "ignoreCase";
+	private static final String PROP_KEY_CASE = "workbench.sql.replace.ignoreCase";
 	private JCheckBox ignoreCase;
 	
 	private JTextField criteria;
@@ -51,7 +50,7 @@ public class ReplaceCriteriaPanel extends JPanel
 	{
 		this.client = aClient;
 		this.ignoreCase = new JCheckBox(ResourceMgr.getString("LabelSearchIgnoreCase"));
-		this.ignoreCase.setSelected("true".equals(Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_CASE, "true")));
+		this.ignoreCase.setSelected(Settings.getInstance().getBoolProperty(PROP_KEY_CASE, true));
 	
 		JLabel label = new JLabel(ResourceMgr.getString("LabelSearchCriteria"));
 		this.criteria = new JTextField();

@@ -569,6 +569,7 @@ public class DataStore
 						{
 							this.resultInfo.setUpdateable(index, true);
 							this.resultInfo.setIsPkColumn(index, columns[i].isPkColumn());
+							this.resultInfo.setIsNullable(index, columns[i].isNullable());
 						}
 					}
 				}
@@ -998,6 +999,11 @@ public class DataStore
 		{
 			this.deletedRows.reset();
 			this.deletedRows = null;
+		}
+		if (this.filteredRows != null)
+		{
+			this.filteredRows.reset();
+			this.filteredRows = null;
 		}
 		this.modified = false;
 	}

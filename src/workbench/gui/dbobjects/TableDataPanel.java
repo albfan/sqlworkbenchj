@@ -19,10 +19,13 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Properties;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -42,6 +45,7 @@ import javax.swing.border.EtchedBorder;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.actions.SelectKeyColumnsAction;
+import workbench.interfaces.PropertyStorage;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
@@ -55,10 +59,12 @@ import workbench.interfaces.TableDeleteListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.interfaces.JobErrorHandler;
 import java.awt.Cursor;
 import java.awt.EventQueue;
+import workbench.util.WbWorkspace;
 
 
 /**
@@ -75,13 +81,13 @@ public class TableDataPanel
 
 	private ReloadAction reloadAction;
 	private SelectKeyColumnsAction defineKeys;
-	
+
 	private JButton config;
 	private JLabel rowCountLabel;
 	private JCheckBox autoRetrieve;
 	private JPanel toolbar;
 
-	private long warningThreshold = -1;
+	private int warningThreshold = -1;
 
 	private boolean shiftDown = false;
 	private boolean retrieveRunning = false;
@@ -132,7 +138,7 @@ public class TableDataPanel
 
 		this.reloadAction = new ReloadAction(this);
 		this.reloadAction.setTooltip(ResourceMgr.getDescription("TxtLoadTableData"));
-		
+
 		WbToolbar toolbar = new WbToolbar();
 		toolbar.addDefaultBorder();
 		topPanel.add(toolbar);
@@ -455,33 +461,78 @@ public class TableDataPanel
 		t.start();
 	}
 
-	public void saveSettings()
+	private String getWorkspacePrefix(int index)
 	{
-		String prefix = TableDataPanel.class.getName();
-		Settings.getInstance().setProperty(prefix, "maxrows", this.getMaxRows());
-		Settings.getInstance().setBoolProperty(prefix + ".autoretrieve", this.autoRetrieve.isSelected());
-		Settings.getInstance().setProperty(prefix, "warningthreshold", Long.toString(this.warningThreshold));
-		Settings.getInstance().setBoolProperty(prefix + ".autoloadrowcount", this.autoloadRowCount);
+		return "dbexplorer" + index + ".tabledata.";
 	}
 
+	/**
+	 * Save the settings to a Workspace
+	 */
+	public void saveToWorkspace(WbWorkspace wb, int index)
+	{
+		String prefix = getWorkspacePrefix(index);
+		saveSettings(prefix, wb.getSettings(), false);
+	}
+
+	/**
+	 * Restore the settings from a Workspace
+	 */
+	public void readFromWorkspace(WbWorkspace wb, int index)
+	{
+		this.restoreSettings(); // load "global" settings first;
+		String prefix = getWorkspacePrefix(index);
+		this.readSettings(prefix, wb.getSettings(), false);
+	}
+
+	/**
+	 *	Store global settings for this DbExplorer
+	 */
+	public void saveSettings()
+	{
+		String prefix = TableDataPanel.class.getName() + ".";
+		saveSettings(prefix, Settings.getInstance(), true);
+	}
+
+	private void saveSettings(String prefix, PropertyStorage props, boolean includeGlobal)
+	{
+		props.setProperty(prefix + "maxrows", this.getMaxRows());
+		props.setProperty(prefix + "autoretrieve", this.autoRetrieve.isSelected());
+		props.setProperty(prefix + "autoloadrowcount", this.autoloadRowCount);
+		if (includeGlobal)
+		{
+			props.setProperty(prefix + "warningthreshold", this.warningThreshold);
+		}
+	}
+	/**
+	 *	Restore global settings for this DbExplorer
+	 */
 	public void restoreSettings()
 	{
-		String propPrefix = TableDataPanel.class.getName();
-		int max = Settings.getInstance().getIntProperty(propPrefix + ".maxrows", 500);
-		this.dataDisplay.setMaxRows(max);
-		boolean auto = Settings.getInstance().getBoolProperty(propPrefix + ".autoretrieve", false);
-		this.autoRetrieve.setSelected(auto);
+		String prefix = TableDataPanel.class.getName() + ".";
+		readSettings(prefix, Settings.getInstance(), true);
+	}
 
-		try
+	private void readSettings(String prefix, PropertyStorage props, boolean includeGlobal)
+	{
+		int max = props.getIntProperty(prefix + "maxrows", -1);
+		if (max == -1 && includeGlobal)
 		{
-			String v = Settings.getInstance().getProperty(TableDataPanel.class.getName(), "warningthreshold", "1500");
-			this.warningThreshold = Long.parseLong(v);
+			max = 500;
 		}
-		catch (Exception e)
+		if (max != -1) this.dataDisplay.setMaxRows(max);
+		String v = props.getProperty(prefix + "autoretrieve", null);
+		if (v == null && includeGlobal)
 		{
-			this.warningThreshold = -1;
+			v = "true";
 		}
-		this.autoloadRowCount = Settings.getInstance().getBoolProperty(propPrefix + ".autoloadrowcount", true);
+		boolean auto = "true".equals(v);
+		this.autoRetrieve.setSelected(auto);
+		this.autoloadRowCount = props.getBoolProperty(prefix + "autoloadrowcount", true);
+		if (includeGlobal)
+		{
+			this.warningThreshold = props.getIntProperty(prefix + "warningthreshold", 1500);
+		}
 	}
 
 	public void showData()
@@ -499,10 +550,9 @@ public class TableDataPanel
 		if (this.autoRetrieve.isSelected() && includeData)
 		{
 			int max = this.getMaxRows();
-			if ( this.warningThreshold > 0 &&
-			     rows > this.warningThreshold &&
-			     (max > this.warningThreshold || max == 0)
-				 )
+			if ( this.warningThreshold > 0
+				   && rows > this.warningThreshold
+				   && max == 0)
 			{
 				String msg = ResourceMgr.getString("MsgDataDisplayWarningThreshold");
 				msg = msg.replaceAll("%rows%", Long.toString(rows));
@@ -543,6 +593,7 @@ public class TableDataPanel
 			}
 		}
 	}
+
 	public void setReadOnly(boolean aFlag)
 	{
 		this.dataDisplay.setReadOnly(aFlag);

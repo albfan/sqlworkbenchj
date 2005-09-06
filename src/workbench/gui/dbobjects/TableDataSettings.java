@@ -14,6 +14,7 @@ package workbench.gui.dbobjects;
 import java.awt.event.ActionListener;
 
 import workbench.resource.ResourceMgr;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -112,20 +113,11 @@ public class TableDataSettings
   }
   // </editor-fold>//GEN-END:initComponents
 	
-	public long getThresholdValue()
+	public int getThresholdValue()
 	{
 		if (this.checkBoxEnableWarning.isSelected())
 		{
-			try
-			{
-				String v = this.textFieldThresholdValue.getText();
-				long rows = Long.parseLong(v);
-				return rows;
-			}
-			catch (Exception e)
-			{
-				return -1;
-			}
+			return StringUtil.getIntValue(this.textFieldThresholdValue.getText(), -1);
 		}
 		else
 		{
@@ -139,7 +131,7 @@ public class TableDataSettings
 	public void setAutoloadData(boolean flag) { this.autoloadData.setSelected(flag); }
 	public boolean getAutoloadData() { return this.autoloadData.isSelected(); }
 	
-	public void setThresholdValue(long aValue)
+	public void setThresholdValue(int aValue)
 	{
 		this.checkBoxEnableWarning.setSelected(aValue > 0);
 		this.textFieldThresholdValue.setEnabled(aValue > 0);
@@ -150,7 +142,7 @@ public class TableDataSettings
 		}
 		else
 		{
-			this.textFieldThresholdValue.setText(Long.toString(aValue));
+			this.textFieldThresholdValue.setText(Integer.toString(aValue));
 		}
 	}
 	

@@ -45,7 +45,6 @@ public class WbExport
 	private DataExporter exporter;
 	private int maxRows = 0;
 	private boolean directExport = false;
-	private List tablesToExport = null;
 	private String currentTable;
 	private String defaultExtension;
 	private boolean showProgress = true;
@@ -361,10 +360,11 @@ public class WbExport
 		file = StringUtil.trimQuotes(file);
 		this.exporter.setOutputFilename(file);
 
+		List tablesToExport = null;
 		if (tables != null)
 		{
-			this.tablesToExport = StringUtil.stringToList(tables, ",");
-			this.directExport = (this.tablesToExport.size() > 0);
+			tablesToExport = StringUtil.stringToList(tables, ",");
+			this.directExport = (tablesToExport.size() > 0);
 		}
 
 		this.exporter.setConnection(aConnection);
@@ -386,6 +386,7 @@ public class WbExport
 
 		if (!this.directExport)
 		{
+			// Waiting for the next SQL Statement...
 			this.exporter.setRowMonitor(this.rowMonitor);
 			this.exporter.setProgressInterval(this.progressInterval);
 
@@ -402,58 +403,66 @@ public class WbExport
 		}
 		else
 		{
-			this.runTableExports(result, outputdir);
+			this.runTableExports(tablesToExport, result, outputdir);
 		}
 		return result;
 	}
 
-	private void runTableExports(StatementRunnerResult result, String outputdir)
+	private void runTableExports(List tableList, StatementRunnerResult result, String outputdir)
 	{
-		if (this.tablesToExport == null || this.tablesToExport.size() == 0)
+		if (tableList == null || tableList.size() == 0)
 		{
 			this.directExport = false;
 			return;
 		}
 
+		TableIdentifier[] tables = null;
+		
 		result.setSuccess();
 
-		int count = this.tablesToExport.size();
+		int count = tableList.size();
 		if (count == 1)
 		{
-			String t = (String)this.tablesToExport.get(0);
-			if (t.endsWith("*"))
+			// If only one table is present, we'll have to 
+			// to check for wildcards e.g. -sourcetable=theschema.*
+			// This will be handled by DbMetadata when passing 
+			// null or wildcards to the getTableList() method
+			String t = (String)tableList.get(0);
+			TableIdentifier tbl = new TableIdentifier(t);
+			tbl.adjustCase(this.currentConnection);
+			List l = null;
+			try
 			{
-				String schema = null;
-				if (t.length() > 1)
-				{
-					schema = t.substring(0, t.indexOf('.'));
-				}
-				List l = null;
-				try
-				{
-					l = this.currentConnection.getMetadata().getTableList(schema);
-				}
-				catch (SQLException e)
-				{
-					LogMgr.logError("WbExport.runTableExports()", "Could not retrieve table list", e);
-					result.addMessage(ExceptionUtil.getDisplay(e));
-					result.setFailure();
-					return;
-				}
-				this.tablesToExport.clear();
-				if (l.size() == 0)
-				{
-					result.addMessage(ResourceMgr.getString("ErrorExportNoTablesFound") + " " + t);
-					result.setFailure();
-					directExport = false;
-					return;
-				}
-				for (int i=0; i < l.size(); i++)
-				{
-					TableIdentifier id = (TableIdentifier)l.get(i);
-					this.tablesToExport.add(id.getTableExpression(this.currentConnection));
-				}
-				count = this.tablesToExport.size();
+				l = this.currentConnection.getMetadata().getTableList(tbl.getTableName(), tbl.getSchema());
+			}
+			catch (SQLException e)
+			{
+				LogMgr.logError("WbExport.runTableExports()", "Could not retrieve table list", e);
+				result.addMessage(ExceptionUtil.getDisplay(e));
+				result.setFailure();
+				return;
+			}
+
+			if (l.size() == 0)
+			{
+				result.addMessage(ResourceMgr.getString("ErrorExportNoTablesFound") + " " + t);
+				result.setFailure();
+				directExport = false;
+				return;
+			}
+			count = l.size();
+			tables = new TableIdentifier[count];
+			for (int i=0; i < count; i++)
+			{
+				tables[i] = (TableIdentifier)l.get(i);
+			}
+		}
+		else
+		{
+			tables = new TableIdentifier[count];
+			for (int i=0; i < count; i++)
+			{
+				tables[i] = new TableIdentifier((String)tableList.get(i));
 			}
 		}
 
@@ -463,6 +472,7 @@ public class WbExport
 
 		if (count > 1)
 		{
+			// when more then table is selected, then we require an output directory
 			if (outputdir == null || outputdir.trim().length() == 0)
 			{
 				result.setFailure();
@@ -471,18 +481,18 @@ public class WbExport
 			}
 
 			outdir = new File(outputdir);
-			if (!outdir.isDirectory())
+			if (!outdir.exists())
 			{
-				msg = ResourceMgr.getString("ErrorExportOutputDirNotDir");
+				msg = ResourceMgr.getString("ErrorExportOutputDirNotFound");
 				msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
 				result.addMessage(msg);
 				result.setFailure();
 				return;
 			}
-
-			if (!outdir.exists())
+			
+			if (!outdir.isDirectory())
 			{
-				msg = ResourceMgr.getString("ErrorExportOutputDirNotFound");
+				msg = ResourceMgr.getString("ErrorExportOutputDirNotDir");
 				msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
 				result.addMessage(msg);
 				result.setFailure();
@@ -497,14 +507,12 @@ public class WbExport
 		{
 			for (int i = 0; i < count; i ++)
 			{
-				String table = (String)this.tablesToExport.get(i);
-				if (table == null) continue;
-				table = table.trim();
-				String fname = StringUtil.makeFilename(table);
+				String fname = StringUtil.makeFilename(tables[i].getTableExpression());
 				File f = new File(outdir, fname + defaultExtension);
-				exporter.addTableExportJob(f.getAbsolutePath(), table);
+				exporter.addTableExportJob(f.getAbsolutePath(), tables[i]);
 			}
 			exporter.runJobs();
+			count = exporter.getNumberExportedTables();
 			msg = ResourceMgr.getString("MsgExportNumTables");
 			msg = msg.replaceAll("%numtables%", Integer.toString(count));
 			msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
@@ -512,7 +520,9 @@ public class WbExport
 		}
 		else
 		{
-			String table = (String)this.tablesToExport.get(0);
+			// For message and error display purposes we treat a single
+			// table export differently 
+			String table = tables[0].getTableExpression(this.currentConnection);
 			if (outfile == null)
 			{
 				File nf = new File(outputdir, table + defaultExtension);
@@ -521,7 +531,7 @@ public class WbExport
 			}
 			this.currentTable = table;
 			this.setCurrentObject(table, -1, -1);
-			String stmt = "SELECT * FROM " + SqlUtil.quoteObjectname(table);
+			String stmt = "SELECT * FROM " + table;
 			exporter.setSql(stmt);
 			long rows = 0;
 			try
@@ -565,6 +575,8 @@ public class WbExport
 
 	public void consumeResult(StatementRunnerResult aResult)
 	{
+		// Run an export that is defined by a SQL Statement
+		// i.e. no sourcetable given in the initial wbexport command
 		try
 		{
 			if (aResult.hasResultSets())
@@ -624,7 +636,6 @@ public class WbExport
 		exporter = null;
 		maxRows = 0;
 		directExport = false;
-		tablesToExport = null;
 		currentTable = null;
 		defaultExtension = null;
 	}
@@ -646,7 +657,7 @@ public class WbExport
 	public void setCurrentObject(String object, long number, long total)
 	{
 		this.currentTable = object;
-		if (!this.showProgress)
+		if (!this.showProgress && this.rowMonitor != null)
 		{
 			this.rowMonitor.setCurrentObject(this.currentTable, -1, -1);
 		}
@@ -654,7 +665,7 @@ public class WbExport
 
 	public void setCurrentRow(long currentRow, long totalRows)
 	{
-		if (this.showProgress)
+		if (this.showProgress && this.rowMonitor != null)
 		{
 			this.rowMonitor.setCurrentObject(this.currentTable, currentRow, -1);
 		}

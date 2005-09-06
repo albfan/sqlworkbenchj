@@ -105,7 +105,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.37 2005-08-14 16:37:19 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.38 2005-09-06 17:44:32 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -1057,8 +1057,10 @@ public class JEditTextArea
 		if(this.document == document)	return;
 
 		if(this.document != null)
+		{
 			this.document.removeDocumentListener(documentHandler);
-
+			this.document.dispose();
+		}
 		this.document = document;
 
 		if(this.document != null)

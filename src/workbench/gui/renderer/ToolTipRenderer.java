@@ -43,7 +43,12 @@ public class ToolTipRenderer
 	private Color selectedBackground;
 	private Color unselectedForeground;
 	private Color unselectedBackground;
-
+	private Color highlightBackground;
+	private int editingRow = -1;
+	private boolean isEditing = false;
+	private boolean[] highlightCols;
+	private int currentColumn = -1;
+	
 	private Rectangle paintIconR = new Rectangle();
 	private Rectangle paintTextR = new Rectangle();
 	private Rectangle paintViewR = new Rectangle();
@@ -73,6 +78,9 @@ public class ToolTipRenderer
 	public ToolTipRenderer()
 	{
 	}
+
+	public void setEditingRow(int row) { this.editingRow = row; }
+	public void setHighlightColumns(boolean[] cols) { this.highlightCols = cols; }
 	
 	public void setVerticalAlignment(int align)
 	{
@@ -83,11 +91,17 @@ public class ToolTipRenderer
 	{
 		this.halign = align;
 	}
+	
 	public int getHorizontalAlignment()
 	{
 		return this.halign;
 	}
 
+	public void setHighlightBackground(Color c)
+	{
+		this.highlightBackground = c;
+	}
+	
 	public Component getTableCellRendererComponent(	JTable table,
 																									Object value,
 																									boolean isSelected,
@@ -96,6 +110,9 @@ public class ToolTipRenderer
 																									int col)
 	{
 		this.focus = hasFocus;
+		this.isEditing = (row == this.editingRow) && (this.highlightBackground != null);
+		this.currentColumn = col;
+		
 		if (isSelected)
 		{
 			if (selectedForeground == null)
@@ -169,15 +186,31 @@ public class ToolTipRenderer
 		int textY = paintTextR.y + fm.getAscent();
 		if (textY < 0) textY = 0;
 
-		if (this.selected)
+		if (!this.isEditing)
 		{
-			g.setColor(selectedBackground);
-			g.fillRect(0,0, w, h);
-			g.setColor(selectedForeground);
+			if (this.selected)
+			{
+				g.setColor(selectedBackground);
+				g.fillRect(0,0, w, h);
+				g.setColor(selectedForeground);
+			}
+			else 
+			{
+				g.setColor(unselectedBackground);
+				g.fillRect(0,0, w, h);
+				g.setColor(unselectedForeground);
+			}
 		}
-		else 
+		else
 		{
-			g.setColor(unselectedBackground);
+			if (this.highlightCols[this.currentColumn])
+			{
+				g.setColor(this.highlightBackground);
+			}
+			else
+			{
+				g.setColor(unselectedBackground);
+			}
 			g.fillRect(0,0, w, h);
 			g.setColor(unselectedForeground);
 		}

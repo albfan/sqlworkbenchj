@@ -45,7 +45,7 @@ public class WbConnection
 	public static final String PROP_CONNECTION_STATE = "state";
 	public static final String CONNECTION_CLOSED = "closed";
 	public static final String CONNECTION_OPEN = "open";
-	
+
   private String id;
 	private Connection sqlConnection;
 	private DbMetadata metaData;
@@ -54,10 +54,10 @@ public class WbConnection
 
 	private boolean ddlNeedsCommit;
 	private boolean cancelNeedsReconnect = false;
-	
+
 	private List listeners;
 	private DbObjectCache objectCache;
-	
+
 	/** Creates a new instance of WbConnection */
 	public WbConnection(String anId)
 	{
@@ -93,7 +93,7 @@ public class WbConnection
 		}
 		return this.pool;
 	}
-	
+
 	public DbObjectCache getObjectCache()
 	{
 		if (this.objectCache == null)
@@ -102,13 +102,13 @@ public class WbConnection
 		}
 		return this.objectCache;
 	}
-	
+
 	public String getCurrentUser()
 	{
 		if (this.metaData == null) return null;
 		return this.metaData.getUserName();
 	}
-	
+
 	public ConnectionProfile getProfile()
 	{
 		return this.profile;
@@ -183,6 +183,8 @@ public class WbConnection
 	 */
 	public void clearWarnings()
 	{
+		if (this.sqlConnection == null) return;
+		if (this.metaData == null) return;
 		try
 		{
 			this.sqlConnection.clearWarnings();
@@ -299,7 +301,7 @@ public class WbConnection
 	public void disconnect()
 	{
 		ConnectionMgr.getInstance().disconnect(this.id);
-		if (this.pool != null) 
+		if (this.pool != null)
 		{
 			this.pool.done();
 		}
@@ -323,12 +325,12 @@ public class WbConnection
 				LogMgr.logWarning("WbConnection.close()", "Error reported when doing rollback before disconnect", e);
 			}
 		}
-		
+
 		try
 		{
-			this.metaData.close();
+			if (this.metaData != null) this.metaData.close();
 			this.metaData = null;
-			this.sqlConnection.close();
+			if (this.sqlConnection != null) this.sqlConnection.close();
 			this.sqlConnection = null;
 		}
 		catch (Throwable th)
@@ -346,7 +348,7 @@ public class WbConnection
 	/**
 	 * Create a statement that produces ResultSets that
 	 * are read only and forward only (for performance)
-	 * If the profile defined a default fetch size, this 
+	 * If the profile defined a default fetch size, this
 	 * will be set as well.
 	 */
 	public Statement createStatementForQuery()
@@ -364,7 +366,7 @@ public class WbConnection
 		}
 		return stmt;
 	}
-	
+
 	public Statement createStatement()
 		throws SQLException
 	{
@@ -432,7 +434,7 @@ public class WbConnection
 				buff.append('=');
 				buff.append(schema);
 			}
-			
+
 			buff.append(", URL=");
 			buff.append(getSqlConnection().getMetaData().getURL());
 			displayString = buff.toString();
@@ -468,7 +470,7 @@ public class WbConnection
 	{
 		return this.getDatabaseInfoAsXml(indent, null);
 	}
-	
+
 	/**
 	 *	Returns information about the DBMS and the JDBC driver
 	 *	in the XML format used for the XML export
@@ -488,26 +490,50 @@ public class WbConnection
 
 		TagWriter tagWriter = new TagWriter(namespace);
 		String value = null;
-		
+
 		tagWriter.appendTag(dbInfo, indent, "created", StringUtil.getCurrentTimestampWithTZString());
-		
+
 		try { value = db.getDriverName(); } catch (Throwable th) { value = "n/a"; }
-		tagWriter.appendTag(dbInfo, indent, "jdbc-driver", value);
-		
+		tagWriter.appendTag(dbInfo, indent, "jdbc-driver", cleanValue(value));
+
 		try { value = db.getDriverVersion(); } catch (Throwable th) { value = "n/a"; }
-		tagWriter.appendTag(dbInfo, indent, "jdbc-driver-version", value);
-		
+		tagWriter.appendTag(dbInfo, indent, "jdbc-driver-version", cleanValue(value));
+
 		tagWriter.appendTag(dbInfo, indent, "connection", this.getDisplayString());
 
-		try { value = db.getDatabaseProductName(); } catch (Throwable th) { value = "n/a"; }
-		tagWriter.appendTag(dbInfo, indent, "database-product-name", value);
+		try { value = db.getDatabaseProductName() +" testing 0 " + (char)0 + " bla"; } catch (Throwable th) { value = "n/a"; }
+		tagWriter.appendTag(dbInfo, indent, "database-product-name", cleanValue(value));
 
 		try { value = db.getDatabaseProductVersion(); } catch (Throwable th) { value = "n/a"; }
-		tagWriter.appendTag(dbInfo, indent, "database-product-version", value);
+		tagWriter.appendTag(dbInfo, indent, "database-product-version", cleanValue(value));
 
 		return dbInfo;
 	}
 
+	/**
+	 *	Some DBMS have strange characters when reporting their name
+	 *  This method ensures that an XML "compatible" value is returned in
+	 *  getDatabaseInfoAsXml
+	 */
+	private String cleanValue(String value)
+	{
+		if (value == null) return null;
+		int len = value.length();
+		StringBuffer result = new StringBuffer(len);
+		for (int i=0; i < len; i++)
+		{
+			char c = value.charAt(i);
+			if ( (c > 32 && c != 127) || c == 9 || c == 10 || c == 13)
+			{
+				result.append(c);
+			}
+			else
+			{
+				result.append(' ');
+			}
+		}
+		return result.toString();
+	}
 
 	/**
 	 *	Some DBMS need to commit DDL (CREATE, DROP, ...) statements.
@@ -560,5 +586,5 @@ public class WbConnection
 	{
 		this.fireConnectionStateChanged(PROP_SCHEMA, oldSchema, newSchema);
 	}
-	
+
 }

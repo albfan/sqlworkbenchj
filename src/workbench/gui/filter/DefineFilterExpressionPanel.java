@@ -274,7 +274,7 @@ public class DefineFilterExpressionPanel
 			try
 			{
 				ColumnExpression col = (ColumnExpression)cols.get(i);
-				this.addExpressionPanel();
+				this.addExpressionPanel(col);
 				PanelEntry item = (PanelEntry)this.panels.get(this.panels.size() - 1);
 				ColumnExpressionPanel panel = item.expressionPanel;
 				panel.setExpression(col);
@@ -315,7 +315,12 @@ public class DefineFilterExpressionPanel
 	
 	private Dimension addExpressionPanel()
 	{
-		final ColumnExpressionPanel exp = new ColumnExpressionPanel(columnInfo);
+		return addExpressionPanel(null);
+	}
+	
+	private Dimension addExpressionPanel(ColumnExpression filter)
+	{
+		final ColumnExpressionPanel exp = new ColumnExpressionPanel(columnInfo, filter);
 		JButton b = new JButton(ResourceMgr.getImage("Remove"));
 		b.setPreferredSize(new Dimension(21,21));
 		b.setBorder(BorderFactory.createEtchedBorder());

@@ -15,7 +15,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Insets;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -23,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
@@ -32,7 +37,7 @@ import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTextLabel;
 import workbench.interfaces.StatusBar;
 import workbench.resource.ResourceMgr;
-import workbench.util.StrBuffer;
+import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 
@@ -51,12 +56,14 @@ public class DwStatusBar
 	private JTextField tfMaxRows;
 	private String readyMsg;
 	private JTextField tfTimeout;
+	private JLabel execTime;
 	private JLabel timeoutLabel;
 	private JPanel auxPanel;
 	
 	private static final int BAR_HEIGHT = 22;
 	private static final int FIELD_HEIGHT = 18;
-
+	private DecimalFormat numberFormatter;
+	
 	public DwStatusBar()
 	{
 		this(false);
@@ -71,6 +78,7 @@ public class DwStatusBar
 		this.tfMaxRows.setMaximumSize(d);
 		this.tfMaxRows.setMargin(new Insets(0, 2, 0, 2));
 		this.tfMaxRows.setText("0");
+		this.tfMaxRows.setName("maxrows");
 		this.tfMaxRows.setToolTipText(ResourceMgr.getDescription("TxtMaxRows"));
 		this.tfMaxRows.setHorizontalAlignment(SwingConstants.RIGHT);
 		this.tfMaxRows.addMouseListener(new TextComponentMouseListener());
@@ -109,12 +117,28 @@ public class DwStatusBar
 		p.setMaximumSize(new Dimension(300, FIELD_HEIGHT));
 		
 		this.add(tfStatus, BorderLayout.CENTER);
+		
+		this.execTime = new JLabel();
+		execTime.setHorizontalAlignment(JTextField.RIGHT);
+		Font f = execTime.getFont();
+		FontMetrics fm = execTime.getFontMetrics(f);
+		Dimension pref = execTime.getPreferredSize();
+		
+		int width = fm.stringWidth("000000000000s");
+		d = new Dimension(width + 4, FIELD_HEIGHT);
+		execTime.setPreferredSize(d);
+		execTime.setMaximumSize(d);
+		
+		b = new CompoundBorder(new DividerBorder(DividerBorder.LEFT_RIGHT), new EmptyBorder(0, 3, 0, 3));
+		execTime.setBorder(b);	
+		p.add(execTime);
+		
 		if (showTimeout)
 		{
 			l = new JLabel(" " + ResourceMgr.getString("LabelQueryTimeout") + " ");
-			l.setBorder(new DividerBorder(DividerBorder.LEFT));		
+			//l.setBorder(new DividerBorder(DividerBorder.LEFT));		
 			p.add(l);
-			this.tfTimeout = new JTextField(4);
+			this.tfTimeout = new JTextField(3);
 			this.tfTimeout.setBorder(b);
 			this.tfTimeout.setMargin(new Insets(0, 2, 0, 2));
 			this.tfTimeout.setToolTipText(ResourceMgr.getDescription("LabelQueryTimeout"));
@@ -124,10 +148,10 @@ public class DwStatusBar
 			p.add(this.tfTimeout);
 		}
 		l = new JLabel(" " + ResourceMgr.getString("LabelMaxRows") + " ");
-		if (!showTimeout)
-		{
-			l.setBorder(new DividerBorder(DividerBorder.LEFT));		
-		}
+//		if (!showTimeout)
+//		{
+//			l.setBorder(new DividerBorder(DividerBorder.LEFT));		
+//		}
 		l.setToolTipText(this.tfRowCount.getToolTipText());
 		p.add(l);
 		p.add(tfMaxRows);
@@ -136,6 +160,12 @@ public class DwStatusBar
 
 		this.readyMsg = ResourceMgr.getString(ResourceMgr.STAT_READY);
 		this.clearStatusMessage();
+		
+		DecimalFormatSymbols symb = new DecimalFormatSymbols();
+		String sep = Settings.getInstance().getDecimalSymbol();
+		symb.setDecimalSeparator(sep.charAt(0));		
+		numberFormatter = new DecimalFormat("0.#s", symb);
+		numberFormatter.setMaximumFractionDigits(2);
 	}
 
 	public void setReadyMsg(String aMsg)
@@ -150,6 +180,19 @@ public class DwStatusBar
 		}
 	}
 
+	public void clearExecutionTime()
+	{
+		this.execTime.setText("");
+		this.execTime.repaint();
+	}
+	
+	public void setExecutionTime(long millis)
+	{
+		double time = (double)(millis/1000.0);
+		this.execTime.setText(numberFormatter.format(time));
+		this.execTime.repaint();
+	}
+	
 	public void setRowcount(int start, int end, int count)
 	{
 		StringBuffer s = new StringBuffer(20);

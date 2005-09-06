@@ -7,7 +7,7 @@
    <string>ALTER TABLE %tablename%
   ADD CONSTRAINT %constraintname% FOREIGN KEY (%columnlist%)
   REFERENCES %targettable% (%targetcolumnlist%)
-  ON DELETE %fk_delete_rule%</string>
+  %fk_delete_rule%</string>
   </void>
   
   <void method="put">
@@ -15,8 +15,8 @@
    <string>ALTER TABLE %tablename%
   ADD CONSTRAINT %constraintname% FOREIGN KEY (%columnlist%)
   REFERENCES %targettable% (%targetcolumnlist%)
-  ON UPDATE %fk_update_rule%
-  ON DELETE %fk_delete_rule%</string>
+  %fk_update_rule%
+  %fk_delete_rule%</string>
   </void>
  
  <void method="put">

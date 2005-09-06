@@ -116,11 +116,6 @@ public class WbWorkspace
 		this.tabInfo.setProperty("dbexplorer.visible", count);
 	}
 	
-//	public void setDbExplorerVisibleCount(int count)
-//	{
-//		this.tabInfo.setProperty("dbexplorer.visible", count);
-//	}
-	
 	public int getDbExplorerVisibleCount()
 	{
 		return this.tabInfo.getIntProperty("dbexplorer.visible", 0);
@@ -164,7 +159,7 @@ public class WbWorkspace
 		return;
 	}
 
-	public Properties getSettings()
+	public WbProperties getSettings()
 	{
 		return this.tabInfo;
 	}
@@ -183,12 +178,15 @@ public class WbWorkspace
 					this.tabInfo.save(this.zout);
 					zout.closeEntry();
 				}
-				catch (Exception e)
+				catch (Throwable e)
 				{
 					LogMgr.logError("WbWorkspace.close()", "Could not write tab info!", e);
 				}
+				finally
+				{
+					this.zout.close();
+				}
 			}
-			this.zout.close();
 		}
 		else if (this.archive != null)
 		{

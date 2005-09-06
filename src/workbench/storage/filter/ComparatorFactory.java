@@ -24,28 +24,27 @@ import java.util.regex.Pattern;
 public class ComparatorFactory
 {
 	private ColumnComparator[] comparatorList;
-	
+
 	public ComparatorFactory()
 	{
 		comparatorList = new ColumnComparator[]
 		{
-			new StringEqualsComparator(), 
+			new ContainsComparator(),
+			new StartsWithComparator(),
+			new ContainsNotComparator(),
+			new RegExComparator(),
+			new StringEqualsComparator(),
 			new NumberEqualsComparator(),
 			new LessThanComparator(),
 			new LessOrEqualComparator(),
 			new GreaterThanComparator(),
-			new GreaterOrEqualComparator(),
-			new StartsWithComparator(),
-			new ContainsComparator(),
-			new ContainsNotComparator(),
-			new RegExComparator()
+			new GreaterOrEqualComparator()
 		};
 	}
-	
+
 	public ColumnComparator[] getAvailableComparators()
 	{
 		return comparatorList;
 	}
-	
-}
 
+}

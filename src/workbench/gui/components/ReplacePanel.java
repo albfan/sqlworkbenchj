@@ -38,10 +38,10 @@ public class ReplacePanel
 	implements ActionListener, WindowListener
 {
 	private static final String PROP_CLASS = "workbench.sql.replace";
-	private static final String PROP_KEY_CASE = "ignoreCase";
-	private static final String PROP_KEY_WHOLE_WORD = "wholeWord";
-	private static final String PROP_KEY_SELECTED = "selectedText";
-	private static final String PROP_KEY_USE_REGEX = "useRegEx";
+	private static final String PROP_KEY_CASE = PROP_CLASS + ".ignoreCase";
+	private static final String PROP_KEY_WHOLE_WORD = PROP_CLASS + ".wholeWord";
+	private static final String PROP_KEY_SELECTED = PROP_CLASS + ".selectedText";
+	private static final String PROP_KEY_USE_REGEX = PROP_CLASS + ".useRegEx";
 	
 	private Replaceable client;
 	private int lastPos = -1;
@@ -358,22 +358,20 @@ public class ReplacePanel
 	
 	private void saveSettings()
 	{
-		Settings.getInstance().setProperty(PROP_CLASS, PROP_KEY_CASE, Boolean.toString(this.ignoreCaseCheckBox.isSelected()));
-		Settings.getInstance().setProperty(PROP_CLASS, PROP_KEY_WHOLE_WORD, Boolean.toString(this.wordsOnlyCheckBox.isSelected()));
-		Settings.getInstance().setProperty(PROP_CLASS, PROP_KEY_SELECTED, Boolean.toString(this.selectedTextCheckBox.isSelected()));
-		Settings.getInstance().setProperty(PROP_CLASS, PROP_KEY_USE_REGEX, Boolean.toString(this.useRegexCheckBox.isSelected()));
+		Settings.getInstance().setProperty(PROP_KEY_CASE, Boolean.toString(this.ignoreCaseCheckBox.isSelected()));
+		Settings.getInstance().setProperty(PROP_KEY_WHOLE_WORD, Boolean.toString(this.wordsOnlyCheckBox.isSelected()));
+		Settings.getInstance().setProperty(PROP_KEY_SELECTED, Boolean.toString(this.selectedTextCheckBox.isSelected()));
+		Settings.getInstance().setProperty(PROP_KEY_USE_REGEX, Boolean.toString(this.useRegexCheckBox.isSelected()));
 		
 		Settings.getInstance().storeWindowPosition(this.dialog, PROP_CLASS + ".window");
 	}
 	
 	private void restoreSettings()
 	{
-		this.ignoreCaseCheckBox.setSelected("true".equals(Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_CASE, "true")));
-		this.wordsOnlyCheckBox.setSelected("true".equals(Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_WHOLE_WORD, "false")));
-		this.selectedTextCheckBox.setSelected("true".equals(Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_SELECTED, "false")));
-		this.useRegexCheckBox.setSelected("true".equals(Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_USE_REGEX, "true")));
-		//this.criteriaTextField.setText(Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_SEARCH, ""));
-		//this.replaceValueTextField.setText(Settings.getInstance().getProperty(PROP_CLASS, PROP_KEY_REPLACE, ""));
+		this.ignoreCaseCheckBox.setSelected(Settings.getInstance().getBoolProperty(PROP_KEY_CASE, true));
+		this.wordsOnlyCheckBox.setSelected(Settings.getInstance().getBoolProperty(PROP_KEY_WHOLE_WORD, false));
+		this.selectedTextCheckBox.setSelected(Settings.getInstance().getBoolProperty(PROP_KEY_SELECTED, false));
+		this.useRegexCheckBox.setSelected(Settings.getInstance().getBoolProperty(PROP_KEY_USE_REGEX, true));
 	}
 	
 	public void windowActivated(java.awt.event.WindowEvent e)

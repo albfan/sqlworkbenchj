@@ -41,9 +41,9 @@ public class TextOptionsPanel
 	public void saveSettings()
 	{
 		Settings s = Settings.getInstance();
-		s.setBoolProperty("workbench.export.text.cleanup", this.getCleanupCarriageReturns());
-		s.setBoolProperty("workbench.export.text.includeheader", this.getExportHeaders());
-		s.setBoolProperty("workbench.export.text.quotealways", this.getQuoteAlways());
+		s.setProperty("workbench.export.text.cleanup", this.getCleanupCarriageReturns());
+		s.setProperty("workbench.export.text.includeheader", this.getExportHeaders());
+		s.setProperty("workbench.export.text.quotealways", this.getQuoteAlways());
 		s.setProperty("workbench.export.text.escaperange", this.getEscapeRange().getId());
 		s.setProperty("workbench.export.text.lineending", (String)this.lineEnding.getSelectedItem());
 		s.setDefaultTextDelimiter(this.getTextDelimiter());

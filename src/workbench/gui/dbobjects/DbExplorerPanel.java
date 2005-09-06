@@ -16,6 +16,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -66,9 +67,7 @@ public class DbExplorerPanel
 	private TableListPanel tables;
 	private TableSearchPanel searchPanel;
 	private ProcedureListPanel procs;
-	//private PersistenceGeneratorPanel generator;
 	private JComboBox schemaSelector;
-	//private JComboBox catalogSelector;
 	private JLabel schemaLabel;
 	private JPanel selectorPanel;
 	private JLabel catalogLabel;
@@ -111,11 +110,8 @@ public class DbExplorerPanel
 
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerProcs"), procs);
 			tabPane.setToolTipTextAt(1, ResourceMgr.getDescription("TxtDbExplorerProcs"));
-
 			tabPane.add(ResourceMgr.getString("TxtSearchTables"), this.searchPanel);
 			tabPane.setToolTipTextAt(2, ResourceMgr.getDescription("TxtSearchTables"));
-
-			//tabPane.add(ResourceMgr.getString("TxtPersistenceGenerator"), new JPanel());
 			tabPane.setFocusable(false);
 
 			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
@@ -132,10 +128,6 @@ public class DbExplorerPanel
 
 			this.selectorPanel.add(schemaLabel);
 			this.schemaSelector = new JComboBox();
-			d = new Dimension(250, 20);
-			this.schemaSelector.setMaximumSize(d);
-			d = new Dimension(100, 20);
-			this.schemaSelector.setPreferredSize(d);
 
 			this.selectorPanel.add(this.schemaSelector);
 
@@ -144,12 +136,10 @@ public class DbExplorerPanel
 			this.searchPanel.restoreSettings();
 
 			this.toolbar = new WbToolbar();
-			Border b = new CompoundBorder(new EmptyBorder(1,0,1,0), new EtchedBorder());
-			this.toolbar.setBorder(b);
-			this.toolbar.setBorderPainted(true);
-			d = new Dimension(30, 30);
+			this.toolbar.addDefaultBorder();
+			d = new Dimension(30, 29);
 			this.toolbar.setMinimumSize(d);
-			this.toolbar.setPreferredSize(new Dimension(100, 30));
+			this.toolbar.setPreferredSize(new Dimension(100, 29));
 			this.connectionInfo = new ConnectionInfo(this.toolbar.getBackground());
 			this.connectionInfo.setMinimumSize(d);
 			this.toolbar.add(this.connectionInfo);
@@ -158,8 +148,6 @@ public class DbExplorerPanel
 		{
 			LogMgr.logError(this, "Could not initialize DbExplorerPanel", e);
 		}
-
-		//this.tabPane.addChangeListener(this);
 	}
 
 	public void showConnectButton(ConnectionSelector selector)
@@ -168,8 +156,6 @@ public class DbExplorerPanel
 		this.selectConnectionButton = new JButton(ResourceMgr.getString("LabelSelectConnection"));
 		Border b = new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED), new EmptyBorder(1, 10, 1, 10));
 		this.selectConnectionButton.setBorder(b);
-		//Dimension d = new Dimension(150, 22);
-		//this.selectConnectionButton.setMaximumSize(d);
 		this.selectConnectionButton.addActionListener(this);
 		this.selectorPanel.add(Box.createHorizontalStrut(15));
 		this.selectorPanel.add(this.selectConnectionButton);
@@ -226,6 +212,15 @@ public class DbExplorerPanel
 			schemaSelector.setSelectedItem(currentSchema);
 			tables.setCatalogAndSchema(null, currentSchema, false);
       procs.setCatalogAndSchema(null, currentSchema, false);
+
+			Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+			int maxWidth = (int)(d.getWidth() / 2);
+			d = this.schemaSelector.getPreferredSize();
+			if (d.getWidth() > maxWidth)
+			{
+				d = new Dimension(maxWidth, 20);
+				this.schemaSelector.setMaximumSize(d);
+			}
 		}
 		catch (Throwable e)
 		{
@@ -413,7 +408,6 @@ public class DbExplorerPanel
 		this.tables.saveSettings();
 		this.procs.saveSettings();
 		if (this.searchPanel != null) this.searchPanel.saveSettings();
-		//if (this.generator != null) this.generator.saveSettings();
 	}
 
 	public void restoreSettings()
@@ -421,7 +415,6 @@ public class DbExplorerPanel
 		tables.restoreSettings();
 		procs.restoreSettings();
 		if (this.searchPanel != null) searchPanel.restoreSettings();
-		//if (this.generator != null) this.generator.restoreSettings();
 	}
 
 	public void actionPerformed(ActionEvent e)
@@ -469,6 +462,8 @@ public class DbExplorerPanel
 		t.start();
 	}
 
+	public String getName() { return getTabTitle(); }
+	
 	public void setTabName(String name)
 	{
 		this.tabTitle = name;
@@ -481,8 +476,20 @@ public class DbExplorerPanel
 	
 	public void setTabTitle(JTabbedPane tab, int index)
 	{
-		if (this.tabTitle == null) tab.setTitleAt(index, getTabTitle());
-		else tab.setTitleAt(index, tabTitle);
+		String title = (this.tabTitle == null ? getTabTitle() : this.tabTitle);
+		
+		String realTitle = title + " " + Integer.toString(index+1);
+		tab.setTitleAt(index, realTitle);
+		if (index < 9)
+		{
+			char c = Integer.toString(index+1).charAt(0);
+			int pos = title.length() + 1;
+			tab.setMnemonicAt(index, c);
+			// The Mnemonic index has to be set explicitely otherwise
+			// the display would be wrong if the tab title contains
+			// the mnemonic character
+			tab.setDisplayedMnemonicIndexAt(index, pos);
+		}
 	}
 
 	public void closeWindow()
@@ -502,7 +509,7 @@ public class DbExplorerPanel
 		{
 			this.window = new DbExplorerWindow(this, aProfileName);
 		}
-		this.window.show();
+		this.window.setVisible(true);
 	}
 
 	public DbExplorerWindow getWindow()
@@ -555,7 +562,7 @@ public class DbExplorerPanel
 		
 		if (this.dbConnection != null)
 		{
-			if (this.dbConnection.getProfile().getUseSeperateConnectionPerTab())
+			if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab())
 			{
 				try { this.dbConnection.disconnect(); } catch (Throwable th) {}
 			}
@@ -609,11 +616,23 @@ public class DbExplorerPanel
 		}
 	}
 
-	public void saveToWorkspace(WbWorkspace w) 
+	public void saveToWorkspace(WbWorkspace w, int index) 
 		throws IOException
 	{
 		// this will increase the visible count for DbExplorer Panels in the workspace
 		w.dDbExplorerVisible();
+		tables.saveToWorkspace(w, index);
+	}
+
+	public boolean prepareWorkspaceSaving()
+	{
+		return true;
+	}
+
+	public void readFromWorkspace(WbWorkspace w, int index) 
+		throws IOException
+	{
+		tables.readFromWorkspace(w, index);
 	}
 
 }

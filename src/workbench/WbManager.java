@@ -329,7 +329,7 @@ public class WbManager
 		// for the first visible window
 		if (w != null)
 		{
-			w.saveWindowSize();
+			w.saveSettings();
 			settingsSaved = true;
 		}
 
@@ -343,7 +343,7 @@ public class WbManager
 			if (w == null) continue;
 			if (i == 0 && !settingsSaved)
 			{
-				w.saveWindowSize();
+				w.saveSettings();
 				settingsSaved = true;
 			}
 			if (w.isBusy())
