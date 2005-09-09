@@ -53,8 +53,13 @@ public class WbToolbar extends JToolBar
 
 	public JButton add(WbAction a)
 	{
+		return add(a, -1);
+	}
+	
+	public JButton add(WbAction a, int index)
+	{
 		JButton button = a.getToolbarButton();
-		this.add(button);
+		this.add(button, index);
 		return button;
 	}
 
