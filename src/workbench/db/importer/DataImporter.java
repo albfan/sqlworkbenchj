@@ -58,7 +58,7 @@ public class DataImporter
 	private PreparedStatement insertStatement;
 	private PreparedStatement updateStatement;
 
-	private String targetTable = null;
+	private TableIdentifier targetTable = null;
 
 	private int commitEvery = 0;
 
@@ -389,26 +389,27 @@ public class DataImporter
 	{
 		if (this.targetTable == null) return;
 		String deleteSql = null;
+
 		if (this.useTruncate) 
 		{
-			deleteSql = "TRUNCATE TABLE " + this.targetTable;
+			deleteSql = "TRUNCATE TABLE " + this.targetTable.getTableExpression(this.dbConn);
 		}
 		else
 		{
-			deleteSql = "DELETE FROM " + this.targetTable;
+			deleteSql = "DELETE FROM " + this.targetTable.getTableExpression(this.dbConn);
 		}
 		Statement stmt = this.dbConn.createStatement();
 		LogMgr.logDebug("DataImporter.deleteTarget()", "Executing: [" + deleteSql + "] to delete target table...");
 		int rows = stmt.executeUpdate(deleteSql);
 		if (this.useTruncate)
 		{
-			String msg = ResourceMgr.getString("MsgImportTableTruncated").replaceAll("%table%", this.targetTable);
+			String msg = ResourceMgr.getString("MsgImportTableTruncated").replaceAll("%table%", this.targetTable.getTableExpression(this.dbConn));
 			this.messages.append(msg);
 			this.messages.append('\n');
 		}
 		else
 		{
-			this.messages.append(rows + " " + ResourceMgr.getString("MsgImporterRowsDeleted") + " " + this.targetTable + "\n");
+			this.messages.append(rows + " " + ResourceMgr.getString("MsgImporterRowsDeleted") + " " + this.targetTable.getTableExpression(this.dbConn) + "\n");
 		}
 	}
 
@@ -466,8 +467,8 @@ public class DataImporter
 		{
 			if (this.totalTables > 0)
 			{
-				StringBuffer msg = new StringBuffer(this.targetTable.length() + 20);
-				msg.append(targetTable);
+				StringBuffer msg = new StringBuffer(this.targetTable.getTableName().length() + 20);
+				msg.append(this.targetTable.getTableName());
 				msg.append(" [");
 				msg.append(this.currentTable);
 				msg.append('/');
@@ -477,7 +478,7 @@ public class DataImporter
 			}
 			else
 			{
-				progressMonitor.setCurrentObject(this.targetTable, currentImportRow, -1);
+				progressMonitor.setCurrentObject(this.targetTable.getTableName(), currentImportRow, -1);
 			}
 		}
 
@@ -779,7 +780,11 @@ public class DataImporter
 		
 		try
 		{
-			this.targetTable = this.dbConn.getMetadata().adjustObjectnameCase(tableName);
+			this.targetTable = new TableIdentifier(tableName);
+			if (this.targetSchema != null)
+			{
+				targetTable.setSchema(this.targetSchema);
+			}
 			this.targetColumns = columns;
 			this.colCount = this.targetColumns.length;
 			
@@ -789,7 +794,7 @@ public class DataImporter
 			}
 			catch (SQLException e)
 			{
-				String msg = ResourceMgr.getString("ErrorImportTableNotFound").replaceAll("%table%", this.targetTable);
+				String msg = ResourceMgr.getString("ErrorImportTableNotFound").replaceAll("%table%", this.targetTable.getTableExpression(this.dbConn));
 				if (parser != null)
 				{
 					String s = ResourceMgr.getString("ErrorImportFileNotProcessed");
@@ -852,12 +857,10 @@ public class DataImporter
 		if (this.targetTable == null) return;
 
 		DbMetadata meta = this.dbConn.getMetadata();
-		TableIdentifier tbl = new TableIdentifier(this.targetTable);
-		if (tbl.getSchema() == null) tbl.setSchema(this.targetSchema == null ? meta.getCurrentSchema() : this.targetSchema);
-		boolean exists = meta.tableExists(tbl);
+		boolean exists = meta.tableExists(this.targetTable);
 		if (!exists) 
 		{
-			throw new SQLException("Table " + this.targetTable + " not found!");
+			throw new SQLException("Table " + this.targetTable.getTableExpression(this.dbConn) + " not found!");
 		}
 	}
 
@@ -870,10 +873,9 @@ public class DataImporter
 	{
 		StringBuffer text = new StringBuffer(this.targetColumns.length * 50);
 		StringBuffer parms = new StringBuffer(targetColumns.length * 20);
-		TableIdentifier tbl = new TableIdentifier(this.targetTable);
 
 		text.append("INSERT INTO ");
-		text.append(tbl.getTableExpression(this.dbConn));
+		text.append(targetTable.getTableExpression(this.dbConn));
 		text.append(" (");
 		for (int i=0; i < this.colCount; i++)
 		{
@@ -928,7 +930,7 @@ public class DataImporter
 		StringBuffer sql = new StringBuffer(this.colCount * 20 + 80);
 		StringBuffer where = new StringBuffer(this.keyColumns.size() * 10);
 		sql.append("UPDATE ");
-		sql.append(this.dbConn.getMetadata().quoteObjectname(this.targetTable));
+		sql.append(this.targetTable.getTableExpression(this.dbConn));
 		sql.append(" SET ");
 		where.append(" WHERE ");
 		boolean pkAdded = false;
@@ -1017,7 +1019,7 @@ public class DataImporter
 	{
 		try
 		{
-			ColumnIdentifier cols[] = this.dbConn.getMetadata().getColumnIdentifiers(new TableIdentifier(this.targetTable));
+			ColumnIdentifier cols[] = this.dbConn.getMetadata().getColumnIdentifiers(this.targetTable);
 			int count = cols.length;
 			this.keyColumns = new ArrayList();
 			for (int i=0; i < count; i++)
@@ -1167,6 +1169,7 @@ public class DataImporter
 	{
 		try
 		{
+			LogMgr.logDebug("DataImporter.importCancelled()", "Ending import...");
 			this.closeStatements();
 			if (!this.dbConn.getAutoCommit())
 			{
@@ -1222,6 +1225,7 @@ public class DataImporter
 	{
 		this.targetSchema = targetSchema;
 	}
+
 
 
 }

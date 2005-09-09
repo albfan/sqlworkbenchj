@@ -79,17 +79,6 @@ public class XmlDataFileParser
 	private StrBuffer messages;
 	private String extensionToUse;
 	
-	
-	/** Define the tags for which the characters surrounded by the
-	 *  tag should be collected
-	 */
-	private static final HashSet DATA_TAGS = new HashSet();
-	static
-	{
-		DATA_TAGS.add(XmlRowDataConverter.LONG_COLUMN_TAG);
-		DATA_TAGS.add(XmlRowDataConverter.SHORT_COLUMN_TAG);
-	}
-
 	private int currentColIndex = 0;
 	private int realColIndex = 0;
 	private boolean ignoreCurrentColumn = false;

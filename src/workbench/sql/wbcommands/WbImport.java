@@ -74,6 +74,7 @@ public class WbImport extends SqlCommand
 	public static final String ARG_TRIM_VALUES = "trimvalues";
 	public static final String ARG_FILE_EXT = "extension";
 	public static final String ARG_UPDATE_WHERE = "updatewhere";
+	public static final String ARG_IGNORE_SCHEMA = "ignoreschema";
 	
 	
 	private ArgumentParser cmdLine;
@@ -196,6 +197,7 @@ public class WbImport extends SqlCommand
 		imp.setContinueOnError(cmdLine.getBoolean(ARG_CONTINUE, continueDefault));
 		
 		String table = cmdLine.getValue(ARG_TARGETTABLE);
+		String schema = cmdLine.getValue(ARG_TARGET_SCHEMA);
 
 		if (file != null)
 		{
@@ -227,7 +229,6 @@ public class WbImport extends SqlCommand
 		
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
-			
 			if (table == null && dir == null)
 			{
 				result.addMessage(ResourceMgr.getString("ErrorTextImportRequiresTableName"));
@@ -247,7 +248,7 @@ public class WbImport extends SqlCommand
 				String ext = cmdLine.getValue(ARG_FILE_EXT);
 				if (ext != null) textParser.setSourceExtension(ext);
 			}
-			
+			textParser.setTargetSchema(schema);
 			textParser.setConnection(aConnection);
 			textParser.setAbortOnError(!cmdLine.getBoolean(ARG_CONTINUE, true));
 			String delimiter = cmdLine.getValue(ARG_DELIM);
@@ -448,8 +449,10 @@ public class WbImport extends SqlCommand
 		String where = cmdLine.getValue(ARG_UPDATE_WHERE);
 		imp.setWhereClauseForUpdate(where);
 		
-		String schema = cmdLine.getValue(ARG_TARGET_SCHEMA);
-		if (schema != null) imp.setTargetSchema(schema);
+		if (schema != null) 
+		{
+			imp.setTargetSchema(schema);
+		}
 
 		String keyColumns = cmdLine.getValue(ARG_KEYCOLUMNS);
 		imp.setKeyColumns(keyColumns);
