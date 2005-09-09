@@ -26,6 +26,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -112,13 +114,13 @@ import workbench.util.WbProperties;
 public class TableListPanel
 	extends JPanel
 	implements ActionListener, ChangeListener, ListSelectionListener, MouseListener,
-						 ShareableDisplay, Exporter, FilenameChangeListener
+						 ShareableDisplay, Exporter, FilenameChangeListener, PropertyChangeListener
 {
 	private WbConnection dbConnection;
 	private JPanel listPanel;
 	private CriteriaPanel findPanel;
 	private WbTable tableList;
-	private WbTable tableDefinition;
+	private TableDefinitionPanel tableDefinition;
 	private WbTable indexes;
 	private WbTable importedKeys;
 	private WbTable exportedKeys;
@@ -136,9 +138,6 @@ public class TableListPanel
 	private EditorPanel tableSource;
 	private JTabbedPane displayTab;
 	private WbSplitPane splitPane;
-
-	private QuickFilterPanel columnFilter;
-	private FindPanel columnSearcher;
 
 	private JComboBox tableTypes = new JComboBox();
 	private String currentSchema;
@@ -181,7 +180,6 @@ public class TableListPanel
 	private WbMenu showDataMenu;
 	private String[] availableTableTypes;
 	private WbAction dropIndexAction;
-	private WbAction createIndexAction;
 	private WbAction createDummyInsertAction;
 	private WbAction createDefaultSelect;
 
@@ -209,41 +207,9 @@ public class TableListPanel
 		this.displayTab.setUI(TabbedPaneUIFactory.getBorderLessUI());
 		this.displayTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
-
-		this.tableDefinition = new WbTable();
-		this.tableDefinition.setAdjustToColumnLabel(false);
-		this.tableDefinition.setSelectOnRightButtonClick(true);
-
-		JPanel bar = new JPanel(new GridBagLayout());
-		columnSearcher = new FindPanel(this.tableDefinition, 20);
-
-		String[] cols = new String[] {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "JAVA_TYPE"};
-		columnFilter  = new QuickFilterPanel(this.tableDefinition, cols, true, "columnlist");
-
-		GridBagConstraints cc = new GridBagConstraints();
-		cc.anchor = GridBagConstraints.WEST;
-		cc.gridx = 0;
-		cc.weightx = 0.6;
-		cc.ipadx = 0;
-		cc.ipady = 0;
-		cc.insets = new Insets(0, 0, 0, 5);
-		cc.fill = GridBagConstraints.HORIZONTAL;
-		bar.add(columnFilter, cc);
-
-		cc.gridx ++;
-		cc.anchor = GridBagConstraints.WEST;
-		cc.fill = GridBagConstraints.NONE;
-		cc.weightx = 0.4;
-		cc.insets = new Insets(0, 0, 0, 0);
-		columnSearcher.setBorder(new DividerBorder(DividerBorder.LEFT));
-		//bar.setBorder(BorderFactory.createEtchedBorder());
-		bar.add(columnSearcher, cc);
-
-		WbScrollPane scroll = new WbScrollPane(this.tableDefinition);
-		JPanel defPanel = new JPanel(new BorderLayout());
-		defPanel.add(bar, BorderLayout.NORTH);
-		defPanel.add(scroll, BorderLayout.CENTER);
-		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), defPanel);
+		this.tableDefinition = new TableDefinitionPanel();
+		this.tableDefinition.addPropertyChangeListener(this);
+		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), tableDefinition);
 
 		this.indexes = new WbTable();
 		this.indexes.setAdjustToColumnLabel(false);
@@ -259,7 +225,7 @@ public class TableListPanel
 
 		this.importedKeys = new WbTable();
 		this.importedKeys.setAdjustToColumnLabel(false);
-		scroll = new WbScrollPane(this.importedKeys);
+		WbScrollPane scroll = new WbScrollPane(this.importedKeys);
 		this.importedPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT);
 		this.importedPanel.setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.importedPanel.setDividerLocation(100);
@@ -282,7 +248,7 @@ public class TableListPanel
 		this.triggers = new TriggerDisplayPanel();
 
 		this.listPanel = new JPanel();
-		this.tableList = new WbTable();
+		this.tableList = new WbTable(true, false);
 		this.tableList.setSelectOnRightButtonClick(true);
 		this.tableList.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		this.tableList.setCellSelectionEnabled(false);
@@ -384,12 +350,6 @@ public class TableListPanel
 		this.dropIndexAction.initMenuDefinition("MnuTxtDropIndex");
 		this.indexes.addPopupAction(this.dropIndexAction, true);
 
-		this.createIndexAction = new WbAction(this, "create-index");
-		this.createIndexAction.setEnabled(false);
-		this.createIndexAction.initMenuDefinition("MnuTxtCreateIndex");
-		this.tableDefinition.getSelectionModel().addListSelectionListener(this);
-		this.tableDefinition.addPopupAction(this.createIndexAction, true);
-
 		this.toggleTableSource = new ToggleTableSourceAction(this);
 		this.splitPane.setOneTouchTooltip(toggleTableSource.getTooltipTextWithKeys());
 		setupActionMap();
@@ -440,7 +400,6 @@ public class TableListPanel
 		this.deleteTableItem.addActionListener(this);
 		this.deleteTableItem.setEnabled(true);
 		tableList.addPopupMenu(this.deleteTableItem, false);
-
 	}
 
 	private Font boldFont = null;
@@ -546,7 +505,6 @@ public class TableListPanel
 			int count = this.displayTab.getTabCount();
 
 			if (count < 3 && includeDataPanel) return;
-			//if (count < 2 && !includeDataPanel) return;
 
 			if (count >= 3 && includeDataPanel) this.removeDataPanel();
 
@@ -610,6 +568,7 @@ public class TableListPanel
 		this.displayTab.removeChangeListener(this);
 		this.availableTableTypes = null;
 		this.tableTypes.removeAllItems();
+		this.tableDefinition.setConnection(null);
 		this.reset();
 	}
 
@@ -663,6 +622,7 @@ public class TableListPanel
 		this.importedTableTree.setConnection(aConnection);
 		this.exportedTableTree.setConnection(aConnection);
 		this.tableData.setConnection(aConnection);
+		this.tableDefinition.setConnection(aConnection);
 
 		this.tableTypes.removeActionListener(this);
 		//this.catalogs.removeActionListener(this);
@@ -956,8 +916,7 @@ public class TableListPanel
 		this.triggers.saveSettings();
 		this.tableData.saveSettings();
 		this.findPanel.saveSettings();
-		this.columnSearcher.saveSettings();
-		this.columnFilter.saveSettings();
+		this.tableDefinition.saveSettings();
 		Settings s = Settings.getInstance();
 		s.setProperty(this.getClass().getName() + ".divider", this.splitPane.getDividerLocation());
 		s.setProperty(this.getClass().getName() + ".exportedtreedivider", this.exportedPanel.getDividerLocation());
@@ -989,8 +948,7 @@ public class TableListPanel
 		this.triggers.restoreSettings();
 		this.tableData.restoreSettings();
 		this.findPanel.restoreSettings();
-		this.columnSearcher.restoreSettings();
-		this.columnFilter.restoreSettings();
+		this.tableDefinition.restoreSettings();
 	}
 
 	private boolean suspendTableSelection = false;
@@ -1028,6 +986,7 @@ public class TableListPanel
 		}
 		this.recompileItem.setEnabled(enabled);
 	}
+
 	/**
 	 * Invoked when the selection in the table list
 	 * has changed
@@ -1047,11 +1006,6 @@ public class TableListPanel
 		else if (e.getSource() == this.indexes.getSelectionModel())
 		{
 			this.dropIndexAction.setEnabled(this.indexes.getSelectedRowCount() > 0);
-		}
-		else if (e.getSource() == this.tableDefinition.getSelectionModel())
-		{
-			boolean rowsSelected = (this.tableDefinition.getSelectedRowCount() > 0);
-			this.createIndexAction.setEnabled(rowsSelected);
 		}
 	}
 
@@ -1205,40 +1159,13 @@ public class TableListPanel
 	private void retrieveTableDefinition()
 		throws SQLException
 	{
+
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			tableDefinition.setIgnoreRepaint(true);
-			DbMetadata meta = this.dbConnection.getMetadata();
-			DataStore def = meta.getTableDefinition(this.selectedCatalog, this.selectedSchema, this.selectedTableName, this.selectedObjectType, false);
-			DataStoreTableModel model = new DataStoreTableModel(def);
-			tableDefinition.setPrintHeader(this.selectedTableName);
-			tableDefinition.setModel(model, true);
-			if ("SEQUENCE".equalsIgnoreCase(this.selectedObjectType))
-			{
-				tableDefinition.optimizeAllColWidth(true);
-			}
-			else
-			{
-				tableDefinition.adjustColumns();
-			}
-
-			// remove the last two columns if we are not displaying a SEQUENCE
-			if (!"SEQUENCE".equalsIgnoreCase(this.selectedObjectType))
-			{
-				TableColumnModel colmod = tableDefinition.getColumnModel();
-				TableColumn col = colmod.getColumn(DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
-				col.setCellRenderer(new SqlTypeRenderer());
-
-				col = colmod.getColumn(colmod.getColumnCount() - 1);
-				colmod.removeColumn(col);
-
-				col = colmod.getColumn(colmod.getColumnCount() - 1);
-				colmod.removeColumn(col);
-
-				col = colmod.getColumn(colmod.getColumnCount() - 1);
-				colmod.removeColumn(col);
-			}
+			TableIdentifier table = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+			this.tableDefinition.retrieve(table, this.selectedObjectType);
+			this.shouldRetrieveTable = false;
 			shouldRetrieveTable = false;
 		}
 		catch (SQLException e)
@@ -1290,8 +1217,6 @@ public class TableListPanel
 		this.infoWindow.setUndecorated(true);
 		this.infoWindow.setSize(260,50);
 		WbSwingUtilities.center(this.infoWindow, f);
-		//WbSwingUtilities.showWaitCursor(this);
-		//WbSwingUtilities.showWaitCursor(this.infoWindow);
 		WbThread t = new WbThread("Info display")
 		{
 			public void run()
@@ -1300,7 +1225,6 @@ public class TableListPanel
 			}
 		};
 		t.start();
-		//this.infoWindow.show();
 		Thread.yield();
 	}
 
@@ -1440,14 +1364,14 @@ public class TableListPanel
 		}
 		finally
 		{
+			this.setBusy(false);
 			this.repaint();
 			closeInfoWindow();
 			WbSwingUtilities.showDefaultCursor(this);
-			this.setBusy(false);
 		}
 	}
 
-	private Object busyLock = new Object();
+	private final Object busyLock = new Object();
 
 	private boolean isBusy()
 	{
@@ -1649,31 +1573,14 @@ public class TableListPanel
 				return null;
 			}
 		}
-
-		int colCount = this.tableDefinition.getRowCount();
-		if (colCount == 0)
+		String sql = tableDefinition.getSelectForTable();
+		if (sql == null)
 		{
 			String msg = ResourceMgr.getString("ErrorNoColumnsRetrieved").replaceAll("%table%", this.selectedTableName);
 			WbSwingUtilities.showErrorMessage(this, msg);
 			return null;
 		}
-
-		StrBuffer sql = new StrBuffer(colCount * 80);
-
-		sql.append("SELECT ");
-		boolean quote = false;
-		DbMetadata meta = this.dbConnection.getMetadata();
-		for (int i=0; i < colCount; i++)
-		{
-			String column = this.tableDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-			column = SqlUtil.quoteObjectname(column);
-			if (i > 0 && i < colCount) sql.append(",\n");
-			if (i > 0) sql.append("       ");
-			sql.append(column);
-		}
-		sql.append("\nFROM ");
-		sql.append(tbl.getTableExpression(this.dbConnection));
-		return sql.toString();
+		return sql;
 	}
 
 	private void compileObjects()
@@ -1713,7 +1620,8 @@ public class TableListPanel
 	}
 
 	/**
-	 *	Invoked when the type dropdown changes or the "Show data" item is selected
+	 * Invoked when the type dropdown changes or one of the additional actions
+	 * is invoked that are put into the context menu of the table list
 	 */
 	public void actionPerformed(ActionEvent e)
 	{
@@ -1784,16 +1692,6 @@ public class TableListPanel
 					public void run()
 					{
 						dropIndexes();
-					}
-				});
-			}
-			else if (e.getSource() == this.createIndexAction)
-			{
-				EventQueue.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						createIndex();
 					}
 				});
 			}
@@ -1895,6 +1793,7 @@ public class TableListPanel
 		if (this.tableListClients == null) this.tableListClients = new ArrayList();
 		if (!this.tableListClients.contains(aClient)) this.tableListClients.add(aClient);
 	}
+
 	public void removeTableListDisplayClient(JTable aClient)
 	{
 		if (this.tableListClients == null) return;
@@ -1997,38 +1896,6 @@ public class TableListPanel
 		ui.show(SwingUtilities.getWindowAncestor(this));
 	}
 
-
-	private void createIndex()
-	{
-		if (this.tableDefinition.getSelectedRowCount() <= 0) return;
-		int rows[] = this.tableDefinition.getSelectedRows();
-		int count = rows.length;
-		String[] columns = new String[count];
-
-		String msg = ResourceMgr.getString("LabelInputIndexName");
-		String indexName = ResourceMgr.getString("TxtNewIndexName");
-		//String indexName = WbSwingUtilities.getUserInput(this, msg, defaultName);
-		if (indexName == null || indexName.trim().length() == 0) return;
-
-		for (int i=0; i < count; i++)
-		{
-			columns[i] = this.tableDefinition.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME).toLowerCase();
-		}
-		TableIdentifier table = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
-		String sql = this.dbConnection.getMetadata().buildIndexSource(table, indexName, false, columns);
-		String title = ResourceMgr.getString("TxtWindowTitleCreateIndex");
-		Window parent = SwingUtilities.getWindowAncestor(this);
-		Frame owner = null;
-		if (parent != null && parent instanceof Frame)
-		{
-			owner = (Frame)parent;
-		}
-		ExecuteSqlDialog dialog = new ExecuteSqlDialog(owner, title, sql, indexName, this.dbConnection);
-		dialog.setStartButtonText(ResourceMgr.getString("TxtCreateIndex"));
-		dialog.show();
-		this.shouldRetrieveIndexes = true;
-	}
-
 	private void dropTables()
 	{
 		if (this.tableList.getSelectedRowCount() == 0) return;
@@ -2093,7 +1960,6 @@ public class TableListPanel
 		if (tables == null) return;
 
 		FileDialogUtil dialog = new FileDialogUtil();
-		//ReportTypePanel p  = new ReportTypePanel();
 
 		String filename = dialog.getXmlReportFilename(this);
 		if (filename == null) return;
@@ -2102,23 +1968,6 @@ public class TableListPanel
 		final Component caller = this;
 		reporter.setShowProgress(true, (JFrame)SwingUtilities.getWindowAncestor(this));
 		reporter.setTableList(tables);
-
-		/*
-		final String outputfile = filename;
-		final String realfile;
-		if (dbDesigner)
-		{
-			File f = new File(filename);
-			String dir = f.getParent();
-			String fname = f.getName();
-			File nf = new File(dir, "__wb_" + fname);
-			realfile = nf.getAbsolutePath();
-		}
-		else
-		{
-			realfile = filename;
-		}
-		*/
 		reporter.setOutputFilename(filename);
 
 		Thread t = new WbThread("Schema Report")
@@ -2128,16 +1977,6 @@ public class TableListPanel
 				try
 				{
 					reporter.writeXml();
-					/*
-					if (dbDesigner)
-					{
-						File f = new File(realfile);
-						Workbench2Designer converter = new Workbench2Designer(f);
-						converter.transformWorkbench2Designer();
-						File output = new File(outputfile);
-						converter.writeOutputFile(output);
-					}
-					*/
 				}
 				catch (Throwable e)
 				{
@@ -2265,8 +2104,8 @@ public class TableListPanel
 			// Updating the showDataMenu needs to be posted because
 			// the ChangeEvent is also triggered when a tab has been
 			// removed (thus implicitely changing the index)
-			// but the changeEvent occurs <b>before</b> the actual
-			// pane is removed from the control.
+			// but the changeEvent occurs before the actual
+			// panel is removed from the control.
       EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
@@ -2277,6 +2116,24 @@ public class TableListPanel
     }
 	}
 
+	/**
+	 * If an index is created in the TableDefinitionPanel it
+	 * sends a PropertyChange event. This will invalidate
+	 * the currently retrieved index list
+	 */
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (TableDefinitionPanel.INDEX_PROP.equals(evt.getPropertyName()))
+		{
+			this.shouldRetrieveIndexes = true;
+		}
+	}
+
+	/**
+	 * This is a callback from the MainWindow if a tab has been
+	 * renamed. As we are showing the tab names in the "Show table data"
+	 * popup menu, we need to update the popup menu
+	 */
 	public void fileNameChanged(Object sender, String newFilename)
 	{
 		try

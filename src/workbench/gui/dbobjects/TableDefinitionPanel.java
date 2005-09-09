@@ -69,7 +69,8 @@ public class TableDefinitionPanel
 	private WbConnection dbConnection;
 	private List changeListener = new LinkedList();
 	private WbAction reloadAction;
-	
+	private boolean busy;
+
 	/** Creates a new instance of TableDefinitionPanel */
 	public TableDefinitionPanel()
 	{
@@ -79,14 +80,14 @@ public class TableDefinitionPanel
 
 		this.reloadAction = new ReloadAction(this);
 		this.reloadAction.setEnabled(false);
-		
+
 		JPanel bar = new JPanel(new GridBagLayout());
 		columnSearcher = new FindPanel(this.tableDefinition, 20);
-		
+
 		String[] cols = new String[] {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "JAVA_TYPE"};
 		columnFilter  = new QuickFilterPanel(this.tableDefinition, cols, true, "columnlist");
 		columnFilter.addToToolbar(reloadAction, 0);
-		
+
 		GridBagConstraints cc = new GridBagConstraints();
 		cc.anchor = GridBagConstraints.WEST;
 		cc.gridx = 0;
@@ -109,30 +110,30 @@ public class TableDefinitionPanel
 		this.setLayout(new BorderLayout());
 		this.add(bar, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
-		
+
 		this.createIndexAction = new WbAction(this, "create-index");
 		this.createIndexAction.setEnabled(false);
 		this.createIndexAction.initMenuDefinition("MnuTxtCreateIndex");
-		
+
 		this.tableDefinition.getSelectionModel().addListSelectionListener(this);
 		this.tableDefinition.addPopupAction(this.createIndexAction, true);
-		
+
 	}
-	
+
 	public void addPropertyChangeListener(PropertyChangeListener l)
 	{
 		this.changeListener.add(l);
 	}
-	
+
 	public void removePropertyChangeListener(PropertyChangeListener l)
 	{
 		this.changeListener.remove(l);
 	}
-	
+
 	private void fireIndexChanged(String indexName)
 	{
 		if (this.changeListener.size() == 0) return;
-		
+
 		Iterator itr = this.changeListener.iterator();
 		PropertyChangeEvent evt = new PropertyChangeEvent(this, INDEX_PROP, null, indexName);
 		while (itr.hasNext())
@@ -141,7 +142,24 @@ public class TableDefinitionPanel
 			l.propertyChange(evt);
 		}
 	}
-	
+
+	private final Object busyLock = new Object();
+	public boolean isBusy()
+	{
+		synchronized (this.busyLock)
+		{
+			return busy;
+		}
+	}
+
+	private void setBusy(boolean flag)
+	{
+		synchronized (this.busyLock)
+		{
+			busy = flag;
+		}
+	}
+
 	public void retrieve(TableIdentifier table, String objectType)
 		throws SQLException
 	{
@@ -149,15 +167,15 @@ public class TableDefinitionPanel
 		this.currentObjectType = objectType;
 		retrieveTableDefinition();
 	}
-	
+
 	private void retrieveTableDefinition()
 		throws SQLException
 	{
+		if (this.isBusy()) return;
 		synchronized (this.dbConnection)
 		{
 			try
 			{
-				WbSwingUtilities.showWaitCursor(this);
 				tableDefinition.setIgnoreRepaint(true);
 				DbMetadata meta = this.dbConnection.getMetadata();
 				DataStore def = meta.getTableDefinition(this.currentTable, false);
@@ -196,13 +214,13 @@ public class TableDefinitionPanel
 			}
 			finally
 			{
-				WbSwingUtilities.showDefaultCursor(this);
 				tableDefinition.setIgnoreRepaint(false);
 				reloadAction.setEnabled(true);
+				setBusy(false);
 			}
 		}
 	}
-	
+
 	public void reset()
 	{
 		this.currentTable = null;
@@ -210,13 +228,14 @@ public class TableDefinitionPanel
 		this.tableDefinition.reset();
 		reloadAction.setEnabled(false);
 	}
-	
+
 	public void setConnection(WbConnection conn)
 	{
 		this.dbConnection = conn;
 		this.createIndexAction.setEnabled(this.dbConnection != null);
+		this.reloadAction.setEnabled(this.dbConnection != null);
 	}
-	
+
 	public void reload()
 	{
 		if (this.currentTable == null) return;
@@ -230,7 +249,7 @@ public class TableDefinitionPanel
 				try
 				{
 					retrieveTableDefinition();
-				} 
+				}
 				catch (SQLException ex)
 				{
 					LogMgr.logError("TableDefinitionPanel.reload()", "Error loading table definition", ex);
@@ -239,7 +258,7 @@ public class TableDefinitionPanel
 		};
 		t.start();
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.createIndexAction)
@@ -251,9 +270,9 @@ public class TableDefinitionPanel
 					createIndex();
 				}
 			});
-		}		
+		}
 	}
-	
+
 	private void createIndex()
 	{
 		if (this.tableDefinition.getSelectedRowCount() <= 0) return;
@@ -320,23 +339,23 @@ public class TableDefinitionPanel
 		sql.append(this.currentTable.getTableExpression(this.dbConnection));
 		return sql.toString();
 	}
-	
+
 	public int getRowCount()
 	{
 		return this.tableDefinition.getRowCount();
 	}
-	
+
 	public DataStore getDataStore()
 	{
 		return this.tableDefinition.getDataStore();
 	}
-	
+
 	public void restoreSettings()
 	{
 		this.columnSearcher.restoreSettings();
 		this.columnFilter.restoreSettings();
 	}
-	
+
 	public void saveSettings()
 	{
 		this.columnSearcher.saveSettings();
