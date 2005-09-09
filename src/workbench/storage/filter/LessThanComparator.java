@@ -24,8 +24,8 @@ public class LessThanComparator
 	public boolean supportsIgnoreCase() { return false; }
 
 	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
-	public String getName() { return "Lower Than"; }
 	public String getOperator() { return "<"; }
+	public boolean needsValue() { return true; }
 	
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{

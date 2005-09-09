@@ -55,4 +55,6 @@ public class ContainsComparator
 		return true;
 	}
 
+	public boolean needsValue() { return true; }
+	
 }

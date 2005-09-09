@@ -25,8 +25,8 @@ public class LessOrEqualComparator
 
 	
 	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
-	public String getName() { return "Less than or Equal"; }
 	public String getOperator() { return "\u2264"; }
+	public boolean needsValue() { return true; }
 	
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{

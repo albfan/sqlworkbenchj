@@ -24,8 +24,8 @@ public class StringEqualsComparator
 	public boolean supportsIgnoreCase() { return true; }
 
 	public String getValueExpression(Object value) { return "'" + value + "'";}
-	public String getName() { return "Equals"; }
 	public String getOperator() { return "="; }
+	public boolean needsValue() { return true; }
 	
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{

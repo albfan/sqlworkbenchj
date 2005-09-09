@@ -31,9 +31,9 @@ public class RegExComparator
 	public boolean supportsIgnoreCase() { return true; }
 	
 	public String getValueExpression(Object value) { return "'" + value + "'";}
-	public String getName() { return "RegEx Matcher"; }
 	public String getOperator() { return "matches"; }
-
+	public boolean needsValue() { return true; }
+	
 	public boolean supportsType(Class valueClass)
 	{
 		return (String.class.isAssignableFrom(valueClass));

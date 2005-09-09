@@ -24,8 +24,8 @@ public class StartsWithComparator
 	public boolean supportsIgnoreCase() { return true; }
 	
 	public String getValueExpression(Object value) { return "'" + value + "'";}
-	public String getName() { return "Starts With"; }
 	public String getOperator() { return "starts with"; }
+	public boolean needsValue() { return true; }
 	
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{

@@ -32,13 +32,15 @@ public class ComparatorFactory
 			new ContainsComparator(),
 			new StartsWithComparator(),
 			new ContainsNotComparator(),
-			new RegExComparator(),
 			new StringEqualsComparator(),
 			new NumberEqualsComparator(),
 			new LessThanComparator(),
 			new LessOrEqualComparator(),
 			new GreaterThanComparator(),
-			new GreaterOrEqualComparator()
+			new GreaterOrEqualComparator(),
+			new IsNullComparator(),
+			new IsNotNullComparator(),
+			new RegExComparator()
 		};
 	}
 
