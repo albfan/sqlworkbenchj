@@ -501,7 +501,7 @@ public class WbConnection
 
 		tagWriter.appendTag(dbInfo, indent, "connection", this.getDisplayString());
 
-		try { value = db.getDatabaseProductName() +" testing 0 " + (char)0 + " bla"; } catch (Throwable th) { value = "n/a"; }
+		try { value = db.getDatabaseProductName(); } catch (Throwable th) { value = "n/a"; }
 		tagWriter.appendTag(dbInfo, indent, "database-product-name", cleanValue(value));
 
 		try { value = db.getDatabaseProductVersion(); } catch (Throwable th) { value = "n/a"; }
