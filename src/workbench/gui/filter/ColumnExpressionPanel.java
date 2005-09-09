@@ -10,6 +10,7 @@
  *
  */
 package workbench.gui.filter;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -22,6 +23,7 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import workbench.db.ColumnIdentifier;
+import workbench.gui.components.TextComponentMouseListener;
 import workbench.resource.ResourceMgr;
 import workbench.storage.ResultInfo;
 import workbench.storage.filter.ColumnComparator;
@@ -80,7 +82,7 @@ public class ColumnExpressionPanel
 
 		ListComboBoxModel model = new ListComboBoxModel(l);
 		columnSelector.setModel(model);
-		d = columnSelector.getPreferredSize();
+		//d = columnSelector.getPreferredSize();
 		//columnSelector.setPreferredSize(d);
 		//columnSelector.setMinimumSize(d);
 
@@ -89,6 +91,9 @@ public class ColumnExpressionPanel
 		ignoreCase.setSelected(false);
 		ignoreCase.setEnabled(false);
 		valueField = new JTextField(10);
+		TextComponentMouseListener ml = new TextComponentMouseListener();
+		valueField.addMouseListener(ml);
+		
 		valueField.setMinimumSize(new Dimension(15,24));
 
 		GridBagConstraints c = new GridBagConstraints();
@@ -148,6 +153,16 @@ public class ColumnExpressionPanel
 			{
 				ignoreCase.setSelected(item.getComparator().supportsIgnoreCase());
 				ignoreCase.setEnabled(item.getComparator().supportsIgnoreCase());
+				boolean needsValue = item.getComparator().needsValue();
+				valueField.setEnabled(needsValue);
+				if (needsValue)
+				{
+					valueField.setBackground(Color.WHITE);
+				}
+				else
+				{
+					valueField.setBackground(this.getBackground());
+				}
 			}
 			else
 			{
@@ -192,7 +207,7 @@ public class ColumnExpressionPanel
 		ColumnComparator comp = getComparator();
 		if (comp == null) return null;
 		Object value = this.getFilterValue();
-		if (value == null) return null;
+		if (value == null && comp.needsValue()) return null;
 
 		ColumnExpression exp = new ColumnExpression(col, comp, value);
 		if (this.ignoreCase.isEnabled())
