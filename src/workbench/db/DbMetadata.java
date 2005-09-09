@@ -176,9 +176,6 @@ public class DbMetadata
 		this.dbConnection = aConnection;
 		this.metaData = c.getMetaData();
 
-		// Listen for SCHEMA changed events
-		this.dbConnection.addChangeListener(this);
-
 		if (!templatesRead)
 		{
 			readTemplates();
@@ -1742,7 +1739,6 @@ public class DbMetadata
 	public void close()
 	{
 		Settings.getInstance().removePropertyChangeLister(this);
-		if (this.dbConnection != null) this.dbConnection.removeChangeListener(this);
 		if (this.dbFunctions != null) this.dbFunctions.clear();
 		if (this.keywords != null) this.keywords.clear();
 		if (this.oraOutput != null) this.oraOutput.close();
@@ -1880,6 +1876,11 @@ public class DbMetadata
 		return this.getTableDefinition(aCatalog, aSchema, aTable, aType, true);
 	}
 
+	public DataStore getTableDefinition(TableIdentifier aTable)
+		throws SQLException
+	{
+		return getTableDefinition(aTable, true);
+	}
 	/**
   * Returns the definition of the given
   * table in a {@link workbench.storage.DataStore }
@@ -1887,11 +1888,11 @@ public class DbMetadata
   * @param aTable The identifier of the table
   * @throws SQLException If the table was not found or an error occurred
   */
-	public DataStore getTableDefinition(TableIdentifier aTable)
+	public DataStore getTableDefinition(TableIdentifier id, boolean adjustCase)
 		throws SQLException
 	{
-		if (aTable == null) return null;
-		return this.getTableDefinition(aTable.getCatalog(), aTable.getSchema(), aTable.getTableName(), tableTypeName, false);
+		if (id == null) return null;
+		return this.getTableDefinition(id.getCatalog(), id.getSchema(), id.getTableName(), tableTypeName, adjustCase);
 	}
 
 	public static final String[] TABLE_DEFINITION_COLS = {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "java.sql.Types", "SCALE/SIZE", "PRECISION", "POSITION"};
@@ -2517,11 +2518,6 @@ public class DbMetadata
 		}
 	}
 
-	public DataStoreTableModel getListOfCatalogs()
-	{
-		return new DataStoreTableModel(this.getCatalogInformation());
-	}
-
 	/** Returns a list of database catalogs as returned by DatabaseMetadata.getCatalogs()
 	 * @return ArrayList with String objects
 	 */
@@ -2539,6 +2535,7 @@ public class DbMetadata
 		}
 		catch (Exception e)
 		{
+        LogMgr.logError("DbMetadata.getCatalogs()", "Error retrieving catalogs", e);
 		}
 		finally
 		{
@@ -2564,6 +2561,7 @@ public class DbMetadata
 		}
 		catch (Exception e)
 		{
+        LogMgr.logError("DbMetadata.getSchemas()", "Error retrieving schemas", e);
 		}
 		finally
 		{
@@ -3086,8 +3084,10 @@ public class DbMetadata
 		return sql.toString();
 	}
 
-	/** 	Return the SQL statement to re-create the given table. (in the dialect for the
-	 *  current DBMS)
+	/** 	
+   * Return the SQL statement to re-create the given table. (in the dialect for the
+	 * current DBMS)
+   *
 	 * @return the SQL statement to create the given table.
 	 * @param catalog The catalog in which the table is defined. This should be null if the DBMS does not support catalogs
 	 * @param schema The schema in which the table is defined. This should be null if the DBMS does not support schemas
@@ -3115,11 +3115,6 @@ public class DbMetadata
 	public String getTableSource(TableIdentifier table, ColumnIdentifier[] columns, String tableNameToUse)
 	{
 		return getTableSource(table.getCatalog(), table.getSchema(), table.getTableName(), columns, null, null, false, tableNameToUse);
-	}
-
-	public String getTableSource(String aCatalog, String aSchema, String aTablename, ColumnIdentifier[] columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop)
-	{
-		return getTableSource(aCatalog, aSchema, aTablename, columns, aIndexDef, aFkDef, includeDrop, null);
 	}
 
 	public String getTableSource(String aCatalog, String aSchema, String aTablename, ColumnIdentifier[] columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse)
@@ -3296,18 +3291,6 @@ public class DbMetadata
 			}
 		}
 		return columnConstraints;
-	}
-
-	/**
-	 * Return check constraints defined for the table. This is
-	 * delegated to a {@link ConstraintReader}
-	 * @return A String with the table constraints. If no constrains exist, a null String is returned
-	 * @param tbl The table to check
-	 * @see ConstraintReader#getColumnConstraints(TableIdentifier)
-	 */
-	public String getTableConstraints(TableIdentifier tbl)
-	{
-		return getTableConstraints(tbl, "");
 	}
 
 	/**
@@ -3572,30 +3555,6 @@ public class DbMetadata
 	}
 
 	/**
-	 *	Convert a Set to a comma separated list.
-	 *	@return the entries of the Set delimited by comma
-	 */
-	private String convertSetToList(Set aSet)
-	{
-		StrBuffer result = new StrBuffer(aSet.size() * 10);
-		Iterator itr = aSet.iterator();
-		boolean first = true;
-		while (itr.hasNext())
-		{
-			if (first)
-			{
-				first = false;
-			}
-			else
-			{
-				result.append(", ");
-			}
-			result.append((String)itr.next());
-		}
-		return result.toString();
-	}
-
-	/**
 	 * 	Build the SQL statement to create an Index on the given table.
 	 * 	@param aTable - The table name for which the index should be constructed
 	 * 	@param indexName - The name of the Index
@@ -3848,10 +3807,6 @@ public class DbMetadata
 			{
 				this.disableOutput();
 			}
-		}
-		else if (WbConnection.PROP_SCHEMA.equals(prop))
-		{
-			//this.currentSchema = null;
 		}
 	}
 
