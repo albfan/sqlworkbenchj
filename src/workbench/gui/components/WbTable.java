@@ -124,8 +124,6 @@ import workbench.storage.ResultInfo;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.WbThread;
 
-
-
 public class WbTable
 	extends JTable
 	implements ActionListener, FocusListener, MouseListener,
@@ -192,10 +190,15 @@ public class WbTable
 	
 	public WbTable()
 	{
-		this(true);
+		this(true, true);
 	}
 
 	public WbTable(boolean printEnabled)
+  {
+      this(printEnabled, true);
+  }
+  
+	public WbTable(boolean printEnabled, boolean sqlCopyAllowed)
 	{
 		super(EmptyTableModel.EMPTY_MODEL);
 		this.setMinimumSize(null);
@@ -243,9 +246,12 @@ public class WbTable
 		this.findAgainAction.setEnabled(false);
 
 		this.dataToClipboard = new DataToClipboardAction(this);
-		this.copyInsertAction = new CopyAsSqlInsertAction(this);
-		this.copyDeleteInsertAction = new CopyAsSqlDeleteInsertAction(this);
-		this.copyUpdateAction = new CopyAsSqlUpdateAction(this);
+    if (sqlCopyAllowed)
+    {
+        this.copyInsertAction = new CopyAsSqlInsertAction(this);
+        this.copyDeleteInsertAction = new CopyAsSqlDeleteInsertAction(this);
+        this.copyUpdateAction = new CopyAsSqlUpdateAction(this);
+    }
 		this.exportDataAction = new SaveDataAsAction(this);
 
 		this.filterAction = new FilterDataAction(this);
@@ -254,12 +260,20 @@ public class WbTable
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.addPopupAction(this.exportDataAction, false);
 		this.addPopupAction(this.dataToClipboard, true);
-		this.addPopupAction(this.copyUpdateAction, false);
-		this.addPopupAction(this.copyInsertAction, false);
-		this.addPopupAction(this.copyDeleteInsertAction, false);
+		if (copyUpdateAction != null) this.addPopupAction(this.copyUpdateAction, false);
+		if (copyInsertAction != null) this.addPopupAction(this.copyInsertAction, false);
+		if (copyDeleteInsertAction != null) this.addPopupAction(this.copyDeleteInsertAction, false);
 
-		WbMenu copy = this.getCopySelectedMenu();
-		this.addPopupSubMenu(copy, true);
+    if (sqlCopyAllowed)
+    {
+        WbMenu copy = this.getCopySelectedMenu();
+        this.addPopupSubMenu(copy, true);
+    }
+    else
+    {
+        this.copySelectedAsTextAction = new CopySelectedAsTextAction(this, "MnuTxtCopySelected");
+        this.addPopupAction(this.copySelectedAsTextAction, false);
+    }
 
 		this.addPopupAction(this.findAction, true);
 		this.addPopupAction(this.findAgainAction, false);
@@ -349,25 +363,26 @@ public class WbTable
 			copySelectedAsTextAction = new CopySelectedAsTextAction(this);
 		}
 
-		if (copySelectedAsInsertAction == null)
+		if (copySelectedAsInsertAction == null && this.copyInsertAction != null)
 		{
 			copySelectedAsInsertAction = new CopySelectedAsSqlInsertAction(this);
 		}
 
-		if (copySelectedAsDeleteInsertAction == null)
+		if (copySelectedAsDeleteInsertAction == null && copyDeleteInsertAction != null)
 		{
 			copySelectedAsDeleteInsertAction = new CopySelectedAsSqlDeleteInsertAction(this);
 		}
 
-		if (copySelectedAsUpdateAction == null)
+		if (copySelectedAsUpdateAction == null && copyUpdateAction != null)
 		{
 			copySelectedAsUpdateAction = new CopySelectedAsSqlUpdateAction(this);
 		}
 
 		copyMenu.add(this.copySelectedAsTextAction);
-		copyMenu.add(copySelectedAsUpdateAction);
-		copyMenu.add(copySelectedAsInsertAction);
-		copyMenu.add(copySelectedAsDeleteInsertAction);
+    
+		if (copySelectedAsUpdateAction != null) copyMenu.add(copySelectedAsUpdateAction);
+		if (copySelectedAsInsertAction != null) copyMenu.add(copySelectedAsInsertAction);
+		if (copySelectedAsDeleteInsertAction != null) copyMenu.add(copySelectedAsDeleteInsertAction);
 		return copyMenu;
 	}
 
@@ -1666,13 +1681,17 @@ public class WbTable
 	 *
 	 *  @see #copyDataToClipboard(boolean)
 	 */
-	public void copyDataToClipboard(final boolean includeHeaders, final boolean selectedOnly, final boolean showSelectColumns)
+	public void copyDataToClipboard(boolean includeHeaders, boolean selectedOnly, final boolean showSelectColumns)
 	{
 		List columnsToCopy = null;
 		if (showSelectColumns)
 		{
-			columnsToCopy = this.selectColumns();
+      ColumnSelectionResult result = this.selectColumns(includeHeaders, selectedOnly, true, getSelectedRowCount() > 0);
+			columnsToCopy = result.columns;
+      includeHeaders = result.includeHeaders;
+      selectedOnly = result.selectedOnly;
 		}
+    
 		if (!selectedOnly)
 		{
 			copyDataToClipboard(includeHeaders, columnsToCopy);
@@ -1732,23 +1751,32 @@ public class WbTable
 	 *	A general purpose method to select specific columns from the result set
 	 *  this is e.g. used for copying data to the clipboard
 	 *
-	 *	@return List the selected columns
 	 */
-	public List selectColumns()
+	public ColumnSelectionResult selectColumns(boolean includeHeader, boolean selectedOnly, boolean showHeaderSelection, boolean showSelectedRowsSelection)
 	{
 		DataStore ds = this.getDataStore();
 		if (ds == null) return null;
 
+    ColumnSelectionResult result = new ColumnSelectionResult();
+    result.includeHeaders = includeHeader;
+    result.selectedOnly = selectedOnly;
+    
 		ColumnIdentifier[] originalCols = ds.getColumns();
-		ColumnSelectorPanel panel = new ColumnSelectorPanel(originalCols);
+		ColumnSelectorPanel panel = new ColumnSelectorPanel(originalCols, includeHeader, selectedOnly, showHeaderSelection, showSelectedRowsSelection);
 		panel.selectAll();
 		int choice = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(this), panel, ResourceMgr.getString("MsgSelectColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
 		if (choice == JOptionPane.OK_OPTION)
 		{
-			return panel.getSelectedColumns();
+			result.columns = panel.getSelectedColumns();
+      result.includeHeaders = panel.includeHeader();
+      result.selectedOnly = panel.selectedOnly();
 		}
-		return null;
+    else
+    {
+        result.columns = null;
+    }
+		return result;
 	}
 
 	/**
@@ -1858,7 +1886,9 @@ public class WbTable
 		List columnsToInclude = null;
 		if (showSelectColumns)
 		{
-			columnsToInclude = this.selectColumns();
+      ColumnSelectionResult result = this.selectColumns(false, selectedOnly, false, getSelectedRowCount() > 0);
+			columnsToInclude = result.columns;
+      selectedOnly = result.selectedOnly;
 		}
 		try
 		{
@@ -2017,6 +2047,13 @@ public class WbTable
 		}
 	}
 
+}
+
+class ColumnSelectionResult
+{
+    boolean includeHeaders;
+    boolean selectedOnly;
+    List columns;
 }
 
 class RowHeaderRenderer
