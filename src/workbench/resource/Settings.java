@@ -282,7 +282,8 @@ public class Settings
 
 	public void saveSettings()
 	{
-		this.keyManager.saveSettings();
+		if (this.props == null) return;
+		if (keyManager!= null) this.keyManager.saveSettings();
 		this.removeObsolete();
 		try
 		{
