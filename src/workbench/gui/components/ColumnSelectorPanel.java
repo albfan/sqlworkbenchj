@@ -13,12 +13,14 @@ package workbench.gui.components;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -45,8 +47,19 @@ public class ColumnSelectorPanel
 	private ColumnSelectTableModel model;
 	private JButton selectAll;
 	private JButton selectNone;
-	
+  private JCheckBox selectedOnlyCheckBox;
+  private JCheckBox includeHeaderCheckBox;
+  
 	public ColumnSelectorPanel(ColumnIdentifier[] columns)
+  {
+      this(columns,false,false,false,false);
+  }
+  
+	public ColumnSelectorPanel(ColumnIdentifier[] columns, 
+          boolean includeHeader, 
+          boolean selectedOnly, 
+          boolean showHeaderSelection,
+          boolean showSelectedCheckBox)
 	{
 		this.setLayout(new BorderLayout());
 		this.selectTable = new JTable();
@@ -72,15 +85,60 @@ public class ColumnSelectorPanel
 		selectNone = new JButton(ResourceMgr.getString("LabelSelectNone"));
 		selectAll.addActionListener(this);
 		selectNone.addActionListener(this);
-		
-		JPanel buttonPanel = new JPanel();
-		buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER,0,0));
-		buttonPanel.add(selectAll);
-		buttonPanel.add(Box.createHorizontalStrut(5));
-		buttonPanel.add(selectNone);
-		buttonPanel.setBorder(new EmptyBorder(5,0,15,0));
-		this.add(buttonPanel, BorderLayout.SOUTH);
-		
+
+    
+    if (showSelectedCheckBox) 
+    {
+        this.selectedOnlyCheckBox = new JCheckBox(ResourceMgr.getString("LabelSelectedRowsOnly"));
+        this.selectedOnlyCheckBox.setSelected(selectedOnly);
+        this.selectedOnlyCheckBox.setEnabled(true);
+    }
+    
+    if (showHeaderSelection)
+    {
+        this.includeHeaderCheckBox = new JCheckBox(ResourceMgr.getString("LabelExportIncludeHeaders"));
+        this.includeHeaderCheckBox.setSelected(includeHeader);
+    }
+    
+    JPanel optionPanel = new JPanel();
+    optionPanel.setLayout(new GridBagLayout());
+    GridBagConstraints c = new GridBagConstraints();
+    c.gridx = 0;
+    c.gridy = 0;
+    c.weightx = 0.5;
+    c.anchor = java.awt.GridBagConstraints.EAST;    
+    optionPanel.add(selectAll, c);
+    
+    c.gridx = 1;
+    c.gridy = 0;
+    c.anchor = java.awt.GridBagConstraints.WEST;    
+    c.weightx = 0.5;
+    optionPanel.add(selectNone, c);
+
+    if (showSelectedCheckBox)
+    {
+        c.gridx = 0;
+        c.gridy = 1;
+        c.insets = new Insets(3,0,0,0);
+        c.anchor = (showHeaderSelection ? java.awt.GridBagConstraints.EAST : java.awt.GridBagConstraints.CENTER);    
+        c.gridwidth = (showHeaderSelection ? 1 : 2);   
+        c.weightx = (showHeaderSelection ? 0.5 : 1.0);   
+        optionPanel.add(selectedOnlyCheckBox, c);
+    }
+
+    if (showHeaderSelection)
+    {
+        c.gridx = (showSelectedCheckBox ? 1 : 0);   
+        c.gridy = 1;
+        c.gridwidth = (showSelectedCheckBox ? java.awt.GridBagConstraints.EAST : java.awt.GridBagConstraints.CENTER);    
+        c.gridwidth = (showSelectedCheckBox ? 1 : 2);   
+        c.weightx = (showSelectedCheckBox ? 0.5 : 1.0);   
+        c.anchor = java.awt.GridBagConstraints.WEST;    
+        optionPanel.add(includeHeaderCheckBox, c);
+    }    
+
+    optionPanel.setBorder(new EmptyBorder(5,0,10,0));
+    this.add(optionPanel, BorderLayout.SOUTH);
 		Dimension d = new Dimension(300, 190);
 		this.setPreferredSize(d);
 	}
@@ -95,6 +153,18 @@ public class ColumnSelectorPanel
 		this.model.selectLabel = label;
 	}
 	
+  public boolean selectedOnly() 
+  { 
+      if (this.selectedOnlyCheckBox == null) return false;
+      return selectedOnlyCheckBox.isSelected(); 
+  }
+  
+  public boolean includeHeader() 
+  { 
+      if (this.includeHeaderCheckBox == null) return false;
+      return includeHeaderCheckBox.isSelected(); 
+  }
+  
 	public boolean isColumnSelected(int i) 
 	{
 		return this.model.selected[i];
