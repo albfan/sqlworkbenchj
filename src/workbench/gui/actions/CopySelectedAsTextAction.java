@@ -26,18 +26,25 @@ public class CopySelectedAsTextAction extends WbAction
 {
 	private WbTable client;
 
-	public CopySelectedAsTextAction(WbTable aClient)
+
+  public CopySelectedAsTextAction(WbTable aClient)
+  {
+      this(aClient, "MnuTxtCopySelectedAsText");
+      this.setIcon(null);
+  }
+  
+  public CopySelectedAsTextAction(WbTable aClient, String labelKey)
 	{
 		super();
 		this.client = aClient;
 
 		this.setMenuItemName(ResourceMgr.MNU_TXT_COPY_SELECTED);
-		String desc = ResourceMgr.getDescription("MnuTxtCopySelectedAsText");
+		String desc = ResourceMgr.getDescription(labelKey);
 		String shift = KeyEvent.getKeyModifiersText(KeyEvent.SHIFT_MASK);
 		desc = StringUtil.replace(desc, "%shift%", shift);
 
-		this.initMenuDefinition(ResourceMgr.getString("MnuTxtCopySelectedAsText"), desc, null);
-		this.setIcon(null);
+		this.initMenuDefinition(ResourceMgr.getString(labelKey), desc, null);
+		this.setIcon(ResourceMgr.getBlankImage());
 		this.setEnabled(false);
 	}
 
