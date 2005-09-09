@@ -184,6 +184,16 @@ public class QuickFilterPanel
 		this.setFocusTraversalPolicy(pol);
 	}
 
+	public void addToToolbar(WbAction action)
+	{
+		addToToolbar(action, -1);
+	}
+	
+	public void addToToolbar(WbAction action, int index)
+	{
+		this.toolbar.add(action, index);
+	}
+	
 	public void setColumnList(String[] columns, boolean showDropDown)
 	{
 		this.columnList = columns;
