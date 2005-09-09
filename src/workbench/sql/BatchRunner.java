@@ -434,36 +434,48 @@ public class BatchRunner
 		if (scripts == null || scripts.trim().length() == 0) return null;
 
 		String profilename = cmdLine.getValue(WbManager.ARG_PROFILE);
-		String errorHandling = cmdLine.getValue(WbManager.ARG_ABORT);
+		boolean abort = cmdLine.getBoolean(WbManager.ARG_ABORT, true);
 		boolean showResult = cmdLine.getBoolean(WbManager.ARG_DISPLAY_RESULT);
-		boolean abort = true;
-		if (errorHandling != null)
-		{
-			abort = StringUtil.stringToBool(errorHandling);
-		}
-
+    
 		ConnectionProfile profile = null;
 		if (profilename == null)
 		{
 			// No connection profile given, create a temporary profile
 			// to be used for the batch runner.
-			String url = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_URL));
-			String driverclass = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_DRIVER));
-			String user = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_USER));
-			String pwd = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_PWD));
-			String jar = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_JAR));
-			DbDriver drv = ConnectionMgr.getInstance().findRegisteredDriver(driverclass);
-			if (drv == null)
+			try
 			{
-				drv = ConnectionMgr.getInstance().registerDriver(driverclass, jar);
+				String url = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_URL));
+				String driverclass = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_DRIVER));
+				String user = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_USER));
+				String pwd = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_PWD));
+				String jar = StringUtil.trimQuotes(cmdLine.getValue(WbManager.ARG_CONN_JAR));
+				DbDriver drv = ConnectionMgr.getInstance().findRegisteredDriver(driverclass);
+				if (drv == null)
+				{
+					drv = ConnectionMgr.getInstance().registerDriver(driverclass, jar);
+				}
+				profile = new ConnectionProfile("BatchRunnerProfile", driverclass, url, user, pwd);
 			}
-			profile = new ConnectionProfile("BatchRunnerProfile", driverclass, url, user, pwd);
+			catch (Exception e)
+			{
+				LogMgr.logError("BatchRunner.initFromCommandLine()", "Error creating temporary profile", e);
+				profile = null;
+			}
 		}
 		else
 		{
 			profile = ConnectionMgr.getInstance().getProfile(StringUtil.trimQuotes(profilename));
+			if (profile == null)
+			{
+				String msg = "Profile [" + profilename + "] not found!";
+				System.out.println(msg);
+				LogMgr.logError("BatchRunner.initFromCommandLine", msg, null);
+			}
 		}
-		boolean ignoreDrop = "true".equalsIgnoreCase(cmdLine.getValue(WbManager.ARG_IGNORE_DROP));
+
+    if (profile == null) return null;
+        
+		boolean ignoreDrop = cmdLine.getBoolean(WbManager.ARG_IGNORE_DROP, true);
 		profile.setIgnoreDropErrors(ignoreDrop);
 
 		String success = cmdLine.getValue(WbManager.ARG_SUCCESS_SCRIPT);
