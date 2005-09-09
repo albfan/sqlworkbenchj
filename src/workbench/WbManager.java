@@ -388,7 +388,7 @@ public class WbManager
 
 		// If it takes too long the user can still abort the JVM ...
 		this.createCloseMessageWindow(window);
-		if (this.closeMessage != null) this.closeMessage.show();
+		if (this.closeMessage != null) this.closeMessage.setVisible(true);
 
 		MacroManager.getInstance().saveMacros();
 		Thread t = new WbThread("WbManager disconnect")
@@ -548,6 +548,7 @@ public class WbManager
     }
     return true;
 	}
+	
   private boolean checkProfiles(MainWindow win)
   {
     if (ConnectionMgr.getInstance().profilesChanged())
@@ -589,7 +590,7 @@ public class WbManager
 					// separate thread as we are already in a background thread
 					// second parameter tells the window not to save the workspace
 					win.disconnect(false, false);
-					win.hide();
+					win.setVisible(false);
 					win.dispose();
 				}
 			};
@@ -611,7 +612,7 @@ public class WbManager
 		if (trace) System.out.println("WbManager.openNewWindow()");
 		final MainWindow main = this.createWindow();
 
-		main.show();
+		main.setVisible(true);
 		main.restoreState();
 		boolean connected = false;
 
@@ -784,7 +785,7 @@ public class WbManager
 		{
 			if (trace) System.out.println("WbManager.init() - opening splash window");
 			splash = new WbSplash();
-			splash.show();
+			splash.setVisible(true);
 		}
 		try
 		{
@@ -821,18 +822,28 @@ public class WbManager
 	{
 		int exitCode = 0;
 		BatchRunner runner = BatchRunner.initFromCommandLine(cmdLine);
-
+		int step = 1;
+		
 		if (runner != null)
 		{
 			try
 			{
 				runner.connect();
+				step = 2;
 				runner.execute();
 			}
 			catch (Exception e)
 			{
 				exitCode = 1;
-				LogMgr.logError("WbManager", "Could not initialize the batch runner\n", e);
+				if (step == 1)
+				{
+					LogMgr.logError("WbManager.runBatch()", "Error connecting to profile", e);
+				}
+				else
+				{
+					LogMgr.logError("WbManager.runBatch()", "Error running batch scripts", e);
+				}
+				
 			}
 			finally
 			{
@@ -840,7 +851,11 @@ public class WbManager
 				ConnectionMgr mgr = ConnectionMgr.getInstance();
 				mgr.disconnectAll();
 			}
-			if (!runner.isSuccess()) exitCode = 1;
+			if (!runner.isSuccess()) exitCode = 2;
+		}
+		else
+		{
+			exitCode = 3;
 		}
 		this.doShutdown(exitCode);
 	}
@@ -863,7 +878,8 @@ public class WbManager
 	public void run()
 	{
 		LogMgr.logDebug("WbManager.run()", "Shutdownhook called!");
-		Settings.getInstance().saveSettings();
+		Settings s = Settings.getInstance();
+		if (s != null) s.saveSettings();
 	}
 
 }
