@@ -20,18 +20,18 @@
     window.</para>
 
     <para>To create a new profile click on the
-    <guibutton>New Profile</guibutton> button (<guiicon>
-    <inlinegraphic fileref="@IMAGE_DIR@/New16.gif" format="GIF"/></guiicon>).
+    <literal>New Profile</literal> button <guiicon>
+    <inlinegraphic fileref="@IMAGE_DIR@/New16.gif" format="GIF"/></guiicon>.
     This will create a new profile with the name "New Profile".
     The other properties will be empty. To create a copy of the currently
-    selected profile click on the <guibutton>Copy Profile</guibutton> button 
-    (<guiicon>
-    <inlinegraphic fileref="@IMAGE_DIR@/CopyProfile16.gif" format="GIF"/></guiicon>). 
+    selected profile click on the <literal>Copy Profile</literal> button 
+    <guiicon>
+    <inlinegraphic fileref="@IMAGE_DIR@/CopyProfile16.gif" format="GIF"/></guiicon>. 
     </para>
 
     <para>To delete an existing profile, select the profile in the list and
-    click on the <guibutton>Delete Profile</guibutton> button
-    (<guiicon><inlinegraphic fileref="@IMAGE_DIR@/Delete16.gif" format="GIF"/></guiicon>)
+    click on the <literal>Delete Profile</literal> button
+    <guiicon><inlinegraphic fileref="@IMAGE_DIR@/Delete16.gif" format="GIF"/></guiicon>
     </para>
   </section>
 
@@ -127,8 +127,8 @@
     <para>To create a new property click on the new button. A new row will be inserted 
     into the table, where you can define the property. To edit an existing property, 
     simply doubleclick in the table cell that you want to edit. To delete an existing property
-    click on the <guibutton>Delete</guibutton> button
-    (<guiicon><inlinegraphic fileref="@IMAGE_DIR@/Delete16.gif" format="GIF"/></guiicon>).</para>
+    click on the <literal>Delete</literal> button
+    <guiicon><inlinegraphic fileref="@IMAGE_DIR@/Delete16.gif" format="GIF"/></guiicon>.</para>
     
   </section>
   

@@ -6,14 +6,25 @@
   
   <para>There are three ways to start the DbExplorer
     <simplelist columns="1">
-        <member>Using <menuchoice><guimenu>Tools</guimenu><guimenuitem>Database Explorer</guimenuitem></menuchoice></member>
+        <member>Using <menuchoice><guimenu>Tools</guimenu><guimenuitem>Database Explorer</guimenuitem></menuchoice>. </member>
         <member>Passing the paramter <literal>-dbexplorer</literal> to the main program (jworkbench or JWorkbench.exe)</member>
         <member>When using Windows with the <literal>DbExplorer.exe</literal> executable or in Linux/Unix using shell script <literal>jworkbench</literal></member>
     </simplelist>
   </para>
   <para>At the top of the window, the current schema (for MS SQL Server this
   would be the current database, for Oracle this is the user) can be selected.</para>
-
+  
+  <para>The displayed list can be filtered using the quick filter above the list. To filter
+    the list by the object name, simply enter the criteria in the filter field, and 
+    press <literal>ENTER</literal> or click the filter icon
+    <guiicon><inlinegraphic fileref="@IMAGE_DIR@/filter16.gif" format="GIF"/></guiicon>.
+    The criteria field will list the last 25 values that were entered in the dropdown.
+    If you want to filter based on a different column of the list, right-click on the 
+    criteria field, and select the desired column from the <literal>Filtercolumn</literal>
+    menu item of the popup menu. The same filter can be applied on the <literal>Procedures</literal>
+    tab.
+  </para>
+  
   <para>The first tab displays the structure of tables and views. The type
   of object displayed can be chosen from the drop down right above the table
   list. This list will be returned by the JDBC driver, so the available
@@ -23,9 +34,15 @@
   the DbExplorer is opened.
   </para>
 
-  <para>The Database Explorer can either be displayed as a separate window,
-  or as a tab inside the main window.	This behavior can be changed in the
-  <link linkend="options-explorer-as-tab">system options</link>
+  <para>The menu item <guimenuitem>Database Explorer</guimenuitem> will either display the explorer
+  as a new window, or a new panel, depending on the <link linkend="options-explorer-as-tab">system options</link>.
+  </para>
+  <para>
+  You can always open additional DbExplorer tabs or windows using
+    <simplelist columns="1">
+        <member><menuchoice><guimenu>Tools</guimenu><guimenuitem>New DbExplorer panel</guimenuitem></menuchoice>. </member>
+        <member><menuchoice><guimenu>Tools</guimenu><guimenuitem>New DbExplorer window</guimenuitem></menuchoice>. </member>
+    </simplelist>
   </para>
 
   <section id="dbexplorer-objectlist">
@@ -174,6 +191,19 @@
     The <literal>Autoload</literal> check box, controls the retrieval of the data. If this is
     checked, then the data will be retrieved from the database as soon as
     the table is selected in the table list (and the tab is visible).</para>
+    
+    <para>The data tab will also display a total row count of the table. As this
+    display can take a while, it can be disabled. To disable the automatic calculation
+    of the table's rowcount, click on the <guibutton>Settings</guibutton> button and deselect 
+    the checkbox <literal>Autoload table row count</literal>. To calculate
+    the table's row count when this is disabled, double-click on the <literal>Rows:</literal>
+    label.</para>
+    
+    <para>The data type is only available if the currently selected objects
+    is recognized as an object that can can be "SELECTED". Which object types
+    are included can be defined in the settings for &wb-productname;
+    See <link linkend="selectable-objects-setting">selectable object types</link> for details.
+    </para>
 
     <para>You can define a maximum number of rows which should be
     retrieved. If you enter 0 (zero) then all rows are retrieved. Limiting

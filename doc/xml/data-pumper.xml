@@ -89,7 +89,7 @@
       <title>Restricting the data to be copied</title>
 
       <para>You can restrict the number of rows to be copied by specifying a
-      <literal>WHERE</literal> clause which will be used when retrieving the data from the source table.
+        <literal>WHERE</literal> clause which will be used when retrieving the data from the source table.
       The <literal>WHERE</literal> clause can be entered in the SQL editor in the lower part
       of the window.
       </para>
@@ -136,7 +136,6 @@
       <para>If the JDBC driver supports batch updates, you can enable the use of batch updates with
       this checkbox. The checkbox will be disabled, if the JDBC driver does not support batch updates,
       or if a combined update mode (insert,update, update,insert) is selected.
-
       </para>
       <para>Batch execution is only available if either INSERT or UPDATE mode is selected.</para>
     </section>
@@ -144,7 +143,7 @@
     <section id="data-pumper-update-mode">
       <title>Update mode</title>
       <para>Just like the <link linkend="command-import">IMPORT</link> and
-      <link linkend="command-copy">COPY</link> commands, the data pumper can
+        <link linkend="command-copy">COPY</link> commands, the data pumper can
       optionally update the data in the target table. Select the approriate
       update strategy from the <literal>Mode</literal> drop down. The DataPumper
       will use the key columns defined in the column mapper to generate the <literal>UPDATE</literal>
@@ -152,13 +151,13 @@
       </para>
       <para>You cannot use the update mode, if you select <emphasis role="strong">only</emphasis> key columns,
       The values from the source are used to build up the <literal>WHERE</literal> clause for the
-      <literal>UPDATE</literal> statement. If ony key columns are defined, then there would be nothing to
+        <literal>UPDATE</literal> statement. If ony key columns are defined, then there would be nothing to
       update.
       </para>
       <para>
         For maximum performance, choose the update strategy that will result in a succssful
         first statement more often. As a rule of thumb:
-          <itemizedlist>
+        <itemizedlist>
           <listitem><para>Use <literal>-mode=insert,upadte</literal>, if you expect more rows to be inserted then updated.</para></listitem>
           <listitem><para>Use <literal>-mode=update,insert</literal>, if you expect more rows to be updated then inserted.</para></listitem>
         </itemizedlist>
@@ -182,7 +181,7 @@
     <section id="create-target-table">
       <title>Creating the target table</title>
       <para>You can create the target table "on the fly" by selecting
-      <literal>(Create&nbsp;target&nbsp;table)</literal> from the list of target tables.
+        <literal>(Create&nbsp;target&nbsp;table)</literal> from the list of target tables.
       You will be prompted for the name of the new table. If you later want to use a different
       name for the table, click on the button to the right of the drop down.
       </para>
@@ -209,7 +208,7 @@
       be ignored during the mapping process. This can be specified in <filename>workbench.settings</filename>.
       The following keys are recognized:
       </para>
-      <informaltable>
+      <informaltable frame="all">
         <tgroup cols="2" align="left">
           <colspec colname="c1" colwidth="4cm" />
           <colspec colname="c2" />
@@ -254,6 +253,7 @@
           </tbody>
         </tgroup>
       </informaltable>
+      
       <para>
         The case of the datatype names is relevant, they should be entered
         the same way as they are reported in the log file!
@@ -271,7 +271,7 @@
       table, you can use a SELECT query as the source of your data. To do this,
       select the option <literal>Use SQL query as source</literal> below the SQL editor.
       After you have entered you query into the editor, click the button
-      <guibutton>Retrieve columns from query</guibutton>. The columns resulting from the
+        <guibutton>Retrieve columns from query</guibutton>. The columns resulting from the
       query will then be put into the source part of the column mapping.
       Make sure, the columns are named uniquely when creating the query. If you select
       columns from different tables with the same name, make sure you use a column alias

@@ -135,8 +135,8 @@ COMMIT</programlisting>
 
 
         <para>The statement is executed by either pressing <keycap>F9</keycap>, <keycap>Ctrl-E</keycap> or
-        clicking the <guibutton>Execute Selected</guibutton> button
-				(<guiicon><inlinegraphic fileref="@IMAGE_DIR@/ExecuteSel16.gif" format="GIF"/></guiicon>)
+        clicking the <literal>Execute Selected</literal> button
+				<guiicon><inlinegraphic fileref="@IMAGE_DIR@/ExecuteSel16.gif" format="GIF"/></guiicon>
 				in the toolbar. This will execute the currently selected
         text. If no text is selected in the editor, the complete statement
         will be executed. If you want to execute the whole statement even when
@@ -287,10 +287,9 @@ END;
           defined, or select the macro from the <guimenu>Macros</guimenu> menu.
           The first 10 macros will be listed there directly. To view the complete list of
 					macros select <menuchoice><guimenu>Macros</guimenu><guimenuitem>Manage Macros...</guimenuitem></menuchoice>
-					After selecting a macro, it can be executed by clicking on the <guibutton>Run</guibutton> button. If you check the
+					After selecting a macro, it can be executed by clicking on the Run <guiicon><inlinegraphic fileref="@IMAGE_DIR@/ExecuteSel16.gif" format="GIF"/></guiicon> button. If you check the
 					option "Replace current SQL", then the text in the editor will be replaced with the
 					text from the macro when you click on the run button.</para>
-					<para>The <guibutton>Run</guibutton> button will only be available if you are connected to a database.</para>
         </section>
       </section>
 
@@ -426,8 +425,8 @@ Done.</programlisting>
       If only one table was used in the <literal>FROM</literal> list, the primary key
       definition for that table is automatically retrieved from the server. On slow
       network connections (or databases) this can take some time. If you don't need the automatic
-      retrieval, you can turn it off in the <xref linkend="profile-ignore-disable-auto-edit">
-      connection profile</xref>.
+      retrieval, you can turn it off in the <link linkend="profile-ignore-disable-auto-edit">
+      connection profile</link>.
       </para>
       <para>
       The adavantage of the automatic check is, that you do not need to enter the
@@ -463,7 +462,36 @@ Done.</programlisting>
       than one table is involved, you will be prompted for the table that should
       be updated.</para>
     </section>
-
+    <section id="filter-data">
+      <title>Filtering the result</title>
+      <para>Once the data has been retrieved from the Server it can be filtered
+      with the need to re-retrieve the data.</para>
+      <para>
+      To define a filter, click on the <literal>Filter</literal> <guiicon><inlinegraphic fileref="@IMAGE_DIR@/filter16.gif" format="GIF"/></guiicon>
+      button in the toolbar or select <menuchoice><guimenu>Data</guimenu><guimenuitem>Filter data</guimenuitem></menuchoice>.
+      A dialog will appear where you can define a filter for the current result set. Each line
+      in the filter dialog defines an expression that will be applied to the column selected
+      in the first dropdown. 
+      </para>
+      <para>
+        To add a multi-column expression, press the <literal>More</literal> button, to create
+        a new line. To remove a column expression from the filter, click the <literal>Remove</literal> 
+        <guiicon><inlinegraphic fileref="@IMAGE_DIR@/Remove16.gif" format="GIF"/></guiicon> icon.
+        For character based column data, you can select to ignore the case of the column's data
+        when applying the expression, i.e. when <literal>Ignore case</literal> is selected, the
+        expression <literal>'NAME = arthur'</literal> will match the column value '<literal>Arthur</literal>', 
+        and '<literal>ARTHUR</literal>'.
+      </para>
+      <para>
+        By default, the column expressions are combined with an <literal>OR</literal>, i.e. 
+        that a row will be displayed if at least one of the column expressions evaluates 
+        to true. If you want to view only rows where <emphasis role="bold">all</emphasis>
+        column expressions must match, select the <literal>AND</literal> radio button
+        at the top of the dialog.
+      </para>
+    </section>
+    
+    <!--
     <section id="change-display">
       <title>Changing the display of the result set table</title>
 
@@ -479,5 +507,6 @@ Done.</programlisting>
       <para>Each row can be resized vertically as well, to display multi line
       contents.</para>
     </section>
+    -->
 
   </section>

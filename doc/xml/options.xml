@@ -1,523 +1,241 @@
-  <section id="options">
-    <title>Configuring &wb-productname;</title>
+<section id="options">
+  <title>Workbench options</title>
 
-    <section id="configure-shortcuts">
-      <title>Configuring keyboard shortcuts</title>
+  <section id="configure-shortcuts">
+    <title>Configuring keyboard shortcuts</title>
 
-      <para>You can configure the keyboard shortcut to execute a specific action (=menu item)
+    <para>You can configure the keyboard shortcut to execute a specific action (=menu item)
       in the dialog which is displayed when you select <menuchoice><guimenu>Tools</guimenu><guimenu>Configure shortcuts...</guimenu></menuchoice>.
       The dialog lists the available actions together with their configured shortcut and their default shortcut.
-      </para>
+    </para>
 
-      <section id="configure-shortcuts-assign">
-        <title>Assign a shortcut to an action</title>
-        <para>
+    <section id="configure-shortcuts-assign">
+      <title>Assign a shortcut to an action</title>
+      <para>
         To assign a (new) keyboard combination for a specific action, select (highlight) the action in the list
         and click on the <guibutton>Assign</guibutton> button. A small window will pop up, where you can
         press the key combination which you would like to assign to that action.
         Note that only F-Keys (F1, F2, ...) can be used without a modifier (Shift, Control, Alt). All other
         keys need be pressed together with one of the modifier keys.
-        </para>
-        <para>After you have entered the desired keyboard shortcut, press the <guibutton>OK</guibutton> button.
+      </para>
+      <para>After you have entered the desired keyboard shortcut, press the <guibutton>OK</guibutton> button.
         If the shortcut is already assigned to a different action, you will be prompted, if you want to
         override that definition. If you select to overwrite the shortcut for the other action, that
         action will then have <emphasis role="bold">no</emphasis> shortcut assigned
-        </para>
-      </section>
+      </para>
+    </section>
 
-      <section id="configure-shortcuts-clear">
-        <title>Removing a shortcut from an action</title>
-        <para>
+    <section id="configure-shortcuts-clear">
+      <title>Removing a shortcut from an action</title>
+      <para>
           To remove a shortcut completely from an action, select (highlight) that action, and
           click on the <guibutton>Clear</guibutton> button. Once the shortcut has been cleared,
           the action is no longer accessible through a shortcut (only through the menu).
-        </para>
-      </section>
+      </para>
+    </section>
 
-      <section id="configure-shortcuts-reset">
-        <title>Reset to defaults</title>
-        <para>
+    <section id="configure-shortcuts-reset">
+      <title>Reset to defaults</title>
+      <para>
           If you want to reset the shortcut for a single action to its default, select (highlight) the
           action in the list, and click on the <guibutton>Reset</guibutton> button.
           To reset all shortcuts click on the <guibutton>Reset all</guibutton> button.
-        </para>
-      </section>
-
+      </para>
     </section>
 
-    <para>The following options can be changed in the options dialog: <menuchoice><guimenu>Tools</guimenu><guimenuitem>Options</guimenuitem></menuchoice>
-    </para>
+  </section>
 
-    <section id="options-explorer-as-tab">
-      <title>DB Explorer as Tab</title>
+  <para>The following options can be changed in the options dialog: <menuchoice><guimenu>Tools</guimenu><guimenuitem>Options</guimenuitem></menuchoice>
+  </para>
 
-      <para>The Database Explorer can either be displayed as a separate
+  <section id="options-explorer-as-tab">
+    <title>DB Explorer as Tab</title>
+
+    <para>The Database Explorer can either be displayed as a separate
       window, or inside the main window as a another tab. If this option is
       selected, the Db Explorer will be displayed inside the main window. If
       the option Retrieve DB Explorer is checked as well, the current database
       scheme will be retrieved upon starting &wb-productname;</para>
-    </section>
+  </section>
 
-    <section id="options-retrieve-explorer" xreflabel="Retrieve DB Explorer">
-      <title>Retrieve DB Explorer</title>
+  <section id="options-retrieve-explorer" xreflabel="Retrieve DB Explorer">
+    <title>Retrieve DB Explorer</title>
 
-      <para>If this option is enabled, the contents of the database schema is
+    <para>If this option is enabled, the contents of the database schema is
       retrieved when the DB Explorer is displayed. If this option is not
       checked, either the <guibutton>Refresh</guibutton> button or selecting a schema or
       table type will load the list.</para>
-    </section>
+  </section>
 
-    <section id="options-encrypt-password">
-      <title>Encrypt passwords</title>
+  <section id="options-encrypt-password">
+    <title>Encrypt passwords</title>
 
-      <para>If this option is enabled, the password stored within a connection
+    <para>If this option is enabled, the password stored within a connection
       profile will be encrypted. Whether the password should be stored at all
       can be selected in the profile itself.</para>
-    </section>
+  </section>
 
-    <section id="options-confirm-update">
-      <title>Confirm result set updates</title>
+  <section id="options-confirm-update">
+    <title>Confirm result set updates</title>
 
-      <para>When this option is enabled, the statements which are sent to the
+    <para>When this option is enabled, the statements which are sent to the
       database when saving changes to result set table, are displayed before
       execution. The update can be cancelled at that point if the statements
       are not correct. The generated statements can also be saved to a file
       from that window.</para>
 
-      <para>The displayed statements can not be changed!</para>
-    </section>
+    <para>The displayed statements can not be changed!</para>
+  </section>
 
-    <section id="options-consolidate-log">
-      <title>Consolidate script log</title>
+  <section id="options-consolidate-log">
+    <title>Consolidate script log</title>
 
-      <para>Usually &wb-productname; reports the success and timings
+    <para>Usually &wb-productname; reports the success and timings
         for each statement that is beeing executed in the message tab
         of the current SQL panel. For large scripts this can slow down
         script execution dramatically. If this option is enabled, only
         a summary of the execution is printed once the script has finished.
         You can turn off the log during script execution by using
         the <link linkend="command-wbfeedback">WBFEEDBACK</link> command.
-      </para>
-    </section>
+    </para>
+  </section>
 
-    <section id="options-enable-out" xreflabel="Enabling DBMS_OUTPUT">
-      <title>Enable DBMS_OUTPUT</title>
+  <section id="options-enable-out" xreflabel="Enabling DBMS_OUTPUT">
+    <title>Enable DBMS_OUTPUT</title>
 
-      <para>If this option is enabled, the <literal>DBMS_OUTPUT</literal> package is
+    <para>If this option is enabled, the <literal>DBMS_OUTPUT</literal> package is
       automatically enabled when connecting to an Oracle database. This option
       has no effect on other DBMS. If it is disabled, the <literal>DBMS_OUTPUT</literal> package
       can be enabled using the <xref linkend="command-enableout"/> command.</para>
 
-      <para>If this option is not checked, you need to manually enable the <literal>DBMS_OUTPUT</literal>
+    <para>If this option is not checked, you need to manually enable the <literal>DBMS_OUTPUT</literal>
       with <xref linkend="command-enableout"/>.</para>
-    </section>
+  </section>
 
-    <section id="option-animated-icon" xreflabel="Enable animated icons">
-      <title>Enable animated icons</title>
-      <para>Enable or disable the use of an animated icons in the SQL editor to
+  <section id="option-animated-icon" xreflabel="Enable animated icons">
+    <title>Enable animated icons</title>
+    <para>Enable or disable the use of an animated icons in the SQL editor to
       indicate a running SQL statement. It has been reported, that the animated
       icon does have a severe (negativ) impact on the performance on some computers
       (depending on JDK/OS/Graphics driver).
       If you experience a high CPU usage during the execution of SQL statements, or
       if you find your SQL statements are running very slow, try
       to turn off the usage of the animated icons.</para>
-    </section>
+  </section>
 
-    <section id="options-date-format">
-      <title>Date format</title>
+  <section id="options-date-format">
+    <title>Date format</title>
 
-      <para>Define the date format for displaying date columns in the result
+    <para>Define the date format for displaying date columns in the result
       set.</para>
-    </section>
+  </section>
 
-    <section id="options-alternate-delimiter" xreflabel="alternate delimiter">
-      <title>Alternate Delimiter</title>
+  <section id="options-alternate-delimiter" xreflabel="alternate delimiter">
+    <title>Alternate Delimiter</title>
 
-      <para>When last characters of the text in the editor match the character
+    <para>When last characters of the text in the editor match the character
       sequence in this input field, this character sequence is used to delimit
       individual statements in the editor.</para>
 
-      <para>This is needed when creating stored procedures which themselves
+    <para>This is needed when creating stored procedures which themselves
       have a semicolon in the source code. Normally the &wb-productname; would
       stop parsing the command at the first semicolon and send that command to
       the database (which will produce an error message as the statement is
       not complete).</para>
 
-      <para>In the case of a <literal>CREATE PROCEDURE</literal> statement this should be
+    <para>In the case of a <literal>CREATE PROCEDURE</literal> statement this should be
       terminated with the character sequence entered in this input field. The
       terminator can have more than one character e.g. ./
       (a dot followed by a slash).
       It should not be a sequence which is used inside a SQL statement.</para>
 
-      <para>Using a slash as the terminator (as e.g. SQL*Plus does) might lead
+    <para>Using a slash as the terminator (as e.g. SQL*Plus does) might lead
       to problems when stored procedures are created that do calculations such
       as</para>
 
-      <para><programlisting>SELECT sum(field)/count(*) FROM table;</programlisting></para>
+    <para><programlisting>SELECT sum(field)/count(*) FROM table;</programlisting></para>
 
-      <para>This would lead to problems as the slash is recognized as the
+    <para>This would lead to problems as the slash is recognized as the
       statement terminator. Thus the &wb-productname; would send everything up
       to sum(field) to the database and execute it. The same is true when
       using the column mapping parameters for the <link linkend="command-copy"><literal>WBCOPY</literal></link>
       command.</para>
-    </section>
+  </section>
 
-    <section id="options-history-size">
-      <title>History size</title>
+  <section id="options-history-size">
+    <title>History size</title>
 
-      <para>The number of statements per tab which should be stored in the
+    <para>The number of statements per tab which should be stored in the
       statement history. Remember that always the full text of the editor
       (together with the selection and cursor information) is stored in the
       history. If you have large amounts of text in the editor and set this
       number quite high, be aware of the memory consumption this might create.</para>
-    </section>
+  </section>
 
-    <section id="options-decimal-symbol">
-      <title>Decimal symbol</title>
+  <section id="options-decimal-symbol">
+    <title>Decimal symbol</title>
 
-      <para>The character which is used as the decimal separator when
+    <para>The character which is used as the decimal separator when
       displaying numbers.</para>
-    </section>
+  </section>
 
-    <section id="options-decimal-digits">
-      <title>Decimal digits</title>
+  <section id="options-decimal-digits">
+    <title>Decimal digits</title>
 
-      <para>Define the maximum number of digits which will be displayed for
+    <para>Define the maximum number of digits which will be displayed for
       numeric columns. This only affects the display of the number internally
       they are still stored as the DBMS returned them. To see the internal
       value, leave the mouse cursor over the cell. The tooltip which is
       displayed will contain the number as it was returned by the JDBC driver.
       When exporting data or copying it to the clipboard, the real value will
       be used.</para>
-    </section>
+  </section>
 
-    <section id="options-column-width">
-      <title>Max column width</title>
+  <section id="options-column-width">
+    <title>Max column width</title>
 
-      <para>When the initial display size of a column is calculated, the
+    <para>When the initial display size of a column is calculated, the
       column width will not exceed this number. This is useful when displaying
       large character columns.</para>
-    </section>
+  </section>
 
-    <section id="options-filed-delimiter">
-      <title>Field delimiter</title>
+  <section id="options-filed-delimiter">
+    <title>Field delimiter</title>
 
-      <para>The default delimiter used when exporting data to a text file.
+    <para>The default delimiter used when exporting data to a text file.
       This can be overridden in the file selection dialog when actually
       exporting the data.</para>
-    </section>
+  </section>
 
-    <section id="options-quote-character">
-      <title>Quote character</title>
+  <section id="options-quote-character">
+    <title>Quote character</title>
 
-      <para>This character will be used to quote column data when exporting to
+    <para>This character will be used to quote column data when exporting to
       a text file. When using a tab character (\t) as the field delimiter this
       is not really necessary. When using a comma as the field delimiter,
       quoting the data is necessary in case the data contains a a comma (or
       whatever character is used to delimit the columns). This will be the
       default for exporting data through the menu. If you use the <link
-      linkend="command-export"><literal>SPOOL</literal> command</link>, you can
+    linkend="command-export"><literal>SPOOL</literal> command</link>, you can
       freely customize the output for each file you create.</para>
-    </section>
+  </section>
 
-    <section id="options-deftabletype">
+  <section id="options-deftabletype">
     <title>Default Object Type</title>
-      <para>This setting allows you to control the initial display of objects in the
-      <link linkend="dbexplorer">DbExplorer's</link> table panel. The value entered here
+    <para>This setting allows you to control the initial display of objects in the
+    <link linkend="dbexplorer">DbExplorer's</link> table panel. The value entered here
       will be used to set the default selection in the type drop down.</para>
-      <para>The list in that dropdown is retrieved from the underlying DBMS through
+    <para>The list in that dropdown is retrieved from the underlying DBMS through
       a JDBC function call. So the value entered here should be something that is
       available on all used DBMS. If the value entered in this property is not found
       in the list, the selection defaults to "*" which means all object types.</para>
-      <note>
+    <note>
       <para>Don't forget to enable <xref linkend="options-retrieve-explorer"/> so
       that the DbExplorer will be retrieved automatically with the desired object
       type, when you open it.</para>
-      </note>
+    </note>
 
-    </section>
+  </section>
 
-      <section id="manual-settings">
-        <title>Settings not available through the GUI</title>
-
-        <para>This section describes the additional options for &wb-productname; which
-        are not (yet) available in the options dialog.</para>
-
-        <para>The name of the setting refers to the entry in the file <literal>workbench.settings</literal>
-        which is located in the <link linkend="config-dir">configuration directory</link>. Not all
-        listed properties will be present in <literal>workbench.settings</literal>. If a property
-        does not yet exist in the file, simply add it to the file. The position does not matter,
-        as the file will be sorted the next time it is written back.
-        </para>
-        <section id="dbms-identifier">
-					<title>Database Identifier</title>
-					<para>Some parameters define a list of "Database Identifiers".
-					The identifier that needs to be put there can be obtained by hovering the mouse over the connection
-					URL information in the main window, or from the log file.
-					After a successful connect to a database, there will be an entry in the log file similar to this:
-        	</para>
-        	<programlisting>INFO  15.08.2004 10:24:42 Connected to: [HSQL Database Engine]</programlisting>
-        	<para>The text between (but not including) the square brackets, is the ID that needs to
-        	be used for the various <literal>workbench.db.</literal> parameters.
-        	</para>
-				</section>
-        <section id="dbid">
-					<title>DBID</title>
-					<para>For some settings, where the ID is part of the property's key, a "clean" version of
-        	the Database Identifer, called the DBID is used. This DBID is also reported in the log
-        	file:</para>
-        	<programlisting>INFO  15.08.2004 10:24:42 DbMetadata - Using DBID=hsql_database_engine</programlisting>
-				</section>
-
-        <informaltable frame="all">
-          <tgroup cols="3">
-            <colspec colname="c1" colwidth="5.5cm" />
-            <colspec colname="c2" colwidth="7.5cm" />
-            <colspec colname="c3" colwidth="1cm" />
-            <thead>
-              <row>
-                <entry>Key</entry>
-                <entry>Description</entry>
-                <entry>Default</entry>
-              </row>
-            </thead>
-            <tbody valign="top">
-              <row>
-                <entry><para>workbench.gui.showmnemonics</para></entry>
-                <entry><para>Usually the mnemonic for a menu item is not shown under
-                       Windows 2000 or later. It will only be shown, when you press the
-                       ALT key. With this settings, this JDK behaviour can be controlled.</para></entry>
-                <entry><para>true</para></entry>
-              </row>
-              <row>
-                <entry><para>workbench.db.verifydriverurl</para></entry>
-                <entry><para>Usually before connecting to the DBMS, &wb-productname; will
-                        call the acceptsUrl() method of the JDBC driver, to verify
-                        if the entered URL is correct and will be accepted by the
-                        driver. Some drivers have been reported to indicate an error
-                        in the URL even if they could connect successfully.</para>
-                        <para>If you are seeing an error indicating that the URL is not
-                        accepted by the driver, but you are sure that the driver accepts
-                        the URL, then set this property to <literal>false</literal>
-                        </para>
-                </entry>
-                <entry><para>true</para></entry>
-              </row>
-              <row>
-                <entry><para>workbench.gui.showsplash</para></entry>
-                <entry><para>Show a splash screen at startup</para></entry>
-                <entry><para>false</para></entry>
-              </row>
-              <row>
-                <entry><para>workbench.log.level</para></entry>
-                <entry><para>Set the log level for the log file. Valid values are
-                       <itemizedlist spacing="compact">
-                          <listitem><para>DEBUG</para></listitem>
-                          <listitem><para>INFO</para></listitem>
-                          <listitem><para>WARN</para></listitem>
-                          <listitem><para>ERROR</para></listitem>
-                       </itemizedlist>
-                       </para>
-                </entry>
-                <entry><para>INFO</para></entry>
-              </row>
-              <row>
-                <entry><para>workbench.log.format</para></entry>
-                <entry><para>Define the format of the log messages. The following placeholders
-                are supported:
-                   <itemizedlist spacing="compact">
-                      <listitem><para>{type}</para></listitem>
-                      <listitem><para>{timestamp}</para></listitem>
-                      <listitem><para>{message}</para></listitem>
-                      <listitem><para>{error}</para></listitem>
-                      <listitem><para>{source}</para></listitem>
-                      <listitem><para>{stacktrace}</para></listitem>
-                   </itemizedlist>
-                   The order of the placeholders defines the order in the log file, except
-                   for the stacktrace which will always be printed after the message.
-                   If the log level is set to debug, the stacktrace will always be displayed
-                   even if it is not included in the format string.
-                   </para>
-                </entry>
-                <entry><para>{type} {timestamp} {message} {error}</para></entry>
-              </row>
-              <row>
-                <entry><para id="options-log-console">workbench.log.console</para></entry>
-                <entry><para>Defines whether &wb-productname; logs messages additionally to the standard
-                error output</para>
-                </entry>
-                <entry><para>false</para></entry>
-              </row>
-              <row>
-                <entry><para>workbench.workspace.autosave</para></entry>
-                <entry><para>If this is enabled, the current workspace will
-                be saved automatically, when a SQL statement is executed. This
-                setting was introduced with Build 61.</para>
-                </entry>
-                <entry><para>false</para></entry>
-              </row>
-              <row>
-                <entry><para>workbench.workspace.createbackup</para></entry>
-                <entry><para>If this is enabled, a backup file will be created
-                before saving the workspace. This is done by renaming the current
-                file (overwriting any existing backup) and then saving the workspace.</para>
-                </entry>
-                <entry><para>false</para></entry>
-              </row>
-
-              <row>
-                <entry><para>workbench.dbmetadata.logsql</para></entry>
-                <entry><para>If this is enabled, the SQL queries used to
-                retrieve DBMS specific meta data (such as view/procedure/trigger source,
-                defined triggers/views) will be logged with level INFO.
-                This can be used to debug customized SQL statements
-                for DBMS's which are not (yet) preconfigured.</para>
-                </entry>
-                <entry><para>false</para></entry>
-              </row>
-              <row>
-                <entry><para id="formatter-subselect-threshold">workbench.sql.formatter.subselect.maxlength</para></entry>
-                <entry><para>When the SQL formatter hits a sub-SELECT while
-                parsing it will not reformat any statement which is shorter
-                then the length specified through this property. I.e. any sub SELECT
-                shorter then this value will be formatted as one single String without
-                line breaks or indention. See <xref linkend="editor-reformat-sql"/> for
-                details on how the SQL formatting works.</para>
-                </entry>
-                <entry><para>60</para></entry>
-              </row>
-              <row>
-                <entry><para id="manual-setting-snippet-no-newline">workbench.javacode.includenewline</para></entry>
-                <entry><para>When creating a <link linkend="editor-copy-java-code-snippet">Java code snippet</link>,
-                the newlines inside the editor are preserved by putting a <literal>\n</literal>
-                character into the String declaration. Setting this property to false, will
-                tell &wb-productname; not put any <literal>\n</literal> characters into the Java string.</para>
-                </entry>
-                <entry><para>true</para></entry>
-              </row>
-              <row>
-                <entry><para id="manual-setting-datapumper-autoconnect">workbench.datapumper.autoconnect</para></entry>
-                <entry><para>When opening the <link linkend="data-pumper">DataPumper</link> it will
-                connect to the current profile as the source connection. If you do not want the DataPumper to
-                connect automatically set this property to <literal>false</literal>
-                </para>
-                </entry>
-                <entry><para>true</para></entry>
-              </row>
-              <row>
-                <entry><para>workbench.db.ddlneedscommit</para></entry>
-                <entry><para>A list of <link linkend="dbms-identifier">DBMS Identifiers</link> that require a COMMIT after issuing DDL statements (such
-                as <literal>CREATE TABLE</literal></para>
-                </entry>
-                <entry><para>PostgreSQL,Firebird</para></entry>
-              </row>
-              <row>
-                <entry><para>workbench.db.usejdbccommit</para></entry>
-                <entry><para>Some DBMS return an error when <literal>COMMIT</literal> or <literal>ROLLBACK</literal> is send as
-                a regular command through the JDBC interface. If the DBMS is listed here,
-                the JDBC functions <literal>commit()</literal> or <literal>rollback()</literal> will
-                be used instead.
-								This is a comma separated list of <link linkend="dbms-identifier">Database Identifiers</link>
-								</para>
-                </entry>
-                <entry><para>Firebird,Cloudscape</para></entry>
-              </row>
-              <row>
-                <entry><para>workbench.db.inlineconstraints</para></entry>
-                <entry><para>This setting controls the generation of the <literal>CREATE TABLE</literal>
-                source in the <link linkend="dbexplorer">DbExplorer</link>. This is a comma separated
-                list of <link linkend="dbms-identifier">Database Identifiers</link> that only support defining
-								primary and foreign keys inside the <literal>CREATE TABLE</literal> statement.</para>
-                </entry>
-                <entry><para>FirstSQL/J</para></entry>
-              </row>
-              <row>
-                <entry><para>workbench.db.casesensitive</para></entry>
-                <entry><para>This is (currently) only used in the table search panel of the DbExplorer.
-                The highlighting of matching values considers this setting.
-								This is a comma separated list of <link linkend="dbms-identifier">Database Identifiers</link>
-								</para>
-                </entry>
-                <entry><para>Oracle</para></entry>
-              </row>
-              <row>
-                <entry><para>workbench.db.ignore.[dbid]=</para></entry>
-                <entry><para>For a DBMS identifier you can define a list of commands
-                that are simply ignored by &wb-productname;. This is useful e.g. for Oracle,
-                when you want to run scripts that are intended for SQL*Plus. If those scripts
-                contain special SQL*Plus commands (that are not understood by the Oracle server
-                as SQL*Plus executes these commands directly) they would fail in &wb-productname;.
-                If those commands are simply ignored and not send to the server, the scripts
-                can run without modification.</para>
-                <para>The <link linkend="dbid">DBID</link> is the lower case DBMS identifier (see above) with all
-                special characters like <literal>\/,.$[]()</literal> and spaces removed.
-                The actual ID that is used to retrieve this list is reported as an
-                informational message in the log file (<literal>Using DBID=</literal>)</para>
-                </entry>
-                <entry><para>workbench.db.ignore.oracle =prompt, exit, whenever</para></entry>
-              </row>
-              <row>
-                <entry><para>workbench.db.keywordlist.[dbid]=</para></entry>
-                <entry><para>For a <link linkend="dbid">DBID</link> you can define a list of additional
-                SQL keywords. This can be used if the JDBC driver does not implement getSQLKeywords() correctly.
-								</para>
-                </entry>
-                <entry><para>No default</para></entry>
-              </row>
-              <row>
-                <entry><para>workbench.db.cancelneedsreconnect</para></entry>
-                <entry><para>A list of JDBC driver classes, that require a reconnect after cancelling
-                a statement. </para>
-                </entry>
-                <entry><para>com.microsoft.jdbc.sqlserver.SQLServerDriver</para></entry>
-              </row>
-              <row>
-                <entry><para>workbench.db.casesensitive</para></entry>
-                <entry><para>This is (currently) only used in the table search panel of the DbExplorer.
-                The highlighting of matching values considers this setting.</para>
-                </entry>
-                <entry><para>Oracle</para></entry>
-              </row>
-
-              <row>
-                <entry><para>workbench.sql.script.inmemory.maxsize</para></entry>
-                <entry><para>Control the size up to which files that are executed in batch
-                mode or via the <link linkend="command-wbinclude">WBINCLUDE</link> command
-                are read into memory. Files exceeding this size are not read into memory
-                but processed statement by statement. When a file is not read into memory
-                the automatic detection of the <link linkend="options-alternate-delimiter">alternate delimiter</link>
-								does not work any longer. The size is given in bytes.</para>
-                </entry>
-                <entry><para>1048576</para></entry>
-              </row>
-              
-              <row>
-                <entry><para>workbench.sql.ignoreschema.[dbid1]=schema1,...</para></entry>
-                <entry><para>
-								Define a list of schemas that should be ignored for the <link linkend="dbid">DB ID</link>
-								When &wb-productname; creates DML statements and the current table is reported
-								to be belong to any of the schemas listed in this property, the schema will not
-								be used to qualify the table. To ignore all schemas use a *, e.g.
-								<literal>workbench.sql.ignoreschema.rdb=*</literal>. In this case, table names
-								will never be prefixed with the schema name reported by the JDBC driver.
-								The entries in there are case sensitiv.
-                </para></entry>
-                <entry><para>For Oracle: PUBLIC, For PostgreSQL: public, For rdb: *</para></entry>
-              </row>
-
-              <row>
-                <entry><para>workbench.editor.rightclickmovescursor</para></entry>
-                <entry>
-                  <para>Normally a right click in the SQL editor does not
-                        change the location of the cursor (caret). If this parameter is set to
-                        true, then a right click will also change the caret's location.
-                   </para>
-                </entry>
-                <entry><para>false</para></entry>
-              </row>
-
-            </tbody>
-          </tgroup>
-        </informaltable>
-      </section>
 </section>
+
