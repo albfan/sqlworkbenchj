@@ -47,6 +47,7 @@
   </path>
 
   <target name="set-build-number" depends="init">
+		<property name="release-src-dir" value="release"/>
     <buildnumber file="build.number"/>
     <echo message="Build number is ${build.number}"/>
 
@@ -58,6 +59,7 @@
   </target>
 
   <target name="set-dev-build" depends="init">
+		<property name="release-src-dir" value="dist"/>
     <propertyfile file="devbuild.number">
         <entry key="dev-build.number" type="int" operation="+" value="1"/>
     </propertyfile>
@@ -118,6 +120,12 @@
 
   <target name="compile" depends="prepare">
     <javac debug="off" debuglevel="source,lines" destdir="${build}" optimize="on" srcdir="${src}" >
+        <exclude name="workbench/test/**"/>
+    </javac>
+  </target>
+  
+  <target name="compile_debug" depends="prepare">
+    <javac debug="on" debuglevel="source,lines" destdir="${build}" optimize="on" srcdir="${src}" >
         <exclude name="workbench/test/**"/>
     </javac>
   </target>
@@ -251,6 +259,9 @@
 
     <copy todir="${html-outdir}/${html-resource-dir}" flatten="true">
       <fileset dir="${src}/workbench/resource/images">
+        <include name="ExecuteSel16.gif"/>
+        <include name="Remove16.gif"/>
+        <include name="filter16.gif"/>
         <include name="New16.gif"/>
         <include name="Delete16.gif"/>
         <include name="CopyProfile16.gif"/>
@@ -391,7 +402,7 @@
   </target>
 
   <!-- build a full relase with documentation and source distribution -->
-  <target name="release" depends="clean, set-build-number, copy-history, build-help, compile, make-jar, pdf, publish, release-package, restart-history, clean-history">
+  <target name="release" depends="clean, set-build-number, copy-history, build-help, compile, make-jar, pdf, publish, release-src-zip, release-package, restart-history, clean-history">
     <tstamp>
       <format pattern="yyyy-MM-dd" property="today"/>
     </tstamp>
@@ -407,11 +418,11 @@
     </ant>
   </target>
 
-  <target name="make-dev-jar" depends="get-dev-build, clean, copy-history, prepare, compile, make-jar, clean-history">
+  <target name="make-dev-jar" depends="get-dev-build, clean, copy-history, prepare, compile_debug, make-jar, clean-history">
   </target>
 
   <!-- build a development release -->
-  <target name="dev-release" depends="set-dev-build, clean, copy-history, prepare, compile, build-help, make-jar, clean-history">
+  <target name="dev-release" depends="set-dev-build, clean, copy-history, prepare, compile_debug, build-help, release-src-zip, make-jar, clean-history">
     <tstamp>
       <format pattern="yyyy-MM-dd" property="today"/>
     </tstamp>
@@ -445,6 +456,7 @@
   </target>
 
   <target name="release-package" depends="init">
+		
     <copy file="${scriptsrc}/history.new" overwrite="true" failonerror="false" tofile="${root}/release/history.txt"/>
 
     <copy file="${doc}/pdf/SQLWorkbench-Manual.pdf" overwrite="true" todir="${root}/release"/>
@@ -481,7 +493,34 @@
       </zipfileset>
     </zip>
 
-    <zip zipfile="${root}/release/WorkbenchSrc-Build${build.number}.zip">
+    <tar destfile="${root}/release/Workbench-Build${build.number}.tar.gz" compression="gzip">
+      <tarfileset dir="${root}/dist">
+        <include name="Workbench.jar"/>
+        <include name="history.txt"/>
+      </tarfileset>
+      <tarfileset dir="${root}/scripts" mode="755">
+          <include name="jworkbench"/>
+          <include name="datapumper"/>
+          <include name="dbexplorer"/>
+      </tarfileset>
+      <tarfileset dir="${html-outdir}" prefix="manual">
+        <include name="**/*.*"/>
+      </tarfileset>
+      <tarfileset dir="${scriptsrc}" prefix="xslt">
+        <include name="**/*.xslt"/>
+      </tarfileset>
+    </tar>
+
+  </target>
+
+	<target name="release-src-zip" depends="init">
+    <delete failonerror="false">
+      <fileset dir="${root}/${release-src-dir}">
+        <include name="WorkbenchSrc*.zip"/>
+      </fileset>
+    </delete>
+		
+    <zip zipfile="${root}/${release-src-dir}/WorkbenchSrc-Build${build.number}.zip">
       <zipfileset dir="${src}" prefix="src">
         <include name="**/*.*"/>
         <exclude name="**/workbench.settings"/>
@@ -518,27 +557,8 @@
         <exclude name="**/*.tws"/>
       </zipfileset>
     </zip>
-
-    <tar destfile="${root}/release/Workbench-Build${build.number}.tar.gz" compression="gzip">
-      <tarfileset dir="${root}/dist">
-        <include name="Workbench.jar"/>
-        <include name="history.txt"/>
-      </tarfileset>
-      <tarfileset dir="${root}/scripts" mode="755">
-          <include name="jworkbench"/>
-          <include name="datapumper"/>
-          <include name="dbexplorer"/>
-      </tarfileset>
-      <tarfileset dir="${html-outdir}" prefix="manual">
-        <include name="**/*.*"/>
-      </tarfileset>
-      <tarfileset dir="${scriptsrc}" prefix="xslt">
-        <include name="**/*.xslt"/>
-      </tarfileset>
-    </tar>
-
-  </target>
-
+	</target>
+	
   <target name="src" depends="make-src-zip"/>
 
 </project>

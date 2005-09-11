@@ -461,7 +461,14 @@ Done.</programlisting>
       turned off again. If you try to enable the edit mode for a result set where more
       than one table is involved, you will be prompted for the table that should
       be updated.</para>
+      
+      <para>When editing, &wb-productname; highlights columns that are defined as <literal>NOT NULL</literal>
+      in the database. You can turn this feature off, or change the color used by editing the
+      <link linkend="settings-highlight-notnull">configuration file</link>.
+      </para>
     </section>
+    
+    
     <section id="filter-data">
       <title>Filtering the result</title>
       <para>Once the data has been retrieved from the Server it can be filtered

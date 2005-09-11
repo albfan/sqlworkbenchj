@@ -131,16 +131,6 @@ public class WbCopy
 		String sourceProfile = cmdLine.getValue(PARAM_SOURCEPROFILE);
 		String targetProfile = cmdLine.getValue(PARAM_TARGETPROFILE);
 
-		/*
-		if (sourceProfile == null && targetProfile == null)
-		{
-			result.addMessage(ResourceMgr.getString("ErrorCopyNoProfile"));
-			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrorCopyWrongParameters"));
-			result.setFailure();
-			return result;
-		}
-		*/
 		int commit = StringUtil.getIntValue(cmdLine.getValue(PARAM_COMMITEVERY),-1);
 
 		String sourcetable = cmdLine.getValue(PARAM_SOURCETABLE);

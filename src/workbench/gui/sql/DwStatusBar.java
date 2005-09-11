@@ -56,7 +56,7 @@ public class DwStatusBar
 	private JTextField tfMaxRows;
 	private String readyMsg;
 	private JTextField tfTimeout;
-	private JLabel execTime;
+	private WbTextLabel execTime;
 	private JLabel timeoutLabel;
 	private JPanel auxPanel;
 	
@@ -101,12 +101,10 @@ public class DwStatusBar
 		tfRowCount.setAutoscrolls(false);
 		tfRowCount.setEnabled(false);
 		
-		JLabel l = null;
 		this.tfStatus = new WbTextLabel();
 		tfStatus.setMaximumSize(new Dimension(32768, FIELD_HEIGHT));
 		tfStatus.setMinimumSize(new Dimension(80, FIELD_HEIGHT));
 		tfStatus.setPreferredSize(null);
-		//tfStatus.setBorder(new DividerBorder(DividerBorder.RIGHT));		
 		
 		JPanel p = new JPanel();
 		p.setBorder(WbSwingUtilities.EMPTY_BORDER);
@@ -118,8 +116,8 @@ public class DwStatusBar
 		
 		this.add(tfStatus, BorderLayout.CENTER);
 		
-		this.execTime = new JLabel();
-		execTime.setHorizontalAlignment(JTextField.RIGHT);
+		this.execTime = new WbTextLabel();
+		execTime.setHorizontalAlignment(SwingConstants.RIGHT);
 		Font f = execTime.getFont();
 		FontMetrics fm = execTime.getFontMetrics(f);
 		Dimension pref = execTime.getPreferredSize();
@@ -135,7 +133,7 @@ public class DwStatusBar
 		
 		if (showTimeout)
 		{
-			l = new JLabel(" " + ResourceMgr.getString("LabelQueryTimeout") + " ");
+			JLabel l = new JLabel(" " + ResourceMgr.getString("LabelQueryTimeout") + " ");
 			//l.setBorder(new DividerBorder(DividerBorder.LEFT));		
 			p.add(l);
 			this.tfTimeout = new JTextField(3);
@@ -147,7 +145,7 @@ public class DwStatusBar
 			l.setToolTipText(this.tfTimeout.getToolTipText());
 			p.add(this.tfTimeout);
 		}
-		l = new JLabel(" " + ResourceMgr.getString("LabelMaxRows") + " ");
+		JLabel l = new JLabel(" " + ResourceMgr.getString("LabelMaxRows") + " ");
 //		if (!showTimeout)
 //		{
 //			l.setBorder(new DividerBorder(DividerBorder.LEFT));		

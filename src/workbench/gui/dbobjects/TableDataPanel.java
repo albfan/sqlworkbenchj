@@ -416,6 +416,7 @@ public class TableDataPanel
 			String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
 			dataDisplay.setPrintHeader(header);
 			dataDisplay.setStatusMessage("");
+			dataDisplay.showlastExecutionTime();
 		}
 		catch (OutOfMemoryError mem)
 		{

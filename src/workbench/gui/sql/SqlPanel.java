@@ -2076,6 +2076,7 @@ public class SqlPanel
 
 			long displayTime = 0;
 			long startTime = System.currentTimeMillis();
+			long stmtTotal = 0;
 			int executedCount = 0;
 			String lastSql = null;
 
@@ -2138,8 +2139,8 @@ public class SqlPanel
 				{
 					highlightStatement(scriptParser, i, selectionOffset);
 				}
-
 				this.data.runStatement(lastSql, control);
+				stmtTotal += data.getLastExecutionTime();
 
 				// the SET FEEDBACK command might change the feedback level
 				// so it needs to be checked each time.
@@ -2220,6 +2221,10 @@ public class SqlPanel
 
 			} // end for loop
 
+			final long end = System.currentTimeMillis();
+			long execTime = (end - startTime);
+			data.getStatusBar().setExecutionTime(stmtTotal);
+
 			this.data.clearStatusMessage();
 
 			if (commandWithError > -1 && highlightOnError)
@@ -2237,8 +2242,6 @@ public class SqlPanel
 					}
 				});
 			}
-
-			final long end = System.currentTimeMillis();
 
 			if (failuresIgnored > 0)
 			{
@@ -2270,7 +2273,6 @@ public class SqlPanel
 			if (count > 1)
 			{
 				this.appendToLog(ResourceMgr.getString("TxtScriptFinished")+ "\n");
-				long execTime = (end - startTime);
 				String s = ResourceMgr.getString("MsgScriptExecTime") + " " + (((double)execTime) / 1000.0) + "s";
 				this.appendToLog(s + "\n");
 			}

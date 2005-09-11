@@ -267,6 +267,7 @@ public class StringUtil
 	{
     if (aString == null || aString.length() == 0) return Collections.EMPTY_LIST;
 		WbStringTokenizer tok = new WbStringTokenizer(aString, aDelimiter);
+		tok.setDelimiterNeedsWhitspace(false);
 		ArrayList result = new ArrayList(150);
 		while (tok.hasMoreTokens())
 		{
@@ -706,21 +707,22 @@ public class StringUtil
 		return ("true".equalsIgnoreCase(aString) || "1".equals(aString) || "y".equalsIgnoreCase(aString) || "yes".equalsIgnoreCase(aString) );
 	}
 
-	public static List split(String aString, String delim, boolean singleDelimiter, String quoteChars, boolean keepQuotes)
-	{
-		if (aString == null) return Collections.EMPTY_LIST;
-		WbStringTokenizer tok = new WbStringTokenizer(delim, singleDelimiter, quoteChars, keepQuotes);
-		tok.setSourceString(aString.trim());
-
-		List result = new ArrayList();
-		String token = null;
-		while (tok.hasMoreTokens())
-		{
-			token = tok.nextToken();
-			if (token != null) result.add(token);
-		}
-		return result;
-	}
+//	public static List split(String aString, String delim, boolean singleDelimiter, String quoteChars, boolean keepQuotes)
+//	{
+//		if (aString == null) return Collections.EMPTY_LIST;
+//		WbStringTokenizer tok = new WbStringTokenizer(delim, singleDelimiter, quoteChars, keepQuotes);
+//		tok.setDelimiterNeedsWhitspace(false);
+//		tok.setSourceString(aString.trim());
+//
+//		List result = new ArrayList();
+//		String token = null;
+//		while (tok.hasMoreTokens())
+//		{
+//			token = tok.nextToken();
+//			if (token != null) result.add(token);
+//		}
+//		return result;
+//	}
 
 	public static final String getMaxSubstring(String s, int maxLen)
 	{

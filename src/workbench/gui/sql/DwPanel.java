@@ -110,6 +110,7 @@ public class DwPanel
 	private DefaultCellEditor defaultEditor;
 	private DefaultCellEditor defaultNumberEditor;
 	private int maxRows = 0;
+	private long lastExecutionTime = 0;
 	
 	private boolean success;
 	private boolean hasWarning;
@@ -188,7 +189,7 @@ public class DwPanel
 		return this.selectKeys;
 	}
 	
-	public StatusBar getStatusBar()
+	public DwStatusBar getStatusBar()
 	{
 		return this.statusBar;
 	}
@@ -722,9 +723,22 @@ public class DwPanel
 	{
 		if (this.stmtRunner != null) this.stmtRunner.setResultLogger(logger);
 	}
+
+	/**
+	 * Displays the last execution time in the status bar
+	 */
+	public void showlastExecutionTime()
+	{
+		statusBar.setExecutionTime(lastExecutionTime);
+	}
+	
+	public long getLastExecutionTime()
+	{
+		return lastExecutionTime;
+	}
 	
 	public void runStatement(String sql)
-	throws SQLException, Exception
+		throws SQLException, Exception
 	{
 		runStatement(sql, null);
 	}
@@ -735,7 +749,7 @@ public class DwPanel
 	 *  connection profile
 	 */
 	public void runStatement(String aSql, ExecutionController controller)
-	throws SQLException, Exception
+		throws SQLException, Exception
 	{
 		this.success = false;
 		this.cancel = false;
@@ -756,12 +770,9 @@ public class DwPanel
 			int max = this.statusBar.getMaxRows();
 			int timeout = this.statusBar.getQueryTimeout();
 			this.stmtRunner.runStatement(aSql, max, timeout);
-			
-			long sqlTime = (System.currentTimeMillis() - sqlExecStart);
-			long end = 0, checkUpdateTime = 0;
-			
 			result = this.stmtRunner.getResult();
 			
+			long end = 0, checkUpdateTime = 0;
 			this.hasResultSet = false;
 			this.success = result.isSuccess();
 			this.hasWarning = result.hasWarning();
@@ -791,21 +802,29 @@ public class DwPanel
 					this.setMessageDisplayModel(this.getErrorTableModel());
 				}
 			}
-			long execTime = (end - sqlExecStart);
-			this.lastTimingMessage = ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s";
-			/*
+			this.lastExecutionTime = (System.currentTimeMillis() - sqlExecStart);
+			//long execTime = (end - sqlExecStart);
+			StringBuffer msg = new StringBuffer(100);
+			msg.append(ResourceMgr.getString("MsgExecTime"));
+			msg.append(' ');
+			msg.append(((double)lastExecutionTime) / 1000.0);
+			msg.append('s');
 			if (LogMgr.isDebugEnabled())
 			{
-				this.lastTimingMessage += "\n" + ResourceMgr.getString("MsgSqlVerbTime") + " " + (((double)sqlTime) / 1000.0) + "s";
+				//this.lastTimingMessage += "\n" + ResourceMgr.getString("MsgSqlVerbTime") + " " + (((double)sqlTime) / 1000.0) + "s";
 				if (checkUpdateTime > 0)
 				{
-					this.lastTimingMessage += "\n" + ResourceMgr.getString("MsgCheckUpdateTableTime") + " " + (((double)checkUpdateTime) / 1000.0) + "s";
+					msg.append('\n');
+					msg.append(ResourceMgr.getString("MsgCheckUpdateTableTime"));
+					msg.append(' ');
+					msg.append(((double)checkUpdateTime) / 1000.0);
+					msg.append('s');
 				}
 			}
-			 */
+			this.lastTimingMessage = msg.toString();
+
 			this.rowsAffectedByScript += result.getTotalUpdateCount();
 			this.lastResultMessages = result.getMessages();
-			this.statusBar.setExecutionTime(execTime);
 		}
 		catch (SQLException sqle)
 		{
@@ -861,7 +880,7 @@ public class DwPanel
 	}
 	
 	private long showData(StatementRunnerResult result)
-	throws SQLException
+		throws SQLException
 	{
 		this.hasResultSet = true;
 		long checkUpdateTime = -1;

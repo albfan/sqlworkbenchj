@@ -44,6 +44,11 @@
       </itemizedlist>
       </para>
 
+			<para>If you want to use a different file than WbProfiles.xml then you can specify the
+			location of the profiles with the <literal>-profilestorage</literal> parameter on the commandline.
+			Thus you can create different shortcuts on your desktop pointing to different sets of profiles.
+			The different shortcuts can still use the same configuration (i.e. settings) file.
+			</para>
       <para>If you want to put these files into a different directory, start &wb-productname;
       with the parameter -configdir to specify an alternate directory:</para>
       <para>
@@ -58,9 +63,8 @@
       of the workspace file is usually stored with a placeholder for the configuration directory
       (%ConfigDir%) so that the profiles don't need to be adjusted.
       </para>
-      <para>The driver definitions (stored in <filename>WbDrivers.xml</filename>)
-      will most probably need editing, as the path to the actual .jar files is stored
-      as an absolute path.</para>
+      <para>You will need to edit the driver definitions (stored in <filename>WbDrivers.xml</filename>)
+      as the full path to the driver's jar file(s) is stored in the file.</para>
     </section>
   </section>
 
@@ -271,17 +275,29 @@
     the launcher or starting &wb-productname; using the java command itself.</para>
 
     <section>
-      <title>-configdir=&#60;a directory&#62;</title>
+      <title>-configdir</title>
 
       <para>Store all settings, the connection profile and the statement
-      history in the given directory.</para>
+      history in the given directory. If this parameter is not supplied, the current
+			working directory is used.</para>
 
       <programlisting>java -jar Workbench.jar -configdir=$HOME/wbconfig
 jworkbench -configdir='c:/Configurations/JWorkbench'</programlisting>
     </section>
 
+		<section>
+			 <title>-profilestorage</title>
+			 <para>&wb-productname; stores the connection profiles in a file called <literal>WbProfiles.xml</literal>.
+			 If you want to use a different filename, or use different sets of profiles for different purposes
+			 you can define the file where the profiles are stored with this parameter.
+			 </para>
+			 <para>If the value of the parameter does not contain a path, the file will be stored in the
+			 configuration directory.
+			 </para>
+		</section>
+		
     <section id="vardef-commandline">
-      <title>-vardef=&#60;variable definition&#62;</title>
+      <title>-vardef</title>
 
       <para>With this command line parameter a definition file for internal variables can 
       be defined. Each variable is listed on a single line in the format <literal>variable=value</literal>.

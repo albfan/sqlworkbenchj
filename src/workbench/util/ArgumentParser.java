@@ -55,12 +55,16 @@ public class ArgumentParser
 	public void parse(String aCmdLine)
 	{
 		this.reset();
-		List words = StringUtil.split(aCmdLine, "-", false, "\"'", false);
+		//List words = StringUtil.split(aCmdLine, "-", false, "\"'", false);
+		WbStringTokenizer tok = new WbStringTokenizer('-', "\"'", false);
+		tok.setDelimiterNeedsWhitspace(true);
+		tok.setSourceString(aCmdLine.trim());
 
-		int count = words.size();
-		for (int i=0; i < count; i++)
+		//int count = words.size();
+		//for (int i=0; i < count; i++)
+		while (tok.hasMoreTokens())
 		{
-			String word = (String)words.get(i);
+			String word = tok.nextToken();// String)words.get(i);
 			if (word.length() == 0) continue;
 			String arg = null;
 			String value = null;

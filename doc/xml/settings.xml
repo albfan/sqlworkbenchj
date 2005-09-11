@@ -38,18 +38,37 @@
     <section>
       <title>workbench.editor.rightclickmovescursor</title>
       <para>Normally a right click in the SQL editor does not
-                  change the location of the cursor (caret). If this parameter is set to
-                  true, then a right click will also change the caret's location.
+            change the location of the cursor (caret). If this parameter is set to
+            true, then a right click will also change the caret's location.
       </para>
       <para>Default: <literal>false</literal></para>
+    </section>
+    
+    <section id="settings-highlight-notnull">
+      <title>workbench.gui.edit.requiredfield.dohighlight</title>
+      <para>When editing data in the result set, mandatory columns (i.e. those
+			that are defined as <literal>NOT NULL</literal>) will be highlighted
+			if this parameter is set to <literal>true</literal>. The background color that
+			is used for those fields can also be defined.
+      </para>
+      <para>Default: <literal>true</literal></para>
+    </section>
+
+    <section>
+      <title>workbench.gui.edit.requiredfield.color</title>
+      <para>When highlighting mandatory columns from a result set, the background
+      color can be defined with this parameter. It expects three integer values
+      defining the <ulink url="http://en.wikipedia.org/wiki/List_of_colors">RGB value</ulink> of the color to be used.
+      </para>
+      <para>Default: <literal>255,100,100</literal></para>
     </section>
 
     <section>
       <title>workbench.gui.showmnemonics</title>
       <para>
-	              Usually the mnemonic (aka. Accelerator) for a menu item is not shown under
-	              Windows 2000 or later. It will only be shown, when you press the
-	              ALT key. With this settings, this JDK behaviour can be controlled.
+        Usually the mnemonic (aka. Accelerator) for a menu item is not shown under
+        Windows 2000 or later. It will only be shown, when you press the
+        ALT key. With this settings, this JDK behaviour can be controlled.
       </para>
       <para>Default: <literal>true</literal></para>
     </section>
@@ -73,8 +92,10 @@
     <section id="selectable-objects-setting">
       <title>workbench.db.objecttype.selectable.[dbid]=value1,value2,...</title>
       <para>
-            The DbExplorer makes the "data" tab available based on the type of the object
-            in the object list. The default list consists of the
+            The DbExplorer makes the "data" tab available based on the type of the selected object
+            in the object list (second column). If the type returned by the JDBC driver
+						is one of the types listed in this property, &wb-productname; assumes that
+						it can issue a <literal>SELECT * FROM</literal> to retrieve data from that object.
       </para>
       <para>Default values:
         <simplelist columns="1">

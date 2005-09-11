@@ -16,7 +16,10 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import javax.swing.JComponent;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+import javax.swing.border.Border;
+import workbench.resource.ResourceMgr;
 
 /**
  *  Displays a Label left aligned with no further overhead in painting
@@ -28,25 +31,42 @@ public class WbTextLabel
 {
 	private String text;
 	private final Color textColor;
-	private final int textX = 2;
+	private int textX = 2;
 	private int textY;
+	private int alignment = SwingConstants.LEFT;
+	private FontMetrics fm;
+	private boolean hasBorder = false;
 	
 	public WbTextLabel()
 	{
+		super();
 		this.setDoubleBuffered(true);
 		this.setBackground(UIManager.getColor("Label.background")); 	
 		this.textColor = UIManager.getColor("Label.foreground");
 		this.setForeground(textColor);
 		this.setOpaque(false);
 		Font f = UIManager.getFont("Label.font");
-		FontMetrics fm = this.getFontMetrics(f);
+		super.setFont(f);
+		this.fm = this.getFontMetrics(f);
 		textY = fm.getAscent() + 2;
+		setToolTipText(ResourceMgr.getString("MsgTotalSqlTime"));
+	}
+	
+	public void setBorder(Border b)
+	{
+		super.setBorder(b);
+		hasBorder = (b != null);
+	}
+	
+	public void setHorizontalAlignment(int align)
+	{
+		this.alignment = align;
 	}
 	
 	public void setFont(Font f)
 	{
 		super.setFont(f);
-		FontMetrics fm = this.getFontMetrics(f);
+		this.fm = this.getFontMetrics(f);
 		textY = fm.getAscent() + 2;
 	}
 
@@ -55,13 +75,22 @@ public class WbTextLabel
 	public void setText(String label)
 	{
 		this.text = label;
+		if (alignment == SwingConstants.RIGHT)
+		{
+			int w = fm.stringWidth(this.text);
+			textX = this.getWidth() - w - 4;
+		}
 		this.repaint();
 	}
 	
 	public void paint(Graphics g)
 	{
-		g.setColor(this.textColor);
-		g.drawString(this.text, textX, textY);
+		if (hasBorder) super.paint(g);
+		if (text != null) 
+		{
+			g.setColor(this.textColor);
+			g.drawString(this.text, textX, textY);
+		}
 	}
 
 }

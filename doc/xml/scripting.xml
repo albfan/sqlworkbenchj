@@ -6,8 +6,8 @@
       other SQL queries or statements.
       </para>
       <para>When using &wb-productname; from a batch file (or the commandline that is) it is
-      recommend not to use the <link linkend="launcher-using">launcher</link> as it will
-      immediately return to the commandline while starting the JVM in the background.
+      recommend <emphasis role="bold">not</emphasis> to use the <link linkend="launcher-using">launcher</link> as it will
+      immediately return to the commandline while starting the JVM (and thus &wb-productname;) in the background.
       Please refer to <link linkend="starting">Starting &wb-productname;</link> for details
       on how to start &wb-productname; with the <literal>java</literal> command.
       </para>
@@ -22,7 +22,7 @@
     			<para>You can specify the name of an already created connection
           profile on the commandline with the <literal>-profile=&#60;profile name&#62;</literal>
           parameter. The name has to be passed exactly like it appears in the profile dialog
-          (case sensitiv!). If the name contains spaces, it has to be enclosed in
+          (case sensitiv!). If the name contains spaces or dashes, it has to be enclosed in
           quotations marks.</para>
 
 			     <para>Example:</para>
@@ -105,7 +105,8 @@
         <para>With the parameter <literal>-script=&#60;filename&#62;</literal> the script
         file to be executed can be passed to the application. Multiple scripts can be specified by
         separating them with a comma. The scripts will be executed in the
-        order in which they appear in the commandline.
+        order in which they appear in the commandline. Again, if the filenames contain spaces
+				or dashes (i.e. <literal>test-1.sql</literal>) the names have to be quoted.
 				</para>
 				<para>
 				You can also execute several scripts by using the <link linkend="command-wbinclude"><literal>WBINCLUDE</literal></link>
@@ -190,7 +191,7 @@
           <para>When running &wb-productname; in batch mode, it is recommended that
           the <link linkend="options-log-console">logging to the console</link> is disabled.
           If you are running <literal>SELECT</literal> statements in your script wihtout "using" 
-          the data through an <link linkend="command-export"><literal>EXPORT</literal></link>, 
+          the data through an <link linkend="command-export"><literal>WBEXPORT</literal></link>,
           you can optionally display the results to the console using the parameter 
           <literal>-displayresult=true</literal>. If this parameter is not passed or set
           to false, results sets will not be visible (for a <literal>SELECT</literal> statement

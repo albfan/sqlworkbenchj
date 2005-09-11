@@ -1489,9 +1489,10 @@ public class DbMetadata
 		ResultSet rs = null;
 		try
 		{
-			String c = StringUtil.trimQuotes(this.adjustObjectnameCase(aTable.getCatalog()));
-			String s = StringUtil.trimQuotes(this.adjustObjectnameCase(aTable.getSchema()));
-			String t = StringUtil.trimQuotes(this.adjustObjectnameCase(aTable.getTableName()));
+      aTable.adjustCase(this.dbConnection);
+			String c = StringUtil.trimQuotes(aTable.getCatalog());
+			String s = StringUtil.trimQuotes(aTable.getSchema());
+			String t = StringUtil.trimQuotes(aTable.getTableName());
 			rs = this.metaData.getTables(c, s, t, TABLE_TYPES_TABLE);
 			exists = rs.next();
 		}

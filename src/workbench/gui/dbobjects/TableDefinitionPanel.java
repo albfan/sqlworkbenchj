@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EtchedBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
@@ -33,7 +34,6 @@ import javax.swing.table.TableColumnModel;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
@@ -87,6 +87,7 @@ public class TableDefinitionPanel
 		String[] cols = new String[] {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "JAVA_TYPE"};
 		columnFilter  = new QuickFilterPanel(this.tableDefinition, cols, true, "columnlist");
 		columnFilter.addToToolbar(reloadAction, 0);
+		//columnFilter.setToolbarBorder(new EtchedBorder());
 
 		GridBagConstraints cc = new GridBagConstraints();
 		cc.anchor = GridBagConstraints.WEST;

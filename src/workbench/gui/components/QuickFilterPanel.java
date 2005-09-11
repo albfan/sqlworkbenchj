@@ -30,6 +30,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
+import javax.swing.border.Border;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.QuickFilterAction;
@@ -184,9 +185,9 @@ public class QuickFilterPanel
 		this.setFocusTraversalPolicy(pol);
 	}
 
-	public void addToToolbar(WbAction action)
+	public void setToolbarBorder(Border b)
 	{
-		addToToolbar(action, -1);
+		this.toolbar.setBorder(b);
 	}
 	
 	public void addToToolbar(WbAction action, int index)

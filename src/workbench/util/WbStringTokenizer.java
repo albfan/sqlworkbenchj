@@ -31,6 +31,7 @@ public class WbStringTokenizer
 	private int maxDelim;
 	private Reader input;
 	private boolean endOfInput = false;
+	private boolean delimNeedWhitespace = true;
 	
 	public WbStringTokenizer()
 	{
@@ -48,6 +49,7 @@ public class WbStringTokenizer
 		this.singleWordDelimiter = false;
 		this.quoteChars = quoteChars;
 		this.keepQuotes = keepQuotes;
+		this.endOfInput = true;
 		this.maxDelim = this.delimit.length() - 1;		
 	}
 
@@ -67,6 +69,7 @@ public class WbStringTokenizer
 		this.singleWordDelimiter = isSingleDelimiter;
 		this.quoteChars = quoteChars;
 		this.keepQuotes = keepQuotes;
+		this.endOfInput = true;
 		this.maxDelim = this.delimit.length() - 1;		
 	}
 	
@@ -86,6 +89,11 @@ public class WbStringTokenizer
 		this.singleWordDelimiter = isSingleWord;
 	}
 
+	public void setDelimiterNeedsWhitspace(boolean flag)
+	{
+		this.delimNeedWhitespace = flag;
+	}
+	
 	public void setQuoteChars(String chars)
 	{
 		this.quoteChars = chars;
@@ -129,7 +137,12 @@ public class WbStringTokenizer
 		String value = null;
 		int delimIndex = 0;
 		char lastQuote = 0;
-
+		// if the input string directly starts with a delimiter
+		// and delimNeedsWhitspace == true, setting lastToken to
+		// a whitespace prevents returning the delimiter for the
+		// first argument
+		char lastToken = 9; 
+		
 		// the loop will be exited if a complete "word" is built
 		// or the Reader is at the end of the file
 		while (true)
@@ -213,6 +226,7 @@ public class WbStringTokenizer
 							else
 							{
 								delimIndex = 0;
+								if (current == null) return "";
 								value = current.toString();
 								return value;
 							}
@@ -220,10 +234,20 @@ public class WbStringTokenizer
 					}
 					else
 					{
-						if (current != null) 
+						if (!delimNeedWhitespace || 
+							   delimNeedWhitespace && Character.isWhitespace(lastToken) )
 						{
-							value = current.toString();
-							return value;
+							// found a new string to be split, return the current buffer
+							if (current != null) 
+							{
+								value = current.toString();
+								return value;
+							}
+						}
+						else
+						{
+							if (current == null) current = new StringBuffer();
+							current.append(token);
 						}
 					}
 				}
@@ -232,6 +256,7 @@ public class WbStringTokenizer
 					if (current == null) current = new StringBuffer();
 					current.append(token);
 				}
+				lastToken = token;
 			}
 			catch (IOException e)
 			{
