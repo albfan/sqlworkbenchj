@@ -94,10 +94,12 @@ another_variable=24</programlisting>
         or you put the quotes around the variable's placeholder, e.g.: <literal>WHERE name='$[name]';</literal>
       </para>
       <para>
-        If you need to use values that contain the special characters that are used to flag variables
-        you can either make sure that you have no variable defined, or configure a different prefix
-        and suffix for flagging variables.
-        To change the the prefix e.g. to %# and the suffix to # add the following lines to
+        If you are using values in your regualar statements that actually need the prefix (<literal>$[</literal> or
+        suffix (<literal>]</literal>) characters, please make sure that you have no variables defined.
+        Otherwise you will unpredictable results. If you want to use variables but need to use 
+        the default prefix for marking variables in your statements, you can configure a different 
+        prefix and suffix for flagging variables. To change the the prefix e.g. to <literal>%#</literal> and 
+        the suffix (i.e end of the variable name) to <literal>#</literal>, add the following lines to
         your <literal>workbench.settings</literal> file:
       </para>
         <programlisting>workbench.sql.parameter.prefix=%#

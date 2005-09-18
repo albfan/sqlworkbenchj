@@ -5,74 +5,74 @@
       <title>Executing SQL statements</title>
 
       <section id="statement-history">
-        <title>Statement history</title>
+      <title>Statement history</title>
 
-        <para>When executing a statement the contents of the editor is put
+      <para>When executing a statement the contents of the editor is put
         into an internal buffer together with the information about the
         text selection and the cursor position. Even when you select a part of the current
         text and execute that statement, the whole text is stored in the history buffer together
         with the selection information. When you select and execute different parts of the text
         and then move through the history you will see the selection change for each history
         entry.</para>
-        <para>The previous statement can be
+      <para>The previous statement can be
         recalled by pressing <keycap>Alt-Left</keycap> or choosing
-        <menuchoice><guimenu>SQL</guimenu><guimenuitem>Previous Statement</guimenuitem></menuchoice>
+      <menuchoice><guimenu>SQL</guimenu><guimenuitem>Previous Statement</guimenuitem></menuchoice>
         statement from the menu. Once the previous statement(s) have been
         recalled the next statement can be shown using <keycap>Alt-Right</keycap> or choosing
-        <menuchoice><guimenu>SQL</guimenu><guimenuitem>Next Statement</guimenuitem></menuchoice>
+      <menuchoice><guimenu>SQL</guimenu><guimenuitem>Next Statement</guimenuitem></menuchoice>
         from the menu. This is similar to browsing through the history of a web browser.</para>
       </section>
 
       <section id="execute-sql-commands">
-	       <title>Executing Statements</title>
-				 <para>There are three different ways to execute a SQL command</para>
+      <title>Executing Statements</title>
+      <para>There are three different ways to execute a SQL command</para>
 
-				 <para><emphasis role="bold">Execute the selected text</emphasis></para>
-				 <para>When you press <keycap>Ctrl-E</keycap> or select
-				 <menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute selected</guimenuitem></menuchoice>
+      <para><emphasis role="bold">Execute the selected text</emphasis></para>
+      <para>When you press <keycap>Ctrl-E</keycap> or select
+      <menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute selected</guimenuitem></menuchoice>
 				 the currently selected text will be send to the DBMS for execution. If no text is
 				 selected the complete contents of the editor will be send to the database.
-				 </para>
+      </para>
 
-				 <para><emphasis role="bold">Execute current command</emphasis></para>
-				 <para>When you press <keycap>Ctrl-Enter</keycap> or select
-				 <menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute current</guimenuitem></menuchoice>
+      <para><emphasis role="bold">Execute current command</emphasis></para>
+      <para>When you press <keycap>Ctrl-Enter</keycap> or select
+      <menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute current</guimenuitem></menuchoice>
 				 the current statement will be executed. The "current" statement will be the text
 				 between the next delimiter before the current cursor position and the delimiter
 				 after the cursor position.</para>
-				 <para>Example (| indicating the cursor position)</para>
-				 <programlisting>SELECT firstname, lastname FROM person;
+      <para>Example (| indicating the cursor position)</para>
+      <programlisting>SELECT firstname, lastname FROM person;
 
 DELETE FROM person| WHERE lastname = 'Dent';
 COMMIT;</programlisting>
-				 <para>When pressing Ctrl-Enter the <literal>DELETE</literal> statement will be exectuted</para>
-         <para>You can configure &wb-productname; to automatically jump to the next statement,
+      <para>When pressing Ctrl-Enter the <literal>DELETE</literal> statement will be exectuted</para>
+      <para>You can configure &wb-productname; to automatically jump to the next statement,
          after executing the current statement. Simply select <menuchoice><guimenu>SQL</guimenu><guimenuitem>Jump to next statement</guimenuitem></menuchoice>
          The check mark next to the menu item indicates if this option is enabled.
-         </para>
-				 <para><emphasis role="bold">Execute All</emphasis></para>
-				 <para>If you want to execute the complete text in the editor regardless
+      </para>
+      <para><emphasis role="bold">Execute All</emphasis></para>
+      <para>If you want to execute the complete text in the editor regardless
 				 of the current selection, use the <guimenuitem>Execute all</guimenuitem> command.
 				 Either by pressing <keycap>Ctrl-Shift-E</keycap> or selecting
-				 <menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute All</guimenuitem></menuchoice>
-				 </para>
+      <menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute All</guimenuitem></menuchoice>
+      </para>
 
-				 <para>As long as at least one statement is running the title of the main window
+      <para>As long as at least one statement is running the title of the main window
 				 will be prefixed with the &raquo; sign. Even if the main window is minimized
 				 you can still see if a statement is running by looking at the window title.</para>
          
-         <para>You can use variables in your SQL statements that are replaced when 
+      <para>You can use variables in your SQL statements that are replaced when 
          the statement is executed. Details on how to use variables can be found in
          the chapter <xref linkend="using-variables"/>.</para>
-			</section>
+      </section>
 
       <section id="execute-dml">
-        <title>Executing DML Statements</title>
+      <title>Executing DML Statements</title>
 
-        <para>SQL statements can be entered in the upper part of the window.
+      <para>SQL statements can be entered in the upper part of the window.
         Please refer to <xref linkend="editor"/> for details on the editing features
         of &wb-productname;.</para>
-        <para>
+      <para>
         The tabbed display allows you to keep more than one statement
         accessible (without needing to use the history functions). Each tab
         has its own result set and message panel. When you switch to a
@@ -80,119 +80,119 @@ COMMIT;</programlisting>
         window will change to either the last result or the last message of
         that statement.</para>
 
-        <para>For JDBC drivers which do not support multi-threaded execution (e.g. Oracle's
+      <para>For JDBC drivers which do not support multi-threaded execution (e.g. Oracle's
 				JDBC driver), you can configure your <link linkend="profiles">Connection Profile</link>
 				so that &wb-productname; will open a new connection for each tab.</para>
 
-        <para>If you enter more than one statement in the editor and want to execute all statements
+      <para>If you enter more than one statement in the editor and want to execute all statements
         as a batch script, you need to delimit each statement. The SQL standard for terminating a SQL
         statement is the semicolon. Alternatively you can separate each statement with the keyword
-        <literal>GO</literal> on a single line (MS SQL Server Syntax).</para>
-        <para>As a third alternative, an <link linkend="options-alternate-delimiter">alternate delimiter</link>
+      <literal>GO</literal> on a single line (MS SQL Server Syntax).</para>
+      <para>As a third alternative, an <link linkend="options-alternate-delimiter">alternate delimiter</link>
         can be defined, which can be used in cases where the semicolon is not suitable. See <xref linkend="execute-ddl"/>
         for details.
-        </para>
+      </para>
 
-        <para>Valid "scripts" are:</para>
-<programlisting>UPDATE person SET numheads = 2 WHERE name='Beeblebrox';
+      <para>Valid "scripts" are:</para>
+      <programlisting>UPDATE person SET numheads = 2 WHERE name='Beeblebrox';
 COMMIT;</programlisting>
-<para>or using the keyword <literal>GO</literal>. This is the same syntax as the MS SQL Query Analyzer uses</para>
-<programlisting>UPDATE person SET numheads = 2 WHERE name='Beeblebrox'
+      <para>or using the keyword <literal>GO</literal>. This is the same syntax as the MS SQL Query Analyzer uses</para>
+      <programlisting>UPDATE person SET numheads = 2 WHERE name='Beeblebrox'
 GO
 COMMIT
 GO</programlisting>
-<para>or if the alternate delimiter has been set to / the same syntax as Oracle's
+      <para>or if the alternate delimiter has been set to / the same syntax as Oracle's
 SQL*Plus can be used.</para>
-<programlisting>UPDATE person SET numheads = 2 WHERE name='Beeblebrox'
+      <programlisting>UPDATE person SET numheads = 2 WHERE name='Beeblebrox'
 /
 COMMIT
 /</programlisting>
-				<para>The detection of the MS SQL "<literal>GO</literal>" syntax only works if the script
+      <para>The detection of the MS SQL "<literal>GO</literal>" syntax only works if the script
 				that is to be executed is terminated with a <literal>GO</literal> on a single line. The
 				following script will fail on every database that does not know the GO keyword (to my
 				knowledge MS SQL Server is the only one supporting this):</para>
-<programlisting>UPDATE person SET numheads = 2 WHERE name='Beeblebrox'
+      <programlisting>UPDATE person SET numheads = 2 WHERE name='Beeblebrox'
 GO
 COMMIT</programlisting>
-				<para>As the complete script does <emphasis role="bold">not</emphasis> end with the
-				<literal>GO</literal> keyword, it is not recognized by &wb-productname;. In this case
+      <para>As the complete script does <emphasis role="bold">not</emphasis> end with the
+      <literal>GO</literal> keyword, it is not recognized by &wb-productname;. In this case
 				the whole script will be send to the server because no (known) delimiter is used
 				at all.</para>
 
-				<note><para>This automatic detection of the delimiter does not work when using
+      <note><para>This automatic detection of the delimiter does not work when using
 				the <link linkend="command-wbinclude">WbInclude</link> command with large files
 				that are not processed in memory.</para></note>
 				
-        <para>You can run any statement that is valid for the current DBMS. If
+      <para>You can run any statement that is valid for the current DBMS. If
         the statement returns a result set, it will be displayed, otherwise
         any messages from the server will be displayed in the messages tab. To
         add or remove tab pages, right click on the tab header and choose
-        <guimenuitem>Add tab</guimenuitem> or <guimenuitem>Close tab</guimenuitem>).
+      <guimenuitem>Add tab</guimenuitem> or <guimenuitem>Close tab</guimenuitem>).
         The number of tabs is stored in
         the associated workspace. If you do not have a workspace assigned to
         the current profile, the tab count will be stored in the default
         workspace.</para>
 
 
-        <para>The statement is executed by either pressing <keycap>F9</keycap>, <keycap>Ctrl-E</keycap> or
+      <para>The statement is executed by either pressing <keycap>F9</keycap>, <keycap>Ctrl-E</keycap> or
         clicking the <literal>Execute Selected</literal> button
-				<guiicon><inlinegraphic fileref="@IMAGE_DIR@/ExecuteSel16.gif" format="GIF"/></guiicon>
+      <guiicon><inlinegraphic fileref="@IMAGE_DIR@/ExecuteSel16.gif" format="GIF"/></guiicon>
 				in the toolbar. This will execute the currently selected
         text. If no text is selected in the editor, the complete statement
         will be executed. If you want to execute the whole statement even when
         text is selected, use the command
-				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute All</guimenuitem></menuchoice>
-				</para>
+      <menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute All</guimenuitem></menuchoice>
+      </para>
 
-        <para>To execute the statement in which the cursor is currently
+      <para>To execute the statement in which the cursor is currently
         located use <keycap>Ctrl-Enter</keycap>. The current statement is defined as the text
         between the previous SQL delimiter and the next SQL delimiter. The
         delimiter is not necessarily a semicolon. The delimiter can
         be configured in the <link linkend="options">system preferences</link>.
-        </para>
+      </para>
 
-        <para>The font that is used for the SQL editor can be defined in the
-        <link linkend="options">system preferences</link>.</para>
+      <para>The font that is used for the SQL editor can be defined in the
+      <link linkend="options">system preferences</link>.</para>
       </section>
 
       <section id="execute-ddl" xreflabel="Executing DDL Statements">
-        <title>Executing DDL Statements</title>
+      <title>Executing DDL Statements</title>
 
-        <para>&wb-productname; will send every statement to the backend DBMS, so
+      <para>&wb-productname; will send every statement to the backend DBMS, so
         executing DDL statements (<literal>CREATE TABLE</literal>, ...) is not a problem.</para>
 
-        <para>However when executing statements such as <literal>CREATE PROCEDURE</literal> which
+      <para>However when executing statements such as <literal>CREATE PROCEDURE</literal> which
         in turn contain valid SQL statement, delimited with a ; the &wb-productname;
 				will send everything up to the first semicolon to the
         backend. In case of a <literal>CREATE PROCEDURE</literal> statement this will obviously
         result in an error as the statement is not complete.</para>
 
-        <para>This is an example of a <literal>CREATE PROCEDURE</literal> which will
-        <emphasis role="bold">not</emphasis> work due to the embedded semicolon in
+      <para>This is an example of a <literal>CREATE PROCEDURE</literal> which will
+      <emphasis role="bold">not</emphasis> work due to the embedded semicolon in
         the procedure source itself</para>
-<programlisting>CREATE OR REPLACE FUNCTION proc_sample RETURN INTEGER
+      <programlisting>CREATE OR REPLACE FUNCTION proc_sample RETURN INTEGER
 IS
 result INTEGER;
 BEGIN
   SELECT max(col1) INTO result FROM sometable;
   RETURN result;
 END;</programlisting>
-        <para>When executing this script, Oracle would return an error because &wb-productname; will
+      <para>When executing this script, Oracle would return an error because &wb-productname; will
         send everything up to the keyword <literal>INTEGER</literal> to the database. Obviously this
         fragment is not correct.</para>
 
-        <para>The solution is to terminate the script with a character
+      <para>The solution is to terminate the script with a character
         sequence called "<xref linkend="options-alternate-delimiter"/>".
         The value of this sequence can be configured in the <link linkend="options">options dialog</link>.
         The default is <emphasis role="bold">./</emphasis> (a dot followed by a slash)</para>
 
-        <para>If a SQL statement is terminated with the alternate delimiter,
+      <para>If a SQL statement is terminated with the alternate delimiter,
         that delimiter is used instead of a semicolon. This way the semicolons embedded in
         the <literal>CREATE PROCEDURE</literal> script will be sent correctly to the backend
         DBMS.</para>
 
-        <para>So the solution to the above problem is the following script:</para>
-<programlisting>CREATE OR REPLACE FUNCTION proc_sample RETURN INTEGER
+      <para>So the solution to the above problem is the following script:</para>
+      <programlisting>CREATE OR REPLACE FUNCTION proc_sample RETURN INTEGER
 IS
 result INTEGER;
 BEGIN
@@ -200,22 +200,22 @@ BEGIN
   RETURN result;
 END;
 ./</programlisting>
-        <para>Note the trailing <literal>./</literal> at the end in order to "turn on" the
+      <para>Note the trailing <literal>./</literal> at the end in order to "turn on" the
         use of the alternate delimiter.</para>
 
-        <para><emphasis role="bold">When is the alternate delimiter used?</emphasis></para>
+      <para><emphasis role="bold">When is the alternate delimiter used?</emphasis></para>
 
-        <para>As soon as the statement (or script) that you execute is terminated with the
+      <para>As soon as the statement (or script) that you execute is terminated with the
         alternate delimiter, the alternate delimiter is used to separate the individual
         SQL statements. When you execute selected text from the editor, be sure to
         select the alternate delimiter as well, otherwise it will not be
         recognized (if the alternate delimiter is not selected, the statement to be executed
         does not end with the alternate delimiter).</para>
-        <para>If you use the alternate delimiter (by terminating the whole script with it), then
-        <emphasis role="bold">all</emphasis> statements have to be delimited with it. You cannot mix the use
+      <para>If you use the alternate delimiter (by terminating the whole script with it), then
+      <emphasis role="bold">all</emphasis> statements have to be delimited with it. You cannot mix the use
         of the normal semicolon and the alternate delimiter for one execution. The following statement (when executed
         as a whole) would produce an error message:</para>
-<programlisting>
+      <programlisting>
 SELECT sysdate FROM DUAL;
 
 CREATE OR REPLACE FUNCTION proc_sample RETURN INTEGER
@@ -226,11 +226,73 @@ BEGIN
   RETURN result;
 END;
 ./</programlisting>
-      <para>&wb-productname; would turn on the use of the alternate delimiter as the whole script is terminated
-      with it. As there is only a semicolon between the <literal>SELECT</literal> and the <literal>CREATE</literal>
-      statement, both would be sent to the database as one statement.</para>
-
+        <para>&wb-productname; will use the alternate delimiter as the whole script is terminated
+        with it. But as there is a semicolon between the <literal>SELECT</literal> and the <literal>CREATE</literal>
+        statement, the whole script will be seen as one statement and it will be sent to the database
+        as one statement (which of course will lead to an error).
+        </para>
       </section>
+    </section>
+    
+    <section id="blob-support">
+      <title>Writing BLOB and CLOB columns</title>
+      <para>&wb-productname; supports reading and writing <literal>BLOB</literal> (Binary Large OBject)
+        or <literal>CLOB</literal> (Character Large OBject) columns from and to external files. 
+        BLOB clumns are sometimes also referred to as binary data. CLOB columns 
+        are sometimes also referred to as <literal>LONG VARCHAR</literal>. The exact data type 
+        depends on the DBMS used</para>
+        <para>To insert and update LOB columns the usual <literal>INSERT</literal> and
+        <literal>UPDATE</literal> statements can be used by using a special
+        placeholder to define the source for the LOB data. When updating the 
+        LOB column, a different placeholder for BLOB and CLOB columns has to be used as
+        the process of reading and sending the data is different for binary and character
+        data.
+      </para>
+      <section>
+         <title>Updating binary data</title>
+         <para>To update a BLOB (or binary) column, use the placeholder 
+         <literal>${blobfile=path_to_file}</literal> in the place where the 
+         actual value has to occur in the <literal>INSERT</literal> or <literal>UPDATE</literal>
+         statement:
+         </para>
+         <programlisting>UPDATE theTable SET blob_col = ${blobfile=c:/data/image.bmp} WHERE id=24;</programlisting>
+         <para>
+           &wb-productname; will rewrite the UPDATE statement and send the contents
+          of the file located in <literal>c:/data/image.bmp</literal> to the database. The syntax
+          for inserting BLOB data is similar. Note that some DBMS might not allow you to 
+          supply a value for the blob column during an insert. In this case you need to 
+          first insert the row without the blob column, then use an <literal>UPDATE</literal>
+          to send the blob data. You should make sure to update only one row by specifying an
+          approriate <literal>WHERE</literal> clause.
+         </para>
+         <programlisting>INSERT INTO theTable (id, blob_col) VALUES (42,${blobfile=c:/data/image.bmp});</programlisting>
+         <para>This will create a new record with id=42 and the content of <literal>c:/data/image.bmp</literal> in 
+         the column <literal>blob_col</literal></para>
+      </section>
+      <section>
+          <title>Updating character data</title>
+          <para>
+            The process of updating or inserting <literal>CLOB</literal> data is identical to the 
+            process for <literal>BLOB</literal> data. The only difference is in the syntax of 
+            the placeholder used to specify the source file. Firstly, the placeholder has
+            to start with <literal>${clobfile=</literal> and can optionally contain an 
+            encoding
+          </para>
+         <programlisting>UPDATE theTable SET clob_col = ${clobfile=c:/data/image.html encoding=utf8} WHERE id=42;</programlisting>
+         <para>If you ommit the encoding parameter, &wb-productname; will leave the data conversion 
+         to the JDBC driver (technically, it will use the <literal>PreapredStatement.setAsciiStream()</literal> method
+         whereas with an encoding it will use the <literal>PreparedStatement.setCharacterStream()</literal> method).
+         </para>
+      </section>
+    </section>
+
+    <section id="read-blob">
+      <title>Saving BLOB data to a file</title>
+      <para>
+        To save the data stored in a BLOB column, the command <link linkend="command-selectblob">WbSelectBlob</link>
+        can be used. The syntax of this command is similar to the regular <literal>SELECT</literal> command
+        except that a target file has to be specified where the read data should be stored. 
+      </para>
     </section>
     
     <section id="sql-performance">
@@ -282,7 +344,6 @@ END;
 
         <section id="exec-macro">
           <title>Executing macros</title>
-
           <para>To execute a macro, you can either type the alias you have
           defined, or select the macro from the <guimenu>Macros</guimenu> menu.
           The first 10 macros will be listed there directly. To view the complete list of

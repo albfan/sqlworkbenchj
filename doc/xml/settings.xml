@@ -211,9 +211,10 @@
             If those commands are simply ignored and not send to the server, the scripts
             can run without modification.</para>
       <para>The <link linkend="dbid">DBID</link> is the lower case DBMS identifier (see above) with all
-            special characters like <literal>\/,.$[]()</literal> and spaces removed.
-            The actual ID that is used to retrieve this list is reported as an
-            informational message in the log file (<literal>Using DBID=</literal>)</para>
+        special characters like <literal>\/,.$[]()</literal> and spaces removed.
+        The actual ID that is used to retrieve this list is reported as an
+        informational message in the log file (<literal>Using DBID=</literal>)
+				</para>
       <para>Default: <literal>workbench.db.ignore.oracle=prompt,exit,whenever</literal></para>
     </section>
   </section>
@@ -245,10 +246,10 @@
           <listitem><para>{source}</para></listitem>
           <listitem><para>{stacktrace}</para></listitem>
         </itemizedlist>
-               The order of the placeholders defines the order in the log file, except
-               for the stacktrace which will always be printed after the message.
-               If the log level is set to debug, the stacktrace will always be displayed
-               even if it is not included in the format string.
+         The order of the placeholders defines the order in the log file, except
+         for the stacktrace which will always be printed after the message.
+         If the log level is set to debug, the stacktrace will always be displayed
+         even if it is not included in the format string.
       </para>
       <para>Default: <literal>{type} {timestamp} {message} {error}</literal></para>
     </section>
@@ -264,10 +265,10 @@
     <section>
       <title>workbench.dbmetadata.logsql</title>
       <para>If this is set to <literal>true</literal>the SQL queries used to
-                retrieve DBMS specific meta data (such as view/procedure/trigger source,
-                defined triggers/views) will be logged with level INFO.
-                This can be used to debug customized SQL statements
-                for DBMS's which are not (yet) preconfigured.</para>
+      retrieve DBMS specific meta data (such as view/procedure/trigger source,
+      defined triggers/views) will be logged with level INFO.
+      This can be used to debug customized SQL statements
+      for DBMS's which are not (yet) preconfigured.</para>
       <para>Default: <literal>false</literal></para>
     </section>
 
@@ -318,12 +319,12 @@
 
     <section>
       <title>workbench.sql.generate.update.doformat</title>
-      <entry><para>Controls the formatting of generated UPDATE statements.
+      <para>Controls the formatting of generated UPDATE statements.
 					If this is set to <literal>false</literal> then UPDATE statements,
 					that are generated are not formatted at all (the complete statement
-					will be put into a single line)</para>
-      </entry>
-      <para>Default: <literal>true</literal></para>
+					will be put into a single line)
+      </para>
+       <para>Default: <literal>true</literal></para>
     </section>
         
     <section>
