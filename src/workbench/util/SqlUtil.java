@@ -549,6 +549,13 @@ public class SqlUtil
 		return (aSqlType == Types.DATE ||
 						aSqlType == Types.TIMESTAMP);
 	}
+	
+	public static final boolean isBlobType(int aSqlType)
+	{
+		return (aSqlType == Types.BLOB || 
+		        aSqlType == Types.BINARY ||
+						aSqlType == Types.LONGVARBINARY);
+	}
 
 	/**
 	 *	Convenience method to close a ResultSet without a possible

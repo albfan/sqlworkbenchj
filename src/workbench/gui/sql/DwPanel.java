@@ -534,7 +534,7 @@ public class DwPanel
 	}
 	
 	public synchronized int saveChanges(WbConnection aConnection, JobErrorHandler errorHandler)
-	throws SQLException
+		throws SQLException
 	{
 		int rows = 0;
 		JobErrorHandler activeErrorHandler = this;
@@ -559,7 +559,17 @@ public class DwPanel
 			this.lastMessage = ResourceMgr.getString("MsgUpdateSuccessfull");
 			this.lastMessage = this.lastMessage + "\n" + rows + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED) + "\n";
 			this.lastMessage = this.lastMessage + ResourceMgr.getString("MsgExecTime") + " " + (((double)sqlTime) / 1000.0) + "s";
-			this.endEdit();
+			if (!ds.lastUpdateHadErrors())
+			{
+				EventQueue.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						endEdit();
+						repaint();
+					}
+				});
+			}
 		}
 		catch (SQLException e)
 		{
@@ -571,7 +581,7 @@ public class DwPanel
 			this.clearStatusMessage();
 			if (this.manageUpdateAction) this.enableUpdateActions();
 		}
-		this.repaint();
+		
 		
 		return rows;
 	}
@@ -1059,7 +1069,6 @@ public class DwPanel
 	 *  database.
 	 *	@see workbench.storage.DataStore#restoreOriginalValues()
 	 */
-	
 	public void restoreOriginalValues()
 	{
 		DataStore ds = this.dataTable.getDataStore();
@@ -1514,6 +1523,10 @@ public class DwPanel
 	public void setAutomaticUpdateTableCheck(boolean flag)
 	{
 		this.automaticUpdateTableCheck = flag;
+	}
+
+	public void fatalError(String msg)
+	{
 	}
 	
 }

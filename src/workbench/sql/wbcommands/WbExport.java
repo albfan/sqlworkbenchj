@@ -86,6 +86,7 @@ public class WbExport
 		cmdLine.addArgument("lineending");
 		cmdLine.addArgument("showencodings");
 		cmdLine.addArgument("verbosexml");
+		cmdLine.addArgument("writeoracleloader");
 	}
 
 	public String getVerb() { return VERB; }
@@ -108,7 +109,7 @@ public class WbExport
 		}
 		catch (Exception e)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorSpoolWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrorExportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -135,7 +136,7 @@ public class WbExport
 				if (i > 0) msg.append(',');
 			}
 			result.addMessage(msg.toString());
-			result.addMessage(ResourceMgr.getString("ErrorSpoolWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrorExportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -156,7 +157,7 @@ public class WbExport
 		{
 			result.addMessage(ResourceMgr.getString("ErrorExportTypeRequired"));
 			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrorSpoolWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrorExportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -165,7 +166,7 @@ public class WbExport
 		{
 			result.addMessage(ResourceMgr.getString("ErrorExportFileRequired"));
 			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrorSpoolWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrorExportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -180,6 +181,7 @@ public class WbExport
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
 			exporter.setOutputTypeText();
+			exporter.setWriteOracleControlFile(cmdLine.getBoolean("writeoracleloader"));
 			String delimiter = cmdLine.getValue("delimiter");
 			if (delimiter != null) exporter.setTextDelimiter(delimiter);
 
@@ -334,7 +336,7 @@ public class WbExport
 		}
 		else
 		{
-			result.addMessage(ResourceMgr.getString("ErrorSpoolWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrorExportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -417,18 +419,22 @@ public class WbExport
 		}
 
 		TableIdentifier[] tables = null;
-		
+
 		result.setSuccess();
 
 		int count = tableList.size();
 		if (count == 1)
 		{
-			// If only one table is present, we'll have to 
+			// If only one table is present, we'll have to
 			// to check for wildcards e.g. -sourcetable=theschema.*
-			// This will be handled by DbMetadata when passing 
+			// This will be handled by DbMetadata when passing
 			// null or wildcards to the getTableList() method
 			String t = (String)tableList.get(0);
 			TableIdentifier tbl = new TableIdentifier(t);
+			if (tbl.getSchema() == null)
+			{
+				tbl.setSchema(this.currentConnection.getMetadata().getSchemaToUse());
+			}
 			tbl.adjustCase(this.currentConnection);
 			List l = null;
 			try
@@ -489,7 +495,7 @@ public class WbExport
 				result.setFailure();
 				return;
 			}
-			
+
 			if (!outdir.isDirectory())
 			{
 				msg = ResourceMgr.getString("ErrorExportOutputDirNotDir");
@@ -521,7 +527,7 @@ public class WbExport
 		else
 		{
 			// For message and error display purposes we treat a single
-			// table export differently 
+			// table export differently
 			String table = tables[0].getTableExpression(this.currentConnection);
 			if (outfile == null)
 			{

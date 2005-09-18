@@ -10,10 +10,9 @@
  *
  */
 package workbench.gui.components;
-
-import java.awt.Cursor;
 import java.awt.Toolkit;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Types;
 
@@ -22,6 +21,8 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.dialogs.dataimport.ImportOptions;
+import workbench.gui.dialogs.dataimport.TextImportOptions;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -279,11 +280,8 @@ public class DataStoreTableModel
 		return row;
 	}
 
-	public void importFile(String aFilename, boolean hasHeader, String colSep, String quoteChar, JobErrorHandler errorHandler)
-		throws FileNotFoundException
+	public void fileImported()
 	{
-		if (this.dataCache == null) return;
-		this.dataCache.importData(aFilename, hasHeader, colSep, quoteChar, errorHandler);
 		int row = this.getRowCount();
 		this.fireTableRowsInserted(0, row - 1);
 	}

@@ -248,36 +248,37 @@ public class WbManager
 		UIDefaults def = UIManager.getDefaults();
 		
 		Font stdFont = settings.getStandardFont();
-
-		def.put("Button.font", stdFont);
-		def.put("CheckBox.font", stdFont);
-		def.put("CheckBoxMenuItem.font", stdFont);
-		def.put("ColorChooser.font", stdFont);
-		def.put("ComboBox.font", stdFont);
-		def.put("EditorPane.font", stdFont);
-		def.put("FileChooser.font", stdFont);
-		def.put("InternalFrame.font", stdFont);
-		def.put("Label.font", stdFont);
-		def.put("List.font", stdFont);
-		def.put("Menu.font", stdFont);
-		def.put("MenuItem.font", stdFont);
-		def.put("OptionPane.font", stdFont);
-		def.put("Panel.font", stdFont);
-		def.put("PasswordField.font", stdFont);
-		def.put("PopupMenu.font", stdFont);
-		def.put("ProgressBar.font", stdFont);
-		def.put("RadioButton.font", stdFont);
-		def.put("TabbedPane.font", stdFont);
-		def.put("TextArea.font", stdFont);
-		def.put("TextField.font", stdFont);
-		def.put("TextPane.font", stdFont);
-		def.put("TitledBorder.font", stdFont);
-		def.put("ToggleButton.font", stdFont);
-		def.put("ToolBar.font", stdFont);
-		def.put("ToolTip.font", stdFont);
-		def.put("Tree.font", stdFont);
-		def.put("ViewPort.font", stdFont);
-
+		if (stdFont != null)
+		{
+			def.put("Button.font", stdFont);
+			def.put("CheckBox.font", stdFont);
+			def.put("CheckBoxMenuItem.font", stdFont);
+			def.put("ColorChooser.font", stdFont);
+			def.put("ComboBox.font", stdFont);
+			def.put("EditorPane.font", stdFont);
+			def.put("FileChooser.font", stdFont);
+			def.put("InternalFrame.font", stdFont);
+			def.put("Label.font", stdFont);
+			def.put("List.font", stdFont);
+			def.put("Menu.font", stdFont);
+			def.put("MenuItem.font", stdFont);
+			def.put("OptionPane.font", stdFont);
+			def.put("Panel.font", stdFont);
+			def.put("PasswordField.font", stdFont);
+			def.put("PopupMenu.font", stdFont);
+			def.put("ProgressBar.font", stdFont);
+			def.put("RadioButton.font", stdFont);
+			def.put("TabbedPane.font", stdFont);
+			def.put("TextArea.font", stdFont);
+			def.put("TextField.font", stdFont);
+			def.put("TextPane.font", stdFont);
+			def.put("TitledBorder.font", stdFont);
+			def.put("ToggleButton.font", stdFont);
+			def.put("ToolBar.font", stdFont);
+			def.put("ToolTip.font", stdFont);
+			def.put("Tree.font", stdFont);
+			def.put("ViewPort.font", stdFont);
+		}
 		Font dataFont = settings.getDataFont();
 
 		def.put("Table.font", dataFont);

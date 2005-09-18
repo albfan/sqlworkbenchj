@@ -87,7 +87,7 @@ public class DataExporter
 	private int sqlType = SqlRowDataConverter.SQL_INSERT;
 	private boolean useCDATA = false;
 	private CharacterRange escapeRange = null;
-	private String lineEnding = "\n";//StringUtil.LINE_TERMINATOR;
+	private String lineEnding = "\n";
 	private String tableName;
 	private String sqlTable;
 	private String encoding;
@@ -108,9 +108,6 @@ public class DataExporter
 	private	SimpleDateFormat dateTimeFormatter = null;
 	private DecimalFormat numberFormatter = null;
 
-	/** If true, then cr/lf characters will be removed from
-	 *  character columns
-	 */
 	private boolean cleancr = false;
 	private boolean append = false;
 	private boolean escapeHtml = true;
@@ -137,6 +134,8 @@ public class DataExporter
 	private ExportWriter exportWriter;
 	private Window parentWindow;
 	private int tablesExported;
+	
+	private boolean writeOracleControlFile = false;
 	
 	public DataExporter()
 	{
@@ -791,7 +790,7 @@ public class DataExporter
 		{
 			File f = new File(this.outputfile);
 			this.fullOutputFileName = f.getAbsolutePath();
-
+			String dir = f.getParent();
 			// first try to open the file using the current encoding
 			if (this.encoding != null)
 			{
@@ -817,6 +816,7 @@ public class DataExporter
 				pw = new BufferedWriter(new FileWriter(f,this.append), buffSize);
 			}
 			exporter.setOutput(pw);
+			exporter.setBaseDir(dir);
 		}
 		catch (IOException e)
 		{
@@ -1091,6 +1091,16 @@ public class DataExporter
 	public void setUseVerboseFormat(boolean flag)
 	{
 		this.verboseFormat = flag;
+	}
+
+	public boolean getWriteOracleControlFile()
+	{
+		return writeOracleControlFile;
+	}
+	
+	public void setWriteOracleControlFile(boolean flag)
+	{
+		this.writeOracleControlFile = flag;
 	}
 
 }

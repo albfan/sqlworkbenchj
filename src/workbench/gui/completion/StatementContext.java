@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.db.WbConnection;
+import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -33,7 +34,7 @@ public class StatementContext
 		
 		if (!inSubSelect(conn, sql, pos))
 		{
-			if ("SELECT".equalsIgnoreCase(verb))
+			if ("SELECT".equalsIgnoreCase(verb) || WbSelectBlob.VERB.equalsIgnoreCase(verb))
 			{
 				analyzer = new SelectAnalyzer(conn, sql, pos);
 			}

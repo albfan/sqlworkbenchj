@@ -53,6 +53,8 @@ import javax.swing.border.EtchedBorder;
 import workbench.db.DeleteScriptGenerator;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
+import workbench.db.importer.DataStoreImporter;
+import workbench.gui.dialogs.dataimport.ImportFileDialog;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.AutoCompletionAction;
@@ -110,7 +112,6 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.ExtensionFileFilter;
-import workbench.gui.components.ImportFileOptionsPanel;
 import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbMenu;
@@ -227,9 +228,8 @@ public class SqlPanel
 	private ConnectionInfo connectionInfo;
 
 	private WbConnection dbConnection;
-	private boolean updating;
-
-	private boolean updateRunning;
+	private boolean importRunning = false;
+	private boolean updateRunning = false;
 	private boolean textModified = false;
 	private String tabName = null;
 
@@ -237,7 +237,7 @@ public class SqlPanel
 
 	private ArrayList execListener = null;
 	private Thread executionThread = null;
-	private DataExporter exporter;
+	private Interruptable worker = null;
 
 	/** Creates new SqlPanel */
 	public SqlPanel(int anId)
@@ -1539,36 +1539,23 @@ public class SqlPanel
 		this.showStatusMessage(ResourceMgr.getString("MsgCancellingStmt") + "\n");
 		try
 		{
-			if (this.importRunning)
+			if (this.worker != null)
 			{
-				WbTable table = this.data.getTable();
-				if (table != null)
-				{
-					DataStoreTableModel model = (DataStoreTableModel)table.getModel();
-					DataStore ds = table.getDataStore();
-					ds.cancelImport();
-				}
-				this.setCancelState(false);
+				this.worker.cancelExecution();
 			}
 			else if (this.updateRunning)
 			{
 				this.cancelUpdate();
 			}
-			else if (this.exporter != null)
-			{
-				this.exporter.cancelExecution();
-			}
 			else
 			{
-				Thread t = new Thread()
+				WbThread t = new WbThread("Cancel Thread")
 				{
 					public void run()
 					{
 						cancelRetrieve();
 					}
 				};
-				t.setDaemon(true);
-				t.setName("Cancel Thread");
 				t.start();
 			}
 		}
@@ -1722,11 +1709,12 @@ public class SqlPanel
 
 		this.cancelExecution = false;
 
-		this.exporter = new DataExporter();
+		final DataExporter exporter = new DataExporter();
 		exporter.setRowMonitor(this.data);
 		exporter.setSql(sql);
 		exporter.setConnection(this.dbConnection);
-
+		this.worker = exporter;
+		
 		boolean selected = exporter.selectOutput(getParentWindow());
 		if (selected)
 		{
@@ -1799,15 +1787,18 @@ public class SqlPanel
 						clearStatusMessage();
 						setCancelState(false);
 						executionThread = null;
-						exporter = null;
+						worker = null;
 					}
 				}
 			};
 			this.executionThread.start();
 		}
 	}
-
-	private boolean importRunning = false;
+	
+	public void fatalError(String msg)
+	{
+		WbSwingUtilities.showErrorMessage(this, msg);
+	}
 
 	public int getActionOnError(int errorRow, String errorColumn, String data, String errorMessage)
 	{
@@ -1870,67 +1861,57 @@ public class SqlPanel
 	public synchronized void importFile()
 	{
 		if (!this.data.startEdit()) return;
+		ImportFileDialog dialog = new ImportFileDialog(this);
+		dialog.allowImportModeSelection(false);
+		boolean ok = dialog.selectInput(ResourceMgr.getString("TxtWindowTitleSelectImportFile"));
+		if (!ok) return; 
+		
+		this.setActionState(this.importFileAction, false);
+		
+		final DataStoreImporter importer = new DataStoreImporter(data.getTable().getDataStore(), data, this);
+		final String filename = dialog.getSelectedFilename();
+		
+		importer.setImportOptions(filename, 
+			                        dialog.getImportType(), 
+			                        dialog.getGeneralOptions(), 
+			                        dialog.getTextOptions(), 
+			                        dialog.getXmlOptions());
+		
+		File f = new File(filename);//lastDir = fc.getCurrentDirectory().getAbsolutePath();
+		Settings.getInstance().setLastImportDir(f.getParent());
+		dialog.saveSettings();
 
-		WbTable table = this.data.getTable();
-		if (table == null) return;
-		final DataStoreTableModel model = (DataStoreTableModel)table.getModel();
-		final DataStore ds = table.getDataStore();
-		final String currentFormat = ds.getDefaultDateFormat();
-		if (ds == null) return;
-		String lastDir = Settings.getInstance().getLastImportDir();
-		JFileChooser fc = new JFileChooser(lastDir);
-		ImportFileOptionsPanel optionPanel = new ImportFileOptionsPanel();
-		optionPanel.restoreSettings();
-		fc.setAccessory(optionPanel);
-		fc.addChoosableFileFilter(ExtensionFileFilter.getTextFileFilter());
-		int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(this));
-		if (answer == JFileChooser.APPROVE_OPTION)
+		this.setBusy(true);
+		this.setCancelState(true);
+		this.worker = importer;
+		WbThread importThread = new WbThread("DataImport")
 		{
-			this.setActionState(this.importFileAction, false);
-			String filename = fc.getSelectedFile().getAbsolutePath();
-			lastDir = fc.getCurrentDirectory().getAbsolutePath();
-			Settings.getInstance().setLastImportDir(lastDir);
-			optionPanel.saveSettings();
-			
-			ds.setDefaultDateFormat(optionPanel.getDateFormat());
-			ds.setDefaultNumberFormat(optionPanel.getNumberFormat());
-			final boolean header = optionPanel.getContainsHeader();
-			final String delimit = optionPanel.getColumnDelimiter();
-			final String quote = optionPanel.getQuoteChar();
-			final String fname = filename;
-			this.setBusy(true);
-			this.setCancelState(true);
-			Thread importThread = new WbThread("DataImport")
+			public void run()
 			{
-				public void run()
+				try
 				{
-					try
-					{
-						fireDbExecStart();
-						importRunning = true;
-						ds.setProgressMonitor(data);
-						model.importFile(fname, header, delimit, quote, SqlPanel.this);
-						data.rowCountChanged();
-					}
-					catch (Exception e)
-					{
-						LogMgr.logError("SqlPanel.importFile() - worker thread", "Error when importing " + fname, e);
-					}
-					finally
-					{
-						importRunning = false;
-						setBusy(false);
-						fireDbExecEnd();
-						ds.setDefaultDateFormat(currentFormat);
-						ds.setProgressMonitor(null);
-						data.clearStatusMessage();
-						setCancelState(false);
-						checkResultSetActions();
-					}
+					importRunning = true;
+					fireDbExecStart();
+					importer.startImport();
 				}
-			};
-			importThread.start();
-		}			
+				catch (Exception e)
+				{
+					LogMgr.logError("SqlPanel.importFile() - worker thread", "Error when importing " + filename, e);
+				}
+				finally
+				{
+					importRunning = false;
+					setBusy(false);
+					fireDbExecEnd();
+					data.getTable().getDataStoreTableModel().fileImported();
+					data.rowCountChanged();
+					data.clearStatusMessage();
+					setCancelState(false);
+					checkResultSetActions();
+				}
+			}
+		};
+		importThread.start();
 		this.selectEditor();
 	}
 

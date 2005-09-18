@@ -11,13 +11,19 @@
  */
 package workbench.db.exporter;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.sql.Blob;
 import java.sql.Types;
-import workbench.db.DbMetadata;
 
 import workbench.db.TableIdentifier;
 import workbench.db.report.ReportColumn;
 import workbench.db.report.ReportTable;
 import workbench.db.report.TagWriter;
+import workbench.log.LogMgr;
+import workbench.storage.NullValue;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.SqlUtil;
@@ -150,6 +156,7 @@ public class XmlRowDataConverter
 		StrBuffer indent = new StrBuffer("    ");
 		int colCount = this.metaData.getColumnCount();
 		StrBuffer xml = new StrBuffer(colCount * 100);
+		StringBuffer externalFilename = null;
 
 		if (this.verboseFormat)
 		{
@@ -164,9 +171,10 @@ public class XmlRowDataConverter
 		for (int c=0; c < colCount; c ++)
 		{
 			if (!this.includeColumnInExport(c)) continue;
-			String value = this.getValueAsFormattedString(row, c);
 			Object data = row.getValue(c);
-
+			int type = this.metaData.getColumnType(c);
+			boolean isNull = (data == null || data instanceof NullValue);
+			
 			if (this.verboseFormat) xml.append(indent);
 			xml.append(startColTag);
 			if (this.verboseFormat)
@@ -174,16 +182,12 @@ public class XmlRowDataConverter
 				xml.append(c);
 				xml.append('"');
 			}
-			if (value == null)
+			if (isNull)
 			{
 				xml.append(" null=\"true\"");
 			}
-			else if (value.length() == 0)
-			{
-				xml.append(" null=\"false\"");
-			}
 
-			if (SqlUtil.isDateType(this.metaData.getColumnType(c)))
+			if (SqlUtil.isDateType(type))
 			{
 				try
 				{
@@ -196,27 +200,43 @@ public class XmlRowDataConverter
 				{
 				}
 			}
+			else if (SqlUtil.isBlobType(type))
+			{
+				externalFilename = new StringBuffer(100);
+				externalFilename.append("row_");
+				externalFilename.append(rowIndex + 1);
+				externalFilename.append("_column_");
+				externalFilename.append(c + 1);
+				externalFilename.append("_data.dat");
+				xml.append(" externalFile=\"");
+				xml.append(externalFilename);
+				xml.append("\"");
+			}
 			xml.append('>');
 
-			if (value != null)
+			if (!isNull)
 			{
 				// String data needs to be escaped!
-				if (data instanceof String)
+				if (SqlUtil.isCharacterType(type))
 				{
 					if (this.useCData)
 					{
 						xml.append("<![CDATA[");
-						xml.append((String)data);
+						xml.append(this.getValueAsFormattedString(row, c));
 						xml.append("]]>");
 					}
 					else
 					{
-						xml.append(StringUtil.escapeXML((String)data));
+						xml.append(StringUtil.escapeXML(this.getValueAsFormattedString(row, c)));
 					}
+				}
+				else if (SqlUtil.isBlobType(type))
+				{
+					writeBlobFile(externalFilename, data);
 				}
 				else
 				{
-					xml.append(value);
+					xml.append(this.getValueAsFormattedString(row, c));
 				}
 			}
 			xml.append(closeColTag);
@@ -228,6 +248,34 @@ public class XmlRowDataConverter
 		return xml;
 	}
 
+	private void writeBlobFile(StringBuffer file, Object data)
+	{
+		OutputStream out = null;
+		try
+		{
+			File f = new File(this.baseDir, file.toString());
+			out = new BufferedOutputStream(new FileOutputStream(f), 64*1024);
+			byte[] binary = null;
+			if (data instanceof byte[])
+			{
+				binary = (byte[])data;
+			}
+			else if (data instanceof Blob)
+			{
+				Blob bl = (Blob)data;
+				binary = bl.getBytes(0, (int)bl.length());
+			}
+			out.write(binary);
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("XmlRowDataConverter.writeBlobFile()", "Error writing blob to external file", e);
+		}
+		finally
+		{
+			try { out.close(); } catch (Throwable e) {}
+		}
+	}
 	private StrBuffer getMetaDataAsXml(String anIndent)
 	{
 		TagWriter tagWriter = new TagWriter();

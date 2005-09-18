@@ -273,6 +273,7 @@ public class SqlFormatter
 	{
 		char lastChar = last.getContents().charAt(0);
 		char currChar = current.getContents().charAt(0);
+		if (Character.isWhitespace(lastChar) || Character.isWhitespace(currChar)) return false;
 		if (!ignoreStartOfline && this.isStartOfLine()) return false;
 		if ( (lastChar == '<' || lastChar == '>') && (currChar == '=' || currChar == '<' || currChar == '>')) return false;
 		if (currChar == '=') return true;
@@ -961,16 +962,8 @@ public class SqlFormatter
 			{
 				this.appendComment(verb);
 			}
-			else if (bracketCount == 0 && t.isReservedWord() && (verb.equals("AND") || verb.equals("OR")) )
-			{
-				if (!this.isStartOfLine()) this.appendNewline();
-				this.appendText(verb);
-				this.appendText("  ");
-				if (verb.equals("OR")) this.appendText(' ');
-			}
 			else if (t.isSeparator() && t.getContents().equals("("))
 			{
-				bracketCount ++;
 				String lastWord = lastToken.getContents();
 				if (lastToken.isReservedWord() && SUBSELECT_START.contains(lastWord))
 				{
@@ -979,14 +972,22 @@ public class SqlFormatter
 					if (t == null) return null;
 					continue;
 				}
+				bracketCount ++;
 				if (lastWord != null) lastWord = lastWord.toUpperCase();
 				if (!lastToken.isSeparator() && !this.dbFunctions.contains(lastWord)) this.appendText(' ');
 				this.appendText(t.getContents());
 			}
+			else if (bracketCount == 0 && t.isReservedWord() && (verb.equals("AND") || verb.equals("OR")) )
+			{
+				if (!this.isStartOfLine()) this.appendNewline();
+				this.appendText(verb);
+				this.appendText("  ");
+				if (verb.equals("OR")) this.appendText(' ');
+			}
 			else
 			{
 				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
-				this.appendText(t.getContents());
+				this.appendText(verb);
 			}
 
 			lastToken = t;

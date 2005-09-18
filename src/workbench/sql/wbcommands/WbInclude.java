@@ -90,7 +90,7 @@ public class WbInclude
 		{
 			result.setFailure();
 			String msg = ResourceMgr.getString("ErrorIncludeFileNotFound");
-			msg = msg.replaceAll("%filename%", file);
+			msg = StringUtil.replace(msg, "%filename%", file);
 			result.addMessage(msg);
 			return result;
 		}
@@ -99,7 +99,7 @@ public class WbInclude
 		boolean checkEscape = cmdLine.getBoolean("checkescapedquotes", Settings.getInstance().getCheckEscapedQuotes());
 		boolean verbose = cmdLine.getBoolean("verbose", false);
 		String encoding = cmdLine.getValue("encoding");
-		
+
 		String delim = cmdLine.getValue("delimiter");
 		try
 		{

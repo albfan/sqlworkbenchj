@@ -11,6 +11,11 @@
  */
 package workbench.sql.commands;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -21,6 +26,8 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.LobFileStatement;
+import workbench.util.StringUtil;
 
 /**
  * @author  support@sql-workbench.net
@@ -32,24 +39,48 @@ public class UpdatingCommand extends SqlCommand
 	public static final SqlCommand INSERT = new UpdatingCommand("INSERT");
 
 	private String verb;
-
+	private boolean checkLobParameter = false;
+	
 	public UpdatingCommand(String aVerb)
 	{
 		this.verb = aVerb;
 		this.isUpdatingCommand = true;
+		checkLobParameter = aVerb.equals("UPDATE") || aVerb.equals("INSERT");
 	}
 
-	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
+	public StatementRunnerResult execute(WbConnection aConnection, String sql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
+		InputStream in = null;
+		
 		try
 		{
 			boolean isPrepared = false;
-			if (Settings.getInstance().getCheckPreparedStatements() &&
-					aConnection.getPreparedStatementPool().isRegistered(aSql))
+			LobFileStatement lob = null;
+			if (checkLobParameter)
 			{
-				this.currentStatement = aConnection.getPreparedStatementPool().prepareStatement(aSql);
+				try
+				{
+					lob = new LobFileStatement(sql);
+				}
+				catch (FileNotFoundException e)
+				{
+					result.addMessage(e.getMessage());
+					result.setFailure();
+					return result;
+				}
+			}
+			
+			if (lob != null && lob.containsParameter())
+			{
+				isPrepared = true;
+				this.currentStatement = lob.prepareStatement(aConnection.getSqlConnection());
+			}
+			else if (Settings.getInstance().getCheckPreparedStatements() &&
+					aConnection.getPreparedStatementPool().isRegistered(sql))
+			{
+				this.currentStatement = aConnection.getPreparedStatementPool().prepareStatement(sql);
 				isPrepared = true;
 			}
 			else
@@ -64,7 +95,7 @@ public class UpdatingCommand extends SqlCommand
 			}
 			else
 			{
-				updateCount = this.currentStatement.executeUpdate(aSql);
+				updateCount = this.currentStatement.executeUpdate(sql);
 			}
 			result.addUpdateCount(updateCount);
 			StringBuffer warnings = new StringBuffer();
@@ -81,10 +112,14 @@ public class UpdatingCommand extends SqlCommand
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
 			result.addMessage(ExceptionUtil.getDisplay(e));
 			result.setFailure();
-			LogMgr.logDebug("UpdatingCommnad.execute()", "Error executing statement: " + aSql, null);
+			LogMgr.logDebug("UpdatingCommnad.execute()", "Error executing statement: " + sql, null);
 		}
 		finally
 		{
+			if (in != null)
+			{
+				try { in.close(); } catch (Throwable th) {}
+			}
 			this.done();
 		}
 		return result;

@@ -53,31 +53,40 @@ public class LogMgr
 	private static PrintStream logOut = null;
 	private static final Date theDate = new Date();
 	private static boolean logSystemErr = false;
-	
+
 	private static int typeIndex = -1;
 	private static int timeIndex = -1;
 	private static int sourceIndex = -1;
 	private static int messageIndex = 0;
 	private static int exceptionMsgIndex = 1;
 	private static boolean showStackTrace = false;
-	private static final int NUM_ELEMENTS = 5; 
+	private static final int NUM_ELEMENTS = 5;
 	private static String[] MSG_ELEMENTS = new String[NUM_ELEMENTS];
-	
+
 	private static SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
-	public static void setMessageFormat(String aFormat) 
-	{ 
+	private static int loglevel = 3;
+
+	private static int levelDebug;
+	private static int levelWarning;
+	private static int levelInfo;
+	private static int levelError;
+	private static boolean debugEnabled;
+	private static boolean infoEnabled;
+
+	public static void setMessageFormat(String aFormat)
+	{
 		if (aFormat == null) return;
 		Pattern p = Pattern.compile("\\{[a-zA-Z]+\\}");
 		Matcher m = p.matcher(aFormat);
-		
+
 		typeIndex = -1;
 		timeIndex = -1;
 		sourceIndex = -1;
 		messageIndex = -1;
 		exceptionMsgIndex = -1;
 		showStackTrace = false;
-		
+
 		int currentIndex = 0;
 		while (m.find())
 		{
@@ -86,7 +95,7 @@ public class LogMgr
 			String key = aFormat.substring(start, end).toLowerCase();
 			if ("{type}".equals(key))
 			{
-				typeIndex = currentIndex; 
+				typeIndex = currentIndex;
 				currentIndex ++;
 			}
 			else if ("{timestamp}".equals(key))
@@ -115,20 +124,12 @@ public class LogMgr
 			}
 		}
 	}
-	
+
 	public static void logErrors() { setLevel(ERROR); }
 	public static void logWarnings() { setLevel(WARNING); }
 	public static void logInfo() { setLevel(INFO); }
 	public static void logDebug() { setLevel(DEBUG); }
 	public static void logAll() { logDebug(); }
-
-	private static int loglevel = 3;
-
-	private static int levelDebug;
-	private static int levelWarning;
-	private static int levelInfo;
-	private static int levelError;
-	private static boolean debugEnabled;
 
 	public static void logToSystemError(boolean flag)
 	{
@@ -155,6 +156,7 @@ public class LogMgr
 			logError("LogMgr.setLevel()", "Requested level " +  aType + " not found! Setting level " + ERROR, null);
 		}
 		debugEnabled = (loglevel == levelDebug);
+		infoEnabled = (loglevel == levelInfo || debugEnabled);
 	}
 
 
@@ -199,17 +201,21 @@ public class LogMgr
 	  if (WbManager.trace) System.out.println("LogMgr.setOutputFile() - done");
 	}
 
+	public static boolean isInfoEnabled()
+	{
+		return infoEnabled;
+	}
 	public static boolean isDebugEnabled()
 	{
 		return debugEnabled;
 	}
-	
+
 	public static void logDebug(Object aCaller, String aMsg)
 	{
 		if (levelDebug > loglevel)  return;
 		logMessage(DEBUG, aCaller, aMsg, null);
 	}
-	
+
 	public static void logDebug(Object aCaller, String aMsg, Throwable th)
 	{
 		if (levelDebug > loglevel)  return;
@@ -245,11 +251,11 @@ public class LogMgr
 		if (levelError > loglevel) return;
 		logMessage(ERROR, aCaller, aMsg, th);
 	}
-	
+
 	public static void logError(Object aCaller, String aMsg, SQLException se)
 	{
 		if (levelError > loglevel) return;
-		
+
 		logMessage(ERROR, aCaller, aMsg, se);
 		if (se != null)
 		{
@@ -270,7 +276,7 @@ public class LogMgr
 			s.writeTo(logOut);
 			logOut.flush();
 		}
-		if (logSystemErr) 
+		if (logSystemErr)
 		{
 			s.writeTo(System.err);
 		}
@@ -281,20 +287,20 @@ public class LogMgr
 		StrBuffer buff = new StrBuffer(100);
 
 		for (int i=0; i < NUM_ELEMENTS; i++) MSG_ELEMENTS[i] = null;
-		
+
 		if (timeIndex > -1)
 		{
 			MSG_ELEMENTS[timeIndex] = getTimeString();
 		}
-		
+
 		if (typeIndex > -1)
 		{
 			MSG_ELEMENTS[typeIndex] = aType;
 		}
-		
+
 		if (sourceIndex > -1)
 		{
-			if (aCaller != null) 
+			if (aCaller != null)
 			{
 				if (aCaller instanceof String)
 					MSG_ELEMENTS[sourceIndex] = (String)aCaller;
@@ -302,24 +308,24 @@ public class LogMgr
 					MSG_ELEMENTS[sourceIndex] = aCaller.getClass().getName();
 			}
 		}
-		
+
 		if (messageIndex > -1)
 		{
 			MSG_ELEMENTS[messageIndex] = aMsg;
 		}
-		
+
 		boolean hasException = false;
 		if (exceptionMsgIndex > -1 && th != null)
 		{
 			MSG_ELEMENTS[exceptionMsgIndex] = ExceptionUtil.getDisplay(th);
 			hasException = true;
 		}
-		
+
 		boolean first = true;
-		
+
 		for (int i=0; i < NUM_ELEMENTS; i++)
 		{
-			
+
 			if (MSG_ELEMENTS[i] != null)
 			{
 				if (!first) buff.append(" ");
@@ -330,14 +336,14 @@ public class LogMgr
 			}
 		}
 		buff.append(StringUtil.LINE_TERMINATOR);
-		
+
 		// always display the stacktrace in debug level
 		if ((showStackTrace || loglevel == levelDebug) && th != null)
 		{
 			buff.append(getStackTrace(th));
 			buff.append(StringUtil.LINE_TERMINATOR);
 		}
-		
+
 		return buff;
 	}
 
@@ -364,5 +370,5 @@ public class LogMgr
 		theDate.setTime(System.currentTimeMillis());
 		return formatter.format(theDate);
 	}
-	
+
 }

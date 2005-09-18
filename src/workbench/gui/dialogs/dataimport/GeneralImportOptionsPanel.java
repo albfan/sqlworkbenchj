@@ -29,6 +29,13 @@ public class GeneralImportOptionsPanel
 		initComponents();
 	}
 
+	public void setModeSelectorEnabled(boolean flag)
+	{
+		this.modeComboBox.setEnabled(flag);
+		this.modeComboBox.setSelectedIndex(0);
+		//this.modeComboBox.setVisible(flag);
+	}
+	
 	public void saveSettings()
 	{
 		Settings s = Settings.getInstance();

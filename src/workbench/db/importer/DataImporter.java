@@ -37,7 +37,7 @@ import workbench.util.WbThread;
 
 
 /**
- * Import data that is provided from {@link RowDataProducer} into 
+ * Import data that is provided from {@link RowDataProducer} into
  * a tabel in the database.
  *
  * @author  support@sql-workbench.net
@@ -79,13 +79,13 @@ public class DataImporter
 	private int reportInterval = 1;
 	private StrBuffer messages;
 	private String targetSchema;
-	
+
 	private int colCount;
 	private int numTables;
 	private boolean useTruncate = false;
 	private int totalTables = -1;
 	private int currentTable = -1;
-	
+
 	// this array will map the columns for updating the target table
 	// the index into this array will be the index
 	// from the row data array supplied by the producer.
@@ -102,10 +102,10 @@ public class DataImporter
 	private boolean isRunning = false;
 	private int batchSize = -1;
 	private ImportFileParser parser;
-	
+
 	// Additional WHERE clause for UPDATE statements
 	private String whereClauseForUpdate;
-	
+
 	public DataImporter()
 	{
 		this.messages = new StrBuffer(1000);
@@ -147,18 +147,18 @@ public class DataImporter
 	public boolean getDeleteTarget() { return deleteTarget; }
 	public void setBatchSize(int size) { this.batchSize = size; }
 
-	public void setWhereClauseForUpdate(String clause) 
-	{ 
+	public void setWhereClauseForUpdate(String clause)
+	{
 		if (StringUtil.isEmptyString(clause))
 		{
-			this.whereClauseForUpdate = null; 
+			this.whereClauseForUpdate = null;
 		}
 		else
 		{
-			this.whereClauseForUpdate = clause; 
+			this.whereClauseForUpdate = clause;
 		}
 	}
-	
+
 	/**
 	 *	Controls deletion of the target table.
 	 */
@@ -390,7 +390,7 @@ public class DataImporter
 		if (this.targetTable == null) return;
 		String deleteSql = null;
 
-		if (this.useTruncate) 
+		if (this.useTruncate)
 		{
 			deleteSql = "TRUNCATE TABLE " + this.targetTable.getTableExpression(this.dbConn);
 		}
@@ -446,12 +446,12 @@ public class DataImporter
 	{
 		this.totalTables = total;
 	}
-	
+
 	public void setCurrentTable(int current)
 	{
 		this.currentTable = current;
 	}
-	
+
 	/**
 	 *	Callback function for RowDataProducer. The order in the data array
 	 * 	has to be the same as initially passed in the setTargetTable() method.
@@ -777,7 +777,7 @@ public class DataImporter
 			this.messages.append(this.parser.getSourceFilename());
 			this.messages.append('\n');
 		}
-		
+
 		try
 		{
 			this.targetTable = new TableIdentifier(tableName);
@@ -787,7 +787,7 @@ public class DataImporter
 			}
 			this.targetColumns = columns;
 			this.colCount = this.targetColumns.length;
-			
+
 			try
 			{
 				this.checkTable();
@@ -804,7 +804,7 @@ public class DataImporter
 				this.targetTable = null;
 				throw e;
 			}
-			
+
 			if (this.mode != MODE_UPDATE)
 			{
 				this.prepareInsertStatement();
@@ -827,16 +827,20 @@ public class DataImporter
 			}
 			this.currentImportRow = 0;
 			this.totalRows = 0;
-			
+
 			if (this.reportInterval == 0 && this.progressMonitor != null)
 			{
 				this.progressMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 				this.progressMonitor.setCurrentObject(ResourceMgr.getString("MsgImportingTableData") + " " + this.targetTable + " (" + this.getModeString() + ")",-1,-1);
 			}
+			if (LogMgr.isInfoEnabled())
+			{
+				LogMgr.logInfo("DataImporter.setTargetTable()", "Starting import for table " + tableName);
+			}
 		}
 		catch (RuntimeException th)
 		{
-			LogMgr.logError("DataImporter.setTargetTable()", "Error when setting target table", th);
+			LogMgr.logError("DataImporter.setTargetTable()", "Error when setting target table " + tableName, th);
 			throw th;
 		}
 	}
@@ -858,7 +862,7 @@ public class DataImporter
 
 		DbMetadata meta = this.dbConn.getMetadata();
 		boolean exists = meta.tableExists(this.targetTable);
-		if (!exists) 
+		if (!exists)
 		{
 			throw new SQLException("Table " + this.targetTable.getTableExpression(this.dbConn) + " not found!");
 		}
@@ -895,7 +899,7 @@ public class DataImporter
 		{
 			this.insertSql = text.toString();
 			this.insertStatement = this.dbConn.getSqlConnection().prepareStatement(this.insertSql);
-			LogMgr.logInfo("DataImporter.prepareInsertStatement()", "Statement for insert: " + this.insertSql);
+			if (LogMgr.isDebugEnabled()) LogMgr.logDebug("DataImporter.prepareInsertStatement()", "Statement for insert: " + this.insertSql);
 		}
 		catch (SQLException e)
 		{
@@ -979,7 +983,7 @@ public class DataImporter
 		if (!StringUtil.isEmptyString(this.whereClauseForUpdate))
 		{
 			boolean addBracket = false;
-			if (!this.whereClauseForUpdate.trim().toUpperCase().startsWith("AND") && 
+			if (!this.whereClauseForUpdate.trim().toUpperCase().startsWith("AND") &&
 				  !this.whereClauseForUpdate.trim().toUpperCase().startsWith("OR")
 				)
 			{
@@ -993,12 +997,12 @@ public class DataImporter
 			sql.append(this.whereClauseForUpdate.trim());
 			if (addBracket) sql.append(")");
 		}
-		
+
 		try
 		{
 			this.updateSql = sql.toString();
 			this.updateStatement = this.dbConn.getSqlConnection().prepareStatement(this.updateSql);
-			LogMgr.logInfo("DataImporter.prepareUpdateStatement()", "Statement for update: " + this.updateSql);
+			if (LogMgr.isDebugEnabled()) LogMgr.logDebug("DataImporter.prepareUpdateStatement()", "Statement for update: " + this.updateSql);
 		}
 		catch (SQLException e)
 		{
@@ -1105,19 +1109,19 @@ public class DataImporter
 		{
 			if (!this.dbConn.getAutoCommit())
 			{
-				try { this.dbConn.rollback(); } catch (Throwable ignore) {} 
+				try { this.dbConn.rollback(); } catch (Throwable ignore) {}
 			}
 			LogMgr.logError("DataImporter.finishTable()", "Error commiting changes", e);
 			this.messages.append(ExceptionUtil.getDisplay(e) + "\n");
 			throw e;
 		}
 	}
-	
+
 	public String getMessages()
 	{
 		return this.messages.toString();
 	}
-	
+
 	/**
 	 *	Callback from the RowDataProducer
 	 */
@@ -1164,7 +1168,7 @@ public class DataImporter
 		}
 		this.messages.append(this.source.getMessages());
 	}
-	
+
 	public void importCancelled()
 	{
 		try

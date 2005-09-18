@@ -59,7 +59,7 @@ public class ComboStringPropertyEditor
 		{
 			String name = "get" + propertyName;
 			Class cls = aSource.getClass();
-			this.getter = cls.getMethod(name, null);
+			this.getter = cls.getMethod(name, (Class[])null);
 
 			name = "set" + propertyName;
 			Class[] parms = {String.class};
@@ -89,7 +89,7 @@ public class ComboStringPropertyEditor
 	{
 		try
 		{
-			Object value = this.getter.invoke(this.source, null);
+			Object value = this.getter.invoke(this.source, (Object[])null);
 			this.setSelectedItem(value);
 		}
 		catch (Exception e)

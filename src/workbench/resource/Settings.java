@@ -29,11 +29,10 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.StringTokenizer;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
 
 import workbench.WbManager;
 import workbench.interfaces.PropertyStorage;
@@ -380,11 +379,33 @@ public class Settings
 	{
 		if (this.standardFont == null)
 		{
-			this.standardFont = this.getFont(PROPERTY_STANDARD_FONT);
+			this.standardFont = this.getFont(PROPERTY_STANDARD_FONT,false);
 		}
 		return this.standardFont;
 	}
-
+	
+	public Font getStandardLabelFont()
+	{
+		Font f = this.getStandardFont();
+		if (f == null)
+		{
+			UIDefaults def = UIManager.getLookAndFeelDefaults();
+			f = def.getFont("Label.font");
+		}
+		return f;
+	}
+	
+	public Font getStandardMenuFont()
+	{
+		Font f = this.getStandardFont();
+		if (f == null)
+		{
+			UIDefaults def = UIManager.getLookAndFeelDefaults();
+			f = def.getFont("Menu.font");
+		}
+		return f;
+	}
+	
 	public Font getEditorFont()
 	{
 		if (this.editorFont == null)
@@ -438,7 +459,7 @@ public class Settings
 		if (WbManager.trace) System.out.println("Setting.getFont() - start");
 		Font result;
 
-		String baseKey = new StringBuffer("workbench.font.").append(aFontName).toString();
+		String baseKey = "workbench.font." + aFontName;
 		String name = null;
 
 		if (returnDefault)

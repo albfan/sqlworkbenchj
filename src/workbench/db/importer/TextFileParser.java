@@ -30,6 +30,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.interfaces.JobErrorHandler;
 import workbench.util.ExceptionUtil;
 import workbench.interfaces.ImportFileParser;
 import workbench.log.LogMgr;
@@ -74,10 +75,11 @@ public class TextFileParser
 	private String timestampFormat;
 	private char decimalChar = '.';
 	private boolean abortOnError = false;
+	private boolean ignoreAllErrors = false;
 	private WbConnection connection;
 	private String sourceDir;
 	private String extensionToUse;
-
+	private JobErrorHandler errorHandler;
 	// for each column from columns
 	// the value for the respective index
 	// defines its real index
@@ -306,7 +308,21 @@ public class TextFileParser
 		throws SQLException
 	{
 		if (columnList == null || columnList.size()  == 0) return;
-		this.readColumnDefinition(columnList);
+		if (this.connection != null && this.tableName != null)
+		{
+			this.readColumnDefinition(columnList);
+		}
+		else
+		{
+			this.colCount = columnList.size();
+			this.columns = new ColumnIdentifier[colCount];
+			for (int i = 0; i < columns.length; i++)
+			{
+				this.columns[i] = (ColumnIdentifier)columnList.get(i);
+			}
+			this.importAllColumns();
+		}
+		
 	}
 
 	public void setConnection(WbConnection aConn)
@@ -526,6 +542,7 @@ public class TextFileParser
 			boolean includeLine = true;
 			boolean hasColumnFilter = this.hasColumnFilter();
 			boolean hasLineFilter = this.lineFilter != null;
+			this.ignoreAllErrors = false;
 
 			while (line != null)
 			{
@@ -620,6 +637,16 @@ public class TextFileParser
 						this.messages.append(msg);
 						this.messages.append("\n");
 						if (this.abortOnError) throw e;
+						if (this.errorHandler != null)
+						{
+							int choice = errorHandler.getActionOnError(importRow + 1, this.columns[i].getColumnName(), (value == null ? "(NULL)" : value.toString()), ExceptionUtil.getDisplay(e, false));
+							if (choice == JobErrorHandler.JOB_ABORT) throw e;
+							if (choice == JobErrorHandler.JOB_IGNORE_ALL) 
+							{
+								this.abortOnError = false;
+								this.ignoreAllErrors = true;
+							}
+						}
 					}
 				}
 
@@ -670,6 +697,7 @@ public class TextFileParser
 	{
 		List cols = new ArrayList();
 		WbStringTokenizer tok = new WbStringTokenizer(delimiter.charAt(0), this.quoteChar, false);
+		tok.setDelimiterNeedsWhitspace(false);
 		tok.setSourceString(headerLine);
 		while (tok.hasMoreTokens())
 		{
@@ -801,6 +829,7 @@ public class TextFileParser
 								String msg = ResourceMgr.getString("ErrorImportColumnNotFound");
 								msg = StringUtil.replace(msg, "%column%", colname);
 								msg = StringUtil.replace(msg, "%table%", this.tableName);
+								this.messages.append(msg + "\n");
 								throw new SQLException(msg);
 							}
 							else
@@ -924,5 +953,8 @@ public class TextFileParser
 	{
 		this.trimValues = trimValues;
 	}
+
+    public void setErrorHandler(JobErrorHandler handler) {
+    }
 
 }

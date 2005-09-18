@@ -221,7 +221,7 @@ public class DataPumper
 	private void selectInputFile()
 	{
 		ImportFileDialog dialog = new ImportFileDialog(this);
-		boolean ok = dialog.selectInput("Please select the input file");
+		boolean ok = dialog.selectInput(ResourceMgr.getString("TxtWindowTitleSelectImportFile"));
 		if (!ok) return; 
 		if (this.source != null)
 		{

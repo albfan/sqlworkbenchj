@@ -161,7 +161,7 @@ public class TableDataPanel
 
 		rowCountLabel = new JLabel(ResourceMgr.getString("LabelTableDataRowCount"));
 		rowCountLabel.setToolTipText(ResourceMgr.getDescription("LabelTableDataRowCount"));
-		Font std = Settings.getInstance().getStandardFont();
+		Font std = Settings.getInstance().getStandardLabelFont();
 		Font bold = std.deriveFont(Font.BOLD);
 		rowCountLabel.setFont(bold);
 		rowCountLabel.setHorizontalTextPosition(SwingConstants.LEFT);

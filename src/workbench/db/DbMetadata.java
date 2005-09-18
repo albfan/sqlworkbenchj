@@ -1262,6 +1262,14 @@ public class DbMetadata
 		return null;
 	}
 
+	/**
+	 * Returns the schema that should be used for the current user
+	 * This essential call {@link getCurrentSchema()}. The method 
+	 * then checks if the schema should be ignored for the current
+	 * dbms by calling {@link ignoreSchema(String)}. If the 
+	 * Schema should not be ignored, the it's returned, otherwise
+	 * the method will return null
+	 */
 	public String getSchemaToUse()
 	{
 		String schema = this.getCurrentSchema();

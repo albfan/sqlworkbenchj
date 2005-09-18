@@ -909,6 +909,10 @@ public class StringUtil
 		return outBuffer.toString();
 	}
 
+	public static String escapeUnicode(String value, CharacterRange range)
+	{
+		return escapeUnicode(value, null, range);
+	}
 	/*
 	 * Converts unicodes to encoded &#92;uxxxx
 	 * and writes out any of the characters in specialSaveChars

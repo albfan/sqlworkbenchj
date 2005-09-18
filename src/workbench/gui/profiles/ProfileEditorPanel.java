@@ -128,7 +128,7 @@ public class ProfileEditorPanel
     listPanel.setLayout(new java.awt.BorderLayout());
 
     jScrollPane1.setPreferredSize(null);
-    jList1.setFont(Settings.getInstance().getStandardFont());
+    jList1.setFont(Settings.getInstance().getStandardLabelFont());
     jList1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
     jList1.setVisibleRowCount(10);
     this.fillProfiles();

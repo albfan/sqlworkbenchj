@@ -40,7 +40,7 @@ import workbench.util.EncodingUtil;
 import workbench.util.StringUtil;
 
 /**
- * A class to run several statements from a script file. This is used 
+ * A class to run several statements from a script file. This is used
  * when running SQL Workbench in batch mode and for the {@link workbench.sql.wbcommands.WbInclude}
  * command.
  * @author  support@sql-workbench.net
@@ -64,7 +64,7 @@ public class BatchRunner
 	private boolean verboseLogging = true;
 	private boolean checkEscapedQuotes = false;
 	private String encoding = null;
-	
+
 	public BatchRunner(String aFilelist)
 	{
 		this.files = StringUtil.stringToList(aFilelist, ",", true);
@@ -305,7 +305,7 @@ public class BatchRunner
 
 			try
 			{
-				if (this.resultDisplay == null) LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchExecutingStatement") + " "  + sql);
+				if (this.resultDisplay == null && LogMgr.isDebugEnabled()) LogMgr.logDebug("BatchRunner", ResourceMgr.getString("MsgBatchExecutingStatement") + " "  + sql);
 				long verbstart = System.currentTimeMillis();
 				this.stmtRunner.runStatement(sql, 0);
 				long verbend = System.currentTimeMillis();
@@ -390,12 +390,12 @@ public class BatchRunner
 			this.encoding = EncodingUtil.cleanupEncoding(enc);
 		}
 	}
-	
+
 	public void setShowTiming(boolean flag)
 	{
 		this.showTiming = flag;
 	}
-	
+
 	public void setAbortOnError(boolean aFlag)
 	{
 		this.abortOnError = aFlag;
@@ -436,7 +436,7 @@ public class BatchRunner
 		String profilename = cmdLine.getValue(WbManager.ARG_PROFILE);
 		boolean abort = cmdLine.getBoolean(WbManager.ARG_ABORT, true);
 		boolean showResult = cmdLine.getBoolean(WbManager.ARG_DISPLAY_RESULT);
-    
+
 		ConnectionProfile profile = null;
 		if (profilename == null)
 		{
@@ -474,7 +474,7 @@ public class BatchRunner
 		}
 
     if (profile == null) return null;
-        
+
 		boolean ignoreDrop = cmdLine.getBoolean(WbManager.ARG_IGNORE_DROP, true);
 		profile.setIgnoreDropErrors(ignoreDrop);
 

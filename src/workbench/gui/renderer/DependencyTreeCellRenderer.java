@@ -56,7 +56,7 @@ public class DependencyTreeCellRenderer
 		this.selectedBackground = UIManager.getColor("Tree.selectionBackground");
 		this.unselectedForeground = UIManager.getColor("Tree.textForeground");
 		this.unselectedBackground = UIManager.getColor("Tree.textBackground");
-		this.setFont(Settings.getInstance().getStandardFont());
+		this.setFont(Settings.getInstance().getStandardLabelFont());
 	}
 	
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus)

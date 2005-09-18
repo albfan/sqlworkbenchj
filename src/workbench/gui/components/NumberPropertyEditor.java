@@ -54,13 +54,13 @@ public class NumberPropertyEditor
 		{
 			String name = "get" + propertyName;
 			Class cls = aSource.getClass();
-			this.getter = cls.getMethod(name, null);
+			this.getter = cls.getMethod(name, (Class[])null);
 
 			name = "set" + propertyName;
 			Class[] parms = {int.class};
 			this.setter = cls.getMethod(name, parms);
 			
-			String value = this.getter.invoke(this.source, null).toString();
+			String value = this.getter.invoke(this.source, (Object[])null).toString();
 			super.setText(value);
 		}
 		catch (Exception e)

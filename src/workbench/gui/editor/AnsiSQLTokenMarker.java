@@ -223,6 +223,8 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("WBREPORT",Token.KEYWORD2);
 		keywords.add("WBDIFF",Token.KEYWORD2);
 		keywords.add("WBXSLT",Token.KEYWORD2);
+		keywords.add("WBUPDATEBLOB",Token.KEYWORD2);
+		keywords.add("WBSELECTBLOB",Token.KEYWORD2);
 	}
 
 	private static void addDataTypes()

@@ -60,12 +60,10 @@ public class ArgumentParser
 		tok.setDelimiterNeedsWhitspace(true);
 		tok.setSourceString(aCmdLine.trim());
 
-		//int count = words.size();
-		//for (int i=0; i < count; i++)
 		while (tok.hasMoreTokens())
 		{
 			String word = tok.nextToken();// String)words.get(i);
-			if (word.length() == 0) continue;
+			if (word == null || word.length() == 0) continue;
 			String arg = null;
 			String value = null;
 			int pos = word.indexOf('=');

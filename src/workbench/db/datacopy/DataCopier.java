@@ -23,6 +23,7 @@ import java.util.Map;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.RowDataReceiver;
+import workbench.interfaces.JobErrorHandler;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -828,5 +829,9 @@ public class DataCopier
 		if (this.errors != null) log.append(this.errors);
 
 		return log.toString();
+	}
+
+	public void setErrorHandler(JobErrorHandler handler)
+	{
 	}
 }

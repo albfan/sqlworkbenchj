@@ -49,6 +49,7 @@ public class ImportFileDialog
 	private boolean filterChange = false;
 	private String lastDirConfigKey = "workbench.import.lastdir";
 	private Component parentComponent;
+	private boolean showImportMode = true;
 	
 	public ImportFileDialog(Component caller)
 	{
@@ -56,6 +57,11 @@ public class ImportFileDialog
 		this.parentComponent = caller;
 	}
 
+	public void allowImportModeSelection(boolean flag)
+	{
+		this.importOptions.allowImportModeSelection(flag);
+	}
+	
 	public void saveSettings()
 	{
 		importOptions.saveSettings();
@@ -173,17 +179,6 @@ public class ImportFileDialog
 		return result;
 	}
 
-	public void setImportOptions(ProducerFactory factory)
-	{
-		switch (this.importType)
-		{
-			case ProducerFactory.IMPORT_TEXT:
-				break;
-			case ProducerFactory.IMPORT_XML:
-				break;
-		}
-	}
-	
 	private int getImportType(FileFilter ff)
 	{
 		if (ff == ExtensionFileFilter.getXmlFileFilter())

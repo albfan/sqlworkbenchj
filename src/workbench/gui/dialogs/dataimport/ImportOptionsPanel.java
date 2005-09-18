@@ -82,6 +82,11 @@ public class ImportOptionsPanel
 		typeSelector.addActionListener(this);
 	}
 	
+	public void allowImportModeSelection(boolean flag)
+	{
+		this.generalOptions.setModeSelectorEnabled(flag);
+	}
+	
 	public void saveSettings()
 	{
 		this.generalOptions.saveSettings();

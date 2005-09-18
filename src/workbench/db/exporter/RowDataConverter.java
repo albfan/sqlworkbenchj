@@ -37,7 +37,7 @@ public abstract class RowDataConverter
 	protected WbConnection originalConnection;
 	protected String generatingSql;
 	protected ResultInfo metaData;
-	
+	protected String baseDir;
 	private boolean[] columnsToExport = null;
 	protected List exportColumns = null;
 	
@@ -55,6 +55,8 @@ public abstract class RowDataConverter
 		int colCount = meta.getColumnCount();
 	}
 
+	public void setBaseDir(String dir) { this.baseDir = dir; }
+	
 	public boolean includeColumnInExport(int col)
 	{
 		if (this.columnsToExport == null) return true;

@@ -29,6 +29,10 @@ public interface ImportFileParser
 	 */
 	List getColumnsFromFile();
 	void setTableName(String table);
+	
+	/**
+	 * Define the column structure to be used for the import
+	 */
 	void setColumns(List columns)
 		throws SQLException;
 	

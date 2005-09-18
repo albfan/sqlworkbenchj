@@ -85,13 +85,13 @@ public class IntegerPropertyEditor
 		{
 			String name = "get" + propertyName;
 			Class cls = aSource.getClass();
-			this.getter = cls.getMethod(name, null);
+			this.getter = cls.getMethod(name, (Class[])null);
 
 			name = "set" + propertyName;
 			Class[] parms = {Integer.class};
 			this.setter = cls.getMethod(name, parms);
 
-			Integer value = (Integer)this.getter.invoke(this.source, null);
+			Integer value = (Integer)this.getter.invoke(this.source, (Object[])null);
 			if (value == null)
 				this.setText("");
 			else

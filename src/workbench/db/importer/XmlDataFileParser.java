@@ -39,6 +39,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.exporter.XmlRowDataConverter;
+import workbench.interfaces.JobErrorHandler;
 import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
 import workbench.interfaces.ImportFileParser;
@@ -74,6 +75,8 @@ public class XmlDataFileParser
 	private RowDataReceiver receiver;
 	private boolean ignoreCurrentRow = false;
 	private boolean abortOnError = false;
+	private boolean ignoreAllErrors = false;
+	private JobErrorHandler errorHandler;
 	private boolean verboseFormat = false;
 	private String missingColumn;
 	private StrBuffer messages;
@@ -762,6 +765,17 @@ public class XmlDataFileParser
 			{
 				LogMgr.logError("XmlDataFileParser.sendRowData()", "Error when sending row data to receiver", e);
 				if (this.abortOnError) throw e;
+				if (this.errorHandler != null)
+				{
+					int choice = errorHandler.getActionOnError(this.currentRowNumber + 1, null, null, ExceptionUtil.getDisplay(e, false));
+					if (choice == JobErrorHandler.JOB_ABORT) throw e;
+					if (choice == JobErrorHandler.JOB_IGNORE_ALL) 
+					{
+						this.abortOnError = false;
+						this.ignoreAllErrors = true;
+					}
+				}
+				
 			}
 		}
 		if (!this.keepRunning) throw new ParsingInterruptedException();
@@ -792,5 +806,10 @@ public class XmlDataFileParser
 			columnTag = XmlRowDataConverter.SHORT_COLUMN_TAG;
 		}
 	}
+
+    public void setErrorHandler(JobErrorHandler handler) 
+		{
+			this.errorHandler = handler;
+    }
 	
 }

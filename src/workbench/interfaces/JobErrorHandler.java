@@ -31,4 +31,10 @@ public interface JobErrorHandler
 	 * @return JOB_CONTINUE the job should ignore the error (if possible and continue) or JOB_ABORT
 	 */
 	int getActionOnError(int errorRow, String errorColumn, String data, String errorMessage);
+	
+	/**
+	 * A fatal error has occured and should be displayed to the user. The backend worker
+	 * will stop its process after calling this.
+	 */
+	void fatalError(String msg);
 }

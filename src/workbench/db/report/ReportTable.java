@@ -107,6 +107,13 @@ public class ReportTable
 		this.namespace = nspace;
 		this.includePrimaryKey = includePk; 
 		
+		if (tbl.getSchema() == null)
+		{
+			// This is important for e.g. Oracle. Otherwise the table definition 
+			// will contain multiple columns if a table exists more then once in 
+			// different schemas with the same name
+			tbl.setSchema(conn.getMetadata().getSchemaToUse());
+		}
 		List cols = conn.getMetadata().getTableColumns(tbl);
 		Collections.sort(cols);
 

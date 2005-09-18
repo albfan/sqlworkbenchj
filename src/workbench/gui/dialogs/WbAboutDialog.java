@@ -76,7 +76,6 @@ public class WbAboutDialog extends javax.swing.JDialog
 
     setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
     setTitle(ResourceMgr.getString("TxtAbout") + " " + ResourceMgr.TXT_PRODUCT_NAME);
-    setFont(new java.awt.Font("Dialog", 0, 10));
     setName("AboutDialog");
     addWindowListener(new java.awt.event.WindowAdapter()
     {
@@ -88,7 +87,6 @@ public class WbAboutDialog extends javax.swing.JDialog
 
     buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-    closeButton.setFont(Settings.getInstance().getStandardFont());
     closeButton.setText(ResourceMgr.getString("LabelClose"));
     closeButton.addActionListener(new java.awt.event.ActionListener()
     {
@@ -104,7 +102,6 @@ public class WbAboutDialog extends javax.swing.JDialog
 
     contentPanel.setLayout(new java.awt.GridBagLayout());
 
-    logo.setFont(null);
     logo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/workbench/resource/images/hitchguide.gif")));
     logo.setBorder(new javax.swing.border.EtchedBorder());
     logo.setIconTextGap(0);

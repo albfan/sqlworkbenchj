@@ -402,9 +402,6 @@ public class TableListPanel
 		tableList.addPopupMenu(this.deleteTableItem, false);
 	}
 
-	private Font boldFont = null;
-	private Font standardFont = null;
-
 	private void setupActionMap()
 	{
 		InputMap im = new ComponentInputMap(this);
@@ -413,12 +410,6 @@ public class TableListPanel
 		this.setActionMap(am);
 
 		this.toggleTableSource.addToInputMap(im, am);
-	}
-
-	private void initFonts()
-	{
-		this.standardFont = Settings.getInstance().getStandardFont();
-		this.boldFont = new Font(this.standardFont.getName(), Font.BOLD, this.standardFont.getSize());
 	}
 
 	private void updateShowDataMenu()
@@ -449,7 +440,8 @@ public class TableListPanel
 			this.showDataMenu.removeAll();
 		}
 
-		if (this.boldFont == null) this.initFonts();
+		Font boldFont = Settings.getInstance().getStandardMenuFont().deriveFont(Font.BOLD);
+		
 		JMenuItem item = null;
 
 		for (int i=0; i < newCount; i++)
@@ -466,7 +458,7 @@ public class TableListPanel
 				item.setActionCommand("panel-" + i);
 				if (i == current)
 				{
-					item.setFont(this.boldFont);
+					item.setFont(boldFont);
 				}
 			}
 			item.setToolTipText(ResourceMgr.getDescription("LabelShowDataInNewTab"));

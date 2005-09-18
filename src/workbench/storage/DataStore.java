@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.sql.Clob;
 import java.sql.ResultSet;
@@ -42,11 +43,14 @@ import workbench.db.exporter.RowDataConverter;
 import workbench.db.exporter.SqlRowDataConverter;
 import workbench.db.exporter.XmlRowDataConverter;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.dialogs.dataimport.ImportOptions;
+import workbench.gui.dialogs.dataimport.TextImportOptions;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.CsvLineParser;
+import workbench.util.EncodingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.ValueConverter;
@@ -91,7 +95,8 @@ public class DataStore
 	
 	private boolean allowUpdates = false;
 	private boolean escapeHtml = true;
-
+	private boolean updateHadErrors = false;
+	
 	private ValueConverter converter = new ValueConverter();
 
 	private boolean cancelRetrieve = false;
@@ -1201,55 +1206,6 @@ public class DataStore
 		return table;
 	}
 
-//	/**
-//	 * Write the contents of this DataStore as XML into the  
-//	 * supplied Writer
-//	 * @param pw Thw writer to which the XML is written.
-//	 * @see #writeXmlData(Writer, boolean)
-//	 */
-//	public void writeXmlData(Writer pw)
-//		throws IOException
-//	{
-//		this.writeXmlData(pw, false);
-//	}
-//
-//	/**
-//	 * Write the contents of this DataStore as XML into the  
-//	 * supplied Writer
-//	 *
-//	 * @param pw The writer to which the XML is written.
-//	 * @param useCdata if true all character data is put into a CDATA sectioni
-//	 * @see workbench.db.exporter.XmlRowDataConverter
-//	 */
-//	public void writeXmlData(Writer pw, boolean useCdata)
-//		throws IOException
-//	{
-//		int count = this.getRowCount();
-//		if (count == 0) return;
-//
-//		XmlRowDataConverter converter = new XmlRowDataConverter(this.resultInfo);
-//		converter.setUseCDATA(useCdata);
-//		this.writeConverterData(converter, pw);
-//	}
-//
-//	/**
-//	 * Write the contents of this DataStore as HTML into the  
-//	 * supplied Writer
-//	 *
-//	 * @param pw The writer to which the HTML is written.
-//	 * @see workbench.db.exporter.HtmlRowDataConverter
-//	 */
-//	public void writeHtmlData(Writer pw)
-//		throws IOException
-//	{
-//		HtmlRowDataConverter converter = new HtmlRowDataConverter(this.resultInfo);
-//		converter.setEscapeHtml(this.escapeHtml);
-//		converter.setCreateFullPage(true);
-//		String sql = SqlUtil.makeCleanSql(this.sql, false, false, '\'');
-//		if (sql.length() > 60) sql = sql.substring(0, 60);
-//		converter.setPageTitle(sql);
-//		this.writeConverterData(converter, pw);
-//	}
 
 	/**
 	 * Writes all rows using the supplied {@link workbench.db.exporter.RowDataConverter}
@@ -1485,132 +1441,6 @@ public class DataStore
 		this.cancelRetrieve = true;
 	}
 
-	/**
-	 *	Import a text file into this DataStore.
-	 * @param aFilename - The text file to import
-	 * @param hasHeader - wether the text file has a header row
-	 * @param aColSeparator - the separator for column data
-	 */
-	public void importData(String aFilename
-	                     , boolean hasHeader
-											 , String aColSeparator
-											 , String aQuoteChar
-											 , JobErrorHandler errorHandler)
-		throws FileNotFoundException
-	{
-		File f = new File(aFilename);
-		long fileSize = f.length();
-		BufferedReader in = new BufferedReader(new FileReader(aFilename),1024*512);
-		String line;
-		Object colData;
-		int row;
-		this.cancelImport = false;
-
-		if ("\\t".equals(aColSeparator))
-    {
-      aColSeparator = "\t";
-    }
-
-		try
-		{
-			line = in.readLine();
-			if (hasHeader) line = in.readLine();
-		}
-		catch (IOException e)
-		{
-			line = null;
-		}
-
-		if (this.rowActionMonitor != null)
-		{
-			this.rowActionMonitor.setMonitorType(RowActionMonitor.MONITOR_INSERT);
-		}
-
-		// if the data store is empty, we trie to initialize the
-		// data array to an approx. size. As we don't know how many lines
-		// we really have in the file, we take the length of the first line
-		// as the average, and calculate the expected number of lines from
-		// this length.
-		// Even if we don't get the number of lines correct, this method should be better
-		// then not initializing the array at all.
-		if (line != null && this.data.size() == 0)
-		{
-			int initialSize = (int)(fileSize / line.length());
-			this.data = createData(initialSize);
-		}
-
-		CsvLineParser tok = new CsvLineParser(aColSeparator.charAt(0), '"');
-		int importRow = 0;
-		boolean ignoreError = false;
-
-		while (line != null)
-		{
-			tok.setLine(line);
-
-			row = this.addRow();
-			importRow ++;
-
-			this.updateProgressMonitor(importRow, -1);
-
-			this.setRowNull(row);
-
-			for (int col=0; col < this.resultInfo.getColumnCount(); col++)
-			{
-				if (col > -1)
-				{
-					String value = null;
-					try
-					{
-
-						if (tok.hasNext()) value = tok.getNext();
-
-						if (value == null || value.length() == 0)
-						{
-							this.setNull(row, col);
-						}
-						else
-						{
-							colData = this.convertCellValue(value, col);
-							this.setValue(row, col, colData);
-						}
-					}
-					catch (Exception e)
-					{
-						LogMgr.logWarning("DataStore.importData()","Error reading line #" + row + ",col #" + col + ",colValue=" + value, e);
-						if (errorHandler != null && !ignoreError)
-						{
-							String colname = this.getColumnName(col);
-							int choice = errorHandler.getActionOnError(row, colname, (value == null ? null : value.toString()), "");
-							if (choice == JobErrorHandler.JOB_ABORT)
-							{
-								this.cancelImport = true;
-								break;
-							}
-							else if (choice == JobErrorHandler.JOB_IGNORE_ALL)
-							{
-								ignoreError = true;
-							}
-						}
-					}
-				}
-			}
-
-			Thread.yield();
-			if (this.cancelImport) break;
-
-			try
-			{
-				line = in.readLine();
-			}
-			catch (IOException e)
-			{
-				line = null;
-			}
-		}
-
-		try { in.close(); } catch (IOException e) {}
-	}
-
 	private void updateProgressMonitor(int currentRow, int totalRows)
 	{
 		if (this.rowActionMonitor != null)
@@ -1665,24 +1495,20 @@ public class DataStore
 		return stmt;
 	}
 
-	public synchronized int updateDb(WbConnection aConnection)
-		throws SQLException
-	{
-		return this.updateDb(aConnection, null);
-	}
-
 	private boolean ignoreAllUpdateErrors = false;
 
-	private int executeGuarded(WbConnection aConnection, DmlStatement dml, JobErrorHandler errorHandler, int row)
+	private int executeGuarded(WbConnection aConnection, RowData data, DmlStatement dml, JobErrorHandler errorHandler, int row)
 		throws SQLException
 	{
 		int rowsUpdated = 0;
 		try
 		{
 			rowsUpdated = dml.execute(aConnection);
+			data.setDmlSent(true);
 		}
 		catch (SQLException e)
 		{
+			this.updateHadErrors = true;
 			if (!this.ignoreAllUpdateErrors)
 			{
 				boolean abort = true;
@@ -1727,6 +1553,7 @@ public class DataStore
 		this.cancelUpdate = false;
 		this.updatePkInformation(aConnection);
 		int totalRows = this.getModifiedCount();
+		this.updateHadErrors = false;
 		int currentRow = 0;
 		if (this.rowActionMonitor != null)
 		{
@@ -1750,8 +1577,7 @@ public class DataStore
 				if (!row.isDmlSent())
 				{
 					dml = factory.createDeleteStatement(row);
-					rows += this.executeGuarded(aConnection, dml, errorHandler, -1);
-					row.setDmlSent(true);
+					rows += this.executeGuarded(aConnection, row, dml, errorHandler, -1);
 				}
 				Thread.yield();
 				if (this.cancelUpdate) return rows;
@@ -1766,8 +1592,7 @@ public class DataStore
 				if (!row.isDmlSent())
 				{
 					dml = factory.createUpdateStatement(row, false, "\r\n");
-					rows += this.executeGuarded(aConnection, dml, errorHandler, currentUpdateRow);
-					row.setDmlSent(true);
+					rows += this.executeGuarded(aConnection, row, dml, errorHandler, currentUpdateRow);
 				}
 				Thread.yield();
 				if (this.cancelUpdate) return rows;
@@ -1782,16 +1607,20 @@ public class DataStore
 				if (!row.isDmlSent())
 				{
 					dml = factory.createInsertStatement(row, false);
-					rows += this.executeGuarded(aConnection, dml, errorHandler, currentInsertRow);
-					row.setDmlSent(true);
+					rows += this.executeGuarded(aConnection, row, dml, errorHandler, currentInsertRow);
 				}
 				Thread.yield();
 				if (this.cancelUpdate) return rows;
 				row = this.getNextInsertedRow();
 			}
 
-			if (!aConnection.getAutoCommit() && rows > 0) aConnection.commit();
-			this.resetStatus();
+			// If we got here, then either all errors were ignored
+			// or no errors occured at all. Even if no rows were updated
+			// we are sending a commit() to make sure the transaction
+			// is ended. This is especially important for Postgres
+			// in case an error occured during update (and the user chose to proceed)
+			if (!aConnection.getAutoCommit()) aConnection.commit();
+			this.resetStatusForSentRows();
 		}
 		catch (SQLException e)
 		{
@@ -1806,6 +1635,11 @@ public class DataStore
 		return rows;
 	}
 
+	public boolean lastUpdateHadErrors()
+	{
+		return updateHadErrors;
+	}
+	
 	/**
 	 * Clears the flag for all modified rows that the update
 	 * has already been sent to the database
@@ -1876,7 +1710,7 @@ public class DataStore
 		}
 		this.resetUpdateRowCounters();
 	}
-
+	
 	public void sortByColumn(int col, boolean ascending)
 	{
 		synchronized (this.data)

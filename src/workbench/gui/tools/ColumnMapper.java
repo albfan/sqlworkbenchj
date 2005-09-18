@@ -214,6 +214,7 @@ public class ColumnMapper
 	{
 		int count = this.mapping.length;
 		ArrayList result = new ArrayList(count);
+		ColumnIdentifier skipId = new ColumnIdentifier(RowDataProducer.SKIP_INDICATOR);
 		for (int i=0; i < count; i++)
 		{
 			ColumnMapRow row = this.mapping[i];
@@ -221,12 +222,11 @@ public class ColumnMapper
 
 			if (row.getSource() == null)
 			{
-				result.add(RowDataProducer.SKIP_INDICATOR);
+				result.add(skipId);
 			}
 			else
 			{
-				s = row.getTarget().getColumnName();
-				result.add(s);
+				result.add(row.getTarget());
 			}
 		}
 		return result;

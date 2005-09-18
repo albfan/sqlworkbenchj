@@ -57,13 +57,13 @@ public class PasswordPropertyEditor
 			//String name = "decryptPassword";
 			String name = "getInputPassword";
 			Class cls = aSource.getClass();
-			this.getter = cls.getMethod(name, null);
+			this.getter = cls.getMethod(name, (Class[])null);
 
 			name = "setPassword";
 			Class[] parms = {String.class};
 			this.setter = cls.getMethod(name, parms);
 
-			String value = (String)this.getter.invoke(this.source, null);
+			String value = (String)this.getter.invoke(this.source, (Object[])null);
 			this.setText(value);
 		}
 		catch (Exception e)

@@ -31,7 +31,7 @@ public class WbStringTokenizer
 	private int maxDelim;
 	private Reader input;
 	private boolean endOfInput = false;
-	private boolean delimNeedWhitespace = true;
+	private boolean delimNeedWhitespace = false;
 	
 	public WbStringTokenizer()
 	{

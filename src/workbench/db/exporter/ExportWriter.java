@@ -35,6 +35,7 @@ public abstract class ExportWriter
 	protected RowActionMonitor rowMonitor;
 	private RowDataConverter converter;
 	private Writer output;
+	private String baseDir;
 	private int progressInterval = 10;
 	
 	public ExportWriter(DataExporter exp)
@@ -57,6 +58,8 @@ public abstract class ExportWriter
 		this.rowMonitor = monitor;
 	}
 
+	public void setBaseDir(String dir) { this.baseDir = dir; }
+	
 	public long getNumberOfRecords()
 	{
 		return rows;
@@ -72,6 +75,7 @@ public abstract class ExportWriter
 		converter.setGeneratingSql(exporter.getSql());
 		converter.setOriginalConnection(this.exporter.getConnection());
 		converter.setColumnsToExport(this.exporter.getColumnsToExport());
+		converter.setBaseDir(this.baseDir);
 	}
 
 	public void writeExport(DataStore ds)
@@ -150,7 +154,7 @@ public abstract class ExportWriter
 		writeEnd(rows);
 	}
 
-	private void writeStart()
+	protected void writeStart()
 		throws IOException
 	{
 		StrBuffer data = converter.getStart();
@@ -160,7 +164,7 @@ public abstract class ExportWriter
 		}
 	}
 
-	private void writeEnd(long rows)
+	protected void writeEnd(long rows)
 		throws IOException
 	{
 		StrBuffer data = converter.getEnd(rows);

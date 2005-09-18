@@ -51,6 +51,7 @@ import workbench.sql.wbcommands.WbListVars;
 import workbench.sql.wbcommands.WbOraExecute;
 import workbench.sql.wbcommands.WbRemoveVar;
 import workbench.sql.wbcommands.WbSchemaReport;
+import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.sql.wbcommands.WbStartBatch;
 import workbench.sql.wbcommands.WbXslt;
 import workbench.storage.RowActionMonitor;
@@ -169,7 +170,8 @@ public class DefaultStatementRunner
 		cmdDispatch.put(UpdatingCommand.DELETE.getVerb(), UpdatingCommand.DELETE);
 		cmdDispatch.put(UpdatingCommand.INSERT.getVerb(), UpdatingCommand.INSERT);
 		cmdDispatch.put(UpdatingCommand.UPDATE.getVerb(), UpdatingCommand.UPDATE);
-
+		cmdDispatch.put(WbSelectBlob.VERB, new WbSelectBlob());
+		
 		for (int i=0; i < DdlCommand.DDL_COMMANDS.size(); i ++)
 		{
 			sql = (SqlCommand)DdlCommand.DDL_COMMANDS.get(i);
@@ -357,7 +359,7 @@ public class DefaultStatementRunner
 	private SqlCommand getCommandToUse(String sql)
 	{
 		String verb = SqlUtil.getSqlVerb(sql);
-		if (this.supportsSelectInto && this.dbConnection.getMetadata().isSelectIntoNewTable(sql))
+		if (this.supportsSelectInto && !verb.equalsIgnoreCase(WbSelectBlob.VERB) && this.dbConnection.getMetadata().isSelectIntoNewTable(sql))
 		{
 			LogMgr.logDebug("StatementRunner.getCommandToUse()", "Found 'SELECT ... INTO new_table'");
 			// use the generic SqlCommand implementation for this.

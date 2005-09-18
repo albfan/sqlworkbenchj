@@ -127,7 +127,7 @@ public class VariablesEditor
 		{
 			try
 			{
-				vardata.updateDb(null);
+				vardata.updateDb(null,null);
 				result = true;
 			}
 			catch (Exception e)
