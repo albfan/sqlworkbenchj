@@ -1929,7 +1929,8 @@ public class SqlPanel
 
 	/** Used for storing the result of the confirmExecution() callback */
 	private boolean executeAllStatements = true;
-
+	private boolean cancelAll = false;
+	
 	public boolean confirmExecution(String command)
 	{
 		if (executeAllStatements) return true;
@@ -1946,6 +1947,11 @@ public class SqlPanel
 					break;
 				case JOptionPane.NO_OPTION:
 					result = false;
+					break;
+				case JOptionPane.CANCEL_OPTION:
+					result = false;
+					this.executeAllStatements = false;
+					this.cancelAll = true;
 					break;
 				case WbSwingUtilities.EXECUTE_ALL:
 					result = true;
@@ -1973,6 +1979,8 @@ public class SqlPanel
 		boolean shouldRestoreSelection = Settings.getInstance().getBoolProperty("workbench.gui.sql.restoreselection", true);
 		boolean parametersPresent = (VariablePool.getInstance().getParameterCount() > 0);
 		this.executeAllStatements = false;
+		this.cancelAll = false;
+		
 		ExecutionController control = null;
 		if (this.dbConnection.getProfile().isConfirmUpdates())
 		{
@@ -2157,6 +2165,10 @@ public class SqlPanel
 					this.showLogPanel();
 				}
 
+				// this will be set by confirmExecution() if
+				// Cancel was selected
+				if (this.cancelAll) break;
+				
 				if (!this.data.wasSuccessful())
 				{
 					commandWithError = i;

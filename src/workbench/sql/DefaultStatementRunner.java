@@ -80,7 +80,8 @@ public class DefaultStatementRunner
 	private int maxRows;
 	private boolean isCancelled;
 	private boolean batchMode = false;
-
+	private String baseDir;
+	
 	private RowActionMonitor rowMonitor;
 	private ExecutionController controller;
 	private WbStartBatch batchCommand;
@@ -195,6 +196,9 @@ public class DefaultStatementRunner
 		this.controller = control;
 	}
 
+	public void setBaseDir(String dir) { this.baseDir = dir; }
+	public String getBaseDir() { return this.baseDir; }
+	
 	public void setConnection(WbConnection aConn)
 	{
 
@@ -272,12 +276,6 @@ public class DefaultStatementRunner
 		this.resultLogger = logger;
 	}
 
-	public void runStatement(String aSql, int maxRows)
-		throws SQLException, Exception
-	{
-		this.runStatement(aSql, maxRows, 0);
-	}
-	
 	public void runStatement(String aSql, int maxRows, int queryTimeout)
 		throws SQLException, Exception
 	{

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 import workbench.db.WbConnection;
+import workbench.interfaces.StatementRunner;
 import workbench.util.ExceptionUtil;
 import workbench.interfaces.ResultLogger;
 import workbench.log.LogMgr;
@@ -41,7 +42,7 @@ public class SqlCommand
 	protected RowActionMonitor rowMonitor;
 	protected boolean isUpdatingCommand = false;
 	protected ResultLogger resultLogger;
-	protected DefaultStatementRunner runner;
+	protected StatementRunner runner;
 	protected int queryTimeout = 0;
 
 	/**

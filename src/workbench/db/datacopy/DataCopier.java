@@ -43,7 +43,7 @@ public class DataCopier
 	private WbConnection targetConnection;
 
 	private RowDataProducer sourceData;
-	
+
 	private TableIdentifier sourceTable;
 	private TableIdentifier targetTable;
 
@@ -87,7 +87,7 @@ public class DataCopier
 		this.sourceData = source;
 		this.importer.setProducer(source);
 	}
-	
+
 	/**
 	 *	Define the source table, the target table and the column mapping
 	 *	for the copy process.
@@ -105,13 +105,13 @@ public class DataCopier
 		this.targetTable = aTargetTable;
 		this.useQuery = false;
 		this.targetColumnsForQuery = null;
-		
+
 		if (!this.sourceConnection.getMetadata().tableExists(aSourceTable))
 		{
 			this.addError(ResourceMgr.getString("ErrorCopySourceTableNotFound").replaceAll("%name%", aTargetTable.getTableName()));
 			throw new SQLException("Table " + aTargetTable.getTableName() + " not found in target connection");
 		}
-		
+
 		this.setSourceTableWhere(additionalWhere);
 		boolean exists = this.targetConnection.getMetadata().tableExists(aTargetTable);
 
@@ -190,7 +190,7 @@ public class DataCopier
 	{
 		this.importer.setKeyColumns(keys);
 	}
-	
+
 	/**
 	 *	Forwards the setMode() call to the DataImporter.
 	 *	@see workbench.db.importer.DataImporter#setMode(String)
@@ -204,7 +204,7 @@ public class DataCopier
 	{
 		this.importer.setReportInterval(value);
 	}
-	
+
 	/**
 	 *	Set the definition to copy a table from source to target.
 	 *	The table will be created in the target connection. If the table
@@ -220,10 +220,10 @@ public class DataCopier
 		this.targetTable = newTableName;
 		this.useQuery = false;
 		this.targetColumnsForQuery = null;
-		
+
 		this.setSourceTableWhere(additionalWhere);
 		boolean tableExists = target.getMetadata().tableExists(newTableName);
-		
+
 		if (tableExists && !drop)
 		{
 			LogMgr.logInfo("DataCopier.copyToNewTable()", "New table " + newTableName.getTableExpression() + " does already exist!");
@@ -459,15 +459,15 @@ public class DataCopier
 		{
 			public void run()
 			{
-				try 
-				{ 
+				try
+				{
 					// can't use start() because
 					// this would refer to the start() method
 					// of the thread, and not the from the DataCopier
-					DataCopier.this.start(); 
-				} 
-				catch (Throwable th) 
-				{ 
+					DataCopier.this.start();
+				}
+				catch (Throwable th)
+				{
 				}
 			}
 		};
@@ -590,7 +590,7 @@ public class DataCopier
 	public void cancel()
 	{
 		this.keepRunning = false;
-		if (this.sourceData != null) 
+		if (this.sourceData != null)
 		{
 			this.sourceData.cancel();
 		}
@@ -764,7 +764,7 @@ public class DataCopier
 		{
 			sourceCols = cols;
 		}
-		
+
 		List targetCols = this.targetConnection.getMetadata().getTableColumns(this.targetTable);
 
 		int count = targetCols.size();
@@ -787,7 +787,7 @@ public class DataCopier
 		}
 		if (requestedCols == null)
 		{
-			String msg = ResourceMgr.getString("MsgCopyColumnsUsed") + ": " + usedColumns.toString();
+			String msg = ResourceMgr.getString("MsgCopyColumnsUsed") + ": " + usedColumns.toString() + "\n";
 			this.addMessage(msg);
 		}
 	}
@@ -811,7 +811,7 @@ public class DataCopier
 	{
 		return this.importer.hasWarnings();
 	}
-	
+
 	public String getMessages()
 	{
 		if (this.messages == null) return null;

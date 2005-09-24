@@ -34,6 +34,7 @@ public class XmlExportWriter
 		converter.setLineEnding(exporter.getLineEnding());
 		converter.setUseVerboseFormat(exporter.getUseVerboseFormat());
 		converter.setTableNameToUse(exporter.getTableName());
+		converter.setBaseFilename(exporter.getOutputFilename());
 		return converter;
 	}
 

@@ -163,7 +163,26 @@ public class ResultInfo
 			
 			try
 			{
-				col.setColumnClass(metaData.getColumnClassName(i + 1));
+				String cls = metaData.getColumnClassName(i + 1);
+				// fix for drivers (such as Postgres') that use
+				// byte[] as the class for binary data, as I don't know
+				// what other drivers are doing, I'm simply anticipating 
+				// other array types as well. 
+				if (cls.charAt(0) == '[')
+				{
+					if (cls.equals("[B")) cls = "byte[]";
+					else if (cls.equals("[C")) cls = "char[]";
+					else if (cls.equals("[I")) cls = "int[]";
+					else if (cls.equals("[J")) cls = "long[]";
+					else if (cls.startsWith("[L"))
+					{
+						// a "class" starting with [L is a "real" Object not 
+						// a native data type, so we'll extract the real class
+						// name, and make that array of that class
+						cls = cls.substring(2, cls.length() - 1) + "[]";
+					}
+				}
+				col.setColumnClass(cls);
 			}
 			catch (Throwable e)
 			{

@@ -17,7 +17,8 @@ import java.io.Reader;
 import java.io.Writer;
 
 /**
- *
+ * A wrapper class for any "file" object that can be closed.
+ * (In JDK 1.5 the Closeable interface could be used, but I want to stay compatible with 1.4)
  * @author support@sql-workbench.net
  */
 public class CloseableDataStream

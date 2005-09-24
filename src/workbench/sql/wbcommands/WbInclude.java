@@ -48,6 +48,7 @@ public class WbInclude
 		cmdLine.addArgument("delimiter");
 		cmdLine.addArgument("verbose");
 		cmdLine.addArgument("encoding");
+		this.isUpdatingCommand = true;
 	}
 
 	public String getVerb() { return verb; }
@@ -88,6 +89,12 @@ public class WbInclude
 		File f = new File(file);
 		if (!f.exists())
 		{
+			String dir = this.runner.getBaseDir();
+			f = new File(dir, file);
+		}
+
+		if (!f.exists())
+		{
 			result.setFailure();
 			String msg = ResourceMgr.getString("ErrorIncludeFileNotFound");
 			msg = StringUtil.replace(msg, "%filename%", file);
@@ -103,7 +110,9 @@ public class WbInclude
 		String delim = cmdLine.getValue("delimiter");
 		try
 		{
-			batchRunner = new BatchRunner(file);
+			batchRunner = new BatchRunner(f.getCanonicalPath());
+			String dir = f.getCanonicalFile().getParent();
+			batchRunner.setBaseDir(dir);
 			batchRunner.setConnection(aConnection);
 			if (delim != null) batchRunner.setDelimiter(delim);
 			batchRunner.setResultLogger(this.resultLogger);

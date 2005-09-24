@@ -11,7 +11,12 @@
  */
 package workbench.db.importer;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -22,12 +27,14 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.util.CloseableDataStream;
 import workbench.util.ExceptionUtil;
 import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
 import workbench.util.FileUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import java.io.StringReader;
@@ -638,47 +645,14 @@ public class DataImporter
 	private int insertRow(Object[] row)
 		throws SQLException
 	{
-		//this.insertStatement.clearParameters();
-
-		for (int i=0; i < row.length; i++)
-		{
-			if (row[i] == null)
-			{
-				this.insertStatement.setNull(i + 1, this.targetColumns[i].getDataType());
-			}
-			else if (this.targetColumns[i].getDataType() == java.sql.Types.LONGVARCHAR ||
-				       "LONG".equals(this.targetColumns[i].getDbmsType()))
-			{
-				String value = row[i].toString();
-				int size = value.length();
-				Reader in = new StringReader(value);
-				this.insertStatement.setCharacterStream(i + 1, in, size);
-			}
-			else
-			{
-				if (this.dbConn.getMetadata().isOracle() &&
-					  this.targetColumns[i].getDataType() == java.sql.Types.DATE &&
-						row[i] instanceof java.sql.Date
-					)
-				{
-					java.sql.Timestamp ts = new java.sql.Timestamp(((java.sql.Date)row[i]).getTime());
-					this.insertStatement.setTimestamp(i + 1, ts);
-				}
-				else
-				{
-					this.insertStatement.setObject(i + 1, row[i]);
-				}
-			}
-		}
-
 		int rows = 0;
-		if (this.useBatch && this.isModeInsert())
+		if (this.useBatch)
 		{
-			this.insertStatement.addBatch();
+			sendRowData(this.insertStatement, row, true, false);
 		}
 		else
 		{
-			rows = this.insertStatement.executeUpdate();
+			rows = sendRowData(this.insertStatement, row, false, false);
 			this.insertedRows += rows;
 		}
 		return rows;
@@ -691,39 +665,82 @@ public class DataImporter
 	private int updateRow(Object[] row)
 		throws SQLException
 	{
-		int count = row.length;
-		for (int i=0; i < count; i++)
-		{
-			int realIndex = this.columnMap[i] + 1;
-			if (row[i] == null)
-			{
-				this.updateStatement.setNull(realIndex, this.targetColumns[i].getDataType());
-			}
-			else if (this.targetColumns[i].getDataType() == java.sql.Types.LONGVARCHAR ||
-						   "LONG".equals(this.targetColumns[i].getDbmsType()))
-			{
-				String value = row[i].toString();
-				Reader in = new StringReader(value);
-				this.updateStatement.setCharacterStream(realIndex, in, value.length());
-			}
-			else
-			{
-				this.updateStatement.setObject(realIndex, row[i]);
-			}
-		}
 		int rows = 0;
 		if (this.useBatch && this.isModeUpdate())
 		{
-			this.updateStatement.addBatch();
+			sendRowData(this.updateStatement, row, true, true);
 		}
 		else
 		{
-			rows = this.updateStatement.executeUpdate();
+			rows = sendRowData(this.updateStatement, row, false, true);
 			this.updatedRows += rows;
 		}
 		return rows;
 	}
 
+	private int sendRowData(PreparedStatement pstmt, Object[] row, boolean addBatch, boolean useColMap)
+		throws SQLException
+	{
+		for (int i=0; i < row.length; i++)
+		{
+			int colIndex = i  + 1;
+			if (useColMap)
+			{
+				colIndex = this.columnMap[i] + 1;
+			}
+			if (row[i] == null)
+			{
+				pstmt.setNull(colIndex, this.targetColumns[i].getDataType());
+			}
+			else if (this.targetColumns[i].getDataType() == java.sql.Types.LONGVARCHAR ||
+				       "LONG".equals(this.targetColumns[i].getDbmsType()))
+			{
+				String value = row[i].toString();
+				int size = value.length();
+				Reader in = new StringReader(value);
+				pstmt.setCharacterStream(colIndex, in, size);
+			}
+			else if (SqlUtil.isBlobType(this.targetColumns[i].getDataType()) && row[i] instanceof File)
+			{
+				File f = (File)row[i];
+				try
+				{
+					InputStream in = new BufferedInputStream(new FileInputStream(f), 64*1024);
+					pstmt.setBinaryStream(colIndex, in, (int)f.length());
+				}
+				catch (FileNotFoundException ex)
+				{
+					throw new SQLException("External data file " + f.getAbsolutePath() + " not found");
+				}
+			}
+			else
+			{
+				if (this.dbConn.getMetadata().isOracle() &&
+					  this.targetColumns[i].getDataType() == java.sql.Types.DATE &&
+						row[i] instanceof java.sql.Date
+					)
+				{
+					java.sql.Timestamp ts = new java.sql.Timestamp(((java.sql.Date)row[i]).getTime());
+					pstmt.setTimestamp(colIndex, ts);
+				}
+				else
+				{
+					pstmt.setObject(colIndex, row[i]);
+				}
+			}
+		}
+
+		int rows = 0;
+		if (addBatch)
+		{
+			pstmt.addBatch();
+		}
+		else
+		{
+			rows = pstmt.executeUpdate();
+		}
+		return rows;
+	}
 	/**
 	 * 	Oracle8 does not seem to support batch updates with the LONG
 	 *  datatype.

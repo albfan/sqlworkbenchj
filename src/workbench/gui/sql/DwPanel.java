@@ -561,14 +561,7 @@ public class DwPanel
 			this.lastMessage = this.lastMessage + ResourceMgr.getString("MsgExecTime") + " " + (((double)sqlTime) / 1000.0) + "s";
 			if (!ds.lastUpdateHadErrors())
 			{
-				EventQueue.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						endEdit();
-						repaint();
-					}
-				});
+				endEdit();
 			}
 		}
 		catch (SQLException e)
@@ -581,8 +574,6 @@ public class DwPanel
 			this.clearStatusMessage();
 			if (this.manageUpdateAction) this.enableUpdateActions();
 		}
-		
-		
 		return rows;
 	}
 	

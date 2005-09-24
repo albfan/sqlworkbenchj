@@ -86,6 +86,7 @@ public class XmlDataFileParser
 	private int realColIndex = 0;
 	private boolean ignoreCurrentColumn = false;
 	private long columnLongValue = 0;
+	private String columnDataFile = null;
 	private boolean hasLongValue = false;
 	private boolean isNull = false;
 	private StrBuffer chars;
@@ -511,6 +512,7 @@ public class XmlDataFileParser
 			}
 			attrValue = attrs.getValue(XmlRowDataConverter.ATTR_NULL);
 			this.isNull = "true".equals(attrValue);
+			columnDataFile = attrs.getValue(XmlRowDataConverter.ATTR_DATA_FILE);
 		}
 		else
 		{
@@ -672,6 +674,14 @@ public class XmlDataFileParser
 				}
 				break;
 
+			case Types.BINARY:
+			case Types.BLOB:
+			case Types.LONGVARBINARY:
+				File thisFile = new File(this.inputFile);
+				String fileDir = thisFile.getParent();
+				this.currentRow[this.realColIndex] = new File(fileDir, columnDataFile);
+				break;
+				
 			case Types.DECIMAL:
 			case Types.FLOAT:
 			case Types.DOUBLE:

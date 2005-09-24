@@ -130,10 +130,12 @@ public class DataStoreTableModel
 			if (aFlag)
 			{
 				this.statusOffset = 1;
+				if (this.sortColumn != -1) this.sortColumn++;
 			}
 			else
 			{
 				this.statusOffset = 0;
+				if (this.sortColumn != -1) this.sortColumn--;
 			}
 			this.showStatusColumn = aFlag;
 		}

@@ -32,4 +32,6 @@ public interface StatementRunner
 	void done();
 	void setRowMonitor(RowActionMonitor monitor);
 	void statementDone();
+	void setBaseDir(String dir);
+	String getBaseDir();
 }

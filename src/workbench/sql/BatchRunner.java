@@ -28,6 +28,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
 import workbench.db.WbConnection;
+import workbench.interfaces.StatementRunner;
 import workbench.util.ExceptionUtil;
 import workbench.interfaces.ResultLogger;
 import workbench.log.LogMgr;
@@ -48,7 +49,7 @@ import workbench.util.StringUtil;
 public class BatchRunner
 {
 	private List files;
-	private DefaultStatementRunner stmtRunner;
+	private StatementRunner stmtRunner;
 	private WbConnection connection;
 	private boolean abortOnError = false;
 	private String successScript;
@@ -64,12 +65,22 @@ public class BatchRunner
 	private boolean verboseLogging = true;
 	private boolean checkEscapedQuotes = false;
 	private String encoding = null;
+	private String baseDir;
 
 	public BatchRunner(String aFilelist)
 	{
 		this.files = StringUtil.stringToList(aFilelist, ",", true);
 	}
 
+	public void setBaseDir(String dir) 
+	{ 
+		baseDir = dir; 
+		if (this.stmtRunner != null)
+		{
+			this.stmtRunner.setBaseDir(dir);
+		}
+	}
+	
 	public void showResultSets(boolean flag)
 	{
 		this.showResultSets = flag;
@@ -111,6 +122,7 @@ public class BatchRunner
 		this.stmtRunner = new DefaultStatementRunner();
 		this.stmtRunner.setConnection(this.connection);
 		this.stmtRunner.setVerboseLogging(this.verboseLogging);
+		this.stmtRunner.setBaseDir(this.baseDir);
 	}
 
 	public void connect()
@@ -192,7 +204,7 @@ public class BatchRunner
 
 			try
 			{
-				String msg = ResourceMgr.getString("MsgBatchProcessingFile") + " " + file;
+				String msg = ResourceMgr.getString("MsgBatchProcessingFile") + " " + fo.getCanonicalPath();
 				LogMgr.logInfo("BatchRunner", msg);
 				if (this.resultDisplay != null)
 				{
@@ -200,15 +212,6 @@ public class BatchRunner
 					this.resultDisplay.appendToLog("\n");
 				}
 				error = this.executeScript(fo);
-				/*
-				if (this.resultDisplay != null)
-				{
-					msg = ResourceMgr.getString("MsgBatchProcessingFileDone") + " " + file;
-					this.resultDisplay.appendToLog(msg);
-					this.resultDisplay.appendToLog("\n");
-				}
-				*/
-				LogMgr.logInfo("BatchRunner", msg);
 			}
 			catch (Exception e)
 			{
@@ -281,11 +284,11 @@ public class BatchRunner
 		long start, end;
 
 		int interval;
-		if (scriptFile.length() < 5000)
+		if (scriptFile.length() < 50000)
 		{
 			interval = 1;
 		}
-		if (scriptFile.length() < 100000)
+		else if (scriptFile.length() < 100000)
 		{
 			interval = 10;
 		}
@@ -307,7 +310,7 @@ public class BatchRunner
 			{
 				if (this.resultDisplay == null && LogMgr.isDebugEnabled()) LogMgr.logDebug("BatchRunner", ResourceMgr.getString("MsgBatchExecutingStatement") + " "  + sql);
 				long verbstart = System.currentTimeMillis();
-				this.stmtRunner.runStatement(sql, 0);
+				this.stmtRunner.runStatement(sql, 0, -1);
 				long verbend = System.currentTimeMillis();
 				result = this.stmtRunner.getResult();
 				if (result.hasMessages() && (this.stmtRunner.getVerboseLogging() || !result.isSuccess()))
@@ -362,15 +365,20 @@ public class BatchRunner
 			if (error && abortOnError) break;
 		}
 		end = System.currentTimeMillis();
-		String msg = executedCount + " " + ResourceMgr.getString("MsgTotalStatementsExecuted");
-		this.printMessage(msg);
+		StringBuffer msg = new StringBuffer();
+		msg.append(scriptFile.getCanonicalPath());
+		msg.append(": ");
+		msg.append(executedCount);
+		msg.append(' ');
+		msg.append(ResourceMgr.getString("MsgTotalStatementsExecuted"));
+		this.printMessage(msg.toString());
 		parser.done();
 
 		if (this.showTiming)
 		{
 			long execTime = (end - start);
-			msg = ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s";
-			this.printMessage(msg);
+			String m = ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s";
+			this.printMessage(m);
 		}
 
 		return error;

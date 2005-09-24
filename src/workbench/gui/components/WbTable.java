@@ -171,7 +171,7 @@ public class WbTable
 	private boolean adjustToColumnLabel = false;
 	private int headerPopupY = -1;
 	private int headerPopupX = -1;
-	private HashMap savedColumnSizes;
+	private int[] savedColumnSizes;
 	private int maxColWidth = 32768;
 	private int minColWidth = 10;
 
@@ -892,16 +892,15 @@ public class WbTable
 			this.initDefaultEditors();
 			this.restoreColumnSizes();
 
-			this.setSuspendRepaint(false);
-
-			if (sortColumn > -1 && this.dwModel != null)
-			{
-				if (aFlag)
-					sortColumn ++;
-				else
-					sortColumn --;
-				this.dwModel.sortByColumn(sortColumn, asc);
-			}
+//			if (sortColumn > -1 && this.dwModel != null)
+//			{
+//				if (aFlag)
+//					sortColumn ++;
+//				else
+//					sortColumn --;
+//				this.dwModel.sortByColumn(sortColumn, asc);
+//			}
+			
 			if (row >= 0)
 			{
 				this.getSelectionModel().setSelectionInterval(row, row);
@@ -1065,34 +1064,30 @@ public class WbTable
 	{
 		TableColumnModel colMod = this.getColumnModel();
 		int count = colMod.getColumnCount();
-		this.savedColumnSizes = new HashMap(count);
-		for (int i=0; i < count; i++)
+		this.savedColumnSizes = new int[count];
+		int start = 0;
+		if (this.dwModel.getShowStatusColumn()) start = 1;
+		
+		for (int i=start; i < count; i++)
 		{
 			TableColumn col = colMod.getColumn(i);
-			String name = this.getColumnName(i);
-			Integer width = new Integer(col.getPreferredWidth());
-			this.savedColumnSizes.put(name, width);
+			savedColumnSizes[i-start] = col.getPreferredWidth();
 		}
 	}
 
 	public void restoreColumnSizes()
 	{
-		if (this.savedColumnSizes == null || this.savedColumnSizes.size() == 0) return;
-		Iterator itr = this.savedColumnSizes.entrySet().iterator();
-		while (itr.hasNext())
+		if (this.savedColumnSizes == null || this.savedColumnSizes.length == 0) return;
+		int start = 0;
+		TableColumnModel colMod = this.getColumnModel();
+		int count = colMod.getColumnCount();
+		if (this.dwModel.getShowStatusColumn()) start = 1;
+		
+		for (int i=start; i < count; i++)
 		{
-			Entry entry = (Entry)itr.next();
-			try
-			{
-				TableColumn col = this.getColumn(entry.getKey());
-				int width = ((Integer)entry.getValue()).intValue();
-				col.setPreferredWidth(width);
-			}
-			catch (Throwable th)
-			{
-				// ignore errors for columns which do no longer exist
-			}
-		}
+			TableColumn col = colMod.getColumn(i);
+			col.setPreferredWidth(savedColumnSizes[i-start]);
+		}		
 		this.savedColumnSizes = null;
 	}
 

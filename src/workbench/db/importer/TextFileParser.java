@@ -70,6 +70,7 @@ public class TextFileParser
 	private boolean emptyStringIsNull = false;
 	private boolean trimValues = false;
 
+	private JobErrorHandler handler;
 	private RowDataReceiver receiver;
 	private String dateFormat;
 	private String timestampFormat;
@@ -337,6 +338,7 @@ public class TextFileParser
 
 	public String getMessages()
 	{
+		if (messages == null) return null;
 		return this.messages.toString();
 	}
 
@@ -634,6 +636,7 @@ public class TextFileParser
 						msg = msg.replaceAll("%value%", (value == null ? "(NULL)" : value.toString()));
 						msg = msg.replaceAll("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
 						LogMgr.logWarning("TextFileParser.start()",msg, e);
+						if (this.messages == null) this.messages = new StrBuffer();
 						this.messages.append(msg);
 						this.messages.append("\n");
 						if (this.abortOnError) throw e;
@@ -954,7 +957,9 @@ public class TextFileParser
 		this.trimValues = trimValues;
 	}
 
-    public void setErrorHandler(JobErrorHandler handler) {
-    }
+	public void setErrorHandler(JobErrorHandler handler)
+	{
+		this.errorHandler = handler;
+	}
 
 }

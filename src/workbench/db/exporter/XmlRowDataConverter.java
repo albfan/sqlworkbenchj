@@ -14,6 +14,7 @@ package workbench.db.exporter;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Blob;
 import java.sql.Types;
@@ -52,6 +53,7 @@ public class XmlRowDataConverter
 	public static final String COLUMN_NAME_TAG = ReportColumn.TAG_COLUMN_NAME;
 	public static final String ATTR_LONGVALUE = "longValue";
 	public static final String ATTR_NULL = "null";
+	public static final String ATTR_DATA_FILE = "dataFile";
 	public static final String KEY_FORMAT_LONG = "long";
 	public static final String KEY_FORMAT_SHORT = "short";
 	public static final String TAG_TAG_FORMAT = "wb-tag-format";
@@ -66,7 +68,8 @@ public class XmlRowDataConverter
 	private String closeColTag = "</" + coltag + ">";
 	private String closeRowTag = "</" + rowtag + ">";
 	private String tableToUse = null;
-
+	private String baseFilename;
+	
 	public XmlRowDataConverter(ResultInfo info)
 	{
 		super(info);
@@ -118,7 +121,15 @@ public class XmlRowDataConverter
 		return xml;
 	}
 
-
+	public void setBaseFilename(String name) 
+	{ 
+		File f = new File(name);
+		String fname = f.getName();
+		int pos = fname.lastIndexOf('.');
+		if (pos == -1) pos = fname.length() - 1;
+		this.baseFilename = fname.substring(0, pos) + "_";
+	}
+	
 	public StrBuffer getEnd(long totalRows)
 	{
 		StrBuffer xml = new StrBuffer(100);
@@ -156,7 +167,7 @@ public class XmlRowDataConverter
 		StrBuffer indent = new StrBuffer("    ");
 		int colCount = this.metaData.getColumnCount();
 		StrBuffer xml = new StrBuffer(colCount * 100);
-		StringBuffer externalFilename = null;
+		StringBuffer dataFile = null;
 
 		if (this.verboseFormat)
 		{
@@ -174,7 +185,7 @@ public class XmlRowDataConverter
 			Object data = row.getValue(c);
 			int type = this.metaData.getColumnType(c);
 			boolean isNull = (data == null || data instanceof NullValue);
-			
+			boolean writeCloseTag = true;
 			if (this.verboseFormat) xml.append(indent);
 			xml.append(startColTag);
 			if (this.verboseFormat)
@@ -202,15 +213,19 @@ public class XmlRowDataConverter
 			}
 			else if (SqlUtil.isBlobType(type))
 			{
-				externalFilename = new StringBuffer(100);
-				externalFilename.append("row_");
-				externalFilename.append(rowIndex + 1);
-				externalFilename.append("_column_");
-				externalFilename.append(c + 1);
-				externalFilename.append("_data.dat");
-				xml.append(" externalFile=\"");
-				xml.append(externalFilename);
-				xml.append("\"");
+				dataFile = new StringBuffer(100);
+				dataFile.append(baseFilename);
+				dataFile.append('r');
+				dataFile.append(rowIndex + 1);
+				dataFile.append("_c");
+				dataFile.append(c);
+				dataFile.append(".dat");
+				xml.append(' ');
+				xml.append(ATTR_DATA_FILE);
+				xml.append("=\"");
+				xml.append(dataFile);
+				xml.append("\"/");
+				writeCloseTag = false;
 			}
 			xml.append('>');
 
@@ -232,14 +247,14 @@ public class XmlRowDataConverter
 				}
 				else if (SqlUtil.isBlobType(type))
 				{
-					writeBlobFile(externalFilename, data);
+					writeBlobFile(dataFile, data);
 				}
 				else
 				{
 					xml.append(this.getValueAsFormattedString(row, c));
 				}
 			}
-			xml.append(closeColTag);
+			if (writeCloseTag) xml.append(closeColTag);
 			if (this.verboseFormat) xml.append(this.lineEnding);
 		}
 		if (this.verboseFormat) xml.append(indent);
@@ -255,17 +270,23 @@ public class XmlRowDataConverter
 		{
 			File f = new File(this.baseDir, file.toString());
 			out = new BufferedOutputStream(new FileOutputStream(f), 64*1024);
-			byte[] binary = null;
 			if (data instanceof byte[])
 			{
-				binary = (byte[])data;
+				out.write((byte[])data);
 			}
 			else if (data instanceof Blob)
 			{
 				Blob bl = (Blob)data;
-				binary = bl.getBytes(0, (int)bl.length());
+				InputStream in = bl.getBinaryStream();
+				int buffsize = 32*1024;
+				byte[] buffer = new byte[buffsize];
+				int read = in.read(buffer);
+				while (read > -1)
+				{
+					out.write(buffer, 0, read);
+					read = in.read(buffer);
+				}
 			}
-			out.write(binary);
 		}
 		catch (Exception e)
 		{

@@ -13,6 +13,7 @@ package workbench.db.importer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.xml.sax.ErrorHandler;
 import workbench.db.ColumnIdentifier;
 import workbench.gui.dialogs.dataimport.ImportOptions;
 import workbench.gui.dialogs.dataimport.TextImportOptions;
@@ -91,6 +92,11 @@ public class DataStoreImporter
 		this.source.setAbortOnError(false);
 		this.source.setErrorHandler(this.errorHandler);
 		
+	}
+	
+	public String getMessage()
+	{
+		return this.source.getMessages();
 	}
 	
 	public void processRow(Object[] row) throws SQLException
