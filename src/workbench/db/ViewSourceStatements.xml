@@ -135,6 +135,21 @@ catalog_definition_schema.sysschema
     </void> 
    </object> 
   </void> 
+
+  <void method="put"> 
+   <string>MySQL</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>SELECT view_definition FROM INFORMATION_SCHEMA.VIEWS</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>TABLE_NAME</string> 
+    </void> 
+    <void property="useUpperCase"> 
+      <boolean>false</boolean> 
+    </void> 
+   </object> 
+  </void> 
   
   <void method="put"> 
    <string>HSQL Database Engine</string> 

@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import workbench.db.DbMetadata;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
+import workbench.db.WbConnection;
 import workbench.storage.DataStore;
 import workbench.util.StrBuffer;
 
@@ -44,7 +45,7 @@ public class FirebirdMetadata
 		return reader.getProcedureColumns(aCatalog, aSchema, aProcname);
 	}
 	
-	public StrBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname)
+	public StrBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
 	{
 		StrBuffer source = new StrBuffer();
 		try

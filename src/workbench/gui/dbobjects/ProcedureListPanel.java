@@ -17,6 +17,7 @@ import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -353,7 +354,7 @@ public class ProcedureListPanel
 		final String proc = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
 		final String schema = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
 		final String catalog = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
-
+		final int type = this.procList.getDataStore().getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
@@ -379,7 +380,7 @@ public class ProcedureListPanel
 
 					try
 					{
-						String sql = meta.getProcedureSource(catalog, schema, proc);
+						String sql = meta.getProcedureSource(catalog, schema, proc, type);
 						source.setText(sql);
 					}
 					catch (Exception ex)

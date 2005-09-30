@@ -124,6 +124,21 @@ where trg.tgrelid = tbl.oid
   </void>
   
   <void method="put"> 
+   <string>MySQL</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>SELECT concat('CREATE TRIGGER ',trigger_name, ' ', action_timing, ' ', event_manipulation, '\n  ON ', event_object_table, '\n  FOR EACH ROW', action_statement) FROM information_schema.triggers</string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>trigger_name</string> 
+    </void> 
+    <void property="schemaField"> 
+     <string>trigger_schema</string> 
+    </void> 
+   </object> 
+  </void> 
+  
+  <void method="put"> 
    <string>HSQL Database Engine</string> 
    <object class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 

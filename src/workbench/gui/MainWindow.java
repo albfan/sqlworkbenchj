@@ -824,10 +824,6 @@ public class MainWindow
 
 	public void windowDeiconified(WindowEvent windowEvent)
 	{
-//		if (this.dbExplorerPanel != null)
-//		{
-//			this.dbExplorerPanel.mainWindowDeiconified();
-//		}
 	}
 
 	public void windowClosing(WindowEvent windowEvent)
@@ -837,8 +833,6 @@ public class MainWindow
 
 	public void windowDeactivated(WindowEvent windowEvent)
 	{
-		SqlPanel p = this.getCurrentSqlPanel();
-		if (p != null) p.checkFocus();
 	}
 
 	public void windowActivated(WindowEvent windowEvent)
@@ -867,7 +861,7 @@ public class MainWindow
 			public void run()
 			{
 				if (m != null) m.setSelected(false);
-				if (p != null) p.restoreFocus();			}
+			}
 		});
 	}
 
@@ -1007,6 +1001,11 @@ public class MainWindow
 	public void connectEnded()
 	{
 		this.clearConnectIsInProgress();
+		MainPanel p = this.getCurrentPanel();
+		if (p instanceof SqlPanel)
+		{
+			((SqlPanel)p).selectEditorLater();
+		}
 	}
 
 	private static final int CREATE_WORKSPACE = 0;

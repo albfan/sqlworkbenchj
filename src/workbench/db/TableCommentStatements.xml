@@ -12,5 +12,10 @@
    <string>COMMENT ON TABLE %table% IS '%comment%';</string>
   </void>
   
+  <void method="put">
+    <string>MySQL</string>
+    <string>ALTER TABLE %table% COMMENT '%comment%';</string>
+  </void>
+  
  </object>
 </java>

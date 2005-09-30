@@ -202,7 +202,7 @@ public class ResourceMgr
 
 	public static InputStream getDefaultSettings()
 	{
-		InputStream in = ResourceMgr.class.getResourceAsStream("guidefaults.properties");
+		InputStream in = ResourceMgr.class.getResourceAsStream("default.properties");
 
 		return in;
 	}

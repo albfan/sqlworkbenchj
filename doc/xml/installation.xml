@@ -228,9 +228,27 @@
 
             <row>
               <entry>-server</entry>
-              <entry>Select the server JVM (instead of the default client JVM)</entry>
+              <entry>Select the server JVM (instead of the default client JVM). 
+              This switch only works with the Sun JVM.</entry>
             </row>
 
+            <row>
+              <entry>-client</entry>
+              <entry>Select the client JVM. This switch only works with the Sun JVM.</entry>
+            </row>
+
+            <row>
+              <entry>-jvmtype=typename</entry>
+              <entry>Select the JVM type to be loaded. For the Sun JVM this 
+              may be either <literal>client</literal> or <literal>server</literal> (equivalent
+              to the -server or -client switches). If the JDK identified with the
+              -jdk switch points to BEA's JRockit&tm; JVM, this should be
+              <literal>jrockit</literal> (i.e. -jvtype=jrockit). Basically the value
+              of this switch is used to locate the <literal>jvm.dll</literal>
+              in the base directory specified with the -jdk switch.
+              </entry>
+            </row>
+            
             <row>
               <entry>-noddraw</entry>
               <entry>Disable the use of DirectDraw routines for the JVM. Use this

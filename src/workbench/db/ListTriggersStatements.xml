@@ -168,6 +168,28 @@ where trg.tgrelid = tbl.oid
     </void> 
    </object> 
   </void> 
+
+  <void method="put"> 
+   <string>MySQL</string> 
+   <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseSql"> 
+     <string>SELECT trigger_name,
+                    action_timing AS trigger_type,
+                    event_manipulation as trigger_event
+             FROM information_schema.triggers
+      </string> 
+    </void> 
+    <void property="objectNameField"> 
+     <string>event_object_table</string> 
+    </void> 
+    <void property="schemaField"> 
+     <string>event_object_schema</string> 
+    </void> 
+    <void property="orderBy"> 
+     <string>ORDER BY trigger_name</string> 
+    </void> 
+   </object> 
+  </void> 
   
   <void method="put"> 
    <string>HSQL Database Engine</string> 

@@ -166,8 +166,6 @@ public class SqlPanel
 						MainPanel, Exporter, TextFileContainer, DbUpdater, Interruptable, FormattableSql, Commitable,
 						JobErrorHandler, FilenameChangeListener, ExecutionController, ResultLogger
 {
-	private static int instanceCount = 0;
-	
 	private EditorPanel editor;
 	private DwPanel data;
 	private SqlHistory sqlHistory;
@@ -183,10 +181,6 @@ public class SqlPanel
 
 	private List filenameChangeListeners;
 
-	private NextStatementAction nextStmtAction;
-	private PrevStatementAction prevStmtAction;
-	private FirstStatementAction firstStmtAction;
-	private LastStatementAction lastStmtAction;
 	private StopAction stopAction;
 	private ExecuteAllAction executeAll;
 	private ExecuteCurrentAction executeCurrent;
@@ -250,7 +244,6 @@ public class SqlPanel
 		DwStatusBar statusBar = new DwStatusBar(true);
 		Border b = BorderFactory.createCompoundBorder(new EmptyBorder(2, 1, 0, 1), new EtchedBorder());
 		statusBar.setBorder(b);
-		instanceCount ++;
 		this.data = new DwPanel(statusBar);
 		this.data.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.data.setDoubleBuffered(true);
@@ -289,6 +282,8 @@ public class SqlPanel
 		this.add(this.contentPanel, BorderLayout.CENTER);
 		this.add(statusBar, BorderLayout.SOUTH);
 
+		this.initStatementHistory();
+		
 		this.initActions();
 		this.initToolbar();
 		this.setupActionMap();
@@ -297,7 +292,6 @@ public class SqlPanel
 		this.data.getTable().setMinColWidth(Settings.getInstance().getMinColumnWidth());
 		this.makeReadOnly();
 		this.checkResultSetActions();
-		this.initStatementHistory();
 
 		Settings s = Settings.getInstance();
 		s.addFontChangedListener(this);
@@ -336,11 +330,6 @@ public class SqlPanel
 		return this.toolbar;
 	}
 
-	public DwPanel getData()
-	{
-		return this.data;
-	}
-
 	private void initToolbar()
 	{
 		this.toolbar = new WbToolbar();
@@ -367,16 +356,6 @@ public class SqlPanel
 		this.toolbar.add(anAction.getToolbarButton(true), this.toolbar.getComponentCount() - 1);
 		if (withSeperator) this.toolbar.add(new WbToolbarSeparator(), this.toolbar.getComponentCount() - 1);
 	}
-
-//	public void updateUI()
-//	{
-//		super.updateUI();
-//		if (this.toolbar != null)
-//		{
-//			this.toolbar.updateUI();
-//			this.toolbar.repaint();
-//		}
-//	}
 
 	public boolean readFile(String aFilename, String encoding)
 	{
@@ -432,8 +411,6 @@ public class SqlPanel
 
 	public boolean reloadFile()
 	{
-		Exception e = new Exception();
-		e.printStackTrace();
 		if (this.editor.reloadFile())
 		{
 			this.showFileIcon();
@@ -496,7 +473,6 @@ public class SqlPanel
 	{
 		if (this.sqlHistory != null) this.sqlHistory.clear();
 		this.editor.setText("");
-		this.checkStatementActions();
 	}
 
 	public boolean closeFile(boolean emptyEditor)
@@ -573,9 +549,6 @@ public class SqlPanel
 		this.editor.showFindOnPopupMenu();
 		this.editor.showFormatSql();
 
-		//this.editor.addPopupMenuItem(makeLower, true);
-		//this.editor.addPopupMenuItem(makeUpper, false);
-
 		this.editor.addPopupMenuItem(this.executeSelected, true);
 		this.editor.addPopupMenuItem(this.executeAll, false);
 		this.editor.addPopupMenuItem(this.executeCurrent, false);
@@ -629,7 +602,7 @@ public class SqlPanel
 		this.actions.add(this.data.getCopyRowAction());
 		this.actions.add(this.data.getDeleteRowAction());
 
-		this.createDeleteScript = new CreateDeleteScriptAction(this);
+		this.createDeleteScript = new CreateDeleteScriptAction(this.data.getTable());
 		this.actions.add(this.createDeleteScript);
 
 		this.exportDataAction = this.data.getTable().getExportAction();
@@ -641,7 +614,7 @@ public class SqlPanel
 		this.actions.add(sea);
 		SelectResultAction r = new SelectResultAction(this);
 		this.actions.add(r);
-		this.actions.add(new SelectMaxRowsAction(this));
+		this.actions.add(new SelectMaxRowsAction(this.data));
 
 		a = new ExpandEditorAction(this);
 		a.setCreateMenuSeparator(true);
@@ -704,21 +677,10 @@ public class SqlPanel
 		this.toggleAutoCommit = new ToggleAutoCommitAction();
 		this.actions.add(this.toggleAutoCommit);
 		
-		this.firstStmtAction = new FirstStatementAction(this);
-		this.firstStmtAction.setEnabled(false);
-		this.actions.add(this.firstStmtAction);
-
-		this.prevStmtAction = new PrevStatementAction(this);
-		this.prevStmtAction.setEnabled(false);
-		this.actions.add(this.prevStmtAction);
-
-		this.nextStmtAction = new NextStatementAction(this);
-		this.nextStmtAction.setEnabled(false);
-		this.actions.add(this.nextStmtAction);
-
-		this.lastStmtAction = new LastStatementAction(this);
-		this.lastStmtAction.setEnabled(false);
-		this.actions.add(this.lastStmtAction);
+		this.actions.add(this.sqlHistory.getShowFirstStatementAction());
+		this.actions.add(this.sqlHistory.getShowPreviousStatementAction());
+		this.actions.add(this.sqlHistory.getShowNextStatementAction());
+		this.actions.add(this.sqlHistory.getShowLastStatementAction());
 
 		this.actions.add(new AutoJumpNextStatement());
 		a = new HighlightCurrentStatement();
@@ -736,11 +698,11 @@ public class SqlPanel
 		
 		this.stopAction.setCreateToolbarSeparator(true);
 		this.toolbarActions.add(this.stopAction);
-		this.toolbarActions.add(this.firstStmtAction);
-		this.toolbarActions.add(this.prevStmtAction);
-		this.toolbarActions.add(this.nextStmtAction);
-		this.toolbarActions.add(this.lastStmtAction);
-
+		this.toolbarActions.add(this.sqlHistory.getShowFirstStatementAction());
+		this.toolbarActions.add(this.sqlHistory.getShowPreviousStatementAction());
+		this.toolbarActions.add(this.sqlHistory.getShowNextStatementAction());
+		this.toolbarActions.add(this.sqlHistory.getShowLastStatementAction());
+		
 		this.toolbarActions.add(this.data.getUpdateDatabaseAction());
 		this.toolbarActions.add(this.data.getStartEditAction());
 		this.toolbarActions.add(this.data.getInsertRowAction());
@@ -797,7 +759,7 @@ public class SqlPanel
 		this.actions.add(this.printDataAction);
 		this.actions.add(this.printPreviewAction);
 
-		this.disableExecuteActions();
+		this.setExecuteActionStates(false);
 	}
 
 	private void setupActionMap()
@@ -838,65 +800,30 @@ public class SqlPanel
 		this.selectEditorLater();
 	}
 
-	private JTabbedPane parentTab;
-
 	private boolean isCurrentTab()
 	{
-		if (this.parentTab == null)
+		JTabbedPane parentTab = null;
+		Component p = this.getParent();
+		if (p instanceof JTabbedPane)
 		{
-			Component p = this.getParent();
-			if (p instanceof JTabbedPane)
-			{
-				this.parentTab = (JTabbedPane)p;
-			}
+			parentTab = (JTabbedPane)p;
 		}
+		if (parentTab == null) return false;
 
-		if (this.parentTab == null) return false;
-
-		return (this.parentTab.getSelectedComponent() == this);
-	}
-
-	private boolean editorFocusPending = false;
-	private Component currentFocus = null;
-
-	public void checkFocus()
-	{
-		this.currentFocus = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
-		//this.editorFocusPending = (this.currentFocus == this.editor);
+		return (parentTab.getSelectedComponent() == this);
 	}
 
 	public void selectEditor()
 	{
 		// make sure the panel and its window are really visible
-		// before requesting the focus, otherwise the window
-		// will be put into front.
+		// before putting the focus to the editor
 		Window w = SwingUtilities.getWindowAncestor(this);
 		if (w == null) return;
 
 		if (w.isActive() && w.isVisible() && w.isFocused() && this.isVisible() && this.isCurrentTab() && editor != null)
 		{
 			editor.requestFocusInWindow();
-			this.editorFocusPending = false;
 		}
-		else
-		{
-			this.editorFocusPending = true;
-			this.currentFocus = null;
-		}
-	}
-
-	public void restoreFocus()
-	{
-		if (this.editorFocusPending && editor != null)
-		{
-			editor.requestFocusInWindow();
-		}
-		else if (this.currentFocus != null)
-		{
-			currentFocus.requestFocusInWindow();
-		}
-		this.currentFocus = null;
-		this.editorFocusPending = false;
 	}
 
 	public void selectResult()
@@ -925,7 +852,7 @@ public class SqlPanel
 		this.updateRunning = true;
 		this.showStatusMessage(ResourceMgr.getString("MsgUpdatingDatabase"));
 		this.setCancelState(true);
-		this.disableExecuteActions();
+		this.setExecuteActionStates(false);
 
 		Thread t = new WbThread("Workbench DB Update Thread")
 		{
@@ -975,7 +902,7 @@ public class SqlPanel
 			WbSwingUtilities.showDefaultCursor(this);
 		}
 
-		this.enableExecuteActions();
+		this.setExecuteActionStates(true);
 
 		if (success)
 		{
@@ -1066,61 +993,12 @@ public class SqlPanel
 	public void initStatementHistory()
 	{
 		int size = Settings.getInstance().getMaxHistorySize();
-
-		this.sqlHistory = new SqlHistory(size);
-		this.checkStatementActions();
-	}
-
-	private void checkStatementActions()
-	{
-		if (this.sqlHistory == null)
-		{
-			this.nextStmtAction.setEnabled(false);
-			this.prevStmtAction.setEnabled(false);
-			this.lastStmtAction.setEnabled(false);
-			this.firstStmtAction.setEnabled(false);
-		}
-		else
-		{
-			this.nextStmtAction.setEnabled(this.sqlHistory.hasNext());
-			this.lastStmtAction.setEnabled(this.sqlHistory.hasNext());
-			this.prevStmtAction.setEnabled(this.sqlHistory.hasPrevious());
-			this.firstStmtAction.setEnabled(this.sqlHistory.hasPrevious());
-		}
-	}
-
-	public void showNextStatement()
-	{
-		this.sqlHistory.showNext(this.editor);
-		this.checkStatementActions();
-		this.selectEditor();
-	}
-
-	public void showPrevStatement()
-	{
-		this.sqlHistory.showPrevious(editor);
-		this.checkStatementActions();
-		this.selectEditor();
-	}
-
-	public void showFirstStatement()
-	{
-		this.sqlHistory.showFirst(editor);
-		this.checkStatementActions();
-		this.selectEditor();
-	}
-
-	public void showLastStatement()
-	{
-		this.sqlHistory.showLast(editor);
-		this.checkStatementActions();
-		this.selectEditor();
+		this.sqlHistory = new SqlHistory(editor,size);
 	}
 
 	public void showCurrentHistoryStatement()
 	{
-		this.sqlHistory.showCurrent(editor);
-		this.checkStatementActions();
+		this.sqlHistory.showCurrent();
 		this.selectEditor();
 	}
 
@@ -1249,12 +1127,10 @@ public class SqlPanel
 			{
 				fname = "[" + tabName + "]";
 			}
-			//this.showIconForTab(getFileIcon());
 		}
 		else
 		{
 			fname = this.getTabName();
-			//this.removeIconFromTab();
 		}
 		if (fname == null) fname = defaultLabel;
 		return fname;
@@ -1425,7 +1301,6 @@ public class SqlPanel
 	public synchronized void storeStatementInHistory()
 	{
 		this.sqlHistory.addContent(editor);
-		this.checkStatementActions();
 	}
 
 	public void cancelUpdate()
@@ -1877,7 +1752,7 @@ public class SqlPanel
 			                        dialog.getTextOptions(), 
 			                        dialog.getXmlOptions());
 		
-		File f = new File(filename);//lastDir = fc.getCurrentDirectory().getAbsolutePath();
+		File f = new File(filename);
 		Settings.getInstance().setLastImportDir(f.getParent());
 		dialog.saveSettings();
 
@@ -2344,28 +2219,6 @@ public class SqlPanel
 		this.editor.selectError(startPos, endPos);
 	}
 
-	public void generateDeleteScript()
-	{
-		final WbTable table = this.data.getTable();
-		if (table == null) return;
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				try
-				{
-					DeleteScriptGenerator gen = new DeleteScriptGenerator(dbConnection);
-					gen.setSource(table);
-					gen.startGenerate();
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError("SqlPanel.generateDeleteScript()", "Error initializing DeleteScriptGenerator", e);
-				}
-			}
-		});
-	}
-
 	private void checkResultSetActions()
 	{
 		if (this.data == null) return;
@@ -2390,9 +2243,6 @@ public class SqlPanel
 		this.importFileAction.setEnabled(mayEdit);
 	}
 
-	private void enableExecuteActions() { this.setExecuteActionStates(true); }
-	private void disableExecuteActions() { this.setExecuteActionStates(false); }
-	
 	private void setExecuteActionStates(boolean aFlag)
 	{
 		this.executeAll.setEnabled(aFlag);
@@ -2641,6 +2491,11 @@ public class SqlPanel
 		this.toolbar = null;
 		this.abortExecution();
 		this.executionThread = null;
+		this.connectionInfo = null;
+		if (cancelIcon != null) cancelIcon.getImage().flush();
+		if (loadingIcon != null) loadingIcon.getImage().flush();
+		if (fileIcon != null) fileIcon.getImage().flush();
+		if (fileModifiedIcon != null) fileModifiedIcon.getImage().flush();
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)

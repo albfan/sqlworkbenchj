@@ -226,7 +226,7 @@ BEGIN
   RETURN result;
 END;
 ./</programlisting>
-        <para>&wb-productname; will use the alternate delimiter as the whole script is terminated
+        <para>&wb-productname; will use the alternate delimiter because the whole script is terminated
         with it. But as there is a semicolon between the <literal>SELECT</literal> and the <literal>CREATE</literal>
         statement, the whole script will be seen as one statement and it will be sent to the database
         as one statement (which of course will lead to an error).
@@ -241,21 +241,27 @@ END;
         BLOB clumns are sometimes also referred to as binary data. CLOB columns 
         are sometimes also referred to as <literal>LONG VARCHAR</literal>. The exact data type 
         depends on the DBMS used</para>
-        <para>To insert and update LOB columns the usual <literal>INSERT</literal> and
+      <para>To insert and update LOB columns the usual <literal>INSERT</literal> and
         <literal>UPDATE</literal> statements can be used by using a special
         placeholder to define the source for the LOB data. When updating the 
         LOB column, a different placeholder for BLOB and CLOB columns has to be used as
         the process of reading and sending the data is different for binary and character
         data.
       </para>
+      <note>
+        <para>Only the Oracle 10g driver supports the standard JDBC calls used by &wb-productname; 
+        to read and write the LOB data. Earlier drivers will not work as described in this chapter. 
+        </para>
+      </note>
+      
       <section>
          <title>Updating binary data</title>
          <para>To update a BLOB (or binary) column, use the placeholder 
-         <literal>${blobfile=path_to_file}</literal> in the place where the 
+         <literal>{$blobfile=path_to_file}</literal> in the place where the 
          actual value has to occur in the <literal>INSERT</literal> or <literal>UPDATE</literal>
          statement:
          </para>
-         <programlisting>UPDATE theTable SET blob_col = ${blobfile=c:/data/image.bmp} WHERE id=24;</programlisting>
+         <programlisting>UPDATE theTable SET blob_col = {$blobfile=c:/data/image.bmp} WHERE id=24;</programlisting>
          <para>
            &wb-productname; will rewrite the UPDATE statement and send the contents
           of the file located in <literal>c:/data/image.bmp</literal> to the database. The syntax
@@ -265,7 +271,7 @@ END;
           to send the blob data. You should make sure to update only one row by specifying an
           approriate <literal>WHERE</literal> clause.
          </para>
-         <programlisting>INSERT INTO theTable (id, blob_col) VALUES (42,${blobfile=c:/data/image.bmp});</programlisting>
+         <programlisting>INSERT INTO theTable (id, blob_col) VALUES (42,{$blobfile=c:/data/image.bmp});</programlisting>
          <para>This will create a new record with id=42 and the content of <literal>c:/data/image.bmp</literal> in 
          the column <literal>blob_col</literal></para>
       </section>
@@ -275,10 +281,10 @@ END;
             The process of updating or inserting <literal>CLOB</literal> data is identical to the 
             process for <literal>BLOB</literal> data. The only difference is in the syntax of 
             the placeholder used to specify the source file. Firstly, the placeholder has
-            to start with <literal>${clobfile=</literal> and can optionally contain an 
+            to start with <literal>{$clobfile=</literal> and can optionally contain an 
             encoding
           </para>
-         <programlisting>UPDATE theTable SET clob_col = ${clobfile=c:/data/image.html encoding=utf8} WHERE id=42;</programlisting>
+         <programlisting>UPDATE theTable SET clob_col = {$clobfile=c:/data/image.html encoding=utf8} WHERE id=42;</programlisting>
          <para>If you ommit the encoding parameter, &wb-productname; will leave the data conversion 
          to the JDBC driver (technically, it will use the <literal>PreapredStatement.setAsciiStream()</literal> method
          whereas with an encoding it will use the <literal>PreparedStatement.setCharacterStream()</literal> method).

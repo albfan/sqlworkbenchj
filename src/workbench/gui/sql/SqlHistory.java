@@ -19,10 +19,15 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import workbench.gui.actions.WbAction;
 
 import workbench.log.LogMgr;
 import workbench.util.StringUtil;
 import java.io.UnsupportedEncodingException;
+import workbench.gui.actions.FirstStatementAction;
+import workbench.gui.actions.LastStatementAction;
+import workbench.gui.actions.NextStatementAction;
+import workbench.gui.actions.PrevStatementAction;
 
 /**
  *
@@ -36,13 +41,35 @@ public class SqlHistory
 	private int currentEntry;
 	private int maxSize;
 	private boolean changed = false;
+	private EditorPanel editor;
+	private NextStatementAction nextStmtAction;
+	private PrevStatementAction prevStmtAction;
+	private FirstStatementAction firstStmtAction;
+	private LastStatementAction lastStmtAction;
 
-	public SqlHistory(int maxSize)
+	public SqlHistory(EditorPanel ed, int maxSize)
 	{
 		this.maxSize = maxSize;
 		this.history = new ArrayList(maxSize + 2);
+		this.editor = ed;
+		this.firstStmtAction = new FirstStatementAction(this);
+		this.firstStmtAction.setEnabled(false);
+
+		this.prevStmtAction = new PrevStatementAction(this);
+		this.prevStmtAction.setEnabled(false);
+
+		this.nextStmtAction = new NextStatementAction(this);
+		this.nextStmtAction.setEnabled(false);
+
+		this.lastStmtAction = new LastStatementAction(this);
+		this.lastStmtAction.setEnabled(false);
 	}
 
+	public WbAction getShowFirstStatementAction() { return this.firstStmtAction; }
+	public WbAction getShowLastStatementAction() { return this.lastStmtAction; }
+	public WbAction getShowNextStatementAction() { return this.nextStmtAction; }
+	public WbAction getShowPreviousStatementAction() { return this.prevStmtAction; }
+	
 	public void addContent(EditorPanel editor)
 	{
 		String text = editor.getText();
@@ -68,6 +95,7 @@ public class SqlHistory
 		{
 			LogMgr.logError("SqlHistory.addContent(editor)", "Could not add entry", e);
 		}
+		checkActions();
 	}
 
 	public void addEntry(SqlHistoryEntry entry)
@@ -96,43 +124,49 @@ public class SqlHistory
 		this.currentEntry = 0;
 		this.history.clear();
 		this.changed = false;
+		this.checkActions();
 	}
 
-	public void showLast(EditorPanel editor)
+	public void showLastStatement()
 	{
 		if (this.history.size() == 0) return;
 		this.currentEntry = this.history.size() - 1;
 		SqlHistoryEntry entry = (SqlHistoryEntry)this.history.get(this.currentEntry);
 		entry.applyTo(editor);
+		checkActions();
 	}
 
-	public void showFirst(EditorPanel editor)
+	public void showFirstStatement()
 	{
 		if (this.history.size() == 0) return;
 		this.currentEntry = 0;
 		SqlHistoryEntry entry = (SqlHistoryEntry)this.history.get(this.currentEntry);
 		entry.applyTo(editor);
+		checkActions();
 	}
 
-	public void showCurrent(EditorPanel editor)
+	public void showCurrent()
 	{
 		if (this.currentEntry >= this.history.size()) return;
 		SqlHistoryEntry entry = (SqlHistoryEntry)this.history.get(this.currentEntry);
 		entry.applyTo(editor);
+		checkActions();
 	}
 
-	public void showPrevious(EditorPanel editor)
+	public void showPreviousStatement()
 	{
 		if (!this.hasPrevious()) return;
 		SqlHistoryEntry entry = this.getPreviousEntry();
 		entry.applyTo(editor);
+		checkActions();
 	}
 
-	public void showNext(EditorPanel editor)
+	public void showNextStatement()
 	{
 		if (!this.hasNext()) return;
 		SqlHistoryEntry entry = this.getNextEntry();
 		entry.applyTo(editor);
+		checkActions();
 	}
 
 	public SqlHistoryEntry getTopEntry()
@@ -277,5 +311,13 @@ public class SqlHistory
 			SqlHistoryEntry entry = new SqlHistoryEntry(content.toString(), pos, start, end);
 			this.addEntry(entry);
 		}
+	}
+
+	private void checkActions()
+	{
+		this.nextStmtAction.setEnabled(this.hasNext());
+		this.lastStmtAction.setEnabled(this.hasNext());
+		this.prevStmtAction.setEnabled(this.hasPrevious());
+		this.firstStmtAction.setEnabled(this.hasPrevious());
 	}
 }

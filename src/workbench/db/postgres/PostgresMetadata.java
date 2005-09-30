@@ -11,6 +11,7 @@
  */
 package workbench.db.postgres;
 
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import workbench.db.DbMetadata;
 import workbench.db.JdbcProcedureReader;
@@ -45,13 +46,17 @@ public class PostgresMetadata
 		return procReader.getProcedures(catalog, schema);
 	}
 	
-	public StrBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname)
+	public StrBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
 	{
 		StrBuffer source = new StrBuffer();
 		try
 		{
 			DataStore ds = this.metaData.getProcedureColumns(aCatalog, aSchema, aProcname);
-			source.append("CREATE OR REPLACE FUNCTION ");
+			source.append("CREATE OR REPLACE ");
+			
+			if (procType == DatabaseMetaData.procedureReturnsResult) source.append("FUNCTION ");
+			else source.append("PROCEDURE ");
+			
 			source.append(aProcname);
 			source.append(" (");
 			String retType = null;

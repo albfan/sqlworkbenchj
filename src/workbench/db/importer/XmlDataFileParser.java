@@ -627,6 +627,7 @@ public class XmlDataFileParser
 		{
 			case Types.CHAR:
 			case Types.VARCHAR:
+			case Types.CLOB:
 			case Types.LONGVARCHAR:
 				this.currentRow[this.realColIndex] = value;
 				break;
@@ -677,6 +678,7 @@ public class XmlDataFileParser
 			case Types.BINARY:
 			case Types.BLOB:
 			case Types.LONGVARBINARY:
+			case Types.VARBINARY:
 				File thisFile = new File(this.inputFile);
 				String fileDir = thisFile.getParent();
 				this.currentRow[this.realColIndex] = new File(fileDir, columnDataFile);
@@ -699,7 +701,7 @@ public class XmlDataFileParser
 				// type not taken into account. Simply use the String 
 				// value, hoping that the JDBC driver can cope with that :)
 				this.currentRow[this.realColIndex] = value;
-				String msg = ResourceMgr.getString("ErrorConvertError").replaceAll("%type%", SqlUtil.getTypeName(type));
+				String msg = ResourceMgr.getString("ErrorConvertError").replaceAll("%type%", SqlUtil.getTypeName(type)) + "\n";
 				this.messages.append(msg);
 				LogMgr.logWarning("XmlDataFileParser.buildColumnData()", msg, null);
 				break;

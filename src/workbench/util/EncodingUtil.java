@@ -38,28 +38,28 @@ public class EncodingUtil
 	
 	/**
 	 *	Create a BufferedReader for the given file and encoding
+	 *  The buffer size is set to 64K
 	 */
-	public static BufferedReader createReader(File f, String encoding)
+	public static Reader createReader(File f, String encoding)
 		throws IOException, UnsupportedEncodingException
 	{
-		return createReader(f, encoding, 512*1024);
-	}
-	
-	/**
-	 * Create a BufferedReader for the given file and encoding.
-	 * If no encoding is given, then a regular FileReader without 
-	 * a specific encoding is used.
-	 */
-	public static BufferedReader createReader(File f, String encoding, int buffSize)
-		throws IOException
-	{
 		BufferedReader in = null;
+		Reader r = null;
 		if (encoding != null)
 		{
 			try
 			{
 				InputStream inStream = new FileInputStream(f);
-				in = new BufferedReader(new InputStreamReader(inStream, cleanupEncoding(encoding)),buffSize);
+				String enc = cleanupEncoding(encoding);
+				
+				if (enc.toLowerCase().startsWith("utf"))
+				{
+					r = new UnicodeReader(inStream, enc);
+				}
+				else
+				{
+					r = new InputStreamReader(inStream, enc);
+				}
 			}
 			catch (UnsupportedEncodingException e)
 			{
@@ -68,9 +68,33 @@ public class EncodingUtil
 		}
 		else
 		{
-			in = new BufferedReader(new FileReader(f), buffSize);
+			r = new FileReader(f);
 		}
-		return in;
+		return r;
+	}
+	
+	/**
+	 * Create a BufferedReader for the given file and encoding.
+	 * If no encoding is given, then a regular FileReader without 
+	 * a specific encoding is used.
+	 * The default buffer size is 16kb
+	 */
+	public static BufferedReader createBufferedReader(File f, String encoding)
+		throws IOException
+	{
+		return createBufferedReader(f, encoding, 16*1024);
+	}
+	
+	/**
+	 * Create a BufferedReader for the given file, encoding and buffer size.
+	 * If no encoding is given, then a regular FileReader without 
+	 * a specific encoding is used.
+	 */
+	public static BufferedReader createBufferedReader(File f, String encoding, int buffSize)
+		throws IOException
+	{
+		Reader r = createReader(f, encoding);
+		return new BufferedReader(r, buffSize);
 	}
 	
 	/**

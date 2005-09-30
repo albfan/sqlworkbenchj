@@ -16,6 +16,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
+import workbench.gui.sql.DwPanel;
 
 import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
@@ -26,9 +27,9 @@ import workbench.resource.ResourceMgr;
  */
 public class SelectMaxRowsAction extends WbAction
 {
-	private SqlPanel client;
+	private DwPanel client;
 
-	public SelectMaxRowsAction(SqlPanel aClient)
+	public SelectMaxRowsAction(DwPanel aClient)
 	{
 		super();
 		this.client = aClient;
@@ -38,12 +39,11 @@ public class SelectMaxRowsAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.showResultPanel();
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
-				client.getData().selectMaxRowsField();
+				client.selectMaxRowsField();
 			}
 		});
 	}

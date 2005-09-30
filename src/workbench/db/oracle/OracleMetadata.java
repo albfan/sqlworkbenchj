@@ -455,7 +455,7 @@ public class OracleMetadata
 	
 	private final StrBuffer PROC_HEADER = new StrBuffer("CREATE OR REPLACE ");
 	
-	public StrBuffer getProcedureHeader(String catalog, String schema, String procname)
+	public StrBuffer getProcedureHeader(String catalog, String schema, String procname, int procType)
 	{
 		return PROC_HEADER;
 	}

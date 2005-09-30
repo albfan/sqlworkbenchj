@@ -46,6 +46,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.GapContent;
 
 import workbench.db.WbConnection;
 import workbench.interfaces.EncodingSelector;
@@ -86,6 +88,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.ScriptParser;
 import workbench.sql.formatter.SqlFormatter;
+import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.UnicodeReader;
 
@@ -494,7 +497,7 @@ public class EditorPanel
 		if (clearText)
 		{
 			this.setCaretPosition(0);
-			this.setText("");
+			this.setDocument(new SyntaxDocument());
 			this.clearUndoBuffer();
 		}
 		this.resetModified();
@@ -567,7 +570,7 @@ public class EditorPanel
 		}
 		boolean result = false;
 		int caret = this.getCaretPosition();
-		result = this.readFile(currentFile);
+		result = this.readFile(currentFile, fileEncoding);
 		if (result)
 		{
 			this.setCaretPosition(caret);
@@ -630,36 +633,19 @@ public class EditorPanel
 			return false;
 		}
 		boolean result = false;
-
-		if (encoding == null || encoding.trim().length() == 0)
-		{
-			encoding = Settings.getInstance().getDefaultFileEncoding();
-		}
+		
+		Reader reader = null;
 		try
 		{
-			this.setText(""); // clear memory!
+			// try to free memory by releasing the current document
+			this.setDocument(new SyntaxDocument());
+			System.gc();
+			
 			String filename = aFile.getAbsolutePath();
-			Reader r = null;
-			FileInputStream in = new FileInputStream(filename);
+			File f = new File(filename);
 			try
 			{
-				if (encoding.toLowerCase().startsWith("utf"))
-				{
-					try
-					{
-						r = new UnicodeReader(in, encoding);
-					}
-					catch (IOException io)
-					{
-						LogMgr.logError("EditorPanel.readFile()", "Error creating UnicodeReader, using default reader", io);
-						r = null;
-					}
-				}
-
-				if (r == null)
-				{
-					r = new InputStreamReader(in, encoding);
-				}
+				reader = EncodingUtil.createReader(f, encoding);
 			}
 			catch (UnsupportedEncodingException e)
 			{
@@ -667,40 +653,37 @@ public class EditorPanel
 				try
 				{
 					encoding = "UTF-8";
-					r = new InputStreamReader(in, "UTF-8");
+					FileInputStream in = new FileInputStream(filename);
+					reader = new InputStreamReader(in, "UTF-8");
 				}
 				catch (Throwable ignore) {}
 			}
 
-			BufferedReader reader = new BufferedReader(r);
-
-			// Reading the text into a StringBuffer before
-			// putting it into the editor is faster then
-			// then calling this.appendLine() for each line
-			// in the file.
-			// Using a StrBuffer would make the creation and filling
-			// of the buffer faster, but would duplicate the memory usage
-			// as StrBuffer.toString() effectively copies the char array
-			// whereas StringBuffer.toString() re-uses the internal buffer
-			// for the new String object
-
-			StringBuffer content = new StringBuffer((int)aFile.length() + 500);
-			String line = reader.readLine();
-			while (line != null)
+			// Creating a SyntaxDocument with a filled GapContent
+			// does not seem to work, inserting the text has to
+			// go through the SyntaxDocument
+			GapContent  content = new GapContent((int)aFile.length() + 500);
+			SyntaxDocument doc = new SyntaxDocument(content);
+			char[] buff = new char[8192];
+			int pos = 0;
+			int bytes = reader.read(buff);
+			while (bytes > 0)
 			{
-				content.append(line);
-				content.append('\n');
-				line = reader.readLine();
+				String line = new String(buff, 0, bytes);
+				doc.insertString(pos, line, null);
+				bytes = reader.read(buff);
+				pos += bytes;
 			}
-			this.setText(content.toString());
-			reader.close();
+			this.setDocument(doc);
 			this.currentFile = aFile;
 			this.fileEncoding = encoding;
 			result = true;
-			this.clearUndoBuffer();
 			this.resetModified();
-			content = null;
 			this.fireFilenameChanged(filename);
+		}
+		catch (BadLocationException bl)
+		{
+			LogMgr.logError("EditorPanel.readFile()", "Error reading file " + aFile.getAbsolutePath(), bl);
 		}
 		catch (IOException e)
 		{
@@ -710,6 +693,10 @@ public class EditorPanel
 		{
 			mem.printStackTrace();
 			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
+		}
+		finally
+		{
+			try { reader.close(); } catch (Throwable th) {}
 		}
 		this.setCaretPosition(0);
 		return result;

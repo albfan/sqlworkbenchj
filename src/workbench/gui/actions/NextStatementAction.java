@@ -16,8 +16,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
-
-import workbench.gui.sql.SqlPanel;
+import workbench.gui.sql.SqlHistory;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -26,11 +25,11 @@ import workbench.resource.ResourceMgr;
  */
 public class NextStatementAction extends WbAction
 {
-	private SqlPanel panel;
-	public NextStatementAction(SqlPanel aPanel)
+	private SqlHistory history;
+	public NextStatementAction(SqlHistory aHistory)
 	{
 		super();
-		this.panel = aPanel;
+		this.history = aHistory;
 		this.initMenuDefinition("MnuTxtNextStatement", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.ALT_MASK));
 		this.setIcon(ResourceMgr.getImage("Forward"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
@@ -41,6 +40,6 @@ public class NextStatementAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.panel.showNextStatement();
+		this.history.showNextStatement();
 	}
 }

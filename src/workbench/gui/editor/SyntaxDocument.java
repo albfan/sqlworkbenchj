@@ -18,13 +18,14 @@ import javax.swing.undo.UndoableEdit;
  * system.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxDocument.java,v 1.12 2005-09-06 17:44:33 thomas Exp $
+ * @version $Id: SyntaxDocument.java,v 1.13 2005-09-30 13:04:23 thomas Exp $
  */
 public class SyntaxDocument
 	extends PlainDocument
 	implements UndoableEditListener
 {
 	private UndoManager undoManager = new UndoManager();
+	protected TokenMarker tokenMarker;
 
 	public SyntaxDocument()
 	{
@@ -40,9 +41,16 @@ public class SyntaxDocument
 		this.initDefaultProperties();
 	}
 
+	public DocumentEvent createChangedEvent()
+	{
+		DefaultDocumentEvent evt = new DefaultDocumentEvent(0, this.getLength(), DocumentEvent.EventType.CHANGE); 		
+		return evt;
+	}
+	
 	protected void initDefaultProperties()
 	{
 		this.putProperty("noWordSep", "_");
+		this.putProperty("filterNewlines", Boolean.FALSE);
 	}
 	/**
 	 * Returns the token marker that is to be used to split lines
@@ -79,7 +87,7 @@ public class SyntaxDocument
 	public void dispose()
 	{
 		this.clearUndoBuffer();
-		tokenMarker.dispose();
+		if (tokenMarker != null) tokenMarker.dispose();
 		try { this.remove(0, this.getLength()); } catch (Throwable th) {}
 	}
 	
@@ -180,9 +188,6 @@ public class SyntaxDocument
 	public void addUndoableEdit(UndoableEdit edit)
 	{
 	}
-
-	// protected members
-	protected TokenMarker tokenMarker;
 
 	/**
 	 * We overwrite this method to update the token marker

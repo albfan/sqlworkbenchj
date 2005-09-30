@@ -17,7 +17,7 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
-import workbench.gui.sql.SqlPanel;
+import workbench.gui.sql.SqlHistory;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -26,12 +26,12 @@ import workbench.resource.ResourceMgr;
  */
 public class LastStatementAction extends WbAction
 {
-	private SqlPanel panel;
+	private SqlHistory history;
 
-	public LastStatementAction(SqlPanel aPanel)
+	public LastStatementAction(SqlHistory aHistory)
 	{
 		super();
-		this.panel = aPanel;
+		this.history = aHistory;
 		this.initMenuDefinition("MnuTxtLastStatement", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK ));
 		this.setIcon(ResourceMgr.getImage("Last"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
@@ -41,6 +41,6 @@ public class LastStatementAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.panel.showLastStatement();
+		this.history.showLastStatement();
 	}
 }

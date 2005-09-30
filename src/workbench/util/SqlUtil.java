@@ -554,7 +554,8 @@ public class SqlUtil
 	{
 		return (aSqlType == Types.BLOB || 
 		        aSqlType == Types.BINARY ||
-						aSqlType == Types.LONGVARBINARY);
+						aSqlType == Types.LONGVARBINARY ||
+			      aSqlType == Types.VARBINARY);
 	}
 
 	/**

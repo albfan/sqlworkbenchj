@@ -32,7 +32,7 @@ public class JdbcProcedureReader
 		this.dbMeta = meta;
 	}
 	
-	public StrBuffer getProcedureHeader(String catalog, String schema, String procName)
+	public StrBuffer getProcedureHeader(String catalog, String schema, String procName, int procType)
 	{
 		return StrBuffer.EMPTY_BUFFER;
 	}

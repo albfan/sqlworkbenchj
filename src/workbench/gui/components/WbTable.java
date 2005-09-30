@@ -649,6 +649,13 @@ public class WbTable
 		this.repaint();
 	}
 
+	public boolean isUpdateable()
+	{
+		DataStore ds = this.getDataStore();
+		if (ds == null) return false;
+		return ds.isUpdateable();
+	}
+	
 	public void editingCanceled(ChangeEvent e)
 	{
 		int row = this.getEditingRow();

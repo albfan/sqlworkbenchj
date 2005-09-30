@@ -55,6 +55,7 @@ import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.EventListenerList;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.PlainDocument;
@@ -64,6 +65,8 @@ import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEdit;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.events.Event;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
@@ -105,7 +108,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.38 2005-09-06 17:44:32 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.39 2005-09-30 13:04:23 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -121,6 +124,7 @@ public class JEditTextArea
 	private static final Color TEMP_COLOR = Color.GREEN.brighter();
 	private boolean currentSelectionIsTemporary;
 	protected String commentChar;
+	private TokenMarker currentTokenMarker;
 	
 	private KeyListener keyEventInterceptor;
 	/**
@@ -1059,13 +1063,18 @@ public class JEditTextArea
 		if(this.document != null)
 		{
 			this.document.removeDocumentListener(documentHandler);
-			this.document.dispose();
+			this.document.clearUndoBuffer();
 		}
 		this.document = document;
 
 		if(this.document != null)
 		{
+			if (this.currentTokenMarker != null)
+			{
+				this.document.setTokenMarker(this.currentTokenMarker);
+			}
 			this.document.addDocumentListener(documentHandler);
+			painter.invalidateLineRange(0, getLineCount());
 			select(0,0);
 		}
 		updateScrollBars();
@@ -1093,6 +1102,7 @@ public class JEditTextArea
 	 */
 	public final void setTokenMarker(TokenMarker tokenMarker)
 	{
+		this.currentTokenMarker = tokenMarker;
 		document.setTokenMarker(tokenMarker);
 	}
 
@@ -1246,7 +1256,10 @@ public class JEditTextArea
 		try
 		{
 			document.beginCompoundEdit();
-			document.remove(0,document.getLength());
+			if (document.getLength() > 0)
+			{
+				document.remove(0,document.getLength());
+			}
 			if (text != null && text.length() > 0)
 			{
 				document.insertString(0,text,null);

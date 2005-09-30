@@ -483,7 +483,7 @@ public class TextFileParser
 		File f = new File(this.filename);
 		long fileSize = f.length();
 
-		BufferedReader in = EncodingUtil.createReader(f, this.encoding);
+		BufferedReader in = EncodingUtil.createBufferedReader(f, this.encoding);
 
 		String line;
 		int col;

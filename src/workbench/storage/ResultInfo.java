@@ -26,6 +26,7 @@ import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 
 /**
@@ -42,6 +43,7 @@ public class ResultInfo
 	private boolean pkFlagValid = false;
 	private boolean pkColumnsAreReal = true;
 	private TableIdentifier updateTable;
+	private boolean fixOracleDateBug = false;
 	
 	public ResultInfo(String[] colNames, int[] colTypes, int[] colSizes)
 	{
@@ -75,7 +77,8 @@ public class ResultInfo
 	{
 		this.colCount = metaData.getColumnCount();
 		this.columns = new ColumnIdentifier[this.colCount];
-
+		DbMetadata dbMeta = sourceConnection.getMetadata();
+		
 		for (int i=0; i < this.colCount; i++)
 		{
 			String name = metaData.getColumnName(i + 1);
@@ -90,7 +93,7 @@ public class ResultInfo
 				realColumn = false;
 			}
 			
-			int type = metaData.getColumnType(i + 1);
+			int type = dbMeta.fixColumnType(metaData.getColumnType(i + 1));
 			ColumnIdentifier col = new ColumnIdentifier(name);
 			col.setDataType(type);
 			col.setUpdateable(realColumn);

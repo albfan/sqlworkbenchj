@@ -33,7 +33,7 @@ public class GeneralImportOptionsPanel
 	{
 		this.modeComboBox.setEnabled(flag);
 		this.modeComboBox.setSelectedIndex(0);
-		//this.modeComboBox.setVisible(flag);
+		this.modeComboBox.setVisible(flag);
 	}
 	
 	public void saveSettings()

@@ -151,7 +151,7 @@ public class LobFileStatement
 			}
 			else
 			{
-				Reader in = EncodingUtil.createReader(f, parameters[i].encoding, buffSize);
+				Reader in = EncodingUtil.createBufferedReader(f, parameters[i].encoding);
 				parameters[i].dataStream = new CloseableDataStream(in);
 				pstmt.setCharacterStream(i+1, in, length);
 			}

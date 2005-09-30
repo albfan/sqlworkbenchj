@@ -16,8 +16,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
-
-import workbench.gui.sql.SqlPanel;
+import workbench.gui.sql.SqlHistory;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -26,12 +25,12 @@ import workbench.resource.ResourceMgr;
  */
 public class FirstStatementAction extends WbAction
 {
-	private SqlPanel panel;
+	private SqlHistory history;
 
-	public FirstStatementAction(SqlPanel aPanel)
+	public FirstStatementAction(SqlHistory aHistory)
 	{
 		super();
-		this.panel = aPanel;
+		this.history = aHistory;
 		this.initMenuDefinition("MnuTxtFirstStatement", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK ));
 		this.setIcon(ResourceMgr.getImage("First"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
@@ -41,6 +40,6 @@ public class FirstStatementAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.panel.showFirstStatement();
+		this.history.showFirstStatement();
 	}
 }

@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import workbench.db.DbMetadata;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
+import workbench.db.WbConnection;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
@@ -38,7 +39,7 @@ public class SqlServerMetadata
 		this.meta = db;
 	}
 	
-	public StrBuffer getProcedureHeader(String catalog, String schema, String procName)
+	public StrBuffer getProcedureHeader(String catalog, String schema, String procName, int procType)
 	{
 		return StrBuffer.EMPTY_BUFFER;
 	}

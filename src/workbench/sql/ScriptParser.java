@@ -116,7 +116,7 @@ public class ScriptParser
 		try
 		{
 			content = new StrBuffer((int)f.length());
-			in = EncodingUtil.createReader(f, encoding, 256*1024);
+			in = EncodingUtil.createBufferedReader(f, encoding);
 			String line = in.readLine();
 			while (line != null)
 			{

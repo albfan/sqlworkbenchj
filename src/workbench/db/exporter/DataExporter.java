@@ -824,9 +824,6 @@ public class DataExporter
 			LogMgr.logError("DataExporter", "Error writing data file", e);
 			throw e;
 		}
-		finally
-		{
-		}
 
 		if (this.progressInterval > 0)
 		{

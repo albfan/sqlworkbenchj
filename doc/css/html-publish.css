@@ -74,12 +74,19 @@ span.guisubmenu, span.guimenuitem, span.guimenu {
 }
 
 span.guibutton {
-  /*background: #C0C0C0;
-  text-transform:uppercase;
-  */
-  border: 1px dotted light-gray;
+  background: #E0E0E0;
+  padding-left:2px;
+  padding-right:2px;
+  border: 1px solid gray;
   color:#000000;
   font-family: monospace;
+}
+
+span.guiicon {
+  padding-left:2px;
+  padding-right:2px;
+  border: 1px solid gray;
+  vertical-align:sub;
 }
 
 div.note {

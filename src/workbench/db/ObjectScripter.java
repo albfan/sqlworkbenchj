@@ -104,7 +104,7 @@ public class ObjectScripter
 				tbl.adjustCase(this.dbConnection);
 				if (TYPE_TABLE.equalsIgnoreCase(type))
 				{
-					source = meta.getTableSource(null, tbl.getSchema(), tbl.getTableName(), true);
+					source = meta.getTableSource(tbl, true);
 				}
 				else if (TYPE_VIEW.equalsIgnoreCase(type))
 				{

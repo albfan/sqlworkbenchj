@@ -11,11 +11,13 @@
  */
 package workbench.gui.actions;
 
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 
 import javax.swing.event.ListSelectionListener;
-
-import workbench.gui.sql.SqlPanel;
+import workbench.db.DeleteScriptGenerator;
+import workbench.gui.components.WbTable;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -25,28 +27,45 @@ public class CreateDeleteScriptAction
 	extends WbAction
 	implements ListSelectionListener
 {
-	private SqlPanel client;
+	private WbTable client;
 
-	public CreateDeleteScriptAction(SqlPanel aClient)
+	public CreateDeleteScriptAction(WbTable aClient)
 	{
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtCreateDeleteScript", null);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		
-		this.client.getData().getTable().getSelectionModel().addListSelectionListener(this);
+		this.client.getSelectionModel().addListSelectionListener(this);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.generateDeleteScript();
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				try
+				{
+					DeleteScriptGenerator gen = new DeleteScriptGenerator(client.getDataStore().getOriginalConnection());
+					gen.setSource(client);
+					gen.startGenerate();
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("SqlPanel.generateDeleteScript()", "Error initializing DeleteScriptGenerator", e);
+				}
+			}
+		});
+		
 	}
 
 	public void valueChanged(javax.swing.event.ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
-		boolean mayUpdate = this.client.getData().hasUpdateableColumns();
-		int rows = this.client.getData().getTable().getSelectedRowCount();
+		
+		boolean mayUpdate = this.client.isUpdateable();
+		int rows = this.client.getSelectedRowCount();
 		this.setEnabled(mayUpdate && rows > 0);
 	}
 		

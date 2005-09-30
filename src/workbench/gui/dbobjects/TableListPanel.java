@@ -1117,7 +1117,8 @@ public class TableListPanel
 				// passed to getTableSource() would be empty
 				if (this.shouldRetrieveIndexes) this.retrieveIndexes();
 				if (this.shouldRetrieveImportedTree) this.retrieveImportedTables();
-				sql = meta.getTableSource(this.selectedCatalog, this.selectedSchema, this.selectedTableName, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore(), true);
+				TableIdentifier tbl = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+				sql = meta.getTableSource(tbl, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore(), true);
 			}
 			final String s = sql;
 			EventQueue.invokeLater(new Runnable()
@@ -1409,7 +1410,10 @@ public class TableListPanel
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			DbMetadata meta = this.dbConnection.getMetadata();
-			indexes.setModel(meta.getTableIndexes(this.selectedCatalog, this.selectedSchema, this.selectedTableName), true);
+			TableIdentifier tbl = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+			DataStore ds = meta.getTableIndexInformation(tbl);
+			DataStoreTableModel model = new DataStoreTableModel(ds);
+			indexes.setModel(model, true);
 			indexes.adjustColumns();
 			this.shouldRetrieveIndexes = false;
 		}
