@@ -114,7 +114,7 @@ public class ConnectionMgr
 			version = "n/a";
 		}
 
-		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" + sql.getMetaData().getDatabaseProductName() + "], Database version: [" + conn.getMetadata().getDbVersion() + "], Driver version: [" + version + "]");
+		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" + conn.getMetadata().getProductName() + "], Database version: [" + conn.getMetadata().getDbVersion() + "], Driver version: [" + version + "]");
 
 		try
 		{

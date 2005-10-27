@@ -30,7 +30,6 @@ public class TableIdentifier
 	private String pkName;
 	private String type;
 	private boolean neverAdjustCase;
-//	private boolean external;
 	
 	public TableIdentifier(String aName)
 	{
@@ -49,6 +48,8 @@ public class TableIdentifier
 
 	/**
 	 *	Initialize a TableIdentifier for a new (to be defined) table
+	 * This is mainly used by the {@link workbench.db.datacopy.DataCopier}
+	 * to flag the target table to be created on the fly
 	 */
 	public TableIdentifier()
 	{
@@ -77,10 +78,7 @@ public class TableIdentifier
 	{
 		this.neverAdjustCase = flag;
 	}
-	
-//	public void setExternalTable(boolean flag) { this.external = true; }
-//	public boolean isExternal() { return this.external; }
-	
+
 	public TableIdentifier createCopy()
 	{
 		TableIdentifier copy = new TableIdentifier();
@@ -91,7 +89,6 @@ public class TableIdentifier
 		copy.catalog = this.catalog;
 		copy.expression = null;
 		copy.neverAdjustCase = this.neverAdjustCase;
-		//copy.external = this.external;
 		return copy;
 	}
 	
@@ -176,8 +173,10 @@ public class TableIdentifier
 			return;
 		}
 		
+		int atPos = aTable.indexOf("@");
+		if (atPos < 0) atPos = aTable.length() + 1;
 		int pos = aTable.indexOf('.');
-		if (pos > -1)
+		if (pos > -1 && pos < atPos)
 		{
 			this.schema = aTable.substring(0, pos).trim();
 			this.tablename = aTable.substring(pos + 1).trim();

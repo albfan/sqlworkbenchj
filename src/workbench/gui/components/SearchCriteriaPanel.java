@@ -129,7 +129,6 @@ public class SearchCriteriaPanel
 		});
 		String title = ResourceMgr.getString("TxtWindowTitleSearchText");
 		int choice = JOptionPane.showConfirmDialog(caller, this, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-		System.out.println("choice=" + choice);
 		Settings.getInstance().setProperty(PROP_KEY_CASE, this.getIgnoreCase());
 		Settings.getInstance().setProperty(PROP_KEY_CRIT, this.getCriteria());
 		Settings.getInstance().setProperty(PROP_KEY_WHOLE_WORD, this.getWholeWordOnly());

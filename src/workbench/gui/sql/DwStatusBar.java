@@ -118,6 +118,8 @@ public class DwStatusBar
 		
 		this.execTime = new WbTextLabel();
 		execTime.setHorizontalAlignment(SwingConstants.RIGHT);
+		this.execTime.setToolTipText(ResourceMgr.getString("MsgTotalSqlTime"));
+
 		Font f = execTime.getFont();
 		FontMetrics fm = execTime.getFontMetrics(f);
 		Dimension pref = execTime.getPreferredSize();

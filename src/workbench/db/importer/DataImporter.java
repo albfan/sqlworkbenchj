@@ -947,6 +947,7 @@ public class DataImporter
 
 		this.columnMap = new int[this.colCount];
 		int pkIndex = this.colCount - this.keyColumns.size();
+		int pkCount = 0;
 		int colIndex = 0;
 		StringBuffer sql = new StringBuffer(this.colCount * 20 + 80);
 		StringBuffer where = new StringBuffer(this.keyColumns.size() * 10);
@@ -978,16 +979,26 @@ public class DataImporter
 				where.append(col.getColumnName());
 				where.append(" = ?");
 				pkIndex ++;
+				pkCount ++;
 			}
 		}
 		if (!pkAdded)
 		{
-			LogMgr.logError("DataImporter.prepareUpdateStatement()", "No primary key columns defined! Update mode not available", null);
-			this.messages.append(ResourceMgr.getString("ErrorImportNoKeyForUpdate"));
+			LogMgr.logError("DataImporter.prepareUpdateStatement()", "No primary key columns defined! Update mode not available\n", null);
+			this.messages.append(ResourceMgr.getString("ErrorImportNoKeyForUpdate") + "\n");
 			this.updateSql = null;
 			this.updateStatement = null;
 			throw new SQLException("No key columns defined for update mode");
 		}
+		if (pkCount != this.keyColumns.size())
+		{
+			LogMgr.logError("DataImporter.prepareUpdateStatement()", "At least one of the supplied primary key columns was not found in the target table!\n", null);
+			this.messages.append(ResourceMgr.getString("ErrorImportUpdateKeyColumnNotFound") + "\n");
+			this.updateSql = null;
+			this.updateStatement = null;
+			throw new SQLException("Not enough key columns defined for update mode");
+		}
+		
 		if (colIndex == 0)
 		{
 			LogMgr.logError("DataImporter.prepareUpdateStatement()", "Only PK columns defined! Update mode is not available!", null);

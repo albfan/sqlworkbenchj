@@ -77,7 +77,7 @@ public class ResultInfo
 	{
 		this.colCount = metaData.getColumnCount();
 		this.columns = new ColumnIdentifier[this.colCount];
-		DbMetadata dbMeta = sourceConnection.getMetadata();
+		DbMetadata dbMeta = (sourceConnection == null ? null : sourceConnection.getMetadata());
 		
 		for (int i=0; i < this.colCount; i++)
 		{
@@ -93,7 +93,8 @@ public class ResultInfo
 				realColumn = false;
 			}
 			
-			int type = dbMeta.fixColumnType(metaData.getColumnType(i + 1));
+			int type = metaData.getColumnType(i + 1);
+			if (dbMeta != null) type = dbMeta.fixColumnType(type);
 			ColumnIdentifier col = new ColumnIdentifier(name);
 			col.setDataType(type);
 			col.setUpdateable(realColumn);

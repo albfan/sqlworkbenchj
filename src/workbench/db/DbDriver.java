@@ -285,7 +285,7 @@ public class DbDriver
 
 			if (propName != null && !props.containsKey(propName))
 			{
-				String appName = ResourceMgr.TXT_PRODUCT_NAME;
+				String appName = ResourceMgr.TXT_PRODUCT_NAME + " (" + ResourceMgr.getBuildId() +")";
 				props.put(propName, appName);
 			}
 

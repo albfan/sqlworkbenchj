@@ -53,7 +53,7 @@ public class SchemaReporter
 	implements Interruptable
 {
 	private WbConnection dbConn;
-	private ArrayList tables;
+	private List tables;
 	private String xmlNamespace;
 	private String[] types;
 	private List schemas;
@@ -76,7 +76,9 @@ public class SchemaReporter
 	public SchemaReporter(WbConnection conn)
 	{
 		this.dbConn = conn;
-		types = conn.getMetadata().getTypeListTable();
+		types = new String[2];
+		types[0] = conn.getMetadata().getTableTypeName();
+		types[1] = DbMetadata.TABLE_TYPE_VIEW;
 	}
 
 	public void setProgressMonitor(RowActionMonitor mon)
@@ -174,7 +176,7 @@ public class SchemaReporter
 
 		try
 		{
-			bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(this.outputfile), "UTF-8"));
+			bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(this.outputfile), "UTF-8"), 16*1024);
 			this.writeXml(bw);
 		}
 		catch (IOException io)
@@ -239,10 +241,25 @@ public class SchemaReporter
 				{
 					this.progressPanel.setInfoText(tableName);
 				}
-				ReportTable rtable = new ReportTable(table, this.dbConn, this.xmlNamespace, true, true, true, true);
-				rtable.setSchemaNameToUse(this.schemaNameToUse);
-				rtable.writeXml(out);
-				rtable.done();
+				
+				String type = table.getType();
+				if (type == null)
+				{
+					type = this.dbConn.getMetadata().getObjectType(table);
+				}
+				if ("VIEW".equals(type))
+				{
+					ReportView rview = new ReportView(table, this.dbConn, this.xmlNamespace);
+					rview.setSchemaNameToUse(this.schemaNameToUse);
+					rview.writeXml(out);
+				}
+				else
+				{
+					ReportTable rtable = new ReportTable(table, this.dbConn, this.xmlNamespace, true, true, true, true);
+					rtable.setSchemaNameToUse(this.schemaNameToUse);
+					rtable.writeXml(out);
+					rtable.done();
+				}
 				out.flush();
 			}
 			catch (Exception e)
@@ -330,8 +347,6 @@ public class SchemaReporter
 		this.progressWindow.setSize(300,120);
 		WbSwingUtilities.center(progressWindow, parentWindow);
 		this.progressWindow.setTitle(ResourceMgr.getString("MsgReportWindowTitle"));
-		//ImageIcon i = ResourceMgr.getPicture("xml16");
-		//if (i != null) this.progressWindow.setIconImage(i.getImage());
 		this.progressWindow.addWindowListener(new WindowAdapter()
 		{
 			public void windowClosing(WindowEvent e)
@@ -379,31 +394,15 @@ public class SchemaReporter
 	{
 		try
 		{
-			if (this.cancel) return null;
 			DataStore ds = this.dbConn.getMetadata().getTables(null, null, name, this.types);
 			ds.sortByColumn(DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, true);
-			int count = ds.getRowCount();
-			ArrayList result = new ArrayList(count);
-			for (int i=0; i < count; i++)
-			{
-				if (this.cancel) return null;
-
-				String type = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-				if (type.indexOf("TABLE") > -1)
-				{
-					String table = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-					String catalog = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
-					String schema = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-					result.add(new TableIdentifier(catalog, schema, table));
-				}
-			}
-			return result;
+			return this.processTableList(ds);
 		}
 		catch (SQLException e)
 		{
 			LogMgr.logError("SchemaReporter.retrieveWildcardTables()", "Error retrieving tables", e);
+			return null;
 		}
-		return null;
 	}
 
 
@@ -419,7 +418,7 @@ public class SchemaReporter
 
 			if (this.cancel) return;
 			DataStore ds = this.dbConn.getMetadata().getTables(targetSchema, this.types);
-			this.processTableList(ds);
+			this.tables = this.processTableList(ds);
 		}
 		catch (SQLException e)
 		{
@@ -427,23 +426,23 @@ public class SchemaReporter
 		}
 	}
 
-	private void processTableList(DataStore ds)
+	private List processTableList(DataStore ds)
 	{
 		int count = ds.getRowCount();
 		ds.sortByColumn(DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, true);
-
+		ArrayList tableList = new ArrayList(count);
 		for (int i=0; i < count; i++)
 		{
-			if (this.cancel) return;
+			if (this.cancel) return tableList;
 
 			String type = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-			if (type.indexOf("TABLE") > -1)
-			{
-				String table = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-				String catalog = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
-				String schema = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-				this.tables.add(new TableIdentifier(catalog, schema, table));
-			}
+			String table = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+			String catalog = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
+			String schema = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+			TableIdentifier tbl = new TableIdentifier(catalog, schema, table);
+			tbl.setType(type);
+			tables.add(tbl);
 		}
+		return tableList;
 	}
 }

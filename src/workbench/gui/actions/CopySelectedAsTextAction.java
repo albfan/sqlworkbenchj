@@ -41,7 +41,9 @@ public class CopySelectedAsTextAction extends WbAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_COPY_SELECTED);
 		String desc = ResourceMgr.getDescription(labelKey);
 		String shift = KeyEvent.getKeyModifiersText(KeyEvent.SHIFT_MASK);
+		String ctrl = KeyEvent.getKeyModifiersText(KeyEvent.CTRL_MASK);
 		desc = StringUtil.replace(desc, "%shift%", shift);
+		desc = StringUtil.replace(desc, "%control%", ctrl);
 
 		this.initMenuDefinition(ResourceMgr.getString(labelKey), desc, null);
 		this.setIcon(ResourceMgr.getBlankImage());

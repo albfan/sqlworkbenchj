@@ -622,6 +622,7 @@ public class DbExplorerPanel
 		// this will increase the visible count for DbExplorer Panels in the workspace
 		w.dDbExplorerVisible();
 		tables.saveToWorkspace(w, index);
+		searchPanel.saveToWorkspace(w, index);
 	}
 
 	public boolean prepareWorkspaceSaving()
@@ -633,6 +634,7 @@ public class DbExplorerPanel
 		throws IOException
 	{
 		tables.readFromWorkspace(w, index);
+		searchPanel.readFromWorkspace(w, index);
 	}
 
 }

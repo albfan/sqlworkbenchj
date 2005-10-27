@@ -52,4 +52,9 @@ public interface ColumnComparator
 	
 	String getValueExpression(Object value);
 	
+	/**
+	 *	Validate the input whether this comparator
+	 * can actually deal with the value
+	 */
+	boolean validateInput(String input);
 }

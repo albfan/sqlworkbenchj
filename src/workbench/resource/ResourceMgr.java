@@ -137,6 +137,12 @@ public class ResourceMgr
 		return (c == '[' || c == '@');
 	}
 
+	public static String getBuildId()
+	{
+		String nr = getString("TxtBuildNumber");
+		if ("@BUILD_NUMBER@".equals(nr)) return "Dev";
+		return nr;
+	}
 	public static int getBuildNumber()
 	{
 		String nr = getString("TxtBuildNumber");

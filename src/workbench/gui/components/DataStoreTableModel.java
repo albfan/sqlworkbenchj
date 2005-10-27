@@ -42,7 +42,7 @@ public class DataStoreTableModel
 	private DataStore dataCache;
 	private WbTable parentTable;
 	private boolean showStatusColumn = false;
-	private int statusOffset = 0;
+	private int columnStartIndex = 0;
 	public static final String NOT_AVAILABLE = "(n/a)";
 	private int lockColumn = -1;
 
@@ -52,7 +52,8 @@ public class DataStoreTableModel
 	private boolean allowEditing = true;
 	private final Object model_change_lock = new Object();
 
-	public DataStoreTableModel(DataStore aDataStore) throws IllegalArgumentException
+	public DataStoreTableModel(DataStore aDataStore) 
+		throws IllegalArgumentException
 	{
 		if (aDataStore == null) throw new IllegalArgumentException("DataStore cannot be null");
 		this.setDataStore(aDataStore);
@@ -68,7 +69,7 @@ public class DataStoreTableModel
 		this.dispose();
 		this.dataCache = newData;
 		this.showStatusColumn = false;
-		this.statusOffset = 0;
+		this.columnStartIndex = 0;
 		this.sortColumn = -1;
 		this.fireTableStructureChanged();
 	}
@@ -89,7 +90,7 @@ public class DataStoreTableModel
 		try
 		{
 			Object result;
-			result = this.dataCache.getValue(row, col - this.statusOffset);
+			result = this.dataCache.getValue(row, col - this.columnStartIndex);
 			return result;
 		}
 		catch (Exception e)
@@ -103,7 +104,7 @@ public class DataStoreTableModel
 		int index = -1;
 		try
 		{
-			index = this.dataCache.getColumnIndex(aColname) + this.statusOffset;
+			index = this.dataCache.getColumnIndex(aColname) + this.columnStartIndex;
 		}
 		catch (SQLException e)
 		{
@@ -129,12 +130,12 @@ public class DataStoreTableModel
 		{
 			if (aFlag)
 			{
-				this.statusOffset = 1;
+				this.columnStartIndex = 1;
 				if (this.sortColumn != -1) this.sortColumn++;
 			}
 			else
 			{
-				this.statusOffset = 0;
+				this.columnStartIndex = 0;
 				if (this.sortColumn != -1) this.sortColumn--;
 			}
 			this.showStatusColumn = aFlag;
@@ -158,13 +159,13 @@ public class DataStoreTableModel
 		{
 			if (aValue == null || aValue.toString().length() == 0)
 			{
-				this.dataCache.setNull(row, column - this.statusOffset);
+				this.dataCache.setNull(row, column - this.columnStartIndex);
 			}
 			else
 			{
 				try
 				{
-					this.dataCache.setInputValue(row, column - this.statusOffset, aValue);
+					this.dataCache.setInputValue(row, column - this.columnStartIndex, aValue);
 				}
 				catch (Exception ce)
 				{
@@ -187,7 +188,7 @@ public class DataStoreTableModel
 	 */
 	public int getColumnCount()
 	{
-		return this.dataCache.getColumnCount() + this.statusOffset;
+		return this.dataCache.getColumnCount() + this.columnStartIndex;
 	}
 
 	/**
@@ -201,7 +202,7 @@ public class DataStoreTableModel
 		if (this.dataCache == null) return 0;
 		try
 		{
-			return this.dataCache.getColumnDisplaySize(aColumn - this.statusOffset);
+			return this.dataCache.getColumnDisplaySize(aColumn);
 		}
 		catch (Exception e)
 		{
@@ -230,7 +231,7 @@ public class DataStoreTableModel
 
 		try
 		{
-			return this.dataCache.getColumnType(aColumn - this.statusOffset);
+			return this.dataCache.getColumnType(aColumn - this.columnStartIndex);
 		}
 		catch (Exception e)
 		{
@@ -251,8 +252,8 @@ public class DataStoreTableModel
 	public Class getColumnClass(int aColumn)
 	{
 		if (this.dataCache == null) return null;
-		if (this.showStatusColumn && aColumn == 0) return Integer.class;
-		return this.dataCache.getColumnClass(aColumn - this.statusOffset);
+		if (aColumn == 0 && this.showStatusColumn) return Integer.class;
+		return this.dataCache.getColumnClass(aColumn - columnStartIndex);
 	}
 
 	public int insertRow(int afterRow)
@@ -309,7 +310,7 @@ public class DataStoreTableModel
 
 		try
 		{
-			String name = this.dataCache.getColumnName(aColumn - this.statusOffset);
+			String name = this.dataCache.getColumnName(aColumn - this.columnStartIndex);
 			return name;
 		}
 		catch (Exception e)
@@ -320,13 +321,13 @@ public class DataStoreTableModel
 
 	public boolean isCellEditable(int row, int column)
 	{
-		if (this.showStatusColumn)
-		{
-			return (column != 0);
-		}
-		else if (this.lockColumn > -1)
+		if (this.lockColumn > -1)
 		{
 			return (column != lockColumn && this.allowEditing);
+		}
+		else if (this.columnStartIndex > 0 && column < this.columnStartIndex)
+		{
+			return false;
 		}
 		else
 		{
@@ -447,7 +448,7 @@ public class DataStoreTableModel
 		try
 		{
 			setSortInProgress(true);
-			this.dataCache.sortByColumn(aColumn - statusOffset, ascending);
+			this.dataCache.sortByColumn(aColumn - columnStartIndex, ascending);
 		}
 		catch (Throwable th)
 		{

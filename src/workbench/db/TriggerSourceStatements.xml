@@ -39,23 +39,6 @@
   </void>
   
   <void method="put">
-   <string>-PostgreSQL</string>
-   <object class="workbench.db.GetMetaDataSql">
-    <void property="baseSql">
-     <string>
-select 'create trigger '|| trg.tgname || '\r\non ' || tbl.relname || '\r\n for each row execute procedure '||src.proname ||'();\r\n--- Source for '|| src.proname||' ---\r\n'|| src.prosrc 
-from pg_trigger trg, pg_class tbl, pg_proc src
-where trg.tgrelid = tbl.oid 
- AND trg.tgfoid = src.oid
-      </string>
-    </void>
-    <void property="objectNameField">
-     <string>trg.tgname</string>
-    </void>
-   </object>
-  </void>
-  
-  <void method="put">
    <string>Microsoft SQL Server</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
@@ -199,9 +182,10 @@ and  sysobjects.type = &apos;TR&apos;</string>
     </void> 
    </object> 
   </void> 
+  
   <void method="put"> 
    <string>Cloudscape</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
+   <object id="id_cloudscape_trg" class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
      <string>
 SELECT 'CREATE TRIGGER ' || trg.triggername || '\n  '
@@ -239,7 +223,12 @@ and   t.schemaid = s.schemaid
     </void> 
    </object> 
   </void> 
-
+  
+  <void method="put"> 
+   <string>Apache Derby</string> 
+   <object idref="id_cloudscape_trg"/> 
+  </void> 
+  
   <void method="put">
    <string>INGRES</string>
    <object class="workbench.db.GetMetaDataSql">

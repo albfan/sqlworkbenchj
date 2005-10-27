@@ -72,8 +72,8 @@ public class RowData
 				// it does not return the correct object class
 				// when using getObject() on a TIMESTAMP column
 				// I simply assume that this is working properly
-				// for other JDBC drivers as well. 
-				
+				// for other JDBC drivers as well.
+
 				// On the other hand we may not use getDate()
 				// for Oracle DATE columns as this will remove
 				// the time part of the column
@@ -299,7 +299,7 @@ public class RowData
 	{
 		return this.getDataAsString(aDelimiter, formatter, null);
 	}
-	
+
 	public StringBuffer getDataAsString(String aDelimiter, DecimalFormat formatter, boolean[] columns)
 	{
 		int count = this.colData.length;
@@ -347,7 +347,7 @@ public class RowData
 		}
 		return result;
 	}
-	
+
 	public String toString()
 	{
 		int count = this.colData.length;

@@ -37,6 +37,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -634,7 +635,7 @@ public class EditorPanel
 		}
 		boolean result = false;
 		
-		Reader reader = null;
+		BufferedReader reader = null;
 		try
 		{
 			// try to free memory by releasing the current document
@@ -645,7 +646,7 @@ public class EditorPanel
 			File f = new File(filename);
 			try
 			{
-				reader = EncodingUtil.createReader(f, encoding);
+				reader = EncodingUtil.createBufferedReader(f, encoding);
 			}
 			catch (UnsupportedEncodingException e)
 			{
@@ -654,7 +655,7 @@ public class EditorPanel
 				{
 					encoding = "UTF-8";
 					FileInputStream in = new FileInputStream(filename);
-					reader = new InputStreamReader(in, "UTF-8");
+					reader = new BufferedReader(new InputStreamReader(in, "UTF-8"), 8192);
 				}
 				catch (Throwable ignore) {}
 			}
@@ -664,16 +665,16 @@ public class EditorPanel
 			// go through the SyntaxDocument
 			GapContent  content = new GapContent((int)aFile.length() + 500);
 			SyntaxDocument doc = new SyntaxDocument(content);
-			char[] buff = new char[8192];
 			int pos = 0;
-			int bytes = reader.read(buff);
-			while (bytes > 0)
+			String line = reader.readLine();
+			doc.beginCompoundEdit();
+			while (line != null)
 			{
-				String line = new String(buff, 0, bytes);
-				doc.insertString(pos, line, null);
-				bytes = reader.read(buff);
-				pos += bytes;
+				doc.insertString(pos, line + "\n", null);
+				pos += line.length() + 1;
+				line = reader.readLine();
 			}
+			doc.endCompoundEdit();
 			this.setDocument(doc);
 			this.currentFile = aFile;
 			this.fileEncoding = encoding;
@@ -870,18 +871,35 @@ public class EditorPanel
 
 	public int find()
 	{
+		boolean showDialog = true;
 		String crit = this.lastSearchCriteria;
 		if (crit == null) crit = this.getSelectedText();
 		SearchCriteriaPanel p = new SearchCriteriaPanel(crit);
-		boolean doFind = p.showFindDialog(this);
-		if (!doFind) return -1;
-		String criteria = p.getCriteria();
-		boolean ignoreCase = p.getIgnoreCase();
-		boolean wholeWord = p.getWholeWordOnly();
-		boolean useRegex = p.getUseRegex();
-		int pos = this.findText(criteria, ignoreCase, wholeWord, useRegex);
-		this.lastSearchCriteria = criteria;
-		this.findAgainAction.setEnabled(pos > -1);
+
+		int pos = -1;
+		while (showDialog)
+		{
+			boolean doFind = p.showFindDialog(this);
+			if (!doFind) return -1;
+			String criteria = p.getCriteria();
+			boolean ignoreCase = p.getIgnoreCase();
+			boolean wholeWord = p.getWholeWordOnly();
+			boolean useRegex = p.getUseRegex();
+			try
+			{
+				this.lastSearchCriteria = criteria;
+				this.findAgainAction.setEnabled(false);
+				pos = this.findText(criteria, ignoreCase, wholeWord, useRegex);
+				showDialog = false;
+				this.findAgainAction.setEnabled(pos > -1);
+			}
+			catch (Exception e)
+			{
+				pos = -1;
+				WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(e));
+				showDialog = true;
+			}
+		}
 		return pos;
 	}
 
@@ -913,7 +931,6 @@ public class EditorPanel
 	{
 		if (this.replacePanel == null)
 		{
-
 			this.replacePanel = new ReplacePanel(this);
 		}
 		this.replacePanel.showReplaceDialog(this, this.getSelectedText());
@@ -927,8 +944,12 @@ public class EditorPanel
 		int pos = this.findNext();
 		if (pos > -1)
 		{
-			this.setSelectedText(aReplacement);
+			String text = this.getSelectedText();
+			Matcher m = this.lastSearchPattern.matcher(text);
+			String newText = m.replaceAll(aReplacement);
+			this.setSelectedText(newText);
 		}
+		
 		return (pos > -1);
 	}
 
@@ -938,6 +959,7 @@ public class EditorPanel
 		int selEnd = this.getSelectionEnd();
 		return (selStart > -1 && selEnd > selStart);
 	}
+	
 	public int replaceAll(String value, String replacement, boolean selectedText, boolean ignoreCase, boolean wholeWord, boolean useRegex)
 	{
 		String old = null;
@@ -954,6 +976,11 @@ public class EditorPanel
 		int selEnd = this.getSelectionEnd();
 		int newLen = -1;
 		String regex = this.getSearchExpression(value, ignoreCase, wholeWord, useRegex);
+		if (!useRegex)
+		{
+			replacement = StringUtil.quoteRegexMeta(replacement);
+		}
+		
 		String newText = old.replaceAll(regex, replacement);
 		if (selectedText)
 		{
@@ -982,18 +1009,15 @@ public class EditorPanel
 	{
 		if (this.searchPatternMatchesSelectedText())
 		{
-			this.setSelectedText(aReplacement);
+			Matcher m = this.lastSearchPattern.matcher(this.getSelectedText());
+			String newText = m.replaceAll(aReplacement);
+			this.setSelectedText(newText);
 			return true;
 		}
 		else
 		{
-			if (this.findNext() > -1)
-			{
-				this.setSelectedText(aReplacement);
-				return true;
-			}
+			return replaceNext(aReplacement);
 		}
-		return false;
 	}
 
 	/* (non-Javadoc)

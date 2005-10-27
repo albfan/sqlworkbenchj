@@ -177,11 +177,12 @@ public class TableDefinitionPanel
 		{
 			try
 			{
-				tableDefinition.setIgnoreRepaint(true);
+				tableDefinition.setSuspendRepaint(true);
 				DbMetadata meta = this.dbConnection.getMetadata();
 				DataStore def = meta.getTableDefinition(this.currentTable, false);
 				DataStoreTableModel model = new DataStoreTableModel(def);
 				tableDefinition.setPrintHeader(this.currentTable.getTableName());
+				tableDefinition.setAutoCreateColumnsFromModel(true);
 				tableDefinition.setModel(model, true);
 				if ("SEQUENCE".equalsIgnoreCase(this.currentObjectType))
 				{
@@ -192,22 +193,35 @@ public class TableDefinitionPanel
 					tableDefinition.adjustColumns();
 				}
 
-				// remove the last two columns if we are not displaying a SEQUENCE
+				// remove the last three columns if we are not displaying a SEQUENCE
+				// these columns are "SCALE/SIZE", "PRECISION" and "POSITION"
+				// they don't need to be displayed as this is "included" in the
+				// displayed (DBMS) data type already
 				if (!"SEQUENCE".equalsIgnoreCase(this.currentObjectType))
 				{
 					TableColumnModel colmod = tableDefinition.getColumnModel();
+					
+					// Assign the correct renderer to display java.sql.Types values
 					TableColumn col = colmod.getColumn(DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
 					col.setCellRenderer(new SqlTypeRenderer());
 
-					col = colmod.getColumn(colmod.getColumnCount() - 1);
-					colmod.removeColumn(col);
-
-					col = colmod.getColumn(colmod.getColumnCount() - 1);
-					colmod.removeColumn(col);
-
-					col = colmod.getColumn(colmod.getColumnCount() - 1);
-					colmod.removeColumn(col);
+					try
+					{
+						if (colmod.getColumnCount() == DbMetadata.TABLE_DEFINITION_COLS.length)
+						{
+							for (int i = 0; i < 3; i++)
+							{
+								col = colmod.getColumn(colmod.getColumnCount() - 1);
+								colmod.removeColumn(col);
+							}
+						}
+					}
+					catch (Throwable e)
+					{
+						// ignore it
+					}
 				}
+				
 			}
 			catch (SQLException e)
 			{
@@ -215,7 +229,7 @@ public class TableDefinitionPanel
 			}
 			finally
 			{
-				tableDefinition.setIgnoreRepaint(false);
+				tableDefinition.setSuspendRepaint(false);
 				reloadAction.setEnabled(true);
 				setBusy(false);
 			}

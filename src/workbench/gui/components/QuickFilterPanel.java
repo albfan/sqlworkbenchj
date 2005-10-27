@@ -120,6 +120,7 @@ public class QuickFilterPanel
 				columnDropDown = new JComboBox(columnList);
 				columnDropDown.addActionListener(this);
 				columnDropDown.setSelectedIndex(0);
+				columnDropDown.setToolTipText(ResourceMgr.getString("TxtQuickFilterColumnSelector"));
 			}
 		}
 		

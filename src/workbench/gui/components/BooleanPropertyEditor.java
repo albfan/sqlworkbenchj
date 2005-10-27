@@ -58,16 +58,16 @@ public class BooleanPropertyEditor
       Class cls = aSource.getClass();
       try
       {
-	this.getter = cls.getMethod(name, (Class[])null);
+				this.getter = cls.getMethod(name, (Class[])null);
       }
       catch (NoSuchMethodException e)
       {
-	this.getter = null;
+				this.getter = null;
       }
       if (this.getter == null)
       {
-	name = "is" + propertyName;
-	this.getter = cls.getMethod(name, (Class[])null);
+				name = "is" + propertyName;
+				this.getter = cls.getMethod(name, (Class[])null);
       }
       
       name = "set" + propertyName;

@@ -36,7 +36,8 @@ public class WbDiff
 	extends SqlCommand
 {
 	public static final String VERB = "WBDIFF";
-	public static final String PARAM_SOURCEPROFILE = "sourceprofile";
+	//public static final String PARAM_SOURCEPROFILE = "sourceprofile";
+	public static final String PARAM_SOURCEPROFILE = "referenceprofile";
 	public static final String PARAM_TARGETPROFILE = "targetprofile";
 	public static final String PARAM_FILENAME = "file";
 	public static final String PARAM_ENCODING = "encoding";
@@ -54,7 +55,7 @@ public class WbDiff
 	public static final String PARAM_INCLUDE_FK = "includeforeignkeys";
 	public static final String PARAM_INCLUDE_PK = "includeprimarykeys";
 	public static final String PARAM_INCLUDE_CONSTRAINTS = "includeconstraints";
-	public static final String PARAM_INCLUDE_COMMENTS = "includecomments";
+	//public static final String PARAM_INCLUDE_COMMENTS = "includecomments";
 		
 	private ArgumentParser cmdLine;
 	private SchemaDiff diff;
@@ -63,6 +64,7 @@ public class WbDiff
 	{
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(PARAM_SOURCEPROFILE);
+		cmdLine.addArgument("sourceprofile"); // old name of the parameter
 		cmdLine.addArgument(PARAM_TARGETPROFILE);
 		cmdLine.addArgument(PARAM_FILENAME);
 		cmdLine.addArgument(PARAM_ENCODING);
@@ -76,7 +78,7 @@ public class WbDiff
 		cmdLine.addArgument(PARAM_INCLUDE_INDEX);
 		cmdLine.addArgument(PARAM_EXCLUDE_TABLES);
 		cmdLine.addArgument(PARAM_INCLUDE_CONSTRAINTS);
-		cmdLine.addArgument(PARAM_INCLUDE_COMMENTS);
+		//cmdLine.addArgument(PARAM_INCLUDE_COMMENTS);
 	}
 
 	public String getVerb() { return VERB; }
@@ -125,6 +127,7 @@ public class WbDiff
 		String filename = cmdLine.getValue(PARAM_FILENAME);
 
 		String sourceProfile = cmdLine.getValue(PARAM_SOURCEPROFILE);
+		if (sourceProfile == null) sourceProfile = cmdLine.getValue("sourceprofile"); // old name
 		String targetProfile = cmdLine.getValue(PARAM_TARGETPROFILE);
 
 		WbConnection targetCon = null;
@@ -180,10 +183,10 @@ public class WbDiff
 
 		// this needs to be set before the tables are defined!
 		diff.setIncludeForeignKeys(cmdLine.getBoolean(PARAM_INCLUDE_FK, true));
-		diff.setIncludeIndex(cmdLine.getBoolean(PARAM_INCLUDE_INDEX, false));
+		diff.setIncludeIndex(cmdLine.getBoolean(PARAM_INCLUDE_INDEX, true));
 		diff.setIncludePrimaryKeys(cmdLine.getBoolean(PARAM_INCLUDE_PK, true));
-		diff.setIncludeTableConstraints(cmdLine.getBoolean(PARAM_INCLUDE_CONSTRAINTS, false));
-		diff.setIncludeComments(cmdLine.getBoolean(PARAM_INCLUDE_COMMENTS, false));
+		diff.setIncludeTableConstraints(cmdLine.getBoolean(PARAM_INCLUDE_CONSTRAINTS, true));
+		//diff.setIncludeComments(cmdLine.getBoolean(PARAM_INCLUDE_COMMENTS, false));
 		
 		String refTables = cmdLine.getValue(PARAM_SOURCETABLES);
 		String tarTables = cmdLine.getValue(PARAM_TARGETTABLES);

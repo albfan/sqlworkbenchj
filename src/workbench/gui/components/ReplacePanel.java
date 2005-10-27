@@ -23,15 +23,17 @@ import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
+import workbench.gui.WbSwingUtilities;
 
 import workbench.gui.actions.EscAction;
 import workbench.interfaces.Replaceable;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.ExceptionUtil;
 
 /**
  *
- * @author  thomas
+ * @author  support@sql-workbench.net
  */
 public class ReplacePanel 
 	extends javax.swing.JPanel
@@ -42,6 +44,8 @@ public class ReplacePanel
 	private static final String PROP_KEY_WHOLE_WORD = PROP_CLASS + ".wholeWord";
 	private static final String PROP_KEY_SELECTED = PROP_CLASS + ".selectedText";
 	private static final String PROP_KEY_USE_REGEX = PROP_CLASS + ".useRegEx";
+	private static final String PROP_KEY_CRITERIA = PROP_CLASS + ".criteria";
+	private static final String PROP_KEY_REPLACEMENT = PROP_CLASS + ".replacement";
 	
 	private Replaceable client;
 	private int lastPos = -1;
@@ -72,6 +76,8 @@ public class ReplacePanel
 		this.replaceAllButton.addActionListener(this);
 		this.closeButton.addActionListener(this);
 
+		this.replaceNextButton.setEnabled(false);
+		
 		this.criteriaTextField.addMouseListener(new TextComponentMouseListener());
 		this.replaceValueTextField.addMouseListener(new TextComponentMouseListener());
 		
@@ -322,19 +328,36 @@ public class ReplacePanel
 	private void find()
 	{
 		String toFind = this.criteriaTextField.getText();
-		this.lastPos = this.client.findFirst(toFind, this.ignoreCaseCheckBox.isSelected(), this.wordsOnlyCheckBox.isSelected(), this.useRegexCheckBox.isSelected());
+		try
+		{
+			this.lastPos = this.client.findFirst(toFind, this.ignoreCaseCheckBox.isSelected(), this.wordsOnlyCheckBox.isSelected(), this.useRegexCheckBox.isSelected());
+			this.replaceNextButton.setEnabled(this.lastPos > 0);
+		}
+		catch (Exception e)
+		{
+			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(e));
+		}
 	}
 	
 	private void replaceNext()
 	{
+		if (this.lastPos < 0) this.find();
+		
 		if (this.client.replaceCurrent(this.replaceValueTextField.getText()))
+		//if (this.client.replaceNext(this.replaceValueTextField.getText()))
 		{
 			this.find();
+		}
+		else
+		{
+			this.replaceNextButton.setEnabled(false);
 		}
 	}
 	
 	private void replaceAll()
 	{
+		//this.find();
+		//if (this.lastPos < 0) return;
 		boolean selected = this.selectedTextCheckBox.isEnabled() && this.selectedTextCheckBox.isSelected();
 		this.client.replaceAll(this.criteriaTextField.getText(), 
 		                       this.replaceValueTextField.getText(), 
@@ -362,7 +385,8 @@ public class ReplacePanel
 		Settings.getInstance().setProperty(PROP_KEY_WHOLE_WORD, Boolean.toString(this.wordsOnlyCheckBox.isSelected()));
 		Settings.getInstance().setProperty(PROP_KEY_SELECTED, Boolean.toString(this.selectedTextCheckBox.isSelected()));
 		Settings.getInstance().setProperty(PROP_KEY_USE_REGEX, Boolean.toString(this.useRegexCheckBox.isSelected()));
-		
+		Settings.getInstance().setProperty(PROP_KEY_CRITERIA, this.criteriaTextField.getText());
+		Settings.getInstance().setProperty(PROP_KEY_REPLACEMENT, this.replaceValueTextField.getText());
 		Settings.getInstance().storeWindowPosition(this.dialog, PROP_CLASS + ".window");
 	}
 	
@@ -372,6 +396,8 @@ public class ReplacePanel
 		this.wordsOnlyCheckBox.setSelected(Settings.getInstance().getBoolProperty(PROP_KEY_WHOLE_WORD, false));
 		this.selectedTextCheckBox.setSelected(Settings.getInstance().getBoolProperty(PROP_KEY_SELECTED, false));
 		this.useRegexCheckBox.setSelected(Settings.getInstance().getBoolProperty(PROP_KEY_USE_REGEX, true));
+		this.criteriaTextField.setText(Settings.getInstance().getProperty(PROP_KEY_CRITERIA, ""));
+		this.replaceValueTextField.setText(Settings.getInstance().getProperty(PROP_KEY_REPLACEMENT, ""));
 	}
 	
 	public void windowActivated(java.awt.event.WindowEvent e)

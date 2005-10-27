@@ -11,6 +11,8 @@
  */
 package workbench.storage.filter;
 
+import workbench.util.StringUtil;
+
 /**
  * @author support@sql-workbench.net
  */
@@ -53,4 +55,8 @@ public class LessOrEqualComparator
 		return (other instanceof LessOrEqualComparator);
 	}
 	
+	public boolean validateInput(String value)
+	{
+		return StringUtil.isNumber(value);
+	}	
 }

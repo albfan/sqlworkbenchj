@@ -45,6 +45,8 @@ public class SchemaDiff
 	public static final String TAG_INDEX_INFO = "include-index";
 	public static final String TAG_FK_INFO = "include-foreign-key";
 	public static final String TAG_PK_INFO = "include-primary-key";
+	public static final String TAG_CONSTRAINT_INFO = "include-constraints";
+	//public static final String TAG_COMMENT_INFO = "include-comments";
 	
 	private WbConnection sourceDb;
 	private WbConnection targetDb;
@@ -56,7 +58,7 @@ public class SchemaDiff
 	private boolean diffIndex = true;
 	private boolean diffForeignKeys = true;
 	private boolean diffPrimaryKeys = true;
-	private boolean diffConstraints;
+	private boolean diffConstraints = false;
 	private RowActionMonitor monitor;
 	private boolean cancel = false;
 	private String referenceSchema;
@@ -588,6 +590,7 @@ public class SchemaDiff
 		tw.appendTag(info, indent2, TAG_INDEX_INFO, this.diffIndex);
 		tw.appendTag(info, indent2, TAG_FK_INFO, this.diffForeignKeys);
 		tw.appendTag(info, indent2, TAG_PK_INFO, this.diffPrimaryKeys);
+		tw.appendTag(info, indent2, TAG_CONSTRAINT_INFO, this.diffConstraints);
 		info.append('\n');
 		
 		if (this.referenceSchema != null && this.targetSchema != null)

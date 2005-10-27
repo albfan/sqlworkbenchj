@@ -1,5 +1,5 @@
 /*
- * ColumnFilterDefinition.java
+ * ColumnExpression.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -19,7 +19,7 @@ import workbench.util.StringUtil;
  * @author support@sql-workbench.net
  */
 public class ColumnExpression
-	implements FilterExpression
+	implements FilterExpression,ExpressionValue
 {
 	private String columnName;
 	private Object filterValue;
@@ -43,11 +43,6 @@ public class ColumnExpression
 		setColumnName(column);
 	}
 	
-	public boolean evaluate(Object value)
-	{
-		return comparator.evaluate(filterValue, value, this.ignoreCase);
-	}
-
 	public Object getFilterValue()
 	{
 		return filterValue;
@@ -91,9 +86,9 @@ public class ColumnExpression
 	{
 		Object value = columnValues.get(this.columnName);
 		if (value == null) return true;
-		return evaluate(value);
+		return comparator.evaluate(filterValue, value, this.ignoreCase);
 	}
-
+	
 	public String getColumnName()
 	{
 

@@ -226,7 +226,6 @@ public class TableDiff
 			writer.appendEmptyTag(result, myindent, TAG_REMOVE_COLUMN, "name", col.getColumn().getColumnName());
 			result.append('\n');
 		}
-		result.append('\n');
 	}
 	
 	private void appendIndexDiff(StrBuffer result)

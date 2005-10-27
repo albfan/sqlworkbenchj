@@ -236,9 +236,9 @@ public class XmlRowDataConverter
 				{
 					if (this.useCData)
 					{
-						xml.append("<![CDATA[");
+						xml.append(TagWriter.CDATA_START);
 						xml.append(this.getValueAsFormattedString(row, c));
-						xml.append("]]>");
+						xml.append(TagWriter.CDATA_END);
 					}
 					else
 					{

@@ -93,7 +93,7 @@ public class OracleMetadata
 			stmt.setString(1, owner);
 			stmt.setString(2, sequence);
 			rs = stmt.executeQuery();
-			result = new DataStore(rs, true);
+			result = new DataStore(rs, this.connection, true);
 		}
 		catch (Exception e)
 		{
@@ -244,7 +244,7 @@ public class OracleMetadata
 	 *  cardinality field anyway)
 	 */
 	public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique, boolean flag1)
-	throws SQLException
+		throws SQLException
 	{
 		this.closeStatement();
 		
@@ -401,9 +401,14 @@ public class OracleMetadata
 			"       0 AS sql_datetime_sub,  \n" +
 			"       t.data_length AS char_octet_length,  \n" +
 			"       t.column_id AS ordinal_position,   \n" +
-			"	     DECODE (t.nullable, 'N', 'NO', 'YES') AS is_nullable  \n" +
+			"       DECODE (t.nullable, 'N', 'NO', 'YES') AS is_nullable  \n" +
 			"FROM all_tab_columns t";
-		final String where = " WHERE t.owner LIKE ? ESCAPE '/'  AND t.table_name LIKE ? ESCAPE '/'  AND t.column_name LIKE ? ESCAPE '/'  \n";
+		
+		// not using LIKE for owner and table
+		// because internally we never call this with wildcards
+		// and leaving out the like (which is used in the original statement from Oracle's driver)
+		// speeds up the statement
+		final String where = " WHERE t.owner = ? AND t.table_name = ? AND t.column_name LIKE ? ESCAPE '/'  \n";
 		
 		final String comment_join = "   AND t.owner = c.owner (+)  AND t.table_name = c.table_name (+)  AND t.column_name = c.column_name (+)  \n";
 		final String order = "ORDER BY table_schem, table_name, ordinal_position";

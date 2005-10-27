@@ -514,7 +514,8 @@ public class MainWindow
 		Collections.sort(macros);
 		int count = macros.size();
 		RunMacroAction run = null;
-		for (int i=0; (i < count && i < 9); i++)
+		int maxItems = Settings.getInstance().getMaxMacrosInMenu();
+		for (int i=0; (i < count && i < maxItems); i++)
 		{
 			String name = (String)macros.get(i);
 			run = new RunMacroAction(this, name, i+1);

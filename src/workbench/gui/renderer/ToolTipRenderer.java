@@ -52,7 +52,7 @@ public class ToolTipRenderer
 	private Rectangle paintIconR = new Rectangle();
 	private Rectangle paintTextR = new Rectangle();
 	private Rectangle paintViewR = new Rectangle();
-	private static Insets paintViewInsets = new Insets(0, 0, 0, 0);
+	//private static Insets paintViewInsets = new Insets(0, 0, 0, 0);
 	private static Insets emptyInsets = new Insets(0, 0, 0, 0);
 
 	private boolean isPrinting = false;
@@ -79,8 +79,17 @@ public class ToolTipRenderer
 	{
 	}
 
-	public void setEditingRow(int row) { this.editingRow = row; }
-	public void setHighlightColumns(boolean[] cols) { this.highlightCols = cols; }
+	public void setEditingRow(int row) 
+	{ 
+		this.editingRow = row; 
+		//if (row < 0) this.isEditing = false;
+	}
+	
+	public void setHighlightColumns(boolean[] cols) 
+	{ 
+		//if (cols == null) this.isEditing = false;
+		this.highlightCols = cols; 
+	}
 	
 	public void setVerticalAlignment(int align)
 	{
@@ -113,22 +122,18 @@ public class ToolTipRenderer
 		this.isEditing = (row == this.editingRow) && (this.highlightBackground != null);
 		this.currentColumn = col;
 		
-		if (isSelected)
+		if (selectedForeground == null)
 		{
-			if (selectedForeground == null)
-			{
-				selectedForeground = table.getSelectionForeground();
-				selectedBackground = table.getSelectionBackground();
-			}
+			selectedForeground = table.getSelectionForeground();
+			selectedBackground = table.getSelectionBackground();
 		}
-		else
+		
+		if (unselectedForeground == null)
 		{
-			if (selectedForeground == null)
-			{
-				unselectedForeground = table.getForeground();
-				unselectedBackground = table.getBackground();
-			}
+			unselectedForeground = table.getForeground();
+			unselectedBackground = table.getBackground();
 		}
+
 		this.selected = isSelected;
 		
 		if (value != null)
@@ -167,7 +172,6 @@ public class ToolTipRenderer
 		paintViewR.width = w - (insets.left + insets.right);
 		paintViewR.height = h - (insets.top + insets.bottom);
 		
-		
 		paintIconR.x = paintIconR.y = paintIconR.width = paintIconR.height = 0;
 		paintTextR.x = paintTextR.y = paintTextR.width = paintTextR.height = 0;
 		
@@ -191,13 +195,13 @@ public class ToolTipRenderer
 			if (this.selected)
 			{
 				g.setColor(selectedBackground);
-				g.fillRect(0,0, w, h);
+				g.fillRect(0,0,w,h);
 				g.setColor(selectedForeground);
 			}
 			else 
 			{
 				g.setColor(unselectedBackground);
-				g.fillRect(0,0, w, h);
+				g.fillRect(0,0,w,h);
 				g.setColor(unselectedForeground);
 			}
 		}
@@ -211,9 +215,10 @@ public class ToolTipRenderer
 			{
 				g.setColor(unselectedBackground);
 			}
-			g.fillRect(0,0, w, h);
+			g.fillRect(0,0,w,h);
 			g.setColor(unselectedForeground);
 		}
+		
 		g.drawString(clippedText, textX, textY);
 
 		if (focus) 

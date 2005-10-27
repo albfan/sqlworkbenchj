@@ -375,6 +375,11 @@ public class Settings
 		if (WbManager.trace) System.out.println("Setting.fillDefaults() - done");
 	}
 	
+	public int getMaxMacrosInMenu()
+	{
+		return getIntProperty("workbench.gui.macro.maxmenuitems", 9);
+	}
+	
 	public Font getStandardFont()
 	{
 		if (this.standardFont == null)
@@ -701,6 +706,11 @@ public class Settings
 	public static final int SHOW_NO_FILENAME = 0;
 	public static final int SHOW_FILENAME = 1;
 	public static final int SHOW_FULL_PATH = 2;
+	
+	public boolean getShowRowNumbers()
+	{
+		return getBoolProperty("workbench.data.rownumbers", false);
+	}
 	
 	public int getShowFilenameInWindowTitle()
 	{

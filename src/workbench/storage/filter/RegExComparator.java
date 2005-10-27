@@ -22,8 +22,6 @@ import java.util.regex.Pattern;
 public class RegExComparator
 	implements ColumnComparator
 {
-	private Map patterns;
-	
 	public RegExComparator()
 	{
 	}
@@ -45,24 +43,13 @@ public class RegExComparator
 		if (reference == null && value != null) return false;
 		if (reference != null && value == null) return false;
 		Pattern p = null;
-		if (patterns == null)
+		if (ignoreCase)
 		{
-			patterns = new HashMap();
+			p = Pattern.compile((String)reference, Pattern.CASE_INSENSITIVE);
 		}
 		else
 		{
-			p = (Pattern)patterns.get(reference);
-		}
-		if (p == null)
-		{
-			if (ignoreCase)
-			{
-				p = Pattern.compile((String)reference, Pattern.CASE_INSENSITIVE);
-			}
-			else
-			{
-				p = Pattern.compile((String)reference);
-			}
+			p = Pattern.compile((String)reference);
 		}
 		Matcher m = p.matcher((String)value);
 		return m.matches();
@@ -71,6 +58,19 @@ public class RegExComparator
 	public boolean equals(Object other)
 	{
 		return (other instanceof RegExComparator);
+	}
+	
+	public boolean validateInput(String value)
+	{
+		try
+		{
+			Pattern.compile(value);
+			return true;
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
 	}
 	
 }

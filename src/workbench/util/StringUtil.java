@@ -149,6 +149,19 @@ public class StringUtil
 		return temp.toString();
 	}
 
+	public static boolean isNumber(String value)
+	{
+		try
+		{
+			 Double.parseDouble(value);
+			 return true;
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+	}
+	
 	public static final boolean isEmptyString(String value)
 	{
 		if (value == null) return true;

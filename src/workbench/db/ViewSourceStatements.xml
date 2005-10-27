@@ -68,7 +68,7 @@
   
   <void method="put"> 
    <string>Cloudscape</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
+   <object id="id_list_cloudscape_views" class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
      <string>SELECT v.viewdefinition 
      FROM sys.sysviews v, sys.systables t, sys.sysschemas s
@@ -83,6 +83,11 @@
      <string>s.schemaname</string> 
     </void> 
    </object> 
+  </void> 
+  
+  <void method="put"> 
+   <string>Apache Derby</string> 
+   <object idref="id_list_cloudscape_views"/> 
   </void> 
   
   <void method="put"> 

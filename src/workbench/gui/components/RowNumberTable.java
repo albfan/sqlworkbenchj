@@ -35,6 +35,7 @@ public class RowNumberTable
 	public RowNumberTable(TableModel model)
 	{
 		super(model);
+		setAutoCreateColumnsFromModel(true);
 		setBackground(UIManager.getColor("Label.background"));
 		setForeground(UIManager.getColor("Label.foreground"));
 		this.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);

@@ -54,12 +54,14 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.sql.EditorPanel;
+import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.ShareableDisplay;
 import workbench.interfaces.TableSearchDisplay;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.Like;
+import workbench.util.WbWorkspace;
 
 
 /**
@@ -313,7 +315,9 @@ public class TableSearchPanel
 	{//GEN-HEADEREND:event_startButtonActionPerformed
 		if (this.searcher.isRunning())
 		{
+			setStartButtonEnabled(false);
 			this.searcher.cancelSearch();
+			//setStartButtonEnabled(true);
 		}
 		else
 		{
@@ -321,6 +325,23 @@ public class TableSearchPanel
 		}
 	}//GEN-LAST:event_startButtonActionPerformed
 
+	private void setStartButtonEnabled(final boolean flag)
+	{
+		try
+		{
+			EventQueue.invokeAndWait(new Runnable()
+			{
+				public void run()
+				{
+					startButton.setEnabled(flag);
+				}
+			});
+		}
+		catch (Throwable th)
+		{
+			startButton.setEnabled(flag);
+		}
+	}
 	private void adjustDataTable()
 	{
 		if (this.currentDisplayTable != null)
@@ -505,25 +526,46 @@ public class TableSearchPanel
 		searcher.search(); // starts the background thread
 	}
 
+	private String getWorkspacePrefix(int index)
+	{
+		return "dbexplorer" + index + ".tablesearcher";
+	}
+	
+	public void saveToWorkspace(WbWorkspace wb, int index)
+	{
+		saveSettings(getWorkspacePrefix(index), wb.getSettings());
+	}
+	
+	public void readFromWorkspace(WbWorkspace wb, int index)
+	{
+		restoreSettings(getWorkspacePrefix(index), wb.getSettings());
+	}
+	
 	public void saveSettings()
 	{
-		Settings s = Settings.getInstance();
-		String cl = this.getClass().getName();
-		s.setProperty(cl + ".divider", this.jSplitPane1.getDividerLocation());
-		s.setProperty(cl + ".criteria", this.searchText.getText());
-		s.setProperty(cl + ".maxrows", this.rowCount.getText());
-		s.setProperty(cl + ".column-function", this.columnFunction.getText());
+		saveSettings(this.getClass().getName(), Settings.getInstance());
+	}
+	
+	private void saveSettings(String prefix, PropertyStorage props)
+	{
+		props.setProperty(prefix + ".divider", this.jSplitPane1.getDividerLocation());
+		props.setProperty(prefix + ".criteria", this.searchText.getText());
+		props.setProperty(prefix + ".maxrows", this.rowCount.getText());
+		props.setProperty(prefix + ".column-function", this.columnFunction.getText());
 	}
 
 	public void restoreSettings()
 	{
-		Settings s = Settings.getInstance();
-		String cl = this.getClass().getName();
-		int loc = s.getIntProperty(cl + ".divider",200);
+		restoreSettings(this.getClass().getName(), Settings.getInstance());
+	}
+	
+	private void restoreSettings(String prefix, PropertyStorage props)
+	{
+		int loc = props.getIntProperty(prefix + ".divider",200);
 		this.jSplitPane1.setDividerLocation(loc);
-		this.searchText.setText(s.getProperty(cl + ".criteria", ""));
-		this.rowCount.setText(s.getProperty(cl + ".maxrows", "0"));
-		this.columnFunction.setText(s.getProperty(cl + ".column-function", "$col$"));
+		this.searchText.setText(props.getProperty(prefix + ".criteria", ""));
+		this.rowCount.setText(props.getProperty(prefix + ".maxrows", "0"));
+		this.columnFunction.setText(props.getProperty(prefix + ".column-function", "$col$"));
 	}
 
 	public void searchEnded()
@@ -550,6 +592,7 @@ public class TableSearchPanel
 		this.columnFunction.setEnabled(true);
 		startButton.setText(ResourceMgr.getString("LabelStartSearch"));
 		this.statusInfo.setText("");
+		this.startButton.setEnabled(this.tableNames.getSelectedRowCount() > 0);
 	}
 
 	public void searchStarted()

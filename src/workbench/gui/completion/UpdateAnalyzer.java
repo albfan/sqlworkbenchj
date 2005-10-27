@@ -43,7 +43,7 @@ public class UpdateAnalyzer
 	{
 		int setPos = StringUtil.findPattern(SET_PATTERN, sql, 0);
 
-		String currentWord = StringUtil.getWordLeftOfCursor(sql, cursorPos, null);
+		String currentWord = StringUtil.getWordLeftOfCursor(sql, cursorPos, ",");
 		if (currentWord != null)
 		{
 			boolean keyWord = this.dbConnection.getMetadata().isKeyword(currentWord);

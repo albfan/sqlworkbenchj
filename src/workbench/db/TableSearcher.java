@@ -23,6 +23,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.util.StringUtil;
+import workbench.util.WbThread;
 
 /**
  *
@@ -48,15 +49,13 @@ public class TableSearcher
 
 	private Thread createThread()
 	{
-		Thread t = new Thread()
+		Thread t = new WbThread("TableSearcher Thread")
 		{
 			public void run()
 			{
 				doSearch();
 			}
 		};
-		t.setName("TableSearcher Thread");
-		t.setDaemon(true);
 		return t;
 	}
 
@@ -81,16 +80,18 @@ public class TableSearcher
 					this.getConnection().reconnect();
 				}
 			}
-			//this.setRunning(false);
 		}
 		catch (Exception e)
 		{
 		}
 	}
 
-	private synchronized void setRunning(boolean aFlag)
+	private void setRunning(boolean aFlag)
 	{
-		this.isRunning = aFlag;
+		synchronized (this)
+		{
+			this.isRunning = aFlag;
+		}
 		if (this.display != null)
 		{
 			if (aFlag) this.display.searchStarted();
@@ -248,6 +249,7 @@ public class TableSearcher
 		}
 		return false;
 	}
+	
 	public boolean setColumnFunction(String aColFunc)
 	{
 		this.columnFunction = null;

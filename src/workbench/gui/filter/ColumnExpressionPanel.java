@@ -29,6 +29,8 @@ import workbench.storage.ResultInfo;
 import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.ComparatorFactory;
+import workbench.storage.filter.DataRowExpression;
+import workbench.storage.filter.ExpressionValue;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.ValueConverter;
 import java.awt.EventQueue;
@@ -51,7 +53,7 @@ public class ColumnExpressionPanel
 	private ValueConverter converter = new ValueConverter();
 	private Class lastColumnClass;
 
-	public ColumnExpressionPanel(ResultInfo info, ColumnExpression filter)
+	public ColumnExpressionPanel(ResultInfo info, ExpressionValue filter)
 	{
 		columnInfo = info;
 		comparatorDropDown = new JComboBox();
@@ -75,6 +77,7 @@ public class ColumnExpressionPanel
 		columnSelector = new JComboBox();
 		int count = info.getColumnCount();
 		ArrayList l = new ArrayList(count);
+		l.add("*");
 		for (int i=0; i < count; i++)
 		{
 			l.add(info.getColumnName(i));
@@ -82,9 +85,6 @@ public class ColumnExpressionPanel
 
 		ListComboBoxModel model = new ListComboBoxModel(l);
 		columnSelector.setModel(model);
-		//d = columnSelector.getPreferredSize();
-		//columnSelector.setPreferredSize(d);
-		//columnSelector.setMinimumSize(d);
 
 		this.setLayout(new GridBagLayout());
 		ignoreCase = new JCheckBox(ResourceMgr.getString("LabelFilterIgnoreCase"));
@@ -133,7 +133,7 @@ public class ColumnExpressionPanel
 		}
 		else
 		{
-			setExpression(filter);
+			setExpressionValue(filter);
 		}
 	}
 
@@ -143,8 +143,15 @@ public class ColumnExpressionPanel
 		if (evt.getSource() == this.columnSelector)
 		{
 			int index = this.columnSelector.getSelectedIndex();
-			ColumnIdentifier col = this.columnInfo.getColumn(index);
-			buildColumnComparatorDropDown(col);
+			if (index == 0)
+			{
+				buildColumnComparatorDropDown(String.class);
+			}
+			else
+			{
+				ColumnIdentifier col = this.columnInfo.getColumn(index-1);
+				buildColumnComparatorDropDown(col);
+			}
 		}
 		else if (evt.getSource() == this.comparatorDropDown)
 		{
@@ -172,10 +179,11 @@ public class ColumnExpressionPanel
 		}
 	}
 
-	public void setExpression(ColumnExpression expr)
+	public void setExpressionValue(ExpressionValue expr)
 	{
 		String col = expr.getColumnName();
-		int index = this.columnInfo.findColumn(col);
+		int index = 0;
+		if (!"*".equals(col)) this.columnInfo.findColumn(col);
 		if (index > -1)
 		{
 			this.columnSelector.setSelectedItem(col);
@@ -200,7 +208,20 @@ public class ColumnExpressionPanel
 		return (String)columnSelector.getSelectedItem();
 	}
 
-	public FilterExpression getExpression()
+	public boolean validateInput()
+	{
+		ColumnComparator comp = getComparator();
+		if (comp == null) return false;
+		String value = valueField.getText();
+		return comp.validateInput(value);
+	}
+	
+	public String getInputValue()
+	{
+		return valueField.getText();
+	}
+	
+	public ExpressionValue getExpressionValue()
 	{
 		String col = this.getColumnName();
 		if (col == null) return null;
@@ -209,7 +230,15 @@ public class ColumnExpressionPanel
 		Object value = this.getFilterValue();
 		if (value == null && comp.needsValue()) return null;
 
-		ColumnExpression exp = new ColumnExpression(col, comp, value);
+		ExpressionValue exp = null;
+		if ("*".equals(col))
+		{
+			exp = new DataRowExpression(comp, value);
+		}
+		else
+		{
+			exp = new ColumnExpression(col, comp, value);
+		}
 		if (this.ignoreCase.isEnabled())
 		{
 			exp.setIgnoreCase(ignoreCase.isSelected());
@@ -232,6 +261,9 @@ public class ColumnExpressionPanel
 		String value = valueField.getText();
 		String col = getColumnName();
 		int colIndex = this.columnInfo.findColumn(col);
+		// If the any column entry is selected ("*")
+		// colIndex will be -1, and we simply return the value entered
+		// because we tried everything as a String
 		if (colIndex > -1)
 		{
 			int type = this.columnInfo.getColumnType(colIndex);

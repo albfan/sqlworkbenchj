@@ -46,7 +46,6 @@ import javax.swing.table.TableModel;
 import workbench.db.TableIdentifier;
 
 import workbench.db.WbConnection;
-import workbench.gui.components.WbCellEditor;
 import workbench.gui.components.WbTextCellEditor;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
@@ -182,6 +181,7 @@ public class DwPanel
 		this.dataTable.setRowSelectionAllowed(true);
 		this.dataTable.getSelectionModel().addListSelectionListener(this);
 		this.dataTable.setHighlightRequiredFields(Settings.getInstance().getHighlightRequiredFields());
+		this.dataTable.setShowRowNumbers(Settings.getInstance().getShowRowNumbers());
 	}
 	
 	public SelectKeyColumnsAction getSelectKeysAction()
@@ -642,15 +642,15 @@ public class DwPanel
 			this.insertRow.setEnabled(false);
 			this.deleteRow.setEnabled(false);
 			this.updateAction.setEnabled(false);
-			this.restoreOriginalValues();
+			this.dataTable.restoreOriginalValues();
 		}
 		else
 		{
 			this.insertRow.setEnabled(true);
 		}
 	}
-	public boolean isReadOnly()
-	{ return this.readOnly; }
+	
+	public boolean isReadOnly() { return this.readOnly; }
 	
 	public boolean checkUpdateTable()
 	{
@@ -1043,8 +1043,8 @@ public class DwPanel
 		return newRow;
 	}
 	
-	public boolean confirmCancel()
-	{ return true; }
+	public boolean confirmCancel() { return true; }
+	
 	public void cancelExecution()
 	{
 		this.cancel = true;
@@ -1056,16 +1056,13 @@ public class DwPanel
 	}
 	
 	/**
-	 *	Replaces the current values with the values initially retrieved from the
-	 *  database.
+	 *	Replaces the current values in the underlying DataStore of the 
+	 *  the values initially retrieved from the database.
 	 *	@see workbench.storage.DataStore#restoreOriginalValues()
 	 */
 	public void restoreOriginalValues()
 	{
-		DataStore ds = this.dataTable.getDataStore();
-		if (ds == null) return;
-		ds.restoreOriginalValues();
-		this.repaint();
+		dataTable.restoreOriginalValues();
 	}
 	
 	public String getLastMessage()
@@ -1351,7 +1348,7 @@ public class DwPanel
 		this.deleteRow.setEnabled(this.isUpdateable() && rows > 0);
 		this.duplicateRow.setEnabled(this.isUpdateable() && rows == 1);
 		this.startEdit.setSwitchedOn(false);
-		this.restoreOriginalValues();
+		this.dataTable.restoreOriginalValues();
 	}
 	
 	/**
@@ -1440,16 +1437,11 @@ public class DwPanel
 		return update;
 	}
 	
-	public InsertRowAction getInsertRowAction()
-	{ return this.insertRow; }
-	public CopyRowAction getCopyRowAction()
-	{ return this.duplicateRow; }
-	public DeleteRowAction getDeleteRowAction()
-	{ return this.deleteRow; }
-	public UpdateDatabaseAction getUpdateDatabaseAction()
-	{ return this.updateAction; }
-	public StartEditAction getStartEditAction()
-	{ return this.startEdit; }
+	public InsertRowAction getInsertRowAction() { return this.insertRow; }
+	public CopyRowAction getCopyRowAction() { return this.duplicateRow; }
+	public DeleteRowAction getDeleteRowAction() { return this.deleteRow; }
+	public UpdateDatabaseAction getUpdateDatabaseAction() { return this.updateAction; }
+	public StartEditAction getStartEditAction() { return this.startEdit; }
 	
 	/**
 	 *	Turns on the batchUpdate mode.

@@ -29,7 +29,7 @@ public class OracleSynonymReader
 	public OracleSynonymReader()
 	{
 	}
-	
+
 	public TableIdentifier getSynonymTable(Connection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
@@ -53,6 +53,7 @@ public class OracleSynonymReader
 				owner = rs.getString(2);
 				table = rs.getString(3);
 				dblink = rs.getString(4);
+				if (dblink != null) table = table + "@" + dblink;
 				result = new TableIdentifier(null, owner, table);
 				//result.setExternalTable(dblink != null);
 			}
@@ -80,4 +81,3 @@ public class OracleSynonymReader
 	}
 
 }
-

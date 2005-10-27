@@ -49,7 +49,6 @@ public class WbTextLabel
 		super.setFont(f);
 		this.fm = this.getFontMetrics(f);
 		textY = fm.getAscent() + 2;
-		setToolTipText(ResourceMgr.getString("MsgTotalSqlTime"));
 	}
 	
 	public void setBorder(Border b)
@@ -85,6 +84,7 @@ public class WbTextLabel
 	
 	public void paint(Graphics g)
 	{
+		if (g == null) return;
 		if (hasBorder) super.paint(g);
 		if (text != null) 
 		{

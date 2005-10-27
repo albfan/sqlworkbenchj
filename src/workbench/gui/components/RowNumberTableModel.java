@@ -13,6 +13,7 @@ package workbench.gui.components;
 
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import workbench.resource.ResourceMgr;
 
 /**
  *
@@ -22,10 +23,12 @@ public class RowNumberTableModel
 	extends AbstractTableModel
 {
 	private JTable referenceTable;
+	private String label;
 	
 	public RowNumberTableModel(JTable reference)
 	{
 		this.referenceTable = reference;
+		label = ResourceMgr.getString("LabelRowColumn");
 	}
 	
 	public int getRowCount()
@@ -36,6 +39,11 @@ public class RowNumberTableModel
 	public Class getColumnClass(int columnIndex)
 	{
 		return Integer.class;
+	}
+	
+	public String getColumnName(int column)
+	{
+		return label;
 	}
 	
 	public int getColumnCount()

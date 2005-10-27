@@ -21,6 +21,9 @@ import workbench.util.StringUtil;
  */
 public class TagWriter
 {
+	public static final String CDATA_START = "<![CDATA[";
+	public static final String CDATA_END = "]]>";
+	
 	private String xmlNamespace = null;
 	
 	public TagWriter()
@@ -83,9 +86,9 @@ public class TagWriter
 	{
 		appendOpenTag(target, indent, tag);
 		boolean useCData = checkCData && needsCData(value);
-		if (useCData) target.append("<![CDATA[");
+		if (useCData) target.append(CDATA_START);
 		target.append(value);
-		if (useCData) target.append("]]>");
+		if (useCData) target.append(CDATA_END);
 		appendCloseTag(target, null, tag);
 	}
 

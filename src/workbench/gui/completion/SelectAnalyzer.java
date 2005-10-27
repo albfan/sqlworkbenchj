@@ -46,8 +46,8 @@ public class SelectAnalyzer
 	protected void checkContext()
 	{
 		this.context = NO_CONTEXT;
-		String currentWord = StringUtil.getWordLeftOfCursor(sql, cursorPos, null);
-		if (currentWord != null)
+		String currentWord = StringUtil.getWordLeftOfCursor(sql, cursorPos, ",");
+		if (!StringUtil.isEmptyString(currentWord))
 		{
 			boolean keyWord = this.dbConnection.getMetadata().isKeyword(currentWord);
 			setOverwriteCurrentWord(!keyWord);

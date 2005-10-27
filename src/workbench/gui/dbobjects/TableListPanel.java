@@ -1157,6 +1157,7 @@ public class TableListPanel
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			TableIdentifier table = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+			table.setType(this.selectedObjectType);
 			this.tableDefinition.retrieve(table, this.selectedObjectType);
 			this.shouldRetrieveTable = false;
 			shouldRetrieveTable = false;

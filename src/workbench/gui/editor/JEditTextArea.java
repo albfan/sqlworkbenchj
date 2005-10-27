@@ -108,15 +108,15 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.39 2005-09-30 13:04:23 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.40 2005-10-27 21:55:03 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
 	implements MouseWheelListener, Undoable, ClipboardSupport
 {
 	private boolean rightClickMovesCursor = false;
-	private Pattern lastSearchPattern;
-	private String lastSearchExpression;
+	protected Pattern lastSearchPattern;
+	protected String lastSearchExpression;
 	private int lastSearchPos = -1;
 	private boolean lastSearchOptionWholeWords;
 	private Color alternateSelectionColor;
@@ -415,12 +415,6 @@ public class JEditTextArea
 				regex = regex + "\\b";
 			}
 		}
-
-		if (ignoreCase)
-		{
-			regex = "(?i)" + regex;
-		}
-
 		return regex;
 	}
 
@@ -438,7 +432,8 @@ public class JEditTextArea
 
 		int start = -1;
 		int end = -1;
-		this.lastSearchPattern = Pattern.compile(regex);
+		this.lastSearchPattern = (ignoreCase ? Pattern.compile(regex, Pattern.CASE_INSENSITIVE) : Pattern.compile(regex));
+		this.lastSearchExpression = anExpression;
 		Matcher m = this.lastSearchPattern.matcher(this.getText());
 
 		if (m.find(this.getCaretPosition()))
@@ -507,10 +502,6 @@ public class JEditTextArea
 		this.getInputHandler().removeKeyBinding(key);
 	}
 	
-	/**
-	 * Returns if this component can be traversed by pressing
-	 * the Tab key. This returns false.
-	 */
 	public final boolean isManagingFocus()
 	{
 		return true;

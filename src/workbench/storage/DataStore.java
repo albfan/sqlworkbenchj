@@ -148,6 +148,12 @@ public class DataStore
 	{
 		this(aResult, readData, null, -1, null);
 	}
+	
+	public DataStore(ResultSet aResult, WbConnection conn, boolean readData)
+		throws SQLException
+	{
+		this(aResult, readData, null, -1, conn);
+	}
 
 	/**
 	 *	Create a DataStore based on the given ResultSet.

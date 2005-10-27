@@ -203,7 +203,7 @@ public abstract class BaseAnalyzer
 		if (Character.isWhitespace(c)) return null;
 		
 		// get the word left of the cursor that is "terminated" by a whitespace
-		String word = StringUtil.getWordLeftOfCursor(statement, pos, null);
+		String word = StringUtil.getWordLeftOfCursor(statement, pos, ",");
 		if (word == null) return null;
 		int dotPos= word.indexOf('.');
 		

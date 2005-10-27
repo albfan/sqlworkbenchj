@@ -53,8 +53,8 @@ public class SelectCommand extends SqlCommand
 		{
 			this.currentConnection = aConnection;
 			boolean isPrepared = false;
-			
-			if (Settings.getInstance().getCheckPreparedStatements() 
+
+			if (Settings.getInstance().getCheckPreparedStatements()
 				  && aConnection.getPreparedStatementPool().isRegistered(aSql))
 			{
 				this.currentStatement = aConnection.getPreparedStatementPool().prepareStatement(aSql);
@@ -65,7 +65,7 @@ public class SelectCommand extends SqlCommand
 				this.currentStatement = aConnection.createStatementForQuery();
 			}
 			try { this.currentStatement.setQueryTimeout(this.queryTimeout); } catch (Throwable th) {}
-			
+
 			try
 			{
 				this.currentStatement.setMaxRows(this.maxRows);
@@ -74,7 +74,7 @@ public class SelectCommand extends SqlCommand
 			{
 				LogMgr.logWarning("SelectCommand.execute()", "The JDBC driver does not support the setMaxRows() function! (" +e.getMessage() + ")");
 			}
-			
+
 			ResultSet rs = null;
 			if (isPrepared)
 			{

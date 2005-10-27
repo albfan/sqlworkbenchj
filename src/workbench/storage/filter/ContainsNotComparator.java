@@ -24,6 +24,7 @@ public class ContainsNotComparator
 	public String getName() { return "Contains not"; }
 	public String getOperator() { return "contains not"; }
 	public boolean needsValue() { return true; }
+	public boolean validateInput(String value) { return true; }
 	
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{

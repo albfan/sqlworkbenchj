@@ -322,29 +322,4 @@ public class DdlCommand extends SqlCommand
 		return verb;
 	}
 
-	public static void main(String[] args)
-	{
-		try
-		{
-			String sql = "CREATE OR REPLACE PACKAGE BODY questionnaire_service_pkg \n" + 
-									 "IS \n" + 
-									 " \n" + 
-									 " \n" + 
-									 "/* !!!!!!!!!!!!!!!!!!!!!! ONLY FOR DEVELOPMENT REASONS !!!!!!!!!!!!!!!! */ \n" + 
-									 "PROCEDURE DELETE_QUESTIONNAIRE_RESULT (quest_id IN NUMBER, partnerId IN VARCHAR2) \n" + 
-									 "IS \n" + 
-									 " \n" + 
-									 "BEGIN";		
-			
-			String cleanSql = SqlUtil.makeCleanSql(sql, false);
-			DdlCommand ddl = new DdlCommand("CREATE");
-			System.out.println("name = " + ddl.getObjectName(cleanSql));
-			//System.out.println("type = " + ddl.getObjectType(cleanSql));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		System.out.println("Done.");
-	}
 }

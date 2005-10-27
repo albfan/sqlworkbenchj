@@ -142,6 +142,7 @@ public class DbMetadata
 	private boolean isIngres;
 	private boolean isMcKoi;
 
+	private boolean trimDefaults = true;
 	private boolean createInlineConstraints;
 	private boolean useNullKeyword = true;
 	private boolean fixOracleDateBug = false;
@@ -167,8 +168,8 @@ public class DbMetadata
 	public static final String TABLE_TYPE_VIEW = "VIEW";
 
 	private String[] TABLE_TYPES_VIEW = new String[] {TABLE_TYPE_VIEW};
-	private String[] TABLE_TYPES_TABLE; // = new String[] {TABLE_TYPE_TABLE};
-	private String[] TABLE_TYPES_SELECTABLE;// = new String[] {TABLE_TYPE_TABLE, TABLE_TYPE_VIEW, "SYNONYM"};
+	private String[] TABLE_TYPES_TABLE; 
+	private String[] TABLE_TYPES_SELECTABLE;
 	private List objectsWithData = null;
 
 	public DbMetadata(WbConnection aConnection)
@@ -270,6 +271,10 @@ public class DbMetadata
 			this.isFirebird = true;
 			this.constraintReader = new FirebirdConstraintReader();
 			this.procedureReader = new FirebirdMetadata(this);
+			// Jaybird 2.0 seems to report the Firebird vesion in the 
+			// productname. To ease the DBMS handling we'll use the same
+			// product name that is reported with the 1.5 driver. 
+			this.productName = "Firebird";
 		}
 		else if (productLower.indexOf("sql server") > -1)
 		{
@@ -404,6 +409,7 @@ public class DbMetadata
 
 		String quote = settings.getProperty("workbench.db.neverquote","");
 		this.neverQuoteObjects = quote.indexOf(this.getDbId()) > -1;
+		this.trimDefaults = settings.getBoolProperty("workbench.db." + getDbId() + ".trimdefaults", true);
 	}
 
 	public String getTableTypeName() { return tableTypeName; }
@@ -763,6 +769,30 @@ public class DbMetadata
 		}
 	}
 
+	public String getObjectType(TableIdentifier table)
+	{
+		String type = null;
+		ResultSet rs = null;
+		try
+		{
+			TableIdentifier tbl = table.createCopy();
+			tbl.adjustCase(this.dbConnection);
+			rs = this.metaData.getTables(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName(), null);
+			if (rs.next())
+			{
+				type = rs.getString("TABLE_TYPE");
+			}
+		}
+		catch (Exception e)
+		{
+			type = null;
+		}
+		finally
+		{
+			SqlUtil.closeResult(rs);
+		}
+		return type;
+	}
 	public String getUserName()
 	{
 		try
@@ -835,6 +865,10 @@ public class DbMetadata
 		result.append("\nAS \n");
 		result.append(source);
 		result.append("\n");
+		if (this.ddlNeedsCommit)
+		{
+			result.append("COMMIT;\n");
+		}
 		return result.toString();
 	}
 
@@ -1910,7 +1944,9 @@ public class DbMetadata
 		throws SQLException
 	{
 		if (id == null) return null;
-		return this.getTableDefinition(id.getCatalog(), id.getSchema(), id.getTableName(), tableTypeName, adjustCase);
+		String type = id.getType();
+		if (type == null) type = tableTypeName;
+		return this.getTableDefinition(id.getCatalog(), id.getSchema(), id.getTableName(), type, adjustCase);
 	}
 
 	public static final String[] TABLE_DEFINITION_COLS = {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "java.sql.Types", "SCALE/SIZE", "PRECISION", "POSITION"};
@@ -1931,7 +1967,6 @@ public class DbMetadata
 	 * @return A DataStore with the table definition.
 	 * The individual columns should be accessed using the
 	 * COLUMN_IDX_TABLE_DEFINITION_xxx constants.
-	 *
 	 */
 	public DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, String aType, boolean adjustNames)
 		throws SQLException
@@ -2031,6 +2066,10 @@ public class DbMetadata
 				int digits = rs.getInt("DECIMAL_DIGITS");
 				String rem = rs.getString("REMARKS");
 				String def = rs.getString("COLUMN_DEF");
+				if (def != null && this.trimDefaults)
+				{
+					def = def.trim();
+				}
 				int position = rs.getInt("ORDINAL_POSITION");
 				String nul = rs.getString("IS_NULLABLE");
 
@@ -3231,6 +3270,7 @@ public class DbMetadata
 			result.append(cons);
 			result.append('\n');
 		}
+		String realTable = (tableNameToUse == null ? table.getTableName() : tableNameToUse);
 
 		if (this.createInlineConstraints && pkCols.length() > 0)
 		{
@@ -3238,7 +3278,7 @@ public class DbMetadata
 			result.append(pkCols.toString());
 			result.append(")\n");
 
-			StrBuffer fk = this.getFkSource(table.getTableName(), aFkDef);
+			StrBuffer fk = this.getFkSource(table.getTableName(), aFkDef, tableNameToUse);
 			if (fk.length() > 0)
 			{
 				result.append(fk);
@@ -3249,17 +3289,17 @@ public class DbMetadata
 		if (!this.createInlineConstraints && pkCols.length() > 0)
 		{
 			String template = this.getSqlTemplate(DbMetadata.pkStatements);
-			template = StringUtil.replace(template, TABLE_NAME_PLACEHOLDER, table.getTableName());
+			template = StringUtil.replace(template, TABLE_NAME_PLACEHOLDER, realTable);
 			template = StringUtil.replace(template, COLUMNLIST_PLACEHOLDER, pkCols.toString());
 			String name = this.getPkIndexName(aIndexDef);
-			if (name == null) name = "pk_" + table.getTableName().toLowerCase();
+			if (name == null) name = "pk_" + realTable.toLowerCase();
 			if (isKeyword(name)) name = "\"" + name + "\"";
 			template = StringUtil.replace(template, PK_NAME_PLACEHOLDER, name);
 			result.append(template);
 			result.append(";\n\n");
 		}
-		result.append(this.getIndexSource(table.getTableName(), aIndexDef).toString());
-		if (!this.createInlineConstraints) result.append(this.getFkSource(table.getTableName(), aFkDef));
+		result.append(this.getIndexSource(table.getTableName(), aIndexDef, tableNameToUse).toString());
+		if (!this.createInlineConstraints) result.append(this.getFkSource(table.getTableName(), aFkDef, tableNameToUse));
 
 		String comments = this.getTableCommentSql(table);
 		if (comments != null && comments.length() > 0)
@@ -3281,6 +3321,11 @@ public class DbMetadata
 		if (grants.length() > 0)
 		{
 			result.append(grants);
+		}
+		
+		if (this.ddlNeedsCommit)
+		{
+			result.append("\nCOMMIT;\n");
 		}
 
 		return result.toString();
@@ -3412,7 +3457,7 @@ public class DbMetadata
 	 *
 	 *	@return a SQL statement to add the foreign key definitions to the given table
 	 */
-	public StrBuffer getFkSource(String aTable, DataStore aFkDef)
+	public StrBuffer getFkSource(String aTable, DataStore aFkDef, String tableNameToUse)
 	{
 		if (aFkDef == null) return StrBuffer.EMPTY_BUFFER;
 		int count = aFkDef.getRowCount();
@@ -3494,7 +3539,7 @@ public class DbMetadata
 				stmt = template;
 			}
 			String entry = null;
-			stmt = StringUtil.replace(stmt, TABLE_NAME_PLACEHOLDER, aTable);
+			stmt = StringUtil.replace(stmt, TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? aTable : tableNameToUse));
 			stmt = StringUtil.replace(stmt, FK_NAME_PLACEHOLDER, name);
 			colList = (List)fkCols.get(name);
 			entry = StringUtil.listToString(colList, ',');//this.convertSetToList(colList);
@@ -3606,7 +3651,7 @@ public class DbMetadata
 		return sql;
 	}
 
-	public StrBuffer getIndexSource(String aTable, DataStore aIndexDef)
+	public StrBuffer getIndexSource(String aTable, DataStore aIndexDef, String tableNameToUse)
 	{
 		if (aIndexDef == null) return StrBuffer.EMPTY_BUFFER;
 		int count = aIndexDef.getRowCount();
@@ -3647,7 +3692,7 @@ public class DbMetadata
 			if ("NO".equalsIgnoreCase(is_pk))
 			{
 				idxCount ++;
-				sql = StringUtil.replace(template, TABLE_NAME_PLACEHOLDER, aTable);
+				sql = StringUtil.replace(template, TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? aTable : tableNameToUse));
 				if ("YES".equalsIgnoreCase(unique))
 				{
 					sql = StringUtil.replace(sql, UNIQUE_PLACEHOLDER, "UNIQUE ");

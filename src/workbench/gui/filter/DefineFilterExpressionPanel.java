@@ -25,19 +25,16 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.InputVerifier;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
 import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.plaf.BorderUIResource;
-import javax.swing.plaf.basic.BasicBorders;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.WbTable;
@@ -47,11 +44,14 @@ import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.filter.AndExpression;
+import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.ComplexExpression;
+import workbench.storage.filter.ExpressionValue;
 import workbench.storage.filter.FilterExpression;
 import workbench.storage.filter.OrExpression;
 import workbench.util.ExceptionUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 
 
@@ -238,12 +238,6 @@ public class DefineFilterExpressionPanel
 	
 	private void removeAllPanels()
 	{
-//		int count = panels.size();
-//		for (int i=0; i < count; i++)
-//		{
-//			PanelEntry entry = (PanelEntry)panels.get(i);
-//			entry.expressionPanel.removeChangeListener(this);
-//		}
 		this.panels.clear();
 		this.expressions.removeAll();
 	}
@@ -265,19 +259,19 @@ public class DefineFilterExpressionPanel
 			return;
 		}
 		removeAllPanels();
-		ComplexExpression exp = (ComplexExpression) filter;
-		List cols = exp.getExpressions();
-		int count = cols.size();
+		ComplexExpression cExp = (ComplexExpression) filter;
+		List expressions = cExp.getExpressions();
+		int count = expressions.size();
 		for (int i=0; i < count; i++)
 		{
 			
 			try
 			{
-				ColumnExpression col = (ColumnExpression)cols.get(i);
-				this.addExpressionPanel(col);
+				ExpressionValue exp = (ExpressionValue)expressions.get(i);
+				this.addExpressionPanel(exp);
 				PanelEntry item = (PanelEntry)this.panels.get(this.panels.size() - 1);
 				ColumnExpressionPanel panel = item.expressionPanel;
-				panel.setExpression(col);
+				panel.setExpressionValue(exp);
 			}
 			catch (ClassCastException e)
 			{
@@ -288,7 +282,32 @@ public class DefineFilterExpressionPanel
 		this.validate();
 		this.repaint();
 	}
-	
+
+	public boolean validateInput()
+	{
+		int count = this.panels.size();
+		for (int i=0; i < count; i++)
+		{
+			PanelEntry entry = (PanelEntry)panels.get(i);
+			ColumnComparator comp = entry.expressionPanel.getComparator();
+			if (comp == null)
+			{
+				String msg = ResourceMgr.getString("ErrorFilterNoComparator");
+				WbSwingUtilities.showErrorMessage(this, msg);
+				return false;
+			}
+			
+			if (!entry.expressionPanel.validateInput())
+			{
+				String msg = ResourceMgr.getString("ErrorFilterWrongValue");
+				msg = StringUtil.replace(msg, "%value%", entry.expressionPanel.getInputValue());
+				msg = StringUtil.replace(msg, "%op%", comp.getOperator());
+				WbSwingUtilities.showErrorMessage(this, msg);
+				return false;
+			}
+		}
+		return true;
+	}
 	public FilterExpression getExpression()
 	{
 		ComplexExpression exp = null;
@@ -297,7 +316,7 @@ public class DefineFilterExpressionPanel
 		for (int i=0; i < count; i++)
 		{
 			PanelEntry entry = (PanelEntry)panels.get(i);
-			FilterExpression f = entry.expressionPanel.getExpression();
+			FilterExpression f = (FilterExpression)entry.expressionPanel.getExpressionValue();
 			if (f != null)
 			{
 				if (exp == null)
@@ -318,7 +337,7 @@ public class DefineFilterExpressionPanel
 		return addExpressionPanel(null);
 	}
 	
-	private Dimension addExpressionPanel(ColumnExpression filter)
+	private Dimension addExpressionPanel(ExpressionValue filter)
 	{
 		final ColumnExpressionPanel exp = new ColumnExpressionPanel(columnInfo, filter);
 		JButton b = new JButton(ResourceMgr.getImage("Remove"));
@@ -423,13 +442,26 @@ public class DefineFilterExpressionPanel
 		if (info == null) return;
 		
 		DefineFilterExpressionPanel panel = new DefineFilterExpressionPanel(info);
+		
 		panel.setFilter(source.getLastFilter());
 		String title = ResourceMgr.getString("MsgFilterWindowTitle");
-		boolean result = WbSwingUtilities.getOKCancel(title, SwingUtilities.getWindowAncestor(source), panel);
-		if (result)
+		boolean showDialog = true;
+		while (showDialog)
 		{
-			FilterExpression filter = panel.getExpression();
-			source.applyFilter(filter);
+			boolean result = WbSwingUtilities.getOKCancel(title, SwingUtilities.getWindowAncestor(source), panel);
+			if (result)
+			{
+				if (panel.validateInput())
+				{
+					FilterExpression filter = panel.getExpression();
+					source.applyFilter(filter);
+					showDialog = false;
+				}
+			}
+			else
+			{
+				showDialog = false;
+			}
 		}
 	}
 
@@ -451,3 +483,4 @@ class PanelEntry
 		expressionPanel = ep;
 	}
 }
+

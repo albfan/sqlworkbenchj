@@ -141,6 +141,7 @@ public class WbConnection
 
 	private Method clearSettings = null;
 	private Object dbAccess = null;
+	private boolean doOracleClear = true;
 
 	public String getWarnings()
 	{
@@ -188,7 +189,8 @@ public class WbConnection
 		try
 		{
 			this.sqlConnection.clearWarnings();
-			if (this.metaData.isOracle())
+
+			if (this.metaData.isOracle() && doOracleClear)
 			{
 				// obviously the Oracle driver does NOT clear the warnings
 				// (as discovered when looking at the source code)
@@ -207,7 +209,15 @@ public class WbConnection
 						Field dbAccessField = ora.getField("db_access");
 						Class dbAccessClass = dbAccessField.getType();
 						dbAccess = dbAccessField.get(this.sqlConnection);
-						clearSettings = dbAccessClass.getDeclaredMethod("setWarnings", new Class[] {SQLWarning.class} );
+						try
+						{
+							clearSettings = dbAccessClass.getDeclaredMethod("setWarnings", new Class[] {SQLWarning.class} );
+						}
+						catch (NoSuchMethodException e)
+						{
+							doOracleClear = false;
+						}
+						
 					}
 				}
 				// the following line is equivalent to:

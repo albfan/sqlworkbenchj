@@ -57,4 +57,7 @@ public class ContainsComparator
 
 	public boolean needsValue() { return true; }
 	
+	public boolean validateInput(String value) { return true; }
+
+	
 }

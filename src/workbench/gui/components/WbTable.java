@@ -44,10 +44,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.EventObject;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import javax.swing.ActionMap;
 import javax.swing.CellEditor;
 import javax.swing.InputMap;
@@ -68,6 +65,7 @@ import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.JPopupMenu.Separator;
 import javax.swing.border.Border;
@@ -77,6 +75,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -123,7 +122,6 @@ import workbench.storage.NullValue;
 import workbench.storage.ResultInfo;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.WbThread;
-
 public class WbTable
 	extends JTable
 	implements ActionListener, FocusListener, MouseListener,
@@ -176,18 +174,16 @@ public class WbTable
 	private int minColWidth = 10;
 
 	private RowHeightResizer rowResizer;
-	//private TableModelListener changeListener;
 	private ArrayList changeListener = new ArrayList();
 	private JScrollPane scrollPane;
 
 	private String defaultPrintHeader = null;
-	//private boolean showRowNumbers = false;
-	private JList rowHeader = null;
 	private boolean showPopup = true;
+	private boolean showRowNumbers = false;
 	private boolean selectOnRightButtonClick = false;
 	private boolean highlightRequiredFields = false;
 	private Color requiredColor;
-	
+
 	public WbTable()
 	{
 		this(true, true);
@@ -197,7 +193,7 @@ public class WbTable
   {
       this(printEnabled, true);
   }
-  
+
 	public WbTable(boolean printEnabled, boolean sqlCopyAllowed)
 	{
 		super(EmptyTableModel.EMPTY_MODEL);
@@ -223,7 +219,7 @@ public class WbTable
 		this.headerPopup.add(this.optimizeAllCol.getMenuItem());
 		this.headerPopup.add(this.setColWidth.getMenuItem());
 
-		this.setDoubleBuffered(true);
+		//this.setDoubleBuffered(true);
 
 		Font dataFont = this.getFont();
 		if (dataFont == null) dataFont = (Font)UIManager.get("Table.font");
@@ -379,7 +375,7 @@ public class WbTable
 		}
 
 		copyMenu.add(this.copySelectedAsTextAction);
-    
+
 		if (copySelectedAsUpdateAction != null) copyMenu.add(copySelectedAsUpdateAction);
 		if (copySelectedAsInsertAction != null) copyMenu.add(copySelectedAsInsertAction);
 		if (copySelectedAsDeleteInsertAction != null) copyMenu.add(copySelectedAsDeleteInsertAction);
@@ -590,6 +586,8 @@ public class WbTable
 	public Component prepareEditor(TableCellEditor editor, int row, int column)
 	{
 		Component comp = super.prepareEditor(editor, row, column);
+		if (!this.highlightRequiredFields) return comp;
+
 		ResultInfo info = this.getDataStore().getResultInfo();
 		int realColumn  = column;
 		if (this.dwModel.getShowStatusColumn())
@@ -655,44 +653,55 @@ public class WbTable
 		if (ds == null) return false;
 		return ds.isUpdateable();
 	}
-	
+
 	public void editingCanceled(ChangeEvent e)
 	{
 		int row = this.getEditingRow();
+		int col = this.getEditingColumn();
 		super.editingCanceled(e);
-		resetHighlightRenderers(row);
+		resetHighlightRenderers(row, col);
 	}
 
 	public void editingStopped(ChangeEvent e)
 	{
 		int row = this.getEditingRow();
+		int col = this.getEditingColumn();
 		super.editingStopped(e);
-		resetHighlightRenderers(row);
+		resetHighlightRenderers(row, col);
 	}
 
 	public void removeEditor()
 	{
 		int row = this.getEditingRow();
+		int col = this.getEditingColumn();
 		super.removeEditor();
-		resetHighlightRenderers(row);
+		resetHighlightRenderers(row, col);
 	}
-	
-	private void resetHighlightRenderers(int row)
+
+	private void resetHighlightRenderers(int row, int col)
 	{
 		if (!this.highlightRequiredFields) return;
 		int colcount = this.getColumnCount();
-		for (int i=0; i < colcount; i++)
+		try
 		{
-			TableCellRenderer renderer = getCellRenderer(row, i);
-			if (renderer instanceof ToolTipRenderer)
+			this.setSuspendRepaint(true);
+			for (int i=0; i < colcount; i++)
 			{
-				ToolTipRenderer wbRenderer = (ToolTipRenderer)renderer;
-				wbRenderer.setHighlightBackground(null);
-				wbRenderer.setEditingRow(-1);
-				wbRenderer.setHighlightColumns(null);
+				TableCellRenderer renderer = getCellRenderer(row, i);
+				if (renderer instanceof ToolTipRenderer)
+				{
+					ToolTipRenderer wbRenderer = (ToolTipRenderer)renderer;
+					wbRenderer.setEditingRow(-1);
+					wbRenderer.setHighlightBackground(null);
+					wbRenderer.setHighlightColumns(null);
+				}
 			}
 		}
-		this.repaint();
+		finally
+		{
+			this.setSuspendRepaint(false);
+			this.invalidate();
+		}
 		if (row > -1) this.getSelectionModel().setSelectionInterval(row, row);
 	}
 
@@ -752,7 +761,7 @@ public class WbTable
 			this.dwModel.dispose();
 			this.dwModel = null;
 		}
-		
+
 		resetFilter();
 
 		if (aModel instanceof DataStoreTableModel)
@@ -769,6 +778,8 @@ public class WbTable
 				header.addMouseListener(this);
 			}
 		}
+
+		updateRowHeader();
 
 		if (aModel != EmptyTableModel.EMPTY_MODEL)
 		{
@@ -819,6 +830,15 @@ public class WbTable
 		}
 	}
 
+	public void restoreOriginalValues()
+	{
+		if (this.dwModel != null)
+		{
+			this.dwModel.getDataStore().restoreOriginalValues();
+			this.dwModel.fireTableDataChanged();
+		}
+	}
+
 	public PrintPreviewAction getPrintPreviewAction()
 	{
 		return this.printPreviewAction;
@@ -855,6 +875,33 @@ public class WbTable
 		return this.dwModel.getSortColumn();
 	}
 
+	public void setShowRowNumbers(boolean flag)
+	{
+		if (flag == this.showRowNumbers) return;
+		this.showRowNumbers = flag;
+		updateRowHeader();
+	}
+
+	private JTable rowHeaderTable;
+
+	private void updateRowHeader()
+	{
+		if (this.scrollPane == null) return;
+
+		if (this.showRowNumbers && this.dwModel != null && this.getRowCount() > 0)
+		{
+			// Only show row numbers for "proper" data
+			RowNumberTableModel model = new RowNumberTableModel(this);
+			this.rowHeaderTable = new RowNumberTable(model);
+			this.scrollPane.setRowHeaderView(this.rowHeaderTable);
+		}
+		else
+		{
+			this.rowHeaderTable = null;
+			this.scrollPane.setRowHeaderView(null);
+		}
+	}
+
 	public void setShowStatusColumn(boolean aFlag)
 	{
 		if (this.dwModel == null) return;
@@ -873,11 +920,10 @@ public class WbTable
 				asc = this.dwModel.isSortAscending();
 			}
 
-			this.saveColumnSizes();
-
 			this.setSuspendRepaint(true);
-
+			this.saveColumnSizes();
 			this.dwModel.setShowStatusColumn(aFlag);
+
 			if (aFlag)
 			{
 				TableColumn col = this.getColumnModel().getColumn(0);
@@ -899,15 +945,6 @@ public class WbTable
 			this.initDefaultEditors();
 			this.restoreColumnSizes();
 
-//			if (sortColumn > -1 && this.dwModel != null)
-//			{
-//				if (aFlag)
-//					sortColumn ++;
-//				else
-//					sortColumn --;
-//				this.dwModel.sortByColumn(sortColumn, asc);
-//			}
-			
 			if (row >= 0)
 			{
 				this.getSelectionModel().setSelectionInterval(row, row);
@@ -963,32 +1000,32 @@ public class WbTable
 		super.repaint();
 	}
 
-	public void paintComponents(Graphics g)
-	{
-		if (this.suspendRepaint) return;
-		Graphics2D gf2d = (Graphics2D)g;
-		gf2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
-		gf2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-		super.paintComponents(g);
-	}
+//	public void paintComponents(Graphics g)
+//	{
+//		if (this.suspendRepaint) return;
+//		Graphics2D gf2d = (Graphics2D)g;
+//		gf2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+////		gf2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+//		super.paintComponents(g);
+//	}
 
-	public void paintComponent(Graphics g)
-	{
-		if (this.suspendRepaint) return;
-		Graphics2D gf2d = (Graphics2D)g;
-		gf2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
-		gf2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-		super.paintComponent(g);
-	}
+//	public void paintComponent(Graphics g)
+//	{
+//		if (this.suspendRepaint) return;
+//		Graphics2D gf2d = (Graphics2D)g;
+//		gf2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+////		gf2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+//		super.paintComponent(g);
+//	}
 
-	public void paint(Graphics g)
-	{
-		if (this.suspendRepaint) return;
-		Graphics2D gf2d = (Graphics2D)g;
-		gf2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
-		gf2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-		super.paint(g);
-	}
+//	public void paint(Graphics g)
+//	{
+//		if (this.suspendRepaint) return;
+//		Graphics2D gf2d = (Graphics2D)g;
+//		gf2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+////		gf2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+//		super.paint(g);
+//	}
 
 
 	public int getSortedViewColumnIndex()
@@ -1074,7 +1111,7 @@ public class WbTable
 		this.savedColumnSizes = new int[count];
 		int start = 0;
 		if (this.dwModel.getShowStatusColumn()) start = 1;
-		
+
 		for (int i=start; i < count; i++)
 		{
 			TableColumn col = colMod.getColumn(i);
@@ -1089,12 +1126,12 @@ public class WbTable
 		TableColumnModel colMod = this.getColumnModel();
 		int count = colMod.getColumnCount();
 		if (this.dwModel.getShowStatusColumn()) start = 1;
-		
+
 		for (int i=start; i < count; i++)
 		{
 			TableColumn col = colMod.getColumn(i);
 			col.setPreferredWidth(savedColumnSizes[i-start]);
-		}		
+		}
 		this.savedColumnSizes = null;
 	}
 
@@ -1693,7 +1730,7 @@ public class WbTable
       includeHeaders = result.includeHeaders;
       selectedOnly = result.selectedOnly;
 		}
-    
+
 		if (!selectedOnly)
 		{
 			copyDataToClipboard(includeHeaders, columnsToCopy);
@@ -1762,7 +1799,7 @@ public class WbTable
     ColumnSelectionResult result = new ColumnSelectionResult();
     result.includeHeaders = includeHeader;
     result.selectedOnly = selectedOnly;
-    
+
 		ColumnIdentifier[] originalCols = ds.getColumns();
 		ColumnSelectorPanel panel = new ColumnSelectorPanel(originalCols, includeHeader, selectedOnly, showHeaderSelection, showSelectedRowsSelection);
 		panel.selectAll();
@@ -2056,35 +2093,4 @@ class ColumnSelectionResult
     boolean includeHeaders;
     boolean selectedOnly;
     List columns;
-}
-
-class RowHeaderRenderer
-	extends JLabel
-	implements ListCellRenderer
-{
-	private WbTable table;
-	RowHeaderRenderer(WbTable aTable)
-	{
-		this.table = aTable;
-		JTableHeader header = table.getTableHeader();
-		setOpaque(true);
-		//Border b = new CompoundBorder(new DividerBorder(DividerBorder.TOP, 1, false), new EmptyBorder(0, 0, 0, 2));
-		Border b = new WbLineBorder(WbLineBorder.BOTTOM);
-		setBorder(b);
-		setHorizontalAlignment(RIGHT);
-		setForeground(header.getForeground());
-		setBackground(header.getBackground());
-		setFont(header.getFont());
-	}
-
-	public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
-	{
-		setText(Integer.toString(index + 1));
-		Dimension d = this.getPreferredSize();
-		d.height = this.table.getRowHeight(index);
-		this.setPreferredSize(d);
-		this.setMaximumSize(d);
-		this.setMinimumSize(d);
-		return this;
-	}
 }
