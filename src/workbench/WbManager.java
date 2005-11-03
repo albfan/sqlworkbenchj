@@ -643,13 +643,7 @@ public class WbManager
 		// no connection? then display the connection dialog
 		if (!connected && autoSelect)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					main.selectConnection();
-				}
-			});
+			main.selectConnection();
 		}
 	}
 

@@ -149,7 +149,6 @@ public class WbExport
 		type = cmdLine.getValue("type");
 		file = cmdLine.getValue("file");
 		String tables = cmdLine.getValue("sourcetable");
-		boolean allTables = "*".equals(tables);
 
 		String outputdir = cmdLine.getValue("outputdir");
 

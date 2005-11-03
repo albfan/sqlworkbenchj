@@ -1,16 +1,19 @@
 /*
  * TableDefinitionPanel.java
  *
- * Created on 8. September 2005, 19:09
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
+ * Copyright 2002-2005, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
  */
-
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -24,9 +27,12 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.border.EtchedBorder;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
@@ -47,13 +53,13 @@ import workbench.gui.sql.ExecuteSqlDialog;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.StrBuffer;
 import workbench.util.WbThread;
 
 /**
- *
- * @author thomas
+ * @author  support@sql-workbench.net
  */
 public class TableDefinitionPanel
 	extends JPanel
@@ -61,14 +67,16 @@ public class TableDefinitionPanel
 {
 	public static final String INDEX_PROP = "index";
 	private WbTable tableDefinition;
+	private JLabel tableNameLabel;
 	private QuickFilterPanel columnFilter;
-	private FindPanel columnSearcher;
+//	private FindPanel columnSearcher;
 	private WbAction createIndexAction;
 	private TableIdentifier currentTable;
 	private String currentObjectType;
 	private WbConnection dbConnection;
 	private List changeListener = new LinkedList();
 	private WbAction reloadAction;
+	private JPanel toolbar;
 	private boolean busy;
 
 	/** Creates a new instance of TableDefinitionPanel */
@@ -81,35 +89,61 @@ public class TableDefinitionPanel
 		this.reloadAction = new ReloadAction(this);
 		this.reloadAction.setEnabled(false);
 
-		JPanel bar = new JPanel(new GridBagLayout());
-		columnSearcher = new FindPanel(this.tableDefinition, 20);
+		toolbar = new JPanel(new GridBagLayout());
+//		columnSearcher = new FindPanel(this.tableDefinition, 15);
 
 		String[] cols = new String[] {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "JAVA_TYPE"};
 		columnFilter  = new QuickFilterPanel(this.tableDefinition, cols, true, "columnlist");
 		columnFilter.addToToolbar(reloadAction, 0);
 		//columnFilter.setToolbarBorder(new EtchedBorder());
-
+		//columnFilter.setBorder(new LineBorder(Color.RED));
 		GridBagConstraints cc = new GridBagConstraints();
+		
 		cc.anchor = GridBagConstraints.WEST;
+		cc.fill = GridBagConstraints.HORIZONTAL;
 		cc.gridx = 0;
-		cc.weightx = 0.6;
+		cc.weightx = 0.0;
 		cc.ipadx = 0;
 		cc.ipady = 0;
 		cc.insets = new Insets(0, 0, 0, 5);
-		cc.fill = GridBagConstraints.HORIZONTAL;
-		bar.add(columnFilter, cc);
+		toolbar.add(columnFilter, cc);
 
-		cc.gridx ++;
-		cc.anchor = GridBagConstraints.WEST;
+//		cc.gridx ++;
+//		cc.anchor = GridBagConstraints.WEST;
+//		cc.fill = GridBagConstraints.NONE;
+//		cc.weightx = 0.0;
+//		cc.insets = new Insets(0, 0, 0, 0);
+//		Border o = new DividerBorder(DividerBorder.LEFT_RIGHT);
+//		Border i = new EmptyBorder(0,0,0,5);
+//		Border b = new CompoundBorder(o,i);
+//		columnSearcher.setBorder(b);
+//		toolbar.add(columnSearcher, cc);
+		
+		JLabel l = new JLabel(ResourceMgr.getString("LabelTable") + ":");
 		cc.fill = GridBagConstraints.NONE;
-		cc.weightx = 0.4;
-		cc.insets = new Insets(0, 0, 0, 0);
-		columnSearcher.setBorder(new DividerBorder(DividerBorder.LEFT));
-		bar.add(columnSearcher, cc);
+		cc.gridx ++;
+		cc.weightx = 0.0;
+		cc.insets = new Insets(0, 5, 0, 5);
+		toolbar.add(l, cc);
 
+		Font std = Settings.getInstance().getStandardLabelFont();
+		Font bold = std.deriveFont(Font.BOLD);
+		tableNameLabel = new JLabel();
+		tableNameLabel.setFont(bold);
+		cc.gridx ++;
+		cc.weightx = 0.0;
+		cc.fill = GridBagConstraints.NONE;
+		cc.insets = new Insets(0, 0, 0, 0);
+		toolbar.add(tableNameLabel, cc);
+		
+		cc.gridx ++;
+		cc.weightx = 1.0;
+		cc.fill = GridBagConstraints.HORIZONTAL;
+		toolbar.add(new JPanel(), cc);
+		
 		WbScrollPane scroll = new WbScrollPane(this.tableDefinition);
 		this.setLayout(new BorderLayout());
-		this.add(bar, BorderLayout.NORTH);
+		this.add(toolbar, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
 
 		this.createIndexAction = new WbAction(this, "create-index");
@@ -165,6 +199,8 @@ public class TableDefinitionPanel
 		throws SQLException
 	{
 		this.currentTable = table;
+		this.tableNameLabel.setText(table.getTableName());
+		this.toolbar.validate();
 		this.currentObjectType = objectType;
 		retrieveTableDefinition();
 	}
@@ -294,8 +330,6 @@ public class TableDefinitionPanel
 		int rows[] = this.tableDefinition.getSelectedRows();
 		int count = rows.length;
 		String[] columns = new String[count];
-
-		String msg = ResourceMgr.getString("LabelInputIndexName");
 		String indexName = ResourceMgr.getString("TxtNewIndexName");
 		//String indexName = WbSwingUtilities.getUserInput(this, msg, defaultName);
 		if (indexName == null || indexName.trim().length() == 0) return;
@@ -314,7 +348,7 @@ public class TableDefinitionPanel
 		}
 		ExecuteSqlDialog dialog = new ExecuteSqlDialog(owner, title, sql, indexName, this.dbConnection);
 		dialog.setStartButtonText(ResourceMgr.getString("TxtCreateIndex"));
-		dialog.show();
+		dialog.setVisible(true);
 		fireIndexChanged(indexName);
 	}
 
@@ -340,7 +374,6 @@ public class TableDefinitionPanel
 		StrBuffer sql = new StrBuffer(colCount * 80);
 
 		sql.append("SELECT ");
-		boolean quote = false;
 		DbMetadata meta = this.dbConnection.getMetadata();
 		for (int i=0; i < colCount; i++)
 		{
@@ -367,13 +400,13 @@ public class TableDefinitionPanel
 
 	public void restoreSettings()
 	{
-		this.columnSearcher.restoreSettings();
+		//this.columnSearcher.restoreSettings();
 		this.columnFilter.restoreSettings();
 	}
 
 	public void saveSettings()
 	{
-		this.columnSearcher.saveSettings();
+		//this.columnSearcher.saveSettings();
 		this.columnFilter.saveSettings();
 	}
 }

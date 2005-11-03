@@ -33,10 +33,7 @@ import workbench.util.TableAlias;
 public class SelectAnalyzer
 	extends BaseAnalyzer
 {
-	private final Pattern FROM_PATTERN = Pattern.compile("\\sFROM\\s|\\sFROM$", Pattern.CASE_INSENSITIVE);
 	private final Pattern WHERE_PATTERN = Pattern.compile("\\sWHERE\\s|\\sWHERE$", Pattern.CASE_INSENSITIVE);
-	private final Pattern BRACKET_TEXT = Pattern.compile("\\(.*\\)");
-	private final Pattern QUOTED_TEXT = Pattern.compile("'.*'");
 	
 	public SelectAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{	
@@ -78,8 +75,6 @@ public class SelectAnalyzer
 			LogMgr.logError("SelectAnalyzer.getContext()", "Could not retrieve table list in FROM part", e);
 			tables = Collections.EMPTY_LIST;
 		}
-
-		String rest = sql.substring(fromPos);
 		
 		if ( fromPos < 0 ||
 			   (wherePos < 0 && cursorPos > fromPos) ||
@@ -135,7 +130,6 @@ public class SelectAnalyzer
 			else
 			{
 				String q = getQualifierLeftOfCursor(sql, cursorPos);
-				String tableToUse = null;
 				this.tableForColumnList = null;
 				
 				// check if the current qualifier is either one of the

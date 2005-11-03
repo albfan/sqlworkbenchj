@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -69,7 +68,6 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.ReplacePanel;
 import workbench.gui.components.SearchCriteriaPanel;
-import workbench.gui.completion.CompletionHandler;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.editor.JEditTextArea;
 import workbench.gui.editor.SyntaxDocument;
@@ -89,10 +87,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.ScriptParser;
 import workbench.sql.formatter.SqlFormatter;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
-import workbench.util.UnicodeReader;
-
 
 /**
  * @author  support@sql-workbench.net
@@ -216,7 +211,6 @@ public class EditorPanel
 	}
 
 	private Set dbFunctions = null;
-	private CompletionHandler completionHandler;
 	
 	public void setDatabaseConnection(WbConnection aConnection)
 	{
@@ -532,7 +526,6 @@ public class EditorPanel
 	public boolean openFile()
 	{
 		boolean result = false;
-		String oldFile = this.getCurrentFileName();
 		if (!this.canCloseFile())
 		{
 			this.requestFocusInWindow();

@@ -523,7 +523,7 @@ public class DataCopier
 			}
 
 			step = "cleanup";
-			if (this.sourceData == null) this.importer.importFinished();
+			
 			String msg = this.getRowsInsertedMessage();
 			if (msg != null) this.addMessage(msg);
 			msg = this.getRowsUpdatedMessage();
@@ -548,7 +548,7 @@ public class DataCopier
 				msg = ResourceMgr.getString("ErrorCopyCleanup");
 			}
 			this.addError(msg + ": " + ExceptionUtil.getDisplay(e, false));
-			this.importer.importCancelled();
+			this.importer.tableImportError();
 			throw e;
 		}
 		finally
@@ -590,11 +590,21 @@ public class DataCopier
 	public void cancel()
 	{
 		this.keepRunning = false;
-		if (this.sourceData != null)
+		
+		if (this.sourceData != null) 
 		{
+			// if we are copying from a file then we only 
+			// need to cancel on the source (which in turn 
+			// will notify the importer)
 			this.sourceData.cancel();
 		}
-		this.importer.importCancelled();
+		else 
+		{
+			// do not call importer.cancelExecution() because
+			// the DataCopier is registered as the source for the importer
+			// which in turn would call cancel() resulting in an infinite loop
+			this.importer.importCancelled();
+		}
 	}
 
 	private void initImporterForQuery()

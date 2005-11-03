@@ -12,6 +12,7 @@
 package workbench.gui.tools;
 
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
@@ -69,10 +70,10 @@ public class DataPumper
 	implements ActionListener, WindowListener, PropertyChangeListener, RowActionMonitor,
 	           ToolWindow
 {
-	private ConnectionProfile source;
+	private ConnectionProfile sourceProfile;
 	private String sourceFile;
 	private ProducerFactory fileImporter;
-	private ConnectionProfile target;
+	private ConnectionProfile targetProfile;
 	private WbConnection sourceConnection;
 	private WbConnection targetConnection;
 
@@ -82,7 +83,6 @@ public class DataPumper
 	private boolean copyRunning = false;
 	private DataCopier copier;
 	private DataImporter importer;
-	private StringBuffer copyLog;
 	private EditorPanel sqlEditor;
 	private MainWindow mainWindow;
 	private boolean supportsBatch = false;
@@ -91,8 +91,8 @@ public class DataPumper
 	/** Creates new form DataPumper */
 	public DataPumper(ConnectionProfile source, ConnectionProfile target)
 	{
-		this.source = source;
-		this.target = target;
+		this.sourceProfile = source;
+		this.targetProfile = target;
 		initComponents();
 		this.selectSourceButton.addActionListener(this);
 		this.selectTargetButton.addActionListener(this);
@@ -149,13 +149,13 @@ public class DataPumper
 	public void saveSettings()
 	{
 		Settings s = Settings.getInstance();
-		if (this.source != null)
+		if (this.sourceProfile != null)
 		{
-			s.setProperty("workbench.datapumper.source.lastprofile", this.source.getName());
+			s.setProperty("workbench.datapumper.source.lastprofile", this.sourceProfile.getName());
 		}
-		if (this.target != null)
+		if (this.targetProfile != null)
 		{
-			s.setProperty("workbench.datapumper.target.lastprofile", this.target.getName());
+			s.setProperty("workbench.datapumper.target.lastprofile", this.targetProfile.getName());
 		}
 		s.setProperty("workbench.datapumper.divider", jSplitPane1.getDividerLocation());
 		s.setProperty("workbench.datapumper.target.deletetable", Boolean.toString(this.deleteTargetCbx.isSelected()));
@@ -223,7 +223,7 @@ public class DataPumper
 		ImportFileDialog dialog = new ImportFileDialog(this);
 		boolean ok = dialog.selectInput(ResourceMgr.getString("TxtWindowTitleSelectImportFile"));
 		if (!ok) return; 
-		if (this.source != null)
+		if (this.sourceProfile != null)
 		{
 			this.disconnectSource();
 		}
@@ -248,7 +248,7 @@ public class DataPumper
 		this.checkType();
 
 		this.updateSourceDisplay();
-		if (this.target != null)
+		if (this.targetProfile != null)
 		{
 			initColumnMapper();
 		}
@@ -257,9 +257,9 @@ public class DataPumper
 	private void updateTargetDisplay()
 	{
 		String label = ResourceMgr.getString("LabelDPTargetProfile");
-		if (this.target != null)
+		if (this.targetProfile != null)
 		{
-			this.targetProfileLabel.setText(label + ": " + this.target.getName());
+			this.targetProfileLabel.setText(label + ": " + this.targetProfile.getName());
 		}
 		else
 		{
@@ -271,9 +271,9 @@ public class DataPumper
 	private void updateSourceDisplay()
 	{
 		String label = ResourceMgr.getString("LabelDPSourceProfile");
-		if (this.source != null)
+		if (this.sourceProfile != null)
 		{
-			this.sourceProfileLabel.setText(label + ": " + this.source.getName());
+			this.sourceProfileLabel.setText(label + ": " + this.sourceProfile.getName());
 		}
 		else if (this.sourceFile != null)
 		{
@@ -296,15 +296,15 @@ public class DataPumper
 
 	private void updateWindowTitle()
 	{
-		if (this.target != null && (this.source != null || this.sourceFile != null) && this.window != null)
+		if (this.targetProfile != null && (this.sourceProfile != null || this.sourceFile != null) && this.window != null)
 		{
 			String title = ResourceMgr.getString("TxtWindowTitleDataPumper");
 			String sourceName = "";
-			if (this.source != null)
-				sourceName = this.source.getName();
+			if (this.sourceProfile != null)
+				sourceName = this.sourceProfile.getName();
 			else if (this.sourceFile != null) 
 				sourceName = this.sourceFile;
-			title = title + " [" + sourceName + " -> " + this.target.getName() + "]";
+			title = title + " [" + sourceName + " -> " + this.targetProfile.getName() + "]";
 			if (this.copier != null && this.copyRunning)
 			{
 				title = "» " + title;
@@ -315,41 +315,41 @@ public class DataPumper
 
 	private void checkConnections()
 	{
-		this.connectSource();
-		this.connectTarget();
+		this.connectSource(this.sourceProfile);
+		this.connectTarget(this.targetProfile);
 	}
 
-	private void connectSource()
+	private void connectSource(final ConnectionProfile profile)
 	{
-		if (this.source == null) return;
+		if (profile == null) return;
 
 		Thread t = new WbThread("DataPumper source connection")
 		{
 			public void run()
 			{
-				doConnectSource();
+				doConnectSource(profile);
 			}
 		};
 		t.start();
 	}
 
-	private void doConnectSource()
+	private void doConnectSource(ConnectionProfile profile)
 	{
 		this.disconnectSource();
-
-		String label = ResourceMgr.getString("MsgConnectingTo") + " " + this.source.getName() + " ...";
+		this.sourceProfile = profile;
+		String label = ResourceMgr.getString("MsgConnectingTo") + " " + this.sourceProfile.getName() + " ...";
 		this.sourceProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
 		this.sourceProfileLabel.setText(label);
 
 		try
 		{
-			this.sourceConnection = ConnectionMgr.getInstance().getConnection(this.source, "Dp-Source");
+			this.sourceConnection = ConnectionMgr.getInstance().getConnection(this.sourceProfile, "Dp-Source");
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("DataPumper.doConnectSource()", "Error when connecting to profile: " + this.source.getName(), e);
+			LogMgr.logError("DataPumper.doConnectSource()", "Error when connecting to profile: " + this.sourceProfile.getName(), e);
 			String msg = ResourceMgr.getString("ErrorConnectionError") + "\n" + e.getMessage();
-			this.source = null;
+			this.sourceProfile = null;
 			WbSwingUtilities.showErrorMessage(this, msg);
 		}
 		finally
@@ -377,37 +377,37 @@ public class DataPumper
 		}
 	}
 
-	private void connectTarget()
+	private void connectTarget(final ConnectionProfile profile)
 	{
-		if (this.target == null) return;
+		if (profile == null) return;
 
 		Thread t = new WbThread("DataPumper target connection")
 		{
 			public void run()
 			{
-				doConnectTarget();
+				doConnectTarget(profile);
 			}
 		};
 		t.start();
 	}
 
-	private void doConnectTarget()
+	private void doConnectTarget(ConnectionProfile profile)
 	{
 		this.disconnectTarget();
-
-		String label = ResourceMgr.getString("MsgConnectingTo") + " " + this.target.getName() + " ...";
+		this.targetProfile = profile;
+		String label = ResourceMgr.getString("MsgConnectingTo") + " " + this.targetProfile.getName() + " ...";
 		this.targetProfileLabel.setText(label);
 		this.targetProfileLabel.setIcon(ResourceMgr.getPicture("wait"));
 
 		try
 		{
-			this.targetConnection = ConnectionMgr.getInstance().getConnection(this.target, "Dp-Target");
+			this.targetConnection = ConnectionMgr.getInstance().getConnection(this.targetProfile, "Dp-Target");
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("DataPumper.doConnectSource()", "Error when connecting to profile: " + this.target.getName(), e);
+			LogMgr.logError("DataPumper.doConnectSource()", "Error when connecting to profile: " + this.targetProfile.getName(), e);
 			String msg = ResourceMgr.getString("ErrorConnectionError") + "\n" + e.getMessage();
-			this.target = null;
+			this.targetProfile = null;
 			WbSwingUtilities.showErrorMessage(this, msg);
 		}
 		finally
@@ -950,7 +950,7 @@ public class DataPumper
 			public void setVisible(boolean visible)
 			{
 				if (!visible) saveSettings();
-				super.hide();
+				super.setVisible(visible);
 			}
 		};
 
@@ -972,7 +972,7 @@ public class DataPumper
 		{
 			WbSwingUtilities.center(this.window, aParent);
 		}
-		this.window .show();
+		this.window .setVisible(true);
 		SwingUtilities.invokeLater(new Runnable()
 		{
 			public void run()
@@ -1003,6 +1003,7 @@ public class DataPumper
 		finally
 		{
 			this.targetConnection = null;
+			this.targetProfile = null;
 			this.updateTargetDisplay();
 			this.targetProfileLabel.setIcon(null);
 		}
@@ -1029,6 +1030,7 @@ public class DataPumper
 		finally
 		{
 			this.sourceConnection = null;
+			this.sourceProfile = null;
 			this.updateSourceDisplay();
 			this.sourceProfileLabel.setIcon(null);
 		}
@@ -1036,14 +1038,14 @@ public class DataPumper
 
 	private void selectTargetConnection()
 	{
-		this.target = this.selectConnection("workbench.datapumper.target.lastprofile");
-		this.connectTarget();
+		ConnectionProfile profile = this.selectConnection("workbench.datapumper.target.lastprofile");
+		this.connectTarget(profile);
 	}
 
 	private void selectSourceConnection()
 	{
-		this.source = this.selectConnection("workbench.datapumper.source.lastprofile");
-		this.connectSource();
+		ConnectionProfile profile = this.selectConnection("workbench.datapumper.source.lastprofile");
+		this.connectSource(profile);
 	}
 
 	private ConnectionProfile selectConnection(String lastProfileKey)
@@ -1268,8 +1270,8 @@ public class DataPumper
 	{
 		this.saveSettings();
 
-		this.source = null;
-		this.target = null;
+		this.sourceProfile = null;
+		this.targetProfile = null;
 		this.columnMapper.resetData();
 		this.columnMapper = null;
 
@@ -1315,29 +1317,29 @@ public class DataPumper
 	 */
 	public void propertyChange(java.beans.PropertyChangeEvent evt)
 	{
-		TableIdentifier target = this.targetTable.getSelectedTable();
+		TableIdentifier theTarget = this.targetTable.getSelectedTable();
 		TableIdentifier source = this.sourceTable.getSelectedTable();
 
 		if (evt.getSource() == this.sourceTable && source != null)
 		{
-			if (target != null && target.isNewTable())
+			if (theTarget != null && theTarget.isNewTable())
 			{
 				this.targetTable.resetNewTableItem();
-				target = null;
+				theTarget = null;
 			}
-			if (target == null)
+			if (theTarget == null)
 			{
 				this.targetTable.findAndSelectTable(source.getTableName());
 			}
 		}
-		else if (evt.getSource() == this.targetTable && target != null && source == null)
+		else if (evt.getSource() == this.targetTable && theTarget != null && source == null)
 		{
-			this.sourceTable.findAndSelectTable(target.getTableName());
+			this.sourceTable.findAndSelectTable(theTarget.getTableName());
 		}
 
-		if (target != null && target.isNewTable())
+		if (theTarget != null && theTarget.isNewTable())
 		{
-			String name = target.getTableName();
+			String name = theTarget.getTableName();
 			if (name == null)
 			{
 				String def = null;
@@ -1348,13 +1350,13 @@ public class DataPumper
 				name = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("TxtEnterNewTableName"), def);
 				if (name != null)
 				{
-					target.setTable(name);
+					theTarget.setTable(name);
 					this.targetTable.repaint();
 				}
 			}
 		}
 
-		if (this.hasSource() && target != null)
+		if (this.hasSource() && theTarget != null)
 		{
 			SwingUtilities.invokeLater(new Runnable()
 			{
@@ -1431,7 +1433,7 @@ public class DataPumper
 
 	private void showImportCommand()
 	{
-		if (this.fileImporter == null || this.target == null) return;
+		if (this.fileImporter == null || this.targetProfile == null) return;
 		try
 		{
 			this.initImporter();
@@ -1442,7 +1444,7 @@ public class DataPumper
 		}
 		String sql = this.fileImporter.getWbCommand();
 		EditWindow w = new EditWindow(this.window, ResourceMgr.getString("MsgWindowTitleDPScript"), sql, "workbench.datapumper.scriptwindow", true);
-		w.show();
+		w.setVisible(true);
 		w.dispose();
 		
 	}
@@ -1453,24 +1455,24 @@ public class DataPumper
 			this.showImportCommand();
 			return;
 		}
-		if (this.source == null || this.target == null) return;
+		if (this.sourceProfile == null || this.targetProfile == null) return;
 		if (!this.hasSource()) return;
 
 		StringBuffer result = new StringBuffer(150);
 		result.append(WbCopy.VERB + " -" + WbCopy.PARAM_SOURCEPROFILE + "=");
-		String s = this.source.getName();
+		String s = this.sourceProfile.getName();
 		if (s.indexOf(' ') >-1) result.append('"');
 		result.append(s);
 		if (s.indexOf(' ') >-1) result.append('"');
 
-		s = this.target.getName();
+		s = this.targetProfile.getName();
 		result.append("\n     -" + WbCopy.PARAM_TARGETPROFILE + "=");
 		if (s.indexOf(' ') >-1) result.append('"');
 		result.append(s);
 		if (s.indexOf(' ') >-1) result.append('"');
 
 		TableIdentifier id = this.targetTable.getSelectedTable();
-		if (target == null) return;
+		if (targetProfile == null) return;
 
 		if (id.isNewTable())
 			s = id.getTableName();
@@ -1575,7 +1577,7 @@ public class DataPumper
 		result.append("\n;");
 
 		EditWindow w = new EditWindow(this.window, ResourceMgr.getString("MsgWindowTitleDPScript"), result.toString(), "workbench.datapumper.scriptwindow", true);
-		w.show();
+		w.setVisible(true);
 		w.dispose();
 	}
 
@@ -1640,19 +1642,34 @@ public class DataPumper
 
 	private void cancelCopy()
 	{
-		if (this.copier == null && this.importer == null) return;
-		
 		this.statusLabel.setText(ResourceMgr.getString("MsgCancellingCopy"));
-		if (this.copier != null)
-			this.copier.cancel();
-		else
-			this.importer.cancelExecution();
-
-		this.cancelButton.setEnabled(false);
-		this.startButton.setEnabled(true);
-		this.copyRunning = false;
-		this.updateWindowTitle();
-		this.statusLabel.setText(ResourceMgr.getString("MsgCopyCancelled"));
+		this.statusLabel.repaint();
+		cancelButton.setEnabled(false);
+		WbThread t = new WbThread("DataPumper cancel")
+		{
+			public void run()
+			{
+				doCancel();
+			}
+		};
+		t.start();
+	}
+	
+	private void doCancel()
+	{
+		if (copier != null) copier.cancel();
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				cancelButton.setEnabled(false);
+				startButton.setEnabled(true);
+				copyRunning = false;
+				updateWindowTitle();
+				statusLabel.setText(ResourceMgr.getString("MsgCopyCancelled"));
+				statusLabel.repaint();
+			}
+		});
 	}
 
 	private void initImporter()
@@ -1769,16 +1786,24 @@ public class DataPumper
 		this.copier.setReportInterval(10);
 		return true;
 	}
-	public void setCurrentObject(String object, long number, long total)
+	
+	public void setCurrentObject(String object, long currentRow, long total)
 	{
+		updateMonitor(currentRow);
 	}
 
 	public void setCurrentRow(long currentRow, long totalRows)
 	{
-		if (currentRow == 1) this.updateWindowTitle();
-		this.statusLabel.setText(this.copyMsg + " " + currentRow);
+		updateMonitor(currentRow);
 	}
 
+	private void updateMonitor(long currentRow)
+	{
+		if (currentRow == 1) this.updateWindowTitle();
+		this.statusLabel.setText(this.copyMsg + " " + currentRow);
+		this.statusLabel.repaint();
+	}
+	
 	public void setMonitorType(int aType)
 	{
 	}
@@ -1869,7 +1894,7 @@ public class DataPumper
 		}
 
 		EditWindow w = new EditWindow(this.window, ResourceMgr.getString("MsgWindowTitleDPLog"), log, "workbench.datapumper.logwindow");
-		w.show(); // EditWindow is modal
+		w.setVisible(true); // EditWindow is modal
 		w.dispose();
 	}
 }

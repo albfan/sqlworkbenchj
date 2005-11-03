@@ -80,10 +80,10 @@ public class WbSplitPane
 
 	public void setOneTouchTooltip(String tip)
 	{
-		SplitPaneUI ui = getUI();
-		if (ui instanceof WbSplitPaneUI)
+		SplitPaneUI currentUI = getUI();
+		if (currentUI instanceof WbSplitPaneUI)
 		{
-			((WbSplitPaneUI)ui).setOneTouchTooltip(tip);
+			((WbSplitPaneUI)currentUI).setOneTouchTooltip(tip);
 		}
 	}
 	private void initDefaults()
@@ -100,8 +100,8 @@ public class WbSplitPane
 		try
 		{
 			int divider = this.getDividerSize();
-			BasicSplitPaneUI ui = (BasicSplitPaneUI)this.getUI();
-			BasicSplitPaneDivider div = ui.getDivider();
+			BasicSplitPaneUI currentUI = (BasicSplitPaneUI)this.getUI();
+			BasicSplitPaneDivider div = currentUI.getDivider();
 			result = div.getBorder();
 		}
 		catch (Exception e)
@@ -115,8 +115,8 @@ public class WbSplitPane
 		try
 		{
 			int divider = this.getDividerSize();
-			BasicSplitPaneUI ui = (BasicSplitPaneUI)this.getUI();
-			BasicSplitPaneDivider div = ui.getDivider();
+			BasicSplitPaneUI currentUI = (BasicSplitPaneUI)this.getUI();
+			BasicSplitPaneDivider div = currentUI.getDivider();
 			div.setBorder(newBorder);
 			this.setDividerSize(divider);
 		}

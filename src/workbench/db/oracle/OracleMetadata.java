@@ -12,7 +12,6 @@
 package workbench.db.oracle;
 
 import java.math.BigInteger;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import workbench.db.ConnectionProfile;
-import workbench.db.DbMetadata;
 import workbench.db.ErrorInformationReader;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
@@ -57,12 +55,12 @@ public class OracleMetadata
 		this.connection = conn;
 		try
 		{
-			String version = this.connection.getSqlConnection().getMetaData().getDatabaseProductVersion();
-			if (version.indexOf("Release 9.") > -1)
+			String versionInfo = this.connection.getSqlConnection().getMetaData().getDatabaseProductVersion();
+			if (versionInfo.indexOf("Release 9.") > -1)
 			{
 				this.version = 9;
 			}
-			else if (version.indexOf("Release 10.") > -1)
+			else if (versionInfo.indexOf("Release 10.") > -1)
 			{
 				this.version = 10;
 			}
@@ -265,7 +263,6 @@ public class OracleMetadata
 			"       i.index_type " +
 			"FROM all_indexes i, all_ind_columns c " +
 			"WHERE i.table_name = '" + table + "' \n");
-		String ownerWhere2 = "";
 		if (schema != null && schema.length() > 0)
 		{
 			sql.append("  AND i.owner = '" + schema + "'\n");

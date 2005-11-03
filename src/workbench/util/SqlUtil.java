@@ -549,6 +549,11 @@ public class SqlUtil
 		return (aSqlType == Types.DATE ||
 						aSqlType == Types.TIMESTAMP);
 	}
+
+	public static final boolean isClobType(int aSqlType)
+	{
+		return (aSqlType == Types.LONGVARCHAR || aSqlType == Types.CLOB);
+	}
 	
 	public static final boolean isBlobType(int aSqlType)
 	{

@@ -43,10 +43,9 @@ public class ParameterDefinition
 	
 	public boolean isValueValid(String v)
 	{
-		boolean valid = false;
 		try
 		{
-			Object value = CONVERTER.convertValue(v, this.type);
+			CONVERTER.convertValue(v, this.type);
 			return true;
 		}
 		catch (Exception e)

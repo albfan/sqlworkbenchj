@@ -138,7 +138,6 @@ public class DependencyTreeCellRenderer
 		int imageOffset = -1;
 		if(bColor != null)
 		{
-			Icon currentI = getIcon();
 			
 			imageOffset = getLabelStart();
 			Color oldColor = g.getColor();

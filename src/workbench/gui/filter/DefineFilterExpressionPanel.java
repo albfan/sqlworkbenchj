@@ -1,5 +1,5 @@
 /*
- * FilterPanel.java
+ * DefineFilterExpressionPanel.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -260,14 +260,14 @@ public class DefineFilterExpressionPanel
 		}
 		removeAllPanels();
 		ComplexExpression cExp = (ComplexExpression) filter;
-		List expressions = cExp.getExpressions();
-		int count = expressions.size();
+		List expList = cExp.getExpressions();
+		int count = expList.size();
 		for (int i=0; i < count; i++)
 		{
 			
 			try
 			{
-				ExpressionValue exp = (ExpressionValue)expressions.get(i);
+				ExpressionValue exp = (ExpressionValue)expList.get(i);
 				this.addExpressionPanel(exp);
 				PanelEntry item = (PanelEntry)this.panels.get(this.panels.size() - 1);
 				ColumnExpressionPanel panel = item.expressionPanel;

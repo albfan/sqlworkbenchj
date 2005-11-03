@@ -37,7 +37,6 @@ public class DbExplorerWindow
 	implements WindowListener, Connectable, ToolWindow
 {
 	private DbExplorerPanel panel;
-	private boolean connected;
 	private static int instanceCount = 0;
 	private boolean standalone;
 	private ConnectionSelector connectionSelector;

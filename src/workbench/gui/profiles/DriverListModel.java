@@ -88,9 +88,7 @@ class DriverListModel
 
 	public void putDriver(int index, DbDriver aDriver)
 	{
-		DbDriver last = (DbDriver)this.drivers.get(index);
 		this.drivers.set(index, aDriver);
-		DbDriver newp = (DbDriver)this.drivers.get(index);
 		index = 1;
 	}
 

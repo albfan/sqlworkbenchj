@@ -183,17 +183,15 @@ public class PrintPreview
 		{
 			this.printTarget.setFont(f);
 			Settings.getInstance().setPrintFont(f);
-			final PrintPreview preview = this;
-			Thread t = new Thread()
+			final PrintPreview thePreview = this;
+			Thread t = new WbThread("PrintPreview update font")
 			{
 				public void run()
 				{
-					preview.showCurrentPage();
-					preview.doLayout();
+					thePreview.showCurrentPage();
+					thePreview.doLayout();
 				}
 			};
-			t.setName("PrintPreview update font");
-			t.setDaemon(true);
 			t.start();
 		}
 	}

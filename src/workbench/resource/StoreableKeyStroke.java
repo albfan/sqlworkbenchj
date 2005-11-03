@@ -100,12 +100,12 @@ public class StoreableKeyStroke
 	{
 		if (this.key == null) return "";
 		
-		int modifier = this.key.getModifiers();
+		int mod = this.key.getModifiers();
 		int code = this.key.getKeyCode();
 		
 		if (modifier == 0)
 			return KeyEvent.getKeyText(code);
 		else
-			return KeyEvent.getKeyModifiersText(modifier) + "-" + KeyEvent.getKeyText(code);
+			return KeyEvent.getKeyModifiersText(mod) + "-" + KeyEvent.getKeyText(code);
 	}
 }

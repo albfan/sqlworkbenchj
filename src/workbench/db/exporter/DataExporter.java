@@ -162,8 +162,6 @@ public class DataExporter
 	 */
 	private void openProgressMonitor(Frame parent, boolean modal)
 	{
-		File f = new File(this.outputfile);
-		String fname = f.getName();
 
 		if (this.progressPanel == null) createProgressPanel();
 
@@ -307,7 +305,9 @@ public class DataExporter
 					return "SQL INSERT";
 				else if (this.getSqlType() == SqlRowDataConverter.SQL_UPDATE)
 					return "SQL UPDATE";
-
+				else 
+					return "SQL";
+				
 			case EXPORT_TXT:
 				return "Text";
 
@@ -894,16 +894,16 @@ public class DataExporter
 		{
 			try
 			{
-				StringBuffer sql = new StringBuffer(250);
-				sql.append("SELECT ");
+				StringBuffer query = new StringBuffer(250);
+				query.append("SELECT ");
 				List cols = dialog.getColumnsToExport();
 				if (cols != null)
 				{
 					for (int i=0; i < cols.size(); i++)
 					{
-						if (i > 0) sql.append(", ");
+						if (i > 0) query.append(", ");
 						ColumnIdentifier col = (ColumnIdentifier)cols.get(i);
-						sql.append(col.getColumnName());
+						query.append(col.getColumnName());
 					}
 				}
 				else
@@ -911,13 +911,13 @@ public class DataExporter
 					int count = info.getColumnCount();
 					for (int i=0; i < count; i++)
 					{
-						if (i > 0) sql.append(", ");
-						sql.append(info.getColumnName(i));
+						if (i > 0) query.append(", ");
+						query.append(info.getColumnName(i));
 					}
 				}
-				sql.append(" FROM ");
-				sql.append(table.getTableExpression(aConnection));
-				this.setSql(sql.toString());
+				query.append(" FROM ");
+				query.append(table.getTableExpression(aConnection));
+				this.setSql(query.toString());
 				this.setConnection(aConnection);
 				dialog.setExporterOptions(this);
 				this.setShowProgressWindow(true);
@@ -1047,7 +1047,7 @@ public class DataExporter
 		private String outputFile;
 		private String sqlStatement;
 		private String tableName;
-		private int exportType;
+
 	}
 
 	public boolean getQuoteAlways()

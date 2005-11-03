@@ -80,16 +80,14 @@ public class TableDataPanel
 	private DwPanel dataDisplay;
 
 	private ReloadAction reloadAction;
-	private SelectKeyColumnsAction defineKeys;
 
 	private JButton config;
+	private JLabel tableNameLabel;
 	private JLabel rowCountLabel;
 	private JCheckBox autoRetrieve;
-	private JPanel toolbar;
+	private JPanel topPanel;
 
 	private int warningThreshold = -1;
-
-	private boolean shiftDown = false;
 	private boolean retrieveRunning = false;
 	private boolean updateRunning = false;
 	private boolean autoloadRowCount = true;
@@ -131,7 +129,7 @@ public class TableDataPanel
 		this.dataDisplay.getTable().setMinColWidth(Settings.getInstance().getMinColumnWidth());
 		this.dataDisplay.setSaveChangesInBackground(true);
 
-    JPanel topPanel = new JPanel();
+    topPanel = new JPanel();
 		topPanel.setMaximumSize(new Dimension(32768, 32768));
 		BoxLayout box = new BoxLayout(topPanel, BoxLayout.X_AXIS);
 		topPanel.setLayout(box);
@@ -139,36 +137,43 @@ public class TableDataPanel
 		this.reloadAction = new ReloadAction(this);
 		this.reloadAction.setTooltip(ResourceMgr.getDescription("TxtLoadTableData"));
 
-		WbToolbar toolbar = new WbToolbar();
-		toolbar.addDefaultBorder();
-		topPanel.add(toolbar);
-		toolbar.add(this.reloadAction);
-		toolbar.addSeparator();
+		WbToolbar mytoolbar = new WbToolbar();
+		mytoolbar.addDefaultBorder();
+		topPanel.add(mytoolbar);
+		mytoolbar.add(this.reloadAction);
+		mytoolbar.addSeparator();
 
 		this.cancelRetrieve = new StopAction(this);
 		this.cancelRetrieve.setEnabled(false);
-		toolbar.add(this.cancelRetrieve);
-		toolbar.addSeparator();
+		mytoolbar.add(this.cancelRetrieve);
+		mytoolbar.addSeparator();
 
 		topPanel.add(Box.createHorizontalStrut(15));
+		topPanel.add(new JLabel(ResourceMgr.getString("LabelTable") + ":"));
+		Font std = Settings.getInstance().getStandardLabelFont();
+		Font bold = std.deriveFont(Font.BOLD);
+		tableNameLabel = new JLabel();
+		tableNameLabel.setFont(bold);
+		topPanel.add(Box.createHorizontalStrut(5));
+		topPanel.add(tableNameLabel);
+
+		topPanel.add(Box.createHorizontalStrut(10));
+		JLabel l = new JLabel(ResourceMgr.getString("LabelTableDataRowCount"));
+		l.setToolTipText(ResourceMgr.getDescription("LabelTableDataRowCount"));
+		topPanel.add(l);
+		topPanel.add(Box.createHorizontalStrut(5));
+		rowCountLabel = new JLabel();
+		rowCountLabel.setToolTipText(ResourceMgr.getDescription("LabelTableDataRowCount"));
+		rowCountLabel.setFont(bold);
+		rowCountLabel.setHorizontalTextPosition(SwingConstants.LEFT);
+		rowCountLabel.addMouseListener(this);
+		topPanel.add(rowCountLabel);
+		topPanel.add(Box.createHorizontalStrut(10));
 
 		autoRetrieve = new JCheckBox(ResourceMgr.getString("LabelAutoLoadTableData"));
 		autoRetrieve.setToolTipText(ResourceMgr.getDescription("LabelAutoLoadTableData"));
 		autoRetrieve.setHorizontalTextPosition(SwingConstants.LEFT);
 		topPanel.add(autoRetrieve);
-
-		topPanel.add(Box.createHorizontalStrut(10));
-
-		rowCountLabel = new JLabel(ResourceMgr.getString("LabelTableDataRowCount"));
-		rowCountLabel.setToolTipText(ResourceMgr.getDescription("LabelTableDataRowCount"));
-		Font std = Settings.getInstance().getStandardLabelFont();
-		Font bold = std.deriveFont(Font.BOLD);
-		rowCountLabel.setFont(bold);
-		rowCountLabel.setHorizontalTextPosition(SwingConstants.LEFT);
-		rowCountLabel.addMouseListener(this);
-		topPanel.add(rowCountLabel);
-
-		topPanel.add(Box.createHorizontalStrut(10));
 
 		topPanel.add(Box.createHorizontalGlue());
 		this.config = new WbButton(ResourceMgr.getString("LabelConfigureWarningThreshold"));
@@ -179,15 +184,15 @@ public class TableDataPanel
 
 		this.add(topPanel, BorderLayout.NORTH);
 
-		toolbar.add(this.dataDisplay.getUpdateDatabaseAction());
-		toolbar.add(this.dataDisplay.getSelectKeysAction());
-		toolbar.addSeparator();
-		toolbar.add(this.dataDisplay.getInsertRowAction());
-		toolbar.add(this.dataDisplay.getCopyRowAction());
-		toolbar.add(this.dataDisplay.getDeleteRowAction());
-		toolbar.addSeparator();
-		toolbar.add(this.dataDisplay.getTable().getFilterAction());
-		toolbar.add(this.dataDisplay.getTable().getResetFilterAction());
+		mytoolbar.add(this.dataDisplay.getUpdateDatabaseAction());
+		mytoolbar.add(this.dataDisplay.getSelectKeysAction());
+		mytoolbar.addSeparator();
+		mytoolbar.add(this.dataDisplay.getInsertRowAction());
+		mytoolbar.add(this.dataDisplay.getCopyRowAction());
+		mytoolbar.add(this.dataDisplay.getDeleteRowAction());
+		mytoolbar.addSeparator();
+		mytoolbar.add(this.dataDisplay.getTable().getFilterAction());
+		mytoolbar.add(this.dataDisplay.getTable().getResetFilterAction());
 
 		this.add(dataDisplay, BorderLayout.CENTER);
 	}
@@ -217,7 +222,7 @@ public class TableDataPanel
 	{
 		if (this.isRetrieving()) return;
 		this.dataDisplay.clearContent();
-		this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount"));
+		this.rowCountLabel.setText("");
 		this.clearLoadingImage();
 	}
 
@@ -239,13 +244,13 @@ public class TableDataPanel
 		if (this.dbConnection == null) return -1;
 		if (this.isRetrieving()) return -1;
 
-		this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount"));
+		this.rowCountLabel.setText("");
 		this.rowCountLabel.setIcon(this.getLoadingIndicator());
 
 		this.reloadAction.setEnabled(false);
 		this.dataDisplay.setStatusMessage(ResourceMgr.getString("MsgCalculatingRowCount"));
-		this.repaint();
-		this.rowCountLabel.repaint();
+		//this.topPanel.doLayout();
+		this.topPanel.validate();
 		String sql = this.buildSqlForTable(true);
 		if (sql == null) return -1;
 
@@ -261,16 +266,16 @@ public class TableDataPanel
 			{
 				rowCount = rs.getLong(1);
 			}
-			this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount") + " " + rowCount);
+			this.rowCountLabel.setText(Long.toString(rowCount));
 		}
 		catch (SQLException e)
 		{
-			this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount") + " " + ResourceMgr.getString("TxtError"));
+			this.rowCountLabel.setText(ResourceMgr.getString("TxtError"));
 			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.table.getTableExpression() + ": " + ExceptionUtil.getDisplay(e), null);
 		}
 		catch (Exception e)
 		{
-			this.rowCountLabel.setText(ResourceMgr.getString("LabelTableDataRowCount") + " " + ResourceMgr.getString("TxtError"));
+			this.rowCountLabel.setText(ResourceMgr.getString("TxtError"));
 			LogMgr.logError("TableDataPanel.showRowCount()", "Error retrieving rowcount for " + this.table.getTableExpression(), e);
 		}
 		finally
@@ -288,6 +293,9 @@ public class TableDataPanel
 	{
 		if (!this.isRetrieving()) reset();
 		this.table = aTable;
+		this.tableNameLabel.setText(this.table.getTableName());
+		this.topPanel.doLayout();
+		this.topPanel.repaint();
 	}
 
 	private String buildSqlForTable(boolean forRowCount)
@@ -548,6 +556,7 @@ public class TableDataPanel
 		this.reset();
 		long rows = -1;
 		if (this.autoloadRowCount) rows = this.showRowCount();
+
 		if (this.autoRetrieve.isSelected() && includeData)
 		{
 			int max = this.getMaxRows();

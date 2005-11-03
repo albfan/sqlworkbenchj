@@ -76,10 +76,7 @@ public class DefaultStatementRunner
 
 	private SqlCommand currentCommand;
 	private SqlCommand currentConsumer;
-
-	private int maxRows;
 	private boolean isCancelled;
-	private boolean batchMode = false;
 	private String baseDir;
 	
 	private RowActionMonitor rowMonitor;

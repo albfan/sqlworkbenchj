@@ -39,7 +39,6 @@ public class TableDeleterUI extends javax.swing.JPanel
 {
 	private JDialog dialog;
 	private List objectNames;
-	private List objectTypes;
 	private boolean cancelled;
 	private WbConnection connection;
 	private Thread deleteThread;
@@ -258,9 +257,9 @@ public class TableDeleterUI extends javax.swing.JPanel
 		this.cancelled = false;
 		boolean ignoreAll = false;
 
-		boolean commitEach = this.commitEach.isSelected();
+		boolean doCommitEach = this.commitEach.isSelected();
 		boolean useTruncate = this.useTruncateCheckBox.isSelected();
-		if (useTruncate) commitEach = false;
+		if (useTruncate) doCommitEach = false;
 		boolean hasError = false;
 		List tables = new ArrayList();
 		int count = this.objectNames.size();
@@ -272,7 +271,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 			this.statusLabel.setText(ResourceMgr.getString("TxtDeletingTable") + " " + table + " ...");
 			try
 			{
-				this.deleteTable(table, useTruncate, commitEach);
+				this.deleteTable(table, useTruncate, doCommitEach);
 				tables.add(table);
 			}
 			catch (Exception ex)
@@ -305,14 +304,14 @@ public class TableDeleterUI extends javax.swing.JPanel
 		}
 
 		this.fireTableDeleted(tables);
-		boolean commit = true;
+		boolean doCommit = true;
 		try
 		{
-			if (!commitEach)
+			if (!doCommitEach)
 			{
 				if (hasError)
 				{
-					commit = false;
+					doCommit = false;
 					this.connection.rollback();
 				}
 				else
@@ -326,7 +325,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 			LogMgr.logError("TableDeleterUI.doDelete()", "Error on commit/rollback", e);
 			String msg = null;
 
-			if (commit) ResourceMgr.getString("ErrorCommitDeleteTableData");
+			if (doCommit) ResourceMgr.getString("ErrorCommitDeleteTableData");
 			else msg = ResourceMgr.getString("ErrorRollbackTableData");
 			msg = msg.replaceAll("%error%", e.getMessage());
 

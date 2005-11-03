@@ -45,8 +45,6 @@ public class TableDependencyTreeDisplay
 {
 	private WbConnection connection;
 	private DependencyTreeCellRenderer renderer;
-	
-	private	DefaultMutableTreeNode emptyRoot = new DefaultMutableTreeNode("");
 	private ArrayList nodesToExpand;
 	private boolean showExported;
 	
@@ -125,18 +123,11 @@ public class TableDependencyTreeDisplay
 	
 	private void buildTree(DependencyNode parent, DefaultMutableTreeNode treeParent)
 	{
-		String parentcatalog = parent.getCatalog();
-		String parentschema = parent.getSchema();
 		String parenttable = parent.getTable();
 			
 		DependencyNode child = null;
-		String currentfk = null;
-		String currenttable = null;
 		DefaultMutableTreeNode treeNode = null;
-		String catalog = null;
-		String schema = null;
 		String table = null;
-		String fkname = null;
 			
 		List children = parent.getChildren();
 		int count = children.size();

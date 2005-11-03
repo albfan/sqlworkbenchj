@@ -169,7 +169,6 @@ public class WbImport extends SqlCommand
 
 		String type = cmdLine.getValue(ARG_TYPE);
 		String file = cmdLine.getValue(ARG_FILE);
-		String cleancr = null;
 		String dir = cmdLine.getValue(ARG_DIRECTORY);
 
 		if (type == null)

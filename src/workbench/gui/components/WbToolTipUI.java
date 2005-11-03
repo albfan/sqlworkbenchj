@@ -86,14 +86,14 @@ public class WbToolTipUI extends BasicToolTipUI
 	
 	public void paint(Graphics g, JComponent c)
 	{
-		JToolTip tip = (JToolTip)c;
+		JToolTip tp = (JToolTip)c;
 		
 		super.paint(g, c);
 		
 		Font font = c.getFont();
 		FontMetrics metrics = g.getFontMetrics(font);
-		String keyText = getAcceleratorString(tip);
-		String tipText = tip.getTipText();
+		String keyText = getAcceleratorString(tp);
+		String tipText = tp.getTipText();
 		if (tipText == null)
 		{
 			tipText = "";

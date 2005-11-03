@@ -51,8 +51,8 @@ public class DependencyNode
 	
 	public void addColumnDefinition(String aColumn, String aParentColumn)
 	{
-		Object parent = this.columns.get(aColumn);
-		if (parent == null)
+		Object currentParent = this.columns.get(aColumn);
+		if (currentParent == null)
 		{
 			this.columns.put(aColumn, aParentColumn);
 		}
@@ -136,11 +136,11 @@ public class DependencyNode
 	public boolean isInParentTree(DependencyNode aNode)
 	{
 		if (aNode == null) return false;
-		DependencyNode parent = this;//.getParent();
-		while (parent != null)
+		DependencyNode currentParent = this;//.getParent();
+		while (currentParent != null)
 		{
-			if (parent.equals(aNode)) return true;
-			parent = parent.getParent();
+			if (currentParent.equals(aNode)) return true;
+			currentParent = currentParent.getParent();
 		}
 		return false;
 	}

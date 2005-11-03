@@ -33,8 +33,6 @@ public class PreparedStatementPool
 	private Map statements;
 	private WbConnection dbConnection;
 	
-	private Object lock = new Object();
-	
 	public PreparedStatementPool(WbConnection conn)
 	{
 		setConnection(conn);

@@ -774,15 +774,6 @@ public class SettingsPanel
 		if (this.saveSettings()) this.closeWindow();
 	}//GEN-LAST:event_okButtonActionPerformed
 
-	private String getFontDisplay(Font aFont)
-	{
-		StringBuffer result = new StringBuffer(aFont.getName());
-		result.append(' ');
-		result.append(aFont.getSize());
-		result.append(' ');
-		return result.toString();
-	}
-
 	private boolean saveSettings()
 	{
 		Settings set = Settings.getInstance();

@@ -37,7 +37,6 @@ public class EchoCommand extends SqlCommand
 		StatementRunnerResult result = null;
 
 		String[] words = aSql.split("\\s");
-		boolean execSql = true;
 
 		if (words.length > 1)
 		{

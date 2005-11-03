@@ -53,7 +53,6 @@ public class CompletionPopup
 	private JWindow window;
 	private JPanel content;
 	private JList elementList;
-	private List listeners;
 	private ListModel data;
 	private JComponent headerComponent;
 	private String pasteCase;
@@ -200,8 +199,8 @@ public class CompletionPopup
 					}
 					else if (o instanceof SelectAllMarker)
 					{
-						ListModel data = this.elementList.getModel();
-						int count = data.getSize();
+						//ListModel elementData = this.elementList.getModel();
+						int count = this.data.getSize();
 						StringBuffer cols = new StringBuffer(count * 10);
 						int col = 0;
 						for (int i=0; i < count; i++)

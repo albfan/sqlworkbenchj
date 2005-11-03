@@ -12,8 +12,7 @@
 package workbench.gui.dbobjects;
 
 /**
- *
- * @author  kellererth
+ * @author  support@sql-workbench.net
  */
 public class TableImport extends javax.swing.JPanel
 {

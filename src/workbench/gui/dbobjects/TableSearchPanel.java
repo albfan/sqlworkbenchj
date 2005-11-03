@@ -72,7 +72,6 @@ public class TableSearchPanel
 	extends JPanel
 	implements TableSearchDisplay, ListSelectionListener, KeyListener
 {
-	private DataStore tableList;
 	private TableModel tableListModel;
 	//private String currentTable;
 	private String currentSql;
@@ -82,7 +81,6 @@ public class TableSearchPanel
 	private String fixedStatusText;
 	private ShareableDisplay tableListSource;
 	private DataStore currentResult;
-	private Dimension maxTableSize = new Dimension(32768, 150);
 	private WbTable currentDisplayTable;
 	private JScrollPane currentScrollPane;
 	private TitledBorder currentBorder;
@@ -347,7 +345,6 @@ public class TableSearchPanel
 		if (this.currentDisplayTable != null)
 		{
 			int rows = this.currentDisplayTable.getRowCount();
-			int cols = this.currentDisplayTable.getColumnCount();
 			int height = this.currentDisplayTable.getRowHeight();
 			int width = this.resultScrollPane.getWidth();
 			// Recycle the Dimension object from the ScrollPane

@@ -25,11 +25,12 @@ import workbench.sql.StatementRunnerResult;
  */
 public class WbRemoveVar extends SqlCommand
 {
+	public static final String VERB = "WBVARDELETE";
 	public WbRemoveVar()
 	{
 	}
 
-	public String getVerb() { return "WBVARDELETE"; }
+	public String getVerb() { return VERB; }
 
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
 		throws SQLException

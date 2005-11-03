@@ -55,7 +55,6 @@ public class ExportOptionsPanel
 	private XmlOptionsPanel xmlOptions;
 	private int currentType = -1;
 	private boolean allowColumnSelection = false;
-	private ResultInfo columns;
 	private List selectedColumns;
 	private Object columnSelectEventSource;
 	private ColumnSelectorPanel columnSelectorPanel;

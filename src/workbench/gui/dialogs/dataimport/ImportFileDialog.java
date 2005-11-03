@@ -49,7 +49,6 @@ public class ImportFileDialog
 	private boolean filterChange = false;
 	private String lastDirConfigKey = "workbench.import.lastdir";
 	private Component parentComponent;
-	private boolean showImportMode = true;
 	
 	public ImportFileDialog(Component caller)
 	{

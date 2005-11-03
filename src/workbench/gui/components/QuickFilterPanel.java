@@ -139,7 +139,7 @@ public class QuickFilterPanel
 		Dimension d = new Dimension(32768, 20);
 		this.setMaximumSize(d);
 		this.filterValue.setMaximumSize(d);
-		this.filterValue.setPreferredSize(new Dimension(50,20));
+		//this.filterValue.setPreferredSize(new Dimension(25,20));
 		this.toolbar.setMaximumSize(d);
 
 		gridBagConstraints = new GridBagConstraints();
@@ -151,13 +151,13 @@ public class QuickFilterPanel
 		{
 			gridBagConstraints.gridx ++;
 			gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints.weightx = 1.0;
+			gridBagConstraints.weightx = 0.8;
 			this.add(filterValue, gridBagConstraints);
 			
 			gridBagConstraints.gridx ++;
-			gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
+			//gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
 			gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints.weightx = 0.0;
+			gridBagConstraints.weightx = 0.2;
 			this.add(columnDropDown, gridBagConstraints);
 		}
 		else

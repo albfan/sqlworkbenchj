@@ -26,7 +26,6 @@ import workbench.interfaces.ClipboardSupport;
  */
 public class TextPopup extends JPopupMenu
 {
-	private ClipboardSupport client;
 	private CopyAction copy;
 	private PasteAction paste;
 	private ClearAction clear;

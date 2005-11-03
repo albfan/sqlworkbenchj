@@ -1554,7 +1554,6 @@ public class TableListPanel
 	private String buildSqlForTable()
 	{
 		if (this.selectedTableName == null || this.selectedTableName.length() == 0) return null;
-		TableIdentifier tbl = new TableIdentifier(this.selectedSchema, this.selectedTableName);
 
 		if (this.shouldRetrieveTable || this.tableDefinition.getRowCount() == 0)
 		{
@@ -1606,8 +1605,8 @@ public class TableListPanel
 
 		try
 		{
-			ObjectCompilerUI ui = new ObjectCompilerUI(names, types, this.dbConnection);
-			ui.show(SwingUtilities.getWindowAncestor(this));
+			ObjectCompilerUI compilerUI = new ObjectCompilerUI(names, types, this.dbConnection);
+			compilerUI.show(SwingUtilities.getWindowAncestor(this));
 		}
 		catch (SQLException e)
 		{
@@ -1730,12 +1729,12 @@ public class TableListPanel
 			names.add(this.selectedSchema + "." + name);
 			types.add("INDEX");
 		}
-		ObjectDropperUI ui = new ObjectDropperUI();
-		ui.setObjects(names, types);
-		ui.setConnection(this.dbConnection);
+		ObjectDropperUI dropperUI = new ObjectDropperUI();
+		dropperUI.setObjects(names, types);
+		dropperUI.setConnection(this.dbConnection);
 		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
-		ui.showDialog(f);
-		if (!ui.dialogWasCancelled())
+		dropperUI.showDialog(f);
+		if (!dropperUI.dialogWasCancelled())
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -1841,8 +1840,8 @@ public class TableListPanel
 			tables.put(tbl.getTableExpression(this.dbConnection), type.toLowerCase());
 		}
 		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
-		ObjectScripterUI ui = new ObjectScripterUI(s);
-		ui.show(SwingUtilities.getWindowAncestor(this));
+		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
+		scripterUI.show(SwingUtilities.getWindowAncestor(this));
 	}
 
 	private void createDummyInserts()
@@ -1865,8 +1864,8 @@ public class TableListPanel
 			}
 		}
 		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
-		ObjectScripterUI ui = new ObjectScripterUI(s);
-		ui.show(SwingUtilities.getWindowAncestor(this));
+		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
+		scripterUI.show(SwingUtilities.getWindowAncestor(this));
 	}
 
 	private void createDefaultSelects()
@@ -1889,8 +1888,8 @@ public class TableListPanel
 			}
 		}
 		ObjectScripter s = new ObjectScripter(tables, this.dbConnection);
-		ObjectScripterUI ui = new ObjectScripterUI(s);
-		ui.show(SwingUtilities.getWindowAncestor(this));
+		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
+		scripterUI.show(SwingUtilities.getWindowAncestor(this));
 	}
 
 	private void dropTables()
@@ -1916,12 +1915,12 @@ public class TableListPanel
 			types.add(type);
 		}
 
-		ObjectDropperUI ui = new ObjectDropperUI();
-		ui.setObjects(names, types);
-		ui.setConnection(this.dbConnection);
+		ObjectDropperUI dropperUI = new ObjectDropperUI();
+		dropperUI.setObjects(names, types);
+		dropperUI.setConnection(this.dbConnection);
 		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
-		ui.showDialog(f);
-		if (!ui.dialogWasCancelled())
+		dropperUI.showDialog(f);
+		if (!dropperUI.dialogWasCancelled())
 		{
 			EventQueue.invokeLater(new Runnable()
 			{

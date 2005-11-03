@@ -348,7 +348,6 @@ public class IteratingScriptParser
 						
 						int commandStart = lastNewLineStart;
 						int commandEnd = pos;
-						int newEndPos = lastNewLineStart + line.length();
 						
 						lastNewLineStart = pos;
 						startOfLine = true;
@@ -418,7 +417,6 @@ public class IteratingScriptParser
 
 		value = this.script.substring(startPos, endPos).trim();
 		if (value.length() == 0) return null;
-		int len = value.length();
 		
 		int offset = this.getRealStartOffset(value);
 		if (offset > 0)

@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +46,7 @@ import workbench.util.WbThread;
 
 /**
  * Import data that is provided from {@link RowDataProducer} into
- * a tabel in the database.
+ * a table in the database.
  *
  * @author  support@sql-workbench.net
  */
@@ -446,7 +447,7 @@ public class DataImporter
 		this.isRunning = false;
 		this.source.cancel();
 		this.messages.append(ResourceMgr.getString("MsgImportCancelled") + "\n");
-		if (this.progressMonitor != null) this.progressMonitor.jobFinished();
+		//if (this.progressMonitor != null) this.progressMonitor.jobFinished();
 	}
 
 	public void setTableCount(int total)
@@ -690,10 +691,24 @@ public class DataImporter
 			}
 			if (row[i] == null)
 			{
-				pstmt.setNull(colIndex, this.targetColumns[i].getDataType());
+				if ("CLOB".equals(this.targetColumns[i].getDbmsType()))
+				{
+					pstmt.setNull(colIndex, Types.CLOB);
+				}
+				else
+				{
+					pstmt.setNull(colIndex, this.targetColumns[i].getDataType());
+				}
 			}
-			else if (this.targetColumns[i].getDataType() == java.sql.Types.LONGVARCHAR ||
-				       "LONG".equals(this.targetColumns[i].getDbmsType()))
+			// CLOB and LONG check is for Oracle, because Oracle 
+			// reports CLOB and LONG columns as java.sql.Types.OTHER (!!)
+			// but they need to be treated as CLOBs (i.e. using setCharacterStream()
+			// this will only work with Oracle 10g drivers.
+			// Oracle 9i drivers do not implement the setCharacterStream() 
+			// and associated methods properly
+			else if ( SqlUtil.isClobType(this.targetColumns[i].getDataType()) || 
+				       "LONG".equals(this.targetColumns[i].getDbmsType()) ||
+				       "CLOB".equals(this.targetColumns[i].getDbmsType()) )
 			{
 				String value = row[i].toString();
 				int size = value.length();
@@ -1155,6 +1170,7 @@ public class DataImporter
 	 */
 	public void importFinished()
 	{
+		if (!isRunning) return;
 		try
 		{
 			this.finishTable();
@@ -1199,6 +1215,8 @@ public class DataImporter
 
 	public void importCancelled()
 	{
+		if (!isRunning) return;
+		
 		try
 		{
 			LogMgr.logDebug("DataImporter.importCancelled()", "Ending import...");
@@ -1219,9 +1237,9 @@ public class DataImporter
 		finally
 		{
 			this.isRunning = false;
-			if (this.progressMonitor != null) this.progressMonitor.jobFinished();
 		}
 		this.messages.append(this.source.getMessages());
+		if (this.progressMonitor != null) this.progressMonitor.jobFinished();
 	}
 
 	private void closeStatements()

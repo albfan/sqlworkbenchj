@@ -31,7 +31,6 @@ import workbench.gui.actions.MoveSqlTab;
  */
 public class SqlTabPopup extends JPopupMenu
 {
-	private MainWindow client;
 	private AddTabAction add;
 	private NewDbExplorerPanelAction newDbExp;
 	private RemoveTabAction remove;

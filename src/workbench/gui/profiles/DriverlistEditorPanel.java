@@ -137,7 +137,7 @@ public class DriverlistEditorPanel
 
 			for (int i=0; i < count; i++)
 			{
-				DbDriver drv = (DbDriver)this.model.getDriver(i);
+				DbDriver drv = this.model.getDriver(i);
 				if (drv.getName().equals(aDriverName))
 				{
 					this.driverList.setSelectedIndex(i);

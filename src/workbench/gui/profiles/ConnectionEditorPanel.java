@@ -63,7 +63,6 @@ public class ConnectionEditorPanel
 	implements PropertyChangeListener, ActionListener
 {
 	private ConnectionProfile currentProfile;
-	private List drivers;
 	private ProfileListModel sourceModel;
 	private boolean init;
 	private List editors;

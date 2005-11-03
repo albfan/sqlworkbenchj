@@ -11,7 +11,12 @@
  */
 package workbench.db.diff;
 
-import java.sql.Types;
+import workbench.db.ColumnIdentifier;
+import workbench.db.report.ColumnReference;
+import workbench.db.report.ReportColumn;
+import workbench.db.report.TagWriter;
+import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 import workbench.db.ColumnIdentifier;
 import workbench.db.report.ColumnReference;
 import workbench.db.report.ReportColumn;
@@ -39,7 +44,6 @@ public class ColumnDiff
 	// Use a ReportColumn for future FK reference diff...
 	private ReportColumn referenceColumn;
 	private ReportColumn targetColumn;
-	private String namespace;
 	private StrBuffer indent;
 	private TagWriter writer;
 	private boolean compareFK = true;

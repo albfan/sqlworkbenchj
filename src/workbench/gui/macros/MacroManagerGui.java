@@ -236,8 +236,6 @@ public class MacroManagerGui
 	{
 		if (this.model == null || this.macroList == null) return;
 		int count = this.model.getSize();
-		boolean selected = false;
-		int index = 0;
 		if (macro == null)
 		{
 			this.macroList.setSelectedIndex(0);

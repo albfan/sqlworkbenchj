@@ -200,7 +200,6 @@ public class DdlCommand extends SqlCommand
     String word = null;
     String name = null;
     String type = null;
-		String lastType = null;
     boolean nextTokenIsName = false;
     while (tok.hasMoreTokens())
     {

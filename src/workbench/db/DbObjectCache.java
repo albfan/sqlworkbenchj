@@ -34,7 +34,8 @@ public class DbObjectCache
 {
 	private WbConnection dbConnection;
 	private Set schemasInCache = new HashSet();
-	private final String NULL_SCHEMA = "wb-null-schema-marker";
+	private final String NULL_SCHEMA = "$$wb-null-schema$$";
+	private boolean retrieveOraclePublicSynonyms = false;
 	
 	// This will map a TableIdentifier to a list of ColumnIdentifier's
 	private SortedMap objects = new TreeMap();
@@ -42,6 +43,7 @@ public class DbObjectCache
 	DbObjectCache(WbConnection conn)
 	{
 		this.dbConnection = conn;
+		retrieveOraclePublicSynonyms = conn.getMetadata().isOracle() && Settings.getInstance().getBoolProperty("workbench.editor.autocompletion.oracle.public_synonyms", false);
 		conn.addChangeListener(this);
 	}
 	
@@ -167,6 +169,13 @@ public class DbObjectCache
 				t2.setSchema(null);
 				t2.setType(null);
 				cols = (List)this.objects.get(t2);
+				if (cols == null && retrieveOraclePublicSynonyms)
+				{
+					// retrieve Oracle PUBLIC synonyms
+					this.getTables("PUBLIC");
+					//t2.setType("SYNONYM");
+					cols = (List)this.objects.get(t2);
+				}
 			}
 		}
 		
@@ -245,20 +254,5 @@ public class DbObjectCache
 			this.clear();
 		}
 	}
-	
-	
-	/**
-	 * Utility function for debugging for printing out the conents
-	 * of the cache
-	 */
-	private void dumpTables()
-	{
-		Iterator keys = this.objects.keySet().iterator();
-		System.out.println("Objects in completion cache:");
-		while (keys.hasNext())
-		{
-			TableIdentifier tbl = (TableIdentifier)keys.next();
-			System.out.println(tbl.getTableExpression() + "(" + tbl.getType() + ")");
-		}
-	}
+
 }

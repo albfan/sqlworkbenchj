@@ -16,7 +16,6 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Window;
-import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -68,7 +67,6 @@ import workbench.interfaces.Interruptable;
 import workbench.interfaces.JobErrorHandler;
 import workbench.interfaces.ResultLogger;
 import workbench.interfaces.ScriptGenerationMonitor;
-import workbench.interfaces.StatusBar;
 import workbench.interfaces.StatementRunner;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -108,7 +106,6 @@ public class DwPanel
 	private WbScrollPane scrollPane;
 	private DefaultCellEditor defaultEditor;
 	private DefaultCellEditor defaultNumberEditor;
-	private int maxRows = 0;
 	private long lastExecutionTime = 0;
 	
 	private boolean success;
@@ -933,7 +930,7 @@ public class DwPanel
 		
 		if (this.manageUpdateAction)
 		{
-			boolean update = this.isUpdateable();
+			//boolean update = this.isUpdateable();
 			this.insertRow.setEnabled(true);
 		}
 		this.rowCountChanged();
@@ -1378,8 +1375,8 @@ public class DwPanel
 			
 			if (!this.checkUpdateTable())
 			{
-				String sql = this.getCurrentSql();
-				List tables = SqlUtil.getTables(sql);
+				String csql = this.getCurrentSql();
+				List tables = SqlUtil.getTables(csql);
 				String table = null;
 				
 				if (tables.size() > 1)

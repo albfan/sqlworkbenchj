@@ -97,18 +97,6 @@ public class ComboStringPropertyEditor
 		}
 	}
 	
-	private int findObject(Object aValue)
-	{
-		if (aValue == null) return -1;
-		ComboBoxModel model = this.getModel();
-		for (int i=0; i < model.getSize(); i++)
-		{
-			Object element = model.getElementAt(i);
-			if (aValue.equals(element)) return i;
-		}
-		return -1;
-	}
-	
 	public boolean isChanged() { return this.changed; }
 	
 	public void applyChanges()

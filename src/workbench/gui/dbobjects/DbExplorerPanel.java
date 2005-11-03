@@ -70,13 +70,11 @@ public class DbExplorerPanel
 	private JComboBox schemaSelector;
 	private JLabel schemaLabel;
 	private JPanel selectorPanel;
-	private JLabel catalogLabel;
 	boolean connected;
 	private WbConnection dbConnection;
 	private DbExplorerWindow window;
 	private WbToolbar toolbar;
 	private ConnectionInfo connectionInfo;
-	private boolean restoreWindow = false;
 	private boolean retrievePending = false;
 	private int internalId = 0;
 	private ConnectionSelector connectionSelector;
@@ -169,21 +167,6 @@ public class DbExplorerPanel
 	public String getId()
 	{
 		return "WbExp-" + Integer.toString(this.internalId);
-	}
-
-	private void initSearchPanel()
-	{
-		if (this.searchPanel != null) return;
-
-		this.searchPanel = new TableSearchPanel(tables);
-
-		if (this.dbConnection != null)
-		{
-			this.searchPanel.setConnection(this.dbConnection);
-		}
-		this.searchPanel.restoreSettings();
-		int index = this.tabPane.getTabCount() - 2;
-		this.tabPane.setComponentAt(index, this.searchPanel);
 	}
 
 	public void readSchemas()

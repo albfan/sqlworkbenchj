@@ -452,7 +452,6 @@ public class WbTable
 
 		if (this.printDataAction != null)
 		{
-			int count = this.popup.getComponentCount();
 
 			if (withSep)
 			{
@@ -1404,7 +1403,7 @@ public class WbTable
 		int col = this.getEditingColumn();
 		int row = this.getEditingRow();
 		String data = this.getValueAsString(row, col);
-		Window owner = (Window)SwingUtilities.getWindowAncestor(this);
+		Window owner = SwingUtilities.getWindowAncestor(this);
 		Frame ownerFrame = null;
 		if (owner instanceof Frame)
 		{
@@ -1467,15 +1466,15 @@ public class WbTable
 		Point p = view.getViewPosition();
 		Dimension d = view.getExtentSize();
 		int height = (int)d.getHeight();
-		int rowHeight = 0;
+		int currentRowHeight = 0;
 		int spacing = this.getRowMargin();
 		int lastRow = 0;
 		if (this.rowResizer == null)
 		{
 			// if the row height cannot be resized, we can
 			// calculate the number of visible rows
-			rowHeight = this.getRowHeight();
-			int numRows = (int) ((height / rowHeight) - 0.5);
+			currentRowHeight = this.getRowHeight();
+			int numRows = (int) ((height / currentRowHeight) - 0.5);
 			lastRow = numRows;
 		}
 		else
@@ -1483,12 +1482,12 @@ public class WbTable
 			for (int r = first; r < count; r ++)
 			{
 				int h = this.getRowHeight(r) + spacing;
-				if (rowHeight + h > height) break;
-				rowHeight += h;
+				if (currentRowHeight + h > height) break;
+				currentRowHeight += h;
 			}
 
 			//p.move(0, (int)d.getHeight());
-			p.move(0, rowHeight);
+			p.move(0, currentRowHeight);
 
 			lastRow = this.rowAtPoint(p);
 		}
@@ -1561,8 +1560,8 @@ public class WbTable
 		else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1
 		         && this.dwModel != null && e.getSource() instanceof JTableHeader)
 		{
-			TableColumnModel columnModel = this.getColumnModel();
-			int viewColumn = columnModel.getColumnIndexAtX(e.getX());
+			TableColumnModel colMod = this.getColumnModel();
+			int viewColumn = colMod.getColumnIndexAtX(e.getX());
 			int realColumn = this.convertColumnIndexToModel(viewColumn);
 
 			if (realColumn >= 0)
@@ -1612,8 +1611,8 @@ public class WbTable
 
 	public void actionPerformed(ActionEvent e)
 	{
-		TableColumnModel columnModel = this.getColumnModel();
-		int viewColumn = columnModel.getColumnIndexAtX(this.headerPopupX);
+		TableColumnModel colMod = this.getColumnModel();
+		int viewColumn = colMod.getColumnIndexAtX(this.headerPopupX);
 		final int column = this.convertColumnIndexToModel(viewColumn);
 		if (e.getSource() == this.sortAscending && this.dwModel != null)
 		{

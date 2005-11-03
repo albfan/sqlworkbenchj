@@ -57,8 +57,6 @@ public class DwStatusBar
 	private String readyMsg;
 	private JTextField tfTimeout;
 	private WbTextLabel execTime;
-	private JLabel timeoutLabel;
-	private JPanel auxPanel;
 	
 	private static final int BAR_HEIGHT = 22;
 	private static final int FIELD_HEIGHT = 18;
@@ -122,7 +120,6 @@ public class DwStatusBar
 
 		Font f = execTime.getFont();
 		FontMetrics fm = execTime.getFontMetrics(f);
-		Dimension pref = execTime.getPreferredSize();
 		
 		int width = fm.stringWidth("000000000000s");
 		d = new Dimension(width + 4, FIELD_HEIGHT);

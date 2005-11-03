@@ -45,7 +45,6 @@ public class ImportOptionsPanel
 	private TextOptionsPanel textOptions;
 	private XmlOptionsPanel xmlOptions;
 	private int currentType = -1;
-	private boolean allowColumnSelection = false;
 	
 	public ImportOptionsPanel()
 	{

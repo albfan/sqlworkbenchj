@@ -256,7 +256,6 @@ public class ShortcutEditor
 	{
 		ShortcutManager mgr = Settings.getInstance().getShortcutManager();
 		int count = this.definitions.getRowCount();
-		boolean update = false;
 		for (int row = 0; row < count; row++)
 		{
 			ShortcutDisplay d = (ShortcutDisplay)this.definitions.getValue(row, 1);

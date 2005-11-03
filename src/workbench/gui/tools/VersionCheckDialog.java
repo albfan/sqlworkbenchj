@@ -36,7 +36,6 @@ public class VersionCheckDialog extends javax.swing.JDialog
 	private Thread readThread;
 	private Timer timeout;
 	private boolean timedOut = false;
-	private boolean isDevVersion =  false;
 	private WbVersionReader versionReader;
 
 	/** Creates new form VersionCheckDialog */

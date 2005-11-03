@@ -112,7 +112,6 @@ public class ShortcutManager
 	public String getActionClassForKey(KeyStroke key)
 	{
 		String clazz = null;
-		String name = null;
 		Iterator itr = this.keyMap.values().iterator();
 
 		while (itr.hasNext())

@@ -50,9 +50,6 @@ public class VariablesEditor
 
 	public VariablesEditor(DataStore data)
 	{
-		String[] cols = new String[] { ResourceMgr.getString("TxtConnDataPropName"), ResourceMgr.getString("TxtConnDataPropValue") };
-		int[] types = new int[] { Types.VARCHAR, Types.VARCHAR };
-		int[] sizes = new int[] { 15, 5 };
 
 		this.variablesTable = new WbTable();
 		this.variablesTable.setRowSelectionAllowed(false);

@@ -122,7 +122,7 @@ public class ColumnMapper
 
 		// we cannot have more mapping entries then the number of columns in the target
 		int numTargetCols = this.targetColumns.size();
-		int numSourceCols = this.sourceColumns.size();
+		//int numSourceCols = this.sourceColumns.size();
 		this.mapping = new ColumnMapRow[numTargetCols];
 		for (int i=0; i < numTargetCols; i++)
 		{
@@ -218,7 +218,6 @@ public class ColumnMapper
 		for (int i=0; i < count; i++)
 		{
 			ColumnMapRow row = this.mapping[i];
-			String s = null;
 
 			if (row.getSource() == null)
 			{

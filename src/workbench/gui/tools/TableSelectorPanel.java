@@ -189,6 +189,10 @@ public class TableSelectorPanel
 				schemaSelector.setSelectedItem(this.currentSchema);
 				this.retrieveTables();
 			}
+			else
+			{
+				schemaSelector.setSelectedItem(null);
+			}
 			this.schemaSelector.addItemListener(this);
 		}
 		catch (Exception e)

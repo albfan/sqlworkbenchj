@@ -108,7 +108,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.40 2005-10-27 21:55:03 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.41 2005-11-03 20:16:18 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -156,7 +156,7 @@ public class JEditTextArea
 		painter = new TextAreaPainter(this,defaults);
 		//painter.setBorder(BorderFactory.createLoweredBevelBorder());
 		documentHandler = new DocumentHandler();
-		listenerList = new EventListenerList();
+		listeners = new EventListenerList();
 		caretEvent = new MutableCaretEvent();
 		lineSegment = new Segment();
 		bracketLine = bracketPosition = -1;
@@ -2007,22 +2007,22 @@ public class JEditTextArea
 
 	public final void addSelectionListener(TextSelectionListener l)
 	{
-		listenerList.add(TextSelectionListener.class, l);
+		listeners.add(TextSelectionListener.class, l);
 	}
 
 	public final void removeSelectionListener(TextSelectionListener l)
 	{
-		listenerList.remove(TextSelectionListener.class, l);
+		listeners.remove(TextSelectionListener.class, l);
 	}
 
 	public final void addTextChangeListener(TextChangeListener l)
 	{
-		listenerList.add(TextChangeListener.class, l);
+		listeners.add(TextChangeListener.class, l);
 	}
 
 	public final void removeTextChangeListener(TextChangeListener l)
 	{
-		listenerList.remove(TextChangeListener.class, l);
+		listeners.remove(TextChangeListener.class, l);
 	}
 
 	/**
@@ -2031,7 +2031,7 @@ public class JEditTextArea
 	 */
 	public final void addCaretListener(CaretListener listener)
 	{
-		listenerList.add(CaretListener.class,listener);
+		listeners.add(CaretListener.class,listener);
 	}
 
 	/**
@@ -2040,7 +2040,7 @@ public class JEditTextArea
 	 */
 	public final void removeCaretListener(CaretListener listener)
 	{
-		listenerList.remove(CaretListener.class,listener);
+		listeners.remove(CaretListener.class,listener);
 	}
 
 	/**
@@ -2209,7 +2209,7 @@ public class JEditTextArea
 
 	protected TextPopup popup;
 
-	protected EventListenerList listenerList;
+	protected EventListenerList listeners;
 	protected MutableCaretEvent caretEvent;
 
 	protected boolean caretBlinks;
@@ -2253,36 +2253,36 @@ public class JEditTextArea
 
 	protected void fireTextStatusChanged(boolean isModified)
 	{
-		Object[] listeners = listenerList.getListenerList();
-		for(int i = listeners.length - 2; i >= 0; i--)
+		Object[] list = listeners.getListenerList();
+		for(int i = list.length - 2; i >= 0; i--)
 		{
-			if(listeners[i] == TextChangeListener.class)
+			if(list[i] == TextChangeListener.class)
 			{
-				((TextChangeListener)listeners[i+1]).textStatusChanged(isModified);
+				((TextChangeListener)list[i+1]).textStatusChanged(isModified);
 			}
 		}
 	}
 
 	protected void fireSelectionEvent()
 	{
-		Object[] listeners = listenerList.getListenerList();
-		for(int i = listeners.length - 2; i >= 0; i--)
+		Object[] list = listeners.getListenerList();
+		for(int i = list.length - 2; i >= 0; i--)
 		{
-			if(listeners[i] == TextSelectionListener.class)
+			if(list[i] == TextSelectionListener.class)
 			{
-				((TextSelectionListener)listeners[i+1]).selectionChanged(this.getSelectionStart(), this.getSelectionEnd());
+				((TextSelectionListener)list[i+1]).selectionChanged(this.getSelectionStart(), this.getSelectionEnd());
 			}
 		}
 	}
 
 	protected void fireCaretEvent()
 	{
-		Object[] listeners = listenerList.getListenerList();
-		for(int i = listeners.length - 2; i >= 0; i--)
+		Object[] list = listeners.getListenerList();
+		for(int i = list.length - 2; i >= 0; i--)
 		{
-			if(listeners[i] == CaretListener.class)
+			if(list[i] == CaretListener.class)
 			{
-				((CaretListener)listeners[i+1]).caretUpdate(caretEvent);
+				((CaretListener)list[i+1]).caretUpdate(caretEvent);
 			}
 		}
 	}

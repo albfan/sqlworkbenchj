@@ -78,7 +78,6 @@ public class DataStore
 
 	private boolean modified;
 	private boolean pkColumnsRead = false;
-	private int realColumns;
 
 	private RowDataList data;
 	private RowDataList deletedRows;
@@ -279,8 +278,8 @@ public class DataStore
 			count = this.deletedRows.size();
 			for (int i=0; i < count; i++)
 			{
-				RowData data = this.deletedRows.get(i);
-				if (!data.isNew()) modifiedCount++;
+				RowData rowData = this.deletedRows.get(i);
+				if (!rowData.isNew()) modifiedCount++;
 			}
 		}
 		return modifiedCount;
@@ -1212,29 +1211,6 @@ public class DataStore
 		return table;
 	}
 
-
-	/**
-	 * Writes all rows using the supplied {@link workbench.db.exporter.RowDataConverter}
-	 * to the supplied Writer.
-	 */
-	private void writeConverterData(RowDataConverter converter, Writer pw)
-		throws IOException
-	{
-		int count = this.getRowCount();
-		if (count == 0) return;
-		converter.setDefaultTimestampFormat(this.converter.getTimestampPattern());
-		converter.setDefaultNumberFormatter(this.defaultNumberFormatter);
-		converter.setDefaultDateFormat(this.converter.getDatePattern());
-		converter.getStart().writeTo(pw);
-		for (int row=0; row < count; row++)
-		{
-			RowData data = this.getRow(row);
-			StrBuffer rowData = converter.convertRowData(data, row);
-			rowData.writeTo(pw);
-		}
-		converter.getEnd(count).writeTo(pw);
-	}
-
 	public void setEscapeExportValues(boolean aFlag)
 	{
 		this.escapeHtml = aFlag;
@@ -1314,37 +1290,36 @@ public class DataStore
 		{
 			includeDelete = false;
 		}
-		SqlRowDataConverter converter = new SqlRowDataConverter(this.resultInfo);
-		converter.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
-		converter.setOriginalConnection(this.originalConnection);
-		converter.setLineTerminator(aLineTerminator);
-		converter.setColumnsToExport(columns);
+		SqlRowDataConverter conv = new SqlRowDataConverter(this.resultInfo);
+		conv.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
+		conv.setOriginalConnection(this.originalConnection);
+		conv.setLineTerminator(aLineTerminator);
+		conv.setColumnsToExport(columns);
 		if (aCharFunc != null)
 		{
-			converter.setChrFunction(aCharFunc);
-			converter.setConcatString(aConcatString);
+			conv.setChrFunction(aCharFunc);
+			conv.setConcatString(aConcatString);
 		}
 		if (includeDelete)
 		{
-			converter.setCreateInsertDelete();
+			conv.setCreateInsertDelete();
 		}
 		else
 		{
-			converter.setCreateInsert();
+			conv.setCreateInsert();
 		}
 		TableIdentifier tbl = new TableIdentifier(this.getInsertTable());
-		converter.setAlternateUpdateTable(tbl);
+		conv.setAlternateUpdateTable(tbl);
 
 		for (int row = 0; row < count; row ++)
 		{
-			RowData data;
 			int rowIndex = -1;
 			if (rows == null) rowIndex = row;
 			else rowIndex = rows[row];
 
-			data = this.getRow(rowIndex);
-			StrBuffer sql = converter.convertRowData(data, rowIndex);
-			sql.writeTo(out);
+			RowData rowData = this.getRow(rowIndex);
+			StrBuffer rowsql = conv.convertRowData(rowData, rowIndex);
+			rowsql.writeTo(out);
 		}
 	}
 
@@ -1400,18 +1375,18 @@ public class DataStore
 		factory.setCurrentConnection(this.originalConnection);
 		for (int row = 0; row < count; row ++)
 		{
-			RowData data;
-			if (rows == null) data = this.getRow(row);
-			else data = this.getRow(rows[row]);
+			RowData rowdata;
+			if (rows == null) rowdata = this.getRow(row);
+			else rowdata = this.getRow(rows[row]);
 
-			DmlStatement stmt = factory.createUpdateStatement(data, true, aLineTerminator, columns);
+			DmlStatement stmt = factory.createUpdateStatement(rowdata, true, aLineTerminator, columns);
 			if (aCharFunc != null)
 			{
 				stmt.setChrFunction(aCharFunc);
 				stmt.setConcatString(aConcatString);
 			}
-			String sql = stmt.getExecutableStatement(this.originalConnection.getSqlConnection());
-			out.write(sql);
+			String rowsql = stmt.getExecutableStatement(this.originalConnection.getSqlConnection());
+			out.write(rowsql);
 			out.write(";");
 			out.write(aLineTerminator);
 			out.write(aLineTerminator);
@@ -1840,8 +1815,8 @@ public class DataStore
 
 		if (!this.resultInfo.hasPkColumns()) return Collections.EMPTY_MAP;
 
-		RowData data = this.getRow(aRow);
-		if (data == null) return Collections.EMPTY_MAP;
+		RowData rowdata = this.getRow(aRow);
+		if (rowdata == null) return Collections.EMPTY_MAP;
 
 		int count = this.resultInfo.getColumnCount();
 		HashMap result = new HashMap(count);
@@ -1850,7 +1825,7 @@ public class DataStore
 			if (this.resultInfo.isPkColumn(j))
 			{
 				String name = this.getColumnName(j);
-				Object value = data.getValue(j);
+				Object value = rowdata.getValue(j);
 				if (value instanceof NullValue)
 				{
 					result.put(name, null);
@@ -2004,11 +1979,6 @@ public class DataStore
 			this.checkUpdateTable();
 		}
 		this.resultInfo.readPkDefinition(this.originalConnection, false);
-	}
-
-	private boolean isPkColumn(int col)
-	{
-		return this.resultInfo.isPkColumn(col);
 	}
 
 	/** Getter for property progressMonitor.

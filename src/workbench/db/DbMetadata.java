@@ -53,7 +53,6 @@ import workbench.db.postgres.PostgresSequenceReader;
 import workbench.db.postgres.PostgresConstraintReader;
 import workbench.db.postgres.PostgresMetadata;
 import workbench.util.ExceptionUtil;
-import workbench.gui.components.DataStoreTableModel;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -153,12 +152,12 @@ public class DbMetadata
 	private String quoteCharacter;
 	private String dbVersion;
 
-	private final String SELECT_INTO_PG = "(?i)(?s)SELECT.*INTO\\p{Print}*\\s*FROM.*";
-	private final String SELECT_INTO_INFORMIX = "(?i)(?s)SELECT.*FROM.*INTO\\s*\\p{Print}*";
+	private static final String SELECT_INTO_PG = "(?i)(?s)SELECT.*INTO\\p{Print}*\\s*FROM.*";
+	private static final String SELECT_INTO_INFORMIX = "(?i)(?s)SELECT.*FROM.*INTO\\s*\\p{Print}*";
 	private Pattern selectIntoPattern = null;
 
-	private final int UPPERCASE_NAMES = 1;
-	private final int LOWERCASE_NAMES = 2;
+	private static final int UPPERCASE_NAMES = 1;
+	private static final int LOWERCASE_NAMES = 2;
 	private int objectCaseStorage = -1;
 	private int schemaCaseStorage = -1;
 
@@ -435,7 +434,6 @@ public class DbMetadata
 			String keyPrefix = "workbench.db.objecttype.selectable.";
 			String s = Settings.getInstance().getProperty(keyPrefix + getDbId(), null);
 			if (s == null) s = Settings.getInstance().getProperty(keyPrefix + "default", null);
-			List l = null;
 
 			if (s == null)
 			{
@@ -458,7 +456,7 @@ public class DbMetadata
 		for (int i=0; i < count; i++)
 		{
 			String t = (String)objectsWithData.get(i);
-			if (type.equals(t)) return true;
+			if (ltype.equals(t)) return true;
 		}
 		return false;
 	}
@@ -903,8 +901,6 @@ public class DbMetadata
 				LogMgr.logInfo("DbMetadata.getViewSource()", "Using query=\n" + query);
 			}
 			rs = stmt.executeQuery(query);
-			ResultSetMetaData meta = rs.getMetaData();
-			int type = meta.getColumnType(1);
 			while (rs.next())
 			{
 				String line = rs.getString(1);
@@ -1439,6 +1435,20 @@ public class DbMetadata
 		aCatalog = adjustObjectnameCase(aCatalog);
 		boolean sequencesReturned = false;
 		boolean checkOracleInternalSynonyms = (isOracle && typeIncluded("SYNONYM", types));
+		String excludeSynsRegex = Settings.getInstance().getProperty("workbench.db.oracle.exclude.synonyms", null);
+		Pattern synPattern = null;
+		if (checkOracleInternalSynonyms && excludeSynsRegex != null)
+		{
+			try
+			{
+				synPattern = Pattern.compile(excludeSynsRegex);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("DbMetadata.getTables()", "Invalid RegEx for excluding public synonyms specified. RegEx ignored", e);
+				synPattern = null;
+			}
+		}
 		boolean hideIndexes = hideIndexes();
 
 		ResultSet tableRs = null;
@@ -1453,12 +1463,20 @@ public class DbMetadata
 				if (name == null) continue;
 
 				// filter out "internal" synonyms for Oracle
-				if (checkOracleInternalSynonyms && name.indexOf("/") > -1) continue;
+				if (checkOracleInternalSynonyms)
+				{
+					if (name.indexOf("/") > -1) continue;
+					if (synPattern != null)
+					{
+						Matcher m = synPattern.matcher(name);
+						if (m.matches()) continue;
+					}
+					
+				}
 				String ttype = tableRs.getString(4);
 				if (hideIndexes && isIndexType(ttype)) continue;
 
 				String rem = tableRs.getString(5);
-				String typeUpper = ttype.toUpperCase();
 				int row = result.addRow();
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, name);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_TYPE, ttype);
@@ -1624,7 +1642,7 @@ public class DbMetadata
 		{
 			case Types.VARCHAR:
 			case Types.CHAR:
-				display = aTypeName + "(" + size + ")";
+				if (size > 0) display = aTypeName + "(" + size + ")";
 				break;
 			case Types.DECIMAL:
 			case Types.DOUBLE:
@@ -1987,6 +2005,11 @@ public class DbMetadata
 		aSchema = StringUtil.trimQuotes(aSchema);
 		aTable = StringUtil.trimQuotes(aTable);
 
+		if (aSchema == null && this.isOracle()) 
+		{
+			aSchema = this.getSchemaToUse();
+		}
+		
 		if (adjustNames)
 		{
 			aCatalog = this.adjustObjectnameCase(aCatalog);
@@ -2291,7 +2314,6 @@ public class DbMetadata
 		DataStore ds = getTables(null, schema, table, types);
 		int count = ds.getRowCount();
 		List tables = new ArrayList(count);
-		String user = getUserName();
 		for (int i=0; i < count; i++)
 		{
 			String t = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_NAME);
@@ -2816,7 +2838,6 @@ public class DbMetadata
 			aSchema = this.adjustObjectnameCase(aSchema);
 			aTable = this.adjustObjectnameCase(aTable);
 			int tableCol;
-			int catalogCol;
 			int fkNameCol;
 			int colCol;
 			int fkColCol;
@@ -3062,8 +3083,6 @@ public class DbMetadata
 		sql.append("INSERT INTO ");
 		sql.append(tbl.getTableName());
 		sql.append("\n(\n");
-
-		boolean quote = false;
 		for (int i=0; i < colCount; i++)
 		{
 			String column = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
@@ -3112,8 +3131,6 @@ public class DbMetadata
 		StrBuffer sql = new StrBuffer(colCount * 80);
 
 		sql.append("SELECT ");
-
-		boolean quote = false;
 		for (int i=0; i < colCount; i++)
 		{
 			String column = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
@@ -3656,8 +3673,6 @@ public class DbMetadata
 		if (aIndexDef == null) return StrBuffer.EMPTY_BUFFER;
 		int count = aIndexDef.getRowCount();
 		if (count == 0) return StrBuffer.EMPTY_BUFFER;
-
-		StrBuffer pk = new StrBuffer();
 		StrBuffer idx = new StrBuffer();
 		String template = this.getSqlTemplate(DbMetadata.idxStatements);
 		String sql;

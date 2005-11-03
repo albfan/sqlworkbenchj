@@ -85,7 +85,6 @@ public class ProcedureListPanel
 
 	private static final String DROP_CMD = "drop-object";
 	private static final String COMPILE_CMD = "compile-procedure";
-	private EmptyBorder EMPTY = new EmptyBorder(1,1, 3, 1);
 
 	public ProcedureListPanel() throws Exception
 	{
@@ -299,12 +298,12 @@ public class ProcedureListPanel
 
 		this.readSelecteItems(names, types);
 
-		ObjectDropperUI ui = new ObjectDropperUI();
-		ui.setObjects(names, types);
-		ui.setConnection(this.dbConnection);
+		ObjectDropperUI dropperUI = new ObjectDropperUI();
+		dropperUI.setObjects(names, types);
+		dropperUI.setConnection(this.dbConnection);
 		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
-		ui.showDialog(f);
-		if (!ui.dialogWasCancelled())
+		dropperUI.showDialog(f);
+		if (!dropperUI.dialogWasCancelled())
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -478,8 +477,8 @@ public class ProcedureListPanel
 
 		try
 		{
-			ObjectCompilerUI ui = new ObjectCompilerUI(names, types, this.dbConnection);
-			ui.show(SwingUtilities.getWindowAncestor(this));
+			ObjectCompilerUI compilerUI = new ObjectCompilerUI(names, types, this.dbConnection);
+			compilerUI.show(SwingUtilities.getWindowAncestor(this));
 		}
 		catch (SQLException e)
 		{

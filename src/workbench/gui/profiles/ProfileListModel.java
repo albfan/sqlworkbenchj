@@ -92,11 +92,6 @@ class ProfileListModel
 		this.changed = true;
 	}
 
-	private void putProfile(int index, ConnectionProfile aProfile)
-	{
-		this.profiles.set(index, aProfile);
-	}
-
 	public boolean isChanged()
 	{
 		if (changed) return true;

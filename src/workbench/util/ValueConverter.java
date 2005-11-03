@@ -147,6 +147,7 @@ public class ValueConverter
 				catch (Exception e)
 				{
 					LogMgr.logError("ValueConverter.convertValue()", "Could not convert [" + aValue + "] to Boolean",e);
+					return null;
 				}
 			default:
 				return aValue;

@@ -160,8 +160,8 @@ public class WbDefineVar extends SqlCommand
 	{
 		ResultSet rs = null;
 		String result = StringUtil.EMPTY_STRING;
-		VariablePool parameterPool = VariablePool.getInstance();
-		String realSql = parameterPool.replaceAllParameters(sql);
+		//VariablePool parameterPool = VariablePool.getInstance();
+		//String realSql = parameterPool.replaceAllParameters(sql);
 
 		try
 		{

@@ -177,7 +177,7 @@ public class MainWindow
 
 		this.sqlTab.setUI(TabbedPaneUIFactory.getBorderLessUI());
 		this.sqlTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		this.sqlTab.setDoubleBuffered(true);
+		//this.sqlTab.setDoubleBuffered(true);
 
 		this.currentProfile = null;
 

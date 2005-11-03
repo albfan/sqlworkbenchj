@@ -119,7 +119,6 @@ public class Settings
 		configDir = cf.getAbsolutePath();
 
 		if (WbManager.trace) System.out.println("Settings.<init> - using configDir: " + configDir);
-		String sep = System.getProperty("file.separator");
 
 		if (filename == null)
 		{
@@ -572,11 +571,6 @@ public class Settings
 	private int getPrintOrientation()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.print.orientation"), PageFormat.PORTRAIT);
-	}
-
-	private void setPrintOrientation(int aValue)
-	{
-		this.props.setProperty("workbench.print.orientation", Integer.toString(aValue));
 	}
 
 	private double getPrintPaperWidth()

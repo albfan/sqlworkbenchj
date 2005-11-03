@@ -217,7 +217,6 @@ public class SqlPanel
 	private FileReloadAction fileReloadAction;
 	private FindDataAction findDataAction;
 	private FindDataAgainAction findDataAgainAction;
-	private String lastSearchCriteria;
 	private WbToolbar toolbar;
 	private ConnectionInfo connectionInfo;
 
@@ -226,8 +225,6 @@ public class SqlPanel
 	private boolean updateRunning = false;
 	private boolean textModified = false;
 	private String tabName = null;
-
-	private int lastDividerLocation = -1;
 
 	private ArrayList execListener = null;
 	private Thread executionThread = null;
@@ -874,7 +871,7 @@ public class SqlPanel
 		{
 			this.log.setText(ResourceMgr.getString("MsgUpdatingDatabase"));
 			this.log.append("\n");
-			int rows = this.data.saveChanges(this.dbConnection, this);
+			this.data.saveChanges(this.dbConnection, this);
 			this.log.append(this.data.getLastMessage());
 			success = true;
 		}
@@ -1118,14 +1115,14 @@ public class SqlPanel
 		if (fname != null)
 		{
 			File f = new File(fname);
-			String tabName = getTabName();
-			if (tabName == null || tabName.startsWith(defaultLabel))
+			String tName = getTabName();
+			if (tName == null || tName.startsWith(defaultLabel))
 			{
 				fname = f.getName();
 			}
 			else
 			{
-				fname = "[" + tabName + "]";
+				fname = "[" + tName + "]";
 			}
 		}
 		else
@@ -1625,7 +1622,7 @@ public class SqlPanel
 							}
 						}
 
-						String warn = ResourceMgr.getString("TxtWarning");
+						//String warn = ResourceMgr.getString("TxtWarning");
 						spoolMsg = exporter.getWarnings();
 						if (spoolMsg.length > 0)
 						{
@@ -1852,7 +1849,6 @@ public class SqlPanel
 		boolean restoreSelection = false;
 		boolean checkPreparedStatement = Settings.getInstance().getCheckPreparedStatements();
 		boolean shouldRestoreSelection = Settings.getInstance().getBoolProperty("workbench.gui.sql.restoreselection", true);
-		boolean parametersPresent = (VariablePool.getInstance().getParameterCount() > 0);
 		this.executeAllStatements = false;
 		this.cancelAll = false;
 		
@@ -1937,8 +1933,6 @@ public class SqlPanel
 				oldSelectionEnd = this.editor.getSelectionEnd();
 				restoreSelection = shouldRestoreSelection;
 			}
-
-			long displayTime = 0;
 			long startTime = System.currentTimeMillis();
 			long stmtTotal = 0;
 			int executedCount = 0;
@@ -2238,8 +2232,6 @@ public class SqlPanel
 		this.findDataAgainAction.setEnabled(findNext);
 
 		this.data.getTable().checkKeyActions();
-
-		boolean canUpdate = this.data.hasKeyColumns();
 		this.importFileAction.setEnabled(mayEdit);
 	}
 

@@ -51,7 +51,6 @@ public class ProfileSelectionDialog
   private JButton cancelButton;
 	private ProfileEditorPanel profiles;
 	private ConnectionProfile selectedProfile;
-	private int selectedIndex = -1;
 	private boolean cancelled = false;
 	private String escActionCommand;
 

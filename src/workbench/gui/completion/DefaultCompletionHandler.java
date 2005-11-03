@@ -43,7 +43,6 @@ public class DefaultCompletionHandler
 	protected WbConnection dbConnection;
 	private JLabel header;
 	private List listeners;
-	private int currentCursorLocation;
 	private CompletionPopup window;
 	private StatusBar statusBar;
 	private String currentWord;
