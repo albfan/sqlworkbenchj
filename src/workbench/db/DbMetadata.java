@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -985,6 +986,12 @@ public class DbMetadata
 		return result;
 	}
 
+	public Collection getSqlKeywords()
+	{
+		if (this.keywords == null) this.readKeywords();
+		return this.keywords;
+	}
+	
 	/**
 	 * Read the keywords for the current DBMS that the JDBC driver returns.
 	 * If the driver does not return all keywords, this list can be manually
@@ -3653,7 +3660,7 @@ public class DbMetadata
 			cols.append(columnList[i]);
 		}
 
-		String sql = StringUtil.replace(template, TABLE_NAME_PLACEHOLDER, aTable.getTableExpression());
+		String sql = StringUtil.replace(template, TABLE_NAME_PLACEHOLDER, aTable.getTableExpression(this.dbConnection));
 		if (unique)
 		{
 			sql = StringUtil.replace(sql, UNIQUE_PLACEHOLDER, "UNIQUE ");
@@ -3664,7 +3671,10 @@ public class DbMetadata
 		}
 		sql = StringUtil.replace(sql, COLUMNLIST_PLACEHOLDER, cols.toString());
 		sql = StringUtil.replace(sql, INDEX_NAME_PLACEHOLDER, indexName);
-
+//		if (this.ddlNeedsCommit)
+//		{
+//			sql = sql + ";\n" + "COMMIT;";
+//		}
 		return sql;
 	}
 

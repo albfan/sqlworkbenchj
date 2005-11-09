@@ -141,6 +141,7 @@ public class DriverlistEditorPanel
 				if (drv.getName().equals(aDriverName))
 				{
 					this.driverList.setSelectedIndex(i);
+					this.driverList.ensureIndexIsVisible(i);
 					break;
 				}
 			}

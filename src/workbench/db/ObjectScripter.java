@@ -66,14 +66,22 @@ public class ObjectScripter
 	
 	public void generateScript()
 	{
-		this.cancel = false;
-		this.script = new StrBuffer(this.objectList.size() * 500);
-		if (!cancel) this.appendObjectType(TYPE_SEQUENCE);
-		if (!cancel) this.appendObjectType(TYPE_TABLE);
-		if (!cancel) this.appendObjectType(TYPE_VIEW);
-		if (!cancel) this.appendObjectType(TYPE_SYNONYM);
-		if (!cancel) this.appendObjectType(TYPE_INSERT);
-		if (!cancel) this.appendObjectType(TYPE_SELECT);
+		try
+		{
+			this.dbConnection.setBusy(true);
+			this.cancel = false;
+			this.script = new StrBuffer(this.objectList.size() * 500);
+			if (!cancel) this.appendObjectType(TYPE_SEQUENCE);
+			if (!cancel) this.appendObjectType(TYPE_TABLE);
+			if (!cancel) this.appendObjectType(TYPE_VIEW);
+			if (!cancel) this.appendObjectType(TYPE_SYNONYM);
+			if (!cancel) this.appendObjectType(TYPE_INSERT);
+			if (!cancel) this.appendObjectType(TYPE_SELECT);
+		}
+		finally 
+		{
+			this.dbConnection.setBusy(false);
+		}
 	}
 
 	public void cancel()

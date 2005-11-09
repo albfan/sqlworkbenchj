@@ -115,6 +115,14 @@ public class ExportOptionsPanel
 		typeSelector.addActionListener(this);
 	}
 	
+	public void setIncludeSqlInsert(boolean flag)
+	{
+		if (!flag)
+		{
+			sqlOptions.setAlternateUpdateTable("target_table");
+		}
+	}
+	
 	public void setIncludeSqlUpdate(boolean flag)
 	{
 		this.sqlOptions.setIncludeUpdate(flag);
@@ -153,7 +161,7 @@ public class ExportOptionsPanel
 	
 	/**
 	 *	Sets the displayed options according to 
-	 *  DataExporter.EXPRT_XXXX types
+	 *  DataExporter.EXPORT_XXXX types
 	 */
 	public void setExportType(int type)
 	{
@@ -163,6 +171,10 @@ public class ExportOptionsPanel
 				setTypeHtml();
 				break;
 			case DataExporter.EXPORT_SQL:
+				if (!sqlOptions.isSqlAllowed())
+				{
+					this.sqlOptions.setAlternateUpdateTable("target_table");
+				}
 				setTypeSql();
 				break;
 			case DataExporter.EXPORT_TXT:

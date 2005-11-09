@@ -60,6 +60,10 @@ public class OracleObjectCompiler
 			this.lastError = e.getMessage();
 			return false;
 		}
+		finally
+		{
+			this.dbConnection.setBusy(false);
+		}
 	}
 	
 }

@@ -81,8 +81,9 @@ public class TableSearcher
 				}
 			}
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
+			LogMgr.logWarning("TableSearcher.cancelSearc()", "Error when cancelling", e);
 		}
 	}
 
@@ -109,6 +110,7 @@ public class TableSearcher
 		this.setRunning(true);
 		try
 		{
+			this.connection.setBusy(true);
 			for (int i=0; i < this.tableNames.size(); i++)
 			{
 				this.searchTable((String)this.tableNames.get(i));
@@ -123,6 +125,7 @@ public class TableSearcher
 		finally
 		{
 			this.setRunning(false);
+			this.connection.setBusy(false);
 		}
 	}
 

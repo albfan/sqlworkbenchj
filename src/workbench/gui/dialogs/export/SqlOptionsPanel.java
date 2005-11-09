@@ -89,6 +89,14 @@ public class SqlOptionsPanel
 		return result;
 	}
 
+	//public boolean insertEnabled() { return useInsert.isEnabled(); }
+	public boolean updateEnabled() { return useUpdate.isEnabled(); }
+	public boolean deleteInsertEnabled() { return useDeleteInsert.isEnabled(); }
+	public boolean isSqlAllowed()
+	{
+		return updateEnabled() || deleteInsertEnabled();
+	}
+	
 	public void setIncludeUpdate(boolean flag)
 	{
 		useUpdate.setEnabled(flag);

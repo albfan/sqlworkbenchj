@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import workbench.db.report.TagWriter;
+import workbench.interfaces.DbExecutionListener;
 import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
@@ -38,6 +39,7 @@ import workbench.util.StringUtil;
  * @author  support@sql-workbench.net
  */
 public class WbConnection
+	implements DbExecutionListener
 {
 	public static final String PROP_CATALOG = "catalog";
 	public static final String PROP_SCHEMA = "schema";
@@ -597,4 +599,40 @@ public class WbConnection
 		this.fireConnectionStateChanged(PROP_SCHEMA, oldSchema, newSchema);
 	}
 
+	private boolean busy; 
+	private Object busyLock = new Object();
+	
+	public boolean isBusy()
+	{
+			synchronized (busyLock)
+			{
+				return this.busy;
+			}
+	}
+	
+	public void setBusy(boolean flag)
+	{
+		synchronized (busyLock)
+		{
+			this.busy = flag;
+		}
+	}
+	public void executionStart(WbConnection conn, Object source)
+	{
+		if (conn == this)
+		{
+			setBusy(true);
+		}
+	}
+
+	/*
+	 *	Fired by the SqlPanel if DB access finished
+	 */
+	public void executionEnd(WbConnection conn, Object source)
+	{
+		if (conn == this)
+		{
+			setBusy(false);
+		}
+	}	
 }

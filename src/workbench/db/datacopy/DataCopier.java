@@ -37,7 +37,6 @@ import workbench.db.*;
  * @author  support@sql-workbench.net
  */
 public class DataCopier
-	implements RowDataProducer
 {
 	private WbConnection sourceConnection;
 	private WbConnection targetConnection;
@@ -52,22 +51,13 @@ public class DataCopier
 	// the columnMap will contain elements of type ColumnIdentifier
 	private HashMap columnMap;
 
-	private Statement retrieveStatement;
-	private String retrieveSql;
-	private boolean keepRunning = true;
-	private String addWhere;
-
-	// used when the source is a SQL and not a table
-	private boolean useQuery = false;
 	private ColumnIdentifier[] targetColumnsForQuery;
 	private StringBuffer messages = null;
 	private StringBuffer errors = null;
-	private boolean abortOnError = false;
 
 	public DataCopier()
 	{
 		this.importer = new DataImporter();
-		this.importer.setProducer(this);
 	}
 
 	public void copyFromTable(WbConnection source, WbConnection target, TableIdentifier aSourceTable, TableIdentifier aTargetTable)
@@ -82,7 +72,6 @@ public class DataCopier
 		this.targetConnection = target;
 		this.importer.setConnection(target);
 		this.targetTable = targetTable;
-		this.useQuery = false;
 		this.targetColumnsForQuery = null;
 		this.sourceData = source;
 		this.importer.setProducer(source);
@@ -103,7 +92,6 @@ public class DataCopier
 		this.importer.setConnection(target);
 		this.sourceTable = aSourceTable;
 		this.targetTable = aTargetTable;
-		this.useQuery = false;
 		this.targetColumnsForQuery = null;
 
 		if (!this.sourceConnection.getMetadata().tableExists(aSourceTable))
@@ -112,7 +100,7 @@ public class DataCopier
 			throw new SQLException("Table " + aTargetTable.getTableName() + " not found in target connection");
 		}
 
-		this.setSourceTableWhere(additionalWhere);
+		//this.setSourceTableWhere(additionalWhere);
 		boolean exists = this.targetConnection.getMetadata().tableExists(aTargetTable);
 
 		if (exists && dropTable && createTable)
@@ -173,12 +161,7 @@ public class DataCopier
 			this.addError(ResourceMgr.getString("ErrorCopyTargetTableNotFound").replaceAll("%name%", aTargetTable.getTableName()));
 			throw new SQLException("Table " + aTargetTable.getTableName() + " not found in target connection");
 		}
-		this.initImporterForTable();
-	}
-
-	public void setAbortOnError(boolean flag)
-	{
-		this.abortOnError = flag;
+		this.initImporterForTable(additionalWhere);
 	}
 
 	public void setKeyColumns(List keys)
@@ -218,10 +201,8 @@ public class DataCopier
 		this.importer.setConnection(target);
 		this.sourceTable = aSourceTable;
 		this.targetTable = newTableName;
-		this.useQuery = false;
 		this.targetColumnsForQuery = null;
 
-		this.setSourceTableWhere(additionalWhere);
 		boolean tableExists = target.getMetadata().tableExists(newTableName);
 
 		if (tableExists && !drop)
@@ -248,7 +229,7 @@ public class DataCopier
 			}
 			this.initNewTable(sourceColumns);
 		}
-		this.initImporterForTable();
+		this.initImporterForTable(additionalWhere);
 	}
 
 	/**
@@ -352,8 +333,6 @@ public class DataCopier
 		this.importer.setConnection(target);
 		this.sourceTable = null;
 		this.targetTable = aTargetTable;
-		this.retrieveSql = aSourceQuery;
-		this.useQuery = true;
 		this.targetColumnsForQuery = queryColumns;
 
 		if (aTargetTable.isNewTable())
@@ -363,7 +342,7 @@ public class DataCopier
 				this.initNewTable(targetColumnsForQuery);
 			}
 		}
-		this.initImporterForQuery();
+		this.initImporterForQuery(aSourceQuery);
 	}
 
 	/**
@@ -373,7 +352,7 @@ public class DataCopier
 	 *  they have been retrieved somewhere else (e.g. the DataPumper)
 	 */
 	public void copyFromTable(WbConnection source, WbConnection target, TableIdentifier aSourceTable, TableIdentifier aTargetTable,
-	                          ColumnIdentifier[] sourceColumns, ColumnIdentifier targetColumns[])
+	                          ColumnIdentifier[] sourceColumns, ColumnIdentifier targetColumns[], String additionalWhere)
 		throws SQLException
 	{
 		this.sourceConnection = source;
@@ -381,7 +360,6 @@ public class DataCopier
 		this.importer.setConnection(target);
 		this.sourceTable = aSourceTable;
 		this.targetTable = aTargetTable;
-		this.useQuery = false;
 		this.targetColumnsForQuery = null;
 		if (sourceColumns == null || sourceColumns.length == 0 ||
 		    targetColumns == null || targetColumns.length == 0 ||
@@ -399,26 +377,26 @@ public class DataCopier
 				this.columnMap.put(sourceColumns[i], targetColumns[i]);
 			}
 		}
-		this.initImporterForTable();
+		this.initImporterForTable(additionalWhere);
 	}
 
-	public void setSourceTableWhere(String aWhere)
-	{
-		if (aWhere == null || aWhere.trim().length() == 0)
-		{
-			this.addWhere = null;
-		}
-		else
-		{
-			this.addWhere = aWhere; //SqlUtil.makeCleanSql(aWhere, false);
-			String verb = SqlUtil.getSqlVerb(this.addWhere).toUpperCase();
-			if ("SELECT".equals(verb))
-			{
-				LogMgr.logWarning("DataCopier", "Ignoring additional WHERE statement: " + this.addWhere);
-				this.addWhere = null;
-			}
-		}
-	}
+//	public void setSourceTableWhere(String aWhere)
+//	{
+//		if (aWhere == null || aWhere.trim().length() == 0)
+//		{
+//			this.addWhere = null;
+//		}
+//		else
+//		{
+//			this.addWhere = aWhere; //SqlUtil.makeCleanSql(aWhere, false);
+//			String verb = SqlUtil.getSqlVerb(this.addWhere).toUpperCase();
+//			if ("SELECT".equals(verb))
+//			{
+//				LogMgr.logWarning("DataCopier", "Ignoring additional WHERE statement: " + this.addWhere);
+//				this.addWhere = null;
+//			}
+//		}
+//	}
 
 	public void setRowActionMonitor(RowActionMonitor rowMonitor)
 	{
@@ -439,15 +417,11 @@ public class DataCopier
 		this.importer.setContinueOnError(cont);
 	}
 
-	public String getSourceTableWhere()
-	{
-		return this.addWhere;
-	}
-
 	public void setUseBatch(boolean flag)
 	{
 		this.importer.setUseBatch(flag);
 	}
+	
 	public void setCommitEvery(int interval)
 	{
 		this.importer.setCommitEvery(interval);
@@ -461,10 +435,7 @@ public class DataCopier
 			{
 				try
 				{
-					// can't use start() because
-					// this would refer to the start() method
-					// of the thread, and not the from the DataCopier
-					DataCopier.this.start();
+					startCopy();
 				}
 				catch (Throwable th)
 				{
@@ -490,39 +461,15 @@ public class DataCopier
 		return this.errors.toString();
 	}
 
-	public void start()
+	public void startCopy()
 		throws Exception
 	{
-		ResultSet rs = null;
-
-		String step = null;
 		try
 		{
-			step = "retrieve";
-			if (this.sourceData == null)
-			{
-				this.retrieveStatement = this.sourceConnection.createStatementForQuery();
-				rs = this.retrieveStatement.executeQuery(this.retrieveSql);
-				int colCount = rs.getMetaData().getColumnCount();
-				Object[] rowData = new Object[colCount];
-				step = "copy";
-				while (this.keepRunning && rs.next())
-				{
-					for (int i=0; i < colCount; i++)
-					{
-						if (!keepRunning) break;
-						rowData[i] = rs.getObject(i + 1);
-					}
-					if (this.keepRunning) this.importer.processRow(rowData);
-				}
-			}
-			else
-			{
-				step = "copy";
-				this.sourceData.start();
-			}
-
-			step = "cleanup";
+			// this will call start() or sourceData.start()
+			// depending on which source we set for the importer
+			this.sourceData.setAbortOnError(!this.importer.getContinueOnError());
+			this.importer.startImport();
 			
 			String msg = this.getRowsInsertedMessage();
 			if (msg != null) this.addMessage(msg);
@@ -534,27 +481,10 @@ public class DataCopier
 		catch (Exception e)
 		{
 			LogMgr.logError("DataCopier.start()", "Error when copying data", e);
-			String msg = null;
-			if ("retrieve".equals(step))
-			{
-				msg = ResourceMgr.getString("ErrorCopyRetrieving");
-			}
-			else if ("copy".equals(step))
-			{
-				msg = ResourceMgr.getString("ErrorCopyInsert");
-			}
-			else if ("cleanup".equals(step))
-			{
-				msg = ResourceMgr.getString("ErrorCopyCleanup");
-			}
+			String msg = ResourceMgr.getString("ErrorCopy");
 			this.addError(msg + ": " + ExceptionUtil.getDisplay(e, false));
 			this.importer.tableImportError();
 			throw e;
-		}
-		finally
-		{
-			try { rs.close(); } catch (Throwable th) {}
-			try { this.retrieveStatement.close(); } catch (Throwable th) {}
 		}
 	}
 
@@ -581,44 +511,24 @@ public class DataCopier
 		return msg;
 	}
 
-	public void setReceiver(RowDataReceiver receiver)
-	{
-		// ignore this call, as we know that it comes from the DataImporter
-		// which is created in the constructor
-	}
-
 	public void cancel()
 	{
-		this.keepRunning = false;
-		
-		if (this.sourceData != null) 
-		{
-			// if we are copying from a file then we only 
-			// need to cancel on the source (which in turn 
-			// will notify the importer)
-			this.sourceData.cancel();
-		}
-		else 
-		{
-			// do not call importer.cancelExecution() because
-			// the DataCopier is registered as the source for the importer
-			// which in turn would call cancel() resulting in an infinite loop
-			this.importer.importCancelled();
-		}
+		this.sourceData.cancel();
 	}
 
-	private void initImporterForQuery()
+	private void initImporterForQuery(String query)
 		throws SQLException
 	{
-		if (!this.useQuery || this.targetColumnsForQuery == null) return;
+		if (this.targetColumnsForQuery == null) return;
 		this.importer.setTargetTable(this.targetTable.getTableExpression(), this.targetColumnsForQuery);
+		initQuerySource(query);
 	}
 
 	/**
 	 *	Send the definition of the target table to the DataImporter, and creates
 	 *	the approriate SELECT statement to retrieve the data from the source
 	 */
-	private void initImporterForTable()
+	private void initImporterForTable(String addWhere)
 		throws SQLException
 	{
 		if (this.columnMap == null || this.columnMap.size() == 0)  return;
@@ -647,9 +557,9 @@ public class DataCopier
 		sql.append(" \nFROM ");
 		sql.append(this.sourceTable.getTableExpression(this.sourceConnection));
 
-		if (this.addWhere != null)
+		if (addWhere != null && addWhere.trim().length() > 0)
 		{
-			if (!this.addWhere.toUpperCase().startsWith("WHERE"))
+			if (!addWhere.toUpperCase().startsWith("WHERE"))
 			{
 				sql.append(" \nWHERE ");
 			}
@@ -657,10 +567,10 @@ public class DataCopier
 			{
 				sql.append("\n ");
 			}
-			sql.append(this.addWhere);
+			sql.append(addWhere);
 		}
-		this.retrieveSql = sql.toString();
-		LogMgr.logDebug("DataCopier.initImporter()", "Using retrieve statement\n" + this.retrieveSql);
+		initQuerySource(sql.toString());
+		
 		try
 		{
 			this.importer.setTargetTable(this.targetTable.getTableExpression(this.targetConnection), cols);
@@ -673,6 +583,14 @@ public class DataCopier
 		}
 	}
 
+	private void initQuerySource(String sql)
+	{
+		QueryCopySource source = new QueryCopySource(this.sourceConnection, sql);
+		this.sourceData = source;
+		this.importer.setProducer(source);
+		LogMgr.logDebug("DataCopier.initImporter()", "Using retrieve statement\n" + sql);
+	}
+	
 	/**
 	 *	Initialize the column mapping between source and target table.
 	 *	If a mapping is provided, it is used (after checking that the columns

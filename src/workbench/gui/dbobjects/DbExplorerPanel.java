@@ -39,6 +39,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 
 import workbench.db.WbConnection;
+import workbench.interfaces.DbExecutionListener;
 import workbench.util.ExceptionUtil;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
@@ -61,7 +62,7 @@ import workbench.util.WbWorkspace;
  */
 public class DbExplorerPanel
 	extends JPanel
-	implements ActionListener, MainPanel, ChangeListener
+	implements ActionListener, MainPanel, ChangeListener, DbExecutionListener
 {
 	private JTabbedPane tabPane;
 	private TableListPanel tables;
@@ -76,12 +77,15 @@ public class DbExplorerPanel
 	private WbToolbar toolbar;
 	private ConnectionInfo connectionInfo;
 	private boolean retrievePending = false;
+	private boolean schemaRetrievePending = false;
+	private boolean connectionInitPending = false;
 	private int internalId = 0;
 	private ConnectionSelector connectionSelector;
 	private JButton selectConnectionButton;
 	private String tabTitle;
 	private static int instanceCount = 0;
 	private MainWindow mainWindow;
+	private boolean busy;
 	
 	public DbExplorerPanel()
 	{
@@ -141,6 +145,7 @@ public class DbExplorerPanel
 			this.connectionInfo = new ConnectionInfo(this.toolbar.getBackground());
 			this.connectionInfo.setMinimumSize(d);
 			this.toolbar.add(this.connectionInfo);
+			mainWindow.addExecutionListener(this);
 		}
 		catch (Throwable e)
 		{
@@ -159,9 +164,21 @@ public class DbExplorerPanel
 		this.selectorPanel.add(this.selectConnectionButton);
 	}
 
+	private final Object busyLock = new Object();
+	private void setBusy(boolean flag)
+	{
+		synchronized (busyLock)
+		{
+			busy = flag;
+		}
+	}
+	
 	public boolean isBusy()
 	{
-		return false;
+		synchronized (busyLock)
+		{
+			return this.busy;
+		}
 	}
 
 	public String getId()
@@ -169,16 +186,22 @@ public class DbExplorerPanel
 		return "WbExp-" + Integer.toString(this.internalId);
 	}
 
-	public void readSchemas()
+	private void readSchemas()
 	{
+		if (this.isBusy() || isMainWindowBusy() || this.dbConnection == null) 
+		{
+			this.retrievePending = true;
+			this.schemaRetrievePending = true;
+			return;
+		}
+		
 		String currentSchema = null;
 		try
 		{
 			this.schemaSelector.removeActionListener(this);
 
-			StringBuffer s = new StringBuffer(this.dbConnection.getMetadata().getSchemaTerm());
-			s.setCharAt(0, Character.toUpperCase(s.charAt(0)));
-			this.schemaLabel.setText(s.toString());
+			setBusy(true);
+			
 			List schemas = this.dbConnection.getMetadata().getSchemas();
 			String user = this.dbConnection.getMetadata().getUserName();
 			this.schemaSelector.removeAllItems();
@@ -209,20 +232,17 @@ public class DbExplorerPanel
 		{
 			LogMgr.logError(this, "Could not retrieve list of schemas", e);
 		}
+		finally
+		{
+			schemaRetrievePending = false;
+			setBusy(false);
+		}
 		this.schemaSelector.addActionListener(this);
 	}
 
 	public boolean isConnected()
 	{
-		if (this.dbConnection == null) return false;
-		try
-		{
-			return !this.dbConnection.isClosed();
-		}
-		catch (Throwable e)
-		{
-			return false;
-		}
+		return (this.dbConnection != null);
 	}
 
 	private void doConnect(ConnectionProfile profile)
@@ -237,7 +257,7 @@ public class DbExplorerPanel
 			this.setConnection(conn);
 			if (Settings.getInstance().getRetrieveDbExplorer())
 			{
-				this.startRetrieve();
+				this.retrieve();
 			}
 		}
 		catch (Exception e)
@@ -270,26 +290,58 @@ public class DbExplorerPanel
 		}
 	}
 	
+	private boolean isMainWindowBusy()
+	{
+		if (this.dbConnection == null) return false;
+		if (!this.mainWindow.isBusy()) return false;
+		if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab()) return this.isBusy();
+		return mainWindow.isBusy();
+	}
+	
+	private void initConnection()
+	{
+		if (this.dbConnection == null) return;
+		try
+		{
+			this.tables.setConnection(this.dbConnection);
+			this.procs.setConnection(dbConnection);
+			if (this.searchPanel != null) this.searchPanel.setConnection(dbConnection);
+			readSchemaLabel();
+			this.connectionInitPending = false;
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DbExplorerPanel.initConnection()", "Error during init",e);
+		}
+	}
+
+	private void readSchemaLabel()
+	{
+		StringBuffer s = new StringBuffer(this.dbConnection.getMetadata().getSchemaTerm());
+		s.setCharAt(0, Character.toUpperCase(s.charAt(0)));
+		this.schemaLabel.setText(s.toString());
+	}
+	
 	public void setConnection(WbConnection aConnection)
 	{
+		if (this.isBusy()) return;
+		
+		this.dbConnection = aConnection;
+		
 		if (aConnection == null)
 		{
 			this.reset();
+			this.connectionInitPending = false;
 			return;
 		}
 		
 		WbSwingUtilities.showWaitCursorOnWindow(this);
+		boolean mainWindowBusy = this.isMainWindowBusy();
+		
 		try
 		{
-			this.dbConnection = aConnection;
-			this.tables.setConnection(aConnection);
-			this.procs.setConnection(aConnection);
-			if (this.searchPanel != null) this.searchPanel.setConnection(aConnection);
-			//if (this.generator != null) this.generator.setConnection(aConnection);
-			this.schemaLabel.setText(aConnection.getMetadata().getSchemaTerm());
-			this.schemaSelector.doLayout();
-			this.readSchemas();
-
+			this.connectionInitPending = true;
+			
 			if (this.window != null)
 			{
 				String name = null;
@@ -299,28 +351,43 @@ public class DbExplorerPanel
 			}
 			
 			this.connectionInfo.setConnection(aConnection);
-
-			if (Settings.getInstance().getRetrieveDbExplorer())
+			
+			// Try to avoid concurrent execution on the 
+			// same connection object
+			if (mainWindowBusy)
 			{
-				if (this.isVisible())
+				this.retrievePending = true;
+				this.schemaRetrievePending = true;
+			}
+			else
+			{
+				initConnection();
+				try
 				{
-					// if we are visible start the retrieve immediately
-					this.retrievePending = false;
-					EventQueue.invokeLater(new Runnable()
-					{
-						public void run()
-						{
-							fireSchemaChanged();
-						}
-					});
+					setBusy(true);
+					this.readSchemas();
 				}
-				else
+				finally
 				{
-					// if we are not visible just store the information
-					// that we need to retrieve the table list.
-					// this will be evaluated by the (overwritten) setVisible() method
-					// There is no need in retrieving the information if we are not visible
-					this.retrievePending = true;
+					setBusy(false);
+				}
+
+				if (Settings.getInstance().getRetrieveDbExplorer())
+				{
+					if (this.isVisible())
+					{
+						// if we are visible start the retrieve immediately
+						retrieve();
+						this.retrievePending = false;
+					}
+					else
+					{
+						// if we are not visible just store the information
+						// that we need to retrieve the table list.
+						// this will be evaluated by the (overwritten) setVisible() method
+						// There is no need in retrieving the information if we are not visible
+						this.retrievePending = true;
+					}
 				}
 			}
 		}
@@ -328,6 +395,7 @@ public class DbExplorerPanel
 		{
 			WbSwingUtilities.showDefaultCursorOnWindow(this);
 		}
+		
 	}
 
 	public void setVisible(boolean flag)
@@ -344,7 +412,7 @@ public class DbExplorerPanel
 			{
 				public void run()
 				{
-					fireSchemaChanged();
+					retrieve();
 				}
 			});
 		}
@@ -355,11 +423,6 @@ public class DbExplorerPanel
 		// nothing to do
 	}
 	
-	public void startRetrieve()
-	{
-		this.fireSchemaChanged();
-	}
-
 	public WbConnection getConnection()
 	{
 		return this.dbConnection;
@@ -367,10 +430,10 @@ public class DbExplorerPanel
 
 	private void reset()
 	{
-		if (this.dbConnection != null)
-		{
-			try { this.dbConnection.rollback(); } catch (Throwable th) {}
-		}
+//		if (this.dbConnection != null)
+//		{
+//			try { this.dbConnection.rollback(); } catch (Throwable th) {}
+//		}
 		this.tables.reset();
 		this.procs.reset();
 		this.searchPanel.reset();
@@ -404,7 +467,7 @@ public class DbExplorerPanel
 	{
 		if (e.getSource() == this.schemaSelector)
 		{
-			fireSchemaChanged();
+			retrieve();
 		}
 		else if (e.getSource() == this.selectConnectionButton)
 		{
@@ -412,13 +475,19 @@ public class DbExplorerPanel
 		}
 	}
 
-	private void fireSchemaChanged()
+	private void retrieve()
 	{
-		this.fireSchemaChanged(true);
-	}
-
-	private void fireSchemaChanged(final boolean retrieve)
-	{
+		if (this.isBusy() || isMainWindowBusy()) 
+		{
+			this.retrievePending = true;
+			return;
+		}
+		
+		if (this.schemaRetrievePending)
+		{
+			this.readSchemas();
+		}
+		
 		final String schema = (String)schemaSelector.getSelectedItem();
 		final Component c = this;
 		
@@ -428,9 +497,10 @@ public class DbExplorerPanel
 			{
 				try
 				{
+					setBusy(true);
 					WbSwingUtilities.showWaitCursorOnWindow(c);
-					tables.setCatalogAndSchema(null, schema, retrieve);
-					procs.setCatalogAndSchema(null, schema, retrieve);
+					tables.setCatalogAndSchema(null, schema, true);
+					procs.setCatalogAndSchema(null, schema, true);
 				}
 				catch (Exception ex)
 				{
@@ -438,6 +508,7 @@ public class DbExplorerPanel
 				}
 				finally
 				{
+					setBusy(false);
 					WbSwingUtilities.showDefaultCursorOnWindow(c);
 				}
 			}
@@ -556,13 +627,13 @@ public class DbExplorerPanel
 		this.mainWindow.explorerWindowClosed(this);
 	}
 
-	public void mainWindowDeiconified()
-	{
-	}
-
-	public void mainWindowIconified()
-	{
-	}
+//	public void mainWindowDeiconified()
+//	{
+//	}
+//
+//	public void mainWindowIconified()
+//	{
+//	}
 
 	public void updateUI()
 	{
@@ -593,6 +664,11 @@ public class DbExplorerPanel
 	public void dispose()
 	{
 		this.reset();
+		if (mainWindow != null)
+		{
+			mainWindow.removeExecutionListener(this);
+		}
+		
 		synchronized (DbExplorerPanel.class)
 		{
 			instanceCount--;
@@ -618,6 +694,29 @@ public class DbExplorerPanel
 	{
 		tables.readFromWorkspace(w, index);
 		searchPanel.readFromWorkspace(w, index);
+	}
+
+	public void executionStart(WbConnection conn, Object source)
+	{
+	}
+
+	/*
+	 *	Fired by the SqlPanel if DB access finished
+	 */
+	public void executionEnd(WbConnection conn, Object source)
+	{
+		if (this.connectionInitPending)
+		{
+			this.initConnection();
+		}
+		if (this.schemaRetrievePending)
+		{
+			this.readSchemas();
+		}
+		if (this.isVisible() && this.retrievePending)
+		{
+			this.retrieve();
+		}
 	}
 
 }

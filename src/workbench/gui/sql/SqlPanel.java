@@ -28,6 +28,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -226,7 +227,7 @@ public class SqlPanel
 	private boolean textModified = false;
 	private String tabName = null;
 
-	private ArrayList execListener = null;
+	private List execListener = null;
 	private Thread executionThread = null;
 	private Interruptable worker = null;
 
@@ -1230,6 +1231,7 @@ public class SqlPanel
 		if (this.dbConnection != null)
 		{
 			this.dbConnection.removeChangeListener(this);
+			this.removeDbExecutionListener(this.dbConnection);
 		}
 
 		this.dbConnection = aConnection;
@@ -1259,6 +1261,7 @@ public class SqlPanel
 		if (this.dbConnection != null)
 		{
 			this.dbConnection.addChangeListener(this);
+			this.addDbExecutionListener(this.dbConnection);
 		}
 
 		this.checkResultSetActions();
@@ -1506,6 +1509,11 @@ public class SqlPanel
 	{
 		if (this.isBusy()) return;
 		if (!this.isConnected()) return;
+		if (this.dbConnection.isBusy())
+		{
+			showLogMessage(ResourceMgr.getString("ErrorConnectionBusy"));
+			return;
+		}
 
 		this.executionThread = new WbThread(new Runnable()
 		{
@@ -2438,7 +2446,7 @@ public class SqlPanel
 
 	public void addDbExecutionListener(DbExecutionListener l)
 	{
-		if (this.execListener == null) this.execListener = new ArrayList();
+		if (this.execListener == null) this.execListener = Collections.synchronizedList(new ArrayList());
 		this.execListener.add(l);
 	}
 
@@ -2454,16 +2462,19 @@ public class SqlPanel
 		int count = this.execListener.size();
 		for (int i=0; i < count; i++)
 		{
-			((DbExecutionListener)this.execListener.get(i)).executionStart(this.dbConnection, this);
+			DbExecutionListener l = (DbExecutionListener)this.execListener.get(i);
+			if (l != null) l.executionStart(this.dbConnection, this);
 		}
 	}
+	
 	private void fireDbExecEnd()
 	{
 		if (this.execListener == null) return;
 		int count = this.execListener.size();
 		for (int i=0; i < count; i++)
 		{
-			((DbExecutionListener)this.execListener.get(i)).executionEnd(this.dbConnection, this);
+			DbExecutionListener l = (DbExecutionListener)this.execListener.get(i);
+			if (l != null) l.executionEnd(this.dbConnection, this);
 		}
 	}
 

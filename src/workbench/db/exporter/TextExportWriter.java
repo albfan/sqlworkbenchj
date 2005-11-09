@@ -17,6 +17,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.ResultInfo;
 import workbench.util.CharacterRange;
 import workbench.util.SqlUtil;
@@ -95,7 +96,9 @@ public class TextExportWriter
 			max ++;
 			
 			String format = exporter.getTimestampFormat();
-			if (format == null) format = exporter.getDateFormat();
+			if (format == null) format = Settings.getInstance().getDefaultDateTimeFormat();
+			//if (format == null) format = exporter.getDateFormat();
+			
 			String oraFormat = convertJavaDateFormatToOracle(format);
 			
 			for (int i=0; i < count; i++)

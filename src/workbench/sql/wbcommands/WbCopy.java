@@ -257,7 +257,7 @@ public class WbCopy
 				copier.copyFromQuery(sourceCon, targetCon, sourcequery, targetId, cols);
 			}
 
-			copier.start();
+			copier.startCopy();
 			result.setSuccess();
 			result.addMessage(copier.getAllMessages());
 		}

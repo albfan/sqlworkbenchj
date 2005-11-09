@@ -1733,8 +1733,7 @@ public class DataPumper
 				}
 				else
 				{
-					this.copier.setSourceTableWhere(where);
-					this.copier.copyFromTable(this.sourceConnection, this.targetConnection, stable, ttable, colMapping.sourceColumns, colMapping.targetColumns);
+					this.copier.copyFromTable(this.sourceConnection, this.targetConnection, stable, ttable, colMapping.sourceColumns, colMapping.targetColumns, where);
 				}
 			}
 			this.copier.startBackgroundCopy();

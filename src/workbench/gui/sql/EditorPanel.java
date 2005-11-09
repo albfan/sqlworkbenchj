@@ -216,7 +216,7 @@ public class EditorPanel
 	{
 		if (aConnection == null) return;
 		AnsiSQLTokenMarker token = this.getSqlTokenMarker();
-		if (token != null) token.initDatabaseKeywords(aConnection.getSqlConnection());
+		if (token != null) token.initDatabaseKeywords(aConnection);
 		this.dbFunctions = aConnection.getMetadata().getDbFunctions();
 		if (aConnection.getMetadata().isMySql())
 		{

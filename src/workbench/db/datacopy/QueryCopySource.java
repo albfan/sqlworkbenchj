@@ -12,6 +12,7 @@
 package workbench.db.datacopy;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import workbench.db.WbConnection;
 import workbench.db.importer.RowDataProducer;
@@ -30,6 +31,7 @@ public class QueryCopySource
 	private WbConnection sourceConnection;
 	private Statement retrieveStatement;
 	private String retrieveSql;
+	private boolean abortOnError;
 	
 	public QueryCopySource(WbConnection source, String sql)
 	{
@@ -60,8 +62,20 @@ public class QueryCopySource
 					if (!keepRunning) break;
 					rowData[i] = rs.getObject(i + 1);
 				}
-				if (this.keepRunning) this.receiver.processRow(rowData);
+				if (!keepRunning) break;
+				try
+				{
+					this.receiver.processRow(rowData);
+				}
+				catch (SQLException e)
+				{
+					if (abortOnError) throw e;
+				}
 			}
+			
+			// if keepRunning == false, cancel() was
+			// called and we have to tell that the Importer
+			// in order to do a rollback
 			if (this.keepRunning) 
 			{
 				this.receiver.importFinished();
@@ -99,6 +113,7 @@ public class QueryCopySource
 
 	public void setAbortOnError(boolean flag)
 	{
+		this.abortOnError = flag;
 	}
 
 	public void setErrorHandler(JobErrorHandler handler)

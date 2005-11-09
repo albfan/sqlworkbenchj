@@ -44,19 +44,19 @@ public class ConnectionProfile
 	private boolean changed;
 	private boolean isNew;
 	private boolean storePassword = true;
-	private boolean separateConnection;
+	private boolean separateConnection = true;
 	private Properties connectionProperties;
 	private String workspaceFile;
 	private boolean ignoreDropErrors;
 	private boolean confirmUpdates;
 	private Integer defaultFetchSize;
 	private boolean globalProfile = false;
-	
+
 	static
 	{
 		WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
 		WbPersistence.makeTransient(ConnectionProfile.class, "globalProfile");
-		
+
 		// trying to correct the misspelled seperate...
 		WbPersistence.makeTransient(ConnectionProfile.class, "useSeperateConnectionPerTab");
 	}
@@ -109,24 +109,24 @@ public class ConnectionProfile
 	{
 		return this.separateConnection;
 	}
-	
+
 	public void setUseSeparateConnectionPerTab(boolean aFlag)
 	{
 		if (this.separateConnection != aFlag) this.changed = true;
 		this.separateConnection = aFlag;
 	}
-	
+
 	public void setGlobalProfile(boolean flag) {this.globalProfile = flag; }
 	public boolean isGlobalProfile() { return this.globalProfile; }
-	
+
 	/**
-	 * 
+	 *
 	 * @deprecate Replaced by {@link #setUseSeparateConnectionPerTab(boolean)}
 	 */
 	public void setUseSeperateConnectionPerTab(boolean aFlag) { this.setUseSeparateConnectionPerTab(aFlag); }
-	
+
 	/**
-	 * 
+	 *
 	 * @deprecated replaced by {@link #getUseSeparateConnectionPerTab()}
 	 */
 	public boolean getUseSeperateConnectionPerTab() { return this.getUseSeparateConnectionPerTab(); 	}
@@ -531,7 +531,7 @@ public class ConnectionProfile
 		if (this.defaultFetchSize == null) return -1;
 		else return this.defaultFetchSize.intValue();
 	}
-	
+
 	public Integer getDefaultFetchSize()
 	{
 		return defaultFetchSize;
@@ -558,7 +558,7 @@ public class ConnectionProfile
 			this.changed = true;
 			return;
 		}
-		
+
 		if (fetchSize.intValue() != this.defaultFetchSize.intValue())
 		{
 			if (fetchSize.intValue() < 0)

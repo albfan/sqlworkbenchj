@@ -153,6 +153,11 @@ public class SqlRowDataConverter
 	{
 		if (!this.createTable) return null;
 		TableIdentifier updatetable = this.metaData.getUpdateTable();
+		if (updatetable == null && alternateUpdateTable == null)
+		{
+			LogMgr.logError("SqlRowDataConverter.getStart()", "Cannot write create table without update table!",null);
+			return null;
+		}
 		ColumnIdentifier[] cols = this.metaData.getColumns();
 		DbMetadata db = this.originalConnection.getMetadata();
 		String source = db.getTableSource(updatetable, cols, (alternateUpdateTable == null ? updatetable.getTableName() : alternateUpdateTable.getTableName()));

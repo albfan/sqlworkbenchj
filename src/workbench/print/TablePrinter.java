@@ -232,9 +232,6 @@ public class TablePrinter
 		int currentPageWidth = 0;
 		int[] width = new int[colCount]; // stores the width for each column
 
-		// stores the column number where a horizontal page needs to be
-		// created
-
 		int[] colPageBreaks = new int[colCount];
 		this.colHeaders = new String[colCount];
 		int[] colHeaderX = new int[colCount];
@@ -244,6 +241,9 @@ public class TablePrinter
 		Rectangle paintTextR = new Rectangle();
 		Rectangle paintViewR = new Rectangle();
 
+		// TODO: horizontal pages do not work 
+		// when a column exceeds the horizontal space
+		// column needs to be split, currently it's only cut off
 		for (int col=0; col < colCount; col++)
 		{
 			TableColumn column = colModel.getColumn(col);
@@ -282,12 +282,13 @@ public class TablePrinter
 
 			colHeaderX[col] = paintTextR.x;
 
-			//System.out.println("col=" + col + ",colWidth=" + width[col] +",currentPageWidth="+ currentPageWidth + ",width=" + pageWidth);
 			if ((currentPageWidth + width[col] + colSpacing) >= pageWidth)
 			{
-				colPageBreaks[pagesAcross] = col;
-				pagesAcross ++;
-				currentPageWidth = 0;
+				if (pagesAcross < colCount)
+				{
+					colPageBreaks[pagesAcross] = col;
+					pagesAcross ++;
+				}
 			}
 			currentPageWidth += (width[col] + colSpacing);
 		}
@@ -300,16 +301,15 @@ public class TablePrinter
 
 		for (int pd=0; pd<pagesDown; pd++)
 		{
-
 			for (int pa=0; pa<pagesAcross;pa++)
 			{
 				int startCol = colPageBreaks[pa];
 				int endCol = 0;
 
-				if (pa + 1 == pagesAcross)
+				if (pa + 1 >= pagesAcross)
 					endCol = colCount - 1;
 				else
-					endCol = colPageBreaks[pa + 1] - 1;
+					endCol = colPageBreaks[pa] - 1;
 
 				int endRow = startRow + rowsPerPage;
 				if (endRow >= rowCount) endRow = rowCount -1;

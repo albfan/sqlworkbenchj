@@ -86,7 +86,7 @@ public class WbExport
 		cmdLine.addArgument("lineending");
 		cmdLine.addArgument("showencodings");
 		cmdLine.addArgument("verbosexml");
-		cmdLine.addArgument("writeoracleloader");
+		cmdLine.addArgument("oraldr");
 	}
 
 	public String getVerb() { return VERB; }
@@ -180,7 +180,7 @@ public class WbExport
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
 			exporter.setOutputTypeText();
-			exporter.setWriteOracleControlFile(cmdLine.getBoolean("writeoracleloader"));
+			exporter.setWriteOracleControlFile(cmdLine.getBoolean("oraldr"));
 			String delimiter = cmdLine.getValue("delimiter");
 			if (delimiter != null) exporter.setTextDelimiter(delimiter);
 

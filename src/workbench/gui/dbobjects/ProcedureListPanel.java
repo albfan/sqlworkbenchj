@@ -186,7 +186,7 @@ public class ProcedureListPanel
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
-		this.source.getSqlTokenMarker().initDatabaseKeywords(aConnection.getSqlConnection());
+		this.source.getSqlTokenMarker().initDatabaseKeywords(aConnection);
 		this.reset();
 
 		if (this.recompileItem != null)

@@ -74,7 +74,6 @@ import workbench.gui.actions.ToggleTableSourceAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.DividerBorder;
-import workbench.gui.components.FindPanel;
 import workbench.gui.components.QuickFilterPanel;
 import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbMenu;
@@ -283,11 +282,6 @@ public class TableListPanel
 
 		this.tableTypes.setMaximumSize(new Dimension(32768, 18));
 		this.tableTypes.setMinimumSize(new Dimension(80, 18));
-		//selectPanel.add(this.tableTypes);
-
-		//this.catalogs.setMaximumSize(new Dimension(32768, 18));
-		//this.catalogs.setMinimumSize(new Dimension(80, 18));
-		//selectPanel.add(this.catalogs);
 
 		JPanel topPanel = new JPanel();
 		topPanel.setLayout(new GridBagLayout());
@@ -595,6 +589,35 @@ public class TableListPanel
 		this.tableData.reset();
 	}
 
+	private void resetCurrentPanel()
+	{
+		int index = this.displayTab.getSelectedIndex();
+		switch (index)
+		{
+			case 0:
+				this.tableDefinition.reset();
+				break;
+			case 1:
+				this.tableSource.setText("");
+				break;
+			case 2:
+				this.tableData.reset();
+				break;
+			case 3:
+				this.indexes.reset();
+				break;
+			case 4:
+				this.importedKeys.reset();
+				this.importedTableTree.reset();
+				break;
+			case 5:
+				this.exportedKeys.reset();
+				this.exportedTableTree.reset();
+				break;
+			case 6:
+				this.triggers.reset();
+		}
+	}
 	private void invalidateData()
 	{
 		this.shouldRetrieveTable = true;
@@ -620,7 +643,7 @@ public class TableListPanel
 		//this.catalogs.removeActionListener(this);
 
 		this.triggers.setConnection(aConnection);
-		this.tableSource.getSqlTokenMarker().initDatabaseKeywords(aConnection.getSqlConnection());
+		this.tableSource.getSqlTokenMarker().initDatabaseKeywords(aConnection);
 		this.reset();
 		try
 		{
@@ -1215,7 +1238,7 @@ public class TableListPanel
 		{
 			public void run()
 			{
-				infoWindow.show();
+				infoWindow.setVisible(true);
 			}
 		};
 		t.start();
@@ -1304,9 +1327,10 @@ public class TableListPanel
 
 	private void retrieveCurrentPanel(final boolean withMessage)
 	{
-		if (this.isBusy())
+		if (this.isBusy() || this.dbConnection.isBusy())
 		{
 			this.invalidateData();
+			this.resetCurrentPanel();
 			return;
 		}
 
@@ -1319,6 +1343,7 @@ public class TableListPanel
 
 		try
 		{
+			this.dbConnection.executionStart(this.dbConnection, this);
 			synchronized (this.dbConnection)
 			{
 				switch (index)
@@ -1358,6 +1383,7 @@ public class TableListPanel
 		}
 		finally
 		{
+			this.dbConnection.executionEnd(this.dbConnection, this);
 			this.setBusy(false);
 			this.repaint();
 			closeInfoWindow();
@@ -1612,7 +1638,6 @@ public class TableListPanel
 		{
 			LogMgr.logError("ProcedureListPanel.compileObjects()", "Error initializing ObjectCompilerUI", e);
 		}
-
 	}
 
 	/**
@@ -1798,6 +1823,7 @@ public class TableListPanel
 
 	private void deleteTables()
 	{
+		if (!checkConnection()) return;
 		if (this.tableList.getSelectedRowCount() == 0) return;
 		int rows[] = this.tableList.getSelectedRows();
 		int count = rows.length;
@@ -1826,6 +1852,7 @@ public class TableListPanel
 
 	private void createScript()
 	{
+		if (!checkConnection()) return;
 		int[] rows = this.tableList.getSelectedRows();
 		int count = rows.length;
 		HashMap tables = new HashMap(count);
@@ -1846,6 +1873,7 @@ public class TableListPanel
 
 	private void createDummyInserts()
 	{
+		if (!checkConnection()) return;
 		int[] rows = this.tableList.getSelectedRows();
 		int count = rows.length;
 		HashMap tables = new HashMap(count);
@@ -1868,8 +1896,18 @@ public class TableListPanel
 		scripterUI.show(SwingUtilities.getWindowAncestor(this));
 	}
 
+	private boolean checkConnection()
+	{
+		if (this.dbConnection.isBusy())
+		{
+			WbSwingUtilities.showMessageKey(this, "ErrorConnectionBusy");
+			return false;
+		}
+		return true;
+	}
 	private void createDefaultSelects()
 	{
+		if (!checkConnection()) return;
 		int[] rows = this.tableList.getSelectedRows();
 		int count = rows.length;
 		HashMap tables = new HashMap(count);
@@ -1894,6 +1932,7 @@ public class TableListPanel
 
 	private void dropTables()
 	{
+		if (!checkConnection()) return;
 		if (this.tableList.getSelectedRowCount() == 0) return;
 		int rows[] = this.tableList.getSelectedRows();
 		int count = rows.length;
@@ -1952,6 +1991,7 @@ public class TableListPanel
 
 	public void saveReport()
 	{
+		if (!checkConnection()) return;
 		TableIdentifier[] tables = getSelectedTables();
 		if (tables == null) return;
 
@@ -1972,6 +2012,7 @@ public class TableListPanel
 			{
 				try
 				{
+					dbConnection.setBusy(true);
 					reporter.writeXml();
 				}
 				catch (Throwable e)
@@ -1986,6 +2027,10 @@ public class TableListPanel
 						}
 					});
 				}
+				finally
+				{
+					dbConnection.setBusy(false);
+				}
 			}
 		};
 		t.start();
@@ -1993,6 +2038,7 @@ public class TableListPanel
 
 	public void exportData()
 	{
+		if (!checkConnection()) return;
 		int rowCount = this.tableList.getSelectedRowCount();
 		if (rowCount <= 0) return;
 

@@ -273,6 +273,32 @@ public class MainWindow
     this.sqlTab.removeChangeListener(aListener);
   }
 
+	public void addExecutionListener(DbExecutionListener l)
+	{
+		int count = this.sqlTab.getTabCount();
+		for (int i = 0; i < count; i++)
+		{
+			MainPanel p = this.getSqlPanel(i);
+			if (p instanceof SqlPanel)
+			{
+				((SqlPanel)p).addDbExecutionListener(l);
+			}
+		}
+	}
+	
+	public void removeExecutionListener(DbExecutionListener l)
+	{
+		int count = this.sqlTab.getTabCount();
+		for (int i = 0; i < count; i++)
+		{
+			MainPanel p = this.getSqlPanel(i);
+			if (p instanceof SqlPanel)
+			{
+				((SqlPanel)p).removeDbExecutionListener(l);
+			}
+		}
+	}
+	
 	private void checkWorkspaceActions()
 	{
 		this.saveWorkspaceAction.setEnabled(this.currentWorkspaceFile != null);
@@ -2320,15 +2346,6 @@ public class MainWindow
 	{
 		boolean canRename = (this.currentWorkspaceFile != null);
 		MainPanel p = this.getCurrentPanel();
-//		if (p instanceof SqlPanel)
-//		{
-//			SqlPanel sql = (SqlPanel)p;
-//			canRename = canRename && (!sql.hasFileLoaded());
-//		}
-//		else
-//		{
-//			canRename = false;
-//		}
 		canRename = canRename && (p instanceof SqlPanel);
 		return canRename;
 	}

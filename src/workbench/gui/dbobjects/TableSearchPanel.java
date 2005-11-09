@@ -468,6 +468,12 @@ public class TableSearchPanel
 		}
 
 		if (this.tableNames.getSelectedRowCount() == 0) return;
+		if (this.connection.isBusy())
+		{
+			WbSwingUtilities.showMessageKey(this, "ErrorConnectionBusy");
+			return;
+		}
+		
 		this.reset();
 
 		int[] selectedTables = this.tableNames.getSelectedRows();

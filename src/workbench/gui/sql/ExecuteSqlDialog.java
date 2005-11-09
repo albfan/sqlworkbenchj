@@ -31,6 +31,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbButton;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.WbThread;
 
 /**
  *
@@ -118,16 +119,21 @@ public class ExecuteSqlDialog
 			this.worker = null;
 		}
 		Settings.getInstance().storeWindowSize(this, this.getClass().getName());
-		this.hide();
+		this.setVisible(false);
 		this.dispose();
 	}
 
 	private void startCreate()
 	{
 		if (this.dbConn == null) return;
+		if (this.dbConn.isBusy()) 
+		{
+			WbSwingUtilities.showMessageKey(this, "ErrorConnectionBusy");
+			return;
+		}
 		this.statusMessage.setText(ResourceMgr.getString("MsgCreatingIndex"));
 
-		this.worker = new Thread()
+		this.worker = new WbThread("Create index thread")
 		{
 			public void run()
 			{
@@ -135,9 +141,14 @@ public class ExecuteSqlDialog
 				try
 				{
 					String sql = sqlEditor.getText().trim().replaceAll(";", "");
+					dbConn.setBusy(true);
 					stmt = dbConn.createStatement();
 					stmt.executeUpdate(sql);
 					statusMessage.setText(ResourceMgr.getString("MsgIndexCreated"));
+					if (dbConn.getMetadata().getDDLNeedsCommit() && !dbConn.getAutoCommit())
+					{
+						dbConn.commit();
+					}
 					EventQueue.invokeLater(new Runnable()
 					{
 						public void run()
@@ -148,10 +159,15 @@ public class ExecuteSqlDialog
 				}
 				catch (Exception e)
 				{
+					if (dbConn.getMetadata().getDDLNeedsCommit() && !dbConn.getAutoCommit())
+					{
+						try { dbConn.rollback(); } catch (Throwable th) {}
+					}
 					createFailure(e);
 				}
 				finally
 				{
+					dbConn.setBusy(false);
 					try { stmt.close(); } catch (Throwable th) {}
 					createFinished();
 				}
@@ -160,8 +176,6 @@ public class ExecuteSqlDialog
 		this.startButton.setEnabled(false);
 		this.closeButton.setEnabled(false);
 		WbSwingUtilities.showWaitCursorOnWindow(this);
-		this.worker.setName("CreateIndex Thread");
-		this.worker.setDaemon(true);
 		this.worker.start();
 	}
 
@@ -170,6 +184,7 @@ public class ExecuteSqlDialog
 		WbSwingUtilities.showMessage(this, ResourceMgr.getString("MsgIndexCreated"));
 		this.closeWindow();
 	}
+	
 	private void createFinished()
 	{
 		WbSwingUtilities.showDefaultCursorOnWindow(this);

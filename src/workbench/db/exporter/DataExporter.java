@@ -622,9 +622,15 @@ public class DataExporter
 		Statement stmt = this.dbConn.createStatementForQuery();
 		ResultSet rs = null;
 		long rows = 0;
-
+		boolean busyControl = false;
 		try
 		{
+			if (!this.dbConn.isBusy()) 
+			{
+				// only set the busy flag if the caller did not already do this!
+				this.dbConn.setBusy(true);
+				busyControl = true;
+			}
 			stmt.execute(this.sql);
 			rs = stmt.getResultSet();
 			rows = this.startExport(rs);
@@ -651,6 +657,7 @@ public class DataExporter
 			try { rs.close(); } catch (Throwable th) {}
 			try { stmt.close(); } catch (Throwable th) {}
 			if (!jobsRunning) this.closeProgress();
+			if (busyControl) this.dbConn.setBusy(false);
 		}
 		return rows;
 	}
@@ -871,7 +878,6 @@ public class DataExporter
 		return result;
 	}
 
-	//public void executeStatement(Window aParent, WbConnection aConnection, String aSql, boolean modal)
 	public void exportTable(Window aParent, WbConnection aConnection, TableIdentifier table)
 	{
 		this.parentWindow = aParent;

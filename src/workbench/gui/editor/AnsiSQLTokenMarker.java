@@ -2,7 +2,11 @@ package workbench.gui.editor;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.StringTokenizer;
+import workbench.db.DbMetadata;
+import workbench.db.WbConnection;
 
 import workbench.log.LogMgr;
 
@@ -18,20 +22,17 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		super(getKeywordMap());
 	}
 
-	public void initDatabaseKeywords(Connection aConnection)
+	public void initDatabaseKeywords(WbConnection aConnection)
 	{
 		try
 		{
-			DatabaseMetaData meta = aConnection.getMetaData();
-			String product = meta.getDatabaseProductName();
-			this.isMySql = (product.toLowerCase().indexOf("mysql") > -1);
-			String keys = null;
-
-			keys = meta.getSQLKeywords();
+			DbMetadata meta = aConnection.getMetadata();
+			this.isMySql = meta.isMySql();
+			
+			Collection keys = meta.getSqlKeywords();
 			this.addKeywordList(keys, Token.KEYWORD1);
-			//System.out.println("keys=" + keys);
 
-			if (meta.getDatabaseProductName().toLowerCase().indexOf("oracle") > -1)
+			if (meta.isOracle())
 			{
 				keywords.add("START", Token.KEYWORD1);
 				keywords.add("SYNONYM", Token.KEYWORD1);
@@ -56,35 +57,22 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 				keywords.add("MODIFY", Token.KEYWORD3);
 			}
 
-			keys = meta.getStringFunctions();
-			//System.out.println("string funcs=" + keys);
+			keys = meta.getDbFunctions();
 			this.addKeywordList(keys, Token.KEYWORD3);
-
-			keys = meta.getNumericFunctions();
-			//System.out.println("num funcs=" + keys);
-			this.addKeywordList(keys, Token.KEYWORD3);
-
-			keys = meta.getTimeDateFunctions();
-			//System.out.println("date func=" + keys);
-			this.addKeywordList(keys, Token.KEYWORD3);
-
-			keys = meta.getSystemFunctions();
-			//System.out.println("sys funcs=" + keys);
-			this.addKeywordList(keys, Token.KEYWORD3);
-
 		}
 		catch (Exception e)
 		{
 			LogMgr.logWarning(this, "Could not read database keywords", e);
 		}
 	}
-	private void addKeywordList(String aList, byte anId)
+	
+	private void addKeywordList(Collection words, byte anId)
 	{
-		if (aList == null) return;
-		StringTokenizer tok = new StringTokenizer(aList, ",");
-		while (tok.hasMoreTokens())
+		if (words == null) return;
+		Iterator itr = words.iterator();
+		while (itr.hasNext())
 		{
-			String keyword = tok.nextToken();
+			String keyword = (String)itr.next();
 			if (!keywords.containsKey(keyword))
 			{
 				//System.out.println("adding key=" + keyword);

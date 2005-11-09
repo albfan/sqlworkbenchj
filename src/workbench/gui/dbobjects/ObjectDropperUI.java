@@ -122,6 +122,7 @@ public class ObjectDropperUI
 		WbSwingUtilities.showWaitCursor(this.dialog);
 		try
 		{
+			this.connection.setBusy(true);
 			ObjectDropper dropper = new ObjectDropper(this.objectNames, this.objectTypes);
 			dropper.setConnection(this.connection);
 			dropper.setCascadeConstraints(this.checkBoxCascadeConstraints.isSelected());
@@ -135,6 +136,7 @@ public class ObjectDropperUI
 		}
 		finally
 		{
+			this.connection.setBusy(false);
 			WbSwingUtilities.showDefaultCursor(this.dialog);
 		}
 		this.dialog.setVisible(true);

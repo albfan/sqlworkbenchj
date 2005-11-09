@@ -188,6 +188,7 @@ public class ExportFileDialog
 		}
 		this.exportOptions.addPropertyChangeListener("exportType", this);
 		this.restoreSettings();
+		this.exportOptions.setIncludeSqlInsert(includeSqlInsert);
 		this.exportOptions.setIncludeSqlUpdate(includeSqlUpdate);
 		this.exportOptions.setIncludeSqlDeleteInsert(includeSqlDeleteInsert);
 			

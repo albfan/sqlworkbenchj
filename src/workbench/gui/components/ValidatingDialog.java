@@ -105,13 +105,13 @@ public class ValidatingDialog
 	public static boolean showConfirmDialog(Frame parent, JPanel editor, String title)
 	{
 		ValidatingDialog dialog = new ValidatingDialog(parent, title, editor);
-		dialog.show();
+		dialog.setVisible(true);
 		return !dialog.isCancelled();
 	}
 	
 	private void close()
 	{
-		this.hide();
+		this.setVisible(false);
 		this.dispose();
 	}
 	

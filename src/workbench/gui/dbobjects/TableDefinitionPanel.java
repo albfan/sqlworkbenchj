@@ -44,7 +44,6 @@ import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.DividerBorder;
-import workbench.gui.components.FindPanel;
 import workbench.gui.components.QuickFilterPanel;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
@@ -69,7 +68,6 @@ public class TableDefinitionPanel
 	private WbTable tableDefinition;
 	private JLabel tableNameLabel;
 	private QuickFilterPanel columnFilter;
-//	private FindPanel columnSearcher;
 	private WbAction createIndexAction;
 	private TableIdentifier currentTable;
 	private String currentObjectType;
@@ -90,13 +88,10 @@ public class TableDefinitionPanel
 		this.reloadAction.setEnabled(false);
 
 		toolbar = new JPanel(new GridBagLayout());
-//		columnSearcher = new FindPanel(this.tableDefinition, 15);
 
 		String[] cols = new String[] {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "JAVA_TYPE"};
 		columnFilter  = new QuickFilterPanel(this.tableDefinition, cols, true, "columnlist");
 		columnFilter.addToToolbar(reloadAction, 0);
-		//columnFilter.setToolbarBorder(new EtchedBorder());
-		//columnFilter.setBorder(new LineBorder(Color.RED));
 		GridBagConstraints cc = new GridBagConstraints();
 		
 		cc.anchor = GridBagConstraints.WEST;
@@ -108,17 +103,6 @@ public class TableDefinitionPanel
 		cc.insets = new Insets(0, 0, 0, 5);
 		toolbar.add(columnFilter, cc);
 
-//		cc.gridx ++;
-//		cc.anchor = GridBagConstraints.WEST;
-//		cc.fill = GridBagConstraints.NONE;
-//		cc.weightx = 0.0;
-//		cc.insets = new Insets(0, 0, 0, 0);
-//		Border o = new DividerBorder(DividerBorder.LEFT_RIGHT);
-//		Border i = new EmptyBorder(0,0,0,5);
-//		Border b = new CompoundBorder(o,i);
-//		columnSearcher.setBorder(b);
-//		toolbar.add(columnSearcher, cc);
-		
 		JLabel l = new JLabel(ResourceMgr.getString("LabelTable") + ":");
 		cc.fill = GridBagConstraints.NONE;
 		cc.gridx ++;
@@ -400,13 +384,11 @@ public class TableDefinitionPanel
 
 	public void restoreSettings()
 	{
-		//this.columnSearcher.restoreSettings();
 		this.columnFilter.restoreSettings();
 	}
 
 	public void saveSettings()
 	{
-		//this.columnSearcher.saveSettings();
 		this.columnFilter.saveSettings();
 	}
 }

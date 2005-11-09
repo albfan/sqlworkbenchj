@@ -12,6 +12,7 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.awt.Window;
 import java.awt.event.WindowListener;
 import java.sql.SQLException;
@@ -42,12 +43,14 @@ public class ObjectCompilerUI
 	private List types;
 	private List names;
 	private OracleObjectCompiler compiler;
-
+	private WbConnection dbConnection;
+	
 	public ObjectCompilerUI(List names, List types, WbConnection conn)
 		throws SQLException
 	{
 		super();
 		this.names = names;
+		this.dbConnection = conn;
 		this.types = types;
 		this.compiler = new OracleObjectCompiler(conn);
 		this.setLayout(new BorderLayout());
@@ -66,28 +69,42 @@ public class ObjectCompilerUI
 		String msg = ResourceMgr.getString("TxtCompilingObject");
 		this.log.setText("");
 		int count = this.names.size();
-
-
-		for (int i=0; i < count; i++)
+		try
 		{
-			String name = (String)this.names.get(i);
-			String type = (String)this.types.get(i);
-			if (i > 0) this.log.appendLine("\n");
-			this.log.appendLine(msg + " " + name + " ... ");
-			if (this.compiler.compileObject(name, type))
+			this.dbConnection.setBusy(true);
+			for (int i=0; i < count; i++)
 			{
-				this.log.appendLine(ResourceMgr.getString("TxtOK"));
+				String name = (String)this.names.get(i);
+				String type = (String)this.types.get(i);
+				if (i > 0) appendLog("\n");
+				appendLog(msg + " " + name + " ... ");
+				if (this.compiler.compileObject(name, type))
+				{
+					appendLog(ResourceMgr.getString("TxtOK"));
+				}
+				else
+				{
+					appendLog("\n" + ResourceMgr.getString("TxtError") + "\n" + this.compiler.getLastError());
+				}
 			}
-			else
-			{
-				this.log.appendLine("");
-				this.log.appendLine(ResourceMgr.getString("TxtError"));
-				this.log.appendLine(this.compiler.getLastError());
-			}
+		}
+		finally
+		{
+			this.dbConnection.setBusy(false);
 		}
 		this.log.setCaretPosition(0);
 	}
 
+	private void appendLog(final String msg)
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				log.appendLine(msg);
+			}
+		});
+	}
 	public void show(Window aParent)
 	{
 		if (this.window == null)
@@ -107,7 +124,7 @@ public class ObjectCompilerUI
 			}
 			this.window.addWindowListener(this);
 		}
-		this.window.show();
+		this.window.setVisible(true);
 		this.startCompile();
 	}
 
@@ -130,7 +147,7 @@ public class ObjectCompilerUI
 		}
 		Settings.getInstance().storeWindowPosition(this.window, ObjectCompilerUI.class.getName());
 		Settings.getInstance().storeWindowSize(this.window, ObjectCompilerUI.class.getName());
-		this.window.hide();
+		this.window.setVisible(false);
 		this.window.dispose();
 	}
 
