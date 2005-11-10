@@ -48,8 +48,10 @@ import workbench.db.mysql.EnumReader;
 import workbench.db.mysql.MySqlMetadata;
 import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.OracleConstraintReader;
+import workbench.db.oracle.OracleIndexReader;
 import workbench.db.oracle.OracleMetadata;
 import workbench.db.oracle.OracleSynonymReader;
+import workbench.db.postgres.PostgresIndexReader;
 import workbench.db.postgres.PostgresSequenceReader;
 import workbench.db.postgres.PostgresConstraintReader;
 import workbench.db.postgres.PostgresMetadata;
@@ -75,6 +77,8 @@ import workbench.db.firebird.FirebirdConstraintReader;
 public class DbMetadata
 	implements PropertyChangeListener
 {
+
+// <editor-fold defaultstate="collapsed" desc="Placeholders for statement templates">
 	public static final String TABLE_NAME_PLACEHOLDER = "%tablename%";
 	public static final String INDEX_NAME_PLACEHOLDER = "%indexname%";
 	public static final String PK_NAME_PLACEHOLDER = "%pk_name%";
@@ -89,6 +93,7 @@ public class DbMetadata
 	public static final String FK_UPDATE_RULE = "%fk_update_rule%";
 	public static final String FK_DELETE_RULE = "%fk_delete_rule%";
 	public static final String GENERAL_SQL = "All";
+// </editor-fold>
 
 	private String schemaTerm;
 	private String catalogTerm;
@@ -109,9 +114,9 @@ public class DbMetadata
 	private ProcedureReader procedureReader;
 	private ErrorInformationReader errorInfoReader;
 	private SchemaInformationReader schemaInfoReader;
+	private IndexReader indexReader;
 
-	// These Hashmaps contains SQL templates
-	// for metadata retrieval and object creation
+	// <editor-fold defaultstate="collapsed" desc="HashMaps containing statement templates">
 	private static HashMap procSourceSql;
 	private static HashMap viewSourceSql;
 	private static HashMap triggerSourceSql;
@@ -122,6 +127,7 @@ public class DbMetadata
 	private static HashMap columnCommentStatements;
 	private static HashMap tableCommentStatements;
 	private static boolean templatesRead;
+	// </editor-fold>
 
 	private DbmsOutput oraOutput;
 
@@ -231,7 +237,7 @@ public class DbMetadata
 		if (productLower.indexOf("oracle") > -1)
 		{
 			this.isOracle = true;
-			this.oracleMetaData = new OracleMetadata(this.dbConnection);
+			this.oracleMetaData = new OracleMetadata(this, this.dbConnection);
 			this.constraintReader = new OracleConstraintReader();
 			this.synonymReader = new OracleSynonymReader();
 
@@ -243,6 +249,7 @@ public class DbMetadata
 			this.errorInfoReader = this.oracleMetaData;
 			this.schemaInfoReader = this.oracleMetaData;
 			this.fixOracleDateBug = Settings.getInstance().getBoolProperty("workbench.db.oracle.date.usetimestamp", true);
+			this.indexReader = new OracleIndexReader(this);
 		}
 		else if (productLower.indexOf("postgres") > - 1)
 		{
@@ -251,6 +258,7 @@ public class DbMetadata
 			this.constraintReader = new PostgresConstraintReader();
 			this.sequenceReader = new PostgresSequenceReader(this.dbConnection.getSqlConnection());
 			this.procedureReader = new PostgresMetadata(this);
+			this.indexReader = new PostgresIndexReader(this);
 		}
 		else if (productLower.indexOf("hsql") > -1)
 		{
@@ -338,6 +346,11 @@ public class DbMetadata
 			this.procedureReader = new JdbcProcedureReader(this);
 		}
 
+		if (this.indexReader == null)
+		{
+			this.indexReader = new JdbcIndexReader(this);
+		}
+		
 		try
 		{
 			this.quoteCharacter = this.metaData.getIdentifierQuoteString();
@@ -422,6 +435,8 @@ public class DbMetadata
 		return this.metaData;
 	}
 
+	public WbConnection getWbConnection() { return this.dbConnection; }
+	
 	public Connection getSqlConnection()
 	{
 		return this.dbConnection.getSqlConnection();
@@ -1812,7 +1827,7 @@ public class DbMetadata
 		if (this.dbFunctions != null) this.dbFunctions.clear();
 		if (this.keywords != null) this.keywords.clear();
 		if (this.oraOutput != null) this.oraOutput.close();
-		if (this.oracleMetaData != null) this.oracleMetaData.done();
+		if (this.oracleMetaData != null) this.oracleMetaData.columnsProcessed();
 	}
 
 
@@ -2126,7 +2141,7 @@ public class DbMetadata
 			SqlUtil.closeResult(rs);
 			if (this.oracleMetaData != null)
 			{
-				this.oracleMetaData.closeStatement();
+				this.oracleMetaData.columnsProcessed();
 			}
 		}
 
@@ -2180,18 +2195,17 @@ public class DbMetadata
 			// int he ArrayList will have the unique/non-unique
 			// flag, the rest will be the column list
 			HashMap idxInfo = new HashMap();
-			HashMap funcIndex = null;
+			
+			// A list of index names that are functional indexes for Oracle
+			List funcIndexNames = null;
 
 			if (this.isOracle)
 			{
-				idxRs = this.oracleMetaData.getIndexInfo(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName(), false, true);
-				funcIndex = new HashMap();
+				funcIndexNames = new ArrayList();
 			}
-			else
-			{
-				idxRs = this.metaData.getIndexInfo(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName(), false, true);
-			}
-
+			
+			idxRs = this.indexReader.getIndexInfo(tbl, false);
+			
 			while (idxRs.next())
 			{
 				boolean unique = idxRs.getBoolean("NON_UNIQUE");
@@ -2220,17 +2234,17 @@ public class DbMetadata
 					String type = idxRs.getString("INDEX_TYPE");
 					if (type != null && type.startsWith("FUNCTION-BASED"))
 					{
-						if (!funcIndex.containsKey(indexName))
+						if (!funcIndexNames.contains(indexName))
 						{
-							funcIndex.put(indexName, new ArrayList());
+							funcIndexNames.add(indexName);
 						}
 					}
 				}
 			}
 
-			if (this.isOracle && funcIndex != null)
+			if (this.isOracle && funcIndexNames.size() > 0)
 			{
-				this.oracleMetaData.readFunctionIndexDefinition(tbl.getSchema(), tbl.getTableName(), funcIndex);
+				Map funcIndex = ((OracleIndexReader)this.indexReader).readFunctionIndexDefinition(tbl.getSchema(), tbl.getTableName(), funcIndexNames);
 				Iterator defs = funcIndex.entrySet().iterator();
 				while (defs.hasNext())
 				{
@@ -2284,10 +2298,7 @@ public class DbMetadata
 		finally
 		{
 			try { idxRs.close(); } catch (Throwable th) {}
-			if (this.isOracle)
-			{
-				this.oracleMetaData.closeStatement();
-			}
+			this.indexReader.indexInfoProcessed();
 		}
 		return idxData;
 	}
@@ -3322,7 +3333,8 @@ public class DbMetadata
 			result.append(template);
 			result.append(";\n\n");
 		}
-		result.append(this.getIndexSource(table.getTableName(), aIndexDef, tableNameToUse).toString());
+		StrBuffer indexSource = this.indexReader.getIndexSource(table, aIndexDef, tableNameToUse);
+		result.append(indexSource);
 		if (!this.createInlineConstraints) result.append(this.getFkSource(table.getTableName(), aFkDef, tableNameToUse));
 
 		String comments = this.getTableCommentSql(table);
@@ -3647,95 +3659,8 @@ public class DbMetadata
 	 */
 	public String buildIndexSource(TableIdentifier aTable, String indexName, boolean unique, String[] columnList)
 	{
-		if (columnList == null) return StringUtil.EMPTY_STRING;
-		int count = columnList.length;
-		if (count == 0) return StringUtil.EMPTY_STRING;
-		String template = this.getSqlTemplate(DbMetadata.idxStatements);
-		StrBuffer cols = new StrBuffer(count * 25);
-
-		for (int i=0; i < count; i++)
-		{
-			if (columnList[i] == null || columnList[i].length() == 0) continue;
-			if (cols.length() > 0) cols.append(',');
-			cols.append(columnList[i]);
-		}
-
-		String sql = StringUtil.replace(template, TABLE_NAME_PLACEHOLDER, aTable.getTableExpression(this.dbConnection));
-		if (unique)
-		{
-			sql = StringUtil.replace(sql, UNIQUE_PLACEHOLDER, "UNIQUE ");
-		}
-		else
-		{
-			sql = StringUtil.replace(sql, UNIQUE_PLACEHOLDER, "");
-		}
-		sql = StringUtil.replace(sql, COLUMNLIST_PLACEHOLDER, cols.toString());
-		sql = StringUtil.replace(sql, INDEX_NAME_PLACEHOLDER, indexName);
-//		if (this.ddlNeedsCommit)
-//		{
-//			sql = sql + ";\n" + "COMMIT;";
-//		}
-		return sql;
+		return this.indexReader.buildCreateIndexSql(aTable, indexName, unique, columnList);
 	}
-
-	public StrBuffer getIndexSource(String aTable, DataStore aIndexDef, String tableNameToUse)
-	{
-		if (aIndexDef == null) return StrBuffer.EMPTY_BUFFER;
-		int count = aIndexDef.getRowCount();
-		if (count == 0) return StrBuffer.EMPTY_BUFFER;
-		StrBuffer idx = new StrBuffer();
-		String template = this.getSqlTemplate(DbMetadata.idxStatements);
-		String sql;
-		int idxCount = 0;
-		for (int i = 0; i < count; i++)
-		{
-			String idx_name = aIndexDef.getValue(i, 0).toString();
-			String unique = aIndexDef.getValue(i, 1).toString();
-			String is_pk  = aIndexDef.getValue(i, 2).toString();
-			String definition = aIndexDef.getValue(i, 3).toString();
-			StrBuffer columns = new StrBuffer();
-			StringTokenizer tok = new StringTokenizer(definition, ",");
-			String col;
-			int pos;
-			while (tok.hasMoreTokens())
-			{
-				col = tok.nextToken().trim();
-				if (col == null || col.length() == 0) continue;
-				if (columns.length() > 0) columns.append(',');
-				pos = col.indexOf(' ');
-				if (pos > -1)
-				{
-					columns.append(col.substring(0, pos));
-				}
-				else
-				{
-					columns.append(col);
-				}
-			}
-			// The PK's have been created with the table source, so
-			// we do not need to add the corresponding index here.
-			if ("NO".equalsIgnoreCase(is_pk))
-			{
-				idxCount ++;
-				sql = StringUtil.replace(template, TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? aTable : tableNameToUse));
-				if ("YES".equalsIgnoreCase(unique))
-				{
-					sql = StringUtil.replace(sql, UNIQUE_PLACEHOLDER, "UNIQUE ");
-				}
-				else
-				{
-					sql = StringUtil.replace(sql, UNIQUE_PLACEHOLDER, "");
-				}
-				sql = StringUtil.replace(sql, COLUMNLIST_PLACEHOLDER, columns.toString());
-				sql = StringUtil.replace(sql, INDEX_NAME_PLACEHOLDER, idx_name);
-				idx.append(sql);
-				idx.append(";\n");
-			}
-		}
-		if (idxCount > 0) idx.append("\n");
-		return idx;
-	}
-
 
 	/**	The column index for the DataStore returned by getTableGrants() which contains the object's name */
 	public static final int COLUMN_IDX_TABLE_GRANTS_OBJECT_NAME = 0;
@@ -3870,6 +3795,11 @@ public class DbMetadata
 		return m.replaceAll(" ");
 	}
 
+	public String getIndexSqlTemplate()
+	{
+		return getSqlTemplate(DbMetadata.idxStatements);
+	}
+	
 	private String getSqlTemplate(HashMap aMap)
 	{
 		String template = (String)aMap.get(this.productName);

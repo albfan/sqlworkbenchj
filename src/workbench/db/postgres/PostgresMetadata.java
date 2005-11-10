@@ -11,12 +11,21 @@
  */
 package workbench.db.postgres;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import workbench.db.DbMetadata;
+import workbench.db.IndexReader;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.storage.DataStore;
+import workbench.util.ExceptionUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 
 /**

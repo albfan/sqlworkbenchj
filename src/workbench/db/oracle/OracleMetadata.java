@@ -22,11 +22,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import workbench.db.ConnectionProfile;
+import workbench.db.DbMetadata;
 import workbench.db.ErrorInformationReader;
+import workbench.db.IndexReader;
+import workbench.db.JdbcIndexReader;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
 import workbench.db.SchemaInformationReader;
 import workbench.db.SequenceReader;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
 import workbench.util.ExceptionUtil;
@@ -44,14 +48,14 @@ public class OracleMetadata
 	implements SequenceReader, ProcedureReader, ErrorInformationReader, SchemaInformationReader
 {
 	private WbConnection connection;
-	private Statement statement;
+	private DbMetadata metaData;
 	private PreparedStatement columnStatement;
 	private int version = 8;
-	private JdbcProcedureReader procReader;
 	
 	/** Creates a new instance of OracleMetaData */
-	public OracleMetadata(WbConnection conn)
+	public OracleMetadata(DbMetadata meta, WbConnection conn)
 	{
+		this.metaData = meta;
 		this.connection = conn;
 		try
 		{
@@ -233,150 +237,7 @@ public class OracleMetadata
 		}
 		return result.toString();
 	}
-	
-	/**
-	 * 	Replacement for the DatabaseMetaData.getIndexInfo() method.
-	 * 	Oracle's JDBC driver does an ANALYZE INDEX each time an indexInfo is
-	 * 	requested which slows down the retrieval of index information.
-	 *  (and is not necessary at all for the Workbench, as we don't use the
-	 *  cardinality field anyway)
-	 */
-	public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique, boolean flag1)
-		throws SQLException
-	{
-		this.closeStatement();
-		
-		StringBuffer sql = new StringBuffer(200);
-		sql.append("SELECT null as table_cat, " +
-			"       i.owner as table_schem, " +
-			"       i.table_name, "+
-			"       decode (i.uniqueness, 'UNIQUE', 0, 1) as non_unique, " +
-			"       null as index_qualifier, " +
-			"       i.index_name, "+
-			"       1 as type, " +
-			"       c.column_position as ordinal_position, " +
-			"       c.column_name, " +
-			"       null as asc_or_desc, " +
-			"       i.distinct_keys as cardinality, " +
-			"       i.leaf_blocks as pages, " +
-			"       null as filter_condition, " +
-			"       i.index_type " +
-			"FROM all_indexes i, all_ind_columns c " +
-			"WHERE i.table_name = '" + table + "' \n");
-		if (schema != null && schema.length() > 0)
-		{
-			sql.append("  AND i.owner = '" + schema + "'\n");
-		}
-		if (unique)
-		{
-			sql.append("  and i.uniqueness = 'UNIQUE'\n");
-		}
-		sql.append("  and i.index_name = c.index_name " +
-			"  and i.table_owner = c.table_owner " +
-			"  and i.table_name = c.table_name " +
-			"  and i.owner = c.index_owner ");
-		sql.append("ORDER BY non_unique, type, index_name, ordinal_position ");
-		if (this.statement != null) this.closeStatement();
-		this.statement = this.connection.createStatementForQuery();
-		ResultSet rs = this.statement.executeQuery(sql.toString());
-		return rs;
-	}
-	
-	/**
-	 * 	Read the definition for function based indexes into the Map provided.
-	 * 	The map should contain the names of the indexes as keys, and an List
-	 * 	as elements. Each Element of the list is one part (=function call to a column)
-	 * 	of the index definition.
-	 */
-	public void readFunctionIndexDefinition(String schema, String table, Map indexNames)
-	{
-		if (indexNames.size() == 0) return;
-		
-		String base="SELECT i.index_name, e.column_expression, e.column_position \n" +
-			"FROM all_indexes i, all_ind_expressions e  \n" +
-			" WHERE i.index_name = e.index_name   \n" +
-			"    and i.owner = e.index_owner   \n" +
-			"    and i.table_name = e.table_name   \n" +
-			"    and e.index_owner = i.owner \n " +
-			"    and i.index_type like 'FUNCTION-BASED%' ";
-		StringBuffer sql = new StringBuffer(300);
-		sql.append(base);
-		if (schema != null && schema.length() > 0)
-		{
-			sql.append(" AND i.owner = '" + schema + "' ");
-		}
-		Iterator keys = indexNames.keySet().iterator();
-		boolean first = true;
-		sql.append(" AND i.index_name IN (");
-		while (keys.hasNext())
-		{
-			if (first)
-			{
-				first = false;
-			}
-			else
-			{
-				sql.append(",");
-			}
-			sql.append('\'');
-			sql.append((String)keys.next());
-			sql.append('\'');
-		}
-		sql.append(") ");
-		
-		ResultSet rs = null;
-		Statement stmt = null;
-		try
-		{
-			stmt = this.connection.createStatementForQuery();
-			rs = stmt.executeQuery(sql.toString());
-			while (rs.next())
-			{
-				String name = rs.getString(1);
-				String exp = rs.getString(2);
-				List cols = (List)indexNames.get(name);
-				if (cols != null)
-				{
-					if (!cols.contains(exp))
-					{
-						cols.add(exp);
-					}
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning("OracleMetaData.readFunctionIndexDefinition()", "Error reading function-based index definition", e);
-		}
-		finally
-		{
-			try
-			{ rs.close(); }
-			catch (Throwable th)
-			{}
-			try
-			{ stmt.close(); }
-			catch (Throwable th)
-			{}
-		}
-	}
-	
-	public void closeStatement()
-	{
-		if (this.statement != null)
-		{
-			try
-			{
-				this.statement.close();
-			}
-			catch (Throwable e)
-			{
-			}
-		}
-		
-		this.statement = null;
-	}
-	
+
 	public ResultSet getColumns(String catalog, String schema, String table, String cols)
 		throws SQLException
 	{
@@ -438,10 +299,11 @@ public class OracleMetadata
 			// so in that case we revert back to Oracle's implementation of getColumns()
 			if (version > 8 && Settings.getInstance().useOracleCharSemanticsFix())
 			{
-				if (this.columnStatement == null)
+				if (this.columnStatement != null)
 				{
-					this.columnStatement = this.connection.getSqlConnection().prepareStatement(sql);
+					try { this.columnStatement.close(); } catch (Throwable th) {}
 				}
+				this.columnStatement = this.connection.getSqlConnection().prepareStatement(sql);
 				this.columnStatement.setString(1, schema != null ? schema : "%");
 				this.columnStatement.setString(2, table != null ? table : "%");
 				this.columnStatement.setString(3, cols != null ? cols : "%");
@@ -465,23 +327,17 @@ public class OracleMetadata
 	public DataStore getProcedureColumns(String catalog, String schema, String procname)
 		throws SQLException
 	{
-		initProcReader();
-		return this.procReader.getProcedureColumns(catalog, schema, procname);
+		JdbcProcedureReader reader = new JdbcProcedureReader(this.connection.getMetadata());
+		return reader.getProcedureColumns(catalog, schema, procname);
 	}
 	
 	public DataStore getProcedures(String catalog, String schema)
 		throws SQLException
 	{
-		initProcReader();
-		return this.procReader.getProcedures(catalog, schema);
+		JdbcProcedureReader reader = new JdbcProcedureReader(this.connection.getMetadata());
+		return reader.getProcedures(catalog, schema);
 	}
 
-	private void initProcReader()
-	{
-		if (this.procReader != null) return;
-		this.procReader = new JdbcProcedureReader(this.connection.getMetadata());
-	}
-	
 	public StrBuffer getPackageSource(String owner, String packageName)
 	{
 		final String sql = "SELECT text \n" +
@@ -642,15 +498,16 @@ public class OracleMetadata
 		return result.toString();
 	}
 	
-	public void done()
+	/**
+	 * Close the statement object that was used in {@link getColumns(String, String, String, String)}.
+	 * This method should be called after closing the ResultSet obtained from that method.
+	 */
+	public void columnsProcessed()
 	{
-		this.closeStatement();
 		if (this.columnStatement != null)
 		{
-			try
-			{ this.columnStatement.close(); }
-			catch (Throwable th)
-			{}
+			try {  this.columnStatement.close();  } catch (Throwable th) {}
 		}
 	}
+
 }
