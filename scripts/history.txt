@@ -1,5 +1,86 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
------------------------
+--------------------
+Enh:  (82.1) When running external files using WbInclude the directory of the 
+      currently executed file is used as the "current" directory, so if the executed 
+      file is using WbInclude (@) files can be referenced with a relative path.
+Enh:  (82.1) SQL Workbench now supports reading and writing blob columns to and from
+      external files. For updating blob and clob columns the usual UPDATE and INSERT
+      statements can be used with placeholders for the file definition. To 
+      retrieve a blob the new WbSelectBlob command can be used. 
+      When exporting data into an XML file, blob columns are now written
+      into external files (the files are referenced from the XML output)
+      This has been tested with Postgres 8.0, SQL Server (jTDS driver), MySQL,
+      Firebird 1.5 and SQL Anywhere.
+      For Oracle, the 10g driver is required. Earlier drivers do not support 
+      the standard JDBC calls used for this feature.
+Enh:  (82.1) When "confirming" updates, there was no way to cancel the execution
+      completely. WbInclude is now also considered as an "updating" command.
+Enh:  (82.2) Oracle 10g drivers do not work properly with Oracle 9i and date columns.
+      (The time part is not retrieved correctly). SQL Workbench now always treats
+      DATE columns as TIMESTAMP columns (i.e. it will getTimestamp() and  
+      java.sql.Timestamp objects for those columns) to preserve the time part. 
+      This can be switched off by setting workbench.db.oracle.date.usetimestamp=false
+      in workbench.settings
+Enh:  (82.2) Added support for views, stored procedures and triggers for MySQL 5.x
+      in DbExplorer
+Enh:  (82.3) WbReport now includes VIEW definitions
+Enh:  (82.3) Added support for views and triggers for Apache Derby in DbExplorer
+Enh:  (82.3) The password in the connection dialog can now be displayed in plain
+      text
+Enh:  (82.6) With WbImport -truncatetable=true can be used as a shortcut
+      for -deletetarget=true -usetruncate=true. If -truncatetable is present
+      -deletetarget will be ignored.
+Enh:  (82.15) Filters can now be applied to all columns with a single expression
+Enh:  (82.16) Oracle public synonyms can now optionally be included in the 
+      auto completion popup. To enable this, a new property is available in 
+      workbench.settings:
+      workbench.editor.autocompletion.oracle.public_synonyms=true
+Enh:  (82.18) The data tab in the DbExplorer now displays the current table name      
+Enh:  (82.25) Tried to make concurrent access to the same connection more robust
+Enh:  (82.27) The WbExport command can now write a skeleton for an SQL*Loader 
+      control file when -oraldr=true is specified
+Enh:  (82.28) Postgres: The source for a table now includes the index definition 
+      as returned by the view pg_indexes, thus indexes with operator classes are 
+      displayed correctly. The Index tab will still display it incorrectly though
+      (the JDBC driver does not return the information)
+Enh:  (82.29) WbDiff now includes Views
+Enh:  (92.29) The "Create DDL Script" is now also available in the Procedures tab
+      of the DBExplorer, not only the Objects tab.
+      
+Fix:  (82.1) When an error occurs during inserting of new rows from a result set, 
+      and the error is ignored, the status for the incorrect rows is lost, and 
+      subsequent saving of the data will generate an UPDATE statement instead
+      of an INSERT statement
+Fix:  (82.2) When importing XML files with a CLOB column SQL Workbench/J would
+      report an error. 
+Fix:  (82.4) Fixed an error when loading files into the editor (files with CR/LF ending
+      were not loaded correctly)
+Fix:  (82.5) Since 82.3 the assigned workspace file was not shown any longer in the 
+      connection dialog
+Fix:  (82.6) The defaults stated in the help for the WbDiff command did not match 
+      the actual defaults used. The constraint comparing is now reported correctly
+      in the XML file as well.
+Fix:  (82.6) The first column of a result set could not be edited any more.      
+Fix:  (82.7) If an invalid regular expression is entered in the search dialog 
+      of the editor, an error message is now displayed.
+Fix:  (82.9) Replace & Next was not using regular expressions correctly for the 
+      replacement string      
+Fix:  (82.11) -decimal did not work for text imports
+Fix:  (82.13) The tree display of foreign key references did not work any more
+Fix:  (82.14) "Replace all" did not work any longer in the editor
+Fix:  (82.15) When using a different table name for the generated script with 
+      WbExport (with -type=sqlinsert) together with the -createtable option 
+      the alternate name was not used for the PK, FK and Index definition.
+Fix:  (82.18) Importing CLOB columns in Oracle did not work      
+
+Build 82, 12.09.2005
+--------------------
+Fix:  @filename.sql was not working any longer
+Fix:  Import of text files with the column definition in the header line was not 
+      working
+
+Build 81, 11.09.2005
+--------------------
 Enh:  (80.33) The filter definitions now support IS NULL and IS NOT NULL comparator
 Enh:  (80.32) Auto completion now supports CREATE VIEW statements.
 Enh:  (80.30) The SQL that is used for the UPDATE Statement in the WbImport command
@@ -8,13 +89,11 @@ Enh:  (80.30) The SQL that is used for the UPDATE Statement in the WbImport comm
       e.g. -updatewhere="column=value" then this expression will be appended to the
       generated UPDATE statement with an AND condition. e.g. 
       UPDATE table SET col1=?, col2=? WHERE id=? AND (column=value)
-      
       If the expression starts with the keyword AND or OR, then it will appended
       to the UPDATE staement as it is. If it does not start with either of the two
       keywords, it will be put into brackets and appended using AND.
       The expression -updatewhere="AND (col5=42 OR col5 = 43)" will be append "as is" 
       to the generated UPDATE statement.
-      
 Enh:  (80.29) The execution time of the last statement is now also shown
       in the statusbar.
 Enh:  (80.26) The object types that are considered by the DbExplorer to contain
@@ -68,7 +147,7 @@ Fix:  (80.2) Fixed some errors in the generation of DbDesigner files
 Fix:  (80.2) When using single line comments in the FROM list, the comments
       would show up in the generated update statemens when editing the data
 Fix:  (80.3) When connecting to a database profile with a workspace assigned
-      while another workspace was loaded the last tab would removed from
+      while a workspace was loaded the last tab would be removed from
       the currently active workspace
 Fix:  (80.4) Re-introduced fix for the bug in Oracle 9 
       regarding the wrong information vor VARCHAR columns if NLS_LENGTH_SEMANTICS

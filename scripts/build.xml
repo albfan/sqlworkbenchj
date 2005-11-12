@@ -35,7 +35,12 @@
   <path id="docbook.extensions.path">
     <pathelement location="c:/etc/xalan/bin/xalan.jar"/>
     <pathelement location="c:/etc/xalan/bin/xercesImpl.jar"/>
-    <pathelement location="${docbook.root}/extensions/xalan2.jar"/>
+    <pathelement location="${docbook.root}/extensions/xalan25.jar"/>
+    <pathelement path="${classpath}"/>
+  </path>
+
+  <path id="saxon.path">
+    <pathelement location="c:/etc/saxon/saxon8.jar"/>
     <pathelement path="${classpath}"/>
   </path>
 
@@ -47,7 +52,7 @@
   </path>
 
   <target name="set-build-number" depends="init">
-		<property name="release-src-dir" value="release"/>
+        <property name="release-src-dir" value="release"/>
     <buildnumber file="build.number"/>
     <echo message="Build number is ${build.number}"/>
 
@@ -59,7 +64,7 @@
   </target>
 
   <target name="set-dev-build" depends="init">
-		<property name="release-src-dir" value="dist"/>
+        <property name="release-src-dir" value="dist"/>
     <propertyfile file="devbuild.number">
         <entry key="dev-build.number" type="int" operation="+" value="1"/>
     </propertyfile>
@@ -123,9 +128,15 @@
         <exclude name="workbench/test/**"/>
     </javac>
   </target>
-  
+
   <target name="compile_debug" depends="prepare">
     <javac debug="on" debuglevel="source,lines" destdir="${build}" optimize="on" srcdir="${src}" >
+        <exclude name="workbench/test/**"/>
+    </javac>
+  </target>
+
+  <target name="compile_jikes" depends="prepare">
+    <javac executable="c:/etc/jikes/bin/jikes.exe" compiler="jikes" debug="on" debuglevel="source,lines" destdir="${build}" optimize="on" srcdir="${src}" >
         <exclude name="workbench/test/**"/>
     </javac>
   </target>
@@ -149,13 +160,27 @@
     </copy>
 
     <xslt in="${doc}/pdf/Manual.xml" out="${doc}/pdf/manual.fo" style="${doc}/xsl/workbench-pdf.xsl">
+      <xmlcatalog>
+        <dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN"
+             location="${doc}/dtd/docbookx.dtd"/>
+      </xmlcatalog>
       <param name="paper.type" expression="A4"/>
-      <param name="page.orientation" expression="portrait"/>
       <param name="margin.bottom" expression="1.5cm"/>
       <param name="margin.top" expression="1.5cm"/>
-      <param name="margin.left" expression="2cm"/>
-      <param name="margin.right" expression="2cm"/>
+      <param name="margin.left" expression="1.5cm"/>
+      <param name="margin.right" expression="1.5cm"/>
+      <param name="generate.section.toc.level" expression="3"/>
+      <param name="toc.indent.width" expression="24"/>
+      <param name="toc.max.depth" expression="3"/>
+      <param name="toc.section.depth" expression="3"/>
+      <param name="title.margin.left" expression="0pt"/>
+      <param name="body.start.indent" expression="0pt"/>
+      <param name="section.autolabel" expression="1"/>
+      <param name="section.autolabel.max.depth" expression="3"/>
+      <param name="alignment" expression="left"/>
+      <param name="use.extensions" expression="0"/>
     </xslt>
+
     <delete>
       <fileset dir="${doc}/pdf">
         <include name="*.xml"/>
@@ -211,6 +236,7 @@
       <param name="chunker.output.indent" expression="yes"/>
       <param name="chunk.quietly" expression="1"/>
       <param name="chunk.fast" expression="1"/>
+      <param name="toc.section.depth" expression="3"/>
       <param name="use.id.as.filename" expression="1"/>
       <param name="section.autolabel" expression="1"/>
       <param name="table.borders.with.css" expression="0"/>
@@ -291,7 +317,7 @@
     <copy overwrite="true" tofile="${html-outdir}/history.txt" file="${scriptsrc}/history.new"/>
 
     <xslt basedir="${html-outdir}" includes="Manual.xml" style="${doc}/docbook/html/chunk.xsl"
-          destdir="${html-outdir}" classpathref="docbook.extensions.path">
+          destdir="${html-outdir}" classpathref="saxon.path">
       <xmlcatalog>
         <dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN"
              location="${doc}/dtd/docbookx.dtd"/>
@@ -315,6 +341,7 @@
       <param name="table.cell.border.thickness" expression="1px"/>
       <param name="table.frame.border.style" expression="solid"/>
       <param name="table.frame.border.thickness" expression="1px"/>
+      <param name="toc.section.depth" expression="3"/>
       <param name="make.valid.html" expression="1"/>
       <param name="html.cleanup" expression="1"/>
       <param name="navig.showtitles" expression="1"/>
@@ -456,20 +483,22 @@
   </target>
 
   <target name="release-package" depends="init">
-		
+
     <copy file="${scriptsrc}/history.new" overwrite="true" failonerror="false" tofile="${root}/release/history.txt"/>
 
     <copy file="${doc}/pdf/SQLWorkbench-Manual.pdf" overwrite="true" todir="${root}/release"/>
 
     <delete dir="${root}/release/manual" failonerror="false"/>
+    <mkdir dir="${root}/release/manual"/>
+
     <copy todir="${root}/release/manual">
         <fileset dir="${html-outdir}"/>
     </copy>
 
     <delete>
       <fileset dir="${root}/release">
-        <include name="Workbench*.zip"/>
-        <include name="Workbench*.tar.gz"/>
+        <include name="Workbench-Build*.zip"/>
+        <include name="Workbench-Build*.tar.gz"/>
       </fileset>
     </delete>
 
@@ -487,6 +516,9 @@
         <include name="jworkbench"/>
         <include name="datapumper"/>
         <include name="dbexplorer"/>
+      </zipfileset>
+      <zipfileset dir="${html-outdir}" prefix="manual">
+        <include name="**/*.*"/>
       </zipfileset>
       <zipfileset dir="${scriptsrc}" prefix="xslt">
         <include name="**/*.xslt"/>
@@ -513,13 +545,13 @@
 
   </target>
 
-	<target name="release-src-zip" depends="init">
+    <target name="release-src-zip" depends="init">
     <delete failonerror="false">
       <fileset dir="${root}/${release-src-dir}">
         <include name="WorkbenchSrc*.zip"/>
       </fileset>
     </delete>
-		
+
     <zip zipfile="${root}/${release-src-dir}/WorkbenchSrc-Build${build.number}.zip">
       <zipfileset dir="${src}" prefix="src">
         <include name="**/*.*"/>
@@ -557,8 +589,8 @@
         <exclude name="**/*.tws"/>
       </zipfileset>
     </zip>
-	</target>
-	
+    </target>
+
   <target name="src" depends="make-src-zip"/>
 
 </project>

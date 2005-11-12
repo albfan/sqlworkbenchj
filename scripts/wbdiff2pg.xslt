@@ -8,7 +8,7 @@
   encoding="iso-8859-15" 
   method="text" 
   indent="no" 
-  standalone="yes"	
+  standalone="yes"  
   omit-xml-declaration="yes"
   doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
 />
@@ -16,7 +16,7 @@
 <xsl:strip-space elements="*"/>
 
 <xsl:template match="/">
-	<xsl:for-each select="/schema-diff/modify-table">
+    <xsl:for-each select="/schema-diff/modify-table">
     <xsl:variable name="table" select="@name"/>
     <xsl:apply-templates select="add-column">
       <xsl:with-param name="table" select="$table"/>
@@ -56,18 +56,25 @@ COMMIT;
 <xsl:template match="drop-index">
 </xsl:template>
 
+<xsl:template match="add-column">
+<xsl:param name="table"/> 
+<xsl:variable name="column" select="column-def/column-name"/>
+<xsl:variable name="nullable" select="column-def/nullable"/>
+ALTER TABLE <xsl:value-of select="$table"/> ADD COLUMN <xsl:value-of select="$column"/><xsl:text> </xsl:text><xsl:value-of select="column-def/dbms-data-type"/><xsl:if test="$nullable = 'false'">  NOT NULL</xsl:if>;
+</xsl:template>
+
 <!-- Process the modify-column part -->
 <xsl:template match="modify-column">
 <xsl:param name="table"/> 
 <xsl:variable name="column" select="@name"/>
 <xsl:if test="string-length(dbms-data-type) &gt; 0">
-ALTER TABLE <xsl:value-of select="$table"/> ALTER <xsl:value-of select="$column"/> TYPE <xsl:value-of select="dbms-data-type"/>;
+ALTER TABLE <xsl:value-of select="$table"/> ALTER COLUMN <xsl:value-of select="$column"/> TYPE <xsl:value-of select="dbms-data-type"/>;
 </xsl:if>
 <xsl:if test="nullable = 'true'">
-ALTER TABLE <xsl:value-of select="$table"/> ALTER <xsl:value-of select="$column"/> DROP NOT NULL;
+ALTER TABLE <xsl:value-of select="$table"/> ALTER COLUMN <xsl:value-of select="$column"/> DROP NOT NULL;
 </xsl:if>
 <xsl:if test="nullable = 'false'">
-ALTER TABLE <xsl:value-of select="$table"/> ALTER <xsl:value-of select="$column"/> SET NOT NULL;
+ALTER TABLE <xsl:value-of select="$table"/> ALTER COLUMN <xsl:value-of select="$column"/> SET NOT NULL;
 </xsl:if>
 <xsl:if test="string-length(default-value) &gt; 0">
 ALTER TABLE <xsl:value-of select="$table"/> <xsl:value-of select="$column"/> SET DEFAULT <xsl:value-of select="default-value"/>;
@@ -80,7 +87,14 @@ COMMENT ON COLUMN <xsl:value-of select="$table"/>.<xsl:value-of select="$column"
 <!-- Add primary keys -->
 <xsl:template match="add-primary-key">
 <xsl:param name="table"/> 
-ALTER TABLE <xsl:value-of select="$table"/> ADD CONSTRAINT <xsl:value-of select="@name"/> PRIMARY KEY (<xsl:value-of select="column-name"/>);
+ALTER TABLE <xsl:value-of select="$table"/> 
+ADD CONSTRAINT <xsl:value-of select="@name"/><xsl:text> </xsl:text>
+PRIMARY KEY (
+  <xsl:for-each select="column-name">
+    <xsl:copy-of select="."/><xsl:if test="position() &lt; last()"><xsl:text>, 
+  </xsl:text></xsl:if>
+  </xsl:for-each>
+);  
 </xsl:template>
 
 <!-- Remove primary keys -->
