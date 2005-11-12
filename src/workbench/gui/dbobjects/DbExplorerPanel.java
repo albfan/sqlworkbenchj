@@ -627,14 +627,6 @@ public class DbExplorerPanel
 		this.mainWindow.explorerWindowClosed(this);
 	}
 
-//	public void mainWindowDeiconified()
-//	{
-//	}
-//
-//	public void mainWindowIconified()
-//	{
-//	}
-
 	public void updateUI()
 	{
 		super.updateUI();

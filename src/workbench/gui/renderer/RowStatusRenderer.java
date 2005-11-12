@@ -23,8 +23,7 @@ import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 
 /**
- *
- * @author  thomas.kellerer@mgm-edv.de
+ * @author  support@sql-workbench.net
  */
 public class RowStatusRenderer 
 	extends DefaultTableCellRenderer
@@ -32,20 +31,20 @@ public class RowStatusRenderer
 	private static final ImageIcon STATUS_MODIFIED_ICON = ResourceMgr.getPicture("modifiedrow");
 	private static final ImageIcon STATUS_NOT_MODIFIED_ICON = ResourceMgr.getPicture("blank");
 	private static final ImageIcon STATUS_NEW_ICON = ResourceMgr.getPicture("newrow");
+
+	private final String newTip = ResourceMgr.getString("TxtRowNew");
+	private final String modifiedTip = ResourceMgr.getString("TxtRowModified");
+	private final String notModifiedTip = ResourceMgr.getString("TxtRowNotModified");
 	
-	private JLabel label;
-	
-	/** Creates a new instance of NumberColumnRenderer */
 	public RowStatusRenderer()
 	{
-		this.label = new JLabel();
 		Dimension dim = new Dimension(18, 18);
-		this.label.setMaximumSize(dim);
-		this.label.setMinimumSize(dim);
-		this.label.setPreferredSize(dim);
-		this.label.setText(null);
-		this.label.setIconTextGap(0);
-		this.label.setHorizontalAlignment(JLabel.LEFT);
+		this.setMaximumSize(dim);
+		this.setMinimumSize(dim);
+		this.setPreferredSize(dim);
+		this.setText(null);
+		this.setIconTextGap(0);
+		this.setHorizontalAlignment(JLabel.LEFT);
 	}
 	
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
@@ -55,26 +54,26 @@ public class RowStatusRenderer
 			Integer status = (Integer)value;
 			if (status == DataStore.ROW_NEW)
 			{
-				this.label.setIcon(STATUS_NEW_ICON);
-				this.label.setToolTipText(ResourceMgr.getString("TxtRowNew"));
+				this.setIcon(STATUS_NEW_ICON);
+				this.setToolTipText(newTip);
 			}
 			else if (status == DataStore.ROW_MODIFIED)
 			{
-				this.label.setIcon(STATUS_MODIFIED_ICON);
-				this.label.setToolTipText(ResourceMgr.getString("TxtRowModified"));
+				this.setIcon(STATUS_MODIFIED_ICON);
+				this.setToolTipText(modifiedTip);
 			}
 			else
 			{
-				this.label.setIcon(STATUS_NOT_MODIFIED_ICON);
-				this.label.setToolTipText(ResourceMgr.getString("TxtRowNotModified"));
+				this.setIcon(STATUS_NOT_MODIFIED_ICON);
+				this.setToolTipText(notModifiedTip);
 			}			
 		}
 		catch (Exception e)
 		{
-			this.label.setIcon(STATUS_NOT_MODIFIED_ICON);
-			this.label.setToolTipText(ResourceMgr.getString("TxtRowNotModified"));
+			this.setIcon(STATUS_NOT_MODIFIED_ICON);
+			this.setToolTipText(notModifiedTip);
 		}
-		return this.label;
+		return this;
 	}
 	
 }

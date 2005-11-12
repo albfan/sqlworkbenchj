@@ -20,8 +20,8 @@
     and target columns can be specified as well</para>
 
     <para>Everything that can be done with the DataPumper, can also be accomplished
-    with the <link linkend="command-copy">COPY</link> command. The DataPumper can
-    also generate a script which executes the COPY command with the correct parameters
+    with the <link linkend="command-copy"><literal>WbCopy</literal></link> command. The DataPumper can
+    also generate a script which executes the <literal>WbCopy</literal> command with the correct parameters
     according to the current settings in the window. This can be used to create
     scripts which copy several tables.
     </para>
@@ -54,6 +54,10 @@
     connection you want to use as the source, and click OK. The DataPumper will then
     connect to the database. Connecting to the target database works similar. Simply
     click on the ellipsis next to the target profile box.</para>
+		<para>Instead of a database connection as the source, you can also select
+		a text or XML file as the source for the DataPumper. Thus it can also 
+		be used as a replacement of the <link linkend="command-import">WbImport</link> command.
+		</para>
 
     <para>The dropdown for the target table includes an entry labelled "(Create new table)". For details
     on how to create a new table during the copy process please refer to the
@@ -158,8 +162,8 @@
         For maximum performance, choose the update strategy that will result in a succssful
         first statement more often. As a rule of thumb:
         <itemizedlist>
-          <listitem><para>Use <literal>-mode=insert,upadte</literal>, if you expect more rows to be inserted then updated.</para></listitem>
-          <listitem><para>Use <literal>-mode=update,insert</literal>, if you expect more rows to be updated then inserted.</para></listitem>
+          <listitem>Use <literal>-mode=insert,upadte</literal>, if you expect more rows to be inserted then updated.</listitem>
+          <listitem>Use <literal>-mode=update,insert</literal>, if you expect more rows to be updated then inserted.</listitem>
         </itemizedlist>
       </para>
     </section>

@@ -45,7 +45,7 @@
       prepared statements refer to <link linkend="editor-prepared-statement">support for prepared statements</link> 
       </para>
       
-      <programlisting>#Define the ID that we need later
+<programlisting>#Define the ID that we need later
 var_id=42
 person_name=Dent
 another_variable=24</programlisting>

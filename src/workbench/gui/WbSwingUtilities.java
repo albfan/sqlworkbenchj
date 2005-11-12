@@ -34,6 +34,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import workbench.db.WbConnection;
 
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.resource.ResourceMgr;
@@ -469,5 +470,16 @@ public class WbSwingUtilities
 			}
 		});
 	} 
+
+	public static boolean checkConnection(Component parent, WbConnection dbConnection)
+	{
+		if (dbConnection.isBusy())
+		{
+			showMessageKey(parent, "ErrorConnectionBusy");
+			return false;
+		}
+		return true;
+	}
+	
 	
 }

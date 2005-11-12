@@ -22,6 +22,7 @@ import workbench.interfaces.TableSearchDisplay;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -44,25 +45,18 @@ public class TableSearcher
 
 	public TableSearcher()
 	{
-		this.createThread();
 	}
 
-	private Thread createThread()
+	public void search()
 	{
-		Thread t = new WbThread("TableSearcher Thread")
+		this.cancelSearch = false;
+		this.searchThread = new WbThread("TableSearcher Thread")
 		{
 			public void run()
 			{
 				doSearch();
 			}
 		};
-		return t;
-	}
-
-	public void search()
-	{
-		this.cancelSearch = false;
-		this.searchThread = this.createThread();
 		this.searchThread.start();
 	}
 
@@ -75,9 +69,9 @@ public class TableSearcher
 			if (this.query != null)
 			{
 				this.query.cancel();
-				if (this.getConnection().cancelNeedsReconnect())
+				if (this.connection.cancelNeedsReconnect())
 				{
-					this.getConnection().reconnect();
+					this.connection.reconnect();
 				}
 			}
 		}
@@ -183,20 +177,13 @@ public class TableSearcher
 		throws SQLException
 	{
 		DbMetadata meta = this.connection.getMetadata();
-		String tablename = aTable;
-		String schema = null;
-		int pos = aTable.indexOf('.');
-		if (pos > -1)
-		{
-			tablename = aTable.substring(pos + 1);
-			schema = aTable.substring(0, pos);
-		}
+		TableIdentifier tbl = new TableIdentifier(aTable);
 
-		DataStore def = meta.getTableDefinition(null, schema, tablename);
+		DataStore def = meta.getTableDefinition(tbl);
 		int cols = def.getRowCount();
 		StringBuffer sql = new StringBuffer(cols * 120);
 		sql.append("SELECT * FROM ");
-		sql.append(aTable);
+		sql.append(tbl.getTableExpression(this.connection));
 		sql.append("\n WHERE ");
 		boolean first = true;
 		int colcount = 0;
@@ -205,7 +192,7 @@ public class TableSearcher
 			String column = (String)def.getValue(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
 			Integer type = (Integer)def.getValue(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
 			int sqlType = type.intValue();
-			boolean isChar = (sqlType == Types.VARCHAR || sqlType == Types.CHAR);
+			boolean isChar = SqlUtil.isCharacterType(sqlType);
 			if (isChar)
 			{
 				colcount ++;
@@ -278,56 +265,32 @@ public class TableSearcher
 		return result;
 	}
 
-	/** Getter for property tableNames.
-	 * @return Value of property tableNames.
-	 *
-	 */
-	public java.util.List getTableNames()
+	public List getTableNames()
 	{
 		return tableNames;
 	}
 
-	/** Setter for property tableNames.
-	 * @param tableNames New value of property tableNames.
-	 *
-	 */
-	public void setTableNames(java.util.List tableNames)
+	public void setTableNames(List tables)
 	{
-		this.tableNames = tableNames;
+		this.tableNames = tables;
 	}
 
-	/** Getter for property display.
-	 * @return Value of property display.
-	 *
-	 */
-	public workbench.interfaces.TableSearchDisplay getDisplay()
+	public TableSearchDisplay getDisplay()
 	{
 		return display;
 	}
 
-	/** Setter for property display.
-	 * @param display New value of property display.
-	 *
-	 */
-	public void setDisplay(workbench.interfaces.TableSearchDisplay display)
+	public void setDisplay(TableSearchDisplay searchDisplay)
 	{
-		this.display = display;
+		this.display = searchDisplay;
 	}
 
-	/** Getter for property criteria.
-	 * @return Value of property criteria.
-	 *
-	 */
-	public java.lang.String getCriteria()
+	public String getCriteria()
 	{
 		return criteria;
 	}
 
-	/** Setter for property criteria.
-	 * @param aText New value of property criteria.
-	 *
-	 */
-	public void setCriteria(java.lang.String aText)
+	public void setCriteria(String aText)
 	{
     if (aText == null) return;
     if (aText.startsWith("'"))
@@ -344,38 +307,11 @@ public class TableSearcher
     return;
 	}
 
-	/** Getter for property connection.
-	 * @return Value of property connection.
-	 *
-	 */
-	public workbench.db.WbConnection getConnection()
+	public void setConnection(WbConnection conn)
 	{
-		return connection;
+		this.connection = conn;
 	}
 
-	/** Setter for property connection.
-	 * @param connection New value of property connection.
-	 *
-	 */
-	public void setConnection(workbench.db.WbConnection connection)
-	{
-		this.connection = connection;
-	}
-
-
-	/** Getter for property maxRows.
-	 * @return Value of property maxRows.
-	 *
-	 */
-	public int getMaxRows()
-	{
-		return maxRows;
-	}
-
-	/** Setter for property maxRows.
-	 * @param maxRows New value of property maxRows.
-	 *
-	 */
 	public void setMaxRows(int maxRows)
 	{
 		this.maxRows = maxRows;

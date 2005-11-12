@@ -100,7 +100,7 @@ public class DbMetadata
 	private String productName;
 	private String dbId;
 
-	DatabaseMetaData metaData;
+	private DatabaseMetaData metaData;
 	private WbConnection dbConnection;
 
 	// Specialized classes to retrieve metadata that is either not
@@ -418,7 +418,14 @@ public class DbMetadata
 
 		tableTypeName = settings.getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
 		TABLE_TYPES_TABLE = new String[] {tableTypeName};
-		TABLE_TYPES_SELECTABLE = new String[] {tableTypeName, TABLE_TYPE_VIEW, "SYNONYM"};
+		if (this.isOracle)
+		{
+			TABLE_TYPES_SELECTABLE = new String[] {tableTypeName, TABLE_TYPE_VIEW, "SYNONYM"};
+		}
+		else
+		{
+			TABLE_TYPES_SELECTABLE = new String[] {tableTypeName, TABLE_TYPE_VIEW};
+		}
 
 		String quote = settings.getProperty("workbench.db.neverquote","");
 		this.neverQuoteObjects = quote.indexOf(this.getDbId()) > -1;
@@ -426,6 +433,7 @@ public class DbMetadata
 	}
 
 	public String getTableTypeName() { return tableTypeName; }
+	public String getViewTypeName() { return TABLE_TYPE_VIEW; }
 	public String[] getTypeListView() { return TABLE_TYPES_VIEW; }
 	public String[] getTypeListTable() { return TABLE_TYPES_TABLE; }
 	public String[] getTypeListSelectable() { return TABLE_TYPES_SELECTABLE; }
@@ -1568,6 +1576,17 @@ public class DbMetadata
 	 */
 	public boolean tableExists(TableIdentifier aTable)
 	{
+		return objectExists(aTable, TABLE_TYPES_TABLE);
+	}
+	
+	public boolean objectExists(TableIdentifier aTable, String type)
+	{
+		String[] types = new String[] { type };
+		return objectExists(aTable, types);
+	}
+	
+	public boolean objectExists(TableIdentifier aTable, String[] types)
+	{
 		if (aTable == null) return false;
 		boolean exists = false;
 		ResultSet rs = null;
@@ -1577,7 +1596,7 @@ public class DbMetadata
 			String c = StringUtil.trimQuotes(aTable.getCatalog());
 			String s = StringUtil.trimQuotes(aTable.getSchema());
 			String t = StringUtil.trimQuotes(aTable.getTableName());
-			rs = this.metaData.getTables(c, s, t, TABLE_TYPES_TABLE);
+			rs = this.metaData.getTables(c, s, t, types);
 			exists = rs.next();
 		}
 		catch (Exception e)
@@ -2303,6 +2322,13 @@ public class DbMetadata
 		return idxData;
 	}
 
+	public List getTableList(String schema, String[] types)
+		throws SQLException
+	{
+		if (schema == null) schema = this.getCurrentSchema();
+		return getTableList(null, schema, types);
+	}
+	
 	public List getTableList()
 		throws SQLException
 	{
@@ -2323,7 +2349,7 @@ public class DbMetadata
 	}
 
 	/**
-	 *	Return a list of tables for the given schema
+	 * Return a list of tables for the given schema
 	 * if the schema is null, all tables will be returned
 	 */
 	public List getTableList(String table, String schema, String[] types)

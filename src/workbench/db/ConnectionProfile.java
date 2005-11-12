@@ -44,7 +44,7 @@ public class ConnectionProfile
 	private boolean changed;
 	private boolean isNew;
 	private boolean storePassword = true;
-	private boolean separateConnection = true;
+	private boolean separateConnection;
 	private Properties connectionProperties;
 	private String workspaceFile;
 	private boolean ignoreDropErrors;

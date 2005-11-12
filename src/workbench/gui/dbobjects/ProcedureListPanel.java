@@ -20,6 +20,8 @@ import java.awt.event.ActionListener;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -33,6 +35,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableCellRenderer;
 
 import workbench.db.DbMetadata;
 import workbench.db.ProcedureReader;
@@ -45,14 +48,17 @@ import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
+import workbench.gui.menu.GenerateScriptMenuItem;
+import workbench.gui.renderer.ProcStatusRenderer;
 import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.util.SqlUtil;
-import workbench.util.WbThread;
+import workbench.util.StringUtil;
 import javax.swing.JLabel;
+import workbench.db.ObjectScripter;
+import workbench.db.ProcedureDefinition;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.QuickFilterPanel;
 import workbench.interfaces.CriteriaPanel;
@@ -67,6 +73,7 @@ public class ProcedureListPanel
 	extends JPanel
 	implements ListSelectionListener, Reloadable, ActionListener
 {
+	//<editor-fold defaultstate="collapsed" desc="Variables">
 	private WbConnection dbConnection;
 	private JPanel listPanel;
 	private CriteriaPanel findPanel;
@@ -81,8 +88,13 @@ public class ProcedureListPanel
 	private boolean shouldRetrieve;
 	private WbMenuItem dropTableItem;
 	private WbMenuItem recompileItem;
+	private WbMenuItem createScriptItem;
 	private JLabel infoLabel;
-
+	private boolean isRetrieving;
+	private ProcStatusRenderer statusRenderer;
+	//</editor-fold>
+	
+	private static final String SCRIPT_CMD = "create-script";
 	private static final String DROP_CMD = "drop-object";
 	private static final String COMPILE_CMD = "compile-procedure";
 
@@ -111,7 +123,16 @@ public class ProcedureListPanel
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), scroll);
 
 		this.listPanel = new JPanel();
-		this.procList = new WbTable();
+		this.statusRenderer = new ProcStatusRenderer();
+		this.procList = new WbTable()
+		{
+			public TableCellRenderer getCellRenderer(int row, int column) 
+			{
+				if (column == ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE) return statusRenderer;
+				return super.getCellRenderer(row, column);
+			}
+		};
+		
 		this.procList.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		this.procList.setCellSelectionEnabled(false);
 		this.procList.setColumnSelectionAllowed(false);
@@ -162,6 +183,10 @@ public class ProcedureListPanel
 	{
 		JPopupMenu popup = this.procList.getPopupMenu();
 		popup.addSeparator();
+		this.createScriptItem = new GenerateScriptMenuItem();
+		this.createScriptItem.addActionListener(this);
+		popup.add(this.createScriptItem);
+		popup.addSeparator();
 		this.dropTableItem = new WbMenuItem(ResourceMgr.getString("MnuTxtDropDbObject"));
 		this.dropTableItem.setActionCommand(DROP_CMD);
 		this.dropTableItem.addActionListener(this);
@@ -186,7 +211,7 @@ public class ProcedureListPanel
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
-		this.source.getSqlTokenMarker().initDatabaseKeywords(aConnection);
+		this.source.setDatabaseConnection(aConnection);
 		this.reset();
 
 		if (this.recompileItem != null)
@@ -214,12 +239,6 @@ public class ProcedureListPanel
 		}
 	}
 
-	public void setCatalogAndSchema(String aCatalog, String aSchema)
-		throws Exception
-	{
-		this.setCatalogAndSchema(aCatalog, aSchema, true);
-	}
-
 	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)
 		throws Exception
 	{
@@ -229,7 +248,7 @@ public class ProcedureListPanel
 		if (this.isVisible() && retrieve)
 		{
 			this.retrieve();
-			this.procList.requestFocusInWindow();
+			//this.procList.requestFocusInWindow();
 		}
 		else
 		{
@@ -243,51 +262,45 @@ public class ProcedureListPanel
 		if (this.shouldRetrieve) this.retrieve();
 	}
 
-	public void startRetrieve()
-	{
-		Thread t = new WbThread("ProcedureListPanel retrieve thread")
-		{
-			public void run()
-			{
-				retrieve();
-			}
-		};
-		t.start();
-	}
-
 	public void retrieve()
 	{
-		synchronized (retrieveLock)
+		if (this.isRetrieving) return;
+		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
+		
+		try
 		{
-			try
-			{
-				DbMetadata meta = dbConnection.getMetadata();
-				WbSwingUtilities.showWaitCursorOnWindow(this);
-				DataStoreTableModel model = new DataStoreTableModel(meta.getProcedures(currentCatalog, currentSchema));
-				int rows = model.getRowCount();
-				String info = rows + " " + ResourceMgr.getString("TxtTableListObjects");
-				this.infoLabel.setText(info);
-				procList.setModel(model, true);
-				procList.adjustColumns();
-				shouldRetrieve = false;
-			}
-			catch (OutOfMemoryError mem)
-			{
-				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
-			}
-			catch (Throwable e)
-			{
-				LogMgr.logError("ProcedureListPanel.retrieve() thread", "Could not retrieve procedure list", e);
-			}
-			finally
-			{
-				WbSwingUtilities.showDefaultCursorOnWindow(this);
-			}
+			this.dbConnection.setBusy(true);
+			this.isRetrieving = true;
+			DbMetadata meta = dbConnection.getMetadata();
+			WbSwingUtilities.showWaitCursorOnWindow(this);
+			DataStoreTableModel model = new DataStoreTableModel(meta.getProcedures(currentCatalog, currentSchema));
+			int rows = model.getRowCount();
+			String info = rows + " " + ResourceMgr.getString("TxtTableListObjects");
+			this.infoLabel.setText(info);
+			procList.setModel(model, true);
+			procList.adjustColumns();
+			shouldRetrieve = false;
 		}
+		catch (OutOfMemoryError mem)
+		{
+			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
+		}
+		catch (Throwable e)
+		{
+			LogMgr.logError("ProcedureListPanel.retrieve() thread", "Could not retrieve procedure list", e);
+		}
+		finally
+		{
+			this.isRetrieving = false;
+			this.dbConnection.setBusy(false);
+			WbSwingUtilities.showDefaultCursorOnWindow(this);
+		}
+
 	}
 
 	private void dropObjects()
 	{
+		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		if (this.procList.getSelectedRowCount() == 0) return;
 		int rows[] = this.procList.getSelectedRows();
 		int count = rows.length;
@@ -340,7 +353,6 @@ public class ProcedureListPanel
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
-		final Container parent = this.getParent();
 		int row = this.procList.getSelectedRow();
 
 		if (row < 0) return;
@@ -354,47 +366,81 @@ public class ProcedureListPanel
 		final String schema = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
 		final String catalog = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
 		final int type = this.procList.getDataStore().getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
-		EventQueue.invokeLater(new Runnable()
+		EventQueue.invokeLater(new Runnable() 
 		{
 			public void run()
 			{
-				synchronized (retrieveLock)
-				{
-					DbMetadata meta = dbConnection.getMetadata();
-					parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					try
-					{
-						procColumns.setVisible(false);
-						DataStoreTableModel model = new DataStoreTableModel(meta.getProcedureColumns(catalog, schema, proc));
-						procColumns.setModel(model, true);
-						procColumns.adjustColumns();
-						procColumns.setVisible(true);
-					}
-					catch (Exception ex)
-					{
-						LogMgr.logError("ProcedureListPanel.valueChanged() thread", "Could not read procedure definition", ex);
-						procColumns.reset();
-						procColumns.setVisible(true);
-					}
-
-					try
-					{
-						String sql = meta.getProcedureSource(catalog, schema, proc, type);
-						source.setText(sql);
-					}
-					catch (Exception ex)
-					{
-						LogMgr.logError("ProcedureListPanel.valueChanged() thread", "Could not read procedure source", ex);
-						source.setText(ex.getMessage());
-					}
-					source.setCaretPosition(0);
-
-					parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-				}
+				retrieveProcColumns(catalog, schema, proc, type);
 			}
 		});
 	}
 
+	private void retrieveProcColumns(String catalog, String schema, String proc, int type)
+	{
+		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
+		DbMetadata meta = dbConnection.getMetadata();
+		Container parent = this.getParent();
+		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		try
+		{
+			try
+			{
+				dbConnection.setBusy(true);
+				procColumns.setVisible(false);
+				DataStoreTableModel model = new DataStoreTableModel(meta.getProcedureColumns(catalog, schema, proc));
+				procColumns.setModel(model, true);
+				procColumns.adjustColumns();
+			}
+			catch (Exception ex)
+			{
+				LogMgr.logError("ProcedureListPanel.valueChanged() thread", "Could not read procedure definition", ex);
+				procColumns.reset();
+			}
+			finally
+			{
+				procColumns.setVisible(true);
+			}
+
+			try
+			{
+				String sql = meta.getProcedureSource(catalog, schema, proc, type);
+				source.setText(sql);
+			}
+			catch (Exception ex)
+			{
+				LogMgr.logError("ProcedureListPanel.valueChanged() thread", "Could not read procedure source", ex);
+				source.setText(ex.getMessage());
+			}
+		}
+		finally
+		{
+			parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			dbConnection.setBusy(false);
+		}
+		source.setCaretPosition(0);
+	}
+	
+	private void createScript()
+	{
+		if (this.procList.getSelectedRowCount() == 0) return;
+		int rows[] = this.procList.getSelectedRows();
+		int count = rows.length;
+		HashMap procs = new HashMap(count);
+		for (int i = 0; i < count; i++)
+		{
+			String proc = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
+			String schema = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
+			String catalog = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
+			int type = this.procList.getDataStore().getValueAsInt(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
+			ProcedureDefinition def = new ProcedureDefinition(catalog, schema, proc, type);
+			procs.put(def, "PROCEDURE");
+		}
+		ObjectScripter s = new ObjectScripter(procs, this.dbConnection);
+		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
+		scripterUI.show(SwingUtilities.getWindowAncestor(this));
+		
+	}
+	
 	private void readSelecteItems(ArrayList names, ArrayList types)
 	{
 		if (this.procList.getSelectedRowCount() == 0) return;
@@ -415,14 +461,24 @@ public class ProcedureListPanel
 			String schema = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
       if (schema != null && schema.length() > 0)
       {
-  			name = SqlUtil.quoteObjectname(schema) + "." + SqlUtil.quoteObjectname(name);
+  			name = dbConnection.getMetadata().quoteObjectname(schema) + "." + dbConnection.getMetadata().quoteObjectname(name);
       }
       else
       {
-        name = SqlUtil.quoteObjectname(name);
+        name = dbConnection.getMetadata().quoteObjectname(name);
       }
 
-			String type = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE);
+			int procType = this.procList.getDataStore().getValueAsInt(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
+			String type = StringUtil.EMPTY_STRING;
+			if (procType == DatabaseMetaData.procedureReturnsResult)
+			{
+				type = "FUNCTION";
+			}
+			else if (procType == DatabaseMetaData.procedureNoResult)
+			{
+				type = "PROCEDURE";
+			}
+			
 			if (this.dbConnection.getMetadata().isOracle())
 			{
 				// Oracle reports the type of the procedure in a rather strange way.
@@ -433,29 +489,10 @@ public class ProcedureListPanel
 				{
 					type = "PACKAGE";
 
-					// the procedure itself cannot neither be dropped
+					// the procedure itself can neither be dropped
 					// nor recompiled. So we use the name of the package
 					// as the object name
 					name = catalog;
-				}
-      	else if ("RESULT".equalsIgnoreCase(type))
-      	{
-        	type = "FUNCTION";
-				}
-				else if ("NO RESULT".equalsIgnoreCase(type))
-				{
-					type = "PROCEDURE";
-				}
-			}
-			else
-			{
-				if ("RESULT".equalsIgnoreCase(type))
-      	{
-        	type = "FUNCTION";
-				}
-				else if ("NO RESULT".equalsIgnoreCase(type))
-				{
-					type = "PROCEDURE";
 				}
 			}
 			names.add(name);
@@ -503,5 +540,16 @@ public class ProcedureListPanel
 		{
 			this.compileObjects();
 		}
+		else if (e.getSource() == this.createScriptItem)
+		{
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					createScript();
+				}
+			});
+		}
+		
 	}
 }

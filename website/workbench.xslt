@@ -96,15 +96,15 @@
             <xsl:value-of select="$imageTitle"/>
           </xsl:if>
         </title>
-      <meta http-equiv="Pragma" CONTENT="no-cache"/>
-      <meta http-equiv="Expires" content="-1"/>
-      <meta name="description" content="A free DBMS-independent SQL query tool and front-end"/>
-      <meta name="keywords" lang="en" content="sql,query,query analyzer,jdbc,database,isql,viewer,frontend,java,dbms,oracle,postgres,firebirdsql,hsql,hsqldb,sqlserver,sqlplus,replacement,import,export,convert,insert,xml,etl,migrate"/>
-        <meta name="date">
-        <xsl:attribute name="content"><xsl:value-of select="$currentDate"/></xsl:attribute>
-        </meta>
-      <meta name="robots" content="follow"/>
-        <link href="wb.css" rel="stylesheet" type="text/css"></link>
+		<meta http-equiv="Pragma" CONTENT="no-cache"/>
+		<meta http-equiv="Expires" content="-1"/>
+		<meta name="description" content="A free DBMS-independent SQL query tool and front-end"/>
+		<meta name="keywords" lang="en" content="sql,query,tool,analyzer,jdbc,database,isql,viewer,frontend,java,dbms,oracle,postgres,firebirdsql,hsql,hsqldb,sqlserver,sqlplus,replacement,import,export,convert,insert,xml,etl,migrate,compare,diff"/>
+	    <meta name="date">
+	    	<xsl:attribute name="content"><xsl:value-of select="$currentDate"/></xsl:attribute>
+	    </meta>
+		<meta name="robots" content="follow"/>
+		<link href="wb.css" rel="stylesheet" type="text/css"></link>
     </head>
     <body>
     <table style="margin-right:10px;margin-left:5px;" border="0" cellpadding="0" cellspacing="0">
@@ -151,7 +151,7 @@
                     <img src="{$imageName}"/>
                 </td>
             </xsl:if>
-            <xsl:if test="not($imageName)">
+            <xsl:if test="not(imageName)">
                   <td class="content">
                     <xsl:apply-templates select="content"/>
                 </td>
@@ -225,9 +225,14 @@
             Basically I'm using these builds myself on a daily basis, and it should be pretty safe to use them.<br/><br/>
             Bugfixes will show up in these builds first. <a href="dev-history.txt" target="_blank">Change history</a>
         </p>
+        <p>The development build is not a full release. It contains only the Workbench.jar binary. The update
+        help is contained in that file, but no PDF or HTML help files are available. The source code
+        for the development build is also available.
+        </p>
       <ul>
-        <li><a href="Workbench.jar">Build <xsl:value-of select="$devBuildNumber"/></a> (JAR File, <xsl:value-of select="$devBuildDate"/>)</li>
-        </ul>
+        <li><a href="Workbench.jar">JAR File</a> (Build <xsl:value-of select="$devBuildNumber"/>,&nbsp;<xsl:value-of select="$devBuildDate"/>)</li>
+        <li><a href="WorkbenchSrc-Build{$devBuildNumber}.zip">Source code</a></li>
+       </ul>
     </xsl:if>
 </xsl:template>
     

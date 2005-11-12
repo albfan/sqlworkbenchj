@@ -22,13 +22,21 @@ FROM person p, address a;</programlisting>
 			<literal>WHERE</literal> part of an statement is similar.</para>
 			<para>When editing the list of tables in the <literal>FROM</literal> part of the statement,
 			pressing the <keycap>Ctrl-Q</keycap> will pop up a list of available tables.</para>
+			
+			<para>Usually a semicolon is used to separate statements in the editor. However 
+			for the auto completion of object names, this behaviour can be <link linkend="auto-completion-empty-line">configured</link>
+			to also	accept an empty line as a separator.</para>
     </section>
     
     <section id="editing-files">
       <title>Editing files</title>
       <para>You can also load and save the editor's content into external files (e.g. for re-using)
-      them in other SQL tools</para>
-      
+      them in other SQL tools
+      </para>
+      <para>The association between an editor tab and the external file will be saved
+      in the workspace that is used for the current connection. When opening the 
+      workspace (e.g. by connecting using a profile that is linked to that workspace) the
+      external file will be loaded as well.</para>
     </section>
     
       <section id="editor-reformat-sql" xreflabel="SQL Formatter">
@@ -38,6 +46,7 @@ FROM person p, address a;</programlisting>
         into a format that's easier to read and understand for a human beeing. This feature is often called pretty-printing.
         Suppose you have the following statement (pasted from a log file)
         </para>
+				
 <programlisting>select user.* from user, user_profile, user_data 
 where user.user_id = user_profile.user_id and 
 user_profile.user_id = uprof.user_id and user_data.user_role = 1 

@@ -19,7 +19,7 @@ package workbench.gui.renderer;
  * instead of toString() which is much faster when no exceptions
  * are thrown. 
  *
- * @author  thomas.kellerer@mgm-edv.de
+ * @author  support@sql-workbench.net
  */
 public class StringColumnRenderer extends ToolTipRenderer
 {

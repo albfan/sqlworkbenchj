@@ -21,6 +21,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.sql.Clob;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
@@ -38,6 +39,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import workbench.db.DbMetadata;
@@ -358,6 +360,8 @@ public class TableSearchPanel
 		}
 	}
 
+	private ResultHighlightingRenderer renderer;
+	
 	public synchronized void addResultRow(String aTablename, ResultSet aResult)
 	{
 		try
@@ -369,13 +373,25 @@ public class TableSearchPanel
 				// (or only results from one database table where returned)
 				// therefor it's important to call this in searchEnded() as well
 				this.adjustDataTable();
-				this.currentDisplayTable = new WbTable();
+				if (renderer == null)
+				{
+					renderer = new ResultHighlightingRenderer(this.searchPattern);
+				}
+				
+				this.currentDisplayTable = new WbTable()
+				{
+					public TableCellRenderer getCellRenderer(int row, int column) 
+					{
+						return renderer;
+					}
+				};
+				this.currentDisplayTable.setDefaultRenderer(String.class, renderer);
 				this.currentDisplayTable.setUseDefaultStringRenderer(false);
 				if (this.firstTable == null)
 				{
 					this.firstTable = this.currentDisplayTable;
 				}
-				this.currentDisplayTable.setDefaultRenderer(String.class, new ResultHighlightingRenderer(this.searchPattern));
+				//this.currentDisplayTable.setDefaultRenderer(Object.class, rend);
 				this.currentResult = new DataStore(aResult);
 				DataStoreTableModel model = new DataStoreTableModel(this.currentResult);
 				this.currentDisplayTable.setModel(model, true);
@@ -691,10 +707,32 @@ public class TableSearchPanel
 
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
 		{
-			JLabel result = (JLabel)super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			String displayValue = null;
+			if (value != null)
+			{
+				if (value instanceof Clob)
+				{
+					Clob clob = (Clob)value;
+					try
+					{
+						long len = clob.length();
+						displayValue = clob.getSubString(1, (int)len);
+					}
+					catch (Throwable th)
+					{
+						displayValue = null;
+					}
+				}
+				else
+				{
+					displayValue = value.toString();
+				}
+			}
+			JLabel result = (JLabel)super.getTableCellRendererComponent(table, displayValue, isSelected, hasFocus, row, column);
+			
 			try
 			{
-				if (!isSelected && value != null && value instanceof String && this.pattern.like((String)value))
+				if (!isSelected && value != null && displayValue instanceof String && this.pattern.like(displayValue))
 				{
 					result.setBackground(Color.YELLOW);
 					result.setForeground(Color.BLACK);

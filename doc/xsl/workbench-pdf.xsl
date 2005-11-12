@@ -6,11 +6,9 @@
 
   <!--  Original DocBook Stylesheet    -->
   <xsl:import href="../docbook/fo/docbook.xsl"/>
-
   <xsl:attribute-set name="section.title.level1.properties">
     <xsl:attribute name="break-before">page</xsl:attribute>
   </xsl:attribute-set>
-
   
 </xsl:stylesheet>
 

@@ -22,10 +22,10 @@ import workbench.gui.components.WbTable;
 import workbench.util.SqlUtil;
 
 /**
- *
- * @author  thomas.kellerer@mgm-edv.de
+ * @author  support@sql-workbench.net
  */
-public class SqlTypeRenderer extends DefaultTableCellRenderer
+public class SqlTypeRenderer 
+	extends DefaultTableCellRenderer
 {
 	private Color selectedForeground;
 	private Color selectedBackground;

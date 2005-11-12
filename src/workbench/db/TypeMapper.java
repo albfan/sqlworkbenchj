@@ -21,6 +21,10 @@ import java.util.List;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 
+/**
+ * A class to map datatypes from one DBMS to another.
+ * @author support@sql-workbench.net
+ */
 public class TypeMapper
 {
 	private WbConnection dbConn;

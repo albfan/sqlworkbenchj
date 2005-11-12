@@ -15,15 +15,18 @@ import javax.swing.text.Segment;
  * SQL token marker.
  *
  * @author mike dillon
- * @version $Id: SQLTokenMarker.java,v 1.5 2005-02-02 20:57:10 thomas Exp $
+ * @version $Id: SQLTokenMarker.java,v 1.6 2005-11-12 22:49:27 thomas Exp $
  */
-public class SQLTokenMarker extends TokenMarker
+public class SQLTokenMarker 
+	extends TokenMarker
 {
 	private int offset, lastOffset, lastKeyword, length;
+	protected boolean isMySql = false;
+	protected KeywordMap keywords;
+	private char literalChar = 0;
 
-	public SQLTokenMarker(KeywordMap k)
+	public SQLTokenMarker()
 	{
-		keywords = k;
 	}
 
 	public byte markTokensImpl(byte token, Segment line, int lineIndex)
@@ -165,13 +168,6 @@ loop:
 			addToken(length - lastOffset,token);
 		return token;
 	}
-
-	// protected members
-	protected boolean isMySql = false;
-
-	// private members
-	private KeywordMap keywords;
-	private char literalChar = 0;
 
 	private void searchBack(Segment line, int pos)
 	{

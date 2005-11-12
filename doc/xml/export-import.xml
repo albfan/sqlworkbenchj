@@ -18,12 +18,10 @@
             choose <menuchoice><guimenu>Data</guimenu><guimenuitem>Save Data as</guimenuitem></menuchoice>
             You will be prompted for the filename. On the right side of the file dialog
             you will have the possibility to define the type of the export. 
-        </para>
-        <para>
-            The export parameters to the right side are split into two parts. The upper part
-            defines parameters that are available for all export types. These are the encoding
-            for the file, the format for date and date/time data and the columns 
-            that should be exported.
+            The export parameters on the right side of the dialog are split into two parts. 
+            The upper part defines parameters that are available for all export types. 
+			These are the encoding for the file, the format for date and date/time data 
+            and the columns that should be exported.
         </para>
         <para>
             All format specific options that are available in the lower part, are also 
@@ -41,10 +39,11 @@
         <para>Please keep in mind that exporting the data from the result set
             requires you to load everything into memory. If you need to export
             data sets which are too big to fit into memory, you should use the 
-            <link linkend="command-export">WBEXPORT</link> command to either
+            <link linkend="command-export">WbExport</link> command to either
             create SQL scripts or to save the data as text or XML files that
-            can be imported into the database using the <link linkend="command-import">WBIMPORT</link>
-            command.
+            can be imported into the database using the <link linkend="command-import">WbImport</link>
+            command. You can also use  <menuchoice><guimenu>SQL</guimenu><guimenuitem>Export query result</guimenuitem></menuchoice>
+            to export the result of the currently selected SQL statement.            
         </para>
     </section>
     

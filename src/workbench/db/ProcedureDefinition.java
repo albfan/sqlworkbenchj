@@ -11,6 +11,8 @@
  */
 package workbench.db;
 
+import java.sql.DatabaseMetaData;
+
 /**
  *
  * @author support@sql-workbench.net
@@ -39,6 +41,19 @@ public class ProcedureDefinition
 	public String getSchema() { return this.schema; }
 	public String getProcedureName() { return this.procName; }
 	public int getResultType() { return this.resultType; }
+	
+	public String getResultTypeDisplay()
+	{
+		if (resultType == DatabaseMetaData.procedureReturnsResult)
+		{
+			return "FUNCTION";
+		}
+		else if (resultType == DatabaseMetaData.procedureNoResult)
+		{
+			return "PROCEDURE";
+		}
+		return "";
+	}
 	
 	public String toString()
 	{

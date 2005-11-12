@@ -56,13 +56,6 @@ public class TableDiff
 		this.targetTable = target;
 	}
 
-	public void writeXml(Writer out)
-		throws IOException
-	{
-		StrBuffer result = this.getMigrateTargetXml();
-		result.writeTo(out);
-	}
-	
 	public void setCompareComments(boolean flag) { this.compareComments = flag; }
 	public void setCompareForeignKeys(boolean flag) { this.compareFK = flag; }
 	

@@ -55,6 +55,8 @@ public class WbSchemaReport
 		cmdLine.addArgument("schemas");
 		cmdLine.addArgument("format");
 		cmdLine.addArgument("useschemaname");
+		cmdLine.addArgument("includeprocedures");
+		cmdLine.addArgument("includetables");
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 	}
@@ -150,10 +152,12 @@ public class WbSchemaReport
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
 		}
 
+		this.reporter.setIncludeTables(cmdLine.getBoolean("includetables", true));
+		this.reporter.setIncludeProcedures(cmdLine.getBoolean("includeprocedures", false));
+		
 		if (aConnection.getMetadata().isOracle())
 		{
-			// check if remarksReporting is turned on for Oracle, if not
-			// issue a warning.
+			// check if remarksReporting is turned on for Oracle, if not issue a warning.
 			ConnectionProfile prof = aConnection.getProfile();
 			Properties props = prof.getConnectionProperties();
 			String value = "false";

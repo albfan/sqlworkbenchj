@@ -34,6 +34,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -216,8 +217,24 @@ public class EditorPanel
 	{
 		if (aConnection == null) return;
 		AnsiSQLTokenMarker token = this.getSqlTokenMarker();
-		if (token != null) token.initDatabaseKeywords(aConnection);
 		this.dbFunctions = aConnection.getMetadata().getDbFunctions();
+		if (token != null) 
+		{
+			token.initKeywordMap(); // reset keywords, to get rid of old DBMS specific ones
+			
+			Collection keywords = aConnection.getMetadata().getSqlKeywords();
+			token.setSqlKeyWords(keywords);
+			token.setSqlFunctions(this.dbFunctions);
+			
+			String key = "workbench.db." + aConnection.getMetadata().getDbId() + ".syntax.";
+
+			List addKeys = StringUtil.stringToList(Settings.getInstance().getProperty(key  + "keywords", ""), ",", true, true);
+			token.setSqlKeyWords(addKeys);
+			addKeys = StringUtil.stringToList(Settings.getInstance().getProperty(key  + "functions", ""), ",", true, true);
+			token.setSqlFunctions(addKeys);			
+			token.setIsMySQL(aConnection.getMetadata().isMySql());
+		}
+		
 		if (aConnection.getMetadata().isMySql())
 		{
 			this.commentChar = "#";

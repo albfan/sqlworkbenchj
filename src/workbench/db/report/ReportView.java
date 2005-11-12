@@ -135,12 +135,15 @@ public class ReportView
 		line.writeTo(out);
 	}
 
+	
 	public StrBuffer getXml()
 	{
 		return getXml(new StrBuffer("  "));
 	}
 	
-	public String getTableComment() { return this.viewComment; }
+	public TableIdentifier getView() { return this.view; }
+	public String getViewComment() { return this.viewComment; }
+	public String getViewSource() { return this.viewSource; }
 	
 	public void appendTableNameXml(StrBuffer toAppend, StrBuffer indent)
 	{
@@ -150,7 +153,7 @@ public class ReportView
 	}
 
 	/**
-	 * Return an XML representation of this table information.
+	 * Return an XML representation of this view information.
 	 * The columns will be listed alphabetically not in the order
 	 * they were retrieved from the database.
 	 */

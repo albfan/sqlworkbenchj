@@ -103,9 +103,10 @@ public class StoreableKeyStroke
 		int mod = this.key.getModifiers();
 		int code = this.key.getKeyCode();
 		
-		if (modifier == 0)
+		String modText = KeyEvent.getKeyModifiersText(mod);
+		if (modText.length() == 0)
 			return KeyEvent.getKeyText(code);
 		else
-			return KeyEvent.getKeyModifiersText(mod) + "-" + KeyEvent.getKeyText(code);
+			return  modText + "-" + KeyEvent.getKeyText(code);
 	}
 }

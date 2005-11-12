@@ -55,6 +55,7 @@ public class WbDiff
 	public static final String PARAM_INCLUDE_FK = "includeforeignkeys";
 	public static final String PARAM_INCLUDE_PK = "includeprimarykeys";
 	public static final String PARAM_INCLUDE_CONSTRAINTS = "includeconstraints";
+	public static final String PARAM_INCLUDE_VIEWS = "includeviews";
 	//public static final String PARAM_INCLUDE_COMMENTS = "includecomments";
 		
 	private ArgumentParser cmdLine;
@@ -186,6 +187,7 @@ public class WbDiff
 		diff.setIncludeIndex(cmdLine.getBoolean(PARAM_INCLUDE_INDEX, true));
 		diff.setIncludePrimaryKeys(cmdLine.getBoolean(PARAM_INCLUDE_PK, true));
 		diff.setIncludeTableConstraints(cmdLine.getBoolean(PARAM_INCLUDE_CONSTRAINTS, true));
+		diff.setIncludeViews(cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true));
 		//diff.setIncludeComments(cmdLine.getBoolean(PARAM_INCLUDE_COMMENTS, false));
 		
 		String refTables = cmdLine.getValue(PARAM_SOURCETABLES);

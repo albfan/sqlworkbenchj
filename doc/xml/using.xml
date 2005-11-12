@@ -126,15 +126,15 @@ COMMIT</programlisting>
       <para>You can run any statement that is valid for the current DBMS. If
         the statement returns a result set, it will be displayed, otherwise
         any messages from the server will be displayed in the messages tab. To
-        add or remove tab pages, right click on the tab header and choose
+        add or remove editor pages, right click on the tab header and choose
       <guimenuitem>Add tab</guimenuitem> or <guimenuitem>Close tab</guimenuitem>).
-        The number of tabs is stored in
-        the associated workspace. If you do not have a workspace assigned to
-        the current profile, the tab count will be stored in the default
-        workspace.</para>
+				You can re-order the tabs by right clicking on the tab label, then 
+				choose <guimenuitem>Move left</guimenuitem> or <guimenuitem>Move right</guimenuitem>
+				to change the position of the tab.
+			</para>
 
 
-      <para>The statement is executed by either pressing <keycap>F9</keycap>, <keycap>Ctrl-E</keycap> or
+      <para>A statement is executed by either pressing <keycap>F9</keycap>, <keycap>Ctrl-E</keycap> or
         clicking the <literal>Execute Selected</literal> button
       <guiicon><inlinegraphic fileref="@IMAGE_DIR@/ExecuteSel16.gif" format="GIF"/></guiicon>
 				in the toolbar. This will execute the currently selected
@@ -203,7 +203,7 @@ END;
       <para>Note the trailing <literal>./</literal> at the end in order to "turn on" the
         use of the alternate delimiter.</para>
 
-      <para><emphasis role="bold">When is the alternate delimiter used?</emphasis></para>
+      <para id="alternate-delimiter-usage"><emphasis role="bold">When is the alternate delimiter used?</emphasis></para>
 
       <para>As soon as the statement (or script) that you execute is terminated with the
         alternate delimiter, the alternate delimiter is used to separate the individual
@@ -535,6 +535,18 @@ Done.</programlisting>
       </para>
     </section>
     
+    <section id="using-copy-clipboard">
+        <title>Copying result data to the clipboard</title>
+        <para>Once you have retrieved data and it is displayed in the result set table,
+            you can copy the data to the clipboard in various formats. These are the same
+            formats available when exporting data using the <link linkend="command-export">WbExport</link>
+            command.
+        </para>
+        <para>Cou can either copy all the data, or only selected rows to the clipboard. 
+            When you select the menu item while holding down the <keycap>Control</keycap> key
+            you will be able to select the columns that should be part of the data to be copied.
+        </para>
+    </section>
     
     <section id="filter-data">
       <title>Filtering the result</title>

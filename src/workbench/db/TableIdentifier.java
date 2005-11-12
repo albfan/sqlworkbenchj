@@ -47,7 +47,7 @@ public class TableIdentifier
 	}
 
 	/**
-	 *	Initialize a TableIdentifier for a new (to be defined) table
+	 * Initialize a TableIdentifier for a new (to be defined) table
 	 * This is mainly used by the {@link workbench.db.datacopy.DataCopier}
 	 * to flag the target table to be created on the fly
 	 */
@@ -183,7 +183,6 @@ public class TableIdentifier
 		}
 		else
 		{
-			//this.tablename = StringUtil.trimQuotes(aTable).trim();
 			this.tablename = aTable.trim();
 		}
 		this.expression = null;

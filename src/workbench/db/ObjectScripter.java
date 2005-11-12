@@ -33,6 +33,7 @@ public class ObjectScripter
 	public static final String TYPE_SYNONYM = "synonym";
 	public static final String TYPE_INSERT = "insert";
 	public static final String TYPE_SELECT = "select";
+	public static final String TYPE_PROC = "procedure";
 
 	private Map objectList;
 	private DbMetadata meta;
@@ -77,6 +78,7 @@ public class ObjectScripter
 			if (!cancel) this.appendObjectType(TYPE_SYNONYM);
 			if (!cancel) this.appendObjectType(TYPE_INSERT);
 			if (!cancel) this.appendObjectType(TYPE_SELECT);
+			if (!cancel) this.appendObjectType(TYPE_PROC);
 		}
 		finally 
 		{
@@ -96,7 +98,7 @@ public class ObjectScripter
 		{
 			if (cancel) break;
 			Map.Entry entry = (Map.Entry)itr.next();
-			String object = (String)entry.getKey();
+			Object key = entry.getKey();
 			String type = (String)entry.getValue();
 			String source = null;
 			
@@ -104,48 +106,58 @@ public class ObjectScripter
 			
 			if (this.progressMonitor != null)
 			{
-				this.progressMonitor.setCurrentObject(object);
+				this.progressMonitor.setCurrentObject(key.toString());
 			}
 			try
 			{
-				TableIdentifier tbl = new TableIdentifier(object);
-				tbl.adjustCase(this.dbConnection);
-				if (TYPE_TABLE.equalsIgnoreCase(type))
+				if (key instanceof ProcedureDefinition)
 				{
-					source = meta.getTableSource(tbl, true);
+					ProcedureDefinition procDef = (ProcedureDefinition)key;
+					type = procDef.getResultTypeDisplay();
+					source = meta.getProcedureSource(procDef.getCatalog(), procDef.getSchema(), procDef.getProcedureName(), procDef.getResultType());
 				}
-				else if (TYPE_VIEW.equalsIgnoreCase(type))
+				else
 				{
-					source = meta.getExtendedViewSource(null, tbl.getSchema(), tbl.getTableName(), false);
-				}
-				else if (TYPE_SYNONYM.equalsIgnoreCase(type))
-				{
-					source = meta.getSynonymSource(tbl.getSchema(), tbl.getTableName());
-				}
-				else if (TYPE_SEQUENCE.equalsIgnoreCase(type))
-				{
-					source = this.meta.getSequenceSource(object);
-				}
-				else if (TYPE_INSERT.equalsIgnoreCase(type))
-				{
-					source = this.meta.getEmptyInsert(tbl);
-				}
-				else if (TYPE_SELECT.equalsIgnoreCase(type))
-				{
-					source = this.meta.getDefaultSelect(tbl);
+					String object = (String)key;
+					TableIdentifier tbl = new TableIdentifier(object);
+					tbl.adjustCase(this.dbConnection);
+					if (TYPE_TABLE.equalsIgnoreCase(type))
+					{
+						source = meta.getTableSource(tbl, true);
+					}
+					else if (TYPE_VIEW.equalsIgnoreCase(type))
+					{
+						source = meta.getExtendedViewSource(null, tbl.getSchema(), tbl.getTableName(), false);
+					}
+					else if (TYPE_SYNONYM.equalsIgnoreCase(type))
+					{
+						source = meta.getSynonymSource(tbl.getSchema(), tbl.getTableName());
+					}
+					else if (TYPE_SEQUENCE.equalsIgnoreCase(type))
+					{
+						source = this.meta.getSequenceSource(object);
+					}
+					else if (TYPE_INSERT.equalsIgnoreCase(type))
+					{
+						source = this.meta.getEmptyInsert(tbl);
+					}
+					else if (TYPE_SELECT.equalsIgnoreCase(type))
+					{
+						source = this.meta.getDefaultSelect(tbl);
+					}
 				}
 			}
 			catch (Exception e)
 			{
-				this.script.append("\nError creating script for " + object + " " + ExceptionUtil.getDisplay(e));
+				this.script.append("\nError creating script for " + key.toString() + " " + ExceptionUtil.getDisplay(e));
 			}
 
 			if (source != null && source.length() > 0)
 			{
 				boolean useSeparator = !type.equalsIgnoreCase("insert") && !type.equalsIgnoreCase("select");
-				if (useSeparator) this.script.append("-- BEGIN " + type + " " + object + "\n");
+				if (useSeparator) this.script.append("-- BEGIN " + type + " " + key.toString() + "\n");
 				this.script.append(source);
-				if (useSeparator) this.script.append("-- END " + type + " " + object + "\n");
+				if (useSeparator) this.script.append("\n-- END " + type + " " + key.toString() + "\n");
 				this.script.append("\n");
 			}
 		}

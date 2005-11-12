@@ -188,7 +188,7 @@ public class ShortcutEditor
 		}
 		WbSwingUtilities.center(window, parent);
 		WbSwingUtilities.showDefaultCursor(parent);
-		window.show();
+		window.setVisible(true);
 	}
 	
 	private void createModel()
@@ -278,10 +278,11 @@ public class ShortcutEditor
 		}
 		mgr.updateActions();
 	}
+	
 	private void closeWindow()
 	{
 		this.saveSettings();
-		this.window.hide();
+		this.window.setVisible(false);
 		this.window.dispose();
 	}
 
@@ -311,7 +312,7 @@ public class ShortcutEditor
 		JDialog dialog = overwritePane.createDialog(this, ResourceMgr.getString("LabelEnterKeyWindowTitle"));
 		
 		dialog.setResizable(true);
-		dialog.show();
+		dialog.setVisible(true);
 		Object result = overwritePane.getValue();
 		dialog.dispose();
 		

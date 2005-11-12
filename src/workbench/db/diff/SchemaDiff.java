@@ -13,8 +13,6 @@ package workbench.db.diff;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,7 +21,9 @@ import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.report.ReportTable;
+import workbench.db.report.ReportView;
 import workbench.db.report.TagWriter;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
 import workbench.util.StrBuffer;
@@ -37,7 +37,9 @@ import workbench.util.StrWriter;
 public class SchemaDiff
 {
 	public static final String TAG_ADD_TABLE = "add-table";
+	public static final String TAG_ADD_VIEW = "add-view";
 	public static final String TAG_DROP_TABLE = "drop-table";
+	public static final String TAG_DROP_VIEW = "drop-view";
 	public static final String TAG_REF_CONN = "reference-connection";
 	public static final String TAG_TARGET_CONN = "target-connection";
 	public static final String TAG_COMPARE_INFO = "compare-settings";
@@ -46,19 +48,20 @@ public class SchemaDiff
 	public static final String TAG_FK_INFO = "include-foreign-key";
 	public static final String TAG_PK_INFO = "include-primary-key";
 	public static final String TAG_CONSTRAINT_INFO = "include-constraints";
-	//public static final String TAG_COMMENT_INFO = "include-comments";
+	public static final String TAG_VIEW_INFO = "include-views";
 	
 	private WbConnection sourceDb;
 	private WbConnection targetDb;
-	private ReportTable[] referenceTables;
-	private ReportTable[] targetTables;
+	private List objectsToCompare;
 	private List tablesToDelete;
+	private List viewsToDelete;
 	private String namespace;
 	private String encoding = "UTF-8";
 	private boolean diffIndex = true;
 	private boolean diffForeignKeys = true;
 	private boolean diffPrimaryKeys = true;
 	private boolean diffConstraints = false;
+	private boolean diffViews = true;
 	private RowActionMonitor monitor;
 	private boolean cancel = false;
 	private String referenceSchema;
@@ -113,6 +116,8 @@ public class SchemaDiff
 	 */
 	public void setIncludeTableConstraints(boolean flag) { this.diffConstraints = flag; }
 	
+	public void setIncludeViews(boolean flag) { this.diffViews = flag; }
+	
 	public void setIncludeComments(boolean flag) { this.diffComments = flag; }
 	
 	/**
@@ -147,20 +152,20 @@ public class SchemaDiff
 	 * compared to target at index 0...)
 	 * No name matching will take place. Thus it's possible to compare
 	 * tables that might have different names but are supposed to be identical
-	 * otherwise. The entries in the list are expected to be Strings or {@link workbench.db.TableIdentifier}
+	 * otherwise. 
+	 * The entries in the list are expected to be Strings or {@link workbench.db.TableIdentifier}
 	 *
 	 * @see #setTables(List)
 	 * @see #compareAll()
 	 */
-	public void setTables(List reference, List target)
+	public void setTables(List referenceList, List targetList)
 		throws SQLException
 	{
-		if (reference == null) throw new NullPointerException("Source tables may not be null");
-		if (target == null) throw new NullPointerException("Target tables may not be null");
-		if (reference.size() != target.size()) throw new IllegalArgumentException("Number of source and target tables have to match");
-		int count = reference.size();
-		this.referenceTables = new ReportTable[count];
-		this.targetTables = new ReportTable[count];
+		if (referenceList == null) throw new NullPointerException("Source tables may not be null");
+		if (targetList == null) throw new NullPointerException("Target tables may not be null");
+		if (referenceList.size() != targetList.size()) throw new IllegalArgumentException("Number of source and target tables have to match");
+		int count = referenceList.size();
+		this.objectsToCompare = new ArrayList(count);
 		
 		if (this.monitor != null)
 		{
@@ -172,42 +177,45 @@ public class SchemaDiff
 		{
 			if (this.cancel) 
 			{
-				this.targetTables = null;
-				this.referenceTables = null;
+				this.objectsToCompare = null;
 				break;
 			}
 			
-			Object o = reference.get(i);
-			TableIdentifier ref = null;
+			Object o = referenceList.get(i);
+			TableIdentifier reference = null;
 			
 			if (o instanceof TableIdentifier)
 			{
-				ref = (TableIdentifier)o;
+				reference = (TableIdentifier)o;
 			}
 			else if (o != null)
 			{
-				ref = new TableIdentifier(o.toString());
+				reference = new TableIdentifier(o.toString());
 			}
-			if (ref == null) continue;
+			if (reference == null) continue;
 			
-			TableIdentifier tar = null;
-			o = target.get(i);
+			TableIdentifier target = null;
+			o = targetList.get(i);
 			if (o instanceof TableIdentifier)
 			{
-				tar = (TableIdentifier)o;
+				target = (TableIdentifier)o;
 			}
 			else if (o != null)
 			{
-				tar = new TableIdentifier(o.toString());
+				target = new TableIdentifier(o.toString());
 			}
-			this.referenceTables[i] = createReportTableInstance(ref, this.sourceDb);
-			if (tar != null)
-			{
-				this.targetTables[i] = createReportTableInstance(tar, this.targetDb);
-			}
+			DiffEntry entry = new DiffEntry(reference, target);
 		}
 	}
 
+	private ReportView createReportViewInstance(TableIdentifier tbl, WbConnection con)
+		throws SQLException
+	{
+		tbl.adjustCase(con);
+		ReportView view = new ReportView(tbl, con, this.namespace);
+		return view;
+	}
+	
 	private ReportTable createReportTableInstance(TableIdentifier tbl, WbConnection con)
 		throws SQLException
 	{
@@ -248,61 +256,7 @@ public class SchemaDiff
 	public void compareAll()
 		throws SQLException
 	{
-		if (this.monitor != null)
-		{
-			this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
-			this.monitor.setCurrentObject(ResourceMgr.getString("MsgDiffRetrieveDbInfo"), -1, -1);
-		}
-		
-		List refTables = this.sourceDb.getMetadata().getTableList();
-		int count = refTables.size();
-		List refTableNames = new ArrayList(count);
-		
-		this.referenceTables = new ReportTable[count];
-		this.targetTables = new ReportTable[count];
-		DbMetadata meta = this.targetDb.getMetadata();
-		
-		this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
-		String msg = ResourceMgr.getString("MsgLoadTableInfo") + " ";
-		
-		for (int i=0; i < count; i++)
-		{
-			if (this.cancel) 
-			{
-				this.targetTables = null;
-				this.referenceTables = null;
-				break;
-			}
-			
-			TableIdentifier t = (TableIdentifier)refTables.get(i);
-			if (this.tablesToIgnore != null && this.tablesToIgnore.contains(t.getTableName())) continue;
-			
-			if (this.monitor != null)
-			{
-				this.monitor.setCurrentObject(msg + t.getTableName(), -1, -1);
-			}
-			this.referenceTables[i] = createReportTableInstance(t, this.sourceDb);
-			TableIdentifier tid = new TableIdentifier(t.getTableName());
-			if (meta.tableExists(tid))
-			{
-				this.targetTables[i] = createReportTableInstance(tid, this.targetDb);
-			}
-			refTableNames.add(t.getTableName());
-		}
-
-		if (cancel) return;
-		
-		this.tablesToDelete = new ArrayList();
-		List target= meta.getTableList();
-		count = target.size();
-		for (int i=0; i < count; i++)
-		{
-			TableIdentifier t = (TableIdentifier)target.get(i);
-			if (!refTableNames.contains(t.getTableName()))
-			{
-				this.tablesToDelete.add(t);
-			}
-		}
+		setSchemas(null, null);
 	}
 
 	/**
@@ -330,13 +284,29 @@ public class SchemaDiff
 		this.referenceSchema = refSchema;
 		this.targetSchema = targetSchema;
 		
-		List refTables = this.sourceDb.getMetadata().getTableList(null, refSchema);
+		String[] types;
+		if (diffViews)
+		{
+			types = new String[] { this.sourceDb.getMetadata().getTableTypeName(), this.sourceDb.getMetadata().getViewTypeName() };
+		}
+		else
+		{
+			types = new String[] { this.sourceDb.getMetadata().getTableTypeName() };
+		}
+		List refTables = sourceDb.getMetadata().getTableList(refSchema, types);
+		List target = sourceDb.getMetadata().getTableList(targetSchema, types);
+		
+		processTableList(refTables, target);
+	}
+
+	private void processTableList(List refTables, List targetTables)
+		throws SQLException
+	{
 		int count = refTables.size();
 		List refTableNames = new ArrayList(count);
 		
-		this.referenceTables = new ReportTable[count];
-		this.targetTables = new ReportTable[count];
-		DbMetadata meta = this.targetDb.getMetadata();
+		this.objectsToCompare = new ArrayList(count);
+		DbMetadata targetMeta = this.targetDb.getMetadata();
 		
 		this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 		String msg = ResourceMgr.getString("MsgLoadTableInfo") + " ";
@@ -345,8 +315,7 @@ public class SchemaDiff
 		{
 			if (this.cancel) 
 			{
-				this.targetTables = null;
-				this.referenceTables = null;
+				this.objectsToCompare = null;
 				break;
 			}
 			
@@ -357,29 +326,45 @@ public class SchemaDiff
 			{
 				this.monitor.setCurrentObject(msg + t.getTableName(), -1, -1);
 			}
-			this.referenceTables[i] = createReportTableInstance(t, this.sourceDb);
-			TableIdentifier tid = new TableIdentifier(targetSchema, t.getTableName());
-			tid.adjustCase(targetDb);
-			if (meta.tableExists(tid))
+			
+			TableIdentifier tid = new TableIdentifier(t.getTableName());
+			DiffEntry entry = null;
+			if (targetMeta.objectExists(tid,t.getType()))
 			{
-				this.targetTables[i] = createReportTableInstance(tid, this.targetDb);
+				entry = new DiffEntry(t, tid);
 			}
+			else
+			{
+				entry = new DiffEntry(t, null);
+			}
+			objectsToCompare.add(entry);
 			refTableNames.add(t.getTableName());
 		}
 
 		if (cancel) return;
 		
 		this.tablesToDelete = new ArrayList();
-		List target= meta.getTableList();
-		count = target.size();
-		for (int i=0; i < count; i++)
+		this.viewsToDelete = new ArrayList();
+		
+		if (targetTables != null)
 		{
-			TableIdentifier t = (TableIdentifier)target.get(i);
-			if (tablesToIgnore != null && tablesToIgnore.contains(t.getTableName())) continue;
-			if (!refTableNames.contains(t.getTableName()))
+			String tableType = targetDb.getMetadata().getTableTypeName();
+			count = targetTables.size();
+			for (int i=0; i < count; i++)
 			{
-				this.tablesToDelete.add(t);
-			}
+				TableIdentifier t = (TableIdentifier)targetTables.get(i);
+				if (!refTableNames.contains(t.getTableName()))
+				{
+					if (tableType.equals(t.getType()))
+					{
+						this.tablesToDelete.add(t);
+					}
+					else
+					{
+						this.viewsToDelete.add(t);
+					}
+				}
+			}	
 		}
 	}
 	
@@ -394,44 +379,7 @@ public class SchemaDiff
 	public void setTables(List reference)
 		throws SQLException
 	{
-		if (reference == null) throw new NullPointerException("Source tables may not be null");
-		int count = reference.size();
-		this.referenceTables = new ReportTable[count];
-		this.targetTables = new ReportTable[count];
-		this.tablesToDelete = null;
-		DbMetadata meta = this.targetDb.getMetadata();
-		
-		this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
-		String msg = ResourceMgr.getString("MsgLoadTableInfo") + " ";
-		
-		for (int i=0; i < count; i++)
-		{
-			Object o = reference.get(i);
-			TableIdentifier ref = null;
-
-			if (o instanceof TableIdentifier)
-			{
-				ref = (TableIdentifier)o;
-			}
-			else if (o != null)
-			{
-				ref = new TableIdentifier(o.toString());
-			}
-			if (ref == null) continue;
-		
-			if (this.monitor != null)
-			{
-				this.monitor.setCurrentObject(msg + ref.getTableName(), -1, -1);
-			}
-			
-			this.referenceTables[i] = createReportTableInstance(ref, this.sourceDb);
-
-			TableIdentifier tid = new TableIdentifier(ref.getTableName());
-			if (meta.tableExists(tid))
-			{
-				this.targetTables[i] = createReportTableInstance(tid, this.targetDb);
-			}
-		}
+		this.processTableList(reference, null);
 	}
 	
 	/**
@@ -484,9 +432,7 @@ public class SchemaDiff
 	public void writeXml(Writer out)
 		throws IOException
 	{
-		if (referenceTables == null) throw new NullPointerException("Source tables may not be null");
-		if (targetTables == null) throw new NullPointerException("Target tables may not be null");
-		if (referenceTables.length != targetTables.length) throw new IllegalArgumentException("Number of source and target tables have to match");
+		if (objectsToCompare == null) throw new NullPointerException("Source tables may not be null");
 		
 		StrBuffer indent = new StrBuffer("  ");
 		StrBuffer tblIndent = new StrBuffer("    ");
@@ -502,48 +448,115 @@ public class SchemaDiff
 		
 		writeTag(out, null, "schema-diff", true);
 		writeDiffInfo(out);
-		int count = this.referenceTables.length;
+		int count = this.objectsToCompare.size();
+		List viewDiffs = new ArrayList();
+		String tableType = sourceDb.getMetadata().getTableTypeName();
+		// First we have to process the tables
 		for (int i=0; i < count; i++)
 		{
-			if (this.cancel) 
-			{
-				break;
-			}
+			DiffEntry entry = (DiffEntry)objectsToCompare.get(i);
 			
-			if (this.referenceTables[i] == null) continue;
-			
+			if (this.cancel) break;
 			if (this.monitor != null)
 			{
-				this.monitor.setCurrentObject(this.referenceTables[i].getTable().getTableExpression(), i+1, count);
+				this.monitor.setCurrentObject(entry.reference.getTableExpression(), i+1, count);
 			}
-			
-			if (this.targetTables[i] == null)
+
+			try
 			{
-				out.write("\n");
-				writeTag(out, indent, TAG_ADD_TABLE, true, "name", referenceTables[i].getTable().getTableName());
-				StrBuffer s = referenceTables[i].getXml(tblIndent);
-				s.writeTo(out);
-				writeTag(out, indent, TAG_ADD_TABLE, false);
-			}
-			else
-			{
-				TableDiff d = new TableDiff(this.referenceTables[i], this.targetTables[i]);
-				d.setCompareComments(this.diffComments);
-				d.setIndent(indent);
-				d.setTagWriter(tw);
-				StrBuffer s = d.getMigrateTargetXml();
-				if (s.length() > 0)
+				if (tableType.equalsIgnoreCase(entry.reference.getType()))
 				{
-					out.write("\n");
-					s.writeTo(out);
+					ReportTable source = createReportTableInstance(entry.reference, this.sourceDb);
+					if (entry.target == null)
+					{
+						out.write("\n");
+						writeTag(out, indent, TAG_ADD_TABLE, true, "name", entry.reference.getTableName());
+						StrBuffer s = source.getXml(tblIndent);
+						s.writeTo(out);
+						writeTag(out, indent, TAG_ADD_TABLE, false);
+					}
+					else
+					{
+						ReportTable target = createReportTableInstance(entry.target, this.targetDb);
+						TableDiff d = new TableDiff(source, target);
+						d.setCompareComments(this.diffComments);
+						d.setIndent(indent);
+						d.setTagWriter(tw);
+						StrBuffer s = d.getMigrateTargetXml();
+						if (s.length() > 0)
+						{
+							out.write("\n");
+							s.writeTo(out);
+						}
+					}
+				}
+				else
+				{
+					// We cannot write out the diff ror the views immediately
+					// because that has to be listed after the table diffs
+					ReportView source = createReportViewInstance(entry.reference, sourceDb);
+					ReportView target = null;
+					if (entry.target != null)
+					{
+						target = createReportViewInstance(entry.target, targetDb);
+					}
+					ViewDiff d = new ViewDiff(source, target);
+					d.setIndent(indent);
+					d.setTagWriter(tw);
+					viewDiffs.add(d);
 				}
 			}
+			catch (SQLException sql)
+			{
+				LogMgr.logError("SchemaDiff.writeXml()", "Error comparing " + entry.toString(), sql);
+			}
 		}
+		
 		if (this.cancel) return;
 		
 		this.appendDropTables(out, indent, tw);
 		out.write("\n");
+		if (this.diffViews)
+		{
+			this.appendViewDiff(viewDiffs, out);
+			out.write("\n");
+		}
 		writeTag(out, null, "schema-diff", false);
+	}
+	
+	private void appendViewDiff(List diffs, Writer out)
+		throws IOException
+	{
+		Iterator itr = diffs.iterator();
+		if (diffs.size() > 0)
+		
+		while (itr.hasNext())
+		{
+			ViewDiff d = (ViewDiff)itr.next();
+			StrBuffer source = d.getMigrateTargetXml();
+			if (source.length() > 0)  
+			{
+				out.write("\n");
+				source.writeTo(out);
+			}
+		}
+	}
+	
+	private void appendDropViews(Writer out, StrBuffer indent, TagWriter tw)
+		throws IOException
+	{
+		if (this.viewsToDelete == null || this.viewsToDelete.size() == 0) return;
+		out.write("\n");
+		writeTag(out, indent, TAG_DROP_VIEW, true);
+		Iterator itr = this.tablesToDelete.iterator();
+		StrBuffer myindent = new StrBuffer(indent);
+		myindent.append("  ");
+		while (itr.hasNext())
+		{
+			TableIdentifier t = (TableIdentifier)itr.next();
+			writeTagValue(out, myindent, ReportView.TAG_VIEW_NAME, t.getTableName());
+		}
+		writeTag(out, indent, TAG_DROP_VIEW, false);
 	}
 	
 	private void appendDropTables(Writer out, StrBuffer indent, TagWriter tw)
@@ -591,23 +604,25 @@ public class SchemaDiff
 		tw.appendTag(info, indent2, TAG_FK_INFO, this.diffForeignKeys);
 		tw.appendTag(info, indent2, TAG_PK_INFO, this.diffPrimaryKeys);
 		tw.appendTag(info, indent2, TAG_CONSTRAINT_INFO, this.diffConstraints);
-		info.append('\n');
+		tw.appendTag(info, indent2, TAG_VIEW_INFO, this.diffViews);
 		
 		if (this.referenceSchema != null && this.targetSchema != null)
 		{
 			tw.appendTag(info, indent2, "reference-schema", this.referenceSchema);
 			tw.appendTag(info, indent2, "target-schema", this.targetSchema);
 		}
-		int count = this.referenceTables.length;
+		int count = this.objectsToCompare.size();
 		String attr[] = new String[] { "referenceTable", "compareTo" };
 		String tbls[] = new String[2];
 		for (int i=0; i < count; i++)
 		{
 			// check for ignored tables
-			if (this.referenceTables[i] == null) continue;
+			//if (this.referenceTables[i] == null) continue;
+			DiffEntry de = (DiffEntry)objectsToCompare.get(i);
 			
-			tbls[0] = this.referenceTables[i].getTable().getTableName();
-			tbls[1] = this.targetTables[i] == null ? "" : this.targetTables[i].getTable().getTableName();
+			tbls[0] = de.reference.getTableName();
+			tbls[1] = (de.target == null ? "" : de.target.getTableName());
+			
 			tw.appendOpenTag(info, indent2, TAG_TABLE_PAIR, attr, tbls, false);
 			info.append("/>\n");
 		}
@@ -672,5 +687,22 @@ public class SchemaDiff
 		out.write(tag);
 		out.write(">\n");
 	}
+}
 
+class DiffEntry
+{
+	TableIdentifier reference;
+	TableIdentifier target;
+	public DiffEntry(TableIdentifier ref, TableIdentifier tar)
+	{
+		reference = ref;
+		target = tar;
+	}
+	public String toString()
+	{
+		if (target == null)
+			return reference.getType() + ": " + reference.getTableExpression();
+		else
+			return reference.getType() + ": " + reference.getTableExpression() + " to " + target.getType() + ": " + target.getTableExpression();
+	}
 }

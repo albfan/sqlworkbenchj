@@ -18,18 +18,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 
 import javax.swing.JFrame;
-import javax.swing.JWindow;
 
 import workbench.db.DbMetadata;
+import workbench.db.ProcedureReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -53,7 +51,8 @@ public class SchemaReporter
 	implements Interruptable
 {
 	private WbConnection dbConn;
-	private List tables;
+	private List tables = new ArrayList();
+	private List procedures = new ArrayList();
 	private String xmlNamespace;
 	private String[] types;
 	private List schemas;
@@ -62,6 +61,8 @@ public class SchemaReporter
 	private RowActionMonitor monitor;
 	private String outputfile;
 	private boolean cancel = false;
+	private boolean includeTables = true;
+	private boolean includeProcedures = false;
 	private ProgressPanel progressPanel;
 	private JDialog progressWindow;
 	private boolean showProgress = false;
@@ -109,15 +110,6 @@ public class SchemaReporter
 		}
 	}
 
-	/**
-	 *	Define the table types to be retrieved if no tables
-	 *  are specified.
-	 */
-	public void setTypes(String[] selectedTypes)
-	{
-		this.types = selectedTypes;
-	}
-
 	public void setSchemas(List list)
 	{
 		if (list == null || list.size() == 0) return;
@@ -133,6 +125,16 @@ public class SchemaReporter
 		}
 	}
 
+	public void setIncludeTables(boolean flag)
+	{
+		this.includeTables = flag;
+	}
+	
+	public void setIncludeProcedures(boolean flag)
+	{
+		this.includeProcedures = flag;
+	}
+	
 	public void setOutputFilename(String filename)
 	{
 		this.outputfile = filename;
@@ -192,15 +194,6 @@ public class SchemaReporter
 	}
 
 	/**
-	 *	Return a List of ReportTable objects
-	 */
-	public List getTables()
-	{
-		if (this.tables == null || this.tables.size() == 0) this.retrieveTables();
-		return Collections.unmodifiableList(this.tables);
-	}
-	
-	/**
 	 *	Write the XML into the supplied output
 	 */
 	public void writeXml(Writer out)
@@ -208,11 +201,12 @@ public class SchemaReporter
 	{
 		this.cancel = false;
 
-		if (this.tables == null || this.tables.size() == 0) this.retrieveTables();
+		if (this.includeTables && this.tables.size() == 0) this.retrieveTables();
 		if (this.cancel) return;
-		if (this.tables == null) return;
+		
+		if (this.includeProcedures && this.procedures.size() == 0) this.retrieveProcedures();
+		if (this.cancel) return;
 
-		int count = this.tables.size();
 		out.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		out.write("<");
 		if (this.xmlNamespace != null)
@@ -224,6 +218,10 @@ public class SchemaReporter
 		writeReportInfo(out);
 		out.write("\n");
 
+		int count = this.tables.size();
+		int totalCount = count + this.procedures.size();
+		int totalCurrent = 1;
+		
 		TableIdentifier table  = null;
 		for (int i=0; i < count; i++)
 		{
@@ -235,7 +233,7 @@ public class SchemaReporter
 				String tableName = table.getTableExpression();
 				if (this.monitor != null)
 				{
-					this.monitor.setCurrentObject(tableName, i+1, count);
+					this.monitor.setCurrentObject(tableName, totalCurrent, totalCount);
 				}
 				if (this.progressPanel != null)
 				{
@@ -261,13 +259,31 @@ public class SchemaReporter
 					rtable.done();
 				}
 				out.flush();
+				totalCurrent ++;
 			}
 			catch (Exception e)
 			{
 				LogMgr.logError("SchemaReporter.writeXml()", "Error writing table: " + table, e);
 			}
 		}
-		//out.write("\n");
+		count = this.procedures.size();
+		if (count > 0) out.write("\n");
+		for (int i = 0; i < count; i++)
+		{
+			ReportProcedure proc = (ReportProcedure)procedures.get(i);
+			if (this.monitor != null)
+			{
+				this.monitor.setCurrentObject(proc.getProcedureName(), totalCurrent, totalCount);
+			}
+			if (this.progressPanel != null)
+			{
+				this.progressPanel.setInfoText(proc.getProcedureName());
+			}
+			proc.writeXml(out);
+			out.write('\n');
+			totalCurrent ++;
+		}
+		
 		out.write("</");
 		if (this.xmlNamespace != null)
 		{
@@ -360,7 +376,7 @@ public class SchemaReporter
 		{
 			public void run()
 			{
-				progressWindow.show();
+				progressWindow.setVisible(true);
 			}
 		};
 		t.start();
@@ -394,9 +410,7 @@ public class SchemaReporter
 	{
 		try
 		{
-			DataStore ds = this.dbConn.getMetadata().getTables(null, null, name, this.types);
-			ds.sortByColumn(DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, true);
-			return this.processTableList(ds);
+			return this.dbConn.getMetadata().getTableList(null, name, this.types);
 		}
 		catch (SQLException e)
 		{
@@ -405,7 +419,52 @@ public class SchemaReporter
 		}
 	}
 
+	private void retrieveProcedures()
+	{
+		if (this.monitor != null)
+		{
+			this.monitor.setCurrentObject(ResourceMgr.getString("MsgSchemaReporterRetrievingProcedures"), -1, -1);
+		}
+		if (this.schemas == null || this.schemas.size() == 0)
+		{
+			this.retrieveProcedures(null);
+		}
+		else
+		{
+			int count = this.schemas.size();
+			for (int i=0; i < count; i++)
+			{
+				this.retrieveProcedures((String)schemas.get(i));
+			}
+		}
+		if (this.monitor != null)
+		{
+			this.monitor.setCurrentObject(null, -1, -1);
+		}
+	}
 
+	private void retrieveProcedures(String targetSchema)
+	{
+		try
+		{
+			DataStore procs = this.dbConn.getMetadata().getProcedures(null, targetSchema);
+			procs.sortByColumn(ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, true);
+			int count = procs.getRowCount();
+			for (int i = 0; i < count; i++)
+			{
+				String name = procs.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
+				String schema = procs.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
+				String cat = procs.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
+				int type = procs.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
+				ReportProcedure proc = new ReportProcedure(cat, schema, name, type, this.dbConn);
+				this.procedures.add(proc);
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("SchemaReporter.retrieveProcedures()", "Error retrieving procedures", e);
+		}
+	}
 	/**
 	 *	Retrieve all tables for the current user.
 	 *	The "type" of table can be defined by #setTableTypes(String)
@@ -414,11 +473,8 @@ public class SchemaReporter
 	{
 		try
 		{
-			if (this.tables == null) this.tables = new ArrayList();
-
 			if (this.cancel) return;
-			DataStore ds = this.dbConn.getMetadata().getTables(targetSchema, this.types);
-			this.tables = this.processTableList(ds);
+			this.tables = this.dbConn.getMetadata().getTableList(targetSchema, this.types);
 		}
 		catch (SQLException e)
 		{
@@ -426,23 +482,4 @@ public class SchemaReporter
 		}
 	}
 
-	private List processTableList(DataStore ds)
-	{
-		int count = ds.getRowCount();
-		ds.sortByColumn(DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, true);
-		ArrayList tableList = new ArrayList(count);
-		for (int i=0; i < count; i++)
-		{
-			if (this.cancel) return tableList;
-
-			String type = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-			String table = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-			String catalog = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
-			String schema = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-			TableIdentifier tbl = new TableIdentifier(catalog, schema, table);
-			tbl.setType(type);
-			tables.add(tbl);
-		}
-		return tableList;
-	}
 }

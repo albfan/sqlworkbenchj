@@ -249,7 +249,7 @@ public class OracleMetadata
 			"       t.column_name AS column_name,  \n" +
 			"       DECODE (t.data_type, 'CHAR', 1, 'VARCHAR2', 12, 'NVARCHAR2', 12, 'NUMBER', 3, 'LONG', -1, 'DATE', 93, 'RAW', -3, 'LONG RAW', -4, 1111)  AS data_type,  \n" +
 			"       t.data_type AS type_name,  \n" +
-			"       DECODE (t.data_precision, null, decode(t.data_type, 'VARCHAR2', t.char_length, 'NVARCHAR2', t.char_length, t.data_length), t.data_precision) AS column_size,  \n" +
+			"       DECODE (t.data_precision, null, decode(t.data_type, 'VARCHAR2', t.char_length, 'NVARCHAR', t.char_length, 'NVARCHAR2', t.char_length, 'CHAR', t.char_length, 'VARCHAR', t.char_length, 'NCHAR', t.char_length, t.data_length), t.data_precision) AS column_size,  \n" +
 			"       0 AS buffer_length,  \n" +
 			"       t.data_scale AS decimal_digits,  \n" +
 			"       10 AS num_prec_radix,  \n" +

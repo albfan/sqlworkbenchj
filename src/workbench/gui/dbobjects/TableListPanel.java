@@ -83,6 +83,7 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.dialogs.export.ExportFileDialog;
+import workbench.gui.menu.GenerateScriptMenuItem;
 import workbench.gui.renderer.SqlTypeRenderer;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.ExecuteSqlDialog;
@@ -115,6 +116,7 @@ public class TableListPanel
 	implements ActionListener, ChangeListener, ListSelectionListener, MouseListener,
 						 ShareableDisplay, Exporter, FilenameChangeListener, PropertyChangeListener
 {
+	// <editor-fold defaultstate="collapsed" desc=" Variables ">
 	private WbConnection dbConnection;
 	private JPanel listPanel;
 	private CriteriaPanel findPanel;
@@ -172,7 +174,6 @@ public class TableListPanel
 
 	private static final String SCHEMA_REPORT_CMD = "create-schema-report";
 	private static final String DROP_CMD = "drop-table";
-	private static final String SCRIPT_CMD = "create-scripts";
 	private static final String DELETE_TABLE_CMD = "delete-table-data";
 	private static final String COMPILE_CMD = "compile-procedure";
 
@@ -195,7 +196,8 @@ public class TableListPanel
 	private JLabel infoLabel;
 	private JLabel tableInfoLabel;
 	private String tableTypeToSelect;
-
+	// </editor-fold>
+	
 	public TableListPanel(MainWindow aParent)
 		throws Exception
 	{
@@ -363,12 +365,8 @@ public class TableListPanel
 		this.tableList.addPopupAction(this.createDummyInsertAction, true);
 		this.tableList.addPopupAction(this.createDefaultSelect, false);
 
-		this.scriptTablesItem = new WbMenuItem(ResourceMgr.getString("MnuTxtCreateScript"));
-		this.scriptTablesItem.setIcon(ResourceMgr.getImage("script"));
-		this.scriptTablesItem.setActionCommand(SCRIPT_CMD);
+		this.scriptTablesItem = new GenerateScriptMenuItem();
 		this.scriptTablesItem.addActionListener(this);
-		this.scriptTablesItem.setEnabled(true);
-		this.scriptTablesItem.setToolTipText(ResourceMgr.getDescription("MnuTxtCreateScript"));
 		this.tableList.addPopupMenu(this.scriptTablesItem, false);
 
 		WbMenuItem item = new WbMenuItem(ResourceMgr.getString("MnuTxtSchemaReport"));
@@ -643,7 +641,7 @@ public class TableListPanel
 		//this.catalogs.removeActionListener(this);
 
 		this.triggers.setConnection(aConnection);
-		this.tableSource.getSqlTokenMarker().initDatabaseKeywords(aConnection);
+		this.tableSource.setDatabaseConnection(aConnection);
 		this.reset();
 		try
 		{
@@ -1696,7 +1694,7 @@ public class TableListPanel
 			{
 				this.dropTables();
 			}
-			else if (command.equals(SCRIPT_CMD))
+			else if (e.getSource() == scriptTablesItem)
 			{
 				EventQueue.invokeLater(new Runnable()
 				{
@@ -1823,7 +1821,7 @@ public class TableListPanel
 
 	private void deleteTables()
 	{
-		if (!checkConnection()) return;
+		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		if (this.tableList.getSelectedRowCount() == 0) return;
 		int rows[] = this.tableList.getSelectedRows();
 		int count = rows.length;
@@ -1852,7 +1850,7 @@ public class TableListPanel
 
 	private void createScript()
 	{
-		if (!checkConnection()) return;
+		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		int[] rows = this.tableList.getSelectedRows();
 		int count = rows.length;
 		HashMap tables = new HashMap(count);
@@ -1873,7 +1871,7 @@ public class TableListPanel
 
 	private void createDummyInserts()
 	{
-		if (!checkConnection()) return;
+		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		int[] rows = this.tableList.getSelectedRows();
 		int count = rows.length;
 		HashMap tables = new HashMap(count);
@@ -1896,18 +1894,9 @@ public class TableListPanel
 		scripterUI.show(SwingUtilities.getWindowAncestor(this));
 	}
 
-	private boolean checkConnection()
-	{
-		if (this.dbConnection.isBusy())
-		{
-			WbSwingUtilities.showMessageKey(this, "ErrorConnectionBusy");
-			return false;
-		}
-		return true;
-	}
 	private void createDefaultSelects()
 	{
-		if (!checkConnection()) return;
+		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		int[] rows = this.tableList.getSelectedRows();
 		int count = rows.length;
 		HashMap tables = new HashMap(count);
@@ -1932,7 +1921,7 @@ public class TableListPanel
 
 	private void dropTables()
 	{
-		if (!checkConnection()) return;
+		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		if (this.tableList.getSelectedRowCount() == 0) return;
 		int rows[] = this.tableList.getSelectedRows();
 		int count = rows.length;
@@ -1991,7 +1980,7 @@ public class TableListPanel
 
 	public void saveReport()
 	{
-		if (!checkConnection()) return;
+		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		TableIdentifier[] tables = getSelectedTables();
 		if (tables == null) return;
 
@@ -2038,7 +2027,7 @@ public class TableListPanel
 
 	public void exportData()
 	{
-		if (!checkConnection()) return;
+		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		int rowCount = this.tableList.getSelectedRowCount();
 		if (rowCount <= 0) return;
 

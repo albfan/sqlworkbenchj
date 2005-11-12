@@ -40,15 +40,14 @@
   <section id="version">
     <title>Program version</title>
 
-    <para>This document describes build @BUILD_NUMBER@ of the &wb-productname;</para>
+    <para>This document describes build @BUILD_NUMBER@ of &wb-productname;</para>
   </section>
   
   <section id="general-contact">
     <title>Feedback</title>
     <para>Feedback regarding this program is more then welcome. Please report
-    any problems you find, or send ideas to improve the usability.
+    any problems you find, or send your ideas to improve the usability to: <email>support@sql-workbench.net</email>
     </para>
-    <para>Please send all emails to <email>support@sql-workbench.net</email></para>
     <para>&wb-productname; can be downloaded from <ulink url="http://www.sql-workbench.net">http://www.sql-workbench.net</ulink>
     </para>
   </section>

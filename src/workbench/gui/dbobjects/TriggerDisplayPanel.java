@@ -78,7 +78,7 @@ public class TriggerDisplayPanel
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
-		this.source.getSqlTokenMarker().initDatabaseKeywords(aConnection);
+		this.source.setDatabaseConnection(aConnection);
 		this.reset();
 	}
 	

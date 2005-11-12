@@ -1412,7 +1412,7 @@ public class WbTable
 		String title = ResourceMgr.getString("TxtEditWindowTitle");
 		TableCellEditor editor = this.getCellEditor();
 		EditWindow w = new EditWindow(ownerFrame, title, data);
-		w.show();
+		w.setVisible(true);
 		if (editor != null)
 		{
 			// we need to "cancel" the editor so that the data

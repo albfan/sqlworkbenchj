@@ -44,7 +44,7 @@ public class JdbcProcedureReader
 		{
 			aSchema = null;
 		}
-		ResultSet rs = this.dbMeta.metaData.getProcedures(aCatalog, aSchema, "%");
+		ResultSet rs = this.dbMeta.getSqlConnection().getMetaData().getProcedures(aCatalog, aSchema, "%");
 		return buildProcedureListDataStore(rs);
 	}
 	
@@ -67,18 +67,15 @@ public class JdbcProcedureReader
 				String name = rs.getString("PROCEDURE_NAME");
 				String remark = rs.getString("REMARKS");
 				short type = rs.getShort("PROCEDURE_TYPE");
+				Integer iType = null;
 				if (rs.wasNull())
 				{
-					sType = "N/A";
+					//sType = "N/A";
+					iType = new Integer(DatabaseMetaData.procedureResultUnknown);
 				}
 				else
 				{
-					if (type == DatabaseMetaData.procedureNoResult)
-						sType = ProcedureReader.PROC_RESULT_NO;
-					else if (type == DatabaseMetaData.procedureReturnsResult)
-						sType = ProcedureReader.PROC_RESULT_YES;
-					else
-						sType = ProcedureReader.PROC_RESULT_UNKNOWN;
+					iType = new Integer(type);
 				}
 				int row = ds.addRow();
 
@@ -86,7 +83,7 @@ public class JdbcProcedureReader
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, cat);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, name);
-				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, sType);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, iType);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS, remark);
 			}
 		}
@@ -101,6 +98,16 @@ public class JdbcProcedureReader
 		return ds;
 	}
 	
+	public static String convertProcType(int type)
+	{
+		if (type == DatabaseMetaData.procedureNoResult)
+			return ProcedureReader.PROC_RESULT_NO;
+		else if (type == DatabaseMetaData.procedureReturnsResult)
+			return ProcedureReader.PROC_RESULT_YES;
+		else
+			return ProcedureReader.PROC_RESULT_UNKNOWN;
+	}
+	
 	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
 		throws SQLException
 	{
@@ -112,7 +119,7 @@ public class JdbcProcedureReader
 		ResultSet rs = null;
 		try
 		{
-			rs = this.dbMeta.metaData.getProcedureColumns(aCatalog, aSchema, dbMeta.adjustObjectnameCase(aProcname), "%");
+			rs = this.dbMeta.getSqlConnection().getMetaData().getProcedureColumns(aCatalog, aSchema, dbMeta.adjustObjectnameCase(aProcname), "%");
 			while (rs.next())
 			{
 				int row = ds.addRow();

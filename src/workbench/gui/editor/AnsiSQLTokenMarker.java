@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.StringTokenizer;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
@@ -19,51 +20,18 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 	// public members
 	public AnsiSQLTokenMarker()
 	{
-		super(getKeywordMap());
+		super();
+		initKeywordMap();
 	}
 
-	public void initDatabaseKeywords(WbConnection aConnection)
+	public void setSqlKeyWords(Collection keywords)
 	{
-		try
-		{
-			DbMetadata meta = aConnection.getMetadata();
-			this.isMySql = meta.isMySql();
-			
-			Collection keys = meta.getSqlKeywords();
-			this.addKeywordList(keys, Token.KEYWORD1);
-
-			if (meta.isOracle())
-			{
-				keywords.add("START", Token.KEYWORD1);
-				keywords.add("SYNONYM", Token.KEYWORD1);
-				keywords.add("WHILE", Token.KEYWORD1);
-				keywords.add("LOOP", Token.KEYWORD1);
-				keywords.add("ELSIF", Token.KEYWORD1);
-				keywords.add("REFRESH", Token.KEYWORD1);
-				keywords.add("NCHAR", Token.KEYWORD1);
-				keywords.add("NVARCHAR", Token.KEYWORD1);
-				keywords.add("CALL", Token.KEYWORD1);
-
-				keywords.add("SNAPSHOT", Token.KEYWORD1);
-
-				keywords.add("SYSDATE", Token.KEYWORD3);
-				keywords.add("INSTR", Token.KEYWORD3);
-				keywords.add("SUBSTR", Token.KEYWORD3);
-				keywords.add("INSTRB", Token.KEYWORD3);
-				keywords.add("SUBSTRB", Token.KEYWORD3);
-				keywords.add("LPAD", Token.KEYWORD3);
-				keywords.add("RPAD", Token.KEYWORD3);
-				keywords.add("CONTINUE", Token.KEYWORD3);
-				keywords.add("MODIFY", Token.KEYWORD3);
-			}
-
-			keys = meta.getDbFunctions();
-			this.addKeywordList(keys, Token.KEYWORD3);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning(this, "Could not read database keywords", e);
-		}
+		this.addKeywordList(keywords, Token.KEYWORD1);
+	}
+	
+	public void setSqlFunctions(Collection functions)
+	{
+		this.addKeywordList(functions, Token.KEYWORD3);
 	}
 	
 	private void addKeywordList(Collection words, byte anId)
@@ -81,22 +49,21 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		}
 	}
 
-	public static KeywordMap getKeywordMap()
+	public void setIsMySQL(boolean flag)
 	{
-		if (keywords == null)
-		{
-			keywords = new KeywordMap(true, 80);
-			addKeywords();
-			addDataTypes();
-			addSystemFunctions();
-			addOperators();
-			addSystemStoredProcedures();
-			addSystemTables();
-		}
-		return keywords;
+		this.isMySql = flag;
+	}
+	
+	public void initKeywordMap()
+	{
+		keywords = new KeywordMap(true, 80);
+		addKeywords();
+		addDataTypes();
+		addSystemFunctions();
+		addOperators();
 	}
 
-	private static void addKeywords()
+	private void addKeywords()
 	{
 		keywords.add("AVG",Token.KEYWORD1);
 		keywords.add("ADD",Token.KEYWORD1);
@@ -215,7 +182,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("WBSELECTBLOB",Token.KEYWORD2);
 	}
 
-	private static void addDataTypes()
+	private void addDataTypes()
 	{
 		keywords.add("binary",Token.KEYWORD1);
 		keywords.add("bit",Token.KEYWORD1);
@@ -252,7 +219,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("nclob",Token.KEYWORD1);
 	}
 
-	private static void addSystemFunctions()
+	private void addSystemFunctions()
 	{
 		keywords.add("ABS",Token.KEYWORD3);
 		keywords.add("ACOS",Token.KEYWORD3);
@@ -291,7 +258,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("YEAR",Token.KEYWORD3);
 	}
 
-	private static void addOperators()
+	private void addOperators()
 	{
 		keywords.add("ALL",Token.KEYWORD1);
 		keywords.add("AND",Token.KEYWORD1);
@@ -309,14 +276,4 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("OUTER",Token.KEYWORD1);
 		keywords.add("SOME",Token.KEYWORD1);
 	}
-
-	private static void addSystemStoredProcedures()
-	{
-	}
-
-	private static void addSystemTables()
-	{
-	}
-
-	private static KeywordMap keywords;
 }

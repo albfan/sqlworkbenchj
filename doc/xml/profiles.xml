@@ -8,16 +8,17 @@
     of settings:
 
     <itemizedlist>
-      <listitem><para>JDBC related properties such as the JDBC driver class, the connection URL, etc.</para></listitem>
-      <listitem><para>&wb-productname; related properties such as the profile name the associated workspace, etc.</para></listitem>
+      <listitem>JDBC related properties such as the JDBC driver class, the connection URL, the username etc.</listitem>
+      <listitem>&wb-productname; related properties such as the profile name the associated workspace, etc.</listitem>
     </itemizedlist>
     </para>
 
     <para>After the program is started, you are prompted to choose a
-    connection profile to connect to a database. The dialog will display a list
-    of available profiles on the left side. When selecting a profile, its details
-    (JDBC and &wb-productname; settings) are displayed on the right side of the
-    window.</para>
+			connection profile to connect to a database. The dialog will display a list
+			of available profiles on the left side. When selecting a profile, its details
+			(JDBC and &wb-productname; settings) are displayed on the right side of the
+			window.
+    </para>
 
     <para>To create a new profile click on the
     <literal>New Profile</literal> button <guiicon>
@@ -167,6 +168,13 @@
       tabs until they are committed (depending on the isolation level of the database of 
       course)
       </para>
+	  <para>If you intend to execute several statements in parallel then it's strongly
+	  recommended to use one connection for each tab. Most JDBC drivers are not multi-threaded
+	  and thus cannot run more then on statement on the same connection. &wb-productname; does
+	  try to detect conflicting usages of a single connection as far as possible, 
+      but it is still possible to lock the GUI when running multiple statements on 
+	  the same connection
+	  </para>
     </section>
 
     <section id="profile-ignore-drop-error">
