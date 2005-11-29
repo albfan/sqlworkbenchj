@@ -23,32 +23,28 @@ import workbench.util.WbPersistence;
  *
  * @author  support@sql-workbench.net
  */
-public class SqlSyntaxFormatter
+public class SqlLiteralFormatter
 {
-
 	public static final String GENERAL_SQL = "All";
 
-	private static HashMap dateLiteralFormatter;
-	private static DbDateFormatter defaultDateFormatter;
+	private HashMap dateLiteralFormats;
+	private DbDateFormatter defaultDateFormatter;
 
-	private SqlSyntaxFormatter()
+	public SqlLiteralFormatter()
 	{
+		dateLiteralFormats = readStatementTemplates("DateLiteralFormats.xml");
 	}
 
-	static
-	{
-		dateLiteralFormatter = readStatementTemplates("DateLiteralFormats.xml");
-	}
-
-	static HashMap readStatementTemplates(String aFilename)
+	private HashMap readStatementTemplates(String aFilename)
 	{
 		HashMap result = null;
 
-		BufferedInputStream in = new BufferedInputStream(SqlSyntaxFormatter.class.getResourceAsStream(aFilename));
+		BufferedInputStream in = new BufferedInputStream(this.getClass().getResourceAsStream(aFilename));
 		Object value;
-		// filename is for logging purposes only
+		
 		try
 		{
+			// filename is for logging purposes only
 			WbPersistence reader = new WbPersistence(aFilename);
 			value = reader.readObject(in);
 		}
@@ -57,6 +53,7 @@ public class SqlSyntaxFormatter
 			value = null;
 			LogMgr.logError("SqlSyntaxFormatter.readStatementTemplates()", "Error reading template file " + aFilename,e);
 		}
+		
 		if (value != null && value instanceof HashMap)
 		{
 			result = (HashMap)value;
@@ -87,7 +84,7 @@ public class SqlSyntaxFormatter
 		return result;
 	}
 
-	public static DbDateFormatter getDateLiteralFormatter()
+	public DbDateFormatter getDateLiteralFormatter()
 	{
 		if (defaultDateFormatter == null)
 		{
@@ -96,48 +93,58 @@ public class SqlSyntaxFormatter
 		return defaultDateFormatter;
 	}
 
-	public static DbDateFormatter getDateLiteralFormatter(String aProductname)
+	public DbDateFormatter getDateLiteralFormatter(String aProductname)
 	{
-		Object value = dateLiteralFormatter.get(aProductname);
+		Object value = dateLiteralFormats.get(aProductname);
 		if (value == null)
 		{
-			value = dateLiteralFormatter.get(GENERAL_SQL);
+			value = dateLiteralFormats.get(GENERAL_SQL);
 		}
 		DbDateFormatter format = (DbDateFormatter)value;
 		return format;
 	}
 
-	public static String getDefaultLiteral(Object aValue)
+	public String getDefaultLiteral(ColumnData data, DbDateFormatter formatter)
 	{
-		return getDefaultLiteral(aValue, getDateLiteralFormatter());
-	}
-
-	public static String getDefaultLiteral(Object aValue, DbDateFormatter formatter)
-	{
-		if (aValue == null) return "NULL";
-
-		if (aValue instanceof String || aValue instanceof OracleLongType)
+		Object value = data.getValue();
+		if (value == null) return "NULL";
+		int type = data.getIdentifier().getDataType();
+		
+		if (value instanceof String || value instanceof OracleLongType)
 		{
-			// Single quotes in a String must be "quoted"...
-			String t = aValue.toString();
+			String t = (String)value;
 			StringBuffer realValue = new StringBuffer(t.length() + 10);
+			// Single quotes in a String must be "quoted"...
 			realValue.append('\'');
+			// replace to Buffer writes the result of into the passed buffer
+			// so this appends the correct literal to realValue
 			StringUtil.replaceToBuffer(realValue, t, "'", "''");
 			realValue.append("'");
 			return realValue.toString();
 		}
-		else if (aValue instanceof Date)
+		else if (value instanceof Date)
 		{
 			if (formatter == null) formatter = DbDateFormatter.DEFAULT_FORMATTER;
-			return formatter.getLiteral((Date)aValue);
+			return formatter.getLiteral((Date)value);
 		}
-		else if (aValue instanceof NullValue)
+		else if (value instanceof NullValue)
 		{
 			return "NULL";
 		}
+		else if (type == java.sql.Types.BIT && "bit".equalsIgnoreCase(data.getIdentifier().getDbmsType()))
+		{
+			// this is for MS SQL Server
+			// we cannot convert all values denoted as Types.BIT to 0/1 as
+			// e.g. Postgres only accepts the literals true/false for boolean columns
+			// which are reported as Types.BIT as well.
+			// that's why I compare to the DBMS data type bit (hoping that 
+			// other DBMS's that are also using 'bit' work the same way
+			boolean flag = ((java.lang.Boolean)value).booleanValue();
+			return (flag ? "1" : "0");
+		}
 		else
 		{
-			return aValue.toString();
+			return value.toString();
 		}
 	}
 
