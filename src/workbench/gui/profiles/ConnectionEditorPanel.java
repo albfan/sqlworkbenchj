@@ -85,6 +85,8 @@ public class ConnectionEditorPanel
 		policy.addComponent(disableTableCheck);
 		policy.addComponent(rollbackBeforeDisconnect);
 		policy.addComponent(tfWorkspaceFile);
+		policy.addComponent(confirmUpdates);
+		policy.addComponent(emptyStringIsNull);
 		policy.setDefaultComponent(tfProfileName);
 
 		this.setFocusCycleRoot(true);
@@ -156,10 +158,13 @@ public class ConnectionEditorPanel
     confirmUpdates = new BooleanPropertyEditor();
     cbIgnoreDropErrors = new BooleanPropertyEditor();
     cbSeparateConnections = new BooleanPropertyEditor();
+    emptyStringIsNull = new BooleanPropertyEditor();
+    includeNull = new BooleanPropertyEditor();
     jPanel1 = new javax.swing.JPanel();
     tfWorkspaceFile = new StringPropertyEditor();
     selectWkspButton = new javax.swing.JButton();
     workspaceFileLabel = new javax.swing.JLabel();
+    jLabel1 = new javax.swing.JLabel();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -230,7 +235,6 @@ public class ConnectionEditorPanel
     add(tfUserName, gridBagConstraints);
 
     tfPwd.setName("password");
-    tfPwd.setNextFocusableComponent(cbAutocommit);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
@@ -240,7 +244,6 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 2);
     add(tfPwd, gridBagConstraints);
 
-    cbAutocommit.setText("Autocommit");
     cbAutocommit.setName("autocommit");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -368,7 +371,6 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 5;
     gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 6);
     add(tfFetchSize, gridBagConstraints);
@@ -385,9 +387,6 @@ public class ConnectionEditorPanel
 
     showPassword.setText(ResourceMgr.getString("LabelShowPassword"));
     showPassword.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(1, 6, 1, 6)));
-    showPassword.setMaximumSize(new java.awt.Dimension(83, 21));
-    showPassword.setMinimumSize(new java.awt.Dimension(83, 21));
-    showPassword.setPreferredSize(new java.awt.Dimension(83, 21));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 4;
@@ -457,6 +456,29 @@ public class ConnectionEditorPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     wbOptionsPanel.add(cbSeparateConnections, gridBagConstraints);
 
+    emptyStringIsNull.setText(ResourceMgr.getString("LabelEmptyStringIsNull"));
+    emptyStringIsNull.setToolTipText(ResourceMgr.getDescription("LabelEmptyStringIsNull"));
+    emptyStringIsNull.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    emptyStringIsNull.setName("emptyStringIsNull");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+    wbOptionsPanel.add(emptyStringIsNull, gridBagConstraints);
+
+    includeNull.setText(ResourceMgr.getString("LabelIncludeNullInInsert"));
+    includeNull.setToolTipText(ResourceMgr.getString("LabelIncludeNullInInsert"));
+    includeNull.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    includeNull.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    includeNull.setName("includeNullInInsert");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 6, 0, 0);
+    wbOptionsPanel.add(includeNull, gridBagConstraints);
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 9;
@@ -514,8 +536,28 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
     add(workspaceFileLabel, gridBagConstraints);
 
-  }
-  // </editor-fold>//GEN-END:initComponents
+    jLabel1.setText("Autocommit");
+    jLabel1.addMouseListener(new java.awt.event.MouseAdapter()
+    {
+      public void mouseClicked(java.awt.event.MouseEvent evt)
+      {
+        jLabel1MouseClicked(evt);
+      }
+    });
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+    add(jLabel1, gridBagConstraints);
+
+  }// </editor-fold>//GEN-END:initComponents
+
+	private void jLabel1MouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_jLabel1MouseClicked
+	{//GEN-HEADEREND:event_jLabel1MouseClicked
+		this.cbAutocommit.setSelected(!this.cbAutocommit.isSelected());
+	}//GEN-LAST:event_jLabel1MouseClicked
 
 	private void helpButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_helpButtonActionPerformed
 	{//GEN-HEADEREND:event_helpButtonActionPerformed
@@ -591,7 +633,7 @@ public class ConnectionEditorPanel
 				DriverEditorDialog d = new DriverEditorDialog(parent, true);
 				d.setDriverName(drvName);
 				WbSwingUtilities.center(d,parent);
-				d.show();
+				d.setVisible(true);
 				if (!d.isCancelled())
 				{
 					List drivers = ConnectionMgr.getInstance().getDrivers();
@@ -611,9 +653,12 @@ public class ConnectionEditorPanel
   private javax.swing.JCheckBox cbStorePassword;
   private javax.swing.JCheckBox confirmUpdates;
   private javax.swing.JCheckBox disableTableCheck;
+  private javax.swing.JCheckBox emptyStringIsNull;
   private javax.swing.JButton extendedProps;
   private javax.swing.JLabel fetchSizeLabel;
   private javax.swing.JButton helpButton;
+  private javax.swing.JCheckBox includeNull;
+  private javax.swing.JLabel jLabel1;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JSeparator jSeparator1;
   private javax.swing.JSeparator jSeparator2;

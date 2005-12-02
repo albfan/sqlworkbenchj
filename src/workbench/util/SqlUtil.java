@@ -217,7 +217,7 @@ public class SqlUtil
 	
 	public static int getFromPosition(String sql)
 	{
-		Matcher m = IGNORED_TEXT.matcher(sql);
+		Matcher im = IGNORED_TEXT.matcher(sql);
 		Matcher fm = FROM_PATTERN.matcher(sql);
 		int fromPos = -1; 
 		if (fm.find())
@@ -226,21 +226,26 @@ public class SqlUtil
 		}
 		int end = 0;
 		int firstIgnoredText = -1;
-		if (m.find())
+		
+		if (im.find())
 		{
-			firstIgnoredText = m.start();
+			firstIgnoredText = im.start();
 		}
+		
 		if (firstIgnoredText > -1 && fromPos > -1 && firstIgnoredText < fromPos)
 		{
-			while (m.find())
+			end = im.end();
+			
+			while (im.find())
 			{
-				end = m.end();
+				end = im.end();
 			}
 		}
-		m = FROM_PATTERN.matcher(sql);
-		if (m.find(end)) 
+
+		fm.reset();
+		if (fm.find(end)) 
 		{
-			fromPos = m.start();
+			fromPos = fm.start();
 			int len = sql.length();
 			while (fromPos < len)
 			{

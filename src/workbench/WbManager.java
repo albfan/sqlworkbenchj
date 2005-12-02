@@ -18,11 +18,11 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Toolkit;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -30,7 +30,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.LookAndFeel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
@@ -41,7 +40,6 @@ import workbench.db.ConnectionProfile;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbExplorerWindow;
-import workbench.gui.help.HtmlViewer;
 import workbench.gui.tools.DataPumper;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.ToolWindow;
@@ -67,11 +65,11 @@ public class WbManager
 	implements FontChangedListener, Runnable
 {
 	private static WbManager wb;
-	private ArrayList mainWindows = new ArrayList();
-	private ArrayList toolWindows = new ArrayList();
+	private List mainWindows = new ArrayList();
+	private List toolWindows = new ArrayList();
 	private WbCipher desCipher = null;
 	private boolean batchMode = false;
-	public static boolean trace = "true".equalsIgnoreCase(System.getProperty("workbench.startuptrace", "false"));
+	public static final boolean trace = "true".equalsIgnoreCase(System.getProperty("workbench.startuptrace", "false"));
 	private boolean shutdownInProgress = false;
 
 	private Thread shutdownHook = new Thread(this);
@@ -257,7 +255,6 @@ public class WbManager
 			def.put("ComboBox.font", stdFont);
 			def.put("EditorPane.font", stdFont);
 			def.put("FileChooser.font", stdFont);
-			def.put("InternalFrame.font", stdFont);
 			def.put("Label.font", stdFont);
 			def.put("List.font", stdFont);
 			def.put("Menu.font", stdFont);
@@ -404,8 +401,6 @@ public class WbManager
 		t.setDaemon(false);
 		t.start();
 	}
-
-	public boolean isShutdownInProgress() { return this.shutdownInProgress; }
 
 	private void createCloseMessageWindow(JFrame parent)
 	{
@@ -605,7 +600,14 @@ public class WbManager
 	// when the user requests a new window
 	public void openNewWindow()
 	{
-		this.openNewWindow(false);
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				openNewWindow(false);
+			}
+		});
+		
 	}
 
 	private void openNewWindow(boolean checkCmdLine)
@@ -666,6 +668,8 @@ public class WbManager
 
 	// Other parameters
 	public static final String ARG_PROFILE = "profile";
+	public static final String ARG_SHOWPROGRESS = "showprogress";
+	
 	private static final String ARG_PROFILE_STORAGE = "profilestorage";
 	
 	private static final String ARG_CONFIGDIR = "configdir";
@@ -699,6 +703,7 @@ public class WbManager
 		cmdLine.addArgument(ARG_DISPLAY_RESULT);
 		cmdLine.addArgument(ARG_SHOW_DBEXP);
 		cmdLine.addArgument(ARG_SHOW_TIMING);
+		cmdLine.addArgument(ARG_SHOWPROGRESS);
 
 		try
 		{
@@ -768,7 +773,13 @@ public class WbManager
 		}
 		else
 		{
-			runGui();
+			EventQueue.invokeLater(new Runnable() 
+			{
+				public void run()
+				{
+					runGui();
+				}
+			});
 		}
 		if (trace) System.out.println("WbManager.init() - done.");
 	}

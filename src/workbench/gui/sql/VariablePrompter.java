@@ -22,15 +22,20 @@ import workbench.storage.DataStore;
  */
 public class VariablePrompter
 {
-	private Set toPrompt = null;
+	private Set toPrompt;
 	private	VariablePool pool = VariablePool.getInstance();
 	private String sql;
 
-	public VariablePrompter(String input)
+	public VariablePrompter()
 	{
-		this.sql = input;
 	}
 
+	public void setSql(String input)
+	{
+		this.sql = input;
+		this.toPrompt = null;
+	}
+	
 	public boolean hasPrompt()
 	{
 		return this.pool.hasPrompt(this.sql);

@@ -48,6 +48,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
@@ -55,6 +56,7 @@ import workbench.db.DeleteScriptGenerator;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.db.importer.DataStoreImporter;
+import workbench.gui.components.WbTabbedPane;
 import workbench.gui.dialogs.dataimport.ImportFileDialog;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
@@ -231,35 +233,37 @@ public class SqlPanel
 	private Thread executionThread = null;
 	private Interruptable worker = null;
 
-	/** Creates new SqlPanel */
+	private static final Border statusBarBorder = new CompoundBorder(new EmptyBorder(2, 1, 0, 1), new EtchedBorder());
+	private static final Border logBorder = new EmptyBorder(0,2,0,0);
+
 	public SqlPanel(int anId)
 	{
 		this.setId(anId);
 		this.setDoubleBuffered(true);
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setLayout(new BorderLayout());
-		this.setOpaque(true);
+		this.setOpaque(false);
+		
 		DwStatusBar statusBar = new DwStatusBar(true);
-		Border b = BorderFactory.createCompoundBorder(new EmptyBorder(2, 1, 0, 1), new EtchedBorder());
-		statusBar.setBorder(b);
+		statusBar.setBorder(statusBarBorder);
 		this.data = new DwPanel(statusBar);
 		this.data.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		this.data.setDoubleBuffered(true);
 
 		this.log = new JTextArea();
 		this.log.setDoubleBuffered(true);
-		this.log.setBorder(new EmptyBorder(0,2,0,0));
+		this.log.setBorder(logBorder);
 		this.log.setFont(Settings.getInstance().getMsgLogFont());
 		this.log.setEditable(false);
 		this.log.setLineWrap(true);
 		this.log.setWrapStyleWord(true);
 		this.log.addMouseListener(new TextComponentMouseListener());
 
-		this.resultTab = new JTabbedPane();
+		this.resultTab = new WbTabbedPane();
 		this.resultTab.setTabPlacement(JTabbedPane.TOP);
 		this.resultTab.setUI(TabbedPaneUIFactory.getBorderLessUI());
 		this.resultTab.setDoubleBuffered(true);
 		this.resultTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		this.resultTab.setFocusable(false);
 
 		this.resultTab.addTab(ResourceMgr.getString(ResourceMgr.TAB_LABEL_RESULT), this.data);
 		JScrollPane scroll = new WbScrollPane(log);
@@ -268,8 +272,8 @@ public class SqlPanel
 		WbTraversalPolicy pol = new WbTraversalPolicy();
 		pol.setDefaultComponent(data.getTable());
 		pol.addComponent(data.getTable());
+		
 		this.resultTab.setFocusTraversalPolicy(pol);
-
 		this.editor = EditorPanel.createSqlEditor();
 		this.editor.addFilenameChangeListener(this);
 		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
@@ -994,12 +998,6 @@ public class SqlPanel
 		this.sqlHistory = new SqlHistory(editor,size);
 	}
 
-	public void showCurrentHistoryStatement()
-	{
-		this.sqlHistory.showCurrent();
-		this.selectEditor();
-	}
-
 	public void readFromWorkspace(WbWorkspace w, int index)
 		throws IOException
 	{
@@ -1038,7 +1036,7 @@ public class SqlPanel
 		{
 			try
 			{
-				this.showCurrentHistoryStatement();
+				this.sqlHistory.showCurrent();
 			}
 			catch (Exception e)
 			{
@@ -1064,6 +1062,7 @@ public class SqlPanel
 		{
 			LogMgr.logWarning("SqlPanel.restoreSettings()", "Error when restore settings", e);
 		}
+		this.editor.clearUndoBuffer();
 	}
 
 	/** Do any work which should be done during the process of saving the
@@ -1514,7 +1513,6 @@ public class SqlPanel
 			showLogMessage(ResourceMgr.getString("ErrorConnectionBusy"));
 			return;
 		}
-
 		this.executionThread = new WbThread(new Runnable()
 		{
 			public void run()
@@ -1522,6 +1520,7 @@ public class SqlPanel
 				runStatement(sql, offset, commandAtIndex, highlight);
 			}
 		},"SQL Execution Thread " + this.getId());
+		this.executionThread.setPriority(Thread.NORM_PRIORITY + 2);
 		this.executionThread.start();
 	}
 
@@ -1536,17 +1535,22 @@ public class SqlPanel
 		this.showStatusMessage(ResourceMgr.getString(ResourceMgr.MSG_EXEC_SQL));
 		
 		this.storeStatementInHistory();
+		cancelExecution = false;
+		setBusy(true);
+		fireDbExecStart();
+		data.setBatchUpdate(true);
 
 		// the dbStart should be fired *after* updating the
 		// history, as the history might be saved ("AutoSaveHistory") if the MainWindow
 		// receives the execStart event
-		this.fireDbExecStart();
-
-		this.cancelExecution = false;
-		this.setBusy(true);
-		this.setCancelState(true);
-		this.makeReadOnly();
-		this.data.setBatchUpdate(true);
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				setCancelState(true);
+				makeReadOnly();
+			}
+		});
 		
 		try
 		{
@@ -1557,9 +1561,15 @@ public class SqlPanel
 			this.data.setBatchUpdate(false);
 			this.setBusy(false);
 
-			this.clearStatusMessage();
-			this.setCancelState(false);
-			this.checkResultSetActions();
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					clearStatusMessage();
+					setCancelState(false);
+					checkResultSetActions();
+				}
+			});
 
 			this.fireDbExecEnd();
 			this.selectEditorLater();
@@ -1578,9 +1588,8 @@ public class SqlPanel
 		{
 			this.storeStatementInHistory();
 			this.editor.setText(sql);
-			this.storeStatementInHistory();
 		}
-		this.startExecution(sql, 0, -1, replaceText);
+		this.startExecution(sql, 0, -1, false);
 	}
 
 	public void exportData()
@@ -1590,7 +1599,7 @@ public class SqlPanel
 		this.cancelExecution = false;
 
 		final DataExporter exporter = new DataExporter();
-		exporter.setRowMonitor(this.data);
+		exporter.setRowMonitor(this.data.getRowMonitor());
 		exporter.setSql(sql);
 		exporter.setConnection(this.dbConnection);
 		this.worker = exporter;
@@ -1651,8 +1660,7 @@ public class SqlPanel
 							messages.append(msg);
 							messages.append("\n\n");
 						}
-						messages.append(ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s");
-						messages.append('\n');
+						messages.append(ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s\n");
 						appendToLog(messages.toString());
 						showLogPanel();
 					}
@@ -1748,7 +1756,7 @@ public class SqlPanel
 		
 		this.setActionState(this.importFileAction, false);
 		
-		final DataStoreImporter importer = new DataStoreImporter(data.getTable().getDataStore(), data, this);
+		final DataStoreImporter importer = new DataStoreImporter(data.getTable().getDataStore(), data.getRowMonitor(), this);
 		final String filename = dialog.getSelectedFilename();
 		
 		importer.setImportOptions(filename, 
@@ -1850,7 +1858,6 @@ public class SqlPanel
 	{
 		if (script == null) return;
 
-		boolean compressLog = false;
 		boolean logWasCompressed = false;
 		boolean jumpToNext = (commandAtIndex > -1 && Settings.getInstance().getAutoJumpNextStatement());
 		boolean highlightCurrent = false;
@@ -1869,6 +1876,7 @@ public class SqlPanel
 		ScriptParser scriptParser = new ScriptParser();
 		scriptParser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
 		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
+		scriptParser.setSupportOracleInclude(this.dbConnection.getMetadata().supportShortInclude());
 
 		int oldSelectionStart = -1;
 		int oldSelectionEnd = -1;
@@ -1900,9 +1908,6 @@ public class SqlPanel
 				return;
 			}
 			
-			compressLog = !this.data.getVerboseLogging() && (count > 1);
-			logWasCompressed = logWasCompressed || compressLog;
-
 			if (commandAtIndex > -1)
 			{
 				count = 1;
@@ -1916,19 +1921,20 @@ public class SqlPanel
 				}
 			}
 
-			StringBuffer msg1 = new StringBuffer(ResourceMgr.getString("TxtScriptStatementFinished1"));
-			msg1.append(' ');
-			StringBuffer msg2 = new StringBuffer();
-			msg2.append(" ");
+			if (count > 1) logWasCompressed = !this.data.getVerboseLogging();
+			
+			StringBuffer finishedMsg1 = new StringBuffer(ResourceMgr.getString("TxtScriptStatementFinished1"));
+			finishedMsg1.append(' ');
+			StringBuffer finishedMsg2 = new StringBuffer(20);
+			finishedMsg2.append(' ');
 			String msg = ResourceMgr.getString("TxtScriptStatementFinished2");
 			msg = StringUtil.replace(msg, "%total%", Integer.toString(count));
-			msg2.append(msg);
-
+			finishedMsg2.append(msg);
+			
+			StringBuffer finishedMsg = new StringBuffer(finishedMsg1.length() + finishedMsg2.length() + 5);
 			String currentMsg = null;
 
 			boolean onErrorAsk = !Settings.getInstance().getIgnoreErrors();
-
-			if (count == 1) compressLog = false;
 
 			this.data.scriptStarting();
 			this.showResultPanel();
@@ -1944,24 +1950,23 @@ public class SqlPanel
 			long startTime = System.currentTimeMillis();
 			long stmtTotal = 0;
 			int executedCount = 0;
-			String lastSql = null;
-
+			String currentSql = null;
+			VariablePrompter prompter = new VariablePrompter();
+			
+			StringBuffer logmsg = new StringBuffer(100);
 			for (int i=startIndex; i < endIndex; i++)
 			{
-				StringBuffer logmsg = new StringBuffer();
-				lastSql = scriptParser.getCommand(i);
-				if (lastSql == null)
-				{
-					continue;
-				}
+				logmsg.delete(0,logmsg.length());
+				currentSql = scriptParser.getCommand(i);
 
-				// in case of a batch execution we need to make sure that
+				// By calling yield() we make sure that
 				// this thread can actually be interrupted!
 				Thread.yield();
 				if (cancelExecution) break;
 
 				boolean goOn = true;
-				VariablePrompter prompter = new VariablePrompter(lastSql);
+				
+				prompter.setSql(currentSql);
 				if (prompter.needsInput())
 				{
 					// the animated gif needs to be turned off when a
@@ -1976,9 +1981,9 @@ public class SqlPanel
 					PreparedStatementPool pool = this.dbConnection.getPreparedStatementPool();
 					try
 					{
-						if (pool.isRegistered(lastSql) || pool.addPreparedStatement(lastSql))
+						if (pool.isRegistered(currentSql) || pool.addPreparedStatement(currentSql))
 						{
-							StatementParameters parms = pool.getParameters(lastSql);
+							StatementParameters parms = pool.getParameters(currentSql);
 							this.showBusyIcon(false);
 							goOn = ParameterEditor.showParameterDialog(parms);
 							this.showBusyIcon(true);
@@ -2004,28 +2009,31 @@ public class SqlPanel
 				if (highlightCurrent)
 				{
 					highlightStatement(scriptParser, i, selectionOffset);
+					editor.validate();
+					Thread.yield();
 				}
-				this.data.runStatement(lastSql, control);
+				
+				this.data.runStatement(currentSql, control);
+				
 				stmtTotal += data.getLastExecutionTime();
 
 				// the SET FEEDBACK command might change the feedback level
 				// so it needs to be checked each time.
-				compressLog = !this.data.getVerboseLogging() && (count > 1);
-				logWasCompressed = logWasCompressed || compressLog;
+				if (count > 1) logWasCompressed = logWasCompressed || !this.data.getVerboseLogging();
+				
+				finishedMsg.delete(0, finishedMsg.length());
+				finishedMsg.append(finishedMsg1);
+				finishedMsg.append(i + 1);
+				finishedMsg.append(finishedMsg2);
+				currentMsg = finishedMsg.toString();
 
-				StringBuffer b = new StringBuffer(80);
-				b.append(msg1);
-				b.append(i + 1);
-				b.append(msg2);
-				currentMsg = b.toString();
-				//currentMsg = StringUtil.replace(msg, "%nr%", Integer.toString(i + 1));
-
-				if (!compressLog)
+				if (!logWasCompressed)
 				{
 					logmsg.append(this.data.getLastMessage());
+					logmsg.append('\n');
 					if (count > 1)
 					{
-						logmsg.append("\n(");
+						logmsg.append("(");
 						logmsg.append(currentMsg);
 						logmsg.append(")\n\n");
 					}
@@ -2053,7 +2061,7 @@ public class SqlPanel
 					// error messages should always be shown in the log
 					// panel, even if compressLog is enabled (if it is not enabled
 					// the messages have been appended to the log already)
-					if (compressLog) this.appendToLog(this.data.getLastMessage());
+					if (logWasCompressed) this.appendToLog(this.data.getLastMessage());
 
 					if (count > 1 && onErrorAsk && (i < (count - 1)))
 					{
@@ -2064,7 +2072,14 @@ public class SqlPanel
 						this.highlightError(scriptParser, commandWithError, selectionOffset);
 
 						// force a refresh in order to display the selection
-						this.repaint();
+						EventQueue.invokeLater(new Runnable()
+						{
+							public void run()
+							{
+								validate();
+								repaint();
+							}
+						});
 						Thread.yield();
 
 						String question = ResourceMgr.getString("MsgScriptStatementError");
@@ -2085,9 +2100,6 @@ public class SqlPanel
 					failuresIgnored ++;
 				}
 				executedCount ++;
-
-				Thread.yield();
-				if (cancelExecution) break;
 
 			} // end for loop
 
@@ -2118,7 +2130,7 @@ public class SqlPanel
 				this.appendToLog("\n" + failuresIgnored + " " + ResourceMgr.getString("MsgTotalStatementsFailed")+ "\n");
 			}
 
-			if (compressLog || logWasCompressed)
+			if (logWasCompressed)
 			{
 				msg = executedCount + " " + ResourceMgr.getString("MsgTotalStatementsExecuted") + "\n";
 				this.appendToLog(msg);
@@ -2132,7 +2144,7 @@ public class SqlPanel
 				this.showResultPanel();
 				StringBuffer header = new StringBuffer(80);
 				header.append(ResourceMgr.getString("TxtPrintHeaderResultFrom"));
-				header.append(lastSql);
+				header.append(currentSql);
 				this.data.setPrintHeader(header.toString());
 			}
 			else
@@ -2143,8 +2155,8 @@ public class SqlPanel
 			if (count > 1)
 			{
 				this.appendToLog(ResourceMgr.getString("TxtScriptFinished")+ "\n");
-				String s = ResourceMgr.getString("MsgScriptExecTime") + " " + (((double)execTime) / 1000.0) + "s";
-				this.appendToLog(s + "\n");
+				String s = ResourceMgr.getString("MsgScriptExecTime") + " " + (((double)execTime) / 1000.0) + "s\n";
+				this.appendToLog(s);
 			}
 
 			if (!jumpToNext && restoreSelection && oldSelectionStart > -1 && oldSelectionEnd > -1)
@@ -2356,7 +2368,35 @@ public class SqlPanel
 		}
 	}
 
+	private Runnable hideBusyRunnable = new Runnable()
+	{
+		public void run()
+		{
+			_showBusyIcon(false);
+		}
+	};
+	
+	private Runnable showBusyRunnable = new Runnable()
+	{
+		public void run()
+		{
+			_showBusyIcon(true);
+		}
+	};
+	
 	private void showBusyIcon(boolean show)
+	{
+		if (show)
+		{
+			WbSwingUtilities.invoke(showBusyRunnable);
+		}
+		else
+		{
+			WbSwingUtilities.invoke(hideBusyRunnable);
+		}
+	}
+	
+	private void _showBusyIcon(boolean show)
 	{
 		Container parent = this.getParent();
 		if (parent instanceof JTabbedPane)
@@ -2381,21 +2421,25 @@ public class SqlPanel
 						{
 							tab.setIconAt(index, null);
 						}
-						if (this.loadingIcon != null) this.loadingIcon.getImage().flush();
-						if (this.cancelIcon != null) this.cancelIcon.getImage().flush();
+						if (Settings.getInstance().getUseAnimatedIcon())
+						{
+							// flushing the animated icons also stops the thread that
+							// is used for the animation. If this is not done it will still
+							// "animate" in the background (at least on older JDKs) and thus
+							// degrade performance
+							// For a static icon this is not necessary, actually not flushing
+							// the static icon improves performance when it's re-displayed
+							if (this.loadingIcon != null) this.loadingIcon.getImage().flush();
+							if (this.cancelIcon != null) this.cancelIcon.getImage().flush();
+						}
 					}
 				}
 				catch (Throwable th)
 				{
 					LogMgr.logWarning("SqlPanel.setBusy()", "Error when setting busy icon!", th);
 				}
-				EventQueue.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						tab.repaint();
-					}
-				});
+				//tab.validate();
+				tab.repaint();
 			}
 		}
 	}

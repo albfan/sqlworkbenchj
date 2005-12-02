@@ -162,10 +162,22 @@ public class Settings
 			logfile = System.getProperty("workbench.log.filename", null);
 			if (logfile == null)
 			{
-				logfile = this.props.getProperty("workbench.log.filename", "%configdir%/workbench.log");
+				logfile = this.props.getProperty("workbench.log.filename", FileDialogUtil.CONFIG_DIR_KEY + "/workbench.log");
 			}
 			int maxSize = this.getMaxLogfileSize();
-			logfile = StringUtil.replace(logfile, "%configdir%", configDir);
+			if (logfile.indexOf("%configdir%") > -1)
+			{
+				logfile = StringUtil.replace(logfile, "%configdir%", FileDialogUtil.CONFIG_DIR_KEY);
+			}
+			logfile = StringUtil.replace(logfile, FileDialogUtil.CONFIG_DIR_KEY, configDir);
+			
+			// Replace old System.out or System.err settings
+			if (logfile.equalsIgnoreCase("System.out") || logfile.equalsIgnoreCase("System.err"))
+			{
+				File f = new File(configDir, "workbench.log");
+				logfile = f.getAbsolutePath();
+				this.props.setProperty("workbench.log.filename", FileDialogUtil.CONFIG_DIR_KEY + "/workbench.log");
+			}
 			LogMgr.setOutputFile(logfile, maxSize);
     }
     catch (Throwable e)
@@ -210,6 +222,25 @@ public class Settings
 	public String getConfigDir() { return this.configDir; }
 	public void setConfigDir(String aDir) { this.configDir = aDir; }
 
+	public String getLibDir()
+	{
+		return System.getProperty("workbench.libdir", getProperty("workbench.libdir", null));
+	}
+
+	public static final String PK_MAPPING_FILENAME_PROPERTY = "workbench.pkmapping.file";
+	public String getPKMappingFilename()
+	{
+		String filename = System.getProperty(PK_MAPPING_FILENAME_PROPERTY, getProperty(PK_MAPPING_FILENAME_PROPERTY, null));
+		if (filename == null) return null;
+		String dir = getConfigDir();
+		return StringUtil.replace(filename, FileDialogUtil.CONFIG_DIR_KEY, dir);
+	}
+	
+	public void setPKMappingFilename(String file)
+	{
+		setProperty(PK_MAPPING_FILENAME_PROPERTY,file);
+	}
+	
 	private String getShortcutFilename()
 	{
 		return new File(this.configDir, "WbShortcuts.xml").getAbsolutePath();
@@ -246,7 +277,7 @@ public class Settings
 		File f = new File(realFilename);
 		if (f.getParent() == null)
 		{
-			// no directory in filename use config directory 
+			// no directory in filename -> use config directory 
 			f = new File(this.configDir, realFilename);
 		}
 		LogMgr.logInfo("Settings.getProfileFilename()", "Using profiles from " + f.getAbsolutePath());
@@ -300,15 +331,6 @@ public class Settings
 		this.renameProperty("connection.last", "workbench.connection.last");
 		this.renameProperty("drivers.lastlibdir", "workbench.drivers.lastlibdir");
 		this.renameProperty("workbench.db.debugger", "workbench.db.previewsql");
-
-		// check if the reconnect setting has been modified
-		String reconnect = this.props.getProperty("workbench.db.cancelwithreconnect", "");
-
-		// Still the old default -> Change to classname of driver
-		if (reconnect.equalsIgnoreCase("Microsoft SQL Server"))
-		{
-			this.props.setProperty("workbench.db.cancelwithreconnect", "com.microsoft.jdbc.sqlserver.SQLServerDriver");
-		}
 	}
 
 	private void renameProperty(String oldKey, String newKey)
@@ -324,34 +346,18 @@ public class Settings
 	{
 		try
 		{
-			// remove settings which are no longer needed
-			this.props.remove("workbench.sql.lasttab");
-			for (int i=0; i < 10; i++)
-			{
-				this.props.remove("workbench.gui.sql.lastdivider" + i);
-				this.props.remove("workbench.gui.sql.divider" + i);
-			}
-			this.props.remove("workbench.dbexplorer.disconnect");
-			this.props.remove("workbench.db.rollbackdisconnect");
+			// added for build 82
 			this.props.remove("workbench.db.fetchsize");
-			this.props.remove("workbench.workspace.lastfile");
-			this.props.remove("workbench.workspace.restorelast");
-			this.props.remove("workbench.persistence.cleanupunderscores");
-			this.props.remove("workbench.persistence.lastdir.table");
-			this.props.remove("workbench.persistence.lastdir.value");
-			this.props.remove("workbench.persistence.lastdir");
-			this.props.remove("workbench.sql.defaulttabcount");
 
-			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.divider");
-			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.package");
-			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.package.table");
-			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.package.value");
-			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.pattern.table");
-			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.pattern.value");
-			this.props.remove("workbench.gui.dbobjects.PersistenceGeneratorPanel.tables");
-
-			this.props.remove("workbench.db.one_connection_per_tab");
-
+			// added for build 84
+			this.props.remove("workbench.sql.replace.ignorecase");
+			this.props.remove("workbench.sql.replace.selectedtext");
+			this.props.remove("workbench.sql.replace.useregex");
+			this.props.remove("workbench.sql.replace.wholeword");
+			this.props.remove("workbench.sql.search.ignorecase");
+			this.props.remove("workbench.sql.search.useregex");
+			this.props.remove("workbench.sql.search.wholeword");
+			this.props.remove("workbench.sql.search.lastvalue");
 		}
 		catch (Throwable e)
 		{
@@ -1111,6 +1117,7 @@ public class Settings
 	{
 		return this.props.getProperty("workbench.drivers.lastlibdir", "");
 	}
+	
 	public void setLastLibraryDir(String aDir)
 	{
 		this.props.setProperty("workbench.drivers.lastlibdir", aDir);
@@ -1154,7 +1161,12 @@ public class Settings
 		this.props.setProperty("workbench.sql.script.inmemory.maxsize", Integer.toString(size));
 	}
 
-	public int getMaxSubselectLength()
+	public int getFormatterMaxColumnsInSelect()
+	{
+		return Settings.getInstance().getIntProperty("workbench.sql.formatter.select.columnsperline", 1);
+	}
+	
+	public int getFormatterMaxSubselectLength()
 	{
 		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.formatter.subselect.maxlength"), 60);
 	}

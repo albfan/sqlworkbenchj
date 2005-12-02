@@ -37,6 +37,7 @@ import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 
 /**
@@ -72,9 +73,6 @@ public class ProfileSelectionDialog
 		escActionCommand = esc.getActionName();
 		im.put(esc.getAccelerator(), esc.getActionName());
 		am.put(esc.getActionName(), esc);
-
-		//this.getRootPane().setInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW, im);
-		//this.getRootPane().setActionMap(am);
 
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -143,9 +141,9 @@ public class ProfileSelectionDialog
 	/** Closes the dialog */
 	private void closeDialog()
 	{
+		this.saveSize();
 		this.profiles.saveSettings();
 		this.setVisible(false);
-		//this.dispose();
 	}
 
 	public ConnectionProfile getSelectedProfile()
@@ -180,14 +178,14 @@ public class ProfileSelectionDialog
 	private boolean checkPassword()
 	{
 		if (this.selectedProfile == null) return false;
-		if (!this.selectedProfile.getStorePassword())
-		{
-			String pwd = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgInputPwdWindowTitle"), "", true);
-			if (pwd == null) return false;
-			this.selectedProfile.setPassword(pwd);
-		}
+		if (this.selectedProfile.getStorePassword()) return true;
+		
+		String pwd = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgInputPwdWindowTitle"), "", true);
+		if (StringUtil.isEmptyString(pwd)) return false;
+		this.selectedProfile.setPassword(pwd);
 		return true;
 	}
+	
 	public void profileListClicked(MouseEvent evt)
 	{
 		if (evt.getClickCount() == 2)
@@ -201,6 +199,7 @@ public class ProfileSelectionDialog
 			});
 		}
 	}
+	
 	public void setInitialFocus()
 	{
 		profiles.setInitialFocus();
@@ -212,7 +211,13 @@ public class ProfileSelectionDialog
 	{
 		if (e.getSource() == this.okButton)
 		{
-			this.selectProfile();
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					selectProfile();
+				}
+			});
 		}
 		else if (e.getSource() == this.cancelButton ||
 						e.getActionCommand().equals(escActionCommand))
@@ -220,7 +225,6 @@ public class ProfileSelectionDialog
 			this.selectedProfile = null;
 			this.closeDialog();
 		}
-		this.saveSize();
 	}
 
 	public boolean isCancelled() { return this.cancelled;	}

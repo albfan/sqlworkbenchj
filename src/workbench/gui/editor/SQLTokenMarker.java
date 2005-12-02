@@ -15,12 +15,12 @@ import javax.swing.text.Segment;
  * SQL token marker.
  *
  * @author mike dillon
- * @version $Id: SQLTokenMarker.java,v 1.6 2005-11-12 22:49:27 thomas Exp $
+ * @version $Id: SQLTokenMarker.java,v 1.7 2005-12-02 16:39:22 thomas Exp $
  */
 public class SQLTokenMarker 
 	extends TokenMarker
 {
-	private int offset, lastOffset, lastKeyword, length;
+	private int offset, lastOffset, lastKeyword;//, length;
 	protected boolean isMySql = false;
 	protected KeywordMap keywords;
 	private char literalChar = 0;
@@ -33,15 +33,15 @@ public class SQLTokenMarker
 	{
 		char[] array = line.array;
 		offset = lastOffset = lastKeyword = line.offset;
-		length = line.count + offset;
+		int currentLength = line.count + offset;
 loop:
-		for(int i = offset; i < length; i++)
+		for(int i = offset; i < currentLength; i++)
 		{
 			int i1 = i+1;
 			switch(array[i])
 			{
 			case '*':
-				if(token == Token.COMMENT1 && length - i >= 1 && array[i1] == '/')
+				if(token == Token.COMMENT1 && currentLength - i >= 1 && array[i1] == '/')
 				{
 					token = Token.NULL;
 					i++;
@@ -96,7 +96,7 @@ loop:
 			case '/':
 				if(token == Token.NULL)
 				{
-					if (length - i >= 2 && array[i1] == '*')
+					if (currentLength - i >= 2 && array[i1] == '*')
 					{
 						searchBack(line, i);
 						token = Token.COMMENT1;
@@ -114,11 +114,11 @@ loop:
 			case '-':
 				if(token == Token.NULL)
 				{
-					if (length - i >= 2 && array[i1] == '-')
+					if (currentLength - i >= 2 && array[i1] == '-')
 					{
 						searchBack(line, i);
-						addToken(length - i,Token.COMMENT1);
-						lastOffset = length;
+						addToken(currentLength - i,Token.COMMENT1);
+						lastOffset = currentLength;
 						break loop;
 					}
 					else
@@ -132,11 +132,11 @@ loop:
 			case '#':
 				if (isMySql && token == Token.NULL)
 				{
-					if (length - i >= 1)
+					if (currentLength - i >= 1)
 					{
 						searchBack(line, i);
-						addToken(length - i, Token.COMMENT1);
-						lastOffset = length;
+						addToken(currentLength - i, Token.COMMENT1);
+						lastOffset = currentLength;
 						break loop;
 					}
 				}
@@ -163,9 +163,9 @@ loop:
 			}
 		}
 		if(token == Token.NULL)
-			searchBack(line, length, false);
-		if(lastOffset != length)
-			addToken(length - lastOffset,token);
+			searchBack(line, currentLength, false);
+		if(lastOffset != currentLength)
+			addToken(currentLength - lastOffset,token);
 		return token;
 	}
 

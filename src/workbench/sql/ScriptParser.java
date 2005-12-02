@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -45,6 +46,7 @@ public class ScriptParser
 	private boolean checkEscapedQuotes = true;
 	private IteratingScriptParser iteratingParser = null;
 	private boolean emptyLineIsSeparator = false;
+	private boolean supportOracleInclude = true;
 	
 	/** Create a ScriptParser
 	 *
@@ -97,8 +99,7 @@ public class ScriptParser
 		else
 		{
 			this.iteratingParser = new IteratingScriptParser(f, encoding);
-			this.iteratingParser.setCheckEscapedQuotes(this.checkEscapedQuotes);
-			this.iteratingParser.allowEmptyLineAsSeparator(this.emptyLineIsSeparator);
+			configureParserInstance(this.iteratingParser);
 		}
 	}
 	
@@ -155,6 +156,15 @@ public class ScriptParser
 		}
 	}
 	
+	public void setSupportOracleInclude(boolean flag)
+	{
+		this.supportOracleInclude = flag;
+		if (this.iteratingParser != null)
+		{
+			this.iteratingParser.setSupportOracleInclude(flag);
+		}
+	}
+	
 	/**
 	 *	Define the script to be parsed.
 	 *	The delimiter to be used will be checked automatically
@@ -202,7 +212,7 @@ public class ScriptParser
 		{
 			this.delimiter = this.alternateDelimiter;
 		}
-		else if (cleanSql.toUpperCase().endsWith("GO"))
+		else if (cleanSql.matches("(?i).*[\\n\\r|\\n]GO$"))
 		{
 			this.delimiter = "GO";
 		}
@@ -367,6 +377,14 @@ public class ScriptParser
 		return this.delimiter;
 	}
 
+	private void configureParserInstance(IteratingScriptParser p)
+	{
+		p.setSupportOracleInclude(this.supportOracleInclude);
+		p.allowEmptyLineAsSeparator(this.emptyLineIsSeparator);
+		p.setCheckEscapedQuotes(this.checkEscapedQuotes);
+		p.setDelimiter(this.delimiter);
+	}
+	
 	/**
 	 *	Parse the given SQL Script into a List of single SQL statements.
 	 */
@@ -374,10 +392,8 @@ public class ScriptParser
 	{
 		this.commands = new ArrayList();
 		IteratingScriptParser p = new IteratingScriptParser();
-		p.allowEmptyLineAsSeparator(this.emptyLineIsSeparator);
+		configureParserInstance(p);
 		p.setScript(this.originalScript);
-		p.setDelimiter(this.delimiter);
-		p.setCheckEscapedQuotes(this.checkEscapedQuotes);
 
 		ScriptCommandDefinition c = null; 
 		int index = 0;

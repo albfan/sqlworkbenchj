@@ -28,10 +28,10 @@ import workbench.util.StringUtil;
 
 public class MultiLineToolTipUI extends BasicToolTipUI
 {
+	private final String[] emptyLines = new String[] { StringUtil.EMPTY_STRING };
 	private int maxWidth = 0;
 	private Dimension prefSize = new Dimension();
-	private List displayLines = new ArrayList();
-	private static Toolkit toolkit = Toolkit.getDefaultToolkit();
+	private String[] displayLines;
 	
 	public void paint(Graphics g, JComponent c)
 	{
@@ -42,10 +42,11 @@ public class MultiLineToolTipUI extends BasicToolTipUI
 		g.setColor(c.getForeground());
 		if (this.displayLines != null)
 		{
-			int count = displayLines.size();
+			int h = metrics.getHeight();
+			int count = displayLines.length;
 			for (int i=0;i< count; i++)
 			{
-				g.drawString((String)displayLines.get(i), 3, (metrics.getHeight()) * (i+1));
+				g.drawString(displayLines[i], 3, (h * (i+1)) - 2);
 			}
 		}
 	}
@@ -54,25 +55,22 @@ public class MultiLineToolTipUI extends BasicToolTipUI
 	{
 		FontMetrics metrics = c.getFontMetrics(c.getFont());
 		String tipText = ((JToolTip)c).getTipText();
-		this.displayLines.clear();
 		if (tipText == null)
 		{
-			displayLines.add(StringUtil.EMPTY_STRING);
+			this.displayLines = emptyLines;
 		}
 		else
 		{
-			StringUtil.getTextLines(this.displayLines, tipText);
-			String line;
+			displayLines = StringUtil.PATTERN_CRLF.split(tipText);//
 			this.maxWidth = -1;
-			for (int i=0; i < displayLines.size(); i++)
+			for (int i=0; i < displayLines.length; i++)
 			{
-				line = (String)this.displayLines.get(i);
-				int width = SwingUtilities.computeStringWidth(metrics,line);
+				int width = SwingUtilities.computeStringWidth(metrics,displayLines[i]);
 				this.maxWidth = (this.maxWidth < width) ? width : this.maxWidth;
 			} 
 		}
-		int height = metrics.getHeight() * displayLines.size();
-		prefSize.setSize(maxWidth + 6, height + 4);
+		int height = metrics.getHeight() * displayLines.length;
+		prefSize.setSize(maxWidth + 6, height + 2);
 		return prefSize;
 	}
 	

@@ -299,6 +299,7 @@ public class EditorPanel
 		String sql = this.getSelectedStatement();
 		ScriptParser parser = new ScriptParser();
 		parser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
+		//parser.setSupportOracleInclude(this.dbConnection.getMetadata().supportShortInclude());
 		parser.setScript(sql);
 		List commands = parser.getCommands();
 		String delimit = parser.getDelimiter();
@@ -327,8 +328,11 @@ public class EditorPanel
 		for (int i=0; i < count; i++)
 		{
 			String command = (String)commands.get(i);
-			SqlFormatter f = new SqlFormatter(command, Settings.getInstance().getMaxSubselectLength());
+			SqlFormatter f = new SqlFormatter(command, Settings.getInstance().getFormatterMaxSubselectLength());
 			f.setDBFunctions(this.dbFunctions);
+			int cols = Settings.getInstance().getFormatterMaxColumnsInSelect();
+			f.setMaxColumnsPerSelect(cols);
+			
 			try
 			{
 				String formattedSql = f.getFormattedSql().trim();
@@ -375,7 +379,7 @@ public class EditorPanel
 
 
 	/**
-	 *	Change the currently selected so that it can be used for a SQL IN statement with
+	 *	Change the currently selected text so that it can be used for a SQL IN statement with
 	 *	character datatype.
 	 *	e.g.
 	 *<pre>

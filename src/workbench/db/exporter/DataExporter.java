@@ -377,6 +377,11 @@ public class DataExporter
 
 	public void setDateFormat(String aFormat)
 	{
+		if (StringUtil.isEmptyString(aFormat))
+		{
+			aFormat = Settings.getInstance().getDefaultDateFormat();
+		}
+		if (StringUtil.isEmptyString(aFormat)) return;
 		this.dateFormat = aFormat;
 		if (this.dateFormat != null)
 		{
@@ -404,6 +409,11 @@ public class DataExporter
 
 	public void setTimestampFormat(String aFormat)
 	{
+		if (StringUtil.isEmptyString(aFormat))
+		{
+			aFormat = Settings.getInstance().getDefaultDateTimeFormat();
+		}
+		if (StringUtil.isEmptyString(aFormat)) return;
 		this.dateTimeFormat = aFormat;
 		if (this.dateTimeFormat != null)
 		{
@@ -488,13 +498,18 @@ public class DataExporter
 			numberFormatter.setGroupingUsed(false);
 			numberFormatter.setMaximumFractionDigits(999);
 		}
+		else
+		{
+			numberFormatter = Settings.getInstance().getDefaultDecimalFormatter();
+		}
 	}
+	
 	public DecimalFormat getDecimalFormatter() { return this.numberFormatter; }
 
 
 	public void setDecimalSymbol(String aSymbol)
 	{
-		if (aSymbol == null || aSymbol.length() == 0) return;
+		if (StringUtil.isEmptyString(aSymbol)) return;
 		this.setDecimalSymbol(aSymbol.charAt(0));
 	}
 

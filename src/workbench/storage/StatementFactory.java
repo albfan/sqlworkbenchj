@@ -28,14 +28,18 @@ import workbench.util.SqlUtil;
 public class StatementFactory
 {
 	private ResultInfo resultInfo;
-	//private String tableToUse;
 	private TableIdentifier tableToUse;
 	private boolean includeTableOwner = true;
 	private String currentUser;
 	private WbConnection dbConnection;
-	public StatementFactory(ResultInfo metaData)
+	private SqlLiteralFormatter literalFormatter;
+	private boolean emptyStringIsNull = false;
+	
+	public StatementFactory(ResultInfo metaData, WbConnection conn)
 	{
 		this.resultInfo = metaData;
+		this.literalFormatter = new SqlLiteralFormatter();
+		this.setCurrentConnection(conn);
 	}
 
 	public DmlStatement createUpdateStatement(RowData aRow)
@@ -53,6 +57,15 @@ public class StatementFactory
 		return createUpdateStatement(aRow, ignoreStatus, lineEnd, null);
 	}
 
+	private boolean isNull(Object value)
+	{
+		if (value == null) return true;
+		if (value instanceof NullValue) return true;
+		String s = value.toString();
+		if (emptyStringIsNull && s.length() == 0) return true;
+		return false;
+	}
+	
 	/**
 	 *	Create an UPDATE Statement based on the data provided 
 	 *
@@ -70,13 +83,12 @@ public class StatementFactory
 		boolean doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.update.doformat",true);
 		int columnThresholdForNewline = Settings.getInstance().getIntProperty("workbench.sql.generate.update.newlinethreshold",5);
 		
-		//boolean newLineAfterColumn = (cols > 5);
 		boolean newLineAfterColumn = doFormatting && (cols > columnThresholdForNewline);
 
 		DmlStatement dml;
 
 		if (!ignoreStatus && !aRow.isModified()) return null;
-		ArrayList values = new ArrayList();
+		ArrayList values = new ArrayList(cols);
 		StringBuffer sql = new StringBuffer("UPDATE ");
 
 		sql.append(getTableNameToUse());
@@ -104,21 +116,18 @@ public class StatementFactory
 				String colName = SqlUtil.quoteObjectname(this.resultInfo.getColumnName(col));
 				sql.append(colName);
 				Object value = aRow.getValue(col);
-				if (value instanceof NullValue)
+				if (isNull(value))
 				{
 					sql.append(" = NULL");
 				}
 				else
 				{
 					sql.append(" = ?");
-					if ("LONG".equals(this.resultInfo.getDbmsTypeName(col)))
+					if (value instanceof String && "LONG".equals(this.resultInfo.getDbmsTypeName(col)))
 					{
-						values.add(new OracleLongType(value.toString()));
+						value = new OracleLongType(value.toString());
 					}
-					else
-					{
-						values.add(value);
-					}
+					values.add(new ColumnData(value,this.resultInfo.getColumn(col)));
 				}
 			}
 		}
@@ -146,18 +155,11 @@ public class StatementFactory
 			else
 			{
 				sql.append(" = ?");
-				values.add(value);
+				values.add(new ColumnData(value,this.resultInfo.getColumn(j)));
 			}
 		}
-		try
-		{
-			dml = new DmlStatement(sql.toString(), values);
-		}
-		catch (Exception e)
-		{
-			dml = null;
-			LogMgr.logError(this, "Error creating DmlStatement for " + sql.toString(), e);
-		}
+		
+		dml = new DmlStatement(sql.toString(), values, this.literalFormatter);
 		return dml;
 	}
 
@@ -194,10 +196,11 @@ public class StatementFactory
 		boolean doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.doformat",true);
 		int columnThresholdForNewline = Settings.getInstance().getIntProperty("workbench.sql.generate.insert.newlinethreshold",5);
 		boolean newLineAfterColumn = doFormatting && (cols > columnThresholdForNewline);
-		
+		boolean skipIdentityCols = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.ignoreidentity",true);
 		int colsPerLine = Settings.getInstance().getIntProperty("workbench.sql.generate.insert.colsperline",1);
+		boolean includeNulls = this.dbConnection.getProfile().getIncludeNullInInsert();
 		
-		ArrayList values = new ArrayList();
+		ArrayList values = new ArrayList(cols);
 		StringBuffer sql = new StringBuffer(250);
     sql.append("INSERT INTO ");
 		StringBuffer valuePart = new StringBuffer(250);
@@ -227,11 +230,27 @@ public class StatementFactory
 		
 		for (int col=0; col < cols; col ++)
 		{
+			ColumnIdentifier colId = this.resultInfo.getColumn(col);
 			if (columns != null)
 			{
-				if (!columns.contains(this.resultInfo.getColumn(col))) continue;
+				if (!columns.contains(colId)) continue;
 			}
-			if (ignoreStatus || aRow.isColumnModified(col))
+			
+			if (skipIdentityCols && colId.getDbmsType().indexOf("identity") > -1) continue;
+			Object value = aRow.getValue(col);
+			if (isNull(value)) value = null;
+			
+			boolean includeCol = (ignoreStatus || aRow.isColumnModified(col));
+			
+			if (includeCol)
+			{
+				if (value == null)
+				{
+					includeCol = includeNulls;
+				}
+			}
+			
+			if (includeCol)
 			{
 				if (!first)
 				{
@@ -268,7 +287,7 @@ public class StatementFactory
 				sql.append(colName);
 				valuePart.append('?');
 
-				values.add(aRow.getValue(col));
+				values.add(new ColumnData(value,this.resultInfo.getColumn(col)));
 			}
 			colsInThisLine ++;
 		}
@@ -293,15 +312,7 @@ public class StatementFactory
 		sql.append(valuePart);
 		sql.append(')');
 		
-		try
-		{
-			dml = new DmlStatement(sql.toString(), values);
-		}
-		catch (Exception e)
-		{
-			dml = null;
-			LogMgr.logError(this, "Error creating DmlStatement for " + sql.toString(), e);
-		}
+		dml = new DmlStatement(sql.toString(), values, this.literalFormatter);
 		return dml;
 	}
 
@@ -317,14 +328,14 @@ public class StatementFactory
 
 		boolean first = true;
 		DmlStatement dml;
+		int count = this.resultInfo.getColumnCount();
 
-		ArrayList values = new ArrayList();
+		ArrayList values = new ArrayList(count);
 		StringBuffer sql = new StringBuffer(250);
     sql.append("DELETE FROM ");
 		sql.append(getTableNameToUse());
 		sql.append(" WHERE ");
 		first = true;
-		int count = this.resultInfo.getColumnCount();
 		for (int j=0; j < count; j++)
 		{
 			if (!this.resultInfo.isPkColumn(j)) continue;
@@ -340,25 +351,19 @@ public class StatementFactory
 			sql.append(colName);
 
 			Object value = aRow.getOriginalValue(j);
-			if (value instanceof NullValue)
+			if (isNull(value)) value = null;
+			if (value == null)
 			{
 				sql.append(" IS NULL");
 			}
 			else
 			{
 				sql.append(" = ?");
-				values.add(value);
+				values.add(new ColumnData(value, resultInfo.getColumn(j)));
 			}
 		}
-		try
-		{
-			dml = new DmlStatement(sql.toString(), values);
-		}
-		catch (Exception e)
-		{
-			dml = null;
-			LogMgr.logError(this, "Error creating DELETE Statement for " + sql.toString(), e);
-		}
+		
+		dml = new DmlStatement(sql.toString(), values, this.literalFormatter);
 		return dml;
 	}
 
@@ -396,9 +401,10 @@ public class StatementFactory
 	public void setIncludeTableOwner(boolean flag) { this.includeTableOwner = flag; }
 	public boolean getIncludeTableOwner() { return this.includeTableOwner; }
 	
-	public void setCurrentConnection(WbConnection conn)
+	private void setCurrentConnection(WbConnection conn)
 	{
 		this.dbConnection = conn;
 		this.currentUser = conn.getCurrentUser();
+		emptyStringIsNull = this.dbConnection.getProfile().getEmptyStringIsNull();
 	}
 }

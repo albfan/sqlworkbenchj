@@ -76,6 +76,9 @@ public class SelectAnalyzer
 			tables = Collections.EMPTY_LIST;
 		}
 		
+		boolean afterWhere = (wherePos > 0 && cursorPos > wherePos);
+		boolean afterFrom = (fromPos > 0 && cursorPos > fromPos);
+		
 		if ( fromPos < 0 ||
 			   (wherePos < 0 && cursorPos > fromPos) ||
 			   (wherePos > -1 && cursorPos > fromPos && cursorPos <= wherePos))
@@ -122,52 +125,54 @@ public class SelectAnalyzer
 			// we'll try to find a proper column list
 			
 			int count = tables.size();
-			if (count == 1)
+			String q = getQualifierLeftOfCursor(sql, cursorPos);
+			this.tableForColumnList = null;
+
+			// check if the current qualifier is either one of the
+			// tables in the table list or one of the aliases used
+			// in the table list.
+			TableAlias currentAlias = null;
+			if (q != null)
+			{
+				for (int i=0; i < count; i++)
+				{
+					String element = (String)tables.get(i);
+					TableAlias tbl = new TableAlias(element);
+
+					if (tbl.isTableOrAlias(q))
+					{
+						tableForColumnList = tbl.getTable();
+						currentAlias = tbl;
+						break;
+					}
+				}
+			}
+			else if (count == 1)
 			{
 				TableAlias tbl = new TableAlias((String)tables.get(0));
 				tableForColumnList = tbl.getTable();
 			}
-			else
+
+			if (tableForColumnList == null && currentWord != null && currentWord.endsWith(".") && afterWhere)
 			{
-				String q = getQualifierLeftOfCursor(sql, cursorPos);
-				this.tableForColumnList = null;
-				
-				// check if the current qualifier is either one of the
-				// tables in the table list or one of the aliases used
-				// in the table list.
-				TableAlias currentAlias = null;
-				if (q != null)
-				{
-					for (int i=0; i < count; i++)
-					{
-						String element = (String)tables.get(i);
-						TableAlias tbl = new TableAlias(element);
+				tableForColumnList = new TableIdentifier(currentWord.substring(0, currentWord.length() - 1));
+			}
 
-						if (tbl.isTableOrAlias(q))
-						{
-							tableForColumnList = tbl.getTable();
-							currentAlias = tbl;
-							break;
-						}
-					}
-				}
-
-				if (tableForColumnList == null)
+			if (tableForColumnList == null)
+			{
+				context = CONTEXT_FROM_LIST;
+				this.elements = new ArrayList();
+				for (int i=0; i < count; i++)
 				{
-					context = CONTEXT_FROM_LIST;
-					this.elements = new ArrayList();
-					for (int i=0; i < count; i++)
-					{
-						String entry = (String)tables.get(i);
-						TableAlias tbl = new TableAlias(entry);
-						this.elements.add(tbl);
-						setAppendDot(true);
-					}
+					String entry = (String)tables.get(i);
+					TableAlias tbl = new TableAlias(entry);
+					this.elements.add(tbl);
+					setAppendDot(true);
 				}
-				else if (currentAlias != null)
-				{
-					setColumnPrefix(currentAlias.getNameToUse());
-				}
+			}
+			else if (currentAlias != null)
+			{
+				setColumnPrefix(currentAlias.getNameToUse());
 			}
 		}
 	}

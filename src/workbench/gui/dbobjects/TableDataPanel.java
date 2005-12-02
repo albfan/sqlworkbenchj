@@ -178,8 +178,7 @@ public class TableDataPanel
 		topPanel.add(Box.createHorizontalGlue());
 		this.config = new WbButton(ResourceMgr.getString("LabelConfigureWarningThreshold"));
 		this.config.addActionListener(this);
-		Border border = new CompoundBorder(new EtchedBorder(), new EmptyBorder(1,6,1,6));
-		this.config.setBorder(border);
+		this.config.setBorder(WbSwingUtilities.FLAT_BUTTON_BORDER);
 		topPanel.add(this.config);
 
 		this.add(topPanel, BorderLayout.NORTH);

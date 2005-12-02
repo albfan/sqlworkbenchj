@@ -12,13 +12,12 @@
 package workbench.util;
 
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,7 +30,8 @@ import workbench.log.LogMgr;
  */
 public class StringUtil
 {
-	public static final Pattern PATTERN_CRLF = Pattern.compile("(\r\n|\n\r|\r|\n)");
+	public static final String REGEX_CRLF = "(\r\n|\n\r|\r|\n)";
+	public static final Pattern PATTERN_CRLF = Pattern.compile(REGEX_CRLF);
 
 	public static final String LINE_TERMINATOR = System.getProperty("line.separator");
 	public static final String PATH_SEPARATOR = System.getProperty("path.separator");
@@ -295,6 +295,25 @@ public class StringUtil
 		return result;
 	}
 
+	public static final String[] toArray(Collection c)
+	{
+		if (c == null) return null;
+		if (c.size() == 0) return new String[0];
+		Iterator itr = c.iterator();
+		int i = 0;
+		String[] result = new String[c.size()];
+		while (itr.hasNext())
+		{
+			Object o = itr.next();
+			if (o != null)
+			{
+				result[i] = o.toString();
+			} 
+			i++;
+		}
+		return result;
+	}
+	
 	/**
 	 * Create a String from the given list, where the elements are delimited
 	 * with the supplied delimiter
@@ -384,15 +403,17 @@ public class StringUtil
 
 	public static final String cleanJavaString(String aString)
 	{
-		Pattern newline = Pattern.compile("\\\\n|\\\\r");
-		if (aString == null || aString.trim().length() == 0) return "";
-		List lines = getTextLines(aString);
+		//Pattern newline = Pattern.compile("\\\\n|\\\\r");
+		if (isEmptyString(aString)) return "";
+		//List lines = getTextLines(aString);
+		String lines[] = PATTERN_CRLF.split(aString);
 		StringBuffer result = new StringBuffer(aString.length());
-		int count = lines.size();
+		int count = lines.length;
 		for (int i=0; i < count; i ++)
 		{
-			String l = (String)lines.get(i);
-			if ( l == null) continue;
+			//String l = (String)lines.get(i);
+			String l = lines[i];
+			if (l == null) continue;
 			if (l.trim().startsWith("//"))
 			{
 				l = l.replaceFirst("//", "--");
@@ -406,7 +427,7 @@ public class StringUtil
 					l = l.substring(start + 1, end);
 				}
 			}
-			Matcher m = newline.matcher(l);
+			Matcher m = PATTERN_CRLF.matcher(l);
 			l = m.replaceAll("");
 			l = replace(l,"\\\"", "\"");
 			result.append(l);
@@ -415,74 +436,74 @@ public class StringUtil
 		return result.toString();
 	}
 
-	public static List getTextLines(String aScript)
-	{
-		ArrayList l = new ArrayList(100);
-		getTextLines(l, aScript);
-		return l;
-	}
-
-	public static void getTextLines(List aList, String aScript)
-	{
-		if (aScript == null) return;
-		if (aScript.length() > 100)
-		{
-			// the solution with the StringReader performs
-			// better on long Strings, for short strings
-			// using regex is faster
-			readTextLines(aList, aScript);
-			return;
-		}
-
-		if (aList == null) return;
-		aList.clear();
-		Matcher m = StringUtil.PATTERN_CRLF.matcher(aScript);
-		int start = 0;
-		boolean notOne = true;
-		while (m.find())
-		{
-			notOne = false;
-			String line = aScript.substring(start, m.start());
-			if (line != null)
-			{
-				aList.add(line.trim());
-			}
-			start = m.end();
-		}
-
-		if (notOne)
-			aList.add(aScript);
-		else if (start < aScript.length())
-			aList.add(aScript.substring(start));
-	}
-
-	private static void readTextLines(List aList, String aScript)
-	{
-		aList.clear();
-		if (aScript.indexOf('\n') < 0)
-		{
-			aList.add(aScript);
-			return;
-		}
-
-		BufferedReader br = new BufferedReader(new StringReader(aScript));
-		String line;
-		try
-		{
-			while ((line = br.readLine()) != null)
-			{
-				aList.add(line.trim());
-			}
-		}
-		catch (IOException ex)
-		{
-			ex.printStackTrace();
-		}
-		finally
-		{
-			try { br.close(); } catch (Throwable th) {}
-		}
-	}
+//	public static List getTextLines(String aScript)
+//	{
+//		ArrayList l = new ArrayList(100);
+//		getTextLines(l, aScript);
+//		return l;
+//	}
+//
+//	public static void getTextLines(List aList, String aScript)
+//	{
+//		if (aScript == null) return;
+//		if (aScript.length() > 250)
+//		{
+//			// the solution with the StringReader performs
+//			// better on long Strings, for short strings
+//			// using regex is faster
+//			readTextLines(aList, aScript);
+//			return;
+//		}
+//
+//		if (aList == null) return;
+//		aList.clear();
+//		Matcher m = StringUtil.PATTERN_CRLF.matcher(aScript);
+//		int start = 0;
+//		boolean notOne = true;
+//		while (m.find())
+//		{
+//			notOne = false;
+//			String line = aScript.substring(start, m.start());
+//			if (line != null)
+//			{
+//				aList.add(line.trim());
+//			}
+//			start = m.end();
+//		}
+//
+//		if (notOne)
+//			aList.add(aScript);
+//		else if (start < aScript.length())
+//			aList.add(aScript.substring(start));
+//	}
+//
+//	private static void readTextLines(List aList, String aScript)
+//	{
+//		aList.clear();
+//		if (aScript.indexOf('\n') < 0)
+//		{
+//			aList.add(aScript);
+//			return;
+//		}
+//
+//		BufferedReader br = new BufferedReader(new StringReader(aScript));
+//		String line;
+//		try
+//		{
+//			while ((line = br.readLine()) != null)
+//			{
+//				aList.add(line.trim());
+//			}
+//		}
+//		catch (IOException ex)
+//		{
+//			ex.printStackTrace();
+//		}
+//		finally
+//		{
+//			try { br.close(); } catch (Throwable th) {}
+//		}
+//	}
 
 	public static final String trimQuotes(String input)
 	{
@@ -508,38 +529,38 @@ public class StringUtil
 		return result;
 	}
 
-	public static final String cleanupUnderscores(String aString, boolean capitalize)
-	{
-		if (aString == null) return null;
-		int pos = aString.indexOf('_');
-
-		int len = aString.length();
-		StringBuffer result = new StringBuffer(len);
-
-		if (capitalize)
-			result.append(Character.toUpperCase(aString.charAt(0)));
-		else
-			result.append(aString.charAt(0));
-
-		for (int i=1; i < len; i++)
-		{
-			char c = aString.charAt(i);
-			if (c == '_')
-			{
-				if (i < len - 1)
-				{
-					i++;
-					c = Character.toUpperCase(aString.charAt(i));
-				}
-			}
-			else
-			{
-				c = Character.toLowerCase(aString.charAt(i));
-			}
-			result.append(c);
-		}
-		return result.toString();
-	}
+//	public static final String cleanupUnderscores(String aString, boolean capitalize)
+//	{
+//		if (aString == null) return null;
+//		int pos = aString.indexOf('_');
+//
+//		int len = aString.length();
+//		StringBuffer result = new StringBuffer(len);
+//
+//		if (capitalize)
+//			result.append(Character.toUpperCase(aString.charAt(0)));
+//		else
+//			result.append(aString.charAt(0));
+//
+//		for (int i=1; i < len; i++)
+//		{
+//			char c = aString.charAt(i);
+//			if (c == '_')
+//			{
+//				if (i < len - 1)
+//				{
+//					i++;
+//					c = Character.toUpperCase(aString.charAt(i));
+//				}
+//			}
+//			else
+//			{
+//				c = Character.toLowerCase(aString.charAt(i));
+//			}
+//			result.append(c);
+//		}
+//		return result.toString();
+//	}
 
 	public static final String escapeXML(String s)
 	{
@@ -720,33 +741,11 @@ public class StringUtil
 		return ("true".equalsIgnoreCase(aString) || "1".equals(aString) || "y".equalsIgnoreCase(aString) || "yes".equalsIgnoreCase(aString) );
 	}
 
-//	public static List split(String aString, String delim, boolean singleDelimiter, String quoteChars, boolean keepQuotes)
-//	{
-//		if (aString == null) return Collections.EMPTY_LIST;
-//		WbStringTokenizer tok = new WbStringTokenizer(delim, singleDelimiter, quoteChars, keepQuotes);
-//		tok.setDelimiterNeedsWhitspace(false);
-//		tok.setSourceString(aString.trim());
-//
-//		List result = new ArrayList();
-//		String token = null;
-//		while (tok.hasMoreTokens())
-//		{
-//			token = tok.nextToken();
-//			if (token != null) result.add(token);
-//		}
-//		return result;
-//	}
-
 	public static final String getMaxSubstring(String s, int maxLen)
-	{
-		return getMaxSubstring(s, maxLen, "...");
-	}
-
-	public static final String getMaxSubstring(String s, int maxLen, String cont)
 	{
 		if (s == null) return null;
 		if (s.length() < maxLen) return s;
-		return s.substring(0, maxLen - 1) + cont;
+		return s.substring(0, maxLen - 1) + "...";
 	}
 
 	public static final String REGEX_SPECIAL_CHARS = "\\[](){}.*+?$^|";
@@ -824,25 +823,36 @@ public class StringUtil
 
 	public static final String getWordLeftOfCursor(String text, int pos, String wordBoundaries)
 	{
-		if (pos < 0) return null;
-		int len = text.length();
-		int end = pos;
-		if (pos >= len) 
+		try
 		{
-			end = len - 1;
-		}
-		if (end < 1) return null;
-		
-		if (Character.isWhitespace(text.charAt(end-1))) return null;
-		
-		String word = null;
-		int startOfWord = findWordBoundary(text, end-1, wordBoundaries);
-		if (startOfWord > 0)
-		{
-			word = text.substring(startOfWord+1, Math.min(pos,len));
-		}
+			if (pos < 0) return null;
+			int len = text.length();
+			int testPos = -1;
+			if (pos >= len) 
+			{
+				testPos = len - 1;
+			}
+			else
+			{
+				testPos = pos - 1;
+			}
+			if (testPos < 1) return null;
 
-		return word;
+			if (Character.isWhitespace(text.charAt(testPos))) return null;
+
+			String word = null;
+			int startOfWord = findWordBoundary(text, testPos, wordBoundaries);
+			if (startOfWord > 0)
+			{
+				word = text.substring(startOfWord+1, Math.min(pos,len));
+			}
+			return word;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
 	}	
 	
 	public static int findPattern(String regex, String data)
@@ -869,6 +879,7 @@ public class StringUtil
 	{
 		char aChar;
 		int len = theString.length();
+		if (len == 0) return theString;
 		StringBuffer outBuffer = new StringBuffer(len);
 
 		for (int x=0; x<len; )

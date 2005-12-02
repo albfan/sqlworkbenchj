@@ -241,6 +241,7 @@ public class DataStore
 	{
 		return new RowDataList(size);
 	}
+	
 	private RowDataList createData()
 	{
 		return new RowDataList();
@@ -1099,15 +1100,18 @@ public class DataStore
 	public void initData(ResultSet aResultSet, int maxRows)
 		throws SQLException
 	{
-		try
+		if (this.resultInfo == null)
 		{
-			ResultSetMetaData metaData = aResultSet.getMetaData();
-			this.initMetaData(metaData);
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("DataStore.initData()", "Error while retrieving ResultSetMetaData", e);
-			throw e;
+			try
+			{
+				ResultSetMetaData metaData = aResultSet.getMetaData();
+				this.initMetaData(metaData);
+			}
+			catch (SQLException e)
+			{
+				LogMgr.logError("DataStore.initData()", "Error while retrieving ResultSetMetaData", e);
+				throw e;
+			}
 		}
 
 		if (this.rowActionMonitor != null)
@@ -1120,7 +1124,7 @@ public class DataStore
 		{
 			int rowCount = 0;
 			int cols = this.resultInfo.getColumnCount();
-			this.data = createData(500);
+			if (this.data == null) this.data = createData();
 			while (!this.cancelRetrieve && aResultSet.next())
 			{
 				rowCount ++;
@@ -1370,9 +1374,8 @@ public class DataStore
 		if (rows != null) count = rows.length;
 		else count = this.getRowCount();
 
-		StatementFactory factory = new StatementFactory(this.resultInfo);
+		StatementFactory factory = new StatementFactory(this.resultInfo, this.originalConnection);
 		factory.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
-		factory.setCurrentConnection(this.originalConnection);
 		for (int row = 0; row < count; row ++)
 		{
 			RowData rowdata;
@@ -1385,7 +1388,7 @@ public class DataStore
 				stmt.setChrFunction(aCharFunc);
 				stmt.setConcatString(aConcatString);
 			}
-			String rowsql = stmt.getExecutableStatement(this.originalConnection.getSqlConnection());
+			String rowsql = stmt.getExecutableStatement(this.originalConnection.getMetadata().getProductName());
 			out.write(rowsql);
 			out.write(";");
 			out.write(aLineTerminator);
@@ -1446,7 +1449,7 @@ public class DataStore
 		DmlStatement dml = null;
 		RowData row = null;
 
-		StatementFactory factory = new StatementFactory(this.resultInfo);
+		StatementFactory factory = new StatementFactory(this.resultInfo, this.originalConnection);
 		factory.setIncludeTableOwner(aConnection.getMetadata().needSchemaInDML(resultInfo.getUpdateTable()));
 
 		row = this.getNextDeletedRow();
@@ -1490,13 +1493,15 @@ public class DataStore
 		catch (SQLException e)
 		{
 			this.updateHadErrors = true;
+			String dbProduct = null;
+			if (this.originalConnection != null) dbProduct = this.originalConnection.getMetadata().getProductName();
 			if (!this.ignoreAllUpdateErrors)
 			{
 				boolean abort = true;
 				int choice = JobErrorHandler.JOB_ABORT;
 				if (errorHandler != null)
 				{
-					choice = errorHandler.getActionOnError(row, null, dml.getExecutableStatement(), e.getMessage());
+					choice = errorHandler.getActionOnError(row, null, dml.getExecutableStatement(dbProduct), e.getMessage());
 				}
 				if (choice == JobErrorHandler.JOB_CONTINUE)
 				{
@@ -1511,7 +1516,7 @@ public class DataStore
 			}
 			else
 			{
-				LogMgr.logError("DataStore.executeGuarded()", "Error executing statement " + dml.getExecutableStatement() + " for row = " + row + ", error: " + e.getMessage(), null);
+				LogMgr.logError("DataStore.executeGuarded()", "Error executing statement " + dml.getExecutableStatement(dbProduct) + " for row = " + row + ", error: " + e.getMessage(), null);
 			}
 		}
 		return rowsUpdated;
@@ -1543,7 +1548,7 @@ public class DataStore
 
 		this.ignoreAllUpdateErrors = false;
 
-		StatementFactory factory = new StatementFactory(this.resultInfo);
+		StatementFactory factory = new StatementFactory(this.resultInfo, this.originalConnection);
 		factory.setIncludeTableOwner(aConnection.getMetadata().needSchemaInDML(resultInfo.getUpdateTable()));
 		
 		try

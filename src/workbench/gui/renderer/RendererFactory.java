@@ -14,6 +14,7 @@ package workbench.gui.renderer;
 import java.lang.reflect.Constructor;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
+import workbench.log.LogMgr;
 
 /**
  * A factory for TableCellRenderers. Classes are created using
@@ -36,6 +37,7 @@ public class RendererFactory
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("RendererFactory.getSortHeaderRenderer()", "Error creating renderer", e);
 			return new DefaultTableCellRenderer();
 		}
 	}
@@ -53,6 +55,7 @@ public class RendererFactory
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("RendererFactory.getDateRenderer()", "Error creating renderer", e);
 			return new DefaultTableCellRenderer();
 		}
 	}
@@ -67,6 +70,7 @@ public class RendererFactory
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("RendererFactory.getTooltipRenderer()", "Error creating renderer", e);
 			return new DefaultTableCellRenderer();
 		}
 	}
@@ -81,6 +85,7 @@ public class RendererFactory
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("RendererFactory.getStringRenderer()", "Error creating renderer", e);
 			return new DefaultTableCellRenderer();
 		}
 	}
@@ -95,6 +100,7 @@ public class RendererFactory
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("RendererFactory.getIntegerRenderer()", "Error creating renderer", e);
 			return new DefaultTableCellRenderer();
 		}
 	}
@@ -112,6 +118,7 @@ public class RendererFactory
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("RendererFactory.getNumberRenderer()", "Error creating renderer", e);
 			return new DefaultTableCellRenderer();
 		}
 	}
@@ -126,6 +133,7 @@ public class RendererFactory
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("RendererFactory.getClobRenderer()", "Error creating renderer", e);
 			return new DefaultTableCellRenderer();
 		}
 	}

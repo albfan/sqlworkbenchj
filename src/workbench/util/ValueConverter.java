@@ -32,6 +32,7 @@ public class ValueConverter
 	 *  or a TimeStamp column
 	 */
 	private static final String[] dateFormats = new String[] {
+														"yyyy-MM-dd HH:mm:ss.SS",
 														"yyyy-MM-dd HH:mm:ss",
 														"dd.MM.yyyy HH:mm:ss",
 														"MM/dd/yy HH:mm:ss",
@@ -44,42 +45,53 @@ public class ValueConverter
 													};
 													
 	private static final String[] timestampFormats = new String[] {
+														"yyyy-MM-dd HH:mm:ss.SS",
 														"yyyy-MM-dd HH:mm:ss",
+														"dd.MM.yyyy HH:mm:ss.SS",
 														"dd.MM.yyyy HH:mm:ss",
+														"MM/dd/yy HH:mm:ss.SS",
 														"MM/dd/yy HH:mm:ss",
+														"MM/dd/yyyy HH:mm:ss.SS",
 														"MM/dd/yyyy HH:mm:ss",
 													};
 
 	private String defaultDateFormat;
 	private String defaultTimestampFormat;
 	private char decimalCharacter = '.';
-	private SimpleDateFormat dateFormatter = new SimpleDateFormat();
-	private SimpleDateFormat timestampFormatter = new SimpleDateFormat();
+	private SimpleDateFormat dateFormatter;
+	private SimpleDateFormat timestampFormatter;
 	private SimpleDateFormat formatter = new SimpleDateFormat();
 	
 	public ValueConverter()
 	{
 		Settings sett = Settings.getInstance();
-		this.defaultDateFormat = sett.getDefaultDateFormat();
-		this.defaultTimestampFormat = sett.getDefaultDateTimeFormat();
+		this.setDefaultDateFormat(sett.getDefaultDateFormat());
+		this.setDefaultTimestampFormat(sett.getDefaultDateTimeFormat());
 	}
 
 	public ValueConverter(String aDateFormat, String aTimeStampFormat)
 	{
+		this();
 		this.setDefaultDateFormat(aDateFormat);
 		this.setDefaultTimestampFormat(aTimeStampFormat);
 	}
 
 	public void setDefaultDateFormat(String aFormat)
 	{
-		this.defaultDateFormat = aFormat;
-		if (aFormat != null) this.dateFormatter.applyPattern(aFormat);
+		if (!StringUtil.isEmptyString(aFormat))
+		{
+			this.defaultDateFormat = aFormat;
+			this.dateFormatter = new SimpleDateFormat(aFormat);
+		}
 	}
 
 	public void setDefaultTimestampFormat(String aFormat)
 	{
-		this.defaultTimestampFormat = aFormat;
-		if (aFormat != null) this.timestampFormatter.applyPattern(aFormat);
+		if (!StringUtil.isEmptyString(aFormat))
+		{
+			this.defaultTimestampFormat = aFormat;
+			this.timestampFormatter = new SimpleDateFormat(aFormat);
+		}
 	}
 
 	public void setDecimalCharacter(char aChar)
@@ -176,6 +188,7 @@ public class ValueConverter
 			}
 			catch (Exception e)
 			{
+				LogMgr.logWarning("ValueConverter.parseTimestamp()", "Could not parse '" + aDate + "' using " + this.timestampFormatter.toPattern(),e);
 				result = null;
 			}
 		}

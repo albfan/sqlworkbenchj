@@ -26,7 +26,6 @@ import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.storage.DataStore;
 
 /**
- *
  * @author  support@sql-workbench.net
  */
 public class SelectCommand extends SqlCommand
@@ -90,7 +89,7 @@ public class SelectCommand extends SqlCommand
 				// if a ResultSetConsumer is waiting, we have to store the
 				// result set, so that not all the data is read into memory
 				// when exporting data
-				// If the result set is not consume, we can create the DataStore
+				// If the result set is not consumed, we can create the DataStore
 				// right away. This is necessary, because with Oracle, the stream to
 				// read LONG columns would be closed, if any other statement
 				// is executed before the result set is retrieved.
@@ -201,15 +200,9 @@ public class SelectCommand extends SqlCommand
 		}
 	}
 
-
 	public String getVerb()
 	{
 		return VERB;
-	}
-
-	public boolean supportsMaxRows()
-	{
-		return true;
 	}
 
 	public void setMaxRows(int max)

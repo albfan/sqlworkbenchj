@@ -12,7 +12,6 @@
 package workbench.storage;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -20,13 +19,14 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Collection;
+import java.util.Iterator;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
-import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 
 /**
@@ -71,7 +71,6 @@ public class ResultInfo
 		this.colCount = this.columns.length;
 	}
 	
-	/** Creates a new instance of ResultMetaData */
 	public ResultInfo(ResultSetMetaData metaData, WbConnection sourceConnection) 
 		throws SQLException
 	{
@@ -94,7 +93,7 @@ public class ResultInfo
 			}
 			
 			int type = metaData.getColumnType(i + 1);
-			if (dbMeta != null) type = dbMeta.fixColumnType(type);
+			if (dbMeta != null) type = dbMeta.fixColumnType(type); // currently only for Oracle
 			ColumnIdentifier col = new ColumnIdentifier(name);
 			col.setDataType(type);
 			col.setUpdateable(realColumn);
@@ -111,25 +110,28 @@ public class ResultInfo
 			}
 
 			int scale = 0;
-			// Some JDBC drivers (e.g. Oracle) do not like 
-			// getPrecision or getScale() on all column types
-			// so we'll simply ignore any exceptions thrown by
-			// those methods
+			int prec = 0;
+			
+			// Some JDBC drivers (e.g. Oracle, MySQL) do not like 
+			// getPrecision or getScale() on all column types, so we only call
+			// it for number data types (the only ones were it seems to make sense)
 			try
 			{
-				scale = metaData.getScale(i + 1);
+				if (SqlUtil.isNumberType(type)) scale = metaData.getScale(i + 1);
 			}
 			catch (Throwable th)
 			{
+				LogMgr.logError("ResultInfo.<init>", "Error when obtaining scale for column " + name, th);
 				scale = 0;
 			}
-			int prec = 0;
+			
 			try
 			{
 				prec = metaData.getPrecision(i + 1);
 			}
 			catch (Throwable th)
 			{
+				LogMgr.logError("ResultInfo.<init>", "Error when obtaining precision for column " + name, th);
 				prec = 0;
 			}
 
@@ -143,13 +145,13 @@ public class ResultInfo
 				size = prec;
 			}
 
-			String dbmsType = DbMetadata.getSqlTypeDisplay(typename, col.getDataType(), prec, scale);; 
 			col.setDecimalDigits(scale);
+			String dbmsType = DbMetadata.getSqlTypeDisplay(typename, col.getDataType(), prec, scale);; 
 			if (type == Types.VARCHAR)
 			{
+				// HSQL reports the VARCHAR size in displaySize()
 				if (sourceConnection != null && sourceConnection.getMetadata().reportsRealSizeAsDisplaySize())
 				{
-					// HSQL reports the VARCHAR size in displaySize()
 					dbmsType = DbMetadata.getSqlTypeDisplay(typename, col.getDataType(), size, 0);
 					col.setColumnSize(size);
 				}
@@ -393,12 +395,19 @@ public class ResultInfo
 
 		ResultSet rs = meta.getPrimaryKeys(null, schema, table);
 		boolean found = this.readPkColumns(rs);
-
+		
 		// no primary keys found --> try the bestRowIdentifier...
 		if (!found)
 		{
+			LogMgr.logInfo("ResultInfo.readPkDefinition()", "No primary key found, trying getBestRowIdentifier()");
 			rs = meta.getBestRowIdentifier(null, schema, table, DatabaseMetaData.bestRowSession, false);
 			found = this.readPkColumns(rs);
+		}
+
+		if (!found)
+		{
+			LogMgr.logInfo("ResultInfo.readPkDefinition()", "No primary key found, checking for mapping file");
+			found = readPkColumnsFromMapping(aConnection); // try to retrieve the PK from a configuration file
 		}
 
 		// if we didn't find any columns, use all columns as the identifier
@@ -428,6 +437,25 @@ public class ResultInfo
 		return -1;
 	}
 
+	private boolean readPkColumnsFromMapping(WbConnection con)
+	{
+		Collection cols = PkMapping.getInstance().getPKColumns(con, this.updateTable);
+		if (cols == null) return false;
+		Iterator itr = cols.iterator();
+		boolean found = false;
+		while (itr.hasNext())
+		{
+			String col = (String)itr.next();
+			int index = this.findColumn(col);
+			if (index > -1)
+			{
+				this.setIsPkColumn(index, true);
+				found = true;
+			}
+		}
+		return found;
+	}
+	
 	private boolean readPkColumns(ResultSet rs)
 	{
 		String col = null;

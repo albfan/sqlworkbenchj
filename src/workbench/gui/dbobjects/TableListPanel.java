@@ -19,7 +19,6 @@ import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -31,6 +30,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -56,8 +56,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import workbench.db.DbMetadata;
@@ -73,7 +71,6 @@ import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.actions.ToggleTableSourceAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
-import workbench.gui.components.DividerBorder;
 import workbench.gui.components.QuickFilterPanel;
 import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbMenu;
@@ -84,9 +81,7 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.dialogs.export.ExportFileDialog;
 import workbench.gui.menu.GenerateScriptMenuItem;
-import workbench.gui.renderer.SqlTypeRenderer;
 import workbench.gui.sql.EditorPanel;
-import workbench.gui.sql.ExecuteSqlDialog;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.FilenameChangeListener;
 import workbench.interfaces.ShareableDisplay;
@@ -96,13 +91,11 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.FileDialogUtil;
-import workbench.util.SqlUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.util.ExceptionUtil;
 import java.awt.Component;
-import workbench.db.ColumnIdentifier;
+import java.util.Iterator;
 import workbench.interfaces.CriteriaPanel;
 import workbench.util.WbWorkspace;
 import workbench.util.WbProperties;
@@ -550,7 +543,6 @@ public class TableListPanel
 		this.dbConnection = null;
 		this.tableTypes.removeActionListener(this);
 		this.displayTab.removeChangeListener(this);
-		this.availableTableTypes = null;
 		this.tableTypes.removeAllItems();
 		this.tableDefinition.setConnection(null);
 		this.reset();
@@ -645,49 +637,34 @@ public class TableListPanel
 		this.reset();
 		try
 		{
-
-			String preferredType = null;
-			if (this.tableTypeToSelect != null)
-			{
-				preferredType = tableTypeToSelect;
-				tableTypeToSelect = null;
-			}
-			else
-			{
-				preferredType = Settings.getInstance().getProperty("workbench.dbexplorer.defTableType", null);
-			}
-			if (preferredType != null && preferredType.length() == 0) preferredType = null;
-			List types = this.dbConnection.getMetadata().getTableTypes();
-			this.availableTableTypes = new String[types.size()];
+			String preferredType = Settings.getInstance().getProperty("workbench.dbexplorer.defTableType", this.tableTypeToSelect);
+			
+			Collection types = this.dbConnection.getMetadata().getTableTypes();
 			this.tableTypes.removeAllItems();
 			this.tableTypes.addItem("*");
-			int preferredIndex = -1;
 
-			for (int i=0; i < types.size(); i++)
+			Iterator itr = types.iterator();
+			String typeToSelect = null;
+			
+			while (itr.hasNext())
 			{
-				String type = types.get(i).toString();
+				String type = (String)itr.next();
+				this.tableTypes.addItem(type);
 				if (type.equalsIgnoreCase(preferredType))
 				{
-					preferredIndex = i + 1;
-				}
-				this.tableTypes.addItem(type);
-				this.availableTableTypes[i] = type;
-			}
-
-			if (preferredIndex > -1)
-			{
-				try
-				{
-					this.tableTypes.setSelectedIndex(preferredIndex);
-				}
-				catch (Exception e)
-				{
-					// ignore it!
+					typeToSelect = type;
 				}
 			}
+			if (typeToSelect == null)
+				this.tableTypes.setSelectedIndex(0);
+			else
+				this.tableTypes.setSelectedItem(typeToSelect);
+			
+			this.tableTypeToSelect = null;
 		}
 		catch (Exception e)
 		{
+			LogMgr.logError("TableListPanel.setConnection()", "Error when setting up connection", e);
 		}
 
 		this.tableTypes.addActionListener(this);
@@ -813,6 +790,7 @@ public class TableListPanel
 			DataStore ds = dbConnection.getMetadata().getTables(currentCatalog, currentSchema, types);
 			String info = ds.getRowCount() + " " + ResourceMgr.getString("TxtTableListObjects");
 			this.tableInfoLabel.setText(info);
+			
 			DataStoreTableModel model = new DataStoreTableModel(ds);
 			tableList.setModel(model, true);
 			model.sortByColumn(0);
@@ -1043,7 +1021,7 @@ public class TableListPanel
 
 		boolean dataVisible = false;
 
-		if (this.selectedObjectType.indexOf("table") > -1)
+		if (isTable(this.selectedObjectType))
 		{
 			addTablePanels();
 			dataVisible = true;
@@ -1090,6 +1068,11 @@ public class TableListPanel
 		return (aType.indexOf("table") > -1 || aType.indexOf("view") > -1);
 	}
 
+	private boolean isTable(String type)
+	{
+		return ((type.indexOf("table") > -1) || type.equalsIgnoreCase(DbMetadata.MVIEW_NAME));
+	}
+	
 	private boolean isTableType(String type)
 	{
 		return this.dbConnection.getMetadata().objectTypeCanContainData(type);
@@ -1111,9 +1094,11 @@ public class TableListPanel
 				this.shouldRetrieveIndexes = true;
 				this.shouldRetrieveImportedTree = true;
 			}
+			TableIdentifier tbl = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
+			tbl.setType(this.selectedObjectType);
 			if (this.selectedObjectType.indexOf("view") > -1)
 			{
-				sql = meta.getExtendedViewSource(this.selectedCatalog, this.selectedSchema, this.selectedTableName, tableDefinition.getDataStore(), true);
+				sql = meta.getExtendedViewSource(tbl, tableDefinition.getDataStore(), true);
 			}
 			else if ("synonym".equals(this.selectedObjectType))
 			{
@@ -1138,7 +1123,6 @@ public class TableListPanel
 				// passed to getTableSource() would be empty
 				if (this.shouldRetrieveIndexes) this.retrieveIndexes();
 				if (this.shouldRetrieveImportedTree) this.retrieveImportedTables();
-				TableIdentifier tbl = new TableIdentifier(this.selectedCatalog, this.selectedSchema, this.selectedTableName);
 				sql = meta.getTableSource(tbl, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore(), true);
 			}
 			final String s = sql;

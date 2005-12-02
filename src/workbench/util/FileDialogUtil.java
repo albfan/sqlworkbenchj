@@ -46,8 +46,7 @@ public class FileDialogUtil
 	public static final int FILE_TYPE_SQL_UPDATE = 4;
 
 	private int lastFileType = FILE_TYPE_UNKNOWN;
-	private Settings settings = Settings.getInstance();
-	private static final String CONFIG_DIR_KEY = "%ConfigDir%";
+	public static final String CONFIG_DIR_KEY = "%ConfigDir%";
 	private String encoding = null;
 	private ExportOptionsPanel exportOptions;
 	private JFileChooser chooser;
@@ -75,14 +74,14 @@ public class FileDialogUtil
 
 	public String getXmlReportFilename(Component caller, JComponent accessory)
 	{
-		String lastDir = settings.getProperty("workbench.xmlreport.lastdir", null);
+		String lastDir = Settings.getInstance().getProperty("workbench.xmlreport.lastdir", null);
 		JFileChooser fc = new JFileChooser(lastDir);
 		fc.addChoosableFileFilter(ExtensionFileFilter.getXmlFileFilter());
 		fc.setFileFilter(ExtensionFileFilter.getXmlFileFilter());
 
 		if (this.encoding == null)
 		{
-			this.encoding = this.settings.getDefaultDataEncoding();
+			this.encoding = Settings.getInstance().getDefaultDataEncoding();
 		}
 
 		EncodingSelector selector = null;
@@ -132,7 +131,7 @@ public class FileDialogUtil
 			}
 
 			lastDir = fc.getCurrentDirectory().getAbsolutePath();
-			settings.setProperty("workbench.xmlreport.lastdir", lastDir);
+			Settings.getInstance().setProperty("workbench.xmlreport.lastdir", lastDir);
 		}
 
 		return filename;
@@ -170,7 +169,7 @@ public class FileDialogUtil
 
 	public String getWorkspaceFilename(Window parent, boolean toSave, boolean replaceConfigDir)
 	{
-		String lastDir = settings.getLastWorkspaceDir();
+		String lastDir = Settings.getInstance().getLastWorkspaceDir();
 		JFileChooser fc = new JFileChooser(lastDir);
 		FileFilter wksp = ExtensionFileFilter.getWorkspaceFileFilter();
 		fc.addChoosableFileFilter(wksp);
@@ -206,7 +205,7 @@ public class FileDialogUtil
 			}
 
 			lastDir = fc.getCurrentDirectory().getAbsolutePath();
-			settings.setLastWorkspaceDir(lastDir);
+			Settings.getInstance().setLastWorkspaceDir(lastDir);
 		}
 		if (replaceConfigDir && filename != null)
 		{
@@ -220,7 +219,7 @@ public class FileDialogUtil
 		File f = new File(aPathname);
 		String fname = f.getName();
 		File dir = f.getParentFile();
-		File config = new File(this.settings.getConfigDir());
+		File config = new File(Settings.getInstance().getConfigDir());
 		if (dir.equals(config))
 		{
 			return CONFIG_DIR_KEY + StringUtil.FILE_SEPARATOR + fname;
@@ -231,10 +230,10 @@ public class FileDialogUtil
 		}
 	}
 
-	public String replaceConfigDir(String aPathname)
+	public static String replaceConfigDir(String aPathname)
 	{
 		if (aPathname == null) return null;
-		String dir = this.settings.getConfigDir();
+		String dir = Settings.getInstance().getConfigDir();
 		return StringUtil.replace(aPathname, CONFIG_DIR_KEY, dir);
 	}
 

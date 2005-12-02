@@ -26,8 +26,8 @@ public class WbListCatalogs extends SqlCommand
 {
 	public final String VERB;
 
-	public static final WbListCatalogs LISTDB = new WbListCatalogs("LISTDB");
-	public static final WbListCatalogs LISTCAT = new WbListCatalogs("LISTCAT");
+	public static final WbListCatalogs LISTDB = new WbListCatalogs("WBLISTDB");
+	public static final WbListCatalogs LISTCAT = new WbListCatalogs("WBLISTCAT");
 
 	private WbListCatalogs(String verb)
 	{

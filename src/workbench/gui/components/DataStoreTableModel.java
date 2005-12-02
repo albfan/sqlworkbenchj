@@ -398,6 +398,8 @@ public class DataStoreTableModel
 	 */
 	public void resetFilter()
 	{
+		if (isSortInProgress()) return;
+		
 		dataCache.clearFilter();
 		// sort() will already fire a tableDataChanged() 
 		// if a sort column was defined
@@ -413,6 +415,8 @@ public class DataStoreTableModel
 	 */
 	public void applyFilter(FilterExpression filter)
 	{
+		if (isSortInProgress()) return;
+		
 		dataCache.applyFilter(filter);
 		// sort() will already fire a tableDataChanged() 
 		// if a sort column was defined
@@ -425,6 +429,11 @@ public class DataStoreTableModel
 	private synchronized void setSortInProgress(final boolean flag)
 	{
 		this.sortingInProgress = flag;
+	}
+
+	private synchronized boolean isSortInProgress()
+	{
+		return this.sortingInProgress;
 	}
 	
 	/**
@@ -469,7 +478,7 @@ public class DataStoreTableModel
 
 		if (aColumn < 0 && aColumn >= this.getColumnCount())
 		{
-			LogMgr.logWarning("DataStoreTableModel", "Wrong column index specified!");
+			LogMgr.logWarning("DataStoreTableModel", "Wrong column index for sorting specified!");
 			return;
 		}
 
@@ -484,27 +493,20 @@ public class DataStoreTableModel
 	 */
 	public void sortInBackground(final WbTable table, final int aColumn, final boolean ascending)
 	{
-		if (sortingInProgress) return;
+		if (isSortInProgress()) return;
 
-		final DataStoreTableModel model = this;
-		WbSwingUtilities.showWaitCursor(table);
-		WbSwingUtilities.showWaitCursor(table.getTableHeader());
 		Thread t = new WbThread("Data Sort")
 		{
 			public void run()
 			{
-				setSortInProgress(true);
 				try
 				{
 					table.sortingStarted();
-					model.sortByColumn(aColumn, ascending);
+					sortByColumn(aColumn, ascending);
 				}
 				finally
 				{
 					table.sortingFinished();
-					WbSwingUtilities.showDefaultCursor(table);
-					WbSwingUtilities.showDefaultCursor(table.getTableHeader());
-					setSortInProgress(false);
 				}
 			}
 		};

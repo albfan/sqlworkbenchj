@@ -123,7 +123,7 @@ public class DefaultCompletionHandler
 			showNoObjectsFoundMessage();
 			return false;
 		}
-		this.currentWord = editor.getWordAtCursor(".");//StringUtil.getWordLeftOfCursor(sql, commandCursorPos);
+		this.currentWord = editor.getWordAtCursor(".");
 		
 		try
 		{

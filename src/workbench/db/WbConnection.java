@@ -13,10 +13,12 @@ package workbench.db;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -192,7 +194,7 @@ public class WbConnection
 		{
 			this.sqlConnection.clearWarnings();
 
-			if (this.metaData.isOracle() && doOracleClear)
+			if (doOracleClear && this.metaData.isOracle())
 			{
 				// obviously the Oracle driver does NOT clear the warnings
 				// (as discovered when looking at the source code)
@@ -217,7 +219,10 @@ public class WbConnection
 						}
 						catch (NoSuchMethodException e)
 						{
+							// newer drivers do not seem to support this any more,
+							// so after the first error, we'll skip this for the rest of the session
 							doOracleClear = false;
+							clearSettings = null;
 						}
 						
 					}
@@ -344,6 +349,15 @@ public class WbConnection
 			this.metaData = null;
 			if (this.sqlConnection != null) this.sqlConnection.close();
 			this.sqlConnection = null;
+			
+			if (Settings.getInstance().getProperty("workbench.db.driver.log", null) != null)
+			{
+				PrintWriter pw = DriverManager.getLogWriter();
+				if (pw != null) 
+				{
+					try { pw.close(); } catch (Throwable th) {}
+				}
+			}
 		}
 		catch (Throwable th)
 		{
@@ -369,8 +383,11 @@ public class WbConnection
 		Statement stmt = this.sqlConnection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 		try
 		{
-			int fetchSize = this.getProfile().getFetchSize();
-			if (fetchSize > -1) stmt.setFetchSize(fetchSize);
+			if (this.getProfile() != null)
+			{
+				int fetchSize = this.getProfile().getFetchSize();
+				if (fetchSize > -1) stmt.setFetchSize(fetchSize);
+			}
 		}
 		catch (Exception e)
 		{

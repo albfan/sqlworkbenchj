@@ -188,7 +188,7 @@ public class DbExplorerPanel
 
 	private void readSchemas()
 	{
-		if (this.isBusy() || isMainWindowBusy() || this.dbConnection == null) 
+		if (this.isBusy() || isConnectionBusy() || this.dbConnection == null) 
 		{
 			this.retrievePending = true;
 			this.schemaRetrievePending = true;
@@ -290,12 +290,12 @@ public class DbExplorerPanel
 		}
 	}
 	
-	private boolean isMainWindowBusy()
+	private boolean isConnectionBusy()
 	{
 		if (this.dbConnection == null) return false;
-		if (!this.mainWindow.isBusy()) return false;
+		//if (!this.mainWindow.isBusy()) return false;
 		if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab()) return this.isBusy();
-		return mainWindow.isBusy();
+		return dbConnection.isBusy();
 	}
 	
 	private void initConnection()
@@ -336,7 +336,6 @@ public class DbExplorerPanel
 		}
 		
 		WbSwingUtilities.showWaitCursorOnWindow(this);
-		boolean mainWindowBusy = this.isMainWindowBusy();
 		
 		try
 		{
@@ -354,7 +353,7 @@ public class DbExplorerPanel
 			
 			// Try to avoid concurrent execution on the 
 			// same connection object
-			if (mainWindowBusy)
+			if (this.isConnectionBusy())
 			{
 				this.retrievePending = true;
 				this.schemaRetrievePending = true;
@@ -362,15 +361,7 @@ public class DbExplorerPanel
 			else
 			{
 				initConnection();
-				try
-				{
-					setBusy(true);
-					this.readSchemas();
-				}
-				finally
-				{
-					setBusy(false);
-				}
+				readSchemas();
 
 				if (Settings.getInstance().getRetrieveDbExplorer())
 				{
@@ -477,7 +468,7 @@ public class DbExplorerPanel
 
 	private void retrieve()
 	{
-		if (this.isBusy() || isMainWindowBusy()) 
+		if (this.isBusy() || isConnectionBusy()) 
 		{
 			this.retrievePending = true;
 			return;

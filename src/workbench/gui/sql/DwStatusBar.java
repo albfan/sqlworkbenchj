@@ -145,10 +145,6 @@ public class DwStatusBar
 			p.add(this.tfTimeout);
 		}
 		JLabel l = new JLabel(" " + ResourceMgr.getString("LabelMaxRows") + " ");
-//		if (!showTimeout)
-//		{
-//			l.setBorder(new DividerBorder(DividerBorder.LEFT));		
-//		}
 		l.setToolTipText(this.tfRowCount.getToolTipText());
 		p.add(l);
 		p.add(tfMaxRows);

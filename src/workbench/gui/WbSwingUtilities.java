@@ -24,7 +24,6 @@ import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import javax.swing.InputVerifier;
 
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -33,10 +32,13 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import workbench.db.WbConnection;
 
 import workbench.gui.components.TextComponentMouseListener;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 
@@ -69,11 +71,30 @@ public class WbSwingUtilities
 	}
 
 	public static final Border EMPTY_BORDER = new EmptyBorder(0,0,0,0);
-
+	public static final Border FLAT_BUTTON_BORDER = new CompoundBorder(new EtchedBorder(), new EmptyBorder(1,6,1,6));
+	
 	private WbSwingUtilities()
 	{
 	}
 
+	public static final void invoke(Runnable r)
+	{
+		if (EventQueue.isDispatchThread())
+		{
+			r.run();
+		}
+		else
+		{
+			try
+			{
+				EventQueue.invokeAndWait(r);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logWarning("WbSwingUtilities.invoke()", "Error executing on EventQueue",e);
+			}
+		}
+	}
 	/**
 	 *	Centers the given window either agains anotherone on the screen
 	 *	If a second window is passed the first window is centered
@@ -138,7 +159,7 @@ public class WbSwingUtilities
 
 	public static void showWaitCursorOnWindow(Component caller)
 	{
-		showCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR), caller, true);
+		showCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR), caller, true, false);
 	}
 
 	public static void showDefaultCursorOnWindow(Component caller)
@@ -158,10 +179,10 @@ public class WbSwingUtilities
 
 	public static void showDefaultCursor(final Component caller, final boolean includeParents)
 	{
-		showCursor(null, caller, includeParents);
+		showCursor(null, caller, includeParents, true);
 	}
 
-	private static void showCursor(final Cursor cursor, final Component caller, final boolean includeParents)
+	private static void showCursor(final Cursor cursor, final Component caller, final boolean includeParents, boolean immediate)
 	{
 		if (caller == null) return;
 		Runnable r = new Runnable()
@@ -183,8 +204,14 @@ public class WbSwingUtilities
 		}
 		else
 		{
-			//try { EventQueue.invokeAndWait(r); } catch (Throwable ignore) {} 
-			EventQueue.invokeLater(r);
+			if (immediate)
+			{
+				try { EventQueue.invokeAndWait(r); } catch (Throwable th) {}
+			}
+			else
+			{
+				EventQueue.invokeLater(r);
+			}
 		}
 	}
 
@@ -228,7 +255,7 @@ public class WbSwingUtilities
 		{
 			dialog.setResizable(true);
 			dialog.pack();
-			dialog.show();
+			dialog.setVisible(true);
 			Object result = ignorePane.getValue();
 			if (result == null) rvalue = JOptionPane.YES_OPTION;
 			else if (result.equals(options[0])) rvalue = JOptionPane.YES_OPTION;
@@ -252,7 +279,7 @@ public class WbSwingUtilities
 		{
 			dialog.setResizable(true);
 			dialog.pack();
-			dialog.show();
+			dialog.setVisible(true);
 			Object result = ignorePane.getValue();
 			if (result == null) return JOptionPane.YES_OPTION;
 			else if (result.equals(options[0])) return JOptionPane.YES_OPTION;
@@ -275,7 +302,7 @@ public class WbSwingUtilities
 		{
 			dialog.setResizable(true);
 			dialog.pack();
-			dialog.show();
+			dialog.setVisible(true);
 			Object result = ignorePane.getValue();
 			if (result == null) return JOptionPane.YES_OPTION;
 			else if (result.equals(options[0])) return 0;
@@ -294,7 +321,7 @@ public class WbSwingUtilities
 		JDialog dialog = pane.createDialog(aCaller, title);
 		dialog.setResizable(true);
 		dialog.pack();
-		dialog.show();
+		dialog.setVisible(true);
 		dialog.dispose();
 		Object value = pane.getValue();
 		if (value == null) return false;
@@ -328,7 +355,7 @@ public class WbSwingUtilities
 		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);
 		dialog.setSize(w + 130, dialog.getHeight());
 		dialog.setResizable(true);
-		dialog.show();
+		dialog.setVisible(true);
 		dialog.dispose();
 		Object result = ignorePane.getValue();
 		if (result == null) return DO_ROLLBACK;
@@ -480,6 +507,5 @@ public class WbSwingUtilities
 		}
 		return true;
 	}
-	
 	
 }

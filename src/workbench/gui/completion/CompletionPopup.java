@@ -130,9 +130,6 @@ public class CompletionPopup
 			}
 			if (index == -1) index = 0;
 			
-			elementList.setSelectedIndex(index);
-			elementList.ensureIndexIsVisible(index);
-			
 			window = new JWindow((Frame)SwingUtilities.getWindowAncestor(editor));
 			editor.setKeyEventInterceptor(this);
 			
@@ -149,8 +146,12 @@ public class CompletionPopup
 				window.setSize(d.width + 5, window.getHeight());
 			}
 			
+			elementList.setSelectedIndex(index);
+			elementList.ensureIndexIsVisible(index);
+			
 			WbSwingUtilities.requestFocus(window, elementList);
-			window.show();
+			window.setVisible(true);
+			
 		}
 		catch (Exception e)
 		{
@@ -185,7 +186,7 @@ public class CompletionPopup
 		if (this.window != null)
 		{
 			editor.requestFocus();
-			this.window.hide();
+			this.window.setVisible(false);
 			this.window.dispose();
 			if (pasteEntry)
 			{

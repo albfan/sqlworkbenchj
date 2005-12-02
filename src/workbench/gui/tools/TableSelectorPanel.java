@@ -29,6 +29,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -43,7 +44,7 @@ public class TableSelectorPanel
 	private TableIdentifier currentTable;
 	private PropertyChangeListener client;
 	private String clientPropName;
-	private boolean tablesOnly = false;
+	//private boolean tablesOnly = false;
 	private boolean allowNewTable = false;
 	private TableIdentifier newTableId = new TableIdentifier();
 	//private WbMenuItem editNewTableNameItem;
@@ -67,8 +68,8 @@ public class TableSelectorPanel
 		this.tableSelector.removeAllItems();
 	}
 	
-	public void setTablesOnly(boolean tablesOnly) { this.tablesOnly = tablesOnly; }
-	public boolean getTablesOnly() { return this.tablesOnly; }
+//	public void setTablesOnly(boolean tablesOnly) { this.tablesOnly = tablesOnly; }
+//	public boolean getTablesOnly() { return this.tablesOnly; }
 
 	public void resetNewTableItem()
 	{
@@ -159,40 +160,28 @@ public class TableSelectorPanel
 			this.schemaSelector.removeAllItems();
 			this.tableSelector.removeAllItems();
 
-			//this.schemaSelector.addItem(ResourceMgr.getString("LabelLoadingProgress"));
-			//this.schemaSelector.setSelectedIndex(0);
-
-			List schemas = this.dbConnection.getMetadata().getSchemas();
-			String user = this.dbConnection.getMetadata().getUserName();
-
-			//this.schemaSelector.removeAllItems();
 			this.schemaSelector.addItem("*");
-
-			int numSchemasFound = 0;
 			this.currentSchema = null;
 
+			List schemas = this.dbConnection.getMetadata().getSchemas();
+			String current = this.dbConnection.getMetadata().getCurrentSchema();
+			
 			for (int i=0; i < schemas.size(); i++)
 			{
 				String schema = (String)schemas.get(i);
-				if (schema == null || schema.trim().length() == 0) continue;
+				if (StringUtil.isEmptyString(schema)) continue;
 				this.schemaSelector.addItem(schema);
-				numSchemasFound++;
-				if (user.equalsIgnoreCase(schema)) this.currentSchema = schema;
+				if (current != null && schema.equalsIgnoreCase(current)) this.currentSchema = schema;
 			}
-			if (numSchemasFound == 0)
-			{
-				this.schemaSelector.setSelectedIndex(0);
-				this.retrieveTables();
-			}
-			else if (this.currentSchema != null)
+			if (this.currentSchema != null)
 			{
 				schemaSelector.setSelectedItem(this.currentSchema);
-				this.retrieveTables();
 			}
-			else
+			else 
 			{
-				schemaSelector.setSelectedItem(null);
+				this.schemaSelector.setSelectedIndex(0);
 			}
+			this.retrieveTables();
 			this.schemaSelector.addItemListener(this);
 		}
 		catch (Exception e)
@@ -229,34 +218,31 @@ public class TableSelectorPanel
 	{
 		try
 		{
-			String[] types;
 			this.tableSelector.removeItemListener(this);
-			if (this.tablesOnly) types = new String[] { "TABLE"};
-			else types = new String[] { "TABLE", "VIEW" };
-
-			DataStore tables = this.dbConnection.getMetadata().getTables(null, this.currentSchema, types);
-			tables.sortByColumn(DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, true);
+			List tables = this.dbConnection.getMetadata().getSelectableObjectsList(this.currentSchema);
 			this.tableSelector.removeAllItems();
 			if (this.allowNewTable)
 			{
 				this.tableSelector.addItem(this.newTableId);
 			}
-			int count = tables.getRowCount();
+			int count = tables.size();
 			for (int i=0; i < count; i++)
 			{
-				String table = tables.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-				this.tableSelector.addItem(table);
+				this.tableSelector.addItem(tables.get(i));
 			}
 			this.editNewTableNameButton.setEnabled(false);
 			tableSelector.setSelectedItem(null);
 			TableIdentifier old = this.currentTable;
 			this.currentTable = null;
 			this.firePropertyChange(old, null);
-			this.tableSelector.addItemListener(this);
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("TableSelectorPanel.retrieveTables()", "Could not retrieve table list", e);
+		}
+		finally
+		{
+			this.tableSelector.addItemListener(this);
 		}
 	}
 
@@ -266,19 +252,7 @@ public class TableSelectorPanel
 		Object selected = this.tableSelector.getSelectedItem();
 		if (selected == null) return null;
 
-		if (selected instanceof TableIdentifier)
-		{
-			TableIdentifier id = (TableIdentifier)selected;
-			return id;
-		}
-
-		String schema = (String)this.schemaSelector.getSelectedItem();
-		if ("*".equals(schema) || (schema != null && schema.length() == 0)) schema = null;
-
-		String table = (String)selected;
-
-		if (table == null || table.trim().length() == 0) return null;
-		return new TableIdentifier(schema, table);
+		return (TableIdentifier)selected;
 	}
 
 	public void findAndSelectTable(String aTable)
@@ -293,10 +267,6 @@ public class TableSelectorPanel
 			if (item instanceof TableIdentifier)
 			{
 				table = ((TableIdentifier)item).getTableName();
-			}
-			else
-			{
-				table = (String)item;
 			}
 			if (table == null) continue;
 

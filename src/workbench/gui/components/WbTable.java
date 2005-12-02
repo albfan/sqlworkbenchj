@@ -50,8 +50,6 @@ import javax.swing.CellEditor;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -61,21 +59,17 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolTip;
 import javax.swing.JViewport;
-import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.JPopupMenu.Separator;
-import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -127,6 +121,7 @@ public class WbTable
 	implements ActionListener, FocusListener, MouseListener,
 	           FontChangedListener, Searchable, ListSelectionListener, PropertyChangeListener
 {
+	// <editor-fold defaultstate="collapsed" desc=" Variables ">
 	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.YELLOW);
 	private JPopupMenu popup;
 
@@ -183,7 +178,8 @@ public class WbTable
 	private boolean selectOnRightButtonClick = false;
 	private boolean highlightRequiredFields = false;
 	private Color requiredColor;
-
+	// </editor-fold>
+	
 	public WbTable()
 	{
 		this(true, true);
@@ -219,7 +215,7 @@ public class WbTable
 		this.headerPopup.add(this.optimizeAllCol.getMenuItem());
 		this.headerPopup.add(this.setColWidth.getMenuItem());
 
-		//this.setDoubleBuffered(true);
+		this.setDoubleBuffered(true);
 
 		Font dataFont = this.getFont();
 		if (dataFont == null) dataFont = (Font)UIManager.get("Table.font");
@@ -242,12 +238,12 @@ public class WbTable
 		this.findAgainAction.setEnabled(false);
 
 		this.dataToClipboard = new DataToClipboardAction(this);
-    if (sqlCopyAllowed)
-    {
-        this.copyInsertAction = new CopyAsSqlInsertAction(this);
-        this.copyDeleteInsertAction = new CopyAsSqlDeleteInsertAction(this);
-        this.copyUpdateAction = new CopyAsSqlUpdateAction(this);
-    }
+		if (sqlCopyAllowed)
+		{
+			this.copyInsertAction = new CopyAsSqlInsertAction(this);
+			this.copyDeleteInsertAction = new CopyAsSqlDeleteInsertAction(this);
+			this.copyUpdateAction = new CopyAsSqlUpdateAction(this);
+		}
 		this.exportDataAction = new SaveDataAsAction(this);
 
 		this.filterAction = new FilterDataAction(this);
@@ -260,16 +256,16 @@ public class WbTable
 		if (copyInsertAction != null) this.addPopupAction(this.copyInsertAction, false);
 		if (copyDeleteInsertAction != null) this.addPopupAction(this.copyDeleteInsertAction, false);
 
-    if (sqlCopyAllowed)
-    {
-        WbMenu copy = this.getCopySelectedMenu();
-        this.addPopupSubMenu(copy, true);
-    }
-    else
-    {
-        this.copySelectedAsTextAction = new CopySelectedAsTextAction(this, "MnuTxtCopySelected");
-        this.addPopupAction(this.copySelectedAsTextAction, false);
-    }
+		if (sqlCopyAllowed)
+		{
+			WbMenu copy = this.getCopySelectedMenu();
+			this.addPopupSubMenu(copy, true);
+		}
+		else
+		{
+			this.copySelectedAsTextAction = new CopySelectedAsTextAction(this, "MnuTxtCopySelected");
+			this.addPopupAction(this.copySelectedAsTextAction, false);
+		}
 
 		this.addPopupAction(this.findAction, true);
 		this.addPopupAction(this.findAgainAction, false);
@@ -292,8 +288,12 @@ public class WbTable
 		this.dataToClipboard.addToInputMap(im, am);
 		this.exportDataAction.addToInputMap(im, am);
 		this.optimizeAllCol.addToInputMap(im, am);
+		
 		Settings.getInstance().addFontChangedListener(this);
 		Settings.getInstance().addPropertyChangeListener(this);
+		
+		this.initDefaultRenderers();
+		this.initDefaultEditors();
 	}
 
 	public void setShowPopupMenu(boolean aFlag)
@@ -309,11 +309,11 @@ public class WbTable
 		}
 		else if (!aFlag)
 		{
-			 if (this.rowResizer != null)
-			 {
-				 this.rowResizer.done();
-			 }
-			 this.rowResizer = null;
+			if (this.rowResizer != null)
+			{
+				this.rowResizer.done();
+			}
+			this.rowResizer = null;
 		}
 	}
 
@@ -785,6 +785,8 @@ public class WbTable
 			if (this.sortAscending != null) this.sortAscending.setEnabled(sortIt);
 			if (this.sortDescending != null) this.sortDescending.setEnabled(sortIt);
 
+			// it seems that JTable.setModel() does reset the default
+			// renderers and editors, so we'll have to do it again...
 			this.initDefaultRenderers();
 			this.initDefaultEditors();
 		}
@@ -993,39 +995,29 @@ public class WbTable
 		}
 	}
 
+	public void paintComponents(Graphics g)
+	{
+		if (this.suspendRepaint) return;
+		super.paintComponents(g);
+	}
+
+	public void paintComponent(Graphics g)
+	{
+		if (this.suspendRepaint) return;
+		super.paintComponent(g);
+	}
+
+	public void paint(Graphics g)
+	{
+		if (this.suspendRepaint) return;
+		super.paint(g);
+	}
+	
 	public void repaint()
 	{
 		if (this.suspendRepaint) return;
 		super.repaint();
 	}
-
-//	public void paintComponents(Graphics g)
-//	{
-//		if (this.suspendRepaint) return;
-//		Graphics2D gf2d = (Graphics2D)g;
-//		gf2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
-////		gf2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-//		super.paintComponents(g);
-//	}
-
-//	public void paintComponent(Graphics g)
-//	{
-//		if (this.suspendRepaint) return;
-//		Graphics2D gf2d = (Graphics2D)g;
-//		gf2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
-////		gf2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-//		super.paintComponent(g);
-//	}
-
-//	public void paint(Graphics g)
-//	{
-//		if (this.suspendRepaint) return;
-//		Graphics2D gf2d = (Graphics2D)g;
-//		gf2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
-////		gf2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-//		super.paint(g);
-//	}
-
 
 	public int getSortedViewColumnIndex()
 	{
@@ -1043,13 +1035,34 @@ public class WbTable
 
 	public void sortingStarted()
 	{
-		this.setIgnoreRepaint(true);
+		if (this.scrollPane != null)
+		{
+			WbSwingUtilities.showWaitCursor(this.scrollPane);
+		}
+		else
+		{
+			WbSwingUtilities.showWaitCursor(this);
+			//WbSwingUtilities.showWaitCursor(this.getTableHeader());
+		}
+		//this.setIgnoreRepaint(true);
 	}
 
 	public void sortingFinished()
 	{
-		this.setIgnoreRepaint(false);
+		if (this.scrollPane != null)
+		{
+			WbSwingUtilities.showDefaultCursor(this.scrollPane);
+		}
+		else
+		{
+			//this.setIgnoreRepaint(false);
+			WbSwingUtilities.showDefaultCursor(this.getParent());
+			//WbSwingUtilities.showDefaultCursor(this.getTableHeader());
+		}
+		
+		this.getTableHeader().validate();
 		this.getTableHeader().repaint();
+//		this.getTableHeader().doLayout();
 	}
 
 	public boolean canSearchAgain()
@@ -1081,7 +1094,6 @@ public class WbTable
 
 		for (int i=start; i < this.dwModel.getRowCount(); i++)
 		{
-			//int row = sortModel.getRealIndex(i);
 			String rowString = this.getDataStore().getRowDataAsString(i).toString();
 			if (rowString == null) continue;
 
@@ -1144,9 +1156,12 @@ public class WbTable
 	private void initDateRenderers()
 	{
 		Settings sett = Settings.getInstance();
+		
+		this.setDefaultRenderer(java.sql.Time.class, RendererFactory.getDateRenderer("mm:HH:ss"));
 
 		String format = sett.getDefaultDateFormat();
 		this.setDefaultRenderer(java.sql.Date.class, RendererFactory.getDateRenderer(format));
+		this.setDefaultRenderer(java.util.Date.class, RendererFactory.getDateRenderer(format));
 
 		format = sett.getDefaultDateTimeFormat();
 		this.setDefaultRenderer(java.sql.Timestamp.class, RendererFactory.getDateRenderer(format));
@@ -1195,6 +1210,15 @@ public class WbTable
 		}
 
 		this.setDefaultRenderer(Object.class, RendererFactory.getTooltipRenderer());
+//		if (LogMgr.isDebugEnabled())
+//		{
+//			Iterator itr = this.defaultRenderersByColumnClass.entrySet().iterator();
+//			while (itr.hasNext())
+//			{
+//				Map.Entry entry = (Map.Entry)itr.next();
+//				LogMgr.logDebug("WbTable.initDefaultRenderers()", "Default renderer for " + entry.getKey().toString() + " = " + entry.getValue().getClass().getName());
+//			}
+//		}
 	}
 
 	public void initDefaultEditors()
@@ -1472,7 +1496,7 @@ public class WbTable
 		if (this.rowResizer == null)
 		{
 			// if the row height cannot be resized, we can
-			// calculate the number of visible rows
+			// calculate the number of visible rows 
 			currentRowHeight = this.getRowHeight();
 			int numRows = (int) ((height / currentRowHeight) - 0.5);
 			lastRow = numRows;
@@ -1485,10 +1509,7 @@ public class WbTable
 				if (currentRowHeight + h > height) break;
 				currentRowHeight += h;
 			}
-
-			//p.move(0, (int)d.getHeight());
 			p.move(0, currentRowHeight);
-
 			lastRow = this.rowAtPoint(p);
 		}
 
@@ -1633,8 +1654,13 @@ public class WbTable
 		}
 		else if (e.getSource() == this.optimizeAllCol)
 		{
-			Thread t = new Thread() { 	public void run()	{ optimizeAllColWidth(); } };
-			t.setName("OptimizeAllCols Thread");
+			Thread t = new WbThread("OptimizeAllCols Thread") 
+			{ 	
+				public void run()	
+				{ 
+					optimizeAllColWidth(); 
+				} 
+			};
 			t.start();
 		}
 		else if (e.getSource() == this.setColWidth)

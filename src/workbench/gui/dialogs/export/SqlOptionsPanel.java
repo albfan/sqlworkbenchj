@@ -39,6 +39,10 @@ public class SqlOptionsPanel
 	{
 		initComponents();
 		this.tableColumns = info;
+		if (info == null)
+		{
+			this.selectKeys.setEnabled(false);
+		}
 	}
 
 	public void saveSettings()

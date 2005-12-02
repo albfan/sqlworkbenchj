@@ -11,8 +11,10 @@
  */
 package workbench.sql.wbcommands;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A class to test whether a given SQL Verb is an internal 
@@ -23,11 +25,12 @@ import java.util.List;
  */
 public class CommandTester
 {
-	private final List commands;
+	private final Set commands;
+	private final Map formattedWords;
 	
 	public CommandTester()
 	{
-		commands = new ArrayList();
+		commands = new HashSet();
 		commands.add(WbCopy.VERB);
 		commands.add(WbExport.VERB);
 		commands.add(WbImport.VERB);
@@ -42,12 +45,45 @@ public class CommandTester
 		commands.add(WbSelectBlob.VERB);
 		commands.add(WbStartBatch.VERB);
 		commands.add(WbEndBatch.VERB);
+		commands.add(WbDefinePk.VERB);
+		commands.add(WbListPkDef.VERB);
+		commands.add(WbSavePkMapping.VERB);
+		commands.add(WbLoadPkMapping.VERB);
+		
+		formattedWords = new HashMap();
+		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);
+		formattedWords.put(WbLoadPkMapping.VERB, WbLoadPkMapping.FORMATTED_VERB);
+		formattedWords.put(WbDefineVar.DEFINE_LONG.getVerb(), "WbVarDefine");
+		formattedWords.put(WbDefineVar.DEFINE_SHORT.getVerb(), "WbVarDef");
+		formattedWords.put(WbListPkDef.VERB, WbListPkDef.FORMATTED_VERB);
+		formattedWords.put(WbEndBatch.VERB, "WbEndBatch");
+		formattedWords.put(WbStartBatch.VERB, "WbStartBatch");
 	}
 	
 	public boolean isWbCommand(String verb)
 	{
 		if (verb == null) return false;
 		return commands.contains(verb.trim().toUpperCase());
+	}
+	
+	public String formatVerb(String verb)
+	{
+		String f = (String)formattedWords.get(verb.toUpperCase());
+		if (f != null)
+		{
+			return f;
+		}
+		else
+		{
+			return fixCase(verb);
+		}
+	}
+	
+	private String fixCase(String verb)
+	{
+		if (!verb.toLowerCase().startsWith("wb")) return verb;
+		String s = "Wb" + Character.toUpperCase(verb.charAt(2)) + verb.substring(3).toLowerCase();
+		return s;
 	}
 	
 }

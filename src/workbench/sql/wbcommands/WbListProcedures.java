@@ -25,7 +25,7 @@ import workbench.storage.DataStore;
 public class WbListProcedures
 	extends SqlCommand
 {
-	public static final String VERB = "LISTPROCS";
+	public static final String VERB = "WBLISTPROCS";
 
 	public WbListProcedures()
 	{

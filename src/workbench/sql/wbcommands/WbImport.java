@@ -193,7 +193,7 @@ public class WbImport extends SqlCommand
 		int commit = cmdLine.getIntValue(ARG_COMMIT,-1);
 		imp.setCommitEvery(commit);
 
-		boolean continueDefault = Settings.getInstance().getBoolProperty("workbench.export.default.continue", true);
+		boolean continueDefault = Settings.getInstance().getBoolProperty("workbench.import.default.continue", false);
 		imp.setContinueOnError(cmdLine.getBoolean(ARG_CONTINUE, continueDefault));
 
 		String table = cmdLine.getValue(ARG_TARGETTABLE);

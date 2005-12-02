@@ -24,7 +24,7 @@ import workbench.storage.DataStore;
  */
 public class WbListTables extends SqlCommand
 {
-	public static final String VERB = "LIST";
+	public static final String VERB = "WBLIST";
 
 	/** Creates a new instance of WbListTables */
 	public WbListTables()

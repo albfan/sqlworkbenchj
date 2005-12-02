@@ -11,7 +11,10 @@
  */
 package workbench.db;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Connection;
@@ -37,6 +40,7 @@ import java.sql.DriverManager;
  */
 public class DbDriver
 {
+	private static final String LIB_DIR_KEY = "%LibDir%";
 	private Driver driverClassInstance;
 	private URLClassLoader classLoader;
 
@@ -112,9 +116,9 @@ public class DbDriver
 	}
 
 	public String getLibrary() { return this.library; }
-	public void setLibrary(String library)
+	public void setLibrary(String libList)
 	{
-		this.library = library;
+		this.library = libList; 
 		this.driverClassInstance = null;
 		this.classLoader = null;
 	}
@@ -124,7 +128,9 @@ public class DbDriver
 		StringTokenizer tok = new StringTokenizer(this.library, StringUtil.PATH_SEPARATOR);
 		while(tok.hasMoreTokens())
 		{
-			File f = new File(tok.nextToken().trim());
+			String lib = tok.nextToken().trim();
+			lib = replaceLibDirKey(lib);
+			File f = new File(lib);
 			if (!f.exists()) return false;
 		}
 		return true;
@@ -142,6 +148,7 @@ public class DbDriver
 		throws ClassNotFoundException, Exception
 	{
 		if (this.driverClassInstance != null) return;
+		
 		try
 		{
 			if (this.classLoader == null)
@@ -150,13 +157,15 @@ public class DbDriver
 				URL[] url = new URL[tok.countTokens()];
 				for (int i=0; tok.hasMoreTokens(); i++)
 				{
-					url[i] = new File(tok.nextToken().trim()).toURL();
+					String fname = tok.nextToken().trim();
+					String realFile = replaceLibDirKey(fname);
+					url[i] = new File(realFile).toURL();
 					LogMgr.logInfo("DbDriver.loadDriverClass()", "Adding ClassLoader URL=" + url[i].toString());
 				}
 				this.classLoader = new URLClassLoader(url);
 			}
 
-			// New Firebird 2.0 driver needs this, it does not seem to harm
+			// New Firebird 2.0 driver needs this, and it does not seem to do any harm
 			// for other drivers
 			Thread.currentThread().setContextClassLoader(classLoader);
 			
@@ -174,6 +183,21 @@ public class DbDriver
 					LogMgr.logError("DbDriver.loadDriverClass()", "Error registering driver instance with DriverManager", th);
 				}
 			}
+			
+			String dbLog = Settings.getInstance().getProperty("workbench.db.driver.log", null);
+			if (!StringUtil.isEmptyString(dbLog))
+			{
+				try
+				{
+					PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(dbLog)));
+					DriverManager.setLogWriter(pw);
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("DbDriver.loadDriverClass()", "Error setting driverManager logWriter", e);
+				}
+			}
+			
 		}
 		catch (ClassNotFoundException e)
 		{
@@ -395,4 +419,11 @@ public class DbDriver
 		};
 	}
 
+	private String replaceLibDirKey(String aPathname)
+	{
+		if (aPathname == null) return null;
+		String libDir = Settings.getInstance().getLibDir();
+		if (libDir == null) return aPathname;
+		return StringUtil.replace(aPathname, LIB_DIR_KEY, libDir);
+	}	
 }

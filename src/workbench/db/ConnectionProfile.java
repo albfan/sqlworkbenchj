@@ -51,6 +51,8 @@ public class ConnectionProfile
 	private boolean confirmUpdates;
 	private Integer defaultFetchSize;
 	private boolean globalProfile = false;
+	private boolean emptyStringIsNull = false;
+	private boolean includeNullInInsert = true;
 
 	static
 	{
@@ -116,8 +118,11 @@ public class ConnectionProfile
 		this.separateConnection = aFlag;
 	}
 
-	public void setGlobalProfile(boolean flag) {this.globalProfile = flag; }
-	public boolean isGlobalProfile() { return this.globalProfile; }
+	public void setIncludeNullInInsert(boolean flag) {this.includeNullInInsert = flag; }
+	public boolean getIncludeNullInInsert() { return this.includeNullInInsert; }
+	
+	public void setEmptyStringIsNull(boolean flag) {this.emptyStringIsNull = flag; }
+	public boolean getEmptyStringIsNull() { return this.emptyStringIsNull; }
 
 	/**
 	 *
@@ -390,6 +395,7 @@ public class ConnectionProfile
 				result.connectionProperties.put(key, value);
 			}
 		}
+		result.setEmptyStringIsNull(this.emptyStringIsNull);
 		result.changed = false;
 		return result;
 	}

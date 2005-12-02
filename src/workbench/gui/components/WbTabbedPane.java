@@ -67,11 +67,11 @@ public class WbTabbedPane
 		super.repaint();
 	}
 
-//	public void paintComponent(Graphics g)
-//	{
-//		if (this.suspendRepaint) return;
-//		super.paintComponent(g);
-//	}
+	public void paintComponent(Graphics g)
+	{
+		if (this.suspendRepaint) return;
+		super.paintComponent(g);
+	}
 
 	public void paintComponents(Graphics g)
 	{

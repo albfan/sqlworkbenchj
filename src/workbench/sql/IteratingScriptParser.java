@@ -58,6 +58,7 @@ public class IteratingScriptParser
 	private char lastQuote = 0;
 	private boolean checkEscapedQuotes = true;
 	private boolean emptyLineIsSeparator = false;
+	private boolean supportOracleInclude = true;
 	
 	/** Create an InteratingScriptParser
 	 */
@@ -115,6 +116,14 @@ public class IteratingScriptParser
 		this.reset();
 	}
 
+	/**
+	 * Support Oracle style @ includes
+	 */
+	public void setSupportOracleInclude(boolean flag)
+	{
+		this.supportOracleInclude = flag;
+	}
+	
 	public void allowEmptyLineAsSeparator(boolean flag)
 	{
 		this.emptyLineIsSeparator = flag;
@@ -193,14 +202,15 @@ public class IteratingScriptParser
 	// can be used in a single line without a delimiter
 	// This is basically to make the parser as Oracle compatible as possible
 	// while not breaking the SQL queries for other servers
-	private static final Pattern[] SLC_PATTERNS =
-         { Pattern.compile("(?m)^\\s*@.*$"),
-					 Pattern.compile("(?mi)^\\s*SET\\s*\\w*\\s*((ON)|(OFF))\\s*;?\\s*$"),
+	private Pattern[] SLC_PATTERNS =
+         { Pattern.compile("(?mi)^\\s*SET\\s*\\w*\\s*((ON)|(OFF))\\s*;?\\s*$"),
 					 Pattern.compile("(?mi)^\\s*ECHO\\s*((ON)|(OFF))\\s*;?\\s*$"),
 					 Pattern.compile("(?mi)^\\s*WHENEVER\\s*ERROR\\s*$"),
 					 Pattern.compile("(?mi)^\\s*SET\\s*TRANSACTION\\s*READ\\s*((WRITE)|(ONLY))\\s*;?\\s*$")
 	       };
 
+	private Pattern ORA_INCLUDE_PATTERN = Pattern.compile("(?m)^\\s*@.*$");
+	
 	public boolean hasMoreCommands()
 	{
 		return this.lastPos < this.scriptLength;
@@ -362,6 +372,14 @@ public class IteratingScriptParser
 								{
 									slcFound = true;
 									break;
+								}
+							}
+							if (!slcFound && this.supportOracleInclude)
+							{
+								Matcher m = ORA_INCLUDE_PATTERN.matcher(clean);
+								if (m.matches())
+								{
+									slcFound = true;
 								}
 							}
 						}

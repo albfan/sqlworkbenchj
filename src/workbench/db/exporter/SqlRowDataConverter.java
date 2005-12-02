@@ -54,7 +54,7 @@ public class SqlRowDataConverter
 	public SqlRowDataConverter(ResultInfo info)
 	{
 		super(info);
-		this.factory = new StatementFactory(info);
+		this.factory = new StatementFactory(info, this.originalConnection);
 		this.needsUpdateTable = info.getUpdateTable() == null;
 	}
 
@@ -108,11 +108,16 @@ public class SqlRowDataConverter
 	{
 		StrBuffer result = new StrBuffer();
 		DmlStatement dml = null;
+		String db = null;
+		if (this.originalConnection != null)
+		{
+			db = this.originalConnection.getDatabaseProductName();
+		}
 		this.factory.setIncludeTableOwner(this.includeOwner);
 		if (this.sqlType == SQL_DELETE_INSERT)
 		{
 			dml = this.factory.createDeleteStatement(row, true);
-			result.append(dml.getExecutableStatement());
+			result.append(dml.getExecutableStatement(db));
 			result.append(';');
 			result.append(lineTerminator);
 		}
@@ -120,18 +125,13 @@ public class SqlRowDataConverter
 		{
 			dml = this.factory.createInsertStatement(row, true, "\n", this.exportColumns);
 		}
-		else
+		else // implies sqlType == SQL_UPDATE
 		{
 			dml = this.factory.createUpdateStatement(row, true, "\n", this.exportColumns);
 		}
 		dml.setChrFunction(this.chrFunction);
 		dml.setConcatString(this.concatString);
 		dml.setConcatFunction(this.concatFunction);
-		String db = null;
-		if (this.originalConnection != null)
-		{
-			db = this.originalConnection.getDatabaseProductName();
-		}
 		// passing the db name is important, so that e.g. 
 		// date literals can be formatted correctly
 		result.append(dml.getExecutableStatement(db));

@@ -185,12 +185,12 @@ public class SqlCommand
 	{
 		if (this.currentStatement != null)
 		{
-			try { this.currentStatement.close(); } catch (Throwable th) {}
 			if (!this.isCancelled)
 			{
 				try { this.currentStatement.clearWarnings(); } catch (Throwable th) {}
 				try { this.currentStatement.clearBatch(); } catch (Throwable th) {}
 			}
+			try { this.currentStatement.close(); } catch (Throwable th) {}
 		}
 		if (this.isCancelled)
 		{
@@ -200,7 +200,7 @@ public class SqlCommand
 		this.isCancelled = false;
 	}
 
-	public void setStatementRunner(DefaultStatementRunner r)
+	public void setStatementRunner(StatementRunner r)
 	{
 		this.runner = r;
 	}

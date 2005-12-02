@@ -282,6 +282,7 @@ public class SchemaReporter
 			proc.writeXml(out);
 			out.write('\n');
 			totalCurrent ++;
+			if (this.cancel) break;
 		}
 		
 		out.write("</");
@@ -458,6 +459,7 @@ public class SchemaReporter
 				int type = procs.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
 				ReportProcedure proc = new ReportProcedure(cat, schema, name, type, this.dbConn);
 				this.procedures.add(proc);
+				if (this.cancel) return;
 			}
 		}
 		catch (SQLException e)

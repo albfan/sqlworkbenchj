@@ -15,17 +15,15 @@ import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbMetadata;
 import workbench.db.ErrorInformationReader;
-import workbench.db.IndexReader;
-import workbench.db.JdbcIndexReader;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
 import workbench.db.SchemaInformationReader;
@@ -39,6 +37,7 @@ import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -51,6 +50,7 @@ public class OracleMetadata
 	private DbMetadata metaData;
 	private PreparedStatement columnStatement;
 	private int version = 8;
+	private boolean retrieveSnapshots = true;
 	
 	/** Creates a new instance of OracleMetaData */
 	public OracleMetadata(DbMetadata meta, WbConnection conn)
@@ -496,6 +496,84 @@ public class OracleMetadata
 			SqlUtil.closeAll(rs, stmt);
 		}
 		return result.toString();
+	}
+	
+	/**
+	 * Returns a Set with Strings identifying available Snapshots (materialized views)
+	 * The names will be returned as owner.tablename
+	 * In case the retrieve throws an error, this method will return 
+	 * an empty set in subsequent calls.
+	 */
+	public Set getSnapshots(String schema)
+	{
+		if (!retrieveSnapshots) return Collections.EMPTY_SET;
+		Set result = new HashSet();
+		String sql = "SELECT owner||'.'||mview_name FROM all_mviews";
+		if (schema != null)
+		{
+			sql += " WHERE owner = ?";
+		}
+		
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try
+		{
+			stmt = this.connection.getSqlConnection().prepareStatement(sql);
+			if (schema != null) stmt.setString(1, schema);
+			rs = stmt.executeQuery();
+			while (rs.next())
+			{
+				String name = rs.getString(1);
+				result.add(name);
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logWarning("OracleMetadata.getSnapshots()", "Error accessing all_mviews", e);
+			// When we an exception, most probably we cannot access the ALL_MVIEWS view
+			// to avoid further (unnecessary) calls, we are disabling the support 
+			// for snapshots 
+			this.retrieveSnapshots = false;
+			result = Collections.EMPTY_SET;
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		return result;
+	}
+	
+	public String getSnapshotSource(TableIdentifier tbl)
+	{
+		if (!retrieveSnapshots) return StringUtil.EMPTY_STRING;
+		String result = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		String sql = "SELECT query FROM all_mviews WHERE owner = ? and mview_name = ?";
+		
+		try
+		{
+			stmt = this.connection.getSqlConnection().prepareStatement(sql);
+			stmt.setString(1, tbl.getSchema());
+			stmt.setString(2, tbl.getTableName());
+			rs = stmt.executeQuery();
+			if (rs.next())
+			{
+				result = rs.getString(1);
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logWarning("OracleMetadata.getSnapshotSource()", "Error accessing all_mviews", e);
+			this.retrieveSnapshots = false;
+			result = ExceptionUtil.getDisplay(e);;
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		return result;
 	}
 	
 	/**

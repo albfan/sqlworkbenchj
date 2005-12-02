@@ -18,13 +18,15 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+import workbench.db.ColumnIdentifier;
 
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 
 /**
- *
+ * A class to execute a SQL Statement and to create the statement
+ * from a given list of values.
  * @author  support@sql-workbench.net
  */
 public class DmlStatement
@@ -32,19 +34,11 @@ public class DmlStatement
 	private String sql;
 	private List values;
 	private boolean usePrepared = true;
-	
+	private SqlLiteralFormatter literalFormatter;
 	private String chrFunc;
 	private String concatString;
 	private String concatFunction;
-	/**
-	 *	Create a new DmlStatement with the given SQL template string
-	 *	that has no parameters.
-	 */
-	public DmlStatement(String aStatement)
-		throws IllegalArgumentException
-	{
-		this(aStatement, null);
-	}
+	
 	/**
 	 *	Create a new DmlStatement with the given SQL template string
 	 *	and the given values.
@@ -53,11 +47,10 @@ public class DmlStatement
 	 *	passed in aValueList. The SQL statement will be executed
 	 *	using a prepared statement.
 	 */
-	public DmlStatement(String aStatement, List aValueList)
-		//throws IllegalArgumentException
+	public DmlStatement(String aStatement, List aValueList, SqlLiteralFormatter formatter)
 	{
 		if (aStatement == null) throw new NullPointerException();
-
+		this.setLiteralFormatter(formatter);
 		int count = this.countParameters(aStatement);
 		if (count > 0 && aValueList != null && count != aValueList.size())
 		{
@@ -76,36 +69,19 @@ public class DmlStatement
 		}
 	}
 
-	public int execute(WbConnection aWbConn)
-		throws SQLException
-	{
-		return this.execute(aWbConn.getSqlConnection());
-	}
-
 	/**
-	 * Execute the statement.
-	 * If setUsePreparedStatement(false) is called before
-	 * calling execute(), the statement generated {@link #getExecutableStatement() }
-	 * will be executed directly. Otherwise a prepared statement will be used.
+	 * Execute the statement as a prepared statement
 	 * @param aConnection the Connection to be used
 	 * @return the number of rows affected
 	 */
-	public int execute(Connection aConnection)
+	public int execute(WbConnection aConnection)
 		throws SQLException
 	{
-		int rows;
-		rows = this.executePrepared(aConnection);
-
-		return rows;
-	}
-
-	private int executePrepared(Connection aConnection)
-		throws SQLException
-	{
-		PreparedStatement stmt = aConnection.prepareStatement(this.sql);
+		PreparedStatement stmt = aConnection.getSqlConnection().prepareStatement(this.sql);
 		for (int i=0; i < this.values.size(); i++)
 		{
-			Object value = this.values.get(i);
+			ColumnData data = (ColumnData)this.values.get(i);
+			Object value = data.getValue();
 			if (value instanceof NullValue)
 			{
 				NullValue nv = (NullValue)value;
@@ -136,28 +112,6 @@ public class DmlStatement
 		return this.usePrepared;
 	}
 	
-	public String getExecutableStatement()
-	{
-		return this.getExecutableStatement((String)null);
-	}
-	
-	public String getExecutableStatement(Connection aConn)
-	{
-		String dbproduct = null;
-		if (aConn != null) 
-		{
-			try
-			{
-				dbproduct = aConn.getMetaData().getDatabaseProductName();
-			}
-			catch (Exception e)
-			{
-				dbproduct = null;
-			}
-		}
-		return this.getExecutableStatement(dbproduct);	
-	}
-	
 	public void setConcatString(String concat)
 	{
 		if (concat == null) return;
@@ -185,9 +139,11 @@ public class DmlStatement
 	 */
 	public String getExecutableStatement(String dbproduct)
 	{
+		if (this.literalFormatter == null) this.literalFormatter = new SqlLiteralFormatter();
+		
 		if (this.values.size() > 0)
 		{
-			DbDateFormatter dateFormat = SqlSyntaxFormatter.getDateLiteralFormatter(dbproduct);
+			DbDateFormatter dateFormat = this.literalFormatter.getDateLiteralFormatter();
 			
 			StrBuffer result = new StrBuffer(this.sql.length() + this.values.size() * 10);
 			boolean inQuotes = false;
@@ -199,9 +155,10 @@ public class DmlStatement
 				if (c == '\'') inQuotes = !inQuotes;
 				if (c == '?' && !inQuotes && parmIndex < this.values.size())
 				{
-					Object v = this.values.get(parmIndex);
-					String literal = SqlSyntaxFormatter.getDefaultLiteral(v, dateFormat);
-					if (this.chrFunc != null && v instanceof String)
+					ColumnData data = (ColumnData)this.values.get(parmIndex);
+					Object v = data.getValue();
+					String literal = this.literalFormatter.getDefaultLiteral(data, dateFormat);
+					if (this.chrFunc != null && SqlUtil.isCharacterType(data.getIdentifier().getDataType()))
 					{
 						literal = this.createInsertString(literal);
 					}
@@ -319,4 +276,9 @@ public class DmlStatement
 		return sql;
 	}
 
+	public void setLiteralFormatter(SqlLiteralFormatter f)
+	{
+		this.literalFormatter = f;
+	}
+	
 }

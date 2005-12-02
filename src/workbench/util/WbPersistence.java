@@ -75,10 +75,17 @@ public class WbPersistence
 	public Object readObject(InputStream in)
 		throws Exception
 	{
-		XMLDecoder e = new XMLDecoder(in, null, this);
-		Object result = e.readObject();
-		e.close();
-		return result;
+		try
+		{
+			XMLDecoder e = new XMLDecoder(in, null, this);
+			Object result = e.readObject();
+			e.close();
+			return result;
+		}
+		finally
+		{
+			try { in.close(); } catch (Throwable th) {}
+		}
 	}
 
 	public void writeObject(Object aValue)

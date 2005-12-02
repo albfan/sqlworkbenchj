@@ -34,6 +34,7 @@ import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.commands.UpdatingCommand;
 import workbench.sql.commands.UseCommand;
 import workbench.sql.wbcommands.WbCopy;
+import workbench.sql.wbcommands.WbDefinePk;
 import workbench.sql.wbcommands.WbDefineVar;
 import workbench.sql.wbcommands.WbDescribeTable;
 import workbench.sql.wbcommands.WbDiff;
@@ -45,11 +46,14 @@ import workbench.sql.wbcommands.WbHelp;
 import workbench.sql.wbcommands.WbImport;
 import workbench.sql.wbcommands.WbInclude;
 import workbench.sql.wbcommands.WbListCatalogs;
+import workbench.sql.wbcommands.WbListPkDef;
 import workbench.sql.wbcommands.WbListProcedures;
 import workbench.sql.wbcommands.WbListTables;
 import workbench.sql.wbcommands.WbListVars;
+import workbench.sql.wbcommands.WbLoadPkMapping;
 import workbench.sql.wbcommands.WbOraExecute;
 import workbench.sql.wbcommands.WbRemoveVar;
+import workbench.sql.wbcommands.WbSavePkMapping;
 import workbench.sql.wbcommands.WbSchemaReport;
 import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.sql.wbcommands.WbStartBatch;
@@ -155,7 +159,19 @@ public class DefaultStatementRunner
 
 		sql = new WbFeedback();
 		cmdDispatch.put(sql.getVerb(), sql);
+		
+		sql = new WbDefinePk();
+		cmdDispatch.put(sql.getVerb(), sql);
 
+		sql = new WbListPkDef();
+		cmdDispatch.put(sql.getVerb(), sql);
+
+		sql = new WbLoadPkMapping();
+		cmdDispatch.put(sql.getVerb(), sql);
+		
+		sql = new WbSavePkMapping();
+		cmdDispatch.put(sql.getVerb(), sql);
+		
 		cmdDispatch.put(WbInclude.INCLUDE_LONG.getVerb(), WbInclude.INCLUDE_LONG);
 		cmdDispatch.put(WbInclude.INCLUDE_SHORT.getVerb(), WbInclude.INCLUDE_SHORT);
 

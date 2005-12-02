@@ -1,15 +1,13 @@
 package workbench.gui.editor;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-import java.util.StringTokenizer;
-import workbench.db.DbMetadata;
-import workbench.db.WbConnection;
-
-import workbench.log.LogMgr;
+import workbench.sql.wbcommands.WbDefinePk;
+import workbench.sql.wbcommands.WbDefineVar;
+import workbench.sql.wbcommands.WbListPkDef;
+import workbench.sql.wbcommands.WbLoadPkMapping;
+import workbench.sql.wbcommands.WbSavePkMapping;
+import workbench.sql.wbcommands.WbSelectBlob;
 
 /**
  * ANSI-SQL token marker.
@@ -158,9 +156,10 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		// Workbench specific keywords
 		keywords.add("DESC",Token.KEYWORD2);
 		keywords.add("DESCRIBE",Token.KEYWORD2);
-		keywords.add("LIST",Token.KEYWORD2);
-		keywords.add("LISTPROCS",Token.KEYWORD2);
-		keywords.add("LISTDB",Token.KEYWORD2);
+		keywords.add("WBLIST",Token.KEYWORD2);
+		keywords.add("WBLISTPROCS",Token.KEYWORD2);
+		keywords.add("WBLISTDB",Token.KEYWORD2);
+		keywords.add("WBLISTCAT",Token.KEYWORD2);
 		keywords.add("ENABLEOUT",Token.KEYWORD2);
 		keywords.add("DISABLEOUT",Token.KEYWORD2);
 		keywords.add("WBEXPORT",Token.KEYWORD2);
@@ -168,8 +167,8 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("WBFEEDBACK",Token.KEYWORD2);
 		keywords.add("WBINCLUDE",Token.KEYWORD2);
 		keywords.add("WBCOPY",Token.KEYWORD2);
-		keywords.add("WBVARDEF",Token.KEYWORD2);
-		keywords.add("WBVARDEFINE",Token.KEYWORD2);
+		keywords.add(WbDefineVar.DEFINE_LONG.getVerb(),Token.KEYWORD2);
+		keywords.add(WbDefineVar.DEFINE_SHORT.getVerb(),Token.KEYWORD2);
 		keywords.add("WBVARLIST",Token.KEYWORD2);
 		keywords.add("WBVARDELETE",Token.KEYWORD2);
 		keywords.add("WBSTARTBATCH",Token.KEYWORD2);
@@ -178,8 +177,11 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("WBREPORT",Token.KEYWORD2);
 		keywords.add("WBDIFF",Token.KEYWORD2);
 		keywords.add("WBXSLT",Token.KEYWORD2);
-		keywords.add("WBUPDATEBLOB",Token.KEYWORD2);
-		keywords.add("WBSELECTBLOB",Token.KEYWORD2);
+		keywords.add(WbSelectBlob.VERB,Token.KEYWORD2);
+		keywords.add(WbDefinePk.VERB,Token.KEYWORD2);
+		keywords.add(WbListPkDef.VERB,Token.KEYWORD2);
+		keywords.add(WbSavePkMapping.VERB,Token.KEYWORD2);
+		keywords.add(WbLoadPkMapping.VERB,Token.KEYWORD2);
 	}
 
 	private void addDataTypes()

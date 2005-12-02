@@ -42,25 +42,25 @@ public class WbDiff
 	public static final String PARAM_FILENAME = "file";
 	public static final String PARAM_ENCODING = "encoding";
 	public static final String PARAM_NAMESPACE = "namespace";
-	
+
 	public static final String PARAM_SOURCETABLES = "referencetables";
 	public static final String PARAM_TARGETTABLES = "targettables";
 
 	public static final String PARAM_SOURCESCHEMA = "referenceschema";
 	public static final String PARAM_TARGETSCHEMA = "targetschema";
-	
+
 	public static final String PARAM_EXCLUDE_TABLES = "excludetables";
-	
+
 	public static final String PARAM_INCLUDE_INDEX = "includeindex";
 	public static final String PARAM_INCLUDE_FK = "includeforeignkeys";
 	public static final String PARAM_INCLUDE_PK = "includeprimarykeys";
 	public static final String PARAM_INCLUDE_CONSTRAINTS = "includeconstraints";
 	public static final String PARAM_INCLUDE_VIEWS = "includeviews";
 	//public static final String PARAM_INCLUDE_COMMENTS = "includecomments";
-		
+
 	private ArgumentParser cmdLine;
 	private SchemaDiff diff;
-	
+
 	public WbDiff()
 	{
 		cmdLine = new ArgumentParser();
@@ -79,6 +79,7 @@ public class WbDiff
 		cmdLine.addArgument(PARAM_INCLUDE_INDEX);
 		cmdLine.addArgument(PARAM_EXCLUDE_TABLES);
 		cmdLine.addArgument(PARAM_INCLUDE_CONSTRAINTS);
+		cmdLine.addArgument(PARAM_INCLUDE_VIEWS);
 		//cmdLine.addArgument(PARAM_INCLUDE_COMMENTS);
 	}
 
@@ -97,7 +98,7 @@ public class WbDiff
 		}
 		int pos = sql.toUpperCase().indexOf(VERB);
 		if (pos > -1) sql = sql.substring(pos + VERB.length() + 1);
-		
+
 		try
 		{
 			cmdLine.parse(sql);
@@ -124,7 +125,7 @@ public class WbDiff
 			result.setFailure();
 			return result;
 		}
-		
+
 		String filename = cmdLine.getValue(PARAM_FILENAME);
 
 		String sourceProfile = cmdLine.getValue(PARAM_SOURCEPROFILE);
@@ -133,9 +134,9 @@ public class WbDiff
 
 		WbConnection targetCon = null;
 		WbConnection sourceCon = null;
-		
+
 		this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
-		
+
 		if (targetProfile == null || aConnection.getProfile().getName().equals(targetProfile))
 		{
 			targetCon = aConnection;
@@ -178,7 +179,7 @@ public class WbDiff
 				return result;
 			}
 		}
-		
+
 		this.diff = new SchemaDiff(sourceCon, targetCon);
 		diff.setMonitor(this.rowMonitor);
 
@@ -189,16 +190,16 @@ public class WbDiff
 		diff.setIncludeTableConstraints(cmdLine.getBoolean(PARAM_INCLUDE_CONSTRAINTS, true));
 		diff.setIncludeViews(cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true));
 		//diff.setIncludeComments(cmdLine.getBoolean(PARAM_INCLUDE_COMMENTS, false));
-		
+
 		String refTables = cmdLine.getValue(PARAM_SOURCETABLES);
 		String tarTables = cmdLine.getValue(PARAM_TARGETTABLES);
-		
+
 		if (refTables == null)
 		{
 			String refSchema = cmdLine.getValue(PARAM_SOURCESCHEMA);
 			String targetSchema = cmdLine.getValue(PARAM_TARGETSCHEMA);
 			String excludeTables = cmdLine.getValue(PARAM_EXCLUDE_TABLES);
-			
+
 			if (refSchema == null || targetSchema == null)
 			{
 				if (sourceCon == targetCon)
@@ -261,7 +262,7 @@ public class WbDiff
 			else
 			{
 				String encoding = cmdLine.getValue(PARAM_ENCODING);
-				if (encoding == null) 
+				if (encoding == null)
 				{
 					encoding =  diff.getEncoding();
 				}
@@ -300,7 +301,7 @@ public class WbDiff
 		}
 		return result;
 	}
-	
+
 	public void cancel()
 	{
 		if (this.diff != null) this.diff.cancel();

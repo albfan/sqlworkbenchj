@@ -145,7 +145,7 @@ public class DeleteScriptGenerator
 		sql.append(';');
 		try
 		{
-			int max = Settings.getInstance().getMaxSubselectLength();
+			int max = Settings.getInstance().getFormatterMaxSubselectLength();
 			SqlFormatter format = new SqlFormatter(sql.toString(), max);
 			return format.getFormattedSql().trim();
 		}
@@ -335,7 +335,7 @@ public class DeleteScriptGenerator
 
 		int numRows = rows.length;
 		StringBuffer result = new StringBuffer(numRows * 150);
-		int max = Settings.getInstance().getMaxSubselectLength();
+		int max = Settings.getInstance().getFormatterMaxSubselectLength();
 		StringBuffer sep = new StringBuffer(max + 2);
 		sep.append('\n');
 		for (int i=0; i < max; i++) sep.append('=');

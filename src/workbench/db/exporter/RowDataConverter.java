@@ -148,12 +148,14 @@ public abstract class RowDataConverter
 
 	public void setDefaultDateFormat(String format)
 	{
+		if (StringUtil.isEmptyString(format)) return;
 		SimpleDateFormat formatter = new SimpleDateFormat(format);
 		this.setDefaultDateFormatter(formatter);
 	}
 	
 	public void setDefaultTimestampFormat(String format)
 	{
+		if (StringUtil.isEmptyString(format)) return;
 		SimpleDateFormat formatter = new SimpleDateFormat(format);
 		this.setDefaultTimestampFormatter(formatter);
 	}

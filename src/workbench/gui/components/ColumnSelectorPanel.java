@@ -43,7 +43,8 @@ public class ColumnSelectorPanel
 	implements ActionListener
 {
 	private JTable selectTable;
-	private JLabel infoLabel;
+	protected JPanel infoPanel;
+	//private JLabel infoLabel;
 	private ColumnSelectTableModel model;
 	private JButton selectAll;
 	private JButton selectNone;
@@ -76,9 +77,9 @@ public class ColumnSelectorPanel
 		col.setPreferredWidth(100);
 		col.setMinWidth(50);
 		WbScrollPane scroll = new WbScrollPane(this.selectTable);
-		String msg = ResourceMgr.getString("MsgSelectColumns");
-		this.infoLabel = new JLabel(msg);
-		this.add(this.infoLabel, BorderLayout.NORTH);
+		this.infoPanel = new JPanel();
+		configureInfoPanel();
+		this.add(this.infoPanel, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
 		
 		selectAll = new JButton(ResourceMgr.getString("LabelSelectAll"));
@@ -87,18 +88,18 @@ public class ColumnSelectorPanel
 		selectNone.addActionListener(this);
 
     
-    if (showSelectedCheckBox) 
-    {
-        this.selectedOnlyCheckBox = new JCheckBox(ResourceMgr.getString("LabelSelectedRowsOnly"));
-        this.selectedOnlyCheckBox.setSelected(selectedOnly);
-        this.selectedOnlyCheckBox.setEnabled(true);
-    }
-    
-    if (showHeaderSelection)
-    {
-        this.includeHeaderCheckBox = new JCheckBox(ResourceMgr.getString("LabelExportIncludeHeaders"));
-        this.includeHeaderCheckBox.setSelected(includeHeader);
-    }
+		if (showSelectedCheckBox)
+		{
+			this.selectedOnlyCheckBox = new JCheckBox(ResourceMgr.getString("LabelSelectedRowsOnly"));
+			this.selectedOnlyCheckBox.setSelected(selectedOnly);
+			this.selectedOnlyCheckBox.setEnabled(true);
+		}
+		
+		if (showHeaderSelection)
+		{
+			this.includeHeaderCheckBox = new JCheckBox(ResourceMgr.getString("LabelExportIncludeHeaders"));
+			this.includeHeaderCheckBox.setSelected(includeHeader);
+		}
     
     JPanel optionPanel = new JPanel();
     optionPanel.setLayout(new GridBagLayout());
@@ -143,9 +144,11 @@ public class ColumnSelectorPanel
 		this.setPreferredSize(d);
 	}
 
-	public void setInfoText(String text)
+	protected void configureInfoPanel()
 	{
-		this.infoLabel.setText(text);
+		String msg = ResourceMgr.getString("MsgSelectColumns");
+		JLabel infoLabel = new JLabel(msg);
+		this.infoPanel.add(infoLabel);
 	}
 	
 	public void setSelectionLabel(String label)

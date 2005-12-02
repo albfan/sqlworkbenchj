@@ -44,6 +44,9 @@ public class JdbcProcedureReader
 		{
 			aSchema = null;
 		}
+		aSchema = this.dbMeta.adjustObjectnameCase(aSchema);
+		aCatalog = this.dbMeta.adjustObjectnameCase(aCatalog);
+		
 		ResultSet rs = this.dbMeta.getSqlConnection().getMetaData().getProcedures(aCatalog, aSchema, "%");
 		return buildProcedureListDataStore(rs);
 	}

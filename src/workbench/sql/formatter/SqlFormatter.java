@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import workbench.resource.Settings;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.util.StringUtil;
 
@@ -114,6 +115,7 @@ public class SqlFormatter
 	private int realLength = 0;
 	private int maxSubselectLength = 60;
 	private Set dbFunctions = Collections.EMPTY_SET;
+	private int selectColumnsPerLine = 1;
 	
 	public SqlFormatter(String aScript, int maxLength)
 	{
@@ -134,6 +136,11 @@ public class SqlFormatter
 		this.maxSubselectLength = maxSubselectLength;
 	}
 
+	public void setMaxColumnsPerSelect(int cols)
+	{
+		this.selectColumnsPerLine = cols;
+	}
+	
 	public void setDBFunctions(Set functionNames)
 	{
 		if (functionNames != null)
@@ -335,6 +342,7 @@ public class SqlFormatter
 		StringBuffer b = new StringBuffer(indentCount);
 		for (int i=0; i < indentCount; i++) b.append(' ');
 
+		int currentColumnCount = 0;
 		boolean isSelect = last.getContents().equals("SELECT");
 		SQLToken t = (SQLToken)this.lexer.getNextToken(true, false);
 		SQLToken lastToken = last;
@@ -383,9 +391,18 @@ public class SqlFormatter
 			}
 			else if (t.isSeparator() && text.equals(","))
 			{
-				this.appendText(",");
-				this.appendNewline();
-				this.indent(b);
+				this.appendText(',');
+				currentColumnCount++;
+				if (!isSelect || currentColumnCount >= selectColumnsPerLine)
+				{
+					currentColumnCount = 0;
+					this.appendNewline();
+					this.indent(b);
+				}
+				else
+				{
+					this.appendText(' ');
+				}
 			}
 			else if (text.equals("*") && !lastToken.isSeparator())
 			{
@@ -553,13 +570,6 @@ public class SqlFormatter
 			t = (SQLToken)this.lexer.getNextToken(true,true);
 		}
 		return null;
-	}
-	
-	private String fixWbCommandCase(String verb)
-	{
-		if (!verb.toLowerCase().startsWith("wb")) return verb;
-		String s = "Wb" + Character.toUpperCase(verb.charAt(2)) + verb.substring(3).toLowerCase();
-		return s;
 	}
 	
 	private SQLToken processWbCommand(int indent)
@@ -765,7 +775,7 @@ public class SqlFormatter
 					if (!lastToken.isSeparator() && lastToken != t && !isStartOfLine()) this.appendText(' ');
 					if (wbTester.isWbCommand(word))
 					{
-						this.appendText(fixWbCommandCase(word));
+						this.appendText(wbTester.formatVerb(word));
 					}
 					else
 					{

@@ -45,6 +45,7 @@ import javax.swing.table.TableModel;
 import workbench.db.TableIdentifier;
 
 import workbench.db.WbConnection;
+import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.components.WbTextCellEditor;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
@@ -89,8 +90,7 @@ import workbench.util.WbThread;
 public class DwPanel
 	extends JPanel
 	implements TableModelListener, ListSelectionListener, ChangeListener,
-	RowActionMonitor, DbData, DbUpdater, Interruptable, JobErrorHandler,
-	ScriptGenerationMonitor
+						 DbData, DbUpdater, Interruptable, JobErrorHandler
 {
 	private WbTable dataTable;
 	private DwStatusBar statusBar;
@@ -133,6 +133,7 @@ public class DwPanel
 	private String lastTimingMessage;
 	
 	private StatementRunner stmtRunner;
+	private GenericRowMonitor genericRowMonitor;
 	
 	public DwPanel()
 	{
@@ -154,11 +155,6 @@ public class DwPanel
 		this.defaultNumberEditor = new DefaultCellEditor(numberField);
 		this.initLayout(aStatusBar);
 		
-		WbTraversalPolicy pol = new WbTraversalPolicy();
-		pol.setDefaultComponent(dataTable);
-		pol.addComponent(dataTable);
-		//pol.addComponent(this.statusBar.tfMaxRows);
-		this.setFocusTraversalPolicy(pol);
 		this.setDoubleBuffered(true);
 		this.dataTable.addTableModelListener(this);
 		
@@ -179,6 +175,12 @@ public class DwPanel
 		this.dataTable.getSelectionModel().addListSelectionListener(this);
 		this.dataTable.setHighlightRequiredFields(Settings.getInstance().getHighlightRequiredFields());
 		this.dataTable.setShowRowNumbers(Settings.getInstance().getShowRowNumbers());
+		
+		WbTraversalPolicy pol = new WbTraversalPolicy();
+		pol.setDefaultComponent(dataTable);
+		pol.addComponent(dataTable);
+		this.setFocusTraversalPolicy(pol);
+		this.genericRowMonitor = new GenericRowMonitor(this.statusBar);
 	}
 	
 	public SelectKeyColumnsAction getSelectKeysAction()
@@ -256,120 +258,6 @@ public class DwPanel
 		this.showLoadProgress = aFlag;
 	}
 	
-	private String updateMsg;
-	private String currentMonitorObject;
-	private int monitorType = -1;
-	
-	private void clearRowMonitorSettings()
-	{
-		this.updateMsg = null;
-		this.monitorType = -1;
-	}
-	
-	public void setMonitorType(int aType)
-	{
-		this.monitorType = aType;
-		try
-		{
-			switch (aType)
-			{
-				case RowActionMonitor.MONITOR_INSERT:
-					this.updateMsg = ResourceMgr.getString("MsgImportingRow") + " ";
-					break;
-				case RowActionMonitor.MONITOR_UPDATE:
-					this.updateMsg = ResourceMgr.getString("MsgUpdatingRow") + " ";
-					break;
-				case RowActionMonitor.MONITOR_LOAD:
-					this.updateMsg = ResourceMgr.getString("MsgLoadingRow") + " ";
-					break;
-				case RowActionMonitor.MONITOR_EXPORT:
-					this.updateMsg = ResourceMgr.getString("MsgWritingRow") + " ";
-					break;
-				case RowActionMonitor.MONITOR_COPY:
-					this.updateMsg = ResourceMgr.getString("MsgCopyingRow") + " ";
-					break;
-				case RowActionMonitor.MONITOR_PROCESS_TABLE:
-					this.updateMsg = ResourceMgr.getString("MsgProcessTable") + " ";
-					break;
-				case RowActionMonitor.MONITOR_PLAIN:
-					this.updateMsg = null;
-					break;
-				default:
-					clearRowMonitorSettings();
-			}
-		}
-		catch (Exception e)
-		{
-			clearRowMonitorSettings();
-		}
-	}
-	
-	private String objectMsg = ResourceMgr.getString("MsgProcessObject") + " ";
-	
-	/**
-	 *	Callback method from the {@link workbench.interfaces.ScriptGenerationMonitor}
-	 */
-	public void setCurrentObject(String name)
-	{
-		statusBar.setStatusMessage(name);
-	}
-	
-	/**
-	 *	Callback method from the {@link workbench.storage.RowActionMonitor}
-	 */
-	public void setCurrentObject(String name, long number, long total)
-	{
-		if (this.monitorType == RowActionMonitor.MONITOR_PLAIN)
-		{
-			statusBar.setStatusMessage(name);
-		}
-		else
-		{
-			this.currentMonitorObject = name;
-			StringBuffer msg = new StringBuffer(40);
-			msg.append(objectMsg);
-			msg.append(name);
-			if (number > 0)
-			{
-				msg.append(" (");
-				msg.append(number);
-				if (total > 0)
-				{
-					msg.append('/');
-					msg.append(total);
-				}
-				msg.append(')');
-			}
-			statusBar.setStatusMessage(msg.toString());
-		}
-	}
-	
-	/**
-	 *	Callback method from the {@link workbench.storage.RowActionMonitor}
-	 */
-	public void setCurrentRow(final long currentRow, final long totalRows)
-	{
-		StringBuffer msg = new StringBuffer(40);
-		if (this.updateMsg == null)
-		{
-			msg.append(objectMsg);
-			msg.append(this.currentMonitorObject);
-			msg.append(" (");
-		}
-		else
-		{
-			msg.append(this.updateMsg);
-		}
-		msg.append(currentRow);
-		if (totalRows > 0)
-		{
-			msg.append('/');
-			msg.append(totalRows);
-		}
-		if (this.updateMsg == null) msg.append(')');
-		statusBar.setStatusMessage(msg.toString());
-	}
-	
 	public void setPrintHeader(String header)
 	{
 		this.dataTable.setPrintHeader(header);
@@ -407,7 +295,7 @@ public class DwPanel
 			{
 				e.printStackTrace();
 			}
-			this.stmtRunner.setRowMonitor(this);
+			this.stmtRunner.setRowMonitor(this.genericRowMonitor);
 		}
 		if (this.stmtRunner != null)
 		{
@@ -547,7 +435,7 @@ public class DwPanel
 		{
 			DataStore ds = this.dataTable.getDataStore();
 			long start, end;
-			ds.setProgressMonitor(this);
+			ds.setProgressMonitor(this.genericRowMonitor);
 			start = System.currentTimeMillis();
 			rows = ds.updateDb(aConnection, errorHandler);
 			end = System.currentTimeMillis();
@@ -757,6 +645,7 @@ public class DwPanel
 		this.lastMessage = null;
 		this.lastTimingMessage = null;
 		this.statusBar.clearExecutionTime();
+		
 		try
 		{
 			this.clearContent();
@@ -767,7 +656,9 @@ public class DwPanel
 			this.stmtRunner.setExecutionController(controller);
 			int max = this.statusBar.getMaxRows();
 			int timeout = this.statusBar.getQueryTimeout();
+			
 			this.stmtRunner.runStatement(aSql, max, timeout);
+			
 			result = this.stmtRunner.getResult();
 			
 			long end = 0, checkUpdateTime = 0;
@@ -900,7 +791,7 @@ public class DwPanel
 			// The datastore will make sure that no more rows are read then really requested
 			if (this.showLoadProgress)
 			{
-				newData = new DataStore(rs, true, this, this.getMaxRows(), this.dbConnection);
+				newData = new DataStore(rs, true, this.genericRowMonitor, this.getMaxRows(), this.dbConnection);
 			}
 			else
 			{
@@ -1070,7 +961,7 @@ public class DwPanel
 			for (int i=0; i < lastResultMessages.length; i++)
 			{
 				msg.append(lastResultMessages[i]);
-				msg.append("\n");
+				msg.append('\n');
 			}
 			this.lastMessage = msg.toString();
 			this.lastResultMessages = null;
@@ -1108,10 +999,10 @@ public class DwPanel
 		this.setLayout(new BorderLayout());
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.dataTable = new WbTable();
-		this.dataTable.setRowResizeAllowed(true);
+		this.dataTable.setRowResizeAllowed(Settings.getInstance().getBoolProperty("workbench.gui.display.rowheightresize", true));
 		if (status != null)
 		{
-			this.statusBar = status; //new DwStatusBar();
+			this.statusBar = status;
 		}
 		else
 		{
@@ -1127,9 +1018,7 @@ public class DwPanel
 		this.scrollPane.getViewport().addChangeListener(this);
 		
 		this.add(this.scrollPane, BorderLayout.CENTER);
-		//this.dataTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		this.dataTable.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		this.dataTable.setDoubleBuffered(true);
 		this.dataTable.setAdjustToColumnLabel(true);
 	}
 	
@@ -1322,8 +1211,7 @@ public class DwPanel
 		this.statusBar.selectMaxRowsField();
 	}
 	
-	public WbTable getTable()
-	{ return this.dataTable; }
+	public WbTable getTable() { return this.dataTable; }
 	
 	
 	/**
@@ -1450,7 +1338,11 @@ public class DwPanel
 	{
 		this.batchUpdate = aFlag;
 	}
-	
+
+	public RowActionMonitor getRowMonitor()
+	{
+		return this.genericRowMonitor;
+	}
 	/**
 	 *	If the user changes something in the database (which is possible, as
 	 *  the table defaults to beeing editable) the edit mode (with status column
@@ -1494,10 +1386,6 @@ public class DwPanel
 	public void stateChanged(ChangeEvent e)
 	{
 		this.rowCountChanged();
-	}
-	
-	public void jobFinished()
-	{
 	}
 	
 	public void setAutomaticUpdateTableCheck(boolean flag)

@@ -11,14 +11,32 @@
      <string>derby.jar</string>
     </void>
     <void property="name">
-     <string>Cloudscape/Derby</string>
+     <string>Apache Derby</string>
     </void>
     <void property="sampleUrl">
      <string>jdbc:derby:&lt;/path/to/database&gt;</string>
     </void>
    </object>
   </void>
+	
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.sap.dbtech.jdbc.DriverSapDB</string>
+    </void>
+    <void property="library">
+     <string>sapdbc.jar</string>
+    </void>
+    <void property="name">
+     <string>MaxDB</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:sapdb://&lt;database_computer&gt;[:&lt;port&gt;]/&lt;database_name&gt;[&lt;options&gt;]</string>
+    </void>
+   </object>
+  </void>
 
+	
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">

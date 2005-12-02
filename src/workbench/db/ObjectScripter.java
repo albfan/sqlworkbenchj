@@ -127,7 +127,7 @@ public class ObjectScripter
 					}
 					else if (TYPE_VIEW.equalsIgnoreCase(type))
 					{
-						source = meta.getExtendedViewSource(null, tbl.getSchema(), tbl.getTableName(), false);
+						source = meta.getExtendedViewSource(tbl, false);
 					}
 					else if (TYPE_SYNONYM.equalsIgnoreCase(type))
 					{

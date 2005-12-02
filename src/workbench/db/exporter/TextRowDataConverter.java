@@ -27,8 +27,6 @@ import workbench.util.StringUtil;
 public class TextRowDataConverter
 	extends RowDataConverter
 {
-	private SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-	private SimpleDateFormat timestampFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SS");
 	private String delimiter = "\t";
 	private String quoteCharacter = null;
 	private boolean writeHeader = true;

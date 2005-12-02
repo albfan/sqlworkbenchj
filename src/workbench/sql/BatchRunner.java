@@ -11,33 +11,36 @@
  */
 package workbench.sql;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.UnsupportedCharsetException;
+
 import java.util.Iterator;
 import java.util.List;
 
 import workbench.WbManager;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
 import workbench.db.WbConnection;
-import workbench.interfaces.StatementRunner;
-import workbench.util.ExceptionUtil;
+import workbench.gui.components.ConsoleStatusBar;
+import workbench.gui.components.GenericRowMonitor;
+
 import workbench.interfaces.ResultLogger;
+import workbench.interfaces.StatementRunner;
+
 import workbench.log.LogMgr;
+
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
+
 import workbench.util.ArgumentParser;
 import workbench.util.EncodingUtil;
+import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -123,6 +126,7 @@ public class BatchRunner
 		this.stmtRunner.setConnection(this.connection);
 		this.stmtRunner.setVerboseLogging(this.verboseLogging);
 		this.stmtRunner.setBaseDir(this.baseDir);
+		this.stmtRunner.setRowMonitor(this.rowMonitor);
 	}
 
 	public void connect()
@@ -275,6 +279,7 @@ public class BatchRunner
 		ScriptParser parser = new ScriptParser();
 		parser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
 		parser.setDelimiter(this.delimiter);
+		parser.setSupportOracleInclude(this.connection.getMetadata().isOracle());
 		parser.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		parser.setFile(scriptFile, this.encoding);
 		String sql = null;
@@ -300,6 +305,7 @@ public class BatchRunner
 		start = System.currentTimeMillis();
 
 		Iterator itr = parser.getIterator();
+
 		while (itr.hasNext())
 		{
 			Object command = itr.next();
@@ -444,6 +450,7 @@ public class BatchRunner
 		String profilename = cmdLine.getValue(WbManager.ARG_PROFILE);
 		boolean abort = cmdLine.getBoolean(WbManager.ARG_ABORT, true);
 		boolean showResult = cmdLine.getBoolean(WbManager.ARG_DISPLAY_RESULT);
+		boolean showProgress = cmdLine.getBoolean(WbManager.ARG_SHOWPROGRESS, false);
 
 		ConnectionProfile profile = null;
 		if (profilename == null)
@@ -496,7 +503,11 @@ public class BatchRunner
 		runner.setSuccessScript(success);
 		runner.setProfile(profile);
 		runner.showTiming = cmdLine.getBoolean(WbManager.ARG_SHOW_TIMING, true);
-
+		if (showProgress)
+		{
+			runner.setRowMonitor(new GenericRowMonitor(new ConsoleStatusBar()));
+		}
+		
 		return runner;
 	}
 }

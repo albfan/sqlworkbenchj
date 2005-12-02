@@ -272,6 +272,7 @@ public class ProfileEditorPanel
 		if (cp == null)
 		{
 			cp = new ConnectionProfile();
+			cp.setUseSeparateConnectionPerTab(true);
 			cp.setName(ResourceMgr.getString("TxtEmptyProfileName"));
 		}
     cp.setNew();

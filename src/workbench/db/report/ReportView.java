@@ -100,7 +100,7 @@ public class ReportView
 			schema = conn.getMetadata().findSchemaForTable(this.view.getTableName());
 			if (schema != null) this.view.setSchema(schema);
 		}
-		this.viewSource = conn.getMetadata().getViewSource(tbl.getSchema(), tbl.getCatalog(), tbl.getTableName());
+		this.viewSource = conn.getMetadata().getViewSource(tbl);
 		if (viewSource == null) viewSource = StringUtil.EMPTY_STRING;
 		this.setColumns(cols);
 		this.tagWriter.setNamespace(namespace);
