@@ -56,7 +56,10 @@ public class HtmlViewer
 		{
 			this.initHtml("workbench-manual.html");
 		}
-		this.initHtml(aStartFile);
+		else
+		{
+			this.initHtml(aStartFile);
+		}
 		this.restoreSettings(owner);
 		if (aStartFile == null)
 		{
@@ -87,15 +90,16 @@ public class HtmlViewer
 	private void initHtml(String aStartFile)
 	{
 		display = new JEditorPane();
-		display.setFont(new Font("SansSerif", Font.PLAIN, 14));
+		display.setEditable(false);
+		display.addHyperlinkListener(this);
+		
+		//display.setFont(new Font("SansSerif", Font.PLAIN, 14));
 		JScrollPane scroll = new JScrollPane(display);
 		
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(scroll, BorderLayout.CENTER);
 		
-		this.initDocument();
-		
-		display.addHyperlinkListener(this);
+		//this.initDocument();
 		
 		if (aStartFile != null) this.showHtmlFile(aStartFile);
 		
@@ -104,40 +108,40 @@ public class HtmlViewer
 			public void windowClosing(WindowEvent evt)
 			{
 				saveSettings();
-				hide();
+				setVisible(false);
 				dispose();
 			}
 		});
 	}
 	
-	private void initDocument()
-	{
-		HTMLEditorKit kit = new HTMLEditorKit();
-		StyleSheet style = new StyleSheet();
-		HTMLDocument htmlDoc = null;
-		try
-		{
-			URL file = this.getClass().getClassLoader().getResource("help/html-internal.css");
-			if (file != null)
-			{
-				style.importStyleSheet(file);
-				htmlDoc = new HTMLDocument(style);
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("HtmlViewer", "Error loading style sheet html-internal.css", e);
-		}
-
-		if (htmlDoc == null)
-		{
-			htmlDoc = new HTMLDocument();
-		}
-		
-		display.setEditable(false);
-		display.setEditorKit(kit);
-		display.setDocument(htmlDoc);
-	}
+//	private void initDocument()
+//	{
+//		HTMLEditorKit kit = new HTMLEditorKit();
+//		StyleSheet style = new StyleSheet();
+//		HTMLDocument htmlDoc = null;
+//		try
+//		{
+//			URL file = this.getClass().getClassLoader().getResource("help/html-internal.css");
+//			if (file != null)
+//			{
+//				style.importStyleSheet(file);
+//				htmlDoc = new HTMLDocument(style);
+//			}
+//		}
+//		catch (Exception e)
+//		{
+//			LogMgr.logError("HtmlViewer", "Error loading style sheet html-internal.css", e);
+//		}
+//
+//		if (htmlDoc == null)
+//		{
+//			htmlDoc = new HTMLDocument();
+//		}
+//		
+//		display.setEditable(false);
+//		display.setEditorKit(kit);
+//		display.setDocument(htmlDoc);
+//	}
 
 	public void showDataPumperHelp()
 	{
@@ -158,7 +162,7 @@ public class HtmlViewer
 	{
 		try
 		{
-			this.initDocument();
+			//this.initDocument();
 			URL file = this.getClass().getClassLoader().getResource("help/" + aFile);
 			if (file == null)
 			{
@@ -180,8 +184,8 @@ public class HtmlViewer
 			{
 				public void run()
 				{
-					repaint();
-					getRootPane().updateUI();
+					validate();
+					//getRootPane().updateUI();
 				}
 			});
 		}
@@ -233,7 +237,6 @@ public class HtmlViewer
 	{
 		if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
 		{
-			JEditorPane pane = (JEditorPane) e.getSource();
 			String descr=e.getDescription();
 			if (descr != null && descr.startsWith("#"))
 			{

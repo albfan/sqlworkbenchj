@@ -47,7 +47,6 @@ public class OracleMetadata
 	implements SequenceReader, ProcedureReader, ErrorInformationReader, SchemaInformationReader
 {
 	private WbConnection connection;
-	private DbMetadata metaData;
 	private PreparedStatement columnStatement;
 	private int version = 8;
 	private boolean retrieveSnapshots = true;
@@ -55,7 +54,6 @@ public class OracleMetadata
 	/** Creates a new instance of OracleMetaData */
 	public OracleMetadata(DbMetadata meta, WbConnection conn)
 	{
-		this.metaData = meta;
 		this.connection = conn;
 		try
 		{

@@ -45,10 +45,8 @@ public class ProfileEditorPanel
 	//private ConnectionEditorPanel connectionEditor;
 	private ProfileListModel model;
 	private JToolBar toolbar;
-	private int lastIndex = -1;
 	private ConnectionEditorPanel connectionEditor;
 	private MouseListener listMouseListener;
-	private boolean ctrlPressed = false;
 
 	/** Creates new form ProfileEditor */
 	public ProfileEditorPanel(String lastProfileKey)
@@ -185,11 +183,11 @@ public class ProfileEditorPanel
 				{
 					this.connectionEditor.setProfile(newProfile);
 				}
-				lastIndex = this.jList1.getSelectedIndex();
+				//lastIndex = this.jList1.getSelectedIndex();
 			}
 			catch (Exception e)
 			{
-				lastIndex = 0;
+				//lastIndex = 0;
 			}
 		}
 	}//GEN-LAST:event_jList1ValueChanged
@@ -299,7 +297,7 @@ public class ProfileEditorPanel
 	 */
 	public void keyPressed(KeyEvent e)
 	{
-		this.ctrlPressed = ((e.getModifiers() & KeyEvent.CTRL_DOWN_MASK) == KeyEvent.CTRL_DOWN_MASK);
+		//this.ctrlPressed = ((e.getModifiers() & KeyEvent.CTRL_DOWN_MASK) == KeyEvent.CTRL_DOWN_MASK);
 	}
 
 	/** Invoked when a key has been released.
@@ -309,7 +307,7 @@ public class ProfileEditorPanel
 	 */
 	public void keyReleased(KeyEvent e)
 	{
-		this.ctrlPressed = ((e.getModifiers() & KeyEvent.CTRL_MASK) == 0);
+		//this.ctrlPressed = ((e.getModifiers() & KeyEvent.CTRL_MASK) == 0);
 	}
 
 	/** Invoked when a key has been typed.

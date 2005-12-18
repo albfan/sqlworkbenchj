@@ -31,6 +31,7 @@ import workbench.gui.components.NumberField;
 import workbench.gui.components.WbButton;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -41,8 +42,6 @@ public class SettingsPanel
 	extends JPanel
 	implements ActionListener
 {
-
-	private Frame parent;
 	private String escActionCommand;
 
 	/** Creates new form SettingsPanel */
@@ -111,9 +110,13 @@ public class SettingsPanel
     tabSize = new javax.swing.JTextField();
     timestampFormatLabel = new javax.swing.JLabel();
     timestampFormatTextField = new javax.swing.JTextField();
+    pkMapFileLabel = new javax.swing.JLabel();
+    jPanel2 = new javax.swing.JPanel();
+    pkMapFile = new javax.swing.JTextField();
+    selectMapFile = new javax.swing.JButton();
     fontPanel = new javax.swing.JPanel();
-    wbFontChooser1 = new workbench.gui.components.WbFontChooser();
     fontsComboBox = new javax.swing.JComboBox();
+    wbFontChooser1 = new workbench.gui.components.WbFontChooser();
     buttonPanel = new javax.swing.JPanel();
     okButton = new WbButton();
     cancelButton = new WbButton();
@@ -350,7 +353,7 @@ public class SettingsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 20;
+    gridBagConstraints.gridy = 21;
     gridBagConstraints.weighty = 1.0;
     generalPanel.add(jPanel1, gridBagConstraints);
 
@@ -493,7 +496,7 @@ public class SettingsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 19;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 12, 8, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
     generalPanel.add(editorTabSizeLabel, gridBagConstraints);
 
     defTableTypeField.setHorizontalAlignment(javax.swing.JTextField.LEFT);
@@ -614,7 +617,7 @@ public class SettingsPanel
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 8, 11);
+    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 11);
     generalPanel.add(tabSize, gridBagConstraints);
 
     timestampFormatLabel.setFont(null);
@@ -628,7 +631,7 @@ public class SettingsPanel
     generalPanel.add(timestampFormatLabel, gridBagConstraints);
 
     timestampFormatTextField.setFont(getFont());
-    timestampFormatTextField.setText(Settings.getInstance().getDefaultDateTimeFormat());
+    timestampFormatTextField.setText(Settings.getInstance().getDefaultTimestampFormat());
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 10;
@@ -638,19 +641,47 @@ public class SettingsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 11);
     generalPanel.add(timestampFormatTextField, gridBagConstraints);
 
+    pkMapFileLabel.setText(ResourceMgr.getString("LabelPKMapFile"));
+    pkMapFileLabel.setToolTipText(ResourceMgr.getDescription("LabelPKMapFile"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 20;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
+    generalPanel.add(pkMapFileLabel, gridBagConstraints);
+
+    jPanel2.setLayout(new java.awt.BorderLayout());
+
+    pkMapFile.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+    pkMapFile.setText(Settings.getInstance().getPKMappingFilename());
+    jPanel2.add(pkMapFile, java.awt.BorderLayout.CENTER);
+
+    selectMapFile.setText("...");
+    selectMapFile.setMaximumSize(new java.awt.Dimension(26, 22));
+    selectMapFile.setMinimumSize(new java.awt.Dimension(26, 22));
+    selectMapFile.setPreferredSize(new java.awt.Dimension(26, 22));
+    selectMapFile.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        selectMapFile(evt);
+      }
+    });
+
+    jPanel2.add(selectMapFile, java.awt.BorderLayout.EAST);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 20;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 11);
+    generalPanel.add(jPanel2, gridBagConstraints);
+
     mainTab.addTab(ResourceMgr.getString("LabelSettingsGeneral"), generalPanel);
 
     fontPanel.setLayout(new java.awt.GridBagLayout());
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(7, 6, 7, 6);
-    fontPanel.add(wbFontChooser1, gridBagConstraints);
 
     fontsComboBox.addItemListener(new java.awt.event.ItemListener()
     {
@@ -664,8 +695,17 @@ public class SettingsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(7, 6, 7, 6);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(7, 0, 7, 2);
     fontPanel.add(fontsComboBox, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    fontPanel.add(wbFontChooser1, gridBagConstraints);
 
     mainTab.addTab(ResourceMgr.getString("LabelSettingsFontsTab"), fontPanel);
 
@@ -704,8 +744,29 @@ public class SettingsPanel
 
     add(buttonPanel, java.awt.BorderLayout.SOUTH);
 
-  }
-  // </editor-fold>//GEN-END:initComponents
+  }// </editor-fold>//GEN-END:initComponents
+
+	private void selectMapFile(java.awt.event.ActionEvent evt)//GEN-FIRST:event_selectMapFile
+	{//GEN-HEADEREND:event_selectMapFile
+		String fileName = FileDialogUtil.selectPkMapFile(this);
+		if (fileName != null) pkMapFile.setText(fileName);
+	}//GEN-LAST:event_selectMapFile
+
+	private void fontsComboBoxItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_fontsComboBoxItemStateChanged
+	{//GEN-HEADEREND:event_fontsComboBoxItemStateChanged
+		FontListEntry entry;
+		if (evt.getStateChange() == ItemEvent.DESELECTED)
+		{
+			entry = (FontListEntry)evt.getItem();
+			entry.currentFont = this.wbFontChooser1.getSelectedFont();
+		}
+		else if (evt.getStateChange() == ItemEvent.SELECTED)
+		{
+			entry = (FontListEntry)evt.getItem();
+			this.wbFontChooser1.setSelectedFont(entry.currentFont);
+			this.fontsComboBox.setToolTipText(entry.tooltip);
+		}
+	}//GEN-LAST:event_fontsComboBoxItemStateChanged
 
 	private void autoAdvanceLabelMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_autoAdvanceLabelMouseClicked
 	{//GEN-HEADEREND:event_autoAdvanceLabelMouseClicked
@@ -748,22 +809,6 @@ public class SettingsPanel
 		this.showDbExplorer.setSelected(!this.showDbExplorer.isSelected());
 	}//GEN-LAST:event_dbExplorerLabelMouseClicked
 
-	private void fontsComboBoxItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_fontsComboBoxItemStateChanged
-	{//GEN-HEADEREND:event_fontsComboBoxItemStateChanged
-		FontListEntry entry;
-		if (evt.getStateChange() == ItemEvent.DESELECTED)
-		{
-			entry = (FontListEntry)evt.getItem();
-			entry.currentFont = this.wbFontChooser1.getSelectedFont();
-		}
-		else if (evt.getStateChange() == ItemEvent.SELECTED)
-		{
-			entry = (FontListEntry)evt.getItem();
-			this.wbFontChooser1.setSelectedFont(entry.currentFont);
-			this.fontsComboBox.setToolTipText(entry.tooltip);
-		}
-	}//GEN-LAST:event_fontsComboBoxItemStateChanged
-
 	private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_cancelButtonActionPerformed
 	{//GEN-HEADEREND:event_cancelButtonActionPerformed
 		this.closeWindow();
@@ -780,7 +825,7 @@ public class SettingsPanel
 		set.setShowDbExplorerInMainWindow(this.showDbExplorer.isSelected());
 		set.setAlternateDelimiter(this.altDelimitTextField.getText());
 		set.setDefaultDateFormat(this.dateFormatTextField.getText());
-		set.setDefaultDateTimeFormat(this.timestampFormatTextField.getText());
+		set.setDefaultTimestampFormat(this.timestampFormatTextField.getText());
 		set.setDecimalSymbol(this.decimalField.getText());
 		set.setUseEncryption(this.useEncryption.isSelected());
 		set.setRetrieveDbExplorer(retrieveDbExplorer.isSelected());
@@ -799,7 +844,7 @@ public class SettingsPanel
     set.setDbmsOutputDefaultBuffer(StringUtil.getIntValue(this.defaultBufferSize.getText(), -1));
 		set.setAutoJumpNextStatement(this.autoAdvance.isSelected());
 		set.setEditorTabWidth(StringUtil.getIntValue(this.tabSize.getText(), 2));
-
+		set.setPKMappingFilename(pkMapFile.getText());
 		FontListEntry entry = (FontListEntry)this.fontsComboBox.getSelectedItem();
 		entry.currentFont = this.wbFontChooser1.getSelectedFont();
 
@@ -813,7 +858,7 @@ public class SettingsPanel
 
 	public void showSettingsDialog(JFrame aReference)
 	{
-		this.parent = aReference;
+		//this.parent = aReference;
 		this.dialog = new JDialog(aReference, true);
 		this.dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.dialog.setTitle(ResourceMgr.getString("TxtSettingsDialogTitle"));
@@ -836,12 +881,13 @@ public class SettingsPanel
 		am.put(esc.getActionName(), esc);
 
 		WbSwingUtilities.center(this.dialog, aReference);
-		this.dialog.show();
+		this.dialog.setVisible(true);
 	}
 
 	private void closeWindow()
 	{
 		Settings.getInstance().setWindowSize(this.getClass().getName(), this.dialog.getWidth(), this.dialog.getHeight());
+		this.dialog.setVisible(false);
 		this.dialog.dispose();
 	}
 
@@ -886,18 +932,22 @@ public class SettingsPanel
   private javax.swing.JTextField historySizeField;
   private javax.swing.JLabel historySizeLabel;
   private javax.swing.JPanel jPanel1;
+  private javax.swing.JPanel jPanel2;
   private javax.swing.JTabbedPane mainTab;
   private javax.swing.JTextField maxColSizeField;
   private javax.swing.JLabel maxColSizeLabel;
   private javax.swing.JTextField maxDigitsField;
   private javax.swing.JLabel maxDigitsLabel;
   private javax.swing.JButton okButton;
+  private javax.swing.JTextField pkMapFile;
+  private javax.swing.JLabel pkMapFileLabel;
   private javax.swing.JCheckBox previewDml;
   private javax.swing.JLabel previewDmlLabel;
   private javax.swing.JTextField quoteCharField;
   private javax.swing.JLabel quoteCharLabel;
   private javax.swing.JCheckBox retrieveDbExplorer;
   private javax.swing.JLabel retrieveDbExplorerLabel;
+  private javax.swing.JButton selectMapFile;
   private javax.swing.JCheckBox showDbExplorer;
   private javax.swing.JTextField tabSize;
   private javax.swing.JTextField textDelimiterField;

@@ -22,7 +22,8 @@ import workbench.resource.ResourceMgr;
 public class ReloadAction extends WbAction
 {
 	private Reloadable client;
-
+	private boolean ctrlPressed;
+	
 	public ReloadAction(Reloadable aClient)
 	{
 		super();
@@ -32,8 +33,14 @@ public class ReloadAction extends WbAction
 		//this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 	}
 
+	public boolean ctrlPressed()
+	{
+		return ctrlPressed;
+	}
+	
 	public void executeAction(ActionEvent e)
 	{
+		this.ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
 		this.client.reload();
 	}
 	

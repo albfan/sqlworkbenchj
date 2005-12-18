@@ -36,7 +36,7 @@ public class HsqlConstraintReader
            "and cons.table_name = ?; \n";
 	
 	private String sql;
-	private boolean useSchemaName = false;
+
 	public HsqlConstraintReader()
 	{
 		this.sql = TABLE_SQL_17;

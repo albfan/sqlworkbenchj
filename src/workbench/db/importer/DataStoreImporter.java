@@ -37,9 +37,7 @@ public class DataStoreImporter
 	private DataStore target;
 	private RowDataProducer source;
 	private RowActionMonitor rowMonitor;
-	private ValueConverter converter;
 	private JobErrorHandler errorHandler;
-	private boolean cancelImport = false;
 	private int currentRowNumber;
 	
 	public DataStoreImporter(DataStore data, RowActionMonitor monitor, JobErrorHandler handler)
@@ -143,7 +141,6 @@ public class DataStoreImporter
 
 	public void cancelExecution()
 	{
-		this.cancelImport = true;
 		this.source.cancel();
 	}
 	

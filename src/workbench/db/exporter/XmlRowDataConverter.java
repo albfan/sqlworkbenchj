@@ -20,6 +20,7 @@ import java.sql.Blob;
 import java.sql.Types;
 
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.db.report.ReportColumn;
 import workbench.db.report.ReportTable;
 import workbench.db.report.TagWriter;
@@ -69,10 +70,11 @@ public class XmlRowDataConverter
 	private String closeRowTag = "</" + rowtag + ">";
 	private String tableToUse = null;
 	private String baseFilename;
+	private StrBuffer dbInfo;
 	
-	public XmlRowDataConverter(ResultInfo info)
+	public XmlRowDataConverter()
 	{
-		super(info);
+		super();
 	}
 
 	public void setTableNameToUse(String name)
@@ -80,6 +82,13 @@ public class XmlRowDataConverter
 		this.tableToUse = name;
 	}
 
+	public void setOriginalConnection(WbConnection con)
+	{
+		super.setOriginalConnection(con);
+		StrBuffer indent = new StrBuffer("    ");
+		this.dbInfo = con.getDatabaseInfoAsXml(indent);
+	}
+	
 	public void setUseVerboseFormat(boolean flag)
 	{
 		this.verboseFormat = flag;
@@ -297,6 +306,7 @@ public class XmlRowDataConverter
 			try { out.close(); } catch (Throwable e) {}
 		}
 	}
+	
 	private StrBuffer getMetaDataAsXml(String anIndent)
 	{
 		TagWriter tagWriter = new TagWriter();
@@ -307,10 +317,10 @@ public class XmlRowDataConverter
 		int colCount = this.metaData.getColumnCount();
 		StrBuffer result = new StrBuffer(colCount * 50);
 		tagWriter.appendOpenTag(result, indent, "meta-data");
+		result.append(this.lineEnding);
 
 		if (this.generatingSql != null)
 		{
-			result.append(this.lineEnding);
 			result.append(this.lineEnding);
 			tagWriter.appendOpenTag(result, indent2, "generating-sql");
 			result.append(this.lineEnding);
@@ -327,16 +337,21 @@ public class XmlRowDataConverter
 			result.append(this.lineEnding);
 		}
 
-		if (this.originalConnection != null)
+		if (this.dbInfo != null)
+		{
+			result.append(this.dbInfo);
+		}
+		else if (this.originalConnection != null)
 		{
 			result.append(this.originalConnection.getDatabaseInfoAsXml(indent2));
 		}
 
-		result.append(this.lineEnding);
+		//result.append(this.lineEnding);
 		result.append(indent2);
 		result.append('<');result.append(TAG_TAG_FORMAT);result.append('>');
 		result.append(this.verboseFormat ? KEY_FORMAT_LONG : KEY_FORMAT_SHORT);
 		result.append("</");result.append(TAG_TAG_FORMAT);result.append('>');
+		result.append(this.lineEnding);
 		result.append(indent);
 		result.append("</meta-data>");
 		result.append(this.lineEnding);

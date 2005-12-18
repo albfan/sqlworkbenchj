@@ -17,32 +17,39 @@
 
 <xsl:template match="/">
     <xsl:for-each select="/schema-diff/modify-table">
-    <xsl:variable name="table" select="@name"/>
-    <xsl:apply-templates select="add-column">
-      <xsl:with-param name="table" select="$table"/>
-    </xsl:apply-templates>
-    
-    <xsl:apply-templates select="remove-column">
-      <xsl:with-param name="table" select="$table"/>
-    </xsl:apply-templates>
-    
-    <xsl:apply-templates select="modify-column">
-      <xsl:with-param name="table" select="$table"/>
-    </xsl:apply-templates>
+        <xsl:variable name="table" select="@name"/>
+        <xsl:apply-templates select="add-column">
+            <xsl:with-param name="table" select="$table"/>
+        </xsl:apply-templates>
 
-    <xsl:apply-templates select="remove-primary-key">
-      <xsl:with-param name="table" select="$table"/>
-    </xsl:apply-templates>
-    
-    <xsl:apply-templates select="add-primary-key">
-      <xsl:with-param name="table" select="$table"/>
-    </xsl:apply-templates>
+        <xsl:apply-templates select="remove-column">
+            <xsl:with-param name="table" select="$table"/>
+        </xsl:apply-templates>
 
-    <xsl:apply-templates select="add-index">
-      <xsl:with-param name="table" select="$table"/>
-    </xsl:apply-templates>
+        <xsl:apply-templates select="modify-column">
+            <xsl:with-param name="table" select="$table"/>
+        </xsl:apply-templates>
 
-  </xsl:for-each>
+        <xsl:apply-templates select="remove-primary-key">
+            <xsl:with-param name="table" select="$table"/>
+        </xsl:apply-templates>
+
+        <xsl:apply-templates select="add-primary-key">
+            <xsl:with-param name="table" select="$table"/>
+        </xsl:apply-templates>
+
+        <xsl:apply-templates select="add-index">
+            <xsl:with-param name="table" select="$table"/>
+        </xsl:apply-templates>
+    </xsl:for-each>
+
+    <xsl:for-each select="/schema-diff/create-view">
+        <xsl:apply-templates select="view-def"/>
+    </xsl:for-each>
+    <xsl:for-each select="/schema-diff/update-view">
+        <xsl:apply-templates select="view-def"/>
+    </xsl:for-each>
+  
 COMMIT;
 </xsl:template>
 
@@ -101,6 +108,31 @@ PRIMARY KEY (
 <xsl:template match="remove-primary-key">
 <xsl:param name="table"/> 
 ALTER TABLE <xsl:value-of select="$table"/> DROP PRIMARY KEY;
+</xsl:template>
+
+<!-- re-create a view -->
+<xsl:template match="view-def">
+<xsl:variable name="quote"><xsl:text>"</xsl:text></xsl:variable>
+CREATE OR REPLACE VIEW <xsl:value-of select="view-name"/>
+(
+  <xsl:for-each select="column-def">
+    <xsl:sort select="dbms-position"/>
+    <xsl:variable name="colname">
+      <xsl:choose>
+        <xsl:when test="contains(column-name,' ')">
+          <xsl:value-of select="concat($quote,column-name,$quote)"/>
+        </xsl:when>
+        <xsl:otherwise>
+            <xsl:value-of select="column-name"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    <xsl:copy-of select="$colname"/><xsl:if test="position() &lt; last()"><xsl:text>, 
+  </xsl:text></xsl:if>
+  </xsl:for-each>
+)
+AS 
+<xsl:copy-of select="view-source"/>
 </xsl:template>
 
 </xsl:stylesheet>

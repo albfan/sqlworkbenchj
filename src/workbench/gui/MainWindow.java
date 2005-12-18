@@ -141,7 +141,6 @@ public class MainWindow
 	private WbTabbedPane sqlTab = new WbTabbedPane();
 	private WbToolbar currentToolbar;
 	private ArrayList panelMenus = new ArrayList(5);
-	private int nextConnectionId = 0;
 
 	private String currentWorkspaceFile = null;
 
@@ -152,7 +151,6 @@ public class MainWindow
 	private AssignWorkspaceAction assignWorkspaceAction;
 
 	private boolean isProfileWorkspace = false;
-	private boolean workspaceLoaded = false;
 	private boolean tabRemovalInProgress = false;
 
 	// will indicate a connect or disconnect in progress
@@ -759,8 +757,6 @@ public class MainWindow
 
 	private void tabSelected(int anIndex)
 	{
-		
-		Container content = this.getContentPane();
 		MainPanel current = this.getCurrentPanel();
 		
 		this.updateGuiForTab(anIndex);
@@ -881,7 +877,6 @@ public class MainWindow
 				}
 			}
 		}
-		final SqlPanel p = this.getCurrentSqlPanel();
 		final JMenu m = m1;
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -1069,11 +1064,9 @@ public class MainWindow
 		if (create)
 		{
 			this.currentWorkspaceFile = realFilename;
-			this.workspaceLoaded = true;
 		}
 		else
 		{
-			this.workspaceLoaded = false;
 			this.currentWorkspaceFile = null;
 		}
 	}
@@ -1091,8 +1084,7 @@ public class MainWindow
 	public boolean loadWorkspace(String filename)
 	{
 		if (filename == null) return false;
-		FileDialogUtil util = new FileDialogUtil();
-		String realFilename = util.replaceConfigDir(filename);
+		String realFilename = FileDialogUtil.replaceConfigDir(filename);
 
 		File f = new File(realFilename);
 	 	if (!f.exists())
@@ -1101,7 +1093,6 @@ public class MainWindow
 			// variables as it would. Thus the file will be automatically
 			// created...
 			this.currentWorkspaceFile = realFilename;
-			this.workspaceLoaded = true;
 			this.updateWindowTitle();
 			this.checkWorkspaceActions();
 			return true;
@@ -1110,7 +1101,6 @@ public class MainWindow
 		this.sqlTab.setSuspendRepaint(true);
 
 		boolean result = false;
-		int index = 0;
 		WbWorkspace w = null;
 		this.currentWorkspaceFile = null;
 		try
@@ -1150,7 +1140,6 @@ public class MainWindow
 				}
 			}
 
-			this.workspaceLoaded = true;
 			result = true;
 			
 			int newIndex = w.getSelectedTab();
@@ -1189,8 +1178,7 @@ public class MainWindow
 		try
 		{
 			String workspaceFilename = aProfile.getWorkspaceFile();
-			FileDialogUtil util = new FileDialogUtil();
-			realFilename = util.replaceConfigDir(workspaceFilename);
+			realFilename = FileDialogUtil.replaceConfigDir(workspaceFilename);
 			if (realFilename == null) realFilename = "";
 
 			File f = new File(realFilename);
@@ -1199,6 +1187,7 @@ public class MainWindow
 				int action = this.checkNonExistingWorkspace();
 				if (action == LOAD_OTHER_WORKSPACE)
 				{
+					FileDialogUtil util = new FileDialogUtil();
 					workspaceFilename = util.getWorkspaceFilename(this, false, true);
 					aProfile.setWorkspaceFile(workspaceFilename);
 				}
@@ -1490,34 +1479,34 @@ public class MainWindow
 	 *	Remove the action to select a specific SQL tab
 	 *  from the view menu
 	 */
-	private void removeFromViewMenu(int sqlTabIndex)
-	{
-		int panelCount = this.panelMenus.size();
-		for (int i=0; i < panelCount; i++)
-		{
-			JMenu view = this.getViewMenu(i);
-
-			int count = view.getItemCount();
-			for (int k=0; k < count; k++)
-			{
-        JMenuItem item = view.getItem(k);
-        if (item == null) continue;
-        Action ac = item.getAction();
-        if (ac == null) continue;
-
-        if (ac instanceof SelectTabAction)
-				{
-	        SelectTabAction a = (SelectTabAction)ac;
-
-					if (a.getIndex() == sqlTabIndex)
-					{
-						view.remove(k);
-						break;
-					}
-				}
-			}
-		}
-	}
+//	private void removeFromViewMenu(int sqlTabIndex)
+//	{
+//		int panelCount = this.panelMenus.size();
+//		for (int i=0; i < panelCount; i++)
+//		{
+//			JMenu view = this.getViewMenu(i);
+//
+//			int count = view.getItemCount();
+//			for (int k=0; k < count; k++)
+//			{
+//        JMenuItem item = view.getItem(k);
+//        if (item == null) continue;
+//        Action ac = item.getAction();
+//        if (ac == null) continue;
+//
+//        if (ac instanceof SelectTabAction)
+//				{
+//	        SelectTabAction a = (SelectTabAction)ac;
+//
+//					if (a.getIndex() == sqlTabIndex)
+//					{
+//						view.remove(k);
+//						break;
+//					}
+//				}
+//			}
+//		}
+//	}
 
 	private void updateViewMenu(int sqlTabIndex, String aName)
 	{
@@ -1993,24 +1982,35 @@ public class MainWindow
 		}
 		finally
 		{
-			if (!suspended) this.sqlTab.setSuspendRepaint(false);
+			if (!suspended) 
+			{
+				this.sqlTab.setSuspendRepaint(false);
+				EventQueue.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						validate();
+						repaint();
+					}
+				});
+			}
 		}
 	}
 
-	private void removeAllTabs()
-	{
-		try
-		{
-			while (this.sqlTab.getTabCount() > 0)
-			{
-				this.removeLastTab(true);
-			}
-		}
-		finally
-		{
-			//if (!suspended) this.sqlTab.setSuspendRepaint(false);
-		}
-	}
+//	private void removeAllTabs()
+//	{
+//		try
+//		{
+//			while (this.sqlTab.getTabCount() > 0)
+//			{
+//				this.removeLastTab(true);
+//			}
+//		}
+//		finally
+//		{
+//			//if (!suspended) this.sqlTab.setSuspendRepaint(false);
+//		}
+//	}
 
 
 	/**
@@ -2079,7 +2079,6 @@ public class MainWindow
 	{
 		this.currentWorkspaceFile = null;
 		this.isProfileWorkspace = false;
-		this.workspaceLoaded = false;
 		try
 		{
 			this.closeExplorerPanels();
@@ -2105,7 +2104,6 @@ public class MainWindow
 		if (this.currentProfile == null) return;
 		FileDialogUtil util = new FileDialogUtil();
 		String filename = util.putConfigDirKey(this.currentWorkspaceFile);
-		ConnectionMgr mgr = ConnectionMgr.getInstance();
 		this.currentProfile.setWorkspaceFile(filename);
 		this.isProfileWorkspace = true;
 		this.updateWindowTitle();
@@ -2137,17 +2135,16 @@ public class MainWindow
 	{
 		WbWorkspace w = null;
 		boolean interactive = false;
-		boolean result = true;
-		FileDialogUtil util = new FileDialogUtil();
 
 		if (filename == null)
 		{
 			interactive = true;
+			FileDialogUtil util = new FileDialogUtil();
 			filename = util.getWorkspaceFilename(this, true);
 			if (filename == null) return true;
 		}
 
-		String realFilename = util.replaceConfigDir(filename);
+		String realFilename = FileDialogUtil.replaceConfigDir(filename);
 
 		File f = new File(realFilename);
 		if (Settings.getInstance().getCreateWorkspaceBackup())
@@ -2325,10 +2322,9 @@ public class MainWindow
 	public void removeLastTab(boolean includeExplorer)
 	{
 		int index = this.sqlTab.getTabCount() - 1;
-		MainPanel p;
 		if (!includeExplorer)
 		{
-			while ((p = this.getSqlPanel(index)) instanceof DbExplorerPanel)
+			while (this.getSqlPanel(index) instanceof DbExplorerPanel)
 			{
 				index --;
 			}
@@ -2401,7 +2397,6 @@ public class MainWindow
 		int count = this.sqlTab.getTabCount();
 		for (int i=0; i < count; i++)
 		{
-			MainPanel p = this.getSqlPanel(i);
 			SelectTabAction a = new SelectTabAction(sqlTab, i);
 			a.setName(getPlainTabTitle(i));
 			menu.insert(a, i);
@@ -2629,7 +2624,6 @@ public class MainWindow
 	{
 		if (e.getSource() == this.sqlTab && e.getButton() == MouseEvent.BUTTON3)
 		{
-			MainPanel p = this.getCurrentPanel();
 			SqlTabPopup pop = new SqlTabPopup(this);
 			pop.show(this.sqlTab,e.getX(),e.getY());
 		}

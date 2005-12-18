@@ -66,7 +66,6 @@ public class SchemaReporter
 	private ProgressPanel progressPanel;
 	private JDialog progressWindow;
 	private boolean showProgress = false;
-	private boolean outputDbDesigner = false;
 	private String schemaNameToUse = null;
 	private JFrame parentWindow;
 

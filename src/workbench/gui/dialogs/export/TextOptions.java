@@ -25,8 +25,6 @@ public interface TextOptions
 	void setExportHeaders(boolean flag);
 	String getTextQuoteChar();
 	void setTextQuoteChar(String quote);
-	boolean getCleanupCarriageReturns();
-	void setCleanupCarriageReturns(boolean flag);
 	void setQuoteAlways(boolean flag);
 	boolean getQuoteAlways();
 	void setEscapeRange(CharacterRange range);

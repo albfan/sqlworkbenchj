@@ -1598,10 +1598,9 @@ public class SqlPanel
 
 		this.cancelExecution = false;
 
-		final DataExporter exporter = new DataExporter();
+		final DataExporter exporter = new DataExporter(this.dbConnection);
 		exporter.setRowMonitor(this.data.getRowMonitor());
 		exporter.setSql(sql);
-		exporter.setConnection(this.dbConnection);
 		this.worker = exporter;
 		
 		boolean selected = exporter.selectOutput(getParentWindow());
@@ -1623,7 +1622,6 @@ public class SqlPanel
 					{
 						boolean newLineAppended = false;
 						StringBuffer messages = new StringBuffer();
-						String msg;
 						long start = System.currentTimeMillis();
 						long rowCount = exporter.startExport();
 						long execTime = (System.currentTimeMillis() - start);
@@ -1652,12 +1650,12 @@ public class SqlPanel
 						}
 						if (exporter.isSuccess())
 						{
-							msg = ResourceMgr.getString("MsgSpoolOk").replaceAll("%rows%", Long.toString(rowCount));
+							String msg2 = ResourceMgr.getString("MsgSpoolOk").replaceAll("%rows%", Long.toString(rowCount));
 							messages.append("\n"); 
-							messages.append(msg);
+							messages.append(msg2);
 							messages.append("\n"); 
-							msg = ResourceMgr.getString("MsgSpoolTarget") + " " + exporter.getFullOutputFilename();
-							messages.append(msg);
+							msg2 = ResourceMgr.getString("MsgSpoolTarget") + " " + exporter.getFullOutputFilename();
+							messages.append(msg2);
 							messages.append("\n\n");
 						}
 						messages.append(ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s\n");
@@ -1688,15 +1686,15 @@ public class SqlPanel
 		WbSwingUtilities.showErrorMessage(this, msg);
 	}
 
-	public int getActionOnError(int errorRow, String errorColumn, String data, String errorMessage)
+	public int getActionOnError(int errorRow, String errorColumn, String dataLine, String errorMessage)
 	{
 		if (this.importRunning)
 		{
-			return this.getImportErrorAction(errorRow, errorColumn, data, errorMessage);
+			return this.getImportErrorAction(errorRow, errorColumn, dataLine, errorMessage);
 		}
 		else if (this.updateRunning)
 		{
-			return this.getUpdateErrorAction(errorRow, errorColumn, data, errorMessage);
+			return this.getUpdateErrorAction(errorRow, errorColumn, dataLine, errorMessage);
 		}
 		return JobErrorHandler.JOB_ABORT;
 	}
@@ -1706,15 +1704,15 @@ public class SqlPanel
 	 *  turn off the loading indicator before displaying a message box.
 	 * 	DwPanel's getUpdateErrorAction is called from here after turning off the loading indicator.
 	 */
-	public int getUpdateErrorAction(int errorRow, String errorColumn, String data, String errorMessage)
+	public int getUpdateErrorAction(int errorRow, String errorColumn, String dataLine, String errorMessage)
 	{
 		this.showBusyIcon(false);
-		int choice = this.data.getActionOnError(errorRow, errorColumn, data, errorMessage);
+		int choice = this.data.getActionOnError(errorRow, errorColumn, dataLine, errorMessage);
 		this.showBusyIcon(true);
 		return choice;
 	}
 
-	public int getImportErrorAction(int errorRow, String errorColumn, String data, String errorMessage)
+	public int getImportErrorAction(int errorRow, String errorColumn, String dataLine, String errorMessage)
 	{
 		String msg = null;
 		if (errorColumn != null)
@@ -1722,13 +1720,13 @@ public class SqlPanel
 			msg = ResourceMgr.getString("ErrorColumnImportError");
 			msg = msg.replaceAll("%row%", Integer.toString(errorRow));
 			msg = msg.replaceAll("%column%", errorColumn);
-			msg = msg.replaceAll("%data%", data);
+			msg = msg.replaceAll("%data%", dataLine);
 		}
 		else
 		{
 			msg = ResourceMgr.getString("ErrorRowImportError");
 			msg = msg.replaceAll("%row%", Integer.toString(errorRow));
-			msg = msg.replaceAll("%data%", data == null ? "(null)" : data.substring(0,40) + " ...");
+			msg = msg.replaceAll("%data%", dataLine == null ? "(null)" : dataLine.substring(0,40) + " ...");
 		}
 
 		this.showBusyIcon(false);
@@ -2013,7 +2011,7 @@ public class SqlPanel
 					Thread.yield();
 				}
 				
-				this.data.runStatement(currentSql, control);
+				this.data.runStatement(currentSql, control, true);
 				
 				stmtTotal += data.getLastExecutionTime();
 

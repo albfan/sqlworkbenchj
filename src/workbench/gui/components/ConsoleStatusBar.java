@@ -24,22 +24,10 @@ public class ConsoleStatusBar
 {
 	private PrintStream output;
 	private String lastMessage;
-	private String clear;
-	private final int lineLength = 150;
 	
 	public ConsoleStatusBar()
 	{
 		output = System.out;
-//		StringBuffer s = new StringBuffer(lineLength);
-//		StringBuffer e = new StringBuffer(lineLength);
-//		
-//		for (int i=0; i < lineLength; i++) 
-//		{
-//			e.append(' ');
-//			s.append((char)8);
-//		}
-//		empty = e.toString();
-//		clear = s.toString();
 	}
 	
 	private String createDeleteString(String original)

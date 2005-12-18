@@ -51,9 +51,9 @@ public class CreateDeleteScriptAction
 					gen.setSource(client);
 					gen.startGenerate();
 				}
-				catch (Exception e)
+				catch (Exception ex)
 				{
-					LogMgr.logError("SqlPanel.generateDeleteScript()", "Error initializing DeleteScriptGenerator", e);
+					LogMgr.logError("SqlPanel.generateDeleteScript()", "Error initializing DeleteScriptGenerator", ex);
 				}
 			}
 		});

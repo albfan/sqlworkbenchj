@@ -45,7 +45,7 @@ public class TableDiff
 	private ReportTable targetTable;
 	private StrBuffer indent;
 	private TagWriter writer;
-	private boolean compareComments = true;
+	//private boolean compareComments = true;
 	private boolean compareFK = true;
 	
 	public TableDiff(ReportTable reference, ReportTable target)
@@ -56,7 +56,7 @@ public class TableDiff
 		this.targetTable = target;
 	}
 
-	public void setCompareComments(boolean flag) { this.compareComments = flag; }
+	//public void setCompareComments(boolean flag) { this.compareComments = flag; }
 	public void setCompareForeignKeys(boolean flag) { this.compareFK = flag; }
 	
 	/**
@@ -85,7 +85,7 @@ public class TableDiff
 			else
 			{
 				ColumnDiff d = new ColumnDiff(refCols[i], tcol);
-				d.setCompareComments(this.compareComments);
+				//d.setCompareComments(this.compareComments);
 				d.setCompareForeignKeys(this.compareFK);
 				d.setTagWriter(this.writer);
 				d.setIndent(myindent);
@@ -107,11 +107,11 @@ public class TableDiff
 			}
 		}
 
-		boolean commentsEqual = true;
-		if (this.compareComments)
-		{
-			commentsEqual = StringUtil.equalString(this.referenceTable.getTableComment(), this.targetTable.getTableComment());
-		}
+//		boolean commentsEqual = true;
+//		if (this.compareComments)
+//		{
+//			commentsEqual = StringUtil.equalString(this.referenceTable.getTableComment(), this.targetTable.getTableComment());
+//		}
 		
 		boolean rename = !ref.getTableName().equalsIgnoreCase(target.getTableName());
 		String rc = this.referenceTable.getTableConstraints();

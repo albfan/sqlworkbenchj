@@ -62,12 +62,12 @@ public class SchemaDiff
 	private boolean diffPrimaryKeys = true;
 	private boolean diffConstraints = false;
 	private boolean diffViews = true;
+	//private boolean diffComments;
 	private RowActionMonitor monitor;
 	private boolean cancel = false;
 	private String referenceSchema;
 	private String targetSchema;
 	private List tablesToIgnore;
-	private boolean diffComments;
 	
 	public SchemaDiff()
 	{
@@ -118,7 +118,7 @@ public class SchemaDiff
 	
 	public void setIncludeViews(boolean flag) { this.diffViews = flag; }
 	
-	public void setIncludeComments(boolean flag) { this.diffComments = flag; }
+//	public void setIncludeComments(boolean flag) { this.diffComments = flag; }
 	
 	/**
 	 *	Set the {@link workbench.storage.RowActionMonitor} for reporting progress
@@ -205,6 +205,7 @@ public class SchemaDiff
 				target = new TableIdentifier(o.toString());
 			}
 			DiffEntry entry = new DiffEntry(reference, target);
+			this.objectsToCompare.add(entry);
 		}
 	}
 
@@ -294,7 +295,7 @@ public class SchemaDiff
 			types = new String[] { this.sourceDb.getMetadata().getTableTypeName() };
 		}
 		List refTables = sourceDb.getMetadata().getTableList(refSchema, types);
-		List target = sourceDb.getMetadata().getTableList(targetSchema, types);
+		List target = targetDb.getMetadata().getTableList(targetSchema, types);
 		
 		processTableList(refTables, target);
 	}
@@ -353,6 +354,7 @@ public class SchemaDiff
 			for (int i=0; i < count; i++)
 			{
 				TableIdentifier t = (TableIdentifier)targetTables.get(i);
+				if (this.tablesToIgnore != null && this.tablesToIgnore.contains(t.getTableName())) continue;
 				if (!refTableNames.contains(t.getTableName()))
 				{
 					if (tableType.equals(t.getType()))
@@ -479,7 +481,7 @@ public class SchemaDiff
 					{
 						ReportTable target = createReportTableInstance(entry.target, this.targetDb);
 						TableDiff d = new TableDiff(source, target);
-						d.setCompareComments(this.diffComments);
+						//d.setCompareComments(this.diffComments);
 						d.setIndent(indent);
 						d.setTagWriter(tw);
 						StrBuffer s = d.getMigrateTargetXml();
@@ -542,22 +544,22 @@ public class SchemaDiff
 		}
 	}
 	
-	private void appendDropViews(Writer out, StrBuffer indent, TagWriter tw)
-		throws IOException
-	{
-		if (this.viewsToDelete == null || this.viewsToDelete.size() == 0) return;
-		out.write("\n");
-		writeTag(out, indent, TAG_DROP_VIEW, true);
-		Iterator itr = this.tablesToDelete.iterator();
-		StrBuffer myindent = new StrBuffer(indent);
-		myindent.append("  ");
-		while (itr.hasNext())
-		{
-			TableIdentifier t = (TableIdentifier)itr.next();
-			writeTagValue(out, myindent, ReportView.TAG_VIEW_NAME, t.getTableName());
-		}
-		writeTag(out, indent, TAG_DROP_VIEW, false);
-	}
+//	private void appendDropViews(Writer out, StrBuffer indent, TagWriter tw)
+//		throws IOException
+//	{
+//		if (this.viewsToDelete == null || this.viewsToDelete.size() == 0) return;
+//		out.write("\n");
+//		writeTag(out, indent, TAG_DROP_VIEW, true);
+//		Iterator itr = this.tablesToDelete.iterator();
+//		StrBuffer myindent = new StrBuffer(indent);
+//		myindent.append("  ");
+//		while (itr.hasNext())
+//		{
+//			TableIdentifier t = (TableIdentifier)itr.next();
+//			writeTagValue(out, myindent, ReportView.TAG_VIEW_NAME, t.getTableName());
+//		}
+//		writeTag(out, indent, TAG_DROP_VIEW, false);
+//	}
 	
 	private void appendDropTables(Writer out, StrBuffer indent, TagWriter tw)
 		throws IOException

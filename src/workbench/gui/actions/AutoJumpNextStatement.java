@@ -28,8 +28,6 @@ import workbench.resource.Settings;
  */
 public class AutoJumpNextStatement extends WbAction
 {
-	private Border originalBorder;
-
 	private boolean switchedOn = false;
 	private JCheckBoxMenuItem toggleMenu;
 

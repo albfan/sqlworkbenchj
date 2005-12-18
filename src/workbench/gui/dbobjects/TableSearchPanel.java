@@ -51,6 +51,7 @@ import workbench.gui.actions.ReloadAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.EmptyTableModel;
 import workbench.gui.components.TabbedPaneUIFactory;
+import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
@@ -75,8 +76,6 @@ public class TableSearchPanel
 	implements TableSearchDisplay, ListSelectionListener, KeyListener
 {
 	private TableModel tableListModel;
-	//private String currentTable;
-	private String currentSql;
 	private TableSearcher searcher;
 	private WbConnection connection;
 	private boolean tableLogged;
@@ -89,12 +88,16 @@ public class TableSearchPanel
 	private Like searchPattern;
 	private WbTable firstTable;
 	private EditorPanel sqlDisplay;
+	private ResultHighlightingRenderer renderer;
 
 	public TableSearchPanel(ShareableDisplay aTableListSource)
 	{
 		this.tableListModel = EmptyTableModel.EMPTY_MODEL;
 		this.tableListSource = aTableListSource;
 		initComponents();
+		this.columnFunction.addMouseListener(new TextComponentMouseListener());
+		this.searchText.addMouseListener(new TextComponentMouseListener());
+
 		this.resultTabPane.setUI(TabbedPaneUIFactory.getBorderLessUI());
 		this.resultTabPane.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
@@ -360,8 +363,6 @@ public class TableSearchPanel
 		}
 	}
 
-	private ResultHighlightingRenderer renderer;
-	
 	public synchronized void addResultRow(String aTablename, ResultSet aResult)
 	{
 		try
@@ -373,20 +374,9 @@ public class TableSearchPanel
 				// (or only results from one database table where returned)
 				// therefor it's important to call this in searchEnded() as well
 				this.adjustDataTable();
-				if (renderer == null)
-				{
-					renderer = new ResultHighlightingRenderer(this.searchPattern);
-				}
-				
-				this.currentDisplayTable = new WbTable()
-				{
-					public TableCellRenderer getCellRenderer(int row, int column) 
-					{
-						return renderer;
-					}
-				};
-				this.currentDisplayTable.setDefaultRenderer(String.class, renderer);
+				this.currentDisplayTable = new WbTable();
 				this.currentDisplayTable.setUseDefaultStringRenderer(false);
+				this.currentDisplayTable.setDefaultRenderer(String.class, renderer);
 				if (this.firstTable == null)
 				{
 					this.firstTable = this.currentDisplayTable;
@@ -424,8 +414,6 @@ public class TableSearchPanel
 	 */
 	public synchronized void setCurrentTable(String aTablename, String aSql)
 	{
-		//this.currentTable = aTablename;
-		this.currentSql = aSql;
 		this.tableLogged = false;
 		this.currentResult = null;
 		this.statusInfo.setText(this.fixedStatusText + aTablename);
@@ -489,7 +477,7 @@ public class TableSearchPanel
 			WbSwingUtilities.showMessageKey(this, "ErrorConnectionBusy");
 			return;
 		}
-		
+
 		this.reset();
 
 		int[] selectedTables = this.tableNames.getSelectedRows();
@@ -541,6 +529,8 @@ public class TableSearchPanel
 			ignoreCase = searcher.getCriteriaMightBeCaseInsensitive();
 		}
 		this.searchPattern = new Like(searcher.getCriteria(), ignoreCase);
+		this.renderer = new ResultHighlightingRenderer(this.searchPattern);
+
 		searcher.setTableNames(searchTables);
 		searcher.search(); // starts the background thread
 	}
@@ -549,22 +539,22 @@ public class TableSearchPanel
 	{
 		return "dbexplorer" + index + ".tablesearcher";
 	}
-	
+
 	public void saveToWorkspace(WbWorkspace wb, int index)
 	{
 		saveSettings(getWorkspacePrefix(index), wb.getSettings());
 	}
-	
+
 	public void readFromWorkspace(WbWorkspace wb, int index)
 	{
 		restoreSettings(getWorkspacePrefix(index), wb.getSettings());
 	}
-	
+
 	public void saveSettings()
 	{
 		saveSettings(this.getClass().getName(), Settings.getInstance());
 	}
-	
+
 	private void saveSettings(String prefix, PropertyStorage props)
 	{
 		props.setProperty(prefix + ".divider", this.jSplitPane1.getDividerLocation());
@@ -577,7 +567,7 @@ public class TableSearchPanel
 	{
 		restoreSettings(this.getClass().getName(), Settings.getInstance());
 	}
-	
+
 	private void restoreSettings(String prefix, PropertyStorage props)
 	{
 		int loc = props.getIntProperty(prefix + ".divider",200);
@@ -729,7 +719,7 @@ public class TableSearchPanel
 				}
 			}
 			JLabel result = (JLabel)super.getTableCellRendererComponent(table, displayValue, isSelected, hasFocus, row, column);
-			
+
 			try
 			{
 				if (!isSelected && value != null && displayValue instanceof String && this.pattern.like(displayValue))

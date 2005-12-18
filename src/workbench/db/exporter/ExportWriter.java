@@ -33,7 +33,7 @@ public abstract class ExportWriter
 	protected long rows;
 	protected String tableToUse;
 	protected RowActionMonitor rowMonitor;
-	private RowDataConverter converter;
+	protected RowDataConverter converter;
 	private Writer output;
 	private String baseDir;
 	private int progressInterval = 10;
@@ -41,9 +41,18 @@ public abstract class ExportWriter
 	public ExportWriter(DataExporter exp)
 	{
 		this.exporter = exp;
+		converter = createConverter();
+		converter.setErrorReporter(exp);
+		converter.setEncoding(exporter.getEncoding());
+		converter.setDefaultDateFormatter(exporter.getDateFormatter());
+		converter.setDefaultTimestampFormatter(exporter.getTimestampFormatter());
+		converter.setDefaultNumberFormatter(exporter.getDecimalFormatter());
+		converter.setOriginalConnection(this.exporter.getConnection());
+		converter.setColumnsToExport(this.exporter.getColumnsToExport());
+		converter.setBaseDir(this.baseDir);
 	}
 
-	public abstract RowDataConverter createConverter(ResultInfo info);
+	public abstract RowDataConverter createConverter();
 
 	public void setProgressInterval(int interval)
 	{
@@ -65,24 +74,13 @@ public abstract class ExportWriter
 		return rows;
 	}
 
-	private void initConverter(ResultInfo info)
-	{
-		converter = createConverter(info);
-		converter.setEncoding(exporter.getEncoding());
-		converter.setDefaultDateFormatter(exporter.getDateFormatter());
-		converter.setDefaultTimestampFormatter(exporter.getTimestampFormatter());
-		converter.setDefaultNumberFormatter(exporter.getDecimalFormatter());
-		converter.setGeneratingSql(exporter.getSql());
-		converter.setOriginalConnection(this.exporter.getConnection());
-		converter.setColumnsToExport(this.exporter.getColumnsToExport());
-		converter.setBaseDir(this.baseDir);
-	}
-
 	public void writeExport(DataStore ds)
 		throws SQLException, IOException
 	{
 		ResultInfo info = ds.getResultInfo();
-		this.initConverter(info);
+		this.converter.setGeneratingSql(exporter.getSql());
+		this.converter.setResultInfo(info);
+		
 		if (this.converter.needsUpdateTable())
 		{
 			ds.checkUpdateTable();
@@ -96,7 +94,6 @@ public abstract class ExportWriter
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
 		}
 		writeStart();
-		int colCount = info.getColumnCount();
 		int rowCount = ds.getRowCount();
 		StrBuffer data = null;
 		for (int i=0; i < rowCount; i++)
@@ -124,7 +121,8 @@ public abstract class ExportWriter
 	public void writeExport(ResultSet rs, ResultInfo info)
 		throws SQLException, IOException
 	{
-		this.initConverter(info);
+		this.converter.setResultInfo(info);
+		this.converter.setGeneratingSql(exporter.getSql());
 
 		this.cancel = false;
 		this.rows = 0;
@@ -164,10 +162,10 @@ public abstract class ExportWriter
 		}
 	}
 
-	protected void writeEnd(long rows)
+	protected void writeEnd(long totalRows)
 		throws IOException
 	{
-		StrBuffer data = converter.getEnd(rows);
+		StrBuffer data = converter.getEnd(totalRows);
 		if (data != null)
 		{
 			data.writeTo(this.output);

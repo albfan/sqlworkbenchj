@@ -27,6 +27,7 @@ import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.storage.ResultInfo;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.SqlUtil;
 import workbench.util.WbThread;
@@ -221,6 +222,21 @@ public class DataStoreTableModel
 		return SqlUtil.getTypeName(this.getColumnType(aColumn));
 	}
 
+	public String getDbmsType(int col)
+	{
+		if (this.dataCache == null) return null;
+		if (this.showStatusColumn && col == 0) return null;
+		try
+		{
+			ResultInfo info = this.dataCache.getResultInfo();
+			return info.getDbmsTypeName(col - this.columnStartIndex);
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+		
+	}
 	/**
 	 *	Returns the type (java.sql.Types) of the given column.
 	 */

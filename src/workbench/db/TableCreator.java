@@ -94,7 +94,7 @@ public class TableCreator
 		if (col == null) return null;
 
 		int type = col.getDataType();
-		Integer typeKey = new Integer(type);
+		//Integer typeKey = new Integer(type);
 		int size = col.getColumnSize();
 		int digits = col.getDecimalDigits();
 

@@ -126,9 +126,9 @@ public class WbToolTipUI extends BasicToolTipUI
 		return b != null && b.booleanValue();
 	}
 	
-	private String getAcceleratorString(JToolTip tip)
+	private String getAcceleratorString(JToolTip toolTip)
 	{
-		this.tip = tip;
+		this.tip = toolTip;
 		
 		String retValue = getAcceleratorString();
 		

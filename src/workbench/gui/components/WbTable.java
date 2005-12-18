@@ -21,11 +21,9 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
@@ -113,8 +111,10 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.NullValue;
+import workbench.storage.PkMapping;
 import workbench.storage.ResultInfo;
 import workbench.storage.filter.FilterExpression;
+import workbench.util.FileDialogUtil;
 import workbench.util.WbThread;
 public class WbTable
 	extends JTable
@@ -162,7 +162,6 @@ public class WbTable
 	private TableCellRenderer sortHeaderRenderer;
 
 	private boolean adjustToColumnLabel = false;
-	private int headerPopupY = -1;
 	private int headerPopupX = -1;
 	private int[] savedColumnSizes;
 	private int maxColWidth = 32768;
@@ -771,14 +770,14 @@ public class WbTable
 			{
 				if (this.sortHeaderRenderer == null)
 				{
-					this.sortHeaderRenderer = RendererFactory.getSortHeaderRenderer();
+					this.sortHeaderRenderer = RendererFactory.createSortHeaderRenderer();
 				}
 				header.setDefaultRenderer(this.sortHeaderRenderer);
 				header.addMouseListener(this);
 			}
 		}
 
-		updateRowHeader();
+		//updateRowHeader();
 
 		if (aModel != EmptyTableModel.EMPTY_MODEL)
 		{
@@ -912,14 +911,6 @@ public class WbTable
 		{
 			int column = this.getSelectedColumn();
 			final int row = this.getSelectedRow();
-
-			int sortColumn = -1;
-			boolean asc = false;
-			if (this.dwModel != null)
-			{
-				sortColumn = dwModel.getSortColumn();
-				asc = this.dwModel.isSortAscending();
-			}
 
 			this.setSuspendRepaint(true);
 			this.saveColumnSizes();
@@ -1157,14 +1148,14 @@ public class WbTable
 	{
 		Settings sett = Settings.getInstance();
 		
-		this.setDefaultRenderer(java.sql.Time.class, RendererFactory.getDateRenderer("mm:HH:ss"));
+		this.setDefaultRenderer(java.sql.Time.class, RendererFactory.createDateRenderer("mm:HH:ss"));
 
 		String format = sett.getDefaultDateFormat();
-		this.setDefaultRenderer(java.sql.Date.class, RendererFactory.getDateRenderer(format));
-		this.setDefaultRenderer(java.util.Date.class, RendererFactory.getDateRenderer(format));
+		this.setDefaultRenderer(java.sql.Date.class, RendererFactory.createDateRenderer(format));
+		this.setDefaultRenderer(java.util.Date.class, RendererFactory.createDateRenderer(format));
 
-		format = sett.getDefaultDateTimeFormat();
-		this.setDefaultRenderer(java.sql.Timestamp.class, RendererFactory.getDateRenderer(format));
+		format = sett.getDefaultTimestampFormat();
+		this.setDefaultRenderer(java.sql.Timestamp.class, RendererFactory.createDateRenderer(format));
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)
@@ -1192,24 +1183,24 @@ public class WbTable
 		int maxDigits = sett.getMaxFractionDigits();
 		char sep = sett.getDecimalSymbol().charAt(0);
 
-		TableCellRenderer numberRenderer = RendererFactory.getNumberRenderer(maxDigits, sep);
+		TableCellRenderer numberRenderer = RendererFactory.createNumberRenderer(maxDigits, sep);
 
-		this.setDefaultRenderer(java.sql.Clob.class, RendererFactory.getClobRenderer());
+		this.setDefaultRenderer(java.sql.Clob.class, RendererFactory.createClobRenderer());
 		this.setDefaultRenderer(Number.class, numberRenderer);
 		this.setDefaultRenderer(Double.class, numberRenderer);
 		this.setDefaultRenderer(Float.class, numberRenderer);
 		this.setDefaultRenderer(BigDecimal.class, numberRenderer);
 
-		TableCellRenderer intRenderer = RendererFactory.getIntegerRenderer();
+		TableCellRenderer intRenderer = RendererFactory.createIntegerRenderer();
 		this.setDefaultRenderer(BigInteger.class, intRenderer);
 		this.setDefaultRenderer(Integer.class, intRenderer);
 
 		if (this.useDefaultStringRenderer)
 		{
-			this.setDefaultRenderer(String.class, RendererFactory.getStringRenderer());
+			this.setDefaultRenderer(String.class, RendererFactory.createStringRenderer());
 		}
 
-		this.setDefaultRenderer(Object.class, RendererFactory.getTooltipRenderer());
+		this.setDefaultRenderer(Object.class, RendererFactory.createTooltipRenderer());
 //		if (LogMgr.isDebugEnabled())
 //		{
 //			Iterator itr = this.defaultRenderersByColumnClass.entrySet().iterator();
@@ -1539,7 +1530,6 @@ public class WbTable
 			if (e.getSource() instanceof JTableHeader)
 			{
 				this.headerPopupX = e.getX();
-				this.headerPopupY = e.getY();
 				this.headerPopup.show(this.getTableHeader(), e.getX(), e.getY());
 			}
 			else if (this.showPopup && this.popup != null)
@@ -1854,14 +1844,21 @@ public class WbTable
 		DataStore ds = this.getDataStore();
 		ColumnIdentifier[] originalCols = ds.getColumns();
 		KeyColumnSelectorPanel panel = new KeyColumnSelectorPanel(originalCols, ds.getUpdateTable());
-		int choice = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(this), panel, ResourceMgr.getString("MsgSelectKeyColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+		Window parent = SwingUtilities.getWindowAncestor(this);
+		int choice = JOptionPane.showConfirmDialog(parent, panel, ResourceMgr.getString("MsgSelectKeyColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
 		// KeyColumnSelectorPanel works on a copy of the ColumnIdentifiers so
 		// we need to copy the PK flag back to the original ones..
 		if (choice == JOptionPane.OK_OPTION)
 		{
-			ds.setPKColumns(panel.getColumns());
+			ColumnIdentifier[] cols = panel.getColumns();
+			ds.setPKColumns(cols);
 			checkKeyActions();
+			if (panel.getSaveToGlobalPKMap())
+			{
+				PkMapping.getInstance().addMapping(ds.getUpdateTable(), cols);
+				FileDialogUtil.selectPkMapFileIfNecessary(parent);
+			}
 			return true;
 		}
 		return false;

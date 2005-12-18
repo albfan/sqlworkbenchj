@@ -70,13 +70,11 @@ public class TextFileParser
 	private boolean emptyStringIsNull = false;
 	private boolean trimValues = false;
 
-	private JobErrorHandler handler;
 	private RowDataReceiver receiver;
 	private String dateFormat;
 	private String timestampFormat;
 	private char decimalChar = '.';
 	private boolean abortOnError = false;
-	private boolean ignoreAllErrors = false;
 	private WbConnection connection;
 	private String sourceDir;
 	private String extensionToUse;
@@ -481,13 +479,10 @@ public class TextFileParser
 	{
 		this.cancelImport = false;
 		File f = new File(this.filename);
-		long fileSize = f.length();
 
 		BufferedReader in = EncodingUtil.createBufferedReader(f, this.encoding);
 
 		String line;
-		int col;
-		int row;
 
 		try
 		{
@@ -544,7 +539,6 @@ public class TextFileParser
 			boolean includeLine = true;
 			boolean hasColumnFilter = this.hasColumnFilter();
 			boolean hasLineFilter = this.lineFilter != null;
-			this.ignoreAllErrors = false;
 
 			while (line != null)
 			{
@@ -647,7 +641,7 @@ public class TextFileParser
 							if (choice == JobErrorHandler.JOB_IGNORE_ALL) 
 							{
 								this.abortOnError = false;
-								this.ignoreAllErrors = true;
+//								this.ignoreAllErrors = true;
 							}
 						}
 					}
@@ -716,9 +710,9 @@ public class TextFileParser
 	}
 
 	/**
-	 *	Return a list of ColumnIdentifier objects determined
-	 *	by the input file. The identifiers will only have a name
-	 *  not data type assigned.
+	 *	Return a list of {@link workbench.db.ColumnIdentifier} objects determined
+	 *	by the input file. The identifiers will only have a name but 
+	 *  no data type assigned as this information is not available in a text file
 	 *  If the input file does not contain a header row, the columns
 	 *  will be named Column1, Column2, ...
 	 */

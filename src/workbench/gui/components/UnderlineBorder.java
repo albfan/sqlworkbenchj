@@ -48,10 +48,10 @@ public class UnderlineBorder extends AbstractBorder
 		return insets;
 	}
 	
-	public Insets getBorderInsets(Component c, Insets insets)
+	public Insets getBorderInsets(Component c, Insets i)
 	{
-		insets.left = insets.top = insets.right = insets.bottom = 0;
-		return insets;
+		i.left = i.top = i.right = i.bottom = 0;
+		return i;
 	}
 	
 

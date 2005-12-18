@@ -30,7 +30,7 @@ import workbench.util.StringUtil;
 public class TextExportWriter
 	extends ExportWriter
 {
-	private ResultInfo resultInfo;
+	//private ResultInfo resultInfo;
 	
 	/** Creates a new instance of TextExportWriter */
 	public TextExportWriter(DataExporter exp)
@@ -38,18 +38,16 @@ public class TextExportWriter
 		super(exp);
 	}
 
-	public RowDataConverter createConverter(ResultInfo info)
+	public RowDataConverter createConverter()
 	{
-		TextRowDataConverter converter = new TextRowDataConverter(info);
+		TextRowDataConverter converter = new TextRowDataConverter();
 		converter.setDelimiter(exporter.getTextDelimiter());
 		converter.setWriteHeader(exporter.getExportHeaders());
 		converter.setQuoteCharacter(exporter.getTextQuoteChar());
 		converter.setCleanNonPrintable(exporter.getCleanupCarriageReturns());
 		converter.setQuoteAlways(exporter.getQuoteAlways());
 		converter.setEscapeRange(exporter.getEscapeRange());
-		converter.setEncodingUsed(exporter.getEncoding());
 		converter.setLineEnding(exporter.getLineEnding());
-		this.resultInfo = info;
 		return converter;
 	}
 
@@ -63,6 +61,8 @@ public class TextExportWriter
 	private void writeOracleControlFile()
 	{
 		if (!exporter.getWriteOracleControlFile()) return;
+		
+		ResultInfo resultInfo = this.converter.getResultInfo();
 		File baseFile = new File(exporter.getFullOutputFilename());
 		String dir = baseFile.getParent();
 		String baseName = baseFile.getName();
@@ -96,7 +96,7 @@ public class TextExportWriter
 			max ++;
 			
 			String format = exporter.getTimestampFormat();
-			if (format == null) format = Settings.getInstance().getDefaultDateTimeFormat();
+			if (format == null) format = Settings.getInstance().getDefaultTimestampFormat();
 			//if (format == null) format = exporter.getDateFormat();
 			
 			String oraFormat = convertJavaDateFormatToOracle(format);

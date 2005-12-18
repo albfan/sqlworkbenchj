@@ -126,7 +126,7 @@ public class ColumnDiff
 			}
 			else 
 			{
-				fkDifferent = fkDifferent = !(refFk.equals(targetFk));
+				fkDifferent = !(refFk.equals(targetFk));
 			}
 		}
 		

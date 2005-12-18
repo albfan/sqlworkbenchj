@@ -48,7 +48,6 @@ public class ReportTable
 	public static final String TAG_TABLE_COMMENT = "table-comment";
 	public static final String TAG_TABLE_CONSTRAINT = "table-constraint";
 
-	private List referencedTables;
 	private TableIdentifier table;
 	private ReportColumn[] columns;
 	private IndexReporter index;
@@ -337,5 +336,18 @@ public class ReportTable
 		this.columns = null;
 		this.index.done();
 	}
+
+	public boolean equals(Object other)
+	{
+		if (other instanceof ReportTable)
+		{
+			return equals((ReportTable)other);
+		}
+		return false;
+	}
 	
+	public boolean equals(ReportTable other)
+	{
+		return this.table.getTableName().equalsIgnoreCase(other.table.getTableName());
+	}
 }

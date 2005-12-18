@@ -99,7 +99,6 @@ public class WbSplitPane
 		Border result = null;
 		try
 		{
-			int divider = this.getDividerSize();
 			BasicSplitPaneUI currentUI = (BasicSplitPaneUI)this.getUI();
 			BasicSplitPaneDivider div = currentUI.getDivider();
 			result = div.getBorder();

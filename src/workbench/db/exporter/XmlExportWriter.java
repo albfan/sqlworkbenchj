@@ -27,9 +27,9 @@ public class XmlExportWriter
 		super(exp);
 	}
 
-	public RowDataConverter createConverter(ResultInfo info)
+	public RowDataConverter createConverter()
 	{
-		XmlRowDataConverter converter = new XmlRowDataConverter(info);
+		XmlRowDataConverter converter = new XmlRowDataConverter();
 		converter.setUseCDATA(this.exporter.getUseCDATA());
 		converter.setLineEnding(exporter.getLineEnding());
 		converter.setUseVerboseFormat(exporter.getUseVerboseFormat());
@@ -37,7 +37,7 @@ public class XmlExportWriter
 		converter.setBaseFilename(exporter.getOutputFilename());
 		return converter;
 	}
-
+	
 	public void exportFinished()
 	{
 		super.exportFinished();

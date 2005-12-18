@@ -34,22 +34,22 @@ public class WbTabbedPane
 		this.putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
 	}
 
-	public synchronized void setSuspendRepaint(boolean aFlag)
+	public synchronized void setSuspendRepaint(boolean suspendNow)
 	{
-		boolean suspend = this.suspendRepaint;
-		this.suspendRepaint = aFlag;
+		boolean suspended = this.suspendRepaint;
+		this.suspendRepaint = suspendNow;
 
 		// if repainting was re-enabled, then queue
 		// a repaint event right away
 		// I'm using invokeLater() to make sure, that
 		// this is executed on the AWT thread.
-		if (suspend && !aFlag)
+		if (suspended && !suspendNow)
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
-					invalidate();
+					validate();
 					repaint();
 				}
 			});

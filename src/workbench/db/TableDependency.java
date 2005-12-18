@@ -44,13 +44,13 @@ public class TableDependency
 		this.wbMetadata = this.connection.getMetadata();
 	}
 
-	private void setTableName(String aCatalog, String aSchema, String aTable)
-	{
-		aTable = this.wbMetadata.adjustObjectnameCase(aTable);
-		aCatalog = this.wbMetadata.adjustObjectnameCase(aCatalog);
-		aSchema = this.wbMetadata.adjustObjectnameCase(aSchema);
-		this.theTable = new TableIdentifier(aCatalog, aSchema, aTable);
-	}
+//	private void setTableName(String aCatalog, String aSchema, String aTable)
+//	{
+//		aTable = this.wbMetadata.adjustObjectnameCase(aTable);
+//		aCatalog = this.wbMetadata.adjustObjectnameCase(aCatalog);
+//		aSchema = this.wbMetadata.adjustObjectnameCase(aSchema);
+//		this.theTable = new TableIdentifier(aCatalog, aSchema, aTable);
+//	}
 
 	public void setTable(TableIdentifier aTable)
 	{
@@ -94,7 +94,6 @@ public class TableDependency
 
 		try
 		{
-			ResultSet rs = null;
 			DataStore ds = null;
 			int catalogcol;
 			int schemacol;
@@ -102,7 +101,7 @@ public class TableDependency
 			int fknamecol;
 			int tablecolumncol;
 			int parentcolumncol;
-			int parenttablecol;
+//			int parenttablecol;
 
 			if (exportedKeys)
 			{
@@ -112,7 +111,7 @@ public class TableDependency
 				fknamecol = 11;
 				tablecolumncol = 7;
 				parentcolumncol = 3;
-				parenttablecol = 2;
+//				parenttablecol = 2;
 				ds = this.wbMetadata.getExportedKeys(parentcatalog, parentschema, parenttable);
 			}
 			else
@@ -123,20 +122,16 @@ public class TableDependency
 				fknamecol = 11;
 				tablecolumncol = 3;
 				parentcolumncol = 7;
-				parenttablecol = 6;
+//				parenttablecol = 6;
 				ds = this.wbMetadata.getImportedKeys(parentcatalog, parentschema, parenttable);
 			}
 
 			DependencyNode child = null;
-			String currentfk = null;
-			String currenttable = null;
-			DefaultMutableTreeNode treeNode = null;
 			String catalog = null;
 			String schema = null;
 			String table = null;
 			String fkname = null;
 
-			boolean created = false;
 			int count = ds.getRowCount();
 			//System.out.print(indentString);
 			//System.out.println("processing " + count + " entries for " + parent);
@@ -150,7 +145,6 @@ public class TableDependency
 				child = parent.addChild(catalog, schema, table, fkname);
 				String tablecolumn = ds.getValueAsString(i, tablecolumncol); // the column in "table" referencing the other table
 				String parentcolumn = ds.getValueAsString(i, parentcolumncol); // the column in the parent table
-				String parenttable2 = ds.getValueAsString(i, parenttablecol);
 
 				int update = ds.getValueAsInt(i, 9, -1);
 				int delete = ds.getValueAsInt(i, 10, -1);
@@ -166,7 +160,7 @@ public class TableDependency
 			for (int i=0; i < count; i++)
 			{
 				child = (DependencyNode)children.get(i);
-				int childrenCount = 0;
+//				int childrenCount = 0;
 				if (!child.isInParentTree(parent))
 				{
 					this.readTree(child, exportedKeys);

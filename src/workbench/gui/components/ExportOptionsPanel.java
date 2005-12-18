@@ -47,7 +47,6 @@ public class ExportOptionsPanel
 	
 	private JCheckBox createTableOption;
 	private JCheckBox includeHeadersOption;
-	private JCheckBox fullHtmlOption;
 	private JTextField commitEvery;
 	private JLabel commitLabel;
 	private EncodingPanel encPanel;

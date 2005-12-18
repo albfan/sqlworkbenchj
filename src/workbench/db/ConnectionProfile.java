@@ -50,7 +50,7 @@ public class ConnectionProfile
 	private boolean ignoreDropErrors;
 	private boolean confirmUpdates;
 	private Integer defaultFetchSize;
-	private boolean globalProfile = false;
+	//private boolean globalProfile = false;
 	private boolean emptyStringIsNull = false;
 	private boolean includeNullInInsert = true;
 

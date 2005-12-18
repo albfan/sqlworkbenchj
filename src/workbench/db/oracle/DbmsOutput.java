@@ -66,7 +66,6 @@ public class DbmsOutput
 	public String getResult()
 		throws SQLException
 	{
-		int done = 0;
     if (!this.enabled) return "";
 		CallableStatement showOutputStatement = conn.prepareCall(
 		"declare " +
@@ -91,7 +90,7 @@ public class DbmsOutput
 			showOutputStatement.setInt( 1, 32000 );
 			showOutputStatement.executeUpdate();
 			result.append(showOutputStatement.getString(3).trim());
-			if ( (done = showOutputStatement.getInt(2)) == 1 ) break;
+			if (showOutputStatement.getInt(2) == 1 ) break;
 		}
 		try { showOutputStatement.close(); } catch (Throwable th) {}
 		return result.toString().trim();

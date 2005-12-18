@@ -26,9 +26,9 @@ public class HtmlExportWriter
 		super(exp);
 	}
 
-	public RowDataConverter createConverter(ResultInfo info)
+	public RowDataConverter createConverter()
 	{
-		HtmlRowDataConverter converter = new HtmlRowDataConverter(info);
+		HtmlRowDataConverter converter = new HtmlRowDataConverter();
 		converter.setPageTitle(this.exporter.getHtmlTitle());
 		converter.setCreateFullPage(exporter.getCreateFullHtmlPage());
 		converter.setEscapeHtml(exporter.getEscapeHtml());

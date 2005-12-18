@@ -1,27 +1,18 @@
 /*
- * WbFontChooser.java
+ * MyFontChooser.java
  *
- * This file is part of SQL Workbench/J, http://www.sql-workbench.net
- *
- * Copyright 2002-2005, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
- *
- * To contact the author please send an email to: support@sql-workbench.net
- *
+ * Created on 3. Dezember 2005, 14:47
  */
+
 package workbench.gui.components;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
-
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
 
@@ -29,14 +20,94 @@ import workbench.util.StringUtil;
  *
  * @author  support@sql-workbench.net
  */
-public class WbFontChooser extends JPanel
+public class WbFontChooser extends javax.swing.JPanel
 {
+	private boolean updateing;
 	
 	/** Creates new form BeanForm */
 	public WbFontChooser()
 	{
 		initComponents();
+		fillFontDropDown();
 	}
+	
+	public void setSelectedFont(Font aFont)
+	{
+		String name = aFont.getFamily();
+		String size = Integer.toString(aFont.getSize());
+		int style = aFont.getStyle();
+		this.updateing = true;
+		try
+		{
+			this.fontNameComboBox.setSelectedItem(name);
+			this.fontSizeComboBox.setSelectedItem(size);
+			this.boldCheckBox.setSelected((style & Font.BOLD) == Font.BOLD);
+			this.italicCheckBox.setSelected((style & Font.ITALIC) == Font.ITALIC);
+		}
+		catch (Exception e)
+		{
+		}
+		this.updateing = false;
+		this.updateFontDisplay();
+	}
+	
+	public Font getSelectedFont()
+	{
+		String fontName = (String)this.fontNameComboBox.getSelectedItem();
+		int size = StringUtil.getIntValue((String)this.fontSizeComboBox.getSelectedItem());
+		int style = 0;
+		if (this.italicCheckBox.isSelected())
+			style = style | Font.ITALIC;
+		if (this.boldCheckBox.isSelected())
+			style = style | Font.BOLD;
+		
+		Font f = new Font(fontName, style, size);
+		return f;
+	}
+	
+  public static Font chooseFont(JDialog owner, Font defaultFont)
+  {
+		WbFontChooser chooser = new WbFontChooser();
+		chooser.setSelectedFont(defaultFont);
+		chooser.setSize(new Dimension(400, 250));
+
+		int answer = JOptionPane.showConfirmDialog(owner, chooser, ResourceMgr.getString("TxtWindowTitleChooseFont"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+		Font result = null;
+		if (answer == JOptionPane.OK_OPTION)
+		{
+			result = chooser.getSelectedFont();
+		}
+		return result;
+  }
+	
+	
+	private void fillFontDropDown()
+	{
+		String[] fonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+		ComboBoxModel model = new DefaultComboBoxModel(fonts);
+		this.fontNameComboBox.setModel(model);
+	}
+
+	private void updateFontDisplay()
+	{                                       
+		if (!this.updateing)
+		{
+			synchronized (this)
+			{
+				this.updateing = true;
+				try
+				{
+					Font f = this.getSelectedFont();
+					this.sampleLabel.setFont(f);
+					this.sampleLabel.setText((String)this.fontNameComboBox.getSelectedItem());
+				}
+				finally
+				{
+					this.updateing = false;
+				}
+			}
+		}
+	}                                  
 	
 	/** This method is called from within the constructor to
 	 * initialize the form.
@@ -54,7 +125,6 @@ public class WbFontChooser extends JPanel
     boldCheckBox = new javax.swing.JCheckBox();
     italicCheckBox = new javax.swing.JCheckBox();
     sampleLabel = new javax.swing.JLabel();
-    jPanel1 = new javax.swing.JPanel();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -66,7 +136,7 @@ public class WbFontChooser extends JPanel
     {
       public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        updateFontDisplay(evt);
+        fontNameComboBoxupdateFontDisplay(evt);
       }
     });
 
@@ -86,7 +156,7 @@ public class WbFontChooser extends JPanel
     {
       public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        updateFontDisplay(evt);
+        fontSizeComboBoxupdateFontDisplay(evt);
       }
     });
 
@@ -108,7 +178,7 @@ public class WbFontChooser extends JPanel
     {
       public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        updateFontDisplay(evt);
+        boldCheckBoxupdateFontDisplay(evt);
       }
     });
 
@@ -123,7 +193,7 @@ public class WbFontChooser extends JPanel
     {
       public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        updateFontDisplay(evt);
+        italicCheckBoxupdateFontDisplay(evt);
       }
     });
 
@@ -150,88 +220,35 @@ public class WbFontChooser extends JPanel
     gridBagConstraints.weighty = 1.0;
     add(sampleLabel, gridBagConstraints);
 
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.weighty = 1.0;
-    add(jPanel1, gridBagConstraints);
+  }// </editor-fold>//GEN-END:initComponents
 
-  }
-  // </editor-fold>//GEN-END:initComponents
+	private void italicCheckBoxupdateFontDisplay(java.awt.event.ItemEvent evt)//GEN-FIRST:event_italicCheckBoxupdateFontDisplay
+	{//GEN-HEADEREND:event_italicCheckBoxupdateFontDisplay
+		updateFontDisplay();
+	}//GEN-LAST:event_italicCheckBoxupdateFontDisplay
 
-	private void updateFontDisplay(java.awt.event.ItemEvent evt)//GEN-FIRST:event_updateFontDisplay
-	{//GEN-HEADEREND:event_updateFontDisplay
-		if (!this.updateing)
-		{
-			Font f = this.getSelectedFont();
-			this.sampleLabel.setFont(f);
-			this.sampleLabel.setText((String)this.fontNameComboBox.getSelectedItem());
-		}
-	}//GEN-LAST:event_updateFontDisplay
-	
-	public Font getSelectedFont()
-	{
-		String fontName = (String)this.fontNameComboBox.getSelectedItem();
-		int size = StringUtil.getIntValue((String)this.fontSizeComboBox.getSelectedItem());
-		int style = 0;
-		if (this.italicCheckBox.isSelected())
-			style = style | Font.ITALIC;
-		if (this.boldCheckBox.isSelected())
-			style = style | Font.BOLD;
-		
-		Font f = new Font(fontName, style, size);
-		return f;
-	}
-	
-	public void setSelectedFont(Font aFont)
-	{
-		String name = aFont.getFamily();
-		String size = Integer.toString(aFont.getSize());
-		int style = aFont.getStyle();
-		this.updateing = true;
-		try
-		{
-			this.fontNameComboBox.setSelectedItem(name);
-			this.fontSizeComboBox.setSelectedItem(size);
-			this.boldCheckBox.setSelected((style & Font.BOLD) == Font.BOLD);
-			this.italicCheckBox.setSelected((style & Font.ITALIC) == Font.ITALIC);
-		}
-		catch (Exception e)
-		{
-		}
-		this.updateing = false;
-		this.updateFontDisplay(null);
-	}
-	private void fillFontDropDown()
-	{
-		String[] fonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-		ComboBoxModel model = new DefaultComboBoxModel(fonts);
-		this.fontNameComboBox.setModel(model);
-	}
-  
-  public static Font chooseFont(JDialog owner, Font defaultFont)
-  {
-		WbFontChooser chooser = new WbFontChooser();
-		chooser.setSelectedFont(defaultFont);
-		chooser.setSize(new Dimension(400, 250));
+	private void boldCheckBoxupdateFontDisplay(java.awt.event.ItemEvent evt)//GEN-FIRST:event_boldCheckBoxupdateFontDisplay
+	{//GEN-HEADEREND:event_boldCheckBoxupdateFontDisplay
+		updateFontDisplay();
+	}//GEN-LAST:event_boldCheckBoxupdateFontDisplay
 
-		int answer = JOptionPane.showConfirmDialog(owner, chooser, ResourceMgr.getString("TxtWindowTitleChooseFont"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-		Font result = null;
-		if (answer == JOptionPane.OK_OPTION)
-		{
-			result = chooser.getSelectedFont();
-		}
-		return result;
-  }
+	private void fontSizeComboBoxupdateFontDisplay(java.awt.event.ItemEvent evt)//GEN-FIRST:event_fontSizeComboBoxupdateFontDisplay
+	{//GEN-HEADEREND:event_fontSizeComboBoxupdateFontDisplay
+		updateFontDisplay();
+	}//GEN-LAST:event_fontSizeComboBoxupdateFontDisplay
+
+	private void fontNameComboBoxupdateFontDisplay(java.awt.event.ItemEvent evt)//GEN-FIRST:event_fontNameComboBoxupdateFontDisplay
+	{//GEN-HEADEREND:event_fontNameComboBoxupdateFontDisplay
+		updateFontDisplay();
+	}//GEN-LAST:event_fontNameComboBoxupdateFontDisplay
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JCheckBox boldCheckBox;
-  private javax.swing.JPanel checkBoxPanel;
-  private javax.swing.JComboBox fontNameComboBox;
-  private javax.swing.JComboBox fontSizeComboBox;
-  private javax.swing.JCheckBox italicCheckBox;
-  private javax.swing.JPanel jPanel1;
-  private javax.swing.JLabel sampleLabel;
+  public javax.swing.JCheckBox boldCheckBox;
+  public javax.swing.JPanel checkBoxPanel;
+  public javax.swing.JComboBox fontNameComboBox;
+  public javax.swing.JComboBox fontSizeComboBox;
+  public javax.swing.JCheckBox italicCheckBox;
+  public javax.swing.JLabel sampleLabel;
   // End of variables declaration//GEN-END:variables
-
-	private boolean updateing;
 	
 }

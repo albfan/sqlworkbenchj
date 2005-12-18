@@ -75,7 +75,6 @@ public class XmlDataFileParser
 	private RowDataReceiver receiver;
 	private boolean ignoreCurrentRow = false;
 	private boolean abortOnError = false;
-	private boolean ignoreAllErrors = false;
 	private JobErrorHandler errorHandler;
 	private boolean verboseFormat = false;
 	private String missingColumn;
@@ -84,10 +83,8 @@ public class XmlDataFileParser
 	
 	private int currentColIndex = 0;
 	private int realColIndex = 0;
-	private boolean ignoreCurrentColumn = false;
 	private long columnLongValue = 0;
 	private String columnDataFile = null;
-	private boolean hasLongValue = false;
 	private boolean isNull = false;
 	private StrBuffer chars;
 	private boolean keepRunning;
@@ -368,9 +365,7 @@ public class XmlDataFileParser
 		ignoreCurrentRow = false;
 		currentColIndex = 0;
 		realColIndex = 0;
-		ignoreCurrentColumn = false;
 		columnLongValue = 0;
-		hasLongValue = false;
 		isNull = false;
 		chars = null;
 		columns = null;
@@ -496,18 +491,15 @@ public class XmlDataFileParser
 		else if (qName.equals(this.columnTag))
 		{
 			this.chars = new StrBuffer();
-			hasLongValue = false;
 			String attrValue = attrs.getValue(XmlRowDataConverter.ATTR_LONGVALUE);
 			if (attrValue != null)
 			{
 				try
 				{
 					columnLongValue = Long.parseLong(attrValue);
-					hasLongValue = true;
 				}
 				catch (NumberFormatException e)
 				{
-					hasLongValue = false;
 				}
 			}
 			attrValue = attrs.getValue(XmlRowDataConverter.ATTR_NULL);
@@ -784,7 +776,6 @@ public class XmlDataFileParser
 					if (choice == JobErrorHandler.JOB_IGNORE_ALL) 
 					{
 						this.abortOnError = false;
-						this.ignoreAllErrors = true;
 					}
 				}
 				

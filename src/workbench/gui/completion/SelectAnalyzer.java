@@ -43,7 +43,7 @@ public class SelectAnalyzer
 	protected void checkContext()
 	{
 		this.context = NO_CONTEXT;
-		String currentWord = StringUtil.getWordLeftOfCursor(sql, cursorPos, ",");
+		String currentWord = StringUtil.getWordLeftOfCursor(sql, cursorPos, ",(;");
 		if (!StringUtil.isEmptyString(currentWord))
 		{
 			boolean keyWord = this.dbConnection.getMetadata().isKeyword(currentWord);
@@ -77,7 +77,7 @@ public class SelectAnalyzer
 		}
 		
 		boolean afterWhere = (wherePos > 0 && cursorPos > wherePos);
-		boolean afterFrom = (fromPos > 0 && cursorPos > fromPos);
+//		boolean afterFrom = (fromPos > 0 && cursorPos > fromPos);
 		
 		if ( fromPos < 0 ||
 			   (wherePos < 0 && cursorPos > fromPos) ||

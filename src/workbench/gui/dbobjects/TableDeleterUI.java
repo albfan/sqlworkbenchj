@@ -358,7 +358,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 			}
 			Statement stmt = this.connection.createStatement();
 			LogMgr.logDebug("TableDeleterUI.deleteTable()", "Executing: [" + deleteSql + "] to delete target table...");
-			int rows = stmt.executeUpdate(deleteSql);
+			stmt.executeUpdate(deleteSql);
 			if (doCommit && !this.connection.getAutoCommit())
 			{
 				this.connection.commit();

@@ -30,7 +30,7 @@ import javax.swing.text.Utilities;
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.17 2005-10-27 21:55:03 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.18 2005-12-18 22:16:02 thomas Exp $
  */
 public class TextAreaPainter extends JComponent implements TabExpander
 {
@@ -525,7 +525,6 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	private void paintGutterLine(Graphics gfx, int line)
 	{
 		Font defaultFont = getFont();
-		Color defaultColor = getForeground();
 
 		gfx.setFont(defaultFont);
 		gfx.setColor(GUTTER_COLOR);

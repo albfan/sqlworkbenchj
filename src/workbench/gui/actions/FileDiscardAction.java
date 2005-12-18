@@ -32,9 +32,7 @@ public class FileDiscardAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		String desc = ResourceMgr.getDescription("MnuTxtFileDiscard");
-		String shift = KeyEvent.getKeyModifiersText(KeyEvent.SHIFT_MASK);
-		desc = StringUtil.replace(desc, "%shift%", shift);
+		String desc = ResourceMgr.getDescription("MnuTxtFileDiscard", true);
 		this.putValue(Action.SHORT_DESCRIPTION, desc);
 		this.initMenuDefinition(ResourceMgr.getString("MnuTxtFileDiscard"), desc, KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.CTRL_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);

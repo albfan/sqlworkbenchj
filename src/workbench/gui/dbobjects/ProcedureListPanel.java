@@ -82,7 +82,6 @@ public class ProcedureListPanel
 	private EditorPanel source;
 	private JTabbedPane displayTab;
 	private WbSplitPane splitPane;
-	private Object retrieveLock = new Object();
 	private String currentSchema;
 	private String currentCatalog;
 	private boolean shouldRetrieve;
@@ -94,7 +93,7 @@ public class ProcedureListPanel
 	private ProcStatusRenderer statusRenderer;
 	//</editor-fold>
 	
-	private static final String SCRIPT_CMD = "create-script";
+//	private static final String SCRIPT_CMD = "create-script";
 	private static final String DROP_CMD = "drop-object";
 	private static final String COMPILE_CMD = "compile-procedure";
 

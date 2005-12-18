@@ -30,7 +30,6 @@ public class SelectTabAction extends WbAction
 {
 	private JTabbedPane client;
 	private int index;
-	private String baseName;
 
 	public SelectTabAction(JTabbedPane aPane, int anIndex)
 	{

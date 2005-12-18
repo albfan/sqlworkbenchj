@@ -36,7 +36,6 @@ public class ObjectDropperUI
 	private List objectTypes;
 	private WbConnection connection;
 	private boolean cancelled;
-	private boolean typesAreTables;
 
 	public ObjectDropperUI()
 	{
@@ -159,7 +158,6 @@ public class ObjectDropperUI
 	{
 		this.objectNames = objects;
 		this.objectTypes = types;
-		this.typesAreTables = false;
 		int numNames = this.objectNames.size();
 		int numTypes = this.objectTypes.size();
 

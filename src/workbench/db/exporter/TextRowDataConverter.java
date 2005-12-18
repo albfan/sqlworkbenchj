@@ -33,13 +33,12 @@ public class TextRowDataConverter
 	private boolean cleanCR = false;
 	private boolean quoteAlways = false;
 	private CharacterRange escapeRange = null;
-	private String encodingUsed = null;
 	private String additionalEncodeCharacters = null;
 	private String lineEnding = StringUtil.LINE_TERMINATOR;
 
-	public TextRowDataConverter(ResultInfo info)
+	public TextRowDataConverter()
 	{
-		super(info);
+		super();
 	}
 
 	public void setCleanNonPrintable(boolean flag)
@@ -217,10 +216,5 @@ public class TextRowDataConverter
 	public CharacterRange getEscapeRange()
 	{
 		return this.escapeRange;
-	}
-
-	public void setEncodingUsed(String enc)
-	{
-		this.encodingUsed = enc;
 	}
 }

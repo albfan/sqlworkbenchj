@@ -102,9 +102,11 @@ public class ProgressPanel
 		if (currentRow > -1) this.rowInfo.setText(Long.toString(currentRow));
 	}
 
-	public void setMonitorType(int aType)
-	{
-	}
+	public void saveCurrentType(String type) {}
+	public void restoreType(String type) {}
+	public void setMonitorType(int aType) {}
+	public int getMonitorType() { return RowActionMonitor.MONITOR_PLAIN; }
+	
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is

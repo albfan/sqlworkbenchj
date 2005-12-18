@@ -1,12 +1,59 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh:  (83.3) The number of columns the formatter ("Reformat SQL" menu item) puts
+      into one line of a SELECT list, can now be defined:
+      workbench.sql.formatter.select.columnsperline=1
+Enh:  (83.2) When creating insert statements, columns defined as identity columns 
+      are now ignored. This behaviour can be disabled (i.e. switch back to the 
+      old way) by setting
+      workbench.sql.generate.insert.ignoreidentity=false
+Enh:  (83.7) Added the ability to define primary key columns for tables and views. 
+      This can either be done using the new "WbDefinPk" command, or by defining 
+      a mapping file that contains the definitions. The name of the mapping file 
+      (which has to be a standard Java properties file with table=col1,col2 
+      entries) can be defined in workbench.settings using
+      workbench.pkmapping.file=filename
+      The new commands to control this additional PK settings are:
+      WbDefinePk - Define a PK mapping for one table
+      WbListPkDef - List the currently active PK mapping
+      WbLoadPkMap - Load a PK mapping from an external file
+      WbSavePKMap - Save the current mapping to an external file
+Enh:  (83.8) The way empty strings are treated and whether columns containing NULL
+      values are included in INSERT statements can now be controlled in the 
+      connection profile
+Enh:  (83.9) Import progress (and other progress messages from the statusbar) can 
+      now be enabled in the commandline (batch execution) with the parameter
+      -showprogress=true
+      As Java's support for the console is very limited this might not work
+      properly in all situations
+      
+Fix:  (83.1) The shortcut @ for the WbInclude command is now only supported for 
+      Oracle because e.g. SQL Server uses the @ sign to name procedure 
+      parameters (and thus existing scripts do not work). 
+Fix:  (83.2) Correct handling of MS SQL Server's BIT datatype when creating
+      SQL statements.
+Fix:  (83.3) Workaround for a bug in the Postgres JDBC driver which would 
+      not show tables in the DbExplorer for the schemas pg_catalog and 
+      information_schema
+Fix:  (83.6) Minor bugfixes to the code completion
+Fix:  (83.8) The defined date and timestamp format (Options) was not used
+      when parsing dates entered.
+Fix:  (83.10) Copying data as SQL statements was broken
+Fix:  (83.10) FK Constraints were not compared correctly in the WbDiff command
+Fix:  (83.11) Prevent sending another SQL Statement while a WbExport is running
+Fix:  (83.12) Auto-completion was not working properly inside function calls
+Fix:  (83.13) Copying selected data as SQL statements was broken
+
+Build 83, 20.11.2005
+--------------------
 Enh:  (82.1) When running external files using WbInclude the directory of the 
-      currently executed file is used as the "current" directory, so if the executed 
-      file is using WbInclude (@) files can be referenced with a relative path.
-Enh:  (82.1) SQL Workbench now supports reading and writing blob columns to and from
-      external files. For updating blob and clob columns the usual UPDATE and INSERT
-      statements can be used with placeholders for the file definition. To 
-      retrieve a blob the new WbSelectBlob command can be used. 
+      currently executed file is used as the "current" directory, so if the 
+      executed file is using WbInclude (@) files can be referenced with a 
+      relative path.
+Enh:  (82.1) SQL Workbench now supports reading and writing blob columns to and 
+      from external files. For updating blob and clob columns the usual 
+      UPDATE and INSERT statements can be used with placeholders for the file 
+      definition. To retrieve a blob the new WbSelectBlob command can be used. 
       When exporting data into an XML file, blob columns are now written
       into external files (the files are referenced from the XML output)
       This has been tested with Postgres 8.0, SQL Server (jTDS driver), MySQL,
@@ -15,14 +62,15 @@ Enh:  (82.1) SQL Workbench now supports reading and writing blob columns to and 
       the standard JDBC calls used for this feature.
 Enh:  (82.1) When "confirming" updates, there was no way to cancel the execution
       completely. WbInclude is now also considered as an "updating" command.
-Enh:  (82.2) Oracle 10g drivers do not work properly with Oracle 9i and date columns.
-      (The time part is not retrieved correctly). SQL Workbench now always treats
-      DATE columns as TIMESTAMP columns (i.e. it will getTimestamp() and  
-      java.sql.Timestamp objects for those columns) to preserve the time part. 
-      This can be switched off by setting workbench.db.oracle.date.usetimestamp=false
+Enh:  (82.2) Oracle 10g drivers do not work properly with Oracle 9i and date 
+      columns. (The time part is not retrieved correctly). SQL Workbench now 
+      always treats DATE columns as TIMESTAMP columns (i.e. it will 
+      getTimestamp() and java.sql.Timestamp objects for those columns) to 
+      preserve the time part. This can be switched off by setting 
+      workbench.db.oracle.date.usetimestamp=false
       in workbench.settings
-Enh:  (82.2) Added support for views, stored procedures and triggers for MySQL 5.x
-      in DbExplorer
+Enh:  (82.2) Added support for views, stored procedures and triggers for 
+      MySQL 5.x in DbExplorer
 Enh:  (82.3) WbReport now includes VIEW definitions
 Enh:  (82.3) Added support for views and triggers for Apache Derby in DbExplorer
 Enh:  (82.3) The password in the connection dialog can now be displayed in plain
@@ -44,22 +92,23 @@ Enh:  (82.28) Postgres: The source for a table now includes the index definition
       displayed correctly. The Index tab will still display it incorrectly though
       (the JDBC driver does not return the information)
 Enh:  (82.29) WbDiff now includes Views
-Enh:  (92.29) The "Create DDL Script" is now also available in the Procedures tab
+Enh:  (82.29) The "Create DDL Script" is now also available in the Procedures tab
       of the DBExplorer, not only the Objects tab.
-      
+Enh:  (82.30) Basic support for Oracle materialized views added
+
 Fix:  (82.1) When an error occurs during inserting of new rows from a result set, 
       and the error is ignored, the status for the incorrect rows is lost, and 
       subsequent saving of the data will generate an UPDATE statement instead
       of an INSERT statement
 Fix:  (82.2) When importing XML files with a CLOB column SQL Workbench/J would
       report an error. 
-Fix:  (82.4) Fixed an error when loading files into the editor (files with CR/LF ending
-      were not loaded correctly)
-Fix:  (82.5) Since 82.3 the assigned workspace file was not shown any longer in the 
-      connection dialog
-Fix:  (82.6) The defaults stated in the help for the WbDiff command did not match 
-      the actual defaults used. The constraint comparing is now reported correctly
-      in the XML file as well.
+Fix:  (82.4) Fixed an error when loading files into the editor (files with CR/LF 
+      ending were not loaded correctly)
+Fix:  (82.5) Since 82.3 the assigned workspace file was not shown any longer in 
+      the connection dialog
+Fix:  (82.6) The defaults stated in the help for the WbDiff command did not  
+      match the actual defaults used. The constraint comparing is now reported 
+      correctly in the XML file as well.
 Fix:  (82.6) The first column of a result set could not be edited any more.      
 Fix:  (82.7) If an invalid regular expression is entered in the search dialog 
       of the editor, an error message is now displayed.
@@ -72,6 +121,11 @@ Fix:  (82.15) When using a different table name for the generated script with
       WbExport (with -type=sqlinsert) together with the -createtable option 
       the alternate name was not used for the PK, FK and Index definition.
 Fix:  (82.18) Importing CLOB columns in Oracle did not work      
+Fix:  (82.33) Checking for the MS SQL "GO" delimiter did not work properly 
+Fix:  (82.34) When "Retrieve Explorer" was disabled, nothing was retrieved at 
+      all when the Explorer was opened in a separate window
+Fix:  (82.35) When using "Save Data as" date and timestamp columns were not
+      written into the export file if not format was specified.
 
 Build 82, 12.09.2005
 --------------------

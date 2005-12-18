@@ -38,7 +38,6 @@ public class XmlTableDefinitionParser
 	private int currentColIndex;
 	private ColumnIdentifier[] columnList;
 	private String tableName;
-	//private ColumnIdentifier currentColumn;
 	private String filename;
 	private String encoding = "UTF-8";
 	private StringBuffer chars;

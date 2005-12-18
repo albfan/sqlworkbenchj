@@ -16,6 +16,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.File;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 
 import javax.swing.JLabel;
@@ -36,7 +37,7 @@ public class KeyColumnSelectorPanel
 {
 	private ColumnIdentifier[] columns;
 	private String tableName;
-	private JButton saveButton;
+	private JCheckBox saveCheckBox;
 	
 	public KeyColumnSelectorPanel(ColumnIdentifier[] cols, String table)
 	{
@@ -69,17 +70,21 @@ public class KeyColumnSelectorPanel
 		
 		this.infoPanel.add(infoLabel,c);
 		
-		msg = ResourceMgr.getString("MsgSavePKMapping");
-		this.saveButton = new JButton(msg);
-		c = new GridBagConstraints();
+		this.saveCheckBox = new JCheckBox(ResourceMgr.getString("LabelRememberPKMapping"));
+		this.saveCheckBox.setToolTipText(ResourceMgr.getDescription("LabelRememberPKMapping"));
     c.gridx = 0;
     c.gridy = 1;
+		c.fill = GridBagConstraints.NONE;
     c.anchor = GridBagConstraints.NORTHWEST;
     c.weighty = 1.0;
+		c.weightx = 0.0;
     c.insets = new Insets(5, 0, 5, 0);
-		this.saveButton.setBorder(WbSwingUtilities.FLAT_BUTTON_BORDER);
-		this.saveButton.addActionListener(this);
-		this.infoPanel.add(saveButton, c);
+		this.infoPanel.add(saveCheckBox, c);
+	}
+	
+	public boolean getSaveToGlobalPKMap()
+	{
+		return this.saveCheckBox.isSelected();
 	}
 	
 	public ColumnIdentifier[] getColumns()
@@ -91,46 +96,6 @@ public class KeyColumnSelectorPanel
 		return this.columns;
 	}
 
-	public void actionPerformed(java.awt.event.ActionEvent e)
-	{
-		super.actionPerformed(e);
-		if (e.getSource() == this.saveButton)
-		{
-			String fileName = Settings.getInstance().getPKMappingFilename();
-			if (fileName == null) 
-			{
-				File dir = new File(Settings.getInstance().getConfigDir());
-				JFileChooser dialog = new JFileChooser(dir);
-				int result = dialog.showSaveDialog(this);
-				if (result == JFileChooser.APPROVE_OPTION)
-				{
-					File target = dialog.getSelectedFile();
-					fileName = target.getAbsolutePath();
-					Settings.getInstance().setPKMappingFilename(fileName);
-				}
-			}
-			
-			if (fileName != null)
-			{
-				ColumnIdentifier[] cols = this.getColumns();
-				StringBuffer colNames = new StringBuffer(50);
-				for (int i = 0; i < cols.length; i++)
-				{
-					if (cols[i].isPkColumn())
-					{
-						if (colNames.length() > 0) colNames.append(',');
-						colNames.append(cols[i].getColumnName());
-					}
-				}
-				PkMapping.getInstance().addMapping(this.tableName, colNames.toString());
-				PkMapping.getInstance().saveMapping(fileName);
-				String msg = ResourceMgr.getString("MsgPkMappingSaved");
-				msg = StringUtil.replace(msg, "%filename%", fileName);
-				WbSwingUtilities.showMessage(this, msg);
-			}
-			
-		}
-	}
-	
+
 }
 

@@ -30,11 +30,10 @@ public class SqlExportWriter
 		super(exp);
 	}
 
-	public RowDataConverter createConverter(ResultInfo info)
+	public RowDataConverter createConverter()
 	{
-		SqlRowDataConverter converter = new SqlRowDataConverter(info);
+		SqlRowDataConverter converter = new SqlRowDataConverter(exporter.getConnection());
 		converter.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
-		converter.setOriginalConnection(exporter.getConnection());
 		converter.setCommitEvery(exporter.getCommitEvery());
 		converter.setChrFunction(exporter.getChrFunction());
 		converter.setConcatString(exporter.getConcatString());

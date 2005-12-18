@@ -30,18 +30,12 @@ public class HistoryTextField
 	private String propName;
 	private List values;
 	private int maxHistorySize = 25;
-	private char delimiter = ';';
 		
 	public HistoryTextField(String prop)
 	{
 		super();
 		setEditable(true);
 		this.propName = prop;
-		String d = Settings.getInstance().getProperty("workbench.history." + propName + ".delimiter", null);
-		if (d != null)
-		{
-			this.delimiter = d.charAt(0);
-		}
 	}
 	
 	public String getText()

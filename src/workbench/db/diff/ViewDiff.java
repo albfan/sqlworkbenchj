@@ -40,12 +40,12 @@ public class ViewDiff
 	{
 		StrBuffer result = new StrBuffer(500);
 		if (this.writer == null) this.writer = new TagWriter();
-		StrBuffer colDiff = new StrBuffer(500);
+		
 		StrBuffer myindent = new StrBuffer(indent);
 		myindent.append("  ");
 		boolean isDifferent = true;
 		String tagToUse = TAG_CREATE_VIEW;
-		String viewName = reference.getView().getTableName();
+
 		if (target != null)
 		{
 			String refSource = reference.getViewSource();

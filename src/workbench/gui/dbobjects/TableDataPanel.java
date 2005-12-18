@@ -135,7 +135,7 @@ public class TableDataPanel
 		topPanel.setLayout(box);
 
 		this.reloadAction = new ReloadAction(this);
-		this.reloadAction.setTooltip(ResourceMgr.getDescription("TxtLoadTableData"));
+		this.reloadAction.setTooltip(ResourceMgr.getDescription("TxtLoadTableData", true));
 
 		WbToolbar mytoolbar = new WbToolbar();
 		mytoolbar.addDefaultBorder();
@@ -210,11 +210,6 @@ public class TableDataPanel
 	{
 		this.dbConnection = null;
 		this.reset();
-	}
-
-	private int getMaxRows()
-	{
-		return this.dataDisplay.getMaxRows();
 	}
 
 	public void reset()
@@ -400,7 +395,7 @@ public class TableDataPanel
 		}
 	}
 
-	private void doRetrieve()
+	private void doRetrieve(boolean respectMaxRows)
 	{
 		if (this.isRetrieving()) return;
 
@@ -416,8 +411,7 @@ public class TableDataPanel
 			dataDisplay.setShowErrorMessages(true);
 			dataDisplay.setAutomaticUpdateTableCheck(false);
 			dataDisplay.scriptStarting();
-			dataDisplay.setMaxRows(this.getMaxRows());
-			dataDisplay.runStatement(sql);
+			dataDisplay.runStatement(sql, respectMaxRows);
 			dataDisplay.setUpdateTable(this.table);
 			dataDisplay.getSelectKeysAction().setEnabled(true);
 			String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
@@ -455,7 +449,7 @@ public class TableDataPanel
 		this.dataDisplay.setCursor(null);
 	}
 
-	public void retrieve()
+	public void retrieve(final boolean respectMaxRows)
 	{
 		if (this.isRetrieving()) return;
 
@@ -463,7 +457,7 @@ public class TableDataPanel
 		{
 			public void run()
 			{
-				doRetrieve();
+				doRetrieve(respectMaxRows);
 			}
 		};
 		t.start();
@@ -504,7 +498,7 @@ public class TableDataPanel
 
 	private void saveSettings(String prefix, PropertyStorage props, boolean includeGlobal)
 	{
-		props.setProperty(prefix + "maxrows", this.getMaxRows());
+		props.setProperty(prefix + "maxrows", this.dataDisplay.getMaxRows());
 		props.setProperty(prefix + "autoretrieve", this.autoRetrieve.isSelected());
 		props.setProperty(prefix + "autoloadrowcount", this.autoloadRowCount);
 		if (includeGlobal)
@@ -558,7 +552,7 @@ public class TableDataPanel
 
 		if (this.autoRetrieve.isSelected() && includeData)
 		{
-			int max = this.getMaxRows();
+			int max = this.dataDisplay.getMaxRows();
 			if ( this.warningThreshold > 0
 				   && rows > this.warningThreshold
 				   && max == 0)
@@ -568,7 +562,7 @@ public class TableDataPanel
 				int choice = JOptionPane.showConfirmDialog(this, msg, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION);
 				if (choice == JOptionPane.NO_OPTION) return;
 			}
-			this.doRetrieve();
+			this.doRetrieve(true);
 		}
 	}
 
@@ -576,7 +570,8 @@ public class TableDataPanel
 	{
 		this.reset();
 		this.showRowCount();
-		this.retrieve();
+		boolean ctrlPressed = this.reloadAction.ctrlPressed();
+		this.retrieve(!ctrlPressed);
 	}
 
 	public Window getParentWindow()

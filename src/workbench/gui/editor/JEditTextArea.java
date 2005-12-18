@@ -108,7 +108,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.41 2005-11-03 20:16:18 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.42 2005-12-18 22:16:02 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -118,7 +118,6 @@ public class JEditTextArea
 	protected Pattern lastSearchPattern;
 	protected String lastSearchExpression;
 	private int lastSearchPos = -1;
-	private boolean lastSearchOptionWholeWords;
 	private Color alternateSelectionColor;
 	private static final Color ERROR_COLOR = Color.RED.brighter();
 	private static final Color TEMP_COLOR = Color.GREEN.brighter();
@@ -322,7 +321,6 @@ public class JEditTextArea
 			int bracket = getBracketPosition();
 			int line = getBracketLine();
 			int caret = getLineStartOffset(line) + bracket;
-			SyntaxDocument doc = this.getDocument();
 			if (caret > -1)
 			{
 					setCaretPosition(caret);
@@ -430,7 +428,6 @@ public class JEditTextArea
 	{
 		String regex = this.getSearchExpression(anExpression, ignoreCase, wholeWord, useRegex);
 
-		int start = -1;
 		int end = -1;
 		this.lastSearchPattern = (ignoreCase ? Pattern.compile(regex, Pattern.CASE_INSENSITIVE) : Pattern.compile(regex));
 		this.lastSearchExpression = anExpression;
@@ -458,7 +455,6 @@ public class JEditTextArea
 	{
 		if (this.lastSearchPattern == null) return -1;
 		if (this.lastSearchPos == -1) return -1;
-		String search = null;
 
 		Matcher m = this.lastSearchPattern.matcher(this.getText());
 
@@ -657,7 +653,6 @@ public class JEditTextArea
 	{
 		if(firstLine == this.firstLine)
 			return;
-		int oldFirstLine = this.firstLine;
 		this.firstLine = firstLine;
 		if(firstLine != vertical.getValue())
 			updateScrollBars();
@@ -682,7 +677,6 @@ public class JEditTextArea
 			return;
 		int height = painter.getHeight();
 		int lineHeight = painter.getFontMetrics().getHeight();
-		int oldVisibleLines = visibleLines;
 		visibleLines = height / lineHeight;
 		updateScrollBars();
 	}
@@ -718,7 +712,6 @@ public class JEditTextArea
 	public boolean setOrigin(int firstLine, int horizontalOffset)
 	{
 		boolean changed = false;
-		int oldFirstLine = this.firstLine;
 
 		if(horizontalOffset != this.horizontalOffset)
 		{
@@ -885,7 +878,6 @@ public class JEditTextArea
 				tokens = painter.currentLineTokens = tokenMarker.markTokens(lineSegment,line);
 			}
 
-			Toolkit toolkit = painter.getToolkit();
 			Font defaultFont = painter.getFont();
 			SyntaxStyle[] styles = painter.getStyles();
 
@@ -978,7 +970,6 @@ public class JEditTextArea
 			}
 
 			int offset = 0;
-			Toolkit toolkit = painter.getToolkit();
 			Font defaultFont = painter.getFont();
 			SyntaxStyle[] styles = painter.getStyles();
 

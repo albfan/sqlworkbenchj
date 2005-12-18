@@ -82,9 +82,9 @@ public class DataPumper
 	private final String copyMsg = ResourceMgr.getString("MsgCopyingRow");
 	private boolean copyRunning = false;
 	private DataCopier copier;
-	private DataImporter importer;
+//	private DataImporter importer;
 	private EditorPanel sqlEditor;
-	private MainWindow mainWindow;
+//	private MainWindow mainWindow;
 	private boolean supportsBatch = false;
 	boolean allowCreateTable = true; //"true".equals(Settings.getInstance().getProperty("workbench.datapumper.allowcreate", "true"));
 
@@ -944,7 +944,7 @@ public class DataPumper
 
 	public void showWindow(MainWindow aParent)
 	{
-		this.mainWindow = aParent;
+//		this.mainWindow = aParent;
 		this.window  = new JFrame(ResourceMgr.getString("TxtWindowTitleDataPumper"))
 		{
 			public void setVisible(boolean visible)
@@ -1803,9 +1803,10 @@ public class DataPumper
 		this.statusLabel.repaint();
 	}
 	
-	public void setMonitorType(int aType)
-	{
-	}
+	public void saveCurrentType(String type) {}
+	public void restoreType(String type) {}
+	public int getMonitorType() { return RowActionMonitor.MONITOR_PLAIN; }
+	public void setMonitorType(int aType) {}
 
 	public void jobFinished()
 	{

@@ -114,11 +114,31 @@ ALTER TABLE <xsl:value-of select="$table"/> DROP PRIMARY KEY;
 
 <!-- re-create a view -->
 <xsl:template match="view-def">
+  <xsl:variable name="quote"><xsl:text>"</xsl:text></xsl:variable>
 CREATE OR REPLACE VIEW <xsl:value-of select="view-name"/>
 (
   <xsl:for-each select="column-def">
   	<xsl:sort select="dbms-position"/>
-    <xsl:copy-of select="column-name"/><xsl:if test="position() &lt; last()"><xsl:text>, 
+	<xsl:variable name="orgname" select="column-name"/>
+	<xsl:variable name="uppername">
+	  <xsl:value-of select="translate(column-name,
+                                  'abcdefghijklmnopqrstuvwxyz',
+                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/> 	
+	</xsl:variable>
+	<xsl:variable name="colname">
+	  <xsl:choose>
+		<xsl:when test="contains(column-name,' ')">
+		  <xsl:value-of select="concat($quote,column-name,$quote)"/>
+		</xsl:when>
+		<xsl:when test="$uppername != column-name">
+		  <xsl:value-of select="concat($quote,column-name,$quote)"/>
+		</xsl:when>
+        <xsl:otherwise>
+            <xsl:value-of select="column-name"/>
+        </xsl:otherwise>
+	  </xsl:choose>
+	</xsl:variable>
+    <xsl:copy-of select="$colname"/><xsl:if test="position() &lt; last()"><xsl:text>, 
   </xsl:text></xsl:if>
   </xsl:for-each>
 )

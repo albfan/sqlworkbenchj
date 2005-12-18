@@ -56,7 +56,7 @@ public class WbConnection
 	private ConnectionProfile profile;
 	private PreparedStatementPool pool;
 
-	private boolean ddlNeedsCommit;
+//	private boolean ddlNeedsCommit;
 	private boolean cancelNeedsReconnect = false;
 
 	private List listeners;
@@ -430,7 +430,12 @@ public class WbConnection
 	}
 
 	/**
-	 *	Return a readable display of a connection
+	 * Return a readable display of a connection. 
+	 * This might actually send a SELECT to the database to 
+	 * retrieve the current user or schema.
+	 * @see DbMetadata#getUserName()
+	 * @see DbMetadata#getSchemaToUse()
+	 * @see DbMetadata#getCurrentCatalog()
 	 */
 	public String getDisplayString()
 	{

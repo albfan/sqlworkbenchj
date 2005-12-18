@@ -41,7 +41,6 @@ public class MySqlMetadata
 	public DataStore getProcedures(String catalog, String schema)
 		throws SQLException
 	{
-		JdbcProcedureReader procReader = new JdbcProcedureReader(this.metaData);
 		PreparedStatement stmt = null;
 		String sql = "SELECT NULL AS procedure_cat, \n" + 
              "       routine_schema AS procedure_schem, \n" + 

@@ -43,11 +43,7 @@ public class RunMacroAction extends WbAction
 		}
 		this.putValue(Action.NAME, menuTitle);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
-		String desc = ResourceMgr.getDescription("MnuTxtRunMacro");
-		String shift = KeyEvent.getKeyModifiersText(KeyEvent.SHIFT_MASK);
-		desc = StringUtil.replace(desc, "%shift%", shift);
-		desc = StringUtil.replace(desc, "%macro%", this.macroName);
-		
+		String desc = ResourceMgr.getDescription("MnuTxtRunMacro", true);
 		this.putValue(Action.SHORT_DESCRIPTION, desc);
 		this.setIcon(null);
 	}

@@ -78,9 +78,9 @@ public class WbLineBorder extends AbstractBorder
 		return this.insets;
 	}
 	
-	public Insets getBorderInsets(Component c, Insets insets)
+	public Insets getBorderInsets(Component c, Insets i)
 	{
-		insets.left = insets.top = insets.right = insets.bottom = 2;
+		i.left = i.top = i.right = i.bottom = 2;
 		return insets;
 	}
 	

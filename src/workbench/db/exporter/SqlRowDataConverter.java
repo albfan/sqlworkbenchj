@@ -17,7 +17,9 @@ import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DmlStatement;
 import workbench.storage.ResultInfo;
@@ -51,13 +53,39 @@ public class SqlRowDataConverter
 	private boolean includeOwner = true;
 	private boolean doFormatting = true; 
 
-	public SqlRowDataConverter(ResultInfo info)
+	public SqlRowDataConverter(WbConnection con)
 	{
-		super(info);
-		this.factory = new StatementFactory(info, this.originalConnection);
-		this.needsUpdateTable = info.getUpdateTable() == null;
+		super();
+		setOriginalConnection(con);
 	}
 
+	public void setOriginalConnection(WbConnection con)
+	{
+		super.setOriginalConnection(con);
+	}
+
+	public void setResultInfo(ResultInfo meta)
+	{
+		super.setResultInfo(meta);
+		this.factory = new StatementFactory(meta, this.originalConnection);
+		this.needsUpdateTable = meta.getUpdateTable() == null;
+		this.factory.setIncludeTableOwner(this.includeOwner);
+		this.factory.setTableToUse(this.alternateUpdateTable);
+		
+		boolean keysPresent = this.checkKeyColumns();
+		if (!keysPresent && (this.sqlType == SQL_DELETE_INSERT || this.sqlType == SQL_UPDATE))
+		{
+			if (this.errorReporter != null)
+			{
+				String msg = ResourceMgr.getString("ErrorExportNoKeys");
+				this.errorReporter.addWarning(msg);
+			}
+			LogMgr.logWarning("SqlRowDataConverter.setResultInfo()", "No key columns found, reverting back to INSERT generation");
+			this.sqlType = SQL_INSERT;
+		}
+		
+	}
+	
 	public StrBuffer convertData()
 	{
 		return null;
@@ -190,26 +218,19 @@ public class SqlRowDataConverter
 	public void setCreateUpdate()
 	{
 		this.sqlType = SQL_UPDATE;
-		// when creating update statements, we need to make sure
-		// that we have key columns
-		this.checkKeyColumns();
 		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.update.doformat",true);
 	}
 
 	public void setCreateInsertDelete()
 	{
 		this.sqlType = SQL_DELETE_INSERT;
-		if (!this.checkKeyColumns())
-		{
-			LogMgr.logWarning("SqlRowDataConverter.setCreateInsertDelete()", "No key columns found, reverting back to INSERT generation");
-			this.sqlType = SQL_INSERT;
-		}
 		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.doformat",true);
 	}
 	
 	private boolean checkKeyColumns()
 	{
 		boolean keysPresent = false;
+		
 		if (this.keyColumnsToUse != null && this.keyColumnsToUse.size() > 0)
 		{
 			int keyCount = this.keyColumnsToUse.size();
@@ -227,7 +248,7 @@ public class SqlRowDataConverter
 		{
 			try
 			{
-				this.metaData.readPkDefinition(this.originalConnection);
+				this.metaData.readPkDefinition(this.originalConnection, false);
 				keysPresent = this.metaData.hasPkColumns();
 			}
 			catch (SQLException e)
@@ -319,7 +340,7 @@ public class SqlRowDataConverter
 		{
 			this.alternateUpdateTable = table;
 			this.needsUpdateTable = false;
-			this.factory.setTableToUse(this.alternateUpdateTable);
+			if (this.factory != null) this.factory.setTableToUse(this.alternateUpdateTable);
 		}
 		else
 		{
@@ -344,7 +365,6 @@ public class SqlRowDataConverter
 	public void setKeyColumnsToUse(List keyColumnsToUse)
 	{
 		this.keyColumnsToUse = keyColumnsToUse;
-		checkKeyColumns();
 	}
 
 	public void setLineTerminator(String lineEnd)
@@ -356,6 +376,6 @@ public class SqlRowDataConverter
 	public void setIncludeTableOwner(boolean flag)
 	{
 		this.includeOwner = flag;
-		this.factory.setIncludeTableOwner(flag);
+		if (this.factory != null) this.factory.setIncludeTableOwner(flag);
 	}
 }

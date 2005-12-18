@@ -27,7 +27,7 @@ public class ProcedureDefinition
 	// DatabaseMetadata.DatabaseMetaData.procedureNoResult
 	// DatabaseMetadata.DatabaseMetaData.procedureReturnsResult
 	private int resultType; 
-	private String typeDefinition;
+	//private String typeDefinition;
 	
 	public ProcedureDefinition(String cat, String schem, String name, int type)
 	{

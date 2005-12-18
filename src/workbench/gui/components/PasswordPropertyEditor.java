@@ -48,7 +48,7 @@ public class PasswordPropertyEditor
 		this.source = aSource;
 		this.changed = false;
 		this.propName = aProperty;
-		String propertyName = Character.toUpperCase(aProperty.charAt(0)) + aProperty.substring(1);
+		//String propertyName = Character.toUpperCase(aProperty.charAt(0)) + aProperty.substring(1);
 
 		this.getDocument().removeDocumentListener(this);
 

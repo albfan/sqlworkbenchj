@@ -20,16 +20,13 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
+import workbench.storage.DataStore;
+import workbench.storage.ResultInfo;
 
 
 public class SortHeaderRenderer extends DefaultTableCellRenderer
 {
-	private static Border DEFAULT_HEADER_BORDER;
-	static
-	{
-		Border empty = new EmptyBorder(0, 1, 0, 1);
-		DEFAULT_HEADER_BORDER = new CompoundBorder(UIManager.getBorder("TableHeader.cellBorder"), empty);
-	}
+	private static Border DEFAULT_HEADER_BORDER = new CompoundBorder(UIManager.getBorder("TableHeader.cellBorder"), new EmptyBorder(0, 1, 0, 1));
 	
   public SortHeaderRenderer()
   {
@@ -42,16 +39,20 @@ public class SortHeaderRenderer extends DefaultTableCellRenderer
   {
     int index = -1;
     boolean ascending = true;
+		String type = null;
+		
     if (table instanceof WbTable)
     {
       WbTable sortTable = (WbTable)table;
       index = sortTable.getSortedViewColumnIndex();
       ascending = sortTable.isSortedColumnAscending();
+			DataStoreTableModel model = sortTable.getDataStoreTableModel();
+			if (model != null) type = model.getDbmsType(col);
     }
+		
 		if (col == index)
 		{
-			Icon icon = ascending ? SortArrowIcon.ARROW_DOWN : SortArrowIcon.ARROW_UP;
-			this.setIcon(icon);
+			this.setIcon(ascending ? SortArrowIcon.ARROW_DOWN : SortArrowIcon.ARROW_UP);
 		}
 		else
 		{
@@ -59,7 +60,21 @@ public class SortHeaderRenderer extends DefaultTableCellRenderer
 		}
 		String text = (value == null) ? "" : value.toString();
 		setText(text);
-		setToolTipText(text);
+		
+		if (type == null)
+		{
+			setToolTipText(text);
+		}
+		else
+		{
+			StringBuffer tip = new StringBuffer(text.length() + 20);
+			tip.append("<html>&nbsp;");
+			tip.append(text);
+			tip.append("&nbsp;<br>&nbsp;<code>");
+			tip.append(type);
+			tip.append("</code>&nbsp;</html>");
+			setToolTipText(tip.toString());
+		}
     return this;
   }
 }

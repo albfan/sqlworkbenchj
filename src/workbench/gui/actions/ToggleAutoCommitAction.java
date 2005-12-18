@@ -31,7 +31,6 @@ public class ToggleAutoCommitAction
 {
 	private WbConnection connection;
 	private JCheckBoxMenuItem toggleMenu;
-	private boolean ignorePropertyChange = false;
 	
 	public ToggleAutoCommitAction()
 	{
@@ -60,14 +59,12 @@ public class ToggleAutoCommitAction
 		{
 			try
 			{
-				this.ignorePropertyChange = true;
 				this.connection.toggleAutoCommit();
 				boolean flag = this.connection.getAutoCommit();
 				if (this.toggleMenu != null) this.toggleMenu.setSelected(flag);
 			}
 			finally
 			{
-				this.ignorePropertyChange = false;
 			}
 		}
 	}

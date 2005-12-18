@@ -171,7 +171,6 @@ public class TableListPanel
 	private static final String COMPILE_CMD = "compile-procedure";
 
 	private WbMenu showDataMenu;
-	private String[] availableTableTypes;
 	private WbAction dropIndexAction;
 	private WbAction createDummyInsertAction;
 	private WbAction createDefaultSelect;
@@ -1019,18 +1018,14 @@ public class TableListPanel
 
 		this.invalidateData();
 
-		boolean dataVisible = false;
-
 		if (isTable(this.selectedObjectType))
 		{
 			addTablePanels();
-			dataVisible = true;
 		}
 		else
 		{
 			if (isTableType(this.selectedObjectType))
 			{
-				dataVisible = true;
 				if (this.displayTab.getTabCount() == 2)
 				{
 					this.addDataPanel();
@@ -2017,7 +2012,7 @@ public class TableListPanel
 
 		if (rowCount > 1)
 		{
-			this.spoolTables();
+			this.exportTables();
 			return;
 		}
 
@@ -2026,12 +2021,12 @@ public class TableListPanel
 		String table = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 		String schema = this.tableList.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
 		TableIdentifier id = new TableIdentifier(schema, table);
-		DataExporter exporter = new DataExporter();
+		DataExporter exporter = new DataExporter(this.dbConnection);
 		exporter.setProgressInterval(10);
-		exporter.exportTable(SwingUtilities.getWindowAncestor(this), this.dbConnection, id);
+		exporter.exportTable(SwingUtilities.getWindowAncestor(this), id);
 	}
 
-	public void spoolTables()
+	private void exportTables()
 	{
 		ExportFileDialog dialog = new ExportFileDialog(this);
 		dialog.setIncludeSqlInsert(true);
@@ -2046,9 +2041,8 @@ public class TableListPanel
 		{
 			String fdir = dialog.getSelectedFilename();
 
-			DataExporter exporter = new DataExporter();
+			DataExporter exporter = new DataExporter(this.dbConnection);
 			dialog.setExporterOptions(exporter);
-			exporter.setConnection(this.dbConnection);
 			exporter.setShowProgressWindow(true);
 			String ext = null;
 			int type = dialog.getExportType();
@@ -2082,10 +2076,17 @@ public class TableListPanel
 				if (!this.isTableType(ttype.toLowerCase())) continue;
 				String schema = this.tableList.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
 				TableIdentifier id = new TableIdentifier(schema, table);
-				String stmt = "SELECT * FROM " + id.getTableExpression(this.dbConnection);
 				String fname = StringUtil.makeFilename(table);
 				File f = new File(fdir, fname + ext);
-				exporter.addJob(f.getAbsolutePath(), stmt);
+				try
+				{
+					exporter.addTableExportJob(f.getAbsolutePath(), id);
+				}
+				catch (SQLException e)
+				{
+					LogMgr.logError("TableListPanel.exportTables()", "Error adding ExportJob", e);
+					WbSwingUtilities.showMessage(this, e.getMessage());
+				}
 			}
 			exporter.setProgressInterval(10);
 			exporter.startExportJobs((Frame)SwingUtilities.getWindowAncestor(this));

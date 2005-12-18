@@ -65,9 +65,7 @@ public class DataStoreExporter
 	private void writeFile()
 	{
 		if (this.source == null) return;
-		int type = dialog.getExportType();
-		DataExporter exporter = new DataExporter();
-		exporter.setConnection(this.source.getOriginalConnection());
+		DataExporter exporter = new DataExporter(this.source.getOriginalConnection());
 		exporter.setColumnsToExport(this.dialog.getColumnsToExport());
 		dialog.setExporterOptions(exporter);
 		try

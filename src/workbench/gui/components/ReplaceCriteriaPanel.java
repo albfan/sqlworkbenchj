@@ -39,7 +39,7 @@ public class ReplaceCriteriaPanel extends JPanel
 	
 	private JTextField criteria;
 	private JTextField newValue;
-	private Replaceable client;
+//	private Replaceable client;
 	
 	public ReplaceCriteriaPanel(Replaceable aClient)
 	{
@@ -48,7 +48,7 @@ public class ReplaceCriteriaPanel extends JPanel
 	
 	public ReplaceCriteriaPanel(Replaceable aClient, String initialValue)
 	{
-		this.client = aClient;
+//		this.client = aClient;
 		this.ignoreCase = new JCheckBox(ResourceMgr.getString("LabelSearchIgnoreCase"));
 		this.ignoreCase.setSelected(Settings.getInstance().getBoolProperty(PROP_KEY_CASE, true));
 	
@@ -125,13 +125,9 @@ public class ReplaceCriteriaPanel extends JPanel
 				criteria.grabFocus();
 			}
 		});
-		String title = ResourceMgr.getString("TxtWindowTitleReplaceText");
-		//int choice = JOptionPane.showConfirmDialog(caller, this, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 		JDialog d = new JDialog();
 		d.getContentPane().add(this, BorderLayout.CENTER);
 		d.show();
-		//Settings.getInstance().setProperty(PROP_CLASS, PROP_KEY_CASE, Boolean.toString(this.getIgnoreCase()));
-		//if (choice == JOptionPane.CANCEL_OPTION) return false;
 		return true;
 	}
 	

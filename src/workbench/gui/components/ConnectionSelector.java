@@ -44,7 +44,6 @@ public class ConnectionSelector
 	private Frame parent;
 	private JDialog connectingInfo;
 	private JLabel connectLabel;
-	private String fullError;
 	private String propertyKey;
 
 	/** Creates a new instance of ConnectionSelector */
@@ -219,7 +218,6 @@ public class ConnectionSelector
 				logmsg.append(next.getMessage());
 				next = next.getNextException();
 			}
-			this.fullError = logmsg.toString();
 
 			LogMgr.logError("ConnectionSelector.doConnect()", "SQL Exception when connecting", se);
 		}

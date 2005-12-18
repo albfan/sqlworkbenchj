@@ -30,8 +30,6 @@ import workbench.resource.Settings;
  */
 public class IgnoreErrorsAction extends WbAction
 {
-	private Border originalBorder;
-
 	private boolean switchedOn = false;
 	private JCheckBoxMenuItem toggleMenu;
 	private JToggleButton toggleButton;

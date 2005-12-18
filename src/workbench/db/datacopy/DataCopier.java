@@ -66,12 +66,12 @@ public class DataCopier
 		this.copyFromTable(source, target, aSourceTable, aTargetTable, (Map)null, null, false, false);
 	}
 
-	public void copyFromFile(RowDataProducer source, WbConnection target, TableIdentifier targetTable)
+	public void copyFromFile(RowDataProducer source, WbConnection target, TableIdentifier targetTbl)
 	{
 		this.sourceConnection = null;
 		this.targetConnection = target;
 		this.importer.setConnection(target);
-		this.targetTable = targetTable;
+		this.targetTable = targetTbl;
 		this.targetColumnsForQuery = null;
 		this.sourceData = source;
 		this.importer.setProducer(source);
@@ -237,7 +237,7 @@ public class DataCopier
 	 *  so that the requested columns are copied.
 	 *	If a column list is passed, the new table will contain only the passed columns,
 	 *	otherwise it will contain all columns from the sourcetable.
-	 *	The method expecst sourceConnect, targetConnection, sourceTable and targetTable
+	 *	The method expects sourceConnection, targetConnection, sourceTable and targetTable
 	 *	to be initialized accordingly
 	 */
 	private void initNewTable(ColumnIdentifier[] sourceColumns)

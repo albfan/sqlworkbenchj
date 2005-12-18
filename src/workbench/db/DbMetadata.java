@@ -1626,7 +1626,11 @@ public class DbMetadata
 	
 	public boolean objectExists(TableIdentifier aTable, String type)
 	{
-		String[] types = new String[] { type };
+		String[] types = null;
+		if (type != null)
+		{
+			types = new String[] { type };
+		}
 		return objectExists(aTable, types);
 	}
 	

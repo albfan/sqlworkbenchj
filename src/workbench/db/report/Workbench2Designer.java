@@ -222,7 +222,7 @@ public class Workbench2Designer
 		Element dbdPluginDataRec = destination.createElement("PLUGINDATARECORDS");
 		Element dbdQueryData = destination.createElement("QUERYDATA");
 		Element dbdQueryDataRec = destination.createElement("QUERYRECORDS");
-		Element dbdLinkedMod = destination.createElement("LINKEDMODELS");
+//		Element dbdLinkedMod = destination.createElement("LINKEDMODELS");
 		Element dbdMetaData = destination.createElement("METADATA");
 		Element dbdRoot = destination.createElement("DBMODEL");
 
@@ -478,7 +478,7 @@ public class Workbench2Designer
 					continue;
 				}
 
-				String source = Workbench2Designer.dbdIDReference.getTableDBDID(src.getName());
+				//String relSource = Workbench2Designer.dbdIDReference.getTableDBDID(src.getName());
 				Table dest = (Table) Workbench2Designer.tables.get(relation.getDestTable());
 
 				if (dest == null) 
@@ -488,8 +488,8 @@ public class Workbench2Designer
 					continue;
 				}
 
-				String destination = Workbench2Designer.dbdIDReference.getTableDBDID(dest.getName());
-				if (destination == null)
+				String relDestination = Workbench2Designer.dbdIDReference.getTableDBDID(dest.getName());
+				if (relDestination == null)
 				{
 					LogMgr.logWarning("Workbench2DbDesigner.dbdCreateRelations()", "Destination string for relation " + relation.getRelName() + " not found in WB table list!");
 					it.remove();
@@ -922,8 +922,8 @@ public class Workbench2Designer
 		for(int i=0;i<indexdata.getLength();i++)
 		{
 			Node node = indexdata.item(i);
-			String type = getNodeTypeName(node.getNodeType());
-			String name =node.getNodeName();
+//			String type = getNodeTypeName(node.getNodeType());
+			String name = node.getNodeName();
 			String text = this.getTextFromElement(node);
 
 			if (name.equals("name"))
@@ -964,7 +964,7 @@ public class Workbench2Designer
 		{
 
 			Node node = coldata.item(i);
-			String type = getNodeTypeName(node.getNodeType());
+//			String type = getNodeTypeName(node.getNodeType());
 			String name =node.getNodeName();
 			String text = this.getTextFromElement(node);
 

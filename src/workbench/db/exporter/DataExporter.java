@@ -37,6 +37,7 @@ import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.interfaces.ErrorReporter;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.ProgressPanel;
@@ -65,7 +66,7 @@ import workbench.util.WbThread;
  * @author  support@sql-workbench.net
  */
 public class DataExporter
-	implements Interruptable
+	implements Interruptable, ErrorReporter
 {
 	public static final int EXPORT_SQL = 1;
 	public static final int EXPORT_TXT = 2;
@@ -120,7 +121,7 @@ public class DataExporter
 
 	private ProgressPanel progressPanel;
 	private JDialog progressWindow;
-	private boolean keepRunning = true;
+	private ExportJobEntry currentJob;
 	private boolean cancelJobs = false;
 	private int pendingJobs = 0;
 	private boolean jobsRunning = false;
@@ -134,21 +135,13 @@ public class DataExporter
 	private ExportWriter exportWriter;
 	private Window parentWindow;
 	private int tablesExported;
+	private long totalRows;
 	
 	private boolean writeOracleControlFile = false;
 	
-	public DataExporter()
+	public DataExporter(WbConnection con)
 	{
-	}
-
-	private void openProgressMonitor(Window parent, boolean modal)
-	{
-		Frame f = null;
-		if (parent instanceof Frame)
-		{
-			f = (Frame)parent;
-		}
-		openProgressMonitor(parent, modal);
+		this.dbConn = con;
 	}
 
 	private void createProgressPanel()
@@ -174,7 +167,7 @@ public class DataExporter
 		{
 			public void windowClosing(WindowEvent e)
 			{
-				keepRunning = false;
+				cancelExecution();
 			}
 		});
 
@@ -182,39 +175,27 @@ public class DataExporter
 		this.progressWindow.setVisible(true);
 	}
 
-	public void addTableExportJob(String anOutputfile, TableIdentifier table)
+	public void clearJobs()
 	{
-		if (this.jobQueue == null)
-		{
-			this.jobQueue = new ArrayList();
-		}
-		JobEntry job = new DataExporter.JobEntry();
-		job.tableName = table.getTableExpression(this.dbConn);
-		job.outputFile = anOutputfile;
-		job.sqlStatement = "SELECT * FROM " + job.tableName;
-		this.jobQueue.add(job);
+		if (this.jobsRunning) return;
+		if (this.jobQueue == null) return;
+		this.jobQueue.clear();
 	}
-
-	public void addJob(String anOutputfile, String aStatement)
+	
+	public void addTableExportJob(String anOutputfile, TableIdentifier table)
+		throws SQLException
 	{
 		if (this.jobQueue == null)
 		{
 			this.jobQueue = new ArrayList();
 		}
-		JobEntry job = new DataExporter.JobEntry();
-		job.outputFile = anOutputfile;
-		job.sqlStatement = aStatement;
+		ExportJobEntry job = new ExportJobEntry(anOutputfile, table, this.dbConn);
 		this.jobQueue.add(job);
 	}
 
 	public WbConnection getConnection()
 	{
 		return this.dbConn;
-	}
-
-	public void setConnection(WbConnection aConn)
-	{
-		this.dbConn = aConn;
 	}
 
 	public boolean confirmCancel()
@@ -233,7 +214,6 @@ public class DataExporter
 
 	public void cancelExecution()
 	{
-		this.keepRunning = false;
 		this.cancelJobs = true;
 		if (this.exportWriter != null)
 		{
@@ -251,10 +231,6 @@ public class DataExporter
 	public void setRowMonitor(RowActionMonitor monitor)
 	{
 		this.rowMonitor = monitor;
-		if (this.rowMonitor != null)
-		{
-			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
-		}
 	}
 
 	/**
@@ -411,7 +387,7 @@ public class DataExporter
 	{
 		if (StringUtil.isEmptyString(aFormat))
 		{
-			aFormat = Settings.getInstance().getDefaultDateTimeFormat();
+			aFormat = Settings.getInstance().getDefaultTimestampFormat();
 		}
 		if (StringUtil.isEmptyString(aFormat)) return;
 		this.dateTimeFormat = aFormat;
@@ -435,29 +411,66 @@ public class DataExporter
 		return this.dateTimeFormatter;
 	}
 
+	private void createExportWriter()
+	{
+		ExportWriter exporter = null;
+
+		switch (this.exportType)
+		{
+			case EXPORT_HTML:
+				this.exportWriter = new HtmlExportWriter(this);
+				break;
+			case EXPORT_SQL:
+				this.exportWriter = new SqlExportWriter(this);
+				break;
+			case EXPORT_TXT:
+				this.exportWriter = new TextExportWriter(this);
+				break;
+			case EXPORT_XML:
+				this.exportWriter = new XmlExportWriter(this);
+		}
+	}
+	
 	public void setHtmlTitle(String aTitle) { this.htmlTitle = aTitle; }
 	public String getHtmlTitle() { return this.htmlTitle; }
 
-	public void setOutputTypeHtml() { this.exportType = EXPORT_HTML; }
-	public void setOutputTypeXml() { this.exportType = EXPORT_XML; }
-	public void setOutputTypeText() { this.exportType = EXPORT_TXT; }
+	public void setOutputTypeHtml() 
+	{ 
+		this.exportType = EXPORT_HTML; 
+		createExportWriter();
+	}
+	
+	public void setOutputTypeXml() 
+	{ 
+		this.exportType = EXPORT_XML; 
+		createExportWriter();
+	}
+	
+	public void setOutputTypeText() 
+	{ 
+		this.exportType = EXPORT_TXT; 
+		createExportWriter();
+	}
 
 	public void setOutputTypeSqlInsert()
 	{
 		this.exportType = EXPORT_SQL;
 		this.sqlType = SqlRowDataConverter.SQL_INSERT;
+		createExportWriter();
 	}
 
 	public void setOutputTypeSqlUpdate()
 	{
 		this.exportType = EXPORT_SQL;
 		this.sqlType = SqlRowDataConverter.SQL_UPDATE;
+		createExportWriter();
 	}
 
 	public void setOutputTypeSqlDeleteInsert()
 	{
 		this.exportType = EXPORT_SQL;
 		this.sqlType = SqlRowDataConverter.SQL_DELETE_INSERT;
+		createExportWriter();
 	}
 
 	public int getSqlType()
@@ -513,17 +526,21 @@ public class DataExporter
 		this.setDecimalSymbol(aSymbol.charAt(0));
 	}
 
-	public char getDecimalSymbol() { return this.decimalSymbol; }
-
-
 	public void setSql(String aSql)
 	{
 		this.sql = aSql;
-		String cleanSql = SqlUtil.makeCleanSql(aSql, false);
-		List tables = SqlUtil.getTables(cleanSql);
-		if (tables.size() == 1);
+		if (aSql != null) 
 		{
-			this.sqlTable = (String)tables.get(0);
+			String cleanSql = SqlUtil.makeCleanSql(aSql, false);
+			List tables = SqlUtil.getTables(cleanSql);
+			if (tables.size() == 1);
+			{
+				this.sqlTable = (String)tables.get(0);
+			}
+		}
+		else
+		{
+			this.sqlTable = null;
 		}
 	}
 
@@ -578,21 +595,24 @@ public class DataExporter
 		this.jobsRunning = true;
 		this.cancelJobs = false;
 		this.tablesExported = 0;
+		this.totalRows = 0;
+		this.setSql(null);
+		
 		for (int i=0; i < count; i++)
 		{
-			JobEntry job = (JobEntry)this.jobQueue.get(i);
-			this.setSql(job.sqlStatement);
-			this.setOutputFilename(job.outputFile);
+			this.currentJob = (ExportJobEntry)this.jobQueue.get(i);
+			
+			this.setOutputFilename(this.currentJob.getOutputFile());
 			if (this.progressPanel != null)
 			{
 				this.progressPanel.setFilename(this.outputfile);
 				this.progressPanel.setRowInfo(0);
 				this.progressWindow.pack();
 			}
-			if (this.rowMonitor != null && job.tableName != null)
+			if (this.rowMonitor != null && this.currentJob.getTableName() != null)
 			{
 				StringBuffer msg = new StringBuffer(80);
-				msg.append(job.tableName);
+				msg.append(this.currentJob.getTableName());
 				msg.append(" [");
 				msg.append(i+1);
 				msg.append('/');
@@ -603,7 +623,7 @@ public class DataExporter
 
 			try
 			{
-				this.startExport();
+				totalRows += this.startExport();
 				this.tablesExported ++;
 			}
 			catch (Throwable th)
@@ -619,6 +639,8 @@ public class DataExporter
 		this.closeProgress();
 	}
 
+	public long getTotalRows() { return this.totalRows; }
+	
 	public void setCurrentRow(int currentRow)
 	{
 		if (this.rowMonitor != null)
@@ -646,7 +668,14 @@ public class DataExporter
 				this.dbConn.setBusy(true);
 				busyControl = true;
 			}
-			stmt.execute(this.sql);
+			if (this.currentJob != null)
+			{
+				stmt.execute(this.currentJob.getQuerySql());
+			}
+			else
+			{
+				stmt.execute(this.sql);
+			}
 			rs = stmt.getResultSet();
 			rows = this.startExport(rs);
 		}
@@ -721,15 +750,22 @@ public class DataExporter
 		try
 		{
 			ResultSetMetaData meta = rs.getMetaData();
-			ResultInfo info = new ResultInfo(meta, this.dbConn);
-			this.exportWriter = createExportWriter(info);
-			if (this.progressPanel != null) this.progressPanel.setInfoText(ResourceMgr.getString("MsgSpoolingRow"));
+			ResultInfo info;
+			if (this.currentJob != null)
+			{
+				info = currentJob.getResultInfo();
+			}
+			else
+			{
+				info = new ResultInfo(meta, this.dbConn);
+			}
+			configureExportWriter(info);
 			this.exportWriter.writeExport(rs, info);
 		}
 		catch (SQLException e)
 		{
 			this.errors.add(e.getMessage());
-			LogMgr.logError("DataExporter", "SQL Error", e);
+			LogMgr.logError("DataExporter.startExport()", "SQL Error", e);
 			throw e;
 		}
 		finally
@@ -748,18 +784,18 @@ public class DataExporter
 		try
 		{
 			ResultInfo info = ds.getResultInfo();
-			this.exportWriter = createExportWriter(info);
+			configureExportWriter(info);
 			this.exportWriter.writeExport(ds);
 		}
 		catch (SQLException e)
 		{
 			this.errors.add(e.getMessage());
-			LogMgr.logError("DataExporter", "Error when exporting DataStore", e);
+			LogMgr.logError("DataExporter.startExport()", "SQL Error", e);
 			throw e;
 		}
 		finally
 		{
-			this.exportWriter.exportFinished();
+			if (this.exportWriter != null) this.exportWriter.exportFinished();
 			if (!jobsRunning) this.closeProgress();
 		}
 		long numRows = this.exportWriter.getNumberOfRecords();
@@ -769,7 +805,7 @@ public class DataExporter
 	/**
 	 *	Export a table to an external file.
 	 */
-	public ExportWriter createExportWriter(ResultInfo info)
+	private void configureExportWriter(ResultInfo info)
 		throws IOException, SQLException, Exception
 	{
 		if (!jobsRunning)
@@ -777,32 +813,17 @@ public class DataExporter
 			this.warnings.clear();
 			this.errors.clear();
 		}
+		
 		if (this.sqlTable != null)
 		{
 			info.setUpdateTable(new TableIdentifier(this.sqlTable));
 		}
 
 		if (this.encoding == null) this.encoding = Settings.getInstance().getDefaultDataEncoding();
-		ExportWriter exporter = null;
-
-		switch (this.exportType)
-		{
-			case EXPORT_HTML:
-				exporter = new HtmlExportWriter(this);
-				break;
-			case EXPORT_SQL:
-				exporter = new SqlExportWriter(this);
-				break;
-			case EXPORT_TXT:
-				exporter = new TextExportWriter(this);
-				break;
-			case EXPORT_XML:
-				exporter = new XmlExportWriter(this);
-		}
-
+		
 		if (this.tableName != null)
 		{
-			exporter.setTableToUse(this.tableName);
+			this.exportWriter.setTableToUse(this.tableName);
 		}
 
 		BufferedWriter pw = null;
@@ -837,8 +858,8 @@ public class DataExporter
 			{
 				pw = new BufferedWriter(new FileWriter(f,this.append), buffSize);
 			}
-			exporter.setOutput(pw);
-			exporter.setBaseDir(dir);
+			this.exportWriter.setOutput(pw);
+			this.exportWriter.setBaseDir(dir);
 		}
 		catch (IOException e)
 		{
@@ -849,8 +870,8 @@ public class DataExporter
 
 		if (this.progressInterval > 0)
 		{
-			exporter.setRowMonitor(this.rowMonitor);
-			exporter.setProgressInterval(this.progressInterval);
+			this.exportWriter.setRowMonitor(this.rowMonitor);
+			this.exportWriter.setProgressInterval(this.progressInterval);
 		}
 		else if (this.rowMonitor != null)
 		{
@@ -863,10 +884,9 @@ public class DataExporter
 		if (this.showProgressWindow)
 		{
 			if (this.progressPanel == null) createProgressPanel();
-			exporter.setRowMonitor(this.progressPanel);
+			this.exportWriter.setRowMonitor(this.progressPanel);
+			this.progressPanel.setInfoText(ResourceMgr.getString("MsgSpoolingRow"));
 		}
-
-		return exporter;
 	}
 
 	public void closeProgress()
@@ -876,6 +896,10 @@ public class DataExporter
 			this.progressWindow.setVisible(false);
 			this.progressWindow.dispose();
 			this.progressPanel = null;
+		}
+		if (this.rowMonitor != null)
+		{
+			this.rowMonitor.jobFinished();
 		}
 	}
 
@@ -893,13 +917,13 @@ public class DataExporter
 		return result;
 	}
 
-	public void exportTable(Window aParent, WbConnection aConnection, TableIdentifier table)
+	public void exportTable(Window aParent, TableIdentifier table)
 	{
 		this.parentWindow = aParent;
 		ResultInfo info = null;
 		try
 		{
-			info = new ResultInfo(table, aConnection);
+			info = new ResultInfo(table, this.dbConn);
 		}
 		catch (SQLException e)
 		{
@@ -937,9 +961,8 @@ public class DataExporter
 					}
 				}
 				query.append(" FROM ");
-				query.append(table.getTableExpression(aConnection));
+				query.append(table.getTableExpression(this.dbConn));
 				this.setSql(query.toString());
-				this.setConnection(aConnection);
 				dialog.setExporterOptions(this);
 				this.setShowProgressWindow(true);
 				Frame parent = null;
@@ -1008,7 +1031,6 @@ public class DataExporter
 	{
 		this.setOutputTypeText();
 		this.setExportHeaders(text.getExportHeaders());
-		this.setCleanupCarriageReturns(text.getCleanupCarriageReturns());
 		this.setTextDelimiter(text.getTextDelimiter());
 		this.setTextQuoteChar(text.getTextQuoteChar());
 		this.setQuoteAlways(text.getQuoteAlways());
@@ -1061,14 +1083,6 @@ public class DataExporter
 	{
 		this.concatFunction = func;
 		this.concatString = null;
-	}
-
-	private class JobEntry
-	{
-		private String outputFile;
-		private String sqlStatement;
-		private String tableName;
-
 	}
 
 	public boolean getQuoteAlways()

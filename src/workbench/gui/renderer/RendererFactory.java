@@ -27,7 +27,7 @@ import workbench.log.LogMgr;
  */
 public class RendererFactory
 {
-	public static TableCellRenderer getSortHeaderRenderer()
+	public static TableCellRenderer createSortHeaderRenderer()
 	{
 		try
 		{
@@ -42,7 +42,7 @@ public class RendererFactory
 		}
 	}
 	
-	public static TableCellRenderer getDateRenderer(String format)
+	public static TableCellRenderer createDateRenderer(String format)
 	{
 		try
 		{
@@ -60,7 +60,7 @@ public class RendererFactory
 		}
 	}
 
-	public static TableCellRenderer getTooltipRenderer()
+	public static TableCellRenderer createTooltipRenderer()
 	{
 		try
 		{
@@ -75,7 +75,7 @@ public class RendererFactory
 		}
 	}
 	
-	public static TableCellRenderer getStringRenderer()
+	public static TableCellRenderer createStringRenderer()
 	{
 		try
 		{
@@ -90,7 +90,7 @@ public class RendererFactory
 		}
 	}
 	
-	public static TableCellRenderer getIntegerRenderer()
+	public static TableCellRenderer createIntegerRenderer()
 	{
 		try
 		{
@@ -105,7 +105,7 @@ public class RendererFactory
 		}
 	}
 	
-	public static TableCellRenderer getNumberRenderer(int maxDigits, char sep)
+	public static TableCellRenderer createNumberRenderer(int maxDigits, char sep)
 	{
 		try
 		{
@@ -123,7 +123,7 @@ public class RendererFactory
 		}
 	}
 
-	public static TableCellRenderer getClobRenderer()
+	public static TableCellRenderer createClobRenderer()
 	{
 		try
 		{

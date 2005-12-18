@@ -48,7 +48,7 @@ public class QueryCopySource
 		throws Exception
 	{
 		ResultSet rs = null;
-		Statement stmt = null;
+//		Statement stmt = null;
 		try
 		{
 			this.retrieveStatement = this.sourceConnection.createStatementForQuery();

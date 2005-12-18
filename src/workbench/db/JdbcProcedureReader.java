@@ -62,7 +62,6 @@ public class JdbcProcedureReader
 
 		try
 		{
-			String sType;
 			while (rs.next())
 			{
 				String cat = rs.getString("PROCEDURE_CAT");

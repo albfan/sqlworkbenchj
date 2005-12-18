@@ -18,7 +18,9 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import workbench.db.WbConnection;
+import workbench.interfaces.ErrorReporter;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.NullValue;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
@@ -40,22 +42,32 @@ public abstract class RowDataConverter
 	protected String baseDir;
 	private boolean[] columnsToExport = null;
 	protected List exportColumns = null;
+	protected ErrorReporter errorReporter;
 	
-	protected SimpleDateFormat defaultDateFormatter = StringUtil.ISO_DATE_FORMATTER;
+	protected SimpleDateFormat defaultDateFormatter;
 	protected DecimalFormat defaultNumberFormatter;
-	protected SimpleDateFormat defaultTimestampFormatter = StringUtil.ISO_TIMESTAMP_FORMATTER;
+	protected SimpleDateFormat defaultTimestampFormatter;
 	protected boolean needsUpdateTable = false;
 	
 	/**
 	 *	The metadata for the result set that should be exported
 	 */
-	public RowDataConverter(ResultInfo meta)
+	public RowDataConverter()
 	{
-		this.metaData = meta;
-		int colCount = meta.getColumnCount();
+		this.defaultDateFormatter = Settings.getInstance().getDefaultDateFormatter();
+		this.defaultTimestampFormatter = Settings.getInstance().getDefaultTimestampFormatter();
+		this.defaultNumberFormatter = Settings.getInstance().getDefaultDecimalFormatter();
 	}
 
+	public void setResultInfo(ResultInfo meta) { this.metaData = meta; }
+	public ResultInfo getResultInfo() { return this.metaData; }
+	
 	public void setBaseDir(String dir) { this.baseDir = dir; }
+	
+	public void setErrorReporter(ErrorReporter reporter)
+	{
+		this.errorReporter = reporter;
+	}
 	
 	public boolean includeColumnInExport(int col)
 	{
@@ -107,7 +119,6 @@ public abstract class RowDataConverter
 	 *  #getEnd();
 	 */
 	public abstract StrBuffer convertData();
-	
 	
 	/**
 	 *	Returns the data for one specific row as a String in the 

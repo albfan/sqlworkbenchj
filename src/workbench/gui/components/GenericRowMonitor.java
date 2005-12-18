@@ -11,6 +11,8 @@
  */
 package workbench.gui.components;
 
+import java.util.HashMap;
+import java.util.Map;
 import workbench.interfaces.StatusBar;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
@@ -27,12 +29,15 @@ public class GenericRowMonitor
 	private String currentMonitorObject;
 	private int monitorType;
 	private String objectMsg = ResourceMgr.getString("MsgProcessObject") + " ";
+	private Map typeStack = new HashMap();
 
 	public GenericRowMonitor(StatusBar status)
 	{
 		this.statusBar = status;
 	}
 
+	public int getMonitorType() { return this.monitorType; }
+	
 	public void setMonitorType(int type)
 	{
 		statusBar.clearStatusMessage();
@@ -131,6 +136,38 @@ public class GenericRowMonitor
 	{
 		this.updateMsg = null;
 		this.monitorType = -1;
+		statusBar.clearStatusMessage();
 	}
+	
+	public void saveCurrentType(String type) 
+	{
+		TypeEntry entry = new TypeEntry();
+		entry.msg = this.updateMsg;
+		entry.type = this.monitorType;
+		entry.obj = this.currentMonitorObject;
+		this.typeStack.put(type, entry);
+		statusBar.clearStatusMessage();
+	}
+	
+	public void restoreType(String type) 
+	{
+		TypeEntry entry = (TypeEntry)typeStack.get(type);
+		if (entry == null) return;
+		this.updateMsg = entry.msg;
+		this.currentMonitorObject = entry.obj;
+		this.monitorType = entry.type;
+		statusBar.clearStatusMessage();
+	}
+	
+}
 
+class TypeEntry
+{
+	int type;
+	String msg;
+	String obj;
+	
+	public TypeEntry()
+	{
+	}
 }

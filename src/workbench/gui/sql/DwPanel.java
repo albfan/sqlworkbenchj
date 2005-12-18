@@ -104,8 +104,6 @@ public class DwPanel
 	private boolean hasResultSet;
 	
 	private WbScrollPane scrollPane;
-	private DefaultCellEditor defaultEditor;
-	private DefaultCellEditor defaultNumberEditor;
 	private long lastExecutionTime = 0;
 	
 	private boolean success;
@@ -127,8 +125,8 @@ public class DwPanel
 	private boolean automaticUpdateTableCheck = true;
 	
 	private long rowsAffectedByScript = -1;
-	private boolean scriptRunning;
-	private boolean cancel;
+//	private boolean scriptRunning;
+//	private boolean cancel;
 	private String[] lastResultMessages;
 	private String lastTimingMessage;
 	
@@ -145,14 +143,12 @@ public class DwPanel
 		JTextField stringField = new JTextField();
 		stringField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		stringField.addMouseListener(new TextComponentMouseListener());
-		this.defaultEditor = new DefaultCellEditor(stringField);
 		
 		JTextField numberField = new JTextField();
 		numberField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		numberField.setHorizontalAlignment(SwingConstants.RIGHT);
 		numberField.addMouseListener(new TextComponentMouseListener());
 		
-		this.defaultNumberEditor = new DefaultCellEditor(numberField);
 		this.initLayout(aStatusBar);
 		
 		this.setDoubleBuffered(true);
@@ -422,8 +418,6 @@ public class DwPanel
 		throws SQLException
 	{
 		int rows = 0;
-		JobErrorHandler activeErrorHandler = this;
-		if (errorHandler != null) activeErrorHandler = errorHandler;
 		
 		this.dataTable.stopEditing();
 		if (this.manageUpdateAction)
@@ -623,10 +617,16 @@ public class DwPanel
 		return lastExecutionTime;
 	}
 	
-	public void runStatement(String sql)
+	public void runStatement(String sqlStmt)
 		throws SQLException, Exception
 	{
-		runStatement(sql, null);
+		runStatement(sqlStmt, null, true);
+	}
+	
+	public void runStatement(String sqlStmt, boolean respectMaxRows)
+		throws SQLException, Exception
+	{
+		runStatement(sqlStmt, null, respectMaxRows);
 	}
 	/**
 	 *	Execute the given SQL statement. The ExecutionController is
@@ -634,11 +634,11 @@ public class DwPanel
 	 *  when the option "Confirm DB updates" has been selected in the
 	 *  connection profile
 	 */
-	public void runStatement(String aSql, ExecutionController controller)
+	public void runStatement(String aSql, ExecutionController controller, boolean respectMaxRows)
 		throws SQLException, Exception
 	{
 		this.success = false;
-		this.cancel = false;
+//		this.cancel = false;
 		this.hasWarning = false;
 		
 		StatementRunnerResult result = null;
@@ -654,14 +654,14 @@ public class DwPanel
 			
 			long sqlExecStart = System.currentTimeMillis();
 			this.stmtRunner.setExecutionController(controller);
-			int max = this.statusBar.getMaxRows();
+			int max = (respectMaxRows ? this.statusBar.getMaxRows() : 0);
 			int timeout = this.statusBar.getQueryTimeout();
 			
 			this.stmtRunner.runStatement(aSql, max, timeout);
 			
 			result = this.stmtRunner.getResult();
 			
-			long end = 0, checkUpdateTime = 0;
+			long checkUpdateTime = 0;
 			this.hasResultSet = false;
 			this.success = result.isSuccess();
 			this.hasWarning = result.hasWarning();
@@ -677,11 +677,9 @@ public class DwPanel
 				{
 					this.setMessageDisplayModel(this.getEmptyMsgTableModel());
 				}
-				end = System.currentTimeMillis();
 			}
 			else
 			{
-				end = System.currentTimeMillis();
 				if (this.showErrorMessages)
 				{
 					this.setMessageDisplayModel(this.getErrorTableModel(this.getLastMessage()));
@@ -692,7 +690,6 @@ public class DwPanel
 				}
 			}
 			this.lastExecutionTime = (System.currentTimeMillis() - sqlExecStart);
-			//long execTime = (end - sqlExecStart);
 			StringBuffer msg = new StringBuffer(100);
 			msg.append(ResourceMgr.getString("MsgExecTime"));
 			msg.append(' ');
@@ -842,7 +839,6 @@ public class DwPanel
 	public void scriptStarting()
 	{
 		this.rowsAffectedByScript = 0;
-		this.scriptRunning = true;
 		this.oldVerboseLogging = this.stmtRunner.getVerboseLogging();
 	}
 	
@@ -853,10 +849,8 @@ public class DwPanel
 	 */
 	public void scriptFinished()
 	{
-		this.scriptRunning = false;
 		this.stmtRunner.done();
 		this.stmtRunner.setVerboseLogging(this.oldVerboseLogging);
-		//WbSwingUtilities.showDefaultCursor(this);
 	}
 	
 	public boolean wasSuccessful()
@@ -935,12 +929,10 @@ public class DwPanel
 	
 	public void cancelExecution()
 	{
-		this.cancel = true;
 		if (this.stmtRunner != null)
 		{
 			this.stmtRunner.cancel();
 		}
-		this.cancel = false;
 	}
 	
 	/**

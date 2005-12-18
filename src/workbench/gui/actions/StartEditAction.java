@@ -37,8 +37,6 @@ public class StartEditAction
 	extends WbAction
 {
 	private DbData client;
-	private Border enabledBorder = new CompoundBorder(new BevelBorder(BevelBorder.LOWERED), new EmptyBorder(2,2,2,2));
-	private Border originalBorder;
 
 	private boolean switchedOn = false;
 	private JToggleButton toggleButton;

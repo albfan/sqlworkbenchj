@@ -49,7 +49,6 @@ public class PostgresIndexReader
 		int count = indexDefinition.getRowCount();
 		if (count == 0) return StrBuffer.EMPTY_BUFFER;
 		StrBuffer source = new StrBuffer(count * 50);
-		boolean includeSchema = false;
 		try
 		{
 			stmt = con.prepareStatement(sql);

@@ -28,9 +28,9 @@ public class HtmlRowDataConverter
 	private boolean createFullPage = true;
 	private boolean escapeHtml = false;
 
-	public HtmlRowDataConverter(ResultInfo info)
+	public HtmlRowDataConverter()
 	{
-		super(info);
+		super();
 	}
 	
 	public StrBuffer convertData()

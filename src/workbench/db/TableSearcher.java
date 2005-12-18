@@ -293,17 +293,7 @@ public class TableSearcher
 	public void setCriteria(String aText)
 	{
     if (aText == null) return;
-    if (aText.startsWith("'"))
-    {
-      int pos = 1;
-      int len = aText.length();
-      if (aText.endsWith("'")) len--;
-      this.criteria = aText.substring(pos, len);
-    }
-    else
-    {
-  		this.criteria = aText;
-    }
+    this.criteria = StringUtil.trimQuotes(aText);
     return;
 	}
 
