@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -56,6 +56,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
 import workbench.db.DbMetadata;
@@ -84,6 +86,7 @@ import workbench.gui.menu.GenerateScriptMenuItem;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.FilenameChangeListener;
+import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.ShareableDisplay;
 import workbench.interfaces.Exporter;
 import workbench.log.LogMgr;
@@ -107,7 +110,8 @@ import workbench.util.WbProperties;
 public class TableListPanel
 	extends JPanel
 	implements ActionListener, ChangeListener, ListSelectionListener, MouseListener,
-						 ShareableDisplay, Exporter, FilenameChangeListener, PropertyChangeListener
+						 ShareableDisplay, Exporter, FilenameChangeListener, PropertyChangeListener,
+						 TableModelListener
 {
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
 	private WbConnection dbConnection;
@@ -250,6 +254,7 @@ public class TableListPanel
 		this.tableList.getSelectionModel().addListSelectionListener(this);
 		this.tableList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.tableList.setAdjustToColumnLabel(false);
+		this.tableList.addTableModelListener(this);
 
 		this.spoolData = new SpoolDataAction(this);
 		this.tableList.addPopupAction(spoolData, true);
@@ -737,7 +742,12 @@ public class TableListPanel
 			this.shouldRetrieve = true;
 		}
 	}
-
+	public void tableChanged(TableModelEvent e)
+	{
+		String info = tableList.getRowCount() + " " + ResourceMgr.getString("TxtTableListObjects");
+		this.tableInfoLabel.setText(info);
+		
+	}
 	private void setFocusToTableList()
 	{
 		EventQueue.invokeLater(new Runnable()
@@ -787,9 +797,6 @@ public class TableListPanel
 				types = new String[] { type };
 			}
 			DataStore ds = dbConnection.getMetadata().getTables(currentCatalog, currentSchema, types);
-			String info = ds.getRowCount() + " " + ResourceMgr.getString("TxtTableListObjects");
-			this.tableInfoLabel.setText(info);
-			
 			DataStoreTableModel model = new DataStoreTableModel(ds);
 			tableList.setModel(model, true);
 			model.sortByColumn(0);
@@ -845,13 +852,33 @@ public class TableListPanel
 		return "dbexplorer" + index + ".tablelist.";
 	}
 
+	/** 
+	 * Save settings to global settings file
+	 */
+	public void saveSettings()
+	{
+		this.triggers.saveSettings();
+		this.tableData.saveSettings();
+		this.findPanel.saveSettings();
+		this.tableDefinition.saveSettings();
+		storeSettings(Settings.getInstance(), this.getClass().getName() + ".");
+	}
+
+	/**
+	 * Save settings to a workspace
+	 */
 	public void saveToWorkspace(WbWorkspace w, int index)
 	{
 		tableData.saveToWorkspace(w, index);
+		WbProperties props = w.getSettings();
+		String prefix = getWorkspacePrefix(index);
+		storeSettings(props, prefix);
+	}
+	
+	private void storeSettings(PropertyStorage props, String prefix)
+	{
 		try
 		{
-			Properties props = w.getSettings();
-			String prefix = getWorkspacePrefix(index);
 			String type = (String)tableTypes.getSelectedItem();
 			if (type != null) props.setProperty(prefix + "objecttype", type);
 			props.setProperty(prefix + "divider", Integer.toString(this.splitPane.getDividerLocation()));
@@ -862,7 +889,7 @@ public class TableListPanel
 		}
 		catch (Throwable th)
 		{
-			LogMgr.logError("TableListPanel.saveToWorkspace()", "Error during workspace saving", th);
+			LogMgr.logError("TableListPanel.storeSettings()", "Error storing settings", th);
 		}
 	}
 
@@ -872,7 +899,10 @@ public class TableListPanel
 		tableData.readFromWorkspace(w, index);
 		WbProperties props = w.getSettings();
 		String prefix = getWorkspacePrefix(index);
-
+	}
+	
+	private void readSettings(PropertyStorage props, String prefix)
+	{
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
 		int maxWidth = (int)(d.getWidth() - 50);
 
@@ -901,40 +931,14 @@ public class TableListPanel
 		this.findPanel.setText(s);
 	}
 
-	public void saveSettings()
-	{
-		this.triggers.saveSettings();
-		this.tableData.saveSettings();
-		this.findPanel.saveSettings();
-		this.tableDefinition.saveSettings();
-		Settings s = Settings.getInstance();
-		s.setProperty(this.getClass().getName() + ".divider", this.splitPane.getDividerLocation());
-		s.setProperty(this.getClass().getName() + ".exportedtreedivider", this.exportedPanel.getDividerLocation());
-		s.setProperty(this.getClass().getName() + ".importedtreedivider", this.exportedPanel.getDividerLocation());
-		s.setProperty(this.getClass().getName() + ".lastsearch", this.findPanel.getText());
-	}
-
 	public void restoreSettings()
 	{
-		String prefix = this.getClass().getName();
+		String prefix = this.getClass().getName() + ".";
 		Settings s = Settings.getInstance();
 
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
 		int maxWidth = (int)(d.getWidth() - 50);
-		int loc = s.getIntProperty(prefix + ".divider",200);
-		if (loc > maxWidth) loc = 200;
-		splitPane.setDividerLocation(loc);
-
-		loc = s.getIntProperty(prefix + ".exportedtreedivider",0);
-		if (loc == 0 || loc > maxWidth) loc = 200;
-		exportedPanel.setDividerLocation(loc);
-
-		loc = s.getIntProperty(prefix + ".importedtreedivider",0);
-		if (loc == 0 || loc > maxWidth) loc = 200;
-		importedPanel.setDividerLocation(loc);
-
-		String search = s.getProperty(prefix  + ".lastsearch", "");
-		this.findPanel.setText(search);
+		readSettings(Settings.getInstance(), prefix);
 		this.triggers.restoreSettings();
 		this.tableData.restoreSettings();
 		this.findPanel.restoreSettings();
@@ -2186,5 +2190,6 @@ public class TableListPanel
 	public void mouseReleased(MouseEvent e)
 	{
 	}
+
 
 }

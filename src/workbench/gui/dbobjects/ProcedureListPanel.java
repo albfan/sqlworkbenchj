@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -21,7 +21,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -51,6 +52,7 @@ import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.menu.GenerateScriptMenuItem;
 import workbench.gui.renderer.ProcStatusRenderer;
 import workbench.gui.sql.EditorPanel;
+import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -62,6 +64,7 @@ import workbench.db.ProcedureDefinition;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.QuickFilterPanel;
 import workbench.interfaces.CriteriaPanel;
+import workbench.util.WbWorkspace;
 
 
 /**
@@ -308,7 +311,7 @@ public class ProcedureListPanel
 		ArrayList names = new ArrayList(count);
 		ArrayList types = new ArrayList(count);
 
-		this.readSelecteItems(names, types);
+		this.readSelectedItems(names, types);
 
 		ObjectDropperUI dropperUI = new ObjectDropperUI();
 		dropperUI.setObjects(names, types);
@@ -334,18 +337,43 @@ public class ProcedureListPanel
 			this.retrieve();
 	}
 
+	private String getWorkspacePrefix(int index)
+	{
+		return "dbexplorer" + index + ".procedurelist.";
+	}
+	
 	public void saveSettings()
 	{
-		Settings.getInstance().setProperty(this.getClass().getName() + ".divider", this.splitPane.getDividerLocation());
-		Settings.getInstance().setProperty(this.getClass().getName() + ".lastsearch", this.findPanel.getText());
+		storeSettings(Settings.getInstance(), this.getClass().getName() + ".");
 	}
-
+	
+	public void saveToWorkspace(WbWorkspace w, int index)
+	{
+		storeSettings(w.getSettings(), getWorkspacePrefix(index));
+	}
+	
+	private void storeSettings(PropertyStorage props, String prefix)
+	{
+		props.setProperty(prefix + "divider", this.splitPane.getDividerLocation());
+		props.setProperty(prefix + "lastsearch", this.findPanel.getText());
+	}
+	
 	public void restoreSettings()
 	{
-		int loc = Settings.getInstance().getIntProperty(this.getClass().getName() + ".divider", 200);
+		readSettings(Settings.getInstance(), this.getClass().getName() + ".");
+	}
+	
+	public void readFromWorkspace(WbWorkspace w, int index)
+	{
+		readSettings(w.getSettings(), getWorkspacePrefix(index));
+	}
+	
+	private void readSettings(PropertyStorage props, String prefix)
+	{
+		int loc = props.getIntProperty(prefix + "divider", 200);
 		this.splitPane.setDividerLocation(loc);
 
-		String s = Settings.getInstance().getProperty(this.getClass().getName() + ".lastsearch", "");
+		String s = props.getProperty(this.getClass().getName() + ".lastsearch", "");
 		this.findPanel.setText(s);
 	}
 
@@ -365,26 +393,21 @@ public class ProcedureListPanel
 		final String schema = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
 		final String catalog = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
 		final int type = this.procList.getDataStore().getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
-		EventQueue.invokeLater(new Runnable() 
-		{
-			public void run()
-			{
-				retrieveProcColumns(catalog, schema, proc, type);
-			}
-		});
+		retrieveProcDefinition(catalog, schema, proc, type);
 	}
 
-	private void retrieveProcColumns(String catalog, String schema, String proc, int type)
+	private void retrieveProcDefinition(String catalog, String schema, String proc, int type)
 	{
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 		DbMetadata meta = dbConnection.getMetadata();
 		Container parent = this.getParent();
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		int pos = 0;
 		try
 		{
+			dbConnection.setBusy(true);
 			try
 			{
-				dbConnection.setBusy(true);
 				procColumns.setVisible(false);
 				DataStoreTableModel model = new DataStoreTableModel(meta.getProcedureColumns(catalog, schema, proc));
 				procColumns.setModel(model, true);
@@ -404,6 +427,7 @@ public class ProcedureListPanel
 			{
 				String sql = meta.getProcedureSource(catalog, schema, proc, type);
 				source.setText(sql);
+				pos = checkOraclePackage(sql, catalog, proc, type);
 			}
 			catch (Exception ex)
 			{
@@ -416,7 +440,39 @@ public class ProcedureListPanel
 			parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 			dbConnection.setBusy(false);
 		}
-		source.setCaretPosition(0);
+		source.setCaretPosition(pos);
+		source.scrollToCaret();
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				source.requestFocusInWindow();
+			}
+		});
+	}
+	
+	private int checkOraclePackage(String sql, String catalog, String object, int type)
+	{
+		if (this.dbConnection == null) return 0;
+		if (!this.dbConnection.getMetadata().isOracle()) return 0;
+		if (StringUtil.isEmptyString(catalog)) return 0;
+		String regex = null;
+		if (type == DatabaseMetaData.procedureNoResult)
+		{
+			regex = "(?i)PROCEDURE\\s*" + object + "\\s*IS";
+		}
+		else
+		{
+			regex = "(?i)FUNCTION\\s*" + object + ".*RETURN.*AS";
+		}
+		Pattern p = Pattern.compile(regex);
+		
+		Matcher m = p.matcher(sql);
+		if (m.find())
+		{
+			return m.start();
+		}
+		return 0;
 	}
 	
 	private void createScript()
@@ -440,7 +496,7 @@ public class ProcedureListPanel
 		
 	}
 	
-	private void readSelecteItems(ArrayList names, ArrayList types)
+	private void readSelectedItems(ArrayList names, ArrayList types)
 	{
 		if (this.procList.getSelectedRowCount() == 0) return;
 		int rows[] = this.procList.getSelectedRows();
@@ -509,7 +565,7 @@ public class ProcedureListPanel
 		ArrayList names = new ArrayList(count);
 		ArrayList types = new ArrayList(count);
 
-		this.readSelecteItems(names, types);
+		this.readSelectedItems(names, types);
 
 		try
 		{

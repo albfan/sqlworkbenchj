@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -40,6 +40,7 @@ import workbench.util.ExceptionUtil;
 import workbench.gui.actions.ActionRegistration;
 import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
+import workbench.storage.PkMapping;
 import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
@@ -230,10 +231,10 @@ public class Settings
 	public static final String PK_MAPPING_FILENAME_PROPERTY = "workbench.pkmapping.file";
 	public String getPKMappingFilename()
 	{
-		String filename = System.getProperty(PK_MAPPING_FILENAME_PROPERTY, getProperty(PK_MAPPING_FILENAME_PROPERTY, null));
-		if (filename == null) return null;
+		String fName = System.getProperty(PK_MAPPING_FILENAME_PROPERTY, getProperty(PK_MAPPING_FILENAME_PROPERTY, null));
+		if (StringUtil.isEmptyString(fName)) return null;
 		String dir = getConfigDir();
-		return StringUtil.replace(filename, FileDialogUtil.CONFIG_DIR_KEY, dir);
+		return StringUtil.replace(fName, FileDialogUtil.CONFIG_DIR_KEY, dir);
 	}
 	
 	public void setPKMappingFilename(String file)
@@ -270,8 +271,7 @@ public class Settings
 		{
 			return new File(this.configDir, "WbProfiles.xml").getAbsolutePath();
 		}
-		FileDialogUtil util = new FileDialogUtil();
-		String realFilename = util.replaceConfigDir(profiles);
+		String realFilename = FileDialogUtil.replaceConfigDir(profiles);
 		
 		// Check if filename contains a directory
 		File f = new File(realFilename);
@@ -321,6 +321,10 @@ public class Settings
 		catch (IOException e)
 		{
 			LogMgr.logError(this, "Error saving Settings file '" + filename + "'", e);
+		}
+		if (this.getPKMappingFilename() != null)
+		{
+			PkMapping.getInstance().saveMapping(this.getPKMappingFilename());
 		}
 	}
 
@@ -1186,9 +1190,10 @@ public class Settings
 		this.props.setProperty("workbench.sql.maxcolwidth", Integer.toString(aWidth));
 	}
 
-	private DateFormat defaultDateFormatter = null;
-
-	public DateFormat getDefaultDateFormatter()
+	private SimpleDateFormat defaultDateFormatter = null;
+	private SimpleDateFormat defaultTimestampFormatter = null;
+	
+	public SimpleDateFormat getDefaultDateFormatter()
 	{
 		if (this.defaultDateFormatter == null)
 		{
@@ -1197,26 +1202,35 @@ public class Settings
 		return this.defaultDateFormatter;
 	}
 
-	public String getDefaultDateFormat()
-	{
-		return this.props.getProperty(PROPERTY_DATE_FORMAT, "yyyy-MM-dd");
-	}
-
-	public String getDefaultDateTimeFormat()
-	{
-		return this.props.getProperty(PROPERTY_DATETIME_FORMAT, "yyyy-MM-dd HH:mm:ss");
-	}
-
 	public void setDefaultDateFormat(String aFormat)
 	{
 		this.defaultDateFormatter = null;
 		this.props.setProperty(PROPERTY_DATE_FORMAT, aFormat);
 	}
 
-	public void setDefaultDateTimeFormat(String aFormat)
+	public String getDefaultDateFormat()
+	{
+		return this.props.getProperty(PROPERTY_DATE_FORMAT, StringUtil.ISO_DATE_FORMAT);
+	}
+
+	public String getDefaultTimestampFormat()
+	{
+		return this.props.getProperty(PROPERTY_DATETIME_FORMAT, StringUtil.ISO_TIMESTAMP_FORMAT);
+	}
+
+	public void setDefaultTimestampFormat(String aFormat)
 	{
 		this.defaultDateFormatter = null;
 		this.props.setProperty(PROPERTY_DATETIME_FORMAT, aFormat);
+	}
+	
+	public SimpleDateFormat getDefaultTimestampFormatter()
+	{
+		if (this.defaultTimestampFormatter == null)
+		{
+			this.defaultTimestampFormatter = new SimpleDateFormat(this.getDefaultTimestampFormat());
+		}
+		return this.defaultTimestampFormatter;
 	}
 
 	public int getMaxFractionDigits()
@@ -1227,28 +1241,28 @@ public class Settings
 	public void setMaxFractionDigits(int aValue)
 	{
 		this.props.setProperty("workbench.gui.display.maxfractiondigits", Integer.toString(aValue));
-		this.defaultFormatter = null;
+		this.defaultDecimalFormatter = null;
 	}
 
-	private DecimalFormat defaultFormatter = null;
+	private DecimalFormat defaultDecimalFormatter = null;
 	private DecimalFormatSymbols decSymbols = new DecimalFormatSymbols();
 
 	public DecimalFormat getDefaultDecimalFormatter()
 	{
 		this.initFormatter();
-		return this.defaultFormatter;
+		return this.defaultDecimalFormatter;
 	}
 
 	private void initFormatter()
 	{
-		if (this.defaultFormatter == null)
+		if (this.defaultDecimalFormatter == null)
 		{
-			this.defaultFormatter = new DecimalFormat("0.#");
+			this.defaultDecimalFormatter = new DecimalFormat("0.#");
 			String sep = this.getDecimalSymbol();
 			int maxDigits = this.getMaxFractionDigits();
 			this.decSymbols.setDecimalSeparator(sep.charAt(0));
-			this.defaultFormatter.setDecimalFormatSymbols(this.decSymbols);
-			this.defaultFormatter.setMaximumFractionDigits(maxDigits);
+			this.defaultDecimalFormatter.setDecimalFormatSymbols(this.decSymbols);
+			this.defaultDecimalFormatter.setMaximumFractionDigits(maxDigits);
 		}
 	}
 
@@ -1260,7 +1274,7 @@ public class Settings
 	public void setDecimalSymbol(String aSep)
 	{
 		this.props.setProperty("workbench.gui.display.decimal.separator", aSep);
-		this.defaultFormatter = null;
+		this.defaultDecimalFormatter = null;
 	}
 
 	public String getAlternateDelimiter()
@@ -1364,6 +1378,11 @@ public class Settings
 		this.props.setProperty("workbench.gui.log.consolidate", Boolean.toString(aFlag));
 	}
 
+	public boolean getUsePlainEditorForData()
+	{
+		return getBoolProperty("workbench.gui.editor.data.plain", false);
+	}
+	
 	public boolean getUseCollator()
 	{
 		return this.getBoolProperty("workbench.sort.usecollator", false);

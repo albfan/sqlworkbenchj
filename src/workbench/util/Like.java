@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -19,7 +19,7 @@ import java.util.StringTokenizer;
  * An instance of this class represents a pattern of the SQL operator LIKE.
  *
  * @author  <a href="mailto:ey@inweb.de?subject=Like Operator">Christian Ey</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class Like {
 
@@ -39,8 +39,8 @@ public class Like {
      * @param pattern the LIKE pattern to represent
      * @param escape the escape character/String used to escape wildcards
      */
-    public Like( String pattern, String escape) {
-        this.init( pattern, escape, false);
+    public Like(String pattern, String escape) {
+        this.init(pattern, escape, false);
     }
 
     /**
@@ -50,8 +50,8 @@ public class Like {
      * @param ignoreCase defines whether pattern matching is case sensitive
      *        or not
      */
-    public Like( String pattern, boolean ignoreCase) {
-        this.init( pattern, null, ignoreCase);
+    public Like(String pattern, boolean ignoreCase) {
+        this.init(pattern, null, ignoreCase);
     }
 
     /**
@@ -61,17 +61,20 @@ public class Like {
      * @param pattern the LIKE pattern to represent
      */
     public Like( String pattern) {
-        this.init( pattern, null, false);
+        this.init(pattern, null, false);
     }
 
-    private void init( String pattern, String escape, boolean ignoreCase) {
-        if (pattern == null) {
-            pattern = "";
+    private void init(String ptrn, String esc, boolean ignore) {
+        this.ignoreCase = ignore;
+        if (ptrn == null) 
+        {
+            this.pattern = "";
         }
-        this.ignoreCase = ignoreCase;
-        this.pattern = pattern;
-        pattern = (ignoreCase) ? pattern.toLowerCase() : pattern;
-        this.escape = escape;
+        else
+        {
+        	this.pattern = (ignore) ? ptrn.toLowerCase() : ptrn;
+        }
+        this.escape = esc;
 
         // cut the pattern into tokens
         StringTokenizer t = new StringTokenizer( pattern, WILDCARD_SINGLE+WILDCARD_SEQUENCE, true);

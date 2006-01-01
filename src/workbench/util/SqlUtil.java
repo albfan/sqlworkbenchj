@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -31,7 +31,6 @@ import workbench.db.WbConnection;
 public class SqlUtil
 {
 	private static Pattern specialCharPattern = Pattern.compile("[$ ]");
-	private static Pattern whiteSpacePattern = Pattern.compile("\\s");
 	
 	/** Creates a new instance of SqlUtil */
 	private SqlUtil()
@@ -119,40 +118,8 @@ public class SqlUtil
 	 */
 	public static List getTables(String aSql, boolean includeAlias)
 	{
-		boolean inQotes = false;
-		boolean fromFound = false;
-
 		int fromPos = getFromPosition(aSql);
 		int pos = -1;
-		/*
-		Matcher m = FROM_PATTERN.matcher(aSql);
-		if (!m.find()) return Collections.EMPTY_LIST;
-
-		int fromPos = m.start();
-		if (fromPos == -1) return Collections.EMPTY_LIST;
-
-		int quotePos = aSql.indexOf('\'');
-		int pos;
-		if (quotePos != -1 && quotePos < fromPos)
-		{
-			while (!fromFound)
-			{
-				pos = skipQuotes(aSql, quotePos + 1);
-				
-				if (m.find(pos))
-				{
-					fromPos = m.start();
-				}
-				else
-				{
-					fromPos = -1;
-				}
-				if (fromPos == -1) break;
-				quotePos = aSql.indexOf('\'', pos);
-				fromFound = (quotePos == -1 || (quotePos > fromPos));
-			}
-		}
-		*/
 		if (fromPos == -1) return Collections.EMPTY_LIST;
 		int fromEnd = fromPos + 5;
 
@@ -173,7 +140,7 @@ public class SqlUtil
 			// we can add it right away
 			if (tok.hasMoreTokens())
 			{
-				result.add(tok.nextToken());
+				result.add(tok.nextToken().trim());
 			}
 			boolean nextIsTable = false;
 			while (tok.hasMoreTokens())
@@ -181,7 +148,7 @@ public class SqlUtil
 				String s = tok.nextToken();
 				if (nextIsTable)
 				{
-					result.add(s);
+					result.add(s.trim());
 					nextIsTable = false;
 				}
 				else
@@ -358,34 +325,35 @@ public class SqlUtil
 		return s;
 	}
 
-	private static int findClosingBracket(String value, int startPos)
-	{
-		int len = value.length();
-		boolean inQuotes = false;
-		for (int pos=startPos; pos < len; pos++)
-		{
-			char c = value.charAt(pos);
-			if (c == '\'') 
-			{
-				inQuotes = !inQuotes;
-			}
-			if (!inQuotes)
-			{
-				if (c == ')') return pos;
-			}
-		}
-		return -1;
-	}
-	private static final int skipQuotes(String aString, int aStartpos)
-	{
-		char c = aString.charAt(aStartpos);
-		while (c != '\'')
-		{
-			aStartpos ++;
-			c = aString.charAt(aStartpos);
-		}
-		return aStartpos + 1;
-	}
+//	private static int findClosingBracket(String value, int startPos)
+//	{
+//		int len = value.length();
+//		boolean inQuotes = false;
+//		for (int pos=startPos; pos < len; pos++)
+//		{
+//			char c = value.charAt(pos);
+//			if (c == '\'') 
+//			{
+//				inQuotes = !inQuotes;
+//			}
+//			if (!inQuotes)
+//			{
+//				if (c == ')') return pos;
+//			}
+//		}
+//		return -1;
+//	}
+//	
+//	private static final int skipQuotes(String aString, int aStartpos)
+//	{
+//		char c = aString.charAt(aStartpos);
+//		while (c != '\'')
+//		{
+//			aStartpos ++;
+//			c = aString.charAt(aStartpos);
+//		}
+//		return aStartpos + 1;
+//	}
 
 	public static final String getJavaPrimitive(String aClass)
 	{

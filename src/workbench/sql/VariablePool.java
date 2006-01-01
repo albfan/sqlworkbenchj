@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -50,9 +50,9 @@ public class VariablePool
 	private int suffixLen = 0;
 	private Pattern validNamePattern = Pattern.compile("[\\w]*");;
 	private Pattern promptPattern;
-	private Pattern promptAlwaysPattern;
-	private Pattern conditionalPattern;
-	private Pattern variablePattern;
+//	private Pattern promptAlwaysPattern;
+//	private Pattern conditionalPattern;
+//	private Pattern variablePattern;
 	
 	public static VariablePool getInstance()
 	{
@@ -68,14 +68,14 @@ public class VariablePool
 		
 		String expr = StringUtil.quoteRegexMeta(prefix) + "[\\?\\&][\\w]*" + StringUtil.quoteRegexMeta(suffix);
 		this.promptPattern = Pattern.compile(expr);
-		expr = StringUtil.quoteRegexMeta(prefix) + "[\\?][\\w]*" + StringUtil.quoteRegexMeta(suffix);
-		this.promptAlwaysPattern = Pattern.compile(expr);
+//		expr = StringUtil.quoteRegexMeta(prefix) + "[\\?][\\w]*" + StringUtil.quoteRegexMeta(suffix);
+//		this.promptAlwaysPattern = Pattern.compile(expr);
 
-		expr = StringUtil.quoteRegexMeta(prefix) + "[\\&][\\w]*" + StringUtil.quoteRegexMeta(suffix);
-		this.conditionalPattern = Pattern.compile(expr);
-		
-		expr = StringUtil.quoteRegexMeta(prefix) + "[\\?\\&]?[\\w]*" + StringUtil.quoteRegexMeta(suffix);
-		this.variablePattern = Pattern.compile(expr);
+//		expr = StringUtil.quoteRegexMeta(prefix) + "[\\&][\\w]*" + StringUtil.quoteRegexMeta(suffix);
+//		this.conditionalPattern = Pattern.compile(expr);
+//		
+//		expr = StringUtil.quoteRegexMeta(prefix) + "[\\?\\&]?[\\w]*" + StringUtil.quoteRegexMeta(suffix);
+//		this.variablePattern = Pattern.compile(expr);
 		
 		this.initFromSystemProperties();
 	}
@@ -197,9 +197,9 @@ public class VariablePool
 	}
 	public DataStore getVariablesDataStore(Set varNames)
 	{
-		final String cols[] = {"VARIABLE", "VALUE"};
-		final int types[] =   {Types.VARCHAR, Types.VARCHAR};
-		final int sizes[] =   {20, 50};
+//		final String cols[] = {"VARIABLE", "VALUE"};
+//		final int types[] =   {Types.VARCHAR, Types.VARCHAR};
+//		final int sizes[] =   {20, 50};
 		
 		DataStore vardata = new VariableDataStore();
 		

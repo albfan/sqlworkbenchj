@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -13,16 +13,11 @@ package workbench.util;
 
 import java.awt.Component;
 import java.awt.Window;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 
 import javax.swing.JFileChooser;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
-import workbench.db.exporter.DataExporter;
 import workbench.gui.components.EncodingPanel;
 
 import workbench.gui.components.ExtensionFileFilter;
@@ -30,6 +25,8 @@ import workbench.gui.dialogs.export.ExportOptionsPanel;
 import workbench.interfaces.EncodingSelector;
 import workbench.resource.Settings;
 import javax.swing.JComponent;
+import workbench.gui.WbSwingUtilities;
+import workbench.resource.ResourceMgr;
 //import workbench.gui.components.ExportOptionsPanel;
 
 /**
@@ -48,9 +45,6 @@ public class FileDialogUtil
 	private int lastFileType = FILE_TYPE_UNKNOWN;
 	public static final String CONFIG_DIR_KEY = "%ConfigDir%";
 	private String encoding = null;
-	private ExportOptionsPanel exportOptions;
-	private JFileChooser chooser;
-	private boolean filterChange = false;
 
 	/** Creates a new instance of FileDialogUtil */
 	public FileDialogUtil()
@@ -237,4 +231,49 @@ public class FileDialogUtil
 		return StringUtil.replace(aPathname, CONFIG_DIR_KEY, dir);
 	}
 
+	public static void selectPkMapFileIfNecessary(Component parent)
+	{
+		String file = Settings.getInstance().getPKMappingFilename();
+		if (file != null)
+		{
+			File f = new File(file);
+			if (f.exists()) return;
+		}
+		boolean doSelectFile = WbSwingUtilities.getYesNo(parent, ResourceMgr.getString("MsgSelectPkMapFile"));
+		if (!doSelectFile) return;
+		file = selectPkMapFile(parent);
+		if (file != null)
+		{
+			Settings.getInstance().setPKMappingFilename(file);
+		}
+	}
+	
+	public static String selectPkMapFile(Component parent)
+	{
+		String fileName = Settings.getInstance().getPKMappingFilename();
+		File f = null;
+		if (fileName == null)
+		{
+			f = new File(Settings.getInstance().getConfigDir());
+		}
+		else
+		{
+			f = new File(fileName).getParentFile();
+		}
+				
+		JFileChooser dialog = new JFileChooser(f);
+		dialog.setApproveButtonText(ResourceMgr.getString("LabelOK"));
+		if (fileName != null) 
+		{
+			dialog.setSelectedFile(new File(fileName));
+		}
+		String selectedFile = null;
+		int choice = dialog.showSaveDialog(parent);
+		if (choice == JFileChooser.APPROVE_OPTION)
+		{
+			File target = dialog.getSelectedFile();
+			selectedFile = target.getAbsolutePath();
+		}
+		return selectedFile;
+	}
 }

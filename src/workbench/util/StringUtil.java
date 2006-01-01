@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -39,22 +39,23 @@ public class StringUtil
 	public static final StringBuffer EMPTY_STRINGBUFFER = new StringBuffer("");
 	public static final String EMPTY_STRING = "";
 
-	public static final SimpleDateFormat ISO_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
-	public static final SimpleDateFormat ISO_TIMESTAMP_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SS");
-	public static final SimpleDateFormat ISO_TZ_TIMESTAMP_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SS z");
+	public static final String ISO_DATE_FORMAT = "yyyy-MM-dd";
+	public static final String ISO_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SS";
+	public static final String ISO_TZ_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SS z";
+	
+	//public static final SimpleDateFormat ISO_DATE_FORMATTER = new SimpleDateFormat(ISO_DATE_FORMAT);
+	public static final SimpleDateFormat ISO_TIMESTAMP_FORMATTER = new SimpleDateFormat(ISO_TIMESTAMP_FORMAT);
+	public static final SimpleDateFormat ISO_TZ_TIMESTAMP_FORMATTER = new SimpleDateFormat(ISO_TZ_TIMESTAMP_FORMAT);
 
-	/**
-	 *	Returns the current date formatted as yyyy-MM-dd
-	 */
-	public static final String getCurrentDateString()
-	{
-		return ISO_DATE_FORMATTER.format(now());
-	}
+//	public static final String getCurrentDateString()
+//	{
+//		return ISO_DATE_FORMATTER.format(now());
+//	}
 
-	public static final String getCurrentTimestampString()
-	{
-		return ISO_TIMESTAMP_FORMATTER.format(now());
-	}
+//	public static final String getCurrentTimestampString()
+//	{
+//		return ISO_TIMESTAMP_FORMATTER.format(now());
+//	}
 
 	public static final String getCurrentTimestampWithTZString()
 	{
@@ -436,75 +437,6 @@ public class StringUtil
 		return result.toString();
 	}
 
-//	public static List getTextLines(String aScript)
-//	{
-//		ArrayList l = new ArrayList(100);
-//		getTextLines(l, aScript);
-//		return l;
-//	}
-//
-//	public static void getTextLines(List aList, String aScript)
-//	{
-//		if (aScript == null) return;
-//		if (aScript.length() > 250)
-//		{
-//			// the solution with the StringReader performs
-//			// better on long Strings, for short strings
-//			// using regex is faster
-//			readTextLines(aList, aScript);
-//			return;
-//		}
-//
-//		if (aList == null) return;
-//		aList.clear();
-//		Matcher m = StringUtil.PATTERN_CRLF.matcher(aScript);
-//		int start = 0;
-//		boolean notOne = true;
-//		while (m.find())
-//		{
-//			notOne = false;
-//			String line = aScript.substring(start, m.start());
-//			if (line != null)
-//			{
-//				aList.add(line.trim());
-//			}
-//			start = m.end();
-//		}
-//
-//		if (notOne)
-//			aList.add(aScript);
-//		else if (start < aScript.length())
-//			aList.add(aScript.substring(start));
-//	}
-//
-//	private static void readTextLines(List aList, String aScript)
-//	{
-//		aList.clear();
-//		if (aScript.indexOf('\n') < 0)
-//		{
-//			aList.add(aScript);
-//			return;
-//		}
-//
-//		BufferedReader br = new BufferedReader(new StringReader(aScript));
-//		String line;
-//		try
-//		{
-//			while ((line = br.readLine()) != null)
-//			{
-//				aList.add(line.trim());
-//			}
-//		}
-//		catch (IOException ex)
-//		{
-//			ex.printStackTrace();
-//		}
-//		finally
-//		{
-//			try { br.close(); } catch (Throwable th) {}
-//		}
-//	}
-
 	public static final String trimQuotes(String input)
 	{
 		//System.out.println("toTrim=" + input);
@@ -513,7 +445,6 @@ public class StringUtil
 		if (input.length() == 1) return input;
 
 		String result = input.trim();
-		int first = 0;
 		int len = result.length();
 		if (len == 0) return EMPTY_STRING;
 		if (len == 1) return input;
@@ -528,39 +459,6 @@ public class StringUtil
 		}
 		return result;
 	}
-
-//	public static final String cleanupUnderscores(String aString, boolean capitalize)
-//	{
-//		if (aString == null) return null;
-//		int pos = aString.indexOf('_');
-//
-//		int len = aString.length();
-//		StringBuffer result = new StringBuffer(len);
-//
-//		if (capitalize)
-//			result.append(Character.toUpperCase(aString.charAt(0)));
-//		else
-//			result.append(aString.charAt(0));
-//
-//		for (int i=1; i < len; i++)
-//		{
-//			char c = aString.charAt(i);
-//			if (c == '_')
-//			{
-//				if (i < len - 1)
-//				{
-//					i++;
-//					c = Character.toUpperCase(aString.charAt(i));
-//				}
-//			}
-//			else
-//			{
-//				c = Character.toLowerCase(aString.charAt(i));
-//			}
-//			result.append(c);
-//		}
-//		return result.toString();
-//	}
 
 	public static final String escapeXML(String s)
 	{
@@ -712,7 +610,7 @@ public class StringUtil
 			{  "&euro;"   , "\u20a0" }
 		};
 
-		int i, j, k, l ;
+		int i, j, k;
 
 		i = s.indexOf("&");
 		if (i > -1)
@@ -780,7 +678,6 @@ public class StringUtil
 		if (data == null) return -1;
 		int count = data.length();
 		if (pos > count || pos <= 1) return -1;
-		int index = pos;
 		for (int i=pos; i > 0; i--)
 		{
 			if (Character.isWhitespace(data.charAt(i))) return i;
@@ -794,7 +691,6 @@ public class StringUtil
 		if (data == null) return -1;
 		int count = data.length();
 		if (pos > count || pos <= 1) return -1;
-		int index = pos;
 		for (int i=pos; i > 0; i--)
 		{
 			char c = data.charAt(i);

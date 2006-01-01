@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -198,26 +198,25 @@ public class DdlCommand extends SqlCommand
 	{
     StringTokenizer tok = new StringTokenizer(cleanSql, " ");
     String word = null;
-    String name = null;
     String type = null;
-    boolean nextTokenIsName = false;
+    boolean nextTokenIsType = false;
     while (tok.hasMoreTokens())
     {
       word = tok.nextToken();
-      if (nextTokenIsName)
+      if (nextTokenIsType)
       {
 				if ("PACKAGE".equals(type) && "BODY".equals(word))
 				{
 					type = "PACKAGE BODY";
 					continue;
 				}
-        name = word;
+				type = word;
         break;
       }
       if (TYPES.contains(word))
       {
         type = word;
-        nextTokenIsName = true;
+        nextTokenIsType = true;
       }
     }
     return type;

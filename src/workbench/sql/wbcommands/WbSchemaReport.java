@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -283,18 +283,11 @@ public class WbSchemaReport
 		}
 	}
 
-	public void setCurrentRow(long number, long total)
-	{
-
-	}
-
-	public void setMonitorType(int type)
-	{
-
-	}
-
-	public void jobFinished()
-	{
-
-	}
+	public void setCurrentRow(long number, long total) {}
+	public int getMonitorType() { return RowActionMonitor.MONITOR_PLAIN; }
+	public void setMonitorType(int aType) {}
+	public void jobFinished() {}
+	public void saveCurrentType(String type) {}
+	public void restoreType(String type) {}
+	
 }

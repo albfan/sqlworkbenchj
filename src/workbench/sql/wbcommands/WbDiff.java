@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -19,6 +19,7 @@ import java.io.Writer;
 import java.sql.SQLException;
 import java.util.List;
 import workbench.db.ConnectionMgr;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.diff.SchemaDiff;
 import workbench.resource.ResourceMgr;
@@ -36,7 +37,6 @@ public class WbDiff
 	extends SqlCommand
 {
 	public static final String VERB = "WBDIFF";
-	//public static final String PARAM_SOURCEPROFILE = "sourceprofile";
 	public static final String PARAM_SOURCEPROFILE = "referenceprofile";
 	public static final String PARAM_TARGETPROFILE = "targetprofile";
 	public static final String PARAM_FILENAME = "file";
@@ -56,7 +56,6 @@ public class WbDiff
 	public static final String PARAM_INCLUDE_PK = "includeprimarykeys";
 	public static final String PARAM_INCLUDE_CONSTRAINTS = "includeconstraints";
 	public static final String PARAM_INCLUDE_VIEWS = "includeviews";
-	//public static final String PARAM_INCLUDE_COMMENTS = "includecomments";
 
 	private ArgumentParser cmdLine;
 	private SchemaDiff diff;
@@ -129,7 +128,7 @@ public class WbDiff
 		String filename = cmdLine.getValue(PARAM_FILENAME);
 
 		String sourceProfile = cmdLine.getValue(PARAM_SOURCEPROFILE);
-		if (sourceProfile == null) sourceProfile = cmdLine.getValue("sourceprofile"); // old name
+		if (sourceProfile == null) sourceProfile = cmdLine.getValue("sourceprofile"); // support old name
 		String targetProfile = cmdLine.getValue(PARAM_TARGETPROFILE);
 
 		WbConnection targetCon = null;
@@ -236,6 +235,13 @@ public class WbDiff
 		else if (tarTables == null)
 		{
 			List rl = StringUtil.stringToList(refTables, ",", true, true);
+			for (int i = 0; i < rl.size(); i++)
+			{
+				String t = (String)rl.get(i);
+				TableIdentifier tbl = new TableIdentifier(t);
+				tbl.setType(this.currentConnection.getMetadata().getTableTypeName());
+				rl.set(i, tbl);
+			}
 			diff.setTables(rl);
 		}
 		else

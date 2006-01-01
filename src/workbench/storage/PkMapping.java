@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -180,6 +181,23 @@ public class PkMapping
 		finally
 		{
 			try { out.close(); } catch (Throwable th) {}
+		}
+	}
+	
+	public void addMapping(String table, ColumnIdentifier[] cols)
+	{
+		StringBuffer colNames = new StringBuffer(50);
+		for (int i = 0; i < cols.length; i++)
+		{
+			if (cols[i].isPkColumn())
+			{
+				if (colNames.length() > 0) colNames.append(',');
+				colNames.append(cols[i].getColumnName());
+			}
+		}
+		if (colNames.length() > 0)
+		{
+			this.addMapping(table, colNames.toString());
 		}
 	}
 }

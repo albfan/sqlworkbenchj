@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -16,12 +16,14 @@ import java.awt.Window;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import javax.swing.SwingUtilities;
+import workbench.gui.macros.MacroEntry;
 
 import workbench.gui.macros.MacroManagerDialog;
 import workbench.gui.sql.SqlPanel;
@@ -93,6 +95,20 @@ public class MacroManager
 		this.modified = true;
 		this.fireMacroListChange();
 	}
+	
+	public synchronized void setMacros(Collection newMacros)
+	{
+		if (macros == null) return;
+		this.macros = new HashMap(); // clear out the old entries
+		Iterator itr = newMacros.iterator();
+		while (itr.hasNext())
+		{
+			MacroEntry entry = (MacroEntry)itr.next();
+			this.macros.put(entry.getName().toLowerCase(), entry.getText());
+		}
+		this.modified = true;
+		this.fireMacroListChange();
+	}
 
 	public boolean isModified() { return this.modified; }
 
@@ -128,7 +144,7 @@ public class MacroManager
 			parent = (Frame)w;
 		}
 		MacroManagerDialog d = new MacroManagerDialog(parent, aPanel);
-		d.show();
+		d.setVisible(true);
 	}
 
 	public synchronized void saveMacros()
@@ -136,7 +152,14 @@ public class MacroManager
 		if (this.macros != null && this.modified)
 		{
 			WbPersistence writer = new WbPersistence(this.getMacroFile().getAbsolutePath());
-			try { writer.writeObject(this.macros); } catch (Throwable th) {}
+			try 
+			{ 
+				writer.writeObject(this.macros); 
+			} 
+			catch (Throwable th) 
+			{
+				LogMgr.logError("MacroManager.saveMacros()", "Error saving macros", th);
+			}
 			this.modified = false;
 			this.errorDuringLoad = false;
 		}

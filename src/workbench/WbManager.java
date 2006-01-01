@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -70,7 +70,7 @@ public class WbManager
 	private WbCipher desCipher = null;
 	private boolean batchMode = false;
 	public static final boolean trace = "true".equalsIgnoreCase(System.getProperty("workbench.startuptrace", "false"));
-	private boolean shutdownInProgress = false;
+	//private boolean shutdownInProgress = false;
 
 	private Thread shutdownHook = new Thread(this);
 
@@ -146,18 +146,6 @@ public class WbManager
 		{
 			LogMgr.logError("WbManager.changeLookAndFeel()", "Error setting new look and feel to " + className, e);
 		}
-	}
-	
-	public ToolWindow findToolWindow(Class clz)
-	{
-		int count = this.toolWindows.size();
-		if (count == 0) return null;
-		for (int i=0; i < count; i ++)
-		{
-			ToolWindow w = (ToolWindow)this.toolWindows.get(i);
-			if (clz.isInstance(w)) return w;
-		}
-		return null;
 	}
 	
 	public void registerToolWindow(ToolWindow aWindow)
@@ -371,7 +359,7 @@ public class WbManager
 		// files should be changed
 		boolean canExit = this.saveWindowSettings();
 		if (!canExit) return;
-		shutdownInProgress = true;
+		//shutdownInProgress = true;
 		if (window == null)
 		{
 			ConnectionMgr.getInstance().disconnectAll();
@@ -438,12 +426,11 @@ public class WbManager
 	private void disconnectWindows()
 	{
 		MainWindow w = null;
-		boolean aborted = false;
 		for (int i=0; i < mainWindows.size(); i ++)
 		{
 			w = (MainWindow)this.mainWindows.get(i);
 			if (w == null) continue;
-			aborted = w.abortAll();
+			w.abortAll();
 			w.disconnect(false, true);
 		}
 	}
@@ -510,7 +497,7 @@ public class WbManager
 	private void doShutdown(int errorCode)
 	{
 		Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
-		this.shutdownInProgress = true;
+		//this.shutdownInProgress = true;
 		this.closeAllWindows();
 		if (!this.isBatchMode()) Settings.getInstance().saveSettings();
 		LogMgr.logInfo("WbManager.doShutdown()", "Stopping " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
@@ -523,28 +510,6 @@ public class WbManager
 		return WbSwingUtilities.getYesNo(win, ResourceMgr.getString("MsgAbortRunningSql"));
 	}
 
-	private boolean checkMacros(MainWindow win)
-	{
-		if (MacroManager.getInstance().isModified())
-		{
-      int answer = JOptionPane.showConfirmDialog(win, ResourceMgr.getString("MsgConfirmUnsavedMacros"), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_CANCEL_OPTION);
-      if (answer == JOptionPane.OK_OPTION)
-      {
-        MacroManager.getInstance().saveMacros();
-        return true;
-      }
-      else if (answer == JOptionPane.NO_OPTION)
-      {
-        return true;
-      }
-      else
-      {
-        return false;
-      }
-    }
-    return true;
-	}
-	
   private boolean checkProfiles(MainWindow win)
   {
     if (ConnectionMgr.getInstance().profilesChanged())
@@ -827,7 +792,7 @@ public class WbManager
 	private void runBatch()
 	{
 		int exitCode = 0;
-		BatchRunner runner = BatchRunner.initFromCommandLine(cmdLine);
+		BatchRunner runner = BatchRunner.createBatchRunner(cmdLine);
 		int step = 1;
 		
 		if (runner != null)

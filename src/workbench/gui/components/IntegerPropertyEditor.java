@@ -1,9 +1,9 @@
 /*
- * StringPropertyEditor.java
+ * IntegerPropertyEditor.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -85,13 +85,13 @@ public class IntegerPropertyEditor
 		{
 			String name = "get" + propertyName;
 			Class cls = aSource.getClass();
-			this.getter = cls.getMethod(name, (Class[])null);
+			this.getter = cls.getMethod(name, null);
 
 			name = "set" + propertyName;
 			Class[] parms = {Integer.class};
 			this.setter = cls.getMethod(name, parms);
 
-			Integer value = (Integer)this.getter.invoke(this.source, (Object[])null);
+			Integer value = (Integer)this.getter.invoke(this.source, null);
 			if (value == null)
 				this.setText("");
 			else

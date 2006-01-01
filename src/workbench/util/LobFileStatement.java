@@ -1,9 +1,9 @@
 /*
- * LobFileParameter.java
+ * LobFileStatement.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -37,19 +37,15 @@ public class LobFileStatement
 {
 	private final String MARKER = "\\{\\$[cb]lobfile=";
 	private final Pattern MARKER_PATTERN = Pattern.compile(MARKER, Pattern.CASE_INSENSITIVE);
-	private String blobMarker;
-	private String originalSql;
 	private String sqlToUse;
 	private ParameterEntry[] parameters;
 	private int parameterCount = 0;
-	private String missingFilename = null;
 	
 	public LobFileStatement(String sql)
 		throws FileNotFoundException
 	{
 		Matcher m = MARKER_PATTERN.matcher(sql);
 		if (!m.find()) return;
-		this.originalSql = sql;
 		
 		// Calculate number of parameters
 		parameterCount ++;

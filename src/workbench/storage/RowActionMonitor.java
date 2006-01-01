@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -29,6 +29,9 @@ public interface RowActionMonitor
 	final int MONITOR_LOAD_INFO = 9;
 	
 	void setMonitorType(int aType);
+	int getMonitorType();
+	void saveCurrentType(String type);
+	void restoreType(String type);
 	void setCurrentObject(String object, long number, long totalObjects);
 	void setCurrentRow(long currentRow, long totalRows);
 	void jobFinished();

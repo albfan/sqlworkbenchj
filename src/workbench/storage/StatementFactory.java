@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -30,7 +30,6 @@ public class StatementFactory
 	private ResultInfo resultInfo;
 	private TableIdentifier tableToUse;
 	private boolean includeTableOwner = true;
-	private String currentUser;
 	private WbConnection dbConnection;
 	private SqlLiteralFormatter literalFormatter;
 	private boolean emptyStringIsNull = false;
@@ -225,7 +224,6 @@ public class StatementFactory
 
 		first = true;
     String colName = null;
-		int includedColumns = 0;
 		int colsInThisLine = 0;
 		
 		for (int col=0; col < cols; col ++)
@@ -237,14 +235,16 @@ public class StatementFactory
 			}
 			
 			if (skipIdentityCols && colId.getDbmsType().indexOf("identity") > -1) continue;
+			
 			Object value = aRow.getValue(col);
-			if (isNull(value)) value = null;
+			boolean isNull = isNull(value);
+			//if (isNull(value)) value = null;
 			
 			boolean includeCol = (ignoreStatus || aRow.isColumnModified(col));
 			
 			if (includeCol)
 			{
-				if (value == null)
+				if (isNull)
 				{
 					includeCol = includeNulls;
 				}
@@ -401,10 +401,12 @@ public class StatementFactory
 	public void setIncludeTableOwner(boolean flag) { this.includeTableOwner = flag; }
 	public boolean getIncludeTableOwner() { return this.includeTableOwner; }
 	
-	private void setCurrentConnection(WbConnection conn)
+	public void setCurrentConnection(WbConnection conn)
 	{
 		this.dbConnection = conn;
-		this.currentUser = conn.getCurrentUser();
-		emptyStringIsNull = this.dbConnection.getProfile().getEmptyStringIsNull();
+		if (this.dbConnection != null)
+		{
+			emptyStringIsNull = this.dbConnection.getProfile().getEmptyStringIsNull();
+		}
 	}
 }

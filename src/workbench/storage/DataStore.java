@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -91,16 +91,15 @@ public class DataStore
 
 	private WbConnection originalConnection;
 	private DecimalFormat defaultNumberFormatter;
-	
+
 	private boolean allowUpdates = false;
-	private boolean escapeHtml = true;
 	private boolean updateHadErrors = false;
-	
+
 	private ValueConverter converter = new ValueConverter();
 
 	private boolean cancelRetrieve = false;
 	private boolean cancelUpdate = false;
-	private boolean cancelImport = false;
+	//private boolean cancelImport = false;
 	private int reportInterval = Settings.getInstance().getIntProperty("workbench.gui.data.reportinterval", 10);
 
 	public DataStore(String[] aColNames, int[] colTypes)
@@ -147,7 +146,7 @@ public class DataStore
 	{
 		this(aResult, readData, null, -1, null);
 	}
-	
+
 	public DataStore(ResultSet aResult, WbConnection conn, boolean readData)
 		throws SQLException
 	{
@@ -241,7 +240,7 @@ public class DataStore
 	{
 		return new RowDataList(size);
 	}
-	
+
 	private RowDataList createData()
 	{
 		return new RowDataList();
@@ -326,7 +325,7 @@ public class DataStore
 		for (int i= (count - 1); i >= 0; i--)
 		{
 			RowData rowData = this.getRow(i);
-			
+
 			// Build the value map required for the FilterExpression
 			for (int c=0; c < cols; c++)
 			{
@@ -334,17 +333,17 @@ public class DataStore
 				Object value = rowData.getValue(c);
 				valueMap.put(col, value);
 			}
-			
+
 			if (!filterExpression.evaluate(valueMap))
 			{
 				this.data.remove(i);
 				this.filteredRows.add(rowData);
 			}
 		}
-		
+
 		if (this.filteredRows.size() == 0) this.filteredRows = null;
 	}
-	
+
 	/**
 	 * Restores all rows that were filtered.
 	 */
@@ -360,7 +359,7 @@ public class DataStore
 		this.filteredRows.reset();
 		this.filteredRows = null;
 	}
-	
+
 	/**
 	 *	Deletes the given row and saves it in the delete buffer
 	 *	in order to be able to generate a DELETE statement if
@@ -393,7 +392,7 @@ public class DataStore
 	 *	@return int - the new row number
 	 *	The new row will be marked as "Not modified".
 	 */
-	public int addRow(ResultSet data)
+	public int addRow(ResultSet rs)
 		throws SQLException
 	{
 		int cols = this.resultInfo.getColumnCount();
@@ -401,8 +400,8 @@ public class DataStore
 		this.data.add(row);
 		for (int i=0; i < cols; i++)
 		{
-			Object value = data.getObject(i + 1);
-			if (data.wasNull() || value == null)
+			Object value = rs.getObject(i + 1);
+			if (rs.wasNull() || value == null)
 			{
 				row.setNull(i, this.resultInfo.getColumnType(i));
 			}
@@ -538,12 +537,12 @@ public class DataStore
 		TableIdentifier tbl = new TableIdentifier(aTablename);
 		setUpdateTable(tbl, aConn);
 	}
-	
+
 	public void setUpdateTable(TableIdentifier tbl)
 	{
 		setUpdateTable(tbl, this.originalConnection);
 	}
-	
+
 	public void setUpdateTable(TableIdentifier tbl, WbConnection aConn)
 	{
 		if (tbl == null)
@@ -565,7 +564,7 @@ public class DataStore
 				if (meta == null) return;
 
 				this.updateTable = tbl.getTableExpression(aConn);
-				
+
 				ColumnIdentifier[] columns = meta.getColumnIdentifiers(tbl);
 				if (columns == null || columns.length == 0)
 				{
@@ -738,7 +737,7 @@ public class DataStore
 	}
 
 	/**
-	 *	Set a value received from a user input. This 
+	 *	Set a value received from a user input. This
 	 *  will convert the given value to an object of the
 	 *  correct class
 	 */
@@ -748,7 +747,7 @@ public class DataStore
 		Object realValue = this.convertCellValue(value, col);
 		this.setValue(row, col, realValue);
 	}
-	
+
 	/**
 	 * Set the value for the given column. This will change the internal state of the DataStore to modified.
 	 * @param aRow
@@ -871,7 +870,7 @@ public class DataStore
 	}
 
 	/**
-	 * Return a StringBuffer with the names of the columns present in the 
+	 * Return a StringBuffer with the names of the columns present in the
 	 * given List.
 	 * @param aFieldDelimiter the delimiter to be used
 	 * @param columns the columns to include. If null, all columns are included
@@ -973,7 +972,7 @@ public class DataStore
 		}
 		return includeColumns;
 	}
-	
+
 	public void writeDataString(Writer out, String aFieldDelimiter, String aLineTerminator, boolean includeHeaders, int[] rows)
 		throws IOException
 	{
@@ -1049,7 +1048,7 @@ public class DataStore
 
 	/**
 	 * Returns true if key columns are needed to save the changes
-	 * to the database. If only inserted rows are present, then no 
+	 * to the database. If only inserted rows are present, then no
 	 * key is needed. For updated or deleted rows a key is needed
 	 */
 	public boolean needPkForUpdate()
@@ -1091,7 +1090,7 @@ public class DataStore
 	}
 
 	/**
-	 * Read the column definitions from the result set's meta data 
+	 * Read the column definitions from the result set's meta data
 	 * and store the data from the ResultSet in this DataStore (up to maxRows)
 	 *
 	 * @param aResultSet the ResultSet to read
@@ -1166,8 +1165,8 @@ public class DataStore
 		}
 	}
 
-	/**	
-	 * Define the (SELECT) statement that was used to produce this 
+	/**
+	 * Define the (SELECT) statement that was used to produce this
 	 * DataStore's result set. This is used to find the update table later
 	 */
 	public void setOriginalStatement(String aSql)
@@ -1215,10 +1214,6 @@ public class DataStore
 		return table;
 	}
 
-	public void setEscapeExportValues(boolean aFlag)
-	{
-		this.escapeHtml = aFlag;
-	}
 	/**
 	 *	Returns true if the current data can be converted to SQL INSERT statements.
 	 *	The data can be saved as SQL INSERTs if an update table is defined.
@@ -1250,7 +1245,7 @@ public class DataStore
 	{
 		return this.getDataAsSqlInsert("\n", null, null, rows, columns, true);
 	}
-	
+
 	public String getDataAsSqlInsert(int[] rows, List columns)
 		throws Exception, SQLException
 	{
@@ -1294,9 +1289,9 @@ public class DataStore
 		{
 			includeDelete = false;
 		}
-		SqlRowDataConverter conv = new SqlRowDataConverter(this.resultInfo);
+		SqlRowDataConverter conv = new SqlRowDataConverter(this.originalConnection);
+		conv.setResultInfo(this.resultInfo);
 		conv.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
-		conv.setOriginalConnection(this.originalConnection);
 		conv.setLineTerminator(aLineTerminator);
 		conv.setColumnsToExport(columns);
 		if (aCharFunc != null)
@@ -1412,14 +1407,6 @@ public class DataStore
 		this.cancelUpdate = true;
 	}
 
-	/**
-	 * 	Cancel a running import
-	 */
-	public void cancelImport()
-	{
-		this.cancelImport = true;
-	}
-
 	public void cancelRetrieve()
 	{
 		this.cancelRetrieve = true;
@@ -1481,14 +1468,14 @@ public class DataStore
 
 	private boolean ignoreAllUpdateErrors = false;
 
-	private int executeGuarded(WbConnection aConnection, RowData data, DmlStatement dml, JobErrorHandler errorHandler, int row)
+	private int executeGuarded(WbConnection aConnection, RowData row, DmlStatement dml, JobErrorHandler errorHandler, int rowNum)
 		throws SQLException
 	{
 		int rowsUpdated = 0;
 		try
 		{
 			rowsUpdated = dml.execute(aConnection);
-			data.setDmlSent(true);
+			row.setDmlSent(true);
 		}
 		catch (SQLException e)
 		{
@@ -1501,7 +1488,7 @@ public class DataStore
 				int choice = JobErrorHandler.JOB_ABORT;
 				if (errorHandler != null)
 				{
-					choice = errorHandler.getActionOnError(row, null, dml.getExecutableStatement(dbProduct), e.getMessage());
+					choice = errorHandler.getActionOnError(rowNum, null, dml.getExecutableStatement(dbProduct), e.getMessage());
 				}
 				if (choice == JobErrorHandler.JOB_CONTINUE)
 				{
@@ -1550,7 +1537,7 @@ public class DataStore
 
 		StatementFactory factory = new StatementFactory(this.resultInfo, this.originalConnection);
 		factory.setIncludeTableOwner(aConnection.getMetadata().needSchemaInDML(resultInfo.getUpdateTable()));
-		
+
 		try
 		{
 			this.resetUpdateRowCounters();
@@ -1625,7 +1612,7 @@ public class DataStore
 	{
 		return updateHadErrors;
 	}
-	
+
 	/**
 	 * Clears the flag for all modified rows that the update
 	 * has already been sent to the database
@@ -1682,7 +1669,7 @@ public class DataStore
 	}
 
 	/**
-	 * Reset all rows to not modified. After this a call 
+	 * Reset all rows to not modified. After this a call
 	 * to #isModified() will return false.
 	 */
 	public void resetStatus()
@@ -1696,7 +1683,7 @@ public class DataStore
 		}
 		this.resetUpdateRowCounters();
 	}
-	
+
 	public void sortByColumn(int col, boolean ascending)
 	{
 		synchronized (this.data)
@@ -1716,7 +1703,7 @@ public class DataStore
 		if (aFormat == null) return;
 		this.converter.setDefaultTimestampFormat(aFormat);
 	}
-	
+
 	public void setDefaultDateFormat(String aFormat)
 	{
 		if (aFormat == null) return;
@@ -1746,7 +1733,7 @@ public class DataStore
 	}
 
 	/**
-	 * Convert the value to the approriate class instance 
+	 * Convert the value to the approriate class instance
 	 * for the given column
 	 *
 	 * @param aValue the value as entered by the user
@@ -1765,7 +1752,7 @@ public class DataStore
 
 		return converter.convertValue(aValue, type);
 	}
-	
+
 	/**
 	 * Return the status object for the given row.
 	 * The status is one of
@@ -1774,7 +1761,7 @@ public class DataStore
 	 * <li>{@link #ROW_MODIFIED}</li>
 	 * <li>{@link #ROW_NEW}</li>
 	 * </ul>
-	 * The status object is used by the {@link workbench.gui.renderer.RowStatusRenderer} 
+	 * The status object is used by the {@link workbench.gui.renderer.RowStatusRenderer}
 	 * in the result table to display the approriate icon.
 	 * @param aRow the row for which the status should be returned
 	 * @return an Integer identifying the status

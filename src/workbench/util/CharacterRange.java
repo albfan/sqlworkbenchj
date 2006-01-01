@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -23,8 +23,6 @@ public class CharacterRange
 	public static final CharacterRange RANGE_7BIT = new CharacterRange(2);
 	public static final CharacterRange RANGE_8BIT = new CharacterRange(3);
 	public static final CharacterRange RANGE_8BIT_EXTENDED = new CharacterRange(4);
-	
-	private static final int MAX_ID = 4;
 	
 	private int typeIndex = 0;
 	

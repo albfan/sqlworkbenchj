@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -40,7 +40,6 @@ public class ScriptParser
 	private String originalScript = null;
 	private ArrayList commands = null;
 	private String delimiter = ";";
-	private int delimiterLength = -1;
 	private String alternateDelimiter;
 	private int currentIteratorIndex = 0;
 	private boolean checkEscapedQuotes = true;
@@ -216,7 +215,6 @@ public class ScriptParser
 		{
 			this.delimiter = "GO";
 		}
-		this.delimiterLength = this.delimiter.length();
 	}
 
 	/**

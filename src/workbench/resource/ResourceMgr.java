@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -11,9 +11,8 @@
  */
 package workbench.resource;
 
-import java.io.BufferedReader;
+import java.awt.event.KeyEvent;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -23,6 +22,7 @@ import java.util.ResourceBundle;
 import javax.swing.ImageIcon;
 
 import workbench.log.LogMgr;
+import workbench.util.StringUtil;
 
 /**
  * @author  thomas.kellerer
@@ -111,6 +111,15 @@ public class ResourceMgr
 		return BUILD_INFO;
 	}
 
+	private static final String shiftText = KeyEvent.getKeyModifiersText(KeyEvent.SHIFT_MASK);
+	private static final String ctrlText = KeyEvent.getKeyModifiersText(KeyEvent.CTRL_MASK);
+	public static String replaceModifierText(String msg)
+	{
+		msg = StringUtil.replace(msg, "%shift%", shiftText);
+		msg = StringUtil.replace(msg, "%control%", ctrlText);
+		return msg;
+	}
+	
 	public static java.util.Date getBuildDate()
 	{
 		String builddate = getString("TxtBuildDate");
@@ -187,16 +196,24 @@ public class ResourceMgr
 		}
 	}
 
+	public static String getDescription(String aKey)
+	{
+		return getDescription(aKey, false);
+	}
 	/**
 	 *    Returns the description associcate with the given key.
 	 *    This is used for Tooltips which are associated with a
 	 *    certain menu text etc.
 	 */
-	public static String getDescription(String aKey)
+	public static String getDescription(String aKey, boolean replaceModifiers)
 	{
 		try
 		{
 			String value = resources.getString("Desc_" + aKey);
+			if (replaceModifiers)
+			{
+				value = replaceModifierText(value);
+			}
 			return value;
 		}
 		catch (MissingResourceException e)

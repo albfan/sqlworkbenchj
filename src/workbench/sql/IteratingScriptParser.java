@@ -1,9 +1,9 @@
 /*
- * ScriptParser.java
+ * IteratingScriptParser.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -460,7 +460,6 @@ public class IteratingScriptParser
 		
 		boolean inComment = false;
 		boolean inQuotes = false;
-		char last = 0;
 		
 		for (int i=0; i < len - 1; i++)
 		{
@@ -474,7 +473,6 @@ public class IteratingScriptParser
 				inComment = true;
 				// skip the start at the next position
 				i++;
-				last = '*';
 				continue;
 			}
 			

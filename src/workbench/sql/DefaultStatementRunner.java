@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -80,7 +80,6 @@ public class DefaultStatementRunner
 
 	private SqlCommand currentCommand;
 	private SqlCommand currentConsumer;
-	private boolean isCancelled;
 	private String baseDir;
 	
 	private RowActionMonitor rowMonitor;
@@ -405,7 +404,6 @@ public class DefaultStatementRunner
 	{
 		try
 		{
-			this.isCancelled = true;
 			if (this.currentConsumer != null)
 			{
 				this.currentConsumer.cancel();

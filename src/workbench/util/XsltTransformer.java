@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -34,7 +34,6 @@ import javax.xml.transform.stream.StreamSource;
 public class XsltTransformer
 {
 	private Transformer transformer;
-	private String basedir;
 
 	public XsltTransformer(File xslfile)
 		throws IOException, TransformerException
@@ -43,7 +42,6 @@ public class XsltTransformer
 		{
 			throw new FileNotFoundException("File "+xslfile.getAbsolutePath()+" doesn't exist");
 		}
-		this.basedir = xslfile.getParent();
 		Source sxslt = new StreamSource(new FileInputStream(xslfile));
 		sxslt.setSystemId(xslfile.getName());
 		TransformerFactory factory = TransformerFactory.newInstance();

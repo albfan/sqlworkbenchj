@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -30,6 +30,7 @@ import javax.swing.JPanel;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.sql.EditorPanel;
+import workbench.interfaces.TextContainer;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -43,7 +44,8 @@ public class EditWindow
 	implements ActionListener, WindowListener
 {
 	
-	private EditorPanel editor;
+	private TextContainer textContainer;
+	private JComponent editor;
 	private JButton okButton = new WbButton(ResourceMgr.getString("LabelOK"));
 	private JButton cancelButton = new WbButton(ResourceMgr.getString("LabelCancel"));
 	private boolean isCancelled = true;
@@ -71,14 +73,29 @@ public class EditWindow
 		this.getContentPane().setLayout(new BorderLayout());
 		if (createSqlEditor)
 		{
-			this.editor = EditorPanel.createSqlEditor();
+			EditorPanel panel = EditorPanel.createSqlEditor();
+			panel.showFindOnPopupMenu();
+			panel.showFormatSql();
+			this.editor = panel;
+			this.textContainer = panel;
 		}
 		else
 		{
-			this.editor = EditorPanel.createTextEditor();
+			if (Settings.getInstance().getUsePlainEditorForData())
+			{
+				PlainEditor ed = new PlainEditor();
+				this.textContainer = ed;
+				this.editor = ed;
+			}
+			else
+			{
+				EditorPanel panel = EditorPanel.createTextEditor();
+				panel.showFindOnPopupMenu();
+				panel.showFormatSql();
+				this.editor = panel;
+				this.textContainer = panel;
+			}
 		}
-		this.editor.showFindOnPopupMenu();
-		this.editor.showFormatSql();
 		
 		this.getContentPane().add(editor, BorderLayout.CENTER);
 		JPanel buttonPanel = new JPanel();
@@ -87,10 +104,10 @@ public class EditWindow
 		buttonPanel.add(this.cancelButton);
 		this.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 		
-		this.editor.setText(text);
+		this.textContainer.setText(text);
 		this.editor.setMinimumSize(new Dimension(100,100));
 		this.editor.setPreferredSize(new Dimension(300,200));
-		this.editor.setCaretPosition(0);
+		this.textContainer.setCaretPosition(0);
 		
 		
 		this.okButton.addActionListener(this);
@@ -149,7 +166,7 @@ public class EditWindow
 
 	public String getText() 
 	{
-		return this.editor.getText();
+		return this.textContainer.getText();
 	}
 
 	public void windowActivated(java.awt.event.WindowEvent e)

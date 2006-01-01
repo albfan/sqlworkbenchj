@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -665,6 +665,7 @@ public class DbExplorerPanel
 		w.dDbExplorerVisible();
 		tables.saveToWorkspace(w, index);
 		searchPanel.saveToWorkspace(w, index);
+		procs.saveToWorkspace(w, index);
 	}
 
 	public boolean prepareWorkspaceSaving()
@@ -677,6 +678,7 @@ public class DbExplorerPanel
 	{
 		tables.readFromWorkspace(w, index);
 		searchPanel.readFromWorkspace(w, index);
+		procs.readFromWorkspace(w, index);
 	}
 
 	public void executionStart(WbConnection conn, Object source)

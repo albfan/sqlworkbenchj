@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -69,7 +69,8 @@ public class BatchRunner
 	private boolean checkEscapedQuotes = false;
 	private String encoding = null;
 	private String baseDir;
-
+	private boolean showProgress = false;
+	
 	public BatchRunner(String aFilelist)
 	{
 		this.files = StringUtil.stringToList(aFilelist, ",", true);
@@ -130,19 +131,19 @@ public class BatchRunner
 	}
 
 	public void connect()
-		throws Exception
 	{
 		if (this.profile == null)
 		{
-			LogMgr.logWarning("BatchRunner.setProfile()", "Called with a <null> profile!");
+			LogMgr.logError("BatchRunner.setProfile()", "Called with a <null> profile!", null);
 			return;
 		}
+		
 		try
 		{
 			ConnectionMgr mgr = ConnectionMgr.getInstance();
 			WbConnection c = mgr.getConnection(this.profile, "BatchRunner");
 			this.setConnection(c);
-			LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchConnectOk"));
+			LogMgr.logInfo("BatchRunner", ResourceMgr.getString("MsgBatchConnectOk") + " (" + c.getDisplayString() + ")");
 			System.out.println(ResourceMgr.getString("MsgBatchConnectOk"));
 		}
 		catch (Exception e)
@@ -204,6 +205,7 @@ public class BatchRunner
 			if (this.rowMonitor != null)
 			{
 				this.rowMonitor.setCurrentObject(file, i+1, count);
+				this.rowMonitor.saveCurrentType("batchrunnerMain");
 			}
 
 			try
@@ -321,6 +323,7 @@ public class BatchRunner
 				result = this.stmtRunner.getResult();
 				if (result.hasMessages() && (this.stmtRunner.getVerboseLogging() || !result.isSuccess()))
 				{
+					this.printMessage("");
 					String[] msg = result.getMessages();
 					for (int m=0; m < msg.length; m++)
 					{
@@ -336,6 +339,7 @@ public class BatchRunner
 
 				if (this.rowMonitor != null && (executedCount % interval == 0))
 				{
+					this.rowMonitor.restoreType("batchrunnerMain");
 					this.rowMonitor.setCurrentRow(executedCount, -1);
 				}
 
@@ -377,6 +381,7 @@ public class BatchRunner
 		msg.append(executedCount);
 		msg.append(' ');
 		msg.append(ResourceMgr.getString("MsgTotalStatementsExecuted"));
+		if (this.showProgress) this.printMessage("\n");
 		this.printMessage(msg.toString());
 		parser.done();
 
@@ -442,7 +447,7 @@ public class BatchRunner
 		}
 	}
 
-	public static BatchRunner initFromCommandLine(ArgumentParser cmdLine)
+	public static BatchRunner createBatchRunner(ArgumentParser cmdLine)
 	{
 		String scripts = cmdLine.getValue(WbManager.ARG_SCRIPT);
 		if (scripts == null || scripts.trim().length() == 0) return null;
@@ -503,6 +508,7 @@ public class BatchRunner
 		runner.setSuccessScript(success);
 		runner.setProfile(profile);
 		runner.showTiming = cmdLine.getBoolean(WbManager.ARG_SHOW_TIMING, true);
+		runner.showProgress = showProgress;
 		if (showProgress)
 		{
 			runner.setRowMonitor(new GenericRowMonitor(new ConsoleStatusBar()));

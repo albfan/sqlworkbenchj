@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -488,24 +488,43 @@ public class MainWindow
 		return menuBar;
 	}
 
+	private void checkMacroMenuForPanel(int index)
+	{
+		MainPanel p = this.getSqlPanel(index);
+		try
+		{
+			JMenu macro = this.getMacroMenu(index);
+			setItemStates(macro, p.isConnected());
+		}
+		catch (Exception e)
+		{
+			
+		}
+	}
+	
 	private void setMacroMenuEnabled(boolean enabled)
 	{
 		int count = this.sqlTab.getTabCount();
 		for (int i=0; i < count; i++)
 		{
 			JMenu macro = this.getMacroMenu(i);
-			if (macro != null)
-			{
-				int itemCount = macro.getItemCount();
-				for (int in=2; in < itemCount; in++)
-				{
-					JMenuItem item = macro.getItem(in);
-					if (item != null) item.setEnabled(enabled);
-				}
-			}
+			setItemStates(macro, enabled);
 		}
 	}
 
+	private void setItemStates(JMenu menu, boolean enabled)
+	{
+		if (menu != null)
+		{
+			int itemCount = menu.getItemCount();
+			for (int in=2; in < itemCount; in++)
+			{
+				JMenuItem item = menu.getItem(in);
+				if (item != null) item.setEnabled(enabled);
+			}
+		}
+	}
+	
 	public void macroListChanged()
 	{
 		this.updateMacroMenus();
@@ -520,6 +539,8 @@ public class MainWindow
 			if (macros != null)
 			{
 				this.buildMacroMenu(macros);
+				MainPanel p = this.getSqlPanel(i);
+				this.setItemStates(macros, p.isConnected());
 			}
 		}
 	}
@@ -751,7 +772,7 @@ public class MainWindow
 			content.add(this.currentToolbar, BorderLayout.NORTH);
 		}
 		current.panelSelected();
-		this.setMacroMenuEnabled(current.isConnected());
+		this.checkMacroMenuForPanel(anIndex);
 		this.doLayout();
 	}
 

@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2005, Thomas Kellerer
+ * Copyright 2002-2006, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -132,28 +132,28 @@ public class WbProperties
 		this.setProperty(property, Boolean.toString(value));
 	}
 	
-	private String getFirstTwoSections(String aString)
-	{
-		int pos1 = aString.indexOf(".");
-		String result;
-		if (pos1 > -1)
-		{
-			int pos2 = aString.indexOf(".", pos1 + 1);
-			if (pos2 > -1)
-			{
-				result = aString.substring(0, pos2);
-			}
-			else
-			{
-				result = aString.substring(0, pos1);
-			}
-			return result;
-		}
-		else
-		{
-			return aString;
-		}
-	}
+//	private String getFirstTwoSections(String aString)
+//	{
+//		int pos1 = aString.indexOf(".");
+//		String result;
+//		if (pos1 > -1)
+//		{
+//			int pos2 = aString.indexOf(".", pos1 + 1);
+//			if (pos2 > -1)
+//			{
+//				result = aString.substring(0, pos2);
+//			}
+//			else
+//			{
+//				result = aString.substring(0, pos1);
+//			}
+//			return result;
+//		}
+//		else
+//		{
+//			return aString;
+//		}
+//	}
 	
 	private String getSections(String aString, int aNum)
 	{
