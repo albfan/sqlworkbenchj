@@ -24,9 +24,8 @@ import workbench.util.SqlUtil;
 public class GenericSchemaInfoReader
 	implements SchemaInformationReader
 {
-	// <editor-fold defaultstate="collapsed" desc=" Variables ">
-	String schemaQuery = null;
-	// </editor-fold>
+	private String schemaQuery = null;
+
 	public GenericSchemaInfoReader(String dbid)
 	{
 		this.schemaQuery = Settings.getInstance().getProperty("workbench.db." + dbid + ".currentschema.query", null);
