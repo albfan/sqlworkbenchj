@@ -17,7 +17,6 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
@@ -59,7 +58,6 @@ import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
-import workbench.storage.DbDateFormatter;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -93,6 +91,19 @@ public class DbMetadata
 	public static final String FK_DELETE_RULE = "%fk_delete_rule%";
 	public static final String GENERAL_SQL = "All";
 	// </editor-fold>
+	
+	// <editor-fold defaultstate="collapsed" desc="HashMaps containing statement templates">
+	private static HashMap procSourceSql;
+	private static HashMap viewSourceSql;
+	private static HashMap triggerSourceSql;
+	private static HashMap triggerList;
+	private static HashMap pkStatements;
+	private static HashMap idxStatements;
+	private static HashMap fkStatements;
+	private static HashMap columnCommentStatements;
+	private static HashMap tableCommentStatements;
+	private static boolean templatesRead;
+	// </editor-fold>
 
 	public static final String MVIEW_NAME = "MATERIALIZED VIEW";
 	private String schemaTerm;
@@ -116,19 +127,6 @@ public class DbMetadata
 	private SchemaInformationReader schemaInfoReader;
 	private IndexReader indexReader;
 
-	// <editor-fold defaultstate="collapsed" desc="HashMaps containing statement templates">
-	private static HashMap procSourceSql;
-	private static HashMap viewSourceSql;
-	private static HashMap triggerSourceSql;
-	private static HashMap triggerList;
-	private static HashMap pkStatements;
-	private static HashMap idxStatements;
-	private static HashMap fkStatements;
-	private static HashMap columnCommentStatements;
-	private static HashMap tableCommentStatements;
-	private static boolean templatesRead;
-	// </editor-fold>
-
 	private DbmsOutput oraOutput;
 
   private boolean caseSensitive;
@@ -144,7 +142,7 @@ public class DbMetadata
 	private boolean isCloudscape;
 	private boolean isApacheDerby;
 	private boolean isIngres;
-	//private boolean isMcKoi;
+	private boolean isDB2;
 
 	private boolean trimDefaults = true;
 	private boolean createInlineConstraints;
@@ -328,6 +326,10 @@ public class DbMetadata
 			this.constraintReader = new FirstSqlMetadata();
 			this.isFirstSql = true;
 		}
+		else if (productLower.indexOf("db2") > -1)
+		{
+			this.isDB2 = true;
+		}
 
 		// if the DBMS does not need a specific ProcedureReader
 		// we use the default implementation
@@ -406,6 +408,11 @@ public class DbMetadata
 			}
 		}
 
+		if (this.schemaInfoReader == null)
+		{
+			this.schemaInfoReader = new GenericSchemaInfoReader(this.getDbId());
+		}
+		
 		tableTypeName = settings.getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
 		TABLE_TYPES_TABLE = new String[] {tableTypeName};
 		if (this.isOracle)
@@ -584,6 +591,7 @@ public class DbMetadata
 	public boolean isCloudscape() { return this.isCloudscape; }
 	public boolean isApacheDerby() { return this.isApacheDerby; }
 	public boolean isFirstSql() { return this.isFirstSql; }
+	public boolean isDB2() { return this.isDB2; }
 
 	private List schemasToIgnore;
 
