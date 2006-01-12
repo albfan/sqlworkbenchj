@@ -291,6 +291,21 @@ public class OracleMetadata
 		
 		ResultSet rs = null;
 		
+		int pos = table.indexOf('@');
+		
+		if (pos > 0)
+		{
+			String dblink = table.substring(pos);
+			table = table.substring(0, pos);
+			sql = StringUtil.replace(sql, "all_tab_columns", "all_tab_columns" + dblink);
+			sql = StringUtil.replace(sql, "all_col_comments", "all_col_comments" + dblink);
+			String dblinkOwner = this.getDbLinkTargetSchema(dblink.substring(1), schema);
+			if (!StringUtil.isEmptyString(dblinkOwner))
+			{
+				schema = dblinkOwner;
+			}
+		}
+		
 		synchronized (connection)
 		{
 			// The above statement does not work with Oracle 8
@@ -430,6 +445,49 @@ public class OracleMetadata
 			SqlUtil.closeAll(rs, stmt);
 		}
 		return schema;
+	}
+	
+	private String getDbLinkTargetSchema(String dblink, String owner)
+	{
+		String sql = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		String linkOwner = null;
+		
+		if (dblink.indexOf('.') > 0)
+		{
+			sql = "SELECT username FROM all_db_links WHERE db_link = ? AND (owner = ? or owner = 'PUBLIC')";
+		}
+		else
+		{
+			sql = "SELECT username FROM all_db_links WHERE db_link like ? AND (owner = ? or owner = 'PUBLIC')";
+			dblink = dblink + ".%";
+		}
+		
+		try
+		{
+			synchronized (connection)
+			{
+				stmt = this.connection.getSqlConnection().prepareStatement(sql);
+				stmt.setString(1, dblink);
+				stmt.setString(2, owner);
+				rs = stmt.executeQuery();
+				if (rs.next())
+				{
+					linkOwner = rs.getString(1);
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("OracleMetadata.getDblinkSchema()", "Error retrieving target schema for DBLINK " + dblink, e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs,stmt);
+		}
+			
+		return linkOwner;
 	}
 	
 	private String ERROR_QUERY = "SELECT line, position, text " +
