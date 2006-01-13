@@ -112,7 +112,7 @@ public class ProcedureListPanel
 		this.procColumns.setCellSelectionEnabled(false);
 		this.procColumns.setColumnSelectionAllowed(false);
 		this.procColumns.setRowSelectionAllowed(true);
-		this.procColumns.getSelectionModel().addListSelectionListener(this);
+		//this.procColumns.getSelectionModel().addListSelectionListener(this);
 		this.procColumns.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		this.procColumns.setAdjustToColumnLabel(false);
 		JScrollPane scroll = new WbScrollPane(this.procColumns);
@@ -379,6 +379,7 @@ public class ProcedureListPanel
 
 	public void valueChanged(ListSelectionEvent e)
 	{
+		if (e.getSource() != this.procList.getSelectionModel()) return;
 		if (e.getValueIsAdjusting()) return;
 		int row = this.procList.getSelectedRow();
 
@@ -399,10 +400,11 @@ public class ProcedureListPanel
 	private void retrieveProcDefinition(String catalog, String schema, String proc, int type)
 	{
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
+		if (this.dbConnection == null) return;
 		DbMetadata meta = dbConnection.getMetadata();
 		Container parent = this.getParent();
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		int pos = 0;
+		String sql = null;
 		try
 		{
 			dbConnection.setBusy(true);
@@ -425,12 +427,12 @@ public class ProcedureListPanel
 
 			try
 			{
-				String sql = meta.getProcedureSource(catalog, schema, proc, type);
+				sql = meta.getProcedureSource(catalog, schema, proc, type);
 				source.setText(sql);
-				pos = checkOraclePackage(sql, catalog, proc, type);
 			}
-			catch (Exception ex)
+			catch (Throwable ex)
 			{
+				sql = null;
 				LogMgr.logError("ProcedureListPanel.valueChanged() thread", "Could not read procedure source", ex);
 				source.setText(ex.getMessage());
 			}
@@ -440,6 +442,7 @@ public class ProcedureListPanel
 			parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 			dbConnection.setBusy(false);
 		}
+		int pos = checkOraclePackage(sql, catalog, proc, type);
 		source.setCaretPosition(pos);
 		source.scrollToCaret();
 		EventQueue.invokeLater(new Runnable()
@@ -453,19 +456,20 @@ public class ProcedureListPanel
 	
 	private int checkOraclePackage(String sql, String catalog, String object, int type)
 	{
+		if (sql == null) return 0;
 		if (this.dbConnection == null) return 0;
 		if (!this.dbConnection.getMetadata().isOracle()) return 0;
 		if (StringUtil.isEmptyString(catalog)) return 0;
 		String regex = null;
 		if (type == DatabaseMetaData.procedureNoResult)
 		{
-			regex = "(?i)PROCEDURE\\s*" + object + "\\s*IS";
+			regex = "PROCEDURE\\s*" + object + "\\s*IS|PROCEDURE\\s*" + object + "\\s*\\([^;]*\\)\\s*IS";
 		}
 		else
 		{
-			regex = "(?i)FUNCTION\\s*" + object + ".*RETURN.*AS";
+			regex = "FUNCTION\\s*" + object + ".*RETURN.*AS";
 		}
-		Pattern p = Pattern.compile(regex);
+		Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE + Pattern.DOTALL);
 		
 		Matcher m = p.matcher(sql);
 		if (m.find())

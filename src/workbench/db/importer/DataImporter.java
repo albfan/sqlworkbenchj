@@ -156,6 +156,7 @@ public class DataImporter
 	public boolean getDeleteTarget() { return deleteTarget; }
 	public void setBatchSize(int size) { this.batchSize = size; }
 
+	
 	public void setWhereClauseForUpdate(String clause)
 	{
 		if (StringUtil.isEmptyString(clause))
@@ -168,6 +169,15 @@ public class DataImporter
 		}
 	}
 
+	/**
+	 * Controls creation of target table for imports where the 
+	 * producer can retrieve a full table definition (i.e. XML files
+	 * created with SQL Workbench
+	 * @see #createTable()
+	 * @see #setTargetTable(String, workbench.db.ColumnIdentifier[])
+	 */
+	public void setCreateTarget(boolean flag) { this.createTarget = flag; }
+	
 	/**
 	 *	Controls deletion of the target table.
 	 */
@@ -427,6 +437,9 @@ public class DataImporter
 		TableCreator creator = new TableCreator(this.dbConn, this.targetTable, this.targetColumns);
 		creator.useDbmsDataType(true);
 		creator.createTable();
+		String table = creator.getTable().getTableName();
+		String msg = StringUtil.replace(ResourceMgr.getString("MsgImporterTableCreated"), "%table%", table);
+		this.messages.append(msg + "\n");
 	}
 
 	public void setUseTruncate(boolean flag)

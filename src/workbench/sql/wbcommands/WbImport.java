@@ -76,6 +76,7 @@ public class WbImport extends SqlCommand
 	public static final String ARG_UPDATE_WHERE = "updatewhere";
 	public static final String ARG_IGNORE_SCHEMA = "ignoreschema";
 	public static final String ARG_TRUNCATE_TABLE = "truncatetable";
+	public static final String ARG_CREATE_TABLE = "createtarget";
 
 	private ArgumentParser cmdLine;
 
@@ -115,6 +116,7 @@ public class WbImport extends SqlCommand
 		cmdLine.addArgument(ARG_TRIM_VALUES);
 		cmdLine.addArgument(ARG_FILE_EXT);
 		cmdLine.addArgument(ARG_TRUNCATE_TABLE);
+		cmdLine.addArgument(ARG_CREATE_TABLE);
 
 		this.isUpdatingCommand = true;
 	}
@@ -404,6 +406,7 @@ public class WbImport extends SqlCommand
 			boolean verbose = cmdLine.getBoolean(ARG_VERBOSEXML, true);
 			xmlParser.setUseVerboseFormat(verbose);
 
+			imp.setCreateTarget(cmdLine.getBoolean(ARG_CREATE_TABLE, false));
 			imp.setProducer(xmlParser);
 		}
 		else

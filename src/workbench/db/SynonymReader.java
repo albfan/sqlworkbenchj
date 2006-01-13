@@ -13,6 +13,7 @@ package workbench.db;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Read the definition of synonyms from the database.
@@ -25,4 +26,7 @@ public interface SynonymReader
 	
 	TableIdentifier getSynonymTable(Connection con, String anOwner, String aSynonym)
 			throws SQLException;
+	
+	List getSynonymList(String owner)
+		throws SQLException;
 }

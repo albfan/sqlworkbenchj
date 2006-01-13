@@ -638,6 +638,7 @@ public class WbManager
 	private static final String ARG_PROFILE_STORAGE = "profilestorage";
 	
 	private static final String ARG_CONFIGDIR = "configdir";
+	private static final String ARG_LIBDIR = "libdir";
 	private static final String ARG_LOGFILE = "logfile";
 	private static final String ARG_VARDEF = "vardef";
 
@@ -651,6 +652,7 @@ public class WbManager
 		cmdLine.addArgument(ARG_PROFILE);
 		cmdLine.addArgument(ARG_PROFILE_STORAGE);
 		cmdLine.addArgument(ARG_CONFIGDIR);
+		cmdLine.addArgument(ARG_LIBDIR);
 		cmdLine.addArgument(ARG_SCRIPT);
 		cmdLine.addArgument(ARG_LOGFILE);
 		cmdLine.addArgument(ARG_ABORT);
@@ -677,6 +679,11 @@ public class WbManager
 			if (!StringUtil.isEmptyString(value))
 			{
 				System.setProperty("workbench.configdir", value);
+			}
+			value = cmdLine.getValue(ARG_LIBDIR);
+			if (!StringUtil.isEmptyString(value))
+			{
+				System.setProperty("workbench.libdir", value);
 			}
 			
 			value = cmdLine.getValue(ARG_LOGFILE);

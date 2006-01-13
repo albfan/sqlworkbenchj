@@ -43,6 +43,7 @@ public class TableCreator
 	}
 
 	public void useDbmsDataType(boolean flag) { this.useDbmsDataType = flag; }
+	public TableIdentifier getTable() { return this.tablename; }
 	
 	public void createTable()
 		throws SQLException

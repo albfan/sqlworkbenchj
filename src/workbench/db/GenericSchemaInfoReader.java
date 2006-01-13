@@ -12,6 +12,7 @@
 package workbench.db;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -49,6 +50,12 @@ public class GenericSchemaInfoReader
 		catch (Exception e)
 		{
 			LogMgr.logWarning("GenericSchemaInfoReader.getCurrentSchema()", "Error reading current schema", e);
+			if (e instanceof SQLException)
+			{
+				// When a SQLException is thrown, we assume an error with the configured
+				// query, so it's disabled to avoid subsequent errors
+				this.schemaQuery = null;
+			}
 			currentSchema = null;
 		}
 		finally

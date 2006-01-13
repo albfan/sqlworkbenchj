@@ -935,6 +935,8 @@ public class DataExporter
 		dialog.setIncludeSqlUpdate(true);
 
 		boolean result = dialog.selectOutput();
+		boolean tableExport = false;
+		
 		if (result)
 		{
 			try
@@ -950,28 +952,43 @@ public class DataExporter
 						ColumnIdentifier col = (ColumnIdentifier)cols.get(i);
 						query.append(col.getColumnName());
 					}
+					query.append(" FROM ");
+					query.append(table.getTableExpression(this.dbConn));
+					this.setSql(query.toString());
 				}
 				else
 				{
-					int count = info.getColumnCount();
-					for (int i=0; i < count; i++)
-					{
-						if (i > 0) query.append(", ");
-						query.append(info.getColumnName(i));
-					}
+					tableExport = true;
+					this.addTableExportJob(dialog.getSelectedFilename(), table);
 				}
-				query.append(" FROM ");
-				query.append(table.getTableExpression(this.dbConn));
-				this.setSql(query.toString());
+				
 				dialog.setExporterOptions(this);
-				this.setShowProgressWindow(true);
+				
 				Frame parent = null;
 				if (aParent instanceof Frame)
 				{
 					parent = (Frame)aParent;
 				}
-				this.startBackgroundThread();
-				this.openProgressMonitor(parent, true);
+				// In order to initialize the resultInfo as accurate as 
+				// possible, we use a table export when all columns are
+				// selected. This way the column information will be retrieved
+				// directly from the table definition and not from the 
+				// ResultSetMetadata object which might not return 
+				// the correct column types (e.g. in Postgres)
+				// but for an XML export we want to have the types as 
+				// exact as possible to enable creating the target table
+				// later
+				
+				if (tableExport)
+				{
+					this.setShowProgressWindow(true);
+					this.startExportJobs(parent);
+				}
+				else
+				{
+					this.startBackgroundThread();
+					this.openProgressMonitor(parent, true);
+				}
 			}
 			catch (Exception e)
 			{

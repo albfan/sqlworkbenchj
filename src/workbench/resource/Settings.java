@@ -263,6 +263,11 @@ public class Settings
 	{
 		return getProperty("workbench.dbexplorer.defTableType", null);
 	}
+
+	public boolean getStoreExplorerSchema()
+	{
+		return getBoolProperty("workbench.dbexplorer.rememberSchema", true);
+	}
 	
 	public String getProfileStorage()
 	{
@@ -335,6 +340,17 @@ public class Settings
 		this.renameProperty("connection.last", "workbench.connection.last");
 		this.renameProperty("drivers.lastlibdir", "workbench.drivers.lastlibdir");
 		this.renameProperty("workbench.db.debugger", "workbench.db.previewsql");
+		
+		// Fix typos from incorrect default.properties
+		this.renameProperty("workbench.db.objecttype.data.postgres", "workbench.db.objecttype.data.postgresql");
+		this.renameProperty("workbench.db.objecttype.selectable.postgres", "workbench.db.objecttype.selectable.postgresql");
+		this.renameProperty("workbench.ignoretypes.postgres", "workbench.ignoretypes.postgresql");
+		String s = getProperty("workbench.db.truncatesupported",null);
+		if (s!=null)
+		{
+			s = s.replaceAll(",postgres,",",postgresql,");
+			this.setProperty("workbench.db.truncatesupported",s);
+		}
 	}
 
 	private void renameProperty(String oldKey, String newKey)

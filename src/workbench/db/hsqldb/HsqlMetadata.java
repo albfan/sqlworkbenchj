@@ -11,59 +11,38 @@
  */
 package workbench.db.hsqldb;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import workbench.db.SchemaInformationReader;
-import workbench.db.WbConnection;
-import workbench.util.SqlUtil;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  *
  * @author info@sql-workbench.net
  */
 public class HsqlMetadata
-	implements SchemaInformationReader
 {
-	private boolean is18;
-	
-	public HsqlMetadata(WbConnection conn)
+	public static boolean supportsInformationSchema(Connection con)
 	{
-		String version = null;
+		int major = 0;
+		int minor = 0;
 		try
 		{
-			version = conn.getSqlConnection().getMetaData().getDatabaseProductVersion();
+			major = con.getMetaData().getDatabaseMajorVersion();
+			minor = con.getMetaData().getDriverMinorVersion();
 		}
-		catch (Exception e)
+		catch (SQLException e)
 		{
-			version = "1.7";
+			major = 1;
+			minor = 7;
 		}
-		is18 = (version != null && version.startsWith("1.8"));
-	}
-
-	private String CURRENT_SCHEMA_SQL = "SELECT value FROM information_schema.system_sessioninfo WHERE key = 'SCHEMA'";
-	
-	public String getCurrentSchema(WbConnection conn)
-	{
-		if (!is18) return null;
 		
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		String schema = null;
-		try
+		if (major >= 1 && minor >= 8)
 		{
-			stmt = conn.getSqlConnection().prepareStatement(CURRENT_SCHEMA_SQL);
-			rs = stmt.executeQuery();
-			if (rs.next()) schema = rs.getString(1);;
+			return true;
 		}
-		catch (Exception e)
+		else
 		{
-			schema = null;
+			return false;
 		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return schema;
-	}
+	}	
 	
 }

@@ -460,7 +460,7 @@ public class WbConnection
 			}
 
 			String schema = meta.getSchemaToUse();
-			if (schema != null && !schema.equals(user))
+			if (schema != null && !schema.equalsIgnoreCase(user))
 			{
 				String schemaName = meta.getSchemaTerm();
 				buff.append(", ");

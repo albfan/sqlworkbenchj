@@ -15,6 +15,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.List;
 import workbench.db.SynonymReader;
 
 import workbench.db.TableIdentifier;
@@ -28,6 +30,12 @@ public class OracleSynonymReader
 {
 	public OracleSynonymReader()
 	{
+	}
+
+	public List getSynonymList(String owner) 
+		throws SQLException
+	{
+		return Collections.EMPTY_LIST;
 	}
 
 	public TableIdentifier getSynonymTable(Connection con, String anOwner, String aSynonym)

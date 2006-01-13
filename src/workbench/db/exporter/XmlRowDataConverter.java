@@ -132,6 +132,7 @@ public class XmlRowDataConverter
 
 	public void setBaseFilename(String name) 
 	{ 
+		if (name == null) return;
 		File f = new File(name);
 		String fname = f.getName();
 		int pos = fname.lastIndexOf('.');

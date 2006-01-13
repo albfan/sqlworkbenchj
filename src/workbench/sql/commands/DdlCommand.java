@@ -107,23 +107,17 @@ public class DdlCommand extends SqlCommand
 				if ("ALTER".equals(verb) && aConnection.getMetadata().isOracle())
 				{
 					// check for schema change in oracle
-					String[] args = aSql.split("\\s");
-					if (args.length > 3 && args[1].equalsIgnoreCase("SESSION") && args[2].equalsIgnoreCase("SET"))
+					String regex = "alter\\s*session\\s*set\\s*current_schema\\s*=\\s*";
+					Pattern p = Pattern.compile(regex,Pattern.CASE_INSENSITIVE);
+					Matcher m = p.matcher(aSql);
+					
+					if (m.find())
 					{
-						String[] newValue = args[3].split("="); 
-						if (newValue.length == 2)
-						{
-							String property = newValue[0];
-							String schema = newValue[1];
-							if (property != null)
-							{
-								if (property.trim().equalsIgnoreCase("CURRENT_SCHEMA"))
-								{
-									aConnection.schemaChanged(null, schema);
-									schemaChanged = true;
-								}
-							}
-						}
+						String c = aSql.substring(m.start());
+						int pos = c.indexOf('=');
+						String schema = c.substring(pos + 1).trim();
+						aConnection.schemaChanged(null, schema);
+						schemaChanged = true;
 					}
 				}
 					

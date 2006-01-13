@@ -38,7 +38,18 @@ public class SqlRowDataConverter
 	public static final int SQL_UPDATE = 2;
 	public static final int SQL_DELETE_INSERT = 3;
 	
+	// This instance can be re-used for several 
+	// table exports from DataExporter, to prevent 
+	// that one failed export for the requested type
+	// resets the export type for subsequent tables
+	// the requested sqlType is stored in sqlType
+	// once the resultInfo is set in setResultInfo()
+	// the sqlTypeToUse is set accordingly and then 
+	// used in convertRowData()
+	private int sqlTypeToUse = SQL_INSERT;
 	private int sqlType = SQL_INSERT;
+	
+	
 	private boolean createTable = false;
 	private TableIdentifier alternateUpdateTable;
 	private int commitEvery;
@@ -73,15 +84,23 @@ public class SqlRowDataConverter
 		this.factory.setTableToUse(this.alternateUpdateTable);
 		
 		boolean keysPresent = this.checkKeyColumns();
+		this.sqlTypeToUse = this.sqlType;
 		if (!keysPresent && (this.sqlType == SQL_DELETE_INSERT || this.sqlType == SQL_UPDATE))
 		{
+			String tbl = "";
+			if (meta.getUpdateTable() != null)
+			{
+				tbl = " (" + meta.getUpdateTable().getTableName() + ")";
+			}
+			
 			if (this.errorReporter != null)
 			{
-				String msg = ResourceMgr.getString("ErrorExportNoKeys");
+				String msg = ResourceMgr.getString("ErrorExportNoKeys") + tbl;
 				this.errorReporter.addWarning(msg);
 			}
-			LogMgr.logWarning("SqlRowDataConverter.setResultInfo()", "No key columns found, reverting back to INSERT generation");
-			this.sqlType = SQL_INSERT;
+			
+			LogMgr.logWarning("SqlRowDataConverter.setResultInfo()", "No key columns found" + tbl + " reverting back to INSERT generation");
+			this.sqlTypeToUse = SQL_INSERT;
 		}
 		
 	}
@@ -142,14 +161,14 @@ public class SqlRowDataConverter
 			db = this.originalConnection.getDatabaseProductName();
 		}
 		this.factory.setIncludeTableOwner(this.includeOwner);
-		if (this.sqlType == SQL_DELETE_INSERT)
+		if (this.sqlTypeToUse == SQL_DELETE_INSERT)
 		{
 			dml = this.factory.createDeleteStatement(row, true);
 			result.append(dml.getExecutableStatement(db));
 			result.append(';');
 			result.append(lineTerminator);
 		}
-		if (this.sqlType == SQL_DELETE_INSERT || this.sqlType == SQL_INSERT)
+		if (this.sqlTypeToUse == SQL_DELETE_INSERT || this.sqlType == SQL_INSERT)
 		{
 			dml = this.factory.createInsertStatement(row, true, "\n", this.exportColumns);
 		}

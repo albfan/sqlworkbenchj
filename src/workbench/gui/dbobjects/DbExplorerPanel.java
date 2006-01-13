@@ -52,6 +52,7 @@ import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.WbProperties;
 import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
 
@@ -86,6 +87,7 @@ public class DbExplorerPanel
 	private static int instanceCount = 0;
 	private MainWindow mainWindow;
 	private boolean busy;
+	private String schemaFromWorkspace;
 	
 	public DbExplorerPanel()
 	{
@@ -195,7 +197,7 @@ public class DbExplorerPanel
 			return;
 		}
 		
-		String currentSchema = null;
+		String schemaToSelect = null;
 		try
 		{
 			this.schemaSelector.removeActionListener(this);
@@ -203,7 +205,11 @@ public class DbExplorerPanel
 			setBusy(true);
 			
 			List schemas = this.dbConnection.getMetadata().getSchemas();
-			String user = this.dbConnection.getMetadata().getUserName();
+			String currentSchema = this.schemaFromWorkspace;
+			if (currentSchema == null || "*".equals(currentSchema)) currentSchema = this.dbConnection.getMetadata().getCurrentSchema();
+			if (currentSchema == null) currentSchema = this.dbConnection.getMetadata().getUserName();
+			this.schemaFromWorkspace = null;
+			
 			this.schemaSelector.removeAllItems();
 			this.schemaSelector.addItem("*");
 			for (int i=0; i < schemas.size(); i++)
@@ -212,12 +218,12 @@ public class DbExplorerPanel
 				if (schema != null) 
 				{
 					this.schemaSelector.addItem(schema.trim());
-					if (user.equalsIgnoreCase(schema)) currentSchema = schema;
+					if (currentSchema.equalsIgnoreCase(schema)) schemaToSelect = schema;
 				}
 			}
-			schemaSelector.setSelectedItem(currentSchema);
-			tables.setCatalogAndSchema(null, currentSchema, false);
-      procs.setCatalogAndSchema(null, currentSchema, false);
+			schemaSelector.setSelectedItem(schemaToSelect);
+			tables.setCatalogAndSchema(null, schemaToSelect, false);
+      procs.setCatalogAndSchema(null, schemaToSelect, false);
 
 			Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
 			int maxWidth = (int)(d.getWidth() / 2);
@@ -361,13 +367,13 @@ public class DbExplorerPanel
 			else
 			{
 				initConnection();
-				readSchemas();
 
 				if (Settings.getInstance().getRetrieveDbExplorer())
 				{
 					if (this.isVisible())
 					{
 						// if we are visible start the retrieve immediately
+						readSchemas();
 						retrieve();
 						this.retrievePending = false;
 					}
@@ -377,6 +383,7 @@ public class DbExplorerPanel
 						// that we need to retrieve the table list.
 						// this will be evaluated by the (overwritten) setVisible() method
 						// There is no need in retrieving the information if we are not visible
+						this.schemaRetrievePending = true;
 						this.retrievePending = true;
 					}
 				}
@@ -421,10 +428,6 @@ public class DbExplorerPanel
 
 	private void reset()
 	{
-//		if (this.dbConnection != null)
-//		{
-//			try { this.dbConnection.rollback(); } catch (Throwable th) {}
-//		}
 		this.tables.reset();
 		this.procs.reset();
 		this.searchPanel.reset();
@@ -663,6 +666,12 @@ public class DbExplorerPanel
 	{
 		// this will increase the visible count for DbExplorer Panels in the workspace
 		w.dDbExplorerVisible();
+		Object s = this.schemaSelector.getSelectedItem();
+		if (s != null)
+		{
+			WbProperties p = w.getSettings();
+			p.setProperty("dbexplorer" + index + ".currentschema", s.toString());
+		}
 		tables.saveToWorkspace(w, index);
 		searchPanel.saveToWorkspace(w, index);
 		procs.saveToWorkspace(w, index);
@@ -676,6 +685,12 @@ public class DbExplorerPanel
 	public void readFromWorkspace(WbWorkspace w, int index) 
 		throws IOException
 	{
+		this.schemaFromWorkspace = null;
+		if (Settings.getInstance().getStoreExplorerSchema())
+		{
+			WbProperties p = w.getSettings();
+			this.schemaFromWorkspace = p.getProperty("dbexplorer" + index + ".currentschema", null);
+		}
 		tables.readFromWorkspace(w, index);
 		searchPanel.readFromWorkspace(w, index);
 		procs.readFromWorkspace(w, index);

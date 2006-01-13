@@ -12,6 +12,8 @@
 package workbench.sql.commands;
 
 import java.sql.SQLException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import workbench.db.WbConnection;
 import workbench.util.ExceptionUtil;
@@ -19,6 +21,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.SqlUtil;
 
 /**
  * This class implements a wrapper for the SET command
@@ -55,6 +58,9 @@ public class SetCommand extends SqlCommand
 			
 			if (words.length > 1)
 			{
+				// those SET commands that have a SQL Workbench equivalent
+				// will be "executed" by calling the approriate functions
+				// we don't need to send the SQL to the server in this case
 				command = words[1];
 				if (command.equalsIgnoreCase("autocommit"))
 				{
@@ -88,8 +94,9 @@ public class SetCommand extends SqlCommand
 					result.addMessage(warnings.toString());
 				}
 			}
-			
-			if ("SCHEMA".equalsIgnoreCase(command))
+			String regex = "set\\s*(current|)\\s*schema";
+			Matcher m = Pattern.compile(regex,Pattern.CASE_INSENSITIVE).matcher(aSql);
+			if (m.find())
 			{
 				aConnection.schemaChanged(null, null);
 				result.addMessage(ResourceMgr.getString("MsgSchemaChanged"));
@@ -116,7 +123,7 @@ public class SetCommand extends SqlCommand
 		}
 		finally
 		{
-			if (this.currentStatement != null) this.currentStatement.close();
+			SqlUtil.closeStatement(this.currentStatement);
 			this.done();
 		}
 

@@ -30,53 +30,28 @@ public class HsqlSequenceReader
 	implements SequenceReader
 {
 	private Connection dbConn;
-	private final String queryDefinition;
-	private boolean is18;
+	private boolean useInformationSchema;
 	
 	public HsqlSequenceReader(Connection conn)
 	{
 		this.dbConn = conn;
-		String version = null;
-		try
-		{
-			version = conn.getMetaData().getDatabaseProductVersion();
-		}
-		catch (SQLException e)
-		{
-			version = "1.7.0";
-		}
-		
-		if (version.startsWith("1.8"))
-		{
-			this.is18 = true;
-			queryDefinition = "SELECT sequence_name, \n" + 
-             "       dtd_identifier, \n" + 
-             "       maximum_value, \n" + 
-             "       minimum_value, \n" + 
-             "       increment, \n" + 
-             "       start_with " + 
-             " FROM information_schema.system_sequences WHERE sequence_name = ?";		
-		}
-		else
-		{
-			queryDefinition = "SELECT sequence_name, \n" + 
-             "       dtd_identifier, \n" + 
-             "       maximum_value, \n" + 
-             "       minimum_value, \n" + 
-             "       increment, \n" + 
-             "       start_with " + 
-             " FROM system_sequences WHERE sequence_name = ?";		
-		}
+		this.useInformationSchema = HsqlMetadata.supportsInformationSchema(conn);
 	}
 
 	public DataStore getSequenceDefinition(String owner, String sequence)
 	{
+		
+		StringBuffer query = new StringBuffer(100);
+		query.append("SELECT sequence_name, dtd_identifier, maximum_value, minimum_value, increment, start_with FROM ");
+		if (useInformationSchema) query.append("information_schema.");
+		query.append("system_sequences WHERE sequence_name = ?");
+		
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		DataStore result = null;
 		try
 		{
-			stmt = this.dbConn.prepareStatement(queryDefinition);
+			stmt = this.dbConn.prepareStatement(query.toString());
 			stmt.setString(1, sequence.trim());
 			rs = stmt.executeQuery();
 			result = new DataStore(rs, true);
@@ -99,9 +74,9 @@ public class HsqlSequenceReader
 		PreparedStatement stmt = null;
 		ArrayList result = new ArrayList(100);
 
-		StringBuffer query = new StringBuffer(200);
+		StringBuffer query = new StringBuffer(100);
 		query.append("SELECT sequence_name FROM ");
-		if (is18) query.append("information_schema.");
+		if (useInformationSchema) query.append("information_schema.");
 		query.append("system_sequences");
 
 		try
@@ -129,18 +104,18 @@ public class HsqlSequenceReader
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
-		
-		final String query = "SELECT sequence_name, " +
-			                 "       dtd_identifier, " +
-			                 "       start_with, " +
-			                 "       maximum_value, " +
-			                 "       increment " +
-			                 "FROM system_sequences WHERE sequence_name = ?";
+		StringBuffer query = new StringBuffer(100);
+		query.append("SELECT sequence_name, dtd_identifier, start_with, maximum_value, increment FROM ");
+		if (useInformationSchema)
+		{
+			query.append("information_schema.");
+		}
+		query.append("system_sequences WHERE sequence_name = ?");
 		StringBuffer result = new StringBuffer(100);
 		result.append("CREATE SEQUENCE ");
 		try
 		{
-			stmt = this.dbConn.prepareStatement(query);
+			stmt = this.dbConn.prepareStatement(query.toString());
 			stmt.setString(1, sequence);
 			rs = stmt.executeQuery();
 			while (rs.next())

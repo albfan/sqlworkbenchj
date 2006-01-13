@@ -36,7 +36,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.db.firebird.FirebirdMetadata;
 import workbench.db.firstsql.FirstSqlMetadata;
-import workbench.db.hsqldb.HsqlMetadata;
 import workbench.db.hsqldb.HsqlSequenceReader;
 import workbench.db.ingres.IngresMetadata;
 import workbench.db.mckoi.McKoiMetadata;
@@ -114,10 +113,7 @@ public class DbMetadata
 	private DatabaseMetaData metaData;
 	private WbConnection dbConnection;
 
-	// Specialized classes to retrieve metadata that is either not
-	// supported by JDBC or where the JDBC driver does not work properly
 	private OracleMetadata oracleMetaData;
-	private IngresMetadata ingresMetaData;
 
 	private ConstraintReader constraintReader;
 	private SynonymReader synonymReader;
@@ -141,8 +137,6 @@ public class DbMetadata
 	private boolean isMySql;
 	private boolean isCloudscape;
 	private boolean isApacheDerby;
-	private boolean isIngres;
-	private boolean isDB2;
 
 	private boolean trimDefaults = true;
 	private boolean createInlineConstraints;
@@ -207,7 +201,7 @@ public class DbMetadata
 		}
 
 		// Some JDBC drivers do not return a value for getCatalogTerm() or getSchemaTerm()
-		// and don't throw an Exception. This is to ensure that getCatalogTerm() will
+		// and don't throw an Exception. This is to ensure that our getCatalogTerm() will
 		// always return something usable.
 		if (StringUtil.isEmptyString(this.schemaTerm)) this.schemaTerm = "Schema";
 		if (StringUtil.isEmptyString(this.catalogTerm))	this.catalogTerm = "Catalog";
@@ -235,10 +229,10 @@ public class DbMetadata
 			// register with the Settings Object to be notified for
 			// changes to the "enable dbms output" property
 			settings.addPropertyChangeListener(this);
+			
 			this.sequenceReader = this.oracleMetaData;
 			this.procedureReader = this.oracleMetaData;
 			this.errorInfoReader = this.oracleMetaData;
-			this.schemaInfoReader = this.oracleMetaData;
 			this.fixOracleDateBug = Settings.getInstance().getBoolProperty("workbench.db.oracle.date.usetimestamp", true);
 			this.indexReader = new OracleIndexReader(this);
 		}
@@ -254,14 +248,20 @@ public class DbMetadata
 		else if (productLower.indexOf("hsql") > -1)
 		{
 			this.isHsql = true;
-			this.constraintReader = new HsqlConstraintReader();
+			this.constraintReader = new HsqlConstraintReader(this.dbConnection.getSqlConnection());
 			this.sequenceReader = new HsqlSequenceReader(this.dbConnection.getSqlConnection());
-			this.schemaInfoReader = new HsqlMetadata(this.dbConnection);
-			int major = metaData.getDatabaseMajorVersion();
-			int minor = metaData.getDriverMinorVersion();
-			if (major == 1 && minor <= 7)
+			try
 			{
-				// HSQLDB 1.7.x does not support a column list in the view definition
+				int major = metaData.getDatabaseMajorVersion();
+				int minor = metaData.getDriverMinorVersion();
+				if (major == 1 && minor <= 7)
+				{
+					// HSQLDB 1.7.x does not support a column list in the view definition
+					this.columnsListInViewDefinitionAllowed = false;
+				}
+			}
+			catch (Exception e)
+			{
 				this.columnsListInViewDefinitionAllowed = false;
 			}
 		}
@@ -270,7 +270,7 @@ public class DbMetadata
 			this.isFirebird = true;
 			this.constraintReader = new FirebirdConstraintReader();
 			this.procedureReader = new FirebirdMetadata(this);
-			// Jaybird 2.0 seems to report the Firebird vesion in the 
+			// Jaybird 2.0 reports the Firebird version in the 
 			// productname. To ease the DBMS handling we'll use the same
 			// product name that is reported with the 1.5 driver. 
 			this.productName = "Firebird";
@@ -306,10 +306,9 @@ public class DbMetadata
 		}
 		else if (productLower.indexOf("ingres") > -1)
 		{
-			this.isIngres = true;
-			this.ingresMetaData = new IngresMetadata(this.dbConnection.getSqlConnection());
-			this.synonymReader = this.ingresMetaData;
-			this.sequenceReader = this.ingresMetaData;
+			IngresMetadata imeta = new IngresMetadata(this.dbConnection.getSqlConnection());
+			this.synonymReader = imeta;
+			this.sequenceReader = imeta;
 		}
 		else if (productLower.indexOf("mckoi") > -1)
 		{
@@ -326,10 +325,6 @@ public class DbMetadata
 			this.constraintReader = new FirstSqlMetadata();
 			this.isFirstSql = true;
 		}
-		else if (productLower.indexOf("db2") > -1)
-		{
-			this.isDB2 = true;
-		}
 
 		// if the DBMS does not need a specific ProcedureReader
 		// we use the default implementation
@@ -341,6 +336,11 @@ public class DbMetadata
 		if (this.indexReader == null)
 		{
 			this.indexReader = new JdbcIndexReader(this);
+		}
+		
+		if (this.schemaInfoReader == null)
+		{
+			this.schemaInfoReader = new GenericSchemaInfoReader(this.getDbId());
 		}
 		
 		try
@@ -408,11 +408,6 @@ public class DbMetadata
 			}
 		}
 
-		if (this.schemaInfoReader == null)
-		{
-			this.schemaInfoReader = new GenericSchemaInfoReader(this.getDbId());
-		}
-		
 		tableTypeName = settings.getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
 		TABLE_TYPES_TABLE = new String[] {tableTypeName};
 		if (this.isOracle)
@@ -538,6 +533,7 @@ public class DbMetadata
 	{
 		synchronized (GENERAL_SQL)
 		{
+			if (templatesRead) return;
 			procSourceSql = readStatementTemplates("ProcSourceStatements.xml");
 			viewSourceSql = readStatementTemplates("ViewSourceStatements.xml");
 			fkStatements = readStatementTemplates("CreateFkStatements.xml");
@@ -590,8 +586,6 @@ public class DbMetadata
 	public boolean isSqlServer() { return this.isSqlServer; }
 	public boolean isCloudscape() { return this.isCloudscape; }
 	public boolean isApacheDerby() { return this.isApacheDerby; }
-	public boolean isFirstSql() { return this.isFirstSql; }
-	public boolean isDB2() { return this.isDB2; }
 
 	private List schemasToIgnore;
 
@@ -845,7 +839,7 @@ public class DbMetadata
 		}
 		catch (Exception e)
 		{
-			return "";
+			return StringUtil.EMPTY_STRING;
 		}
 	}
 
@@ -952,7 +946,7 @@ public class DbMetadata
 				String line = rs.getString(1);
 				if (line != null)
 				{
-					source.append(line.replaceAll("\r", ""));
+					source.append(line.replaceAll("\r", StringUtil.EMPTY_STRING));
 				}
 			}
 			source.rtrim();
@@ -1593,10 +1587,11 @@ public class DbMetadata
 			}
 		}
 
-		if (this.isIngres && typeIncluded("SYNONYM", types) && "true".equals(Settings.getInstance().getProperty("workbench.db.ingres.retrieve_synonyms", "true")))
+		boolean retrieveSyns = (this.synonymReader != null && Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_synonyms", false));
+		if (retrieveSyns && typeIncluded("SYNONYM", types) )
 		{
-			LogMgr.logDebug("DbMetadata.getTables()", "Retrieving Ingres synonyms...");
-			List syns = this.ingresMetaData.getSynonymList(aSchema);
+			LogMgr.logDebug("DbMetadata.getTables()", "Retrieving synonyms...");
+			List syns = this.synonymReader.getSynonymList(aSchema);
 			int count = syns.size();
 			for (int i=0; i < count; i++)
 			{
@@ -1851,10 +1846,8 @@ public class DbMetadata
 	 */
 	public void disableOutput()
 	{
-    if (!this.isOracle)
-		{
-			return;
-		}
+    if (!this.isOracle) return;
+		
 		if (this.oraOutput != null)
 		{
 			try
@@ -1876,7 +1869,7 @@ public class DbMetadata
 	 */
 	public String getOutputMessages()
 	{
-		String result = "";
+		String result = StringUtil.EMPTY_STRING;
 
 		if (this.oraOutput != null)
 		{
@@ -1887,7 +1880,7 @@ public class DbMetadata
 			catch (Throwable th)
 			{
 				LogMgr.logError("DbMetadata.getOutputMessages()", "Error when retrieving Output Messages", th);
-				result = "";
+				result = StringUtil.EMPTY_STRING;
 			}
 		}
 		return result;
@@ -2493,17 +2486,17 @@ public class DbMetadata
 			}
 			catch (Exception e)
 			{
-				catalog = "";
+				catalog = StringUtil.EMPTY_STRING;
 			}
 		}
-		if (catalog == null) catalog = "";
+		if (catalog == null) catalog = StringUtil.EMPTY_STRING;
 
 		return catalog;
 	}
 
 	public boolean supportsTruncate()
 	{
-		String s = Settings.getInstance().getProperty("workbench.db.truncatesupported", "");
+		String s = Settings.getInstance().getProperty("workbench.db.truncatesupported", StringUtil.EMPTY_STRING);
 		List l = StringUtil.stringToList(s, ",");
 		return l.contains(this.getDbId());
 	}
@@ -2637,7 +2630,7 @@ public class DbMetadata
 		if ("*".equals(aSchema)) aSchema = null;
 
 		GetMetaDataSql sql = (GetMetaDataSql)triggerSourceSql.get(this.productName);
-		if (sql == null) return "";
+		if (sql == null) return StringUtil.EMPTY_STRING;
 
 		sql.setSchema(aSchema);
 		sql.setCatalog(aCatalog);
@@ -3027,7 +3020,7 @@ public class DbMetadata
 			case DatabaseMetaData.importedKeyNotDeferrable:
 				return "NOT DEFERRABLE";
 			default:
-				return "";
+				return StringUtil.EMPTY_STRING;
 		}
 	}
 
@@ -3109,7 +3102,7 @@ public class DbMetadata
 			}
 			return this.sequenceReader.getSequenceSource(aSchema, aSequence);
 		}
-		return "";
+		return StringUtil.EMPTY_STRING;
 	}
 
 	/**
@@ -3142,7 +3135,7 @@ public class DbMetadata
 	 */
 	public String getSynonymSource(String anOwner, String aSynonym)
 	{
-		if (this.synonymReader == null) return "";
+		if (this.synonymReader == null) return StringUtil.EMPTY_STRING;
 		String result = null;
 
 		try
@@ -3151,7 +3144,7 @@ public class DbMetadata
 		}
 		catch (Exception e)
 		{
-			result = "";
+			result = StringUtil.EMPTY_STRING;
 		}
 
 		return result;
@@ -3165,9 +3158,9 @@ public class DbMetadata
 	{
 		DataStore tableDef = this.getTableDefinition(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName(), true);
 
-		if (tableDef.getRowCount() == 0) return "";
+		if (tableDef.getRowCount() == 0) return StringUtil.EMPTY_STRING;
 		int colCount = tableDef.getRowCount();
-		if (colCount == 0) return "";
+		if (colCount == 0) return StringUtil.EMPTY_STRING;
 
 		StrBuffer sql = new StrBuffer(colCount * 80);
 
@@ -3186,7 +3179,7 @@ public class DbMetadata
 
 		for (int i=0; i < colCount; i++)
 		{
-			String dummyvalue = "";
+			String dummyvalue = StringUtil.EMPTY_STRING;
 			String type = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
 			String name = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
 			if (type != null || type.length() > 0)
@@ -3215,9 +3208,9 @@ public class DbMetadata
 	{
 		DataStore tableDef = this.getTableDefinition(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName(), true);
 
-		if (tableDef.getRowCount() == 0) return "";
+		if (tableDef.getRowCount() == 0) return StringUtil.EMPTY_STRING;
 		int colCount = tableDef.getRowCount();
-		if (colCount == 0) return "";
+		if (colCount == 0) return StringUtil.EMPTY_STRING;
 
 		StrBuffer sql = new StrBuffer(colCount * 80);
 
@@ -3277,7 +3270,7 @@ public class DbMetadata
 
 	public String getTableSource(TableIdentifier table, ColumnIdentifier[] columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse)
 	{
-		if (columns == null || columns.length == 0) return "";
+		if (columns == null || columns.length == 0) return StringUtil.EMPTY_STRING;
 
 		StrBuffer result = new StrBuffer();
 
@@ -3662,7 +3655,7 @@ public class DbMetadata
 				// remove the placeholder completely
 				if ("restrict".equalsIgnoreCase(rule))
 				{
-					stmt = StringUtil.replace(stmt, FK_DELETE_RULE, "");
+					stmt = StringUtil.replace(stmt, FK_DELETE_RULE, StringUtil.EMPTY_STRING);
 				}
 				else
 				{
@@ -3848,7 +3841,7 @@ public class DbMetadata
 	 */
   public String getExtendedErrorInfo(String schema, String objectName, String objectType)
   {
-    if (this.errorInfoReader == null) return "";
+    if (this.errorInfoReader == null) return StringUtil.EMPTY_STRING;
 		return this.errorInfoReader.getErrorInfo(schema, objectName, objectType);
   }
 

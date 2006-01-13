@@ -124,13 +124,13 @@
   </target>
 
   <target name="compile" depends="prepare">
-    <javac debug="off" debuglevel="source,lines" destdir="${build}" optimize="on" srcdir="${src}" >
+    <javac debug="off" debuglevel="source,lines" destdir="${build}" optimize="on" srcdir="${src}" target="1.4" source="1.4">
         <exclude name="workbench/test/**"/>
     </javac>
   </target>
 
   <target name="compile_debug" depends="prepare">
-    <javac debug="on" debuglevel="source,lines" destdir="${build}" optimize="on" srcdir="${src}" >
+    <javac debug="on" debuglevel="source,lines" destdir="${build}" optimize="on" srcdir="${src}" target="1.4" source="1.4">
         <exclude name="workbench/test/**"/>
     </javac>
   </target>

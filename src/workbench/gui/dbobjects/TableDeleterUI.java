@@ -278,6 +278,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 			{
 				String error = ex.getMessage();
 				LogMgr.logError("TableDeleterUI.doDelete()", "Error deleting table " + table, ex);
+				
 				if (!ignoreAll)
 				{
 					String question = ResourceMgr.getString("ErrorDeleteTableData");
@@ -366,6 +367,10 @@ public class TableDeleterUI extends javax.swing.JPanel
 		}
 		catch (SQLException e)
 		{
+			if (doCommit && !this.connection.getAutoCommit())
+			{
+				this.connection.rollback();
+			}
 			LogMgr.logError("TableDeleterUI.deleteTable()", "Error when deleting table!", e);
 			throw e;
 		}

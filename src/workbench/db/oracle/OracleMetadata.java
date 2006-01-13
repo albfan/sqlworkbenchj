@@ -44,11 +44,11 @@ import workbench.util.StringUtil;
  * @author  support@sql-workbench.net
  */
 public class OracleMetadata
-	implements SequenceReader, ProcedureReader, ErrorInformationReader, SchemaInformationReader
+	implements SequenceReader, ProcedureReader, ErrorInformationReader
 {
 	private WbConnection connection;
 	private PreparedStatement columnStatement;
-	private int version = 8;
+	private int version;
 	private boolean retrieveSnapshots = true;
 	
 	/** Creates a new instance of OracleMetaData */
@@ -57,18 +57,12 @@ public class OracleMetadata
 		this.connection = conn;
 		try
 		{
-			String versionInfo = this.connection.getSqlConnection().getMetaData().getDatabaseProductVersion();
-			if (versionInfo.indexOf("Release 9.") > -1)
-			{
-				this.version = 9;
-			}
-			else if (versionInfo.indexOf("Release 10.") > -1)
-			{
-				this.version = 10;
-			}
+			this.version = this.connection.getSqlConnection().getMetaData().getDriverMajorVersion();
 		}
 		catch (Throwable th)
 		{
+			// The Oracle 8 driver (classes12.jar) did not implement getDriverMajorVersion()
+			// and throws an AbstractMethodError
 			this.version = 8;
 		}
 	}
@@ -114,7 +108,7 @@ public class OracleMetadata
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
-		ArrayList result = new ArrayList(100);
+		List result = new ArrayList(100);
 		
 		StringBuffer sql = new StringBuffer(200);
 		sql.append("SELECT sequence_name FROM all_sequences ");
@@ -420,33 +414,6 @@ public class OracleMetadata
 		return result;
 	}
 	
-	private String CURRENT_SCHEMA_SQL = "select schemaname from v$session where audsid = userenv('sessionid')";
-	
-	public String getCurrentSchema(WbConnection con)
-	{
-		String schema = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		try
-		{
-			stmt = con.getSqlConnection().prepareStatement(CURRENT_SCHEMA_SQL);
-			rs = stmt.executeQuery();
-			if (rs.next())
-			{
-				schema = rs.getString(1);
-			}
-		}
-		catch (Exception e)
-		{
-			schema = con.getCurrentUser();
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return schema;
-	}
-	
 	private String getDbLinkTargetSchema(String dblink, String owner)
 	{
 		String sql = null;
@@ -454,12 +421,19 @@ public class OracleMetadata
 		ResultSet rs = null;
 		String linkOwner = null;
 		
+		// check if DB Link name contains a domain
+		// If yes, use the link name directly
 		if (dblink.indexOf('.') > 0)
 		{
 			sql = "SELECT username FROM all_db_links WHERE db_link = ? AND (owner = ? or owner = 'PUBLIC')";
 		}
 		else
 		{
+			// apparently Oracle stores all DB Links with the default domain 
+			// appended. I did not find a reliable way to retrieve the domain 
+			// name, so I'm using a like to retrieve the definition
+			// hoping that there won't be two dblinks with the same name
+			// but different domains
 			sql = "SELECT username FROM all_db_links WHERE db_link like ? AND (owner = ? or owner = 'PUBLIC')";
 			dblink = dblink + ".%";
 		}
