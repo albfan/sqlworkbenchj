@@ -27,6 +27,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
+import workbench.util.SqlUtil;
 import workbench.util.StrWriter;
 import workbench.util.StringUtil;
 
@@ -36,7 +37,7 @@ import workbench.util.StringUtil;
 public class WbSchemaDiff
 	extends SqlCommand
 {
-	public static final String VERB = "WBDIFF";
+	public static final String VERB = "WBSCHEMADIFF";
 	public static final String PARAM_SOURCEPROFILE = "referenceprofile";
 	public static final String PARAM_TARGETPROFILE = "targetprofile";
 	public static final String PARAM_FILENAME = "file";
@@ -89,14 +90,15 @@ public class WbSchemaDiff
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		if (sql.equalsIgnoreCase(VERB))
+		String verb = SqlUtil.getSqlVerb(sql);
+		if ("wbdiff".equalsIgnoreCase(verb))
 		{
-			result.addMessage(ResourceMgr.getString("ErrorDiffWrongParameters"));
-			result.setFailure();
-			return result;
+			result.addMessage("WbDiff has been renamed to WbSchemaDiff. Please use the new command instead.");
+			result.addMessage("Support for 'WbDiff' will be removed in a future release.\n");
 		}
-		int pos = sql.toUpperCase().indexOf(VERB);
-		if (pos > -1) sql = sql.substring(pos + VERB.length() + 1);
+		
+//		int pos = sql.toUpperCase().indexOf(VERB);
+//		if (pos > -1) sql = sql.substring(pos + VERB.length() + 1);
 
 		try
 		{
@@ -108,6 +110,14 @@ public class WbSchemaDiff
 			result.setFailure();
 			return result;
 		}
+		
+		if (cmdLine.getArgumentCount() == 0)
+		{
+			result.addMessage(ResourceMgr.getString("ErrorDiffWrongParameters"));
+			result.setFailure();
+			return result;
+		}
+
 
 		if (cmdLine.hasUnknownArguments())
 		{

@@ -38,7 +38,14 @@ public class TableCreator
 		this.tablename = newTable;
 		this.columnDefinition = columns;
 
-		List ignored = getIgnoredDataTypes();
+		//Retrieve the list of datatypes that should be ignored for the current 
+		//connection. The names in that list must match the names returned 
+		//by DatabaseMetaData.getTypeInfo()
+
+		DbMetadata meta = this.connection.getMetadata();
+		String types = Settings.getInstance().getProperty("workbench.ignoretypes." + meta.getDbId(), null);;
+		List ignored = StringUtil.stringToList(types, ",", true, true);
+		
 		this.mapper = new TypeMapper(this.connection, ignored);
 	}
 
@@ -117,45 +124,4 @@ public class TableCreator
 		return result.toString();
 	}
 
-	/**
-	 *	Return a list of datatype as returned from DatabaseMetaData.getTypeInfo()
-	 *	which we cannot handle. This is used by the {@linke TableCreator} when searching
-	 *	for a matching data type.
-	 */
-	private List getIgnoredDataTypes()
-	{
-		String types = null;
-		DbMetadata meta = this.connection.getMetadata();
-		
-		if (meta.isMySql())
-		{
-			types = Settings.getInstance().getProperty("workbench.ignoretypes.mysql", null);
-		}
-		else if (meta.isFirebird())
-		{
-			types = Settings.getInstance().getProperty("workbench.ignoretypes.firebird", null);
-		}
-		else if (meta.isOracle())
-		{
-			types = Settings.getInstance().getProperty("workbench.ignoretypes.oracle", null);
-		}
-		else if (meta.isPostgres())
-		{
-			types = Settings.getInstance().getProperty("workbench.ignoretypes.postgres", null);
-		}
-		else if (meta.isHsql())
-		{
-			types = Settings.getInstance().getProperty("workbench.ignoretypes.hsqldb", null);
-		}
-		else if (meta.isSqlServer())
-		{
-			types = Settings.getInstance().getProperty("workbench.ignoretypes.sqlserver", null);
-		}
-		else
-		{
-			types = Settings.getInstance().getProperty("workbench.ignoretypes." + meta.getDbId(), null);
-		}
-
-		return StringUtil.stringToList(types, ",", true, true);
-	}
 }

@@ -34,7 +34,7 @@ public class CommandTester
 		commands.add(WbCopy.VERB);
 		commands.add(WbExport.VERB);
 		commands.add(WbImport.VERB);
-		commands.add(WbDiff.VERB);
+		commands.add(WbSchemaDiff.VERB);
 		commands.add(WbSchemaReport.VERB);
 		commands.add(WbInclude.INCLUDE_LONG);
 		commands.add(WbXslt.VERB);
@@ -58,6 +58,7 @@ public class CommandTester
 		formattedWords.put(WbListPkDef.VERB, WbListPkDef.FORMATTED_VERB);
 		formattedWords.put(WbEndBatch.VERB, "WbEndBatch");
 		formattedWords.put(WbStartBatch.VERB, "WbStartBatch");
+		formattedWords.put(WbSchemaDiff.VERB, "WbSchemaDiff");
 	}
 	
 	public boolean isWbCommand(String verb)

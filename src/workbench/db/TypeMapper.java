@@ -31,11 +31,6 @@ public class TypeMapper
 	private HashMap typeInfo;
 	private List ignoreTypes;
 
-	public TypeMapper(WbConnection aConnection)
-	{
-		this(aConnection, Collections.EMPTY_LIST);
-	}
-
 	public TypeMapper(WbConnection aConnection, List ignoreList)
 	{
 		this.dbConn = aConnection;
@@ -67,11 +62,6 @@ public class TypeMapper
 		// INTEGER's normally don't need a size argument
 		else if (SqlUtil.isNumberType(type) && !SqlUtil.isIntegerType(type))
 		{
-			//if (size == 0) return null;
-//			if (size > info.max_scale)
-//			{
-//				size = info.max_scale;
-//			}
 			if (SqlUtil.isDecimalType(type, size, digits))
 			{
 				result.append('(');

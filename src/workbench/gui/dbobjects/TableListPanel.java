@@ -895,10 +895,13 @@ public class TableListPanel
 
 	public void readFromWorkspace(WbWorkspace w, int index)
 	{
-		restoreSettings();
+		// first we read the global settings, then we'll let
+		// the settings in the workspace override the global ones
+		restoreSettings(); 
 		tableData.readFromWorkspace(w, index);
 		WbProperties props = w.getSettings();
 		String prefix = getWorkspacePrefix(index);
+		readSettings(props, prefix);
 	}
 	
 	private void readSettings(PropertyStorage props, String prefix)

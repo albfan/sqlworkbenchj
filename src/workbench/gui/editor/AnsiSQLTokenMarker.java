@@ -175,7 +175,7 @@ public class AnsiSQLTokenMarker extends SQLTokenMarker
 		keywords.add("WBENDBATCH",Token.KEYWORD2);
 		keywords.add("WBFEEDBACK",Token.KEYWORD2);
 		keywords.add("WBREPORT",Token.KEYWORD2);
-		keywords.add("WBDIFF",Token.KEYWORD2);
+		keywords.add("WBSCHEMADIFF",Token.KEYWORD2);
 		keywords.add("WBXSLT",Token.KEYWORD2);
 		keywords.add(WbSelectBlob.VERB,Token.KEYWORD2);
 		keywords.add(WbDefinePk.VERB,Token.KEYWORD2);

@@ -40,10 +40,9 @@ public class WbSelectBlob
 {
 	public static final String VERB = "WBSELECTBLOB";
 
-	/** Creates a new instance of WbUpdateBlob */
 	public WbSelectBlob()
 	{
-		this.isUpdatingCommand = true;
+		this.isUpdatingCommand = false;
 	}
 	
 	public String getVerb() { return VERB; }

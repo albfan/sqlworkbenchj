@@ -194,8 +194,15 @@ public class XmlRowDataConverter
 			if (!this.includeColumnInExport(c)) continue;
 			Object data = row.getValue(c);
 			int type = this.metaData.getColumnType(c);
+			String dbmsType = this.metaData.getDbmsTypeName(c);
 			boolean isNull = (data == null || data instanceof NullValue);
 			boolean writeCloseTag = true;
+			
+			// Oracle (again!) does not report blob columns
+			// as java.sql.Types.BLOB but as java.sql.Types.OTHER
+			// so we have to check the DBMS type as well.
+			boolean isBlob = SqlUtil.isBlobType(type) || "BLOB".equalsIgnoreCase(dbmsType) || "CLOB".equalsIgnoreCase(dbmsType);
+			
 			if (this.verboseFormat) xml.append(indent);
 			xml.append(startColTag);
 			if (this.verboseFormat)
@@ -221,7 +228,7 @@ public class XmlRowDataConverter
 				{
 				}
 			}
-			else if (SqlUtil.isBlobType(type))
+			else if (isBlob)
 			{
 				dataFile = new StringBuffer(100);
 				dataFile.append(baseFilename);
@@ -255,7 +262,7 @@ public class XmlRowDataConverter
 						xml.append(StringUtil.escapeXML(this.getValueAsFormattedString(row, c)));
 					}
 				}
-				else if (SqlUtil.isBlobType(type))
+				else if (isBlob)
 				{
 					writeBlobFile(dataFile, data);
 				}

@@ -67,7 +67,14 @@ public abstract class ExportWriter
 		this.rowMonitor = monitor;
 	}
 
-	public void setBaseDir(String dir) { this.baseDir = dir; }
+	public void setBaseDir(String dir) 
+	{ 
+		this.baseDir = dir; 
+		if (this.converter != null) 
+		{
+			this.converter.setBaseDir(dir);
+		}
+	}
 	
 	public long getNumberOfRecords()
 	{

@@ -598,6 +598,11 @@ public class DataExporter
 		this.totalRows = 0;
 		this.setSql(null);
 		
+		if (this.exportWriter == null)
+		{
+			this.createExportWriter();
+		}
+		
 		for (int i=0; i < count; i++)
 		{
 			this.currentJob = (ExportJobEntry)this.jobQueue.get(i);

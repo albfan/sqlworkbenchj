@@ -77,8 +77,8 @@ public class DbExplorerPanel
 	private DbExplorerWindow window;
 	private WbToolbar toolbar;
 	private ConnectionInfo connectionInfo;
-	private boolean retrievePending = false;
-	private boolean schemaRetrievePending = false;
+	private boolean retrievePending;
+	private boolean schemaRetrievePending;
 	private boolean connectionInitPending = false;
 	private int internalId = 0;
 	private ConnectionSelector connectionSelector;
@@ -205,10 +205,13 @@ public class DbExplorerPanel
 			setBusy(true);
 			
 			List schemas = this.dbConnection.getMetadata().getSchemas();
+			//LogMgr.logDebug("DbExplorerPanel.readSchemas()", "Retrieved " + (schemas == null ? -1 : schemas.size()) + " schemas from JDBC driver");
+			
 			String currentSchema = this.schemaFromWorkspace;
-			if (currentSchema == null || "*".equals(currentSchema)) currentSchema = this.dbConnection.getMetadata().getCurrentSchema();
+			if (currentSchema == null) currentSchema = this.dbConnection.getMetadata().getCurrentSchema();
 			if (currentSchema == null) currentSchema = this.dbConnection.getMetadata().getUserName();
-			this.schemaFromWorkspace = null;
+
+			//LogMgr.logDebug("DbExplorerPanel.readSchemas()", "Current schema is: " + currentSchema);
 			
 			this.schemaSelector.removeAllItems();
 			this.schemaSelector.addItem("*");
@@ -218,12 +221,21 @@ public class DbExplorerPanel
 				if (schema != null) 
 				{
 					this.schemaSelector.addItem(schema.trim());
-					if (currentSchema.equalsIgnoreCase(schema)) schemaToSelect = schema;
+					if (schema.equalsIgnoreCase(currentSchema)) schemaToSelect = schema;
 				}
 			}
-			schemaSelector.setSelectedItem(schemaToSelect);
-			tables.setCatalogAndSchema(null, schemaToSelect, false);
-      procs.setCatalogAndSchema(null, schemaToSelect, false);
+			//LogMgr.logDebug("DbExplorerPanel.readSchemas()", "Selected schema entry: " + schemaToSelect);
+			if (schemaToSelect != null) 
+			{
+				schemaSelector.setSelectedItem(schemaToSelect);
+			}
+			else 
+			{
+				schemaSelector.setSelectedIndex(0);
+			}
+			currentSchema = (String)schemaSelector.getSelectedItem();
+			tables.setCatalogAndSchema(null, currentSchema, false);
+      procs.setCatalogAndSchema(null, currentSchema, false);
 
 			Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
 			int maxWidth = (int)(d.getWidth() / 2);
@@ -236,11 +248,12 @@ public class DbExplorerPanel
 		}
 		catch (Throwable e)
 		{
-			LogMgr.logError(this, "Could not retrieve list of schemas", e);
+			LogMgr.logError("DbExplorer.readSchemas()", "Could not retrieve list of schemas", e);
 		}
 		finally
 		{
-			schemaRetrievePending = false;
+			this.schemaFromWorkspace = null;
+			this.schemaRetrievePending = false;
 			setBusy(false);
 		}
 		this.schemaSelector.addActionListener(this);
@@ -389,6 +402,12 @@ public class DbExplorerPanel
 				}
 			}
 		}
+		catch (Throwable th)
+		{
+			this.retrievePending = true;
+			this.schemaRetrievePending = true;
+			LogMgr.logError("DbExplorerPanel.setConnection()", "Error during connection init", th);
+		}
 		finally
 		{
 			WbSwingUtilities.showDefaultCursorOnWindow(this);
@@ -475,6 +494,11 @@ public class DbExplorerPanel
 		{
 			this.retrievePending = true;
 			return;
+		}
+		
+		if (this.connectionInitPending)
+		{
+			this.initConnection();
 		}
 		
 		if (this.schemaRetrievePending)

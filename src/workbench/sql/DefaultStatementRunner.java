@@ -37,7 +37,7 @@ import workbench.sql.wbcommands.WbCopy;
 import workbench.sql.wbcommands.WbDefinePk;
 import workbench.sql.wbcommands.WbDefineVar;
 import workbench.sql.wbcommands.WbDescribeTable;
-import workbench.sql.wbcommands.WbDiff;
+import workbench.sql.wbcommands.WbSchemaDiff;
 import workbench.sql.wbcommands.WbDisableOraOutput;
 import workbench.sql.wbcommands.WbEnableOraOutput;
 import workbench.sql.wbcommands.WbEndBatch;
@@ -150,8 +150,9 @@ public class DefaultStatementRunner
 		sql = new WbSchemaReport();
 		cmdDispatch.put(sql.getVerb(), sql);
 		
-		sql = new WbDiff();
+		sql = new WbSchemaDiff();
 		cmdDispatch.put(sql.getVerb(), sql);
+		cmdDispatch.put("WBDIFF", sql);
 
 		sql = new SetCommand();
 		cmdDispatch.put(sql.getVerb(), sql);

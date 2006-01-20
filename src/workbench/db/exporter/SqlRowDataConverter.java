@@ -215,34 +215,37 @@ public class SqlRowDataConverter
 
 	public boolean isCreateInsert()
 	{
-		return this.sqlType == SQL_INSERT;
+		return this.sqlTypeToUse == SQL_INSERT;
 	}
 
 	public boolean isCreateUpdate()
 	{
-		return this.sqlType == SQL_UPDATE;
+		return this.sqlTypeToUse == SQL_UPDATE;
 	}
 	
 	public boolean isCreateInsertDelete()
 	{
-		return this.sqlType == SQL_DELETE_INSERT;
+		return this.sqlTypeToUse == SQL_DELETE_INSERT;
 	}
 	
 	public void setCreateInsert()
 	{
 		this.sqlType = SQL_INSERT;
+		this.sqlTypeToUse = this.sqlType;
 		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.doformat",true);
 	}
 	
 	public void setCreateUpdate()
 	{
 		this.sqlType = SQL_UPDATE;
+		this.sqlTypeToUse = this.sqlType;
 		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.update.doformat",true);
 	}
 
 	public void setCreateInsertDelete()
 	{
 		this.sqlType = SQL_DELETE_INSERT;
+		this.sqlTypeToUse = this.sqlType;
 		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.doformat",true);
 	}
 	

@@ -144,10 +144,15 @@ public class DbMetadata
 	private boolean fixOracleDateBug = false;
 	private boolean columnsListInViewDefinitionAllowed = true;
 	
-	private Set keywords;
+	// This is set to true if identifiers starting with
+	// a digit should always be quoted. This will 
+	// be initialized through the Settings object
+	private boolean quoteIdentifierWithDigits = false;
+	
 	private String quoteCharacter;
 	private String dbVersion;
-
+	private SqlKeywordHandler keywordHandler;
+	
 	private static final String SELECT_INTO_PG = "(?i)(?s)SELECT.*INTO\\p{Print}*\\s*FROM.*";
 	private static final String SELECT_INTO_INFORMIX = "(?i)(?s)SELECT.*FROM.*INTO\\s*\\p{Print}*";
 	private Pattern selectIntoPattern = null;
@@ -422,6 +427,7 @@ public class DbMetadata
 		String quote = settings.getProperty("workbench.db.neverquote","");
 		this.neverQuoteObjects = quote.indexOf(this.getDbId()) > -1;
 		this.trimDefaults = settings.getBoolProperty("workbench.db." + getDbId() + ".trimdefaults", true);
+		this.quoteIdentifierWithDigits = settings.getBoolProperty("workbench.db." + getDbId() + ".quotedigits", false);
 	}
 
 	public String getTableTypeName() { return tableTypeName; }
@@ -1025,62 +1031,6 @@ public class DbMetadata
 		return result;
 	}
 
-	public Collection getSqlKeywords()
-	{
-		if (this.keywords == null) this.readKeywords();
-		return this.keywords;
-	}
-	
-	/**
-	 * Read the keywords for the current DBMS that the JDBC driver returns.
-	 * If the driver does not return all keywords, this list can be manually
-	 * extended by defining the property workbench.db.keywordlist.<dbid>
-	 * with a comma separated list of additional keywords
-	 */
-	private void readKeywords()
-	{
-		this.keywords = new TreeSet();
-		try
-		{
-			String keys = this.metaData.getSQLKeywords();
-			List keyList = StringUtil.stringToList(keys, ",");
-			this.keywords.addAll(keyList);
-
-			keys = Settings.getInstance().getProperty("workbench.db.keywordlist." + this.getDbId(), null);
-			if (keys != null)
-			{
-				List l = StringUtil.stringToList(keys.toUpperCase(), ",");
-				this.keywords.addAll(l);
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DbMetadata.readKeywords", "Error reading SQL keywords", e);
-		}
-
-		try
-		{
-			BufferedInputStream in = new BufferedInputStream(DbMetadata.class.getResourceAsStream("SqlKeywords.xml"));
-			WbPersistence reader = new WbPersistence("SqlKeywords.xml");
-			List values = (ArrayList)reader.readObject(in);
-			this.keywords.addAll(values);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DbMetadata.readKeywords", "Error reading SQL keywords", e);
-		}
-	}
-
-	public boolean isKeyword(String verb)
-	{
-		if (verb == null) return false;
-		if (this.keywords == null)
-		{
-			this.readKeywords();
-		}
-		return this.keywords.contains(verb.toUpperCase());
-	}
-
 	public String getProcedureSource(String aCatalog, String aSchema, String aProcname, int type)
 	{
 		if (aProcname == null) return null;
@@ -1168,6 +1118,22 @@ public class DbMetadata
 		return source.toString();
 	}
 
+	private void initKeywordHandler()
+	{
+		this.keywordHandler = new SqlKeywordHandler(this.dbConnection.getSqlConnection(), this.getDbId());
+	}
+	
+	public boolean isKeyword(String name)
+	{
+		if (this.keywordHandler == null) this.initKeywordHandler();
+		return this.keywordHandler.isKeyword(name);
+	}
+	
+	public Collection getSqlKeywords()
+	{
+		if (this.keywordHandler == null) this.initKeywordHandler();
+		return this.keywordHandler.getSqlKeywords();
+	}
 
 	/**
 	 *	Encloses the given object name in double quotes if necessary.
@@ -1177,73 +1143,39 @@ public class DbMetadata
 	 *
 	 *	If the given name is not a keyword, {@link workbench.util.SqlUtil#quoteObjectname(String)}
 	 *  will be called to check if the name contains special characters which require
-	 *	double quotes around the object name
+	 *	double quotes around the object name.
+	 *
+	 *  For Oracle and HSQL strings starting with a digit will
+	 *  always be quoted.
 	 */
 	public String quoteObjectname(String aName)
 	{
 		if (aName == null) return null;
 		if (aName.length() == 0) return aName;
+		
 		// already quoted?
 		if (aName.startsWith("\"")) return aName;
 
 		if (this.neverQuoteObjects) return StringUtil.trimQuotes(aName);
 
-		if (this.keywords == null)
-		{
-			this.readKeywords();
-		}
 		try
 		{
 			boolean needQuote = false;
-			boolean isKeyword = false;
 
-			if (this.storesLowerCaseIdentifiers())
+			// Oracle and HSQL require identifiers starting with a number 
+			// have to be quoted always. 
+			if (this.quoteIdentifierWithDigits)
 			{
-				isKeyword = this.keywords.contains(aName.trim().toLowerCase());
+				needQuote = (Character.isDigit(aName.charAt(0)));
 			}
-			else if (this.storesUpperCaseIdentifiers())
+			
+			if (needQuote || isKeyword(aName))
 			{
-				isKeyword = this.keywords.contains(aName.trim().toUpperCase());
-			}
-			else
-			{
-				// The ODBC driver for Access returns false for storesLowerCaseIdentifiers()
-				// AND storesUpperCaseIdentifiers()!
-				if (this.productName.equalsIgnoreCase("ACCESS"))
-				{
-					isKeyword = this.keywords.contains(aName.trim().toUpperCase());
-				}
-				else
-				{
-					// if both methods return false, then we'll check
-					// the keyword as it is
-					isKeyword = this.keywords.contains(aName.trim());
-				}
-			}
-
-			// Oracle and HSQL require identifiers starting with a number to be quoted
-			if (this.isHsql || this.isOracle)
-			{
-				char c = aName.charAt(0);
-				if (Character.isDigit(c))
-				{
-					needQuote = true;
-				}
-			}
-
-//			if (this.storesLowerCaseIdentifiers() && !aName.toLowerCase().equals(aName))
-//			{
-//				needQuote = true;
-//			}
-//
-//			if (this.storesUpperCaseIdentifiers() && !aName.toUpperCase().equals(aName))
-//			{
-//				needQuote = true;
-//			}
-
-			if (isKeyword || needQuote)
-			{
-				return this.quoteCharacter + aName.trim() + this.quoteCharacter;
+				StringBuffer result = new StringBuffer(aName.length() + 4);
+				result.append(this.quoteCharacter);
+				result.append(aName.trim());
+				result.append(this.quoteCharacter);
+				return result.toString();
 			}
 		}
 		catch (Exception e)
@@ -1893,7 +1825,6 @@ public class DbMetadata
 	public void close()
 	{
 		Settings.getInstance().removePropertyChangeLister(this);
-		if (this.keywords != null) this.keywords.clear();
 		if (this.oraOutput != null) this.oraOutput.close();
 		if (this.oracleMetaData != null) this.oracleMetaData.columnsProcessed();
 	}
@@ -2709,7 +2640,7 @@ public class DbMetadata
 	}
 
 	/** Returns the list of schemas as returned by DatabaseMetadata.getSchemas()
-	 * @return ArrayList
+	 * @return List
 	 */
 	public List getSchemas()
 	{

@@ -13,7 +13,9 @@ package workbench.sql.commands;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -177,43 +179,39 @@ public class DdlCommand extends SqlCommand
 	}
 
 
-  private final static List TYPES;
+  private final static Set TYPES;
   static
   {
-    TYPES = new ArrayList();
+    TYPES = new HashSet();
     TYPES.add("TRIGGER");
     TYPES.add("PROCEDURE");
     TYPES.add("FUNCTION");
     TYPES.add("PACKAGE");
 		TYPES.add("VIEW");
   }
+	
+	private final static Set TYPE_VERBS;
+	static
+	{
+		TYPE_VERBS = new HashSet();
+		TYPE_VERBS.add("CREATE");
+		TYPE_VERBS.add("REPLACE");
+		
+	}
 
 	private String getObjectType(String cleanSql)
 	{
-    StringTokenizer tok = new StringTokenizer(cleanSql, " ");
-    String word = null;
-    String type = null;
-    boolean nextTokenIsType = false;
-    while (tok.hasMoreTokens())
-    {
-      word = tok.nextToken();
-      if (nextTokenIsType)
-      {
-				if ("PACKAGE".equals(type) && "BODY".equals(word))
-				{
-					type = "PACKAGE BODY";
-					continue;
-				}
-				type = word;
-        break;
-      }
-      if (TYPES.contains(word))
-      {
-        type = word;
-        nextTokenIsType = true;
-      }
-    }
-    return type;
+		String createProc = "CREATE\\s*(OR\\s*REPLACE|)\\s*PROCEDURE";
+		String createFunc = "CREATE\\s*(OR\\s*REPLACE|)\\s*FUNCTION";
+
+		Matcher m = Pattern.compile(createProc,Pattern.CASE_INSENSITIVE).matcher(cleanSql);
+		if (m.find()) return "PROCEDURE";
+		else 
+		{
+			m = Pattern.compile(createFunc,Pattern.CASE_INSENSITIVE).matcher(cleanSql);
+			if (m.find()) return "FUNCTION";
+		}				
+    return null;
 	}
 
 	private String getObjectName(String cleanSql)

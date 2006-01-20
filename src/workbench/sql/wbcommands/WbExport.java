@@ -144,9 +144,18 @@ public class WbExport
 		String type = null;
 		String file = null;
 
-		this.exporter = new DataExporter(this.currentConnection);
 
 		type = cmdLine.getValue("type");
+		if (!isTypeValid(type))
+		{
+			result.addMessage(ResourceMgr.getString("ErrorExportWrongType"));
+			result.addMessage("");
+			result.addMessage(ResourceMgr.getString("ErrorExportWrongParameters"));
+			result.setFailure();
+			return result;
+		}
+		
+		this.exporter = new DataExporter(this.currentConnection);
 		file = cmdLine.getValue("file");
 		String tables = cmdLine.getValue("sourcetable");
 
@@ -344,31 +353,7 @@ public class WbExport
 		// Setting the output type should be the last step in the configuration
 		// of the exporter as this will trigger some initialization 
 		// that depends on the other properties
-		if (type.equals("sql") || type.equals("sqlinsert"))
-		{
-			exporter.setOutputTypeSqlInsert();
-		}
-		else if (type.equals("sqlupdate"))
-		{
-			exporter.setOutputTypeSqlUpdate();
-		}
-		else if (type.equals("sqldeleteinsert"))
-		{
-			exporter.setOutputTypeSqlDeleteInsert();
-		}
-		else if (type.equals("xml"))
-		{
-			exporter.setOutputTypeXml();	
-		}
-		else if (type.equals("text") || type.equals("txt"))
-		{
-			exporter.setOutputTypeText();
-		}
-		else if (type.equals("html"))
-		{
-			exporter.setOutputTypeHtml();
-		}
-		
+		setExportType(exporter, type);
 		List tablesToExport = null;
 		if (tables != null)
 		{
@@ -410,11 +395,70 @@ public class WbExport
 		}
 		else
 		{
-			this.runTableExports(tablesToExport, result, outputdir);
+			setExportType(exporter, type);
+			runTableExports(tablesToExport, result, outputdir);
 		}
 		return result;
 	}
 
+	private boolean isTypeValid(String type)
+	{
+		if (type == null) return false;
+		if (type.equals("sql") || type.equals("sqlinsert"))
+		{
+			return true;
+		}
+		else if (type.equals("sqlupdate"))
+		{
+			return true;
+		}
+		else if (type.equals("sqldeleteinsert"))
+		{
+			return true;
+		}
+		else if (type.equals("xml"))
+		{
+			return true;
+		}
+		else if (type.equals("text") || type.equals("txt"))
+		{
+			return true;
+		}
+		else if (type.equals("html"))
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	private void setExportType(DataExporter exporter, String type)
+	{
+		if (type.equals("sql") || type.equals("sqlinsert"))
+		{
+			exporter.setOutputTypeSqlInsert();
+		}
+		else if (type.equals("sqlupdate"))
+		{
+			exporter.setOutputTypeSqlUpdate();
+		}
+		else if (type.equals("sqldeleteinsert"))
+		{
+			exporter.setOutputTypeSqlDeleteInsert();
+		}
+		else if (type.equals("xml"))
+		{
+			exporter.setOutputTypeXml();	
+		}
+		else if (type.equals("text") || type.equals("txt"))
+		{
+			exporter.setOutputTypeText();
+		}
+		else if (type.equals("html"))
+		{
+			exporter.setOutputTypeHtml();
+		}
+		
+	}
 	private void runTableExports(List tableList, StatementRunnerResult result, String outputdir)
 		throws SQLException
 	{
