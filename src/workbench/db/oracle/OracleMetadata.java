@@ -57,11 +57,23 @@ public class OracleMetadata
 		this.connection = conn;
 		try
 		{
-			this.version = this.connection.getSqlConnection().getMetaData().getDriverMajorVersion();
+			String versionInfo = this.connection.getSqlConnection().getMetaData().getDatabaseProductVersion();
+			if (versionInfo == null)
+			{
+				this.version = 8;
+			}
+			if (versionInfo.toLowerCase().indexOf("release 9.") > -1)
+			{
+				this.version = 9;
+			}
+			else if (versionInfo.toLowerCase().indexOf("release 10.") > -1)
+			{
+				this.version = 10;
+			}
 		}
 		catch (Throwable th)
 		{
-			// The Oracle 8 driver (classes12.jar) did not implement getDriverMajorVersion()
+			// The Oracle 8 driver (classes12.jar) did not implement getDatabaseMajorVersion()
 			// and throws an AbstractMethodError
 			this.version = 8;
 		}
@@ -294,7 +306,7 @@ public class OracleMetadata
 			sql = StringUtil.replace(sql, "all_tab_columns", "all_tab_columns" + dblink);
 			sql = StringUtil.replace(sql, "all_col_comments", "all_col_comments" + dblink);
 			String dblinkOwner = this.getDbLinkTargetSchema(dblink.substring(1), schema);
-			if (!StringUtil.isEmptyString(dblinkOwner))
+			if (StringUtil.isEmptyString(schema) && !StringUtil.isEmptyString(dblinkOwner))
 			{
 				schema = dblinkOwner;
 			}
@@ -498,7 +510,14 @@ public class OracleMetadata
 			stmt = this.connection.getSqlConnection().prepareStatement(ERROR_QUERY);
 			stmt.setString(1, schema.toUpperCase());
 			stmt.setString(2, objectType.toUpperCase());
-			stmt.setString(3, objectName.toUpperCase());
+			if (objectName.startsWith("\""))
+			{
+				stmt.setString(3, StringUtil.trimQuotes(objectName));
+			}
+			else
+			{
+				stmt.setString(3, objectName.toUpperCase());
+			}
 			
 			rs = stmt.executeQuery();
 			int count = 0;
@@ -561,8 +580,8 @@ public class OracleMetadata
 		catch (SQLException e)
 		{
 			LogMgr.logWarning("OracleMetadata.getSnapshots()", "Error accessing all_mviews", e);
-			// When we an exception, most probably we cannot access the ALL_MVIEWS view
-			// to avoid further (unnecessary) calls, we are disabling the support 
+			// When we get an exception, most probably we cannot access the ALL_MVIEWS view.
+			// To avoid further (unnecessary) calls, we are disabling the support 
 			// for snapshots 
 			this.retrieveSnapshots = false;
 			result = Collections.EMPTY_SET;

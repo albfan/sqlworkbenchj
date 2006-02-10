@@ -84,76 +84,14 @@ public class SqlCommand
 	 */
 	protected boolean appendWarnings(WbConnection aConn, Statement aStmt, StringBuffer msg)
 	{
-		try
+		String warn = SqlUtil.getWarnings(aConn, aStmt, !this.isCancelled);
+		boolean hasWarning = false;
+		if (warn != null)
 		{
-			// some DBMS return warnings on the connection rather then on the
-			// statement. We need to check them here as well. Then some of
-			// the DBMS return the same warnings on the Statement AND the
-			// Connection object.
-			// For this we keep a list of warnings which have been added
-			// from the statement. They will not be added when the Warnings from
-			// the connection are retrieved
-			ArrayList added = new ArrayList();
-
-			String s = null;
-			SQLWarning warn = aStmt.getWarnings();
-			boolean hasWarnings = warn != null;
-			int count = 0;
-			while (warn != null)
-			{
-				count ++;
-				s = warn.getMessage();
-				if (s != null && s.length() > 0)
-				{
-					msg.append(s);
-					if (!s.endsWith("\n")) msg.append('\n');
-				}
-				added.add(s);
-				if (count > 25) break; // prevent endless loop
-				warn = warn.getNextWarning();
-				
-			}
-
-			// if the statement has been cancelled Oracle
-			// does not seem to like the getting of the
-			// output messages...
-			if (!this.isCancelled)
-			{
-				if (hasWarnings) msg.append('\n');
-
-				s = aConn.getOutputMessages();
-				if (s.length() > 0)
-				{
-					msg.append(s);
-					if (!s.endsWith("\n")) msg.append("\n");
-					hasWarnings = true;
-				}
-			}
-			warn = aConn.getSqlConnection().getWarnings();
-			hasWarnings = hasWarnings || (warn != null);
-			count = 0;
-			while (warn != null)
-			{
-				s = warn.getMessage();
-				if (!added.contains(s))
-				{
-					msg.append(s);
-					if (!s.endsWith("\n")) msg.append('\n');
-				}
-				if (count > 25) break; // prevent endless loop
-				warn = warn.getNextWarning();
-			}
-
-			// make sure the warnings are cleared from both objects!
-			aStmt.clearWarnings();
-			aConn.clearWarnings();
-
-			return hasWarnings;
+			hasWarning = true;
+			msg.append(warn);
 		}
-		catch (Exception e)
-		{
-			return false;
-		}
+		return hasWarning;
 	}
 
 	public void cancel()

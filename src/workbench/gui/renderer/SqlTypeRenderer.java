@@ -47,7 +47,7 @@ public class SqlTypeRenderer
 			
 			if (hasFocus)
 			{
-				this.setBorder(WbTable.FOCUSED_CELL_BORDER);
+				this.setBorder(WbSwingUtilities.FOCUSED_CELL_BORDER);
 			}
 			else
 			{

@@ -351,6 +351,8 @@ public class Settings
 			s = s.replaceAll(",postgres,",",postgresql,");
 			this.setProperty("workbench.db.truncatesupported",s);
 		}
+		this.renameProperty("workbench.history.tablelist", "workbench.quickfilter.tablelist.history");
+		this.renameProperty("workbench.history.columnlist", "workbench.quickfilter.columnlist.history");
 	}
 
 	private void renameProperty(String oldKey, String newKey)

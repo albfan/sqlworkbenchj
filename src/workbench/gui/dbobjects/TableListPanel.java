@@ -723,10 +723,14 @@ public class TableListPanel
 	{
 		this.currentSchema = aSchema;
 		this.currentCatalog = aCatalog;
-		this.shouldRetrieve = true;
 		this.invalidateData();
 
-		if (this.isBusy()) return;
+		if (this.isBusy())
+		{
+			this.shouldRetrieve = retrieve;
+			return;
+		}
+		
 		this.reset();
 
 		if (!retrieve) return;
@@ -863,6 +867,23 @@ public class TableListPanel
 		this.tableDefinition.saveSettings();
 		storeSettings(Settings.getInstance(), this.getClass().getName() + ".");
 	}
+	
+	/**
+	 *	Restore settings from global settings file.
+	 */
+	public void restoreSettings()
+	{
+		String prefix = this.getClass().getName() + ".";
+		Settings s = Settings.getInstance();
+		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+		int maxWidth = (int)(d.getWidth() - 50);
+		readSettings(Settings.getInstance(), prefix);
+		this.triggers.restoreSettings();
+		this.tableData.restoreSettings();
+		this.findPanel.restoreSettings();
+		this.tableDefinition.restoreSettings();
+	}
+
 
 	/**
 	 * Save settings to a workspace
@@ -873,6 +894,22 @@ public class TableListPanel
 		WbProperties props = w.getSettings();
 		String prefix = getWorkspacePrefix(index);
 		storeSettings(props, prefix);
+		this.findPanel.saveSettings(props, prefix + "quickfilter.");
+	}
+	
+	/**
+	 *	Read settings from a workspace
+	 */
+	public void readFromWorkspace(WbWorkspace w, int index)
+	{
+		// first we read the global settings, then we'll let
+		// the settings in the workspace override the global ones
+		restoreSettings(); 
+		tableData.readFromWorkspace(w, index);
+		WbProperties props = w.getSettings();
+		String prefix = getWorkspacePrefix(index);
+		readSettings(props, prefix);
+		findPanel.restoreSettings(props, prefix + "quickfilter.");
 	}
 	
 	private void storeSettings(PropertyStorage props, String prefix)
@@ -884,8 +921,6 @@ public class TableListPanel
 			props.setProperty(prefix + "divider", Integer.toString(this.splitPane.getDividerLocation()));
 			props.setProperty(prefix + "exportedtreedivider", Integer.toString(this.exportedPanel.getDividerLocation()));
 			props.setProperty(prefix + "importedtreedivider", Integer.toString(this.exportedPanel.getDividerLocation()));
-			String text = this.findPanel.getText();
-			if (text != null) props.setProperty(prefix + "lastsearch", text);
 		}
 		catch (Throwable th)
 		{
@@ -893,17 +928,6 @@ public class TableListPanel
 		}
 	}
 
-	public void readFromWorkspace(WbWorkspace w, int index)
-	{
-		// first we read the global settings, then we'll let
-		// the settings in the workspace override the global ones
-		restoreSettings(); 
-		tableData.readFromWorkspace(w, index);
-		WbProperties props = w.getSettings();
-		String prefix = getWorkspacePrefix(index);
-		readSettings(props, prefix);
-	}
-	
 	private void readSettings(PropertyStorage props, String prefix)
 	{
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
@@ -930,22 +954,6 @@ public class TableListPanel
 			if (loc == 0 || loc > maxWidth) loc = 200;
 			this.importedPanel.setDividerLocation(loc);
 		}
-		String s = props.getProperty(prefix  + "lastsearch", "");
-		this.findPanel.setText(s);
-	}
-
-	public void restoreSettings()
-	{
-		String prefix = this.getClass().getName() + ".";
-		Settings s = Settings.getInstance();
-
-		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-		int maxWidth = (int)(d.getWidth() - 50);
-		readSettings(Settings.getInstance(), prefix);
-		this.triggers.restoreSettings();
-		this.tableData.restoreSettings();
-		this.findPanel.restoreSettings();
-		this.tableDefinition.restoreSettings();
 	}
 
 	private boolean suspendTableSelection = false;

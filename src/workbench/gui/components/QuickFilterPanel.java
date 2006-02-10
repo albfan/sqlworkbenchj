@@ -37,6 +37,7 @@ import workbench.gui.actions.QuickFilterAction;
 import workbench.gui.actions.ResetFilterAction;
 import workbench.gui.actions.WbAction;
 import workbench.interfaces.CriteriaPanel;
+import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.QuickFilter;
 import workbench.resource.ResourceMgr;
 import workbench.storage.filter.ColumnComparator;
@@ -209,6 +210,16 @@ public class QuickFilterPanel
 //		im.put(resetFilterAction.getAccelerator(), resetFilterAction.getActionName());
 //		am.put(resetFilterAction.getActionName(), resetFilterAction);
 	}
+
+	public void saveSettings(PropertyStorage props, String prefix)
+	{
+		filterValue.saveSettings(props, prefix);
+	}
+
+	public void restoreSettings(PropertyStorage props, String prefix)
+	{
+		filterValue.restoreSettings(props, prefix);
+	}
 	
 	public void saveSettings()
 	{
@@ -229,14 +240,19 @@ public class QuickFilterPanel
 	{
 		if (this.searchTable.getRowCount() <= 0) return;
 		String value = this.filterValue.getText();
-		if (StringUtil.isEmptyString(value)) return;
-		
-		ColumnExpression col = new ColumnExpression(this.searchColumn, comparator, value);
-		col.setIgnoreCase(true);
-		searchTable.applyFilter(col);
-		filterValue.addToHistory(value);
+		if (StringUtil.isEmptyString(value)) 
+		{
+			this.searchTable.resetFilter();
+		}
+		else
+		{
+			ColumnExpression col = new ColumnExpression(this.searchColumn, comparator, value);
+			col.setIgnoreCase(true);
+			searchTable.applyFilter(col);
+			filterValue.addToHistory(value);
+		}
 	}
-
+	
 	public String getText()
 	{
 		return filterValue.getText();

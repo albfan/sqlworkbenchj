@@ -102,19 +102,19 @@ public class ConnectionMgr
 		conn.setProfile(aProfile);
 		conn.setSqlConnection(sql);
 		
-		String version = null;
+		String driverVersion = null;
 		try
 		{
 			int minor = sql.getMetaData().getDriverMinorVersion();
 			int major = sql.getMetaData().getDriverMajorVersion();
-			version = major + "." + minor;
+			driverVersion = major + "." + minor;
 		}
 		catch (Throwable th)
 		{
-			version = "n/a";
+			driverVersion = "n/a";
 		}
 
-		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" + conn.getMetadata().getProductName() + "], Database version: [" + conn.getMetadata().getDbVersion() + "], Driver version: [" + version + "]");
+		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" + conn.getMetadata().getProductName() + "], Database version: [" + conn.getMetadata().getDbVersion() + "], Driver version: [" + driverVersion + "]");
 
 		try
 		{

@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -652,6 +653,76 @@ public class SqlUtil
 		catch (Throwable th)
 		{
 			th.printStackTrace();
+		}
+	}
+
+	public static String getWarnings(WbConnection con, Statement stmt, boolean retrieveOutputMsg)
+	{
+		try
+		{
+			// some DBMS return warnings on the connection rather then on the
+			// statement. We need to check them here as well. Then some of
+			// the DBMS return the same warnings on the Statement AND the
+			// Connection object.
+			// For this we keep a list of warnings which have been added
+			// from the statement. They will not be added when the Warnings from
+			// the connection are retrieved
+			ArrayList added = new ArrayList();
+			StringBuffer msg = new StringBuffer(100);
+			String s = null;
+			SQLWarning warn = stmt.getWarnings();
+			boolean hasWarnings = warn != null;
+			int count = 0;
+			while (warn != null)
+			{
+				count ++;
+				s = warn.getMessage();
+				if (s != null && s.length() > 0)
+				{
+					msg.append(s);
+					if (!s.endsWith("\n")) msg.append('\n');
+				}
+				added.add(s);
+				if (count > 25) break; // prevent endless loop
+				warn = warn.getNextWarning();
+			}
+			
+			if (retrieveOutputMsg)
+			{
+				if (hasWarnings) msg.append('\n');
+
+				s = con.getOutputMessages();
+				if (s.length() > 0)
+				{
+					msg.append(s);
+					if (!s.endsWith("\n")) msg.append("\n");
+					hasWarnings = true;
+				}
+			}
+			warn = con.getSqlConnection().getWarnings();
+			hasWarnings = hasWarnings || (warn != null);
+			count = 0;
+			while (warn != null)
+			{
+				s = warn.getMessage();
+				if (!added.contains(s))
+				{
+					msg.append(s);
+					if (!s.endsWith("\n")) msg.append('\n');
+				}
+				if (count > 25) break; // prevent endless loop
+				warn = warn.getNextWarning();
+			}
+
+			// make sure the warnings are cleared from both objects!
+			stmt.clearWarnings();
+			con.clearWarnings();
+
+			return msg.toString();
+		}
+		catch (Exception e)
+		{
+			return null;
 		}
 	}
 	

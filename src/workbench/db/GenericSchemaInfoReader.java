@@ -56,10 +56,11 @@ public class GenericSchemaInfoReader
 			{
 				currentSchema = rs.getString(1);
 			}
+			if (currentSchema != null) currentSchema = currentSchema.trim();
 		}
 		catch (Exception e)
 		{
-			LogMgr.logWarning("GenericSchemaInfoReader.getCurrentSchema()", "Error reading current schema", e);
+			LogMgr.logWarning("GenericSchemaInfoReader.getCurrentSchema()", "Error reading current schema using query: " + schemaQuery, e);
 			if (e instanceof SQLException)
 			{
 				// When a SQLException is thrown, we assume an error with the configured

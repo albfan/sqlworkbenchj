@@ -55,6 +55,7 @@ public class WbCopy
 	public static final String PARAM_DROPTARGET = "droptarget";
 	public static final String PARAM_CREATETARGET = "createtarget";
 	public static final String PARAM_USEBATCH = "usebatch";
+	public static final String PARAM_PROGRESS = "showprogress";
 
 	private ArgumentParser cmdLine;
 	private DataCopier copier;
@@ -77,6 +78,7 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_DROPTARGET);
 		cmdLine.addArgument(PARAM_CREATETARGET);
 		cmdLine.addArgument(PARAM_USEBATCH);
+		cmdLine.addArgument(PARAM_PROGRESS);
 	}
 
 	public String getVerb() { return VERB; }
@@ -215,6 +217,7 @@ public class WbCopy
 			}
 		}
 
+		copier.setReportInterval(cmdLine.getIntValue(PARAM_PROGRESS,10));
 		copier.setRowActionMonitor(this.rowMonitor);
 		copier.setContinueOnError(cont);
 		copier.setCommitEvery(commit);

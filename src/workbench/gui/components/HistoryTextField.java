@@ -10,14 +10,11 @@
  *
  */
 package workbench.gui.components;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import workbench.interfaces.ClipboardSupport;
+import workbench.interfaces.PropertyStorage;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
@@ -36,6 +33,7 @@ public class HistoryTextField
 		super();
 		setEditable(true);
 		this.propName = prop;
+		this.maxHistorySize = Settings.getInstance().getIntProperty("workbench.history." + propName + ".size", 25);
 	}
 	
 	public String getText()
@@ -51,21 +49,33 @@ public class HistoryTextField
 //		this.getEditor().setItem(s);
 		this.setSelectedItem(s);
 	}
-	
-	public void restoreSettings()
+
+	public void saveSettings(PropertyStorage props, String prefix)
 	{
-		String s = Settings.getInstance().getProperty("workbench.history." + propName, "");
+		props.setProperty(prefix + "history", StringUtil.listToString(values, ';'));
+		props.setProperty(prefix + "lastvalue", this.getText());
+	}
+	
+	public void restoreSettings(PropertyStorage props, String prefix)
+	{
+		String s = props.getProperty(prefix + "history", "");
 		if (StringUtil.isEmptyString(s))
 			this.values = new ArrayList();
 		else
 			this.values = StringUtil.stringToList(s, ";", true, true);
 		this.updateModel();
-		this.maxHistorySize = Settings.getInstance().getIntProperty("workbench.history." + propName + ".size", 25);
+		String lastValue = props.getProperty(prefix + "lastvalue", null);
+		if (lastValue != null) this.setText(lastValue);
+	}
+	
+	public void restoreSettings()
+	{
+		restoreSettings(Settings.getInstance(), "workbench.quickfilter." + propName + ".");
 	}
 
 	public void saveSettings()
 	{
-		Settings.getInstance().setProperty("workbench.history." + propName, StringUtil.listToString(values, ';'));
+		saveSettings(Settings.getInstance(), "workbench.quickfilter." + propName + ".");
 	}
 	
 	public void addToHistory(String s)

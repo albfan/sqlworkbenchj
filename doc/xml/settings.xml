@@ -35,7 +35,7 @@
   <section id="gui-settings">
     <title>GUI related settings</title>
 
-    <section>
+    <section id="settings-right-clickmove">
       <title>Right click behaviour in the editor</title>
       <para>Property: <literal>workbench.editor.rightclickmovescursor</literal></para>
       <para>Normally a right click in the SQL editor does not
@@ -56,7 +56,7 @@
       <para>Default: <literal>true</literal></para>
     </section>
 
-    <section>
+    <section id="settings-highlight-required">
       <title>Highlight color for required fields</title>
       <para>Property: <literal>workbench.gui.edit.requiredfield.color</literal></para>
       <para>When highlighting mandatory columns from a result set, the background
@@ -66,7 +66,7 @@
       <para>Default: <literal>255,100,100</literal></para>
     </section>
 
-    <section>
+    <section id="settings-show-acc-menu">
       <title>Showing accelerator in menu</title>
       <para>Property: <literal>workbench.gui.showmnemonics</literal></para>
       <para>
@@ -77,7 +77,7 @@
       <para>Default: <literal>true</literal></para>
     </section>
 				
-    <section>
+    <section id="settings-save-workspace">
       <title>Save workspaces automatically</title>
       <para><literal>workbench.workspace.autosave</literal></para>
       <para>If this is enabled, the current workspace will
@@ -86,7 +86,7 @@
       <para>Default: <literal>false</literal></para>
     </section>
         
-    <section>
+    <section id="settings-workspace-backup">
       <title>Controlling workspace backups</title>
       <para>Property: <literal>workbench.workspace.createbackup</literal></para>
       <para>If this is enabled, a backup file will be created
@@ -318,20 +318,58 @@
       <para>Default: <literal>com.microsoft.jdbc.sqlserver.SQLServerDriver</literal></para>
     </section>
 		
-		<section id="db-oracle-filter-syns">
-			<title>Filtering Oracle public synonyms</title>
-			<para>Property: <literal>workbench.db.oracle.exclude.synonyms</literal></para>
-			<para>
-				The <link linkend="dbexplorer">database explorer</link> and the 
-				<link linkend="command-completion">auto completion</link> can display Oracle public synonyms. 
-				Some of these are usually not of interest when simply querying a database, so the
-				list synonyms actually displayed can be controlled. This property defines
-				a regular expression. Each synonym that matches this regular expression, 
-				will be excluded from the list presented in the GUI.
-			</para>
-			<para>Default value: <literal>^AQ\\$.*|^MGMT\\$.*|^GV\\$.*|^EXF\\$.*|^KU\\$_.*|^WM\\$.*|^MRV_.*|^CWM_.*|^CWM2_.*|^WK\\$_.*|^CTX_.*</literal></para>
-			<para>Note that you need to use two backslashes in the RegeEx.</para>
-		</section>
+	<section id="db-oracle-filter-syns">
+		<title>Filtering Oracle public synonyms</title>
+		<para>Property: <literal>workbench.db.oracle.exclude.synonyms</literal></para>
+		<para>
+			The <link linkend="dbexplorer">database explorer</link> and the 
+			<link linkend="command-completion">auto completion</link> can display Oracle public synonyms. 
+			Some of these are usually not of interest when simply querying a database, so the
+			list synonyms actually displayed can be controlled. This property defines
+			a regular expression. Each synonym that matches this regular expression, 
+			will be excluded from the list presented in the GUI.
+		</para>
+		<para>Default value: <literal>^AQ\\$.*|^MGMT\\$.*|^GV\\$.*|^EXF\\$.*|^KU\\$_.*|^WM\\$.*|^MRV_.*|^CWM_.*|^CWM2_.*|^WK\\$_.*|^CTX_.*</literal></para>
+		<para>Note that you need to use two backslashes in the RegeEx.</para>
+	</section>
+
+	<section id="db-oracle-detect-snapshots">
+		<title>Support for Oracle materialized views (snapshots)</title>
+		<para>Property: <literal>workbench.db.oracle.detectsnapshots</literal></para>
+		<para>
+			When displaying the list of tables in the <link linkend="dbexplorer">database explorer</link> 
+			Oracle materialized views (snapshots) are identified as tables by the Oracle JDBC driver.
+			To identify a specific "table" as a materialized view, a second request to the database
+			is necessary (accessing the system view <literal>ALL_MVIEWS</literal>). As this 
+			request can slow down the retrieval performance, this feature can be turned off. If for
+			any reason the <literal>ALL_MVIEWS</literal> view cannot be accessed, this feature
+			will be turned off until you re-connect to the database.
+		</para>
+		<para>Default value: <literal>true</literal></para>
+	</section>
+	
+	<section id="options-pkmapping">
+		<title>Define mapping file for primary key columns</title>
+		<para>Property: <literal>workbench.pkmapping.file</literal></para>
+		<para>
+		  This property defines a mapping file for primary key columns that 
+		  is read whenever the primary keys for the base table of a result
+		  cannot be obtained from the database. For a detailed
+		  description on how to define extra primary key columns, please
+		  refer to the <link linkend="command-define-pk"><literal>WbDefinPk</literal></link> command.
+		</para>
+	</section>
+
+    <section id="settings-libdir">
+      <title>Defining a base directory for JDBC libraries</title>
+      <para>Property: <literal>workbench.libdir</literal></para>
+      <para>A directory that contains the .jar files for the <link linkend="jdbc-lib-dir">JDBC drivers</link>. 
+	  The value of this property can be referenced using <literal>%LibDir%</literal> 
+	  in the driver's definition. The value for this can also be specified
+	  <link linkend="cmdline-parameter-libdir">on the commandline</link>.
+      </para>
+      <para>No default</para>
+    </section>
           
   </section>
 			
@@ -366,9 +404,21 @@
         special characters like <literal>\/,.$[]()</literal> and spaces removed.
         The actual ID that is used to retrieve this list is reported as an
         informational message in the log file (<literal>Using DBID=</literal>)
-				</para>
+	  </para>
       <para>Default: <literal>workbench.db.ignore.oracle=prompt,exit,whenever</literal></para>
     </section>
+	
+	<section id="options-enable-shortinclude">
+	  <title>Enabling short WbInclude</title>
+	  <para>Property: <literal>workbench.db.supportshortinclude</literal></para>
+	  <para>By default the <link linkend="command-wbinclude">WbInclude</link> command
+	  can be shortened using the @ sign. This behaviour is disabled for MS SQL to 
+	  avoid conflicts with parameter definitions in stored procedures. This property
+	  contains a list of <link linkend="dbid"><literal>DBID</literal>s</link></para> for which
+	  this should be enabled. To enable this for all DBMS, simply use * as the value for
+	  this property.
+      <para>Default: <literal>oracle, rdb, hsqldb, postgresql, mysql, adaptive_server_anywhere, cloudscape, apache_derby</literal></para>
+	</section>
   </section>
 			
   <section id="log-setting">
@@ -427,10 +477,9 @@
     </section>
 
   </section>
-			
-  <section id="setting-sql-generation">
-    <title>Settings related to SQL statement generation</title>
-		      
+
+  <section id="setting-sql-formatting">
+	<title>Settings related to SQL formatting in the editor</title>
     <section id="formatter-subselect-threshold">
         <title>Max length for subselects</title>
         <para>Property: <literal>workbench.sql.formatter.subselect.maxlength</literal></para>
@@ -443,7 +492,21 @@
         </para>
         <para>Default: <literal>60</literal></para>
     </section>
-  			
+	
+    <section id="formatter-select-columns">
+        <title>Number of columns per line for SELECT list</title>
+        <para>Property: <literal>workbench.sql.formatter.select.columnsperline</literal></para>
+        <para>This property defines the number of columns the formatter puts in on line 
+        when formatting a <literal>SELECT</literal> statement.
+        </para>
+        <para>Default: <literal>1</literal></para>
+    </section>
+	
+  </section>
+  
+  <section id="setting-sql-generation">
+    <title>Settings related to SQL statement generation</title>
+		      
     <section id="manual-setting-snippet-no-newline">
         <title>Controlling newlines in code snippets</title>
         <para>Property: <literal>workbench.javacode.includenewline</literal></para>
@@ -461,12 +524,14 @@
         <para>
             Define a list of schemas that should be ignored for the <link linkend="dbid">DB ID</link>
             When &wb-productname; creates DML statements and the current table is reported
-            to be belong to any of the schemas listed in this property, the schema will not
+            to belong to any of the schemas listed in this property, the schema will not
             be used to qualify the table. To ignore all schemas use a *, e.g.
             <literal>workbench.sql.ignoreschema.rdb=*</literal>. In this case, table names
             will never be prefixed with the schema name reported by the JDBC driver.
             The entries in there are case sensitiv.
         </para>
+		<para>Note that for Oracle tables that are owned by the connection user 
+		will never be prefixed with the owner.</para>
         <para>Default values:
             <simplelist columns="1">
                 <member><literal>.oracle=PUBLIC</literal></member>

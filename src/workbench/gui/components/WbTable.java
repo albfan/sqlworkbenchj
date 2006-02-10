@@ -122,7 +122,6 @@ public class WbTable
 	           FontChangedListener, Searchable, ListSelectionListener, PropertyChangeListener
 {
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
-	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.YELLOW);
 	private JPopupMenu popup;
 
 	private JPopupMenu headerPopup;
@@ -173,7 +172,7 @@ public class WbTable
 
 	private String defaultPrintHeader = null;
 	private boolean showPopup = true;
-	private boolean showRowNumbers = false;
+//	private boolean showRowNumbers = false;
 	private boolean selectOnRightButtonClick = false;
 	private boolean highlightRequiredFields = false;
 	private Color requiredColor;
@@ -875,32 +874,32 @@ public class WbTable
 		return this.dwModel.getSortColumn();
 	}
 
-	public void setShowRowNumbers(boolean flag)
-	{
-		if (flag == this.showRowNumbers) return;
-		this.showRowNumbers = flag;
-		updateRowHeader();
-	}
+//	public void setShowRowNumbers(boolean flag)
+//	{
+//		if (flag == this.showRowNumbers) return;
+//		this.showRowNumbers = flag;
+//		updateRowHeader();
+//	}
 
-	private JTable rowHeaderTable;
-
-	private void updateRowHeader()
-	{
-		if (this.scrollPane == null) return;
-
-		if (this.showRowNumbers && this.dwModel != null && this.getRowCount() > 0)
-		{
-			// Only show row numbers for "proper" data
-			RowNumberTableModel model = new RowNumberTableModel(this);
-			this.rowHeaderTable = new RowNumberTable(model);
-			this.scrollPane.setRowHeaderView(this.rowHeaderTable);
-		}
-		else
-		{
-			this.rowHeaderTable = null;
-			this.scrollPane.setRowHeaderView(null);
-		}
-	}
+//	private JTable rowHeaderTable;
+//
+//	private void updateRowHeader()
+//	{
+//		if (this.scrollPane == null) return;
+//
+//		if (this.showRowNumbers && this.dwModel != null && this.getRowCount() > 0)
+//		{
+//			// Only show row numbers for "proper" data
+//			RowNumberTableModel model = new RowNumberTableModel(this);
+//			this.rowHeaderTable = new RowNumberTable(model);
+//			this.scrollPane.setRowHeaderView(this.rowHeaderTable);
+//		}
+//		else
+//		{
+//			this.rowHeaderTable = null;
+//			this.scrollPane.setRowHeaderView(null);
+//		}
+//	}
 
 	public void setShowStatusColumn(boolean aFlag)
 	{
@@ -1506,7 +1505,7 @@ public class WbTable
 
 		// if rowAtPoint() returns a negative number, then all
 		// rows fit into the current viewport
-		if (lastRow < 0) lastRow = this.getRowCount() - 1;
+		if (lastRow < 0 || lastRow > count) lastRow = count - 1;
 
 		return first + lastRow;
 	}

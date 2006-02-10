@@ -103,6 +103,7 @@
         <include name="**/*.png"/>
         <include name="**/*.xml"/>
         <include name="**/*.html"/>
+        <include name="**/*.txt"/>
       </fileset>
     </copy>
     <copy todir="${build}">

@@ -108,7 +108,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.42 2005-12-18 22:16:02 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.43 2006-02-10 18:57:49 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -468,6 +468,9 @@ public class JEditTextArea
 		{
 			this.lastSearchPos = -1;
 			Toolkit.getDefaultToolkit().beep();
+			String msg = ResourceMgr.getString("MsgEditorCriteriaNotFound");
+			msg = StringUtil.replace(msg, "%value%", this.lastSearchExpression);
+			WbSwingUtilities.showMessage(this, msg);
 		}
 		return this.lastSearchPos;
 	}

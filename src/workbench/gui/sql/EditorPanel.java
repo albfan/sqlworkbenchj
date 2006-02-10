@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -995,7 +996,10 @@ public class EditorPanel
 			replacement = StringUtil.quoteRegexMeta(replacement);
 		}
 		
-		String newText = old.replaceAll(regex, replacement);
+		Pattern p = Pattern.compile(regex, (ignoreCase ? Pattern.CASE_INSENSITIVE : 0));
+		Matcher m = p.matcher(old);
+		String newText = m.replaceAll(replacement);
+		
 		if (selectedText)
 		{
 			this.setSelectedText(newText);

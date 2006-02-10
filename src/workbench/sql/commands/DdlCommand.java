@@ -61,16 +61,11 @@ public class DdlCommand extends SqlCommand
 	}
 
 	private String verb;
-	private Pattern createFunc;
 
 	private DdlCommand(String aVerb)
 	{
 		this.verb = aVerb;
 		this.isUpdatingCommand = true;
-		if ("CREATE".equals(verb))
-		{
-			createFunc = Pattern.compile("CREATE.*FUNCTION.*AS\\s*\\$", Pattern.CASE_INSENSITIVE);
-		}
 	}
 
 	public StatementRunnerResult execute(WbConnection aConnection, String aSql)
@@ -109,15 +104,13 @@ public class DdlCommand extends SqlCommand
 				if ("ALTER".equals(verb) && aConnection.getMetadata().isOracle())
 				{
 					// check for schema change in oracle
-					String regex = "alter\\s*session\\s*set\\s*current_schema\\s*=\\s*";
+					String regex = "alter\\s*session\\s*set\\s*current_schema\\s*=\\s*(\\p{Graph}*)";
 					Pattern p = Pattern.compile(regex,Pattern.CASE_INSENSITIVE);
 					Matcher m = p.matcher(aSql);
 					
-					if (m.find())
+					if (m.find() && m.groupCount() > 0)
 					{
-						String c = aSql.substring(m.start());
-						int pos = c.indexOf('=');
-						String schema = c.substring(pos + 1).trim();
+						String schema = m.group(1);
 						aConnection.schemaChanged(null, schema);
 						schemaChanged = true;
 					}
@@ -178,87 +171,60 @@ public class DdlCommand extends SqlCommand
 		return result;
 	}
 
-
-  private final static Set TYPES;
-  static
-  {
-    TYPES = new HashSet();
-    TYPES.add("TRIGGER");
-    TYPES.add("PROCEDURE");
-    TYPES.add("FUNCTION");
-    TYPES.add("PACKAGE");
-		TYPES.add("VIEW");
-  }
-	
-	private final static Set TYPE_VERBS;
-	static
+	/**
+	 * Extract the type (function, package, procedure) of the created object.
+	 * @see #addExtendErrorInfo(workbench.db.WbConnection, String, workbench.sql.StatementRunnerResult)
+	 */
+	private String getObjectType(String sql)
 	{
-		TYPE_VERBS = new HashSet();
-		TYPE_VERBS.add("CREATE");
-		TYPE_VERBS.add("REPLACE");
-		
-	}
-
-	private String getObjectType(String cleanSql)
-	{
-		String createProc = "CREATE\\s*(OR\\s*REPLACE|)\\s*PROCEDURE";
-		String createFunc = "CREATE\\s*(OR\\s*REPLACE|)\\s*FUNCTION";
-
-		Matcher m = Pattern.compile(createProc,Pattern.CASE_INSENSITIVE).matcher(cleanSql);
-		if (m.find()) return "PROCEDURE";
-		else 
+		String regex = "CREATE\\s*(OR\\s*REPLACE|)\\s*(PROCEDURE|FUNCTION|PACKAGE\\s*BODY|PACKAGE)\\s*(\\p{Graph}*)";
+		String type = null;
+		Matcher m = Pattern.compile(regex,Pattern.CASE_INSENSITIVE).matcher(sql);
+		if (m.find() && m.groupCount() > 1) 
 		{
-			m = Pattern.compile(createFunc,Pattern.CASE_INSENSITIVE).matcher(cleanSql);
-			if (m.find()) return "FUNCTION";
-		}				
-    return null;
+			type = m.group(2).toUpperCase();
+		}
+    return type;
 	}
 
-	private String getObjectName(String cleanSql)
+	/**
+	 * Extract the name of the created object for Oracle stored procedures.
+	 * @see #addExtendErrorInfo(workbench.db.WbConnection, String, workbench.sql.StatementRunnerResult)
+	 */
+	private String getObjectName(String sql)
 	{
-    StringTokenizer tok = new StringTokenizer(cleanSql, " ");
-    String word = null;
-    String name = null;
-    String type = null;
-    boolean nextTokenIsName = false;
-    while (tok.hasMoreTokens())
-    {
-      word = tok.nextToken();
-      if (nextTokenIsName)
-      {
-				if ("PACKAGE".equals(type) && "BODY".equals(word))
-				{
-					// ignore the BODY keyword --> the next word is the real name
-					continue;
-				}
-        name = word;
-        break;
-      }
-      if (TYPES.contains(word))
-      {
-        type = word;
-        nextTokenIsName = true;
-      }
-    }
-    return name;
+		String regex = "CREATE\\s*(OR\\s*REPLACE|)\\s*(PROCEDURE|FUNCTION|PACKAGE\\s*BODY|PACKAGE)\\s*(\\p{Graph}*)";
+		String name = null;
+		Matcher m = Pattern.compile(regex,Pattern.CASE_INSENSITIVE).matcher(sql);
+		if (m.find() && m.groupCount() > 2)
+		{
+			name = m.group(3);
+			int pos = name.indexOf('(');
+			if (pos > -1)
+			{
+				name = name.substring(0,pos).toUpperCase();
+			}
+		}
+		return name;
 	}
 
+	/**
+	 * Retrieve extended error information if the DBMS supports this.
+	 * Currently this is only implemented for Oracle to read errors 
+	 * after creating a stored procedure from the ALL_ERRORS view.
+	 *
+	 * @see #getObjectName(String)
+	 * @see #getObjectType(String)
+	 */
   private boolean addExtendErrorInfo(WbConnection aConnection, String sql, StatementRunnerResult result)
   {
-    String cleanSql = SqlUtil.makeCleanSql(sql, false).toUpperCase();
-    String sqlverb = SqlUtil.getSqlVerb(cleanSql);
+    //String cleanSql = SqlUtil.makeCleanSql(sql, false).toUpperCase();
+    String sqlverb = SqlUtil.getSqlVerb(sql);
     if (!"CREATE".equals(sqlverb)) return false;
-    String type = getObjectType(cleanSql);
-    String name = getObjectName(cleanSql);
+    String type = getObjectType(sql);
+    String name = getObjectName(sql);
 
 		if (type == null || name == null) return false;
-
-		// remove anything behind the ( to get the real object name
-		StringTokenizer tok = new StringTokenizer(name, "(");
-		if (tok.hasMoreTokens())
-		{
-			name = tok.nextToken();
-		}
 
     String msg = aConnection.getMetadata().getExtendedErrorInfo(null, name, type);
 		if (msg != null && msg.length() > 0)
@@ -270,10 +236,8 @@ public class DdlCommand extends SqlCommand
 		{
 			return false;
 		}
-
   }
 
-	
 	/**
 	 * PG's documentation shows CREATE FUNCTION samples that use
 	 * a "dollar quoting" to avoid the nested single quotes
@@ -286,6 +250,7 @@ public class DdlCommand extends SqlCommand
 	 */
 	private String fixPgDollarQuote(String sql)
 	{
+		Pattern createFunc = Pattern.compile("CREATE.*FUNCTION.*AS\\s*\\$", Pattern.CASE_INSENSITIVE);
 		Matcher m = createFunc.matcher(sql);
 		if (!m.find()) return sql;
 		

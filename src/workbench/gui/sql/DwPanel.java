@@ -170,7 +170,7 @@ public class DwPanel
 		this.dataTable.setRowSelectionAllowed(true);
 		this.dataTable.getSelectionModel().addListSelectionListener(this);
 		this.dataTable.setHighlightRequiredFields(Settings.getInstance().getHighlightRequiredFields());
-		this.dataTable.setShowRowNumbers(Settings.getInstance().getShowRowNumbers());
+		//this.dataTable.setShowRowNumbers(Settings.getInstance().getShowRowNumbers());
 		
 		WbTraversalPolicy pol = new WbTraversalPolicy();
 		pol.setDefaultComponent(dataTable);

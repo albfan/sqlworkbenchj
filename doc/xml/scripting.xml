@@ -28,6 +28,10 @@
 			     <para>Example:</para>
 
 			     <programlisting>java -jar Workbench.jar -profile='Oracle - Test' -script='test.sql'</programlisting>
+					 <para>In this case the file <literal>WbProfiles.xml</literal> must be in the current
+					 (working) directory of the application. If this is not the case, please specify the 
+					 location of the profile using either the <link linkend="cmdline-parameter-profilestorage"><literal>-profilestorage</literal></link> or 
+					 <link linkend="cmdline-parameter-configdir"><literal>-configdir</literal></link> parameter</para>
         </section>
 
         <section id="scripting-connecting-no-profile">
@@ -223,8 +227,8 @@
         <para><emphasis role="bold">Connect to the database without specifying a connection profile:</emphasis></para>
         <programlisting>java -jar Workbench.jar -url=jdbc:postgresql:/dbserver/mydb
      -driver=org.postgresql.Driver
-     -username=thomas
-     -password=welcome
+     -username=zaphod
+     -password=vogsphere
      -driverjar=C:/Programme/pgsql/pg73jdbc3.jar 
      -script='test-script.sql'</programlisting>
 

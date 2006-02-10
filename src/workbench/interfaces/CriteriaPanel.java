@@ -24,4 +24,7 @@ public interface CriteriaPanel
 	void addToToolbar(WbAction action, boolean atFront, boolean withSep);
 	void saveSettings();
 	void restoreSettings();
+	void saveSettings(PropertyStorage props, String key);
+	void restoreSettings(PropertyStorage props, String key);
+	
 }

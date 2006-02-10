@@ -24,8 +24,7 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
-
-import workbench.gui.components.WbTable;
+import workbench.gui.WbSwingUtilities;
 import workbench.util.StringUtil;
 
 /**
@@ -59,12 +58,7 @@ public class ToolTipRenderer
 	
 	public static final ToolTipRenderer DEFAULT_TEXT_RENDERER = new ToolTipRenderer();
 	
-	private static Insets focusedInsets;
-	static
-	{
-		int thick = WbTable.FOCUSED_CELL_BORDER.getThickness();
-		focusedInsets = new Insets(thick, thick, thick, thick);
-	}
+	private Insets focusedInsets;
 
 	private boolean selected;
 	private boolean focus;
@@ -77,6 +71,8 @@ public class ToolTipRenderer
 	
 	public ToolTipRenderer()
 	{
+		int thick = WbSwingUtilities.FOCUSED_CELL_BORDER.getThickness();
+		focusedInsets = new Insets(thick, thick, thick, thick);
 	}
 
 	public void setEditingRow(int row) 
@@ -223,7 +219,7 @@ public class ToolTipRenderer
 
 		if (focus) 
 		{
-			WbTable.FOCUSED_CELL_BORDER.paintBorder(this, g, 0, 0, w, h);
+			WbSwingUtilities.FOCUSED_CELL_BORDER.paintBorder(this, g, 0, 0, w, h);
 		}
 	}
 

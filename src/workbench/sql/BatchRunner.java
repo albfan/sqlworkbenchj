@@ -281,7 +281,7 @@ public class BatchRunner
 		ScriptParser parser = new ScriptParser();
 		parser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
 		parser.setDelimiter(this.delimiter);
-		parser.setSupportOracleInclude(this.connection.getMetadata().isOracle());
+		parser.setSupportOracleInclude(this.connection.getMetadata().supportShortInclude());
 		parser.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		parser.setFile(scriptFile, this.encoding);
 		String sql = null;

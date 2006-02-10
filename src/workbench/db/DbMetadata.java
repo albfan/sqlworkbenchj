@@ -34,6 +34,7 @@ import java.util.Map.Entry;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import workbench.WbManager;
 import workbench.db.firebird.FirebirdMetadata;
 import workbench.db.firstsql.FirstSqlMetadata;
 import workbench.db.hsqldb.HsqlSequenceReader;
@@ -677,11 +678,12 @@ public class DbMetadata
 			result = (HashMap)value;
 		}
 
-		// Try to read the file in the current directory.
-		File f = new File(aFilename);
+		// Try to read the file in the directory where the jar file is locateds
+		File baseDir = new File(WbManager.getInstance().getJarPath());
+		File f = new File(baseDir, aFilename);
 		if (f.exists())
 		{
-			//LogMgr.logInfo("DbMetadata.readStatementTemplates()", "Reading user define template file " + aFilename);
+			LogMgr.logDebug("DbMetadata.readStatementTemplates()", "Reading user define template file " + aFilename);
 			// try to read additional definitions from local file
 			try
 			{
@@ -2566,7 +2568,7 @@ public class DbMetadata
 		sql.setSchema(aSchema);
 		sql.setCatalog(aCatalog);
 		sql.setObjectName(aTriggername);
-		Statement stmt = this.dbConnection.createStatementForQuery();
+		Statement stmt = this.dbConnection.createStatement();
 		String query = this.adjustHsqlQuery(sql.getSql());
 
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -2577,31 +2579,40 @@ public class DbMetadata
 		ResultSet rs = null;
 		try
 		{
-			rs = stmt.executeQuery(query);
+			// for some DBMS (e.g. SQL Server)
+			// we need to run a exec which might not work 
+			// when using executeQuery() (depending on the JDBC driver)
+			stmt.execute(query);
+			rs = stmt.getResultSet();
+			
+			if (rs != null)
+			{
+				int colCount = rs.getMetaData().getColumnCount();
+				while (rs.next())
+				{
+					for (int i=1; i <= colCount; i++)
+					{
+						result.append(rs.getString(i));
+					}
+				}
+			}
+			String warn = SqlUtil.getWarnings(this.dbConnection, stmt, true);
+			if (warn != null && result.length() > 0) result.append("\n\n");
+			result.append(warn);
 		}
 		catch (SQLException e)
 		{
+			LogMgr.logError("DbMetadata.getTriggerSource()", "Error reading trigger source", e);
 			if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
-			SqlUtil.closeStatement(stmt);
-			throw e;
-		}
-
-		int colCount = rs.getMetaData().getColumnCount();
-		try
-		{
-			while (rs.next())
-			{
-				for (int i=1; i <= colCount; i++)
-				{
-					result.append(rs.getString(i));
-				}
-			}
+			result.append(ExceptionUtil.getDisplay(e));
+			SqlUtil.closeAll(rs, stmt);
+			return result.toString();
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
-
+		
 		if (this.isCloudscape || this.isFirstSql)
 		{
 			String r = result.toString().replaceAll("\\\\n", "\n");

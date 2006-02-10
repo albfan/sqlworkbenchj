@@ -288,7 +288,7 @@
 
 			<para>The following call to the launcher:</para>
 
-			<programlisting>JWorkbench -configdir=c:\MyConf -J-Dsun.java2d.noddraw=true</programlisting>
+			<programlisting>jworkbench -configdir=c:\MyConf -J-Dsun.java2d.noddraw=true</programlisting>
 
 			<para>is the same as directly starting Workbench.jar with these
 			parameters:</para>
@@ -305,7 +305,7 @@
 		identical. The usage of the command line parameters is identical between
 		the launcher or starting &wb-productname; using the java command itself.</para>
 
-		<section>
+		<section id="cmdline-parameter-configdir">
 			<title>-configdir</title>
 
 			<para>Store all settings, the connection profile and the statement
@@ -313,10 +313,18 @@
 			working directory is used.</para>
 
 			<programlisting>java -jar Workbench.jar -configdir=$HOME/wbconfig
-			jworkbench -configdir='c:/Configurations/JWorkbench'</programlisting>
+jworkbench -configdir='c:/Configurations/JWorkbench'</programlisting>
 		</section>
 
-		<section>
+		<section id="cmdline-parameter-libdir">
+			<title>-libdir</title>
+			<para>Define the base directory for your JDBC drivers. The value of
+			this parameter can be referenced when <link linkend="jdbc-lib-dir">defining a driver library</link> 
+			using the placholder <literal>%LibDir%</literal></para>.
+			The value for this parameter can also be set in the <link linkend="settings-libdir"><literal>workbench.settings</literal></link>.
+		</section>
+		
+		<section id="cmdline-parameter-profilestorage">
 			<title>-profilestorage</title>
 			<para>&wb-productname; stores the connection profiles in a file called <literal>WbProfiles.xml</literal>.
 				If you want to use a different filename, or use different sets of profiles for different purposes
@@ -327,6 +335,7 @@
 			</para>
 		</section>
 		
+		
 		<section id="vardef-commandline">
 			<title>-vardef</title>
 
@@ -335,9 +344,9 @@
 				Lines starting with a <literal>#</literal> character are ignored (comments)
 			</para>
 			<programlisting>#Define some values
-			var_id=42
-			person_name=Dent
-			another_variable=24</programlisting>
+var_id=42
+person_name=Dent
+another_variable=24</programlisting>
 
 			<para>You can also define a list of variables with this parameter. In this case, the first
 				character after the = sign, has to be # (hash sign) to flag the value as a variable list:

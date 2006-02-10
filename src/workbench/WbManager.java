@@ -20,7 +20,10 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -147,7 +150,7 @@ public class WbManager
 			LogMgr.logError("WbManager.changeLookAndFeel()", "Error setting new look and feel to " + className, e);
 		}
 	}
-	
+
 	public void registerToolWindow(ToolWindow aWindow)
 	{
 		this.toolWindows.add(aWindow);
@@ -225,6 +228,13 @@ public class WbManager
 		if (trace) System.out.println("WbManager.setLookAndFeel() - done");
 	}
 
+	public String getJarPath()
+	{
+		URL url = this.getClass().getProtectionDomain().getCodeSource().getLocation();
+		File f = new File(url.getFile());
+		return f.getAbsoluteFile().getParentFile().getAbsolutePath();
+	}
+	
 	private void initUI()
 	{
 		if (trace) System.out.println("WbManager.initUI() - start");
@@ -232,7 +242,7 @@ public class WbManager
 
 		Settings settings = Settings.getInstance();
 		UIDefaults def = UIManager.getDefaults();
-		
+
 		Font stdFont = settings.getStandardFont();
 		if (stdFont != null)
 		{
@@ -270,14 +280,14 @@ public class WbManager
 		def.put("TableHeader.font", dataFont);
 
 		// Polish up the standard look & feel settings
-		
+
 		Color c = settings.getColor("workbench.table.gridcolor");
 		if (c == null)
 		{
 			c = new Color(215,215,215);
 		}
 		def.put("Table.gridColor", c);
-		
+
 		// use our own classes for some GUI elements
 		def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
 		def.put("SplitPaneUI", "workbench.gui.components.WbSplitPaneUI");
@@ -431,7 +441,7 @@ public class WbManager
 			w = (MainWindow)this.mainWindows.get(i);
 			if (w == null) continue;
 			w.abortAll();
-			w.disconnect(false, true);
+			w.disconnect(false, true, false);
 		}
 	}
 
@@ -549,8 +559,9 @@ public class WbManager
 				{
 					// First parameter tells the window to disconnect the window in a
 					// separate thread as we are already in a background thread
-					// second parameter tells the window not to save the workspace
-					win.disconnect(false, false);
+					// second parameter tells the window not to close the workspace
+					// third parameter tells the window not to save the workspace
+					win.disconnect(false, false, false);
 					win.setVisible(false);
 					win.dispose();
 				}
@@ -572,7 +583,7 @@ public class WbManager
 				openNewWindow(false);
 			}
 		});
-		
+
 	}
 
 	private void openNewWindow(boolean checkCmdLine)
@@ -634,9 +645,9 @@ public class WbManager
 	// Other parameters
 	public static final String ARG_PROFILE = "profile";
 	public static final String ARG_SHOWPROGRESS = "showprogress";
-	
+
 	private static final String ARG_PROFILE_STORAGE = "profilestorage";
-	
+
 	private static final String ARG_CONFIGDIR = "configdir";
 	private static final String ARG_LIBDIR = "libdir";
 	private static final String ARG_LOGFILE = "logfile";
@@ -685,7 +696,7 @@ public class WbManager
 			{
 				System.setProperty("workbench.libdir", value);
 			}
-			
+
 			value = cmdLine.getValue(ARG_LOGFILE);
 			if (!StringUtil.isEmptyString(value))
 			{
@@ -716,7 +727,7 @@ public class WbManager
 					LogMgr.logError("WbManager.initCmdLine()", "Error reading variable definition from file " + value, e);
 				}
 			}
-			
+
 			// Setting the profile storage should be done after initializing the configuration
 			// stuff correctly!
 			value = cmdLine.getValue(ARG_PROFILE_STORAGE);
@@ -731,11 +742,11 @@ public class WbManager
 	public void init()
 	{
 		if (trace) System.out.println("WbManager.init() - start");
-		
+
 		LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
 		LogMgr.logInfo("WbManager.init()", "Using Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") );
 		LogMgr.logDebug("WbManager.init()", "Use -Dworkbench.startuptrace=true to display trace messages during startup");
-		
+
     if (this.cmdLine == null) this.initCmdLine(null);
 
 		// batchMode flag is set by initCmdLine()
@@ -745,7 +756,7 @@ public class WbManager
 		}
 		else
 		{
-			EventQueue.invokeLater(new Runnable() 
+			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
@@ -755,7 +766,7 @@ public class WbManager
 		}
 		if (trace) System.out.println("WbManager.init() - done.");
 	}
-	
+
 	private void runGui()
 	{
 		WbSplash splash = null;
@@ -795,13 +806,13 @@ public class WbManager
 			}
 		}
 	}
-	
+
 	private void runBatch()
 	{
 		int exitCode = 0;
 		BatchRunner runner = BatchRunner.createBatchRunner(cmdLine);
 		int step = 1;
-		
+
 		if (runner != null)
 		{
 			try
@@ -821,7 +832,7 @@ public class WbManager
 				{
 					LogMgr.logError("WbManager.runBatch()", "Error running batch scripts", e);
 				}
-				
+
 			}
 			finally
 			{

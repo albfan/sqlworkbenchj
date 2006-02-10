@@ -73,6 +73,10 @@
     <para>If this option is enabled, the password stored within a connection
       profile will be encrypted. Whether the password should be stored at all
       can be selected in the profile itself.</para>
+			<note>Using this option only supplies very limited security. As the 
+			source code for &wb-productname; is freely available, the algorithm 
+			to decrypt the passwords stored in this way can easily be extracted
+			to retrieve the plain text passwords.</note>
   </section>
 
   <section id="options-confirm-update">
@@ -124,10 +128,51 @@
   </section>
 
   <section id="options-date-format">
-    <title>Date format</title>
+    <title>Date and Date/time format</title>
 
-    <para>Define the date format for displaying date columns in the result
-      set.</para>
+    <para>Define the format for displaying date and date/time (timestamp) columns in the result
+      set. For details on the format of this option, please refer to the 
+    documentation of the <ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/text/SimpleDateFormat.html"><literal>SimpleDateFormat</literal></ulink> class.
+		This format is also used when parsing input for date or timestamp fields, so if you 
+		enter a date, make sure you enter it the same way as defined with this option.
+    </para>
+		<para>
+			Here is an overview of the letters and their meaning that can be used to format
+			the date and timestamp values. Be aware that case matters! 
+			<informaltable frame="all">
+				<tgroup cols="2" align="left">
+					<colspec colname="c1" colwidth="1cm" />
+					<colspec colname="c2" />				
+          <thead>
+            <row>
+              <entry>Letter</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody valign="top">
+						<row><entry>G</entry><entry>Era designator (Text, e.g. AD)</entry></row>
+						<row><entry>y</entry><entry>Year (Number)</entry></row>
+						<row><entry>M</entry><entry>Month in year (Number)</entry></row>
+						<row><entry>w</entry><entry>Week in year (Number)</entry></row>
+						<row><entry>W</entry><entry>Week in month (Number)</entry></row>
+						<row><entry>D</entry><entry>Day in year (Number)</entry></row>
+						<row><entry>d</entry><entry>Day in month (Number)</entry></row>
+						<row><entry>F</entry><entry>Day of week in month (Number)</entry></row>
+						<row><entry>E</entry><entry>Day in week (Text)</entry></row>
+						<row><entry>a</entry><entry>AM/PM marker</entry></row>
+						<row><entry>H</entry><entry>Hour in day (0-23)</entry></row>
+						<row><entry>k</entry><entry>Hour in day (1-24)</entry></row>
+						<row><entry>K</entry><entry>Hour in am/pm (0-11)</entry></row>
+						<row><entry>h</entry><entry>Hour in am/pm (1-12)</entry></row>
+						<row><entry>m</entry><entry>Minute in hour</entry></row>
+						<row><entry>s</entry><entry>Second in minute</entry></row>
+						<row><entry>S</entry><entry>Milliseconds</entry></row>
+						<row><entry>z</entry><entry>General time zone (e.g. Pacific Standard Time; PST; GMT-08:00)</entry></row>
+						<row><entry>Z</entry><entry>RFC 822 time zone (e.g. -0800)</entry></row>
+          </tbody>
+				</tgroup>
+			</informaltable>
+		</para>
   </section>
 
   <section id="options-alternate-delimiter" xreflabel="alternate delimiter">
@@ -234,8 +279,12 @@
       that the DbExplorer will be retrieved automatically with the desired object
       type, when you open it.</para>
     </note>
+ </section>
 
-  </section>
-
+ <section id="options-tab-width">
+		<title>Editor tab width</title>
+		<para>The number of spaces that are assumed for the <literal>TAB</literal>
+		character.</para>
+ </section>
 </section>
 

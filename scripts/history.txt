@@ -1,5 +1,8 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+
+Build 84, 10.02.2006
+--------------------
 Enh:  (83.3) The number of columns the formatter ("Reformat SQL" menu item) puts
       into one line of a SELECT list, can now be defined:
       workbench.sql.formatter.select.columnsperline=1
@@ -39,7 +42,8 @@ Enh:  (83.16) The path to the driver jar files can now contain the placeholder
 Enh:  (83.19) DbExplorers opened as a tab will store the selected schema in the 
       current workspace. This behavior can be disabled (old way) by setting
       workbench.dbexplorer.rememberSchema=false in workbench.settings
-      
+Enh:  WbDiff has been renamed to WbSchemaDiff 
+
 Fix:  (83.1) The shortcut @ for the WbInclude command is now only supported for 
       Oracle because e.g. SQL Server uses the @ sign to name procedure 
       parameters (and thus existing scripts do not work). 
@@ -60,7 +64,14 @@ Fix:  (83.14) The SQL Formatter treats != as an operator (and does not separate
       the two characters)
 Fix:  (83.19) A schema change (e.g. in Oracle via ALTER SESSION) was not always
       reflected in the connection info
-      
+Fix:  (83.22) WbExport did not export blob columns correctly when writing XML files
+Fix:  (83.23) When creating procedures or functions in Oracle, the error information
+      was not always displayed correctly.
+Fix:  (83.25) When "Retrieve DbExplorer" was not enabled in the options dialog, 
+      the schema dropdown was never populated in the DbExplorer
+Fix:  (83.26) Displaying table structure in DbExplorer was broken with Oracle 8i
+Fix:  (83.28) "Replace all" was not working with "Ignore case" in the editor
+
 Build 83, 20.11.2005
 --------------------
 Enh:  (82.1) When running external files using WbInclude the directory of the 

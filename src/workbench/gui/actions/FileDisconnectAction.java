@@ -28,6 +28,6 @@ public class FileDisconnectAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		window.disconnect(true, true);
+		window.disconnect(true, true, true);
 	}
 }

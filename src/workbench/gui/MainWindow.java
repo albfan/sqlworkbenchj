@@ -727,29 +727,15 @@ public class MainWindow
 	{
 		this.closeConnectingInfo();
 		panel.setConnection(conn);
-
-		if (SwingUtilities.isEventDispatchThread())
+		
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			this.updateGuiForTab(anIndex);
-		}
-		else
-		{
-			try
+			public void run()
 			{
-				SwingUtilities.invokeAndWait(new Runnable()
-				{
-					public void run()
-					{
-						updateGuiForTab(anIndex);
-						selectCurrentEditor();
-					}
-				});
+				updateGuiForTab(anIndex);
+				selectCurrentEditor();
 			}
-			catch (Exception e)
-			{
-				LogMgr.logError("MainWindow.doUpdateForTab()", "Error executing GUI update on AWT thread", e);
-			}
-		}
+		});
 	}
 
 	private void updateGuiForTab(int anIndex)
@@ -776,7 +762,7 @@ public class MainWindow
 		this.doLayout();
 	}
 
-	private void tabSelected(int anIndex)
+	private void tabSelected(final int anIndex)
 	{
 		MainPanel current = this.getCurrentPanel();
 		
@@ -933,7 +919,7 @@ public class MainWindow
 		{
 			this.saveWorkspace(this.currentWorkspaceFile, true);
 		}
-		disconnect(false, false);
+		disconnect(false, false, false);
 
 		showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
 
@@ -985,7 +971,6 @@ public class MainWindow
 	public void connected(WbConnection conn)
 	{
 		this.showStatusMessage("");
-		
 		this.currentProfile = conn.getProfile();
 		if (this.currentProfile.getUseSeparateConnectionPerTab())
 		{
@@ -1184,12 +1169,17 @@ public class MainWindow
 		}
 
 
-		this.doLayout();
-		this.validate();
-
-		this.updateWindowTitle();
-		this.checkWorkspaceActions();
-		this.updateAddMacroAction();
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				doLayout();
+				validate();
+				updateWindowTitle();
+				checkWorkspaceActions();
+				updateAddMacroAction();
+			}
+		});
 		return result;
 	}
 
@@ -1238,7 +1228,7 @@ public class MainWindow
 		}
 	}
 
-	public void disconnect(boolean background, final boolean closeWorkspace)
+	public void disconnect(boolean background, final boolean closeWorkspace, final boolean saveWorkspace)
 	{
 		if (this.isConnectInProgress()) return;
 		this.setConnectIsInProgress();
@@ -1260,7 +1250,7 @@ public class MainWindow
 		}
 		else
 		{
-			if (closeWorkspace) saveWorkspace(false);
+			if (saveWorkspace) saveWorkspace(false);
 			this.doDisconnect();
 			if (closeWorkspace) closeWorkspace();
 		}

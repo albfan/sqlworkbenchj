@@ -11,6 +11,7 @@
  */
 package workbench.db.oracle;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -34,7 +35,7 @@ import workbench.util.SqlUtil;
 public class OracleIndexReader
 	extends JdbcIndexReader
 {
-	private Statement indexStatement;
+	private PreparedStatement indexStatement;
 	
 	/** Creates a new instance of OracleMetaData */
 	public OracleIndexReader(DbMetadata meta)
@@ -83,11 +84,11 @@ public class OracleIndexReader
 			"       null as filter_condition, " +
 			"       i.index_type " +
 			"FROM all_indexes i, all_ind_columns c " +
-			"WHERE i.table_name = '" + tbl.getTableName() + "' \n");
+			"WHERE i.table_name = ? \n");
 		
 		if (tbl.getSchema() != null)
 		{
-			sql.append("  AND i.owner = '" + tbl.getSchema() + "'\n");
+			sql.append("  AND i.owner = ? \n");
 		}
 		if (unique)
 		{
@@ -99,8 +100,10 @@ public class OracleIndexReader
 			"  and i.owner = c.index_owner ");
 		sql.append("ORDER BY non_unique, type, index_name, ordinal_position ");
 		
-		this.indexStatement = this.metaData.getWbConnection().createStatementForQuery();
-		ResultSet rs = this.indexStatement.executeQuery(sql.toString());
+		this.indexStatement = this.metaData.getWbConnection().getSqlConnection().prepareStatement(sql.toString());
+		this.indexStatement.setString(1,table.getTableName());
+		if (table.getSchema() != null) this.indexStatement.setString(2, table.getSchema());
+		ResultSet rs = this.indexStatement.executeQuery();
 		return rs;
 	}
 	

@@ -170,7 +170,7 @@ public class TableDataPanel
 		topPanel.add(rowCountLabel);
 		topPanel.add(Box.createHorizontalStrut(10));
 
-		autoRetrieve = new JCheckBox(ResourceMgr.getString("LabelAutoLoadTableData"));
+		autoRetrieve = new JCheckBox(ResourceMgr.getString("LabelAutoLoad"));
 		autoRetrieve.setToolTipText(ResourceMgr.getDescription("LabelAutoLoadTableData"));
 		autoRetrieve.setHorizontalTextPosition(SwingConstants.LEFT);
 		topPanel.add(autoRetrieve);

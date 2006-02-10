@@ -78,8 +78,8 @@ public class DbExplorerPanel
 	private WbToolbar toolbar;
 	private ConnectionInfo connectionInfo;
 	private boolean retrievePending;
-	private boolean schemaRetrievePending;
-	private boolean connectionInitPending = false;
+	private boolean schemaRetrievePending = true;
+	private boolean connectionInitPending = true;
 	private int internalId = 0;
 	private ConnectionSelector connectionSelector;
 	private JButton selectConnectionButton;
@@ -192,7 +192,6 @@ public class DbExplorerPanel
 	{
 		if (this.isBusy() || isConnectionBusy() || this.dbConnection == null) 
 		{
-			this.retrievePending = true;
 			this.schemaRetrievePending = true;
 			return;
 		}
@@ -359,6 +358,8 @@ public class DbExplorerPanel
 		try
 		{
 			this.connectionInitPending = true;
+			this.schemaRetrievePending = true;
+			this.retrievePending = Settings.getInstance().getRetrieveDbExplorer();
 			
 			if (this.window != null)
 			{
@@ -372,32 +373,17 @@ public class DbExplorerPanel
 			
 			// Try to avoid concurrent execution on the 
 			// same connection object
-			if (this.isConnectionBusy())
-			{
-				this.retrievePending = true;
-				this.schemaRetrievePending = true;
-			}
-			else
+			if (!this.isConnectionBusy())
 			{
 				initConnection();
-
-				if (Settings.getInstance().getRetrieveDbExplorer())
+				
+				if (this.isVisible())
 				{
-					if (this.isVisible())
+					readSchemas();
+					if (this.retrievePending)
 					{
 						// if we are visible start the retrieve immediately
-						readSchemas();
 						retrieve();
-						this.retrievePending = false;
-					}
-					else
-					{
-						// if we are not visible just store the information
-						// that we need to retrieve the table list.
-						// this will be evaluated by the (overwritten) setVisible() method
-						// There is no need in retrieving the information if we are not visible
-						this.schemaRetrievePending = true;
-						this.retrievePending = true;
 					}
 				}
 			}
@@ -419,19 +405,25 @@ public class DbExplorerPanel
 	{
 		boolean wasVisible = this.isVisible();
 		super.setVisible(flag);
-		if (!wasVisible && flag && retrievePending)
+		if (!wasVisible && flag)
 		{
-			// retrievePending will be true, if the connection has
-			// been set already, the DbExplorer should be retrieved automatically
-			// and the panel was not visible when the connection was provided
-			retrievePending = false;
-			EventQueue.invokeLater(new Runnable()
+			if (schemaRetrievePending)
 			{
-				public void run()
+				this.readSchemas();
+			}
+			if (retrievePending)
+			{
+				// retrievePending will be true, if the connection has
+				// been set already, the DbExplorer should be retrieved automatically
+				// and the panel was not visible when the connection was provided
+				EventQueue.invokeLater(new Runnable()
 				{
-					retrieve();
-				}
-			});
+					public void run()
+					{
+						retrieve();
+					}
+				});
+			}
 		}
 	}
 
@@ -526,6 +518,7 @@ public class DbExplorerPanel
 				}
 				finally
 				{
+					retrievePending = false;
 					setBusy(false);
 					WbSwingUtilities.showDefaultCursorOnWindow(c);
 				}

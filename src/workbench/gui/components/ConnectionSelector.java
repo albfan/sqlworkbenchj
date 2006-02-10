@@ -68,26 +68,33 @@ public class ConnectionSelector
 
 	public void selectConnection()
 	{
-		this.selectConnection(this.propertyKey);
-	}
-
-	public void selectConnection(String profileKey)
-	{
 		if (this.isConnectInProgress()) return;
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this.parent);
-			ProfileSelectionDialog dialog = new ProfileSelectionDialog(this.parent, true, profileKey);
+			final ProfileSelectionDialog dialog = new ProfileSelectionDialog(this.parent, true, this.propertyKey);
 			WbSwingUtilities.center(dialog, this.parent);
 			WbSwingUtilities.showDefaultCursor(this.parent);
-			dialog.setVisible(true);
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					dialog.setVisible(true);
+				}
+			});
       ConnectionProfile prof = dialog.getSelectedProfile();
 			boolean cancelled = dialog.isCancelled();
-			dialog.setVisible(false);
+			
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					dialog.setVisible(false);
+					parent.repaint();
+				}
+			});
 			dialog.dispose();
-
-			this.parent.repaint();
-
+			
 			if (cancelled || prof == null)
 			{
 				this.client.connectCancelled();
@@ -145,12 +152,24 @@ public class ConnectionSelector
 
 	public void showDisconnectInfo()
 	{
-		this.showPopupMessagePanel(ResourceMgr.getString("MsgDisconnecting"));
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				showPopupMessagePanel(ResourceMgr.getString("MsgDisconnecting"));
+			}
+		});
 	}
 
 	public void showConnectingInfo()
 	{
-		this.showPopupMessagePanel(ResourceMgr.getString("MsgConnecting"));
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				showPopupMessagePanel(ResourceMgr.getString("MsgConnecting"));
+			}
+		});
 	}
 
 	private void showPopupMessagePanel(String aMsg)
@@ -234,11 +253,25 @@ public class ConnectionSelector
 		{
 			if (connected)
 			{
-				client.connected(conn);
+				final WbConnection theConnection = conn;
+				WbSwingUtilities.invoke(new Runnable()
+				{
+					public void run()
+					{
+						client.connected(theConnection);
+					}
+				});
 			}
 			else
 			{
-				client.connectFailed(error);
+				final String theError = error;
+				WbSwingUtilities.invoke(new Runnable()
+				{
+					public void run()
+					{
+						client.connectFailed(theError);
+					}
+				});
 				if (showSelectDialogOnError)
 				{
 					selectConnection();

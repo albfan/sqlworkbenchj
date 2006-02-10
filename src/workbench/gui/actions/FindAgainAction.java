@@ -38,6 +38,6 @@ public class FindAgainAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.findNext();
+		int pos = this.client.findNext();
 	}
 }

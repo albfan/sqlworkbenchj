@@ -35,6 +35,7 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import javax.swing.border.LineBorder;
 import workbench.db.WbConnection;
 
 import workbench.gui.components.TextComponentMouseListener;
@@ -70,6 +71,7 @@ public class WbSwingUtilities
 					b.getShadowInnerColor());
 	}
 
+	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.YELLOW);
 	public static final Border EMPTY_BORDER = new EmptyBorder(0,0,0,0);
 	public static final Border FLAT_BUTTON_BORDER = new CompoundBorder(new EtchedBorder(), new EmptyBorder(1,6,1,6));
 	
@@ -77,6 +79,9 @@ public class WbSwingUtilities
 	{
 	}
 
+	/**
+	 * Synchronously execute code on the EDT
+	 */
 	public static final void invoke(Runnable r)
 	{
 		if (EventQueue.isDispatchThread())

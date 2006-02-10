@@ -240,7 +240,8 @@ END;
         or <literal>CLOB</literal> (Character Large OBject) columns from and to external files. 
         BLOB clumns are sometimes also referred to as binary data. CLOB columns 
         are sometimes also referred to as <literal>LONG VARCHAR</literal>. The exact data type 
-        depends on the DBMS used</para>
+        depends on the DBMS used.
+      </para>
       <para>To insert and update LOB columns the usual <literal>INSERT</literal> and
         <literal>UPDATE</literal> statements can be used by using a special
         placeholder to define the source for the LOB data. When updating the 
@@ -249,7 +250,7 @@ END;
         data.
       </para>
       <note>
-        <para>Only the Oracle 10g driver supports the standard JDBC calls used by &wb-productname; 
+        <para>When working with Oracle, only the 10g driver supports the standard JDBC calls used by &wb-productname; 
         to read and write the LOB data. Earlier drivers will not work as described in this chapter. 
         </para>
       </note>
@@ -284,7 +285,7 @@ END;
             to start with <literal>{$clobfile=</literal> and can optionally contain an 
             encoding
           </para>
-         <programlisting>UPDATE theTable SET clob_col = {$clobfile=c:/data/image.html encoding=utf8} WHERE id=42;</programlisting>
+         <programlisting>UPDATE theTable SET clob_col = {$clobfile=c:/data/manual.html encoding=utf8} WHERE id=42;</programlisting>
          <para>If you ommit the encoding parameter, &wb-productname; will leave the data conversion 
          to the JDBC driver (technically, it will use the <literal>PreapredStatement.setAsciiStream()</literal> method
          whereas with an encoding it will use the <literal>PreparedStatement.setCharacterStream()</literal> method).
@@ -319,7 +320,8 @@ END;
         off the progress display in the statusbar that shows the current row
         that is imported/exported because this will slow down the process as 
         well. In both cases you can use <literal>-showprogress</literal>
-        to turn off the display. 
+        to turn off the display (or set it to a high number such as 1000) in 
+				order to reduce the overhead caused by updating the screen.
       </para>
     </section>
 
@@ -466,7 +468,7 @@ Done.</programlisting>
       <section>
         <title>Other database systems</title>
       <para>If your DBMS supports something similar please let me know, and I
-      will try to implement it - provided I have access to the DBMS. Please send your
+      will try to implement it - provided I have free access to the DBMS. Please send your
       request to <ulink url="mailto:support@sql-workbench.net">support@sql-workbench.net</ulink></para>
       </section>
     </section>
@@ -518,12 +520,10 @@ Done.</programlisting>
       <menuchoice><guimenu>Data</guimenu><guimenuitem>Save</guimenuitem></menuchoice>.
       If the update is successful (no database errors) a <literal>COMMIT</literal> will be
       sent to the database automatically. If an error is reported during the
-      update, a <literal>ROLLBACK</literal> will be sent to the database</para>
-
-			<note><para>When you save changes from the result set, &wb-productname; will
-			always send a <literal>ROLLBACK</literal> or <literal>COMMIT</literal> to the database server
-			regardless of the autocommit setting of the connection profile.</para></note>
-
+      update, a <literal>ROLLBACK</literal> will be sent to the database. The <literal>COMMIT</literal>
+      or <literal>ROLLBACK</literal> will only be sent if <link linkend="profile-autocommit">autocommit</link> is turned off.
+      </para>
+			
       <para>Once you issue a new <literal>SELECT</literal> statement the edit mode will be
       turned off again. If you try to enable the edit mode for a result set where more
       than one table is involved, you will be prompted for the table that should
@@ -533,6 +533,11 @@ Done.</programlisting>
       in the database. You can turn this feature off, or change the color used by editing the
       <link linkend="settings-highlight-notnull">configuration file</link>.
       </para>
+			
+			<para>When editing date or timestamp fields, the format specified in the <link linkend="options-date-format">system 
+			options</link> is used for parsing the entered value and converting that into the 
+			internal representation of a date.
+			</para>
     </section>
     
     <section id="using-copy-clipboard">
