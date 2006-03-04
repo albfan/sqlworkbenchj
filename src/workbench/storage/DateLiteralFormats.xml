@@ -21,6 +21,14 @@
    </object> 
   </void> 
   <void method="put"> 
+   <string>All</string> 
+   <object class="workbench.storage.DbDateFormatter"> 
+    <void property="format"> 
+     <string>yyyy-MM-dd HH:mm:ss</string> 
+    </void> 
+   </object> 
+  </void> 
+  <void method="put"> 
    <string>Oracle8</string> 
    <object idref="DbDateFormatter0"/> 
   </void> 

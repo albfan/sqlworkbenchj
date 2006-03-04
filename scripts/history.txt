@@ -1,6 +1,45 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh:  (85.7) "Expand Editor" and "Expand Result" now act as a toggle. 
+      The first time they are invoked they will expand the editor (or the
+      result area) the second time they will undo the expand. 
+      The "Undo Expand" will undo the last expand.
+Enh:  (85.2) Reworked the Options dialog
+Enh:  (85.9) The connection profile has a new attribute "Remove comments" which 
+      is disabled by default. If enbled, any comments will be removed
+      from the SQL statement before sending it to the server
+      
+Fix:  (85.1) Not all settings were saved in the new options dialog
+Fix:  (85.3) When generating SQL statements (INSERT, UPDATE,...) date 
+      values where not formatted correctly for Oracle
+Fix:  (85.5) The SQL Formatter inserted a space between two single quotes inside 
+      a character literal
+Fix:  (85.6) Oracle CLOB columns where not always copied correctly in the 
+      DataPumper
+Fix:  (85.6) When an error ocurred during copying, the DataPumper would 
+      not always show the error.
+Fix:  (85.7) The Options dialog would not open on a new installation
+Fix:  (85.10) CLOB columns where not exported correctly for XML exports
 
+Build 85, 20.02.2006
+--------------------
+Enh:  (84.2) The automatic scroll area of the editor ("electric scroll") can 
+      now be configured with the property workbench.editor.electricscroll and 
+      defines the number of lines where the electric scrolling should be 
+      enabled. The current default is 3. This property can also be set
+      through the options dialog ("Editor" tab)
+      
+      The color used to highlight statements that failed can now be configured 
+      with the setting workbench.editor.color.error
+      
+Fix:  (84.1) When no profile was selected in the connect dialog, the OK button 
+      could still be clicked (without result). Additionally if no profile 
+      was selected, profile information could still be entered but would be lost
+      when switching the profile
+Fix:  (84.4) Code completion was not always working with subselects
+Fix:  (84.4) WbSchemaDiff was not working any longer (due to the rename from 
+      WbDiff
+      
 Build 84, 10.02.2006
 --------------------
 Enh:  (83.3) The number of columns the formatter ("Reformat SQL" menu item) puts

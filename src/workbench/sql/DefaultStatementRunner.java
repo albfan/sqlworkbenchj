@@ -88,6 +88,7 @@ public class DefaultStatementRunner
 	private ResultLogger resultLogger;
 	private boolean verboseLogging;
 	private boolean supportsSelectInto = false;
+	private boolean removeComments;
 	
 	public DefaultStatementRunner()
 	{
@@ -272,6 +273,7 @@ public class DefaultStatementRunner
 		// huge scripts the repeated call to getCommandToUse should
 		// be as quick as possible
 		this.supportsSelectInto = meta.supportsSelectIntoNewTable();
+		this.removeComments = dbConnection.getProfile().getRemoveComments();
 	}
 
 	public StatementRunnerResult getResult()
@@ -301,6 +303,11 @@ public class DefaultStatementRunner
 			return;
 		}
 
+		if (removeComments)
+		{
+			aSql = SqlUtil.makeCleanSql(aSql, true, false, '\'');
+		}
+		
 		this.currentCommand = this.getCommandToUse(aSql);
 
 		// if no mapping is found use the default implementation
@@ -336,6 +343,7 @@ public class DefaultStatementRunner
 				return;
 			}
 		}
+		
 		this.result = this.currentCommand.execute(this.dbConnection, realSql);
 
 		if (this.currentCommand instanceof WbStartBatch && result.isSuccess())

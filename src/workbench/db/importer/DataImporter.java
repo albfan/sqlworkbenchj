@@ -17,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Blob;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -29,7 +30,6 @@ import workbench.db.DbMetadata;
 import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.util.CloseableDataStream;
 import workbench.util.ExceptionUtil;
 import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
@@ -41,7 +41,9 @@ import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import java.io.StringReader;
 import java.io.Reader;
+import java.sql.Clob;
 import workbench.interfaces.ImportFileParser;
+import workbench.storage.NullValue;
 import workbench.util.WbThread;
 
 
@@ -710,7 +712,7 @@ public class DataImporter
 			{
 				colIndex = this.columnMap[i] + 1;
 			}
-			if (row[i] == null)
+			if (row[i] == null || row[i] instanceof NullValue)
 			{
 				if ("CLOB".equals(this.targetColumns[i].getDbmsType()))
 				{
@@ -721,6 +723,7 @@ public class DataImporter
 					pstmt.setNull(colIndex, this.targetColumns[i].getDataType());
 				}
 			}
+			
 			// CLOB and LONG check is for Oracle, because Oracle 
 			// reports CLOB and LONG columns as java.sql.Types.OTHER (!!)
 			// but they need to be treated as CLOBs (i.e. using setCharacterStream()
@@ -731,22 +734,64 @@ public class DataImporter
 				       "LONG".equals(this.targetColumns[i].getDbmsType()) ||
 				       "CLOB".equals(this.targetColumns[i].getDbmsType()) )
 			{
-				String value = row[i].toString();
+				String value = null;
+				if (row[i] instanceof Clob)
+				{
+					try
+					{
+						Clob clob = (Clob)row[i];
+						int len = (int)clob.length();
+						value = clob.getSubString(1, len);
+					}
+					catch (Throwable e)
+					{
+						value = null;
+					}
+				}
+				else
+				{
+					// this assumes that the JDBC driver will actually
+					// implement the toString() for whatever object 
+					// it created when reading that column!
+					value = row[i].toString();
+				}
 				int size = value.length();
 				Reader in = new StringReader(value);
 				pstmt.setCharacterStream(colIndex, in, size);
 			}
-			else if (SqlUtil.isBlobType(this.targetColumns[i].getDataType()) && row[i] instanceof File)
+			else if (SqlUtil.isBlobType(this.targetColumns[i].getDataType()))
 			{
-				File f = (File)row[i];
-				try
+				InputStream in = null;
+				int len = -1;
+				if (row[i] instanceof File)
 				{
-					InputStream in = new BufferedInputStream(new FileInputStream(f), 64*1024);
-					pstmt.setBinaryStream(colIndex, in, (int)f.length());
+					// When importing XML files created by SQL Workbench/J
+					// blobs will be "passed" as File objects pointing to 
+					// the external file 
+					File f = (File)row[i];
+					try
+					{
+						in = new BufferedInputStream(new FileInputStream(f), 64*1024);
+						len = (int)f.length();
+					}
+					catch (FileNotFoundException ex)
+					{
+						throw new SQLException("External data file " + f.getAbsolutePath() + " not found");
+					}
 				}
-				catch (FileNotFoundException ex)
+				else if (row[i] instanceof Blob)
 				{
-					throw new SQLException("External data file " + f.getAbsolutePath() + " not found");
+					Blob b = (Blob)row[i];
+					in = b.getBinaryStream();
+					len = (int)b.length();
+				}
+				if (in != null && len > -1)
+				{
+					pstmt.setBinaryStream(colIndex, in, len);
+				}
+				else
+				{
+					this.messages.append(ResourceMgr.getString("MsgBlobNotRead") + " " + (i+1) +"\n");
 				}
 			}
 			else
@@ -1246,6 +1291,7 @@ public class DataImporter
 			this.messages.append(ExceptionUtil.getDisplay(e));
 		}
 		this.messages.append(this.source.getMessages());
+		if (this.progressMonitor != null) this.progressMonitor.jobFinished();
 	}
 
 	public void importCancelled()

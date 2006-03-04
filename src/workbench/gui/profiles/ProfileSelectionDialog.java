@@ -30,11 +30,14 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import workbench.db.ConnectionProfile;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
@@ -45,7 +48,8 @@ import workbench.util.StringUtil;
  * @author  support@sql-workbench.net
  */
 public class ProfileSelectionDialog
-	extends JDialog implements ActionListener, WindowListener
+	extends JDialog 
+	implements ActionListener, WindowListener, ListSelectionListener
 {
   private JPanel buttonPanel;
   private JButton okButton;
@@ -60,6 +64,7 @@ public class ProfileSelectionDialog
 	{
 		this(parent, modal, null);
 	}
+	
 	public ProfileSelectionDialog(Frame parent, boolean modal, String lastProfileKey)
 	{
 		super(parent, modal);
@@ -95,6 +100,7 @@ public class ProfileSelectionDialog
 			}
 			catch (Exception e)
 			{
+				LogMgr.logError("ProfileSelectionDialog.checkProfiles()", "Error creating default profile", e);
 			}
 		}
 	}
@@ -102,8 +108,11 @@ public class ProfileSelectionDialog
   private void initComponents(String lastProfileKey)
   {
 		profiles = new ProfileEditorPanel(lastProfileKey);
+		
     buttonPanel = new JPanel();
     okButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_OK));
+		okButton.setEnabled(profiles.getSelectedProfile() != null);
+		
     cancelButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));
 
 		addWindowListener(this);
@@ -125,6 +134,7 @@ public class ProfileSelectionDialog
 				profileListClicked(evt);
 			}
 		});
+		profiles.addSelectionListener(this);
 
 		BorderLayout bl = new BorderLayout();
 		this.getContentPane().setLayout(bl);
@@ -269,6 +279,12 @@ public class ProfileSelectionDialog
 		this.cancelled = true;
 		this.selectedProfile = null;
 		this.setInitialFocus();
+	}
+
+	public void valueChanged(ListSelectionEvent e)
+	{
+		if (e.getValueIsAdjusting()) return;
+		this.okButton.setEnabled(e.getFirstIndex() >= 0);
 	}
 
 }

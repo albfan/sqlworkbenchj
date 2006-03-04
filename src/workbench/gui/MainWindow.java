@@ -81,14 +81,11 @@ import workbench.gui.actions.VersionCheckAction;
 import workbench.gui.actions.ViewLineNumbers;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.ConnectionSelector;
-import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.dbobjects.DbExplorerPanel;
-import workbench.gui.dbobjects.DbExplorerWindow;
-import workbench.gui.help.HtmlViewer;
 import workbench.gui.help.WhatsNewViewer;
 import workbench.gui.menu.SqlTabPopup;
 import workbench.gui.settings.SettingsPanel;
@@ -99,7 +96,6 @@ import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.FilenameChangeListener;
 import workbench.interfaces.MacroChangeListener;
 import workbench.interfaces.MainPanel;
-import workbench.interfaces.ToolWindow;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -138,11 +134,11 @@ public class MainWindow
 	private NewDbExplorerPanelAction newDbExplorerPanel;
 	private NewDbExplorerWindowAction newDbExplorerWindow;
 
-	private WbTabbedPane sqlTab = new WbTabbedPane();
+	private WbTabbedPane sqlTab;
 	private WbToolbar currentToolbar;
 	private ArrayList panelMenus = new ArrayList(5);
 
-	private String currentWorkspaceFile = null;
+	private String currentWorkspaceFile;
 
 	private CloseWorkspaceAction closeWorkspaceAction;
 	private SaveWorkspaceAction saveWorkspaceAction;
@@ -150,13 +146,13 @@ public class MainWindow
 	private LoadWorkspaceAction loadWorkspaceAction;
 	private AssignWorkspaceAction assignWorkspaceAction;
 
-	private boolean isProfileWorkspace = false;
-	private boolean tabRemovalInProgress = false;
+	private boolean isProfileWorkspace;
+	private boolean tabRemovalInProgress;
 
 	// will indicate a connect or disconnect in progress
 	// connecting and disconnecting is done a separate thread
 	// so that slow connections do not block the GUI
-	private boolean connectInProgress = false;
+	private boolean connectInProgress;
 
 	private AddMacroAction createMacro;
 	private ManageMacroAction manageMacros;
@@ -168,54 +164,41 @@ public class MainWindow
 	{
 		super(ResourceMgr.TXT_PRODUCT_NAME);
 		instanceCount ++;
+		
+		sqlTab = new WbTabbedPane();
+		sqlTab.setFocusable(false);
+		
 		this.connectionSelector = new ConnectionSelector(this, this);
-		this.windowId = "WbWin-" + Integer.toString(instanceCount);
+		this.windowId = new StringBuffer("WbWin-").append(instanceCount).toString();
 		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		this.addWindowListener(this);
 
-		this.sqlTab.setUI(TabbedPaneUIFactory.getBorderLessUI());
-		this.sqlTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		this.sqlTab.setFocusable(false);
-
-		this.currentProfile = null;
-
-		this.disconnectAction = new FileDisconnectAction(this);
-		this.disconnectAction.setEnabled(false);
-		this.assignWorkspaceAction = new AssignWorkspaceAction(this);
-		this.closeWorkspaceAction = new CloseWorkspaceAction(this);
-	  this.saveAsWorkspaceAction = new SaveAsNewWorkspaceAction(this);
-
-		this.loadWorkspaceAction = new LoadWorkspaceAction(this);
-		this.saveWorkspaceAction = new SaveWorkspaceAction(this);
-
-		this.initMenu();
+		initMenu();
+		setIconImage(ResourceMgr.getPicture("workbench16").getImage());
+		
 		this.getContentPane().add(this.sqlTab, BorderLayout.CENTER);
-		this.setIconImage(ResourceMgr.getPicture("workbench16").getImage());
-
-		this.addTab(false, false);
-
-		// this is necessary to initialize the size of the panel!
-		// so that sql.initDefaults() will actually be able to
-		// to set the divider at 50%
-		this.pack();
 
 		this.restoreSettings();
-
-		this.sqlTab.setSelectedIndex(0);
-		this.updateGuiForTab(0);
-
-		this.updateWindowTitle();
+		
 		this.checkWorkspaceActions();
 
 		this.sqlTab.addChangeListener(this);
 		this.sqlTab.addMouseListener(this);
-		//this.sqlTab.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
+		this.addWindowListener(this);
 		MacroManager.getInstance().addChangeListener(this);
 
 		new DropTarget(this.sqlTab, DnDConstants.ACTION_COPY, this);
 	}
 
+	public void display()
+	{
+		this.restoreState();
+		this.setVisible(true);
+		this.addTab(true, false);
+		this.updateGuiForTab(0);
+		this.updateWindowTitle();
+	}
+	
 	/**
 	 * Return the internal ID of this window. This ID will be used
 	 * to generate the ID for each connection done from within this
@@ -306,7 +289,17 @@ public class MainWindow
 
 	private void initMenu()
 	{
+		this.disconnectAction = new FileDisconnectAction(this);
+		this.disconnectAction.setEnabled(false);
+		this.assignWorkspaceAction = new AssignWorkspaceAction(this);
+		this.closeWorkspaceAction = new CloseWorkspaceAction(this);
+		this.saveAsWorkspaceAction = new SaveAsNewWorkspaceAction(this);
+
+		this.loadWorkspaceAction = new LoadWorkspaceAction(this);
+		this.saveWorkspaceAction = new SaveWorkspaceAction(this);
+		
 		this.createMacro = new AddMacroAction();
+		
 		this.createMacro.setEnabled(false);
 		this.manageMacros = new ManageMacroAction(this);
 
@@ -389,14 +382,23 @@ public class MainWindow
 		menuBar.add(menu);
 		menus.put(ResourceMgr.MNU_TXT_SQL, menu);
 
+		WbThread macroThread = null;
+		
 		if (aPanel instanceof SqlPanel)
 		{
-			menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_MACRO));
-			menu.setName(ResourceMgr.MNU_TXT_MACRO);
-			menu.setVisible(true);
-			menuBar.add(menu);
-			menus.put(ResourceMgr.MNU_TXT_MACRO, menu);
-			this.buildMacroMenu(menu);
+			final WbMenu macroMenu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_MACRO));
+			macroMenu.setName(ResourceMgr.MNU_TXT_MACRO);
+			macroMenu.setVisible(true);
+			menuBar.add(macroMenu);
+			menus.put(ResourceMgr.MNU_TXT_MACRO, macroMenu);
+			macroThread = new WbThread("MacroMenuCreation")
+			{
+				public void run()
+				{
+					buildMacroMenu(macroMenu);
+				}
+			};
+			macroThread.start();
 		}
 
 		menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_WORKSPACE));
@@ -423,8 +425,8 @@ public class MainWindow
 			if (entry instanceof WbAction)
 			{
 				action = (WbAction)actions.get(i);
-				menuName = (String)action.getValue(WbAction.MAIN_MENU_ITEM);
-				menuSep = "true".equals((String)action.getValue(WbAction.MENU_SEPARATOR));
+				menuName = action.getMenuItemName();
+				menuSep = action.getCreateMenuSeparator();
 			}
 			else if (entry instanceof WbMenu)
 			{
@@ -484,6 +486,7 @@ public class MainWindow
 		menuBar.add(this.buildHelpMenu());
 
 		aPanel.addToToolbar(this.dbExplorerAction, true);
+		try { if (macroThread != null) macroThread.join(); } catch (Throwable th) {}
 
 		return menuBar;
 	}
@@ -617,7 +620,8 @@ public class MainWindow
 	public MainPanel getCurrentPanel()
 	{
 		int index = this.sqlTab.getSelectedIndex();
-		return this.getSqlPanel(index);
+		if (index >-1) return this.getSqlPanel(index);
+		else return null;
 	}
 
 	public SqlPanel getCurrentSqlPanel()
@@ -759,13 +763,12 @@ public class MainWindow
 		}
 		current.panelSelected();
 		this.checkMacroMenuForPanel(anIndex);
-		this.doLayout();
 	}
 
 	private void tabSelected(final int anIndex)
 	{
 		MainPanel current = this.getCurrentPanel();
-		
+		if (current == null) return;
 		this.updateGuiForTab(anIndex);
 		this.updateAddMacroAction();
 		this.updateWindowTitle();
@@ -1541,7 +1544,7 @@ public class MainWindow
 
 					if (a.getIndex() == sqlTabIndex)
 					{
-						a.setName(aName);
+						a.setMenuText(aName);
 						break;
 					}
 				}
@@ -1655,7 +1658,7 @@ public class MainWindow
 		explorer.setTabTitle(this.sqlTab, this.sqlTab.getTabCount() - 1);
 
 		SelectTabAction action = new SelectTabAction(this.sqlTab, this.sqlTab.getTabCount() - 1);
-		action.setName(explorer.getTabTitle());
+		action.setMenuText(explorer.getTabTitle());
 		this.panelMenus.add(dbmenu);
 		this.addToViewMenu(action);
 	}
@@ -2260,7 +2263,7 @@ public class MainWindow
 	{
 		int index = this.findFirstExplorerTab();
 		if (index == -1) index = sqlTab.getTabCount();
-		SqlPanel sql = new SqlPanel(index+1);
+		final SqlPanel sql = new SqlPanel(index+1);
 		sql.addDbExecutionListener(this);
 		sql.addFilenameChangeListener(this);
 		if (checkConnection) this.checkConnectionForPanel(sql, false);
@@ -2271,12 +2274,12 @@ public class MainWindow
 		{
 			// suspending the repaint will also prevent
 			// our own stateChanged event to carry out its work
-			if (!isSuspended) this.sqlTab.setSuspendRepaint(true);
-
 			// if the new tab index is lower then the currently
 			// selected index, Swing will select the new index
-			// as the new tab is not setup completely, we have to
+			// But as the new tab is not setup completely, we have to
 			// prevent our own stateChanged event to do its work!
+			if (!isSuspended) this.sqlTab.setSuspendRepaint(true);
+
 			JMenuBar menuBar = this.createMenuForPanel(sql);
 			this.panelMenus.add(index, menuBar);
 
@@ -2286,9 +2289,6 @@ public class MainWindow
 			// this will set the correct title with Mnemonics
 			this.setTabTitle(index, ResourceMgr.getDefaultTabLabel());
 
-			//initDefaults has to be called after doLayout()!!!
-			if (selectNew) sqlTab.doLayout();
-			sql.initDefaults();
 			this.setMacroMenuEnabled(sql.isConnected());
 
 			this.renumberTabs();
@@ -2298,7 +2298,7 @@ public class MainWindow
 			if (!isSuspended) this.sqlTab.setSuspendRepaint(false);
 		}
 
-		// This needs to be done after disabling repaint suspend
+		// This needs to be done after re-enabling repaint 
 		// otherwise the tab will not change properly!
 		if (selectNew) 	this.sqlTab.setSelectedIndex(index);
 
@@ -2409,7 +2409,7 @@ public class MainWindow
 		for (int i=0; i < count; i++)
 		{
 			SelectTabAction a = new SelectTabAction(sqlTab, i);
-			a.setName(getPlainTabTitle(i));
+			a.setMenuText(getPlainTabTitle(i));
 			menu.insert(a, i);
 		}
 		if (this.sqlTab.getSelectedIndex() == panel)
@@ -2452,7 +2452,7 @@ public class MainWindow
 		this.sqlTab.add(p, index);
 		this.sqlTab.setSelectedIndex(index);
 		SelectTabAction a = new SelectTabAction(this.sqlTab, index);
-		a.setName(getPlainTabTitle(index));
+		a.setMenuText(getPlainTabTitle(index));
 		//addToViewMenu(a);
 		renumberTabs();
 		this.validate();
@@ -2577,8 +2577,15 @@ public class MainWindow
 				{
 					public void run()
 					{
-						SettingsPanel panel = new SettingsPanel();
-						panel.showSettingsDialog(MainWindow.this);
+						try
+						{
+							SettingsPanel panel = new SettingsPanel();
+							panel.showSettingsDialog(MainWindow.this);
+						}
+						catch (Exception e)
+						{
+							LogMgr.logError("MainWindow.showOptions()", "Error displaying options window", e);
+						}
 					}
 				});
 			}

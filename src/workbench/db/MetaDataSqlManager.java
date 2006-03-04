@@ -198,8 +198,7 @@ public class MetaDataSqlManager
 		Object value;
 		try
 		{
-			// filename is for logging purposes only
-			WbPersistence reader = new WbPersistence(aFilename);
+			WbPersistence reader = new WbPersistence();
 			value = reader.readObject(in);
 		}
 		catch (Exception e)

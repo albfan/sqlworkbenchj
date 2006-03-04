@@ -19,6 +19,8 @@ import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.RowDataReceiver;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
+import workbench.storage.ResultInfo;
+import workbench.storage.RowData;
 
 /**
  * @author  support@sql-workbench.net
@@ -53,19 +55,30 @@ public class QueryCopySource
 		{
 			this.retrieveStatement = this.sourceConnection.createStatementForQuery();
 			rs = this.retrieveStatement.executeQuery(this.retrieveSql);
-			int colCount = rs.getMetaData().getColumnCount();
-			Object[] rowData = new Object[colCount];
+			ResultInfo info = new ResultInfo(rs.getMetaData(), this.sourceConnection);
+			int colCount = info.getColumnCount();
+			//Object[] rowData = new Object[colCount];
+			RowData row = new RowData(colCount);
+			row.setUseNullValueObject(false);
 			while (this.keepRunning && rs.next())
 			{
-				for (int i=0; i < colCount; i++)
-				{
-					if (!keepRunning) break;
-					rowData[i] = rs.getObject(i + 1);
-				}
+				// RowData will make some transformation 
+				// on the data read from the database
+				// which works around some bugs in the Oracle
+				// JDBC driver. Especially it will supply
+				// CLOB data as a String which I hope will be
+				// more flexible when copying from Oracle
+				// to other systems
+				row.read(rs, info);
+//				for (int i=0; i < colCount; i++)
+//				{
+//					if (!keepRunning) break;
+//					rowData[i] = rs.getObject(i + 1);
+//				}
 				if (!keepRunning) break;
 				try
 				{
-					this.receiver.processRow(rowData);
+					this.receiver.processRow(row.getData());
 				}
 				catch (SQLException e)
 				{

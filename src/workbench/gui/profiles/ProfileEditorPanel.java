@@ -20,6 +20,7 @@ import java.util.List;
 
 import javax.swing.JToolBar;
 import javax.swing.ListModel;
+import javax.swing.event.ListSelectionListener;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -33,6 +34,7 @@ import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.FileActions;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -65,10 +67,8 @@ public class ProfileEditorPanel
 		this.toolbar.add(new DeleteListEntryAction(this, "LabelDeleteProfile"));
 		this.listPanel.add(this.toolbar, BorderLayout.NORTH);
 		int pos = Settings.getInstance().getProfileDividerLocation();
-		if (pos > -1)
-		{
-			this.jSplitPane1.setDividerLocation(pos);
-		}
+		if (pos == -1) pos = 140;
+		this.jSplitPane1.setDividerLocation(pos);
 		this.addKeyListener(this);
 		this.connectionEditor.setSourceList(this.model);
 		WbTraversalPolicy policy = new WbTraversalPolicy();
@@ -79,6 +79,17 @@ public class ProfileEditorPanel
 		this.setFocusTraversalPolicy(policy);
 	}
 
+
+	public void removeSelectionListener(ListSelectionListener listener)
+	{
+		this.jList1.removeListSelectionListener(listener);
+	}
+	
+	public void addSelectionListener(ListSelectionListener listener)
+	{
+		this.jList1.addListSelectionListener(listener);
+	}
+	
 	public void setInitialFocus()
 	{
 		EventQueue.invokeLater(new Runnable()
@@ -100,6 +111,7 @@ public class ProfileEditorPanel
 	{
 		Settings.getInstance().setProfileDividerLocation(this.jSplitPane1.getDividerLocation());
 	}
+	
 	private void fillProfiles()
 	{
 		this.model = new ProfileListModel(ConnectionMgr.getInstance().getProfiles());
@@ -208,12 +220,17 @@ public class ProfileEditorPanel
 
 	private void selectProfile(String aProfileName)
 	{
-		if (aProfileName == null) return;
+		ListModel m = jList1.getModel();
+		int count = m.getSize();
+		
+		if (StringUtil.isEmptyString(aProfileName) && count > 0)
+		{
+			jList1.setSelectedIndex(0);
+			return;
+		}
 
 		try
 		{
-			ListModel m = jList1.getModel();
-			int count = m.getSize();
 
 			for (int i=0; i < count; i++)
 			{

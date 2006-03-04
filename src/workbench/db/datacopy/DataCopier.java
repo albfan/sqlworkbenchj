@@ -380,24 +380,6 @@ public class DataCopier
 		this.initImporterForTable(additionalWhere);
 	}
 
-//	public void setSourceTableWhere(String aWhere)
-//	{
-//		if (aWhere == null || aWhere.trim().length() == 0)
-//		{
-//			this.addWhere = null;
-//		}
-//		else
-//		{
-//			this.addWhere = aWhere; //SqlUtil.makeCleanSql(aWhere, false);
-//			String verb = SqlUtil.getSqlVerb(this.addWhere).toUpperCase();
-//			if ("SELECT".equals(verb))
-//			{
-//				LogMgr.logWarning("DataCopier", "Ignoring additional WHERE statement: " + this.addWhere);
-//				this.addWhere = null;
-//			}
-//		}
-//	}
-
 	public void setRowActionMonitor(RowActionMonitor rowMonitor)
 	{
 		if (rowMonitor != null)

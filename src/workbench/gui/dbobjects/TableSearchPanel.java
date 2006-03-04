@@ -39,7 +39,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import workbench.db.DbMetadata;
@@ -54,6 +53,7 @@ import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
+import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.sql.EditorPanel;
@@ -139,7 +139,7 @@ public class TableSearchPanel
 
     buttonGroup1 = new javax.swing.ButtonGroup();
     jSplitPane1 = new WbSplitPane();
-    resultTabPane = new javax.swing.JTabbedPane();
+    resultTabPane = new WbTabbedPane();
     resultScrollPane = new WbScrollPane();
     resultPanel = new javax.swing.JPanel();
     tablePane = new javax.swing.JPanel();
@@ -161,12 +161,12 @@ public class TableSearchPanel
 
     setLayout(new java.awt.BorderLayout());
 
-    jSplitPane1.setBorder(new javax.swing.border.EmptyBorder(new java.awt.Insets(1, 1, 1, 1)));
+    jSplitPane1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
     jSplitPane1.setDividerLocation(150);
-    resultScrollPane.setHorizontalScrollBarPolicy(javax.swing.JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    resultScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     resultPanel.setLayout(new java.awt.GridBagLayout());
 
-    resultPanel.setBorder(new javax.swing.border.EmptyBorder(new java.awt.Insets(0, 0, 0, 0)));
+    resultPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
     resultScrollPane.setViewportView(resultPanel);
 
     resultTabPane.addTab(ResourceMgr.getString("LabelTableSearchResultTab"), resultScrollPane);
@@ -215,7 +215,7 @@ public class TableSearchPanel
 
     add(jSplitPane1, java.awt.BorderLayout.CENTER);
 
-    statusInfo.setBorder(new javax.swing.border.EtchedBorder());
+    statusInfo.setBorder(javax.swing.BorderFactory.createEtchedBorder());
     statusInfo.setMinimumSize(new java.awt.Dimension(4, 22));
     statusInfo.setPreferredSize(new java.awt.Dimension(4, 22));
     add(statusInfo, java.awt.BorderLayout.SOUTH);
@@ -258,7 +258,7 @@ public class TableSearchPanel
     entryPanel.add(jLabel1, gridBagConstraints);
 
     reloadButton.setText("jButton1");
-    reloadButton.setBorder(new javax.swing.border.EtchedBorder());
+    reloadButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
     reloadButton.setMaximumSize(new java.awt.Dimension(24, 24));
     reloadButton.setMinimumSize(new java.awt.Dimension(24, 24));
     reloadButton.setPreferredSize(new java.awt.Dimension(24, 24));
@@ -301,8 +301,7 @@ public class TableSearchPanel
 
     add(entryPanel, java.awt.BorderLayout.NORTH);
 
-  }
-  // </editor-fold>//GEN-END:initComponents
+  }// </editor-fold>//GEN-END:initComponents
 
 	private void selectNoneButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_selectNoneButtonActionPerformed
 	{//GEN-HEADEREND:event_selectNoneButtonActionPerformed

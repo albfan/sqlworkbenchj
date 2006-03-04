@@ -241,9 +241,7 @@ public class TablePrinter
 		Rectangle paintTextR = new Rectangle();
 		Rectangle paintViewR = new Rectangle();
 
-		// TODO: horizontal pages do not work 
-		// when a column exceeds the horizontal space
-		// column needs to be split, currently it's only cut off
+		// TODO: horizontal pages do not work when a column exceeds the horizontal space
 		for (int col=0; col < colCount; col++)
 		{
 			TableColumn column = colModel.getColumn(col);

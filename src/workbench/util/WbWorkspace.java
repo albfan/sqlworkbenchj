@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -310,6 +309,7 @@ public class WbWorkspace
 		if (this.tabInfo == null) return null;
 		String key = "tab" + tabIndex + ".encoding";
 		String value = (String)this.tabInfo.get(key);
+		if (StringUtil.isEmptyString(value)) return EncodingUtil.getDefaultEncoding();
 		return value;
 	}
 
@@ -327,6 +327,7 @@ public class WbWorkspace
 
 	public void setExternalFileEncoding(int tabIndex, String encoding)
 	{
+		if (encoding == null) return;
 		String key = "tab" + tabIndex + ".encoding";
 		this.tabInfo.setProperty(key, encoding);
 	}

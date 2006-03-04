@@ -22,12 +22,16 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.Types;
+import javax.swing.ActionMap;
 
 import javax.swing.Box;
+import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
@@ -38,6 +42,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.EscAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.WbButton;
@@ -71,6 +76,8 @@ public class ShortcutEditor
 	private JButton resetAllButton;
 	private JButton clearButton;
 	
+	private String escActionCommand;
+	
 	public ShortcutEditor(Frame parent)
 	{
 		this.parent = parent;
@@ -91,6 +98,14 @@ public class ShortcutEditor
 		JScrollPane scroll = new JScrollPane(this.keysTable);
 		contentPanel.add(scroll, BorderLayout.CENTER);
 		
+		JRootPane root = window.getRootPane();
+		InputMap im = root.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		ActionMap am = root.getActionMap();
+		EscAction esc = new EscAction(this);
+		escActionCommand = esc.getActionName();
+		im.put(esc.getAccelerator(), esc.getActionName());
+		am.put(esc.getActionName(), esc);
+		
 		this.createModel();
 		this.keysTable.setRowSelectionAllowed(true);
 		this.keysTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -99,6 +114,11 @@ public class ShortcutEditor
 		this.keysTable.addMouseListener(this);
 		this.cancelButton = new WbButton(ResourceMgr.getString("LabelCancel"));
 		this.cancelButton.addActionListener(this);
+
+		im = keysTable.getInputMap(JComponent.WHEN_FOCUSED);
+		am = keysTable.getActionMap();
+		im.put(esc.getAccelerator(), esc.getActionName());
+		am.put(esc.getActionName(), esc);
 		
 		this.okButton = new WbButton(ResourceMgr.getString("LabelOK"));
 		this.okButton.addActionListener(this);
@@ -244,6 +264,10 @@ public class ShortcutEditor
 		else if (source == this.clearButton)
 		{
 			this.clearKey();
+		}
+		else if (e.getActionCommand().equals(escActionCommand))
+		{
+			this.closeWindow();
 		}
 	}
 

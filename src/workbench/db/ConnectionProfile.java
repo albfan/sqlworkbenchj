@@ -53,6 +53,7 @@ public class ConnectionProfile
 	//private boolean globalProfile = false;
 	private boolean emptyStringIsNull = false;
 	private boolean includeNullInInsert = true;
+	private boolean removeComments = false;
 
 	static
 	{
@@ -105,7 +106,8 @@ public class ConnectionProfile
 
 	/**
 	 * Return true if the application should use a separate connection
-	 * per tab or if all SQL tabs should share the same connection
+	 * per tab or if all SQL tabs including DbExplorer tabs and windows 
+	 * should share the same connection
 	 */
 	public boolean getUseSeparateConnectionPerTab()
 	{
@@ -118,23 +120,68 @@ public class ConnectionProfile
 		this.separateConnection = aFlag;
 	}
 
-	public void setIncludeNullInInsert(boolean flag) {this.includeNullInInsert = flag; }
-	public boolean getIncludeNullInInsert() { return this.includeNullInInsert; }
-	
-	public void setEmptyStringIsNull(boolean flag) {this.emptyStringIsNull = flag; }
-	public boolean getEmptyStringIsNull() { return this.emptyStringIsNull; }
+	public void setIncludeNullInInsert(boolean flag) 
+	{
+		if (this.includeNullInInsert != flag) this.changed = true;
+		this.includeNullInInsert = flag; 
+	}
+	/**
+	 * Define how columns with a NULL value are treated when creating INSERT statements.
+	 * If this is set to false, then any column with an a NULL value
+	 * will not be included in an generated INSERT statement.
+	 *
+	 * @see workbench.storage.StatementFactory#createInsertStatement(workbench.storage.RowData, boolean, String, java.util.List)
+	 */
+	public boolean getIncludeNullInInsert() 
+	{ 
+		return this.includeNullInInsert; 
+	}
 
 	/**
-	 *
-	 * @deprecate Replaced by {@link #setUseSeparateConnectionPerTab(boolean)}
+	 * Define how empty strings (Strings with length == 0) are treated.
+	 * If this is set to true, then they are treated as a NULL value, else an 
+	 * empty string is sent to the database during update and insert.
+	 * @see #setIncludeNullInInsert(flag)
+	 */
+	public void setEmptyStringIsNull(boolean flag) 
+	{
+		if (this.emptyStringIsNull != flag) this.changed = true;
+		this.emptyStringIsNull = flag; 
+	}
+	
+	public boolean getEmptyStringIsNull() 
+	{ 
+		return this.emptyStringIsNull; 
+	}
+
+	/**
+	 * Define how comments inside SQL statements are handled. 
+	 * If this is set to true, then any comment (single line comments with --
+	 * or multi-line comments using /* are removed from the statement
+	 * before sending it to the database. 
+	 * 
+	 * @see workbench.sql.DefaultStatementRunner#runStatement(String, int, int)
+	 */
+	public void setRemoveComments(boolean flag) 
+	{ 
+		if (this.removeComments != flag) this.changed = true;
+		this.removeComments = flag; 
+	}
+	
+	public boolean getRemoveComments() 
+	{ 
+		return this.removeComments; 
+	}
+	
+	/**
+	 * @deprecated Replaced by {@link #setUseSeparateConnectionPerTab(boolean)}
 	 */
 	public void setUseSeperateConnectionPerTab(boolean aFlag) { this.setUseSeparateConnectionPerTab(aFlag); }
 
 	/**
-	 *
 	 * @deprecated replaced by {@link #getUseSeparateConnectionPerTab()}
 	 */
-	public boolean getUseSeperateConnectionPerTab() { return this.getUseSeparateConnectionPerTab(); 	}
+	//public boolean getUseSeperateConnectionPerTab() { return this.getUseSeparateConnectionPerTab(); 	}
 
 	public boolean getRollbackBeforeDisconnect()
 	{

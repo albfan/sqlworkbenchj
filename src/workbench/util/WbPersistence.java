@@ -34,6 +34,10 @@ public class WbPersistence
 {
 	private String filename;
 
+	public WbPersistence()
+	{
+	}
+	
 	public WbPersistence(String file)
 	{
 		filename = file;
@@ -68,6 +72,7 @@ public class WbPersistence
 	public Object readObject()
 		throws Exception
 	{
+		if (this.filename == null) throw new IllegalArgumentException("No filename specified!");
 		InputStream in = new BufferedInputStream(new FileInputStream(filename), 32*1024);
 		return readObject(in);
 	}

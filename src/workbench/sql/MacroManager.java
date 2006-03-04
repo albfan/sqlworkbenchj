@@ -56,6 +56,7 @@ public class MacroManager
 
 	public synchronized String getMacroText(String aKey)
 	{
+		loadIfNecessary();
 		if (aKey == null) return null;
 		return (String)this.macros.get(aKey.toLowerCase());
 	}
@@ -63,6 +64,7 @@ public class MacroManager
 
 	public synchronized void removeMacro(String aKey)
 	{
+		loadIfNecessary();
 		if (aKey == null) return;
 		this.macros.remove(aKey);
 		this.modified = true;
@@ -71,6 +73,7 @@ public class MacroManager
 
 	public synchronized List getMacroList()
 	{
+		loadIfNecessary();
 		Set keys = this.macros.keySet();
 		ArrayList result = new ArrayList(keys);
 		return result;
@@ -78,6 +81,7 @@ public class MacroManager
 
 	public synchronized String[] getMacroNames()
 	{
+		loadIfNecessary();
 		Set keys = this.macros.keySet();
 		String[] result = new String[keys.size()];
 		Iterator itr = keys.iterator();
@@ -90,6 +94,7 @@ public class MacroManager
 
 	public synchronized void setMacro(String aKey, String aText)
 	{
+		loadIfNecessary();
 		if (aKey == null || aKey.trim().length() == 0) return;
 		this.macros.put(aKey.toLowerCase(), aText);
 		this.modified = true;
@@ -98,7 +103,7 @@ public class MacroManager
 	
 	public synchronized void setMacros(Collection newMacros)
 	{
-		if (macros == null) return;
+		if (newMacros == null) return;
 		this.macros = new HashMap(); // clear out the old entries
 		Iterator itr = newMacros.iterator();
 		while (itr.hasNext())
@@ -137,6 +142,7 @@ public class MacroManager
 
 	public void selectAndRun(SqlPanel aPanel)
 	{
+		loadIfNecessary();
 		Window w = SwingUtilities.getWindowAncestor(aPanel);
 		Frame parent = null;
 		if (w instanceof Frame)
@@ -164,10 +170,14 @@ public class MacroManager
 			this.errorDuringLoad = false;
 		}
 	}
+	
+	private void loadIfNecessary()
+	{
+		if (this.macros == null) this.loadMacros();
+	}
 
 	private MacroManager()
 	{
-		this.loadMacros();
 	}
 
 	private File getMacroFile()

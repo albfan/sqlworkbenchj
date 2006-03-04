@@ -39,13 +39,12 @@ import workbench.resource.ShortcutManager;
 public class WbAction 
 	extends AbstractAction
 {
-	public static final String ADD_TO_TOOLBAR = "AddToToolbar";
 	private static final String MAIN_MENU_ITEM = "MainMenuItem";
-	private static final String MENU_SEPARATOR = "MenuSepBefore";
-	private static final String TBAR_SEPARATOR = "TbarSepBefore";
-	public static final String ALTERNATE_ACCELERATOR = "AlternateAccelerator";
-	public static final String DEFAULT_ACCELERATOR = "DefaultAccelerator";
-	public static final String MNEMONIC_INDEX = "MnemonicIndex";
+	private static final String MENU_SEPARATOR = "MenuSep";
+	private static final String TBAR_SEPARATOR = "TbarSep";
+	private static final String ALTERNATE_ACCELERATOR = "AltAcc";
+	private static final String DEFAULT_ACCELERATOR = "DefaultAcc";
+	private static final String MNEMONIC_INDEX = "MnemonicIndex";
 	
 	private String actionName;
 	protected JMenuItem menuItem;
@@ -201,6 +200,11 @@ public class WbAction
 		putValue(Action.NAME, text);
 	}	
 	
+	public void setAlternateAccelerator(KeyStroke key)
+	{
+		this.putValue(ALTERNATE_ACCELERATOR, key);
+	}
+	
 	public KeyStroke getAlternateAccelerator()
 	{
 		return (KeyStroke)this.getValue(ALTERNATE_ACCELERATOR);
@@ -301,6 +305,7 @@ public class WbAction
 	public boolean getCreateToolbarSeparator()
 	{
 		Boolean flag = (Boolean)getValue(WbAction.TBAR_SEPARATOR);
+		if (flag == null) return false;
 		return flag.booleanValue();
 	}
 	
@@ -312,6 +317,7 @@ public class WbAction
 	public boolean getCreateMenuSeparator()
 	{
 		Boolean flag = (Boolean)getValue(WbAction.MENU_SEPARATOR);
+		if (flag == null) return false;
 		return flag.booleanValue();
 	}
 	

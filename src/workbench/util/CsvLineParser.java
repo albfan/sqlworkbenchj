@@ -14,7 +14,8 @@ package workbench.util;
 /**
  * A class to efficiently parse a delimited line of data. 
  * A quoted delimiter is recognized, line data spanning multiple lines (i.e.
- * data with embedded \n) is not recognized
+ * data with embedded \n) is not recognized.
+ *
  * @author  support@sql-workbench.net
  */
 public class CsvLineParser

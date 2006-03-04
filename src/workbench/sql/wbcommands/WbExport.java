@@ -87,6 +87,7 @@ public class WbExport
 		cmdLine.addArgument("showencodings");
 		cmdLine.addArgument("verbosexml");
 		cmdLine.addArgument("oraldr");
+		cmdLine.addArgument("writeoracleloader");
 	}
 
 	public String getVerb() { return VERB; }

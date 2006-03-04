@@ -19,6 +19,7 @@ import java.io.Writer;
 import java.sql.SQLException;
 import java.util.List;
 import workbench.db.ConnectionMgr;
+import workbench.db.ConnectionProfile;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.diff.SchemaDiff;
@@ -97,8 +98,8 @@ public class WbSchemaDiff
 			result.addMessage("Support for 'WbDiff' will be removed in a future release.\n");
 		}
 		
-//		int pos = sql.toUpperCase().indexOf(VERB);
-//		if (pos > -1) sql = sql.substring(pos + VERB.length() + 1);
+		int pos = sql.toUpperCase().indexOf(VERB);
+		if (pos > -1) sql = sql.substring(pos + VERB.length() + 1);
 
 		try
 		{
@@ -152,6 +153,15 @@ public class WbSchemaDiff
 		}
 		else
 		{
+			ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(targetProfile);
+			if (prof == null)
+			{
+				String msg = ResourceMgr.getString("ErrorProfileNotFound");
+				msg = StringUtil.replace(msg, "%profile%", targetProfile);
+				result.addMessage(msg);
+				result.setFailure();
+				return result;
+			}
 			try
 			{
 				this.rowMonitor.setCurrentObject(ResourceMgr.getString("MsgDiffConnectingTarget"),-1,-1);
@@ -171,6 +181,16 @@ public class WbSchemaDiff
 		}
 		else
 		{
+			ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(sourceProfile);
+			if (prof == null)
+			{
+				String msg = ResourceMgr.getString("ErrorProfileNotFound");
+				msg = StringUtil.replace(msg, "%profile%", sourceProfile);
+				result.addMessage(msg);
+				result.setFailure();
+				return result;
+			}
+			
 			try
 			{
 				this.rowMonitor.setCurrentObject(ResourceMgr.getString("MsgDiffConnectingSource"),-1,-1);

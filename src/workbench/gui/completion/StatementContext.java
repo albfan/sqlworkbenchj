@@ -94,7 +94,7 @@ public class StatementContext
 		return analyzer.getColumnPrefix();
 	}
 	
-	private final Pattern SUBSELECT_PATTERN = Pattern.compile("\\(\\s*SELECT.*FROM.*\\)", Pattern.CASE_INSENSITIVE);
+	private final Pattern SUBSELECT_PATTERN = Pattern.compile("\\(\\s*SELECT.*FROM.*\\)", Pattern.CASE_INSENSITIVE + Pattern.DOTALL);
 	private final Pattern OPEN_BRACKET = Pattern.compile("^\\s*\\(\\s*");
 	private final Pattern CLOSE_BRACKET = Pattern.compile("\\s*\\)\\s*$");
 	

@@ -42,6 +42,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.tools.DataPumper;
 import workbench.interfaces.FontChangedListener;
@@ -291,7 +292,8 @@ public class WbManager
 		// use our own classes for some GUI elements
 		def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
 		def.put("SplitPaneUI", "workbench.gui.components.WbSplitPaneUI");
-
+		def.put("TabbedPaneUI", TabbedPaneUIFactory.getTabbedPaneUIClass());
+		
 		if (settings.getShowMnemonics())
 		{
 			def.put("Button.showMnemonics", Boolean.TRUE);
@@ -589,11 +591,11 @@ public class WbManager
 	private void openNewWindow(boolean checkCmdLine)
 	{
 		if (trace) System.out.println("WbManager.openNewWindow()");
-		final MainWindow main = this.createWindow();
 
-		main.setVisible(true);
-		main.restoreState();
+		final MainWindow main = this.createWindow();
+		main.display();
 		boolean connected = false;
+
 
 		if (checkCmdLine)
 		{
@@ -749,6 +751,17 @@ public class WbManager
 
     if (this.cmdLine == null) this.initCmdLine(null);
 
+		// Kick off loading of the profiles in the background...
+		WbThread rp = new WbThread("ReadProfiles")
+		{
+			public void run()
+			{
+				ConnectionMgr.getInstance().getDrivers();
+				ConnectionMgr.getInstance().getProfiles();
+			}
+		};
+		rp.start();
+		
 		// batchMode flag is set by initCmdLine()
 		if (this.batchMode)
 		{

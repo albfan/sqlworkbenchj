@@ -21,6 +21,7 @@ import javax.swing.Action;
 import javax.swing.KeyStroke;
 
 import workbench.gui.actions.WbAction;
+import workbench.log.LogMgr;
 import workbench.util.WbPersistence;
 
 /**
@@ -36,12 +37,14 @@ public class ShortcutManager
 	// the actual object in it will be a ShortcutDefinition
 	private HashMap keyMap;
 
+	private HashMap actionNames;
+	
 	// we need the list of registered actions, in order to be able to
 	// display the label for the action for the customization dialog
-	private HashMap actionNames;
-
 	private ArrayList allActions;
-
+	
+	private HashMap keyDebugMap;
+	
 	ShortcutManager(String aFilename)
 	{
 		this.filename = aFilename;
@@ -97,6 +100,24 @@ public class ShortcutManager
 		{
 			KeyStroke defaultkey = anAction.getDefaultAccelerator();
 			def.assignDefaultKey(defaultkey);
+		}
+
+		if (LogMgr.isDebugEnabled())
+		{
+			KeyStroke key = anAction.getAccelerator();
+			if (key != null)
+			{
+				if (this.keyDebugMap == null) this.keyDebugMap = new HashMap(100);
+				WbAction a = (WbAction)this.keyDebugMap.get(key);
+				if (a != null)
+				{
+					LogMgr.logWarning("ShortcutManager.registerAction", "Duplicate key assignment for keyStroke " + key + " from " + clazz + ", already registered for "+ a.getClass().getName());
+				}
+				else
+				{
+					this.keyDebugMap.put(key, anAction);
+				}
+			}
 		}
 
 		// a list of all instances is needed when updating

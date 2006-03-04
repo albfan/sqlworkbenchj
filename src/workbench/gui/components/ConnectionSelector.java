@@ -82,7 +82,7 @@ public class ConnectionSelector
 					dialog.setVisible(true);
 				}
 			});
-      ConnectionProfile prof = dialog.getSelectedProfile();
+			ConnectionProfile prof = dialog.getSelectedProfile();
 			boolean cancelled = dialog.isCancelled();
 			
 			WbSwingUtilities.invoke(new Runnable()
@@ -100,9 +100,9 @@ public class ConnectionSelector
 				this.client.connectCancelled();
 			}
 			else
-      {
+			{
 				this.connectTo(prof);
-      }
+			}
 		}
 		catch (Throwable th)
 		{

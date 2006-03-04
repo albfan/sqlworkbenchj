@@ -25,7 +25,7 @@ public class HistoryTextField
 	extends JComboBox
 {
 	private String propName;
-	private List values;
+	private List historyValues = new ArrayList();
 	private int maxHistorySize = 25;
 		
 	public HistoryTextField(String prop)
@@ -52,19 +52,19 @@ public class HistoryTextField
 
 	public void saveSettings(PropertyStorage props, String prefix)
 	{
-		props.setProperty(prefix + "history", StringUtil.listToString(values, ';'));
+		props.setProperty(prefix + "history", StringUtil.listToString(historyValues, ';'));
 		props.setProperty(prefix + "lastvalue", this.getText());
 	}
 	
 	public void restoreSettings(PropertyStorage props, String prefix)
 	{
 		String s = props.getProperty(prefix + "history", "");
-		if (StringUtil.isEmptyString(s))
-			this.values = new ArrayList();
-		else
-			this.values = StringUtil.stringToList(s, ";", true, true);
+		
+		List l = StringUtil.stringToList(s, ";", true, true);
+		this.historyValues.addAll(l);
 		this.updateModel();
 		String lastValue = props.getProperty(prefix + "lastvalue", null);
+		
 		if (lastValue != null) this.setText(lastValue);
 	}
 	
@@ -83,26 +83,26 @@ public class HistoryTextField
 		if (StringUtil.isEmptyString(s)) return;
 		s = s.trim();	
 		Object item = getSelectedItem();
-		int index = values.indexOf(s);
+		int index = historyValues.indexOf(s);
 		if (index > -1)
 		{
-			this.values.remove(index);
+			this.historyValues.remove(index);
 		}
 		else
 		{
-			while (this.values.size() >= this.maxHistorySize)
+			while (this.historyValues.size() >= this.maxHistorySize)
 			{
-				this.values.remove(values.size() - 1);
+				this.historyValues.remove(historyValues.size() - 1);
 			}
 		}
-		this.values.add(0,s);
+		this.historyValues.add(0,s);
 		this.updateModel();
 		setSelectedItem(item);
 	}
 	
 	private void updateModel()
 	{
-		DefaultComboBoxModel model = new DefaultComboBoxModel(this.values.toArray());
+		DefaultComboBoxModel model = new DefaultComboBoxModel(this.historyValues.toArray());
 		setModel(model);
 	}
 }

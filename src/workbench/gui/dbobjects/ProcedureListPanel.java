@@ -43,7 +43,6 @@ import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
-import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
@@ -63,6 +62,7 @@ import workbench.db.ObjectScripter;
 import workbench.db.ProcedureDefinition;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.QuickFilterPanel;
+import workbench.gui.components.WbTabbedPane;
 import workbench.interfaces.CriteriaPanel;
 import workbench.util.WbWorkspace;
 
@@ -102,10 +102,8 @@ public class ProcedureListPanel
 
 	public ProcedureListPanel() throws Exception
 	{
-		this.displayTab = new JTabbedPane();
+		this.displayTab = new WbTabbedPane();
 		this.displayTab.setTabPlacement(JTabbedPane.BOTTOM);
-		this.displayTab.setUI(TabbedPaneUIFactory.getBorderLessUI());
-		this.displayTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		this.procColumns = new WbTable();
 		this.procColumns.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -345,36 +343,38 @@ public class ProcedureListPanel
 	public void saveSettings()
 	{
 		storeSettings(Settings.getInstance(), this.getClass().getName() + ".");
+		findPanel.saveSettings();
 	}
 	
 	public void saveToWorkspace(WbWorkspace w, int index)
 	{
-		storeSettings(w.getSettings(), getWorkspacePrefix(index));
+		String prefix = getWorkspacePrefix(index);
+		storeSettings(w.getSettings(), prefix);
+		findPanel.saveSettings(w.getSettings(), prefix);
 	}
 	
 	private void storeSettings(PropertyStorage props, String prefix)
 	{
 		props.setProperty(prefix + "divider", this.splitPane.getDividerLocation());
-		props.setProperty(prefix + "lastsearch", this.findPanel.getText());
 	}
 	
 	public void restoreSettings()
 	{
 		readSettings(Settings.getInstance(), this.getClass().getName() + ".");
+		findPanel.restoreSettings();
 	}
 	
 	public void readFromWorkspace(WbWorkspace w, int index)
 	{
-		readSettings(w.getSettings(), getWorkspacePrefix(index));
+		String prefix = getWorkspacePrefix(index);
+		readSettings(w.getSettings(), prefix);
+		this.findPanel.restoreSettings(w.getSettings(), prefix);
 	}
 	
 	private void readSettings(PropertyStorage props, String prefix)
 	{
 		int loc = props.getIntProperty(prefix + "divider", 200);
 		this.splitPane.setDividerLocation(loc);
-
-		String s = props.getProperty(this.getClass().getName() + ".lastsearch", "");
-		this.findPanel.setText(s);
 	}
 
 	public void valueChanged(ListSelectionEvent e)

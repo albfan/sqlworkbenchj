@@ -68,11 +68,6 @@ public class Settings
 	public static final String PROPERTY_EDITOR_TAB_WIDTH = "workbench.editor.tabwidth";
 	
 	private WbProperties props;
-	private Font printerFont;
-	private Font standardFont;
-	private Font editorFont;
-	private Font msgLogFont;
-	private Font dataFont;
 	private String filename;
 	private ArrayList fontChangeListeners = new ArrayList();
 	private String configDir;
@@ -264,6 +259,21 @@ public class Settings
 		return getProperty("workbench.dbexplorer.defTableType", null);
 	}
 
+	public void setStoreExplorerObjectType(boolean flag)
+	{
+		setProperty("workbench.dbexplorer.rememberObjectType", flag);
+	}
+	
+	public boolean getStoreExplorerObjectType()
+	{
+		return getBoolProperty("workbench.dbexplorer.rememberObjectType", false);
+	}
+	
+	public void setStoreExplorerSchema(boolean flag)
+	{
+		setProperty("workbench.dbexplorer.rememberSchema", flag);
+	}
+	
 	public boolean getStoreExplorerSchema()
 	{
 		return getBoolProperty("workbench.dbexplorer.rememberSchema", true);
@@ -353,6 +363,7 @@ public class Settings
 		}
 		this.renameProperty("workbench.history.tablelist", "workbench.quickfilter.tablelist.history");
 		this.renameProperty("workbench.history.columnlist", "workbench.quickfilter.columnlist.history");
+		this.renameProperty("workbench.gui.dbobjects.ProcedureListPanel.lastsearch", "workbench.quickfilter.procedurelist.history");
 	}
 
 	private void renameProperty(String oldKey, String newKey)
@@ -409,11 +420,18 @@ public class Settings
 	
 	public Font getStandardFont()
 	{
-		if (this.standardFont == null)
+		Font f = this.getFont(PROPERTY_STANDARD_FONT,false);
+		if (f == null)
 		{
-			this.standardFont = this.getFont(PROPERTY_STANDARD_FONT,false);
+			UIDefaults def = UIManager.getLookAndFeelDefaults();
+			f = def.getFont("Menu.font");
 		}
-		return this.standardFont;
+		return f;
+	}
+
+	public void setStandardFont(Font f)
+	{
+		setFont(PROPERTY_STANDARD_FONT,f);
 	}
 	
 	public Font getStandardLabelFont()
@@ -437,45 +455,47 @@ public class Settings
 		}
 		return f;
 	}
+
+	public void setEditorFont(Font f)
+	{
+		this.setFont(PROPERTY_EDITOR_FONT, f);
+	}
 	
 	public Font getEditorFont()
 	{
-		if (this.editorFont == null)
-		{
-			this.editorFont = this.getFont(PROPERTY_EDITOR_FONT);
-		}
-		return editorFont;
+		return this.getFont(PROPERTY_EDITOR_FONT);
 	}
 
+	public void setMsgLogFont(Font f)
+	{
+		this.setFont(PROPERTY_MSGLOG_FONT, f);
+	}
+	
 	public Font getMsgLogFont()
 	{
-		if (this.msgLogFont == null)
-		{
-			this.msgLogFont = this.getFont(PROPERTY_MSGLOG_FONT);
-		}
-		return this.msgLogFont;
+		return this.getFont(PROPERTY_MSGLOG_FONT);
 	}
 
+	public void setDataFont(Font f)
+	{
+		this.setFont(PROPERTY_DATA_FONT, f);
+	}
+	
 	public Font getDataFont()
 	{
-		if (this.dataFont == null)
-		{
-			this.dataFont = this.getFont(PROPERTY_DATA_FONT);
-		}
-		return this.dataFont;
+		Font f = this.getFont(PROPERTY_DATA_FONT, false);
+		if (f == null) f = this.getStandardFont();
+		return f;
 	}
 
 	public Font getPrinterFont()
 	{
-		if (this.printerFont == null)
+		Font f  = this.getFont(PROPERTY_PRINTER_FONT);
+		if (f == null)
 		{
-			this.printerFont = this.getFont(PROPERTY_PRINTER_FONT);
-			if (this.printerFont == null)
-			{
-				this.printerFont = this.getDataFont();
-			}
+			f = this.getDataFont();
 		}
-		return this.printerFont;
+		return f;
 	}
 
 	public Font getFont(String aFontName)
@@ -488,7 +508,6 @@ public class Settings
 	 */
 	public Font getFont(String aFontName, boolean returnDefault)
 	{
-		if (WbManager.trace) System.out.println("Setting.getFont() - start");
 		Font result;
 
 		String baseKey = "workbench.font." + aFontName;
@@ -522,13 +541,22 @@ public class Settings
 			size = 11;
 		}
 		result = new Font(name, style, size);
-		if (WbManager.trace) System.out.println("Setting.getFont() - done");
 		return result;
 	}
 
+	public void setRequiredFieldColor(Color c)
+	{
+		setColor("workbench.gui.edit.requiredfield.color", c);
+	}
+	
 	public Color getRequiredFieldColor()
 	{
 		return getColor("workbench.gui.edit.requiredfield.color", new Color(255,100,100));
+	}
+	
+	public void setHighlightRequiredFields(boolean flag)
+	{
+		setProperty("workbench.gui.edit.requiredfield.dohighlight", flag);
 	}
 	
 	public boolean getHighlightRequiredFields()
@@ -702,17 +730,6 @@ public class Settings
 		}
 		if (value == null) value = "PLAIN";
 		this.props.setProperty(baseKey + ".style", value);
-		if (aFontName.equals(PROPERTY_EDITOR_FONT))
-			this.editorFont = aFont;
-		else if (aFontName.equals(PROPERTY_MSGLOG_FONT))
-			this.msgLogFont = aFont;
-		else if (aFontName.equals(PROPERTY_STANDARD_FONT))
-			this.standardFont = aFont;
-		else if (aFontName.equals(PROPERTY_DATA_FONT))
-			this.dataFont = aFont;
-		else if (aFontName.equals(PROPERTY_PRINTER_FONT))
-			this.printerFont = aFont;
-
 		this.fireFontChangedEvent(aFontName, aFont);
 	}
 
@@ -732,6 +749,22 @@ public class Settings
 	public boolean getShowRowNumbers()
 	{
 		return getBoolProperty("workbench.data.rownumbers", false);
+	}
+	
+	public void setShowFilenameInWindowTitle(int type)
+	{
+		switch (type)
+		{
+			case SHOW_NO_FILENAME:
+				this.setProperty("workbench.gui.display.showfilename", "none");
+				break;
+			case SHOW_FILENAME:
+				this.setProperty("workbench.gui.display.showfilename", "name");
+				break;
+			case SHOW_FULL_PATH:
+				this.setProperty("workbench.gui.display.showfilename", "path");
+				break;
+		}
 	}
 	
 	public int getShowFilenameInWindowTitle()
@@ -1071,17 +1104,40 @@ public class Settings
 		return result;
 	}
 
-	public void setEditorFile(int anEditorId, String aFilename)
+	private void setColor(String key, Color c)
 	{
-		if (aFilename == null) aFilename = "";
-		this.props.setProperty("workbench.editor.lastfile" + anEditorId, aFilename);
+		int r = c.getRed();
+		int g = c.getGreen();
+		int b = c.getBlue();
+		String value = Integer.toString(r) + "," + Integer.toString(g) + "," + Integer.toString(b);
+		this.setProperty(key, value);
 	}
 
-	public String getEditorFile(int anEditorId)
+	public void setEditorSelectionColor(Color c)
 	{
-		return this.props.getProperty("workbench.editor.lastfile" + anEditorId, null);
+		setColor("workbench.editor.color.selection", c);
 	}
-
+	
+	public Color getEditorSelectionColor()
+	{
+		return getColor("workbench.editor.color.selection", new Color(0xccccff));
+	}
+	
+	public void setEditorErrorColor(Color c)
+	{
+		setColor("workbench.editor.color.error", c);
+	}
+	
+	public Color getEditorErrorColor()
+	{
+		return getColor("workbench.editor.color.error", Color.RED.brighter());
+	}
+	
+	public int getElectricScroll()
+	{
+		return this.getIntProperty("workbench.editor.electricscroll", 3);
+	}
+	
 	public int getWindowPosX(String windowClass)
 	{
 		return StringUtil.getIntValue(this.props.getProperty(windowClass + ".x", "0"));
@@ -1196,6 +1252,11 @@ public class Settings
 	public boolean getRightClickMovesCursor()
 	{
 		return this.getBoolProperty("workbench.editor.rightclickmovescursor", false);
+	}
+	
+	public void setRightClickMovesCursor(boolean flag)
+	{
+		setProperty("workbench.editor.rightclickmovescursor", flag);
 	}
 
 	public int getMaxColumnWidth()
@@ -1398,7 +1459,7 @@ public class Settings
 
 	public boolean getUsePlainEditorForData()
 	{
-		return getBoolProperty("workbench.gui.editor.data.plain", false);
+		return getBoolProperty("workbench.gui.editor.data.plain", true);
 	}
 	
 	public boolean getUseCollator()
@@ -1506,12 +1567,12 @@ public class Settings
 
 	public void setShowDbExplorerInMainWindow(boolean showWindow)
 	{
-		this.props.setProperty("workbench.dbexplorer.mainwindow", Boolean.toString(showWindow));
+		this.setProperty("workbench.dbexplorer.mainwindow", showWindow);
 	}
 
 	public boolean getShowDbExplorerInMainWindow()
 	{
-		return this.getBoolProperty("workbench.dbexplorer.mainwindow", false);
+		return this.getBoolProperty("workbench.dbexplorer.mainwindow", true);
 	}
 
 	public boolean getUseEncryption()

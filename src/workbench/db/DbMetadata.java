@@ -663,8 +663,7 @@ public class DbMetadata
 		Object value;
 		try
 		{
-			// filename is for logging purposes only
-			WbPersistence reader = new WbPersistence(aFilename);
+			WbPersistence reader = new WbPersistence();
 			value = reader.readObject(in);
 		}
 		catch (Exception e)
@@ -2667,7 +2666,7 @@ public class DbMetadata
 		}
 		catch (Exception e)
 		{
-        LogMgr.logError("DbMetadata.getSchemas()", "Error retrieving schemas", e);
+        LogMgr.logWarning("DbMetadata.getSchemas()", "Error retrieving schemas: " + e.getMessage(), null);
 		}
 		finally
 		{

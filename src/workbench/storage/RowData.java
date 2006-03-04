@@ -45,6 +45,8 @@ public class RowData
 	 *  have been sent to the database during the update process
 	 */
 	private boolean dmlSent = false;
+	
+	private boolean useNullValueObject = true;
 
 	private Object[] colData;
 	private Object[] originalData;
@@ -56,6 +58,9 @@ public class RowData
 		this.setNew();
 	}
 
+	public void setUseNullValueObject(boolean flag) { this.useNullValueObject = flag; }
+	public Object[] getData() { return this.colData; }
+	
 	/**
 	 *	Read the row data from the supplied ResultSet
 	 */
@@ -104,7 +109,7 @@ public class RowData
 				value = null;
 			}
 
-			if (value == null)
+			if (value == null && useNullValueObject)
 			{
 				this.colData[i] = NullValue.getInstance(type);
 			}

@@ -31,7 +31,6 @@ public class StopAction extends WbAction
 		this.initMenuDefinition(ResourceMgr.TXT_STOP_STMT);
 		this.setIcon(ResourceMgr.getImage("Stop"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.putValue(WbAction.ADD_TO_TOOLBAR, "true");
 		this.setCreateMenuSeparator(true);
 	}
 

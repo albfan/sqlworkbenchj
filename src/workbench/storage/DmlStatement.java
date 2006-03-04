@@ -139,12 +139,10 @@ public class DmlStatement
 	 */
 	public String getExecutableStatement(String dbproduct)
 	{
-		if (this.literalFormatter == null) this.literalFormatter = new SqlLiteralFormatter();
+		if (this.literalFormatter == null) this.literalFormatter = new SqlLiteralFormatter(dbproduct);
 		
 		if (this.values.size() > 0)
 		{
-			DbDateFormatter dateFormat = this.literalFormatter.getDateLiteralFormatter();
-			
 			StrBuffer result = new StrBuffer(this.sql.length() + this.values.size() * 10);
 			boolean inQuotes = false;
 			int parmIndex = 0;
@@ -156,7 +154,7 @@ public class DmlStatement
 				if (c == '?' && !inQuotes && parmIndex < this.values.size())
 				{
 					ColumnData data = (ColumnData)this.values.get(parmIndex);
-					String literal = this.literalFormatter.getDefaultLiteral(data, dateFormat);
+					String literal = this.literalFormatter.getDefaultLiteral(data);
 					if (this.chrFunc != null && SqlUtil.isCharacterType(data.getIdentifier().getDataType()))
 					{
 						literal = this.createInsertString(literal);

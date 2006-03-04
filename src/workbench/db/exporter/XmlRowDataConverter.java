@@ -201,8 +201,9 @@ public class XmlRowDataConverter
 			// Oracle (again!) does not report blob columns
 			// as java.sql.Types.BLOB but as java.sql.Types.OTHER
 			// so we have to check the DBMS type as well.
-			boolean isBlob = SqlUtil.isBlobType(type) || "BLOB".equalsIgnoreCase(dbmsType) || "CLOB".equalsIgnoreCase(dbmsType);
-			
+			boolean isBlob = SqlUtil.isBlobType(type) || "BLOB".equalsIgnoreCase(dbmsType);
+			boolean isClob = SqlUtil.isClobType(type) || "CLOB".equalsIgnoreCase(dbmsType);
+				
 			if (this.verboseFormat) xml.append(indent);
 			xml.append(startColTag);
 			if (this.verboseFormat)
@@ -249,9 +250,9 @@ public class XmlRowDataConverter
 			if (!isNull)
 			{
 				// String data needs to be escaped!
-				if (SqlUtil.isCharacterType(type))
+				if (SqlUtil.isCharacterType(type) || isClob)
 				{
-					if (this.useCData)
+					if (this.useCData || isClob)
 					{
 						xml.append(TagWriter.CDATA_START);
 						xml.append(this.getValueAsFormattedString(row, c));

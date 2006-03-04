@@ -16,7 +16,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Font;
-import java.awt.KeyboardFocusManager;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,22 +23,20 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
 import javax.swing.Action;
 import javax.swing.ActionMap;
-import javax.swing.BorderFactory;
 import javax.swing.ComponentInputMap;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -51,8 +48,6 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
-
-import workbench.db.DeleteScriptGenerator;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.db.importer.DataStoreImporter;
@@ -85,19 +80,15 @@ import workbench.gui.actions.FileSaveAsAction;
 import workbench.gui.actions.FindAction;
 import workbench.gui.actions.FindDataAction;
 import workbench.gui.actions.FindDataAgainAction;
-import workbench.gui.actions.FirstStatementAction;
 import workbench.gui.actions.FormatSqlAction;
 import workbench.gui.actions.HighlightCurrentStatement;
 import workbench.gui.actions.IgnoreErrorsAction;
 import workbench.gui.actions.ImportFileAction;
-import workbench.gui.actions.LastStatementAction;
 import workbench.gui.actions.MakeInListAction;
 import workbench.gui.actions.MakeLowerCaseAction;
 import workbench.gui.actions.MakeNonCharInListAction;
 import workbench.gui.actions.MakeUpperCaseAction;
-import workbench.gui.actions.NextStatementAction;
 import workbench.gui.actions.OptimizeAllColumnsAction;
-import workbench.gui.actions.PrevStatementAction;
 import workbench.gui.actions.PrintAction;
 import workbench.gui.actions.PrintPreviewAction;
 import workbench.gui.actions.RedoAction;
@@ -114,8 +105,6 @@ import workbench.gui.actions.UndoExpandAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.DataStoreTableModel;
-import workbench.gui.components.ExtensionFileFilter;
-import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbScrollPane;
@@ -145,7 +134,6 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.MacroManager;
 import workbench.sql.ScriptParser;
-import workbench.sql.VariablePool;
 import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.sql.preparedstatement.StatementParameters;
@@ -177,10 +165,10 @@ public class SqlPanel
 	private JTabbedPane resultTab;
 	private JSplitPane contentPanel;
 	private boolean threadBusy;
-	private boolean cancelExecution = false;
+	private boolean cancelExecution;
 
-	private List actions = new ArrayList();
-	private List toolbarActions = new ArrayList();
+	private List actions = new LinkedList();
+	private List toolbarActions = new LinkedList();
 
 	private List filenameChangeListeners;
 
@@ -224,45 +212,64 @@ public class SqlPanel
 	private ConnectionInfo connectionInfo;
 
 	private WbConnection dbConnection;
-	private boolean importRunning = false;
-	private boolean updateRunning = false;
-	private boolean textModified = false;
-	private String tabName = null;
+	private boolean importRunning;
+	private boolean updateRunning;
+	private boolean textModified;
+	private String tabName;
 
-	private List execListener = null;
-	private Thread executionThread = null;
-	private Interruptable worker = null;
+	private List execListener;
+	private Thread executionThread;
+	private Interruptable worker;
 
 	private static final Border statusBarBorder = new CompoundBorder(new EmptyBorder(2, 1, 0, 1), new EtchedBorder());
 	private static final Border logBorder = new EmptyBorder(0,2,0,0);
 
+	private DwStatusBar statusBar;
+	
 	public SqlPanel(int anId)
 	{
 		this.setId(anId);
 		this.setDoubleBuffered(true);
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setLayout(new BorderLayout());
-		this.setOpaque(false);
 		
-		DwStatusBar statusBar = new DwStatusBar(true);
-		statusBar.setBorder(statusBarBorder);
-		this.data = new DwPanel(statusBar);
-		this.data.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		WbThread et = new WbThread("EditorCreation")
+		{
+			public void run()
+			{
+				editor = EditorPanel.createSqlEditor();
+			}
+		};
+		
+		WbThread dt = new WbThread("DwCreate")
+		{
+			public void run()
+			{
+				statusBar = new DwStatusBar(true);
+				statusBar.setBorder(statusBarBorder);
+				data = new DwPanel(statusBar);
+				data.setBorder(WbSwingUtilities.EMPTY_BORDER);
+			}
+		};
 
-		this.log = new JTextArea();
-		this.log.setDoubleBuffered(true);
-		this.log.setBorder(logBorder);
-		this.log.setFont(Settings.getInstance().getMsgLogFont());
-		this.log.setEditable(false);
-		this.log.setLineWrap(true);
-		this.log.setWrapStyleWord(true);
-		this.log.addMouseListener(new TextComponentMouseListener());
+		log = new JTextArea();
+		log.setDoubleBuffered(true);
+		log.setBorder(logBorder);
+		log.setFont(Settings.getInstance().getMsgLogFont());
+		log.setEditable(false);
+		log.setLineWrap(true);
+		log.setWrapStyleWord(true);
+		log.addMouseListener(new TextComponentMouseListener());
+		
+		et.start();
+		dt.start();
 
+		try { et.join(); } catch (Throwable th) {}
+		try { dt.join(); } catch (Throwable th) {}
+		
 		this.resultTab = new WbTabbedPane();
 		this.resultTab.setTabPlacement(JTabbedPane.TOP);
-		this.resultTab.setUI(TabbedPaneUIFactory.getBorderLessUI());
 		this.resultTab.setDoubleBuffered(true);
-		this.resultTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.resultTab.setFocusable(false);
 
 		this.resultTab.addTab(ResourceMgr.getString(ResourceMgr.TAB_LABEL_RESULT), this.data);
@@ -274,7 +281,7 @@ public class SqlPanel
 		pol.addComponent(data.getTable());
 		
 		this.resultTab.setFocusTraversalPolicy(pol);
-		this.editor = EditorPanel.createSqlEditor();
+		
 		this.editor.addFilenameChangeListener(this);
 		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
 		this.contentPanel.setOneTouchExpandable(true);
@@ -290,19 +297,19 @@ public class SqlPanel
 		this.initToolbar();
 		this.setupActionMap();
 
-		this.data.getTable().setMaxColWidth(Settings.getInstance().getMaxColumnWidth());
-		this.data.getTable().setMinColWidth(Settings.getInstance().getMinColumnWidth());
-		this.makeReadOnly();
-		this.checkResultSetActions();
-
 		Settings s = Settings.getInstance();
 		s.addFontChangedListener(this);
+		s.addPropertyChangeListener(this);
+		
+		this.data.getTable().setMaxColWidth(s.getMaxColumnWidth());
+		this.data.getTable().setMinColWidth(s.getMinColumnWidth());
+		this.makeReadOnly();
+		this.checkResultSetActions();
 
 		this.editor.addTextChangeListener(this);
 		this.data.setUpdateDelegate(this);
 		this.data.addPropertyChangeListener("updateTable", this);
-
-		Settings.getInstance().addPropertyChangeListener(this);
+		this.initDivider();
 	}
 
 	public String getId()
@@ -315,11 +322,12 @@ public class SqlPanel
 		this.internalId = anId;
 	}
 
-	public void initDefaults()
+	public void initDivider()
 	{
-		int loc = this.getHeight() / 2;
-		if (loc <= 5) loc = 200;
-		this.contentPanel.setDividerLocation(loc);
+		int myHeight = (int)this.contentPanel.getPreferredSize().getHeight();
+		int loc = myHeight / 2;
+		if (loc <= 25) loc = 200;
+		this.contentPanel.setDividerLocation(loc); 
 	}
 
 	public void saveSettings()
@@ -336,17 +344,16 @@ public class SqlPanel
 	{
 		this.toolbar = new WbToolbar();
 		this.toolbar.addDefaultBorder();
-		for (int i=0; i < this.toolbarActions.size(); i++)
+		Iterator itr = this.toolbarActions.iterator();
+		while (itr.hasNext())
 		{
-			WbAction a = (WbAction)toolbarActions.get(i);
-			boolean toolbarSep = "true".equals((String)a.getValue(WbAction.TBAR_SEPARATOR));
+			WbAction a = (WbAction)itr.next();
+			boolean toolbarSep = a.getCreateToolbarSeparator();
+			if (toolbarSep)
 			{
-				if (toolbarSep)
-				{
-					toolbar.addSeparator();
-				}
-				a.addToToolbar(toolbar);
+				toolbar.addSeparator();
 			}
+			a.addToToolbar(toolbar);
 		}
 		toolbar.addSeparator();
 		this.connectionInfo = new ConnectionInfo(this.toolbar.getBackground());
@@ -522,20 +529,60 @@ public class SqlPanel
 		this.filenameChangeListeners.remove(aListener);
 	}
 
+	private int lastDivider = -1;
+	private boolean editorExpanded = false;
+	private boolean resultExpanded = false;
+	
 	public void undoExpand()
 	{
-		int newLoc = (int)(this.getHeight() / 2);
-		this.contentPanel.setDividerLocation(newLoc);
+		if (lastDivider != -1)
+		{
+			this.contentPanel.setDividerLocation(this.lastDivider);
+		}
+		else
+		{
+			int newLoc = (int)(this.getHeight() / 2);
+			this.contentPanel.setDividerLocation(newLoc);
+		}
+		this.lastDivider = -1;
 	}
 
-	public void expandEditor()
+	public void toggleEditorExpand()
 	{
-		this.contentPanel.setDividerLocation(this.getHeight());
+		if (editorExpanded)
+		{
+			undoExpand();
+			editorExpanded = false;
+		}
+		else
+		{
+			if (!resultExpanded)
+			{
+				lastDivider = this.contentPanel.getDividerLocation();
+			}
+			this.contentPanel.setDividerLocation(this.getHeight());
+			editorExpanded = true;
+		}
+		this.resultExpanded = false;
 	}
 
-	public void expandResultTable()
+	public void toggleResultTableExpand()
 	{
-		this.contentPanel.setDividerLocation(0);
+		if (this.resultExpanded)
+		{
+			undoExpand();
+			resultExpanded = false;
+		}
+		else
+		{
+			if (!editorExpanded)
+			{
+				lastDivider = this.contentPanel.getDividerLocation();
+			}
+			this.contentPanel.setDividerLocation(0);
+			this.resultExpanded = true;
+		}
+		this.editorExpanded = false;
 	}
 
 	private void initActions()
@@ -627,8 +674,8 @@ public class SqlPanel
 		this.optimizeAllCol = new OptimizeAllColumnsAction(this.data.getTable());
 		this.optimizeAllCol.setCreateMenuSeparator(true);
 		this.optimizeAllCol.setEnabled(false);
-		this.optimizeAllCol.putValue(Action.SMALL_ICON, null);
-		this.optimizeAllCol.putValue(WbAction.MAIN_MENU_ITEM, ResourceMgr.MNU_TXT_VIEW);
+		this.optimizeAllCol.removeIcon();
+		this.optimizeAllCol.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 		this.actions.add(this.optimizeAllCol);
 
 		this.dataToClipboard = this.data.getTable().getDataToClipboardAction();
@@ -771,9 +818,10 @@ public class SqlPanel
 		this.setInputMap(WHEN_IN_FOCUSED_WINDOW, im);
 		this.setActionMap(am);
 
-		for (int i=0; i < this.actions.size(); i++)
+		Iterator itr = this.actions.iterator();
+		while (itr.hasNext())
 		{
-			Object entry = this.actions.get(i);
+			Object entry = itr.next();
 			if (entry instanceof WbAction)
 			{
 				WbAction wb = (WbAction)entry;
@@ -2236,7 +2284,7 @@ public class SqlPanel
 		if (this.data == null) return;
 
 		boolean hasResult = this.data.hasResultSet();
-		this.setActionState(new Action[] {this.findDataAction, this.dataToClipboard, this.exportDataAction, this.optimizeAllCol}, hasResult);
+		this.setActionState(new Action[] {this.findDataAction, this.dataToClipboard, this.exportDataAction, this.optimizeAllCol, this.printDataAction, this.printPreviewAction}, hasResult);
 
 		boolean mayEdit = hasResult && this.data.hasUpdateableColumns();
 		this.data.getStartEditAction().setEnabled(mayEdit);

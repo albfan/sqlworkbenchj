@@ -113,6 +113,7 @@ public class ResourceMgr
 
 	private static final String shiftText = KeyEvent.getKeyModifiersText(KeyEvent.SHIFT_MASK);
 	private static final String ctrlText = KeyEvent.getKeyModifiersText(KeyEvent.CTRL_MASK);
+	
 	public static String replaceModifierText(String msg)
 	{
 		msg = StringUtil.replace(msg, "%shift%", shiftText);
@@ -209,7 +210,7 @@ public class ResourceMgr
 	{
 		try
 		{
-			String value = resources.getString("Desc_" + aKey);
+			String value = resources.getString("d_" + aKey);
 			if (replaceModifiers)
 			{
 				value = replaceModifierText(value);

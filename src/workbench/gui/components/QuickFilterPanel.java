@@ -100,7 +100,6 @@ public class QuickFilterPanel
 
 		this.filterValue = new HistoryTextField(historyProperty);
 		this.filterValue.setToolTipText(ResourceMgr.getString("TxtQuickFilterColumnHint"));
-		this.filterValue.addActionListener(this);
 		TextComponentMouseListener l = new TextComponentMouseListener();
 		if (this.columnList != null)
 		{
@@ -185,6 +184,7 @@ public class QuickFilterPanel
 		pol.addComponent(filterAction.getToolbarButton());
 		pol.addComponent(resetFilterAction.getToolbarButton());
 		this.setFocusTraversalPolicy(pol);
+		this.filterValue.addActionListener(this);
 	}
 
 	public void setToolbarBorder(Border b)
@@ -238,7 +238,6 @@ public class QuickFilterPanel
 
 	public void applyQuickFilter()
 	{
-		if (this.searchTable.getRowCount() <= 0) return;
 		String value = this.filterValue.getText();
 		if (StringUtil.isEmptyString(value)) 
 		{

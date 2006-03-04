@@ -47,6 +47,7 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.ConnectionSelector;
 import workbench.gui.components.TabbedPaneUIFactory;
+import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbToolbar;
 import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
@@ -107,8 +108,9 @@ public class DbExplorerPanel
 			tables = new TableListPanel(aParent);
 			procs = new ProcedureListPanel();
 			this.searchPanel = new TableSearchPanel(tables);
-			tabPane = new JTabbedPane(JTabbedPane.TOP);
+			tabPane = new WbTabbedPane(JTabbedPane.TOP);
 			tabPane.setUI(TabbedPaneUIFactory.getBorderLessUI());
+			tabPane.setBorder(WbSwingUtilities.EMPTY_BORDER);
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerTables"), tables);
 			tabPane.setToolTipTextAt(0, ResourceMgr.getDescription("TxtDbExplorerTables"));
 
@@ -251,7 +253,6 @@ public class DbExplorerPanel
 		}
 		finally
 		{
-			this.schemaFromWorkspace = null;
 			this.schemaRetrievePending = false;
 			setBusy(false);
 		}
@@ -684,11 +685,17 @@ public class DbExplorerPanel
 		// this will increase the visible count for DbExplorer Panels in the workspace
 		w.dDbExplorerVisible();
 		Object s = this.schemaSelector.getSelectedItem();
+		WbProperties p = w.getSettings();
+		String key = "dbexplorer" + index + ".currentschema";
 		if (s != null)
 		{
-			WbProperties p = w.getSettings();
-			p.setProperty("dbexplorer" + index + ".currentschema", s.toString());
+			p.setProperty(key, s.toString());
 		}
+		else if (this.schemaFromWorkspace != null)
+		{
+			p.setProperty(key, this.schemaFromWorkspace);
+		}
+		
 		tables.saveToWorkspace(w, index);
 		searchPanel.saveToWorkspace(w, index);
 		procs.saveToWorkspace(w, index);

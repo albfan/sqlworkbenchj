@@ -47,40 +47,38 @@ public class TabbedPaneUIFactory
 		}
 	}
 
-	public static TabbedPaneUI getBorderLessUI()
+	public static String getTabbedPaneUIClass()
 	{
 		LookAndFeel lnf = UIManager.getLookAndFeel();
 		String lnfClass = lnf.getClass().getName();
 		if (lnfClass.equals("javax.swing.plaf.metal.MetalLookAndFeel"))
 		{
-			return getClassInstance("workbench.gui.components.BorderLessMetalTabbedPaneUI");
+			return "workbench.gui.components.BorderLessMetalTabbedPaneUI";
 		}
-		else if (lnfClass.equals("com.sun.java.swing.plaf.windows.WindowsLookAndFeel") ||
-		         lnfClass.equals("com.sun.java.swing.plaf.windows.WindowsClassicLookAndFeel"))
+		else if (lnfClass.startsWith("com.sun.java.swing.plaf.windows.Windows"))
 		{
-			return getClassInstance("workbench.gui.components.BorderLessWindowsTabbedPaneUI");
+			return "workbench.gui.components.BorderLessWindowsTabbedPaneUI";
 		}
 		else if (lnfClass.equals("com.sun.java.swing.plaf.motif.MotifLookAndFeel"))
 		{
-			return getClassInstance("workbench.gui.components.BorderLessMotifTabbedPaneUI");
+			return "workbench.gui.components.BorderLessMotifTabbedPaneUI";
 		}
-		else
+		else if (lnfClass.startsWith("com.jgoodies.looks.plastic.Plastic"))
 		{
-			TabbedPaneUI uiInstance = null;
-			String uiClass = (String)UIManager.getDefaults().get("TabbedPaneUI");
-			try
+			if ("Metal".equals(System.getProperty("Plastic.tabStyle")))
 			{
-				Class ui = Class.forName(uiClass);
-				uiInstance = (TabbedPaneUI)ui.newInstance();
+				return "workbench.gui.components.BorderLessMetalTabbedPaneUI";
 			}
-			catch (Throwable e)
-			{
-				JTabbedPane pane = new JTabbedPane();
-				uiInstance = (TabbedPaneUI)UIManager.getUI(pane);
-			}
-			return uiInstance;
 		}
+		return UIManager.getDefaults().getString("TabbedPaneUI");
 	}
+	
+	public static TabbedPaneUI getBorderLessUI()
+	{
+		String uiClass = getTabbedPaneUIClass();
+		return getClassInstance(uiClass);
+	}
+	
 
 	private static TabbedPaneUI getClassInstance(String className)
 	{

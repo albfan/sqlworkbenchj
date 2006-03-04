@@ -25,15 +25,17 @@ import javax.swing.text.PlainDocument;
 import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
+import workbench.resource.Settings;
 
 /**
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.18 2005-12-18 22:16:02 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.19 2006-03-04 10:34:41 thomas Exp $
  */
 public class TextAreaPainter extends JComponent implements TabExpander
 {
+	public static final int DEFAULT_TAB_SIZE = 2;
 	// package-private members
 	int currentLineIndex;
 	Token currentLineTokens;
@@ -54,8 +56,6 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	protected boolean bracketHighlight;
 	protected boolean paintInvalid;
 	protected boolean eolMarkers;
-	protected int cols;
-	protected int rows;
 
 	protected int tabSize;
 	protected FontMetrics fm;
@@ -72,11 +72,10 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	 * Creates a new repaint manager. This should be not be called
 	 * directly.
 	 */
-	public TextAreaPainter(JEditTextArea textArea, TextAreaDefaults defaults)
+	public TextAreaPainter(JEditTextArea textArea)
 	{
 		this.textArea = textArea;
 
-		//setAutoscrolls(true);
 		setDoubleBuffered(true);
 		setOpaque(true);
 
@@ -88,23 +87,21 @@ public class TextAreaPainter extends JComponent implements TabExpander
 		setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
 
 		setFont(new Font("Monospaced",Font.PLAIN,12));
-		setForeground(Color.black);
-		setBackground(Color.white);
+		setForeground(Color.BLACK);
+		setBackground(Color.WHITE);
 
-		blockCaret = defaults.blockCaret;
-		styles = defaults.styles;
-		cols = defaults.cols;
-		rows = defaults.rows;
-		caretColor = defaults.caretColor;
-		errorColor = defaults.errorColor;
-		selectionColor = defaults.selectionColor;
-		lineHighlightColor = defaults.lineHighlightColor;
-		lineHighlight = defaults.lineHighlight;
-		bracketHighlightColor = defaults.bracketHighlightColor;
-		bracketHighlight = defaults.bracketHighlight;
-		paintInvalid = defaults.paintInvalid;
-		eolMarkerColor = defaults.eolMarkerColor;
-		eolMarkers = defaults.eolMarkers;
+		blockCaret = false;
+		styles = SyntaxUtilities.getDefaultSyntaxStyles();
+		caretColor = Color.BLACK;
+		errorColor = Settings.getInstance().getEditorErrorColor();
+		selectionColor = Settings.getInstance().getEditorSelectionColor();
+		lineHighlightColor = new Color(0xe0e0e0);
+		lineHighlight = false;
+		bracketHighlightColor = Color.BLACK;
+		bracketHighlight = true;
+		paintInvalid = false;
+		eolMarkerColor = new Color(0x009999);
+		eolMarkers = false;
 	}
 
 	/**
@@ -587,7 +584,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	private void calcTabSize()
 	{
 		tabSize = fm.charWidth(' ') * ((Integer)textArea.getDocument().getProperty(PlainDocument.tabSizeAttribute)).intValue();
-		if (tabSize == 0) tabSize = TextAreaDefaults.getDefaults().tabSize;
+		if (tabSize == 0) tabSize = DEFAULT_TAB_SIZE;
 	}
 
 	protected void paintLine(Graphics gfx, TokenMarker tokenMarker,	int line, int x)

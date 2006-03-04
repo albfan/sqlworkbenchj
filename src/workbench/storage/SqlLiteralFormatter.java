@@ -12,8 +12,12 @@
 package workbench.storage;
 
 import java.io.BufferedInputStream;
+import java.io.File;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
+import workbench.WbManager;
 
 import workbench.log.LogMgr;
 import workbench.util.StringUtil;
@@ -27,51 +31,57 @@ public class SqlLiteralFormatter
 {
 	public static final String GENERAL_SQL = "All";
 
-	private HashMap dateLiteralFormats;
+	private Map dateLiteralFormats;
 	private DbDateFormatter defaultDateFormatter;
-
-	public SqlLiteralFormatter()
+	
+	public SqlLiteralFormatter(String product)
 	{
 		dateLiteralFormats = readStatementTemplates("DateLiteralFormats.xml");
+		if (dateLiteralFormats == null) dateLiteralFormats = Collections.EMPTY_MAP;
+		defaultDateFormatter = getDateLiteralFormatter(product);
 	}
 
-	private HashMap readStatementTemplates(String aFilename)
+	private Map readStatementTemplates(String aFilename)
 	{
-		HashMap result = null;
+		Map result = null;
 
 		BufferedInputStream in = new BufferedInputStream(this.getClass().getResourceAsStream(aFilename));
-		Object value;
 		
 		try
 		{
-			// filename is for logging purposes only
-			WbPersistence reader = new WbPersistence(aFilename);
-			value = reader.readObject(in);
+			WbPersistence reader = new WbPersistence();
+			Object value = reader.readObject(in);
+			if (value != null && value instanceof Map)
+			{
+				result = (Map)value;
+			}
 		}
 		catch (Exception e)
 		{
-			value = null;
+			result = null;
 			LogMgr.logError("SqlSyntaxFormatter.readStatementTemplates()", "Error reading template file " + aFilename,e);
 		}
 		
-		if (value != null && value instanceof HashMap)
-		{
-			result = (HashMap)value;
-		}
-
+		Map customizedMap = null;
+		
 		// try to read additional definitions from local file
 		try
 		{
-			WbPersistence reader = new WbPersistence(aFilename);
-			value = reader.readObject();
+			File f = new File(WbManager.getInstance().getJarPath(), aFilename);
+			if (f.exists())
+			{
+				WbPersistence reader = new WbPersistence(f.getAbsolutePath());
+				customizedMap = (Map)reader.readObject();
+			}
 		}
 		catch (Exception e)
 		{
-			value = null;
+			customizedMap = null;
 		}
-		if (value != null && value instanceof HashMap)
+		
+		if (customizedMap != null)
 		{
-			HashMap m = (HashMap)value;
+			HashMap m = (HashMap)customizedMap;
 			if (result != null)
 			{
 				result.putAll(m);
@@ -84,27 +94,20 @@ public class SqlLiteralFormatter
 		return result;
 	}
 
-	public DbDateFormatter getDateLiteralFormatter()
-	{
-		if (defaultDateFormatter == null)
-		{
-			defaultDateFormatter = getDateLiteralFormatter(GENERAL_SQL);
-		}
-		return defaultDateFormatter;
-	}
-
 	public DbDateFormatter getDateLiteralFormatter(String aProductname)
 	{
-		Object value = dateLiteralFormats.get(aProductname);
-		if (value == null)
+		DbDateFormatter format = (DbDateFormatter)dateLiteralFormats.get(aProductname == null ? GENERAL_SQL : aProductname);
+		if (format == null)
 		{
-			value = dateLiteralFormats.get(GENERAL_SQL);
+			format = (DbDateFormatter)dateLiteralFormats.get(GENERAL_SQL);
+			
+			// Just in case someone messed around with the XML file
+			if (format == null) format = DbDateFormatter.DEFAULT_FORMATTER;
 		}
-		DbDateFormatter format = (DbDateFormatter)value;
 		return format;
 	}
 
-	public String getDefaultLiteral(ColumnData data, DbDateFormatter formatter)
+	public String getDefaultLiteral(ColumnData data)
 	{
 		Object value = data.getValue();
 		if (value == null) return "NULL";
@@ -124,8 +127,7 @@ public class SqlLiteralFormatter
 		}
 		else if (value instanceof Date)
 		{
-			if (formatter == null) formatter = DbDateFormatter.DEFAULT_FORMATTER;
-			return formatter.getLiteral((Date)value);
+			return this.defaultDateFormatter.getLiteral((Date)value);
 		}
 		else if (value instanceof NullValue)
 		{
@@ -144,6 +146,8 @@ public class SqlLiteralFormatter
 		}
 		else
 		{
+			// This assumes that the JDBC driver returned a class
+			// that implements the approriate toString() method!
 			return value.toString();
 		}
 	}

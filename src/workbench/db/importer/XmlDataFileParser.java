@@ -75,6 +75,7 @@ public class XmlDataFileParser
 	private RowDataReceiver receiver;
 	private boolean ignoreCurrentRow = false;
 	private boolean abortOnError = false;
+	private boolean[] warningAdded;
 	private JobErrorHandler errorHandler;
 	private boolean verboseFormat = false;
 	private String missingColumn;
@@ -264,6 +265,7 @@ public class XmlDataFileParser
 		//if (columns == null) throw new IllegalArgumentException("No valid table definition found");
 		this.colCount = this.columns.length;
 		this.tableNameFromFile = tableDef.getTableName();
+		this.warningAdded = new boolean[this.colCount];
 		String format = tableDef.getTagFormat();
 		if (format != null)
 		{
@@ -693,9 +695,22 @@ public class XmlDataFileParser
 				// type not taken into account. Simply use the String 
 				// value, hoping that the JDBC driver can cope with that :)
 				this.currentRow[this.realColIndex] = value;
-				String msg = ResourceMgr.getString("ErrorConvertError").replaceAll("%type%", SqlUtil.getTypeName(type)) + "\n";
-				this.messages.append(msg);
-				LogMgr.logWarning("XmlDataFileParser.buildColumnData()", msg, null);
+				
+				// Oracle (again this dreaded driver!) reports CLOB columns
+				// as Types.OTHER. For all other column types, we issue a warning
+				if (!"CLOB".equalsIgnoreCase(this.columns[this.realColIndex].getDbmsType()))
+				{
+					if (!this.warningAdded[this.realColIndex])
+					{
+						String msg = ResourceMgr.getString("ErrorConvertError");
+						msg = StringUtil.replace(msg, "%type%", SqlUtil.getTypeName(type));
+						msg = StringUtil.replace(msg, "%column%", this.columns[realColIndex].getColumnName());
+						msg = msg + '\n';
+						this.messages.append(msg);
+						this.warningAdded[this.realColIndex] = true;
+						LogMgr.logWarning("XmlDataFileParser.buildColumnData()", msg, null);
+					}
+				}
 				break;
 		}
 		this.realColIndex ++;

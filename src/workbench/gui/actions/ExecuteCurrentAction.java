@@ -34,7 +34,6 @@ public class ExecuteCurrentAction extends WbAction
 		this.initMenuDefinition("MnuTxtExecuteCurrent", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK));
 		this.setIcon(ResourceMgr.getImage("ExecuteCurrent"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.putValue(WbAction.ADD_TO_TOOLBAR, "true");
 	}
 
 	public void executeAction(ActionEvent e)

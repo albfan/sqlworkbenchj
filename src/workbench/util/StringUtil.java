@@ -269,7 +269,7 @@ public class StringUtil
 	 */
 	public static final List stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries)
 	{
-    if (aString == null || aString.length() == 0) return Collections.EMPTY_LIST;
+		if (aString == null || aString.length() == 0) return Collections.EMPTY_LIST;
 		WbStringTokenizer tok = new WbStringTokenizer(aString, aDelimiter);
 		tok.setDelimiterNeedsWhitspace(false);
 		ArrayList result = new ArrayList(150);

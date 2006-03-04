@@ -33,11 +33,6 @@ public class SqlUtil
 {
 	private static Pattern specialCharPattern = Pattern.compile("[$ ]");
 	
-	/** Creates a new instance of SqlUtil */
-	private SqlUtil()
-	{
-	}
-
 	public static String quoteObjectname(String aColname)
 	{
 		if (aColname == null) return null;
@@ -54,7 +49,6 @@ public class SqlUtil
 	public static String getSqlVerb(String aStatement)
 	{
 		if (aStatement == null) return "";
-		//String s = makeCleanSql(aStatement, false, false, '\'');
 		String s = aStatement.trim();
 		if (s.length() == 0) return "";
 		if (s.charAt(0) == '@') return "@";

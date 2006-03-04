@@ -15,6 +15,7 @@ import java.awt.EventQueue;
 import java.awt.Graphics;
 
 import javax.swing.JTabbedPane;
+import workbench.gui.WbSwingUtilities;
 
 
 /**
@@ -31,9 +32,21 @@ public class WbTabbedPane
 	public WbTabbedPane()
 	{
 		super();
-		this.putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
+		init();
 	}
 
+	public WbTabbedPane(int placement)
+	{
+		super(placement);
+		init();
+	}
+	
+	private void init()
+	{
+		this.putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
+		this.setUI(TabbedPaneUIFactory.getBorderLessUI());
+		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
+	}
 	public synchronized void setSuspendRepaint(boolean suspendNow)
 	{
 		boolean suspended = this.suspendRepaint;

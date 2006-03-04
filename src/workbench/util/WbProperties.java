@@ -132,29 +132,6 @@ public class WbProperties
 		this.setProperty(property, Boolean.toString(value));
 	}
 	
-//	private String getFirstTwoSections(String aString)
-//	{
-//		int pos1 = aString.indexOf(".");
-//		String result;
-//		if (pos1 > -1)
-//		{
-//			int pos2 = aString.indexOf(".", pos1 + 1);
-//			if (pos2 > -1)
-//			{
-//				result = aString.substring(0, pos2);
-//			}
-//			else
-//			{
-//				result = aString.substring(0, pos1);
-//			}
-//			return result;
-//		}
-//		else
-//		{
-//			return aString;
-//		}
-//	}
-	
 	private String getSections(String aString, int aNum)
 	{
 		int pos = aString.indexOf(".");
@@ -202,6 +179,13 @@ public class WbProperties
 	
 	public Object setProperty(String name, String value)
 	{
+		if (name == null) return null;
+		if (value == null) 
+		{
+			super.remove(name);
+			return null;
+		}
+		
 		String oldValue = (String)super.setProperty(name, value);
 		
 		// Only fire propertyChanged event if something has changed!

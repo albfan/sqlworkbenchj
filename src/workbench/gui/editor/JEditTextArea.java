@@ -77,6 +77,7 @@ import workbench.interfaces.TextSelectionListener;
 import workbench.interfaces.Undoable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -108,7 +109,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.43 2006-02-10 18:57:49 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.44 2006-03-04 10:34:41 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -139,20 +140,11 @@ public class JEditTextArea
 	 */
 	public JEditTextArea()
 	{
-		this(TextAreaDefaults.getDefaults());
-	}
-
-	/**
-	 * Creates a new JEditTextArea with the specified settings.
-	 * @param defaults The default settings
-	 */
-	public JEditTextArea(TextAreaDefaults defaults)
-	{
 		// Enable the necessary events
 		enableEvents(AWTEvent.KEY_EVENT_MASK);
 
 		// Initialize some misc. stuff
-		painter = new TextAreaPainter(this,defaults);
+		painter = new TextAreaPainter(this);
 		//painter.setBorder(BorderFactory.createLoweredBevelBorder());
 		documentHandler = new DocumentHandler();
 		listeners = new EventListenerList();
@@ -180,12 +172,12 @@ public class JEditTextArea
 		setInputHandler(new DefaultInputHandler());
 		this.inputHandler.addDefaultKeyBindings();
 		setDocument(new SyntaxDocument());
-		editable = defaults.editable;
-		caretVisible = defaults.caretVisible;
-		caretBlinks = defaults.caretBlinks;
-		electricScroll = defaults.electricScroll;
-		autoIndent = defaults.autoIndent;
-		this.setTabSize(defaults.tabSize);
+		editable = true;
+		caretVisible = true;
+		caretBlinks = true;
+		electricScroll = Settings.getInstance().getElectricScroll();
+		autoIndent = true;
+		this.setTabSize(TextAreaPainter.DEFAULT_TAB_SIZE);
 		this.popup = new TextPopup(this);
 
 		this.addKeyBinding("C+C", this.popup.getCopyAction());

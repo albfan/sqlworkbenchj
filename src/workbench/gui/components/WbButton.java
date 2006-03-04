@@ -25,15 +25,24 @@ public class WbButton
 	public WbButton()
 	{
 		super();
+		init();
 	}
 	
 	public WbButton(Action a)
 	{
 		super(a);
+		init();
 	}
+	
 	public WbButton(String aText)
 	{
 		super(aText);
+		init();
+	}
+	
+	private void init()
+	{
+		putClientProperty("jgoodies.isNarrow", Boolean.FALSE);
 	}
 	
 	public void setText(String newText)

@@ -333,7 +333,7 @@ public class ConnectionMgr
 	 *	Returns a Map with the current profiles.
 	 *	The key to the map is the profile name, the value is the actual profile
 	 */
-	public Map getProfiles()
+	public synchronized Map getProfiles()
 	{
 		if (this.profiles == null) this.readProfiles();
 		return this.profiles;
@@ -600,8 +600,7 @@ public class ConnectionMgr
 		{
 			in = this.getClass().getResourceAsStream("DriverTemplates.xml");
 			
-			// the additional filename is for logging purposes only
-			WbPersistence reader = new WbPersistence("DriverTemplates.xml");
+			WbPersistence reader = new WbPersistence();
 			ArrayList templates = (ArrayList)reader.readObject(in);
 
 			for (int i=0; i < templates.size(); i++)

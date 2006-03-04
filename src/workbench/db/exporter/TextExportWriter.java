@@ -83,7 +83,7 @@ public class TextExportWriter
 			out.println(resultInfo.getUpdateTable().getTableName());
 			out.print("FIELDS TERMINATED BY '");
 			out.print(StringUtil.escapeUnicode(exporter.getTextDelimiter(), CharacterRange.RANGE_CONTROL));
-			out.println("'");
+			out.println("' TRAILING NULLCOLS");
 			out.println("(");
 			int count = resultInfo.getColumnCount();
 			int max = 0;

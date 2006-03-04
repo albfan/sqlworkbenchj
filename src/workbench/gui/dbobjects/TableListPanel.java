@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
 
 import javax.swing.ActionMap;
 import javax.swing.ComponentInputMap;
@@ -74,7 +73,6 @@ import workbench.gui.actions.ToggleTableSourceAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.QuickFilterPanel;
-import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbScrollPane;
@@ -99,6 +97,7 @@ import workbench.util.WbThread;
 import workbench.util.ExceptionUtil;
 import java.awt.Component;
 import java.util.Iterator;
+import workbench.gui.components.WbTabbedPane;
 import workbench.interfaces.CriteriaPanel;
 import workbench.util.WbWorkspace;
 import workbench.util.WbProperties;
@@ -199,10 +198,7 @@ public class TableListPanel
 	{
 		this.parentWindow = aParent;
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		this.displayTab = new JTabbedPane();
-		this.displayTab.setTabPlacement(JTabbedPane.BOTTOM);
-		this.displayTab.setUI(TabbedPaneUIFactory.getBorderLessUI());
-		this.displayTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		this.displayTab = new WbTabbedPane(JTabbedPane.BOTTOM);
 
 		this.tableDefinition = new TableDefinitionPanel();
 		this.tableDefinition.addPropertyChangeListener(this);
@@ -278,9 +274,6 @@ public class TableListPanel
 
 		JPanel selectPanel = new JPanel();
 		selectPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-
-		this.tableTypes.setMaximumSize(new Dimension(32768, 18));
-		this.tableTypes.setMinimumSize(new Dimension(80, 18));
 
 		JPanel topPanel = new JPanel();
 		topPanel.setLayout(new GridBagLayout());
@@ -641,8 +634,6 @@ public class TableListPanel
 		this.reset();
 		try
 		{
-			String preferredType = Settings.getInstance().getProperty("workbench.dbexplorer.defTableType", this.tableTypeToSelect);
-			
 			Collection types = this.dbConnection.getMetadata().getTableTypes();
 			this.tableTypes.removeAllItems();
 			this.tableTypes.addItem("*");
@@ -654,7 +645,7 @@ public class TableListPanel
 			{
 				String type = (String)itr.next();
 				this.tableTypes.addItem(type);
-				if (type.equalsIgnoreCase(preferredType))
+				if (type.equalsIgnoreCase(this.tableTypeToSelect))
 				{
 					typeToSelect = type;
 				}
@@ -664,7 +655,7 @@ public class TableListPanel
 			else
 				this.tableTypes.setSelectedItem(typeToSelect);
 			
-			this.tableTypeToSelect = null;
+			//this.tableTypeToSelect = null;
 		}
 		catch (Exception e)
 		{
@@ -882,6 +873,10 @@ public class TableListPanel
 		this.tableData.restoreSettings();
 		this.findPanel.restoreSettings();
 		this.tableDefinition.restoreSettings();
+		if (!Settings.getInstance().getStoreExplorerObjectType())
+		{
+			this.tableTypeToSelect = Settings.getInstance().getDefaultObjectType();
+		}
 	}
 
 
@@ -895,6 +890,13 @@ public class TableListPanel
 		String prefix = getWorkspacePrefix(index);
 		storeSettings(props, prefix);
 		this.findPanel.saveSettings(props, prefix + "quickfilter.");
+		if (Settings.getInstance().getStoreExplorerObjectType())
+		{
+			String type = (String)tableTypes.getSelectedItem();
+			if (type != null) props.setProperty(prefix + "objecttype", type);
+			else if (tableTypeToSelect != null) props.setProperty(prefix + "objecttype", tableTypeToSelect);
+		}
+		
 	}
 	
 	/**
@@ -910,6 +912,14 @@ public class TableListPanel
 		String prefix = getWorkspacePrefix(index);
 		readSettings(props, prefix);
 		findPanel.restoreSettings(props, prefix + "quickfilter.");
+		if (Settings.getInstance().getStoreExplorerObjectType())
+		{
+			this.tableTypeToSelect = props.getProperty(prefix + "objecttype", Settings.getInstance().getDefaultObjectType());
+		}
+		else
+		{
+			this.tableTypeToSelect = Settings.getInstance().getDefaultObjectType();
+		}
 	}
 	
 	private void storeSettings(PropertyStorage props, String prefix)
@@ -933,7 +943,6 @@ public class TableListPanel
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
 		int maxWidth = (int)(d.getWidth() - 50);
 
-		this.tableTypeToSelect = props.getProperty(prefix + "objecttype", Settings.getInstance().getDefaultObjectType());
 		int loc = props.getIntProperty(prefix + "divider",-1);
 		if (loc != -1)
 		{

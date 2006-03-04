@@ -120,7 +120,7 @@ public class ResultInfo
 			}
 			catch (Throwable th)
 			{
-				LogMgr.logError("ResultInfo.<init>", "Error when obtaining scale for column " + name, th);
+				//LogMgr.logError("ResultInfo.<init>", "Error when obtaining scale for column " + name, th);
 				scale = 0;
 			}
 			
@@ -130,7 +130,7 @@ public class ResultInfo
 			}
 			catch (Throwable th)
 			{
-				LogMgr.logError("ResultInfo.<init>", "Error when obtaining precision for column " + name, th);
+				//LogMgr.logError("ResultInfo.<init>", "Error when obtaining precision for column " + name, th);
 				prec = 0;
 			}
 

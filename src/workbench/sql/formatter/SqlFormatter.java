@@ -263,6 +263,7 @@ public class SqlFormatter
 		char currChar = current.getContents().charAt(0);
 		if (Character.isWhitespace(lastChar) || Character.isWhitespace(currChar)) return false;
 		if (!ignoreStartOfline && this.isStartOfLine()) return false;
+		if (lastChar == '\'') return false;
 		if ( (lastChar == '<' || lastChar == '>') && (currChar == '=' || currChar == '<' || currChar == '>')) return false;
 		if (currChar == '=') return true;
 		if (lastChar == '=') return true;

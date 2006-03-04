@@ -87,6 +87,7 @@ public class ConnectionEditorPanel
 		policy.addComponent(tfWorkspaceFile);
 		policy.addComponent(confirmUpdates);
 		policy.addComponent(emptyStringIsNull);
+		policy.addComponent(removeComments);
 		policy.setDefaultComponent(tfProfileName);
 
 		this.setFocusCycleRoot(true);
@@ -160,6 +161,7 @@ public class ConnectionEditorPanel
     cbSeparateConnections = new BooleanPropertyEditor();
     emptyStringIsNull = new BooleanPropertyEditor();
     includeNull = new BooleanPropertyEditor();
+    removeComments = new BooleanPropertyEditor();
     jPanel1 = new javax.swing.JPanel();
     tfWorkspaceFile = new StringPropertyEditor();
     selectWkspButton = new javax.swing.JButton();
@@ -249,7 +251,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 6;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 1, 3, 6);
+    gridBagConstraints.insets = new java.awt.Insets(2, 1, 6, 6);
     add(cbAutocommit, gridBagConstraints);
 
     lblUsername.setLabelFor(tfUserName);
@@ -298,6 +300,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
     add(jSeparator2, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -345,8 +348,9 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 6;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 5, 6);
     add(extendedProps, gridBagConstraints);
 
     helpButton.setText(ResourceMgr.getString("LabelHelp"));
@@ -365,14 +369,13 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 4);
     add(helpButton, gridBagConstraints);
 
-    tfFetchSize.setColumns(4);
     tfFetchSize.setName("defaultFetchSize");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 5;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 6);
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 2);
     add(tfFetchSize, gridBagConstraints);
 
     fetchSizeLabel.setText(ResourceMgr.getString("LabelFetchSize"));
@@ -404,7 +407,9 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
     wbOptionsPanel.add(cbStorePassword, gridBagConstraints);
 
     disableTableCheck.setText(ResourceMgr.getString("LabelDisableAutoTableCheck"));
@@ -412,9 +417,10 @@ public class ConnectionEditorPanel
     disableTableCheck.setName("disableUpdateTableCheck");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
     wbOptionsPanel.add(disableTableCheck, gridBagConstraints);
 
     rollbackBeforeDisconnect.setText(ResourceMgr.getString("LabelRollbackBeforeDisconnect"));
@@ -422,9 +428,10 @@ public class ConnectionEditorPanel
     rollbackBeforeDisconnect.setName("rollbackBeforeDisconnect");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
     wbOptionsPanel.add(rollbackBeforeDisconnect, gridBagConstraints);
 
     confirmUpdates.setText(ResourceMgr.getString("LabelConfirmDbUpdates"));
@@ -433,8 +440,9 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
     wbOptionsPanel.add(confirmUpdates, gridBagConstraints);
 
     cbIgnoreDropErrors.setSelected(true);
@@ -444,7 +452,9 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
     wbOptionsPanel.add(cbIgnoreDropErrors, gridBagConstraints);
 
     cbSeparateConnections.setText(ResourceMgr.getString("LabelSeperateConnections"));
@@ -453,40 +463,54 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
     wbOptionsPanel.add(cbSeparateConnections, gridBagConstraints);
 
     emptyStringIsNull.setText(ResourceMgr.getString("LabelEmptyStringIsNull"));
     emptyStringIsNull.setToolTipText(ResourceMgr.getDescription("LabelEmptyStringIsNull"));
-    emptyStringIsNull.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
     emptyStringIsNull.setName("emptyStringIsNull");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
     wbOptionsPanel.add(emptyStringIsNull, gridBagConstraints);
 
     includeNull.setText(ResourceMgr.getString("LabelIncludeNullInInsert"));
     includeNull.setToolTipText(ResourceMgr.getString("LabelIncludeNullInInsert"));
-    includeNull.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-    includeNull.setMargin(new java.awt.Insets(0, 0, 0, 0));
     includeNull.setName("includeNullInInsert");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 6, 0, 0);
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
     wbOptionsPanel.add(includeNull, gridBagConstraints);
+
+    removeComments.setText(ResourceMgr.getString("LabelRemoveComments"));
+    removeComments.setToolTipText(ResourceMgr.getDescription("LabelRemoveComments"));
+    removeComments.setName("removeComments");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
+    wbOptionsPanel.add(removeComments, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 9;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.gridheight = 4;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(3, 0, 5, 6);
     add(wbOptionsPanel, gridBagConstraints);
 
     jPanel1.setLayout(new java.awt.GridBagLayout());
@@ -549,7 +573,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 5, 3, 0);
     add(jLabel1, gridBagConstraints);
 
   }// </editor-fold>//GEN-END:initComponents
@@ -667,6 +691,7 @@ public class ConnectionEditorPanel
   private javax.swing.JLabel lblUrl;
   private javax.swing.JLabel lblUsername;
   private javax.swing.JButton manageDriversButton;
+  private javax.swing.JCheckBox removeComments;
   private javax.swing.JCheckBox rollbackBeforeDisconnect;
   private javax.swing.JButton selectWkspButton;
   private javax.swing.JButton showPassword;

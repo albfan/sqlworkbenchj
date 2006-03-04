@@ -37,7 +37,6 @@ public class StatementFactory
 	public StatementFactory(ResultInfo metaData, WbConnection conn)
 	{
 		this.resultInfo = metaData;
-		this.literalFormatter = new SqlLiteralFormatter();
 		this.setCurrentConnection(conn);
 	}
 
@@ -408,5 +407,6 @@ public class StatementFactory
 		{
 			emptyStringIsNull = this.dbConnection.getProfile().getEmptyStringIsNull();
 		}
+		this.literalFormatter = new SqlLiteralFormatter(conn.getDatabaseProductName());
 	}
 }

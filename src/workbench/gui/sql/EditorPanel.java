@@ -661,6 +661,7 @@ public class EditorPanel
 			File f = new File(filename);
 			try
 			{
+				if (StringUtil.isEmptyString(encoding)) encoding = EncodingUtil.getDefaultEncoding();
 				reader = EncodingUtil.createBufferedReader(f, encoding);
 			}
 			catch (UnsupportedEncodingException e)
