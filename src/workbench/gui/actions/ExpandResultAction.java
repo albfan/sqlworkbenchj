@@ -38,6 +38,6 @@ public class ExpandResultAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.expandResultTable();
+		this.client.toggleResultTableExpand();
 	}
 }

@@ -40,9 +40,9 @@ public class WbAction
 	extends AbstractAction
 {
 	public static final String ADD_TO_TOOLBAR = "AddToToolbar";
-	public static final String MAIN_MENU_ITEM = "MainMenuItem";
-	public static final String MENU_SEPARATOR = "MenuSepBefore";
-	public static final String TBAR_SEPARATOR = "TbarSepBefore";
+	private static final String MAIN_MENU_ITEM = "MainMenuItem";
+	private static final String MENU_SEPARATOR = "MenuSepBefore";
+	private static final String TBAR_SEPARATOR = "TbarSepBefore";
 	public static final String ALTERNATE_ACCELERATOR = "AlternateAccelerator";
 	public static final String DEFAULT_ACCELERATOR = "DefaultAccelerator";
 	public static final String MNEMONIC_INDEX = "MnemonicIndex";
@@ -146,7 +146,7 @@ public class WbAction
 	 */
 	public void initMenuDefinition(String aMenuText, String aTooltip, KeyStroke defaultKey)
 	{
-		this.putValue(Action.NAME, aMenuText);
+		this.setMenuText(aMenuText);
 		this.setTooltip(aTooltip);
 		
 		this.setDefaultAccelerator(defaultKey);
@@ -166,12 +166,40 @@ public class WbAction
 	 * @param aKey  The key for the ResourceManager
 	 * @see workbench.resource.ResourceMgr#getString(String)
 	 * @see workbench.resource.ResourceMgr#getDescription(String)
+	 * @see #setMenuText(String)
 	 */
 	public void setMenuTextByKey(String aKey)
 	{
-		this.putValue(Action.NAME, ResourceMgr.getString(aKey));
+		this.setMenuText(ResourceMgr.getString(aKey));
 		this.setTooltip(ResourceMgr.getDescription(aKey));
 	}
+	
+	/**
+	 * Define the displayed text for the associcated menu item
+	 * If the text contains a & sign, the character after the 
+	 * & sign will be used as the Mnemonic for the menu item.
+	 * Once the mnemonic is identified the passed text (after
+	 * removing the & sign) will be set using
+	 * putValue(Actin.NAME, Object)
+	 *
+	 * @param the text for the menu item 
+	 * @see setMenuTextByKey(String)
+	 */
+	public void setMenuText(String text)
+	{
+		if (text == null) return;
+		int pos = text.indexOf('&');
+		if (pos > -1)
+		{
+			char mnemonic = text.charAt(pos + 1);
+			text = text.substring(0, pos) + text.substring(pos + 1);
+			Integer keycode = new Integer((int)mnemonic);
+			Integer index = new Integer(pos);
+			this.putValue(Action.MNEMONIC_KEY, keycode);
+			this.putValue(WbAction.MNEMONIC_INDEX, index);
+		}
+		putValue(Action.NAME, text);
+	}	
 	
 	public KeyStroke getAlternateAccelerator()
 	{
@@ -260,32 +288,36 @@ public class WbAction
 		return this.menuItem;
 	}
 
+	public String getMenuItemName()
+	{
+		return (String)this.getValue(WbAction.MAIN_MENU_ITEM);
+	}
+	
 	public void setMenuItemName(String aKey)
 	{
 		this.putValue(WbAction.MAIN_MENU_ITEM, aKey);
 	}
 	
-	public void setCreateToolbarSeparator(boolean aFlag)
+	public boolean getCreateToolbarSeparator()
 	{
-		if (aFlag)
-		{
-			this.putValue(WbAction.TBAR_SEPARATOR, "true");
-		}
-		else
-		{
-			putValue(WbAction.TBAR_SEPARATOR, "false");
-		}
+		Boolean flag = (Boolean)getValue(WbAction.TBAR_SEPARATOR);
+		return flag.booleanValue();
 	}
-	public void setCreateMenuSeparator(boolean aFlag)
+	
+	public void setCreateToolbarSeparator(boolean flag)
 	{
-		if (aFlag)
-		{
-			this.putValue(WbAction.MENU_SEPARATOR, "true");
-		}
-		else
-		{
-			putValue(WbAction.MENU_SEPARATOR, "false");
-		}
+		putValue(WbAction.TBAR_SEPARATOR, (flag ? Boolean.TRUE : Boolean.FALSE));
+	}
+
+	public boolean getCreateMenuSeparator()
+	{
+		Boolean flag = (Boolean)getValue(WbAction.MENU_SEPARATOR);
+		return flag.booleanValue();
+	}
+	
+	public void setCreateMenuSeparator(boolean flag)
+	{
+		this.putValue(WbAction.MENU_SEPARATOR, (flag ? Boolean.TRUE : Boolean.FALSE));
 	}
 
 	public String getActionName()
@@ -316,62 +348,6 @@ public class WbAction
 		}
 	}
 	
-	public void putValue(String key, Object newValue)
-	{
-		if (Action.NAME.equals(key) && (newValue instanceof String) && (newValue != null))
-		{
-			String name = newValue.toString();
-			int pos = name.indexOf('&');
-			if (pos > -1)
-			{
-				char mnemonic = name.charAt(pos + 1);
-				name = name.substring(0, pos) + name.substring(pos + 1);
-				Integer keycode = new Integer((int)mnemonic);
-				Integer index = new Integer(pos);
-				this.putValue(Action.MNEMONIC_KEY, keycode);
-				this.putValue(WbAction.MNEMONIC_INDEX, index);
-			}
-			super.putValue(key, name);
-		}
-		else
-		{
-			super.putValue(key, newValue);
-		}
-		
-		/*
-		// if the accelerator is beeing set, check if we already
-		// have a default key. If not, then set the current accelerator
-		// as the default key. This way, the first shortcut defined
-		// for this action, will define the default shortcut.
-		if (Action.ACCELERATOR_KEY.equals(key))
-		{
-			if (this.getDefaultAccelerator() == null)
-			{
-				super.putValue(DEFAULT_ACCELERATOR, this.getAccelerator());
-			}
-		}
-		
-		String label = this.getMenuLabel();
-		KeyStroke def = this.getDefaultAccelerator();
-
-		// if label and default accelerator are defined
-		// ask the ShortcutManager if a customized shortcut is available
-		// if it is, we'll overwrite the current accelerator 
-		// with the value from the ShortcutManager
-		if (label != null && def != null)
-		{
-			ShortcutManager mgr = WbManager.getShortcutManager(); 
-			mgr.registerAction(this);
-			KeyStroke custom = mgr.getCustomizedKeyStroke(this);
-			if (custom != null)
-			{
-				// call the ancestor directly, otherwise we'll run into an infitinite loop!
-				super.putValue(Action.ACCELERATOR_KEY, custom);
-			}
-		}
-		*/
-	}
-	
 	public void setDefaultAccelerator(KeyStroke key)
 	{
 		this.putValue(DEFAULT_ACCELERATOR, key);
@@ -386,6 +362,7 @@ public class WbAction
 	{
 		this.putValue(Action.SMALL_ICON, icon);
 	}
+	
 	public void removeIcon()
 	{
 		this.putValue(Action.SMALL_ICON, null);

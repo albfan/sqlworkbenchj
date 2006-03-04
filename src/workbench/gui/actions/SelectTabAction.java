@@ -74,7 +74,7 @@ public class SelectTabAction extends WbAction
 				this.setAccelerator(null);
 		}
 		this.setActionName("SelectTab" + (this.index+1));
-		this.putValue(Action.NAME, ResourceMgr.getDefaultTabLabel());// + " &" + Integer.toString(this.index+1));
+		this.setMenuText(ResourceMgr.getDefaultTabLabel());// + " &" + Integer.toString(this.index+1));
 		this.setIcon(null);
 	}
 	public int getIndex() { return this.index; }
@@ -83,11 +83,6 @@ public class SelectTabAction extends WbAction
 	{
 		this.index = anIndex;
 		this.initName();
-	}
-
-	public void setName(String aName)
-	{
-		this.putValue(Action.NAME, aName);// + " &" + Integer.toString(this.index+1));
 	}
 
 	public void executeAction(ActionEvent e)

@@ -32,13 +32,12 @@ public class ExpandEditorAction extends WbAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtExpandEditor", KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
-		//this.initMenuDefinition("MnuTxtExpandEditor", null);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 		this.setIcon(null);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.expandEditor();
+		this.client.toggleEditorExpand();
 	}
 }
