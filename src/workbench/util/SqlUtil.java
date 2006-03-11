@@ -32,6 +32,7 @@ import workbench.db.WbConnection;
 public class SqlUtil
 {
 	private static Pattern specialCharPattern = Pattern.compile("[$ ]");
+	private static Pattern selectPattern = Pattern.compile("^\\s*SELECT\\s+.*",Pattern.CASE_INSENSITIVE);
 	
 	public static String quoteObjectname(String aColname)
 	{
@@ -46,6 +47,12 @@ public class SqlUtil
 		return col.toString();
 	}
 
+	public static boolean isSelect(String sql)
+	{
+		Matcher m = selectPattern.matcher(sql);
+		return m.find();
+	}
+	
 	public static String getSqlVerb(String aStatement)
 	{
 		if (aStatement == null) return "";

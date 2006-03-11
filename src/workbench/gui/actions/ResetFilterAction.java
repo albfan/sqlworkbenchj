@@ -30,9 +30,8 @@ public class ResetFilterAction
 	public ResetFilterAction(WbTable aClient)
 	{
 		super();
-		this.client = aClient;
 		this.initMenuDefinition("MnuTxtResetFilter");
-		this.client.addTableModelListener(this);
+		this.setClient(aClient);
 		this.setIcon(ResourceMgr.getImage("resetFilter"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(false);
@@ -48,4 +47,18 @@ public class ResetFilterAction
 	{
 		this.setEnabled(this.client.isFiltered());
 	}
+	
+	public void setClient(WbTable c)
+	{
+		if (this.client != null)
+		{
+			this.client.removeTableModelListener(this);
+		}
+		this.client = c;
+		if (this.client != null)
+		{
+			this.client.addTableModelListener(this);
+		}
+	}
+	
 }

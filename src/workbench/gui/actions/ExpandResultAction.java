@@ -16,6 +16,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
+import workbench.gui.sql.SplitPaneExpander;
 
 import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
@@ -25,12 +26,12 @@ import workbench.resource.ResourceMgr;
  */
 public class ExpandResultAction extends WbAction
 {
-	private SqlPanel client;
+	private SplitPaneExpander client;
 
-	public ExpandResultAction(SqlPanel aClient)
+	public ExpandResultAction(SplitPaneExpander expander)
 	{
 		super();
-		this.client = aClient;
+		this.client = expander;
 		this.initMenuDefinition("MnuTxtExpandResult", KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 		this.setIcon(null);
@@ -38,6 +39,6 @@ public class ExpandResultAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.toggleResultTableExpand();
+		this.client.toggleLowerComponentExpand();
 	}
 }

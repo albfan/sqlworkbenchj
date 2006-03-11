@@ -22,7 +22,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -114,6 +115,55 @@ public class WbManager
 		return wb;
 	}
 
+	public void showHelpForProfiles(JDialog owner)
+	{
+		JDialog dialog = null;
+		try
+		{
+			// Use reflection to load the HtmlViewer in order to
+			// avoid unnecessary class loading during startup
+			Class cls = Class.forName("workbench.gui.help.HtmlViewer");
+			Class[] types = new Class[] { JDialog.class  };
+			Constructor cons = cls.getConstructor(types);
+			Object[] args = new Object[] { owner };
+			dialog = (JDialog)cons.newInstance(args);
+			
+			Class[] noArgs = new Class[] {};
+			Method m = cls.getMethod("showProfileHelp", noArgs);
+			if (m != null)
+			{
+				m.invoke(dialog, noArgs);
+			}
+			dialog.setVisible(true);
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError("WbManager.showDialog()", "Error when creating help viewer", ex);
+		}
+	}
+	
+	public void showDialog(String clazz)
+	{
+		JFrame parent = WbManager.getInstance().getCurrentWindow();
+		JDialog dialog = null;
+		try
+		{
+			// Use reflection to load various dialogs in order to
+			// avoid unnecessary class loading during startup
+			Class cls = Class.forName(clazz);
+			Class[] types = new Class[] { java.awt.Frame.class  };
+			Constructor cons = cls.getConstructor(types);
+			Object[] args = new Object[] { parent };
+			dialog = (JDialog)cons.newInstance(args);
+			WbSwingUtilities.center(dialog, parent);
+			dialog.setVisible(true);
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError("WbManager.showDialog()", "Error when creating dialog " + clazz, ex);
+		}
+	}
+	
 	public MainWindow getCurrentWindow()
 	{
 		if (this.mainWindows == null) return null;

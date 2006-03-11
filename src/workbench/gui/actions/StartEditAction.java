@@ -51,7 +51,7 @@ public class StartEditAction
 		this.setIcon(ResourceMgr.getImage("editor"));
 		this.setEnabled(false);
 	}
-
+	
 	public void executeAction(ActionEvent e)
 	{
 		this.setSwitchedOn(!this.switchedOn);
@@ -77,6 +77,10 @@ public class StartEditAction
 		if (this.toggleButton != null)
 		{
 			this.toggleButton.setSelected(aFlag);
+		}
+		if (this.proxy != null)
+		{
+			((StartEditAction)proxy).setSwitchedOn(aFlag);
 		}
 	}
 
@@ -122,11 +126,25 @@ public class StartEditAction
 		}
 		aMenu.add(this.toggleMenu);
 	}
+	
 	public void setEnabled(boolean aFlag)
 	{
 		boolean last = this.isEnabled();
 		super.setEnabled(aFlag);
 		if (!this.enabled || (last != this.enabled))
 			this.setSwitchedOn(false);
+	}
+
+	public void setOriginal(WbAction org)
+	{
+		super.setOriginal(org);
+		if (org != null)
+		{
+			setSwitchedOn(((StartEditAction)org).isSwitchedOn());
+		}
+		else
+		{
+			setSwitchedOn(false);
+		}
 	}
 }

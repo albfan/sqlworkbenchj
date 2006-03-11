@@ -39,9 +39,9 @@ public class VersionCheckDialog extends javax.swing.JDialog
 	private WbVersionReader versionReader;
 
 	/** Creates new form VersionCheckDialog */
-	public VersionCheckDialog(java.awt.Frame parent, boolean modal)
+	public VersionCheckDialog(java.awt.Frame parent)
 	{
-		super(parent, modal);
+		super(parent, true);
 		initComponents();
 		this.closeButton.addActionListener(this);
 		Font f = this.headingLabel.getFont().deriveFont(Font.BOLD);

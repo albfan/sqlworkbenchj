@@ -46,27 +46,20 @@ import workbench.resource.ResourceMgr;
 public class WbSwingUtilities
 {
 	public static final Border BEVEL_BORDER;
+	public static final Border BEVEL_BORDER_RAISED;
 	static
 	{
 		BevelBorder b = new BevelBorder(BevelBorder.LOWERED);
 		Color c = Color.LIGHT_GRAY;
-		//c.darker();
 		BEVEL_BORDER = new BevelBorder(BevelBorder.LOWERED,
 					b.getHighlightOuterColor(),
-					c,//b.getShadowOuterColor(),
+					c,
 					b.getHighlightInnerColor(),
 					b.getShadowInnerColor());
-	}
-
-	public static final Border BEVEL_BORDER_RAISED;
-	static
-	{
-		BevelBorder b = new BevelBorder(BevelBorder.RAISED);
-		Color c = Color.LIGHT_GRAY;
-		//c.darker();
+		
 		BEVEL_BORDER_RAISED = new BevelBorder(BevelBorder.RAISED,
 					b.getHighlightOuterColor(),
-					c,//b.getShadowOuterColor(),
+					c,
 					b.getHighlightInnerColor(),
 					b.getShadowInnerColor());
 	}
@@ -75,10 +68,6 @@ public class WbSwingUtilities
 	public static final Border EMPTY_BORDER = new EmptyBorder(0,0,0,0);
 	public static final Border FLAT_BUTTON_BORDER = new CompoundBorder(new EtchedBorder(), new EmptyBorder(1,6,1,6));
 	
-	private WbSwingUtilities()
-	{
-	}
-
 	/**
 	 * Synchronously execute code on the EDT
 	 */
@@ -100,6 +89,7 @@ public class WbSwingUtilities
 			}
 		}
 	}
+	
 	/**
 	 *	Centers the given window either agains anotherone on the screen
 	 *	If a second window is passed the first window is centered

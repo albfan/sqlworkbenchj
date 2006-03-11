@@ -36,6 +36,7 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import workbench.WbManager;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -48,7 +49,6 @@ import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbTraversalPolicy;
-import workbench.gui.help.HtmlViewer;
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -585,8 +585,9 @@ public class ConnectionEditorPanel
 
 	private void helpButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_helpButtonActionPerformed
 	{//GEN-HEADEREND:event_helpButtonActionPerformed
-		HtmlViewer viewer = new HtmlViewer((JDialog)SwingUtilities.getWindowAncestor(this));
-		viewer.showProfileHelp();
+		//HtmlViewer viewer = new HtmlViewer((JDialog)SwingUtilities.getWindowAncestor(this));
+		//viewer.showProfileHelp();
+		WbManager.getInstance().showHelpForProfiles((JDialog)SwingUtilities.getWindowAncestor(this));
 	}//GEN-LAST:event_helpButtonActionPerformed
 
 	private void extendedPropsMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_extendedPropsMouseClicked
@@ -654,7 +655,7 @@ public class ConnectionEditorPanel
 		{
 			public void run()
 			{
-				DriverEditorDialog d = new DriverEditorDialog(parent, true);
+				DriverEditorDialog d = new DriverEditorDialog(parent);
 				d.setDriverName(drvName);
 				WbSwingUtilities.center(d,parent);
 				d.setVisible(true);

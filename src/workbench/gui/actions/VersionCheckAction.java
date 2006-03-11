@@ -10,14 +10,15 @@
  *
  */
 package workbench.gui.actions;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
+import java.lang.reflect.Constructor;
+import javax.swing.JDialog;
 
 import javax.swing.JFrame;
 
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.tools.VersionCheckDialog;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -26,25 +27,19 @@ import workbench.resource.ResourceMgr;
 public class VersionCheckAction extends WbAction
 {
 
-	public VersionCheckAction()
+	private static VersionCheckAction instance = new VersionCheckAction();
+	public static VersionCheckAction getInstance() { return instance; }
+	
+	private VersionCheckAction()
 	{
 		super();
 		this.initMenuDefinition("MnuTxtVersionCheck");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_TOOLS);
-		this.setIcon(null);
+		this.removeIcon();
 	}
 
 	public void executeAction(ActionEvent e)
 	{
-		final JFrame parent = WbManager.getInstance().getCurrentWindow();
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				VersionCheckDialog dialog = new VersionCheckDialog(parent, true);
-				WbSwingUtilities.center(dialog, parent);
-				dialog.show();
-			}
-		});
+		WbManager.getInstance().showDialog("workbench.gui.tools.VersionCheckDialog");
 	}
 }

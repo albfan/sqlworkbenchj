@@ -69,6 +69,8 @@ public class WbVersionReader
 			URL url = new URL("http://www.sql-workbench.net/release.property");
 			URLConnection conn = url.openConnection();
 			conn.setRequestProperty("User-Agent", this.userAgent);
+			conn.setRequestProperty("Referer", System.getProperty("java.version"));
+				
 			in = conn.getInputStream();
 			
 			Properties props = new Properties();

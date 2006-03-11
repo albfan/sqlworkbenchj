@@ -11,6 +11,7 @@
  */
 package workbench.gui.actions;
 
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -50,20 +51,8 @@ public class WbAction
 	protected JMenuItem menuItem;
 	protected JButton toolbarButton;
 	private ActionListener delegate = null;
-	
-	public WbAction(ActionListener l)
-	{
-		this();
-		this.delegate = l;
-	}
-	
-	public WbAction(ActionListener l, String aName)
-	{
-		this();
-		this.delegate = l;
-		this.actionName = aName;
-    this.putValue(ACTION_COMMAND_KEY, this.actionName);
-	}
+	protected WbAction proxy;
+	private WbAction original;
 	
 	public WbAction()
 	{
@@ -73,6 +62,21 @@ public class WbAction
 		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("blank"));
 	}
 
+	/**
+	 * Creates a WbAction which dispatches its {@link executeAction(ActionEvent)} 
+	 * event to the passed ActionListener, instead of executing it itself.
+	 * This is intended for situations where an Action is needed, but not 
+	 * implemented with a subclass of WbAction, but with an ActionListener
+	 * instead.
+	 */
+	public WbAction(ActionListener l, String aName)
+	{
+		this();
+		this.delegate = l;
+		this.actionName = aName;
+    this.putValue(ACTION_COMMAND_KEY, this.actionName);
+	}
+	
 	public void setTooltip(String aText)
 	{
 		this.putValue(Action.SHORT_DESCRIPTION, aText);
@@ -376,7 +380,20 @@ public class WbAction
 	
 	public void actionPerformed(final ActionEvent e)
 	{
-		if (this.isEnabled()) executeAction(e);
+		if (this.isEnabled()) 
+		{
+			if (this.original != null) this.original.executeAction(e);
+			else
+			{
+				EventQueue.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						executeAction(e);
+					}
+				});
+			}
+		}
 	}
 	
 	public void executeAction(ActionEvent e)
@@ -409,6 +426,33 @@ public class WbAction
 										acceleratorDelimiter + 
 										KeyEvent.getKeyText(keycode);
     return display;
-		
+	}
+
+	public void setEnabled(boolean flag)
+	{
+		super.setEnabled(flag);
+		if (this.proxy != null) this.proxy.setEnabled(flag);
+//		else if (this.original != null) this.original.setEnabled(flag);
+	}
+	
+	public void setOriginal(WbAction org)
+	{
+		if (this.original != null)
+		{
+			this.original.setProxy(null);
+			if (org == null) setEnabled(false);
+		}
+		this.original = null;
+		if (org != null)
+		{
+			setEnabled(org.isEnabled());
+			this.original = org;
+			this.original.setProxy(this);
+		}
+	}
+	
+	protected void setProxy(WbAction p)
+	{
+		this.proxy = p;
 	}
 }

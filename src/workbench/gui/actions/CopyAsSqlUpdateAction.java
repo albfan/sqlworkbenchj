@@ -30,6 +30,7 @@ public class CopyAsSqlUpdateAction extends WbAction
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtCopyAsSqlUpdate",null);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+		this.setEnabled(false);
 	}
 
 	public void executeAction(ActionEvent e)

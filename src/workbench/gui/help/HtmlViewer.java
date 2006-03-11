@@ -13,7 +13,7 @@ package workbench.gui.help;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
@@ -22,15 +22,12 @@ import java.net.URL;
 
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
-import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
-import javax.swing.text.html.HTMLEditorKit;
-import javax.swing.text.html.StyleSheet;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
@@ -44,14 +41,23 @@ public class HtmlViewer
 {
 	private JEditorPane display;
 	
-	public HtmlViewer(JFrame owner)
+	public HtmlViewer(Frame owner)
 	{
 		this(owner, null);
 	}
 	
-	public HtmlViewer(JFrame owner, String aStartFile)
+	public HtmlViewer(Frame owner, String aStartFile)
 	{
 		super(owner, ResourceMgr.getString("TxtHelpWindowTitle"), false);
+		addWindowListener(new WindowAdapter()
+		{
+			public void windowClosing(WindowEvent evt)
+			{
+				saveSettings();
+				setVisible(false);
+				dispose();
+			}
+		});
 		if (aStartFile == null)
 		{
 			this.initHtml("workbench-manual.html");
@@ -61,10 +67,10 @@ public class HtmlViewer
 			this.initHtml(aStartFile);
 		}
 		this.restoreSettings(owner);
-		if (aStartFile == null)
-		{
-			showIndex();
-		}
+//		if (aStartFile == null)
+//		{
+//			showIndex();
+//		}
 	}
 
 	public HtmlViewer(JDialog owner)
@@ -101,64 +107,27 @@ public class HtmlViewer
 		
 		//this.initDocument();
 		
-		if (aStartFile != null) this.showHtmlFile(aStartFile);
+		if (aStartFile != null) this.loadHtmlFile(aStartFile);
 		
-		addWindowListener(new WindowAdapter()
-		{
-			public void windowClosing(WindowEvent evt)
-			{
-				saveSettings();
-				setVisible(false);
-				dispose();
-			}
-		});
 	}
 	
-//	private void initDocument()
-//	{
-//		HTMLEditorKit kit = new HTMLEditorKit();
-//		StyleSheet style = new StyleSheet();
-//		HTMLDocument htmlDoc = null;
-//		try
-//		{
-//			URL file = this.getClass().getClassLoader().getResource("help/html-internal.css");
-//			if (file != null)
-//			{
-//				style.importStyleSheet(file);
-//				htmlDoc = new HTMLDocument(style);
-//			}
-//		}
-//		catch (Exception e)
-//		{
-//			LogMgr.logError("HtmlViewer", "Error loading style sheet html-internal.css", e);
-//		}
-//
-//		if (htmlDoc == null)
-//		{
-//			htmlDoc = new HTMLDocument();
-//		}
-//		
-//		display.setEditable(false);
-//		display.setEditorKit(kit);
-//		display.setDocument(htmlDoc);
-//	}
-
 	public void showDataPumperHelp()
 	{
-		this.showHtmlFile("data-pumper.html");
+		this.loadHtmlFile("data-pumper.html");
+		this.setVisible(true);
 	}
 	
 	public void showProfileHelp()
 	{
-		this.showHtmlFile("profiles.html");
+		this.loadHtmlFile("profiles.html");
 	}
 	
 	public void showIndex()
 	{
-		this.showHtmlFile("workbench-manual.html");
+		this.loadHtmlFile("workbench-manual.html");
 	}
 	
-	private void showHtmlFile(String aFile)
+	private void loadHtmlFile(String aFile)
 	{
 		try
 		{
@@ -178,16 +147,16 @@ public class HtmlViewer
 				display.setContentType("text/html");
 				display.setText("<h2>Help file not found!</h2>"); 
 			}
-			this.setVisible(true);
-			this.requestFocus();
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					validate();
-					//getRootPane().updateUI();
-				}
-			});
+//			this.setVisible(true);
+//			this.requestFocus();
+//			EventQueue.invokeLater(new Runnable()
+//			{
+//				public void run()
+//				{
+//					validate();
+//					//getRootPane().updateUI();
+//				}
+//			});
 		}
 		catch (Exception e)
 		{

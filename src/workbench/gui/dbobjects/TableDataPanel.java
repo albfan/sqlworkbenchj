@@ -121,13 +121,12 @@ public class TableDataPanel
 			}
 		};
 
-		this.dataDisplay.setManageActions(true);
+		this.dataDisplay.setManageUpdateAction(true);
 		this.dataDisplay.setShowLoadProcess(true);
 		this.dataDisplay.setDefaultStatusMessage("");
 		this.dataDisplay.setShowErrorMessages(true);
 		this.dataDisplay.getTable().setMaxColWidth(Settings.getInstance().getMaxColumnWidth());
 		this.dataDisplay.getTable().setMinColWidth(Settings.getInstance().getMinColumnWidth());
-		this.dataDisplay.setSaveChangesInBackground(true);
 
     topPanel = new JPanel();
 		topPanel.setMaximumSize(new Dimension(32768, 32768));
@@ -406,12 +405,12 @@ public class TableDataPanel
 
 		this.cancelRetrieve.setEnabled(true);
 		this.reloadAction.setEnabled(false);
+		
 		try
 		{
 			dataDisplay.setShowErrorMessages(true);
 			dataDisplay.setAutomaticUpdateTableCheck(false);
-			dataDisplay.scriptStarting();
-			dataDisplay.runStatement(sql, respectMaxRows);
+			dataDisplay.runQuery(sql, respectMaxRows);
 			dataDisplay.setUpdateTable(this.table);
 			dataDisplay.getSelectKeysAction().setEnabled(true);
 			String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
@@ -419,23 +418,28 @@ public class TableDataPanel
 			dataDisplay.setStatusMessage("");
 			dataDisplay.showlastExecutionTime();
 		}
-		catch (OutOfMemoryError mem)
+		catch (Throwable e)
 		{
+			LogMgr.logError("TableDataPanel.doRetrieve()", "Error retrieving table data", e);
+			final String msg; 
+			if (e instanceof OutOfMemoryError)
+			{
+				msg = ResourceMgr.getString("MsgOutOfMemoryError");
+			}				
+			else
+			{
+				msg = ExceptionUtil.getDisplay(e);
+			}
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
-					WbSwingUtilities.showErrorMessage(TableDataPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
+					WbSwingUtilities.showErrorMessage(TableDataPanel.this, msg);
 				}
 			});
 		}
-		catch (Throwable e)
-		{
-			LogMgr.logError("TableDataPanel.doRetrieve()", "Error retrieving table data", e);
-		}
 		finally
 		{
-			dataDisplay.scriptFinished();
 			cancelRetrieve.setEnabled(false);
 			reloadAction.setEnabled(true);
 			this.retrieveEnd();

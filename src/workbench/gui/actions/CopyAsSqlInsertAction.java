@@ -34,6 +34,7 @@ public class CopyAsSqlInsertAction extends WbAction
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtCopyAsSqlInsert",KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+		this.setEnabled(false);
 	}
 
 	public void executeAction(ActionEvent e)

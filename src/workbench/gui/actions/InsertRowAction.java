@@ -31,10 +31,16 @@ public class InsertRowAction extends WbAction
 		this.initMenuDefinition("MnuTxtInsertRow");
 		this.setIcon(ResourceMgr.getImage("RowInsertAfter"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+		this.setEnabled(false);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
 		this.client.addRow();
+	}
+	
+	public void setClient(DbData db)
+	{
+		this.client = db;
 	}
 }

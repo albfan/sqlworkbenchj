@@ -16,8 +16,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
-
-import workbench.gui.sql.SqlPanel;
+import workbench.gui.sql.SplitPaneExpander;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -25,9 +24,9 @@ import workbench.resource.ResourceMgr;
  */
 public class ExpandEditorAction extends WbAction
 {
-	private SqlPanel client;
+	private SplitPaneExpander client;
 
-	public ExpandEditorAction(SqlPanel aClient)
+	public ExpandEditorAction(SplitPaneExpander aClient)
 	{
 		super();
 		this.client = aClient;
@@ -38,6 +37,6 @@ public class ExpandEditorAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.toggleEditorExpand();
+		this.client.toggleUpperComponentExpand();
 	}
 }

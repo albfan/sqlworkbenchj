@@ -39,9 +39,10 @@ public class UpdateDatabaseAction extends WbAction
 	{
 		panel.saveChangesToDatabase();
 	}
-	
-	public void setClient(DbUpdater aPanel)
+
+	public void setClient(DbUpdater client)
 	{
-		this.panel = aPanel;
+		this.panel = client;
 	}
+	
 }

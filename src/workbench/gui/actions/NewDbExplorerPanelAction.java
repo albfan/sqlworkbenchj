@@ -42,14 +42,6 @@ public class NewDbExplorerPanelAction
 
 	public void executeAction(ActionEvent e)
 	{
-		// don't do this "now" otherwise the toolbar
-		// button is not painted correctly
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				mainWin.newDbExplorerPanel(true);
-			}
-		});
+		mainWin.newDbExplorerPanel(true);
 	}
 }

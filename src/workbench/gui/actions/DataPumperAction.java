@@ -11,8 +11,8 @@
  */
 package workbench.gui.actions;
 
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
+import workbench.WbManager;
 
 import workbench.db.ConnectionProfile;
 import workbench.gui.MainWindow;
@@ -28,38 +28,40 @@ import workbench.resource.Settings;
  */
 public class DataPumperAction extends WbAction
 {
-	private MainWindow parent;
+	private static DataPumperAction instance = new DataPumperAction();
 	
-	public DataPumperAction(MainWindow parent)
+	private DataPumperAction()
 	{
 		super();
-		this.parent = parent;
 		this.initMenuDefinition("MnuTxtDataPumper");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_TOOLS);
 		this.setIcon(ResourceMgr.getImage("DataPumper"));
 	}
 	
+	public static DataPumperAction getInstance() { return instance; }
+	
 	public void executeAction(ActionEvent e)
 	{
-		if (parent == null)
+		MainWindow parent = WbManager.getInstance().getCurrentWindow();
+		if (parent != null) 
 		{
-			return;
+			WbSwingUtilities.showWaitCursor(parent);
 		}
-		EventQueue.invokeLater(new Runnable()
+		try
 		{
-			public void run()
+			ConnectionProfile profile = null;
+			if (Settings.getInstance().getAutoConnectDataPumper())
 			{
-				WbSwingUtilities.showWaitCursor(parent);
-				ConnectionProfile profile = null;
-				if (Settings.getInstance().getAutoConnectDataPumper())
-				{
-					profile = parent.getCurrentProfile();
-				}
-				DataPumper p = new DataPumper(profile, null);
-				p.showWindow(parent);
-				WbSwingUtilities.showDefaultCursor(parent);
+				profile = parent.getCurrentProfile();
 			}
-		});
+			DataPumper p = new DataPumper(profile, null);
+			p.showWindow(parent);
+		}
+		finally
+		{
+			if (parent != null) WbSwingUtilities.showDefaultCursor(parent);
+		}
+		
 	}
 	
 }

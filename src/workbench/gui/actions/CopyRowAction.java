@@ -31,10 +31,17 @@ public class CopyRowAction extends WbAction
 		this.initMenuDefinition("MnuTxtCopyRow");
 		this.setIcon(ResourceMgr.getImage("CopyRow"));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+		this.setEnabled(false);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
 		this.client.duplicateRow();
 	}
+	
+	public void setClient(DbData db)
+	{
+		this.client = db;
+	}	
+	
 }

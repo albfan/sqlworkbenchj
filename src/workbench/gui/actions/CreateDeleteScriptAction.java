@@ -35,39 +35,53 @@ public class CreateDeleteScriptAction
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtCreateDeleteScript", null);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+		this.setEnabled(false);
 		
-		this.client.getSelectionModel().addListSelectionListener(this);
+		if (this.client != null)
+		{
+			this.client.getSelectionModel().addListSelectionListener(this);
+		}
 	}
 
 	public void executeAction(ActionEvent e)
 	{
-		EventQueue.invokeLater(new Runnable()
+		try
 		{
-			public void run()
-			{
-				try
-				{
-					DeleteScriptGenerator gen = new DeleteScriptGenerator(client.getDataStore().getOriginalConnection());
-					gen.setSource(client);
-					gen.startGenerate();
-				}
-				catch (Exception ex)
-				{
-					LogMgr.logError("SqlPanel.generateDeleteScript()", "Error initializing DeleteScriptGenerator", ex);
-				}
-			}
-		});
-		
+			DeleteScriptGenerator gen = new DeleteScriptGenerator(client.getDataStore().getOriginalConnection());
+			gen.setSource(client);
+			gen.startGenerate();
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError("SqlPanel.generateDeleteScript()", "Error initializing DeleteScriptGenerator", ex);
+		}
 	}
 
 	public void valueChanged(javax.swing.event.ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
+		checkSelection();
+	}
 		
-		boolean mayUpdate = this.client.isUpdateable();
+	private void checkSelection()
+	{
+		boolean mayUpdate = (client != null && this.client.isUpdateable());
 		int rows = this.client.getSelectedRowCount();
 		this.setEnabled(mayUpdate && rows > 0);
 	}
-		
-
+	
+	public void setClient(WbTable w)
+	{
+		if (this.client != null)
+		{
+			this.client.getSelectionModel().removeListSelectionListener(this);
+		}
+		this.client = w;
+		if (this.client != null)
+		{
+			this.client.getSelectionModel().addListSelectionListener(this);
+			checkSelection();
+		}
+		this.setEnabled(this.client != null);
+	}
 }

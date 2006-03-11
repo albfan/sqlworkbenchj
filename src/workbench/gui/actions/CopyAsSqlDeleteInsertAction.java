@@ -34,6 +34,7 @@ public class CopyAsSqlDeleteInsertAction extends WbAction
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtCopyAsSqlDeleteInsert");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+		this.setEnabled(false);
 	}
 
 	public void executeAction(ActionEvent e)

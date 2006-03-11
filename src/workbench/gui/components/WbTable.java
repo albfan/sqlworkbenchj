@@ -345,13 +345,8 @@ public class WbTable
 		return this.copySelectedAsUpdateAction;
 	}
 
-	public WbMenu getCopySelectedMenu()
+	public void populateCopySelectedMenu(WbMenu copyMenu)
 	{
-		WbMenu copyMenu = new WbMenu(ResourceMgr.getString("MnuTxtCopySelected"));
-		//copyMenu.setEnabled(false);
-		copyMenu.setIcon(ResourceMgr.getImage("blank"));
-		copyMenu.setParentMenuId(ResourceMgr.MNU_TXT_DATA);
-
 		if (copySelectedAsTextAction == null)
 		{
 			copySelectedAsTextAction = new CopySelectedAsTextAction(this);
@@ -377,9 +372,23 @@ public class WbTable
 		if (copySelectedAsUpdateAction != null) copyMenu.add(copySelectedAsUpdateAction);
 		if (copySelectedAsInsertAction != null) copyMenu.add(copySelectedAsInsertAction);
 		if (copySelectedAsDeleteInsertAction != null) copyMenu.add(copySelectedAsDeleteInsertAction);
+	}
+	
+	public WbMenu getCopySelectedMenu()
+	{
+		WbMenu copyMenu = createCopySelectedMenu();
+		populateCopySelectedMenu(copyMenu);
 		return copyMenu;
 	}
 
+	public static WbMenu createCopySelectedMenu()
+	{
+		WbMenu copyMenu = new WbMenu(ResourceMgr.getString("MnuTxtCopySelected"));
+		copyMenu.setIcon(ResourceMgr.getImage("blank"));
+		copyMenu.setParentMenuId(ResourceMgr.MNU_TXT_DATA);
+		return copyMenu;
+	}
+	
 	public CopyAsSqlInsertAction getCopyAsInsertAction()
 	{
 		 return this.copyInsertAction;

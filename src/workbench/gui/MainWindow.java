@@ -23,14 +23,12 @@ import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,7 +42,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
@@ -56,6 +53,8 @@ import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+import workbench.gui.actions.AboutAction;
+import workbench.gui.actions.ConfigureShortcutsAction;
 import workbench.util.ExceptionUtil;
 import workbench.gui.actions.AddMacroAction;
 import workbench.gui.actions.AddTabAction;
@@ -82,14 +81,10 @@ import workbench.gui.actions.ViewLineNumbers;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.ConnectionSelector;
 import workbench.gui.components.WbMenu;
-import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.dbobjects.DbExplorerPanel;
-import workbench.gui.help.WhatsNewViewer;
 import workbench.gui.menu.SqlTabPopup;
-import workbench.gui.settings.SettingsPanel;
-import workbench.gui.settings.ShortcutEditor;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.Connectable;
 import workbench.interfaces.DbExecutionListener;
@@ -105,7 +100,9 @@ import workbench.util.StringUtil;
 import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
 import workbench.gui.actions.FileSaveProfiles;
-import workbench.gui.dialogs.WbAboutDialog;
+import workbench.gui.actions.OptionsDialogAction;
+import workbench.gui.actions.ShowHelpAction;
+import workbench.gui.actions.WhatsNewAction;
 
 /**
  * The main window for the Workbench.
@@ -465,7 +462,7 @@ public class MainWindow
 
 		menu = (JMenu)menus.get(ResourceMgr.MNU_TXT_FILE);
 		menu.addSeparator();
-		menu.add(new ManageDriversAction(this));
+		menu.add(new ManageDriversAction());
 		menu.addSeparator();
 
 		action = new FileExitAction();
@@ -906,8 +903,15 @@ public class MainWindow
 	 */
 	public void showStatusMessage(String aMsg)
 	{
+		if (aMsg == null) return;
 		MainPanel current = this.getCurrentPanel();
-		if (current != null) current.showStatusMessage(aMsg);
+		if (current != null) 
+		{
+			if (aMsg.length() == 0)
+				current.clearStatusMessage();
+			else
+				current.showStatusMessage(aMsg);
+		}
 	}
 
 	public void showLogMessage(String aMsg)
@@ -1099,8 +1103,7 @@ public class MainWindow
 	 	if (!f.exists())
 		{
 			// if the file does not exist, we are setting all
-			// variables as it would. Thus the file will be automatically
-			// created...
+			// variables as if it would. Thus the file will be created automatically
 			this.currentWorkspaceFile = realFilename;
 			this.updateWindowTitle();
 			this.checkWorkspaceActions();
@@ -1802,26 +1805,14 @@ public class MainWindow
 	{
 		JMenu result = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_HELP));
 		result.setName(ResourceMgr.MNU_TXT_HELP);
-		JMenuItem item = new WbMenuItem(ResourceMgr.getString("MnuTxtHelpContents"));
-		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1,0));
-		item.putClientProperty("command", "helpContents");
-		item.addActionListener(this);
-		result.add(item);
+		result.add(ShowHelpAction.getInstance());
 
 		result.addSeparator();
 
-		item = new WbMenuItem(ResourceMgr.getString("MnuTxtWhatsNew"));
-		item.putClientProperty("command", "whatsNew");
-		item.addActionListener(this);
-		result.add(item);
-
-		VersionCheckAction version = new VersionCheckAction();
-		result.add(version);
-
-		item = new WbMenuItem(ResourceMgr.getString("MnuTxtAbout"));
-		item.putClientProperty("command", "helpAbout");
-		item.addActionListener(this);
-		result.add(item);
+		result.add(WhatsNewAction.getInstance());
+		result.add(VersionCheckAction.getInstance());
+		result.add(AboutAction.getInstance());
+		
 		return result;
 	}
 
@@ -1841,22 +1832,12 @@ public class MainWindow
 		result.add(this.newDbExplorerWindow);
 		result.addSeparator();
 
-		DataPumperAction pumper = new DataPumperAction(this);
-		result.add(pumper);
+		result.add(DataPumperAction.getInstance());
 
 		result.addSeparator();
 
-		JMenuItem options = new WbMenuItem(ResourceMgr.getString(ResourceMgr.MNU_TXT_OPTIONS));
-		options.setName(ResourceMgr.MNU_TXT_OPTIONS);
-		options.putClientProperty("command", "optionsDialog");
-		options.addActionListener(this);
-		result.add(options);
-
-		JMenuItem shortcuts = new WbMenuItem(ResourceMgr.getString("MnuTxtConfigureShortcuts"));
-		shortcuts.setName("shortcuts");
-		shortcuts.putClientProperty("command", "keyboardDialog");
-		shortcuts.addActionListener(this);
-		result.add(shortcuts);
+		result.add(OptionsDialogAction.getInstance());
+		result.add(ConfigureShortcutsAction.getInstance());
 
 		JMenu lnf = new WbMenu(ResourceMgr.getString("MnuTxtLookAndFeel"));
 		lnf.setName("lnf");
@@ -2282,9 +2263,8 @@ public class MainWindow
 
 			JMenuBar menuBar = this.createMenuForPanel(sql);
 			this.panelMenus.add(index, menuBar);
-
 			this.sqlTab.add(sql, index);
-
+			
 			// setTabTitle needs to be called after adding the panel!
 			// this will set the correct title with Mnemonics
 			this.setTabTitle(index, ResourceMgr.getDefaultTabLabel());
@@ -2298,9 +2278,15 @@ public class MainWindow
 			if (!isSuspended) this.sqlTab.setSuspendRepaint(false);
 		}
 
+		sql.initDivider(sqlTab.getHeight() - sqlTab.getTabHeight());
+		
 		// This needs to be done after re-enabling repaint 
 		// otherwise the tab will not change properly!
-		if (selectNew) 	this.sqlTab.setSelectedIndex(index);
+		if (selectNew) 	
+		{
+			this.sqlTab.setSelectedIndex(index);
+		}
+			
 
 		return sql;
 	}
@@ -2478,6 +2464,11 @@ public class MainWindow
 			this.tabRemovalInProgress = true;
 			WbConnection conn = panel.getConnection();
 
+			// this does not really close the connection
+			// it simply tells the panel that it should
+			// release anything attached to the connection!
+			// the actual disconnect from the DB is done afterwards
+			// through the ConnectionMgr
 			panel.disconnect();
 			try
 			{
@@ -2519,122 +2510,34 @@ public class MainWindow
 		if (newTab >= 0) this.tabSelected(newTab);
 	}
 
-	/**
-	 *	Some menu items are built without an Action, so the window
-	 *  is registered as the ActionListener...
-	 *	These menu items are:
-	 *	- Change look and feel
-	 *  - What's new
-	 *  - Help
-	 *  - About
-	 *  - Tools/Options
-	 */
 	public void actionPerformed(ActionEvent e)
 	{
-		Object sender = e.getSource();
-		if (sender instanceof JMenuItem)
+		JMenuItem item = (JMenuItem)e.getSource();
+		String command = (String)item.getClientProperty("command");
+		if ("lnf".equals(command))
 		{
-			JMenuItem item = (JMenuItem)sender;
-			String command = (String)item.getClientProperty("command");
-			if ("lnf".equals(command))
+			String className = (String)item.getClientProperty("class");
+			try
 			{
-				String className = (String)item.getClientProperty("class");
+				WbManager.getInstance().changeLookAndFeel(className);
+				for (int i=0; i < this.sqlTab.getTabCount(); i ++)
+				{
+					JMenuBar menu = (JMenuBar)this.panelMenus.get(i);
+					SwingUtilities.updateComponentTreeUI(menu);
+				}
 				try
 				{
-					WbManager.getInstance().changeLookAndFeel(className);
-					for (int i=0; i < this.sqlTab.getTabCount(); i ++)
-					{
-						JMenuBar menu = (JMenuBar)this.panelMenus.get(i);
-						SwingUtilities.updateComponentTreeUI(menu);
-					}
-					try
-					{
-						this.updateToolsMenu();
-					}
-					catch (Exception upe)
-					{
-						LogMgr.logWarning("MainWindow.actionPerformed()", "Error updating LNF menu", upe);
-					}
+					this.updateToolsMenu();
 				}
-				catch (Exception ex)
+				catch (Exception upe)
 				{
-					LogMgr.logError("MainWindow.actionPerformed()", "Could not change look and feel", ex);
+					LogMgr.logWarning("MainWindow.actionPerformed()", "Error updating LNF menu", upe);
 				}
 			}
-			else if ("whatsNew".equals(command))
+			catch (Exception ex)
 			{
-				EventQueue.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						new WhatsNewViewer(MainWindow.this).setVisible(true);
-					}
-				});
+				LogMgr.logError("MainWindow.actionPerformed()", "Could not change look and feel", ex);
 			}
-			else if ("optionsDialog".equals(command))
-			{
-				EventQueue.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						try
-						{
-							SettingsPanel panel = new SettingsPanel();
-							panel.showSettingsDialog(MainWindow.this);
-						}
-						catch (Exception e)
-						{
-							LogMgr.logError("MainWindow.showOptions()", "Error displaying options window", e);
-						}
-					}
-				});
-			}
-			else if ("helpContents".equals(command))
-			{
-				this.showHelp();
-			}
-			else if ("keyboardDialog".equals(command))
-			{
-				EventQueue.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						ShortcutEditor editor = new ShortcutEditor(MainWindow.this);
-						editor.showWindow();
-					}
-				});
-			}
-			else if ("helpAbout".equals(command))
-			{
-				EventQueue.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						WbAboutDialog about = new WbAboutDialog(MainWindow.this, true);
-						WbSwingUtilities.center(about, MainWindow.this);
-						about.setVisible(true);
-					}
-				});
-			}
-		}
-	}
-
-	public void showHelp()
-	{
-		try
-		{
-			// Use reflection to load the HtmlViewer in order to
-			// avoid unnecessary class loading during startup
-			Class cls = Class.forName("workbench.gui.help.HtmlViewer");
-			Class[] types = new Class[] { JFrame.class };
-			Constructor cons = cls.getConstructor(types);
-			Object[] args = new Object[] { this };
-			cons.newInstance(args);
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logError("MainWindow.showHelp()", "Error when displaying HTML help", ex);
-			JOptionPane.showMessageDialog(this, "The documentation is currently available at www.kellerer.org/workbench");
 		}
 	}
 

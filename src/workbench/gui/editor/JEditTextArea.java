@@ -109,7 +109,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.44 2006-03-04 10:34:41 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.45 2006-03-11 16:29:52 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -133,7 +133,6 @@ public class JEditTextArea
 	 * bar is added this way.
 	 */
 	public static String LEFT_OF_SCROLLBAR = "los";
-
 
 	/**
 	 * Creates a new JEditTextArea with the default settings.
@@ -195,6 +194,11 @@ public class JEditTextArea
 		focusedComponent = this;
 	}
 
+	public int getHScrollBarHeight()
+	{
+		return (int)horizontal.getPreferredSize().getHeight();
+	}
+	
 	public Point getCursorLocation()
 	{
 		int line = getCaretLine();

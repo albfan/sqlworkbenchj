@@ -39,12 +39,6 @@ public class RemoveTabAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				client.removeTab();
-			}
-		});
+		client.removeTab();
 	}
 }

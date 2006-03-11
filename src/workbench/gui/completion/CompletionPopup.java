@@ -12,6 +12,7 @@
 package workbench.gui.completion;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Point;
 import java.awt.event.FocusEvent;
@@ -20,7 +21,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -59,6 +59,7 @@ public class CompletionPopup
 	private boolean appendDot;
 	private boolean selectCurrentWordInEditor;
 	private String columnPrefix;
+	private CompletionSearchField searchField;
 	
 	public CompletionPopup(JEditTextArea ed, JComponent header, ListModel listData)
 	{
@@ -91,7 +92,7 @@ public class CompletionPopup
 	
 	public void showPopup(String valueToSelect)
 	{
-		if (window != null) closePopup(false);
+		//if (window != null) closePopup(false);
 		try
 		{
 			scroll.setColumnHeaderView(headerComponent);
@@ -130,7 +131,11 @@ public class CompletionPopup
 			}
 			if (index == -1) index = 0;
 			
-			window = new JWindow((Frame)SwingUtilities.getWindowAncestor(editor));
+			if (window == null)
+			{
+				window = new JWindow((Frame)SwingUtilities.getWindowAncestor(editor));
+			}
+			
 			editor.setKeyEventInterceptor(this);
 			
 			elementList.doLayout();
@@ -159,6 +164,35 @@ public class CompletionPopup
 		}
 	}
 	
+	public void closeQuickSearch()
+	{
+		searchField = null;
+		if (Settings.getInstance().getCloseAutoCompletionWithSearch())
+		{
+			this.closePopup(false);
+		}
+		else
+		{
+			this.scroll.setColumnHeaderView(this.headerComponent);
+			this.headerComponent.doLayout();
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					elementList.requestFocusInWindow();
+				}
+			});
+		}			
+	}
+	
+	/**
+	 * Callback from the SearchField when enter has been pressed in the search field
+	 */
+	public void quickSearchValueSelected()
+	{
+		this.closePopup(true);
+	}
+	
 	private String getPasteValue(String value)
 	{
 		if (value == null) return value;
@@ -182,12 +216,20 @@ public class CompletionPopup
 	private void closePopup(boolean pasteEntry)
 	{
 		editor.removeKeyEventInterceptor();
+		if (this.window == null) return;
 		
-		if (this.window != null)
+		try
 		{
-			editor.requestFocus();
 			this.window.setVisible(false);
-			this.window.dispose();
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					editor.requestFocus();
+					editor.requestFocusInWindow();
+				}
+			});
+			
 			if (pasteEntry)
 			{
 				Object o = this.elementList.getSelectedValue();
@@ -232,6 +274,12 @@ public class CompletionPopup
 					editor.setSelectedText(value);
 				}
 			}
+			
+		}
+		finally
+		{
+			this.window.dispose();
+			this.window = null;
 		}
 	}
 
@@ -250,7 +298,20 @@ public class CompletionPopup
 		this.appendDot = flag;
 	}
 	
-	protected int findEntry(String s)
+	public void selectMatchingEntry(String s)
+	{
+		int index = this.findEntry(s);
+		if (index > 0)
+		{
+			elementList.setSelectedIndex(index);
+			elementList.ensureIndexIsVisible(index);
+		}
+		else
+		{
+			elementList.clearSelection();
+		}
+	}
+	private int findEntry(String s)
 	{
 		if (s == null) return -1;
 		int count = this.data.getSize();
@@ -258,9 +319,7 @@ public class CompletionPopup
 		for (int i=0; i < count; i++)
 		{
 			String entry = this.data.getElementAt(i).toString();
-			if (entry.length() == 0) continue;
-			entry = entry.toLowerCase();
-			if (entry.startsWith(search)) return i;
+			if (entry.toLowerCase().startsWith(search)) return i;
 		}
 		return -1;
 	}
@@ -292,7 +351,7 @@ public class CompletionPopup
 	 */
 	public void focusLost(FocusEvent focusEvent)
 	{
-		closePopup(false);
+		if (this.searchField == null) closePopup(false);
 	}
 	
 	/**
@@ -353,16 +412,24 @@ public class CompletionPopup
 			if (l[i] != this) l[i].keyPressed(evt);
 		}
 	}
+	
 	public void keyTyped(KeyEvent evt)
 	{
-		char ch = evt.getKeyChar();
-		int index = findEntry(ch);
-		if (index > -1)
+		if (this.searchField == null)
 		{
-			elementList.setSelectedIndex(index);
-			elementList.ensureIndexIsVisible(index);
-			evt.consume();
+			this.searchField = new CompletionSearchField(this);
+			String text = "" + evt.getKeyChar();
+			this.searchField.setText(text);
+			this.scroll.setColumnHeaderView(this.searchField);
+			this.scroll.doLayout();
 		}
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				searchField.requestFocusInWindow();
+			}
+		});
 	}
 
 	public void keyReleased(KeyEvent keyEvent)

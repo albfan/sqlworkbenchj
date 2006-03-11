@@ -137,6 +137,8 @@ public class SettingsPanel
     selectionColor = new workbench.gui.components.WbColorPicker();
     editorFontLabel = new javax.swing.JLabel();
     editorFont = new workbench.gui.components.WbFontPicker();
+    labelCloseSearch = new javax.swing.JLabel();
+    closePopup = new javax.swing.JCheckBox();
     dataEdit = new javax.swing.JPanel();
     pkMapFileLabel = new javax.swing.JLabel();
     jPanel3 = new javax.swing.JPanel();
@@ -144,12 +146,14 @@ public class SettingsPanel
     selectMapFile = new javax.swing.JButton();
     previewDmlLabel = new javax.swing.JLabel();
     previewDml = new javax.swing.JCheckBox();
-    highlightRequiredLabel = new javax.swing.JLabel();
-    highlightRequired = new javax.swing.JCheckBox();
+    labelRowHeight = new javax.swing.JLabel();
+    rowHeightResize = new javax.swing.JCheckBox();
     requiredFieldLabel = new javax.swing.JLabel();
     requiredFieldColor = new workbench.gui.components.WbColorPicker();
     dataFontLabel = new javax.swing.JLabel();
     dataFont = new workbench.gui.components.WbFontPicker();
+    highlightRequiredLabel = new javax.swing.JLabel();
+    highlightRequired = new javax.swing.JCheckBox();
     explorerPanel = new javax.swing.JPanel();
     dbExplorerLabel = new javax.swing.JLabel();
     showDbExplorer = new javax.swing.JCheckBox();
@@ -526,7 +530,6 @@ public class SettingsPanel
     gridBagConstraints.insets = new java.awt.Insets(8, 12, 2, 0);
     editorTab.add(autoAdvanceLabel, gridBagConstraints);
 
-    autoAdvance.setFont(null);
     autoAdvance.setSelected(Settings.getInstance().getAutoJumpNextStatement());
     autoAdvance.setText("");
     autoAdvance.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -545,7 +548,7 @@ public class SettingsPanel
     editorTabSizeLabel.setToolTipText(ResourceMgr.getDescription("LabelTabWidth"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
@@ -556,7 +559,7 @@ public class SettingsPanel
     tabSize.setMinimumSize(new java.awt.Dimension(72, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
@@ -567,7 +570,7 @@ public class SettingsPanel
     altDelimLabel.setToolTipText(ResourceMgr.getDescription("LabelAltDelimit"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
     editorTab.add(altDelimLabel, gridBagConstraints);
@@ -576,7 +579,7 @@ public class SettingsPanel
     altDelimitTextField.setMinimumSize(new java.awt.Dimension(72, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(6, 11, 0, 15);
@@ -586,7 +589,7 @@ public class SettingsPanel
     historySizeLabel.setToolTipText(ResourceMgr.getDescription("LabelHistorySize"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 12, 0, 0);
     editorTab.add(historySizeLabel, gridBagConstraints);
@@ -595,7 +598,7 @@ public class SettingsPanel
     historySizeField.setMinimumSize(new java.awt.Dimension(72, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(3, 11, 0, 15);
@@ -605,7 +608,7 @@ public class SettingsPanel
     electricScrollLabel.setToolTipText(ResourceMgr.getDescription("LabelSettingElectricScroll"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
     editorTab.add(electricScrollLabel, gridBagConstraints);
@@ -614,7 +617,7 @@ public class SettingsPanel
     electricScroll.setMinimumSize(new java.awt.Dimension(72, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(3, 11, 0, 15);
@@ -638,7 +641,6 @@ public class SettingsPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
     editorTab.add(rightClickLabel, gridBagConstraints);
 
-    rightClickMovesCursor.setFont(null);
     rightClickMovesCursor.setSelected(Settings.getInstance().getRightClickMovesCursor());
     rightClickMovesCursor.setText("");
     rightClickMovesCursor.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -657,14 +659,14 @@ public class SettingsPanel
     pkMapLabel.setToolTipText(ResourceMgr.getDescription("LabelShowEditorInfo"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(3, 12, 0, 0);
     editorTab.add(pkMapLabel, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(3, 11, 0, 15);
@@ -674,7 +676,7 @@ public class SettingsPanel
     selectionColorLabel.setToolTipText(ResourceMgr.getDescription("LabelSelectionColor"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 0);
@@ -682,7 +684,7 @@ public class SettingsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(3, 5, 0, 0);
     editorTab.add(errorColor, gridBagConstraints);
@@ -691,7 +693,7 @@ public class SettingsPanel
     errorColorLabel.setToolTipText(ResourceMgr.getDescription("LabelSelectErrorColor"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
@@ -699,7 +701,7 @@ public class SettingsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 5, 0, 0);
     editorTab.add(selectionColor, gridBagConstraints);
@@ -708,7 +710,7 @@ public class SettingsPanel
     editorFontLabel.setToolTipText(ResourceMgr.getDescription("LabelEditorFont"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
@@ -716,11 +718,42 @@ public class SettingsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 9, 0, 15);
     editorTab.add(editorFont, gridBagConstraints);
+
+    labelCloseSearch.setText(ResourceMgr.getString("TxtCloseCompletion"));
+    labelCloseSearch.setToolTipText(ResourceMgr.getDescription("TxtCloseCompletion"));
+    labelCloseSearch.addMouseListener(new java.awt.event.MouseAdapter()
+    {
+      public void mouseClicked(java.awt.event.MouseEvent evt)
+      {
+        labelCloseSearchMouseClicked(evt);
+      }
+    });
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
+    editorTab.add(labelCloseSearch, gridBagConstraints);
+
+    closePopup.setSelected(Settings.getInstance().getCloseAutoCompletionWithSearch());
+    closePopup.setText("");
+    closePopup.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    closePopup.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(1, 7, 0, 11);
+    editorTab.add(closePopup, gridBagConstraints);
 
     mainTab.addTab(ResourceMgr.getString("LabelSettingsEditor"), editorTab);
 
@@ -782,7 +815,7 @@ public class SettingsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(14, 12, 0, 0);
     dataEdit.add(previewDmlLabel, gridBagConstraints);
@@ -795,43 +828,42 @@ public class SettingsPanel
     previewDml.setIconTextGap(5);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(10, 7, 0, 11);
     dataEdit.add(previewDml, gridBagConstraints);
 
-    highlightRequiredLabel.setLabelFor(highlightRequired);
-    highlightRequiredLabel.setText(ResourceMgr.getString("LabelHiliteRqd"));
-    highlightRequiredLabel.setToolTipText(ResourceMgr.getDescription("LabelHiliteRqd"));
-    highlightRequiredLabel.addMouseListener(new java.awt.event.MouseAdapter()
+    labelRowHeight.setLabelFor(rowHeightResize);
+    labelRowHeight.setText(ResourceMgr.getString("LblRowResize"));
+    labelRowHeight.setToolTipText(ResourceMgr.getDescription("LblRowResize"));
+    labelRowHeight.addMouseListener(new java.awt.event.MouseAdapter()
     {
       public void mouseClicked(java.awt.event.MouseEvent evt)
       {
-        highlightRequiredLabelMouseClicked(evt);
+        labelRowHeightMouseClicked(evt);
       }
     });
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
-    dataEdit.add(highlightRequiredLabel, gridBagConstraints);
+    dataEdit.add(labelRowHeight, gridBagConstraints);
 
-    highlightRequired.setFont(null);
-    highlightRequired.setSelected(Settings.getInstance().getHighlightRequiredFields());
-    highlightRequired.setText("");
-    highlightRequired.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    highlightRequired.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-    highlightRequired.setIconTextGap(5);
+    rowHeightResize.setSelected(Settings.getInstance().getAllowRowHeightResizing());
+    rowHeightResize.setText("");
+    rowHeightResize.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    rowHeightResize.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+    rowHeightResize.setIconTextGap(5);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(3, 7, 0, 11);
-    dataEdit.add(highlightRequired, gridBagConstraints);
+    dataEdit.add(rowHeightResize, gridBagConstraints);
 
     requiredFieldLabel.setText(ResourceMgr.getString("LabelReqFldColor"));
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -867,6 +899,38 @@ public class SettingsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 15);
     dataEdit.add(dataFont, gridBagConstraints);
+
+    highlightRequiredLabel.setLabelFor(highlightRequired);
+    highlightRequiredLabel.setText(ResourceMgr.getString("LabelHiliteRqd"));
+    highlightRequiredLabel.setToolTipText(ResourceMgr.getDescription("LabelHiliteRqd"));
+    highlightRequiredLabel.addMouseListener(new java.awt.event.MouseAdapter()
+    {
+      public void mouseClicked(java.awt.event.MouseEvent evt)
+      {
+        highlightRequiredLabelMouseClicked(evt);
+      }
+    });
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
+    dataEdit.add(highlightRequiredLabel, gridBagConstraints);
+
+    highlightRequired.setFont(null);
+    highlightRequired.setSelected(Settings.getInstance().getHighlightRequiredFields());
+    highlightRequired.setText("");
+    highlightRequired.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    highlightRequired.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+    highlightRequired.setIconTextGap(5);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(3, 7, 0, 11);
+    dataEdit.add(highlightRequired, gridBagConstraints);
 
     mainTab.addTab(ResourceMgr.getString("LabelDataEdit"), dataEdit);
 
@@ -1056,15 +1120,25 @@ public class SettingsPanel
 
   }// </editor-fold>//GEN-END:initComponents
 
+	private void highlightRequiredLabelMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_highlightRequiredLabelMouseClicked
+	{//GEN-HEADEREND:event_highlightRequiredLabelMouseClicked
+		highlightRequired.setSelected(!highlightRequired.isSelected());
+	}//GEN-LAST:event_highlightRequiredLabelMouseClicked
+
+	private void labelCloseSearchMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_labelCloseSearchMouseClicked
+	{//GEN-HEADEREND:event_labelCloseSearchMouseClicked
+		closePopup.setSelected(!closePopup.isSelected());
+	}//GEN-LAST:event_labelCloseSearchMouseClicked
+
 	private void rememberObjectLabelMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_rememberObjectLabelMouseClicked
 	{//GEN-HEADEREND:event_rememberObjectLabelMouseClicked
 		this.rememberObject.setSelected(!this.rememberObject.isSelected());
 	}//GEN-LAST:event_rememberObjectLabelMouseClicked
 
-	private void highlightRequiredLabelMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_highlightRequiredLabelMouseClicked
-	{//GEN-HEADEREND:event_highlightRequiredLabelMouseClicked
-		this.highlightRequired.setSelected(!this.highlightRequired.isSelected());
-	}//GEN-LAST:event_highlightRequiredLabelMouseClicked
+	private void labelRowHeightMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_labelRowHeightMouseClicked
+	{//GEN-HEADEREND:event_labelRowHeightMouseClicked
+		this.rowHeightResize.setSelected(!this.rowHeightResize.isSelected());
+	}//GEN-LAST:event_labelRowHeightMouseClicked
 
 	private void selectMapFile(java.awt.event.ActionEvent evt)//GEN-FIRST:event_selectMapFile
 	{//GEN-HEADEREND:event_selectMapFile
@@ -1136,6 +1210,8 @@ public class SettingsPanel
 	private boolean saveSettings()
 	{
 		Settings set = Settings.getInstance();
+		set.setCloseAutoCompletionWithSearch(closePopup.isSelected());
+		set.setAllowRowHeightResizing(rowHeightResize.isSelected());
 		set.setEditorErrorColor(errorColor.getSelectedColor());
 		set.setEditorFont(editorFont.getSelectedFont());
 		set.setStandardFont(standardFont.getSelectedFont());
@@ -1231,6 +1307,7 @@ public class SettingsPanel
   private javax.swing.JLabel bufferSizeLabel;
   private javax.swing.JPanel buttonPanel;
   private javax.swing.JButton cancelButton;
+  private javax.swing.JCheckBox closePopup;
   private javax.swing.JCheckBox consolidateLog;
   private javax.swing.JLabel consolidateLogLabel;
   private javax.swing.JPanel dataEdit;
@@ -1264,6 +1341,8 @@ public class SettingsPanel
   private javax.swing.JLabel historySizeLabel;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanel3;
+  private javax.swing.JLabel labelCloseSearch;
+  private javax.swing.JLabel labelRowHeight;
   private javax.swing.JTabbedPane mainTab;
   private javax.swing.JTextField maxColSizeField;
   private javax.swing.JLabel maxColSizeLabel;
@@ -1288,6 +1367,7 @@ public class SettingsPanel
   private javax.swing.JLabel retrieveDbExplorerLabel;
   private javax.swing.JLabel rightClickLabel;
   private javax.swing.JCheckBox rightClickMovesCursor;
+  private javax.swing.JCheckBox rowHeightResize;
   private javax.swing.JButton selectMapFile;
   private workbench.gui.components.WbColorPicker selectionColor;
   private javax.swing.JLabel selectionColorLabel;

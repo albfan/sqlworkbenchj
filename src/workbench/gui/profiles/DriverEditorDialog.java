@@ -47,9 +47,9 @@ public class DriverEditorDialog extends JDialog
 	private EscAction escAction;
 
 	/** Creates new form DriverEditorDialog */
-	public DriverEditorDialog(Frame parent, boolean modal)
+	public DriverEditorDialog(Frame parent)
 	{
-		super(parent, modal);
+		super(parent, true);
 		initComponents();
 
 		this.getRootPane().setDefaultButton(this.okButton);

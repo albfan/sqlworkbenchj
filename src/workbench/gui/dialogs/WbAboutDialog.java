@@ -28,15 +28,15 @@ import workbench.util.BrowserLauncher;
  *
  * @author  support@sql-workbench.net
  */
-public class WbAboutDialog extends javax.swing.JDialog
+public class WbAboutDialog 
+	extends javax.swing.JDialog
 	implements ActionListener
 {
 	private EscAction escAction;
 
-	/** Creates new form WbAboutDialog */
-	public WbAboutDialog(java.awt.Frame parent, boolean modal)
+	public WbAboutDialog(java.awt.Frame parent)
 	{
-		super(parent, modal);
+		super(parent, true);
 		initComponents();
 		homepageLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		mailToLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));

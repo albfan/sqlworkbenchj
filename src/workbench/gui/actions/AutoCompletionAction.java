@@ -80,12 +80,6 @@ public class AutoCompletionAction
 	public void executeAction(ActionEvent e)
 	{
 		Component focus = FocusManager.getCurrentManager().getFocusOwner();
-		if (focus == this.editor)
-		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run() { handler.showCompletionPopup(); }
-			});
-		}
+		handler.showCompletionPopup();
 	}
 }

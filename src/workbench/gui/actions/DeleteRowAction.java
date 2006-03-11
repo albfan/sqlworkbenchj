@@ -38,4 +38,9 @@ public class DeleteRowAction extends WbAction
 	{
 		this.client.deleteRow();
 	}
+	
+	public void setClient(DbData db)
+	{
+		this.client = db;
+	}	
 }

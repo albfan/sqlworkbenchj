@@ -12,9 +12,8 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-
-import workbench.WbManager;
 import workbench.db.WbConnection;
+import workbench.gui.actions.ShowHelpAction;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -35,7 +34,7 @@ public class WbHelp extends SqlCommand
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
-		WbManager.getInstance().getCurrentWindow().showHelp();
+		ShowHelpAction.getInstance().showHelp();
 		return result;
 	}
 

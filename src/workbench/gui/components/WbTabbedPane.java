@@ -12,9 +12,13 @@
 package workbench.gui.components;
 
 import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Insets;
 
 import javax.swing.JTabbedPane;
+import javax.swing.UIManager;
 import workbench.gui.WbSwingUtilities;
 
 
@@ -35,6 +39,18 @@ public class WbTabbedPane
 		init();
 	}
 
+	public int getTabHeight()
+	{
+		Font font = getFont();
+		if (font == null) return 0;
+		FontMetrics metrics = getFontMetrics(font);
+		if (metrics == null) return 0;
+		int fontHeight = metrics.getHeight();
+    Insets tabInsets = UIManager.getInsets("TabbedPane.tabInsets");
+		fontHeight += tabInsets.top + tabInsets.bottom + 2;
+		return fontHeight + 5;
+	}
+	
 	public WbTabbedPane(int placement)
 	{
 		super(placement);
@@ -47,6 +63,7 @@ public class WbTabbedPane
 		this.setUI(TabbedPaneUIFactory.getBorderLessUI());
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 	}
+	
 	public synchronized void setSuspendRepaint(boolean suspendNow)
 	{
 		boolean suspended = this.suspendRepaint;

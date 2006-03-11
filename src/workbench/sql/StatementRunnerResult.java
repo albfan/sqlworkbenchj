@@ -13,6 +13,7 @@ package workbench.sql;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import workbench.resource.ResourceMgr;
 
 import workbench.storage.DataStore;
 
@@ -32,6 +33,8 @@ public class StatementRunnerResult
 	private boolean success = true;
 	private boolean hasWarning = false;
 
+	private long executionTime = -1;
+	
 	public StatementRunnerResult()
 	{
 	}
@@ -41,6 +44,19 @@ public class StatementRunnerResult
 		this.sourceCommand = aCmd;
 	}
 
+	public void setExecutionTime(long t) { this.executionTime = t; }
+	public long getExecutionTime() { return this.executionTime; }
+	public String getTimingMessage()
+	{
+		if (executionTime == -1) return null;
+		StringBuffer msg = new StringBuffer(100);
+		msg.append(ResourceMgr.getString("MsgExecTime"));
+		msg.append(' ');
+		msg.append(((double)executionTime) / 1000.0);
+		msg.append('s');
+		return msg.toString();
+	}
+	
 	public void setSuccess() { this.success = true; }
 	public void setFailure() { this.success = false; }
 	public void setWarning(boolean flag) { this.hasWarning = flag; }
@@ -135,6 +151,19 @@ public class StatementRunnerResult
 		return rs;
 	}
 
+	public StringBuffer getMessageBuffer()
+	{
+		if (this.messages == null) return null;
+		int size = this.messages.size();
+		StringBuffer result = new StringBuffer(size * 80);
+		for (int i = 0; i < size; i++)
+		{
+			result.append((String)messages.get(i));
+			result.append('\n');
+		}
+		return result;
+	}
+	
 	public String[] getMessages()
 	{
 		if (this.messages == null) return null;
@@ -146,7 +175,7 @@ public class StatementRunnerResult
 		}
 		return msgs;
 	}
-
+	
 	public long getTotalUpdateCount()
 	{
 		if (this.updateCounts == null) return 0;
@@ -200,6 +229,7 @@ public class StatementRunnerResult
 		if (this.updateCounts !=null) this.updateCounts.clear();
 		this.sourceCommand = null;
 		this.hasWarning = false;
+		this.executionTime = -1;
 	}
 	
 }

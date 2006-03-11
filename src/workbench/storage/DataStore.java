@@ -1169,11 +1169,13 @@ public class DataStore
 	 * Define the (SELECT) statement that was used to produce this
 	 * DataStore's result set. This is used to find the update table later
 	 */
-	public void setOriginalStatement(String aSql)
+	public void setGeneratingSql(String aSql)
 	{
 		this.sql = aSql;
 	}
 
+	public String getGeneratingSql() { return this.sql; }
+	
 	public boolean checkUpdateTable(WbConnection aConn)
 	{
 		if (this.sql == null) return false;

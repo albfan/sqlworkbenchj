@@ -42,6 +42,7 @@ public class OptimizeAllColumnsAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
+		if (client == null) return;
 		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
 		this.client.optimizeAllColWidth(shiftPressed);
 	}
@@ -52,4 +53,9 @@ public class OptimizeAllColumnsAction extends WbAction
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK), this.getActionName());
 	}
 
+	public void setClient(WbTable c)
+	{
+		this.client = c;
+		this.setEnabled(this.client != null);
+	}
 }

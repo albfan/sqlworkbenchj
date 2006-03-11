@@ -20,10 +20,11 @@ import workbench.resource.ResourceMgr;
  *	Action to clear the contents of a entry field
  *	@author  support@sql-workbench.net
  */
-public class SelectKeyColumnsAction extends WbAction
+public class SelectKeyColumnsAction 
+	extends WbAction
 {
 	private DwPanel client;
-	
+
 	public SelectKeyColumnsAction(DwPanel aClient)
 	{
 		super();
@@ -41,5 +42,5 @@ public class SelectKeyColumnsAction extends WbAction
 			this.client.checkAndSelectKeyColumns();
 		}
 	}
-	
+
 }

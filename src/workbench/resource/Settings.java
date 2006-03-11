@@ -745,6 +745,16 @@ public class Settings
 	public static final int SHOW_NO_FILENAME = 0;
 	public static final int SHOW_FILENAME = 1;
 	public static final int SHOW_FULL_PATH = 2;
+
+	public boolean getAllowRowHeightResizing()
+	{
+		return getBoolProperty("workbench.gui.display.rowheightresize", true);
+	}
+	
+	public void setAllowRowHeightResizing(boolean flag)
+	{
+		setProperty("workbench.gui.display.rowheightresize", flag);
+	}
 	
 	public boolean getShowRowNumbers()
 	{
@@ -802,17 +812,17 @@ public class Settings
 
 	public boolean getShowLineNumbers()
 	{
-		return StringUtil.stringToBool(this.props.getProperty(PROPERTY_SHOW_LINE_NUMBERS, "true"));
+		return getBoolProperty(PROPERTY_SHOW_LINE_NUMBERS, true);
 	}
 	
 	public void setShowLineNumbers(boolean show)
 	{
-		this.props.setProperty(PROPERTY_SHOW_LINE_NUMBERS, Boolean.toString(show));
+		setProperty(PROPERTY_SHOW_LINE_NUMBERS, show);
 	}
 
 	public boolean getAutoJumpNextStatement()
 	{
-		return StringUtil.stringToBool(this.props.getProperty("workbench.editor.autojumpnext", "false"));
+		return getBoolProperty("workbench.editor.autojumpnext", false);
 	}
 
 	public void setAutoJumpNextStatement(boolean show)
@@ -1558,6 +1568,16 @@ public class Settings
 	public String getAutoCompletionPasteCase()
 	{
 		return getProperty("workbench.editor.autocompletion.paste.case", null);
+	}
+	
+	public boolean getCloseAutoCompletionWithSearch()
+	{
+		return getBoolProperty("workbench.editor.autocompletion.closewithsearch", false);
+	}
+	
+	public void setCloseAutoCompletionWithSearch(boolean flag)
+	{
+		setProperty("workbench.editor.autocompletion.closewithsearch", flag);
 	}
 	
 	public boolean getAutoCompletionEmptyLineIsSeparator()

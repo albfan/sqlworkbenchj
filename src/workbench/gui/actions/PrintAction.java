@@ -29,8 +29,7 @@ public class PrintAction
 	public PrintAction(WbTable aClient)
 	{
 		super();
-		this.client = aClient;
-		this.client.addTableModelListener(this);
+		this.setClient(aClient);
 		this.initMenuDefinition("MnuTxtPrint");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
 		this.setIcon(ResourceMgr.getImage("Print"));
@@ -45,5 +44,17 @@ public class PrintAction
 	{
 		this.setEnabled(this.client.getRowCount() > 0);
 	}
-	
+
+	public void setClient(WbTable c)
+	{
+		if (this.client != null)
+		{
+			this.client.removeTableModelListener(this);
+		}
+		this.client = c;
+		if (this.client != null)
+		{
+			this.client.addTableModelListener(this);
+		}
+	}
 }

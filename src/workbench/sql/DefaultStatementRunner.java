@@ -227,6 +227,8 @@ public class DefaultStatementRunner
 		}
 
 		this.dbConnection = aConn;
+		if (aConn == null) return;
+		
 		DbMetadata meta = this.dbConnection.getMetadata();
 		if (meta.isOracle())
 		{
@@ -344,6 +346,7 @@ public class DefaultStatementRunner
 			}
 		}
 		
+		long sqlExecStart = System.currentTimeMillis();
 		this.result = this.currentCommand.execute(this.dbConnection, realSql);
 
 		if (this.currentCommand instanceof WbStartBatch && result.isSuccess())
@@ -367,6 +370,8 @@ public class DefaultStatementRunner
 				this.currentConsumer = null;
 			}
 		}
+		long time = (System.currentTimeMillis() - sqlExecStart);
+		result.setExecutionTime(time);
 	}
 
 	/**

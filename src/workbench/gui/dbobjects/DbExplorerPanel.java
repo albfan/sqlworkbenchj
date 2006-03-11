@@ -597,13 +597,9 @@ public class DbExplorerPanel
 		return this.toolbar;
 	}
 
-	public void showLogMessage(String aMsg)
-	{
-	}
-
-	public void showStatusMessage(String aMsg)
-	{
-	}
+	public void showLogMessage(String aMsg) {}
+	public void clearStatusMessage() {} 
+	public void showStatusMessage(String aMsg) {}
 	public void clearLog() {}
 
 	public void showLogPanel() {}

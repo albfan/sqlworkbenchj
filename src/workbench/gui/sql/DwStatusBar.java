@@ -14,6 +14,7 @@ package workbench.gui.sql;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -218,14 +219,31 @@ public class DwStatusBar
 	
 	public String getText() { return this.tfStatus.getText(); }
 	
-	public void setStatusMessage(String aMsg)
+	/**
+	 *	Show a message in the status panel.
+	 *	This method might be called from within a background thread, so we
+	 *  need to make sure the actual setText() stuff is called on the AWT
+	 *  thread in order to update the GUI correctly.
+	 *  @see DwStatusBar#setStatusMessage(String)
+	 */
+	public void setStatusMessage(final String aMsg)
 	{
-		this.tfStatus.setText(aMsg);
+		if (aMsg == null) return;
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				tfStatus.setText(aMsg);
+			}
+		});
 	}
-
+	
+	/**
+	 * Clears the status bar by displaying the default message.
+	 */
 	public void clearStatusMessage()
 	{
-		this.tfStatus.setText(this.readyMsg);
+		this.setStatusMessage(this.readyMsg);
 	}
 
 	public void setQueryTimeout(int timeout)

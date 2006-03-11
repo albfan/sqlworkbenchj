@@ -44,6 +44,7 @@ public class SqlCommand
 	protected ResultLogger resultLogger;
 	protected StatementRunner runner;
 	protected int queryTimeout = 0;
+	protected int maxRows = 0;
 
 	/**
 	 *	Checks if the verb of the given SQL script
@@ -162,6 +163,7 @@ public class SqlCommand
 		this.currentStatement = aConnection.createStatement();
 		this.currentConnection = aConnection;
 		this.isCancelled = false;
+		
 
 		try
 		{
@@ -182,8 +184,20 @@ public class SqlCommand
 			if (hasResult)
 			{
 				rs = this.currentStatement.getResultSet();
-				ds = new DataStore(rs, aConnection);
+				ds = new DataStore(rs, true, this.rowMonitor, 0, aConnection);
 				result.addDataStore(ds);
+				int counter = 0;
+				while (this.currentStatement.getMoreResults())
+				{
+					rs = this.currentStatement.getResultSet();
+					if (rs == null) break;
+					ds = new DataStore(rs, true, this.rowMonitor, this.maxRows, aConnection);
+					result.addDataStore(ds);
+					// prevent endless loop with some JDBC drivers 
+					// that do not return false with getMoreResults()
+					counter ++;
+					if (counter > 25) break;
+				}
 			}
 			else
 			{
@@ -259,7 +273,7 @@ public class SqlCommand
 		this.queryTimeout = timeout;
 	}
 
-	public void setMaxRows(int maxRows) { }
+	public void setMaxRows(int max) { maxRows = max; }
 	public boolean isResultSetConsumer() { return false; }
 	public void preConsume(SqlCommand producer) {}
 	public void consumeResult(StatementRunnerResult aResult) {}

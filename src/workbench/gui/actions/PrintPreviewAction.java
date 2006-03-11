@@ -29,8 +29,7 @@ public class PrintPreviewAction
 	public PrintPreviewAction(WbTable aClient)
 	{
 		super();
-		this.client = aClient;
-		this.client.addTableModelListener(this);
+		this.setClient(aClient);
 		this.initMenuDefinition("MnuTxtPrintPreview");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
 	}
@@ -43,5 +42,18 @@ public class PrintPreviewAction
 	public void tableChanged(TableModelEvent tableModelEvent)
 	{
 		this.setEnabled(this.client.getRowCount() > 0);
+	}
+
+	public void setClient(WbTable c)
+	{
+		if (this.client != null)
+		{
+			this.client.removeTableModelListener(this);
+		}
+		this.client = c;
+		if (this.client != null)
+		{
+			this.client.addTableModelListener(this);
+		}
 	}
 }

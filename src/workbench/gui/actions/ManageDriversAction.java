@@ -10,12 +10,8 @@
  *
  */
 package workbench.gui.actions;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
-
-import workbench.gui.MainWindow;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.profiles.DriverEditorDialog;
+import workbench.WbManager;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -23,27 +19,16 @@ import workbench.resource.ResourceMgr;
  */
 public class ManageDriversAction extends WbAction
 {
-	private MainWindow client;
-
-	public ManageDriversAction(MainWindow aClient)
+	public ManageDriversAction()
 	{
 		super();
-		this.client = aClient;
 		this.initMenuDefinition("MnuTxtEditDrivers");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				DriverEditorDialog d = new DriverEditorDialog(client, true);
-				WbSwingUtilities.center(d, client);
-				d.show();
-			}
-		});
+		WbManager.getInstance().showDialog("workbench.gui.profiles.DriverEditorDialog");
 	}
 	
 }

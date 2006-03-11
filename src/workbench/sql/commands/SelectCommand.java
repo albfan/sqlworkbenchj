@@ -63,7 +63,15 @@ public class SelectCommand extends SqlCommand
 			{
 				this.currentStatement = aConnection.createStatementForQuery();
 			}
-			try { this.currentStatement.setQueryTimeout(this.queryTimeout); } catch (Throwable th) {}
+			
+			try 
+			{ 
+				if (this.queryTimeout >= 0) this.currentStatement.setQueryTimeout(this.queryTimeout); 
+			} 
+			catch (Throwable th) 
+			{
+				LogMgr.logWarning("SelectCommand.execute()", "Error when setting query timeout", th);
+			}
 
 			try
 			{

@@ -27,11 +27,12 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 
-public class WhatsNewViewer extends JDialog 
+public class WhatsNewViewer 
+	extends JDialog 
 {
-	JTextPane display;
+	private JTextPane display;
 	
-	public WhatsNewViewer(JFrame owner)
+	public WhatsNewViewer(java.awt.Frame owner)
 	{
 		
 		super(owner, ResourceMgr.getString("TxtWhatsNewWindowTitle"), false);

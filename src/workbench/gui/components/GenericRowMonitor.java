@@ -146,7 +146,7 @@ public class GenericRowMonitor
 		entry.type = this.monitorType;
 		entry.obj = this.currentMonitorObject;
 		this.typeStack.put(type, entry);
-		statusBar.clearStatusMessage();
+		//statusBar.clearStatusMessage();
 	}
 	
 	public void restoreType(String type) 
@@ -156,7 +156,7 @@ public class GenericRowMonitor
 		this.updateMsg = entry.msg;
 		this.currentMonitorObject = entry.obj;
 		this.monitorType = entry.type;
-		statusBar.clearStatusMessage();
+		//statusBar.clearStatusMessage();
 	}
 	
 }

@@ -31,6 +31,7 @@ public class SaveDataAsAction extends WbAction
 		this.initMenuDefinition("MnuTxtSaveDataAs");
 		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_SAVE_AS));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+		this.setEnabled(false);
 	}
 
 	public void executeAction(ActionEvent e)
