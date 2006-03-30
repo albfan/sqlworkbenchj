@@ -58,6 +58,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
 import javax.swing.JLabel;
+import workbench.WbManager;
 import workbench.db.ObjectScripter;
 import workbench.db.ProcedureDefinition;
 import workbench.gui.components.DataStoreTableModel;
@@ -283,7 +284,7 @@ public class ProcedureListPanel
 		}
 		catch (OutOfMemoryError mem)
 		{
-			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
+			WbManager.getInstance().showOutOfMemoryError();
 		}
 		catch (Throwable e)
 		{

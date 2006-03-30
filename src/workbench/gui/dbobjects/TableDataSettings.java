@@ -51,8 +51,8 @@ public class TableDataSettings
 
     setLayout(new java.awt.GridBagLayout());
 
-    checkBoxEnableWarning.setText(ResourceMgr.getString("LabelEnableDataThresholdWarning"));
-    checkBoxEnableWarning.setToolTipText(ResourceMgr.getDescription("LabelEnableDataThresholdWarning"));
+    checkBoxEnableWarning.setText(ResourceMgr.getString("LblEnableDataThresholdWarning"));
+    checkBoxEnableWarning.setToolTipText(ResourceMgr.getDescription("LblEnableDataThresholdWarning"));
     checkBoxEnableWarning.setMargin(new java.awt.Insets(0, 0, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -62,8 +62,8 @@ public class TableDataSettings
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     add(checkBoxEnableWarning, gridBagConstraints);
 
-    autoloadRowCount.setText(ResourceMgr.getString("LabelAutoLoadRowCount"));
-    autoloadRowCount.setToolTipText(ResourceMgr.getDescription("LabelAutoLoadRowCount"));
+    autoloadRowCount.setText(ResourceMgr.getString("LblAutoLoadRowCount"));
+    autoloadRowCount.setToolTipText(ResourceMgr.getDescription("LblAutoLoadRowCount"));
     autoloadRowCount.setMargin(new java.awt.Insets(0, 0, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -74,8 +74,8 @@ public class TableDataSettings
     gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
     add(autoloadRowCount, gridBagConstraints);
 
-    autoloadData.setText(ResourceMgr.getString("LabelAutoLoadTableData"));
-    autoloadData.setToolTipText(ResourceMgr.getDescription("LabelAutoLoadTableData"));
+    autoloadData.setText(ResourceMgr.getString("LblAutoLoadTableData"));
+    autoloadData.setToolTipText(ResourceMgr.getDescription("LblAutoLoadTableData"));
     autoloadData.setMargin(new java.awt.Insets(0, 0, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -85,8 +85,8 @@ public class TableDataSettings
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     add(autoloadData, gridBagConstraints);
 
-    thresholdLabel.setText(ResourceMgr.getString("LabelThresholdLevel"));
-    thresholdLabel.setToolTipText(ResourceMgr.getDescription("LabelThresholdLevel"));
+    thresholdLabel.setText(ResourceMgr.getString("LblThresholdLevel"));
+    thresholdLabel.setToolTipText(ResourceMgr.getDescription("LblThresholdLevel"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;

@@ -160,7 +160,7 @@ public class DbExplorerPanel
 	public void showConnectButton(ConnectionSelector selector)
 	{
 		this.connectionSelector = selector;
-		this.selectConnectionButton = new JButton(ResourceMgr.getString("LabelSelectConnection"));
+		this.selectConnectionButton = new JButton(ResourceMgr.getString("LblSelectConnection"));
 		Border b = new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED), new EmptyBorder(1, 10, 1, 10));
 		this.selectConnectionButton.setBorder(b);
 		this.selectConnectionButton.addActionListener(this);
@@ -282,7 +282,7 @@ public class DbExplorerPanel
 		catch (Exception e)
 		{
 			String error = ExceptionUtil.getDisplay(e);
-			String msg = ResourceMgr.getString("ErrorExplorerConnectFailed").replaceAll("%msg%", error.trim());
+			String msg = ResourceMgr.getString("ErrExplorerConnectFailed").replaceAll("%msg%", error.trim());
 			WbSwingUtilities.showErrorMessage(this, msg);
 			LogMgr.logError("MainWindow.showDbExplorer()", "Error getting new connection for DbExplorer tab. Using connection from current panel", e);
 		}
@@ -537,7 +537,7 @@ public class DbExplorerPanel
 	
 	public String getTabTitle()
 	{
-		return ResourceMgr.getString("LabelDbExplorer");
+		return ResourceMgr.getString("LblDbExplorer");
 	}
 	
 	public void setTabTitle(JTabbedPane tab, int index)

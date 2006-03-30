@@ -103,7 +103,7 @@ public class TableDefinitionPanel
 		cc.insets = new Insets(0, 0, 0, 5);
 		toolbar.add(columnFilter, cc);
 
-		JLabel l = new JLabel(ResourceMgr.getString("LabelTable") + ":");
+		JLabel l = new JLabel(ResourceMgr.getString("LblTable") + ":");
 		cc.fill = GridBagConstraints.NONE;
 		cc.gridx ++;
 		cc.weightx = 0.0;

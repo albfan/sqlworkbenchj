@@ -159,7 +159,7 @@ public class ProgressPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 6, 0, 6);
     add(infoPanel, gridBagConstraints);
 
-    cancelButton.setText(ResourceMgr.getString("LabelCancel"));
+    cancelButton.setText(ResourceMgr.getString("LblCancel"));
     cancelButton.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)

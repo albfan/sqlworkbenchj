@@ -24,6 +24,7 @@ import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+import workbench.WbManager;
 
 import workbench.db.DependencyNode;
 import workbench.db.TableDependency;
@@ -33,8 +34,6 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.renderer.DependencyTreeCellRenderer;
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-
 
 /**
  *
@@ -74,7 +73,7 @@ public class TableDependencyTreeDisplay
     }
 		catch (OutOfMemoryError mem)
 		{
-			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
+			WbManager.getInstance().showOutOfMemoryError();
 		}
     catch (Exception e)
     {

@@ -97,6 +97,7 @@ import workbench.util.WbThread;
 import workbench.util.ExceptionUtil;
 import java.awt.Component;
 import java.util.Iterator;
+import workbench.WbManager;
 import workbench.gui.components.WbTabbedPane;
 import workbench.interfaces.CriteriaPanel;
 import workbench.util.WbWorkspace;
@@ -430,7 +431,7 @@ public class TableListPanel
 		{
 			if (i == newCount - 1)
 			{
-				item = new WbMenuItem(ResourceMgr.getString("LabelShowDataInNewTab"));
+				item = new WbMenuItem(ResourceMgr.getString("LblShowDataInNewTab"));
 				item.setActionCommand("panel--1");
 				showDataMenu.addSeparator();
 			}
@@ -443,7 +444,7 @@ public class TableListPanel
 					item.setFont(boldFont);
 				}
 			}
-			item.setToolTipText(ResourceMgr.getDescription("LabelShowDataInNewTab"));
+			item.setToolTipText(ResourceMgr.getDescription("LblShowDataInNewTab"));
 			item.addActionListener(this);
 			this.showDataMenu.add(item);
 		}
@@ -767,7 +768,7 @@ public class TableListPanel
 		{
 			if (dbConnection == null || dbConnection.isClosed())
 			{
-				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrorConnectionGone"));
+				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrConnectionGone"));
 				return;
 			}
 		}
@@ -807,7 +808,7 @@ public class TableListPanel
 		}
 		catch (OutOfMemoryError mem)
 		{
-			WbSwingUtilities.showErrorMessage(TableListPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
+			WbManager.getInstance().showOutOfMemoryError();
 		}
 		catch (Throwable e)
 		{
@@ -1599,7 +1600,7 @@ public class TableListPanel
 		String sql = tableDefinition.getSelectForTable();
 		if (sql == null)
 		{
-			String msg = ResourceMgr.getString("ErrorNoColumnsRetrieved").replaceAll("%table%", this.selectedTableName);
+			String msg = ResourceMgr.getString("ErrNoColumnsRetrieved").replaceAll("%table%", this.selectedTableName);
 			WbSwingUtilities.showErrorMessage(this, msg);
 			return null;
 		}
@@ -2058,7 +2059,7 @@ public class TableListPanel
 		dialog.setSelectDirectoryOnly(true);
 		dialog.restoreSettings();
 
-		String title = ResourceMgr.getString("LabelSelectDirTitle");
+		String title = ResourceMgr.getString("LblSelectDirTitle");
 
 		boolean answer = dialog.selectOutput(title);
 		if (answer)

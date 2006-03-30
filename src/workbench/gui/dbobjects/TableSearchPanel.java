@@ -102,7 +102,7 @@ public class TableSearchPanel
 		this.resultTabPane.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		sqlDisplay = EditorPanel.createSqlEditor();
-		this.resultTabPane.addTab(ResourceMgr.getString("LabelTableSearchSqlLog"), sqlDisplay);
+		this.resultTabPane.addTab(ResourceMgr.getString("LblTableSearchSqlLog"), sqlDisplay);
 
 		WbTable tables = (WbTable)this.tableNames;
 		tables.setAdjustToColumnLabel(false);
@@ -169,7 +169,7 @@ public class TableSearchPanel
     resultPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
     resultScrollPane.setViewportView(resultPanel);
 
-    resultTabPane.addTab(ResourceMgr.getString("LabelTableSearchResultTab"), resultScrollPane);
+    resultTabPane.addTab(ResourceMgr.getString("LblTableSearchResultTab"), resultScrollPane);
 
     jSplitPane1.setRightComponent(resultTabPane);
 
@@ -182,7 +182,7 @@ public class TableSearchPanel
 
     selectButtonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 0, 3));
 
-    selectAllButton.setText(ResourceMgr.getString("LabelSelectAll"));
+    selectAllButton.setText(ResourceMgr.getString("LblSelectAll"));
     selectAllButton.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -198,7 +198,7 @@ public class TableSearchPanel
     jPanel2.setPreferredSize(new java.awt.Dimension(4, 0));
     selectButtonPanel.add(jPanel2);
 
-    selectNoneButton.setText(ResourceMgr.getString("LabelSelectNone"));
+    selectNoneButton.setText(ResourceMgr.getString("LblSelectNone"));
     selectNoneButton.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -222,7 +222,7 @@ public class TableSearchPanel
 
     entryPanel.setLayout(new java.awt.GridBagLayout());
 
-    startButton.setText(ResourceMgr.getString("LabelStartSearch"));
+    startButton.setText(ResourceMgr.getString("LblStartSearch"));
     startButton.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -240,7 +240,7 @@ public class TableSearchPanel
 
     searchText.setColumns(20);
     searchText.setText("% ... %");
-    searchText.setToolTipText(ResourceMgr.getDescription("LabelSearchTableCriteria"));
+    searchText.setToolTipText(ResourceMgr.getDescription("LblSearchTableCriteria"));
     searchText.setMinimumSize(new java.awt.Dimension(100, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 4;
@@ -250,7 +250,7 @@ public class TableSearchPanel
     entryPanel.add(searchText, gridBagConstraints);
 
     jLabel1.setText("LIKE");
-    jLabel1.setToolTipText(ResourceMgr.getDescription("LabelSearchTableCriteria"));
+    jLabel1.setToolTipText(ResourceMgr.getDescription("LblSearchTableCriteria"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 0;
@@ -280,7 +280,7 @@ public class TableSearchPanel
     entryPanel.add(columnFunction, gridBagConstraints);
 
     labelRowCount.setLabelFor(rowCount);
-    labelRowCount.setText(ResourceMgr.getString("LabelMaxRows"));
+    labelRowCount.setText(ResourceMgr.getString("LblMaxRows"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 5;
     gridBagConstraints.gridy = 0;
@@ -473,7 +473,7 @@ public class TableSearchPanel
 		if (this.tableNames.getSelectedRowCount() == 0) return;
 		if (this.connection.isBusy())
 		{
-			WbSwingUtilities.showMessageKey(this, "ErrorConnectionBusy");
+			WbSwingUtilities.showMessageKey(this, "ErrConnectionBusy");
 			return;
 		}
 
@@ -598,7 +598,7 @@ public class TableSearchPanel
 		this.resultPanel.doLayout();
 		this.searchText.setEnabled(true);
 		this.columnFunction.setEnabled(true);
-		startButton.setText(ResourceMgr.getString("LabelStartSearch"));
+		startButton.setText(ResourceMgr.getString("LblStartSearch"));
 		this.statusInfo.setText("");
 		this.startButton.setEnabled(this.tableNames.getSelectedRowCount() > 0);
 	}
@@ -607,7 +607,7 @@ public class TableSearchPanel
 	{
 		this.searchText.setEnabled(false);
 		this.columnFunction.setEnabled(false);
-		startButton.setText(ResourceMgr.getString("LabelCancelSearch"));
+		startButton.setText(ResourceMgr.getString("LblCancelSearch"));
 	}
 
 	public void valueChanged(javax.swing.event.ListSelectionEvent e)

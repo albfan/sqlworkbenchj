@@ -148,7 +148,7 @@ public class TableDataPanel
 		mytoolbar.addSeparator();
 
 		topPanel.add(Box.createHorizontalStrut(15));
-		topPanel.add(new JLabel(ResourceMgr.getString("LabelTable") + ":"));
+		topPanel.add(new JLabel(ResourceMgr.getString("LblTable") + ":"));
 		Font std = Settings.getInstance().getStandardLabelFont();
 		Font bold = std.deriveFont(Font.BOLD);
 		tableNameLabel = new JLabel();
@@ -157,25 +157,25 @@ public class TableDataPanel
 		topPanel.add(tableNameLabel);
 
 		topPanel.add(Box.createHorizontalStrut(10));
-		JLabel l = new JLabel(ResourceMgr.getString("LabelTableDataRowCount"));
-		l.setToolTipText(ResourceMgr.getDescription("LabelTableDataRowCount"));
+		JLabel l = new JLabel(ResourceMgr.getString("LblTableDataRowCount"));
+		l.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCount"));
 		topPanel.add(l);
 		topPanel.add(Box.createHorizontalStrut(5));
 		rowCountLabel = new JLabel();
-		rowCountLabel.setToolTipText(ResourceMgr.getDescription("LabelTableDataRowCount"));
+		rowCountLabel.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCount"));
 		rowCountLabel.setFont(bold);
 		rowCountLabel.setHorizontalTextPosition(SwingConstants.LEFT);
 		rowCountLabel.addMouseListener(this);
 		topPanel.add(rowCountLabel);
 		topPanel.add(Box.createHorizontalStrut(10));
 
-		autoRetrieve = new JCheckBox(ResourceMgr.getString("LabelAutoLoad"));
-		autoRetrieve.setToolTipText(ResourceMgr.getDescription("LabelAutoLoadTableData"));
+		autoRetrieve = new JCheckBox(ResourceMgr.getString("LblAutoLoad"));
+		autoRetrieve.setToolTipText(ResourceMgr.getDescription("LblAutoLoadTableData"));
 		autoRetrieve.setHorizontalTextPosition(SwingConstants.LEFT);
 		topPanel.add(autoRetrieve);
 
 		topPanel.add(Box.createHorizontalGlue());
-		this.config = new WbButton(ResourceMgr.getString("LabelConfigureWarningThreshold"));
+		this.config = new WbButton(ResourceMgr.getString("LblConfigureWarningThreshold"));
 		this.config.addActionListener(this);
 		this.config.setBorder(WbSwingUtilities.FLAT_BUTTON_BORDER);
 		topPanel.add(this.config);
@@ -592,7 +592,7 @@ public class TableDataPanel
 			p.setAutoloadData(this.autoRetrieve.isSelected());
 			p.setAutoloadRowCount(this.autoloadRowCount);
 			Window parent = SwingUtilities.getWindowAncestor(this);
-			int choice = JOptionPane.showConfirmDialog(parent, p, ResourceMgr.getString("LabelConfigureWarningThresholdTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+			int choice = JOptionPane.showConfirmDialog(parent, p, ResourceMgr.getString("LblConfigureWarningThresholdTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 			if (choice == JOptionPane.OK_OPTION)
 			{
 				this.warningThreshold = p.getThresholdValue();

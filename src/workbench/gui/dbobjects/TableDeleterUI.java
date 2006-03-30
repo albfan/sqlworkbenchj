@@ -76,7 +76,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 
     buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-    deleteButton.setText(ResourceMgr.getString("LabelDeleteTableData"));
+    deleteButton.setText(ResourceMgr.getString("LblDeleteTableData"));
     deleteButton.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -87,7 +87,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 
     buttonPanel.add(deleteButton);
 
-    cancelButton.setText(ResourceMgr.getString("LabelCancel"));
+    cancelButton.setText(ResourceMgr.getString("LblCancel"));
     cancelButton.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -118,7 +118,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 
     jPanel1.setLayout(new java.awt.GridBagLayout());
 
-    useTruncateCheckBox.setText(ResourceMgr.getString("LabelUseTruncate"));
+    useTruncateCheckBox.setText(ResourceMgr.getString("LblUseTruncate"));
     useTruncateCheckBox.addItemListener(new java.awt.event.ItemListener()
     {
       public void itemStateChanged(java.awt.event.ItemEvent evt)
@@ -139,7 +139,7 @@ public class TableDeleterUI extends javax.swing.JPanel
     jPanel1.add(useTruncateCheckBox, gridBagConstraints);
 
     commitEach.setSelected(true);
-    commitEach.setText(ResourceMgr.getString("LabelCommitEachTableDelete")
+    commitEach.setText(ResourceMgr.getString("LblCommitEachTableDelete")
     );
     buttonGroup1.add(commitEach);
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -149,7 +149,7 @@ public class TableDeleterUI extends javax.swing.JPanel
     gridBagConstraints.insets = new java.awt.Insets(3, 2, 0, 0);
     jPanel1.add(commitEach, gridBagConstraints);
 
-    commitAtEnd.setText(ResourceMgr.getString("LabelCommitTableDeleteAtEnd"));
+    commitAtEnd.setText(ResourceMgr.getString("LblCommitTableDeleteAtEnd"));
     buttonGroup1.add(commitAtEnd);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -281,7 +281,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 				
 				if (!ignoreAll)
 				{
-					String question = ResourceMgr.getString("ErrorDeleteTableData");
+					String question = ResourceMgr.getString("ErrDeleteTableData");
 					question = question.replaceAll("%table%", table.toString());
 					question = question.replaceAll("%error%", error);
 
@@ -326,8 +326,8 @@ public class TableDeleterUI extends javax.swing.JPanel
 			LogMgr.logError("TableDeleterUI.doDelete()", "Error on commit/rollback", e);
 			String msg = null;
 
-			if (doCommit) ResourceMgr.getString("ErrorCommitDeleteTableData");
-			else msg = ResourceMgr.getString("ErrorRollbackTableData");
+			if (doCommit) ResourceMgr.getString("ErrCommitDeleteTableData");
+			else msg = ResourceMgr.getString("ErrRollbackTableData");
 			msg = msg.replaceAll("%error%", e.getMessage());
 
 			WbSwingUtilities.showErrorMessage(this.dialog, msg);
@@ -389,7 +389,7 @@ public class TableDeleterUI extends javax.swing.JPanel
 		String[] display = new String[numNames];
 		for (int i=0; i < numNames; i ++)
 		{
-			display[i] = this.objectNames.toString();
+			display[i] = this.objectNames.get(i).toString();
 		}
 		this.objectList.setListData(display);
 	}
