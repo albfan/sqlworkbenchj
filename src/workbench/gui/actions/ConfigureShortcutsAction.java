@@ -35,9 +35,9 @@ public class ConfigureShortcutsAction
 
 	public void executeAction(ActionEvent e)
 	{
-//		final MainWindow main = WbManager.getInstance().getCurrentWindow();
-//		ShortcutEditor editor = new ShortcutEditor(main);
-//		editor.showWindow();
-		WbManager.getInstance().showDialog("workbench.gui.settings.ShortcutEditor");
+		final MainWindow main = WbManager.getInstance().getCurrentWindow();
+		ShortcutEditor editor = new ShortcutEditor(main);
+		editor.showWindow();
+		//WbManager.getInstance().showDialog("workbench.gui.settings.ShortcutEditor");
 	}
 }

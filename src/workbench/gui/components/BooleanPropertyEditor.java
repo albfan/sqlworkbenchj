@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import javax.swing.JCheckBox;
 
 import workbench.interfaces.SimplePropertyEditor;
+import workbench.log.LogMgr;
 
 
 /**
@@ -80,8 +81,7 @@ public class BooleanPropertyEditor
     }
     catch (Exception e)
     {
-      System.out.println("Error on init");
-      e.printStackTrace();
+			LogMgr.logError("BooleanPropertyEditor.setSourceObject()", "Error during init", e);
     }
   }
   

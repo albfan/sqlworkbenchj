@@ -24,7 +24,6 @@ import workbench.db.JdbcProcedureReader;
 public class ProcStatusRenderer 
 	extends DefaultTableCellRenderer
 {
-	/** Creates a new instance of NumberColumnRenderer */
 	public ProcStatusRenderer()
 	{
 		this.setHorizontalAlignment(JLabel.LEFT);

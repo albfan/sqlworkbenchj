@@ -202,7 +202,7 @@ public class WbFontChooser extends javax.swing.JPanel
     gridBagConstraints.weighty = 0.5;
     add(jScrollPane1, gridBagConstraints);
 
-    boldCheckBox.setText(ResourceMgr.getString("LabelBold"));
+    boldCheckBox.setText(ResourceMgr.getString("LblBold"));
     boldCheckBox.addItemListener(new java.awt.event.ItemListener()
     {
       public void itemStateChanged(java.awt.event.ItemEvent evt)
@@ -218,7 +218,7 @@ public class WbFontChooser extends javax.swing.JPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
     add(boldCheckBox, gridBagConstraints);
 
-    italicCheckBox.setText(ResourceMgr.getString("LabelItalic"));
+    italicCheckBox.setText(ResourceMgr.getString("LblItalic"));
     italicCheckBox.addItemListener(new java.awt.event.ItemListener()
     {
       public void itemStateChanged(java.awt.event.ItemEvent evt)

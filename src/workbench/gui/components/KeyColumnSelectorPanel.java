@@ -45,7 +45,7 @@ public class KeyColumnSelectorPanel
 		this.tableName = table;
 		configureInfoPanel();
 		this.doLayout();
-		this.setSelectionLabel(ResourceMgr.getString("LabelHeaderKeyColumnPKFlag"));
+		this.setSelectionLabel(ResourceMgr.getString("LblHeaderKeyColumnPKFlag"));
 		this.columns = new ColumnIdentifier[cols.length];
 		for (int i=0; i < this.columns.length; i++)
 		{
@@ -70,8 +70,8 @@ public class KeyColumnSelectorPanel
 		
 		this.infoPanel.add(infoLabel,c);
 		
-		this.saveCheckBox = new JCheckBox(ResourceMgr.getString("LabelRememberPKMapping"));
-		this.saveCheckBox.setToolTipText(ResourceMgr.getDescription("LabelRememberPKMapping"));
+		this.saveCheckBox = new JCheckBox(ResourceMgr.getString("LblRememberPKMapping"));
+		this.saveCheckBox.setToolTipText(ResourceMgr.getDescription("LblRememberPKMapping"));
     c.gridx = 0;
     c.gridy = 1;
 		c.fill = GridBagConstraints.NONE;

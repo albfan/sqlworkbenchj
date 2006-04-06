@@ -26,6 +26,7 @@ public class ObjectDropper
 	private List objectNames;
 	private List objectTypes;
 	private WbConnection connection;
+	private Statement currentStatement;
 	private boolean cascadeConstraints;
 
 	public ObjectDropper(List names, List types)
@@ -47,13 +48,12 @@ public class ObjectDropper
 	public void execute()
 		throws SQLException
 	{
-		Statement stmt = null;
 		try
 		{
 			if (this.connection == null) throw new NullPointerException("No connection!");
 			if (this.objectNames == null || this.objectNames.size() == 0) return;
 			int count = this.objectNames.size();
-			stmt = this.connection.createStatement();
+			currentStatement = this.connection.createStatement();
 			String cascade = null;
 
 			for (int i=0; i < count; i++)
@@ -78,7 +78,7 @@ public class ObjectDropper
 					}
 				}
 				LogMgr.logDebug("ObjectDropper.execute()", "Using SQL: " + sql);
-				stmt.execute(sql.toString());
+				currentStatement.execute(sql.toString());
 			}
 
 			// Check if we need to commit the DDL statements
@@ -97,10 +97,22 @@ public class ObjectDropper
 		}
 		finally
 		{
-			try { stmt.close(); } catch (Throwable th) {}
+			try { currentStatement.close(); } catch (Throwable th) {}
+			this.currentStatement = null;
 		}
 	}
 
+	public void cancel()
+		throws SQLException
+	{
+		if (this.currentStatement == null) return;
+		this.currentStatement.cancel();
+		if (!this.connection.getAutoCommit() && this.connection.getDdlNeedsCommit())
+		{
+			try { this.connection.rollback(); } catch (Throwable th) {}
+		}
+	}
+	
 	public void setCascadeConstraints(boolean flag)
 	{
 		this.cascadeConstraints = flag;

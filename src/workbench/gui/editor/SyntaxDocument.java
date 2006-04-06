@@ -4,6 +4,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.AbstractDocument;
+import javax.swing.text.AbstractDocument.DefaultDocumentEvent;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.PlainDocument;
@@ -12,13 +13,14 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
+import workbench.resource.Settings;
 
 /**
  * A document implementation that can be tokenized by the syntax highlighting
  * system.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxDocument.java,v 1.13 2005-09-30 13:04:23 thomas Exp $
+ * @version $Id: SyntaxDocument.java,v 1.14 2006-04-06 16:30:05 thomas Exp $
  */
 public class SyntaxDocument
 	extends PlainDocument
@@ -51,6 +53,7 @@ public class SyntaxDocument
 	{
 		this.putProperty("noWordSep", "_");
 		this.putProperty("filterNewlines", Boolean.FALSE);
+		this.putProperty(PlainDocument.tabSizeAttribute,new Integer(Settings.getInstance().getEditorTabWidth()));
 	}
 	/**
 	 * Returns the token marker that is to be used to split lines
@@ -189,6 +192,9 @@ public class SyntaxDocument
 	{
 	}
 
+	public int getPositionOfLastChange() { return lastChangePosition; }
+	
+	private int lastChangePosition = -1;
 	/**
 	 * We overwrite this method to update the token marker
 	 * state immediately so that any event listeners get a
@@ -204,7 +210,7 @@ public class SyntaxDocument
 				tokenMarker.insertLines(ch.getIndex() + 1,ch.getChildrenAdded().length - ch.getChildrenRemoved().length);
 			}
 		}
-
+		lastChangePosition = evt.getOffset();
 		super.fireInsertUpdate(evt);
 	}
 
@@ -224,6 +230,7 @@ public class SyntaxDocument
 			}
 		}
 
+		lastChangePosition = evt.getOffset();
 		super.fireRemoveUpdate(evt);
 	}
 }

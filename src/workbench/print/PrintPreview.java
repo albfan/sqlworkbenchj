@@ -43,6 +43,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.MatteBorder;
+import workbench.WbManager;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbFontChooser;
@@ -100,19 +101,19 @@ public class PrintPreview
 		WbToolbar tb = new WbToolbar();
 		tb.addDefaultBorder();
 
-		this.printButton = new WbToolbarButton(ResourceMgr.getString("LabelPrintButton"));
+		this.printButton = new WbToolbarButton(ResourceMgr.getString("LblPrintButton"));
 		this.printButton.addActionListener(this);
 		tb.add(printButton);
 
 		tb.addSeparator();
 
-		this.chooseFontButton = new WbToolbarButton(ResourceMgr.getString("LabelSelectPrintFont"));
+		this.chooseFontButton = new WbToolbarButton(ResourceMgr.getString("LblSelectPrintFont"));
 		this.chooseFontButton.addActionListener(this);
 		tb.add(this.chooseFontButton);
 
 		tb.addSeparator();
 
-		this.pageSetupButton = new WbToolbarButton(ResourceMgr.getString("LabelPageSetupButton"));
+		this.pageSetupButton = new WbToolbarButton(ResourceMgr.getString("LblPageSetupButton"));
 		this.pageSetupButton.addActionListener(this);
 		tb.add(this.pageSetupButton);
 
@@ -154,7 +155,7 @@ public class PrintPreview
 		tb.add(this.cbZoom);
 		tb.addSeparator();
 
-		this.closeButton = new WbToolbarButton(ResourceMgr.getString("LabelClose"));
+		this.closeButton = new WbToolbarButton(ResourceMgr.getString("LblClose"));
 		this.closeButton.addActionListener(this);
 		tb.add(this.closeButton);
 
@@ -239,7 +240,7 @@ public class PrintPreview
 		}
 		catch (OutOfMemoryError e)
 		{
-			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
+			WbManager.getInstance().showOutOfMemoryError();
 			this.pageDisplay.setImage(0,0,null);
 		}
 		finally

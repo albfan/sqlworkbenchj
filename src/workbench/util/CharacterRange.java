@@ -87,15 +87,15 @@ public class CharacterRange
 		switch (typeIndex)
 		{
 			case 0:
-				return ResourceMgr.getString("LabelExportRangeNone");
+				return ResourceMgr.getString("LblExportRangeNone");
 			case 1:
-				return ResourceMgr.getString("LabelExportRangeCtrl");
+				return ResourceMgr.getString("LblExportRangeCtrl");
 			case 2:
-				return ResourceMgr.getString("LabelExportRange7Bit");
+				return ResourceMgr.getString("LblExportRange7Bit");
 			case 3:
-				return ResourceMgr.getString("LabelExportRange8Bit");
+				return ResourceMgr.getString("LblExportRange8Bit");
 			case 4: 
-				return ResourceMgr.getString("LabelExportRange8BitExtended");
+				return ResourceMgr.getString("LblExportRange8BitExtended");
 		}
 		return "";
 	}

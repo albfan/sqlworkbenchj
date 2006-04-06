@@ -65,8 +65,8 @@ public class XmlOptionsPanel
 
     setLayout(new java.awt.GridBagLayout());
 
-    verboseXmlCheckBox.setText(ResourceMgr.getString("LabelExportVerboseXml"));
-    verboseXmlCheckBox.setToolTipText(ResourceMgr.getDescription("LabelExportVerboseXml"));
+    verboseXmlCheckBox.setText(ResourceMgr.getString("LblExportVerboseXml"));
+    verboseXmlCheckBox.setToolTipText(ResourceMgr.getDescription("LblExportVerboseXml"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;

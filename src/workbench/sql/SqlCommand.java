@@ -11,11 +11,10 @@
  */
 package workbench.sql;
 
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 import workbench.db.WbConnection;
@@ -278,4 +277,33 @@ public class SqlCommand
 	public void preConsume(SqlCommand producer) {}
 	public void consumeResult(StatementRunnerResult aResult) {}
 
+	protected String evaluateFileArgument(String fileName)
+	{
+		if (StringUtil.isEmptyString(fileName)) return fileName;
+		
+		String fname = StringUtil.trimQuotes(fileName);
+		File f  = new File(fname);
+		if (f.isAbsolute()) return fname;
+		
+		// Use the "current" directory of the StatementRunner
+		// for the ouptut path of the file, if no path
+		// is specified.
+		if (this.runner != null)
+		{
+			String dir = this.runner.getBaseDir();
+			if (!StringUtil.isEmptyString(dir))
+			{
+				f = new File(dir, fname);
+				try
+				{
+					fname = f.getCanonicalPath();
+				}
+				catch (Exception e)
+				{
+				}
+			}
+		}
+		return fname;
+	}
+	
 }

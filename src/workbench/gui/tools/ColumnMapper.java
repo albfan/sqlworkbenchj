@@ -282,8 +282,8 @@ class MapDataModel
 {
 	private boolean allowTargetEditing = false;
 	private ColumnMapRow[] data;
-	private final String sourceColName = ResourceMgr.getString("LabelSourceColumn");
-	private final String targetColName = ResourceMgr.getString("LabelTargetColumn");
+	private final String sourceColName = ResourceMgr.getString("LblSourceColumn");
+	private final String targetColName = ResourceMgr.getString("LblTargetColumn");
 
 	public MapDataModel(ColumnMapRow[] data)
 	{
@@ -311,7 +311,7 @@ class MapDataModel
 			case 1:
 				return this.targetColName;
 			case 2:
-				return ResourceMgr.getString("LabelDPKeyColumnTitle");
+				return ResourceMgr.getString("LblDPKeyColumnTitle");
 		}
 		return "";
 	}
@@ -465,7 +465,7 @@ class ColumnMapRow
 
 class SkipColumnIndicator
 {
-	private final String display = ResourceMgr.getString("LabelDPDoNotCopyColumns");
+	private final String display = ResourceMgr.getString("LblDPDoNotCopyColumns");
 
 	public SkipColumnIndicator()
 	{

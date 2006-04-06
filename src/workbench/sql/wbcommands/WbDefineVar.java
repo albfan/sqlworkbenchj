@@ -59,7 +59,7 @@ public class WbDefineVar extends SqlCommand
 
 		if (var == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorVarDefWrongParameter"));
+			result.addMessage(ResourceMgr.getString("ErrVarDefWrongParameter"));
 			result.setFailure();
 			return result;
 		}
@@ -83,7 +83,7 @@ public class WbDefineVar extends SqlCommand
 				{
 					File f = new File(value);
 					LogMgr.logError("WbDefineVar.execute()", "Error reading definition file: " + value, e);
-					msg = ResourceMgr.getString("ErrorReadingVarDefFile");
+					msg = ResourceMgr.getString("ErrReadingVarDefFile");
 					msg = StringUtil.replace(msg, "%file%", f.getAbsolutePath());
 					msg = msg + " " + ExceptionUtil.getDisplay(e);
 					result.addMessage(msg);
@@ -92,7 +92,7 @@ public class WbDefineVar extends SqlCommand
 			}
 			else
 			{
-				result.addMessage(ResourceMgr.getString("ErrorReadingVarDefFile"));
+				result.addMessage(ResourceMgr.getString("ErrReadingVarDefFile"));
 				result.setFailure();
 			}
 			return result;
@@ -113,7 +113,7 @@ public class WbDefineVar extends SqlCommand
 				catch (SQLException e)
 				{
 					LogMgr.logError("WbDefineVar.execute()", "Error retrieving variable value using SQL: " + valueSql, e);
-					msg = ResourceMgr.getString("ErrorReadingVarSql");
+					msg = ResourceMgr.getString("ErrReadingVarSql");
 					msg = StringUtil.replace(msg, "%sql%", valueSql);
 					msg = msg + "\n\n" + ExceptionUtil.getDisplay(e);
 					result.addMessage(msg);
@@ -133,7 +133,7 @@ public class WbDefineVar extends SqlCommand
 			catch (IllegalArgumentException e)
 			{
 				result.setFailure();
-				msg = ResourceMgr.getString("ErrorVarDefWrongName");
+				msg = ResourceMgr.getString("ErrVarDefWrongName");
 			}
 
 		}

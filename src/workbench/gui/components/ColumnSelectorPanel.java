@@ -82,22 +82,22 @@ public class ColumnSelectorPanel
 		this.add(this.infoPanel, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
 		
-		selectAll = new JButton(ResourceMgr.getString("LabelSelectAll"));
-		selectNone = new JButton(ResourceMgr.getString("LabelSelectNone"));
+		selectAll = new JButton(ResourceMgr.getString("LblSelectAll"));
+		selectNone = new JButton(ResourceMgr.getString("LblSelectNone"));
 		selectAll.addActionListener(this);
 		selectNone.addActionListener(this);
 
     
 		if (showSelectedCheckBox)
 		{
-			this.selectedOnlyCheckBox = new JCheckBox(ResourceMgr.getString("LabelSelectedRowsOnly"));
+			this.selectedOnlyCheckBox = new JCheckBox(ResourceMgr.getString("LblSelectedRowsOnly"));
 			this.selectedOnlyCheckBox.setSelected(selectedOnly);
 			this.selectedOnlyCheckBox.setEnabled(true);
 		}
 		
 		if (showHeaderSelection)
 		{
-			this.includeHeaderCheckBox = new JCheckBox(ResourceMgr.getString("LabelExportIncludeHeaders"));
+			this.includeHeaderCheckBox = new JCheckBox(ResourceMgr.getString("LblExportIncludeHeaders"));
 			this.includeHeaderCheckBox.setSelected(includeHeader);
 		}
     
@@ -250,8 +250,8 @@ class ColumnSelectTableModel
 {
 	ColumnIdentifier[] columns;
 	boolean[] selected;
-	private String colLabel = ResourceMgr.getString("LabelHeaderKeyColumnColName");
-	String selectLabel = ResourceMgr.getString("LabelHeaderUseColumn");
+	private String colLabel = ResourceMgr.getString("LblHeaderKeyColumnColName");
+	String selectLabel = ResourceMgr.getString("LblHeaderUseColumn");
 	private int rows;
 	public ColumnSelectTableModel(ColumnIdentifier[] cols)
 	{

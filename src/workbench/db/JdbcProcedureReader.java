@@ -26,7 +26,8 @@ import workbench.util.StrBuffer;
 public class JdbcProcedureReader
 	implements ProcedureReader
 {
-	private DbMetadata dbMeta;
+	protected DbMetadata dbMeta;
+	
 	public JdbcProcedureReader(DbMetadata meta)
 	{
 		this.dbMeta = meta;
@@ -48,18 +49,23 @@ public class JdbcProcedureReader
 		aCatalog = this.dbMeta.adjustObjectnameCase(aCatalog);
 		
 		ResultSet rs = this.dbMeta.getSqlConnection().getMetaData().getProcedures(aCatalog, aSchema, "%");
-		return buildProcedureListDataStore(rs);
+		return fillProcedureListDataStore(rs);
 	}
-	
-	public DataStore buildProcedureListDataStore(ResultSet rs)
-		throws SQLException
+
+	public static DataStore buildProcedureListDataStore(DbMetadata meta)
 	{
-		String[] cols = new String[] {"PROCEDURE_NAME", "TYPE", this.dbMeta.getCatalogTerm().toUpperCase(), this.dbMeta.getSchemaTerm().toUpperCase(), "REMARKS"};
+		String[] cols = new String[] {"PROCEDURE_NAME", "TYPE", meta.getCatalogTerm().toUpperCase(), meta.getSchemaTerm().toUpperCase(), "REMARKS"};
 		final int types[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 		final int sizes[] = {30,12,10,10,20};
 
 		DataStore ds = new DataStore(cols, types, sizes);
-
+		return ds;
+	}
+	
+	public DataStore fillProcedureListDataStore(ResultSet rs)
+		throws SQLException
+	{
+		DataStore ds = buildProcedureListDataStore(this.dbMeta);
 		try
 		{
 			while (rs.next())

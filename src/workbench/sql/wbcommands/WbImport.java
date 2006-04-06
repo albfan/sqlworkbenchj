@@ -39,7 +39,8 @@ import workbench.util.StringUtil;
  *
  * @author  support@sql-workbench.net
  */
-public class WbImport extends SqlCommand
+public class WbImport 
+	extends SqlCommand
 {
 	public static final String VERB = "WBIMPORT";
 	private DataImporter imp;
@@ -143,7 +144,7 @@ public class WbImport extends SqlCommand
 		}
 		catch (Exception e)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorImportWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrImportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -151,20 +152,20 @@ public class WbImport extends SqlCommand
 		if (cmdLine.hasUnknownArguments())
 		{
 			List params = cmdLine.getUnknownArguments();
-			StringBuffer msg = new StringBuffer(ResourceMgr.getString("ErrorUnknownParameter"));
+			StringBuffer msg = new StringBuffer(ResourceMgr.getString("ErrUnknownParameter"));
 			for (int i=0; i < params.size(); i++)
 			{
 				msg.append((String)params.get(i));
 				if (i > 0) msg.append(',');
 			}
 			result.addMessage(msg.toString());
-			result.addMessage(ResourceMgr.getString("ErrorImportWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrImportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
 		if (!cmdLine.hasArguments())
 		{
-			result.addMessage(ResourceMgr.getString("ErrorImportWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrImportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -175,22 +176,22 @@ public class WbImport extends SqlCommand
 
 		if (type == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorImportTypeMissing"));
-			result.addMessage(ResourceMgr.getString("ErrorImportWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrImportTypeMissing"));
+			result.addMessage(ResourceMgr.getString("ErrImportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
 
 		if (file == null && dir == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorImportFileMissing"));
+			result.addMessage(ResourceMgr.getString("ErrImportFileMissing"));
 			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrorImportWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrImportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
 
-		file = StringUtil.trimQuotes(file);
+		file = evaluateFileArgument(file);
 
 		int commit = cmdLine.getIntValue(ARG_COMMIT,-1);
 		imp.setCommitEvery(commit);
@@ -206,7 +207,7 @@ public class WbImport extends SqlCommand
 			File f = new File(file);
 			if (!f.exists())
 			{
-				result.addMessage(ResourceMgr.getString("ErrorImportFileNotFound"));
+				result.addMessage(ResourceMgr.getString("ErrImportFileNotFound"));
 				result.setFailure();
 				return result;
 			}
@@ -216,13 +217,13 @@ public class WbImport extends SqlCommand
 			File d = new File(dir);
 			if (!d.exists())
 			{
-				result.addMessage(ResourceMgr.getString("ErrorImportSourceDirNotFound"));
+				result.addMessage(ResourceMgr.getString("ErrImportSourceDirNotFound"));
 				result.setFailure();
 				return result;
 			}
 			if (!d.isDirectory())
 			{
-				String msg = ResourceMgr.getString("ErrorImportNoDir");
+				String msg = ResourceMgr.getString("ErrImportNoDir");
 				msg = StringUtil.replace(msg, "%dir%", dir);
 				result.addMessage(msg);
 				result.setFailure();
@@ -234,7 +235,7 @@ public class WbImport extends SqlCommand
 		{
 			if (table == null && dir == null)
 			{
-				result.addMessage(ResourceMgr.getString("ErrorTextImportRequiresTableName"));
+				result.addMessage(ResourceMgr.getString("ErrTextImportRequiresTableName"));
 				result.setFailure();
 				return result;
 			}
@@ -309,7 +310,7 @@ public class WbImport extends SqlCommand
 					}
 					catch (Exception e)
 					{
-						result.addMessage(ResourceMgr.getString("ErrorWrongColumnList"));
+						result.addMessage(ResourceMgr.getString("ErrWrongColumnList"));
 						result.addMessage(ExceptionUtil.getDisplay(e));
 						result.setFailure();
 						return result;
@@ -318,14 +319,14 @@ public class WbImport extends SqlCommand
 
 				if (!header && filecolumns == null)
 				{
-					result.addMessage(ResourceMgr.getString("ErrorHeaderOrColumnDefRequired"));
+					result.addMessage(ResourceMgr.getString("ErrHeaderOrColumnDefRequired"));
 					result.setFailure();
 					return result;
 				}
 
 				if (!header && importcolumns != null && filecolumns == null)
 				{
-					result.addMessage(ResourceMgr.getString("ErrorImportNoFileColumns"));
+					result.addMessage(ResourceMgr.getString("ErrImportNoFileColumns"));
 					result.setFailure();
 					return result;
 				}
@@ -392,7 +393,7 @@ public class WbImport extends SqlCommand
 					{
 						result.setFailure();
 						String col = xmlParser.getMissingColumn();
-						String msg = ResourceMgr.getString("ErrorImportColumnNotFound").replaceAll("%name%", col);
+						String msg = ResourceMgr.getString("ErrImportColumnNotFound").replaceAll("%name%", col);
 						result.addMessage(msg);
 						LogMgr.logError("WbImport.execute()", msg, null);
 						return result;
@@ -411,7 +412,7 @@ public class WbImport extends SqlCommand
 		}
 		else
 		{
-			result.addMessage(ResourceMgr.getString("ErrorImportWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrImportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -446,7 +447,7 @@ public class WbImport extends SqlCommand
 		{
 			if (!imp.setMode(mode))
 			{
-				result.addMessage(ResourceMgr.getString("ErrorInvalidModeIgnored").replaceAll("%mode%", mode));
+				result.addMessage(ResourceMgr.getString("ErrInvalidModeIgnored").replaceAll("%mode%", mode));
 			}
 		}
 
@@ -492,7 +493,7 @@ public class WbImport extends SqlCommand
 			}
 			else
 			{
-				result.addMessage(ResourceMgr.getString("ErrorImportInvalidBatchSize"));
+				result.addMessage(ResourceMgr.getString("ErrImportInvalidBatchSize"));
 			}
 		}
 		try

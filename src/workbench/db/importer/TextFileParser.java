@@ -624,7 +624,7 @@ public class TextFileParser
 					catch (Exception e)
 					{
 						rowData[i] = null;
-						String msg = ResourceMgr.getString("ErrorTextfileImport");
+						String msg = ResourceMgr.getString("ErrTextfileImport");
 						msg = msg.replaceAll("%row%", Integer.toString(importRow + 1));
 						msg = msg.replaceAll("%col%", this.columns[i].getColumnName());
 						msg = msg.replaceAll("%value%", (value == null ? "(NULL)" : value.toString()));
@@ -793,7 +793,7 @@ public class TextFileParser
 
 			if (numTableCols == 0)
 			{
-				String msg = ResourceMgr.getString("ErrorImportTableNotFound").replaceAll("%table%", targetTable.getTableExpression());
+				String msg = ResourceMgr.getString("ErrImportTableNotFound").replaceAll("%table%", targetTable.getTableExpression());
 				msg = StringUtil.replace(msg, "%filename%", this.filename);
 				this.messages.append(msg + "\n\n");
 				this.columns = null;
@@ -823,7 +823,7 @@ public class TextFileParser
 						{
 							if (this.abortOnError)
 							{
-								String msg = ResourceMgr.getString("ErrorImportColumnNotFound");
+								String msg = ResourceMgr.getString("ErrImportColumnNotFound");
 								msg = StringUtil.replace(msg, "%column%", colname);
 								msg = StringUtil.replace(msg, "%table%", this.tableName);
 								this.messages.append(msg + "\n");
@@ -831,7 +831,7 @@ public class TextFileParser
 							}
 							else
 							{
-								String msg = ResourceMgr.getString("ErrorImportColumnIgnored");
+								String msg = ResourceMgr.getString("ErrImportColumnIgnored");
 								msg = StringUtil.replace(msg, "%column%", colname);
 								msg = StringUtil.replace(msg, "%table%", this.tableName);
 								LogMgr.logWarning("TextFileParser.readColumns()", msg);
@@ -845,7 +845,7 @@ public class TextFileParser
 
 			if (realCols.size() == 0)
 			{
-				String msg = ResourceMgr.getString("ErrorImportNoColumns");
+				String msg = ResourceMgr.getString("ErrImportNoColumns");
 				msg = StringUtil.replace(msg, "%table%", this.tableName);
 				this.messages.append(msg + "\n");
 				throw new SQLException("No column matched in import file");

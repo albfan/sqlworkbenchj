@@ -144,6 +144,14 @@ public class DbDriver
 	public void setSampleUrl(String anUrl) { this.sampleUrl = anUrl; }
 	public String getSampleUrl() { return this.sampleUrl; }
 
+	public Class loadClassFromDriverLib(String className)
+		throws ClassNotFoundException
+	{
+		if (this.classLoader == null) return null;
+		Class clz = this.classLoader.loadClass(className);
+		return clz;
+	}
+	
 	private void loadDriverClass()
 		throws ClassNotFoundException, Exception
 	{
@@ -244,7 +252,7 @@ public class DbDriver
 			boolean verify = Settings.getInstance().getVerifyDriverUrl();
 			if (!this.driverClassInstance.acceptsURL(url))
 			{
-				String msg = ResourceMgr.getString("ErrorInvalidUrl");
+				String msg = ResourceMgr.getString("ErrInvalidUrl");
 				msg = msg.replaceAll("%driver%", this.driverClass);
 				msg = msg + " " + url;
 				if (verify)

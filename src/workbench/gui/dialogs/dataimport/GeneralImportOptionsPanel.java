@@ -122,7 +122,7 @@ public class GeneralImportOptionsPanel
     gridBagConstraints.weightx = 1.0;
     add(encodingPanel, gridBagConstraints);
 
-    dateFormatLabel.setText(ResourceMgr.getString("LabelDateFormat"));
+    dateFormatLabel.setText(ResourceMgr.getString("LblDateFormat"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -139,7 +139,7 @@ public class GeneralImportOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
     add(dateFormat, gridBagConstraints);
 
-    timestampFormatLabel.setText(ResourceMgr.getString("LabelTimestampFormat"));
+    timestampFormatLabel.setText(ResourceMgr.getString("LblTimestampFormat"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -163,7 +163,7 @@ public class GeneralImportOptionsPanel
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
 
-    modeLabel.setText(ResourceMgr.getString("LabelImportMode"));
+    modeLabel.setText(ResourceMgr.getString("LblImportMode"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;

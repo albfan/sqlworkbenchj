@@ -88,11 +88,11 @@ public class DefineFilterExpressionPanel
 		this.setLayout(new BorderLayout(0,2));
 		
 		Insets ins = new Insets(0,0,0,0);
-		orButton = new JRadioButton(ResourceMgr.getString("LabelFilterOrOption"));
-		orButton.setToolTipText(ResourceMgr.getDescription("LabelFilterOrOption"));
+		orButton = new JRadioButton(ResourceMgr.getString("LblFilterOrOption"));
+		orButton.setToolTipText(ResourceMgr.getDescription("LblFilterOrOption"));
 		orButton.setMargin(ins);
-		andButton = new JRadioButton(ResourceMgr.getString("LabelFilterAndOption"));
-		andButton.setToolTipText(ResourceMgr.getDescription("LabelFilterAndOption"));
+		andButton = new JRadioButton(ResourceMgr.getString("LblFilterAndOption"));
+		andButton.setToolTipText(ResourceMgr.getDescription("LblFilterAndOption"));
 		andButton.setMargin(ins);
 		ButtonGroup g = new ButtonGroup();
 		g.add(orButton);
@@ -138,7 +138,7 @@ public class DefineFilterExpressionPanel
 		c.weightx = 1;
 		p.add(radioPanel, c);
 		
-		addLineButton = new JButton(ResourceMgr.getString("LabelFilterAddLine"));
+		addLineButton = new JButton(ResourceMgr.getString("LblFilterAddLine"));
 		Border ob = BorderFactory.createEtchedBorder();
 		Border ib = BorderFactory.createEmptyBorder(2,5,2,5);
 		addLineButton.setBorder(BorderFactory.createCompoundBorder(ob, ib));
@@ -173,7 +173,7 @@ public class DefineFilterExpressionPanel
 		FilterExpression filter = this.getExpression();
 		if (filter == null) 
 		{
-			WbSwingUtilities.showMessageKey(this, "ErrorFilterNotPresent");
+			WbSwingUtilities.showMessageKey(this, "ErrFilterNotPresent");
 			return;
 		}
 			
@@ -199,7 +199,7 @@ public class DefineFilterExpressionPanel
 			} 
 			catch (IOException e)
 			{
-				String msg = ResourceMgr.getString("ErrorLoadingFilter");
+				String msg = ResourceMgr.getString("ErrLoadingFilter");
 				msg = msg + "\n" + ExceptionUtil.getDisplay(e);
 				WbSwingUtilities.showErrorMessage(this, msg);
 			}
@@ -229,7 +229,7 @@ public class DefineFilterExpressionPanel
 			} 
 			catch (Exception e)
 			{
-				String msg = ResourceMgr.getString("ErrorLoadingFilter");
+				String msg = ResourceMgr.getString("ErrLoadingFilter");
 				msg = msg + "\n" + ExceptionUtil.getDisplay(e);
 				WbSwingUtilities.showErrorMessage(this, msg);
 			}
@@ -292,14 +292,14 @@ public class DefineFilterExpressionPanel
 			ColumnComparator comp = entry.expressionPanel.getComparator();
 			if (comp == null)
 			{
-				String msg = ResourceMgr.getString("ErrorFilterNoComparator");
+				String msg = ResourceMgr.getString("ErrFilterNoComparator");
 				WbSwingUtilities.showErrorMessage(this, msg);
 				return false;
 			}
 			
 			if (!entry.expressionPanel.validateInput())
 			{
-				String msg = ResourceMgr.getString("ErrorFilterWrongValue");
+				String msg = ResourceMgr.getString("ErrFilterWrongValue");
 				msg = StringUtil.replace(msg, "%value%", entry.expressionPanel.getInputValue());
 				msg = StringUtil.replace(msg, "%op%", comp.getOperator());
 				WbSwingUtilities.showErrorMessage(this, msg);

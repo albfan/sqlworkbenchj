@@ -256,21 +256,21 @@ public class DataPumper
 	
 	private void updateTargetDisplay()
 	{
-		String label = ResourceMgr.getString("LabelDPTargetProfile");
+		String label = ResourceMgr.getString("LblDPTargetProfile");
 		if (this.targetProfile != null)
 		{
 			this.targetProfileLabel.setText(label + ": " + this.targetProfile.getName());
 		}
 		else
 		{
-			this.targetProfileLabel.setText(label + ": " + ResourceMgr.getString("LabelPleaseSelect"));
+			this.targetProfileLabel.setText(label + ": " + ResourceMgr.getString("LblPleaseSelect"));
 		}
 		this.updateWindowTitle();
 	}
 
 	private void updateSourceDisplay()
 	{
-		String label = ResourceMgr.getString("LabelDPSourceProfile");
+		String label = ResourceMgr.getString("LblDPSourceProfile");
 		if (this.sourceProfile != null)
 		{
 			this.sourceProfileLabel.setText(label + ": " + this.sourceProfile.getName());
@@ -278,11 +278,11 @@ public class DataPumper
 		else if (this.sourceFile != null)
 		{
 			File f = new File(this.sourceFile);
-			this.sourceProfileLabel.setText(ResourceMgr.getString("LabelDPSourceFile") + ": " + f.getAbsolutePath());
+			this.sourceProfileLabel.setText(ResourceMgr.getString("LblDPSourceFile") + ": " + f.getAbsolutePath());
 		}
 		else
 		{
-			this.sourceProfileLabel.setText(label + ": " + ResourceMgr.getString("LabelPleaseSelect"));
+			this.sourceProfileLabel.setText(label + ": " + ResourceMgr.getString("LblPleaseSelect"));
 		}
 		this.updateWindowTitle();
 	}
@@ -348,7 +348,7 @@ public class DataPumper
 		catch (Exception e)
 		{
 			LogMgr.logError("DataPumper.doConnectSource()", "Error when connecting to profile: " + this.sourceProfile.getName(), e);
-			String msg = ResourceMgr.getString("ErrorConnectionError") + "\n" + e.getMessage();
+			String msg = ResourceMgr.getString("ErrConnectionError") + "\n" + e.getMessage();
 			this.sourceProfile = null;
 			WbSwingUtilities.showErrorMessage(this, msg);
 		}
@@ -406,7 +406,7 @@ public class DataPumper
 		catch (Exception e)
 		{
 			LogMgr.logError("DataPumper.doConnectSource()", "Error when connecting to profile: " + this.targetProfile.getName(), e);
-			String msg = ResourceMgr.getString("ErrorConnectionError") + "\n" + e.getMessage();
+			String msg = ResourceMgr.getString("ErrConnectionError") + "\n" + e.getMessage();
 			this.targetProfile = null;
 			WbSwingUtilities.showErrorMessage(this, msg);
 		}
@@ -591,7 +591,7 @@ public class DataPumper
 
     targetHeader.setBackground(java.awt.Color.white);
     targetHeader.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-    targetHeader.setText("<html><b>" + ResourceMgr.getString("LabelTargetConnection") + "</b></html>");
+    targetHeader.setText("<html><b>" + ResourceMgr.getString("LblTargetConnection") + "</b></html>");
     targetHeader.setMaximumSize(new java.awt.Dimension(23768, 22));
     targetHeader.setMinimumSize(new java.awt.Dimension(25, 22));
     targetHeader.setPreferredSize(new java.awt.Dimension(25, 22));
@@ -606,7 +606,7 @@ public class DataPumper
 
     sourceHeader.setBackground(java.awt.Color.white);
     sourceHeader.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-    sourceHeader.setText("<html><b>" + ResourceMgr.getString("LabelSourceConnection") + "</b></html>");
+    sourceHeader.setText("<html><b>" + ResourceMgr.getString("LblSourceConnection") + "</b></html>");
     sourceHeader.setMaximumSize(new java.awt.Dimension(32768, 22));
     sourceHeader.setMinimumSize(new java.awt.Dimension(25, 22));
     sourceHeader.setPreferredSize(new java.awt.Dimension(50, 22));
@@ -631,7 +631,7 @@ public class DataPumper
 
     wherePanel.setLayout(new java.awt.BorderLayout());
 
-    sqlEditorLabel.setText(ResourceMgr.getString("LabelDPAdditionalWhere"));
+    sqlEditorLabel.setText(ResourceMgr.getString("LblDPAdditionalWhere"));
     wherePanel.add(sqlEditorLabel, java.awt.BorderLayout.NORTH);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -646,8 +646,8 @@ public class DataPumper
     gridBagConstraints.insets = new java.awt.Insets(5, 0, 4, 1);
     sqlPanel.add(wherePanel, gridBagConstraints);
 
-    useQueryCbx.setText(ResourceMgr.getString("LabelDPUseSQLSource"));
-    useQueryCbx.setToolTipText(ResourceMgr.getString("LabelDPUseSQLSource"));
+    useQueryCbx.setText(ResourceMgr.getString("LblDPUseSQLSource"));
+    useQueryCbx.setToolTipText(ResourceMgr.getString("LblDPUseSQLSource"));
     useQueryCbx.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     useQueryCbx.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -660,8 +660,8 @@ public class DataPumper
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 0, 2);
     sqlPanel.add(useQueryCbx, gridBagConstraints);
 
-    checkQueryButton.setText(ResourceMgr.getString("LabelDPCheckQuery"));
-    checkQueryButton.setToolTipText(ResourceMgr.getDescription("LabelDPCheckQuery"));
+    checkQueryButton.setText(ResourceMgr.getString("LblDPCheckQuery"));
+    checkQueryButton.setToolTipText(ResourceMgr.getDescription("LblDPCheckQuery"));
     checkQueryButton.setBorder(new javax.swing.border.EtchedBorder());
     checkQueryButton.setEnabled(false);
     checkQueryButton.setMargin(new java.awt.Insets(2, 5, 2, 5));
@@ -690,8 +690,8 @@ public class DataPumper
     updateOptionPanel.setLayout(new java.awt.GridBagLayout());
 
     commitLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    commitLabel.setText(ResourceMgr.getString("LabelDPCommitEvery"));
-    commitLabel.setToolTipText(ResourceMgr.getDescription("LabelDPCommitEvery"));
+    commitLabel.setText(ResourceMgr.getString("LblDPCommitEvery"));
+    commitLabel.setToolTipText(ResourceMgr.getDescription("LblDPCommitEvery"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
@@ -720,8 +720,8 @@ public class DataPumper
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
     updateOptionPanel.add(continueOnErrorCbx, gridBagConstraints);
 
-    deleteTargetCbx.setText(ResourceMgr.getString("LabelDeleteTargetTable"));
-    deleteTargetCbx.setToolTipText(ResourceMgr.getDescription("LabelDeleteTargetTable"));
+    deleteTargetCbx.setText(ResourceMgr.getString("LblDeleteTargetTable"));
+    deleteTargetCbx.setToolTipText(ResourceMgr.getDescription("LblDeleteTargetTable"));
     deleteTargetCbx.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -731,8 +731,8 @@ public class DataPumper
     gridBagConstraints.insets = new java.awt.Insets(6, 5, 0, 0);
     updateOptionPanel.add(deleteTargetCbx, gridBagConstraints);
 
-    dropTargetCbx.setText(ResourceMgr.getString("LabelDPDropTable"));
-    dropTargetCbx.setToolTipText(ResourceMgr.getDescription("LabelDPDropTable"));
+    dropTargetCbx.setText(ResourceMgr.getString("LblDPDropTable"));
+    dropTargetCbx.setToolTipText(ResourceMgr.getDescription("LblDPDropTable"));
     dropTargetCbx.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
     dropTargetCbx.setEnabled(false);
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -752,7 +752,7 @@ public class DataPumper
     gridBagConstraints.insets = new java.awt.Insets(3, 4, 0, 0);
     updateOptionPanel.add(modeComboBox, gridBagConstraints);
 
-    modeLabel.setText(ResourceMgr.getString("LabelDPMode"));
+    modeLabel.setText(ResourceMgr.getString("LblDPMode"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
@@ -767,14 +767,14 @@ public class DataPumper
     gridBagConstraints.weighty = 1.0;
     updateOptionPanel.add(jPanel1, gridBagConstraints);
 
-    jLabel1.setText(ResourceMgr.getString("LabelDPUpdateOptions"));
+    jLabel1.setText(ResourceMgr.getString("LblDPUpdateOptions"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 5);
     updateOptionPanel.add(jLabel1, gridBagConstraints);
 
-    useBatchCheckBox.setText(ResourceMgr.getString("LabelUseBatchUpdate"));
+    useBatchCheckBox.setText(ResourceMgr.getString("LblUseBatchUpdate"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
@@ -829,13 +829,13 @@ public class DataPumper
 
     jPanel3.setLayout(new java.awt.GridBagLayout());
 
-    startButton.setText(ResourceMgr.getString("LabelStartDataPumper"));
+    startButton.setText(ResourceMgr.getString("LblStartDataPumper"));
     startButton.setEnabled(false);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
     jPanel3.add(startButton, gridBagConstraints);
 
-    cancelButton.setText(ResourceMgr.getString("LabelCancelCopy"));
+    cancelButton.setText(ResourceMgr.getString("LblCancelCopy"));
     cancelButton.setEnabled(false);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
@@ -848,12 +848,12 @@ public class DataPumper
 
     jPanel4.setLayout(new java.awt.GridBagLayout());
 
-    showLogButton.setText(ResourceMgr.getString("LabelShowDataPumperLog"));
+    showLogButton.setText(ResourceMgr.getString("LblShowDataPumperLog"));
     showLogButton.setEnabled(false);
     jPanel4.add(showLogButton, new java.awt.GridBagConstraints());
 
-    showWbCommand.setText(ResourceMgr.getString("LabelShowWbCopyCommand"));
-    showWbCommand.setToolTipText(ResourceMgr.getDescription("LabelShowWbCopyCommand"));
+    showWbCommand.setText(ResourceMgr.getString("LblShowWbCopyCommand"));
+    showWbCommand.setToolTipText(ResourceMgr.getDescription("LblShowWbCopyCommand"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
     jPanel4.add(showWbCommand, gridBagConstraints);
@@ -865,13 +865,13 @@ public class DataPumper
 
     jPanel5.setLayout(new java.awt.GridBagLayout());
 
-    helpButton.setText(ResourceMgr.getString("LabelHelp"));
+    helpButton.setText(ResourceMgr.getString("LblHelp"));
     helpButton.setToolTipText("");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
     jPanel5.add(helpButton, gridBagConstraints);
 
-    closeButton.setText(ResourceMgr.getString("LabelClose"));
+    closeButton.setText(ResourceMgr.getString("LblClose"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
@@ -1106,8 +1106,9 @@ public class DataPumper
 	}
 	private void showHelp()
 	{
-		HtmlViewer viewer = new HtmlViewer(this.window, "data-pumper.html");
+		HtmlViewer viewer = new HtmlViewer(this.window);
 		viewer.showDataPumperHelp();
+		viewer.setVisible(true);
 	}
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
@@ -1195,11 +1196,11 @@ public class DataPumper
 		this.targetTable.allowNewTable(allowCreateTable);
 		if (useQuery)
 		{
-			this.sqlEditorLabel.setText(ResourceMgr.getString("LabelDPQueryText"));
+			this.sqlEditorLabel.setText(ResourceMgr.getString("LblDPQueryText"));
 		}
 		else
 		{
-			this.sqlEditorLabel.setText(ResourceMgr.getString("LabelDPAdditionalWhere"));
+			this.sqlEditorLabel.setText(ResourceMgr.getString("LblDPAdditionalWhere"));
 		}
 		if (!useQuery)
 		{
@@ -1769,12 +1770,12 @@ public class DataPumper
 		this.copier.setKeyColumns(keys);
 		if (mode.indexOf("update") > -1 && keys.size() == 0)
 		{
-			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrorDPNoKeyColumns"));
+			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrDPNoKeyColumns"));
 			return false;
 		}
 		if (keys.size() == colMapping.targetColumns.length && mode.indexOf("update") > -1)
 		{
-			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrorDPUpdateOnlyKeyColumns"));
+			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrDPUpdateOnlyKeyColumns"));
 			return false;
 		}
 		this.copier.setMode(mode);

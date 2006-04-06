@@ -49,10 +49,10 @@ public class ReplaceCriteriaPanel extends JPanel
 	public ReplaceCriteriaPanel(Replaceable aClient, String initialValue)
 	{
 //		this.client = aClient;
-		this.ignoreCase = new JCheckBox(ResourceMgr.getString("LabelSearchIgnoreCase"));
+		this.ignoreCase = new JCheckBox(ResourceMgr.getString("LblSearchIgnoreCase"));
 		this.ignoreCase.setSelected(Settings.getInstance().getBoolProperty(PROP_KEY_CASE, true));
 	
-		JLabel label = new JLabel(ResourceMgr.getString("LabelSearchCriteria"));
+		JLabel label = new JLabel(ResourceMgr.getString("LblSearchCriteria"));
 		this.criteria = new JTextField();
 		this.criteria.setColumns(40);
 		this.criteria.setText(initialValue);
@@ -66,7 +66,7 @@ public class ReplaceCriteriaPanel extends JPanel
 		searchPanel.add(label, BorderLayout.WEST);
 		searchPanel.add(this.criteria, BorderLayout.CENTER);
 		
-		label = new JLabel(ResourceMgr.getString("LabelReplaceNewValue"));
+		label = new JLabel(ResourceMgr.getString("LblReplaceNewValue"));
 		this.newValue = new JTextField();
 		this.newValue.setColumns(40);
 		JPanel replacePanel = new JPanel();

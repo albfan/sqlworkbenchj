@@ -23,7 +23,7 @@ public class SelectAllMarker
 	
 	public SelectAllMarker()
 	{
-		display = ResourceMgr.getString("LabelCompletionAllCols");
+		display = ResourceMgr.getString("LblCompletionAllCols");
 	}
 	
 	public String toString()

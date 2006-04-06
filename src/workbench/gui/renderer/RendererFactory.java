@@ -12,6 +12,8 @@
 package workbench.gui.renderer;
 
 import java.lang.reflect.Constructor;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import workbench.log.LogMgr;
@@ -27,82 +29,70 @@ import workbench.log.LogMgr;
  */
 public class RendererFactory
 {
-	public static TableCellRenderer createSortHeaderRenderer()
+	private static Map sharedInstances = new HashMap();
+	private static Map dateRenderer = new HashMap();
+	
+	private static TableCellRenderer createRenderer(String className)
 	{
-		try
+		TableCellRenderer rend = (TableCellRenderer)sharedInstances.get(className);
+		if (rend == null)
 		{
-			Class cls = Class.forName("workbench.gui.components.SortHeaderRenderer");
-			TableCellRenderer rend = (TableCellRenderer)cls.newInstance();
-			return rend;
+			try
+			{
+				Class cls = Class.forName(className);
+				rend = (TableCellRenderer)cls.newInstance();
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("RendererFactory.createRenderer()", "Error creating renderer", e);
+				rend = new DefaultTableCellRenderer();
+			}
+			
 		}
-		catch (Exception e)
-		{
-			LogMgr.logError("RendererFactory.getSortHeaderRenderer()", "Error creating renderer", e);
-			return new DefaultTableCellRenderer();
-		}
+		return rend;
+	}	
+	
+	public static TableCellRenderer getSortHeaderRenderer()
+	{
+		return createRenderer("workbench.gui.components.SortHeaderRenderer");
 	}
 	
-	public static TableCellRenderer createDateRenderer(String format)
+	public static TableCellRenderer getDateRenderer(String format)
 	{
-		try
+		TableCellRenderer rend = (TableCellRenderer)dateRenderer.get(format);
+		if (rend == null)
 		{
-			Class cls = Class.forName("workbench.gui.renderer.DateColumnRenderer");
-			Class[] types = new Class[] { String.class };
-			Constructor cons = cls.getConstructor(types);
-			Object[] args = new Object[] { format };
-			TableCellRenderer rend = (TableCellRenderer)cons.newInstance(args);
-			return rend;
+			try
+			{
+				Class cls = Class.forName("workbench.gui.renderer.DateColumnRenderer");
+				Class[] types = new Class[] { String.class };
+				Constructor cons = cls.getConstructor(types);
+				Object[] args = new Object[] { format };
+				rend = (TableCellRenderer)cons.newInstance(args);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("RendererFactory.getDateRenderer()", "Error creating renderer", e);
+				return new DefaultTableCellRenderer();
+			} 
+			dateRenderer.put(format, rend);
 		}
-		catch (Exception e)
-		{
-			LogMgr.logError("RendererFactory.getDateRenderer()", "Error creating renderer", e);
-			return new DefaultTableCellRenderer();
-		}
+		return rend;
 	}
 
-	public static TableCellRenderer createTooltipRenderer()
+	public static TableCellRenderer getTooltipRenderer()
 	{
-		try
-		{
-			Class cls = Class.forName("workbench.gui.renderer.ToolTipRenderer");
-			TableCellRenderer rend = (TableCellRenderer)cls.newInstance();
-			return rend;
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("RendererFactory.getTooltipRenderer()", "Error creating renderer", e);
-			return new DefaultTableCellRenderer();
-		}
+		return createRenderer("workbench.gui.renderer.ToolTipRenderer");
 	}
 	
-	public static TableCellRenderer createStringRenderer()
+	public static TableCellRenderer getStringRenderer()
 	{
-		try
-		{
-			Class cls = Class.forName("workbench.gui.renderer.StringColumnRenderer");
-			TableCellRenderer rend = (TableCellRenderer)cls.newInstance();
-			return rend;
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("RendererFactory.getStringRenderer()", "Error creating renderer", e);
-			return new DefaultTableCellRenderer();
-		}
+		return createRenderer("workbench.gui.renderer.StringColumnRenderer");
 	}
 	
-	public static TableCellRenderer createIntegerRenderer()
+	public static TableCellRenderer getIntegerRenderer()
 	{
-		try
-		{
-			Class cls = Class.forName("workbench.gui.renderer.NumberColumnRenderer");
-			TableCellRenderer rend = (TableCellRenderer)cls.newInstance();
-			return rend;
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("RendererFactory.getIntegerRenderer()", "Error creating renderer", e);
-			return new DefaultTableCellRenderer();
-		}
+		return createRenderer("workbench.gui.renderer.NumberColumnRenderer");
 	}
 	
 	public static TableCellRenderer createNumberRenderer(int maxDigits, char sep)
@@ -123,19 +113,14 @@ public class RendererFactory
 		}
 	}
 
-	public static TableCellRenderer createClobRenderer()
+	public static TableCellRenderer getClobRenderer()
 	{
-		try
-		{
-			Class cls = Class.forName("workbench.gui.renderer.ClobColumnRenderer");
-			TableCellRenderer rend = (TableCellRenderer)cls.newInstance();
-			return rend;
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("RendererFactory.getClobRenderer()", "Error creating renderer", e);
-			return new DefaultTableCellRenderer();
-		}
+		return createRenderer("workbench.gui.renderer.ClobColumnRenderer");
+	}
+
+	public static TableCellRenderer getBlobRenderer()
+	{
+		return createRenderer("workbench.gui.renderer.BlobColumnRenderer");
 	}
 	
 }

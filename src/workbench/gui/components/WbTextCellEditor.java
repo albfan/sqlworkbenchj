@@ -13,19 +13,22 @@ package workbench.gui.components;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.EventObject;
+import javax.swing.ActionMap;
 
 import javax.swing.DefaultCellEditor;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.OpenEditWindowAction;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -61,6 +64,11 @@ public class WbTextCellEditor
 		this.textField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.textField.addMouseListener(this);
 		this.textField.addMouseListener(new TextComponentMouseListener());
+		
+//		OpenEditWindowAction a = new OpenEditWindowAction(this);
+//		InputMap im = textField.getInputMap(JComponent.WHEN_FOCUSED);
+//		ActionMap am = textField.getActionMap();
+//		a.addToInputMap(im, am);
 		super.addCellEditorListener(parent);
 	}
 
@@ -147,7 +155,7 @@ public class WbTextCellEditor
 		return result;
 	}
 	
-	private void openEditWindow()
+	public void openEditWindow()
 	{
 		if (this.parentTable == null)
 		{

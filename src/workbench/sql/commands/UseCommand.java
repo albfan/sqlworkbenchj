@@ -21,6 +21,7 @@ import workbench.sql.StatementRunnerResult;
 
 /**
  * MS SQL Server's USE command. 
+ *
  * This class will notify the connection used that the current database has changed
  * so that the connection display in the main window can be updated.
  * @author  support@sql-workbench.net

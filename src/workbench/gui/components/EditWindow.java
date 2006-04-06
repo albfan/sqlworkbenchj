@@ -12,9 +12,11 @@
 package workbench.gui.components;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
@@ -30,6 +32,7 @@ import javax.swing.JPanel;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.sql.EditorPanel;
+import workbench.interfaces.Restoreable;
 import workbench.interfaces.TextContainer;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -43,17 +46,22 @@ public class EditWindow
 	extends JDialog
 	implements ActionListener, WindowListener
 {
-	
 	private TextContainer textContainer;
 	private JComponent editor;
-	private JButton okButton = new WbButton(ResourceMgr.getString("LabelOK"));
-	private JButton cancelButton = new WbButton(ResourceMgr.getString("LabelCancel"));
+	private Restoreable componentSettings;
+	private JButton okButton = new WbButton(ResourceMgr.getString("LblOK"));
+	private JButton cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));
 	private boolean isCancelled = true;
 	private String settingsId = null;
 	
 	public EditWindow(Frame owner, String title, String text)
 	{
-		this(owner, title, text, null);
+		this(owner, title, text, "workbench.data.edit.window");
+	}
+	
+	public EditWindow(Frame owner, String title, String text, boolean createSqlEditor, boolean showCloseButtonOnly)
+	{
+		this(owner, title, text, "workbench.data.edit.window", createSqlEditor, true, showCloseButtonOnly);
 	}
 	
 	public EditWindow(Frame owner, String title, String text, String settingsId)
@@ -63,12 +71,31 @@ public class EditWindow
 	
 	public EditWindow(Frame owner, String title, String text, String settingsId, boolean createSqlEditor)
 	{
-		this(owner, title, text, settingsId, createSqlEditor, true);
+		this(owner, title, text, settingsId, createSqlEditor, true, false);
 	}
 	
 	public EditWindow(Frame owner, String title, String text, String settingsId, boolean createSqlEditor, boolean modal)
 	{
+		this(owner, title, text, settingsId, createSqlEditor, modal, false);
+	}
+	
+	public EditWindow(Frame owner, String title, String text, String settingsId, boolean createSqlEditor, boolean modal, boolean showCloseButtonOnly)
+	{
 		super(owner, title, modal);
+		init(owner, text, settingsId, createSqlEditor, showCloseButtonOnly);
+		// pack() needs to be called before center() !!!
+		WbSwingUtilities.center(this, owner);
+	}
+
+	public EditWindow(Dialog owner, String title, String text, boolean createSqlEditor, boolean showCloseButtonOnly)
+	{
+		super(owner, title, true);
+		init(owner, text, "workbench.data.edit.window", createSqlEditor, showCloseButtonOnly);
+		WbSwingUtilities.center(this, null);
+	}
+	
+	private void init(Window owner, String text, String settingsId, boolean createSqlEditor, boolean showCloseButtonOnly)
+	{
 		this.settingsId = settingsId;
 		this.getContentPane().setLayout(new BorderLayout());
 		if (createSqlEditor)
@@ -84,6 +111,8 @@ public class EditWindow
 			if (Settings.getInstance().getUsePlainEditorForData())
 			{
 				PlainEditor ed = new PlainEditor();
+				ed.restoreSettings();
+				this.componentSettings = ed;
 				this.textContainer = ed;
 				this.editor = ed;
 			}
@@ -100,7 +129,14 @@ public class EditWindow
 		this.getContentPane().add(editor, BorderLayout.CENTER);
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		buttonPanel.add(this.okButton);
+		if (!showCloseButtonOnly)
+		{
+			buttonPanel.add(this.okButton);
+		}
+		else
+		{
+			this.cancelButton.setText(ResourceMgr.getString("LblClose"));
+		}
 		buttonPanel.add(this.cancelButton);
 		this.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 		
@@ -135,9 +171,6 @@ public class EditWindow
 		}
 
 		this.addWindowListener(this);
-		
-		// pack() needs to be called before center() !!!
-		WbSwingUtilities.center(this, owner);
 	}
 
 	public void hideCancelButton()
@@ -171,11 +204,13 @@ public class EditWindow
 
 	public void windowActivated(java.awt.event.WindowEvent e)
 	{
+		editor.requestFocus();
 	}
 	
 	public void windowClosed(java.awt.event.WindowEvent e)
 	{
 		Settings.getInstance().storeWindowSize(this, this.settingsId);
+		if (componentSettings != null) componentSettings.saveSettings();
 	}
 	
 	public void windowClosing(java.awt.event.WindowEvent e)

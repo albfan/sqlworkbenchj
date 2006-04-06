@@ -11,10 +11,11 @@
 
 package workbench.gui.completion;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Color;
+import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import javax.swing.BorderFactory;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -34,6 +35,7 @@ public class CompletionSearchField
 	{
 		super();
 		this.parent = popup;
+		this.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
 		this.addKeyListener(this);
 		this.getDocument().addDocumentListener(this);
 	}
@@ -46,11 +48,17 @@ public class CompletionSearchField
 	{
 		if (e.getKeyCode() == KeyEvent.VK_ENTER)
 		{
+			e.consume();
 			parent.quickSearchValueSelected();
 		}
 		else if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 		{
+			e.consume();
 			this.parent.closeQuickSearch();
+		}
+		else if (e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP)
+		{
+			parent.keyPressed(e);
 		}
 	}
 

@@ -65,11 +65,12 @@ public class MacroManagerDialog
 		this.initComponents();
 		this.initWindow(parent);
 		boolean connected = this.client.isConnected();
-		this.runButton.setEnabled(connected);
-		this.runButton.setVisible(connected);
+		boolean busy = this.client.isBusy();
+		this.runButton.setEnabled(connected && !busy);
+		this.runButton.setVisible(connected && !busy);
 
-		this.replaceEditorText.setVisible(connected);
-		this.replaceEditorText.setEnabled(connected);
+		this.replaceEditorText.setVisible(connected && !busy);
+		this.replaceEditorText.setEnabled(connected && !busy);
 		this.initKeys();
 	}
 
@@ -106,14 +107,14 @@ public class MacroManagerDialog
 	{
 		macroPanel = new MacroManagerGui();
 		buttonPanel = new JPanel();
-		runButton = new WbButton(ResourceMgr.getString("LabelRunMacro"));
-		runButton.setToolTipText(ResourceMgr.getDescription("LabelManageMacrosRun"));
+		runButton = new WbButton(ResourceMgr.getString("LblRunMacro"));
+		runButton.setToolTipText(ResourceMgr.getDescription("LblManageMacrosRun"));
 
 		okButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_OK));
-		okButton.setToolTipText(ResourceMgr.getDescription("LabelManageMacrosOK"));
+		okButton.setToolTipText(ResourceMgr.getDescription("LblManageMacrosOK"));
 
 		cancelButton = new WbButton(ResourceMgr.getString(ResourceMgr.TXT_CANCEL));
-		cancelButton.setToolTipText(ResourceMgr.getDescription("LabelManageMacrosCancel"));
+		cancelButton.setToolTipText(ResourceMgr.getDescription("LblManageMacrosCancel"));
 		dummyPanel = new JPanel();
 
 		setTitle(ResourceMgr.getString("TxtMacroManagerWindowTitle"));
@@ -130,8 +131,8 @@ public class MacroManagerDialog
 		macroPanel.setBorder(new CompoundBorder(new EmptyBorder(1,1,1,1), new EtchedBorder()));
 		getContentPane().add(macroPanel, BorderLayout.CENTER);
 
-		this.replaceEditorText = new WbCheckBox(ResourceMgr.getString("LabelReplaceCurrentSql"));
-		this.replaceEditorText.setToolTipText(ResourceMgr.getDescription("LabelReplaceCurrentSql"));
+		this.replaceEditorText = new WbCheckBox(ResourceMgr.getString("LblReplaceCurrentSql"));
+		this.replaceEditorText.setToolTipText(ResourceMgr.getDescription("LblReplaceCurrentSql"));
 
 		JPanel p = new JPanel();
 		p.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -146,16 +147,11 @@ public class MacroManagerDialog
 		buttonPanel.add(runButton);
 
 		okButton.addActionListener(this);
-		//okButton.setEnabled(false);
 		buttonPanel.add(okButton);
 
 		cancelButton.addActionListener(this);
 		buttonPanel.add(cancelButton);
 
-//		JPanel bp = new JPanel();
-//		bp.setLayout(new GridLayout(1,0));
-//		bp.add(p);
-//		bp.add(buttonPanel);
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
 		dummyPanel.setMaximumSize(new Dimension(2, 2));

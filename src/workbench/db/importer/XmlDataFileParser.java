@@ -683,7 +683,7 @@ public class XmlDataFileParser
 			case Types.DOUBLE:
 			case Types.NUMERIC:
 			case Types.REAL:
-				Object result = this.createNumericType(this.columns[this.currentColIndex].getColumnClass(), value);
+				Object result = this.createNumericType(this.columns[this.currentColIndex].getColumnClassName(), value);
 				this.currentRow[this.realColIndex] = result;
 				break;
 				
@@ -702,7 +702,7 @@ public class XmlDataFileParser
 				{
 					if (!this.warningAdded[this.realColIndex])
 					{
-						String msg = ResourceMgr.getString("ErrorConvertError");
+						String msg = ResourceMgr.getString("ErrConvertError");
 						msg = StringUtil.replace(msg, "%type%", SqlUtil.getTypeName(type));
 						msg = StringUtil.replace(msg, "%column%", this.columns[realColIndex].getColumnName());
 						msg = msg + '\n';

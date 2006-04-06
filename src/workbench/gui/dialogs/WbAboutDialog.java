@@ -87,7 +87,7 @@ public class WbAboutDialog
 
     buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-    closeButton.setText(ResourceMgr.getString("LabelClose"));
+    closeButton.setText(ResourceMgr.getString("LblClose"));
     closeButton.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)

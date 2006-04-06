@@ -29,11 +29,16 @@ public class DateColumnRenderer
 
 	public static final String DEFAULT_FORMAT = "yyyy-MM-dd mm:HH:ss";
 	
-	public DateColumnRenderer(String aDateFormat)
+	public DateColumnRenderer()
 	{
 		this.dateFormatter = new SimpleDateFormat(DEFAULT_FORMAT);
-		this.setFormat(aDateFormat);
     this.setHorizontalAlignment(SwingConstants.RIGHT);
+	}
+	
+	public DateColumnRenderer(String aDateFormat)
+	{
+		this();
+		this.setFormat(aDateFormat);
 	}
 	
 	public void setFormat(String aDateFormat)

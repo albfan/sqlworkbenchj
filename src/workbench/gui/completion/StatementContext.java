@@ -11,11 +11,15 @@
  */
 package workbench.gui.completion;
 
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.db.WbConnection;
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
 import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -49,6 +53,10 @@ public class StatementContext
 			else if ("DROP".equalsIgnoreCase(verb) || "TRUNCATE".equalsIgnoreCase(verb))
 			{
 				analyzer = new DdlAnalyzer(conn, sql, pos);
+			}
+			else if ("ALTER".equalsIgnoreCase(verb))
+			{
+				analyzer = new AlterTableAnalyzer(conn, sql, pos);
 			}
 			else if ("INSERT".equalsIgnoreCase(verb))
 			{
@@ -94,42 +102,136 @@ public class StatementContext
 		return analyzer.getColumnPrefix();
 	}
 	
-	private final Pattern SUBSELECT_PATTERN = Pattern.compile("\\(\\s*SELECT.*FROM.*\\)", Pattern.CASE_INSENSITIVE + Pattern.DOTALL);
-	private final Pattern OPEN_BRACKET = Pattern.compile("^\\s*\\(\\s*");
-	private final Pattern CLOSE_BRACKET = Pattern.compile("\\s*\\)\\s*$");
+//	private final Pattern SUBSELECT_PATTERN = Pattern.compile("\\(\\s*SELECT.*FROM.*?\\)", Pattern.CASE_INSENSITIVE + Pattern.DOTALL);
+	private final Pattern INSERT_SELECT_PATTERN = Pattern.compile("INSERT\\s+INTO\\s+.*\\s+SELECT\\s+", Pattern.CASE_INSENSITIVE + Pattern.DOTALL);
+	private final Pattern SELECT_PATTERN = Pattern.compile("SELECT\\s+", Pattern.CASE_INSENSITIVE);
+//	private final Pattern OPEN_BRACKET = Pattern.compile("^\\s*\\(\\s*");
+//	private final Pattern CLOSE_BRACKET = Pattern.compile("\\s*\\)\\s*$");
 	
+//	private boolean inSubSelect(WbConnection conn, String sql, int pos)
+//	{
+//		Matcher m = SUBSELECT_PATTERN.matcher(sql);
+//		int start = 0;
+//		int end = -1;
+//		while (m.find())
+//		{
+//			start = m.start();
+//			end = m.end();
+//			if (pos > start && pos < end)
+//			{
+//				int newpos = pos - start;
+//				
+//				// cleanup the brackets, and adjust the position
+//				// to reflect the removed brackets at the beginning
+//				String subselect = sql.substring(start, end);
+//				Matcher o = OPEN_BRACKET.matcher(subselect);
+//				
+//				// the find() is necessary in order to get the correct
+//				// value from end()
+//				if (o.find())
+//				{
+//					int oend = o.end(); // is actually the number of characters that we'll remove
+//					newpos -= oend;
+//					subselect = o.replaceAll("");
+//				}
+//				
+//				Matcher c = CLOSE_BRACKET.matcher(subselect);
+//				subselect = c.replaceAll("");
+//				analyzer = new SelectAnalyzer(conn, subselect, newpos);
+//				return true;
+//			}
+//		}
+//		
+//		m = INSERT_SELECT_PATTERN.matcher(sql);
+//		if (m.find())
+//		{
+//			Matcher s = SELECT_PATTERN.matcher(sql);
+//			if (s.find())
+//			{
+//				int selectStart = s.start();
+//				if (selectStart < pos)
+//				{
+//					String subselect = sql.substring(selectStart).trim();
+//					int newpos = pos - selectStart;
+//					analyzer = new SelectAnalyzer(conn, subselect, newpos);
+//					return true;
+//				}
+//			}
+//		}
+//		return false;
+//	}
 	private boolean inSubSelect(WbConnection conn, String sql, int pos)
 	{
-		Matcher m = SUBSELECT_PATTERN.matcher(sql);
-		if (m == null) return false;
-		int start = 0;
-		int end = -1;
-		while (m.find())
+		try
 		{
-			start = m.start();
-			end = m.end();
-			if (pos > start && pos < end)
+			Reader in = new StringReader(sql);
+			SQLLexer lexer = new SQLLexer(in);
+
+			SQLToken t = (SQLToken)lexer.getNextToken(false, false);
+			SQLToken lastToken = null;
+			
+			int lastStart = 0;
+			int lastEnd = 0;
+			
+			int bracketCount = 0;
+			boolean inSubselect = false;
+			while (t != null)
 			{
-				int newpos = pos - start;
-				
-				// cleanup the brackets, and adjust the position
-				// to reflect the removed brackets at the beginning
-				String subselect = sql.substring(start, end);
-				Matcher o = OPEN_BRACKET.matcher(subselect);
-				
-				// the find() is necessary in order to get the correct
-				// value from end()
-				if (o.find())
+				String value = t.getContents();
+				if ("(".equals(value)) 
 				{
-					int oend = o.end(); // is actually the number of characters that we'll remove
-					newpos -= oend;
-					subselect = o.replaceAll("");
+					bracketCount ++;
+					if (bracketCount == 1) lastStart = t.getCharBegin();
+				}
+				else if (")".equals(value))
+				{
+					bracketCount --;
+					if (inSubselect && bracketCount == 0)
+					{
+						lastEnd = t.getCharBegin();
+						if (lastStart <= pos && pos <= lastEnd) 
+						{
+							int newpos = pos - lastStart - 1;
+							String sub = sql.substring(lastStart + 1, lastEnd);
+							analyzer = new SelectAnalyzer(conn, sub, newpos);
+							return true;
+						}
+					}
+					if (bracketCount == 0)
+					{
+						inSubselect = false;
+						lastStart = 0;
+						lastEnd = 0;
+					}
 				}
 				
-				Matcher c = CLOSE_BRACKET.matcher(subselect);
-				subselect = c.replaceAll("");
-				analyzer = new SelectAnalyzer(conn, subselect, newpos);
-				return true;
+				if (bracketCount == 1 && lastToken.getContents().equals("(") && t.getContents().equals("SELECT"))
+				{
+					inSubselect = true;
+				}
+
+				lastToken = t;
+				t = (SQLToken)lexer.getNextToken(false, false);
+			}		
+		}
+		catch (Exception e)
+		{
+		}
+		
+		Matcher m = INSERT_SELECT_PATTERN.matcher(sql);
+		if (m.find())
+		{
+			Matcher s = SELECT_PATTERN.matcher(sql);
+			if (s.find())
+			{
+				int selectStart = s.start();
+				if (selectStart < pos)
+				{
+					String subselect = sql.substring(selectStart).trim();
+					int newpos = pos - selectStart;
+					analyzer = new SelectAnalyzer(conn, subselect, newpos);
+					return true;
+				}
 			}
 		}
 		return false;

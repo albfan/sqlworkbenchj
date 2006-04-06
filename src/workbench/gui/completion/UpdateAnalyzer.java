@@ -43,21 +43,12 @@ public class UpdateAnalyzer
 	{
 		int setPos = StringUtil.findPattern(SET_PATTERN, sql, 0);
 
-		String currentWord = StringUtil.getWordLeftOfCursor(sql, cursorPos, ",");
-		if (currentWord != null)
-		{
-			boolean keyWord = this.dbConnection.getMetadata().isKeyword(currentWord);
-			setOverwriteCurrentWord(!keyWord);
-		}
-		else
-		{
-			setOverwriteCurrentWord(false);
-		}
-
-		if ( setPos == -1 || setPos > -1 && cursorPos < setPos )
+		checkOverwrite();
+		
+		if ( setPos == -1 || setPos > -1 && this.cursorPos < setPos )
 		{
 			context = CONTEXT_TABLE_LIST;
-			String q = this.getQualifierLeftOfCursor(sql, cursorPos);
+			String q = this.getQualifierLeftOfCursor();
 			if (q != null)
 			{
 				this.schemaForTableList = q;

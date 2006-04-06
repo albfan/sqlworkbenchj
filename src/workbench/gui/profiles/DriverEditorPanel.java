@@ -37,7 +37,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 	public DriverEditorPanel()
 	{
 		initComponents();
-		String text = ResourceMgr.getDescription("LabelDriverLibrary");
+		String text = ResourceMgr.getDescription("LblDriverLibrary");
 		text = text.replaceAll("%path_sep%", StringUtil.PATH_SEPARATOR);
 		lblLibrary.setToolTipText(text);
 		tfLibrary.setToolTipText(text);
@@ -69,7 +69,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		
 		setFont(null);
 		lblName.setFont(null);
-		lblName.setText(ResourceMgr.getString("LabelDriverName"));
+		lblName.setText(ResourceMgr.getString("LblDriverName"));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 0;
@@ -100,7 +100,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		add(tfName, gridBagConstraints);
 		
 		lblClassName.setFont(null);
-		lblClassName.setText(ResourceMgr.getString("LabelDriverClass"));
+		lblClassName.setText(ResourceMgr.getString("LblDriverClass"));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 1;
@@ -129,7 +129,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		add(tfClassName, gridBagConstraints);
 		
 		lblLibrary.setFont(null);
-		lblLibrary.setText(ResourceMgr.getString("LabelDriverLibrary"));
+		lblLibrary.setText(ResourceMgr.getString("LblDriverLibrary"));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 2;
@@ -186,7 +186,7 @@ public class DriverEditorPanel extends javax.swing.JPanel
 		add(jButton1, gridBagConstraints);
 		
 		lblSample.setFont(null);
-		lblSample.setText(ResourceMgr.getString("LabelSampleUrl"));
+		lblSample.setText(ResourceMgr.getString("LblSampleUrl"));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 3;

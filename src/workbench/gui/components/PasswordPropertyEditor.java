@@ -20,6 +20,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import workbench.interfaces.SimplePropertyEditor;
+import workbench.log.LogMgr;
 
 
 /**
@@ -68,8 +69,7 @@ public class PasswordPropertyEditor
 		}
 		catch (Exception e)
 		{
-			System.out.println("Error on init");
-			e.printStackTrace();
+			LogMgr.logError("PasswordPropertyEditor.setSourceObject()", "Error during init", e);
 		}
 		this.getDocument().addDocumentListener(this);
 	}

@@ -43,8 +43,8 @@ public class ExecuteSqlDialog
 {
 	private WbConnection dbConn;
 	private EditorPanel sqlEditor;
-	private WbButton startButton = new WbButton(ResourceMgr.getString("LabelStartSql"));
-	private WbButton closeButton = new WbButton(ResourceMgr.getString("LabelClose"));
+	private WbButton startButton = new WbButton(ResourceMgr.getString("LblStartSql"));
+	private WbButton closeButton = new WbButton(ResourceMgr.getString("LblClose"));
 	private JLabel statusMessage;
 	private Thread worker;
 
@@ -126,9 +126,10 @@ public class ExecuteSqlDialog
 	private void startCreate()
 	{
 		if (this.dbConn == null) return;
+		
 		if (this.dbConn.isBusy()) 
 		{
-			WbSwingUtilities.showMessageKey(this, "ErrorConnectionBusy");
+			WbSwingUtilities.showMessageKey(this, "ErrConnectionBusy");
 			return;
 		}
 		this.statusMessage.setText(ResourceMgr.getString("MsgCreatingIndex"));
@@ -173,28 +174,34 @@ public class ExecuteSqlDialog
 				}
 			}
 		};
+		WbSwingUtilities.showWaitCursorOnWindow(ExecuteSqlDialog.this);
+		WbSwingUtilities.showWaitCursorOnWindow(sqlEditor);
 		this.startButton.setEnabled(false);
 		this.closeButton.setEnabled(false);
-		WbSwingUtilities.showWaitCursorOnWindow(this);
+		this.sqlEditor.setEnabled(false);
 		this.worker.start();
 	}
 
 	private void createSuccess()
 	{
+		WbSwingUtilities.showDefaultCursor(sqlEditor);
+		WbSwingUtilities.showDefaultCursor(ExecuteSqlDialog.this);
 		WbSwingUtilities.showMessage(this, ResourceMgr.getString("MsgIndexCreated"));
 		this.closeWindow();
 	}
 	
 	private void createFinished()
 	{
-		WbSwingUtilities.showDefaultCursorOnWindow(this);
 		this.startButton.setEnabled(true);
 		this.closeButton.setEnabled(true);
+		this.sqlEditor.setEnabled(true);
 		this.worker = null;
 	}
 
 	private void createFailure(Exception e)
 	{
+		WbSwingUtilities.showDefaultCursor(sqlEditor);
+		WbSwingUtilities.showDefaultCursor(ExecuteSqlDialog.this);
 		String error = ExceptionUtil.getDisplay(e);
 		statusMessage.setText(error);
 		String msg = ResourceMgr.getString("MsgCreateIndexError") + "\n" + error;

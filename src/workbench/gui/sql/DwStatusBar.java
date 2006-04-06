@@ -133,19 +133,19 @@ public class DwStatusBar
 		
 		if (showTimeout)
 		{
-			JLabel l = new JLabel(" " + ResourceMgr.getString("LabelQueryTimeout") + " ");
+			JLabel l = new JLabel(" " + ResourceMgr.getString("LblQueryTimeout") + " ");
 			//l.setBorder(new DividerBorder(DividerBorder.LEFT));		
 			p.add(l);
 			this.tfTimeout = new JTextField(3);
 			this.tfTimeout.setBorder(b);
 			this.tfTimeout.setMargin(new Insets(0, 2, 0, 2));
-			this.tfTimeout.setToolTipText(ResourceMgr.getDescription("LabelQueryTimeout"));
+			this.tfTimeout.setToolTipText(ResourceMgr.getDescription("LblQueryTimeout"));
 			this.tfTimeout.setHorizontalAlignment(SwingConstants.RIGHT);
 			this.tfTimeout.addMouseListener(new TextComponentMouseListener());
 			l.setToolTipText(this.tfTimeout.getToolTipText());
 			p.add(this.tfTimeout);
 		}
-		JLabel l = new JLabel(" " + ResourceMgr.getString("LabelMaxRows") + " ");
+		JLabel l = new JLabel(" " + ResourceMgr.getString("LblMaxRows") + " ");
 		l.setToolTipText(this.tfRowCount.getToolTipText());
 		p.add(l);
 		p.add(tfMaxRows);

@@ -246,12 +246,13 @@ public class OracleMetadata
 		throws SQLException
 	{
 		// Oracle 9 and above reports a wrong length if NLS_LENGTH_SEMANTICS is set to char
-		// this statement fixes this problem
+		// this statement fixes this problem and also removes the usage of LIKE 
+		// to speed up the retrieval.
 		final String sql1 ="SELECT NULL AS table_cat,  \n" +
 			"       t.owner AS table_schem,  \n" +
 			"       t.table_name AS table_name,  \n" +
 			"       t.column_name AS column_name,  \n" +
-			"       DECODE (t.data_type, 'CHAR', 1, 'VARCHAR2', 12, 'NVARCHAR2', 12, 'NUMBER', 3, 'LONG', -1, 'DATE', 93, 'RAW', -3, 'LONG RAW', -4, 1111)  AS data_type,  \n" +
+			"       DECODE (t.data_type, 'CHAR', 1, 'VARCHAR2', 12, 'NUMBER', 3, 'LONG', -1, 'DATE', 91, 'RAW', -3, 'LONG RAW', -4, 'BLOB', 2004, 'CLOB', 2005, 'BFILE', -13, 'FLOAT', 6, 'TIMESTAMP(6)', 93, 'TIMESTAMP(6) WITH TIME ZONE', -101, 'TIMESTAMP(6) WITH LOCAL TIME ZONE', -102, 'INTERVAL YEAR(2) TO MONTH', -103, 'INTERVAL DAY(2) TO SECOND(6)', -104, 'BINARY_FLOAT', 100, 'BINARY_DOUBLE', 101, 1111) AS data_type,  \n " +
 			"       t.data_type AS type_name,  \n" +
 			"       DECODE (t.data_precision, null, decode(t.data_type, 'VARCHAR2', t.char_length, 'NVARCHAR', t.char_length, 'NVARCHAR2', t.char_length, 'CHAR', t.char_length, 'VARCHAR', t.char_length, 'NCHAR', t.char_length, t.data_length), t.data_precision) AS column_size,  \n" +
 			"       0 AS buffer_length,  \n" +

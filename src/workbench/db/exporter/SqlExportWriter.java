@@ -32,32 +32,38 @@ public class SqlExportWriter
 
 	public RowDataConverter createConverter()
 	{
-		SqlRowDataConverter converter = new SqlRowDataConverter(exporter.getConnection());
-		converter.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
-		converter.setCommitEvery(exporter.getCommitEvery());
-		converter.setChrFunction(exporter.getChrFunction());
-		converter.setConcatString(exporter.getConcatString());
-		converter.setConcatFunction(exporter.getConcatFunction());
+		return new SqlRowDataConverter(exporter.getConnection());
+	}
+
+	public void configureConverter()
+	{
+		super.configureConverter();
+		SqlRowDataConverter conv = (SqlRowDataConverter)this.converter;
+		conv.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
+		conv.setCommitEvery(exporter.getCommitEvery());
+		conv.setChrFunction(exporter.getChrFunction());
+		conv.setConcatString(exporter.getConcatString());
+		conv.setConcatFunction(exporter.getConcatFunction());
 		
 		// the key columns need to be set before the createInsert flag!
-		converter.setKeyColumnsToUse(exporter.getKeyColumnsToUse());
+		conv.setKeyColumnsToUse(exporter.getKeyColumnsToUse());
 		try
 		{
-			converter.setType(exporter.getSqlType());
+			conv.setType(exporter.getSqlType());
 		}
 		catch (IllegalArgumentException e)
 		{
 			LogMgr.logError("SqlExportWriter.createConverter()", "Illegal SQL type requested. Reverting to INSERT", null);
-			converter.setCreateInsert();
+			conv.setCreateInsert();
 		}
-		converter.setSql(exporter.getSql());
+		conv.setSql(exporter.getSql());
 		String table = exporter.getTableName();
 		if (table != null)
 		{
-			converter.setAlternateUpdateTable(new TableIdentifier(table));
+			conv.setAlternateUpdateTable(new TableIdentifier(table));
 		}
-		converter.setCreateTable(exporter.isIncludeCreateTable());
-		return converter;
+		conv.setCreateTable(exporter.isIncludeCreateTable());
+	
 	}
 
 }

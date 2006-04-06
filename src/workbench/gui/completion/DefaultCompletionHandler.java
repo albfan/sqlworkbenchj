@@ -123,7 +123,7 @@ public class DefaultCompletionHandler
 			showNoObjectsFoundMessage();
 			return false;
 		}
-		this.currentWord = editor.getWordAtCursor(".(;");
+		this.currentWord = editor.getWordAtCursor(BaseAnalyzer.WORD_DELIM);
 		
 		try
 		{

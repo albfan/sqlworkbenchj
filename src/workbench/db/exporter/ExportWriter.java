@@ -42,7 +42,17 @@ public abstract class ExportWriter
 	{
 		this.exporter = exp;
 		converter = createConverter();
-		converter.setErrorReporter(exp);
+		configureConverter();
+	}
+
+	public void configureFromExporter()
+	{
+		configureConverter();
+	}
+	
+	public void configureConverter()
+	{
+		converter.setErrorReporter(exporter);
 		converter.setEncoding(exporter.getEncoding());
 		converter.setDefaultDateFormatter(exporter.getDateFormatter());
 		converter.setDefaultTimestampFormatter(exporter.getTimestampFormatter());
@@ -51,7 +61,6 @@ public abstract class ExportWriter
 		converter.setColumnsToExport(this.exporter.getColumnsToExport());
 		converter.setBaseDir(this.baseDir);
 	}
-
 	public abstract RowDataConverter createConverter();
 
 	public void setProgressInterval(int interval)

@@ -328,9 +328,9 @@ public class VariablePool
 		}
 		else
 		{
-			String msg = ResourceMgr.getString("ErrorIllegalVariableName");
+			String msg = ResourceMgr.getString("ErrIllegalVariableName");
 			msg = StringUtil.replace(msg, "%varname%", varName);
-			msg = msg + "\n" + ResourceMgr.getString("ErrorVarDefWrongName");
+			msg = msg + "\n" + ResourceMgr.getString("ErrVarDefWrongName");
 			throw new IllegalArgumentException(msg);
 		}
 	}		
@@ -410,7 +410,7 @@ public class VariablePool
 class VariableDataStore 
 	extends DataStore
 {
-	private static final String cols[] = {ResourceMgr.getString("LabelVariableName"), ResourceMgr.getString("LabelVariableValue") };
+	private static final String cols[] = {ResourceMgr.getString("LblVariableName"), ResourceMgr.getString("LblVariableValue") };
 	private static final int types[] =   {Types.VARCHAR, Types.VARCHAR};
 	private static final int sizes[] =   {20, 50};
 	private static final String TABLE_ID = "$__wb-internal-variable-list__$";

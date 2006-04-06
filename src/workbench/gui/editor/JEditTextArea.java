@@ -109,7 +109,7 @@ import workbench.util.StringUtil;
  *     + "}");</pre>
  *
  * @author Slava Pestov
- * @version $Id: JEditTextArea.java,v 1.45 2006-03-11 16:29:52 thomas Exp $
+ * @version $Id: JEditTextArea.java,v 1.46 2006-04-06 16:30:05 thomas Exp $
  */
 public class JEditTextArea
 	extends JComponent
@@ -176,7 +176,7 @@ public class JEditTextArea
 		caretBlinks = true;
 		electricScroll = Settings.getInstance().getElectricScroll();
 		autoIndent = true;
-		this.setTabSize(TextAreaPainter.DEFAULT_TAB_SIZE);
+		this.setTabSize(Settings.getInstance().getEditorTabWidth());
 		this.popup = new TextPopup(this);
 
 		this.addKeyBinding("C+C", this.popup.getCopyAction());
@@ -1525,11 +1525,23 @@ public class JEditTextArea
 	public void undo()
 	{
 		this.document.undo();
+		int pos = this.document.getPositionOfLastChange();
+		if (pos > -1)
+		{
+			this.setCaretPosition(pos);
+			this.scrollToCaret();
+		}
 	}
 
 	public void redo()
 	{
 		this.document.redo();
+		int pos = this.document.getPositionOfLastChange();
+		if (pos > -1)
+		{
+			this.setCaretPosition(pos);
+			this.scrollToCaret();
+		}
 	}
 
 	public boolean currentSelectionIsTemporary()

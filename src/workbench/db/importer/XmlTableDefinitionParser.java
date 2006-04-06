@@ -177,7 +177,7 @@ public class XmlTableDefinitionParser
 		{
 			try
 			{
-				this.columnList[currentColIndex].setColumnClass(this.chars.toString());
+				this.columnList[currentColIndex].setColumnClassName(this.chars.toString());
 			}
 			catch (Exception e)
 			{

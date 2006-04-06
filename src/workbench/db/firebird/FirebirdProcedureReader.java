@@ -1,5 +1,5 @@
 /*
- * FirebirdMetadata.java
+ * FirebirdProcedureReader.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -22,36 +22,20 @@ import workbench.util.StrBuffer;
 /**
  * @author  support@sql-workbench.net
  */
-public class FirebirdMetadata
-	implements ProcedureReader
+public class FirebirdProcedureReader
+	extends JdbcProcedureReader
 {
-	private DbMetadata metaData;
-	public FirebirdMetadata(DbMetadata meta)
+	public FirebirdProcedureReader(DbMetadata meta)
 	{
-		this.metaData = meta;
+		super(meta);
 	}
 
-	public DataStore getProcedures(String catalog, String schema)
-		throws SQLException
-	{
-		JdbcProcedureReader procReader = new JdbcProcedureReader(this.metaData);
-		return procReader.getProcedures(catalog, schema);
-	}
-	
-	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
-		throws SQLException
-	{
-		JdbcProcedureReader reader = new JdbcProcedureReader(this.metaData);
-		return reader.getProcedureColumns(aCatalog, aSchema, aProcname);
-	}
-	
 	public StrBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
 	{
 		StrBuffer source = new StrBuffer();
 		try
 		{
-			JdbcProcedureReader reader = new JdbcProcedureReader(this.metaData);
-			DataStore ds = reader.getProcedureColumns(aCatalog, aSchema, aProcname);
+			DataStore ds = this.getProcedureColumns(aCatalog, aSchema, aProcname);
 			source.append("CREATE PROCEDURE ");
 			source.append(aProcname);
 			String retType = null;

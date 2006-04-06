@@ -107,14 +107,14 @@ public class WbSchemaDiff
 		}
 		catch (Exception e)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorDiffWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrDiffWrongParameters"));
 			result.setFailure();
 			return result;
 		}
 		
 		if (cmdLine.getArgumentCount() == 0)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorDiffWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrDiffWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -123,7 +123,7 @@ public class WbSchemaDiff
 		if (cmdLine.hasUnknownArguments())
 		{
 			List params = cmdLine.getUnknownArguments();
-			StringBuffer msg = new StringBuffer(ResourceMgr.getString("ErrorUnknownParameter") + " ");
+			StringBuffer msg = new StringBuffer(ResourceMgr.getString("ErrUnknownParameter") + " ");
 			for (int i=0; i < params.size(); i++)
 			{
 				if (i > 0) msg.append(',');
@@ -131,12 +131,12 @@ public class WbSchemaDiff
 			}
 			result.addMessage(msg.toString());
 			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrorDiffWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrDiffWrongParameters"));
 			result.setFailure();
 			return result;
 		}
 
-		String filename = cmdLine.getValue(PARAM_FILENAME);
+		String filename = evaluateFileArgument(cmdLine.getValue(PARAM_FILENAME));
 
 		String sourceProfile = cmdLine.getValue(PARAM_SOURCEPROFILE);
 		if (sourceProfile == null) sourceProfile = cmdLine.getValue("sourceprofile"); // support old name
@@ -156,7 +156,7 @@ public class WbSchemaDiff
 			ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(targetProfile);
 			if (prof == null)
 			{
-				String msg = ResourceMgr.getString("ErrorProfileNotFound");
+				String msg = ResourceMgr.getString("ErrProfileNotFound");
 				msg = StringUtil.replace(msg, "%profile%", targetProfile);
 				result.addMessage(msg);
 				result.setFailure();
@@ -169,7 +169,7 @@ public class WbSchemaDiff
 			}
 			catch (Exception e)
 			{
-				result.addMessage(ResourceMgr.getString("ErrorDiffCouldNotConnectTarget"));
+				result.addMessage(ResourceMgr.getString("ErrDiffCouldNotConnectTarget"));
 				result.setFailure();
 				return result;
 			}
@@ -184,7 +184,7 @@ public class WbSchemaDiff
 			ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(sourceProfile);
 			if (prof == null)
 			{
-				String msg = ResourceMgr.getString("ErrorProfileNotFound");
+				String msg = ResourceMgr.getString("ErrProfileNotFound");
 				msg = StringUtil.replace(msg, "%profile%", sourceProfile);
 				result.addMessage(msg);
 				result.setFailure();
@@ -198,7 +198,7 @@ public class WbSchemaDiff
 			}
 			catch (Exception e)
 			{
-				result.addMessage(ResourceMgr.getString("ErrorDiffCouldNotConnectSource"));
+				result.addMessage(ResourceMgr.getString("ErrDiffCouldNotConnectSource"));
 				result.setFailure();
 				// disconnect the target connection only if it was created by this command
 				if (targetCon.getId().startsWith("Wb-Diff"))
@@ -233,7 +233,7 @@ public class WbSchemaDiff
 			{
 				if (sourceCon == targetCon)
 				{
-					result.addMessage(ResourceMgr.getString("ErrorDiffSameConnectionNoTableSelection"));
+					result.addMessage(ResourceMgr.getString("ErrDiffSameConnectionNoTableSelection"));
 					result.setFailure();
 					if (targetCon.getId().startsWith("Wb-Diff"))
 					{
@@ -280,7 +280,7 @@ public class WbSchemaDiff
 			List tl = StringUtil.stringToList(tarTables, ",", true, true);
 			if (rl.size() != tl.size())
 			{
-				result.addMessage(ResourceMgr.getString("ErrorDiffTableListNoMatch"));
+				result.addMessage(ResourceMgr.getString("ErrDiffTableListNoMatch"));
 				result.setFailure();
 				return result;
 			}

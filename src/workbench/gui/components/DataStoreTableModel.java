@@ -11,8 +11,6 @@
  */
 package workbench.gui.components;
 import java.awt.Toolkit;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Types;
 
@@ -21,11 +19,9 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.dialogs.dataimport.ImportOptions;
-import workbench.gui.dialogs.dataimport.TextImportOptions;
-import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.filter.FilterExpression;
@@ -43,6 +39,7 @@ public class DataStoreTableModel
 	private DataStore dataCache;
 	private WbTable parentTable;
 	private boolean showStatusColumn = false;
+	
 	private int columnStartIndex = 0;
 	public static final String NOT_AVAILABLE = "(n/a)";
 	private int lockColumn = -1;
@@ -347,7 +344,7 @@ public class DataStoreTableModel
 		}
 		else
 		{
-			return this.allowEditing;
+			return this.allowEditing;// && !SqlUtil.isBlobType(this.dataCache.getColumnType(column));
 		}
 	}
 

@@ -50,6 +50,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.GapContent;
+import workbench.WbManager;
 
 import workbench.db.WbConnection;
 import workbench.interfaces.EncodingSelector;
@@ -427,17 +428,19 @@ public class EditorPanel
 		int maxElementsPerLine = 5;
 		if (quoteElements)
 		{
-			maxElementsPerLine = Settings.getInstance().getIntProperty("workbench.editor.format.list.maxelements.quoted", 2);
+			maxElementsPerLine = Settings.getInstance().getMaxCharInListElements();
 		}
 		else
 		{
-			maxElementsPerLine = Settings.getInstance().getIntProperty("workbench.editor.format.list.maxelements.nonquoted", 10);
+			maxElementsPerLine = Settings.getInstance().getMaxNumInListElements();
 		}
 		int elements = 0;
 		
+		boolean newLinePending = false;
+		
 		for (int i=startline; i <= endline; i++)
 		{
-			String line = this.getLineText(i);
+			String line = this.getLineText(i).trim();
 			if (line == null || line.length() == 0) continue;
 
 			if (i == startline)
@@ -446,27 +449,27 @@ public class EditorPanel
 			}
 			else
 			{
-				newText.append(' ');
+				newText.append(", ");
+			}
+			if (newLinePending)
+			{
+				newText.append("\n ");
+				newLinePending = false;
 			}
 			if (quoteElements) newText.append('\'');
 			newText.append(line);
 			if (quoteElements) newText.append('\'');
 			elements ++;
-			if (i == endline)
+			if (i < endline)
 			{
-				newText.append(')');
-			}
-			else
-			{
-				newText.append(',');
 				if ((elements & maxElementsPerLine) == maxElementsPerLine) 
 				{
-					newText.append('\n');
+					newLinePending = true;
 					elements = 0;
 				}
 			}
 		}
-		newText.append('\n');
+		newText.append(")\n");
 		this.setSelectedText(newText.toString());
 	}
 
@@ -708,8 +711,7 @@ public class EditorPanel
 		}
 		catch (OutOfMemoryError mem)
 		{
-			mem.printStackTrace();
-			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("MsgOutOfMemoryError"));
+			WbManager.getInstance().showOutOfMemoryError();
 		}
 		finally
 		{
@@ -792,7 +794,7 @@ public class EditorPanel
 			}
 			catch (IOException e)
 			{
-				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrorSavingFile") + "\n" + ExceptionUtil.getDisplay(e));
+				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrSavingFile") + "\n" + ExceptionUtil.getDisplay(e));
 				result = false;
 			}
 		}
@@ -962,7 +964,7 @@ public class EditorPanel
 		{
 			String text = this.getSelectedText();
 			Matcher m = this.lastSearchPattern.matcher(text);
-			String newText = m.replaceAll(aReplacement);
+			String newText = m.replaceAll(fixSpecialReplacementChars(aReplacement));
 			this.setSelectedText(newText);
 		}
 		
@@ -974,6 +976,14 @@ public class EditorPanel
 		int selStart = this.getSelectionStart();
 		int selEnd = this.getSelectionEnd();
 		return (selStart > -1 && selEnd > selStart);
+	}
+	
+	private String fixSpecialReplacementChars(String input)
+	{
+		String fixed = input.replaceAll("\\\\n", "\n");
+		fixed = fixed.replaceAll("\\\\r", "\r");
+		fixed = fixed.replaceAll("\\\\t", "\t");
+		return fixed;
 	}
 	
 	public int replaceAll(String value, String replacement, boolean selectedText, boolean ignoreCase, boolean wholeWord, boolean useRegex)
@@ -995,6 +1005,10 @@ public class EditorPanel
 		if (!useRegex)
 		{
 			replacement = StringUtil.quoteRegexMeta(replacement);
+		}
+		else
+		{
+			replacement = fixSpecialReplacementChars(replacement);
 		}
 		
 		Pattern p = Pattern.compile(regex, (ignoreCase ? Pattern.CASE_INSENSITIVE : 0));
@@ -1029,7 +1043,7 @@ public class EditorPanel
 		if (this.searchPatternMatchesSelectedText())
 		{
 			Matcher m = this.lastSearchPattern.matcher(this.getSelectedText());
-			String newText = m.replaceAll(aReplacement);
+			String newText = m.replaceAll(fixSpecialReplacementChars(aReplacement));
 			this.setSelectedText(newText);
 			return true;
 		}
@@ -1108,7 +1122,7 @@ public class EditorPanel
 						{
 							w.toFront();
 							w.requestFocus();
-							WbSwingUtilities.showErrorMessage(w, ResourceMgr.getString("ErrorNoMultipleDrop"));
+							WbSwingUtilities.showErrorMessage(w, ResourceMgr.getString("ErrNoMultipleDrop"));
 						}
 					});
 				}

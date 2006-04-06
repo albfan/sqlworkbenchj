@@ -54,8 +54,8 @@ public class TableSelectorPanel
 	public TableSelectorPanel()
 	{
 		initComponents();
-		this.schemaLabel.setText(ResourceMgr.getString("LabelSchema"));
-		this.tableLabel.setText(ResourceMgr.getString("LabelTable"));
+		this.schemaLabel.setText(ResourceMgr.getString("LblSchema"));
+		this.tableLabel.setText(ResourceMgr.getString("LblTable"));
 		this.tableSelector.setMaximumRowCount(15);
 		this.editNewTableNameButton.setVisible(false);
 	}
@@ -415,7 +415,7 @@ public class TableSelectorPanel
     add(tableLabel, gridBagConstraints);
 
     editNewTableNameButton.setIcon(ResourceMgr.getImage("Rename"));
-    editNewTableNameButton.setToolTipText(ResourceMgr.getString("LabelEditNewTableName"));
+    editNewTableNameButton.setToolTipText(ResourceMgr.getString("LblEditNewTableName"));
     editNewTableNameButton.setBorder(new javax.swing.border.EtchedBorder());
     editNewTableNameButton.setMaximumSize(new java.awt.Dimension(24, 24));
     editNewTableNameButton.setMinimumSize(new java.awt.Dimension(24, 24));

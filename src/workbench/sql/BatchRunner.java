@@ -107,7 +107,7 @@ public class BatchRunner
 		ConnectionProfile prof = mgr.getProfile(aProfilename);
 		if (prof == null)
 		{
-			LogMgr.logError("BatchRunner", ResourceMgr.getString("ErrorConnectionError"),null);
+			LogMgr.logError("BatchRunner", ResourceMgr.getString("ErrConnectionError"),null);
 			throw new IllegalArgumentException("Could not find profile " + aProfilename);
 		}
 		this.setProfile(prof);
@@ -281,7 +281,8 @@ public class BatchRunner
 		ScriptParser parser = new ScriptParser();
 		parser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
 		parser.setDelimiter(this.delimiter);
-		parser.setSupportOracleInclude(this.connection.getMetadata().supportShortInclude());
+		parser.setSupportOracleInclude(this.connection.getMetadata().supportSingleLineCommands());
+		parser.setCheckForSingleLineCommands(this.connection.getMetadata().supportShortInclude());
 		parser.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		parser.setFile(scriptFile, this.encoding);
 		String sql = null;

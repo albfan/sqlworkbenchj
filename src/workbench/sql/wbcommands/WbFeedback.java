@@ -41,7 +41,7 @@ public class WbFeedback
 		if (words.length != 2)
 		{
 			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrorFeedbackWrongParameter"));
+			result.addMessage(ResourceMgr.getString("ErrFeedbackWrongParameter"));
 			return result;
 		}
 		String parm = words[1];
@@ -59,7 +59,7 @@ public class WbFeedback
 		else
 		{
 			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrorFeedbackWrongParameter"));
+			result.addMessage(ResourceMgr.getString("ErrFeedbackWrongParameter"));
 		}
 		return result;
 	}

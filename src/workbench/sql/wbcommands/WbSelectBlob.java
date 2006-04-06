@@ -55,7 +55,7 @@ public class WbSelectBlob
 		Matcher m = expr.matcher(aSql);
 		if (!m.find())
 		{
-			result.addMessage(ResourceMgr.getString("ErrorSelectBlobSyntax"));
+			result.addMessage(ResourceMgr.getString("ErrSelectBlobSyntax"));
 			result.setFailure();
 			return result;
 		}
@@ -66,7 +66,7 @@ public class WbSelectBlob
 		m = p.matcher(sql);
 		if (!m.find())
 		{
-			result.addMessage(ResourceMgr.getString("ErrorSelectBlobParseError"));
+			result.addMessage(ResourceMgr.getString("ErrSelectBlobParseError"));
 			result.setFailure();
 			return result;
 		}
@@ -79,11 +79,11 @@ public class WbSelectBlob
 		}
 		sql = StringUtil.replace(sql, filename, "");
 		sql = sql.replaceFirst("(?i)\\sINTO\\s", " ");
-		filename = StringUtil.trimQuotes(filename);
+		filename = evaluateFileArgument(filename);
 		File f = new File(filename);
 		if (f.isDirectory())
 		{
-			String msg = ResourceMgr.getString("ErrorUpdateBlobFileNotFound").replaceAll("%filename%", filename);
+			String msg = ResourceMgr.getString("ErrUpdateBlobFileNotFound").replaceAll("%filename%", filename);
 			result.addMessage(msg);
 			result.setFailure();
 			return result;
@@ -108,7 +108,7 @@ public class WbSelectBlob
 				if (in == null)
 				{
 					result.setFailure();
-					result.addMessage(ResourceMgr.getString("ErrorSelectBlobNoStream"));
+					result.addMessage(ResourceMgr.getString("ErrSelectBlobNoStream"));
 					return result;
 				}
 				out = new BufferedOutputStream(new FileOutputStream(filename), bufsize * 2);
@@ -121,7 +121,7 @@ public class WbSelectBlob
 				}
 			}
 			this.appendSuccessMessage(result);
-			String msg = ResourceMgr.getString("MsgSelectBlobSuccess");
+			String msg = ResourceMgr.getString("MsgBlobSaved");
 			msg = StringUtil.replace(msg, "%filename%", filename);
 			msg = msg.replaceAll("%filesize%", Integer.toString(filesize));
 			result.addMessage(msg);
@@ -129,14 +129,14 @@ public class WbSelectBlob
 		}
 		catch (IOException e)
 		{
-			String msg = ResourceMgr.getString("ErrorSelectBlobFileError").replaceAll("%filename%", filename);
+			String msg = ResourceMgr.getString("ErrSelectBlobFileError").replaceAll("%filename%", filename);
 			result.addMessage(msg);
 			result.setFailure();
 			return result;
 		}
 		catch (SQLException e)
 		{
-			String msg = ResourceMgr.getString("ErrorSelectBlobSqlError").replaceAll("%filename%", filename);
+			String msg = ResourceMgr.getString("ErrSelectBlobSqlError").replaceAll("%filename%", filename);
 			result.addMessage(msg);
 			result.addMessage(ExceptionUtil.getDisplay(e));
 			result.setFailure();

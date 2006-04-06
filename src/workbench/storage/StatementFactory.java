@@ -78,8 +78,8 @@ public class StatementFactory
 		boolean first = true;
 		int cols = this.resultInfo.getColumnCount();
 
-		boolean doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.update.doformat",true);
-		int columnThresholdForNewline = Settings.getInstance().getIntProperty("workbench.sql.generate.update.newlinethreshold",5);
+		boolean doFormatting = Settings.getInstance().getDoFormatUpdates();
+		int columnThresholdForNewline = Settings.getInstance().getFormatUpdateColumnThreshold();
 		
 		boolean newLineAfterColumn = doFormatting && (cols > columnThresholdForNewline);
 
@@ -191,11 +191,11 @@ public class StatementFactory
 
 		int cols = this.resultInfo.getColumnCount();
 		
-		boolean doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.doformat",true);
+		boolean doFormatting = Settings.getInstance().getDoFormatInserts();
 		int columnThresholdForNewline = Settings.getInstance().getIntProperty("workbench.sql.generate.insert.newlinethreshold",5);
 		boolean newLineAfterColumn = doFormatting && (cols > columnThresholdForNewline);
-		boolean skipIdentityCols = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.ignoreidentity",true);
-		int colsPerLine = Settings.getInstance().getIntProperty("workbench.sql.generate.insert.colsperline",1);
+		boolean skipIdentityCols = Settings.getInstance().getFormatInsertIgnoreIdentity();
+		int colsPerLine = Settings.getInstance().getFormatInsertColsPerLine();
 		boolean includeNulls = this.dbConnection.getProfile().getIncludeNullInInsert();
 		
 		ArrayList values = new ArrayList(cols);

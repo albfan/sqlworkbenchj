@@ -134,6 +134,16 @@ public class ConnectionMgr
 		return conn;
 	}
 
+	public Class loadClassFromDriverLib(ConnectionProfile profile, String className)
+		throws ClassNotFoundException
+	{
+		String drvClass = profile.getDriverclass();
+		String drvName = profile.getDriverName();
+		DbDriver drv = this.findDriverByName(drvClass, drvName);
+		if (drv == null) return null;
+		return drv.loadClassFromDriverLib(className);
+	}
+
 	Connection connect(ConnectionProfile aProfile, String anId)
 		throws ClassNotFoundException, Exception
 	{

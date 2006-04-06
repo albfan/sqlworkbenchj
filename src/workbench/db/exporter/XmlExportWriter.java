@@ -29,13 +29,18 @@ public class XmlExportWriter
 
 	public RowDataConverter createConverter()
 	{
-		XmlRowDataConverter converter = new XmlRowDataConverter();
-		converter.setUseCDATA(this.exporter.getUseCDATA());
-		converter.setLineEnding(exporter.getLineEnding());
-		converter.setUseVerboseFormat(exporter.getUseVerboseFormat());
-		converter.setTableNameToUse(exporter.getTableName());
-		converter.setBaseFilename(exporter.getOutputFilename());
-		return converter;
+		return new XmlRowDataConverter();
+	}
+	
+	public void configureConverter()
+	{
+		super.configureConverter();
+		XmlRowDataConverter conv = (XmlRowDataConverter)this.converter;
+		conv.setUseCDATA(this.exporter.getUseCDATA());
+		conv.setLineEnding(exporter.getLineEnding());
+		conv.setUseVerboseFormat(exporter.getUseVerboseFormat());
+		conv.setTableNameToUse(exporter.getTableName());
+		conv.setBaseFilename(exporter.getOutputFilename());
 	}
 	
 	public void exportFinished()

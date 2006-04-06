@@ -50,7 +50,7 @@ public class WbDefinePk
 
 		if (table == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorPkDefWrongParameter"));
+			result.addMessage(ResourceMgr.getString("ErrPkDefWrongParameter"));
 			result.setFailure();
 			return result;
 		}

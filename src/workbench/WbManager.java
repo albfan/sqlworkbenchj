@@ -163,6 +163,11 @@ public class WbManager
 			LogMgr.logError("WbManager.showDialog()", "Error when creating dialog " + clazz, ex);
 		}
 	}
+
+	public void showOutOfMemoryError()
+	{
+		WbSwingUtilities.showErrorMessage(getCurrentWindow(), ResourceMgr.getString("MsgOutOfMemoryError"));		
+	}
 	
 	public MainWindow getCurrentWindow()
 	{
@@ -711,6 +716,7 @@ public class WbManager
 	private void initCmdLine(String[] args)
 	{
 		if (trace) System.out.println("WbManager.initCmdLine() - start");
+
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(ARG_PROFILE);
 		cmdLine.addArgument(ARG_PROFILE_STORAGE);
@@ -779,7 +785,7 @@ public class WbManager
 					LogMgr.logError("WbManager.initCmdLine()", "Error reading variable definition from file " + value, e);
 				}
 			}
-
+			
 			// Setting the profile storage should be done after initializing the configuration
 			// stuff correctly!
 			value = cmdLine.getValue(ARG_PROFILE_STORAGE);
@@ -912,7 +918,7 @@ public class WbManager
 		this.doShutdown(exitCode);
 	}
 
-	public static void main(String args[])
+	public static void main(String[] args)
 	{
 		wb = new WbManager();
 		if (trace) System.out.println("WbManager.main() - start");

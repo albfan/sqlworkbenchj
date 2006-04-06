@@ -54,7 +54,7 @@ public class EchoCommand extends SqlCommand
 			}
 			else
 			{
-				result.addMessage(ResourceMgr.getString("ErrorEchoWrongParameter"));
+				result.addMessage(ResourceMgr.getString("ErrEchoWrongParameter"));
 				result.setFailure();
 			}
 		}

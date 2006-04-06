@@ -111,7 +111,7 @@ public class CompletionPopup
 				{
 					public void run()
 					{
-						editor.selectWordAtCursor(".");
+						editor.selectWordAtCursor(BaseAnalyzer.WORD_DELIM);
 					}
 				};
 				t.start();
@@ -166,23 +166,16 @@ public class CompletionPopup
 	
 	public void closeQuickSearch()
 	{
-		searchField = null;
-		if (Settings.getInstance().getCloseAutoCompletionWithSearch())
+		this.searchField = null;
+		this.scroll.setColumnHeaderView(this.headerComponent);
+		this.headerComponent.doLayout();
+		EventQueue.invokeLater(new Runnable()
 		{
-			this.closePopup(false);
-		}
-		else
-		{
-			this.scroll.setColumnHeaderView(this.headerComponent);
-			this.headerComponent.doLayout();
-			EventQueue.invokeLater(new Runnable()
+			public void run()
 			{
-				public void run()
-				{
-					elementList.requestFocusInWindow();
-				}
-			});
-		}			
+				elementList.requestFocusInWindow();
+			}
+		});
 	}
 	
 	/**
@@ -216,6 +209,8 @@ public class CompletionPopup
 	private void closePopup(boolean pasteEntry)
 	{
 		editor.removeKeyEventInterceptor();
+		this.scroll.setColumnHeaderView(this.headerComponent);
+		
 		if (this.window == null) return;
 		
 		try
@@ -280,6 +275,7 @@ public class CompletionPopup
 		{
 			this.window.dispose();
 			this.window = null;
+			this.searchField = null;
 		}
 	}
 
@@ -301,7 +297,7 @@ public class CompletionPopup
 	public void selectMatchingEntry(String s)
 	{
 		int index = this.findEntry(s);
-		if (index > 0)
+		if (index >= 0)
 		{
 			elementList.setSelectedIndex(index);
 			elementList.ensureIndexIsVisible(index);
@@ -359,9 +355,14 @@ public class CompletionPopup
 	 */
 	public void mouseClicked(java.awt.event.MouseEvent mouseEvent)
 	{
-		if (mouseEvent.getClickCount() == 2)
+		int clicks = mouseEvent.getClickCount();
+		if (clicks == 2)
 		{
 			closePopup(true);
+		}
+		else if (clicks == 1 && this.searchField != null)
+		{
+			closeQuickSearch();
 		}
 	}
 	
@@ -401,6 +402,26 @@ public class CompletionPopup
 			case KeyEvent.VK_LEFT:
 				forwardKeyToList(evt);
 				break;
+			case KeyEvent.VK_UP:
+				index = elementList.getSelectedIndex();
+				if (index > 0)
+				{
+					elementList.setSelectedIndex(index - 1);
+					elementList.ensureIndexIsVisible(index - 1);
+				}
+				evt.consume();
+				break;
+			case KeyEvent.VK_DOWN:
+				index = elementList.getSelectedIndex();
+				if (index < data.getSize() - 1)
+				{
+					elementList.setSelectedIndex(index + 1);
+					elementList.ensureIndexIsVisible(index + 1);
+				}
+				evt.consume();
+				break;
+			default:
+				evt.consume();
 		}
 	}
 	

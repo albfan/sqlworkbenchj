@@ -58,7 +58,7 @@ public class ResultInfo
 			ColumnIdentifier col = new ColumnIdentifier(colNames[i]);
 			if (colSizes != null) col.setColumnSize(colSizes[i]);
 			col.setDataType(colTypes[i]);
-			if (columnClasses != null) col.setColumnClass(columnClasses[i]);
+			if (columnClasses != null) col.setColumnClassName(columnClasses[i]);
 			this.columns[i] = col;
 		}
 	}
@@ -187,11 +187,11 @@ public class ResultInfo
 						cls = cls.substring(2, cls.length() - 1) + "[]";
 					}
 				}
-				col.setColumnClass(cls);
+				col.setColumnClassName(cls);
 			}
 			catch (Throwable e)
 			{
-				col.setColumnClass("java.lang.Object");
+				col.setColumnClassName("java.lang.Object");
 			}
 			this.columns[i] = col;
 		}
@@ -327,9 +327,14 @@ public class ResultInfo
 		return this.columns[i].getDataType(); 
 	}
 	
+	public void setColumnClassName(int i, String name)
+	{
+		this.columns[i].setColumnClassName(name);
+	}
+	
 	public String getColumnClassName(int i) 
 	{ 
-		String className = this.columns[i].getColumnClass();
+		String className = this.columns[i].getColumnClassName();
 		if (className != null) return className;
 		return this.getColumnClass(i).getName();
 	}
@@ -341,32 +346,33 @@ public class ResultInfo
 	public Class getColumnClass(int aColumn)
 	{
 		if (aColumn > this.colCount) return null;
-		int type = this.getColumnType(aColumn);
-		switch (type)
-		{
-			case Types.BIGINT:
-			case Types.INTEGER:
-				return Long.class;
-			case Types.SMALLINT:
-				return Integer.class;
-			case Types.NUMERIC:
-			case Types.DECIMAL:
-				return BigDecimal.class;
-			case Types.DOUBLE:
-				return Double.class;
-			case Types.REAL:
-			case Types.FLOAT:
-				return Float.class;
-			case Types.CHAR:
-			case Types.VARCHAR:
-				return String.class;
-			case Types.DATE:
-				return java.sql.Date.class;
-			case Types.TIMESTAMP:
-				return Timestamp.class;
-			default:
-				return Object.class;
-		}
+		return this.columns[aColumn].getColumnClass();
+//		int type = this.getColumnType(aColumn);
+//		switch (type)
+//		{
+//			case Types.BIGINT:
+//			case Types.INTEGER:
+//				return Long.class;
+//			case Types.SMALLINT:
+//				return Integer.class;
+//			case Types.NUMERIC:
+//			case Types.DECIMAL:
+//				return BigDecimal.class;
+//			case Types.DOUBLE:
+//				return Double.class;
+//			case Types.REAL:
+//			case Types.FLOAT:
+//				return Float.class;
+//			case Types.CHAR:
+//			case Types.VARCHAR:
+//				return String.class;
+//			case Types.DATE:
+//				return java.sql.Date.class;
+//			case Types.TIMESTAMP:
+//				return Timestamp.class;
+//			default:
+//				return this.columns[aColumn].getColumnClass();
+//		}
 	}
 
 	public boolean hasRealPkColumns()

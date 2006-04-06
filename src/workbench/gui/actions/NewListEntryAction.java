@@ -40,8 +40,8 @@ public class NewListEntryAction
 		this.client = aClient;
 		this.setIcon(ResourceMgr.getImage(ResourceMgr.IMG_NEW));
 		this.checkShift = true;
-		String tip = ResourceMgr.getDescription("LabelNewListEntry", true);
-		this.initMenuDefinition(ResourceMgr.getString("LabelNewListEntry"), tip, null);
+		String tip = ResourceMgr.getDescription("LblNewListEntry", true);
+		this.initMenuDefinition(ResourceMgr.getString("LblNewListEntry"), tip, null);
 	}
 
 	public void executeAction(ActionEvent e)

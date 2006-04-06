@@ -379,8 +379,6 @@ public class MainWindow
 		menuBar.add(menu);
 		menus.put(ResourceMgr.MNU_TXT_SQL, menu);
 
-		WbThread macroThread = null;
-		
 		if (aPanel instanceof SqlPanel)
 		{
 			final WbMenu macroMenu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_MACRO));
@@ -388,14 +386,7 @@ public class MainWindow
 			macroMenu.setVisible(true);
 			menuBar.add(macroMenu);
 			menus.put(ResourceMgr.MNU_TXT_MACRO, macroMenu);
-			macroThread = new WbThread("MacroMenuCreation")
-			{
-				public void run()
-				{
-					buildMacroMenu(macroMenu);
-				}
-			};
-			macroThread.start();
+			buildMacroMenu(macroMenu);
 		}
 
 		menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_WORKSPACE));
@@ -483,8 +474,6 @@ public class MainWindow
 		menuBar.add(this.buildHelpMenu());
 
 		aPanel.addToToolbar(this.dbExplorerAction, true);
-		try { if (macroThread != null) macroThread.join(); } catch (Throwable th) {}
-
 		return menuBar;
 	}
 
@@ -719,7 +708,7 @@ public class MainWindow
 			closeConnectingInfo();
 			showStatusMessage("");
 			String error = ExceptionUtil.getDisplay(e);
-			String msg = ResourceMgr.getString("ErrorConnectFailed").replaceAll("%msg%", error.trim());
+			String msg = ResourceMgr.getString("ErrConnectFailed").replaceAll("%msg%", error.trim());
 			WbSwingUtilities.showErrorMessage(this, msg);
 		}
 	}
@@ -1017,7 +1006,7 @@ public class MainWindow
 		this.disconnectAction.setEnabled(false);
 		try
 		{
-			String msg = ResourceMgr.getString("ErrorConnectFailed");
+			String msg = ResourceMgr.getString("ErrConnectFailed");
 			msg = StringUtil.replace(msg, "%msg%", error.trim());
 			WbSwingUtilities.showErrorMessage(this, msg);
 		}
@@ -1049,7 +1038,7 @@ public class MainWindow
 
 	private int checkNonExistingWorkspace()
 	{
-		String[] options = new String[] { ResourceMgr.getString("LabelCreateWorkspace"), ResourceMgr.getString("LabelLoadWorkspace"), ResourceMgr.getString("LabelIgnore")};
+		String[] options = new String[] { ResourceMgr.getString("LblCreateWorkspace"), ResourceMgr.getString("LblLoadWorkspace"), ResourceMgr.getString("LblIgnore")};
 		JOptionPane ignorePane = new JOptionPane(ResourceMgr.getString("MsgProfileWorkspaceNotFound"), JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
 		JDialog dialog = ignorePane.createDialog(this, ResourceMgr.TXT_PRODUCT_NAME);
 		dialog.setResizable(true);
@@ -1066,7 +1055,7 @@ public class MainWindow
 	private void handleWorkspaceLoadError(Throwable e, String realFilename)
 	{
 		String error = ExceptionUtil.getDisplay(e);
-		String msg = StringUtil.replace(ResourceMgr.getString("ErrorLoadingWorkspace"), "%error%", error);
+		String msg = StringUtil.replace(ResourceMgr.getString("ErrLoadingWorkspace"), "%error%", error);
 		if (e instanceof OutOfMemoryError)
 		{
 			// try to free memory...
@@ -1102,8 +1091,8 @@ public class MainWindow
 		File f = new File(realFilename);
 	 	if (!f.exists())
 		{
-			// if the file does not exist, we are setting all
-			// variables as if it would. Thus the file will be created automatically
+			// if the file does not exist, set all variables as if it did
+			// thus the file will be created automatically.
 			this.currentWorkspaceFile = realFilename;
 			this.updateWindowTitle();
 			this.checkWorkspaceActions();
@@ -1174,12 +1163,15 @@ public class MainWindow
 			this.sqlTab.setSuspendRepaint(false);
 		}
 
-
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
 			{
-				doLayout();
+				SqlPanel p = getCurrentSqlPanel();
+				if (p != null)
+				{
+					p.scrollEditorToCursor();
+				}
 				validate();
 				updateWindowTitle();
 				checkWorkspaceActions();
@@ -2180,7 +2172,7 @@ public class MainWindow
 		catch (Throwable e)
 		{
 			LogMgr.logError("MainWindow.saveWorkspace()", "Error saving workspace: " + filename, e);
-			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrorSavingWorkspace") + "\n" + ExceptionUtil.getDisplay(e));
+			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrSavingWorkspace") + "\n" + ExceptionUtil.getDisplay(e));
 		}
 		finally
 		{

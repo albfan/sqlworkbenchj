@@ -62,7 +62,7 @@ public class WbSavePkMapping
 		if (file == null)
 		{
 			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrorPkSaveNoFile"));
+			result.addMessage(ResourceMgr.getString("ErrPkSaveNoFile"));
 			return result;
 		}
 		

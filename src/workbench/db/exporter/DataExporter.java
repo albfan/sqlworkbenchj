@@ -81,7 +81,7 @@ public class DataExporter
 	private String xsltFile = null;
 	private String transformOutputFile = null;
 	private int exportType;
-	private boolean exportHeaders = Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false);
+	private boolean exportHeaders;
 	private boolean includeCreateTable = false;
 	private boolean headerOnly = false;
 
@@ -142,6 +142,7 @@ public class DataExporter
 	public DataExporter(WbConnection con)
 	{
 		this.dbConn = con;
+		this.setExportHeaders(Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false));
 	}
 
 	private void createProgressPanel()
@@ -202,8 +203,8 @@ public class DataExporter
 	{
 		if (!this.jobsRunning) return true;
 		String msg = ResourceMgr.getString("MsgCancelAllCurrent");
-		String current = ResourceMgr.getString("LabelCancelCurrentExport");
-		String all = ResourceMgr.getString("LabelCancelAllExports");
+		String current = ResourceMgr.getString("LblCancelCurrentExport");
+		String all = ResourceMgr.getString("LblCancelAllExports");
 		int answer = WbSwingUtilities.getYesNo(this.progressWindow, msg, new String[] { current, all });
 		if (answer == 1)
 		{
@@ -333,7 +334,10 @@ public class DataExporter
 	}
 	public String getXsltTransformationOutput() { return this.transformOutputFile; }
 
-	public void setExportHeaders(boolean aFlag) { this.exportHeaders = aFlag; }
+	public void setExportHeaders(boolean aFlag) 
+	{ 
+		this.exportHeaders = aFlag; 
+	}
 	public boolean getExportHeaders() { return this.exportHeaders; }
 
 	public void setCreateFullHtmlPage(boolean aFlag) { this.createFullHtmlPage = aFlag; }
@@ -367,7 +371,7 @@ public class DataExporter
 			}
 			catch (IllegalArgumentException i)
 			{
-				this.addWarning(ResourceMgr.getString("ErrorWrongDateFormat") + " " + this.dateFormat);
+				this.addWarning(ResourceMgr.getString("ErrWrongDateFormat") + " " + this.dateFormat);
 				dateFormatter = null;
 			}
 		}
@@ -399,7 +403,7 @@ public class DataExporter
 			}
 			catch (Exception e)
 			{
-				this.warnings.add(ResourceMgr.getString("ErrorWrongDateFormat") + " " + this.dateTimeFormat);
+				this.warnings.add(ResourceMgr.getString("ErrWrongDateFormat") + " " + this.dateTimeFormat);
 				dateTimeFormatter = null;
 			}
 		}
@@ -755,14 +759,23 @@ public class DataExporter
 		try
 		{
 			ResultSetMetaData meta = rs.getMetaData();
-			ResultInfo info;
+			ResultInfo rsInfo = new ResultInfo(meta, this.dbConn);
+			ResultInfo info = null;
 			if (this.currentJob != null)
 			{
 				info = currentJob.getResultInfo();
+				for (int i=0; i < info.getColumnCount(); i++)
+				{
+					int colIndex = rsInfo.findColumn(info.getColumnName(i));
+					if (colIndex > -1)
+					{
+						info.setColumnClassName(i, rsInfo.getColumnClassName(i));
+					}
+				}
 			}
 			else
 			{
-				info = new ResultInfo(meta, this.dbConn);
+				info = rsInfo;
 			}
 			configureExportWriter(info);
 			this.exportWriter.writeExport(rs, info);
@@ -850,7 +863,7 @@ public class DataExporter
 				catch (UnsupportedEncodingException e)
 				{
 					pw = null;
-					String msg = ResourceMgr.getString("ErrorExportWrongEncoding");
+					String msg = ResourceMgr.getString("ErrExportWrongEncoding");
 					msg = StringUtil.replace(msg, "%encoding%", this.encoding);
 					this.encoding = null;
 					this.addWarning(msg);
@@ -1012,6 +1025,7 @@ public class DataExporter
 		this.setDateFormat(options.getDateFormat());
 		this.setTimestampFormat(options.getTimestampFormat());
 		this.setEncoding(options.getEncoding());
+		if (this.exportWriter != null) this.exportWriter.configureFromExporter();
 	}
 
 	public void setSqlOptions(SqlOptions sqlOptions)
@@ -1032,6 +1046,7 @@ public class DataExporter
 		this.setCommitEvery(sqlOptions.getCommitEvery());
 		this.setTableName(sqlOptions.getAlternateUpdateTable());
 		this.setKeyColumnsToUse(sqlOptions.getKeyColumns());
+		this.exportWriter.configureFromExporter();
 	}
 
 	public void setXmlOptions(XmlOptions xmlOptions)
@@ -1039,6 +1054,7 @@ public class DataExporter
 		this.setOutputTypeXml();
 		this.setUseCDATA(xmlOptions.getUseCDATA());
 		this.setUseVerboseFormat(xmlOptions.getUseVerboseXml());
+		this.exportWriter.configureFromExporter();
 	}
 
 	public void setHtmlOptions(HtmlOptions html)
@@ -1047,6 +1063,7 @@ public class DataExporter
 		this.setCreateFullHtmlPage(html.getCreateFullPage());
 		this.setHtmlTitle(html.getPageTitle());
 		this.setEscapeHtml(html.getEscapeHtml());
+		this.exportWriter.configureFromExporter();
 	}
 
 	public void setTextOptions(TextOptions text)
@@ -1058,6 +1075,7 @@ public class DataExporter
 		this.setQuoteAlways(text.getQuoteAlways());
 		this.setEscapeRange(text.getEscapeRange());
 		this.setLineEnding(text.getLineEnding());
+		this.exportWriter.configureFromExporter();
 	}
 
 	public boolean isIncludeCreateTable()

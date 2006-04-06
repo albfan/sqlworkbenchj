@@ -96,7 +96,7 @@ public class DataCopier
 
 		if (!this.sourceConnection.getMetadata().tableExists(aSourceTable))
 		{
-			this.addError(ResourceMgr.getString("ErrorCopySourceTableNotFound").replaceAll("%name%", aTargetTable.getTableName()));
+			this.addError(ResourceMgr.getString("ErrCopySourceTableNotFound").replaceAll("%name%", aTargetTable.getTableName()));
 			throw new SQLException("Table " + aTargetTable.getTableName() + " not found in target connection");
 		}
 
@@ -158,7 +158,7 @@ public class DataCopier
 		}
 		else
 		{
-			this.addError(ResourceMgr.getString("ErrorCopyTargetTableNotFound").replaceAll("%name%", aTargetTable.getTableName()));
+			this.addError(ResourceMgr.getString("ErrCopyTargetTableNotFound").replaceAll("%name%", aTargetTable.getTableName()));
 			throw new SQLException("Table " + aTargetTable.getTableName() + " not found in target connection");
 		}
 		this.initImporterForTable(additionalWhere);
@@ -463,7 +463,7 @@ public class DataCopier
 		catch (Exception e)
 		{
 			LogMgr.logError("DataCopier.start()", "Error when copying data", e);
-			String msg = ResourceMgr.getString("ErrorCopy");
+			String msg = ResourceMgr.getString("ErrCopy");
 			this.addError(msg + ": " + ExceptionUtil.getDisplay(e, false));
 			this.importer.tableImportError();
 			throw e;
@@ -559,7 +559,7 @@ public class DataCopier
 		}
 		catch (SQLException e)
 		{
-			String msg = ResourceMgr.getString("ErrorCopyTargetTableNotFound").replaceAll("%table%", this.targetTable.getTableExpression());
+			String msg = ResourceMgr.getString("ErrCopyTargetTableNotFound").replaceAll("%table%", this.targetTable.getTableExpression());
 			this.addMessage(msg);
 			throw e;
 		}
@@ -618,13 +618,13 @@ public class DataCopier
 			if (sidx < 0)
 			{
 				LogMgr.logWarning("DataCopier.initColumnMapping()", "Column " + sc + " not found in table " + this.sourceTable + ". Ignoring mapping!");
-				String msg = ResourceMgr.getString("ErrorCopySourceColumnNotFound").replaceAll("%name%", sc);
+				String msg = ResourceMgr.getString("ErrCopySourceColumnNotFound").replaceAll("%name%", sc);
 				this.addMessage(msg);
 			}
 			if (tidx < 0)
 			{
 				LogMgr.logWarning("DataCopier.initColumnMapping()", "Column " + tc + " not found in table " + this.targetTable + ". Ignoring mapping!");
-				String msg = ResourceMgr.getString("ErrorCopyTargetColumnNotFound").replaceAll("%name%", tc);
+				String msg = ResourceMgr.getString("ErrCopyTargetColumnNotFound").replaceAll("%name%", tc);
 				this.addMessage(msg);
 			}
 

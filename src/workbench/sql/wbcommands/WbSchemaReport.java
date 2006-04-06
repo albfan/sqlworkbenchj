@@ -82,7 +82,7 @@ public class WbSchemaReport
 		}
 		catch (Exception e)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorSchemaReportWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrSchemaReportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -90,23 +90,23 @@ public class WbSchemaReport
 		if (cmdLine.hasUnknownArguments())
 		{
 			List params = cmdLine.getUnknownArguments();
-			StringBuffer msg = new StringBuffer(ResourceMgr.getString("ErrorUnknownParameter"));
+			StringBuffer msg = new StringBuffer(ResourceMgr.getString("ErrUnknownParameter"));
 			for (int i=0; i < params.size(); i++)
 			{
 				msg.append((String)params.get(i));
 				if (i > 0) msg.append(',');
 			}
 			result.addMessage(msg.toString());
-			result.addMessage(ResourceMgr.getString("ErrorSchemaReportWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrSchemaReportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
 
-		String file = cmdLine.getValue("file");
+		String file = evaluateFileArgument(cmdLine.getValue("file"));
 
 		if (file == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorSchemaReportWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrSchemaReportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -123,7 +123,7 @@ public class WbSchemaReport
 		         !"wb".equalsIgnoreCase(format) &&
 						 !"wbxml".equalsIgnoreCase(format))
 		{
-			result.addMessage(ResourceMgr.getString("ErrorSchemaReportWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrSchemaReportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -220,7 +220,7 @@ public class WbSchemaReport
 			catch (Exception e)
 			{
 				result.setFailure();
-				String msg = ResourceMgr.getString("ErrorGeneratingDbDesigner");
+				String msg = ResourceMgr.getString("ErrGeneratingDbDesigner");
 				msg = StringUtil.replace(msg, "%wbfile%", f.getAbsolutePath());
 				msg = StringUtil.replace(msg, "%error%", ExceptionUtil.getDisplay(e));
 				result.addMessage(msg);

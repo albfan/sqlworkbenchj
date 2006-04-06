@@ -110,7 +110,7 @@ public class WbExport
 		}
 		catch (Exception e)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorExportWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrExportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -130,14 +130,14 @@ public class WbExport
 		if (cmdLine.hasUnknownArguments())
 		{
 			List params = cmdLine.getUnknownArguments();
-			StringBuffer msg = new StringBuffer(ResourceMgr.getString("ErrorUnknownParameter"));
+			StringBuffer msg = new StringBuffer(ResourceMgr.getString("ErrUnknownParameter"));
 			for (int i=0; i < params.size(); i++)
 			{
 				msg.append((String)params.get(i));
 				if (i > 0) msg.append(',');
 			}
 			result.addMessage(msg.toString());
-			result.addMessage(ResourceMgr.getString("ErrorExportWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrExportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -149,9 +149,9 @@ public class WbExport
 		type = cmdLine.getValue("type");
 		if (!isTypeValid(type))
 		{
-			result.addMessage(ResourceMgr.getString("ErrorExportWrongType"));
+			result.addMessage(ResourceMgr.getString("ErrExportWrongType"));
 			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrorExportWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrExportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -164,18 +164,18 @@ public class WbExport
 
 		if (type == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorExportTypeRequired"));
+			result.addMessage(ResourceMgr.getString("ErrExportTypeRequired"));
 			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrorExportWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrExportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
 
 		if (file == null && outputdir == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorExportFileRequired"));
+			result.addMessage(ResourceMgr.getString("ErrExportFileRequired"));
 			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrorExportWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrExportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -234,7 +234,7 @@ public class WbExport
 				else
 				{
 					exporter.setEscapeRange(null);
-					String msg = ResourceMgr.getString("ErrorExportInvalidEscapeRangeIgnored").replaceAll("%value%", escape);
+					String msg = ResourceMgr.getString("ErrExportInvalidEscapeRangeIgnored").replaceAll("%value%", escape);
 					result.addMessage(msg);
 				}
 			}
@@ -287,7 +287,7 @@ public class WbExport
 				}
 				else
 				{
-					String msg = ResourceMgr.getString("ErrorSpoolXsltNotFound");
+					String msg = ResourceMgr.getString("ErrSpoolXsltNotFound");
 					msg = msg.replaceAll("%xslt%", f.getAbsolutePath());
 					result.addMessage(msg);
 				}
@@ -325,7 +325,7 @@ public class WbExport
 		}
 		else
 		{
-			result.addMessage(ResourceMgr.getString("ErrorExportWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrExportWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -348,7 +348,7 @@ public class WbExport
 			}
 		}
 
-		file = StringUtil.trimQuotes(file);
+		file = evaluateFileArgument(file);
 		this.exporter.setOutputFilename(file);
 
 		// Setting the output type should be the last step in the configuration
@@ -502,7 +502,7 @@ public class WbExport
 
 			if (l.size() == 0)
 			{
-				result.addMessage(ResourceMgr.getString("ErrorExportNoTablesFound") + " " + t);
+				result.addMessage(ResourceMgr.getString("ErrExportNoTablesFound") + " " + t);
 				result.setFailure();
 				directExport = false;
 				return;
@@ -533,14 +533,14 @@ public class WbExport
 			if (outputdir == null || outputdir.trim().length() == 0)
 			{
 				result.setFailure();
-				result.addMessage(ResourceMgr.getString("ErrorExportOutputDirRequired"));
+				result.addMessage(ResourceMgr.getString("ErrExportOutputDirRequired"));
 				return;
 			}
 
 			outdir = new File(outputdir);
 			if (!outdir.exists())
 			{
-				msg = ResourceMgr.getString("ErrorExportOutputDirNotFound");
+				msg = ResourceMgr.getString("ErrExportOutputDirNotFound");
 				msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
 				result.addMessage(msg);
 				result.setFailure();
@@ -549,7 +549,7 @@ public class WbExport
 
 			if (!outdir.isDirectory())
 			{
-				msg = ResourceMgr.getString("ErrorExportOutputDirNotDir");
+				msg = ResourceMgr.getString("ErrExportOutputDirNotDir");
 				msg = StringUtil.replace(msg, "%dir%", outdir.getAbsolutePath());
 				result.addMessage(msg);
 				result.setFailure();

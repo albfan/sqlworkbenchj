@@ -175,16 +175,32 @@ public class TableIdentifier
 		
 		int atPos = aTable.indexOf("@");
 		if (atPos < 0) atPos = aTable.length() + 1;
-		int pos = aTable.indexOf('.');
-		if (pos > -1 && pos < atPos)
-		{
-			this.schema = aTable.substring(0, pos).trim();
-			this.tablename = aTable.substring(pos + 1).trim();
-		}
-		else
+		String[] elements = aTable.split("\\.");
+		if (elements.length == 1)
 		{
 			this.tablename = aTable.trim();
 		}
+		else if (elements.length == 2)
+		{
+			this.schema = elements[0];
+			this.tablename = elements[1];
+		}
+		else if (elements.length == 3)
+		{
+			this.catalog = elements[0];
+			this.schema = elements[1];
+			this.tablename = elements[2];
+		}
+//		int pos = aTable.indexOf('.');
+//		if (pos > -1 && pos < atPos)
+//		{
+//			this.schema = aTable.substring(0, pos).trim();
+//			this.tablename = aTable.substring(pos + 1).trim();
+//		}
+//		else
+//		{
+//			this.tablename = aTable.trim();
+//		}
 		this.expression = null;
 	}
 

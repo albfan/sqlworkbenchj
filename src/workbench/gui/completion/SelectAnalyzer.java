@@ -11,18 +11,18 @@
  */
 package workbench.gui.completion;
 
-import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SqlFormatter;
+import workbench.sql.formatter.Token;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
@@ -34,8 +34,8 @@ import workbench.util.TableAlias;
 public class SelectAnalyzer
 	extends BaseAnalyzer
 {
-	private final Pattern WHERE_PATTERN = Pattern.compile("\\sWHERE\\s|\\sWHERE$", Pattern.CASE_INSENSITIVE);
-	private final Pattern GROUP_PATTERN = Pattern.compile("\\sGROUP\\s*BY\\s|\\sGROUP\\s*BY$", Pattern.CASE_INSENSITIVE);
+//	private final Pattern WHERE_PATTERN = Pattern.compile("\\sWHERE\\s|\\sWHERE$", Pattern.CASE_INSENSITIVE);
+//	private final Pattern GROUP_PATTERN = Pattern.compile("\\sGROUP\\s*BY\\s|\\sGROUP\\s*BY$", Pattern.CASE_INSENSITIVE);
 	
 	public SelectAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{	
@@ -45,16 +45,8 @@ public class SelectAnalyzer
 	protected void checkContext()
 	{
 		this.context = NO_CONTEXT;
-		String currentWord = StringUtil.getWordLeftOfCursor(this.sql, cursorPos, ",(;");
-		if (!StringUtil.isEmptyString(currentWord))
-		{
-			boolean keyWord = this.dbConnection.getMetadata().isKeyword(currentWord);
-			setOverwriteCurrentWord(!keyWord);
-		}
-		else
-		{
-			setOverwriteCurrentWord(false);
-		}
+		
+		String currentWord = getCurrentWord();
 		
 		setAppendDot(false);
 		setColumnPrefix(null);
@@ -64,26 +56,17 @@ public class SelectAnalyzer
 		
 		if (fromPos > 0)
 		{
-			wherePos = StringUtil.findPattern(WHERE_PATTERN, sql, fromPos);
+			wherePos = SqlUtil.getWherePosition(sql);
 		}
 
 		int groupStart = 0;
 		if (wherePos > 0) groupStart = wherePos + 1;
 		else if (fromPos > 0) groupStart = fromPos + 1;
 		
-		int groupPos = StringUtil.findPattern(GROUP_PATTERN, sql, groupStart);
+		int groupPos = SqlUtil.getKeywordPosition("GROUP", sql);
 		
 		// find the tables from the FROM clause
-		List tables = Collections.EMPTY_LIST;
-		try
-		{
-			tables = SqlUtil.getTables(sql, true);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("SelectAnalyzer.getContext()", "Could not retrieve table list in FROM part", e);
-			tables = Collections.EMPTY_LIST;
-		}
+		List tables = SqlUtil.getTables(sql, true);
 		
 		boolean afterWhere = (wherePos > 0 && cursorPos > wherePos);
 		boolean afterGroup = (groupPos > 0 && cursorPos > groupPos);
@@ -94,9 +77,14 @@ public class SelectAnalyzer
 		
 		if (inTableList && afterGroup) inTableList = false;
 		
+		if (inTableList && inJoinONPart(fromPos))
+		{
+			inTableList = false;
+		}
+		
 		if (inTableList)
 		{
-			String q = getQualifierLeftOfCursor(sql, cursorPos);
+			String q = getQualifierLeftOfCursor();
 			if (q != null)
 			{
 				setOverwriteCurrentWord(!this.dbConnection.getMetadata().isKeyword(q));
@@ -138,7 +126,7 @@ public class SelectAnalyzer
 			// we'll try to find a proper column list
 			
 			int count = tables.size();
-			String q = getQualifierLeftOfCursor(sql, cursorPos);
+			String q = getQualifierLeftOfCursor();
 			this.tableForColumnList = null;
 
 			if (afterGroup)
@@ -197,12 +185,60 @@ public class SelectAnalyzer
 		}
 	}
 
-
+	private boolean inJoinONPart(int fromPos)
+	{
+		try
+		{
+			boolean afterFrom = false;
+			int lastON = -1;
+			int lastJoin = -1;
+			SQLLexer lexer = new SQLLexer(this.sql);
+			Token token = lexer.getNextToken(false, false);
+			while (token != null)
+			{
+				String t = token.getContents();
+				if (afterFrom)
+				{
+					if ("ON".equals(t))
+					{
+						lastON = token.getCharEnd();
+					}
+					else if (t.equals("JOIN"))
+					{
+						lastON = -1;
+					}
+					else if (SqlFormatter.FROM_TERMINAL.contains(t))
+					{
+						if (lastON > -1)
+						{
+							return (cursorPos < token.getCharBegin() && cursorPos > lastON);
+						}
+						return false;
+					}
+				}
+				else
+				{
+					if (SqlFormatter.FROM_TERMINAL.contains(t)) break;
+					if (t.equals("FROM"))
+					{
+						afterFrom = true;
+					}
+				}
+				token = lexer.getNextToken(false, false);
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("SelectAnalyzer.inJoinONPart()", "Error parsing SQL Statement!", e);
+		}
+		return false;
+	}	
+	
 	private List getColumnsForGroupBy(int fromStart)
 	{
 		int colStart = StringUtil.findFirstWhiteSpace(this.sql.trim());
 		String columns = this.sql.substring(colStart, fromStart);
-		List cols = StringUtil.stringToList(columns, ",", true, true);
+		List cols = StringUtil.stringToList(columns, ",", true, true, true);
 		List validCols = new LinkedList();
 		Pattern p = Pattern.compile("\\s*AS\\s*", Pattern.CASE_INSENSITIVE);
 		String[] funcs = new String[]{"sum", "count", "avg", "min", "max" };
@@ -214,7 +250,6 @@ public class SelectAnalyzer
 			regex.append(funcs[i]);
 			regex.append("\\s*\\(");
 		}
-		System.out.println("pattern=" + regex);
 		Pattern aggregate = Pattern.compile(regex.toString(), Pattern.CASE_INSENSITIVE);
 		for (int i = 0; i < cols.size(); i++)
 		{

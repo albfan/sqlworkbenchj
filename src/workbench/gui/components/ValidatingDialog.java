@@ -59,9 +59,9 @@ public class ValidatingDialog
 			throw new IllegalArgumentException("The supplied panel does not implement the ValidatingComponent interface");
 		}
 		this.validator = (ValidatingComponent)editor;
-		this.okButton = new WbButton(ResourceMgr.getString("LabelOK"));
+		this.okButton = new WbButton(ResourceMgr.getString("LblOK"));
 		this.okButton.addActionListener(this);
-		this.cancelButton = new WbButton(ResourceMgr.getString("LabelCancel"));
+		this.cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));
 		this.cancelButton.addActionListener(this);
 		
 		JRootPane root = this.getRootPane();

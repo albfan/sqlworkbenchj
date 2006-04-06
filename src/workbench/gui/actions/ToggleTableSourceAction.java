@@ -31,7 +31,6 @@ public class ToggleTableSourceAction extends WbAction
 		super();
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtToggleTableSource", KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
-		//this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 		this.setIcon(null);
 	}
 

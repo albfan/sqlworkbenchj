@@ -13,6 +13,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 import java.util.StringTokenizer;
+import workbench.db.TableIdentifier;
 
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
@@ -45,23 +46,14 @@ public class WbDescribeTable extends SqlCommand
         !VERB_LONG.equalsIgnoreCase(verb)) throw new SQLException("Wrong syntax. " + VERB + " expected!");
 		String table = null;
 		if (tok.hasMoreTokens()) table = tok.nextToken();
-		String schema = null;
-		int pos = table.indexOf('.');
-		if (pos > -1)
-		{
-			schema = table.substring(0, pos);
-			table = table.substring(pos + 1);
-		}
-
-    if (schema == null && aConnection.getMetadata().isOracle())
-    {
-      schema = aConnection.getMetadata().getUserName();
-    }
-		DataStore ds = aConnection.getMetadata().getTableDefinition(null, schema, table);
+		
+		TableIdentifier tbl = new TableIdentifier(table);
+		
+		DataStore ds = aConnection.getMetadata().getTableDefinition(tbl);
     if (ds == null || ds.getRowCount() == 0)
     {
       result.setFailure();
-      String msg = ResourceMgr.getString("ErrorTableOrViewNotFound");
+      String msg = ResourceMgr.getString("ErrTableOrViewNotFound");
       msg = msg.replaceAll("%name%", table);
       result.addMessage(msg);
     }

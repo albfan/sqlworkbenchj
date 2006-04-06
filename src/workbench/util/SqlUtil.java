@@ -20,14 +20,20 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.StringTokenizer;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
+import workbench.sql.formatter.SqlFormatter;
+import workbench.sql.formatter.Token;
 
 public class SqlUtil
 {
@@ -102,133 +108,267 @@ public class SqlUtil
 		}
 		return result;
 	}
-	
 
+	private static String stripTableAlias(String table)
+	{
+		int pos = StringUtil.findFirstWhiteSpace(table);
+		if (pos > -1) return table.substring(0, pos - 1);
+		return table;
+	}
+	
 	public static List getTables(String aSql)
 	{
 		return getTables(aSql, false);
 	}
 	
-	public static final Pattern FROM_PATTERN = Pattern.compile("\\sFROM\\s|\\sFROM$", Pattern.CASE_INSENSITIVE);
-	public static final Pattern WHERE_PATTERN = Pattern.compile("\\sWHERE\\s|\\sWHERE$", Pattern.CASE_INSENSITIVE);
-	private static final Pattern GROUP_PATTERN = Pattern.compile("\\sGROUP\\s", Pattern.CASE_INSENSITIVE);
-	private static final Pattern ORDER_PATTERN = Pattern.compile("\\sORDER\\s", Pattern.CASE_INSENSITIVE);
-	private static final Pattern JOIN_PATTERN = Pattern.compile("\\sJOIN\\s", Pattern.CASE_INSENSITIVE);
-		
-	/**
-	 * Return the list of tables which are in the FROM list of the given SQL statement.
-	 */
-	public static List getTables(String aSql, boolean includeAlias)
+	public static List getTables(String sql, boolean includeAlias)
 	{
-		int fromPos = getFromPosition(aSql);
-		int pos = -1;
-		if (fromPos == -1) return Collections.EMPTY_LIST;
-		int fromEnd = fromPos + 5;
-
-		int nextVerb = StringUtil.findPattern(WHERE_PATTERN, aSql, fromPos);
-
-		if (nextVerb == -1) nextVerb = StringUtil.findPattern(GROUP_PATTERN, aSql, fromPos);
-		if (nextVerb == -1) nextVerb = StringUtil.findPattern(ORDER_PATTERN, aSql, fromPos);
-		if (nextVerb == -1) nextVerb = aSql.length();
-		if (nextVerb < fromEnd) return Collections.EMPTY_LIST;
-		
-		String fromList = aSql.substring(fromEnd, nextVerb);
-		boolean joinSyntax = (StringUtil.findPattern(JOIN_PATTERN, aSql, fromPos) > -1);
-		ArrayList result = new ArrayList();
-		if (joinSyntax)
+		String from = SqlUtil.getFromPart(sql);
+		if (from == null || from.trim().length() == 0) return Collections.EMPTY_LIST;
+		List result = new LinkedList();
+		try
 		{
-			StringTokenizer tok = new StringTokenizer(fromList, " ");
-			// first token after the FROM clause is the first table
-			// we can add it right away
-			if (tok.hasMoreTokens())
-			{
-				result.add(tok.nextToken().trim());
-			}
-			boolean nextIsTable = false;
-			while (tok.hasMoreTokens())
-			{
-				String s = tok.nextToken();
-				if (nextIsTable)
+				SQLLexer lex = new SQLLexer(from);
+				Token t = lex.getNextToken(false, false);
+				Set js = new HashSet();
+				js.add("INNER");
+				js.add("CROSS");
+				js.add("NATURAL");
+				js.add("FULL");
+				js.add("RIGHT");
+				js.add("LEFT");
+				int lastStart = 0;
+				int lastJoinStart = 0;
+				boolean hadJoin = false;
+				boolean isJoinSyntax = false;
+				while (t != null)
 				{
-					result.add(s.trim());
-					nextIsTable = false;
-				}
-				else
-				{
-					nextIsTable = ("JOIN".equalsIgnoreCase(s));
-				}
-			}
-		}
-		else
-		{
-			StringTokenizer tok = new StringTokenizer(fromList, ",");
-			pos = -1;
-			while (tok.hasMoreTokens())
-			{
-				String table = tok.nextToken().trim();
-				if (table.length() == 0) continue;
-				if (!includeAlias)
-				{
-					pos = table.indexOf(' ');
-					if (pos != -1)
+					String s = t.getContents();
+					if (js.contains(s))
 					{
-						table = table.substring(0, pos);
+						lastJoinStart = t.getCharBegin();
+						// if we find a JOIN keyword
+						// we assume the FROM clause is in the new ANSI syntax
+						// this assumes that even with the new syntax, a comma does
+						// not occur before any of the JOIN keywords!
+						isJoinSyntax = true;
+					}
+					else if (",".equals(s))
+					{
+						if (isJoinSyntax)
+						{
+							lastStart = t.getCharEnd();
+							lastJoinStart = -1;
+						}
+						else if (lastStart > -1)
+						{
+							String table = from.substring(lastStart, t.getCharBegin()).trim();
+							result.add(table);
+							lastStart = t.getCharEnd();
+						}
+					}
+					else if ("JOIN".equals(s) && lastStart > -1 && lastJoinStart > lastStart)
+					{
+						String table = from.substring(lastStart, lastJoinStart).trim();
+						if (includeAlias)
+						{
+							result.add(table);
+						}
+						else
+						{
+							result.add(stripTableAlias(table));
+						}
+						lastStart = t.getCharEnd();
+						hadJoin = true;
+					}
+					else if ("ON".equals(s) && lastStart > -1)
+					{
+						String table = from.substring(lastStart, t.getCharBegin()).trim();
+						if (includeAlias)
+						{
+							result.add(table);
+						}
+						else
+						{
+							result.add(stripTableAlias(table));
+						}
+						// reset the start markers until a new JOIN keyword is detected
+						lastStart = -1;
+						lastJoinStart = -1;
+					}
+					
+					t = lex.getNextToken(false, false);
+				}
+				if (lastStart < from.length() && lastStart > -1)
+				{
+					String table = from.substring(lastStart).trim();
+					if (includeAlias)
+					{
+						result.add(table);
+					}
+					else
+					{
+						result.add(stripTableAlias(table));
 					}
 				}
-				result.add(makeCleanSql(table, false));
-			}
 		}
-
+		catch (Exception e)
+		{
+			LogMgr.logError("SqlUtil.getTable()", "Error parsing sql", e);
+		}
 		return result;
 	}
 
-	private static final Pattern IGNORED_TEXT = Pattern.compile("'.*'|\\(.*\\)");
+
+//	public static final Pattern FROM_PATTERN = Pattern.compile("\\sFROM\\s|\\sFROM$", Pattern.CASE_INSENSITIVE);
+//	public static final Pattern WHERE_PATTERN = Pattern.compile("\\sWHERE\\s|\\sWHERE$", Pattern.CASE_INSENSITIVE);
+//	private static final Pattern GROUP_PATTERN = Pattern.compile("\\sGROUP\\s", Pattern.CASE_INSENSITIVE);
+//	private static final Pattern ORDER_PATTERN = Pattern.compile("\\sORDER\\s", Pattern.CASE_INSENSITIVE);
+//	private static final Pattern JOIN_PATTERN = Pattern.compile("\\sJOIN\\s", Pattern.CASE_INSENSITIVE);
+//		
+//	/**
+//	 * Return the list of tables which are in the FROM list of the given SQL statement.
+//	 */
+//	public static List getTables(String aSql, boolean includeAlias)
+//	{
+//		int fromPos = getFromPosition(aSql);
+//		int pos = -1;
+//		if (fromPos == -1) return Collections.EMPTY_LIST;
+//		int fromEnd = fromPos + 5;
+//
+//		int nextVerb = StringUtil.findPattern(WHERE_PATTERN, aSql, fromPos);
+//
+//		if (nextVerb == -1) nextVerb = StringUtil.findPattern(GROUP_PATTERN, aSql, fromPos);
+//		if (nextVerb == -1) nextVerb = StringUtil.findPattern(ORDER_PATTERN, aSql, fromPos);
+//		if (nextVerb == -1) nextVerb = aSql.length();
+//		if (nextVerb < fromEnd) return Collections.EMPTY_LIST;
+//		
+//		String fromList = aSql.substring(fromEnd, nextVerb);
+//		boolean joinSyntax = (StringUtil.findPattern(JOIN_PATTERN, aSql, fromPos) > -1);
+//		ArrayList result = new ArrayList();
+//		if (joinSyntax)
+//		{
+//			StringTokenizer tok = new StringTokenizer(fromList, " ");
+//			// first token after the FROM clause is the first table
+//			// we can add it right away
+//			if (tok.hasMoreTokens())
+//			{
+//				result.add(tok.nextToken().trim());
+//			}
+//			boolean nextIsTable = false;
+//			while (tok.hasMoreTokens())
+//			{
+//				String s = tok.nextToken();
+//				if (nextIsTable)
+//				{
+//					result.add(s.trim());
+//					nextIsTable = false;
+//				}
+//				else
+//				{
+//					nextIsTable = ("JOIN".equalsIgnoreCase(s));
+//				}
+//			}
+//		}
+//		else
+//		{
+//			StringTokenizer tok = new StringTokenizer(fromList, ",");
+//			pos = -1;
+//			while (tok.hasMoreTokens())
+//			{
+//				String table = tok.nextToken().trim();
+//				if (table.length() == 0) continue;
+//				if (!includeAlias)
+//				{
+//					pos = table.indexOf(' ');
+//					if (pos != -1)
+//					{
+//						table = table.substring(0, pos);
+//					}
+//				}
+//				result.add(makeCleanSql(table, false));
+//			}
+//		}
+//
+//		return result;
+//	}
+
+	/**	
+	 * Extract the FROM part of a SQL statement. That is anything after the FROM
+	 * up to (but not including) the WHERE, GROUP BY, ORDER BY, whichever comes first
+	 */
+	public static String getFromPart(String sql)
+	{
+		int fromPos = getFromPosition(sql);
+		if (fromPos == -1) return null;
+		fromPos += "FROM".length();
+		if (fromPos >= sql.length()) return null;
+		int fromEnd = getKeywordPosition(SqlFormatter.FROM_TERMINAL, sql);
+		if (fromEnd == -1)
+		{
+			fromEnd = sql.length() -1;
+		}
+		return sql.substring(fromPos, fromEnd);
+	}
 	
 	public static int getFromPosition(String sql)
 	{
-		Matcher im = IGNORED_TEXT.matcher(sql);
-		Matcher fm = FROM_PATTERN.matcher(sql);
-		int fromPos = -1; 
-		if (fm.find())
+		Set s = new HashSet();
+		s.add("FROM");
+		return getKeywordPosition(s, sql);
+	}
+	
+	public static int getWherePosition(String sql)
+	{
+		Set s = new HashSet();
+		s.add("WHERE");
+		return getKeywordPosition(s, sql);
+	}
+	
+	public static int getKeywordPosition(String keyword, String sql)
+	{
+		if (keyword == null) return -1;
+		Set s = new HashSet();
+		s.add(keyword.toUpperCase());
+		return getKeywordPosition(s, sql);
+	}
+	public static int getKeywordPosition(Set keywords, String sql)
+	{
+		int pos = -1;
+		try
 		{
-			fromPos = fm.start();
-		}
-		int end = 0;
-		int firstIgnoredText = -1;
-		
-		if (im.find())
-		{
-			firstIgnoredText = im.start();
-		}
-		
-		if (firstIgnoredText > -1 && fromPos > -1 && firstIgnoredText < fromPos)
-		{
-			end = im.end();
-			
-			while (im.find())
-			{
-				end = im.end();
-			}
-		}
+			SQLLexer lexer = new SQLLexer(sql);
 
-		fm.reset();
-		if (fm.find(end)) 
-		{
-			fromPos = fm.start();
-			int len = sql.length();
-			while (fromPos < len)
+			SQLToken t = (SQLToken)lexer.getNextToken(false, false);
+			int bracketCount = 0;
+			while (t != null)
 			{
-				if (Character.isWhitespace(sql.charAt(fromPos))) 
+				String value = t.getContents();
+				if ("(".equals(value)) 
 				{
-					fromPos ++;
+					bracketCount ++;
 				}
-				else
+				else if (")".equals(value))
 				{
-					break;
+					bracketCount --;
 				}
-			}
+				else if (bracketCount == 0)
+				{
+					if (keywords.contains(value))
+					{
+						pos = t.getCharBegin();
+						break;
+					}
+				}
+
+				t = (SQLToken)lexer.getNextToken(false, false);
+			}		
 		}
-		return fromPos;
+		catch (Exception e)
+		{
+			pos = -1;
+		}
+		return pos;
 	}
 	
 	public static String makeCleanSql(String aSql, boolean keepNewlines)

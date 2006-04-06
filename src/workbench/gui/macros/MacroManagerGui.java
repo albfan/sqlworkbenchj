@@ -90,7 +90,7 @@ public class MacroManagerGui
 
 		JPanel namePanel = new JPanel();
 		namePanel.setLayout(new BorderLayout());
-		JLabel l = new JLabel(ResourceMgr.getString("LabelMacroName"));
+		JLabel l = new JLabel(ResourceMgr.getString("LblMacroName"));
 		l.setBorder(new CompoundBorder(new EmptyBorder(0,5,0,5), l.getBorder()));
 		this.macroNameField = new StringPropertyEditor(); //new JTextField(40);
 		this.macroNameField.setColumns(40);

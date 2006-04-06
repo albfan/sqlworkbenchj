@@ -249,7 +249,6 @@ public class ProcedureListPanel
 		if (this.isVisible() && retrieve)
 		{
 			this.retrieve();
-			//this.procList.requestFocusInWindow();
 		}
 		else
 		{

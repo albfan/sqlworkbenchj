@@ -156,6 +156,22 @@ public class FileDialogUtil
 		return FILE_TYPE_UNKNOWN;
 	}
 
+	public static String getBlobFile(Component caller)
+	{
+		Window parent = SwingUtilities.getWindowAncestor(caller);
+		String lastDir = Settings.getInstance().getLastBlobDir();
+		JFileChooser fc = new JFileChooser(lastDir);
+		int answer = answer = fc.showSaveDialog(parent);
+		String filename = null;
+		if (answer == JFileChooser.APPROVE_OPTION)
+		{
+			File fl = fc.getSelectedFile();
+			filename = fl.getAbsolutePath();
+			Settings.getInstance().setLastBlobDir(fl.getParentFile().getAbsolutePath());
+		}
+		return filename;
+	}
+	
 	public String getWorkspaceFilename(Window parent, boolean toSave)
 	{
 		return this.getWorkspaceFilename(parent, toSave, false);
@@ -262,7 +278,7 @@ public class FileDialogUtil
 		}
 				
 		JFileChooser dialog = new JFileChooser(f);
-		dialog.setApproveButtonText(ResourceMgr.getString("LabelOK"));
+		dialog.setApproveButtonText(ResourceMgr.getString("LblOK"));
 		if (fileName != null) 
 		{
 			dialog.setSelectedFile(new File(fileName));

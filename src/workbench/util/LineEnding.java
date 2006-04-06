@@ -40,11 +40,11 @@ public class LineEnding
 	public String toString()
 	{
 		if (isDefault)
-			return ResourceMgr.getString("LabelPlatformDefaultLineEnding");
+			return ResourceMgr.getString("LblPlatformDefaultLineEnding");
 		if ("\n".equals(lineEnd)) 
-			return ResourceMgr.getString("LabelUnixLineEnding");
+			return ResourceMgr.getString("LblUnixLineEnding");
 		else 
-			return ResourceMgr.getString("LabelWindLineEnding");
+			return ResourceMgr.getString("LblWindLineEnding");
 	}
 	
 	public String getLineEnding()

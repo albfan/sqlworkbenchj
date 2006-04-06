@@ -108,7 +108,7 @@ public class WbCopy
 		}
 		catch (Exception e)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorCopyWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrCopyWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -116,7 +116,7 @@ public class WbCopy
 		if (cmdLine.hasUnknownArguments())
 		{
 			List params = cmdLine.getUnknownArguments();
-			StringBuffer msg = new StringBuffer(ResourceMgr.getString("ErrorUnknownParameter") + " ");
+			StringBuffer msg = new StringBuffer(ResourceMgr.getString("ErrUnknownParameter") + " ");
 			for (int i=0; i < params.size(); i++)
 			{
 				if (i > 0) msg.append(',');
@@ -124,7 +124,7 @@ public class WbCopy
 			}
 			result.addMessage(msg.toString());
 			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrorCopyWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrCopyWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -139,9 +139,9 @@ public class WbCopy
 		String sourcequery = cmdLine.getValue(PARAM_SOURCEQUERY);
 		if (sourcetable == null && sourcequery == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorCopyNoSourceSpecified"));
+			result.addMessage(ResourceMgr.getString("ErrCopyNoSourceSpecified"));
 			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrorCopyWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrCopyWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -149,9 +149,9 @@ public class WbCopy
 		String targettable = cmdLine.getValue(PARAM_TARGETTABLE);
 		if (targettable == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorCopyNoTarget"));
+			result.addMessage(ResourceMgr.getString("ErrCopyNoTarget"));
 			result.addMessage(""); // force empty line
-			result.addMessage(ResourceMgr.getString("ErrorCopyWrongParameters"));
+			result.addMessage(ResourceMgr.getString("ErrCopyWrongParameters"));
 			result.setFailure();
 			return result;
 		}
@@ -170,7 +170,7 @@ public class WbCopy
 			}
 			catch (Exception e)
 			{
-				result.addMessage(ResourceMgr.getString("ErrorCopyCouldNotConnectTarget"));
+				result.addMessage(ResourceMgr.getString("ErrCopyCouldNotConnectTarget"));
 				result.setFailure();
 				return result;
 			}
@@ -188,7 +188,7 @@ public class WbCopy
 			}
 			catch (Exception e)
 			{
-				result.addMessage(ResourceMgr.getString("ErrorCopyCouldNotConnectSource"));
+				result.addMessage(ResourceMgr.getString("ErrCopyCouldNotConnectSource"));
 				result.setFailure();
 				// disconnect the target connection only if it was created by this command
 				if (targetCon.getId().startsWith("Wb-Copy"))
@@ -213,7 +213,7 @@ public class WbCopy
 		{
 			if (!this.copier.setMode(mode))
 			{
-				result.addMessage(ResourceMgr.getString("ErrorInvalidModeIgnored").replaceAll("%mode%", mode));
+				result.addMessage(ResourceMgr.getString("ErrInvalidModeIgnored").replaceAll("%mode%", mode));
 			}
 		}
 
@@ -249,7 +249,7 @@ public class WbCopy
 				}
 				else
 				{
-					result.addMessage(ResourceMgr.getString("ErrorCopyWrongParameters"));
+					result.addMessage(ResourceMgr.getString("ErrCopyWrongParameters"));
 					result.setFailure();
 					return result;
 				}
@@ -267,7 +267,7 @@ public class WbCopy
 		catch (SQLException e)
 		{
 			LogMgr.logError("WbCopy.execute()", "SQL Error when copying data", e);
-			result.addMessage(ResourceMgr.getString("ErrorOnCopy"));
+			result.addMessage(ResourceMgr.getString("ErrOnCopy"));
 			result.addMessage(copier.getAllMessages());
 			result.setFailure();
 		}

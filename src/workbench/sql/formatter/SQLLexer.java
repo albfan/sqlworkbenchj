@@ -2140,7 +2140,10 @@ public class SQLLexer {
 		this.yycolumn = yycolumn;
 	}
 
-
+		public SQLLexer(String source)
+		{
+			this(new StringReader(source));
+		}
   /**
    * Creates a new scanner
    * There is also a java.io.InputStream version of this constructor.

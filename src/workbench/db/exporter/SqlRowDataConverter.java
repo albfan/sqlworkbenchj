@@ -95,7 +95,7 @@ public class SqlRowDataConverter
 			
 			if (this.errorReporter != null)
 			{
-				String msg = ResourceMgr.getString("ErrorExportNoKeys") + tbl;
+				String msg = ResourceMgr.getString("ErrExportNoKeys") + tbl;
 				this.errorReporter.addWarning(msg);
 			}
 			

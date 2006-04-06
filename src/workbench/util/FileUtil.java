@@ -15,6 +15,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * @author  support@sql-workbench.net
@@ -71,4 +73,30 @@ public class FileUtil
 
 	}
 
+	public static int copy(InputStream in, OutputStream out)
+	{
+		int filesize = 0;
+		try
+		{
+			int bufsize = 32*1024;
+			byte[] buffer = new byte[bufsize];
+			int bytesRead = in.read(buffer);
+			while (bytesRead != -1)
+			{
+				filesize += bytesRead;
+				out.write(buffer, 0, bytesRead);
+				bytesRead = in.read(buffer);
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			try { out.close(); } catch (Throwable th) {}
+			try { in.close(); } catch (Throwable th) {}
+		}
+		return filesize;
+	}
 }

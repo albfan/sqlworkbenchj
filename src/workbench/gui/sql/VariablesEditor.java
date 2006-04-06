@@ -101,9 +101,9 @@ public class VariablesEditor
 			String varName = this.varData.getValueAsString(i, 0);
 			if (!VariablePool.getInstance().isValidVariableName(varName))
 			{
-				String msg = ResourceMgr.getString("ErrorIllegalVariableName");
+				String msg = ResourceMgr.getString("ErrIllegalVariableName");
 				msg = msg.replaceAll("%varname%", varName);
-				msg = msg + "\n" + ResourceMgr.getString("ErrorVarDefWrongName");
+				msg = msg + "\n" + ResourceMgr.getString("ErrVarDefWrongName");
 				WbSwingUtilities.showErrorMessage(this, msg);
 				return false;
 			}

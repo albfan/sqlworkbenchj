@@ -29,7 +29,7 @@ public class CopyProfileAction
 	{
 		this.client = aClient;
 		this.setIcon(ResourceMgr.getImage("CopyProfile"));
-		this.initMenuDefinition("LabelCopyProfile");
+		this.initMenuDefinition("LblCopyProfile");
 	}
 
 	public void executeAction(ActionEvent e)

@@ -40,12 +40,20 @@ public class LobFileStatement
 	private String sqlToUse;
 	private ParameterEntry[] parameters;
 	private int parameterCount = 0;
+	private String baseDir;
 	
 	public LobFileStatement(String sql)
 		throws FileNotFoundException
 	{
+		this(sql, null);
+	}
+	public LobFileStatement(String sql, String dir)
+		throws FileNotFoundException
+	{
 		Matcher m = MARKER_PATTERN.matcher(sql);
 		if (!m.find()) return;
+		
+		this.baseDir = dir;
 		
 		// Calculate number of parameters
 		parameterCount ++;
@@ -89,19 +97,25 @@ public class LobFileStatement
 					else
 					{
 						// only other parameter allowed is [cb]lobfile
+						File f = new File(value);
+						if (!f.isAbsolute() && this.baseDir != null)
+						{
+							f = new File(this.baseDir, value);
+							value = f.getAbsolutePath();
+						}
 						parameters[index].filename = value;
 						parameters[index].binary = "blobfile".equals(arg);
 					}
 				}
 				if (parameters[index].filename == null)
 				{
-					String msg = ResourceMgr.getString("ErrorUpdateBlobNoFileParameter".replaceAll("%parm%",sql.substring(start + 2, end)));
+					String msg = ResourceMgr.getString("ErrUpdateBlobNoFileParameter".replaceAll("%parm%",sql.substring(start + 2, end)));
 					throw new FileNotFoundException(msg);
 				}
 				File f = new File(parameters[index].filename);
 				if (f.isDirectory() || !f.exists())
 				{
-					String msg = ResourceMgr.getString("ErrorUpdateBlobFileNotFound").replaceAll("%filename%", parameters[index].filename);
+					String msg = ResourceMgr.getString("ErrUpdateBlobFileNotFound").replaceAll("%filename%", parameters[index].filename);
 					throw new FileNotFoundException(msg);
 				}
 			}

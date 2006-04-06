@@ -56,12 +56,12 @@ public class ExportOptionsPanel
 		this.setLayout(new GridBagLayout());
 		ButtonGroup type = new ButtonGroup();
 
-		JLabel label = new JLabel(ResourceMgr.getString("LabelExportTypeDesc"));
-		this.typeSql = new JRadioButton(ResourceMgr.getString("LabelExportTypeSql"));
+		JLabel label = new JLabel(ResourceMgr.getString("LblExportTypeDesc"));
+		this.typeSql = new JRadioButton(ResourceMgr.getString("LblExportTypeSql"));
 
-		this.typeText = new JRadioButton(ResourceMgr.getString("LabelExportTypeText"));
-		this.typeXml = new JRadioButton(ResourceMgr.getString("LabelExportTypeXml"));
-		this.typeHtml = new JRadioButton(ResourceMgr.getString("LabelExportTypeHtml"));
+		this.typeText = new JRadioButton(ResourceMgr.getString("LblExportTypeText"));
+		this.typeXml = new JRadioButton(ResourceMgr.getString("LblExportTypeXml"));
+		this.typeHtml = new JRadioButton(ResourceMgr.getString("LblExportTypeHtml"));
 		
 		this.typeSql.addActionListener(this);
 		this.typeText.addActionListener(this);
@@ -89,13 +89,13 @@ public class ExportOptionsPanel
 		gbc.gridy++;
 		
 
-		this.createTableOption = new JCheckBox(ResourceMgr.getString("LabelExportIncludeCreateTable"));
+		this.createTableOption = new JCheckBox(ResourceMgr.getString("LblExportIncludeCreateTable"));
 		
 		this.add(this.createTableOption, gbc);
 		gbc.gridy ++;
 		
 		this.commitEvery = new JTextField(5);
-		this.commitLabel = new JLabel(ResourceMgr.getString("LabelDPCommitEvery"));
+		this.commitLabel = new JLabel(ResourceMgr.getString("LblDPCommitEvery"));
 		gbc.gridy++;
 		gbc.gridwidth = 1;
 		
@@ -116,7 +116,7 @@ public class ExportOptionsPanel
 		gbc.insets = emptyInsets;
 		this.add(this.typeText, gbc);
 
-		this.includeHeadersOption = new JCheckBox(ResourceMgr.getString("LabelExportIncludeHeaders"));
+		this.includeHeadersOption = new JCheckBox(ResourceMgr.getString("LblExportIncludeHeaders"));
 		gbc.gridy++;
 		this.add(this.includeHeadersOption, gbc);
 

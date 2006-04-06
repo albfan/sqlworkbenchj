@@ -340,10 +340,10 @@ public class WbAction
 		im.put(this.getAccelerator(), this.getActionName());
 		am.put(this.getActionName(), this);
 		
-		KeyStroke alternate = this.getAlternateAccelerator();
+		KeyStroke alternate = getAlternateAccelerator();
 		if (alternate != null)
 		{
-			im.put(alternate, this.getActionName());
+			im.put(alternate, getActionName());
 		}
 	}
 

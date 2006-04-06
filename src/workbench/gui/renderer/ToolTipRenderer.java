@@ -13,6 +13,7 @@ package workbench.gui.renderer;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Insets;
@@ -25,6 +26,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
 import workbench.gui.WbSwingUtilities;
+import workbench.storage.NullValue;
 import workbench.util.StringUtil;
 
 /**
@@ -33,17 +35,17 @@ import workbench.util.StringUtil;
  */
 public class ToolTipRenderer
 	extends JComponent
-	implements TableCellRenderer
+	implements TableCellRenderer, WbRenderer
 {
 	protected String displayValue = StringUtil.EMPTY_STRING;
 	protected String tooltip = null;
 
-	private Color selectedForeground;
-	private Color selectedBackground;
-	private Color unselectedForeground;
-	private Color unselectedBackground;
-	private Color highlightBackground;
-	private int editingRow = -1;
+	protected Color selectedForeground;
+	protected Color selectedBackground;
+	protected Color unselectedForeground;
+	protected Color unselectedBackground;
+	protected Color highlightBackground;
+	protected int editingRow = -1;
 	private boolean isEditing = false;
 	private boolean[] highlightCols;
 	private int currentColumn = -1;
@@ -51,7 +53,6 @@ public class ToolTipRenderer
 	private Rectangle paintIconR = new Rectangle();
 	private Rectangle paintTextR = new Rectangle();
 	private Rectangle paintViewR = new Rectangle();
-	//private static Insets paintViewInsets = new Insets(0, 0, 0, 0);
 	private static Insets emptyInsets = new Insets(0, 0, 0, 0);
 
 	private boolean isPrinting = false;
@@ -60,8 +61,8 @@ public class ToolTipRenderer
 	
 	private Insets focusedInsets;
 
-	private boolean selected;
-	private boolean focus;
+	protected boolean selected;
+	protected boolean focus;
 	private int valign = SwingConstants.TOP; 
 	private int halign = SwingConstants.LEFT;
 	
@@ -78,7 +79,6 @@ public class ToolTipRenderer
 	public void setEditingRow(int row) 
 	{ 
 		this.editingRow = row; 
-		//if (row < 0) this.isEditing = false;
 	}
 	
 	public void setHighlightColumns(boolean[] cols) 
@@ -131,20 +131,20 @@ public class ToolTipRenderer
 		}
 
 		this.selected = isSelected;
-		
-		if (value != null)
-		{
-			this.prepareDisplay(value);
-			this.setToolTipText(this.tooltip);
-		}
-		else
+		boolean isNull = (value == null) || (value instanceof NullValue);
+		if (isNull)
 		{
 			displayValue = StringUtil.EMPTY_STRING;
 			tooltip = null;
 		}
+		else
+		{
+			this.prepareDisplay(value);
+			this.setToolTipText(this.tooltip);
+		}
 		return this;
 	}
-	
+
 	public void paint(Graphics g)
 	{
 		int w = this.getWidth();

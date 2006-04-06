@@ -166,7 +166,7 @@ public class TextOptionsPanel
 
     setLayout(new java.awt.GridBagLayout());
 
-    delimiterLabel.setText(ResourceMgr.getString("LabelFieldDelimiter"));
+    delimiterLabel.setText(ResourceMgr.getString("LblFieldDelimiter"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 7;
@@ -184,7 +184,7 @@ public class TextOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
     add(delimiter, gridBagConstraints);
 
-    exportHeaders.setText(ResourceMgr.getString("LabelExportIncludeHeaders"));
+    exportHeaders.setText(ResourceMgr.getString("LblExportIncludeHeaders"));
     exportHeaders.setToolTipText("");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -192,7 +192,7 @@ public class TextOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     add(exportHeaders, gridBagConstraints);
 
-    quoteCharLabel.setText(ResourceMgr.getString("LabelQuoteChar"));
+    quoteCharLabel.setText(ResourceMgr.getString("LblQuoteChar"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 9;
@@ -215,7 +215,7 @@ public class TextOptionsPanel
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
 
-    quoteAlways.setText(ResourceMgr.getString("LabelExportQuoteAlways"));
+    quoteAlways.setText(ResourceMgr.getString("LblExportQuoteAlways"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
@@ -231,7 +231,7 @@ public class TextOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
     add(escapeRange, gridBagConstraints);
 
-    escapeLabel.setText(ResourceMgr.getString("LabelExportEscapeType"));
+    escapeLabel.setText(ResourceMgr.getString("LblExportEscapeType"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -240,7 +240,7 @@ public class TextOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
     add(escapeLabel, gridBagConstraints);
 
-    lineEndingLabel.setText(ResourceMgr.getString("LabelExportLineEnding"));
+    lineEndingLabel.setText(ResourceMgr.getString("LblExportLineEnding"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;

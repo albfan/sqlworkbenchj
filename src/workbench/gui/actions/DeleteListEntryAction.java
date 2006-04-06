@@ -27,7 +27,7 @@ public class DeleteListEntryAction extends WbAction
 
 	public DeleteListEntryAction(FileActions aClient)
 	{
-		this(aClient, "LabelDeleteListEntry");
+		this(aClient, "LblDeleteListEntry");
 	}
 
 	public DeleteListEntryAction(FileActions aClient, String aKey)

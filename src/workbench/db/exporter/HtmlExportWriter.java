@@ -28,11 +28,14 @@ public class HtmlExportWriter
 
 	public RowDataConverter createConverter()
 	{
-		HtmlRowDataConverter converter = new HtmlRowDataConverter();
-		converter.setPageTitle(this.exporter.getHtmlTitle());
-		converter.setCreateFullPage(exporter.getCreateFullHtmlPage());
-		converter.setEscapeHtml(exporter.getEscapeHtml());
-		return converter;
+		return new HtmlRowDataConverter();
 	}
-	
+
+	public void configureConverter()
+	{
+		HtmlRowDataConverter conv = (HtmlRowDataConverter)this.converter;
+		conv.setPageTitle(this.exporter.getHtmlTitle());
+		conv.setCreateFullPage(exporter.getCreateFullHtmlPage());
+		conv.setEscapeHtml(exporter.getEscapeHtml());
+	}
 }

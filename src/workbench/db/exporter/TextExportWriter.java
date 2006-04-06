@@ -40,17 +40,22 @@ public class TextExportWriter
 
 	public RowDataConverter createConverter()
 	{
-		TextRowDataConverter converter = new TextRowDataConverter();
-		converter.setDelimiter(exporter.getTextDelimiter());
-		converter.setWriteHeader(exporter.getExportHeaders());
-		converter.setQuoteCharacter(exporter.getTextQuoteChar());
-		converter.setCleanNonPrintable(exporter.getCleanupCarriageReturns());
-		converter.setQuoteAlways(exporter.getQuoteAlways());
-		converter.setEscapeRange(exporter.getEscapeRange());
-		converter.setLineEnding(exporter.getLineEnding());
-		return converter;
+		return new TextRowDataConverter();
 	}
 
+	public void configureConverter()
+	{
+		super.configureConverter();
+		TextRowDataConverter conv = (TextRowDataConverter)this.converter;
+		conv.setDelimiter(exporter.getTextDelimiter());
+		conv.setWriteHeader(exporter.getExportHeaders());
+		conv.setQuoteCharacter(exporter.getTextQuoteChar());
+		conv.setCleanNonPrintable(exporter.getCleanupCarriageReturns());
+		conv.setQuoteAlways(exporter.getQuoteAlways());
+		conv.setEscapeRange(exporter.getEscapeRange());
+		conv.setLineEnding(exporter.getLineEnding());
+	}
+	
 	protected void writeStart()
 		throws IOException
 	{

@@ -115,6 +115,7 @@ public class DbObjectCache
 				 )
 			{
 				TableIdentifier copy = tbl.createCopy();
+				if (tSchema != null && tSchema.equals(tbl.getSchema())) copy.setSchema(null);
 				result.add(copy);
 			}
 		}

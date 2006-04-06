@@ -82,7 +82,7 @@ public class DataStore
 	private RowDataList data;
 	private RowDataList deletedRows;
 	private RowDataList filteredRows;
-
+	
 	// The SQL statement (SELECT) that produced this DataStore
 	private String sql;
 
@@ -99,7 +99,6 @@ public class DataStore
 
 	private boolean cancelRetrieve = false;
 	private boolean cancelUpdate = false;
-	//private boolean cancelImport = false;
 	private int reportInterval = Settings.getInstance().getIntProperty("workbench.gui.data.reportinterval", 10);
 
 	public DataStore(String[] aColNames, int[] colTypes)
@@ -986,6 +985,11 @@ public class DataStore
 	public void writeDataString(Writer out, String aFieldDelimiter, String aLineTerminator, boolean includeHeaders, int[] rows, List columns)
 		throws IOException
 	{
+		if (rows == null) 
+		{
+			writeDataString(out, aFieldDelimiter, aLineTerminator, includeHeaders, columns);
+			return;
+		}
 		if (includeHeaders)
 		{
 			out.write(this.getHeaderString(aFieldDelimiter, columns).toString());
@@ -1117,6 +1121,7 @@ public class DataStore
 		{
 			this.rowActionMonitor.setMonitorType(RowActionMonitor.MONITOR_LOAD);
 		}
+		
 		this.cancelRetrieve = false;
 
 		try

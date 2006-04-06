@@ -20,6 +20,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
@@ -53,6 +54,8 @@ import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.storage.DataStore;
+import workbench.util.StringUtil;
 import workbench.util.WbProperties;
 import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
@@ -71,7 +74,9 @@ public class DbExplorerPanel
 	private TableSearchPanel searchPanel;
 	private ProcedureListPanel procs;
 	private JComboBox schemaSelector;
+	private JComboBox catalogSelector;
 	private JLabel schemaLabel;
+	private JLabel catalogLabel;
 	private JPanel selectorPanel;
 	boolean connected;
 	private WbConnection dbConnection;
@@ -89,6 +94,7 @@ public class DbExplorerPanel
 	private MainWindow mainWindow;
 	private boolean busy;
 	private String schemaFromWorkspace;
+	private boolean switchCatalog = false;
 	
 	public DbExplorerPanel()
 	{
@@ -122,21 +128,27 @@ public class DbExplorerPanel
 
 			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 			this.setLayout(new BorderLayout());
-			Dimension d = new Dimension(800, 20);
+			
 			this.selectorPanel = new JPanel();
-			this.selectorPanel.setMaximumSize(d);
-			d = new Dimension(250, 20);
-			this.selectorPanel.setPreferredSize(d);
-
 			this.selectorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 0));
 
-			this.schemaLabel = new JLabel();
+			this.schemaLabel = new JLabel(ResourceMgr.getString("LblSchema"));
 
 			this.selectorPanel.add(schemaLabel);
 			this.schemaSelector = new JComboBox();
-
+			Dimension d = new Dimension(80, 20);
+			this.schemaSelector.setMinimumSize(d);
+			this.schemaSelector.setPreferredSize(d);
 			this.selectorPanel.add(this.schemaSelector);
 
+			this.catalogSelector  = new JComboBox();
+			this.catalogLabel = new JLabel("Catalog");
+			this.catalogSelector.setVisible(false);
+			this.catalogSelector.setEnabled(false);
+			this.catalogLabel.setVisible(false);
+			this.selectorPanel.add(catalogLabel);
+			this.selectorPanel.add(catalogSelector);
+			
 			this.add(this.selectorPanel, BorderLayout.NORTH);
 			this.add(tabPane, BorderLayout.CENTER);
 			this.searchPanel.restoreSettings();
@@ -149,7 +161,7 @@ public class DbExplorerPanel
 			this.connectionInfo = new ConnectionInfo(this.toolbar.getBackground());
 			this.connectionInfo.setMinimumSize(d);
 			this.toolbar.add(this.connectionInfo);
-			mainWindow.addExecutionListener(this);
+			if (mainWindow != null) mainWindow.addExecutionListener(this);
 		}
 		catch (Throwable e)
 		{
@@ -157,6 +169,11 @@ public class DbExplorerPanel
 		}
 	}
 
+	public void setSwitchCatalog(boolean flag)
+	{
+		this.switchCatalog = flag;
+	}
+	
 	public void showConnectButton(ConnectionSelector selector)
 	{
 		this.connectionSelector = selector;
@@ -166,6 +183,8 @@ public class DbExplorerPanel
 		this.selectConnectionButton.addActionListener(this);
 		this.selectorPanel.add(Box.createHorizontalStrut(15));
 		this.selectorPanel.add(this.selectConnectionButton);
+		
+		
 	}
 
 	private final Object busyLock = new Object();
@@ -234,9 +253,12 @@ public class DbExplorerPanel
 			{
 				schemaSelector.setSelectedIndex(0);
 			}
+			
+			readCatalogs();
+			
 			currentSchema = (String)schemaSelector.getSelectedItem();
-			tables.setCatalogAndSchema(null, currentSchema, false);
-      procs.setCatalogAndSchema(null, currentSchema, false);
+			tables.setCatalogAndSchema(getSelectedCatalog(), currentSchema, false);
+      procs.setCatalogAndSchema(getSelectedCatalog(), currentSchema, false);
 
 			Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
 			int maxWidth = (int)(d.getWidth() / 2);
@@ -346,6 +368,7 @@ public class DbExplorerPanel
 		if (this.isBusy()) return;
 		
 		this.dbConnection = aConnection;
+		setSwitchCatalog(false);
 		
 		if (aConnection == null)
 		{
@@ -358,6 +381,16 @@ public class DbExplorerPanel
 		
 		try
 		{
+			if (this.connectionSelector != null)
+			{
+				// always switch database/catalog if in stand-alone mode
+				setSwitchCatalog(true);
+			}
+			else if (aConnection.getProfile() != null)
+			{
+				setSwitchCatalog(aConnection.getProfile().getUseSeparateConnectionPerTab());
+			}
+			
 			this.connectionInitPending = true;
 			this.schemaRetrievePending = true;
 			this.retrievePending = Settings.getInstance().getRetrieveDbExplorer();
@@ -381,6 +414,7 @@ public class DbExplorerPanel
 				if (this.isVisible())
 				{
 					readSchemas();
+					
 					if (this.retrievePending)
 					{
 						// if we are visible start the retrieve immediately
@@ -402,6 +436,38 @@ public class DbExplorerPanel
 		
 	}
 
+	private void readCatalogs()
+	{
+		DataStore ds = this.dbConnection.getMetadata().getCatalogInformation();
+		this.catalogSelector.removeActionListener(this);
+		if (ds.getRowCount() == 0) 
+		{
+			this.catalogSelector.setVisible(false);
+			this.catalogSelector.setEnabled(false);
+			this.catalogLabel.setVisible(false);
+		}
+		else
+		{
+			String cat = "  " + StringUtil.capitalize(this.dbConnection.getMetadata().getCatalogTerm());
+
+			this.catalogSelector.removeAllItems();
+			this.catalogLabel.setText(cat);
+
+			for (int i = 0; i < ds.getRowCount(); i++)
+			{
+				String db = ds.getValueAsString(i, 0);
+				catalogSelector.addItem(db);
+			}
+			String db = this.dbConnection.getMetadata().getCurrentCatalog();
+			catalogSelector.setSelectedItem(db);
+			this.catalogSelector.addActionListener(this);
+			this.catalogSelector.setVisible(true);
+			this.catalogSelector.setEnabled(true);
+			this.catalogLabel.setVisible(true);
+		}
+		this.selectorPanel.validate();
+	}
+	
 	public void setVisible(boolean flag)
 	{
 		boolean wasVisible = this.isVisible();
@@ -479,8 +545,33 @@ public class DbExplorerPanel
 		{
 			this.connectionSelector.selectConnection();
 		}
+		else if (e.getSource() == this.catalogSelector)
+		{
+			if (this.switchCatalog)
+			{
+				try
+				{
+					this.dbConnection.getMetadata().setCurrentCatalog(getSelectedCatalog());
+				}
+				catch (SQLException ex)
+				{
+					WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(ex));
+				}
+			}
+			retrieve();
+		}
 	}
 
+	private String getSelectedCatalog()
+	{
+		if (this.catalogSelector == null) return null;
+		return (String)catalogSelector.getSelectedItem();
+	}
+	
+	private void startRetrieve()
+	{
+		
+	}
 	private void retrieve()
 	{
 		if (this.isBusy() || isConnectionBusy()) 
@@ -502,7 +593,7 @@ public class DbExplorerPanel
 		final String schema = (String)schemaSelector.getSelectedItem();
 		final Component c = this;
 		
-		Thread t = new WbThread("Schema Change")
+		Thread t = new WbThread("SchemaChange")
 		{
 			public void run()
 			{
@@ -510,8 +601,8 @@ public class DbExplorerPanel
 				{
 					setBusy(true);
 					WbSwingUtilities.showWaitCursorOnWindow(c);
-					tables.setCatalogAndSchema(null, schema, true);
-					procs.setCatalogAndSchema(null, schema, true);
+					tables.setCatalogAndSchema(getSelectedCatalog(), schema, true);
+					procs.setCatalogAndSchema(getSelectedCatalog(), schema, true);
 				}
 				catch (Exception ex)
 				{

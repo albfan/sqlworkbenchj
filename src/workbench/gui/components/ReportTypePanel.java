@@ -37,7 +37,7 @@ public class ReportTypePanel
 	public ReportTypePanel(String encoding)
 	{
 		super(encoding);
-		JLabel l =  new JLabel(ResourceMgr.getString("LabelReportType"));
+		JLabel l =  new JLabel(ResourceMgr.getString("LblReportType"));
 
 		GridBagLayout layout = (GridBagLayout)this.getLayout();
 		GridBagConstraints c = layout.getConstraints(this.encodings);
@@ -60,7 +60,7 @@ public class ReportTypePanel
     c.fill = java.awt.GridBagConstraints.HORIZONTAL;
     c.anchor = java.awt.GridBagConstraints.NORTHWEST;
 
-		wbReportType = new JRadioButton(ResourceMgr.getString("LabelReportTypeWorkbench"));
+		wbReportType = new JRadioButton(ResourceMgr.getString("LblReportTypeWorkbench"));
 		wbReportType.setSelected(true);
 		this.add(wbReportType, c);
 
@@ -71,7 +71,7 @@ public class ReportTypePanel
     c.anchor = java.awt.GridBagConstraints.NORTHWEST;
     c.weightx = 1.0;
     c.weighty = 1.0;
-		dbDesignerType = new JRadioButton(ResourceMgr.getString("LabelReportTypeDbDesigner"));
+		dbDesignerType = new JRadioButton(ResourceMgr.getString("LblReportTypeDbDesigner"));
 		this.add(dbDesignerType, c);
 		buttonGroup.add(this.wbReportType);
 		buttonGroup.add(this.dbDesignerType);

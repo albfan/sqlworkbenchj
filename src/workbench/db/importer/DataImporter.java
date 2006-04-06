@@ -568,9 +568,9 @@ public class DataImporter
 		{
 			this.hasErrors = true;
 			LogMgr.logError("DataImporter.processRow()", "Error importing row " + this.totalRows + ": " + e.getMessage(), null);
-			this.messages.append(ResourceMgr.getString("ErrorImportingRow") + " " + currentImportRow + "\n");
-			this.messages.append(ResourceMgr.getString("ErrorImportErrorMsg") + " " + e.getMessage() + "\n");
-			this.messages.append(ResourceMgr.getString("ErrorImportValues") + " " + this.getValueDisplay(row) + "\n");
+			this.messages.append(ResourceMgr.getString("ErrImportingRow") + " " + currentImportRow + "\n");
+			this.messages.append(ResourceMgr.getString("ErrImportErrorMsg") + " " + e.getMessage() + "\n");
+			this.messages.append(ResourceMgr.getString("ErrImportValues") + " " + this.getValueDisplay(row) + "\n");
 			this.messages.append("\n");
 			if (!this.continueOnError) throw e;
 		}
@@ -585,7 +585,7 @@ public class DataImporter
 			{
 				this.hasErrors = true;
 				LogMgr.logError("DataImporter.processRow()", "Error executing batch after " + this.totalRows + " rows", e);
-				this.messages.append(ResourceMgr.getString("ErrorImportExecuteBatchQueue") + "\n");
+				this.messages.append(ResourceMgr.getString("ErrImportExecuteBatchQueue") + "\n");
 				this.messages.append("\n");
 				if (!this.continueOnError) throw e;
 			}
@@ -618,7 +618,7 @@ public class DataImporter
 						catch (Exception e)
 						{
 							LogMgr.logWarning("DataImporter.processRow()", "Error when adding COMMIT to batch. This does not seem to be supported by the server: " + ExceptionUtil.getDisplay(e));
-							String msg = ResourceMgr.getString("ErrorCommitInBatch").replaceAll("%error%", e.getMessage()) + "\n";
+							String msg = ResourceMgr.getString("ErrCommitInBatch").replaceAll("%error%", e.getMessage()) + "\n";
 							this.messages.append(msg);
 							this.canCommitInBatch = false;
 						}
@@ -672,7 +672,7 @@ public class DataImporter
 		int rows = 0;
 		if (this.useBatch)
 		{
-			processRowData(this.insertStatement, row, true, false);
+			rows = processRowData(this.insertStatement, row, true, false);
 		}
 		else
 		{
@@ -692,7 +692,7 @@ public class DataImporter
 		int rows = 0;
 		if (this.useBatch && this.isModeUpdate())
 		{
-			processRowData(this.updateStatement, row, true, true);
+			rows = processRowData(this.updateStatement, row, true, true);
 		}
 		else
 		{
@@ -714,20 +714,10 @@ public class DataImporter
 			}
 			if (row[i] == null || row[i] instanceof NullValue)
 			{
-				if ("CLOB".equals(this.targetColumns[i].getDbmsType()))
-				{
-					pstmt.setNull(colIndex, Types.CLOB);
-				}
-				else
-				{
-					pstmt.setNull(colIndex, this.targetColumns[i].getDataType());
-				}
+				pstmt.setNull(colIndex, this.targetColumns[i].getDataType());
 			}
 			
-			// CLOB and LONG check is for Oracle, because Oracle 
-			// reports CLOB and LONG columns as java.sql.Types.OTHER (!!)
-			// but they need to be treated as CLOBs (i.e. using setCharacterStream()
-			// this will only work with Oracle 10g drivers.
+			// This will only work with Oracle 10g drivers.
 			// Oracle 9i drivers do not implement the setCharacterStream() 
 			// and associated methods properly
 			else if ( SqlUtil.isClobType(this.targetColumns[i].getDataType()) || 
@@ -759,7 +749,8 @@ public class DataImporter
 				Reader in = new StringReader(value);
 				pstmt.setCharacterStream(colIndex, in, size);
 			}
-			else if (SqlUtil.isBlobType(this.targetColumns[i].getDataType()))
+			else if (SqlUtil.isBlobType(this.targetColumns[i].getDataType()) || 
+				       "BLOB".equals(this.targetColumns[i].getDbmsType()))
 			{
 				InputStream in = null;
 				int len = -1;
@@ -815,6 +806,12 @@ public class DataImporter
 		if (addBatch)
 		{
 			pstmt.addBatch();
+			// let's assume the batch statement affects at least one row
+			// if this is not done, the rowcount will never be increased
+			// in batchmode and thus each row will be committed even if 
+			// a different commit frequency is selected.
+			// Thanks to Pascal for pointing this out!
+			rows = 1;
 		}
 		else
 		{
@@ -837,7 +834,7 @@ public class DataImporter
 			{
 				this.supportsBatch = false;
 				this.useBatch = false;
-				this.messages.append(ResourceMgr.getString("ErrorNoOracle8BatchWithLong") + "\n");
+				this.messages.append(ResourceMgr.getString("ErrNoOracle8BatchWithLong") + "\n");
 			}
 		}
 	}
@@ -905,10 +902,10 @@ public class DataImporter
 			}
 			catch (SQLException e)
 			{
-				String msg = ResourceMgr.getString("ErrorImportTableNotFound").replaceAll("%table%", this.targetTable.getTableExpression(this.dbConn));
+				String msg = ResourceMgr.getString("ErrImportTableNotFound").replaceAll("%table%", this.targetTable.getTableExpression(this.dbConn));
 				if (parser != null)
 				{
-					String s = ResourceMgr.getString("ErrorImportFileNotProcessed");
+					String s = ResourceMgr.getString("ErrImportFileNotProcessed");
 					msg = msg + " " + StringUtil.replace(s, "%filename%", this.parser.getSourceFilename());
 				}
 				this.messages.append(msg + "\n");
@@ -1016,7 +1013,7 @@ public class DataImporter
 		catch (SQLException e)
 		{
 			LogMgr.logError("DataImporter.prepareInsertStatement()", "Error when preparing INSERT statement: " + this.insertSql, e);
-			this.messages.append(ResourceMgr.getString("ErrorImportInitTargetFailed"));
+			this.messages.append(ResourceMgr.getString("ErrImportInitTargetFailed"));
 			this.messages.append(ExceptionUtil.getDisplay(e));
 			this.insertStatement = null;
 			throw e;
@@ -1035,7 +1032,7 @@ public class DataImporter
 			this.retrieveKeyColumns();
 			if (this.keyColumns == null)
 			{
-				this.messages.append(ResourceMgr.getString("ErrorImportNoKeyForUpdate"));
+				this.messages.append(ResourceMgr.getString("ErrImportNoKeyForUpdate"));
 				throw new SQLException("No key columns defined for update mode");
 			}
 		}
@@ -1080,7 +1077,7 @@ public class DataImporter
 		if (!pkAdded)
 		{
 			LogMgr.logError("DataImporter.prepareUpdateStatement()", "No primary key columns defined! Update mode not available\n", null);
-			this.messages.append(ResourceMgr.getString("ErrorImportNoKeyForUpdate") + "\n");
+			this.messages.append(ResourceMgr.getString("ErrImportNoKeyForUpdate") + "\n");
 			this.updateSql = null;
 			this.updateStatement = null;
 			throw new SQLException("No key columns defined for update mode");
@@ -1088,7 +1085,7 @@ public class DataImporter
 		if (pkCount != this.keyColumns.size())
 		{
 			LogMgr.logError("DataImporter.prepareUpdateStatement()", "At least one of the supplied primary key columns was not found in the target table!\n", null);
-			this.messages.append(ResourceMgr.getString("ErrorImportUpdateKeyColumnNotFound") + "\n");
+			this.messages.append(ResourceMgr.getString("ErrImportUpdateKeyColumnNotFound") + "\n");
 			this.updateSql = null;
 			this.updateStatement = null;
 			throw new SQLException("Not enough key columns defined for update mode");
@@ -1097,7 +1094,7 @@ public class DataImporter
 		if (colIndex == 0)
 		{
 			LogMgr.logError("DataImporter.prepareUpdateStatement()", "Only PK columns defined! Update mode is not available!", null);
-			this.messages.append(ResourceMgr.getString("ErrorImportOnlyKeyColumnsForUpdate"));
+			this.messages.append(ResourceMgr.getString("ErrImportOnlyKeyColumnsForUpdate"));
 			this.updateSql = null;
 			this.updateStatement = null;
 			throw new SQLException("Only key columns defined for update mode");
@@ -1130,7 +1127,7 @@ public class DataImporter
 		catch (SQLException e)
 		{
 			LogMgr.logError("DataImporter.prepareUpdateStatement()", "Error when preparing UPDATE statement", e);
-			this.messages.append(ResourceMgr.getString("ErrorImportInitTargetFailed"));
+			this.messages.append(ResourceMgr.getString("ErrImportInitTargetFailed"));
 			this.messages.append(ExceptionUtil.getDisplay(e));
 			this.updateStatement = null;
 			throw e;

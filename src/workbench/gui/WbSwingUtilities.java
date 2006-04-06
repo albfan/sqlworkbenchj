@@ -212,28 +212,33 @@ public class WbSwingUtilities
 
 	public static void showErrorMessage(Component aCaller, String aMessage)
 	{
-		JOptionPane.showMessageDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(SwingUtilities.getWindowAncestor(aCaller), aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.ERROR_MESSAGE);
 	}
 
 	public static void showMessage(Component aCaller, Object aMessage)
 	{
-		JOptionPane.showMessageDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
+		JOptionPane.showMessageDialog(SwingUtilities.getWindowAncestor(aCaller), aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
+	}
+	
+	public static void showMessage(Component aCaller, String title, Object aMessage)
+	{
+		JOptionPane.showMessageDialog(SwingUtilities.getWindowAncestor(aCaller), aMessage, title, JOptionPane.PLAIN_MESSAGE);
 	}
 
 	public static void showMessageKey(Component aCaller, String aKey)
 	{
-		JOptionPane.showMessageDialog(aCaller, ResourceMgr.getString(aKey), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
+		JOptionPane.showMessageDialog(SwingUtilities.getWindowAncestor(aCaller), ResourceMgr.getString(aKey), ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	public static boolean getYesNo(Component aCaller, String aMessage)
 	{
-		int result = JOptionPane.showConfirmDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+		int result = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(aCaller), aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 		return (result == JOptionPane.YES_OPTION);
 	}
 
 	public static int getYesNoCancel(Component aCaller, String aMessage)
 	{
-		int result = JOptionPane.showConfirmDialog(aCaller, aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+		int result = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(aCaller), aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
 		return result;
 	}
 
@@ -242,9 +247,9 @@ public class WbSwingUtilities
 
 	public static int getYesNoIgnoreAll(Component aCaller, String aMessage)
 	{
-		String[] options = new String[] { ResourceMgr.getString("LabelYes"), ResourceMgr.getString("LabelNo"), ResourceMgr.getString("LabelIgnoreAll")};
+		String[] options = new String[] { ResourceMgr.getString("LblYes"), ResourceMgr.getString("LblNo"), ResourceMgr.getString("LblIgnoreAll")};
 		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
-		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);
+		JDialog dialog = ignorePane.createDialog(SwingUtilities.getWindowAncestor(aCaller), ResourceMgr.TXT_PRODUCT_NAME);
 		int rvalue = -1;
 		try
 		{
@@ -267,7 +272,7 @@ public class WbSwingUtilities
 
 	public static int getYesNoExecuteAll(Component aCaller, String aMessage)
 	{
-		String[] options = new String[] { ResourceMgr.getString("LabelYes"), ResourceMgr.getString("LabelExecuteAll"), ResourceMgr.getString("LabelNo"), ResourceMgr.getString("ButtonLabelCancel")};
+		String[] options = new String[] { ResourceMgr.getString("LblYes"), ResourceMgr.getString("LblExecuteAll"), ResourceMgr.getString("LblNo"), ResourceMgr.getString("ButtonLabelCancel")};
 		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
 		JDialog dialog = ignorePane.createDialog(aCaller, ResourceMgr.TXT_PRODUCT_NAME);
 		try
@@ -333,7 +338,7 @@ public class WbSwingUtilities
 
 	public static int getCommitRollbackQuestion(Component aCaller, String aMessage)
 	{
-		String[] options = new String[] { ResourceMgr.getString("LabelCommit"), ResourceMgr.getString("LabelRollback")};
+		String[] options = new String[] { ResourceMgr.getString("LblCommit"), ResourceMgr.getString("LblRollback")};
 		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, null, options);
 		int w = 0;
 		try
@@ -497,7 +502,7 @@ public class WbSwingUtilities
 	{
 		if (dbConnection.isBusy())
 		{
-			showMessageKey(parent, "ErrorConnectionBusy");
+			showMessageKey(parent, "ErrConnectionBusy");
 			return false;
 		}
 		return true;

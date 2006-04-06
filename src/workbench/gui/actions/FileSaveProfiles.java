@@ -38,7 +38,7 @@ public class FileSaveProfiles extends WbAction
 		catch (Exception ex)
 		{
 			LogMgr.logError("FileSaveProfiles.executeAction()", "Error saving profiles", ex);
-			WbSwingUtilities.showMessage(WbManager.getInstance().getCurrentWindow(), ResourceMgr.getString("ErrorSavingProfiles") + "\n" + ExceptionUtil.getDisplay(ex));
+			WbSwingUtilities.showMessage(WbManager.getInstance().getCurrentWindow(), ResourceMgr.getString("ErrSavingProfiles") + "\n" + ExceptionUtil.getDisplay(ex));
 		}
 	}
 }

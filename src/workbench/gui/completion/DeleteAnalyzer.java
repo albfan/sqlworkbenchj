@@ -42,17 +42,19 @@ public class DeleteAnalyzer
 	
 	protected void checkContext()
 	{
-
 		this.context = -1;
 
 		int wherePos = StringUtil.findPattern(WHERE_PATTERN, sql, 0);
+		checkOverwrite();
 		
 		if ( wherePos == -1 || wherePos > -1 && cursorPos < wherePos)
 		{
+			
 			context = CONTEXT_TABLE_LIST;
-			String q = this.getQualifierLeftOfCursor(sql, cursorPos);
+			String q = this.getQualifierLeftOfCursor();
 			if (q != null)
 			{
+				this.setOverwriteCurrentWord(false);
 				this.schemaForTableList = q;
 			}
 			else

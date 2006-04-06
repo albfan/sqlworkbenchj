@@ -11,6 +11,8 @@
  */
 package workbench.db;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.sql.Types;
 import workbench.util.SqlUtil;
 
@@ -31,7 +33,8 @@ public class ColumnIdentifier
 	private String dbmsType = null;
 	private String comment = null;
 	private String defaultValue = null;
-	private String columnClass = null;
+	private String columnClassName = null;
+	private Class columnClass;
 	private String columnTypeName = null;
 
 	private int position;
@@ -120,7 +123,7 @@ public class ColumnIdentifier
 		result.isUpdateable = this.isUpdateable;
 		result.comment = this.comment;
 		result.defaultValue = this.defaultValue;
-		result.columnClass = this.columnClass;
+		result.columnClassName = this.columnClassName;
 		result.columnTypeName = this.columnTypeName;
 		result.position = this.position;
 		return result;
@@ -239,21 +242,69 @@ public class ColumnIdentifier
 	}
 
 	/**
-	 * Getter for property columnClass.
-	 * @return Value of property columnClass.
+	 * Getter for property columnClassName.
+	 * 
+	 * @return Value of property columnClassName.
 	 */
-	public String getColumnClass()
+	public String getColumnClassName()
 	{
-		return columnClass;
+		return columnClassName;
 	}
 
 	/**
-	 * Setter for property columnClass.
-	 * @param columnClass New value of property columnClass.
+	 * Setter for property columnClassName.
+	 * 
+	 * @param columnClassName New value of property columnClassName.
 	 */
-	public void setColumnClass(String columnClass)
+	public void setColumnClassName(String columnClass)
 	{
-		this.columnClass = columnClass;
+		this.columnClassName = columnClass;
+	}
+	
+	public Class getColumnClass()
+	{
+		if (this.columnClassName != null)
+		{
+			if (this.columnClass == null)
+			{
+				try
+				{
+					this.columnClass = Class.forName(this.columnClassName);
+				}
+				catch (Exception e)
+				{
+					this.columnClass = null;
+				}
+			}
+		}
+		if (this.columnClass != null) return this.columnClass;
+		
+		switch (this.type)
+		{
+			case Types.BIGINT:
+			case Types.INTEGER:
+				return Long.class;
+			case Types.SMALLINT:
+				return Integer.class;
+			case Types.NUMERIC:
+			case Types.DECIMAL:
+				return BigDecimal.class;
+			case Types.DOUBLE:
+				return Double.class;
+			case Types.REAL:
+			case Types.FLOAT:
+				return Float.class;
+			case Types.CHAR:
+			case Types.VARCHAR:
+				return String.class;
+			case Types.DATE:
+				return java.sql.Date.class;
+			case Types.TIMESTAMP:
+				return Timestamp.class;
+			default:
+				return Object.class;
+		}
+
 	}
 
 	/**

@@ -68,26 +68,26 @@ public class WbXslt
 
 		if (!cmdLine.hasArguments())
 		{
-			result.addMessage(ResourceMgr.getString("ErrorXsltWrongParameter"));
+			result.addMessage(ResourceMgr.getString("ErrXsltWrongParameter"));
 			result.setFailure();
 			return result;
 		}
 
 		if (inputFile == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorXsltMissingInputFile"));
+			result.addMessage(ResourceMgr.getString("ErrXsltMissingInputFile"));
 			result.setFailure();
 			return result;
 		}
 		if (outputFile == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorXsltMissingOutputFile"));
+			result.addMessage(ResourceMgr.getString("ErrXsltMissingOutputFile"));
 			result.setFailure();
 			return result;
 		}
 		if (xsltFile == null)
 		{
-			result.addMessage(ResourceMgr.getString("ErrorXsltMissingStylesheet"));
+			result.addMessage(ResourceMgr.getString("ErrXsltMissingStylesheet"));
 			result.setFailure();
 			return result;
 		}

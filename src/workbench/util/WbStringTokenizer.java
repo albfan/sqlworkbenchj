@@ -32,6 +32,7 @@ public class WbStringTokenizer
 	private Reader input;
 	private boolean endOfInput = false;
 	private boolean delimNeedWhitespace = false;
+	private boolean checkBrackets = false;
 	
 	public WbStringTokenizer()
 	{
@@ -83,6 +84,8 @@ public class WbStringTokenizer
 		this.setSourceString(input);
 	}
 
+	public void setCheckBrackets(boolean flag) { this.checkBrackets = flag; }
+	
 	public void setDelimiter(String aDelimiter, boolean isSingleWord)
 	{
 		this.delimit = aDelimiter;
@@ -142,6 +145,7 @@ public class WbStringTokenizer
 		// a whitespace prevents returning the delimiter for the
 		// first argument
 		char lastToken = 9; 
+		int bracketCount = 0;
 		
 		// the loop will be exited if a complete "word" is built
 		// or the Reader is at the end of the file
@@ -170,7 +174,7 @@ public class WbStringTokenizer
 				{
 					if (inQuotes)
 					{
-						// Make sure its the same quote character that started quoting
+						// Make sure it's the same quote character that started quoting
 						if (token == lastQuote)
 						{
 							inQuotes = false;
@@ -211,6 +215,24 @@ public class WbStringTokenizer
 					continue;
 				}
 				
+				if (this.checkBrackets) 
+				{
+					if (token == '(')
+					{
+						bracketCount ++;
+					}
+					else if (token == ')')
+					{
+						bracketCount --;
+					}
+					if (bracketCount > 0) 
+					{
+						if (current == null) current = new StringBuffer();
+						current.append(token);
+						continue;
+					}
+				}
+					
 				if (this.delimit.indexOf(token) > -1)
 				{
 					if (this.singleWordDelimiter)

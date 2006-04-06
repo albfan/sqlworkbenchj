@@ -28,7 +28,7 @@ public class RowNumberTableModel
 	public RowNumberTableModel(JTable reference)
 	{
 		this.referenceTable = reference;
-		label = ResourceMgr.getString("LabelRowColumn");
+		label = ResourceMgr.getString("LblRowColumn");
 	}
 	
 	public int getRowCount()

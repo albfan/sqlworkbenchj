@@ -14,13 +14,11 @@ package workbench.gui.components;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import javax.swing.JCheckBox;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import workbench.interfaces.Restoreable;
 import workbench.interfaces.TextContainer;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -31,7 +29,7 @@ import workbench.resource.Settings;
  */
 public class PlainEditor
 	extends JPanel
-	implements TextContainer, ActionListener
+	implements ActionListener, TextContainer, Restoreable
 {
 	private JTextArea editor;
 	private JCheckBox wordWrap;
@@ -46,11 +44,32 @@ public class PlainEditor
 		editor.setWrapStyleWord(true); 
 		editor.setFont(Settings.getInstance().getDataFont());
 		this.setLayout(new BorderLayout());
-		wordWrap = new JCheckBox(ResourceMgr.getString("LabelWordWrap"));
+		wordWrap = new JCheckBox(ResourceMgr.getString("LblWordWrap"));
 		wordWrap.addActionListener(this);
 		wordWrap.setSelected(true);
 		this.add(wordWrap, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
+		this.setFocusable(false);
+	}
+	
+	public void requestFocus()
+	{
+		this.editor.requestFocus();
+	}
+	
+	public boolean requestFocusInWindow()
+	{
+		return this.editor.requestFocusInWindow();
+	}
+	
+	public void restoreSettings()
+	{
+		wordWrap.setSelected(Settings.getInstance().getPlainEditorWordWrap());
+	}
+	
+	public void saveSettings()
+	{
+		Settings.getInstance().setPlainEditorWordWrap(wordWrap.isSelected());
 	}
 
 	public void setSelectedText(String aText)

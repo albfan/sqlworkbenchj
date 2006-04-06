@@ -226,7 +226,7 @@ public class SqlOptionsPanel
 
     setLayout(new java.awt.GridBagLayout());
 
-    commitLabel.setText(ResourceMgr.getString("LabelExportCommitEvery"));
+    commitLabel.setText(ResourceMgr.getString("LblExportCommitEvery"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -242,7 +242,7 @@ public class SqlOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
     add(commitCount, gridBagConstraints);
 
-    createTable.setText(ResourceMgr.getString("LabelExportIncludeCreateTable"));
+    createTable.setText(ResourceMgr.getString("LblExportIncludeCreateTable"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
@@ -252,7 +252,7 @@ public class SqlOptionsPanel
     add(createTable, gridBagConstraints);
 
     typeGroup.add(useUpdate);
-    useUpdate.setText(ResourceMgr.getString("LabelExportSqlUpdate"));
+    useUpdate.setText(ResourceMgr.getString("LblExportSqlUpdate"));
     useUpdate.setEnabled(false);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -262,7 +262,7 @@ public class SqlOptionsPanel
 
     typeGroup.add(useInsert);
     useInsert.setSelected(true);
-    useInsert.setText(ResourceMgr.getString("LabelExportSqlInsert"));
+    useInsert.setText(ResourceMgr.getString("LblExportSqlInsert"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -279,7 +279,7 @@ public class SqlOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(2, 4, 0, 0);
     add(alternateTable, gridBagConstraints);
 
-    jLabel1.setText(ResourceMgr.getString("LabelUseExportTableName"));
+    jLabel1.setText(ResourceMgr.getString("LblUseExportTableName"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 7;
@@ -288,7 +288,7 @@ public class SqlOptionsPanel
     add(jLabel1, gridBagConstraints);
 
     typeGroup.add(useDeleteInsert);
-    useDeleteInsert.setText(ResourceMgr.getString("LabelExportSqlDeleteInsert"));
+    useDeleteInsert.setText(ResourceMgr.getString("LblExportSqlDeleteInsert"));
     useDeleteInsert.setEnabled(false);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -296,7 +296,7 @@ public class SqlOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     add(useDeleteInsert, gridBagConstraints);
 
-    selectKeys.setText(ResourceMgr.getString("LabelSelectKeyColumns"));
+    selectKeys.setText(ResourceMgr.getString("LblSelectKeyColumns"));
     selectKeys.addMouseListener(new java.awt.event.MouseAdapter()
     {
       public void mouseClicked(java.awt.event.MouseEvent evt)

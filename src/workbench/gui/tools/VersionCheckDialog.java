@@ -46,7 +46,7 @@ public class VersionCheckDialog extends javax.swing.JDialog
 		this.closeButton.addActionListener(this);
 		Font f = this.headingLabel.getFont().deriveFont(Font.BOLD);
 		this.headingLabel.setFont(f);
-		this.headingLabel.setText(ResourceMgr.getString("LabelReadingVersion"));
+		this.headingLabel.setText(ResourceMgr.getString("LblReadingVersion"));
 		this.headingLabel.addMouseListener(this);
 		this.headingLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 	}
@@ -79,8 +79,8 @@ public class VersionCheckDialog extends javax.swing.JDialog
 		{
 			this.versionReader = new WbVersionReader();
 
-			this.stableVersion.setText(" " + ResourceMgr.getString("LabelVersionNotAvailable"));
-			this.devVersion.setText(" " + ResourceMgr.getString("LabelVersionNotAvailable"));
+			this.stableVersion.setText(" " + ResourceMgr.getString("LblNotAvailable"));
+			this.devVersion.setText(" " + ResourceMgr.getString("LblNotAvailable"));
 
 			if (!this.timedOut)
 			{
@@ -96,8 +96,8 @@ public class VersionCheckDialog extends javax.swing.JDialog
 		}
 		catch (Exception e)
 		{
-			this.stableVersion.setText(" " + ResourceMgr.getString("LabelVersionNotAvailable"));
-			this.devVersion.setText(" " + ResourceMgr.getString("LabelVersionNotAvailable"));
+			this.stableVersion.setText(" " + ResourceMgr.getString("LblNotAvailable"));
+			this.devVersion.setText(" " + ResourceMgr.getString("LblNotAvailable"));
 		}
 		finally
 		{
@@ -106,7 +106,7 @@ public class VersionCheckDialog extends javax.swing.JDialog
 				this.timeout.stop();
 				this.timeout = null;
 			}
-			this.headingLabel.setText(ResourceMgr.getString("LabelVersionsAvailable"));
+			this.headingLabel.setText(ResourceMgr.getString("LblVersionsAvailable"));
 			this.headingLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		}
 	}
@@ -139,17 +139,17 @@ public class VersionCheckDialog extends javax.swing.JDialog
 			lastStable = new Date(0);
 		}
 
-		String msg = ResourceMgr.getString("LabelVersionUpToDate");
+		String msg = ResourceMgr.getString("LblVersionUpToDate");
 
 		if (lastStable.getTime() > current.getTime())
 		{
 			this.stableVersion.setBackground(Color.YELLOW);
-			msg = ResourceMgr.getString("LabelVersionNewStableAvailable");
+			msg = ResourceMgr.getString("LblVersionNewStableAvailable");
 		}
 		else if (last.getTime() > current.getTime())
 		{
 			this.devVersion.setBackground(Color.YELLOW);
-			msg = ResourceMgr.getString("LabelVersionNewDevAvailable");
+			msg = ResourceMgr.getString("LblVersionNewDevAvailable");
 		}
 		this.statusLabel.setText(msg);
 	}
@@ -168,11 +168,11 @@ public class VersionCheckDialog extends javax.swing.JDialog
 			releaseVersion = -1;
 		}
 
-		String msg = ResourceMgr.getString("LabelVersionUpToDate");
+		String msg = ResourceMgr.getString("LblVersionUpToDate");
 		if (releaseVersion > current)
 		{
 			this.stableVersion.setBackground(Color.YELLOW);
-			msg = ResourceMgr.getString("LabelVersionNewStableAvailable");
+			msg = ResourceMgr.getString("LblVersionNewStableAvailable");
 		}
 		this.statusLabel.setText(msg);
 	}
@@ -210,7 +210,7 @@ public class VersionCheckDialog extends javax.swing.JDialog
       }
     });
 
-    yourVersionLabel.setText(ResourceMgr.getString("LabelYourVersion"));
+    yourVersionLabel.setText(ResourceMgr.getString("LblYourVersion"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
@@ -230,7 +230,7 @@ public class VersionCheckDialog extends javax.swing.JDialog
     gridBagConstraints.insets = new java.awt.Insets(5, 10, 5, 5);
     getContentPane().add(yourVersion, gridBagConstraints);
 
-    closeButton.setText(ResourceMgr.getString("LabelClose"));
+    closeButton.setText(ResourceMgr.getString("LblClose"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 6;
@@ -239,7 +239,7 @@ public class VersionCheckDialog extends javax.swing.JDialog
     gridBagConstraints.insets = new java.awt.Insets(10, 0, 5, 5);
     getContentPane().add(closeButton, gridBagConstraints);
 
-    stableVersionLabel.setText(ResourceMgr.getString("LabelStableVersion"));
+    stableVersionLabel.setText(ResourceMgr.getString("LblStableVersion"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -257,7 +257,7 @@ public class VersionCheckDialog extends javax.swing.JDialog
     gridBagConstraints.insets = new java.awt.Insets(0, 10, 5, 5);
     getContentPane().add(stableVersion, gridBagConstraints);
 
-    devVersionLabel.setText(ResourceMgr.getString("LabelDevVersion"));
+    devVersionLabel.setText(ResourceMgr.getString("LblDevVersion"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
@@ -332,8 +332,8 @@ public class VersionCheckDialog extends javax.swing.JDialog
 			this.readThread.interrupt();
 			this.readThread = null;
 			this.timedOut = true;
-			this.stableVersion.setText(" " + ResourceMgr.getString("LabelVersionNotAvailable"));
-			this.devVersion.setText(" " + ResourceMgr.getString("LabelVersionNotAvailable"));
+			this.stableVersion.setText(" " + ResourceMgr.getString("LblNotAvailable"));
+			this.devVersion.setText(" " + ResourceMgr.getString("LblNotAvailable"));
 		}
 	}
 

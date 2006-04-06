@@ -28,7 +28,7 @@ public class ArgumentParser
 	private Map arguments = new HashMap();
 	private ArrayList unknownParameters = new ArrayList();
 	private int argCount = 0;
-
+	
 	public ArgumentParser()
 	{
 	}
@@ -54,6 +54,7 @@ public class ArgumentParser
 	public void parse(String aCmdLine)
 	{
 		this.reset();
+
 		//List words = StringUtil.split(aCmdLine, "-", false, "\"'", false);
 		WbStringTokenizer tok = new WbStringTokenizer('-', "\"'", false);
 		tok.setDelimiterNeedsWhitspace(true);

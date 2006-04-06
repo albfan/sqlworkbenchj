@@ -222,7 +222,7 @@ public class ConnectionSelector
 		}
 		catch (ClassNotFoundException cnf)
 		{
-			error = ResourceMgr.getString("ErrorDriverNotFound");
+			error = ResourceMgr.getString("ErrDriverNotFound");
 		}
 		catch (SQLException se)
 		{

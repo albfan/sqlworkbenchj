@@ -33,13 +33,19 @@ public class EncodingPanel
 		implements EncodingSelector
 {
 	protected JComboBox encodings = new JComboBox();
-
+	private JLabel label;
+	
 	public EncodingPanel()
 	{
-		this(null);
+		this(null, true);
 	}
 
 	public EncodingPanel(String encoding)
+	{
+		this(encoding, true);
+	}
+
+	public EncodingPanel(String encoding, boolean showLabel)
 	{
 		String[] charsets = EncodingUtil.getEncodings();
 		int count = charsets.length;
@@ -60,17 +66,19 @@ public class EncodingPanel
 		Dimension d = new Dimension(300, 22);
 		encodings.setMaximumSize(d);
 		this.setLayout(new GridBagLayout());
-		JLabel l =  new JLabel(ResourceMgr.getString("LabelFileEncoding"));
-
+		
 		GridBagConstraints c = new GridBagConstraints();
-    c.gridx = 0;
-    c.gridy = 0;
-		c.insets = new java.awt.Insets(0, 5, 0, 5);
-    c.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    c.anchor = java.awt.GridBagConstraints.NORTHWEST;
+		if (showLabel)
+		{
+			label =  new JLabel(ResourceMgr.getString("LblFileEncoding"));
+			c.gridx = 0;
+			c.gridy = 0;
+			c.insets = new java.awt.Insets(0, 5, 0, 5);
+			c.fill = java.awt.GridBagConstraints.HORIZONTAL;
+			c.anchor = java.awt.GridBagConstraints.NORTHWEST;
 
-		this.add(l, c);
-
+			this.add(label, c);
+		}
 		c = new GridBagConstraints();
     c.gridx = 0;
     c.gridy = 1;

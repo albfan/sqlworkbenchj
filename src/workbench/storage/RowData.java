@@ -27,7 +27,7 @@ import workbench.log.LogMgr;
  *	It will also save the originally retrieved information in case the
  *  data is changed.
  *	A row can be in three different status:
- *	NEW          - the row has not been retrieved from the database
+ *	NEW          - the row has not been retrieved from the database (i.e. was created on the client)
  *  MODIFIED     - the row has been retrieved but has been changed since then
  *  NOT_MODIFIED - The row has not been changed since it has been retrieved
  */
@@ -47,7 +47,7 @@ public class RowData
 	private boolean dmlSent = false;
 	
 	private boolean useNullValueObject = true;
-
+	
 	private Object[] colData;
 	private Object[] originalData;
 
@@ -92,6 +92,8 @@ public class RowData
 				}
 				if (type == Types.CLOB)
 				{
+					// "Convert" a CLOB to a String object 
+					// This makes handling the value much easier
 					try
 					{
 						Clob clob = (Clob)value;

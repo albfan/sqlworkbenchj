@@ -20,6 +20,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 
 import workbench.interfaces.SimplePropertyEditor;
+import workbench.log.LogMgr;
 
 /**
  *
@@ -65,8 +66,7 @@ public class NumberPropertyEditor
 		}
 		catch (Exception e)
 		{
-			System.out.println("Error on init");
-			e.printStackTrace();
+			LogMgr.logError("NumberPropertyEditor.setSourceObject()", "Error during init", e);
 		}
 		doc = this.getDocument();
 		if (doc != null) doc.addDocumentListener(this);

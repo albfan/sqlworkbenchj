@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import workbench.resource.Settings;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.util.StringUtil;
 
@@ -63,7 +62,8 @@ public class SqlFormatter
 	}
 
 	// keywords terminating a WHERE clause
-	private final Set WHERE_TERMINAL = new HashSet();
+	public static final Set WHERE_TERMINAL = new HashSet();
+	static
 	{
 		WHERE_TERMINAL.add("ORDER");
 		WHERE_TERMINAL.add("GROUP");
@@ -75,12 +75,11 @@ public class SqlFormatter
 	}
 
 	// keywords terminating the FROM part
-	private final Set FROM_TERMINAL = new HashSet();
+	public static final Set FROM_TERMINAL = new HashSet();
+	static
 	{
 		FROM_TERMINAL.addAll(WHERE_TERMINAL);
 		FROM_TERMINAL.add("WHERE");
-		FROM_TERMINAL.add("MINUS");
-		FROM_TERMINAL.add("INTERSECT");
 	}
 
 

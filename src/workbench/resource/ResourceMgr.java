@@ -29,13 +29,13 @@ import workbench.util.StringUtil;
  */
 public class ResourceMgr
 {
-	public static final String ERROR_DISCONNECT = "ErrorOnDisconnect";
-	public static final String ERROR_NO_CONNECTION_AVAIL = "ErrorNoConnectionAvailable";
-	public static final String TAB_LABEL_RESULT = "LabelTabResult";
-	public static final String TAB_LABEL_MSG = "LabelTabMessages";
+	public static final String ERROR_DISCONNECT = "ErrOnDisconnect";
+	public static final String ERROR_NO_CONNECTION_AVAIL = "ErrNoConnectionAvailable";
+	public static final String TAB_LABEL_RESULT = "LblTabResult";
+	public static final String TAB_LABEL_MSG = "LblTabMessages";
 	public static final String TXT_PRODUCT_NAME = "SQL Workbench/J";
-	public static final String TXT_ERROR_MSG_DATA = "ErrorMessageData";
-	public static final String TXT_ERROR_MSG_TITLE = "ErrorMessageTitle";
+	public static final String TXT_ERROR_MSG_DATA = "ErrMessageData";
+	public static final String TXT_ERROR_MSG_TITLE = "ErrMessageTitle";
 
 	public static final String TXT_COPY = "MnuTxtCopy";
 	public static final String TXT_CUT = "MnuTxtCut";
@@ -45,15 +45,15 @@ public class ResourceMgr
 	public static final String TXT_EXECUTE_SEL = "MnuTxtExecuteSel";
 	public static final String TXT_EXECUTE_ALL = "MnuTxtExecuteAll";
 	public static final String TXT_STOP_STMT = "MnuTxtStopStmt";
-	public static final String TXT_DB_DRIVER = "LabelDriver";
-	public static final String TXT_DB_USERNAME = "LabelUsername";
-	public static final String TXT_DB_URL = "LabelDbURL";
-	public static final String TXT_DB_PASSWORD = "LabelPassword";
-	public static final String TXT_SELECT_PROFILE = "LabelSelectProfile";
-	public static final String TXT_SAVE_PROFILE = "LabelSaveProfile";
-	public static final String TXT_SAVE = "LabelSave";
-	public static final String TXT_OK = "LabelOK";
-	public static final String TXT_CANCEL = "LabelCancel";
+	public static final String TXT_DB_DRIVER = "LblDriver";
+	public static final String TXT_DB_USERNAME = "LblUsername";
+	public static final String TXT_DB_URL = "LblDbURL";
+	public static final String TXT_DB_PASSWORD = "LblPassword";
+	public static final String TXT_SELECT_PROFILE = "LblSelectProfile";
+	public static final String TXT_SAVE_PROFILE = "LblSaveProfile";
+	public static final String TXT_SAVE = "LblSave";
+	public static final String TXT_OK = "LblOK";
+	public static final String TXT_CANCEL = "LblCancel";
 
 	public static final String IMG_COPY = "Copy";
 	public static final String IMG_CUT = "Cut";
@@ -90,8 +90,8 @@ public class ResourceMgr
 	public static final String MSG_ROWS_AFFECTED = "MsgRowsAffected";
 
 	public static final String STAT_READY = "MsgReady";
-	public static final String ERR_DRIVER_NOT_FOUND = "ErrorDriverNotFound";
-	public static final String ERR_CONNECTION_ERROR = "ErrorConnectionError";
+	public static final String ERR_DRIVER_NOT_FOUND = "ErrDriverNotFound";
+	public static final String ERR_CONNECTION_ERROR = "ErrConnectionError";
 
 	private static ResourceBundle resources = ResourceBundle.getBundle("language/wbstrings");
 	private static HashMap images = new HashMap();
@@ -134,7 +134,7 @@ public class ResourceMgr
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("ResourceMgr.getBuildDate()", "Error when parsing build date!", e);
+			LogMgr.logError("ResourceMgr.getBuildDate()", "Err when parsing build date!", e);
 			result = new java.util.Date();
 		}
 		return result;
@@ -178,7 +178,7 @@ public class ResourceMgr
 
 	public static String getDefaultTabLabel()
 	{
-		return getString("LabelTabStatement");
+		return getString("LblTabStatement");
 	}
 	
 	public static String getString(String aKey)

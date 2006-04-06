@@ -60,11 +60,11 @@ public class ProfileEditorPanel
 		String last = Settings.getInstance().getLastConnection(lastProfileKey);
 		this.selectProfile(last);
 		this.toolbar = new WbToolbar();
-		this.toolbar.add(new NewListEntryAction(this, "LabelNewProfile"));
+		this.toolbar.add(new NewListEntryAction(this, "LblNewProfile"));
 		this.toolbar.add(new CopyProfileAction(this));
 		this.toolbar.add(new SaveListFileAction(this));
 		this.toolbar.addSeparator();
-		this.toolbar.add(new DeleteListEntryAction(this, "LabelDeleteProfile"));
+		this.toolbar.add(new DeleteListEntryAction(this, "LblDeleteProfile"));
 		this.listPanel.add(this.toolbar, BorderLayout.NORTH);
 		int pos = Settings.getInstance().getProfileDividerLocation();
 		if (pos == -1) pos = 140;

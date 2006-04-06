@@ -31,11 +31,11 @@ import workbench.resource.Settings;
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.19 2006-03-04 10:34:41 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.20 2006-04-06 16:30:05 thomas Exp $
  */
 public class TextAreaPainter extends JComponent implements TabExpander
 {
-	public static final int DEFAULT_TAB_SIZE = 2;
+	//public static final int DEFAULT_TAB_SIZE = 2;
 	// package-private members
 	int currentLineIndex;
 	Token currentLineTokens;
@@ -584,7 +584,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	private void calcTabSize()
 	{
 		tabSize = fm.charWidth(' ') * ((Integer)textArea.getDocument().getProperty(PlainDocument.tabSizeAttribute)).intValue();
-		if (tabSize == 0) tabSize = DEFAULT_TAB_SIZE;
+		if (tabSize == 0) tabSize = Settings.getInstance().getEditorTabWidth();
 	}
 
 	protected void paintLine(Graphics gfx, TokenMarker tokenMarker,	int line, int x)

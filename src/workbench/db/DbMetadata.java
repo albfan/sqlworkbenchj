@@ -35,16 +35,14 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.WbManager;
-import workbench.db.firebird.FirebirdMetadata;
+import workbench.db.firebird.FirebirdProcedureReader;
 import workbench.db.firstsql.FirstSqlMetadata;
 import workbench.db.hsqldb.HsqlSequenceReader;
 import workbench.db.ingres.IngresMetadata;
 import workbench.db.mckoi.McKoiMetadata;
-
-import workbench.db.mssql.SqlServerMetadata;
 import workbench.db.mssql.SqlServerConstraintReader;
 import workbench.db.mysql.EnumReader;
-import workbench.db.mysql.MySqlMetadata;
+import workbench.db.mysql.MySqlProcedureReader;
 import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.OracleConstraintReader;
 import workbench.db.oracle.OracleIndexReader;
@@ -53,7 +51,7 @@ import workbench.db.oracle.OracleSynonymReader;
 import workbench.db.postgres.PostgresIndexReader;
 import workbench.db.postgres.PostgresSequenceReader;
 import workbench.db.postgres.PostgresConstraintReader;
-import workbench.db.postgres.PostgresMetadata;
+import workbench.db.postgres.PostgresProcedureReader;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -248,7 +246,7 @@ public class DbMetadata
 			this.selectIntoPattern = Pattern.compile(SELECT_INTO_PG);
 			this.constraintReader = new PostgresConstraintReader();
 			this.sequenceReader = new PostgresSequenceReader(this.dbConnection.getSqlConnection());
-			this.procedureReader = new PostgresMetadata(this);
+			this.procedureReader = new PostgresProcedureReader(this);
 			this.indexReader = new PostgresIndexReader(this);
 		}
 		else if (productLower.indexOf("hsql") > -1)
@@ -275,7 +273,7 @@ public class DbMetadata
 		{
 			this.isFirebird = true;
 			this.constraintReader = new FirebirdConstraintReader();
-			this.procedureReader = new FirebirdMetadata(this);
+			this.procedureReader = new FirebirdProcedureReader(this);
 			// Jaybird 2.0 reports the Firebird version in the 
 			// productname. To ease the DBMS handling we'll use the same
 			// product name that is reported with the 1.5 driver. 
@@ -285,7 +283,6 @@ public class DbMetadata
 		{
 			this.isSqlServer = true;
 			this.constraintReader = new SqlServerConstraintReader();
-			this.procedureReader = new SqlServerMetadata(this);
 		}
 		else if (productLower.indexOf("adaptive server") > -1)
 		{
@@ -293,7 +290,7 @@ public class DbMetadata
 		}
 		else if (productLower.indexOf("mysql") > -1)
 		{
-			this.procedureReader = new MySqlMetadata(this, this.dbConnection);
+			this.procedureReader = new MySqlProcedureReader(this, this.dbConnection);
 			this.isMySql = true;
 		}
 		else if (productLower.indexOf("informix") > -1)
@@ -554,6 +551,14 @@ public class DbMetadata
 		}
 	}
 
+	public boolean supportSingleLineCommands()
+	{
+		String ids = Settings.getInstance().getProperty("workbench.db.checksinglelinecmd", "");
+		if ("*".equals(ids)) return true;
+		List dbs = StringUtil.stringToList(ids, ",", true, true);
+		return dbs.contains(this.getDbId());
+	}
+	
 	public boolean supportShortInclude()
 	{
 		String ids = Settings.getInstance().getProperty("workbench.db.supportshortinclude", "");
@@ -643,6 +648,35 @@ public class DbMetadata
 		return true;
 	}
 
+	public boolean setCurrentCatalog(String newCatalog)
+		throws SQLException
+	{
+		if (newCatalog == null) return false;
+		
+		String sql = Settings.getInstance().getProperty("workbench.sql.switchcatalog." + dbId, null);
+		if (sql == null) return false;
+		Statement stmt = null;
+		try
+		{
+			String old = getCurrentCatalog();
+			stmt = this.dbConnection.createStatement();
+			sql = StringUtil.replace(sql, "%catalog%", newCatalog);
+			stmt.execute(sql);
+			String newCat = getCurrentCatalog();
+			if (old != null && newCat != null && !newCat.equals(old))
+			{
+				this.dbConnection.catalogChanged(old, newCatalog);
+			}
+			LogMgr.logDebug("DbMetadata.setCurrentCatalog", "Catalog changed to " + newCat);
+		}
+		catch (SQLException e)
+		{
+			SqlUtil.closeStatement(stmt);
+			throw e;
+		}
+		return true;
+	}
+	
 	/**
 	 * Return true if connected to an Oracle8 database. Returns fals
 	 * for every other DBMS (including Oracle9 and later)
@@ -1684,10 +1718,18 @@ public class DbMetadata
 					{
 						display = aTypeName + "(" + size + "," + digits + ")";
 					}
-					else if (size > 0 && "NUMBER".equals(aTypeName)) // Oracle specific
+					else if (size <= 0 && digits > 0)
+					{
+						display = aTypeName + "(" + digits + ")";
+					}
+					else if (size > 0 && digits <= 0)
 					{
 						display = aTypeName + "(" + size + ")";
 					}
+//					else if (size > 0 && ("NUMBER".equals(aTypeName) || "FLOAT".equals(aTypeName))) // Oracle specific
+//					{
+//						display = aTypeName + "(" + size + ")";
+//					}
 				}
 				break;
 

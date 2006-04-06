@@ -185,22 +185,6 @@ public class Settings
 		LogMgr.logInfo("Settings.<init>", "Using configdir: " + configDir);
 
 		this.renameOldProps();
-
-		// init settings for datastore sort feature
-		if (WbManager.trace) System.out.println("Setting default sort properties for WbTable");
-		try
-		{
-			System.setProperty("org.kellerer.sort.language", this.getSortLanguage());
-			System.setProperty("org.kellerer.sort.country", this.getSortCountry());
-		}
-		catch (Exception e)
-		{
-			if (WbManager.trace)
-			{
-				System.out.println("Error setting default sort properties for WbTable: " + ExceptionUtil.getDisplay(e));
-			}
-		}
-		if (WbManager.trace) System.out.println("Settings.<init> - done");
 	}
 
 	public ShortcutManager getShortcutManager()
@@ -252,6 +236,86 @@ public class Settings
 		{
 			this.props.setProperty(PROPERTY_PROFILE_STORAGE, file);
 		}
+	}
+
+	public int getMaxCharInListElements()
+	{
+		return getIntProperty("workbench.editor.format.list.maxelements.quoted", 2);
+	}
+	
+	public void setMaxCharInListElements(int value)
+	{
+		setProperty("workbench.editor.format.list.maxelements.quoted", (value <= 0 ? 2 : value));
+	}
+
+	public int getMaxNumInListElements()
+	{
+		return getIntProperty("workbench.editor.format.list.maxelements.nonquoted", 10);
+	}
+	
+	public void setMaxNumInListElements(int value)
+	{
+		setProperty("workbench.editor.format.list.maxelements.nonquoted", (value <= 0 ? 10 : value));
+	}
+	
+	public int getFormatUpdateColumnThreshold()
+	{
+		return getIntProperty("workbench.sql.generate.update.newlinethreshold", 5);
+	}
+	
+	public void setFormatUpdateColumnThreshold(int value)
+	{
+		setProperty("workbench.sql.generate.update.newlinethreshold", value);
+	}
+
+	public int getFormatInsertColsPerLine()
+	{
+		return getIntProperty("workbench.sql.generate.insert.colsperline",1);
+	}
+	
+	public void setFormatInsertColsPerLine(int value)
+	{
+		setProperty("workbench.sql.generate.insert.colsperline",1);
+	}
+	
+	public boolean getFormatInsertIgnoreIdentity()
+	{
+		return getBoolProperty("workbench.sql.generate.insert.ignoreidentity",true);
+	}
+	
+	public void setFormatInsertIgnoreIdentity(boolean flag)
+	{
+		setProperty("workbench.sql.generate.insert.ignoreidentity",flag);
+	}
+	
+	public int getFormatInsertColumnThreshold()
+	{
+		return getIntProperty("workbench.sql.generate.insert.newlinethreshold", 5);
+	}
+	
+	public void setFormatInsertColumnThreshold(int value)
+	{
+		setProperty("workbench.sql.generate.insert.newlinethreshold", value);
+	}
+	
+	public boolean getDoFormatUpdates()
+	{
+		return getBoolProperty("workbench.sql.generate.update.doformat",true);
+	}
+	
+	public void setDoFormatUpdates(boolean flag)
+	{
+		setProperty("workbench.sql.generate.update.doformat", flag);
+	}
+
+	public boolean getDoFormatInserts()
+	{
+		return getBoolProperty("workbench.sql.generate.insert.doformat",true);
+	}
+	
+	public void setDoFormatInserts(boolean flag)
+	{
+		setProperty("workbench.sql.generate.insert.doformat", flag);
 	}
 	
 	public String getDefaultObjectType()
@@ -391,6 +455,10 @@ public class Settings
 			this.props.remove("workbench.sql.search.useregex");
 			this.props.remove("workbench.sql.search.wholeword");
 			this.props.remove("workbench.sql.search.lastvalue");
+
+			// not needed any longer
+			this.props.remove("workbench.db.oracle.quotedigits");
+			this.props.remove("workbench.gui.macros.replaceonrun");
 		}
 		catch (Throwable e)
 		{
@@ -868,6 +936,11 @@ public class Settings
 	{
 		return this.getBoolProperty("workbench.export.sql.includeowner", true);
 	}
+	
+	public void setIncludeOwnerInSqlExport(boolean flag)
+	{
+		setProperty("workbench.export.sql.includeowner", flag);
+	}
 
 	public boolean getEnableDbmsOutput()
 	{
@@ -944,6 +1017,17 @@ public class Settings
 		this.props.setProperty("workbench.import.quotechar", aChar);
 	}
 
+	public String getLastBlobDir()
+	{
+		return getProperty("workbench.data.blob.save.lastdir", null);
+	}
+
+	public void setLastBlobDir(String aDir)
+	{
+		this.setProperty("workbench.data.blob.save.lastdir", aDir);
+	}
+	
+	
 	public String getLastWorkspaceDir()
 	{
 		return this.props.getProperty("workbench.workspace.lastdir", this.getConfigDir());
@@ -1148,6 +1232,11 @@ public class Settings
 		return this.getIntProperty("workbench.editor.electricscroll", 3);
 	}
 	
+	public void setElectricScroll(int value)
+	{
+		setProperty("workbench.editor.electricscroll", (value < 0 ? 3 : value));
+	}
+	
 	public int getWindowPosX(String windowClass)
 	{
 		return StringUtil.getIntValue(this.props.getProperty(windowClass + ".x", "0"));
@@ -1246,17 +1335,27 @@ public class Settings
 
 	public void setInMemoryScriptSizeThreshold(int size)
 	{
-		this.props.setProperty("workbench.sql.script.inmemory.maxsize", Integer.toString(size));
+		setProperty("workbench.sql.script.inmemory.maxsize", size);
 	}
 
 	public int getFormatterMaxColumnsInSelect()
 	{
-		return Settings.getInstance().getIntProperty("workbench.sql.formatter.select.columnsperline", 1);
+		return getIntProperty("workbench.sql.formatter.select.columnsperline", 1);
+	}
+
+	public void setFormatterMaxColumnsInSelect(int value)
+	{
+		setProperty("workbench.sql.formatter.select.columnsperline", value);
 	}
 	
 	public int getFormatterMaxSubselectLength()
 	{
-		return StringUtil.getIntValue(this.props.getProperty("workbench.sql.formatter.subselect.maxlength"), 60);
+		return getIntProperty("workbench.sql.formatter.subselect.maxlength", 60);
+	}
+	
+	public void setFormatterMaxSubselectLength(int value)
+	{
+		setProperty("workbench.sql.formatter.subselect.maxlength", value);
 	}
 
 	public boolean getRightClickMovesCursor()
@@ -1467,6 +1566,16 @@ public class Settings
 		this.props.setProperty("workbench.gui.log.consolidate", Boolean.toString(aFlag));
 	}
 
+	public boolean getPlainEditorWordWrap()
+	{
+		return getBoolProperty("workbench.editor.plain.wordwrap", true);
+	}
+	
+	public void setPlainEditorWordWrap(boolean flag)
+	{
+		setProperty("workbench.editor.plain.wordwrap", flag);
+	}
+	
 	public boolean getUsePlainEditorForData()
 	{
 		return getBoolProperty("workbench.gui.editor.data.plain", true);
@@ -1565,6 +1674,20 @@ public class Settings
 		return StringUtil.getIntValue(value, defaultValue);
 	}
 
+	public void setAutoCompletionPasteCase(String value)
+	{
+		if (value != null)
+		{
+			if (value.toLowerCase().startsWith("lower")) setProperty("workbench.editor.autocompletion.paste.case", "lower");
+			else if (value.toLowerCase().startsWith("upper")) setProperty("workbench.editor.autocompletion.paste.case", "upper");
+			else setProperty("workbench.editor.autocompletion.paste.case", null);
+		}
+		else
+		{
+			setProperty("workbench.editor.autocompletion.paste.case", null);
+		}
+	}
+	
 	public String getAutoCompletionPasteCase()
 	{
 		return getProperty("workbench.editor.autocompletion.paste.case", null);

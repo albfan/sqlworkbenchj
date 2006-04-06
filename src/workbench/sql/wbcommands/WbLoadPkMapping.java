@@ -61,7 +61,7 @@ public class WbLoadPkMapping
 		if (file == null)
 		{
 			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrorPkLoadNoFile"));
+			result.addMessage(ResourceMgr.getString("ErrPkLoadNoFile"));
 			return result;
 		}
 		

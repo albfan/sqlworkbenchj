@@ -40,7 +40,7 @@ public class WbStartBatch
 		{
 			this.batch = null;
 			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrorJdbcBatchUpdateNotSupported"));
+			result.addMessage(ResourceMgr.getString("ErrJdbcBatchUpdateNotSupported"));
 		}
 		else
 		{
@@ -65,7 +65,7 @@ public class WbStartBatch
 		if (this.batch == null)
 		{
 			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrorJdbcBatchUpdateNotSupported"));
+			result.addMessage(ResourceMgr.getString("ErrJdbcBatchUpdateNotSupported"));
 			return result;
 		}
 		long totalRows = 0;

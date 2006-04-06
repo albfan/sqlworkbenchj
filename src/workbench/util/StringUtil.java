@@ -258,6 +258,10 @@ public class StringUtil
 		return stringToList(aString, aDelimiter, removeEmpty, false);
 	}
 	
+	public static final List stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries)
+	{
+		return stringToList(aString, aDelimiter, removeEmpty, false, false);
+	}
 	/**
 	 * 	Parses the given String and creates a List containing the elements
 	 *  of the string that are separated by <tt>aDelimiter</aa>
@@ -267,11 +271,12 @@ public class StringUtil
 	 * @param trimEntries flag to trim entries
 	 * @return A List of Strings
 	 */
-	public static final List stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries)
+	public static final List stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries, boolean checkBrackets)
 	{
 		if (aString == null || aString.length() == 0) return Collections.EMPTY_LIST;
 		WbStringTokenizer tok = new WbStringTokenizer(aString, aDelimiter);
 		tok.setDelimiterNeedsWhitspace(false);
+		tok.setCheckBrackets(checkBrackets);
 		ArrayList result = new ArrayList(150);
 		while (tok.hasMoreTokens())
 		{
@@ -392,11 +397,11 @@ public class StringUtil
 		return result.toString();
 	}
 
+	
 	public static final String cleanJavaString(String aString)
 	{
-		//Pattern newline = Pattern.compile("\\\\n|\\\\r");
 		if (isEmptyString(aString)) return "";
-		//List lines = getTextLines(aString);
+		Pattern newline = Pattern.compile("\\\\n|\\\\r");
 		String lines[] = PATTERN_CRLF.split(aString);
 		StringBuffer result = new StringBuffer(aString.length());
 		int count = lines.length;
@@ -411,14 +416,19 @@ public class StringUtil
 			}
 			else
 			{
-				int start = l.indexOf('"');
-				int end = l.lastIndexOf('"');
-				if (start > -1)
+				l = l.trim();
+				//if (l.startsWith("\"")) start = 1;
+				int start = l.indexOf("\"");
+				int end = l.lastIndexOf("\"");
+				if (end == start) start = 1;
+				if (end == 0) end = l.length() - 1;
+				if (start > -1) start ++;
+				if (start > -1 && end > -1)
 				{
-					l = l.substring(start + 1, end);
+					l = l.substring(start, end);
 				}
 			}
-			Matcher m = PATTERN_CRLF.matcher(l);
+			Matcher m = newline.matcher(l);
 			l = m.replaceAll("");
 			l = replace(l,"\\\"", "\"");
 			result.append(l);

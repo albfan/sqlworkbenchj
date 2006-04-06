@@ -150,7 +150,7 @@ public class SetCommand extends SqlCommand
 			else
 			{
 				result.setFailure();
-				result.addMessage(ResourceMgr.getString("ErrorServeroutputWrongParameter"));
+				result.addMessage(ResourceMgr.getString("ErrServeroutputWrongParameter"));
 			}
 		}
 		else
@@ -166,7 +166,7 @@ public class SetCommand extends SqlCommand
 		if (words.length <= 2)
 		{
 			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrorAutocommitWrongParameter"));
+			result.addMessage(ResourceMgr.getString("ErrAutocommitWrongParameter"));
 			return result;
 		}
 
@@ -186,7 +186,7 @@ public class SetCommand extends SqlCommand
 			}
 			else
 			{
-				result.addMessage(ResourceMgr.getString("ErrorAutocommitWrongParameter"));
+				result.addMessage(ResourceMgr.getString("ErrAutocommitWrongParameter"));
 				result.setFailure();
 			}
 		}
@@ -204,7 +204,7 @@ public class SetCommand extends SqlCommand
 		if (words.length <= 2)
 		{
 			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrorFeedbackWrongParameter"));
+			result.addMessage(ResourceMgr.getString("ErrFeedbackWrongParameter"));
 			return result;
 		}
 
@@ -222,7 +222,7 @@ public class SetCommand extends SqlCommand
 		}
 		else
 		{
-			result.addMessage(ResourceMgr.getString("ErrorFeedbackWrongParameter"));
+			result.addMessage(ResourceMgr.getString("ErrFeedbackWrongParameter"));
 			result.setFailure();
 		}
 

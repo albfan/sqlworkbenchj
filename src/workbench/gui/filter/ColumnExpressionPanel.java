@@ -87,7 +87,7 @@ public class ColumnExpressionPanel
 		columnSelector.setModel(model);
 
 		this.setLayout(new GridBagLayout());
-		ignoreCase = new JCheckBox(ResourceMgr.getString("LabelFilterIgnoreCase"));
+		ignoreCase = new JCheckBox(ResourceMgr.getString("LblFilterIgnoreCase"));
 		ignoreCase.setSelected(false);
 		ignoreCase.setEnabled(false);
 		valueField = new JTextField(10);
@@ -285,7 +285,7 @@ public class ColumnExpressionPanel
 		Class columnClass = null;
 		try
 		{
-			columnClass = Class.forName(col.getColumnClass());
+			columnClass = Class.forName(col.getColumnClassName());
 			buildColumnComparatorDropDown(columnClass);
 		}
 		catch (Exception e)

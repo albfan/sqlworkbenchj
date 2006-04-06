@@ -84,6 +84,7 @@ public class TableDataPanel
 	private JButton config;
 	private JLabel tableNameLabel;
 	private JLabel rowCountLabel;
+	private JButton rowCountButton;
 	private JCheckBox autoRetrieve;
 	private JPanel topPanel;
 
@@ -157,9 +158,12 @@ public class TableDataPanel
 		topPanel.add(tableNameLabel);
 
 		topPanel.add(Box.createHorizontalStrut(10));
-		JLabel l = new JLabel(ResourceMgr.getString("LblTableDataRowCount"));
-		l.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCount"));
-		topPanel.add(l);
+		rowCountButton = new WbButton(ResourceMgr.getString("LblTableDataRowCount"));
+		rowCountButton.addActionListener(this);
+		rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountButton"));
+		rowCountButton.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		rowCountButton.setFocusable(false);
+		topPanel.add(rowCountButton);
 		topPanel.add(Box.createHorizontalStrut(5));
 		rowCountLabel = new JLabel();
 		rowCountLabel.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCount"));
@@ -215,7 +219,7 @@ public class TableDataPanel
 	{
 		if (this.isRetrieving()) return;
 		this.dataDisplay.clearContent();
-		this.rowCountLabel.setText("");
+		this.rowCountLabel.setText(ResourceMgr.getString("LblNotAvailable"));
 		this.clearLoadingImage();
 	}
 
@@ -232,6 +236,18 @@ public class TableDataPanel
 		}
 	}
 
+	private void startRetrieveRowCount()
+	{
+		Thread t = new WbThread("RowCount Retrieve")
+		{
+			public void run()
+			{
+				showRowCount();
+			}
+		};
+		t.start();
+	}
+	
 	public long showRowCount()
 	{
 		if (this.dbConnection == null) return -1;
@@ -411,6 +427,7 @@ public class TableDataPanel
 			dataDisplay.setShowErrorMessages(true);
 			dataDisplay.setAutomaticUpdateTableCheck(false);
 			dataDisplay.runQuery(sql, respectMaxRows);
+			dataDisplay.getTable().adjustColumns();
 			dataDisplay.setUpdateTable(this.table);
 			dataDisplay.getSelectKeysAction().setEnabled(true);
 			String header = ResourceMgr.getString("TxtTableDataPrintHeader") + " " + table;
@@ -573,7 +590,7 @@ public class TableDataPanel
 	public void reload()
 	{
 		this.reset();
-		this.showRowCount();
+		if (this.autoloadRowCount) this.showRowCount();
 		boolean ctrlPressed = this.reloadAction.ctrlPressed();
 		this.retrieve(!ctrlPressed);
 	}
@@ -599,6 +616,10 @@ public class TableDataPanel
 				this.autoRetrieve.setSelected(p.getAutoloadData());
 				this.autoloadRowCount = p.getAutoloadRowCount();
 			}
+		}
+		else if (e.getSource() == this.rowCountButton)
+		{
+			this.startRetrieveRowCount();
 		}
 	}
 

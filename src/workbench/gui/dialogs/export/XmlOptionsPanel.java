@@ -79,7 +79,7 @@ public class XmlOptionsPanel
 
     setLayout(new java.awt.GridBagLayout());
 
-    useCdata.setText(ResourceMgr.getString("LabelExportUseCDATA"));
+    useCdata.setText(ResourceMgr.getString("LblExportUseCDATA"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -87,8 +87,8 @@ public class XmlOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     add(useCdata, gridBagConstraints);
 
-    verboseXmlCheckBox.setText(ResourceMgr.getString("LabelExportVerboseXml"));
-    verboseXmlCheckBox.setToolTipText(ResourceMgr.getDescription("LabelExportVerboseXml"));
+    verboseXmlCheckBox.setText(ResourceMgr.getString("LblExportVerboseXml"));
+    verboseXmlCheckBox.setToolTipText(ResourceMgr.getDescription("LblExportVerboseXml"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;

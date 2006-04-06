@@ -43,7 +43,7 @@ public class HtmlViewer
 	
 	public HtmlViewer(Frame owner)
 	{
-		this(owner, null);
+		this(owner, "workbench-manual.html");
 	}
 	
 	public HtmlViewer(Frame owner, String aStartFile)
@@ -58,19 +58,8 @@ public class HtmlViewer
 				dispose();
 			}
 		});
-		if (aStartFile == null)
-		{
-			this.initHtml("workbench-manual.html");
-		}
-		else
-		{
-			this.initHtml(aStartFile);
-		}
+		this.initHtml(aStartFile);
 		this.restoreSettings(owner);
-//		if (aStartFile == null)
-//		{
-//			showIndex();
-//		}
 	}
 
 	public HtmlViewer(JDialog owner)
@@ -114,7 +103,11 @@ public class HtmlViewer
 	public void showDataPumperHelp()
 	{
 		this.loadHtmlFile("data-pumper.html");
-		this.setVisible(true);
+	}
+	
+	public void showOptionsHelp()
+	{
+		this.loadHtmlFile("options.html");
 	}
 	
 	public void showProfileHelp()

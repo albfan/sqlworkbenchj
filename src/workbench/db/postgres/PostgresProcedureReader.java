@@ -1,5 +1,5 @@
 /*
- * PostgresMetadata.java
+ * PostgresProcedureReader.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -31,28 +31,12 @@ import workbench.util.StrBuffer;
 /**
  * @author  support@sql-workbench.net
  */
-public class PostgresMetadata
-	implements ProcedureReader
+public class PostgresProcedureReader
+	extends JdbcProcedureReader
 {
-	private DbMetadata metaData;
-	
-	public PostgresMetadata(DbMetadata meta)
+	public PostgresProcedureReader(DbMetadata meta)
 	{
-		this.metaData = meta;
-	}
-	
-	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
-		throws SQLException
-	{
-		JdbcProcedureReader reader = new JdbcProcedureReader(this.metaData);
-		return reader.getProcedureColumns(aCatalog, aSchema, aProcname);
-	}
-	
-	public DataStore getProcedures(String catalog, String schema)
-		throws SQLException
-	{
-		JdbcProcedureReader procReader = new JdbcProcedureReader(this.metaData);
-		return procReader.getProcedures(catalog, schema);
+		super(meta);
 	}
 	
 	public StrBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
@@ -60,7 +44,7 @@ public class PostgresMetadata
 		StrBuffer source = new StrBuffer();
 		try
 		{
-			DataStore ds = this.metaData.getProcedureColumns(aCatalog, aSchema, aProcname);
+			DataStore ds = this.getProcedureColumns(aCatalog, aSchema, aProcname);
 			source.append("CREATE OR REPLACE ");
 			
 			if (procType == DatabaseMetaData.procedureReturnsResult) source.append("FUNCTION ");

@@ -11,21 +11,16 @@
  */
 package workbench.sql;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.interfaces.CharacterSequence;
+import workbench.resource.Settings;
 import workbench.util.EncodingUtil;
 import workbench.util.FileMappedSequence;
 import workbench.util.SqlUtil;
 import workbench.util.StringSequence;
-import workbench.util.StringUtil;
-
 
 /**
  * A class to parse a script with SQL commands. Access to the commands
@@ -53,18 +48,21 @@ public class IteratingScriptParser
 	private boolean commentOn = false;
 	private boolean blockComment = false;
 	private boolean singleLineComment = false;
+	private boolean singleLineDelimiter = false;
 	private boolean startOfLine = true;
 	private int lastNewLineStart = 0;
 	private char lastQuote = 0;
 	private boolean checkEscapedQuotes = true;
 	private boolean emptyLineIsSeparator = false;
 	private boolean supportOracleInclude = true;
+	private boolean checkSingleLineCommands = true;
 	
 	/** Create an InteratingScriptParser
 	 */
 	public IteratingScriptParser()
 	{
 	}
+	
 
 	/**
 	 * Initialize a ScriptParser from a file with a given encoding.
@@ -73,6 +71,7 @@ public class IteratingScriptParser
 	public IteratingScriptParser(File f, String encoding)
 		throws IOException
 	{
+		this();
 		this.setFile(f, encoding);
 	}
 	
@@ -83,6 +82,7 @@ public class IteratingScriptParser
 	public IteratingScriptParser(String aScript)
 		throws IOException
 	{
+		this();
 		if (aScript == null) throw new IllegalArgumentException("Script may not be null");
 		this.setScript(aScript);
 	}
@@ -116,6 +116,16 @@ public class IteratingScriptParser
 		this.reset();
 	}
 
+	public void setIsSingleLineDelimiter(boolean flag)
+	{
+		this.singleLineDelimiter = flag;
+	}
+
+	public void setCheckForSingleLineCommands(boolean flag)
+	{
+		this.checkSingleLineCommands = flag;
+	}
+	
 	/**
 	 * Support Oracle style @ includes
 	 */
@@ -336,7 +346,7 @@ public class IteratingScriptParser
 				else
 				{
 					// check for single line commands...
-					if (firstChar == '\r' || firstChar == '\n' )
+					if (firstChar == '\r' || firstChar == '\n')
 					{
 						String line = this.script.substring(lastNewLineStart, pos).trim();
 						String clean = SqlUtil.makeCleanSql(line, false, false, '\'');
@@ -354,43 +364,47 @@ public class IteratingScriptParser
 								return c;
 							}
 						}
-						boolean slcFound = false;
 						
-						int commandStart = lastNewLineStart;
-						int commandEnd = pos;
-						
-						lastNewLineStart = pos;
-						startOfLine = true;
-
-						if (clean.length() > 0 )
+						if (this.checkSingleLineCommands)
 						{
-							for (int pi=0; pi < SLC_PATTERNS.length; pi++)
-							{
-								Matcher m = SLC_PATTERNS[pi].matcher(clean);
+							boolean slcFound = false;
 
-								if (m.matches())
+							int commandStart = lastNewLineStart;
+							int commandEnd = pos;
+
+							lastNewLineStart = pos;
+							startOfLine = true;
+
+							if (clean.length() > 0 )
+							{
+								for (int pi=0; pi < SLC_PATTERNS.length; pi++)
 								{
-									slcFound = true;
-									break;
+									Matcher m = SLC_PATTERNS[pi].matcher(clean);
+
+									if (m.matches())
+									{
+										slcFound = true;
+										break;
+									}
+								}
+								if (!slcFound && this.supportOracleInclude)
+								{
+									Matcher m = ORA_INCLUDE_PATTERN.matcher(clean);
+									if (m.matches())
+									{
+										slcFound = true;
+									}
 								}
 							}
-							if (!slcFound && this.supportOracleInclude)
+
+							if (slcFound)
 							{
-								Matcher m = ORA_INCLUDE_PATTERN.matcher(clean);
-								if (m.matches())
-								{
-									slcFound = true;
-								}
+								lastPos = pos;
+								this.lastCommandEnd = commandEnd + 1;
+								return createCommand(commandStart, commandEnd);
 							}
+							continue;
 						}
-						
-						if (slcFound)
-						{
-							lastPos = pos;
-							this.lastCommandEnd = commandEnd + 1;
-							return createCommand(commandStart, commandEnd);
-						}
-						continue;
 					}
 					else
 					{

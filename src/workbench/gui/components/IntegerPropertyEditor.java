@@ -99,8 +99,7 @@ public class IntegerPropertyEditor
 		}
 		catch (Exception e)
 		{
-			System.out.println("Error on init");
-			e.printStackTrace();
+			LogMgr.logError("IntegerPropertyEditor.setSourceObject()", "Error during init", e);
 		}
 		this.getDocument().addDocumentListener(this);
 	}

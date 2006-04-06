@@ -80,12 +80,13 @@ public class WbInclude
 
 		if (file == null || file.length() == 0)
 		{
-			String msg = ResourceMgr.getString("ErrorIncludeWrongParameter");
+			String msg = ResourceMgr.getString("ErrIncludeWrongParameter");
 			result.addMessage(msg);
 			result.setFailure();
 			return result;
 		}
 
+		file = evaluateFileArgument(file);
 		File f = new File(file);
 		if (!f.exists())
 		{
@@ -96,7 +97,7 @@ public class WbInclude
 		if (!f.exists())
 		{
 			result.setFailure();
-			String msg = ResourceMgr.getString("ErrorIncludeFileNotFound");
+			String msg = ResourceMgr.getString("ErrIncludeFileNotFound");
 			msg = StringUtil.replace(msg, "%filename%", file);
 			result.addMessage(msg);
 			return result;

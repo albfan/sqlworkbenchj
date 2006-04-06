@@ -29,6 +29,8 @@ import workbench.util.StringUtil;
  */
 public abstract class BaseAnalyzer
 {
+	public static final String WORD_DELIM = ",;()@.";
+	
 	protected static final int NO_CONTEXT = -1;
 	
 	// List the available tables
@@ -104,9 +106,11 @@ public abstract class BaseAnalyzer
 		this.elements = null;
 		this.context = NO_CONTEXT;
 		this.typeFilter = null;
-		
+
+		checkOverwrite();
+
 		// this should not be done in the constructor as the 
-		// sub-classes might to import initializations there
+		// sub-classes might do important initializations there
 		this.checkContext();
 		this.buildResult();
 	}
@@ -115,6 +119,12 @@ public abstract class BaseAnalyzer
 	public List getData() { return this.elements; }
 	
 	protected abstract void checkContext();
+	
+	protected boolean between(int toTest, int start, int end)
+	{
+		if (start == -1 || end == -1) return false;
+		return (toTest > start && toTest < end);
+	}
 	
 	private void buildResult()
 	{
@@ -137,7 +147,7 @@ public abstract class BaseAnalyzer
 		else if (context == CONTEXT_FROM_LIST)
 		{
 			// element list has already been filled
-			this.title = ResourceMgr.getString("LabelCompletionListTables");
+			this.title = ResourceMgr.getString("LblCompletionListTables");
 		}
 		else
 		{
@@ -153,7 +163,7 @@ public abstract class BaseAnalyzer
 		Set tables = this.dbConnection.getObjectCache().getTables(schemaForTableList, typeFilter);
 		if (schemaForTableList == null)
 		{
-			this.title = ResourceMgr.getString("LabelCompletionListTables");
+			this.title = ResourceMgr.getString("LblCompletionListTables");
 		}
 		else
 		{
@@ -189,21 +199,20 @@ public abstract class BaseAnalyzer
 		this.typeFilter = filter;
 	}
 
-	protected String getQualifierLeftOfCursor(String statement, int pos)
+	protected String getQualifierLeftOfCursor()
 	{
 		String qualifier = null;
-		int len = statement.length();
-		int start = pos - 1;
-		if (pos > len) 
+		int len = this.sql.length();
+		int start = this.cursorPos - 1;
+		if (this.cursorPos > len) 
 		{
 			start = len - 1;
 		}
 			
-		char c = statement.charAt(start);
+		char c = this.sql.charAt(start);
 		if (Character.isWhitespace(c)) return null;
 		
-		// get the word left of the cursor that is "terminated" by a whitespace
-		String word = StringUtil.getWordLeftOfCursor(statement, pos, ",();@");
+		String word = StringUtil.getWordLeftOfCursor(this.sql, this.cursorPos, ".");
 		if (word == null) return null;
 		int dotPos= word.indexOf('.');
 		
@@ -213,5 +222,23 @@ public abstract class BaseAnalyzer
 		}
 		return qualifier;
 	}
+
+	protected String getCurrentWord()
+	{
+		return StringUtil.getWordLeftOfCursor(this.sql, cursorPos, WORD_DELIM);
+	}
 	
+	protected void checkOverwrite()
+	{
+		String currentWord = getCurrentWord();
+		if (!StringUtil.isEmptyString(currentWord))
+		{
+			boolean keyWord = this.dbConnection.getMetadata().isKeyword(currentWord);
+			setOverwriteCurrentWord(!keyWord);
+		}
+		else
+		{
+			setOverwriteCurrentWord(false);
+		}
+	}
 }

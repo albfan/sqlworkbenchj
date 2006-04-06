@@ -343,7 +343,7 @@ public class DwPanel
 		}
 		catch (Exception e)
 		{
-			String msg = ResourceMgr.getString("ErrorUpdatingDb");
+			String msg = ResourceMgr.getString("ErrUpdatingDb");
 			WbSwingUtilities.showErrorMessage(this, msg + "\n" + e.getMessage());
 		}
 	}
@@ -728,6 +728,8 @@ public class DwPanel
 		this.startEdit.setEnabled(mayEdit);
 		int rows = this.getTable().getSelectedRowCount();
 
+		this.dataTable.getExportAction().setEnabled(hasResult);
+		
 		this.updateAction.setEnabled(false);
 		this.insertRow.setEnabled(mayEdit);
 		this.deleteRow.setEnabled(updateable && (rows == 1));
@@ -967,7 +969,7 @@ public class DwPanel
 	
 	public int getActionOnError(int errorRow, String errorColumn, String data, String errorMessage)
 	{
-		String msg = ResourceMgr.getString("ErrorUpdateSqlError");
+		String msg = ResourceMgr.getString("ErrUpdateSqlError");
 		try
 		{
 			String d = "";

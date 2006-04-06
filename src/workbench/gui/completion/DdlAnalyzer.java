@@ -35,7 +35,7 @@ public class DdlAnalyzer
 	protected void checkContext()
 	{
 		String verb = SqlUtil.getSqlVerb(this.sql);
-		String q = this.getQualifierLeftOfCursor(sql, cursorPos);
+		String q = this.getQualifierLeftOfCursor();
 		if (q != null)
 		{
 			this.schemaForTableList = q;

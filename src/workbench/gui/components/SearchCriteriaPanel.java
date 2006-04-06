@@ -51,19 +51,19 @@ public class SearchCriteriaPanel
 	
 	public SearchCriteriaPanel(String initialValue)
 	{
-		this.ignoreCase = new JCheckBox(ResourceMgr.getString("LabelSearchIgnoreCase"));
-		this.ignoreCase.setToolTipText(ResourceMgr.getDescription("LabelSearchIgnoreCase"));
+		this.ignoreCase = new JCheckBox(ResourceMgr.getString("LblSearchIgnoreCase"));
+		this.ignoreCase.setToolTipText(ResourceMgr.getDescription("LblSearchIgnoreCase"));
 		this.ignoreCase.setSelected(Settings.getInstance().getBoolProperty(PROP_KEY_CASE, true));
 		
-		this.wholeWord = new JCheckBox(ResourceMgr.getString("LabelSearchWordsOnly"));
-		this.wholeWord.setToolTipText(ResourceMgr.getDescription("LabelSearchWordsOnly"));
+		this.wholeWord = new JCheckBox(ResourceMgr.getString("LblSearchWordsOnly"));
+		this.wholeWord.setToolTipText(ResourceMgr.getDescription("LblSearchWordsOnly"));
 		this.wholeWord.setSelected(Settings.getInstance().getBoolProperty(PROP_KEY_WHOLE_WORD, false));
 
-		this.useRegEx = new JCheckBox(ResourceMgr.getString("LabelSearchRegEx"));
-		this.useRegEx.setToolTipText(ResourceMgr.getDescription("LabelSearchRegEx"));
+		this.useRegEx = new JCheckBox(ResourceMgr.getString("LblSearchRegEx"));
+		this.useRegEx.setToolTipText(ResourceMgr.getDescription("LblSearchRegEx"));
 		this.useRegEx.setSelected(Settings.getInstance().getBoolProperty(PROP_KEY_REGEX, false));
 		
-		this.label = new JLabel(ResourceMgr.getString("LabelSearchCriteria"));
+		this.label = new JLabel(ResourceMgr.getString("LblSearchCriteria"));
 		this.criteria = new JTextField();
 		this.criteria.setColumns(40);
 		if (initialValue != null)

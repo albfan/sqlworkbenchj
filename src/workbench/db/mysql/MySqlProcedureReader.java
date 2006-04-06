@@ -1,5 +1,5 @@
 /*
- * MySqlMetadata.java
+ * MySqlProcedureReader.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -27,59 +27,59 @@ import workbench.util.StrBuffer;
 /**
  * @author  support@sql-workbench.net
  */
-public class MySqlMetadata
-	implements ProcedureReader
+public class MySqlProcedureReader
+	extends JdbcProcedureReader
 {
-	private DbMetadata metaData;
 	private WbConnection conn;
-	public MySqlMetadata(DbMetadata meta, WbConnection con)
+	
+	public MySqlProcedureReader(DbMetadata meta, WbConnection con)
 	{
-		this.metaData = meta;
+		super(meta);
 		this.conn = con;
 	}
 
-	public DataStore getProcedures(String catalog, String schema)
-		throws SQLException
-	{
-		PreparedStatement stmt = null;
-		String sql = "SELECT NULL AS procedure_cat, \n" + 
-             "       routine_schema AS procedure_schem, \n" + 
-             "       routine_name AS procedure_name, \n" + 
-             "       case when routine_type = 'PROCEDURE' then 1 \n" + 
-             "            else 2 end as procedure_type, \n" + 
-             "       NULL AS remarks \n" + 
-             "FROM information_schema.routines " +
-		         " WHERE routine_schema like ?";	
-		DataStore ds = null;
-		try 
-		{
-			stmt = this.conn.getSqlConnection().prepareStatement(sql);
-			if (schema == null)
-			{
-				stmt.setString(1, "%");
-			}
-			else
-			{
-				stmt.setString(1, schema);
-			}
-			ResultSet rs = stmt.executeQuery();
-			JdbcProcedureReader reader = new JdbcProcedureReader(this.metaData);
-			// buildProcedureListDataStore will close the result set
-			ds = reader.buildProcedureListDataStore(rs);
-		}
-		finally
-		{
-			SqlUtil.closeStatement(stmt);
-		}
-		return ds;		
-	}
+//	public DataStore getProcedures(String catalog, String schema)
+//		throws SQLException
+//	{
+//		PreparedStatement stmt = null;
+//		String sql = "SELECT NULL AS procedure_cat, \n" + 
+//             "       routine_schema AS procedure_schem, \n" + 
+//             "       routine_name AS procedure_name, \n" + 
+//             "       case when routine_type = 'PROCEDURE' then 1 \n" + 
+//             "            else 2 end as procedure_type, \n" + 
+//             "       NULL AS remarks \n" + 
+//             "FROM information_schema.routines " +
+//		         " WHERE routine_schema like ?";	
+//		DataStore ds = null;
+//		try 
+//		{
+//			stmt = this.conn.getSqlConnection().prepareStatement(sql);
+//			if (schema == null || schema.equals("*") || schema.equals("%"))
+//			{
+//				stmt.setString(1, null);
+//			}
+//			else
+//			{
+//				stmt.setString(1, schema);
+//			}
+//			ResultSet rs = stmt.executeQuery();
+//			JdbcProcedureReader reader = new JdbcProcedureReader(this.metaData);
+//			// fillProcedureListDataStore will close the result set
+//			ds = reader.fillProcedureListDataStore(rs);
+//		}
+//		finally
+//		{
+//			SqlUtil.closeStatement(stmt);
+//		}
+//		return ds;		
+//	}
 	
-	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
-		throws SQLException
-	{
-		JdbcProcedureReader reader = new JdbcProcedureReader(this.metaData);
-		return reader.getProcedureColumns(aCatalog, aSchema, aProcname);
-	}
+//	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
+//		throws SQLException
+//	{
+//		JdbcProcedureReader reader = new JdbcProcedureReader(this.metaData);
+//		return reader.getProcedureColumns(aCatalog, aSchema, aProcname);
+//	}
 	
 	public StrBuffer getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
 	{
@@ -111,7 +111,7 @@ public class MySqlMetadata
 			source.append(aProcname);
 			source.append(" (");
 			
-			DataStore ds = this.metaData.getProcedureColumns(aCatalog, aSchema, aProcname);
+			DataStore ds = this.getProcedureColumns(aCatalog, aSchema, aProcname);
 			int count = ds.getRowCount();
 			int added = 0;
 			for (int i=0; i < count; i++)

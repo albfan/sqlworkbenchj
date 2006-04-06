@@ -46,6 +46,7 @@ public class ScriptParser
 	private IteratingScriptParser iteratingParser = null;
 	private boolean emptyLineIsSeparator = false;
 	private boolean supportOracleInclude = true;
+	private boolean checkSingleLineCommands = true;
 	
 	/** Create a ScriptParser
 	 *
@@ -152,6 +153,15 @@ public class ScriptParser
 		if (this.iteratingParser != null)
 		{
 			this.iteratingParser.allowEmptyLineAsSeparator(this.emptyLineIsSeparator);
+		}
+	}
+
+	public void setCheckForSingleLineCommands(boolean flag)
+	{
+		this.checkSingleLineCommands = flag;
+		if (this.iteratingParser != null)
+		{
+			this.iteratingParser.setCheckForSingleLineCommands(flag);
 		}
 	}
 	
@@ -378,6 +388,7 @@ public class ScriptParser
 	private void configureParserInstance(IteratingScriptParser p)
 	{
 		p.setSupportOracleInclude(this.supportOracleInclude);
+		p.setCheckForSingleLineCommands(this.checkSingleLineCommands);
 		p.allowEmptyLineAsSeparator(this.emptyLineIsSeparator);
 		p.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		p.setDelimiter(this.delimiter);

@@ -33,7 +33,7 @@ import workbench.util.TableAlias;
 public class InsertAnalyzer
 	extends BaseAnalyzer
 {
-	private final Pattern INTO_PATTERN = Pattern.compile("INSERT\\s*INTO", Pattern.CASE_INSENSITIVE);
+	private final Pattern INTO_PATTERN = Pattern.compile("INSERT\\s+INTO\\s+[a-zA-Z0-9_$]*\\s+", Pattern.CASE_INSENSITIVE);
 	
 	public InsertAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{	
@@ -42,7 +42,8 @@ public class InsertAnalyzer
 	
 	public void checkContext()
 	{
-		setOverwriteCurrentWord(true);
+		checkOverwrite();
+		String currentWord = getCurrentWord();
 		Matcher im = INTO_PATTERN.matcher(this.sql);
 		
 		int intoEnd = Integer.MAX_VALUE;

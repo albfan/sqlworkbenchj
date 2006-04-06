@@ -198,9 +198,6 @@ public class XmlRowDataConverter
 			boolean isNull = (data == null || data instanceof NullValue);
 			boolean writeCloseTag = true;
 			
-			// Oracle (again!) does not report blob columns
-			// as java.sql.Types.BLOB but as java.sql.Types.OTHER
-			// so we have to check the DBMS type as well.
 			boolean isBlob = SqlUtil.isBlobType(type) || "BLOB".equalsIgnoreCase(dbmsType);
 			boolean isClob = SqlUtil.isClobType(type) || "CLOB".equalsIgnoreCase(dbmsType);
 				

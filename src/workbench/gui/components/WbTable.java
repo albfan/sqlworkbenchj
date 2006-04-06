@@ -62,7 +62,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.JPopupMenu.Separator;
-import javax.swing.border.LineBorder;
+import javax.swing.UIDefaults;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -74,6 +74,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+import workbench.WbManager;
 
 import workbench.db.ColumnIdentifier;
 import workbench.gui.WbSwingUtilities;
@@ -102,6 +103,7 @@ import workbench.gui.dialogs.export.DataStoreExporter;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RowStatusRenderer;
 import workbench.gui.renderer.ToolTipRenderer;
+import workbench.gui.renderer.WbRenderer;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.Searchable;
 import workbench.log.LogMgr;
@@ -115,6 +117,7 @@ import workbench.storage.PkMapping;
 import workbench.storage.ResultInfo;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.FileDialogUtil;
+import workbench.util.SqlUtil;
 import workbench.util.WbThread;
 public class WbTable
 	extends JTable
@@ -157,8 +160,6 @@ public class WbTable
 
 	private PrintAction printDataAction;
 	private PrintPreviewAction printPreviewAction;
-
-	private TableCellRenderer sortHeaderRenderer;
 
 	private boolean adjustToColumnLabel = false;
 	private int headerPopupX = -1;
@@ -776,12 +777,23 @@ public class WbTable
 			this.dwModel = (DataStoreTableModel)aModel;
 			if (sortIt && header != null)
 			{
-				if (this.sortHeaderRenderer == null)
-				{
-					this.sortHeaderRenderer = RendererFactory.createSortHeaderRenderer();
-				}
-				header.setDefaultRenderer(this.sortHeaderRenderer);
+				header.setDefaultRenderer(RendererFactory.getSortHeaderRenderer());
 				header.addMouseListener(this);
+			}
+			
+			// If none of the columns is a BLOB column
+			// getCellRenderer() does not need to check for the BLOB renderer
+			int cols = this.dwModel.getColumnCount();
+			this.checkForBlobs = false;
+			for (int i=0; i < cols; i++)
+			{
+				//Class cl = this.dwModel.getColumnClass(i);
+				int type = this.dwModel.getColumnType(i);
+				if (SqlUtil.isBlobType(type))// || java.sql.Blob.class.isAssignableFrom(cl))
+				{
+					this.checkForBlobs = true;
+					break;
+				}
 			}
 		}
 
@@ -800,6 +812,11 @@ public class WbTable
 		addListeners();
 	}
 
+	private void setCopyActions(boolean flag)
+	{
+
+	}
+	
 	private FilterExpression lastFilter;
 	private FilterExpression currentFilter;
 
@@ -1156,14 +1173,14 @@ public class WbTable
 	{
 		Settings sett = Settings.getInstance();
 		
-		this.setDefaultRenderer(java.sql.Time.class, RendererFactory.createDateRenderer("mm:HH:ss"));
+		this.setDefaultRenderer(java.sql.Time.class, RendererFactory.getDateRenderer("mm:HH:ss"));
 
 		String format = sett.getDefaultDateFormat();
-		this.setDefaultRenderer(java.sql.Date.class, RendererFactory.createDateRenderer(format));
-		this.setDefaultRenderer(java.util.Date.class, RendererFactory.createDateRenderer(format));
+		this.setDefaultRenderer(java.sql.Date.class, RendererFactory.getDateRenderer(format));
+		this.setDefaultRenderer(java.util.Date.class, RendererFactory.getDateRenderer(format));
 
 		format = sett.getDefaultTimestampFormat();
-		this.setDefaultRenderer(java.sql.Timestamp.class, RendererFactory.createDateRenderer(format));
+		this.setDefaultRenderer(java.sql.Timestamp.class, RendererFactory.getDateRenderer(format));
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)
@@ -1175,6 +1192,48 @@ public class WbTable
 		}
 	}
 
+	protected void createDefaultRenderers()
+	{
+		defaultRenderersByColumnClass = new UIDefaults();
+		initDefaultRenderers();
+	}
+
+	private boolean checkForBlobs = false;
+	
+	public TableCellRenderer getCellRenderer(int row, int column) 
+	{
+		if (!this.checkForBlobs || this.dwModel == null) return super.getCellRenderer(row, column);
+		
+		if (isBlobColumn(column))
+		{
+			return getDefaultRenderer(java.sql.Blob.class);
+		}
+		return super.getCellRenderer(row, column);
+	}
+
+//	public TableCellEditor getCellEditor(int row, int column)
+//	{
+//		if (!this.checkForBlobs || this.dwModel == null) return super.getCellEditor(row, column);
+//		
+//		if (isBlobColumn(column))
+//		{
+//			return getDefaultEditor(java.sql.Blob.class);
+//		}
+//		return super.getCellEditor(row, column);
+//	}
+	
+	public boolean isBlobColumn(int column)
+	{
+		int type = this.dwModel.getColumnType(column);
+		//Class cl = this.dwModel.getColumnClass(column);
+		//if (cl == null) return false;
+		if (SqlUtil.isBlobType(type))// || java.sql.Blob.class.isAssignableFrom(cl))
+		{
+			return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * Initialize the default renderers for this table
 	 * @see workbench.gui.renderer.RendererFactory
@@ -1184,7 +1243,6 @@ public class WbTable
 		// need to let JTable do some initialization stuff
 		// otherwise setDefaultRenderer() bombs out with a NullPointerException
 		if (this.defaultRenderersByColumnClass == null) createDefaultRenderers();
-
 		initDateRenderers();
 
 		Settings sett = Settings.getInstance();
@@ -1193,22 +1251,41 @@ public class WbTable
 
 		TableCellRenderer numberRenderer = RendererFactory.createNumberRenderer(maxDigits, sep);
 
-		this.setDefaultRenderer(java.sql.Clob.class, RendererFactory.createClobRenderer());
+		this.setDefaultRenderer(Object.class, RendererFactory.getTooltipRenderer());
+		
+		// ClobRenderer is no longer needed because CLOBs are transformed into
+		// String objects during read (see RowData.read(ResultSet, ResultInfo);
+		this.setDefaultRenderer(java.sql.Clob.class, RendererFactory.getClobRenderer());
+		
+		this.setDefaultRenderer(java.sql.Blob.class, RendererFactory.getBlobRenderer());
+		this.setDefaultRenderer(byte[].class, RendererFactory.getBlobRenderer());
+		
 		this.setDefaultRenderer(Number.class, numberRenderer);
 		this.setDefaultRenderer(Double.class, numberRenderer);
 		this.setDefaultRenderer(Float.class, numberRenderer);
 		this.setDefaultRenderer(BigDecimal.class, numberRenderer);
 
-		TableCellRenderer intRenderer = RendererFactory.createIntegerRenderer();
+		TableCellRenderer intRenderer = RendererFactory.getIntegerRenderer();
 		this.setDefaultRenderer(BigInteger.class, intRenderer);
 		this.setDefaultRenderer(Integer.class, intRenderer);
 
 		if (this.useDefaultStringRenderer)
 		{
-			this.setDefaultRenderer(String.class, RendererFactory.createStringRenderer());
+			this.setDefaultRenderer(String.class, RendererFactory.getStringRenderer());
 		}
+		
+//		int count = this.getModel().getColumnCount();
+//		for (int i = 0; i < count; i++)
+//		{
+//			Class cl = this.getModel().getColumnClass(i);
+//			if (java.sql.Blob.class.isAssignableFrom(cl))
+//			{
+//				System.out.println("found blob column " + i);
+//				TableColumn col = this.getColumnModel().getColumn(i);
+//				col.setCellRenderer(RendererFactory.getBlobRenderer());
+//			}
+//		}
 
-		this.setDefaultRenderer(Object.class, RendererFactory.createTooltipRenderer());
 //		if (LogMgr.isDebugEnabled())
 //		{
 //			Iterator itr = this.defaultRenderersByColumnClass.entrySet().iterator();
@@ -1222,20 +1299,21 @@ public class WbTable
 
 	public void initDefaultEditors()
 	{
-		if (this.dwModel == null) return;
-
 		TableColumnModel colMod = this.getColumnModel();
 
 		for (int i=0; i < colMod.getColumnCount(); i++)
 		{
-			if (this.dwModel == null) return;
 			TableColumn col = colMod.getColumn(i);
 			if (col == null) continue;
-			Class clz = this.dwModel.getColumnClass(i);
-			if (clz == null) continue;
-			if (Number.class.isAssignableFrom(clz))
+			Class clz = null;
+			if (this.dwModel != null) this.dwModel.getColumnClass(i);
+			if (clz != null && Number.class.isAssignableFrom(clz))
 			{
 				col.setCellEditor(this.defaultNumberEditor);
+			}
+			else if (this.dwModel != null && isBlobColumn(i))
+			{
+				col.setCellEditor((TableCellEditor)RendererFactory.getBlobRenderer());
 			}
 			else
 			{
@@ -1339,12 +1417,22 @@ public class WbTable
 
 		for (int row = 0; row < rowCount; row ++)
 		{
-			s = this.getValueAsString(row, aColumn);
+			TableCellRenderer rend = this.getCellRenderer(row, aColumn);
+			Component c = rend.getTableCellRendererComponent(this, getValueAt(row, aColumn), false, false, row, aColumn);
+			if (rend instanceof WbRenderer)
+			{
+				s = ((WbRenderer)rend).getDisplayValue();
+			}
+			else
+			{
+				s = this.getValueAsString(row, aColumn);
+			}
+			
 			if (s == null || s.length() == 0)
 				stringWidth = 0;
 			else
 				stringWidth = fm.stringWidth(s);
-
+			
 			optWidth = Math.max(optWidth, stringWidth + addWidth);
 		}
 		if (optWidth > 0)
@@ -1419,6 +1507,14 @@ public class WbTable
 //		checkActions();
 	}
 
+	public void openBlobWindow(int row, int col)
+	{
+		this.stopEditing();
+		BlobHandler h = new BlobHandler();
+		Object value = this.getValueAt(row, col);
+		h.showBlobInfoDialog(WbManager.getInstance().getCurrentWindow(), value);
+	}
+	
 	public void openEditWindow()
 	{
 		if (!this.isEditing()) return;
@@ -1533,6 +1629,7 @@ public class WbTable
 	 */
 	public void mouseClicked(MouseEvent e)
 	{
+	
 		if (e.getButton() == MouseEvent.BUTTON3)
 		{
 			if (e.getSource() instanceof JTableHeader)
@@ -1586,6 +1683,25 @@ public class WbTable
 			if (realColumn >= 0)
 			{
 				this.dwModel.sortInBackground(this, realColumn);
+			}
+		}
+		else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2 && checkForBlobs)
+		{
+			int col = this.columnAtPoint(e.getPoint());
+			int row = this.rowAtPoint(e.getPoint());
+			if (isBlobColumn(col))
+			{
+				boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
+				if (ctrlPressed)
+				{
+					BlobHandler h = new BlobHandler();
+					Object value = this.getValueAt(row, col);
+					h.showBlobAsText(value);
+				}
+				else
+				{
+					openBlobWindow(row, col);
+				}
 			}
 		}
 	}
@@ -1654,10 +1770,7 @@ public class WbTable
 		{
 			Thread t = new WbThread("OptimizeAllCols Thread") 
 			{ 	
-				public void run()	
-				{ 
-					optimizeAllColWidth(); 
-				} 
+				public void run()	{ optimizeAllColWidth(); }  
 			};
 			t.start();
 		}
@@ -1710,33 +1823,6 @@ public class WbTable
 	}
 
 	/**
-	 *	Copy all rows from the table as tab-delimited into the clipboard
-	 *	@param includeheaders if true, then a header line with the column names is copied as well
-	 *  @param columns a {@link java.util.List} of Strings with the names of columns to be copied
-	 *
-	 *  @see #copyDataToClipboard(boolean, boolean)
-	 */
-	public void copyDataToClipboard(final boolean includeheaders, List columns)
-	{
-		if (this.getRowCount() <= 0) return;
-
-		try
-		{
-			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
-			WbSwingUtilities.showWaitCursorOnWindow(this);
-			DataStore ds = this.getDataStore();
-			String data = ds.getDataString("\n", includeheaders, columns);
-			StringSelection sel = new StringSelection(data);
-			clp.setContents(sel, sel);
-		}
-		catch (Throwable e)
-		{
-			LogMgr.logError(this, "Could not copy text data to clipboard", e);
-		}
-		WbSwingUtilities.showDefaultCursorOnWindow(this);
-	}
-
-	/**
 	 *	Copy data from the table as tab-delimited into the clipboard
 	 *	@param includeHeaders if true, then a header line with the column names is copied as well
 	 *  @param selectedOnly if true, then only selected rows are copied, else all rows
@@ -1749,35 +1835,43 @@ public class WbTable
 		if (showSelectColumns)
 		{
       ColumnSelectionResult result = this.selectColumns(includeHeaders, selectedOnly, true, getSelectedRowCount() > 0);
+			if (result == null) return;
 			columnsToCopy = result.columns;
       includeHeaders = result.includeHeaders;
       selectedOnly = result.selectedOnly;
 		}
 
-		if (!selectedOnly)
+		try
 		{
-			copyDataToClipboard(includeHeaders, columnsToCopy);
+			DataStore ds = this.dwModel.getDataStore();
+			StringWriter out = null;
+			int count = this.getRowCount();
+			int[] rows = null;
+			if (selectedOnly)
+			{
+				rows = this.getSelectedRows();
+				count = rows.length;
+			}
+			
+			out = new StringWriter(count * 250);
+			// Do not use StringUtil.LINE_TERMINATOR for the line terminator
+			// because for some reason this creates additional empty lines
+			// under Windows
+			ds.writeDataString(out, "\t", "\n", includeHeaders, rows, columnsToCopy);
+			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
+			WbSwingUtilities.showWaitCursorOnWindow(this);
+			StringSelection sel = new StringSelection(out.toString());
+			clp.setContents(sel, sel);
 		}
-		else
+		catch (Throwable e)
 		{
-			try
+			if (e instanceof OutOfMemoryError)
 			{
-				DataStore ds = this.dwModel.getDataStore();
-				int[] rows = this.getSelectedRows();
-				StringWriter out = new StringWriter(rows.length * 250);
-				ds.writeDataString(out, "\t", "\n", includeHeaders, rows, columnsToCopy);
-
-				Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
-				WbSwingUtilities.showWaitCursorOnWindow(this);
-				StringSelection sel = new StringSelection(out.toString());
-				clp.setContents(sel, sel);
+				WbManager.getInstance().showOutOfMemoryError();
 			}
-			catch (Throwable e)
-			{
-				LogMgr.logError(this, "Could not copy text data to clipboard", e);
-			}
-			WbSwingUtilities.showDefaultCursorOnWindow(this);
+			LogMgr.logError(this, "Could not copy text data to clipboard", e);
 		}
+		WbSwingUtilities.showDefaultCursorOnWindow(this);
 	}
 
 
@@ -1836,7 +1930,7 @@ public class WbTable
 		}
     else
     {
-        result.columns = null;
+        result = null;
     }
 		return result;
 	}
@@ -1956,6 +2050,7 @@ public class WbTable
 		if (showSelectColumns)
 		{
       ColumnSelectionResult result = this.selectColumns(false, selectedOnly, false, getSelectedRowCount() > 0);
+			if (result == null) return;
 			columnsToInclude = result.columns;
       selectedOnly = result.selectedOnly;
 		}
@@ -1984,6 +2079,10 @@ public class WbTable
 		}
 		catch (Throwable e)
 		{
+			if (e instanceof OutOfMemoryError)
+			{
+				WbManager.getInstance().showOutOfMemoryError();
+			}
 			LogMgr.logError(this, "Error when copying SQL inserts", e);
 		}
 		WbSwingUtilities.showDefaultCursorOnWindow(this);

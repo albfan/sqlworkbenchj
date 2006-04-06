@@ -86,7 +86,7 @@ public class ShortcutEditor
 	public void showWindow()
 	{
 		WbSwingUtilities.showWaitCursor(parent);
-		window = new JDialog(parent, ResourceMgr.getString("LabelConfigureShortcutWindowTitle"), true);
+		window = new JDialog(parent, ResourceMgr.getString("LblConfigureShortcutWindowTitle"), true);
 		window.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		window.addWindowListener(this);
 		JPanel contentPanel = new JPanel(new BorderLayout());
@@ -112,7 +112,7 @@ public class ShortcutEditor
 		this.keysTable.setAdjustToColumnLabel(true);
 		this.keysTable.optimizeAllColWidth(80);
 		this.keysTable.addMouseListener(this);
-		this.cancelButton = new WbButton(ResourceMgr.getString("LabelCancel"));
+		this.cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));
 		this.cancelButton.addActionListener(this);
 
 		im = keysTable.getInputMap(JComponent.WHEN_FOCUSED);
@@ -120,7 +120,7 @@ public class ShortcutEditor
 		im.put(esc.getAccelerator(), esc.getActionName());
 		am.put(esc.getActionName(), esc);
 		
-		this.okButton = new WbButton(ResourceMgr.getString("LabelOK"));
+		this.okButton = new WbButton(ResourceMgr.getString("LblOK"));
 		this.okButton.addActionListener(this);
 		
 		JPanel buttonPanel = new JPanel();
@@ -135,32 +135,32 @@ public class ShortcutEditor
 		Dimension min = new Dimension(90, 24);
 		Dimension max = new Dimension(160, 24);
 		
-		this.assignButton = new WbButton(ResourceMgr.getString("LabelAssignShortcut"));
-		this.assignButton.setToolTipText(ResourceMgr.getDescription("LabelAssignShortcut"));
+		this.assignButton = new WbButton(ResourceMgr.getString("LblAssignShortcut"));
+		this.assignButton.setToolTipText(ResourceMgr.getDescription("LblAssignShortcut"));
 		this.assignButton.addActionListener(this);
 		this.assignButton.setEnabled(false);
 		this.assignButton.setPreferredSize(min);
 		this.assignButton.setMinimumSize(min);
 		this.assignButton.setMaximumSize(max);
 
-		this.clearButton = new WbButton(ResourceMgr.getString("LabelClearShortcut"));
-		this.clearButton.setToolTipText(ResourceMgr.getDescription("LabelClearShortcut"));
+		this.clearButton = new WbButton(ResourceMgr.getString("LblClearShortcut"));
+		this.clearButton.setToolTipText(ResourceMgr.getDescription("LblClearShortcut"));
 		this.clearButton.addActionListener(this);
 		this.clearButton.setEnabled(false);
 		this.clearButton.setPreferredSize(min);
 		this.clearButton.setMinimumSize(min);
 		this.clearButton.setMaximumSize(max);
 		
-		this.resetButton = new WbButton(ResourceMgr.getString("LabelResetShortcut"));
-		this.resetButton.setToolTipText(ResourceMgr.getDescription("LabelResetShortcut"));
+		this.resetButton = new WbButton(ResourceMgr.getString("LblResetShortcut"));
+		this.resetButton.setToolTipText(ResourceMgr.getDescription("LblResetShortcut"));
 		this.resetButton.addActionListener(this);
 		this.resetButton.setEnabled(false);
 		this.resetButton.setPreferredSize(min);
 		this.resetButton.setMinimumSize(min);
 		this.resetButton.setMaximumSize(max);
 
-		this.resetAllButton = new WbButton(ResourceMgr.getString("LabelResetAllShortcuts"));
-		this.resetAllButton.setToolTipText(ResourceMgr.getDescription("LabelResetAllShortcuts"));
+		this.resetAllButton = new WbButton(ResourceMgr.getString("LblResetAllShortcuts"));
+		this.resetAllButton.setToolTipText(ResourceMgr.getDescription("LblResetAllShortcuts"));
 		this.resetAllButton.addActionListener(this);
 		this.resetAllButton.setPreferredSize(min);
 		this.resetAllButton.setMinimumSize(min);
@@ -215,9 +215,9 @@ public class ShortcutEditor
 	{
 		ShortcutDefinition[] keys = Settings.getInstance().getShortcutManager().getDefinitions();
 		
-		String[] cols = new String[] { ResourceMgr.getString("LabelKeyDefCommandCol"), 
-                                   ResourceMgr.getString("LabelKeyDefKeyCol"),
-				                           ResourceMgr.getString("LabelKeyDefDefaultCol") };
+		String[] cols = new String[] { ResourceMgr.getString("LblKeyDefCommandCol"), 
+                                   ResourceMgr.getString("LblKeyDefKeyCol"),
+				                           ResourceMgr.getString("LblKeyDefDefaultCol") };
 		int[] types = new int[] { Types.VARCHAR, Types.OTHER, Types.OTHER };
 		
 		this.definitions = new DataStore(cols, types);
@@ -329,11 +329,11 @@ public class ShortcutEditor
 				mapper.grabFocus();
 			}
 		});
-		String[] options = new String[] { ResourceMgr.getString("LabelOK").replaceAll("&", ""), ResourceMgr.getString("LabelCancel").replaceAll("&", "")};
+		String[] options = new String[] { ResourceMgr.getString("LblOK").replaceAll("&", ""), ResourceMgr.getString("LblCancel").replaceAll("&", "")};
 		
 		
 		JOptionPane overwritePane = new JOptionPane(mapper, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, options);
-		JDialog dialog = overwritePane.createDialog(this, ResourceMgr.getString("LabelEnterKeyWindowTitle"));
+		JDialog dialog = overwritePane.createDialog(this, ResourceMgr.getString("LblEnterKeyWindowTitle"));
 		
 		dialog.setResizable(true);
 		dialog.setVisible(true);

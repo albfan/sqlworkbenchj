@@ -51,6 +51,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.db.importer.DataStoreImporter;
@@ -126,7 +127,6 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarSeparator;
-import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.menu.TextPopup;
 import workbench.gui.preparedstatement.ParameterEditor;
 import workbench.interfaces.Commitable;
@@ -776,7 +776,8 @@ public class SqlPanel
 	{
 		InputMap im = new ComponentInputMap(this);
 		ActionMap am = new ActionMap();
-		this.setInputMap(WHEN_IN_FOCUSED_WINDOW, im);
+		//this.setInputMap(WHEN_IN_FOCUSED_WINDOW, im);
+		this.setInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, im);
 		this.setActionMap(am);
 
 		Iterator itr = this.actions.iterator();
@@ -1080,6 +1081,11 @@ public class SqlPanel
 		this.editor.clearUndoBuffer();
 	}
 
+	public void scrollEditorToCursor()
+	{
+		editor.scrollToCaret();
+	}
+	
 	/** Do any work which should be done during the process of saving the
 	 *  current workspace, but before the workspace file is actually opened!
 	 *  This is to ensure a corrupted workspace due to interrupting the saving
@@ -1221,6 +1227,7 @@ public class SqlPanel
 		{
 			this.setConnection(null);
 		}
+		this.clearResultTabs();
 		this.makeReadOnly();
 		this.log.setText("");
 	}
@@ -1536,7 +1543,7 @@ public class SqlPanel
 		if (!this.isConnected()) return;
 		if (this.dbConnection.isBusy())
 		{
-			showLogMessage(ResourceMgr.getString("ErrorConnectionBusy"));
+			showLogMessage(ResourceMgr.getString("ErrConnectionBusy"));
 			return;
 		}
 		this.executionThread = new WbThread("SQL Execution Thread " + this.getId())
@@ -1581,7 +1588,7 @@ public class SqlPanel
 			this.setBusy(false);
 			clearStatusMessage();
 			setCancelState(false);
-			checkResultSetActions();
+			updateResultInfos();
 			this.fireDbExecEnd();
 			this.selectEditorLater();
 			this.executionThread = null;
@@ -1732,14 +1739,14 @@ public class SqlPanel
 		String msg = null;
 		if (errorColumn != null)
 		{
-			msg = ResourceMgr.getString("ErrorColumnImportError");
+			msg = ResourceMgr.getString("ErrColumnImportError");
 			msg = msg.replaceAll("%row%", Integer.toString(errorRow));
 			msg = msg.replaceAll("%column%", errorColumn);
 			msg = msg.replaceAll("%data%", dataLine);
 		}
 		else
 		{
-			msg = ResourceMgr.getString("ErrorRowImportError");
+			msg = ResourceMgr.getString("ErrRowImportError");
 			msg = msg.replaceAll("%row%", Integer.toString(errorRow));
 			msg = msg.replaceAll("%data%", dataLine == null ? "(null)" : dataLine.substring(0,40) + " ...");
 		}
@@ -1873,6 +1880,11 @@ public class SqlPanel
 	public void stateChanged(ChangeEvent evt)
 	{
 		if (this.ignoreStateChange) return;
+		updateResultInfos();
+	}
+
+	private void updateResultInfos()
+	{
 		if (currentData != null)
 		{
 			this.currentData.removePropertyChangeListener(this);
@@ -1886,8 +1898,8 @@ public class SqlPanel
 		this.currentData.addPropertyChangeListener("updateTable", this);
 		updateProxiedActions();
 		checkResultSetActions();
+		
 	}
-
 	private void clearResultTabs()
 	{
 		try
@@ -2010,6 +2022,7 @@ public class SqlPanel
 		scriptParser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
 		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
 		scriptParser.setSupportOracleInclude(this.dbConnection.getMetadata().supportShortInclude());
+		scriptParser.setCheckForSingleLineCommands(this.dbConnection.getMetadata().supportSingleLineCommands());
 
 		int oldSelectionStart = -1;
 		int oldSelectionEnd = -1;
@@ -2045,7 +2058,7 @@ public class SqlPanel
 
 			if (count == 0)
 			{
-				this.appendToLog(ResourceMgr.getString("ErrorNoCommand"));
+				this.appendToLog(ResourceMgr.getString("ErrNoCommand"));
 				this.showLogPanel();
 				return;
 			}
@@ -2057,7 +2070,7 @@ public class SqlPanel
 				endIndex = startIndex + 1;
 				if (startIndex == -1)
 				{
-					this.appendToLog(ResourceMgr.getString("ErrorNoCurrentStatement"));
+					this.appendToLog(ResourceMgr.getString("ErrNoCurrentStatement"));
 					this.showLogPanel();
 					return;
 				}
@@ -2136,7 +2149,7 @@ public class SqlPanel
 					catch (SQLException e)
 					{
 							this.showBusyIcon(false);
-							msg = ResourceMgr.getString("ErrorCheckPreparedStatement").replaceAll("%error%", ExceptionUtil.getDisplay(e));
+							msg = ResourceMgr.getString("ErrCheckPreparedStatement").replaceAll("%error%", ExceptionUtil.getDisplay(e));
 							WbSwingUtilities.showErrorMessage(this, msg);
 							this.showBusyIcon(true);
 					}
@@ -2174,7 +2187,8 @@ public class SqlPanel
 
 				if (!logWasCompressed)
 				{
-					logmsg.append(statementResult.getMessageBuffer());
+					StringBuffer b = statementResult.getMessageBuffer();
+					if (b != null) logmsg.append(b);
 					String timing = statementResult.getTimingMessage();
 					if (timing != null) 
 					{
@@ -2336,7 +2350,7 @@ public class SqlPanel
 				{
 					this.editor.setCaretPosition(startPos);
 				}
-				else
+				else if (oldSelectionStart > -1)
 				{
 					this.editor.setCaretPosition(oldSelectionStart);
 				}
@@ -2350,7 +2364,7 @@ public class SqlPanel
 		{
 			if (e instanceof OutOfMemoryError)
 			{
-				WbSwingUtilities.showErrorMessage(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("MsgOutOfMemoryError"));
+				WbManager.getInstance().showOutOfMemoryError();
 			}
 			LogMgr.logError("SqlPanel.displayResult()", "Error executing statement", e);
 			if (statementResult != null) this.showLogMessage(statementResult.getMessageBuffer().toString());

@@ -122,7 +122,7 @@ public class DataStoreImporter
 	{
 		if (columns.length != this.target.getColumnCount())
 		{
-			errorHandler.fatalError(ResourceMgr.getString("ErrorImportInvalidColumnStructure"));
+			errorHandler.fatalError(ResourceMgr.getString("ErrImportInvalidColumnStructure"));
 			throw new SQLException("Invalid column count");
 		}
 	}

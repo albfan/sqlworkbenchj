@@ -125,7 +125,7 @@ public class TextOptionsPanel
 
     setLayout(new java.awt.GridBagLayout());
 
-    delimiterLabel.setText(ResourceMgr.getString("LabelFieldDelimiter"));
+    delimiterLabel.setText(ResourceMgr.getString("LblFieldDelimiter"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
@@ -143,8 +143,8 @@ public class TextOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
     add(delimiter, gridBagConstraints);
 
-    headerIncluded.setText(ResourceMgr.getString("LabelImportIncludeHeaders"));
-    headerIncluded.setToolTipText(ResourceMgr.getDescription("LabelImportIncludeHeaders"));
+    headerIncluded.setText(ResourceMgr.getString("LblImportIncludeHeaders"));
+    headerIncluded.setToolTipText(ResourceMgr.getDescription("LblImportIncludeHeaders"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -152,7 +152,7 @@ public class TextOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     add(headerIncluded, gridBagConstraints);
 
-    quoteCharLabel.setText(ResourceMgr.getString("LabelQuoteChar"));
+    quoteCharLabel.setText(ResourceMgr.getString("LblQuoteChar"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
@@ -175,15 +175,15 @@ public class TextOptionsPanel
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
 
-    decode.setText(ResourceMgr.getString("LabelImportDecode"));
-    decode.setToolTipText(ResourceMgr.getDescription("LabelImportDecode"));
+    decode.setText(ResourceMgr.getString("LblImportDecode"));
+    decode.setToolTipText(ResourceMgr.getDescription("LblImportDecode"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     add(decode, gridBagConstraints);
 
-    decimalCharLabel.setText(ResourceMgr.getString("LabelImportDecimalChar"));
-    decimalCharLabel.setToolTipText(ResourceMgr.getDescription("LabelImportDecimalChar"));
+    decimalCharLabel.setText(ResourceMgr.getString("LblImportDecimalChar"));
+    decimalCharLabel.setToolTipText(ResourceMgr.getDescription("LblImportDecimalChar"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
@@ -192,7 +192,7 @@ public class TextOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 4);
     add(decimalCharLabel, gridBagConstraints);
 
-    decimalCharTextField.setToolTipText(ResourceMgr.getDescription("LabelImportDecimalChar"));
+    decimalCharTextField.setToolTipText(ResourceMgr.getDescription("LblImportDecimalChar"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;

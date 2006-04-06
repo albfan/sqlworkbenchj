@@ -110,7 +110,7 @@ public class ReplacePanel
     setLayout(new java.awt.GridBagLayout());
 
     criteriaLabel.setLabelFor(criteriaTextField);
-    criteriaLabel.setText(ResourceMgr.getString("LabelSearchCriteria"));
+    criteriaLabel.setText(ResourceMgr.getString("LblSearchCriteria"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -134,8 +134,8 @@ public class ReplacePanel
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 5);
     add(replaceValueTextField, gridBagConstraints);
 
-    ignoreCaseCheckBox.setText(ResourceMgr.getString("LabelSearchIgnoreCase"));
-    ignoreCaseCheckBox.setToolTipText(ResourceMgr.getDescription("LabelSearchIgnoreCase"));
+    ignoreCaseCheckBox.setText(ResourceMgr.getString("LblSearchIgnoreCase"));
+    ignoreCaseCheckBox.setToolTipText(ResourceMgr.getDescription("LblSearchIgnoreCase"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
@@ -145,8 +145,8 @@ public class ReplacePanel
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
     add(ignoreCaseCheckBox, gridBagConstraints);
 
-    wordsOnlyCheckBox.setText(ResourceMgr.getString("LabelSearchWordsOnly"));
-    wordsOnlyCheckBox.setToolTipText(ResourceMgr.getDescription("LabelSearchWordsOnly"));
+    wordsOnlyCheckBox.setText(ResourceMgr.getString("LblSearchWordsOnly"));
+    wordsOnlyCheckBox.setToolTipText(ResourceMgr.getDescription("LblSearchWordsOnly"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -157,7 +157,7 @@ public class ReplacePanel
     add(wordsOnlyCheckBox, gridBagConstraints);
 
     replaceLabel.setLabelFor(replaceValueTextField);
-    replaceLabel.setText(ResourceMgr.getString("LabelReplaceNewValue"));
+    replaceLabel.setText(ResourceMgr.getString("LblReplaceNewValue"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -172,16 +172,16 @@ public class ReplacePanel
     gridBagConstraints.weighty = 1.0;
     add(spacerPanel, gridBagConstraints);
 
-    findButton.setText(ResourceMgr.getString("LabelFindNow"));
-    findButton.setToolTipText(ResourceMgr.getDescription("LabelFindNow"));
+    findButton.setText(ResourceMgr.getString("LblFindNow"));
+    findButton.setToolTipText(ResourceMgr.getDescription("LblFindNow"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
     gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 5);
     add(findButton, gridBagConstraints);
 
-    replaceNextButton.setText(ResourceMgr.getString("LabelReplaceNext"));
-    replaceNextButton.setToolTipText(ResourceMgr.getDescription("LabelReplaceNext"));
+    replaceNextButton.setText(ResourceMgr.getString("LblReplaceNext"));
+    replaceNextButton.setToolTipText(ResourceMgr.getDescription("LblReplaceNext"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
@@ -190,8 +190,8 @@ public class ReplacePanel
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
     add(replaceNextButton, gridBagConstraints);
 
-    replaceAllButton.setText(ResourceMgr.getString("LabelReplaceAll"));
-    replaceAllButton.setToolTipText(ResourceMgr.getDescription("LabelReplaceAll"));
+    replaceAllButton.setText(ResourceMgr.getString("LblReplaceAll"));
+    replaceAllButton.setToolTipText(ResourceMgr.getDescription("LblReplaceAll"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 2;
@@ -200,7 +200,7 @@ public class ReplacePanel
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
     add(replaceAllButton, gridBagConstraints);
 
-    closeButton.setText(ResourceMgr.getString("LabelClose"));
+    closeButton.setText(ResourceMgr.getString("LblClose"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 5;
@@ -209,8 +209,8 @@ public class ReplacePanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHEAST;
     add(closeButton, gridBagConstraints);
 
-    selectedTextCheckBox.setText(ResourceMgr.getString("LabelSelectedTextOnly"));
-    selectedTextCheckBox.setToolTipText(ResourceMgr.getDescription("LabelSelectedTextOnly"));
+    selectedTextCheckBox.setText(ResourceMgr.getString("LblSelectedTextOnly"));
+    selectedTextCheckBox.setToolTipText(ResourceMgr.getDescription("LblSelectedTextOnly"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
@@ -220,8 +220,8 @@ public class ReplacePanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     add(selectedTextCheckBox, gridBagConstraints);
 
-    useRegexCheckBox.setText(ResourceMgr.getString("LabelSearchRegEx"));
-    useRegexCheckBox.setToolTipText(ResourceMgr.getDescription("LabelSearchRegEx"));
+    useRegexCheckBox.setText(ResourceMgr.getString("LblSearchRegEx"));
+    useRegexCheckBox.setToolTipText(ResourceMgr.getDescription("LblSearchRegEx"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
