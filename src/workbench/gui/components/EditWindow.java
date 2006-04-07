@@ -28,6 +28,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import workbench.WbManager;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
@@ -91,9 +92,13 @@ public class EditWindow
 	{
 		super(owner, title, true);
 		init(owner, text, "workbench.data.edit.window", createSqlEditor, showCloseButtonOnly);
-		WbSwingUtilities.center(this, null);
+		WbSwingUtilities.center(this, WbManager.getInstance().getCurrentWindow());
 	}
 	
+	public void setReadOnly()
+	{
+		this.textContainer.setEditable(false);
+	}
 	private void init(Window owner, String text, String settingsId, boolean createSqlEditor, boolean showCloseButtonOnly)
 	{
 		this.settingsId = settingsId;

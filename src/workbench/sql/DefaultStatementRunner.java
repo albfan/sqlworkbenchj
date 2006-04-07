@@ -242,7 +242,7 @@ public class DefaultStatementRunner
 			this.dbSpecificCommands.add(WbOraExecute.EXECUTE.getVerb());
 			this.dbSpecificCommands.add(echo.getVerb());
 		}
-		else if (meta.isSqlServer())
+		else if (meta.isSqlServer() || meta.isMySql())
 		{
 			UseCommand cmd = new UseCommand();
 			this.cmdDispatch.put(cmd.getVerb(), cmd);

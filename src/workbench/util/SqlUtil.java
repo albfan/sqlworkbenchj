@@ -306,7 +306,7 @@ public class SqlUtil
 		int fromEnd = getKeywordPosition(SqlFormatter.FROM_TERMINAL, sql);
 		if (fromEnd == -1)
 		{
-			fromEnd = sql.length() -1;
+			return sql.substring(fromPos);
 		}
 		return sql.substring(fromPos, fromEnd);
 	}

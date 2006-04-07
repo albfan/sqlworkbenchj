@@ -46,7 +46,7 @@ public class PlainEditor
 		this.setLayout(new BorderLayout());
 		wordWrap = new JCheckBox(ResourceMgr.getString("LblWordWrap"));
 		wordWrap.addActionListener(this);
-		wordWrap.setSelected(true);
+		//wordWrap.setSelected(true);
 		this.add(wordWrap, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
 		this.setFocusable(false);
@@ -64,7 +64,9 @@ public class PlainEditor
 	
 	public void restoreSettings()
 	{
-		wordWrap.setSelected(Settings.getInstance().getPlainEditorWordWrap());
+		boolean wrap = Settings.getInstance().getPlainEditorWordWrap();
+		wordWrap.setSelected(wrap);
+		this.editor.setLineWrap(wrap);
 	}
 	
 	public void saveSettings()
@@ -100,6 +102,11 @@ public class PlainEditor
 	public void actionPerformed(ActionEvent e)
 	{
 		this.editor.setLineWrap(this.wordWrap.isSelected());
+	}
+
+	public void setEditable(boolean flag)
+	{
+		this.editor.setEditable(flag);
 	}
 
 }

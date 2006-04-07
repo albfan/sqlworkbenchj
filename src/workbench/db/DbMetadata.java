@@ -654,7 +654,12 @@ public class DbMetadata
 		if (newCatalog == null) return false;
 		
 		String sql = Settings.getInstance().getProperty("workbench.sql.switchcatalog." + dbId, null);
-		if (sql == null) return false;
+		if (sql == null || sql.trim().length() == 0)
+		{
+			LogMgr.logWarning("DbMetadata.setCurrentCatalog", "No SQL statement configured to switch the current catalog. Please add 'workbench.sql.switchcatalog." + dbId + "=<sqlstatement>' to workbench.settings");
+			return false;
+		}
+		
 		Statement stmt = null;
 		try
 		{
@@ -2509,6 +2514,15 @@ public class DbMetadata
 		{
 			SqlUtil.closeResult(rs);
 		}
+		if (result.getRowCount() == 1)
+		{
+			String cat = result.getValueAsString(0, 0);
+			if (cat.equals(this.getCurrentCatalog()))
+			{
+				result.reset();
+			}
+		}
+		
 		return result;
 	}
 
@@ -2663,32 +2677,6 @@ public class DbMetadata
 		{
 			return result.toString();
 		}
-	}
-
-	/** Returns a list of database catalogs as returned by DatabaseMetadata.getCatalogs()
-	 * @return ArrayList with String objects
-	 */
-	public List getCatalogs()
-	{
-		ArrayList result = new ArrayList();
-		ResultSet rs = null;
-		try
-		{
-			rs = this.metaData.getCatalogs();
-			while (rs.next())
-			{
-				result.add(rs.getString(1));
-			}
-		}
-		catch (Exception e)
-		{
-        LogMgr.logError("DbMetadata.getCatalogs()", "Error retrieving catalogs", e);
-		}
-		finally
-		{
-			SqlUtil.closeResult(rs);
-		}
-		return result;
 	}
 
 	/** Returns the list of schemas as returned by DatabaseMetadata.getSchemas()

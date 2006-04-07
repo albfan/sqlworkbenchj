@@ -222,7 +222,10 @@ public class MainWindow
 		}
 	}
 
-	public void removeFilenameChangeListener(FilenameChangeListener aListener)
+	/**
+	 * Remove the file name change listener.
+	 * @see #addFilenameChangeListener(FilenameChangeListener )
+	 */	public void removeFilenameChangeListener(FilenameChangeListener aListener)
 	{
 		for (int i=0; i < this.sqlTab.getTabCount(); i++)
 		{

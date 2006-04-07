@@ -1685,25 +1685,25 @@ public class WbTable
 				this.dwModel.sortInBackground(this, realColumn);
 			}
 		}
-		else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2 && checkForBlobs)
-		{
-			int col = this.columnAtPoint(e.getPoint());
-			int row = this.rowAtPoint(e.getPoint());
-			if (isBlobColumn(col))
-			{
-				boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
-				if (ctrlPressed)
-				{
-					BlobHandler h = new BlobHandler();
-					Object value = this.getValueAt(row, col);
-					h.showBlobAsText(value);
-				}
-				else
-				{
-					openBlobWindow(row, col);
-				}
-			}
-		}
+//		else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2 && checkForBlobs)
+//		{
+//			int col = this.columnAtPoint(e.getPoint());
+//			int row = this.rowAtPoint(e.getPoint());
+//			if (isBlobColumn(col))
+//			{
+//				boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
+//				if (ctrlPressed)
+//				{
+//					BlobHandler h = new BlobHandler();
+//					Object value = this.getValueAt(row, col);
+//					h.showBlobAsText(value);
+//				}
+//				else
+//				{
+//					openBlobWindow(row, col);
+//				}
+//			}
+//		}
 	}
 
 	/** Invoked when the mouse enters a component.

@@ -343,6 +343,11 @@ public class Settings
 		return getBoolProperty("workbench.dbexplorer.rememberSchema", true);
 	}
 	
+	public boolean getSwitchCatalogInExplorer()
+	{
+		return getBoolProperty("workbench.dbexplorer.switchcatalog", true);
+	}
+	
 	public String getProfileStorage()
 	{
 		String profiles = this.props.getProperty(PROPERTY_PROFILE_STORAGE);
@@ -1490,6 +1495,16 @@ public class Settings
 		this.props.setProperty("workbench.export.text.quotechar", aQuoteChar);
 	}
 
+	public String getDefaultBlobTextEncoding()
+	{
+		return getProperty("workbench.blob.text.encoding", getDefaultDataEncoding());
+	}
+	
+	public void setDefaultBlobTextEncoding(String enc)
+	{
+		setProperty("workbench.blob.text.encoding", enc);
+	}
+	
 	public String getDefaultDataEncoding()
 	{
 		String def = System.getProperty("file.encoding");

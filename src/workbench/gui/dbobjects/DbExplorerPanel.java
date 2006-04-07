@@ -138,7 +138,6 @@ public class DbExplorerPanel
 			this.schemaSelector = new JComboBox();
 			Dimension d = new Dimension(80, 20);
 			this.schemaSelector.setMinimumSize(d);
-			this.schemaSelector.setPreferredSize(d);
 			this.selectorPanel.add(this.schemaSelector);
 
 			this.catalogSelector  = new JComboBox();
@@ -171,7 +170,7 @@ public class DbExplorerPanel
 
 	public void setSwitchCatalog(boolean flag)
 	{
-		this.switchCatalog = flag;
+		this.switchCatalog = flag && Settings.getInstance().getSwitchCatalogInExplorer();
 	}
 	
 	public void showConnectButton(ConnectionSelector selector)
