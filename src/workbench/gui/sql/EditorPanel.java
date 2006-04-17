@@ -483,14 +483,6 @@ public class EditorPanel
 		this.addKeyBinding(anAction);
 	}
 
-	/**
-	 *	Return the contents of the EditorPanel
-	 */
-	public String getStatement()
-	{
-		return this.getText();
-	}
-
 	public void dispose()
 	{
 		this.clearUndoBuffer();
@@ -499,7 +491,8 @@ public class EditorPanel
 		this.setDocument(new SyntaxDocument());
 	}
 	/**
-	 *	Return the selected text of the editor
+	 * Return the selected statement of the editor. If no 
+	 * text is selected, the whole text will be returned
 	 */
 	public String getSelectedStatement()
 	{

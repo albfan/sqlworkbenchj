@@ -57,6 +57,7 @@ public class Settings
 	public static final String PROPERTY_ENCRYPT_PWD = "workbench.profiles.encryptpassword";
 	public static final String PROPERTY_DATE_FORMAT = "workbench.gui.display.dateformat";
 	public static final String PROPERTY_DATETIME_FORMAT = "workbench.gui.display.datetimeformat";
+	public static final String PROPERTY_TIME_FORMAT = "workbench.gui.display.timeformat";
 
 	public static final String PROPERTY_EDITOR_FONT = "editor";
 	public static final String PROPERTY_STANDARD_FONT = "standard";
@@ -104,8 +105,18 @@ public class Settings
 		File cf;
 		if (configDir == null || configDir.trim().length() == 0)
 		{
-			// use the current working directory as the configuration directory
-			cf = new File("");
+			//cf = new File("");
+			// check the current directory for a configuration file
+			// if it is not present, then use the directory of the jar file
+			File f = new File(filename);
+			if (f.exists())
+			{
+				cf = new File("");
+			}
+			else
+			{
+				cf = new File(WbManager.getInstance().getJarPath());
+			}
 		}
 		else
 		{
@@ -1401,6 +1412,12 @@ public class Settings
 		this.props.setProperty(PROPERTY_DATE_FORMAT, aFormat);
 	}
 
+	public boolean isDateFormatProperty(String prop)
+	{
+		if (prop == null) return false;
+		return (PROPERTY_DATE_FORMAT.equals(prop) || PROPERTY_DATETIME_FORMAT.equals(prop) || PROPERTY_TIME_FORMAT.equals(prop));
+	}
+	
 	public String getDefaultDateFormat()
 	{
 		return this.props.getProperty(PROPERTY_DATE_FORMAT, StringUtil.ISO_DATE_FORMAT);
@@ -1415,6 +1432,16 @@ public class Settings
 	{
 		this.defaultDateFormatter = null;
 		this.props.setProperty(PROPERTY_DATETIME_FORMAT, aFormat);
+	}
+	
+	public void setDefaultTimeFormat(String format)
+	{
+		this.props.setProperty(PROPERTY_TIME_FORMAT, format);
+	}
+	
+	public String getDefaultTimeFormat()
+	{
+		return getProperty(PROPERTY_TIME_FORMAT, "HH:mm:ss");
 	}
 	
 	public SimpleDateFormat getDefaultTimestampFormatter()

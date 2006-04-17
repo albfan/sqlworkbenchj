@@ -27,7 +27,7 @@ public class DateColumnRenderer
 {
 	private SimpleDateFormat dateFormatter;
 
-	public static final String DEFAULT_FORMAT = "yyyy-MM-dd mm:HH:ss";
+	public static final String DEFAULT_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	
 	public DateColumnRenderer()
 	{

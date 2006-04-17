@@ -86,7 +86,7 @@ public class SqlCommand
 	{
 		String warn = SqlUtil.getWarnings(aConn, aStmt, !this.isCancelled);
 		boolean hasWarning = false;
-		if (warn != null)
+		if (warn != null && warn.trim().length() > 0)
 		{
 			hasWarning = true;
 			msg.append(warn);

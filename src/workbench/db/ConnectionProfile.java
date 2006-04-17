@@ -178,11 +178,6 @@ public class ConnectionProfile
 	 */
 	public void setUseSeperateConnectionPerTab(boolean aFlag) { this.setUseSeparateConnectionPerTab(aFlag); }
 
-	/**
-	 * @deprecated replaced by {@link #getUseSeparateConnectionPerTab()}
-	 */
-	//public boolean getUseSeperateConnectionPerTab() { return this.getUseSeparateConnectionPerTab(); 	}
-
 	public boolean getRollbackBeforeDisconnect()
 	{
 		return this.rollbackBeforeDisconnect;

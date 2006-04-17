@@ -34,9 +34,7 @@ import workbench.util.TableAlias;
 public class SelectAnalyzer
 	extends BaseAnalyzer
 {
-//	private final Pattern WHERE_PATTERN = Pattern.compile("\\sWHERE\\s|\\sWHERE$", Pattern.CASE_INSENSITIVE);
-//	private final Pattern GROUP_PATTERN = Pattern.compile("\\sGROUP\\s*BY\\s|\\sGROUP\\s*BY$", Pattern.CASE_INSENSITIVE);
-	
+
 	public SelectAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{	
 		super(conn, statement, cursorPos);

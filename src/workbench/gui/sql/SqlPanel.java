@@ -868,7 +868,6 @@ public class SqlPanel
 
 		this.setBusy(true);
 
-		this.updateRunning = true;
 		this.showStatusMessage(ResourceMgr.getString("MsgUpdatingDatabase"));
 		this.setCancelState(true);
 		this.setExecuteActionStates(false);
@@ -885,60 +884,42 @@ public class SqlPanel
 
 	private void updateDb()
 	{
-		String errorMessage = null;
-		boolean success = false;
 
 		try
 		{
+			fireDbExecStart();
+			this.updateRunning = true;
 			this.log.setText(ResourceMgr.getString("MsgUpdatingDatabase"));
 			this.log.append("\n");
 			this.currentData.saveChanges(this.dbConnection, this);
-			this.log.append(this.currentData.getLastMessage());
-			success = true;
 		}
 		catch (OutOfMemoryError mem)
 		{
-			// do not show the error message right away
-			// the message dialog should only be shown if the
-			// animated icon is not running! Otherwise
-			// the system might lock
 			this.log.setText(ExceptionUtil.getDisplay(mem));
-			errorMessage = ResourceMgr.getString("MsgOutOfMemoryError");
-			success = false;
+			showBusyIcon(false);
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					WbSwingUtilities.showErrorMessage(SqlPanel.this, ResourceMgr.getString("MsgOutOfMemoryError"));
+				}
+			});
 		}
 		catch (Exception e)
 		{
-			errorMessage = this.currentData.getLastMessage();
-			this.log.setText(errorMessage);
-			success = false;
+			// All other errors are already handled or displayed to the user
 		}
 		finally
 		{
 			this.updateRunning = false;
 			this.setCancelState(false);
 			this.setBusy(false);
+			fireDbExecEnd();
 			WbSwingUtilities.showDefaultCursor(this);
 		}
-
-		this.setExecuteActionStates(true);
-
-		if (success)
-		{
-			this.clearStatusMessage();
-			this.checkResultSetActions();
-		}
-		else// if (!wasUpdate)
-		{
-			final String msg = errorMessage;
-			// Make sure the error dialog is displayed on the AWT
-			EventQueue.invokeLater(new Runnable()
-			{
-				public void run()
-				{
-					WbSwingUtilities.showErrorMessage(getParentWindow(), msg);
-				}
-			});
-		}
+		this.log.append(this.currentData.getLastMessage());
+		this.clearStatusMessage();
+		this.checkResultSetActions();
 	}
 
 	public void panelSelected()
@@ -1501,6 +1482,15 @@ public class SqlPanel
 		}
 	}
 
+	private String getStatementAtCursor()
+	{
+		ScriptParser parser = createScriptParser();
+		parser.setScript(this.editor.getText());
+		int index = parser.getCommandIndexAtCursorPos(this.editor.getCaretPosition());
+		String currentStatement = parser.getCommand(index);
+		return currentStatement;
+	}
+	
 	public void runCurrentStatement()
 	{
 		String sql = this.editor.getText();
@@ -1595,21 +1585,36 @@ public class SqlPanel
 		}
 	}
 
-	private void retrieveEnd()
-	{
-		
-	}
+	private String currentMacroSql = null;
+	
 	public void executeMacro(final String macroName, final boolean replaceText)
 	{
 		if (isBusy()) return;
 
-		final String sql = MacroManager.getInstance().getMacroText(macroName);
+		MacroManager mgr = MacroManager.getInstance();
+		String sql = mgr.getMacroText(macroName);
 		if (sql == null || sql.trim().length() == 0) return;
 
+		if (mgr.hasSelectedKey(sql))
+		{
+			sql = mgr.replaceSelected(sql, this.editor.getSelectedText());
+		}
+		
+		if (mgr.hasCurrentKey(sql))
+		{
+			String current = getStatementAtCursor();
+			sql = mgr.replaceCurrent(sql, current);
+		}
+		
 		if (replaceText)
 		{
 			this.storeStatementInHistory();
 			this.editor.setText(sql);
+			this.currentMacroSql = null;
+		}
+		else
+		{
+			this.currentMacroSql = sql;
 		}
 		this.startExecution(sql, 0, -1, false);
 	}
@@ -1998,6 +2003,16 @@ public class SqlPanel
 		return data;
 	}
 
+	private ScriptParser createScriptParser()
+	{
+		ScriptParser scriptParser = new ScriptParser();
+		scriptParser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
+		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
+		scriptParser.setSupportOracleInclude(this.dbConnection.getMetadata().supportShortInclude());
+		scriptParser.setCheckForSingleLineCommands(this.dbConnection.getMetadata().supportSingleLineCommands());
+		return scriptParser;
+	}
+	
 	private void displayResult(String script, int selectionOffset, int commandAtIndex, boolean highlightOnError)
 	{
 		if (script == null) return;
@@ -2018,12 +2033,8 @@ public class SqlPanel
 			control = this;
 		}
 
-		ScriptParser scriptParser = new ScriptParser();
-		scriptParser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter());
-		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
-		scriptParser.setSupportOracleInclude(this.dbConnection.getMetadata().supportShortInclude());
-		scriptParser.setCheckForSingleLineCommands(this.dbConnection.getMetadata().supportSingleLineCommands());
-
+		ScriptParser scriptParser = createScriptParser();
+		
 		int oldSelectionStart = -1;
 		int oldSelectionEnd = -1;
 
@@ -2044,9 +2055,17 @@ public class SqlPanel
 			String macro = MacroManager.getInstance().getMacroText(cleanSql);
 			if (macro != null)
 			{
-				appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ": " + cleanSql + "\n");
+				appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ":\n" + cleanSql + "\n");
 				script = macro;
 			}
+			
+			if (currentMacroSql != null)
+			{
+				// executeMacro will set this variable for logging purposes
+				appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ":\n" + currentMacroSql  + "\n");
+				currentMacroSql = null;
+			}
+			
 			scriptParser.setScript(script);
 			List sqls = scriptParser.getCommands();
 
@@ -2376,6 +2395,13 @@ public class SqlPanel
 		}
 	}
 
+	/**
+	 * Display the data contained in the StatementRunnerResult.
+	 * For each DataStore or ResultSet in the result, an additional
+	 * result {@link workbench.gui.sql.DwPanel} will be added.
+	 * @param result the result to be displayed (obtained from a {@link workbench.sql.StatementRunner}
+	 * @see workbench.gui.sql.DwPanel
+	 */
 	private int showResult(StatementRunnerResult result)
 		throws SQLException
 	{
@@ -2409,6 +2435,7 @@ public class SqlPanel
 		
 		return count;
 	}
+	
 	private void highlightStatement(ScriptParser scriptParser, int command, int startOffset)
 	{
 		if (this.editor == null) return;
@@ -2452,11 +2479,9 @@ public class SqlPanel
 			findNext = hasResult && (this.currentData.getTable().canSearchAgain());
 		}
 		this.setActionState(new Action[] {this.findDataAction, this.dataToClipboard, this.exportDataAction, this.optimizeAllCol, this.printDataAction, this.printPreviewAction}, hasResult);
-		//this.createDeleteScript.setEnabled(mayEdit && rows == 1);
 		this.importFileAction.setEnabled(mayEdit);
 		this.findDataAgainAction.setEnabled(findNext);
 		this.copySelectedMenu.setEnabled(hasResult);
-		//this.optimizeAllCol.setEnabled(hasResult);
 	}
 
 	private void setExecuteActionStates(boolean aFlag)
@@ -2655,7 +2680,6 @@ public class SqlPanel
 		this.setExecuteActionStates(!busy);
 		this.showBusyIcon(busy);
 	}
-
 
 	public synchronized boolean isBusy() { return this.threadBusy; }
 

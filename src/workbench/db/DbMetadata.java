@@ -648,40 +648,6 @@ public class DbMetadata
 		return true;
 	}
 
-	public boolean setCurrentCatalog(String newCatalog)
-		throws SQLException
-	{
-		if (newCatalog == null) return false;
-		
-		String sql = Settings.getInstance().getProperty("workbench.sql.switchcatalog." + dbId, null);
-		if (sql == null || sql.trim().length() == 0)
-		{
-			LogMgr.logWarning("DbMetadata.setCurrentCatalog", "No SQL statement configured to switch the current catalog. Please add 'workbench.sql.switchcatalog." + dbId + "=<sqlstatement>' to workbench.settings");
-			return false;
-		}
-		
-		Statement stmt = null;
-		try
-		{
-			String old = getCurrentCatalog();
-			stmt = this.dbConnection.createStatement();
-			sql = StringUtil.replace(sql, "%catalog%", newCatalog);
-			stmt.execute(sql);
-			String newCat = getCurrentCatalog();
-			if (old != null && newCat != null && !newCat.equals(old))
-			{
-				this.dbConnection.catalogChanged(old, newCatalog);
-			}
-			LogMgr.logDebug("DbMetadata.setCurrentCatalog", "Catalog changed to " + newCat);
-		}
-		catch (SQLException e)
-		{
-			SqlUtil.closeStatement(stmt);
-			throw e;
-		}
-		return true;
-	}
-	
 	/**
 	 * Return true if connected to an Oracle8 database. Returns fals
 	 * for every other DBMS (including Oracle9 and later)
@@ -2480,6 +2446,43 @@ public class DbMetadata
 		return l.contains(this.getDbId());
 	}
 
+	public boolean supportsCatalogs()
+	{
+		boolean supportsCatalogs = false;
+		try
+		{
+			supportsCatalogs = metaData.supportsCatalogsInDataManipulation()
+		                  || metaData.supportsCatalogsInTableDefinitions();
+		}
+		catch (Exception e)
+		{
+			supportsCatalogs = false;
+		}
+		return supportsCatalogs;
+	}
+	
+	/**
+	 * Changes the current catalog using Connection.setCatalot()
+	 * and notifies the connection object about the change.
+	 */
+	public boolean setCurrentCatalog(String newCatalog)
+		throws SQLException
+	{
+		if (newCatalog == null) return false;
+	
+		String old = getCurrentCatalog();
+		this.dbConnection.getSqlConnection().setCatalog(newCatalog);
+		String newCat = getCurrentCatalog();
+		if (old != null && newCat != null && !newCat.equals(old))
+		{
+			this.dbConnection.catalogChanged(old, newCatalog);
+		}
+		LogMgr.logDebug("DbMetadata.setCurrentCatalog", "Catalog changed to " + newCat);
+		
+		return true;
+	}
+	
+	
 	/**
 	 *	Returns a list of all catalogs in the database.
 	 *	Some DBMS's do not support catalogs, in this case the method
@@ -2514,6 +2517,7 @@ public class DbMetadata
 		{
 			SqlUtil.closeResult(rs);
 		}
+		
 		if (result.getRowCount() == 1)
 		{
 			String cat = result.getValueAsString(0, 0);

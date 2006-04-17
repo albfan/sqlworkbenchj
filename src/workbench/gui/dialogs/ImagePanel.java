@@ -13,8 +13,10 @@ package workbench.gui.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.Image;
-import java.awt.MediaTracker;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
@@ -47,6 +49,13 @@ public class ImagePanel
 		label.setHorizontalAlignment(SwingConstants.CENTER);
 		label.setBorder(new EtchedBorder());
 	}
+	
+	public void setImage(File imageData)
+		throws IOException, SQLException
+	{
+		InputStream in = new BufferedInputStream(new FileInputStream(imageData));
+		this.readImageData(in);
+	}	
 	
 	public void setImage(Blob imageData)
 		throws IOException, SQLException

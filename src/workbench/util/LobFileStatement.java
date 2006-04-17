@@ -109,13 +109,15 @@ public class LobFileStatement
 				}
 				if (parameters[index].filename == null)
 				{
-					String msg = ResourceMgr.getString("ErrUpdateBlobNoFileParameter".replaceAll("%parm%",sql.substring(start + 2, end)));
+					String msg = ResourceMgr.getString("ErrUpdateBlobNoFileParameter");
+					msg = StringUtil.replace(msg, "%parm%",sql.substring(start + 2, end));
 					throw new FileNotFoundException(msg);
 				}
 				File f = new File(parameters[index].filename);
 				if (f.isDirectory() || !f.exists())
 				{
-					String msg = ResourceMgr.getString("ErrUpdateBlobFileNotFound").replaceAll("%filename%", parameters[index].filename);
+					String msg = ResourceMgr.getString("ErrUpdateBlobFileNotFound");
+					msg = StringUtil.replace(msg, "%filename%", parameters[index].filename);
 					throw new FileNotFoundException(msg);
 				}
 			}

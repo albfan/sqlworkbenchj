@@ -37,7 +37,7 @@ public class EncodingPanel
 	
 	public EncodingPanel()
 	{
-		this(null, true);
+		this(System.getProperty("file.encoding"), true);
 	}
 
 	public EncodingPanel(String encoding)
@@ -54,12 +54,7 @@ public class EncodingPanel
 			encodings.addItem(charsets[i]);
 		}
 
-		if (encoding == null)
-		{
-			String defaultEncoding = Settings.getInstance().getDefaultFileEncoding();
-			encodings.setSelectedItem(defaultEncoding);
-		}
-		else
+		if (encoding != null)
 		{
 			encodings.setSelectedItem(encoding);
 		}

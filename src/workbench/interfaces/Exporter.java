@@ -20,5 +20,4 @@ import java.awt.Window;
 public interface Exporter
 {
 	void exportData();
-	Window getParentWindow();
 }

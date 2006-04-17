@@ -11,8 +11,16 @@
  */
 package workbench.gui.components;
 
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import javax.swing.Action;
 import javax.swing.JButton;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.basic.BasicBorders;
 
 /**
  *
@@ -20,8 +28,11 @@ import javax.swing.JButton;
  */
 public class WbButton
 	extends JButton
+	implements MouseListener
 {
-	
+	private Border rolloverBorder;
+	private Border emptyBorder;
+	private Border lastBorder;
 	public WbButton()
 	{
 		super();
@@ -60,6 +71,50 @@ public class WbButton
 			super.setText(newText);
 		}
 	}
+	
+	public void setRollover(boolean flag)
+	{
+		this.setRolloverEnabled(flag);
+		if (flag)
+		{
+			UIDefaults table = UIManager.getLookAndFeelDefaults();
+			Border out = new BasicBorders.RolloverButtonBorder(
+					   table.getColor("controlShadow"),
+             table.getColor("controlDkShadow"),
+             table.getColor("controlHighlight"),
+             table.getColor("controlLtHighlight"));
+			Border in = new EmptyBorder(3,3,3,3);
+			this.rolloverBorder = new CompoundBorder(out, in);
+			this.emptyBorder = new EmptyBorder(6,6,6,6);;
+			this.setBorder(emptyBorder);
+			this.addMouseListener(this);
+		}
+		else
+		{
+			this.addMouseListener(this);
+		}
+	}
+
+	public void mouseClicked(MouseEvent e)
+	{
+	}
+
+	public void mousePressed(MouseEvent e)
+	{
+	}
+
+	public void mouseReleased(MouseEvent e)
+	{
+	}
+
+	public void mouseEntered(MouseEvent e)
+	{
+		this.setBorder(this.rolloverBorder);
+	}
+
+	public void mouseExited(MouseEvent e)
+	{
+		this.setBorder(this.emptyBorder);
+	}
+	
 }
-
-

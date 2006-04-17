@@ -890,6 +890,15 @@ public class MainWindow
 	{
 	}
 
+	private void clearMessageForAllPanels()
+	{
+		for (int i=0; i < this.sqlTab.getTabCount(); i++)
+		{
+			MainPanel sql = this.getSqlPanel(i);;
+			sql.clearStatusMessage();
+		}
+	}
+	
 	/**
 	 *	Display a message in the status bar
 	 */
@@ -1000,7 +1009,6 @@ public class MainWindow
 
 	public void connectFailed(String error)
 	{
-		this.showStatusMessage("");
 		this.setMacroMenuEnabled(false);
 		this.updateWindowTitle();
 		this.dbExplorerAction.setEnabled(false);
@@ -1022,11 +1030,11 @@ public class MainWindow
 
 	public void connectCancelled()
 	{
-		this.showStatusMessage("");
 	}
 
 	public void connectEnded()
 	{
+		clearMessageForAllPanels();
 		this.clearConnectIsInProgress();
 		MainPanel p = this.getCurrentPanel();
 		if (p instanceof SqlPanel)

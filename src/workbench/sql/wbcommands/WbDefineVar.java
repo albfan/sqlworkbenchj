@@ -125,9 +125,9 @@ public class WbDefineVar extends SqlCommand
 			msg = ResourceMgr.getString("MsgVarDefVariableDefined");
 			try
 			{
-				VariablePool.getInstance().setParameterValue(var, value);
-				msg = StringUtil.replace(msg, "%var%", var);
-				msg = StringUtil.replace(msg, "%value%", value);
+				VariablePool.getInstance().setParameterValue(var.trim(), value.trim());
+				msg = StringUtil.replace(msg, "%var%", var.trim());
+				msg = StringUtil.replace(msg, "%value%", value.trim());
 				msg = StringUtil.replace(msg, "%varname%", VariablePool.getInstance().buildVarName(var, false));
 			}
 			catch (IllegalArgumentException e)

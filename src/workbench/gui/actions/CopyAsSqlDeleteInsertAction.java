@@ -12,10 +12,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.KeyStroke;
+import workbench.gui.components.ClipBoardCopier;
 
 import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
@@ -41,7 +38,8 @@ public class CopyAsSqlDeleteInsertAction extends WbAction
 	{
 		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
 		ctrlPressed = ctrlPressed && ((e.getModifiers() & ActionEvent.MOUSE_EVENT_MASK) == ActionEvent.MOUSE_EVENT_MASK);
-		client.copyAsSqlDeleteInsert(false, ctrlPressed);
+		ClipBoardCopier copier = new ClipBoardCopier(this.client);
+		copier.copyAsSqlDeleteInsert(false, ctrlPressed);
 	}
 
 }

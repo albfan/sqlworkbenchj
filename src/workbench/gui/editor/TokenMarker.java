@@ -22,7 +22,7 @@ import java.util.*;
  * cached.
  *
  * @author Slava Pestov
- * @version $Id: TokenMarker.java,v 1.7 2005-09-06 17:44:33 thomas Exp $
+ * @version $Id: TokenMarker.java,v 1.8 2006-04-17 14:55:34 thomas Exp $
  *
  * @see Token
  */

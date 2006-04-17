@@ -207,7 +207,7 @@
     <Component class="javax.swing.JButton" name="manageDriversButton">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelEditDrivers&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblEditDrivers&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="ResourceMgr.getDescription(&quot;EditDrivers&quot;)" type="code"/>
@@ -237,10 +237,10 @@
     <Component class="javax.swing.JButton" name="extendedProps">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelConnExtendedProps&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblConnExtendedProps&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LabelConnExtendedProps&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getDescription(&quot;LblConnExtendedProps&quot;)" type="code"/>
         </Property>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.CompoundBorderInfo">
@@ -267,7 +267,7 @@
     <Component class="javax.swing.JButton" name="helpButton">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelHelp&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblHelp&quot;)" type="code"/>
         </Property>
       </Properties>
       <Events>
@@ -298,10 +298,10 @@
     <Component class="javax.swing.JLabel" name="fetchSizeLabel">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelFetchSize&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblFetchSize&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LabelFetchSize&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getDescription(&quot;LblFetchSize&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -313,7 +313,7 @@
     <Component class="javax.swing.JButton" name="showPassword">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelShowPassword&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblShowPassword&quot;)" type="code"/>
         </Property>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.CompoundBorderInfo">
@@ -347,10 +347,10 @@
           <Properties>
             <Property name="selected" type="boolean" value="true"/>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;LabelSavePassword&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getString(&quot;LblSavePassword&quot;)" type="code"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getDescription(&quot;LabelSavePassword&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getDescription(&quot;LblSavePassword&quot;)" type="code"/>
             </Property>
             <Property name="name" type="java.lang.String" value="storePassword"/>
           </Properties>
@@ -366,10 +366,10 @@
         <Component class="javax.swing.JCheckBox" name="disableTableCheck">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;LabelDisableAutoTableCheck&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getString(&quot;LblDisableAutoTableCheck&quot;)" type="code"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getDescription(&quot;LabelDisableAutoTableCheck&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getDescription(&quot;LblDisableAutoTableCheck&quot;)" type="code"/>
             </Property>
             <Property name="name" type="java.lang.String" value="disableUpdateTableCheck"/>
           </Properties>
@@ -385,10 +385,10 @@
         <Component class="javax.swing.JCheckBox" name="rollbackBeforeDisconnect">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;LabelRollbackBeforeDisconnect&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getString(&quot;LblRollbackBeforeDisconnect&quot;)" type="code"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getDescription(&quot;LabelRollbackBeforeDisconnect&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getDescription(&quot;LblRollbackBeforeDisconnect&quot;)" type="code"/>
             </Property>
             <Property name="name" type="java.lang.String" value="rollbackBeforeDisconnect"/>
           </Properties>
@@ -404,10 +404,10 @@
         <Component class="javax.swing.JCheckBox" name="confirmUpdates">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;LabelConfirmDbUpdates&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getString(&quot;LblConfirmDbUpdates&quot;)" type="code"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getDescription(&quot;LabelConfirmDbUpdates&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getDescription(&quot;LblConfirmDbUpdates&quot;)" type="code"/>
             </Property>
             <Property name="name" type="java.lang.String" value="confirmUpdates"/>
           </Properties>
@@ -424,10 +424,10 @@
           <Properties>
             <Property name="selected" type="boolean" value="true"/>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;LabelIgnoreDropErrors&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getString(&quot;LblIgnoreDropErrors&quot;)" type="code"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getDescription(&quot;LabelIgnoreDropErrors&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getDescription(&quot;LblIgnoreDropErrors&quot;)" type="code"/>
             </Property>
             <Property name="name" type="java.lang.String" value="ignoreDropErrors"/>
           </Properties>
@@ -443,10 +443,10 @@
         <Component class="javax.swing.JCheckBox" name="cbSeparateConnections">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;LabelSeperateConnections&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getString(&quot;LblSeperateConnections&quot;)" type="code"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getDescription(&quot;LabelSeperateConnections&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getDescription(&quot;LblSeperateConnections&quot;)" type="code"/>
             </Property>
             <Property name="name" type="java.lang.String" value="useSeparateConnectionPerTab"/>
           </Properties>
@@ -462,10 +462,10 @@
         <Component class="javax.swing.JCheckBox" name="emptyStringIsNull">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;LabelEmptyStringIsNull&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getString(&quot;LblEmptyStringIsNull&quot;)" type="code"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getDescription(&quot;LabelEmptyStringIsNull&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getDescription(&quot;LblEmptyStringIsNull&quot;)" type="code"/>
             </Property>
             <Property name="name" type="java.lang.String" value="emptyStringIsNull"/>
           </Properties>
@@ -481,10 +481,10 @@
         <Component class="javax.swing.JCheckBox" name="includeNull">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;LabelIncludeNullInInsert&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getString(&quot;LblIncludeNullInInsert&quot;)" type="code"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;LabelIncludeNullInInsert&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getString(&quot;LblIncludeNullInInsert&quot;)" type="code"/>
             </Property>
             <Property name="name" type="java.lang.String" value="includeNullInInsert"/>
           </Properties>
@@ -500,10 +500,10 @@
         <Component class="javax.swing.JCheckBox" name="removeComments">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getString(&quot;LabelRemoveComments&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getString(&quot;LblRemoveComments&quot;)" type="code"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ResourceMgr.getDescription(&quot;LabelRemoveComments&quot;)" type="code"/>
+              <Connection code="ResourceMgr.getDescription(&quot;LblRemoveComments&quot;)" type="code"/>
             </Property>
             <Property name="name" type="java.lang.String" value="removeComments"/>
           </Properties>
@@ -577,10 +577,10 @@
           <ComponentRef name="tfWorkspaceFile"/>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelOpenWksp&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblOpenWksp&quot;)" type="code"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LabelOpenWksp&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getDescription(&quot;LblOpenWksp&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -591,11 +591,14 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel1">
       <Properties>
+        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
+          <ComponentRef name="cbAutocommit"/>
+        </Property>
         <Property name="text" type="java.lang.String" value="Autocommit"/>
       </Properties>
-      <Events>
-        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel1MouseClicked"/>
-      </Events>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new WbCheckBoxLabel();"/>
+      </AuxValues>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
           <GridBagConstraints gridX="0" gridY="6" gridWidth="1" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="5" insetsBottom="3" insetsRight="0" anchor="10" weightX="0.0" weightY="0.0"/>

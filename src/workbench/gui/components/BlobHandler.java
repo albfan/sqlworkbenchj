@@ -14,8 +14,10 @@ package workbench.gui.components;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Frame;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,15 +40,21 @@ import workbench.util.StringUtil;
  */
 public class BlobHandler
 {
-
+	private File uploadFile;
+	
 	public BlobHandler()
 	{
-		
 	}
+	
 	public StringBuffer getByteDisplay(Object value)
 	{
 		long l = getBlobSize(value);
 		return getByteDisplay(l);
+	}
+
+	public File getUploadFile() 
+	{
+		return uploadFile;
 	}
 	
 	public StringBuffer getByteDisplay(long l)
@@ -91,6 +99,11 @@ public class BlobHandler
 				LogMgr.logError("BlobHandler.getBlobSize()", "Could not retrieve blob size",e);
 			}
 		}
+		else if (value instanceof File)
+		{
+			// can happen if a file has been uploaded through the BlobInfoDialog
+			return ((File)value).length();
+		}
 		else if (value instanceof byte[])
 		{
 			byte[] b = (byte[])value;
@@ -121,6 +134,27 @@ public class BlobHandler
 		else if (value instanceof byte[])
 		{
 			return new String((byte[])value);
+		}
+		else if (value instanceof File)
+		{
+			InputStream in = null;
+			try
+			{
+				File f = (File)value;
+				in = new BufferedInputStream(new FileInputStream(f));
+				byte[] buff = new byte[(int)f.length()];
+				in.read(buff);
+				return new String(buff, encoding);
+			}
+			catch (Exception e)
+			{
+				return "";
+			}
+			finally
+			{
+				try { in.close(); } catch (Throwable th) {}
+			}
+			
 		}
 		return value.toString();
 	}
@@ -157,6 +191,19 @@ public class BlobHandler
 				return;
 			}
 		}
+		else if (data instanceof File)
+		{
+			try
+			{
+				in = new FileInputStream((File)data);
+			}
+			catch (Exception ex)
+			{
+				WbSwingUtilities.showErrorMessage(caller, ex.getMessage());
+				return;
+			}
+		}
+		
 		if (in == null) 
 		{
 			LogMgr.logError("WbTable.saveBlobContent", "No valid BLOB data found, got " + data.getClass().getName() + " instead", null);
@@ -212,6 +259,7 @@ public class BlobHandler
 		BlobInfoDialog d = new BlobInfoDialog(parent, true);
 		d.setBlobValue(blobValue);
 		d.setVisible(true);
+		this.uploadFile = d.getUploadedFile();
 		d.dispose();
 	}
 }

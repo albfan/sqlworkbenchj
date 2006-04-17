@@ -18,12 +18,10 @@ import java.awt.EventQueue;
 import java.awt.Window;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.CellEditor;
-import javax.swing.DefaultCellEditor;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -64,11 +62,8 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.DbData;
 import workbench.interfaces.DbUpdater;
-import workbench.interfaces.ExecutionController;
 import workbench.interfaces.Interruptable;
 import workbench.interfaces.JobErrorHandler;
-import workbench.interfaces.ResultLogger;
-import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.StatementRunner;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -108,7 +103,6 @@ public class DwPanel
 	private WbScrollPane scrollPane;
 	private long lastExecutionTime = 0;
 	
-	private boolean success;
 	private boolean hasWarning;
 	private boolean showLoadProgress;
 	
@@ -440,6 +434,7 @@ public class DwPanel
 		catch (SQLException e)
 		{
 			this.lastMessage = ExceptionUtil.getDisplay(e);
+			rows = -1;
 			throw e;
 		}
 		finally
@@ -487,6 +482,7 @@ public class DwPanel
 			{
 				ds.setUpdateTable(table);
 			}
+			checkResultSetActions();
 			this.fireUpdateTableChanged();
 		}
 		finally
@@ -603,8 +599,6 @@ public class DwPanel
 	public void runQuery(String aSql, boolean respectMaxRows)
 		throws SQLException, Exception
 	{
-		this.success = false;
-		
 		this.lastMessage = null;
 		this.statusBar.clearExecutionTime();
 
@@ -628,7 +622,6 @@ public class DwPanel
 				this.showData(result);
 
 				this.lastExecutionTime = result.getExecutionTime();
-				this.success = true;
 			}
 			else
 			{
@@ -735,15 +728,11 @@ public class DwPanel
 		this.deleteRow.setEnabled(updateable && (rows == 1));
 		this.duplicateRow.setEnabled(mayEdit && (rows == 1));
 		this.selectKeys.setEnabled(hasResult);
+		this.dataTable.checkKeyActions();
 	}
 	
 	private boolean oldVerboseLogging = true;
 	
-	
-	public boolean wasSuccessful()
-	{
-		return this.success;
-	}
 	
 	/**
 	 *  This method will update the row info display on the statusbar.
@@ -981,15 +970,15 @@ public class DwPanel
 					d = data;
 			}
 			
-			msg = msg.replaceAll("%statement%", d);
-			msg = msg.replaceAll("%message%", errorMessage);
+			msg = StringUtil.replace(msg,"%statement%", d);
+			msg = StringUtil.replace(msg,"%message%", errorMessage);
 			
 			String r = "";
 			if (errorRow > -1)
 			{
 				r = ResourceMgr.getString("TxtErrorRow").replaceAll("%row%", Integer.toString(errorRow));
 			}
-			msg = msg.replaceAll("%row%", r);
+			msg = StringUtil.replace(msg, "%row%", r);
 		}
 		catch (Exception e)
 		{

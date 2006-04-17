@@ -11,7 +11,6 @@
  */
 package workbench.gui.components;
 
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -19,16 +18,15 @@ import java.awt.event.ActionListener;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-import javax.swing.WindowConstants;
 import workbench.db.exporter.DataExporter;
 import workbench.interfaces.EncodingSelector;
 
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 
 
@@ -134,7 +132,7 @@ public class ExportOptionsPanel
 
 		gbc.gridx = 0;
 		gbc.gridy ++;
-		this.encPanel = new EncodingPanel();
+		this.encPanel = new EncodingPanel(Settings.getInstance().getDefaultFileEncoding());
 		this.add(encPanel, gbc);
 
 		gbc.gridx = 0;

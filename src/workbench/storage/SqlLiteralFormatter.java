@@ -129,6 +129,10 @@ public class SqlLiteralFormatter
 		{
 			return this.defaultDateFormatter.getLiteral((Date)value);
 		}
+		else if (value instanceof File)
+		{
+			return "{$blobfile='" + value.toString() + "'}";
+		}
 		else if (value instanceof NullValue)
 		{
 			return "NULL";

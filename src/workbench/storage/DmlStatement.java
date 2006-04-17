@@ -11,14 +11,18 @@
  */
 package workbench.storage;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import workbench.db.ColumnIdentifier;
 
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
@@ -77,6 +81,9 @@ public class DmlStatement
 	public int execute(WbConnection aConnection)
 		throws SQLException
 	{
+		List readers = new LinkedList();
+		List streams = new LinkedList();
+		
 		PreparedStatement stmt = aConnection.getSqlConnection().prepareStatement(this.sql);
 		for (int i=0; i < this.values.size(); i++)
 		{
@@ -91,7 +98,24 @@ public class DmlStatement
 			{
 				OracleLongType longValue = (OracleLongType)value;
 				Reader in = new StringReader(longValue.getValue());
-				stmt.setCharacterStream(1, in, longValue.getLength());
+				stmt.setCharacterStream(i + 1, in, longValue.getLength());
+				readers.add(in);
+			}
+			else if (value instanceof File)
+			{
+				// Wenn storing data into a blob field, the GUI will
+				// put a File object into the DataStore
+				File f = (File)value;
+				try
+				{
+					InputStream in = new FileInputStream(f);
+					stmt.setBinaryStream(i + 1, in, (int)f.length());
+					streams.add(in);
+				}
+				catch (IOException e)
+				{
+					throw new SQLException("Input file (" + f.getAbsolutePath() + ") for BLOB not found!");
+				}
 			}
 			else
 			{
@@ -100,6 +124,20 @@ public class DmlStatement
 		}
 		int rows = stmt.executeUpdate();
 		stmt.close();
+		Iterator itr = readers.iterator();
+		while (itr.hasNext())
+		{
+			Reader r = (Reader)itr.next();
+			try { r.close(); } catch (Throwable th) {}
+		}
+
+		itr = streams.iterator();
+		while (itr.hasNext())
+		{
+			InputStream s = (InputStream)itr.next();
+			try { s.close(); } catch (Throwable th) {}
+		}
+		
 		return rows;
 	}
 

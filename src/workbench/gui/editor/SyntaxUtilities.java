@@ -22,7 +22,7 @@ import javax.swing.text.Utilities;
  * subsystem.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxUtilities.java,v 1.2 2003-12-16 21:58:37 thomas Exp $
+ * @version $Id: SyntaxUtilities.java,v 1.3 2006-04-17 14:55:34 thomas Exp $
  */
 public class SyntaxUtilities
 {

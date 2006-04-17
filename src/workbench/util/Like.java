@@ -1,14 +1,3 @@
-/*
- * Like.java
- *
- * This file is part of SQL Workbench/J, http://www.sql-workbench.net
- *
- * Copyright 2002-2006, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
- *
- * To contact the author please send an email to: support@sql-workbench.net
- *
- */
 package workbench.util;
 
 import java.util.ArrayList;
@@ -19,7 +8,6 @@ import java.util.StringTokenizer;
  * An instance of this class represents a pattern of the SQL operator LIKE.
  *
  * @author  <a href="mailto:ey@inweb.de?subject=Like Operator">Christian Ey</a>
- * @version $Revision: 1.12 $
  */
 public class Like {
 
@@ -66,7 +54,7 @@ public class Like {
 
     private void init(String ptrn, String esc, boolean ignore) {
         this.ignoreCase = ignore;
-        if (ptrn == null) 
+        if (ptrn == null)
         {
             this.pattern = "";
         }

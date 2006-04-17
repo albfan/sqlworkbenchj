@@ -13,6 +13,7 @@ package workbench.gui.dialogs;
 
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
@@ -24,36 +25,40 @@ import workbench.gui.components.EncodingPanel;
 import workbench.gui.components.WbButton;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.FileDialogUtil;
 
 /**
  *
  * @author  support@sql-workbench.net
  */
-public class BlobInfoDialog 
-	extends JDialog 
+public class BlobInfoDialog
+	extends JDialog
 	implements java.awt.event.MouseListener, java.awt.event.ActionListener, java.awt.event.WindowListener
 {
 	private Object blobValue;
 	private BlobHandler handler;
 	private EscAction escAction;
-
+	private File uploadFile;
+	
 	public BlobInfoDialog(java.awt.Frame parent, boolean modal)
 	{
 		super(parent, modal);
 		initComponents();
 		handler = new BlobHandler();
-		
+
 		getRootPane().setDefaultButton(closeButton);
 		InputMap im = this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 		ActionMap am = this.getRootPane().getActionMap();
 		escAction = new EscAction(this);
 		im.put(escAction.getAccelerator(), escAction.getActionName());
 		am.put(escAction.getActionName(), escAction);
-		
+
 		String encoding = Settings.getInstance().getDefaultBlobTextEncoding();
 		encodingPanel.setEncoding(encoding);
 		WbSwingUtilities.center(this, parent);
 	}
+
+	public File getUploadedFile() { return uploadFile; }
 	
 	public void actionPerformed(ActionEvent e)
 	{
@@ -63,7 +68,7 @@ public class BlobInfoDialog
 			dispose();
 		}
 	}
-	
+
 	private void closeWindow()
 	{
 		EventQueue.invokeLater(new Runnable()
@@ -78,13 +83,31 @@ public class BlobInfoDialog
 	public void setBlobValue(Object value)
 	{
 		this.blobValue = value;
-		String lbl = ResourceMgr.getString("LblBlobSize") + ": ";
+		String lbl = null;
+		if (value instanceof File)
+		{
+			lbl = ResourceMgr.getString("LblFileSize");
+		}
+		else
+		{
+			lbl = ResourceMgr.getString("LblBlobSize");
+		}
 		long len = handler.getBlobSize(blobValue);
-		lbl = lbl + Long.toString(len) + " Byte";
+		lbl = lbl + ": " + Long.toString(len) + " Byte";
 		infoLabel.setText(lbl);
-		infoLabel.setToolTipText(handler.getByteDisplay(len).toString());
+		if (value instanceof File)
+		{
+			infoLabel.setToolTipText(value.toString());
+		}
+		else
+		{
+			infoLabel.setToolTipText(handler.getByteDisplay(len).toString());
+		}
+		saveAsButton.setEnabled(len > 0);
+		showAsTextButton.setEnabled(len > 0);
+		showImageButton.setEnabled(len > 0);
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -102,6 +125,7 @@ public class BlobInfoDialog
     saveAsButton = new WbButton();
     encodingPanel = new EncodingPanel(null, false);
     showImageButton = new javax.swing.JButton();
+    uploadButton = new WbButton();
 
     getContentPane().setLayout(new java.awt.GridBagLayout());
 
@@ -175,6 +199,18 @@ public class BlobInfoDialog
     gridBagConstraints.insets = new java.awt.Insets(2, 8, 2, 5);
     jPanel1.add(showImageButton, gridBagConstraints);
 
+    uploadButton.setText(ResourceMgr.getString("LblUploadFile"));
+    uploadButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3)));
+    uploadButton.addMouseListener(this);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 0.5;
+    gridBagConstraints.insets = new java.awt.Insets(9, 8, 2, 5);
+    jPanel1.add(uploadButton, gridBagConstraints);
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -207,6 +243,10 @@ public class BlobInfoDialog
     else if (evt.getSource() == showImageButton)
     {
       BlobInfoDialog.this.showImageButtonMouseClicked(evt);
+    }
+    else if (evt.getSource() == uploadButton)
+    {
+      BlobInfoDialog.this.uploadButtonMouseClicked(evt);
     }
   }
 
@@ -258,6 +298,16 @@ public class BlobInfoDialog
   {
   }// </editor-fold>//GEN-END:initComponents
 
+	private void uploadButtonMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_uploadButtonMouseClicked
+	{//GEN-HEADEREND:event_uploadButtonMouseClicked
+		String file = FileDialogUtil.getBlobFile(this, false);
+		if (file != null)
+		{
+			this.uploadFile = new File(file);
+		}
+		closeWindow();
+	}//GEN-LAST:event_uploadButtonMouseClicked
+
 	private void showImageButtonMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_showImageButtonMouseClicked
 	{//GEN-HEADEREND:event_showImageButtonMouseClicked
 		ImageViewer v = new ImageViewer(this, ResourceMgr.getString("TxtBlobData"));
@@ -287,7 +337,7 @@ public class BlobInfoDialog
 	{//GEN-HEADEREND:event_closeButtonMouseClicked
 		this.setVisible(false);
 	}//GEN-LAST:event_closeButtonMouseClicked
-	
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   public javax.swing.JButton closeButton;
   public workbench.gui.components.EncodingPanel encodingPanel;
@@ -296,6 +346,7 @@ public class BlobInfoDialog
   public javax.swing.JButton saveAsButton;
   public javax.swing.JButton showAsTextButton;
   public javax.swing.JButton showImageButton;
+  public javax.swing.JButton uploadButton;
   // End of variables declaration//GEN-END:variables
-	
+
 }

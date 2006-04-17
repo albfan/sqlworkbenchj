@@ -347,32 +347,6 @@ public class ResultInfo
 	{
 		if (aColumn > this.colCount) return null;
 		return this.columns[aColumn].getColumnClass();
-//		int type = this.getColumnType(aColumn);
-//		switch (type)
-//		{
-//			case Types.BIGINT:
-//			case Types.INTEGER:
-//				return Long.class;
-//			case Types.SMALLINT:
-//				return Integer.class;
-//			case Types.NUMERIC:
-//			case Types.DECIMAL:
-//				return BigDecimal.class;
-//			case Types.DOUBLE:
-//				return Double.class;
-//			case Types.REAL:
-//			case Types.FLOAT:
-//				return Float.class;
-//			case Types.CHAR:
-//			case Types.VARCHAR:
-//				return String.class;
-//			case Types.DATE:
-//				return java.sql.Date.class;
-//			case Types.TIMESTAMP:
-//				return Timestamp.class;
-//			default:
-//				return this.columns[aColumn].getColumnClass();
-//		}
 	}
 
 	public boolean hasRealPkColumns()

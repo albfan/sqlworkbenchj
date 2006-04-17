@@ -158,10 +158,22 @@ public class FileDialogUtil
 
 	public static String getBlobFile(Component caller)
 	{
+		return getBlobFile(caller, true);
+	}
+	public static String getBlobFile(Component caller, boolean showSaveDialog)
+	{
 		Window parent = SwingUtilities.getWindowAncestor(caller);
 		String lastDir = Settings.getInstance().getLastBlobDir();
 		JFileChooser fc = new JFileChooser(lastDir);
-		int answer = answer = fc.showSaveDialog(parent);
+		int answer = JFileChooser.CANCEL_OPTION;
+		if (showSaveDialog)
+		{
+			answer = fc.showSaveDialog(parent);
+		}
+		else
+		{
+			answer = fc.showOpenDialog(parent);
+		}
 		String filename = null;
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{

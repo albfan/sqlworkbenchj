@@ -48,6 +48,7 @@ import workbench.gui.components.PasswordPropertyEditor;
 import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbButton;
+import workbench.gui.components.WbCheckBoxLabel;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.log.LogMgr;
@@ -104,7 +105,7 @@ public class ConnectionEditorPanel
 		this.editors = new ArrayList(10);
 		initEditorList(this);
 	}
-	
+
 	private void initEditorList(Container parent)
 	{
 		for (int i=0; i < parent.getComponentCount(); i++)
@@ -166,7 +167,7 @@ public class ConnectionEditorPanel
     tfWorkspaceFile = new StringPropertyEditor();
     selectWkspButton = new javax.swing.JButton();
     workspaceFileLabel = new javax.swing.JLabel();
-    jLabel1 = new javax.swing.JLabel();
+    jLabel1 = new WbCheckBoxLabel();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -313,7 +314,7 @@ public class ConnectionEditorPanel
     add(jSeparator1, gridBagConstraints);
 
     manageDriversButton.setText(ResourceMgr.getString("LblEditDrivers"));
-    manageDriversButton.setToolTipText(ResourceMgr.getDescription("EditDrivers"));
+    manageDriversButton.setToolTipText(ResourceMgr.getDescription("LblEditDrivers"));
     manageDriversButton.setMaximumSize(new java.awt.Dimension(200, 25));
     manageDriversButton.setMinimumSize(new java.awt.Dimension(70, 25));
     manageDriversButton.setPreferredSize(new java.awt.Dimension(150, 25));
@@ -560,15 +561,8 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
     add(workspaceFileLabel, gridBagConstraints);
 
+    jLabel1.setLabelFor(cbAutocommit);
     jLabel1.setText("Autocommit");
-    jLabel1.addMouseListener(new java.awt.event.MouseAdapter()
-    {
-      public void mouseClicked(java.awt.event.MouseEvent evt)
-      {
-        jLabel1MouseClicked(evt);
-      }
-    });
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
@@ -577,11 +571,6 @@ public class ConnectionEditorPanel
     add(jLabel1, gridBagConstraints);
 
   }// </editor-fold>//GEN-END:initComponents
-
-	private void jLabel1MouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_jLabel1MouseClicked
-	{//GEN-HEADEREND:event_jLabel1MouseClicked
-		this.cbAutocommit.setSelected(!this.cbAutocommit.isSelected());
-	}//GEN-LAST:event_jLabel1MouseClicked
 
 	private void helpButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_helpButtonActionPerformed
 	{//GEN-HEADEREND:event_helpButtonActionPerformed
@@ -748,7 +737,7 @@ public class ConnectionEditorPanel
 			this.currentProfile.setConnectionProperties(editor.getProperties());
 		}
 	}
-	
+
 	public void selectWorkspace()
 	{
 		FileDialogUtil util = new FileDialogUtil();

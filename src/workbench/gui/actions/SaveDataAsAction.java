@@ -13,6 +13,7 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import workbench.gui.components.WbTable;
+import workbench.gui.dialogs.export.DataStoreExporter;
 
 import workbench.resource.ResourceMgr;
 
@@ -36,6 +37,7 @@ public class SaveDataAsAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.saveAs();
+		DataStoreExporter exporter = new DataStoreExporter(this.client.getDataStore(), this.client);
+		exporter.saveAs();
 	}
 }

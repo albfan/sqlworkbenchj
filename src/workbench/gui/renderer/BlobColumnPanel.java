@@ -20,8 +20,9 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import workbench.gui.components.BlobHandler;
-import workbench.resource.Settings;
+import workbench.resource.ResourceMgr;
 import workbench.storage.NullValue;
+import workbench.util.StringUtil;
 
 /**
  * Renderer for BLOB datatype...
@@ -47,7 +48,8 @@ public class BlobColumnPanel
 		openButton.setFocusable(false);
 		add(label,BorderLayout.WEST);
 		add(openButton,BorderLayout.EAST);
-		openButton.setVisible(false);
+		openButton.setVisible(true);
+		this.setToolTipText(ResourceMgr.getDescription("LblShowBlobInfo", true));
 	}
 
 	public int getButtonWidth()
@@ -63,23 +65,11 @@ public class BlobColumnPanel
 		if (value == null || value instanceof NullValue)
 		{
 			this.label.setText("");
-			this.hideButton();
 		}
 		else
 		{
 			this.label.setText("(BLOB)");
-			this.showButton();
 		}
-		long l = blobHandler.getBlobSize(value);
-		StringBuffer size = blobHandler.getByteDisplay(l);
-		setTooltip(size.toString());
-	}
-	
-	public String getTooltip() { return this.label.getToolTipText(); }
-	public void setTooltip(String tip)
-	{
-		this.label.setToolTipText(tip);
-		this.setToolTipText(tip);
 	}
 	
 	public void addActionListener(ActionListener l)
@@ -115,22 +105,4 @@ public class BlobColumnPanel
 		if (label != null) label.setForeground(c);
 	}
 	
-	public void showButton()
-	{
-		if (openButton != null) 
-		{
-			this.openButton.setVisible(true);
-			this.doLayout();
-		}
-	}
-	
-	public void hideButton()
-	{
-		if (openButton != null) 
-		{
-			this.openButton.setVisible(false);
-			this.doLayout();
-		}
-	}
-
 }

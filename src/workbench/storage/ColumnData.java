@@ -18,6 +18,8 @@ import workbench.db.ColumnIdentifier;
  * and it's definition.
  * The column definition is represented by a {@link workbench.db.ColumnIdentifier}
  * The value can be any Java object
+ * This is used by {@link workbench.storage.DmlStatement} to store the values
+ * when creating PreparedStatements
  * @author support@sql-workbench.net
  */
 public class ColumnData

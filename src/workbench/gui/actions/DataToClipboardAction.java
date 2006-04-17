@@ -18,10 +18,10 @@ import java.awt.event.KeyEvent;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.KeyStroke;
+import workbench.gui.components.ClipBoardCopier;
 import workbench.gui.components.WbTable;
 
 import workbench.resource.ResourceMgr;
-import workbench.util.StringUtil;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
@@ -46,7 +46,8 @@ public class DataToClipboardAction extends WbAction
 		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
 		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
 		ctrlPressed = ctrlPressed && ((e.getModifiers() & ActionEvent.MOUSE_EVENT_MASK) == ActionEvent.MOUSE_EVENT_MASK);
-		client.copyDataToClipboard(!shiftPressed, false, ctrlPressed);
+		ClipBoardCopier copier = new ClipBoardCopier(this.client);
+		copier.copyDataToClipboard(!shiftPressed, false, ctrlPressed);
 	}
 
 	public void addToInputMap(InputMap im, ActionMap am)

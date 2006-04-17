@@ -84,7 +84,7 @@ public class TableDataPanel
 	private JButton config;
 	private JLabel tableNameLabel;
 	private JLabel rowCountLabel;
-	private JButton rowCountButton;
+	private WbButton rowCountButton;
 	private JCheckBox autoRetrieve;
 	private JPanel topPanel;
 
@@ -159,9 +159,10 @@ public class TableDataPanel
 
 		topPanel.add(Box.createHorizontalStrut(10));
 		rowCountButton = new WbButton(ResourceMgr.getString("LblTableDataRowCount"));
+		rowCountButton.setRollover(true);
 		rowCountButton.addActionListener(this);
 		rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountButton"));
-		rowCountButton.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		//rowCountButton.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		rowCountButton.setFocusable(false);
 		topPanel.add(rowCountButton);
 		topPanel.add(Box.createHorizontalStrut(5));

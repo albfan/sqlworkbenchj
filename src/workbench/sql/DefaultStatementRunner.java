@@ -230,6 +230,7 @@ public class DefaultStatementRunner
 		if (aConn == null) return;
 		
 		DbMetadata meta = this.dbConnection.getMetadata();
+		
 		if (meta.isOracle())
 		{
 			this.cmdDispatch.put(WbOraExecute.EXEC.getVerb(), WbOraExecute.EXEC);
@@ -242,7 +243,7 @@ public class DefaultStatementRunner
 			this.dbSpecificCommands.add(WbOraExecute.EXECUTE.getVerb());
 			this.dbSpecificCommands.add(echo.getVerb());
 		}
-		else if (meta.isSqlServer() || meta.isMySql())
+		else if (meta.isSqlServer() || meta.isMySql() || meta.supportsCatalogs())
 		{
 			UseCommand cmd = new UseCommand();
 			this.cmdDispatch.put(cmd.getVerb(), cmd);

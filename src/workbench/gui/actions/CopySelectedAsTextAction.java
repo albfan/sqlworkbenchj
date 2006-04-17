@@ -12,11 +12,10 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
+import workbench.gui.components.ClipBoardCopier;
 import workbench.gui.components.WbTable;
 
 import workbench.resource.ResourceMgr;
-import workbench.util.StringUtil;
 
 /**
  *	Action to copy the contents of a entry field into the clipboard
@@ -50,6 +49,7 @@ public class CopySelectedAsTextAction extends WbAction
 		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
 		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
 		ctrlPressed = ctrlPressed && ((e.getModifiers() & ActionEvent.MOUSE_EVENT_MASK) == ActionEvent.MOUSE_EVENT_MASK);
-		client.copyDataToClipboard(!shiftPressed, true, ctrlPressed);
+		ClipBoardCopier copier = new ClipBoardCopier(this.client);
+		copier.copyDataToClipboard(!shiftPressed, true, ctrlPressed);
 	}
 }

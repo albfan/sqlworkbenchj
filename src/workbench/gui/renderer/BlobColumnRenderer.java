@@ -17,6 +17,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.EventObject;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JTable;
@@ -44,7 +45,6 @@ public class BlobColumnRenderer
 	{
 		super();
 		this.displayPanel = new BlobColumnPanel();
-		this.displayPanel.showButton();
 		this.displayPanel.addActionListener(this);
 	}
 
@@ -135,6 +135,11 @@ public class BlobColumnRenderer
 		else
 		{
 			handler.showBlobInfoDialog(WbManager.getInstance().getCurrentWindow(), currentValue);
+		}
+		File f = handler.getUploadFile();
+		if (f != null) 
+		{
+			currentTable.setValueAt(f, currentRow, currentColumn);
 		}
 	}
 

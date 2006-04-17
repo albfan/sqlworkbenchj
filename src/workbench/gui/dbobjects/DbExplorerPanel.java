@@ -224,49 +224,50 @@ public class DbExplorerPanel
 			setBusy(true);
 			
 			List schemas = this.dbConnection.getMetadata().getSchemas();
-			//LogMgr.logDebug("DbExplorerPanel.readSchemas()", "Retrieved " + (schemas == null ? -1 : schemas.size()) + " schemas from JDBC driver");
-			
 			String currentSchema = this.schemaFromWorkspace;
+			
 			if (currentSchema == null) currentSchema = this.dbConnection.getMetadata().getCurrentSchema();
 			if (currentSchema == null) currentSchema = this.dbConnection.getMetadata().getUserName();
+			
+			if (schemas.size() > 0)
+			{
+				this.schemaSelector.setEnabled(true);
+				this.schemaSelector.setVisible(true);
+				this.schemaLabel.setVisible(true);
 
-			//LogMgr.logDebug("DbExplorerPanel.readSchemas()", "Current schema is: " + currentSchema);
-			
-			this.schemaSelector.removeAllItems();
-			this.schemaSelector.addItem("*");
-			for (int i=0; i < schemas.size(); i++)
-			{
-				String schema = (String)schemas.get(i);
-				if (schema != null) 
+				this.schemaSelector.removeAllItems();
+				this.schemaSelector.addItem("*");
+				for (int i=0; i < schemas.size(); i++)
 				{
-					this.schemaSelector.addItem(schema.trim());
-					if (schema.equalsIgnoreCase(currentSchema)) schemaToSelect = schema;
+					String schema = (String)schemas.get(i);
+					if (schema != null) 
+					{
+						this.schemaSelector.addItem(schema.trim());
+						if (schema.equalsIgnoreCase(currentSchema)) schemaToSelect = schema;
+					}
 				}
+				//LogMgr.logDebug("DbExplorerPanel.readSchemas()", "Selected schema entry: " + schemaToSelect);
+				if (schemaToSelect != null) 
+				{
+					schemaSelector.setSelectedItem(schemaToSelect);
+				}
+				else 
+				{
+					schemaSelector.setSelectedIndex(0);
+				}
+				currentSchema = (String)schemaSelector.getSelectedItem();
 			}
-			//LogMgr.logDebug("DbExplorerPanel.readSchemas()", "Selected schema entry: " + schemaToSelect);
-			if (schemaToSelect != null) 
+			else
 			{
-				schemaSelector.setSelectedItem(schemaToSelect);
+				this.schemaSelector.setEnabled(false);
+				this.schemaSelector.setVisible(false);
+				this.schemaLabel.setVisible(false);
+				currentSchema = null;
 			}
-			else 
-			{
-				schemaSelector.setSelectedIndex(0);
-			}
-			
 			readCatalogs();
 			
-			currentSchema = (String)schemaSelector.getSelectedItem();
 			tables.setCatalogAndSchema(getSelectedCatalog(), currentSchema, false);
       procs.setCatalogAndSchema(getSelectedCatalog(), currentSchema, false);
-
-			Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-			int maxWidth = (int)(d.getWidth() / 2);
-			d = this.schemaSelector.getPreferredSize();
-			if (d.getWidth() > maxWidth)
-			{
-				d = new Dimension(maxWidth, 20);
-				this.schemaSelector.setMaximumSize(d);
-			}
 		}
 		catch (Throwable e)
 		{
@@ -447,7 +448,7 @@ public class DbExplorerPanel
 		}
 		else
 		{
-			String cat = "  " + StringUtil.capitalize(this.dbConnection.getMetadata().getCatalogTerm());
+			String cat = StringUtil.capitalize(this.dbConnection.getMetadata().getCatalogTerm());
 
 			this.catalogSelector.removeAllItems();
 			this.catalogLabel.setText(cat);

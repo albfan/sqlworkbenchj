@@ -18,7 +18,7 @@
           <Connection code="null" type="code"/>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelDriverName&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblDriverName&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -55,7 +55,7 @@
           <Connection code="null" type="code"/>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelDriverClass&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblDriverClass&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -87,7 +87,7 @@
           <Connection code="null" type="code"/>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelDriverLibrary&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblDriverLibrary&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>
@@ -153,7 +153,7 @@
           <Connection code="null" type="code"/>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LabelSampleUrl&quot;)" type="code"/>
+          <Connection code="ResourceMgr.getString(&quot;LblSampleUrl&quot;)" type="code"/>
         </Property>
       </Properties>
       <Constraints>

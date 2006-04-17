@@ -30,6 +30,7 @@ import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.MacroChangeListener;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 
 /**
@@ -43,7 +44,9 @@ public class MacroManager
 	private boolean modified = false;
 	private List changeListeners = null;
 	private boolean errorDuringLoad = false;
-
+	private String selectedTextKey = Settings.getInstance().getProperty("workbench.macro.key.selectedtext", "${selected}$");
+	private String currentStatementKey = Settings.getInstance().getProperty("workbench.macro.key.currentstatement", "${current}$");
+	
 	public static MacroManager getInstance()
 	{
 		return instance;
@@ -58,10 +61,33 @@ public class MacroManager
 	{
 		loadIfNecessary();
 		if (aKey == null) return null;
-		return (String)this.macros.get(aKey.toLowerCase());
+		String sql = (String)this.macros.get(aKey.toLowerCase());
+		return sql;
 	}
 
-
+	public synchronized boolean hasSelectedKey(String sql)
+	{
+		if (sql == null) return false;
+		return (sql.indexOf(selectedTextKey) > - 1);
+	}
+	
+	public synchronized boolean hasCurrentKey(String sql)
+	{
+		if (sql == null) return false;
+		return (sql.indexOf(currentStatementKey) > - 1);
+	}
+	
+	public synchronized String replaceCurrent(String sql, String statementAtCursor)
+	{
+		return StringUtil.replace(sql, currentStatementKey, statementAtCursor);
+		
+	}
+	
+	public synchronized String replaceSelected(String sql, String selectedText)
+	{
+		return StringUtil.replace(sql, selectedTextKey, selectedText);
+	}
+	
 	public synchronized void removeMacro(String aKey)
 	{
 		loadIfNecessary();
