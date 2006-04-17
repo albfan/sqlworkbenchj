@@ -21,7 +21,6 @@ public class WbCheckBox
 	extends JCheckBox
 {
 	
-	/** Creates a new instance of WbCheckBox */
 	public WbCheckBox()
 	{
 	}
