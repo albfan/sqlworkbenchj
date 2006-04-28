@@ -102,64 +102,9 @@ public class StatementContext
 		return analyzer.getColumnPrefix();
 	}
 	
-//	private final Pattern SUBSELECT_PATTERN = Pattern.compile("\\(\\s*SELECT.*FROM.*?\\)", Pattern.CASE_INSENSITIVE + Pattern.DOTALL);
-	private final Pattern INSERT_SELECT_PATTERN = Pattern.compile("INSERT\\s+INTO\\s+.*\\s+SELECT\\s+", Pattern.CASE_INSENSITIVE + Pattern.DOTALL);
-	private final Pattern SELECT_PATTERN = Pattern.compile("SELECT\\s+", Pattern.CASE_INSENSITIVE);
-//	private final Pattern OPEN_BRACKET = Pattern.compile("^\\s*\\(\\s*");
-//	private final Pattern CLOSE_BRACKET = Pattern.compile("\\s*\\)\\s*$");
+//	private final Pattern INSERT_SELECT_PATTERN = Pattern.compile("INSERT\\s+INTO\\s+.*\\s+SELECT\\s+", Pattern.CASE_INSENSITIVE + Pattern.DOTALL);
+//	private final Pattern SELECT_PATTERN = Pattern.compile("SELECT\\s+", Pattern.CASE_INSENSITIVE);
 	
-//	private boolean inSubSelect(WbConnection conn, String sql, int pos)
-//	{
-//		Matcher m = SUBSELECT_PATTERN.matcher(sql);
-//		int start = 0;
-//		int end = -1;
-//		while (m.find())
-//		{
-//			start = m.start();
-//			end = m.end();
-//			if (pos > start && pos < end)
-//			{
-//				int newpos = pos - start;
-//				
-//				// cleanup the brackets, and adjust the position
-//				// to reflect the removed brackets at the beginning
-//				String subselect = sql.substring(start, end);
-//				Matcher o = OPEN_BRACKET.matcher(subselect);
-//				
-//				// the find() is necessary in order to get the correct
-//				// value from end()
-//				if (o.find())
-//				{
-//					int oend = o.end(); // is actually the number of characters that we'll remove
-//					newpos -= oend;
-//					subselect = o.replaceAll("");
-//				}
-//				
-//				Matcher c = CLOSE_BRACKET.matcher(subselect);
-//				subselect = c.replaceAll("");
-//				analyzer = new SelectAnalyzer(conn, subselect, newpos);
-//				return true;
-//			}
-//		}
-//		
-//		m = INSERT_SELECT_PATTERN.matcher(sql);
-//		if (m.find())
-//		{
-//			Matcher s = SELECT_PATTERN.matcher(sql);
-//			if (s.find())
-//			{
-//				int selectStart = s.start();
-//				if (selectStart < pos)
-//				{
-//					String subselect = sql.substring(selectStart).trim();
-//					int newpos = pos - selectStart;
-//					analyzer = new SelectAnalyzer(conn, subselect, newpos);
-//					return true;
-//				}
-//			}
-//		}
-//		return false;
-//	}
 	private boolean inSubSelect(WbConnection conn, String sql, int pos)
 	{
 		try
@@ -172,9 +117,12 @@ public class StatementContext
 			
 			int lastStart = 0;
 			int lastEnd = 0;
+			String verb = t.getContents();
 			
 			int bracketCount = 0;
 			boolean inSubselect = false;
+			boolean checkForInsertSelect = verb.equals("INSERT");
+			
 			while (t != null)
 			{
 				String value = t.getContents();
@@ -204,7 +152,16 @@ public class StatementContext
 						lastEnd = 0;
 					}
 				}
-				
+				else if (bracketCount == 0 && checkForInsertSelect && value.equals("SELECT"))
+				{
+					if (pos >= t.getCharBegin())
+					{
+						int newPos = pos - t.getCharBegin();
+						analyzer = new SelectAnalyzer(conn, sql.substring(t.getCharBegin()), newPos);
+						return true;
+					}
+				}
+					
 				if (bracketCount == 1 && lastToken.getContents().equals("(") && t.getContents().equals("SELECT"))
 				{
 					inSubselect = true;
@@ -218,22 +175,22 @@ public class StatementContext
 		{
 		}
 		
-		Matcher m = INSERT_SELECT_PATTERN.matcher(sql);
-		if (m.find())
-		{
-			Matcher s = SELECT_PATTERN.matcher(sql);
-			if (s.find())
-			{
-				int selectStart = s.start();
-				if (selectStart < pos)
-				{
-					String subselect = sql.substring(selectStart).trim();
-					int newpos = pos - selectStart;
-					analyzer = new SelectAnalyzer(conn, subselect, newpos);
-					return true;
-				}
-			}
-		}
+//		Matcher m = INSERT_SELECT_PATTERN.matcher(sql);
+//		if (m.find())
+//		{
+//			Matcher s = SELECT_PATTERN.matcher(sql);
+//			if (s.find())
+//			{
+//				int selectStart = s.start();
+//				if (selectStart < pos)
+//				{
+//					String subselect = sql.substring(selectStart).trim();
+//					int newpos = pos - selectStart;
+//					analyzer = new SelectAnalyzer(conn, subselect, newpos);
+//					return true;
+//				}
+//			}
+//		}
 		return false;
 	}
 	

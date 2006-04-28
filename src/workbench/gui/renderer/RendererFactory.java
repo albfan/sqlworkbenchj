@@ -113,6 +113,11 @@ public class RendererFactory
 		}
 	}
 
+	public static TableCellRenderer getSqlTypeRenderer()
+	{
+		return createRenderer("workbench.gui.renderer.SqlTypeRenderer");
+	}
+	
 	public static TableCellRenderer getClobRenderer()
 	{
 		return createRenderer("workbench.gui.renderer.ClobColumnRenderer");

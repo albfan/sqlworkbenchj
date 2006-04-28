@@ -70,12 +70,13 @@ public class TabbedPaneUIFactory
 				return "workbench.gui.components.BorderLessMetalTabbedPaneUI";
 			}
 		}
-		return UIManager.getDefaults().getString("TabbedPaneUI");
+		return null;// UIManager.getDefaults().getString("TabbedPaneUI");
 	}
 	
 	public static TabbedPaneUI getBorderLessUI()
 	{
 		String uiClass = getTabbedPaneUIClass();
+		if (uiClass == null) return null;
 		return getClassInstance(uiClass);
 	}
 	
@@ -90,9 +91,9 @@ public class TabbedPaneUIFactory
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
 			JTabbedPane pane = new JTabbedPane();
 			ui = (TabbedPaneUI)UIManager.getUI(pane);
+			UIManager.getDefaults().put("TabbedPaneUI", ui.getClass().getName());
 		}
 		return ui;
 	}

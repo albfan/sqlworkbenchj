@@ -96,7 +96,7 @@
    <string>PostgreSQL</string> 
    <object class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
-     <string>SELECT ''''|| p.prosrc|| '''\nLANGUAGE '||l.lanname
+     <string>SELECT '$$'|| p.prosrc|| '$$\nLANGUAGE '||l.lanname
 FROM pg_proc p, pg_language l
 where p.prolang = l.oid
 </string> 

@@ -80,6 +80,52 @@ public class BlobHandler
 		return result;
 	}
 	
+	public byte[] getBlobAsArray(Object value)
+	{
+		if (value == null) return null;
+		if (value instanceof NullValue) return null;
+		
+		if (value instanceof Blob)
+		{
+			Blob blob = (Blob)value;
+			try
+			{
+				byte[] buffer = blob.getBytes(1, (int)blob.length());
+				return buffer;
+			}
+			catch (Exception e)
+			{
+				return null;
+			}
+		}
+		else if (value instanceof byte[])
+		{
+			return (byte[])value;
+		}
+		else if (value instanceof File)
+		{
+			InputStream in = null;
+			try
+			{
+				File f = (File)value;
+				in = new BufferedInputStream(new FileInputStream(f));
+				byte[] buff = new byte[(int)f.length()];
+				in.read(buff);
+				return buff;
+			}
+			catch (Exception e)
+			{
+				return null;
+			}
+			finally
+			{
+				try { in.close(); } catch (Throwable th) {}
+			}
+			
+		}
+		return null;
+	}
+	
 	public long getBlobSize(Object value)
 	{
 		if (value == null) return 0;
@@ -253,7 +299,7 @@ public class BlobHandler
 		w.setVisible(true);
 		w.dispose();
 	}
-	
+
 	public void showBlobInfoDialog(Frame parent, Object blobValue)
 	{
 		BlobInfoDialog d = new BlobInfoDialog(parent, true);

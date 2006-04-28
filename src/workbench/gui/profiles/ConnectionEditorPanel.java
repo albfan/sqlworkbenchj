@@ -163,6 +163,7 @@ public class ConnectionEditorPanel
     emptyStringIsNull = new BooleanPropertyEditor();
     includeNull = new BooleanPropertyEditor();
     removeComments = new BooleanPropertyEditor();
+    rememberExplorerSchema = new BooleanPropertyEditor();
     jPanel1 = new javax.swing.JPanel();
     tfWorkspaceFile = new StringPropertyEditor();
     selectWkspButton = new javax.swing.JButton();
@@ -503,6 +504,17 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
     wbOptionsPanel.add(removeComments, gridBagConstraints);
 
+    rememberExplorerSchema.setText(ResourceMgr.getString("LblRememberSchema"));
+    rememberExplorerSchema.setToolTipText(ResourceMgr.getDescription("LblRememberSchema"));
+    rememberExplorerSchema.setName("storeExplorerSchema");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
+    wbOptionsPanel.add(rememberExplorerSchema, gridBagConstraints);
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 9;
@@ -681,6 +693,7 @@ public class ConnectionEditorPanel
   private javax.swing.JLabel lblUrl;
   private javax.swing.JLabel lblUsername;
   private javax.swing.JButton manageDriversButton;
+  private javax.swing.JCheckBox rememberExplorerSchema;
   private javax.swing.JCheckBox removeComments;
   private javax.swing.JCheckBox rollbackBeforeDisconnect;
   private javax.swing.JButton selectWkspButton;

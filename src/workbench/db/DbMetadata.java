@@ -2339,14 +2339,19 @@ public class DbMetadata
 	public List getSelectableObjectsList(String schema)
 		throws SQLException
 	{
-		return getTableList(null, schema, TABLE_TYPES_SELECTABLE);
+		return getTableList(null, schema, TABLE_TYPES_SELECTABLE, false);
 	}
 
-	/**
+	public List getTableList(String table, String schema, String[] types)
+		throws SQLException
+	{
+		return getTableList(table, schema, types, false);
+	}
+		/**
 	 * Return a list of tables for the given schema
 	 * if the schema is null, all tables will be returned
 	 */
-	public List getTableList(String table, String schema, String[] types)
+	public List getTableList(String table, String schema, String[] types, boolean returnAllSchemas)
 		throws SQLException
 	{
 		DataStore ds = getTables(null, schema, table, types);
@@ -2357,7 +2362,7 @@ public class DbMetadata
 			String t = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_NAME);
 			String s = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_SCHEMA);
 			String c = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_CATALOG);
-			if (this.ignoreSchema(s))
+			if (!returnAllSchemas && this.ignoreSchema(s))
 			{
 				s = null;
 			}

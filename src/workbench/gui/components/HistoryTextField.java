@@ -59,7 +59,6 @@ public class HistoryTextField
 	public void restoreSettings(PropertyStorage props, String prefix)
 	{
 		String s = props.getProperty(prefix + "history", "");
-		
 		List l = StringUtil.stringToList(s, ";", true, true);
 		this.historyValues.addAll(l);
 		this.updateModel();

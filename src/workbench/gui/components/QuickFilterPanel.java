@@ -218,7 +218,9 @@ public class QuickFilterPanel
 
 	public void restoreSettings(PropertyStorage props, String prefix)
 	{
+		filterValue.removeActionListener(this);
 		filterValue.restoreSettings(props, prefix);
+		filterValue.addActionListener(this);
 	}
 	
 	public void saveSettings()
@@ -228,7 +230,9 @@ public class QuickFilterPanel
 	
 	public void restoreSettings()
 	{
+		filterValue.removeActionListener(this);
 		filterValue.restoreSettings();
+		filterValue.addActionListener(this);
 	}
 	
 	public void setFocusToEntryField()
@@ -322,9 +326,6 @@ public class QuickFilterPanel
 
 	public void mouseClicked(MouseEvent e)
 	{
-		if (e.getButton() == MouseEvent.BUTTON3 && e.getSource() == this.filterValue)
-		{
-		}
 	}
 
 	public void mouseEntered(java.awt.event.MouseEvent e) {}

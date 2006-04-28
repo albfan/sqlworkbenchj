@@ -21,6 +21,7 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicBorders;
+import workbench.resource.ResourceMgr;
 
 /**
  *
@@ -33,6 +34,7 @@ public class WbButton
 	private Border rolloverBorder;
 	private Border emptyBorder;
 	private Border lastBorder;
+	
 	public WbButton()
 	{
 		super();
@@ -54,6 +56,12 @@ public class WbButton
 	private void init()
 	{
 		putClientProperty("jgoodies.isNarrow", Boolean.FALSE);
+	}
+	
+	public void setResourceKey(String key)
+	{
+		this.setText(ResourceMgr.getString(key));
+		this.setToolTipText(ResourceMgr.getDescription(key));
 	}
 	
 	public void setText(String newText)

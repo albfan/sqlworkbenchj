@@ -225,12 +225,12 @@
             Basically I'm using these builds myself on a daily basis, and it should be pretty safe to use them.<br/><br/>
             Bugfixes will show up in these builds first. <a href="dev-history.txt" target="_blank">Change history</a>
         </p>
-        <p>The development build is not a full release. It contains only the Workbench.jar binary. The update
+        <p>The development build is not a full release. It contains only the Workbench.jar binary. The updated
         help is contained in that file, but no PDF or HTML help files are available. The source code
         for the development build is also available.
         </p>
       <ul>
-        <li><a href="Workbench.jar">JAR File</a> (Build <xsl:value-of select="$devBuildNumber"/>,&nbsp;<xsl:value-of select="$devBuildDate"/>)</li>
+        <li><a href="Workbench-Build{$devBuildNumber}.zip">ZIP Archive</a> (Build <xsl:value-of select="$devBuildNumber"/>,&nbsp;<xsl:value-of select="$devBuildDate"/>)</li>
         <li><a href="WorkbenchSrc-Build{$devBuildNumber}.zip">Source code</a></li>
        </ul>
     </xsl:if>

@@ -877,19 +877,19 @@ public class StringUtil
 					{
 						outBuffer.append('\\');
 						outBuffer.append('u');
-						outBuffer.append(toHex((aChar >> 12) & 0xF));
-						outBuffer.append(toHex((aChar >>  8) & 0xF));
-						outBuffer.append(toHex((aChar >>  4) & 0xF));
-						outBuffer.append(toHex( aChar        & 0xF));
+						outBuffer.append(hexDigit((aChar >> 12) & 0xF));
+						outBuffer.append(hexDigit((aChar >>  8) & 0xF));
+						outBuffer.append(hexDigit((aChar >>  4) & 0xF));
+						outBuffer.append(hexDigit( aChar        & 0xF));
 					}
 					else if (specialSaveChars != null && specialSaveChars.indexOf(aChar) > -1)
 					{
 						outBuffer.append('\\');
 						outBuffer.append('u');
-						outBuffer.append(toHex((aChar >> 12) & 0xF));
-						outBuffer.append(toHex((aChar >>  8) & 0xF));
-						outBuffer.append(toHex((aChar >>  4) & 0xF));
-						outBuffer.append(toHex( aChar        & 0xF));
+						outBuffer.append(hexDigit((aChar >> 12) & 0xF));
+						outBuffer.append(hexDigit((aChar >>  8) & 0xF));
+						outBuffer.append(hexDigit((aChar >>  4) & 0xF));
+						outBuffer.append(hexDigit( aChar        & 0xF));
 					}
 					else
 					{
@@ -900,7 +900,7 @@ public class StringUtil
 		return outBuffer.toString();
 	}
 
-	public static char toHex(int nibble)
+	private static char hexDigit(int nibble)
 	{
 		return hexDigit[(nibble & 0xF)];
 	}

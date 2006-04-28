@@ -494,6 +494,7 @@ public class DataStore
 	{
 		this.useUpdateTable(aTablename, false);
 	}
+	
 	public void useUpdateTable(String aTablename, boolean updatePk)
 	{
 		// A connection-less update table is used to
@@ -533,8 +534,15 @@ public class DataStore
 	 */
 	public void setUpdateTable(String aTablename, WbConnection aConn)
 	{
-		TableIdentifier tbl = new TableIdentifier(aTablename);
-		setUpdateTable(tbl, aConn);
+		if (aTablename == null || aTablename.trim().length() == 0)
+		{
+			setUpdateTable((TableIdentifier)null, aConn);
+		}
+		else
+		{
+			TableIdentifier tbl = new TableIdentifier(aTablename);
+			setUpdateTable(tbl, aConn);
+		}
 	}
 
 	public void setUpdateTable(TableIdentifier tbl)

@@ -44,6 +44,7 @@ public class RunMacroAction extends WbAction
 		this.setMenuText(menuTitle);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
 		String desc = ResourceMgr.getDescription("MnuTxtRunMacro", true);
+		desc = StringUtil.replace(desc, "%macro%", aName);
 		this.putValue(Action.SHORT_DESCRIPTION, desc);
 		this.setIcon(null);
 	}

@@ -44,8 +44,10 @@ public class MacroManager
 	private boolean modified = false;
 	private List changeListeners = null;
 	private boolean errorDuringLoad = false;
-	private String selectedTextKey = Settings.getInstance().getProperty("workbench.macro.key.selectedtext", "${selected}$");
-	private String currentStatementKey = Settings.getInstance().getProperty("workbench.macro.key.currentstatement", "${current}$");
+	private String selectedTextKey = Settings.getInstance().getProperty("workbench.macro.key.selectioin", "${selection}$");
+	private String selectedStatementKey = Settings.getInstance().getProperty("workbench.macro.key.selectedstmt", "${selected_statement}$");
+	private String currentStatementKey = Settings.getInstance().getProperty("workbench.macro.key.currentstatement", "${current_statement}$");
+	private String editorTextKey = Settings.getInstance().getProperty("workbench.macro.key.editortext", "${text}$");
 	
 	public static MacroManager getInstance()
 	{
@@ -65,10 +67,16 @@ public class MacroManager
 		return sql;
 	}
 
+	public synchronized boolean hasTextKey(String sql)
+	{
+		if (sql == null) return false;
+		return (sql.indexOf(editorTextKey) > - 1);
+	}
+	
 	public synchronized boolean hasSelectedKey(String sql)
 	{
 		if (sql == null) return false;
-		return (sql.indexOf(selectedTextKey) > - 1);
+		return (sql.indexOf(selectedTextKey) > - 1) || (sql.indexOf(selectedStatementKey) > -1);
 	}
 	
 	public synchronized boolean hasCurrentKey(String sql)
@@ -79,13 +87,34 @@ public class MacroManager
 	
 	public synchronized String replaceCurrent(String sql, String statementAtCursor)
 	{
+		if (statementAtCursor == null || sql == null) return sql;
 		return StringUtil.replace(sql, currentStatementKey, statementAtCursor);
-		
+	}
+	
+	public synchronized String replaceEditorText(String sql, String text)
+	{
+		if (text == null || sql == null) return sql;
+		return StringUtil.replace(sql, currentStatementKey, text);
 	}
 	
 	public synchronized String replaceSelected(String sql, String selectedText)
 	{
-		return StringUtil.replace(sql, selectedTextKey, selectedText);
+		if (selectedText == null || sql == null) return sql;
+		
+		if (sql.indexOf(selectedTextKey) > -1)
+		{
+			return StringUtil.replace(sql, selectedTextKey, selectedText);
+		}
+		else if (sql.indexOf(selectedStatementKey) > -1)
+		{
+			String stmt = selectedText.trim();
+			if (stmt.endsWith(";"))
+			{
+				stmt = stmt.substring(0, stmt.length() - 1);
+			}
+			return StringUtil.replace(sql, selectedStatementKey, stmt);
+		}
+		return sql;
 	}
 	
 	public synchronized void removeMacro(String aKey)

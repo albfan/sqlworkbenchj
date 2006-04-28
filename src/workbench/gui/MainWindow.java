@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.Action;
@@ -42,10 +43,10 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
-import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -103,6 +104,8 @@ import workbench.gui.actions.FileSaveProfiles;
 import workbench.gui.actions.OptionsDialogAction;
 import workbench.gui.actions.ShowHelpAction;
 import workbench.gui.actions.WhatsNewAction;
+import workbench.gui.lnf.LnFDefinition;
+import workbench.gui.lnf.LnFManager;
 
 /**
  * The main window for the Workbench.
@@ -115,7 +118,7 @@ import workbench.gui.actions.WhatsNewAction;
  */
 public class MainWindow
 	extends JFrame
-	implements ActionListener, MouseListener, WindowListener, ChangeListener, DropTargetListener,
+	implements MouseListener, WindowListener, ChangeListener, DropTargetListener,
 						FilenameChangeListener, MacroChangeListener, DbExecutionListener, Connectable
 {
 	private static final String DEFAULT_WORKSPACE = "%ConfigDir%/Default.wksp";
@@ -892,11 +895,18 @@ public class MainWindow
 
 	private void clearMessageForAllPanels()
 	{
-		for (int i=0; i < this.sqlTab.getTabCount(); i++)
+		final JTabbedPane tab = this.sqlTab;
+		EventQueue.invokeLater(new Runnable()
 		{
-			MainPanel sql = this.getSqlPanel(i);;
-			sql.clearStatusMessage();
-		}
+			public void run()
+			{
+				for (int i=0; i < tab.getTabCount(); i++)
+				{
+					MainPanel sql = getSqlPanel(i);;
+					sql.clearStatusMessage();
+				}
+			}
+		});
 	}
 	
 	/**
@@ -1125,32 +1135,33 @@ public class MainWindow
 			this.adjustTabCount(entryCount);
 			//this.sqlTab.setSelectedIndex(0);
 
-			for (int i=0; i < entryCount; i++)
+			int explorerCount = w.getDbExplorerVisibleCount();
+			this.adjustDbExplorerCount(explorerCount);
+		
+			int count = this.sqlTab.getTabCount();
+			for (int i=0; i < count; i++)
 			{
 				MainPanel p = this.getSqlPanel(i);
+				p.readFromWorkspace(w,i);
 				if (p instanceof SqlPanel)
 				{
 					SqlPanel sql = (SqlPanel)p;
 					sql.closeFile(true);
-					sql.clearSqlStatements();
-					sql.readFromWorkspace(w,i);
 					sql.setTabTitle(this.sqlTab, i);
 					updateViewMenu(i, getPlainTabTitle(i));
 				}
 			}
 			this.currentWorkspaceFile = realFilename;
 
-			int explorerCount = w.getDbExplorerVisibleCount();
-			this.adjustDbExplorerCount(explorerCount);
-			int count = this.sqlTab.getTabCount();
-			for (int i=0; i < count; i++)
-			{
-				MainPanel p = this.getSqlPanel(i);
-				if (p instanceof DbExplorerPanel)
-				{
-					p.readFromWorkspace(w,i);
-				}
-			}
+//			int count = this.sqlTab.getTabCount();
+//			for (int i=0; i < count; i++)
+//			{
+//				MainPanel p = this.getSqlPanel(i);
+//				if (p instanceof DbExplorerPanel)
+//				{
+//					p.readFromWorkspace(w,i);
+//				}
+//			}
 
 			result = true;
 			
@@ -1181,7 +1192,7 @@ public class MainWindow
 				SqlPanel p = getCurrentSqlPanel();
 				if (p != null)
 				{
-					p.scrollEditorToCursor();
+					p.getEditor().scrollToCaret();
 				}
 				validate();
 				updateWindowTitle();
@@ -1495,39 +1506,6 @@ public class MainWindow
 		return null;
 	}
 
-	/**
-	 *	Remove the action to select a specific SQL tab
-	 *  from the view menu
-	 */
-//	private void removeFromViewMenu(int sqlTabIndex)
-//	{
-//		int panelCount = this.panelMenus.size();
-//		for (int i=0; i < panelCount; i++)
-//		{
-//			JMenu view = this.getViewMenu(i);
-//
-//			int count = view.getItemCount();
-//			for (int k=0; k < count; k++)
-//			{
-//        JMenuItem item = view.getItem(k);
-//        if (item == null) continue;
-//        Action ac = item.getAction();
-//        if (ac == null) continue;
-//
-//        if (ac instanceof SelectTabAction)
-//				{
-//	        SelectTabAction a = (SelectTabAction)ac;
-//
-//					if (a.getIndex() == sqlTabIndex)
-//					{
-//						view.remove(k);
-//						break;
-//					}
-//				}
-//			}
-//		}
-//	}
-
 	private void updateViewMenu(int sqlTabIndex, String aName)
 	{
 		int panelCount = this.panelMenus.size();
@@ -1608,8 +1586,8 @@ public class MainWindow
 				{
 					// no index found which is greater or equal than the new one
 					// so add it to the end
-	        if (!(view.getItem(count -1).getAction() instanceof SelectTabAction))
-          view.addSeparator();
+					if (!(view.getItem(count -1).getAction() instanceof SelectTabAction))
+					view.addSeparator();
 
 					view.add(anAction.getMenuItem());
 				}
@@ -1652,6 +1630,7 @@ public class MainWindow
 		finally
 		{
 			WbSwingUtilities.showDefaultCursor(this);
+			aPanel.clearStatusMessage();
 		}
 		return conn;
 	}
@@ -1822,8 +1801,8 @@ public class MainWindow
 	/**
 	 * Create the tools menu for a panel menu. This will be called
 	 * for each panel that gets added to the main window.
-	 * Actions that are singletons (like the db explorer stuff
-	 * should not be created here)
+	 * Actions that are singletons (like the db explorer stuff)
+	 * should not be created here
 	 */
 	public JMenu buildToolsMenu()
 	{
@@ -1842,28 +1821,6 @@ public class MainWindow
 		result.add(OptionsDialogAction.getInstance());
 		result.add(ConfigureShortcutsAction.getInstance());
 
-		JMenu lnf = new WbMenu(ResourceMgr.getString("MnuTxtLookAndFeel"));
-		lnf.setName("lnf");
-		LookAndFeelInfo[] info = UIManager.getInstalledLookAndFeels();
-		String current = UIManager.getLookAndFeel().getClass().getName();
-
-		for (int i=0; i < info.length; i++)
-		{
-			JCheckBoxMenuItem item = new JCheckBoxMenuItem(info[i].getName());
-			if (current.equals(info[i].getClassName()))
-			{
-				item.setSelected(true);
-			}
-			else
-			{
-				item.setSelected(false);
-			}
-			item.putClientProperty("command", "lnf");
-			item.putClientProperty("class", info[i].getClassName());
-			item.addActionListener(this);
-			lnf.add(item);
-		}
-		result.add(lnf);
 		return result;
 	}
 
@@ -1994,22 +1951,6 @@ public class MainWindow
 			}
 		}
 	}
-
-//	private void removeAllTabs()
-//	{
-//		try
-//		{
-//			while (this.sqlTab.getTabCount() > 0)
-//			{
-//				this.removeLastTab(true);
-//			}
-//		}
-//		finally
-//		{
-//			//if (!suspended) this.sqlTab.setSuspendRepaint(false);
-//		}
-//	}
-
 
 	/**
 	 *	Sets the default title for all tab titles
@@ -2511,37 +2452,6 @@ public class MainWindow
 			if (!inProgress) this.clearConnectIsInProgress();
 		}
 		if (newTab >= 0) this.tabSelected(newTab);
-	}
-
-	public void actionPerformed(ActionEvent e)
-	{
-		JMenuItem item = (JMenuItem)e.getSource();
-		String command = (String)item.getClientProperty("command");
-		if ("lnf".equals(command))
-		{
-			String className = (String)item.getClientProperty("class");
-			try
-			{
-				WbManager.getInstance().changeLookAndFeel(className);
-				for (int i=0; i < this.sqlTab.getTabCount(); i ++)
-				{
-					JMenuBar menu = (JMenuBar)this.panelMenus.get(i);
-					SwingUtilities.updateComponentTreeUI(menu);
-				}
-				try
-				{
-					this.updateToolsMenu();
-				}
-				catch (Exception upe)
-				{
-					LogMgr.logWarning("MainWindow.actionPerformed()", "Error updating LNF menu", upe);
-				}
-			}
-			catch (Exception ex)
-			{
-				LogMgr.logError("MainWindow.actionPerformed()", "Could not change look and feel", ex);
-			}
-		}
 	}
 
 	public void mouseClicked(MouseEvent e)

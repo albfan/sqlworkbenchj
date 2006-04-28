@@ -137,6 +137,7 @@ public class SqlUtil
 				js.add("FULL");
 				js.add("RIGHT");
 				js.add("LEFT");
+				js.add("OUTER");
 				int lastStart = 0;
 				int lastJoinStart = 0;
 				boolean hadJoin = false;
@@ -167,16 +168,19 @@ public class SqlUtil
 							lastStart = t.getCharEnd();
 						}
 					}
-					else if ("JOIN".equals(s) && lastStart > -1 && lastJoinStart > lastStart)
+					else if ("JOIN".equals(s) )
 					{
-						String table = from.substring(lastStart, lastJoinStart).trim();
-						if (includeAlias)
+						if (lastStart > -1 && lastJoinStart > lastStart)
 						{
-							result.add(table);
-						}
-						else
-						{
-							result.add(stripTableAlias(table));
+							String table = from.substring(lastStart, lastJoinStart).trim();
+							if (includeAlias)
+							{
+								result.add(table);
+							}
+							else
+							{
+								result.add(stripTableAlias(table));
+							}
 						}
 						lastStart = t.getCharEnd();
 						hadJoin = true;
@@ -332,6 +336,7 @@ public class SqlUtil
 		s.add(keyword.toUpperCase());
 		return getKeywordPosition(s, sql);
 	}
+	
 	public static int getKeywordPosition(Set keywords, String sql)
 	{
 		int pos = -1;

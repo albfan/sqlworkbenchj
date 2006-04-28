@@ -1209,7 +1209,7 @@ public class WbTable
 		}
 		else 
 		{
-			rend = getDefaultRenderer(getColumnClass(column));
+			rend = super.getCellRenderer(row,column);
 		}
 		// in some cases getCellRenderer does not seem to return
 		// a renderer at all. This is a fallback to prevent a null

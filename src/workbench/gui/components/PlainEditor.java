@@ -38,6 +38,7 @@ public class PlainEditor
 	public PlainEditor()
 	{
 		editor = new JTextArea();
+		editor.putClientProperty("JTextArea.infoBackground", Boolean.TRUE);
 		editor.addMouseListener(new TextComponentMouseListener());
 		JScrollPane scroll = new JScrollPane(editor);
 		editor.setLineWrap(true);

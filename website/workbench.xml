@@ -55,22 +55,25 @@
 		<p style="margin-top:25px">Please send your comments or bug reports to <mail-to/><br/>
 		Your feedback is very much welcome!
 		</p>
+		<!--
 		<p style="margin-top:50px">
 			<img src="http://kellerer.org/tinc?key=ANF6MRlA&amp;no=5"></img> visits since June 1st, 2003
 		</p>
+		-->
 		</content>
 	</page>
 	
 	<page name="databases" title="Supported DBMS">
     <title>Supported database systems</title>
     <content>
-		<p style="margin-top:10px">SQL Workbench/J has been tested with the following database systems:</p>
+		<p style="margin-top:10px">SQL Workbench/J is known to work with the following database systems:</p>
 		<ul>
 			<li><a target="_blank" href="http://www.postgresql.org/">PostgreSQL</a> <a target="_blank" href="http://jdbc.postgresql.org/download.html">(Download JDBC driver)</a></li>
 			<li><a target="_blank" href="http://hsqldb.sourceforge.net/">HSQLDB</a></li>
 			<li><a target="_blank" href="http://www.firebirdsql.org">Firebird SQL</a> <a target="_blank" href="http://www.firebirdsql.org/index.php?op=devel&amp;sub=jdbc">(Download JDBC driver)</a></li>
 			<li><a target="_blank" href="http://www.mckoi.com/database/">Mckoi SQL Database</a></li>
 			<li><a target="_blank" href="http://www.ibm.com/software/data/cloudscape/">IBM Cloudscape</a></li>
+			<li><a target="_blank" href="http://www.ibm.com/software/data/db2/">IBM DB2</a></li>
 			<li><a target="_blank" href="http://www.oracle.com">Oracle</a> <a target="_blank" href="http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html">(Download JDBC driver)</a></li>
 			<li><a target="_blank" href="http://www.microsoft.com/sql">Microsoft SQL Server</a> <a target="_blank" href="http://jtds.sourceforge.net/">(Download free JDBC driver)</a></li>
 			<li><a target="_blank" href="http://opensource.ca.com/projects/ingres/">Ingres R3</a></li>
@@ -126,8 +129,8 @@
   <page name="xslt" title="XSLT">
     <title>Sample XSL transformations</title>
     <content>
-	    <p>Several SQL Workbench/J commands produce XML output (e.g. WbReport to
-			generate a report of the current schema, or the output of the WbDiff command).
+	    <p>Several SQL Workbench/J commands produce XML output (e.g. WbSchemaReport to
+			generate a report of the current schema, or the output of the WbSchemaDiff command).
 			</p>
 			<p>On this page you can find some sample XSLT files to transform these output
 			formats into SQL scripts or HTML documents. These scripts are meant to be a
@@ -136,15 +139,18 @@
 			<p>If you have developed an XSLT file to support the various
 			XML outputs of SQL Workbench/J and would like to share it, please send
 			it to <mail-to/></p>
-			<h2 style="text-align:left;padding-top:25px">WbReport transformations</h2>
-  		<p>The following files will transform the output of the <a href="http://www.sql-workbench.net/manual/wb-commands.html#command-schema-report">WbReport</a>
+			<h2 style="text-align:left;padding-top:25px">WbSchemaReport transformations</h2>
+  			<p>The following files will transform the output of the <a href="http://www.sql-workbench.net/manual/wb-commands.html#command-schema-report">WbSchemaReport</a>
 			command</p>
 			<ul>
 			  <li><a href="wbreport2html.xslt">HTML output</a></li>
+			  <li><a href="wbreport2ctl.xslt">Create an Oracle SQL*Loader skeleton</a></li>
+			  <li><a href="wbreport2proc14.xslt">Extract procedures (JDK 1.4 Version)</a></li>
+			  <li><a href="wbreport2proc15.xslt">Extract procedures (JDK 1.5 Version)</a></li>
 	 		</ul>
 
-			<h2 style="text-align:left;padding-top:5px">WbDiff transformations</h2>
-			<p>The following files will transform the output of the <a href="http://www.sql-workbench.net/manual/wb-commands.html#command-diff">WbDiff</a>
+			<h2 style="text-align:left;padding-top:5px">WbSchemaDiff transformations</h2>
+			<p>The following files will transform the output of the <a href="http://www.sql-workbench.net/manual/wb-commands.html#command-diff">WbSchemaDiff</a>
 			command</p>
 			<ul>
 			  <li><a href="wbdiff2pg.xslt">Transform to a PostgreSQL script</a></li>
@@ -171,16 +177,15 @@
             <li><tar-link/></li>
             <li><source-link/></li>
         </ul>
+        <p>The release archive contains the needed binaries, the manual in HTML format and some sample XSLT
+        scripts.<br/>The manual is also available <a href="manual/workbench-manual.html" target="_blank">online</a>
+        or as a <a href="SQLWorkbench-Manual.pdf">PDF document</a>.
+				</p>
         <p>If you are having problems unzipping the distribution archive with WinZip, please read <a href="winzip.html">this</a>.</p>
         <p>If you want to do a full build from the source code including the documentation you need to install
             <a href="http://docbook.sourceforge.net/">DocBook</a> and <a href="http://xml.apache.org/fop/">FOP</a>
         </p>
         <dev-build/>
-        <h3>Documentation</h3>
-        <ul>
-            <li><a href="manual/workbench-manual.html">Online manual (HTML)</a></li>
-            <li><a href="SQLWorkbench-Manual.pdf">PDF Version</a></li>
-        </ul>
 				<p>
 					A JDK/JRE 1.4 or later is required to run and compile this application.<br/>
 					It will not run with JDK 1.3 or earlier!

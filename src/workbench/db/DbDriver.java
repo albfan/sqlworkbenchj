@@ -170,7 +170,7 @@ public class DbDriver
 					url[i] = new File(realFile).toURL();
 					LogMgr.logInfo("DbDriver.loadDriverClass()", "Adding ClassLoader URL=" + url[i].toString());
 				}
-				this.classLoader = new URLClassLoader(url);
+				this.classLoader = new URLClassLoader(url, this.getClass().getClassLoader());
 			}
 
 			// New Firebird 2.0 driver needs this, and it does not seem to do any harm

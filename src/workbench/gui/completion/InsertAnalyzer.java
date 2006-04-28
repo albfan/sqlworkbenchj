@@ -11,20 +11,13 @@
  */
 package workbench.gui.completion;
 
-import java.awt.Toolkit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
-import workbench.util.TableAlias;
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
 
 /**
  * Analyze an UPDATE statement regarding the context for the auto-completion
@@ -33,7 +26,7 @@ import workbench.util.TableAlias;
 public class InsertAnalyzer
 	extends BaseAnalyzer
 {
-	private final Pattern INTO_PATTERN = Pattern.compile("INSERT\\s+INTO\\s+[a-zA-Z0-9_$]*\\s+", Pattern.CASE_INSENSITIVE);
+	private final Pattern INTO_PATTERN = Pattern.compile("\\sINTO\\s|\\sINTO$", Pattern.CASE_INSENSITIVE);
 	
 	public InsertAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{	
@@ -42,46 +35,124 @@ public class InsertAnalyzer
 	
 	public void checkContext()
 	{
-		checkOverwrite();
-		String currentWord = getCurrentWord();
-		Matcher im = INTO_PATTERN.matcher(this.sql);
+		SQLLexer lexer = new SQLLexer(this.sql);
 		
 		int intoEnd = Integer.MAX_VALUE;
 		int intoStart = Integer.MAX_VALUE;
-		int tableBracketStart = Integer.MAX_VALUE;
-		int tableBracketEnd = Integer.MAX_VALUE;
+		int tableStart = Integer.MAX_VALUE;
+		int columnBracketStart = Integer.MAX_VALUE;
+		int columnBracketEnd = Integer.MAX_VALUE;
+		int valuesPos = Integer.MAX_VALUE;
+		boolean inColumnBracket = false;
 		
-		if (im.find())
+		String schema = null;
+		String table = null;
+		try
 		{
-			intoEnd = im.end();
-			intoStart = im.start();
-			tableBracketStart = this.sql.indexOf('(', intoEnd);
-			if (tableBracketStart == -1) 
+			int bracketCount = 0;
+			boolean nextTokenIsTable = false;
+			SQLToken t = (SQLToken)lexer.getNextToken(false, false);
+			
+			while (t != null)
 			{
-				tableBracketStart = Integer.MAX_VALUE;
-			}
-			else
-			{
-				tableBracketEnd = this.sql.indexOf(')', tableBracketStart);
-				if (tableBracketEnd == -1) tableBracketEnd = Integer.MAX_VALUE;
-			}
+				String value = t.getContents();
+				if ("(".equals(value)) 
+				{
+					bracketCount ++;
+					// if the INTO keyword was already read but not the VALUES
+					// keyword, the opening bracket marks the end of the table 
+					// definition between INTO and the column list
+					if (intoStart != Integer.MAX_VALUE && valuesPos == Integer.MAX_VALUE)
+					{
+						intoEnd = t.getCharBegin();
+						columnBracketStart = t.getCharEnd();
+						inColumnBracket = true;
+					}
+				}
+				else if (")".equals(value))
+				{
+					if (inColumnBracket)
+					{
+						columnBracketEnd = t.getCharBegin();
+					}
+					bracketCount --;
+					inColumnBracket = false;
+				}
+				else if (bracketCount == 0)
+				{
+					if (nextTokenIsTable)
+					{
+						tableStart = t.getCharBegin();
+						t = (SQLToken)lexer.getNextToken(false, false);
+						if (".".equals(t.getContents()))
+						{
+							schema = value;
+							// we have a schema.table qualifier
+							t = (SQLToken)lexer.getNextToken(false, false);
+							if (!"(".equals(t.getContents()))
+							{
+								table = t.getContents();
+							}
+						}
+						else
+						{
+							table = value;
+						}
+						nextTokenIsTable = false;
+						// skip getting the next token at the end of the loop
+						// otherwise we'd swallow the one that was just retrieved.
+						continue;
+					}
+					if ("INTO".equals(value))
+					{
+						intoStart = t.getCharEnd();
+						nextTokenIsTable = true;
+					}
+					else if ("VALUES".equals(value))
+					{
+						valuesPos = t.getCharBegin();
+						break;
+					}
+				}
+				t = (SQLToken)lexer.getNextToken(false, false);
+			}		
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("InsertAnalyzer.checkContext()", "Error parsing insert statement", e);
+			this.context = NO_CONTEXT;
 		}
 		
-		if (cursorPos > tableBracketStart && cursorPos < tableBracketEnd)
+		TableIdentifier id = null;
+		if (table != null && schema != null)
 		{
-			// cursor is in VALUES ( ) part or 
-			// in the column list for the INTO part
-			context = CONTEXT_COLUMN_LIST;
-				
-			// find the table to be used
-			int tableStart = intoEnd;
-			int tableEnd = tableBracketStart - 1;
-			String table = this.sql.substring(tableStart, tableEnd).trim();
-			this.tableForColumnList = new TableIdentifier(table);
+			id = new TableIdentifier(schema, table);
+		} 
+		else if (table != null)
+		{
+			id = new TableIdentifier(table);
 		}
-		else if (cursorPos > intoStart)
+		
+		if (cursorPos > intoStart && cursorPos < intoEnd)
 		{
+			if (cursorPos > tableStart)
+			{
+				if (id != null)
+				{
+					schemaForTableList = id.getSchema();
+				}
+				else
+				{
+					schemaForTableList = this.dbConnection.getMetadata().getCurrentSchema();
+				}
+			}
 			context = CONTEXT_TABLE_LIST;
 		}
+		else if (cursorPos >= columnBracketStart && cursorPos <= columnBracketEnd)
+		{
+			tableForColumnList = id;
+			context = CONTEXT_COLUMN_LIST;
+		}
 	}
+	
 }

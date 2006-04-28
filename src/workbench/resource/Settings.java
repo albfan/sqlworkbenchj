@@ -35,6 +35,7 @@ import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 
 import workbench.WbManager;
+import workbench.gui.lnf.LnFDefinition;
 import workbench.interfaces.PropertyStorage;
 import workbench.util.ExceptionUtil;
 import workbench.gui.actions.ActionRegistration;
@@ -88,9 +89,9 @@ public class Settings
 
 	private Settings()
 	{
-		if (WbManager.trace) System.out.println("Settings.<init> - start");
+		WbManager.trace("Settings.<init> - start");
 		this.props = new WbProperties();
-		this.filename = System.getProperty("workbench.settings.file", null);
+		String configFile = System.getProperty("workbench.settings.file", "workbench.settings");
 		
 		// first read the built-in defaults
 		// this ensures that new defaults will be applied automatically.
@@ -102,39 +103,51 @@ public class Settings
 			this.configDir = System.getProperty("workbench.configdir", "");
 		}
 
-		File cf;
-		if (configDir == null || configDir.trim().length() == 0)
+		File cfd = null;
+		try
 		{
-			//cf = new File("");
-			// check the current directory for a configuration file
-			// if it is not present, then use the directory of the jar file
-			File f = new File(filename);
-			if (f.exists())
+			if (configDir == null || configDir.trim().length() == 0)
 			{
-				cf = new File("");
+				// check the current directory for a configuration file
+				// if it is not present, then use the directory of the jar file
+				// this means that upon first startup, the settings file
+				// will be created in the directory of the jar file
+				File f = new File(System.getProperty("user.dir"), configFile);
+				if (f.exists())
+				{
+					cfd = new File(System.getProperty("user.dir"));
+				}
+				else
+				{
+					cfd = new File(WbManager.getInstance().getJarPath());
+				}
+				configDir = cfd.getAbsolutePath();
 			}
-			else
+			else 
 			{
-				cf = new File(WbManager.getInstance().getJarPath());
+				if ("${user.home}".equals(configDir))
+				{
+					this.configDir = System.getProperty("user.home");
+				}
+				cfd = new File(configDir);
 			}
 		}
-		else
+		catch (Exception e)
 		{
-			// "normalize" the directory name based on the platform
-			cf = new File(configDir);
+			LogMgr.logError("Settings.<init>", "Error when initializing configdir", e);
+			cfd = new File(System.getProperty("user.dir"));
 		}
-		configDir = cf.getAbsolutePath();
+		
+		configDir = cfd.getAbsolutePath();
+		
+		WbManager.trace("Settings.<init> - using configDir: " + configDir);
 
-		if (WbManager.trace) System.out.println("Settings.<init> - using configDir: " + configDir);
+		File cf = new File(this.configDir, configFile);
+		this.filename = cf.getAbsolutePath();
+		
+		WbManager.trace("Settings.<init> - using configfile: " + this.filename);
 
-		if (filename == null)
-		{
-			File f = new File(this.configDir, "workbench.settings");
-			this.filename = f.getAbsolutePath();
-			if (WbManager.trace) System.out.println("Settings.<init> - using configfile: " + this.filename);
-		}
-
-	  if (WbManager.trace) System.out.println("Settings.<init> - Reading settings");
+	  WbManager.trace("Settings.<init> - Reading settings");
 	  try
 		{
 			BufferedInputStream in = new BufferedInputStream(new FileInputStream(this.filename));
@@ -146,7 +159,7 @@ public class Settings
 			fillDefaults();
 		}
 
-	  if (WbManager.trace) System.out.println("Settings.<init> - Done reading settings. Initializing LogMgr");
+	  WbManager.trace("Settings.<init> - Done reading settings. Initializing LogMgr");
 
 		boolean logSysErr = StringUtil.stringToBool(this.props.getProperty("workbench.log.console", "false"));
 		String sysLog = System.getProperty("workbench.log.console", null);
@@ -174,9 +187,12 @@ public class Settings
 			int maxSize = this.getMaxLogfileSize();
 			if (logfile.indexOf("%configdir%") > -1)
 			{
-				logfile = StringUtil.replace(logfile, "%configdir%", FileDialogUtil.CONFIG_DIR_KEY);
+				logfile = StringUtil.replace(logfile, "%configdir%", configDir);
 			}
-			logfile = StringUtil.replace(logfile, FileDialogUtil.CONFIG_DIR_KEY, configDir);
+			else
+			{
+				logfile = StringUtil.replace(logfile, FileDialogUtil.CONFIG_DIR_KEY, configDir);
+			}
 			
 			// Replace old System.out or System.err settings
 			if (logfile.equalsIgnoreCase("System.out") || logfile.equalsIgnoreCase("System.err"))
@@ -185,6 +201,7 @@ public class Settings
 				logfile = f.getAbsolutePath();
 				this.props.setProperty("workbench.log.filename", FileDialogUtil.CONFIG_DIR_KEY + "/workbench.log");
 			}
+			
 			LogMgr.setOutputFile(logfile, maxSize);
     }
     catch (Throwable e)
@@ -344,16 +361,6 @@ public class Settings
 		return getBoolProperty("workbench.dbexplorer.rememberObjectType", false);
 	}
 	
-	public void setStoreExplorerSchema(boolean flag)
-	{
-		setProperty("workbench.dbexplorer.rememberSchema", flag);
-	}
-	
-	public boolean getStoreExplorerSchema()
-	{
-		return getBoolProperty("workbench.dbexplorer.rememberSchema", true);
-	}
-	
 	public boolean getSwitchCatalogInExplorer()
 	{
 		return getBoolProperty("workbench.dbexplorer.switchcatalog", true);
@@ -379,6 +386,11 @@ public class Settings
 		return f.getAbsolutePath();
 	}
 
+	public void removeProperty(String property)
+	{
+		this.props.remove(property);
+	}
+	
 	public String getDriverConfigFilename()
 	{
 		return new File(this.configDir, "WbDrivers.xml").getAbsolutePath();
@@ -471,10 +483,12 @@ public class Settings
 			this.props.remove("workbench.sql.search.useregex");
 			this.props.remove("workbench.sql.search.wholeword");
 			this.props.remove("workbench.sql.search.lastvalue");
-
+			this.props.remove("workbench.dbexplorer.rememberSchema");
+			
 			// not needed any longer
 			this.props.remove("workbench.db.oracle.quotedigits");
 			this.props.remove("workbench.gui.macros.replaceonrun");
+			
 		}
 		catch (Throwable e)
 		{
@@ -484,7 +498,7 @@ public class Settings
 
 	private void fillDefaults()
 	{
-		if (WbManager.trace) System.out.println("Setting.fillDefaults() - start");
+		WbManager.trace("Setting.fillDefaults() - start");
 
 		try
 		{
@@ -494,7 +508,7 @@ public class Settings
 		{
 			LogMgr.logError(this, "Could not read default settings", e);
 		}
-		if (WbManager.trace) System.out.println("Setting.fillDefaults() - done");
+		WbManager.trace("Setting.fillDefaults() - done");
 	}
 	
 	public int getMaxMacrosInMenu()

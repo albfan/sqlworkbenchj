@@ -21,11 +21,14 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -45,6 +48,8 @@ import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.dbobjects.DbExplorerWindow;
+import workbench.gui.lnf.LnFDefinition;
+import workbench.gui.lnf.LnFLoader;
 import workbench.gui.tools.DataPumper;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.ToolWindow;
@@ -57,6 +62,7 @@ import workbench.sql.VariablePool;
 import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 import workbench.gui.dialogs.WbSplash;
+import workbench.gui.lnf.LnFManager;
 import workbench.util.WbCipher;
 import workbench.util.WbNullCipher;
 import workbench.util.WbThread;
@@ -74,7 +80,31 @@ public class WbManager
 	private List toolWindows = new ArrayList();
 	private WbCipher desCipher = null;
 	private boolean batchMode = false;
-	public static final boolean trace = "true".equalsIgnoreCase(System.getProperty("workbench.startuptrace", "false"));
+	
+	private static boolean trace = false;
+	private static PrintStream traceOut;
+	private static final String traceFile = "workbench.trc";
+	
+	static
+	{
+		boolean doTrace = "true".equalsIgnoreCase(System.getProperty("workbench.startuptrace", "false"));
+		if (doTrace)
+		{
+			try
+			{
+				traceOut = new PrintStream(new FileOutputStream(traceFile));
+				traceOut.println(ResourceMgr.TXT_PRODUCT_NAME + " startup trace enabled");
+				traceOut.close();
+				trace = true;
+			}
+			catch (Exception e)
+			{
+				trace = false;
+			}
+			
+		}
+	}
+	
 	//private boolean shutdownInProgress = false;
 
 	private Thread shutdownHook = new Thread(this);
@@ -84,6 +114,24 @@ public class WbManager
 		Runtime.getRuntime().addShutdownHook(this.shutdownHook);
 	}
 
+	public static void trace(String msg)
+	{
+		if (traceOut != null) 
+		{
+			try
+			{
+				traceOut = new PrintStream(new FileOutputStream(traceFile,true));
+				traceOut.println(msg);
+				traceOut.close();
+			}
+			catch (Exception e)
+			{
+				trace = false;
+			}
+		}
+	}
+	
+	
 	/**
 	 *	return an instance of the WbDesCipher.
 	 *
@@ -169,6 +217,11 @@ public class WbManager
 		WbSwingUtilities.showErrorMessage(getCurrentWindow(), ResourceMgr.getString("MsgOutOfMemoryError"));		
 	}
 	
+	public List getMainWindows()
+	{
+		return Collections.unmodifiableList(this.mainWindows);
+	}
+	
 	public MainWindow getCurrentWindow()
 	{
 		if (this.mainWindows == null) return null;
@@ -182,29 +235,6 @@ public class WbManager
 			if (w.hasFocus()) return w;
 		}
 		return null;
-	}
-
-	public void changeLookAndFeel(String className)
-	{
-		try
-		{
-			Settings.getInstance().setLookAndFeelClass(className);
-			UIManager.setLookAndFeel(className);
-			for (int i=0; i < this.mainWindows.size(); i++)
-			{
-				MainWindow w = (MainWindow)this.mainWindows.get(i);
-				SwingUtilities.updateComponentTreeUI(w);
-			}
-			for (int i=0; i < this.toolWindows.size(); i++)
-			{
-				Component c = (Component)this.toolWindows.get(i);
-				SwingUtilities.updateComponentTreeUI(c);
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("WbManager.changeLookAndFeel()", "Error setting new look and feel to " + className, e);
-		}
 	}
 
 	public void registerToolWindow(ToolWindow aWindow)
@@ -253,26 +283,32 @@ public class WbManager
 		}
 	}
 
-	private void setLookAndFeel()
+	private void initializeLookAndFeel()
 	{
-		if (trace) System.out.println("WbManager.setLookAndFeel() - start");
+		trace("WbManager.setLookAndFeel() - start");
 		try
 		{
 			String className = Settings.getInstance().getLookAndFeelClass();
-			if (className != null && className.trim().length() > 0)
+			if (StringUtil.isEmptyString(className))
 			{
-				UIManager.setLookAndFeel(className);
+				className = UIManager.getSystemLookAndFeelClassName();
 			}
-			else
+			LnFManager mgr = new LnFManager();
+			LnFDefinition def = mgr.findLookAndFeel(className);
+			if (def == null) 
 			{
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				LogMgr.logError("WbManager.setLookAndFeel", "Specified Look & Feel " + className + " not available!", null);
+				return;
 			}
+			
+			LnFLoader loader = new LnFLoader(def);
+			UIManager.put("jgoodies.useNarrowButtons", Boolean.FALSE);
+			UIManager.setLookAndFeel(loader.getLookAndFeel());
 		}
 		catch (Exception e)
 		{
 			LogMgr.logWarning("Settings.setLookAndFeel()", "Could not set look and feel", e);
 		}
-
 
 		try
 		{
@@ -281,7 +317,7 @@ public class WbManager
 		catch (Exception e)
 		{
 		}
-		if (trace) System.out.println("WbManager.setLookAndFeel() - done");
+		trace("WbManager.setLookAndFeel() - done");
 	}
 
 	public String getJarPath()
@@ -293,8 +329,8 @@ public class WbManager
 	
 	private void initUI()
 	{
-		if (trace) System.out.println("WbManager.initUI() - start");
-		this.setLookAndFeel();
+		trace("WbManager.initUI() - start");
+		this.initializeLookAndFeel();
 
 		Settings settings = Settings.getInstance();
 		UIDefaults def = UIManager.getDefaults();
@@ -359,15 +395,15 @@ public class WbManager
 		}
 
 		settings.addFontChangedListener(this);
-		if (trace) System.out.println("WbManager.initUI() - done");
+		trace("WbManager.initUI() - done");
 	}
 
 	public MainWindow createWindow()
 	{
-		if (trace) System.out.println("WbManager.createWindow() - start");
+		trace("WbManager.createWindow() - start");
 		MainWindow win = new MainWindow();
 		this.mainWindows.add(win);
-		if (trace) System.out.println("WbManager.createWindow() - done");
+		trace("WbManager.createWindow() - done");
 		return win;
 	}
 
@@ -645,7 +681,7 @@ public class WbManager
 
 	private void openNewWindow(boolean checkCmdLine)
 	{
-		if (trace) System.out.println("WbManager.openNewWindow()");
+		trace("WbManager.openNewWindow()");
 
 		final MainWindow main = this.createWindow();
 		main.display();
@@ -715,7 +751,7 @@ public class WbManager
 
 	private void initCmdLine(String[] args)
 	{
-		if (trace) System.out.println("WbManager.initCmdLine() - start");
+		trace("WbManager.initCmdLine() - start");
 
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(ARG_PROFILE);
@@ -794,12 +830,12 @@ public class WbManager
 		catch (Exception e)
 		{
 		}
-		if (trace) System.out.println("WbManager.initCmdLine() - done");
+		trace("WbManager.initCmdLine() - done");
 	}
 
 	public void init()
 	{
-		if (trace) System.out.println("WbManager.init() - start");
+		trace("WbManager.init() - start");
 
 		LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
 		LogMgr.logInfo("WbManager.init()", "Using Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") );
@@ -833,7 +869,7 @@ public class WbManager
 				}
 			});
 		}
-		if (trace) System.out.println("WbManager.init() - done.");
+		trace("WbManager.init() - done.");
 	}
 
 	private void runGui()
@@ -841,13 +877,13 @@ public class WbManager
 		WbSplash splash = null;
 		if (Settings.getInstance().getShowSplash())
 		{
-			if (trace) System.out.println("WbManager.init() - opening splash window");
+			trace("WbManager.init() - opening splash window");
 			splash = new WbSplash();
 			splash.setVisible(true);
 		}
 		try
 		{
-			if (trace) System.out.println("WbManager.init() - initializing UI defaults");
+			trace("WbManager.init() - initializing UI defaults");
 			this.initUI();
 			boolean pumper = cmdLine.isArgPresent(ARG_SHOW_PUMPER);
 			boolean explorer = cmdLine.isArgPresent(ARG_SHOW_DBEXP);
@@ -869,7 +905,7 @@ public class WbManager
 		{
 			if (splash != null)
 			{
-				if (trace) System.out.println("WbManager.init() - closing splash window");
+				trace("WbManager.init() - closing splash window");
 				splash.setVisible(false);
 				splash.dispose();
 			}
@@ -921,13 +957,13 @@ public class WbManager
 	public static void main(String[] args)
 	{
 		wb = new WbManager();
-		if (trace) System.out.println("WbManager.main() - start");
+		trace("WbManager.main() - start");
 		// the command line needs to be initialized before everything
 		// else, in order to set some of the system poperties correctly
 		// e.g. the configdir.
 		wb.initCmdLine(args);
 		wb.init();
-		if (trace) System.out.println("WbManager.main() - done");
+		trace("WbManager.main() - done");
 	}
 
 	/**

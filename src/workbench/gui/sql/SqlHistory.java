@@ -70,7 +70,7 @@ public class SqlHistory
 	public WbAction getShowNextStatementAction() { return this.nextStmtAction; }
 	public WbAction getShowPreviousStatementAction() { return this.prevStmtAction; }
 	
-	public void addContent(EditorPanel editor)
+	public synchronized void addContent(EditorPanel editor)
 	{
 		String text = editor.getText();
 		if (text == null || text.length() == 0) return;

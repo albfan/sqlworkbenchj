@@ -98,9 +98,6 @@ public class TableSearchPanel
 		this.columnFunction.addMouseListener(new TextComponentMouseListener());
 		this.searchText.addMouseListener(new TextComponentMouseListener());
 
-		this.resultTabPane.setUI(TabbedPaneUIFactory.getBorderLessUI());
-		this.resultTabPane.setBorder(WbSwingUtilities.EMPTY_BORDER);
-
 		sqlDisplay = EditorPanel.createSqlEditor();
 		this.resultTabPane.addTab(ResourceMgr.getString("LblTableSearchSqlLog"), sqlDisplay);
 
@@ -118,7 +115,6 @@ public class TableSearchPanel
 		//this.searchResult.setFont(Settings.getInstance().getMsgLogFont());
 		this.tableNames.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.fixedStatusText = ResourceMgr.getString("TxtSearchingTable") + " ";
-		((WbSplitPane)this.jSplitPane1).setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
 		tables.getSelectionModel().addListSelectionListener(this);
 		this.startButton.setEnabled(false);
 		this.searchText.addKeyListener(this);

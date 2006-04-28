@@ -54,7 +54,8 @@ public class ConnectionProfile
 	private boolean emptyStringIsNull = false;
 	private boolean includeNullInInsert = true;
 	private boolean removeComments = false;
-
+	private boolean rememberExplorerSchema = false;
+	
 	static
 	{
 		WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
@@ -88,6 +89,16 @@ public class ConnectionProfile
 		this.changed = false;
 	}
 
+	public boolean getStoreExplorerSchema()
+	{
+		return rememberExplorerSchema;
+	}
+		
+	public void setStoreExplorerSchema(boolean value)
+	{
+		rememberExplorerSchema = value;
+	}
+	
   public String getIdentifier()
   {
     return Integer.toString(this.id);

@@ -57,6 +57,7 @@ import workbench.db.exporter.DataExporter;
 import workbench.db.importer.DataStoreImporter;
 import workbench.gui.actions.FilterDataAction;
 import workbench.gui.actions.ResetFilterAction;
+import workbench.gui.actions.ViewMessageLogAction;
 import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.dialogs.dataimport.ImportFileDialog;
@@ -264,7 +265,7 @@ public class SqlPanel
 		statusBar.setBorder(statusBarBorder);
 		
 		log = new JTextArea();
-		log.setDoubleBuffered(true);
+		log.putClientProperty("JTextArea.infoBackground", Boolean.TRUE);
 		log.setBorder(logBorder);
 		log.setFont(Settings.getInstance().getMsgLogFont());
 		log.setEditable(false);
@@ -277,17 +278,14 @@ public class SqlPanel
 		this.resultTab.setDoubleBuffered(true);
 		this.resultTab.setFocusable(false);
 
-		//this.resultTab.addTab(ResourceMgr.getString(ResourceMgr.TAB_LABEL_RESULT), EMPTY_PANEL);
 		this.resultTab.addChangeListener(this);
 		JScrollPane scroll = new WbScrollPane(log);
 		this.resultTab.addTab(ResourceMgr.getString(ResourceMgr.TAB_LABEL_MSG), scroll);
 
-		
 		this.editor.addFilenameChangeListener(this);
 		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
 		this.contentPanel.setOneTouchExpandable(true);
 		this.contentPanel.setContinuousLayout(true);
-		this.contentPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		this.add(this.contentPanel, BorderLayout.CENTER);
 		this.add(statusBar, BorderLayout.SOUTH);
@@ -307,7 +305,6 @@ public class SqlPanel
 
 		this.editor.addTextChangeListener(this);
 		this.rowMonitor = new GenericRowMonitor(this.statusBar);
-		//initDivider();
 	}
 
 	public String getId()
@@ -338,11 +335,6 @@ public class SqlPanel
 		this.contentPanel.setDividerLocation(loc); 
 	}
 
-	public void saveSettings()
-	{
-		// no global settings to store
-	}
-	
 	public WbToolbar getToolbar()
 	{
 		return this.toolbar;
@@ -618,9 +610,9 @@ public class SqlPanel
 		SelectEditorAction sea = new SelectEditorAction(this);
 		sea.setCreateMenuSeparator(true);
 		this.actions.add(sea);
-		SelectResultAction r = new SelectResultAction(this);
-		this.actions.add(r);
+		this.actions.add(new SelectResultAction(this));
 		this.actions.add(new SelectMaxRowsAction(this.statusBar));
+		this.actions.add(new ViewMessageLogAction(this));
 
 		SplitPaneExpander expander = new SplitPaneExpander(this.contentPanel);
 		a = new ExpandEditorAction(expander);
@@ -1062,11 +1054,6 @@ public class SqlPanel
 		this.editor.clearUndoBuffer();
 	}
 
-	public void scrollEditorToCursor()
-	{
-		editor.scrollToCaret();
-	}
-	
 	/** Do any work which should be done during the process of saving the
 	 *  current workspace, but before the workspace file is actually opened!
 	 *  This is to ensure a corrupted workspace due to interrupting the saving
@@ -1169,10 +1156,10 @@ public class SqlPanel
 		tab.setToolTipTextAt(index, tooltip);
 	}
 
-	public String getName()
-	{
-		return this.getTabTitle();
-	}
+//	public String getName()
+//	{
+//		return this.getTabTitle();
+//	}
 	
 	public String getTabName()
 	{
@@ -1213,12 +1200,12 @@ public class SqlPanel
 		this.log.setText("");
 	}
 
-	public synchronized WbConnection getConnection()
+	public WbConnection getConnection()
 	{
 		return this.dbConnection;
 	}
 
-	public synchronized boolean isConnected()
+	public boolean isConnected()
 	{
 		// I'm only checking if the connection is defined, because
 		// MainWindow will make sure a valid connection is set
@@ -1309,7 +1296,7 @@ public class SqlPanel
 
 	public boolean isRequestFocusEnabled() { return true; }
 
-	public synchronized void storeStatementInHistory()
+	public void storeStatementInHistory()
 	{
 		this.sqlHistory.addContent(editor);
 	}
@@ -1604,6 +1591,11 @@ public class SqlPanel
 		{
 			String current = getStatementAtCursor();
 			sql = mgr.replaceCurrent(sql, current);
+		}
+		
+		if (mgr.hasTextKey(sql))
+		{
+			sql = mgr.replaceEditorText(sql, editor.getText());
 		}
 		
 		if (replaceText)
@@ -2063,7 +2055,6 @@ public class SqlPanel
 			{
 				// executeMacro will set this variable for logging purposes
 				appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ":\n" + currentMacroSql  + "\n");
-				currentMacroSql = null;
 			}
 			
 			scriptParser.setScript(script);
@@ -2112,7 +2103,7 @@ public class SqlPanel
 
 			this.showResultPanel();
 
-			highlightCurrent = ( (count > 1 || commandAtIndex > -1) && Settings.getInstance().getHighlightCurrentStatement());
+			highlightCurrent = ((count > 1 || commandAtIndex > -1) && (currentMacroSql == null) && Settings.getInstance().getHighlightCurrentStatement());
 
 			if (highlightCurrent)
 			{
@@ -2120,6 +2111,7 @@ public class SqlPanel
 				oldSelectionEnd = this.editor.getSelectionEnd();
 				restoreSelection = shouldRestoreSelection;
 			}
+			
 			long startTime = System.currentTimeMillis();
 			long stmtTotal = 0;
 			int executedCount = 0;
@@ -2129,6 +2121,7 @@ public class SqlPanel
 			StringBuffer logmsg = new StringBuffer(100);
 			int resultSets = 0;
 			this.ignoreStateChange = false;
+			this.currentMacroSql = null;
 			
 			for (int i=startIndex; i < endIndex; i++)
 			{
@@ -2681,7 +2674,7 @@ public class SqlPanel
 		this.showBusyIcon(busy);
 	}
 
-	public synchronized boolean isBusy() { return this.threadBusy; }
+	public boolean isBusy() { return this.threadBusy; }
 
 
 	public void fontChanged(String aFontId, Font newFont)
@@ -2716,13 +2709,13 @@ public class SqlPanel
 		if (this.hasFileLoaded()) this.showFileIcon();
 	}
 
-	public synchronized void addDbExecutionListener(DbExecutionListener l)
+	public void addDbExecutionListener(DbExecutionListener l)
 	{
 		if (this.execListener == null) this.execListener = Collections.synchronizedList(new ArrayList());
 		this.execListener.add(l);
 	}
 
-	public synchronized void removeDbExecutionListener(DbExecutionListener l)
+	public void removeDbExecutionListener(DbExecutionListener l)
 	{
 		if (this.execListener == null) return;
 		this.execListener.remove(l);
@@ -2755,6 +2748,7 @@ public class SqlPanel
 		Settings.getInstance().removePropertyChangeLister(this);
 		if (this.currentData != null) this.currentData.clearContent();
 		this.currentData = null;
+		if (this.execListener != null) execListener.clear();
 		this.sqlHistory.clear();
 		this.editor.dispose();
 		this.editor = null;

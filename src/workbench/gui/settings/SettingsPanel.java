@@ -80,11 +80,16 @@ public class SettingsPanel
 		page = new FormatterOptionsPanel();
 		mainTab.addTab(ResourceMgr.getString("LblSqlFormat"), page);
 		pages.add(page);
+		
+		page = new LnFOptionsPanel();
+		mainTab.addTab(ResourceMgr.getString("LblLnFOptions"), page);
+		pages.add(page);
 	}
 
   private void initComponents()
   {
     mainTab = new JTabbedPane();
+		mainTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		
     okButton = new WbButton(ResourceMgr.getString("LblOK"));
     cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));

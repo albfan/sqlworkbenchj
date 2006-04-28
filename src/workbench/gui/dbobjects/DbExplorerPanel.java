@@ -94,6 +94,7 @@ public class DbExplorerPanel
 	private MainWindow mainWindow;
 	private boolean busy;
 	private String schemaFromWorkspace;
+	private String catalogFromWorkspace;
 	private boolean switchCatalog = false;
 	
 	public DbExplorerPanel()
@@ -115,8 +116,6 @@ public class DbExplorerPanel
 			procs = new ProcedureListPanel();
 			this.searchPanel = new TableSearchPanel(tables);
 			tabPane = new WbTabbedPane(JTabbedPane.TOP);
-			tabPane.setUI(TabbedPaneUIFactory.getBorderLessUI());
-			tabPane.setBorder(WbSwingUtilities.EMPTY_BORDER);
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerTables"), tables);
 			tabPane.setToolTipTextAt(0, ResourceMgr.getDescription("TxtDbExplorerTables"));
 
@@ -224,7 +223,13 @@ public class DbExplorerPanel
 			setBusy(true);
 			
 			List schemas = this.dbConnection.getMetadata().getSchemas();
-			String currentSchema = this.schemaFromWorkspace;
+			String currentSchema = null;
+			boolean workspaceSchema = false;
+			if (this.dbConnection.getProfile().getStoreExplorerSchema())
+			{
+				currentSchema = this.schemaFromWorkspace;
+				workspaceSchema = true;
+			}
 			
 			if (currentSchema == null) currentSchema = this.dbConnection.getMetadata().getCurrentSchema();
 			if (currentSchema == null) currentSchema = this.dbConnection.getMetadata().getUserName();
@@ -245,6 +250,15 @@ public class DbExplorerPanel
 						this.schemaSelector.addItem(schema.trim());
 						if (schema.equalsIgnoreCase(currentSchema)) schemaToSelect = schema;
 					}
+				}
+				
+				if (workspaceSchema && schemaToSelect == null)
+				{
+					// when using the workspace for multiple connections
+					// it can happen that the stored schema does not exist 
+					// for the current connection, in this case we revert
+					// to "current" schema
+					schemaToSelect = this.dbConnection.getMetadata().getCurrentSchema();
 				}
 				//LogMgr.logDebug("DbExplorerPanel.readSchemas()", "Selected schema entry: " + schemaToSelect);
 				if (schemaToSelect != null) 
@@ -445,6 +459,7 @@ public class DbExplorerPanel
 			this.catalogSelector.setVisible(false);
 			this.catalogSelector.setEnabled(false);
 			this.catalogLabel.setVisible(false);
+			this.catalogFromWorkspace = null;
 		}
 		else
 		{
@@ -460,6 +475,10 @@ public class DbExplorerPanel
 			}
 			String db = this.dbConnection.getMetadata().getCurrentCatalog();
 			catalogSelector.setSelectedItem(db);
+			if (this.dbConnection.getProfile().getStoreExplorerSchema() && this.catalogFromWorkspace != null)
+			{
+				this.catalogSelector.setSelectedItem(this.catalogFromWorkspace);
+			}
 			this.catalogSelector.addActionListener(this);
 			this.catalogSelector.setVisible(true);
 			this.catalogSelector.setEnabled(true);
@@ -562,6 +581,14 @@ public class DbExplorerPanel
 		}
 	}
 
+	private void setSelectedCatalog(String s)
+	{
+		if (this.catalogSelector != null)
+		{
+			this.catalogSelector.setSelectedItem(s);
+		}
+	}
+	
 	private String getSelectedCatalog()
 	{
 		if (this.catalogSelector == null) return null;
@@ -780,9 +807,22 @@ public class DbExplorerPanel
 		}
 		else if (this.schemaFromWorkspace != null)
 		{
+			// if the DbExplorer was never "really" displayed we have to 
+			// save the schema that we retrieved initially from the workspace
 			p.setProperty(key, this.schemaFromWorkspace);
 		}
 		
+		key = "dbexplorer" + index + ".currentcatalog";
+		s = this.getSelectedCatalog();
+		if (s != null)
+		{
+			p.setProperty(key, s.toString());
+		}
+		else if (this.catalogFromWorkspace != null)
+		{
+			p.setProperty(key, this.catalogFromWorkspace);
+		}
+
 		tables.saveToWorkspace(w, index);
 		searchPanel.saveToWorkspace(w, index);
 		procs.saveToWorkspace(w, index);
@@ -797,14 +837,23 @@ public class DbExplorerPanel
 		throws IOException
 	{
 		this.schemaFromWorkspace = null;
-		if (Settings.getInstance().getStoreExplorerSchema())
+		this.catalogFromWorkspace = null;
+		try
 		{
-			WbProperties p = w.getSettings();
-			this.schemaFromWorkspace = p.getProperty("dbexplorer" + index + ".currentschema", null);
+//			if (Settings.getInstance().getStoreExplorerSchema())
+//			{
+				WbProperties p = w.getSettings();
+				this.schemaFromWorkspace = p.getProperty("dbexplorer" + index + ".currentschema", null);
+				this.catalogFromWorkspace = p.getProperty("dbexplorer" + index + ".currentcatalog", null);
+//			}
+			tables.readFromWorkspace(w, index);
+			searchPanel.readFromWorkspace(w, index);
+			procs.readFromWorkspace(w, index);
 		}
-		tables.readFromWorkspace(w, index);
-		searchPanel.readFromWorkspace(w, index);
-		procs.readFromWorkspace(w, index);
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	public void executionStart(WbConnection conn, Object source)

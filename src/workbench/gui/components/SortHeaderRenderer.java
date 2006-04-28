@@ -24,7 +24,8 @@ import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 
 
-public class SortHeaderRenderer extends DefaultTableCellRenderer
+public class SortHeaderRenderer 
+	extends DefaultTableCellRenderer
 {
 	private static Border DEFAULT_HEADER_BORDER = new CompoundBorder(UIManager.getBorder("TableHeader.cellBorder"), new EmptyBorder(0, 1, 0, 1));
 	

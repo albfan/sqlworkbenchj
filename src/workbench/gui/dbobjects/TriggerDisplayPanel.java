@@ -115,7 +115,6 @@ public class TriggerDisplayPanel
 	/**
 	 * Called whenever the value of the selection changes.
 	 * @param e the event that characterizes the change.
-	 *
 	 */
 	public void valueChanged(ListSelectionEvent e)
 	{

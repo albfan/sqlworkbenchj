@@ -8,18 +8,77 @@ Enh:  (85.2) Reworked the Options dialog
 Enh:  (85.9) The connection profile has a new attribute "Remove comments" which 
       is disabled by default. If enbled, any comments will be removed
       from the SQL statement before sending it to the server
+Enh:  (85.14) Support for multiple result sets. This includes a change in the 
+      display of the results. The result tab in the lower pane will not be 
+      displayed unless the last SQL statement actually did produce a
+      result set
+Enh:  (85.14) Incremental search ("Search as you type") in auto completion
+Enh:  (85.17) When using the auto completion in a GROUP BY the columns
+      from the select list are now displayed
+Enh:  (85.19) Added more properties to the options dialog
+Enh:  (85.27) When undoing in the editor, the cursor now moves to the 
+      position where the undo actually happened
+Enh:  (85.32) The DbExplorer now includes a dropdown for the database 
+      when connected to SQL Server (or any DBMS that supports catalogs)
+Enh:  (85.38) BLOB columns are now displayed with a button that 
+      will open a dialog to either save the blob or display it as
+      text or an image. Files can also be "uploaded" from within
+      that dialog.
+Enh:  (85.39) If a macro definition contains the string ${selection}$ it 
+      will be replaced with the selected text in the current editor. 
+      If the definition contains the string ${current_statement}$ it will be 
+      replaced with the sql statement at the cursor location.
+      The replacement keys are case-sensitiv. 
+Enh:  (85.43) Moved the "Remember DbExplorer Schema" option from the 
+      global options to the profile options.
+Enh:  (85.43) Additional Look & Feels can now be defined through the 
+      Options dialog. Switching the Look & Feel has been moved to 
+      the options dialog as well.
       
 Fix:  (85.1) Not all settings were saved in the new options dialog
 Fix:  (85.3) When generating SQL statements (INSERT, UPDATE,...) date 
       values where not formatted correctly for Oracle
-Fix:  (85.5) The SQL Formatter inserted a space between two single quotes inside 
-      a character literal
+Fix:  (85.5) The SQL Formatter inserted a space between two single quotes  
+      inside a character literal
 Fix:  (85.6) Oracle CLOB columns where not always copied correctly in the 
       DataPumper
 Fix:  (85.6) When an error ocurred during copying, the DataPumper would 
       not always show the error.
 Fix:  (85.7) The Options dialog would not open on a new installation
 Fix:  (85.10) CLOB columns where not exported correctly for XML exports
+Fix:  (85.16) When using "Save Data as" the options from the dialog
+      where not correctly applied to the export file
+Fix:  (85.19) Code completion inside a subselect was not working properly 
+      if a statement contained more then one subselect
+Fix:  (85.21) -commitevery was not working for WbImport if -usebatch was
+      used (Thanks to Pascal for reporting this and also supplying the fix)
+Fix:  (85.24) When using "Autojump to next statement" the result tab was 
+      not selected when executing the last statement in the editor (using 
+      "Execute Current"). 
+Fix:  (85.25) Code completion was not working properly for statements 
+      using the "new" JOIN syntax
+Fix:  (85.29) Single line commands (such as SET SPOOL OFF) without a
+      delimiter are now only detected when connected with an Oracle
+      database. To (re-)enable this feature for other database systems
+      add the DBID for your DBMS to the setting
+      workbench.db.checksinglelinecmd
+Fix:  (85.32) DESC dbname.owner.tablename was not working for SQL Server
+Fix:  (85.34) Stored procedures where not displayed for SQL Server 
+      when using multiple databases.
+Fix:  (85.37) The USE command did not work with MySQL. This is actually 
+      a "feature" of the MySQL driver which does not allow to change 
+      the database with the USE command, only through Connection.setCatalog()
+      which is now used internally by when a "USE dbname" is executed
+Fix:  (85.38) WbVarDef was not working properly if a space was put around
+      the equal sign (e.g. WbVarDef function_code = 1)
+Fix:  (85.38) Time columns were not displayed correctly.
+Fix:  (85.39) Detection of table alias for code completion 
+      was not working properly any more
+Fix:  (85.41) The application was not starting any more if no -configdir 
+      was passed
+Fix:  (85.43) The available tables were not recognized properly if 
+      more then one JOIN was used.
+      
 
 Build 85, 20.02.2006
 --------------------

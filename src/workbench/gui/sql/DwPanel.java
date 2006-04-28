@@ -24,6 +24,7 @@ import javax.swing.BorderFactory;
 import javax.swing.CellEditor;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;

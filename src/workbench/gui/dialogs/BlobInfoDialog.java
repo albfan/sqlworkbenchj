@@ -126,6 +126,7 @@ public class BlobInfoDialog
     encodingPanel = new EncodingPanel(null, false);
     showImageButton = new javax.swing.JButton();
     uploadButton = new WbButton();
+    showHexButton = new javax.swing.JButton();
 
     getContentPane().setLayout(new java.awt.GridBagLayout());
 
@@ -185,7 +186,7 @@ public class BlobInfoDialog
     gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 1, 14, 8);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 14, 8);
     jPanel1.add(encodingPanel, gridBagConstraints);
 
     showImageButton.setText(ResourceMgr.getString("LblShowAsImg"));
@@ -196,7 +197,7 @@ public class BlobInfoDialog
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(2, 8, 2, 5);
+    gridBagConstraints.insets = new java.awt.Insets(16, 8, 2, 5);
     jPanel1.add(showImageButton, gridBagConstraints);
 
     uploadButton.setText(ResourceMgr.getString("LblUploadFile"));
@@ -210,6 +211,17 @@ public class BlobInfoDialog
     gridBagConstraints.weightx = 0.5;
     gridBagConstraints.insets = new java.awt.Insets(9, 8, 2, 5);
     jPanel1.add(uploadButton, gridBagConstraints);
+
+    showHexButton.setText(ResourceMgr.getString("LblShowAsHex"));
+    showHexButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3)));
+    showHexButton.addMouseListener(this);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(16, 6, 2, 5);
+    jPanel1.add(showHexButton, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -247,6 +259,10 @@ public class BlobInfoDialog
     else if (evt.getSource() == uploadButton)
     {
       BlobInfoDialog.this.uploadButtonMouseClicked(evt);
+    }
+    else if (evt.getSource() == showHexButton)
+    {
+      BlobInfoDialog.this.showHexButtonMouseClicked(evt);
     }
   }
 
@@ -298,6 +314,15 @@ public class BlobInfoDialog
   {
   }// </editor-fold>//GEN-END:initComponents
 
+	private void showHexButtonMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_showHexButtonMouseClicked
+	{//GEN-HEADEREND:event_showHexButtonMouseClicked
+		HexViewer v = new HexViewer(this, ResourceMgr.getString("TxtBlobData"));
+		v.setData(handler.getBlobAsArray(this.blobValue));
+		v.setVisible(true);
+		closeWindow();		
+		
+	}//GEN-LAST:event_showHexButtonMouseClicked
+
 	private void uploadButtonMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_uploadButtonMouseClicked
 	{//GEN-HEADEREND:event_uploadButtonMouseClicked
 		String file = FileDialogUtil.getBlobFile(this, false);
@@ -345,6 +370,7 @@ public class BlobInfoDialog
   public javax.swing.JPanel jPanel1;
   public javax.swing.JButton saveAsButton;
   public javax.swing.JButton showAsTextButton;
+  public javax.swing.JButton showHexButton;
   public javax.swing.JButton showImageButton;
   public javax.swing.JButton uploadButton;
   // End of variables declaration//GEN-END:variables

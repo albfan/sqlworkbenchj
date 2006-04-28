@@ -201,26 +201,29 @@ public abstract class BaseAnalyzer
 
 	protected String getQualifierLeftOfCursor()
 	{
-		String qualifier = null;
 		int len = this.sql.length();
 		int start = this.cursorPos - 1;
+		
 		if (this.cursorPos > len) 
 		{
 			start = len - 1;
 		}
 			
 		char c = this.sql.charAt(start);
-		if (Character.isWhitespace(c)) return null;
+		//if (Character.isWhitespace(c)) return null;
 		
-		String word = StringUtil.getWordLeftOfCursor(this.sql, this.cursorPos, ".");
+		// if no dot is present, then the current word is not a qualifier (e.g. a table name or alias)
+		if (c != '.') return null;
+		
+		String word = StringUtil.getWordLeftOfCursor(this.sql, start, ".");
 		if (word == null) return null;
 		int dotPos= word.indexOf('.');
 		
 		if (dotPos > -1)
 		{
-			qualifier = word.substring(0, dotPos);
+			return word.substring(0, dotPos);
 		}
-		return qualifier;
+		return word;
 	}
 
 	protected String getCurrentWord()

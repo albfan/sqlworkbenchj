@@ -37,7 +37,7 @@ public class DbExplorerOptionsPanel
 		Settings set = Settings.getInstance();
 		set.setRetrieveDbExplorer(retrieveDbExplorer.isSelected());
 		set.setShowDbExplorerInMainWindow(this.showDbExplorer.isSelected());
-		set.setStoreExplorerSchema(this.storeExplorerSchema.isSelected());
+		//set.setStoreExplorerSchema(this.rememberSchema.isSelected());
 		set.setStoreExplorerObjectType(this.rememberObject.isSelected());
 		set.setProperty("workbench.dbexplorer.defTableType", this.defTableTypeField.getText());
 	}
@@ -60,10 +60,8 @@ public class DbExplorerOptionsPanel
     showDbExplorer = new javax.swing.JCheckBox();
     retrieveDbExplorer = new javax.swing.JCheckBox();
     retrieveDbExplorerLabel = new WbCheckBoxLabel();
-    defTableTypeLabel1 = new javax.swing.JLabel();
+    defTableTypeLabel = new javax.swing.JLabel();
     defTableTypeField = new javax.swing.JTextField();
-    rememberSchemaLabel = new WbCheckBoxLabel();
-    storeExplorerSchema = new javax.swing.JCheckBox();
     rememberObjectLabel = new WbCheckBoxLabel();
     rememberObject = new javax.swing.JCheckBox();
 
@@ -120,15 +118,15 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 0);
     add(retrieveDbExplorerLabel, gridBagConstraints);
 
-    defTableTypeLabel1.setText(ResourceMgr.getString("LblDefTableType"));
-    defTableTypeLabel1.setToolTipText(ResourceMgr.getDescription("LblDefTableType"));
+    defTableTypeLabel.setText(ResourceMgr.getString("LblDefTableType"));
+    defTableTypeLabel.setToolTipText(ResourceMgr.getDescription("LblDefTableType"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(11, 12, 0, 0);
-    add(defTableTypeLabel1, gridBagConstraints);
+    add(defTableTypeLabel, gridBagConstraints);
 
     defTableTypeField.setHorizontalAlignment(javax.swing.JTextField.LEFT);
     defTableTypeField.setText(Settings.getInstance().getProperty("workbench.dbexplorer.defTableType", null));
@@ -141,27 +139,6 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(9, 9, 0, 15);
     add(defTableTypeField, gridBagConstraints);
-
-    rememberSchemaLabel.setLabelFor(rememberSchemaLabel);
-    rememberSchemaLabel.setText(ResourceMgr.getString("LblRememberSchema"));
-    rememberSchemaLabel.setToolTipText(ResourceMgr.getDescription("LblRememberSchema"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
-    add(rememberSchemaLabel, gridBagConstraints);
-
-    storeExplorerSchema.setSelected(Settings.getInstance().getStoreExplorerSchema());
-    storeExplorerSchema.setText("");
-    storeExplorerSchema.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-    storeExplorerSchema.setMargin(new java.awt.Insets(0, 0, 0, 0));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(6, 9, 0, 0);
-    add(storeExplorerSchema, gridBagConstraints);
 
     rememberObjectLabel.setLabelFor(rememberObject);
     rememberObjectLabel.setText(ResourceMgr.getString("LblRememberObjectType"));
@@ -190,14 +167,12 @@ public class DbExplorerOptionsPanel
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JLabel dbExplorerLabel;
   private javax.swing.JTextField defTableTypeField;
-  private javax.swing.JLabel defTableTypeLabel1;
+  private javax.swing.JLabel defTableTypeLabel;
   private javax.swing.JCheckBox rememberObject;
   private javax.swing.JLabel rememberObjectLabel;
-  private javax.swing.JLabel rememberSchemaLabel;
   private javax.swing.JCheckBox retrieveDbExplorer;
   private javax.swing.JLabel retrieveDbExplorerLabel;
   private javax.swing.JCheckBox showDbExplorer;
-  private javax.swing.JCheckBox storeExplorerSchema;
   // End of variables declaration//GEN-END:variables
 
 }

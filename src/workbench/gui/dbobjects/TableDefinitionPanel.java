@@ -30,9 +30,6 @@ import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
@@ -43,11 +40,10 @@ import workbench.db.WbConnection;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
-import workbench.gui.components.DividerBorder;
 import workbench.gui.components.QuickFilterPanel;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
-import workbench.gui.renderer.SqlTypeRenderer;
+import workbench.gui.renderer.RendererFactory;
 import workbench.gui.sql.ExecuteSqlDialog;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
@@ -223,7 +219,7 @@ public class TableDefinitionPanel
 					
 					// Assign the correct renderer to display java.sql.Types values
 					TableColumn col = colmod.getColumn(DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
-					col.setCellRenderer(new SqlTypeRenderer());
+					col.setCellRenderer(RendererFactory.getSqlTypeRenderer());
 
 					try
 					{

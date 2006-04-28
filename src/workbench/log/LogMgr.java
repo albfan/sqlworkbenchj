@@ -171,7 +171,7 @@ public class LogMgr
 
 	public static void setOutputFile(String aFilename, int maxFilesize)
 	{
-	  if (WbManager.trace) System.out.println("LogMgr.setOutputFile() - " + aFilename);
+	  WbManager.trace("LogMgr.setOutputFile() - " + aFilename);
 		if (aFilename == null || aFilename.length() == 0) return;
 		if (aFilename.startsWith("System")) return;
 		try
@@ -181,7 +181,7 @@ public class LogMgr
 				logOut.close();
 				logOut = null;
 			}
-      if (WbManager.trace) System.out.println("LogMgr.checkOutput() - Opening logfile " + aFilename);
+      WbManager.trace("LogMgr.checkOutput() - Opening logfile " + aFilename);
 			File f = new File(aFilename);
 
 			if (f.exists() && f.length() > maxFilesize)
@@ -198,7 +198,7 @@ public class LogMgr
 			logOut = null;
 			logError("LogMgr.checkOutput()", "Error when opening logfile=" + aFilename, th);
 		}
-	  if (WbManager.trace) System.out.println("LogMgr.setOutputFile() - done");
+	  WbManager.trace("LogMgr.setOutputFile() - done");
 	}
 
 	public static boolean isInfoEnabled()

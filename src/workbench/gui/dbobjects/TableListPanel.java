@@ -221,7 +221,6 @@ public class TableListPanel
 		this.importedKeys.setAdjustToColumnLabel(false);
 		WbScrollPane scroll = new WbScrollPane(this.importedKeys);
 		this.importedPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT);
-		this.importedPanel.setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.importedPanel.setDividerLocation(100);
 		this.importedPanel.setDividerSize(6);
 		this.importedPanel.setTopComponent(scroll);
@@ -232,7 +231,6 @@ public class TableListPanel
 		this.exportedKeys.setAdjustToColumnLabel(false);
 		scroll = new WbScrollPane(this.exportedKeys);
 		this.exportedPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT);
-		this.exportedPanel.setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.exportedPanel.setDividerLocation(100);
 		this.exportedPanel.setDividerSize(5);
 		this.exportedPanel.setTopComponent(scroll);
@@ -855,7 +853,7 @@ public class TableListPanel
 	{
 		this.triggers.saveSettings();
 		this.tableData.saveSettings();
-		this.findPanel.saveSettings();
+		//this.findPanel.saveSettings();
 		this.tableDefinition.saveSettings();
 		storeSettings(Settings.getInstance(), this.getClass().getName() + ".");
 	}
@@ -872,7 +870,7 @@ public class TableListPanel
 		readSettings(Settings.getInstance(), prefix);
 		this.triggers.restoreSettings();
 		this.tableData.restoreSettings();
-		this.findPanel.restoreSettings();
+		//this.findPanel.restoreSettings();
 		this.tableDefinition.restoreSettings();
 		if (!Settings.getInstance().getStoreExplorerObjectType())
 		{

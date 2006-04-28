@@ -19,6 +19,7 @@ import java.awt.Insets;
 
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
+import javax.swing.plaf.TabbedPaneUI;
 import workbench.gui.WbSwingUtilities;
 
 
@@ -60,7 +61,16 @@ public class WbTabbedPane
 	private void init()
 	{
 		this.putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
-		this.setUI(TabbedPaneUIFactory.getBorderLessUI());
+		//this.putClientProperty("jgoodies.embeddedTabs", Boolean.TRUE);
+		try
+		{
+			TabbedPaneUI ui = TabbedPaneUIFactory.getBorderLessUI();
+			if (ui != null) this.setUI(ui);
+		}
+		catch (Exception e)
+		{
+			// ignore
+		}
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 	}
 	

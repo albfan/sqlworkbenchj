@@ -451,6 +451,14 @@
 
   <!-- build a development release -->
   <target name="dev-release" depends="set-dev-build, clean, copy-history, prepare, compile_debug, build-help, release-src-zip, make-jar, clean-history">
+  
+    <zip zipfile="${distdir}/Workbench-Build${build.number}.zip">
+      <zipfileset dir="${distdir}">
+        <include name="Workbench.jar"/>
+        <include name="history.txt"/>
+      </zipfileset>
+    </zip>
+
     <tstamp>
       <format pattern="yyyy-MM-dd" property="today"/>
     </tstamp>
@@ -479,6 +487,7 @@
       <filelist dir="${scriptsrc}" files="history.header,history.new"/>
     </concat>
   </target>
+  
   <target name="clean-history">
     <delete file="${scriptsrc}/history.new" failonerror="false"/>
   </target>

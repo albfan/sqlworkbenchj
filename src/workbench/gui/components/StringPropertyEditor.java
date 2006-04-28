@@ -50,11 +50,20 @@ public class StringPropertyEditor
 	{
 		this.setSourceObject(aSource, aProperty, null);
 	}
+	
 	public void setSourceObject(Object aSource, String aProperty, String initialText)
 	{
 		this.source = aSource;
 		this.changed = false;
 		this.propName = aProperty;
+		if (aSource == null)
+		{
+			this.setText("");
+			this.getter = null;
+			this.setter = null;
+			return;
+		}
+
 		String propertyName = Character.toUpperCase(aProperty.charAt(0)) + aProperty.substring(1);
 		
 		this.getDocument().removeDocumentListener(this);
@@ -73,8 +82,11 @@ public class StringPropertyEditor
 			Class[] parms = {String.class};
 			this.setter = cls.getMethod(name, parms);
 
-			String value = (String)this.getter.invoke(this.source, (Object[])null);
-			this.setText(value);
+			if (initialText == null)
+			{
+				String value = (String)this.getter.invoke(this.source, (Object[])null);
+				this.setText(value);
+			}
 		}
 		catch (Exception e)
 		{
