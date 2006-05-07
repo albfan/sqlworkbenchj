@@ -127,6 +127,7 @@ public class BatchRunner
 		this.stmtRunner.setConnection(this.connection);
 		this.stmtRunner.setVerboseLogging(this.verboseLogging);
 		this.stmtRunner.setBaseDir(this.baseDir);
+		this.stmtRunner.setFullErrorReporting(true);
 		this.stmtRunner.setRowMonitor(this.rowMonitor);
 	}
 
@@ -494,7 +495,7 @@ public class BatchRunner
 			}
 		}
 
-    if (profile == null) return null;
+		if (profile == null) return null;
 
 		boolean ignoreDrop = cmdLine.getBoolean(WbManager.ARG_IGNORE_DROP, true);
 		profile.setIgnoreDropErrors(ignoreDrop);

@@ -97,11 +97,10 @@ public class UpdatingCommand extends SqlCommand
 			{
 				updateCount = this.currentStatement.executeUpdate(sql);
 			}
-			result.addUpdateCount(updateCount);
 			StringBuffer warnings = new StringBuffer();
 			boolean hasWarnings = this.appendWarnings(aConnection, this.currentStatement, warnings);
 			this.appendSuccessMessage(result);
-			result.addMessage(updateCount + " " + ResourceMgr.getString("MsgRowsAffected"));
+			result.addUpdateCount(updateCount);
 			if (hasWarnings) result.addMessage(warnings.toString());
 
 			result.setSuccess();
@@ -110,6 +109,10 @@ public class UpdatingCommand extends SqlCommand
 		{
 			result.clear();
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
+			if (reportFullStatementOnError)
+			{
+				result.addMessage(sql);
+			}
 			result.addMessage(ExceptionUtil.getDisplay(e));
 			result.setFailure();
 			LogMgr.logDebug("UpdatingCommnad.execute()", "Error executing statement: " + sql, e);

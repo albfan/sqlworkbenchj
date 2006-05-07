@@ -14,6 +14,7 @@
 	<!ENTITY dbexplorer SYSTEM "dbexplorer.xml">
 	<!ENTITY data-pumper SYSTEM "data-pumper.xml">
 	<!ENTITY options SYSTEM "options.xml">
+	<!ENTITY shortcuts SYSTEM "shortcuts.xml">
 	<!ENTITY settings SYSTEM "settings.xml">
 	<!ENTITY variables SYSTEM "script-variables.xml">
 	<!ENTITY wb-productname	"SQL Workbench/J">
@@ -34,6 +35,7 @@
 &export-import;
 &data-pumper;
 &dbexplorer;
+&shortcuts;
 &options;
 &settings;
 </article>

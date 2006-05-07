@@ -35,5 +35,5 @@ public interface StatementRunner
 	void statementDone();
 	void setBaseDir(String dir);
 	String getBaseDir();
-	
+	void setFullErrorReporting(boolean flag);
 }

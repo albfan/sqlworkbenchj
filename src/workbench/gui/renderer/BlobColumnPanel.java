@@ -16,13 +16,13 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionListener;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import workbench.gui.components.BlobHandler;
 import workbench.resource.ResourceMgr;
 import workbench.storage.NullValue;
-import workbench.util.StringUtil;
 
 /**
  * Renderer for BLOB datatype...
@@ -46,6 +46,7 @@ public class BlobColumnPanel
 		openButton.setMinimumSize(d);
 		openButton.setEnabled(true);
 		openButton.setFocusable(false);
+		openButton.setBorder(BorderFactory.createEtchedBorder());
 		add(label,BorderLayout.WEST);
 		add(openButton,BorderLayout.EAST);
 		openButton.setVisible(true);

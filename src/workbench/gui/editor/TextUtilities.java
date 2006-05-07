@@ -15,7 +15,7 @@ import javax.swing.text.Document;
 /**
  * Class with several utility functions used by the text area component.
  * @author Slava Pestov
- * @version $Id: TextUtilities.java,v 1.3 2006-04-17 14:55:34 thomas Exp $
+ * @version $Id: TextUtilities.java,v 1.4 2006-05-07 11:29:10 thomas Exp $
  */
 public class TextUtilities
 {
@@ -135,17 +135,15 @@ public class TextUtilities
 	{
 		char ch = line.charAt(pos - 1);
 
-		if(noWordSep == null)
-			noWordSep = "";
-		boolean selectNoLetter = (!Character.isLetterOrDigit(ch)
-			&& noWordSep.indexOf(ch) == -1);
+		if(noWordSep == null) noWordSep = SyntaxDocument.DEFAULT_NO_WORD_SEP;
+
+		boolean selectNoLetter = (!Character.isLetterOrDigit(ch) 	&& noWordSep.indexOf(ch) == -1);
 
 		int wordStart = 0;
 		for(int i = pos - 1; i >= 0; i--)
 		{
 			ch = line.charAt(i);
-			if(selectNoLetter ^ (!Character.isLetterOrDigit(ch) &&
-				noWordSep.indexOf(ch) == -1))
+			if(selectNoLetter ^ (!Character.isLetterOrDigit(ch) && noWordSep.indexOf(ch) == -1))
 			{
 				wordStart = i + 1;
 				break;
@@ -164,17 +162,14 @@ public class TextUtilities
 	{
 		char ch = line.charAt(pos);
 
-		if(noWordSep == null)
-			noWordSep = "";
-		boolean selectNoLetter = (!Character.isLetterOrDigit(ch)
-			&& noWordSep.indexOf(ch) == -1);
+		if(noWordSep == null) noWordSep = SyntaxDocument.DEFAULT_NO_WORD_SEP;
+		boolean selectNoLetter = (!Character.isLetterOrDigit(ch) && noWordSep.indexOf(ch) == -1);
 
 		int wordEnd = line.length();
 		for(int i = pos; i < line.length(); i++)
 		{
 			ch = line.charAt(i);
-			if(selectNoLetter ^ (!Character.isLetterOrDigit(ch) &&
-				noWordSep.indexOf(ch) == -1))
+			if(selectNoLetter ^ (!Character.isLetterOrDigit(ch) && noWordSep.indexOf(ch) == -1))
 			{
 				wordEnd = i;
 				break;

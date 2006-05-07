@@ -51,7 +51,7 @@ public abstract class BaseAnalyzer
 	protected int context;
 	protected TableIdentifier tableForColumnList;
 	protected String schemaForTableList;
-
+	protected boolean addAllMarker = false;
 	protected List elements;
 	protected String title;
 	private boolean overwriteCurrentWord;
@@ -108,9 +108,11 @@ public abstract class BaseAnalyzer
 		this.typeFilter = null;
 
 		checkOverwrite();
+		this.addAllMarker = false;
 
 		// this should not be done in the constructor as the 
-		// sub-classes might do important initializations there
+		// sub-classes might need to do important initializations durin initialization
+		// and before checkContext is called
 		this.checkContext();
 		this.buildResult();
 	}
@@ -155,6 +157,10 @@ public abstract class BaseAnalyzer
 			this.elements = Collections.EMPTY_LIST;
 			this.title = null;
 			Toolkit.getDefaultToolkit().beep();
+		}
+		if (this.addAllMarker && this.elements != null)
+		{
+			this.elements.add(0, this.allColumnsMarker);
 		}
 	}
 

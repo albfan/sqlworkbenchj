@@ -426,6 +426,7 @@ public class TableDataPanel
 		try
 		{
 			dataDisplay.setShowErrorMessages(true);
+			dataDisplay.setStatusMessage(ResourceMgr.getString("LblLoadingProgress"));
 			dataDisplay.setAutomaticUpdateTableCheck(false);
 			dataDisplay.runQuery(sql, respectMaxRows);
 			dataDisplay.getTable().adjustColumns();

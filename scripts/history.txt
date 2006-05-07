@@ -1,5 +1,11 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+
+Build 86, 07.05.2006
+--------------------
+
+Build 85, 07.05.2006
+--------------------
 Enh:  (85.7) "Expand Editor" and "Expand Result" now act as a toggle. 
       The first time they are invoked they will expand the editor (or the
       result area) the second time they will undo the expand. 
@@ -78,7 +84,17 @@ Fix:  (85.41) The application was not starting any more if no -configdir
       was passed
 Fix:  (85.43) The available tables were not recognized properly if 
       more then one JOIN was used.
-      
+Fix:  (85.45) The result of stored procedures that returned ResultSets 
+      and updateCounts where not processed correctly
+Fix:  (85.46) Update counts were sometimes reported twice
+Fix:  (85.46) When trying to update a result based on a SELECT statement 
+      with multiple tables, the tables were not listed correctly in the 
+      dialog
+Fix:  ALTER TABLE ... DROP CONSTRAINT was not considered for the "Ignore
+      DROP errors" option. (Thanks, Janek for this)
+Fix:  Statements immediately following a combination of multi-line and 
+      single line statements were not always detected correctly and 
+      thus not considered e.g. for the "Ignore DROP errors" option
 
 Build 85, 20.02.2006
 --------------------

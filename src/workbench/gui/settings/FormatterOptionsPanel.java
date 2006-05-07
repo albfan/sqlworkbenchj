@@ -97,6 +97,7 @@ public class FormatterOptionsPanel
     formatUpdates.setFont(null);
     formatUpdates.setSelected(Settings.getInstance().getDoFormatUpdates());
     formatUpdates.setText("");
+    formatUpdates.setBorder(null);
     formatUpdates.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     formatUpdates.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
     formatUpdates.setIconTextGap(5);
@@ -105,7 +106,7 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 11);
     internalFormatterPanel.add(formatUpdates, gridBagConstraints);
 
     formatUpdatesLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -117,7 +118,7 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(1, 12, 0, 0);
     internalFormatterPanel.add(formatUpdatesLabel, gridBagConstraints);
 
     formatInsertsLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -129,12 +130,13 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 0);
     internalFormatterPanel.add(formatInsertsLabel, gridBagConstraints);
 
     formatInserts.setFont(null);
     formatInserts.setSelected(Settings.getInstance().getDoFormatInserts());
     formatInserts.setText("");
+    formatInserts.setBorder(null);
     formatInserts.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     formatInserts.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
     formatInserts.setIconTextGap(5);
@@ -143,7 +145,7 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 5, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 11);
     internalFormatterPanel.add(formatInserts, gridBagConstraints);
 
     insertColThresholdLbl.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -154,7 +156,7 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 18, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(6, 18, 0, 0);
     internalFormatterPanel.add(insertColThresholdLbl, gridBagConstraints);
 
     insertThreshold.setText(Integer.toString(Settings.getInstance().getFormatInsertColumnThreshold()));
@@ -163,7 +165,7 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 9, 0, 15);
+    gridBagConstraints.insets = new java.awt.Insets(4, 10, 0, 15);
     internalFormatterPanel.add(insertThreshold, gridBagConstraints);
 
     updateThreshold.setText(Integer.toString(Settings.getInstance().getFormatUpdateColumnThreshold()));
@@ -172,7 +174,7 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(1, 9, 0, 15);
+    gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 15);
     internalFormatterPanel.add(updateThreshold, gridBagConstraints);
 
     updateColThresholdLbl.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -183,7 +185,7 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(3, 18, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(7, 18, 0, 0);
     internalFormatterPanel.add(updateColThresholdLbl, gridBagConstraints);
 
     ignoreIdentityLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -195,12 +197,13 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 18, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(6, 18, 0, 0);
     internalFormatterPanel.add(ignoreIdentityLabel, gridBagConstraints);
 
     ignoreIdentity.setFont(null);
     ignoreIdentity.setSelected(Settings.getInstance().getFormatInsertIgnoreIdentity());
     ignoreIdentity.setText("");
+    ignoreIdentity.setBorder(null);
     ignoreIdentity.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     ignoreIdentity.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
     ignoreIdentity.setIconTextGap(5);
@@ -210,7 +213,7 @@ public class FormatterOptionsPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(1, 5, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(6, 10, 0, 11);
     internalFormatterPanel.add(ignoreIdentity, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -227,7 +230,7 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 9, 0, 15);
+    gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 15);
     internalFormatterPanel.add(insertColsPerLine, gridBagConstraints);
 
     colsPerLineLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -238,7 +241,7 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 18, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(7, 18, 0, 0);
     internalFormatterPanel.add(colsPerLineLabel, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -252,6 +255,7 @@ public class FormatterOptionsPanel
     includeOwner.setFont(null);
     includeOwner.setSelected(Settings.getInstance().getIncludeOwnerInSqlExport());
     includeOwner.setText("");
+    includeOwner.setBorder(null);
     includeOwner.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     includeOwner.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
     includeOwner.setIconTextGap(5);
@@ -262,7 +266,7 @@ public class FormatterOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(1, 5, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(6, 10, 0, 11);
     internalFormatterPanel.add(includeOwner, gridBagConstraints);
 
     includeOwnerLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -274,7 +278,7 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 8;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 0);
     internalFormatterPanel.add(includeOwnerLabel, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();

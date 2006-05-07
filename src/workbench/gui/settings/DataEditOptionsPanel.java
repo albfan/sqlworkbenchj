@@ -81,7 +81,7 @@ public class DataEditOptionsPanel
     pkMapFileLabel.setToolTipText(ResourceMgr.getDescription("LblPKMapFile"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(11, 12, 0, 0);
@@ -106,7 +106,7 @@ public class DataEditOptionsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
@@ -119,7 +119,7 @@ public class DataEditOptionsPanel
     previewDmlLabel.setToolTipText(ResourceMgr.getDescription("LblPreviewDml"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(14, 12, 0, 0);
     add(previewDmlLabel, gridBagConstraints);
@@ -127,15 +127,16 @@ public class DataEditOptionsPanel
     previewDml.setFont(null);
     previewDml.setSelected(Settings.getInstance().getPreviewDml());
     previewDml.setText("");
+    previewDml.setBorder(null);
     previewDml.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     previewDml.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
     previewDml.setIconTextGap(5);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 7, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(10, 9, 0, 11);
     add(previewDml, gridBagConstraints);
 
     labelRowHeight.setLabelFor(rowHeightResize);
@@ -143,28 +144,29 @@ public class DataEditOptionsPanel
     labelRowHeight.setToolTipText(ResourceMgr.getDescription("LblRowResize"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
     add(labelRowHeight, gridBagConstraints);
 
     rowHeightResize.setSelected(Settings.getInstance().getAllowRowHeightResizing());
     rowHeightResize.setText("");
+    rowHeightResize.setBorder(null);
     rowHeightResize.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     rowHeightResize.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
     rowHeightResize.setIconTextGap(5);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(3, 7, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(6, 9, 0, 11);
     add(rowHeightResize, gridBagConstraints);
 
     requiredFieldLabel.setText(ResourceMgr.getString("LblReqFldColor"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 0);
@@ -172,7 +174,7 @@ public class DataEditOptionsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 25);
@@ -182,7 +184,7 @@ public class DataEditOptionsPanel
     dataFontLabel.setToolTipText(ResourceMgr.getDescription("LblDataFont"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
@@ -190,7 +192,7 @@ public class DataEditOptionsPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 15);
@@ -201,23 +203,24 @@ public class DataEditOptionsPanel
     highlightRequiredLabel.setToolTipText(ResourceMgr.getDescription("LblHiliteRqd"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
     add(highlightRequiredLabel, gridBagConstraints);
 
     highlightRequired.setFont(null);
     highlightRequired.setSelected(Settings.getInstance().getHighlightRequiredFields());
     highlightRequired.setText("");
+    highlightRequired.setBorder(null);
     highlightRequired.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     highlightRequired.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
     highlightRequired.setIconTextGap(5);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(3, 7, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(6, 9, 0, 11);
     add(highlightRequired, gridBagConstraints);
 
   }

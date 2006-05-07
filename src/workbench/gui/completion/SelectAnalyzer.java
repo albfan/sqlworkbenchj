@@ -130,6 +130,7 @@ public class SelectAnalyzer
 			if (afterGroup)
 			{
 				this.elements = getColumnsForGroupBy(fromPos);
+				this.addAllMarker = true;
 				this.title = ResourceMgr.getString("TxtTitleColumns");
 				return;
 			}

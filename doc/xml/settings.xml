@@ -6,9 +6,9 @@
 
   <para>The name of the setting refers to the entry in the file <literal>workbench.settings</literal>
       which is located in the <link linkend="config-dir">configuration directory</link>. Not all
-      listed properties will be present in <literal>workbench.settings</literal>. If a property
-      does not yet exist in the file, simply add it to the file. The position does not matter,
-      as the file will be sorted the next time it is written back.
+      listed properties will be present in <literal>workbench.settings</literal>. In this case
+			simply create a new line with the property name and the value as described here. 
+			The position where you add this entry does not matter.
   </para>
         
   <section id="dbms-identifier">
@@ -19,52 +19,27 @@
         After a successful connect to a database, there will be an entry in the log file similar to this:
     </para>
     <programlisting>INFO  15.08.2004 10:24:42 Connected to: [HSQL Database Engine]</programlisting>
-    <para>The text between (but not including) the square brackets, is the ID that needs to
-      	be used for the various <literal>workbench.db.</literal> parameters.
+    <para>If the description for a property in this chapter refers to 
+			a "Database Identifier", the text between (but not including) the square brackets has to be used.
     </para>
   </section>
         
   <section id="dbid">
     <title>DBID</title>
     <para>For some settings, where the ID is part of the property's key, a "clean" version of
-      	the Database Identifer, called the DBID is used. This DBID is also reported in the log
-      	file:</para>
-    <programlisting>INFO  15.08.2004 10:24:42 DbMetadata - Using DBID=hsql_database_engine</programlisting>
+      	the Database Identifer, called the DBID, is used. This DBID is also reported in the log
+      	file:
+    </para>
+    <programlisting>INFO  15.08.2004 10:24:42 Using DBID=hsql_database_engine</programlisting>
+		<para> 
+			If the description for a property in this chapter refers to the "DBID", then this value has to be used. 
+			If the DBID is part of the property key this will be referred to as <literal>[dbid]</literal> in the
+			key.
+		</para>
   </section>
 
   <section id="gui-settings">
     <title>GUI related settings</title>
-
-    <section id="settings-right-clickmove">
-      <title>Right click behaviour in the editor</title>
-      <para>Property: <literal>workbench.editor.rightclickmovescursor</literal></para>
-      <para>Normally a right click in the SQL editor does not
-            change the location of the cursor (caret). If this parameter is set to
-            true, then a right click will also change the caret's location.
-      </para>
-      <para>Default: <literal>false</literal></para>
-    </section>
-    
-    <section id="settings-highlight-notnull">
-      <title>Highlight required fields during editing</title>
-      <para>Property: <literal>workbench.gui.edit.requiredfield.dohighlight</literal></para>
-      <para>When editing data in the result set, mandatory columns (i.e. those
-			that are defined as <literal>NOT NULL</literal>) will be highlighted
-			if this parameter is set to <literal>true</literal>. The background color that
-			is used for those fields can also be defined.
-      </para>
-      <para>Default: <literal>true</literal></para>
-    </section>
-
-    <section id="settings-highlight-required">
-      <title>Highlight color for required fields</title>
-      <para>Property: <literal>workbench.gui.edit.requiredfield.color</literal></para>
-      <para>When highlighting mandatory columns from a result set, the background
-      color can be defined with this parameter. It expects three integer values
-      defining the <ulink url="http://en.wikipedia.org/wiki/List_of_colors">RGB value</ulink> of the color to be used.
-      </para>
-      <para>Default: <literal>255,100,100</literal></para>
-    </section>
 
     <section id="settings-show-acc-menu">
       <title>Showing accelerator in menu</title>
@@ -97,19 +72,20 @@
 
     <section id="selectable-objects-setting">
       <title>Controlling data display in the DbExplorer</title>
-      <para>Property: <literal>workbench.db.objecttype.selectable.[dbid]=value1,value2,...</literal></para>
+      <para>Property: <literal>workbench.db.objecttype.selectable.<link linkend="dbid">[dbid]</link>=value1,value2,...</literal></para>
       <para>
-      The DbExplorer makes the "data" tab available based on the type of the selected object
-      in the object list (second column). If the type returned by the JDBC driver
-			is one of the types listed in this property, &wb-productname; assumes that
-			it can issue a <literal>SELECT * FROM</literal> to retrieve data from that object.
+				The DbExplorer makes the "data" tab available based on the type of the selected object
+				in the object list (second column). If the type returned by the JDBC driver
+				is one of the types listed in this property, &wb-productname; assumes that
+				it can issue a <literal>SELECT * FROM</literal> to retrieve data from that object.
       </para>
       <para>Default values:
         <simplelist columns="1">
-          <member><literal>.default=view,table,system view,system table</literal></member>
+          <member><literal>.defaultt=view,table,system view,system table</literal></member>
           <member><literal>.postgres=view,table,system view,system table,sequence</literal></member>
           <member><literal>.rdb=view,table,system,system view</literal></member>
         </simplelist>
+				The values in this property are not case-sensitiv (TABLE is the same as table)
       </para>
     </section>
 
@@ -117,16 +93,44 @@
       <title>Controlling the number of macros in the main menu</title>
       <para>Property: <literal>workbench.gui.macro.maxmenuitems</literal></para>
       <para>
-      With this setting the number of macros displayed in the Macro menu can be controlled.
+	      With this setting the number of macros displayed in the Macro menu can be controlled.
+				Note that only the first 9 macros will be accessible with a menu accelerator.
       </para>
       <para>Default value: <literal>15</literal></para>
     </section>
+		
+    <section id="editor-color-setting">
+			
+      <title>Customizing the colors used for syntax highlighting</title>
+      <para>Property: <literal>workbench.editor.color.[type]</literal></para>
+      <para>
+				These properties control the various colors used for syntax highlighting in the editor. 
+				Each entry defines a color with the three RGB values that make up the color.
+      </para>
+			
+      <para>Available values for <literal>[type]</literal> and their defaults:
+        <simplelist columns="1">
+          <member><literal>comment1</literal> - The color used for multi-line comments (128,128,128)</member>
+          <member><literal>comment2</literal> - The color used for single-line comments (128,128,128)</member>
+          <member><literal>keyword1</literal> - The color standard SQL keywords (0,0,255)</member>
+          <member><literal>keyword2</literal> - The color used for WB specific commands (255,0,255)</member>
+          <member><literal>keyword3</literal> - The color used for SQL functions (0,150,0)</member>
+          <member><literal>literal1</literal> - The color used for literals (101,0,153)</member>
+          <member><literal>operator</literal> - The color used for operators (0,0,0)</member>
+        </simplelist>
+      </para>
+			
+    </section>
+		
+		
   </section>
 
 	<section id="auto-completion">
 		<title>Controlling auto completion of table and column names</title>
-		<para>The behaviour of the <link linkend="command-completion">auto completion</link> 
-    can be controlled to a certain extent with the following parameters.</para>
+		<para>
+			The behaviour of the <link linkend="command-completion">auto completion</link> 
+			can be controlled to a certain extent with the following parameters.
+		</para>
 
 		<section id="auto-completion-public-syn">
 				<title>Include Oracle public synonyms in auto-completion of tables</title>
@@ -135,7 +139,7 @@
 					When using auto completion for table columns and table names, Oracle's public synonyms 
 					are not included by default. This has two reasons: first, the author believes that public
 					synonyms shouldn't be used (it's just as bad as global variables in programming) and
-					secondly, Oracle already defines a huge number of public synonyms that would make the 
+					second, Oracle defines a huge number of public synonyms that would make the 
 					popup with all available tables very long and hard to use. Setting this property
 					to <literal>true</literal>, will include public synonyms in the popup. Please
 					refer to <link linkend="db-oracle-filter-syns">filtering synonyms</link> for 
@@ -174,20 +178,20 @@
 	
   <section id="settings-sorting">
     <title>Controlling sorting of data</title>
-    <para>
-    	When you sort data in the result set (by clicking on the column header) this 
-		is performed using Java built-in comparisons. For performance reasons the sorting
-		of character values (Strings) is done based on the ASCII value of the characters which
-		results in a case-sensitive sorting. Another disadvantage of this method is, that 
-		non-ascii characters might not be sorted correctly either. 
-	</para>  
-    <para>
-    The sorting of character values can be influenced with three different settings
-		in <literal>workbench.settings</literal> that control the collation to be used.
-		The first property enables the usage of a country and language aware collation 
-		sequence, the other two properties control the language and the country to 
-		be used for the collator. 
-	</para>  
+		<para>
+			When you sort data in the result set (by clicking on the column header) this 
+			is performed using Java built-in comparisons. For performance reasons the sorting
+			of character values (Strings) is done based on the ASCII value of the characters which
+			results in a case-sensitive sorting. Another disadvantage of this method is, that 
+			non-ascii characters might not be sorted correctly either. 
+		</para>  
+		<para>
+			The sorting of character values can be influenced with three different settings
+			in <literal>workbench.settings</literal> that control the collation to be used.
+			The first property enables the usage of a country and language aware collation 
+			sequence, the other two properties control the language and the country to 
+			be used for the collator. 
+		</para>  
 	
 	<section id="sorting-use-collator">
       <title>Using language aware collations for sorting</title>
@@ -239,9 +243,10 @@
         driver. Some drivers have been reported to indicate an error
         in the URL even if they could connect successfully.
       </para>
-      <para>If you are seeing an error indicating that the URL is not
-      accepted by the driver, but you are sure that the driver accepts
-      the URL, then set this property to <literal>false</literal>
+      <para>
+				If you are seeing an error indicating that the URL is not
+				accepted by the driver, but you are sure that the driver accepts
+				the URL, then set this property to <literal>false</literal>
       </para>
       <para>Default: <literal>true</literal></para>
     </section>
@@ -249,66 +254,72 @@
     <section id="manual-setting-datapumper-autoconnect">
       <title>Automatically connect the DataPumper</title>
       <para>Property: <literal>workbench.datapumper.autoconnect</literal></para>
-      <para>When opening the <link linkend="data-pumper">DataPumper</link> it will
-            connect to the current profile as the source connection. If you do not want the DataPumper to
-            connect automatically set this property to <literal>false</literal>
+      <para>
+				When opening the <link linkend="data-pumper">DataPumper</link> it will
+				connect to the current profile as the source connection. If you do not want the DataPumper to
+				connect automatically set this property to <literal>false</literal>
       </para>
       <para>Default: <literal>true</literal></para>
     </section>
 
-    <section>
+    <section id="db-settings-ddl-commit">
       <title>Controlling COMMIT for DDL statements</title>
       <para>Property <literal>workbench.db.ddlneedscommit</literal></para>
-      <para>A list of <link linkend="dbms-identifier">DBMS Identifiers</link> that require a COMMIT after issuing DDL statements (such
-      as <literal>CREATE TABLE</literal>
+      <para>
+				A list of <link linkend="dbms-identifier">Database Identifiers</link> that require a COMMIT after issuing DDL statements (such
+				as <literal>CREATE TABLE</literal>
       </para>
-      <para>Default: <literal>PostgreSQL,Firebird</literal></para>
+      <para>Default: <literal>PostgreSQL,Firebird,Cloudscape,Apache Derby,DB2/NT,Frontbase,Microsoft SQL Server</literal></para>
     </section>
           
-    <section>
+    <section id="db-settings-commit">
       <title>COMMIT/ROLLBACK behaviour</title>
       <para>Property: <literal>workbench.db.usejdbccommit</literal></para>
-      <para>Some DBMS return an error when <literal>COMMIT</literal> or <literal>ROLLBACK</literal> is sent as
-      a regular command through the JDBC interface. If the DBMS is listed here,
-      the JDBC functions <literal>commit()</literal> or <literal>rollback()</literal> will
-      be used instead.
-      This is a comma separated list of <link linkend="dbms-identifier">Database Identifiers</link>
+      <para>
+				Some DBMS return an error when <literal>COMMIT</literal> or <literal>ROLLBACK</literal> is sent as
+				a regular command through the JDBC interface. If the DBMS is listed here,
+				the JDBC functions <literal>commit()</literal> or <literal>rollback()</literal> will
+				be used instead.
       </para>
+			<para>This is a comma separated list of <link linkend="dbms-identifier">Database Identifiers</link></para>
       <para>Default: <literal>Firebird,Cloudscape</literal></para>
     </section>
 
-    <section>
+    <section id="db-settings-constraint-gen">
       <title>Generating constraints for SQL source</title>
       <para>Property: <literal>workbench.db.inlineconstraints</literal></para>
-      <para>This setting controls the generation of the <literal>CREATE TABLE</literal>
-      source in the <link linkend="dbexplorer">DbExplorer</link>. This is a comma separated
-      list of <link linkend="dbms-identifier">Database Identifiers</link> that only support defining
-      primary and foreign keys inside the <literal>CREATE TABLE</literal> statement.
+      <para>
+				This setting controls the generation of the <literal>CREATE TABLE</literal>
+				source in the <link linkend="dbexplorer">DbExplorer</link>. This is a comma separated
+				list of <link linkend="dbms-identifier">Database Identifiers</link> that only support defining
+				primary and foreign keys inside the <literal>CREATE TABLE</literal> statement.
       </para>
       <para>Default: <literal>FirstSQL/J</literal></para>
     </section>
 
-    <section>
+    <section id="db-settings-case-sensitiv">
       <title>Case sensitivity when comparing values</title>
       <para>Property <literal>workbench.db.casesensitive</literal></para>
-      <para>The search panel of the DbExplorer highlights matching values in the result
-        tables. The highlighter needs to know whether string comparisons in the database
-        are case sensitive in order to highlight the correct values.
-        This is a comma separated list of <link linkend="dbms-identifier">Database Identifiers</link>
+      <para>
+				The search panel of the DbExplorer highlights matching values in the result
+				tables. The highlighter needs to know whether string comparisons in the database
+				are case sensitive in order to highlight the correct values.
+				This is a comma separated list of <link linkend="dbms-identifier">Database Identifiers</link>
       </para>
       <para>Default: <literal>Oracle</literal></para>
     </section>
 
-    <section>
+    <section id="db-settings-keywords">
       <title>Definining additional SQL keywords</title>
-      <para>Property: <literal>workbench.db.keywordlist.[dbid]=</literal></para>
-      <para>For a <link linkend="dbid">DBID</link> you can define a list of additional
-       SQL keywords. This can be used if the JDBC driver does not implement getSQLKeywords() correctly.
+      <para>Property: <literal>workbench.db.keywordlist.<link linkend="dbid">[dbid]</link>=</literal></para>
+      <para>
+				For a <link linkend="dbid">DBID</link> you can define a list of additional
+				SQL keywords. This can be used if the JDBC driver does not implement getSQLKeywords() correctly.
       </para>
       <para>No default</para>
     </section>
 
-    <section>
+    <section id="db-settings-cancel-reconnect">
       <title>Controlling statement cancelling</title>
       <para>Property: <literal>workbench.db.cancelneedsreconnect</literal></para>
       <para>Some JDBC drivers (such as the MS SQL JDBC driver) cannot handle cancelling of 
@@ -317,59 +328,84 @@
        that require a reconnect after cancelling a statement. </para>
       <para>Default: <literal>com.microsoft.jdbc.sqlserver.SQLServerDriver</literal></para>
     </section>
-		
-	<section id="db-oracle-filter-syns">
-		<title>Filtering Oracle public synonyms</title>
-		<para>Property: <literal>workbench.db.oracle.exclude.synonyms</literal></para>
-		<para>
-			The <link linkend="dbexplorer">database explorer</link> and the 
-			<link linkend="command-completion">auto completion</link> can display Oracle public synonyms. 
-			Some of these are usually not of interest when simply querying a database, so the
-			list synonyms actually displayed can be controlled. This property defines
-			a regular expression. Each synonym that matches this regular expression, 
-			will be excluded from the list presented in the GUI.
-		</para>
-		<para>Default value: <literal>^AQ\\$.*|^MGMT\\$.*|^GV\\$.*|^EXF\\$.*|^KU\\$_.*|^WM\\$.*|^MRV_.*|^CWM_.*|^CWM2_.*|^WK\\$_.*|^CTX_.*</literal></para>
-		<para>Note that you need to use two backslashes in the RegeEx.</para>
-	</section>
 
-	<section id="db-oracle-detect-snapshots">
-		<title>Support for Oracle materialized views (snapshots)</title>
-		<para>Property: <literal>workbench.db.oracle.detectsnapshots</literal></para>
-		<para>
-			When displaying the list of tables in the <link linkend="dbexplorer">database explorer</link> 
-			Oracle materialized views (snapshots) are identified as tables by the Oracle JDBC driver.
-			To identify a specific "table" as a materialized view, a second request to the database
-			is necessary (accessing the system view <literal>ALL_MVIEWS</literal>). As this 
-			request can slow down the retrieval performance, this feature can be turned off. If for
-			any reason the <literal>ALL_MVIEWS</literal> view cannot be accessed, this feature
-			will be turned off until you re-connect to the database.
-		</para>
-		<para>Default value: <literal>true</literal></para>
-	</section>
-	
-	<section id="options-pkmapping">
-		<title>Define mapping file for primary key columns</title>
-		<para>Property: <literal>workbench.pkmapping.file</literal></para>
-		<para>
-		  This property defines a mapping file for primary key columns that 
-		  is read whenever the primary keys for the base table of a result
-		  cannot be obtained from the database. For a detailed
-		  description on how to define extra primary key columns, please
-		  refer to the <link linkend="command-define-pk"><literal>WbDefinPk</literal></link> command.
-		</para>
-	</section>
-
-    <section id="settings-libdir">
-      <title>Defining a base directory for JDBC libraries</title>
-      <para>Property: <literal>workbench.libdir</literal></para>
-      <para>A directory that contains the .jar files for the <link linkend="jdbc-lib-dir">JDBC drivers</link>. 
-	  The value of this property can be referenced using <literal>%LibDir%</literal> 
-	  in the driver's definition. The value for this can also be specified
-	  <link linkend="cmdline-parameter-libdir">on the commandline</link>.
+    <section id="db-settings-switch-catalog">
+      <title>Database switch in DbExplorer</title>
+      <para>Property: <literal>workbench.dbexplorer.switchcatalog</literal></para>
+      <para>
+				When connected to a DBMS that supports multiple databases (catalogs) for the 
+				same connection, the DbExplorer displays a dropdown list with the available 
+				databases. Switching the selected catalog in the dropdown will trigger a switch 
+				of the current catalog/database if the DbExplorer uses 
+				its <link linkend="profile-separate-connection">own connection</link>.
+				If you do not want to switch the database, but merely apply the new
+				selection as a filter (which is always done, if the DbExplorer shares the connection
+				with the other SQL panels) set this property to <literal>false</literal>.
       </para>
-      <para>No default</para>
+      <para>Default: <literal>true</literal></para>
     </section>
+		
+		<section id="db-oracle-filter-syns">
+			<title>Filtering Oracle public synonyms</title>
+			<para>Property: <literal>workbench.db.oracle.exclude.synonyms</literal></para>
+			<para>
+				The <link linkend="dbexplorer">database explorer</link> and the 
+				<link linkend="command-completion">auto completion</link> can display Oracle public synonyms. 
+				Some of these are usually not of interest when simply querying a database, so the
+				list of displayed synonyms can be controlled. This property defines
+				a regular expression. Each synonym that matches this regular expression, 
+				will be excluded from the list presented in the GUI.
+			</para>
+			<para>Default value: <literal>^AQ\\$.*|^MGMT\\$.*|^GV\\$.*|^EXF\\$.*|^KU\\$_.*|^WM\\$.*|^MRV_.*|^CWM_.*|^CWM2_.*|^WK\\$_.*|^CTX_.*</literal></para>
+			<para>Note that you need to use two backslashes in the RegeEx.</para>
+		</section>
+
+		<section id="db-oracle-detect-snapshots">
+			<title>Support for Oracle materialized views (snapshots)</title>
+			<para>Property: <literal>workbench.db.oracle.detectsnapshots</literal></para>
+			<para>
+				When displaying the list of tables in the <link linkend="dbexplorer">database explorer</link> 
+				Oracle materialized views (snapshots) are identified as tables by the Oracle JDBC driver.
+				To identify a specific "table" as a materialized view, a second request to the database
+				is necessary (accessing the system view <literal>ALL_MVIEWS</literal>). As this 
+				request can slow down the retrieval performance, this feature can be turned off. If for
+				any reason the <literal>ALL_MVIEWS</literal> view cannot be accessed, this feature
+				will be turned off until you re-connect to the database.
+			</para>
+			<para>Default value: <literal>true</literal></para>
+		</section>
+
+		<section id="db-oracle-char-semantics-fix">
+		  <title>Fix tye display for varchar columns in Oracle</title>
+		  <para>Property: <literal>workbench.db.oracle.fixcharsemantics</literal></para>
+		  <para>
+			  The Oracle driver does not report the size of VARCHAR2 columns correctly
+			  if the character semantic has been set to "char". The JDBC driver always returns
+			  the length in bytes.
+			  When this property is set to true, the length for those columns will 
+			  be displayed correctly in the DbExplorer. As this means &wb-productname;
+			  is using it's own query to retrieve the table definition, this might not 
+			  always yield the same results as the original statement from the Oracle driver.
+			  If your table definitions are not displayed correcly, set this value
+			  to <literal>false</literal> so that the original driver methods are used.
+			  The statement used by &wb-productname; is a bit faster then then original
+			  Oracle statement, as it does not use a <literal>LIKE</literal> predicate
+			  (which is required to comply with the JDBC specs).
+		  </para>
+		  <para>Default value: <literal>true</literal></para>
+		</section>
+
+		<section id="settings-libdir">
+		  <title>Defining a base directory for JDBC libraries</title>
+		  <para>Property: <literal>workbench.libdir</literal></para>
+		  <para>
+				A directory that contains the .jar files for the <link linkend="jdbc-lib-dir">JDBC drivers</link>. 
+				The value of this property can be referenced using <literal>%LibDir%</literal> 
+				in the driver's definition. The value for this can also be specified
+				<link linkend="cmdline-parameter-libdir">on the commandline</link>.
+		  </para>
+		  <para>No default</para>
+		</section>
           
   </section>
 			
@@ -379,12 +415,13 @@
     <section id="options-max-script-size">
       <title>Maximum script size for in-memory script execution</title>
       <para>Property: <literal>workbench.sql.script.inmemory.maxsize</literal></para>
-      <para>This setting controls the size up to which files that are executed in batch
-      mode or via the <link linkend="command-wbinclude">WbInclude</link> command
-      are read into memory. Files exceeding this size are not read into memory
-      but processed statement by statement. When a file is not read into memory
-      the automatic detection of the <link linkend="options-alternate-delimiter">alternate delimiter</link>
-      does not work any longer. The size is given in bytes.
+      <para>
+				This setting controls the size up to which files that are executed in batch
+				mode or via the <link linkend="command-wbinclude">WbInclude</link> command
+				are read into memory. Files exceeding this size are not read into memory
+				but processed statement by statement. When a file is not read into memory
+				the automatic detection of the <link linkend="options-alternate-delimiter">alternate delimiter</link>
+				does not work any longer. The size is given in bytes.
       </para>
       <para>Default: <literal>1048576</literal></para>
     </section>
@@ -392,33 +429,50 @@
     <section>
       <title>Ignoring certain SQL commands</title>
       <para>Property: <literal>workbench.db.ignore.[dbid]=</literal></para>
-      <para>For a DBMS identifier you can define a list of commands
-      that are simply ignored by &wb-productname;. This is useful e.g. for Oracle,
-      when you want to run scripts that are intended for SQL*Plus. If those scripts
-      contain special SQL*Plus commands (that are not understood by the Oracle server
-      as SQL*Plus executes these commands directly) they would fail in &wb-productname;.
-      If those commands are simply ignored and not send to the server, the scripts
-      can run without modification.
+      <para>
+				For a DBMS identifier you can define a list of commands
+				that are simply ignored by &wb-productname;. This is useful e.g. for Oracle,
+				when you want to run scripts that are intended for SQL*Plus. If those scripts
+				contain special SQL*Plus commands (that are not understood by the Oracle server
+				as SQL*Plus executes these commands directly) they would fail in &wb-productname;.
+				If those commands are simply ignored and not send to the server, the scripts
+				can run without modification.
       </para>
-      <para>The <link linkend="dbid">DBID</link> is the lower case DBMS identifier (see above) with all
-        special characters like <literal>\/,.$[]()</literal> and spaces removed.
-        The actual ID that is used to retrieve this list is reported as an
-        informational message in the log file (<literal>Using DBID=</literal>)
+      <para>
+				The <link linkend="dbid">DBID</link> is the lower case DBMS identifier (see above) with all
+				special characters like <literal>\/,.$[]()</literal> and spaces removed.
+				The actual ID that is used to retrieve this list is reported as an
+				informational message in the log file (<literal>Using DBID=</literal>)
 	  </para>
       <para>Default: <literal>workbench.db.ignore.oracle=prompt,exit,whenever</literal></para>
     </section>
 	
-	<section id="options-enable-shortinclude">
-	  <title>Enabling short WbInclude</title>
-	  <para>Property: <literal>workbench.db.supportshortinclude</literal></para>
-	  <para>By default the <link linkend="command-wbinclude">WbInclude</link> command
-	  can be shortened using the @ sign. This behaviour is disabled for MS SQL to 
-	  avoid conflicts with parameter definitions in stored procedures. This property
-	  contains a list of <link linkend="dbid"><literal>DBID</literal>s</link></para> for which
-	  this should be enabled. To enable this for all DBMS, simply use * as the value for
-	  this property.
-      <para>Default: <literal>oracle, rdb, hsqldb, postgresql, mysql, adaptive_server_anywhere, cloudscape, apache_derby</literal></para>
-	</section>
+		<section id="options-enable-shortinclude">
+			<title>Enabling short WbInclude</title>
+			<para>Property: <literal>workbench.db.supportshortinclude</literal></para>
+			<para>
+				By default the <link linkend="command-wbinclude">WbInclude</link> command
+				can be shortened using the @ sign. This behaviour is disabled for MS SQL to 
+				avoid conflicts with parameter definitions in stored procedures. This property
+				contains a list of <link linkend="dbid"><literal>DBID</literal>s</link> for which
+				this should be enabled. To enable this for all DBMS, simply use * as the value for
+				this property.
+			</para>
+			<para>Default: <literal>oracle, rdb, hsqldb, postgresql, mysql, adaptive_server_anywhere, cloudscape, apache_derby</literal></para>
+		</section>
+		
+		<section id="options-check-single-line-commands">
+			<title>Check for single line commands without delimiter</title>
+			<para>Property: <literal>workbench.db.checksinglelinecmd</literal></para>
+			<para>
+				When parsing a SQL script, &wb-productname; supports statements that 
+				are put into a single line without a delimiter. This is primarily intended
+				for compatibility with Oracle's SQL*Plus and is not enabled for other
+				database systems (starting with build 86).
+			</para>
+			<para>Default: <literal>oracle</literal></para>
+		</section>
+		
   </section>
 			
   <section id="log-setting">
@@ -449,10 +503,10 @@
           <listitem>{source}</listitem>
           <listitem>{stacktrace}</listitem>
         </itemizedlist>
-         The order of the placeholders defines the order in the log file, except
-         for the stacktrace which will always be printed after the message.
-         If the log level is set to debug, the stacktrace will always be displayed
-         even if it is not included in the format string.
+				The order of the placeholders defines the order in the log file, except
+				for the stacktrace which will always be printed after the message.
+				If the log level is set to debug, the stacktrace will always be displayed
+				even if it is not included in the format string.
       </para>
       <para>Default: <literal>{type} {timestamp} {message} {error}</literal></para>
     </section>
@@ -466,110 +520,59 @@
     </section>
 					
     <section>
-        <title>Logging SQL used for retrieving metadata</title>
-        <para>Property: <literal>workbench.dbmetadata.logsql</literal></para>
-        <para>If this is set to <literal>true</literal>the SQL queries used to
-        retrieve DBMS specific meta data (such as view/procedure/trigger source,
-        defined triggers/views) will be logged with level INFO.
-        This can be used to debug customized SQL statements
-        for DBMS's which are not (yet) preconfigured.</para>
-        <para>Default: <literal>false</literal></para>
+			<title>Logging SQL used for retrieving metadata</title>
+			<para>Property: <literal>workbench.dbmetadata.logsql</literal></para>
+			<para>
+				If this is set to <literal>true</literal>the SQL queries used to
+				retrieve DBMS specific meta data (such as view/procedure/trigger source,
+				defined triggers/views) will be logged with level INFO.
+				This can be used to debug customized SQL statements
+				for DBMS's which are not (yet) preconfigured.
+			</para>
+			<para>Default: <literal>false</literal></para>
     </section>
 
   </section>
 
-  <section id="setting-sql-formatting">
-	<title>Settings related to SQL formatting in the editor</title>
-    <section id="formatter-subselect-threshold">
-        <title>Max length for subselects</title>
-        <para>Property: <literal>workbench.sql.formatter.subselect.maxlength</literal></para>
-        <para>When the SQL formatter hits a sub-SELECT while
-            parsing it will not reformat any statement which is shorter
-            then the length specified through this property. I.e. any sub SELECT
-            shorter then this value will be formatted as one single String without
-            line breaks or indention. See <xref linkend="editor-reformat-sql"/> for
-            details on how the SQL formatting works.
-        </para>
-        <para>Default: <literal>60</literal></para>
-    </section>
-	
-    <section id="formatter-select-columns">
-        <title>Number of columns per line for SELECT list</title>
-        <para>Property: <literal>workbench.sql.formatter.select.columnsperline</literal></para>
-        <para>This property defines the number of columns the formatter puts in on line 
-        when formatting a <literal>SELECT</literal> statement.
-        </para>
-        <para>Default: <literal>1</literal></para>
-    </section>
-	
-  </section>
-  
   <section id="setting-sql-generation">
     <title>Settings related to SQL statement generation</title>
 		      
     <section id="manual-setting-snippet-no-newline">
-        <title>Controlling newlines in code snippets</title>
-        <para>Property: <literal>workbench.javacode.includenewline</literal></para>
-        <para>When creating a <link linkend="editor-copy-java-code-snippet">Java code snippet</link>,
-            the newlines inside the editor are preserved by putting a <literal>\n</literal>
-            character into the String declaration. Setting this property to false, will
-            tell &wb-productname; not put any <literal>\n</literal> characters into the Java string.
-        </para>
-        <para>Default: <literal>true</literal></para>
+			<title>Controlling newlines in code snippets</title>
+			<para>Property: <literal>workbench.javacode.includenewline</literal></para>
+			<para>
+				When creating a <link linkend="editor-copy-java-code-snippet">Java code snippet</link>,
+				the newlines inside the editor are preserved by putting a <literal>\n</literal>
+				character into the String declaration. Setting this property to false, will
+				tell &wb-productname; not put any <literal>\n</literal> characters into the Java string.
+			</para>
+			<para>Default: <literal>true</literal></para>
     </section>
 
     <section id="settings-db-ignoreschema">
-        <title>Controlling schema usage in generated SQL statements</title>
-        <para>Property: <literal>workbench.sql.ignoreschema.[dbid1]=schema1,...</literal></para>
-        <para>
-            Define a list of schemas that should be ignored for the <link linkend="dbid">DB ID</link>
-            When &wb-productname; creates DML statements and the current table is reported
-            to belong to any of the schemas listed in this property, the schema will not
-            be used to qualify the table. To ignore all schemas use a *, e.g.
-            <literal>workbench.sql.ignoreschema.rdb=*</literal>. In this case, table names
-            will never be prefixed with the schema name reported by the JDBC driver.
-            The entries in there are case sensitiv.
-        </para>
-		<para>Note that for Oracle tables that are owned by the connection user 
-		will never be prefixed with the owner.</para>
-        <para>Default values:
-            <simplelist columns="1">
-                <member><literal>.oracle=PUBLIC</literal></member>
-                <member><literal>.postgres=public</literal></member>
-                <member><literal>.rdb=*</literal></member>
-            </simplelist>
-        </para>
-    </section>
-
-    <section id="format-internal-update">
-        <title>Controlling formatting of internal UPDATE statements</title>
-        <para>Property: <literal>workbench.sql.generate.update.doformat</literal></para>
-        <para>Controls the formatting of generated UPDATE statements.
-            If this is set to <literal>false</literal> then UPDATE statements,
-            that are generated are not formatted at all (the complete statement
-            will be put into a single line)
-        </para>
-        <para>Default: <literal>true</literal></para>
-    </section>
-        
-    <section id="format-internal-insert">
-        <title>Controlling formatting of internal INSERT statements</title>
-        <para>Property: <literal>workbench.sql.generate.insert.doformat</literal></para>
-        <para>Controls the formatting of generated INSERT statements.</para>
-        <para>Default: <literal>true</literal></para>
-    </section>
-		
-    <section id="sql-script-generation-owner">
-        <title>Controlling schema usage for generated SQL scripts</title>
-        <para>Property: <literal>workbench.export.sql.includeowner</literal></para>
-        <para>
-            This setting controls whether &wb-productname; uses the onwer (schema)
-            when creating SQL scripts during exporting data (through WbExport 
-            or "Save as"). When this is set to true, the usage of the schema
-            depends on the <link linkend="settings-db-ignoreschema">ignore schema</link> setting. 
-            When this is set to false, the schema/owner will never be used for SQL scripts.
-        </para>
-        <para>Default: <literal>true</literal></para>
+			<title>Controlling schema usage in generated SQL statements</title>
+			<para>Property: <literal>workbench.sql.ignoreschema.<link linkend="dbid">[dbid]</link>=schema1,...</literal></para>
+			<para>
+				Define a list of schemas that should be ignored for the <link linkend="dbid">DB ID</link>
+				When &wb-productname; creates DML statements and the current table is reported
+				to belong to any of the schemas listed in this property, the schema will not
+				be used to qualify the table. To ignore all schemas use a *, e.g.
+				<literal>workbench.sql.ignoreschema.rdb=*</literal>. In this case, table names
+				will never be prefixed with the schema name reported by the JDBC driver.
+				The values specified in this property are case sensitiv.
+			</para>
+			<para>
+				Note that for Oracle, tables that are owned by the current user will never 
+				be prefixed with the owner.
+			</para>
+			<para>
+				Default values:
+				<simplelist columns="1">
+					<member><literal>.oracle=PUBLIC</literal></member>
+					<member><literal>.postgres=public</literal></member>
+					<member><literal>.rdb=*</literal></member>
+				</simplelist>
+			</para>
     </section>
 
   </section>

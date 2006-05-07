@@ -83,7 +83,7 @@ public class DdlCommand extends SqlCommand
 			
 			String msg = null;
 
-			if ("DROP".equals(verb) && aConnection.getIgnoreDropErrors())
+			if (isDropCommand(aSql) && aConnection.getIgnoreDropErrors())
 			{
 				try
 				{
@@ -149,15 +149,21 @@ public class DdlCommand extends SqlCommand
 
 			StringBuffer msg = new StringBuffer(150);
 			msg.append(ResourceMgr.getString("MsgExecuteError") + "\n");
-			int maxLen = 150;
-			msg.append(StringUtil.getMaxSubstring(aSql.trim(), maxLen));
+			if (reportFullStatementOnError)
+			{
+				msg.append(aSql);
+			}
+			else
+			{
+				int maxLen = 150;
+				msg.append(StringUtil.getMaxSubstring(aSql.trim(), maxLen));
+			}
 			msg.append("\n");
-
 			result.addMessage(msg.toString());
 			String ex = ExceptionUtil.getDisplay(e);
 			result.addMessage(ex);
 
-      this.addExtendErrorInfo(aConnection, aSql, result);
+			this.addExtendErrorInfo(aConnection, aSql, result);
 			result.setFailure();
 			LogMgr.logDebug("DdlCommand.execute()", "Error executing statement " + ex,null);
 		}
@@ -171,6 +177,14 @@ public class DdlCommand extends SqlCommand
 		return result;
 	}
 
+	private boolean isDropCommand(String sql)
+	{
+		if ("DROP".equals(this.verb)) return true;
+		Pattern p = Pattern.compile("\\sDROP\\s*(PRIMARY\\s*KEY|CONSTRAINT)\\s*", Pattern.CASE_INSENSITIVE);
+		Matcher m = p.matcher(sql);
+		return m.find();
+	}
+	
 	/**
 	 * Extract the type (function, package, procedure) of the created object.
 	 * @see #addExtendErrorInfo(workbench.db.WbConnection, String, workbench.sql.StatementRunnerResult)

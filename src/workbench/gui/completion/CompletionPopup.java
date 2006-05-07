@@ -237,25 +237,33 @@ public class CompletionPopup
 					}
 					else if (o instanceof SelectAllMarker)
 					{
-						//ListModel elementData = this.elementList.getModel();
 						int count = this.data.getSize();
 						StringBuffer cols = new StringBuffer(count * 10);
 						int col = 0;
-						for (int i=0; i < count; i++)
+						
+						// The first element is the SelectAllMarker, so we do not 
+						// need to include it
+						for (int i=1; i < count; i++)
 						{
-							
 							Object c = this.data.getElementAt(i);
+							if (c == null) continue;
+							String v = c.toString();
 							if (c instanceof ColumnIdentifier) 
 							{
-								if (col > 0) cols.append(", ");
+								v = getPasteValue(c.toString());
 								if (columnPrefix != null)
 								{
 									cols.append(columnPrefix);
 									cols.append(".");
 								}
-								cols.append(getPasteValue(c.toString()));
-								col ++;
 							}
+							else if (c instanceof String)
+							{
+								v = (String)c;
+							}
+							if (col > 0) cols.append(", ");
+							cols.append(v);
+							col ++;
 						}
 						value = cols.toString();
 					}

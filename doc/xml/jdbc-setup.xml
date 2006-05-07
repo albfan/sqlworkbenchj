@@ -1,234 +1,235 @@
-  <section id="jdbc-setup" xreflabel="JDBC drivers">
-    <title>JDBC Drivers</title>
+<section id="jdbc-setup" xreflabel="JDBC drivers">
+	<title>JDBC Drivers</title>
 
-    <section id="configure-drivers">
-      <title>Configuring JDBC drivers</title>
-      <para>Before you can connect to a DBMS you have to configure the JDBC
-      driver to be used. The driver configuration is available in the connection
-      dialog or through <menuchoice><guimenu>File</guimenu><guimenuitem>Manage Drivers</guimenuitem></menuchoice>
-      </para>
-
-      <para>The configuration of a specific driver requires at least two properties:</para>
-
-      <itemizedlist>
-		<listitem>the driver&apos;s class name</listitem>
-		<listitem>the library where to find the classes</listitem>
-      </itemizedlist>
-
-      <para>
-		The name of the library has to contain the full path to the driver&apos;s jar file, so that
-		&wb-productname; can find it. If a driver requires more than one library,
-		select all necessary libraries in the file open dialog, or enter all the
-		filenames separated by a semicolon. This is also true for drivers that require
-		a license file that is contained in a jar file. In this case you have to
-		include the license jar in the list of files. Basically this list defines
-		the classpath for the classloader that is used to load and instantiate the driver.
-		If the driver accesses files through its classpath definition that are not
-		contained in a jar library, you have to include that directory as part
-		of the library definition (e.g: "c:\etc\TheDriver\jdbcDriver.jar;c:\etc\TheDriver").
-		The file selection dialog will not let you select a directory, so you have
-		to add it manually to the library definition.
-	  </para>
-			
-      <para>&wb-productname; is <emphasis role="bold">not</emphasis> using
-		the system CLASSPATH definition (e.g. environment variable) to load the
-		driver classes.
-	  </para>
-
-      <note>
-		<para>When using the JDBC-ODBC bridge you do not need to specify a library as
-		the necessary drivers are already part of the Java runtime.
+	<section id="configure-drivers">
+		<title>Configuring JDBC drivers</title>
+		<para>Before you can connect to a DBMS you have to configure the JDBC
+			driver to be used. The driver configuration is available in the connection
+			dialog or through <menuchoice><guimenu>File</guimenu><guimenuitem>Manage Drivers</guimenuitem></menuchoice>
 		</para>
-      </note>
 
-      <para>You can assign a sample URL to each driver, which will be put into
-      the URL property of the profile, when the driver class is selected.
-      </para>
+		<para>The configuration of a specific driver requires at least two properties:</para>
 
-      <para>&wb-productname; comes with some sample URLs pre-configured.
-		Some of these sample URLs use brackets to indicate a parameters that need
-		to be replaced with the actual value for your connection: (servername)
-      </para>
-      <para>
-		In this case the entire sequence including the brackets need to be replaced with the 
-		actual value.
-      </para>
-	  
-    </section>
-	<section id="jdbc-lib-dir">
-	  <title>Specifying a library directory</title>
-	  <para>
-		When defining the location of the driver's .jar file, you can use the placeholder
-		<literal>%LibDir%</literal> instead of the using the directory's name directly.
-		This way your <literal>WbDrivers.xml</literal> is portable across installations.
-		To specify the library directory, either set it in the <link linkend="settings-libdir"><literal>workbench.settings</literal></link>
-		file, or specify the directory using the <link linkend="cmdline-parameter-libdir">-libdir</link>
-		switch when starting the application.
-	  </para>
+		<itemizedlist>
+			<listitem>the driver&apos;s class name</listitem>
+			<listitem>the library where to find the classes</listitem>
+		</itemizedlist>
+
+		<para>
+			The name of the library has to contain the full path to the driver&apos;s jar file, so that
+			&wb-productname; can find it. If a driver requires more than one library,
+			select all necessary libraries in the file open dialog, or enter all the
+			filenames separated by a semicolon. This is also true for drivers that require
+			a license file that is contained in a jar file. In this case you have to
+			include the license jar in the list of files. Basically this list defines
+			the classpath for the classloader that is used to load and instantiate the driver.
+			If the driver accesses files through its classpath definition that are not
+			contained in a jar library, you have to include that directory as part
+			of the library definition (e.g: "c:\etc\TheDriver\jdbcDriver.jar;c:\etc\TheDriver").
+			The file selection dialog will not let you select a directory, so you have
+			to add it manually to the library definition.
+		</para>
+
+		<para>&wb-productname; is <emphasis role="bold">not</emphasis> using
+			the system CLASSPATH definition (e.g. environment variable) to load the
+			driver classes. Changing the CLASSPATH environment variable to include
+			your driver's library will not work.
+		</para>
+
+		<note>
+			<para>When using the JDBC-ODBC bridge you do not need to specify a library as
+				the necessary drivers are already part of the Java runtime.
+			</para>
+		</note>
+
+		<para>You can assign a sample URL to each driver, which will be put into
+			the URL property of the profile, when the driver class is selected.
+		</para>
+
+		<para>&wb-productname; comes with some sample URLs pre-configured.
+			Some of these sample URLs use brackets to indicate a parameters that need
+			to be replaced with the actual value for your connection: (servername)
+		</para>
+		<para>
+			In this case the entire sequence including the brackets need to be replaced with the 
+			actual value.
+		</para>
 	</section>
-    <section id="jdbc-drivers">
-      <title>Popular JDBC drivers</title>
+	
+	<section id="jdbc-lib-dir">
+		<title>Specifying a library directory</title>
+		<para>
+			When defining the location of the driver's .jar file, you can use the placeholder
+			<literal>%LibDir%</literal> instead of the using the directory's name directly.
+			This way your <literal>WbDrivers.xml</literal> is portable across installations.
+			To specify the library directory, either set it in the <link linkend="settings-libdir"><literal>workbench.settings</literal></link>
+			file, or specify the directory using the <link linkend="cmdline-parameter-libdir">-libdir</link>
+			switch when starting the application.
+		</para>
+	</section>
+	<section id="jdbc-drivers">
+		<title>Popular JDBC drivers</title>
 
-	  <para>
-		Here is an overview of common JDBC drivers, and the classname that needs 
-		to be used. &wb-productname; contains predefined JDBC drivers that 
-		also contain sample URLs for connecting to the database. Note that most 
-		drivers accept additional configuration parameters either in the URL
-		or through the <link linkend="profile-extended-properties">extended properties</link>.
-		Please consult the manual of your driver for more detailed information on these
-		additional parameters.
-	  </para>
+		<para>
+			Here is an overview of common JDBC drivers, and the classname that needs 
+			to be used. &wb-productname; contains predefined JDBC drivers that 
+			also contain sample URLs for connecting to the database. Note that most 
+			drivers accept additional configuration parameters either in the URL
+			or through the <link linkend="profile-extended-properties">extended properties</link>.
+			Please consult the manual of your driver for more detailed information on these
+			additional parameters.
+		</para>
 
-      <informaltable frame="all">
-      <tgroup cols="3" align="left">
-        <colspec colname="c1" colwidth="2cm" />
-        <colspec colname="c2" colwidth="4cm" />
-        <colspec colname="c3"  />
-        <thead valign="top">
-          <row>
-            <entry>DBMS</entry>
-            <entry>Driver class</entry>
-            <entry>Library name</entry>
-          </row>
-        </thead>
-        <tbody valign="top">
-          <row>
-            <entry>PostgreSQL</entry>
-            <entry>org.postgresql.Driver</entry>
-            <entry> <simplelist columns="1">
-            <member>postgresql-8.1-404.jdbc3.jar (exact name depends on PostgreSQL version)</member>
-						<member><ulink url="http://jdbc.postgresql.org"/></member>
+		<informaltable frame="all">
+			<tgroup cols="3" align="left">
+				<colspec colname="c1" colwidth="2cm" />
+				<colspec colname="c2" colwidth="4cm" />
+				<colspec colname="c3"  />
+				<thead valign="top">
+					<row>
+						<entry>DBMS</entry>
+						<entry>Driver class</entry>
+						<entry>Library name</entry>
+					</row>
+				</thead>
+				<tbody valign="top">
+					<row>
+						<entry>PostgreSQL</entry>
+						<entry>org.postgresql.Driver</entry>
+						<entry> <simplelist columns="1">
+							<member>postgresql-8.1-404.jdbc3.jar (exact name depends on PostgreSQL version)</member>
+							<member><ulink url="http://jdbc.postgresql.org"/></member>
 						</simplelist>
-            </entry>
-          </row>
-          <row>
-            <entry>HSQLDB</entry>
-            <entry>org.hsqldb.jdbcDriver</entry>
-            <entry>
-              <simplelist columns="1">
-                <member>hsqldb.jar</member>
-                <member><ulink url="http://hsqldb.sourceforge.net"/></member>
-              </simplelist>
-            </entry>
-          </row>
-          <row>
-            <entry>Firebird SQL</entry>
-            <entry>org.firebirdsql.jdbc.FBDriver</entry>
-            <entry>
-              <simplelist columns="1">
-                <member>firebirdsql-full.jar</member>
-                <member><ulink url="http://www.firebirdsql.org/"/></member>
-              </simplelist>
-            </entry>
-          </row>
-					
-          <row>
-            <entry>Apache Derby</entry>
-            <entry>org.apache.derby.jdbc.EmbeddedDriver</entry>
-            <entry>
-              <simplelist columns="1">
-                <member>derby.jar</member>
-                <member><ulink url="http://db.apache.org/derby/"/></member>
-              </simplelist>
-            </entry>
-          </row>
-					
-          <row>
-            <entry>Cloudscape</entry>
-            <entry>org.apache.derby.jdbc.EmbeddedDriver</entry>
-            <entry>
-              <simplelist columns="1">
-                <member>cs.jar</member>
-                <member><ulink url="http://www.ibm.com/software/data/cloudscape"/></member>
-              </simplelist>
-            </entry>
-          </row>
-          <row>
-            <entry>Oracle</entry>
-            <entry>oracle.jdbc.OracleDriver</entry>
-            <entry>
-						<simplelist columns="1">
-							<member>ojdbc4.jar (JDBC 2.x, for JDK 1.4)</member>
-							<member><ulink url="http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html"/></member>
+						</entry>
+					</row>
+					<row>
+						<entry>HSQLDB</entry>
+						<entry>org.hsqldb.jdbcDriver</entry>
+						<entry>
+							<simplelist columns="1">
+								<member>hsqldb.jar</member>
+								<member><ulink url="http://hsqldb.sourceforge.net"/></member>
+							</simplelist>
+						</entry>
+					</row>
+					<row>
+						<entry>Firebird SQL</entry>
+						<entry>org.firebirdsql.jdbc.FBDriver</entry>
+						<entry>
+							<simplelist columns="1">
+								<member>firebirdsql-full.jar</member>
+								<member><ulink url="http://www.firebirdsql.org/"/></member>
+							</simplelist>
+						</entry>
+					</row>
+
+					<row>
+						<entry>Apache Derby</entry>
+						<entry>org.apache.derby.jdbc.EmbeddedDriver</entry>
+						<entry>
+							<simplelist columns="1">
+								<member>derby.jar</member>
+								<member><ulink url="http://db.apache.org/derby/"/></member>
+							</simplelist>
+						</entry>
+					</row>
+
+					<row>
+						<entry>Cloudscape</entry>
+						<entry>org.apache.derby.jdbc.EmbeddedDriver</entry>
+						<entry>
+							<simplelist columns="1">
+								<member>cs.jar</member>
+								<member><ulink url="http://www.ibm.com/software/data/cloudscape"/></member>
+							</simplelist>
+						</entry>
+					</row>
+					<row>
+						<entry>Oracle</entry>
+						<entry>oracle.jdbc.OracleDriver</entry>
+						<entry>
+							<simplelist columns="1">
+								<member>ojdbc4.jar (JDBC 2.x, for JDK 1.4)</member>
+								<member><ulink url="http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html"/></member>
+							</simplelist>
+						</entry>
+					</row>
+					<row>
+						<entry>FirstSQL/J</entry>
+						<entry>COM.FirstSQL.Dbcp.DbcpDriver</entry>
+						<entry>
+							<simplelist columns="1">
+								<member>fsjclient.jar</member>
+								<member><ulink url="http://www.firstsql.com"/></member>
+							</simplelist>
+						</entry>
+					</row>
+					<row>
+						<entry>ThinkSQL</entry>
+						<entry>uk.co.thinksql.ThinkSQLDriver</entry>
+						<entry>
+							<simplelist columns="1">
+								<member>ThinkSQLDriver.jar</member>
+								<member><ulink url="http://www.thinksql.co.uk"/></member>
+							</simplelist>
+						</entry>
+					</row>
+					<row>
+						<entry>SQL Server </entry>
+						<entry>net.sourceforge.jtds.jdbc.Driver</entry>
+						<entry>
+							<simplelist columns="1">
+								<member><ulink url="http://jtds.sourceforge.net"/></member>
+							</simplelist>
+						</entry>
+					</row>
+					<row>
+						<entry>MySQL</entry>
+						<entry>com.mysql.jdbc.Driver</entry>
+						<entry>
+							<simplelist columns="1">
+								<member>mysql-connector-java-3.1.7-bin.jar (exact name depends on version)</member>
+								<member><ulink url="http://www.mysql.com"/></member>
+							</simplelist>
+						</entry>
+					</row>
+					<row>
+						<entry>MaxDB</entry>
+						<entry>com.sap.dbtech.jdbc.DriverSapDB</entry>
+						<entry>
+							<simplelist columns="1">
+								<member>sapdbc.jar</member>
+								<member><ulink url="http://www.mysql.com/products/maxdb/"/></member>
+							</simplelist>
+						</entry>
+					</row>
+					<row>
+						<entry>ODBC Bridge</entry>
+						<entry>sun.jdbc.odbc.JdbcOdbcDriver</entry>
+						<entry><simplelist columns="1">
+							<member>Included in the JDK</member>
 						</simplelist>
-            </entry>
-          </row>
-          <row>
-            <entry>FirstSQL/J</entry>
-            <entry>COM.FirstSQL.Dbcp.DbcpDriver</entry>
-            <entry>
-              <simplelist columns="1">
-                <member>fsjclient.jar</member>
-                <member><ulink url="http://www.firstsql.com"/></member>
-              </simplelist>
-            </entry>
-          </row>
-          <row>
-            <entry>ThinkSQL</entry>
-            <entry>uk.co.thinksql.ThinkSQLDriver</entry>
-            <entry>
-              <simplelist columns="1">
-                <member>ThinkSQLDriver.jar</member>
-                <member><ulink url="http://www.thinksql.co.uk"/></member>
-              </simplelist>
-            </entry>
-          </row>
-          <row>
-            <entry>SQL Server </entry>
-            <entry>net.sourceforge.jtds.jdbc.Driver</entry>
-            <entry>
-              <simplelist columns="1">
-                <member><ulink url="http://jtds.sourceforge.net"/></member>
-              </simplelist>
-            </entry>
-          </row>
-          <row>
-            <entry>MySQL</entry>
-            <entry>com.mysql.jdbc.Driver</entry>
-            <entry>
-              <simplelist columns="1">
-                <member>mysql-connector-java-3.1.7-bin.jar (exact name depends on version)</member>
-                <member><ulink url="http://www.mysql.com"/></member>
-              </simplelist>
-            </entry>
-          </row>
-          <row>
-            <entry>MaxDB</entry>
-            <entry>com.sap.dbtech.jdbc.DriverSapDB</entry>
-            <entry>
-              <simplelist columns="1">
-                <member>sapdbc.jar</member>
-                <member><ulink url="http://www.mysql.com/products/maxdb/"/></member>
-              </simplelist>
-            </entry>
-          </row>
-          <row>
-            <entry>ODBC Bridge</entry>
-            <entry>sun.jdbc.odbc.JdbcOdbcDriver</entry>
-            <entry><simplelist columns="1">
-              <member>Included in the JDK</member>
-              </simplelist>
-            </entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>1
-    </section>
-		
-		<section id="db2-charset">
-				<title>Using DB2 JDBC drivers</title>
-				<para>
-					When using the DB2 JDBC drivers it is important that the <literal>charsets.jar</literal> 
-					is part of the used JDK (or JRE). Apparently the DB2 JDBC driver needs this library in 
-					order to correctly convert the EBCDIC characterset (used in the database) into the 
-					Unicode encoding that is used by Java.
-					The library <literal>charsets.jar</literal> is usually included in all multi-language
-					JDK/JRE installations. 
-				</para>
-				<para>
-					If you experience intermittent "Connection closed" errors when running SQL statements,
-					please verify that <literal>charsets.jar</literal> is part of your JDK/JRE installation.
-					This file is usually installed in <literal>jre\lib\charsets.jar</literal>.
-				</para>
-		</section>
-  </section>
+						</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</informaltable>
+	</section>
+
+	<section id="db2-charset">
+		<title>Using DB2 JDBC drivers</title>
+		<para>
+			When using the DB2 JDBC drivers it is important that the <literal>charsets.jar</literal> 
+			is part of the used JDK (or JRE). Apparently the DB2 JDBC driver needs this library in 
+			order to correctly convert the EBCDIC characterset (used in the database) into the 
+			Unicode encoding that is used by Java.
+			The library <literal>charsets.jar</literal> is usually included in all multi-language
+			JDK/JRE installations. 
+		</para>
+		<para>
+			If you experience intermittent "Connection closed" errors when running SQL statements,
+			please verify that <literal>charsets.jar</literal> is part of your JDK/JRE installation.
+			This file is usually installed in <literal>jre\lib\charsets.jar</literal>.
+		</para>
+	</section>
+</section>

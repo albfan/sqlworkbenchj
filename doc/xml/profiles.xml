@@ -226,6 +226,51 @@
       </para>
     </section>
 
+	<section id="profile-empty-string-is-null">
+		<title>Treat empty strings as NULL</title>
+		<para>
+			When entering data into the result set (grid) this setting controls, how 
+			empty values (for character columns) should be treated. If this option
+			is enabled, then a NULL value will be sent to the database for an empty
+			(zero length) string. Empty values for other datatypes (dates, numbers etc)
+			are always considered NULL. If this option is not enabled, then an empty
+			string ('') will be sent to the database.
+		</para>
+	</section>
+
+	<section id="profile-insert-null-column">
+		<title>Include NULL columns in INSERT</title>
+		<para>
+			This setting controls whether columns where the value from the result grid
+			is null are included in INSERT statements. If this setting is enabled, then 
+			columns for new rows that have a null value are listed in the column list 
+			for the <literal>INSERT</literal> statement (with the corresponding <literal>NULL</literal>
+			value passed in the <literal>VALUES</literal> list).
+			If this property is un-checked, then those columns will not be listed in 
+			<literal>INSERT</literal> statements. This is useful if you have e.g.
+			auto-increment columns that only work if the columns are not listed in the 
+			DML statement.
+		</para>
+	</section>
+
+	<section id="profile-remove-comments">
+		<title>Remove comments</title>
+		<para>
+			If this option is checked, then comments will be removed from the SQL 
+    statement before it is sent to the database. This covers 
+    single line comments using -- or multi-line comments using /* .. */ 
+		</para>
+	</section>
+	
+		<section id="options-explorer-remember-schema" xreflabel="Remember DbExplorer Schema">
+			<title>Remember DbExplorer Schema</title>
+			<para>If this option is enabled, the currently selected schema in the 
+				DbExplorer will be stored in the workspace associated with the current
+				connection profile. If this option is not enabled, the DbExplorer 
+				tries to pre-select the current schema when its opened
+			</para>
+		</section>
+
     <section id="profile-workspace-file">
       <title>Workspace</title>
 
@@ -255,34 +300,11 @@
       when you select the location of the profile using the file dialog. The file dialog
       will be opened when you click the button with <literal>...</literal> to the right
       of the input field.</para>
+      <note>As the workspace stores several settings that are related to the connection
+      (e.g. the selected schema in the <link linkend="dbexplorer">DbExplorer</link>) it is recommended to create one
+      workspace for each connection profile.</note>
     </section>
 		
-		<section id="profile-empty-string-is-null">
-			<title>Treat empty strings as NULL</title>
-			<para>
-				When entering data into the result set (grid) this setting controls, how 
-				empty values (for character columns) should be treated. If this option
-				is enabled, then a NULL value will be sent to the database for an empty
-				(zero length) string. Empty values for other datatypes (dates, numbers etc)
-				are always considered NULL. If this option is not enabled, then an empty
-				string ('') will be sent to the database.
-			</para>
-		</section>
-
-		<section id="profile-insert-null-column">
-			<title>Include NULL columns in INSERT</title>
-			<para>
-				This setting controls whether columns where the value from the result grid
-				is null are included in INSERT statements. If this setting is enabled, then 
-				columns for new rows that have a null value are listed in the column list 
-				for the <literal>INSERT</literal> statement (with the corresponding <literal>NULL</literal>
-				value passed in the <literal>VALUES</literal> list).
-				If this property is un-checked, then those columns will not be listed in 
-				<literal>INSERT</literal> statements. This is useful if you have e.g.
-				auto-increment columns that only work if the columns are not listed in the 
-				DML statement.
-			</para>
-		</section>
 		
   </section>
 

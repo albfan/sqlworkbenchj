@@ -38,7 +38,6 @@ import workbench.sql.formatter.Token;
 public class SqlUtil
 {
 	private static Pattern specialCharPattern = Pattern.compile("[$ ]");
-	private static Pattern selectPattern = Pattern.compile("^\\s*SELECT\\s+.*",Pattern.CASE_INSENSITIVE);
 	
 	public static String quoteObjectname(String aColname)
 	{
@@ -53,24 +52,27 @@ public class SqlUtil
 		return col.toString();
 	}
 
-	public static boolean isSelect(String sql)
+	public static String getSqlVerb(String sql)
 	{
-		Matcher m = selectPattern.matcher(sql);
-		return m.find();
-	}
-	
-	public static String getSqlVerb(String aStatement)
-	{
-		if (aStatement == null) return "";
-		String s = aStatement.trim();
+		if (sql == null) return "";
+		String s = sql.trim();
 		if (s.length() == 0) return "";
+		
+		// The SQLLexer does not recognize @ as a keyword (which is basically
+		// correct, but to support the Oracle style include we'll treat it
+		// as a keyword here.
 		if (s.charAt(0) == '@') return "@";
-		int pos = StringUtil.findFirstWhiteSpace(s);
-		if (pos > -1)
+		
+		SQLLexer l = new SQLLexer(sql);
+		try
 		{
-			return s.substring(0, pos).trim().toUpperCase();
+			Token t = l.getNextToken(false, false);
+			return t.getContents();
 		}
-		return s.toUpperCase();
+		catch (Exception e)
+		{
+			return "";
+		}
 	}
 	
 	public static List getResultSetColumns(String sql, WbConnection conn)
@@ -103,16 +105,16 @@ public class SqlUtil
 		}
 		finally
 		{
-			try { rs.close(); } catch (Throwable th) {}
-			try { stmt.close(); } catch (Throwable th) {}
+			closeAll(rs, stmt);
 		}
 		return result;
 	}
 
-	private static String stripTableAlias(String table)
+	private static String getTableDefinition(String table, boolean keepAlias)
 	{
+		if (keepAlias) return table;
 		int pos = StringUtil.findFirstWhiteSpace(table);
-		if (pos > -1) return table.substring(0, pos - 1);
+		if (pos > -1) return table.substring(0, pos);
 		return table;
 	}
 	
@@ -142,12 +144,15 @@ public class SqlUtil
 				int lastJoinStart = 0;
 				boolean hadJoin = false;
 				boolean isJoinSyntax = false;
+				boolean inJoinKeyWords = false;
+				
 				while (t != null)
 				{
 					String s = t.getContents();
-					if (js.contains(s))
+					if (js.contains(s) && !inJoinKeyWords)
 					{
 						lastJoinStart = t.getCharBegin();
+						inJoinKeyWords = true;
 						// if we find a JOIN keyword
 						// we assume the FROM clause is in the new ANSI syntax
 						// this assumes that even with the new syntax, a comma does
@@ -164,38 +169,27 @@ public class SqlUtil
 						else if (lastStart > -1)
 						{
 							String table = from.substring(lastStart, t.getCharBegin()).trim();
-							result.add(table);
+							result.add(getTableDefinition(table, includeAlias));
 							lastStart = t.getCharEnd();
 						}
 					}
 					else if ("JOIN".equals(s) )
 					{
-						if (lastStart > -1 && lastJoinStart > lastStart)
+						inJoinKeyWords = true;
+						if (lastStart > -1 && (lastJoinStart == -1 || lastJoinStart > lastStart))
 						{
+							if (lastJoinStart == -1) lastJoinStart = t.getCharBegin();
 							String table = from.substring(lastStart, lastJoinStart).trim();
-							if (includeAlias)
-							{
-								result.add(table);
-							}
-							else
-							{
-								result.add(stripTableAlias(table));
-							}
+							result.add(getTableDefinition(table, includeAlias));
 						}
 						lastStart = t.getCharEnd();
+						lastJoinStart = -1;
 						hadJoin = true;
 					}
 					else if ("ON".equals(s) && lastStart > -1)
 					{
 						String table = from.substring(lastStart, t.getCharBegin()).trim();
-						if (includeAlias)
-						{
-							result.add(table);
-						}
-						else
-						{
-							result.add(stripTableAlias(table));
-						}
+						result.add(getTableDefinition(table, includeAlias));
 						// reset the start markers until a new JOIN keyword is detected
 						lastStart = -1;
 						lastJoinStart = -1;
@@ -206,14 +200,7 @@ public class SqlUtil
 				if (lastStart < from.length() && lastStart > -1)
 				{
 					String table = from.substring(lastStart).trim();
-					if (includeAlias)
-					{
-						result.add(table);
-					}
-					else
-					{
-						result.add(stripTableAlias(table));
-					}
+					result.add(getTableDefinition(table, includeAlias));
 				}
 		}
 		catch (Exception e)
@@ -222,80 +209,6 @@ public class SqlUtil
 		}
 		return result;
 	}
-
-
-//	public static final Pattern FROM_PATTERN = Pattern.compile("\\sFROM\\s|\\sFROM$", Pattern.CASE_INSENSITIVE);
-//	public static final Pattern WHERE_PATTERN = Pattern.compile("\\sWHERE\\s|\\sWHERE$", Pattern.CASE_INSENSITIVE);
-//	private static final Pattern GROUP_PATTERN = Pattern.compile("\\sGROUP\\s", Pattern.CASE_INSENSITIVE);
-//	private static final Pattern ORDER_PATTERN = Pattern.compile("\\sORDER\\s", Pattern.CASE_INSENSITIVE);
-//	private static final Pattern JOIN_PATTERN = Pattern.compile("\\sJOIN\\s", Pattern.CASE_INSENSITIVE);
-//		
-//	/**
-//	 * Return the list of tables which are in the FROM list of the given SQL statement.
-//	 */
-//	public static List getTables(String aSql, boolean includeAlias)
-//	{
-//		int fromPos = getFromPosition(aSql);
-//		int pos = -1;
-//		if (fromPos == -1) return Collections.EMPTY_LIST;
-//		int fromEnd = fromPos + 5;
-//
-//		int nextVerb = StringUtil.findPattern(WHERE_PATTERN, aSql, fromPos);
-//
-//		if (nextVerb == -1) nextVerb = StringUtil.findPattern(GROUP_PATTERN, aSql, fromPos);
-//		if (nextVerb == -1) nextVerb = StringUtil.findPattern(ORDER_PATTERN, aSql, fromPos);
-//		if (nextVerb == -1) nextVerb = aSql.length();
-//		if (nextVerb < fromEnd) return Collections.EMPTY_LIST;
-//		
-//		String fromList = aSql.substring(fromEnd, nextVerb);
-//		boolean joinSyntax = (StringUtil.findPattern(JOIN_PATTERN, aSql, fromPos) > -1);
-//		ArrayList result = new ArrayList();
-//		if (joinSyntax)
-//		{
-//			StringTokenizer tok = new StringTokenizer(fromList, " ");
-//			// first token after the FROM clause is the first table
-//			// we can add it right away
-//			if (tok.hasMoreTokens())
-//			{
-//				result.add(tok.nextToken().trim());
-//			}
-//			boolean nextIsTable = false;
-//			while (tok.hasMoreTokens())
-//			{
-//				String s = tok.nextToken();
-//				if (nextIsTable)
-//				{
-//					result.add(s.trim());
-//					nextIsTable = false;
-//				}
-//				else
-//				{
-//					nextIsTable = ("JOIN".equalsIgnoreCase(s));
-//				}
-//			}
-//		}
-//		else
-//		{
-//			StringTokenizer tok = new StringTokenizer(fromList, ",");
-//			pos = -1;
-//			while (tok.hasMoreTokens())
-//			{
-//				String table = tok.nextToken().trim();
-//				if (table.length() == 0) continue;
-//				if (!includeAlias)
-//				{
-//					pos = table.indexOf(' ');
-//					if (pos != -1)
-//					{
-//						table = table.substring(0, pos);
-//					}
-//				}
-//				result.add(makeCleanSql(table, false));
-//			}
-//		}
-//
-//		return result;
-//	}
 
 	/**	
 	 * Extract the FROM part of a SQL statement. That is anything after the FROM
@@ -471,36 +384,6 @@ public class SqlUtil
 		if (s.endsWith(";")) s = s.substring(0, s.length() - 1);
 		return s;
 	}
-
-//	private static int findClosingBracket(String value, int startPos)
-//	{
-//		int len = value.length();
-//		boolean inQuotes = false;
-//		for (int pos=startPos; pos < len; pos++)
-//		{
-//			char c = value.charAt(pos);
-//			if (c == '\'') 
-//			{
-//				inQuotes = !inQuotes;
-//			}
-//			if (!inQuotes)
-//			{
-//				if (c == ')') return pos;
-//			}
-//		}
-//		return -1;
-//	}
-//	
-//	private static final int skipQuotes(String aString, int aStartpos)
-//	{
-//		char c = aString.charAt(aStartpos);
-//		while (c != '\'')
-//		{
-//			aStartpos ++;
-//			c = aString.charAt(aStartpos);
-//		}
-//		return aStartpos + 1;
-//	}
 
 	public static final String getJavaPrimitive(String aClass)
 	{
@@ -782,26 +665,6 @@ public class SqlUtil
 		return !getTypeName(sqlType).equals("UNKNOWN");
 	}
 	
-	private static void validateStaticTypes()
-	{
-		try
-		{
-			Field fields[] = java.sql.Types.class.getDeclaredFields();
-			for (int i=0; i < fields.length; i++)
-			{
-				int type = fields[i].getInt(null);
-				if (!isValidType(type))
-				{
-					System.out.println("Type " + fields[i].getName() + " not included in getTypeName()!");
-				}
-			}
-		}
-		catch (Throwable th)
-		{
-			th.printStackTrace();
-		}
-	}
-
 	public static String getWarnings(WbConnection con, Statement stmt, boolean retrieveOutputMsg)
 	{
 		try
@@ -872,9 +735,24 @@ public class SqlUtil
 		}
 	}
 	
-	public static void main(String args[])
-	{
-		validateStaticTypes();
-		System.out.println("Done.");
-	}
+//	public static void main(String args[])
+//	{
+//		try
+//		{
+//			Field fields[] = java.sql.Types.class.getDeclaredFields();
+//			for (int i=0; i < fields.length; i++)
+//			{
+//				int type = fields[i].getInt(null);
+//				if (!isValidType(type))
+//				{
+//					System.out.println("Type " + fields[i].getName() + " not included in getTypeName()!");
+//				}
+//			}
+//		}
+//		catch (Throwable th)
+//		{
+//			th.printStackTrace();
+//		}
+//		System.out.println("Done.");
+//	}
 }

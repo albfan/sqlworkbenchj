@@ -1,60 +1,63 @@
 <section id="editor" xreflabel="Editing SQL Statements">
 
-    <title>Editing SQL Statements</title>
+	<title>Editing SQL Statements</title>
     
-    <section id="command-completion">
-      <title>Command completion</title>
-      <para>The editor can show a popup window with a list of available tables (and views) or
-      a list of available columns for a table. Which list is displayed depends on the position
-      of the cursor inside the statement.
-      </para>
-      <para>If the cursor is located in the column list of a <literal>SELECT</literal> statement
-      and the <literal>FROM</literal> part already contains the necessary tables, the window
-			will show the columns available in the table. Assuming you are editing the following
-			statement ( the <literal>|</literal> indicating the position of the caret):</para>
-			<programlisting>SELECT p.|, p.firstname, a.zip, a.city
+	<section id="command-completion">
+		<title>Command completion</title>
+		<para>The editor can show a popup window with a list of available tables (and views) or
+			a list of available columns for a table. Which list is displayed depends on the position
+			of the cursor inside the statement.
+		</para>
+		<para>If the cursor is located in the column list of a <literal>SELECT</literal> statement
+		and the <literal>FROM</literal> part already contains the necessary tables, the window
+		will show the columns available in the table. Assuming you are editing the following
+		statement ( the <literal>|</literal> indicating the position of the caret):</para>
+		<programlisting>SELECT p.|, p.firstname, a.zip, a.city
 FROM person p, address a;</programlisting>
-			<para>then pressing the <keycap>Ctrl-Q</keycap> key will show a list of columns available
+		<para>then pressing the <keycap>Ctrl-Q</keycap> key will show a list of columns available
 			in the <literal>PERSON</literal> table (because the cursor is located after the <literal>p.</literal>
 			alias). If you put the cursor after the <literal>a.city</literal> column and press the
 			<keycap>Ctrl-Q</keycap> the popup window will list the two tables that are referenced
 			in the <literal>FROM</literal> part of the statement. The behaviour when editing the
-			<literal>WHERE</literal> part of an statement is similar.</para>
-			<para>When editing the list of tables in the <literal>FROM</literal> part of the statement,
-			pressing the <keycap>Ctrl-Q</keycap> will pop up a list of available tables.</para>
+			<literal>WHERE</literal> part of an statement is similar.
+		</para>
+		<para>When editing the list of tables in the <literal>FROM</literal> part of the statement,
+			pressing the <keycap>Ctrl-Q</keycap> will pop up a list of available tables.
+		</para>
 			
-			<para>Usually a semicolon is used to separate statements in the editor. However 
+		<para>Usually a semicolon is used to separate statements in the editor. However 
 			for the auto completion of object names, this behaviour can be <link linkend="auto-completion-empty-line">configured</link>
-			to also	accept an empty line as a separator.</para>
-    </section>
+			to also	accept an empty line as a separator.
+		</para>
+	</section>
     
-    <section id="editing-files">
-      <title>Editing files</title>
-      <para>You can also load and save the editor's content into external files (e.g. for re-using)
-      them in other SQL tools
-      </para>
-      <para>The association between an editor tab and the external file will be saved
-      in the workspace that is used for the current connection. When opening the 
-      workspace (e.g. by connecting using a profile that is linked to that workspace) the
-      external file will be loaded as well.</para>
-    </section>
+	<section id="editing-files">
+		<title>Editing files</title>
+		<para>You can also load and save the editor's content into external files (e.g. for re-using)
+			them in other SQL tools
+		</para>
+		<para>The association between an editor tab and the external file will be saved
+		in the workspace that is used for the current connection. When opening the 
+		workspace (e.g. by connecting using a profile that is linked to that workspace) the
+		external file will be loaded as well.</para>
+	</section>
     
-      <section id="editor-reformat-sql" xreflabel="SQL Formatter">
-        <title>Reformat SQL</title>
-        <para>When you analyze statements from e.g. a log file, they are not necessarily formatted in a way that
-        can be easily read, let alone understood. The editor of the &wb-productname; can reformat SQL statements
-        into a format that's easier to read and understand for a human beeing. This feature is often called pretty-printing.
-        Suppose you have the following statement (pasted from a log file)
-        </para>
+	<section id="editor-reformat-sql" xreflabel="SQL Formatter">
+		<title>Reformat SQL</title>
+		<para>When you analyze statements from e.g. a log file, they are not necessarily formatted in a way that
+			can be easily read, let alone understood. The editor of the &wb-productname; can reformat SQL statements
+			into a format that's easier to read and understand for a human beeing. This feature is often called pretty-printing.
+			Suppose you have the following statement (pasted from a log file)
+		</para>
 				
-<programlisting>select user.* from user, user_profile, user_data 
+		<programlisting>select user.* from user, user_profile, user_data 
 where user.user_id = user_profile.user_id and 
 user_profile.user_id = uprof.user_id and user_data.user_role = 1 
 and user_data.delete_flag = 'F' and not exists 
 (select 1 from data_detail where data_detail.id = data.id and 
 data_detail.flag = 'X' and data_detail.value > 42)</programlisting>
-      <para>this will be reformatted to look like this:</para>
-      <programlisting>SELECT user.*
+		<para>this will be reformatted to look like this:</para>
+		<programlisting>SELECT user.*
 FROM user,
      user_profile,
      user_data
@@ -66,68 +69,77 @@ AND   NOT EXISTS (SELECT 1
                   FROM data_detail
                   WHERE data_detail.id = DATA.id
                   AND   data_detail.flag = 'x'
-                  AND   data_detail.value &gt; 42
-                  )</programlisting>
+                  AND   data_detail.value &gt; 42)</programlisting>
 
-			<para>You can configure a threshold up to which sub-<literal>SELECT</literal>s will not be reformatted but
+		<para>You can configure a threshold up to which sub-<literal>SELECT</literal>s will not be reformatted but
 			put into one single line. The default for this threshold is 80 characters. Meaning that any
 			subselect that is shorter than 80 characters will not be reformatted as the sub-<literal>SELECT</literal>
-			in the above example. Please refer to <link linkend="formatter-subselect-threshold">Formatting options</link> for details. </para>
-      </section>
+			in the above example. Please refer to <link linkend="options-sql-formatting">Formatting options</link> for details. 
+		</para>
+	</section>
       
-      <note><para>Please note that currently only <literal>SELECT</literal>, <literal>INSERT</literal>, <literal>UPDATE</literal>,
-			<literal>DELETE</literal>, <literal>CREATE TABLE</literal> and <literal>CREATE VIEW</literal> are supported for reformatting.
-			</para></note>
+	<note>
+		Please note that formatting of stored procedures is currently not supported.
+	</note>
 
-      <section id="editor-make-in-list">
-        <title>Create SQL value lists</title>
-        <para>Sometimes when you Copy &amp; Paste lines of text from e.g. a spreadsheet, you might want to use those values
-				as a condition for a SQL <literal>IN</literal> expression. Suppose you a have a list of ID's in your
-        spreadsheet each in one row of the same column. If you copy and paste this into the editor, each ID
-				will be put on a separate line.
-        If you select the text, and then choose <menuchoice><guimenu>SQL</guimenu><guimenuitem>Create SQL List</guimenuitem></menuchoice>
-				the selected text will be converted into a format that can be used as an expression for an <literal>IN</literal> condition:</para>
-<programlisting>Dent
+	<section id="editor-make-in-list">
+		<title>Create SQL value lists</title>
+		<para>
+			Sometimes when you Copy &amp; Paste lines of text from e.g. a spreadsheet, you might want to use those values
+			as a condition for a SQL <literal>IN</literal> expression. Suppose you a have a list of ID's in your
+			spreadsheet each in one row of the same column. If you copy and paste this into the editor, each ID
+			will be put on a separate line.
+			If you select the text, and then choose <menuchoice><guimenu>SQL</guimenu><guimenuitem>Create SQL List</guimenuitem></menuchoice>
+			the selected text will be converted into a format that can be used as an expression for an <literal>IN</literal> condition:
+		</para>
+		<programlisting>Dent
 Beeblebrox
 Prefect
 Trillian
 Marvin
-</programlisting><para>will be converted to:</para>
-<programlisting>('Dent',
+</programlisting>
+
+		<para>will be converted to:</para>
+		<programlisting>('Dent',
  'Beeblebrox',
  'Trillian',
  'Prefect',
  'Marvin')</programlisting>
-        <para>The function <menuchoice><guimenu>SQL</guimenu><guimenuitem>Create non-char SQL List</guimenuitem></menuchoice>
-        is basically the same. The only difference is, that it assumes that each item in the list is a numeric value, and no
-        single quotes are placed around the values.</para>
-        <para>The following list:</para>
-<programlisting>42
+		<para>
+			The function <menuchoice><guimenu>SQL</guimenu><guimenuitem>Create non-char SQL List</guimenuitem></menuchoice>
+			is basically the same. The only difference is, that it assumes that each item in the list is a numeric value, and no
+			single quotes are placed around the values.
+		</para>
+		<para>The following list:</para>
+		<programlisting>42
 43
 44
 45</programlisting>
-        <para>will be converted to:</para><programlisting>(42, 43, 44, 45)</programlisting>
-        <para>These two functions will only be available when text is selected which spans
-        more then one line.</para>
-        </section>
+		<para>will be converted to:</para><programlisting>(42, 43, 44, 45)</programlisting>
+		<para>
+			These two functions will only be available when text is selected which spans
+			more then one line.
+		</para>
+	</section>
 
+	<section id="editor-java-tools">
+		<title>Java related editor functions</title>
 
-    <section id="editor-java-tools">
-      <title>Java related editor functions</title>
+		<para>
+			The editor of the &wb-productname; offers two functions to aid in developing
+			SQL statements which should be used inside a Java class (e.g. with JDBC access).
+		</para>
 
-        <para>The editor of the &wb-productname; offers two functions to aid in developing
-            SQL statements which should be used inside a Java class (e.g. with JDBC access).
-        </para>
-
-        <section id="editor-copy-java-code-snippet" xreflabel="Copy Code Snippet">
-            <title>Copy Code Snippet</title>
-            <para>Suppose you have created the SQL statement that you wish to use inside
-            a Java class to access your DBMS. The menu item <menuchoice><guimenu>SQL</guimenu><guimenuitem>Copy Code Snippet</guimenuitem></menuchoice>
-            will create a piece of code that defines a String variable which contains the current SQL statement (or
-            the currently selected statement if any text is selected).
-            </para>
-            <para>Suppose you have the following SQL statement:</para>
-            <programlisting>SELECT p.name,
+		<section id="editor-copy-java-code-snippet" xreflabel="Copy Code Snippet">
+			<title>Copy Code Snippet</title>
+			<para>
+				Suppose you have created the SQL statement that you wish to use inside
+				a Java class to access your DBMS. The menu item <menuchoice><guimenu>SQL</guimenu><guimenuitem>Copy Code Snippet</guimenuitem></menuchoice>
+				will create a piece of code that defines a String variable which contains the current SQL statement (or
+				the currently selected statement if any text is selected).
+			</para>
+			<para>Suppose you have the following SQL statement:</para>
+			<programlisting>SELECT p.name,
        p.firstname,
        a.street,
        a.zipcode,
@@ -135,48 +147,53 @@ Marvin
 FROM person p,
      address a
 WHERE p.person_id = a.person_id;</programlisting>
-            <para>When copying the code snippet, the following text will be placed into the clipboard</para>
-            <programlisting>String sql="SELECT p.name, \n" +
-           "       p.firstname, \n" +
-           "       a.street, \n" +
-           "       a.zipcode, \n" +
-           "       a.phone \n" +
-           "FROM person p, \n" +
-           "     address a \n" +
-           "WHERE p.person_id = a.person_id; \n";</programlisting>
+			<para>When copying the code snippet, the following text will be placed into the clipboard</para>
+			<programlisting>
+String sql="SELECT p.name, \n" +
+"       p.firstname, \n" +
+"       a.street, \n" +
+"       a.zipcode, \n" +
+"       a.phone \n" +
+"FROM person p, \n" +
+"     address a \n" +
+"WHERE p.person_id = a.person_id; \n";</programlisting>
 
-            <para>You can now paste this code into your Java class.</para>
-            <para>If you don't like the <literal>\n</literal> character in
-                your code, you can disable the generation of the newline characters
-                in you <literal>workbench.settings</literal> file.
-                See <link linkend="manual-setting-snippet-no-newline">Manual settings</link>
-                for details.
+			<para>You can now paste this code into your Java class.</para>
+			<para>
+				If you don't like the <literal>\n</literal> character in
+				your code, you can disable the generation of the newline characters
+				in you <literal>workbench.settings</literal> file.
+				See <link linkend="manual-setting-snippet-no-newline">Manual settings</link>
+				for details.
 			</para>
-        </section>
+		</section>
 
-        <section id="editor-clean-java-code" xreflabel="Clean Java Code">
-            <title>Clean Java code</title>
-            <para>When using the <xref linkend="editor-copy-java-code-snippet"/> feature during
-                development, the SQL statement usually needs refinement after testing the Java class.
-                You can Copy &amp; Paste the generated Java code into &wb-productname;, then when you select
-                the pasted text, and call <menuchoice><guimenu>SQL</guimenu><guimenuitem>Clean Java Code</guimenuitem></menuchoice>
-                the selected text will be "cleaned" from the Java stuff around it. The algorithm behind that is as
-                follows: remove everything up to the first &quot; at the beginning of the line. Delete everything
-                up to the first &quot; searching backwards from the end of the line. Any trailing white-space including
-                escaped characters such as \n will be removed as well. Lines starting with // will be converted to
-                SQL single line comments starting with -- (keeping existing quotes!). The following code:
-            </para>
-            <programlisting>String sql="SELECT p.name, \n" +
-           "       p.firstname, \n" +
-           "       a.street, \n" +
-           //"       a.county, \n" +
-           "       a.zipcode, \n" +
-           "       a.phone \n" +
-           "FROM person p, \n" +
-           "     address a \n" +
-           "WHERE p.person_id = a.person_id; \n"</programlisting>
-            <para>will be converted to:</para>
-            <programlisting>SELECT p.name,
+		<section id="editor-clean-java-code" xreflabel="Clean Java Code">
+			<title>Clean Java code</title>
+			<para>
+				When using the <xref linkend="editor-copy-java-code-snippet"/> feature during
+				development, the SQL statement usually needs refinement after testing the Java class.
+				You can Copy &amp; Paste the generated Java code into &wb-productname;, then when you select
+				the pasted text, and call <menuchoice><guimenu>SQL</guimenu><guimenuitem>Clean Java Code</guimenuitem></menuchoice>
+				the selected text will be "cleaned" from the Java stuff around it. The algorithm behind that is as
+				follows: remove everything up to the first &quot; at the beginning of the line. Delete everything
+				up to the first &quot; searching backwards from the end of the line. Any trailing white-space including
+				escaped characters such as \n will be removed as well. Lines starting with // will be converted to
+				SQL single line comments starting with -- (keeping existing quotes!). The following code:
+			</para>
+			<programlisting>String sql="SELECT p.name, \n" +
+"       p.firstname, \n" +
+"       a.street, \n" +
+//"       a.county, \n" +
+"       a.zipcode, \n" +
+"       a.phone \n" +
+"FROM person p, \n" +
+"     address a \n" +
+"WHERE p.person_id = a.person_id; \n"</programlisting>
+
+			<para>will be converted to:</para>
+			
+			<programlisting>SELECT p.name,
        p.firstname,
        a.street,
 --"       a.county, " +
@@ -186,60 +203,63 @@ FROM person p,
      address a
 WHERE p.person_id = a.person_id;</programlisting>
 
-        </section>
+		</section>
 
-        <section id="editor-prepared-statement">
-            <title>Support for prepared statements</title>
-            <para>For better performance Java applications usually make use of
-            <ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/PreparedStatement.html">prepared statements</ulink>.
-            The SQL for a prepared statement does not contain the actual values that should be used e.g.
-            in the WHERE clause, but uses quotation marks instead. Let's assume the above example should be
-            enhanced to retrieve the person information for a specific ID. The code could look like
-            this:
-            </para>
-            <programlisting>String sql="SELECT p.name, \n" +
-           "       p.firstname, \n" +
-           "       a.street, \n" +
-           "       a.zipcode, \n" +
-           "       a.phone \n" +
-           "FROM person p, \n" +
-           "     address a \n" +
-           "WHERE p.person_id = a.person_id; \n" +
-           "  AND p.person_id = ?";</programlisting>
-            <para>You can copy and <link linkend="editor-clean-java-code">clean</link> the SQL statement
-            but you will not be able to execute it, because there is no value available for the parameter
-            denoted by the quotation mark. To run this kind of statements, you need to enable the prepared statement
-						detection using <menuchoice><guimenu>SQL</guimenu><guimenuitem>Detect prepared statements</guimenuitem></menuchoice>
-            </para>
-            <para>Once the prepared statement detection is enabled, &wb-productname; will examine
-            each statement to check whether it is a prepared statement. This examination
-            is delegated to the JDBC driver and does cause some overhead when running the statement.
-            For performance reasons you should disable the detection, if you are not using
-            prepared statements in the editor (especially when running large scripts).
-            </para>
-            <para>If a prepared statement is detected, you will be prompted to enter a value for each defined
-            parameter. The dialog will list all parameters of the statement together with their type as returned
-            by the JDBC driver. Once you have entered a value for each parameter, clicking OK
-            will execute the statement using those values. When you execute the SQL statement
-            the next time, the old values will be presevered, and you can either use them again
-            or modify them before running the statement.
-            </para>
-            <para>Once you are satisfied with your SQL statement, you can <link linkend="editor-copy-java-code-snippet">copy</link>
-            the statement and paste the Java code into your program.
-            </para>
-            <para>Prepared statements are supported for <literal>SELECT</literal>, <literal>INSERT</literal>,
-            <literal>UPDATE</literal> and <literal>UPDATE</literal> statements.
-            </para>
-            <note><para>This feature requires that the <ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/ParameterMetaData.html#getParameterCount()">getParameterCount()</ulink> and
-            <ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/ParameterMetaData.html#getParameterType(int)">getParameterType()</ulink>
-						methods of the <literal>ParameterMetaData</literal> class are implemented by the JDBC driver.
-						Currently the drivers for <ulink url="http://www.oracle.com">Oracle</ulink>
-						and <ulink url="http://www.postgresql.org">PostgreSQL</ulink> do not implement this. The feature has
-						been tested with <ulink url="http://www.firebirdsql.org/">Firebird SQL</ulink> and <ulink url="http://hsqldb.sourceforge.net">HSQLDB</ulink>
-						</para>
-						</note>
-        </section>
+		<section id="editor-prepared-statement">
+			<title>Support for prepared statements</title>
+			<para>
+				For better performance Java applications usually make use of
+				<ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/PreparedStatement.html">prepared statements</ulink>.
+				The SQL for a prepared statement does not contain the actual values that should be used e.g.
+				in the WHERE clause, but uses quotation marks instead. Let's assume the above example should be
+				enhanced to retrieve the person information for a specific ID. The code could look like
+				this:
+			</para>
+			<programlisting>String sql="SELECT p.name, \n" +
+"       p.firstname, \n" +
+"       a.street, \n" +
+"       a.zipcode, \n" +
+"       a.phone \n" +
+"FROM person p, \n" +
+"     address a \n" +
+"WHERE p.person_id = a.person_id; \n" +
+"  AND p.person_id = ?";</programlisting>
 
-    </section>
+			<para>
+				You can copy and <link linkend="editor-clean-java-code">clean</link> the SQL statement
+				but you will not be able to execute it, because there is no value available for the parameter
+				denoted by the quotation mark. To run this kind of statements, you need to enable the prepared statement
+				detection using <menuchoice><guimenu>SQL</guimenu><guimenuitem>Detect prepared statements</guimenuitem></menuchoice>
+			</para>
+			<para>
+				Once the prepared statement detection is enabled, &wb-productname; will examine
+				each statement to check whether it is a prepared statement. This examination
+				is delegated to the JDBC driver and does cause some overhead when running the statement.
+				For performance reasons you should disable the detection, if you are not using
+				prepared statements in the editor (especially when running large scripts).
+			</para>
+			<para>If a prepared statement is detected, you will be prompted to enter a value for each defined
+				parameter. The dialog will list all parameters of the statement together with their type as returned
+				by the JDBC driver. Once you have entered a value for each parameter, clicking OK
+				will execute the statement using those values. When you execute the SQL statement
+				the next time, the old values will be presevered, and you can either use them again
+				or modify them before running the statement.
+			</para>
+			<para>Once you are satisfied with your SQL statement, you can <link linkend="editor-copy-java-code-snippet">copy</link>
+				the statement and paste the Java code into your program.
+			</para>
+			<para>Prepared statements are supported for <literal>SELECT</literal>, <literal>INSERT</literal>,
+				<literal>UPDATE</literal> and <literal>UPDATE</literal> statements.
+			</para>
+			<note>This feature requires that the <ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/ParameterMetaData.html#getParameterCount()">getParameterCount()</ulink> and
+				<ulink url="http://java.sun.com/j2se/1.4.2/docs/api/java/sql/ParameterMetaData.html#getParameterType(int)">getParameterType()</ulink>
+				methods of the <literal>ParameterMetaData</literal> class are implemented by the JDBC driver.
+				Currently the drivers for <ulink url="http://www.oracle.com">Oracle</ulink>
+				and <ulink url="http://www.postgresql.org">PostgreSQL</ulink> do not implement this. The feature has
+				been tested with <ulink url="http://www.firebirdsql.org/">Firebird SQL</ulink> and <ulink url="http://hsqldb.sourceforge.net">HSQLDB</ulink>
+			</note>
+		</section>
+
+	</section>
 
 </section>

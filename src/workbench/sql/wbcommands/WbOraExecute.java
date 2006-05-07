@@ -60,24 +60,16 @@ public class WbOraExecute extends SqlCommand
 		}
 		realSql = realSql + "{call " + sql.substring(startpos + this.sqlcommand.length() + 1) + "}";
 
+		setConnection(aConnection);
+		
 		result.addMessage(ResourceMgr.getString("MsgProcCallConverted") + " " + realSql);
 
 		try
 		{
 			this.currentStatement = aConnection.createStatement();
 			boolean hasResult = this.currentStatement.execute(realSql);
-			DataStore ds = null;
-			if (hasResult)
-			{
-				ResultSet rs = this.currentStatement.getResultSet();
-				ds = new DataStore(rs, aConnection);
-				result.addDataStore(ds);
-			}
-			StringBuffer warnings = new StringBuffer();
-			if (this.appendWarnings(aConnection, this.currentStatement, warnings))
-			{
-				result.addMessage(warnings.toString());
-			}
+
+			processResults(result, hasResult);
 			result.setSuccess();
 		}
 		catch (Exception e)

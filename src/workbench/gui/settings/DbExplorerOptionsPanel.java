@@ -81,6 +81,7 @@ public class DbExplorerOptionsPanel
     showDbExplorer.setFont(null);
     showDbExplorer.setSelected(Settings.getInstance().getShowDbExplorerInMainWindow());
     showDbExplorer.setText("");
+    showDbExplorer.setBorder(null);
     showDbExplorer.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     showDbExplorer.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
     showDbExplorer.setIconTextGap(5);
@@ -88,14 +89,15 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(3, 5, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(3, 9, 0, 11);
     add(showDbExplorer, gridBagConstraints);
 
     retrieveDbExplorer.setFont(null);
     retrieveDbExplorer.setSelected(Settings.getInstance().getRetrieveDbExplorer());
     retrieveDbExplorer.setText("");
+    retrieveDbExplorer.setBorder(null);
     retrieveDbExplorer.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     retrieveDbExplorer.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
     retrieveDbExplorer.setIconTextGap(5);
@@ -103,9 +105,9 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(4, 5, 0, 5);
+    gridBagConstraints.insets = new java.awt.Insets(5, 9, 0, 5);
     add(retrieveDbExplorer, gridBagConstraints);
 
     retrieveDbExplorerLabel.setLabelFor(retrieveDbExplorer);
@@ -122,7 +124,7 @@ public class DbExplorerOptionsPanel
     defTableTypeLabel.setToolTipText(ResourceMgr.getDescription("LblDefTableType"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(11, 12, 0, 0);
@@ -133,7 +135,7 @@ public class DbExplorerOptionsPanel
     defTableTypeField.setMinimumSize(new java.awt.Dimension(72, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
@@ -145,7 +147,7 @@ public class DbExplorerOptionsPanel
     rememberObjectLabel.setToolTipText(ResourceMgr.getDescription("LblRememberObjectType"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
     add(rememberObjectLabel, gridBagConstraints);
@@ -156,9 +158,10 @@ public class DbExplorerOptionsPanel
     rememberObject.setMargin(new java.awt.Insets(0, 0, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(9, 9, 0, 0);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(5, 9, 0, 0);
     add(rememberObject, gridBagConstraints);
 
   }// </editor-fold>//GEN-END:initComponents

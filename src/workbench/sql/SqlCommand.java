@@ -40,6 +40,7 @@ public class SqlCommand
 	private boolean consumerWaiting = false;
 	protected RowActionMonitor rowMonitor;
 	protected boolean isUpdatingCommand = false;
+	protected boolean reportFullStatementOnError = false;
 	protected ResultLogger resultLogger;
 	protected StatementRunner runner;
 	protected int queryTimeout = 0;
@@ -70,6 +71,9 @@ public class SqlCommand
 		this.resultLogger = logger;
 	}
 
+	public boolean getFullErrorReporting() { return reportFullStatementOnError; }
+	public void setFullErrorReporting(boolean flag) { reportFullStatementOnError = flag; }
+	
 	protected void appendSuccessMessage(StatementRunnerResult result)
 	{
 		result.addMessage(this.getVerb() + " " + ResourceMgr.getString("MsgKnownStatementOK"));
@@ -158,9 +162,8 @@ public class SqlCommand
 			result.setSuccess();
 			return result;
 		}
-		ResultSet rs = null;
 		this.currentStatement = aConnection.createStatement();
-		this.currentConnection = aConnection;
+		setConnection(aConnection);
 		this.isCancelled = false;
 		
 
@@ -168,48 +171,8 @@ public class SqlCommand
 		{
 			boolean hasResult = this.currentStatement.execute(aSql);
 
-			// Postgres obviously clears the warnings if the getMoreResults()
-			// and stuff is called, so we add the warnings right at the beginning
-			// this shouldn't affect other DBMSs (hopefully :-)
-			StringBuffer warnings = new StringBuffer();
-			if (appendWarnings(aConnection, this.currentStatement, warnings))
-			{
-				result.addMessage(warnings.toString());
-			}
-			int updateCount = -1;
-
-			DataStore ds = null;
-
-			if (hasResult)
-			{
-				rs = this.currentStatement.getResultSet();
-				ds = new DataStore(rs, true, this.rowMonitor, 0, aConnection);
-				result.addDataStore(ds);
-				int counter = 0;
-				while (this.currentStatement.getMoreResults())
-				{
-					rs = this.currentStatement.getResultSet();
-					if (rs == null) break;
-					ds = new DataStore(rs, true, this.rowMonitor, this.maxRows, aConnection);
-					result.addDataStore(ds);
-					// prevent endless loop with some JDBC drivers 
-					// that do not return false with getMoreResults()
-					counter ++;
-					if (counter > 25) break;
-				}
-			}
-			else
-			{
-				updateCount = this.currentStatement.getUpdateCount();
-				//result.addUpdateCount(updateCount);
-				if (updateCount > -1)
-				{
-					result.addMessage(updateCount + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
-				}
-			}
-			// we are not checking for further results as we
-			// won't support them anyway :)
-
+			processResults(result, hasResult);
+			
 			result.setSuccess();
 		}
 		catch (Exception e)
@@ -233,6 +196,62 @@ public class SqlCommand
 		return result;
 	}
 
+	protected void processResults(StatementRunnerResult result, boolean hasResult)
+		throws SQLException
+	{
+		// Postgres obviously clears the warnings if the getMoreResults()
+		// and stuff is called, so we add the warnings right at the beginning
+		// this shouldn't affect other DBMSs (hopefully :-)
+		StringBuffer warnings = new StringBuffer();
+		if (appendWarnings(this.currentConnection, this.currentStatement, warnings))
+		{
+			result.addMessage(warnings.toString());
+		}
+
+		int updateCount = -1;
+		boolean moreResults = false;
+
+		// if hasResult == false, then the first "result" is an updateCount
+		if (!hasResult) 
+		{
+			updateCount = this.currentStatement.getUpdateCount();
+			//result.addMessage(updateCount + " " + ResourceMgr.getString(ResourceMgr.MSG_ROWS_AFFECTED));
+			moreResults = this.currentStatement.getMoreResults();
+		}
+		else
+		{
+			moreResults = true;
+		}
+
+		ResultSet rs = null;
+		DataStore ds = null;
+
+		int counter = 0;
+		while (moreResults || updateCount > -1)
+		{
+			if (moreResults)
+			{
+				rs = this.currentStatement.getResultSet();
+				if (rs != null) 
+				{
+					ds = new DataStore(rs, true, this.rowMonitor, this.maxRows, this.currentConnection);
+					result.addDataStore(ds);
+				}
+			}
+			else if (updateCount > -1)
+			{			
+				result.addUpdateCountMsg(updateCount);
+			}
+			moreResults = this.currentStatement.getMoreResults();
+			updateCount = this.currentStatement.getUpdateCount();
+			
+			counter ++;
+			// some JDBC drivers do not implement getMoreResults() and getUpdateCount()
+			// correctly, so this is a safety to prevent an endless loop
+			if (counter > 50) break;
+		}
+		
+	}
 	public void setConnection(WbConnection conn)
 	{
 		this.currentConnection = conn;

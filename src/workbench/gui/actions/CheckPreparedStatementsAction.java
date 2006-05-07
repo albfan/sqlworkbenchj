@@ -25,7 +25,8 @@ import workbench.resource.Settings;
  *	Action to copy the contents of a entry field into the clipboard
  *	@author  support@sql-workbench.net
  */
-public class CheckPreparedStatementsAction extends WbAction
+public class CheckPreparedStatementsAction 
+	extends WbAction
 {
 	private boolean switchedOn = false;
 	private JCheckBoxMenuItem toggleMenu;
@@ -35,7 +36,6 @@ public class CheckPreparedStatementsAction extends WbAction
 		super();
 		this.initMenuDefinition("MnuTxtCheckPrepared");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		//this.setIcon(null);
 		this.switchedOn = Settings.getInstance().getCheckPreparedStatements();
 	}
 

@@ -89,6 +89,7 @@ public class DefaultStatementRunner
 	private boolean verboseLogging;
 	private boolean supportsSelectInto = false;
 	private boolean removeComments;
+	private boolean fullErrorReporting = false;
 	
 	public DefaultStatementRunner()
 	{
@@ -109,7 +110,7 @@ public class DefaultStatementRunner
 
 		sql = new WbDescribeTable();
 		cmdDispatch.put(sql.getVerb(), sql);
-    cmdDispatch.put("DESCRIBE", sql);
+		cmdDispatch.put("DESCRIBE", sql);
 
 		sql = new WbEnableOraOutput();
 		cmdDispatch.put(sql.getVerb(), sql);
@@ -205,6 +206,8 @@ public class DefaultStatementRunner
 		}
 	}
 
+	public void setFullErrorReporting(boolean flag) { this.fullErrorReporting = flag; }
+	
 	public void setExecutionController(ExecutionController control)
 	{
 		this.controller = control;
@@ -348,7 +351,10 @@ public class DefaultStatementRunner
 		}
 		
 		long sqlExecStart = System.currentTimeMillis();
+		boolean oldReporting = this.currentCommand.getFullErrorReporting();
+		this.currentCommand.setFullErrorReporting(this.fullErrorReporting);
 		this.result = this.currentCommand.execute(this.dbConnection, realSql);
+		this.currentCommand.setFullErrorReporting(oldReporting);
 
 		if (this.currentCommand instanceof WbStartBatch && result.isSuccess())
 		{

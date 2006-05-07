@@ -1,27 +1,27 @@
 <section id="wb-commands">
-  <title>Special &wb-productname; commands</title>
+	<title>Special &wb-productname; commands</title>
 
   <section id="command-export">
     <title>Export data - WbExport</title>
 
     <para>Exports the result of the <emphasis role="bold">next</emphasis>
         SQL statement (which has to produce a result set) to a file without
-        loading the data into memory. If you want to save the data that is 
-        currently displayed in the result area into an external file, please 
+        loading the data into memory. If you want to save the data that is
+        currently displayed in the result area into an external file, please
         use the <link linkend="export">Save Data as</link> feature.
     </para>
-    <para>If you want to simply export the contents of one or more tables, 
-      the <literal>-sourcetable</literal> switch can be used to specify the 
-      tables. In this case no additional SELECT statement is necessary. 
+    <para>If you want to simply export the contents of one or more tables,
+      the <literal>-sourcetable</literal> switch can be used to specify the
+      tables. In this case no additional SELECT statement is necessary.
       You can also use the <link linkend="dbexplorer-spool">Database Explorer</link>
       to export multiple tables.
     </para>
-	<para>
-	  You can also export the result of a <literal>SELECT</literal> statement, by
-	  selecting the statment in the editor, and then choose
-	  <menuchoice><guimenu>SQL</guimenu><guimenuitem>Export query result</guimenuitem></menuchoice>.
-	</para>
-    
+    <para>
+      You can also export the result of a <literal>SELECT</literal> statement, by
+      selecting the statment in the editor, and then choose
+      <menuchoice><guimenu>SQL</guimenu><guimenuitem>Export query result</guimenuitem></menuchoice>.
+    </para>
+
     <para>The command supports the following parameters:</para>
 
     <informaltable frame="all">
@@ -38,7 +38,7 @@
           <tbody valign="top">
               <row>
               <entry><para>-type=[text |sqlinsert |sqlupdate |sqldeleteinsert |xml |html]</para></entry>
-              
+
               <entry>
                 <para>
                   Defines the type of the output file. <literal>sqlinsert</literal>
@@ -55,10 +55,10 @@
                   switch.
                 </para>
                 <para>
-                  <literal>sqlupdate</literal> will generate UPDATE 
+                  <literal>sqlupdate</literal> will generate UPDATE
                   statements that update all non-key columns of the table. This will only
                   generate valid <literal>UPDATE</literal> statements if at least one key
-                  column is present. If the table does not have key columns defined, or you 
+                  column is present. If the table does not have key columns defined, or you
                   want to use different columns, they can be specified using the <literal>-keycolumns</literal>
                   switch.
                 </para>
@@ -69,29 +69,29 @@
               <entry><para>-file=&#60;filename&#62;</para></entry>
               <entry><para>Defines the name of the output file </para></entry>
           </row>
-          
+
           <row>
               <entry><para>-sourcetable=table1,table2</para></entry>
               <entry><para>Defines the table(s) to be exported. If this
               switch is used, <literal>-outputdir</literal> is also required
-              unless exactly one table is specified. If one table is 
+              unless exactly one table is specified. If one table is
               specified, the -file parameter is used to generate the file
-              for the table. If more then one table is specified, the 
+              for the table. If more then one table is specified, the
               <literal>-outputdir</literal> parameter is used to defined
-              the directory where the generated files should be stored. 
+              the directory where the generated files should be stored.
               Each file will be named as the exported table with the approriate
               extension (.xml, .sql, etc). You can specify * as the table
-              name which will then export all tables accessible by the 
+              name which will then export all tables accessible by the
               current user.
               </para>
               <para>If you want to export tables from a different user
               or schema you can use a schema name combined with a wildcard
               e.g. <literal> -sourcetable=otheruser.*</literal>. In this case
-              the generated output files will contain the schema name as part of the 
-              filename (e.g. <literal>otheruser.person.txt</literal>). 
-              When <link linkend="command-import">importing</link> these files, 
-              &wb-productname; will try to import the tables into the schema/user 
-              specified in the filename. If you want to import them into 
+              the generated output files will contain the schema name as part of the
+              filename (e.g. <literal>otheruser.person.txt</literal>).
+              When <link linkend="command-import">importing</link> these files,
+              &wb-productname; will try to import the tables into the schema/user
+              specified in the filename. If you want to import them into
               a different user/schema, then you have to use the <literal>-schema</literal>
               switch for the <link linkend="command-import">import</link> command.
               </para>
@@ -106,7 +106,7 @@
           </row>
           <row>
               <entry><para>-encoding</para></entry>
-              <entry><para>Defines the encoding in which the file should be 
+              <entry><para>Defines the encoding in which the file should be
               written. Common encodings are ISO-8859-1, ISO-8859-15, UTF-8 (or UTF8).
               To get a list of available encodings, execut <literal>WbExport</literal>
               with the parameter <literal>-showencoding</literal>
@@ -114,22 +114,22 @@
           </row>
           <row>
               <entry><para>-showencodings</para></entry>
-              <entry><para>Displays the encodings supported by your Java version and 
+              <entry><para>Displays the encodings supported by your Java version and
               operating system. If this parameter is present, all other parameters are ignored.
               </para></entry>
           </row>
           <row>
             <entry><para>-lineending</para></entry>
-            <entry><para>Defines the line ending used for XML or text files. Possible 
+            <entry><para>Defines the line ending used for XML or text files. Possible
             values are: <literal>dos</literal>, <literal>win</literal>, <literal>crlf</literal>
-            to create files that use the file ending using a CR (ASCII value 13) followed by 
+            to create files that use the file ending using a CR (ASCII value 13) followed by
             a LF (ASCII value 10). For a single character line ending using the LF character
             use the value <literal>lf</literal> or <literal>unix</literal>.
             The default line ending used depends on the platform where &wb-productname; is running.
             </para>
             </entry>
           </row>
-          
+
         </tbody>
       </tgroup>
     </informaltable>
@@ -152,8 +152,8 @@
             <row>
               <entry><para>-table</para></entry>
 
-              <entry><para>Define the tablename to be used for the UPDATE or INSERT 
-              statements. This parameter is required if the SELECT statement has 
+              <entry><para>Define the tablename to be used for the UPDATE or INSERT
+              statements. This parameter is required if the SELECT statement has
               multiple tables in the FROM list. It can be used if only the data
               is retrieved from only one table to UPDATE or INSERT into a different
               table.</para></entry>
@@ -180,9 +180,9 @@
               <entry><para>-concat</para></entry>
 
               <entry><para>If the parameter <literal>-charfunc</literal> is used
-              &wb-productname; will concatenate the individual pieces using 
-              the ANSI SQL operator for string concatenation. In case 
-              your DBMS does not support the ANSI standard (e.g. MS ACCESS) 
+              &wb-productname; will concatenate the individual pieces using
+              the ANSI SQL operator for string concatenation. In case
+              your DBMS does not support the ANSI standard (e.g. MS ACCESS)
               you can specify the operator to be used:</para>
               <para><literal>-concat=+</literal></para><para> defines the plus sign
               as the concatenation operator.</para></entry>
@@ -192,7 +192,7 @@
               <entry><para>-commitevery</para></entry>
 
               <entry><para>A numeric value which identifies
-              the number of <literal>INSERT</literal> or <literal>UPDATE</literal> statements 
+              the number of <literal>INSERT</literal> or <literal>UPDATE</literal> statements
               after which a <literal>COMMIT</literal> is put into the generated SQL script.</para>
               <para>-commitevery=100</para>
               <para>will create a <literal>COMMIT;</literal> after every 100th statement.</para>
@@ -208,19 +208,19 @@
               statements.</para>
               </entry>
             </row>
-            
+
             <row>
               <entry><para>-keycolumns=column1, column2, ...</para></entry>
 
               <entry><para>
               If the table does not have key columns, or the source SELECT statement uses
-              a join over several tables, or you do not want to use the key columns defined 
+              a join over several tables, or you do not want to use the key columns defined
               in the database, this key can be used to define the key columns to be used
               for the UPDATE statements. This key overrides any key columns defined on the
               base table of the SELECT statement.
               </para></entry>
             </row>
-            
+
           </tbody>
         </tgroup>
       </informaltable>
@@ -270,14 +270,14 @@
             <row>
               <entry><para>-quotechar</para></entry>
 
-              <entry><para>The character (or sequence of characters) to be used 
-                  to enclose text (character) data if the delimiter is 
+              <entry><para>The character (or sequence of characters) to be used
+                  to enclose text (character) data if the delimiter is
                   contained in the data. By default quoting is disabled until a quote character
                   is defined. To set the double quote as the quote character
                   you have to enclose it in single quotes: <literal>-quotechar='"'</literal>
               </para></entry>
             </row>
-            
+
             <row>
               <entry><para>-quoteAlways</para></entry>
 
@@ -285,11 +285,11 @@
                   then character data will only be quoted
                   if the delimiter is found inside the actual value that is
                   written to the output file. If <literal>-quoteAlways=true</literal> is
-                  specified, character data will always be 
+                  specified, character data will always be
                   enclosed in the specified quote character.</para>
               </entry>
             </row>
-            
+
             <row>
               <entry><para>-decimal</para></entry>
 
@@ -298,39 +298,39 @@
               </entry>
             </row>
 
-						<!--
+                        <!--
             <row>
               <entry><para>-cleancr=[true|false]</para></entry>
 
               <entry><para>Controls the handling of non
                   printable characters inside character columns. If
-                  <literal>-cleancr=true</literal>, any character &#60; ASCII 32 will 
-                  be replaced with a space character. This results in 
-                  exported data that is different to the content of the database, 
-                  but will allow importing using tools that do not 
-                  support embedded newlines. 
+                  <literal>-cleancr=true</literal>, any character &#60; ASCII 32 will
+                  be replaced with a space character. This results in
+                  exported data that is different to the content of the database,
+                  but will allow importing using tools that do not
+                  support embedded newlines.
                   If you plan to use <literal>WbImport</literal> to import
                   the textfile, then using the <literal>-escapetext</literal> flag
-                  is the recommended way to deal with special characters. Using 
+                  is the recommended way to deal with special characters. Using
                   the text encoding offered by <literal>WbImport/WbExport</literal>
                   special characters can be written and restored using text files that would
                   otherwise not support this.
               </para></entry>
             </row>
             -->
-						
+
             <row>
               <entry><para id="text-escape-switch">-escapetext</para></entry>
 
-              <entry><para>This parameter controls the escaping of non-printable 
+              <entry><para>This parameter controls the escaping of non-printable
               or non-ASCII characters. Valid options are <literal>ctrl</literal> which
               will escape everything below ASCII 32 (newline, tab, etc), <literal>7bit</literal>
               which will escape everything below ASCII 32 and above 126, <literal>8bit</literal>
               which will escape everything below ASCII 32 and above 255 and <literal>extended</literal>
               which will escape everything outside the range [32-126] and [161-255]
               </para>
-              <para>This will write a unicode representation of the character into the 
-              text file e.g. \n for a newline, \u00F6 for &ouml;. This file 
+              <para>This will write a unicode representation of the character into the
+              text file e.g. \n for a newline, \u00F6 for &ouml;. This file
               can only be imported using &wb-productname; (at least I don't know
               of any DBMS specific loader that will decode this properly)</para>
               </entry>
@@ -347,20 +347,20 @@
             <row>
               <entry><para>-oraldr=[true|false]</para></entry>
               <entry><para>
-                  This parameter controls the creation of Oracle SQL*Loader 
+                  This parameter controls the creation of Oracle SQL*Loader
                   control files. If it is set to true, then &wb-productname;
                   will generate a control file for each exported text file,
-                  that can be used to import the text file using SQL*Loader 
+                  that can be used to import the text file using SQL*Loader
                   instead of &wb-productname;. The control file has the same
                   filename as the output file but with the ending <literal>.ctl</literal>
               </para>
-			  <para>Note that the generated control file will most probably
-				  need some adjustments before you can actually use it. It is mainly
-				  meant as a template that needs further refinement.
-			  </para>
+              <para>Note that the generated control file will most probably
+                  need some adjustments before you can actually use it. It is mainly
+                  meant as a template that needs further refinement.
+              </para>
               </entry>
             </row>
-            
+
           </tbody>
         </tgroup>
       </informaltable>
@@ -427,31 +427,31 @@
             <row>
               <entry><para>-stylesheet</para></entry>
               <entry><para>The name of the XSLT stylesheet that should be used
-              to transform the &wb-productname; specific XML file into a 
+              to transform the &wb-productname; specific XML file into a
               different format. If -stylesheet is specified, -xsltoutput has
               to be specified as well.</para></entry>
             </row>
             <row>
               <entry><para>-xsltoutput</para></entry>
-              <entry><para>The resulting output file (specified 
+              <entry><para>The resulting output file (specified
               with the -file parameter), can be transformed using XSLT after
-              the export has finished. This parameter then defines 
+              the export has finished. This parameter then defines
               the name of the outputfile of the transformation.</para></entry>
             </row>
             <row>
               <entry><para>-verboseXML=[true|false]</para></entry>
-              <entry><para>This parameter controls the tags that 
+              <entry><para>This parameter controls the tags that
               are used in the XML file and minor formatting features.
-              The default is -verboseXML=true and this will generate 
+              The default is -verboseXML=true and this will generate
               more readable tags and formatting. However the overhead
               imposed by this is quite high. Using -verboseXML=false
               uses shorter tag names (not longer then two characters) and
-              does put more information in one line. This output is 
-              a harder to read for a human but is smaller in size which 
+              does put more information in one line. This output is
+              a harder to read for a human but is smaller in size which
               could be important for exports with large result sets.
               </para></entry>
             </row>
-            
+
           </tbody>
         </tgroup>
       </informaltable>
@@ -460,9 +460,9 @@
     <section id="export-examples">
       <title>Examples</title>
 
-<programlisting>WbExport -type=text 
-         -file='c:/data/data.txt' 
-         -delimiter='|' 
+<programlisting>WbExport -type=text
+         -file='c:/data/data.txt'
+         -delimiter='|'
          -decimal=',';
 SELECT * FROM data_table;</programlisting>
 
@@ -470,28 +470,28 @@ SELECT * FROM data_table;</programlisting>
         Each column will be separated with the character | Each fractional number
         will be written with a comma as the decimal separator. As the
         SELECT statement retrieves all rows and columns from the table, this
-        could also be written as: 
+        could also be written as:
     </para>
 
-<programlisting>WbExport -type=text 
-         -file='c:/data/data.txt' 
-         -delimiter='|' 
-         -decimal=',' 
+<programlisting>WbExport -type=text
+         -file='c:/data/data.txt'
+         -delimiter='|'
+         -decimal=','
          -sourcetable=data_table;</programlisting>
     <para>There is a difference in the behaviour of the command regarding the "Max. Rows" setting
-    in the GUI. When you use the <literal>WbExport</literal> command together with 
+    in the GUI. When you use the <literal>WbExport</literal> command together with
     a <literal>SELECT</literal> query, the Max. Rows setting will be respected
     by the <literal>SELECT</literal> statement (and you will see a warning
     that the result set was limited). When you use the <literal>WbExport</literal>
-    with the <literal>-sourcetable</literal> switch, the "Max. Rows" setting 
+    with the <literal>-sourcetable</literal> switch, the "Max. Rows" setting
     will not be respected, and all rows from the table will be written into
     the specified file.</para>
-    
+
     <para>To generate a file that contains SQL INSERT statements that can be
       executed on the target system, the following command can be used:</para>
 
-<programlisting>WbExport -type=sqlinsert 
-         -file='c:/data/newtable.sql' 
+<programlisting>WbExport -type=sqlinsert
+         -file='c:/data/newtable.sql'
          -table=newtable;
 SELECT * FROM table1, table2
 WHERE table1.column1 = table2.column1;</programlisting>
@@ -527,11 +527,11 @@ WHERE table1.column1 = table2.column1;</programlisting>
           spanning multiple lines in the input file. If the input file is created using
           WbExport then it is recommended to use the <literal>-escapetext</literal> switch
           to escape non-printable characters which could break text import.
-	  </para>
-		<para>The <link linkend="data-pumper">DataPumper</link> can also be used to import text files
-		into a database table, though it does not offer all of the possibilities as the 
+      </para>
+        <para>The <link linkend="data-pumper">DataPumper</link> can also be used to import text files
+        into a database table, though it does not offer all of the possibilities as the
     <literal>WbImport</literal> command.
-		</para>
+        </para>
 
     <para>The WbImport command has the following syntax</para>
     <informaltable frame="all">
@@ -561,16 +561,16 @@ WHERE table1.column1 = table2.column1;</programlisting>
             files from that directory will be imported. If this switch is used
             with text files, then it is assumed that each filename (without the extension)
             defines the target table.
-						</para></entry>
+                        </para></entry>
           </row>
           <row>
             <entry><para>-extension</para></entry>
             <entry><para>When using the <literal>-sourcedir</literal> switch, the
             extension for the files can be defined. All files ending with the supplied
-            value will be processed. (e.g. <literal>-extension=csv</literal>). 
-            The extension given is case-sensitiv (i.e. <literal>TXT</literal> is something 
+            value will be processed. (e.g. <literal>-extension=csv</literal>).
+            The extension given is case-sensitiv (i.e. <literal>TXT</literal> is something
             different than <literal>txt</literal>
-						</para></entry>
+                        </para></entry>
           </row>
           <row>
             <entry><para>-commitevery</para></entry>
@@ -592,7 +592,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
             <entry><para>-ContinueOnError</para></entry>
             <entry><para>This parameter controls the behaviour when errors occur during
             the import. The default is <literal>true</literal>, meaning that the import
-            will continue even if an error occurs during file parsing or updating the database. 
+            will continue even if an error occurs during file parsing or updating the database.
             Set this parameter to <literal>false</literal>
             if you want to stop the import as soon as an error occurs.
             </para></entry>
@@ -616,7 +616,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
           </row>
           <row>
             <entry><para>-schema</para></entry>
-            <entry><para>Defines the schema into which the data should be imported. This 
+            <entry><para>Defines the schema into which the data should be imported. This
             is necessary for DBMS that support schemas, and you want to import
             the data into a different schema, then the current one.</para>
             </entry>
@@ -635,12 +635,12 @@ WHERE table1.column1 = table2.column1;</programlisting>
           <row>
             <entry><para>-usebatch</para></entry>
             <entry><para>Enable or disable the use of the JDBC batch update features. If the
-            JDBC driver supports this, the INSERT (or UPDATE) performance can be increased. 
-            This parameter will be ignored if the driver does not support batch updates or if 
+            JDBC driver supports this, the INSERT (or UPDATE) performance can be increased.
+            This parameter will be ignored if the driver does not support batch updates or if
             the mode is not UPDATE or INSERT (i.e. if <literal>-mode=update,insert</literal>
               or <literal>-mode=insert,update</literal>is used).
-              Note that for some JDBC drivers this means that all SQL statements that 
-              are generated for the input file will be kept in memory until the batch 
+              Note that for some JDBC drivers this means that all SQL statements that
+              are generated for the input file will be kept in memory until the batch
               is execute, so for large input files this might lead to memory problems.
               In this case the size of the batch queue should be controlled using
               the <literal>-batchsize</literal> parameter.
@@ -667,7 +667,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
               </para>
               </entry>
           </row>
-          
+
         </tbody>
       </tgroup>
     </informaltable>
@@ -693,23 +693,23 @@ WHERE table1.column1 = table2.column1;</programlisting>
               Each column from the file should be listed with the approriate column
               name from the target table. This parameter also defines
               the order in which those columns appear in the file.
-              If the file does not contain a header line or the header line does not 
-              contain the names of the columns in the database (or has different names), 
-              this parameter has to be supplied. If a column from the input 
-              file has no match in the target table, then it should be specified with 
+              If the file does not contain a header line or the header line does not
+              contain the names of the columns in the database (or has different names),
+              this parameter has to be supplied. If a column from the input
+              file has no match in the target table, then it should be specified with
               the name $wb_skip$. You can also specify the $wb_skip$ flag for
-              columns which are present but that you want to exclude from the 
+              columns which are present but that you want to exclude from the
               import.
               </para>
               <para>This parameter is ignored when the <literal>-sourcedir</literal>
               parameter is used.</para>
-							</entry>
+                            </entry>
             </row>
             <row>
               <entry><para>-importcolumns</para></entry>
-              <entry><para>Defines the columns that should be imported. If all 
-              columns from the input file should be imported (the default), then 
-              this parameter can be ommited. If only certain columns should be 
+              <entry><para>Defines the columns that should be imported. If all
+              columns from the input file should be imported (the default), then
+              this parameter can be ommited. If only certain columns should be
               imported then the list of columns can be specified here. The column
               names should match the names provided with the -filecolumns switch.
               The same result can be achieved by providing the columns
@@ -717,11 +717,11 @@ WHERE table1.column1 = table2.column1;</programlisting>
               in the <literal>-filecolumns</literal> switch. Which one you choose
               is mainly a matter of taste. Listing all columns and excluding
               some using <literal>-importcolumns</literal> might be more readable
-              because the structure of the file is still "visible" in the 
+              because the structure of the file is still "visible" in the
               <literal>-filecolumns</literal> switch.</para>
               <para>This parameter is ignored when the <literal>-sourcedir</literal>
               parameter is used.</para>
-							</entry>
+                            </entry>
             </row>
             <row>
               <entry><para>-delimiter</para></entry>
@@ -764,12 +764,12 @@ WHERE table1.column1 = table2.column1;</programlisting>
               would be treated as a regular data column.</para>
               <para>This parameter is always set to true when the <literal>-sourcedir</literal>
               parameter is used.</para>
-							</entry>
+                            </entry>
             </row>
             <row>
               <entry><para>-decode=[true|false]</para></entry>
-              <entry><para>This controls the decoding of escaped characters. If the 
-              export file was e.g. written with <link linkend="text-escape-switch">escaping enabled</link> 
+              <entry><para>This controls the decoding of escaped characters. If the
+              export file was e.g. written with <link linkend="text-escape-switch">escaping enabled</link>
               then you need to set <literal>-decode=true</literal> in order to interpret string sequences
               like \t, \n or escaped Unicode characters properly. This is not enabled by default
               because applying the necessary checks has an impact on the performance.
@@ -779,7 +779,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
               <entry><para>-columnfilter</para></entry>
               <entry><para>
                 This defines a filter on column level that selects only certain rows
-                from the input file to be sent to the database. The filter has to be 
+                from the input file to be sent to the database. The filter has to be
                 define <literal>as column1="regex",column2="regex"</literal>
               </para>
               <para>If more then one column is listed, then all expressions must match
@@ -788,64 +788,64 @@ WHERE table1.column1 = table2.column1;</programlisting>
               </para>
               <para>This parameter is ignored when the <literal>-sourcedir</literal>
               parameter is used.</para>
-							</entry>
+                            </entry>
             </row>
             <row>
               <entry><para>-linefilter</para></entry>
               <entry><para>
               To define a filter on the level of the input row (rather then
               for each column individually) you can define a regular expression
-              that is applied to the whole input row. As the regular expressioin 
-              will be applied to the input row as it is retrieved from the 
-              input file, the column delimiter(s) have to be taken into account 
+              that is applied to the whole input row. As the regular expressioin
+              will be applied to the input row as it is retrieved from the
+              input file, the column delimiter(s) have to be taken into account
               when defining the regular expression.
               </para></entry>
             </row>
           </tbody>
         </tgroup>
       </informaltable>
-      
+
       <para>Examples:</para>
       <programlisting>WbImport -file=c:/temp/contacts.txt
          -table=person
          -filecolumns=lastname,firstname,birthday
          -dateformat="yyyy-MM-dd";</programlisting>
-     
+
      <para>
-         This imports a file with three columns into a table named person. The 
+         This imports a file with three columns into a table named person. The
          first column in the file is <literal>lastname</literal>, the second column
          is <literal>firstname</literal> and the third column is <literal>birhtday</literal>.
          Values in date columns are formated as yyyy-MM-dd
      </para>
-     
+
       <programlisting>WbImport -file=c:/temp/contacts.txt
          -table=person
          -filecolumns=lastname,firstname,$wb_skip$,birthday
          -dateformat="yyyy-MM-dd";</programlisting>
-     
+
      <para>
          This will import a file with four columns. The third column in the file
          does not have a corresponding column in the table <literal>person</literal>
-         so its specified as <literal>$wb_skip$</literal> and will not be imported. 
+         so its specified as <literal>$wb_skip$</literal> and will not be imported.
      </para>
-     
+
       <programlisting>WbImport -file=c:/temp/contacts.txt
          -table=person
          -filecolumns=lastname,firstname,phone,birthday
          -importcolumns=lastname,firstname;</programlisting>
-     
+
       <para>
           This will import a file with four columns where all columns
-          exist in the target table. Only <literal>lastname</literal> and 
-          <literal>firstname</literal> will be imported. The same effect could 
+          exist in the target table. Only <literal>lastname</literal> and
+          <literal>firstname</literal> will be imported. The same effect could
           be achieved by specifying $wb_skip$ for the last two columns and leaving
           out the -importcolumns switch. Using -importcolumns is a bit more readable
-          because you can still see the structure of the input file. The 
+          because you can still see the structure of the input file. The
           version with <literal>$wb_skip$</literal> is mandatory if the input file
           contains columns that do not exist in the target table.
       </para>
-     
-     <para>If you want to import certain rows from the input file, you can 
+
+     <para>If you want to import certain rows from the input file, you can
      use regular expressions:</para>
       <programlisting>WbImport -file=c:/temp/contacts.txt
          -table=person
@@ -861,9 +861,9 @@ WHERE table1.column1 = table2.column1;</programlisting>
      If you want to learn more about regular expressions, please have a look
      at <ulink url="http://www.regular-expressions.info/"/>
      </para>
-     
-     <para>If you want to limit the rows that are updated but cannot filter them 
-      from the input file using <literal>-columnfilter</literal> or <literal>-linefilter</literal>, 
+
+     <para>If you want to limit the rows that are updated but cannot filter them
+      from the input file using <literal>-columnfilter</literal> or <literal>-linefilter</literal>,
       use the <literal>-updatewhere</literal> parameter:</para>
       <programlisting>WbImport -file=c:/temp/contacts.txt
          -table=person
@@ -872,13 +872,19 @@ WHERE table1.column1 = table2.column1;</programlisting>
          -mode=update
          -updatewhere="source &lt;&gt; 'manual'"</programlisting>
       <para>This will update the table <literal>PERSON</literal>. The generated <literal>UPDATE</literal>
-      statement would normally be: <literal>UPDATE person SET lastname=?, firstname=?, birthday=? WHERE id=?</literal>. 
-      The table contains entries that are maintained manually (identified by the value 'manual' in 
-      the column <literal>source</literal>) and should not be updated by &wb-productname;. By specifying 
-      the <literal>-updatewhere</literal> parameter, the above <literal>UPDATE</literal> statement will 
+      statement would normally be: <literal>UPDATE person SET lastname=?, firstname=?, birthday=? WHERE id=?</literal>.
+      The table contains entries that are maintained manually (identified by the value 'manual' in
+      the column <literal>source</literal>) and should not be updated by &wb-productname;. By specifying
+      the <literal>-updatewhere</literal> parameter, the above <literal>UPDATE</literal> statement will
       be extended to <literal>WHERE id=? AND (source &lt;&gt; 'manual')</literal>. Thus skipping
       records that are flagged as manual even if they are contained in the input file.
       </para>
+
+            <note>
+                When importing text files, records spanning multiple lines in the input
+                file are <emphasis role="strong">not</emphasis> supported, even when
+                they are quoted.
+            </note>
     </section>
 
     <section id="import-xml-parameters">
@@ -901,28 +907,28 @@ WHERE table1.column1 = table2.column1;</programlisting>
                 <entry><para>If the XML was generated with <literal>-verboseXML=false</literal>
                 then this needs to be specified also when importing the file.
                 Beginning with build 78, the &wb-productname; writes the information
-                about the used tags into the meta information. So it is no 
-                longer necessary to specify whether -verboseXML was true when 
+                about the used tags into the meta information. So it is no
+                longer necessary to specify whether -verboseXML was true when
                 creating the XML file.
                 </para></entry>
               </row>
               <row>
                 <entry><para>-sourcedir</para></entry>
-                <entry><para>Specify a director which contains the XML files. 
-                All files in that directory ending with ".xml" 
-                (lowercase!) will be processed. 
+                <entry><para>Specify a director which contains the XML files.
+                All files in that directory ending with ".xml"
+                (lowercase!) will be processed.
                 The table into which the data is imported is read
                 from the XML file, also the columns to be imported. The parameters
-                <literal>-keycolumns</literal>, <literal>-table</literal> and 
+                <literal>-keycolumns</literal>, <literal>-table</literal> and
                 <literal>-file</literal> are ignored if this parameter is specified.
-                If XML files are used that are generated with a version prior to 
+                If XML files are used that are generated with a version prior to
                 build 78, then all files need to use either the long or short
                 tag format and the <literal>-verboseXML=false</literal> parameter has
                 to be specified if the short format was used.
                 </para>
-                <para>When importing several files at once, the files will be 
-                imported into the tables specified in the XML files. You cannot 
-                specify a different table (apart from editing the XML file 
+                <para>When importing several files at once, the files will be
+                imported into the tables specified in the XML files. You cannot
+                specify a different table (apart from editing the XML file
                 before starting the import).
                 </para>
                 </entry>
@@ -931,7 +937,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
           </tgroup>
         </informaltable>
     </section>
-    
+
     <section id="import-update-mode">
       <title>Update mode</title>
       <para>The <literal>-mode</literal> parameter controls the way the data is send
@@ -963,8 +969,8 @@ WHERE table1.column1 = table2.column1;</programlisting>
       have to match the real primary key, but they should identify one row uniquely.
       </para>
      <para>You cannot use the update mode, if you select <emphasis role="bold">only</emphasis> key columns.
-     The values from the source are used to build up the <literal>WHERE</literal> clause for the 
-     <literal>UPDATE</literal> statement. If ony key columns are defined, then there would be nothing to 
+     The values from the source are used to build up the <literal>WHERE</literal> clause for the
+     <literal>UPDATE</literal> statement. If ony key columns are defined, then there would be nothing to
      update.
       </para>
 
@@ -979,17 +985,17 @@ WHERE table1.column1 = table2.column1;</programlisting>
     </section>
 
   </section>
-    
+
     <section id="command-copy">
       <title>Copy one database to another - WbCopy</title>
-			
+
       <para>
-				The <literal>WbCopy</literal> is essentially the command line version of the
-				the <link linkend="data-pumper">DataPumper</link>. For a more detailed explanation
-				of the copy process, please refer to that section. It bascially chains a WbExport and a
-				<literal>WbImport</literal> statement without the need of an intermediate data file. 
-				The <literal>WbCopy</literal> command requires that a connection to the source and target 
-				database can be made at the same time.
+                The <literal>WbCopy</literal> is essentially the command line version of the
+                the <link linkend="data-pumper">DataPumper</link>. For a more detailed explanation
+                of the copy process, please refer to that section. It bascially chains a WbExport and a
+                <literal>WbImport</literal> statement without the need of an intermediate data file.
+                The <literal>WbCopy</literal> command requires that a connection to the source and target
+                database can be made at the same time.
       </para>
 
       <section id="copy-general-parameters">
@@ -1144,7 +1150,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
         the different update modes, please refer to the <link linkend="import-update-mode">WbImport</link>
         command.</para>
       </section>
-      
+
       <section id="copy-examples">
         <title>Examples:</title>
         <para>Copy all columns from one table to another table with the same columns:</para>
@@ -1162,7 +1168,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
        -targettable=the_other_table;</programlisting>
 
         <para>Copy only selected columns to a table with different column names. Before the
-					copy is started all rows are deleted from the target table:
+                    copy is started all rows are deleted from the target table:
         </para>
         <programlisting>WbCopy -sourceprofile=ProfileA
        -targerprofile=ProfileB
@@ -1170,20 +1176,20 @@ WHERE table1.column1 = table2.column1;</programlisting>
        -targettable=contact
        -deletetarget=true
        -columns=firstname/surname, lastname/name, birthday/bday;</programlisting>
-			 
+
        <para>If you use this way to map columns, please make sure that you
-				 don't use the forward slash as the <link linkend="options-alternate-delimiter">alternate delimiter</link>.
-				 This can be achieved by either specifying a different character sequence or making sure
-				 that - if you use the forward slash - the current script does not end with it, as
-				 this turns on the usage of the alternate delimiter. The above example would work even if
-				 the forward slash was used as the alternate delimiter, because the whole command is
-				 terminated with a semicolon, which disables the usage of the alternate delimiter.
+                 don't use the forward slash as the <link linkend="options-alternate-delimiter">alternate delimiter</link>.
+                 This can be achieved by either specifying a different character sequence or making sure
+                 that - if you use the forward slash - the current script does not end with it, as
+                 this turns on the usage of the alternate delimiter. The above example would work even if
+                 the forward slash was used as the alternate delimiter, because the whole command is
+                 terminated with a semicolon, which disables the usage of the alternate delimiter.
        </para>
 
         <para>Copy data based on a SQL query, matching the columns
-					from the query to the corresponding columns from the target table:
+                    from the query to the corresponding columns from the target table:
         </para>
-				
+
         <programlisting>WbCopy -sourceprofile=ProfileA
        -targerprofile=ProfileB
        -sourcequery="SELECT firstname, lastname, birthday FROM person"
@@ -1197,31 +1203,34 @@ WHERE table1.column1 = table2.column1;</programlisting>
     </section>
 
     <section id="command-selectblob">
-      <title>Reading BLOB columns - WbSelectBlob</title>
+      <title>Extracting BLOB content - WbSelectBlob</title>
       <para>To save the contents of a <literal>BLOB</literal> or <literal>CLOB</literal> column
         into an external file the <literal>WbSelectBlob</literal> command can be used. Most DBMS
         support reading of <literal>CLOB</literal> (character data) columns directly, so depending
         on your DBMS (and JDBC driver) this command might only be needed for binary data.
       </para>
       <para>The syntax is very similar to the regular <literal>SELECT</literal> statement, an additional
-        <literal>INTO</literal> keyword specifies the name of the external file into which the 
+        <literal>INTO</literal> keyword specifies the name of the external file into which the
         data should be written:
       </para>
-      <programlisting>WbSelectBlob blob_column 
+      <programlisting>WbSelectBlob blob_column
 INTO c:/temp/image.bmp
 FROM theTable
 WHERE id=42;</programlisting>
-      <para>Even if you specify more then one column in the column list, &wb-productname; will only 
-        use the first column. It will also only write the first row's data to the external 
-        file. Any additional rows that might be returned by the <literal>SELECT></literal> 
-        statement will be ignored.</para>
-       <para>To insert or update binary data
-         you can use the regular <literal>INSERT</literal> or <literal>UPDATE</literal>
-         statements. For details, please refer to <link linkend="blob-support">Writing BLOB and CLOB columns</link>.
-       </para>
+            <para>Even if you specify more then one column in the column list, &wb-productname; will only
+                use the first column. It will also only write the first row's data to the external
+                file. Any additional rows that might be returned by the <literal>SELECT></literal>
+                statement will be ignored.
+                If you want to export the BLOB contents of more than one row , please
+                use the <link linkend="command-export">WbExport</link> together with the XML format.
+            </para>
+            <note>
+                You can full manipulate (save, view, upload) the contents of BLOB columns in a result set.
+                Please refer to <xref linkend="blob-support"/> for details.
+            </note>
     </section>
-    
-    
+
+
     <section id="command-schema-report">
       <title>Create a report of the database objects - WbReport</title>
 
@@ -1231,17 +1240,17 @@ WHERE id=42;</programlisting>
       </para>
       <para>
         The resulting XML file can  be transformed into a HTML documentation of your database schema.
-        Sample stylesheets can be downloaded from	<ulink url="http://www.sql-workbench.net/xstl.html"/>.
+        Sample stylesheets can be downloaded from   <ulink url="http://www.sql-workbench.net/xstl.html"/>.
         If you have XSLT stylsheets that you would like to share, please send them to
         <email>support@sql-workbench.net</email>.
-      </para> 
-      
+      </para>
+
       <para>Using this command you can reverse engineer an existing database. The XML file
       can then be used to generate a HTML documentation of the database or to be transformed
       into a format that is supported by your design tool.</para>
-			<para>To see table and column comments with an Oracle database, you need to
-			<link linkend="oracle-enable-remarks">enable remarks reporting</link> for the JDBC
-			driver in order to see the comments.</para>
+            <para>To see table and column comments with an Oracle database, you need to
+            <link linkend="oracle-enable-remarks">enable remarks reporting</link> for the JDBC
+            driver in order to see the comments.</para>
 
       <para>The command supports the following parameters:</para>
 
@@ -1263,7 +1272,7 @@ WHERE id=42;</programlisting>
             </row>
             <row>
                 <entry><para>-tables</para></entry>
-                <entry><para>A (comma separated) list of tables to report. Default is 
+                <entry><para>A (comma separated) list of tables to report. Default is
                 all tables. If this parameter is specified <literal>-schemas</literal> is ignored.
                 If you want to generate the report on tables from different users/schemas you have
                 to use fully qualified names in the list (e.g. <literal>-tables=MY_USER.TABLE1,OTHER_USER.TABLE2</literal>)
@@ -1273,8 +1282,8 @@ WHERE id=42;</programlisting>
             </row>
             <row>
                 <entry><para>-schemas</para></entry>
-                <entry><para>A (comma separated) list of schemas to generate the report from. 
-                For each user/schema all tables are included in the report. e.g. 
+                <entry><para>A (comma separated) list of schemas to generate the report from.
+                For each user/schema all tables are included in the report. e.g.
                 <literal>-schemas=MY_USER,OTHER_USER</literal> would generate a report
                 for all tables in the schemas <literal>MY_USER</literal> and <literal>OTHER_USER</literal>.
                 </para></entry>
@@ -1289,13 +1298,13 @@ WHERE id=42;</programlisting>
             <row>
                 <entry><para>-includetables</para></entry>
                 <entry><para>Control the output of table information for the report. The default is
-				          <literal>true</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
+                          <literal>true</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
                 </para></entry>
             </row>
             <row>
                 <entry><para>-includeprocedures</para></entry>
                 <entry><para>Control the output of stored procedure information for the report. The default is
-				<literal>false</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
+                <literal>false</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
                 </para></entry>
             </row>
             <row>
@@ -1309,18 +1318,18 @@ WHERE id=42;</programlisting>
         </tgroup>
      </informaltable>
    </section>
-   
+
    <section id="command-schema-diff">
     <title>Compare two database schemas - WbSchemaDiff</title>
-    <para>The <literal>WbSchemaDiff</literal> analyzes two schemas (or a list of tables) 
+    <para>The <literal>WbSchemaDiff</literal> analyzes two schemas (or a list of tables)
     and outputs the differences between those schemas as an XML file. The XML file
-    describes the changes that need to be applied to the target schema to have 
-    the same structure as the reference schema, e.g. modify column definitions, 
-    remove or add tables, remove or add indexes. 
+    describes the changes that need to be applied to the target schema to have
+    the same structure as the reference schema, e.g. modify column definitions,
+    remove or add tables, remove or add indexes.
     </para>
-    <para>The output is intended to be transformed using XSLT (e.g. with the 
+    <para>The output is intended to be transformed using XSLT (e.g. with the
     <link linkend="command-xslt">XSLT Command</link>).
-		Sample XSLT transformations
+        Sample XSLT transformations
     can be found on the <ulink url="http://www.sql-workbench.net/xslt.html">&wb-productname; homepage</ulink>
     </para>
       <para>The command supports the following parameters:</para>
@@ -1346,41 +1355,41 @@ WHERE id=42;</programlisting>
             <row>
                 <entry><para>-targetprofile</para></entry>
                 <entry><para>The name of the connection profile for the target
-                connection (the one that needs to be migrated). If this is not 
+                connection (the one that needs to be migrated). If this is not
                 specified, then the current connection is used.</para>
                 <para>If you use the current connection for reference and target,
                 then you should prefix the table names with schema/user or
-                use the <literal>-referenceschema</literal> and 
+                use the <literal>-referenceschema</literal> and
                 <literal>-targetschema</literal> parameters.</para>
                 </entry>
             </row>
             <row>
               <entry><para>-file</para></entry>
-              <entry><para>The filename of the output file. If this 
+              <entry><para>The filename of the output file. If this
               is not supplied the output will be written to the message area</para></entry>
             </row>
-            
+
             <row>
                 <entry><para>-referencetables</para></entry>
-                <entry><para>A (comma separated) list of tables that are the reference 
-                tables, to be checked. 
+                <entry><para>A (comma separated) list of tables that are the reference
+                tables, to be checked.
                 </para></entry>
             </row>
             <row>
                 <entry><para>-targettables</para></entry>
                 <entry><para>A (comma separated) list of tables in the target
-                connection to be compared to the source tables. The tables 
+                connection to be compared to the source tables. The tables
                 are "matched" by their position in the list. The first table in the
-                <literal>-sourcetables</literal> parameter is compared to the 
+                <literal>-sourcetables</literal> parameter is compared to the
                 first table in the <literal>-targettables</literal> parameter. And so
                 on. Using this parameter you can compare tables that do not have the
                 same name.</para>
-                <para>If you omit this parameter, then all tables from the 
-                target connection with the same names as those listed in 
+                <para>If you omit this parameter, then all tables from the
+                target connection with the same names as those listed in
                 <literal>-sourcetables</literal> are compared.
                 </para>
-                <para>If you omit both parameters, then all tables that the 
-                user can access are retrieved from the source connection 
+                <para>If you omit both parameters, then all tables that the
+                user can access are retrieved from the source connection
                 and compared to the tables with the same name in the target
                 connection.
                 </para>
@@ -1399,7 +1408,7 @@ WHERE id=42;</programlisting>
                 </para>
                 </entry>
             </row>
-            
+
             <row>
                 <entry><para>-namespace</para></entry>
                 <entry><para>The namespace to be used for the XML tags. By default no
@@ -1409,54 +1418,54 @@ WHERE id=42;</programlisting>
             </row>
             <row>
                 <entry><para>-encoding</para></entry>
-                <entry><para>The encoding to be used for the XML file. The 
+                <entry><para>The encoding to be used for the XML file. The
                 default is UTF-8
                 </para></entry>
             </row>
             <row>
-	              <entry><para>-includeprimarykeys=[true|false]</para></entry>
+                  <entry><para>-includeprimarykeys=[true|false]</para></entry>
                 <entry><para>Select whether primary key constraint definitions should be compared as well.
-								The default is to compare primary keys.
+                                The default is to compare primary keys.
                 </para></entry>
             </row>
             <row>
                 <entry><para>-includeforeignkeys=[true|false]</para></entry>
                 <entry><para>Select whether foreign key constraint definitions should be compared as well.
-								The default is to compare foreign keys.
+                                The default is to compare foreign keys.
                 </para></entry>
             </row>
             <row>
                 <entry><para>-includeconstraints=[true|false]</para></entry>
                 <entry><para>Select whether table and column (check) constraints
-								should be compared as well. &wb-productname; compares the constraint
-								definition (SQL) as stored in the database. When comparing schemas from
-								different DBMS systems this will not return the desired results.</para>
-								<para>The default is to not compare table constraints.</para>
-								</entry>
+                                should be compared as well. &wb-productname; compares the constraint
+                                definition (SQL) as stored in the database. When comparing schemas from
+                                different DBMS systems this will not return the desired results.</para>
+                                <para>The default is to not compare table constraints.</para>
+                                </entry>
             </row>
-						<!--
+                        <!--
             <row>
                 <entry><para>-includecomments=[true|false]</para></entry>
                 <entry><para>Select whether table and column comments should be compared as well.
-								The default is to not compare comments. When using an Oracle database, you need
-								to <link linkend="oracle-enable-remarks">enable remarks reporting</link> for the JDBC
-								driver in order to use this feature.
+                                The default is to not compare comments. When using an Oracle database, you need
+                                to <link linkend="oracle-enable-remarks">enable remarks reporting</link> for the JDBC
+                                driver in order to use this feature.
                 </para></entry>
             </row>
-						-->
+                        -->
             <row>
                 <entry><para>-includeviews=[true|false]</para></entry>
                 <entry><para>Select whether views should also be compared. When comparing
-								views, the source as it is stored in the DBMS is compared. This comparison 
-								is case-sensitiv, which means <literal>SELECT * FROM foo;</literal> will be 
-								reported as a difference to <literal>select * from foo;</literal> even 
-								if they are logically the same. A comparison across different DBMS will also not 
-								work properly.
+                                views, the source as it is stored in the DBMS is compared. This comparison
+                                is case-sensitiv, which means <literal>SELECT * FROM foo;</literal> will be
+                                reported as a difference to <literal>select * from foo;</literal> even
+                                if they are logically the same. A comparison across different DBMS will also not
+                                work properly.
                 </para>
-								<para>The default is to include view definitions.</para>
+                                <para>The default is to include view definitions.</para>
                 </entry>
             </row>
-						
+
             <row>
                 <entry><para>-includeindex=[true|false]</para></entry>
                 <entry><para>Select whether indexes should be compared as well.  The default
@@ -1466,7 +1475,7 @@ WHERE id=42;</programlisting>
           </tbody>
         </tgroup>
      </informaltable>
-    
+
    </section>
 
   <section id="command-xslt">
@@ -1512,17 +1521,17 @@ WHERE id=42;</programlisting>
       SQL execution. Details can be found in the chapter <xref linkend="using-variables"/>.
       </para>
       <para>The syntax for defining a variable is: <literal>WbVarDef variable=value</literal></para>
-      <para>The variable definition can also be read from a file. The file should list 
-      each variable definition on one line (this is the format of a normal Java properties 
+      <para>The variable definition can also be read from a file. The file should list
+      each variable definition on one line (this is the format of a normal Java properties
       file). Lines beginning with a <literal>#</literal> sign are ignored.
       The syntax is <literal>WBVARDEF -file=&lt;filename&gt;</literal>
       </para>
-      <para>You can also specify a file when starting &wb-productname; with the 
+      <para>You can also specify a file when starting &wb-productname; with the
       parameter <literal>-vardef=&lt;filename&gt;</literal>.
       For details see see <link linkend="vardef-commandline">Reading variables from a file</link>.
       </para>
     </section>
-    
+
     <section id="command-vardelete">
       <title>Delete a script variable - WbVarDelete</title>
 
@@ -1545,28 +1554,28 @@ WHERE id=42;</programlisting>
          With the <literal>WbInclude</literal> command you run SQL scripts without
          actually loading them into the editor, or call other scripts from within
          a script. The format of the command is <literal>WbInclude filename;</literal>.
-         For DBMS other then MS SQL, the command can be abbreviated using the @ sign: <literal>@filename;</literal> 
-		 is equivalent to <literal>WbInclude filename;</literal>. 
-		 The script that is run in this way may also include other scripts. 
+         For DBMS other then MS SQL, the command can be abbreviated using the @ sign: <literal>@filename;</literal>
+         is equivalent to <literal>WbInclude filename;</literal>.
+         The script that is run in this way may also include other scripts.
       </para>
-	  <para><note>
-		 The reason for excluding MS SQL is, that when creating stored procedures in MS SQL, the procedure
-		 parameters are identified using the @ sign, thus &wb-productname; would interpret the lines
+      <para><note>
+         The reason for excluding MS SQL is, that when creating stored procedures in MS SQL, the procedure
+         parameters are identified using the @ sign, thus &wb-productname; would interpret the lines
          with the variable definition as the WbInclude command. If you want to use the @ command
-		 with MS SQL, you can <link linkend="options-enable-shortinclude">configure</link> this in your 
-		 <literal>workbench.settings</literal> configuration file.
-	  </note></para>
-      <para>The long version of the command accepts additional parameters. 
-		When using the long version, the filename needs to be passed as a parameter as well.
+         with MS SQL, you can <link linkend="options-enable-shortinclude">configure</link> this in your
+         <literal>workbench.settings</literal> configuration file.
+      </note></para>
+      <para>The long version of the command accepts additional parameters.
+        When using the long version, the filename needs to be passed as a parameter as well.
       </para>
-	  <para>
-		  Only files up to a <link linkend="options-max-script-size">certain size</link> will be read into memory. Files exceeding 
-		  this size will be processes statement by statement. In this case the automatic
-		  detection of the <link linkend="alternate-delimiter-usage">alternate delimiter</link> will 
-		  not work. If your scripts exceed the maximum size and do use the alternate delimiter
-		  you will have to use the "long" version so that you can specify the actual
-		  delimiter used in your script.
-	  </para>
+      <para>
+          Only files up to a <link linkend="options-max-script-size">certain size</link> will be read into memory. Files exceeding
+          this size will be processes statement by statement. In this case the automatic
+          detection of the <link linkend="alternate-delimiter-usage">alternate delimiter</link> will
+          not work. If your scripts exceed the maximum size and do use the alternate delimiter
+          you will have to use the "long" version so that you can specify the actual
+          delimiter used in your script.
+      </para>
       <para>The command supports the following parameters:</para>
 
       <informaltable frame="all">
@@ -1600,96 +1609,99 @@ WHERE id=42;</programlisting>
           </tbody>
         </tgroup>
       </informaltable>
-      
+
       <para>Execute <literal>my_script.sql</literal></para>
       <programlisting>@my_script.sql;</programlisting>
       <para>Execute <literal>my_script.sql</literal> but abort on the first error</para>
       <programlisting>wbinclude -file="my_script.sql" -continueOnError=false;</programlisting>
     </section>
 
-	<section id="command-define-pk">
-	  <title>Define primary key columns - WbDefinePK</title>
-	  <para>To be able to directly edit data in the result set (grid) &wb-productname; needs
-	  a primary key on the underlying table. In some cases these primary keys are not present or
-	  cannot be retrieved from the database (e.g. when using updateable views). 
-	  To still be able to automatically update a result based on those tables (without always 
-	  manually defining the primary key) you can manually define a primary
-	  key using the <literal>WbDefinePk</literal> command.
-	  </para>
-	  <para>Assuming you have an updateable view called <literal>v_person</literal> where
-	  the primary key is the column <literal>person_id</literal>. When you simply do a 
-	  <literal>SELECT * FROM v_person</literal>, &wb-productname; will prompt you for the 
-	  primary key when you try to save changes to the data. If you run</para>
-	  
-	  <programlisting>WbDefinePk v_person=person_id</programlisting>
-	  <para>before retrieving the result, &wb-productname; will automatically 
-			use the <literal>person_id</literal> as the primary key (just as if this 
-			information had been retrieved from the database).</para>
-			<para>To delete a definition simply call the command with an empty column list:</para>
-			<programlisting>WbDefinePk v_person=</programlisting>
-			<para>If you want to define certain mappings permanently, this can be done using
-			a mapping file that is specified in the <link linkend="options-pkmapping">configuration file</link>.
-			The file specified has to be a text file with each line containing one 
-			primary key definition in the same format as passed to this command. The global mapping will 
-			automatically be saved when you exit the application if a filename has been defined.
-			If no file is defined, then all PK mappings that you define are lost when 
-			exiting the application (unless you explicitely save them using 
-			<link linkend="command-save-pkmap">WbSavePkMap</link>
-	  </para>
-	  
-	  <programlisting>v_person=person_id
+    <section id="command-define-pk">
+      <title>Define primary key columns - WbDefinePK</title>
+      <para>
+            To be able to directly edit data in the result set (grid) &wb-productname; needs
+            a primary key on the underlying table. In some cases these primary keys are not present or
+            cannot be retrieved from the database (e.g. when using updateable views).
+            To still be able to automatically update a result based on those tables (without always
+            manually defining the primary key) you can manually define a primary
+            key using the <literal>WbDefinePk</literal> command.
+      </para>
+      <para>
+            Assuming you have an updateable view called <literal>v_person</literal> where
+            the primary key is the column <literal>person_id</literal>. When you simply do a
+            <literal>SELECT * FROM v_person</literal>, &wb-productname; will prompt you for the
+            primary key when you try to save changes to the data. If you run
+      </para>
+
+      <programlisting>WbDefinePk v_person=person_id</programlisting>
+      <para>before retrieving the result, &wb-productname; will automatically
+            use the <literal>person_id</literal> as the primary key (just as if this
+            information had been retrieved from the database).</para>
+            <para>To delete a definition simply call the command with an empty column list:</para>
+            <programlisting>WbDefinePk v_person=</programlisting>
+            <para>If you want to define certain mappings permanently, this can be done using
+            a mapping file that is specified in the <link linkend="options-pkmapping">configuration file</link>.
+            The file specified has to be a text file with each line containing one
+            primary key definition in the same format as passed to this command. The global mapping will
+            automatically be saved when you exit the application if a filename has been defined.
+            If no file is defined, then all PK mappings that you define are lost when
+            exiting the application (unless you explicitely save them using
+            <link linkend="command-save-pkmap">WbSavePkMap</link>
+      </para>
+
+      <programlisting>v_person=person_id
 v_data=id1,id2</programlisting>
-	  <para>will define a primary key for the view <literal>v_person</literal> and one for 
-			the view <literal>v_data</literal>. The definitions stored in that file can 
-			be overwritten using the <literal>WbDefinePk</literal> command, but those changes
-			won't be saved to the file. This file will be read for all database connections and 
-			is not profile specific. If you have conflicting primary key definitions for 
-			different databases, you'll need to execute the <literal>WbDefinePk</literal> command
-			each time, rather then specifying the keys in the mapping file.
-	  </para>
-	  <para>
-			When you define the key columns for a table through the GUI, you have the option
-			to remember the defined mapping. If this option is checked, then that mapping
-			will be added to the global map (just as if you had executed <literal>WbDefinePk</literal>
-			manually. 
-	  </para>
-	  <note>
-			The mappings will be stored with lowercase table names internally, regardless on 
-			how you specify them.
-	  </note>
-	  
-	</section>
-	
-	<section id="command-list-pk">
-	  <title>List defined primary key columns - WbListPKDef</title>
-	  <para>To view the currently defined primary keys, execute the command
-	  <literal>WbListPkDef</literal>.</para>
-	</section>
+      <para>will define a primary key for the view <literal>v_person</literal> and one for
+            the view <literal>v_data</literal>. The definitions stored in that file can
+            be overwritten using the <literal>WbDefinePk</literal> command, but those changes
+            won't be saved to the file. This file will be read for all database connections and
+            is not profile specific. If you have conflicting primary key definitions for
+            different databases, you'll need to execute the <literal>WbDefinePk</literal> command
+            each time, rather then specifying the keys in the mapping file.
+      </para>
+      <para>
+            When you define the key columns for a table through the GUI, you have the option
+            to remember the defined mapping. If this option is checked, then that mapping
+            will be added to the global map (just as if you had executed <literal>WbDefinePk</literal>
+            manually.
+      </para>
+      <note>
+            The mappings will be stored with lowercase table names internally, regardless on
+            how you specify them.
+      </note>
 
-	<section id="command-load-pkmap">
-	  <title>Load primary key mappings - WbLoadPKMap</title>
-	  <para>
-		To load the additional primary key definitions from a file, you can 
-		use the the <literal>WbLoadPKMap</literal> command. If a filename is defined
-		in the <link linkend="options-pkmapping">configuration file</link> then that 
-		file is loaded. Alternatively if no file is configured, or if you want to 
-		load a different file, you can specify the filename using the <literal>-file</literal>
-		parameter.
-	  </para>
-	</section>
+    </section>
 
-	<section id="command-save-pkmap">
-	  <title>Save primary key mappings - WbSavePKMap</title>
-	  <para>
-		To save the current primary key definitions to a file, you can 
-		use the the <literal>WbSavePKMap</literal> command. If a filename is defined
-		in the <link linkend="options-pkmapping">configuration file</link> then the 
-		definition is stored in that file. Alternatively if no file is configured, or if you want to 
-		store the current mapping into a different file, you can specify the filename 
-		using the <literal>-file</literal> parameter.
-	  </para>
-	</section>
-	
+    <section id="command-list-pk">
+      <title>List defined primary key columns - WbListPKDef</title>
+      <para>To view the currently defined primary keys, execute the command
+      <literal>WbListPkDef</literal>.</para>
+    </section>
+
+    <section id="command-load-pkmap">
+      <title>Load primary key mappings - WbLoadPKMap</title>
+      <para>
+        To load the additional primary key definitions from a file, you can
+        use the the <literal>WbLoadPKMap</literal> command. If a filename is defined
+        in the <link linkend="options-pkmapping">configuration file</link> then that
+        file is loaded. Alternatively if no file is configured, or if you want to
+        load a different file, you can specify the filename using the <literal>-file</literal>
+        parameter.
+      </para>
+    </section>
+
+    <section id="command-save-pkmap">
+      <title>Save primary key mappings - WbSavePKMap</title>
+      <para>
+        To save the current primary key definitions to a file, you can
+        use the the <literal>WbSavePKMap</literal> command. If a filename is defined
+        in the <link linkend="options-pkmapping">configuration file</link> then the
+        definition is stored in that file. Alternatively if no file is configured, or if you want to
+        store the current mapping into a different file, you can specify the filename
+        using the <literal>-file</literal> parameter.
+      </para>
+    </section>
+
     <section id="command-enableout" xreflabel="ENABLEOUT">
       <title>Enable Oracle's DBMS_OUTPUT package - ENABLEOUT</title>
 
@@ -1712,21 +1724,33 @@ v_data=id1,id2</programlisting>
     </section>
 
     <section id="command-wbfeedback">
-      <title>Control feedback messages - WbFeedback</title>
-
-      <para>Normally &wb-productname; prints the results for each statement
-      into the message panel. As this feedback can slow down the execution
-      of large scripts, you can disable the feedback using the <literal>WbFeedback</literal>
-      command. When <literal>WbFeedback OFF</literal> is executed, only a summary of the
-      number of executed statements will be displayed, once the script execution has
-			finished. This is the same behaviour as selecting "Consolidate script log" in the
-			options window. The only difference is, that the setting through <literal>WbFeedback</literal>
-			is temporary and does not affect the global setting.
-      </para>
+        <title>Control feedback messages - WbFeedback</title>
+        <para>
+            Normally &wb-productname; prints the results for each statement
+            into the message panel. As this feedback can slow down the execution
+            of large scripts, you can disable the feedback using the <literal>WbFeedback</literal>
+            command. When <literal>WbFeedback OFF</literal> is executed, only a summary of the
+            number of executed statements will be displayed, once the script execution has
+            finished. This is the same behaviour as selecting "Consolidate script log" in the
+            options window. The only difference is, that the setting through <literal>WbFeedback</literal>
+            is temporary and does not affect the global setting.
+        </para>
     </section>
-    
+
+  <section id="command-desc">
+    <title>Show table structure - DESCRIBE</title>
+
+    <para>Describe shows the definition of the given table. It can be
+    abbreviated with DESC. The command expects the table name as a parameter.</para>
+    <programlisting>DESC person;</programlisting>
+    <para>If you want to show the structure of a table from a different user, you need
+    to prefix the table name with the desired user</para>
+    <programlisting>DESCRIBE otheruser.person;</programlisting>
+  </section>
+
+
   <section id="command-list">
-    <title>List all available tables - WbList</title>
+    <title>List tables - WbList</title>
 
     <para>This command lists all available tables (including views and
       synonyms). This output is equivalent to the left part of the Database
@@ -1742,17 +1766,6 @@ v_data=id1,id2</programlisting>
     Explorer&apos;s Procedure tab.</para>
   </section>
 
-  <section id="command-desc">
-    <title>Show table structure - DESCRIBE</title>
-
-    <para>Describe shows the definition of the given table. It can be
-    abbreviated with DESC. The command expects the table name as a parameter.</para>
-    <programlisting>DESC person;</programlisting>
-    <para>If you want to show the structure of a table from a different user, you need
-    to prefix the table name with the desired user</para>
-    <programlisting>DESCRIBE otheruser.person;</programlisting>
-  </section>
-
   <section id="command-listcat">
     <title>List catalogs - WbListCat</title>
 
@@ -1763,12 +1776,11 @@ v_data=id1,id2</programlisting>
 
     <para>For Oracle this command returns nothing (as Oracle does not
     implement the concept of catalogs)</para>
-    <para>This command calls the JDBC driver&apos;s getCatalogs() method and will
+    <para>This command calls the JDBC driver&apos;s <literal>getCatalogs()</literal> method and will
     return its result. If on your database system this command does not display
     a list, it is most likely that your DBMS does not support catalogs (e.g. Oracle)
     or the driver does not implement this feature.
     </para>
   </section>
-
 
 </section>

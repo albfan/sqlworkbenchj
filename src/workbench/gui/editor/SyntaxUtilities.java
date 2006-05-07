@@ -12,17 +12,19 @@ package workbench.gui.editor;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.util.Set;
 
 import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
+import workbench.resource.Settings;
 
 /**
  * Class with several utility functions used by jEdit's syntax colorizing
  * subsystem.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxUtilities.java,v 1.3 2006-04-17 14:55:34 thomas Exp $
+ * @version $Id: SyntaxUtilities.java,v 1.4 2006-05-07 11:29:10 thomas Exp $
  */
 public class SyntaxUtilities
 {
@@ -95,20 +97,23 @@ public class SyntaxUtilities
 	{
 		SyntaxStyle[] styles = new SyntaxStyle[Token.ID_COUNT];
 
-		styles[Token.COMMENT1] = new SyntaxStyle(Color.black,true,false);
-		styles[Token.COMMENT2] = new SyntaxStyle(new Color(0x990033),true,false);
-		styles[Token.KEYWORD1] = new SyntaxStyle(Color.black,false,true);
-		styles[Token.KEYWORD2] = new SyntaxStyle(Color.magenta,false,false);
-		styles[Token.KEYWORD3] = new SyntaxStyle(new Color(0x009600),false,false);
-		styles[Token.LITERAL1] = new SyntaxStyle(new Color(0x650099),false,false);
-		styles[Token.LITERAL2] = new SyntaxStyle(new Color(0x650099),false,true);
-		styles[Token.LABEL] = new SyntaxStyle(new Color(0x990033),false,true);
-		styles[Token.OPERATOR] = new SyntaxStyle(Color.black,false,true);
-		styles[Token.INVALID] = new SyntaxStyle(Color.red,false,true);
-
+		Settings sett = Settings.getInstance();
+		
+		styles[Token.COMMENT1] = new SyntaxStyle(sett.getColor("workbench.editor.color.comment1", Color.GRAY),true,false);
+		styles[Token.COMMENT2] = new SyntaxStyle(sett.getColor("workbench.editor.color.comment2", Color.GRAY),true,false);
+		styles[Token.KEYWORD1] = new SyntaxStyle(sett.getColor("workbench.editor.color.keyword1", Color.BLUE),false,false);
+		styles[Token.KEYWORD2] = new SyntaxStyle(sett.getColor("workbench.editor.color.keyword2", Color.MAGENTA),false,false);
+		styles[Token.KEYWORD3] = new SyntaxStyle(sett.getColor("workbench.editor.color.keyword3", new Color(0x009600)),false,false);
+		styles[Token.LITERAL1] = new SyntaxStyle(sett.getColor("workbench.editor.color.literal1", new Color(0x650099)),false,false);
+		styles[Token.LITERAL2] = new SyntaxStyle(sett.getColor("workbench.editor.color.literal2", new Color(0x650099)),false,true);
+		styles[Token.LABEL] = new SyntaxStyle(sett.getColor("workbench.editor.color.label", new Color(0x990033)),false,true);
+		styles[Token.OPERATOR] = new SyntaxStyle(sett.getColor("workbench.editor.color.operator", Color.BLACK),false,false);
+		styles[Token.INVALID] = new SyntaxStyle(sett.getColor("workbench.editor.color.invalid", Color.RED),false,true);
+		
 		return styles;
 	}
 
+	
 	/**
 	 * Paints the specified line onto the graphics context. Note that this
 	 * method munges the offset and count values of the segment.

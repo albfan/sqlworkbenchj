@@ -12,6 +12,7 @@
 package workbench.gui.actions;
 
 import java.awt.EventQueue;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -59,7 +60,6 @@ public class WbAction
 		String c = this.getClass().getName();
 		this.actionName = "wb-" + c.substring(c.lastIndexOf('.')  + 1);
     this.putValue(ACTION_COMMAND_KEY, this.actionName);
-		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("blank"));
 	}
 
 	/**
@@ -76,7 +76,7 @@ public class WbAction
 		this.actionName = aName;
     this.putValue(ACTION_COMMAND_KEY, this.actionName);
 	}
-	
+
 	public void setTooltip(String aText)
 	{
 		this.putValue(Action.SHORT_DESCRIPTION, aText);
@@ -371,6 +371,11 @@ public class WbAction
 	public void setIcon(ImageIcon icon)
 	{
 		this.putValue(Action.SMALL_ICON, icon);
+	}
+	
+	protected void setBlankIcon()
+	{
+		this.putValue(Action.SMALL_ICON, ResourceMgr.getImage("blank"));
 	}
 	
 	public void removeIcon()

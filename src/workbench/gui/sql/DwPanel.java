@@ -1087,7 +1087,7 @@ public class DwPanel
 			if (!this.checkUpdateTable())
 			{
 				String csql = this.getCurrentSql();
-				List tables = SqlUtil.getTables(csql);
+				List tables = SqlUtil.getTables(csql, false);
 				String table = null;
 				
 				if (tables.size() > 1)

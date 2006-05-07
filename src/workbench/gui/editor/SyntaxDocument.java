@@ -20,7 +20,7 @@ import workbench.resource.Settings;
  * system.
  *
  * @author Slava Pestov
- * @version $Id: SyntaxDocument.java,v 1.14 2006-04-06 16:30:05 thomas Exp $
+ * @version $Id: SyntaxDocument.java,v 1.15 2006-05-07 11:29:10 thomas Exp $
  */
 public class SyntaxDocument
 	extends PlainDocument
@@ -49,9 +49,11 @@ public class SyntaxDocument
 		return evt;
 	}
 	
+	public static final String DEFAULT_NO_WORD_SEP = "";
+	
 	protected void initDefaultProperties()
 	{
-		this.putProperty("noWordSep", "_");
+		this.putProperty("noWordSep", DEFAULT_NO_WORD_SEP);
 		this.putProperty("filterNewlines", Boolean.FALSE);
 		this.putProperty(PlainDocument.tabSizeAttribute,new Integer(Settings.getInstance().getEditorTabWidth()));
 	}

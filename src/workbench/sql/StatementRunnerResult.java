@@ -79,12 +79,18 @@ public class StatementRunnerResult
 		return this.results.size();
 	}
 
-	public void addUpdateCount(int aCount)
+	public void addUpdateCount(int count)
 	{
 		if (this.updateCounts == null) this.updateCounts = new ArrayList();
-		this.updateCounts.add(new Integer(aCount));
+		this.updateCounts.add(new Integer(count));
+		addUpdateCountMsg(count);
 	}
 
+	public void addUpdateCountMsg(int count)
+	{
+		addMessage(count + " " + ResourceMgr.getString("MsgRowsAffected"));
+	}
+	
 	public void addMessages(String[] msg)
 	{
 		if (this.messages == null) this.messages = new ArrayList();

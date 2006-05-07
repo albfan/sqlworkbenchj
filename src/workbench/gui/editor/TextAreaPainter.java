@@ -31,7 +31,7 @@ import workbench.resource.Settings;
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
  * @author Slava Pestov
- * @version $Id: TextAreaPainter.java,v 1.20 2006-04-06 16:30:05 thomas Exp $
+ * @version $Id: TextAreaPainter.java,v 1.21 2006-05-07 11:29:10 thomas Exp $
  */
 public class TextAreaPainter extends JComponent implements TabExpander
 {
@@ -66,8 +66,8 @@ public class TextAreaPainter extends JComponent implements TabExpander
 	protected int gutterWidth = 0;
 
 	protected static final int GUTTER_MARGIN = 2;
-	public static final Color GUTTER_BACKGROUND = new Color(238,240,238);
-	public static final Color GUTTER_COLOR = Color.DARK_GRAY;
+	private static final Color GUTTER_BACKGROUND = new Color(238,240,238);
+	private static final Color GUTTER_COLOR = Color.DARK_GRAY;
 	/**
 	 * Creates a new repaint manager. This should be not be called
 	 * directly.
@@ -91,7 +91,7 @@ public class TextAreaPainter extends JComponent implements TabExpander
 		setBackground(Color.WHITE);
 
 		blockCaret = false;
-		styles = SyntaxUtilities.getDefaultSyntaxStyles();
+		//styles = SyntaxUtilities.getDefaultSyntaxStyles();
 		caretColor = Color.BLACK;
 		errorColor = Settings.getInstance().getEditorErrorColor();
 		selectionColor = Settings.getInstance().getEditorSelectionColor();

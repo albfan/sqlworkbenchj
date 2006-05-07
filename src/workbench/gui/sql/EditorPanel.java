@@ -53,6 +53,7 @@ import javax.swing.text.GapContent;
 import workbench.WbManager;
 
 import workbench.db.WbConnection;
+import workbench.gui.editor.SyntaxUtilities;
 import workbench.interfaces.EncodingSelector;
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
@@ -103,8 +104,7 @@ public class EditorPanel
 	private static final Border DEFAULT_BORDER = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
 	private AnsiSQLTokenMarker sqlTokenMarker;
 	private static final int SQL_EDITOR = 0;
-	private static final int JAVA_EDITOR = 1;
-	private static final int TEXT_EDITOR = 2;
+	private static final int TEXT_EDITOR = 1;
 	private int editorType;
 	private String lastSearchCriteria;
 
@@ -121,23 +121,6 @@ public class EditorPanel
 	private List filenameChangeListeners;
 	private File currentFile;
 	private String fileEncoding;
-
-  private static final SyntaxStyle[] SYNTAX_COLORS;
-  static
-  {
-		SYNTAX_COLORS = new SyntaxStyle[Token.ID_COUNT];
-
-		SYNTAX_COLORS[Token.COMMENT1] = new SyntaxStyle(Color.GRAY,true,false);
-		SYNTAX_COLORS[Token.COMMENT2] = new SyntaxStyle(Color.GRAY,true,false);
-		SYNTAX_COLORS[Token.KEYWORD1] = new SyntaxStyle(Color.BLUE,false,false);
-		SYNTAX_COLORS[Token.KEYWORD2] = new SyntaxStyle(Color.MAGENTA,false,false);
-		SYNTAX_COLORS[Token.KEYWORD3] = new SyntaxStyle(new Color(0x009600),false,false);
-		SYNTAX_COLORS[Token.LITERAL1] = new SyntaxStyle(new Color(0x650099),false,false);
-		SYNTAX_COLORS[Token.LITERAL2] = new SyntaxStyle(new Color(0x650099),false,true);
-		SYNTAX_COLORS[Token.LABEL] = new SyntaxStyle(new Color(0x990033),false,true);
-		SYNTAX_COLORS[Token.OPERATOR] = new SyntaxStyle(Color.BLACK,false,false);
-		SYNTAX_COLORS[Token.INVALID] = new SyntaxStyle(Color.RED,false,true);
-  }
 
 	public static EditorPanel createSqlEditor()
 	{
@@ -167,7 +150,7 @@ public class EditorPanel
 		this.setFont(Settings.getInstance().getEditorFont());
 		this.setBorder(DEFAULT_BORDER);
 
-		this.getPainter().setStyles(SYNTAX_COLORS);
+		this.getPainter().setStyles(SyntaxUtilities.getDefaultSyntaxStyles());
 
 		this.setTabSize(Settings.getInstance().getEditorTabWidth());
 		this.setCaretBlinkEnabled(true);
@@ -746,11 +729,6 @@ public class EditorPanel
 			lastDir = Settings.getInstance().getLastSqlDir();
 			ff = ExtensionFileFilter.getSqlFileFilter();
 		}
-		else if (this.editorType == JAVA_EDITOR)
-		{
-			lastDir = Settings.getInstance().getLastJavaDir();
-			ff = ExtensionFileFilter.getJavaFileFilter();
-		}
 		else
 		{
 			lastDir = Settings.getInstance().getLastEditorDir();
@@ -775,10 +753,6 @@ public class EditorPanel
 				if (this.editorType == SQL_EDITOR)
 				{
 					Settings.getInstance().setLastSqlDir(lastDir);
-				}
-				else if (this.editorType == JAVA_EDITOR)
-				{
-					Settings.getInstance().setLastJavaDir(lastDir);
 				}
 				else
 				{

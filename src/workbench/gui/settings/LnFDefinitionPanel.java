@@ -48,8 +48,8 @@ public class LnFDefinitionPanel
 		text = text.replaceAll("%path_sep%", StringUtil.PATH_SEPARATOR);
 		lblLibrary.setToolTipText(text);
 		tfLibrary.setToolTipText(text);
-    text = ResourceMgr.getDescription("SelectLnfLib");
-    selectLibButton.setToolTipText(text);
+		text = ResourceMgr.getDescription("SelectLnfLib");
+		selectLibButton.setToolTipText(text);
 		tfName.addFocusListener(new FocusAdapter()
 		{
 			public void focusLost(FocusEvent evt)

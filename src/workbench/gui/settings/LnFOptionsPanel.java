@@ -61,7 +61,6 @@ public class LnFOptionsPanel
 	private JComboBox lnfSelector;
 	private JLabel currentLabel;
 	private WbButton switchLnFButton;
-	private String newLnFClass;
 	
 	public LnFOptionsPanel()
 	{
@@ -141,10 +140,6 @@ public class LnFOptionsPanel
 		int divider = splitPane.getDividerLocation();
 		Settings.getInstance().setProperty(this.getClass().getName() + ".divider", divider);
 		manager.saveLookAndFeelDefinitions();
-		if (this.newLnFClass != null)
-		{
-			Settings.getInstance().setLookAndFeelClass(newLnFClass);
-		}
 	}
 	
 	public void restoreSettings()
@@ -153,13 +148,12 @@ public class LnFOptionsPanel
 		splitPane.setDividerLocation(divider);
 	}
 	
-  public void valueChanged(ListSelectionEvent evt)
-  {
-		//if (evt.getValueIsAdjusting()) return;
+	public void valueChanged(ListSelectionEvent evt)
+	{
 		int index = lnfList.getSelectedIndex();
 		LnFDefinition def = (LnFDefinition)manager.getAvailableLookAndFeels().get(index);
 		definitionPanel.setDefinition(def);
-  }
+	}
 
 	public void saveItem() throws Exception
 	{
@@ -234,13 +228,13 @@ public class LnFOptionsPanel
 		LnFDefinition lnf = (LnFDefinition)manager.getAvailableLookAndFeels().get(index);
 		if (testLnF(lnf))
 		{
-			this.newLnFClass = lnf.getClassName();
+			String className = lnf.getClassName();
 			this.currentLabel.setText(lnf.getName());
+			Settings.getInstance().setLookAndFeelClass(className);
 			WbSwingUtilities.showMessage(this, ResourceMgr.getString("MsgLnFChanged"));
 		}
 		else
 		{
-			this.newLnFClass = null;
 			WbSwingUtilities.showMessage(this, ResourceMgr.getString("MsgLnFNotLoaded"));
 		}
 	}
