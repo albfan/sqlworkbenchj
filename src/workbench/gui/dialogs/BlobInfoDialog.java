@@ -106,6 +106,7 @@ public class BlobInfoDialog
 		saveAsButton.setEnabled(len > 0);
 		showAsTextButton.setEnabled(len > 0);
 		showImageButton.setEnabled(len > 0);
+		showHexButton.setEnabled(len > 0);
 	}
 
 	/** This method is called from within the constructor to
