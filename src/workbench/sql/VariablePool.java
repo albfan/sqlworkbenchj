@@ -426,6 +426,8 @@ class VariableDataStore
 		return Collections.EMPTY_LIST;
 	}
 	
+	public boolean hasPkColumns() { return true; }
+	public boolean checkUpdateTable(String sql, WbConnection conn) { return true; }
 	public boolean isUpdateable() { return true; }
 	public boolean hasUpdateableColumns() { return true; }
 	
