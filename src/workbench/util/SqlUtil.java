@@ -67,7 +67,7 @@ public class SqlUtil
 		try
 		{
 			Token t = l.getNextToken(false, false);
-			return t.getContents();
+			return t.getContents().toUpperCase();
 		}
 		catch (Exception e)
 		{
@@ -140,7 +140,7 @@ public class SqlUtil
 				js.add("RIGHT");
 				js.add("LEFT");
 				js.add("OUTER");
-				int lastStart = 0;
+				int lastStart = t.getCharBegin();
 				int lastJoinStart = 0;
 				boolean hadJoin = false;
 				boolean isJoinSyntax = false;
