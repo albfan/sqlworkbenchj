@@ -230,6 +230,8 @@ public class DefaultStatementRunner
 		}
 
 		this.dbConnection = aConn;
+		this.supportsSelectInto = false;
+		
 		if (aConn == null) return;
 		
 		DbMetadata meta = this.dbConnection.getMetadata();
@@ -382,15 +384,16 @@ public class DefaultStatementRunner
 	}
 
 	/**
-	 *	Check for a SELECT ... INTO syntax for Informix which actually
-	 *  creates a table. In that case we will simply pretend it's a
-	 *  CREATE statement.
-	 *	In all other casese, the approriate SqlCommand from commanDispatch will be used
+	 * Check for a SELECT ... INTO syntax for Informix which actually
+	 * creates a table. In that case we will simply pretend it's a
+	 * CREATE statement.
+	 * In all other casese, the approriate SqlCommand from commanDispatch will be used
+	 * This is made public in order to be accessible from a JUnit test
 	 */
-	private SqlCommand getCommandToUse(String sql)
+	public SqlCommand getCommandToUse(String sql)
 	{
 		String verb = SqlUtil.getSqlVerb(sql);
-		if (this.supportsSelectInto && !verb.equalsIgnoreCase(WbSelectBlob.VERB) && this.dbConnection.getMetadata().isSelectIntoNewTable(sql))
+		if (this.supportsSelectInto && !verb.equalsIgnoreCase(WbSelectBlob.VERB) && this.dbConnection != null && this.dbConnection.getMetadata().isSelectIntoNewTable(sql))
 		{
 			LogMgr.logDebug("StatementRunner.getCommandToUse()", "Found 'SELECT ... INTO new_table'");
 			// use the generic SqlCommand implementation for this.
